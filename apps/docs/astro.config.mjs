@@ -1,10 +1,12 @@
-import starlight from "@astrojs/starlight";
-import starlightVersions from "starlight-versions";
-import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
-import { demoRoute, docsSlug, ORIGIN, siteUrl } from "../../scripts/site.mjs";
-import { defineConfig } from "astro/config";
 import { existsSync } from "node:fs";
 
+import starlight from "@astrojs/starlight";
+import { defineConfig } from "astro/config";
+import starlightVersions from "starlight-versions";
+
+import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
+import { demoRoute, docsSlug, ORIGIN, siteUrl } from "../../scripts/site.mjs";
+import { siteNotices } from "../../scripts/site-notices.mjs";
 import { sidebar } from "./sidebar.mjs";
 import { CURRENT_VERSION_LABEL, DOCS_VERSIONS } from "./versions.mjs";
 
@@ -42,6 +44,21 @@ const sectioned = (items) =>
 // https://astro.build/config
 export default defineConfig({
   site: ORIGIN,
+  vite: {
+    plugins: [
+      siteNotices({
+        // CSS from server-rendered components and Pagefind's generated assets
+        // are published outside the client chunk graph.
+        extraPackages: [
+          { name: "astro" },
+          { name: "@astrojs/starlight" },
+          { name: "starlight-versions" },
+          { name: "pagefind", via: "@astrojs/starlight" },
+          { name: "@pagefind/default-ui", via: "@astrojs/starlight" },
+        ],
+      }),
+    ],
+  },
   integrations: [
     starlight({
       title: "AdaptTable",
@@ -177,7 +194,13 @@ export default defineConfig({
           : []),
       ],
       customCss: ["./src/styles/custom.css"],
-      components: { SiteTitle: "./src/components/SiteTitle.astro" },
+      components: {
+        Footer: "./src/components/NoticesFooter.astro",
+        SiteTitle: "./src/components/SiteTitle.astro",
+        ThemeSelect: "./src/components/FrameworkThemeSelect.astro",
+        SocialIcons: "./src/components/FrameworkSocialIcons.astro",
+      },
+      routeMiddleware: "./src/framework-route.ts",
       social: [
         {
           icon: "external",

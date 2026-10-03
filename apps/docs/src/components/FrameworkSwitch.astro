@@ -1,53 +1,22 @@
 ---
-/** Link to each framework's matching guide or its getting-started fallback. */
-import { DOCS } from "../../../../scripts/build-llms-full.mjs";
-import { switchDocsRoute } from "../../../../scripts/site.mjs";
-
-const archived = /^\/v\d+\//.test(Astro.url.pathname);
-const page = Astro.url.pathname.replace(/^\/v\d+\//, "/");
-const frameworks = [
-  { key: "react", label: "React" },
-  { key: "angular", label: "Angular" },
-];
+import { SITE_FRAMEWORKS, selectedFramework, frameworkDocsTarget } from "../../../../scripts/framework-navigation.mjs";
+const current = selectedFramework(Astro.url.pathname);
 ---
 
-<nav aria-label={archived ? "Current framework documentation" : "Framework documentation"}>
-  {
-    frameworks.map(({ key, label }) => {
-      const href = switchDocsRoute(page, key, DOCS);
-      const current = !archived && page.startsWith(`/${key}/`) && Astro.url.pathname === href;
-      return (
-        <a href={href} aria-current={current ? "page" : undefined} title={`${archived ? "Current " : ""}${label} documentation`}>
-          {label}
-        </a>
-      );
-    })
-  }
-</nav>
+<label class="framework-picker">
+  <span aria-hidden="true" data-framework-icon>{current === "angular" ? "Ⓐ" : "⚛"}</span>
+  <span class="sr-only">Framework</span>
+  <select aria-label="Framework" data-framework-select autocomplete="off">
+    {SITE_FRAMEWORKS.map(({key, label}) => <option value={key} selected={key === current} data-href={frameworkDocsTarget(Astro.url.pathname, key).href}>{label}</option>)}
+  </select>
+</label>
 
 <style>
-  nav {
-    display: flex;
-    gap: 0.2rem;
-    align-items: center;
-    font-size: var(--sl-text-xs);
-    white-space: nowrap;
-  }
-  a {
-    padding: 0.25rem 0.4rem;
-    border-radius: 0.25rem;
-    text-decoration: none;
-    color: var(--sl-color-text);
-  }
-  a[aria-current="page"] {
-    background: var(--sl-color-accent-low);
-    color: var(--sl-color-text-accent);
-  }
-  a:hover {
-    text-decoration: underline;
-  }
-  a:focus-visible {
-    outline: 2px solid var(--sl-color-text-accent);
-    outline-offset: 1px;
-  }
+  .framework-picker { display: inline-flex; align-items: center; gap: .25rem; white-space: nowrap; color: var(--sl-color-gray-1); font-size: var(--sl-text-sm); }
+  .framework-picker select { max-width: 7rem; font: inherit; color: inherit; background: transparent; border: 0; border-radius: .3rem; padding: .4rem .2rem; cursor: pointer; }
+  .framework-picker select:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
+  .framework-picker option { color: var(--sl-color-text); background: var(--sl-color-bg); }
 </style>
+<script>
+  import "../framework-navigation";
+</script>

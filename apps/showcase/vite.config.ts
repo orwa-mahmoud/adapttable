@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join, sep } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { dirname, join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import angular from "@analogjs/vite-plugin-angular";
@@ -9,6 +9,7 @@ import { defineConfig, type Plugin } from "vite";
 
 import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
 import { listPackages, packageDir } from "../../scripts/packages.mjs";
+import { installedPackage, siteNotices } from "../../scripts/site-notices.mjs";
 import { SHOWCASE_PAGES } from "./pages.mjs";
 
 const GA_MEASUREMENT_ID = "G-FT8LY7Z15Y";
@@ -162,6 +163,42 @@ const pkg = (rel: string, entry = "index", ext = "ts") =>
 
 const page = (rel: string) => fileURLToPath(new URL(rel, import.meta.url));
 
+/** Serve the exact installed Taiga icon SVGs in both development and builds. */
+function taigaAssets(): Plugin {
+  const directory = join(
+    dirname(installedPackage("@taiga-ui/icons", page("."))),
+    "src"
+  );
+  const files = new Map(
+    readdirSync(directory, { recursive: true })
+      .filter(
+        (name): name is string =>
+          typeof name === "string" && name.endsWith(".svg")
+      )
+      .map((name) => [
+        `assets/taiga-ui/icons/${name.split(sep).join("/")}`,
+        join(directory, name),
+      ])
+  );
+  return {
+    name: "adapttable-taiga-assets",
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const key = request.url?.split("?")[0]?.replace(/^\//, "");
+        const file = key ? files.get(key) : undefined;
+        if (!file) return next();
+        response.setHeader("Content-Type", "image/svg+xml");
+        response.end(readFileSync(file));
+      });
+    },
+    generateBundle() {
+      for (const [fileName, file] of files) {
+        this.emitFile({ type: "asset", fileName, source: readFileSync(file) });
+      }
+    },
+  };
+}
+
 /** Every workspace package's folder, by the name it is published under. */
 const PACKAGE_DIRS = new Map(
   listPackages().map(({ dir }) => [
@@ -215,6 +252,14 @@ const ANGULAR_SOURCES = [
   `${packageDir("ai-angular")}${sep}`,
   `${packageDir("adapter-angular-unstyled")}${sep}`,
   `${packageDir("adapter-ng-zorro")}${sep}`,
+  `${packageDir("adapter-material")}${sep}`,
+  `${packageDir("adapter-ng-bootstrap")}${sep}`,
+  `${packageDir("adapter-spartan")}${sep}`,
+  `${packageDir("adapter-taiga-ui")}${sep}`,
+  `${packageDir("adapter-angular-cdk")}${sep}`,
+  `${packageDir("adapter-clarity")}${sep}`,
+  `${packageDir("adapter-ngx-bootstrap")}${sep}`,
+  `${packageDir("adapter-angular-aria")}${sep}`,
 ];
 
 /** Whether a module is Angular source the Angular compiler owns. */
@@ -234,6 +279,16 @@ export default defineConfig({
     }),
     react({ exclude: ANGULAR_SOURCES.map((dir) => `${dir}**`) }),
     tailwindcss(),
+    taigaAssets(),
+    siteNotices({
+      extraPackages: [
+        { name: "@taiga-ui/icons" },
+        { name: "@taiga-ui/styles" },
+        { name: "@taiga-ui/design-tokens" },
+        { name: "bootstrap" },
+        { name: "@clr/ui" },
+      ],
+    }),
     googleAnalytics(),
     microsoftClarity(),
     patchStream(),
@@ -286,6 +341,57 @@ export default defineConfig({
       { find: /^@adapttable\/antd$/, replacement: pkg("adapter-antd") },
       { find: /^@adapttable\/radix$/, replacement: pkg("adapter-radix") },
       { find: /^@adapttable\/base-ui$/, replacement: pkg("adapter-base-ui") },
+      {
+        find: /^@adapttable\/angular-material$/,
+        replacement: pkg("adapter-material"),
+      },
+      {
+        find: "@adapttable/angular-material/styles.css",
+        replacement: `${packageDir("adapter-material")}/styles.css`,
+      },
+      {
+        find: /^@adapttable\/ng-bootstrap$/,
+        replacement: pkg("adapter-ng-bootstrap"),
+      },
+      {
+        find: "@adapttable/ng-bootstrap/styles.css",
+        replacement: `${packageDir("adapter-ng-bootstrap")}/styles.css`,
+      },
+      { find: /^@adapttable\/spartan$/, replacement: pkg("adapter-spartan") },
+      {
+        find: "@adapttable/spartan/styles.css",
+        replacement: `${packageDir("adapter-spartan")}/styles.css`,
+      },
+      { find: /^@adapttable\/taiga-ui$/, replacement: pkg("adapter-taiga-ui") },
+      {
+        find: /^@adapttable\/angular-aria$/,
+        replacement: pkg("adapter-angular-aria"),
+      },
+      {
+        find: "@adapttable/angular-aria/styles.css",
+        replacement: `${packageDir("adapter-angular-aria")}/styles.css`,
+      },
+      {
+        find: /^@adapttable\/ngx-bootstrap$/,
+        replacement: pkg("adapter-ngx-bootstrap"),
+      },
+      {
+        find: "@adapttable/ngx-bootstrap/styles.css",
+        replacement: `${packageDir("adapter-ngx-bootstrap")}/styles.css`,
+      },
+      { find: /^@adapttable\/clarity$/, replacement: pkg("adapter-clarity") },
+      {
+        find: "@adapttable/clarity/styles.css",
+        replacement: `${packageDir("adapter-clarity")}/styles.css`,
+      },
+      {
+        find: /^@adapttable\/angular-cdk$/,
+        replacement: pkg("adapter-angular-cdk"),
+      },
+      {
+        find: "@adapttable/angular-cdk/styles.css",
+        replacement: `${packageDir("adapter-angular-cdk")}/styles.css`,
+      },
       { find: /^@adapttable\/angular$/, replacement: pkg("angular") },
       {
         find: /^@adapttable\/ng-zorro$/,

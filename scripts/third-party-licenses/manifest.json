@@ -1,0 +1,46 @@
+{
+  "react-compiler-runtime@1.0.0": {
+    "source": "https://raw.githubusercontent.com/facebook/react/5c15c1cd3442f28044217703b5625f98c40042ee/LICENSE",
+    "files": ["react-compiler-runtime-1.0.0.txt"]
+  },
+  "@ant-design/icons-svg@4.5.0": {
+    "source": "https://raw.githubusercontent.com/ant-design/ant-design-icons/e6d33f4ba94ebe9f4b8648373342505b88e51a57/LICENSE",
+    "files": ["ant-design-icons-svg-4.5.0.txt"]
+  },
+  "@spartan-ng/brain@1.5.0": {
+    "source": "https://raw.githubusercontent.com/spartan-ng/spartan/4e7171899ff8dc28af400a6b606564e12ded4a79/LICENSE",
+    "files": ["spartan-ng-brain-1.5.0.txt"]
+  },
+  "@ant-design/icons-angular@22.1.1": {
+    "source": "https://raw.githubusercontent.com/ant-design/ant-design-icons/7f2516ac91226d2b41f93b35cb5197c8d94f7189/LICENSE",
+    "files": ["ant-design-icons-angular22.1.1.txt"]
+  },
+  "ng-zorro-antd@22.1.1": {
+    "source": "https://raw.githubusercontent.com/NG-ZORRO/ng-zorro-antd/22.1.1/LICENSE",
+    "files": ["ng-zorro-antd22.1.1.txt"]
+  },
+  "@pagefind/default-ui@1.5.2": {
+    "source": "https://raw.githubusercontent.com/Pagefind/pagefind/v1.5.2/LICENSE",
+    "files": [
+      "pagefind-default-ui1.5.2.txt",
+      "pagefind-ui-bundled-svelte.txt",
+      "pagefind-ui-bundled-bcp-47.txt",
+      "pagefind-ui-bundled-is-alphabetical.txt",
+      "pagefind-ui-bundled-is-alphanumerical.txt",
+      "pagefind-ui-bundled-is-decimal.txt"
+    ],
+    "sources": {
+      "pagefind-ui-bundled-svelte.txt": "https://registry.npmjs.org/svelte/-/svelte-4.2.1.tgz",
+      "pagefind-ui-bundled-bcp-47.txt": "https://registry.npmjs.org/bcp-47/-/bcp-47-2.1.1.tgz",
+      "pagefind-ui-bundled-is-alphabetical.txt": "https://registry.npmjs.org/is-alphabetical/-/is-alphabetical-2.0.1.tgz",
+      "pagefind-ui-bundled-is-alphanumerical.txt": "https://registry.npmjs.org/is-alphanumerical/-/is-alphanumerical-2.0.1.tgz",
+      "pagefind-ui-bundled-is-decimal.txt": "https://registry.npmjs.org/is-decimal/-/is-decimal-2.0.1.tgz"
+    },
+    "note": "Pagefind UI 1.5.2 includes prebuilt Svelte 4 runtime and bcp-47 helpers, identified by node_modules source banners. These upstream MIT grants supplement its own terms; dependency patch versions are not exposed in that prebuilt output."
+  },
+  "react-remove-scroll-bar@2.3.8": {
+    "source": "https://raw.githubusercontent.com/theKashey/react-remove-scroll-bar/7301c160fda44cb8cf2b9fdfde61efad35736196/LICENSE",
+    "files": ["react-remove-scroll-bar-2.3.8.txt"],
+    "note": "The npm release declares MIT but omits its terms. The maintainer subsequently added this MIT text to the same upstream repository; retain the author attribution verbatim."
+  }
+}

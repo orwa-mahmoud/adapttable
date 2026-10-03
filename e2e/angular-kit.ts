@@ -1,6 +1,10 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
 import { builtAdapters } from "../apps/showcase/matrix.mjs";
+import { kitPart as clarityPart } from "../packages/angular/adapter-clarity/testUtils";
+import { kitSelector as materialPart } from "../packages/angular/adapter-material/testUtils";
+import { ngBootstrapPart } from "../packages/angular/adapter-ng-bootstrap/testUtils";
+import { ngxBootstrapPart } from "../packages/angular/adapter-ngx-bootstrap/testUtils";
 import { getLabels } from "../packages/shared/i18n/src/index";
 
 /** Every registered Angular shell runs the same operation assertions. */
@@ -21,6 +25,20 @@ const escapeRegExp = (text: string): string =>
 const labelsFor = (page: Page) =>
   getLabels(new URL(page.url()).searchParams.get("locale") ?? "en");
 
+/** Each themed kit keeps native-only hooks outside the public parts contract. */
+function themedPart(kit: AngularKit, name: string): string {
+  if (kit.key === "clarity") return clarityPart(name);
+  if (kit.key === "ngx-bootstrap") return ngxBootstrapPart(name);
+  if (kit.key === "material") return materialPart(name);
+  const selector = ngBootstrapPart(name);
+  if (kit.key === "ng-bootstrap") return selector;
+  if (kit.key === "spartan")
+    return selector.replace("data-ng-bootstrap-part", "data-spartan-part");
+  if (kit.key === "taiga-ui")
+    return selector.replace("data-ng-bootstrap-part", "data-taiga-part");
+  return `[data-adapttable-part="${name}"]`;
+}
+
 /** Native-only widget parts map to the real NG-ZORRO surface for axe too. */
 export function angularOverlaySelector(
   kit: AngularKit,
@@ -40,7 +58,7 @@ export function angularOverlaySelector(
         return `.ant-popover fieldset[aria-label=${JSON.stringify(labels.columns)}]`;
     }
   }
-  return `[data-adapttable-part="${name}"]`;
+  return themedPart(kit, name);
 }
 
 /**
@@ -129,7 +147,16 @@ export function angularPart(
         });
     }
   }
-  return scope.locator(`[data-adapttable-part="${name}"]`);
+  const overlay = [
+    "filters-popover",
+    "filters-panel",
+    "filters-backdrop",
+    "views-panel",
+    "column-menu-panel",
+  ].includes(name);
+  return (overlay ? page.locator("body") : scope).locator(
+    themedPart(kit, name)
+  );
 }
 
 /** Parts can identify the select host or its actual, focusable input. */
@@ -145,9 +172,17 @@ export async function expectAngularSelection(
   control: Locator,
   option: SelectOption
 ): Promise<void> {
-  if (kit.key === "unstyled") {
+  if (await control.evaluate((element) => element.tagName === "SELECT")) {
     await expect(control).toHaveValue(option.value);
     await expect(control.locator("option:checked")).toHaveText(option.label);
+    return;
+  }
+  if (kit.key === "aria") {
+    await expect(angularCombobox(control)).toContainText(option.label);
+    return;
+  }
+  if (kit.key === "taiga-ui") {
+    await expect(angularCombobox(control)).toHaveValue(option.label);
     return;
   }
   await expect(angularCombobox(control)).toBeVisible();
@@ -163,10 +198,9 @@ export async function openAngularOptions(control: Locator): Promise<Locator> {
   const combobox = angularCombobox(control);
   // NG-ZORRO overlays its readonly input with the selected label. The visible
   // selector is the pointer target a reader uses; the input retains keyboard ARIA.
-  await combobox
-    .locator("xpath=ancestor::nz-select[1]")
-    .locator("nz-select-top-control")
-    .click();
+  const zorro = combobox.locator("xpath=ancestor::nz-select[1]");
+  if (await zorro.count()) await zorro.locator("nz-select-top-control").click();
+  else await combobox.click();
   await expect(combobox).toHaveAttribute("aria-expanded", "true");
   await expect(combobox).toHaveAttribute("aria-controls", /\S+/);
   const listId = (await combobox.getAttribute("aria-controls"))!;
@@ -185,7 +219,7 @@ export async function selectAngularOption(
   option: SelectOption,
   optionCount?: number
 ): Promise<void> {
-  if (kit.key === "unstyled") {
+  if (await control.evaluate((element) => element.tagName === "SELECT")) {
     if (optionCount !== undefined) {
       await expect(control.locator("option")).toHaveCount(optionCount);
     }

@@ -68,3 +68,53 @@
     border: 1px solid Highlight;
   }
 }
+
+.mx-ng--zorro {
+  --adapttable-ng-zorro-surface: var(--page-surface);
+  --adapttable-ng-zorro-hover: var(--page-surface-2);
+  --adapttable-ng-zorro-selected: color-mix(
+    in srgb,
+    var(--kit) 12%,
+    var(--page-surface)
+  );
+}
+.mx-ng--zorro [data-adapttable-part="search-field"] {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+/* Keep genuine NG-ZORRO controls legible with the showcase's selected theme. */
+[data-theme="dark"]
+  .mx-ng--zorro
+  :is(
+    .ant-table,
+    .ant-table-cell,
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-select-selector,
+    .ant-btn,
+    .ant-pagination-item,
+    .ant-pagination-item-link,
+    .ant-card,
+    .ant-collapse
+  ) {
+  background-color: var(--page-surface);
+  color: var(--ink);
+  border-color: var(--page-border);
+}
+[data-theme="dark"] .mx-ng--zorro .ant-table-thead > tr > th {
+  background-color: var(--page-surface-2);
+  color: var(--ink);
+}
+[data-theme="dark"] .mx-ng--zorro .ant-table-tbody > tr:hover > td {
+  background-color: var(--page-surface-2);
+}
+[data-theme="dark"]
+  .mx-ng--zorro
+  :is(.ant-input, .ant-select-selection-placeholder)::placeholder {
+  color: var(--ink-3);
+}
+[data-theme="dark"]
+  .mx-ng--zorro
+  :is(.ant-btn[disabled], .ant-pagination-disabled, .ant-select-arrow) {
+  color: var(--ink-3);
+}

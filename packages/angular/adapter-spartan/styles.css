@@ -1,0 +1,261 @@
+/* Tailwind 4 source. Import through the application's Tailwind pipeline.
+   @reference emits no Preflight or global utilities. All styles are kit-scoped. */
+@reference "tailwindcss";
+
+@layer adapttable-spartan {
+  [data-adapttable-kit="spartan"] {
+    --at-spartan-background: #fff;
+    --at-spartan-foreground: #18181b;
+    --at-spartan-muted: #f4f4f5;
+    --at-spartan-muted-foreground: #71717a;
+    --at-spartan-border: #e4e4e7;
+    --at-spartan-primary: #18181b;
+    --at-spartan-primary-foreground: #fafafa;
+    --at-spartan-ring: #71717a;
+    --at-spartan-radius: 0.5rem;
+    --at-spartan-cell-padding: 0.75rem;
+    color: var(--at-spartan-foreground);
+    background: var(--at-spartan-background);
+    font: inherit;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  :is(.dark, [data-theme="dark"]) [data-adapttable-kit="spartan"],
+  [data-adapttable-kit="spartan"][data-theme="dark"] {
+    --at-spartan-background: #18181b;
+    --at-spartan-foreground: #fafafa;
+    --at-spartan-muted: #27272a;
+    --at-spartan-muted-foreground: #a1a1aa;
+    --at-spartan-border: #3f3f46;
+    --at-spartan-primary: #fafafa;
+    --at-spartan-primary-foreground: #18181b;
+    --at-spartan-ring: #a1a1aa;
+    color-scheme: dark;
+  }
+
+  [data-adapttable-kit="spartan"]
+    :is(
+      .at-spartan-button,
+      .at-spartan-input,
+      .at-spartan-select,
+      .at-spartan-checkbox
+    ) {
+    @apply rounded-md border text-sm transition-colors;
+    box-sizing: border-box;
+    border-color: var(--at-spartan-border);
+    color: var(--at-spartan-foreground);
+    background: var(--at-spartan-background);
+    font: inherit;
+  }
+
+  [data-adapttable-kit="spartan"] .at-spartan-button {
+    @apply inline-flex shrink-0 items-center justify-center gap-2 px-3 py-2 font-medium;
+    min-block-size: 2rem;
+    cursor: pointer;
+  }
+
+  [data-adapttable-kit="spartan"] .at-spartan-button:hover:not(:disabled) {
+    background: var(--at-spartan-muted);
+  }
+
+  [data-adapttable-kit="spartan"] :is(.at-spartan-input, .at-spartan-select) {
+    @apply min-w-0 px-3 py-2;
+    min-block-size: 2rem;
+    max-inline-size: 100%;
+  }
+
+  [data-adapttable-kit="spartan"] .at-spartan-input::placeholder {
+    color: var(--at-spartan-muted-foreground);
+  }
+
+  [data-adapttable-kit="spartan"] .at-spartan-option {
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  [data-adapttable-kit="spartan"] .at-spartan-checkbox {
+    @apply inline-flex size-4 shrink-0 items-center justify-center rounded border;
+    padding: 0;
+  }
+
+  [data-adapttable-kit="spartan"] .at-spartan-checkbox[aria-checked="true"],
+  [data-adapttable-kit="spartan"] .at-spartan-checkbox[aria-checked="mixed"] {
+    background: var(--at-spartan-primary);
+    color: var(--at-spartan-primary-foreground);
+    border-color: var(--at-spartan-primary);
+  }
+
+  [data-adapttable-kit="spartan"]
+    .at-spartan-checkbox[aria-checked="true"]::after {
+    content: "✓";
+  }
+  [data-adapttable-kit="spartan"]
+    .at-spartan-checkbox[aria-checked="mixed"]::after {
+    content: "−";
+  }
+
+  [data-adapttable-kit="spartan"]
+    :is(
+      .at-spartan-button,
+      .at-spartan-input,
+      .at-spartan-select,
+      .at-spartan-checkbox
+    ):focus-visible {
+    outline: 2px solid var(--at-spartan-ring);
+    outline-offset: 2px;
+  }
+
+  [data-adapttable-kit="spartan"] :disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  [data-adapttable-kit="spartan"][data-density="compact"] {
+    --at-spartan-cell-padding: 0.375rem;
+  }
+  [data-adapttable-kit="spartan"][data-density="comfortable"] {
+    --at-spartan-cell-padding: 1rem;
+  }
+
+  [data-adapttable-kit="spartan"]
+    :is(
+      [data-adapttable-part="toolbar"],
+      [data-adapttable-part="toolbar-extras"],
+      [data-adapttable-part="pagination"],
+      [data-spartan-part="filters-header"],
+      [data-spartan-part="filters-footer"]
+    ) {
+    @apply flex flex-wrap items-center gap-2;
+    padding-block: 0.5rem;
+  }
+
+  [data-adapttable-kit="spartan"] [data-adapttable-part="search-field"] {
+    @apply flex min-w-0 items-center gap-2;
+    flex: 1 1 12rem;
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="search"] {
+    inline-size: 100%;
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="scroll-box"] {
+    overflow: auto;
+    max-inline-size: 100%;
+  }
+  [data-adapttable-kit="spartan"] table {
+    border-collapse: separate;
+    border-spacing: 0;
+    inline-size: 100%;
+  }
+  [data-adapttable-kit="spartan"] :is(th, td) {
+    border-block-end: 1px solid var(--at-spartan-border);
+    padding: var(--at-spartan-cell-padding);
+    text-align: start;
+    background: var(--at-spartan-background);
+  }
+  [data-adapttable-kit="spartan"] th {
+    font-weight: 600;
+    background: var(--at-spartan-muted);
+  }
+  [data-adapttable-kit="spartan"] .at-spartan-header {
+    @apply flex min-w-0 items-center gap-1;
+  }
+  [data-adapttable-kit="spartan"] [data-spartan-part="sort-button"] {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    min-inline-size: 0;
+    text-align: start;
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="cards"] {
+    @apply grid gap-3;
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="card"] {
+    @apply rounded-lg border p-3;
+    border-color: var(--at-spartan-border);
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="card-row"] {
+    @apply flex min-w-0 items-start justify-between gap-3 py-1;
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="card-value"] {
+    overflow-wrap: anywhere;
+  }
+  [data-adapttable-kit="spartan"]
+    :is(
+      [data-spartan-part="filters-title"],
+      [data-spartan-part="column-menu-title"]
+    ) {
+    @apply m-0 flex-1 text-base font-semibold;
+  }
+  [data-adapttable-kit="spartan"]
+    :is(
+      [data-adapttable-part="column-menu-item"],
+      [data-adapttable-part="column-menu-bulk"],
+      [data-spartan-part="views-row"]
+    ) {
+    @apply flex flex-wrap items-center gap-2 py-1;
+  }
+  [data-adapttable-kit="spartan"] [data-spartan-part="column-menu-label"] {
+    flex: 1;
+    min-inline-size: 4rem;
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="filter-checkbox"] {
+    @apply inline-flex items-center gap-2;
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="filter-header-input"] {
+    max-inline-size: 100%;
+    min-inline-size: 0;
+  }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="filter-chips"] {
+    @apply flex flex-wrap gap-2 py-2;
+  }
+
+  .at-spartan-surface {
+    border: 1px solid var(--at-spartan-border);
+    border-radius: var(--at-spartan-radius);
+  }
+  .at-spartan-popover {
+    @apply p-4 shadow-lg;
+    box-sizing: border-box;
+    inline-size: min(24rem, calc(100vw - 1rem));
+    max-block-size: min(32rem, calc(100dvh - 2rem));
+    overflow: auto;
+  }
+  .at-spartan-drawer-overlay {
+    inset-inline-end: 0;
+    margin-inline-start: auto;
+    block-size: 100%;
+  }
+  .at-spartan-drawer {
+    @apply flex flex-col gap-4 p-4 shadow-xl;
+    box-sizing: border-box;
+    inline-size: min(28rem, 100vw);
+    block-size: 100dvh;
+    overflow: auto;
+    border-radius: 0;
+  }
+  .at-spartan-drawer [data-spartan-part="filters-body"] {
+    flex: 1;
+    overflow: auto;
+  }
+  .at-spartan-filter-backdrop {
+    background: rgb(0 0 0 / 45%);
+  }
+
+  @media (max-width: 480px) {
+    [data-adapttable-kit="spartan"] [data-adapttable-part="toolbar"] {
+      align-items: stretch;
+    }
+    [data-adapttable-kit="spartan"] [data-adapttable-part="search-field"] {
+      flex-basis: 100%;
+    }
+    [data-adapttable-kit="spartan"] .at-spartan-button {
+      min-block-size: 2.5rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-adapttable-kit="spartan"] * {
+      transition-duration: 0s;
+      animation-duration: 0s;
+    }
+  }
+}

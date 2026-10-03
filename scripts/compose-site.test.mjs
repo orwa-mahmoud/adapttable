@@ -7,6 +7,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -45,6 +46,8 @@ function fixture() {
   for (const page of PAGES) write(dist, page.html.slice(2));
   write(dist, "assets/entry.js");
   write(dist, "favicon.svg");
+  write(dist, "third-party-notices.txt");
+  write(dist, "third-party-notices.json");
   return { dist, site: join(root, "site") };
 }
 
@@ -77,6 +80,8 @@ describe("composeDemos", () => {
     for (const root of ["react/demo", "angular/demo"]) {
       assert.ok(existsSync(join(site, root, "assets/entry.js")), root);
       assert.ok(existsSync(join(site, root, "favicon.svg")), root);
+      assert.ok(existsSync(join(site, root, "third-party-notices.txt")), root);
+      assert.ok(existsSync(join(site, root, "third-party-notices.json")), root);
     }
   });
 
@@ -103,4 +108,43 @@ describe("composeDemos", () => {
       /no demo root is served for "vue"/
     );
   });
+});
+
+it("relocates framework main/lab entries and preserves relative asset resolution", () => {
+  const { dist, site } = fixture();
+  write(dist, "angular-main/index.html");
+  write(dist, "angular-all-options/index.html");
+  const html =
+    '<script src="../assets/angular.js"></script><link href="../assets/angular.css"><a href="/angular/getting-started/">Docs</a>';
+  writeFileSync(join(dist, "angular-main/index.html"), html);
+  writeFileSync(join(dist, "angular-all-options/index.html"), html);
+  composeDemos({
+    dist,
+    site,
+    pages: [
+      ...PAGES,
+      {
+        html: "./angular-main/index.html",
+        framework: "angular",
+        route: "/angular/demo/",
+      },
+      {
+        html: "./angular-all-options/index.html",
+        framework: "angular",
+        route: "/angular/demo/all-options/",
+      },
+    ],
+  });
+  const main = readFileSync(join(site, "angular/demo/index.html"), "utf8");
+  assert.ok(main.includes('src="./assets/angular.js"'));
+  assert.ok(main.includes('href="./assets/angular.css"'));
+  assert.ok(main.includes('href="/angular/getting-started/"'));
+  assert.ok(
+    readFileSync(
+      join(site, "angular/demo/all-options/index.html"),
+      "utf8"
+    ).includes('src="../assets/angular.js"')
+  );
+  assert.equal(existsSync(join(site, "angular/demo/angular-main")), false);
+  assert.equal(existsSync(join(site, "react/demo/angular-main")), false);
 });

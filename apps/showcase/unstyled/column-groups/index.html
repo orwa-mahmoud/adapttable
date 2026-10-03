@@ -152,6 +152,17 @@
       [data-theme="dark"] .at-fallback a {
         color: #a5b4fc;
       }
+      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
     </style>
   </head>
   <body>
@@ -164,7 +175,7 @@
         <h1>Column groups in Unstyled</h1>
         <p>A parent with <code>children</code> is a column group: its caption spans its columns in a header row of its own. This table has three, open by default; collapse one to see how it folds.</p>
         <p>Assignment is Team + Status with <code>collapsedKey: &quot;team&quot;</code>, so it keeps Team. Delivery is Timeline + Budget with <code>collapsedRender</code>, so it draws the budget in one cell. Workload has neither, so it folds to a narrow stub.</p>
-        <p><code>collapsibleColumnGroups</code> arms the toggles. The group headers and their buttons are native elements.</p>
+        <p><code>collapsibleColumnGroups</code> arms the toggles. The group headers use Unstyled buttons.</p>
         <h2>The code</h2>
         <pre><code>import { Component, input } from &quot;@angular/core&quot;;
 import type { ColumnInput } from &quot;@adapttable/angular&quot;;
@@ -219,6 +230,14 @@ export class Members {
         <h2>The same feature in the other kits</h2>
         <ul>
           <li><a href="../../ng-zorro/column-groups/">Column groups in NG-ZORRO</a> — Ant Design components for Angular</li>
+          <li><a href="../../material/column-groups/">Column groups in Angular Material</a> — Angular Material controls for Angular</li>
+          <li><a href="../../ng-bootstrap/column-groups/">Column groups in ng-bootstrap</a> — ng-bootstrap controls for Angular</li>
+          <li><a href="../../aria/column-groups/">Column groups in Angular Aria</a> — Angular Aria controls for Angular</li>
+          <li><a href="../../ngx-bootstrap/column-groups/">Column groups in ngx-bootstrap</a> — ngx-bootstrap controls for Angular</li>
+          <li><a href="../../clarity/column-groups/">Column groups in Clarity</a> — Clarity controls for Angular</li>
+          <li><a href="../../angular-cdk/column-groups/">Column groups in Angular CDK</a> — Angular CDK controls for Angular</li>
+          <li><a href="../../spartan/column-groups/">Column groups in Spartan</a> — Spartan controls for Angular</li>
+          <li><a href="../../taiga-ui/column-groups/">Column groups in Taiga UI</a> — Taiga UI controls for Angular</li>
         </ul>
         <h2>More Unstyled features</h2>
         <ul>
@@ -246,7 +265,7 @@ export class Members {
         <p>
           Reference: <a href="https://adapttable.orwamahmoud.com/angular/column-groups/">column-groups</a>, <a href="https://adapttable.orwamahmoud.com/angular/columns/">columns</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
-          <a href="/react/demo/">the live demo</a>.
+          <a href="/angular/demo/unstyled/">the live demo</a>.
         </p>
       </main>
     </div>

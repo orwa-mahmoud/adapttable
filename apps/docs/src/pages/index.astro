@@ -4,6 +4,7 @@
 // get-started block and footer as the showcase, so the funnel reads as one
 // product. Pre-rendered text + JSON-LD carry the SEO; the live demo
 // stays at the showcase root, the guide at the React getting-started page.
+import { builtAdapters } from "../../../showcase/matrix.mjs";
 import { demoRoute, docsRoute, siteUrl } from "../../../../scripts/site.mjs";
 
 const REPO = "https://github.com/orwa-mahmoud/adapttable";
@@ -13,6 +14,7 @@ const DESCRIPTION =
 
 // The demo hero's adapter chips, same labels and accent colors as
 // apps/showcase/src/themeTokens.ts.
+const ANGULAR_KITS = builtAdapters("angular");
 const KITS = [
   {
     label: "Mantine",
@@ -421,9 +423,16 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           <a href="#ai">AI</a>
           <a href="#customize">Customize</a>
           <a href="#get-started">Get started</a>
-          <a href={siteUrl(docsRoute("angular/getting-started"))}>Angular docs</a>
+
         </nav>
         <div class="nav__right">
+          <label class="nav__framework">
+            <span aria-hidden="true" data-landing-icon>⚛</span>
+            <select aria-label="Framework" data-landing-framework>
+              <option value="react">React</option>
+              <option value="angular">Angular</option>
+            </select>
+          </label>
           <a class="nav__docs" href={`${siteUrl(docsRoute("getting-started"))}`}>
             <svg
               width="14"
@@ -490,7 +499,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             >Every UI kit.</span
           >
         </h1>
-        <p class="hero__sub reveal">
+        <p class="hero__sub reveal" data-angular-copy="Headless freedom, batteries included for Angular. Use signals and native Angular controls with NG-ZORRO or an unstyled kit you design. Optional features, URL state, RTL and accessible interactions share one engine.">
           Headless freedom, batteries included for <em>your</em> kit. The
           same table features render natively in Mantine, MUI, Chakra, Ant
           Design, Radix, Base UI, shadcn/Tailwind — or your own custom UI. URL
@@ -542,6 +551,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           </a>
           <a
             class="btn-demo btn-demo--ghost"
+            data-framework-only="react"
             href="https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine"
             target="_blank"
             rel="noreferrer"
@@ -553,12 +563,13 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           <span class="hero__adapters-l">Renders natively in</span>
           {
             KITS.map((kit) => (
-              <a class="hero__chip" href={kit.href} style={`--c:${kit.c}`}>
+              <a data-framework-only="react" class="hero__chip" href={kit.href} style={`--c:${kit.c}`}>
                 <span class="hero__chip-dot" />
                 {kit.label}
               </a>
             ))
           }
+          {ANGULAR_KITS.map((kit) => <a hidden data-framework-only="angular" class="hero__chip" href={siteUrl(demoRoute(kit.key, "angular"))} style={`--c:${kit.accentLight}`}><span class="hero__chip-dot" />{kit.label}</a>)}
         </div>
 
         </div>
@@ -568,14 +579,14 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
         <div class="shell">
         <div class="sec__head">
           <span class="sec__kicker">Watch it switch</span>
-          <h2 class="sec__title" id="tour-h">One table. Eight UI kits.</h2>
-          <p class="sec__lead">
+          <h2 class="sec__title" id="tour-h" data-angular-copy="Angular signals. Native controls.">One table. Eight UI kits.</h2>
+          <p class="sec__lead" data-angular-copy="Explore the same feature demos in NG-ZORRO and the unstyled Angular kit. Choose a kit, then switch frameworks without losing the feature you are viewing.">
             The same dataset and feature set, re-rendered by each real adapter
             — Mantine, MUI, Chakra, Ant Design, Radix, Base UI, shadcn and
             Tailwind. Nothing about the table changes but its skin.
           </p>
         </div>
-        <figure class="tour">
+        <figure class="tour" data-framework-only="react">
           <video
             class="tour__video"
             controls
@@ -595,6 +606,9 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
             <a href={`${siteUrl(demoRoute())}`}>open the live demo</a>
           </figcaption>
         </figure>
+        <div class="hero__cta" hidden data-framework-only="angular">
+          {ANGULAR_KITS.map((kit) => <a class="btn-demo" href={siteUrl(demoRoute(kit.key, "angular"))}>Explore {kit.label}</a>)}
+        </div>
         </div>
       </section>
 
@@ -791,7 +805,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
           </a>
         </div>
         <div class="spectrum">
-          <div class="spectrum__track">
+          <div class="spectrum__track" data-framework-only="react">
             {
               SPECTRUM.map((s, i) => (
                 <div class="spcard" style={`--i:${i}`}>
@@ -802,6 +816,15 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
                 </div>
               ))
             }
+          </div>
+          <div class="spectrum__track" hidden data-framework-only="angular">
+            {[
+              ["Inputs", "Pass data, columns and a stable row key.", '[data]="rows" [columns]="columns" [rowKey]="rowKey"'],
+              ["Renderers", "Use Angular templates or components for cells and cards.", '[renderCard]="cardTemplate"'],
+              ["Classes and parts", "Scope your own theme to documented parts.", `[classNames]="{ card: 'person-card' }"`],
+              ["Optional controls", "Compose the features your toolbar needs.", 'features = [densityChooser(), fullscreen()]'],
+              ["Headless signals", "Own the markup and bind complete attribute records.", 'table = injectDataTable(options)'],
+            ].map(([title, description, code], i) => <div class="spcard" style={`--i:${i}`}><div class="spcard__rank">0{i + 1}</div><h3>{title}</h3><p>{description}</p><pre class="spcard__code"><code>{code}</code></pre></div>)}
           </div>
           <div class="spectrum__scale">
             <span>Easy</span>
@@ -825,7 +848,7 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
         </div>
         <div class="getstarted">
           <pre
-            class="getstarted__code"><code>{`import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, base-ui, shadcn, unstyled
+            class="getstarted__code" data-framework-only="react"><code>{`import { DataTable } from "@adapttable/mantine"; // or mui, chakra, antd, radix, base-ui, shadcn, unstyled
 import { filters } from "@adapttable/mantine/filters";
 
 <DataTable
@@ -838,6 +861,22 @@ import { filters } from "@adapttable/mantine/filters";
   ]}
   features={[filters([])]}
 />`}</code></pre>
+          <pre class="getstarted__code" hidden data-framework-only="angular"><code>{`import { Component } from "@angular/core";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import { filters } from "@adapttable/angular-unstyled/filters";
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`<adapt-data-table [data]="rows" [columns]="columns"
+    [rowKey]="rowKey" [features]="features" />\`,
+})
+export class People {
+  readonly rows = [{ id: "ada", name: "Ada Lovelace" }];
+  readonly columns = [{ key: "name" }];
+  readonly rowKey = (row: { id: string }) => row.id;
+  readonly features = [filters([])];
+}`}</code></pre>
           <div class="getstarted__actions">
             <div class="install install--lg">
               <span class="install__prompt" aria-hidden="true">$</span>
@@ -847,9 +886,7 @@ import { filters } from "@adapttable/mantine/filters";
               <a class="gs-btn gs-btn--primary" href={`${siteUrl(docsRoute("getting-started"))}`}
                 >Get started</a
               >
-              <a class="gs-btn gs-btn--ghost" href={siteUrl(docsRoute("angular/getting-started"))}>
-                Angular guide
-              </a>
+
               <a class="gs-btn gs-btn--ghost" href={REPO}>
                 <svg
                   width="15"
@@ -1038,6 +1075,7 @@ import { filters } from "@adapttable/mantine/filters";
     </footer>
 
     <script>
+      import "../landing-framework";
       // Mouse wheel paginates the deck: one flick, one slide — and a
       // SUSTAINED scroll chains slide after slide, so the whole page can
       // be traversed in one go. The listener lives on window so the
@@ -1171,6 +1209,11 @@ import { filters } from "@adapttable/mantine/filters";
 </html>
 
 <style>
+  [data-framework-only][hidden] { display: none !important; }
+  .nav__framework { display: inline-flex; align-items: center; gap: .25rem; color: var(--ink); font-size: .875rem; }
+  .nav__framework select { font: inherit; color: inherit; background: var(--page-surface); border: 1px solid var(--page-border); border-radius: .5rem; padding: .4rem .25rem; max-width: 6.5rem; }
+  .nav__framework select:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
   /* Schibsted Grotesk loads with `display=swap`, so the first paint uses a
      local face and every glyph metric changes when the webfont arrives.
      This face wraps the local fallback in Schibsted Grotesk's own metrics —

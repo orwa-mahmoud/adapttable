@@ -23,6 +23,8 @@ on:
       - "scripts/legacy-routes.mjs"
       - "scripts/build-redirects.mjs"
       - "scripts/check-site-links.mjs"
+      - "scripts/*notices*"
+      - "scripts/third-party-licenses/**"
       - "scripts/sitemap-routes.mjs"
       - "scripts/check-sitemap.mjs"
       - "scripts/build-llms-full.mjs"
@@ -45,6 +47,8 @@ on:
       - "scripts/legacy-routes.mjs"
       - "scripts/build-redirects.mjs"
       - "scripts/check-site-links.mjs"
+      - "scripts/*notices*"
+      - "scripts/third-party-licenses/**"
       - "scripts/sitemap-routes.mjs"
       - "scripts/check-sitemap.mjs"
       - "scripts/build-llms-full.mjs"
@@ -78,6 +82,8 @@ jobs:
         run: pnpm --filter @adapttable/showcase build
       - name: Compose site (each framework's demo pages under its demo root)
         run: node scripts/compose-site.mjs
+      - name: Check website dependency notices
+        run: pnpm check:site-notices
       - name: Check every demo route is in the sitemap
         run: pnpm check:sitemap
       - name: Check every same-site link resolves

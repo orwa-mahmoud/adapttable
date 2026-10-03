@@ -1,0 +1,245 @@
+{
+  "name": "@adapttable/angular-aria",
+  "version": "0.0.0",
+  "description": "Angular Aria accessible composite controls and adapter-owned styling for AdaptTable",
+  "keywords": [
+    "angular",
+    "angular-aria",
+    "data-table",
+    "accessible",
+    "headless",
+    "adapttable"
+  ],
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "homepage": "https://adapttable.orwamahmoud.com/angular/demo/aria/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/angular/adapter-angular-aria"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "LICENSE",
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "styles.css"
+  ],
+  "module": "./dist/fesm2022/adapttable-angular-aria.mjs",
+  "types": "./dist/types/adapttable-angular-aria.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/adapttable-angular-aria.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria.mjs"
+    },
+    "./batch-editing": {
+      "types": "./dist/types/adapttable-angular-aria-batch-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-batch-editing.mjs"
+    },
+    "./bulk-actions": {
+      "types": "./dist/types/adapttable-angular-aria-bulk-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-bulk-actions.mjs"
+    },
+    "./cell-navigation": {
+      "types": "./dist/types/adapttable-angular-aria-cell-navigation.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-cell-navigation.mjs"
+    },
+    "./cell-span": {
+      "types": "./dist/types/adapttable-angular-aria-cell-span.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-cell-span.mjs"
+    },
+    "./column-groups": {
+      "types": "./dist/types/adapttable-angular-aria-column-groups.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-column-groups.mjs"
+    },
+    "./column-menu": {
+      "types": "./dist/types/adapttable-angular-aria-column-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-column-menu.mjs"
+    },
+    "./column-selection": {
+      "types": "./dist/types/adapttable-angular-aria-column-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-column-selection.mjs"
+    },
+    "./command-palette": {
+      "types": "./dist/types/adapttable-angular-aria-command-palette.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-command-palette.mjs"
+    },
+    "./context-menu": {
+      "types": "./dist/types/adapttable-angular-aria-context-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-context-menu.mjs"
+    },
+    "./density": {
+      "types": "./dist/types/adapttable-angular-aria-density.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-density.mjs"
+    },
+    "./editing": {
+      "types": "./dist/types/adapttable-angular-aria-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-editing.mjs"
+    },
+    "./export": {
+      "types": "./dist/types/adapttable-angular-aria-export.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-export.mjs"
+    },
+    "./extra-rows": {
+      "types": "./dist/types/adapttable-angular-aria-extra-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-extra-rows.mjs"
+    },
+    "./features": {
+      "types": "./dist/types/adapttable-angular-aria-features.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-features.mjs"
+    },
+    "./find-in-table": {
+      "types": "./dist/types/adapttable-angular-aria-find-in-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-find-in-table.mjs"
+    },
+    "./filters": {
+      "types": "./dist/types/adapttable-angular-aria-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-filters.mjs"
+    },
+    "./fit-columns": {
+      "types": "./dist/types/adapttable-angular-aria-fit-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-fit-columns.mjs"
+    },
+    "./fullscreen": {
+      "types": "./dist/types/adapttable-angular-aria-fullscreen.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-fullscreen.mjs"
+    },
+    "./grouping": {
+      "types": "./dist/types/adapttable-angular-aria-grouping.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-grouping.mjs"
+    },
+    "./grouping-panel": {
+      "types": "./dist/types/adapttable-angular-aria-grouping-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-grouping-panel.mjs"
+    },
+    "./header-filters": {
+      "types": "./dist/types/adapttable-angular-aria-header-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-header-filters.mjs"
+    },
+    "./multi-sort": {
+      "types": "./dist/types/adapttable-angular-aria-multi-sort.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-multi-sort.mjs"
+    },
+    "./nested-table": {
+      "types": "./dist/types/adapttable-angular-aria-nested-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-nested-table.mjs"
+    },
+    "./pinned-summary-rows": {
+      "types": "./dist/types/adapttable-angular-aria-pinned-summary-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-pinned-summary-rows.mjs"
+    },
+    "./preset": {
+      "types": "./dist/types/adapttable-angular-aria-preset.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-preset.mjs"
+    },
+    "./pivot": {
+      "types": "./dist/types/adapttable-angular-aria-pivot.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-pivot.mjs"
+    },
+    "./print": {
+      "types": "./dist/types/adapttable-angular-aria-print.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-print.mjs"
+    },
+    "./resizable-columns": {
+      "types": "./dist/types/adapttable-angular-aria-resizable-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-resizable-columns.mjs"
+    },
+    "./row-actions": {
+      "types": "./dist/types/adapttable-angular-aria-row-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-row-actions.mjs"
+    },
+    "./row-appearance": {
+      "types": "./dist/types/adapttable-angular-aria-row-appearance.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-row-appearance.mjs"
+    },
+    "./row-detail": {
+      "types": "./dist/types/adapttable-angular-aria-row-detail.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-row-detail.mjs"
+    },
+    "./row-pinning": {
+      "types": "./dist/types/adapttable-angular-aria-row-pinning.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-row-pinning.mjs"
+    },
+    "./row-reorder": {
+      "types": "./dist/types/adapttable-angular-aria-row-reorder.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-row-reorder.mjs"
+    },
+    "./saved-views": {
+      "types": "./dist/types/adapttable-angular-aria-saved-views.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-saved-views.mjs"
+    },
+    "./selection-stats": {
+      "types": "./dist/types/adapttable-angular-aria-selection-stats.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-selection-stats.mjs"
+    },
+    "./side-panel": {
+      "types": "./dist/types/adapttable-angular-aria-side-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-side-panel.mjs"
+    },
+    "./status-bar": {
+      "types": "./dist/types/adapttable-angular-aria-status-bar.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-status-bar.mjs"
+    },
+    "./tree": {
+      "types": "./dist/types/adapttable-angular-aria-tree.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-tree.mjs"
+    },
+    "./virtualize": {
+      "types": "./dist/types/adapttable-angular-aria-virtualize.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-virtualize.mjs"
+    },
+    "./package.json": "./package.json",
+    "./assistant": {
+      "types": "./dist/types/adapttable-angular-aria-assistant.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-aria-assistant.mjs"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c tsconfig.build.json && node -e \"require('node:fs').rmSync('dist/package.json')\"",
+    "test": "vitest run && vitest run -c vitest.ssr.config.ts",
+    "test:coverage": "vitest run --coverage && vitest run -c vitest.ssr.config.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist coverage .turbo"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/aria": "22.2.1",
+    "@angular/cdk": "22.2.1"
+  },
+  "dependencies": {
+    "@adapttable/core": "3.8.0",
+    "@adapttable/angular": "0.3.0",
+    "tslib": "^2.8.1"
+  },
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.7.5",
+    "@analogjs/vitest-angular": "^2.7.5",
+    "@angular/build": "^22.2.0",
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/compiler-cli": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/platform-server": "^22.2.0",
+    "@testing-library/dom": "^10.4.1",
+    "ng-packagr": "^22.2.1",
+    "rxjs": "^7.8.2",
+    "@angular/aria": "22.2.1",
+    "@angular/cdk": "22.2.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": true
+}

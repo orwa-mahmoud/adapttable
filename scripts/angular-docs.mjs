@@ -1,7 +1,20 @@
+/** Angular-only kit setup guides; these have no React documentation counterpart. */
+export const ANGULAR_KIT_DOCS = Object.freeze([
+  "material",
+  "ng-bootstrap",
+  "spartan",
+  "taiga-ui",
+  "angular-cdk",
+  "clarity",
+  "ngx-bootstrap",
+  "aria",
+]);
+
 /** Canonical Angular guide sources, in reading order. Safe to import in apps. */
 export const ANGULAR_DOCS = Object.freeze(
   [
     "getting-started",
+    ...ANGULAR_KIT_DOCS,
     "features",
     "data-tiers",
     "headless",

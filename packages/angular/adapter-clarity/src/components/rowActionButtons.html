@@ -1,0 +1,65 @@
+@let content = renderer();
+@if (content?.template; as template) {
+  <ng-container
+    [ngTemplateOutlet]="template"
+    [ngTemplateOutletContext]="context()"
+  />
+} @else if (content?.component; as component) {
+  <ng-container
+    [ngComponentOutlet]="component"
+    [ngComponentOutletInputs]="content?.inputs"
+  />
+} @else if (layout() === "menu") {
+  <clr-dropdown
+    #menu
+    data-adapttable-part="row-actions-menu"
+    [class]="classNames().rowActionsMenu"
+    (pointerdown)="$event.stopPropagation()"
+  >
+    <button
+      clrDropdownTrigger
+      class="btn btn-sm btn-outline"
+      type="button"
+      data-adapttable-part="row-actions-trigger"
+      [class]="classNames().rowActionsTrigger"
+      [attr.aria-label]="labels().rowActionsMenu"
+      (click)="$event.stopPropagation()"
+    >
+      ⋮
+    </button>
+    <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
+      @for (item of items(); track item.action.key) {
+        <button
+          clrDropdownItem
+          class="btn btn-sm btn-outline"
+          type="button"
+          data-adapttable-part="action-button"
+          [class]="classNames().actionButton"
+          [attr.aria-label]="item.action.label"
+          [attr.title]="item.reason ?? null"
+          [attr.data-color]="item.action.color ?? null"
+          [disabled]="item.disabled"
+          (click)="run($event, item.action)"
+        >
+          {{ item.action.label }}
+        </button>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+} @else {
+  @for (item of items(); track item.action.key) {
+    <button
+      class="btn btn-sm btn-outline"
+      type="button"
+      data-adapttable-part="action-button"
+      [class]="classNames().actionButton"
+      [attr.aria-label]="item.action.label"
+      [attr.title]="item.reason ?? null"
+      [attr.data-color]="item.action.color ?? null"
+      [disabled]="item.disabled"
+      (click)="run($event, item.action)"
+    >
+      {{ item.action.label }}
+    </button>
+  }
+}

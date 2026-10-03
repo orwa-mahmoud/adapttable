@@ -447,7 +447,7 @@
     }
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "node ../../../scripts/build-library.mjs",
     "dev": "tsdown --watch",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

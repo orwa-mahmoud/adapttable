@@ -15,7 +15,12 @@ import { fileURLToPath } from "node:url";
 
 import { buildLlmsFull } from "../../scripts/build-llms-full.mjs";
 import { docLinkTarget, docsFiles } from "../../scripts/docs-files.mjs";
-import { docsRoute, docsSlug, siteUrl } from "../../scripts/site.mjs";
+import {
+  docsReferenceRoute,
+  docsRoute,
+  docsSlug,
+  siteUrl,
+} from "../../scripts/site.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, "../..");
@@ -32,6 +37,14 @@ const target = join(here, "src/content/docs");
  * `docs/` to each other.
  */
 export const TITLES = {
+  "angular/angular-cdk.md": "Angular CDK tables",
+  "angular/aria.md": "Angular Aria tables",
+  "angular/clarity.md": "Clarity Angular tables",
+  "angular/material.md": "Angular Material tables",
+  "angular/ng-bootstrap.md": "ng-bootstrap Angular tables",
+  "angular/ngx-bootstrap.md": "ngx-bootstrap Angular tables",
+  "angular/spartan.md": "Spartan Angular tables",
+  "angular/taiga-ui.md": "Taiga UI Angular tables",
   "angular/getting-started.md": "Get started with Angular tables",
   "angular/features.md": "Angular table features and presets",
   "angular/data-tiers.md": "Angular table data — client and server",
@@ -160,6 +173,22 @@ export const TITLES = {
 // emits from `description`. Keyword-rich and unique per page so search and
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
+  "angular/angular-cdk.md":
+    "Use the private Angular CDK table adapter with CDK overlays, focus handling, native controls and composable features.",
+  "angular/aria.md":
+    "Use the private Angular Aria table adapter with accessible behavior primitives, native controls and composable features.",
+  "angular/clarity.md":
+    "Build Angular tables with the private Clarity adapter, native forms and overlays, scoped styles and composable features.",
+  "angular/material.md":
+    "Build Angular tables with the private Material adapter, native controls, scoped themes and composable features.",
+  "angular/ng-bootstrap.md":
+    "Use the private ng-bootstrap table adapter with native Bootstrap overlays, scoped styles and composable Angular features.",
+  "angular/ngx-bootstrap.md":
+    "Use the private ngx-bootstrap table adapter with native dropdowns and modals, scoped themes and composable Angular features.",
+  "angular/spartan.md":
+    "Build Angular tables with the private Spartan adapter, Brain behavior primitives, package-owned Helm controls and scoped styles.",
+  "angular/taiga-ui.md":
+    "Use the private Taiga UI table adapter with its scoped root, native controls and overlays, and composable Angular features.",
   "angular/getting-started.md":
     "Install an Angular table with native HTML or NG-ZORRO controls. Follow npm setup, CLI scaffolding and a standalone component example with signal-backed rows.",
   "angular/features.md":
@@ -473,7 +502,14 @@ export function rewriteDocLinks(markdown, file) {
     /(\]\()([^\s)]+)([^)]*\))/g,
     (_link, open, href, close) => {
       const doc = docLinkTarget(file, href);
-      if (doc) return `${open}${docsRoute(doc.file)}${doc.suffix}${close}`;
+      if (doc) {
+        const route =
+          file.startsWith("angular/") && !doc.file.startsWith("angular/")
+            ? docsReferenceRoute(doc.file, "angular")
+            : docsRoute(doc.file);
+        const suffix = route.includes("?unavailable=") ? "" : doc.suffix;
+        return `${open}${route}${suffix}${close}`;
+      }
       if (href.startsWith("../")) {
         const repositoryPath = posix.normalize(
           posix.join("docs", posix.dirname(file), href)

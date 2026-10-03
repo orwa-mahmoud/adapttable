@@ -501,3 +501,53 @@ describe("starterComponent (v2 shape)", () => {
     expect(src).not.toContain("useFrontendData");
   });
 });
+
+describe("private Angular kit discovery", () => {
+  it("links private kits locally instead of claiming registry installation", () => {
+    const { io, logs } = makeIO(
+      JSON.stringify({
+        dependencies: { "@angular/core": "22.2.0", "@angular/aria": "22.2.1" },
+      }),
+      ["pnpm-lock.yaml"]
+    );
+    const result = runInit(io);
+    expect(result.kit).toBe("angular-aria");
+    expect(result.installCommand).not.toContain("@adapttable/angular-aria");
+    expect(logs.join("\n")).toContain(
+      "private 0.0.0 workspace preview, not available on npm"
+    );
+    expect(logs.join("\n")).toContain(
+      "Build and link its local package separately"
+    );
+  });
+  it("prefers a specific UI kit when its transitive CDK peer is present", () => {
+    expect(
+      detectKit(
+        { "@angular/aria": "22.2.1", "@angular/cdk": "22.2.1" },
+        { framework: "angular" }
+      ).kit
+    ).toBe("angular-aria");
+    expect(
+      detectKit(
+        { "@clr/angular": "18.3.0", "@angular/cdk": "22.2.1" },
+        { framework: "angular" }
+      ).kit
+    ).toBe("clarity");
+  });
+
+  it.each([
+    ["@angular/material", "angular-material", "@adapttable/angular-material"],
+    ["@ng-bootstrap/ng-bootstrap", "ng-bootstrap", "@adapttable/ng-bootstrap"],
+    ["@spartan-ng/brain", "spartan", "@adapttable/spartan"],
+    ["@taiga-ui/core", "taiga-ui", "@adapttable/taiga-ui"],
+    ["@angular/aria", "angular-aria", "@adapttable/angular-aria"],
+    ["@angular/cdk", "angular-cdk", "@adapttable/angular-cdk"],
+    ["@clr/angular", "clarity", "@adapttable/clarity"],
+    ["ngx-bootstrap", "ngx-bootstrap", "@adapttable/ngx-bootstrap"],
+  ])("detects %s only in Angular", (signal, kit, adapter) => {
+    expect(
+      detectKit({ [signal]: "*" }, { framework: "angular" })
+    ).toMatchObject({ kit, adapter, framework: "angular" });
+    expect(detectKit({ [signal]: "*" }).kit).toBe("unstyled");
+  });
+});

@@ -20,7 +20,15 @@ export type Kit =
   | "shadcn"
   | "unstyled"
   | "angular-unstyled"
-  | "ng-zorro";
+  | "ng-zorro"
+  | "angular-material"
+  | "ng-bootstrap"
+  | "spartan"
+  | "taiga-ui"
+  | "angular-aria"
+  | "angular-cdk"
+  | "clarity"
+  | "ngx-bootstrap";
 
 /**
  * Metadata about a kit's adapter and the packages it needs.
@@ -38,6 +46,8 @@ export interface KitInfo {
   signals: string[];
   /** Extra peer package specifiers to install alongside the adapter. */
   extras: string[];
+  /** An unpublished workspace preview: link a local build instead of npm. */
+  privatePreview?: boolean;
   /** Human label for messages. */
   label: string;
 }
@@ -111,6 +121,70 @@ export const KITS: readonly KitInfo[] = [
     label: "Tailwind / unstyled",
   },
   {
+    kit: "angular-material",
+    privatePreview: true,
+    framework: "angular",
+    adapter: "@adapttable/angular-material",
+    signals: ["@angular/material"],
+    extras: [
+      "@angular/material@^22.2.1",
+      "@angular/cdk@^22.2.1",
+      "@angular/forms@^22.0.0",
+    ],
+    label: "Angular Material",
+  },
+  {
+    kit: "ng-bootstrap",
+    privatePreview: true,
+    framework: "angular",
+    adapter: "@adapttable/ng-bootstrap",
+    signals: ["@ng-bootstrap/ng-bootstrap"],
+    extras: [
+      "@ng-bootstrap/ng-bootstrap@^21.0.0",
+      "bootstrap@^5.3.8",
+      "@popperjs/core@^2.11.8",
+      "@angular/forms@^22.0.0",
+      "@angular/localize@^22.0.0",
+    ],
+    label: "ng-bootstrap",
+  },
+  {
+    kit: "spartan",
+    privatePreview: true,
+    framework: "angular",
+    adapter: "@adapttable/spartan",
+    signals: ["@spartan-ng/brain"],
+    extras: [
+      "@spartan-ng/brain@^1.5.0",
+      "@angular/cdk@^22.0.0",
+      "@angular/forms@^22.0.0",
+      "tailwindcss@^4.0.0",
+      "clsx@^2.1.1",
+      "tw-animate-css@^1.0.0",
+    ],
+    label: "Spartan",
+  },
+  {
+    kit: "taiga-ui",
+    privatePreview: true,
+    framework: "angular",
+    adapter: "@adapttable/taiga-ui",
+    signals: ["@taiga-ui/core"],
+    extras: [
+      "@taiga-ui/core@5.26.0",
+      "@taiga-ui/kit@5.26.0",
+      "@taiga-ui/cdk@5.26.0",
+      "@taiga-ui/i18n@5.26.0",
+      "@taiga-ui/styles@5.26.0",
+      "@taiga-ui/icons@5.26.0",
+      "@taiga-ui/event-plugins@^5.0.0",
+      "@angular/cdk@^22.0.0",
+      "@angular/forms@^22.0.0",
+      "@angular/router@^22.0.0",
+    ],
+    label: "Taiga UI",
+  },
+  {
     kit: "ng-zorro",
     framework: "angular",
     adapter: "@adapttable/ng-zorro",
@@ -122,6 +196,48 @@ export const KITS: readonly KitInfo[] = [
       "@angular/router@^22.0.0",
     ],
     label: "NG-ZORRO",
+  },
+  {
+    kit: "angular-aria",
+    framework: "angular",
+    privatePreview: true,
+    adapter: "@adapttable/angular-aria",
+    signals: ["@angular/aria"],
+    extras: ["@angular/aria@22.2.1", "@angular/cdk@22.2.1"],
+    label: "Angular Aria",
+  },
+  {
+    kit: "clarity",
+    framework: "angular",
+    privatePreview: true,
+    adapter: "@adapttable/clarity",
+    signals: ["@clr/angular"],
+    extras: [
+      "@clr/angular@18.3.0",
+      "@clr/ui@18.3.0",
+      "@angular/forms@^22.0.0",
+      "@angular/animations@^22.0.0",
+      "@angular/cdk@^22.0.0",
+    ],
+    label: "Clarity",
+  },
+  {
+    kit: "ngx-bootstrap",
+    framework: "angular",
+    privatePreview: true,
+    adapter: "@adapttable/ngx-bootstrap",
+    signals: ["ngx-bootstrap"],
+    extras: ["ngx-bootstrap@22.0.0", "@angular/forms@^22.0.0"],
+    label: "ngx-bootstrap",
+  },
+  {
+    kit: "angular-cdk",
+    framework: "angular",
+    privatePreview: true,
+    adapter: "@adapttable/angular-cdk",
+    signals: ["@angular/cdk"],
+    extras: ["@angular/cdk@^22.2.1"],
+    label: "Angular CDK",
   },
   {
     kit: "angular-unstyled",

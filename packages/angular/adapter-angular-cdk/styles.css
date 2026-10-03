@@ -1,0 +1,79 @@
+/* Load @angular/cdk/overlay-prebuilt.css before this adapter-owned theme. */
+[data-adapttable-cdk-control] {
+  box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  accent-color: var(--adapt-cdk-accent, #3158b6);
+}
+button[data-adapttable-cdk-control],
+select[data-adapttable-cdk-control],
+input[data-adapttable-cdk-control]:not([type="checkbox"]),
+textarea[data-adapttable-cdk-control] {
+  border: 1px solid var(--adapt-cdk-border, #8993a5);
+  border-radius: 0.375rem;
+  background: var(--adapt-cdk-background, Canvas);
+  padding: 0.375rem 0.625rem;
+}
+[data-adapttable-cdk-control].cdk-keyboard-focused,
+[data-adapttable-cdk-control]:focus-visible {
+  outline: 2px solid var(--adapt-cdk-accent, #3158b6);
+  outline-offset: 2px;
+}
+[data-adapttable-cdk-control]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.adapt-cdk-surface {
+  box-sizing: border-box;
+  color: var(--adapt-cdk-color, CanvasText);
+  background: var(--adapt-cdk-background, Canvas);
+  border: 1px solid var(--adapt-cdk-border, #8993a5);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  padding: 0.75rem;
+  max-inline-size: calc(100vw - 16px);
+  max-block-size: calc(100dvh - 16px);
+  overflow: auto;
+}
+.adapt-cdk-surface-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.adapt-cdk-filter-card {
+  inline-size: 480px;
+}
+.adapt-cdk-backdrop {
+  background: rgb(0 0 0 / 42%);
+}
+.adapt-cdk-drawer-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: none;
+}
+.adapt-cdk-drawer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: min(480px, 100vw);
+  max-block-size: 100dvh;
+  border-radius: 0;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+.adapt-cdk-drawer-body {
+  overflow: auto;
+  flex: 1;
+}
+.adapt-cdk-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.adapt-cdk-modal-overlay > .adapt-cdk-surface {
+  pointer-events: auto;
+}

@@ -1,0 +1,260 @@
+/* AdaptTable layout supplements. Every rule stays within the Bootstrap kit. */
+.adapttable-ngx-bootstrap {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  color: var(--bs-body-color);
+  background: var(--bs-body-bg);
+  font-family: var(--bs-body-font-family);
+  font-size: var(--bs-body-font-size);
+  line-height: var(--bs-body-line-height);
+  --adapt-cell-padding: 0.625rem 0.75rem;
+}
+.adapttable-ngx-bootstrap [data-density="compact"] {
+  --adapt-cell-padding: 0.25rem 0.5rem;
+}
+.adapttable-ngx-bootstrap [data-density="comfortable"] {
+  --adapt-cell-padding: 0.875rem 1rem;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="root"] {
+  min-inline-size: 0;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="toolbar"],
+.adapttable-ngx-bootstrap [data-adapttable-part="toolbar-extras"],
+.adapttable-ngx-bootstrap [data-adapttable-part="footer"],
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="pager"],
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-header"],
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-footer"],
+.adapttable-ngx-bootstrap [data-adapttable-part="column-menu-item"],
+.adapttable-ngx-bootstrap [data-adapttable-part="column-menu-bulk"],
+.adapttable-ngx-bootstrap [data-adapttable-part="chips"],
+.adapttable-ngx-bootstrap [data-adapttable-part="bulk-bar"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-inline-size: 0;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="toolbar"],
+.adapttable-ngx-bootstrap [data-adapttable-part="footer"] {
+  padding-block: 0.75rem;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="footer"] {
+  justify-content: space-between;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="search-field"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 12rem;
+  max-inline-size: 24rem;
+  min-inline-size: 0;
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="rows-per-page"] {
+  display: inline-block;
+  inline-size: auto;
+  margin-inline-start: 0.5rem;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="scroll-box"] {
+  max-inline-size: 100%;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="table"] {
+  margin: 0;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="table"] :is(th, td) {
+  padding: var(--adapt-cell-padding);
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="header-cell"] {
+  white-space: nowrap;
+  background: var(--bs-tertiary-bg);
+  vertical-align: middle;
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="sort-button"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font-weight: 600;
+  padding: 0;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="header-filter-button"] {
+  display: inline-flex;
+  margin-inline-start: 0.375rem;
+}
+.adapttable-ngx-bootstrap :is(th, td)[data-pinned] {
+  background: var(--bs-body-bg);
+}
+.adapttable-ngx-bootstrap th[data-pinned] {
+  background: var(--bs-tertiary-bg);
+}
+.adapttable-ngx-bootstrap svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+.adapttable-ngx-bootstrap .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+.adapttable-ngx-bootstrap :is(button, input, select, textarea):focus-visible {
+  outline: 3px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+.adapttable-ngx-bootstrap [aria-current="page"],
+.adapttable-ngx-bootstrap .btn[aria-pressed="true"] {
+  background: var(--bs-primary);
+  color: #fff;
+  border-color: var(--bs-primary);
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-title"] {
+  font-size: 1rem;
+  margin: 0;
+  flex: 1;
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-header"],
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-footer"] {
+  padding: 0.75rem;
+}
+.adapttable-ngx-bootstrap .adapttable-filter-popover {
+  --bs-popover-max-width: min(26rem, calc(100vw - 1rem));
+  z-index: 1080;
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-popover"] {
+  inline-size: min(23rem, calc(100vw - 3rem));
+  max-block-size: min(70vh, 40rem);
+  overflow-y: auto;
+}
+.adapttable-ngx-bootstrap .offcanvas {
+  --bs-offcanvas-width: min(28rem, 100vw);
+}
+.adapttable-ngx-bootstrap .adapttable-filter-panel-content {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  min-block-size: 0;
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-body"] {
+  min-block-size: 0;
+}
+.adapttable-ngx-bootstrap .dropdown-menu {
+  --bs-dropdown-min-width: min(20rem, calc(100vw - 1rem));
+  max-inline-size: calc(100vw - 1rem);
+  z-index: 1070;
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-part="column-menu-label"] {
+  flex: 1;
+  min-inline-size: 5rem;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="column-menu-item"] {
+  padding-block: 0.35rem;
+  flex-wrap: nowrap;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="cards"] {
+  display: grid;
+  gap: 0.75rem;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="card"] {
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  padding: 0.75rem;
+  background: var(--bs-body-bg);
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="status-bar"] {
+  border-block-start: 1px solid var(--bs-border-color);
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="context-menu"],
+.adapttable-ngx-bootstrap [data-adapttable-part="command-palette"] {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow: var(--bs-box-shadow);
+  padding: 0.5rem;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="error"] {
+  color: var(--bs-danger-text-emphasis);
+  background: var(--bs-danger-bg-subtle);
+  padding: 1rem;
+}
+@media (max-width: 575px) {
+  .adapttable-ngx-bootstrap [data-adapttable-part="search-field"] {
+    max-inline-size: none;
+    flex-basis: 100%;
+  }
+  .adapttable-ngx-bootstrap [data-adapttable-part="footer"] {
+    align-items: flex-start;
+  }
+  .adapttable-ngx-bootstrap .form-control,
+  .adapttable-ngx-bootstrap .form-select {
+    max-inline-size: 100%;
+  }
+}
+
+.adapttable-ngx-bootstrap .visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="cards"],
+.adapttable-ngx-bootstrap [data-adapttable-part="chips"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="card-row"] {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.25rem;
+}
+.adapttable-ngx-bootstrap [data-adapttable-part="card-label"] {
+  color: var(--bs-secondary-color);
+}
+.adapttable-ngx-bootstrap .pagination {
+  margin: 0;
+  flex-wrap: wrap;
+}
+.adapttable-ngx-bootstrap .page-link:disabled {
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+  background: var(--bs-secondary-bg);
+}
+
+.adapttable-ngx-bootstrap .adapttable-edge-drawer .modal-dialog {
+  margin: 0;
+  margin-inline-start: auto;
+  inline-size: min(28rem, 100vw);
+  max-inline-size: 100vw;
+  block-size: 100dvh;
+}
+.adapttable-ngx-bootstrap .adapttable-edge-drawer .modal-content {
+  block-size: 100%;
+  border-radius: 0;
+}
+.adapttable-ngx-bootstrap .adapttable-edge-drawer .offcanvas-body {
+  flex: 1;
+  overflow-y: auto;
+}
+.adapttable-ngx-bootstrap [data-ngx-bootstrap-overlay] {
+  position: relative;
+  z-index: 1070;
+}
+.adapttable-ngx-bootstrap [dir="rtl"] .dropdown-menu {
+  text-align: right;
+}

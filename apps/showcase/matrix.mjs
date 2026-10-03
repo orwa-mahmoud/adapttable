@@ -358,6 +358,408 @@ export const SHOWCASE_ADAPTERS = [
       "ai",
     ],
   },
+  {
+    key: "material",
+    framework: "angular",
+    label: "Angular Material",
+    blurb: "Angular Material controls for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/angular-material",
+    peer: "@angular/material",
+    install:
+      "Private workspace preview: @adapttable/angular-material (not on npm)",
+    provider: "",
+    tagline:
+      "Angular Material controls and overlays with optional features and host-owned data.",
+    surface:
+      "native Angular Material controls carrying the shared data-adapttable-part hooks",
+    landing: {
+      title: "Angular Material Angular data table examples — AdaptTable",
+      description:
+        "Explore the private Angular Material Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
+    ],
+    built: true,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
+  {
+    key: "ng-bootstrap",
+    framework: "angular",
+    label: "ng-bootstrap",
+    blurb: "ng-bootstrap controls for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/ng-bootstrap",
+    peer: "@ng-bootstrap/ng-bootstrap",
+    install: "Private workspace preview: @adapttable/ng-bootstrap (not on npm)",
+    provider: "",
+    tagline:
+      "ng-bootstrap controls and overlays with optional features and host-owned data.",
+    surface:
+      "native ng-bootstrap controls carrying the shared data-adapttable-part hooks",
+    landing: {
+      title: "ng-bootstrap Angular data table examples — AdaptTable",
+      description:
+        "Explore the private ng-bootstrap Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
+    ],
+    built: true,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
+  {
+    key: "aria",
+    framework: "angular",
+    label: "Angular Aria",
+    blurb: "Angular Aria controls for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/angular-aria",
+    peer: "@angular/aria",
+    install: "Private workspace preview: @adapttable/angular-aria (not on npm)",
+    provider: "",
+    tagline:
+      "Angular Aria controls and overlays with optional features and host-owned data.",
+    surface:
+      "Aria composite behavior and adapter-owned native controls carrying the shared data-adapttable-part hooks",
+    landing: {
+      title: "Angular Aria Angular data table examples — AdaptTable",
+      description:
+        "Explore the private Angular Aria Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
+    ],
+    built: true,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
+  {
+    key: "ngx-bootstrap",
+    framework: "angular",
+    label: "ngx-bootstrap",
+    blurb: "ngx-bootstrap controls for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/ngx-bootstrap",
+    peer: "ngx-bootstrap",
+    install:
+      "Private workspace preview: @adapttable/ngx-bootstrap (not on npm)",
+    provider: "",
+    tagline:
+      "ngx-bootstrap controls and overlays with optional features and host-owned data.",
+    surface:
+      "native ngx-bootstrap controls carrying the shared data-adapttable-part hooks",
+    landing: {
+      title: "ngx-bootstrap Angular data table examples — AdaptTable",
+      description:
+        "Explore the private ngx-bootstrap Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
+    ],
+    built: true,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
+  {
+    key: "clarity",
+    framework: "angular",
+    label: "Clarity",
+    blurb: "Clarity controls for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/clarity",
+    peer: "@clr/angular",
+    install: "Private workspace preview: @adapttable/clarity (not on npm)",
+    provider: "",
+    tagline:
+      "Clarity controls and overlays with optional features and host-owned data.",
+    surface:
+      "native clarity controls carrying the shared data-adapttable-part hooks",
+    landing: {
+      title: "Clarity Angular data table examples — AdaptTable",
+      description:
+        "Explore the private Clarity Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
+    ],
+    built: true,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
+  {
+    key: "angular-cdk",
+    framework: "angular",
+    label: "Angular CDK",
+    blurb: "Angular CDK controls for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/angular-cdk",
+    peer: "@angular/cdk",
+    install: "Private workspace preview: @adapttable/angular-cdk (not on npm)",
+    provider: "",
+    tagline:
+      "Angular CDK controls and overlays with optional features and host-owned data.",
+    surface:
+      "adapter-owned native controls enhanced with CDK accessibility, overlays and shared data-adapttable-part hooks",
+    landing: {
+      title: "Angular CDK Angular data table examples — AdaptTable",
+      description:
+        "Explore the private Angular CDK Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
+    ],
+    built: true,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
+  {
+    key: "spartan",
+    framework: "angular",
+    label: "Spartan",
+    blurb: "Spartan controls for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/spartan",
+    peer: "@spartan-ng/brain",
+    install: "Private workspace preview: @adapttable/spartan (not on npm)",
+    provider: "",
+    tagline:
+      "Spartan controls and overlays with optional features and host-owned data.",
+    surface:
+      "native Spartan controls carrying the shared data-adapttable-part hooks",
+    landing: {
+      title: "Spartan Angular data table examples — AdaptTable",
+      description:
+        "Explore the private Spartan Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
+    ],
+    built: true,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
+  {
+    key: "taiga-ui",
+    framework: "angular",
+    label: "Taiga UI",
+    blurb: "Taiga UI controls for Angular",
+    accentLight: "oklch(0.55 0.21 255)",
+    accentDark: "oklch(0.73 0.14 255)",
+    pkg: "@adapttable/taiga-ui",
+    peer: "@taiga-ui/core",
+    install: "Private workspace preview: @adapttable/taiga-ui (not on npm)",
+    provider: "",
+    tagline:
+      "Taiga UI controls and overlays with optional features and host-owned data.",
+    surface:
+      "native Taiga UI controls carrying the shared data-adapttable-part hooks",
+    landing: {
+      title: "Taiga UI Angular data table examples — AdaptTable",
+      description:
+        "Explore the private Taiga UI Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
+    ],
+    built: true,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+      "tree",
+      "nested-tables",
+      "rows",
+      "column-groups",
+      "columns",
+      "aggregation",
+      "pivot",
+      "formulas",
+      "rtl",
+      "realtime",
+      "accessibility",
+      "ai",
+    ],
+  },
 ];
 
 /**
@@ -548,7 +950,7 @@ export function People({ rows, columns }) {
         "Every row is native markup carrying the map's classes — a gray-bordered button per name, an indigo ring on the rename input, and the save action in bg-indigo-600.",
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "Save and restore {kit} {framework} table filters, sorting and column layouts as named views from the views menu.",
         card: "Name an arrangement and restore it from the menu.",
@@ -560,7 +962,7 @@ export function People({ rows, columns }) {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "A view is the table's state — search, sort, filters and the column layout — saved under a name.",
         "Save one from the views menu and pick it again later to put the table back the way it was. The list lives in this browser's storage, or in any store you hand `savedViews`.",
       ],
@@ -820,7 +1222,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "Try inline editing in a {kit} {framework} table with text, number, date and select editors. Your application validates and saves each change.",
         card: "Native editors in the cell; every write goes through your handler.",
@@ -832,8 +1234,8 @@ export class People {
       },
     },
     intros: {
-      unstyled: [
-        "Mark a column `editable`, compose `editing(onCellEdit)`, and double-click opens a native editor in the cell — text, number, date or select. Enter commits, Escape cancels.",
+      angular: [
+        "Mark a column `editable`, compose `editing(onCellEdit)`, and double-click opens a {kit} editor in the cell — text, number, date or select. Enter commits, Escape cancels.",
         "The table never mutates your rows. It hands your handler the row, the column key and the new value, and a column's `validate` refuses a value before it reaches you: clear a name and try to commit it.",
         "With `cellNavigation()` composed, the arrow keys move a visible focus from cell to cell.",
       ],
@@ -952,7 +1354,7 @@ export class Org {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "Explore a {kit} {framework} tree table with parent-child rows, expandable branches, lazy children and phone cards. Includes integration code.",
         card: "Nesting, chevrons, lazy children, and a tree on phones.",
@@ -964,9 +1366,9 @@ export class Org {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Compose `tree()` with `getChildren` or `getParentId` and it renders the hierarchy.",
-        "Children indent under their parent and a native chevron in the tree column opens and closes each branch. Give `hasChildren` and `onLoadChildren` and a branch fetches its children as it opens, showing that it is loading; a failed fetch closes it again, so the next click retries.",
+        "Children indent under their parent and a {kit} chevron control in the tree column opens and closes each branch. Give `hasChildren` and `onLoadChildren` and a branch fetches its children as it opens, showing that it is loading; a failed fetch closes it again, so the next click retries.",
         "On a phone each card leads with the same chevron and indents by depth. Sorting reorders each branch in place, and a search shows the rows it matches.",
       ],
       "ng-zorro": [
@@ -1042,7 +1444,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "A {kit} {framework} data table that becomes cards on phones — automatic below the mobile breakpoint, with the same columns and state and infinite scroll in place of the pager.",
       },
@@ -1052,7 +1454,7 @@ export class People {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "Below the mobile breakpoint every row becomes a card — same columns, same row content, same query state. This page forces the card layout inside a phone-width frame.",
         "Per column, `mobileLabel` and `hideOnMobile` tune what a card shows, and on a phone the pager gives way to infinite scroll: the next rows load as the list reaches its end. There is no second layout to build.",
       ],
@@ -1142,7 +1544,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "Scroll a large {kit} {framework} table with row virtualization inside a scroll box. Sorting and filtering keep working on every row.",
         card: "40,000 rows in a scroll box, only the visible ones rendered.",
@@ -1154,7 +1556,7 @@ export class People {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "Compose `virtualize()` and the table renders the rows in view plus a small overscan, whatever the dataset's size — forty thousand rows on this page, a few dozen of them in the page at once.",
         "The scroll box scrolls rather than the page, and sorting and filtering keep working on the whole dataset rather than on what is drawn. `virtualize({ virtualizeColumns: true })` does the same across, for column sets wider than the box.",
       ],
@@ -1320,7 +1722,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "Try {kit} {framework} table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.",
         card: "Ranges, selects, an AND/OR tree and chips — all in the URL.",
@@ -1384,8 +1786,8 @@ export function People({ rows }) {
         "The backdrop, panel, popover and every filter input carry the map's classes with an indigo focus ring, and a checked option fills its label in indigo; the checklist and the AND/OR builder are not in the map, so they read as browser defaults.",
     },
     intros: {
-      unstyled: [
-        "Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each a native element.",
+      angular: [
+        "Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each using {kit} controls.",
         "Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.",
         "Filter state lives in the versioned URL, so a filtered view is a link someone can send.",
       ],
@@ -1441,7 +1843,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         label: "CSV export",
         h1: "CSV export in {kit}",
         title: "{kit} {framework} table export to CSV — AdaptTable",
@@ -1459,7 +1861,7 @@ export class People {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "Compose `exportCsv()` and an export button joins the toolbar. It writes the page on screen as it stands — sorted, filtered and searched — to a CSV file the browser downloads.",
         "A column's `exportValue` decides what the file gets, so a cell that shows a formatted date range exports the plain start date a spreadsheet sorts.",
       ],
@@ -1561,7 +1963,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "Select {kit} {framework} table rows with native checkboxes and run bulk actions through your own handler. The selection is a set of row ids that survives paging.",
       },
@@ -1571,7 +1973,7 @@ export class People {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "Tick rows one at a time or take the whole page from the header box, then every matching row from the banner that offers it. The selection is a set of ids rather than a slice of what is rendered, so a row chosen on page one is still chosen while page two is on screen.",
         "Bulk actions run against that set and report back through your own handler — the table never performs the write. This page writes what each action received under the table.",
       ],
@@ -1671,7 +2073,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "Group rows in a {kit} {framework} data table by dragging headers or from a select, reorder levels by keyboard, fold each group and read its totals in the header.",
         card: "Drag, select or keyboard grouping, with totals in the headers.",
@@ -1683,7 +2085,7 @@ export class People {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "Compose `groupingPanel(groupBy)` and rows start nested by Team then Status. Drag a column header into the strip or add a level from its select, and reorder the levels by dragging a chip or with the arrow keys on its handle; every move is announced.",
         "Each group header folds its rows and shows its row count and the totals its columns declare as `aggregatable` — Budget sums here, and the panel changes the operation. The grouping travels in the URL.",
       ],
@@ -1803,10 +2205,10 @@ export class Members {
 }`,
     },
     intros: {
-      unstyled: [
+      angular: [
         "A parent with `children` is a column group: its caption spans its columns in a header row of its own. This table has three, open by default; collapse one to see how it folds.",
         'Assignment is Team + Status with `collapsedKey: "team"`, so it keeps Team. Delivery is Timeline + Budget with `collapsedRender`, so it draws the budget in one cell. Workload has neither, so it folds to a narrow stub.',
-        "`collapsibleColumnGroups` arms the toggles. The group headers and their buttons are native elements.",
+        "`collapsibleColumnGroups` arms the toggles. The group headers use {kit} buttons.",
       ],
       "ng-zorro": [
         "A parent with `children` is a column group: its caption spans its columns in a header row of its own. This table has three, open by default; collapse one to see how it folds.",
@@ -1875,7 +2277,7 @@ export function People({ rows }) {
   {
     slug: "rtl",
     intros: {
-      unstyled: [
+      angular: [
         "Arabic labels and cell values mirror the table, its pager and the filter popover. Pinning uses logical edges, so start is the right edge.",
         'Pass `getLabels("ar")` to `labels` and `getDirection("ar")` to `dir`. Every table, including nested tables, receives the same presentation settings.',
         "Append `?locale=ar&dir=rtl` to any Angular feature page to exercise its real table in Arabic and right-to-left layout.",
@@ -2097,7 +2499,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         title: "{kit} table row pinning and cell spanning — AdaptTable",
         description:
           "Try {kit} {framework} table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once.",
@@ -2111,7 +2513,7 @@ export class People {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and merge a team that runs down consecutive rows so the name is written once.",
         '`rowPinning()`, `cellSpan()` and a `"menu"` row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass `pinnedRowIds` to hold them yourself.',
         "Grouping and trees refuse pinning: a nested list is not a flat pin stack. The pin keeps a team merge together — the person moves, the team stays one cell.",
@@ -2386,7 +2788,7 @@ export class People {
 }`,
     },
     heads: {
-      unstyled: {
+      angular: {
         description:
           "Move rows in a {kit} {framework} data table by pointer or keyboard, with every step announced, stable row identity and host-owned persistence.",
         card: "Drag or keyboard moves, announced — the host writes.",
@@ -2398,7 +2800,7 @@ export class People {
       },
     },
     intros: {
-      unstyled: [
+      angular: [
         "Compose `rowReorder` from `{pkg}/row-reorder` and a grip appears on every row. Drag it, or press Space to lift a row, the arrows to move it and Space to drop it; a live region announces each step.",
         "The table never mutates your array: `onRowReorder` asks the host with the row's old and new positions and the row itself, and the host writes. This page applies each move with core's `applyRowReorder` and says what it did.",
       ],
@@ -2457,10 +2859,10 @@ export function Tasks({ rows, setRows, columns }) {
   {
     slug: "aggregation",
     intros: {
-      unstyled: [
+      angular: [
         "`aggregate()` computes the table footer and each team's `groupAggregates`; `groupFooters` closes each team with its subtotal.",
         "Search the table and group totals and the footer recompute from matching rows. The host-owned portfolio total uses `pinnedSummaryRows` and remains above the scrolling body, independent of filtering and sorting.",
-        "All three surfaces render through the same native kit on desktop and in phone cards.",
+        "All three surfaces render through the same {kit} controls on desktop and in phone cards.",
       ],
       "ng-zorro": [
         "`aggregate()` computes the table footer and each team's `groupAggregates`; `groupFooters` closes each team with its subtotal.",
@@ -2561,7 +2963,7 @@ export function Sales({ rows, columns, teamTotal, grandTotal }) {
     description:
       "Try a {kit} {framework} table assistant: filter, group, pin and propose edits with approval. Use scripted prompts or connect your own AI backend.",
     heads: {
-      unstyled: {
+      angular: {
         h1: "AI table assistant in {kit} {framework}",
         title: "{kit} {framework} AI table assistant demo — AdaptTable",
         description:
@@ -2577,8 +2979,8 @@ export function Sales({ rows, columns, teamTotal, grandTotal }) {
       },
     },
     intros: {
-      unstyled: [
-        "This deterministic local demo mounts a real {kit} {framework} table and its native assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.",
+      angular: [
+        "This deterministic local demo mounts a real {kit} {framework} table and its {kit} assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.",
         "A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.",
         "`tableAgent` and `injectTableAssistant` from `@adapttable/ai-angular` share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.",
       ],
@@ -2913,6 +3315,7 @@ export const headFor = (feature, adapter) => ({
   title: feature.title,
   description: feature.description,
   card: feature.card,
+  ...feature.heads?.[adapter.framework],
   ...feature.heads?.[adapter.key],
 });
 
@@ -2924,7 +3327,9 @@ export const headFor = (feature, adapter) => ({
  * @returns {string[]}
  */
 export const introFor = (feature, adapter) =>
-  feature.intros?.[adapter.key] ?? feature.intro;
+  feature.intros?.[adapter.key] ??
+  feature.intros?.[adapter.framework] ??
+  feature.intro;
 
 /**
  * The landing page's `<title>` and meta description for this kit.

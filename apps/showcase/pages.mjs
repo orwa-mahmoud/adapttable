@@ -107,6 +107,20 @@ export const SHOWCASE_PAGES = [
     framework: SHOWCASE_FRAMEWORK,
   },
   demo("all-options"),
+  {
+    key: "angular-main",
+    html: "./angular-main/index.html",
+    route: demoRoute("", "angular"),
+    indexable: true,
+    framework: "angular",
+  },
+  {
+    key: "angular-all-options",
+    html: "./angular-all-options/index.html",
+    route: demoRoute("all-options", "angular"),
+    indexable: true,
+    framework: "angular",
+  },
   // Optional AI chrome — built for kit/e2e coverage, not a marketing tile.
   demo("agent-approval", { indexable: false }),
   // The view an MCP host embeds in an iframe. Built so the handshake and the

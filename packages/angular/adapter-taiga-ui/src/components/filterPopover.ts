@@ -1,0 +1,97 @@
+import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import { NgTemplateOutlet } from "@angular/common";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  type ElementRef,
+  input,
+  type TemplateRef,
+  viewChild,
+} from "@angular/core";
+
+import { TAIGA_CONTROLS } from "../taigaControls";
+
+/**
+ * The anchored filter card: opens under the Filters button with no
+ * backdrop, closes on an outside click or Escape, and hands focus back to
+ * the button on Escape.
+ */
+
+/** An overlay's props in Angular: its content is a template. */
+
+/**
+ * The anchored filter card: opens under the Filters button with no
+ * backdrop, closes on an outside click or Escape, and hands focus back to
+ * the button on Escape.
+ *
+ * @internal
+ */
+@Component({
+  selector: "adapt-filter-popover",
+  imports: [...TAIGA_CONTROLS, NgTemplateOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @let p = props();
+    <span
+      #anchor
+      [tuiDropdown]="content"
+      [tuiDropdownOpen]="p.open"
+      (tuiDropdownOpenChange)="onOpenChange($event)"
+      data-taiga-part="filters-anchor"
+      style="position: relative; display: inline-flex"
+    >
+      @if (p.children; as trigger) {
+        <ng-container [ngTemplateOutlet]="trigger" />
+      }
+    </span>
+    <ng-template #content>
+      @if (p.open) {
+        <div
+          #card
+          data-taiga-part="filters-popover"
+          [attr.dir]="p.dir ?? 'ltr'"
+          [attr.data-dir]="p.dir ?? 'ltr'"
+          [style.width.px]="380"
+          [style.max-width]="'calc(100vw - 16px)'"
+          [style.overflow-y]="'auto'"
+        >
+          <header data-taiga-part="filters-header">
+            <h3 data-taiga-part="filters-title">
+              {{ p.labels.filters
+              }}{{
+                p.activeFilterCount > 0 ? " (" + p.activeFilterCount + ")" : ""
+              }}
+            </h3>
+            <button
+              tuiButton
+              size="s"
+              appearance="secondary"
+              type="button"
+              data-taiga-part="filters-clear"
+              [disabled]="p.activeFilterCount === 0"
+              (click)="p.onClearFilters()"
+            >
+              {{ p.labels.clearAll }}
+            </button>
+          </header>
+          <div data-taiga-part="filters-body">
+            <ng-container [ngTemplateOutlet]="p.filters" />
+          </div>
+        </div>
+      }
+    </ng-template>
+  `,
+})
+export class AdaptFilterPopover {
+  /** The slot's props. */
+  readonly props =
+    input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
+
+  private readonly anchor =
+    viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected onOpenChange(open: boolean): void {
+    if (open || !this.props().open) return;
+    this.props().onClose();
+    this.anchor().nativeElement.querySelector<HTMLElement>("button")?.focus();
+  }
+}

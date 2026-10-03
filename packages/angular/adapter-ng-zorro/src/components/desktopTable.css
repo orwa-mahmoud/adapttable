@@ -1,0 +1,45 @@
+/* Structural alignment stays in the kit; interactive controls remain NG-ZORRO. */
+.adapt-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-inline-size: 0;
+}
+[data-adapttable-part="header-caption-control"] {
+  display: inline-flex;
+  align-items: center;
+  min-inline-size: 0;
+}
+[data-adapttable-part="header-caption-control"] > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-inline-size: 100%;
+  padding-inline: 0;
+  font-weight: 600;
+}
+/* Sticky cells must paint an opaque surface over horizontally scrolling cells. */
+[data-adapttable-part="cell"][data-pinned] {
+  background: var(--adapttable-ng-zorro-surface, #fff);
+}
+tr:hover > [data-adapttable-part="cell"][data-pinned] {
+  background: var(--adapttable-ng-zorro-hover, #fafafa);
+}
+tr[data-selected] > [data-adapttable-part="cell"][data-pinned] {
+  background: var(--adapttable-ng-zorro-selected, #e6f7ff);
+}
+[data-adapttable-part="cell"][data-pinned][data-cell-selected] {
+  background: var(--adapttable-ng-zorro-selected, #e6f7ff);
+}
+[data-adapttable-part="header-caption-control"] {
+  flex: 1 1 auto;
+}
+[data-adapttable-part="header-caption-control"] > button > span:first-child {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+adapt-header-filter-trigger {
+  display: inline-flex;
+  flex: 0 0 auto;
+}

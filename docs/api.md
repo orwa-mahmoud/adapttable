@@ -3868,6 +3868,39 @@ These controls use NG-ZORRO cards, drawer, buttons, input, tags, menu and
 select; AI sessions and transports remain in the separate AI packages.
 Importing the root table does not import the assistant or AI runtime.
 
+## Angular workspace-preview kits
+
+Eight additional Angular kits are private workspace previews at `0.0.0`, not
+published npm packages. They use the same `AdaptDataTable` inputs, public parts,
+and feature-factory contracts described above, with kit-owned controls:
+
+- [Angular Material](./angular/material.md): `@adapttable/angular-material`.
+- [Taiga UI](./angular/taiga-ui.md): `@adapttable/taiga-ui`.
+- [ng-bootstrap](./angular/ng-bootstrap.md): `@adapttable/ng-bootstrap`.
+- [Spartan](./angular/spartan.md): `@adapttable/spartan`.
+- [Clarity](./angular/clarity.md): `@adapttable/clarity`.
+- [ngx-bootstrap](./angular/ngx-bootstrap.md): `@adapttable/ngx-bootstrap`.
+- [Angular Aria](./angular/aria.md): `@adapttable/angular-aria`.
+- [Angular CDK](./angular/angular-cdk.md): `@adapttable/angular-cdk`.
+
+Aria and CDK combine their behavior primitives with adapter-owned native controls;
+they are not a styled component kit. Follow each guide's peer dependencies,
+styles and provider setup, and link the private workspace package locally.
+
+Material exports `AdaptMaterialCellEditor`, the kit's editable-cell surface,
+and the overlay surfaces `AdaptMaterialDialog` and `AdaptMaterialPopover`.
+The CDK overlay surface is `AdaptCdkPopover`; `CdkPopoverTriggerContext` describes
+its trigger template context. Taiga's `provideAdaptTaiga` installs its integration
+providers, and `AdaptTaigaRoot` supplies the required root/content environment.
+
+The following `ɵ` exports are internal cross-entry implementation bridges, not
+application extension points or a stable API: Taiga's `ɵTAIGA_CONTROLS` and
+`ɵAdaptTaigaLabels`; ng-bootstrap's `ɵbootstrapModal` and
+`ɵbootstrapPopperOptions`; ngx-bootstrap's `ɵbootstrapModal` and
+`ɵinjectBootstrapOverlayContainer`; and Spartan's `ɵHlmButton`, `ɵHlmInput`,
+`ɵHlmCheckbox`, `ɵHlmNativeSelect`, `ɵHlmNativeOption` and `ɵSpartanSelection`.
+Applications should use the documented table, feature and provider APIs instead.
+
 ## Other packages
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
@@ -3887,10 +3920,12 @@ Importing the root table does not import the assistant or AI runtime.
   an `@angular/core` dependency and `hasAngularJson: true` to select Angular.
   `detectKit` accepts `framework` alongside the existing shadcn context, and
   `InitResult.framework` reports the choice. Angular scaffolds a standalone
-  `PeopleTable` in `src/app/peopleTable.ts`, selecting `angular-unstyled` or
-  `ng-zorro`; React keeps `src/PeopleTable.tsx`. Both Angular kits are public npm
-  packages. Init prints installation guidance without checking registry
-  availability or installing packages.
+  `PeopleTable` in `src/app/peopleTable.ts`; React keeps `src/PeopleTable.tsx`.
+  `angular-unstyled` and `ng-zorro` are public npm packages. The eight private
+  Angular previews above are also detected: `KitInfo.privatePreview` marks
+  them, and init prints local-linking guidance rather than an npm install
+  command for an unpublished adapter. Init only prints guidance; it does not
+  install packages or query registry availability.
 - **React adapter packages** — each exports its `DataTable` with `DataTableProps`,
   `DataTablePropsBase`, `DataTableSlots` and `SavedViewsMenuProps` (plus the
   shared core re-exports). `DataTableProps` is `DataTablePropsBase &

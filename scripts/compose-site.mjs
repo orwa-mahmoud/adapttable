@@ -17,12 +17,20 @@
  *
  *   node scripts/compose-site.mjs [showcase-dist] [site-dir]
  */
-import { cpSync, existsSync, mkdirSync, readdirSync } from "node:fs";
-import { join, resolve } from "node:path";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
 import { DEMO_ROOTS, FRAMEWORK } from "./site.mjs";
+import { checkNotices } from "./site-notices.mjs";
 
 const DEFAULT_DIST = fileURLToPath(
   new URL("../apps/showcase/dist", import.meta.url)
@@ -37,7 +45,7 @@ const topEntry = (html) => html.replace(/^\.\//, "").split("/")[0];
 /**
  * Each framework's top-level page entries in the build.
  *
- * @param {readonly { html: string, framework: string | null }[]} pages
+ * @param {readonly { html: string, framework: string | null, route?: string }[]} pages
  * @returns {Map<string, Set<string>>}
  */
 export function pageEntriesByFramework(pages) {
@@ -57,7 +65,7 @@ export function pageEntriesByFramework(pages) {
  * @param {object} options
  * @param {string} options.dist the showcase's build output
  * @param {string} options.site the composed site's root
- * @param {readonly { html: string, framework: string | null }[]} [options.pages]
+ * @param {readonly { html: string, framework: string | null, route?: string }[]} [options.pages]
  *   the page manifest
  * @returns {{ root: string, entries: string[] }[]} what each root received
  */
@@ -79,9 +87,42 @@ export function composeDemos({ dist, site, pages = SHOWCASE_PAGES }) {
     );
     const target = join(site, root);
     mkdirSync(target, { recursive: true });
-    const entries = built.filter((entry) => !others.has(entry));
+    // Main/lab source directories are distinct build inputs but their public
+    // addresses belong at the framework root. Rebase only relative HTML URLs;
+    // Vite's shared chunks stay in assets and their imports remain untouched.
+    const relocated = pages.filter(
+      (page) =>
+        (page.framework ?? FRAMEWORK) === framework &&
+        page.route &&
+        page.html.replace(/^\.\//, "") !==
+          `${page.route.slice(root.length)}index.html`
+    );
+    const relocatedEntries = new Set(
+      relocated.map((page) => topEntry(page.html))
+    );
+    const entries = built.filter(
+      (entry) => !others.has(entry) && !relocatedEntries.has(entry)
+    );
     for (const entry of entries) {
       cpSync(join(dist, entry), join(target, entry), { recursive: true });
+    }
+    for (const page of relocated) {
+      const source = page.html.replace(/^\.\//, "");
+      const destination = `${page.route.slice(root.length)}index.html`;
+      const html = readFileSync(join(dist, source), "utf8").replace(
+        /\b(src|href)="([^"#][^"]*)"/g,
+        (attribute, name, value) => {
+          if (/^(?:[a-z][a-z\d+.-]*:|\/)/i.test(value)) return attribute;
+          const resolved = posix.normalize(
+            posix.join(posix.dirname(source), value)
+          );
+          const rebased = posix.relative(posix.dirname(destination), resolved);
+          return `${name}="${rebased.startsWith(".") ? rebased : `./${rebased}`}"`;
+        }
+      );
+      mkdirSync(dirname(join(target, destination)), { recursive: true });
+      writeFileSync(join(target, destination), html);
+      entries.push(destination);
     }
     return { root, entries };
   });
@@ -94,7 +135,9 @@ function main() {
     console.error(`compose-site: no showcase build at ${dist}`);
     process.exit(1);
   }
+  checkNotices(dist);
   for (const { root, entries } of composeDemos({ dist, site })) {
+    checkNotices(join(site, root));
     console.log(`compose-site: ${root} ← ${entries.length} entries`);
   }
 }

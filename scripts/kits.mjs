@@ -102,10 +102,17 @@ export const KITS = Object.freeze([
   // Contract participation is independent of publication: a finished kit can
   // remain private until the owner chooses its first release.
   { name: "adapter-angular-unstyled", framework: "angular", role: "native" },
-  // The remaining Angular kits are private placeholders until each is built:
-  // Angular Material (#467) and PrimeNG (#468). The pull request that
-  // builds one gives it the `shell` role here; publishing is a separate step.
-  { name: "adapter-material", framework: "angular", role: "private" },
+  { name: "adapter-material", framework: "angular", role: "shell" },
+  { name: "adapter-ng-bootstrap", framework: "angular", role: "shell" },
+  { name: "adapter-spartan", framework: "angular", role: "shell" },
+  { name: "adapter-taiga-ui", framework: "angular", role: "shell" },
+  // Aria/CDK supply interaction primitives; their adapter-owned native controls
+  // retain the native part contract, including the fallback-only surfaces.
+  { name: "adapter-angular-aria", framework: "angular", role: "native" },
+  { name: "adapter-ngx-bootstrap", framework: "angular", role: "shell" },
+  { name: "adapter-clarity", framework: "angular", role: "shell" },
+  { name: "adapter-angular-cdk", framework: "angular", role: "native" },
+  // PrimeNG remains an unimplemented private placeholder.
   { name: "adapter-primeng", framework: "angular", role: "private" },
   { name: "adapter-ng-zorro", framework: "angular", role: "shell" },
 ]);

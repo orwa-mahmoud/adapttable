@@ -23430,6 +23430,17 @@ AdaptTable combines a headless Angular binding with a kit that draws the
 controls. Start with `AdaptDataTable`, an array of rows, column definitions and
 a stable row key. Add feature imports when the table needs them.
 
+## Private kit previews
+
+Additional local previews are available for [Angular Material](material.md),
+[ng-bootstrap](ng-bootstrap.md), [Spartan](spartan.md), [Taiga UI](taiga-ui.md),
+[Angular Aria](aria.md), [Angular CDK](angular-cdk.md), [Clarity](clarity.md) and
+[ngx-bootstrap](ngx-bootstrap.md).
+These packages remain private at `0.0.0` and are not published to npm. Each guide
+covers the kit's peers, styling and assets. Their local showcase routes are
+`/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`,
+`/angular-cdk/`, `/clarity/` and `/ngx-bootstrap/`.
+
 ## Choose a kit
 
 - `@adapttable/angular-unstyled` uses native HTML. Supply your own CSS or
@@ -23618,6 +23629,667 @@ parentheses. Keep callback functions stable on the component.
 Continue with [Data tiers](./data-tiers.md), [Columns](./columns.md),
 [Accessibility](./accessibility.md), or the
 [Angular API reference](../api.md#the-angular-binding).
+
+---
+
+# Angular Material table
+
+Angular Material controls over the headless `@adapttable/angular` binding.
+The binding owns state, feature composition, structural Chrome and localized
+labels; this kit owns buttons, fields, checkboxes, chips, cards, menus and overlays.
+
+## Availability and compatibility
+
+This package is implemented in the repository but remains **private, version
+0.0.0** while integration and release preparation are completed. It is not
+available on npm. Package publication is a separate step.
+
+The initial integration targets Angular **22**, Angular Material **22.2.1**
+and CDK **22.2.1**. Material requires the same CDK version. Keep Material and
+CDK together; AdaptTable packages have independent versions. Node.js must meet
+Angular 22's supported floor: 22.22.3+, 24.15.0+, or Node 26+.
+
+From a pnpm workspace containing this package:
+
+```sh
+pnpm add @adapttable/angular-material@workspace:* @adapttable/angular@workspace:* @angular/material@22.2.1 @angular/cdk@22.2.1
+```
+
+The host must also provide compatible `@angular/common`, `@angular/core`,
+`@angular/forms`, `@angular/platform-browser` and `rxjs` peers. Use the host's
+existing Angular application setup; this adapter does not install a second
+Angular runtime or import another adapter.
+
+## Styling
+
+Load the host's Angular Material theme and the kit's structural styles once:
+
+```scss
+@use "@angular/material" as mat;
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$azure-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+html.dark {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: dark,
+        primary: mat.$azure-palette,
+      ),
+    )
+  );
+}
+```
+
+```css
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@adapttable/angular-material/styles.css";
+```
+
+Import CSS after the theme in the application's global style entry. The kit
+styles are scoped to `.adapt-material` and `.adapt-material-overlay`; they do
+not reset the page or choose a global theme. For locally scoped themes, include
+`.adapt-material-overlay` in the same theme because Material/CDK portals mount
+outside the table. The showcase demonstrates isolated light/dark themes.
+
+Use Material's density theme configuration to change control density. The
+table's `density` input also adjusts cell spacing. `classNames` hooks remain
+available for application-specific customization.
+
+## Minimal table
+
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-material";
+import { filters } from "@adapttable/angular-material/filters";
+import { columnMenu } from "@adapttable/angular-material/column-menu";
+
+interface Person {
+  id: string;
+  name: string;
+  team: string;
+}
+
+@Component({
+  selector: "people-table",
+  imports: [AdaptDataTable],
+  template: `<adapt-data-table
+    [data]="people"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [features]="features"
+    tableLabel="People"
+    [selectable]="true"
+  />`,
+})
+export class PeopleTable {
+  readonly people: Person[] = [{ id: "1", name: "Ada", team: "Research" }];
+  readonly rowKey = (person: Person) => person.id;
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+    { key: "team", header: "Team", accessor: (row) => row.team },
+  ];
+  readonly features = [filters<Person>(), columnMenu()];
+}
+```
+
+Import only needed feature entries, or use `/features` and `/preset` for the
+aggregated factories and `standardPreset()`. Omitting a feature renders no
+controls for it. All edits, row operations and assistant actions remain host
+callbacks; the table never owns or mutates the application data.
+
+## Supported feature inventory
+
+The kit implements the same applicable inventory as Angular unstyled:
+
+- Global search, sorting, multi-sort, pagination, frontend and remote data,
+  infinite loading, status and error states, URL-synced query state
+- Text, boolean, choice, multi-choice, checklist, number/date range and custom
+  filters; nested AND/OR builder, header filters, removable chips and saved views
+- Column visibility, ordering, pinning, resizing, fit-to-content, header rename,
+  collapsible column groups and whole-column selection
+- Row selection, bulk actions, row actions, expansion, nested tables,
+  row reorder, move confirmation, row pinning and pinned summary rows
+- Inline, row and batch editing; boolean, text, number, date and select editors;
+  validation, dirty/save/conflict state, undo/redo, keyboard navigation, paste,
+  range selection and fill; writes go through the existing host callbacks
+- Grouping, aggregation, grouping panel, pivot configuration and pivot tables;
+  tree rows, row/column virtualization, cell spanning, full-width/separator rows,
+  row appearance and conditional row heights
+- CSV/XLSX/PDF export, print, fullscreen, density, find-in-table, command palette,
+  context menu, side panels and selection/status statistics
+- Responsive mobile cards, custom cell/card/action templates and component
+  renderers, all bundled locales, RTL, accessible labels and announcements
+- Optional `/assistant` controls, agent approval, dictation-language selection
+  and example menus using the separately imported AI bindings
+- Formula and sparkline integration through the Angular binding, SSR and hydration
+
+React Server Components are not an Angular integration. No Angular feature is
+silently replaced with a React kit or native-HTML fallback.
+
+## Native component mapping
+
+- Buttons: `MatButton`; text, number, date and search fields: `MatInput` in
+  `MatFormField`; native choice controls: Material's `matNativeControl` in
+  `MatFormField`; multi-choice header controls: `MatSelect`
+- Selection and boolean controls: `MatCheckbox`, with binding refs and semantic
+  part names attached to the real input; tree disclosure: `MatExpansionPanel`
+- Active-filter tokens: `MatChip`; mobile rows and assistant panels: `MatCard`
+- Row-action and assistant-example menus: `MatMenu`; filter cards, column/view
+  controls, header filters, context and row-move menus: CDK connected overlays
+  containing Material surfaces
+- Filter drawer, command palette and assistant sheet: `MatDialog`, with its
+  native backdrop, focus containment, Escape handling and opener restoration
+
+Structural HTML tables retain the binding's semantic table/grid contract,
+virtual rows, pinned cells and feature slots. Replacing the engine with a
+second `MatTableDataSource` would duplicate sorting/filtering state, so it is
+not used. Material themes provide colors, typography and interactive controls.
+
+Filter popovers intentionally have **no backdrop**. They dismiss on outside
+click and Escape, restoring the trigger on Escape. Modal drawers have a real
+Material backdrop. RTL reaches the overlay content and positioning. Mobile
+cards preserve the editing, selection, detail, tree and action shell when a
+custom body renderer is supplied.
+
+## Verification
+
+The package carries the Angular conformance driver and feature regression
+suites, plus Material-specific control and overlay tests. Full package gates,
+coverage and browser acceptance must pass on the final integrated commit;
+source-level checks alone are not a release-readiness claim.
+
+[Angular binding guide](https://adapttable.orwamahmoud.com/angular/getting-started/)
+· [Tracked implementation](https://github.com/orwa-mahmoud/adapttable/issues/467)
+
+---
+
+# ng-bootstrap Angular data table
+
+`@adapttable/ng-bootstrap` is a private workspace preview. It uses the Angular
+binding's signals, feature factories and Chrome with ng-bootstrap overlays and
+Bootstrap controls. Publication and final integrated browser acceptance are
+separate from this implementation.
+
+## Dependencies
+
+Use Angular 22, ng-bootstrap 21, Bootstrap CSS 5.3.8 and Popper 2.11.8, matching
+[the official compatibility table](https://github.com/ng-bootstrap/ng-bootstrap#dependencies).
+ng-bootstrap also requires `@angular/forms`, `@angular/localize` and RxJS.
+The kit is private `0.0.0`; use its workspace dependency until a public release is
+explicitly prepared. Do not substitute a React Bootstrap package.
+
+## Render the table
+
+```ts
+import "@angular/localize/init";
+import "@adapttable/ng-bootstrap/styles.css";
+import { Component } from "@angular/core";
+import { type ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/ng-bootstrap";
+import { filters } from "@adapttable/ng-bootstrap/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "people-table",
+  imports: [AdaptDataTable],
+  template: `<adapt-data-table
+    [data]="people"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [features]="features"
+    theme="dark"
+    dir="rtl"
+    tableLabel="People"
+  />`,
+})
+export class PeopleTable {
+  readonly people = [{ id: "1", name: "Ada" }];
+  readonly rowKey = (row: Person) => row.id;
+  readonly columns: ColumnDef<Person>[] = [
+    {
+      key: "name",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortable: true,
+    },
+  ];
+  readonly features = [filters<Person>([{ key: "name", type: "text" }])];
+}
+```
+
+Use the same optional Angular features and callbacks as the other Angular kits,
+imported from `@adapttable/ng-bootstrap/<feature>`. The host still owns every data
+write. Mobile cards, density, direction, labels and part/class hooks retain the
+binding's contracts.
+
+## Isolated Bootstrap styles
+
+Import only `@adapttable/ng-bootstrap/styles.css` for this kit. Its upstream
+Bootstrap rules are compiled with every selector bounded by
+`.adapttable-ng-bootstrap`, including Reboot, color-mode variables and overlays.
+Animation names are namespaced. The Bootstrap MIT attribution ships alongside
+the stylesheet. Do not import global Bootstrap CSS, RTL CSS or Bootstrap JS into
+a mixed-kit application.
+
+The table host adds that boundary automatically. `theme="light"` and
+`theme="dark"` set its Bootstrap color mode. Standalone exported controls and
+assistant components need a wrapper with the same class and a `data-bs-theme`
+attribute. Native overlays stay inside the boundary, so loading this kit does not
+reset the shared navigation or another kit's controls.
+
+## Component mapping
+
+- Text, number and date inputs: Bootstrap `form-control`
+- Selects and checkboxes: Bootstrap `form-select` and `form-check-input`
+- Buttons and table: Bootstrap `btn` and `table`
+- Filter popover: `NgbPopover`, outside/Escape dismissal, no backdrop
+- Drawer: `NgbOffcanvas`, real backdrop and focus containment
+- Column, saved-view, header, row and context menus: `NgbDropdown`
+- Command palette and assistant sheet: `NgbModal`
+- Paging and advanced disclosure: `NgbPagination` and `NgbCollapse`
+
+ng-bootstrap intentionally uses Bootstrap CSS for controls it does not expose as
+Angular widgets. No controls are borrowed from another AdaptTable kit.
+
+## Validation status
+
+The kit includes conformance, feature and native-control regression tests plus a
+selector-by-selector stylesheet isolation test. Final integration must verify
+all package gates and browser interactions, including kit switching, fixed and
+sticky cells, narrow cards, both themes, RTL, Escape, focus restoration and
+repeated overlay opens. Those integrated checks are required before describing
+the preview as ready for public release.
+
+---
+
+# Spartan Angular table
+
+`@adapttable/spartan` renders AdaptTable through Spartan Brain and an owned
+Helm layer. It is currently a private workspace package at `0.0.0`; the package
+has not been published to npm. Release preparation is a separate step.
+
+## Architecture and supported versions
+
+The Angular binding provides signals, controllers and structural Chrome. The
+Spartan adapter fills interactive slots with Brain-backed controls and supplies
+Tailwind styling. It does not import the React or Angular unstyled adapters.
+
+Verified on 2026-10-02: `@spartan-ng/brain@1.5.0` declares Angular, Forms, Common
+and CDK compatibility with `>=21.0.0 <23.0.0`. This kit targets Angular 22. See
+[Spartan's support policy](https://www.spartan.ng/documentation/version-support).
+
+## Application setup
+
+In a workspace checkout, add the private `@adapttable/spartan` package and its
+peers. These include Angular 22, Angular CDK and Forms, Spartan Brain 1.5,
+RxJS 7, Tailwind CSS 4, `clsx` and `tw-animate-css`. Brain's Luxon peer is optional
+and is not needed for this kit's native date input.
+
+Use the application's Tailwind 4 CSS processing:
+
+```css
+@import "tailwindcss";
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@adapttable/spartan/styles.css";
+```
+
+The kit uses a Tailwind reference and scoped utility application. It does not
+add a global reset or change another adapter's tokens. Apps already processing
+Tailwind do not need a second Tailwind entry. CDK's overlay stylesheet supplies
+positioning for Brain popovers and dialogs.
+
+```ts
+import { Component } from "@angular/core";
+import { AdaptDataTable } from "@adapttable/spartan";
+import { filters } from "@adapttable/spartan/filters";
+import { editing } from "@adapttable/spartan/editing";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: `<adapt-data-table
+    [data]="rows"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [features]="features"
+    [urlSync]="false"
+  />`,
+})
+export class PeopleTable {
+  rows: Person[] = [{ id: "1", name: "Ada" }];
+  readonly columns = [
+    {
+      key: "name",
+      header: "Name",
+      editable: true,
+      accessor: (row: Person) => row.name,
+    },
+  ];
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [
+    filters<Person>([{ key: "name", type: "text" }]),
+    editing<Person>((row, key, value) => {
+      this.rows = this.rows.map((person) =>
+        person.id === row.id ? { ...person, [key]: value } : person
+      );
+    }),
+  ];
+}
+```
+
+## Helm ownership and customization
+
+The adapter maintains its own adapted Helm source. Applications neither copy
+Helm files into the adapter nor supply app-local Helm import aliases. Updating
+an application's separate Spartan components leaves this table unchanged.
+
+Supported customization boundaries are the Angular slot contracts, documented
+`classNames`, `data-adapttable-part` attributes and the kit's CSS variables:
+`--at-spartan-background`, `--at-spartan-foreground`, `--at-spartan-muted`,
+`--at-spartan-muted-foreground`, `--at-spartan-border`, `--at-spartan-primary`,
+`--at-spartan-primary-foreground`, `--at-spartan-ring`, `--at-spartan-radius`,
+and `--at-spartan-cell-padding`.
+
+Set overrides on `[data-adapttable-kit="spartan"]` so portalled surfaces share
+them. Set `.dark` or `data-theme="dark"` on the document element to cover both
+the table and CDK portals. No unprefixed global theme tokens are changed.
+The `ɵ`-prefixed exports only link the kit's secondary entries and are internal.
+
+An upstream Brain upgrade must review compatibility and the copied Helm layer,
+then verify conformance, overlays, keyboard handling, focus, themes and SSR.
+Upstream MIT attribution is preserved in the package's `NOTICE` file.
+
+## Features and interaction
+
+Feature factories have the same entry names as the Angular binding's existing
+kits, including filtering, header filters, editing, row and column operations,
+grouping, trees, pivot, virtualization, saved views, find, export, print,
+command palette, context menu, status and optional assistant/approval controls.
+The host owns writes; callbacks remain the only way rows change.
+
+- Text, numeric, date and textarea controls use Brain Input plus Helm styling.
+- Selects use the owned Helm native-select variant and platform option semantics.
+- Selection uses Brain Checkbox, including mixed states and accessible labels.
+- Filter popovers and menus use Brain Popover without a backdrop.
+- Drawers and modal surfaces use Brain Dialog with a real backdrop and focus trap.
+- The Advanced filter section uses Brain Collapsible.
+- Small screens use the Angular binding's labelled cards. RTL uses logical
+  properties and direction-aware overlay alignment.
+
+State serialization, localized labels, live announcements and keyboard models
+remain in the shared engine/binding. Styling does not change those contracts.
+
+---
+
+# Taiga UI for Angular
+
+`@adapttable/taiga-ui` is a private adapter under development. It is not published
+on npm. It renders the Angular binding's table and feature slots with Taiga UI
+5.26.0. Taiga UI is Apache-2.0; the adapter source is MIT.
+
+## Setup
+
+Use Angular 22, Taiga UI's matching 5.26.0 core/kit/cdk/i18n/styles packages,
+and their published peers. Configure Taiga icon assets at
+`assets/taiga-ui/icons`, or supply your application's Taiga icon resolver.
+Your build must support Less.
+
+Register `provideAdaptTaiga()` from `@adapttable/taiga-ui` in your application's
+bootstrap providers. It enables Taiga's event plugins and stable options without
+writing theme attributes to `document.body`, disabling scrollbars globally, or
+adding document metadata. Use `AdaptTaigaRoot` for the scoped theme instead.
+
+```ts
+import { AdaptDataTable, AdaptTaigaRoot } from "@adapttable/taiga-ui";
+import { filters } from "@adapttable/taiga-ui/filters";
+import { editing } from "@adapttable/taiga-ui/editing";
+```
+
+The table includes a nested-safe Taiga root. Wrap a table and standalone feature
+panels in `AdaptTaigaRoot` to share the same theme and portal host:
+
+```html
+<adapt-taiga-root theme="dark" dir="rtl">
+  <adapt-data-table
+    [data]="rows"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [features]="features"
+    tableLabel="People"
+  />
+</adapt-taiga-root>
+```
+
+The component's `theme` and `dir` inputs also accept `light` and `ltr`.
+It accepts projected children or a `content` template for dynamically mounted
+applications. Only the Taiga root receives Taiga's scoped theme mixin; no
+application-wide reset or global theme variables are installed.
+
+## Controls and feature parity
+
+The adapter supplies Taiga buttons, checkbox inputs, text fields, textarea,
+select/list controls, skeletons, dropdowns, modal dialogs, and drawers. Native
+hosts retain Angular refs, accessibility attributes, and shared public part
+names. The headless binding continues to own state, labels, URL serialization,
+announcements, feature models, and host write callbacks.
+
+The feature-entry inventory matches Angular unstyled, including filtering,
+header filters, columns, editing and history, bulk actions, grouping, pivot,
+row operations, saved views, virtualized rows, mobile cards, keyboard navigation,
+context menus, command palette, assistant controls, and approval prompts.
+
+Filter popovers are nonmodal Taiga dropdowns. Drawers have Taiga's real backdrop
+and trapped keyboard focus. An Escape dismissal restores the opener. Themed
+controls use logical spacing and the same desktop/mobile structure as the
+Angular binding. Public `classNames` hooks remain available.
+
+## Development status
+
+The source includes behavior, conformance, SSR, and native-control contract
+fixtures. Full integration compilation, coverage, and browser acceptance are
+required before release. npm publication is a separate release step.
+
+See the [package README](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-taiga-ui)
+for the full entry inventory and workspace setup.
+
+---
+
+# Angular CDK adapter
+
+`@adapttable/angular-cdk` is a private `0.0.0` Angular 22 adapter, based on
+MIT-licensed `@angular/cdk` 22.2.1. It has not been published to npm.
+
+CDK provides accessibility and overlay primitives, not a visual component theme.
+This adapter owns neutral controls, styles, table/card layouts and all required
+slots over Angular binding Chrome. It does not import Angular Material or any
+other adapter. FocusMonitor enhances the controls; connected overlays, CDK Menu
+and focus traps power popovers, menus and modal drawers/dialogs.
+
+Import global `@angular/cdk/overlay-prebuilt.css` before
+`@adapttable/angular-cdk/styles.css`. No external assets or license key are needed.
+Customize the neutral palette through `--adapt-cdk-accent`, `--adapt-cdk-border`,
+`--adapt-cdk-background` and `--adapt-cdk-color`. Shared part names and class hooks
+remain available on the same public elements.
+
+The implementation includes the full 40-entry feature surface, the optional
+assistant, desktop and responsive mobile cards, RTL, SSR fixtures and host-owned
+writes. Filters use an anchored, backdrop-free card by default; drawer mode
+blocks the background and traps focus. Individual feature imports remain opt-in.
+
+The implementation and its focused CDK fixtures require integrated Angular 22
+compiler, coverage and browser verification before any release claim.
+
+---
+
+# Clarity Angular adapter
+
+`@adapttable/clarity` is a private `0.0.0` workspace implementation, not an
+npm release. It composes the Angular binding's Chrome and required slots
+with Clarity Angular 18.3.0 and scoped Clarity UI 18.3.0 styling.
+
+## Setup
+
+Use Angular 21.1 or 22 and matching Angular forms, animations and CDK.
+The selected Clarity package declares Angular/CDK `>=21.1.0`. Angular 22
+requires Node 22.22.3+, 24.15.0+, or 26+.
+Import `@adapttable/clarity/styles.css` once. Do not import global Clarity
+CSS for this adapter: its distribution is scoped to `.adapttable-clarity`.
+Embedded upstream fonts are omitted; the host controls font loading.
+
+## Features and composition
+
+Import `AdaptDataTable` from the root and feature factories from their
+individual subpaths, or use `/preset` for `standardPreset()`. Filtering,
+saved views, column tools, grouping, editing, row actions, tree/pivot,
+selection, navigation, export, virtualization and optional assistant
+controls retain the Angular binding's model and host-callback contracts.
+Clarity components own form controls, dropdowns, modals and the filter
+drawer. Clarity UI classes style buttons and tables.
+
+Mobile cards retain their selection, editing and row-action shell. Custom
+card templates replace only the field body. The binding supplies localized
+labels and RTL direction; the adapter uses logical layout properties.
+`classNames` and public `data-adapttable-part` hooks retain their shared
+meaning; private Clarity DOM fixtures use `data-clarity-part` separately.
+
+## Integration status
+
+See the package README for source-level usage. The showcase entry is
+`apps/showcase/src/angular/kits/clarity.ts`. Shared registry, CLI, dependency
+lockfile and docs-index registration are integrated separately. Runtime,
+SSR/hydration, accessibility and browser gates must pass before any release
+or verified parity claim. Package fixtures include Clarity dropdown/modal
+selectors and scoped-style checks; their presence does not assert a pass.
+
+---
+
+# Angular ngx-bootstrap adapter
+
+`@adapttable/ngx-bootstrap` is a private `0.0.0` workspace preview. It is not
+published or advertised as a registry-installable package.
+
+## Setup
+
+Use Angular 22, ngx-bootstrap **22.0.0**, and RxJS 7.4 or newer within v7.
+ngx-bootstrap 22 requires zoneless Angular; do not load zone.js in this entry.
+Load `@adapttable/ngx-bootstrap/styles.css` once in the kit-specific entry.
+The adapter compiles Bootstrap **5.3.8** into a host-scoped stylesheet and
+ships its MIT license. Do not add global Bootstrap CSS or its JavaScript bundle.
+No Angular localize initializer or Popper dependency is required by this kit.
+
+```ts
+import "@adapttable/ngx-bootstrap/styles.css";
+import { AdaptDataTable } from "@adapttable/ngx-bootstrap";
+import { filters } from "@adapttable/ngx-bootstrap/filters";
+import { editing } from "@adapttable/ngx-bootstrap/editing";
+```
+
+Use the same Angular table inputs and Chrome slot contracts as the Angular
+binding. Every feature entry uses this adapter's components. The optional
+`/assistant` entry supplies native-styled chat, shortcut and approval controls.
+The isolated showcase module is `src/angular/kits/ngxBootstrap.ts`.
+
+## Native presentation and accessibility
+
+Bootstrap form controls and tables use semantic HTML with upstream Bootstrap
+classes, because ngx-bootstrap does not define separate input, button, checkbox
+or table components. Dropdowns, popovers, pagination, collapse and modal sheets
+use real ngx-bootstrap directives and components. There are no cross-kit imports.
+Filter popovers have no backdrop; modal drawers have a kit-scoped backdrop,
+Escape dismissal, Tab containment and trigger-focus restoration.
+
+The adapter host is `.adapttable-ngx-bootstrap`; `theme="dark"` and
+`theme="light"` set its Bootstrap color mode. Native overlays stay beneath this
+boundary. Standalone controls need a matching wrapper and `data-bs-theme`.
+Public `data-adapttable-part` names and `classNames` remain the structural
+contract; native-widget implementation hooks use `data-ngx-bootstrap-part`.
+
+Mobile cards retain selection, editing, row actions, details, tree expansion and
+reordering. `dir="rtl"` changes reading order and logical drawer placement.
+Localized labels are supplied by the Angular binding. Hosts own all row writes.
+
+## Verification
+
+The package includes native overlay/control fixtures, the feature-conformance
+suite, server-rendering and hydration tests, and CSS isolation/license checks.
+Final acceptance requires the integrated Angular compiler, tests and browser
+checks for mobile, RTL, keyboard focus, portal placement and kit switching.
+This preview's source preparation is not a claim that those gates have passed.
+
+---
+
+# Angular Aria adapter
+
+`@adapttable/angular-aria` is a private, unpublished 0.0.0 workspace preview.
+It targets Angular 22 and the MIT-licensed Angular Aria/CDK 22.2.1 pair.
+
+## Architecture and controls
+
+The adapter fills the Angular binding's required Chrome slots. Aria toolbar
+and toolbar-widget directives provide pager navigation; Aria menu/menu-item
+directives serve context and row-action menus. Filter-tree choices use Aria
+combobox/listbox/option directives, and advanced filters use its accordion.
+CDK positions filter and choice popups; its focus trap supports the drawer.
+
+Angular Aria supplies accessible composite behavior, not a visual theme or
+standalone button, input, checkbox or dialog components. These controls and
+remaining surfaces are deliberately adapter-owned, neutrally styled native
+HTML. There are no Material components and no imports from another kit.
+Table navigation remains in the binding; no Aria grid integration is claimed.
+
+Import `@angular/cdk/overlay-prebuilt.css` and
+`@adapttable/angular-aria/styles.css` in the host. Override `--adapt-aria-*`
+tokens or use the common part attributes and class-name hooks.
+
+## Feature surface
+
+Compose opt-in features from the package's secondary entries, including
+filters, editing, grouping, pivot, tree, selection, saved views, exports,
+virtualization, row actions, command palette and assistant. Model and URL
+state belong to core through the Angular binding. The adapter never owns row
+data; host callbacks perform writes.
+
+Desktop tables and mobile cards share the adapter controls. Logical CSS and
+localized binding labels support RTL. Aria composites own their keyboard
+interactions; the binding owns table navigation and screen-reader messages.
+
+## Verification and release status
+
+The source includes Angular TestBed directive fixtures and the shared adapter
+behavior suite. This preview must pass the integrated Angular compiler,
+coverage, package build and real-browser keyboard/overlay checks before it is
+called release-ready. A workspace manifest or showcase route is not evidence
+of npm publication.
+
+See the [package README](../../packages/angular/adapter-angular-aria/README.md)
+for usage, feature entries, styling hooks and the precise primitive mapping.
 
 ---
 

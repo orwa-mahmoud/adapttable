@@ -125,6 +125,7 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
   });
   const pm = choosePackageManager(io.listRootFiles());
   const packages = packagesFor(info).filter((specifier) => {
+    if (info.privatePreview && specifier === info.adapter) return false;
     if (framework !== "angular" || !info.extras.includes(specifier))
       return true;
     // Angular extras in KITS carry version ranges; compare their bare names so
@@ -158,8 +159,17 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
     );
   }
   io.log("");
-  io.log("1. Install the packages:");
+  io.log(
+    info.privatePreview
+      ? "1. Install the published peers:"
+      : "1. Install the packages:"
+  );
   io.log(`   ${command}`);
+  if (info.privatePreview) {
+    io.log(
+      `   ${info.adapter} is a private 0.0.0 workspace preview, not available on npm. Build and link its local package separately.`
+    );
+  }
   io.log("");
   if (written.length > 0) {
     io.log(`2. Scaffolded: ${written.join(", ")}`);
@@ -174,6 +184,25 @@ export function runInit(io: InitIO, options: InitOptions = {}): InitResult {
     io.log(
       '3. Import { PeopleTable } from "./peopleTable" in your host component, add PeopleTable to its imports, and render <people-table />.'
     );
+    const setup: Partial<Record<Kit, string>> = {
+      "angular-aria":
+        "Import @angular/cdk/overlay-prebuilt.css and @adapttable/angular-aria/styles.css. See /angular/aria/.",
+      "angular-cdk":
+        "Import @angular/cdk/overlay-prebuilt.css and @adapttable/angular-cdk/styles.css. See /angular/angular-cdk/.",
+      clarity:
+        "Configure Angular animation providers and import @adapttable/clarity/styles.css. Do not load global Clarity CSS. See /angular/clarity/.",
+      "ngx-bootstrap":
+        "Use zoneless Angular 22 and import @adapttable/ngx-bootstrap/styles.css. Do not load global Bootstrap CSS or JavaScript. See /angular/ngx-bootstrap/.",
+      "angular-material":
+        "Private workspace preview: configure an Angular Material Sass theme and import @adapttable/angular-material/styles.css plus @angular/cdk/overlay-prebuilt.css. See /angular/material/.",
+      "ng-bootstrap":
+        "Private workspace preview: import @angular/localize/init and @adapttable/ng-bootstrap/styles.css. Do not load global Bootstrap CSS. See /angular/ng-bootstrap/.",
+      spartan:
+        "Private workspace preview: process @adapttable/spartan/styles.css through Tailwind 4 and import @angular/cdk/overlay-prebuilt.css. See /angular/spartan/.",
+      "taiga-ui":
+        "Private workspace preview: register provideAdaptTaiga(), configure Less and serve matching Taiga icons from assets/taiga-ui/icons. See /angular/taiga-ui/.",
+    };
+    if (setup[info.kit]) io.log(`   ${setup[info.kit]}`);
     if (info.kit === "ng-zorro") {
       io.log(
         '   NG-ZORRO requires Angular 22 and ng-zorro-antd 22.1.1-compatible peers. Match any missing Angular peers to your installed Angular version. Add @import "ng-zorro-antd/ng-zorro-antd.min.css"; to your global stylesheet.'

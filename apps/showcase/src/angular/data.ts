@@ -48,11 +48,11 @@ export {
  * `?locale=…` exercises every bundled label set; `?dir=rtl` can independently
  * mirror any example. The RTL destination opens in Arabic without a query.
  */
-export const SHOWCASE_PRESENTATION = ((): {
+function readShowcasePresentation(): {
   readonly locale: string;
   readonly dir: Direction;
   readonly labels: ReturnType<typeof getLabels>;
-} => {
+} {
   const url =
     typeof window === "undefined" ? undefined : new URL(window.location.href);
   const locale =
@@ -67,12 +67,13 @@ export const SHOWCASE_PRESENTATION = ((): {
         : getDirection(locale),
     labels: getLabels(locale),
   };
-})();
+}
+
+export const SHOWCASE_PRESENTATION = readShowcasePresentation();
 
 /** The seed includes Arabic cell data as well as English cell data. */
-const dataLocale =
+const currentDataLocale = (): "ar" | "en" =>
   SHOWCASE_PRESENTATION.locale.split("-")[0] === "ar" ? "ar" : "en";
-const s = strings(dataLocale);
 
 /** Every page keys its rows by the person's id. */
 export const rowKey = (row: Person): string => row.id;
@@ -82,9 +83,18 @@ export const rowKey = (row: Person): string => row.id;
  * definitions, with the name filter on the built-in text type the React pages
  * alias as `personText` to exercise their custom-type registry.
  */
-export const FILTER_DEFS = demoFilterDefs(dataLocale).map((def) =>
-  def.type === "personText" ? { ...def, type: "text" } : def
-);
+const localizedFilterDefs = () =>
+  demoFilterDefs(currentDataLocale()).map((def) =>
+    def.type === "personText" ? { ...def, type: "text" } : def
+  );
+
+export const FILTER_DEFS = localizedFilterDefs();
+
+/** Refresh the same exported objects before a same-document Angular remount. */
+export function refreshShowcasePresentation(): void {
+  Object.assign(SHOWCASE_PRESENTATION, readShowcasePresentation());
+  FILTER_DEFS.splice(0, FILTER_DEFS.length, ...localizedFilterDefs());
+}
 
 /** An ISO day (`2026-03-08`) for the date editor's draft. */
 const isoDay = (date: Date): string => date.toISOString().slice(0, 10);
@@ -99,6 +109,8 @@ const isoDay = (date: Date): string => date.toISOString().slice(0, 10);
 export function peopleColumns(
   options: { readonly editable?: boolean } = {}
 ): ColumnDef<Person>[] {
+  const dataLocale = currentDataLocale();
+  const s = strings(dataLocale);
   const editable = options.editable === true;
   return [
     {
@@ -208,6 +220,7 @@ export function peopleColumns(
  * @returns The changed fields.
  */
 function personChanges(key: string, value: unknown): Partial<Person> {
+  const dataLocale = currentDataLocale();
   switch (key) {
     case "person":
       return dataLocale === "ar"
@@ -258,6 +271,7 @@ export const peopleRows = (): Person[] =>
  * and Workload folds to a stub.
  */
 export function groupedPeopleColumns(): ColumnInput<Person>[] {
+  const dataLocale = currentDataLocale();
   const byKey = new Map(peopleColumns().map((column) => [column.key, column]));
   const column = (key: string): ColumnDef<Person> => {
     const found = byKey.get(key);

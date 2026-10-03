@@ -1,0 +1,443 @@
+<header class="nav">
+  <div class="nav__inner shell">
+    <adapt-showcase-wordmark [href]="mainHref" />
+    <nav class="nav__links" aria-label="Demo pages">
+      <a [href]="mainHref" [attr.aria-current]="!lab ? 'page' : null"
+        >Live demo</a
+      >
+      <a [href]="labHref" [attr.aria-current]="lab ? 'page' : null"
+        >Feature Lab</a
+      >
+      <details class="angular-adapters">
+        <summary>Adapters</summary>
+        <div>
+          @for (adapter of adapters; track adapter.key) {
+            <a [href]="adapterHref(adapter.key)">{{ adapter.label }}</a>
+          }
+        </div>
+      </details>
+      <a href="/angular/getting-started/">Docs</a>
+    </nav>
+    <div class="nav__right">
+      <select
+        aria-label="Framework"
+        data-demo-control="framework"
+        (change)="switchFramework($event)"
+      >
+        <option value="react">React</option>
+        <option value="angular" selected>Angular</option>
+      </select>
+      <button type="button" class="seg__btn" (click)="dark.set(!dark())">
+        {{ dark() ? "Light mode" : "Dark mode" }}
+      </button>
+    </div>
+  </div>
+</header>
+<main
+  class="shell angular-demo"
+  [class.mx-ng--unstyled]="kit.key === 'unstyled'"
+  [style.--kit]="accent()"
+  [style.--c]="accent()"
+  [class.angular-no-motion]="!motion || reducedMotion()"
+>
+  <section class="sec">
+    <p class="eyebrow">ANGULAR · {{ lab ? "FEATURE LAB" : "LIVE DEMO" }}</p>
+    <h1>
+      {{
+        lab
+          ? "Every option. Your combination."
+          : "Same features. Any kit. Watch it switch."
+      }}
+    </h1>
+    <p class="angular-demo__lead">
+      {{
+        lab
+          ? "Compose real features on one table. Every table and control is rendered by the selected Angular adapter."
+          : "One dataset, one feature set, rendered by each real Angular adapter. Switch the kit, data source and locale."
+      }}
+    </p>
+    @if (lab) {
+      <div class="lab-recipes" role="group" aria-label="Feature recipes">
+        @for (recipe of recipes; track recipe) {
+          <button
+            type="button"
+            class="lab-recipe"
+            [class.is-on]="option('recipe', 'baseline') === recipe"
+            (click)="applyRecipe(recipe)"
+          >
+            {{ recipe }}
+          </button>
+        }
+        <button
+          type="button"
+          class="seg__btn"
+          (click)="applyRecipe('baseline')"
+        >
+          Reset options
+        </button>
+      </div>
+    }
+    <div class="angular-kits" role="group" aria-label="Angular adapter">
+      @for (adapter of adapters; track adapter.key) {
+        <label class="seg__btn" [class.is-on]="kit.key === adapter.key"
+          ><input
+            type="radio"
+            name="kit"
+            [value]="adapter.key"
+            [checked]="kit.key === adapter.key"
+            (change)="change('kit', $event)"
+            data-demo-control="kit"
+          />{{ adapter.label }}</label
+        >
+      }
+    </div>
+    <p class="hint">
+      Alongside Unstyled and NG-ZORRO, the other adapters are private previews.
+    </p>
+    <div class="controls angular-options">
+      <label
+        >Data<select
+          [value]="server ? 'server' : 'frontend'"
+          (change)="change('mode', $event)"
+          data-demo-control="mode"
+        >
+          <option value="frontend">Frontend</option>
+          <option value="server">Server</option>
+        </select></label
+      >
+      <label
+        >Locale<select
+          [value]="presentation.locale"
+          (change)="change('locale', $event)"
+          data-demo-control="locale"
+        >
+          <option value="en">English</option>
+          <option value="ar">العربية</option>
+          <option value="de">Deutsch</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="ja">日本語</option>
+        </select></label
+      >
+      <label
+        >Density<select
+          [value]="density()"
+          (change)="change('density', $event)"
+          data-demo-control="density"
+        >
+          <option value="comfortable">Comfortable</option>
+          <option value="compact">Compact</option>
+        </select></label
+      >
+      <label
+        >Filters<select
+          [value]="filterMode"
+          (change)="change('filters', $event)"
+          data-demo-control="filters"
+        >
+          <option value="popover">Popover</option>
+          <option value="drawer">Drawer</option>
+          <option value="header">Header</option>
+        </select></label
+      >
+      @if (!lab) {
+        <label
+          ><input
+            type="checkbox"
+            [checked]="grouping"
+            [disabled]="server"
+            (change)="change('grouping', $event)"
+            data-demo-control="grouping"
+          />Grouping</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            [checked]="editing"
+            [disabled]="server"
+            (change)="change('editing', $event)"
+            data-demo-control="editing"
+          />Editing</label
+        >
+      }
+      <label
+        ><input
+          type="checkbox"
+          [checked]="motion"
+          (change)="change('motion', $event)"
+          data-demo-control="motion"
+        />Motion</label
+      >
+    </div>
+    @if (server) {
+      <p class="hint">
+        Server mode uses the shared simulated API with latency, filtering,
+        sorting and pagination. Editing and grouping need the frontend row set.
+      </p>
+    }
+    @if (lab) {
+      <div class="lab-toolbar">
+        <div>
+          <strong>Table options</strong
+          ><span>Configure data, structure, editing and rows.</span>
+        </div>
+        <button
+          type="button"
+          class="lab-config-trigger"
+          aria-haspopup="dialog"
+          (click)="openOptions()"
+        >
+          Configure options
+        </button>
+      </div>
+      <dialog
+        #optionsDialog
+        class="angular-lab-options"
+        aria-label="Feature Lab controls"
+        (cancel)="closeOptions()"
+      >
+        <header>
+          <h2>Configure Feature Lab</h2>
+          <button type="button" class="seg__btn" (click)="closeOptions()">
+            Done
+          </button>
+        </header>
+        <div class="angular-options">
+          <label
+            >Dataset<select
+              [value]="dataset"
+              (change)="change('dataset', $event)"
+              data-demo-control="dataset"
+            >
+              <option value="people">People</option>
+              <option value="empty">Empty</option>
+              <option value="large" [disabled]="server">
+                40,000 people (frontend)
+              </option>
+            </select></label
+          >
+          <label
+            >Pagination<select
+              [value]="pagination"
+              (change)="change('pagination', $event)"
+              data-demo-control="pagination"
+            >
+              <option value="paged">Paged</option>
+              <option value="infinite">Infinite</option>
+            </select></label
+          >
+          <label
+            >Filter definitions<select
+              [value]="option('filter-set', 'live')"
+              (change)="change('filter-set', $event)"
+              data-demo-control="filter-set"
+            >
+              <option value="live">Live demo</option>
+              <option value="kitchen">
+                Checklist, facets and advanced operators
+              </option>
+            </select></label
+          >
+          <label
+            >Row structure<select
+              [value]="structure"
+              (change)="change('structure', $event)"
+              data-demo-control="structure"
+            >
+              <option value="flat">Flat</option>
+              <option value="grouped" [disabled]="!canWrite">Grouped</option>
+              <option value="tree" [disabled]="!canWrite">Tree</option>
+              <option value="nested" [disabled]="server">Nested detail</option>
+            </select></label
+          >
+          <label
+            >Editing mode<select
+              [value]="editingMode"
+              (change)="change('editing-mode', $event)"
+              data-demo-control="editing-mode"
+            >
+              <option value="off">Off</option>
+              <option value="cell" [disabled]="!canWrite">Cell</option>
+              <option value="row" [disabled]="!canWrite">Row</option>
+              <option value="batch" [disabled]="!canWrite">Batch</option>
+            </select></label
+          >
+          <label
+            >Load failure<select
+              [value]="failure()"
+              (change)="change('failure', $event)"
+              data-demo-control="failure"
+            >
+              <option value="off">Off</option>
+              <option value="builtin">Built-in</option>
+              <option value="replaced">Replaced</option>
+            </select></label
+          >
+          @for (toggle of toggles; track toggle[0]) {
+            <label [title]="reason(toggle[0]) ?? ''"
+              ><input
+                type="checkbox"
+                [checked]="enabled(toggle[0], defaultOn.has(toggle[0]))"
+                [disabled]="!!reason(toggle[0])"
+                (change)="change(toggle[0], $event)"
+                [attr.data-demo-control]="toggle[0]"
+              />{{ toggle[1] }}</label
+            >
+          }
+        </div>
+        @if (!canWrite) {
+          <p class="hint">
+            Server and large-data modes keep query, filters and column features
+            active. Demo writes, grouping and tree rows need the small frontend
+            dataset. Large data still supports nested detail.
+          </p>
+        }
+        @if (structure === "grouped" || structure === "tree") {
+          <p class="hint">
+            Row pinning is unavailable for grouped and tree rows. Reordering
+            across groups or parents asks for confirmation.
+          </p>
+        }
+      </dialog>
+    }
+    <p class="hint" role="status">
+      {{ server ? "Server" : large ? "40,000 frontend rows" : "Frontend" }} ·
+      {{ pivoted() ? "pivot" : structure }} · {{ editingMode }} editing ·
+      {{ filterMode }} filters
+    </p>
+    <ng-template #flashCell let-row let-column="column" let-value="value"
+      ><span
+        [class.angular-cell-flash]="
+          motion &&
+          !reducedMotion() &&
+          highlight.isCellHighlighted(row.id, column.key)
+        "
+        >{{ value }}</span
+      ></ng-template
+    >
+    <ng-template #pivotPanel>
+      <adapt-showcase-pivot-panel
+        [fields]="pivotFields"
+        [config]="pivotState.config()"
+        [onChange]="pivotState.onConfigChange"
+        [labels]="presentation.labels"
+      />
+    </ng-template>
+    <ng-template #viewsPanel
+      ><ng-container
+        [ngComponentOutlet]="kit.savedViewsPanel"
+        [ngComponentOutletInputs]="savedViewsInputs()"
+    /></ng-template>
+    <ng-template #pivotCaption let-row>
+      @if (row.kind === "subtotal") {
+        <button
+          type="button"
+          class="pivot-fold"
+          [attr.aria-expanded]="!pivotState.collapsed().has(row.key)"
+          (click)="toggleFold(row.key)"
+        >
+          {{ pivotState.collapsed().has(row.key) ? "▶" : "▼" }} {{ row.label }}
+        </button>
+      } @else {
+        {{ row.label }}
+      }
+    </ng-template>
+    <div
+      class="demo-surface mx-ng"
+      [class.mx-ng--unstyled]="kit.key === 'unstyled'"
+      [attr.data-adapter]="kit.key"
+      [attr.data-angular-kit]="kit.key"
+      [attr.data-adapttable-kit]="kit.key"
+      [class.mx-ng--zorro]="kit.key === 'ng-zorro'"
+      [class.adapttable-ng-bootstrap]="kit.key === 'ng-bootstrap'"
+      [class.adapttable-ngx-bootstrap]="kit.key === 'ngx-bootstrap'"
+      [attr.data-bs-theme]="dark() ? 'dark' : 'light'"
+      [attr.lang]="presentation.locale"
+      [attr.dir]="presentation.dir"
+    >
+      <ng-template #content>
+        @if (failure() === "replaced") {
+          <section role="alert" class="angular-replaced-error">
+            <h2>The demo request failed</h2>
+            <p>
+              This is the host's replacement error surface. Retry restores the
+              same table configuration.
+            </p>
+            <button type="button" class="seg__btn" (click)="retry()">
+              Retry
+            </button>
+          </section>
+        } @else if (pivoted()) {
+          @let table = pivotModel();
+          <adapt-showcase-table
+            tableLabel="People pivot"
+            [data]="table.rows"
+            [columns]="table.columns"
+            [rowKey]="table.rowKey"
+            [summaryRow]="table.summaryRow"
+            [features]="panelFeatures()"
+            [urlSync]="false"
+            [searchable]="false"
+            [labels]="presentation.labels"
+            [dir]="presentation.dir"
+            [density]="density()"
+            [defaults]="{ limit: 100 }"
+            [maxHeight]="560"
+          />
+        } @else {
+          <adapt-showcase-table
+            tableLabel="People directory"
+            [urlKey]="urlKey"
+            [data]="source ? undefined : rows()"
+            [source]="source"
+            [error]="error()"
+            [loading]="loading()"
+            [defaults]="{ limit: large ? 100 : 10 }"
+            [columns]="columns()"
+            [rowKey]="rowKey"
+            [labels]="presentation.labels"
+            [dir]="presentation.dir"
+            [features]="features()"
+            [density]="density()"
+            (densityChange)="setDensity($event)"
+            [filtersMode]="filterMode === 'drawer' ? 'drawer' : 'popover'"
+            [paginationMode]="pagination"
+            [forceMobile]="mobile ? true : undefined"
+            [selectable]="selectable"
+            [searchable]="searchable"
+            [summaryRow]="summary"
+            [maxHeight]="560"
+          />
+        }
+      </ng-template>
+      @if (kit.root; as kitRoot) {
+        <ng-container
+          [ngComponentOutlet]="kitRoot"
+          [ngComponentOutletInputs]="{
+            content: content,
+            theme: dark() ? 'dark' : 'light',
+            dir: presentation.dir,
+          }"
+        />
+      } @else {
+        <ng-container [ngTemplateOutlet]="content" />
+      }
+    </div>
+    @if (failure() === "builtin") {
+      <button type="button" class="seg__btn" (click)="retry()">
+        Retry failed request
+      </button>
+    }
+    <p class="hint" role="status">{{ log() }}</p>
+    <p class="hint">
+      Save or cancel active edits before switching adapters or options.
+      Committed changes and URL state stay with you; switching resets undo
+      history and any selection not stored in the URL.
+    </p>
+    <p>
+      <a [href]="adapterHref(kit.key)"
+        >Explore {{ adapter.label }} features →</a
+      >
+    </p>
+  </section>
+</main>

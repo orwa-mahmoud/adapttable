@@ -73,7 +73,10 @@ describe("site addresses", () => {
       "/angular/data-tiers/"
     );
     assert.equal(docsReferenceRoute("ai", "angular"), "/ai/");
-    assert.equal(docsReferenceRoute("api", "angular"), "/react/api/");
+    assert.equal(
+      docsReferenceRoute("api", "angular"),
+      "/angular/getting-started/?unavailable=api"
+    );
     assert.equal(docsReferenceRoute("filtering"), "/react/filtering/");
   });
 

@@ -1,0 +1,124 @@
+/**
+ * Row count and the windowed pager.
+ */
+import { AdaptAttrs, AdaptIcon, expandChevronIcon } from "@adapttable/angular";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { PaginationComponent } from "ngx-bootstrap/pagination";
+
+import type { TableView } from "../dataTable";
+
+/**
+ * Prev/next pager with a rows-per-page select.
+ *
+ * @internal
+ */
+@Component({
+  selector: "adapt-pagination-footer",
+  imports: [AdaptAttrs, AdaptIcon, PaginationComponent, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    @let v = view();
+    <div data-adapttable-part="footer">
+      <label>
+        {{ v.table.labels().rowsPerPage }}
+        <select
+          class="form-select form-select-sm"
+          data-ngx-bootstrap-part="rows-per-page"
+          [attr.aria-label]="v.table.labels().rowsPerPage"
+          [adaptAttrs]="{ value: v.table.source().limit }"
+          (change)="v.table.setLimit(+$any($event.target).value)"
+        >
+          @for (size of v.table.pageSizeOptions(); track size) {
+            <option
+              [value]="size"
+              [attr.selected]="size === v.table.source().limit ? '' : null"
+            >
+              {{ size }}
+            </option>
+          }
+        </select>
+      </label>
+      @if (v.table.source().total > 0) {
+        <span>{{
+          v.table.labels().showing({
+            from: v.table.pagination().fromIndex,
+            to: v.table.pagination().toIndex,
+            total: v.table.source().total,
+          })
+        }}</span>
+      }
+      <div data-ngx-bootstrap-part="pager">
+        <span>{{
+          v.table.labels().pageOf({
+            page: v.table.pagination().safePage,
+            total: v.table.pagination().totalPages,
+          })
+        }}</span>
+        <pagination
+          class="pagination-sm"
+          [totalItems]="v.table.source().total"
+          [itemsPerPage]="v.table.source().limit"
+          [ngModel]="v.table.pagination().safePage"
+          (pageChanged)="v.table.setPage($event.page)"
+          [maxSize]="5"
+          [rotate]="false"
+          [directionLinks]="true"
+          [boundaryLinks]="false"
+          [previousText]="v.table.labels().previousPage"
+          [nextText]="v.table.labels().nextPage"
+          [customPreviousTemplate]="previous"
+          [customNextTemplate]="next"
+          [customPageTemplate]="page"
+        />
+        <ng-template #previous let-disabled="disabled">
+          <span
+            data-ngx-bootstrap-part="page-prev"
+            [attr.aria-label]="v.table.labels().previousPage"
+            [attr.aria-disabled]="disabled"
+          >
+            <svg [adaptIcon]="previousIcon()"></svg>
+          </span>
+        </ng-template>
+        <ng-template #next let-disabled="disabled">
+          <span
+            data-ngx-bootstrap-part="page-next"
+            [attr.aria-label]="v.table.labels().nextPage"
+            [attr.aria-disabled]="disabled"
+          >
+            <svg [adaptIcon]="nextIcon()"></svg>
+          </span>
+        </ng-template>
+        <ng-template #page let-page let-currentPage="currentPage">
+          <span
+            data-ngx-bootstrap-part="page-number"
+            [attr.aria-label]="v.table.labels().goToPage(page.number)"
+            [attr.aria-current]="page.number === currentPage ? 'page' : null"
+            >{{ page.text }}</span
+          >
+        </ng-template>
+      </div>
+    </div>
+  `,
+})
+export class AdaptPaginationFooter<TRow> {
+  /** What the table renders from. */
+  readonly view = input.required<TableView<TRow>>();
+
+  /** Pagination follows reading order, including live direction changes. */
+  protected readonly previousIcon = computed(() =>
+    expandChevronIcon({
+      open: false,
+      dir: this.view().table.dir() === "rtl" ? "ltr" : "rtl",
+    })
+  );
+  protected readonly nextIcon = computed(() =>
+    expandChevronIcon({ open: false, dir: this.view().table.dir() })
+  );
+}

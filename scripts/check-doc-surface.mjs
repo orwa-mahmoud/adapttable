@@ -26,11 +26,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import ts from "typescript";
-
 import { sidebarSlugs } from "../apps/docs/sidebar.mjs";
 import { DESCRIPTIONS, TITLES } from "../apps/docs/sync-docs.mjs";
 import { DOCS } from "./build-llms-full.mjs";
+import { extractPackageExports } from "./doc-surface-exports.mjs";
 import { docLinkTarget, docsFiles } from "./docs-files.mjs";
 import {
   packageDir,
@@ -134,10 +133,18 @@ function ngPackageEntry(pkg, key, root) {
     : join(pkg, relative(packageDir(pkg, root), join(folder, entryFile)));
 }
 
-const SURFACES = packageNames()
-  // Wrapped, not passed by reference: `flatMap` hands the callback an index as
-  // its second argument, which is now this function's `root`.
-  .flatMap((pkg) => entriesOf(pkg));
+/** Keep every package's entries together, in the original package/entry order. */
+export function packageSurfaceGroups(root = REPO_ROOT) {
+  return packageNames(root).map((pkg) => ({
+    pkg,
+    entries: entriesOf(pkg, root).map(({ label, entry }) => ({
+      label,
+      entry: resolvePackagePath(entry, root),
+    })),
+  }));
+}
+
+const SURFACE_GROUPS = packageSurfaceGroups();
 
 const docPages = docsFiles(DOCS_DIR);
 
@@ -169,32 +176,10 @@ function isInReference(name) {
   return mentions(reference, name);
 }
 
-function exportsOf(program, checker, entryPath) {
-  const source = program.getSourceFile(entryPath);
-  if (!source) throw new Error(`Missing entry ${entryPath}`);
-  const moduleSymbol = checker.getSymbolAtLocation(source);
-  if (!moduleSymbol) throw new Error(`No module symbol for ${entryPath}`);
-  return checker
-    .getExportsOfModule(moduleSymbol)
-    .map((symbol) => symbol.name)
-    .filter((name) => name !== "default")
-    .sort((a, b) => a.localeCompare(b));
-}
-
 function auditPackages() {
-  const entries = SURFACES.map((surface) => resolvePackagePath(surface.entry));
-  const program = ts.createProgram(entries, {
-    jsx: ts.JsxEmit.ReactJSX,
-    module: ts.ModuleKind.ESNext,
-    moduleResolution: ts.ModuleResolutionKind.Bundler,
-    target: ts.ScriptTarget.ESNext,
-    skipLibCheck: true,
-  });
-  const checker = program.getTypeChecker();
-  return SURFACES.map((surface, index) => {
-    const names = exportsOf(program, checker, entries[index]);
+  return extractPackageExports(SURFACE_GROUPS).map(({ pkg, names }) => {
     const undocumented = new Set(names.filter((name) => !isDocumented(name)));
-    return { pkg: surface.label, names, undocumented };
+    return { pkg, names, undocumented };
   });
 }
 

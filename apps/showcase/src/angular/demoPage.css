@@ -1,0 +1,180 @@
+adapt-showcase-demo-page {
+  display: block;
+}
+adapt-showcase-demo-page *,
+adapt-showcase-demo-page *::before,
+adapt-showcase-demo-page *::after {
+  box-sizing: border-box;
+}
+.angular-demo h1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  letter-spacing: -0.04em;
+  max-width: 900px;
+  margin: 0.5rem 0 1rem;
+}
+.angular-demo__lead {
+  color: var(--ink-2);
+  max-width: 780px;
+  line-height: 1.65;
+}
+.angular-kits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0 0.75rem;
+}
+.angular-kits label {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  cursor: pointer;
+}
+.angular-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1rem 0;
+}
+.angular-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.angular-options select,
+adapt-showcase-demo-page .nav select {
+  background: var(--page-surface);
+  color: var(--ink);
+  border: 1px solid var(--page-border);
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  font: inherit;
+}
+.angular-lab-options {
+  border: 1px solid var(--page-border);
+  border-radius: 0.65rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.angular-lab-options summary,
+.angular-adapters summary {
+  cursor: pointer;
+}
+.angular-adapters {
+  position: relative;
+}
+.angular-adapters > div {
+  position: absolute;
+  z-index: 30;
+  top: 2rem;
+  min-width: 190px;
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.6rem;
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px #0002;
+}
+.angular-demo .demo-surface {
+  padding: 1rem;
+  overflow-x: auto;
+}
+@media (max-width: 700px) {
+  adapt-showcase-demo-page .nav__inner {
+    flex-wrap: wrap;
+    padding-block: 0.75rem;
+    gap: 0.75rem;
+  }
+  adapt-showcase-demo-page .nav__links {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .angular-demo .demo-surface {
+    padding: 0.4rem;
+  }
+}
+.angular-no-motion *,
+.angular-no-motion *::before,
+.angular-no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+.angular-highlight {
+  background-color: color-mix(in srgb, var(--kit) 18%, transparent);
+}
+.angular-cell-flash {
+  display: block;
+  animation: angular-cell-flash 1.1s ease-out;
+}
+@keyframes angular-cell-flash {
+  from {
+    background-color: color-mix(in srgb, var(--kit) 42%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .angular-cell-flash {
+    animation: none;
+  }
+}
+.angular-replaced-error {
+  padding: 2rem;
+  text-align: center;
+}
+.angular-options label:has(input:disabled) {
+  opacity: 0.6;
+}
+dialog.angular-lab-options {
+  color: var(--ink);
+  background: var(--page-surface);
+  border: 1px solid var(--page-border);
+  margin: 0 0 0 auto;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: min(680px, 94vw);
+  max-width: 94vw;
+  padding: 1.5rem;
+  border-radius: 0;
+  overflow-y: auto;
+}
+dialog.angular-lab-options::backdrop {
+  background: #0007;
+}
+dialog.angular-lab-options header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+dialog.angular-lab-options .angular-options {
+  align-items: flex-start;
+}
+dialog.angular-lab-options .angular-options > label {
+  flex: 1 1 230px;
+}
+.angular-transition-warning {
+  position: fixed;
+  inset-block-start: 1rem;
+  inset-inline: 1rem;
+  margin-inline: auto;
+  max-width: 650px;
+  z-index: 2147483647;
+  padding: 1rem;
+  color: var(--ink);
+  background: var(--page-surface);
+  border: 2px solid var(--kit, var(--brand));
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 28px #0004;
+}
+.angular-transition-warning p {
+  margin: 0 0 0.75rem;
+}
+.angular-transition-warning button {
+  font: inherit;
+  cursor: pointer;
+  padding: 0.4rem 0.7rem;
+}

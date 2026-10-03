@@ -234,7 +234,22 @@ const head = ({
       [data-theme="dark"] .at-fallback a {
         color: #a5b4fc;
       }
-    </style>`;
+${
+  route.startsWith("/angular/")
+    ? `      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
+`
+    : ""
+}    </style>`;
 
 /** A document, assembled from its head and its body. */
 const htmlDocument = (headHtml, bodyHtml) => `<!doctype html>
@@ -347,7 +362,7 @@ ${linkSection(
   )}        <p>
           Reference: ${docsList(feature.docs, adapter.framework)}. More of this kit:
           <a href="../">AdaptTable for ${escapeHtml(adapter.label)}</a>, or
-          <a href="${demoRoute()}">the live demo</a>.
+          <a href="${adapter.framework === "angular" ? demoRoute(adapter.key, adapter.framework) : demoRoute()}">the live demo</a>.
         </p>
       </main>
     </div>
@@ -418,7 +433,7 @@ ${linkList(
 )}
 ${otherKitsSection(adapter, fill)}        <p>
           Reference: <a href="${siteUrl(docsReferenceRoute("getting-started", adapter.framework))}">getting started</a>. Or
-          open <a href="${demoRoute()}">the live demo</a> and switch kits on
+          open <a href="${adapter.framework === "angular" ? demoRoute(adapter.key, adapter.framework) : demoRoute()}">the live demo</a> and switch kits on
           the same table.
         </p>
       </main>
@@ -525,8 +540,34 @@ const stubPage = ([from, to]) => {
   return { dir: from, html: htmlDocument(headHtml, body) };
 };
 
+/** The Angular live demo and full-options lab share one real kit bootstrap. */
+export const angularModePage = (lab = false) => {
+  const dir = lab ? "angular-all-options" : "angular-main";
+  const title = lab
+    ? "Angular Feature Lab — AdaptTable"
+    : "Angular live demo — AdaptTable";
+  const description = lab
+    ? "Compose real Angular table features, change adapters and explore every feature."
+    : "One dataset and one feature set, rendered by real Angular adapters.";
+  return {
+    dir,
+    html: htmlDocument(
+      head({
+        dir,
+        title,
+        description,
+        route: demoRoute(lab ? "all-options" : "", "angular"),
+      }),
+      `<div id="root" data-angular-mode="${lab ? "lab" : "live"}"><main class="at-fallback"><h1>${title}</h1><p>${description}</p><a href="/angular/getting-started/">Angular documentation</a></main></div>
+    <script type="module" src="../src/angular/entry-demo.ts"></script>`
+    ),
+  };
+};
+
 /** Every HTML file this writes, as `{ dir, html }`. */
 export const showcaseHtmlFiles = () => [
+  angularModePage(),
+  angularModePage(true),
   ...matrixPages().map((page) => {
     const adapter = adapterByKey(page.adapter);
     if (!adapter) throw new Error(`unknown adapter: ${page.adapter}`);

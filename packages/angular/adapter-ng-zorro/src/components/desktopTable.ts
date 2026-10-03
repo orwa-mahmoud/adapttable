@@ -88,6 +88,7 @@ import { AdaptSelectionCheckbox } from "./selectionCheckbox";
     NgTemplateOutlet,
   ],
   templateUrl: "./desktopTable.html",
+  styleUrl: "./desktopTable.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
 })

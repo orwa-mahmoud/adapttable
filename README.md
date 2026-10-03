@@ -267,3 +267,17 @@ PRs welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md). This is a friendly, well-
 <div align="center">
 <sub>Keywords: react data table, headless table, server-side pagination, url state, infinite scroll table, mantine table, mui datagrid alternative, chakra table, ant design table, antd table, tailwind table, shadcn table, rtl table, arabic table, typescript, dark mode.</sub>
 </div>
+
+### Additional Angular kit previews
+
+The workspace also contains private, unpublished `0.0.0` adapters for
+[Angular Material](docs/angular/material.md) (`@adapttable/angular-material`),
+[ng-bootstrap](docs/angular/ng-bootstrap.md) (`@adapttable/ng-bootstrap`),
+[Spartan](docs/angular/spartan.md) (`@adapttable/spartan`) and
+[Taiga UI](docs/angular/taiga-ui.md) (`@adapttable/taiga-ui`),
+[Angular Aria](docs/angular/aria.md) (`@adapttable/angular-aria`) and
+[ngx-bootstrap](docs/angular/ngx-bootstrap.md) (`@adapttable/ngx-bootstrap`),
+[Clarity](docs/angular/clarity.md) (`@adapttable/clarity`) and
+[Angular CDK](docs/angular/angular-cdk.md) (`@adapttable/angular-cdk`). Their local showcase
+pages use the actual kit controls. Use built workspace packages and follow each
+kit's peer, theme and asset setup; npm publication is a separate release step.

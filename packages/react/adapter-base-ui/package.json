@@ -453,7 +453,7 @@
     }
   },
   "scripts": {
-    "build": "tsdown && cp src/styles.css dist/styles.css",
+    "build": "node ../../../scripts/build-library.mjs && cp src/styles.css dist/styles.css",
     "dev": "tsdown --watch",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

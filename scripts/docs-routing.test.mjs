@@ -63,12 +63,12 @@ describe("canonical docs sources", () => {
 });
 
 describe("source-relative markdown links", () => {
-  it("resolves Angular siblings, shared parents and the API reference with anchors", () => {
+  it("preserves Angular siblings and shared anchors while explaining an unavailable API guide", () => {
     const source =
       "[Filters](./filtering.md#operators) [Concepts](../concepts.md) [API](../api.md#the-angular-binding)";
     assert.equal(
       rewriteDocLinks(source, "angular/columns.md"),
-      "[Filters](/angular/filtering/#operators) [Concepts](/concepts/) [API](/react/api/#the-angular-binding)"
+      "[Filters](/angular/filtering/#operators) [Concepts](/concepts/) [API](/angular/getting-started/?unavailable=api)"
     );
   });
 
