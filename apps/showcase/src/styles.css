@@ -180,6 +180,10 @@ a {
     translate 0.14s ease,
     visibility 0s linear 0.14s;
 }
+/* Closed panels stay in the DOM without widening a narrow viewport. */
+.nav__menu[data-open="false"] {
+  display: none;
+}
 .nav__menu[data-open="true"] {
   visibility: visible;
   opacity: 1;
@@ -2289,35 +2293,63 @@ a {
   }
 }
 
-/* A compact framework control immediately before the existing theme button. */
+/* Framework identity and selection share one focusable surface. */
 .nav__framework {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  flex-shrink: 0;
-  font-size: var(--fs-small);
+  flex: 0 0 auto;
+  height: 36px;
+  border: 1px solid var(--page-border);
+  border-radius: 9px;
+  background: var(--page-surface);
   color: var(--ink);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.nav__framework:hover {
+  border-color: color-mix(in oklch, var(--brand) 45%, var(--page-border));
+}
+.nav__framework:focus-within {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.nav__framework > span {
+  position: absolute;
+  inset-inline-start: 8px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 17px;
+  line-height: 1;
+  pointer-events: none;
 }
 .nav__framework select {
-  font: inherit;
+  height: 100%;
+  padding-inline: 36px 25px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
   color: inherit;
-  background: var(--page-surface);
-  border: 1px solid var(--page-border);
-  border-radius: var(--r-sm);
-  padding: 0.4rem 0.25rem;
-  max-width: 6.5rem;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 }
 .nav__framework select:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
+  outline: none;
 }
 @media (max-width: 560px) {
   .nav__inner:has(.nav__framework) {
     gap: 6px;
   }
   .nav__inner:has(.nav__framework) .nav__mobile {
-    flex: 1 1 112px;
+    flex: 1 1 80px;
     min-width: 0;
   }
   .nav__inner:has(.nav__framework) .nav__mobile select {
@@ -2330,7 +2362,7 @@ a {
     display: none;
   }
   .nav__framework select {
-    max-width: 5rem;
+    padding-inline: 7px 18px;
     font-size: 12px;
   }
 }

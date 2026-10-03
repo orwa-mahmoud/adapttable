@@ -1,61 +1,31 @@
-<header class="nav">
-  <div class="nav__inner shell">
-    <adapt-showcase-wordmark [href]="mainHref" />
-    <nav class="nav__links" aria-label="Demo pages">
-      <a [href]="mainHref" [attr.aria-current]="!lab ? 'page' : null"
-        >Live demo</a
-      >
-      <a [href]="labHref" [attr.aria-current]="lab ? 'page' : null"
-        >Feature Lab</a
-      >
-      <details class="angular-adapters">
-        <summary>Adapters</summary>
-        <div>
-          @for (adapter of adapters; track adapter.key) {
-            <a [href]="adapterHref(adapter.key)">{{ adapter.label }}</a>
-          }
-        </div>
-      </details>
-      <a href="/angular/getting-started/">Docs</a>
-    </nav>
-    <div class="nav__right">
-      <select
-        aria-label="Framework"
-        data-demo-control="framework"
-        (change)="switchFramework($event)"
-      >
-        <option value="react">React</option>
-        <option value="angular" selected>Angular</option>
-      </select>
-      <button type="button" class="seg__btn" (click)="dark.set(!dark())">
-        {{ dark() ? "Light mode" : "Dark mode" }}
-      </button>
-    </div>
-  </div>
-</header>
+<adapt-showcase-nav
+  [active]="lab ? 'all-options' : 'demo'"
+  [kit]="kit.key"
+  [beforeNavigate]="canNavigate"
+/>
 <main
   class="shell angular-demo"
-  [class.mx-ng--unstyled]="kit.key === 'unstyled'"
   [style.--kit]="accent()"
   [style.--c]="accent()"
   [class.angular-no-motion]="!motion || reducedMotion()"
 >
   <section class="sec">
-    <p class="eyebrow">ANGULAR · {{ lab ? "FEATURE LAB" : "LIVE DEMO" }}</p>
-    <h1>
-      {{
-        lab
-          ? "Every option. Your combination."
-          : "Same features. Any kit. Watch it switch."
-      }}
-    </h1>
-    <p class="angular-demo__lead">
-      {{
-        lab
-          ? "Compose real features on one table. Every table and control is rendered by the selected Angular adapter."
-          : "One dataset, one feature set, rendered by each real Angular adapter. Switch the kit, data source and locale."
-      }}
-    </p>
+    <div class="sec__head">
+      <h1 class="sec__title">
+        {{
+          lab
+            ? "Every option. Your combination."
+            : "Same features. Any kit. Watch it switch."
+        }}
+      </h1>
+      <p class="sec__lead">
+        {{
+          lab
+            ? "Compose real features on one table. Every table and control is rendered by the selected Angular adapter."
+            : "One dataset, one feature set, rendered by each real Angular adapter. Switch the kit, data source and locale."
+        }}
+      </p>
+    </div>
     @if (lab) {
       <div class="lab-recipes" role="group" aria-label="Feature recipes">
         @for (recipe of recipes; track recipe) {
@@ -77,17 +47,30 @@
         </button>
       </div>
     }
-    <div class="angular-kits" role="group" aria-label="Angular adapter">
+    <div
+      class="adapterbar angular-kits"
+      role="radiogroup"
+      aria-label="Angular adapter"
+    >
       @for (adapter of adapters; track adapter.key) {
-        <label class="seg__btn" [class.is-on]="kit.key === adapter.key"
+        <label
+          class="adtab angular-kit"
+          [class.is-on]="kit.key === adapter.key"
+          [style.--c]="kitAccent(adapter, dark())"
+          [title]="adapter.label"
           ><input
             type="radio"
+            [attr.aria-label]="adapter.label"
             name="kit"
             [value]="adapter.key"
             [checked]="kit.key === adapter.key"
             (change)="change('kit', $event)"
             data-demo-control="kit"
-          />{{ adapter.label }}</label
+          /><span class="adtab__dot" aria-hidden="true"></span
+          ><span class="adtab__l"
+            ><strong>{{ adapter.label.replace("Angular ", "") }}</strong
+            ><small>{{ adapter.blurb }}</small></span
+          ></label
         >
       }
     </div>

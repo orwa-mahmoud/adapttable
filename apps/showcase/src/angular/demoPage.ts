@@ -41,11 +41,8 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 
-import {
-  FRAMEWORK_STORAGE_KEY,
-  frameworkDemoTarget,
-} from "../../../../scripts/framework-navigation.mjs";
-import { featuresOf, kitAccent, SHOWCASE_ADAPTERS } from "../matrix/content";
+import { FRAMEWORK_STORAGE_KEY } from "../../../../scripts/framework-navigation.mjs";
+import { kitAccent, SHOWCASE_ADAPTERS } from "../matrix/content";
 import {
   budget,
   formatMoney,
@@ -55,6 +52,7 @@ import {
   personSkills,
   personStatus,
   SKILLS,
+  summaryPerson,
 } from "../people";
 import {
   applyPersonEdit,
@@ -82,8 +80,8 @@ import {
   replaceDemoUrl,
 } from "./demoTransitions.mjs";
 import { AdaptShowcasePivotPanel, AdaptShowcaseTable } from "./kitComponents";
+import { AdaptShowcaseNav } from "./nav";
 import { SHOWCASE_DARK, SHOWCASE_KIT } from "./showcaseKit";
-import { AdaptShowcaseWordmark } from "./wordmark";
 
 export const SHOWCASE_LAB = new InjectionToken<boolean>("showcase feature lab");
 const option = (key: string, fallback: string): string =>
@@ -167,7 +165,7 @@ class LabOrders {
 @Component({
   selector: "adapt-showcase-demo-page",
   imports: [
-    AdaptShowcaseWordmark,
+    AdaptShowcaseNav,
     AdaptShowcaseTable,
     AdaptShowcasePivotPanel,
     NgComponentOutlet,
@@ -627,10 +625,11 @@ export class AdaptShowcaseDemoPage {
           this.kit.pinnedSummaryRows<Person>({
             bottom: [
               {
-                ...peopleRows()[0]!,
-                id: "portfolio-total",
-                name: "Portfolio total",
-                nameAr: "إجمالي المحفظة",
+                ...summaryPerson(
+                  "portfolio-total",
+                  "Portfolio total",
+                  "إجمالي المحفظة"
+                ),
                 budget: this.rows().reduce(
                   (total, row) => total + budget(row),
                   0
@@ -1016,16 +1015,6 @@ export class AdaptShowcaseDemoPage {
     url.searchParams.set("density", density);
     replaceDemoUrl(url);
   }
-  switchFramework(event: Event): void {
-    if (!canReplaceDemo()) return;
-    if (!(event.target instanceof HTMLSelectElement)) return;
-    location.assign(
-      frameworkDemoTarget(
-        `/angular/demo/${this.lab ? "all-options/" : ""}`,
-        event.target.value,
-        SHOWCASE_ADAPTERS,
-        featuresOf
-      ).href
-    );
-  }
+  readonly canNavigate = canReplaceDemo;
+  readonly kitAccent = kitAccent;
 }

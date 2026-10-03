@@ -44,6 +44,7 @@ import {
   ControlPanel,
   DemoFallback,
   KitSwitcher,
+  readKitFromUrl,
   Segmented,
 } from "./kitDemos";
 import { kitPivotPanel, KitProvider, kitSavedViewsPanel } from "./kitProviders";
@@ -397,7 +398,7 @@ function LabRows({
 }
 
 export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
-  const [adapter, setAdapter] = useState("mantine");
+  const [adapter, setAdapter] = useState(readKitFromUrl);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [recipe, setRecipe] = useState<Recipe | null>("baseline");
   const [filterSet, setFilterSet] = useState<"live" | "kitchen">("live");
@@ -638,7 +639,12 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
         ))}
       </div>
 
-      <KitSwitcher adapter={adapter} dark={dark} onChange={setAdapter} />
+      <KitSwitcher
+        adapter={adapter}
+        dark={dark}
+        onChange={setAdapter}
+        urlSync
+      />
 
       <div
         className="lab-toolbar"

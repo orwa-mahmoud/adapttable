@@ -1,0 +1,198 @@
+<header class="nav">
+  <div class="nav__inner shell">
+    <adapt-showcase-wordmark [href]="href('')" />
+    <nav class="nav__links" aria-label="Demo pages">
+      <a
+        [href]="demoHref('')"
+        [class.is-on]="active() === 'demo'"
+        [attr.aria-current]="active() === 'demo' ? 'page' : null"
+        >Live demo</a
+      >
+      <a
+        [href]="demoHref('all-options')"
+        [class.is-on]="active() === 'all-options'"
+        [attr.aria-current]="active() === 'all-options' ? 'page' : null"
+        >Feature Lab</a
+      >
+      <a
+        [href]="href(kit() + '/ai')"
+        [class.is-on]="active().endsWith('/ai')"
+        [attr.aria-current]="active().endsWith('/ai') ? 'page' : null"
+        >AI demo</a
+      >
+      <div class="nav__group">
+        <button
+          type="button"
+          class="nav__trigger"
+          [class.is-on]="active() !== 'demo' && active() !== 'all-options'"
+          aria-controls="angular-adapter-menu"
+          aria-haspopup="menu"
+          (keydown)="triggerKey($event)"
+          [attr.aria-expanded]="open()"
+          (click)="toggleMenu()"
+        >
+          Adapters
+          <svg
+            class="nav__chev"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+        <div
+          id="angular-adapter-menu"
+          role="menu"
+          aria-label="Adapters"
+          (keydown)="menuKey($event)"
+          class="nav__menu nav__menu--wide"
+          [attr.data-open]="open()"
+          [style.transform]="'translateX(' + shift() + 'px)'"
+        >
+          @for (adapter of adapters; track adapter.key) {
+            <a
+              role="menuitem"
+              [href]="href(adapter.key)"
+              [class.is-on]="kit() === adapter.key && active() === adapter.key"
+              [attr.aria-current]="active() === adapter.key ? 'page' : null"
+            >
+              <span class="nav__item-label"
+                ><span class="nav__dot" [style.--c]="accent(adapter)"></span
+                >{{ adapter.label }}</span
+              >
+              <span class="nav__item-hint">{{ adapter.blurb }}</span>
+            </a>
+          }
+        </div>
+      </div>
+    </nav>
+    <label class="nav__mobile">
+      <select aria-label="Demo page" (change)="switchPage($event)">
+        <optgroup label="Demo">
+          <option [value]="demoHref('')" [selected]="active() === 'demo'">
+            Live demo
+          </option>
+          <option
+            [value]="demoHref('all-options')"
+            [selected]="active() === 'all-options'"
+          >
+            Feature Lab
+          </option>
+          <option
+            [value]="href(kit() + '/ai')"
+            [selected]="active().endsWith('/ai')"
+          >
+            AI demo
+          </option>
+        </optgroup>
+        <optgroup label="Adapters">
+          @for (adapter of adapters; track adapter.key) {
+            <option
+              [value]="href(adapter.key)"
+              [selected]="active() === adapter.key"
+            >
+              {{ adapter.label }}
+            </option>
+          }
+        </optgroup>
+        <optgroup label="Current kit features">
+          @for (feature of features(); track feature.slug) {
+            <option
+              [value]="href(kit() + '/' + feature.slug)"
+              [selected]="active() === kit() + '/' + feature.slug"
+            >
+              {{ feature.label }}
+            </option>
+          }
+        </optgroup>
+      </select>
+      <span aria-hidden="true">▾</span>
+    </label>
+    <div class="nav__right">
+      <label class="nav__framework">
+        <span aria-hidden="true">Ⓐ</span>
+        <select
+          aria-label="Framework"
+          data-demo-control="framework"
+          (change)="switchFramework($event)"
+        >
+          @for (framework of frameworks; track framework.key) {
+            <option
+              [value]="framework.key"
+              [selected]="framework.key === 'angular'"
+            >
+              {{ framework.label }}
+            </option>
+          }
+        </select>
+      </label>
+      <button
+        type="button"
+        class="nav__icon"
+        aria-label="Toggle dark mode"
+        [attr.aria-pressed]="dark()"
+        (click)="dark.set(!dark())"
+      >
+        <svg
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          @if (dark()) {
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"
+            />
+          } @else {
+            <path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z" />
+          }
+        </svg>
+      </button>
+      <a class="nav__docs" [href]="docs" target="_blank" rel="noreferrer">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"
+          /></svg
+        >Docs
+      </a>
+      <a class="nav__cta" [href]="repo" target="_blank" rel="noreferrer">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M15 3h6v6m0-6L10 14M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"
+          /></svg
+        >GitHub
+      </a>
+    </div>
+  </div>
+</header>
