@@ -58,6 +58,23 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/taiga-ui",
   "@adapttable/unstyled",
 ];
+const TAIGA_NATIVE_PEER_NAMES = [
+  "@maskito/angular",
+  "@maskito/core",
+  "@maskito/kit",
+  "@maskito/phone",
+  "@ng-web-apis/common",
+  "@ng-web-apis/intersection-observer",
+  "@ng-web-apis/mutation-observer",
+  "@ng-web-apis/platform",
+  "@ng-web-apis/resize-observer",
+  "@ng-web-apis/screen-orientation",
+  "@taiga-ui/design-tokens",
+  "@taiga-ui/font-watcher",
+  "@taiga-ui/polymorpheus",
+  "@types/dom-speech-recognition",
+  "libphonenumber-js",
+];
 
 function json(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -222,6 +239,91 @@ describe("supported Node contract", () => {
     assert.ok(deps.rxjs);
     assert.deepEqual(probePrelude(deps), ["@angular/compiler"]);
     assert.deepEqual(probePrelude({ antd: "^5.0.0" }), []);
+  });
+
+  it("supplies Taiga's complete audited native peer closure on supported runtimes", () => {
+    const packages = publishedPackages();
+    const taiga = packages.find(
+      (entry) => entry.name === "@adapttable/taiga-ui"
+    );
+    assert.ok(taiga);
+    const direct = taiga.manifest.peerDependencies;
+    const deps = kitLoadDependencies([taiga], "24.15.0");
+    const extras = Object.keys(deps)
+      .filter(
+        (name) =>
+          !(name in direct) && name !== "@angular/compiler" && name !== "rxjs"
+      )
+      .sort();
+    assert.deepEqual(extras, TAIGA_NATIVE_PEER_NAMES);
+
+    const cli = readFileSync(
+      join(ROOT, "packages/shared/cli/src/detect.ts"),
+      "utf8"
+    );
+    const cliExtras = cli.match(
+      /kit: "taiga-ui",[\s\S]*?extras: \[([\s\S]*?)\n {4}\]/
+    )?.[1];
+    assert.ok(
+      cliExtras,
+      "CLI Taiga extras remain the audited install contract"
+    );
+    for (const name of TAIGA_NATIVE_PEER_NAMES) {
+      assert.ok(
+        cliExtras.includes(JSON.stringify(`${name}@${deps[name]}`)),
+        name
+      );
+    }
+    for (const version of ["22.22.3", "24.15.0", "26.0.0"]) {
+      const combined = kitLoadDependencies(
+        packagesForRuntime(packages, version),
+        version
+      );
+      for (const name of TAIGA_NATIVE_PEER_NAMES) {
+        assert.equal(combined[name], deps[name], `${version}: ${name}`);
+      }
+    }
+    assert.equal(
+      deps["@taiga-ui/icons"],
+      undefined,
+      "static icon assets are not load peers"
+    );
+    assert.equal(
+      deps.luxon,
+      undefined,
+      "unrelated optional peers stay excluded"
+    );
+  });
+
+  it("does not add Taiga's peers to consumers without Taiga", () => {
+    const packages = publishedPackages();
+    for (const [entries, version] of [
+      [packagesForRuntime(packages, "22.12.0"), "22.12.0"],
+      [
+        packages.filter((entry) => entry.name !== "@adapttable/taiga-ui"),
+        "24.15.0",
+      ],
+    ]) {
+      const deps = kitLoadDependencies(entries, version);
+      for (const name of TAIGA_NATIVE_PEER_NAMES)
+        assert.equal(deps[name], undefined, name);
+    }
+  });
+
+  it("preserves a directly supplied native peer range", () => {
+    const taiga = publishedPackages().find(
+      (entry) => entry.name === "@adapttable/taiga-ui"
+    );
+    assert.ok(taiga);
+    const manifest = {
+      ...taiga.manifest,
+      peerDependencies: {
+        ...taiga.manifest.peerDependencies,
+        "@ng-web-apis/common": "5.4.0",
+      },
+    };
+    const deps = kitLoadDependencies([{ ...taiga, manifest }], "24.15.0");
+    assert.equal(deps["@ng-web-apis/common"], "5.4.0");
   });
 });
 

@@ -37,6 +37,30 @@ const BASELINE_NODE_RANGE = ">=22.12.0";
 const ANGULAR_22_NODE_RANGE = "^22.22.3 || ^24.15.0 || >=26.0.0";
 const BASELINE_ANGULAR_RANGE = "^20.0.0";
 
+/**
+ * Required native peers beyond the adapter's direct peers. Audited against
+ * Taiga 5.26.0 core/cdk/kit/styles manifests and the Maskito/ng-web-apis peer
+ * metadata in pnpm-lock.yaml; kept in sync with the CLI's Taiga extras.
+ * The combined consumer uses --legacy-peer-deps, so npm cannot fill these in.
+ */
+const TAIGA_NATIVE_PEERS = Object.freeze({
+  "@taiga-ui/design-tokens": "~0.320.0",
+  "@taiga-ui/polymorpheus": "^5.0.1",
+  "@taiga-ui/font-watcher": "~0.6.0",
+  "@maskito/angular": "^5.5.0",
+  "@maskito/core": "^5.5.0",
+  "@maskito/kit": "^5.5.0",
+  "@maskito/phone": "^5.5.0",
+  "libphonenumber-js": "^1.13.14",
+  "@ng-web-apis/common": "^5.3.0",
+  "@ng-web-apis/intersection-observer": "^5.3.0",
+  "@ng-web-apis/mutation-observer": "^5.3.0",
+  "@ng-web-apis/platform": "^5.3.0",
+  "@ng-web-apis/resize-observer": "^5.3.0",
+  "@ng-web-apis/screen-orientation": "^5.3.0",
+  "@types/dom-speech-recognition": "^0.0.12",
+});
+
 /** Extra published subpaths kept in addition to every package root. */
 export const EXTRA_PROBE_ROUTES = Object.freeze([
   "@adapttable/react/adapter",
@@ -176,6 +200,11 @@ export function kitLoadDependencies(
   if (deps["@mui/material"]) {
     deps["@emotion/react"] ??= "^11.0.0";
     deps["@emotion/styled"] ??= "^11.0.0";
+  }
+  if (deps["@taiga-ui/core"]) {
+    for (const [name, range] of Object.entries(TAIGA_NATIVE_PEERS)) {
+      deps[name] ??= range;
+    }
   }
   // Angular's packages ship partially compiled: outside an app build they
   // load only with the compiler present to finish them, and `@angular/core`
@@ -337,6 +366,8 @@ for (const route of routes) {
     [
       "install",
       "--engine-strict",
+      // This combined load probe supplies native peer closure explicitly;
+      // peer-floor compatibility has its own separate harness.
       "--legacy-peer-deps",
       "--ignore-scripts",
       "--no-audit",
