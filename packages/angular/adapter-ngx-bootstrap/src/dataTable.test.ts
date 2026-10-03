@@ -120,19 +120,63 @@ describe("the unstyled Angular table", () => {
 
   it("pages from the numbered pager and the page-size select", async () => {
     const { part, parts, ids, settle } = await mount();
-    const numbers = parts<HTMLButtonElement>("page-number");
+    const numbers = parts<HTMLAnchorElement>("page-number");
     expect(numbers.map((button) => button.textContent?.trim())).toEqual([
       "1",
       "2",
       "3",
       "4",
       "5",
-      "6",
     ]);
+    expect(
+      numbers.every(
+        (link) => link.tagName === "A" && link.getAttribute("role") === "button"
+      )
+    ).toBe(true);
+    expect(numbers[2]?.getAttribute("aria-label")).toBe("Go to page 3");
+    const enter = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
+    numbers[2]!.dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(false);
+    const nextWindow = part<HTMLAnchorElement>("page-ellipsis")!;
+    expect(nextWindow.textContent?.trim()).toBe("...");
+    expect(nextWindow.getAttribute("aria-label")).toBe("Go to page 6");
     expect(numbers[0]?.getAttribute("aria-current")).toBe("page");
     expect(part("page-prev")?.getAttribute("aria-disabled")).toBe("true");
-    numbers[2]!.click();
+    const prev = part("page-prev")!;
+    expect(prev.getAttribute("tabindex")).toBe("-1");
+    prev.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: " ",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
+    expect(ids()).toEqual(["1", "2", "3", "4", "5"]);
+    nextWindow.click();
+    await settle();
+    expect(ids()).toEqual(["26", "27", "28", "29", "30"]);
+    expect(part("page-next")?.getAttribute("aria-disabled")).toBe("true");
+    part("page-ellipsis")!.click();
+    await settle();
+    const third = parts<HTMLAnchorElement>("page-number")[2]!;
+    third.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: " ",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await settle();
+    expect(
+      parts("page-number")
+        .filter((link) => link.getAttribute("aria-current") === "page")
+        .map((link) => link.textContent?.trim())
+    ).toEqual(["3"]);
     expect(ids()).toEqual(["11", "12", "13", "14", "15"]);
     part<HTMLButtonElement>("page-prev")!.click();
     await settle();

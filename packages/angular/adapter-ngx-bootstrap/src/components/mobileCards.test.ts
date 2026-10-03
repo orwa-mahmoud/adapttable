@@ -817,7 +817,17 @@ describe("mobile card reach", () => {
       ["row-reorder-down", "down-hook"],
       ["action-button", "action-hook"],
     ]) {
-      expect(part(name!, first).className).toBe(className);
+      const kitClasses =
+        name === "checkbox"
+          ? ["form-check-input"]
+          : ["row-reorder-up", "row-reorder-down", "action-button"].includes(
+                name!
+              )
+            ? ["btn", "btn-outline-secondary", "btn-sm"]
+            : [];
+      expect([...part(name!, first).classList].sort()).toEqual(
+        [...kitClasses, className].sort()
+      );
     }
     expect(part("summary-card").className).toBe("card-hook summary-hook");
     part("expand-button", first).click();
@@ -827,5 +837,15 @@ describe("mobile card reach", () => {
     await settle();
     expect(first.className).toBe("new-card person-1");
     expect(part("card-value", first).className).toBe("");
+    expect(part("checkbox", first).classList.contains("checkbox-hook")).toBe(
+      false
+    );
+    expect(part("checkbox", first).classList.contains("form-check-input")).toBe(
+      true
+    );
+    expect(part("action-button", first).classList.contains("action-hook")).toBe(
+      false
+    );
+    expect(part("action-button", first).classList.contains("btn")).toBe(true);
   });
 });

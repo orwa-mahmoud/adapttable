@@ -201,8 +201,10 @@ describe("the Taiga UI Angular filters", () => {
     const { part, openFilters, settle } = await mount();
     const button = part<HTMLButtonElement>("filters-button");
     expect(button?.getAttribute("aria-expanded")).toBe("false");
+    expect(part("filters-anchor")?.hasAttribute("aria-expanded")).toBe(false);
     await openFilters();
     expect(button?.getAttribute("aria-expanded")).toBe("true");
+    expect(part("filters-anchor")?.hasAttribute("aria-expanded")).toBe(false);
     expect(part("filters-popover")).not.toBeNull();
     expect(part("filters-backdrop")).toBeNull();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -244,6 +246,7 @@ describe("the Taiga UI Angular filters", () => {
     const boxes = parts<HTMLInputElement>("filter-checkbox", field("Team")).map(
       (label) => label.querySelector("input")
     );
+    expect(boxes[1]!.disabled).toBe(false);
     boxes[1]!.click();
     await settle();
     expect(ids()).toEqual(["3"]);
@@ -340,7 +343,8 @@ describe("the Taiga UI Angular filters", () => {
     await openFilters();
     const panel = part("filters-panel");
     expect(panel).not.toBeNull();
-    expect(part("filters-backdrop")).not.toBeNull();
+    expect(panel?.tagName).toBe("TUI-DRAWER");
+    expect(panel?.classList.contains("_overlay")).toBe(true);
     expect(document.activeElement).toBe(panel);
     const last = part<HTMLButtonElement>("filters-done");
     last!.focus();
@@ -352,7 +356,7 @@ describe("the Taiga UI Angular filters", () => {
     await settle();
     expect(part("filters-panel")).toBeNull();
     await openFilters();
-    part<HTMLButtonElement>("filters-backdrop")!.click();
+    part("filters-panel")!.click();
     await settle();
     expect(part("filters-panel")).toBeNull();
     await openFilters();

@@ -8,19 +8,24 @@ export const SITE_FRAMEWORKS = Object.freeze([
   { key: "angular", label: "Angular", icon: "Ⓐ" },
 ]);
 export const FRAMEWORK_STORAGE_KEY = "adapttable-framework";
+/** @param {string | null} value */
+export function normalizeFramework(value) {
+  return value === "angular" ? "angular" : "react";
+}
 const angular = new Set(ANGULAR_DOCS.map((page) => page.replace(/\.md$/, "")));
 const shared = new Set(SHARED_DOCS);
 
 /** @param {string} path @param {string | null} [preferred] */
 export function selectedFramework(path, preferred = null) {
   const explicit = /^\/(react|angular)(?:\/|$)/.exec(path)?.[1];
-  return explicit ?? (preferred === "angular" ? "angular" : "react");
+  return explicit ?? normalizeFramework(preferred);
 }
 
 /** A destination includes an explicit explanation when no equivalent exists.
  * @param {string} path @param {string} framework
  */
 export function frameworkDocsTarget(path, framework) {
+  framework = normalizeFramework(framework);
   const slug = path
     .replace(/^\/v\d+\//, "/")
     .replace(/^\/(react|angular)\//, "/")
@@ -46,6 +51,7 @@ export function frameworkDocsTarget(path, framework) {
  * @param {(adapter: T) => readonly {slug: string}[]} features
  */
 export function frameworkDemoTarget(path, framework, adapters, features) {
+  framework = normalizeFramework(framework);
   const url = new URL(path, "https://adapttable.local");
   const parts = url.pathname
     .replace(/^\/(react|angular)\/demo\/?/, "")

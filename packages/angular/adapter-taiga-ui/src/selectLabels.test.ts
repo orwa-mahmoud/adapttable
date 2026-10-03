@@ -9,6 +9,14 @@ describe("Taiga selected-option labels", () => {
     expect(stringify("active")).toBe("Aktiv");
     expect(stringify("other")).toBe("other");
   });
+  it("shows the explicit empty option label without changing its value", () => {
+    const stringify = pipe.transform([{ value: "name", label: "Name" }], {
+      "": "—",
+    });
+    expect(stringify("")).toBe("—");
+    expect(stringify("name")).toBe("Name");
+    expect(stringify("other")).toBe("other");
+  });
   it("supports pivot field keys and primitive values", () => {
     expect(pipe.transform([{ key: "budget", label: "Budget" }])("budget")).toBe(
       "Budget"

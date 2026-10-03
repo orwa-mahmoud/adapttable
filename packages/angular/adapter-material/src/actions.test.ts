@@ -257,6 +257,20 @@ describe("the Angular Material row actions", () => {
     await settle();
     expect(edits).toEqual(["1"]);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(document.querySelector('[role="menu"]')).toBeNull();
+
+    const nextTrigger =
+      parts<HTMLElement>(
+        "row-actions-menu"
+      )[1]!.querySelector<HTMLButtonElement>("button")!;
+    nextTrigger.click();
+    await settle();
+    expect(nextTrigger.getAttribute("aria-expanded")).toBe("true");
+    parts<HTMLButtonElement>("action-button")[0]!.click();
+    await settle();
+    expect(edits).toEqual(["1", "2"]);
+    expect(nextTrigger.getAttribute("aria-expanded")).toBe("false");
+    expect(document.querySelector('[role="menu"]')).toBeNull();
   });
 
   it("puts the actions on each phone card", async () => {

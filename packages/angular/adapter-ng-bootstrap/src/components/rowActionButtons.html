@@ -24,16 +24,19 @@
       ngbDropdownToggle
       class="btn btn-outline-secondary btn-sm"
       data-adapttable-part="row-actions-trigger"
+      [attr.aria-controls]="menuId"
+      aria-haspopup="menu"
       [class]="classNames().rowActionsTrigger"
       [attr.aria-label]="labels().rowActionsMenu"
       (click)="$event.stopPropagation()"
     >
       ⋮
     </button>
-    <div ngbDropdownMenu>
+    <div ngbDropdownMenu role="menu" [id]="menuId">
       @for (item of items(); track item.action.key) {
         <button
           class="dropdown-item"
+          role="menuitem"
           ngbDropdownItem
           type="button"
           data-adapttable-part="action-button"

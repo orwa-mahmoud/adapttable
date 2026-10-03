@@ -4,19 +4,24 @@ import test from "node:test";
 
 import postcss from "postcss";
 
+import manifest from "../package.json" with { type: "json" };
+
 const root = new URL("../", import.meta.url);
 const css = postcss.parse(await readFile(new URL("styles.css", root), "utf8"));
 
-test("every Bootstrap selector stays inside its kit boundary", () => {
+await test("every Bootstrap selector stays inside its kit boundary", () => {
   let rules = 0;
   css.walkRules((rule) => {
-    if (rule.parent?.type === "atrule" && /keyframes$/u.test(rule.parent.name))
+    if (
+      rule.parent?.type === "atrule" &&
+      rule.parent.name.endsWith("keyframes")
+    )
       return;
     rules++;
     for (const selector of rule.selectors) {
       assert.match(
         selector,
-        /^\.adapttable-ng-bootstrap(?:[\s.:#\[]|$)/u,
+        /^\.adapttable-ng-bootstrap(?:[\s.:#[]|$)/u,
         selector
       );
     }
@@ -27,39 +32,39 @@ test("every Bootstrap selector stays inside its kit boundary", () => {
   );
 });
 
-test("global keyframe names are unique to this adapter", () => {
+await test("global keyframe names are unique to this adapter", () => {
   css.walkAtRules(/keyframes$/u, (rule) =>
     assert.match(rule.params, /^adapttable-ng-bootstrap-/u)
   );
 });
 
-test("base variables apply to both themes and dark overrides stay on the host", () => {
-  const roots = css.nodes.filter(
-    (node) =>
-      node.type === "rule" &&
-      node.selectors.includes(".adapttable-ng-bootstrap")
-  );
+await test("base variables apply to both themes and dark overrides stay on the host", () => {
+  const roots = css.nodes.filter((node) => node.type === "rule");
   assert.ok(
-    roots.some((rule) =>
-      rule.nodes.some((node) => node.prop === "--bs-body-font-family")
+    roots.some(
+      (rule) =>
+        rule.selectors.includes(".adapttable-ng-bootstrap") &&
+        rule.nodes.some(
+          (node) =>
+            node.type === "decl" && node.prop === "--bs-body-font-family"
+        )
     )
   );
   let dark = false;
   css.walkRules((rule) => {
     if (rule.selector === '.adapttable-ng-bootstrap[data-bs-theme="dark"]') {
-      dark ||= rule.nodes.some((node) => node.prop === "--bs-body-bg");
+      dark ||= rule.nodes.some(
+        (node) => node.type === "decl" && node.prop === "--bs-body-bg"
+      );
     }
   });
   assert.ok(dark);
 });
 
-test("Bootstrap attribution and reproducible source version are retained", async () => {
+await test("Bootstrap attribution and reproducible source version are retained", async () => {
   const license = await readFile(new URL("BOOTSTRAP-LICENSE", root), "utf8");
   assert.match(license, /The MIT License/u);
   assert.match(license, /Bootstrap Authors/u);
-  const manifest = JSON.parse(
-    await readFile(new URL("package.json", root), "utf8")
-  );
   assert.equal(manifest.devDependencies.bootstrap, "5.3.8");
   assert.equal(manifest.exports["./styles.css"], "./styles.css");
 });

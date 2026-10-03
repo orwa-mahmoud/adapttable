@@ -36,7 +36,7 @@ for (const kit of ANGULAR_KITS) {
         value: "Planned",
         label: "Planned",
       });
-      await selectAngularOption(kit, editor, {
+      await selectAngularOption(editor, {
         value: "Blocked",
         label: "Blocked",
       });

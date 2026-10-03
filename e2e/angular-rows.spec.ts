@@ -18,12 +18,20 @@ for (const kit of ANGULAR_KITS) {
     /** Choose an entry from a row's 3-dot menu. */
     async function choose(page: Page, id: string, entry: string) {
       const target = row(page, id);
-      await target
-        .locator('[data-adapttable-part="row-actions-trigger"]')
-        .click();
-      const menu = page.locator(
+      const trigger = target.locator(
+        '[data-adapttable-part="row-actions-trigger"]'
+      );
+      await trigger.click();
+      let menu = page.locator(
         '[data-adapttable-part="row-actions-menu"]:visible'
       );
+      if (["material", "ng-bootstrap", "ngx-bootstrap"].includes(kit.key)) {
+        await expect(trigger).toHaveAttribute("aria-expanded", "true");
+        await expect(trigger).toHaveAttribute("aria-controls", /\S+/);
+        const menuId = (await trigger.getAttribute("aria-controls"))!;
+        menu = page.getByRole("menu").and(page.locator(`[id="${menuId}"]`));
+        await expect(menu).toBeVisible();
+      }
       const action = menu.locator('[data-adapttable-part="action-button"]');
       await action
         .and(

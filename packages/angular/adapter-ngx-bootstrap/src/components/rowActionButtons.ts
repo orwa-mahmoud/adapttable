@@ -30,6 +30,8 @@ import {
 import type { DataTableClassNames } from "../types";
 import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
 
+let nextRowActionsId = 0;
+
 /**
  * One row's actions: a strip of buttons, or a menu behind a "more" button.
  *
@@ -50,6 +52,7 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
   templateUrl: "./rowActionButtons.html",
 })
 export class AdaptRowActions<TRow> {
+  protected readonly menuId = `adapt-ngx-bootstrap-row-actions-${nextRowActionsId++}`;
   protected readonly overlayContainer = injectBootstrapOverlayContainer();
   /** The row. */
   readonly row = input.required<TRow>();

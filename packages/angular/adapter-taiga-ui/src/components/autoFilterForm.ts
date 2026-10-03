@@ -282,8 +282,9 @@ export class AdaptSelectFilterField<TRow> extends OptionsField<TRow> {
               <input
                 tuiCheckbox
                 type="checkbox"
-                [checked]="selected().includes(option.value)"
-                (change)="toggle(option.value, $any($event.target).checked)"
+                [ngModelOptions]="{ standalone: true }"
+                [ngModel]="selected().includes(option.value)"
+                (ngModelChange)="toggle(option.value, $event)"
               />
               {{ option.label }}
             </label>

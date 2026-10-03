@@ -154,7 +154,7 @@ describe("the unstyled Angular Columns menu", () => {
   it("closes on a press outside it", async () => {
     const { part, open, settle } = await mount();
     await open();
-    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await settle();
     expect(part("column-menu-panel")).toBeNull();
   });

@@ -279,16 +279,35 @@ describe("the unstyled table's column tools", () => {
   it("offers a sort select on a phone", async () => {
     mobile = true;
     const fixture = await mount();
-    const select = parts("sort-select")[0] as HTMLSelectElement;
-    expect([...select.options].map((option) => option.value)).toEqual([
-      "",
-      "name",
-      "country",
-    ]);
-    select.value = "country";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
+    const select = parts("sort-select")[0] as HTMLInputElement;
+    expect(select.getAttribute("role")).toBe("combobox");
+    expect(select.value).toBe("—");
+    select.click();
     await fixture.whenStable();
+    const listId = select.getAttribute("aria-controls");
+    const list = listId ? document.getElementById(listId) : null;
+    const options = [
+      ...(list?.querySelectorAll<HTMLButtonElement>("button[tuiOption]") ?? []),
+    ];
+    expect(options.map((option) => option.textContent?.trim())).toEqual([
+      "—",
+      "Name",
+      "Country",
+    ]);
+    options[2]!.click();
+    await fixture.whenStable();
+    expect(select.value).toBe("Country");
     const cards = parts("card").map((card) => card.textContent ?? "");
     expect(cards[0]).toContain("Amman");
+    select.click();
+    await fixture.whenStable();
+    const empty = document.querySelector<HTMLButtonElement>(
+      "tui-dropdown button[tuiOption]"
+    );
+    expect(empty?.textContent?.trim()).toBe("—");
+    empty!.click();
+    await fixture.whenStable();
+    expect(select.value).toBe("—");
+    expect(parts("card")[0]?.textContent).toContain("Dubai");
   });
 });

@@ -68,9 +68,9 @@ class Host {
 class SheetHost {
   readonly open = signal(false);
   readonly label = signal("Conversation");
-  readonly close = () => {
+  readonly close = vi.fn(() => {
     this.open.set(false);
-  };
+  });
 }
 const fixtures: ComponentFixture<Host>[] = [];
 async function mount(
@@ -121,7 +121,9 @@ describe("native assistant", () => {
       { draft: "Hello", send, setDraft }
     );
     expect(part("assistant-panel")?.tagName).toBe("SECTION");
-    expect(part("assistant-panel")?.className).toBe("native-conversation");
+    expect([...(part("assistant-panel")?.classList ?? [])].sort()).toEqual(
+      ["card", "native-conversation"].sort()
+    );
     const input = part<HTMLTextAreaElement>("assistant-input");
     expect(input?.tagName).toBe("TEXTAREA");
     expect(input?.value).toBe("Hello");
@@ -297,6 +299,7 @@ describe("native assistant", () => {
     fixture.componentInstance.open.set(false);
     await settle(fixture);
     expect(document.querySelector("ngb-modal-window")).toBeNull();
+    expect(fixture.componentInstance.close).not.toHaveBeenCalled();
     fixture.componentInstance.label.set("Closed conversation");
     await settle(fixture);
     expect(document.querySelector("ngb-modal-window")).toBeNull();
@@ -319,6 +322,42 @@ describe("native assistant", () => {
     expect(document.querySelector("ngb-modal-window")).toBeNull();
     expect(document.querySelector("ngb-modal-backdrop")).toBeNull();
   });
+  it("reports only native user dismissal and restores the opener through repeated sheets", async () => {
+    const fixture = TestBed.createComponent(SheetHost);
+    document.body.append(fixture.nativeElement);
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    const modal = document.querySelector<HTMLElement>("ngb-modal-window")!;
+    expect(modal).not.toBeNull();
+    expect(modal.getAttribute("role")).toBe("dialog");
+    expect(modal.getAttribute("aria-modal")).toBe("true");
+    modal.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await settle(fixture);
+    expect(fixture.componentInstance.close).toHaveBeenCalledExactlyOnceWith();
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    fixture.componentInstance.open.set(false);
+    await settle(fixture);
+    expect(fixture.componentInstance.close).toHaveBeenCalledTimes(1);
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    fixture.destroy();
+    // A native delayed show must never recreate a surface after its owner dies.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(document.querySelector("ngb-modal-window")).toBeNull();
+    expect(fixture.componentInstance.close).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+  });
   it("allows enabled disclosure activation but refuses a late selection after disconnect", async () => {
     const runSuggestion = vi.fn();
     const fixture = await mount(
@@ -335,6 +374,7 @@ describe("native assistant", () => {
     });
     trigger?.dispatchEvent(activation);
     expect(activation.defaultPrevented).toBe(false);
+    await settle(fixture);
     expect(part("assistant-examples-menu")?.getAttribute("aria-expanded")).toBe(
       "true"
     );

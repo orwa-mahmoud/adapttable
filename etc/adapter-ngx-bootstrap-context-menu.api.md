@@ -12,6 +12,7 @@ import { InputSignal } from '@angular/core';
 import { Signal } from '@angular/core';
 import { TableContextMenu } from '@adapttable/angular';
 import { TableContextMenuOptions } from '@adapttable/angular';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export class AdaptContextMenuItem {
@@ -74,6 +75,8 @@ export class AdaptContextMenuSurface {
     // (undocumented)
     protected closed(open: boolean): void;
     // (undocumented)
+    protected onKeyDown(event: KeyboardEvent): void;
+    // (undocumented)
     protected readonly overlayContainer: Signal<string | undefined>;
     readonly props: InputSignal<    {
     readonly at: {
@@ -93,6 +96,8 @@ export class AdaptContextMenuSurface {
     readonly Item: ContextMenuSlots["Item"];
     readonly Separator: ContextMenuSlots["Separator"];
     }>;
+    // (undocumented)
+    protected readonly ready: WritableSignal<boolean>;
     protected readonly separatorProps: {};
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptContextMenuSurface, "adapt-context-menu-surface", never, {

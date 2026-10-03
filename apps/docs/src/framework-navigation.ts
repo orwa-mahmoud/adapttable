@@ -1,6 +1,7 @@
 import {
   FRAMEWORK_STORAGE_KEY,
   frameworkDocsTarget,
+  normalizeFramework,
   selectedFramework,
 } from "../../../scripts/framework-navigation.mjs";
 import { ORIGIN } from "../../../scripts/site.mjs";
@@ -26,13 +27,14 @@ function updateFrameworkNavigation() {
       const glyph = framework === "angular" ? "Ⓐ" : "⚛";
       if (icon && icon.textContent !== glyph) icon.textContent = glyph;
       select.onchange = () => {
+        const targetFramework = normalizeFramework(select.value);
         try {
-          localStorage.setItem(FRAMEWORK_STORAGE_KEY, select.value);
+          localStorage.setItem(FRAMEWORK_STORAGE_KEY, targetFramework);
         } catch {
           /* Navigation does not require storage. */
         }
         location.assign(
-          frameworkDocsTarget(location.pathname, select.value).href
+          frameworkDocsTarget(location.pathname, targetFramework).href
         );
       };
     });

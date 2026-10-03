@@ -14,7 +14,9 @@ export function injectBootstrapOverlayContainer() {
   const container = signal<string | undefined>(undefined);
   let element: HTMLElement | undefined;
   afterNextRender(() => {
-    const boundary = host.nativeElement.closest(".adapttable-ngx-bootstrap");
+    const boundary = host.nativeElement.closest(
+      ".modal, .adapttable-ngx-bootstrap"
+    );
     if (!boundary) return;
     element = host.nativeElement.ownerDocument.createElement("div");
     const id = `adapt-ngx-bootstrap-overlay-${nextOverlayId++}`;

@@ -181,11 +181,15 @@ function groupEntryView(
             <input
               tuiCheckbox
               type="checkbox"
+              [ngModelOptions]="{ standalone: true }"
               data-adapttable-part="group-select"
               [attr.aria-label]="p.labels.selectAll"
-              [checked]="view.selectState() === 'all'"
-              [indeterminate]="view.selectState() === 'some'"
-              (change)="selection.toggleGroupLeaves(group.leafIds)"
+              [ngModel]="
+                view.selectState() === 'some'
+                  ? null
+                  : view.selectState() === 'all'
+              "
+              (ngModelChange)="selection.toggleGroupLeaves(group.leafIds)"
             />
           }
         } @else {
@@ -320,11 +324,15 @@ export class AdaptGroupHeaderRow {
             <input
               tuiCheckbox
               type="checkbox"
+              [ngModelOptions]="{ standalone: true }"
               data-adapttable-part="group-select"
               [attr.aria-label]="p.labels.selectAll"
-              [checked]="view.selectState() === 'all'"
-              [indeterminate]="view.selectState() === 'some'"
-              (change)="selection.toggleGroupLeaves(group.leafIds)"
+              [ngModel]="
+                view.selectState() === 'some'
+                  ? null
+                  : view.selectState() === 'all'
+              "
+              (ngModelChange)="selection.toggleGroupLeaves(group.leafIds)"
             />
           }
         }

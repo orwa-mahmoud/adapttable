@@ -31,6 +31,8 @@ import {
 import type { DataTableClassNames } from "../types";
 import { bootstrapPopperOptions } from "./bootstrapPositioning";
 
+let nextRowActionsId = 0;
+
 /**
  * One row's actions: a strip of buttons, or a menu behind a "more" button.
  *
@@ -51,6 +53,7 @@ import { bootstrapPopperOptions } from "./bootstrapPositioning";
   templateUrl: "./rowActionButtons.html",
 })
 export class AdaptRowActions<TRow> {
+  protected readonly menuId = `adapt-ng-bootstrap-row-actions-${nextRowActionsId++}`;
   protected readonly popperOptions = bootstrapPopperOptions;
   /** The row. */
   readonly row = input.required<TRow>();

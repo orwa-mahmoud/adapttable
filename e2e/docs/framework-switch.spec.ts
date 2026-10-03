@@ -112,3 +112,70 @@ for (const width of [320, 390]) {
     await expect(page.locator(SWITCH).first()).toBeVisible();
   });
 }
+
+test("landing switches preserve original markup without parsing mutable DOM text", async ({
+  page,
+}) => {
+  await page.goto("/?framework=react");
+  const copy = page.locator(".hero__sub[data-angular-copy]");
+  const originalText = await copy.innerText();
+  const emphasis = await copy.locator("em").elementHandle();
+  expect(emphasis).not.toBeNull();
+  await copy.evaluate((element) => {
+    element.dataset.reactCopy =
+      '<span data-injected-copy="true">not original copy</span>';
+  });
+  const select = page.locator("[data-landing-framework]");
+  for (let repeat = 0; repeat < 2; repeat += 1) {
+    await select.selectOption("angular");
+    await expect(copy).toHaveText(
+      (await copy.getAttribute("data-angular-copy")) ?? ""
+    );
+    await select.selectOption("react");
+    await expect(copy).toHaveText(originalText);
+    expect(
+      await emphasis!.evaluate(
+        (element) => element === document.querySelector(".hero__sub em")
+      )
+    ).toBe(true);
+    await expect(page.locator("[data-injected-copy]")).toHaveCount(0);
+  }
+  await page.goBack();
+  await expect(select).toHaveValue("angular");
+  await page.goForward();
+  await expect(select).toHaveValue("react");
+  await page.evaluate(() =>
+    window.dispatchEvent(new PageTransitionEvent("pageshow"))
+  );
+  expect(await emphasis!.evaluate((element) => element.isConnected)).toBe(true);
+});
+
+test("malformed landing and documentation options stay on the site", async ({
+  page,
+}) => {
+  const invalid = "/attacker.invalid";
+  await page.goto("/?framework=angular");
+  await page.locator("[data-landing-framework]").evaluate((select, value) => {
+    select.append(new Option("Unsupported", value));
+  }, invalid);
+  await page.locator("[data-landing-framework]").selectOption(invalid);
+  await expect(page).toHaveURL(`${DOCS_URL}/?framework=react`);
+  await expect(page.locator("[data-landing-framework]")).toHaveValue("react");
+  expect(
+    await page.evaluate(() => localStorage.getItem("adapttable-framework"))
+  ).toBe("react");
+  await expect(page.locator('a[href^="//attacker.invalid"]')).toHaveCount(0);
+  await page.goto("/angular/sorting/");
+  await page
+    .locator(SWITCH)
+    .first()
+    .evaluate((select, value) => {
+      select.append(new Option("Unsupported", value));
+    }, invalid);
+  await page.locator(SWITCH).first().selectOption(invalid);
+  await expect(page).toHaveURL(`${DOCS_URL}/react/sorting/`);
+  await expect(page.locator(SWITCH).first()).toHaveValue("react");
+  expect(
+    await page.evaluate(() => localStorage.getItem("adapttable-framework"))
+  ).toBe("react");
+});

@@ -334,12 +334,26 @@ describe("the unstyled Angular filters", () => {
     const panel = part("filters-panel");
     expect(panel).not.toBeNull();
     expect(part("filters-backdrop")).not.toBeNull();
-    expect(document.activeElement).toBe(panel);
+    expect(
+      panel === document.activeElement ||
+        panel?.contains(document.activeElement)
+    ).toBe(true);
     const last = part<HTMLButtonElement>("filters-done");
     last!.focus();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Tab",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Tab",
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
     );
     part<HTMLButtonElement>("filters-done")!.click();
     await settle();
@@ -365,7 +379,10 @@ describe("the unstyled Angular filters", () => {
     if (!trigger) throw new Error("trigger is not rendered");
     trigger.querySelector("button")!.click();
     await settle();
-    expect(part("filter-header-cell", trigger)).not.toBeNull();
+    expect(parts("filter-header-cell")).toHaveLength(1);
+    expect(
+      part("filter-header-cell")?.closest("[data-ngx-bootstrap-overlay]")
+    ).not.toBeNull();
     await type(part("filter-select", field("City")), "Amman");
     expect(ids()).toEqual(["2"]);
     expect(trigger.querySelector("button")?.hasAttribute("data-active")).toBe(
@@ -389,14 +406,31 @@ describe("the unstyled Angular filters", () => {
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
     first!.focus();
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Tab",
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
     );
     expect(document.activeElement).toBe(last);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Tab",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     expect(document.activeElement).toBe(first);
     part<HTMLButtonElement>("filters-button")!.focus();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Tab",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     expect(document.activeElement).toBe(first);
     expect(parts("filters-panel")).toHaveLength(1);
   });

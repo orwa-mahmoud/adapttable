@@ -1,5 +1,8 @@
+import type { TableLabels } from "@adapttable/angular";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { MatCheckbox } from "@angular/material/checkbox";
+import { By } from "@angular/platform-browser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptMaterialDialog } from "./components/materialDialog";
@@ -14,12 +17,15 @@ import { AdaptDataTable } from "./dataTable";
     [columns]="columns"
     [rowKey]="rowKey"
     [urlSync]="false"
-    [forceMobile]="false"
+    [forceMobile]="mobile()"
+    [labels]="labels()"
     [selectable]="true"
     tableLabel="People"
   />`,
 })
 class TableHost {
+  readonly mobile = signal(false);
+  readonly labels = signal<TableLabels>({});
   readonly rows = [{ id: "ada", name: "Ada" }];
   readonly columns = [
     {
@@ -100,6 +106,127 @@ describe("Material control ownership", () => {
     await fixture.whenStable();
     expect(checkbox.checked).toBe(true);
   });
+  for (const mobile of [false, true]) {
+    it(`keeps localized selection names on ${mobile ? "mobile" : "desktop"} native inputs`, async () => {
+      const fixture = TestBed.createComponent(TableHost);
+      fixture.componentInstance.mobile.set(mobile);
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+      const inputs = () => [
+        ...(
+          fixture.nativeElement as HTMLElement
+        ).querySelectorAll<HTMLInputElement>(".adapt-material-checkbox"),
+      ];
+      const names = () =>
+        inputs().map((input) => input.getAttribute("aria-label"));
+      expect(names()).toEqual(
+        mobile ? ["Select row"] : ["Select all", "Select row"]
+      );
+      fixture.componentInstance.labels.set({
+        selectAll: "Tout sélectionner",
+        selectRow: "Sélectionner la ligne",
+      });
+      await fixture.whenStable();
+      expect(names()).toEqual(
+        mobile
+          ? ["Sélectionner la ligne"]
+          : ["Tout sélectionner", "Sélectionner la ligne"]
+      );
+      inputs().at(-1)!.click();
+      await fixture.whenStable();
+      expect(inputs().at(-1)!.checked).toBe(true);
+      expect(names()).toEqual(
+        mobile
+          ? ["Sélectionner la ligne"]
+          : ["Tout sélectionner", "Sélectionner la ligne"]
+      );
+      fixture.componentInstance.labels.set({});
+      await fixture.whenStable();
+      expect(names()).toEqual(
+        mobile ? ["Select row"] : ["Select all", "Select row"]
+      );
+    });
+  }
+
+  it("lets Material retain, clear and reapply the native input's accessible name and description", async () => {
+    const fixture = TestBed.createComponent(AdaptSelectionCheckbox);
+    const change = vi.fn();
+    const keydown = vi.fn();
+    const attrs = {
+      checked: false,
+      "aria-label": "Select row",
+      "aria-labelledby": "row-name",
+      "aria-describedby": "selection-help",
+      "data-adapttable-part": "group-select",
+      onChange: change,
+      onKeyDown: keydown,
+    };
+    fixture.componentRef.setInput("attrs", attrs);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const material = fixture.debugElement.query(By.directive(MatCheckbox))
+      .componentInstance as MatCheckbox;
+    const input = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLInputElement>("input")!;
+    const expectNaming = (
+      label: string | null,
+      labelledby: string | null,
+      description: string | null
+    ) => {
+      expect(material.ariaLabel).toBe(label ?? "");
+      expect(material.ariaLabelledby).toBe(labelledby);
+      expect(material.ariaDescribedby).toBe(description ?? "");
+      expect(input.getAttribute("aria-label")).toBe(label);
+      expect(input.getAttribute("aria-labelledby")).toBe(labelledby);
+      expect(input.getAttribute("aria-describedby")).toBe(description ?? "");
+      expect(input.getAttribute("data-adapttable-part")).toBe("group-select");
+    };
+    expectNaming("Select row", "row-name", "selection-help");
+    input.click();
+    await fixture.whenStable();
+    expect(change).toHaveBeenCalledTimes(1);
+    expect(input.checked).toBe(true);
+    expectNaming("Select row", "row-name", "selection-help");
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+    expect(keydown).toHaveBeenCalledTimes(1);
+
+    fixture.componentRef.setInput("attrs", {
+      checked: true,
+      disabled: true,
+      "data-adapttable-part": "group-select",
+      onChange: change,
+    });
+    await fixture.whenStable();
+    expectNaming(null, null, null);
+    expect(input.disabled).toBe(true);
+    input.click();
+    expect(change).toHaveBeenCalledTimes(1);
+
+    fixture.componentRef.setInput("attrs", {
+      ...attrs,
+      "aria-label": "Sélectionner la ligne",
+      "aria-labelledby": "translated-row-name",
+      "aria-describedby": "translated-selection-help",
+    });
+    await fixture.whenStable();
+    expect(input.disabled).toBe(false);
+    expectNaming(
+      "Sélectionner la ligne",
+      "translated-row-name",
+      "translated-selection-help"
+    );
+    input.click();
+    await fixture.whenStable();
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(input.checked).toBe(true);
+    expectNaming(
+      "Sélectionner la ligne",
+      "translated-row-name",
+      "translated-selection-help"
+    );
+  });
+
   it("preserves mixed state, refs, class hooks and one toggle per Material event", async () => {
     const fixture = TestBed.createComponent(AdaptSelectionCheckbox);
     const change = vi.fn();
@@ -118,6 +245,9 @@ describe("Material control ownership", () => {
     const input = (
       fixture.nativeElement as HTMLElement
     ).querySelector<HTMLInputElement>("input")!;
+    const material = fixture.debugElement.query(By.directive(MatCheckbox))
+      .componentInstance as MatCheckbox;
+    expect(material.ariaLabel).toBe("Select all");
     expect(input.indeterminate).toBe(true);
     expect(input.getAttribute("aria-label")).toBe("Select all");
     expect(input.classList.contains("custom-checkbox")).toBe(true);

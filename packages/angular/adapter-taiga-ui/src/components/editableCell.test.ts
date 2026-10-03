@@ -524,6 +524,7 @@ describe("AdaptCheckboxCellEditor", () => {
     const choices = [
       ...group!.querySelectorAll<HTMLInputElement>("input[tuiCheckbox]"),
     ];
+    expect(choices.every((choice) => !choice.disabled)).toBe(true);
     expect(choices.map((choice) => choice.checked)).toEqual([false, true]);
     choices[0]!.click();
     await fixture.whenStable();
@@ -575,6 +576,7 @@ describe("AdaptNativeCellEditor multi-select drafts", () => {
     const checks = [
       ...root.querySelectorAll<HTMLInputElement>("input[tuiCheckbox]"),
     ];
+    expect(checks.every((check) => !check.disabled)).toBe(true);
     expect(checks.map((check) => check.checked)).toEqual([false, true]);
 
     checks[0]!.click();

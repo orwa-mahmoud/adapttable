@@ -96,11 +96,20 @@ for (const source of ANGULAR_DOCS) {
   const route = `/angular/${basename}/`;
   // These two Angular guides have framework-neutral counterparts at root.
   // Keep this expectation independent of the switch's routing function.
+  const angularOnly = [
+    "material",
+    "ng-bootstrap",
+    "spartan",
+    "taiga-ui",
+    "angular-cdk",
+    "ngx-bootstrap",
+    "aria",
+  ].includes(basename);
   const reactRoute = ["data-tiers", "custom-table-source"].includes(basename)
     ? `/${basename}/`
     : `/react/${basename}/`;
 
-  test(`${route} renders its guide and switches to its real counterpart`, async ({
+  test(`${route} renders its guide and verifies its framework destination`, async ({
     page,
   }) => {
     const response = await page.goto(route, { waitUntil: "domcontentloaded" });
@@ -126,26 +135,37 @@ for (const source of ANGULAR_DOCS) {
     );
     await expect(article.locator("h2").first()).toBeVisible();
 
-    const frameworks = page.getByRole("navigation", {
-      name: "Framework documentation",
-      exact: true,
-    });
-    await expect(
-      frameworks.getByRole("link", { name: "Angular", exact: true })
-    ).toHaveAttribute("aria-current", "page");
-    const react = frameworks.getByRole("link", { name: "React", exact: true });
-    await expect(react).toHaveAttribute("href", reactRoute);
-    await react.click();
-    await expectGuide(page, `${basename}.md`, reactRoute);
-
-    const angular = page
-      .getByRole("navigation", {
-        name: "Framework documentation",
-        exact: true,
-      })
-      .getByRole("link", { name: "Angular", exact: true });
-    await expect(angular).toHaveAttribute("href", route);
-    await angular.click();
+    const framework = page.locator("[data-framework-select]:visible").first();
+    await expect(framework).toHaveValue("angular");
+    const destination = angularOnly
+      ? `/react/getting-started/?unavailable=${basename}`
+      : reactRoute;
+    await expect(framework.locator('option[value="react"]')).toHaveAttribute(
+      "data-href",
+      destination
+    );
+    await framework.selectOption("react");
+    if (angularOnly) {
+      await expect(page).toHaveURL(`${DOCS_URL}${destination}`);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+        TITLES_BY_SOURCE["getting-started.md"]!
+      );
+      await expect(page.locator("[data-framework-notice]")).toContainText(
+        "not available for React"
+      );
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        `${ORIGIN}/react/getting-started/`
+      );
+      await page.goBack();
+    } else {
+      await expectGuide(page, `${basename}.md`, reactRoute);
+      await expect(framework).toHaveValue("react");
+      await expect(
+        framework.locator('option[value="angular"]')
+      ).toHaveAttribute("data-href", route);
+      await framework.selectOption("angular");
+    }
     await expectGuide(page, source, route);
   });
 }

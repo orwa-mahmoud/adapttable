@@ -5,6 +5,7 @@ import { featuresOf, SHOWCASE_ADAPTERS } from "../apps/showcase/matrix.mjs";
 import {
   frameworkDemoTarget,
   frameworkDocsTarget,
+  normalizeFramework,
   selectedFramework,
 } from "./framework-navigation.mjs";
 
@@ -15,6 +16,47 @@ const adapters = [
   { key: "ng-zorro", framework: "angular" },
 ];
 const features = () => [{ slug: "editing" }, { slug: "filtering" }];
+for (const value of [
+  "",
+  "vue",
+  "angular ",
+  "/attacker.invalid",
+  "\\attacker.invalid",
+  "javascript:alert(1)",
+]) {
+  it(`normalizes unsupported framework ${JSON.stringify(value)} before building destinations`, () => {
+    assert.equal(normalizeFramework(value), "react");
+    for (const path of [
+      "/angular/filtering/",
+      "/concepts/",
+      "/angular/material/",
+    ]) {
+      const actual = frameworkDocsTarget(path, value);
+      assert.deepEqual(actual, frameworkDocsTarget(path, "react"));
+      assert.equal(
+        new URL(actual.href, "https://adapttable.local").origin,
+        "https://adapttable.local"
+      );
+    }
+    for (const path of [
+      "/angular/demo/",
+      "/angular/demo/all-options/",
+      "/angular/demo/ng-zorro/editing/",
+    ]) {
+      for (const inventory of [adapters, []]) {
+        const actual = frameworkDemoTarget(path, value, inventory, features);
+        assert.deepEqual(
+          actual,
+          frameworkDemoTarget(path, "react", inventory, features)
+        );
+        assert.equal(
+          new URL(actual.href, "https://adapttable.local").origin,
+          "https://adapttable.local"
+        );
+      }
+    }
+  });
+}
 describe("framework navigation", () => {
   it("gives explicit routes precedence over remembered selection", () => {
     assert.equal(selectedFramework("/react/filtering/", "angular"), "react");

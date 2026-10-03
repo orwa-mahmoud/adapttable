@@ -48,7 +48,7 @@ for (const kit of ANGULAR_KITS) {
 
     test("adds a level from the panel's select", async ({ page }) => {
       await page.goto(PAGE);
-      await selectAngularOption(kit, part(page, "grouping-add"), {
+      await selectAngularOption(part(page, "grouping-add"), {
         value: "load",
         label: "Load",
       });

@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { ɵAdaptTaigaLabels, ɵTAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import { describe, expect, it } from "vitest";
@@ -8,7 +7,10 @@ import { describe, expect, it } from "vitest";
 import { AdaptTaigaLabels } from "./selectLabels";
 import { TAIGA_CONTROLS } from "./taigaControls";
 
-const packageDir = fileURLToPath(new URL("../", import.meta.url));
+const packageDir = process.env.ADAPTER_PACKAGE_DIR;
+if (!packageDir || !isAbsolute(packageDir)) {
+  throw new Error("ADAPTER_PACKAGE_DIR must point to the Taiga package root");
+}
 const entryPoints = readdirSync(packageDir, { withFileTypes: true })
   .filter(
     (entry) =>

@@ -37,6 +37,7 @@ export default defineConfig({
     ],
   },
   test: {
+    env: { ADAPTER_PACKAGE_DIR: packageDir },
     globals: true,
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],

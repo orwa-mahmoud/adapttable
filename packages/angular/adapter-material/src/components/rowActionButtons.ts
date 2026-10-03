@@ -19,9 +19,10 @@ import {
   Component,
   computed,
   input,
+  viewChild,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
-import { MatMenuModule } from "@angular/material/menu";
+import { MatMenuModule, MatMenuTrigger } from "@angular/material/menu";
 
 import type { DataTableClassNames } from "../types";
 
@@ -71,6 +72,8 @@ export class AdaptRowActions<TRow> {
     resolveRenderer(this.render(), this.context())
   );
 
+  private readonly menu = viewChild(MatMenuTrigger);
+
   protected readonly items = computed(() =>
     visibleRowActions(this.actions(), this.row()).map((action) => {
       const reason = resolveDisabledReason(action.disabledReason?.(this.row()));
@@ -85,6 +88,7 @@ export class AdaptRowActions<TRow> {
 
   protected run(event: Event, action: RowAction<TRow>): void {
     event.stopPropagation();
+    this.menu()?.closeMenu();
     runRowAction(action, this.row(), this.confirm(), this.labels().cancel);
   }
 }

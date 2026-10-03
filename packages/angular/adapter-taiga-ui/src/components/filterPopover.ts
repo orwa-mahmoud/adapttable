@@ -1,10 +1,12 @@
 import { type FilterOverlaySlotProps } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   type ElementRef,
   input,
+  signal,
   type TemplateRef,
   viewChild,
 } from "@angular/core";
@@ -34,7 +36,7 @@ import { TAIGA_CONTROLS } from "../taigaControls";
     @let p = props();
     <span
       #anchor
-      [tuiDropdown]="content"
+      [tuiDropdown]="triggerReady() ? content : null"
       [tuiDropdownOpen]="p.open"
       (tuiDropdownOpenChange)="onOpenChange($event)"
       data-taiga-part="filters-anchor"
@@ -89,6 +91,15 @@ export class AdaptFilterPopover {
 
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected readonly triggerReady = signal(false);
+
+  constructor() {
+    // The trigger is an externally declared template. Activate the native
+    // dropdown only after it is mounted, so Taiga assigns popup ARIA to the
+    // focusable button rather than the temporarily empty anchor span.
+    afterNextRender(() => this.triggerReady.set(true));
+  }
+
   protected onOpenChange(open: boolean): void {
     if (open || !this.props().open) return;
     this.props().onClose();

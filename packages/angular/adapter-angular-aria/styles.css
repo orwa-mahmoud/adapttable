@@ -139,10 +139,12 @@
 }
 .adapt-aria [data-adapttable-part="cards"] {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
 }
 .adapt-aria
   :is([data-adapttable-part="card"], [data-adapttable-part="summary-card"]) {
+  min-inline-size: 0;
   background: var(--adapt-aria-surface);
   border: 1px solid var(--adapt-aria-line);
   border-radius: 0.6rem;
@@ -156,6 +158,10 @@
 }
 .adapt-aria [data-adapttable-part="card-label"] {
   font-weight: 600;
+}
+.adapt-aria [data-adapttable-part="card-value"] {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 .adapt-aria-popup,
 .adapt-aria

@@ -11,6 +11,7 @@ import {
 } from "@adapttable/angular";
 import { ɵinjectBootstrapOverlayContainer as injectBootstrapOverlayContainer } from "@adapttable/ngx-bootstrap";
 import {
+  afterEveryRender,
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
@@ -19,6 +20,7 @@ import {
   type ElementRef,
   inject,
   input,
+  signal,
   viewChild,
 } from "@angular/core";
 import {
@@ -96,7 +98,7 @@ export class AdaptContextMenuSeparator {
       [style.top.px]="props().at.y"
       [isAnimated]="false"
       [container]="overlayContainer()"
-      [isOpen]="true"
+      [isOpen]="ready()"
       [autoClose]="true"
       [insideClick]="true"
       (isOpenChange)="closed($event)"
@@ -112,6 +114,7 @@ export class AdaptContextMenuSeparator {
         class="dropdown-menu"
         *dropdownMenu
         #menu
+        (keydown)="onKeyDown($event)"
         role="menu"
         tabindex="-1"
         data-adapttable-part="context-menu"
@@ -136,6 +139,7 @@ export class AdaptContextMenuSeparator {
 })
 export class AdaptContextMenuSurface {
   protected readonly overlayContainer = injectBootstrapOverlayContainer();
+  protected readonly ready = signal(false);
   /** The chrome's surface props. */
   readonly props = input.required<{
     readonly at: { readonly x: number; readonly y: number };
@@ -157,8 +161,16 @@ export class AdaptContextMenuSurface {
   protected readonly separatorProps = SEPARATOR_PROPS;
 
   constructor() {
-    afterNextRender(() => {
-      this.entries()[0]?.focus();
+    // The portal boundary is selected after rendering. Opening before then
+    // makes ngx-bootstrap create an inline view that cannot move with it.
+    afterNextRender(() => this.ready.set(true));
+    let focused = false;
+    afterEveryRender(() => {
+      const first = this.entries()[0];
+      if (!focused && first) {
+        focused = true;
+        first.focus();
+      }
     });
   }
 
@@ -166,10 +178,44 @@ export class AdaptContextMenuSurface {
     if (!open) this.props().onClose();
   }
 
+  protected onKeyDown(event: KeyboardEvent): void {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      this.props().onClose();
+      return;
+    }
+    const entries = this.entries();
+    if (!entries.length) return;
+    const current = entries.indexOf(
+      this.menu()?.nativeElement.ownerDocument.activeElement as HTMLElement
+    );
+    let next: number;
+    switch (event.key) {
+      case "ArrowDown":
+        next = (current + 1) % entries.length;
+        break;
+      case "ArrowUp":
+        next = (current - 1 + entries.length) % entries.length;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = entries.length - 1;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    entries[next]?.focus();
+  }
+
   private entries(): HTMLElement[] {
     return [
       ...(this.menu()?.nativeElement.querySelectorAll<HTMLElement>(
-        '[role="menuitem"]'
+        '[role="menuitem"]:not([disabled]):not([aria-disabled="true"])'
       ) ?? []),
     ];
   }

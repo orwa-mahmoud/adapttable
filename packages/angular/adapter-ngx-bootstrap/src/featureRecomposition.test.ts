@@ -589,7 +589,8 @@ describe("mounted feature recomposition (unstyled Angular)", () => {
     await mounted.settle();
     await open();
     const panel = one(document, part("filters-panel"));
-    expect(panel.tagName).toBe("DIALOG");
+    expect(panel.tagName).toBe("DIV");
+    expect(panel.getAttribute("role")).toBe("dialog");
     expect(panel.getAttribute("aria-modal")).toBe("true");
     expect(document.querySelector(part("filters-backdrop"))).not.toBeNull();
     expect(document.querySelector(part("filters-popover"))).toBeNull();

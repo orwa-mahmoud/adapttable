@@ -238,6 +238,8 @@ export class AdaptAssistantLanguageChip {
   host: { style: "display: contents" },
   template: `<div
     dropdown
+    class="dropdown"
+    [isDisabled]="props().disabled === true"
     [isAnimated]="false"
     [container]="overlayContainer()"
     [autoClose]="true"
@@ -262,6 +264,12 @@ export class AdaptAssistantLanguageChip {
       class="dropdown-menu"
       *dropdownMenu
       data-ngx-bootstrap-part="assistant-examples-list"
+      (keydown.escape)="
+        $event.preventDefault();
+        $event.stopPropagation();
+        dropdown.hide();
+        trigger.focus()
+      "
       [style.max-height]="props().maxHeight"
       style="overflow-y:auto"
     >

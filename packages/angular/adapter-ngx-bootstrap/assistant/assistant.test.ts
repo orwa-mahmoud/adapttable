@@ -68,9 +68,9 @@ class Host {
 class SheetHost {
   readonly open = signal(false);
   readonly label = signal("Conversation");
-  readonly close = () => {
+  readonly close = vi.fn(() => {
     this.open.set(false);
-  };
+  });
 }
 const fixtures: ComponentFixture<Host>[] = [];
 async function mount(
@@ -121,7 +121,9 @@ describe("native assistant", () => {
       { draft: "Hello", send, setDraft }
     );
     expect(part("assistant-panel")?.tagName).toBe("SECTION");
-    expect(part("assistant-panel")?.className).toBe("native-conversation");
+    expect([...(part("assistant-panel")?.classList ?? [])].sort()).toEqual(
+      ["card", "native-conversation"].sort()
+    );
     const input = part<HTMLTextAreaElement>("assistant-input");
     expect(input?.tagName).toBe("TEXTAREA");
     expect(input?.value).toBe("Hello");
@@ -168,12 +170,13 @@ describe("native assistant", () => {
     const details = part<HTMLElement>("assistant-examples");
     expect(details?.classList.contains("dropdown")).toBe(true);
     expect(part("assistant-examples-menu")?.tagName).toBe("BUTTON");
+    expect(part("assistant-examples-list")).toBeNull();
+    part("assistant-examples-menu")!.click();
+    await settle(fixture);
     expect(part("assistant-examples-list")?.tagName).toBe("DIV");
     expect(part("assistant-examples-item")?.textContent).toContain(
       "Highest first"
     );
-    part("assistant-examples-menu")!.click();
-    await settle(fixture);
     const escape = new KeyboardEvent("keydown", {
       key: "Escape",
       bubbles: true,
@@ -220,10 +223,11 @@ describe("native assistant", () => {
     expect(part<HTMLButtonElement>("assistant-examples-menu")?.disabled).toBe(
       true
     );
-    expect(part<HTMLButtonElement>("assistant-examples-item")?.disabled).toBe(
-      true
+    expect(part("assistant-examples-menu")?.getAttribute("aria-expanded")).toBe(
+      "false"
     );
-    part("assistant-examples-item")?.click();
+    expect(part("assistant-examples-list")).toBeNull();
+    expect(part("assistant-examples-item")).toBeNull();
     expect(runSuggestion).not.toHaveBeenCalled();
   });
   it("shows a hand-sized native launcher and restores it on close", async () => {
@@ -307,6 +311,7 @@ describe("native assistant", () => {
     fixture.componentInstance.open.set(false);
     await settle(fixture);
     expect(document.querySelector("adapt-bootstrap-modal .modal")).toBeNull();
+    expect(fixture.componentInstance.close).not.toHaveBeenCalled();
     fixture.componentInstance.label.set("Closed conversation");
     await settle(fixture);
     expect(document.querySelector("adapt-bootstrap-modal .modal")).toBeNull();
@@ -335,6 +340,44 @@ describe("native assistant", () => {
       document.querySelector("adapt-bootstrap-modal .modal-backdrop")
     ).toBeNull();
   });
+  it("reports only native user dismissal and restores the opener through repeated sheets", async () => {
+    const fixture = TestBed.createComponent(SheetHost);
+    document.body.append(fixture.nativeElement);
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    const modal = document.querySelector<HTMLElement>(
+      "adapt-bootstrap-modal .modal"
+    )!;
+    expect(modal).not.toBeNull();
+    expect(modal.getAttribute("role")).toBe("dialog");
+    expect(modal.getAttribute("aria-modal")).toBe("true");
+    modal.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await settle(fixture);
+    expect(fixture.componentInstance.close).toHaveBeenCalledExactlyOnceWith();
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    fixture.componentInstance.open.set(false);
+    await settle(fixture);
+    expect(fixture.componentInstance.close).toHaveBeenCalledTimes(1);
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    fixture.destroy();
+    // A native delayed show must never recreate a surface after its owner dies.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(document.querySelector("adapt-bootstrap-modal .modal")).toBeNull();
+    expect(fixture.componentInstance.close).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+  });
   it("allows enabled disclosure activation but refuses a late selection after disconnect", async () => {
     const runSuggestion = vi.fn();
     const fixture = await mount(
@@ -351,6 +394,7 @@ describe("native assistant", () => {
     });
     trigger?.dispatchEvent(activation);
     expect(activation.defaultPrevented).toBe(false);
+    await settle(fixture);
     expect(part("assistant-examples-menu")?.getAttribute("aria-expanded")).toBe(
       "true"
     );
@@ -364,13 +408,21 @@ describe("native assistant", () => {
     expect(part("assistant-examples-menu")?.getAttribute("aria-expanded")).toBe(
       "true"
     );
+    const item = part<HTMLButtonElement>("assistant-examples-item");
+    expect(item).not.toBeNull();
+    expect(item!.disabled).toBe(false);
     fixture.componentInstance.view.update((view) => ({
       ...view,
       status: "disconnected",
     }));
     await settle(fixture);
-    const item = part<HTMLButtonElement>("assistant-examples-item");
-    expect(item?.disabled).toBe(true);
+    expect(part<HTMLButtonElement>("assistant-examples-menu")!.disabled).toBe(
+      true
+    );
+    expect(part("assistant-examples-menu")?.getAttribute("aria-expanded")).toBe(
+      "false"
+    );
+    expect(part("assistant-examples-list")).toBeNull();
     // A dispatched event can still reach a disabled native element. The
     // component must recheck current availability before running a command.
     item?.dispatchEvent(new MouseEvent("click", { bubbles: true }));

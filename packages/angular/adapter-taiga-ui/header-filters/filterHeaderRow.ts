@@ -136,10 +136,9 @@ class AdaptHeaderFilterRange {
               <input
                 tuiCheckbox
                 type="checkbox"
-                [checked]="props().selected.includes(option.value)"
-                (change)="
-                  props().onToggle(option.value, $any($event.target).checked)
-                "
+                [ngModelOptions]="{ standalone: true }"
+                [ngModel]="props().selected.includes(option.value)"
+                (ngModelChange)="props().onToggle(option.value, $event)"
               />
               {{ option.label }}
             </label>

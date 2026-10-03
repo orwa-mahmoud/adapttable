@@ -124,6 +124,8 @@ describe("the Taiga UI Angular table", () => {
       for (const control of controls) {
         expect(nativeCheckboxes).toContain(control);
         expect(control.type).toBe("checkbox");
+        expect(control.disabled).toBe(false);
+        expect(control.classList.contains("_readonly")).toBe(false);
         expect(control.closest("tui-textfield")).toBeNull();
       }
     }
@@ -202,7 +204,8 @@ describe("the Taiga UI Angular table", () => {
     const { fixture, part, parts, settle } = await mount();
     parts<HTMLInputElement>("checkbox")[1]!.click();
     await settle();
-    expect(fixture.componentInstance.changes.at(-1)).toEqual(["1"]);
+    expect(fixture.componentInstance.changes).toEqual([["1"]]);
+    expect(part<HTMLInputElement>("checkbox")!.indeterminate).toBe(true);
     part<HTMLInputElement>("checkbox")!.click();
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual([
@@ -212,6 +215,8 @@ describe("the Taiga UI Angular table", () => {
       "4",
       "5",
     ]);
+    expect(fixture.componentInstance.changes).toHaveLength(2);
+    expect(part<HTMLInputElement>("checkbox")!.indeterminate).toBe(false);
     fixture.componentInstance.selected.set(["3"]);
     await settle();
     expect(
@@ -246,6 +251,7 @@ describe("the Taiga UI Angular table", () => {
     cards[0]?.querySelector<HTMLInputElement>("input")!.click();
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual(["1"]);
+    expect(fixture.componentInstance.changes).toEqual([["1"]]);
     expect(parts("card")[0]?.hasAttribute("data-selected")).toBe(true);
   });
 });

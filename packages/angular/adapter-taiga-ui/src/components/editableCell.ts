@@ -132,13 +132,14 @@ class AdaptEditCellButton {
         #el
         data-adapttable-part="edit-cell-editor"
         type="checkbox"
+        [ngModelOptions]="{ standalone: true }"
         [attr.aria-label]="p.label"
         [attr.aria-invalid]="v['aria-invalid'] ?? null"
         [attr.aria-describedby]="v['aria-describedby'] ?? null"
         [attr.aria-busy]="v['aria-busy'] ?? null"
         [attr.data-conflict]="v['data-conflict'] ?? null"
-        [checked]="isDraftChecked(p.draft)"
-        (change)="commitBoolean($any($event.target).checked)"
+        [ngModel]="isDraftChecked(p.draft)"
+        (ngModelChange)="commitBoolean($event)"
         (keydown)="onKeyDown($event)"
       />
     } @else if (isMultiSelectEditor(p.editor)) {
@@ -158,8 +159,9 @@ class AdaptEditCellButton {
             ><input
               tuiCheckbox
               type="checkbox"
-              [checked]="readMultiDraft(p.draft).includes(option.value)"
-              (change)="toggleOption(option.value)"
+              [ngModelOptions]="{ standalone: true }"
+              [ngModel]="readMultiDraft(p.draft).includes(option.value)"
+              (ngModelChange)="toggleOption(option.value)"
             />{{ option.label }}</label
           >
         }
@@ -270,9 +272,10 @@ export class AdaptNativeCellEditor implements AfterViewInit {
         tuiCheckbox
         #el
         type="checkbox"
+        [ngModelOptions]="{ standalone: true }"
         [value]="p.value"
-        [checked]="p.checked"
-        (change)="p.onToggle()"
+        [ngModel]="p.checked"
+        (ngModelChange)="p.onToggle()"
         (keydown)="p.onKeyDown($event)"
       />
       {{ p.label }}

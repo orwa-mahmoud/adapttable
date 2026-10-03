@@ -1,14 +1,17 @@
 /** Scoped lifecycle bridge for ngx-bootstrap's native modal directive. */
 import { NgTemplateOutlet } from "@angular/common";
 import {
+  afterNextRender,
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   type ComponentRef,
   DestroyRef,
+  ElementRef,
   inject,
   input,
   output,
+  Renderer2,
   type TemplateRef,
   viewChild,
   ViewContainerRef,
@@ -40,7 +43,8 @@ import { ModalDirective } from "ngx-bootstrap/modal";
       tabindex="-1"
       role="dialog"
       aria-modal="true"
-      (onHidden)="closed.emit()"
+      (onHide)="dismissing = true"
+      (onHidden)="hidden()"
       (keydown.tab)="trapFocus($event)"
     >
       <div class="modal-dialog modal-dialog-scrollable">
@@ -59,23 +63,61 @@ class AdaptBootstrapModal {
   readonly dir = input<"ltr" | "rtl">("ltr");
   readonly closed = output<void>();
   private readonly modal = viewChild.required(ModalDirective);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly destroy = inject(DestroyRef);
+  protected dismissing = false;
+  protected hidden(): void {
+    // Native destruction emits onHidden too, without a user dismissal.
+    if (this.dismissing) this.closed.emit();
+  }
+
+  constructor() {
+    // Open only while the rendered view is alive; config.show schedules an
+    // uncancellable timer that can reopen a destroyed surface.
+    afterNextRender(() => {
+      this.modal().show();
+      const document = this.element.nativeElement.ownerDocument;
+      this.destroy.onDestroy(
+        this.renderer.listen(document, "focusin", (event: FocusEvent) => {
+          const surface =
+            this.element.nativeElement.querySelector<HTMLElement>(
+              ".modal.show"
+            );
+          if (
+            !surface ||
+            !(event.target instanceof Node) ||
+            surface.contains(event.target)
+          )
+            return;
+          // Only the topmost native modal owns containment; nested menus portal
+          // inside their modal boundary and remain part of this focus region.
+          const top = [
+            ...document.querySelectorAll<HTMLElement>(
+              '.modal.show[aria-modal="true"]'
+            ),
+          ].at(-1);
+          if (top !== surface) return;
+          const first = this.controls(surface)[0];
+          (first ?? surface).focus();
+        })
+      );
+    });
+  }
+
   protected readonly config = {
     animated: false,
     backdrop: false,
     keyboard: true,
     focus: true,
-    show: true,
+    show: false,
   };
 
   /** The directive handles Escape and restore; cycle Tab inside its local surface. */
   protected trapFocus(event: Event): void {
     const keyboard = event as KeyboardEvent;
     const surface = event.currentTarget as HTMLElement;
-    const controls = [
-      ...surface.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex="0"]'
-      ),
-    ].filter((element) => !element.closest('[hidden], [aria-hidden="true"]'));
+    const controls = this.controls(surface);
     const first = controls[0];
     const last = controls.at(-1);
     if (!first || !last) {
@@ -92,6 +134,14 @@ class AdaptBootstrapModal {
       keyboard.preventDefault();
       first.focus();
     }
+  }
+
+  private controls(surface: HTMLElement): HTMLElement[] {
+    return [
+      ...surface.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex="0"]'
+      ),
+    ].filter((element) => !element.closest('[hidden], [aria-hidden="true"]'));
   }
 
   hide(): void {

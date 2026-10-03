@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { ANGULAR_KITS, angularPart } from "./angular-kit";
+import { ANGULAR_KITS, angularPart, checkAngularCheckbox } from "./angular-kit";
 
 for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
@@ -38,7 +38,10 @@ for (const kit of ANGULAR_KITS) {
 
     test("a selected export contains no unchecked rows", async ({ page }) => {
       await page.goto(`${PAGE}?scope=selected`);
-      await part(page, "row").first().getByRole("checkbox").check();
+      await checkAngularCheckbox(
+        kit,
+        part(page, "row").first().getByRole("checkbox")
+      );
       const [download] = await Promise.all([
         page.waitForEvent("download"),
         part(page, "export-csv-button").click(),

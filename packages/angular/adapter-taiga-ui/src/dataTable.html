@@ -52,12 +52,14 @@
         @if (v.table.isMobile() && v.table.sortByOptions().length > 0) {
           <label>
             {{ v.table.labels().sortBy }}
-            <tui-textfield [stringify]="v.table.sortByOptions() | taigaLabels"
+            <tui-textfield
+              [stringify]="v.table.sortByOptions() | taigaLabels: { '': '—' }"
               ><input
                 tuiSelect
                 data-taiga-part="sort-select"
                 [attr.aria-label]="v.table.labels().sortBy"
                 [ngModel]="v.table.sortBy() ?? ''"
+                [ngModelOptions]="{ standalone: true }"
                 (ngModelChange)="sortBy($any({ target: { value: $event } }))"
               /><tui-data-list *tuiDropdown>
                 <button tuiOption type="button" value="">—</button>
@@ -73,6 +75,7 @@
         @if (v.filters; as f) {
           <ng-template #filtersTrigger>
             <button
+              #tuiDropdownHost
               tuiButton
               size="s"
               appearance="secondary"

@@ -17,7 +17,7 @@ export class AdaptTaigaLabels implements PipeTransform {
         });
         if (typeof item === "object" && item !== null && "label" in item)
           return String(item.label);
-        return String(value ?? "");
+        return String(labels?.[String(value)] ?? value ?? "");
       }
       const mapped = (options as Readonly<Record<string, unknown>>)[
         String(value)

@@ -1088,9 +1088,12 @@ export class AdaptFilterDrawer {
 
 // @internal
 export class AdaptFilterPopover {
+    constructor();
     // (undocumented)
     protected onOpenChange(open: boolean): void;
     readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
+    // (undocumented)
+    protected readonly triggerReady: WritableSignal<boolean>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterPopover, "adapt-filter-popover", never, {
         "props": {

@@ -1,4 +1,4 @@
-import { AdaptAttrs, AdaptIcon, expandChevronIcon } from "@adapttable/angular";
+import { AdaptIcon, expandChevronIcon } from "@adapttable/angular";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,7 +20,7 @@ import { TAIGA_CONTROLS } from "../taigaControls";
  */
 @Component({
   selector: "adapt-pagination-footer",
-  imports: [...TAIGA_CONTROLS, AdaptAttrs, AdaptIcon],
+  imports: [...TAIGA_CONTROLS, AdaptIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `

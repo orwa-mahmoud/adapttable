@@ -3,6 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 import {
   ANGULAR_KITS,
   angularPart,
+  checkAngularCheckbox,
   expectAngularSelection,
   selectAngularOption,
 } from "./angular-kit";
@@ -44,7 +45,7 @@ for (const kit of ANGULAR_KITS) {
       await expect(log).toHaveText(
         "Activate a person to see the host callback."
       );
-      await cards.first().getByRole("checkbox").check();
+      await checkAngularCheckbox(kit, cards.first().getByRole("checkbox"));
       await expect(cards.first()).toHaveAttribute("data-selected", "");
       await expect(log).toHaveText(
         "Activate a person to see the host callback."
@@ -74,7 +75,7 @@ for (const kit of ANGULAR_KITS) {
       const checkbox = part(page, "card").first().getByRole("checkbox");
       await expect(checkbox).toHaveAccessibleName(/.+/);
       await expect(checkbox).not.toHaveAccessibleName("Select row");
-      await checkbox.check();
+      await checkAngularCheckbox(kit, checkbox);
       await expect(part(page, "card").first()).toHaveAttribute(
         "data-selected",
         ""
@@ -86,12 +87,7 @@ for (const kit of ANGULAR_KITS) {
       const select = part(page, "sort-select");
       await expect(select).toBeVisible();
       await expectAngularSelection(kit, select, { value: "", label: "—" });
-      await selectAngularOption(
-        kit,
-        select,
-        { value: "load", label: "Load" },
-        6
-      );
+      await selectAngularOption(select, { value: "load", label: "Load" }, 6);
       await expectAngularSelection(kit, select, {
         value: "load",
         label: "Load",

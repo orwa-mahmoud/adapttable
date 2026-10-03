@@ -32,6 +32,21 @@ test("every clickable native host uses a Taiga component", () => {
   }
 });
 
+test("interactive Taiga checkboxes participate in standalone Angular forms", () => {
+  for (const file of sources) {
+    for (const match of read(file).matchAll(
+      /<input\b[^>]*\btuiCheckbox\b[^>]*>/g
+    )) {
+      assert.match(match[0], /\[ngModel\]=/, `${file}: ${match[0]}`);
+      assert.match(
+        match[0],
+        /\[ngModelOptions\]="\{ standalone: true \}"/,
+        `${file}: ${match[0]}`
+      );
+    }
+  }
+});
+
 test("kit imports only its Angular binding and its own feature entries", () => {
   for (const file of sources) {
     for (const match of read(file).matchAll(

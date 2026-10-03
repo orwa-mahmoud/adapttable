@@ -76,8 +76,9 @@ export class AdaptChecklistButton {
       <input
         tuiCheckbox
         type="checkbox"
-        [checked]="p.checked"
-        (change)="p.onChange($any($event.target).checked)"
+        [ngModelOptions]="{ standalone: true }"
+        [ngModel]="p.checked"
+        (ngModelChange)="p.onChange($event)"
       />
       {{ p.label }}
       <span data-adapttable-part="filter-checklist-count">{{ p.count }}</span>

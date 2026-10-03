@@ -9,7 +9,9 @@
     "paths": {
       "@adapttable/ng-bootstrap": ["./src/index.ts"],
       "@adapttable/ng-bootstrap/*": ["./*/index.ts"]
-    }
+    },
+    "allowJs": true,
+    "checkJs": true
   },
   "angularCompilerOptions": {
     "strictTemplates": true,
@@ -58,7 +60,8 @@
     "virtualize",
     "vitest.config.ts",
     "vitest.setup.ts",
-    "assistant"
+    "assistant",
+    "scripts/**/*.mjs"
   ],
   "exclude": ["node_modules", "dist", "coverage"]
 }

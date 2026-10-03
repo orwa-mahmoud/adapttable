@@ -157,6 +157,97 @@ export function angularPart(
   );
 }
 
+/** Brain's button commits through Angular's render; native inputs update during the click. */
+export async function checkAngularCheckbox(
+  kit: AngularKit,
+  control: Locator
+): Promise<void> {
+  if (kit.key === "spartan") {
+    await expect(control).toHaveJSProperty("tagName", "BUTTON");
+    await expect(control).toHaveAttribute("role", "checkbox");
+    await expect(control).toHaveAttribute("aria-checked", "false");
+    await control.click();
+    await expect(control).toBeChecked();
+    return;
+  }
+  await control.check();
+}
+
+/** A mixed Brain checkbox exposes ARIA; native checkboxes expose indeterminate. */
+export async function expectAngularCheckboxMixed(
+  kit: AngularKit,
+  control: Locator,
+  mixed: boolean
+): Promise<void> {
+  if (kit.key === "spartan") {
+    if (mixed) await expect(control).toHaveAttribute("aria-checked", "mixed");
+    else
+      await expect(control).toHaveAttribute("aria-checked", /^(true|false)$/);
+    return;
+  }
+  await expect(control).toHaveJSProperty("indeterminate", mixed);
+}
+
+/** Taiga's real backdrop is a fixed pseudo-element on its native drawer. */
+export async function expectAngularDrawerBackdrop(
+  kit: AngularKit,
+  page: Page,
+  drawer: Locator
+): Promise<void> {
+  if (kit.key !== "taiga-ui") {
+    await expect(angularPart(kit, page, "filters-backdrop")).toBeVisible();
+    return;
+  }
+  await expect(drawer).toHaveJSProperty("tagName", "TUI-DRAWER");
+  await expect(drawer).toHaveClass(/(?:^|\s)_overlay(?:\s|$)/);
+  await expect
+    .poll(() =>
+      drawer.evaluate((panel) => {
+        const backdrop = getComputedStyle(panel, "::before");
+        return (
+          backdrop.content === '""' &&
+          backdrop.position === "fixed" &&
+          backdrop.visibility === "visible" &&
+          backdrop.display !== "none" &&
+          backdrop.pointerEvents !== "none" &&
+          Number(backdrop.opacity) > 0 &&
+          backdrop.backgroundColor !== "transparent" &&
+          backdrop.backgroundColor !== "rgba(0, 0, 0, 0)" &&
+          Number.parseFloat(backdrop.top) <= -innerHeight &&
+          Number.parseFloat(backdrop.bottom) <= -innerHeight &&
+          Number.parseFloat(backdrop.left) <= -innerWidth &&
+          Number.parseFloat(backdrop.right) <= -innerWidth
+        );
+      })
+    )
+    .toBe(true);
+}
+
+/** Hit the native pseudo-backdrop outside the visible Taiga drawer content. */
+export async function dismissTaigaDrawerBackdrop(
+  page: Page,
+  drawer: Locator
+): Promise<void> {
+  const bounds = (await drawer.boundingBox())!;
+  const viewport = page.viewportSize()!;
+  const left = Math.max(0, bounds.x);
+  const right = Math.max(0, viewport.width - bounds.x - bounds.width);
+  expect(Math.max(left, right)).toBeGreaterThan(16);
+  const point = {
+    x: left >= right ? left / 2 : bounds.x + bounds.width + right / 2,
+    y: viewport.height / 2,
+  };
+  await expect
+    .poll(() =>
+      drawer.evaluate(
+        (panel, point) => document.elementFromPoint(point.x, point.y) === panel,
+        point
+      )
+    )
+    .toBe(true);
+  await page.mouse.click(point.x, point.y);
+}
+
 /** Parts can identify the select host or its actual, focusable input. */
 export function angularCombobox(control: Locator): Locator {
   return control
@@ -212,7 +303,6 @@ export async function openAngularOptions(control: Locator): Promise<Locator> {
 
 /** Exercise each kit's real control without assigning its model directly. */
 export async function selectAngularOption(
-  kit: AngularKit,
   control: Locator,
   option: SelectOption,
   optionCount?: number

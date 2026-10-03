@@ -6,12 +6,62 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  Directive,
+  ElementRef,
+  inject,
   input,
+  type OnChanges,
+  type OnInit,
+  Renderer2,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { PaginationComponent } from "ngx-bootstrap/pagination";
 
 import type { TableView } from "../dataTable";
+
+/**
+ * Put semantics on ngx-bootstrap's actionable anchor, not its template span.
+ * @internal
+ */
+@Directive({ selector: "[adaptPaginationLink]" })
+export class AdaptPaginationLink implements OnChanges, OnInit {
+  readonly state = input.required<{
+    readonly part: string;
+    readonly label: string;
+    readonly disabled?: boolean;
+    readonly current?: boolean;
+  }>({ alias: "adaptPaginationLink" });
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly destroy = inject(DestroyRef);
+
+  ngOnChanges(): void {
+    const link = this.element.nativeElement.parentElement;
+    if (!link) return;
+    const state = this.state();
+    this.renderer.setAttribute(link, "role", "button");
+    this.renderer.setAttribute(link, "data-ngx-bootstrap-part", state.part);
+    this.renderer.setAttribute(link, "aria-label", state.label);
+    this.renderer.setAttribute(link, "aria-disabled", String(!!state.disabled));
+    this.renderer.setAttribute(link, "tabindex", state.disabled ? "-1" : "0");
+    if (state.current) this.renderer.setAttribute(link, "aria-current", "page");
+    else this.renderer.removeAttribute(link, "aria-current");
+  }
+
+  ngOnInit(): void {
+    const link = this.element.nativeElement.parentElement;
+    if (!link) return;
+    // Enter already activates an anchor. A button role also promises Space.
+    this.destroy.onDestroy(
+      this.renderer.listen(link, "keydown", (event: KeyboardEvent) => {
+        if (event.key !== " ") return;
+        event.preventDefault();
+        if (!this.state().disabled) link.click();
+      })
+    );
+  }
+}
 
 /**
  * Prev/next pager with a rows-per-page select.
@@ -20,7 +70,13 @@ import type { TableView } from "../dataTable";
  */
 @Component({
   selector: "adapt-pagination-footer",
-  imports: [AdaptAttrs, AdaptIcon, PaginationComponent, FormsModule],
+  imports: [
+    AdaptAttrs,
+    AdaptIcon,
+    AdaptPaginationLink,
+    PaginationComponent,
+    FormsModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
@@ -79,27 +135,33 @@ import type { TableView } from "../dataTable";
         />
         <ng-template #previous let-disabled="disabled">
           <span
-            data-ngx-bootstrap-part="page-prev"
-            [attr.aria-label]="v.table.labels().previousPage"
-            [attr.aria-disabled]="disabled"
+            [adaptPaginationLink]="{
+              part: 'page-prev',
+              label: v.table.labels().previousPage,
+              disabled,
+            }"
           >
             <svg [adaptIcon]="previousIcon()"></svg>
           </span>
         </ng-template>
         <ng-template #next let-disabled="disabled">
           <span
-            data-ngx-bootstrap-part="page-next"
-            [attr.aria-label]="v.table.labels().nextPage"
-            [attr.aria-disabled]="disabled"
+            [adaptPaginationLink]="{
+              part: 'page-next',
+              label: v.table.labels().nextPage,
+              disabled,
+            }"
           >
             <svg [adaptIcon]="nextIcon()"></svg>
           </span>
         </ng-template>
         <ng-template #page let-page let-currentPage="currentPage">
           <span
-            data-ngx-bootstrap-part="page-number"
-            [attr.aria-label]="v.table.labels().goToPage(page.number)"
-            [attr.aria-current]="page.number === currentPage ? 'page' : null"
+            [adaptPaginationLink]="{
+              part: page.text === '...' ? 'page-ellipsis' : 'page-number',
+              label: v.table.labels().goToPage(page.number),
+              current: page.number === currentPage,
+            }"
             >{{ page.text }}</span
           >
         </ng-template>

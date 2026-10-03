@@ -21,6 +21,9 @@ import { MatCheckbox, MatCheckboxModule } from "@angular/material/checkbox";
       [checked]="attrs().checked === true"
       [indeterminate]="attrs().indeterminate === true"
       [disabled]="attrs().disabled === true"
+      [aria-label]="textAttribute('aria-label')"
+      [aria-labelledby]="textAttribute('aria-labelledby') || null"
+      [aria-describedby]="textAttribute('aria-describedby')"
       [adaptAttrs]="inputAttrs()"
       [adaptAttrsTarget]="inputElement"
       (change)="change()"
@@ -42,23 +45,36 @@ export class AdaptSelectionCheckbox {
       "input"
     ) ?? null;
 
+  /** Material owns these attributes on its native input in every render. */
+  protected textAttribute(name: string): string {
+    const value = this.attrs()[name];
+    return typeof value === "string" ? value : "";
+  }
+
   /** Material owns change dispatch; refs, keyboard handlers and native mixed state remain intact. */
-  protected readonly inputAttrs = computed((): Attrs => ({
-    ...this.attrs(),
-    onChange: undefined,
-    "data-adapttable-part":
-      this.part() === "checkbox"
-        ? undefined
-        : (this.part() ?? this.attrs()["data-adapttable-part"]),
-    class: [
-      "mdc-checkbox__native-control",
-      "adapt-material-checkbox",
-      this.attrs().class,
-      this.className(),
-    ]
-      .filter(Boolean)
-      .join(" "),
-  }));
+  protected readonly inputAttrs = computed((): Attrs => {
+    const attrs = { ...this.attrs() };
+    // Leave Material as the sole writer of its native accessibility inputs.
+    delete attrs["aria-label"];
+    delete attrs["aria-labelledby"];
+    delete attrs["aria-describedby"];
+    return {
+      ...attrs,
+      onChange: undefined,
+      "data-adapttable-part":
+        this.part() === "checkbox"
+          ? undefined
+          : (this.part() ?? attrs["data-adapttable-part"]),
+      class: [
+        "mdc-checkbox__native-control",
+        "adapt-material-checkbox",
+        attrs.class,
+        this.className(),
+      ]
+        .filter(Boolean)
+        .join(" "),
+    };
+  });
 
   protected change(): void {
     const change = this.attrs().onChange;

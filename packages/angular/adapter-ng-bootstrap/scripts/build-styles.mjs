@@ -55,22 +55,22 @@ const compiled = sass.compileString(source, {
 const css = postcss.parse(compiled);
 const scope = ".adapttable-ng-bootstrap";
 css.walkRules((rule) => {
-  if (rule.parent?.type === "atrule" && /keyframes$/u.test(rule.parent.name))
+  if (rule.parent?.type === "atrule" && rule.parent.name.endsWith("keyframes"))
     return;
   rule.selectors = [
     ...new Set(
       rule.selectors.flatMap((selector) => {
-        if (selector === ":root" || selector === "body") return scope;
+        if (selector === ":root" || selector === "body") return [scope];
         if (selector === "[data-bs-theme=light]")
-          return `${scope}[data-bs-theme="light"]`;
+          return [`${scope}[data-bs-theme="light"]`];
         if (selector === "[data-bs-theme=dark]")
-          return `${scope}[data-bs-theme="dark"]`;
+          return [`${scope}[data-bs-theme="dark"]`];
         if (selector.startsWith("[data-bs-theme=dark] "))
           return [
             `${scope}[data-bs-theme="dark"] ${selector.slice("[data-bs-theme=dark] ".length)}`,
             `${scope} ${selector}`,
           ];
-        return `${scope} ${selector}`;
+        return [`${scope} ${selector}`];
       })
     ),
   ];

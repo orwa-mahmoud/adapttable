@@ -23,7 +23,7 @@ import { TAIGA_CONTROLS } from "../taigaControls";
  * browser's own controls.
  */
 
-/** Closed add control: the shown placeholder plus the native chevron. */
+/** Preferred textfield width: the shown placeholder plus the kit's chevron. */
 function addControlWidth(label: string): string {
   return `calc(${String(label.length)}ch + 2.75rem)`;
 }
@@ -142,16 +142,17 @@ class AdaptGroupingChip {
   host: { style: "display: contents" },
   template: `
     @let p = props();
-    <tui-textfield [stringify]="p.options | taigaLabels"
+    <tui-textfield
+      [stringify]="p.options | taigaLabels"
+      [style.inline-size]="
+        p['data-adapttable-part'] === 'grouping-add' ? width(p.label) : null
+      "
       ><input
         tuiSelect
         [attr.aria-label]="p.label"
         [attr.data-adapttable-part]="p['data-adapttable-part']"
         [disabled]="p.disabled ?? false"
         [ngModel]="p.value"
-        [style.width]="
-          p['data-adapttable-part'] === 'grouping-add' ? width(p.label) : null
-        "
         (ngModelChange)="p.onChange($event)"
       /><tui-data-list *tuiDropdown>
         @if (p["data-adapttable-part"] === "grouping-add") {
@@ -252,13 +253,14 @@ class AdaptGroupingAggregationRemove {
   host: { style: "display: contents" },
   template: `
     @let p = props();
-    <tui-textfield [stringify]="available() | taigaLabels"
+    <tui-textfield
+      [stringify]="available() | taigaLabels"
+      [style.inline-size]="width(p.label)"
       ><input
         tuiSelect
         [attr.aria-label]="p.label"
         [attr.data-adapttable-part]="p['data-adapttable-part']"
         [disabled]="p.disabled === true || available().length === 0"
-        [style.width]="width(p.label)"
         (ngModelChange)="choose($any({ value: $event }))"
         [ngModel]="null"
       /><tui-data-list *tuiDropdown>

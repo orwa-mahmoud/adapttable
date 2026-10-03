@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import {
   ɵbootstrapModal,
@@ -11,7 +10,9 @@ import { describe, expect, it } from "vitest";
 import { bootstrapModal } from "./components/bootstrapModal";
 import { injectBootstrapOverlayContainer } from "./components/bootstrapOverlay";
 
-const packageDir = fileURLToPath(new URL("../", import.meta.url));
+const packageDir = process.env.ADAPTER_PACKAGE_DIR;
+if (!packageDir)
+  throw new Error("The test config must provide ADAPTER_PACKAGE_DIR");
 const entryPoints = readdirSync(packageDir, { withFileTypes: true })
   .filter(
     (entry) =>

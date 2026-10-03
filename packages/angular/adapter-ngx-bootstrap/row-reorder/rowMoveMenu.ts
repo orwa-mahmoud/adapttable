@@ -8,11 +8,13 @@ import {
 } from "@adapttable/angular";
 import { ɵinjectBootstrapOverlayContainer as injectBootstrapOverlayContainer } from "@adapttable/ngx-bootstrap";
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   effect,
   type ElementRef,
   input,
+  signal,
   viewChild,
 } from "@angular/core";
 import {
@@ -58,6 +60,7 @@ const REORDER_BUTTON = {
       [autoClose]="true"
       [insideClick]="true"
       #details="bs-dropdown"
+      [isOpen]="ready() && p.confirmation !== undefined"
       data-adapttable-part="row-move-menu"
       style="display: inline-block; position: relative"
     >
@@ -131,6 +134,7 @@ const REORDER_BUTTON = {
 })
 export class AdaptRowMoveMenu {
   protected readonly overlayContainer = injectBootstrapOverlayContainer();
+  protected readonly ready = signal(false);
   /** Menu label, targets and optional confirmation. */
   readonly props = input.required<RowMoveMenuSlotProps>();
 
@@ -144,10 +148,7 @@ export class AdaptRowMoveMenu {
   private readonly trigger = viewChild<ElementRef<HTMLElement>>("trigger");
 
   constructor() {
-    effect(() => {
-      const confirmation = this.props().confirmation;
-      if (confirmation) this.details()?.show();
-    });
+    afterNextRender(() => this.ready.set(true));
     effect((onCleanup) => {
       const confirmation = this.props().confirmation;
       if (!confirmation) return;

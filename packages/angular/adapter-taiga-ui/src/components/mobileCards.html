@@ -76,10 +76,14 @@
             />
           }
           @if (!summary && v.selection; as selection) {
-            <input tuiCheckbox type="checkbox"
-                data-taiga-part="checkbox"
-                [class]="classes.checkbox"
-                [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
+            <input
+              tuiCheckbox
+              type="checkbox"
+              data-taiga-part="checkbox"
+              [class]="classes.checkbox"
+              [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
+              [ngModel]="selection.isSelected(rowId(entry.row))"
+              [ngModelOptions]="{ standalone: true }"
             />
           }
           @if (v.rowDetail && !summary) {

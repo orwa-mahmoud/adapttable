@@ -28,9 +28,10 @@ import { TAIGA_CONTROLS } from "../taigaControls";
     <input
       tuiCheckbox
       type="checkbox"
+      [ngModelOptions]="{ standalone: true }"
       [attr.aria-label]="props().label"
-      [checked]="props().checked"
-      (change)="props().onToggle()"
+      [ngModel]="props().checked"
+      (ngModelChange)="props().onToggle()"
     />
   `,
 })

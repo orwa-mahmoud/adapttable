@@ -288,7 +288,8 @@ jobs:
     needs: [detect, build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runUnit == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Angular adapters run sequentially; retain enough time to report every kit.
+    timeout-minutes: ${{ matrix.name == 'angular' && 45 || 15 }}
     strategy:
       fail-fast: false
       matrix:
@@ -334,7 +335,7 @@ jobs:
           # bootstrap 5s, server/cli/i18n ~1s each. antd alone sets the floor.
           # angular runs alone: its suites compile with Angular's compiler,
           # not the React plugin the other lanes share.
-          pnpm test:coverage $f $AFFECTED --concurrency=1
+          pnpm test:coverage $f $AFFECTED --concurrency=1 --continue=dependencies-successful
 
   unit:
     name: Unit
@@ -567,8 +568,8 @@ jobs:
         env:
           SHOWCASE_SKIP_BUILD: "1"
           DOCS_SKIP_BUILD: "1"
-      - name: Upload report on failure
-        if: ${{ failure() }}
+      - name: Upload browser report
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report-${{ matrix.shard }}

@@ -252,7 +252,14 @@ describe("the unstyled Angular row actions", () => {
     if (!menu) throw new Error("menu is not rendered");
     part("row-actions-trigger")!.click();
     await settle();
-    parts<HTMLButtonElement>("action-button", menu)[0]!.click();
+    const buttons = parts<HTMLButtonElement>("action-button");
+    expect(buttons.map((button) => button.getAttribute("role"))).toEqual([
+      "menuitem",
+      "menuitem",
+    ]);
+    expect(buttons[0]!.closest("[data-ngx-bootstrap-overlay]")).not.toBeNull();
+    expect(buttons[1]!.disabled).toBe(true);
+    buttons[0]!.click();
     await settle();
     expect(edits).toEqual(["1"]);
     expect(part("row-actions-trigger")?.getAttribute("aria-expanded")).toBe(

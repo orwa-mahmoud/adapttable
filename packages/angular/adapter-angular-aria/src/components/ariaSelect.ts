@@ -48,6 +48,7 @@ export interface AriaChoice {
       {{ display() }} <span aria-hidden="true">⌄</span>
     </div>
     <ng-template
+      cdkConnectedOverlay
       [cdkConnectedOverlayOrigin]="trigger.element"
       [cdkConnectedOverlayOpen]="expanded()"
       [cdkConnectedOverlayHasBackdrop]="false"

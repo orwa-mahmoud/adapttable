@@ -590,9 +590,9 @@ describe("mounted feature recomposition (Taiga UI Angular)", () => {
     await mounted.settle();
     await open();
     const panel = one(document, part("filters-panel"));
-    expect(panel.tagName).toBe("DIALOG");
+    expect(panel.tagName).toBe("TUI-DRAWER");
     expect(panel.getAttribute("aria-modal")).toBe("true");
-    expect(document.querySelector(part("filters-backdrop"))).not.toBeNull();
+    expect(panel.classList.contains("_overlay")).toBe(true);
     expect(document.querySelector(part("filters-popover"))).toBeNull();
     const field = one<HTMLInputElement>(panel, part("filter-input"));
     expect(field.value).toBe("Ada");

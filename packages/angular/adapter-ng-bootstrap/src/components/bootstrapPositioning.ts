@@ -6,4 +6,11 @@ export const bootstrapPopperOptions = (
 ): Partial<Options> => ({
   ...options,
   strategy: "fixed",
+  // Keep coordinates viewport-relative on long, scrolled tables. Adaptive
+  // bottom/right styles depend on the offset parent's height and can place a
+  // fixed dropdown beyond the visible viewport.
+  modifiers: [
+    ...(options.modifiers ?? []),
+    { name: "computeStyles", options: { adaptive: false } },
+  ],
 });

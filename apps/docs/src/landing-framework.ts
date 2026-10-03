@@ -2,6 +2,7 @@ import {
   FRAMEWORK_STORAGE_KEY,
   frameworkDemoTarget,
   frameworkDocsTarget,
+  normalizeFramework,
   selectedFramework,
 } from "../../../scripts/framework-navigation.mjs";
 import { ORIGIN } from "../../../scripts/site.mjs";
@@ -10,7 +11,9 @@ import { featuresOf, SHOWCASE_ADAPTERS } from "../../showcase/matrix.mjs";
 const select = document.querySelector<HTMLSelectElement>(
   "[data-landing-framework]"
 );
+const reactCopy = new WeakMap<HTMLElement, ChildNode[]>();
 function updateLandingFramework(framework: string) {
+  framework = normalizeFramework(framework);
   if (select) select.value = framework;
   const icon = document.querySelector("[data-landing-icon]");
   if (icon) icon.textContent = framework === "angular" ? "Ⓐ" : "⚛";
@@ -27,10 +30,11 @@ function updateLandingFramework(framework: string) {
   document
     .querySelectorAll<HTMLElement>("[data-angular-copy]")
     .forEach((element) => {
-      element.dataset.reactCopy ??= element.innerHTML;
+      if (!reactCopy.has(element))
+        reactCopy.set(element, Array.from(element.childNodes));
       if (framework === "angular")
         element.textContent = element.dataset.angularCopy ?? "";
-      else element.innerHTML = element.dataset.reactCopy;
+      else element.replaceChildren(...reactCopy.get(element)!);
     });
   document.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((link) => {
     link.dataset.frameworkHref ??= link.href;
@@ -77,9 +81,10 @@ function restoreLandingFramework() {
 if (select)
   select.onchange = () => {
     const url = new URL(location.href);
-    url.searchParams.set("framework", select.value);
+    const framework = normalizeFramework(select.value);
+    url.searchParams.set("framework", framework);
     history.pushState(null, "", url);
-    updateLandingFramework(select.value);
+    updateLandingFramework(framework);
   };
 restoreLandingFramework();
 window.addEventListener("pageshow", restoreLandingFramework);
