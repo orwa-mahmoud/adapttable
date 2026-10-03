@@ -379,6 +379,11 @@ describe("already-open native CDK overlay direction", () => {
     const first = await mount();
     const second = await mount();
     try {
+      // TestBed removes prior root hosts when it creates the next fixture.
+      // Attach both owners before opening their independently owned portals.
+      document.body.append(first.element, second.element);
+      expect(first.element.isConnected).toBe(true);
+      expect(second.element.isConnected).toBe(true);
       const triggers = first.fixture.debugElement.queryAll(
         By.directive(CdkMenuTrigger)
       );
@@ -433,6 +438,7 @@ describe("already-open native CDK overlay direction", () => {
       expect(secondViews.panel.isConnected).toBe(true);
       expect(secondViews.overlay.hostElement.dir).toBe("rtl");
       first.fixture.destroy();
+      expect(second.element.isConnected).toBe(true);
       expect(secondViews.panel.isConnected).toBe(true);
       expect(first.element.querySelector(".cdk-overlay-container")).toBeNull();
     } finally {
