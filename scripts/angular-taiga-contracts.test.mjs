@@ -103,10 +103,12 @@ test("overlays and scoped themes belong to Taiga", () => {
   );
 });
 
-test("unreleased package remains private with compatible native peers", () => {
+test("release package is public with compatible native peers", () => {
   const manifest = JSON.parse(read(path.join(root, "package.json")));
-  assert.equal(manifest.private, true);
-  assert.equal(manifest.version, "0.0.0");
+  assert.notEqual(manifest.private, true);
+  assert.equal(manifest.publishConfig?.access, "public");
+  // Changesets owns the initial bump and subsequent release versions.
+  assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
   assert.equal(manifest.peerDependencies["@taiga-ui/core"], "5.26.0");
   assert.equal(manifest.peerDependencies["@taiga-ui/kit"], "5.26.0");
 });

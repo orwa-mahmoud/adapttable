@@ -6,25 +6,26 @@ labels; this kit owns buttons, fields, checkboxes, chips, cards, menus and overl
 
 ## Availability and compatibility
 
-This package is implemented in the repository but remains **private, version
-0.0.0** while integration and release preparation are completed. It is not
-available on npm. Package publication is a separate step.
+`@adapttable/angular-material` is being prepared for its first public **0.1.0**
+release. Registry installation requires the owner-controlled npm publication
+to complete; release preparation does not confirm npm availability.
 
 The initial integration targets Angular **22**, Angular Material **22.2.1**
 and CDK **22.2.1**. Material requires the same CDK version. Keep Material and
 CDK together; AdaptTable packages have independent versions. Node.js must meet
 Angular 22's supported floor: 22.22.3+, 24.15.0+, or Node 26+.
 
-From a pnpm workspace containing this package:
+After publication completes, install in an existing Angular 22 application:
 
 ```sh
-pnpm add @adapttable/angular-material@workspace:* @adapttable/angular@workspace:* @angular/material@22.2.1 @angular/cdk@22.2.1
+npm install @adapttable/angular-material@0.1.0 @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.0
 ```
 
 The host must also provide compatible `@angular/common`, `@angular/core`,
 `@angular/forms`, `@angular/platform-browser` and `rxjs` peers. Use the host's
 existing Angular application setup; this adapter does not install a second
-Angular runtime or import another adapter.
+Angular runtime or import another adapter. No adapter-specific application
+provider is required.
 
 ## Styling
 

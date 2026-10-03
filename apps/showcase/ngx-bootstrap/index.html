@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
-    <meta name="description" content="Explore the private ngx-bootstrap Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export." />
+    <meta name="description" content="Explore the ngx-bootstrap adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation." />
     <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/ngx-bootstrap/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
     <meta property="og:title" content="ngx-bootstrap Angular data table examples — AdaptTable" />
-    <meta property="og:description" content="Explore the private ngx-bootstrap Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export." />
+    <meta property="og:description" content="Explore the ngx-bootstrap adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation." />
     <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/ngx-bootstrap/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="ngx-bootstrap Angular data table examples — AdaptTable" />
-    <meta name="twitter:description" content="Explore the private ngx-bootstrap Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export." />
+    <meta name="twitter:description" content="Explore the ngx-bootstrap adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Explore the private ngx-bootstrap Angular adapter preview: filtering, editing, grouping, pivot, virtualization and export.","url":"https://adapttable.orwamahmoud.com/angular/demo/ngx-bootstrap/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Explore the ngx-bootstrap adapter for Angular: filtering, editing, grouping, pivot, virtualization and export. First public 0.1.0 release in preparation.","url":"https://adapttable.orwamahmoud.com/angular/demo/ngx-bootstrap/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -174,10 +174,11 @@
         <p class="at-fallback__kicker">@adapttable/ngx-bootstrap</p>
         <h1>AdaptTable for ngx-bootstrap</h1>
         <p>ngx-bootstrap controls and overlays with optional features and host-owned data.</p>
-        <p>This adapter is a private workspace preview, not published to npm. Read its Angular setup guide before using the local package.</p>
-        <p>A framework-neutral @adapttable/core provides the data engine; @adapttable/angular connects it to Angular. The visible controls are native ngx-bootstrap controls carrying the shared data-adapttable-part hooks.</p>
+        <p>This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.</p>
+        <p>A framework-neutral @adapttable/core provides the data engine; @adapttable/angular connects it to Angular. The visible controls are ngx-bootstrap overlays and Bootstrap-styled native controls carrying the shared data-adapttable-part hooks.</p>
         <h2>Install</h2>
-        <pre><code>Private workspace preview: @adapttable/ngx-bootstrap (not on npm)</code></pre>
+        <pre><code># After 0.1.0 publication completes; follow the kit setup guide
+pnpm add @adapttable/ngx-bootstrap@0.1.0 @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0</code></pre>
         <h2>Every feature, on its own page</h2>
         <ul>
           <li><a href="./filtering/">Filtering in ngx-bootstrap</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>

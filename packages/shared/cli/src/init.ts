@@ -86,7 +86,7 @@ function chakraVersionWarning(
   return `   Note: @chakra-ui/react ${chakraSpec} detected — @adapttable/chakra targets Chakra v3. Upgrade @chakra-ui/react to v3, or use @adapttable/unstyled.`;
 }
 
-/** Published install targets, preserving peers the Angular host already owns. */
+/** Registry install targets, preserving peers the Angular host already owns. */
 function missingPackages(
   info: KitInfo,
   framework: Framework,
@@ -117,13 +117,13 @@ function logHostSetup(io: InitIO, framework: Framework, info: KitInfo): void {
       "ngx-bootstrap":
         "Use zoneless Angular 22 and import @adapttable/ngx-bootstrap/styles.css. Do not load global Bootstrap CSS or JavaScript. See /angular/ngx-bootstrap/.",
       "angular-material":
-        "Private workspace preview: configure an Angular Material Sass theme and import @adapttable/angular-material/styles.css plus @angular/cdk/overlay-prebuilt.css. See /angular/material/.",
+        "Configure an Angular Material Sass theme and import @adapttable/angular-material/styles.css plus @angular/cdk/overlay-prebuilt.css. See /angular/material/.",
       "ng-bootstrap":
-        "Private workspace preview: import @angular/localize/init and @adapttable/ng-bootstrap/styles.css. Do not load global Bootstrap CSS. See /angular/ng-bootstrap/.",
+        "Import @angular/localize/init and @adapttable/ng-bootstrap/styles.css. Do not load global Bootstrap CSS or JavaScript. See /angular/ng-bootstrap/.",
       spartan:
-        "Private workspace preview: process @adapttable/spartan/styles.css through Tailwind 4 and import @angular/cdk/overlay-prebuilt.css. See /angular/spartan/.",
+        "Process @adapttable/spartan/styles.css through Tailwind 4 and import @angular/cdk/overlay-prebuilt.css. See /angular/spartan/.",
       "taiga-ui":
-        "Private workspace preview: register provideAdaptTaiga(), configure Less and serve matching Taiga icons from assets/taiga-ui/icons. See /angular/taiga-ui/.",
+        "Register provideAdaptTaiga() from @adapttable/taiga-ui in bootstrap providers, configure Less and serve matching @taiga-ui/icons@5.26.0 src assets from assets/taiga-ui/icons. See /angular/taiga-ui/.",
     };
     if (setup[info.kit]) io.log(`   ${setup[info.kit]}`);
     if (info.kit === "ng-zorro") {

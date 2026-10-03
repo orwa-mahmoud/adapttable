@@ -3868,10 +3868,11 @@ These controls use NG-ZORRO cards, drawer, buttons, input, tags, menu and
 select; AI sessions and transports remain in the separate AI packages.
 Importing the root table does not import the assistant or AI runtime.
 
-## Angular workspace-preview kits
+## Additional Angular kits
 
-Seven additional Angular kits are private workspace previews at `0.0.0`, not
-published npm packages. They use the same `AdaptDataTable` inputs, public parts,
+Seven additional Angular kits are prepared for their first public `0.1.0`
+release. Registry installation requires that release to have completed. They use
+the same `AdaptDataTable` inputs, public parts,
 and feature-factory contracts described above, with kit-owned controls:
 
 - [Angular Material](./angular/material.md): `@adapttable/angular-material`.
@@ -3884,7 +3885,8 @@ and feature-factory contracts described above, with kit-owned controls:
 
 Aria and CDK combine their behavior primitives with adapter-owned native controls;
 they are not a styled component kit. Follow each guide's peer dependencies,
-styles and provider setup, and link the private workspace package locally.
+styles and provider setup. Built workspace packages can be used before the
+registry release completes.
 
 Material exports `AdaptMaterialCellEditor`, the kit's editable-cell surface,
 and the overlay surfaces `AdaptMaterialDialog` and `AdaptMaterialPopover`.

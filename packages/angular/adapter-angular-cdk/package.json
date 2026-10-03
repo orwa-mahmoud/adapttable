@@ -238,5 +238,7 @@
     "@angular/cdk": "22.2.1",
     "@angular/forms": "^22.2.0"
   },
-  "private": true
+  "publishConfig": {
+    "access": "public"
+  }
 }

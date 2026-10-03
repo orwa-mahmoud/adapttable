@@ -253,6 +253,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "private": true
+  }
 }

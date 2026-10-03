@@ -173,19 +173,19 @@ export const TITLES = {
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
   "angular/angular-cdk.md":
-    "Use the private Angular CDK table adapter with CDK overlays, focus handling, native controls and composable features.",
+    "Use the Angular CDK table adapter with CDK overlays, focus handling, native controls and composable features.",
   "angular/aria.md":
-    "Use the private Angular Aria table adapter with accessible behavior primitives, native controls and composable features.",
+    "Use the Angular Aria table adapter with accessible behavior primitives, native controls and composable features.",
   "angular/material.md":
-    "Build Angular tables with the private Material adapter, native controls, scoped themes and composable features.",
+    "Build Angular tables with the Material adapter, native controls, scoped themes and composable features.",
   "angular/ng-bootstrap.md":
-    "Use the private ng-bootstrap table adapter with native Bootstrap overlays, scoped styles and composable Angular features.",
+    "Use the ng-bootstrap table adapter with native Bootstrap overlays, scoped styles and composable Angular features.",
   "angular/ngx-bootstrap.md":
-    "Use the private ngx-bootstrap table adapter with native dropdowns and modals, scoped themes and composable Angular features.",
+    "Use the ngx-bootstrap table adapter with native dropdowns and modals, scoped themes and composable Angular features.",
   "angular/spartan.md":
-    "Build Angular tables with the private Spartan adapter, Brain behavior primitives, package-owned Helm controls and scoped styles.",
+    "Build Angular tables with the Spartan adapter, Brain behavior primitives, package-owned Helm controls and scoped styles.",
   "angular/taiga-ui.md":
-    "Use the private Taiga UI table adapter with its scoped root, native controls and overlays, and composable Angular features.",
+    "Use the Taiga UI table adapter with its scoped root, native controls and overlays, and composable Angular features.",
   "angular/getting-started.md":
     "Install an Angular table with native HTML or NG-ZORRO controls. Follow npm setup, CLI scaffolding and a standalone component example with signal-backed rows.",
   "angular/features.md":

@@ -1,10 +1,26 @@
 # @adapttable/angular-aria
 
-Private workspace preview, version **0.0.0**. This package is not published on npm.
+Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matching Angular 22.
+
+Prepared for its first public `0.1.0` release. Publication to npm is a separate
+owner-controlled step; package metadata does not imply registry availability.
 
 Built for Angular 22 with `@angular/aria` **22.2.1** and `@angular/cdk`
-**22.2.1** (MIT). Angular 22 requires Node 22.22.3+, 24.15.0+, or 26+.
+**22.2.1** (MIT).
 The framework binding is [`@adapttable/angular`](../angular/README.md).
+
+## Installation
+
+After publication, install the kit and its native peers in an Angular 22 app:
+
+```sh
+pnpm add @adapttable/angular-aria @adapttable/angular @angular/aria@22.2.1 @angular/cdk@22.2.1
+```
+
+Before publication, link `@adapttable/angular-aria@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo instead. The host must provide
+the Angular 22 peers listed in `package.json`. AdaptTable package versions are
+independent; the adapter resolves its exact binding/core dependencies.
 
 ## What Aria supplies
 

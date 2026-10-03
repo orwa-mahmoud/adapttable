@@ -4,26 +4,34 @@ AdaptTable combines a headless Angular binding with a kit that draws the
 controls. Start with `AdaptDataTable`, an array of rows, column definitions and
 a stable row key. Add feature imports when the table needs them.
 
-## Private kit previews
+## First public releases in preparation
 
-Additional local previews are available for [Angular Material](material.md),
-[ng-bootstrap](ng-bootstrap.md), [Spartan](spartan.md), [Taiga UI](taiga-ui.md),
-[Angular Aria](aria.md), [Angular CDK](angular-cdk.md) and
-[ngx-bootstrap](ngx-bootstrap.md).
-These packages remain private at `0.0.0` and are not published to npm. Each guide
-covers the kit's peers, styling and assets. Their local showcase routes are
-`/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`,
-`/angular-cdk/` and `/ngx-bootstrap/`.
+Seven additional kits are being prepared for their first public **0.1.0**
+releases: [Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
+[Spartan](spartan.md), [Taiga UI](taiga-ui.md), [Angular Aria](aria.md),
+[Angular CDK](angular-cdk.md) and [ngx-bootstrap](ngx-bootstrap.md).
+Their registry installation commands apply only after the owner-controlled npm
+publication completes. Release preparation and working showcase routes do not
+confirm npm availability.
+
+Each kit guide includes its registry command, Angular 22 peers, provider setup,
+styling and assets. Use the source showcase while publication is pending; the
+local routes are `/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`,
+`/aria/`, `/angular-cdk/` and `/ngx-bootstrap/`. ngx-bootstrap also has a
+[documented upstream pre-hydration pagination replay limitation](ngx-bootstrap.md#known-upstream-event-replay-limitation).
 
 ## Choose a kit
 
 - `@adapttable/angular-unstyled` uses native HTML. Supply your own CSS or
   Tailwind classes
 - `@adapttable/ng-zorro` uses NG-ZORRO controls, cards and overlays
+- The seven kits linked above add Material, Bootstrap, Spartan, Taiga UI,
+  Angular Aria and CDK presentation choices with their own setup requirements
 - `@adapttable/angular` supplies signals, column types and structural Chrome
-  for either kit or your own renderer
+  for any Angular kit or your own renderer
 
-The Angular binding, both kits and the optional AI binding are available on npm.
+The Angular binding, Unstyled, NG-ZORRO and the optional AI binding are available
+on npm; the seven new kits have the publication requirement described above.
 Package versions are independent; each kit declares its compatible binding and
 engine dependencies. Do not force core, binding and kit to share a version.
 
@@ -165,11 +173,11 @@ From your Angular application root (the folder containing `angular.json` and
 npx @adapttable/cli@3.1.0 init
 ```
 
-The CLI recognizes an Angular project when **both** `angular.json` and an
-`@angular/core` dependency are present. It detects NG-ZORRO from `ng-zorro-antd`
-in your dependencies; otherwise it chooses the unstyled Angular kit. Install
-NG-ZORRO before running the command if that is the kit you want. There is no
-`--kit` option.
+The published CLI version shown above recognizes an Angular project when
+**both** `angular.json` and an `@angular/core` dependency are present. It detects
+NG-ZORRO from `ng-zorro-antd` in your dependencies; otherwise it chooses the
+unstyled Angular kit. Install NG-ZORRO before running the command if that is
+the kit you want. There is no `--kit` option.
 
 It writes a standalone `PeopleTable` to `src/app/peopleTable.ts` and prints the
 package installation command. Run that printed command, then import
@@ -178,7 +186,8 @@ The CLI does not mount the component or run installation for you. Existing
 scaffold files are skipped; use `init --force` only when you intend to overwrite
 them. The CLI's version does not need to match the table packages.
 
-To test changes to the CLI itself, build it from this repository and invoke its
+The upcoming CLI release also detects the seven new Angular kits. To use this
+release-preparation source, build the CLI from this repository and invoke its
 entry from your Angular application root:
 
 ```sh
@@ -188,6 +197,17 @@ pnpm --filter @adapttable/cli build
 # From your Angular application (replace the path with your checkout):
 node /path/to/adapttable/packages/shared/cli/dist/cli.js init
 ```
+
+The source CLI selects the first installed kit in this order: Angular Material,
+ng-bootstrap, Spartan, Taiga UI, NG-ZORRO, Angular Aria, ngx-bootstrap, then
+Angular CDK. It falls back to Angular unstyled when no kit signal is present.
+It still requires both Angular project markers above and has no `--kit` flag.
+
+It prints the registry command for missing dependencies and the chosen kit's
+stylesheet, provider and asset setup instructions. The seven new adapters'
+registry installation still requires their public `0.1.0` publication to
+complete. This added detection is source preparation for an upcoming CLI
+release; it is not a claim about the published `3.1.0` command above.
 
 ## Data and callbacks
 

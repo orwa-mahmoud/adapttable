@@ -26,6 +26,7 @@
     "LICENSE",
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "styles.css",
     "BOOTSTRAP-LICENSE"
   ],
@@ -249,6 +250,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "private": true
+  }
 }

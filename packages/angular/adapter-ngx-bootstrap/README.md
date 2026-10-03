@@ -1,7 +1,9 @@
 # @adapttable/ngx-bootstrap
 
-Private workspace preview, version `0.0.0`. npm publication is a separate release step;
-this package is not currently advertised as an installable public kit.
+Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matching Angular 22.
+
+Prepared for its first public `0.1.0` release. Publication to npm is a separate
+owner-controlled step; package metadata does not imply registry availability.
 
 AdaptTable's Angular binding and structural Chrome, rendered with Bootstrap form
 controls and ngx-bootstrap overlays. The kit includes scoped Bootstrap 5.3.8 CSS;
@@ -13,18 +15,21 @@ loading it does not reset another adapter, the docs, or application navigation.
 - ngx-bootstrap 22.0.0 and RxJS 7.4 or newer within v7
 - Zoneless Angular only: ngx-bootstrap 22 does not support zone.js
 - Bootstrap CSS 5.3.8 is compiled into the kit's scoped stylesheet
-- Angular 22 requires Node 22.22.3+, 24.15.0+, or 26+
 
 This matches [ngx-bootstrap's official compatibility table](https://github.com/ngx-bootstrap/ngx-bootstrap#dependencies).
 Do not import `bootstrap/dist/css/bootstrap.css`, its RTL variant, or Bootstrap's
 JavaScript bundle for this adapter. ngx-bootstrap owns widget behavior.
 
-In a workspace that contains this package, install the peers and link the local kit:
+After publication, install the kit and its native peers in an Angular 22 app:
 
 ```sh
 pnpm add ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4
-pnpm add @adapttable/ngx-bootstrap@workspace:*
+pnpm add @adapttable/ngx-bootstrap @adapttable/angular
 ```
+
+Before publication, link `@adapttable/ngx-bootstrap@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo instead. AdaptTable package
+versions are independent; the adapter resolves its exact binding/core dependencies.
 
 Import the package CSS once in the application entry or global stylesheet pipeline:
 
@@ -264,5 +269,5 @@ retains its MIT license. `node --test scripts/styles.test.mjs` verifies all emit
 selectors, animation names, theme variables and license metadata. Angular tests
 include shared conformance plus native overlay/control regression coverage.
 Browser acceptance must check narrow layouts, native overlay placement and focus,
-light/dark themes, RTL and switching back to existing kits. The private preview
-has not completed the final integrated package/browser acceptance gate.
+light/dark themes, RTL and switching back to existing kits. Full package and browser
+gates must pass on the final integrated release commit.

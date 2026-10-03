@@ -33,6 +33,33 @@ const NPM_BIN = join(
   dirname(process.execPath),
   process.platform === "win32" ? "npm.cmd" : "npm"
 );
+const BASELINE_NODE_RANGE = ">=22.12.0";
+const ANGULAR_22_NODE_RANGE = "^22.22.3 || ^24.15.0 || >=26.0.0";
+const BASELINE_ANGULAR_RANGE = "^20.0.0";
+
+/**
+ * Required native peers beyond the adapter's direct peers. Audited against
+ * Taiga 5.26.0 core/cdk/kit/styles manifests and the Maskito/ng-web-apis peer
+ * metadata in pnpm-lock.yaml; kept in sync with the CLI's Taiga extras.
+ * The combined consumer uses --legacy-peer-deps, so npm cannot fill these in.
+ */
+const TAIGA_NATIVE_PEERS = Object.freeze({
+  "@taiga-ui/design-tokens": "~0.320.0",
+  "@taiga-ui/polymorpheus": "^5.0.1",
+  "@taiga-ui/font-watcher": "~0.6.0",
+  "@maskito/angular": "^5.5.0",
+  "@maskito/core": "^5.5.0",
+  "@maskito/kit": "^5.5.0",
+  "@maskito/phone": "^5.5.0",
+  "libphonenumber-js": "^1.13.14",
+  "@ng-web-apis/common": "^5.3.0",
+  "@ng-web-apis/intersection-observer": "^5.3.0",
+  "@ng-web-apis/mutation-observer": "^5.3.0",
+  "@ng-web-apis/platform": "^5.3.0",
+  "@ng-web-apis/resize-observer": "^5.3.0",
+  "@ng-web-apis/screen-orientation": "^5.3.0",
+  "@types/dom-speech-recognition": "^0.0.12",
+});
 
 /** Extra published subpaths kept in addition to every package root. */
 export const EXTRA_PROBE_ROUTES = Object.freeze([
@@ -129,11 +156,23 @@ export function supportsAngular22(nodeVersion) {
   );
 }
 
-/** Only NG-ZORRO requires Angular 22; the other Angular packages support 20. */
+/**
+ * Match the workspace's exact engine contracts without an installed semver
+ * dependency. A new contract must gain runtime coverage before being used.
+ */
+function supportsPackageRuntime(entry, nodeVersion) {
+  const range = entry.manifest.engines?.node;
+  if (range === ANGULAR_22_NODE_RANGE) return supportsAngular22(nodeVersion);
+  if (range === BASELINE_NODE_RANGE) {
+    const [major, minor] = nodeVersion.replace(/^v/, "").split(".").map(Number);
+    return major > 22 || (major === 22 && minor >= 12);
+  }
+  throw new Error(`${entry.name} has an untested Node engine range: ${range}`);
+}
+
+/** Select every package whose declared Node engine supports this runtime. */
 export function packagesForRuntime(packages, nodeVersion) {
-  return supportsAngular22(nodeVersion)
-    ? packages
-    : packages.filter((entry) => entry.name !== "@adapttable/ng-zorro");
+  return packages.filter((entry) => supportsPackageRuntime(entry, nodeVersion));
 }
 
 /**
@@ -162,6 +201,11 @@ export function kitLoadDependencies(
     deps["@emotion/react"] ??= "^11.0.0";
     deps["@emotion/styled"] ??= "^11.0.0";
   }
+  if (deps["@taiga-ui/core"]) {
+    for (const [name, range] of Object.entries(TAIGA_NATIVE_PEERS)) {
+      deps[name] ??= range;
+    }
+  }
   // Angular's packages ship partially compiled: outside an app build they
   // load only with the compiler present to finish them, and `@angular/core`
   // needs RxJS, its own peer.
@@ -176,11 +220,31 @@ export function kitLoadDependencies(
 /** Keep the Angular peer major compatible with the probed Node runtime. */
 function useCompatibleAngularPeers(deps, packages, nodeVersion) {
   if (supportsAngular22(nodeVersion)) return;
-  if (packages.some((entry) => entry.name === "@adapttable/ng-zorro")) {
-    throw new Error("NG-ZORRO requires an Angular 22-compatible Node runtime");
+  for (const entry of packages) {
+    if (!supportsPackageRuntime(entry, nodeVersion)) {
+      throw new Error(
+        `${entry.name} requires Node ${entry.manifest.engines.node}; cannot probe on Node ${nodeVersion}`
+      );
+    }
+    for (const [name, range] of Object.entries(
+      entry.manifest.peerDependencies ?? {}
+    )) {
+      if (!name.startsWith("@angular/")) continue;
+      // Check each package before the merged peer map can hide an incompatible
+      // peer. Only the binding's declared Angular 20 alternative may be used.
+      if (
+        !range
+          .split("||")
+          .some((part) => part.trim() === BASELINE_ANGULAR_RANGE)
+      ) {
+        throw new Error(
+          `${entry.name} peer ${name}@${range} cannot use Angular 20 on Node ${nodeVersion}`
+        );
+      }
+    }
   }
   for (const name of Object.keys(deps)) {
-    if (name.startsWith("@angular/")) deps[name] = "^20.0.0";
+    if (name.startsWith("@angular/")) deps[name] = BASELINE_ANGULAR_RANGE;
   }
 }
 
@@ -231,18 +295,18 @@ function verify() {
   const { packages } = JSON.parse(readFileSync(MANIFEST, "utf8"));
   const packedNames = Object.keys(packages);
   assertPackedMatchesExpected(packedNames, expected);
-  const compatible = packagesForRuntime(
-    publishedPackages(),
-    process.versions.node
-  );
+  const published = publishedPackages();
+  const compatible = packagesForRuntime(published, process.versions.node);
   const runtimeNames = compatible.map((entry) => entry.name).sort();
   const count = runtimeNames.length;
   console.log(
     `node-support: verifying ${count} runtime-compatible published packages`
   );
-  for (const name of expected.filter((name) => !runtimeNames.includes(name))) {
+  for (const { name, manifest } of published.filter(
+    (entry) => !runtimeNames.includes(entry.name)
+  )) {
     console.log(
-      `${name} requires Angular 22; tested on Node 22.22.3 and Node 24`
+      `${name} requires Node ${manifest.engines.node}; tested on Node 22.22.3 and Node 24`
     );
   }
 
@@ -302,6 +366,8 @@ for (const route of routes) {
     [
       "install",
       "--engine-strict",
+      // This combined load probe supplies native peer closure explicitly;
+      // peer-floor compatibility has its own separate harness.
       "--legacy-peer-deps",
       "--ignore-scripts",
       "--no-audit",

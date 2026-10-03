@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import * as detection from "./detect";
 import {
   detectFramework,
   detectKit,
@@ -182,10 +183,9 @@ describe("scaffold", () => {
     ]);
   });
 
-  it.each(["angular-unstyled", "ng-zorro"])(
-    "scaffolds a standalone Angular component for %s through public imports",
-    (kit) => {
-      const info = KITS.find((entry) => entry.kit === kit)!;
+  it.each(KITS.filter((info) => info.framework === "angular"))(
+    "scaffolds a standalone Angular component for $kit through public imports",
+    (info) => {
       const files = scaffoldFiles(info);
       expect(files.map((file) => file.path)).toEqual([
         "src/app/peopleTable.ts",
@@ -502,52 +502,330 @@ describe("starterComponent (v2 shape)", () => {
   });
 });
 
-describe("private Angular kit discovery", () => {
-  it("links private kits locally instead of claiming registry installation", () => {
-    const { io, logs } = makeIO(
-      JSON.stringify({
-        dependencies: { "@angular/core": "22.2.0", "@angular/aria": "22.2.1" },
-      }),
-      ["pnpm-lock.yaml"],
-      ["angular.json"]
-    );
-    const result = runInit(io);
-    expect(result.kit).toBe("angular-aria");
-    expect(result.installCommand).not.toContain("@adapttable/angular-aria");
-    expect(logs.join("\n")).toContain(
-      "private 0.0.0 workspace preview, not available on npm"
-    );
-    expect(logs.join("\n")).toContain(
-      "Build and link its local package separately"
-    );
-  });
-  it("prefers a specific UI kit when its transitive CDK peer is present", () => {
-    expect(
-      detectKit(
-        { "@angular/aria": "22.2.1", "@angular/cdk": "22.2.1" },
-        { framework: "angular" }
-      ).kit
-    ).toBe("angular-aria");
-    expect(
-      detectKit(
-        { "@angular/material": "22.2.1", "@angular/cdk": "22.2.1" },
-        { framework: "angular" }
-      ).kit
-    ).toBe("angular-material");
-  });
+const angularReleaseKits = [
+  {
+    signal: "@angular/material",
+    version: "^22.2.1",
+    kit: "angular-material",
+    adapter: "@adapttable/angular-material",
+    peers: ["@angular/cdk@^22.2.1", "@angular/forms@^22.0.0"],
+    setup: [
+      "Configure an Angular Material Sass theme",
+      "@adapttable/angular-material/styles.css",
+      "@angular/cdk/overlay-prebuilt.css",
+    ],
+  },
+  {
+    signal: "@ng-bootstrap/ng-bootstrap",
+    version: "^21.0.0",
+    kit: "ng-bootstrap",
+    adapter: "@adapttable/ng-bootstrap",
+    peers: [
+      "bootstrap@^5.3.8",
+      "@popperjs/core@^2.11.8",
+      "@angular/forms@^22.0.0",
+      "@angular/localize@^22.0.0",
+    ],
+    setup: [
+      "@angular/localize/init",
+      "@adapttable/ng-bootstrap/styles.css",
+      "Do not load global Bootstrap CSS or JavaScript",
+    ],
+  },
+  {
+    signal: "@spartan-ng/brain",
+    version: "^1.5.0",
+    kit: "spartan",
+    adapter: "@adapttable/spartan",
+    peers: [
+      "@angular/cdk@^22.0.0",
+      "@angular/forms@^22.0.0",
+      "tailwindcss@^4.0.0",
+      "clsx@^2.1.1",
+      "tw-animate-css@^1.0.0",
+    ],
+    setup: [
+      "@adapttable/spartan/styles.css through Tailwind 4",
+      "@angular/cdk/overlay-prebuilt.css",
+    ],
+  },
+  {
+    signal: "@taiga-ui/core",
+    version: "5.26.0",
+    kit: "taiga-ui",
+    adapter: "@adapttable/taiga-ui",
+    peers: [
+      "@taiga-ui/kit@5.26.0",
+      "@taiga-ui/cdk@5.26.0",
+      "@taiga-ui/i18n@5.26.0",
+      "@taiga-ui/styles@5.26.0",
+      "@taiga-ui/design-tokens@~0.320.0",
+      "@taiga-ui/icons@5.26.0",
+      "@taiga-ui/event-plugins@^5.0.0",
+      "@taiga-ui/polymorpheus@^5.0.1",
+      "@taiga-ui/font-watcher@~0.6.0",
+      "@maskito/angular@^5.5.0",
+      "@maskito/core@^5.5.0",
+      "@maskito/kit@^5.5.0",
+      "@maskito/phone@^5.5.0",
+      "libphonenumber-js@^1.13.14",
+      "@ng-web-apis/common@^5.3.0",
+      "@ng-web-apis/intersection-observer@^5.3.0",
+      "@ng-web-apis/mutation-observer@^5.3.0",
+      "@ng-web-apis/platform@^5.3.0",
+      "@ng-web-apis/resize-observer@^5.3.0",
+      "@ng-web-apis/screen-orientation@^5.3.0",
+      "@types/dom-speech-recognition@^0.0.12",
+      "@angular/cdk@^22.0.0",
+      "@angular/forms@^22.0.0",
+      "@angular/router@^22.0.0",
+    ],
+    setup: [
+      "provideAdaptTaiga() from @adapttable/taiga-ui in bootstrap providers",
+      "configure Less",
+      "@taiga-ui/icons@5.26.0 src assets from assets/taiga-ui/icons",
+    ],
+  },
+  {
+    signal: "@angular/aria",
+    version: "22.2.1",
+    kit: "angular-aria",
+    adapter: "@adapttable/angular-aria",
+    peers: ["@angular/cdk@22.2.1", "@angular/forms@^22.0.0"],
+    setup: [
+      "@angular/cdk/overlay-prebuilt.css",
+      "@adapttable/angular-aria/styles.css",
+    ],
+  },
+  {
+    signal: "@angular/cdk",
+    version: "^22.2.1",
+    kit: "angular-cdk",
+    adapter: "@adapttable/angular-cdk",
+    peers: ["@angular/forms@^22.0.0"],
+    setup: [
+      "@angular/cdk/overlay-prebuilt.css",
+      "@adapttable/angular-cdk/styles.css",
+    ],
+  },
+  {
+    signal: "ngx-bootstrap",
+    version: "22.0.0",
+    kit: "ngx-bootstrap",
+    adapter: "@adapttable/ngx-bootstrap",
+    peers: ["@angular/forms@^22.0.0"],
+    setup: [
+      "Use zoneless Angular 22",
+      "@adapttable/ngx-bootstrap/styles.css",
+      "Do not load global Bootstrap CSS or JavaScript",
+    ],
+  },
+];
+
+describe("Angular kit first-public-release discovery", () => {
+  it.each(angularReleaseKits)(
+    "detects $signal only in Angular and includes its public install target",
+    ({ signal, version, kit, adapter, peers }) => {
+      const info = detectKit({ [signal]: "*" }, { framework: "angular" });
+      expect(info).toMatchObject({ kit, adapter, framework: "angular" });
+      expect(info.privatePreview).toBeUndefined();
+      expect(packagesFor(info)).toEqual([
+        "@adapttable/core",
+        "@adapttable/angular",
+        adapter,
+        `${signal}@${version}`,
+        ...peers,
+      ]);
+      expect(detectKit({ [signal]: "*" }).kit).toBe("unstyled");
+    }
+  );
+
+  it.each(angularReleaseKits.filter(({ kit }) => kit !== "angular-cdk"))(
+    "prefers $kit when its transitive CDK peer is present",
+    ({ signal, kit }) => {
+      expect(
+        detectKit(
+          { [signal]: "*", "@angular/cdk": "22.2.1" },
+          { framework: "angular" }
+        ).kit
+      ).toBe(kit);
+    }
+  );
 
   it.each([
-    ["@angular/material", "angular-material", "@adapttable/angular-material"],
-    ["@ng-bootstrap/ng-bootstrap", "ng-bootstrap", "@adapttable/ng-bootstrap"],
-    ["@spartan-ng/brain", "spartan", "@adapttable/spartan"],
-    ["@taiga-ui/core", "taiga-ui", "@adapttable/taiga-ui"],
-    ["@angular/aria", "angular-aria", "@adapttable/angular-aria"],
-    ["@angular/cdk", "angular-cdk", "@adapttable/angular-cdk"],
-    ["ngx-bootstrap", "ngx-bootstrap", "@adapttable/ngx-bootstrap"],
-  ])("detects %s only in Angular", (signal, kit, adapter) => {
+    { signal: "@clr/angular", adapter: "@adapttable/clarity" },
+    { signal: "@nebular/theme", adapter: "@adapttable/nebular" },
+    { signal: "primeng", adapter: "@adapttable/primeng" },
+  ])("does not register the excluded $signal kit", ({ signal, adapter }) => {
+    expect(KITS.flatMap((info) => info.signals)).not.toContain(signal);
+    expect(KITS.map((info) => info.adapter)).not.toContain(adapter);
+  });
+});
+
+describe.each([
+  { lockfile: "package-lock.json", command: "npm install" },
+  { lockfile: "pnpm-lock.yaml", command: "pnpm add" },
+  { lockfile: "yarn.lock", command: "yarn add" },
+  { lockfile: "bun.lock", command: "bun add" },
+])("Angular release scaffolding with $command", ({ lockfile, command }) => {
+  it.each(angularReleaseKits)(
+    "installs $kit with missing peers and keeps native host setup",
+    ({ signal, version, kit, adapter, peers, setup }) => {
+      const { io, logs, written } = makeIO(
+        JSON.stringify({
+          dependencies: { "@angular/core": "22.2.0" },
+          devDependencies: { [signal]: version },
+        }),
+        [lockfile],
+        ["angular.json"]
+      );
+      const result = runInit(io);
+      const packages = [
+        "@adapttable/core",
+        "@adapttable/angular",
+        adapter,
+        ...peers,
+      ];
+      expect(result.framework).toBe("angular");
+      expect(result.kit).toBe(kit);
+      expect(result.adapter).toBe(adapter);
+      expect(result.packages).toEqual(packages);
+      expect(result.installCommand).toBe(`${command} ${packages.join(" ")}`);
+      expect(result.written).toEqual(["src/app/peopleTable.ts"]);
+      expect(Object.keys(written)).toEqual(result.written);
+      expect(written["src/app/peopleTable.ts"]).toContain(
+        `import { AdaptDataTable } from "${adapter}"`
+      );
+      const output = logs.join("\n");
+      expect(output).toContain("1. Install the packages:");
+      expect(output).toContain(result.installCommand);
+      expect(output).toContain(
+        "Angular kits are prepared for their first public release"
+      );
+      expect(output).toContain("Check registry availability before installing");
+      expect(output).toContain(
+        "add PeopleTable to its imports, and render <people-table />"
+      );
+      expect(output).not.toMatch(
+        /private|workspace preview|published peers|Build and link/
+      );
+      for (const guidance of setup) expect(output).toContain(guidance);
+    }
+  );
+});
+
+describe("Angular release host ownership", () => {
+  it.each(angularReleaseKits)(
+    "preserves existing $kit peers and an edited component until --force",
+    ({ signal, kit, adapter }) => {
+      const info = detectKit({ [signal]: "*" }, { framework: "angular" });
+      const existingPeers = Object.fromEntries(
+        info.extras.map((specifier) => [
+          specifier.slice(0, specifier.lastIndexOf("@")),
+          specifier.slice(specifier.lastIndexOf("@") + 1),
+        ])
+      );
+      const { io, written } = makeIO(
+        JSON.stringify({
+          dependencies: { "@angular/core": "22.2.0" },
+          devDependencies: existingPeers,
+        }),
+        ["pnpm-lock.yaml"],
+        ["angular.json"]
+      );
+      const path = "src/app/peopleTable.ts";
+      io.writeFile(path, "// Keep this host-owned table");
+      const result = runInit(io);
+      expect(result.kit).toBe(kit);
+      expect(result.packages).toEqual([
+        "@adapttable/core",
+        "@adapttable/angular",
+        adapter,
+      ]);
+      expect(result.written).toEqual([]);
+      expect(result.skipped).toEqual([path]);
+      expect(written[path]).toBe("// Keep this host-owned table");
+      const forced = runInit(io, { force: true });
+      expect(forced.written).toEqual([path]);
+      expect(forced.skipped).toEqual([]);
+      expect(written[path]).toContain(`from "${adapter}"`);
+      expect(written[path]).not.toContain("Keep this host-owned table");
+    }
+  );
+});
+
+describe("private preview metadata compatibility", () => {
+  it("keeps the local-only flow for an explicitly marked preview", () => {
+    const info = detectKit({}, { framework: "angular" });
+    const detect = vi.spyOn(detection, "detectKit").mockReturnValue({
+      ...info,
+      privatePreview: true,
+    });
+    try {
+      const { io, logs } = makeIO(
+        JSON.stringify({ dependencies: { "@angular/core": "22.2.0" } }),
+        ["pnpm-lock.yaml"],
+        ["angular.json"]
+      );
+      const result = runInit(io);
+      expect(result.packages).toEqual([
+        "@adapttable/core",
+        "@adapttable/angular",
+      ]);
+      expect(result.installCommand).not.toContain(info.adapter);
+      expect(logs.join("\n")).toContain("1. Install the published peers:");
+      expect(logs.join("\n")).toContain(
+        `${info.adapter} is a private 0.0.0 workspace preview, not available on npm`
+      );
+      expect(logs.join("\n")).toContain(
+        "Build and link its local package separately"
+      );
+    } finally {
+      detect.mockRestore();
+    }
+  });
+});
+
+describe("required native peer closure", () => {
+  it.each(["angular-aria", "angular-cdk"])(
+    "%s supplies Forms required by its native CDK peer",
+    (kit) => {
+      const info = KITS.find((entry) => entry.kit === kit)!;
+      expect(packagesFor(info)).toContain("@angular/forms@^22.0.0");
+    }
+  );
+
+  it("supplies Taiga's nested nonoptional peers without relying on peer auto-install", () => {
+    const taiga = KITS.find((entry) => entry.kit === "taiga-ui")!;
+    const names = packagesFor(taiga).map((specifier) =>
+      specifier.slice(0, specifier.lastIndexOf("@"))
+    );
+    // Taiga 5.26.0 peer manifests, plus the locked Maskito/ng-web-apis peers.
+    for (const name of [
+      "@taiga-ui/design-tokens",
+      "@taiga-ui/polymorpheus",
+      "@taiga-ui/font-watcher",
+      "@maskito/angular",
+      "@maskito/core",
+      "@maskito/kit",
+      "@maskito/phone",
+      "libphonenumber-js",
+      "@ng-web-apis/common",
+      "@ng-web-apis/intersection-observer",
+      "@ng-web-apis/mutation-observer",
+      "@ng-web-apis/platform",
+      "@ng-web-apis/resize-observer",
+      "@ng-web-apis/screen-orientation",
+      "@types/dom-speech-recognition",
+    ]) {
+      expect(names).toContain(name);
+    }
+  });
+
+  it("does not add Spartan's optional Luxon peer", () => {
+    const spartan = KITS.find((entry) => entry.kit === "spartan")!;
     expect(
-      detectKit({ [signal]: "*" }, { framework: "angular" })
-    ).toMatchObject({ kit, adapter, framework: "angular" });
-    expect(detectKit({ [signal]: "*" }).kit).toBe("unstyled");
+      packagesFor(spartan).some((specifier) => specifier.startsWith("luxon@"))
+    ).toBe(false);
   });
 });

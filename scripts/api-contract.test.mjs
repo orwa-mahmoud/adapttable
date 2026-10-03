@@ -518,6 +518,99 @@ describe("re-export policies", () => {
   });
 });
 
+describe("new Angular kit release contracts", () => {
+  const kits = [
+    "adapter-angular-aria",
+    "adapter-angular-cdk",
+    "adapter-material",
+    "adapter-ng-bootstrap",
+    "adapter-ngx-bootstrap",
+    "adapter-spartan",
+    "adapter-taiga-ui",
+  ];
+  const manifest = JSON.parse(
+    readFileSync(join(REPO_ROOT, "etc", "api-contract.json"), "utf8")
+  );
+  const entries = entrypoints();
+  const reports = Object.fromEntries(
+    entries.map((entry) => [
+      entry.report,
+      readFileSync(join(REPO_ROOT, "etc", entry.report), "utf8"),
+    ])
+  );
+  const check = (overrides) =>
+    checkContract({
+      manifest,
+      entrypoints: entries,
+      reports: { ...reports, ...overrides },
+    });
+
+  it("gives all 287 typed entries nonempty Angular-owned policies", () => {
+    for (const kit of kits) {
+      const kitEntries = entries.filter((entry) => entry.dir === kit);
+      assert.equal(kitEntries.length, 41, kit);
+      for (const entry of kitEntries) {
+        assert.equal(entry.published, true, entry.report);
+        const policy = manifest.entrypoints[entry.report];
+        const surface = policy?.surface ?? policy?.reexport;
+        assert.ok(manifest.frameworks.angular.includes(surface), entry.report);
+        assert.ok(manifest.surfaces[surface]?.length > 0, entry.report);
+      }
+      const reexports = kitEntries
+        .filter((entry) => manifest.entrypoints[entry.report].reexport)
+        .map((entry) => entry.subpath);
+      assert.deepEqual(
+        reexports,
+        [
+          "./cell-span",
+          "./extra-rows",
+          "./fit-columns",
+          "./multi-sort",
+          "./pinned-summary-rows",
+          "./resizable-columns",
+          "./row-appearance",
+          "./row-pinning",
+        ],
+        kit
+      );
+    }
+  });
+
+  it("rejects demoting each kit's public table to internal", () => {
+    for (const kit of kits) {
+      const report = `${kit}.api.md`;
+      const demoted = reports[report].replace(
+        /\/\/ @public(\r?\n)(export class AdaptDataTable\b)/,
+        "// @internal$1$2"
+      );
+      assert.notEqual(demoted, reports[report], report);
+      assert.ok(
+        check({ [report]: demoted }).some(
+          (error) =>
+            error.includes(report) &&
+            /no longer classifies.*AdaptDataTable/.test(error)
+        ),
+        report
+      );
+    }
+  });
+
+  it("rejects losing each kit's named cell-span re-export", () => {
+    for (const kit of kits) {
+      const report = `${kit}-cell-span.api.md`;
+      const withdrawn = reports[report].replace("export { cellSpan }", "");
+      assert.notEqual(withdrawn, reports[report], report);
+      assert.ok(
+        check({ [report]: withdrawn }).some(
+          (error) =>
+            error.includes(report) && /no longer forwards.*cellSpan/.test(error)
+        ),
+        report
+      );
+    }
+  });
+});
+
 describe("the real gate runs this", () => {
   const pkg = JSON.parse(readFileSync(join(REPO_ROOT, "package.json"), "utf8"));
 

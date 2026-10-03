@@ -17,6 +17,7 @@ import {
 import { listPackages, REPO_ROOT as ROOT } from "./packages.mjs";
 
 const FLOOR = ">=22.12.0";
+const ANGULAR_22_FLOOR = "^22.22.3 || ^24.15.0 || >=26.0.0";
 const ANGULAR_22_KITS = new Set([
   "@adapttable/angular-aria",
   "@adapttable/angular-cdk",
@@ -34,6 +35,9 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/ai-angular",
   "@adapttable/ai-react",
   "@adapttable/angular",
+  "@adapttable/angular-aria",
+  "@adapttable/angular-cdk",
+  "@adapttable/angular-material",
   "@adapttable/angular-unstyled",
   "@adapttable/antd",
   "@adapttable/base-ui",
@@ -43,12 +47,33 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/i18n",
   "@adapttable/mantine",
   "@adapttable/mui",
+  "@adapttable/ng-bootstrap",
   "@adapttable/ng-zorro",
+  "@adapttable/ngx-bootstrap",
   "@adapttable/radix",
   "@adapttable/react",
   "@adapttable/server",
   "@adapttable/shadcn",
+  "@adapttable/spartan",
+  "@adapttable/taiga-ui",
   "@adapttable/unstyled",
+];
+const TAIGA_NATIVE_PEER_NAMES = [
+  "@maskito/angular",
+  "@maskito/core",
+  "@maskito/kit",
+  "@maskito/phone",
+  "@ng-web-apis/common",
+  "@ng-web-apis/intersection-observer",
+  "@ng-web-apis/mutation-observer",
+  "@ng-web-apis/platform",
+  "@ng-web-apis/resize-observer",
+  "@ng-web-apis/screen-orientation",
+  "@taiga-ui/design-tokens",
+  "@taiga-ui/font-watcher",
+  "@taiga-ui/polymorpheus",
+  "@types/dom-speech-recognition",
+  "libphonenumber-js",
 ];
 
 function json(path) {
@@ -65,9 +90,7 @@ describe("supported Node contract", () => {
     assert.equal(manifests.length, 29);
     for (const manifest of manifests) {
       const pkg = json(manifest);
-      const floor = ANGULAR_22_KITS.has(pkg.name)
-        ? "^22.22.3 || ^24.15.0 || >=26.0.0"
-        : FLOOR;
+      const floor = ANGULAR_22_KITS.has(pkg.name) ? ANGULAR_22_FLOOR : FLOOR;
       assert.equal(pkg.engines?.node, floor, manifest);
     }
   });
@@ -77,10 +100,9 @@ describe("supported Node contract", () => {
       const pkg = json(manifest);
       if (pkg.private) continue;
       const readme = readFileSync(join(dirname(manifest), "README.md"), "utf8");
-      const claim =
-        pkg.name === "@adapttable/ng-zorro"
-          ? "Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**"
-          : README_CLAIM;
+      const claim = ANGULAR_22_KITS.has(pkg.name)
+        ? "Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**"
+        : README_CLAIM;
       assert.ok(readme.includes(claim), pkg.name);
     }
   });
@@ -114,8 +136,9 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 19);
+    assert.equal(names.length, 26);
     assert.ok(!names.includes("@adapttable/bootstrap"));
+    assert.ok(!names.includes("@adapttable/primeng"));
   });
 
   it("fails a planted missing package with the name involved", () => {
@@ -134,6 +157,27 @@ describe("supported Node contract", () => {
       () => assertPackedMatchesExpected(packed, publishedPackageNames()),
       /unexpected packed package\(s\): @adapttable\/bootstrap/
     );
+  });
+
+  it("rejects each missing Angular 22 kit and each private kit in the packed set", () => {
+    const expected = publishedPackageNames();
+    for (const name of ANGULAR_22_KITS) {
+      assert.throws(
+        () =>
+          assertPackedMatchesExpected(
+            PUBLISHED_SNAPSHOT.filter((packed) => packed !== name),
+            expected
+          ),
+        { message: `missing published package(s): ${name}` }
+      );
+    }
+    for (const name of ["@adapttable/bootstrap", "@adapttable/primeng"]) {
+      assert.throws(
+        () =>
+          assertPackedMatchesExpected([...PUBLISHED_SNAPSHOT, name], expected),
+        { message: `unexpected packed package(s): ${name}` }
+      );
+    }
   });
 
   it("does not treat the packed manifest as the source of expectation", () => {
@@ -196,6 +240,91 @@ describe("supported Node contract", () => {
     assert.deepEqual(probePrelude(deps), ["@angular/compiler"]);
     assert.deepEqual(probePrelude({ antd: "^5.0.0" }), []);
   });
+
+  it("supplies Taiga's complete audited native peer closure on supported runtimes", () => {
+    const packages = publishedPackages();
+    const taiga = packages.find(
+      (entry) => entry.name === "@adapttable/taiga-ui"
+    );
+    assert.ok(taiga);
+    const direct = taiga.manifest.peerDependencies;
+    const deps = kitLoadDependencies([taiga], "24.15.0");
+    const extras = Object.keys(deps)
+      .filter(
+        (name) =>
+          !(name in direct) && name !== "@angular/compiler" && name !== "rxjs"
+      )
+      .sort();
+    assert.deepEqual(extras, TAIGA_NATIVE_PEER_NAMES);
+
+    const cli = readFileSync(
+      join(ROOT, "packages/shared/cli/src/detect.ts"),
+      "utf8"
+    );
+    const cliExtras = cli.match(
+      /kit: "taiga-ui",[\s\S]*?extras: \[([\s\S]*?)\n {4}\]/
+    )?.[1];
+    assert.ok(
+      cliExtras,
+      "CLI Taiga extras remain the audited install contract"
+    );
+    for (const name of TAIGA_NATIVE_PEER_NAMES) {
+      assert.ok(
+        cliExtras.includes(JSON.stringify(`${name}@${deps[name]}`)),
+        name
+      );
+    }
+    for (const version of ["22.22.3", "24.15.0", "26.0.0"]) {
+      const combined = kitLoadDependencies(
+        packagesForRuntime(packages, version),
+        version
+      );
+      for (const name of TAIGA_NATIVE_PEER_NAMES) {
+        assert.equal(combined[name], deps[name], `${version}: ${name}`);
+      }
+    }
+    assert.equal(
+      deps["@taiga-ui/icons"],
+      undefined,
+      "static icon assets are not load peers"
+    );
+    assert.equal(
+      deps.luxon,
+      undefined,
+      "unrelated optional peers stay excluded"
+    );
+  });
+
+  it("does not add Taiga's peers to consumers without Taiga", () => {
+    const packages = publishedPackages();
+    for (const [entries, version] of [
+      [packagesForRuntime(packages, "22.12.0"), "22.12.0"],
+      [
+        packages.filter((entry) => entry.name !== "@adapttable/taiga-ui"),
+        "24.15.0",
+      ],
+    ]) {
+      const deps = kitLoadDependencies(entries, version);
+      for (const name of TAIGA_NATIVE_PEER_NAMES)
+        assert.equal(deps[name], undefined, name);
+    }
+  });
+
+  it("preserves a directly supplied native peer range", () => {
+    const taiga = publishedPackages().find(
+      (entry) => entry.name === "@adapttable/taiga-ui"
+    );
+    assert.ok(taiga);
+    const manifest = {
+      ...taiga.manifest,
+      peerDependencies: {
+        ...taiga.manifest.peerDependencies,
+        "@ng-web-apis/common": "5.4.0",
+      },
+    };
+    const deps = kitLoadDependencies([{ ...taiga, manifest }], "24.15.0");
+    assert.equal(deps["@ng-web-apis/common"], "5.4.0");
+  });
 });
 
 describe("Angular-aware packed runtime coverage", () => {
@@ -209,14 +338,24 @@ describe("Angular-aware packed runtime coverage", () => {
     ]) {
       assert.equal(supportsAngular22(version), false, version);
     }
-    for (const version of ["22.22.3", "22.23.0", "24.15.0", "26.0.0"]) {
+    for (const version of [
+      "22.22.3",
+      "v22.22.3",
+      "22.23.0",
+      "24.15.0",
+      "26.0.0",
+    ]) {
       assert.equal(supportsAngular22(version), true, version);
     }
   });
 
   it("tests every package on Angular 22's floor and Node 24", () => {
     const packages = publishedPackages();
-    for (const version of ["22.22.3", "24.15.0"]) {
+    assert.deepEqual(
+      packages.map((entry) => entry.name).sort(),
+      PUBLISHED_SNAPSHOT
+    );
+    for (const version of ["22.22.3", "24.15.0", "26.0.0"]) {
       assert.deepEqual(packagesForRuntime(packages, version), packages);
     }
   });
@@ -225,18 +364,131 @@ describe("Angular-aware packed runtime coverage", () => {
     const packages = packagesForRuntime(publishedPackages(), "22.12.0");
     assert.deepEqual(
       packages.map((entry) => entry.name).sort(),
-      PUBLISHED_SNAPSHOT.filter((name) => name !== "@adapttable/ng-zorro")
+      PUBLISHED_SNAPSHOT.filter((name) => !ANGULAR_22_KITS.has(name))
     );
     const deps = kitLoadDependencies(packages, "22.12.0");
     assert.equal(deps["@angular/core"], "^20.0.0");
     assert.equal(deps["@angular/compiler"], "^20.0.0");
-    assert.equal(deps["ng-zorro-antd"], undefined);
+    assert.deepEqual(
+      Object.keys(deps)
+        .filter((name) => name.startsWith("@angular/"))
+        .sort(),
+      [
+        "@angular/common",
+        "@angular/compiler",
+        "@angular/core",
+        "@angular/router",
+      ]
+    );
+    for (const name of [
+      "ng-zorro-antd",
+      "@ng-bootstrap/ng-bootstrap",
+      "ngx-bootstrap",
+      "@spartan-ng/brain",
+      "@taiga-ui/core",
+    ]) {
+      assert.equal(deps[name], undefined, name);
+    }
   });
 
-  it("rejects NG-ZORRO on an incompatible runtime instead of relaxing engine checks", () => {
-    assert.throws(
-      () => kitLoadDependencies(publishedPackages(), "22.12.0"),
-      /NG-ZORRO requires an Angular 22-compatible Node runtime/
+  it("selects by declared engine range rather than package name", () => {
+    const packages = [
+      {
+        name: "@adapttable/new-baseline",
+        manifest: { engines: { node: FLOOR } },
+      },
+      {
+        name: "@adapttable/new-angular-kit",
+        manifest: { engines: { node: ANGULAR_22_FLOOR } },
+      },
+    ];
+    for (const version of [
+      "22.12.0",
+      "22.22.2",
+      "23.0.0",
+      "24.14.9",
+      "25.0.0",
+    ]) {
+      assert.deepEqual(
+        packagesForRuntime(packages, version),
+        [packages[0]],
+        version
+      );
+    }
+    for (const version of ["22.22.3", "24.15.0", "26.0.0"]) {
+      assert.deepEqual(
+        packagesForRuntime(packages, version),
+        packages,
+        version
+      );
+    }
+    assert.deepEqual(packagesForRuntime(packages, "22.11.9"), []);
+  });
+
+  it("fails closed when a new Node engine range has no runtime coverage", () => {
+    for (const range of [undefined, ">=22.0.0", ">=28.0.0"]) {
+      assert.throws(
+        () =>
+          packagesForRuntime(
+            [
+              {
+                name: "@adapttable/new-kit",
+                manifest: { engines: { node: range } },
+              },
+            ],
+            "24.15.0"
+          ),
+        {
+          message: `@adapttable/new-kit has an untested Node engine range: ${range}`,
+        }
+      );
+    }
+  });
+
+  it("rejects every Angular 22 kit on an incompatible runtime without relaxing its peers", () => {
+    const kits = publishedPackages().filter((entry) =>
+      ANGULAR_22_KITS.has(entry.name)
     );
+    assert.deepEqual(
+      kits.map((entry) => entry.name).sort(),
+      [...ANGULAR_22_KITS].sort()
+    );
+    for (const kit of kits) {
+      for (const version of ["22.12.0", "22.22.2", "24.14.9", "25.0.0"]) {
+        assert.throws(() => kitLoadDependencies([kit], version), {
+          message: `${kit.name} requires Node ${ANGULAR_22_FLOOR}; cannot probe on Node ${version}`,
+        });
+      }
+      const deps = kitLoadDependencies([kit], "24.15.0");
+      for (const [name, range] of Object.entries(
+        kit.manifest.peerDependencies
+      )) {
+        if (name.startsWith("@angular/"))
+          assert.equal(deps[name], range, `${kit.name}: ${name}`);
+      }
+    }
+  });
+
+  it("cannot hide an incompatible Angular peer behind a later compatible package", () => {
+    const packages = [
+      {
+        name: "@adapttable/strict-kit",
+        manifest: {
+          engines: { node: FLOOR },
+          peerDependencies: { "@angular/core": "^22.0.0" },
+        },
+      },
+      {
+        name: "@adapttable/flexible-kit",
+        manifest: {
+          engines: { node: FLOOR },
+          peerDependencies: { "@angular/core": "^20.0.0 || ^22.0.0" },
+        },
+      },
+    ];
+    assert.throws(() => kitLoadDependencies(packages, "22.12.0"), {
+      message:
+        "@adapttable/strict-kit peer @angular/core@^22.0.0 cannot use Angular 20 on Node 22.12.0",
+    });
   });
 });

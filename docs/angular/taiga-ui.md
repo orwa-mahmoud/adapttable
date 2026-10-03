@@ -1,8 +1,10 @@
 # Taiga UI for Angular
 
-`@adapttable/taiga-ui` is a private adapter under development. It is not published
-on npm. It renders the Angular binding's table and feature slots with Taiga UI
-5.26.0. Taiga UI is Apache-2.0; the adapter source is MIT.
+`@adapttable/taiga-ui` renders the Angular binding's table and feature slots
+with Taiga UI 5.26.0. It is being prepared for its first public **0.1.0** release.
+Registry installation requires the owner-controlled npm publication to complete;
+release preparation does not confirm npm availability. Taiga UI is Apache-2.0;
+the adapter source is MIT.
 
 ## Setup
 
@@ -16,11 +18,16 @@ bootstrap providers. It enables Taiga's event plugins and stable options without
 writing theme attributes to `document.body`, disabling scrollbars globally, or
 adding document metadata. Use `AdaptTaigaRoot` for the scoped theme instead.
 
-In a workspace checkout, link the private `@adapttable/taiga-ui` and
-`@adapttable/angular` packages. Use Taiga 5.26.0 core/kit/cdk/i18n/styles and
-icons, the styles package's design-tokens dependency, Angular 22
-common/core/forms/router/platform-browser and CDK peers, and RxJS 7.
-Copy `@taiga-ui/icons/src` to the application's `assets/taiga-ui/icons` folder.
+After publication completes, install in an existing Angular 22 application:
+
+```sh
+npm install @adapttable/taiga-ui@0.1.0 @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2
+npm install --save-dev less@^4
+```
+
+Keep Angular Common, Core and Platform Browser on compatible Angular 22
+versions. Configure the host build to process Less and copy
+`node_modules/@taiga-ui/icons/src` to `assets/taiga-ui/icons` in its output.
 The adapter compiles its scoped Less theme; do not add a document-wide Taiga reset.
 
 Merge these providers into the config passed to `bootstrapApplication`:
@@ -111,11 +118,11 @@ The internal `ɵAdaptTaigaDropdownLabel` export links secondary entries to the
 directive that names Taiga's actual freeform popup host. Applications should use
 the documented feature factories rather than this internal compatibility helper.
 
-## Development status
+## Release verification
 
 The source includes behavior, conformance, SSR, and native-control contract
 fixtures. Full integration compilation, coverage, and browser acceptance are
 required before release. npm publication is a separate release step.
 
 See the [package README](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-taiga-ui)
-for the full entry inventory and workspace setup.
+for the full entry inventory and application setup.
