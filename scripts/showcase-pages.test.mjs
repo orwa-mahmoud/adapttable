@@ -370,10 +370,23 @@ describe("the kit stylesheets every showcase page loads", () => {
         );
       }
     }
-    assert.ok(
-      sideEffectImportsIn(ngZorro).includes(
-        "ng-zorro-antd/ng-zorro-antd.min.css"
-      )
+    const nativeSheets = ts
+      .createSourceFile("ngZorro.ts", ngZorro, ts.ScriptTarget.Latest, true)
+      .statements.filter(ts.isImportDeclaration)
+      .filter((statement) => statement.importClause?.name)
+      .map((statement) => statement.moduleSpecifier.text);
+    for (const sheet of [
+      "ng-zorro-antd/ng-zorro-antd.min.css?url",
+      "ng-zorro-antd/ng-zorro-antd.dark.min.css?url",
+    ]) {
+      assert.ok(nativeSheets.includes(sheet), `${sheet} is not lazy-loaded`);
+    }
+    assert.equal(
+      sideEffectImportsIn(ngZorro).some((sheet) =>
+        sheet.startsWith("ng-zorro-antd/")
+      ),
+      false,
+      "native themes must be activated individually, rather than both globally"
     );
     assert.doesNotMatch(unstyled, /ng-zorro-antd|ngZorro\.css|kits\/ngZorro/);
   });

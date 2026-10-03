@@ -443,6 +443,7 @@ export class AdaptFilterTreeGroup {
   selector: "adapt-filter-tree-view",
   imports: [AdaptControl, AdaptFilterTreeGroup],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
   template: `
     <ng-template #content>
       @let v = view();

@@ -5005,7 +5005,7 @@
   min-inline-size: 0;
   max-inline-size: 100%;
   color: var(--bs-body-color);
-  background: var(--bs-body-bg);
+  background-color: var(--bs-body-bg);
   font-family: var(--bs-body-font-family);
   font-size: var(--bs-body-font-size);
   line-height: var(--bs-body-line-height);
@@ -5264,8 +5264,9 @@
   overflow-y: auto;
 }
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-overlay] {
-  position: fixed;
+  position: absolute;
   inset: 0;
+  block-size: 0;
   z-index: 1070;
   pointer-events: none;
 }

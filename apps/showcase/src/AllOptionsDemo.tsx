@@ -639,12 +639,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
         ))}
       </div>
 
-      <KitSwitcher
-        adapter={adapter}
-        dark={dark}
-        onChange={setAdapter}
-        urlSync
-      />
+      <KitSwitcher adapter={adapter} dark={dark} onChange={setAdapter} />
 
       <div
         className="lab-toolbar"
