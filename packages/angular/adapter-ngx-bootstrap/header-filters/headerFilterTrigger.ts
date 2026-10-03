@@ -108,12 +108,16 @@ export class AdaptHeaderFilterTrigger {
     hasActiveHeaderFilter(this.props())
   );
   /** The overlay session for this column's funnel. */
-  protected readonly overlay = injectHeaderFilterOverlay({
-    def: computed(() => this.props().def),
-    source: computed(() => this.props().source),
-    closeOnSelect: computed(() => this.props().closeOnSelect === true),
-    registry: computed(() => this.props().registry ?? defaultFilterRegistry),
-  });
+  protected readonly overlay = injectHeaderFilterOverlay(
+    {
+      def: computed(() => this.props().def),
+      source: computed(() => this.props().source),
+      closeOnSelect: computed(() => this.props().closeOnSelect === true),
+      registry: computed(() => this.props().registry ?? defaultFilterRegistry),
+    },
+    // ngx-bootstrap recognises its portaled menu and owns outside dismissal.
+    { pointerDismiss: false }
+  );
   /** The source the form writes, still a table source at runtime. */
   protected readonly formSource = computed(
     () => this.overlay.source() as TableSource<never>
