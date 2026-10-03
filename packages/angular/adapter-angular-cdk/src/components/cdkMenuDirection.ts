@@ -15,44 +15,49 @@ function directionAwareScrollStrategy(): () => ScrollStrategy {
   const inheritedFactory = inject(MENU_SCROLL_STRATEGY, { skipSelf: true });
   const direction = inject(Directionality);
   const injector = inject(Injector);
-  return () => {
-    const inherited = inheritedFactory();
-    let overlay: OverlayRef | undefined;
-    let directionEffect: AfterRenderRef | undefined;
-    const stop = () => {
-      directionEffect?.destroy();
-      directionEffect = undefined;
-    };
-    return {
-      attach: (ref) => {
-        inherited.attach(ref);
-        overlay = ref;
-      },
-      enable: () => {
-        inherited.enable();
-        directionEffect ??= untracked(() =>
-          afterRenderEffect(
-            () => {
-              // Keep CDK's live Directionality object, and update its DOM host.
-              direction.valueSignal();
-              if (!overlay?.hasAttached()) return;
-              overlay.setDirection(direction);
-              overlay.updatePosition();
-            },
-            { injector }
-          )
-        );
-      },
-      disable: () => {
-        stop();
-        inherited.disable();
-      },
-      detach: () => {
-        stop();
-        overlay = undefined;
-        inherited.detach?.();
-      },
-    };
+  return () => withLiveDirection(inheritedFactory(), direction, injector);
+}
+
+function withLiveDirection(
+  inherited: ScrollStrategy,
+  direction: Directionality,
+  injector: Injector
+): ScrollStrategy {
+  let overlay: OverlayRef | undefined;
+  let directionEffect: AfterRenderRef | undefined;
+  const stop = () => {
+    directionEffect?.destroy();
+    directionEffect = undefined;
+  };
+  return {
+    attach: (ref) => {
+      inherited.attach(ref);
+      overlay = ref;
+    },
+    enable: () => {
+      inherited.enable();
+      directionEffect ??= untracked(() =>
+        afterRenderEffect(
+          () => {
+            // Keep CDK's live Directionality object, and update its DOM host.
+            direction.valueSignal();
+            if (!overlay?.hasAttached()) return;
+            overlay.setDirection(direction);
+            overlay.updatePosition();
+          },
+          { injector }
+        )
+      );
+    },
+    disable: () => {
+      stop();
+      inherited.disable();
+    },
+    detach: () => {
+      stop();
+      overlay = undefined;
+      inherited.detach?.();
+    },
   };
 }
 

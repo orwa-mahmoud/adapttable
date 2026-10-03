@@ -39,6 +39,21 @@ or `theme="light"` to the table. Standalone exported controls should be placed i
 `<div class="adapttable-ngx-bootstrap" data-bs-theme="dark">` (or `light`). Keep their
 overlays inside that boundary; no kit overlay is portaled to `document.body`.
 
+## Known hydration replay limitation
+
+With ngx-bootstrap **22.0.0** and Angular **22** (verified on 22.2.0), a click on a
+native pagination anchor before hydration finishes is lost when Angular replays it. The native
+pager calls `preventDefault()` during replay, which Angular rejects and reports
+as an error. This affects queued previous/next, numbered and ellipsis anchor
+clicks; it is an upstream pagination compatibility limitation.
+
+Server rendering and ordinary hydration work, including preserving server rows
+and paging after hydration. A fresh click on the same native control in the same
+hydrated app works without reloading; the adapter does not automatically retry
+the lost early click. The replay case is tracked as an expected failure, with
+strict checks for the exact upstream error and a separate same-app recovery
+regression. Other SSR and hydration checks remain required.
+
 ## Usage
 
 ```ts
@@ -117,7 +132,8 @@ Import a feature from its own secondary entry and compose it through the
   panel, density, fullscreen and status bar
 - **Responsive mobile cards**, shared localized labels and RTL support;
   custom card renderers retain the selection, editing and action shell
-- **Angular SSR and hydration** with deterministic initial data.
+- **Angular SSR and hydration** with deterministic initial data, subject to the
+  [pagination replay limitation](#known-hydration-replay-limitation).
   React Server Components are a React-only integration, not an Angular feature
 - **Optional assistant and approval controls** on `/assistant`, backed by the
   separately imported AI bindings

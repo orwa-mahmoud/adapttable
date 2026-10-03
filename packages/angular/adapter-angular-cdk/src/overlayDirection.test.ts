@@ -112,6 +112,27 @@ class Host {
 
 type Kind = "saved views" | "row actions" | "context menu";
 
+const menuParts: Record<
+  Kind,
+  { trigger: string; field: string; panel: string | null }
+> = {
+  "saved views": {
+    trigger: "views-button",
+    field: "views-input",
+    panel: "views-panel",
+  },
+  "row actions": {
+    trigger: "row-actions-trigger",
+    field: "action-button",
+    panel: null,
+  },
+  "context menu": {
+    trigger: "cell",
+    field: "context-menu-item",
+    panel: "context-menu",
+  },
+};
+
 beforeEach(() => {
   vi.spyOn(document.documentElement, "clientWidth", "get").mockReturnValue(
     1000
@@ -157,15 +178,40 @@ function connectedFor(
   return overlay;
 }
 
+function positionContextOrigin(connected: CdkConnectedOverlay) {
+  const origin = connected.origin;
+  if (!(origin instanceof CdkOverlayOrigin))
+    throw new Error("Missing context menu origin");
+  const originElement: unknown = origin.elementRef.nativeElement;
+  if (!(originElement instanceof HTMLElement))
+    throw new Error("Missing context menu origin element");
+  originElement.getBoundingClientRect = () => new DOMRect(300, 20, 0, 0);
+}
+
+function overlayFor(
+  kind: Kind,
+  mounted: Awaited<ReturnType<typeof mount>>,
+  panel: HTMLElement
+): OverlayRef {
+  if (kind === "row actions") {
+    const record = mounted.probe.records.find((candidate) =>
+      candidate.overlay?.overlayElement.contains(panel)
+    );
+    if (!record?.overlay)
+      throw new Error(
+        "Native menu did not attach its inherited scroll strategy"
+      );
+    return record.overlay;
+  }
+  const connected = connectedFor(mounted.fixture, panel);
+  if (kind === "context menu") positionContextOrigin(connected);
+  return connected.overlayRef;
+}
+
 async function open(kind: Kind, mounted: Awaited<ReturnType<typeof mount>>) {
-  const { fixture, part, probe, settle } = mounted;
-  const trigger = part(
-    kind === "saved views"
-      ? "views-button"
-      : kind === "row actions"
-        ? "row-actions-trigger"
-        : "cell"
-  );
+  const { part, settle } = mounted;
+  const parts = menuParts[kind];
+  const trigger = part(parts.trigger);
   trigger.getBoundingClientRect = () => new DOMRect(300, 0, 100, 20);
   if (kind === "context menu") {
     trigger.dispatchEvent(
@@ -180,41 +226,12 @@ async function open(kind: Kind, mounted: Awaited<ReturnType<typeof mount>>) {
     trigger.click();
   }
   await settle();
-  const field = part(
-    kind === "saved views"
-      ? "views-input"
-      : kind === "row actions"
-        ? "action-button"
-        : "context-menu-item"
-  );
-  const panel =
-    kind === "row actions"
-      ? field.closest<HTMLElement>('[role="menu"]')
-      : part(kind === "saved views" ? "views-panel" : "context-menu");
+  const field = part(parts.field);
+  const panel = parts.panel
+    ? part(parts.panel)
+    : field.closest<HTMLElement>('[role="menu"]');
   if (!panel) throw new Error("Missing actual menu panel");
-  let overlay: OverlayRef;
-  if (kind === "row actions") {
-    const record = probe.records.find((candidate) =>
-      candidate.overlay?.overlayElement.contains(panel)
-    );
-    if (!record?.overlay)
-      throw new Error(
-        "Native menu did not attach its inherited scroll strategy"
-      );
-    overlay = record.overlay;
-  } else {
-    const connected = connectedFor(fixture, panel);
-    overlay = connected.overlayRef;
-    if (kind === "context menu") {
-      const origin = connected.origin;
-      if (!(origin instanceof CdkOverlayOrigin))
-        throw new Error("Missing context menu origin");
-      const originElement: unknown = origin.elementRef.nativeElement;
-      if (!(originElement instanceof HTMLElement))
-        throw new Error("Missing context menu origin element");
-      originElement.getBoundingClientRect = () => new DOMRect(300, 20, 0, 0);
-    }
-  }
+  const overlay = overlayFor(kind, mounted, panel);
   overlay.overlayElement.getBoundingClientRect = () =>
     new DOMRect(0, 0, 200, 40);
   overlay.updatePosition();
@@ -381,20 +398,38 @@ describe("already-open native CDK overlay direction", () => {
         second.fixture.debugElement.injector.get(MENU_SCROLL_STRATEGY)
       ).not.toBe(inherited);
       const secondViews = await open("saved views", second);
-      first.find(".unrelated-trigger").click();
+      const unrelatedTrigger = unrelated.injector.get(CdkMenuTrigger);
+      const unrelatedButton = first.find(".unrelated-trigger");
+      // HTMLElement.click() does not focus the trigger as user activation does.
+      // Keep the native menu stack focused while its portal initializes.
+      unrelatedButton.focus();
+      unrelatedButton.click();
       await first.settle();
       const unrelatedMenu = first.find(".unrelated-menu");
+      const unrelatedItem = first.find(".unrelated-menu button");
+      unrelatedItem.focus();
+      await first.settle();
+      await second.settle();
       const unrelatedOverlay = first.probe.records[0]?.overlay;
       if (!unrelatedOverlay)
         throw new Error("Unrelated native menu did not open");
       const direction = vi.spyOn(unrelatedOverlay, "setDirection");
       const otherDirection = vi.spyOn(secondViews.overlay, "setDirection");
+      expect(unrelatedTrigger.isOpen()).toBe(true);
+      expect(unrelatedOverlay.hasAttached()).toBe(true);
+      expect(unrelatedMenu.isConnected).toBe(true);
+      expect(secondViews.overlay.hasAttached()).toBe(true);
+      expect(secondViews.panel.isConnected).toBe(true);
+      expect(document.activeElement).toBe(unrelatedItem);
       first.fixture.componentInstance.dir.set("ltr");
       await first.settle();
       await second.settle();
       expect(direction).not.toHaveBeenCalled();
       expect(otherDirection).not.toHaveBeenCalled();
+      expect(unrelatedTrigger.isOpen()).toBe(true);
+      expect(unrelatedOverlay.hasAttached()).toBe(true);
       expect(unrelatedMenu.isConnected).toBe(true);
+      expect(document.activeElement).toBe(unrelatedItem);
       expect(secondViews.panel.isConnected).toBe(true);
       expect(secondViews.overlay.hostElement.dir).toBe("rtl");
       first.fixture.destroy();

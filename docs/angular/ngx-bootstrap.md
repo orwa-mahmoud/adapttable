@@ -88,6 +88,27 @@ Mobile cards retain selection, editing, row actions, details, tree expansion and
 reordering. `dir="rtl"` changes reading order and logical drawer placement.
 Localized labels are supplied by the Angular binding. Hosts own all row writes.
 
+## Known upstream event-replay limitation
+
+With ngx-bootstrap **22.0.0** and Angular **22** (verified on 22.2.0), a
+pagination-link click made before hydration is not applied when Angular replays
+it. The native `PaginationComponent` calls `preventDefault()` on the replayed
+event, which Angular rejects and reports as an error. This is an upstream native
+pagination limitation, not a failure to render or hydrate the table.
+
+Server rendering, hydration that reuses the server's nodes, page-size state and
+normal post-hydration paging are supported. Once hydration finishes, clicking
+the same pagination link again works in the same application and updates the
+page and URL exactly once. There is **no automatic retry** of the early click.
+If retaining every pre-hydration paging action is required, use another kit
+until this upstream behavior is corrected.
+
+The replay case has an explicit known-failure exception; a separate strict
+regression checks the rejected action, same-app manual retry and absence of
+duplicate updates. Other SSR, hydration and interaction checks remain required.
+See the [upstream pagination implementation](https://github.com/valor-software/ngx-bootstrap/blob/v22.0.0/src/pagination/pagination.component.ts)
+and [Angular hydration guidance](./ssr-rsc.md).
+
 ## Verification
 
 The package includes native overlay/control fixtures, the feature-conformance

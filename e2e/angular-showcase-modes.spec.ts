@@ -267,6 +267,13 @@ for (const kit of ANGULAR_KITS) {
       const dialog = page.getByRole("dialog", { name: "Feature Lab controls" });
       await configure.click();
       await expect(dialog).toBeVisible();
+      await expect
+        .poll(() =>
+          dialog.evaluate(
+            (element) => element.scrollWidth - element.clientWidth
+          )
+        )
+        .toBeLessThanOrEqual(1);
       await attachView(page, testInfo, `${kit.key}-phone-lab-controls-top`);
       const finalControl = dialog.getByRole("checkbox", {
         name: "Mobile cards",

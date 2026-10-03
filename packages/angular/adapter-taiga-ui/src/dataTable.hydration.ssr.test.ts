@@ -112,8 +112,29 @@ const EARLY_EVENTS = "_ejsas";
 const SHELL = `<html><head></head><body><script id="ng-event-dispatch-contract">${CONTRACT}</script><app-root></app-root></body></html>`;
 
 /** DOM constructor families installed by Angular's Domino server adapter. */
-const SERVER_DOM_TYPE =
-  /^(?:(?:HTML|SVG).*Element|CSSStyleDeclaration|CharacterData|Comment|DOMImplementation|DOMTokenList|Document|DocumentFragment|DocumentType|Element|NamedNodeMap|Node|NodeList|NodeFilter|ProcessingInstruction|Text|Window|Event|UIEvent|MouseEvent|CustomEvent|KeyboardEvent)$/;
+const SERVER_DOM_TYPES = new Set([
+  "CSSStyleDeclaration",
+  "CharacterData",
+  "Comment",
+  "DOMImplementation",
+  "DOMTokenList",
+  "Document",
+  "DocumentFragment",
+  "DocumentType",
+  "Element",
+  "NamedNodeMap",
+  "Node",
+  "NodeList",
+  "NodeFilter",
+  "ProcessingInstruction",
+  "Text",
+  "Window",
+  "Event",
+  "UIEvent",
+  "MouseEvent",
+  "CustomEvent",
+  "KeyboardEvent",
+]);
 
 /** Load the server's page at `url`, running its scripts as the browser would. */
 async function loadServerPage(url: string): Promise<void> {
@@ -122,7 +143,9 @@ async function loadServerPage(url: string): Promise<void> {
   // SSR and a real browser have separate realms; this fixture renders both in
   // one process, so restore its actual browser constructors before hydration.
   const browserTypes = Object.getOwnPropertyNames(browser)
-    .filter((name) => SERVER_DOM_TYPE.test(name))
+    .filter(
+      (name) => SERVER_DOM_TYPES.has(name) || /^(HTML|SVG).*Element$/.test(name)
+    )
     .flatMap((name) => {
       const descriptor = Object.getOwnPropertyDescriptor(globalThis, name);
       const value: unknown = Reflect.get(globalThis, name);

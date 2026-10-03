@@ -155,6 +155,13 @@ dialog.angular-lab-options .angular-options {
 }
 dialog.angular-lab-options .angular-options > label {
   flex: 1 1 230px;
+  min-width: 0;
+  max-width: 100%;
+}
+/* Long native option text must shrink within its label on narrow screens. */
+dialog.angular-lab-options .angular-options select {
+  min-width: 0;
+  max-width: 100%;
 }
 .angular-transition-warning {
   position: fixed;
