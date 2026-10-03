@@ -15,12 +15,15 @@
 }
 .adapt-material [data-adapttable-part="root"] {
   min-inline-size: 0;
+  border: 1px solid var(--adapt-material-line);
+  border-radius: 12px;
+  background: var(--adapt-material-surface);
 }
 .adapt-material [data-density="compact"] {
-  --adapt-material-cell-space: 6px 12px;
+  --adapt-material-cell-space: 4px 12px;
 }
 .adapt-material [data-density="comfortable"] {
-  --adapt-material-cell-space: 18px 20px;
+  --adapt-material-cell-space: 10px 16px;
 }
 .adapt-material [data-adapttable-part="toolbar"],
 .adapt-material [data-adapttable-part="footer"],
@@ -38,15 +41,16 @@
   flex-wrap: wrap;
 }
 .adapt-material [data-adapttable-part="toolbar"] {
-  margin-block-end: 16px;
+  padding: 12px;
+  border-block-end: 1px solid var(--adapt-material-line);
 }
 .adapt-material [data-adapttable-part="footer"] {
   justify-content: space-between;
-  padding-block: 12px;
+  padding: 12px;
+  border-block-start: 1px solid var(--adapt-material-line);
 }
 .adapt-material [data-adapttable-part="search-field"] {
   flex: 1 1 200px;
-  max-inline-size: 360px;
   flex-wrap: nowrap;
 }
 .adapt-material .mat-mdc-form-field,
@@ -60,8 +64,6 @@
 .adapt-material [data-adapttable-part="scroll-box"] {
   overflow: auto;
   max-inline-size: 100%;
-  border: 1px solid var(--adapt-material-line);
-  border-radius: 12px;
 }
 .adapt-material [data-adapttable-part="table"] {
   border-collapse: separate;
@@ -206,4 +208,22 @@
   .adapt-material .adapt-material-pager {
     gap: 0;
   }
+}
+
+/* Editable values remain Material buttons, with the density of table content. */
+.adapt-material [data-adapttable-part="edit-cell-activate"] {
+  --mat-button-text-container-height: 28px;
+  --mat-button-text-horizontal-padding: 0px;
+  --mat-button-text-label-text-color: var(--mat-sys-on-surface, #1d1b20);
+  --mat-button-text-label-text-weight: 400;
+  --mat-button-text-label-text-tracking: normal;
+  min-inline-size: 0;
+}
+.adapt-material [data-adapttable-part="cards"] {
+  padding: 12px;
+}
+.adapt-material
+  [data-adapttable-part="cards"]
+  [data-adapttable-part="edit-cell-activate"] {
+  --mat-button-text-container-height: 40px;
 }
