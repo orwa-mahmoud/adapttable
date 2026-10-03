@@ -75,6 +75,8 @@ export class AdaptContextMenuSurface {
     // (undocumented)
     protected closed(open: boolean): void;
     // (undocumented)
+    protected onKeyDown(event: KeyboardEvent): void;
+    // (undocumented)
     protected readonly popperOptions: (options: Partial<Options>) => Partial<Options>;
     readonly props: InputSignal<    {
     readonly at: {

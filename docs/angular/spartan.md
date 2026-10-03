@@ -95,6 +95,8 @@ Set overrides on `[data-adapttable-kit="spartan"]` so portalled surfaces share
 them. Set `.dark` or `data-theme="dark"` on the document element to cover both
 the table and CDK portals. No unprefixed global theme tokens are changed.
 The `ɵ`-prefixed exports only link the kit's secondary entries and are internal.
+In particular, `ɵHlmPopoverLabel` keeps the actual Brain popover pane's accessible
+name synchronized with its owning control's localized label.
 
 An upstream Brain upgrade must review compatibility and the copied Helm layer,
 then verify conformance, overlays, keyboard handling, focus, themes and SSR.

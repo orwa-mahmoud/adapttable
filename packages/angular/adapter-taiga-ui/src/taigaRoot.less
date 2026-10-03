@@ -11,6 +11,12 @@
     z-index: var(--adapttable-overlay-z-index, 1000);
   }
 
+  // A dynamically declared template can create another native portal root
+  // inside this content wrapper. Let that portal reach the host-page stack.
+  > .t-root-content:has([data-adapttable-taiga-root] > tui-popups) {
+    isolation: auto;
+  }
+
   html[data-theme="dark"] &:not([tuiTheme="light"]),
   html.dark &:not([tuiTheme="light"]) {
     .tui-theme-dark();

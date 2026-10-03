@@ -171,7 +171,7 @@ import { TuiDropdownPosition } from '@taiga-ui/core';
 import { TuiDropdownPositionSided } from '@taiga-ui/core';
 import { TuiDropdownSelection } from '@taiga-ui/core';
 import { TuiInputDirective } from '@taiga-ui/core';
-import { TuiItem } from '@taiga-ui/cdk/directives/item';
+import { TuiItem } from '@taiga-ui/cdk';
 import { TuiLabel } from '@taiga-ui/core';
 import { TuiNativeSelect } from '@taiga-ui/kit';
 import { TuiOptGroup } from '@taiga-ui/core';
@@ -546,7 +546,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly sidePanelSlot: FeatureSlotKey<Omit<SidePanelChromeProps<unknown, SidePanelEntry, KeyboardEvent>, "slots">>;
     readonly skeletonRows: InputSignal<number | undefined>;
-    protected sortBy(event: Event): void;
+    protected sortBy(value: string): void;
     readonly source: InputSignal<TableSource<TRow> | Signal<TableSource<TRow>> | undefined>;
     protected readonly statusBarProps: Signal<{
         enabled: boolean;
@@ -1863,7 +1863,7 @@ export const OVERLAY_Z = 10050;
 export function placeOverlayBelowTrigger(overlay: HTMLElement, trigger: HTMLElement, dir: "ltr" | "rtl"): void;
 
 // @public
-export function provideAdaptTaiga(): Array<Provider | EnvironmentProviders>;
+export function provideAdaptTaiga(): (Provider | EnvironmentProviders)[];
 
 // @public
 export interface RowActionsCell<TRow> {
@@ -1934,6 +1934,23 @@ export interface TableView<TRow> {
 export type TreeCellSlotProps = TreeCellProps<unknown, TemplateRef<unknown>>;
 
 // @public
+export class ɵAdaptTaigaDropdownLabel {
+    constructor();
+    // (undocumented)
+    readonly adaptTaigaDropdownLabel: InputSignal<string>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<ɵAdaptTaigaDropdownLabel, "[adaptTaigaDropdownLabel]", never, {
+        "adaptTaigaDropdownLabel": {
+            "alias": "adaptTaigaDropdownLabel";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<ɵAdaptTaigaDropdownLabel, never>;
+}
+
+// @public
 export class ɵAdaptTaigaLabels implements PipeTransform {
     // (undocumented)
     transform(options: readonly unknown[] | Readonly<Record<string, unknown>>, labels?: Readonly<Record<string, unknown>>): (value: unknown) => string;
@@ -1944,7 +1961,7 @@ export class ɵAdaptTaigaLabels implements PipeTransform {
 }
 
 // @public
-export const ɵTAIGA_CONTROLS: readonly [typeof ɵAdaptTaigaLabels, typeof FormsModule, typeof TuiButton, typeof TuiCheckbox, readonly [TuiDataListComponent, TuiOption, TuiOptionWithValue, TuiOptGroup], readonly [TuiDropdownOptionsDirective, TuiDropdownDriverDirective, TuiDropdownDirective, TuiDropdownComponent, TuiDropdownA11y, TuiDropdownOpen, TuiDropdownManual, TuiDropdownHover, TuiDropdownContent, TuiDropdownContext, TuiDropdownPosition, TuiDropdownPositionSided, TuiDropdownSelection], typeof TuiPopup, typeof TuiDialog, readonly [TuiLabel, TuiTextfieldComponent, TuiTextfieldOptionsDirective, TuiDropdownContent, TuiInputDirective], readonly [TuiItem, TuiLabel, TuiTextfieldComponent, TuiTextfieldOptionsDirective, TuiTextfieldMultiComponent, TuiDropdownContent], readonly [TuiSelectDirective, TuiNativeSelect, TuiLabel, TuiTextfieldComponent, TuiTextfieldOptionsDirective, TuiDropdownContent], typeof TuiDrawer, readonly [TuiTextareaComponent, TuiTextareaDirective, TuiLabel, TuiTextfieldComponent, TuiTextfieldOptionsDirective, TuiDropdownContent], typeof TuiSkeleton];
+export const ɵTAIGA_CONTROLS: readonly [typeof ɵAdaptTaigaLabels, typeof ɵAdaptTaigaDropdownLabel, typeof FormsModule, typeof TuiButton, typeof TuiCheckbox, readonly [TuiDataListComponent, TuiOption, TuiOptionWithValue, TuiOptGroup], readonly [TuiDropdownOptionsDirective, TuiDropdownDriverDirective, TuiDropdownDirective, TuiDropdownComponent, TuiDropdownA11y, TuiDropdownOpen, TuiDropdownManual, TuiDropdownHover, TuiDropdownContent, TuiDropdownContext, TuiDropdownPosition, TuiDropdownPositionSided, TuiDropdownSelection], typeof TuiPopup, typeof TuiDialog, readonly [TuiLabel, TuiTextfieldComponent, TuiTextfieldOptionsDirective, TuiDropdownContent, TuiInputDirective], readonly [TuiItem, TuiLabel, TuiTextfieldComponent, TuiTextfieldOptionsDirective, TuiTextfieldMultiComponent, TuiDropdownContent], readonly [TuiSelectDirective, TuiNativeSelect, TuiLabel, TuiTextfieldComponent, TuiTextfieldOptionsDirective, TuiDropdownContent], typeof TuiDrawer, readonly [TuiTextareaComponent, TuiTextareaDirective, TuiLabel, TuiTextfieldComponent, TuiTextfieldOptionsDirective, TuiDropdownContent], typeof TuiSkeleton];
 
 // (No @packageDocumentation comment for this package)
 

@@ -287,6 +287,9 @@ export async function openAngularOptions(control: Locator): Promise<Locator> {
   const combobox = angularCombobox(control);
   // NG-ZORRO overlays its readonly input with the selected label. The visible
   // selector is the pointer target a reader uses; the input retains keyboard ARIA.
+  // Resolve the rendered native control before classifying its host. A count
+  // on a not-yet-mounted select would choose the generic input click path.
+  await expect(combobox).toBeVisible();
   const zorro = combobox.locator("xpath=ancestor::nz-select[1]");
   if (await zorro.count()) await zorro.locator("nz-select-top-control").click();
   else await combobox.click();

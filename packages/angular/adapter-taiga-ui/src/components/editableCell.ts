@@ -32,7 +32,7 @@ import {
   Component,
   computed,
   DestroyRef,
-  type ElementRef,
+  ElementRef,
   inject,
   input,
   TemplateRef,
@@ -223,7 +223,9 @@ class AdaptEditCellButton {
 })
 export class AdaptNativeCellEditor implements AfterViewInit {
   readonly props = input.required<EditableCellEditorCtrl>();
-  private readonly el = viewChild<ElementRef<HTMLElement>>("el");
+  private readonly el = viewChild<unknown, ElementRef<HTMLElement>>("el", {
+    read: ElementRef,
+  });
 
   protected readonly editorValidationProps = editorValidationProps;
   protected readonly isBooleanEditor = isBooleanEditor;
@@ -297,7 +299,10 @@ export class AdaptNativeCellEditor implements AfterViewInit {
 class AdaptEditCellOption {
   private readonly destroyRef = inject(DestroyRef);
   readonly props = input.required<MultiSelectEditorCheckboxProps>();
-  private readonly el = viewChild.required<ElementRef<HTMLInputElement>>("el");
+  private readonly el = viewChild.required<
+    unknown,
+    ElementRef<HTMLInputElement>
+  >("el", { read: ElementRef });
 
   constructor() {
     afterNextRender(() => {

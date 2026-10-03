@@ -302,9 +302,14 @@ describe("every bundled locale through native Angular controls", () => {
           const panel = localePart(root, "filters-popover");
           const form = within(panel);
           expect(panel.getAttribute("dir")).toBe(getDirection(locale));
-          const operator = form.getByRole<HTMLSelectElement>("combobox", {
-            name: labels.operator,
-          });
+          // The native container stays hidden through its positioning frame
+          // and becomes visible on the following frame. Query accessibility.
+          const operator = await form.findByRole<HTMLSelectElement>(
+            "combobox",
+            {
+              name: labels.operator,
+            }
+          );
           expect(
             within(operator).getByRole<HTMLOptionElement>("option", {
               name: labels.opContains,

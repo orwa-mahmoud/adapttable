@@ -11,6 +11,7 @@ import { AgentApprovalProps } from '@adapttable/angular';
 import { AgentApprovalSlots } from '@adapttable/angular';
 import { ApprovalReviewSlots } from '@adapttable/angular';
 import { BlockScrollStrategy } from '@angular/cdk/overlay';
+import { Directionality } from '@angular/cdk/bidi';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { Signal } from '@angular/core';
@@ -175,6 +176,8 @@ export class AdaptAssistantLanguageChip {
 // @public
 export class AdaptAssistantMenu {
     // (undocumented)
+    protected readonly inheritedDirection: Directionality;
+    // (undocumented)
     readonly props: InputSignal<TableAssistantMenuProps>;
     // (undocumented)
     protected select(id: string): void;
@@ -246,6 +249,8 @@ export class AdaptAssistantWindow {
 export class AdaptTableAssistant {
     // (undocumented)
     protected readonly accented: Signal<TableAssistantProps>;
+    // (undocumented)
+    protected readonly inheritedDirection: Directionality;
     // (undocumented)
     readonly props: InputSignal<TableAssistantProps>;
     // (undocumented)

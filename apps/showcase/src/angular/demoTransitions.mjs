@@ -127,12 +127,12 @@ export function registerDemoRenderer(next) {
  * The action (for example changing a saved view) runs only after draft safety.
  * @param {() => void} [action]
  */
-export function refreshDemo(action = () => {}) {
+export function refreshDemo(action) {
   if (!render)
     throw new Error("The Angular demo transition renderer is not ready");
   if (!canReplaceDemo()) return false;
   captureDemoState();
-  action();
+  if (action) action();
   void render();
   return true;
 }
@@ -300,7 +300,11 @@ export function registerDemoControlRestore(callback) {
 export function initializeDemoHistory() {
   historyController = createDemoHistory({
     href: () => window.location.href,
-    state: () => window.history.state,
+    state: () => {
+      /** @type {unknown} */
+      const state = window.history.state;
+      return state;
+    },
     push: (state, href) => window.history.pushState(state, "", href),
     replace: (state, href) => window.history.replaceState(state, "", href),
     go: (delta) => window.history.go(delta),

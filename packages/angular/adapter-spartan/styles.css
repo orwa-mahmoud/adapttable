@@ -156,6 +156,9 @@
     font-weight: 600;
     background: var(--at-spartan-muted);
   }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="header-cell"] {
+    position: relative;
+  }
   [data-adapttable-kit="spartan"] .at-spartan-header {
     @apply flex min-w-0 items-center gap-1;
   }
@@ -165,6 +168,44 @@
     background: transparent;
     min-inline-size: 0;
     text-align: start;
+  }
+  [data-adapttable-kit="spartan"]
+    .at-spartan-button[data-adapttable-part="resize-handle"] {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block: 0;
+    inline-size: 8px;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: col-resize;
+    touch-action: none;
+    user-select: none;
+  }
+  [data-adapttable-kit="spartan"]
+    .at-spartan-button[data-adapttable-part="resize-handle"]:hover {
+    background: transparent;
+  }
+  [data-adapttable-kit="spartan"]
+    [data-adapttable-part="resize-handle"]::after {
+    content: "";
+    position: absolute;
+    inset-inline-end: 3px;
+    inset-block: 25%;
+    inline-size: 2px;
+    background: var(--at-spartan-border);
+  }
+  [data-adapttable-kit="spartan"]
+    [data-adapttable-part="resize-handle"]:is(:hover, :focus-visible)::after {
+    background: var(--at-spartan-ring);
+  }
+  [data-adapttable-kit="spartan"]
+    [data-adapttable-part="resize-handle"]:focus-visible {
+    outline-offset: -2px;
   }
   [data-adapttable-kit="spartan"] [data-adapttable-part="cards"] {
     @apply grid gap-3;

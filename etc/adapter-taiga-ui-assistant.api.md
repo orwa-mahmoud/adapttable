@@ -157,7 +157,7 @@ export class AdaptAssistantInput {
 // @public
 export class AdaptAssistantLanguageChip {
     // (undocumented)
-    protected changed(event: Event): void;
+    protected changed(value: string | null): void;
     // (undocumented)
     readonly props: InputSignal<TableAssistantLanguageChipProps>;
     // (undocumented)
@@ -174,6 +174,7 @@ export class AdaptAssistantLanguageChip {
 
 // @public
 export class AdaptAssistantMenu {
+    constructor();
     // (undocumented)
     protected readonly menuOpen: WritableSignal<boolean>;
     // (undocumented)

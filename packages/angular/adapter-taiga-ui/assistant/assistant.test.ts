@@ -320,6 +320,8 @@ describe("native assistant", () => {
     try {
       await settle(fixture);
       const slot = document.querySelector("adapt-assistant-sheet");
+      expect(document.querySelectorAll("tui-root")).toHaveLength(1);
+      expect(document.querySelectorAll("tui-popups")).toHaveLength(1);
       expect(part("assistant-sheet")).toBeNull();
       fixture.componentInstance.open.set(true);
       await settle(fixture);
@@ -339,6 +341,10 @@ describe("native assistant", () => {
       fixture.componentInstance.open.set(false);
       await settle(fixture);
       expect(part("assistant-sheet")).toBeNull();
+      // The native modal completes animation teardown after Angular settles.
+      await expect
+        .poll(() => document.querySelectorAll("tui-modal").length)
+        .toBe(0);
       fixture.componentInstance.label.set("Closed conversation");
       await settle(fixture);
       expect(fixture.componentInstance.close).not.toHaveBeenCalled();
@@ -355,6 +361,9 @@ describe("native assistant", () => {
       await settle(fixture);
       expect(fixture.componentInstance.close).toHaveBeenCalledOnce();
       expect(part("assistant-sheet")).toBeNull();
+      await expect
+        .poll(() => document.querySelectorAll("tui-modal").length)
+        .toBe(0);
     } finally {
       fixture.destroy();
     }
@@ -375,12 +384,18 @@ describe("native assistant", () => {
       fixture.componentInstance.open.set(true);
       await settle(fixture);
       const slot = document.querySelector("adapt-assistant-sheet");
+      expect(document.querySelectorAll("tui-root")).toHaveLength(1);
+      expect(document.querySelectorAll("tui-popups")).toHaveLength(1);
       expect(
         part("assistant-sheet")?.closest('[aria-modal="true"]')
       ).not.toBeNull();
       fixture.componentInstance.open.set(false);
       await settle(fixture);
       expect(part("assistant-sheet")).toBeNull();
+      // Content leaves synchronously; the native portal's removal is async.
+      await expect
+        .poll(() => document.querySelectorAll("tui-modal").length)
+        .toBe(0);
       fixture.componentInstance.open.set(true);
       await settle(fixture);
       expect(document.querySelector("adapt-assistant-sheet")).toBe(slot);

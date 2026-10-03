@@ -103,7 +103,9 @@ async function mount() {
     parts("header-cell").map((cell) => cell.dataset.columnKey);
   const settle = () => fixture.whenStable();
   const open = async () => {
-    part<HTMLButtonElement>("column-menu-button")!.click();
+    const button = part<HTMLButtonElement>("column-menu-button")!;
+    button.focus();
+    button.click();
     await settle();
   };
   const item = (index: number) => parts("column-menu-item")[index];

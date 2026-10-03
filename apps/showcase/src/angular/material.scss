@@ -10,7 +10,12 @@
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: (
+          Roboto,
+          sans-serif,
+        ),
+      ),
       density: -1,
     )
   );

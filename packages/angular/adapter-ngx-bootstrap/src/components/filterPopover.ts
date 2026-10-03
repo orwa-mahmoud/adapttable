@@ -41,6 +41,7 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
     <ng-template #content>
       <div
         data-ngx-bootstrap-part="filters-popover"
+        (click)="keepRemovedContentInside($event)"
         [attr.dir]="p.dir ?? 'ltr'"
         [attr.data-dir]="p.dir ?? 'ltr'"
       >
@@ -99,10 +100,23 @@ export class AdaptFilterPopover {
 
   protected shown(): void {
     const anchor = this.anchor().nativeElement;
-    const id = anchor.getAttribute("aria-describedby");
-    const window = id ? anchor.ownerDocument.getElementById(id) : null;
+    // onShown precedes the directive's aria-describedby assignment. Its native
+    // container is already mounted in this instance's dedicated portal.
+    const selector = this.overlayContainer();
+    const container = selector
+      ? anchor.ownerDocument.querySelector(selector)
+      : anchor.parentElement;
+    const window = container?.querySelector("popover-container");
     window?.setAttribute("role", "dialog");
     window?.setAttribute("aria-label", this.props().labels.filters);
+  }
+
+  protected keepRemovedContentInside(event: MouseEvent): void {
+    // The bubbling path still includes this surface if an inside action
+    // removes its target. Preserve that inside press before ngx-bootstrap's
+    // document listener checks the target's current containment.
+    if (event.target instanceof Node && !event.target.isConnected)
+      event.stopPropagation();
   }
 
   protected closed(): void {

@@ -1421,6 +1421,8 @@ export class AdaptPaginationFooter<TRow> {
     // (undocumented)
     protected readonly nextIcon: Signal<IconDescriptor>;
     protected readonly previousIcon: Signal<IconDescriptor>;
+    // (undocumented)
+    protected selectPage(page: number): void;
     readonly view: InputSignal<TableView<TRow>>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPaginationFooter<any>, "adapt-pagination-footer", never, {

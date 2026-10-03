@@ -457,32 +457,48 @@ describe("the unstyled Angular filters", () => {
     expect(parts("filters-panel")).toHaveLength(1);
   });
 
-  it("keeps the popover open for a press inside it or on a removed node", async () => {
+  it("keeps the native popover open for inside presses, including a target removed by its action", async () => {
     const { part, openFilters, settle } = await mount();
     await openFilters();
-    part("filters-popover")!.click();
-    document.createElement("div").click();
-    const detached = document.createElement("span");
-    document.body.append(detached);
-    detached.addEventListener("click", () => {
-      detached.remove();
-    });
-    detached.click();
+    const popover = part("filters-popover")!;
+    clickBootstrapControl(popover);
     await settle();
-    expect(part("filters-popover")).not.toBeNull();
+    expect(part("filters-popover")).toBe(popover);
+    const removedInside = document.createElement("button");
+    popover.append(removedInside);
+    removedInside.addEventListener("click", () => removedInside.remove());
+    clickBootstrapControl(removedInside);
+    await settle();
+    expect(removedInside.isConnected).toBe(false);
+    expect(part("filters-popover")).toBe(popover);
+    clickBootstrapControl(document.createElement("div"));
+    await settle();
+    expect(part("filters-popover")).toBe(popover);
   });
 
-  it("closes once when its open button is pressed, and keeps a focused field", async () => {
+  it("dismisses an outside press while a field is focused and closes once through the trigger", async () => {
     const { part, openFilters, settle } = await mount();
     await openFilters();
-    const input = part("filters-popover")?.querySelector("input");
-    input!.focus();
+    const input =
+      part("filters-popover")!.querySelector<HTMLInputElement>("input")!;
+    input.focus();
+    expect(document.activeElement).toBe(input);
+    clickBootstrapControl(input);
+    await settle();
+    expect(part("filters-popover")?.contains(input)).toBe(true);
+    expect(document.activeElement).toBe(input);
     clickBootstrapControl(document.body);
     await settle();
-    expect(part("filters-popover")).not.toBeNull();
-    const button = part<HTMLButtonElement>("filters-button");
-    button!.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
-    button!.click();
+    expect(part("filters-popover")).toBeNull();
+    const button = part<HTMLButtonElement>("filters-button")!;
+    expect(button.getAttribute("aria-expanded")).toBe("false");
+    await openFilters();
+    expect(button.getAttribute("aria-expanded")).toBe("true");
+    button.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    clickBootstrapControl(button);
+    await settle();
+    expect(part("filters-popover")).toBeNull();
+    expect(button.getAttribute("aria-expanded")).toBe("false");
     await settle();
     expect(part("filters-popover")).toBeNull();
   });

@@ -240,8 +240,10 @@ describe("AdaptFilterHeaderRow", () => {
     await chooseTaigaOption(fixture, select, "Core");
     await fixture.whenStable();
     expect(select.value).toBe("Core");
+    expect(fixture.componentInstance.extra().team).toEqual(["Core"]);
     await clearTaigaSelection(fixture, select);
-    expect(fixture.componentInstance.extra().team).toBe("");
-    expect(select.value).toBe(defaultLabels.filterAll);
+    // Header selects store lists; their shared model removes an empty filter.
+    expect(fixture.componentInstance.extra().team).toBeUndefined();
+    expect(select.value).toBe(defaultLabels.boolAny);
   });
 });

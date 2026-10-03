@@ -16,8 +16,11 @@ import {
   type TableLabels,
 } from "@adapttable/angular";
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  inject,
+  Injector,
   input,
   viewChild,
 } from "@angular/core";
@@ -110,7 +113,7 @@ class AdaptHeaderFilterRange {
   template: `<mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-select
       [panelClass]="['adapt-material-overlay', props().menuClassName ?? '']"
-      (openedChange)="namePanel()"
+      (openedChange)="namePanel($event)"
       multiple
       data-adapttable-part="filter-header-input"
       [aria-label]="props().label"
@@ -126,11 +129,22 @@ class AdaptHeaderFilterRange {
   >`,
 })
 class AdaptHeaderFilterMulti {
+  private readonly injector = inject(Injector);
   private readonly select = viewChild(MatSelect);
-  protected namePanel(): void {
-    const panel = this.select()?.panel?.nativeElement as
-      HTMLElement | undefined;
-    panel?.setAttribute("data-adapttable-part", "filter-header-menu");
+  protected namePanel(opened: boolean): void {
+    if (!opened) return;
+    // Wait for Material's panel view query to be refreshed after opening.
+    afterNextRender(
+      {
+        write: () => {
+          const select = this.select();
+          if (!select?.panelOpen) return;
+          const panel = select.panel?.nativeElement as HTMLElement | undefined;
+          panel?.setAttribute("data-adapttable-part", "filter-header-menu");
+        },
+      },
+      { injector: this.injector }
+    );
   }
   readonly props = input.required<FilterHeaderMultiProps>();
   protected changed(values: string[]): void {

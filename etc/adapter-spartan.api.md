@@ -13,6 +13,8 @@ import { AfterViewInit } from '@angular/core';
 import { AgentApprovalProps } from '@adapttable/angular';
 import { Attrs } from '@adapttable/angular';
 import { BatchEditBarProps } from '@adapttable/angular';
+import { BrnFieldControl } from '@spartan-ng/brain/field';
+import { BrnInput } from '@spartan-ng/brain/input';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
@@ -1876,6 +1878,10 @@ export class ɵHlmCheckbox {
 // @public
 export class ɵHlmInput {
     // (undocumented)
+    protected readonly control: BrnInput;
+    // (undocumented)
+    protected readonly field: BrnFieldControl;
+    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHlmInput, "[adaptHlmInput]", never, {}, {}, never, never, true, [{
         directive: typeof i2.BrnInput;
         inputs: {
@@ -1885,7 +1891,9 @@ export class ɵHlmInput {
         outputs: {};
     }, {
         directive: typeof i3.BrnFieldControlDescribedBy;
-        inputs: {};
+        inputs: {
+            "aria-describedby": "aria-describedby";
+        };
         outputs: {};
     }]>;
     // (undocumented)
@@ -1909,11 +1917,30 @@ export class ɵHlmNativeSelect {
         outputs: {};
     }, {
         directive: typeof i3.BrnFieldControlDescribedBy;
-        inputs: {};
+        inputs: {
+            "aria-describedby": "aria-describedby";
+        };
         outputs: {};
     }]>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵHlmNativeSelect, never>;
+}
+
+// @internal
+export class ɵHlmPopoverLabel {
+    constructor();
+    // (undocumented)
+    readonly label: InputSignal<string>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHlmPopoverLabel, "[brnPopover][adaptHlmPopoverLabel]", never, {
+        "label": {
+            "alias": "adaptHlmPopoverLabel";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<ɵHlmPopoverLabel, never>;
 }
 
 // @public

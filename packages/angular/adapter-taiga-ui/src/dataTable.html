@@ -41,7 +41,7 @@
             >
               <svg [adaptIcon]="searchIcon"></svg>
             </span>
-            <tui-textfield
+            <tui-textfield tuiTextfieldSize="s"
               ><input
                 tuiInput
                 data-adapttable-part="search"
@@ -50,9 +50,10 @@
           </div>
         }
         @if (v.table.isMobile() && v.table.sortByOptions().length > 0) {
-          <label>
+          <label data-taiga-part="sort-field">
             {{ v.table.labels().sortBy }}
             <tui-textfield
+              tuiTextfieldSize="s"
               [stringify]="v.table.sortByOptions() | taigaLabels: { '': '—' }"
               ><input
                 tuiSelect

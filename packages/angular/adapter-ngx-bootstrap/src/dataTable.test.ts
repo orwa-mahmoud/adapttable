@@ -119,7 +119,7 @@ describe("the unstyled Angular table", () => {
   });
 
   it("pages from the numbered pager and the page-size select", async () => {
-    const { part, parts, ids, settle } = await mount();
+    const { element, part, parts, ids, settle } = await mount();
     const numbers = parts<HTMLAnchorElement>("page-number");
     expect(numbers.map((button) => button.textContent?.trim())).toEqual([
       "1",
@@ -141,9 +141,6 @@ describe("the unstyled Angular table", () => {
     });
     numbers[2]!.dispatchEvent(enter);
     expect(enter.defaultPrevented).toBe(false);
-    const nextWindow = part<HTMLAnchorElement>("page-ellipsis")!;
-    expect(nextWindow.textContent?.trim()).toBe("...");
-    expect(nextWindow.getAttribute("aria-label")).toBe("Go to page 6");
     expect(numbers[0]?.getAttribute("aria-current")).toBe("page");
     expect(part("page-prev")?.getAttribute("aria-disabled")).toBe("true");
     const prev = part("page-prev")!;
@@ -157,6 +154,12 @@ describe("the unstyled Angular table", () => {
     );
     await settle();
     expect(ids()).toEqual(["1", "2", "3", "4", "5"]);
+    // Native writeValue recreates its page objects and their tracked anchors.
+    // Resolve the current control after the disabled-key render has settled.
+    const nextWindow = part<HTMLAnchorElement>("page-ellipsis")!;
+    expect(element.contains(nextWindow)).toBe(true);
+    expect(nextWindow.textContent?.trim()).toBe("...");
+    expect(nextWindow.getAttribute("aria-label")).toBe("Go to page 6");
     nextWindow.click();
     await settle();
     expect(ids()).toEqual(["26", "27", "28", "29", "30"]);

@@ -4,8 +4,9 @@ import {
 } from "@adapttable/angular";
 import { type GroupingPanelState, resolveLabels } from "@adapttable/core";
 import { groupingPanel } from "@adapttable/taiga-ui/grouping-panel";
-import { Component, signal } from "@angular/core";
+import { Component, getDebugNode, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { NgModel } from "@angular/forms";
 import { describe, expect, it } from "vitest";
 
 import { AdaptGroupingPanel } from "./components/groupingPanel";
@@ -188,6 +189,7 @@ describe("AdaptGroupingPanel", () => {
   it("does not reset a picker after its host removes it during selection", async () => {
     const { element, host, fixture } = await mountPanel();
     const add = one<HTMLInputElement>(element, "grouping-add");
+    const model = getDebugNode(add)!.injector.get(NgModel);
     const chosen: string[] = [];
     host.panel.update((props) => ({
       ...props,
@@ -196,6 +198,8 @@ describe("AdaptGroupingPanel", () => {
         add: (key) => {
           chosen.push(key);
           fixture.destroy();
+          // The fixture host was manually appended; destroy its DOM too.
+          element.remove();
         },
       },
     }));
@@ -206,7 +210,9 @@ describe("AdaptGroupingPanel", () => {
     option.click();
     await Promise.resolve();
     expect(chosen).toEqual(["budget"]);
+    expect(fixture.componentRef.hostView.destroyed).toBe(true);
     expect(add.isConnected).toBe(false);
+    expect(model.value).toBe("budget");
   });
 
   it("removes a field from its chip", async () => {

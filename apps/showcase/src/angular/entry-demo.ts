@@ -165,6 +165,5 @@ window.addEventListener(
 window.addEventListener("beforeunload", (event) => {
   if (!hasPendingDemoEdits(container)) return;
   event.preventDefault();
-  event.returnValue = "";
 });
 await render();

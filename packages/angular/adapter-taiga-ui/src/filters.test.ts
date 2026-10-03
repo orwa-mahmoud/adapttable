@@ -185,7 +185,9 @@ async function mount(
     await settle();
   };
   const openFilters = async () => {
-    part<HTMLButtonElement>("filters-button")!.click();
+    const button = part<HTMLButtonElement>("filters-button")!;
+    button.focus();
+    button.click();
     await settle();
   };
   return {

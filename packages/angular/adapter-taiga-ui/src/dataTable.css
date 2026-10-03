@@ -47,6 +47,36 @@
   min-inline-size: 0;
   max-inline-size: 100%;
 }
+/* Native textfield inputs are absolutely positioned, so their flex wrappers
+   need a preferred width independent of the input's text or clear button. */
+[data-adapttable-kit="taiga-ui"] [data-adapttable-part="search-field"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 16rem;
+  min-inline-size: 0;
+  max-inline-size: 24rem;
+}
+[data-adapttable-kit="taiga-ui"] [data-adapttable-part="search-icon"] {
+  flex: none;
+}
+[data-adapttable-kit="taiga-ui"] [data-taiga-part="sort-field"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 0 1 12rem;
+  min-inline-size: 0;
+}
+[data-adapttable-kit="taiga-ui"]
+  :is([data-adapttable-part="search-field"], [data-taiga-part="sort-field"])
+  > tui-textfield {
+  inline-size: 100%;
+}
+[data-adapttable-kit="taiga-ui"]
+  [data-adapttable-part="search-field"]
+  > tui-textfield {
+  flex: 1 1 auto;
+}
 [data-adapttable-kit="taiga-ui"]
   :is([data-adapttable-part="mobile-card"], [data-adapttable-part="card"]) {
   border: 1px solid var(--tui-border-normal);

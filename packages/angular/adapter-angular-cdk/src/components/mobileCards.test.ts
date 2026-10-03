@@ -567,10 +567,15 @@ describe("mobile card reach", () => {
   });
 
   it("does not flash card values under reduced motion", async () => {
-    vi.stubGlobal("matchMedia", (query: string) => ({
+    vi.stubGlobal("matchMedia", (query: string): MediaQueryList => ({
       matches: query.includes("reduce"),
+      media: query,
+      onchange: null,
+      addListener: () => undefined,
+      removeListener: () => undefined,
       addEventListener: () => undefined,
       removeEventListener: () => undefined,
+      dispatchEvent: () => true,
     }));
     const { host, settle } = await mount();
     host.flash.mark([

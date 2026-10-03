@@ -8,6 +8,7 @@ import {
   type ElementRef,
   input,
   type TemplateRef,
+  untracked,
   viewChild,
 } from "@angular/core";
 import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
@@ -79,8 +80,12 @@ export class AdaptFilterPopover {
     afterRenderEffect((cleanup) => {
       const { open } = this.props();
       const overlay = this.popover();
-      if (open && !overlay.isOpen()) overlay.open();
-      if (!open && overlay.isOpen()) overlay.close();
+      // NgbPopover registers render callbacks while opening. Native lifecycle
+      // work must run outside this effect's reactive dependency tracking.
+      untracked(() => {
+        if (open && !overlay.isOpen()) overlay.open();
+        if (!open && overlay.isOpen()) overlay.close();
+      });
       if (!open) return;
       const document = this.anchor().nativeElement.ownerDocument;
       const keydown = (event: KeyboardEvent): void => {

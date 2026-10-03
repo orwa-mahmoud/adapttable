@@ -22,9 +22,12 @@ for (const kit of ANGULAR_KITS) {
         '[data-adapttable-part="row-actions-trigger"]'
       );
       await trigger.click();
-      let menu = page.locator(
-        '[data-adapttable-part="row-actions-menu"]:visible'
-      );
+      const nativeDetails = ["unstyled", "aria"].includes(kit.key);
+      let menu = nativeDetails
+        ? target.locator(
+            'details[data-adapttable-part="row-actions-menu"][open]'
+          )
+        : page.locator('[data-adapttable-part="row-actions-menu"]:visible');
       if (
         [
           "material",
@@ -62,7 +65,18 @@ for (const kit of ANGULAR_KITS) {
           )
         )
         .click();
-      await expect(menu).toBeHidden();
+      if (nativeDetails) {
+        // A closed details host (and its summary) stays visible. Its open
+        // state, not the wrapper's visibility, proves dismissal after a row
+        // moves or is removed by the host action.
+        await expect(
+          demo(page).locator(
+            'details[data-adapttable-part="row-actions-menu"][open]'
+          )
+        ).toHaveCount(0);
+      } else {
+        await expect(menu).toBeHidden();
+      }
     }
 
     test("pins a row from its menu and keeps it through a reload", async ({

@@ -47,13 +47,23 @@ function place(
   Object.defineProperty(overlay, "offsetWidth", { value: measured });
   overlay.getBoundingClientRect = () => overlayRect;
   trigger.getBoundingClientRect = () => rect(300, 400);
-  Object.defineProperty(document.documentElement, "clientWidth", {
-    configurable: true,
-    value: 1000,
-  });
   placeOverlayBelowTrigger(overlay, trigger, dir);
   return overlay;
 }
+
+beforeEach(() => {
+  // CDK reads document dimensions as well as the injected ViewportRuler.
+  vi.spyOn(document.documentElement, "clientWidth", "get").mockReturnValue(
+    1000
+  );
+  vi.spyOn(document.documentElement, "clientHeight", "get").mockReturnValue(
+    800
+  );
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("placeOverlayBelowTrigger", () => {
   it("end-aligns under the trigger in LTR, start-aligns in RTL", () => {
@@ -172,8 +182,11 @@ describe("menuPopover with native CDK placement", () => {
     const { element, popover, open, settle, host } = await mount();
     await open();
     const overlay = host.overlay().overlayRef;
-    expect(overlay.hostElement.style.top).toBe("20px");
-    expect(overlay.hostElement.style.left).toBe("300px");
+    // Non-flexible CDK overlays position the pane inside a viewport-sized host.
+    expect(overlay.hostElement.style.top).toBe("0px");
+    expect(overlay.hostElement.style.left).toBe("0px");
+    expect(overlay.overlayElement.style.top).toBe("20px");
+    expect(overlay.overlayElement.style.left).toBe("300px");
     window.dispatchEvent(new Event("resize"));
     element
       .querySelector(".inside")!
@@ -198,8 +211,9 @@ describe("menuPopover with native CDK placement", () => {
     await open();
     const overlay = host.overlay().overlayRef;
     expect(overlay.getDirection()).toBe("rtl");
-    expect(overlay.hostElement.style.top).toBe("20px");
-    expect(overlay.hostElement.style.right).toBe("600px");
+    expect(overlay.hostElement.style.top).toBe("0px");
+    expect(overlay.overlayElement.style.top).toBe("20px");
+    expect(overlay.overlayElement.style.right).toBe("600px");
     popover.close();
     await settle();
     expect(popover.open()).toBe(false);
@@ -310,14 +324,15 @@ describe("actual adapted CDK overlay direction", () => {
       columnsOverlay.updatePosition();
       expect(columnsOverlay.getDirection()).toBe("rtl");
       expect(columnsOverlay.hostElement.dir).toBe("rtl");
-      expect(columnsOverlay.hostElement.style.top).toBe("20px");
-      expect(columnsOverlay.hostElement.style.right).toBe("600px");
+      expect(columnsOverlay.hostElement.style.top).toBe("0px");
+      expect(columnsOverlay.overlayElement.style.top).toBe("20px");
+      expect(columnsOverlay.overlayElement.style.right).toBe("600px");
       fixture.componentInstance.dir.set("ltr");
       await settle();
       expect(part("column-menu-panel")).toBe(columnsPanel);
       expect(columnsOverlay.getDirection()).toBe("ltr");
       expect(columnsOverlay.hostElement.dir).toBe("ltr");
-      expect(columnsOverlay.hostElement.style.left).toBe("300px");
+      expect(columnsOverlay.overlayElement.style.left).toBe("300px");
       columns.click();
       fixture.componentInstance.dir.set("rtl");
       await settle();

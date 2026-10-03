@@ -23708,7 +23708,12 @@ html {
         theme-type: light,
         primary: mat.$azure-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: (
+          Roboto,
+          sans-serif,
+        ),
+      ),
       density: 0,
     )
   );
@@ -24062,6 +24067,8 @@ Set overrides on `[data-adapttable-kit="spartan"]` so portalled surfaces share
 them. Set `.dark` or `data-theme="dark"` on the document element to cover both
 the table and CDK portals. No unprefixed global theme tokens are changed.
 The `ɵ`-prefixed exports only link the kit's secondary entries and are internal.
+In particular, `ɵHlmPopoverLabel` keeps the actual Brain popover pane's accessible
+name synchronized with its owning control's localized label.
 
 An upstream Brain upgrade must review compatibility and the copied Helm layer,
 then verify conformance, overlays, keyboard handling, focus, themes and SSR.
@@ -24197,6 +24204,10 @@ Filter popovers are nonmodal Taiga dropdowns. Drawers have Taiga's real backdrop
 and trapped keyboard focus. An Escape dismissal restores the opener. Themed
 controls use logical spacing and the same desktop/mobile structure as the
 Angular binding. Public `classNames` hooks remain available.
+
+The internal `ɵAdaptTaigaDropdownLabel` export links secondary entries to the
+directive that names Taiga's actual freeform popup host. Applications should use
+the documented feature factories rather than this internal compatibility helper.
 
 ## Development status
 

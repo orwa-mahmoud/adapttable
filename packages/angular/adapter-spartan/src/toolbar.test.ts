@@ -187,7 +187,7 @@ describe("the Spartan Angular toolbar controls", () => {
     await settle();
     expectNamedPopover(
       part("views-panel")!,
-      part("views-button")!.textContent!.trim()
+      part("views-button")!.textContent.trim()
     );
     document.body.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", keyCode: 27 })

@@ -47,6 +47,8 @@ export class AdaptCommandInput {
     readonly "aria-label": string;
     readonly placeholder: string;
     }>;
+    // (undocumented)
+    protected onKeyDown(event: KeyboardEvent): void;
     readonly props: InputSignal<    {
     readonly inputProps: {
     readonly value: string;

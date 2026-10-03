@@ -1,5 +1,6 @@
 import { type ColumnDef } from "@adapttable/angular";
 import { TestBed } from "@angular/core/testing";
+import { within } from "@testing-library/dom";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { columnMenu } from "../column-menu";
@@ -66,7 +67,10 @@ describe("ngx-bootstrap controls and isolated overlay containers", () => {
     part("filters-button")!.focus();
     part("filters-button")!.click();
     await fixture.whenStable();
-    expect(host.querySelector("popover-container")).not.toBeNull();
+    const dialog = await within(host).findByRole("dialog", { name: "Filters" });
+    expect(dialog).toBe(host.querySelector("popover-container"));
+    expect(getComputedStyle(dialog).visibility).toBe("visible");
+    expect(within(dialog).getByRole("textbox", { name: "Name" })).toBeTruthy();
     expect(part("filters-backdrop")).toBeNull();
     expect(part("filters-button")?.getAttribute("aria-expanded")).toBe("true");
     document.dispatchEvent(

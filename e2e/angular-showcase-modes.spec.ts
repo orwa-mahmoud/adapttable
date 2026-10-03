@@ -1,7 +1,7 @@
 /** Main/lab are actual Angular modes, with stateful same-document kit changes. */
 import { expect, type Page, test, type TestInfo } from "@playwright/test";
 
-import { ANGULAR_KITS } from "./angular-kit";
+import { ANGULAR_KITS, angularPart } from "./angular-kit";
 
 /** Keep production browser views with the report for visual review. */
 async function attachView(page: Page, testInfo: TestInfo, name: string) {
@@ -108,6 +108,12 @@ test("live kit switching preserves filtered rows without replacing the document"
 test("lab dataset changes retain the document, modal, and browser history", async ({
   page,
 }) => {
+  const dataset = page.getByRole("combobox", {
+    name: "Dataset",
+    exact: true,
+    // Forward restores the entry where Escape closed the options dialog.
+    includeHidden: true,
+  });
   await page.goto("/angular-all-options/?kit=unstyled");
   await page.evaluate(() =>
     Reflect.set(window, "__angularDocumentMarker", "same document")
@@ -115,12 +121,13 @@ test("lab dataset changes retain the document, modal, and browser history", asyn
   await page
     .getByRole("button", { name: "Configure options", exact: true })
     .click();
-  await page.getByLabel("Dataset", { exact: true }).selectOption("empty");
+  await expect(dataset).toBeVisible();
+  await dataset.selectOption("empty");
   await expect(
     page.getByRole("dialog", { name: "Feature Lab controls" })
   ).toBeVisible();
   await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(0);
-  await page.getByLabel("Dataset", { exact: true }).selectOption("people");
+  await dataset.selectOption("people");
   await expect(
     page.locator('[data-adapttable-part="row"]').first()
   ).toBeVisible();
@@ -129,18 +136,56 @@ test("lab dataset changes retain the document, modal, and browser history", asyn
   ).toBe("same document");
   await page.keyboard.press("Escape");
   await page.goBack();
-  await expect(page.getByLabel("Dataset", { exact: true })).toHaveValue(
-    "empty"
-  );
+  await expect(dataset).toHaveValue("empty");
   await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(0);
   await page.goForward();
-  await expect(page.getByLabel("Dataset", { exact: true })).toHaveValue(
-    "people"
-  );
+  await expect(dataset).toHaveValue("people");
   await expect(
     page.locator('[data-adapttable-part="row"]').first()
   ).toBeVisible();
   expect(
     await page.evaluate(() => Reflect.get(window, "__angularDocumentMarker"))
   ).toBe("same document");
+});
+
+test("Material typography keeps a sans-serif fallback in tables and native portals", async ({
+  page,
+}) => {
+  for (const mode of ["angular-main", "angular-all-options"]) {
+    await page.goto(`/${mode}/?kit=material`);
+    const surface = page.locator('[data-adapter="material"]');
+    const material = { key: "material" };
+    const filters = angularPart(material, page, "filters-button", surface);
+    for (const theme of ["light", "dark"]) {
+      if (theme === "dark")
+        await page
+          .getByRole("button", { name: "Dark mode", exact: true })
+          .click();
+      for (const control of [
+        surface.locator("tbody td").first(),
+        surface.locator('[data-adapttable-part="search"]'),
+        filters,
+        angularPart(material, page, "page-next", surface),
+      ]) {
+        await expect(control).toHaveCSS("font-family", /sans-serif/);
+      }
+      await filters.click();
+      const popup = angularPart(material, page, "filters-popover");
+      await expect(popup).toBeVisible();
+      await expect(
+        popup.locator("input.mat-mdc-input-element").first()
+      ).toHaveCSS("font-family", /sans-serif/);
+      await page.keyboard.press("Escape");
+      await expect(popup).toBeHidden();
+    }
+    await page.getByRole("button", { name: "Light mode", exact: true }).click();
+    await page.getByRole("radio", { name: "Unstyled", exact: true }).check();
+    await page
+      .getByRole("radio", { name: "Angular Material", exact: true })
+      .check();
+    await expect(surface.locator("tbody td").first()).toHaveCSS(
+      "font-family",
+      /sans-serif/
+    );
+  }
 });

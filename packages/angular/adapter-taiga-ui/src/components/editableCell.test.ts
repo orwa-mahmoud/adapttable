@@ -345,6 +345,7 @@ describe("AdaptNativeCellEditor validation attributes", () => {
       await fixture.whenStable();
       const field = editor();
       expect(field).not.toBeNull();
+      expect(props.focusRef).toHaveBeenCalledExactlyOnceWith(field);
       expect(field!.getAttribute("aria-label")).toBe("Edit team");
       const controls =
         field instanceof HTMLInputElement
@@ -379,7 +380,9 @@ describe("AdaptNativeCellEditor validation attributes", () => {
       expect(field!.getAttribute("aria-invalid")).not.toBe("true");
       expect(field!.hasAttribute("aria-describedby")).toBe(false);
       if (field instanceof HTMLInputElement) {
-        expect(field.validity.customError).toBe(false);
+        // Native validity follows NgControl.events through Taiga's delay(0),
+        // which is outside Angular's fixture.whenStable() tracking.
+        await expect.poll(() => field.validity.customError).toBe(false);
         expect(field.classList.contains("ng-valid")).toBe(true);
       }
       expect(props.setDraft).not.toHaveBeenCalled();

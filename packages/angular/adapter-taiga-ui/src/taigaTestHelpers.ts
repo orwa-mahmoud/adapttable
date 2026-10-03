@@ -13,6 +13,9 @@ export async function taigaOptions<T>(
   trigger: HTMLElement
 ): Promise<HTMLButtonElement[]> {
   if (trigger.getAttribute("aria-expanded") !== "true") {
+    // HTMLElement.click() does not perform the focus step of a browser click.
+    // Taiga's active-zone dismissal observes that focus entering the control.
+    trigger.focus();
     trigger.click();
     await fixture.whenStable();
   }

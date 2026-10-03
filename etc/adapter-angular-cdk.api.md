@@ -43,6 +43,7 @@ import { CssProperties } from '@adapttable/core';
 import { DataTable } from '@adapttable/angular';
 import { DesktopRowWiringArgs } from '@adapttable/angular';
 import { Direction } from '@adapttable/angular';
+import { Directionality } from '@angular/cdk/bidi';
 import { DisplayValue } from '@adapttable/core';
 import { EditableCellEditing } from '@adapttable/angular';
 import { EditableCellEditorCtrl } from '@adapttable/angular';
@@ -241,6 +242,7 @@ export class AdaptBulkBar {
 
 // @public
 export class AdaptCdkPopover {
+    constructor();
     close(): void;
     // (undocumented)
     readonly content: InputSignal<TemplateRef<unknown>>;
@@ -379,12 +381,15 @@ export class AdaptColumnHeaderRename {
 
 // @public
 export class AdaptColumnMenu {
+    constructor();
     // (undocumented)
     protected readonly actionsKey = "actions";
     // (undocumented)
     protected readonly drag: ColumnDrag;
     // (undocumented)
     protected hideAll(): void;
+    // (undocumented)
+    protected readonly inheritedDirection: Directionality;
     // (undocumented)
     protected readonly panelStyle: Readonly<Record<string, string>>;
     // (undocumented)

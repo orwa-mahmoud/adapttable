@@ -9,6 +9,7 @@ import { within } from "@testing-library/dom";
 import { describe, expect, it, vi } from "vitest";
 
 import { AdaptCommandPaletteButton } from "../command-palette/palette";
+import { focusAndClick, provideFocusLayout } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {
@@ -244,6 +245,7 @@ describe("command palette (Spartan Angular)", () => {
   });
 
   it("keeps host signals and toolbar callbacks independent across mounted tables", async () => {
+    provideFocusLayout('[data-adapttable-part="command-palette"]');
     const first = TestBed.createComponent(ControlledHost);
     const second = TestBed.createComponent(ControlledHost);
     const firstHost = first.componentInstance;
@@ -271,40 +273,57 @@ describe("command palette (Spartan Angular)", () => {
       '[data-adapttable-part="command-palette-button"]'
     ) as HTMLButtonElement;
     expect(dialogs()).toEqual([]);
-
-    firstHost.paletteOpen.set(true);
-    await first.whenStable();
-    expect(dialogs()).toEqual(["First commands"]);
+    expect(firstHost.paletteOpen()).toBe(false);
     expect(secondHost.paletteOpen()).toBe(false);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
 
-    trigger.click();
+    focusAndClick(trigger);
     await second.whenStable();
+    expect(dialogs()).toEqual(["Second commands"]);
+    expect(firstHost.paletteOpen()).toBe(false);
+    expect(firstHost.onOpenChange).not.toHaveBeenCalled();
+    expect(secondHost.paletteOpen()).toBe(true);
+    expect(secondHost.onOpenChange.mock.calls).toEqual([[true]]);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    const secondInput = part("command-input")!;
+    expect(document.activeElement).toBe(secondInput);
+
+    // Stack through host state: a click outside an open native modal dismisses it.
+    firstHost.paletteOpen.set(true);
+    await first.whenStable();
     expect(dialogs()).toEqual(["First commands", "Second commands"]);
     expect(firstHost.paletteOpen()).toBe(true);
     expect(secondHost.paletteOpen()).toBe(true);
-    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(firstHost.onOpenChange).not.toHaveBeenCalled();
+    expect(secondHost.onOpenChange.mock.calls).toEqual([[true]]);
+    const firstInput = within(document.body)
+      .getByRole("dialog", { name: "First commands" })
+      .querySelector('[data-adapttable-part="command-input"]');
+    expect(firstInput).not.toBeNull();
+    expect(document.activeElement).toBe(firstInput);
 
     firstHost.paletteOpen.set(false);
     await first.whenStable();
     expect(dialogs()).toEqual(["Second commands"]);
     expect(firstHost.onOpenChange).not.toHaveBeenCalled();
     expect(secondHost.paletteOpen()).toBe(true);
-    part("command-input")!.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "Escape",
-        keyCode: 27,
-        bubbles: true,
-        cancelable: true,
-      })
-    );
+    expect(document.activeElement).toBe(secondInput);
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      keyCode: 27,
+      bubbles: true,
+      cancelable: true,
+    });
+    secondInput.dispatchEvent(escape);
     await second.whenStable();
+    expect(escape.defaultPrevented).toBe(true);
     expect(dialogs()).toEqual([]);
     expect(firstHost.paletteOpen()).toBe(false);
     expect(secondHost.paletteOpen()).toBe(false);
     expect(firstHost.onOpenChange).not.toHaveBeenCalled();
     expect(secondHost.onOpenChange.mock.calls).toEqual([[true], [false]]);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement).toBe(trigger);
     first.destroy();
     second.destroy();
   });

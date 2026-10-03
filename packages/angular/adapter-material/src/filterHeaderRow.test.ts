@@ -14,6 +14,7 @@ import {
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { MatInput } from "@angular/material/input";
+import { MatSelect } from "@angular/material/select";
 import { By } from "@angular/platform-browser";
 import { describe, expect, it } from "vitest";
 
@@ -87,6 +88,7 @@ function memory(extra: ReturnType<typeof signal<ExtraFilters>>) {
           [defs]="defs"
           [source]="source()"
           [labels]="labels"
+          [classNames]="classes"
         />
       </thead>
     </table>
@@ -96,6 +98,10 @@ class RowHost {
   readonly labels = defaultLabels;
   readonly columns = COLUMNS;
   readonly defs = DEFS;
+  readonly classes = {
+    filterHeaderInput: "custom-header-input",
+    filterHeaderMenu: "custom-header-menu",
+  };
   readonly enabled = signal(true);
   readonly extra = signal<ExtraFilters>({});
   readonly source = computed(() => memory(this.extra));
@@ -133,7 +139,7 @@ async function mountRow(prepare?: (host: RowHost) => void) {
 
 describe("AdaptFilterHeaderRow", () => {
   it("writes every compact header widget", async () => {
-    const { element, labeled, fixture } = await mountRow();
+    const { element, labeled, fixture, host } = await mountRow();
     expect(
       element.querySelector('[data-adapttable-part="filter-header-row"]')
     ).not.toBeNull();
@@ -158,11 +164,20 @@ describe("AdaptFilterHeaderRow", () => {
 
     const tags = labeled("Tags").find((node) => node.tagName === "MAT-SELECT");
     if (!tags) throw new Error("Tags filter trigger was not rendered");
+    const select = fixture.debugElement
+      .query(By.directive(MatSelect))
+      .injector.get(MatSelect);
+    const menu = () =>
+      document.querySelector('[data-adapttable-part="filter-header-menu"]');
+    expect(tags.classList.contains("custom-header-input")).toBe(true);
     tags.click();
     await fixture.whenStable();
-    expect(
-      document.querySelector('[data-adapttable-part="filter-header-menu"]')
-    ).not.toBeNull();
+    expect(select.panelOpen).toBe(true);
+    const panel = select.panel.nativeElement as HTMLElement;
+    expect(menu()).toBe(panel);
+    expect(panel.getAttribute("role")).toBe("listbox");
+    expect(panel.classList.contains("adapt-material-overlay")).toBe(true);
+    expect(panel.classList.contains("custom-header-menu")).toBe(true);
     const option = (caption: string) =>
       [...document.querySelectorAll<HTMLElement>("mat-option")].find(
         (node) => node.textContent?.trim() === caption
@@ -175,14 +190,41 @@ describe("AdaptFilterHeaderRow", () => {
     second.click();
     await fixture.whenStable();
     expect(tags.textContent).toContain("2");
-    tags.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "Escape",
-        keyCode: 27,
-        bubbles: true,
-      })
-    );
+    expect(host.extra().tags).toEqual(["a", "b"]);
+    const closeTags = async () => {
+      tags.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Escape",
+          keyCode: 27,
+          bubbles: true,
+        })
+      );
+      await fixture.whenStable();
+      expect(select.panelOpen).toBe(false);
+      expect(menu()).toBeNull();
+    };
+    await closeTags();
+    tags.click();
     await fixture.whenStable();
+    expect(select.panelOpen).toBe(true);
+    const reopenedPanel = select.panel.nativeElement as HTMLElement;
+    expect(reopenedPanel).not.toBe(panel);
+    expect(menu()).toBe(reopenedPanel);
+    expect(reopenedPanel.classList.contains("adapt-material-overlay")).toBe(
+      true
+    );
+    expect(reopenedPanel.classList.contains("custom-header-menu")).toBe(true);
+    const reopenedFirst = option("A");
+    const reopenedSecond = option("B");
+    if (!reopenedFirst || !reopenedSecond)
+      throw new Error("tag choices were not restored on reopen");
+    expect(reopenedFirst.getAttribute("aria-selected")).toBe("true");
+    expect(reopenedSecond.getAttribute("aria-selected")).toBe("true");
+    reopenedFirst.click();
+    await fixture.whenStable();
+    expect(host.extra().tags).toEqual(["b"]);
+    expect(tags.textContent).toContain("B");
+    await closeTags();
 
     const core = labeled("Core")[0] as HTMLSelectElement;
     core.value = "true";

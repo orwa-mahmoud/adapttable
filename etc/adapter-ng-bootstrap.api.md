@@ -348,8 +348,6 @@ export class AdaptColumnMenu {
         toggle: () => void;
         close: () => void;
     };
-    // (undocumented)
-    protected readonly popperOptions: (options: Partial<Options>) => Partial<Options>;
     readonly props: InputSignal<ColumnMenuSlotProps<never>>;
     // (undocumented)
     protected readonly query: WritableSignal<string>;

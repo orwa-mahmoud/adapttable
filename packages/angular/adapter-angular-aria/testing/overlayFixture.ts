@@ -1,8 +1,9 @@
 /** Real CDK portals owned by one test fixture, with jsdom visibility support. */
 import { FocusTrapFactory, InteractivityChecker } from "@angular/cdk/a11y";
 import { Overlay, OverlayContainer } from "@angular/cdk/overlay";
-import { ElementRef, inject } from "@angular/core";
+import { ElementRef, inject, Injectable } from "@angular/core";
 
+@Injectable()
 class FixtureOverlayContainer extends OverlayContainer {
   private readonly owner = inject<ElementRef<HTMLElement>>(ElementRef);
 
@@ -47,7 +48,8 @@ export const fixtureOverlayProviders = [
   },
   {
     provide: OverlayContainer,
-    useFactory: () => new FixtureOverlayContainer(),
+    // A class provider registers the inherited destroy hook with this view.
+    useClass: FixtureOverlayContainer,
   },
 ];
 

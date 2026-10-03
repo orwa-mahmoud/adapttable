@@ -40,7 +40,12 @@ html {
         theme-type: light,
         primary: mat.$azure-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: (
+          Roboto,
+          sans-serif,
+        ),
+      ),
       density: 0,
     )
   );

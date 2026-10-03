@@ -107,6 +107,10 @@ and trapped keyboard focus. An Escape dismissal restores the opener. Themed
 controls use logical spacing and the same desktop/mobile structure as the
 Angular binding. Public `classNames` hooks remain available.
 
+The internal `ɵAdaptTaigaDropdownLabel` export links secondary entries to the
+directive that names Taiga's actual freeform popup host. Applications should use
+the documented feature factories rather than this internal compatibility helper.
+
 ## Development status
 
 The source includes behavior, conformance, SSR, and native-control contract

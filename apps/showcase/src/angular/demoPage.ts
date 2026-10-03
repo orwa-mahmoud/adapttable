@@ -91,6 +91,46 @@ const option = (key: string, fallback: string): string =>
 const enabled = (key: string, fallback = false): boolean =>
   option(key, fallback ? "on" : "off") === "on";
 
+function initialStructure(server: boolean, urlKey: string): string {
+  if (server) return "flat";
+  let fallback = "flat";
+  if (enabled("tree")) fallback = "tree";
+  else if (enabled("grouping", Boolean(option(`${urlKey}.groupBy`, ""))))
+    fallback = "grouped";
+  return option("structure", fallback);
+}
+
+function initialEditingMode(canWrite: boolean, lab: boolean): string {
+  if (!canWrite) return "off";
+  const fallback = enabled("editing", !lab) ? "cell" : "off";
+  return option("editing-mode", fallback);
+}
+
+function seedRows(dataset: string, large: boolean): Person[] {
+  if (large) return makeLargeDirectory();
+  if (dataset === "empty") return [];
+  return peopleRows();
+}
+
+function editorChanges(key: string, value: unknown): Partial<Person> {
+  const changes: Partial<Person> = {};
+  if (key === "remote") changes.remote = value === true || value === "true";
+  else
+    changes.skills = Array.isArray(value)
+      ? value.map(String)
+      : String(value)
+          .split(",")
+          .map((skill) => skill.trim())
+          .filter(Boolean);
+  return changes;
+}
+
+function controlValue(target: HTMLInputElement | HTMLSelectElement): string {
+  if (target instanceof HTMLInputElement && target.type === "checkbox")
+    return target.checked ? "on" : "off";
+  return target.value;
+}
+
 /** A nested table uses the selected kit and receives binding-owned defaults. */
 @Component({
   selector: "adapt-showcase-lab-orders",
@@ -168,23 +208,12 @@ export class AdaptShowcaseDemoPage {
   readonly mobile = enabled("mobile");
   readonly selectable = enabled("selection", this.lab);
   readonly searchable = enabled("search", true);
-  readonly requestedStructure = this.server
-    ? "flat"
-    : option(
-        "structure",
-        enabled("tree")
-          ? "tree"
-          : enabled("grouping", Boolean(option(`${this.urlKey}.groupBy`, "")))
-            ? "grouped"
-            : "flat"
-      );
+  readonly requestedStructure = initialStructure(this.server, this.urlKey);
   readonly structure =
     this.large && this.requestedStructure !== "nested"
       ? "flat"
       : this.requestedStructure;
-  readonly editingMode = this.canWrite
-    ? option("editing-mode", enabled("editing", !this.lab) ? "cell" : "off")
-    : "off";
+  readonly editingMode = initialEditingMode(this.canWrite, this.lab);
   readonly editing = this.editingMode !== "off";
   readonly grouping = this.structure === "grouped";
   readonly reducedMotion = injectPrefersReducedMotion();
@@ -196,12 +225,7 @@ export class AdaptShowcaseDemoPage {
     (() => {
       const rows = demoSession.read<readonly Person[]>(
         `rows:${this.dataset}`,
-        () =>
-          this.large
-            ? makeLargeDirectory()
-            : this.dataset === "empty"
-              ? []
-              : peopleRows()
+        () => seedRows(this.dataset, this.large)
       );
       return enabled("cell-span")
         ? [...rows].sort((a, b) => a.team.localeCompare(b.team))
@@ -267,18 +291,24 @@ export class AdaptShowcaseDemoPage {
   });
   readonly columns = computed<readonly ColumnInput<Person>[]>(() => {
     const columns = this.leafColumns();
-    if (!enabled("column-groups")) return columns;
-    const byKey = new Map(columns.map((column) => [column.key, column]));
-    const replace = (column: ColumnInput<Person>): ColumnInput<Person> =>
-      "children" in column
-        ? { ...column, children: column.children.map(replace) }
-        : (byKey.get(column.key) ?? column);
-    return [
-      ...groupedPeopleColumns().map(replace),
-      ...columns.filter((column) =>
-        ["tag", "trend", "remote", "skills"].includes(column.key)
-      ),
-    ];
+    let result: readonly ColumnInput<Person>[] = columns;
+    if (enabled("column-groups")) {
+      const byKey = new Map(columns.map((column) => [column.key, column]));
+      const replace = (column: ColumnInput<Person>): ColumnInput<Person> => {
+        let replacement: ColumnInput<Person> = column;
+        if ("children" in column)
+          replacement = { ...column, children: column.children.map(replace) };
+        else replacement = byKey.get(column.key) ?? column;
+        return replacement;
+      };
+      result = [
+        ...groupedPeopleColumns().map(replace),
+        ...columns.filter((column) =>
+          ["tag", "trend", "remote", "skills"].includes(column.key)
+        ),
+      ];
+    }
+    return result;
   });
   readonly rowKey = rowKey;
   readonly log = signal("Changes are written by this demo's host callbacks.");
@@ -295,7 +325,7 @@ export class AdaptShowcaseDemoPage {
     const url = new URL(location.href);
     url.searchParams.set("failure", "off");
     replaceDemoUrl(url);
-    this.serverSource?.().refetch?.();
+    void this.serverSource?.().refetch?.();
   };
   readonly serverRows = signal<readonly Person[]>([]);
   readonly total = signal(0);
@@ -363,12 +393,13 @@ export class AdaptShowcaseDemoPage {
       this.updateViews(() => this.savedViews.remove(name)),
     labels: this.presentation.labels,
   }));
+  readonly dataLocale: "ar" | "en" = this.presentation.locale.startsWith("ar")
+    ? "ar"
+    : "en";
   readonly baseFeatures: readonly AdaptTableFeature[] = [
     this.kit.filters(
       option("filter-set", "live") === "kitchen" || this.large
-        ? kitchenFilterDefs(
-            this.presentation.locale.startsWith("ar") ? "ar" : "en"
-          ).map((def) =>
+        ? kitchenFilterDefs(this.dataLocale).map((def) =>
             def.type === "personText" ? { ...def, type: "text" } : def
           )
         : FILTER_DEFS
@@ -467,12 +498,7 @@ export class AdaptShowcaseDemoPage {
             (from, to, row) => {
               this.rows.update((rows) => {
                 const sameScope = (item: Person) =>
-                  this.grouping
-                    ? item.team === row.team &&
-                      personStatus(item) === personStatus(row)
-                    : this.structure === "tree"
-                      ? reportsTo(item) === reportsTo(row)
-                      : true;
+                  this.sameReorderScope(item, row);
                 const siblings = rows.filter(sameScope);
                 const source = siblings.findIndex((item) => item.id === row.id);
                 const ordered = applyRowReorder(
@@ -670,30 +696,24 @@ export class AdaptShowcaseDemoPage {
     this.rows.update((rows) => {
       let next = rows;
       for (const [key, value] of Object.entries(patch)) {
-        if (key === "remote" || key === "skills")
+        if (key === "remote" || key === "skills") {
+          const changes = editorChanges(key, value);
           next = next.map((item) =>
-            item.id === row.id
-              ? {
-                  ...item,
-                  [key]:
-                    key === "remote"
-                      ? value === true || value === "true"
-                      : Array.isArray(value)
-                        ? value.map(String)
-                        : String(value)
-                            .split(",")
-                            .map((s) => s.trim())
-                            .filter(Boolean),
-                }
-              : item
+            item.id === row.id ? { ...item, ...changes } : item
           );
-        else next = applyPersonEdit(next, row, key, value);
+        } else next = applyPersonEdit(next, row, key, value);
         this.highlight.flashCell({ rowId: row.id, columnKey: key });
       }
       return next;
     });
     this.highlight.flashRow(row.id);
     this.log.set(`Saved ${Object.keys(patch).join(", ")} for ${row.name}`);
+  }
+  private sameReorderScope(item: Person, row: Person): boolean {
+    if (this.grouping)
+      return item.team === row.team && personStatus(item) === personStatus(row);
+    if (this.structure === "tree") return reportsTo(item) === reportsTo(row);
+    return true;
   }
   private moveRow(
     row: Person,
@@ -833,7 +853,7 @@ export class AdaptShowcaseDemoPage {
         "row-style",
       ])
         url.searchParams.set(key, "on");
-    void navigateDemo(url);
+    navigateDemo(url);
   }
   readonly defaultOn = new Set([
     "columns",
@@ -911,15 +931,18 @@ export class AdaptShowcaseDemoPage {
       target instanceof HTMLSelectElement || target instanceof HTMLInputElement
     ))
       return;
-    const value =
-      target instanceof HTMLInputElement && target.type === "checkbox"
-        ? target.checked
-          ? "on"
-          : "off"
-        : target.value;
+    const value = controlValue(target);
     const url = new URL(location.href);
     url.searchParams.set(key, value);
     url.searchParams.delete("recipe");
+    this.normalizeOptionChange(url, key, value);
+    if (key === "dataset" || key === "mode")
+      url.searchParams.delete(`${this.urlKey}.page`);
+    // The entry replaces the provider scope in this document. Host rows stay
+    // in the demo session, and the binding restores its URL-backed state.
+    navigateDemo(url);
+  }
+  private normalizeOptionChange(url: URL, key: string, value: string): void {
     if (key === "structure" && ["grouped", "tree"].includes(value))
       url.searchParams.set("row-pinning", "off");
     if (key === "dataset" && value === "large") {
@@ -948,11 +971,14 @@ export class AdaptShowcaseDemoPage {
       if (url.searchParams.get("dataset") === "large")
         url.searchParams.set("dataset", "people");
     }
-    if (key === "dataset" || key === "mode")
-      url.searchParams.delete(`${this.urlKey}.page`);
-    // The entry replaces the provider scope in this document. Host rows stay
-    // in the demo session, and the binding restores its URL-backed state.
-    void navigateDemo(url);
+  }
+
+  private checkedControl(key: string): boolean {
+    if (key === "grouping") return this.grouping;
+    if (key === "editing") return this.editing;
+    if (key === "motion") return this.motion;
+    const fallback = this.defaultOn.has(key) ? "on" : "off";
+    return (this.mountedOptions.get(key) ?? fallback) === "on";
   }
   /** Native form controls may already have changed before a draft guard blocks. */
   private restoreControls(): void {
@@ -975,20 +1001,13 @@ export class AdaptShowcaseDemoPage {
     )) {
       const key = element.dataset.demoControl ?? "";
       if (element instanceof HTMLInputElement) {
-        if (element.type === "radio")
-          element.checked = element.value === this.kit.key;
-        else
-          element.checked =
-            key === "grouping"
-              ? this.grouping
-              : key === "editing"
-                ? this.editing
-                : key === "motion"
-                  ? this.motion
-                  : (this.mountedOptions.get(key) ??
-                      (this.defaultOn.has(key) ? "on" : "off")) === "on";
-      } else if (element instanceof HTMLSelectElement)
+        element.checked =
+          element.type === "radio"
+            ? element.value === this.kit.key
+            : this.checkedControl(key);
+      } else if (element instanceof HTMLSelectElement) {
         element.value = values[key] ?? this.mountedOptions.get(key) ?? "";
+      }
     }
   }
   setDensity(density: TableDensity): void {
