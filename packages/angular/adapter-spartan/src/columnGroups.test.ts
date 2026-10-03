@@ -190,7 +190,7 @@ describe("the unstyled table's column selection", () => {
         .filter((cell) => cell.getAttribute("aria-selected") === "true")
         .map((cell) => cell.textContent.trim());
     expect(selected()).toEqual(["London", "New York"]);
-    expect(boxes[1]!.getAttribute("aria-checked") === "true").toBe(true);
+    expect(boxes[1]!.getAttribute("aria-checked")).toBe("true");
     boxes[1]!.click();
     await settle();
     expect(selected()).toEqual([]);

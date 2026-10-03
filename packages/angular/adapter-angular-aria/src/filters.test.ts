@@ -1,8 +1,3 @@
-import { defaultLabels } from "@adapttable/core";
-import {
-  fixtureOverlayProviders,
-  focusTrapAnchor,
-} from "../testing/overlayFixture";
 import {
   type ColumnDef,
   defaultFilterRegistry,
@@ -17,6 +12,7 @@ import {
 } from "@adapttable/angular";
 import { filters, filterTypes } from "@adapttable/angular-aria/filters";
 import { headerFilters } from "@adapttable/angular-aria/header-filters";
+import { defaultLabels } from "@adapttable/core";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -30,6 +26,10 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import {
+  fixtureOverlayProviders,
+  focusTrapAnchor,
+} from "../testing/overlayFixture";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";

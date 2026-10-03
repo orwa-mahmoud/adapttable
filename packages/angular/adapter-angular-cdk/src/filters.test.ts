@@ -1,8 +1,4 @@
 import {
-  fixtureOverlayProviders,
-  focusTrapAnchor,
-} from "../testing/overlayFixture";
-import {
   type ColumnDef,
   defaultFilterRegistry,
   type FilterDef,
@@ -29,6 +25,10 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import {
+  fixtureOverlayProviders,
+  focusTrapAnchor,
+} from "../testing/overlayFixture";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";

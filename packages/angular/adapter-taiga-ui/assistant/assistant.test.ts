@@ -1,9 +1,3 @@
-import { AdaptTaigaRoot } from "../src/taigaRoot";
-import {
-  chooseTaigaOption,
-  taigaOptions,
-  taigaPopup,
-} from "../src/taigaTestHelpers";
 import {
   type TableAssistantProps,
   type TableAssistantView,
@@ -12,6 +6,12 @@ import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { AdaptTaigaRoot } from "../src/taigaRoot";
+import {
+  chooseTaigaOption,
+  taigaOptions,
+  taigaPopup,
+} from "../src/taigaTestHelpers";
 import {
   AdaptAssistantBadge,
   AdaptAssistantButton,

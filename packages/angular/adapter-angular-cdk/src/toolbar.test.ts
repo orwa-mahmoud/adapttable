@@ -1,4 +1,3 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
 import { densityChooser } from "@adapttable/angular-cdk/density";
 import {
@@ -13,6 +12,7 @@ import { savedViews } from "@adapttable/angular-cdk/saved-views";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {

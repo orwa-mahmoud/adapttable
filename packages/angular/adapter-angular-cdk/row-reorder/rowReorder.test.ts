@@ -1,4 +1,3 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /**
  * Keyboard reorder stays on the loaded page — rowCount is on-screen rows,
  * not the source total — and the kit controls call through to the host.
@@ -14,6 +13,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "../src/dataTable";
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { AdaptRowMoveMenu } from "./rowMoveMenu";
 import { AdaptRowReorderButtons } from "./rowReorderButtons";
 import { AdaptRowReorderGrip } from "./rowReorderGrip";

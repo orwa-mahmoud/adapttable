@@ -1,4 +1,3 @@
-import { taigaOptions } from "./taigaTestHelpers";
 import {
   type AdaptTableFeature,
   type AgentApprovalPending,
@@ -32,6 +31,7 @@ import { getDirection } from "../../../shared/i18n/src/direction";
 import { locales } from "../../../shared/i18n/src/getLabels";
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
+import { taigaOptions } from "./taigaTestHelpers";
 
 function columnsFor(
   scenario: ConformanceScenario

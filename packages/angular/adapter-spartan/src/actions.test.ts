@@ -10,8 +10,8 @@ import { bulkActions } from "@adapttable/spartan/bulk-actions";
 import { columnMenu } from "@adapttable/spartan/column-menu";
 import { rowActions } from "@adapttable/spartan/row-actions";
 import { Component, input } from "@angular/core";
-import { within } from "@testing-library/dom";
 import { TestBed } from "@angular/core/testing";
+import { within } from "@testing-library/dom";
 
 import { focusAndClick } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";

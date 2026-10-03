@@ -128,10 +128,9 @@ class AdaptHeaderFilterRange {
 class AdaptHeaderFilterMulti {
   private readonly select = viewChild(MatSelect);
   protected namePanel(): void {
-    this.select()?.panel?.nativeElement.setAttribute(
-      "data-adapttable-part",
-      "filter-header-menu"
-    );
+    const panel = this.select()?.panel?.nativeElement as
+      HTMLElement | undefined;
+    panel?.setAttribute("data-adapttable-part", "filter-header-menu");
   }
   readonly props = input.required<FilterHeaderMultiProps>();
   protected changed(values: string[]): void {

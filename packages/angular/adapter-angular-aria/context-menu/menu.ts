@@ -154,7 +154,6 @@ export class AdaptContextMenuSurface {
     if (event.key === "Escape") {
       event.preventDefault();
       this.props().onClose();
-      return;
     }
   }
 

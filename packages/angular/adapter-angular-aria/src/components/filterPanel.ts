@@ -162,7 +162,6 @@ export class AdaptFilterDrawer {
       const onKey = (event: KeyboardEvent): void => {
         if (event.key === "Escape") {
           onClose();
-          return;
         }
       };
       document.addEventListener("keydown", onKey);

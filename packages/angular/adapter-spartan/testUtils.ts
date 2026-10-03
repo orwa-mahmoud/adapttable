@@ -16,7 +16,11 @@ export function clickOutside(target: HTMLElement = document.body): void {
 
 /** Supply only jsdom's missing geometry; CDK still chooses focus targets. */
 export function provideFocusLayout(selector: string): void {
-  const original = HTMLElement.prototype.getClientRects;
+  const original = Object.getOwnPropertyDescriptor(
+    Element.prototype,
+    "getClientRects"
+  )?.value as HTMLElement["getClientRects"] | undefined;
+  if (!original) throw new Error("Native getClientRects is unavailable");
   vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(
     function (this: HTMLElement) {
       if (!this.closest(selector)) return original.call(this);

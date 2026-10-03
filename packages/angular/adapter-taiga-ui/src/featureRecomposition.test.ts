@@ -1,4 +1,3 @@
-import { chooseTaigaOption } from "./taigaTestHelpers";
 import {
   type AdaptTableFeature,
   type ColumnDef,
@@ -20,6 +19,7 @@ import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
+import { chooseTaigaOption } from "./taigaTestHelpers";
 
 /** Feature identities change while the mounted table and its state stay alive. */
 

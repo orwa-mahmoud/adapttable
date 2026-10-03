@@ -229,8 +229,8 @@ describe("mounted feature recomposition (Spartan Angular)", () => {
       one<HTMLInputElement>(
         root,
         '[data-row-id="2"] button[role="checkbox"]'
-      ).getAttribute("aria-checked") === "true"
-    ).toBe(true);
+      ).getAttribute("aria-checked")
+    ).toBe("true");
 
     await mounted.replace([
       menu,
@@ -261,8 +261,8 @@ describe("mounted feature recomposition (Spartan Angular)", () => {
       one<HTMLInputElement>(
         root,
         '[data-row-id="2"] button[role="checkbox"]'
-      ).getAttribute("aria-checked") === "true"
-    ).toBe(true);
+      ).getAttribute("aria-checked")
+    ).toBe("true");
     expect(
       [...root.querySelectorAll(`${part("header-cell")}[data-column-key]`)].map(
         (header) => header.getAttribute("data-column-key")
@@ -455,8 +455,8 @@ describe("mounted feature recomposition (Spartan Angular)", () => {
       one<HTMLInputElement>(
         root,
         '[data-row-id="parent"] button[role="checkbox"]'
-      ).getAttribute("aria-checked") === "true"
-    ).toBe(true);
+      ).getAttribute("aria-checked")
+    ).toBe("true");
   });
 
   it("retains lazily created uncontrolled selection across disabled controls and capabilities", async () => {
@@ -498,8 +498,8 @@ describe("mounted feature recomposition (Spartan Angular)", () => {
       one<HTMLInputElement>(
         root,
         '[data-row-id="2"] button[role="checkbox"]'
-      ).getAttribute("aria-checked") === "true"
-    ).toBe(true);
+      ).getAttribute("aria-checked")
+    ).toBe("true");
     expect(host.onSelectionChange).toHaveBeenCalledOnce();
   });
 
@@ -567,8 +567,8 @@ describe("mounted feature recomposition (Spartan Angular)", () => {
       one<HTMLInputElement>(
         root,
         '[data-row-id="2"] button[role="checkbox"]'
-      ).getAttribute("aria-checked") === "true"
-    ).toBe(true);
+      ).getAttribute("aria-checked")
+    ).toBe("true");
     expect(host.features()).toBe(features);
     expect(ids(root)).toEqual(["1", "2"]);
   });

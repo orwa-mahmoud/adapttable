@@ -404,7 +404,7 @@ describe("AdaptCheckboxCellEditor", () => {
     expect(document.activeElement).toBe(checks[0]);
     checks[0]!.click();
     await fixture.whenStable();
-    expect(checks[0]!.getAttribute("aria-checked") === "true").toBe(true);
+    expect(checks[0]!.getAttribute("aria-checked")).toBe("true");
     checks[1]!.focus();
     expect(document.activeElement).toBe(checks[1]);
     expect(host.onCellEdit).not.toHaveBeenCalled();

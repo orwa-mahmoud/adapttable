@@ -1,4 +1,3 @@
-import { taigaPopup } from "./taigaTestHelpers";
 import {
   type AdaptTableFeature,
   type BulkAction,
@@ -13,6 +12,7 @@ import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
+import { taigaPopup } from "./taigaTestHelpers";
 
 interface Person {
   id: string;

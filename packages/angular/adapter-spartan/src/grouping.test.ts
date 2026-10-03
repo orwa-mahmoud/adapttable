@@ -290,15 +290,11 @@ describe("grouping (Spartan Angular)", () => {
       rowBoxes.map((box) => box.getAttribute("aria-checked") === "true")
     ).toEqual([true, true, true, false, false]);
     expect(
-      (all("group-select")[0] as HTMLInputElement).getAttribute(
-        "aria-checked"
-      ) === "true"
-    ).toBe(true);
+      (all("group-select")[0] as HTMLInputElement).getAttribute("aria-checked")
+    ).toBe("true");
     expect(
-      (all("group-select")[1] as HTMLInputElement).getAttribute(
-        "aria-checked"
-      ) === "true"
-    ).toBe(false);
+      (all("group-select")[1] as HTMLInputElement).getAttribute("aria-checked")
+    ).not.toBe("true");
   });
 
   it("groups phone cards under header cards", async () => {

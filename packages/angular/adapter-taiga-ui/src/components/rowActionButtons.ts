@@ -20,7 +20,6 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
-
 import { TuiDropdownDirective } from "@taiga-ui/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
@@ -48,7 +47,8 @@ export class AdaptRowActions<TRow> {
 
   constructor() {
     effect(() => {
-      const popup = this.dropdown()?.ref()?.location.nativeElement;
+      const popup = this.dropdown()?.ref()?.location.nativeElement as
+        HTMLElement | undefined;
       popup?.setAttribute("aria-label", this.labels().rowActionsMenu);
     });
   }

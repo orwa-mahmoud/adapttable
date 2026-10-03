@@ -9,8 +9,8 @@ import { Component, input, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
-import { clickOutside } from "../testUtils";
 import { AdaptContextMenuLive } from "../context-menu/menu";
+import { clickOutside } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {

@@ -1,4 +1,3 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /**
  * The unstyled context menu: right-click, the keyboard, and a host entry.
  */
@@ -11,6 +10,7 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
 import { AdaptContextMenuLive } from "../context-menu/menu";
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {

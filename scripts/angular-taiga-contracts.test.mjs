@@ -4,7 +4,9 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-const root = path.dirname(fileURLToPath(import.meta.url));
+const root = fileURLToPath(
+  new URL("../packages/angular/adapter-taiga-ui/", import.meta.url)
+);
 function files(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name);

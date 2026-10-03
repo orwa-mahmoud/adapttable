@@ -1,6 +1,5 @@
 /** Material dialog lifecycle shared by this kit's modal surfaces. */
 import { DOCUMENT } from "@angular/common";
-import type { TemplateRef } from "@angular/core";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -9,6 +8,7 @@ import {
   inject,
   input,
   output,
+  type TemplateRef,
   viewChild,
 } from "@angular/core";
 import {
@@ -54,11 +54,9 @@ export class AdaptMaterialDialog {
         this.close();
         return;
       }
-      const position = sheet
-        ? dir === "rtl"
-          ? { left: "0", top: "0" }
-          : { right: "0", top: "0" }
-        : {};
+      const sheetPosition =
+        dir === "rtl" ? { left: "0", top: "0" } : { right: "0", top: "0" };
+      const position = sheet ? sheetPosition : {};
       const width = sheet ? "420px" : "520px";
       const height = sheet ? "100%" : "";
       if (this.current) {

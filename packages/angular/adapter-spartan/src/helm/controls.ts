@@ -135,7 +135,9 @@ export class SpartanSelection {
   }
 
   protected toggle(): void {
-    const handler = this.attrs()["onChange"];
-    if (typeof handler === "function") handler(new Event("change"));
+    const handler = this.attrs().onChange;
+    if (typeof handler === "function") {
+      (handler as (event: Event) => void)(new Event("change"));
+    }
   }
 }

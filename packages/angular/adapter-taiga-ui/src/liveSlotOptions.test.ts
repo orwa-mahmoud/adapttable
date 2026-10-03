@@ -1,5 +1,3 @@
-import { chooseTaigaOption, taigaOptions } from "./taigaTestHelpers";
-import { AdaptTaigaRoot } from "./taigaRoot";
 import {
   type FilterDef,
   injectFrontendData,
@@ -15,6 +13,8 @@ import { TestBed } from "@angular/core/testing";
 
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptSavedViewsMenu } from "./components/savedViewsMenu";
+import { AdaptTaigaRoot } from "./taigaRoot";
+import { chooseTaigaOption, taigaOptions } from "./taigaTestHelpers";
 
 interface Row {
   id: string;

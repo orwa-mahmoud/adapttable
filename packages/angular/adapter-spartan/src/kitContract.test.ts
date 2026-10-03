@@ -39,7 +39,7 @@ describe("Spartan package boundary", () => {
     for (const filename of sources) {
       const source = readFileSync(filename, "utf8");
       expect(source, filename).not.toMatch(
-        /from ["']@adapttable\/(?:core|react|angular-unstyled|ng-zorro)(?:[\/"'])/
+        /from ["']@adapttable\/(?:core|react|angular-unstyled|ng-zorro)[/"']/
       );
     }
   });
@@ -47,9 +47,12 @@ describe("Spartan package boundary", () => {
   it("owns styles without global resets or unprefixed global tokens", () => {
     const css = readFileSync(path.join(directory, "styles.css"), "utf8");
     expect(css).toContain('@reference "tailwindcss"');
-    expect(css).not.toMatch(
-      /@import\s+["']tailwindcss|:root|(?:^|\n)\s*(?:html|body)\s*\{/
-    );
+    expect(css).not.toMatch(/@import\s+["']tailwindcss|:root/);
+    const trimmedLines = css
+      .split("\n")
+      .map((line) => line.trimStart())
+      .join("\n");
+    expect(trimmedLines).not.toMatch(/^(?:html|body)\s*\{/m);
     expect(css).not.toMatch(
       /--(?:background|foreground|primary|border|ring)\s*:/
     );

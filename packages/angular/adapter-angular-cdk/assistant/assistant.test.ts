@@ -1,4 +1,3 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /** Mounted native controls: no browser interaction is delegated to the binding. */
 import type {
   TableAssistantProps,
@@ -8,6 +7,7 @@ import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import {
   AdaptAssistantBadge,
   AdaptAssistantButton,

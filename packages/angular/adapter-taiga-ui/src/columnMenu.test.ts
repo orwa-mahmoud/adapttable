@@ -1,10 +1,10 @@
-import { clickOutsideTaiga } from "./taigaTestHelpers";
 import { type ColumnDef, type ColumnLayoutState } from "@adapttable/angular";
 import { columnMenu } from "@adapttable/taiga-ui/column-menu";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
+import { clickOutsideTaiga } from "./taigaTestHelpers";
 
 interface City {
   id: string;

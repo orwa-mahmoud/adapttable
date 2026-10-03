@@ -1,4 +1,3 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import type {
   AdaptTableFeature,
   AgentApprovalPending,
@@ -30,6 +29,7 @@ import { fireEvent, waitFor, within } from "@testing-library/dom";
 
 import { getDirection } from "../../../shared/i18n/src/direction";
 import { locales } from "../../../shared/i18n/src/getLabels";
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { AdaptErrorState } from "./components/errorState";
 import { AdaptDataTable } from "./dataTable";
 

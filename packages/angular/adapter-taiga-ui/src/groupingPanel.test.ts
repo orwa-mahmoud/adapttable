@@ -1,10 +1,4 @@
 import {
-  chooseTaigaOption,
-  taigaOptions,
-  taigaOptionValue,
-} from "./taigaTestHelpers";
-import { AdaptTaigaRoot } from "./taigaRoot";
-import {
   type ColumnDef,
   type GroupingPanelSlotProps,
 } from "@adapttable/angular";
@@ -16,6 +10,12 @@ import { describe, expect, it } from "vitest";
 
 import { AdaptGroupingPanel } from "./components/groupingPanel";
 import { AdaptDataTable } from "./dataTable";
+import { AdaptTaigaRoot } from "./taigaRoot";
+import {
+  chooseTaigaOption,
+  taigaOptions,
+  taigaOptionValue,
+} from "./taigaTestHelpers";
 
 interface Row {
   id: string;

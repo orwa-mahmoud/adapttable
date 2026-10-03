@@ -1,6 +1,11 @@
 /** Keep semantic part selectors and validation attributes on Material's native checkbox. */
-import type { AfterViewChecked } from "@angular/core";
-import { Directive, ElementRef, inject, input } from "@angular/core";
+import {
+  type AfterViewChecked,
+  Directive,
+  ElementRef,
+  inject,
+  input,
+} from "@angular/core";
 
 /** @internal */
 @Directive({ selector: "mat-checkbox[adaptCheckboxPart]" })

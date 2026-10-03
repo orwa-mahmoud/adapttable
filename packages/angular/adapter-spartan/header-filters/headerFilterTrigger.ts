@@ -13,8 +13,10 @@ import {
   injectHeaderFilterOverlay,
   type TableSource,
 } from "@adapttable/angular";
-import { ɵHlmButton as HlmButton } from "@adapttable/spartan";
-import { AdaptAutoFilterForm } from "@adapttable/spartan";
+import {
+  AdaptAutoFilterForm,
+  ɵHlmButton as HlmButton,
+} from "@adapttable/spartan";
 import {
   ChangeDetectionStrategy,
   Component,

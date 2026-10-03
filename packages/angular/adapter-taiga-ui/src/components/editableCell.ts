@@ -26,8 +26,8 @@ import {
 } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-  type AfterViewInit,
   afterNextRender,
+  type AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -280,8 +280,6 @@ export class AdaptNativeCellEditor implements AfterViewInit {
     <label>
       <input
         tuiCheckbox
-        [adaptTaigaEditorValidation]="p.error"
-        [adaptTaigaEditorErrorId]="p.errorId"
         #el
         type="checkbox"
         [ngModelOptions]="{ standalone: true }"

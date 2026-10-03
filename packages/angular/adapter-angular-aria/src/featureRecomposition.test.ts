@@ -1,4 +1,3 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /** Feature identities change while the mounted table and its state stay alive. */
 import {
   type AdaptTableFeature,
@@ -20,6 +19,7 @@ import { Component, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {

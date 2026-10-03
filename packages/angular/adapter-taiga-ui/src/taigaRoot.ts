@@ -19,7 +19,7 @@ const TAIGA_OPTIONS: TuiOptions = {
 };
 
 /** Taiga event handling without document-wide theme or scrollbar side effects. */
-export function provideAdaptTaiga(): Array<Provider | EnvironmentProviders> {
+export function provideAdaptTaiga(): (Provider | EnvironmentProviders)[] {
   return [
     { provide: TUI_OPTIONS, useValue: TAIGA_OPTIONS },
     provideEventPlugins(),

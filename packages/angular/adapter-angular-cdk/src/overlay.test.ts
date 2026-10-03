@@ -5,9 +5,6 @@ import {
   OverlayModule,
 } from "@angular/cdk/overlay";
 import { ViewportRuler } from "@angular/cdk/scrolling";
-import { EMPTY } from "rxjs";
-
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import {
   Component,
   type ElementRef,
@@ -17,7 +14,9 @@ import {
   viewChild,
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { EMPTY } from "rxjs";
 
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { menuPopover } from "./components/menuPopover";
 import { placeOverlayBelowTrigger } from "./components/overlayPlacement";
 

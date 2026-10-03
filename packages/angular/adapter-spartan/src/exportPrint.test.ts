@@ -410,10 +410,10 @@ async function downloadBinary(
     '[data-row-id="2"] [data-spartan-part="checkbox"]'
   );
   expect(box).not.toBeNull();
-  expect(box!.getAttribute("aria-checked") === "true").toBe(false);
+  expect(box!.getAttribute("aria-checked")).not.toBe("true");
   box!.click();
   await fixture.whenStable();
-  expect(box!.getAttribute("aria-checked") === "true").toBe(true);
+  expect(box!.getAttribute("aria-checked")).toBe("true");
   const button = element.querySelector<HTMLButtonElement>(
     '[data-adapttable-part="export-csv-button"]'
   );

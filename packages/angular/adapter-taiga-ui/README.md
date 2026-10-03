@@ -101,7 +101,7 @@ the Angular desktop/mobile-card structure. Consumers may override public classes
 
 ## Verification
 
-`node --test contracts.test.mjs` checks source boundaries, native control
+`pnpm test:contracts` checks source boundaries, native control
 coverage, entry parity, and theme isolation. The package also carries Angular
 behavior/conformance and SSR fixtures. Full Angular compilation, interaction,
 coverage, browser, theme, mobile, and RTL acceptance must pass before the package

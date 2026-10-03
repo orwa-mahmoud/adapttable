@@ -1,4 +1,3 @@
-import { chooseTaigaOption } from "./taigaTestHelpers";
 import {
   AdaptCellTemplate,
   type AdaptTableFeature,
@@ -15,6 +14,7 @@ import { TuiCheckbox } from "@taiga-ui/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
+import { chooseTaigaOption } from "./taigaTestHelpers";
 
 interface City {
   id: string;

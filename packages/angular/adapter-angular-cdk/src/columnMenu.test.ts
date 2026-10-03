@@ -1,9 +1,9 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import type { ColumnDef, ColumnLayoutState } from "@adapttable/angular";
 import { columnMenu } from "@adapttable/angular-cdk/column-menu";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {

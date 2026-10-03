@@ -12,10 +12,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   input,
-  viewChild,
   type TemplateRef,
+  viewChild,
 } from "@angular/core";
-
 import { NgModel } from "@angular/forms";
 
 import { TAIGA_CONTROLS } from "../taigaControls";

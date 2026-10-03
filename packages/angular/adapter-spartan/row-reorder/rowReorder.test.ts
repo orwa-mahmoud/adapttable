@@ -14,8 +14,8 @@ import { TestBed } from "@angular/core/testing";
 import { waitFor } from "@testing-library/dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { focusAndClick } from "../testUtils";
 import { AdaptDataTable } from "../src/dataTable";
+import { focusAndClick } from "../testUtils";
 import { AdaptRowMoveMenu } from "./rowMoveMenu";
 import { AdaptRowReorderButtons } from "./rowReorderButtons";
 import { AdaptRowReorderGrip } from "./rowReorderGrip";

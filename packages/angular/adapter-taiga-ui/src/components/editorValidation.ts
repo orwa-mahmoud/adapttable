@@ -29,7 +29,7 @@ export class AdaptTaigaEditorValidation implements Validator {
   readonly adaptTaigaEditorValidation = input<string>();
   readonly adaptTaigaEditorErrorId = input<string>();
   private readonly injector = inject(Injector);
-  private changed = (): void => {};
+  private changed?: () => void;
 
   constructor() {
     effect(() => {
@@ -39,7 +39,7 @@ export class AdaptTaigaEditorValidation implements Validator {
       // Resolve after directive creation: NgModel itself injects NG_VALIDATORS.
       const native = this.injector.get(TuiNativeValidator);
       native.id = this.adaptTaigaEditorErrorId() ?? "";
-      this.changed();
+      this.changed?.();
       if (error) {
         this.injector.get(NgControl).control?.markAsTouched();
       }

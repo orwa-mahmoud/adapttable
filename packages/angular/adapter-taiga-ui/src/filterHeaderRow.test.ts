@@ -1,5 +1,3 @@
-import { chooseTaigaOption } from "./taigaTestHelpers";
-import { AdaptTaigaRoot } from "./taigaRoot";
 import {
   defaultLabels,
   type ExtraFilters,
@@ -12,6 +10,9 @@ import {
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
+
+import { AdaptTaigaRoot } from "./taigaRoot";
+import { chooseTaigaOption } from "./taigaTestHelpers";
 
 /**
  * Native header-filter controls: the same writes the React kit's header

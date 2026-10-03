@@ -203,7 +203,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist coverage .turbo",
-    "test:contracts": "node --test contracts.test.mjs"
+    "test:contracts": "node --test ../../../scripts/angular-taiga-contracts.test.mjs"
   },
   "peerDependencies": {
     "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",

@@ -1,4 +1,3 @@
-import { chooseTaigaOption } from "./taigaTestHelpers";
 import {
   EMPTY_PIVOT_CONFIG,
   pivot,
@@ -10,9 +9,10 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
 import { pivotTableModel } from "../pivot/pivotTableModel";
-import { AdaptTaigaRoot } from "./taigaRoot";
 import { AdaptPivotPanel } from "./components/pivotPanel";
 import { AdaptPivotRowHeader } from "./components/pivotRowHeader";
+import { AdaptTaigaRoot } from "./taigaRoot";
+import { chooseTaigaOption } from "./taigaTestHelpers";
 
 /**
  * The native pivot panel, and the row header it draws for a pivot table.

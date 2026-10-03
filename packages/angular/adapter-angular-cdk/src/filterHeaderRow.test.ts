@@ -1,4 +1,3 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /**
  * Native header-filter controls: the same writes the React kit's header
  * harness covers, drawn through the compact row.
@@ -15,6 +14,8 @@ import {
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
+
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 
 interface Row {
   name: string;

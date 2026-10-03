@@ -1,4 +1,3 @@
-import { AdaptTaigaRoot } from "../src/taigaRoot";
 import {
   type ColumnDef,
   type PaginationMode,
@@ -10,6 +9,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "../src/dataTable";
+import { AdaptTaigaRoot } from "../src/taigaRoot";
 import { AdaptRowMoveMenu } from "./rowMoveMenu";
 import { AdaptRowReorderButtons } from "./rowReorderButtons";
 import { AdaptRowReorderGrip } from "./rowReorderGrip";

@@ -24,6 +24,14 @@ describe("Taiga selected-option labels", () => {
     expect(pipe.transform([10, 25])(25)).toBe("25");
     expect(pipe.transform([])(null)).toBe("");
   });
+  it("does not expose default object or function stringification as a label", () => {
+    expect(pipe.transform([])({ value: "unknown" })).toBe("");
+    expect(pipe.transform([])(() => "unknown")).toBe("");
+    expect(pipe.transform([{ value: "broken", label: {} }])("broken")).toBe("");
+    expect(pipe.transform([true])(true)).toBe("true");
+    expect(pipe.transform([1n])(1n)).toBe("1");
+    expect(pipe.transform([])(Symbol("choice"))).toBe("Symbol(choice)");
+  });
   it("resolves operator label keys through the active locale", () => {
     expect(
       pipe.transform(

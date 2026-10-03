@@ -1,4 +1,3 @@
-import { chooseTaigaOption } from "./taigaTestHelpers";
 import {
   ADAPTTABLE_URL_ADAPTER,
   type AdaptTableFeature,
@@ -13,6 +12,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
+import { chooseTaigaOption } from "./taigaTestHelpers";
 
 /** Live query inputs change the mounted kit while its data and features stay put. */
 

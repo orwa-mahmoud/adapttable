@@ -1,4 +1,3 @@
-import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import type {
   AdaptTableFeature,
   BulkAction,
@@ -12,6 +11,7 @@ import { rowActions } from "@adapttable/angular-cdk/row-actions";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import { AdaptDataTable } from "./dataTable";
 
 interface Person {

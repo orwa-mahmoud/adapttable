@@ -160,7 +160,13 @@ export class AdaptFilterDrawer {
   );
 
   protected onBackdrop(event: MouseEvent): void {
-    if (event.target === this.panel()?.nativeElement) this.props().onClose();
+    const target = event.target;
+    if (
+      target instanceof Node &&
+      this.panel()?.nativeElement.isSameNode(target)
+    ) {
+      this.props().onClose();
+    }
   }
 
   constructor() {

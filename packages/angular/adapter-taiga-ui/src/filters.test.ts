@@ -1,9 +1,4 @@
 import {
-  chooseTaigaOption,
-  taigaOptions,
-  clickOutsideTaiga,
-} from "./taigaTestHelpers";
-import {
   type ColumnDef,
   defaultFilterRegistry,
   type FilterDef,
@@ -33,6 +28,11 @@ import { TestBed } from "@angular/core/testing";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import { type FiltersMode } from "./tableFilters";
+import {
+  chooseTaigaOption,
+  clickOutsideTaiga,
+  taigaOptions,
+} from "./taigaTestHelpers";
 
 interface Person {
   id: string;
