@@ -154,8 +154,12 @@ describe("AdaptFilterHeaderRow", () => {
     await fixture.whenStable();
     expect(team.value).toBe("Web");
 
-    const tags = labeled("Tags").find((node) => node.tagName === "SUMMARY");
+    const tags = labeled("Tags").find((node) => node.tagName === "BUTTON");
     if (!tags) throw new Error("Tags filter trigger was not rendered");
+    expect(tags.getAttribute("aria-expanded")).toBe("false");
+    tags.click();
+    await fixture.whenStable();
+    expect(tags.getAttribute("aria-expanded")).toBe("true");
     const box = (caption: string) => {
       const label = [...element.querySelectorAll("label")].find((node) =>
         node.textContent?.includes(caption)

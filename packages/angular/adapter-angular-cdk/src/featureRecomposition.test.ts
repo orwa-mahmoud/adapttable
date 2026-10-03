@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /** Feature identities change while the mounted table and its state stay alive. */
 import {
   type AdaptTableFeature,
@@ -44,6 +45,7 @@ const COLUMNS: readonly ColumnDef<Row>[] = [
 ];
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
@@ -575,41 +577,47 @@ describe("mounted feature recomposition (unstyled Angular)", () => {
       await mounted.settle();
     };
     await open();
-    const popover = one(document, part("filters-popover"));
-    expect(document.querySelector(part("filters-backdrop"))).toBeNull();
+    const popover = one(root, part("filters-popover"));
+    expect(root.querySelector(part("filters-backdrop"))).toBeNull();
     inputDraft(one<HTMLInputElement>(popover, part("filter-input")), "Ada");
     await mounted.settle();
     expect(ids(root)).toEqual(["1"]);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await mounted.settle();
-    expect(document.querySelector(part("filters-popover"))).toBeNull();
+    expect(root.querySelector(part("filters-popover"))).toBeNull();
 
     host.filterMode.set("drawer");
     await mounted.settle();
     await open();
-    const panel = one(document, part("filters-panel"));
-    expect(panel.tagName).toBe("DIALOG");
+    const panel = one(root, part("filters-panel"));
+    expect(panel.getAttribute("role")).toBe("dialog");
     expect(panel.getAttribute("aria-modal")).toBe("true");
-    expect(document.querySelector(part("filters-backdrop"))).not.toBeNull();
-    expect(document.querySelector(part("filters-popover"))).toBeNull();
+    expect(root.querySelector(part("filters-backdrop"))).not.toBeNull();
+    expect(root.querySelector(part("filters-popover"))).toBeNull();
     const field = one<HTMLInputElement>(panel, part("filter-input"));
     expect(field.value).toBe("Ada");
     inputDraft(field, "Grace");
     await mounted.settle();
     expect(ids(root)).toEqual(["2"]);
-    one(document, part("filters-done")).click();
+    one(root, part("filters-done")).click();
     await mounted.settle();
-    expect(document.querySelector(part("filters-panel"))).toBeNull();
+    expect(root.querySelector(part("filters-panel"))).toBeNull();
     host.filterMode.set("popover");
     await mounted.settle();
     await open();
     expect(
       one<HTMLInputElement>(
-        one(document, part("filters-popover")),
+        one(root, part("filters-popover")),
         part("filter-input")
       ).value
     ).toBe("Grace");
-    expect(document.querySelector(part("filters-backdrop"))).toBeNull();
+    expect(root.querySelector(part("filters-backdrop"))).toBeNull();
     expect(ids(root)).toEqual(["2"]);
     expect(host.features()).toBe(features);
   });
@@ -632,18 +640,18 @@ describe("mounted feature recomposition (unstyled Angular)", () => {
     const { root, host } = mounted;
     const features = host.features();
     const setHeader = async (open: boolean) => {
-      const trigger = one<HTMLDetailsElement>(
+      const trigger = one<HTMLButtonElement>(
         root,
-        part("filter-header-trigger")
+        `${part("filter-header-trigger")} button`
       );
-      trigger.open = open;
-      trigger.dispatchEvent(new Event("toggle"));
+      if (trigger.getAttribute("aria-expanded") !== String(open))
+        trigger.click();
       await mounted.settle();
     };
     const openHeader = () => setHeader(true);
     const closeHeader = () => setHeader(false);
     const choose = async (value: string) => {
-      const select = one<HTMLSelectElement>(document, part("filter-select"));
+      const select = one<HTMLSelectElement>(root, part("filter-select"));
       select.value = value;
       select.dispatchEvent(new Event("change", { bubbles: true }));
       await mounted.settle();
@@ -651,20 +659,20 @@ describe("mounted feature recomposition (unstyled Angular)", () => {
     await openHeader();
     await choose("Research");
     expect(ids(root)).toEqual(["2"]);
-    expect(document.querySelector(part("filter-header-cell"))).not.toBeNull();
+    expect(root.querySelector(part("filter-header-cell"))).not.toBeNull();
     await closeHeader();
     host.closeHeaderFilter.set(true);
     await mounted.settle();
     await openHeader();
     await choose("Core");
     expect(ids(root)).toEqual(["1"]);
-    expect(document.querySelector(part("filter-header-cell"))).toBeNull();
+    expect(root.querySelector(part("filter-header-cell"))).toBeNull();
     host.closeHeaderFilter.set(false);
     await mounted.settle();
     await openHeader();
     await choose("Research");
     expect(ids(root)).toEqual(["2"]);
-    expect(document.querySelector(part("filter-header-cell"))).not.toBeNull();
+    expect(root.querySelector(part("filter-header-cell"))).not.toBeNull();
     expect(host.features()).toBe(features);
   });
 

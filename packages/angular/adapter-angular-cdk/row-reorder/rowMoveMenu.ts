@@ -131,6 +131,8 @@ export class AdaptRowMoveMenu {
     listStyle: "none",
   };
 
+  private completing = false;
+
   private readonly popover = viewChild(AdaptCdkPopover);
   private readonly trigger = viewChild<ElementRef<HTMLElement>>("trigger");
 
@@ -144,7 +146,12 @@ export class AdaptRowMoveMenu {
       const confirmation = this.props().confirmation;
       if (!confirmation) return;
       const onKeyDown = (event: KeyboardEvent) => {
-        if (event.key !== "Escape") return;
+        if (
+          event.key !== "Escape" ||
+          event.defaultPrevented ||
+          !this.popover()?.open()
+        )
+          return;
         event.preventDefault();
         this.finish(confirmation.onCancel);
       };
@@ -156,12 +163,19 @@ export class AdaptRowMoveMenu {
   }
 
   protected openChanged(open: boolean): void {
-    if (!open) this.props().confirmation?.onCancel();
+    if (!open && !this.completing) this.props().confirmation?.onCancel();
   }
 
   protected finish(action: () => void): void {
-    action();
-    this.popover()?.close();
+    const popover = this.popover();
+    if (this.completing || !popover?.open()) return;
+    this.completing = true;
+    try {
+      action();
+      popover.close();
+    } finally {
+      this.completing = false;
+    }
     const trigger = this.trigger()?.nativeElement ?? null;
     queueMicrotask(() => {
       restoreFocusSoon(trigger);

@@ -139,7 +139,7 @@ class AdaptEditCellButton {
         #el
         data-adapttable-part="edit-cell-editor"
         [aria-label]="p.label"
-        [attr.aria-invalid]="v['aria-invalid'] ?? null"
+        [forceInvalid]="v['aria-invalid'] === true"
         [aria-describedby]="v['aria-describedby'] ?? null"
         [attr.aria-busy]="v['aria-busy'] ?? null"
         [attr.data-conflict]="v['data-conflict'] ?? null"
@@ -155,7 +155,7 @@ class AdaptEditCellButton {
         multiple
         [attr.aria-label]="p.label"
         [attr.aria-invalid]="v['aria-invalid'] ?? null"
-        [attr.aria-describedby]="v['aria-describedby'] ?? null"
+        [aria-describedby]="v['aria-describedby'] ?? null"
         [attr.aria-busy]="v['aria-busy'] ?? null"
         [attr.data-conflict]="v['data-conflict'] ?? null"
         (change)="p.setDraft(multiDraftFromSelect($any($event.target)))"
@@ -179,7 +179,7 @@ class AdaptEditCellButton {
         data-adapttable-part="edit-cell-editor"
         [attr.aria-label]="p.label"
         [attr.aria-invalid]="v['aria-invalid'] ?? null"
-        [attr.aria-describedby]="v['aria-describedby'] ?? null"
+        [aria-describedby]="v['aria-describedby'] ?? null"
         [attr.aria-busy]="v['aria-busy'] ?? null"
         [attr.data-conflict]="v['data-conflict'] ?? null"
         [value]="p.draft"
@@ -203,8 +203,8 @@ class AdaptEditCellButton {
         #el
         data-adapttable-part="edit-cell-editor"
         [attr.aria-label]="p.label"
-        [attr.aria-invalid]="v['aria-invalid'] ?? null"
-        [attr.aria-describedby]="v['aria-describedby'] ?? null"
+        [forceInvalid]="v['aria-invalid'] === true"
+        [aria-describedby]="v['aria-describedby'] ?? null"
         [attr.aria-busy]="v['aria-busy'] ?? null"
         [attr.data-conflict]="v['data-conflict'] ?? null"
         [type]="editorInputType(p.editor)"

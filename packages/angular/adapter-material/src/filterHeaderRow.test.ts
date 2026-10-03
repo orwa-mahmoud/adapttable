@@ -139,8 +139,8 @@ describe("AdaptFilterHeaderRow", () => {
       element.querySelector('[data-adapttable-part="filter-header-input"]')
     ).not.toBeNull();
     expect(
-      element.querySelector('[data-adapttable-part="filter-header-menu"]')
-    ).not.toBeNull();
+      document.querySelector('[data-adapttable-part="filter-header-menu"]')
+    ).toBeNull();
 
     const name = labeled("Name")[0] as HTMLInputElement;
     name.value = "Ada";
@@ -158,6 +158,9 @@ describe("AdaptFilterHeaderRow", () => {
     if (!tags) throw new Error("Tags filter trigger was not rendered");
     tags.click();
     await fixture.whenStable();
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-menu"]')
+    ).not.toBeNull();
     const option = (caption: string) =>
       [...document.querySelectorAll<HTMLElement>("mat-option")].find(
         (node) => node.textContent?.trim() === caption
@@ -171,7 +174,11 @@ describe("AdaptFilterHeaderRow", () => {
     await fixture.whenStable();
     expect(tags.textContent).toContain("2");
     tags.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+      })
     );
     await fixture.whenStable();
 

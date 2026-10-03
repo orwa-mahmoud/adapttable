@@ -1,3 +1,5 @@
+import { chooseTaigaOption, taigaOptions } from "./taigaTestHelpers";
+import { AdaptTaigaRoot } from "./taigaRoot";
 import {
   type FilterDef,
   injectFrontendData,
@@ -23,15 +25,15 @@ const OLD = [{ value: "old", label: "Old choice" }];
 const CURRENT = [{ value: "new", label: "Current choice" }];
 
 @Component({
-  imports: [AdaptAutoFilterForm, AdaptSavedViewsMenu],
-  template: `
+  imports: [AdaptTaigaRoot, AdaptAutoFilterForm, AdaptSavedViewsMenu],
+  template: `<adapt-taiga-root>
     <adapt-auto-filter-form
       [defs]="defs()"
       [source]="source()"
       [labels]="labels"
     />
     <adapt-saved-views-menu [props]="viewProps()" />
-  `,
+  </adapt-taiga-root>`,
 })
 class Host {
   readonly labels = defaultLabels;
@@ -62,6 +64,7 @@ async function mount(prepare?: (host: Host) => void) {
   const fixture = TestBed.createComponent(Host);
   const host = fixture.componentInstance;
   prepare?.(host);
+  document.body.append(fixture.nativeElement as HTMLElement);
   fixture.autoDetectChanges();
   await fixture.whenStable();
   const element = fixture.nativeElement as HTMLElement;
@@ -97,22 +100,23 @@ afterEach(() => {
 
 describe("live slot options", () => {
   it("replaces choices on the same mounted fields and writes the new selection", async () => {
-    const { host, element, settle } = await mount();
+    const { host, fixture, element, settle } = await mount();
     const mounted = element.querySelector("adapt-select-filter-field");
     host.defs.update((defs) =>
       defs.map((def) => ({ ...def, options: CURRENT }))
     );
     await settle();
     expect(element.querySelector("adapt-select-filter-field")).toBe(mounted);
-    const select = element.querySelector<HTMLSelectElement>(
+    const select = element.querySelector<HTMLInputElement>(
       '[data-adapttable-part="filter-select"]'
     );
     if (!select) throw new Error("Missing select");
     expect(
-      [...select.options].map((option) => option.textContent?.trim())
+      (await taigaOptions(fixture, select)).map((option) =>
+        option.textContent?.trim()
+      )
     ).toEqual([defaultLabels.filterAll, "Current choice"]);
-    select.value = "new";
-    select.dispatchEvent(new Event("change"));
+    await chooseTaigaOption(fixture, select, "new");
     await settle();
     const check = element.querySelector<HTMLInputElement>(
       '[data-adapttable-part="filter-checkbox"] input'
@@ -134,7 +138,7 @@ describe("live slot options", () => {
     const pending = new Promise<readonly FilterOption[]>((done) => {
       resolve = done;
     });
-    const { host, element, settle } = await mount((instance) => {
+    const { host, fixture, element, settle } = await mount((instance) => {
       instance.defs.update((defs) =>
         defs.map((def) => ({ ...def, options: () => pending }))
       );
@@ -145,15 +149,16 @@ describe("live slot options", () => {
     await settle();
     resolve?.(OLD);
     await settle();
-    const select = element.querySelector<HTMLSelectElement>(
+    const select = element.querySelector<HTMLInputElement>(
       '[data-adapttable-part="filter-select"]'
     );
     if (!select) throw new Error("Missing select");
     expect(
-      [...select.options].map((option) => option.textContent?.trim())
+      (await taigaOptions(fixture, select)).map((option) =>
+        option.textContent?.trim()
+      )
     ).toEqual([defaultLabels.filterAll, "Current choice"]);
-    select.value = "new";
-    select.dispatchEvent(new Event("change"));
+    await chooseTaigaOption(fixture, select, "new");
     await settle();
     expect(
       element.querySelector("adapt-multi-select-filter-field")?.textContent

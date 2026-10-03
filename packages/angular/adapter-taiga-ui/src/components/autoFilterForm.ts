@@ -215,7 +215,10 @@ abstract class OptionsField<TRow> implements OnInit {
     @let value = current();
     <label data-adapttable-part="filter-field" [style]="stack">
       <span data-adapttable-part="filter-label">{{ caption() }}</span>
-      <tui-textfield [stringify]="options().options | taigaLabels"
+      <tui-textfield
+        [stringify]="
+          options().options | taigaLabels: { '': labels().filterAll }
+        "
         ><input
           tuiSelect
           data-adapttable-part="filter-select"

@@ -19,6 +19,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   type ElementRef,
   input,
   signal,
@@ -141,19 +142,20 @@ export class AdaptAssistantPanel {
   imports: [...TAIGA_CONTROLS, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
-  template: `<ng-template
-    [tuiDialog]="props().open"
-    (tuiDialogChange)="!$event && props().onClose()"
-    [tuiDialogOptions]="{ label: props().label, closable: false }"
-  >
-    <section
-      [attr.dir]="props().dir"
-      [attr.data-adapttable-part]="props().part"
-      [class]="props().className"
+  template: `<ng-template #title>{{ props().label }}</ng-template
+    ><ng-template
+      [tuiDialog]="props().open"
+      (tuiDialogChange)="!$event && props().onClose()"
+      [tuiDialogOptions]="{ label: title, closable: false }"
     >
-      <ng-container [ngTemplateOutlet]="props().children" />
-    </section>
-  </ng-template>`,
+      <section
+        [attr.dir]="props().dir"
+        [attr.data-adapttable-part]="props().part"
+        [class]="props().className"
+      >
+        <ng-container [ngTemplateOutlet]="props().children" />
+      </section>
+    </ng-template>`,
 })
 export class AdaptAssistantSheet {
   readonly props = input.required<TableAssistantSheetProps>();
@@ -229,6 +231,7 @@ export class AdaptAssistantLanguageChip {
       type="button"
       [tuiDropdown]="menuContent"
       [tuiDropdownOpen]="menuOpen()"
+      [tuiDropdownEnabled]="!props().disabled"
       (tuiDropdownOpenChange)="menuOpen.set($event)"
       [attr.aria-expanded]="menuOpen()"
       #trigger
@@ -275,6 +278,11 @@ export class AdaptAssistantMenu {
   readonly props = input.required<TableAssistantMenuProps>();
   private readonly trigger =
     viewChild.required<ElementRef<HTMLElement>>("trigger");
+  constructor() {
+    effect(() => {
+      if (this.props().disabled) this.menuOpen.set(false);
+    });
+  }
   protected onTrigger(event: Event): void {
     if (this.props().disabled) event.preventDefault();
   }

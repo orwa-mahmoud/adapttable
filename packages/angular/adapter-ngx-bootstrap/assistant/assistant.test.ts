@@ -121,8 +121,14 @@ describe("native assistant", () => {
       { draft: "Hello", send, setDraft }
     );
     expect(part("assistant-panel")?.tagName).toBe("SECTION");
-    expect([...(part("assistant-panel")?.classList ?? [])].sort()).toEqual(
-      ["card", "native-conversation"].sort()
+    expect(
+      [...(part("assistant-panel")?.classList ?? [])].sort((left, right) =>
+        left.localeCompare(right)
+      )
+    ).toEqual(
+      ["card", "native-conversation"].sort((left, right) =>
+        left.localeCompare(right)
+      )
     );
     const input = part<HTMLTextAreaElement>("assistant-input");
     expect(input?.tagName).toBe("TEXTAREA");
@@ -422,7 +428,10 @@ describe("native assistant", () => {
     expect(part("assistant-examples-menu")?.getAttribute("aria-expanded")).toBe(
       "false"
     );
-    expect(part("assistant-examples-list")).toBeNull();
+    expect(part("assistant-examples-list")?.classList.contains("show")).toBe(
+      false
+    );
+    expect(item!.disabled).toBe(true);
     // A dispatched event can still reach a disabled native element. The
     // component must recheck current availability before running a command.
     item?.dispatchEvent(new MouseEvent("click", { bubbles: true }));

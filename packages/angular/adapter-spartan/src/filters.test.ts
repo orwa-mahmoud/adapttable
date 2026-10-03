@@ -25,6 +25,7 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { focusAndClick, provideFocusLayout } from "../testUtils";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
@@ -186,7 +187,7 @@ async function mount(
     await settle();
   };
   const openFilters = async () => {
-    part<HTMLButtonElement>("filters-button")!.click();
+    focusAndClick(part<HTMLButtonElement>("filters-button")!);
     await settle();
   };
   return {
@@ -343,6 +344,7 @@ describe("the Spartan Angular filters", () => {
   });
 
   it("opens a drawer with a backdrop in drawer mode, and traps focus in it", async () => {
+    provideFocusLayout('[data-spartan-part="filters-panel"]');
     const { part, openFilters, settle } = await mount(
       [filters(DEFS)],
       "drawer"
@@ -354,12 +356,18 @@ describe("the Spartan Angular filters", () => {
     expect(panel).not.toBeNull();
     expect(part("filters-backdrop")).not.toBeNull();
     expect(panel?.contains(document.activeElement)).toBe(true);
-    const last = part<HTMLButtonElement>("filters-done");
-    last!.focus();
-    document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
+    const first = part<HTMLButtonElement>("filters-close")!;
+    const last = part<HTMLButtonElement>("filters-done")!;
+    const anchors = document.querySelectorAll<HTMLElement>(
+      ".cdk-overlay-pane .cdk-focus-trap-anchor"
     );
+    expect(anchors).toHaveLength(2);
+    // Browser Tab enters these native CDK sentinels; jsdom has no Tab default.
+    last.focus();
+    anchors[1]!.focus();
+    expect(document.activeElement).toBe(first);
+    anchors[0]!.focus();
+    expect(document.activeElement).toBe(last);
     part<HTMLButtonElement>("filters-done")!.click();
     await settle();
     expect(part("filters-panel")).toBeNull();
@@ -511,7 +519,7 @@ describe("filters select labels (Spartan Angular)", () => {
       .click();
     await fixture.whenStable();
     const city = [
-      ...element.querySelectorAll<HTMLSelectElement>(
+      ...document.querySelectorAll<HTMLSelectElement>(
         '[data-adapttable-part="filter-select"]'
       ),
     ][0]!;

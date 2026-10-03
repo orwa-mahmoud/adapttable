@@ -153,7 +153,9 @@ describe.each([
     const initial =
       "table.q=City&table.sortBy=name&table.sortDir=desc&table.page=2&table.limit=2&foreign=kept";
     const adapter = createMemoryAdapter(initial);
+    const setSearch = vi.spyOn(adapter, "setSearch");
     const { host, part, names, settle } = await mount(adapter, mobile);
+    expect(setSearch).not.toHaveBeenCalled();
     expect(names()).toEqual(["City 10", "City 09"]);
     expect(part("pager")?.textContent).toContain("Page 2 of 6");
     expect(part("load-more-button")).toBeNull();
@@ -162,11 +164,8 @@ describe.each([
     await settle();
     expect(names()).toEqual(["City 12", "City 11", "City 10", "City 09"]);
     expect(part("pager")).toBeNull();
-    const expectedQuery = new URLSearchParams(initial);
-    expectedQuery.set("table.atv", "1");
-    expect([...new URLSearchParams(adapter.getSearch())].sort()).toEqual(
-      [...expectedQuery].sort()
-    );
+    expect(adapter.getSearch()).toBe(initial);
+    expect(setSearch).not.toHaveBeenCalled();
     part("load-more-button")!.click();
     await settle();
     expect(names()).toEqual([

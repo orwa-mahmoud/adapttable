@@ -15,7 +15,7 @@ function fixture() {
   const dom = new JSDOM(`
     <style>${css}</style>
     <div data-adapttable-kit="angular-cdk" data-adapttable-part="root">
-      <div data-adapttable-part="scroll-box"></div>
+      <div data-adapttable-part="scroll-box"><table data-adapttable-part="table"></table></div>
       <ul data-adapttable-part="cards">
         <li data-adapttable-part="card">
           <div data-adapttable-part="card-row">
@@ -49,6 +49,9 @@ test("CDK table containment is attached to the actual kit root", () => {
     assert.equal(Number.parseFloat(style("root").minInlineSize), 0);
     assert.equal(style("scroll-box").overflow, "auto");
     assert.equal(style("scroll-box").maxInlineSize, "100%");
+    assert.equal(style("table").borderCollapse, "separate");
+    assert.equal(Number.parseFloat(style("table").borderSpacing), 0);
+    assert.equal(style("table").inlineSize, "100%");
   } finally {
     dom.window.close();
   }

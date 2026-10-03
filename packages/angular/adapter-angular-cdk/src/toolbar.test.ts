@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
 import { densityChooser } from "@adapttable/angular-cdk/density";
 import {
@@ -30,6 +31,7 @@ const COLUMNS: ColumnDef<City>[] = [
 ];
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table

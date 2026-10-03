@@ -54,6 +54,7 @@ import {
         (overlayKeydown)="key($event)"
       >
         <div
+          #card
           class="adapt-aria adapt-aria-popup"
           data-adapttable-part="filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
@@ -94,9 +95,29 @@ export class AdaptFilterPopover {
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
 
+  private readonly card = viewChild<ElementRef<HTMLElement>>("card");
+
   protected outside(event: MouseEvent): void {
-    if (!this.anchor().nativeElement.contains(event.target as Node))
-      this.props().onClose();
+    const target = event.target;
+    const card = this.card()?.nativeElement;
+    if (
+      !(target instanceof Node) ||
+      this.anchor().nativeElement.contains(target)
+    )
+      return;
+    // CDK observes outside clicks during capture. Let the target's handler
+    // finish before deciding whether a removed target or focused field closes.
+    queueMicrotask(() => {
+      if (
+        !target.isConnected ||
+        !card ||
+        this.card()?.nativeElement !== card ||
+        card.contains(target) ||
+        card.contains(document.activeElement)
+      )
+        return;
+      if (this.props().open) this.props().onClose();
+    });
   }
 
   protected key(event: KeyboardEvent): void {

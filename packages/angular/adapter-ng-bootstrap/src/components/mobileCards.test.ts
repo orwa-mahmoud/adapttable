@@ -817,16 +817,20 @@ describe("mobile card reach", () => {
       ["row-reorder-down", "down-hook"],
       ["action-button", "action-hook"],
     ]) {
-      const kitClasses =
-        name === "checkbox"
-          ? ["form-check-input"]
-          : ["row-reorder-up", "row-reorder-down", "action-button"].includes(
-                name!
-              )
-            ? ["btn", "btn-outline-secondary", "btn-sm"]
-            : [];
-      expect([...part(name!, first).classList].sort()).toEqual(
-        [...kitClasses, className].sort()
+      const kitClasses: string[] = [];
+      if (name === "checkbox") kitClasses.push("form-check-input");
+      if (
+        ["row-reorder-up", "row-reorder-down", "action-button"].includes(name!)
+      )
+        kitClasses.push("btn", "btn-outline-secondary", "btn-sm");
+      expect(
+        [...part(name!, first).classList].sort((left, right) =>
+          left.localeCompare(right)
+        )
+      ).toEqual(
+        [...kitClasses, className!].sort((left, right) =>
+          left.localeCompare(right)
+        )
       );
     }
     expect(part("summary-card").className).toBe("card-hook summary-hook");

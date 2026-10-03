@@ -7,7 +7,7 @@ import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ngBootstrapPart } from "../testUtils";
+import { ngBootstrapPart, settleBootstrap } from "../testUtils";
 import {
   AdaptAssistantBadge,
   AdaptAssistantButton,
@@ -86,9 +86,7 @@ async function mount(
   return fixture;
 }
 async function settle<T>(fixture: ComponentFixture<T>): Promise<void> {
-  fixture.detectChanges();
-  await fixture.whenStable();
-  fixture.detectChanges();
+  await settleBootstrap(fixture);
 }
 const part = <T extends HTMLElement = HTMLElement>(name: string): T | null =>
   document.querySelector<T>(ngBootstrapPart(name));
@@ -121,8 +119,14 @@ describe("native assistant", () => {
       { draft: "Hello", send, setDraft }
     );
     expect(part("assistant-panel")?.tagName).toBe("SECTION");
-    expect([...(part("assistant-panel")?.classList ?? [])].sort()).toEqual(
-      ["card", "native-conversation"].sort()
+    expect(
+      [...(part("assistant-panel")?.classList ?? [])].sort((left, right) =>
+        left.localeCompare(right)
+      )
+    ).toEqual(
+      ["card", "native-conversation"].sort((left, right) =>
+        left.localeCompare(right)
+      )
     );
     const input = part<HTMLTextAreaElement>("assistant-input");
     expect(input?.tagName).toBe("TEXTAREA");

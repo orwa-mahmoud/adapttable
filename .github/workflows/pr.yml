@@ -227,7 +227,7 @@ jobs:
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           # 2-core runner: two packages at once, each lint is one process.
-          pnpm lint $f $AFFECTED --concurrency=1
+          pnpm lint $f $AFFECTED --concurrency=1 --continue=dependencies-successful
 
   typescript:
     name: TypeScript
@@ -546,7 +546,8 @@ jobs:
     needs: [detect, showcase-build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Keep the expanded browser matrix sequential within each shard.
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -569,7 +570,7 @@ jobs:
           SHOWCASE_SKIP_BUILD: "1"
           DOCS_SKIP_BUILD: "1"
       - name: Upload browser report
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report-${{ matrix.shard }}
@@ -610,6 +611,15 @@ jobs:
         with:
           languages: javascript-typescript
       - uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        id: codeql
+      - name: Retain security analysis results
+        if: ${{ always() && steps.codeql.outputs.sarif-output != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: codeql-results
+          path: ${{ steps.codeql.outputs.sarif-output }}
+          if-no-files-found: error
+          retention-days: 7
 
   bench:
     name: Bench

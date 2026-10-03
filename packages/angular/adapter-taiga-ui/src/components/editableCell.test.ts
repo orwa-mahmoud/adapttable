@@ -338,6 +338,11 @@ describe("AdaptNativeCellEditor validation attributes", () => {
       expect(field!.getAttribute("data-conflict")).toBe("");
       expect(field!.getAttribute("aria-invalid")).toBe("true");
       expect(field!.getAttribute("aria-describedby")).toBe("team-error");
+      if (field instanceof HTMLInputElement) {
+        expect(field.validity.customError).toBe(true);
+        expect(field.classList.contains("ng-invalid")).toBe(true);
+        expect(field.classList.contains("ng-touched")).toBe(true);
+      }
 
       fixture.componentRef.setInput("props", {
         ...props,
@@ -348,8 +353,14 @@ describe("AdaptNativeCellEditor validation attributes", () => {
       await fixture.whenStable();
       expect(field!.hasAttribute("aria-busy")).toBe(false);
       expect(field!.hasAttribute("data-conflict")).toBe(false);
-      expect(field!.hasAttribute("aria-invalid")).toBe(false);
+      expect(field!.getAttribute("aria-invalid")).not.toBe("true");
       expect(field!.hasAttribute("aria-describedby")).toBe(false);
+      if (field instanceof HTMLInputElement) {
+        expect(field.validity.customError).toBe(false);
+        expect(field.classList.contains("ng-valid")).toBe(true);
+      }
+      expect(props.setDraft).not.toHaveBeenCalled();
+      expect(props.commitOnBlur).not.toHaveBeenCalled();
     }
   );
 });

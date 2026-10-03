@@ -199,7 +199,13 @@ describe("the Angular Material filters", () => {
     expect(button?.getAttribute("aria-expanded")).toBe("true");
     expect(part("filters-popover")).not.toBeNull();
     expect(part("filters-backdrop")).toBeNull();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+      })
+    );
     await settle();
     expect(part("filters-popover")).toBeNull();
     expect(document.activeElement).toBe(button);
@@ -341,10 +347,11 @@ describe("the Angular Material filters", () => {
     ).toBe(true);
     const last = part<HTMLButtonElement>("filters-done");
     last!.focus();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
-    );
+    expect(
+      document
+        .querySelector("mat-dialog-container")
+        ?.contains(document.activeElement)
+    ).toBe(true);
     part<HTMLButtonElement>("filters-done")!.click();
     await settle();
     expect(part("filters-panel")).toBeNull();
@@ -353,7 +360,13 @@ describe("the Angular Material filters", () => {
     await settle();
     expect(part("filters-panel")).toBeNull();
     await openFilters();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+      })
+    );
     await settle();
     expect(part("filters-panel")).toBeNull();
   });
@@ -392,42 +405,63 @@ describe("the Angular Material filters", () => {
     ];
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
-    first!.focus();
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
+    // jsdom has no layout or Tab default action. Exercise the native CDK
+    // sentinels with geometry only on the two focus boundaries.
+    Object.defineProperty(first!, "offsetWidth", {
+      configurable: true,
+      value: 1,
+    });
+    Object.defineProperty(last!, "offsetWidth", {
+      configurable: true,
+      value: 1,
+    });
+    const anchors = document.querySelectorAll<HTMLElement>(
+      ".cdk-focus-trap-anchor"
     );
+    expect(anchors).toHaveLength(2);
+    first!.focus();
+    anchors[0]!.focus();
     expect(document.activeElement).toBe(last);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    anchors[1]!.focus();
     expect(document.activeElement).toBe(first);
     part<HTMLButtonElement>("filters-button")!.focus();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    anchors[1]!.focus();
     expect(document.activeElement).toBe(first);
     expect(parts("filters-panel")).toHaveLength(1);
   });
 
-  it("keeps the popover open for a press inside it or on a removed node", async () => {
+  it("keeps inside and detached clicks open, but closes for a connected outside click", async () => {
     const { part, openFilters, settle } = await mount();
     await openFilters();
     part("filters-popover")!.click();
     document.createElement("div").click();
+    await settle();
+    expect(part("filters-popover")).not.toBeNull();
     const detached = document.createElement("span");
     document.body.append(detached);
     detached.addEventListener("click", () => {
       detached.remove();
     });
+    // CDK sees the outside target during capture, before its own handler removes it.
     detached.click();
     await settle();
-    expect(part("filters-popover")).not.toBeNull();
+    expect(detached.isConnected).toBe(false);
+    expect(part("filters-popover")).toBeNull();
   });
 
-  it("closes once when its open button is pressed, and keeps a focused field", async () => {
+  it("keeps a focused inside field, closes outside and toggles the trigger once", async () => {
     const { part, openFilters, settle } = await mount();
     await openFilters();
     const input = part("filters-popover")?.querySelector("input");
     input!.focus();
-    document.body.click();
+    input!.click();
     await settle();
     expect(part("filters-popover")).not.toBeNull();
+    expect(document.activeElement).toBe(input);
+    document.body.click();
+    await settle();
+    expect(part("filters-popover")).toBeNull();
+    await openFilters();
     const button = part<HTMLButtonElement>("filters-button");
     button!.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
     button!.click();
@@ -504,7 +538,7 @@ describe("filters select labels (Angular Material)", () => {
       .click();
     await fixture.whenStable();
     const city = [
-      ...element.querySelectorAll<HTMLSelectElement>(
+      ...document.querySelectorAll<HTMLSelectElement>(
         '[data-adapttable-part="filter-select"]'
       ),
     ][0]!;
@@ -630,7 +664,13 @@ describe("registered Angular form renderers", () => {
     expect(customCreated).toHaveBeenCalledTimes(1);
     expect(customDestroyed).not.toHaveBeenCalled();
 
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+      })
+    );
     await settle();
     expect(field()).toBeNull();
     expect(customDestroyed).toHaveBeenCalledTimes(1);

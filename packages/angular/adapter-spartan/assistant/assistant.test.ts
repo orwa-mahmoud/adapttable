@@ -5,8 +5,10 @@ import type {
 } from "@adapttable/angular";
 import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
+import { within } from "@testing-library/dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { focusAndClick } from "../testUtils";
 import {
   AdaptAssistantBadge,
   AdaptAssistantButton,
@@ -169,7 +171,7 @@ describe("Spartan assistant", () => {
     const details = part<HTMLDetailsElement>("assistant-examples");
     expect(details?.tagName).toBe("DIV");
     expect(part("assistant-examples-menu")?.tagName).toBe("BUTTON");
-    part("assistant-examples-menu")?.click();
+    focusAndClick(part("assistant-examples-menu")!);
     await settle(fixture);
     expect(part("assistant-examples-list")?.tagName).toBe("MENU");
     expect(part("assistant-examples-item")?.textContent).toContain(
@@ -178,9 +180,12 @@ describe("Spartan assistant", () => {
     if (
       part("assistant-examples-menu")?.getAttribute("aria-expanded") !== "true"
     ) {
-      part("assistant-examples-menu")?.click();
+      focusAndClick(part("assistant-examples-menu")!);
       await settle(fixture);
     }
+    const suggestion = part<HTMLButtonElement>("assistant-examples-item")!;
+    suggestion.focus();
+    expect(document.activeElement).toBe(suggestion);
     const escape = new KeyboardEvent("keydown", {
       key: "Escape",
       keyCode: 27,
@@ -198,7 +203,7 @@ describe("Spartan assistant", () => {
     if (
       part("assistant-examples-menu")?.getAttribute("aria-expanded") !== "true"
     ) {
-      part("assistant-examples-menu")?.click();
+      focusAndClick(part("assistant-examples-menu")!);
       await settle(fixture);
     }
     part("assistant-examples-item")?.click();
@@ -220,7 +225,7 @@ describe("Spartan assistant", () => {
   });
   it("does not open or run examples while the connection is unusable", async () => {
     const runSuggestion = vi.fn();
-    await mount(
+    const fixture = await mount(
       {},
       {
         status: "connecting",
@@ -228,16 +233,14 @@ describe("Spartan assistant", () => {
         suggestions: [{ id: "one", title: "Example" }],
       }
     );
-    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
-    part("assistant-examples-menu")?.dispatchEvent(click);
-    expect(click.defaultPrevented).toBe(true);
-    expect(part("assistant-examples-menu")?.getAttribute("aria-disabled")).toBe(
-      "true"
-    );
-    expect(part<HTMLButtonElement>("assistant-examples-item")?.disabled).toBe(
-      true
-    );
-    part("assistant-examples-item")?.click();
+    const trigger = part<HTMLButtonElement>("assistant-examples-menu")!;
+    expect(trigger.disabled).toBe(true);
+    expect(trigger.getAttribute("aria-disabled")).toBe("true");
+    trigger.click();
+    await settle(fixture);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(part("assistant-examples-list")).toBeNull();
+    expect(part("assistant-examples-item")).toBeNull();
     expect(runSuggestion).not.toHaveBeenCalled();
   });
   it("shows a hand-sized native launcher and restores it on close", async () => {
@@ -305,10 +308,10 @@ describe("Spartan assistant", () => {
         fixture.componentInstance.label.set("Updated conversation");
         await settle(fixture);
         expect(
-          document
-            .querySelector('.cdk-overlay-container [role="dialog"]')
-            ?.getAttribute("aria-label")
-        ).toBe("Updated conversation");
+          within(document.body)
+            .getByRole("dialog", { name: "Updated conversation" })
+            .contains(part("assistant-sheet"))
+        ).toBe(true);
         fixture.componentInstance.open.set(false);
         await settle(fixture);
         expect(part("assistant-sheet")).toBeNull();

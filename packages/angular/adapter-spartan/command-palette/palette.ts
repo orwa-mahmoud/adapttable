@@ -25,22 +25,31 @@ import {
   input,
   viewChild,
 } from "@angular/core";
-import { BrnDialog, BrnDialogContent } from "@spartan-ng/brain/dialog";
+import {
+  BrnDialog,
+  BrnDialogContent,
+  BrnDialogTitle,
+} from "@spartan-ng/brain/dialog";
 
 /** The native dialog surface; the binding keeps its keyboard and focus model. */
 @Component({
   selector: "adapt-command-surface",
-  imports: [NgTemplateOutlet, BrnDialog, BrnDialogContent],
+  imports: [NgTemplateOutlet, BrnDialog, BrnDialogContent, BrnDialogTitle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
     <div
       brnDialog
       state="open"
-      [aria-label]="props().label"
       (stateChanged)="$event === 'closed' && props().onClose()"
     >
       <ng-template brnDialogContent>
+        <h2
+          brnDialogTitle
+          style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0"
+        >
+          {{ props().label }}
+        </h2>
         <section
           class="at-spartan-surface at-spartan-popover"
           data-adapttable-kit="spartan"
@@ -77,7 +86,7 @@ class AdaptCommandSurface {
       [value]="field().value"
       style="font: inherit; width: 100%; padding: 0.5em; box-sizing: border-box"
       (input)="changed($event)"
-      (keydown)="field().onKeyDown($event)"
+      (keydown)="onKeyDown($event)"
     />
   `,
 })
@@ -104,6 +113,11 @@ export class AdaptCommandInput {
     afterNextRender(() => {
       this.field().ref(this.box().nativeElement);
     });
+  }
+
+  protected onKeyDown(event: KeyboardEvent): void {
+    this.field().onKeyDown(event);
+    if (event.defaultPrevented) event.stopPropagation();
   }
 
   /** Report the typed value. */

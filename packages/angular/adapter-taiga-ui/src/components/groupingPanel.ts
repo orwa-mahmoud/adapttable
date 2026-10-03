@@ -14,7 +14,14 @@ import {
   type GroupingPanelSlots,
 } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  viewChild,
+} from "@angular/core";
+
+import { NgModel } from "@angular/forms";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
 
@@ -152,8 +159,12 @@ class AdaptGroupingChip {
         [attr.aria-label]="p.label"
         [attr.data-adapttable-part]="p['data-adapttable-part']"
         [disabled]="p.disabled ?? false"
-        [ngModel]="p.value"
-        (ngModelChange)="p.onChange($event)"
+        [placeholder]="
+          p['data-adapttable-part'] === 'grouping-add' ? p.label : ''
+        "
+        [ngModelOptions]="{ standalone: true }"
+        [ngModel]="p.value || null"
+        (ngModelChange)="change($event)"
       /><tui-data-list *tuiDropdown>
         @if (p["data-adapttable-part"] === "grouping-add") {
           <button tuiOption type="button" value="" [disabled]="true" hidden>
@@ -172,6 +183,18 @@ class AdaptGroupingChip {
 class AdaptGroupingSelect {
   readonly props = input.required<GroupingPanelSelectProps>();
   protected readonly width = addControlWidth;
+  private readonly model = viewChild.required(NgModel);
+
+  protected change(value: string | null): void {
+    const props = this.props();
+    if (value !== null) props.onChange(value);
+    if (props["data-adapttable-part"] === "grouping-add") {
+      this.model().control.setValue(null, {
+        emitEvent: false,
+        emitViewToModelChange: false,
+      });
+    }
+  }
 }
 
 @Component({
@@ -261,7 +284,9 @@ class AdaptGroupingAggregationRemove {
         [attr.aria-label]="p.label"
         [attr.data-adapttable-part]="p['data-adapttable-part']"
         [disabled]="p.disabled === true || available().length === 0"
-        (ngModelChange)="choose($any({ value: $event }))"
+        [placeholder]="p.label"
+        [ngModelOptions]="{ standalone: true }"
+        (ngModelChange)="choose($event)"
         [ngModel]="null"
       /><tui-data-list *tuiDropdown>
         <button tuiOption type="button" value="" [disabled]="true" hidden>
@@ -287,10 +312,14 @@ class AdaptGroupingAggregationPicker {
   protected readonly available = () =>
     this.props().options.filter((option) => !option.checked);
 
-  protected choose(select: HTMLSelectElement): void {
-    if (select.value === "") return;
-    this.props().onToggle(select.value, true);
-    select.value = "";
+  private readonly model = viewChild.required(NgModel);
+
+  protected choose(value: string | null): void {
+    if (value) this.props().onToggle(value, true);
+    this.model().control.setValue(null, {
+      emitEvent: false,
+      emitViewToModelChange: false,
+    });
   }
 }
 

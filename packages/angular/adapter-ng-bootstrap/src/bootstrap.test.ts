@@ -1,10 +1,12 @@
 import { type ColumnDef } from "@adapttable/angular";
 import { TestBed } from "@angular/core/testing";
-import { afterEach, describe, expect, it } from "vitest";
+import { By } from "@angular/platform-browser";
+import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { columnMenu } from "../column-menu";
 import { filters } from "../filters";
-import { ngBootstrapPart } from "../testUtils";
+import { ngBootstrapPart, settleBootstrap } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {
@@ -38,7 +40,7 @@ async function mount(mode: "popover" | "drawer" = "popover") {
   fixture.autoDetectChanges();
   const host = fixture.nativeElement as HTMLElement;
   document.body.append(host);
-  await fixture.whenStable();
+  await settleBootstrap(fixture);
   const part = (name: string) =>
     host.querySelector<HTMLElement>(ngBootstrapPart(name));
   return { fixture, host, part };
@@ -63,16 +65,32 @@ describe("ng-bootstrap controls and isolated overlay containers", () => {
 
   it("opens a native popover without a backdrop and returns focus on Escape", async () => {
     const { fixture, host, part } = await mount();
+    const popover = fixture.debugElement
+      .query(By.directive(NgbPopover))
+      .injector.get(NgbPopover);
+    const shown = vi.fn();
+    const hidden = vi.fn();
+    popover.shown.subscribe(shown);
+    popover.hidden.subscribe(hidden);
     part("filters-button")!.focus();
     part("filters-button")!.click();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
+    expect(shown).toHaveBeenCalledOnce();
     expect(host.querySelector("ngb-popover-window")).not.toBeNull();
     expect(part("filters-backdrop")).toBeNull();
     expect(part("filters-button")?.getAttribute("aria-expanded")).toBe("true");
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    const input =
+      part("filters-popover")!.querySelector<HTMLInputElement>("input")!;
+    input.focus();
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
     );
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
+    expect(hidden).toHaveBeenCalledOnce();
     expect(part("filters-popover")).toBeNull();
     expect(document.activeElement).toBe(part("filters-button"));
   });
@@ -81,7 +99,7 @@ describe("ng-bootstrap controls and isolated overlay containers", () => {
     const { fixture, host, part } = await mount("drawer");
     for (let attempt = 0; attempt < 2; attempt++) {
       part("filters-button")!.click();
-      await fixture.whenStable();
+      await settleBootstrap(fixture);
       expect(host.querySelector("ngb-offcanvas-panel")).not.toBeNull();
       expect(part("filters-backdrop")).not.toBeNull();
       expect(part("filters-panel")?.getAttribute("dir")).toBe("rtl");
@@ -89,7 +107,7 @@ describe("ng-bootstrap controls and isolated overlay containers", () => {
         document.body.querySelectorAll(":scope > ngb-offcanvas-panel")
       ).toHaveLength(0);
       part("filters-done")!.click();
-      await fixture.whenStable();
+      await settleBootstrap(fixture);
       expect(host.querySelector("ngb-offcanvas-panel")).toBeNull();
       expect(part("filters-backdrop")).toBeNull();
     }
@@ -98,7 +116,7 @@ describe("ng-bootstrap controls and isolated overlay containers", () => {
   it("uses native dropdown placement for the columns menu", async () => {
     const { fixture, host, part } = await mount();
     part("column-menu-button")!.click();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(
       host.querySelector(
         '[data-ng-bootstrap-part="column-menu"] .dropdown-menu.show'

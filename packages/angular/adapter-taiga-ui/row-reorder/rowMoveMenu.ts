@@ -55,7 +55,7 @@ const REORDER_BUTTON = {
         type="button"
         [tuiDropdown]="menuContent"
         [tuiDropdownOpen]="menuOpen()"
-        (tuiDropdownOpenChange)="menuOpen.set($event)"
+        (tuiDropdownOpenChange)="onOpenChange($event)"
         [attr.aria-expanded]="menuOpen()"
         #trigger
         [attr.aria-label]="p.label"
@@ -138,19 +138,12 @@ export class AdaptRowMoveMenu {
       const confirmation = this.props().confirmation;
       if (confirmation) this.menuOpen.set(true);
     });
-    effect((onCleanup) => {
-      const confirmation = this.props().confirmation;
-      if (!confirmation) return;
-      const onKeyDown = (event: KeyboardEvent) => {
-        if (event.key !== "Escape") return;
-        event.preventDefault();
-        this.finish(confirmation.onCancel);
-      };
-      document.addEventListener("keydown", onKeyDown);
-      onCleanup(() => {
-        document.removeEventListener("keydown", onKeyDown);
-      });
-    });
+  }
+
+  protected onOpenChange(open: boolean): void {
+    const confirmation = this.props().confirmation;
+    if (!open && confirmation) this.finish(confirmation.onCancel);
+    else this.menuOpen.set(open);
   }
 
   protected finish(action: () => void): void {

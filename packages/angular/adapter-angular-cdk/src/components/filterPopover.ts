@@ -45,6 +45,7 @@ import {
         (overlayKeydown)="keydown($event)"
       >
         <section
+          #card
           data-adapttable-part="filters-popover"
           class="adapt-cdk-surface adapt-cdk-filter-card"
           [dir]="p.dir ?? 'ltr'"
@@ -100,14 +101,31 @@ export class AdaptFilterPopover {
       offsetY: -4,
     },
   ];
+  private readonly card = viewChild<ElementRef<HTMLElement>>("card");
+
   protected outside(event: MouseEvent): void {
+    const target = event.target;
+    const card = this.card()?.nativeElement;
     if (
-      event.target instanceof Node &&
-      this.anchor().nativeElement.contains(event.target)
+      !(target instanceof Node) ||
+      this.anchor().nativeElement.contains(target)
     )
       return;
-    this.props().onClose();
+    // CDK observes outside clicks during capture. Let the target's handler
+    // finish before deciding whether a removed target or focused field closes.
+    queueMicrotask(() => {
+      if (
+        !target.isConnected ||
+        !card ||
+        this.card()?.nativeElement !== card ||
+        card.contains(target) ||
+        card.contains(document.activeElement)
+      )
+        return;
+      if (this.props().open) this.props().onClose();
+    });
   }
+
   protected keydown(event: KeyboardEvent): void {
     if (event.key !== "Escape" || event.defaultPrevented) return;
     event.preventDefault();

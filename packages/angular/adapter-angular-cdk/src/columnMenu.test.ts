@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import type { ColumnDef, ColumnLayoutState } from "@adapttable/angular";
 import { columnMenu } from "@adapttable/angular-cdk/column-menu";
 import { Component, signal } from "@angular/core";
@@ -33,6 +34,7 @@ const COLUMNS: ColumnDef<City>[] = [
 ];
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
@@ -60,6 +62,7 @@ class Host {
 }
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
@@ -338,6 +341,7 @@ describe("the unstyled Angular Columns menu", () => {
 
 describe("a controlled column layout", () => {
   @Component({
+    providers: fixtureOverlayProviders,
     imports: [AdaptDataTable],
     template: `
       <adapt-data-table

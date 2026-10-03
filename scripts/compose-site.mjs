@@ -117,7 +117,8 @@ export function composeDemos({ dist, site, pages = SHOWCASE_PAGES }) {
             posix.join(posix.dirname(source), value)
           );
           const rebased = posix.relative(posix.dirname(destination), resolved);
-          return `${name}="${rebased.startsWith(".") ? rebased : `./${rebased}`}"`;
+          const local = rebased.startsWith(".") ? rebased : `./${rebased}`;
+          return `${name}="${local}"`;
         }
       );
       mkdirSync(dirname(join(target, destination)), { recursive: true });

@@ -6,6 +6,11 @@
   max-inline-size: 100%;
   font: var(--tui-font-text-m);
 
+  // The native fixed portal needs its own stacking level above host-page chrome.
+  > tui-popups {
+    z-index: var(--adapttable-overlay-z-index, 1000);
+  }
+
   html[data-theme="dark"] &:not([tuiTheme="light"]),
   html.dark &:not([tuiTheme="light"]) {
     .tui-theme-dark();

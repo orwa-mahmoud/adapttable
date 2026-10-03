@@ -25,7 +25,7 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { ngxBootstrapPart } from "../testUtils";
+import { ngxBootstrapPart, settleBootstrap } from "../testUtils";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
@@ -142,7 +142,7 @@ async function mount(
   fixture.componentRef.setInput("features", features);
   fixture.componentRef.setInput("mode", mode);
   fixture.autoDetectChanges();
-  await fixture.whenStable();
+  await settleBootstrap(fixture);
   const element = fixture.nativeElement as HTMLElement;
   document.body.append(element);
   const part = <T extends HTMLElement>(
@@ -154,7 +154,7 @@ async function mount(
     root: ParentNode = element
   ) => [...root.querySelectorAll<T>(ngxBootstrapPart(name))];
   const ids = () => parts("row").map((row) => row.dataset.rowId);
-  const settle = () => fixture.whenStable();
+  const settle = () => settleBootstrap(fixture);
   const field = (caption: string) =>
     parts("filter-field").find(
       (candidate) =>

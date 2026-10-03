@@ -1,3 +1,5 @@
+import type { ComponentFixture } from "@angular/core/testing";
+
 /** Test selectors distinguish the themed public contract from kit-owned internals. */
 const INTERNAL_PARTS = new Set([
   "assistant-examples-list",
@@ -75,4 +77,24 @@ export function ngBootstrapPart(name: string): string {
     ? "data-ng-bootstrap-part"
     : "data-adapttable-part";
   return `[${attribute}="${name}"]`;
+}
+
+/** Use the native outside-press sequence, including ng-bootstrap's mouseup. */
+export function clickBootstrapControl(control: HTMLElement): void {
+  if (control instanceof HTMLButtonElement && control.disabled) return;
+  for (const type of ["mousedown", "mouseup", "click"])
+    control.dispatchEvent(
+      new MouseEvent(type, { bubbles: true, cancelable: true, button: 0 })
+    );
+}
+
+/** Wait for native render, outside-press and deferred Escape ownership. */
+export async function settleBootstrap<T>(
+  fixture: ComponentFixture<T>
+): Promise<void> {
+  fixture.detectChanges();
+  await fixture.whenStable();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  fixture.detectChanges();
+  await fixture.whenStable();
 }

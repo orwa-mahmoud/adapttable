@@ -23,6 +23,7 @@ import {
 } from "@angular/core";
 import {
   NgbDropdown,
+  NgbDropdownButtonItem,
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle,
@@ -45,6 +46,7 @@ let nextRowActionsId = 0;
     NgTemplateOutlet,
     NgbDropdown,
     NgbDropdownMenu,
+    NgbDropdownButtonItem,
     NgbDropdownItem,
     NgbDropdownToggle,
   ],

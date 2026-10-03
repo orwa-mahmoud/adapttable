@@ -125,6 +125,7 @@ export class AdaptAssistantBadge {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `<mat-card
+    role="region"
     [attr.aria-label]="props().label"
     [attr.data-adapttable-part]="props().part"
     [class]="props().className"

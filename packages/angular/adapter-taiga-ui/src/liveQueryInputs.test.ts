@@ -1,3 +1,4 @@
+import { chooseTaigaOption } from "./taigaTestHelpers";
 import {
   ADAPTTABLE_URL_ADAPTER,
   type AdaptTableFeature,
@@ -120,18 +121,17 @@ describe.each([
 ])("the unstyled table's live query inputs in $layout", ({ mobile }) => {
   it("adopts a changed default limit until the reader chooses a page size", async () => {
     const adapter = createMemoryAdapter("foreign=kept");
-    const { host, part, names, settle } = await mount(adapter, mobile);
+    const { fixture, host, part, names, settle } = await mount(adapter, mobile);
     expect(names()).toEqual(["City 01", "City 02"]);
 
     host.defaults.set({ limit: 3 });
     await settle();
     expect(names()).toEqual(["City 01", "City 02", "City 03"]);
-    expect(part<HTMLSelectElement>("rows-per-page")?.value).toBe("3");
+    expect(part<HTMLInputElement>("rows-per-page")?.value).toBe("3");
     expect(adapter.getSearch()).toBe("foreign=kept");
 
-    const select = part<HTMLSelectElement>("rows-per-page")!;
-    select.value = "10";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
+    const select = part<HTMLInputElement>("rows-per-page")!;
+    await chooseTaigaOption(fixture, select, "10");
     await settle();
     expect(names()).toEqual(CITIES.slice(0, 10).map((city) => city.name));
     expect(host.notified.mock.calls.at(-1)?.[0]).toMatchObject({
@@ -145,7 +145,7 @@ describe.each([
     host.defaults.set({ limit: 1 });
     await settle();
     expect(names()).toEqual(CITIES.slice(0, 10).map((city) => city.name));
-    expect(part<HTMLSelectElement>("rows-per-page")?.value).toBe("10");
+    expect(part<HTMLInputElement>("rows-per-page")?.value).toBe("10");
     expect(new URLSearchParams(adapter.getSearch()).get("table.limit")).toBe(
       "10"
     );

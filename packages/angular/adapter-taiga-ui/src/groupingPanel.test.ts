@@ -1,4 +1,10 @@
 import {
+  chooseTaigaOption,
+  taigaOptions,
+  taigaOptionValue,
+} from "./taigaTestHelpers";
+import { AdaptTaigaRoot } from "./taigaRoot";
+import {
   type ColumnDef,
   type GroupingPanelSlotProps,
 } from "@adapttable/angular";
@@ -80,8 +86,10 @@ function state(
 }
 
 @Component({
-  imports: [AdaptGroupingPanel],
-  template: `<adapt-grouping-panel [props]="panel()" />`,
+  imports: [AdaptTaigaRoot, AdaptGroupingPanel],
+  template: `<adapt-taiga-root
+    ><adapt-grouping-panel [props]="panel()"
+  /></adapt-taiga-root>`,
 })
 class Host {
   readonly added: string[] = [];
@@ -141,9 +149,11 @@ class TableHost {
 
 async function mountPanel() {
   const fixture = TestBed.createComponent(Host);
+  document.body.append(fixture.nativeElement as HTMLElement);
   fixture.autoDetectChanges();
   await fixture.whenStable();
   return {
+    fixture,
     element: fixture.nativeElement as HTMLElement,
     host: fixture.componentInstance,
   };
@@ -162,12 +172,13 @@ function one<T extends HTMLElement = HTMLElement>(
 
 describe("AdaptGroupingPanel", () => {
   it("adds a column from the add select", async () => {
-    const { element, host } = await mountPanel();
-    const add = one<HTMLSelectElement>(element, "grouping-add");
+    const { element, host, fixture } = await mountPanel();
+    const add = one<HTMLInputElement>(element, "grouping-add");
     expect(add.getAttribute("aria-label")).toBe("Add grouping column");
-    add.value = "budget";
-    add.dispatchEvent(new Event("change"));
+    await chooseTaigaOption(fixture, add, "budget");
     expect(host.added).toEqual(["budget"]);
+    expect(add.value).toBe("");
+    expect(add.placeholder).toBe("Add grouping column");
   });
 
   it("removes a field from its chip", async () => {
@@ -195,20 +206,19 @@ describe("AdaptGroupingPanel", () => {
   });
 
   it("adds nothing when the picker's placeholder is chosen", async () => {
-    const { element, host } = await mountPanel();
-    const picker = one<HTMLSelectElement>(element, "grouping-aggregation-add");
-    picker.value = "";
-    picker.dispatchEvent(new Event("change"));
+    const { element, host, fixture } = await mountPanel();
+    const picker = one<HTMLInputElement>(element, "grouping-aggregation-add");
+    await chooseTaigaOption(fixture, picker, "");
     expect(host.added).toEqual([]);
   });
 
   it("adds an aggregation from the picker and speaks the announcement", async () => {
-    const { element, host } = await mountPanel();
-    const picker = one<HTMLSelectElement>(element, "grouping-aggregation-add");
-    picker.value = "budget";
-    picker.dispatchEvent(new Event("change"));
+    const { element, host, fixture } = await mountPanel();
+    const picker = one<HTMLInputElement>(element, "grouping-aggregation-add");
+    await chooseTaigaOption(fixture, picker, "budget");
     expect(host.added).toEqual(["agg:budget"]);
     expect(picker.value).toBe("");
+    expect(picker.placeholder).toBe("Add aggregation column");
     expect(one(element, "grouping-announcer").textContent).toBe(
       "Grouped by Team"
     );
@@ -221,25 +231,21 @@ describe("AdaptGroupingPanel", () => {
       ...props,
       state: { ...props.state, groupBy: [] },
     }));
+    document.body.append(fixture.nativeElement as HTMLElement);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     const add = (
       fixture.nativeElement as HTMLElement
-    ).querySelector<HTMLSelectElement>(
-      '[data-adapttable-part="grouping-add"]'
-    )!;
+    ).querySelector<HTMLInputElement>('[data-adapttable-part="grouping-add"]')!;
     expect(add.value).toBe("");
-    expect(add.selectedOptions[0]!.textContent.trim()).toBe(
-      "Add grouping column"
-    );
-    expect([...add.options].map((option) => option.value)).toEqual([
+    expect(add.placeholder).toBe("Add grouping column");
+    expect((await taigaOptions(fixture, add)).map(taigaOptionValue)).toEqual([
       "",
       "team",
       "budget",
     ]);
 
-    add.value = "team";
-    add.dispatchEvent(new Event("change"));
+    await chooseTaigaOption(fixture, add, "team");
     expect(host.added).toEqual(["team"]);
   });
 
@@ -269,44 +275,46 @@ describe("AdaptGroupingPanel", () => {
         },
       }));
     withOperation("avg");
+    document.body.append(fixture.nativeElement as HTMLElement);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     const operation = () =>
-      (fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>(
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
         '[data-adapttable-part="grouping-aggregation-operation"]'
       )!;
-    expect([...operation().options].map((option) => option.value)).toEqual([
-      "sum",
-      "avg",
-    ]);
-    expect(operation().value).toBe("avg");
-    expect(operation().selectedOptions[0]!.textContent.trim()).toBe(
-      operation().options[1]!.textContent.trim()
-    );
+    expect(
+      (await taigaOptions(fixture, operation())).map(taigaOptionValue)
+    ).toEqual(["sum", "avg"]);
+    const options = await taigaOptions(fixture, operation());
+    expect(operation().value).toBe(options[1]!.textContent.trim());
+    expect(options[1]!.getAttribute("aria-selected")).toBe("true");
 
     withOperation("sum");
     await fixture.whenStable();
-    expect(operation().value).toBe("sum");
-    expect(operation().selectedIndex).toBe(0);
+    expect(operation().value).toBe(options[0]!.textContent.trim());
+    expect(options[0]!.getAttribute("aria-selected")).toBe("true");
   });
 
   it("shows the aggregation picker's placeholder rather than a column", async () => {
     const fixture = TestBed.createComponent(Host);
+    document.body.append(fixture.nativeElement as HTMLElement);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     const picker = (
       fixture.nativeElement as HTMLElement
-    ).querySelector<HTMLSelectElement>(
+    ).querySelector<HTMLInputElement>(
       '[data-adapttable-part="grouping-aggregation-add"]'
     )!;
     expect(picker.value).toBe("");
-    expect(picker.selectedOptions[0]!.textContent.trim()).toBe(
-      "Add aggregation column"
-    );
+    expect(picker.placeholder).toBe("Add aggregation column");
+    const options = await taigaOptions(fixture, picker);
+    expect(options[0]!.textContent.trim()).toBe("Add aggregation column");
+    expect(taigaOptionValue(options[0]!)).toBe("");
   });
 
   it("composes the groupingPanel feature on the table, seeded with its keys", async () => {
     const fixture = TestBed.createComponent(TableHost);
+    document.body.append(fixture.nativeElement as HTMLElement);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     const element = fixture.nativeElement as HTMLElement;

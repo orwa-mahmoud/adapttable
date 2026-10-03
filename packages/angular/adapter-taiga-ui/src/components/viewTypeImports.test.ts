@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { isAbsolute, join } from "node:path";
 
 import {
   ModuleKind,
@@ -8,6 +9,13 @@ import {
 } from "typescript";
 import { describe, expect, it } from "vitest";
 
+const packageDir = process.env.ADAPTER_PACKAGE_DIR;
+if (!packageDir || !isAbsolute(packageDir)) {
+  throw new Error(
+    "ADAPTER_PACKAGE_DIR must identify the absolute package root"
+  );
+}
+
 const components = ["desktopTable", "mobileCards", "paginationFooter"];
 
 describe("Taiga view-only table dependencies", () => {
@@ -15,7 +23,7 @@ describe("Taiga view-only table dependencies", () => {
     "erases %s's dataTable import from emitted JavaScript",
     (component) => {
       const source = readFileSync(
-        new URL(`./${component}.ts`, import.meta.url),
+        join(packageDir, "src/components", `${component}.ts`),
         "utf8"
       );
       const result = transpileModule(source, {

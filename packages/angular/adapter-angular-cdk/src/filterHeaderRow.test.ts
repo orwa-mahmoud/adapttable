@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /**
  * Native header-filter controls: the same writes the React kit's header
  * harness covers, drawn through the compact row.
@@ -75,6 +76,7 @@ function memory(extra: ReturnType<typeof signal<ExtraFilters>>) {
 }
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptFilterHeaderRow],
   template: `
     <table>
@@ -100,6 +102,7 @@ class RowHost {
 }
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptFilterHeaderControl],
   template: `
     <adapt-filter-header-control
@@ -122,6 +125,7 @@ async function mountRow(prepare?: (host: RowHost) => void) {
   fixture.autoDetectChanges();
   await fixture.whenStable();
   const element = fixture.nativeElement as HTMLElement;
+  document.body.append(element);
   const labeled = (name: string) =>
     [...element.querySelectorAll<HTMLElement>("[aria-label]")].filter(
       (node) => node.getAttribute("aria-label") === name
@@ -138,6 +142,14 @@ describe("AdaptFilterHeaderRow", () => {
     expect(
       element.querySelector('[data-adapttable-part="filter-header-input"]')
     ).not.toBeNull();
+    const tagsTrigger = labeled("Tags").find(
+      (node) => node.tagName === "BUTTON"
+    );
+    if (!tagsTrigger) throw new Error("Tags filter trigger was not rendered");
+    expect(tagsTrigger.getAttribute("aria-expanded")).toBe("false");
+    tagsTrigger.click();
+    await fixture.whenStable();
+    expect(tagsTrigger.getAttribute("aria-expanded")).toBe("true");
     expect(
       element.querySelector('[data-adapttable-part="filter-header-menu"]')
     ).not.toBeNull();
@@ -154,7 +166,7 @@ describe("AdaptFilterHeaderRow", () => {
     await fixture.whenStable();
     expect(team.value).toBe("Web");
 
-    const tags = labeled("Tags").find((node) => node.tagName === "SUMMARY");
+    const tags = labeled("Tags").find((node) => node.tagName === "BUTTON");
     if (!tags) throw new Error("Tags filter trigger was not rendered");
     const box = (caption: string) => {
       const label = [...element.querySelectorAll("label")].find((node) =>

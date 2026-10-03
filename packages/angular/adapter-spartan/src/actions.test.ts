@@ -4,13 +4,16 @@ import type {
   ColumnDef,
   ConfirmHandler,
   RowAction,
+  TableLabels,
 } from "@adapttable/angular";
 import { bulkActions } from "@adapttable/spartan/bulk-actions";
 import { columnMenu } from "@adapttable/spartan/column-menu";
 import { rowActions } from "@adapttable/spartan/row-actions";
 import { Component, input } from "@angular/core";
+import { within } from "@testing-library/dom";
 import { TestBed } from "@angular/core/testing";
 
+import { focusAndClick } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface Person {
@@ -39,12 +42,14 @@ const COLUMNS: ColumnDef<Person>[] = [
       [defaults]="{ limit: 5 }"
       [features]="features()"
       [confirm]="confirm"
+      [labels]="labels()"
     />
   `,
 })
 class Host {
   readonly features = input<readonly AdaptTableFeature[]>([]);
   readonly mobile = input(false);
+  readonly labels = input<TableLabels>({});
   readonly data = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = (row: Person) => row.id;
@@ -259,15 +264,30 @@ describe("the Spartan Angular row actions", () => {
     expect(deleted).toEqual(["1"]);
   });
 
-  it("puts the actions behind one button in the menu layout", async () => {
-    const { part, parts, settle } = await mount([
+  it("names the native popup and puts actions behind one menu button", async () => {
+    const { fixture, part, parts, settle } = await mount([
       rowActions(actions, { layout: "menu" }),
     ]);
     const menu = part<HTMLDetailsElement>("row-actions-menu");
     expect(menu).not.toBeNull();
     if (!menu) throw new Error("menu is not rendered");
-    part<HTMLButtonElement>("row-actions-trigger")!.click();
+    const trigger = part<HTMLButtonElement>("row-actions-trigger")!;
+    focusAndClick(trigger);
     await settle();
+    const popup = document.getElementById(
+      trigger.getAttribute("aria-controls")!
+    );
+    expect(
+      within(document.body).getByRole("dialog", { name: "Row actions" })
+    ).toBe(popup);
+    fixture.componentRef.setInput("labels", {
+      rowActionsMenu: "Actions de la ligne",
+    });
+    await settle();
+    expect(
+      within(document.body).getByRole("dialog", { name: "Actions de la ligne" })
+    ).toBe(popup);
+    expect(trigger.getAttribute("aria-label")).toBe("Actions de la ligne");
     parts<HTMLButtonElement>("action-button", document.body)[0]!.click();
     await settle();
     expect(edits).toEqual(["1"]);

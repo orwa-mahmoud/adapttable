@@ -3,6 +3,7 @@ import { columnMenu } from "@adapttable/spartan/column-menu";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { clickOutside, focusAndClick } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {
@@ -112,7 +113,7 @@ async function mount() {
     parts("header-cell").map((cell) => cell.dataset.columnKey);
   const settle = () => fixture.whenStable();
   const open = async () => {
-    part<HTMLButtonElement>("column-menu-button")!.click();
+    focusAndClick(part<HTMLButtonElement>("column-menu-button")!);
     await settle();
   };
   const item = (index: number) => parts("column-menu-item")[index];
@@ -155,7 +156,7 @@ describe("the Spartan Angular Columns menu", () => {
   it("closes on a press outside it", async () => {
     const { part, open, settle } = await mount();
     await open();
-    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    clickOutside();
     await settle();
     expect(part("column-menu-panel")).toBeNull();
   });

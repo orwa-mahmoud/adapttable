@@ -28,7 +28,11 @@ import {
   input,
   viewChild,
 } from "@angular/core";
-import { BrnDialog, BrnDialogContent } from "@spartan-ng/brain/dialog";
+import {
+  BrnDialog,
+  BrnDialogContent,
+  BrnDialogTitle,
+} from "@spartan-ng/brain/dialog";
 import {
   BrnPopover,
   BrnPopoverContent,
@@ -141,16 +145,21 @@ export class AdaptAssistantPanel {
 /** Modal assistant with Spartan focus containment and backdrop. @public */
 @Component({
   selector: "adapt-assistant-sheet",
-  imports: [NgTemplateOutlet, BrnDialog, BrnDialogContent],
+  imports: [NgTemplateOutlet, BrnDialog, BrnDialogContent, BrnDialogTitle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `<div
     brnDialog
     [state]="props().open ? 'open' : 'closed'"
-    [aria-label]="props().label"
     (stateChanged)="$event === 'closed' && props().onClose()"
   >
     <ng-template brnDialogContent>
+      <h2
+        brnDialogTitle
+        style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0"
+      >
+        {{ props().label }}
+      </h2>
       <section
         class="at-spartan-surface at-spartan-popover"
         data-adapttable-kit="spartan"

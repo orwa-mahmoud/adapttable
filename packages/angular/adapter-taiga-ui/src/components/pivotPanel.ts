@@ -12,8 +12,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   input,
+  viewChild,
   type TemplateRef,
 } from "@angular/core";
+
+import { NgModel } from "@angular/forms";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
 
@@ -162,7 +165,9 @@ class AdaptPivotField {
       tuiSelect
       [attr.aria-label]="props().label"
       [disabled]="props().options.length === 0"
-      (ngModelChange)="add($any({ target: { value: $event } }))"
+      [placeholder]="props().label"
+      [ngModelOptions]="{ standalone: true }"
+      (ngModelChange)="add($event)"
       [ngModel]="null"
     /><tui-data-list *tuiDropdown>
       <button tuiOption type="button" value="">{{ props().label }}</button>
@@ -179,11 +184,14 @@ class AdaptPivotAdd {
   readonly props = input.required<AddProps>();
 
   /** Add the chosen field, then show the prompt again. */
-  protected add(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const key = select.value;
-    select.value = "";
+  private readonly model = viewChild.required(NgModel);
+
+  protected add(key: string | null): void {
     if (key) this.props().onAdd(key);
+    this.model().control.setValue(null, {
+      emitEvent: false,
+      emitViewToModelChange: false,
+    });
   }
 }
 

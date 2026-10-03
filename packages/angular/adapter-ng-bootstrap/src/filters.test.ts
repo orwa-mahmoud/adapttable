@@ -25,7 +25,11 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { ngBootstrapPart } from "../testUtils";
+import {
+  clickBootstrapControl,
+  ngBootstrapPart,
+  settleBootstrap,
+} from "../testUtils";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
@@ -142,7 +146,7 @@ async function mount(
   fixture.componentRef.setInput("features", features);
   fixture.componentRef.setInput("mode", mode);
   fixture.autoDetectChanges();
-  await fixture.whenStable();
+  await settleBootstrap(fixture);
   const element = fixture.nativeElement as HTMLElement;
   document.body.append(element);
   const part = <T extends HTMLElement>(
@@ -154,7 +158,7 @@ async function mount(
     root: ParentNode = element
   ) => [...root.querySelectorAll<T>(ngBootstrapPart(name))];
   const ids = () => parts("row").map((row) => row.dataset.rowId);
-  const settle = () => fixture.whenStable();
+  const settle = () => settleBootstrap(fixture);
   const field = (caption: string) =>
     parts("filter-field").find(
       (candidate) =>
@@ -199,12 +203,18 @@ describe("the unstyled Angular filters", () => {
     expect(button?.getAttribute("aria-expanded")).toBe("true");
     expect(part("filters-popover")).not.toBeNull();
     expect(part("filters-backdrop")).toBeNull();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(part("filters-popover")).toBeNull();
     expect(document.activeElement).toBe(button);
     await openFilters();
-    document.body.click();
+    clickBootstrapControl(document.body);
     await settle();
     expect(part("filters-popover")).toBeNull();
   });
@@ -276,7 +286,7 @@ describe("the unstyled Angular filters", () => {
     await openFilters();
     await type(part("filter-select", field("City")), "Amman");
     expect(ids()).toEqual(["2"]);
-    parts<HTMLButtonElement>("chip-remove")[0]!.click();
+    clickBootstrapControl(parts<HTMLButtonElement>("chip-remove")[0]!);
     await settle();
     expect(ids()).toEqual(["1", "2", "3"]);
     // The chip sits outside the popover, so removing one closed it.
@@ -359,11 +369,17 @@ describe("the unstyled Angular filters", () => {
     await settle();
     expect(part("filters-panel")).toBeNull();
     await openFilters();
-    part<HTMLButtonElement>("filters-backdrop")!.click();
+    clickBootstrapControl(part<HTMLButtonElement>("filters-backdrop")!);
     await settle();
     expect(part("filters-panel")).toBeNull();
     await openFilters();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(part("filters-panel")).toBeNull();
   });
@@ -461,7 +477,7 @@ describe("the unstyled Angular filters", () => {
     await openFilters();
     const input = part("filters-popover")?.querySelector("input");
     input!.focus();
-    document.body.click();
+    clickBootstrapControl(document.body);
     await settle();
     expect(part("filters-popover")).not.toBeNull();
     const button = part<HTMLButtonElement>("filters-button");
@@ -532,7 +548,7 @@ describe("filters select labels (unstyled Angular)", () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentRef.setInput("labels", { filterAll: "Tous" });
     fixture.autoDetectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     const element = fixture.nativeElement as HTMLElement;
     document.body.append(element);
     element
@@ -540,7 +556,7 @@ describe("filters select labels (unstyled Angular)", () => {
         '[data-ng-bootstrap-part="filters-button"]'
       )!
       .click();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     const city = [
       ...element.querySelectorAll<HTMLSelectElement>(
         '[data-adapttable-part="filter-select"]'
@@ -668,7 +684,13 @@ describe("registered Angular form renderers", () => {
     expect(customCreated).toHaveBeenCalledTimes(1);
     expect(customDestroyed).not.toHaveBeenCalled();
 
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(field()).toBeNull();
     expect(customDestroyed).toHaveBeenCalledTimes(1);
@@ -716,7 +738,7 @@ describe("registered Angular form renderers", () => {
   it("replaces live custom form definitions and binds template writes to the current source", async () => {
     const fixture = TestBed.createComponent(AutoFilterFormHost);
     fixture.autoDetectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     const host = fixture.componentInstance;
     const element = fixture.nativeElement as HTMLElement;
     const field = () =>
@@ -728,7 +750,7 @@ describe("registered Angular form renderers", () => {
     const type = async (value: string) => {
       field().value = value;
       field().dispatchEvent(new Event("input"));
-      await fixture.whenStable();
+      await settleBootstrap(fixture);
     };
     expect(
       [
@@ -740,7 +762,7 @@ describe("registered Angular form renderers", () => {
     expect(ids()).toEqual(["3"]);
 
     host.defs.set([{ key: "city", type: "custom", label: "Home city" }]);
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(field().getAttribute("aria-label")).toBe("Home city");
     expect(field().value).toBe("");
     expect(host.render).toHaveBeenLastCalledWith({
@@ -754,7 +776,7 @@ describe("registered Angular form renderers", () => {
     expect(ids()).toEqual(["1", "3"]);
 
     host.source().setExtra("city", "Amman");
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(field().value).toBe("Amman");
     expect(ids()).toEqual(["2"]);
   });

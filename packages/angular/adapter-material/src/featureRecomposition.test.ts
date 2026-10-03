@@ -581,7 +581,13 @@ describe("mounted feature recomposition (Angular Material)", () => {
     inputDraft(one<HTMLInputElement>(popover, part("filter-input")), "Ada");
     await mounted.settle();
     expect(ids(root)).toEqual(["1"]);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+      })
+    );
     await mounted.settle();
     expect(document.querySelector(part("filters-popover"))).toBeNull();
 
@@ -589,8 +595,11 @@ describe("mounted feature recomposition (Angular Material)", () => {
     await mounted.settle();
     await open();
     const panel = one(document, part("filters-panel"));
-    expect(panel.tagName).toBe("DIALOG");
-    expect(panel.getAttribute("aria-modal")).toBe("true");
+    expect(panel.tagName).toBe("SECTION");
+    const dialog = panel.closest("mat-dialog-container");
+    expect(dialog?.getAttribute("role")).toBe("dialog");
+    expect(dialog?.getAttribute("aria-label")).toBe("Filters");
+    expect(dialog?.getAttribute("aria-modal")).toBe("false");
     expect(document.querySelector(part("filters-backdrop"))).not.toBeNull();
     expect(document.querySelector(part("filters-popover"))).toBeNull();
     const field = one<HTMLInputElement>(panel, part("filter-input"));

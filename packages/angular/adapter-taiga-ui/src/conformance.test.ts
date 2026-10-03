@@ -1,3 +1,4 @@
+import { taigaOptions } from "./taigaTestHelpers";
 import {
   type AdaptTableFeature,
   type AgentApprovalPending,
@@ -285,14 +286,23 @@ describe("every bundled locale through native Angular controls", () => {
           const panel = localePart(root, "filters-popover");
           const form = within(panel);
           expect(panel.getAttribute("dir")).toBe(getDirection(locale));
-          const operator = form.getByRole<HTMLSelectElement>("combobox", {
+          const operator = form.getByRole<HTMLInputElement>("combobox", {
             name: labels.operator,
           });
+          expect(operator.value).toBe(labels.opContains);
+          const operatorOptions = await taigaOptions(fixture, operator);
           expect(
-            within(operator).getByRole<HTMLOptionElement>("option", {
-              name: labels.opContains,
-            }).selected
-          ).toBe(true);
+            operatorOptions.map((option) => option.textContent.trim())
+          ).toContain(labels.opContains);
+          expect(
+            operatorOptions
+              .find((option) => option.textContent.trim() === labels.opContains)
+              ?.getAttribute("aria-selected")
+          ).toBe("true");
+          operator.dispatchEvent(
+            new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+          );
+          await settleLocale(fixture);
           const field = form.getByRole("textbox", { name: "Name" });
           fireEvent.input(field, { target: { value: "Person 12" } });
           await settleLocale(fixture);

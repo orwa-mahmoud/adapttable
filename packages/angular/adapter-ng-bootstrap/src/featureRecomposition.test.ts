@@ -19,7 +19,7 @@ import { Component, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ngBootstrapPart } from "../testUtils";
+import { ngBootstrapPart, settleBootstrap } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {
@@ -131,7 +131,7 @@ async function mount(
   const root = fixture.nativeElement as HTMLElement;
   document.body.append(root);
   fixture.autoDetectChanges();
-  await fixture.whenStable();
+  await settleBootstrap(fixture);
   if (!context)
     throw new Error("The mounted feature did not receive its runtime");
   const current = context;
@@ -140,10 +140,10 @@ async function mount(
     host,
     root,
     current,
-    settle: () => fixture.whenStable(),
+    settle: () => settleBootstrap(fixture),
     replace: async (next: readonly AdaptTableFeature[]) => {
       host.features.set([capture, ...next]);
-      await fixture.whenStable();
+      await settleBootstrap(fixture);
     },
     destroy: () => {
       fixture.destroy();

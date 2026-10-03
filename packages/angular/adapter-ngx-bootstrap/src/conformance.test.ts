@@ -218,13 +218,31 @@ describe("every bundled locale through native Angular controls", () => {
               .getByRole("button", { name: labels.goToPage(1) })
               .getAttribute("aria-current")
           ).toBe("page");
-          const previous = screen.getByRole<HTMLButtonElement>("button", {
+          const previous = screen.getByRole<HTMLAnchorElement>("button", {
             name: labels.previousPage,
           });
-          const next = screen.getByRole<HTMLButtonElement>("button", {
+          const next = screen.getByRole<HTMLAnchorElement>("button", {
             name: labels.nextPage,
           });
-          expect(previous.disabled).toBe(true);
+          expect(previous.tagName).toBe("A");
+          expect(previous.getAttribute("aria-disabled")).toBe("true");
+          expect(previous.tabIndex).toBe(-1);
+          previous.click();
+          previous.dispatchEvent(
+            new KeyboardEvent("keydown", {
+              key: " ",
+              bubbles: true,
+              cancelable: true,
+            })
+          );
+          await settleLocale(fixture);
+          expect(
+            screen
+              .getByRole("button", { name: labels.goToPage(1) })
+              .getAttribute("aria-current")
+          ).toBe("page");
+          expect(next.getAttribute("aria-disabled")).toBe("false");
+          expect(next.tabIndex).toBe(0);
           expect(
             previous.querySelector<SVGElement>("svg")?.style.transform
           ).toBe(getDirection(locale) === "rtl" ? "" : "rotate(180deg)");

@@ -5,6 +5,7 @@ import type { TableLabels, ToolbarExtrasSlotProps } from "@adapttable/angular";
 import { commandPalette } from "@adapttable/spartan/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { within } from "@testing-library/dom";
 import { describe, expect, it, vi } from "vitest";
 
 import { AdaptCommandPaletteButton } from "../command-palette/palette";
@@ -137,9 +138,11 @@ describe("command palette (Spartan Angular)", () => {
     host.paletteOpen.set(true);
     await fixture.whenStable();
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    expect(part("command-palette")?.getAttribute("aria-label")).toBe(
-      "Table commands"
-    );
+    expect(
+      within(document.body)
+        .getByRole("dialog", { name: "Table commands" })
+        .contains(part("command-palette"))
+    ).toBe(true);
     expect(part("command-list")?.textContent).toContain("Greet");
     const input = part("command-input") as HTMLInputElement;
     input.value = "zzz";
@@ -154,9 +157,11 @@ describe("command palette (Spartan Angular)", () => {
     });
     await fixture.whenStable();
     expect(trigger.textContent?.trim()).toBe("Available actions");
-    expect(part("command-palette")?.getAttribute("aria-label")).toBe(
-      "Available actions"
-    );
+    expect(
+      within(document.body)
+        .getByRole("dialog", { name: "Available actions" })
+        .contains(part("command-palette"))
+    ).toBe(true);
     expect(part("command-list")?.getAttribute("aria-label")).toBe(
       "Available actions"
     );
@@ -188,6 +193,16 @@ describe("command palette (Spartan Angular)", () => {
     expect(host.onOpenChange.mock.calls).toEqual([[true]]);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
     expect(part("command-list")?.textContent).toContain("Greet");
+    const ordinaryKey = new KeyboardEvent("keydown", {
+      key: "a",
+      bubbles: true,
+      cancelable: true,
+    });
+    const bubbled = vi.fn();
+    document.body.addEventListener("keydown", bubbled, { once: true });
+    part("command-input")!.dispatchEvent(ordinaryKey);
+    expect(ordinaryKey.defaultPrevented).toBe(false);
+    expect(bubbled).toHaveBeenCalledOnce();
     part("command-input")!.dispatchEvent(
       new KeyboardEvent("keydown", {
         key: "Escape",
@@ -240,13 +255,18 @@ describe("command palette (Spartan Angular)", () => {
     second.autoDetectChanges();
     await Promise.all([first.whenStable(), second.whenStable()]);
     const dialogs = () =>
-      [
-        ...document.querySelectorAll<HTMLElement>(
-          '[data-adapttable-part="command-palette"]'
-        ),
-      ]
-        .map((dialog) => dialog.getAttribute("aria-label"))
-        .sort((left, right) => (left ?? "").localeCompare(right ?? ""));
+      [...document.querySelectorAll<HTMLElement>('[role="dialog"]')]
+        .map((dialog) => {
+          const label = dialog.querySelector("h2")?.textContent?.trim() ?? "";
+          expect(
+            within(document.body).getByRole("dialog", { name: label })
+          ).toBe(dialog);
+          expect(
+            dialog.querySelector('[data-adapttable-part="command-palette"]')
+          ).not.toBeNull();
+          return label;
+        })
+        .sort((left, right) => left.localeCompare(right));
     const trigger = second.nativeElement.querySelector(
       '[data-adapttable-part="command-palette-button"]'
     ) as HTMLButtonElement;

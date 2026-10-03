@@ -5,13 +5,16 @@
 import {
   type ColumnDef,
   type PaginationMode,
+  type RowMoveMenuSlotProps,
   type RowReorderState,
 } from "@adapttable/angular";
 import { rowReorder } from "@adapttable/spartan/row-reorder";
-import { Component, input } from "@angular/core";
+import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { waitFor } from "@testing-library/dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { focusAndClick } from "../testUtils";
 import { AdaptDataTable } from "../src/dataTable";
 import { AdaptRowMoveMenu } from "./rowMoveMenu";
 import { AdaptRowReorderButtons } from "./rowReorderButtons";
@@ -278,12 +281,12 @@ class GripHost {
 
 @Component({
   imports: [AdaptRowMoveMenu],
-  template: `<adapt-row-move-menu [props]="menuProps" />`,
+  template: `<adapt-row-move-menu [props]="menuProps()" />`,
 })
 class MenuHost {
   readonly onConfirm = vi.fn();
   readonly onCancel = vi.fn();
-  menuProps = {
+  readonly menuProps = signal<RowMoveMenuSlotProps>({
     label: "Move to group…",
     items: [
       {
@@ -300,12 +303,38 @@ class MenuHost {
       cancelLabel: "Cancel",
       onConfirm: () => {
         this.onConfirm();
+        this.menuProps.update((props) => ({
+          ...props,
+          confirmation: undefined,
+        }));
       },
       onCancel: () => {
         this.onCancel();
+        this.menuProps.update((props) => ({
+          ...props,
+          confirmation: undefined,
+        }));
       },
     },
-  };
+  });
+}
+
+async function mountMoveMenu() {
+  const fixture = TestBed.createComponent(MenuHost);
+  document.body.append(fixture.nativeElement);
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  const trigger = (
+    fixture.nativeElement as HTMLElement
+  ).querySelector<HTMLElement>(
+    '[data-adapttable-part="row-move-menu-trigger"]'
+  )!;
+  const dialog = document.querySelector<HTMLElement>(
+    '[data-adapttable-part="row-move-confirmation"]'
+  )!;
+  expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  expect(dialog.getAttribute("role")).toBe("alertdialog");
+  return { fixture, trigger, dialog, host: fixture.componentInstance };
 }
 
 describe("row reorder kit controls", () => {
@@ -345,9 +374,11 @@ describe("row reorder kit controls", () => {
     expect(buttons.every((button) => button.disabled)).toBe(true);
   });
 
-  it("presses the grip and disables it while pending", () => {
+  it("presses the grip and disables it while pending", async () => {
     const fixture = TestBed.createComponent(GripHost);
-    fixture.detectChanges();
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
     const grip = (
       fixture.nativeElement as HTMLElement
     ).querySelector<HTMLButtonElement>(
@@ -356,58 +387,89 @@ describe("row reorder kit controls", () => {
     expect(grip).not.toBeNull();
     expect(grip!.getAttribute("aria-pressed")).toBe("true");
     expect(grip!.disabled).toBe(true);
-    const item = (
+    const trigger = (
       fixture.nativeElement as HTMLElement
-    ).querySelector<HTMLButtonElement>('[role="menuitem"]');
+    ).querySelector<HTMLElement>(
+      '[data-adapttable-part="row-move-menu-trigger"]'
+    )!;
+    focusAndClick(trigger);
+    await fixture.whenStable();
+    const item = document.querySelector<HTMLButtonElement>('[role="menuitem"]');
     expect(item).not.toBeNull();
     expect(item!.disabled).toBe(true);
   });
 
-  it("confirms a pending destination from the move menu", () => {
-    const fixture = TestBed.createComponent(MenuHost);
-    fixture.detectChanges();
-    const dialog = (fixture.nativeElement as HTMLElement).querySelector(
-      '[data-adapttable-part="row-move-confirmation"]'
-    );
-    expect(dialog).not.toBeNull();
-    expect(dialog!.textContent).toContain("Move Ada from A to B?");
-    const confirm = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll("button")
-    ).find((button) => button.textContent?.trim() === "Move");
-    expect(confirm).not.toBeUndefined();
-    confirm!.click();
-    expect(fixture.componentInstance.onConfirm).toHaveBeenCalledOnce();
+  it("confirms a pending destination from the move menu", async () => {
+    const { fixture, trigger, dialog, host } = await mountMoveMenu();
+    expect(dialog.textContent).toContain("Move Ada from A to B?");
+    const confirm = Array.from(dialog.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "Move"
+    )!;
+    focusAndClick(confirm);
+    await fixture.whenStable();
+    expect(host.onConfirm).toHaveBeenCalledOnce();
+    expect(host.onCancel).not.toHaveBeenCalled();
+    expect(
+      document.querySelector('[data-adapttable-part="row-move-confirmation"]')
+    ).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+    focusAndClick(trigger);
+    await fixture.whenStable();
+    expect(
+      document
+        .querySelector('[data-adapttable-part="row-move-menu-item"]')
+        ?.textContent?.trim()
+    ).toBe("Docs");
   });
 
-  it("cancels a pending destination with Escape", () => {
-    const fixture = TestBed.createComponent(MenuHost);
-    fixture.detectChanges();
-    document.dispatchEvent(
+  it("cancels a pending destination with Escape", async () => {
+    const { fixture, trigger, dialog, host } = await mountMoveMenu();
+    const control = dialog.querySelector("button")!;
+    control.focus();
+    control.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
     );
-    expect(fixture.componentInstance.onCancel).not.toHaveBeenCalled();
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "Escape",
-        keyCode: 27,
-        bubbles: true,
-      })
+    expect(host.onCancel).not.toHaveBeenCalled();
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      keyCode: 27,
+      bubbles: true,
+      cancelable: true,
+    });
+    control.dispatchEvent(escape);
+    await fixture.whenStable();
+    expect(escape.defaultPrevented).toBe(true);
+    expect(host.onCancel).toHaveBeenCalledOnce();
+    expect(host.onConfirm).not.toHaveBeenCalled();
+    expect(
+      document.querySelector('[data-adapttable-part="row-move-confirmation"]')
+    ).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+    trigger.dispatchEvent(
+      new KeyboardEvent("keyup", { key: "Escape", keyCode: 27, bubbles: true })
     );
-    expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
+    expect(host.onCancel).toHaveBeenCalledOnce();
   });
 
-  it("cancels a pending destination with the cancel button", () => {
-    const fixture = TestBed.createComponent(MenuHost);
-    fixture.detectChanges();
-    const cancel = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll("button")
-    ).find((button) => button.textContent?.trim() === "Cancel");
-    expect(cancel).not.toBeUndefined();
-    cancel!.click();
-    expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
+  it("cancels a pending destination with the cancel button", async () => {
+    const { fixture, trigger, dialog, host } = await mountMoveMenu();
+    const cancel = Array.from(dialog.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "Cancel"
+    )!;
+    focusAndClick(cancel);
+    await fixture.whenStable();
+    expect(host.onCancel).toHaveBeenCalledOnce();
+    expect(host.onConfirm).not.toHaveBeenCalled();
+    expect(
+      document.querySelector('[data-adapttable-part="row-move-confirmation"]')
+    ).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 
-  it("selects a destination item when no confirmation is pending", () => {
+  it("selects a destination item when no confirmation is pending", async () => {
     @Component({
       imports: [AdaptRowMoveMenu],
       template: `<adapt-row-move-menu [props]="menuProps" />`,
@@ -436,16 +498,28 @@ describe("row reorder kit controls", () => {
       };
     }
     const fixture = TestBed.createComponent(ItemsHost);
-    fixture.detectChanges();
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(
+      document.querySelector('[data-adapttable-part="row-move-menu-item"]')
+    ).toBeNull();
+    const trigger = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLElement>(
+      '[data-adapttable-part="row-move-menu-trigger"]'
+    )!;
+    focusAndClick(trigger);
+    await fixture.whenStable();
     const items = [
-      ...(
-        fixture.nativeElement as HTMLElement
-      ).querySelectorAll<HTMLButtonElement>(
+      ...document.querySelectorAll<HTMLButtonElement>(
         '[data-adapttable-part="row-move-menu-item"]'
       ),
     ];
     expect(items).toHaveLength(2);
     expect(items[1]!.disabled).toBe(true);
+    items[1]!.click();
+    expect(fixture.componentInstance.onSelect).not.toHaveBeenCalled();
     items[0]!.click();
     expect(fixture.componentInstance.onSelect).toHaveBeenCalledOnce();
   });

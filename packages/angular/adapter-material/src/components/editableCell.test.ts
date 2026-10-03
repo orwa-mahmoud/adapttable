@@ -12,6 +12,8 @@ import {
 import { editing } from "@adapttable/angular-material/editing";
 import { Component, computed, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { MatInput } from "@angular/material/input";
+import { By } from "@angular/platform-browser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { kitSelector } from "../../testUtils";
@@ -285,6 +287,16 @@ describe("AdaptMaterialCellEditor validation attributes", () => {
       expect(field!.getAttribute("data-conflict")).toBe("");
       expect(field!.getAttribute("aria-invalid")).toBe("true");
       expect(field!.getAttribute("aria-describedby")).toBe("team-error");
+      const material = fixture.debugElement.query(By.directive(MatInput));
+      const control = material?.injector.get(MatInput);
+      if (kind !== "boolean") {
+        expect(control?.errorState).toBe(true);
+        expect(
+          field!
+            .closest("mat-form-field")
+            ?.classList.contains("mat-form-field-invalid")
+        ).toBe(true);
+      }
 
       fixture.componentRef.setInput("props", {
         ...props,
@@ -295,8 +307,38 @@ describe("AdaptMaterialCellEditor validation attributes", () => {
       await fixture.whenStable();
       expect(field!.hasAttribute("aria-busy")).toBe(false);
       expect(field!.hasAttribute("data-conflict")).toBe(false);
-      expect(field!.hasAttribute("aria-invalid")).toBe(false);
+      expect(field!.getAttribute("aria-invalid")).toBe(
+        kind === "boolean" ? null : "false"
+      );
       expect(field!.hasAttribute("aria-describedby")).toBe(false);
+      if (kind !== "boolean") {
+        expect(control?.errorState).toBe(false);
+        expect(
+          field!
+            .closest("mat-form-field")
+            ?.classList.contains("mat-form-field-invalid")
+        ).toBe(false);
+      }
+      fixture.componentRef.setInput("props", {
+        ...props,
+        errorId: "updated-team-error",
+      });
+      await fixture.whenStable();
+      expect(editor()).toBe(field);
+      expect(field!.getAttribute("aria-invalid")).toBe("true");
+      expect(field!.getAttribute("aria-describedby")).toBe(
+        "updated-team-error"
+      );
+      expect(field!.getAttribute("aria-busy")).toBe("true");
+      expect(field!.getAttribute("data-conflict")).toBe("");
+      if (kind !== "boolean") {
+        expect(control?.errorState).toBe(true);
+        expect(
+          field!
+            .closest("mat-form-field")
+            ?.classList.contains("mat-form-field-invalid")
+        ).toBe(true);
+      }
     }
   );
 });

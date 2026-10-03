@@ -55,6 +55,7 @@ import type { TableView } from "../dataTable";
       }
       <div
         ngToolbar
+        [softDisabled]="false"
         [dir]="v.table.dir()"
         [attr.aria-label]="
           v.table.labels().pageOf({

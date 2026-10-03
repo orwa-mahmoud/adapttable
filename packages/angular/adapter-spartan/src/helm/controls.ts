@@ -35,11 +35,19 @@ export class HlmButton {}
   selector: "[adaptHlmInput]",
   hostDirectives: [
     { directive: BrnInput, inputs: ["id", "forceInvalid"] },
-    BrnFieldControlDescribedBy,
+    { directive: BrnFieldControlDescribedBy, inputs: ["aria-describedby"] },
   ],
-  host: { class: "at-spartan-input", "data-slot": "input" },
+  host: {
+    class: "at-spartan-input",
+    "data-slot": "input",
+    "[attr.aria-invalid]":
+      "control.forceInvalid() || field.invalid() ? 'true' : null",
+  },
 })
-export class HlmInput {}
+export class HlmInput {
+  protected readonly control = inject(BrnInput);
+  protected readonly field = inject(BrnFieldControl);
+}
 
 /**
  * The Helm native-select variant keeps native option semantics on the control
@@ -47,7 +55,10 @@ export class HlmInput {}
  */
 @Directive({
   selector: "select[adaptHlmNativeSelect]",
-  hostDirectives: [BrnFieldControl, BrnFieldControlDescribedBy],
+  hostDirectives: [
+    BrnFieldControl,
+    { directive: BrnFieldControlDescribedBy, inputs: ["aria-describedby"] },
+  ],
   host: { class: "at-spartan-select", "data-slot": "native-select" },
 })
 export class HlmNativeSelect {}

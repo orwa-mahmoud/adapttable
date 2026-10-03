@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /** Mounted native controls: no browser interaction is delegated to the binding. */
 import type {
   TableAssistantProps,
@@ -32,6 +33,7 @@ const VIEW: TableAssistantView = {
   runSuggestion: () => undefined,
 };
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptTableAssistant],
   template: `<adapt-table-assistant [props]="props()" />`,
 })
@@ -50,6 +52,7 @@ class Host {
 }
 /** Keep the exported sheet slot mounted while the host changes its open prop. */
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptAssistantSheet],
   template: `
     <ng-template #contents><p>Retained conversation</p></ng-template>
@@ -72,13 +75,15 @@ class SheetHost {
   };
 }
 const fixtures: ComponentFixture<Host>[] = [];
+let owner: HTMLElement | undefined;
 async function mount(
   extras: Partial<TableAssistantProps> = {},
   view: Partial<TableAssistantView> = {}
 ) {
   const fixture = TestBed.createComponent(Host);
   fixtures.push(fixture);
-  document.body.append(fixture.nativeElement);
+  owner = fixture.nativeElement as HTMLElement;
+  document.body.append(owner);
   fixture.componentInstance.extras.set(extras);
   fixture.componentInstance.view.set({ ...VIEW, ...view });
   await settle(fixture);
@@ -90,10 +95,11 @@ async function settle<T>(fixture: ComponentFixture<T>): Promise<void> {
   fixture.detectChanges();
 }
 const part = <T extends HTMLElement = HTMLElement>(name: string): T | null =>
-  document.querySelector<T>(`[data-adapttable-part="${name}"]`);
+  owner?.querySelector<T>(`[data-adapttable-part="${name}"]`) ?? null;
 afterEach(() => {
   for (const fixture of fixtures.splice(0)) fixture.destroy();
   document.body.replaceChildren();
+  owner = undefined;
   vi.unstubAllGlobals();
 });
 
@@ -164,14 +170,18 @@ describe("native assistant", () => {
         runSuggestion,
       }
     );
-    const details = part<HTMLDetailsElement>("assistant-examples");
-    expect(details?.tagName).toBe("DETAILS");
-    expect(part("assistant-examples-menu")?.tagName).toBe("SUMMARY");
+    expect(part("assistant-examples")?.tagName).toBe("SPAN");
+    const trigger = part<HTMLButtonElement>("assistant-examples-menu");
+    expect(trigger?.tagName).toBe("BUTTON");
+    expect(trigger?.getAttribute("aria-expanded")).toBe("false");
+    expect(part("assistant-examples-list")).toBeNull();
+    trigger?.click();
+    await settle(fixture);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("true");
     expect(part("assistant-examples-list")?.tagName).toBe("MENU");
     expect(part("assistant-examples-item")?.textContent).toContain(
       "Highest first"
     );
-    if (details) details.open = true;
     const escape = new KeyboardEvent("keydown", {
       key: "Escape",
       bubbles: true,
@@ -180,13 +190,14 @@ describe("native assistant", () => {
     part("assistant-examples-item")?.dispatchEvent(escape);
     await settle(fixture);
     expect(escape.defaultPrevented).toBe(true);
-    expect(details?.open).toBe(false);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("false");
     expect(fixture.componentInstance.open()).toBe(true);
     expect(document.activeElement).toBe(part("assistant-examples-menu"));
-    if (details) details.open = true;
+    trigger?.click();
+    await settle(fixture);
     part("assistant-examples-item")?.click();
     await settle(fixture);
-    expect(details?.open).toBe(false);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("false");
     expect(runSuggestion).toHaveBeenCalledWith("sort");
     part("assistant-examples-menu")?.dispatchEvent(
       new KeyboardEvent("keydown", {
@@ -200,7 +211,7 @@ describe("native assistant", () => {
   });
   it("does not open or run examples while the connection is unusable", async () => {
     const runSuggestion = vi.fn();
-    await mount(
+    const fixture = await mount(
       {},
       {
         status: "connecting",
@@ -208,16 +219,29 @@ describe("native assistant", () => {
         suggestions: [{ id: "one", title: "Example" }],
       }
     );
-    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
-    part("assistant-examples-menu")?.dispatchEvent(click);
-    expect(click.defaultPrevented).toBe(true);
-    expect(part("assistant-examples-menu")?.getAttribute("aria-disabled")).toBe(
-      "true"
-    );
-    expect(part<HTMLButtonElement>("assistant-examples-item")?.disabled).toBe(
-      true
-    );
-    part("assistant-examples-item")?.click();
+    const trigger = part<HTMLButtonElement>("assistant-examples-menu");
+    expect(trigger?.disabled).toBe(true);
+    trigger?.click();
+    await settle(fixture);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("false");
+    expect(part("assistant-examples-list")).toBeNull();
+    expect(runSuggestion).not.toHaveBeenCalled();
+    fixture.componentInstance.view.update((view) => ({
+      ...view,
+      status: "ready",
+    }));
+    await settle(fixture);
+    trigger?.click();
+    await settle(fixture);
+    fixture.componentInstance.view.update((view) => ({
+      ...view,
+      status: "connecting",
+    }));
+    await settle(fixture);
+    const item = part<HTMLButtonElement>("assistant-examples-item");
+    expect(item?.disabled).toBe(true);
+    item?.click();
+    item?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(runSuggestion).not.toHaveBeenCalled();
   });
   it("shows a hand-sized native launcher and restores it on close", async () => {
@@ -251,35 +275,27 @@ describe("native assistant", () => {
     await settle(fixture);
     expect(part("assistant-window")?.style.position).toBe("absolute");
   });
-  it("opens a genuine modal sheet, preserves direction and routes native cancel", async () => {
-    const showModal = vi.fn(function (this: HTMLDialogElement) {
-      this.open = true;
+  it("opens a genuine modal sheet, preserves direction and routes native Escape", async () => {
+    const fixture = await mount({ presentation: "sheet", dir: "rtl" });
+    const dialog = part("assistant-sheet");
+    expect(dialog?.getAttribute("role")).toBe("dialog");
+    expect(dialog?.getAttribute("aria-modal")).toBe("true");
+    expect(dialog?.getAttribute("aria-label")).toBeTruthy();
+    expect(dialog?.dir).toBe("rtl");
+    expect(owner?.querySelector(".adapt-cdk-backdrop")).not.toBeNull();
+    expect(owner?.querySelectorAll(".cdk-focus-trap-anchor")).toHaveLength(2);
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
     });
-    const prototype = HTMLDialogElement.prototype;
-    const original = prototype.showModal;
-    Object.defineProperty(prototype, "showModal", {
-      configurable: true,
-      value: showModal,
-    });
-    try {
-      const fixture = await mount({ presentation: "sheet", dir: "rtl" });
-      expect(showModal).toHaveBeenCalledOnce();
-      const dialog = part<HTMLDialogElement>("assistant-sheet");
-      expect(dialog?.open).toBe(true);
-      expect(dialog?.dir).toBe("rtl");
-      const cancel = new Event("cancel", { cancelable: true });
-      dialog?.dispatchEvent(cancel);
-      await settle(fixture);
-      expect(cancel.defaultPrevented).toBe(true);
-      expect(fixture.componentInstance.open()).toBe(false);
-    } finally {
-      Object.defineProperty(prototype, "showModal", {
-        configurable: true,
-        value: original,
-      });
-    }
+    dialog?.dispatchEvent(escape);
+    await settle(fixture);
+    expect(escape.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.open()).toBe(false);
+    expect(part("assistant-sheet")).toBeNull();
   });
-  it("degrades the sheet to an open native dialog when showModal is unavailable", async () => {
+  it("keeps the CDK modal available when showModal is unavailable", async () => {
     const prototype = HTMLDialogElement.prototype;
     const original = prototype.showModal;
     Object.defineProperty(prototype, "showModal", {
@@ -287,8 +303,15 @@ describe("native assistant", () => {
       value: undefined,
     });
     try {
-      await mount({ presentation: "sheet" });
-      expect(part<HTMLDialogElement>("assistant-sheet")?.open).toBe(true);
+      const fixture = await mount({ presentation: "sheet" });
+      expect(part("assistant-sheet")?.getAttribute("role")).toBe("dialog");
+      expect(part("assistant-sheet")?.getAttribute("aria-modal")).toBe("true");
+      const backdrop = owner?.querySelector<HTMLElement>(".adapt-cdk-backdrop");
+      expect(backdrop).not.toBeNull();
+      backdrop?.click();
+      await settle(fixture);
+      expect(fixture.componentInstance.open()).toBe(false);
+      expect(part("assistant-sheet")).toBeNull();
     } finally {
       Object.defineProperty(prototype, "showModal", {
         configurable: true,
@@ -296,66 +319,47 @@ describe("native assistant", () => {
       });
     }
   });
-  it("closes and reopens the same native sheet without duplicate modal calls", async () => {
-    const showModal = vi.fn(function (this: HTMLDialogElement) {
-      this.open = true;
-    });
-    const close = vi.fn(function (this: HTMLDialogElement) {
-      this.open = false;
-    });
-    const prototype = HTMLDialogElement.prototype;
-    const originalShow = Object.getOwnPropertyDescriptor(
-      prototype,
-      "showModal"
-    );
-    const originalClose = Object.getOwnPropertyDescriptor(prototype, "close");
-    Object.defineProperty(prototype, "showModal", {
-      configurable: true,
-      value: showModal,
-    });
-    Object.defineProperty(prototype, "close", {
-      configurable: true,
-      value: close,
-    });
+  it("updates, closes and reopens the retained sheet without duplicate portals", async () => {
     const fixture = TestBed.createComponent(SheetHost);
-    document.body.append(fixture.nativeElement);
+    owner = fixture.nativeElement as HTMLElement;
+    document.body.append(owner);
+    const element = owner;
     try {
       await settle(fixture);
-      const dialog = part<HTMLDialogElement>("assistant-sheet");
-      expect(dialog?.open).toBe(false);
-      expect(showModal).not.toHaveBeenCalled();
-      expect(close).not.toHaveBeenCalled();
+      expect(part("assistant-sheet")).toBeNull();
       fixture.componentInstance.open.set(true);
       await settle(fixture);
-      expect(dialog?.open).toBe(true);
-      expect(showModal).toHaveBeenCalledOnce();
+      const dialog = part("assistant-sheet");
+      expect(dialog?.getAttribute("role")).toBe("dialog");
+      expect(
+        element.querySelectorAll('[data-adapttable-part="assistant-sheet"]')
+      ).toHaveLength(1);
       fixture.componentInstance.label.set("Updated conversation");
       await settle(fixture);
+      expect(part("assistant-sheet")).toBe(dialog);
       expect(dialog?.getAttribute("aria-label")).toBe("Updated conversation");
-      expect(showModal).toHaveBeenCalledOnce();
-      expect(close).not.toHaveBeenCalled();
       fixture.componentInstance.open.set(false);
       await settle(fixture);
-      expect(dialog?.open).toBe(false);
-      expect(close).toHaveBeenCalledOnce();
+      expect(part("assistant-sheet")).toBeNull();
+      expect(dialog?.isConnected).toBe(false);
       fixture.componentInstance.label.set("Closed conversation");
       await settle(fixture);
-      expect(close).toHaveBeenCalledOnce();
+      expect(part("assistant-sheet")).toBeNull();
       fixture.componentInstance.open.set(true);
       await settle(fixture);
-      expect(part("assistant-sheet")).toBe(dialog);
-      expect(dialog?.open).toBe(true);
-      expect(dialog?.textContent).toContain("Retained conversation");
-      expect(showModal).toHaveBeenCalledTimes(2);
+      expect(part("assistant-sheet")?.getAttribute("aria-label")).toBe(
+        "Closed conversation"
+      );
+      expect(part("assistant-sheet")?.textContent).toContain(
+        "Retained conversation"
+      );
+      expect(
+        element.querySelectorAll('[data-adapttable-part="assistant-sheet"]')
+      ).toHaveLength(1);
     } finally {
       fixture.destroy();
-      if (originalShow)
-        Object.defineProperty(prototype, "showModal", originalShow);
-      else Reflect.deleteProperty(prototype, "showModal");
-      if (originalClose)
-        Object.defineProperty(prototype, "close", originalClose);
-      else Reflect.deleteProperty(prototype, "close");
     }
+    expect(element.querySelector(".cdk-overlay-container")).toBeNull();
   });
   it("closes and reopens the retained sheet without dialog methods in older browsers", async () => {
     const prototype = HTMLDialogElement.prototype;
@@ -373,20 +377,24 @@ describe("native assistant", () => {
       value: undefined,
     });
     const fixture = TestBed.createComponent(SheetHost);
-    document.body.append(fixture.nativeElement);
+    owner = fixture.nativeElement as HTMLElement;
+    document.body.append(owner);
     try {
       fixture.componentInstance.open.set(true);
       await settle(fixture);
-      const dialog = part<HTMLDialogElement>("assistant-sheet");
-      expect(dialog?.open).toBe(true);
+      expect(part("assistant-sheet")?.getAttribute("role")).toBe("dialog");
       fixture.componentInstance.open.set(false);
       await settle(fixture);
-      expect(dialog?.open).toBe(false);
+      expect(part("assistant-sheet")).toBeNull();
       fixture.componentInstance.open.set(true);
       await settle(fixture);
-      expect(part("assistant-sheet")).toBe(dialog);
-      expect(dialog?.open).toBe(true);
-      expect(dialog?.textContent).toContain("Retained conversation");
+      expect(part("assistant-sheet")?.getAttribute("aria-modal")).toBe("true");
+      expect(part("assistant-sheet")?.textContent).toContain(
+        "Retained conversation"
+      );
+      expect(
+        owner.querySelectorAll('[data-adapttable-part="assistant-sheet"]')
+      ).toHaveLength(1);
     } finally {
       fixture.destroy();
       if (originalShow)
@@ -413,8 +421,8 @@ describe("native assistant", () => {
     });
     trigger?.dispatchEvent(activation);
     expect(activation.defaultPrevented).toBe(false);
-    const details = part<HTMLDetailsElement>("assistant-examples");
-    expect(details?.open).toBe(true);
+    await settle(fixture);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("true");
     const tab = new KeyboardEvent("keydown", {
       key: "Tab",
       bubbles: true,
@@ -422,7 +430,7 @@ describe("native assistant", () => {
     });
     trigger?.dispatchEvent(tab);
     expect(tab.defaultPrevented).toBe(false);
-    expect(details?.open).toBe(true);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("true");
     fixture.componentInstance.view.update((view) => ({
       ...view,
       status: "disconnected",

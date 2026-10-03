@@ -73,8 +73,12 @@ describe("native approval controls", () => {
         "agent-approval-reject"
       );
       expect(button.getAttribute("data-variant")).toBe(variant);
-      expect([...button.classList].sort()).toEqual(
-        ["btn", "btn-outline-secondary", "btn-sm", "native-control"].sort()
+      expect(
+        [...button.classList].sort((left, right) => left.localeCompare(right))
+      ).toEqual(
+        ["btn", "btn-outline-secondary", "btn-sm", "native-control"].sort(
+          (left, right) => left.localeCompare(right)
+        )
       );
       button.focus();
       expect(document.activeElement).toBe(button);

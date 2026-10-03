@@ -120,8 +120,10 @@ describe("native assistant", () => {
       { className: "native-conversation" },
       { draft: "Hello", send, setDraft }
     );
-    expect(part("assistant-panel")?.tagName).toBe("SECTION");
-    expect(part("assistant-panel")?.className).toBe("native-conversation");
+    expect(part("assistant-panel")?.tagName).toBe("MAT-CARD");
+    expect(
+      part("assistant-panel")?.classList.contains("native-conversation")
+    ).toBe(true);
     const input = part<HTMLTextAreaElement>("assistant-input");
     expect(input?.tagName).toBe("TEXTAREA");
     expect(input?.value).toBe("Hello");
@@ -175,6 +177,7 @@ describe("native assistant", () => {
     part("assistant-examples-item")?.dispatchEvent(
       new KeyboardEvent("keydown", {
         key: "Escape",
+        keyCode: 27,
         bubbles: true,
         cancelable: true,
       })
@@ -243,14 +246,13 @@ describe("native assistant", () => {
       "mat-dialog-container"
     )!;
     expect(container).not.toBeNull();
-    expect(container.closest(".cdk-overlay-pane")?.getAttribute("dir")).toBe(
-      "rtl"
-    );
+    expect(container.closest("[dir]")?.getAttribute("dir")).toBe("rtl");
     expect(document.querySelector(".cdk-overlay-backdrop")).not.toBeNull();
     expect(container.contains(part("assistant-sheet"))).toBe(true);
     container.dispatchEvent(
       new KeyboardEvent("keydown", {
         key: "Escape",
+        keyCode: 27,
         bubbles: true,
         cancelable: true,
       })

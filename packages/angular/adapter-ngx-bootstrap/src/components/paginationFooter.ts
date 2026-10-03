@@ -13,6 +13,7 @@ import {
   input,
   type OnChanges,
   type OnInit,
+  output,
   Renderer2,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -29,9 +30,11 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
   readonly state = input.required<{
     readonly part: string;
     readonly label: string;
+    readonly page: number;
     readonly disabled?: boolean;
     readonly current?: boolean;
   }>({ alias: "adaptPaginationLink" });
+  readonly selected = output<number>({ alias: "adaptPageSelect" });
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly renderer = inject(Renderer2);
   private readonly destroy = inject(DestroyRef);
@@ -52,6 +55,14 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
   ngOnInit(): void {
     const link = this.element.nativeElement.parentElement;
     if (!link) return;
+    // Native pageChanged also fires for model writes. Only activation writes
+    // back to the host; rendering or clamping the native pager must not.
+    this.destroy.onDestroy(
+      this.renderer.listen(link, "click", () => {
+        const state = this.state();
+        if (!state.disabled) this.selected.emit(state.page);
+      })
+    );
     // Enter already activates an anchor. A button role also promises Space.
     this.destroy.onDestroy(
       this.renderer.listen(link, "keydown", (event: KeyboardEvent) => {
@@ -122,7 +133,6 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
           [totalItems]="v.table.source().total"
           [itemsPerPage]="v.table.source().limit"
           [ngModel]="v.table.pagination().safePage"
-          (pageChanged)="v.table.setPage($event.page)"
           [maxSize]="5"
           [rotate]="false"
           [directionLinks]="true"
@@ -135,8 +145,10 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
         />
         <ng-template #previous let-disabled="disabled">
           <span
+            (adaptPageSelect)="selectPage($event)"
             [adaptPaginationLink]="{
               part: 'page-prev',
+              page: v.table.pagination().safePage - 1,
               label: v.table.labels().previousPage,
               disabled,
             }"
@@ -146,8 +158,10 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
         </ng-template>
         <ng-template #next let-disabled="disabled">
           <span
+            (adaptPageSelect)="selectPage($event)"
             [adaptPaginationLink]="{
               part: 'page-next',
+              page: v.table.pagination().safePage + 1,
               label: v.table.labels().nextPage,
               disabled,
             }"
@@ -157,8 +171,10 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
         </ng-template>
         <ng-template #page let-page let-currentPage="currentPage">
           <span
+            (adaptPageSelect)="selectPage($event)"
             [adaptPaginationLink]="{
               part: page.text === '...' ? 'page-ellipsis' : 'page-number',
+              page: page.number,
               label: v.table.labels().goToPage(page.number),
               current: page.number === currentPage,
             }"
@@ -172,6 +188,11 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
 export class AdaptPaginationFooter<TRow> {
   /** What the table renders from. */
   readonly view = input.required<TableView<TRow>>();
+
+  protected selectPage(page: number): void {
+    const table = this.view().table;
+    if (page !== table.pagination().safePage) table.setPage(page);
+  }
 
   /** Pagination follows reading order, including live direction changes. */
   protected readonly previousIcon = computed(() =>

@@ -45,8 +45,6 @@ import {
   NgbDropdownToggle,
 } from "@ng-bootstrap/ng-bootstrap/dropdown";
 
-import { bootstrapPopperOptions } from "./bootstrapPositioning";
-
 /** The menu's props, with the row type erased as every slot erases it. */
 
 const NOOP_RENAME = (): void => undefined;
@@ -381,7 +379,6 @@ export class AdaptColumnMenuEdgeRow {
     <div
       #root
       ngbDropdown
-      [popperOptions]="popperOptions"
       autoClose="outside"
       (openChange)="menuOpen.set($event)"
       data-ng-bootstrap-part="column-menu"
@@ -502,7 +499,6 @@ export class AdaptColumnMenuEdgeRow {
   `,
 })
 export class AdaptColumnMenu {
-  protected readonly popperOptions = bootstrapPopperOptions;
   /** The slot's props. */
   readonly props = input.required<ColumnMenuSlotProps<never>>();
 

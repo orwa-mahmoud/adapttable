@@ -162,11 +162,7 @@ describe.each([
     await settle();
     expect(names()).toEqual(["City 12", "City 11", "City 10", "City 09"]);
     expect(part("pager")).toBeNull();
-    const expectedQuery = new URLSearchParams(initial);
-    expectedQuery.set("table.atv", "1");
-    expect([...new URLSearchParams(adapter.getSearch())].sort()).toEqual(
-      [...expectedQuery].sort()
-    );
+    expect(adapter.getSearch()).toBe(initial);
     part("load-more-button")!.click();
     await settle();
     expect(names()).toEqual([

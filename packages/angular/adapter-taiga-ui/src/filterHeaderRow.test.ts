@@ -1,3 +1,5 @@
+import { chooseTaigaOption } from "./taigaTestHelpers";
+import { AdaptTaigaRoot } from "./taigaRoot";
 import {
   defaultLabels,
   type ExtraFilters,
@@ -76,8 +78,8 @@ function memory(extra: ReturnType<typeof signal<ExtraFilters>>) {
 }
 
 @Component({
-  imports: [AdaptFilterHeaderRow],
-  template: `
+  imports: [AdaptTaigaRoot, AdaptFilterHeaderRow],
+  template: `<adapt-taiga-root>
     <table>
       <thead>
         <adapt-filter-header-row
@@ -89,7 +91,7 @@ function memory(extra: ReturnType<typeof signal<ExtraFilters>>) {
         />
       </thead>
     </table>
-  `,
+  </adapt-taiga-root>`,
 })
 class RowHost {
   readonly labels = defaultLabels;
@@ -101,14 +103,14 @@ class RowHost {
 }
 
 @Component({
-  imports: [AdaptFilterHeaderControl],
-  template: `
+  imports: [AdaptTaigaRoot, AdaptFilterHeaderControl],
+  template: `<adapt-taiga-root>
     <adapt-filter-header-control
       [def]="def"
       [source]="source()"
       [labels]="labels"
     />
-  `,
+  </adapt-taiga-root>`,
 })
 class ControlHost {
   readonly labels = defaultLabels;
@@ -120,6 +122,7 @@ class ControlHost {
 async function mountRow(prepare?: (host: RowHost) => void) {
   const fixture = TestBed.createComponent(RowHost);
   prepare?.(fixture.componentInstance);
+  document.body.append(fixture.nativeElement as HTMLElement);
   fixture.autoDetectChanges();
   await fixture.whenStable();
   const element = fixture.nativeElement as HTMLElement;
@@ -141,7 +144,7 @@ describe("AdaptFilterHeaderRow", () => {
     ).not.toBeNull();
     expect(
       element.querySelector('[data-adapttable-part="filter-header-menu"]')
-    ).not.toBeNull();
+    ).toBeNull();
 
     const name = labeled("Name")[0] as HTMLInputElement;
     name.value = "Ada";
@@ -149,14 +152,18 @@ describe("AdaptFilterHeaderRow", () => {
     await fixture.whenStable();
     expect(name.value).toBe("Ada");
 
-    const team = labeled("Team")[0] as HTMLSelectElement;
-    team.value = "Web";
-    team.dispatchEvent(new Event("change"));
+    const team = labeled("Team")[0] as HTMLInputElement;
+    await chooseTaigaOption(fixture, team, "Web");
     await fixture.whenStable();
     expect(team.value).toBe("Web");
 
-    const tags = labeled("Tags").find((node) => node.tagName === "SUMMARY");
+    const tags = labeled("Tags").find((node) => node.tagName === "BUTTON");
     if (!tags) throw new Error("Tags filter trigger was not rendered");
+    tags.click();
+    await fixture.whenStable();
+    expect(
+      element.querySelector('[data-adapttable-part="filter-header-menu"]')
+    ).not.toBeNull();
     const box = (caption: string) => {
       const label = [...element.querySelectorAll("label")].find((node) =>
         node.textContent?.includes(caption)
@@ -166,19 +173,18 @@ describe("AdaptFilterHeaderRow", () => {
     const first = box("A");
     const second = box("B");
     if (!first || !second) throw new Error("tag checkboxes are not rendered");
-    first.checked = true;
-    first.dispatchEvent(new Event("change"));
+    first.click();
     await fixture.whenStable();
-    second.checked = true;
-    second.dispatchEvent(new Event("change"));
+    second.click();
     await fixture.whenStable();
     expect(tags.textContent).toContain("2");
 
-    const core = labeled("Core")[0] as HTMLSelectElement;
-    core.value = "true";
-    core.dispatchEvent(new Event("change"));
+    const core = labeled("Core")[0] as HTMLInputElement;
+    tags.click();
     await fixture.whenStable();
-    expect(core.value).toBe("true");
+    await chooseTaigaOption(fixture, core, "true");
+    await fixture.whenStable();
+    expect(core.value).toBe(defaultLabels.boolTrue);
 
     const age = labeled("Age")[0] as HTMLInputElement;
     age.value = "30";
@@ -223,14 +229,14 @@ describe("AdaptFilterHeaderRow", () => {
 
   it("renders a lone header control", async () => {
     const fixture = TestBed.createComponent(ControlHost);
+    document.body.append(fixture.nativeElement as HTMLElement);
     fixture.autoDetectChanges();
     await fixture.whenStable();
     const select = (fixture.nativeElement as HTMLElement).querySelector(
-      "select"
+      "input[tuiSelect]"
     );
     if (!select) throw new Error("Team filter is not rendered");
-    select.value = "Core";
-    select.dispatchEvent(new Event("change"));
+    await chooseTaigaOption(fixture, select, "Core");
     await fixture.whenStable();
     expect(select.value).toBe("Core");
   });

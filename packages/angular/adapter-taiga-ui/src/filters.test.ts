@@ -1,4 +1,9 @@
 import {
+  chooseTaigaOption,
+  taigaOptions,
+  clickOutsideTaiga,
+} from "./taigaTestHelpers";
+import {
   type ColumnDef,
   defaultFilterRegistry,
   type FilterDef,
@@ -167,12 +172,14 @@ async function mount(
         part("filter-label", candidate)?.textContent?.trim() === caption
     );
   const type = async (control: Element | null | undefined, value: string) => {
-    const target = control as HTMLInputElement | HTMLSelectElement | null;
+    const target = control as HTMLInputElement | null;
     if (!target) throw new Error("target is not rendered");
+    if (target.matches("[tuiSelect]")) {
+      await chooseTaigaOption(fixture, target, value);
+      return;
+    }
     target.value = value;
-    target.dispatchEvent(
-      new Event(target instanceof HTMLSelectElement ? "change" : "input")
-    );
+    target.dispatchEvent(new Event("input"));
     await settle();
   };
   const openFilters = async () => {
@@ -198,7 +205,7 @@ afterEach(() => {
 
 describe("the Taiga UI Angular filters", () => {
   it("opens an anchored popover from the Filters button, and closes it", async () => {
-    const { part, openFilters, settle } = await mount();
+    const { fixture, part, openFilters, settle } = await mount();
     const button = part<HTMLButtonElement>("filters-button");
     expect(button?.getAttribute("aria-expanded")).toBe("false");
     expect(part("filters-anchor")?.hasAttribute("aria-expanded")).toBe(false);
@@ -212,8 +219,7 @@ describe("the Taiga UI Angular filters", () => {
     expect(part("filters-popover")).toBeNull();
     expect(document.activeElement).toBe(button);
     await openFilters();
-    document.body.click();
-    await settle();
+    await clickOutsideTaiga(fixture);
     expect(part("filters-popover")).toBeNull();
   });
 
@@ -271,7 +277,7 @@ describe("the Taiga UI Angular filters", () => {
     expect(ids()).toEqual(["1", "2", "3"]);
     const joined = field("Joined");
     await type(part("filter-operator", joined), "relative");
-    const preset = parts<HTMLSelectElement>("filter-input", joined)[0];
+    const preset = parts<HTMLInputElement>("filter-input", joined)[0];
     await type(preset, "last");
     const count = parts<HTMLInputElement>("filter-input", joined)[1];
     expect(count?.type).toBe("number");
@@ -285,7 +291,11 @@ describe("the Taiga UI Angular filters", () => {
     await openFilters();
     await type(part("filter-select", field("City")), "Amman");
     expect(ids()).toEqual(["2"]);
-    parts<HTMLButtonElement>("chip-remove")[0]!.click();
+    const remove = parts<HTMLButtonElement>("chip-remove")[0]!;
+    remove.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    remove.focus();
+    remove.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    remove.click();
     await settle();
     expect(ids()).toEqual(["1", "2", "3"]);
     // The chip sits outside the popover, so removing one closed it.
@@ -304,10 +314,9 @@ describe("the Taiga UI Angular filters", () => {
     await openFilters();
     const summary = part("filter-tree-summary");
     expect(summary?.textContent).toContain("Advanced");
-    const tree = part<HTMLDetailsElement>("filter-tree");
+    const tree = part<HTMLElement>("filter-tree");
     if (!tree) throw new Error("tree is not rendered");
-    tree.open = true;
-    tree.dispatchEvent(new Event("toggle"));
+    summary!.click();
     await settle();
     const addCondition = () =>
       [...(part("filter-tree-actions")?.querySelectorAll("button") ?? [])][0];
@@ -392,17 +401,16 @@ describe("the Taiga UI Angular filters", () => {
       filters(DEFS),
       headerFilters(),
     ]);
-    const triggers = parts<HTMLDetailsElement>("filter-header-trigger");
+    const triggers = parts<HTMLElement>("filter-header-trigger");
     expect(triggers).toHaveLength(3);
     const trigger = triggers[1];
     if (!trigger) throw new Error("trigger is not rendered");
-    trigger.open = true;
-    trigger.dispatchEvent(new Event("toggle"));
+    trigger.querySelector<HTMLButtonElement>("button")!.click();
     await settle();
-    expect(part("filter-header-cell", trigger)).not.toBeNull();
+    expect(part("filter-header-cell")).not.toBeNull();
     await type(part("filter-select", field("City")), "Amman");
     expect(ids()).toEqual(["2"]);
-    expect(trigger.querySelector("summary")?.hasAttribute("data-active")).toBe(
+    expect(trigger.querySelector("button")?.hasAttribute("data-active")).toBe(
       true
     );
     element.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
@@ -534,14 +542,16 @@ describe("filters select labels (Taiga UI Angular)", () => {
       .click();
     await fixture.whenStable();
     const city = [
-      ...element.querySelectorAll<HTMLSelectElement>(
+      ...element.querySelectorAll<HTMLInputElement>(
         '[data-adapttable-part="filter-select"]'
       ),
     ][0]!;
     expect(
-      [...city.options].map((option) => option.textContent.trim())
+      (await taigaOptions(fixture, city)).map((option) =>
+        option.textContent.trim()
+      )
     ).toEqual(["Tous", "Dubai", "Amman"]);
-    expect(city.value).toBe("");
+    expect(city.value).toBe("Tous");
   });
 });
 

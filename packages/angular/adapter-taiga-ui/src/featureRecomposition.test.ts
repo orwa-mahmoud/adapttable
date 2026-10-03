@@ -1,3 +1,4 @@
+import { chooseTaigaOption } from "./taigaTestHelpers";
 import {
   type AdaptTableFeature,
   type ColumnDef,
@@ -634,20 +635,19 @@ describe("mounted feature recomposition (Taiga UI Angular)", () => {
     const { root, host } = mounted;
     const features = host.features();
     const setHeader = async (open: boolean) => {
-      const trigger = one<HTMLDetailsElement>(
+      const trigger = one<HTMLButtonElement>(
         root,
-        part("filter-header-trigger")
+        `${part("filter-header-trigger")} button`
       );
-      trigger.open = open;
-      trigger.dispatchEvent(new Event("toggle"));
+      if ((trigger.getAttribute("aria-expanded") === "true") !== open)
+        trigger.click();
       await mounted.settle();
     };
     const openHeader = () => setHeader(true);
     const closeHeader = () => setHeader(false);
     const choose = async (value: string) => {
-      const select = one<HTMLSelectElement>(document, part("filter-select"));
-      select.value = value;
-      select.dispatchEvent(new Event("change", { bubbles: true }));
+      const select = one<HTMLInputElement>(document, part("filter-select"));
+      await chooseTaigaOption(mounted.fixture, select, value);
       await mounted.settle();
     };
     await openHeader();

@@ -60,7 +60,21 @@ async function mount(features: readonly AdaptTableFeature[], mobile = false) {
   return fixture;
 }
 
+const clipboardDescriptor = Object.getOwnPropertyDescriptor(
+  navigator,
+  "clipboard"
+);
+function stubClipboard(text: string): void {
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { readText: vi.fn().mockResolvedValue(text) },
+  });
+}
+
 afterEach(() => {
+  if (clipboardDescriptor)
+    Object.defineProperty(navigator, "clipboard", clipboardDescriptor);
+  else Reflect.deleteProperty(navigator, "clipboard");
   document.body.replaceChildren();
   vi.unstubAllGlobals();
 });
@@ -95,9 +109,7 @@ describe("unstyled range editing", () => {
 
   it("undoes a multi-cell paste as exactly one gesture", async () => {
     const saved = vi.fn();
-    vi.stubGlobal("navigator", {
-      clipboard: { readText: vi.fn().mockResolvedValue("One\nTwo") },
-    });
+    stubClipboard("One\nTwo");
     const fixture = await mount([
       cellNavigation(),
       editing<Row>(saved),
@@ -215,11 +227,7 @@ const initialNames = ["Ada Lovelace", "Alan Turing", "Grace Hopper"];
 
 describe("range edits with coalesced host row patches", () => {
   it("renders both pasted rows and restores both with a single undo", async () => {
-    vi.stubGlobal("navigator", {
-      clipboard: {
-        readText: vi.fn().mockResolvedValue("Pasted Ada\nPasted Grace"),
-      },
-    });
+    stubClipboard("Pasted Ada\nPasted Grace");
     const fixture = await mountPatchedHost();
     cells()[0]!.focus();
     cells()[0]!.dispatchEvent(

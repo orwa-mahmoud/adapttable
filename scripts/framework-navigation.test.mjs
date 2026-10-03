@@ -154,10 +154,8 @@ it("uses the real React tailwind route for Angular-only kit counterparts", () =>
       SHOWCASE_ADAPTERS,
       featuresOf
     );
-    assert.equal(
-      target.href,
-      `/react/demo/tailwind/editing/${kit === "unstyled" ? "" : `?kit-unavailable=${kit}`}`
-    );
+    const fallback = kit === "unstyled" ? "" : `?kit-unavailable=${kit}`;
+    assert.equal(target.href, `/react/demo/tailwind/editing/${fallback}`);
   }
 });
 

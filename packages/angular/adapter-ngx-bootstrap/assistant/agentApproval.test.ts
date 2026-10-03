@@ -122,8 +122,12 @@ describe("native agentApproval()", () => {
     expect(part(root, "agent-approval-list")?.tagName).toBe("UL");
     const reject = part(root, "agent-approval-reject")!;
     const approve = part(root, "agent-approval-approve")!;
-    expect([...reject.classList].sort()).toEqual(
-      ["btn", "btn-outline-secondary", "btn-sm", "native-button"].sort()
+    expect(
+      [...reject.classList].sort((left, right) => left.localeCompare(right))
+    ).toEqual(
+      ["btn", "btn-outline-secondary", "btn-sm", "native-button"].sort(
+        (left, right) => left.localeCompare(right)
+      )
     );
     expect(reject.textContent?.trim()).toBe("Refuser");
     expect(approve.textContent?.trim()).toBe("Accepter");

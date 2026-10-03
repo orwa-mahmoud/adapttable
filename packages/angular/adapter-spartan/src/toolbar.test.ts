@@ -8,6 +8,7 @@ import { savedViews } from "@adapttable/spartan/saved-views";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { focusAndClick } from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {
@@ -182,7 +183,7 @@ describe("the Spartan Angular toolbar controls", () => {
     const { part, settle } = await mount([
       savedViews({ storageKey: "esc-views", storage: null }),
     ]);
-    part<HTMLButtonElement>("views-button")!.click();
+    focusAndClick(part<HTMLButtonElement>("views-button")!);
     await settle();
     document.body.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", keyCode: 27 })
@@ -230,7 +231,7 @@ describe("the Spartan Angular toolbar controls", () => {
       savedViews({ storageKey: "cities-views", storage: null }),
     ]);
     const open = async () => {
-      part<HTMLButtonElement>("views-button")!.click();
+      focusAndClick(part<HTMLButtonElement>("views-button")!);
       await settle();
     };
     part<HTMLButtonElement>("sort-button")!.click();

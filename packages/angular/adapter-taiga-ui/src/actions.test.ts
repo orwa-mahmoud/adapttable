@@ -1,3 +1,4 @@
+import { taigaPopup } from "./taigaTestHelpers";
 import {
   type AdaptTableFeature,
   type BulkAction,
@@ -253,14 +254,21 @@ describe("the Taiga UI Angular row actions", () => {
     const { part, parts, settle } = await mount([
       rowActions(actions, { layout: "menu" }),
     ]);
-    const menu = part<HTMLDetailsElement>("row-actions-menu");
+    const menu = part<HTMLElement>("row-actions-menu");
     expect(menu).not.toBeNull();
     if (!menu) throw new Error("menu is not rendered");
-    menu.open = true;
-    parts<HTMLButtonElement>("action-button", menu)[0]!.click();
+    const trigger = part<HTMLButtonElement>("row-actions-trigger", menu)!;
+    trigger.click();
+    await settle();
+    const popup = taigaPopup(trigger)!;
+    expect(popup.getAttribute("role")).toBe("dialog");
+    expect(popup.getAttribute("aria-label")).toBe(
+      trigger.getAttribute("aria-label")
+    );
+    parts<HTMLButtonElement>("action-button", popup)[0]!.click();
     await settle();
     expect(edits).toEqual(["1"]);
-    expect(menu.open).toBe(false);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
   it("puts the actions on each phone card", async () => {

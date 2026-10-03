@@ -330,6 +330,13 @@ async function mountMoveMenu(pendingInitially = true) {
   document.body.append(element);
   fixture.autoDetectChanges();
   await fixture.whenStable();
+  if (pendingInitially)
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(
+        element.querySelector('[data-adapttable-part="row-move-confirmation"]')
+      ).not.toBeNull();
+    });
   const trigger = element.querySelector<HTMLButtonElement>(
     '[data-adapttable-part="row-move-menu-trigger"]'
   )!;

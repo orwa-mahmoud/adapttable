@@ -3,7 +3,11 @@ import { columnMenu } from "@adapttable/ng-bootstrap/column-menu";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { ngBootstrapPart } from "../testUtils";
+import {
+  clickBootstrapControl,
+  ngBootstrapPart,
+  settleBootstrap,
+} from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface City {
@@ -81,7 +85,7 @@ class Plain {
 async function mount() {
   const fixture = TestBed.createComponent(Host);
   fixture.autoDetectChanges();
-  await fixture.whenStable();
+  await settleBootstrap(fixture);
   const element = fixture.nativeElement as HTMLElement;
   document.body.append(element);
   const part = <T extends HTMLElement>(
@@ -94,7 +98,7 @@ async function mount() {
   ) => [...root.querySelectorAll<T>(ngBootstrapPart(name))];
   const headers = () =>
     parts("header-cell").map((cell) => cell.dataset.columnKey);
-  const settle = () => fixture.whenStable();
+  const settle = () => settleBootstrap(fixture);
   const open = async () => {
     part<HTMLButtonElement>("column-menu-button")!.click();
     await settle();
@@ -111,7 +115,7 @@ describe("the unstyled Angular Columns menu", () => {
   it("draws nothing without the feature", async () => {
     const fixture = TestBed.createComponent(Plain);
     fixture.autoDetectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     const element = fixture.nativeElement as HTMLElement;
     expect(
       element.querySelector('[data-ng-bootstrap-part="column-menu"]')
@@ -128,7 +132,13 @@ describe("the unstyled Angular Columns menu", () => {
     expect(
       parts("column-menu-label").map((label) => label.textContent)
     ).toEqual(["Name", "Country", "Population"]);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    (document.activeElement ?? document).dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(part("column-menu-panel")).toBeNull();
     expect(document.activeElement).toBe(button);
@@ -137,7 +147,7 @@ describe("the unstyled Angular Columns menu", () => {
   it("closes on a press outside it", async () => {
     const { part, open, settle } = await mount();
     await open();
-    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    clickBootstrapControl(document.body);
     await settle();
     expect(part("column-menu-panel")).toBeNull();
   });
@@ -367,7 +377,7 @@ describe("a controlled column layout", () => {
   it("shows the layout the host holds", async () => {
     const fixture = TestBed.createComponent(Controlled);
     fixture.autoDetectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     const element = fixture.nativeElement as HTMLElement;
     const headers = () =>
       [
@@ -382,7 +392,7 @@ describe("a controlled column layout", () => {
       pinned: {},
       widths: {},
     });
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(headers()).toEqual(["population", "name", "country"]);
   });
 });

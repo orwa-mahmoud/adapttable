@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /**
  * The unstyled context menu: right-click, the keyboard, and a host entry.
  */
@@ -32,11 +33,13 @@ const COLUMNS: ColumnDef<Row>[] = [
   },
 ];
 
+let owner: HTMLElement;
+
 const part = (name: string) =>
-  document.querySelector<HTMLElement>(`[data-adapttable-part="${name}"]`);
+  owner.querySelector<HTMLElement>(`[data-adapttable-part="${name}"]`);
 
 const items = () => [
-  ...document.querySelectorAll<HTMLElement>(
+  ...owner.querySelectorAll<HTMLElement>(
     '[data-adapttable-part="context-menu-item"]'
   ),
 ];
@@ -45,6 +48,7 @@ const item = (label: string) =>
   items().find((entry) => entry.textContent?.includes(label));
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
@@ -89,7 +93,8 @@ async function mount(
 ): Promise<ReturnType<typeof TestBed.createComponent<Host>>> {
   const fixture = TestBed.createComponent(Host);
   fixture.componentRef.setInput("navigable", navigable);
-  document.body.append(fixture.nativeElement);
+  owner = fixture.nativeElement as HTMLElement;
+  document.body.append(owner);
   fixture.detectChanges();
   await fixture.whenStable();
   return fixture;
@@ -150,7 +155,10 @@ describe("context menu (unstyled Angular)", () => {
     openOn(part("header-cell")!);
     fixture.detectChanges();
     await fixture.whenStable();
-    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    document.body.dispatchEvent(
+      new MouseEvent("pointerdown", { bubbles: true })
+    );
+    document.body.click();
     fixture.detectChanges();
     expect(part("context-menu")).toBeNull();
 
@@ -199,6 +207,7 @@ describe("context menu (unstyled Angular)", () => {
 
   it("offers Copy without Cut when the host did not wire a cut", async () => {
     @Component({
+      providers: fixtureOverlayProviders,
       imports: [AdaptDataTable],
       template: `
         <adapt-data-table
@@ -220,7 +229,8 @@ describe("context menu (unstyled Angular)", () => {
     }
 
     const fixture = TestBed.createComponent(Navigable);
-    document.body.append(fixture.nativeElement);
+    owner = fixture.nativeElement as HTMLElement;
+    document.body.append(owner);
     fixture.detectChanges();
     await fixture.whenStable();
     openOn(part("cell")!);
@@ -247,6 +257,7 @@ describe("context menu (unstyled Angular)", () => {
     expect(contextMenu(false)).toBeTruthy();
 
     @Component({
+      providers: fixtureOverlayProviders,
       imports: [AdaptDataTable],
       template: `
         <adapt-data-table
@@ -265,7 +276,8 @@ describe("context menu (unstyled Angular)", () => {
     }
 
     const fixture = TestBed.createComponent(Plain);
-    document.body.append(fixture.nativeElement);
+    owner = fixture.nativeElement as HTMLElement;
+    document.body.append(owner);
     fixture.detectChanges();
     await fixture.whenStable();
     const header = part("header-cell")!;
@@ -284,6 +296,7 @@ describe("context menu (unstyled Angular)", () => {
 
   it("publishes nothing when the table did not provide the token", async () => {
     @Component({
+      providers: fixtureOverlayProviders,
       imports: [AdaptContextMenuLive],
       template: `
         <adapt-context-menu-live [props]="props()" />
@@ -302,7 +315,8 @@ describe("context menu (unstyled Angular)", () => {
     }
 
     const fixture = TestBed.createComponent(Bare);
-    document.body.append(fixture.nativeElement);
+    owner = fixture.nativeElement as HTMLElement;
+    document.body.append(owner);
     fixture.detectChanges();
     await fixture.whenStable();
     const header = part("header-cell")!;

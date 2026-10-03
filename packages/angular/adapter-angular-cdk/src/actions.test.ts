@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import type {
   AdaptTableFeature,
   BulkAction,
@@ -28,6 +29,7 @@ const COLUMNS: ColumnDef<Person>[] = [
 ];
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
@@ -246,14 +248,17 @@ describe("the unstyled Angular row actions", () => {
     const { part, parts, settle } = await mount([
       rowActions(actions, { layout: "menu" }),
     ]);
-    const menu = part<HTMLDetailsElement>("row-actions-menu");
-    expect(menu).not.toBeNull();
-    if (!menu) throw new Error("menu is not rendered");
-    menu.open = true;
-    parts<HTMLButtonElement>("action-button", menu)[0]!.click();
+    const trigger = part<HTMLButtonElement>("row-actions-trigger");
+    expect(trigger).not.toBeNull();
+    if (!trigger) throw new Error("menu trigger is not rendered");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    trigger.click();
+    await settle();
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    parts<HTMLButtonElement>("action-button")[0]!.click();
     await settle();
     expect(edits).toEqual(["1"]);
-    expect(menu.open).toBe(false);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
   it("puts the actions on each phone card", async () => {

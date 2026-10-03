@@ -32,8 +32,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  Directive,
   ElementRef,
+  inject,
   input,
+  type OnChanges,
   TemplateRef,
   type Type,
   viewChild,
@@ -41,7 +44,7 @@ import {
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatInputModule } from "@angular/material/input";
+import { MatInput, MatInputModule } from "@angular/material/input";
 
 import { AdaptMaterialCheckboxAttrs } from "./materialCheckbox";
 
@@ -113,6 +116,23 @@ class AdaptEditCellButton {
   readonly props = input.required<EditableCellButtonProps>();
 }
 
+/** Keeps Material's native validation state aligned with the editor. @internal */
+@Directive({
+  selector:
+    "[matInput][adaptEditorInvalid], [matNativeControl][adaptEditorInvalid]",
+})
+export class AdaptMaterialEditorValidation implements OnChanges {
+  readonly invalid = input.required<boolean>({ alias: "adaptEditorInvalid" });
+  private readonly control = inject(MatInput);
+
+  ngOnChanges(): void {
+    const invalid = this.invalid();
+    if (this.control.errorState === invalid) return;
+    this.control.errorState = invalid;
+    this.control.stateChanges.next();
+  }
+}
+
 /**
  * The native editor a cell opens: a text, number or date input, a checkbox,
  * or a select, focused and committed as the editing controller says.
@@ -122,6 +142,7 @@ class AdaptEditCellButton {
 @Component({
   imports: [
     AdaptMaterialCheckboxAttrs,
+    AdaptMaterialEditorValidation,
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
@@ -153,8 +174,8 @@ class AdaptEditCellButton {
           data-adapttable-part="edit-cell-editor"
           multiple
           [attr.aria-label]="p.label"
-          [attr.aria-invalid]="v['aria-invalid'] ?? null"
-          [attr.aria-describedby]="v['aria-describedby'] ?? null"
+          [adaptEditorInvalid]="v['aria-invalid'] === true"
+          [aria-describedby]="v['aria-describedby'] ?? ''"
           [attr.aria-busy]="v['aria-busy'] ?? null"
           [attr.data-conflict]="v['data-conflict'] ?? null"
           (change)="p.setDraft(multiDraftFromSelect($any($event.target)))"
@@ -178,8 +199,8 @@ class AdaptEditCellButton {
           #el
           data-adapttable-part="edit-cell-editor"
           [attr.aria-label]="p.label"
-          [attr.aria-invalid]="v['aria-invalid'] ?? null"
-          [attr.aria-describedby]="v['aria-describedby'] ?? null"
+          [adaptEditorInvalid]="v['aria-invalid'] === true"
+          [aria-describedby]="v['aria-describedby'] ?? ''"
           [attr.aria-busy]="v['aria-busy'] ?? null"
           [attr.data-conflict]="v['data-conflict'] ?? null"
           [value]="p.draft"
@@ -204,8 +225,8 @@ class AdaptEditCellButton {
           #el
           data-adapttable-part="edit-cell-editor"
           [attr.aria-label]="p.label"
-          [attr.aria-invalid]="v['aria-invalid'] ?? null"
-          [attr.aria-describedby]="v['aria-describedby'] ?? null"
+          [adaptEditorInvalid]="v['aria-invalid'] === true"
+          [aria-describedby]="v['aria-describedby'] ?? ''"
           [attr.aria-busy]="v['aria-busy'] ?? null"
           [attr.data-conflict]="v['data-conflict'] ?? null"
           [type]="editorInputType(p.editor)"

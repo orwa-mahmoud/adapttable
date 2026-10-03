@@ -1,3 +1,9 @@
+import { AdaptTaigaRoot } from "../src/taigaRoot";
+import {
+  chooseTaigaOption,
+  taigaOptions,
+  taigaPopup,
+} from "../src/taigaTestHelpers";
 import {
   type TableAssistantProps,
   type TableAssistantView,
@@ -33,8 +39,10 @@ const VIEW: TableAssistantView = {
   runSuggestion: () => undefined,
 };
 @Component({
-  imports: [AdaptTableAssistant],
-  template: `<adapt-table-assistant [props]="props()" />`,
+  imports: [AdaptTaigaRoot, AdaptTableAssistant],
+  template: `<adapt-taiga-root
+    ><adapt-table-assistant [props]="props()"
+  /></adapt-taiga-root>`,
 })
 class Host {
   readonly open = signal(true);
@@ -51,26 +59,27 @@ class Host {
 }
 /** Keep the exported sheet slot mounted while the host changes its open prop. */
 @Component({
-  imports: [AdaptAssistantSheet],
+  imports: [AdaptTaigaRoot, AdaptAssistantSheet],
   template: `
     <ng-template #contents><p>Retained conversation</p></ng-template>
-    <adapt-assistant-sheet
-      [props]="{
-        label: label(),
-        part: 'assistant-sheet',
-        open: open(),
-        onClose: close,
-        children: contents,
-      }"
-    />
+    <adapt-taiga-root
+      ><adapt-assistant-sheet
+        [props]="{
+          label: label(),
+          part: 'assistant-sheet',
+          open: open(),
+          onClose: close,
+          children: contents,
+        }"
+    /></adapt-taiga-root>
   `,
 })
 class SheetHost {
   readonly open = signal(false);
   readonly label = signal("Conversation");
-  readonly close = () => {
+  readonly close = vi.fn(() => {
     this.open.set(false);
-  };
+  });
 }
 const fixtures: ComponentFixture<Host>[] = [];
 async function mount(
@@ -167,29 +176,35 @@ describe("native assistant", () => {
         runSuggestion,
       }
     );
-    const details = part<HTMLDetailsElement>("assistant-examples");
-    expect(details?.tagName).toBe("DETAILS");
-    expect(part("assistant-examples-menu")?.tagName).toBe("SUMMARY");
+    const trigger = part<HTMLButtonElement>("assistant-examples-menu")!;
+    expect(part("assistant-examples")?.tagName).toBe("SPAN");
+    expect(trigger.tagName).toBe("BUTTON");
+    trigger.click();
+    await settle(fixture);
+    expect(taigaPopup(trigger)).not.toBeNull();
     expect(part("assistant-examples-list")?.tagName).toBe("MENU");
     expect(part("assistant-examples-item")?.textContent).toContain(
       "Highest first"
     );
-    if (details) details.open = true;
+
     const escape = new KeyboardEvent("keydown", {
       key: "Escape",
       bubbles: true,
       cancelable: true,
     });
-    part("assistant-examples-item")?.dispatchEvent(escape);
+    const stopPropagation = vi.spyOn(escape, "stopPropagation");
+    part("assistant-examples-item")!.focus();
+    part("assistant-examples-item")!.dispatchEvent(escape);
     await settle(fixture);
-    expect(escape.defaultPrevented).toBe(true);
-    expect(details?.open).toBe(false);
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
     expect(fixture.componentInstance.open()).toBe(true);
     expect(document.activeElement).toBe(part("assistant-examples-menu"));
-    if (details) details.open = true;
+    trigger.click();
+    await settle(fixture);
     part("assistant-examples-item")?.click();
     await settle(fixture);
-    expect(details?.open).toBe(false);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
     expect(runSuggestion).toHaveBeenCalledWith("sort");
     part("assistant-examples-menu")?.dispatchEvent(
       new KeyboardEvent("keydown", {
@@ -203,7 +218,7 @@ describe("native assistant", () => {
   });
   it("does not open or run examples while the connection is unusable", async () => {
     const runSuggestion = vi.fn();
-    await mount(
+    const fixture = await mount(
       {},
       {
         status: "connecting",
@@ -217,10 +232,11 @@ describe("native assistant", () => {
     expect(part("assistant-examples-menu")?.getAttribute("aria-disabled")).toBe(
       "true"
     );
-    expect(part<HTMLButtonElement>("assistant-examples-item")?.disabled).toBe(
-      true
+    await settle(fixture);
+    expect(part("assistant-examples-list")).toBeNull();
+    expect(part("assistant-examples-menu")?.getAttribute("aria-expanded")).toBe(
+      "false"
     );
-    part("assistant-examples-item")?.click();
     expect(runSuggestion).not.toHaveBeenCalled();
   });
   it("shows a hand-sized native launcher and restores it on close", async () => {
@@ -241,9 +257,10 @@ describe("native assistant", () => {
   it("presents floating conversations nonmodally and scopes the boundary", async () => {
     vi.stubGlobal("innerWidth", 1200);
     const fixture = await mount({ presentation: "floating" });
-    const dialog = part<HTMLDialogElement>("assistant-window");
-    expect(dialog?.tagName).toBe("DIALOG");
-    expect(dialog?.open).toBe(true);
+    const dialog = part("assistant-window");
+    expect(dialog?.tagName).toBe("SECTION");
+    expect(dialog?.getAttribute("role")).toBe("dialog");
+    expect(dialog?.closest("tui-popups")).not.toBeNull();
     expect(dialog?.style.position).toBe("fixed");
     expect(dialog?.style.inlineSize).toContain("400px");
     expect(dialog?.hasAttribute("aria-modal")).toBe(false);
@@ -254,150 +271,129 @@ describe("native assistant", () => {
     await settle(fixture);
     expect(part("assistant-window")?.style.position).toBe("absolute");
   });
-  it("opens a genuine modal sheet, preserves direction and routes native cancel", async () => {
-    const showModal = vi.fn(function (this: HTMLDialogElement) {
-      this.open = true;
-    });
-    const prototype = HTMLDialogElement.prototype;
-    const original = prototype.showModal;
-    Object.defineProperty(prototype, "showModal", {
-      configurable: true,
-      value: showModal,
-    });
-    try {
-      const fixture = await mount({ presentation: "sheet", dir: "rtl" });
-      expect(showModal).toHaveBeenCalledOnce();
-      const dialog = part<HTMLDialogElement>("assistant-sheet");
-      expect(dialog?.open).toBe(true);
-      expect(dialog?.dir).toBe("rtl");
-      const cancel = new Event("cancel", { cancelable: true });
-      dialog?.dispatchEvent(cancel);
-      await settle(fixture);
-      expect(cancel.defaultPrevented).toBe(true);
-      expect(fixture.componentInstance.open()).toBe(false);
-    } finally {
-      Object.defineProperty(prototype, "showModal", {
-        configurable: true,
-        value: original,
-      });
-    }
+  it("opens a native modal sheet, preserves direction and routes Escape", async () => {
+    const fixture = await mount({ presentation: "sheet", dir: "rtl" });
+    const sheet = part("assistant-sheet")!;
+    const modal = sheet.closest("tui-modal")!;
+    expect(modal.getAttribute("role")).toBe("dialog");
+    expect(modal.getAttribute("aria-modal")).toBe("true");
+    expect(sheet.dir).toBe("rtl");
+    sheet.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await settle(fixture);
+    expect(fixture.componentInstance.open()).toBe(false);
+    expect(part("assistant-sheet")).toBeNull();
   });
-  it("degrades the sheet to an open native dialog when showModal is unavailable", async () => {
-    const prototype = HTMLDialogElement.prototype;
-    const original = prototype.showModal;
-    Object.defineProperty(prototype, "showModal", {
+  it("opens the native Taiga sheet without HTMLDialogElement methods", async () => {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      HTMLDialogElement.prototype,
+      "showModal"
+    );
+    Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
       configurable: true,
       value: undefined,
     });
     try {
       await mount({ presentation: "sheet" });
-      expect(part<HTMLDialogElement>("assistant-sheet")?.open).toBe(true);
+      expect(
+        part("assistant-sheet")?.closest('[aria-modal="true"]')
+      ).not.toBeNull();
     } finally {
-      Object.defineProperty(prototype, "showModal", {
-        configurable: true,
-        value: original,
-      });
+      if (descriptor)
+        Object.defineProperty(
+          HTMLDialogElement.prototype,
+          "showModal",
+          descriptor
+        );
+      else Reflect.deleteProperty(HTMLDialogElement.prototype, "showModal");
     }
   });
-  it("closes and reopens the same native sheet without duplicate modal calls", async () => {
-    const showModal = vi.fn(function (this: HTMLDialogElement) {
-      this.open = true;
-    });
-    const close = vi.fn(function (this: HTMLDialogElement) {
-      this.open = false;
-    });
-    const prototype = HTMLDialogElement.prototype;
-    const originalShow = Object.getOwnPropertyDescriptor(
-      prototype,
-      "showModal"
-    );
-    const originalClose = Object.getOwnPropertyDescriptor(prototype, "close");
-    Object.defineProperty(prototype, "showModal", {
-      configurable: true,
-      value: showModal,
-    });
-    Object.defineProperty(prototype, "close", {
-      configurable: true,
-      value: close,
-    });
+  it("retains the sheet slot through close and reopen without duplicate modals or close callbacks", async () => {
     const fixture = TestBed.createComponent(SheetHost);
     document.body.append(fixture.nativeElement);
     try {
       await settle(fixture);
-      const dialog = part<HTMLDialogElement>("assistant-sheet");
-      expect(dialog?.open).toBe(false);
-      expect(showModal).not.toHaveBeenCalled();
-      expect(close).not.toHaveBeenCalled();
+      const slot = document.querySelector("adapt-assistant-sheet");
+      expect(part("assistant-sheet")).toBeNull();
       fixture.componentInstance.open.set(true);
       await settle(fixture);
-      expect(dialog?.open).toBe(true);
-      expect(showModal).toHaveBeenCalledOnce();
+      expect(document.querySelectorAll("tui-modal")).toHaveLength(1);
+      const sheet = part("assistant-sheet")!;
+      const modal = sheet.closest("tui-modal")!;
+      const name = () =>
+        document
+          .getElementById(modal.getAttribute("aria-labelledby")!)
+          ?.textContent.trim();
+      expect(name()).toBe("Conversation");
       fixture.componentInstance.label.set("Updated conversation");
       await settle(fixture);
-      expect(dialog?.getAttribute("aria-label")).toBe("Updated conversation");
-      expect(showModal).toHaveBeenCalledOnce();
-      expect(close).not.toHaveBeenCalled();
+      expect(name()).toBe("Updated conversation");
+      expect(part("assistant-sheet")).toBe(sheet);
+      expect(document.querySelectorAll("tui-modal")).toHaveLength(1);
       fixture.componentInstance.open.set(false);
       await settle(fixture);
-      expect(dialog?.open).toBe(false);
-      expect(close).toHaveBeenCalledOnce();
+      expect(part("assistant-sheet")).toBeNull();
       fixture.componentInstance.label.set("Closed conversation");
       await settle(fixture);
-      expect(close).toHaveBeenCalledOnce();
+      expect(fixture.componentInstance.close).not.toHaveBeenCalled();
       fixture.componentInstance.open.set(true);
       await settle(fixture);
-      expect(part("assistant-sheet")).toBe(dialog);
-      expect(dialog?.open).toBe(true);
-      expect(dialog?.textContent).toContain("Retained conversation");
-      expect(showModal).toHaveBeenCalledTimes(2);
+      expect(document.querySelector("adapt-assistant-sheet")).toBe(slot);
+      expect(document.querySelectorAll("tui-modal")).toHaveLength(1);
+      expect(part("assistant-sheet")?.textContent).toContain(
+        "Retained conversation"
+      );
+      part("assistant-sheet")!.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+      );
+      await settle(fixture);
+      expect(fixture.componentInstance.close).toHaveBeenCalledOnce();
+      expect(part("assistant-sheet")).toBeNull();
     } finally {
       fixture.destroy();
-      if (originalShow)
-        Object.defineProperty(prototype, "showModal", originalShow);
-      else Reflect.deleteProperty(prototype, "showModal");
-      if (originalClose)
-        Object.defineProperty(prototype, "close", originalClose);
-      else Reflect.deleteProperty(prototype, "close");
     }
   });
-  it("closes and reopens the retained sheet without dialog methods in older browsers", async () => {
+  it("closes and reopens the retained sheet without HTML dialog methods", async () => {
     const prototype = HTMLDialogElement.prototype;
-    const originalShow = Object.getOwnPropertyDescriptor(
-      prototype,
-      "showModal"
+    const descriptors = ["showModal", "close"].map(
+      (key) => [key, Object.getOwnPropertyDescriptor(prototype, key)] as const
     );
-    const originalClose = Object.getOwnPropertyDescriptor(prototype, "close");
-    Object.defineProperty(prototype, "showModal", {
-      configurable: true,
-      value: undefined,
-    });
-    Object.defineProperty(prototype, "close", {
-      configurable: true,
-      value: undefined,
-    });
+    for (const [key] of descriptors)
+      Object.defineProperty(prototype, key, {
+        configurable: true,
+        value: undefined,
+      });
     const fixture = TestBed.createComponent(SheetHost);
     document.body.append(fixture.nativeElement);
     try {
       fixture.componentInstance.open.set(true);
       await settle(fixture);
-      const dialog = part<HTMLDialogElement>("assistant-sheet");
-      expect(dialog?.open).toBe(true);
+      const slot = document.querySelector("adapt-assistant-sheet");
+      expect(
+        part("assistant-sheet")?.closest('[aria-modal="true"]')
+      ).not.toBeNull();
       fixture.componentInstance.open.set(false);
       await settle(fixture);
-      expect(dialog?.open).toBe(false);
+      expect(part("assistant-sheet")).toBeNull();
       fixture.componentInstance.open.set(true);
       await settle(fixture);
-      expect(part("assistant-sheet")).toBe(dialog);
-      expect(dialog?.open).toBe(true);
-      expect(dialog?.textContent).toContain("Retained conversation");
+      expect(document.querySelector("adapt-assistant-sheet")).toBe(slot);
+      expect(document.querySelectorAll("tui-modal")).toHaveLength(1);
+      expect(part("assistant-sheet")?.textContent).toContain(
+        "Retained conversation"
+      );
+      expect(fixture.componentInstance.close).not.toHaveBeenCalled();
     } finally {
       fixture.destroy();
-      if (originalShow)
-        Object.defineProperty(prototype, "showModal", originalShow);
-      else Reflect.deleteProperty(prototype, "showModal");
-      if (originalClose)
-        Object.defineProperty(prototype, "close", originalClose);
-      else Reflect.deleteProperty(prototype, "close");
+      for (const [key, descriptor] of descriptors) {
+        if (descriptor) Object.defineProperty(prototype, key, descriptor);
+        else Reflect.deleteProperty(prototype, key);
+      }
     }
   });
   it("allows enabled disclosure activation but refuses a late selection after disconnect", async () => {
@@ -416,8 +412,10 @@ describe("native assistant", () => {
     });
     trigger?.dispatchEvent(activation);
     expect(activation.defaultPrevented).toBe(false);
-    const details = part<HTMLDetailsElement>("assistant-examples");
-    expect(details?.open).toBe(true);
+    await settle(fixture);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("true");
+    const item = part<HTMLButtonElement>("assistant-examples-item")!;
+    expect(item.disabled).toBe(false);
     const tab = new KeyboardEvent("keydown", {
       key: "Tab",
       bubbles: true,
@@ -425,14 +423,14 @@ describe("native assistant", () => {
     });
     trigger?.dispatchEvent(tab);
     expect(tab.defaultPrevented).toBe(false);
-    expect(details?.open).toBe(true);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("true");
     fixture.componentInstance.view.update((view) => ({
       ...view,
       status: "disconnected",
     }));
     await settle(fixture);
-    const item = part<HTMLButtonElement>("assistant-examples-item");
-    expect(item?.disabled).toBe(true);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("false");
+    expect(part("assistant-examples-item")).toBeNull();
     // A dispatched event can still reach a disabled native element. The
     // component must recheck current availability before running a command.
     item?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -452,13 +450,10 @@ describe("native assistant", () => {
       stop,
     };
     const fixture = await mount({ speech });
-    const select = part<HTMLSelectElement>("assistant-voice-language");
-    expect(select?.tagName).toBe("SELECT");
-    expect(select?.options.length).toBe(2);
-    if (select) {
-      select.value = "fr";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    }
+    const select = part<HTMLInputElement>("assistant-voice-language")!;
+    expect(select.tagName).toBe("INPUT");
+    expect(await taigaOptions(fixture, select)).toHaveLength(2);
+    await chooseTaigaOption(fixture, select, "fr");
     expect(setLanguage).toHaveBeenCalledWith("fr");
     part("assistant-voice")?.click();
     expect(start).toHaveBeenCalledOnce();
@@ -466,7 +461,7 @@ describe("native assistant", () => {
       speech: { ...speech, state: { ...speech.state, status: "listening" } },
     });
     await settle(fixture);
-    expect(part<HTMLSelectElement>("assistant-voice-language")?.disabled).toBe(
+    expect(part<HTMLInputElement>("assistant-voice-language")?.disabled).toBe(
       true
     );
     part("assistant-voice")?.click();

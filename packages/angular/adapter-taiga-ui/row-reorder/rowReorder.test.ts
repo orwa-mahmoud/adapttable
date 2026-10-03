@@ -1,3 +1,4 @@
+import { AdaptTaigaRoot } from "../src/taigaRoot";
 import {
   type ColumnDef,
   type PaginationMode,
@@ -219,8 +220,10 @@ describe("row reorder keyboard page clamp", () => {
 });
 
 @Component({
-  imports: [AdaptRowReorderButtons],
-  template: `<adapt-row-reorder-buttons [props]="props" />`,
+  imports: [AdaptTaigaRoot, AdaptRowReorderButtons],
+  template: `<adapt-taiga-root
+    ><adapt-row-reorder-buttons [props]="props"
+  /></adapt-taiga-root>`,
 })
 class ButtonsHost {
   readonly onRowReorder = vi.fn();
@@ -239,8 +242,10 @@ class ButtonsHost {
 }
 
 @Component({
-  imports: [AdaptRowReorderButtons],
-  template: `<adapt-row-reorder-buttons [props]="props" />`,
+  imports: [AdaptTaigaRoot, AdaptRowReorderButtons],
+  template: `<adapt-taiga-root
+    ><adapt-row-reorder-buttons [props]="props"
+  /></adapt-taiga-root>`,
 })
 class PendingButtonsHost {
   readonly props = {
@@ -254,8 +259,10 @@ class PendingButtonsHost {
 }
 
 @Component({
-  imports: [AdaptRowReorderGrip],
-  template: `<adapt-row-reorder-grip [props]="props" />`,
+  imports: [AdaptTaigaRoot, AdaptRowReorderGrip],
+  template: `<adapt-taiga-root
+    ><adapt-row-reorder-grip [props]="props"
+  /></adapt-taiga-root>`,
 })
 class GripHost {
   readonly props = {
@@ -278,8 +285,10 @@ class GripHost {
 }
 
 @Component({
-  imports: [AdaptRowMoveMenu],
-  template: `<adapt-row-move-menu [props]="menuProps" />`,
+  imports: [AdaptTaigaRoot, AdaptRowMoveMenu],
+  template: `<adapt-taiga-root
+    ><adapt-row-move-menu [props]="menuProps"
+  /></adapt-taiga-root>`,
 })
 class MenuHost {
   readonly onConfirm = vi.fn();
@@ -346,9 +355,11 @@ describe("row reorder kit controls", () => {
     expect(buttons.every((button) => button.disabled)).toBe(true);
   });
 
-  it("presses the grip and disables it while pending", () => {
+  it("presses the grip and disables it while pending", async () => {
     const fixture = TestBed.createComponent(GripHost);
-    fixture.detectChanges();
+    document.body.append(fixture.nativeElement as HTMLElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
     const grip = (
       fixture.nativeElement as HTMLElement
     ).querySelector<HTMLButtonElement>(
@@ -357,6 +368,12 @@ describe("row reorder kit controls", () => {
     expect(grip).not.toBeNull();
     expect(grip!.getAttribute("aria-pressed")).toBe("true");
     expect(grip!.disabled).toBe(true);
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="row-move-menu-trigger"]'
+      )!
+      .click();
+    await fixture.whenStable();
     const item = (
       fixture.nativeElement as HTMLElement
     ).querySelector<HTMLButtonElement>('[role="menuitem"]');
@@ -364,9 +381,11 @@ describe("row reorder kit controls", () => {
     expect(item!.disabled).toBe(true);
   });
 
-  it("confirms a pending destination from the move menu", () => {
+  it("confirms a pending destination from the move menu", async () => {
     const fixture = TestBed.createComponent(MenuHost);
-    fixture.detectChanges();
+    document.body.append(fixture.nativeElement as HTMLElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
     const dialog = (fixture.nativeElement as HTMLElement).querySelector(
       '[data-adapttable-part="row-move-confirmation"]'
     );
@@ -380,9 +399,11 @@ describe("row reorder kit controls", () => {
     expect(fixture.componentInstance.onConfirm).toHaveBeenCalledOnce();
   });
 
-  it("cancels a pending destination with Escape", () => {
+  it("cancels a pending destination with Escape", async () => {
     const fixture = TestBed.createComponent(MenuHost);
-    fixture.detectChanges();
+    document.body.append(fixture.nativeElement as HTMLElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
     );
@@ -393,9 +414,11 @@ describe("row reorder kit controls", () => {
     expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
   });
 
-  it("cancels a pending destination with the cancel button", () => {
+  it("cancels a pending destination with the cancel button", async () => {
     const fixture = TestBed.createComponent(MenuHost);
-    fixture.detectChanges();
+    document.body.append(fixture.nativeElement as HTMLElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
     const cancel = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll("button")
     ).find((button) => button.textContent?.trim() === "Cancel");
@@ -404,10 +427,12 @@ describe("row reorder kit controls", () => {
     expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
   });
 
-  it("selects a destination item when no confirmation is pending", () => {
+  it("selects a destination item when no confirmation is pending", async () => {
     @Component({
-      imports: [AdaptRowMoveMenu],
-      template: `<adapt-row-move-menu [props]="menuProps" />`,
+      imports: [AdaptTaigaRoot, AdaptRowMoveMenu],
+      template: `<adapt-taiga-root
+        ><adapt-row-move-menu [props]="menuProps"
+      /></adapt-taiga-root>`,
     })
     class ItemsHost {
       readonly onSelect = vi.fn();
@@ -433,7 +458,15 @@ describe("row reorder kit controls", () => {
       };
     }
     const fixture = TestBed.createComponent(ItemsHost);
-    fixture.detectChanges();
+    document.body.append(fixture.nativeElement as HTMLElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="row-move-menu-trigger"]'
+      )!
+      .click();
+    await fixture.whenStable();
     const items = [
       ...(
         fixture.nativeElement as HTMLElement

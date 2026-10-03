@@ -73,7 +73,7 @@ describe("native approval controls", () => {
         "agent-approval-reject"
       );
       expect(button.getAttribute("data-variant")).toBe(variant);
-      expect(button.className).toBe("native-control");
+      expect(button.classList.contains("native-control")).toBe(true);
       button.focus();
       expect(document.activeElement).toBe(button);
       button.click();

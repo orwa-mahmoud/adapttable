@@ -131,3 +131,9 @@ textarea[data-adapttable-cdk-control] {
 .adapt-cdk-modal-overlay > .adapt-cdk-surface {
   pointer-events: auto;
 }
+
+[data-adapttable-kit="angular-cdk"] [data-adapttable-part="table"] {
+  border-collapse: separate;
+  border-spacing: 0;
+  inline-size: 100%;
+}

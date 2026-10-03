@@ -9,8 +9,17 @@ import { Component, input, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
-import { AdaptContextMenuLive } from "../context-menu/menu";
-import { ngBootstrapPart } from "../testUtils";
+import {
+  AdaptContextMenuItem,
+  AdaptContextMenuLive,
+  AdaptContextMenuSeparator,
+  AdaptContextMenuSurface,
+} from "../context-menu/menu";
+import {
+  clickBootstrapControl,
+  ngBootstrapPart,
+  settleBootstrap,
+} from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {
@@ -92,7 +101,7 @@ async function mount(
   fixture.componentRef.setInput("navigable", navigable);
   document.body.append(fixture.nativeElement);
   fixture.detectChanges();
-  await fixture.whenStable();
+  await settleBootstrap(fixture);
   return fixture;
 }
 
@@ -113,7 +122,7 @@ describe("context menu (unstyled Angular)", () => {
     expect(part("context-menu")).toBeNull();
     openOn(part("header-cell")!);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(part("context-menu-anchor")).not.toBeNull();
     expect(part("context-menu")?.getAttribute("role")).toBe("menu");
     expect(item("Sort ascending")).toBeTruthy();
@@ -150,19 +159,74 @@ describe("context menu (unstyled Angular)", () => {
 
     openOn(part("header-cell")!);
     fixture.detectChanges();
-    await fixture.whenStable();
-    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    fixture.detectChanges();
+    await settleBootstrap(fixture);
+    clickBootstrapControl(document.body);
+    await settleBootstrap(fixture);
     expect(part("context-menu")).toBeNull();
 
     openOn(part("header-cell")!);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     item("Sort descending")!.click();
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(part("context-menu")).toBeNull();
     expect(part("cell")?.textContent).toContain("Zoe");
+    fixture.destroy();
+  });
+
+  it("walks only enabled native entries, including Home, End and wrapping", async () => {
+    const fixture = TestBed.createComponent(AdaptContextMenuSurface);
+    const closed = vi.fn();
+    const selected = vi.fn();
+    fixture.componentRef.setInput("props", {
+      at: { x: 10, y: 20 },
+      label: "Actions",
+      onClose: closed,
+      rows: [
+        { item: { key: "first", label: "First" }, onSelect: selected },
+        {
+          item: { key: "blocked", label: "Blocked", disabled: true },
+          onSelect: selected,
+        },
+        { item: { key: "last", label: "Last" }, onSelect: selected },
+      ],
+      Item: AdaptContextMenuItem,
+      Separator: AdaptContextMenuSeparator,
+    });
+    (fixture.nativeElement as HTMLElement).classList.add(
+      "adapttable-ng-bootstrap"
+    );
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await settleBootstrap(fixture);
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(items()).toHaveLength(3);
+    });
+    const [first, blocked, last] = items();
+    expect(document.activeElement).toBe(first);
+    const key = (value: string) =>
+      (document.activeElement ?? document).dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: value,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    key("ArrowDown");
+    expect(document.activeElement).toBe(last);
+    key("Home");
+    expect(document.activeElement).toBe(first);
+    key("End");
+    expect(document.activeElement).toBe(last);
+    key("ArrowDown");
+    expect(document.activeElement).toBe(first);
+    expect((blocked as HTMLButtonElement).disabled).toBe(true);
+    blocked!.click();
+    expect(selected).not.toHaveBeenCalled();
+    key("Escape");
+    expect(closed).toHaveBeenCalledExactlyOnceWith();
     fixture.destroy();
   });
 
@@ -176,7 +240,7 @@ describe("context menu (unstyled Angular)", () => {
     const host = fixture.componentInstance;
     openOn(part("cell")!);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(item("Copy")).toBeTruthy();
     expect(item("Cut")).toBeTruthy();
     expect(item("Pin to top")).toBeTruthy();
@@ -189,9 +253,9 @@ describe("context menu (unstyled Angular)", () => {
 
     openOn(part("cell")!);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     item("Cut")!.click();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(writeText).toHaveBeenCalled();
     expect(host.cut).toHaveBeenCalledOnce();
@@ -223,10 +287,10 @@ describe("context menu (unstyled Angular)", () => {
     const fixture = TestBed.createComponent(Navigable);
     document.body.append(fixture.nativeElement);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     openOn(part("cell")!);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(item("Copy")).toBeTruthy();
     expect(item("Cut")).toBeUndefined();
     fixture.destroy();
@@ -236,7 +300,7 @@ describe("context menu (unstyled Angular)", () => {
     const fixture = await mount();
     openOn(part("header-cell")!);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     item("Filter column")!.click();
     fixture.detectChanges();
     expect(part("filters-button")?.getAttribute("data-active")).toBe("");
@@ -268,7 +332,7 @@ describe("context menu (unstyled Angular)", () => {
     const fixture = TestBed.createComponent(Plain);
     document.body.append(fixture.nativeElement);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     const header = part("header-cell")!;
     const event = new MouseEvent("contextmenu", {
       bubbles: true,
@@ -305,7 +369,7 @@ describe("context menu (unstyled Angular)", () => {
     const fixture = TestBed.createComponent(Bare);
     document.body.append(fixture.nativeElement);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     const header = part("header-cell")!;
     const event = new MouseEvent("contextmenu", {
       bubbles: true,
@@ -316,7 +380,7 @@ describe("context menu (unstyled Angular)", () => {
     header.dispatchEvent(event);
     fixture.componentInstance.live().menu().region.onContextMenu(event);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settleBootstrap(fixture);
     expect(part("context-menu")).not.toBeNull();
     expect(item("Sort ascending")).toBeTruthy();
     fixture.destroy();

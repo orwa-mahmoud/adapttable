@@ -1,3 +1,5 @@
+import type { ComponentFixture } from "@angular/core/testing";
+
 /** Test selectors distinguish the themed public contract from kit-owned internals. */
 const INTERNAL_PARTS = new Set([
   "assistant-examples-list",
@@ -94,4 +96,15 @@ export function pressEscapeFrom(control: HTMLElement): KeyboardEvent {
     })
   );
   return keydown;
+}
+
+/** Wait for native render, outside-press and deferred Escape ownership. */
+export async function settleBootstrap<T>(
+  fixture: ComponentFixture<T>
+): Promise<void> {
+  fixture.detectChanges();
+  await fixture.whenStable();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  fixture.detectChanges();
+  await fixture.whenStable();
 }

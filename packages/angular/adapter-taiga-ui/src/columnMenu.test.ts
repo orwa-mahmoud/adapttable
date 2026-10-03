@@ -1,3 +1,4 @@
+import { clickOutsideTaiga } from "./taigaTestHelpers";
 import { type ColumnDef, type ColumnLayoutState } from "@adapttable/angular";
 import { columnMenu } from "@adapttable/taiga-ui/column-menu";
 import { Component, signal } from "@angular/core";
@@ -149,10 +150,9 @@ describe("the Taiga UI Angular Columns menu", () => {
   });
 
   it("closes on a press outside it", async () => {
-    const { part, open, settle } = await mount();
+    const { fixture, part, open } = await mount();
     await open();
-    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    await settle();
+    await clickOutsideTaiga(fixture);
     expect(part("column-menu-panel")).toBeNull();
   });
 
@@ -332,6 +332,9 @@ describe("the Taiga UI Angular Columns menu", () => {
     );
     await settle();
     expect(part("column-rename-form", item(0))).toBeNull();
+    if (!part("column-menu-panel")) await open();
+    part<HTMLButtonElement>("column-menu-more", item(0))!.click();
+    await settle();
     await beginRename();
     part<HTMLButtonElement>("column-rename-cancel", item(0))!.click();
     await settle();

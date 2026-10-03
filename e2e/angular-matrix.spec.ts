@@ -188,6 +188,48 @@ for (const kit of KITS) {
       .and(page.locator('.mx-demo [data-column-key="email"]'));
     await expect(emailHeader).toHaveCount(1);
     await part(page, "column-menu-button").click();
+    const hideEmail = page.getByRole("button", {
+      name: "Hide column: Email",
+      exact: true,
+    });
+    await test.info().attach(`${kit.key}-columns-open`, {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    await test.info().attach(`${kit.key}-columns-geometry`, {
+      body: JSON.stringify(
+        await hideEmail.evaluate((button) => {
+          const panel = button.closest(
+            "fieldset, [role='menu'], [role='dialog']"
+          );
+          const rect = button.getBoundingClientRect();
+          const panelRect = panel?.getBoundingClientRect();
+          return {
+            button: {
+              x: rect.x,
+              y: rect.y,
+              width: rect.width,
+              height: rect.height,
+            },
+            viewport: { width: innerWidth, height: innerHeight },
+            panel:
+              panel && panelRect
+                ? {
+                    tag: panel.tagName,
+                    rect: {
+                      x: panelRect.x,
+                      y: panelRect.y,
+                      width: panelRect.width,
+                      height: panelRect.height,
+                    },
+                    overflow: getComputedStyle(panel).overflow,
+                  }
+                : null,
+          };
+        })
+      ),
+      contentType: "application/json",
+    });
     await page
       .getByRole("button", { name: "Hide column: Email", exact: true })
       .click();

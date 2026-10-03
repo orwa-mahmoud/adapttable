@@ -5,6 +5,7 @@ import type { TableLabels, ToolbarExtrasSlotProps } from "@adapttable/angular";
 import { commandPalette } from "@adapttable/angular-material/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { within } from "@testing-library/dom";
 import { describe, expect, it, vi } from "vitest";
 
 import { AdaptCommandPaletteButton } from "../command-palette/palette";
@@ -136,9 +137,11 @@ describe("command palette (Angular Material)", () => {
     host.paletteOpen.set(true);
     await fixture.whenStable();
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    expect(part("command-palette")?.getAttribute("aria-label")).toBe(
-      "Table commands"
-    );
+    expect(
+      within(document.body)
+        .getByRole("dialog", { name: "Table commands" })
+        .contains(part("command-palette"))
+    ).toBe(true);
     expect(part("command-list")?.textContent).toContain("Greet");
     const input = part("command-input") as HTMLInputElement;
     input.value = "zzz";
@@ -153,9 +156,11 @@ describe("command palette (Angular Material)", () => {
     });
     await fixture.whenStable();
     expect(trigger.textContent?.trim()).toBe("Available actions");
-    expect(part("command-palette")?.getAttribute("aria-label")).toBe(
-      "Available actions"
-    );
+    expect(
+      within(document.body)
+        .getByRole("dialog", { name: "Available actions" })
+        .contains(part("command-palette"))
+    ).toBe(true);
     expect(part("command-list")?.getAttribute("aria-label")).toBe(
       "Available actions"
     );
@@ -240,7 +245,7 @@ describe("command palette (Angular Material)", () => {
     const dialogs = () =>
       [
         ...document.querySelectorAll<HTMLElement>(
-          '[data-adapttable-part="command-palette"]'
+          'mat-dialog-container[role="dialog"]'
         ),
       ]
         .map((dialog) => dialog.getAttribute("aria-label"))

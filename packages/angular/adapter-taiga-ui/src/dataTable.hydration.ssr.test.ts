@@ -18,6 +18,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
+import { provideAdaptTaiga } from "./taigaRoot";
 
 // @vitest-environment jsdom
 
@@ -74,6 +75,7 @@ class App {
  * half when they are created, so each render creates its own.
  */
 const hydration = () => [
+  ...provideAdaptTaiga(),
   provideZonelessChangeDetection(),
   provideClientHydration(),
 ];
@@ -190,18 +192,14 @@ describe("the Taiga UI Angular table hydrating over its server render", () => {
 
   it("keeps the requested page size selected before and after hydration", async () => {
     await loadServerPage("/cities?limit=25");
-    const select = document.querySelector<HTMLSelectElement>(
+    const select = document.querySelector<HTMLInputElement>(
       '[data-taiga-part="rows-per-page"]'
     )!;
     // Vitest aliases defaultView to its global, whose Event SSR replaces.
     const browser = jsdomWindow() as Window & typeof globalThis;
-    expect(select.options[0]?.value).toBe("2");
+    expect(select.getAttribute("role")).toBe("combobox");
     expect(select.value).toBe("25");
-    expect(
-      [...select.options]
-        .filter((option) => option.hasAttribute("selected"))
-        .map((option) => option.value)
-    ).toEqual(["25"]);
+    expect(select.getAttribute("aria-expanded")).toBe("false");
 
     const app = await bootstrapApplication(App, { providers: hydration() });
     try {
@@ -211,8 +209,19 @@ describe("the Taiga UI Angular table hydrating over its server render", () => {
       );
       expect(select.value).toBe("25");
 
-      select.value = "10";
-      select.dispatchEvent(new browser.Event("change"));
+      select.click();
+      await app.whenStable();
+      const popup = document.getElementById(
+        select.getAttribute("aria-controls")!
+      )!;
+      const options = [
+        ...popup.querySelectorAll<HTMLButtonElement>("button[tuiOption]"),
+      ];
+      expect(options[0]?.textContent.trim()).toBe("2");
+      const choice = options.find(
+        (option) => option.textContent.trim() === "10"
+      )!;
+      choice.click();
       await app.whenStable();
       expect(select.value).toBe("10");
       expect(new URLSearchParams(location.search).get("limit")).toBe("10");
@@ -221,9 +230,8 @@ describe("the Taiga UI Angular table hydrating over its server render", () => {
       browser.dispatchEvent(new browser.PopStateEvent("popstate"));
       await app.whenStable();
       expect(select.value).toBe("50");
-      expect([...select.selectedOptions].map((option) => option.value)).toEqual(
-        ["50"]
-      );
+      expect(select.getAttribute("aria-expanded")).toBe("false");
+      expect(select.getAttribute("role")).toBe("combobox");
     } finally {
       app.destroy();
     }

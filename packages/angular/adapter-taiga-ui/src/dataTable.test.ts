@@ -1,3 +1,4 @@
+import { chooseTaigaOption } from "./taigaTestHelpers";
 import {
   AdaptCellTemplate,
   type AdaptTableFeature,
@@ -144,7 +145,7 @@ describe("the Taiga UI Angular table", () => {
   });
 
   it("pages from the numbered pager and the page-size select", async () => {
-    const { part, parts, ids, settle } = await mount();
+    const { fixture, part, parts, ids, settle } = await mount();
     const numbers = parts<HTMLButtonElement>("page-number");
     expect(numbers.map((button) => button.textContent?.trim())).toEqual([
       "1",
@@ -162,11 +163,10 @@ describe("the Taiga UI Angular table", () => {
     part<HTMLButtonElement>("page-prev")!.click();
     await settle();
     expect(ids()).toEqual(["6", "7", "8", "9", "10"]);
-    const select = part<HTMLSelectElement>("rows-per-page");
+    const select = part<HTMLInputElement>("rows-per-page");
     expect(select?.value).toBe("5");
     if (!select) throw new Error("select is not rendered");
-    select.value = "10";
-    select.dispatchEvent(new Event("change"));
+    await chooseTaigaOption(fixture, select, "10");
     await settle();
     expect(ids()).toHaveLength(10);
   });
@@ -176,10 +176,10 @@ describe("the Taiga UI Angular table", () => {
     fixture.autoDetectChanges();
     await fixture.whenStable();
     const { part, parts } = queryParts(fixture.nativeElement as HTMLElement);
-    const select = part<HTMLSelectElement>("rows-per-page")!;
+    const select = part<HTMLInputElement>("rows-per-page")!;
     expect(parts("row")).toHaveLength(25);
     expect(select.value).toBe("25");
-    expect(select.selectedOptions[0]?.text).toBe("25");
+    expect(select.getAttribute("role")).toBe("combobox");
   });
 
   it("searches, says nothing matched, and offers to clear", async () => {

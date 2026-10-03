@@ -281,7 +281,7 @@ describe("every bundled locale through native Angular controls", () => {
 
           screen.getByRole("button", { name: labels.filters }).click();
           await settleLocale(fixture);
-          const panel = localePart(root, "filters-popover");
+          const panel = localePart(document.body, "filters-popover");
           const form = within(panel);
           expect(panel.getAttribute("dir")).toBe(getDirection(locale));
           const operator = form.getByRole<HTMLSelectElement>("combobox", {
@@ -299,7 +299,10 @@ describe("every bundled locale through native Angular controls", () => {
             labels.showing({ from: 1, to: 1, total: 1 })
           );
           const chip = localePart(root, "chip");
-          const chipLabel = chip.firstChild?.textContent?.trim() ?? "";
+          const chipLabel =
+            chip
+              .querySelector(".mdc-evolution-chip__text-label")
+              ?.textContent?.trim() ?? "";
           expect(chipLabel).toContain("Person 12");
           expect(
             within(chip).getByRole("button", {
@@ -316,21 +319,23 @@ describe("every bundled locale through native Angular controls", () => {
           expect(
             root.querySelector('[data-adapttable-part="chips"]')
           ).toBeNull();
-          fireEvent.keyDown(document, { key: "Escape" });
+          fireEvent.keyDown(document.body, { key: "Escape", keyCode: 27 });
           await settleLocale(fixture);
 
           if (!mobile) {
             screen.getByRole("button", { name: labels.columns }).click();
             await settleLocale(fixture);
             const menu = within(
-              screen.getByRole("group", { name: labels.columns })
+              within(document.body).getByRole("group", {
+                name: labels.columns,
+              })
             );
             expect(
               menu.getByRole("searchbox", { name: labels.searchColumns })
-            ).toBe(localePart(root, "column-menu-search"));
+            ).toBe(localePart(document.body, "column-menu-search"));
             expect(
               menu.getByRole("button", { name: labels.resetColumns })
-            ).toBe(localePart(root, "column-menu-reset"));
+            ).toBe(localePart(document.body, "column-menu-reset"));
             menu
               .getByRole("button", { name: `${labels.hideColumn}: Team` })
               .click();

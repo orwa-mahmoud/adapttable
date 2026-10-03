@@ -25,22 +25,44 @@ for (const kit of ANGULAR_KITS) {
       let menu = page.locator(
         '[data-adapttable-part="row-actions-menu"]:visible'
       );
-      if (["material", "ng-bootstrap", "ngx-bootstrap"].includes(kit.key)) {
+      if (
+        [
+          "material",
+          "ng-bootstrap",
+          "ngx-bootstrap",
+          "angular-cdk",
+          "spartan",
+          "taiga-ui",
+        ].includes(kit.key)
+      ) {
         await expect(trigger).toHaveAttribute("aria-expanded", "true");
         await expect(trigger).toHaveAttribute("aria-controls", /\S+/);
         const menuId = (await trigger.getAttribute("aria-controls"))!;
-        menu = page.getByRole("menu").and(page.locator(`[id="${menuId}"]`));
+        const role = ["spartan", "taiga-ui"].includes(kit.key)
+          ? "dialog"
+          : "menu";
+        menu = page
+          .getByRole(role)
+          .and(page.locator(`[id=${JSON.stringify(menuId)}]`));
+        if (role === "dialog")
+          await expect(menu).toHaveAccessibleName("Row actions");
         await expect(menu).toBeVisible();
       }
       const action = menu.locator('[data-adapttable-part="action-button"]');
       await action
         .and(
-          page.getByRole(kit.key === "unstyled" ? "button" : "menuitem", {
-            name: entry,
-            exact: true,
-          })
+          page.getByRole(
+            ["unstyled", "spartan", "taiga-ui"].includes(kit.key)
+              ? "button"
+              : "menuitem",
+            {
+              name: entry,
+              exact: true,
+            }
+          )
         )
         .click();
+      await expect(menu).toBeHidden();
     }
 
     test("pins a row from its menu and keeps it through a reload", async ({
@@ -77,7 +99,13 @@ for (const kit of ANGULAR_KITS) {
       await box.evaluate((element) => {
         element.scrollTop = element.scrollHeight;
       });
-      const boxTop = (await box.boundingBox())!.y;
+      await expect
+        .poll(() => box.evaluate((element) => element.scrollTop))
+        .toBeGreaterThan(0);
+      // Sticky rows attach to the scroll viewport inside its border.
+      const boxTop = await box.evaluate(
+        (element) => element.getBoundingClientRect().top + element.clientTop
+      );
       await expect
         .poll(async () => Math.round((await row(page, "5").boundingBox())!.y))
         .toBe(Math.round(boxTop));

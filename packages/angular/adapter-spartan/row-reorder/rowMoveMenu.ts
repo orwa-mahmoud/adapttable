@@ -8,11 +8,13 @@ import {
 } from "@adapttable/angular";
 import { ɵHlmButton as HlmButton } from "@adapttable/spartan";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   effect,
   type ElementRef,
   input,
+  untracked,
   viewChild,
 } from "@angular/core";
 import {
@@ -128,10 +130,10 @@ export class AdaptRowMoveMenu {
   private readonly trigger = viewChild<ElementRef<HTMLElement>>("trigger");
 
   constructor() {
-    effect(() => {
+    afterRenderEffect(() => {
       const confirmation = this.props().confirmation;
       const el = this.details();
-      if (confirmation && el) el.open();
+      if (confirmation && el) untracked(() => el.open());
     });
     effect((onCleanup) => {
       const confirmation = this.props().confirmation;

@@ -21,6 +21,7 @@
       appearance="secondary"
       type="button"
       [tuiDropdown]="menuContent"
+      tuiDropdownRole="dialog"
       [tuiDropdownOpen]="menuOpen()"
       (tuiDropdownOpenChange)="menuOpen.set($event)"
       [attr.aria-expanded]="menuOpen()"

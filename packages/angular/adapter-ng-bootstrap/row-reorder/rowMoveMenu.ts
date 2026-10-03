@@ -17,6 +17,7 @@ import {
 } from "@angular/core";
 import {
   NgbDropdown,
+  NgbDropdownButtonItem,
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle,
@@ -43,7 +44,13 @@ const REORDER_BUTTON = {
  */
 @Component({
   selector: "adapt-row-move-menu",
-  imports: [NgbDropdown, NgbDropdownMenu, NgbDropdownItem, NgbDropdownToggle],
+  imports: [
+    NgbDropdown,
+    NgbDropdownMenu,
+    NgbDropdownButtonItem,
+    NgbDropdownItem,
+    NgbDropdownToggle,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `

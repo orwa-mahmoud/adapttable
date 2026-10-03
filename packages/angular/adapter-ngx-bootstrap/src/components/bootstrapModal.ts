@@ -45,7 +45,7 @@ import { ModalDirective } from "ngx-bootstrap/modal";
       aria-modal="true"
       (onHide)="dismissing = true"
       (onHidden)="hidden()"
-      (keydown.tab)="trapFocus($event)"
+      (keydown)="onKeyDown($event)"
     >
       <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
@@ -112,6 +112,14 @@ class AdaptBootstrapModal {
     focus: true,
     show: false,
   };
+
+  protected onKeyDown(event: KeyboardEvent): void {
+    // A nested control already handled this Escape. Do not let the native
+    // document listener close the modal a second time.
+    if (event.key === "Escape" && event.defaultPrevented)
+      event.stopPropagation();
+    if (event.key === "Tab") this.trapFocus(event);
+  }
 
   /** The directive handles Escape and restore; cycle Tab inside its local surface. */
   protected trapFocus(event: Event): void {

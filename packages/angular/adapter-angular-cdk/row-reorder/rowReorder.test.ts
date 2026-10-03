@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 /**
  * Keyboard reorder stays on the loaded page — rowCount is on-screen rows,
  * not the source total — and the kit controls call through to the host.
@@ -77,6 +78,7 @@ function stubReorder(
   };
 }
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptDataTable],
   template: `
     <adapt-data-table
@@ -218,6 +220,7 @@ describe("row reorder keyboard page clamp", () => {
 });
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptRowReorderButtons],
   template: `<adapt-row-reorder-buttons [props]="props" />`,
 })
@@ -238,6 +241,7 @@ class ButtonsHost {
 }
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptRowReorderButtons],
   template: `<adapt-row-reorder-buttons [props]="props" />`,
 })
@@ -253,6 +257,7 @@ class PendingButtonsHost {
 }
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptRowReorderGrip],
   template: `<adapt-row-reorder-grip [props]="props" />`,
 })
@@ -277,6 +282,7 @@ class GripHost {
 }
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptRowMoveMenu],
   template: `<adapt-row-move-menu [props]="menuProps" />`,
 })
@@ -345,8 +351,11 @@ describe("row reorder kit controls", () => {
     expect(buttons.every((button) => button.disabled)).toBe(true);
   });
 
-  it("presses the grip and disables it while pending", () => {
+  it("presses the grip and disables it while pending", async () => {
     const fixture = TestBed.createComponent(GripHost);
+    document.body.append(fixture.nativeElement);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     const grip = (
       fixture.nativeElement as HTMLElement
@@ -356,6 +365,13 @@ describe("row reorder kit controls", () => {
     expect(grip).not.toBeNull();
     expect(grip!.getAttribute("aria-pressed")).toBe("true");
     expect(grip!.disabled).toBe(true);
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="row-move-menu-trigger"]'
+      )!
+      .click();
+    await fixture.whenStable();
+    fixture.detectChanges();
     const item = (
       fixture.nativeElement as HTMLElement
     ).querySelector<HTMLButtonElement>('[role="menuitem"]');
@@ -363,8 +379,11 @@ describe("row reorder kit controls", () => {
     expect(item!.disabled).toBe(true);
   });
 
-  it("confirms a pending destination from the move menu", () => {
+  it("confirms a pending destination from the move menu", async () => {
     const fixture = TestBed.createComponent(MenuHost);
+    document.body.append(fixture.nativeElement);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     const dialog = (fixture.nativeElement as HTMLElement).querySelector(
       '[data-adapttable-part="row-move-confirmation"]'
@@ -376,11 +395,22 @@ describe("row reorder kit controls", () => {
     ).find((button) => button.textContent?.trim() === "Move");
     expect(confirm).not.toBeUndefined();
     confirm!.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
     expect(fixture.componentInstance.onConfirm).toHaveBeenCalledOnce();
+    expect(fixture.componentInstance.onCancel).not.toHaveBeenCalled();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector(
+        '[data-adapttable-part="row-move-confirmation"]'
+      )
+    ).toBeNull();
   });
 
-  it("cancels a pending destination with Escape", () => {
+  it("cancels a pending destination with Escape", async () => {
     const fixture = TestBed.createComponent(MenuHost);
+    document.body.append(fixture.nativeElement);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
@@ -389,11 +419,22 @@ describe("row reorder kit controls", () => {
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
     );
+    document.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
+    expect(fixture.componentInstance.onConfirm).not.toHaveBeenCalled();
   });
 
-  it("cancels a pending destination with the cancel button", () => {
+  it("cancels a pending destination with the cancel button", async () => {
     const fixture = TestBed.createComponent(MenuHost);
+    document.body.append(fixture.nativeElement);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     const cancel = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll("button")
@@ -403,8 +444,9 @@ describe("row reorder kit controls", () => {
     expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
   });
 
-  it("selects a destination item when no confirmation is pending", () => {
+  it("selects a destination item when no confirmation is pending", async () => {
     @Component({
+      providers: fixtureOverlayProviders,
       imports: [AdaptRowMoveMenu],
       template: `<adapt-row-move-menu [props]="menuProps" />`,
     })
@@ -432,6 +474,16 @@ describe("row reorder kit controls", () => {
       };
     }
     const fixture = TestBed.createComponent(ItemsHost);
+    document.body.append(fixture.nativeElement);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="row-move-menu-trigger"]'
+      )!
+      .click();
+    await fixture.whenStable();
     fixture.detectChanges();
     const items = [
       ...(
@@ -444,5 +496,44 @@ describe("row reorder kit controls", () => {
     expect(items[1]!.disabled).toBe(true);
     items[0]!.click();
     expect(fixture.componentInstance.onSelect).toHaveBeenCalledOnce();
+  });
+
+  it("cancels once on native outside dismissal and confirms once after reopening", async () => {
+    const fixture = TestBed.createComponent(MenuHost);
+    const element = fixture.nativeElement as HTMLElement;
+    document.body.append(element);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    document.body.dispatchEvent(
+      new MouseEvent("pointerdown", { bubbles: true })
+    );
+    document.body.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
+    expect(fixture.componentInstance.onConfirm).not.toHaveBeenCalled();
+    expect(
+      element.querySelector('[data-adapttable-part="row-move-confirmation"]')
+    ).toBeNull();
+    element
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="row-move-menu-trigger"]'
+      )!
+      .click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const confirm = [...element.querySelectorAll("button")].find(
+      (button) => button.textContent?.trim() === "Move"
+    );
+    if (!confirm) throw new Error("confirmation button is not rendered");
+    confirm.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.onConfirm).toHaveBeenCalledOnce();
+    expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
+    expect(
+      element.querySelector('[data-adapttable-part="row-move-confirmation"]')
+    ).toBeNull();
   });
 });

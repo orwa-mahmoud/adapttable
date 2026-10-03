@@ -31,6 +31,7 @@ import {
 } from "@angular/core";
 import {
   NgbDropdown,
+  NgbDropdownButtonItem,
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle,
@@ -232,6 +233,7 @@ export class AdaptAssistantLanguageChip {
     AdaptAssistantContent,
     NgbDropdown,
     NgbDropdownMenu,
+    NgbDropdownButtonItem,
     NgbDropdownItem,
     NgbDropdownToggle,
   ],
@@ -259,6 +261,12 @@ export class AdaptAssistantLanguageChip {
     </button>
     <div
       ngbDropdownMenu
+      (keydown.escape)="
+        $event.preventDefault();
+        $event.stopPropagation();
+        dropdown.close();
+        trigger.focus()
+      "
       data-ng-bootstrap-part="assistant-examples-list"
       [style.max-height]="props().maxHeight"
       style="overflow-y:auto"

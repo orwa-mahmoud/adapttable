@@ -1,3 +1,4 @@
+import { fixtureOverlayProviders } from "../testing/overlayFixture";
 import type {
   AdaptTableFeature,
   AgentApprovalPending,
@@ -70,7 +71,9 @@ function featuresFor(scenario: ConformanceScenario): AdaptTableFeature[] {
 const driver: ConformanceDriver = {
   name: "angular-unstyled",
   mount: (scenario) => {
-    const fixture = TestBed.createComponent(AdaptDataTable<ConformanceRow>);
+    const fixture = TestBed.overrideComponent(AdaptDataTable, {
+      add: { providers: fixtureOverlayProviders },
+    }).createComponent(AdaptDataTable<ConformanceRow>);
     const set = (name: string, value: unknown): void => {
       fixture.componentRef.setInput(name, value);
     };
@@ -169,7 +172,9 @@ describe("every bundled locale through native Angular controls", () => {
       it.each([false, true])(
         "relabels table, filters, paging, edits and status in place (mobile=%s)",
         async (mobile) => {
-          const fixture = TestBed.createComponent(AdaptDataTable<LocaleRow>);
+          const fixture = TestBed.overrideComponent(AdaptDataTable, {
+            add: { providers: fixtureOverlayProviders },
+          }).createComponent(AdaptDataTable<LocaleRow>);
           const edit = vi.fn();
           const set = (name: string, value: unknown): void => {
             fixture.componentRef.setInput(name, value);
@@ -315,7 +320,7 @@ describe("every bundled locale through native Angular controls", () => {
           expect(
             root.querySelector('[data-adapttable-part="chips"]')
           ).toBeNull();
-          fireEvent.keyDown(document, { key: "Escape" });
+          fireEvent.keyDown(field, { key: "Escape" });
           await settleLocale(fixture);
 
           if (!mobile) {

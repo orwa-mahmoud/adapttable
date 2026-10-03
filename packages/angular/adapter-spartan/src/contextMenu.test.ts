@@ -9,6 +9,7 @@ import { Component, input, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
+import { clickOutside } from "../testUtils";
 import { AdaptContextMenuLive } from "../context-menu/menu";
 import { AdaptDataTable } from "./dataTable";
 
@@ -156,8 +157,9 @@ describe("context menu (Spartan Angular)", () => {
     openOn(part("header-cell")!);
     fixture.detectChanges();
     await fixture.whenStable();
-    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    clickOutside();
     fixture.detectChanges();
+    await fixture.whenStable();
     expect(part("context-menu")).toBeNull();
 
     openOn(part("header-cell")!);

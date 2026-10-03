@@ -27,6 +27,7 @@ import {
 import { NgTemplateOutlet } from "@angular/common";
 import {
   type AfterViewInit,
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -38,6 +39,7 @@ import {
 } from "@angular/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
+import { AdaptTaigaEditorValidation } from "./editorValidation";
 
 /**
  * Native editable cell — the kit fill for {@link EDITABLE_CELL}.
@@ -119,7 +121,7 @@ class AdaptEditCellButton {
  * @public
  */
 @Component({
-  imports: [...TAIGA_CONTROLS],
+  imports: [...TAIGA_CONTROLS, AdaptTaigaEditorValidation],
   selector: "adapt-native-cell-editor",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
@@ -129,6 +131,8 @@ class AdaptEditCellButton {
     @if (isBooleanEditor(p.editor)) {
       <input
         tuiCheckbox
+        [adaptTaigaEditorValidation]="p.error"
+        [adaptTaigaEditorErrorId]="p.errorId"
         #el
         data-adapttable-part="edit-cell-editor"
         type="checkbox"
@@ -170,6 +174,9 @@ class AdaptEditCellButton {
       <tui-textfield [stringify]="p.selectOptions | taigaLabels"
         ><input
           tuiSelect
+          [adaptTaigaEditorValidation]="p.error"
+          [adaptTaigaEditorErrorId]="p.errorId"
+          [ngModelOptions]="{ standalone: true }"
           #el
           data-adapttable-part="edit-cell-editor"
           [attr.aria-label]="p.label"
@@ -193,6 +200,9 @@ class AdaptEditCellButton {
       <tui-textfield
         ><input
           tuiInput
+          [adaptTaigaEditorValidation]="p.error"
+          [adaptTaigaEditorErrorId]="p.errorId"
+          [ngModelOptions]="{ standalone: true }"
           #el
           data-adapttable-part="edit-cell-editor"
           [attr.aria-label]="p.label"
@@ -201,8 +211,8 @@ class AdaptEditCellButton {
           [attr.aria-busy]="v['aria-busy'] ?? null"
           [attr.data-conflict]="v['data-conflict'] ?? null"
           [type]="editorInputType(p.editor)"
-          [value]="p.draft"
-          (input)="p.setDraft($any($event.target).value)"
+          [ngModel]="p.draft"
+          (ngModelChange)="p.setDraft($event == null ? '' : '' + $event)"
           (keydown)="onKeyDown($event)"
           (blur)="commitOnBlur($event)"
       /></tui-textfield>
@@ -270,6 +280,8 @@ export class AdaptNativeCellEditor implements AfterViewInit {
     <label>
       <input
         tuiCheckbox
+        [adaptTaigaEditorValidation]="p.error"
+        [adaptTaigaEditorErrorId]="p.errorId"
         #el
         type="checkbox"
         [ngModelOptions]="{ standalone: true }"
@@ -282,12 +294,14 @@ export class AdaptNativeCellEditor implements AfterViewInit {
     </label>
   `,
 })
-class AdaptEditCellOption implements AfterViewInit {
+class AdaptEditCellOption {
   readonly props = input.required<MultiSelectEditorCheckboxProps>();
   private readonly el = viewChild.required<ElementRef<HTMLInputElement>>("el");
 
-  ngAfterViewInit(): void {
-    this.props().focusRef?.(this.el().nativeElement);
+  constructor() {
+    afterNextRender(() => {
+      queueMicrotask(() => this.props().focusRef?.(this.el().nativeElement));
+    });
   }
 }
 

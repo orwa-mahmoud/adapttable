@@ -316,6 +316,44 @@ describe("the unstyled Angular table's data tiers", () => {
     { layout: "desktop rows", mobile: false },
     { layout: "mobile cards", mobile: true },
   ])("source replacement in $layout", ({ mobile }) => {
+    it("does not write pages while synchronizing the native pager", async () => {
+      const { host, settle } = await mount(ReplacingSourceHost, (value) => {
+        value.mobile.set(mobile);
+      });
+      expect(host.firstPage).not.toHaveBeenCalled();
+      host.second().setPage(2);
+      const liveSource = host.secondSource;
+      host.source.set(liveSource);
+      await settle();
+      expect(renderedNames(mobile)).toEqual(["Replacement 3", "Replacement 4"]);
+      expect(host.firstPage).not.toHaveBeenCalled();
+      expect(host.secondPage).not.toHaveBeenCalled();
+
+      host.source.set({
+        ...liveSource(),
+        rows: [],
+        total: 0,
+        isLoading: true,
+        isFetching: true,
+      });
+      await settle();
+      expect(host.firstPage).not.toHaveBeenCalled();
+      expect(host.secondPage).not.toHaveBeenCalled();
+      expect(host.second().page).toBe(2);
+
+      host.source.set(liveSource);
+      await settle();
+      expect(renderedNames(mobile)).toEqual(["Replacement 3", "Replacement 4"]);
+      expect(host.secondPage).not.toHaveBeenCalled();
+      document.querySelector<HTMLElement>('[aria-current="page"]')!.click();
+      await settle();
+      expect(host.secondPage).not.toHaveBeenCalled();
+      part("page-next")!.click();
+      await settle();
+      expect(host.secondPage).toHaveBeenCalledExactlyOnceWith(3);
+      expect(renderedNames(mobile)).toEqual(["Replacement 5"]);
+    });
+
     it("replaces a live source with plain snapshots and routes paging to the current source", async () => {
       const { host, settle } = await mount(ReplacingSourceHost);
       host.mobile.set(mobile);

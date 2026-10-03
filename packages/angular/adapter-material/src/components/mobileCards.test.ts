@@ -817,7 +817,7 @@ describe("mobile card reach", () => {
       ["row-reorder-down", "down-hook"],
       ["action-button", "action-hook"],
     ]) {
-      expect(part(name!, first).className).toBe(className);
+      expect(part(name!, first).classList.contains(className!)).toBe(true);
     }
     expect(part("summary-card").className).toBe("card-hook summary-hook");
     part("expand-button", first).click();

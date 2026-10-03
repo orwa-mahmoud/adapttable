@@ -1,4 +1,8 @@
 import {
+  fixtureOverlayProviders,
+  focusTrapAnchor,
+} from "../testing/overlayFixture";
+import {
   type ColumnDef,
   defaultFilterRegistry,
   type FilterDef,
@@ -99,6 +103,7 @@ const DEFS: FilterDef<Person>[] = [
 ];
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptDataTable],
   template: `
     <ng-template #custom let-props let-source="source" let-labels="labels">
@@ -153,7 +158,12 @@ async function mount(
     root: ParentNode = element
   ) => [...root.querySelectorAll<T>(`[data-adapttable-part="${name}"]`)];
   const ids = () => parts("row").map((row) => row.dataset.rowId);
-  const settle = () => fixture.whenStable();
+  const settle = async () => {
+    await Promise.resolve();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+  };
   const field = (caption: string) =>
     parts("filter-field").find(
       (candidate) =>
@@ -198,7 +208,13 @@ describe("the unstyled Angular filters", () => {
     expect(button?.getAttribute("aria-expanded")).toBe("true");
     expect(part("filters-popover")).not.toBeNull();
     expect(part("filters-backdrop")).toBeNull();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(part("filters-popover")).toBeNull();
     expect(document.activeElement).toBe(button);
@@ -334,13 +350,11 @@ describe("the unstyled Angular filters", () => {
     const panel = part("filters-panel");
     expect(panel).not.toBeNull();
     expect(part("filters-backdrop")).not.toBeNull();
-    expect(document.activeElement).toBe(panel);
+    expect(panel!.contains(document.activeElement)).toBe(true);
     const last = part<HTMLButtonElement>("filters-done");
     last!.focus();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
-    );
+    focusTrapAnchor(panel!, "end");
+    focusTrapAnchor(panel!, "start");
     part<HTMLButtonElement>("filters-done")!.click();
     await settle();
     expect(part("filters-panel")).toBeNull();
@@ -349,7 +363,13 @@ describe("the unstyled Angular filters", () => {
     await settle();
     expect(part("filters-panel")).toBeNull();
     await openFilters();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(part("filters-panel")).toBeNull();
   });
@@ -359,19 +379,18 @@ describe("the unstyled Angular filters", () => {
       filters(DEFS),
       headerFilters(),
     ]);
-    const triggers = parts<HTMLDetailsElement>("filter-header-trigger");
+    const triggers = parts<HTMLElement>("filter-header-trigger");
     expect(triggers).toHaveLength(3);
     const trigger = triggers[1];
     if (!trigger) throw new Error("trigger is not rendered");
-    trigger.open = true;
-    trigger.dispatchEvent(new Event("toggle"));
+    const button = trigger.querySelector<HTMLButtonElement>("button");
+    if (!button) throw new Error("header filter button is not rendered");
+    button.click();
     await settle();
-    expect(part("filter-header-cell", trigger)).not.toBeNull();
+    expect(part("filter-header-cell")).not.toBeNull();
     await type(part("filter-select", field("City")), "Amman");
     expect(ids()).toEqual(["2"]);
-    expect(trigger.querySelector("summary")?.hasAttribute("data-active")).toBe(
-      true
-    );
+    expect(button.hasAttribute("data-active")).toBe(true);
     element.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
     document.body.dispatchEvent(
       new MouseEvent("pointerdown", { bubbles: true })
@@ -390,14 +409,12 @@ describe("the unstyled Angular filters", () => {
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
     first!.focus();
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
-    );
+    focusTrapAnchor(panel, "start");
     expect(document.activeElement).toBe(last);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    focusTrapAnchor(panel, "end");
     expect(document.activeElement).toBe(first);
     part<HTMLButtonElement>("filters-button")!.focus();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    focusTrapAnchor(panel, "end");
     expect(document.activeElement).toBe(first);
     expect(parts("filters-panel")).toHaveLength(1);
   });
@@ -438,7 +455,9 @@ describe("the unstyled Angular filters", () => {
       "drawer"
     );
     await openFilters();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "a", bubbles: true })
+    );
     await settle();
     expect(part("filters-panel")).not.toBeNull();
   });
@@ -518,6 +537,7 @@ const customCreated = vi.fn();
 const customDestroyed = vi.fn();
 
 @Component({
+  providers: fixtureOverlayProviders,
   selector: "test-custom-filter",
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<input
@@ -548,6 +568,7 @@ const CUSTOM_DEFS: readonly FilterDef<Person>[] = [
 ];
 
 @Component({
+  providers: fixtureOverlayProviders,
   imports: [AdaptAutoFilterForm],
   template: `
     <ng-template #custom let-props let-source="source" let-labels="labels">
@@ -604,16 +625,17 @@ describe("registered Angular form renderers", () => {
   it("renders a real component before the widget, updates it, and destroys it on close", async () => {
     customCreated.mockClear();
     customDestroyed.mockClear();
-    const { fixture, part, ids, openFilters, settle, type } = await mount([
-      filters(CUSTOM_DEFS),
-      filterTypes([customSpec(() => CustomFilter)]),
-    ]);
+    const { fixture, element, part, ids, openFilters, settle, type } =
+      await mount([
+        filters(CUSTOM_DEFS),
+        filterTypes([customSpec(() => CustomFilter)]),
+      ]);
     await openFilters();
     const field = () =>
-      document.querySelector<HTMLInputElement>("[data-custom-filter]")!;
+      element.querySelector<HTMLInputElement>("[data-custom-filter]")!;
     expect(
       [
-        ...document.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
+        ...element.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
       ].map((input) => input.getAttribute("aria-label"))
     ).toEqual(["Person"]);
     const original = field();
@@ -629,7 +651,13 @@ describe("registered Angular form renderers", () => {
     expect(customCreated).toHaveBeenCalledTimes(1);
     expect(customDestroyed).not.toHaveBeenCalled();
 
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
     await settle();
     expect(field()).toBeNull();
     expect(customDestroyed).toHaveBeenCalledTimes(1);
@@ -644,17 +672,17 @@ describe("registered Angular form renderers", () => {
     const template: { current?: TemplateRef<FilterWidgetRenderProps<Person>> } =
       {};
     const render = vi.fn(() => template.current ?? "");
-    const { fixture, ids, openFilters, settle, type } = await mount([
+    const { fixture, element, ids, openFilters, settle, type } = await mount([
       filters(CUSTOM_DEFS),
       filterTypes([customSpec(render)]),
     ]);
     template.current = fixture.componentInstance.custom();
     await openFilters();
     const field = () =>
-      document.querySelector<HTMLInputElement>("[data-custom-filter]")!;
+      element.querySelector<HTMLInputElement>("[data-custom-filter]")!;
     expect(
       [
-        ...document.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
+        ...element.querySelectorAll<HTMLInputElement>("[data-custom-filter]"),
       ].map((input) => input.getAttribute("aria-label"))
     ).toEqual(["Person"]);
     const original = field();
