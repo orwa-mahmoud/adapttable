@@ -123,7 +123,9 @@ export class AdaptCell<TRow> {
   /** The row. */
   readonly row = input.required<TRow>({ alias: "adaptCellRow" });
   /** The row's position in the rendered window. */
-  readonly rowIndex = input(0, { alias: "adaptCellIndex" });
+  readonly adaptCellIndex = input(0);
+  /** The row position signal, also exposed under its established TypeScript name. */
+  readonly rowIndex = this.adaptCellIndex;
 
   /** What the renderer receives. */
   protected readonly context = computed<CellContext<TRow>>(() => {

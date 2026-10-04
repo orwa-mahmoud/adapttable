@@ -33,7 +33,7 @@
     <span>⋮ </span>
   </button>
   <nz-dropdown-menu #menu="nzDropdownMenu">
-    <ul
+    <div
       #menuPanel
       nz-menu
       role="menu"
@@ -44,7 +44,7 @@
       (pointerdown)="$event.stopPropagation()"
     >
       @for (item of items(); track item.action.key) {
-        <li role="none">
+        <div>
           <button
             nz-menu-item
             role="menuitem"
@@ -62,9 +62,9 @@
           >
             {{ item.action.label }}
           </button>
-        </li>
+        </div>
       }
-    </ul>
+    </div>
   </nz-dropdown-menu>
 } @else {
   @for (item of items(); track item.action.key) {

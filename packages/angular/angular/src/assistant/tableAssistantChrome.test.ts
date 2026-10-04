@@ -367,7 +367,7 @@ describe("AdaptTableAssistantChrome", () => {
       expectNativeList("assistant-messages", []);
     }
   );
-  it("preserves legacy custom selectors and their inner list-item parts", async () => {
+  it("preserves custom selectors as semantic list-item hosts without orphaned native items", async () => {
     const fixture = TestBed.createComponent(LegacyMessagesHost);
     document.body.append(fixture.nativeElement);
     try {
@@ -379,12 +379,9 @@ describe("AdaptTableAssistantChrome", () => {
         "assistant-working",
       ]) {
         const item = part(name);
-        expect(item?.tagName).toBe("LI");
-        expect(item?.parentElement?.localName).toBe(`adapt-${name}`);
-        expect(item?.parentElement?.hasAttribute("data-adapttable-part")).toBe(
-          false
-        );
-        expect(item?.parentElement?.style.display).toBe("contents");
+        expect(item?.localName).toBe(`adapt-${name}`);
+        expect(item?.getAttribute("role")).toBe("listitem");
+        expect(item?.querySelector("li")).toBeNull();
         expect(item?.style.display).toBe("flex");
       }
       expect(part("assistant-message")?.textContent).toContain(

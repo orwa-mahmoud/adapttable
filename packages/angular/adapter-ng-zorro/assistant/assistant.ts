@@ -24,6 +24,7 @@ import {
   input,
   signal,
   viewChild,
+  ViewEncapsulation,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { NzButtonModule } from "ng-zorro-antd/button";
@@ -36,16 +37,26 @@ import { NzTagModule } from "ng-zorro-antd/tag";
 import { NzTooltipModule } from "ng-zorro-antd/tooltip";
 import { NzTypographyModule } from "ng-zorro-antd/typography";
 
+const NONINTERACTIVE_TOOLTIP = `
+.cdk-overlay-pane:has(> .adapt-ng-zorro-assistant-tooltip) {
+  pointer-events: none;
+}
+`;
+
 /** Every assistant action uses the kit's button and optional tooltip. @public */
 @Component({
   selector: "adapt-assistant-button",
+  encapsulation: ViewEncapsulation.None,
+  styles: [NONINTERACTIVE_TOOLTIP],
   imports: [AdaptAssistantContent, NzButtonModule, NzTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `<button
     nz-button
     nz-tooltip
-    [nzTooltipTitle]="props().tooltip ?? null"
+    nzTooltipOverlayClassName="adapt-ng-zorro-assistant-tooltip"
+    [nzTooltipOverlayStyle]="{ 'pointer-events': 'none' }"
+    [nzTooltipTitle]="props().iconOnly ? (props().tooltip ?? null) : null"
     [nzType]="
       props().iconOnly || props().variant === 'subtle'
         ? 'text'
@@ -277,6 +288,8 @@ export class AdaptAssistantLanguageChip {
 /** The kit dropdown keeps examples local and consumes its nested Escape. @public */
 @Component({
   selector: "adapt-assistant-menu",
+  encapsulation: ViewEncapsulation.None,
+  styles: [NONINTERACTIVE_TOOLTIP],
   imports: [
     AdaptAssistantContent,
     NzButtonModule,

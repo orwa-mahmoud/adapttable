@@ -14,6 +14,7 @@ import {
   type GroupedFlatEntry,
   insertExtraRows,
   isExtraEntry,
+  mobileCardRegionProps,
   orderedCardEntries,
   pinnedSummaryPart,
   pinnedSummaryRowId,
@@ -555,9 +556,6 @@ export function MobileCards<TRow>({
   listStyle?: CSSProperties;
 }>) {
   const { labels, selection, columns } = table;
-  const requestedRegionLabel = (tableLabel ?? labels.table).trim();
-  const regionLabel =
-    requestedRegionLabel.length > 0 ? requestedRegionLabel : labels.table;
   // Either the virtual slice or every source row, resolved to render entries
   // with their ORIGINAL index (so cells and classes see the true row index).
   // Pinned rows lead / trail the list; cards have no sticky chrome.
@@ -682,10 +680,8 @@ export function MobileCards<TRow>({
   });
 
   return (
-    <div
-      role="region"
-      aria-label={regionLabel}
-      tabIndex={listStyle?.maxHeight == null ? undefined : 0}
+    <section
+      {...mobileCardRegionProps(tableLabel, labels.table, listStyle?.maxHeight)}
       ref={listRef}
       style={listStyle}
     >
@@ -803,6 +799,6 @@ export function MobileCards<TRow>({
           <li aria-hidden style={{ height: paddingBottom }} />
         )}
       </ul>
-    </div>
+    </section>
   );
 }

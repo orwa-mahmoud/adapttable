@@ -22,6 +22,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
+  inject,
   input,
 } from "@angular/core";
 import {
@@ -53,6 +55,8 @@ import {
     @let p = props();
     <div
       brnPopover
+      [align]="direction() === 'rtl' ? 'end' : 'start'"
+      [sideOffset]="4"
       [adaptHlmPopoverLabel]="caption()"
       data-adapttable-part="filter-header-trigger"
       style="position: relative; display: inline-block"
@@ -87,11 +91,17 @@ import {
   `,
 })
 export class AdaptHeaderFilterTrigger {
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  protected readonly direction = computed(() =>
+    this.element.nativeElement.closest<HTMLElement>("[dir]")?.dir === "rtl"
+      ? "rtl"
+      : "ltr"
+  );
   /** The slot's props. */
   readonly props = input.required<FilterHeaderControlProps<never>>();
 
   protected readonly icon = { ...FILTERS_ICON, width: 14, height: 14 };
-  protected readonly registry = undefined as never;
+  protected readonly registry = defaultFilterRegistry;
   protected readonly caption = computed(() => filterLabel(this.props().def));
   protected readonly active = computed(() =>
     hasActiveHeaderFilter(this.props())

@@ -145,8 +145,8 @@ export class AdaptRowActions<TRow> {
     if (buttons.length === 0) return;
     event.preventDefault();
     event.stopPropagation();
-    const active = buttons.findIndex(
-      (button) => button === menu?.ownerDocument.activeElement
+    const active = buttons.indexOf(
+      menu?.ownerDocument.activeElement as HTMLButtonElement
     );
     let target =
       (active + (event.key === "ArrowDown" ? 1 : -1) + buttons.length) %

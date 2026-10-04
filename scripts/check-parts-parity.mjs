@@ -76,6 +76,7 @@ import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
+import { inheritedBindingSources } from "./binding-inheritance.mjs";
 import {
   bindingDir,
   contractKits,
@@ -868,8 +869,12 @@ function callsCoreGetter(kit, getter, root) {
       ? `\\b(?:table|grid)\\.${getter}\\s*\\(`
       : `\\b${getter}\\b`
   );
-  return kitFiles(kit, root).some((file) =>
-    call.test(readFileSync(file, "utf8"))
+  return kitFiles(kit, root).some(
+    (file) =>
+      call.test(readFileSync(file, "utf8")) ||
+      inheritedBindingSources(file, kit.framework, root).some((base) =>
+        call.test(base.source)
+      )
   );
 }
 

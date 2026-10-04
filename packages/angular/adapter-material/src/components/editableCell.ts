@@ -122,7 +122,8 @@ class AdaptEditCellButton {
     "[matInput][adaptEditorInvalid], [matNativeControl][adaptEditorInvalid]",
 })
 export class AdaptMaterialEditorValidation implements OnChanges {
-  readonly invalid = input.required<boolean>({ alias: "adaptEditorInvalid" });
+  readonly adaptEditorInvalid = input.required<boolean>();
+  readonly invalid = this.adaptEditorInvalid;
   private readonly control = inject(MatInput);
 
   ngOnChanges(): void {

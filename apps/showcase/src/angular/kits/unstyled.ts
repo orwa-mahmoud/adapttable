@@ -1,6 +1,8 @@
 /** The real native kit used by every Angular showcase body. */
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 import {
+  AdaptAssistantButton,
+  AdaptAssistantLanguageChip,
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/angular-unstyled/assistant";
@@ -48,14 +50,18 @@ import { tree } from "@adapttable/angular-unstyled/tree";
 import { virtualize } from "@adapttable/angular-unstyled/virtualize";
 
 import type { ShowcaseKit } from "../showcaseKit";
+import { ShowcaseStatus } from "./unstyledStatus";
 
 /** Components and feature factories are always from this one kit. */
 export const kit = {
   key: "unstyled",
   providers: [],
   table: AdaptDataTable,
+  statusCell: ShowcaseStatus,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  assistantButton: AdaptAssistantButton,
+  assistantSelect: AdaptAssistantLanguageChip,
   savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,

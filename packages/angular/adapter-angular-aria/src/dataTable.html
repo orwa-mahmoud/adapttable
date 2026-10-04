@@ -37,6 +37,7 @@
             <svg [adaptIcon]="searchIcon"></svg>
           </span>
           <input
+            [attr.aria-label]="v.table.labels().search"
             data-adapttable-part="search"
             [adaptAttrs]="v.table.searchInputAttrs()"
           />
@@ -230,6 +231,7 @@
           }
           @case ("mobile") {
             <adapt-mobile-cards
+              #mobileSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"
@@ -237,6 +239,7 @@
           }
           @case ("desktop") {
             <adapt-desktop-table
+              #desktopSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"

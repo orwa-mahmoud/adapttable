@@ -1,5 +1,4 @@
 import {
-  type BulkActionContext,
   bulkActionErrorMessage,
   type BulkActionOutcome,
   bulkBarModel,
@@ -10,9 +9,8 @@ import type { BulkBarState } from "@adapttable/core/binding";
 
 import type { SelectionState } from "../selection/useSelection";
 import { useBulkActionRunner } from "./useBulkActionRunner";
+export type { BulkActionContext } from "@adapttable/core";
 export type { BulkBarState } from "@adapttable/core/binding";
-
-export type { BulkActionContext };
 
 /**
  * Options for {@link useBulkBarState}.

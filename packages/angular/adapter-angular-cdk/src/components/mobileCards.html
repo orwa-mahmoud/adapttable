@@ -39,14 +39,22 @@
           style="display: block"
           [attr.data-adapttable-part]="parts.row"
           [class]="separator ? classes.separatorRow : classes.fullWidthRow"
-          [attr.role]="separator ? 'separator' : null"
-          [attr.aria-label]="separator ? v.table.labels().rowSeparator : null"
         >
           <div
             [attr.data-adapttable-part]="parts.cell"
             [class]="separator ? classes.separatorCell : classes.fullWidthCell"
-            [adaptExtraRowContent]="slot.render"
-          ></div>
+          >
+            @if (separator) {
+              <hr
+                [attr.aria-label]="v.table.labels().rowSeparator"
+                style="border: 0; margin: 0"
+              />
+            }
+            <div
+              style="display: contents"
+              [adaptExtraRowContent]="slot.render"
+            ></div>
+          </div>
         </li>
       }
       @case ("group") {
@@ -77,6 +85,7 @@
           }
           @if (!summary && v.selection; as selection) {
             <input
+              [attr.aria-label]="v.table.labels().selectRow"
               cdkMonitorElementFocus
               data-adapttable-cdk-control
               data-adapttable-part="checkbox"

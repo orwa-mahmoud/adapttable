@@ -40,16 +40,18 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
     @let p = props();
     <div
       data-adapttable-part="filters-form"
-      style="display: flex; flex-direction: column; gap: 16px"
+      style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px"
     >
-      <adapt-filter-tree-chrome
-        [defs]="p.defs"
-        [source]="p.source"
-        [labels]="p.labels"
-        [registry]="p.registry"
-        [defaultExpanded]="p.defaultExpanded ?? false"
-        [slots]="treeSlots"
-      />
+      <div style="grid-column: 1 / -1">
+        <adapt-filter-tree-chrome
+          [defs]="p.defs"
+          [source]="p.source"
+          [labels]="p.labels"
+          [registry]="p.registry"
+          [defaultExpanded]="p.defaultExpanded ?? false"
+          [slots]="treeSlots"
+        />
+      </div>
       @if (p.showSimpleFields) {
         <adapt-auto-filter-form
           [defs]="p.defs"

@@ -219,8 +219,8 @@ export function DemoFallback() {
   );
 }
 
-/** The live demo at `/` is the only page that reads `?kit=`. Unknown or
- * missing values fall back to Mantine. */
+/** Open the live demo or Feature Lab in the linked kit. Unknown or missing
+ * values fall back to Mantine. */
 export function readKitFromUrl(): string {
   if (typeof window === "undefined") return "mantine";
   const kit = new URLSearchParams(window.location.search).get("kit");
@@ -236,7 +236,7 @@ export function KitSwitcher({
   adapter: string;
   dark: boolean;
   onChange: (key: string) => void;
-  /** Write `?kit=` so a link opens this adapter. Live demo only. */
+  /** Write `?kit=` so a link opens this adapter. */
   urlSync?: boolean;
 }>) {
   return (

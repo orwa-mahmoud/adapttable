@@ -3,6 +3,8 @@ import "@adapttable/ng-bootstrap/styles.css";
 
 import { AdaptDataTable } from "@adapttable/ng-bootstrap";
 import {
+  AdaptAssistantButton,
+  AdaptAssistantLanguageChip,
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/ng-bootstrap/assistant";
@@ -51,14 +53,18 @@ import { tree } from "@adapttable/ng-bootstrap/tree";
 import { virtualize } from "@adapttable/ng-bootstrap/virtualize";
 
 import type { ShowcaseKit } from "../showcaseKit";
+import { ShowcaseStatus } from "./ngBootstrapStatus";
 
 /** Components and feature factories are always from this one kit. */
 export const kit = {
   key: "ng-bootstrap",
   providers: [],
   table: AdaptDataTable,
+  statusCell: ShowcaseStatus,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  assistantButton: AdaptAssistantButton,
+  assistantSelect: AdaptAssistantLanguageChip,
   savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,

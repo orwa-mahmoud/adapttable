@@ -4,6 +4,8 @@ import "@adapttable/angular-aria/styles.css";
 
 import { AdaptDataTable } from "@adapttable/angular-aria";
 import {
+  AdaptAssistantButton,
+  AdaptAssistantLanguageChip,
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/angular-aria/assistant";
@@ -52,14 +54,18 @@ import { tree } from "@adapttable/angular-aria/tree";
 import { virtualize } from "@adapttable/angular-aria/virtualize";
 
 import type { ShowcaseKit } from "../showcaseKit";
+import { ShowcaseStatus } from "./ariaStatus";
 
 /** Components and feature factories are always from this one kit. */
 export const kit = {
   key: "aria",
   providers: [],
   table: AdaptDataTable,
+  statusCell: ShowcaseStatus,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  assistantButton: AdaptAssistantButton,
+  assistantSelect: AdaptAssistantLanguageChip,
   savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,

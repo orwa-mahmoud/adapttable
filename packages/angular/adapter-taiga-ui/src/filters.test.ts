@@ -25,9 +25,11 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
 import { AdaptDataTable } from "./dataTable";
 import { type FiltersMode } from "./tableFilters";
+import { AdaptTaigaRoot } from "./taigaRoot";
 import {
   chooseTaigaOption,
   clearTaigaSelection,
@@ -285,6 +287,7 @@ describe("the Taiga UI Angular filters", () => {
     const age = field("Age");
     const rangeOperator = part<HTMLElement>("filter-operator", age)!;
     await chooseTaigaOption(fixture, rangeOperator, "gt");
+    expect((rangeOperator as HTMLInputElement).value).toBe("Greater than");
     await type(parts("filter-input", age)[0], "30");
     expect(ids()).toEqual(["1", "3"]);
     await clearTaigaSelection(fixture, rangeOperator);
@@ -294,6 +297,9 @@ describe("the Taiga UI Angular filters", () => {
       fixture,
       part<HTMLElement>("filter-operator", joined)!,
       "relative"
+    );
+    expect(part<HTMLInputElement>("filter-operator", joined)!.value).toBe(
+      "Relative"
     );
     expect(
       taigaCleaner(parts<HTMLElement>("filter-input", joined)[0]!)
@@ -435,6 +441,54 @@ describe("the Taiga UI Angular filters", () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  it("lets a standalone native header filter use the built-in registry", async () => {
+    @Component({
+      imports: [AdaptHeaderFilterTrigger, AdaptTaigaRoot],
+      template: `<adapt-taiga-root
+        ><adapt-header-filter-trigger [props]="props()"
+      /></adapt-taiga-root>`,
+    })
+    class StandaloneHeader {
+      readonly source = injectFrontendData({
+        data: PEOPLE,
+        columns: COLUMNS,
+        urlSync: false,
+        forceMobile: false,
+      });
+      readonly table = injectDataTable({
+        source: this.source,
+        columns: COLUMNS,
+        rowKey: (row: Person) => row.id,
+      });
+      readonly props = computed(() => ({
+        def: { key: "name", type: "text" },
+        labels: this.table.labels(),
+        source: this.source(),
+      }));
+    }
+    const fixture = TestBed.createComponent(StandaloneHeader);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    const trigger = root.querySelector<HTMLButtonElement>(
+      '[data-adapttable-part="filter-header-trigger"] button'
+    )!;
+    trigger.focus();
+    trigger.click();
+    await fixture.whenStable();
+    const field = document.querySelector<HTMLInputElement>(
+      '[data-adapttable-part="filter-input"]'
+    )!;
+    expect(field).not.toBeNull();
+    field.value = "Ada";
+    field.dispatchEvent(new Event("input"));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.source().extra.name).toBe("Ada");
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    fixture.destroy();
+  });
+
   it("puts a funnel on each filterable header", async () => {
     const { part, parts, ids, field, type, settle, element } = await mount([
       filters(DEFS),
@@ -457,6 +511,52 @@ describe("the Taiga UI Angular filters", () => {
       new MouseEvent("pointerdown", { bubbles: true })
     );
     await settle();
+  });
+
+  it("keeps a portaled header checklist open while a native checkbox writes", async () => {
+    const { fixture, parts, ids, settle } = await mount([
+      filters<Person>([
+        {
+          key: "city",
+          type: "multiSelect",
+          options: [
+            { value: "Dubai", label: "Dubai" },
+            { value: "Amman", label: "Amman" },
+          ],
+        },
+      ]),
+      headerFilters(),
+    ]);
+    const trigger = parts<HTMLElement>(
+      "filter-header-trigger"
+    )[0]!.querySelector<HTMLButtonElement>("button")!;
+    trigger.focus();
+    trigger.click();
+    await settle();
+    const popupId = trigger.getAttribute("aria-controls")!;
+    const panel = document.getElementById(popupId)!;
+    expect(panel).not.toBeNull();
+    expect(
+      trigger
+        .closest('[data-adapttable-part="filter-header-trigger"]')!
+        .contains(panel)
+    ).toBe(false);
+    const checkbox = panel.querySelector<HTMLInputElement>(
+      'input[type="checkbox"]'
+    )!;
+    expect(checkbox).not.toBeNull();
+    checkbox.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    checkbox.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    checkbox.focus();
+    checkbox.click();
+    await settle();
+    expect(checkbox.checked).toBe(true);
+    expect(ids()).toEqual(["1", "3"]);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(document.getElementById(popupId)).toBe(panel);
+    await clickOutsideTaiga(fixture);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(document.getElementById(popupId)).toBeNull();
   });
 
   it("keeps focus inside the drawer in both directions", async () => {

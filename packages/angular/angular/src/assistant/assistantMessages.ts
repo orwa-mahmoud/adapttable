@@ -123,12 +123,12 @@ export class AdaptSpeakerMark {
   imports: [AdaptControl, AdaptIcon, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    "[attr.data-adapttable-part]":
-      "nativeListItem ? 'assistant-receipt' : null",
-    "[attr.data-status]": "nativeListItem ? receipt().status : null",
-    "[attr.data-kind]": "nativeListItem ? receipt().subject?.kind : null",
+    "[attr.role]": "nativeListItem ? null : 'listitem'",
+    "[attr.data-adapttable-part]": "'assistant-receipt'",
+    "[attr.data-status]": "receipt().status",
+    "[attr.data-kind]": "receipt().subject?.kind",
     "[style]":
-      "nativeListItem ? 'display:flex;align-items:center;justify-content:space-between;gap:0.6em;flex-wrap:wrap;padding:0.55em 0.6em;border-radius:0.7em;border:1px solid color-mix(in srgb,currentColor 12%,transparent)' : 'display:contents'",
+      "'display:flex;align-items:center;justify-content:space-between;gap:0.6em;flex-wrap:wrap;padding:0.55em 0.6em;border-radius:0.7em;border:1px solid color-mix(in srgb,currentColor 12%,transparent)'",
   },
   templateUrl: "./assistantReceipt.html",
 })
@@ -210,13 +210,11 @@ let nextReceiptHeading = 0;
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    "[attr.data-adapttable-part]":
-      "nativeListItem ? 'assistant-message' : null",
-    "[attr.data-role]": "nativeListItem ? message().role : null",
-    "[style.align-items]":
-      "nativeListItem ? (mine() ? 'flex-end' : 'flex-start') : null",
-    "[style]":
-      "nativeListItem ? 'display:flex;flex-direction:column;gap:0.25em' : 'display:contents'",
+    "[attr.role]": "nativeListItem ? null : 'listitem'",
+    "[attr.data-adapttable-part]": "'assistant-message'",
+    "[attr.data-role]": "message().role",
+    "[style.align-items]": "mine() ? 'flex-end' : 'flex-start'",
+    "[style]": "'display:flex;flex-direction:column;gap:0.25em'",
   },
   styles: [
     `
@@ -398,11 +396,11 @@ export class AdaptAssistantMessage {
   imports: [AdaptSpeakerMark, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    "[attr.data-adapttable-part]":
-      "nativeListItem ? 'assistant-working' : null",
-    "[attr.aria-hidden]": "nativeListItem ? 'true' : null",
+    "[attr.role]": "nativeListItem ? null : 'listitem'",
+    "[attr.data-adapttable-part]": "'assistant-working'",
+    "[attr.aria-hidden]": "'true'",
     "[style]":
-      "nativeListItem ? 'display:flex;align-items:center;gap:0.5em;opacity:0.75;min-height:1.5em' : 'display:contents'",
+      "'display:flex;align-items:center;gap:0.5em;opacity:0.75;min-height:1.5em'",
   },
   styles: [
     `
@@ -442,17 +440,7 @@ export class AdaptAssistantMessage {
         }</span
       ><span data-adapttable-part="assistant-working-text">{{ word() }}</span>
     </ng-template>
-    @if (nativeListItem) {
-      <ng-container [ngTemplateOutlet]="content" />
-    } @else {
-      <li
-        data-adapttable-part="assistant-working"
-        aria-hidden="true"
-        style="display:flex;align-items:center;gap:0.5em;opacity:0.75;min-height:1.5em"
-      >
-        <ng-container [ngTemplateOutlet]="content" />
-      </li>
-    }
+    <ng-container [ngTemplateOutlet]="content" />
   `,
 })
 export class AdaptAssistantWorking {

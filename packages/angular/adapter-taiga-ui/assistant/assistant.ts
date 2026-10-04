@@ -79,17 +79,21 @@ export class AdaptAssistantButton {
   selector: "adapt-assistant-input",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
-  template: `<tui-textfield>
+  template: `<tui-textfield
+    tuiTextfieldSize="s"
+    style="flex: 1; width: 100%; min-width: 0"
+  >
     <textarea
       tuiTextarea
-      rows="2"
+      [min]="2"
+      [max]="5"
       [attr.aria-label]="props().label"
       [placeholder]="props().placeholder"
       [attr.data-adapttable-part]="props().part"
       [class]="props().className"
       [value]="props().value"
       [disabled]="props().disabled === true"
-      style="width:100%;min-width:0;box-sizing:border-box;font:inherit;resize:vertical"
+      style="width:100%;min-width:0;box-sizing:border-box;font:inherit;resize:none"
       (input)="changed($event)"
       (keydown)="props().onKeyDown($event)"
     ></textarea>
@@ -152,11 +156,17 @@ export class AdaptAssistantPanel {
     <section
       [attr.dir]="props().dir"
       [attr.data-adapttable-part]="props().part"
+      style="block-size: 75dvh; min-block-size: 0; box-sizing: border-box"
       [class]="props().className"
     >
       <header>
         <hgroup tuiTitle>
-          <h2 [id]="dialogId">{{ props().label }}</h2>
+          <h2
+            [id]="dialogId"
+            style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0"
+          >
+            {{ props().label }}
+          </h2>
         </hgroup>
       </header>
       <ng-container [ngTemplateOutlet]="props().children" />

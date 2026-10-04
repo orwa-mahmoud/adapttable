@@ -11,12 +11,9 @@ import {
   type SavedViewsControllerOptions,
   slotRender,
 } from "@adapttable/angular";
-import {
-  AdaptSavedViewsMenu,
-  AdaptSavedViewsPanel,
-} from "@adapttable/ng-zorro";
+import { AdaptSavedViewsMenu } from "@adapttable/ng-zorro";
 
-export { AdaptSavedViewsPanel };
+export { AdaptSavedViewsPanel } from "@adapttable/ng-zorro";
 
 /**
  * Named snapshots of the table's view — search, sort, filters, paging and

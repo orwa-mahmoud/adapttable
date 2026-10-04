@@ -192,6 +192,78 @@ const contractRoot = ({ files = {}, subpaths } = {}) =>
     },
   });
 
+const SHARED_HEADER_WRAPPER = `import { AdaptDesktopTableModel as SharedModel } from "@adapttable/angular";
+@Component({ templateUrl: "./desktopTable.html" })
+export class AdaptDesktopTable extends SharedModel {}`;
+
+function inheritedHeaderRoot({
+  wrapper = SHARED_HEADER_WRAPPER,
+  base = ANGULAR_HEADER_SOURCE,
+  template = ANGULAR_HEADER_TEMPLATE,
+} = {}) {
+  const root = contractRoot({
+    files: {
+      [ANGULAR_SOURCE_PATH]: wrapper,
+      [ANGULAR_TEMPLATE_PATH]: template,
+    },
+  });
+  writePackage(root, "angular", "angular", [], {
+    "src/index.ts":
+      'export { AdaptDesktopTableModel } from "./layout/desktopTableModel";',
+    "src/layout/desktopTableModel.ts": base.replace(
+      "class AdaptDesktopTable",
+      "class AdaptDesktopTableModel"
+    ),
+  });
+  return root;
+}
+
+describe("inherited Angular header contracts", () => {
+  it("follows an aliased binding base and verifies the native template", () => {
+    assert.deepEqual(parity(inheritedHeaderRoot()).problems, []);
+  });
+  for (const [name, options] of [
+    [
+      "an unused model import",
+      { wrapper: SHARED_HEADER_WRAPPER.replace(" extends SharedModel", "") },
+    ],
+    [
+      "a local override dropping the inherited attrs",
+      {
+        wrapper: SHARED_HEADER_WRAPPER.replace(
+          "{}",
+          "{ headerCells = computed(() => new Map()); }"
+        ),
+      },
+    ],
+    [
+      "a base copying attrs by name",
+      {
+        base: ANGULAR_HEADER_SOURCE.replace(
+          "view.table.headerCellAttrs(column)",
+          '{ scope: view.table.headerCellAttrs(column)["scope"] }'
+        ),
+      },
+    ],
+    [
+      "a template copying attrs by name",
+      {
+        template: '<th [attr.role]="headerCells().get(column.key).role"></th>',
+      },
+    ],
+    [
+      "an unexported base",
+      { base: ANGULAR_HEADER_SOURCE.replace("export class", "class") },
+    ],
+  ]) {
+    it(`rejects ${name}`, () => {
+      assert.deepEqual(parity(inheritedHeaderRoot(options)).problems, [
+        MISSING_HEADER,
+      ]);
+    });
+  }
+});
+
 describe("Angular feature contracts before publication", () => {
   it("accepts a private native kit preserving grid and table attrs through its paired template", () => {
     assert.deepEqual(parity(contractRoot()), {

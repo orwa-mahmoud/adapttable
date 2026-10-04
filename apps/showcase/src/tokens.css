@@ -155,3 +155,14 @@
   --dur-state: 140ms;
   --dur-move: 220ms;
 }
+
+:root[data-framework="angular"][data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-framework="angular"][data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-framework="angular"] {
+  scrollbar-gutter: stable;
+}

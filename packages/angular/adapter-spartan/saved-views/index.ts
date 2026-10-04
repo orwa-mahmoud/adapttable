@@ -11,9 +11,9 @@ import {
   type SavedViewsControllerOptions,
   slotRender,
 } from "@adapttable/angular";
-import { AdaptSavedViewsMenu, AdaptSavedViewsPanel } from "@adapttable/spartan";
+import { AdaptSavedViewsMenu } from "@adapttable/spartan";
 
-export { AdaptSavedViewsPanel };
+export { AdaptSavedViewsPanel } from "@adapttable/spartan";
 
 /**
  * Named snapshots of the table's view — search, sort, filters, paging and

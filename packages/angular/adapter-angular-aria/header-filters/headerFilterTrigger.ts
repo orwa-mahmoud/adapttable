@@ -15,10 +15,13 @@ import {
 } from "@adapttable/angular";
 import { AdaptAutoFilterForm } from "@adapttable/angular-aria";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
+  type ElementRef,
   input,
+  viewChild,
 } from "@angular/core";
 
 /**
@@ -43,6 +46,7 @@ import {
       (toggle)="overlay.setOpen($any($event.target).open)"
     >
       <summary
+        #trigger
         style="list-style: none; cursor: pointer; display: inline-flex; align-items: center; padding: 2px"
         [attr.aria-label]="caption()"
         [attr.data-active]="active() ? '' : null"
@@ -51,8 +55,9 @@ import {
       </summary>
       @if (overlay.open()) {
         <div
+          #panel
           data-adapttable-part="filter-header-cell"
-          style="position: absolute; z-index: 3; inset-inline-start: 0; top: 100%; min-width: 20rem; padding: 0.5rem; background: Canvas; color: CanvasText; border: 1px solid currentColor"
+          style="position: fixed; z-index: 10050; width: 20rem; max-width: calc(100vw - 16px); box-sizing: border-box; overflow-y: auto; padding: 0.5rem; background: Canvas; color: CanvasText; border: 1px solid currentColor"
         >
           <adapt-auto-filter-form
             [defs]="[p.def]"
@@ -70,7 +75,7 @@ export class AdaptHeaderFilterTrigger {
   readonly props = input.required<FilterHeaderControlProps<never>>();
 
   protected readonly icon = { ...FILTERS_ICON, width: 14, height: 14 };
-  protected readonly registry = undefined as never;
+  protected readonly registry = defaultFilterRegistry;
   protected readonly caption = computed(() => filterLabel(this.props().def));
   protected readonly active = computed(() =>
     hasActiveHeaderFilter(this.props())
@@ -82,6 +87,33 @@ export class AdaptHeaderFilterTrigger {
     closeOnSelect: computed(() => this.props().closeOnSelect === true),
     registry: computed(() => this.props().registry ?? defaultFilterRegistry),
   });
+  private readonly trigger = viewChild<ElementRef<HTMLElement>>("trigger");
+  private readonly panel = viewChild<ElementRef<HTMLElement>>("panel");
+
+  constructor() {
+    afterRenderEffect((onCleanup) => {
+      if (!this.overlay.open()) return;
+      const trigger = this.trigger()?.nativeElement;
+      const panel = this.panel()?.nativeElement;
+      if (!trigger || !panel) return;
+      const place = (): void => {
+        const origin = trigger.getBoundingClientRect();
+        const width = panel.offsetWidth;
+        const rtl = getComputedStyle(trigger).direction === "rtl";
+        const left = rtl ? origin.right - width : origin.left;
+        panel.style.left = `${String(Math.max(8, Math.min(left, document.documentElement.clientWidth - width - 8)))}px`;
+        panel.style.top = `${String(origin.bottom + 4)}px`;
+        panel.style.maxHeight = `${String(Math.max(80, window.innerHeight - origin.bottom - 12))}px`;
+      };
+      place();
+      window.addEventListener("resize", place);
+      window.addEventListener("scroll", place, true);
+      onCleanup(() => {
+        window.removeEventListener("resize", place);
+        window.removeEventListener("scroll", place, true);
+      });
+    });
+  }
   /** The source the form writes, still a table source at runtime. */
   protected readonly formSource = computed(
     () => this.overlay.source() as TableSource<never>

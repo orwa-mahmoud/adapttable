@@ -195,9 +195,9 @@ const SLOTS: ContextMenuSlots = {
     />
   `,
 })
-export class AdaptContextMenuLive {
+export class AdaptContextMenuLive<TRow> {
   /** The table's menu options. */
-  readonly props = input.required<TableContextMenuOptions<unknown>>();
+  readonly props = input.required<TableContextMenuOptions<TRow>>();
   private readonly options = computed(() => this.props());
   /** The open state, the entries and the region handlers. */
   readonly menu = injectTableContextMenu(this.options);

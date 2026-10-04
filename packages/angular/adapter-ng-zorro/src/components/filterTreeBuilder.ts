@@ -166,7 +166,7 @@ export class AdaptTreeButton {
       [class]="p.className"
       [nzGhost]="true"
       nzSize="small"
-      style="margin-block-end: 4px; padding-block-end: 16px; border-block-end: 1px solid color-mix(in srgb, currentColor 14%, transparent)"
+      style="grid-column: 1 / -1; margin-block-end: 0; padding-block-end: 4px; border-block-end: 1px solid color-mix(in srgb, currentColor 14%, transparent)"
     >
       <nz-collapse-panel
         [nzHeader]="summary"

@@ -212,6 +212,30 @@ afterEach(() => {
 });
 
 describe("the Spartan Angular filters", () => {
+  it("keeps the native popover open after a checkbox updates the filtered rows", async () => {
+    const { part, ids, field, openFilters, settle } = await mount();
+    await openFilters();
+    const checkbox =
+      field("Team")!.querySelector<HTMLButtonElement>('[role="checkbox"]')!;
+    checkbox.click();
+    await settle();
+    expect(ids()).toEqual(["1"]);
+    expect(part("filters-popover")).not.toBeNull();
+    expect(
+      field("Team")!
+        .querySelector('[role="checkbox"]')
+        ?.getAttribute("aria-checked")
+    ).toBe("true");
+    const done =
+      part("filters-popover")!.querySelector<HTMLButtonElement>(
+        "footer button"
+      )!;
+    done.click();
+    await settle();
+    expect(part("filters-popover")).toBeNull();
+    expect(ids()).toEqual(["1"]);
+  });
+
   it("opens an anchored popover from the Filters button, and closes it", async () => {
     const { part, openFilters, settle } = await mount();
     const button = part<HTMLButtonElement>("filters-button");

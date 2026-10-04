@@ -40323,6 +40323,14 @@
       "behavior": ""
     },
     {
+      "export": "mobileCardRegionProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "MountStaggerOptions",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",

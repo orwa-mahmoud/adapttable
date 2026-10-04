@@ -44,7 +44,7 @@ let nextSheetId = 0;
   selector: "adapt-assistant-button",
   imports: [AdaptAssistantContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: "display: contents" },
+  host: { class: "adapttable-ng-bootstrap", style: "display: contents" },
   template: `<button
     class="btn btn-outline-secondary btn-sm"
     type="button"
@@ -148,9 +148,10 @@ export class AdaptAssistantPanel {
   selector: "adapt-assistant-sheet",
   imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: "display: contents" },
+  host: { class: "adapttable-ng-bootstrap", style: "display: contents" },
   template: `<ng-template #content>
     <div
+      style="height: 100%; min-height: 0; padding: 16px; box-sizing: border-box"
       [attr.aria-label]="props().label"
       [attr.dir]="props().dir"
       [attr.data-adapttable-part]="props().part"
@@ -173,6 +174,7 @@ export class AdaptAssistantSheet {
       content: () => this.content(),
       container: () => this.element.nativeElement,
       titleId: this.titleId,
+      sheet: true,
       onClose: () => this.props().onClose(),
     });
   }
@@ -204,7 +206,7 @@ export class AdaptAssistantWindow {
 @Component({
   selector: "adapt-assistant-language-chip",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: "display: contents" },
+  host: { class: "adapttable-ng-bootstrap", style: "display: contents" },
   template: `<select
     class="form-select form-select-sm"
     [attr.aria-label]="props().label"
@@ -324,7 +326,7 @@ export const TABLE_ASSISTANT_SLOTS: TableAssistantSlots = {
   selector: "adapt-table-assistant",
   imports: [AdaptTableAssistantChrome],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: "display: contents" },
+  host: { class: "adapttable-ng-bootstrap", style: "display: contents" },
   template: `<adapt-table-assistant-chrome
     [props]="accented()"
     [slots]="slots"

@@ -4,38 +4,16 @@
  * with native controls, over the menu model in `@adapttable/angular`.
  */
 import {
-  ACTIONS_COLUMN_KEY,
   AdaptAttrs,
+  AdaptColumnMenuEdgeRowModel,
+  AdaptColumnMenuModel,
+  AdaptColumnMenuRowModel,
   AdaptIcon,
   AdaptLiveRegion,
-  ADAPTTABLE_SLOT_TABLE,
-  type ColumnDrag,
-  type ColumnLayout,
-  columnMenuActions,
-  type ColumnMenuChoice,
-  type ColumnMenuItem,
-  type ColumnMenuRow,
-  columnMenuRows,
-  type ColumnMenuSlotProps,
-  eyeIcon,
-  filterColumnMenuRows,
-  GRIP_ICON,
-  hideAllColumns,
-  injectColumnDrag,
-  injectColumnRenameEditor,
-  nextPinSide,
-  PIN_ICON,
-  pinActionLabel,
-  REORDER_COLUMN_KEY,
-  showAllColumns,
-  unpinAllColumns,
 } from "@adapttable/angular";
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
-  inject,
-  input,
   signal,
   viewChild,
 } from "@angular/core";
@@ -47,12 +25,7 @@ import {
 
 /** The menu's props, with the row type erased as every slot erases it. */
 
-const NOOP_RENAME = (): void => undefined;
-
 /** Whether a submenu item is a choice rather than a plain action. */
-function isChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
-  return "kind" in item && item.kind === "choice";
-}
 
 /**
  * One column's row: grip, eye, name, pin, and the "more" submenu with the
@@ -218,72 +191,7 @@ function isChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
     </div>
   `,
 })
-export class AdaptColumnMenuRow {
-  /** The row. */
-  readonly row = input.required<ColumnMenuRow<never>>();
-  /** The menu's props. */
-  readonly props = input.required<ColumnMenuSlotProps<never>>();
-  /** The menu's drag state. */
-  readonly drag = input.required<ColumnDrag>();
-
-  protected readonly open = signal(false);
-  protected readonly gripIcon = GRIP_ICON;
-  protected readonly pinIcon = PIN_ICON;
-  protected readonly eyeOn = eyeIcon(false);
-  protected readonly eyeOff = eyeIcon(true);
-  private readonly table = inject(ADAPTTABLE_SLOT_TABLE);
-
-  protected readonly rename = injectColumnRenameEditor({
-    column: computed(() => ({
-      key: this.row().key,
-      name: this.row().name,
-      onRename: this.props().onRenameColumn ?? NOOP_RENAME,
-      requiredMessage: this.props().labels.columnNameRequired,
-      renamedMessage: this.props().labels.columnRenamed,
-    })),
-  });
-
-  protected readonly actions = computed(() => {
-    const props = this.props();
-    return columnMenuActions(this.row(), {
-      featureHost: this.table.featureHost as never,
-      labels: props.labels,
-      layout: props.layout,
-      sortBy: props.sortBy,
-      sortDir: props.sortDir,
-      onSortColumn: props.onSortColumn,
-      onAutoSizeColumn: props.onAutoSizeColumn,
-      onFilterColumn: props.onFilterColumn,
-      onBeginRename: props.onRenameColumn ? this.rename.begin : undefined,
-      groupingPanel: props.groupingPanel,
-    });
-  });
-
-  protected pinLabel(
-    row: ColumnMenuRow<never>,
-    props: ColumnMenuSlotProps<never>
-  ): string {
-    return pinActionLabel(row.pinned, props.labels);
-  }
-
-  protected nextPin(row: ColumnMenuRow<never>): ReturnType<typeof nextPinSide> {
-    return nextPinSide(row.pinned);
-  }
-
-  protected asChoice(item: ColumnMenuItem): ColumnMenuChoice | undefined {
-    return isChoice(item) ? item : undefined;
-  }
-
-  protected asAction(item: ColumnMenuItem): { disabled: boolean } {
-    return item;
-  }
-
-  protected runAction(item: ColumnMenuItem): void {
-    if (isChoice(item)) return;
-    item.run();
-    if (item.id !== "rename") this.open.set(false);
-  }
-}
+export class AdaptColumnMenuRow extends AdaptColumnMenuRowModel {}
 
 /**
  * A reserved column's row — row actions or the reorder grip — with its eye
@@ -336,28 +244,7 @@ export class AdaptColumnMenuRow {
     </div>
   `,
 })
-export class AdaptColumnMenuEdgeRow {
-  /** The column layout. */
-  readonly layout = input.required<ColumnLayout<never>>();
-  /** The reserved column's key. */
-  readonly columnKey = input.required<string>();
-  /** The edge it pins to. */
-  readonly side = input.required<"start" | "end">();
-  /** Its name. */
-  readonly name = input.required<string>();
-  /** "Show column". */
-  readonly showLabel = input.required<string>();
-  /** "Hide column". */
-  readonly hideLabel = input.required<string>();
-  /** "Pin to start" or "Pin to end". */
-  readonly pinLabel = input.required<string>();
-  /** "Unpin". */
-  readonly unpinLabel = input.required<string>();
-
-  protected readonly pinIcon = PIN_ICON;
-  protected readonly eyeOn = eyeIcon(false);
-  protected readonly eyeOff = eyeIcon(true);
-}
+export class AdaptColumnMenuEdgeRow extends AdaptColumnMenuEdgeRowModel {}
 
 /**
  * The Columns menu in the toolbar.
@@ -498,44 +385,21 @@ export class AdaptColumnMenuEdgeRow {
     </div>
   `,
 })
-export class AdaptColumnMenu {
-  /** The slot's props. */
-  readonly props = input.required<ColumnMenuSlotProps<never>>();
-
-  protected readonly query = signal("");
+export class AdaptColumnMenu extends AdaptColumnMenuModel {
   protected readonly panelStyle = {
     "max-height": "min(70vh, 32rem)",
     "overflow-y": "auto",
     border: "0",
     padding: "0.75rem",
   };
-  protected readonly reorderKey = REORDER_COLUMN_KEY;
-  protected readonly actionsKey = ACTIONS_COLUMN_KEY;
-  protected readonly drag = injectColumnDrag();
-  protected readonly rows = computed(() =>
-    filterColumnMenuRows(
-      columnMenuRows(this.props().allColumns, this.props().layout),
-      this.query()
-    )
-  );
 
   protected readonly menuOpen = signal(false);
+
   private readonly dropdown = viewChild(NgbDropdown);
+
   protected readonly popover = {
     open: this.menuOpen.asReadonly(),
     toggle: (): void => this.dropdown()?.toggle(),
     close: (): void => this.dropdown()?.close(),
   };
-
-  protected showAll(): void {
-    showAllColumns(this.rows(), this.props().layout);
-  }
-
-  protected hideAll(): void {
-    hideAllColumns(this.rows(), this.props().layout);
-  }
-
-  protected unpinAll(): void {
-    unpinAllColumns(this.rows(), this.props().layout);
-  }
 }

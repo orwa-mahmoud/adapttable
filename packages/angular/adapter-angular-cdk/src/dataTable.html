@@ -38,6 +38,7 @@
             <svg [adaptIcon]="searchIcon"></svg>
           </span>
           <input
+            [attr.aria-label]="v.table.labels().search"
             cdkMonitorElementFocus
             data-adapttable-cdk-control
             data-adapttable-part="search"
@@ -241,6 +242,7 @@
           }
           @case ("mobile") {
             <adapt-mobile-cards
+              #mobileSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"
@@ -248,6 +250,7 @@
           }
           @case ("desktop") {
             <adapt-desktop-table
+              #desktopSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"

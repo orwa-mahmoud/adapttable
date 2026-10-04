@@ -580,7 +580,7 @@ describe("new Angular kit release contracts", () => {
     for (const kit of kits) {
       const report = `${kit}.api.md`;
       const demoted = reports[report].replace(
-        /\/\/ @public(\r?\n)(export class AdaptDataTable\b)/,
+        /\/\/ @public(?: \(undocumented\))?(\r?\n)(export class AdaptDataTable\b)/,
         "// @internal$1$2"
       );
       assert.notEqual(demoted, reports[report], report);

@@ -405,6 +405,44 @@ const rowParity = (root) =>
     unnamedInKits: {},
   });
 
+function inheritedRowsRoot(
+  extendsBase = true,
+  body = "table.rowAttrs(row, index)"
+) {
+  const root = angularRowsRoot("{}");
+  writePackage(root, "angular", "angular", {
+    "src/index.ts":
+      'export { AdaptDataTableShell } from "./layout/dataTableShell";',
+    "src/layout/dataTableShell.ts": `export class AdaptDataTableShell {
+      view = () => ({ rowAttrs: ${body} });
+    }`,
+  });
+  writePackage(root, "angular", "adapter-verdant", {
+    "src/dataTable.ts": `import { AdaptDataTableShell } from "@adapttable/angular";
+      export class AdaptDataTable ${extendsBase ? "extends AdaptDataTableShell" : ""} {}`,
+  });
+  return root;
+}
+
+describe("inherited Angular row contracts", () => {
+  it("follows a kit's actual binding shell base to the canonical getter", () => {
+    assert.deepEqual(rowParity(inheritedRowsRoot()).failures, []);
+  });
+  for (const [name, root] of [
+    ["an unused shell import", () => inheritedRowsRoot(false)],
+    [
+      "a base dropping the canonical getter",
+      () => inheritedRowsRoot(true, "{}"),
+    ],
+  ]) {
+    it(`rejects ${name}`, () => {
+      assert.deepEqual(rowParity(root()).failures[0].lines, [
+        "row — adapter-verdant: neither names it nor calls rowAttrs",
+      ]);
+    });
+  }
+});
+
 describe("Angular structural row getter", () => {
   for (const getter of ["table.rowAttrs", "grid.rowAttrs"]) {
     it(`accepts a row assembled from ${getter} and bound whole`, () => {

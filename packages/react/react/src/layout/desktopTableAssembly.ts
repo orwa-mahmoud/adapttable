@@ -2,7 +2,6 @@
 import {
   type ConfirmHandler,
   type FilterDef,
-  type GroupedFlatEntry,
   type PinLeads,
   type pinnedSummaryPart,
   type PinOffset,
@@ -97,16 +96,15 @@ export {
 export const DESKTOP_RESIZE_HANDLE_STYLE: CSSProperties =
   NEUTRAL_DESKTOP_RESIZE_HANDLE_STYLE;
 
+export type { EditableCellEditing } from "../editing/editableCellController";
+export type { GridFocusState } from "../focus/useGridFocus";
+export type { RowPinSide } from "../rows/rowPinning";
 export type {
   CellElementProps,
-  EditableCellEditing,
-  GridFocusState,
-  GroupedFlatEntry,
-  RowPinSide,
   SortButtonElementProps,
-  TreeEntry,
   UseDataTableResult,
-};
+} from "../useDataTable/useDataTable";
+export type { GroupedFlatEntry, TreeEntry } from "@adapttable/core";
 
 /**
  * Options for {@link useDesktopTableAssembly}.

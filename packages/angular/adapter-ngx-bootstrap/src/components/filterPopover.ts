@@ -1,5 +1,8 @@
 /** ngx-bootstrap's anchored, backdrop-free filter overlay. */
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import {
+  type FilterOverlaySlotProps,
+  injectPopoverSpace,
+} from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
@@ -28,7 +31,7 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
       [container]="overlayContainer()"
       triggers="manual"
       [outsideClick]="true"
-      [placement]="p.dir === 'rtl' ? 'bottom right' : 'bottom left'"
+      [placement]="p.dir === 'rtl' ? 'bottom left' : 'bottom right'"
       containerClass="adapttable-filter-popover"
       (onHidden)="closed()"
       (onShown)="shown()"
@@ -41,6 +44,8 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
     <ng-template #content>
       <div
         data-ngx-bootstrap-part="filters-popover"
+        [style.max-height.px]="availableHeight()"
+        style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
         (click)="keepRemovedContentInside($event)"
         [attr.dir]="p.dir ?? 'ltr'"
         [attr.data-dir]="p.dir ?? 'ltr'"
@@ -62,9 +67,23 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
             {{ p.labels.clearAll }}
           </button>
         </header>
-        <div data-ngx-bootstrap-part="filters-body">
+        <div
+          data-ngx-bootstrap-part="filters-body"
+          style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+        >
           <ng-container [ngTemplateOutlet]="p.filters" />
         </div>
+        <footer
+          style="flex: none; display: flex; justify-content: flex-end; padding-block-start: 12px"
+        >
+          <button
+            class="btn btn-primary btn-sm"
+            type="button"
+            (click)="p.onClose()"
+          >
+            {{ p.labels.filtersDone }}
+          </button>
+        </footer>
       </div>
     </ng-template>
   `,
@@ -77,6 +96,11 @@ export class AdaptFilterPopover {
   private readonly popover = viewChild.required(PopoverDirective);
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected readonly availableHeight = injectPopoverSpace({
+    origin: () => this.anchor()?.nativeElement,
+    open: () => this.props().open,
+    reserve: 48,
+  });
   private restoreFocus = false;
 
   constructor() {

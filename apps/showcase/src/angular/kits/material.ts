@@ -5,6 +5,8 @@ import "../material.scss";
 
 import { AdaptDataTable } from "@adapttable/angular-material";
 import {
+  AdaptAssistantButton,
+  AdaptAssistantLanguageChip,
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/angular-material/assistant";
@@ -53,14 +55,18 @@ import { tree } from "@adapttable/angular-material/tree";
 import { virtualize } from "@adapttable/angular-material/virtualize";
 
 import type { ShowcaseKit } from "../showcaseKit";
+import { ShowcaseStatus } from "./materialStatus";
 
 /** Components and feature factories are always from this one kit. */
 export const kit = {
   key: "material",
   providers: [],
   table: AdaptDataTable,
+  statusCell: ShowcaseStatus,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  assistantButton: AdaptAssistantButton,
+  assistantSelect: AdaptAssistantLanguageChip,
   savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,

@@ -8,7 +8,9 @@ function nameCloseControl(root: HTMLSpanElement | null) {
   const close = root?.querySelector<HTMLElement>('[role="button"]');
   if (!close) return;
   close.dataset.adapttablePart = "chip-remove";
-  return () => close.removeAttribute("data-adapttable-part");
+  return () => {
+    delete close.dataset.adapttablePart;
+  };
 }
 
 /** Removable antd tag chips. */

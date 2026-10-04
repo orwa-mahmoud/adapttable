@@ -217,15 +217,4 @@
     </span>
   }
 </ng-template>
-@if (nativeListItem) {
-  <ng-container [ngTemplateOutlet]="content" />
-} @else {
-  <li
-    data-adapttable-part="assistant-message"
-    [attr.data-role]="message().role"
-    [style.align-items]="mine() ? 'flex-end' : 'flex-start'"
-    style="display: flex; flex-direction: column; gap: 0.25em"
-  >
-    <ng-container [ngTemplateOutlet]="content" />
-  </li>
-}
+<ng-container [ngTemplateOutlet]="content" />

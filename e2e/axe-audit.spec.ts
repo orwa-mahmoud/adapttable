@@ -5,7 +5,11 @@ import {
   featuresOf,
   MATRIX_FEATURES,
 } from "../apps/showcase/matrix.mjs";
-import { angularOverlaySelector, angularPart } from "./angular-kit";
+import {
+  angularOverlaySelector,
+  angularPart,
+  selectAngularOption,
+} from "./angular-kit";
 import { expectNoBlockingAxe } from "./axe";
 
 /**
@@ -141,9 +145,11 @@ for (const kit of builtAdapters("angular")) {
     page,
   }) => {
     await openKitPage(page, `/${kit.key}/ai/`);
-    await page
-      .getByLabel("Approval surface", { exact: true })
-      .selectOption("modal");
+    await selectAngularOption(
+      page.getByRole("combobox", { name: "Approval surface", exact: true }),
+      { value: "modal", label: "Dialog" }
+    );
+    await page.locator('[data-adapttable-part="assistant-launcher"]').click();
     const input = page.locator('[data-adapttable-part="assistant-input"]');
     await input.fill("Propose Grace's salary as 150");
     await input.press("Enter");

@@ -162,6 +162,7 @@ export class AdaptAssistantPanel {
         [attr.aria-label]="props().label"
         [dir]="props().dir ?? 'ltr'"
         [attr.data-adapttable-part]="props().part"
+        style="inline-size: min(420px, calc(100vw - 16px)); block-size: 80dvh; max-block-size: 80dvh; min-block-size: 0; box-sizing: border-box"
         [class]="props().className"
       >
         <ng-container [ngTemplateOutlet]="props().children" />

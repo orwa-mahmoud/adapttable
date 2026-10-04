@@ -20,7 +20,7 @@
  * the menu is still mounted otherwise, and the menu's own focus restoration
  * then fights whatever the action just did.
  */
-import type { ContextMenuItem } from "@adapttable/core";
+
 import type {
   ContextMenuChromeProps as NeutralContextMenuChromeProps,
   ContextMenuSlots as NeutralContextMenuSlots,
@@ -28,9 +28,8 @@ import type {
 } from "@adapttable/core/binding";
 import { Fragment, type ReactNode, useRef } from "react";
 
-import type { ContextMenuPoint } from "./useContextMenu";
-
-export type { ContextMenuItem, ContextMenuPoint };
+export type { ContextMenuPoint } from "./useContextMenu";
+export type { ContextMenuItem } from "@adapttable/core";
 export type { ContextMenuItemProps } from "@adapttable/core/binding";
 
 /**

@@ -150,6 +150,7 @@ function spacerHeight(): string {
     ".adapt-material-virtual-spacer td"
   );
   expect(cell).not.toBeNull();
+  expect(cell!.closest("tr")?.hasAttribute("inert")).toBe(true);
   return cell!.style.height;
 }
 

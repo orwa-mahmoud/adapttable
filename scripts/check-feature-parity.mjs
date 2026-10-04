@@ -21,6 +21,7 @@ import { readFileSync } from "node:fs";
 import { basename, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { inheritedBindingSources } from "./binding-inheritance.mjs";
 import { REPORT_REFERENCES } from "./check-parts-parity.mjs";
 import {
   bindingDir,
@@ -78,13 +79,22 @@ const HEADER_NAMED = /leaf\.headerProps\s*\[/;
  * Keep this tied to the real component and its configured sibling template,
  * rather than accepting an unused attrs helper elsewhere in the package.
  */
-function angularHeaderHandoff(files) {
+function angularHeaderHandoff(files, kit, root) {
   const source = files.get("src/components/desktopTable.ts") ?? "";
   const template = files.get("src/components/desktopTable.html") ?? "";
   if (!/templateUrl\s*:\s*(["'])\.\/desktopTable\.html\1/.test(source)) {
     return false;
   }
-  const body = source.match(
+  const assembly = /\bheaderCells\s*=/.test(source)
+    ? source
+    : inheritedBindingSources(
+        join(kitDir(kit, root), "src/components/desktopTable.ts"),
+        kit.framework,
+        root
+      )
+        .map((base) => stripComments(base.source))
+        .join("\n");
+  const body = assembly.match(
     /\bheaderCells\s*=\s*computed\(\(\)\s*=>\s*\{([\s\S]*?)\breturn\s+cells\s*;\s*\}\)/
   )?.[1];
   if (!body) return false;
@@ -271,7 +281,7 @@ function fileProblems(kit, kits, root) {
       problems.push(`${rel}: root table imports the features aggregate barrel`);
     }
   }
-  if (rule?.assembly?.(code)) passesHeaderProps = true;
+  if (rule?.assembly?.(code, kit, root)) passesHeaderProps = true;
   return { problems, passesHeaderProps };
 }
 

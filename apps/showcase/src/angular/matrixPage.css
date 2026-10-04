@@ -107,6 +107,8 @@ adapt-showcase-matrix-page *::after {
 
 .mx-ng--unstyled [data-adapttable-part="search-field"] {
   flex: 1 1 200px;
+  max-inline-size: min(520px, 100%);
+  margin-inline-end: auto;
   display: flex;
 }
 
@@ -505,29 +507,4 @@ adapt-showcase-matrix-page *::after {
 .mx-ng .hint-row > .seg__btn:disabled {
   opacity: 0.5;
   cursor: default;
-}
-
-/* Native disclosure keeps the adapter destinations keyboard reachable. */
-.nav__adapters {
-  position: relative;
-}
-.nav__adapters summary {
-  cursor: pointer;
-}
-.nav__adapter-menu {
-  position: absolute;
-  inset-block-start: calc(100% + 12px);
-  inset-inline-start: 0;
-  z-index: 50;
-  display: grid;
-  min-width: 180px;
-  padding: 8px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--bg);
-  box-shadow: 0 8px 24px #0002;
-}
-.nav__adapter-menu a {
-  padding: 6px 10px;
-  white-space: nowrap;
 }

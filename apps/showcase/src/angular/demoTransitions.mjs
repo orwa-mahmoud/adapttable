@@ -149,17 +149,18 @@ export function navigateDemo(url, { replace = false } = {}) {
   });
 }
 
-/** Public edit parts exist only while a cell, row, or batch draft is active. */
+/** Clean batch fields stay visible; only active editors and pending writes block replacement. */
 export const PENDING_EDIT_SELECTOR = [
-  "edit-cell-editor",
-  "row-edit-save",
-  "row-edit-cancel",
-  "batch-edit-save",
-  "batch-edit-cancel",
-  "batch-edit-bar",
-]
-  .map((part) => `[data-adapttable-part="${part}"]`)
-  .join(",");
+  '[data-adapttable-part="edit-cell-editor"]:not([data-adapttable-part="batch-edit-cell"] *)',
+  '[data-adapttable-part="batch-edit-cell"][data-changed]',
+  ...[
+    "row-edit-save",
+    "row-edit-cancel",
+    "batch-edit-save",
+    "batch-edit-cancel",
+    "batch-edit-bar",
+  ].map((part) => `[data-adapttable-part="${part}"]`),
+].join(",");
 
 /** @param {{querySelector(selector: string): unknown}} root */
 export function hasPendingDemoEdits(root) {

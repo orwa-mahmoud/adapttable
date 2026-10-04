@@ -151,6 +151,7 @@ function spacerHeight(): string {
     '[data-taiga-part="virtual-spacer"] td'
   );
   expect(cell).not.toBeNull();
+  expect(cell!.closest("tr")?.hasAttribute("inert")).toBe(true);
   return cell!.style.height;
 }
 

@@ -1,5 +1,8 @@
 /** CDK connected filter card, intentionally without a backdrop. */
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import {
+  type FilterOverlaySlotProps,
+  injectPopoverSpace,
+} from "@adapttable/angular";
 import { A11yModule } from "@angular/cdk/a11y";
 import { BidiModule } from "@angular/cdk/bidi";
 import { type ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
@@ -39,13 +42,15 @@ import {
         [cdkConnectedOverlayDisableClose]="true"
         [cdkConnectedOverlayPositions]="positions"
         [cdkConnectedOverlayViewportMargin]="8"
-        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayPush]="false"
         cdkConnectedOverlayPanelClass="adapt-cdk-overlay"
         (overlayOutsideClick)="outside($event)"
         (overlayKeydown)="keydown($event)"
       >
         <section
           #card
+          [style.max-height.px]="availableHeight()"
+          style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
           data-adapttable-part="filters-popover"
           class="adapt-cdk-surface adapt-cdk-filter-card"
           [dir]="p.dir ?? 'ltr'"
@@ -72,9 +77,24 @@ import {
               {{ p.labels.clearAll }}
             </button>
           </header>
-          <div data-adapttable-part="filters-body">
+          <div
+            data-adapttable-part="filters-body"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+          >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
+          <footer
+            style="flex: none; display: flex; justify-content: flex-end; padding-block-start: 12px"
+          >
+            <button
+              cdkMonitorElementFocus
+              data-adapttable-cdk-control
+              type="button"
+              (click)="p.onClose()"
+            >
+              {{ p.labels.filtersDone }}
+            </button>
+          </footer>
         </section>
       </ng-template>
     </span>
@@ -85,6 +105,11 @@ export class AdaptFilterPopover {
     input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected readonly availableHeight = injectPopoverSpace({
+    origin: () => this.anchor()?.nativeElement,
+    open: () => this.props().open,
+    reserve: 16,
+  });
   protected readonly positions: ConnectedPosition[] = [
     {
       originX: "end",
@@ -92,13 +117,6 @@ export class AdaptFilterPopover {
       overlayX: "end",
       overlayY: "top",
       offsetY: 4,
-    },
-    {
-      originX: "end",
-      originY: "top",
-      overlayX: "end",
-      overlayY: "bottom",
-      offsetY: -4,
     },
   ];
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");

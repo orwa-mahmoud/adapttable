@@ -16,8 +16,8 @@ export class AdaptMaterialCheckboxAttrs implements AfterViewChecked {
     const host = this.element.nativeElement;
     const input = host.querySelector<HTMLInputElement>("input");
     if (!input) return;
-    input.setAttribute("data-adapttable-part", this.adaptCheckboxPart());
-    host.removeAttribute("data-adapttable-part");
+    input.dataset.adapttablePart = this.adaptCheckboxPart();
+    delete host.dataset.adapttablePart;
     for (const name of [
       "aria-invalid",
       "aria-describedby",

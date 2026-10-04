@@ -11,7 +11,14 @@ const directory = path.resolve(
 function files(root: string): string[] {
   return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
     const filename = path.join(root, entry.name);
-    if (entry.name === "node_modules" || entry.name.startsWith(".")) return [];
+    // Inspect kit sources rather than generated package/coverage output.
+    if (
+      entry.name === "node_modules" ||
+      entry.name === "dist" ||
+      entry.name === "coverage" ||
+      entry.name.startsWith(".")
+    )
+      return [];
     return entry.isDirectory() ? files(filename) : [filename];
   });
 }

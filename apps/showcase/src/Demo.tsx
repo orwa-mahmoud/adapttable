@@ -80,27 +80,8 @@ import {
 } from "./data";
 import { fetchPeople, type PeoplePage, type PeopleParams } from "./mockApi";
 import { usePatchSink } from "./patchSink";
+import { summaryPerson } from "./people";
 import { useRealtimeSlot } from "./realtimeSlot";
-
-function summaryPerson(id: string, name: string): Person {
-  // Materialize every derived field the showcase columns read. Numeric id
-  // hashing would turn non-numeric summary ids into Invalid Date / NaN and
-  // throw while formatting Timeline and Budget.
-  return {
-    id,
-    name,
-    email: "",
-    role: "",
-    team: "All",
-    nameAr: name,
-    roleAr: "",
-    teamAr: "الكل",
-    status: "Active",
-    budget: 0,
-    utilization: 0,
-    start: "2026-01-01",
-  };
-}
 
 /**
  * Where the rows come from.

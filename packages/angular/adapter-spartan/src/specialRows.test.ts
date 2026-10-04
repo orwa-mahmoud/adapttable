@@ -191,8 +191,10 @@ describe("the unstyled table's extra rows", () => {
       "full-width-row",
     ]);
     const separator = parts("separator-cell")[0]!;
-    expect(separator.getAttribute("role")).toBe("separator");
-    expect(separator.getAttribute("aria-label")).toBe("Separator");
+    expect(separator.hasAttribute("role")).toBe(false);
+    const rule = separator.querySelector("hr");
+    expect(rule).not.toBeNull();
+    expect(rule!.getAttribute("aria-label")).toBe("Separator");
     expect(separator.getAttribute("colspan")).toBe("3");
     const wide = parts("full-width-cell");
     expect(wide.map((cell) => cell.getAttribute("colspan"))).toEqual([
@@ -236,8 +238,10 @@ describe("the unstyled table's extra rows", () => {
       )
     ).toEqual(["card", "separator-row", "card", "card", "full-width-row"]);
     const separator = parts("separator-row")[0]!;
-    expect(separator.getAttribute("role")).toBe("separator");
-    expect(separator.getAttribute("aria-label")).toBe("Separator");
+    expect(separator.hasAttribute("role")).toBe(false);
+    const rule = separator.querySelector("hr");
+    expect(rule).not.toBeNull();
+    expect(rule!.getAttribute("aria-label")).toBe("Separator");
     expect(parts("full-width-cell")[0]!.textContent.trim()).toBe("3 people");
   });
 });

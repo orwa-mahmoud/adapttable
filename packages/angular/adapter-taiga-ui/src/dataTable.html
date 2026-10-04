@@ -43,6 +43,7 @@
             </span>
             <tui-textfield tuiTextfieldSize="s"
               ><input
+                [attr.aria-label]="v.table.labels().search"
                 tuiInput
                 data-adapttable-part="search"
                 [adaptAttrs]="v.table.searchInputAttrs()"
@@ -253,6 +254,7 @@
             }
             @case ("mobile") {
               <adapt-mobile-cards
+                #mobileSurface
                 [view]="v"
                 [rowKey]="rowKey()"
                 [maxHeight]="maxHeight()"
@@ -260,6 +262,7 @@
             }
             @case ("desktop") {
               <adapt-desktop-table
+                #desktopSurface
                 [view]="v"
                 [rowKey]="rowKey()"
                 [maxHeight]="maxHeight()"

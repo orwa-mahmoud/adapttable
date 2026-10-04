@@ -5,8 +5,7 @@
 import {
   bulkActionErrorMessage,
   type BulkBarSlotProps,
-  type ConfirmHandler,
-  injectBulkActionRunner,
+  injectBulkBarRunner,
   offersAllMatching,
   resolveDisabledReason,
   type SelectionState,
@@ -94,19 +93,7 @@ export class AdaptBulkBar {
 
   // The runner reads its options when an action runs, after the props
   // have arrived.
-  protected readonly runner = injectBulkActionRunner(
-    ((bar: AdaptBulkBar) => ({
-      confirm: (request: Parameters<ConfirmHandler>[0]) => {
-        bar.props().confirm(request);
-      },
-      get cancelLabel(): string {
-        return bar.props().labels.cancel;
-      },
-      onComplete: (outcome: { status: string }) => {
-        if (outcome.status === "success") bar.props().selection.clear();
-      },
-    }))(this)
-  );
+  protected readonly runner = injectBulkBarRunner(this.props);
   protected readonly ids = computed(() => [
     ...this.props().selection.selectedIds,
   ]);

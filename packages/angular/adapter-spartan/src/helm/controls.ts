@@ -98,8 +98,8 @@ export class HlmCheckbox {
         if (value === null) button.removeAttribute(name);
         else button.setAttribute(name, value);
       }
-      const value = host.getAttribute("data-value");
-      if (value === null) button.removeAttribute("value");
+      const value = host.dataset.value;
+      if (value === undefined) button.removeAttribute("value");
       else button.setAttribute("value", value);
       if (this.checkbox.required())
         button.setAttribute("aria-required", "true");
@@ -127,7 +127,8 @@ export class HlmCheckbox {
 })
 export class SpartanSelection {
   readonly attrs = input.required<Attrs>();
-  readonly userClass = input<string | undefined>(undefined, { alias: "class" });
+  readonly class = input<string | undefined>();
+  readonly userClass = this.class;
 
   protected label(): string {
     const label = this.attrs()["aria-label"];

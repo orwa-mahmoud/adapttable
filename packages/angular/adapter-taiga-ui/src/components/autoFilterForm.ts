@@ -1,45 +1,14 @@
 import {
+  AdaptAutoFilterFormModel,
+  AdaptBooleanFilterFieldModel,
   AdaptChecklistChrome,
-  booleanFilterFor,
-  defaultFilterRegistry,
-  type FilterDef,
-  filterLabel,
-  filterOpLabel,
-  filterOptionsFor,
-  type FilterOptionsState,
-  type FilterTypeRegistry,
-  filterWidgetKind,
-  type FilterWidgetRenderProps,
-  joinRelativeToken,
-  listFilterValues,
-  rangeFilterFor,
-  type RangeOp,
-  RELATIVE_PRESET_LABEL_KEYS,
-  RELATIVE_PRESETS,
-  type RelativePreset,
-  renderRegisteredFilter,
-  resolveRenderer,
-  splitRelativeToken,
-  type TableLabels,
-  type TableSource,
-  textFilterFor,
-  type TextOp,
+  AdaptMultiSelectFilterFieldModel,
+  AdaptRangeFilterFieldModel,
+  AdaptSelectFilterFieldModel,
+  AdaptTextFilterFieldModel,
 } from "@adapttable/angular";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  Directive,
-  inject,
-  Injector,
-  input,
-  type OnInit,
-  type Signal,
-  signal,
-  TemplateRef,
-  type Type,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed } from "@angular/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
 import { CHECKLIST_SLOTS } from "./checklistFilter";
@@ -52,15 +21,9 @@ import { CHECKLIST_SLOTS } from "./checklistFilter";
 
 /** A field's column stack: the caption is a flex item, so `gap` applies. */
 const FIELD_STACK =
-  "display: flex; flex-direction: column; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0";
-
-let nextFieldId = 0;
+  "display: flex; flex-direction: column; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; grid-column: 1 / -1";
 
 /** A fresh id for a field's caption, which its group is labelled by. */
-function fieldId(): string {
-  nextFieldId += 1;
-  return `adapttable-filter-${String(nextFieldId)}`;
-}
 
 /** A text filter: its operator and its value. @internal */
 @Component({
@@ -78,6 +41,8 @@ function fieldId(): string {
       <div data-adapttable-part="filter-label" [id]="id">{{ w.label }}</div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
         <tui-textfield
+          tuiTextfieldSize="s"
+          style="flex: 1 1 7rem; min-width: 0; width: 100%"
           [tuiTextfieldCleaner]="false"
           [stringify]="w.opLabelKeys | taigaLabels: labels()"
           ><input
@@ -97,6 +62,8 @@ function fieldId(): string {
         >
         @if (w.needsValue) {
           <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
             ><input
               tuiInput
               type="text"
@@ -111,28 +78,10 @@ function fieldId(): string {
     </fieldset>
   `,
 })
-export class AdaptTextFilterField<TRow> {
-  /** The definition. */
-  readonly def = input.required<FilterDef<TRow>>();
-  /** The source whose filter bag the field writes. */
-  readonly source = input.required<TableSource<TRow>>();
-  /** Resolved labels. */
-  readonly labels = input.required<Required<TableLabels>>();
-
-  protected readonly id = fieldId();
+export class AdaptTextFilterField<
+  TRow,
+> extends AdaptTextFilterFieldModel<TRow> {
   protected readonly stack = FIELD_STACK;
-  protected readonly widget = textFilterFor(this.def, this.source);
-
-  protected opLabel(key: keyof TableLabels): string {
-    return filterOpLabel(this.labels(), key);
-  }
-
-  /** The select offers only the widget's operators. */
-  protected pickOp(value: TextOp | null): void {
-    if (value === null) return;
-    const w = this.widget();
-    w.write(value, w.value);
-  }
 }
 
 /** A yes/no filter. @internal */
@@ -146,6 +95,8 @@ export class AdaptTextFilterField<TRow> {
     <label data-adapttable-part="filter-field" [style]="stack">
       <span data-adapttable-part="filter-label">{{ w.label }}</span>
       <tui-textfield
+        tuiTextfieldSize="s"
+        style="min-width: 0; width: 100%"
         [stringify]="
           {
             '': labels().boolAny,
@@ -174,39 +125,13 @@ export class AdaptTextFilterField<TRow> {
     </label>
   `,
 })
-export class AdaptBooleanFilterField<TRow> {
-  /** The definition. */
-  readonly def = input.required<FilterDef<TRow>>();
-  /** The source whose filter bag the field writes. */
-  readonly source = input.required<TableSource<TRow>>();
-  /** Resolved labels. */
-  readonly labels = input.required<Required<TableLabels>>();
-
+export class AdaptBooleanFilterField<
+  TRow,
+> extends AdaptBooleanFilterFieldModel<TRow> {
   protected readonly stack = FIELD_STACK;
-  protected readonly widget = booleanFilterFor(this.def, this.source);
-
-  /** The select offers only the three choices. */
-  protected pick(value: "" | "true" | "false" | null): void {
-    this.widget().write(value ?? "");
-  }
 }
 
 /** The choices of a select or checkbox field, following its definition. */
-@Directive()
-abstract class OptionsField<TRow> implements OnInit {
-  abstract readonly def: Signal<FilterDef<TRow>>;
-  private readonly injector = inject(Injector);
-  protected readonly choices = signal<Signal<FilterOptionsState> | undefined>(
-    undefined
-  );
-  protected readonly options = computed(
-    () => this.choices()?.() ?? { options: [], loading: false }
-  );
-
-  ngOnInit(): void {
-    this.choices.set(filterOptionsFor(this.def, this.injector));
-  }
-}
 
 /** A single-choice filter. @internal */
 @Component({
@@ -219,6 +144,8 @@ abstract class OptionsField<TRow> implements OnInit {
     <label data-adapttable-part="filter-field" [style]="stack">
       <span data-adapttable-part="filter-label">{{ caption() }}</span>
       <tui-textfield
+        tuiTextfieldSize="s"
+        style="min-width: 0; width: 100%"
         [stringify]="
           options().options | taigaLabels: { '': labels().filterAll }
         "
@@ -247,19 +174,10 @@ abstract class OptionsField<TRow> implements OnInit {
     </label>
   `,
 })
-export class AdaptSelectFilterField<TRow> extends OptionsField<TRow> {
-  /** The definition. */
-  readonly def = input.required<FilterDef<TRow>>();
-  /** The source whose filter bag the field writes. */
-  readonly source = input.required<TableSource<TRow>>();
-  /** Resolved labels: the option for every value. */
-  readonly labels = input.required<Required<TableLabels>>();
-
+export class AdaptSelectFilterField<
+  TRow,
+> extends AdaptSelectFilterFieldModel<TRow> {
   protected readonly stack = FIELD_STACK;
-  protected readonly caption = computed(() => filterLabel(this.def()));
-  protected readonly current = computed(() =>
-    String(this.source().extra[this.def().key] ?? "")
-  );
 }
 
 /** A multi-choice filter drawn as checkboxes. @internal */
@@ -277,7 +195,7 @@ export class AdaptSelectFilterField<TRow> extends OptionsField<TRow> {
       <div data-adapttable-part="filter-label" [id]="id">{{ caption() }}</div>
       <div
         data-taiga-part="filter-checkbox-group"
-        style="display: flex; flex-wrap: wrap; gap: 10px; overflow: auto"
+        style="display: flex; flex-direction: column; gap: 8px; overflow: auto"
         [style.max-height.px]="listHeight"
       >
         @if (options().loading) {
@@ -300,27 +218,10 @@ export class AdaptSelectFilterField<TRow> extends OptionsField<TRow> {
     </fieldset>
   `,
 })
-export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
-  /** The definition. */
-  readonly def = input.required<FilterDef<TRow>>();
-  /** The source whose filter bag the field writes. */
-  readonly source = input.required<TableSource<TRow>>();
-
-  protected readonly id = fieldId();
-  protected readonly stack = FIELD_STACK;
-  protected readonly listHeight = 220;
-  protected readonly caption = computed(() => filterLabel(this.def()));
-  protected readonly selected = computed(() =>
-    listFilterValues(this.source().extra[this.def().key])
-  );
-
-  protected toggle(value: string, on: boolean): void {
-    const current = this.selected();
-    this.source().setExtra(
-      this.def().key,
-      on ? [...current, value] : current.filter((item) => item !== value)
-    );
-  }
+export class AdaptMultiSelectFilterField<
+  TRow,
+> extends AdaptMultiSelectFilterFieldModel<TRow> {
+  protected readonly stack = FIELD_STACK + "; grid-column: auto";
 }
 
 /** An operator-first number or date range. @internal */
@@ -340,9 +241,13 @@ export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
       <div data-adapttable-part="filter-label" [id]="id">{{ w.label }}</div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px">
         <tui-textfield
+          tuiTextfieldSize="s"
+          style="flex: 1 1 7rem; min-width: 0; width: 100%"
+          [stringify]="w.opLabelKeys | taigaLabels: l"
           ><input
             tuiSelect
             data-adapttable-part="filter-operator"
+            [attr.placeholder]="l.operator"
             style="flex: 0 0 8.5rem; width: 8.5rem"
             [attr.aria-label]="l.operator"
             [ngModel]="w.op ?? ''"
@@ -360,6 +265,8 @@ export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
         >
         @if (w.arity === "two") {
           <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
             ><input
               tuiInput
               data-adapttable-part="filter-input"
@@ -371,6 +278,8 @@ export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
               (input)="w.write(w.op, $any($event.target).value, w.b)"
           /></tui-textfield>
           <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
             ><input
               tuiInput
               data-adapttable-part="filter-input"
@@ -384,7 +293,11 @@ export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
         }
         @if (w.op === "relative") {
           @let token = relative();
-          <tui-textfield [tuiTextfieldCleaner]="false"
+          <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
+            [tuiTextfieldCleaner]="false"
+            [stringify]="presetLabels() | taigaLabels"
             ><input
               tuiSelect
               data-adapttable-part="filter-input"
@@ -402,6 +315,8 @@ export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
           >
           @if (token.preset === "last" || token.preset === "next") {
             <tui-textfield
+              tuiTextfieldSize="s"
+              style="flex: 1 1 7rem; min-width: 0; width: 100%"
               ><input
                 tuiInput
                 type="number"
@@ -421,6 +336,8 @@ export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
           w.arity !== "two"
         ) {
           <tui-textfield
+            tuiTextfieldSize="s"
+            style="flex: 1 1 7rem; min-width: 0; width: 100%"
             ><input
               tuiInput
               data-adapttable-part="filter-input"
@@ -436,52 +353,15 @@ export class AdaptMultiSelectFilterField<TRow> extends OptionsField<TRow> {
     </fieldset>
   `,
 })
-export class AdaptRangeFilterField<TRow> {
-  /** The definition. */
-  readonly def = input.required<FilterDef<TRow>>();
-  /** The source whose filter bag the field writes. */
-  readonly source = input.required<TableSource<TRow>>();
-  /** Resolved labels. */
-  readonly labels = input.required<Required<TableLabels>>();
-
-  protected readonly id = fieldId();
+export class AdaptRangeFilterField<
+  TRow,
+> extends AdaptRangeFilterFieldModel<TRow> {
   protected readonly stack = FIELD_STACK;
-  protected readonly presets = RELATIVE_PRESETS;
-  protected readonly widget = rangeFilterFor(this.def, this.source);
-  protected readonly relative = computed(() =>
-    splitRelativeToken(this.widget().a)
+  protected readonly presetLabels = computed(() =>
+    Object.fromEntries(
+      this.presets.map((preset) => [preset, this.presetLabel(preset)])
+    )
   );
-
-  protected opLabel(op: RangeOp): string {
-    const keys = this.widget().opLabelKeys as Partial<
-      Record<RangeOp, keyof TableLabels>
-    >;
-    const key = keys[op];
-    return key ? filterOpLabel(this.labels(), key) : op;
-  }
-
-  protected presetLabel(preset: RelativePreset): string {
-    return this.labels()[RELATIVE_PRESET_LABEL_KEYS[preset]];
-  }
-
-  protected pickOp(value: string | null): void {
-    const w = this.widget();
-    const next = w.ops.find((op) => op === value);
-    w.setOp(next);
-    w.write(next, w.a, w.b);
-  }
-
-  /** The select offers only the presets. */
-  protected pickPreset(value: RelativePreset | null): void {
-    if (value === null) return;
-    const w = this.widget();
-    w.write(w.op, joinRelativeToken(value, this.relative().n), "");
-  }
-
-  protected pickCount(value: string): void {
-    const w = this.widget();
-    w.write(w.op, joinRelativeToken(this.relative().preset, Number(value)), "");
-  }
 }
 
 /**
@@ -565,55 +445,6 @@ export class AdaptRangeFilterField<TRow> {
     }
   `,
 })
-export class AdaptAutoFilterForm<TRow> {
-  /** The resolved definitions, in order. */
-  readonly defs = input.required<readonly FilterDef<TRow>[]>();
-  /** The source whose filter bag the fields read and write. */
-  readonly source = input.required<TableSource<TRow>>();
-  /** Resolved labels. */
-  readonly labels = input.required<Required<TableLabels>>();
-  /** The filter type registry. */
-  readonly registry = input<FilterTypeRegistry>(defaultFilterRegistry);
-
+export class AdaptAutoFilterForm<TRow> extends AdaptAutoFilterFormModel<TRow> {
   protected readonly checklistSlots = CHECKLIST_SLOTS;
-
-  /** Resolve each host renderer with the same live props its callback receives. */
-  protected readonly fields = computed(() => {
-    const source = this.source();
-    const labels = this.labels();
-    const registry = this.registry();
-    return this.defs().map((def) => {
-      const props: FilterWidgetRenderProps<TRow> = {
-        def,
-        source,
-        labels,
-        className: undefined,
-      };
-      const value = renderRegisteredFilter(def, source, labels, registry);
-      const context = { ...props, $implicit: props };
-      let renderer: TemplateRef<typeof context> | Type<unknown> | undefined;
-      if (value instanceof TemplateRef) {
-        renderer = value;
-      } else if (typeof value === "function" && "ɵcmp" in value) {
-        renderer = value as unknown as Type<unknown>;
-      }
-      return {
-        def,
-        context,
-        renderer: resolveRenderer(renderer, context),
-        text:
-          value && (typeof value === "string" || typeof value === "number")
-            ? String(value)
-            : null,
-      };
-    });
-  });
-
-  /** Which field draws a definition. */
-  protected kindOf(def: FilterDef<TRow>): string {
-    const registry = this.registry();
-    const kind: string =
-      registry.get(def.type)?.widget ?? filterWidgetKind(def, registry) ?? "";
-    return kind === "dateRange" || kind === "numberRange" ? "range" : kind;
-  }
 }

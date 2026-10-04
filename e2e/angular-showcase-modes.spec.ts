@@ -13,6 +13,84 @@ async function attachView(page: Page, testInfo: TestInfo, name: string) {
 }
 
 for (const kit of ANGULAR_KITS) {
+  test(`${kit.key}: pinned summaries render complete derived fields and keep the options drawer open`, async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    await page.goto(`/angular-all-options/?kit=${kit.key}`);
+    await page
+      .getByRole("button", { name: "Configure options", exact: true })
+      .click();
+    const panel = page.getByRole("dialog", {
+      name: "Feature Lab controls",
+      exact: true,
+    });
+    const summary = panel.getByRole("checkbox", {
+      name: "Pinned summary rows",
+      exact: true,
+    });
+    await summary.check();
+    await expect(summary).toBeChecked();
+    await expect(panel).toBeVisible();
+    const row = page.locator('[data-adapttable-part="pinned-summary-bottom"]');
+    await expect(row).toContainText("Portfolio total");
+    await expect(row).not.toContainText("NaN");
+    await expect(row).not.toContainText("Invalid Date");
+    await summary.uncheck();
+    await expect(row).toHaveCount(0);
+    await expect(panel).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test(`${kit.key}: clean batch mode can change while pending batch edits stay protected`, async ({
+    page,
+  }) => {
+    await page.goto(`/angular-all-options/?kit=${kit.key}&editing-mode=batch`);
+    const batchFields = page.locator(
+      '[data-adapttable-part="batch-edit-cell"] [data-adapttable-part="edit-cell-editor"]'
+    );
+    await expect(batchFields.first()).toBeVisible();
+    await expect(
+      page.locator('[data-adapttable-part="batch-edit-bar"]')
+    ).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Configure options", exact: true })
+      .click();
+    const mode = page.getByRole("combobox", {
+      name: "Editing mode",
+      exact: true,
+    });
+    await mode.selectOption("off");
+    await expect(mode).toHaveValue("off");
+    await expect(batchFields).toHaveCount(0);
+    await expect(page.getByRole("alertdialog")).toHaveCount(0);
+    await mode.selectOption("batch");
+    await page.getByRole("button", { name: "Done", exact: true }).click();
+    await batchFields.first().fill("Draft name");
+    await expect(
+      page.locator('[data-adapttable-part="batch-edit-bar"]')
+    ).toBeVisible();
+    const next = ANGULAR_KITS.find((candidate) => candidate.key !== kit.key)!;
+    await page.getByRole("radio", { name: next.label, exact: true }).click();
+    await expect(
+      page.getByRole("alertdialog", { name: "Finish editing before switching" })
+    ).toBeVisible();
+    expect(new URL(page.url()).searchParams.get("kit")).toBe(kit.key);
+    await page
+      .getByRole("button", { name: "Return to editing", exact: true })
+      .click();
+    await expect(batchFields.first()).toHaveValue("Draft name");
+    await page.locator('[data-adapttable-part="batch-edit-cancel"]').click();
+    await expect(batchFields.first()).toHaveValue("Ada Lovelace");
+    await page.getByRole("radio", { name: next.label, exact: true }).check();
+    await expect(page.locator(`[data-adapter="${next.key}"]`)).toBeVisible();
+    await expect(page.getByRole("alertdialog")).toHaveCount(0);
+  });
+
   test(`${kit.key}: an invalid edit survives a blocked kit transition`, async ({
     page,
   }) => {
@@ -157,10 +235,15 @@ test("Material typography keeps a sans-serif fallback in tables and native porta
     const material = { key: "material" };
     const filters = angularPart(material, page, "filters-button", surface);
     for (const theme of ["light", "dark"]) {
-      if (theme === "dark")
-        await page
-          .getByRole("button", { name: "Dark mode", exact: true })
-          .click();
+      const themeToggle = page.getByRole("button", {
+        name: "Toggle dark mode",
+        exact: true,
+      });
+      if (theme === "dark") await themeToggle.click();
+      await expect(themeToggle).toHaveAttribute(
+        "aria-pressed",
+        String(theme === "dark")
+      );
       for (const control of [
         surface.locator("tbody td").first(),
         surface.locator('[data-adapttable-part="search"]'),
@@ -178,7 +261,12 @@ test("Material typography keeps a sans-serif fallback in tables and native porta
       await page.keyboard.press("Escape");
       await expect(popup).toBeHidden();
     }
-    await page.getByRole("button", { name: "Light mode", exact: true }).click();
+    const themeToggle = page.getByRole("button", {
+      name: "Toggle dark mode",
+      exact: true,
+    });
+    await themeToggle.click();
+    await expect(themeToggle).toHaveAttribute("aria-pressed", "false");
     await page.getByRole("radio", { name: "Unstyled", exact: true }).check();
     await page
       .getByRole("radio", { name: "Angular Material", exact: true })
@@ -243,7 +331,7 @@ for (const kit of ANGULAR_KITS) {
       await expect(framework).toBeFocused();
       await framework.press("Tab");
       await expect(
-        page.getByRole("button", { name: "Dark mode", exact: true })
+        page.getByRole("button", { name: "Toggle dark mode", exact: true })
       ).toBeFocused();
       // Exercise a real provider change through the phone's kit controls.
       await page.getByRole("radio", { name: next.label, exact: true }).check();

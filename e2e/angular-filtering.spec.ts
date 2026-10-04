@@ -220,5 +220,35 @@ for (const kit of ANGULAR_KITS) {
       await expect(part(page, "row")).toHaveCount(6);
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
     });
+
+    if (kit.key === "ngx-bootstrap") {
+      test("keeps multiple checkbox choices open in its native header menu", async ({
+        page,
+      }) => {
+        await page.goto(PAGE);
+        await page.getByRole("button", { name: "Header", exact: true }).click();
+        await part(page, "filter-header-trigger").nth(1).click();
+        const core = page.getByRole("checkbox", { name: "Core", exact: true });
+        const platform = page.getByRole("checkbox", {
+          name: "Platform",
+          exact: true,
+        });
+        await core.check();
+        await expect(core).toBeChecked();
+        await expect(platform).toBeVisible();
+        await platform.check();
+        await expect(platform).toBeChecked();
+        await expect(part(page, "row")).toHaveCount(12);
+        expect(new Set(await teams(page))).toEqual(
+          new Set(["Core", "Platform"])
+        );
+        await page.keyboard.press("Escape");
+        await expect(core).toHaveCount(0);
+        await expect(
+          part(page, "filter-header-trigger").nth(1).getByRole("button")
+        ).toBeFocused();
+        await expect(part(page, "row")).toHaveCount(12);
+      });
+    }
   });
 }

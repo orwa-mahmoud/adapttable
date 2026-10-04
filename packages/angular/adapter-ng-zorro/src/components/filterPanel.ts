@@ -40,16 +40,18 @@ import { OVERLAY_Z, overlayEscapeHandled } from "./overlayPlacement";
     @let p = props();
     <div
       data-adapttable-part="filters-form"
-      style="display: flex; flex-direction: column; gap: 16px"
+      style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px"
     >
-      <adapt-filter-tree-chrome
-        [defs]="p.defs"
-        [source]="p.source"
-        [labels]="p.labels"
-        [registry]="p.registry"
-        [defaultExpanded]="p.defaultExpanded ?? false"
-        [slots]="treeSlots"
-      />
+      <div style="grid-column: 1 / -1">
+        <adapt-filter-tree-chrome
+          [defs]="p.defs"
+          [source]="p.source"
+          [labels]="p.labels"
+          [registry]="p.registry"
+          [defaultExpanded]="p.defaultExpanded ?? false"
+          [slots]="treeSlots"
+        />
+      </div>
       @if (p.showSimpleFields) {
         <adapt-auto-filter-form
           [defs]="p.defs"
@@ -158,18 +160,18 @@ export class AdaptFilterDrawer {
       if (!p.open || !overlay) return;
       const panel = overlay.querySelector<HTMLElement>(".ant-drawer-content");
       if (panel) {
-        panel.setAttribute("data-state", "open");
+        panel.dataset.state = "open";
         panel.setAttribute("role", "dialog");
         panel.setAttribute("aria-modal", "true");
         panel.setAttribute("aria-label", p.labels.filters);
         panel.setAttribute("tabindex", "-1");
-        panel.setAttribute("data-dir", p.dir ?? "ltr");
+        panel.dataset.dir = p.dir ?? "ltr";
         panel.dir = p.dir ?? "ltr";
         if (!panel.contains(document.activeElement)) panel.focus();
       }
       const mask = overlay.querySelector<HTMLElement>(".ant-drawer-mask");
       if (mask) {
-        mask.setAttribute("data-state", "open");
+        mask.dataset.state = "open";
       }
     });
     effect((onCleanup) => {

@@ -6,7 +6,8 @@ import { BrnPopover } from "@spartan-ng/brain/popover";
 /** Brain exposes the pane id and state, but no accessible-name input. @internal */
 @Directive({ selector: "[brnPopover][adaptHlmPopoverLabel]" })
 export class HlmPopoverLabel {
-  readonly label = input.required<string>({ alias: "adaptHlmPopoverLabel" });
+  readonly adaptHlmPopoverLabel = input.required<string>();
+  readonly label = this.adaptHlmPopoverLabel;
   private readonly popover = inject(BrnPopover, { self: true });
   private readonly document = inject(DOCUMENT);
 

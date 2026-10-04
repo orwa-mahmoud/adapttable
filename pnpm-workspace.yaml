@@ -71,3 +71,7 @@ overrides:
   # array-limit / prototype pollution advisories; 6.15.1 is the last
   # vulnerable line Dependabot could not raise past a parent range
   qs: "^6.16.0"
+
+# Local security remedy until a patched upstream release exists; see patches/README.md.
+patchedDependencies:
+  http-cache-semantics@4.2.0: patches/http-cache-semantics@4.2.0.patch

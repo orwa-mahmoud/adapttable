@@ -2672,6 +2672,9 @@ export { mobileCardListStyle }
 
 export { MobileCardModel }
 
+// @public
+export function mobileCardRegionProps(requestedLabel: string | undefined, fallbackLabel: string, maxHeight: CSSProperties["maxHeight"]): Pick<HTMLAttributes<HTMLElement>, "aria-label" | "tabIndex">;
+
 export { MobileCardRenderer }
 
 // @public

@@ -49,3 +49,19 @@ html[data-theme="dark"] .adapt-material-overlay {
     )
   );
 }
+
+/* The application's Material theme uses the approved neutral page palette. */
+[data-angular-kit="material"],
+.adapt-material-overlay {
+  @include mat.theme-overrides(
+    (
+      surface: var(--page-surface),
+      surface-container-low: var(--page-surface),
+      surface-container-high: var(--page-surface),
+      on-surface: var(--ink),
+      on-surface-variant: var(--ink-2),
+      outline: var(--page-border),
+      outline-variant: var(--page-border),
+    )
+  );
+}

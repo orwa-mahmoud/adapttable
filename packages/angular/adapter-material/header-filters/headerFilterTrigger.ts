@@ -65,6 +65,7 @@ import { MatButtonModule } from "@angular/material/button";
       @if (overlay.open()) {
         <adapt-material-popover
           [origin]="triggerElement()!.nativeElement"
+          align="start"
           (dismiss)="overlay.setOpen(false)"
         >
           <div
@@ -94,7 +95,7 @@ export class AdaptHeaderFilterTrigger {
   >("trigger", { read: ElementRef });
 
   protected readonly icon = { ...FILTERS_ICON, width: 14, height: 14 };
-  protected readonly registry = undefined as never;
+  protected readonly registry = defaultFilterRegistry;
   protected readonly caption = computed(() => filterLabel(this.props().def));
   protected readonly active = computed(() =>
     hasActiveHeaderFilter(this.props())

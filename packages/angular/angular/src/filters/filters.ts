@@ -33,7 +33,6 @@ import { computed, type Signal, signal, untracked } from "@angular/core";
 
 import { type MaybeSignal, readMaybe } from "../store";
 import { activeFilterChipsFor } from "./activeFilterChips";
-import { filterOptionsFor, type FilterOptionsState } from "./filterOptions";
 
 /**
  * Options for {@link filterRuntimeFor}.
@@ -149,8 +148,8 @@ export function filterChipsFor<TRow>(
  *
  * @public
  */
-export type { FilterOptionsState };
-export { filterOptionsFor };
+export type { FilterOptionsState } from "./filterOptions";
+export { filterOptionsFor } from "./filterOptions";
 
 /**
  * A text filter's field: its operator, kept while the value is empty, and
