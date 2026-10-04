@@ -1,8 +1,22 @@
 import { expect, test } from "@playwright/test";
-const url = process.env.VUE_ASSISTANT_URL ?? "/vue/demo/unstyled/assistant/";
+
+import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
+
+const assistantPage = SHOWCASE_PAGES.find(
+  (page) => page.key === "vue-unstyled-assistant"
+);
+if (!assistantPage) throw new Error("Vue assistant showcase is not registered");
+// The runner serves raw build inputs; site composition assigns public URLs.
+const preview = assistantPage.html
+  .replace(/^\.\//, "/")
+  .replace(/index\.html$/, "");
+const url = process.env.VUE_ASSISTANT_URL ?? preview;
 const part = (name: string) => `[data-adapttable-part="${name}"]`;
 test.beforeEach(async ({ page }) => {
-  await page.goto(url);
+  const response = await page.goto(url);
+  expect(response?.ok(), `Assistant showcase navigation failed: ${url}`).toBe(
+    true
+  );
 });
 test("accepts a controlled model and records its outcome", async ({ page }) => {
   await page.locator(part("assistant-input")).fill("Select Ada");
