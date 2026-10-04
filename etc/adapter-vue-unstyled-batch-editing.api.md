@@ -15,7 +15,7 @@ import { CreateComponentPublicInstanceWithMixins } from 'vue';
 import { EditingLifecycleExtras } from '@adapttable/vue/editing';
 import { PublicProps } from 'vue';
 import { TableEditingOptions } from '@adapttable/vue/editing';
-import { TableFeature } from '@adapttable/vue/features';
+import { TableFeature } from '@adapttable/vue/adapter';
 import { VNodeProps } from 'vue';
 
 // @public

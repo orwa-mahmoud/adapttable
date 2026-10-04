@@ -1,6 +1,7 @@
 import {
   extendFeature,
   slotRender,
+  type TableFeature,
   TOOLBAR_EXTRAS,
 } from "@adapttable/vue/adapter";
 import {
@@ -16,7 +17,7 @@ import { NativeFiltersPanel } from "./filters/NativeFiltersPanel";
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] = [],
   options: FiltersOptions = {}
-) {
+): TableFeature<TRow> {
   return extendFeature(bindingFilters(defs, options), [
     slotRender(TOOLBAR_EXTRAS, () => h(NativeFiltersPanel)),
   ]);

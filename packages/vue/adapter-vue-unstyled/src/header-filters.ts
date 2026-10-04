@@ -1,4 +1,8 @@
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
+import {
+  extendFeature,
+  slotRender,
+  type StaticTableFeature,
+} from "@adapttable/vue/adapter";
 import {
   headerFilters as bindingHeaderFilters,
   headerFilterSlotKey,
@@ -8,7 +12,7 @@ import { h } from "vue";
 import { NativeHeaderFilter } from "./filters/NativeHeaderFilter";
 
 /** Native anchored column filters share the binding's lifecycle and field models. */
-export function headerFilters() {
+export function headerFilters(): StaticTableFeature {
   return extendFeature(bindingHeaderFilters(), [
     slotRender(headerFilterSlotKey<unknown>(), (props) =>
       h(NativeHeaderFilter, { ...props })

@@ -20,9 +20,9 @@ import { PublicProps } from 'vue';
 import { RowEditActionsProps } from '@adapttable/vue/editing';
 import { RowEditIcons } from '@adapttable/vue/editing';
 import { RowEditingState } from '@adapttable/vue/editing';
-import { StaticTableFeature } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue/adapter';
 import { TableEditingOptions } from '@adapttable/vue/editing';
-import { TableFeature } from '@adapttable/vue/features';
+import { TableFeature } from '@adapttable/vue/adapter';
 import { VNodeProps } from 'vue';
 import { VueEditableCellProps } from '@adapttable/vue/editing';
 

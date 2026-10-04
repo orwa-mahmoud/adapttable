@@ -77,10 +77,8 @@ import { SavedViewsPanelChromeProps } from '@adapttable/vue/saved-views';
 import { SavedViewsStore } from '@adapttable/vue/saved-views';
 import { StaticGroupingExtras } from '@adapttable/vue/features';
 import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { StaticTableFeature as StaticTableFeature_2 } from '@adapttable/vue/features';
 import { TableEditingOptions } from '@adapttable/vue/editing';
-import { TableFeature } from '@adapttable/vue/features';
-import { TableFeature as TableFeature_2 } from '@adapttable/vue/adapter';
+import { TableFeature } from '@adapttable/vue/adapter';
 import { TableRowDetail } from '@adapttable/vue/features';
 import { TableTree } from '@adapttable/vue/features';
 import { tree } from '@adapttable/vue/features';
@@ -173,7 +171,7 @@ export { GroupCollapseOptions }
 export function grouping(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: StaticGroupingExtras): StaticTableFeature;
 
 // @public (undocumented)
-export function grouping<TRow>(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: GroupingExtras<TRow>): TableFeature_2<TRow>;
+export function grouping<TRow>(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: GroupingExtras<TRow>): TableFeature<TRow>;
 
 export { GroupingExtras }
 
@@ -182,7 +180,7 @@ export { GroupNode }
 export { GroupSort }
 
 // @public
-export function headerFilters(): StaticTableFeature_2;
+export function headerFilters(): StaticTableFeature;
 
 export { multiSort }
 
@@ -333,7 +331,7 @@ export { TreeExpansionOptions }
 export { TreeFeatureOptions }
 
 // @public
-export function undoRedoButtons(): StaticTableFeature_2;
+export function undoRedoButtons(): StaticTableFeature;
 
 export { useGroupCollapse }
 

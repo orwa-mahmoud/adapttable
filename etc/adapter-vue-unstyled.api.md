@@ -12,7 +12,6 @@ import { ColumnLayoutState } from '@adapttable/vue/adapter';
 import { ComposedFeature } from '@adapttable/vue/adapter';
 import { ConfirmHandler } from '@adapttable/vue/adapter';
 import { DataTableHandle } from '@adapttable/vue/adapter';
-import { DataTableHandle as DataTableHandle_2 } from '@adapttable/vue/features';
 import { Direction } from '@adapttable/vue/adapter';
 import { HeaderContext } from '@adapttable/vue/adapter';
 import { PaginationMode } from '@adapttable/vue/adapter';
@@ -36,7 +35,7 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
     }> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
-    expose: (exposed: ShallowUnwrapRef<DataTableHandle_2<TRow>>) => void;
+    expose: (exposed: ShallowUnwrapRef<DataTableHandle<TRow>>) => void;
     attrs: any;
     slots: DataTableSlots<TRow>;
     emit: ((evt: "update:selectedIds", ids: string[]) => void) & ((evt: "update:columnLayout", layout: ColumnLayoutState) => void) & ((evt: "update:density", density: TableDensity) => void);

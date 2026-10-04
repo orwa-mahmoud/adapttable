@@ -18,7 +18,7 @@ import { FilterTreeBuilderProps } from '@adapttable/vue/filters';
 import { filterTypes } from '@adapttable/vue/filters';
 import { FilterTypeSpec } from '@adapttable/vue/filters';
 import { PublicProps } from 'vue';
-import { TableFeature } from '@adapttable/vue/features';
+import { TableFeature } from '@adapttable/vue/adapter';
 import { VNodeProps } from 'vue';
 
 export { ChecklistFilterProps }

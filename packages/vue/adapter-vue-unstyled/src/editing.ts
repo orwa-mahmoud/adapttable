@@ -1,6 +1,8 @@
 import {
   extendFeature,
   slotRender,
+  type StaticTableFeature,
+  type TableFeature,
   TOOLBAR_EXTRAS,
 } from "@adapttable/vue/adapter";
 import {
@@ -34,7 +36,7 @@ function cellSlot<TRow>() {
 export function editing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
   extras: EditingLifecycleExtras<TRow> = {}
-) {
+): TableFeature<TRow> {
   return extendFeature(bindingEditing(onCellEdit, extras), [cellSlot<TRow>()]);
 }
 
@@ -42,7 +44,7 @@ export function editing<TRow>(
 export function rowEditing<TRow>(
   onRowEdit: NonNullable<TableEditingOptions<TRow>["onRowEdit"]>,
   extras: EditingLifecycleExtras<TRow> = {}
-) {
+): TableFeature<TRow> {
   return extendFeature(bindingRowEditing(onRowEdit, extras), [
     cellSlot<TRow>(),
     slotRender(rowEditActionsSlotKey<TRow>(), (props) =>
@@ -55,7 +57,7 @@ export function rowEditing<TRow>(
 export function batchEditing<TRow>(
   onBatchEdit: NonNullable<TableEditingOptions<TRow>["onBatchEdit"]>,
   extras: EditingLifecycleExtras<TRow> = {}
-) {
+): TableFeature<TRow> {
   return extendFeature(bindingBatchEditing(onBatchEdit, extras), [
     cellSlot<TRow>(),
     slotRender(batchEditBarSlotKey<TRow>(), (props) =>
@@ -81,7 +83,7 @@ export type {
 export { dirtyIndicators, editHistory } from "@adapttable/vue/editing";
 
 /** Opt-in native Undo and Redo buttons use the shell's history projection. */
-export function undoRedoButtons() {
+export function undoRedoButtons(): StaticTableFeature {
   return extendFeature(bindingUndoRedoButtons(), [
     slotRender(TOOLBAR_EXTRAS, (props) =>
       h(NativeHistoryButtons, { ...props })

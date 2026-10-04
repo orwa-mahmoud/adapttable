@@ -1,6 +1,7 @@
 <script setup lang="ts" generic="TRow">
 import {
   type ColumnLayoutState,
+  type DataTableHandle,
   defaultConfirm,
   DENSITY_CONTROL,
   DesktopTableChrome,
@@ -124,7 +125,7 @@ watch([rootElement, scrollElement], () => shell.setSurface(surface), {
 onBeforeUnmount(() => {
   shell.setSurface(null);
 });
-defineExpose(shell.handle);
+defineExpose<DataTableHandle<TRow>>(shell.handle);
 function changeLimit(event: Event): void {
   if (event.target instanceof HTMLSelectElement)
     table.setLimit(Number(event.target.value));

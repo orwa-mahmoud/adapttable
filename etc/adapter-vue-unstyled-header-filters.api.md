@@ -11,7 +11,7 @@ import { ComponentProvideOptions } from 'vue';
 import { CreateComponentPublicInstanceWithMixins } from 'vue';
 import { HeaderFilterOptions } from '@adapttable/vue/header-filters';
 import { PublicProps } from 'vue';
-import { StaticTableFeature } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue/adapter';
 import { VNodeProps } from 'vue';
 
 // @public
