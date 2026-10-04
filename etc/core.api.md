@@ -3791,6 +3791,7 @@ export interface FindBarKeyTarget {
 export interface FindController {
     readonly configure: (options: FindControllerOptions) => void;
     readonly connect: () => () => void;
+    readonly flush: () => void;
     readonly getSnapshot: () => FindSnapshot;
     readonly openBar: () => void;
     readonly setOpen: (open: boolean) => void;
@@ -7158,6 +7159,9 @@ export interface RowPinState {
 }
 
 // @public
+export type RowReorderActions<TRow> = Pick<RowReorderController<TRow>, "dragStart" | "dragEnd" | "dragOver" | "drop" | "keyDown" | "moveBy" | "moveMenu" | "selectMoveTarget" | "confirmMove" | "cancelMove">;
+
+// @public
 export type RowReorderAnnouncements = Required<Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled" | "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever" | "moveRejectedSorted" | "moveRejectedCycle" | "moveUnavailable" | "rootLevel" | "moveToGroup" | "moveUnder">>;
 
 // @public
@@ -7173,6 +7177,7 @@ export interface RowReorderController<TRow> {
     readonly dragOver: (event: RowDragEvent, localIndex: number) => void;
     readonly dragStart: (event: RowDragEvent, rowId: string, localIndex: number) => void;
     readonly drop: (event: RowDragEvent, localIndex: number, row: TRow, windowStart: number) => void;
+    readonly forSession: () => RowReorderActions<TRow>;
     readonly getSnapshot: () => RowReorderSnapshot<TRow>;
     readonly keyDown: (event: RowKeyEvent, slot: RowReorderSlot<TRow>) => void;
     readonly moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
@@ -7187,12 +7192,14 @@ export interface RowReorderControllerOptions<TRow> {
     enabled: boolean;
     getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
     getRowId?: (row: TRow) => string;
+    readonly getRowIndex?: (row: TRow) => number | undefined;
     labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled"> & Partial<Pick<RowReorderLabels, "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever">>;
     movePolicy?: RowMovePolicy;
     onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
     onRowReorder?: RowReorderHandler<TRow>;
     resolveMove?: (row: TRow, target: TRow, position: RowDropPosition) => RowReorderDecision<TRow> | undefined;
     rowAt: (localIndex: number) => TRow | undefined;
+    readonly session?: unknown;
 }
 
 // @public

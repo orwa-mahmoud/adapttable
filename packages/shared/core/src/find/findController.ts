@@ -106,6 +106,8 @@ export interface FindController {
    * waiting on the debounce rather than dropping it.
    */
   readonly connect: () => () => void;
+  /** Persist the pending query to its current URL destination. */
+  readonly flush: () => void;
   /** Show or hide the bar. Hiding clears the query, as a find bar does. */
   readonly setOpen: (open: boolean) => void;
   /** Open the bar — what Ctrl/Cmd+F and a host's own button call. */
@@ -133,7 +135,7 @@ export interface FindController {
 export function createFindController(
   initial: FindControllerOptions
 ): FindController {
-  let options = initial;
+  let options = { ...initial };
   const urlQuery = (): string =>
     options.enabled
       ? readFindQuery(options.adapter.getSearch(), options.urlKey)
@@ -147,7 +149,17 @@ export function createFindController(
   };
   // The last URL value already reacted to, so a query typed while the bar is
   // closed does not read as an external URL change.
-  let seenUrlQuery = first;
+  let seenUrlQuery: string | null = first;
+  let pendingDestination: Pick<
+    FindControllerOptions,
+    "adapter" | "urlKey"
+  > | null = null;
+  const sameDestination = (
+    left: Pick<FindControllerOptions, "adapter" | "urlKey">,
+    right: Pick<FindControllerOptions, "adapter" | "urlKey">
+  ): boolean =>
+    left.adapter === right.adapter &&
+    (left.urlKey ?? "") === (right.urlKey ?? "");
   let timer: ReturnType<typeof setTimeout> | null = null;
   let batchDepth = 0;
   let changed = false;
@@ -184,10 +196,13 @@ export function createFindController(
     }
   };
 
-  const persist = (next: string): void => {
+  const persist = (
+    next: string,
+    destination: Pick<FindControllerOptions, "adapter" | "urlKey">
+  ): void => {
     const trimmed = next.trim();
-    seenUrlQuery = trimmed;
-    const { adapter, urlKey } = options;
+    if (sameDestination(destination, options)) seenUrlQuery = trimmed;
+    const { adapter, urlKey } = destination;
     const namespace = urlKey ? `${urlKey}.` : "";
     const param = `${namespace}${PARAM_FIND}`;
     adapter.setSearch(
@@ -201,18 +216,32 @@ export function createFindController(
     );
   };
 
+  const flushPending = (): void => {
+    const destination = pendingDestination;
+    const value = snapshot.pending;
+    if (!destination || value === null) return;
+    if (timer) clearTimeout(timer);
+    timer = null;
+    // Release this write before calling the adapter: adapters notify
+    // synchronously, and subscribers may synchronize or queue a newer query.
+    batch(() => {
+      pendingDestination = null;
+      write({ pending: null });
+      persist(value, destination);
+    });
+  };
+
   const schedulePersist = (next: string): void => {
+    pendingDestination = { adapter: options.adapter, urlKey: options.urlKey };
     write({ pending: next.trim() });
     if (timer) clearTimeout(timer);
-    timer = setTimeout(() => {
-      timer = null;
-      persist(next);
-      write({ pending: null });
-    }, FIND_URL_WRITE_DEBOUNCE_MS);
+    timer = setTimeout(flushPending, FIND_URL_WRITE_DEBOUNCE_MS);
   };
 
   const setQuery = (next: string): void => {
     batch(() => {
+      if (pendingDestination && !sameDestination(pendingDestination, options))
+        flushPending();
       // A new query starts the walk again: staying on hit 9 of the last
       // search would land the reader somewhere unrelated.
       write({ query: next, index: next.trim() === "" ? -1 : 0 });
@@ -226,10 +255,10 @@ export function createFindController(
 
   const setOpen = (next: boolean): void => {
     batch(() => {
-      write({ open: next });
       // Closing clears the query, so reopening starts clean and no cell stays
       // marked behind a bar that is no longer on screen.
       if (!next) setQuery("");
+      write({ open: next });
     });
   };
 
@@ -242,16 +271,15 @@ export function createFindController(
       };
     },
     configure(next) {
-      options = next;
+      // Bindings can configure during render; URL writes belong to an effect,
+      // an explicit flush, or the debounce that already owns this destination.
+      if (!sameDestination(next, options)) seenUrlQuery = null;
+      options = { ...next };
     },
     connect() {
-      return () => {
-        if (!timer) return;
-        clearTimeout(timer);
-        timer = null;
-        persist(snapshot.pending ?? "");
-      };
+      return flushPending;
     },
+    flush: flushPending,
     setOpen,
     openBar() {
       setOpen(true);
@@ -261,6 +289,11 @@ export function createFindController(
       write({ index: stepMatch(snapshot.index, total, by) });
     },
     syncFromUrl() {
+      if (
+        pendingDestination &&
+        (!options.enabled || !sameDestination(pendingDestination, options))
+      )
+        flushPending();
       if (!options.enabled || snapshot.pending !== null) return;
       const fromUrl = urlQuery();
       const { open, query } = snapshot;

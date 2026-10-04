@@ -653,6 +653,10 @@ export function rowMoveMenu<TRow>(
  * @public
  */
 export interface RowReorderControllerOptions<TRow> {
+  /** A changed owner/source/view token retires every in-flight interaction. */
+  readonly session?: unknown;
+  /** Authoritative dataset index for flat rows. Nested decisions keep their sibling scope. */
+  readonly getRowIndex?: (row: TRow) => number | undefined;
   /** Whether reordering is on; when false every gesture resets. */
   enabled: boolean;
   /** The host's write for a reorder. */
@@ -766,6 +770,27 @@ export interface RowReorderSlot<TRow> {
 }
 
 /**
+ * Row-reordering callbacks captured for one interaction session.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export type RowReorderActions<TRow> = Pick<
+  RowReorderController<TRow>,
+  | "dragStart"
+  | "dragEnd"
+  | "dragOver"
+  | "drop"
+  | "keyDown"
+  | "moveBy"
+  | "moveMenu"
+  | "selectMoveTarget"
+  | "confirmMove"
+  | "cancelMove"
+>;
+
+/**
  * Row reordering for one table.
  *
  * @typeParam TRow - The row type.
@@ -773,6 +798,8 @@ export interface RowReorderSlot<TRow> {
  * @public
  */
 export interface RowReorderController<TRow> {
+  /** Event callbacks bound to this owner session and pending decision. */
+  readonly forSession: () => RowReorderActions<TRow>;
   /** The current state. A new object whenever anything in it changes. */
   readonly getSnapshot: () => RowReorderSnapshot<TRow>;
   /** Listen for state changes. Returns the unsubscribe. */
@@ -861,6 +888,8 @@ export function createRowReorderController<TRow>(
   let mounted = true;
   let nextConfirmToken = 0;
   let activeConfirmToken = 0;
+  let epoch = 0;
+  const menuEpochs = new WeakMap<RowMoveTarget<TRow>, number>();
   let batchDepth = 0;
   let changed = false;
   const listeners = new Set<() => void>();
@@ -902,6 +931,22 @@ export function createRowReorderController<TRow>(
     write({ lifted: null, overIndex: null, overPosition: null });
   };
 
+  const live = (): boolean => mounted && options.enabled;
+  const invalidate = (): void => {
+    epoch += 1;
+    activeConfirmToken = 0;
+    batch(() => {
+      write({ pendingMove: null, hostConfirmPending: false, announcement: "" });
+      reset();
+      snapshot = { ...snapshot };
+      changed = true;
+    });
+  };
+  const sameRow = (expected: TRow, actual: TRow): boolean =>
+    options.getRowId
+      ? options.getRowId(expected) === options.getRowId(actual)
+      : expected === actual;
+
   const announceMove = (request: RowMoveRequest<TRow>): void => {
     const { labels } = options;
     say(
@@ -914,7 +959,14 @@ export function createRowReorderController<TRow>(
   };
 
   const executeMove = (request: RowMoveRequest<TRow>): void => {
+    if (!live()) return;
+    const currentEpoch = epoch;
     options.onRowMove?.(request);
+    if (!live()) return;
+    if (currentEpoch !== epoch) {
+      if (!isLocked() && !snapshot.lifted) announceMove(request);
+      return;
+    }
     batch(() => {
       announceMove(request);
       write({ pendingMove: null });
@@ -927,7 +979,7 @@ export function createRowReorderController<TRow>(
     request: RowMoveRequest<TRow>,
     approved: boolean
   ): void => {
-    if (!mounted || activeConfirmToken !== token) return;
+    if (!live() || activeConfirmToken !== token) return;
     activeConfirmToken = 0;
     batch(() => {
       write({ hostConfirmPending: false });
@@ -960,7 +1012,7 @@ export function createRowReorderController<TRow>(
   };
 
   const requestMove = (request: RowMoveRequest<TRow>): void => {
-    if (isLocked()) return;
+    if (!live() || isLocked()) return;
     const policy = options.movePolicy ?? "never";
     if (policy === "never") {
       batch(() => {
@@ -987,7 +1039,15 @@ export function createRowReorderController<TRow>(
   };
 
   const reorder = (from: number, to: number, row: TRow): void => {
+    if (!live()) return;
+    const currentEpoch = epoch;
     options.onRowReorder?.(from, to, row);
+    if (!live()) return;
+    if (currentEpoch !== epoch) {
+      if (!isLocked() && !snapshot.lifted)
+        say(options.labels.rowMoved(from + 1, to + 1));
+      return;
+    }
     batch(() => {
       say(options.labels.rowMoved(from + 1, to + 1));
       reset();
@@ -1002,11 +1062,24 @@ export function createRowReorderController<TRow>(
     windowStart: number,
     position: RowDropPosition
   ): void => {
-    if (!options.enabled) {
+    if (!live()) {
       reset();
       return;
     }
     if (isLocked()) return;
+    const currentRow = options.rowAt(fromLocal);
+    const currentTarget = options.rowAt(toLocal);
+    if (
+      currentRow === undefined ||
+      currentTarget === undefined ||
+      !sameRow(row, currentRow) ||
+      !sameRow(target, currentTarget)
+    ) {
+      reset();
+      return;
+    }
+    row = currentRow;
+    target = currentTarget;
     const decision = options.resolveMove?.(row, target, position);
     if (decision?.kind === "reject") {
       batch(() => {
@@ -1031,6 +1104,21 @@ export function createRowReorderController<TRow>(
       reset();
       return;
     }
+    if (options.getRowIndex) {
+      const from = options.getRowIndex(row);
+      const targetIndex = options.getRowIndex(target);
+      if (from === undefined || targetIndex === undefined) {
+        reset();
+        return;
+      }
+      const to = sameScopeDestination(from, targetIndex, position);
+      if (from === to) {
+        reset();
+        return;
+      }
+      reorder(from, to, row);
+      return;
+    }
     reorder(
       datasetIndex(fromLocal, windowStart),
       datasetIndex(toLocal, windowStart),
@@ -1047,7 +1135,7 @@ export function createRowReorderController<TRow>(
   };
 
   const keyDown = (event: RowKeyEvent, slot: RowReorderSlot<TRow>): void => {
-    if (!options.enabled) return;
+    if (!live()) return;
     if (isLocked() && event.key !== "Escape") return;
     const { lifted, overIndex } = snapshot;
     const { rowId, localIndex, row, windowStart, rowCount } = slot;
@@ -1096,7 +1184,35 @@ export function createRowReorderController<TRow>(
     });
   };
 
-  return {
+  const controller: RowReorderController<TRow> = {
+    forSession() {
+      const ownedEpoch = epoch;
+      const pending = snapshot.pendingMove;
+      const guard =
+        <TArgs extends readonly unknown[]>(run: (...args: TArgs) => void) =>
+        (...args: TArgs): void => {
+          if (live() && epoch === ownedEpoch) run(...args);
+        };
+      return {
+        dragStart: guard(controller.dragStart),
+        dragEnd: guard(controller.dragEnd),
+        dragOver: guard(controller.dragOver),
+        drop: guard(controller.drop),
+        keyDown: guard(controller.keyDown),
+        moveBy: guard(controller.moveBy),
+        selectMoveTarget: guard(controller.selectMoveTarget),
+        moveMenu: (row) =>
+          live() && epoch === ownedEpoch ? controller.moveMenu(row) : undefined,
+        confirmMove: guard(() => {
+          if (pending !== null && snapshot.pendingMove === pending)
+            controller.confirmMove();
+        }),
+        cancelMove: guard(() => {
+          if (pending !== null && snapshot.pendingMove === pending)
+            controller.cancelMove();
+        }),
+      };
+    },
     getSnapshot: () => snapshot,
     subscribe(listener) {
       listeners.add(listener);
@@ -1105,17 +1221,27 @@ export function createRowReorderController<TRow>(
       };
     },
     configure(next) {
+      const changedSession = !Object.is(options.session, next.session);
       options = next;
+      if (changedSession || !next.enabled) invalidate();
     },
     connect() {
       mounted = true;
       return () => {
         mounted = false;
-        activeConfirmToken = 0;
+        invalidate();
       };
     },
     dragStart(event, rowId, localIndex) {
-      if (!options.enabled || isLocked()) {
+      if (!live() || isLocked()) {
+        event.preventDefault();
+        return;
+      }
+      const current = options.rowAt(localIndex);
+      if (
+        current === undefined ||
+        (options.getRowId && options.getRowId(current) !== rowId)
+      ) {
         event.preventDefault();
         return;
       }
@@ -1130,7 +1256,7 @@ export function createRowReorderController<TRow>(
     dragOver(event, localIndex) {
       // Custom MIME types are often missing from `types` during dragover; the
       // lift flag is the reliable same-table signal.
-      if (snapshot.lifted === null) return;
+      if (!live() || snapshot.lifted === null) return;
       event.preventDefault();
       event.dataTransfer.dropEffect = "move";
       const bounds = event.currentTarget?.getBoundingClientRect?.();
@@ -1140,20 +1266,29 @@ export function createRowReorderController<TRow>(
       });
     },
     drop(event, localIndex, row, windowStart) {
+      if (!live()) return;
       const payload = event.dataTransfer.getData(ROW_DND_MIME);
       if (payload === "") return;
+      const lifted = snapshot.lifted;
+      if (!lifted || payload !== `${lifted.rowId}:${String(lifted.from)}`)
+        return;
+      const dragged = options.rowAt(lifted.from);
+      if (
+        dragged === undefined ||
+        (options.getRowId && options.getRowId(dragged) !== lifted.rowId)
+      ) {
+        reset();
+        return;
+      }
       event.preventDefault();
-      const sep = payload.lastIndexOf(":");
-      const fromLocal = Number(payload.slice(sep + 1));
-      if (!Number.isFinite(fromLocal)) return;
-      const dragged = options.rowAt(fromLocal);
       const bounds = event.currentTarget?.getBoundingClientRect?.();
       const fallbackPosition =
-        snapshot.overPosition ?? (localIndex > fromLocal ? "after" : "before");
+        snapshot.overPosition ??
+        (localIndex > lifted.from ? "after" : "before");
       const position = bounds
         ? rowDropPosition(event.clientY, bounds)
         : fallbackPosition;
-      commit(fromLocal, localIndex, dragged ?? row, row, windowStart, position);
+      commit(lifted.from, localIndex, dragged, row, windowStart, position);
     },
     keyDown,
     moveBy(localIndex, delta, row, windowStart, rowCount) {
@@ -1169,8 +1304,19 @@ export function createRowReorderController<TRow>(
         delta > 0 ? "after" : "before"
       );
     },
-    moveMenu: (row) => options.getMoveMenu?.(row),
+    moveMenu: (row) => {
+      if (!live()) return undefined;
+      const menu = options.getMoveMenu?.(row);
+      for (const target of menu?.targets ?? []) menuEpochs.set(target, epoch);
+      return menu;
+    },
     selectMoveTarget(target) {
+      if (
+        !live() ||
+        (menuEpochs.has(target) && menuEpochs.get(target) !== epoch) ||
+        (options.session !== undefined && !menuEpochs.has(target))
+      )
+        return;
       if (target.disabledReason) {
         say(target.disabledReason);
         return;
@@ -1178,16 +1324,19 @@ export function createRowReorderController<TRow>(
       if (target.request) requestMove(target.request);
     },
     confirmMove() {
+      if (!live()) return;
       const { pendingMove } = snapshot;
       if (pendingMove) executeMove(pendingMove);
     },
     cancelMove() {
+      if (!live()) return;
       batch(() => {
         write({ pendingMove: null });
         say(options.labels.rowReorderCancelled);
       });
     },
   };
+  return controller;
 }
 
 /**

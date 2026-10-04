@@ -359,7 +359,18 @@ function isSingleRowRange(range: CellRange): boolean {
 export function createGridFocusController<TRow>(
   initial: GridFocusControllerOptions<TRow>
 ): GridFocusController<TRow> {
-  let options = initial;
+  let options = { ...initial };
+  let clipboardVersion = 0;
+  let clipboardRows = [...initial.rows];
+  let clipboardRowIds = initial.rows.map((row) => initial.getRowId?.(row));
+  const columnIdentity = (column: ColumnMetadata<TRow>) => ({
+    key: column.key,
+    accessor: column.accessor,
+    parseValue: column.parseValue,
+    editable: column.editable,
+  });
+  let clipboardColumns = initial.columns.map(columnIdentity);
+  let pointerPreviewCancelled = false;
   let snapshot = EMPTY;
   let container: HTMLElement | null = null;
   // A move can outrun the DOM: the target row may not be mounted yet. This
@@ -484,6 +495,10 @@ export function createGridFocusController<TRow>(
   };
 
   const syncFocus = (): void => {
+    if (pointerPreviewCancelled) {
+      pointerPreviewCancelled = false;
+      write({});
+    }
     if (!options.enabled) return;
     const target = pending;
     if (!target || !container) return;
@@ -527,6 +542,7 @@ export function createGridFocusController<TRow>(
 
   /** Ctrl/Cmd+C and Ctrl/Cmd+X — the rectangle, as a spreadsheet reads it. */
   const copySelection = (selection: CellRange, cut: boolean): void => {
+    const version = clipboardVersion;
     const text = clipboardRangeText({
       range: selection,
       rows: options.rows,
@@ -534,6 +550,7 @@ export function createGridFocusController<TRow>(
       firstRowIndex: firstRow(),
     });
     void writeClipboardText(text).then((ok) => {
+      if (!options.enabled || version !== clipboardVersion) return;
       say(
         ok
           ? (labels()?.gridRangeCopied ?? defaultLabels.gridRangeCopied)(
@@ -568,7 +585,9 @@ export function createGridFocusController<TRow>(
 
   /** Ctrl/Cmd+V — the clipboard, mapped onto the selection's top-left cell. */
   const pasteInto = (target: CellRange): void => {
+    const version = clipboardVersion;
     void readClipboardText().then((text) => {
+      if (!options.enabled || version !== clipboardVersion) return;
       if (text === null) {
         say(
           labels()?.gridRangePasteFailed ?? defaultLabels.gridRangePasteFailed
@@ -769,7 +788,39 @@ export function createGridFocusController<TRow>(
       };
     },
     configure(next) {
-      options = next;
+      // A pending request owns its original address space. Keep copied
+      // identities: hosts may replace/reorder entries in the same array.
+      const changed =
+        next.enabled !== options.enabled ||
+        (next.firstRowIndex ?? 0) !== (options.firstRowIndex ?? 0) ||
+        next.rows.length !== clipboardRows.length ||
+        next.rows.some(
+          (row, index) =>
+            row !== clipboardRows[index] ||
+            next.getRowId?.(row) !== clipboardRowIds[index]
+        ) ||
+        next.columns.length !== clipboardColumns.length ||
+        next.columns.some((column, index) => {
+          const previous = clipboardColumns[index];
+          return (
+            column.key !== previous?.key ||
+            column.accessor !== previous.accessor ||
+            column.parseValue !== previous.parseValue ||
+            column.editable !== previous.editable
+          );
+        });
+      if (changed) {
+        clipboardVersion += 1;
+        clipboardRows = [...next.rows];
+        clipboardRowIds = next.rows.map((row) => next.getRowId?.(row));
+        clipboardColumns = next.columns.map(columnIdentity);
+        dragging = false;
+        filling = false;
+        fillTo = null;
+        pointerPreviewCancelled = snapshot.fillPreview !== null;
+      }
+      // configure is deliberately notification-free: React calls it in render.
+      options = { ...next };
     },
     attach(node) {
       container = node;

@@ -826,6 +826,13 @@ GridFocusController` — the active cell, the selected range, a fill drag, the
 RowReorderController` — the keyboard grab, drag and drop, the mobile swap and
   the move policy. `RowReorderSnapshot`, `RowReorderSlot`, `RowDragEvent`,
   `RowKeyEvent`.
+- `controller.forSession(): RowReorderActions<TRow>` captures callbacks for the
+  current reorder interaction. Retained callbacks become inert when the
+  configured `session` changes, reordering is disabled, or the controller
+  disconnects. Confirmation callbacks also belong to the pending move they
+  captured. Set `getRowIndex(row)` when the rendered order differs from the
+  host's flat dataset order, such as when rows are pinned; nested moves retain
+  their sibling scope.
 - `resolveRowMove(view, drop, options, labels)` — a drop inside grouped or tree
   rows as a reorder, a move or a rejection. `rowMoveMenu` — the keyboard and
   touch destinations. `RowMoveView`, `RowMoveDrop`.
@@ -839,6 +846,12 @@ RowReorderController` — the keyboard grab, drag and drop, the mobile swap and
 - `createFindController(options: FindControllerOptions): FindController` — the
   find bar's open state, query and walk, and the debounced `find` URL param.
   `FindSnapshot`, `readFindQuery`, `clampMatchIndex`.
+- `FindController.flush()` writes the pending query to the URL adapter and
+  namespace that accepted it. Call it before capturing a Saved View so the
+  capture includes the latest typed query. `configure()` does not perform URL
+  writes; bindings synchronize in their committed lifecycle with
+  `syncFromUrl()`. Disconnecting flushes an outstanding query to its original
+  destination.
 - `createHeaderFilterOverlay(options: HeaderFilterOverlayOptions):
 HeaderFilterOverlayController` — one header filter's open state and reset
   key. `HeaderFilterOverlaySnapshot`, `isHeaderFilterOpen`,
@@ -1148,6 +1161,12 @@ shares, so a new binding calls them rather than re-deriving them.
   `readColumnViewport` and `columnWindowPlan` (`ColumnViewport`,
   `ColumnWindowPlan`) window the columns; `RowPairMeasureController`
   measures a row with its open detail panel.
+  `columnScrollTarget({ columns, columnKey, viewport, widths, pinnedKeys,
+leadingWidth, trailingWidth })` returns a logical scroll offset that reveals
+  an unpinned column in the space left by pinned columns and reserved controls,
+  or `undefined` when no movement is needed. `columnWindowPlan` accepts
+  `pinnedSides` and the same leading/trailing control widths to keep its
+  mounted column window aligned with that usable viewport.
 
 ### The builder tier
 

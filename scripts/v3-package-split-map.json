@@ -13699,6 +13699,14 @@
       "behavior": ""
     },
     {
+      "export": "columnScrollTarget",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ColumnSelectCheckboxChromeProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -31523,6 +31531,14 @@
       "behavior": ""
     },
     {
+      "export": "RowReorderActions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "rowReorderAnnouncements",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -40612,6 +40628,14 @@
     },
     {
       "export": "PrintToolbar",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "ReactColumnGroupDef",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",

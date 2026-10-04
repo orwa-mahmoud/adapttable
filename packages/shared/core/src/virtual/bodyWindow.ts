@@ -889,9 +889,31 @@ export function columnWindowPlan<
   readonly viewport: ColumnViewport;
   readonly widths?: Readonly<Record<string, number>>;
   readonly pinnedKeys?: ReadonlySet<string>;
+  readonly pinnedSides?: Readonly<Record<string, "start" | "end">>;
+  readonly leadingWidth?: number;
+  readonly trailingWidth?: number;
   readonly overscan?: number;
 }): ColumnWindowPlan<TColumn> {
-  const { columns, viewport, widths, pinnedKeys, overscan = 3 } = input;
+  const { columns, widths, pinnedKeys, overscan = 3 } = input;
+  const pinnedWidth = columns.reduce(
+    (total, column) =>
+      total +
+      (pinnedKeys?.has(column.key)
+        ? (widths?.[column.key] ?? DEFAULT_COLUMN_WIDTH)
+        : 0),
+    0
+  );
+  const leading = input.leadingWidth ?? 0;
+  const viewport = {
+    start: Math.max(0, input.viewport.start - leading),
+    width: Math.max(
+      0,
+      input.viewport.width -
+        pinnedWidth -
+        Math.max(0, leading - input.viewport.start) -
+        (input.trailingWidth ?? 0)
+    ),
+  };
   if (!input.enabled || viewport.width === 0) {
     return { enabled: false, columns, paddingStart: 0, paddingEnd: 0 };
   }
@@ -924,7 +946,11 @@ export function columnWindowPlan<
   const to = Math.min(scrollable.length - 1, last + overscan);
   return {
     enabled: true,
-    columns: [...pinned, ...scrollable.slice(from, to + 1)],
+    columns: [
+      ...pinned.filter((column) => input.pinnedSides?.[column.key] !== "end"),
+      ...scrollable.slice(from, to + 1),
+      ...pinned.filter((column) => input.pinnedSides?.[column.key] === "end"),
+    ],
     paddingStart: offsets[from] ?? 0,
     paddingEnd: Math.max(
       0,
@@ -1020,4 +1046,64 @@ export class RowPairMeasureController {
     // visible, and a resize may never come.
     this.report(index);
   }
+}
+
+/** Logical scroll offset needed to reveal an unpinned column inside its unobscured viewport. @public */
+export function columnScrollTarget(input: {
+  readonly columns: readonly { readonly key: string }[];
+  readonly columnKey: string;
+  readonly viewport: ColumnViewport;
+  readonly widths?: Readonly<Record<string, number>>;
+  readonly pinnedKeys?: ReadonlySet<string>;
+  /** Width preceding data columns, including injected selection/reorder controls. */
+  readonly leadingWidth?: number;
+  /** Visible reserved trailing controls outside the data viewport. */
+  readonly trailingWidth?: number;
+}): number | undefined {
+  if (input.pinnedKeys?.has(input.columnKey)) return undefined;
+  const pinnedWidth = input.columns.reduce(
+    (total, column) =>
+      total +
+      (input.pinnedKeys?.has(column.key)
+        ? (input.widths?.[column.key] ?? DEFAULT_COLUMN_WIDTH)
+        : 0),
+    0
+  );
+  const usableWidth = Math.max(
+    0,
+    input.viewport.width - pinnedWidth - (input.trailingWidth ?? 0)
+  );
+  const scrollable = input.columns.filter(
+    (column) => !input.pinnedKeys?.has(column.key)
+  );
+  const index = scrollable.findIndex(
+    (column) => column.key === input.columnKey
+  );
+  if (index < 0) return undefined;
+  const widthOf = (column: { readonly key: string }) =>
+    input.widths?.[column.key] ?? DEFAULT_COLUMN_WIDTH;
+  const start =
+    (input.leadingWidth ?? 0) +
+    scrollable
+      .slice(0, index)
+      .reduce((offset, column) => offset + widthOf(column), 0);
+  return columnRevealOffset(
+    start,
+    widthOf(scrollable[index]!),
+    input.viewport.start,
+    usableWidth
+  );
+}
+
+function columnRevealOffset(
+  start: number,
+  width: number,
+  viewportStart: number,
+  usableWidth: number
+): number | undefined {
+  if (width > usableWidth) return start === viewportStart ? undefined : start;
+  if (start < viewportStart) return start;
+  if (start + width > viewportStart + usableWidth)
+    return Math.max(0, start + width - usableWidth);
+  return undefined;
 }

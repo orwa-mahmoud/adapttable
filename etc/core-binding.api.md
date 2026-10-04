@@ -1297,6 +1297,19 @@ export interface ColumnResizeHandleProps {
 }
 
 // @public
+export function columnScrollTarget(input: {
+    readonly columns: readonly {
+        readonly key: string;
+    }[];
+    readonly columnKey: string;
+    readonly viewport: ColumnViewport;
+    readonly widths?: Readonly<Record<string, number>>;
+    readonly pinnedKeys?: ReadonlySet<string>;
+    readonly leadingWidth?: number;
+    readonly trailingWidth?: number;
+}): number | undefined;
+
+// @public
 export interface ColumnSelectCheckboxChromeProps {
     readonly checked: boolean;
     readonly className?: string;
@@ -1342,6 +1355,9 @@ export function columnWindowPlan<TColumn extends {
     readonly viewport: ColumnViewport;
     readonly widths?: Readonly<Record<string, number>>;
     readonly pinnedKeys?: ReadonlySet<string>;
+    readonly pinnedSides?: Readonly<Record<string, "start" | "end">>;
+    readonly leadingWidth?: number;
+    readonly trailingWidth?: number;
     readonly overscan?: number;
 }): ColumnWindowPlan<TColumn>;
 

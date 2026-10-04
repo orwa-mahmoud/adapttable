@@ -163,7 +163,7 @@ bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
 Measured on MUI, the table alone is 73 kB gzipped and the same table with
-`standardFeatures()` composed is 127 kB.
+`standardFeatures()` composed is 128 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 

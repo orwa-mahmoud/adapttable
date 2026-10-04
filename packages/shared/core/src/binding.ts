@@ -907,6 +907,7 @@ export {
   type ChromeRenderModel,
   chromeRenderModel,
   type ChromeRenderModelInput,
+  columnScrollTarget,
   type ColumnViewport,
   type ColumnWindowPlan,
   columnWindowPlan,

@@ -783,12 +783,13 @@ describe("keyboard grab", () => {
     expect(letter.preventDefault).not.toHaveBeenCalled();
   });
 
-  it("takes the row under a drop from the source", () => {
+  it("refuses a keyboard drop when its source rows are no longer loaded", () => {
     const { reorder, onRowReorder } = setup({ rowAt: () => undefined });
     reorder.keyDown(keyEvent(" "), slot(0));
     reorder.keyDown(keyEvent("ArrowDown"), slot(0));
     reorder.keyDown(keyEvent(" "), slot(0));
-    expect(onRowReorder).toHaveBeenCalledWith(0, 1, A);
+    expect(onRowReorder).not.toHaveBeenCalled();
+    expect(reorder.getSnapshot().lifted).toBeNull();
   });
 
   it("does nothing while disabled", () => {
@@ -871,18 +872,17 @@ describe("drag and drop", () => {
     expect(onRowReorder).not.toHaveBeenCalled();
   });
 
-  it("falls back to the hovered edge, then to the direction", () => {
+  it("resolves the live lifted identity using the hovered or initial edge", () => {
     const resolveMove = vi.fn(() => undefined);
-    const { reorder } = setup({ resolveMove, rowAt: () => undefined });
+    const { reorder } = setup({ resolveMove });
     const transfer = dataTransfer();
-    transfer.setData(ROW_DND_MIME, "a:0");
+    reorder.dragStart(dragEvent(transfer), "a", 0);
+    reorder.dragOver(dragEvent(transfer), 2);
     reorder.drop(dragEvent(transfer), 2, C, 0);
-    expect(resolveMove).toHaveBeenLastCalledWith(C, C, "after");
+    expect(resolveMove).toHaveBeenLastCalledWith(A, C, "after");
+    reorder.dragStart(dragEvent(transfer), "c", 2);
     reorder.drop(dragEvent(transfer), 0, A, 0);
-    expect(resolveMove).toHaveBeenLastCalledWith(A, A, "before");
-    reorder.dragStart(dragEvent(dataTransfer()), "b", 1);
-    reorder.drop(dragEvent(transfer), 2, C, 0);
-    expect(resolveMove).toHaveBeenLastCalledWith(C, C, "before");
+    expect(resolveMove).toHaveBeenLastCalledWith(C, A, "before");
   });
 
   it("resets instead of writing while disabled", () => {
@@ -914,11 +914,12 @@ describe("mobile swap", () => {
     expect(onRowReorder).toHaveBeenLastCalledWith(1, 0, B);
   });
 
-  it("uses the row itself when the neighbour is not loaded", () => {
+  it("refuses a mobile move without a loaded origin and neighbour", () => {
     const resolveMove = vi.fn(() => undefined);
     const { reorder } = setup({ resolveMove, rowAt: () => undefined });
     reorder.moveBy(0, 1, A, 0, 4);
-    expect(resolveMove).toHaveBeenCalledWith(A, A, "after");
+    expect(resolveMove).not.toHaveBeenCalled();
+    expect(reorder.getSnapshot().lifted).toBeNull();
   });
 });
 
@@ -1102,7 +1103,8 @@ describe("resolved decisions", () => {
     host.approve?.(true);
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(onRowMove).not.toHaveBeenCalled();
-    expect(reorder.getSnapshot().hostConfirmPending).toBe(true);
+    expect(reorder.getSnapshot().hostConfirmPending).toBe(false);
+    expect(reorder.getSnapshot().pendingMove).toBeNull();
   });
 
   it("speaks a disabled menu target instead of moving", () => {

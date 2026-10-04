@@ -969,6 +969,7 @@ export {
   type RowMoveDrop,
   rowMoveMenu,
   type RowMoveView,
+  type RowReorderActions,
   type RowReorderAnnouncements,
   rowReorderAnnouncements,
   type RowReorderController,
