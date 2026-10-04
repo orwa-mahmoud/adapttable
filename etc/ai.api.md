@@ -1102,14 +1102,16 @@ export interface LiveObservationOptions {
 export interface LiveSessionInputs {
     readonly flush: (run: () => void) => void;
     readonly flushAdmission: {
-        readonly current: () => void;
+        readonly current: () => void | Promise<void>;
     };
+    readonly isCurrent?: () => boolean;
     readonly options: {
         readonly current: TableAgentRuntimeOptions;
     };
     readonly reportProgress: {
         readonly current: (report: AgentProgress | null) => void;
     };
+    readonly retirementSignal?: AbortSignal;
     readonly revisions: RevisionCounter;
     readonly runtime: {
         readonly current: TableRuntime;
@@ -1533,7 +1535,7 @@ export interface TableAgentController {
 // @public
 export interface TableAgentControllerInputs {
     readonly flush: (run: () => void) => void;
-    readonly flushAdmission: () => void;
+    readonly flushAdmission: () => void | Promise<void>;
     readonly options: {
         readonly current: TableAgentControllerOptions;
     };

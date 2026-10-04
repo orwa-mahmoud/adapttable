@@ -1005,7 +1005,11 @@ export interface LiveSessionInputs {
    * Commits a state change the binding still holds, before the session takes
    * its admission snapshot for a call.
    */
-  readonly flushAdmission: { readonly current: () => void };
+  readonly flushAdmission: { readonly current: () => void | Promise<void> };
+  /** Whether the controller still owns this table identity and registry. */
+  readonly isCurrent?: () => boolean;
+  /** Wake pending admission when this session is retired; never aborts a handler. */
+  readonly retirementSignal?: AbortSignal;
   /** Asks the table's own approval surface when the host set no `onApprove`. */
   readonly waitForChrome: {
     readonly current: (
@@ -1022,6 +1026,45 @@ export interface LiveSessionInputs {
    * changes before returning.
    */
   readonly flush: (run: () => void) => void;
+}
+
+/** Wait for a framework commit without retaining a cancelled call. */
+function waitForAdmission(
+  admission: Promise<void>,
+  signal?: AbortSignal,
+  retirementSignal?: AbortSignal
+): Promise<void> {
+  const signals = [signal, retirementSignal].filter(
+    (current): current is AbortSignal => current !== undefined
+  );
+  if (signals.length === 0) return admission;
+  return new Promise<void>((resolve, reject) => {
+    let settled = false;
+    const finish = (run: () => void): void => {
+      if (settled) return;
+      settled = true;
+      for (const current of signals)
+        current.removeEventListener("abort", abort);
+      run();
+    };
+    const abort = (): void => finish(resolve);
+    for (const current of signals)
+      current.addEventListener("abort", abort, { once: true });
+    // Keep the rejection handler even if cancellation wins, so a late failed
+    // commit cannot become an unhandled rejection.
+    void Promise.resolve(admission).then(
+      () => finish(resolve),
+      (error: unknown) =>
+        finish(() =>
+          reject(
+            error instanceof Error
+              ? error
+              : new Error("admission failed", { cause: error })
+          )
+        )
+    );
+    if (signals.some((current) => current.aborted)) abort();
+  });
 }
 
 /**
@@ -1202,7 +1245,55 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
       // change is refused as foreign, never swept into the revision of the
       // agent call below. The mapping's own mutation is committed in `apply`
       // above.
-      flushAdmission.current();
+      if (signal?.aborted) {
+        return {
+          ok: false,
+          revision: revisionCounter.current(),
+          idempotencyKey,
+          error: { code: "cancelled", message: "execute cancelled" },
+        };
+      }
+      if (inputs.retirementSignal?.aborted) {
+        return {
+          ok: false,
+          revision: revisionCounter.current(),
+          idempotencyKey,
+          error: {
+            code: "not-wired",
+            message: `capability "${key}" is not wired on this table`,
+          },
+        };
+      }
+      const admission = flushAdmission.current();
+      if (admission && typeof admission.then === "function") {
+        try {
+          await waitForAdmission(admission, signal, inputs.retirementSignal);
+        } catch (error) {
+          if (!signal?.aborted && !inputs.retirementSignal?.aborted)
+            throw error;
+        }
+      }
+      // A disconnect permanently aborts this call. Check it before a validity
+      // reader can touch the runtime, including after a rejected barrier.
+      if (signal?.aborted) {
+        return {
+          ok: false,
+          revision: revisionCounter.current(),
+          idempotencyKey,
+          error: { code: "cancelled", message: "execute cancelled" },
+        };
+      }
+      if (inputs.retirementSignal?.aborted || inputs.isCurrent?.() === false) {
+        return {
+          ok: false,
+          revision: revisionCounter.current(),
+          idempotencyKey,
+          error: {
+            code: "not-wired",
+            message: `capability "${key}" is not wired on this table`,
+          },
+        };
+      }
       const result = await inner.execute(
         key,
         args,

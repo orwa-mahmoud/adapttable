@@ -122,7 +122,7 @@ export interface TableAgentControllerInputs {
    * Commits a state change the binding still holds, before the session takes
    * its admission snapshot for a call.
    */
-  readonly flushAdmission: () => void;
+  readonly flushAdmission: () => void | Promise<void>;
   /**
    * Runs one view mutation and commits the state it changes before returning.
    */
@@ -245,6 +245,8 @@ export function createTableAgentController(
   let registryKey: string | undefined;
   let revisions: RevisionCounter = createRevisionCounter();
   let session: AgentSession | null = null;
+  let sessionGeneration = 0;
+  let sessionRetirement: AbortController | undefined;
   let connected = true;
   const activeCalls = new Set<AbortController>();
 
@@ -306,19 +308,34 @@ export function createTableAgentController(
     if (session && tableId === options.tableId && registryKey === key) {
       return session;
     }
+    const retired = sessionRetirement;
+    const retirement = new AbortController();
     tableId = options.tableId;
     registryKey = key;
     revisions = createRevisionCounter();
+    const boundGeneration = ++sessionGeneration;
+    const boundTableId = options.tableId;
+    const boundRegistryKey = key;
     const live = bindLiveSession({
       options: optionsRef,
       runtime: runtimeRef,
       revisions,
       flushAdmission: flushAdmissionRef,
+      retirementSignal: retirement.signal,
+      isCurrent: () =>
+        connected &&
+        boundGeneration === sessionGeneration &&
+        boundTableId === optionsRef.current.tableId &&
+        boundRegistryKey === registryKeyOf(optionsRef.current),
       waitForChrome: waitForChromeRef,
       reportProgress: reportProgressRef,
       flush: inputs.flush,
     });
     session = bindLifecycle(live, revisions);
+    sessionRetirement = retirement;
+    // Retiring a registry wakes only its admission wait. Already-running
+    // handlers and approvals retain the session's existing revalidation rules.
+    retired?.abort();
     return session;
   };
 
