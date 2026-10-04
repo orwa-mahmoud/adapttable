@@ -22,7 +22,9 @@ test("Vue native table has real keyboard, controlled selection, search and pagin
   await expect(
     table.getByRole("checkbox", { name: "Select row" }).first()
   ).toHaveAttribute("data-adapttable-part", "checkbox");
-  await table.getByRole("button", { name: "Sort by Score" }).press("Enter");
+  await table
+    .getByRole("button", { name: "Sort by: Score", exact: true })
+    .press("Enter");
   await expect(table.locator("tbody tr").first()).toContainText("Grace Hopper");
   await table
     .getByRole("checkbox", { name: "Select row" })
@@ -65,26 +67,45 @@ test("Vue native table has real keyboard, controlled selection, search and pagin
   expect(errors).toEqual([]);
 });
 
-test("Vue native table switches to cards on a phone and preserves Arabic RTL controls", async ({
+test("Vue native cards load more by keyboard and preserve Arabic RTL controls", async ({
   page,
 }, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  // Exercise the native keyboard fallback without a focus-induced scroll
+  // letting the observer load the next page first. Auto-loading is tested below.
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "IntersectionObserver", {
+      configurable: true,
+      value: undefined,
+    });
+  });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(VUE_PREVIEW);
   const table = page.locator('[data-demo-table="people"]');
   await expect(table.locator('[data-adapttable-part="cards"]')).toBeVisible();
   await expect(table.locator("table")).toHaveCount(0);
+  await expect(table.locator("article")).toHaveCount(2);
   await table
     .getByRole("combobox", { name: "Sort by", exact: true })
     .selectOption("score");
-  await expect(table.locator("article").first()).toContainText("Grace Hopper");
+  await expect(table.locator("article")).toContainText([
+    "Grace Hopper",
+    "Ada Lovelace",
+  ]);
   await expect(
     table
       .locator("article")
       .first()
       .locator('[data-adapttable-part="card-row"]')
   ).toHaveCount(2);
+  await table
+    .getByRole("checkbox", { name: "Select row", exact: true })
+    .first()
+    .press("Space");
+  await expect(page.locator("[data-demo-selection]")).toHaveText(
+    "Selected: grace"
+  );
   await page
     .getByRole("checkbox", { name: "Arabic / right to left", exact: true })
     .check();
@@ -97,13 +118,25 @@ test("Vue native table switches to cards on a phone and preserves Arabic RTL con
   await expect(
     table.getByRole("combobox", { name: "ترتيب حسب", exact: true })
   ).toBeVisible();
-  await table
-    .getByRole("button", { name: "الصفحة التالية", exact: true })
-    .press("Enter");
-  await expect(table.locator("article")).toHaveCount(1);
-  await expect(table.locator("article").first()).toContainText(
-    "Katherine Johnson"
+  const loadMoreArabic = table.getByRole("button", {
+    name: "تحميل المزيد",
+    exact: true,
+  });
+  await expect(loadMoreArabic).toHaveAttribute(
+    "data-adapttable-part",
+    "load-more-button"
   );
+  await loadMoreArabic.press("Enter");
+  await expect(table.locator("article")).toHaveCount(3);
+  await expect(table.locator("article")).toContainText([
+    "Grace Hopper",
+    "Ada Lovelace",
+    "Katherine Johnson",
+  ]);
+  await expect(loadMoreArabic).toHaveCount(0);
+  await expect(
+    table.getByRole("checkbox", { name: "تحديد الصف", exact: true }).first()
+  ).toBeChecked();
   const overflow = await page.evaluate(
     () =>
       document.documentElement.scrollWidth -
@@ -118,8 +151,77 @@ test("Vue native table switches to cards on a phone and preserves Arabic RTL con
     .getByRole("checkbox", { name: "Arabic / right to left", exact: true })
     .uncheck();
   await expect(table).toHaveAttribute("dir", "ltr");
+  await expect(table).toHaveAttribute("lang", "en");
+  await expect(table.locator('[data-adapttable-part="cards"]')).toHaveAttribute(
+    "dir",
+    "ltr"
+  );
   await expect(
-    table.getByRole("button", { name: "Previous page", exact: true })
-  ).toBeVisible();
+    table.getByRole("combobox", { name: "Sort by", exact: true })
+  ).toHaveValue("score");
+  await expect(table.locator("article")).toHaveCount(3);
+  await table
+    .getByRole("searchbox", { name: "Search", exact: true })
+    .fill("Ada");
+  await expect(table.locator("article")).toHaveCount(1);
+  await expect(table.locator("article")).toContainText("Ada Lovelace");
+  await table.getByRole("searchbox", { name: "Search", exact: true }).fill("");
+  await expect(table.locator("article")).toHaveCount(2);
+  const loadMoreEnglish = table.getByRole("button", {
+    name: "Load more",
+    exact: true,
+  });
+  await loadMoreEnglish.press("Enter");
+  await expect(table.locator("article")).toHaveCount(3);
+  await expect(table.locator("article")).toContainText([
+    "Grace Hopper",
+    "Ada Lovelace",
+    "Katherine Johnson",
+  ]);
+  await expect(loadMoreEnglish).toHaveCount(0);
+  await expect(
+    table.getByRole("checkbox", { name: "Select row", exact: true }).first()
+  ).toBeChecked();
+  await expect(page.locator("[data-demo-selection]")).toHaveText(
+    "Selected: grace"
+  );
+  expect(errors).toEqual([]);
+});
+
+test("Vue native cards automatically append rows when the loading sentinel scrolls into view", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  // Keep the initial sentinel outside the observer's 200px preload margin.
+  await page.setViewportSize({ width: 390, height: 480 });
+  await page.goto(VUE_PREVIEW);
+  const table = page.locator('[data-demo-table="people"]');
+  await expect(table.locator('[data-adapttable-part="cards"]')).toBeVisible();
+  await expect(table.locator("article")).toHaveCount(2);
+  await expect(table.locator("article")).toContainText([
+    "Ada Lovelace",
+    "Grace Hopper",
+  ]);
+  const loadMore = table.getByRole("button", {
+    name: "Load more",
+    exact: true,
+  });
+  const initialSentinel = await loadMore.evaluate((element) => ({
+    top: element.getBoundingClientRect().top,
+    viewportHeight: window.innerHeight,
+  }));
+  expect(initialSentinel.top).toBeGreaterThan(
+    initialSentinel.viewportHeight + 200
+  );
+  await loadMore.scrollIntoViewIfNeeded();
+  await expect(table.locator("article")).toHaveCount(3);
+  await expect(table.locator("article")).toContainText([
+    "Ada Lovelace",
+    "Grace Hopper",
+    "Katherine Johnson",
+  ]);
+  await expect(loadMore).toHaveCount(0);
+  await expect(table.locator('[data-adapttable-part="pager"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
