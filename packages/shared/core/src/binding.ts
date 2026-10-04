@@ -994,6 +994,13 @@ export type {
   UseTableUrlStateResult,
 } from "./url/urlBindingState";
 // Types the shared state shapes above hand back.
+export type { EditableColumnLike } from "./editing/cellEditing";
+export type { RowValidator } from "./editing/editContracts";
+export type {
+  EditCommitSnapshot,
+  EditCommitValidationFailure,
+  EditCommitValidationOptions,
+} from "./editing/editCommitLifecycle";
 export type { ChecklistWindow } from "./filters/checklistModel";
 export type { HighlightedCell } from "./rows/highlightStore";
 export type { RowPatchEvent } from "./rows/patch";

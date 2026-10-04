@@ -811,3 +811,52 @@ const [history, setHistory] = useState<EditHistoryHandle>();
 The functions are stable and always act on the table's current history. Call
 `clear()` when you replace the data underneath, since a history of rows that no
 longer exist can only put back values nobody wants.
+
+## Headless row and batch save settlement
+
+The neutral `createRowEditStore` and `createBatchEditStore` support a synchronous
+or asynchronous host save. The application still owns rows and persistence.
+A fulfilled save clears the submitted drafts; a rejected save keeps them
+available for correction or retry. A successful callback does not make the
+store write the host's data.
+
+```ts
+import { createRowEditStore } from "@adapttable/core";
+
+type Person = { id: string; name: string };
+const edits = createRowEditStore<Person>({
+  enabled: true,
+  columns: [{ key: "name", editable: true }],
+  validateRow: (next) =>
+    next.name.trim() ? undefined : { name: "Enter a name" },
+  onRowEdit: async (row, patch) => {
+    await savePerson(row.id, patch);
+    // Publish the accepted rows through the application's own state.
+  },
+});
+edits.begin(person, person.id);
+edits.setDraft("name", "Ada");
+edits.save();
+```
+
+`savePerson` and `person` above belong to the host. Subscribe to the store and
+read `getSnapshot().commit` to render pending and failure states.
+`EditCommitSnapshot.phase` is `validating`, `saving`, `invalid` or `failed`;
+`commit` is absent while idle and after success. `EditCommitValidationFailure`
+identifies a `rowId`, an optional `columnKey`, and a message. The stores keep
+`save()` and `saveAll()` as void actions; observe their snapshots instead of
+awaiting the action return value.
+
+Column validators inspect parsed changed values. An optional `validateRow`
+checks the proposed complete row; provide a pure `applyEdit` projection when a
+column key does not correspond to a direct property. These options are named
+by `EditCommitValidationOptions<TRow>`. A batch validates all submitted changes
+before it calls the host once. `formatEditError`, `onEditError` and
+`onValidationFail` let the host format or observe failures without changing
+row ownership. Existing synchronous saves retain synchronous callback ordering.
+
+Cancel, incompatible reconfiguration, disabling editing, and `dispose()`
+invalidate pending local continuations. They cannot cancel a request the host
+already received; the host remains responsible for its own request cancellation
+and response ordering. Bindings should dispose their owned store when its scope
+ends and render pending/validation state using their own controls.

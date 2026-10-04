@@ -410,6 +410,7 @@ export interface BatchEditingState<TRow> {
     acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
     cancelAll: () => void;
     cancelRow: (rowId: string) => void;
+    readonly commit?: EditCommitSnapshot;
     count: number;
     draftFor: (row: TRow, rowId: string, columnKey: string) => string;
     entries: readonly BatchEditEntry[];
@@ -428,6 +429,7 @@ export function batchEditingView<TRow>(store: BatchEditStore<TRow>, snapshot: Ba
 
 // @public
 export interface BatchEditSnapshot {
+    readonly commit?: EditCommitSnapshot;
     readonly entries: readonly BatchEditEntry[];
     readonly pending: BatchPendingDrafts;
     readonly signature: string;
@@ -439,6 +441,7 @@ export interface BatchEditStore<TRow> {
     readonly cancelAll: () => void;
     readonly cancelRow: (rowId: string) => void;
     readonly configure: (options: BatchEditStoreOptions<TRow>) => void;
+    readonly dispose?: () => void;
     readonly getSnapshot: () => BatchEditSnapshot;
     readonly saveAll: () => void;
     readonly setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
@@ -447,14 +450,17 @@ export interface BatchEditStore<TRow> {
 }
 
 // @public
-export interface BatchEditStoreOptions<TRow> {
+export interface BatchEditStoreOptions<TRow> extends EditCommitValidationOptions<TRow> {
     readonly columns: readonly EditableColumnLike<TRow>[];
     readonly enabled?: boolean;
     readonly featureHost?: FeatureHostState;
+    readonly formatEditError?: (error: unknown) => string;
     readonly onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
     readonly onEditCancel?: EditEventHandler<TRow>;
     readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditError?: EditEventHandler<TRow>;
     readonly onEditStart?: EditEventHandler<TRow>;
+    readonly onValidationFail?: EditEventHandler<TRow>;
 }
 
 // @public
@@ -2597,6 +2603,36 @@ export interface EditableColumnLike<TRow = unknown> {
     validate?: {
         bivarianceHack(value: unknown, row: TRow): string | undefined | Promise<string | undefined>;
     }["bivarianceHack"];
+}
+
+// @public
+export interface EditCommitSnapshot {
+    // (undocumented)
+    readonly error?: string;
+    // (undocumented)
+    readonly phase: "validating" | "saving" | "invalid" | "failed";
+    // (undocumented)
+    readonly validation?: readonly EditCommitValidationFailure[];
+}
+
+// @public
+export interface EditCommitValidationFailure {
+    // (undocumented)
+    readonly columnKey?: string;
+    // (undocumented)
+    readonly message: string;
+    // (undocumented)
+    readonly rowId: string;
+}
+
+// @public
+export interface EditCommitValidationOptions<TRow> {
+    // (undocumented)
+    readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
+    // (undocumented)
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    // (undocumented)
+    readonly validateRow?: RowValidator<TRow>;
 }
 
 // @public
@@ -6566,6 +6602,7 @@ export interface RowEditingState<TRow> {
     activeRowId: string | null;
     begin: (row: TRow, rowId: string) => void;
     cancel: () => void;
+    readonly commit?: EditCommitSnapshot;
     draftFor: (columnKey: string) => string;
     drafts: RowEditDrafts;
     featureHost?: FeatureHostState;
@@ -6591,6 +6628,7 @@ export function rowEditSignature(snapshot: RowEditSnapshot): string;
 // @public
 export interface RowEditSnapshot {
     readonly activeRowId: string | null;
+    readonly commit?: EditCommitSnapshot;
     readonly drafts: RowEditDrafts;
     readonly isDirty: boolean;
 }
@@ -6601,6 +6639,7 @@ export interface RowEditStore<TRow> {
     readonly begin: (row: TRow, rowId: string) => void;
     readonly cancel: () => void;
     readonly configure: (options: RowEditStoreOptions<TRow>) => void;
+    readonly dispose?: () => void;
     readonly getSnapshot: () => RowEditSnapshot;
     readonly openedRow: () => TRow | undefined;
     readonly save: () => void;
@@ -6611,14 +6650,17 @@ export interface RowEditStore<TRow> {
 }
 
 // @public
-export interface RowEditStoreOptions<TRow> {
+export interface RowEditStoreOptions<TRow> extends EditCommitValidationOptions<TRow> {
     readonly columns: readonly EditableColumnLike<TRow>[];
     readonly enabled?: boolean;
     readonly featureHost?: FeatureHostState;
+    readonly formatEditError?: (error: unknown) => string;
     readonly onEditCancel?: EditEventHandler<TRow>;
     readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditError?: EditEventHandler<TRow>;
     readonly onEditStart?: EditEventHandler<TRow>;
     readonly onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    readonly onValidationFail?: EditEventHandler<TRow>;
 }
 
 // @public

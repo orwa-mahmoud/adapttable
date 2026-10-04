@@ -766,6 +766,12 @@ EditHistoryController` — the history a table runs: records a gesture with
   many rows held and saved in one list. `BatchEditSnapshot`,
   `BatchPendingDrafts`, `BatchEditEntry`, `batchEditingView`
   (`BatchEditingState`).
+- Row and batch stores expose an optional `commit: EditCommitSnapshot`: its
+  phase is `validating`, `saving`, `invalid` or `failed`, with an optional error
+  and addressed `EditCommitValidationFailure` entries (`rowId`, optional
+  `columnKey`, `message`). `EditCommitValidationOptions<TRow>` names the shared
+  editable columns, optional `validateRow`, and pure `applyEdit` projection.
+  Rejected saves retain drafts; see [asynchronous row and batch saves](./cell-editing.md#headless-row-and-batch-save-settlement).
 - `createDirtyCellStore(options: DirtyCellStoreOptions): DirtyCellStore` —
   cells changed and not yet confirmed. `DirtyCellSnapshot`, `dirtyCellKey`,
   `dirtyCellView` (`DirtyCellState`), and `dirtyMarkerView`, which keeps the

@@ -1206,4 +1206,9 @@ export {
   unpinAllColumns,
   xlsxWriter,
 } from "./adapterMachinery";
+export type {
+  EditCommitSnapshot,
+  EditCommitValidationFailure,
+  EditCommitValidationOptions,
+} from "./editing/editCommitLifecycle";
 export * from "./panelFeatureExports";

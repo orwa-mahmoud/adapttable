@@ -425,6 +425,7 @@ export interface BatchEditingState<TRow> {
     acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
     cancelAll: () => void;
     cancelRow: (rowId: string) => void;
+    readonly commit?: EditCommitSnapshot;
     count: number;
     draftFor: (row: TRow, rowId: string, columnKey: string) => string;
     entries: readonly BatchEditEntry[];
@@ -2375,6 +2376,57 @@ export interface EditableCellSlotProps<TRow = never, TEditing = unknown, TColumn
 export interface EditableCellSlots<TNode = unknown> {
     readonly Activate: (props: EditableCellActivateProps<TNode>) => TNode;
     readonly Button: (props: EditableCellButtonProps) => TNode;
+}
+
+// @public
+export interface EditableColumnLike<TRow = unknown> {
+    editable?: boolean | {
+        bivarianceHack(row: TRow): boolean;
+    }["bivarianceHack"];
+    editor?: ColumnModelEditor;
+    editValue?: {
+        bivarianceHack(row: TRow): string;
+    }["bivarianceHack"];
+    key: string;
+    parseValue?: {
+        bivarianceHack(draft: string, row: TRow): unknown;
+    }["bivarianceHack"];
+    sortValue?: {
+        bivarianceHack(row: TRow): SortableValue;
+    }["bivarianceHack"];
+    validate?: {
+        bivarianceHack(value: unknown, row: TRow): string | undefined | Promise<string | undefined>;
+    }["bivarianceHack"];
+}
+
+// @public
+export interface EditCommitSnapshot {
+    // (undocumented)
+    readonly error?: string;
+    // (undocumented)
+    readonly phase: "validating" | "saving" | "invalid" | "failed";
+    // (undocumented)
+    readonly validation?: readonly EditCommitValidationFailure[];
+}
+
+// @public
+export interface EditCommitValidationFailure {
+    // (undocumented)
+    readonly columnKey?: string;
+    // (undocumented)
+    readonly message: string;
+    // (undocumented)
+    readonly rowId: string;
+}
+
+// @public
+export interface EditCommitValidationOptions<TRow> {
+    // (undocumented)
+    readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
+    // (undocumented)
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    // (undocumented)
+    readonly validateRow?: RowValidator<TRow>;
 }
 
 // @public
@@ -4687,6 +4739,7 @@ export interface RowEditingState<TRow> {
     activeRowId: string | null;
     begin: (row: TRow, rowId: string) => void;
     cancel: () => void;
+    readonly commit?: EditCommitSnapshot;
     draftFor: (columnKey: string) => string;
     drafts: RowEditDrafts;
     featureHost?: FeatureHostState;
@@ -5043,6 +5096,9 @@ export interface RowTreeParentRef<TRow> {
     readonly label: string;
     readonly row: TRow | null;
 }
+
+// @public
+export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;
 
 // @public
 export function rowWindow<TRow>(input: {
