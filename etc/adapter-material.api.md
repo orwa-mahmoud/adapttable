@@ -652,11 +652,16 @@ export class AdaptMaterialPopover {
     // (undocumented)
     protected readonly belowPositions: ConnectedPosition[];
     // (undocumented)
+    protected readonly constrainedSurface: Signal<boolean>;
+    // (undocumented)
     readonly dir: InputSignal<"ltr" | "rtl" | undefined>;
     // (undocumented)
     protected readonly direction: Signal<"ltr" | "rtl">;
     // (undocumented)
     readonly dismiss: OutputEmitterRef<void>;
+    // (undocumented)
+    protected readonly filterPositions: ConnectedPosition[];
+    readonly filterSurface: InputSignal<boolean>;
     // (undocumented)
     protected keydown(event: KeyboardEvent): void;
     // (undocumented)
@@ -683,6 +688,11 @@ export class AdaptMaterialPopover {
         };
         "belowOnly": {
             "alias": "belowOnly";
+            "required": false;
+            "isSignal": true;
+        };
+        "filterSurface": {
+            "alias": "filterSurface";
             "required": false;
             "isSignal": true;
         };

@@ -30,14 +30,18 @@ import { MatCardModule } from "@angular/material/card";
       [cdkConnectedOverlayHasBackdrop]="false"
       [cdkConnectedOverlayDisableClose]="true"
       [cdkConnectedOverlayPositions]="
-        belowOnly() ? belowPositions : positions()
+        belowOnly()
+          ? belowPositions
+          : filterSurface()
+            ? filterPositions
+            : positions()
       "
       [cdkConnectedOverlayPush]="!belowOnly()"
       [cdkConnectedOverlayFlexibleDimensions]="
-        belowOnly() || (overlayDefaults?.flexibleDimensions ?? false)
+        constrainedSurface() || (overlayDefaults?.flexibleDimensions ?? false)
       "
       [cdkConnectedOverlayWidth]="
-        belowOnly() ? 374 : (overlayDefaults?.width ?? '')
+        constrainedSurface() ? 374 : (overlayDefaults?.width ?? '')
       "
       [cdkConnectedOverlayViewportMargin]="8"
       [cdkConnectedOverlayPanelClass]="'adapt-material-overlay'"
@@ -46,14 +50,14 @@ import { MatCardModule } from "@angular/material/card";
     >
       <mat-card
         appearance="outlined"
-        [class.adapt-material-filter-card]="belowOnly()"
+        [class.adapt-material-filter-card]="constrainedSurface()"
         [attr.dir]="direction()"
-        [style.width]="belowOnly() ? '100%' : null"
-        [style.max-height.px]="belowOnly() ? availableHeight() : null"
+        [style.width]="constrainedSurface() ? '100%' : null"
+        [style.max-height.px]="constrainedSurface() ? availableHeight() : null"
         [style.--adapt-material-popover-height]="
-          belowOnly() ? availableHeight() + 'px' : null
+          constrainedSurface() ? availableHeight() + 'px' : null
         "
-        [style.overflow-y]="belowOnly() ? 'hidden' : 'auto'"
+        [style.overflow-y]="constrainedSurface() ? 'hidden' : 'auto'"
         style="max-width: calc(100vw - 16px); max-height: min(560px, calc(100vh - 32px)); overflow: auto; padding: 16px"
       >
         <ng-content />
@@ -70,11 +74,27 @@ export class AdaptMaterialPopover {
   readonly origin = input.required<HTMLElement>();
   readonly open = input(true);
   readonly belowOnly = input(false);
+  /** Constrain a filter card while allowing CDK to flip when space is short. */
+  readonly filterSurface = input(false);
   readonly align = input<"start" | "end">("end");
+  protected readonly constrainedSurface = computed(
+    () => this.belowOnly() || this.filterSurface()
+  );
   protected readonly availableHeight = injectPopoverSpace({
     origin: () => this.origin(),
-    open: () => this.open() && this.belowOnly(),
+    open: () => this.open() && this.constrainedSurface(),
     reserve: 16,
+    allowAbove: () => {
+      if (!this.filterSurface() || this.belowOnly()) return false;
+      const origin = this.origin();
+      const viewport = origin.ownerDocument.defaultView;
+      // Preserve the preferred below placement when a header, footer and
+      // useful portion of the filter body fit. CDK handles the short-space case.
+      return (
+        viewport !== null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom < 160
+      );
+    },
   });
   protected readonly belowPositions: ConnectedPosition[] = [
     {
@@ -100,6 +120,15 @@ export class AdaptMaterialPopover {
       overlayY: "top",
       offsetY: 4,
     },
+  ];
+  protected readonly filterPositions: ConnectedPosition[] = [
+    ...this.belowPositions,
+    ...this.belowPositions.map<ConnectedPosition>((position) => ({
+      ...position,
+      originY: "top",
+      overlayY: "bottom",
+      offsetY: -4,
+    })),
   ];
   readonly dir = input<"ltr" | "rtl">();
   protected readonly direction = computed(

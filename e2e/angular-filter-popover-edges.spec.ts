@@ -331,3 +331,60 @@ for (const key of ["angular-cdk", "material", "aria"]) {
     }
   }
 }
+
+for (const locale of ["en", "ar"]) {
+  test(`material ${locale}: native fallback keeps a near-bottom filter usable through scroll and resize`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto(`/material/?locale=${locale}`);
+    const trigger = angularPart({ key: "material" }, page, "filters-button");
+    const panel = angularPart({ key: "material" }, page, "filters-popover");
+    const surface = page.locator(".cdk-overlay-pane mat-card");
+    await trigger.evaluate((button) => button.scrollIntoView({ block: "end" }));
+    const initialAnchor = await trigger.boundingBox();
+    expect(initialAnchor).not.toBeNull();
+    expect(720 - initialAnchor!.y - initialAnchor!.height).toBeLessThan(80);
+    await trigger.click();
+    await expect(panel).toBeVisible();
+    await expect(panel).toHaveAttribute("dir", locale === "ar" ? "rtl" : "ltr");
+    await expect(page.locator(".cdk-overlay-backdrop")).toHaveCount(0);
+    await expect
+      .poll(async () => {
+        const card = await surface.boundingBox();
+        const anchor = await trigger.boundingBox();
+        return (
+          card !== null && anchor !== null && card.y + card.height <= anchor.y
+        );
+      })
+      .toBe(true);
+
+    const assertUsable = async (phase: string) => {
+      const width = page.viewportSize()!.width;
+      await expectHorizontalFit(surface, width);
+      await expect(surface).toBeInViewport({ ratio: 1 });
+      await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+      const done = panel.locator("footer button").last();
+      await expect(done).toBeInViewport({ ratio: 1 });
+      const controls = panel.locator(
+        'input:not([type="hidden"]), select, [role="combobox"]'
+      );
+      expect(await controls.count()).toBeGreaterThan(0);
+      for (const control of await controls.all()) {
+        await control.scrollIntoViewIfNeeded();
+        await control.click({ trial: true });
+      }
+      await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+      await expect(done).toBeInViewport({ ratio: 1 });
+      await captureMaterialLayout(panel, testInfo, phase);
+    };
+    await assertUsable("near bottom above fallback");
+    await page.evaluate(() => window.scrollBy(0, 220));
+    await assertUsable("after page scroll");
+    await page.setViewportSize({ width: 1024, height: 840 });
+    await assertUsable("after viewport resize");
+    await page.keyboard.press("Escape");
+    await expect(panel).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+  });
+}

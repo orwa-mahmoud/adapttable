@@ -51,6 +51,7 @@ class TableHost {
       [origin]="trigger"
       [open]="open()"
       [belowOnly]="belowOnly()"
+      [filterSurface]="filterSurface()"
       dir="rtl"
       (dismiss)="close()"
     >
@@ -59,6 +60,7 @@ class TableHost {
 })
 class PopoverHost {
   readonly belowOnly = signal(false);
+  readonly filterSurface = signal(false);
   readonly open = signal(false);
   readonly close = vi.fn(() => this.open.set(false));
 }
@@ -367,8 +369,57 @@ describe("Material overlay ownership", () => {
       expect(
         connected.positions.some((position) => position.originY === "top")
       ).toBe(true);
+
+      fixture.componentInstance.filterSurface.set(true);
+      await fixture.whenStable();
+      expect(connected.flexibleDimensions).toBe(true);
+      expect(connected.push).toBe(true);
+      expect(connected.overlayRef.overlayElement.style.width).toBe("374px");
+      expect(connected.positions.map((position) => position.originY)).toEqual([
+        "bottom",
+        "bottom",
+        "bottom",
+        "top",
+        "top",
+        "top",
+      ]);
+      fixture.componentInstance.belowOnly.set(true);
+      await fixture.whenStable();
+      expect(connected.push).toBe(false);
+      expect(
+        connected.positions.every((position) => position.originY === "bottom")
+      ).toBe(true);
     }
   );
+
+  it("measures above space for a cramped filter while preserving below-only callers", async () => {
+    const fixture = TestBed.createComponent(PopoverHost);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector(
+      "button"
+    )!;
+    let top = window.innerHeight - 50;
+    vi.spyOn(trigger, "getBoundingClientRect").mockImplementation(() =>
+      DOMRect.fromRect({ x: 20, y: top, width: 80, height: 36 })
+    );
+    fixture.componentInstance.filterSurface.set(true);
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    const card = document.querySelector<HTMLElement>(
+      "mat-card.adapt-material-filter-card"
+    )!;
+    expect(card.style.maxHeight).toBe(`${top - 16}px`);
+    top = 100;
+    window.dispatchEvent(new Event("resize"));
+    await fixture.whenStable();
+    expect(card.style.maxHeight).toBe(`${window.innerHeight - 152}px`);
+    top = window.innerHeight - 50;
+    fixture.componentInstance.belowOnly.set(true);
+    await fixture.whenStable();
+    expect(card.style.maxHeight).toBe("80px");
+  });
 
   it("uses Material's real modal backdrop and closes on an outside press", async () => {
     const fixture = TestBed.createComponent(DialogHost);

@@ -224,7 +224,7 @@ describe("the Angular Material filters", () => {
   });
 
   it.each(["ltr", "rtl"] as const)(
-    "keeps edge and centered alignments below the trigger without search in %s",
+    "prefers below alignments and offers native above fallbacks without search in %s",
     async (dir) => {
       const { fixture, part, openFilters, settle } = await mount();
       fixture.componentRef.setInput("searchable", false);
@@ -262,10 +262,31 @@ describe("the Angular Material filters", () => {
           overlayY: "top",
           offsetY: 4,
         },
+        {
+          originX: "end",
+          originY: "top",
+          overlayX: "end",
+          overlayY: "bottom",
+          offsetY: -4,
+        },
+        {
+          originX: "start",
+          originY: "top",
+          overlayX: "start",
+          overlayY: "bottom",
+          offsetY: -4,
+        },
+        {
+          originX: "center",
+          originY: "top",
+          overlayX: "center",
+          overlayY: "bottom",
+          offsetY: -4,
+        },
       ]);
       expect(overlay!.flexibleDimensions).toBe(true);
       expect(overlay!.width).toBe(374);
-      expect(overlay!.push).toBe(false);
+      expect(overlay!.push).toBe(true);
       expect(overlay!.viewportMargin).toBe(8);
       expect(overlay!.hasBackdrop).toBe(false);
       const pane = overlay!.overlayRef.overlayElement;

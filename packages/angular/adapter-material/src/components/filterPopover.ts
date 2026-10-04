@@ -29,7 +29,7 @@ import { AdaptMaterialPopover } from "./materialPopover";
     <adapt-material-popover
       [origin]="anchor"
       [open]="p.open"
-      [belowOnly]="true"
+      [filterSurface]="true"
       [dir]="p.dir ?? 'ltr'"
       (dismiss)="p.onClose()"
     >

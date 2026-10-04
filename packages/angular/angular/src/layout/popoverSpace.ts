@@ -17,18 +17,27 @@ export function injectPopoverSpace(options: {
   readonly origin: () => HTMLElement | undefined;
   readonly open: () => boolean;
   readonly reserve: number;
+  /** Include room above the origin for a native overlay that can flip. */
+  readonly allowAbove?: () => boolean;
 }): Signal<number> {
   const viewport = inject(DOCUMENT).defaultView;
   const height = signal(360);
   const measure = (): void => {
     const origin = options.origin();
     if (!viewport || !options.open() || !origin) return;
+    const rect = origin.getBoundingClientRect();
+    const below = viewport.innerHeight - rect.bottom - options.reserve;
+    if (!options.allowAbove?.()) {
+      height.set(Math.max(80, below));
+      return;
+    }
+    const clamp = (edge: number) =>
+      Math.max(0, Math.min(viewport.innerHeight, edge));
     height.set(
       Math.max(
         80,
-        viewport.innerHeight -
-          origin.getBoundingClientRect().bottom -
-          options.reserve
+        viewport.innerHeight - clamp(rect.bottom) - options.reserve,
+        clamp(rect.top) - options.reserve
       )
     );
   };

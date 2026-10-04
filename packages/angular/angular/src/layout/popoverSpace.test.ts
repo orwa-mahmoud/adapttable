@@ -9,10 +9,12 @@ import { injectPopoverSpace } from "./popoverSpace";
 class Host {
   readonly origin = signal<HTMLElement | undefined>(undefined);
   readonly open = signal(false);
+  readonly allowAbove = signal(false);
   readonly height = injectPopoverSpace({
     origin: this.origin,
     open: this.open,
     reserve: 32,
+    allowAbove: this.allowAbove,
   });
 }
 
@@ -22,6 +24,39 @@ afterEach(() => {
 });
 
 describe("native popover viewport space", () => {
+  it("includes above-origin room only when enabled and bounds scrolled origins", () => {
+    const fixture = TestBed.createComponent(Host);
+    const host = fixture.componentInstance;
+    const origin = document.createElement("button");
+    let top = window.innerHeight - 48;
+    vi.spyOn(origin, "getBoundingClientRect").mockImplementation(() =>
+      DOMRect.fromRect({ y: top, height: 32 })
+    );
+    host.origin.set(origin);
+    host.open.set(true);
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(host.height()).toBe(80);
+    host.allowAbove.set(true);
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(host.height()).toBe(top - 32);
+    top = 20;
+    window.dispatchEvent(new Event("resize"));
+    expect(host.height()).toBe(window.innerHeight - 84);
+    top = window.innerHeight + 200;
+    document.dispatchEvent(new Event("scroll"));
+    expect(host.height()).toBe(window.innerHeight - 32);
+    top = -200;
+    document.dispatchEvent(new Event("scroll"));
+    expect(host.height()).toBe(window.innerHeight - 32);
+    host.allowAbove.set(false);
+    top = window.innerHeight - 48;
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(host.height()).toBe(80);
+  });
+
   it("tracks the open origin on resize and ancestor scrolling, then releases listeners", () => {
     const fixture = TestBed.createComponent(Host);
     const host = fixture.componentInstance;

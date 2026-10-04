@@ -6448,6 +6448,7 @@ export function injectPopoverSpace(options: {
     readonly origin: () => HTMLElement | undefined;
     readonly open: () => boolean;
     readonly reserve: number;
+    readonly allowAbove?: () => boolean;
 }): Signal<number>;
 
 // @public
