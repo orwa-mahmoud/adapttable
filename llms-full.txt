@@ -20938,6 +20938,7 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | `TableHeaderModel`, `TableRowModel`, `TableCellModel`, `TableBodySlot`                                          | Header controls/context, row wiring, cell context/decorations and structural row/group/extra/padding variants.                                                                                                |
 | `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                                                                     | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                                                                     |
 | `elementRef`, `composeElementRefs`                                                                              | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
+| `requireScope(name: string): void`                                                                              | Require a Vue effect scope before creating a custom composable; throws outside component setup or `effectScope().run()`. See the [Vue lifecycle contract](./vue/api.md).                                      |
 | `useScopeActivity()`                                                                                            | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                                                                               |
 | `useExternalStore(store)`                                                                                       | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                                                                            |
 | `FeatureLifecycle`, `useFeatureLifecycle`                                                                       | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                                                                    |
@@ -32272,6 +32273,12 @@ getter returning `T | undefined`. Required reactive fields use Vue's
 `MaybeRefOrGetter<T>`. Function-valued domain callbacks remain ordinary
 callbacks, including zero-argument `refetch` functions. A whole-options getter
 is the supported way to replace callback identities.
+
+Adapter authors can call `requireScope(name: string): void` at the start of a
+custom composable to require an active Vue effect scope. It throws outside
+component `setup()` or `effectScope().run()`, using `name` to identify the
+composable in the error. This guard checks ownership; use the activity helper
+below to suspend external effects when the component becomes inactive.
 
 `useScopeActivity(): Readonly<ShallowRef<boolean>>` becomes active after
 component mount, pauses on `KeepAlive` deactivation and becomes false on disposal.

@@ -34,6 +34,12 @@ getter returning `T | undefined`. Required reactive fields use Vue's
 callbacks, including zero-argument `refetch` functions. A whole-options getter
 is the supported way to replace callback identities.
 
+Adapter authors can call `requireScope(name: string): void` at the start of a
+custom composable to require an active Vue effect scope. It throws outside
+component `setup()` or `effectScope().run()`, using `name` to identify the
+composable in the error. This guard checks ownership; use the activity helper
+below to suspend external effects when the component becomes inactive.
+
 `useScopeActivity(): Readonly<ShallowRef<boolean>>` becomes active after
 component mount, pauses on `KeepAlive` deactivation and becomes false on disposal.
 An explicit non-component effect scope starts active immediately and must be
