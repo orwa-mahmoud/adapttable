@@ -641,6 +641,7 @@ export class AdaptMaterialDialog {
 
 // @internal
 export class AdaptMaterialPopover {
+    constructor();
     // (undocumented)
     readonly align: InputSignal<"start" | "end">;
     // (undocumented)
@@ -662,6 +663,8 @@ export class AdaptMaterialPopover {
     // (undocumented)
     protected readonly filterPositions: ConnectedPosition[];
     readonly filterSurface: InputSignal<boolean>;
+    // (undocumented)
+    protected fitFilterOverlay(): void;
     // (undocumented)
     protected keydown(event: KeyboardEvent): void;
     // (undocumented)

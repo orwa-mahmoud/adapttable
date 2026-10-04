@@ -2,6 +2,7 @@ import type { TableLabels } from "@adapttable/angular";
 import {
   CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
   CdkConnectedOverlay,
+  OverlayContainer,
 } from "@angular/cdk/overlay";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -84,6 +85,7 @@ class DialogHost {
 
 afterEach(() => {
   TestBed.resetTestingModule();
+  vi.unstubAllGlobals();
   document.body.innerHTML = "";
 });
 
@@ -411,14 +413,85 @@ describe("Material overlay ownership", () => {
       "mat-card.adapt-material-filter-card"
     )!;
     expect(card.style.maxHeight).toBe(`${top - 16}px`);
+    const connected = fixture.debugElement
+      .queryAllNodes(By.directive(CdkConnectedOverlay))[0]!
+      .injector.get(CdkConnectedOverlay);
+    const reposition = vi.spyOn(connected.overlayRef, "updatePosition");
     top = 100;
     window.dispatchEvent(new Event("resize"));
     await fixture.whenStable();
     expect(card.style.maxHeight).toBe(`${window.innerHeight - 152}px`);
+    expect(reposition).toHaveBeenCalled();
     top = window.innerHeight - 50;
     fixture.componentInstance.belowOnly.set(true);
     await fixture.whenStable();
     expect(card.style.maxHeight).toBe("80px");
+  });
+
+  it("corrects a filter after native positioning and resize, then releases generic menus", async () => {
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    let notifyResize: (() => void) | undefined;
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        readonly observe = observe;
+        readonly disconnect = disconnect;
+        constructor(callback: () => void) {
+          notifyResize = callback;
+        }
+      }
+    );
+    const fixture = TestBed.createComponent(PopoverHost);
+    document.body.append(fixture.nativeElement);
+    fixture.componentInstance.filterSurface.set(true);
+    fixture.componentInstance.open.set(true);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const connected = fixture.debugElement
+      .queryAllNodes(By.directive(CdkConnectedOverlay))[0]!
+      .injector.get(CdkConnectedOverlay);
+    const pane = connected.overlayRef.overlayElement;
+    const container = TestBed.inject(OverlayContainer).getContainerElement();
+    expect(observe).toHaveBeenCalledWith(pane);
+    expect(observe).toHaveBeenCalledWith(container);
+    vi.spyOn(document.documentElement, "clientWidth", "get").mockReturnValue(
+      390
+    );
+    vi.spyOn(container, "getBoundingClientRect").mockReturnValue(
+      DOMRect.fromRect({ x: 0, width: 375 })
+    );
+    vi.spyOn(pane, "getBoundingClientRect").mockReturnValue(
+      DOMRect.fromRect({ x: -7, width: 359 })
+    );
+    pane.style.transform = "translateY(-4px)";
+    connected.positionChange.emit({
+      connectionPair: connected.positions[0]!,
+      scrollableViewProperties: {
+        isOriginClipped: false,
+        isOriginOutsideView: false,
+        isOverlayClipped: false,
+        isOverlayOutsideView: false,
+      },
+    });
+    expect(pane.style.translate).toBe("15px");
+    expect(pane.style.transform).toBe("translateY(-4px)");
+    pane.style.translate = "";
+    window.dispatchEvent(new Event("resize"));
+    expect(pane.style.translate).toBe("15px");
+
+    pane.style.translate = "";
+    notifyResize?.();
+    expect(pane.style.translate).toBe("15px");
+    fixture.componentInstance.filterSurface.set(false);
+    await fixture.whenStable();
+    expect(disconnect).toHaveBeenCalled();
+    expect(pane.style.translate).toBe("");
+    window.dispatchEvent(new Event("resize"));
+    expect(pane.style.translate).toBe("");
+    fixture.destroy();
+    window.dispatchEvent(new Event("resize"));
+    expect(pane.style.translate).toBe("");
   });
 
   it("uses Material's real modal backdrop and closes on an outside press", async () => {

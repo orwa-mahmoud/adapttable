@@ -305,9 +305,18 @@ for (const key of ["angular-cdk", "material", "aria"]) {
             .poll(async () => {
               const anchor = (await trigger.boundingBox())!;
               const card = (await surface.boundingBox())!;
-              return card.y - anchor.y - anchor.height;
+              const below = card.y >= anchor.y + anchor.height;
+              const above = card.y + card.height <= anchor.y;
+              return below || (key === "material" && above);
             })
-            .toBeGreaterThanOrEqual(0);
+            .toBe(true);
+          if (key === "material") {
+            await expect(surface).toBeInViewport({ ratio: 1 });
+            await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+            await expect(panel.locator("footer button")).toBeInViewport({
+              ratio: 1,
+            });
+          }
 
           const diagnoseHeader = key === "material";
           if (diagnoseHeader)
@@ -454,4 +463,54 @@ for (const locale of ["en", "ar"]) {
     await expect(panel).toHaveCount(0);
     await expect(trigger).toBeFocused();
   });
+}
+
+for (const locale of ["en", "ar"]) {
+  for (const gutter of ["auto", "stable"]) {
+    test(`material ${locale}: filter respects ${gutter} scrollbar gutters through narrow resizing`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(
+        `/angular-main/?kit=material&locale=${locale}&search=off`
+      );
+      await page.evaluate((value) => {
+        document.documentElement.style.scrollbarGutter = value;
+      }, gutter);
+      const trigger = angularPart({ key: "material" }, page, "filters-button");
+      const panel = angularPart({ key: "material" }, page, "filters-popover");
+      const surface = page.locator(".cdk-overlay-pane mat-card");
+      await trigger.evaluate((button) =>
+        button.scrollIntoView({ block: "center" })
+      );
+      await trigger.click();
+      await expect(panel).toBeVisible();
+      for (const width of [390, 320, 390]) {
+        await page.setViewportSize({ width, height: 844 });
+        await expectHorizontalFit(surface, width);
+        await expect
+          .poll(() =>
+            surface.evaluate((card) => {
+              const container = card.closest(".cdk-overlay-container")!;
+              const bounds = container.getBoundingClientRect();
+              const actual = card.getBoundingClientRect();
+              return (
+                actual.left >= Math.max(0, bounds.left) + 7 &&
+                actual.right <=
+                  Math.min(document.documentElement.clientWidth, bounds.right) -
+                    7
+              );
+            })
+          )
+          .toBe(true);
+        await expect(surface).toBeInViewport({ ratio: 1 });
+        await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+        await expectReachableFields(panel, width);
+        await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+      }
+      await page.keyboard.press("Escape");
+      await expect(panel).toBeHidden();
+      await expect(trigger).toBeFocused();
+    });
+  }
 }

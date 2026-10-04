@@ -3,10 +3,13 @@ import { BidiModule } from "@angular/cdk/bidi";
 /** Material card surface on the CDK overlay used by Material itself. */
 import {
   CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
+  CdkConnectedOverlay,
   type ConnectedPosition,
+  OverlayContainer,
   OverlayModule,
 } from "@angular/cdk/overlay";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -14,8 +17,11 @@ import {
   inject,
   input,
   output,
+  viewChild,
 } from "@angular/core";
 import { MatCardModule } from "@angular/material/card";
+
+import { fitFilterOverlayHorizontally } from "./materialPopoverGeometry";
 
 /** Anchored, backdrop-free surface with scoped dismissal and focus restoration. @internal */
 @Component({
@@ -45,6 +51,7 @@ import { MatCardModule } from "@angular/material/card";
       "
       [cdkConnectedOverlayViewportMargin]="8"
       [cdkConnectedOverlayPanelClass]="'adapt-material-overlay'"
+      (positionChange)="fitFilterOverlay()"
       (overlayOutsideClick)="outside($event)"
       (overlayKeydown)="keydown($event)"
     >
@@ -65,6 +72,49 @@ import { MatCardModule } from "@angular/material/card";
   ></span>`,
 })
 export class AdaptMaterialPopover {
+  private readonly overlayContainer = inject(OverlayContainer);
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+
+  constructor() {
+    afterRenderEffect((onCleanup) => {
+      const connected = this.connectedOverlay();
+      if (!this.open() || !this.constrainedSurface() || !connected) return;
+      this.availableHeight();
+      this.direction();
+      // Height is measured after the card mounts. Reapply the native strategy
+      // after that size changes so a pushed initial position cannot linger.
+      connected.overlayRef.updatePosition();
+      const pane = connected.overlayRef.overlayElement;
+      const viewport = pane.ownerDocument.defaultView;
+      const fit = () => this.fitFilterOverlay();
+      fit();
+      // Native positioning can stay on the same connection during a resize.
+      // Observe its actual pane as well as page movement and viewport changes.
+      const observer =
+        typeof ResizeObserver === "undefined" ? null : new ResizeObserver(fit);
+      observer?.observe(pane);
+      observer?.observe(this.overlayContainer.getContainerElement());
+      viewport?.addEventListener("resize", fit);
+      viewport?.addEventListener("scroll", fit, true);
+      onCleanup(() => {
+        observer?.disconnect();
+        viewport?.removeEventListener("resize", fit);
+        viewport?.removeEventListener("scroll", fit, true);
+        pane.style.translate = "";
+      });
+    });
+  }
+
+  protected fitFilterOverlay(): void {
+    if (!this.constrainedSurface()) return;
+    const pane = this.connectedOverlay()?.overlayRef?.overlayElement;
+    if (pane)
+      fitFilterOverlayHorizontally(
+        pane,
+        this.overlayContainer.getContainerElement()
+      );
+  }
+
   protected readonly overlayDefaults = inject(
     CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
     {
