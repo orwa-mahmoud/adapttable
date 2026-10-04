@@ -116,6 +116,8 @@ export interface RuntimeChromeInput<TRow> {
   readonly table: {
     readonly selection?: {
       readonly selectedIds: ReadonlySet<string>;
+      readonly allMatching?: boolean;
+      readonly acrossPages?: boolean;
       readonly replace: (ids: readonly string[] | undefined) => void;
     } | null;
     readonly labels: object;
@@ -322,6 +324,12 @@ export function tableRuntimeView<TRow>(
     selection: chrome.table.selection
       ? {
           selectedIds: chrome.table.selection.selectedIds,
+          ...(chrome.table.selection.allMatching === undefined
+            ? {}
+            : { allMatching: chrome.table.selection.allMatching }),
+          ...(chrome.table.selection.acrossPages === undefined
+            ? {}
+            : { acrossPages: chrome.table.selection.acrossPages }),
           replace: chrome.table.selection.replace,
         }
       : undefined,

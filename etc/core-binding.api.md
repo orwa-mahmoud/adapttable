@@ -5152,6 +5152,8 @@ export interface RuntimeChromeInput<TRow> {
     readonly table: {
         readonly selection?: {
             readonly selectedIds: ReadonlySet<string>;
+            readonly allMatching?: boolean;
+            readonly acrossPages?: boolean;
             readonly replace: (ids: readonly string[] | undefined) => void;
         } | null;
         readonly labels: object;
@@ -6543,6 +6545,8 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly rows: readonly TRow[];
     readonly selection?: {
         readonly selectedIds: ReadonlySet<string>;
+        readonly allMatching?: boolean;
+        readonly acrossPages?: boolean;
         readonly replace: (ids: readonly string[] | undefined) => void;
     };
     readonly sortBy?: string;

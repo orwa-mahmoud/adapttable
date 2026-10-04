@@ -2796,7 +2796,11 @@ changes and cell writes through the view's own setters, with the host's `apply`
 callbacks laid over them. `LiveSessionInputs` carries the binding's
 `TableAgentRuntimeOptions`, the runtime, a `RevisionCounter` from
 `createRevisionCounter`, and the binding's flush, approval and progress hooks;
-`viewRevisionStamp` is the stamp that counter moves on.
+`viewRevisionStamp` is the stamp that counter moves on. It includes column
+layout, row and column pinning, and selection even when the view carries a
+neutral table. Set-like selection and hidden-column values use a stable order.
+Runtime selection may expose `allMatching` and `acrossPages`; these describe
+the current scope and do not authorize additional row access.
 `viewInputsFromRuntime` reads the same view in the shape the context builder
 takes, and `sampledColumns` names the columns whose author asked for live
 values. For approvals, `readerResolver` is the `ProposalResolver` over the

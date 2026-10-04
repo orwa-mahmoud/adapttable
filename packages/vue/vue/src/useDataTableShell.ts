@@ -430,6 +430,8 @@ export function useDataTableShell<TRow>(
       selection: selection.value
         ? {
             selectedIds: selection.value.selectedIds.value,
+            allMatching: selection.value.state.value.allMatching,
+            acrossPages: selection.value.state.value.acrossPages,
             replace: selection.value.replace,
           }
         : undefined,

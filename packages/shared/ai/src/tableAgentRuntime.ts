@@ -192,17 +192,22 @@ function stampJson(value: unknown): string {
 /**
  * A string that changes whenever the runtime view an agent reads changes.
  *
- * A view carrying a neutral table stamps that table's revisions. Any other
- * view stamps its row identities and row payloads together with the page,
- * search, sort, filters, grouping, aggregation overrides, pins, hidden columns
- * and column order — written without throwing on a BigInt or on a row that
- * contains itself.
+ * A view carrying a neutral table combines its engine revisions with the
+ * layout, pinning and selection state owned outside that engine. Other views
+ * include row identities and payloads, query, grouping and aggregation state.
+ * Set-like fields use deterministic ordering without changing host collections.
+ * BigInt and cyclic host rows can be stamped without throwing.
  *
  * @public
  */
 export function viewRevisionStamp(view: TableRuntimeView | undefined): string {
   const table = view?.neutralTable;
-  if (table) return monotonicRevision(table.revisions, undefined).token;
+  const overlays = runtimeOverlays(view);
+  if (table) {
+    const token = monotonicRevision(table.revisions, undefined).token;
+    const stamp = stampJson(overlays);
+    return stamp === "{}" ? token : `${token}:${stamp}`;
+  }
   const rows = view?.rows ?? [];
   const getRowId = view?.getRowId;
   const query = view?.query;
@@ -217,11 +222,37 @@ export function viewRevisionStamp(view: TableRuntimeView | undefined): string {
     filters: query?.extra,
     groupBy: view?.groupingState?.groupBy,
     aggregateOverrides: view?.groupingState?.aggregateOverrides,
-    pinnedColumns: view?.pinning?.columns,
-    pinnedRows: view?.pinning?.rows,
-    hiddenColumns: view?.columnLayout?.hidden,
-    columnOrder: view?.columnLayout?.keys,
+    ...overlays,
   });
+}
+
+function compareIds(left: string, right: string): number {
+  if (left === right) return 0;
+  return left < right ? -1 : 1;
+}
+
+function runtimeOverlays(view: TableRuntimeView | undefined) {
+  const columns = view?.pinning?.columns;
+  const selection = view?.selection;
+  return {
+    pinnedColumns: columns
+      ? Object.keys(columns)
+          .sort(compareIds)
+          .map((key) => [key, columns[key]])
+      : undefined,
+    pinnedRows: view?.pinning?.rows,
+    hiddenColumns: view?.columnLayout
+      ? [...new Set(view.columnLayout.hidden)].sort(compareIds)
+      : undefined,
+    columnOrder: view?.columnLayout?.keys,
+    selection: selection
+      ? {
+          ids: [...selection.selectedIds].sort(compareIds),
+          allMatching: selection.allMatching ?? false,
+          acrossPages: selection.acrossPages ?? false,
+        }
+      : undefined,
+  };
 }
 
 function liveReadRows(
