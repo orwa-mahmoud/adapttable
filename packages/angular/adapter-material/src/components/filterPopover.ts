@@ -41,7 +41,7 @@ import { AdaptMaterialPopover } from "./materialPopover";
           [attr.data-dir]="p.dir ?? 'ltr'"
           [style.width]="'100%'"
           [style.max-width]="'calc(100vw - 48px)'"
-          style="display: flex; flex-direction: column; max-height: calc(var(--adapt-material-popover-height, 560px) - 32px)"
+          style="display: flex; flex-direction: column; min-height: 0; max-height: calc(var(--adapt-material-popover-height, 560px) - 32px)"
         >
           <header class="adapt-material-filters-header" style="flex: none">
             <h3 class="adapt-material-filters-title">

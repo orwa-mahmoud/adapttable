@@ -1,4 +1,6 @@
 /** Searchless toolbars must not strand native filter cards outside the viewport. */
+import { writeFile } from "node:fs/promises";
+
 import { expect, type Locator, test, type TestInfo } from "@playwright/test";
 
 import { angularPart } from "./angular-kit";
@@ -127,17 +129,54 @@ async function captureMaterialLayout(
       };
     });
   const beforeScreenshot = await measure();
+  const suffix = phase.replaceAll(" ", "-");
+  const screenshotPath = testInfo.outputPath(
+    `material-filter-layout-${suffix}.png`
+  );
+  await panel.page().screenshot({ path: screenshotPath });
   await testInfo.attach(`Material layout: ${phase}`, {
-    body: await panel.page().screenshot(),
+    path: screenshotPath,
     contentType: "image/png",
   });
   const afterScreenshot = await measure();
+  const geometryPath = testInfo.outputPath(
+    `material-filter-geometry-${suffix}.json`
+  );
+  await writeFile(
+    geometryPath,
+    JSON.stringify({ phase, beforeScreenshot, afterScreenshot }, null, 2)
+  );
   await testInfo.attach(`Material geometry and scroll offsets: ${phase}`, {
-    body: Buffer.from(
-      JSON.stringify({ phase, beforeScreenshot, afterScreenshot }, null, 2)
-    ),
+    path: geometryPath,
     contentType: "application/json",
   });
+  const summarize = (snapshot: typeof beforeScreenshot) =>
+    Object.fromEntries(
+      (["pane", "card", "panel", "header", "body", "done"] as const).map(
+        (key) => {
+          const element = snapshot[key];
+          return [
+            key,
+            element && {
+              top: element.rect.top,
+              height: element.rect.height,
+              scrollTop: element.scrollTop,
+              scrollHeight: element.scrollHeight,
+              clientHeight: element.clientHeight,
+            },
+          ];
+        }
+      )
+    );
+  console.log(
+    "Material filter layout:",
+    JSON.stringify({
+      test: testInfo.title,
+      phase,
+      before: summarize(beforeScreenshot),
+      after: summarize(afterScreenshot),
+    })
+  );
 }
 
 /** Run after the original scenario, so restoration cannot mask its assertions. */
