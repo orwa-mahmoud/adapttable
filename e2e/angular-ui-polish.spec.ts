@@ -101,7 +101,7 @@ for (const key of [
   "taiga-ui",
 ]) {
   for (const locale of ["en", "ar"]) {
-    test(`${key} ${locale}: filters stay beneath their trigger with reachable dismissal`, async ({
+    test(`${key} ${locale}: filters stay anchored with reachable dismissal`, async ({
       page,
     }, testInfo) => {
       await page.setViewportSize({ width: 1440, height: 856 });
@@ -124,13 +124,25 @@ for (const key of [
           '[data-adapttable-part="filters-popover"], [data-spartan-part="filters-popover"], [data-taiga-part="filters-popover"], [data-ng-bootstrap-part="filters-popover"], [data-ngx-bootstrap-part="filters-popover"]'
       );
       await expect(panel).toBeVisible();
+      const surface =
+        key === "material"
+          ? page.locator(".cdk-overlay-pane .adapt-material-filter-card")
+          : panel;
       await expect
         .poll(async () => {
           const anchor = await trigger.boundingBox();
-          const card = await panel.boundingBox();
-          return card!.y - anchor!.y - anchor!.height;
+          const card = await surface.boundingBox();
+          if (!anchor || !card) return false;
+          return (
+            card.y >= anchor.y + anchor.height ||
+            (key === "material" && card.y + card.height <= anchor.y)
+          );
         })
-        .toBeGreaterThanOrEqual(0);
+        .toBe(true);
+      if (key === "material") {
+        await expect(surface).toBeInViewport({ ratio: 1 });
+        await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+      }
       const person = panel.getByRole("textbox", {
         name: locale === "ar" ? "الشخص" : "Person",
         exact: true,
@@ -152,6 +164,7 @@ for (const key of [
       expect(Math.abs(personBox!.y - operatorBox!.y)).toBeLessThanOrEqual(8);
       const done = panel.locator("footer button").last();
       await expect(done).toBeVisible();
+      if (key === "material") await expect(done).toBeInViewport({ ratio: 1 });
       expect(
         (await done.boundingBox())!.y + (await done.boundingBox())!.height
       ).toBeLessThanOrEqual(856);
@@ -170,9 +183,17 @@ for (const key of [
           exact: true,
         })
       ).toBeChecked();
-      await page.screenshot({
-        path: testInfo.outputPath("native-filter-under-button.png"),
-      });
+      const capture = testInfo.outputPath(
+        key === "material"
+          ? `material-filter-layout-polish-${locale}.png`
+          : "native-filter-anchored.png"
+      );
+      await page.screenshot({ path: capture });
+      if (key === "material")
+        await testInfo.attach("Material anchored filters", {
+          path: capture,
+          contentType: "image/png",
+        });
       await done.click();
       await expect(panel).toBeHidden();
       await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(6);
