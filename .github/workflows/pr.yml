@@ -594,7 +594,7 @@ jobs:
           name: docs-dist
           path: apps/docs/dist/
       - name: Run E2E smoke suite
-        run: pnpm exec playwright test --project=chromium --project=chromium-dev --shard=${{ matrix.shard }}/9
+        run: xvfb-run --auto-servernum pnpm exec playwright test --project=chromium --project=chromium-dev --shard=${{ matrix.shard }}/9
         env:
           SHOWCASE_SKIP_BUILD: "1"
           DOCS_SKIP_BUILD: "1"

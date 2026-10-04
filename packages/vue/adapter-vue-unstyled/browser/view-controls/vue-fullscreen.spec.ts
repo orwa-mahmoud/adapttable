@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 // Browser-owned fullscreen handling uses the full Chromium binary.
-test.use({ channel: "chromium" });
+test.use({ channel: "chromium", headless: false });
 
 const PREVIEW = "/vue/unstyled/view-controls/";
 

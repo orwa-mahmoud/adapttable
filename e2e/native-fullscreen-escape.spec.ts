@@ -1,13 +1,15 @@
 import { expect, test } from "@playwright/test";
 
 // Exercise browser-owned fullscreen handling in full Chromium.
-test.use({ channel: "chromium" });
+test.use({ channel: "chromium", headless: false });
 
 // Diagnostic control: no framework, overlay, Escape handler, or fullscreen shim.
 // Keep this assertion failing if the browser input path cannot exit fullscreen.
 test("native fullscreen platform control follows Escape", async ({
   page,
   browser,
+  headless,
+  channel,
 }, testInfo) => {
   const events: string[] = [];
   page.on("console", (message) => events.push(message.text()));
@@ -64,8 +66,8 @@ test("native fullscreen platform control follows Escape", async ({
         {
           browserVersion: browser.version(),
           project: testInfo.project.name,
-          headless: testInfo.project.use.headless ?? true,
-          channel: "chromium",
+          headless,
+          channel,
           events,
         },
         null,
