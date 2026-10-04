@@ -4863,6 +4863,12 @@ export interface RowPairMeasurer {
 }
 
 // @public
+interface RowPairMeasurer_2 {
+    detail: (index: number) => (node: Element | null) => void;
+    row: (index: number) => (node: Element | null) => void;
+}
+
+// @public
 export type RowPatchEvent<TRow> = {
     type: "insert";
     id: string;

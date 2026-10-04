@@ -1017,6 +1017,12 @@ export type CellNavLiveSlotProps<TRow = never> = CellNavLiveSlotProps_2<Omit<Use
 
 export { CellProps }
 
+// @public
+interface CellProps_2<TRow> {
+    readonly row: TRow;
+    readonly rowIndex: number;
+}
+
 export { CellRange }
 
 export { CellSaveState }
@@ -1163,6 +1169,12 @@ export { columnFlexShares }
 
 export { ColumnFooterContext }
 
+// @public
+interface ColumnFooterContext_2<TRow> {
+    column: ColumnDef<TRow>;
+    value: ReactNode;
+}
+
 export { ColumnGroupDef }
 
 export { columnGroupHeaderCaption }
@@ -1194,12 +1206,31 @@ export type ColumnGroupToggleSlots = ColumnGroupToggleSlots_2<ReactNode>;
 
 export { ColumnHeaderContext }
 
+// @public
+interface ColumnHeaderContext_2<TRow> {
+    column: ColumnDef<TRow>;
+    controller: ColumnHeaderController_2;
+}
+
 export { ColumnHeaderController }
+
+// @public
+interface ColumnHeaderController_2 {
+    label: ReactNode;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
 
 // @public
 export type ColumnHeaderRenameSlotProps = ColumnHeaderRenameSlotProps_2<ReactNode>;
 
 export { ColumnInput }
+
+// @public
+type ColumnInput_2<TRow> = ColumnDef<TRow> | ReactColumnGroupDef<TRow>;
 
 export { ColumnLayoutState }
 
@@ -2859,6 +2890,12 @@ export { QueryFilterGroup }
 export { QueryGroupRow }
 
 export { QuerySupport }
+
+// @public
+export interface ReactColumnGroupDef<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
+    // (undocumented)
+    readonly children: readonly ColumnInput_2<TRow>[];
+}
 
 // @public
 export type ReactColumnResizeHandleProps = Omit<ColumnResizeHandleProps, "onPointerDown" | "onKeyDown" | "onDoubleClick"> & Pick<HTMLAttributes<HTMLElement>, "onPointerDown" | "onKeyDown" | "onDoubleClick"> & {

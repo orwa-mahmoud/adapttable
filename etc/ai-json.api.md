@@ -281,6 +281,9 @@ export type ApprovalOutcome = "pending" | "approved" | "partial" | "rejected" | 
 export type ApprovalPolicy = "writes" | "destructive" | "never";
 
 // @public
+type ApprovalPolicy_2 = "writes" | "destructive" | "never";
+
+// @public
 export type ApprovalResult = boolean | {
     readonly approved: readonly number[];
     readonly reason?: string;
@@ -370,6 +373,9 @@ export interface CatalogEntry {
 
 // @public
 export type CommitPolicy = "stage" | "immediate";
+
+// @public
+type CommitPolicy_2 = "stage" | "immediate";
 
 // @public
 export function executeEnvelope(session: AgentSession, envelope: AgentEnvelope): Promise<ExecuteResult>;

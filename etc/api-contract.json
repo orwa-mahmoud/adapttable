@@ -5026,6 +5026,7 @@
       "PivotZoneProps",
       "printToolbar",
       "PrintToolbar",
+      "ReactColumnGroupDef",
       "ReactColumnResizeHandleProps",
       "ReactMobileCardField",
       "ReactMobileCardModel",
