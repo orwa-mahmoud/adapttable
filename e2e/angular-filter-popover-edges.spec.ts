@@ -79,8 +79,9 @@ for (const key of ["angular-cdk", "material", "aria"]) {
             .toBeGreaterThanOrEqual(0);
 
           const done = await expectReachableFields(panel, viewport.width);
-          await page.screenshot({
-            path: testInfo.outputPath("filter-popover-viewport.png"),
+          await testInfo.attach("Filter popover at the toolbar edge", {
+            body: await page.screenshot(),
+            contentType: "image/png",
           });
           await done.click();
           await expect(panel).toBeHidden();
@@ -119,9 +120,13 @@ for (const key of ["angular-cdk", "material", "aria"]) {
               panel,
               viewport.width
             );
-            await page.screenshot({
-              path: testInfo.outputPath("filter-popover-centered.png"),
-            });
+            await testInfo.attach(
+              "Filter popover at a centered narrow trigger",
+              {
+                body: await page.screenshot(),
+                contentType: "image/png",
+              }
+            );
             await centeredDone.click();
             await expect(panel).toBeHidden();
           }

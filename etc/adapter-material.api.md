@@ -20,6 +20,7 @@ import { BodySlot } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
+import { CdkConnectedOverlayConfig } from '@angular/cdk/overlay';
 import { ChecklistSlots } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
 import { ColumnGroupToggleButtonProps } from '@adapttable/angular';
@@ -664,6 +665,8 @@ export class AdaptMaterialPopover {
     readonly origin: InputSignal<HTMLElement>;
     // (undocumented)
     protected outside(event: MouseEvent): void;
+    // (undocumented)
+    protected readonly overlayDefaults: CdkConnectedOverlayConfig | null;
     // (undocumented)
     protected readonly positions: Signal<ConnectedPosition[]>;
     // (undocumented)
