@@ -1,12 +1,17 @@
 import { injectPopoverSpace } from "@adapttable/angular";
 import { BidiModule } from "@angular/cdk/bidi";
 /** Material card surface on the CDK overlay used by Material itself. */
-import { type ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import {
+  CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
+  type ConnectedPosition,
+  OverlayModule,
+} from "@angular/cdk/overlay";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   ElementRef,
+  inject,
   input,
   output,
 } from "@angular/core";
@@ -28,6 +33,12 @@ import { MatCardModule } from "@angular/material/card";
         belowOnly() ? belowPositions : positions()
       "
       [cdkConnectedOverlayPush]="!belowOnly()"
+      [cdkConnectedOverlayFlexibleDimensions]="
+        belowOnly() || (overlayDefaults?.flexibleDimensions ?? false)
+      "
+      [cdkConnectedOverlayWidth]="
+        belowOnly() ? 374 : (overlayDefaults?.width ?? '')
+      "
       [cdkConnectedOverlayViewportMargin]="8"
       [cdkConnectedOverlayPanelClass]="'adapt-material-overlay'"
       (overlayOutsideClick)="outside($event)"
@@ -36,6 +47,7 @@ import { MatCardModule } from "@angular/material/card";
       <mat-card
         appearance="outlined"
         [attr.dir]="direction()"
+        [style.width]="belowOnly() ? '100%' : null"
         [style.max-height.px]="belowOnly() ? availableHeight() : null"
         [style.--adapt-material-popover-height]="
           belowOnly() ? availableHeight() + 'px' : null
@@ -48,6 +60,12 @@ import { MatCardModule } from "@angular/material/card";
   ></span>`,
 })
 export class AdaptMaterialPopover {
+  protected readonly overlayDefaults = inject(
+    CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
+    {
+      optional: true,
+    }
+  );
   readonly origin = input.required<HTMLElement>();
   readonly open = input(true);
   readonly belowOnly = input(false);
@@ -62,6 +80,22 @@ export class AdaptMaterialPopover {
       originX: "end",
       originY: "bottom",
       overlayX: "end",
+      overlayY: "top",
+      offsetY: 4,
+    },
+    // Search can be absent, placing the trigger at the other toolbar edge.
+    // Keep both logical alignments below the trigger, including in RTL.
+    {
+      originX: "start",
+      originY: "bottom",
+      overlayX: "start",
+      overlayY: "top",
+      offsetY: 4,
+    },
+    {
+      originX: "center",
+      originY: "bottom",
+      overlayX: "center",
       overlayY: "top",
       offsetY: 4,
     },

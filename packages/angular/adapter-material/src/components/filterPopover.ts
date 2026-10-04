@@ -39,7 +39,7 @@ import { AdaptMaterialPopover } from "./materialPopover";
           class="adapt-material-filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
-          [style.width.px]="340"
+          [style.width]="'100%'"
           [style.max-width]="'calc(100vw - 48px)'"
           style="display: flex; flex-direction: column; max-height: calc(var(--adapt-material-popover-height, 560px) - 32px)"
         >

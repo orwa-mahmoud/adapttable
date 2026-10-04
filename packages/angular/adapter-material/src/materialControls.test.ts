@@ -1,4 +1,8 @@
 import type { TableLabels } from "@adapttable/angular";
+import {
+  CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
+  CdkConnectedOverlay,
+} from "@angular/cdk/overlay";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { MatCheckbox } from "@angular/material/checkbox";
@@ -46,6 +50,7 @@ class TableHost {
     <adapt-material-popover
       [origin]="trigger"
       [open]="open()"
+      [belowOnly]="belowOnly()"
       dir="rtl"
       (dismiss)="close()"
     >
@@ -53,6 +58,7 @@ class TableHost {
     </adapt-material-popover>`,
 })
 class PopoverHost {
+  readonly belowOnly = signal(false);
   readonly open = signal(false);
   readonly close = vi.fn(() => this.open.set(false));
 }
@@ -299,6 +305,56 @@ describe("Material overlay ownership", () => {
     expect(document.activeElement).toBe(trigger);
     expect(fixture.componentInstance.close).toHaveBeenCalledTimes(1);
   });
+  it.each([false, true])(
+    "preserves generic overlay defaults after filter sizing: custom defaults %s",
+    async (customDefaults) => {
+      if (customDefaults) {
+        TestBed.configureTestingModule({
+          providers: [
+            {
+              provide: CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
+              useValue: { flexibleDimensions: true, width: 260 },
+            },
+          ],
+        });
+      }
+      const fixture = TestBed.createComponent(PopoverHost);
+      document.body.append(fixture.nativeElement);
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+      fixture.componentInstance.open.set(true);
+      await fixture.whenStable();
+      const connected = fixture.debugElement
+        .queryAllNodes(By.directive(CdkConnectedOverlay))[0]!
+        .injector.get(CdkConnectedOverlay);
+      expect(connected.flexibleDimensions).toBe(customDefaults);
+      expect(connected.push).toBe(true);
+      expect(connected.overlayRef.overlayElement.style.width).toBe(
+        customDefaults ? "260px" : ""
+      );
+
+      fixture.componentInstance.belowOnly.set(true);
+      await fixture.whenStable();
+      expect(connected.flexibleDimensions).toBe(true);
+      expect(connected.push).toBe(false);
+      expect(connected.overlayRef.overlayElement.style.width).toBe("374px");
+      expect(
+        connected.positions.every((position) => position.originY === "bottom")
+      ).toBe(true);
+
+      fixture.componentInstance.belowOnly.set(false);
+      await fixture.whenStable();
+      expect(connected.flexibleDimensions).toBe(customDefaults);
+      expect(connected.push).toBe(true);
+      expect(connected.overlayRef.overlayElement.style.width).toBe(
+        customDefaults ? "260px" : ""
+      );
+      expect(
+        connected.positions.some((position) => position.originY === "top")
+      ).toBe(true);
+    }
+  );
+
   it("uses Material's real modal backdrop and closes on an outside press", async () => {
     const fixture = TestBed.createComponent(DialogHost);
     document.body.append(fixture.nativeElement);

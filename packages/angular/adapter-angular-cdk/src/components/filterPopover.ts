@@ -43,6 +43,8 @@ import {
         [cdkConnectedOverlayPositions]="positions"
         [cdkConnectedOverlayViewportMargin]="8"
         [cdkConnectedOverlayPush]="false"
+        [cdkConnectedOverlayFlexibleDimensions]="true"
+        [cdkConnectedOverlayWidth]="340"
         cdkConnectedOverlayPanelClass="adapt-cdk-overlay"
         (overlayOutsideClick)="outside($event)"
         (overlayKeydown)="keydown($event)"
@@ -50,7 +52,7 @@ import {
         <section
           #card
           [style.max-height.px]="availableHeight()"
-          style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
+          style="display: flex; flex-direction: column; overflow: hidden; width: 100%; max-width: calc(100vw - 16px)"
           data-adapttable-part="filters-popover"
           class="adapt-cdk-surface adapt-cdk-filter-card"
           [dir]="p.dir ?? 'ltr'"
@@ -115,6 +117,22 @@ export class AdaptFilterPopover {
       originX: "end",
       originY: "bottom",
       overlayX: "end",
+      overlayY: "top",
+      offsetY: 4,
+    },
+    // Search can be absent, placing the trigger at the other toolbar edge.
+    // Keep both logical alignments below the trigger, including in RTL.
+    {
+      originX: "start",
+      originY: "bottom",
+      overlayX: "start",
+      overlayY: "top",
+      offsetY: 4,
+    },
+    {
+      originX: "center",
+      originY: "bottom",
+      overlayX: "center",
       overlayY: "top",
       offsetY: 4,
     },
