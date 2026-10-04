@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vitest/config";
 
@@ -8,7 +10,15 @@ import {
 
 export default defineConfig({
   plugins: [vue()],
-  resolve: { dedupe: ["vue"] },
+  resolve: {
+    alias: [
+      {
+        find: /^@adapttable\/vue-unstyled$/,
+        replacement: fileURLToPath(new URL("./src/index.ts", import.meta.url)),
+      },
+    ],
+    dedupe: ["vue"],
+  },
   test: {
     environment: "jsdom",
     include: ["src/**/*.test.ts", "test/**/*.test.ts"],

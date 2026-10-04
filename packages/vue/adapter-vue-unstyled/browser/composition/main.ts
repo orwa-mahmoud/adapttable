@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@adapttable/vue";
-import { createApp, defineComponent, h, KeepAlive, shallowRef } from "vue";
+import { defineComponent, h, KeepAlive, shallowRef } from "vue";
 
 import { DataTable } from "../../src";
 import { editing } from "../../src/editing";
@@ -56,29 +56,27 @@ const Table = defineComponent({
 const Other = defineComponent(
   () => () => h("button", { id: "other" }, "Other view")
 );
-createApp(
-  defineComponent({
-    setup() {
-      const shown = shallowRef(true);
-      return () =>
-        h("main", [
-          h(
-            "button",
-            {
-              id: "toggle",
-              onClick: () => {
-                shown.value = !shown.value;
-              },
+export const CompositionDemo = defineComponent({
+  setup() {
+    const shown = shallowRef(true);
+    return () =>
+      h("main", [
+        h(
+          "button",
+          {
+            id: "toggle",
+            onClick: () => {
+              shown.value = !shown.value;
             },
-            "Switch view"
-          ),
-          h("output", { id: "mounts" }, String(mounts.value)),
-          h("output", { id: "writes" }, String(writes.value)),
-          h("output", { id: "selection" }, JSON.stringify(selection.value)),
-          h(KeepAlive, null, {
-            default: () => (shown.value ? h(Table) : h(Other)),
-          }),
-        ]);
-    },
-  })
-).mount("#root");
+          },
+          "Switch view"
+        ),
+        h("output", { id: "mounts" }, String(mounts.value)),
+        h("output", { id: "writes" }, String(writes.value)),
+        h("output", { id: "selection" }, JSON.stringify(selection.value)),
+        h(KeepAlive, null, {
+          default: () => (shown.value ? h(Table) : h(Other)),
+        }),
+      ]);
+  },
+});

@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@adapttable/vue";
-import { createApp, defineComponent, h, shallowRef } from "vue";
+import { defineComponent, h, shallowRef } from "vue";
 
 import { DataTable } from "../../src";
 import {
@@ -64,96 +64,94 @@ function applyEdits(rows: readonly Person[], edits: readonly Edit[]): Person[] {
     return edit ? { ...row, ...edit.patch } : row;
   });
 }
-createApp(
-  defineComponent({
-    setup() {
-      const rows = shallowRef<readonly Person[]>([
-        { id: "1", name: "Ada", amount: 2, active: true },
-        { id: "2", name: "Grace", amount: 3, active: false },
+export const FilterEditingDemo = defineComponent({
+  setup() {
+    const rows = shallowRef<readonly Person[]>([
+      { id: "1", name: "Ada", amount: 2, active: true },
+      { id: "2", name: "Grace", amount: 3, active: false },
+    ]);
+    const writes = shallowRef(0);
+    const pending = shallowRef(false);
+    let finish: (() => void) | undefined;
+    let fail: (() => void) | undefined;
+    const save = (edits: readonly Edit[]) => {
+      writes.value++;
+      pending.value = true;
+      return new Promise<void>((resolve, reject) => {
+        finish = () => {
+          rows.value = applyEdits(rows.value, edits);
+          pending.value = false;
+          resolve();
+        };
+        fail = () => {
+          pending.value = false;
+          reject(new Error("Offline"));
+        };
+      });
+    };
+    const cell = editing<Person>(
+      (row, key, value) => save([{ row, patch: { [key]: value } }]),
+      { formatEditError: () => "Offline", onEditRollback: () => undefined }
+    );
+    let editor = cell;
+    if (unit === "row")
+      editor = rowEditing<Person>((row, patch) => save([{ row, patch }]), {
+        formatEditError: () => "Offline",
+      });
+    if (unit === "batch")
+      editor = batchEditing<Person>((edits) => save(edits), {
+        formatEditError: () => "Offline",
+      });
+    const features = [
+      filters<Person>([], { mode, tree: true }),
+      headerFilters(),
+      editor,
+      dirtyIndicators(),
+      ...(unit === "cell" ? [editHistory(), undoRedoButtons()] : []),
+    ];
+    return () =>
+      h("main", { dir: rtl ? "rtl" : "ltr" }, [
+        h("h1", "Native filters and editing"),
+        h("button", { id: "outside", type: "button" }, "Outside"),
+        h("output", { id: "writes" }, String(writes.value)),
+        h(
+          "button",
+          {
+            id: "accept",
+            type: "button",
+            disabled: !pending.value,
+            onClick: () => finish?.(),
+          },
+          "Accept save"
+        ),
+        h(
+          "button",
+          {
+            id: "reject",
+            type: "button",
+            disabled: !pending.value,
+            onClick: () => fail?.(),
+          },
+          "Reject save"
+        ),
+        h(DataTable<Person>, {
+          data: rows.value,
+          columns,
+          rowKey: (row: Person) => row.id,
+          features,
+          dir: rtl ? "rtl" : "ltr",
+          forceMobile: mobile,
+          urlSync: false,
+          tableLabel: "People",
+          classNames: {
+            filterInput: "native-filter",
+            filterOperator: "native-operator",
+            filterSelect: "native-select",
+            filterCheckboxGroup: "native-checkbox-group",
+            filterCheckbox: "native-checkbox",
+            editCellEditor: "native-editor",
+          },
+        }),
       ]);
-      const writes = shallowRef(0);
-      const pending = shallowRef(false);
-      let finish: (() => void) | undefined;
-      let fail: (() => void) | undefined;
-      const save = (edits: readonly Edit[]) => {
-        writes.value++;
-        pending.value = true;
-        return new Promise<void>((resolve, reject) => {
-          finish = () => {
-            rows.value = applyEdits(rows.value, edits);
-            pending.value = false;
-            resolve();
-          };
-          fail = () => {
-            pending.value = false;
-            reject(new Error("Offline"));
-          };
-        });
-      };
-      const cell = editing<Person>(
-        (row, key, value) => save([{ row, patch: { [key]: value } }]),
-        { formatEditError: () => "Offline", onEditRollback: () => undefined }
-      );
-      let editor = cell;
-      if (unit === "row")
-        editor = rowEditing<Person>((row, patch) => save([{ row, patch }]), {
-          formatEditError: () => "Offline",
-        });
-      if (unit === "batch")
-        editor = batchEditing<Person>((edits) => save(edits), {
-          formatEditError: () => "Offline",
-        });
-      const features = [
-        filters<Person>([], { mode, tree: true }),
-        headerFilters(),
-        editor,
-        dirtyIndicators(),
-        ...(unit === "cell" ? [editHistory(), undoRedoButtons()] : []),
-      ];
-      return () =>
-        h("main", { dir: rtl ? "rtl" : "ltr" }, [
-          h("h1", "Native filters and editing"),
-          h("button", { id: "outside", type: "button" }, "Outside"),
-          h("output", { id: "writes" }, String(writes.value)),
-          h(
-            "button",
-            {
-              id: "accept",
-              type: "button",
-              disabled: !pending.value,
-              onClick: () => finish?.(),
-            },
-            "Accept save"
-          ),
-          h(
-            "button",
-            {
-              id: "reject",
-              type: "button",
-              disabled: !pending.value,
-              onClick: () => fail?.(),
-            },
-            "Reject save"
-          ),
-          h(DataTable<Person>, {
-            data: rows.value,
-            columns,
-            rowKey: (row: Person) => row.id,
-            features,
-            dir: rtl ? "rtl" : "ltr",
-            forceMobile: mobile,
-            urlSync: false,
-            tableLabel: "People",
-            classNames: {
-              filterInput: "native-filter",
-              filterOperator: "native-operator",
-              filterSelect: "native-select",
-              filterCheckboxGroup: "native-checkbox-group",
-              filterCheckbox: "native-checkbox",
-              editCellEditor: "native-editor",
-            },
-          }),
-        ]);
-    },
-  })
-).mount("#root");
+  },
+});
