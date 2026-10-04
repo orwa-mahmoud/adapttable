@@ -578,7 +578,6 @@ export function createTableEngine<TRow>(
     view.data,
     viewConfig()
   );
-  attachIncrementalView(derived.sorted, derived);
 
   /**
    * Bring the incremental view in line with the engine's view. The fields the
@@ -716,7 +715,6 @@ export function createTableEngine<TRow>(
     // configures or patches it again.
     if (staged !== derived) {
       derived = createIncrementalView(view.data, viewConfig());
-      attachIncrementalView(derived.sorted, derived);
     }
   }
 
@@ -792,7 +790,6 @@ export function createTableEngine<TRow>(
       // Row identity decides membership in every incremental bucket, so the
       // view is rebuilt rather than reconciled.
       derived = createIncrementalView(view.data, viewConfig());
-      attachIncrementalView(derived.sorted, derived);
     } else if (changed.has("view") || changed.has("schema")) {
       syncDerived(cleared);
     }
@@ -937,7 +934,6 @@ export function createTableEngine<TRow>(
         // In-place mutation: rebuild from the array the engine already holds
         // so derived results move with the revision token.
         derived = createIncrementalView(view.data, viewConfig());
-        attachIncrementalView(derived.sorted, derived);
       }
       if (next?.columns) {
         view = { ...view, columns: next.columns };
