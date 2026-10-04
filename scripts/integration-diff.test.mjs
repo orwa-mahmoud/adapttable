@@ -97,3 +97,45 @@ describe("integration branch comparisons", () => {
     assert.match(detect, /pulls\/\$\{PR_NUMBER\}\/files/);
   });
 });
+
+describe("Vue CI package gates", () => {
+  it("runs Vue lint, positive and negative types, and coverage in dedicated lanes", () => {
+    const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+    const workflow = readFileSync(
+      join(root, ".github/workflows/pr.yml"),
+      "utf8"
+    );
+    for (const [job, next, command] of [
+      ["eslint", "typescript", "lint"],
+      ["typescript", "lint", "typecheck"],
+      ["unit-shard", "unit", "test:coverage"],
+    ]) {
+      const lane = workflow.slice(
+        workflow.indexOf(`  ${job}:`),
+        workflow.indexOf(`  ${next}:`, workflow.indexOf(`  ${job}:`) + 1)
+      );
+      assert.match(lane, /vue\) f="--filter=\.\/packages\/vue\/\*" ;;/);
+      assert.ok(lane.includes(`pnpm ${command} $f $AFFECTED --concurrency=1`));
+      assert.match(lane, /github.event_name == 'pull_request' && '--affected'/);
+      if (job === "unit-shard") {
+        assert.match(lane, /- name: vue/);
+      } else {
+        assert.match(
+          lane,
+          /name: \[core, react, vue, antd, mui, kits, tools\]/
+        );
+      }
+    }
+    const turbo = JSON.parse(readFileSync(join(root, "turbo.json"), "utf8"));
+    assert.ok(turbo.globalDependencies.includes("scripts/check-vue-types.mjs"));
+    for (const folder of ["vue", "adapter-vue-unstyled"]) {
+      const manifest = JSON.parse(
+        readFileSync(join(root, "packages/vue", folder, "package.json"), "utf8")
+      );
+      assert.match(
+        manifest.scripts.typecheck,
+        /^vue-tsc --noEmit && node \.\.\/\.\.\/\.\.\/scripts\/check-vue-types\.mjs$/
+      );
+    }
+  });
+});

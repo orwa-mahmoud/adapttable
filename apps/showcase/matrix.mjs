@@ -3411,3 +3411,16 @@ export const adapterByKey = (key) =>
  */
 export const featureBySlug = (slug) =>
   MATRIX_FEATURES.find((feature) => feature.slug === slug);
+
+/** The single implemented Vue development preview, outside the parity matrix. */
+export const VUE_NATIVE_BASELINE = Object.freeze({
+  key: "vue-unstyled",
+  dir: "vue/unstyled",
+  path: "unstyled",
+  title: "Vue Unstyled table preview — AdaptTable",
+  description:
+    "Explore native Vue table search, sorting, pagination, selection and responsive cards.",
+  notice:
+    "This development preview is not a published package or a complete feature-parity release.",
+  entry: "/src/vue/entry-native.ts",
+});

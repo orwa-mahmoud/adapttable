@@ -37,6 +37,9 @@ describe("classify", () => {
       "apps/docs/src/components/FrameworkSwitch.astro",
       "apps/docs/sync-docs.mjs",
       "scripts/angular-docs.mjs",
+      "scripts/vue-docs.mjs",
+      "scripts/framework-navigation.mjs",
+      "scripts/og-cards.mjs",
       "scripts/docs-files.mjs",
       "scripts/site.mjs",
       "scripts/build-llms-full.mjs",
@@ -109,6 +112,17 @@ describe("classify", () => {
     assert.equal(f.needBuild, true);
     assert.equal(f.runPlaywright, true);
     assert.equal(f.runBench, false);
+  });
+
+  it("reruns the package gate when the Vue negative type harness changes", () => {
+    const flags = classify(["scripts/check-vue-types.mjs"]);
+    assert.equal(flags.runLint, true);
+    assert.equal(flags.runLintRoot, true);
+    assert.equal(flags.runUnit, true);
+    assert.equal(flags.runPackage, true);
+    assert.equal(flags.needBuild, true);
+    assert.equal(flags.runPlaywright, false);
+    assert.equal(flags.runBench, false);
   });
 
   it("checks Angular packages with their real showcase browser coverage", () => {

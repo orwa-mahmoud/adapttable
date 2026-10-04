@@ -6,8 +6,21 @@ import { JSDOM } from "jsdom";
 
 import { ANGULAR_DOCS } from "./angular-docs.mjs";
 import { ogCardMetadata, ogCardSvg, wrapCardTitle } from "./og-cards.mjs";
+import { VUE_DOCS } from "./vue-docs.mjs";
 
 describe("social card metadata", () => {
+  it("labels every Vue guide as experimental without a React kit claim", () => {
+    const cards = ogCardMetadata().filter((card) => card.framework === "vue");
+    assert.deepEqual(
+      cards.map((card) => `${card.slug}.md`),
+      VUE_DOCS
+    );
+    for (const card of cards) {
+      assert.match(card.footer, /Experimental Vue/);
+      assert.doesNotMatch(card.footer, /React|every UI kit/);
+      assert.ok(wrapCardTitle(card.title).length <= 3);
+    }
+  });
   it("gives all fifty Angular sources their own card and framework text", () => {
     const cards = ogCardMetadata();
     const angular = cards.filter((card) => card.framework === "angular");

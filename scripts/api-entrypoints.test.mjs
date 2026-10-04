@@ -78,7 +78,11 @@ describe("entrypoints", () => {
     const unpublished = [
       ...new Set(ENTRIES.filter((e) => !e.published).map((e) => e.dir)),
     ];
-    assert.deepEqual(unpublished, ["adapter-bootstrap"]);
+    assert.deepEqual(unpublished, [
+      "adapter-bootstrap",
+      "adapter-vue-unstyled",
+      "vue",
+    ]);
     // Publication is a manifest decision, separate from kit participation.
     // Check every subpath so one correct root cannot hide a misfiled feature.
     for (const entry of ENTRIES) {

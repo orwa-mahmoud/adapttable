@@ -11,7 +11,7 @@ const BENCH =
   /^(packages\/(shared|react)\/|apps\/showcase\/|scripts\/bench\.mjs$|pnpm-lock\.yaml$)/;
 
 const PACKAGES =
-  /^(packages\/|pnpm-lock\.yaml$|scripts\/consumer-harness\.mjs$)/;
+  /^(packages\/|pnpm-lock\.yaml$|scripts\/(?:consumer-harness|check-vue-types)\.mjs$)/;
 
 const ROOT_TOOLING =
   /^(scripts\/|vitest\.shared\.ts$|eslint\.config\.mjs$|package\.json$|pnpm-workspace\.yaml$|turbo\.json$)/;

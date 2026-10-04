@@ -26,8 +26,8 @@
     "lint:root": "eslint scripts vitest.shared.ts",
     "lint:fix": "turbo run lint -- --fix",
     "typecheck": "turbo run typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,mjs,cjs}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,mjs,cjs}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,vue,js,jsx,json,md,css,mjs,cjs}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,vue,js,jsx,json,md,css,mjs,cjs}\"",
     "clean": "turbo run clean && rimraf node_modules .turbo coverage",
     "sonar:coverage": "turbo run test:coverage --force && node scripts/fix-lcov-paths.mjs",
     "llms": "node scripts/build-llms-full.mjs",
@@ -110,6 +110,11 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.68.0",
     "unrun": "^0.3.1",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "eslint-plugin-vue": "^10.11.1",
+    "vue-eslint-parser": "^10.4.1",
+    "vue-tsc": "^3.3.12",
+    "unplugin-vue": "^8.0.0"
   }
 }

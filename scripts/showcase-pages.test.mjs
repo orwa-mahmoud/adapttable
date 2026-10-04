@@ -15,7 +15,7 @@ import {
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES, SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
 import { demoRootOf, demoRoute, FRAMEWORK } from "./site.mjs";
-import { isRedirectPage } from "./sitemap-routes.mjs";
+import { indexableRoutes, isRedirectPage } from "./sitemap-routes.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
 
@@ -28,6 +28,7 @@ const STANDALONE_ENTRIES = new Map([
   ["mcp-app", "src/entry-mcp-app.tsx"],
   ["angular-main", "src/angular/entry-demo.ts"],
   ["angular-all-options", "src/angular/entry-demo.ts"],
+  ["vue-unstyled", "src/vue/entry-native.ts"],
 ]);
 
 /** Not page directories: build output, dependencies, static assets, source. */
@@ -122,6 +123,11 @@ function assertStandaloneEntry(page, source, entry) {
     assert.equal(page.indexable, true, page.html);
     assert.ok(source.includes(`data-angular-mode="${lab ? "lab" : "live"}"`));
     assert.doesNotMatch(source, /data-matrix-page/);
+  } else if (page.framework === "vue") {
+    assert.equal(page.key, "vue-unstyled");
+    assert.equal(page.route, "/vue/demo/unstyled/");
+    assert.equal(page.indexable, false);
+    assert.doesNotMatch(source, /data-matrix-page/);
   } else {
     assert.equal(page.framework, "react", page.html);
   }
@@ -132,6 +138,39 @@ describe("the showcase page manifest", () => {
     assert.deepEqual(
       sorted(SHOWCASE_PAGES.map((page) => page.html)),
       entriesOnDisk()
+    );
+  });
+
+  it("keeps the one Vue preview distinct from the other unstyled families", () => {
+    const vue = SHOWCASE_PAGES.filter((page) => page.framework === "vue");
+    assert.deepEqual(vue, [
+      {
+        key: "vue-unstyled",
+        html: "./vue/unstyled/index.html",
+        route: "/vue/demo/unstyled/",
+        indexable: false,
+        framework: "vue",
+      },
+    ]);
+    assert.ok(
+      SHOWCASE_PAGES.some((page) => page.route === "/angular/demo/unstyled/")
+    );
+    assert.equal(
+      indexableRoutes(SHOWCASE_PAGES).includes("/vue/demo/unstyled/"),
+      false
+    );
+    assert.equal(
+      matrixPages().some((page) => page.framework === "vue"),
+      false
+    );
+    const component = readFileSync(
+      join(SHOWCASE, "src/vue/NativeDemo.vue"),
+      "utf8"
+    );
+    assert.match(component, /from "@adapttable\/vue-unstyled"/);
+    assert.doesNotMatch(
+      component,
+      /@adapttable\/(?:core|react|angular|unstyled)["/]/
     );
   });
 

@@ -9,6 +9,7 @@
     "pnpm-workspace.yaml",
     "scripts/bootstrap-styles.mjs",
     "scripts/build-library.mjs",
+    "scripts/check-vue-types.mjs",
     "scripts/vitest-workers.mjs",
     "tsconfig.base.json",
     "vitest.shared.ts"

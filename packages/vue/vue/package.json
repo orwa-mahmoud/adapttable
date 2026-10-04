@@ -1,0 +1,77 @@
+{
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "vue": "^3.5.43"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "vue-tsc --noEmit && node ../../../scripts/check-vue-types.mjs",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf dist coverage .turbo"
+  },
+  "name": "@adapttable/vue",
+  "description": "Headless Vue composables and structural table contracts for AdaptTable.",
+  "dependencies": {
+    "@adapttable/core": "3.8.1"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./adapter": {
+      "import": {
+        "types": "./dist/adapter.d.ts",
+        "default": "./dist/adapter.js"
+      },
+      "require": {
+        "types": "./dist/adapter.d.cts",
+        "default": "./dist/adapter.cjs"
+      }
+    },
+    "./features": {
+      "import": {
+        "types": "./dist/features.d.ts",
+        "default": "./dist/features.js"
+      },
+      "require": {
+        "types": "./dist/features.d.cts",
+        "default": "./dist/features.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/vue/vue"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues"
+}

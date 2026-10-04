@@ -17,7 +17,11 @@
  * blocks are a published programmatic API. `./package.json` and the
  * `adapttable` binary are not typed entrypoints.
  *
- * Packages must be built first (`pnpm build`).
+ * Packages must be built first (`pnpm build`). For a focused local iteration,
+ * select package folders with repeated `--package` flags, for example:
+ * `pnpm api:reports --package vue --package adapter-vue-unstyled`.
+ * The default and CI commands still extract every package.
+ * A scoped check proves only the selected packages.
  */
 import {
   copyFileSync,
@@ -35,16 +39,32 @@ import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
 
 import { entrypoints } from "./api-entrypoints.mjs";
 import { finishApiReportOutput } from "./api-report-diagnostics.mjs";
+import { selectApiReports } from "./api-report-selection.mjs";
 import {
   classifyForgottenExport,
   entryExports,
+  entryPropertyNormalizers,
+  entryValueAliases,
   summarize,
 } from "./api-warnings.mjs";
 import { packageDir } from "./packages.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ETC = join(REPO_ROOT, "etc");
-const LOCAL = process.argv.includes("--local");
+let selection;
+try {
+  selection = selectApiReports(entrypoints(), process.argv.slice(2));
+} catch (error) {
+  console.error(`api-reports: ${error.message}`);
+  process.exit(2);
+}
+const { local: LOCAL, targets, packages: selectedPackages } = selection;
+const scoped = selectedPackages.length > 0;
+if (scoped) {
+  console.log(
+    `api-reports: selected package folders: ${selectedPackages.join(", ")}`
+  );
+}
 // Check mode extracts into a throwaway folder and byte-compares against the
 // committed reports — api-extractor's own "production build" verdict also
 // fails on WARNINGS, which would make undocumented-symbol notes block CI.
@@ -67,6 +87,8 @@ if (!LOCAL && existsSync(ETC)) {
  */
 const counts = {
   published: 0,
+  publishedValueAlias: 0,
+  publishedPropertyNormalizer: 0,
   subpath: 0,
   frontDoor: 0,
   valueBacked: 0,
@@ -77,6 +99,8 @@ const counts = {
 
 /** Every entry point that hands back a type it does not export, named. */
 const findings = [];
+const valueAliasEvidence = new Set();
+const propertyNormalizerEvidence = new Set();
 const generatedReports = [];
 
 /** api-extractor's opening lines, said once for the run rather than per entry. */
@@ -94,6 +118,10 @@ function extractOne({ dir, report, entry, isMainEntry }) {
   // Read once per entry: the `published` class is proved against the very
   // declaration being extracted, not against a list kept beside it.
   const entryExported = entryExports(entry);
+  const valueAliases = entryValueAliases(entry);
+  const propertyNormalizers = valueAliases.size
+    ? entryPropertyNormalizers(entry)
+    : new Map();
   // Captured BEFORE extraction: in local mode the extractor writes straight
   // into `etc/`, so reading afterwards would compare the file with itself.
   const committed = existsSync(join(ETC, report))
@@ -105,6 +133,8 @@ function extractOne({ dir, report, entry, isMainEntry }) {
       mainEntryPointFilePath: entry,
       apiReport: {
         enabled: true,
+        // A public `typeof` alias must not hide the underlying generic contract.
+        includeForgottenExports: valueAliases.size > 0,
         reportFileName: report,
         reportFolder: OUT,
         reportTempFolder: join(REPO_ROOT, "node_modules", ".api-extractor"),
@@ -177,16 +207,38 @@ function extractOne({ dir, report, entry, isMainEntry }) {
         return;
       }
       const named = /"([A-Za-z_$][\w$]*)"/.exec(message.text);
-      const { kind, base, suffix } = classifyForgottenExport({
-        symbol: named?.[1] ?? "",
-        report,
-        isMainEntry,
-        exports: entryExported,
-      });
+      const { kind, base, suffix, exportedAs, referencedBy } =
+        classifyForgottenExport({
+          symbol: named?.[1] ?? "",
+          report,
+          isMainEntry,
+          exports: entryExported,
+          valueAliases,
+          propertyNormalizers,
+        });
       if (kind === "published") {
         counts.published += 1;
         message.logLevel = "none";
         message.text += ` — deferred: ${report} exports ${base}, and ${suffix} is the bundler's private copy`;
+        return;
+      }
+      if (kind === "published-value-alias") {
+        counts.publishedValueAlias += 1;
+        valueAliasEvidence.add(
+          `${report}: ${named?.[1]} is nameable as typeof ${exportedAs}`
+        );
+        message.logLevel = "none";
+        return;
+      }
+      if (kind === "published-property-normalizer") {
+        counts.publishedPropertyNormalizer += 1;
+        propertyNormalizerEvidence.add(
+          `${report}: ${named?.[1]} only normalizes its own argument's properties in ${referencedBy}, nameable through typeof ${exportedAs}; exact definition retained in report`
+        );
+        // Keep the Extractor warning visible; only the separately proved guard
+        // classification changes. A changed helper fails closed next time.
+        message.text +=
+          " — structurally proved closed property normalizer; exact definition retained in the API report";
         return;
       }
       if (kind === "value-backed") {
@@ -225,22 +277,40 @@ function extractOne({ dir, report, entry, isMainEntry }) {
 
 mkdirSync(ETC, { recursive: true });
 let ok = true;
-for (const target of entrypoints()) {
+for (const target of targets) {
   ok = extractOne(target) && ok;
 }
 // Only claim a match when every report actually matched. A run that prints
 // "every committed report matches" under the line saying one is out of date is
 // the same failure as reporting one warning class as if it were the total.
 if (LOCAL) {
-  console.log("\napi-reports: regenerated — commit any changes under etc/.");
+  console.log(
+    scoped
+      ? "\napi-reports: selected reports regenerated — commit their changes under etc/."
+      : "\napi-reports: regenerated — commit any changes under etc/."
+  );
 } else if (ok) {
-  console.log("\napi-reports: every committed report matches the built types.");
+  console.log(
+    scoped
+      ? "\napi-reports: every selected report matches the built types."
+      : "\napi-reports: every committed report matches the built types."
+  );
 } else {
   console.error(
-    "\napi-reports: a committed report no longer matches the built types."
+    scoped
+      ? "\napi-reports: a selected report no longer matches the built types."
+      : "\napi-reports: a committed report no longer matches the built types."
   );
 }
 console.log(summarize(counts));
+for (const evidence of valueAliasEvidence) {
+  console.log(`api-reports: published-value-alias evidence: ${evidence}`);
+}
+for (const evidence of propertyNormalizerEvidence) {
+  console.log(
+    `api-reports: published-property-normalizer evidence: ${evidence}`
+  );
+}
 // The promise, at every documented entry point rather than only the front
 // doors: a type an exported signature hands back must be nameable from the
 // same import. `docs/versioning.md` lists the focused subpaths as supported

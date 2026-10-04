@@ -3982,3 +3982,82 @@ DataModeProps`: the base carries every prop except the data mode, which is
   `FilterPopover` / `FilterPopoverProps`, `AutoFilterForm`, the `cx`
   class joiner) and shadcn additionally ships `shadcnClassNames`, the
   preset map behind its default look.
+
+## Experimental Vue binding and native kit
+
+`@adapttable/vue` and `@adapttable/vue-unstyled` are private `0.1.0` workspace
+packages requiring Vue `^3.5.0`; they are not published npm packages. The
+[Vue getting-started guide](./vue/getting-started.md) and
+[Vue API reference](./vue/api.md) describe the implemented source, rendering,
+lifecycle and native-control surface. The React prop tables above do not define
+Vue's API, and exported Vue extension channels do not imply complete feature
+parity, styled kits or a Vue AI integration.
+
+### Sources, rendering and controllers
+
+| Vue export                                                                    | Signature or role                                                                                                                                            |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MaybeRefOrGetterOptional<T>`                                                 | A value, readonly optional-value ref or getter. Domain callbacks remain ordinary callbacks.                                                                  |
+| `FrontendDataState`, `ServerDataState`, `QuerySourceState`                    | Readonly shallow `TableSource<TRow>` refs from `useFrontendData`, `useServerData` and `useQuerySource`.                                                      |
+| `SourceViewportOptions`                                                       | Reactive pagination mode, forced mobile layout and breakpoint inputs shared by sources.                                                                      |
+| `TableQueryInfo`                                                              | Server request `signal` and canonical `key`; hosts must reject aborted results before publishing.                                                            |
+| `InfiniteQueryState<TPage>`                                                   | Query-library result with reactive data/status and ordinary fetch/refetch methods. The setup-time query factory owns its lifecycle.                          |
+| `TableUrlActions`                                                             | Stable view-store setters returned alongside the readonly snapshot by `useTableUrlState`.                                                                    |
+| `RenderFunction<TContext>`                                                    | A context-to-`VNodeChild` function; never interpreted as a getter.                                                                                           |
+| `ComponentProps<TComponent>`                                                  | Public props inferred from an SFC, Vue component or functional component.                                                                                    |
+| `ComponentRenderer<TContext>`, `componentRenderer`                            | Explicit component-plus-props-mapper descriptor and its required-prop-checking factory.                                                                      |
+| `renderContent`, `renderCell`, `renderHeader`, `renderFooter`                 | Render a typed context. Column renderers win over table slots; text fallback is last.                                                                        |
+| `primitiveText(value)`                                                        | Primitive/path-value text fallback, returning a string or null for unsupported structured values.                                                            |
+| `useRowSelection(options)`                                                    | Controlled or local selected IDs, header state, all-matching scope, selection actions and native-control attribute records.                                  |
+| `DataTableHandle<TRow>`                                                       | `runtime`, `getView()` and `focus()`; the native kit exposes this through its component ref.                                                                 |
+| `UseDataTableShellOptions`, `ResolvedTableOptions`, `UseDataTableShellResult` | Shell input, merged feature/explicit options and composed source/table/model/runtime result types. Runtime `useDataTableShell` comes from the adapter entry. |
+
+### Vue adapter structure and lifecycle
+
+These runtime helpers come from `@adapttable/vue/adapter`.
+
+| Export                                                                 | Role                                                                                                                                                      |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DesktopTableChrome`, `MobileCardsChrome`                              | Structural Vue renderers taking a model, required control slots and optional class names.                                                                 |
+| `TableChromeSlots`, `SortButtonProps`, `SelectionCheckboxProps`        | Typed adapter-control contracts; missing controls throw rather than rendering a native fallback.                                                          |
+| `TableChromeClassNames`                                                | Semantic table, selection, group, action, resize and card class hooks.                                                                                    |
+| `useDesktopTableModel`, `useMobileCardsModel`                          | Computed desktop/card projections from a headless table.                                                                                                  |
+| `DesktopTableModel`, `MobileCardsModel`                                | Complete semantic attributes, rows, header/card layout and optional body-slot projections.                                                                |
+| `TableHeaderModel`, `TableRowModel`, `TableCellModel`, `TableBodySlot` | Header controls/context, row wiring, cell context/decorations and structural row/group/extra/padding variants.                                            |
+| `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                            | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                 |
+| `elementRef`, `composeElementRefs`                                     | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                        |
+| `requireScope(name)`                                                   | Reject resource ownership outside setup or an active effect scope.                                                                                        |
+| `useScopeActivity()`                                                   | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                           |
+| `useExternalStore(store)`                                              | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                        |
+| `FeatureLifecycle`, `useFeatureLifecycle`                              | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                |
+| `TableFeatureState`, `OwnedFeatureState`, `provideFeatureState`        | Table-local state, ownership-safe publication cleanup and descendant injection. `createFeatureState` constructs the registry; `useFeatureState` reads it. |
+
+### Vue feature composition and model channels
+
+`@adapttable/vue/features` exports `ComposedFeature`, `TableFeature`,
+`StaticTableFeature`, `feature`, `extendFeature`, `normalizeFeatures`,
+`featureOptionsOf`, `featureSlotFillsOf`, `renderFeatureSlot`,
+`assertRequiredSlots` and `eraseTableRuntime`. Normalization validates stable
+IDs and keeps the last duplicate before patch/slot composition. Required slots
+are enforced; setup/mount resources are scoped to feature identity and
+dependencies. Runtime erasure preserves identity and permits only rows from
+that same table to cross the neutral boundary.
+
+The following adapter-entry channels publish optional extension models. They
+do not install UI or make the current native kit support every feature.
+
+| Channel or projection                                                      | Meaning                                                                                                           |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `ROW_PINNING_MODEL`, `rowPinningModelKey`                                  | Typed row-pinning state used by body projection and action composition.                                           |
+| `EDITING_MODEL`, `editingModelKey`, `editableCellSlotKey`                  | Editing bundle and required Vue editable-cell content slot.                                                       |
+| `EDIT_HISTORY_MODEL`, `editHistoryModelKey`                                | Edit-history state used to prepare optional undo/redo toolbar props.                                              |
+| `ROW_ACTIONS_MODEL`, `rowActionsModelKey`, `RowActionsModel`               | Add availability and resolved/host row actions.                                                                   |
+| `COLUMN_RESIZE_MODEL`, `ColumnResizeModel`                                 | Per-header semantic resize attributes; requires an adapter resize control.                                        |
+| `HEADER_FILTER_MODEL`, `headerFilterModelKey`, `HeaderFilterModel`         | Column-keyed header-filter control models.                                                                        |
+| `VueHeaderFilterControlProps`, `headerFilterSlotKey`                       | Direction-aware neutral filter props and the typed Vue render slot.                                               |
+| `TableBodyProjectionInput`, `TableBodyProjection`, `TableBodyProjector`    | Transform the base desktop and mobile models together, with optional pinning context.                             |
+| `RowActionControlsInput`, `RowActionControl`, `RowActionControlsProjector` | Map a row and action list into labeled semantic controls using adapter confirmation and a live enabled predicate. |
+
+See the [Vue reference](./vue/api.md) for signatures, lifecycle details, typed
+examples and the exact native `DataTableProps`, `DataTableSlots` and
+`DataTableClassNames` contracts.

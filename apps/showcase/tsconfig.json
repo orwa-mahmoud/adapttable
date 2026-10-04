@@ -23,7 +23,6 @@
     }
   },
   "include": ["src", "vite.config.ts", "matrix.mjs", "pages.mjs"],
-  // Angular's pages are their own project, with Angular's decorator settings:
-  // `src/angular/tsconfig.json`.
-  "exclude": ["src/angular"]
+  // Framework-specific pages have their own compiler settings and checks.
+  "exclude": ["src/angular", "src/vue"]
 }

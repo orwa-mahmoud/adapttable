@@ -1,11 +1,16 @@
 /** Framework-aware navigation shared by documentation, landing, and demos. */
 import { ANGULAR_DOCS, ANGULAR_KIT_DOCS } from "./angular-docs.mjs";
 import { docsRoute, SHARED_DOCS } from "./site.mjs";
+import { VUE_DOCS } from "./vue-docs.mjs";
 
-/** Published frameworks only; new bindings extend this registry when available. */
+/** Full site/demo choices; experimental bindings may have a docs-only surface. */
 export const SITE_FRAMEWORKS = Object.freeze([
   { key: "react", label: "React", icon: "⚛" },
   { key: "angular", label: "Angular", icon: "Ⓐ" },
+]);
+export const DOCS_FRAMEWORKS = Object.freeze([
+  ...SITE_FRAMEWORKS,
+  { key: "vue", label: "Vue (experimental)", icon: "V" },
 ]);
 export const FRAMEWORK_STORAGE_KEY = "adapttable-framework";
 /** @param {string | null} value */
@@ -13,28 +18,33 @@ export function normalizeFramework(value) {
   return value === "angular" ? "angular" : "react";
 }
 const angular = new Set(ANGULAR_DOCS.map((page) => page.replace(/\.md$/, "")));
+const vue = new Set(VUE_DOCS.map((page) => page.replace(/\.md$/, "")));
 const shared = new Set(SHARED_DOCS);
 
 /** @param {string} path @param {string | null} [preferred] */
 export function selectedFramework(path, preferred = null) {
-  const explicit = /^\/(react|angular)(?:\/|$)/.exec(path)?.[1];
-  return explicit ?? normalizeFramework(preferred);
+  const explicit = /^\/(react|angular|vue)(?:\/|$)/.exec(path)?.[1];
+  return (
+    explicit ?? (preferred === "vue" ? "vue" : normalizeFramework(preferred))
+  );
 }
 
 /** A destination includes an explicit explanation when no equivalent exists.
  * @param {string} path @param {string} framework
  */
 export function frameworkDocsTarget(path, framework) {
-  framework = normalizeFramework(framework);
+  framework = framework === "vue" ? "vue" : normalizeFramework(framework);
   const slug = path
     .replace(/^\/v\d+\//, "/")
-    .replace(/^\/(react|angular)\//, "/")
+    .replace(/^\/(react|angular|vue)\//, "/")
     .split("/")
     .filter(Boolean)
     .join("/")
     .replace(/\.md$/, "");
   if (framework === "angular" && angular.has(`angular/${slug}`))
     return { href: docsRoute(`angular/${slug}`), equivalent: true };
+  if (framework === "vue" && vue.has(`vue/${slug}`))
+    return { href: docsRoute(`vue/${slug}`), equivalent: true };
   if (shared.has(slug)) return { href: docsRoute(slug), equivalent: true };
   if (framework === "react" && !ANGULAR_KIT_DOCS.includes(slug))
     return { href: docsRoute(slug || "getting-started"), equivalent: true };

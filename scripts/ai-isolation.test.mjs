@@ -39,12 +39,14 @@ describe("AI isolation", () => {
     }
   });
 
-  it("covers both bindings, every implemented Angular kit, core, server and published React adapters", () => {
+  it("covers all bindings, implemented Angular and Vue kits, core, server and published React adapters", () => {
     // Exact paths catch a dropped graph, a duplicate or an unintended extra.
-    // Private implemented Angular kits still owe proof of AI isolation.
+    // Private implemented Angular and Vue kits still owe AI isolation proof.
     const expected = [
       "packages/shared/core/dist/index.js",
       "packages/react/react/dist/index.js",
+      "packages/vue/vue/dist/index.js",
+      "packages/vue/adapter-vue-unstyled/dist/index.js",
       "packages/angular/angular/dist/fesm2022/adapttable-angular.mjs",
       "packages/shared/server/dist/index.js",
       ...[

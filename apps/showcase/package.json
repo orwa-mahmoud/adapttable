@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p src/angular"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p src/angular && vue-tsc --noEmit -p src/vue"
   },
   "dependencies": {
     "@adapttable/ai": "workspace:*",
@@ -65,7 +65,10 @@
     "@adapttable/angular-cdk": "workspace:*",
     "@adapttable/ngx-bootstrap": "workspace:*",
     "@angular/aria": "22.2.1",
-    "ngx-bootstrap": "22.0.0"
+    "ngx-bootstrap": "22.0.0",
+    "@adapttable/vue": "workspace:*",
+    "@adapttable/vue-unstyled": "workspace:*",
+    "vue": "^3.5.43"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.7.5",
@@ -90,6 +93,8 @@
     "@angular/localize": "22.2.0",
     "sass": "^1.105.0",
     "less": "^4.6.3",
-    "@taiga-ui/design-tokens": "~0.320.0"
+    "@taiga-ui/design-tokens": "~0.320.0",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "vue-tsc": "^3.3.12"
   }
 }

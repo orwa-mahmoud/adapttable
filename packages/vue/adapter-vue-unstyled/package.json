@@ -1,0 +1,57 @@
+{
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "vue": "^3.5.43"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "vue-tsc --noEmit && node ../../../scripts/check-vue-types.mjs",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf dist coverage .turbo"
+  },
+  "name": "@adapttable/vue-unstyled",
+  "description": "Native HTML data table controls for the AdaptTable Vue binding.",
+  "dependencies": {
+    "@adapttable/vue": "0.1.0"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/vue/adapter-vue-unstyled"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues"
+}

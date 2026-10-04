@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@adapttable/vue": ["../../../../packages/vue/vue/src/index.ts"],
+      "@adapttable/vue/adapter": [
+        "../../../../packages/vue/vue/src/adapter.ts"
+      ],
+      "@adapttable/vue/features": [
+        "../../../../packages/vue/vue/src/features.ts"
+      ],
+      "@adapttable/vue-unstyled": [
+        "../../../../packages/vue/adapter-vue-unstyled/src/index.ts"
+      ]
+    }
+  },
+  "include": ["./**/*.ts", "./**/*.vue"],
+  "exclude": []
+}

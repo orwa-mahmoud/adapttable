@@ -10,6 +10,8 @@ import importX from "eslint-plugin-import-x";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
+import vuePlugin from "eslint-plugin-vue";
+import vueParser from "vue-eslint-parser";
 
 import {
   BOUNDED_SCROLL_REGION_FILES,
@@ -61,6 +63,10 @@ export default defineConfig(
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   sonarRecommended,
+  ...vuePlugin.configs["flat/recommended"].map((config) => ({
+    ...config,
+    files: ["**/*.vue"],
+  })),
   {
     languageOptions: {
       ecmaVersion: 2022,
@@ -112,7 +118,7 @@ export default defineConfig(
     files: REACT_SOURCES,
     // The showcase's Angular pages are Angular, compiled by Angular's own
     // compiler; React's rules have nothing to say about them.
-    ignores: ["apps/showcase/src/angular/**"],
+    ignores: ["apps/showcase/src/angular/**", "apps/showcase/src/vue/**"],
     settings: { react: { version: "detect" } },
     rules: {
       ...react.configs.recommended.rules,
@@ -127,6 +133,18 @@ export default defineConfig(
       // intermediate bindings (`const props = applyTableFeatures(incoming)`).
       "react/prop-types": "off",
       ...jsxA11y.flatConfigs.recommended.rules,
+    },
+  },
+  {
+    files: ["**/*.vue"],
+    languageOptions: {
+      parser: vueParser,
+      parserOptions: {
+        parser: tseslint.parser,
+        extraFileExtensions: [".vue"],
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
   },
   {
@@ -189,7 +207,7 @@ export default defineConfig(
     // binding imports `@adapttable/core`, and it re-exports what its kits
     // need, so it can adapt any of it to its framework without touching a kit.
     // Tests may still reach core's test tooling, such as the conformance suite.
-    files: ["packages/*/adapter-*/src/**/*.{ts,tsx}"],
+    files: ["packages/*/adapter-*/src/**/*.{ts,tsx,vue}"],
     ignores: ["**/*.{test,spec}.{ts,tsx}", "**/*test-utils.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [

@@ -87,7 +87,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares the baseline floor and every Angular 22 native kit floor", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 29);
+    assert.equal(manifests.length, 31);
     for (const manifest of manifests) {
       const pkg = json(manifest);
       const floor = ANGULAR_22_KITS.has(pkg.name) ? ANGULAR_22_FLOOR : FLOOR;
@@ -139,6 +139,8 @@ describe("supported Node contract", () => {
     assert.equal(names.length, 26);
     assert.ok(!names.includes("@adapttable/bootstrap"));
     assert.ok(!names.includes("@adapttable/primeng"));
+    assert.ok(!names.includes("@adapttable/vue"));
+    assert.ok(!names.includes("@adapttable/vue-unstyled"));
   });
 
   it("fails a planted missing package with the name involved", () => {
@@ -171,7 +173,12 @@ describe("supported Node contract", () => {
         { message: `missing published package(s): ${name}` }
       );
     }
-    for (const name of ["@adapttable/bootstrap", "@adapttable/primeng"]) {
+    for (const name of [
+      "@adapttable/bootstrap",
+      "@adapttable/primeng",
+      "@adapttable/vue",
+      "@adapttable/vue-unstyled",
+    ]) {
       assert.throws(
         () =>
           assertPackedMatchesExpected([...PUBLISHED_SNAPSHOT, name], expected),

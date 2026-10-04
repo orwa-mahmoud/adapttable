@@ -8,6 +8,8 @@
         "$TURBO_ROOT$/llms.txt",
         "$TURBO_ROOT$/scripts/analytics-guard.mjs",
         "$TURBO_ROOT$/scripts/angular-docs.mjs",
+        "$TURBO_ROOT$/scripts/vue-docs.mjs",
+        "$TURBO_ROOT$/scripts/framework-navigation.mjs",
         "$TURBO_ROOT$/scripts/build-llms-full.mjs",
         "$TURBO_ROOT$/scripts/docs-files.mjs",
         "$TURBO_ROOT$/scripts/site-notices.mjs",

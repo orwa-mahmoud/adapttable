@@ -16,7 +16,8 @@ export const onRequest = defineRouteMiddleware((context) => {
   const transform = (items: Entry[]): Entry[] =>
     items.flatMap((item): Entry[] => {
       if (item.type === "group") {
-        if (item.label === "Angular") return [];
+        if (item.label === "Angular" || item.label === "Vue (experimental)")
+          return [];
         const entries = transform(item.entries);
         return entries.length ? [{ ...item, entries }] : [];
       }

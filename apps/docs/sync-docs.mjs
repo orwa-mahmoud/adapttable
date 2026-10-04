@@ -37,6 +37,8 @@ const target = join(here, "src/content/docs");
  * `docs/` to each other.
  */
 export const TITLES = {
+  "vue/getting-started.md": "Get started with experimental Vue tables",
+  "vue/api.md": "Experimental Vue table API reference",
   "angular/angular-cdk.md": "Angular CDK tables",
   "angular/aria.md": "Angular Aria tables",
   "angular/material.md": "Angular Material tables",
@@ -172,6 +174,10 @@ export const TITLES = {
 // emits from `description`. Keyword-rich and unique per page so search and
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
+  "vue/getting-started.md":
+    "Build a table with the experimental private Vue workspace packages: native controls, reactive sources, controlled selection and SSR lifecycle rules.",
+  "vue/api.md":
+    "Reference for the implemented Vue 3.5 sources, renderers, native table, structural Chrome, scoped features and model channels. Experimental workspace API.",
   "angular/angular-cdk.md":
     "Use the Angular CDK table adapter with CDK overlays, focus handling, native controls and composable features.",
   "angular/aria.md":
@@ -500,9 +506,11 @@ export function rewriteDocLinks(markdown, file) {
     (_link, open, href, close) => {
       const doc = docLinkTarget(file, href);
       if (doc) {
+        const framework = /^(angular|vue)\//.exec(file)?.[1];
+        const explicitFramework = /^(react|angular|vue)\//.test(doc.file);
         const route =
-          file.startsWith("angular/") && !doc.file.startsWith("angular/")
-            ? docsReferenceRoute(doc.file, "angular")
+          framework && !explicitFramework
+            ? docsReferenceRoute(doc.file, framework)
             : docsRoute(doc.file);
         const suffix = route.includes("?unavailable=") ? "" : doc.suffix;
         return `${open}${route}${suffix}${close}`;

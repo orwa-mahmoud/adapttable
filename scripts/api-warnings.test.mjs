@@ -1,14 +1,19 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
+import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
+
 import {
   classifyForgottenExport,
+  entryValueAliases,
+  publishedValueAliases,
   summarize,
   VALUE_BACKED,
 } from "./api-warnings.mjs";
-import { packageDir } from "./packages.mjs";
+import { packageDir, REPO_ROOT } from "./packages.mjs";
 
 const CORE_SRC = join(packageDir("core"), "src");
 
@@ -198,5 +203,244 @@ describe("the value-backed class", () => {
         `${symbol} has a public type derived from it`
       );
     }
+  });
+});
+
+const publicValueFixture = `
+declare const implementation: <TRow extends { id: string }>(props: {
+  rows: readonly TRow[];
+  render: (row: TRow) => string;
+}) => {
+  $slots: { cell: (row: TRow) => string };
+  exposed: { reset(): void };
+};
+declare const local: typeof implementation;
+export { local as PublicTable };
+`;
+
+function classifyValueSource(source, symbol = "implementation") {
+  return classify({
+    symbol,
+    isMainEntry: true,
+    valueAliases: publishedValueAliases(source),
+  });
+}
+
+describe("the structurally proved published-value-alias class", () => {
+  it("proves an aliased runtime export without depending on compiler names", () => {
+    assert.deepEqual(
+      [...publishedValueAliases(publicValueFixture)],
+      [["implementation", "PublicTable"]]
+    );
+    assert.deepEqual(classifyValueSource(publicValueFixture), {
+      kind: "published-value-alias",
+      base: "implementation",
+      suffix: "",
+      exportedAs: "PublicTable",
+    });
+    const renamed = publicValueFixture.replaceAll(
+      "implementation",
+      "OtherValue"
+    );
+    assert.equal(
+      classifyValueSource(renamed, "OtherValue").kind,
+      "published-value-alias"
+    );
+  });
+
+  it("proves direct and default runtime exports and multiple exact typeof hops", () => {
+    assert.deepEqual(
+      [
+        ...publishedValueAliases(`
+        declare function original<T>(value: T): T;
+        declare const middle: typeof original;
+        export declare const PublicValue: typeof middle;
+      `),
+      ],
+      [
+        ["middle", "PublicValue"],
+        ["original", "PublicValue"],
+      ]
+    );
+    assert.deepEqual(
+      [
+        ...publishedValueAliases(`
+        declare class Original { value: string; }
+        declare const local: typeof Original;
+        export default local;
+      `),
+      ],
+      [["Original", "default"]]
+    );
+  });
+
+  it("does not use type-only exports as runtime proof", () => {
+    for (const ending of [
+      "export type { local as PublicTable };",
+      "export { type local as PublicTable };",
+    ]) {
+      assert.equal(
+        classifyValueSource(
+          publicValueFixture.replace("export { local as PublicTable };", ending)
+        ).kind,
+        "front-door"
+      );
+    }
+  });
+
+  it("requires a published local runtime value and a declared local target", () => {
+    for (const source of [
+      "declare const implementation: () => void; declare const local: typeof implementation;",
+      "declare const implementation: () => void; export type PublicValue = typeof implementation;",
+      "export declare const local: typeof missing;",
+      "import { implementation } from 'external'; export declare const local: typeof implementation;",
+      "declare const local: typeof implementation; export { local } from 'external';",
+      "export { default as PublicValue } from 'external';",
+    ]) {
+      assert.deepEqual([...publishedValueAliases(source)], []);
+    }
+  });
+
+  it("rejects cycles rather than publishing a partial chain", () => {
+    for (const source of [
+      "declare const local: typeof local; export { local };",
+      "declare const one: typeof two; declare const two: typeof one; export { one };",
+      "declare const one: typeof two; declare const two: typeof missing; export { one };",
+    ]) {
+      assert.deepEqual([...publishedValueAliases(source)], []);
+    }
+  });
+
+  it("does not reinterpret parameter, return or member types as value aliases", () => {
+    for (const declaration of [
+      "export declare const PublicValue: (arg: typeof implementation) => void;",
+      "export declare const PublicValue: () => typeof implementation;",
+      "export declare const PublicValue: { value: typeof implementation };",
+      "export declare const PublicValue: Array<typeof implementation>;",
+      "export declare const PublicValue: typeof implementation.member;",
+      "export declare const PublicValue: (typeof implementation)['member'];",
+      "export declare const PublicValue: typeof implementation<string>;",
+    ]) {
+      const source = `declare const implementation: unknown; ${declaration}`;
+      assert.equal(classifyValueSource(source).kind, "front-door", declaration);
+    }
+  });
+
+  it("still fails genuine parameter, result and member type holes behind a proven alias", () => {
+    const source = `
+      interface Argument { id: string; }
+      interface Result { value: string; }
+      interface Member { extra: string; }
+      declare const implementation: (input: Argument) => Result & { member: Member };
+      declare const local: typeof implementation;
+      export { local as PublicValue };
+    `;
+    assert.equal(classifyValueSource(source).kind, "published-value-alias");
+    for (const symbol of ["Argument", "Result", "Member"]) {
+      assert.equal(
+        classifyValueSource(source, symbol).kind,
+        "front-door",
+        symbol
+      );
+    }
+  });
+
+  it("fails closed for malformed or unreadable declarations", () => {
+    assert.deepEqual(
+      [...publishedValueAliases("export declare const broken: typeof ;")],
+      []
+    );
+    assert.deepEqual(
+      [...entryValueAliases(join(tmpdir(), "nonexistent-alias-entry.d.ts"))],
+      []
+    );
+  });
+
+  it("counts the distinct class and retains the export name as evidence", () => {
+    assert.equal(
+      summarize({ publishedValueAlias: 2 }),
+      "api-reports: 2 published-value-alias(es)."
+    );
+    const generator = readFileSync(
+      join(REPO_ROOT, "scripts/api-reports.mjs"),
+      "utf8"
+    );
+    assert.match(generator, /includeForgottenExports: valueAliases.size > 0/);
+    assert.match(generator, /counts.publishedValueAlias \+= 1/);
+    assert.match(generator, /published-value-alias evidence:/);
+    assert.match(generator, /is nameable as typeof \$\{exportedAs\}/);
+  });
+});
+
+function extractAliasReport(root, source, report) {
+  const entry = join(root, "index.d.ts");
+  writeFileSync(entry, source);
+  const aliases = entryValueAliases(entry);
+  const configuration = ExtractorConfig.prepare({
+    configObject: {
+      projectFolder: root,
+      mainEntryPointFilePath: entry,
+      compiler: {
+        overrideTsconfig: {
+          compilerOptions: {
+            lib: ["ES2022"],
+            types: [],
+            skipLibCheck: true,
+            strict: true,
+          },
+        },
+      },
+      apiReport: {
+        enabled: true,
+        includeForgottenExports: aliases.size > 0,
+        reportFileName: report,
+        reportFolder: root,
+        reportTempFolder: join(root, "temp"),
+      },
+      docModel: { enabled: false },
+      dtsRollup: { enabled: false },
+      tsdocMetadata: { enabled: false },
+    },
+    configObjectFullPath: undefined,
+    packageJsonFullPath: join(root, "package.json"),
+  });
+  const forgotten = [];
+  const result = Extractor.invoke(configuration, {
+    localBuild: true,
+    messageCallback(message) {
+      if (message.messageId === "ae-forgotten-export")
+        forgotten.push(message.text);
+    },
+  });
+  assert.equal(result.succeeded, true);
+  assert.ok(forgotten.some((message) => message.includes('"implementation"')));
+  return readFileSync(join(root, report), "utf8");
+}
+
+describe("reported generic value-alias signatures", () => {
+  it("retains the underlying generic props, slots and handle and detects their changes", (t) => {
+    const root = mkdtempSync(join(tmpdir(), "adapttable-value-alias-report-"));
+    t.after(() => rmSync(root, { recursive: true, force: true }));
+    writeFileSync(
+      join(root, "package.json"),
+      JSON.stringify({ name: "alias-fixture", version: "1.0.0" })
+    );
+    const first = extractAliasReport(root, publicValueFixture, "first.api.md");
+    assert.match(first, /implementation: <TRow extends/);
+    assert.match(first, /rows: readonly TRow\[\]/);
+    assert.match(first, /\$slots:/);
+    assert.match(first, /cell: \(row: TRow\) => string/);
+    assert.match(first, /reset\(\): void/);
+    assert.match(first, /PublicTable: typeof implementation/);
+    const changed = extractAliasReport(
+      root,
+      publicValueFixture.replace(
+        "rows: readonly TRow[]",
+        "rows: readonly [TRow]"
+      ),
+      "second.api.md"
+    );
+    assert.match(changed, /rows: readonly \[TRow\]/);
+    assert.notEqual(changed, first);
   });
 });

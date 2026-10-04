@@ -17,6 +17,7 @@ import {
   siteUrl,
   switchDocsRoute,
 } from "./site.mjs";
+import { VUE_DOCS } from "./vue-docs.mjs";
 
 const DOCS = fileURLToPath(new URL("../docs/", import.meta.url));
 const PAGES = docsFiles(DOCS).map((file) => file.replace(/\.md$/, ""));
@@ -35,6 +36,31 @@ describe("site addresses", () => {
     assert.equal(docsRoute("filtering"), `/${FRAMEWORK}/filtering/`);
     assert.equal(docsSlug("concepts"), "concepts");
     assert.equal(docsRoute("concepts"), "/concepts/");
+  });
+
+  it("registers only implemented Vue guides with framework-aware fallback", () => {
+    assert.deepEqual(VUE_DOCS, ["vue/getting-started.md", "vue/api.md"]);
+    for (const source of VUE_DOCS) {
+      assert.ok(PAGES.includes(source.replace(/\.md$/, "")), source);
+      assert.equal(docsRoute(source), `/${source.replace(/\.md$/, "")}/`);
+    }
+    assert.equal(docsReferenceRoute("api", "vue"), "/vue/api/");
+    assert.equal(
+      docsReferenceRoute("filtering", "vue"),
+      "/vue/getting-started/?unavailable=filtering"
+    );
+    assert.equal(docsReferenceRoute("concepts", "vue"), "/concepts/");
+    assert.equal(
+      switchDocsRoute("/vue/api/", "react", ["api.md", ...VUE_DOCS]),
+      "/react/api/"
+    );
+    assert.equal(
+      switchDocsRoute("/react/filtering/", "vue", [
+        "filtering.md",
+        ...VUE_DOCS,
+      ]),
+      "/vue/getting-started/"
+    );
   });
 
   it("names only shared pages that exist in docs/", () => {
@@ -165,10 +191,12 @@ describe("site addresses", () => {
       demoRoute("unstyled/filtering", "angular"),
       "/angular/demo/unstyled/filtering/"
     );
+    assert.equal(demoRoute("unstyled", "vue"), "/vue/demo/unstyled/");
     assert.equal(demoRoute("mantine", "react"), "/react/demo/mantine/");
     assert.deepEqual(DEMO_ROOTS, {
       react: "/react/demo/",
       angular: "/angular/demo/",
+      vue: "/vue/demo/",
     });
   });
 });

@@ -37,7 +37,7 @@ test("shared guides remember the framework across navigation and reload", async 
   page,
 }) => {
   await page.goto("/concepts/", { waitUntil: "domcontentloaded" });
-  for (const framework of ["angular", "react"]) {
+  for (const framework of ["angular", "react", "vue"]) {
     await page.locator(SWITCH).first().selectOption(framework);
     await expect(page).toHaveURL(`${DOCS_URL}/concepts/`);
     await expect(page.locator(SWITCH).first()).toHaveValue(framework);
@@ -81,7 +81,7 @@ for (const width of [320, 390]) {
     const select = page.locator(SWITCH).first();
     await expect(select).toBeVisible();
     await expect(select).toHaveValue("react");
-    await expect(select.locator("option")).toHaveCount(2);
+    await expect(select.locator("option")).toHaveCount(3);
     const box = await select.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.x).toBeGreaterThanOrEqual(0);
@@ -179,4 +179,48 @@ test("malformed landing and documentation options stay on the site", async ({
   expect(
     await page.evaluate(() => localStorage.getItem("adapttable-framework"))
   ).toBe("react");
+});
+
+test("experimental Vue docs expose only implemented counterparts", async ({
+  page,
+}) => {
+  await page.goto("/react/api/");
+  await page.locator(SWITCH).first().selectOption("vue");
+  await expect(page).toHaveURL(`${DOCS_URL}/vue/api/`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Experimental Vue table API reference"
+  );
+  await expect(page.locator("main .sl-markdown-content")).toContainText(
+    "private"
+  );
+  await expect(
+    page.locator(
+      '#starlight__sidebar a[href^="/react/"], #starlight__sidebar a[href^="/angular/"]'
+    )
+  ).toHaveCount(0);
+  await expect(
+    page.locator('#starlight__sidebar a[href="/vue/api/"]')
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("link", { name: "Live demo", exact: true }).first()
+  ).toHaveAttribute("href", "/vue/demo/unstyled/");
+  await page
+    .locator('#starlight__sidebar a[href="/vue/getting-started/"]')
+    .click();
+  await expect(page).toHaveURL(`${DOCS_URL}/vue/getting-started/`);
+  await page.goBack();
+  await expect(page).toHaveURL(`${DOCS_URL}/vue/api/`);
+  await expect(page.locator(SWITCH).first()).toHaveValue("vue");
+  await page.goto("/react/filtering/");
+  await page.locator(SWITCH).first().selectOption("vue");
+  await expect(page).toHaveURL(
+    `${DOCS_URL}/vue/getting-started/?unavailable=filtering`
+  );
+  await expect(page.locator("[data-framework-notice]")).toContainText(
+    "not available for Vue"
+  );
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    `${ORIGIN}/vue/getting-started/`
+  );
 });

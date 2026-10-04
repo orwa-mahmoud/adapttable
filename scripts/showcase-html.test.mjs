@@ -9,10 +9,12 @@ import {
   frameworkOf,
   MATRIX_FEATURES,
   matrixPages,
+  VUE_NATIVE_BASELINE,
 } from "../apps/showcase/matrix.mjs";
 import {
   featurePage,
   landingPage,
+  nativeVuePage,
   readShowcaseHtml,
   showcaseHtmlFiles,
 } from "./build-showcase-html.mjs";
@@ -45,12 +47,27 @@ describe("the generated showcase pages", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
     // features — across all eight kits; all nine Angular kits' landings
     // plus all twenty-one feature destinations; and the eight replaced top-level
-    // addresses. Kit `/accessibility/` URLs are matrix pages again, not
+    // addresses, two Angular modes and one native Vue preview. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2);
+    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2 + 1);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
+  });
+
+  it("writes the single Vue preview without indexability or parity claims", () => {
+    const { dir, html } = nativeVuePage();
+    assert.equal(dir, "vue/unstyled");
+    assert.match(html, /name="robots" content="noindex, follow"/);
+    assert.ok(html.includes(`href="${siteUrl("/vue/demo/unstyled/")}"`));
+    assert.ok(html.includes(VUE_NATIVE_BASELINE.notice));
+    assert.match(html, /href="\.\.\/\.\.\/third-party-notices\.txt"/);
+    assert.match(html, /src="\.\.\/\.\.\/src\/vue\/entry-native\.ts"/);
+    assert.doesNotMatch(html, /data-matrix-page|entry-matrix|npm install/);
+    assert.equal(
+      matrixPages().some((page) => page.framework === "vue"),
+      false
+    );
   });
 
   it("gives every Angular kit a destination for every matrix feature", () => {
@@ -242,6 +259,12 @@ describe("the generated showcase pages", () => {
         1,
         `${file.dir} serves more than one h1`
       );
+      if (file.dir === VUE_NATIVE_BASELINE.dir) {
+        assert.ok(main.includes(VUE_NATIVE_BASELINE.description), file.dir);
+        assert.ok(main.includes(VUE_NATIVE_BASELINE.notice), file.dir);
+        assert.doesNotMatch(main, /<pre><code>|npm install/);
+        continue;
+      }
       const mode = ANGULAR_MODES.get(file.dir);
       if (mode) {
         assert.match(

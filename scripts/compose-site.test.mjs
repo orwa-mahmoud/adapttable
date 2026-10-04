@@ -103,9 +103,9 @@ describe("composeDemos", () => {
         composeDemos({
           dist,
           site,
-          pages: [{ html: "./verdant/index.html", framework: "vue" }],
+          pages: [{ html: "./unknown/index.html", framework: "unknown" }],
         }),
-      /no demo root is served for "vue"/
+      /no demo root is served for "unknown"/
     );
   });
 });
@@ -147,4 +147,46 @@ it("relocates framework main/lab entries and preserves relative asset resolution
   );
   assert.equal(existsSync(join(site, "angular/demo/angular-main")), false);
   assert.equal(existsSync(join(site, "react/demo/angular-main")), false);
+});
+
+it("relocates only the Vue preview and keeps its assets and framework isolation", () => {
+  const { dist, site } = fixture();
+  const source = "vue/unstyled/index.html";
+  write(dist, source);
+  writeFileSync(
+    join(dist, source),
+    '<script src="../../assets/vue.js"></script><link href="../../assets/vue.css"><link rel="canonical" href="https://adapttable.orwamahmoud.com/vue/demo/unstyled/">'
+  );
+  composeDemos({
+    dist,
+    site,
+    pages: [
+      ...PAGES,
+      {
+        html: `./${source}`,
+        framework: "vue",
+        route: "/vue/demo/unstyled/",
+      },
+    ],
+  });
+  const html = readFileSync(join(site, "vue/demo/unstyled/index.html"), "utf8");
+  assert.match(html, /src="\.\.\/assets\/vue\.js"/);
+  assert.match(html, /href="\.\.\/assets\/vue\.css"/);
+  assert.match(
+    html,
+    /href="https:\/\/adapttable\.orwamahmoud\.com\/vue\/demo\/unstyled\/"/
+  );
+  assert.ok(existsSync(join(site, "vue/demo/assets/entry.js")));
+  assert.ok(
+    existsSync(join(site, "angular/demo/unstyled/filtering/index.html"))
+  );
+  for (const rel of [
+    "vue/demo/vue",
+    "vue/demo/index.html",
+    "vue/demo/mantine",
+    "vue/demo/unstyled/filtering",
+    "react/demo/vue",
+    "angular/demo/vue",
+  ])
+    assert.equal(existsSync(join(site, rel)), false, rel);
 });

@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import angular from "@analogjs/vite-plugin-angular";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import vue from "@vitejs/plugin-vue";
 import { defineConfig, type Plugin } from "vite";
 
 import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
@@ -261,6 +262,13 @@ const ANGULAR_SOURCES = [
   `${packageDir("adapter-angular-aria")}${sep}`,
 ];
 
+/** Vue owns its SFCs and source modules, never React's transform. */
+const VUE_SOURCES = [
+  fileURLToPath(new URL("./src/vue/", import.meta.url)),
+  `${packageDir("vue")}${sep}`,
+  `${packageDir("adapter-vue-unstyled")}${sep}`,
+];
+
 /** Whether a module is Angular source the Angular compiler owns. */
 const isAngularSource = (id: string): boolean =>
   ANGULAR_SOURCES.some((dir) => id.startsWith(dir));
@@ -271,12 +279,15 @@ export default defineConfig({
     adapttableSubpaths(),
     // The Angular pages and the Angular packages compile with Angular's own
     // compiler, from source like every other package here; React's plugin
-    // keeps to everything else.
+    // and Vue compile their own source separately.
     angular({
       tsconfig: page("./src/angular/tsconfig.json"),
       transformFilter: (_code, id) => isAngularSource(id),
     }),
-    react({ exclude: ANGULAR_SOURCES.map((dir) => `${dir}**`) }),
+    vue(),
+    react({
+      exclude: [...ANGULAR_SOURCES, ...VUE_SOURCES].map((dir) => `${dir}**`),
+    }),
     tailwindcss(),
     taigaAssets(),
     siteNotices({
@@ -327,6 +338,11 @@ export default defineConfig({
     alias: [
       { find: /^@adapttable\/core$/, replacement: pkg("core") },
       { find: /^@adapttable\/react$/, replacement: pkg("react") },
+      { find: /^@adapttable\/vue$/, replacement: pkg("vue") },
+      {
+        find: /^@adapttable\/vue-unstyled$/,
+        replacement: pkg("adapter-vue-unstyled"),
+      },
       { find: /^@adapttable\/ai$/, replacement: pkg("ai") },
       { find: /^@adapttable\/ai-react$/, replacement: pkg("ai-react") },
       { find: /^@adapttable\/ai-angular$/, replacement: pkg("ai-angular") },
@@ -396,6 +412,7 @@ export default defineConfig({
       },
     ],
     dedupe: [
+      "vue",
       "react",
       "react-dom",
       "@mui/material",

@@ -215,7 +215,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [core, react, antd, mui, kits, tools]
+        name: [core, react, vue, antd, mui, kits, tools]
     steps:
       # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -233,6 +233,7 @@ jobs:
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
             react) f="--filter=@adapttable/react" ;;
+            vue) f="--filter=./packages/vue/*" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
@@ -251,7 +252,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [core, react, antd, mui, kits, tools]
+        name: [core, react, vue, antd, mui, kits, tools]
     steps:
       # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -269,6 +270,7 @@ jobs:
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
             react) f="--filter=@adapttable/react" ;;
+            vue) f="--filter=./packages/vue/*" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
@@ -316,6 +318,7 @@ jobs:
           - name: base-ui · ai
           - name: radix · server · cli · i18n
           - name: angular
+          - name: vue
     steps:
       # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -336,6 +339,7 @@ jobs:
             "core · unstyled") f="--filter=@adapttable/core --filter=@adapttable/unstyled" ;;
             "mui · shadcn") f="--filter=@adapttable/mui --filter=@adapttable/shadcn" ;;
             react) f="--filter=@adapttable/react" ;;
+            vue) f="--filter=./packages/vue/*" ;;
             "mantine · bootstrap") f="--filter=@adapttable/mantine --filter=@adapttable/bootstrap" ;;
             "base-ui · ai") f="--filter=@adapttable/base-ui --filter=@adapttable/ai" ;;
             "radix · server · cli · i18n") f="--filter=@adapttable/radix --filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
@@ -347,7 +351,8 @@ jobs:
           # 46s, radix 45s, unstyled 40s, core 33s, shadcn 18s, ai 8s,
           # bootstrap 5s, server/cli/i18n ~1s each. antd alone sets the floor.
           # angular runs alone: its suites compile with Angular's compiler,
-          # not the React plugin the other lanes share.
+          # not the React plugin the other lanes share. Vue has its own lane
+          # using the SFC compiler and its per-package coverage floors.
           pnpm test:coverage $f $AFFECTED --concurrency=1 --continue=dependencies-successful
 
   unit:

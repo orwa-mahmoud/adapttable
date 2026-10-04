@@ -1,7 +1,7 @@
 import {
+  DOCS_FRAMEWORKS,
   FRAMEWORK_STORAGE_KEY,
   frameworkDocsTarget,
-  normalizeFramework,
   selectedFramework,
 } from "../../../scripts/framework-navigation.mjs";
 import { ORIGIN } from "../../../scripts/site.mjs";
@@ -24,10 +24,13 @@ function updateFrameworkNavigation() {
     .forEach((select) => {
       select.value = framework;
       const icon = select.parentElement?.querySelector("[data-framework-icon]");
-      const glyph = framework === "angular" ? "Ⓐ" : "⚛";
+      const glyph =
+        DOCS_FRAMEWORKS.find(({ key }) => key === framework)?.icon ?? "⚛";
       if (icon && icon.textContent !== glyph) icon.textContent = glyph;
       select.onchange = () => {
-        const targetFramework = normalizeFramework(select.value);
+        const targetFramework =
+          DOCS_FRAMEWORKS.find(({ key }) => key === select.value)?.key ??
+          "react";
         try {
           localStorage.setItem(FRAMEWORK_STORAGE_KEY, targetFramework);
         } catch {
@@ -46,14 +49,21 @@ function updateFrameworkNavigation() {
     const url = new URL(link.dataset.frameworkOriginalHref);
     if (
       (url.origin !== location.origin && url.origin !== ORIGIN) ||
-      !/^\/(react|angular)\//.test(url.pathname)
+      !/^\/(react|angular|vue)\//.test(url.pathname)
     )
       return;
-    if (/^\/(react|angular)\/demo\//.test(url.pathname)) {
+    if (/^\/(react|angular|vue)\/demo\//.test(url.pathname)) {
       if (framework === "angular" && url.pathname === "/react/demo/")
         link.href = "/angular/demo/unstyled/";
       return;
     }
+    // An explicit link into the experimental guide remains a useful cross-link.
+    if (
+      url.pathname.startsWith("/vue/") &&
+      framework !== "vue" &&
+      !link.closest("#starlight__sidebar, .pagefind-ui__result")
+    )
+      return;
     const target = frameworkDocsTarget(url.pathname, framework);
     if (target.equivalent && link.closest("#starlight__sidebar")) {
       const item = link.closest("li");
@@ -69,15 +79,14 @@ function updateFrameworkNavigation() {
     }
     link.href = target.href + (target.equivalent ? url.hash : "");
     if (!target.equivalent)
-      link.title =
-        "This guide is not available for Angular. Open Angular getting started.";
+      link.title = `This guide is not available for ${framework}. Open its getting-started guide.`;
   });
   const unavailable = new URLSearchParams(location.search).get("unavailable");
   if (unavailable && !document.querySelector("[data-framework-notice]")) {
     const notice = document.createElement("p");
     notice.dataset.frameworkNotice = "";
     notice.setAttribute("role", "status");
-    notice.textContent = `The ${unavailable.replaceAll("-", " ")} guide is not available for ${framework === "angular" ? "Angular" : "React"}. This getting-started guide lists supported features.`;
+    notice.textContent = `The ${unavailable.replaceAll("-", " ")} guide is not available for ${framework === "vue" ? "Vue" : framework === "angular" ? "Angular" : "React"}. This getting-started guide lists supported features.`;
     document.querySelector("main")?.prepend(notice);
   }
 }

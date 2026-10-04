@@ -39,6 +39,7 @@ import {
   matrixPages,
   otherKitsOf,
   snippetFor,
+  VUE_NATIVE_BASELINE,
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
 import { appendScript, guarded } from "./analytics-guard.mjs";
@@ -564,8 +565,29 @@ export const angularModePage = (lab = false) => {
   };
 };
 
+/** Native Vue's single implemented development-preview surface. */
+export const nativeVuePage = () => {
+  const { dir, title, description, path, entry, notice } = VUE_NATIVE_BASELINE;
+  return {
+    dir,
+    html: htmlDocument(
+      head({
+        dir,
+        title,
+        description,
+        route: demoRoute(path, "vue"),
+        indexable: false,
+      }),
+      `<div id="root"><main class="at-fallback"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p><p>${escapeHtml(notice)}</p></main></div>
+    <footer class="vue-baseline"><a href="${upTo(dir)}third-party-notices.txt">Third-party notices</a></footer>
+    <script type="module" src="${upTo(dir)}${entry.slice(1)}"></script>`
+    ),
+  };
+};
+
 /** Every HTML file this writes, as `{ dir, html }`. */
 export const showcaseHtmlFiles = () => [
+  nativeVuePage(),
   angularModePage(),
   angularModePage(true),
   ...matrixPages().map((page) => {
