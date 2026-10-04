@@ -1,5 +1,16 @@
 # @adapttable/cli
 
+## 3.2.0
+
+### Minor Changes
+
+- 143d5bf: Add discovery and registry-install scaffolding for Angular Material,
+  ng-bootstrap, Spartan, Taiga UI, Angular Aria, Angular CDK and ngx-bootstrap
+  as their first public `0.1.0` releases are prepared. Install commands include
+  the Angular binding, selected adapter and missing native peers, with scoped
+  styling, provider and asset guidance. Check registry availability before
+  installing; npm publication remains a separate release step.
+
 ## 3.1.0
 
 ### Minor Changes

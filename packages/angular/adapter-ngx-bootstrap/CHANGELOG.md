@@ -1,6 +1,16 @@
-# @adapttable/angular-unstyled
+# @adapttable/ngx-bootstrap
 
-## 0.1.1
+## 0.1.0
+
+### Minor Changes
+
+- 143d5bf: Add the first public Angular 22 zoneless ngx-bootstrap adapter with scoped
+  Bootstrap styles, native overlays, feature entries and assistant controls.
+  
+  With ngx-bootstrap 22.0.0 and Angular 22.2, early pagination-anchor clicks queued
+  before hydration can fail during event replay. Ordinary hydration and paging
+  after hydration work. Users must click again after hydration; the adapter does
+  not automatically retry the lost early click.
 
 ### Patch Changes
 
@@ -19,24 +29,10 @@
   Keep Unstyled and Aria text filter controls paired without relying on
   platform-specific native input widths.
 - 8d1e749: Correct native control labels, separator and list-item semantics, and keyboard scroll-region metadata. Preserve established Angular binding names and signal access while removing alias declarations. Share live bulk-action coordination, consolidate CSS rules, and simplify re-exports and controller code without changing subscription snapshots or filter memo invalidation.
+- d57e69c: Keep native header-filter menus open while choosing multiple checkbox values. Let ngx-bootstrap handle outside presses for its portaled menus, while preserving Escape dismissal and configured single-choice completion.
 - Updated dependencies [089d5d5]
 - Updated dependencies [143d5bf]
 - Updated dependencies [0a9cb40]
 - Updated dependencies [8d1e749]
   - @adapttable/angular@0.4.0
   - @adapttable/core@3.8.1
-
-## 0.1.0
-
-### Minor Changes
-
-- 42a4349: Prepare the first public release of `AdaptDataTable` with native HTML controls, desktop tables and mobile cards, kit feature entry points and `standardPreset()`.
-  
-  Support tree/grouped rows, editing and failure recovery, keyboard selection/paste/fill, filtering, menus, exports, saved views and an optional assistant, with localized labels, RTL and SSR. Host callbacks retain ownership of data changes and column widths. XLSX/PDF downloads preserve selected rows and requested visible/all-column scope. Page-size selection survives server rendering, hydration and later input changes.
-
-### Patch Changes
-
-- Updated dependencies [42a4349]
-- Updated dependencies [6fd7108]
-  - @adapttable/core@3.8.0
-  - @adapttable/angular@0.3.0

@@ -1,5 +1,17 @@
 # @adapttable/antd
 
+## 3.3.2
+
+### Patch Changes
+
+- 8d1e749: Correct native control labels, separator and list-item semantics, and keyboard scroll-region metadata. Preserve established Angular binding names and signal access while removing alias declarations. Share live bulk-action coordination, consolidate CSS rules, and simplify re-exports and controller code without changing subscription snapshots or filter memo invalidation.
+- 143d5bf: Bound adapter build memory with sequential JavaScript and production-declaration phases, retaining React Compiler transforms, both module formats, and unchanged full test/typecheck coverage.
+- Updated dependencies [143d5bf]
+- Updated dependencies [8d1e749]
+- Updated dependencies [143d5bf]
+  - @adapttable/core@3.8.1
+  - @adapttable/react@1.6.0
+
 ## 3.3.1
 
 ### Patch Changes

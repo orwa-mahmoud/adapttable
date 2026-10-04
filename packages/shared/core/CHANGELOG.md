@@ -1,5 +1,15 @@
 # @adapttable/core
 
+## 3.8.1
+
+### Patch Changes
+
+- 143d5bf: Build production JavaScript and both declaration formats in separate bounded
+  phases. Keep test sources and globals in normal typechecking and coverage while
+  excluding them from production declaration inputs. Preserve public signatures
+  and embed declaration-map sources before cleaning temporary build files.
+- 8d1e749: Correct native control labels, separator and list-item semantics, and keyboard scroll-region metadata. Preserve established Angular binding names and signal access while removing alias declarations. Share live bulk-action coordination, consolidate CSS rules, and simplify re-exports and controller code without changing subscription snapshots or filter memo invalidation.
+
 ## 3.8.0
 
 ### Minor Changes

@@ -1,5 +1,14 @@
 # @adapttable/ai
 
+## 0.5.2
+
+### Patch Changes
+
+- 8d1e749: Correct native control labels, separator and list-item semantics, and keyboard scroll-region metadata. Preserve established Angular binding names and signal access while removing alias declarations. Share live bulk-action coordination, consolidate CSS rules, and simplify re-exports and controller code without changing subscription snapshots or filter memo invalidation.
+- Updated dependencies [143d5bf]
+- Updated dependencies [8d1e749]
+  - @adapttable/core@3.8.1
+
 ## 0.5.1
 
 ### Patch Changes
