@@ -434,7 +434,7 @@ export type {
   PivotPanelSurfaceProps,
   PivotZoneProps,
 } from "./pivot/pivotPanelContract";
-export { type BodyCell, cellSpanMark } from "./rows/cellSpan";
+export { type BodyCell, cellSpanMark, resolveCellSpan } from "./rows/cellSpan";
 export {
   type CellSpanRequest,
   type GetCellSpan,

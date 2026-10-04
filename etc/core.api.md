@@ -1624,6 +1624,11 @@ export interface ColumnReorderKeyEvent {
 export function columnReorderKeyStep(key: string, rtl: boolean): -1 | 1 | undefined;
 
 // @public
+export interface ColumnResizeHandleOptions {
+    readonly signal?: AbortSignal;
+}
+
+// @public
 export interface ColumnResizeHandleProps {
     "aria-label": string;
     onDoubleClick: (event: MouseEvent & {
@@ -1640,7 +1645,7 @@ export interface ColumnResizeHandleProps {
 }
 
 // @public
-export function columnResizeHandleProps(key: string, setWidth: (key: string, width: number) => void, label: string): ColumnResizeHandleProps;
+export function columnResizeHandleProps(key: string, setWidth: (key: string, width: number) => void, label: string, options?: ColumnResizeHandleOptions): ColumnResizeHandleProps;
 
 // @public
 export function columnSelectLabel(label: string | undefined, column: {

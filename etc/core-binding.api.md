@@ -4596,6 +4596,12 @@ export interface ResolvableColumn<TRow> {
 export function resolveBodyVirtualization<TRow>(keyed: KeyedVirtualization, flat: TableVirtualization<TRow>): TableVirtualization<TRow>;
 
 // @public
+export function resolveCellSpan<TRow>(args: GetCellSpanArgs<TRow>, getCellSpan: GetCellSpan<TRow> | undefined, remainingCols: number, remainingRows: number): {
+    colSpan: number;
+    rowSpan: number;
+};
+
+// @public
 export function resolveColumnDefaults<TRow, TColumn extends ResolvableColumn<TRow>>(columns: readonly TColumn[], locale?: string, rendersItself?: (column: TColumn) => boolean): TColumn[];
 
 // @public

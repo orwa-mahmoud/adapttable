@@ -818,7 +818,11 @@ export {
   columnMenuRows,
   REORDER_COLUMN_KEY,
 } from "./columns/columnMenuModel";
-export { columnResizeHandleProps } from "./columns/columnResize";
+export {
+  type ColumnResizeHandleOptions,
+  type ColumnResizeHandleProps,
+  columnResizeHandleProps,
+} from "./columns/columnResize";
 export {
   type ColumnGroupDef,
   type ColumnGroupRecord,
@@ -1121,7 +1125,6 @@ export type {
   ColumnMenuRow,
 } from "./columns/columnMenuModel";
 export type { PinnedSide } from "./columns/columnMenuModel";
-export type { ColumnResizeHandleProps } from "./columns/columnResize";
 export type { WidthColumn } from "./columns/columnWidths";
 export type { GroupedHeaderAlign } from "./columns/headerGroups";
 export type { ExportCsvProp } from "./export/tableCsv";

@@ -2590,7 +2590,11 @@ column's pin, `pinActionLabel` labels the action, and
 `ColumnDragState`, `ColumnDragRowAttrs`, `ColumnDropProps`,
 `ColumnRowDragProps`, `ColumnReorderKeyProps`,
 `ColumnResizeHandleProps` and `COLUMN_DND_MIME` power the column menu's
-reorder/resize/pin rows. Toolbar glue: `SearchInputState` (debounced
+reorder/resize/pin rows. `columnResizeHandleProps(columnKey, onResize, label,
+options?)` accepts `ColumnResizeHandleOptions`, whose optional `signal` ties a
+custom handle to its owner. Aborting cancels pending drag frames, removes the
+handle's document listeners, and makes retained pointer, keyboard and autosize
+callbacks inert. Existing callers can omit the options. Toolbar glue: `SearchInputState` (debounced
 search binding), `FilterTriggerToggle` (popover/drawer trigger
 handlers). Editing/grouping glue: `focusEditorOnMount`,
 `rowEditingSignature`, `HeaderGroupCell`, `HtmlGroupedHeaderCell`, `headerGroupRow` /

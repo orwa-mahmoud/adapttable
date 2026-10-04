@@ -17131,6 +17131,14 @@
       "behavior": ""
     },
     {
+      "export": "resolveCellSpan",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "resolveColumnDefaults",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -23879,6 +23887,14 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ColumnResizeHandleOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
