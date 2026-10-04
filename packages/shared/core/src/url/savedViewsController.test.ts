@@ -666,3 +666,74 @@ describe("a store instead of this browser", () => {
     expect(store.reorder).toHaveBeenCalledWith(["Renamed", "B", "Mine"]);
   });
 });
+
+describe("saved-view writes cannot be overtaken by older loads", () => {
+  it("keeps a save made while the initial list is pending, then permits authoritative reload", async () => {
+    const old = deferred<readonly SavedView[]>();
+    const store = server();
+    store.list.mockImplementationOnce(() => old.promise);
+    const { controller, listener } = setup({ store });
+    controller.save("Mine");
+    listener.mockClear();
+    old.resolve([A]);
+    await settle();
+    expect(names(controller)).toEqual(["Mine"]);
+    expect(listener).not.toHaveBeenCalled();
+    controller.reload();
+    await settle();
+    expect(names(controller)).toEqual(["Mine"]);
+    expect(store.list).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(["rename", "remove", "move", "default"] as const)(
+    "keeps a %s operation when an earlier reload answers or rejects",
+    async (operation) => {
+      const old = deferred<readonly SavedView[]>();
+      const store = server([A, B]);
+      const { controller, listener } = setup({ store });
+      await settle();
+      store.list.mockImplementationOnce(() => old.promise);
+      controller.reload();
+      if (operation === "rename") controller.rename("A", "Renamed");
+      if (operation === "remove") controller.remove("A");
+      if (operation === "move") controller.move("B", -1);
+      if (operation === "default") controller.setDefault("B");
+      const changed = controller.getSnapshot();
+      listener.mockClear();
+      if (operation === "default") old.reject(new Error("outdated refusal"));
+      else old.resolve([A, B]);
+      await settle();
+      expect(controller.getSnapshot()).toBe(changed);
+      expect(listener).not.toHaveBeenCalled();
+      controller.reload();
+      await settle();
+      expect(controller.getSnapshot().views).toEqual(changed.views);
+    }
+  );
+
+  it("a no-op does not discard a pending authoritative load", async () => {
+    const old = deferred<readonly SavedView[]>();
+    const store = server();
+    store.list.mockImplementationOnce(() => old.promise);
+    const { controller } = setup({ store });
+    controller.remove("absent");
+    old.resolve([A]);
+    await settle();
+    expect(names(controller)).toEqual(["A"]);
+  });
+
+  it("cannot overwrite a read-only saved view through save", async () => {
+    const readonly = { ...A, readOnly: true, visibility: "team" as const };
+    const store = server([readonly, B]);
+    const { controller, listener } = setup({ store });
+    await settle();
+    const before = controller.getSnapshot();
+    listener.mockClear();
+    controller.save("A");
+    expect(controller.getSnapshot()).toBe(before);
+    expect(store.save).not.toHaveBeenCalled();
+    expect(listener).not.toHaveBeenCalled();
+    controller.save("B");
+    expect(store.save).toHaveBeenCalledOnce();
+  });
+});
