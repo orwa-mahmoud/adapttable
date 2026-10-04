@@ -191,7 +191,10 @@ test("experimental Vue docs expose only implemented counterparts", async ({
     "Experimental Vue table API reference"
   );
   await expect(page.locator("main .sl-markdown-content")).toContainText(
-    "private"
+    "public packages"
+  );
+  await expect(page.locator("main .sl-markdown-content")).toContainText(
+    "have not been published to npm"
   );
   await expect(
     page.locator(
