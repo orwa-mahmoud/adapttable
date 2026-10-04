@@ -329,6 +329,11 @@ describe("Material overlay ownership", () => {
         .injector.get(CdkConnectedOverlay);
       expect(connected.flexibleDimensions).toBe(customDefaults);
       expect(connected.push).toBe(true);
+      expect(
+        connected.overlayRef.overlayElement.matches(
+          ":has(> mat-card.adapt-material-filter-card)"
+        )
+      ).toBe(false);
       expect(connected.overlayRef.overlayElement.style.width).toBe(
         customDefaults ? "260px" : ""
       );
@@ -337,6 +342,11 @@ describe("Material overlay ownership", () => {
       await fixture.whenStable();
       expect(connected.flexibleDimensions).toBe(true);
       expect(connected.push).toBe(false);
+      expect(
+        connected.overlayRef.overlayElement.matches(
+          ":has(> mat-card.adapt-material-filter-card)"
+        )
+      ).toBe(true);
       expect(connected.overlayRef.overlayElement.style.width).toBe("374px");
       expect(
         connected.positions.every((position) => position.originY === "bottom")
@@ -346,6 +356,11 @@ describe("Material overlay ownership", () => {
       await fixture.whenStable();
       expect(connected.flexibleDimensions).toBe(customDefaults);
       expect(connected.push).toBe(true);
+      expect(
+        connected.overlayRef.overlayElement.matches(
+          ":has(> mat-card.adapt-material-filter-card)"
+        )
+      ).toBe(false);
       expect(connected.overlayRef.overlayElement.style.width).toBe(
         customDefaults ? "260px" : ""
       );

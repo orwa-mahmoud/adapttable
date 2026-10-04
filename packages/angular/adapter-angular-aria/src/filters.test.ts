@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import {
   type ColumnDef,
   defaultFilterRegistry,
@@ -255,6 +257,7 @@ describe("the Angular Aria Angular filters", () => {
           overlayX: "end",
           overlayY: "top",
           offsetY: 4,
+          panelClass: "adapt-aria-filter-overlay",
         },
         {
           originX: "start",
@@ -262,6 +265,7 @@ describe("the Angular Aria Angular filters", () => {
           overlayX: "start",
           overlayY: "top",
           offsetY: 4,
+          panelClass: "adapt-aria-filter-overlay",
         },
         {
           originX: "center",
@@ -269,6 +273,7 @@ describe("the Angular Aria Angular filters", () => {
           overlayX: "center",
           overlayY: "top",
           offsetY: 4,
+          panelClass: "adapt-aria-filter-overlay",
         },
       ]);
       expect(overlay!.flexibleDimensions).toBe(true);
@@ -276,6 +281,16 @@ describe("the Angular Aria Angular filters", () => {
       expect(overlay!.push).toBe(false);
       expect(overlay!.viewportMargin).toBe(8);
       expect(overlay!.hasBackdrop).toBe(false);
+      const pane = overlay!.overlayRef.overlayElement;
+      expect(pane.classList.contains("adapt-aria-filter-overlay")).toBe(true);
+      const theme = document.createElement("style");
+      theme.textContent = readFileSync("styles.css", "utf8");
+      document.head.append(theme);
+      try {
+        expect(getComputedStyle(pane).maxWidth).toBe("calc(100% - 16px)");
+      } finally {
+        theme.remove();
+      }
       expect(panel.getAttribute("data-dir")).toBe(dir);
     }
   );

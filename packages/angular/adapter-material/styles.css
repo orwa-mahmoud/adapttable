@@ -278,3 +278,9 @@
 .adapt-material-filters-button {
   --mat-button-text-container-shape: 6px;
 }
+
+/* Flexible center bounds can reach the viewport edge. Reserve the horizontal
+   gutter on the actual pane, where its percentage uses those native bounds. */
+.cdk-overlay-pane:has(> mat-card.adapt-material-filter-card) {
+  max-width: calc(100% - 16px);
+}

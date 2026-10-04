@@ -262,3 +262,9 @@ button[data-adapttable-cdk-control]:hover:not(:disabled) {
     transition: none;
   }
 }
+
+/* Flexible center bounds can reach the viewport edge. Reserve the horizontal
+   gutter on the actual pane, where its percentage uses those native bounds. */
+.cdk-overlay-pane.adapt-cdk-filter-overlay {
+  max-width: calc(100% - 16px);
+}

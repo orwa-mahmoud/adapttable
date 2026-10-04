@@ -46,6 +46,7 @@ import { MatCardModule } from "@angular/material/card";
     >
       <mat-card
         appearance="outlined"
+        [class.adapt-material-filter-card]="belowOnly()"
         [attr.dir]="direction()"
         [style.width]="belowOnly() ? '100%' : null"
         [style.max-height.px]="belowOnly() ? availableHeight() : null"

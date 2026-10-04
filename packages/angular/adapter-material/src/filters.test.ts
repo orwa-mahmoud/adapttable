@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import {
   type ColumnDef,
   defaultFilterRegistry,
@@ -266,6 +268,18 @@ describe("the Angular Material filters", () => {
       expect(overlay!.push).toBe(false);
       expect(overlay!.viewportMargin).toBe(8);
       expect(overlay!.hasBackdrop).toBe(false);
+      const pane = overlay!.overlayRef.overlayElement;
+      expect(
+        pane.querySelector("mat-card.adapt-material-filter-card")
+      ).not.toBeNull();
+      const theme = document.createElement("style");
+      theme.textContent = readFileSync("styles.css", "utf8");
+      document.head.append(theme);
+      try {
+        expect(getComputedStyle(pane).maxWidth).toBe("calc(100% - 16px)");
+      } finally {
+        theme.remove();
+      }
       expect(panel.getAttribute("data-dir")).toBe(dir);
     }
   );

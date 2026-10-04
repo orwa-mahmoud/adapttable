@@ -292,3 +292,9 @@
   border-radius: 12px;
   background: var(--adapt-aria-surface);
 }
+
+/* Flexible center bounds can reach the viewport edge. Reserve the horizontal
+   gutter on the actual pane, where its percentage uses those native bounds. */
+.cdk-overlay-pane.adapt-aria-filter-overlay {
+  max-width: calc(100% - 16px);
+}

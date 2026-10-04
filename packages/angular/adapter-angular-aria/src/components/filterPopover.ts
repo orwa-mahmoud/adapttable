@@ -128,6 +128,7 @@ export class AdaptFilterPopover {
       overlayX: "end",
       overlayY: "top",
       offsetY: 4,
+      panelClass: "adapt-aria-filter-overlay",
     },
     // Search can be absent, placing the trigger at the other toolbar edge.
     // Keep both logical alignments below the trigger, including in RTL.
@@ -137,6 +138,7 @@ export class AdaptFilterPopover {
       overlayX: "start",
       overlayY: "top",
       offsetY: 4,
+      panelClass: "adapt-aria-filter-overlay",
     },
     {
       originX: "center",
@@ -144,6 +146,7 @@ export class AdaptFilterPopover {
       overlayX: "center",
       overlayY: "top",
       offsetY: 4,
+      panelClass: "adapt-aria-filter-overlay",
     },
   ];
 
