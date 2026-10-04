@@ -1,7 +1,13 @@
 /** Searchless toolbars must not strand native filter cards outside the viewport. */
 import { writeFile } from "node:fs/promises";
 
-import { expect, type Locator, test, type TestInfo } from "@playwright/test";
+import {
+  expect,
+  type Locator,
+  type Page,
+  test,
+  type TestInfo,
+} from "@playwright/test";
 
 import { angularPart } from "./angular-kit";
 
@@ -18,6 +24,55 @@ async function expectHorizontalFit(surface: Locator, width: number) {
       return box !== null && box.x >= 7 && box.x + box.width <= width - 7;
     })
     .toBe(true);
+}
+
+async function clickOutsideFilter(
+  page: Page,
+  surface: Locator,
+  trigger: Locator
+) {
+  const card = await surface.elementHandle();
+  const origin = await trigger.elementHandle();
+  if (!card || !origin)
+    throw new Error("The open filter has no card or trigger.");
+  const point = await page.evaluate(
+    ({ card, origin }) => {
+      const bounds = [
+        card.getBoundingClientRect(),
+        origin.getBoundingClientRect(),
+      ];
+      const candidates = [
+        { x: 2, y: 2 },
+        { x: 2, y: innerHeight - 2 },
+        { x: innerWidth - 2, y: 2 },
+        { x: innerWidth - 2, y: innerHeight - 2 },
+      ];
+      return (
+        candidates.find(({ x, y }) => {
+          const outside = bounds.every(
+            (rect) =>
+              x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
+          );
+          const hit = document.elementFromPoint(x, y);
+          return (
+            outside &&
+            hit &&
+            !card.contains(hit) &&
+            !origin.contains(hit) &&
+            !hit.closest(
+              ".cdk-overlay-pane, button, a, input, select, textarea, [role=button]"
+            )
+          );
+        }) ?? null
+      );
+    },
+    { card, origin }
+  );
+  if (!point)
+    throw new Error(
+      "No unobstructed viewport point exists outside the filter."
+    );
+  await page.mouse.click(point.x, point.y);
 }
 
 async function expectReachableFields(panel: Locator, width: number) {
@@ -254,7 +309,7 @@ for (const key of ["angular-cdk", "material", "aria"]) {
             })
             .toBeGreaterThanOrEqual(0);
 
-          const diagnoseHeader = key === "material" && viewport.width === 1180;
+          const diagnoseHeader = key === "material";
           if (diagnoseHeader)
             await captureMaterialLayout(
               panel,
@@ -286,7 +341,13 @@ for (const key of ["angular-cdk", "material", "aria"]) {
 
           await trigger.click();
           await expect(panel).toBeVisible();
-          await page.getByRole("heading", { level: 1 }).click();
+          if (key === "material")
+            await captureMaterialLayout(
+              panel,
+              testInfo,
+              "before outside click"
+            );
+          await clickOutsideFilter(page, surface, trigger);
           await expect(panel).toBeHidden();
           await expect(trigger).toHaveAttribute("aria-expanded", "false");
 
@@ -309,6 +370,12 @@ for (const key of ["angular-cdk", "material", "aria"]) {
               panel,
               viewport.width
             );
+            if (key === "material")
+              await captureMaterialLayout(
+                panel,
+                testInfo,
+                "centered narrow trigger"
+              );
             await testInfo.attach(
               "Filter popover at a centered narrow trigger",
               {
