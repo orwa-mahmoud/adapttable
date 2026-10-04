@@ -241,7 +241,7 @@ export interface DesktopTableModel<TRow> {
     // (undocumented)
     readonly groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;
     // (undocumented)
-    readonly headerCheckboxAttrs?: Attrs;
+    readonly headerCheckboxAttrs?: SelectionCheckboxAttrs;
     // (undocumented)
     readonly headerPlan: HtmlGroupedHeaderCell[][] | null;
     // (undocumented)
@@ -594,7 +594,7 @@ export interface RowSelection {
     // (undocumented)
     clear(): void;
     // (undocumented)
-    headerCheckboxAttrs(): Attrs;
+    headerCheckboxAttrs(): SelectionCheckboxAttrs;
     // (undocumented)
     readonly headerState: ComputedRef<HeaderSelectionState>;
     // (undocumented)
@@ -602,7 +602,7 @@ export interface RowSelection {
     // (undocumented)
     replace(this: void, ids: readonly string[] | undefined): void;
     // (undocumented)
-    rowCheckboxAttrs(id: string): Attrs;
+    rowCheckboxAttrs(id: string): SelectionCheckboxAttrs;
     // (undocumented)
     selectAllMatching(): void;
     // (undocumented)
@@ -638,6 +638,16 @@ export interface RowSelectionOptions<TRow> {
 }
 
 export { RuntimeChromeInput }
+
+// @public
+export interface SelectionCheckboxAttrs extends Attrs {
+    // (undocumented)
+    readonly checked: boolean;
+    // (undocumented)
+    readonly indeterminate?: boolean;
+    // (undocumented)
+    readonly onChange: () => void;
+}
 
 export { SelectionState }
 
@@ -800,7 +810,7 @@ export interface TableRowModel<TRow> {
     // (undocumented)
     readonly cells: readonly TableCellModel<TRow>[];
     // (undocumented)
-    readonly checkboxAttrs?: Attrs;
+    readonly checkboxAttrs?: SelectionCheckboxAttrs;
     // (undocumented)
     readonly index: number;
     // (undocumented)
@@ -1040,7 +1050,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     })[] | undefined;
     attrs: Attrs;
     headerRowAttrs: Attrs;
-    headerCheckboxAttrs?: Attrs;
+    headerCheckboxAttrs?: SelectionCheckboxAttrs;
     columnCount: number;
     actionsLabel?: string;
     groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;

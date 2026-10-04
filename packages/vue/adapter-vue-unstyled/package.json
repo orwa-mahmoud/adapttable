@@ -1,6 +1,5 @@
 {
   "version": "0.1.0",
-  "private": true,
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
@@ -53,5 +52,8 @@
     "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
     "directory": "packages/vue/adapter-vue-unstyled"
   },
-  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues"
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "publishConfig": {
+    "access": "public"
+  }
 }

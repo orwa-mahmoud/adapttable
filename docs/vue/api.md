@@ -1,7 +1,7 @@
 # Experimental Vue API reference
 
-This reference describes the implemented private `0.1.0` workspace packages.
-They require Vue `^3.5.0` and are not available through npm publication. See
+This reference describes the experimental `0.1.0` public packages.
+They require Vue `^3.5.0` and have not been published to npm. See
 [getting started](./getting-started.md) for scope, workspace setup and a first
 native table. Identically named APIs in the React and Angular references do
 not define Vue signatures.
@@ -369,9 +369,28 @@ row action requests confirmation; the binding does not draw a dialog.
 `MobileCardsChrome({ model, slots, classNames? })` return structural Vue content.
 `TableChromeSlots<TRow>` requires `SortButton` and `SelectionCheckbox`.
 `SortButtonProps` contains `attrs`, `HeaderContext` and rendered `content`;
-`SelectionCheckboxProps` contains `attrs` and a `header` flag. Forward all
-attributes, including labels, event handlers, refs and indeterminate state,
-to the actual kit control.
+`SelectionCheckboxProps` includes a `header` flag and the
+`SelectionCheckboxControl` contract: `attrs`, `checked`, `indeterminate` and
+`onToggle(): void`. Native controls forward the complete `attrs`, including
+labels, event handlers, refs and indeterminate state, to their checkbox.
+
+A kit with its own model-value API instead forwards
+`selectionCheckboxInputAttrs(control.attrs)`, binds `control.checked` and
+`control.indeterminate` to its state props, and connects exactly one
+user-interaction event to `control.onToggle`. The projection removes only
+native `checked`, `indeterminate` and `onChange` wiring; ARIA, refs, disabled,
+keyboard and form attributes remain intact. Do not also forward the native
+change listener to a widget that emits a separate model update: that would
+request two toggles for one interaction. `onToggle` requests an interaction,
+not a checked-value assignment; repeated interactions remain distinct even
+when a widget repeats the same event payload.
+
+`selectionCheckboxControl(attrs: SelectionCheckboxAttrs)` creates this
+semantic projection for a custom structural model. `SelectionCheckboxAttrs`
+extends `Attrs` with a boolean `checked`, optional boolean `indeterminate`
+and `onChange(): void`. The model remains the state owner, so a controlled
+host can accept or reject the requested selection without a kit maintaining
+a second selection store.
 
 Slots `RowActions`, `ColumnGroupToggle`, `ResizeHandle` and `GroupRow` are
 optional in the type because their features are optional. When a model needs

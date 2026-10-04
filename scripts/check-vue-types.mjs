@@ -19,6 +19,13 @@ import { pathToFileURL } from "node:url";
 /** Every fixture's diagnostic identity, separate from the invalid source. */
 export const VUE_TYPE_EXPECTATIONS = {
   "@adapttable/vue": {
+    "WrongSelectionControl.vue": [
+      {
+        code: 2322,
+        message: /Type 'boolean' is not assignable to type 'number'/,
+      },
+      { code: 2554, message: /Expected 0 arguments, but got 1/ },
+    ],
     "WrongRenderer.vue": [
       {
         code: 2322,
@@ -34,6 +41,12 @@ export const VUE_TYPE_EXPECTATIONS = {
     ],
   },
   "@adapttable/vue-unstyled": {
+    "InvalidSelectionEvent.vue": [
+      {
+        code: 2322,
+        message: /Type '\(ids: number\[\]\) => number' is not assignable/,
+      },
+    ],
     "InvalidRow.vue": [
       {
         code: 2322,

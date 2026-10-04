@@ -16,6 +16,11 @@ import {
   renderCell,
   renderHeader,
 } from "../columnDef";
+import {
+  type SelectionCheckboxAttrs,
+  type SelectionCheckboxControl,
+  selectionCheckboxControl,
+} from "../selection/checkboxControl";
 import type { RowActionControl } from "./modelChannels";
 import type {
   DesktopTableModel,
@@ -53,8 +58,7 @@ export interface SortButtonProps<TRow> {
   readonly context: HeaderContext<TRow>;
   readonly content: VNodeChild;
 }
-export interface SelectionCheckboxProps {
-  readonly attrs: Attrs;
+export interface SelectionCheckboxProps extends SelectionCheckboxControl {
   readonly header: boolean;
 }
 export interface TableChromeSlots<TRow> {
@@ -92,10 +96,14 @@ export function DesktopTableChrome<TRow>(props: {
   readonly classNames?: TableChromeClassNames;
 }): VNodeChild {
   const { model, slots, classNames = {} } = props;
-  const selection = (attrs: Attrs, header: boolean): VNodeChild =>
+  const selection = (
+    attrs: SelectionCheckboxAttrs,
+    header: boolean
+  ): VNodeChild =>
     control(
       slots.SelectionCheckbox,
       {
+        ...selectionCheckboxControl(attrs),
         attrs: mergeVueAttrs(attrs, {
           class: classNames.selectionCheckbox,
           "data-adapttable-part": "checkbox",
@@ -389,6 +397,7 @@ export function MobileCardsChrome<TRow>(props: {
           ? control(
               slots.SelectionCheckbox,
               {
+                ...selectionCheckboxControl(row.checkboxAttrs),
                 attrs: mergeVueAttrs(row.checkboxAttrs, {
                   class: classNames.selectionCheckbox,
                   "data-adapttable-part": "checkbox",

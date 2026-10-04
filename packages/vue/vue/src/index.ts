@@ -12,6 +12,7 @@ export type * from "./features/tableFeature";
 export type * from "./featureState";
 export type * from "./layout/modelChannels";
 export type * from "./layout/tableModels";
+export type { SelectionCheckboxAttrs } from "./selection/checkboxControl";
 export * from "./selection/selection";
 export type { SourceViewportOptions } from "./source/sourceLifecycle";
 export * from "./source/useFrontendData";

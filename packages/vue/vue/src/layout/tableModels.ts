@@ -21,6 +21,7 @@ import {
   renderCell,
   renderHeader,
 } from "../columnDef";
+import type { SelectionCheckboxAttrs } from "../selection/checkboxControl";
 import type { RowSelection } from "../selection/selection";
 import type { UseDataTableResult } from "../useDataTable";
 import type { RowActionControl } from "./modelChannels";
@@ -45,7 +46,7 @@ export interface TableRowModel<TRow> {
   readonly actionControls?: readonly RowActionControl<TRow>[];
   readonly index: number;
   readonly attrs: Attrs;
-  readonly checkboxAttrs?: Attrs;
+  readonly checkboxAttrs?: SelectionCheckboxAttrs;
   readonly cells: readonly TableCellModel<TRow>[];
 }
 export interface TableHeaderModel<TRow> {
@@ -63,7 +64,7 @@ export interface DesktopTableModel<TRow> {
   readonly headers: readonly TableHeaderModel<TRow>[];
   readonly rows: readonly TableRowModel<TRow>[];
   readonly bodySlots?: readonly TableBodySlot<TRow>[];
-  readonly headerCheckboxAttrs?: Attrs;
+  readonly headerCheckboxAttrs?: SelectionCheckboxAttrs;
   readonly columnCount: number;
   readonly actionsLabel?: string;
   readonly groupToggleProps: (

@@ -114,9 +114,7 @@ export const KITS = Object.freeze([
   // PrimeNG remains an unimplemented private placeholder.
   { name: "adapter-primeng", framework: "angular", role: "private" },
   { name: "adapter-ng-zorro", framework: "angular", role: "shell" },
-  // The first Vue native slice is implemented, but has not reached kit parity.
-  // Its declared runtime graphs still participate in the AI isolation check.
-  { name: "adapter-vue-unstyled", framework: "vue", role: "private" },
+  { name: "adapter-vue-unstyled", framework: "vue", role: "native" },
 ]);
 
 /** The folder-name prefix every kit package carries. */

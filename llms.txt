@@ -4,7 +4,7 @@
 
 ## Version and integration boundaries
 
-This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; React's `standardFeatures()` and Angular's `standardPreset()` compose their documented common sets. Enabling props from v2 alone do not activate v3 features. Check registry availability for Angular kits and `@adapttable/ai-angular` before installing. Vue has an experimental private `0.1.0` workspace binding and native unstyled kit for reactive sources, desktop/card structure and basic controls. The Vue packages are not published to npm and do not include full feature parity, styled kits or a Vue AI binding.
+This index describes the v3 documentation. Check the installed package version before applying examples; use the migration guides for v1/v2. React hooks come from `@adapttable/react` or a documented adapter re-export, not from core. Angular injection functions and renderer types come from `@adapttable/angular`. Individual features use kit subpaths; React's `standardFeatures()` and Angular's `standardPreset()` compose their documented common sets. Enabling props from v2 alone do not activate v3 features. Check registry availability for Angular kits and `@adapttable/ai-angular` before installing. Vue has an experimental, unreleased `0.1.0` public binding and native unstyled kit for reactive sources, desktop/card structure and basic controls. The Vue packages are not published to npm and do not include full feature parity, styled kits or a Vue AI binding.
 
 Use AdaptTable when you want TanStack-Table-style headless freedom but batteries-included for your specific UI kit — with URL state, RTL, a real filter UX, virtualization, and mobile layouts that do not break responsively.
 
@@ -38,10 +38,10 @@ Angular packages:
 - [@adapttable/ng-zorro](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/adapter-ng-zorro): Angular 22 and NG-ZORRO 22.1.1 kit; the host loads the NG-ZORRO stylesheet.
 - [@adapttable/ai-angular](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/angular/ai-angular): Optional Angular AI binding, with `tableAgent`, `injectTableAssistant` and `injectSpeechInput`; protocol helpers stay in `@adapttable/ai`.
 
-Experimental Vue workspace packages:
+Experimental, unreleased Vue packages:
 
-- [@adapttable/vue](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/vue/vue): Private Vue 3.5 binding with reactive sources, headless tables, typed rendering, structural Chrome and custom-feature contracts.
-- [@adapttable/vue-unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/vue/adapter-vue-unstyled): Private native Vue table with search, sorting, selection, pagination and responsive cards.
+- [@adapttable/vue](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/vue/vue): Public Vue 3.5 binding with reactive sources, headless tables, typed rendering, structural Chrome and custom-feature contracts.
+- [@adapttable/vue-unstyled](https://github.com/orwa-mahmoud/adapttable/tree/main/packages/vue/adapter-vue-unstyled): Public native Vue table with search, sorting, selection, pagination and responsive cards.
 
 ## Quickstart (React adapter)
 
@@ -203,7 +203,7 @@ const {
 
 ## Experimental Vue docs
 
-- [Get started with Vue](https://adapttable.orwamahmoud.com/vue/getting-started/): private workspace availability, Vue 3.5 peers, native first table, reactive sources, controlled state and SSR boundaries
+- [Get started with Vue](https://adapttable.orwamahmoud.com/vue/getting-started/): experimental release availability, Vue 3.5 peers, native first table, reactive sources, controlled state and SSR boundaries
 - [Experimental Vue API reference](https://adapttable.orwamahmoud.com/vue/api/): implemented source, renderer, native table, structural Chrome, lifecycle and custom-feature contracts; no full-parity claim
 
 ## Demo

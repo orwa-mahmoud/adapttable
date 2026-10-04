@@ -267,9 +267,9 @@ it("selection actions use core group/set semantics and current callbacks", () =>
   expect(selection.selectedCount.value).toBe(1);
   selection.replace(["b"]);
   expect(selection.state.value.visibleIds).toEqual(["a", "b", "c"]);
-  (selection.rowCheckboxAttrs("c").onChange as () => void)();
+  selection.rowCheckboxAttrs("c").onChange();
   expect(selection.isSelected("c")).toBe(true);
-  (selection.headerCheckboxAttrs().onChange as () => void)();
+  selection.headerCheckboxAttrs().onChange();
   expect(selection.headerState.value).toBe("all");
   selection.clear();
   expect(selection.selectedIds.value.size).toBe(0);

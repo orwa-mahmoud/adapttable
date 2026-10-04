@@ -7,9 +7,9 @@ refs, renderers, effect scopes and component lifecycles.
 
 ## Availability and scope
 
-`@adapttable/vue` and `@adapttable/vue-unstyled` are private `0.1.0` workspace
-packages, not published npm packages. These examples require a checkout or an
-application already linked to the built workspace packages. The peer dependency
+`@adapttable/vue` and `@adapttable/vue-unstyled` are public packages prepared for an
+experimental `0.1.0` release. They have not been published to npm. These examples
+require a checkout or an application already linked to the built workspace packages. The peer dependency
 is Vue `^3.5.0`; the workspace build requires Node `>=22.12.0` and pnpm. From the
 repository root, build the binding, native kit and their workspace dependencies:
 

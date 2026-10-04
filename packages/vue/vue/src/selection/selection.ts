@@ -20,8 +20,8 @@ import {
   toValue,
 } from "vue";
 
-import { type Attrs, toVueAttrs } from "../attrs";
 import { type MaybeRefOrGetterOptional, useExternalStore } from "../store";
+import type { SelectionCheckboxAttrs } from "./checkboxControl";
 export interface RowSelectionOptions<TRow> {
   readonly rows: MaybeRefOrGetter<readonly TRow[]>;
   readonly rowKey: (row: TRow) => string;
@@ -44,8 +44,8 @@ export interface RowSelection {
   replace(this: void, ids: readonly string[] | undefined): void;
   toggleGroupLeaves(ids: readonly string[]): void;
   selectAllMatching(): void;
-  rowCheckboxAttrs(id: string): Attrs;
-  headerCheckboxAttrs(): Attrs;
+  rowCheckboxAttrs(id: string): SelectionCheckboxAttrs;
+  headerCheckboxAttrs(): SelectionCheckboxAttrs;
 }
 export function useRowSelection<TRow>(
   input: MaybeRefOrGetter<RowSelectionOptions<TRow>>
@@ -116,20 +116,18 @@ export function useRowSelection<TRow>(
       toggleGroupLeaves,
       selectAllMatching,
     })),
-    rowCheckboxAttrs: (id) =>
-      toVueAttrs({
-        type: "checkbox",
-        "aria-label": labels.value.selectRow,
-        checked: isSelected(id),
-        onChange: () => toggle(id),
-      }),
-    headerCheckboxAttrs: () =>
-      toVueAttrs({
-        type: "checkbox",
-        "aria-label": labels.value.selectAll,
-        checked: headerState.value === "all",
-        indeterminate: headerState.value === "some",
-        onChange: toggleAll,
-      }),
+    rowCheckboxAttrs: (id) => ({
+      type: "checkbox",
+      "aria-label": labels.value.selectRow,
+      checked: isSelected(id),
+      onChange: () => toggle(id),
+    }),
+    headerCheckboxAttrs: () => ({
+      type: "checkbox",
+      "aria-label": labels.value.selectAll,
+      checked: headerState.value === "all",
+      indeterminate: headerState.value === "some",
+      onChange: toggleAll,
+    }),
   };
 }

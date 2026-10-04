@@ -3985,9 +3985,9 @@ DataModeProps`: the base carries every prop except the data mode, which is
 
 ## Experimental Vue binding and native kit
 
-`@adapttable/vue` and `@adapttable/vue-unstyled` are private `0.1.0` workspace
-packages requiring Vue `^3.5.0`; they are not published npm packages. The
-[Vue getting-started guide](./vue/getting-started.md) and
+`@adapttable/vue` and `@adapttable/vue-unstyled` are public packages prepared for an
+experimental `0.1.0` release, requiring Vue `^3.5.0`. They have not been published
+to npm. The [Vue getting-started guide](./vue/getting-started.md) and
 [Vue API reference](./vue/api.md) describe the implemented source, rendering,
 lifecycle and native-control surface. The React prop tables above do not define
 Vue's API, and exported Vue extension channels do not imply complete feature
@@ -4016,21 +4016,22 @@ parity, styled kits or a Vue AI integration.
 
 These runtime helpers come from `@adapttable/vue/adapter`.
 
-| Export                                                                 | Role                                                                                                                                                      |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DesktopTableChrome`, `MobileCardsChrome`                              | Structural Vue renderers taking a model, required control slots and optional class names.                                                                 |
-| `TableChromeSlots`, `SortButtonProps`, `SelectionCheckboxProps`        | Typed adapter-control contracts; missing controls throw rather than rendering a native fallback.                                                          |
-| `TableChromeClassNames`                                                | Semantic table, selection, group, action, resize and card class hooks.                                                                                    |
-| `useDesktopTableModel`, `useMobileCardsModel`                          | Computed desktop/card projections from a headless table.                                                                                                  |
-| `DesktopTableModel`, `MobileCardsModel`                                | Complete semantic attributes, rows, header/card layout and optional body-slot projections.                                                                |
-| `TableHeaderModel`, `TableRowModel`, `TableCellModel`, `TableBodySlot` | Header controls/context, row wiring, cell context/decorations and structural row/group/extra/padding variants.                                            |
-| `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                            | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                 |
-| `elementRef`, `composeElementRefs`                                     | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                        |
-| `requireScope(name)`                                                   | Reject resource ownership outside setup or an active effect scope.                                                                                        |
-| `useScopeActivity()`                                                   | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                           |
-| `useExternalStore(store)`                                              | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                        |
-| `FeatureLifecycle`, `useFeatureLifecycle`                              | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                |
-| `TableFeatureState`, `OwnedFeatureState`, `provideFeatureState`        | Table-local state, ownership-safe publication cleanup and descendant injection. `createFeatureState` constructs the registry; `useFeatureState` reads it. |
+| Export                                                                                                          | Role                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DesktopTableChrome`, `MobileCardsChrome`                                                                       | Structural Vue renderers taking a model, required control slots and optional class names.                                                                                                                     |
+| `TableChromeSlots`, `SortButtonProps`, `SelectionCheckboxProps`                                                 | Typed adapter-control contracts; missing controls throw rather than rendering a native fallback.                                                                                                              |
+| `SelectionCheckboxAttrs`, `SelectionCheckboxControl`, `selectionCheckboxControl`, `selectionCheckboxInputAttrs` | Typed checkbox state and a single toggle action, with safe DOM attributes for widgets that own their model-value event API. See the [Vue control contract](./vue/api.md#adapter-shell-and-structural-chrome). |
+| `TableChromeClassNames`                                                                                         | Semantic table, selection, group, action, resize and card class hooks.                                                                                                                                        |
+| `useDesktopTableModel`, `useMobileCardsModel`                                                                   | Computed desktop/card projections from a headless table.                                                                                                                                                      |
+| `DesktopTableModel`, `MobileCardsModel`                                                                         | Complete semantic attributes, rows, header/card layout and optional body-slot projections.                                                                                                                    |
+| `TableHeaderModel`, `TableRowModel`, `TableCellModel`, `TableBodySlot`                                          | Header controls/context, row wiring, cell context/decorations and structural row/group/extra/padding variants.                                                                                                |
+| `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                                                                     | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                                                                     |
+| `elementRef`, `composeElementRefs`                                                                              | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
+| `requireScope(name)`                                                                                            | Reject resource ownership outside setup or an active effect scope.                                                                                                                                            |
+| `useScopeActivity()`                                                                                            | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                                                                               |
+| `useExternalStore(store)`                                                                                       | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                                                                            |
+| `FeatureLifecycle`, `useFeatureLifecycle`                                                                       | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                                                                    |
+| `TableFeatureState`, `OwnedFeatureState`, `provideFeatureState`                                                 | Table-local state, ownership-safe publication cleanup and descendant injection. `createFeatureState` constructs the registry; `useFeatureState` reads it.                                                     |
 
 ### Vue feature composition and model channels
 

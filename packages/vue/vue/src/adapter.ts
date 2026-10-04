@@ -9,6 +9,7 @@ export * from "./index";
 export * from "./layout/modelChannels";
 export * from "./layout/tableChrome";
 export * from "./layout/tableModels";
+export * from "./selection/checkboxControl";
 export * from "./store";
 export * from "./useDataTableShell";
 export type { BodyCell, RowPairMeasurer } from "@adapttable/core/binding";
