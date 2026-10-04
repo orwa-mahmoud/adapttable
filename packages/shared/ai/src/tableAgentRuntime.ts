@@ -33,15 +33,15 @@ import {
   type ApprovalTransaction,
   settleDecisions,
 } from "./approvalTransaction";
-import type { ProposalResolver } from "./binding";
+import { contractFingerprint, type ProposalResolver } from "./binding";
 import { tableActionCapabilities } from "./capabilities/actions";
 import { capabilityDefinitionStamp } from "./capabilities/registry";
 import type { AgentContextInputs } from "./context";
+import { createLiveApplyCoordinator } from "./controlledApply";
 import { agentFiltersFromDefs } from "./filterCatalog";
 import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
 import {
   agentColumnsFromNeutral,
-  monotonicRevision,
   observationFromNeutral,
   readRowsFromNeutral,
   resolveRowFromNeutral,
@@ -50,7 +50,9 @@ import {
 } from "./liveTable";
 import { agentObservation } from "./observation";
 import { type AgentPagination, agentPagination } from "./pagination";
-import { createAgentSession } from "./session";
+import { viewRevisionStamp } from "./runtimeViewStamp";
+import { createAgentSessionInternal } from "./session";
+export { viewRevisionStamp } from "./runtimeViewStamp";
 import type {
   AgentApply,
   AgentCapabilityDefinition,
@@ -163,96 +165,6 @@ function cellRecord(
     cells[column.id] = record[column.id];
   }
   return cells;
-}
-
-/**
- * `JSON.stringify` that never throws on host rows: a BigInt is written as its
- * digits with an `n`, and a value that contains itself is written once, not
- * followed back in.
- */
-function stampJson(value: unknown): string {
-  // The chain of objects from the root to the one being written. A value
-  // already on it is a cycle; one seen elsewhere is only shared, and is written.
-  const ancestors: unknown[] = [];
-  return JSON.stringify(
-    value,
-    function replace(this: unknown, _key: string, next: unknown): unknown {
-      if (typeof next === "bigint") return `${next.toString()}n`;
-      if (typeof next !== "object" || next === null) return next;
-      while (ancestors.length > 0 && ancestors.at(-1) !== this) {
-        ancestors.pop();
-      }
-      if (ancestors.includes(next)) return undefined;
-      ancestors.push(next);
-      return next;
-    }
-  );
-}
-
-/**
- * A string that changes whenever the runtime view an agent reads changes.
- *
- * A view carrying a neutral table combines its engine revisions with the
- * layout, pinning and selection state owned outside that engine. Other views
- * include row identities and payloads, query, grouping and aggregation state.
- * Set-like fields use deterministic ordering without changing host collections.
- * BigInt and cyclic host rows can be stamped without throwing.
- *
- * @public
- */
-export function viewRevisionStamp(view: TableRuntimeView | undefined): string {
-  const table = view?.neutralTable;
-  const overlays = runtimeOverlays(view);
-  if (table) {
-    const token = monotonicRevision(table.revisions, undefined).token;
-    const stamp = stampJson(overlays);
-    return stamp === "{}" ? token : `${token}:${stamp}`;
-  }
-  const rows = view?.rows ?? [];
-  const getRowId = view?.getRowId;
-  const query = view?.query;
-  return stampJson({
-    ids: rows.map((row) => (getRowId ? getRowId(row) : null)),
-    payloads: rows,
-    page: query?.page ?? 1,
-    limit: query?.limit ?? 10,
-    search: query?.search ?? "",
-    sortBy: query?.sortBy,
-    sortDir: query?.sortDir,
-    filters: query?.extra,
-    groupBy: view?.groupingState?.groupBy,
-    aggregateOverrides: view?.groupingState?.aggregateOverrides,
-    ...overlays,
-  });
-}
-
-function compareIds(left: string, right: string): number {
-  if (left === right) return 0;
-  return left < right ? -1 : 1;
-}
-
-function runtimeOverlays(view: TableRuntimeView | undefined) {
-  const columns = view?.pinning?.columns;
-  const selection = view?.selection;
-  return {
-    pinnedColumns: columns
-      ? Object.keys(columns)
-          .sort(compareIds)
-          .map((key) => [key, columns[key]])
-      : undefined,
-    pinnedRows: view?.pinning?.rows,
-    hiddenColumns: view?.columnLayout
-      ? [...new Set(view.columnLayout.hidden)].sort(compareIds)
-      : undefined,
-    columnOrder: view?.columnLayout?.keys,
-    selection: selection
-      ? {
-          ids: [...selection.selectedIds].sort(compareIds),
-          allMatching: selection.allMatching ?? false,
-          acrossPages: selection.acrossPages ?? false,
-        }
-      : undefined,
-  };
 }
 
 function liveReadRows(
@@ -1057,6 +969,17 @@ export interface LiveSessionInputs {
    * changes before returning.
    */
   readonly flush: (run: () => void) => void;
+  /**
+   * Optional delivery fence for controlled layout and explicit selection.
+   * Invoke `capture` once after model delivery, passing any synchronous binding
+   * reconciliation it needs. The capture checks cancellation before reconciling
+   * and validates authoritative state before the hook completes. A delayed host
+   * write is not confirmed merely because this hook resolved.
+   * Omit for a binding whose setters commit synchronously.
+   */
+  readonly settleApply?: (
+    capture: (reconcile?: () => void) => void
+  ) => void | Promise<void>;
 }
 
 /** Wait for a framework commit without retaining a cancelled call. */
@@ -1156,18 +1079,36 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
   let observedTable: TableRuntimeView["neutralTable"];
   let sourceEpoch = 0;
   let hasObservedView = false;
-  const observe = () => {
-    const options = optionsRef.current;
-    if (options.observe) return options.observe();
-    const runtimeView = runtimeRef.current.view();
-    const table = runtimeView?.neutralTable;
-    // Revisions belong to one engine. A replacement can start at exactly
-    // the same tuple, but work admitted against the old source is stale.
-    // Remember absence too, so engine -> server -> engine is never a reset.
+  let observedRevision: number | undefined;
+  let observationEpoch = 0;
+  const trackedObservation = (
+    observation: AgentObservation
+  ): AgentObservation => {
+    if (
+      observedRevision !== undefined &&
+      observedRevision !== observation.viewRevision
+    )
+      observationEpoch += 1;
+    observedRevision = observation.viewRevision;
+    return observation;
+  };
+  const trackSource = (view: TableRuntimeView | undefined): void => {
+    const table = view?.neutralTable;
     if (table !== observedTable) {
       observedTable = table;
       sourceEpoch += 1;
     }
+  };
+  const observe = () => {
+    const options = optionsRef.current;
+    if (options.observe) {
+      // Controlled delivery still belongs to one runtime source, while the
+      // host keeps ownership of the observation object and revision numbering.
+      if (inputs.settleApply) trackSource(runtimeRef.current.view());
+      return trackedObservation(options.observe());
+    }
+    const runtimeView = runtimeRef.current.view();
+    trackSource(runtimeView);
     // Bindings can observe before their first view is published. That is
     // bootstrap, not a previous source: reserve revision 1 for the first
     // real view. Once published, absence is a transition like any other.
@@ -1177,11 +1118,8 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
           `${String(sourceEpoch)}:${viewRevisionStamp(runtimeView)}`
         )
       : revisionCounter.current();
-    return observationFromRuntime(
-      options,
-      runtimeRef.current,
-      viewRevision,
-      apply
+    return trackedObservation(
+      observationFromRuntime(options, runtimeRef.current, viewRevision, apply)
     );
   };
   const onApprove = (subject: ApprovalSubject, signal?: AbortSignal) => {
@@ -1226,41 +1164,66 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
       };
     }
   );
-  const inner = createAgentSession({
-    observe,
-    apply,
-    onApprove,
-    // Read at call time, like everything else here. The session is built once
-    // and a host may wire where progress goes after that, so what a capability
-    // reports is delivered through the reference rather than through whatever
-    // was configured when the session was made.
-    onProgress: (report) => {
-      reportProgress.current(report);
+  const settlement = inputs.settleApply;
+  const coordinator = settlement
+    ? createLiveApplyCoordinator({
+        view: () => runtimeRef.current.view(),
+        observe,
+        contract: () => contractFingerprint(inner.manifest(), inner.catalog()),
+        sourceEpoch: () => sourceEpoch,
+        revisionEpoch: () => observationEpoch,
+        isCurrent: () => inputs.isCurrent?.() !== false,
+        retirementSignal: inputs.retirementSignal,
+        bindingOwned: (method) =>
+          typeof optionsRef.current.apply?.[method] !== "function",
+        invoke: (method, args) => {
+          const latest = currentApply(optionsRef.current, runtimeRef.current);
+          const fn = asCallable(Reflect.get(latest, method));
+          if (!fn) throw new Error(`${method} is not wired`);
+          fn(...args);
+        },
+        flush,
+        settle: settlement,
+      })
+    : undefined;
+  const inner = createAgentSessionInternal(
+    {
+      observe,
+      apply,
+      onApprove,
+      // Read at call time, like everything else here. The session is built once
+      // and a host may wire where progress goes after that, so what a capability
+      // reports is delivered through the reference rather than through whatever
+      // was configured when the session was made.
+      onProgress: (report) => {
+        reportProgress.current(report);
+      },
+      // The host's own definitions, then one per row and bulk action the table
+      // composed. The action set is part of the registry key, so a table that
+      // gains or loses an action gets a session that offers exactly those.
+      capabilities: [
+        ...customCapabilities,
+        ...tableActionCapabilities(runtimeRef.current.view()?.actions, {
+          actions: () => runtimeRef.current.view()?.actions,
+          rowFor: (rowKey) => {
+            const view = runtimeRef.current.view();
+            return view?.rows.find((row) => view.getRowId(row) === rowKey);
+          },
+          selectedIds: () => {
+            const selection = runtimeRef.current.view()?.selection;
+            return selection ? [...selection.selectedIds] : undefined;
+          },
+        }),
+      ],
+      ...(optionsRef.current.capabilityApproval
+        ? { capabilityApproval: optionsRef.current.capabilityApproval }
+        : {}),
+      ...(optionsRef.current.excludeCapabilities
+        ? { excludeCapabilities: optionsRef.current.excludeCapabilities }
+        : {}),
     },
-    // The host's own definitions, then one per row and bulk action the table
-    // composed. The action set is part of the registry key, so a table that
-    // gains or loses an action gets a session that offers exactly those.
-    capabilities: [
-      ...customCapabilities,
-      ...tableActionCapabilities(runtimeRef.current.view()?.actions, {
-        actions: () => runtimeRef.current.view()?.actions,
-        rowFor: (rowKey) => {
-          const view = runtimeRef.current.view();
-          return view?.rows.find((row) => view.getRowId(row) === rowKey);
-        },
-        selectedIds: () => {
-          const selection = runtimeRef.current.view()?.selection;
-          return selection ? [...selection.selectedIds] : undefined;
-        },
-      }),
-    ],
-    ...(optionsRef.current.capabilityApproval
-      ? { capabilityApproval: optionsRef.current.capabilityApproval }
-      : {}),
-    ...(optionsRef.current.excludeCapabilities
-      ? { excludeCapabilities: optionsRef.current.excludeCapabilities }
-      : {}),
-  });
+    coordinator
+  );
   return {
     catalog: () => inner.catalog(),
     describe: (key: string) => inner.describe(key),

@@ -501,8 +501,29 @@ capability really can stage. Among the built-ins only `edit.cells` stages.
 `AgentCapabilityContext` is what `execute` receives: the `observation` it was
 authorized against, the host's `apply` callbacks, a live `observe()`, the bound
 `onApprove`, the request's `signal` and `throwIfCancelled()`, an optional
-`reportProgress`, and — for a governed write — the approved `plan`, the
-resolved `commit` mode and, after a per-row decision, `approvedIndexes`.
+`reportProgress`, an optional `whenApplied()`, and — for a governed write —
+the approved `plan`, the resolved `commit` mode and, after a per-row decision,
+`approvedIndexes`.
+
+A binding with controlled model delivery supplies `whenApplied()` so a custom
+handler can wait for its earlier apply requests before reading the delivered
+state or invoking an operation that depends on it. For a capability that shows
+a known `notes` column:
+
+```ts
+async function showNotes(context: AgentCapabilityContext) {
+  context.apply.hideColumn?.("notes", false);
+  await context.whenApplied?.();
+  return { hiddenColumns: context.observe().hiddenColumns ?? [] };
+}
+```
+
+The apply setters remain void-compatible, and `whenApplied` is optional for
+bindings that commit synchronously. The session waits for queued controlled
+requests before completing `execute`, even when a handler returns earlier.
+Cancellation or an unconfirmed request rejects the wait and prevents a success
+receipt for that call. Confirmation describes the delivered table model;
+completion of separate persistence work still belongs to the host.
 
 ### Wiring the review
 

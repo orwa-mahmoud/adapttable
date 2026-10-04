@@ -2703,6 +2703,21 @@ capability can stage rather than apply at once. `JsonSchema` and
 `ExecuteError`. `AgentColumnAuthoring` is the column-level authoring a table
 author supplies.
 
+**Controlled model delivery.** When a binding supplies `settleApply`, the
+optional `AgentCapabilityContext.whenApplied()` waits for this call's earlier
+apply requests. Use `await context.whenApplied?.()` before an intermediate
+`observe()` or an operation that must follow a controlled update. `AgentApply`
+setters keep their void-compatible signatures; the session also waits for
+queued requests before returning the final execute result.
+
+A confirmed change reports the captured revision in both the execute envelope
+and the built-in result. A genuine no-op keeps its revision. Use the returned
+revision for the next call; a custom observation may use non-unit increments.
+An unconfirmed target returns `apply-not-confirmed`, and an intervening
+source or table change rejects the call. Once an apply callback has run, its
+idempotency key cannot invoke it again, including after cancellation or replay
+cache eviction.
+
 **Discovery.** `discover(request, source, limit?)` answers a `DiscoveryRequest` with a
 `DiscoveryResult` drawn from a `DiscoverySource`, so a model asks once instead
 of being handed everything. `createDiscoveryCache` memoizes it as a
@@ -2805,6 +2820,21 @@ layout, row and column pinning, and selection even when the view carries a
 neutral table. Set-like selection and hidden-column values use a stable order.
 Runtime selection may expose `allMatching` and `acrossPages`; these describe
 the current scope and do not authorize additional row access.
+
+`flush(run)` invokes a binding-owned setter and reconciles synchronous state.
+For controlled model updates delivered later, optional `settleApply(capture)`
+returns `void` or `Promise<void>`. Call `capture(reconcile?)` once after model
+delivery, optionally passing synchronous reconciliation. Return the delivery
+promise when it is asynchronous, so the hook completes after capture. A late
+capture after cancellation or session retirement does not invoke reconciliation.
+The capture verifies the authoritative model; resolving the hook alone does
+not confirm delayed persistence.
+
+This delivery path covers binding-owned `hideColumn`, `setColumnOrder`,
+`moveColumn`, `pinColumn` and explicit `setSelection` requests. Explicit host
+`apply` overrides retain their return-value and promise acknowledgment
+semantics. Bindings whose setters commit synchronously can omit `settleApply`.
+
 `viewInputsFromRuntime` reads the same view in the shape the context builder
 takes, and `sampledColumns` names the columns whose author asked for live
 values. For approvals, `readerResolver` is the `ProposalResolver` over the
@@ -2820,8 +2850,11 @@ waved through, republishes a changed manifest, announces approvals to the
 bridge, samples the columns that asked, and offers the table to a browser agent.
 `TableAgentControllerInputs` carries the binding's live
 `TableAgentControllerOptions` (the runtime options plus `bridge` and `webmcp`,
-narrowed by `TableAgentWebMcpOptions`), its runtime and its commit hooks. The
-`TableAgentController` it returns has `subscribe` and `getState` — a
+narrowed by `TableAgentWebMcpOptions`), its runtime and its commit hooks.
+Its optional `settleApply` has the same delivery contract as `LiveSessionInputs`;
+the controller forwards it to the live session. It complements
+`flushAdmission`, which delivers pending state before a call is admitted.
+The `TableAgentController` it returns has `subscribe` and `getState` — a
 `TableAgentState` holding the session, the open approval, the always-allow
 list, progress and a `TableAgentViewReader` — plus `sync`, called after each
 commit, and `disconnect`, called when the table goes away. `tableAgent` in

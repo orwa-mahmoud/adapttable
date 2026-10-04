@@ -255,6 +255,17 @@ with every column id exactly once. `view.pinRow` takes `{ side }` — `"top"`,
 the write-approval path. See
 [adaptive capabilities](./agent-capabilities.md#pinning).
 
+A binding with controlled model delivery confirms column visibility, column
+order, column pinning and explicit selection against the delivered state.
+Accepted changes report the captured revision; genuine no-ops retain the
+existing revision. The execute envelope and built-in result agree on that
+revision. Unconfirmed requests return a refusal. `apply-not-confirmed`
+identifies a requested target the host has not confirmed; intervening changes
+to other table state or the source also reject the call. Resolving the delivery
+hook does not confirm separate backend persistence. An invoked callback keeps its
+idempotency key across cancellation and result-cache eviction, so replay
+cannot issue the same request again.
+
 `edit.cells` takes `{ edits: Array<{ column, value, rowKey?, position?, scope? }> }`
 — each edit needs `rowKey` or a 1-based `position`. Positions resolve
 before write. `rows.delete` addresses rows the same way:

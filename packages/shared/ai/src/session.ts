@@ -14,6 +14,11 @@ import {
   createCapabilityRegistry,
   shortForm,
 } from "./capabilities/registry";
+import {
+  type ApplyCallLedger,
+  ControlledApplyError,
+  type LiveApplyCoordinator,
+} from "./controlledApply";
 import { errorMessage } from "./errorMessage";
 import { extrasFromAgentFilters, formatFilterCatalog } from "./filterCatalog";
 import { summaryOf } from "./guides";
@@ -232,6 +237,7 @@ class ReplayStore {
   readonly #capacity: number;
   readonly #records = new Map<string, ReplayRecord>();
   readonly #mutations = new Map<string, string>();
+  readonly #attempted = new Set<string>();
 
   constructor(capacity: number) {
     this.#capacity = Math.max(1, Math.floor(capacity));
@@ -249,6 +255,15 @@ class ReplayStore {
   retiredMutation(key: string): string | undefined {
     if (this.#records.has(key)) return undefined;
     return this.#mutations.get(key);
+  }
+
+  reserve(key: string, fingerprint: string): void {
+    this.#mutations.set(key, fingerprint);
+    this.#attempted.add(key);
+  }
+
+  wasAttempted(key: string): boolean {
+    return this.#attempted.has(key);
   }
 
   set(key: string, record: ReplayRecord): void {
@@ -314,6 +329,14 @@ function boundedInt(value: unknown, fallback: number): number {
  */
 export function createAgentSession(
   options: CreateAgentSessionOptions
+): AgentSession {
+  return createAgentSessionInternal(options);
+}
+
+/** Package-internal live-binding extension; the public constructor stays unchanged. */
+export function createAgentSessionInternal(
+  options: CreateAgentSessionOptions,
+  coordinator?: LiveApplyCoordinator
 ): AgentSession {
   const replay = new ReplayStore(
     options.replayCacheSize ?? DEFAULT_REPLAY_CACHE_SIZE
@@ -423,17 +446,17 @@ export function createAgentSession(
     signal: AbortSignal | undefined,
     call: CallState
   ): Promise<unknown> => {
-    const { apply, progress } = call;
+    const { apply } = call;
     const approve = bindApprove(options.onApprove, signal);
     const throwIfCancelled = cancellationGuard(signal);
     const baseContext: AgentCapabilityContext = {
       observation: entry,
       apply,
-      observe: options.observe,
+      observe: call.observe,
       onApprove: approve,
       signal,
       throwIfCancelled,
-      ...(progress ? { reportProgress: progress } : {}),
+      ...executionCallbacks(call),
     };
     // The reserved execution is starting for real.
     throwIfCancelled();
@@ -591,9 +614,15 @@ export function createAgentSession(
     // host handler is handed it — so the revision read as one of those calls
     // settles is this action's own progress.
     let own: number | undefined;
-    const tracked = traceApply(options.apply, () => {
-      own = options.observe().viewRevision;
-    });
+    let ledger: ApplyCallLedger | undefined;
+    const tracked = traceApply(
+      options.apply,
+      () => {
+        own = options.observe().viewRevision;
+        ledger?.observeLegacy(own);
+      },
+      () => ledger
+    );
 
     // Named where the call’s own identity is, so a surface watching two
     // capabilities at once can tell which one moved.
@@ -603,14 +632,25 @@ export function createAgentSession(
       idempotencyKey
     );
 
-    const call: CallState = { invokedWrite: false, apply: tracked, progress };
+    const call: CallState = {
+      invokedWrite: false,
+      apply: tracked,
+      progress,
+      observe: () => {
+        ledger?.assertActive();
+        return options.observe();
+      },
+    };
 
     const record = (result: ExecuteResult): ExecuteResult => {
       replay.set(idempotencyKey, {
         capabilityKey: key,
-        fingerprint: executeFingerprint(key, args),
+        fingerprint: executeFingerprint(
+          key,
+          ledger?.invoked || ledger?.used ? rawArgs : args
+        ),
         args,
-        mutation: call.invokedWrite,
+        mutation: call.invokedWrite || ledger?.invoked === true,
         result,
       });
       return result;
@@ -629,8 +669,44 @@ export function createAgentSession(
     const resolved = preflight(key, args, expectedRevision);
     if ("code" in resolved) return fail(resolved.code, resolved.message);
 
+    const controlledFailure = (error: ControlledApplyError): ExecuteResult => {
+      const result: ExecuteResult = {
+        ok: false,
+        revision: ledger?.revision ?? resolved.observation.viewRevision,
+        idempotencyKey,
+        error: { code: error.code, message: error.message },
+      };
+      return ledger?.invoked || call.invokedWrite ? record(result) : result;
+    };
     try {
-      const payload = await runCapability(
+      ledger = coordinator?.beginCall({
+        admitted: resolved.observation,
+        signal,
+        guard: (revision) => {
+          try {
+            revalidate(
+              key,
+              { ...resolved.observation, viewRevision: revision },
+              isGoverned(resolved.definition)
+            );
+          } catch (error) {
+            if (error instanceof ApplyError)
+              throw new ControlledApplyError(
+                error.code,
+                error.message,
+                revision
+              );
+            throw error;
+          }
+        },
+        reserveEffect: () =>
+          replay.reserve(idempotencyKey, executeFingerprint(key, rawArgs)),
+        accept: (receipt) => {
+          own = receipt.producedRevision;
+        },
+      });
+      attachCallLedger(call, ledger);
+      const running = runCapability(
         resolved.definition,
         key,
         args,
@@ -638,6 +714,9 @@ export function createAgentSession(
         signal,
         call
       );
+      const initialPayload = ledger
+        ? await settleCapabilityRun(running, ledger)
+        : await running;
       // What this action reached, never where the table happens to be. An
       // action that applied nothing reports the revision it was admitted at,
       // and one that applied reports what its own last call settled at, so a
@@ -651,6 +730,13 @@ export function createAgentSession(
       // call is in flight, and only the host knows which revision its own
       // write produced.
       const produced = own ?? resolved.observation.viewRevision;
+      const payload = controlledPayload(
+        key,
+        initialPayload,
+        produced,
+        ledger,
+        options.capabilities
+      );
       const unfinished = unfinishedWrite(payload);
       if (unfinished) {
         return {
@@ -671,9 +757,12 @@ export function createAgentSession(
         result: payload,
       });
     } catch (error) {
+      const controlled = controlledError(error, ledger);
+      if (controlled) return controlledFailure(controlled);
       if (error instanceof ApplyError) return fail(error.code, error.message);
       return fail("apply-failed", errorMessage(error));
     } finally {
+      ledger?.close();
       closeProgress();
     }
   };
@@ -714,6 +803,13 @@ export function createAgentSession(
       );
     }
 
+    const running = inflight.get(idempotencyKey);
+    if (running) {
+      if (running.fingerprint !== fingerprint)
+        return Promise.resolve(mismatch());
+      return running.promise;
+    }
+
     // An accepted mutation keeps its identity after its result is evicted.
     const retired = replay.retiredMutation(idempotencyKey);
     if (retired !== undefined) {
@@ -724,17 +820,11 @@ export function createAgentSession(
         idempotencyKey,
         error: {
           code: "replay-expired",
-          message:
-            "this write was already accepted; its result is no longer cached and it will not run again",
+          message: replay.wasAttempted(idempotencyKey)
+            ? "this mutation was already attempted; its result is no longer cached and it will not run again"
+            : "this write was already accepted; its result is no longer cached and it will not run again",
         },
       });
-    }
-
-    const running = inflight.get(idempotencyKey);
-    if (running) {
-      if (running.fingerprint !== fingerprint)
-        return Promise.resolve(mismatch());
-      return running.promise;
     }
 
     // Reserve the key before any handler can run, so a synchronous re-entry
@@ -885,6 +975,75 @@ function isThenable(value: unknown): value is PromiseLike<unknown> {
   return typeof (value as { then?: unknown }).then === "function";
 }
 
+function executionCallbacks(
+  call: CallState
+): Pick<AgentCapabilityContext, "whenApplied" | "reportProgress"> {
+  return {
+    ...(call.whenApplied ? { whenApplied: call.whenApplied } : {}),
+    ...(call.progress ? { reportProgress: call.progress } : {}),
+  };
+}
+function attachCallLedger(
+  call: CallState,
+  ledger: ApplyCallLedger | undefined
+): void {
+  if (ledger) call.whenApplied = () => ledger.whenApplied();
+}
+async function settleCapabilityRun(
+  running: Promise<unknown>,
+  ledger: ApplyCallLedger | undefined
+): Promise<unknown> {
+  if (!ledger) return running;
+  const payload = await ledger.race(running);
+  ledger.seal();
+  const waiting = ledger.drain();
+  if (waiting) await waiting;
+  return payload;
+}
+function controlledError(
+  error: unknown,
+  ledger: ApplyCallLedger | undefined
+): ControlledApplyError | undefined {
+  if (error instanceof ControlledApplyError) return error;
+  if (!ledger?.used && !ledger?.invoked) return undefined;
+  return new ControlledApplyError(
+    error instanceof ApplyError ? error.code : "apply-failed",
+    errorMessage(error),
+    ledger.revision
+  );
+}
+function controlledPayload(
+  key: string,
+  payload: unknown,
+  revision: number,
+  ledger: ApplyCallLedger | undefined,
+  capabilities: readonly AgentCapabilityDefinition[] | undefined
+): unknown {
+  if (
+    !ledger?.used ||
+    capabilities?.some((definition) => definition.key === key)
+  )
+    return payload;
+  return settledViewPayload(key, payload, revision);
+}
+
+/** Only these built-in payloads describe the controlled view request itself. */
+function settledViewPayload(
+  key: string,
+  payload: unknown,
+  revision: number
+): unknown {
+  if (
+    key !== "view.pinColumn" &&
+    key !== "view.hideColumn" &&
+    key !== "view.setColumnOrder" &&
+    key !== "view.setSelection"
+  )
+    return payload;
+  if (!payload || typeof payload !== "object") return payload;
+  return { ...payload, revision };
+}
+
 /**
  * `apply`, reporting where each changing call leaves the table.
  *
@@ -896,15 +1055,37 @@ function isThenable(value: unknown): value is PromiseLike<unknown> {
  * A proxy rather than a copy: a host may hand over a class instance, whose
  * methods a spread would drop.
  */
-function traceApply(apply: AgentApply, settled: () => void): AgentApply {
+function traceApply(
+  apply: AgentApply,
+  settled: () => void,
+  currentLedger: () => ApplyCallLedger | undefined
+): AgentApply {
   return new Proxy(apply, {
     get(target, property) {
+      currentLedger()?.assertActive();
       const member: unknown = Reflect.get(target, property);
-      if (typeof member !== "function" || READING_APPLY.has(property)) {
-        return member;
+      if (typeof member !== "function") return member;
+      if (READING_APPLY.has(property)) {
+        if (!currentLedger()) return member;
+        return (...args: readonly unknown[]) => {
+          currentLedger()?.assertActive();
+          return Reflect.apply(
+            member as (...args: readonly unknown[]) => unknown,
+            target,
+            args
+          );
+        };
       }
       const call = member as (...args: readonly unknown[]) => unknown;
       return (...args: readonly unknown[]): unknown => {
+        const ledger = currentLedger();
+        const ticket = ledger?.submit(property, args);
+        if (ticket) return ticket.completion;
+        if (ledger)
+          return ledger.trackLegacy(
+            () => Reflect.apply(call, target, args),
+            settled
+          );
         const outcome = Reflect.apply(call, target, args);
         if (!isThenable(outcome)) {
           settled();
@@ -937,12 +1118,15 @@ function callProgress(
 } {
   if (!report) return { progress: undefined, close: () => undefined };
   let reported = false;
+  let closed = false;
   return {
     progress: (given) => {
+      if (closed) return;
       reported = true;
       report({ ...given, capability, idempotencyKey });
     },
     close: () => {
+      closed = true;
       if (!reported) return;
       reported = false;
       report(null);
@@ -959,6 +1143,8 @@ function callProgress(
  * is a repeated mutation or a harmless re-read.
  */
 interface CallState {
+  whenApplied?: () => Promise<void>;
+  readonly observe: () => AgentObservation;
   /** Whether a host write callback has been invoked for this call. */
   invokedWrite: boolean;
   /** `apply`, reporting where each changing call leaves the table. */

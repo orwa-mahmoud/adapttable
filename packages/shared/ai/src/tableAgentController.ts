@@ -124,6 +124,15 @@ export interface TableAgentControllerInputs {
    */
   readonly flushAdmission: () => void | Promise<void>;
   /**
+   * Optional controlled-model delivery fence. Invoke `capture` once after
+   * delivery, with synchronous binding reconciliation when needed. The hook
+   * completes after capture; delayed persistence is not model acceptance.
+   * Omit for a binding whose setters commit synchronously.
+   */
+  readonly settleApply?: (
+    capture: (reconcile?: () => void) => void
+  ) => void | Promise<void>;
+  /**
    * Runs one view mutation and commits the state it changes before returning.
    */
   readonly flush: (run: () => void) => void;
@@ -321,6 +330,7 @@ export function createTableAgentController(
       runtime: runtimeRef,
       revisions,
       flushAdmission: flushAdmissionRef,
+      settleApply: inputs.settleApply,
       retirementSignal: retirement.signal,
       isCurrent: () =>
         connected &&

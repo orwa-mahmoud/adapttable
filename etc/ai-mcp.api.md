@@ -80,6 +80,7 @@ export interface AgentCapabilityContext {
     readonly reportProgress?: (progress: CapabilityProgress) => void;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
+    readonly whenApplied?: () => Promise<void>;
 }
 
 // @public

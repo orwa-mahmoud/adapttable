@@ -100,6 +100,7 @@ export interface AgentCapabilityContext {
     readonly reportProgress?: (progress: CapabilityProgress) => void;
     readonly signal?: AbortSignal;
     readonly throwIfCancelled: () => void;
+    readonly whenApplied?: () => Promise<void>;
 }
 
 // @public
@@ -1116,6 +1117,7 @@ export interface LiveSessionInputs {
     readonly runtime: {
         readonly current: TableRuntime;
     };
+    readonly settleApply?: (capture: (reconcile?: () => void) => void) => void | Promise<void>;
     readonly waitForChrome: {
         readonly current: (subject: ApprovalSubject, signal?: AbortSignal) => Promise<ApprovalResult>;
     };
@@ -1542,6 +1544,7 @@ export interface TableAgentControllerInputs {
     readonly runtime: {
         readonly current: TableRuntime;
     };
+    readonly settleApply?: (capture: (reconcile?: () => void) => void) => void | Promise<void>;
 }
 
 // @public
