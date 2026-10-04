@@ -777,7 +777,7 @@ export class AdaptSavedViewsPanel {
 // @public
 export class AdaptTableRegion {
     readonly panel: InputSignal<TemplateRef<unknown> | undefined>;
-    readonly side: InputSignal<"end" | "start">;
+    readonly side: InputSignal<"start" | "end">;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTableRegion, "adapt-table-region", never, {
         "panel": {
