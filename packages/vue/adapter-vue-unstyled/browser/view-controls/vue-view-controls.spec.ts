@@ -51,11 +51,25 @@ test("Vue native fullscreen keeps overlays visible and follows Escape", async ({
       )
     )
     .toBe(true);
-  await table.locator('[data-adapttable-part="views-button"]').click();
+  const trigger = table.locator('[data-adapttable-part="views-button"]');
+  const panel = page.locator('[data-adapttable-part="views-panel"]');
+  await trigger.click();
+  await expect(panel).toBeVisible();
   await expect(
-    page.locator('[data-adapttable-part="views-panel"]')
-  ).toBeVisible();
+    panel.locator('[data-adapttable-part="views-input"]')
+  ).toBeFocused();
   await page.keyboard.press("Escape");
+  // Escape dismisses the owned overlay and restores focus before the next key.
+  await expect(panel).toBeHidden();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expect(trigger).toBeFocused();
+  await expect
+    .poll(() =>
+      table.evaluate(
+        (element) => element.ownerDocument.fullscreenElement === element
+      )
+    )
+    .toBe(true);
   await page.keyboard.press("Escape");
   await expect
     .poll(() =>
