@@ -92,6 +92,11 @@ import {
   shellKits,
 } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
+import {
+  vueBindingSources,
+  vueForwardsAttributeApi,
+  vueRenderedParts,
+} from "./vue-binding-structure.mjs";
 
 /**
  * The kit each private kit is measured against while it is built: every part
@@ -141,6 +146,8 @@ const CONTRACT = [
  * `row` has two such routes in React. A kit that lays out its own body spreads
  * `getRowProps` directly; a kit thinned onto the shared desktop assembly
  * receives the same props already merged, through `createDesktopRow`.
+ * Vue renders its imported Chrome with complete model attrs and calls the
+ * neutral `rowAttributes` API through its binding; both sides are checked.
  * Angular assembles each body entry from `table.rowAttrs` (or the grid's
  * preserving wrapper), then binds that record whole with `adaptAttrs` on its
  * `<tr>`. A framework with no entry has no such route, and its kits name every
@@ -149,6 +156,7 @@ const CONTRACT = [
 const CORE_GETTER_PARTS = {
   react: { row: ["getRowProps", "createDesktopRow"] },
   angular: { row: ["rowAttrs"] },
+  vue: { row: ["rowAttributes"] },
 };
 
 /**
@@ -798,7 +806,13 @@ const kitFiles = (kit, root) =>
  * templates.
  */
 function partsOf(kit, root) {
-  return namesIn(kitFiles(kit, root), KIT_PART_PATTERNS);
+  const files = kitFiles(kit, root);
+  const found = namesIn(files, KIT_PART_PATTERNS);
+  if (kit.framework === "vue") {
+    for (const part of vueRenderedParts(vueBindingSources(files, root)))
+      found.add(part);
+  }
+  return found;
 }
 
 /**
@@ -862,6 +876,10 @@ function chromeByFramework(frameworks, root) {
 
 /** Whether a kit's files call one of its binding's prop-getters by name. */
 function callsCoreGetter(kit, getter, root) {
+  if (kit.framework === "vue") {
+    const sources = vueBindingSources(kitFiles(kit, root), root);
+    return vueForwardsAttributeApi(sources, "tr", getter);
+  }
   // Angular also uses `rowAttrs` for the assembled record and for reorder
   // state. Only the table/grid call carries the canonical row part.
   const call = new RegExp(
