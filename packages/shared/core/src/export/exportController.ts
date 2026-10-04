@@ -127,7 +127,10 @@ export interface ExportController {
   /**
    * Bind the controller to a mounted button. Returns the teardown a binding
    * runs on unmount, which abandons the run in flight: its signal aborts and
-   * its settlement is ignored. The controller stays usable after it.
+   * its settlement is ignored. A reconnect reads cancelled for an aborted
+   * cooperative job or idle for non-cancelable work; teardown itself does
+   * not notify listeners or undo admitted host side effects. The controller
+   * stays usable after it.
    */
   readonly connect: () => () => void;
   /**
@@ -280,14 +283,14 @@ export function createExportController(
     try {
       result = handler(abort ? controlsFor(runId, abort) : undefined);
     } catch (error) {
-      fail(error, serverBuilt);
+      if (activeRun === runId) fail(error, serverBuilt);
       if (!serverBuilt) throw error;
       return;
     }
     // The browser already has the file: synchronous work is finished the
     // moment it returns.
     if (!isPromiseLike(result)) {
-      succeed(result);
+      if (activeRun === runId) succeed(result);
       return;
     }
     // Both outcomes release the button — a rejected export must not leave it
@@ -323,6 +326,13 @@ export function createExportController(
         activeRun += 1;
         const abandoned = inFlight;
         inFlight = null;
+        if (abandoned !== null) {
+          snapshot = {
+            ...snapshot,
+            ...CLEARED,
+            status: abandoned instanceof AbortController ? "cancelled" : "idle",
+          };
+        }
         if (abandoned instanceof AbortController) abandoned.abort();
       };
     },
@@ -341,8 +351,8 @@ export function createExportController(
       batch(() => {
         activeRun += 1;
         inFlight = null;
-        abandoned.abort();
         write({ ...CLEARED, status: "cancelled" });
+        abandoned.abort();
       });
     },
     dismiss() {

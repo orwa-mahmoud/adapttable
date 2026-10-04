@@ -474,6 +474,7 @@ describe("createExportController", () => {
 
       teardown();
       expect(signal?.aborted).toBe(true);
+      expect(controller.getSnapshot().status).toBe("cancelled");
       expect(listener).not.toHaveBeenCalled();
       job.resolve({ url: "/exports/orphan.csv" });
       await settle();
@@ -491,6 +492,7 @@ describe("createExportController", () => {
       const teardown = controller.connect();
       controller.start();
       teardown();
+      expect(controller.getSnapshot().status).toBe("idle");
       job.reject(new Error("too late"));
       await settle();
       expect(warn).not.toHaveBeenCalled();
@@ -661,4 +663,71 @@ describe("resolveExportDisabledReason", () => {
       )
     ).toBe("Une page à la fois");
   });
+});
+
+describe("synchronous export reentrancy", () => {
+  it("keeps the newer run started inside an explicit cancellation listener", () => {
+    let signal: AbortSignal | undefined;
+    const controller = createExportController({
+      serverBuilt: true,
+      handler: (controls) => {
+        signal = controls?.signal;
+        return new Promise<ExportAllResult>(() => undefined);
+      },
+    });
+    controller.start();
+    signal?.addEventListener("abort", () => controller.start());
+    controller.cancel();
+    expect(controller.getSnapshot()).toMatchObject({
+      status: "busy",
+      run: 2,
+      error: "",
+    });
+  });
+  it.each([true, false])(
+    "drops a synchronous result returned after teardown, cooperative=%s",
+    (serverBuilt) => {
+      let teardown: () => void = () => undefined;
+      const controller = createExportController({
+        serverBuilt,
+        handler: () => {
+          teardown();
+          return { url: "/abandoned" };
+        },
+      });
+      teardown = controller.connect();
+      controller.start();
+      expect(controller.getSnapshot()).toMatchObject({
+        status: serverBuilt ? "cancelled" : "idle",
+        downloadUrl: undefined,
+        run: 1,
+      });
+    }
+  );
+  it.each([true, false])(
+    "does not publish a stale synchronous failure, cooperative=%s",
+    (serverBuilt) => {
+      let teardown: () => void = () => undefined;
+      const error = new Error("abandoned failure");
+      const warn = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => undefined);
+      const controller = createExportController({
+        serverBuilt,
+        handler: () => {
+          teardown();
+          throw error;
+        },
+      });
+      teardown = controller.connect();
+      if (serverBuilt) controller.start();
+      else expect(controller.start).toThrow(error);
+      expect(controller.getSnapshot()).toMatchObject({
+        status: serverBuilt ? "cancelled" : "idle",
+        error: "",
+        downloadUrl: undefined,
+      });
+      expect(warn).not.toHaveBeenCalled();
+    }
+  );
 });
