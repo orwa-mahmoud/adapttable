@@ -1,46 +1,43 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+import {
+  observeFullscreenInput,
+  x11DiagnosticEnabled,
+} from "./helpers/fullscreen-input-diagnostic";
 
 // Exercise browser-owned fullscreen handling in full Chromium.
 test.use({ channel: "chromium", headless: false });
 
 // Diagnostic control: no framework, overlay, Escape handler, or fullscreen shim.
 // Keep this assertion failing if the browser input path cannot exit fullscreen.
-test("native fullscreen platform control follows Escape", async ({
-  page,
-  browser,
-  headless,
-  channel,
-}, testInfo) => {
-  const events: string[] = [];
-  page.on("console", (message) => events.push(message.text()));
+const ROOT = "#native-fullscreen-control";
+
+async function openControl(page: Page): Promise<void> {
   await page.setContent(`
     <main id="native-fullscreen-control">
       <button type="button">Enter fullscreen</button>
     </main>
   `);
-  const root = page.locator("#native-fullscreen-control");
-  await root.evaluate((element) => {
-    const doc = element.ownerDocument;
-    const report = (event: Event): void => {
-      console.info(
-        JSON.stringify({
-          type: event.type,
-          key: event instanceof KeyboardEvent ? event.key : undefined,
-          trusted: event.isTrusted,
-          defaultPrevented: event.defaultPrevented,
-          fullscreen: doc.fullscreenElement === element,
-          focused: doc.activeElement?.tagName,
-        })
-      );
-    };
-    // Observe only; no event is cancelled and Escape never calls exitFullscreen.
-    doc.defaultView?.addEventListener("keydown", report);
-    doc.defaultView?.addEventListener("keyup", report);
-    doc.addEventListener("fullscreenchange", report);
+  await page.locator(ROOT).evaluate((element) => {
     element.querySelector("button")?.addEventListener("click", () => {
       void element.requestFullscreen();
     });
   });
+}
+
+test("native fullscreen platform control follows Escape", async ({
+  page,
+  channel,
+  headless,
+}, testInfo) => {
+  await openControl(page);
+  const root = page.locator(ROOT);
+  const diagnostic = await observeFullscreenInput(
+    page,
+    testInfo,
+    { root: ROOT },
+    { channel, headless }
+  );
   try {
     await expect(root).toBeVisible();
     await page.getByRole("button", { name: "Enter fullscreen" }).click();
@@ -51,7 +48,9 @@ test("native fullscreen platform control follows Escape", async ({
         )
       )
       .toBe(true);
-    await page.keyboard.press("Escape");
+    await diagnostic.pressEscape("playwright-escape-1", () =>
+      page.keyboard.press("Escape")
+    );
     await expect
       .poll(() =>
         root.evaluate(
@@ -60,19 +59,44 @@ test("native fullscreen platform control follows Escape", async ({
       )
       .toBe(false);
   } finally {
-    await testInfo.attach("native-fullscreen-platform-events", {
-      contentType: "application/json",
-      body: JSON.stringify(
-        {
-          browserVersion: browser.version(),
-          project: testInfo.project.name,
-          headless,
-          channel,
-          events,
-        },
-        null,
-        2
-      ),
-    });
+    await diagnostic.attach("native-fullscreen-platform-events");
   }
+});
+
+test.describe("CI X11 input comparison", () => {
+  // XTest is safe only in the explicitly enabled CI Xvfb session, where the
+  // workflow installs its native input dependency and runs one browser worker.
+  test.skip(!x11DiagnosticEnabled, "CI-only XTest input comparison");
+
+  test("native fullscreen X11 Escape observation", async ({
+    page,
+    channel,
+    headless,
+  }, testInfo) => {
+    await openControl(page);
+    const root = page.locator(ROOT);
+    const diagnostic = await observeFullscreenInput(
+      page,
+      testInfo,
+      { root: ROOT },
+      { channel, headless }
+    );
+    try {
+      const escape = await diagnostic.prepareX11();
+      await page.getByRole("button", { name: "Enter fullscreen" }).click();
+      await expect
+        .poll(() =>
+          root.evaluate(
+            (element) => element.ownerDocument.fullscreenElement === element
+          )
+        )
+        .toBe(true);
+      // Keep both observations even if native Chrome exits on the first Escape.
+      // The independent Playwright control above retains its behavior assertion.
+      await diagnostic.pressEscape("xtest-escape-1", escape);
+      await diagnostic.pressEscape("xtest-escape-2", escape);
+    } finally {
+      await diagnostic.attach("native-fullscreen-x11-observation");
+    }
+  });
 });
