@@ -238,11 +238,11 @@ test("React and Angular retain the original centered content width", async ({
     ["/angular-main/", "main.angular-demo.shell"],
     ["/angular-all-options/", "main.angular-demo.shell"],
     ["/ng-zorro/ai/", ".mx-ng.shell"],
-  ]) {
+  ] as const) {
     await page.goto(route);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.locator(selector!)).toBeVisible();
-    const container = await page.locator(selector!).evaluate((shell) => {
+    await expect(page.locator(selector)).toBeVisible();
+    const container = await page.locator(selector).evaluate((shell) => {
       const box = shell.getBoundingClientRect();
       const style = getComputedStyle(shell);
       return {

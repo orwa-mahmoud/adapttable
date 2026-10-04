@@ -14,6 +14,13 @@ export async function configureFeatureLab(
   await page.getByRole("button", { name: "Configure options" }).click();
   const dialog = page.getByRole("dialog", { name: "Configure Feature Lab" });
   await expect(dialog).toBeVisible();
+  // Visibility begins while the native drawer is sliding into place. Wait
+  // for its settled position before scrolling an offscreen option into view.
+  await expect(dialog).toHaveCSS(
+    "transform",
+    /^(?:none|matrix\(1, 0, 0, 1, 0, 0\))$/
+  );
+  await expect(dialog).toHaveCSS("opacity", "1");
   const choice = dialog
     .getByRole("group", { name: group })
     .getByRole("button", { name: option, exact: true });
