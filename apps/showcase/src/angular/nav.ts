@@ -135,8 +135,20 @@ export class AdaptShowcaseNav {
     return kitAccent(adapter, this.dark());
   }
   switchPage(event: Event): void {
-    if (event.target instanceof HTMLSelectElement && this.beforeNavigate()())
-      window.location.assign(event.target.value);
+    if (!(event.target instanceof HTMLSelectElement)) return;
+    const selected = event.target.value;
+    const destinations = [
+      this.demoHref(""),
+      this.demoHref("all-options"),
+      this.href(this.kit() + "/ai"),
+      ...this.adapters.map((adapter) => this.href(adapter.key)),
+      ...this.features().map((feature) =>
+        this.href(this.kit() + "/" + feature.slug)
+      ),
+    ];
+    const destination = destinations.find((href) => href === selected);
+    if (destination && this.beforeNavigate()())
+      window.location.assign(destination);
   }
   switchFramework(event: Event): void {
     if (!(event.target instanceof HTMLSelectElement)) return;

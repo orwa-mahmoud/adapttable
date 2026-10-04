@@ -1,5 +1,32 @@
 import { expect, test } from "@playwright/test";
 
+test("Angular phone navigation accepts registered destinations and rejects a modified option", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/angular-main/?kit=material");
+  const select = page.getByRole("combobox", { name: "Demo page", exact: true });
+  const title = await page.title();
+  const injected = "javascript:document.title='unexpected-navigation'";
+  await select.evaluate((element, value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = "Unregistered destination";
+    element.append(option);
+  }, injected);
+  await select.selectOption(injected);
+  await expect(page).toHaveURL(/\/angular-main\/\?kit=material$/);
+  await expect(page).toHaveTitle(title);
+  await select.selectOption("/angular-all-options/?kit=material");
+  await expect(page).toHaveURL(/\/angular-all-options\/\?kit=material$/);
+  await select.selectOption("/material/columns/");
+  await expect(page).toHaveURL(/\/material\/columns\/$/);
+  await select.selectOption("/material/");
+  await expect(page).toHaveURL(/\/material\/$/);
+  await select.selectOption("/material/ai/");
+  await expect(page).toHaveURL(/\/material\/ai\/$/);
+});
+
 for (const route of ["/angular-main/", "/angular-all-options/", "/ng-zorro/"]) {
   test(`${route}: Angular header has framework-specific destinations and fits a phone`, async ({
     page,
