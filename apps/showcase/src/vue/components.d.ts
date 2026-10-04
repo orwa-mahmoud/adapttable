@@ -32,3 +32,9 @@ declare module "*ViewControlsDemo.vue" {
   const demo: DefineComponent;
   export default demo;
 }
+
+declare module "*VueAssistantShowcase.vue" {
+  import type { DefineComponent } from "vue";
+  const demo: DefineComponent;
+  export default demo;
+}
