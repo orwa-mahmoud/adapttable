@@ -3,4 +3,5 @@ export const VUE_DOCS = Object.freeze([
   "vue/getting-started.md",
   "vue/features.md",
   "vue/api.md",
+  "vue/assistant.md",
 ]);

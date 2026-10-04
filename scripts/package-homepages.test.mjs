@@ -9,6 +9,11 @@ import { demoRoute, siteUrl } from "./site.mjs";
 
 const HUB = siteUrl(demoRoute());
 const ANGULAR_AI_HOME = siteUrl(demoRoute("unstyled", "angular"));
+const VUE_HOMEPAGES = new Map([
+  ["@adapttable/vue", siteUrl(demoRoute("unstyled", "vue"))],
+  ["@adapttable/vue-unstyled", siteUrl(demoRoute("unstyled", "vue"))],
+  ["@adapttable/ai-vue", siteUrl(demoRoute("unstyled/assistant", "vue"))],
+]);
 const HUB_PACKAGES = new Set([
   "@adapttable/core",
   "@adapttable/react",
@@ -44,11 +49,16 @@ describe("published package homepages", () => {
     for (const { path, pkg } of published) {
       const kit = kitByPkg.get(pkg.name);
       const bindingHome =
-        pkg.name === "@adapttable/ai-angular" ? ANGULAR_AI_HOME : HUB;
+        VUE_HOMEPAGES.get(pkg.name) ??
+        (pkg.name === "@adapttable/ai-angular" ? ANGULAR_AI_HOME : HUB);
       const expected = kit
         ? siteUrl(demoRoute(kit.key, kit.framework))
         : bindingHome;
-      if (!kit && pkg.name !== "@adapttable/ai-angular") {
+      if (
+        !kit &&
+        pkg.name !== "@adapttable/ai-angular" &&
+        !VUE_HOMEPAGES.has(pkg.name)
+      ) {
         assert.ok(
           HUB_PACKAGES.has(pkg.name),
           `${pkg.name} is published but is neither a showcase kit nor a hub package`

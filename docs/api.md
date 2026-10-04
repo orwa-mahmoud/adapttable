@@ -4033,7 +4033,8 @@ to npm. The [Vue getting-started guide](./vue/getting-started.md) and
 and native-control surface; the [Vue feature guide](./vue/features.md) covers
 the implemented optional filter, editing, hierarchy, row and view-control composition. The React prop tables above do not define
 Vue's API, and exported Vue extension channels do not imply complete feature
-parity, styled kits or a Vue AI integration.
+parity or styled kits. The optional `@adapttable/ai-vue` package and native
+assistant surfaces are covered by the [Vue assistant guide](./vue/assistant.md).
 
 ### Sources, rendering and controllers
 
@@ -4170,3 +4171,57 @@ Saved Views restore connected URL slices; controlled props stay authoritative,
 and selection, tree/detail expansion, edit drafts and host data are not captured.
 See [what a view restores](./vue/features.md#what-a-view-restores) before choosing
 which state your application persists.
+
+## Optional Vue assistant contracts
+
+`@adapttable/ai-vue` is the optional public, unreleased Vue 3.5 binding to neutral
+AI stores. `tableAgent(options: MaybeRefOrGetter<TableAgentOptions>)` returns a
+`StaticTableFeature`; `TableAgentBridge` and `TableAgentColumnPatch` describe
+host notifications and column patches. `TABLE_AGENT_STATE` is the typed feature
+state key and `SharedApproval` describes the shared approval configuration.
+
+`useTableAssistant(options: MaybeRefOrGetter<TableAssistantOptions>)` returns
+`TableAssistantState`: readonly computed conversation refs, a presentation `view`,
+controlled or local `open`, `setOpen`, and stable actions for sending, answering,
+stopping, resuming, clearing, undoing and revoking permissions.
+`useSpeechInput(options: MaybeRefOrGetter<UseSpeechInputOptions>)` returns
+`SpeechInputState`, with readonly speech refs, `view` and explicit start/stop
+controls. Neutral AI types are forwarded as type-only exports; the binding also
+forwards `AgentApprovalPending`, `AgentProgress` and `StaticTableFeature`.
+
+`@adapttable/vue/assistant` exports `TableAssistantChrome` /
+`TableAssistantChromeProps`, `AgentApprovalChrome` / `AgentApprovalChromeProps`,
+and `ApprovalReviewChrome` / `ApprovalReviewChromeProps`. These structural
+components require kit controls. `createAdapterTableAssistantFeature(render)` and
+`createAdapterAgentApprovalFeature(render)` register kit surfaces;
+`tableAssistantSlotKey()` returns the single assistant slot channel.
+
+The assistant UI contracts are `TableAssistantProps`, `TableAssistantView`,
+`TableAssistantSlots`, `TableAssistantAvatars`, `TableAssistantButtonProps`,
+`TableAssistantBadgeProps`, `TableAssistantComposerProps`,
+`TableAssistantLanguageChipProps`, `TableAssistantMenuProps`,
+`TableAssistantPanelProps`, `TableAssistantSheetProps` and
+`TableAssistantWindowProps`. Approval slots use `ApprovalReviewSlots`,
+`AgentApprovalProps`, `AgentApprovalButtonProps` and `AgentApprovalListProps`.
+`SpeechInputHandle` describes the optional speech presentation. These contracts
+use Vue render nodes over neutral models and load no AI runtime.
+
+`@adapttable/vue-unstyled/assistant` exports native `TableAssistant` and
+`AgentApproval` components, the `TableAssistantProps` / `AgentApprovalProps`
+types, and `tableAssistant()` / `agentApproval()` feature factories. These
+factories and components are also forwarded by the native `/features` entry.
+Pass `DataTableProps.assistant` only with a registered assistant feature;
+`DataTableClassNames.agentApproval` and `.agentApprovalButton` style the native
+table approval strip. The shell exposes `renderAgentApproval(classNames?)` and
+`renderTableAssistant()` for adapter placement.
+
+See [Vue assistant and approvals](./vue/assistant.md) for a complete application,
+controlled-state settlement, SSR, KeepAlive, keyboard and speech behavior.
+
+The assistant binding entry re-exports the canonical `StaticTableFeature` type
+from `@adapttable/vue/features`. Its setup and mount callback contracts are
+`StaticFeatureHost` and `FeatureMountContext` from that feature entry.
+
+The [assistant adapter type guide](./vue/assistant.md#adapter-feature-types) links the canonical definitions
+for the feature/context/host contract and its type-only member exports. The
+complete signatures are retained in the assistant API report.

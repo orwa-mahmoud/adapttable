@@ -267,6 +267,7 @@ const VUE_SOURCES = [
   fileURLToPath(new URL("./src/vue/", import.meta.url)),
   `${packageDir("vue")}${sep}`,
   `${packageDir("adapter-vue-unstyled")}${sep}`,
+  `${packageDir("ai-vue")}${sep}`,
 ];
 
 /** Whether a module is Angular source the Angular compiler owns. */
@@ -345,6 +346,7 @@ export default defineConfig({
       },
       { find: /^@adapttable\/ai$/, replacement: pkg("ai") },
       { find: /^@adapttable\/ai-react$/, replacement: pkg("ai-react") },
+      { find: /^@adapttable\/ai-vue$/, replacement: pkg("ai-vue") },
       { find: /^@adapttable\/ai-angular$/, replacement: pkg("ai-angular") },
       { find: /^@adapttable\/i18n$/, replacement: pkg("i18n") },
       { find: /^@adapttable\/mantine$/, replacement: pkg("adapter-mantine") },

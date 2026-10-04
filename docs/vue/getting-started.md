@@ -234,3 +234,12 @@ the incoming URL and reuse the seed on the client. A query library's own SSR and
 Continue with the [Vue feature guide](./features.md) for composition examples,
 the [Vue API reference](./api.md) for component and adapter contracts, and the
 [shared concepts](../concepts.md) for engine ownership.
+
+## Optional AI binding
+
+The public, unreleased `@adapttable/ai-vue` package is built and linked alongside
+the Vue binding and native kit when your application needs an agent, conversation
+or speech input. It requires Vue `^3.5.0`; publication is a separate release step.
+The base table and assistant UI entries remain usable without AI. See
+[assistant and approvals](./assistant.md). The CLI currently scaffolds React and
+Angular projects; these Vue examples use explicit application setup.

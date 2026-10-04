@@ -4,6 +4,7 @@ import Vue from "unplugin-vue/rolldown";
 export default defineConfig({
   entry: [
     "src/index.ts",
+    "src/assistant.ts",
     "src/features.ts",
     "src/columns.ts",
     "src/rows.ts",

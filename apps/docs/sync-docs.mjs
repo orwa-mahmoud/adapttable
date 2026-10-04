@@ -39,6 +39,7 @@ const target = join(here, "src/content/docs");
 export const TITLES = {
   "vue/getting-started.md": "Get started with experimental Vue tables",
   "vue/api.md": "Experimental Vue table API reference",
+  "vue/assistant.md": "Vue assistant and approvals",
   "vue/features.md": "Vue filters, editing and feature composition",
   "angular/angular-cdk.md": "Angular CDK tables",
   "angular/aria.md": "Angular Aria tables",
@@ -175,6 +176,8 @@ export const TITLES = {
 // emits from `description`. Keyword-rich and unique per page so search and
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
+  "vue/assistant.md":
+    "Connect Vue agents and conversations with native controls, explicit approval and host-controlled state.",
   "vue/getting-started.md":
     "Build an experimental Vue table with native controls, reactive sources, optional features, controlled state and SSR lifecycle rules.",
   "vue/features.md":

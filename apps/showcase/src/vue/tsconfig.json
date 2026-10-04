@@ -18,7 +18,8 @@
       "@adapttable/vue/*": ["../../../../packages/vue/vue/src/*"],
       "@adapttable/vue-unstyled/*": [
         "../../../../packages/vue/adapter-vue-unstyled/src/*"
-      ]
+      ],
+      "@adapttable/ai-vue": ["../../../../packages/vue/ai-vue/src/index.ts"]
     }
   },
   "include": ["./**/*.ts", "./**/*.vue"],

@@ -79,6 +79,9 @@ const hasToolbarExtras = computed(() =>
 );
 const ToolbarExtras = () => shell.renderToolbarExtras({ ...names.value });
 const BatchEditBar = () => shell.renderBatchEditBar();
+const AgentApprovalSurface = () =>
+  shell.renderAgentApproval({ ...names.value });
+const AssistantSurface = () => shell.renderTableAssistant();
 function controls(): TableChromeSlots<TRow> {
   return {
     SortButton: ({ attrs, content }) => h("button", attrs, [content]),
@@ -240,6 +243,7 @@ const liveStyle = {
       <slot name="toolbar" />
     </div>
     <BatchEditBar />
+    <AgentApprovalSurface />
     <div
       v-if="table.errorState.value"
       role="alert"
@@ -435,5 +439,6 @@ const liveStyle = {
       :style="liveStyle"
       >{{ table.statusAnnouncement.value }}</span
     >
+    <AssistantSurface />
   </div>
 </template>

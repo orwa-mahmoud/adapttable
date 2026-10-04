@@ -93,3 +93,12 @@ Read [getting started](https://adapttable.orwamahmoud.com/vue/getting-started/),
 [feature composition](https://adapttable.orwamahmoud.com/vue/features/) and the
 [Vue API reference](https://adapttable.orwamahmoud.com/vue/api/) for signatures,
 examples, required slots and state-persistence boundaries.
+
+## Optional assistant UI
+
+`@adapttable/vue/assistant` exports `TableAssistantChrome`, `AgentApprovalChrome`,
+`ApprovalReviewChrome` and their required kit control contracts. It imports no
+AI runtime. The separately opt-in `@adapttable/ai-vue` package connects agents,
+conversations and speech to Vue scopes. See the
+[assistant guide](https://adapttable.orwamahmoud.com/vue/assistant/) for approvals,
+controlled updates and lifecycle behavior. These public packages are unreleased.

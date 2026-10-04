@@ -619,3 +619,13 @@ requests still belong to the host. SSR does not start DOM measurements,
 browser listeners, lazy children or default local-storage access. Resource-backed
 controls activate after mount; use identical initial rows, IDs, direction,
 URL seed and responsive settings for deterministic hydration.
+
+## Assistant and approvals
+
+The optional native `/assistant` entry exports `TableAssistant`, `AgentApproval`,
+`tableAssistant()` and `agentApproval()`, plus `TableAssistantProps` and
+`AgentApprovalProps`. The native `/features` barrel also forwards these exports.
+These UI entries have no dependency on `@adapttable/ai`. Use
+`@adapttable/ai-vue` separately for `tableAgent`, `useTableAssistant` and
+`useSpeechInput`. Read [assistant and approvals](./assistant.md) for the full
+integration and try the [native assistant showcase](/vue/demo/unstyled/assistant/).

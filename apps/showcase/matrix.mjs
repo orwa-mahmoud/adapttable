@@ -3429,6 +3429,16 @@ export const VUE_NATIVE_BASELINE = Object.freeze({
 export const VUE_NATIVE_PAGES = Object.freeze([
   VUE_NATIVE_BASELINE,
   {
+    key: "vue-unstyled-assistant",
+    dir: "vue/unstyled/assistant",
+    path: "unstyled/assistant",
+    title: "Assistant and approvals — Vue Unstyled — AdaptTable",
+    description:
+      "Native conversation, governed actions and controlled-state receipts.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-assistant.ts",
+  },
+  {
     key: "vue-unstyled-filter-editing",
     dir: "vue/unstyled/filter-editing",
     path: "unstyled/filter-editing",

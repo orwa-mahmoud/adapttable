@@ -17,6 +17,7 @@ import { HeaderContext } from '@adapttable/vue/adapter';
 import { PaginationMode } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
 import { ShallowUnwrapRef } from 'vue';
+import { TableAssistantProps } from '@adapttable/vue/assistant';
 import { TableDensity } from '@adapttable/vue/adapter';
 import { TableErrorState } from '@adapttable/vue/adapter';
 import { TableLabels } from '@adapttable/vue/adapter';
@@ -65,6 +66,10 @@ export interface DataTableClassNames {
     readonly actionsHeader?: string;
     // (undocumented)
     readonly addRow?: string;
+    // (undocumented)
+    readonly agentApproval?: string;
+    // (undocumented)
+    readonly agentApprovalButton?: string;
     // (undocumented)
     readonly batchEditBar?: string;
     // (undocumented)
@@ -297,6 +302,8 @@ export { DataTableHandle }
 
 // @public
 export interface DataTableProps<TRow> {
+    // (undocumented)
+    readonly assistant?: TableAssistantProps;
     // (undocumented)
     readonly classNames?: DataTableClassNames;
     // (undocumented)

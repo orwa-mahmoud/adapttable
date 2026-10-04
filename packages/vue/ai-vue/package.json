@@ -1,0 +1,63 @@
+{
+  "name": "@adapttable/ai-vue",
+  "version": "0.1.0",
+  "description": "Optional Vue bindings for AdaptTable AI agents, assistants and speech input.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "LICENSE",
+    "dist",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "dependencies": {
+    "@adapttable/ai": "0.5.2",
+    "@adapttable/vue": "0.1.0"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "typecheck": "vue-tsc --noEmit",
+    "clean": "rimraf dist coverage .turbo"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "vue": "^3.5.43",
+    "@adapttable/core": "3.8.1",
+    "@adapttable/vue-unstyled": "0.1.0"
+  },
+  "author": "Orwa Mahmoud",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/vue/ai-vue"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "homepage": "https://adapttable.orwamahmoud.com/vue/demo/unstyled/assistant/"
+}

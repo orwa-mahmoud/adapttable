@@ -149,6 +149,9 @@ Optional behavior is imported from feature subpaths such as
 | `@adapttable/angular-unstyled` | Native Angular table controls with responsive table and card layouts.      |
 | `@adapttable/ng-zorro`         | NG-ZORRO Angular table controls and overlays.                              |
 | `@adapttable/ai-angular`       | Optional Angular agent, assistant and speech bindings.                     |
+| `@adapttable/vue`              | Experimental public Vue 3.5 binding, unreleased.                           |
+| `@adapttable/vue-unstyled`     | Experimental public native Vue controls, unreleased.                       |
+| `@adapttable/ai-vue`           | Optional Vue agent, assistant and speech binding, unreleased.              |
 
 The CLI recognizes an Angular project when both `@angular/core` and
 `angular.json` are present, then scaffolds the native or NG-ZORRO table.

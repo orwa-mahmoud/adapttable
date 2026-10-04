@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AgentApprovalProps } from '@adapttable/vue/assistant';
 import { AllowedComponentProps } from 'vue';
 import { BatchEditBarProps } from '@adapttable/vue/editing';
 import { BatchEditingState } from '@adapttable/vue/editing';
@@ -76,7 +77,9 @@ import { SavedView } from '@adapttable/vue/saved-views';
 import { SavedViewsPanelChromeProps } from '@adapttable/vue/saved-views';
 import { SavedViewsStore } from '@adapttable/vue/saved-views';
 import { StaticGroupingExtras } from '@adapttable/vue/features';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { StaticTableFeature } from '@adapttable/vue/assistant';
+import { StaticTableFeature as StaticTableFeature_2 } from '@adapttable/vue/adapter';
+import { TableAssistantProps } from '@adapttable/vue/assistant';
 import { TableEditingOptions } from '@adapttable/vue/editing';
 import { TableFeature } from '@adapttable/vue/adapter';
 import { TableRowDetail } from '@adapttable/vue/features';
@@ -93,6 +96,14 @@ import { UseSavedViewsOptions } from '@adapttable/vue/saved-views';
 import { useTreeExpansion } from '@adapttable/vue/features';
 import { VNodeProps } from 'vue';
 import { VueEditableCellProps } from '@adapttable/vue/editing';
+
+// @public (undocumented)
+export const AgentApproval: DefineSetupFnComponent<AgentApprovalProps, {}, {}, AgentApprovalProps & {}, PublicProps>;
+
+// @public (undocumented)
+export function agentApproval(): StaticTableFeature;
+
+export { AgentApprovalProps }
 
 // @public
 export function batchEditing<TRow>(onBatchEdit: NonNullable<TableEditingOptions<TRow>["onBatchEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;
@@ -122,7 +133,7 @@ export { ConfirmHandler }
 export { ConfirmRequest }
 
 // @public
-export function densityChooser(): StaticTableFeature;
+export function densityChooser(): StaticTableFeature_2;
 
 export { dirtyIndicators }
 
@@ -159,7 +170,7 @@ export { FilterTypeSpec }
 export { fitColumns }
 
 // @public
-export function fullscreen(): StaticTableFeature;
+export function fullscreen(): StaticTableFeature_2;
 
 export { GetCellSpan }
 
@@ -168,7 +179,7 @@ export { GetCellSpanArgs }
 export { GroupCollapseOptions }
 
 // @public
-export function grouping(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: StaticGroupingExtras): StaticTableFeature;
+export function grouping(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: StaticGroupingExtras): StaticTableFeature_2;
 
 // @public (undocumented)
 export function grouping<TRow>(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: GroupingExtras<TRow>): TableFeature<TRow>;
@@ -180,7 +191,7 @@ export { GroupNode }
 export { GroupSort }
 
 // @public
-export function headerFilters(): StaticTableFeature;
+export function headerFilters(): StaticTableFeature_2;
 
 export { multiSort }
 
@@ -306,7 +317,7 @@ export { RowStyle }
 export { SavedView }
 
 // @public
-export function savedViews(options: MaybeRefOrGetter<UseSavedViewsOptions>): StaticTableFeature;
+export function savedViews(options: MaybeRefOrGetter<UseSavedViewsOptions>): StaticTableFeature_2;
 
 // @public
 export const SavedViewsPanel: DefineSetupFnComponent<SavedViewsPanelProps, {}, {}, SavedViewsPanelProps & {}, PublicProps>;
@@ -317,6 +328,14 @@ export type SavedViewsPanelProps = Omit<SavedViewsPanelChromeProps, "slots">;
 export { SavedViewsStore }
 
 export { StaticGroupingExtras }
+
+// @public (undocumented)
+export const TableAssistant: DefineSetupFnComponent<TableAssistantProps, {}, {}, TableAssistantProps & {}, PublicProps>;
+
+// @public (undocumented)
+export function tableAssistant(): StaticTableFeature;
+
+export { TableAssistantProps }
 
 export { TableEditingOptions }
 
@@ -331,7 +350,7 @@ export { TreeExpansionOptions }
 export { TreeFeatureOptions }
 
 // @public
-export function undoRedoButtons(): StaticTableFeature;
+export function undoRedoButtons(): StaticTableFeature_2;
 
 export { useGroupCollapse }
 

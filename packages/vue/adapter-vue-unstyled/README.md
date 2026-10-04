@@ -167,3 +167,14 @@ Read [getting started](https://adapttable.orwamahmoud.com/vue/getting-started/),
 [feature composition](https://adapttable.orwamahmoud.com/vue/features/) and the
 [Vue API reference](https://adapttable.orwamahmoud.com/vue/api/) for exact
 signatures, controlled events, slots, examples and current state boundaries.
+
+## Optional assistant and approval controls
+
+Import `TableAssistant`, `AgentApproval`, `tableAssistant()` and `agentApproval()`
+from `@adapttable/vue-unstyled/assistant`. The components and features provide
+native HTML controls without loading an AI runtime. Pass conversation state through
+the `assistant` prop and include `tableAssistant()` when mounting it inside
+`DataTable`. `agentApproval()` adds the table approval strip; widget and modal
+reviews have one decision owner. Optional agents, conversations and speech are
+provided by `@adapttable/ai-vue`. See the
+[assistant guide](https://adapttable.orwamahmoud.com/vue/assistant/).

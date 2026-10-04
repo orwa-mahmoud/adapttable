@@ -1,4 +1,5 @@
 /** Optional native contributions. The base entry never imports this barrel. */
+export * from "./assistant";
 export * from "./batch-editing";
 export * from "./columns";
 export * from "./density";

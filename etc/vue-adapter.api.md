@@ -191,6 +191,7 @@ import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { SortLevel } from '@adapttable/core';
+import { TableAssistantProps } from '@adapttable/core/binding';
 import { TableDensity } from '@adapttable/core';
 import { TableEngine } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
@@ -2061,6 +2062,8 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     toolbarExtrasProps: ComputedRef<ToolbarExtrasSlotProps>;
     renderToolbarExtras: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
     renderBatchEditBar: () => VNodeChild[];
+    renderAgentApproval: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
+    renderTableAssistant: () => VNodeChild[];
     slotFills: ComputedRef<ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>>;
     runtime: TableRuntime<TRow>;
     handle: DataTableHandle<TRow>;
@@ -2070,6 +2073,8 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
 
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
+    // (undocumented)
+    readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
     readonly confirm?: ConfirmHandler;
     // (undocumented)

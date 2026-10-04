@@ -135,6 +135,16 @@
         "types": "./dist/saved-views.d.cts",
         "default": "./dist/saved-views.cjs"
       }
+    },
+    "./assistant": {
+      "import": {
+        "types": "./dist/assistant.d.ts",
+        "default": "./dist/assistant.js"
+      },
+      "require": {
+        "types": "./dist/assistant.d.cts",
+        "default": "./dist/assistant.cjs"
+      }
     }
   },
   "repository": {
@@ -145,5 +155,6 @@
   "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "homepage": "https://adapttable.orwamahmoud.com/vue/demo/unstyled/"
 }

@@ -137,6 +137,7 @@ export const sidebar = [
       { label: "Get started with Vue", slug: "vue/getting-started" },
       { label: "Vue feature composition", slug: "vue/features" },
       { label: "Vue API reference", slug: "vue/api" },
+      { label: "Vue assistant and approvals", slug: "vue/assistant" },
     ],
   },
   ...primarySidebar,

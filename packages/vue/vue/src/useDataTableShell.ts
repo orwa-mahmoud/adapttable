@@ -16,11 +16,15 @@ import {
   withRowPinActions,
 } from "@adapttable/core";
 import {
+  AGENT_APPROVAL,
+  AGENT_APPROVAL_STATE,
   DENSITY_STATE,
   EMPTY_FEATURE_HOST,
   type FeatureHostState,
   type FilterEngine,
   type RuntimeChromeInput,
+  TABLE_ASSISTANT,
+  type TableAssistantProps,
   type TableRuntime,
   TableRuntimePublisher,
   type TableRuntimeView,
@@ -37,6 +41,7 @@ import {
   onScopeDispose,
   shallowRef,
   toValue,
+  type VNodeChild,
   watch,
 } from "vue";
 
@@ -116,6 +121,9 @@ export interface UseDataTableShellOptions<TRow>
   readonly data?: MaybeRefOrGetter<readonly TRow[]>;
   readonly features?: MaybeRefOrGetterOptional<
     readonly ComposedFeature<NoInfer<TRow>>[]
+  >;
+  readonly assistant?: MaybeRefOrGetterOptional<
+    TableAssistantProps<VNodeChild>
   >;
   readonly confirm?: ConfirmHandler;
   readonly density?: MaybeRefOrGetterOptional<TableDensity>;
@@ -389,6 +397,30 @@ export function useDataTableShell<TRow>(
   ];
   const editing = state.get(editingModelKey<TRow>());
   const editingChrome = state.get(editingChromeModelKey<TRow>());
+  const approval = state.get(AGENT_APPROVAL_STATE);
+  const renderAgentApproval = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) =>
+    renderFeatureSlot(AGENT_APPROVAL, slotFills.value, {
+      pending: approval.value,
+      labels: table.labels.value,
+      className: classNames?.agentApproval,
+      buttonClassName: classNames?.agentApprovalButton,
+    });
+  const renderTableAssistant = () => {
+    const assistant = toValue(resolved.value.assistant);
+    if (!assistant) return [];
+    if (!slotFills.value.get(TABLE_ASSISTANT.id)?.length)
+      throw new Error(
+        "AdaptTable: assistant requires tableAssistant() from this Vue kit’s assistant entry."
+      );
+    return renderFeatureSlot(TABLE_ASSISTANT, slotFills.value, {
+      labels: table.labels.value,
+      dir: table.dir.value,
+      approval: approval.value,
+      ...assistant,
+    });
+  };
   const renderBatchEditBar = () =>
     editingChrome.value?.batch
       ? renderFeatureSlot(
@@ -701,6 +733,8 @@ export function useDataTableShell<TRow>(
     toolbarExtrasProps,
     renderToolbarExtras,
     renderBatchEditBar,
+    renderAgentApproval,
+    renderTableAssistant,
     slotFills,
     runtime,
     handle,

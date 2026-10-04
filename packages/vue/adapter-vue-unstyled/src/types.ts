@@ -14,10 +14,13 @@ import type {
   TableViewStateConfig,
   UrlStateAdapter,
 } from "@adapttable/vue/adapter";
+import type { TableAssistantProps } from "@adapttable/vue/assistant";
 import type { VNodeChild } from "vue";
 
 /** CSS hooks are applied to the corresponding semantic element. */
 export interface DataTableClassNames {
+  readonly agentApproval?: string;
+  readonly agentApprovalButton?: string;
   readonly resizeHandle?: string;
   readonly filterHeaderInput?: string;
   readonly actionsHeader?: string;
@@ -138,6 +141,7 @@ export interface DataTableClassNames {
 
 /** Native-kit props. Query state is owned by the supplied source when present. */
 export interface DataTableProps<TRow> {
+  readonly assistant?: TableAssistantProps;
   readonly data?: readonly TRow[];
   readonly source?: TableSource<TRow>;
   readonly columns: readonly ColumnInput<TRow>[];

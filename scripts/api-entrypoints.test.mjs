@@ -78,11 +78,7 @@ describe("entrypoints", () => {
     const unpublished = [
       ...new Set(ENTRIES.filter((e) => !e.published).map((e) => e.dir)),
     ];
-    assert.deepEqual(unpublished, [
-      "adapter-bootstrap",
-      "adapter-vue-unstyled",
-      "vue",
-    ]);
+    assert.deepEqual(unpublished, ["adapter-bootstrap"]);
     // Publication is a manifest decision, separate from kit participation.
     // Check every subpath so one correct root cannot hide a misfiled feature.
     for (const entry of ENTRIES) {
@@ -112,6 +108,24 @@ describe("entrypoints", () => {
       assert.ok(
         entries.every((entry) => entry.published),
         dir
+      );
+    }
+  });
+
+  it("reports every public Vue package and assistant entry", () => {
+    for (const dir of ["vue", "adapter-vue-unstyled", "ai-vue"]) {
+      const entries = ENTRIES.filter((entry) => entry.dir === dir);
+      assert.ok(entries.length > 0, `${dir} exposes a public entry`);
+      assert.ok(
+        entries.every((entry) => entry.published),
+        dir
+      );
+      assert.equal(packageJson(dir).publishConfig?.access, "public", dir);
+      assert.ok(
+        entries.some(
+          (entry) => entry.subpath === (dir === "ai-vue" ? "." : "./assistant")
+        ),
+        `${dir} exposes its optional assistant entry`
       );
     }
   });
