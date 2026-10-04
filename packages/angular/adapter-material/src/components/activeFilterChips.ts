@@ -3,6 +3,7 @@
  */
 import { type ActiveFilterChipsSlotProps } from "@adapttable/angular";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import { MatButtonModule } from "@angular/material/button";
 import { MatChipsModule } from "@angular/material/chips";
 
 /**
@@ -11,7 +12,7 @@ import { MatChipsModule } from "@angular/material/chips";
  * @internal
  */
 @Component({
-  imports: [MatChipsModule],
+  imports: [MatButtonModule, MatChipsModule],
   selector: "adapt-filter-chips",
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -35,16 +36,16 @@ import { MatChipsModule } from "@angular/material/chips";
             </button>
           </mat-chip>
         }
-        <mat-chip data-adapttable-part="chip">
+        <span class="adapt-material-chips-clear" data-adapttable-part="chip">
           <button
-            matChipRemove
+            mat-button
             type="button"
             data-adapttable-part="chip-remove"
             (click)="p.onClearAll()"
           >
             {{ p.labels.clearAll }}
           </button>
-        </mat-chip>
+        </span>
       </mat-chip-set>
     }
   `,

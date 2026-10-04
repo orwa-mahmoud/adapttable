@@ -14,6 +14,14 @@
   min-inline-size: 0;
   max-inline-size: 100%;
 }
+.adapt-material .adapt-material-chips-clear {
+  align-self: center;
+  flex: 0 0 auto;
+  margin-inline-start: 8px;
+}
+.adapt-material .adapt-material-chips-clear button {
+  white-space: nowrap;
+}
 .adapt-material [data-adapttable-part="root"] {
   min-inline-size: 0;
   border: 1px solid var(--adapt-material-line);
