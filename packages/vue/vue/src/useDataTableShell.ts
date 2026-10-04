@@ -3,10 +3,13 @@ import {
   ACTIONS_COLUMN_KEY,
   type BulkAction,
   type ConfirmHandler,
+  createMemoryAdapter,
   type ExtraFilters,
   type FilterDef,
   type FilterTypeSpec,
+  groupedViewSource,
   type QueryFilterGroup,
+  resolveUrlAdapter,
   type RowAction,
   type TableDensity,
   type TableSource,
@@ -28,6 +31,7 @@ import {
 import {
   computed,
   getCurrentInstance,
+  getCurrentScope,
   type MaybeRefOrGetter,
   nextTick,
   onScopeDispose,
@@ -37,26 +41,37 @@ import {
 } from "vue";
 
 import { flattenColumns } from "./columnDef";
-import { useFeatureLifecycle } from "./featureLifecycle";
+import type { TableEditingOptions } from "./editing/editingModels";
+import { type FeatureLifecycle, useFeatureLifecycle } from "./featureLifecycle";
 import {
   assertRequiredSlots,
   type ComposedFeature,
+  type FeatureMountContext,
   featureOptionsOf,
   featureSlotFillsOf,
   normalizeFeatures,
   renderFeatureSlot,
 } from "./features/tableFeature";
 import { createFeatureState, provideFeatureState } from "./featureState";
+import {
+  groupingModelKey,
+  rowDetailModelKey,
+  treeModelKey,
+} from "./hierarchy/models";
+import { tableRowInventory } from "./hierarchy/rowInventory";
 import { createFilterOptionCache } from "./layout/filterOptionCache";
 import {
+  batchEditBarSlotKey,
   COLUMN_RESIZE_MODEL,
   editableCellSlotKey,
   editHistoryModelKey,
+  editingChromeModelKey,
   editingModelKey,
   headerFilterModelKey,
   headerFilterSlotKey,
   type RowActionControlsProjector,
   rowActionsModelKey,
+  rowEditActionsSlotKey,
   rowPinningModelKey,
   type TableBodyProjector,
 } from "./layout/modelChannels";
@@ -74,8 +89,16 @@ import {
 } from "./source/useFrontendData";
 import { type MaybeRefOrGetterOptional, useScopeActivity } from "./store";
 import { useDataTable, type UseDataTableOptions } from "./useDataTable";
+import {
+  DENSITY_CONTROL,
+  FULLSCREEN_CONTROL,
+  FULLSCREEN_MODEL,
+  SAVED_VIEWS_CONTROL,
+  SAVED_VIEWS_MODEL,
+} from "./viewControls/contracts";
 export interface DataTableSurface {
   scrollElement(): HTMLElement | null;
+  rootElement?(): HTMLElement | null;
 }
 export interface DataTableHandle<TRow> {
   readonly runtime: TableRuntime<TRow>;
@@ -114,9 +137,18 @@ export interface UseDataTableShellOptions<TRow>
     >
   >;
 }
-export interface ResolvedTableOptions<
-  TRow,
-> extends UseDataTableShellOptions<TRow> {
+export interface ResolvedTableOptions<TRow>
+  extends
+    UseDataTableShellOptions<TRow>,
+    Partial<
+      Omit<
+        TableEditingOptions<TRow>,
+        "rows" | "columns" | "rowKey" | "featureHost"
+      >
+    > {
+  readonly editingModel?: (
+    context: FeatureMountContext<TRow>
+  ) => void | (() => void);
   readonly bodyModel?: TableBodyProjector<TRow>;
   readonly filterEngine?: FilterEngine;
   readonly filters?: readonly FilterDef<TRow>[];
@@ -147,6 +179,19 @@ export function useDataTableShell<TRow>(
         )
       ) as unknown as ResolvedTableOptions<TRow>
   );
+  const localUrlAdapter = createMemoryAdapter();
+  const urlAdapter = computed(() =>
+    resolveUrlAdapter(
+      toValue(resolved.value.urlAdapter),
+      toValue(resolved.value.urlSync) ?? true,
+      localUrlAdapter
+    )
+  );
+  const root = shallowRef<HTMLElement | null>(null);
+  const viewStateFlushers = new Set<() => void>();
+  const flushViewState = (): void => {
+    for (const flush of viewStateFlushers) flush();
+  };
   const isMobile = useViewportMobile(resolved);
   const supplied = computed(() => toValue(resolved.value.source));
   const registered = shallowRef<FeatureHostState<TRow>>(
@@ -195,7 +240,8 @@ export function useDataTableShell<TRow>(
     data: supplied.value ? [] : (toValue(resolved.value.data) ?? []),
     columns: flattenColumns(toValue(resolved.value.columns)).leaves,
     getRowId: resolved.value.rowKey,
-    urlSync: supplied.value ? false : resolved.value.urlSync,
+    urlAdapter: supplied.value ? undefined : urlAdapter,
+    urlSync: supplied.value ? false : true,
     filterFn: filterRuntime.value ? filterRows : resolved.value.filterFn,
     filterTreeFn: filterRuntime.value
       ? filterTree
@@ -229,8 +275,25 @@ export function useDataTableShell<TRow>(
       ),
     };
   });
+  const state = createFeatureState();
+  const grouping = state.get(groupingModelKey<TRow>());
+  const tree = state.get(treeModelKey<TRow>());
+  const detail = state.get(rowDetailModelKey<TRow>());
+  const viewSource = computed(() =>
+    grouping.value ? groupedViewSource(source.value) : source.value
+  );
+  const pinning = state.get(rowPinningModelKey<TRow>());
+  const rowInventory = computed(() =>
+    tableRowInventory({
+      rows: viewSource.value.rows,
+      rowKey: resolved.value.rowKey,
+      grouping: grouping.value,
+      tree: tree.value,
+      pinning: pinning.value,
+    })
+  );
   const selectionState = useRowSelection(() => ({
-    rows: source.value.rows,
+    rows: rowInventory.value.visibleRows,
     rowKey: resolved.value.rowKey,
     selectedIds: resolved.value.selectedIds,
     defaultSelectedIds: resolved.value.defaultSelectedIds,
@@ -250,10 +313,9 @@ export function useDataTableShell<TRow>(
   const table = useDataTable(() => ({
     ...resolved.value,
     forceMobile: isMobile,
-    source,
+    source: viewSource,
     selection: selection.value,
   }));
-  const state = createFeatureState();
   const editHistory = state.get(editHistoryModelKey<TRow>());
   const ownDensity = shallowRef(resolved.value.defaultDensity ?? "comfortable");
   const featureDensity = state.get(DENSITY_STATE);
@@ -264,6 +326,7 @@ export function useDataTableShell<TRow>(
       ownDensity.value
   );
   const setDensity = (next: TableDensity): void => {
+    if (!active.value) return;
     if (toValue(resolved.value.density) === undefined) {
       if (featureDensity.value) featureDensity.value.setDensity(next);
       else ownDensity.value = next;
@@ -282,15 +345,58 @@ export function useDataTableShell<TRow>(
         )
       : {}),
   }));
+  const fullscreen = state.get(FULLSCREEN_MODEL);
+  const savedViewsState = state.get(SAVED_VIEWS_MODEL);
+  const renderViewControls = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) => {
+    const presentation = {
+      labels: table.labels.value,
+      dir: table.dir.value,
+      classNames,
+      container: fullscreen.value?.container,
+    };
+    return [
+      ...(featureDensity.value
+        ? renderFeatureSlot(DENSITY_CONTROL, slotFills.value, {
+            ...presentation,
+            density: density.value,
+            onDensityChange: setDensity,
+          })
+        : []),
+      ...(fullscreen.value
+        ? renderFeatureSlot(FULLSCREEN_CONTROL, slotFills.value, {
+            ...presentation,
+            fullscreen: fullscreen.value,
+          })
+        : []),
+      ...(savedViewsState.value
+        ? renderFeatureSlot(SAVED_VIEWS_CONTROL, slotFills.value, {
+            ...presentation,
+            savedViews: savedViewsState.value,
+          })
+        : []),
+    ];
+  };
   const renderToolbarExtras = (
     classNames?: Readonly<Record<string, string | undefined>>
-  ) =>
-    renderFeatureSlot(TOOLBAR_EXTRAS, slotFills.value, {
+  ) => [
+    ...renderViewControls(classNames),
+    ...renderFeatureSlot(TOOLBAR_EXTRAS, slotFills.value, {
       ...toolbarExtrasProps.value,
       classNames,
-    });
-  const pinning = state.get(rowPinningModelKey<TRow>());
+    }),
+  ];
   const editing = state.get(editingModelKey<TRow>());
+  const editingChrome = state.get(editingChromeModelKey<TRow>());
+  const renderBatchEditBar = () =>
+    editingChrome.value?.batch
+      ? renderFeatureSlot(
+          batchEditBarSlotKey<TRow>(),
+          slotFills.value,
+          editingChrome.value.batch
+        )
+      : [];
   const rowActions = state.get(rowActionsModelKey<TRow>());
   const resize = state.get(COLUMN_RESIZE_MODEL);
   const headerFilters = state.get(headerFilterModelKey<TRow>());
@@ -309,22 +415,34 @@ export function useDataTableShell<TRow>(
     () => toValue(resolved.value.fitColumns) ?? false
   );
   const baseMobile = useMobileCardsModel(table, baseDesktop);
+  const rowEditControlsVisible = computed(
+    () =>
+      editingChrome.value?.row !== undefined &&
+      !table.layout.value.isHidden(ACTIONS_COLUMN_KEY)
+  );
   const actionsDesktop = computed(() => ({
     ...baseDesktop.value,
-    actionsLabel: mergedActions.value.rowActions
-      ? table.labels.value.actions
-      : undefined,
+    actionsLabel:
+      mergedActions.value.rowActions || rowEditControlsVisible.value
+        ? table.labels.value.actions
+        : undefined,
     columnCount:
-      baseDesktop.value.columnCount + (mergedActions.value.rowActions ? 1 : 0),
+      baseDesktop.value.columnCount +
+      (mergedActions.value.rowActions || rowEditControlsVisible.value ? 1 : 0),
   }));
   const body = computed(
     () =>
       resolved.value.bodyModel?.({
         table,
+        rowInventory: rowInventory.value,
         options: resolved.value,
         desktop: actionsDesktop.value,
         mobile: baseMobile.value,
         pinning: pinning.value,
+        grouping: grouping.value,
+        tree: tree.value,
+        detail: detail.value,
+        selection: selection.value,
       }) ?? { desktop: actionsDesktop.value, mobile: baseMobile.value }
   );
   const requestConfirm: ConfirmHandler = (request) => {
@@ -337,18 +455,41 @@ export function useDataTableShell<TRow>(
   };
   const decorateRow = (original: TableRowModel<TRow>): TableRowModel<TRow> => {
     const projector = resolved.value.rowActionControls;
+    const rowEditing =
+      !original.summary && rowEditControlsVisible.value
+        ? editingChrome.value?.row?.(
+            original.row,
+            original.key,
+            mergedActions.value.rowActions
+          )
+        : undefined;
+    const actions = rowEditing?.actions ?? mergedActions.value.rowActions;
     const controls =
-      !original.summary && projector && mergedActions.value.rowActions
+      !original.summary && projector && actions
         ? projector({
             row: original.row,
-            actions: mergedActions.value.rowActions,
+            actions,
             confirm: requestConfirm,
             cancelLabel: table.labels.value.cancel,
             enabled: () =>
               active.value && resolved.value.rowActionControls === projector,
           })
         : undefined;
-    const row = controls ? { ...original, actionControls: controls } : original;
+    const row =
+      controls || rowEditing
+        ? {
+            ...original,
+            actionControls: controls,
+            editActions: rowEditing
+              ? () =>
+                  renderFeatureSlot(
+                    rowEditActionsSlotKey<TRow>(),
+                    slotFills.value,
+                    rowEditing.props
+                  )
+              : undefined,
+          }
+        : original;
     if (!editing.value || row.summary) return row;
     return {
       ...row,
@@ -361,7 +502,7 @@ export function useDataTableShell<TRow>(
             rowId: row.key,
             rowIndex: row.index,
             column: cell.context.column,
-            rows: table.rows.value,
+            rows: rowInventory.value.visibleRows,
             columns: table.columns.value,
             rowKey: table.rowKey,
             editLabel: table.labels.value.editCell,
@@ -416,11 +557,13 @@ export function useDataTableShell<TRow>(
   let disposed = false;
   let currentView: TableRuntimeView<TRow> | undefined;
   const frame = computed((): RuntimeChromeInput<TRow> => ({
-    source: source.value,
+    source: viewSource.value,
     getRowId: table.rowKey,
     allColumns: table.allColumns.value,
     columnLayout: table.layout.value,
     columnLayoutLive: true,
+    grouping: grouping.value,
+    tree: tree.value,
     rowPinning: pinning.value,
     editing: editing.value,
     filterDefs: filterRuntime.value?.defs,
@@ -461,6 +604,8 @@ export function useDataTableShell<TRow>(
     featureIds: () =>
       disposed ? [] : declarations.value.map((feature) => feature.id),
   };
+  const lifecycleOwner = getCurrentScope();
+  let editingLifecycle: FeatureLifecycle<TRow> | undefined;
   let reconciling = false;
   const reconcile = (): void => {
     if (reconciling || disposed) return;
@@ -469,14 +614,33 @@ export function useDataTableShell<TRow>(
       assertRequiredSlots(declarations.value, slotFills.value);
       publish();
       lifecycle.reconcile(declarations.value);
+      const model = resolved.value.editingModel;
+      if (model) {
+        editingLifecycle ??= lifecycleOwner?.run(() =>
+          useFeatureLifecycle(lifecycleInput)
+        );
+        editingLifecycle?.reconcile([{ id: "editing-model", mount: model }]);
+      } else editingLifecycle?.reconcile([]);
       publish();
     } finally {
       reconciling = false;
     }
   };
-  const lifecycle = useFeatureLifecycle({
+  const lifecycleInput = {
     runtime,
+    root,
+    urlAdapter,
+    flushViewState,
+    registerViewStateFlush: (flush: () => void) => {
+      viewStateFlushers.add(flush);
+      return () => {
+        viewStateFlushers.delete(flush);
+      };
+    },
+    source,
+    density,
     table,
+    rowInventory,
     options: resolved,
     filterRuntime,
     featureHost: registered,
@@ -487,7 +651,8 @@ export function useDataTableShell<TRow>(
       await nextTick();
       if (active.value) reconcile();
     },
-  });
+  };
+  const lifecycle = useFeatureLifecycle(lifecycleInput);
   watch(
     lifecycle.host,
     (value) => {
@@ -511,6 +676,7 @@ export function useDataTableShell<TRow>(
   });
   return {
     table,
+    rowInventory,
     source,
     selection,
     desktop,
@@ -520,19 +686,28 @@ export function useDataTableShell<TRow>(
     features: declarations,
     featureHost: lifecycle.host,
     rowActions,
+    grouping,
+    tree,
+    detail,
     editing,
     filterRuntime,
     featureOptions: patches,
     density,
     setDensity,
+    fullscreen,
+    savedViews: savedViewsState,
+    urlAdapter,
+    flushViewState,
     toolbarExtrasProps,
     renderToolbarExtras,
+    renderBatchEditBar,
     slotFills,
     runtime,
     handle,
     reconcile,
     setSurface: (next: DataTableSurface | null): void => {
       surface.value = next;
+      root.value = next?.rootElement?.() ?? null;
     },
   };
 }

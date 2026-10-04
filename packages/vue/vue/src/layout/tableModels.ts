@@ -2,6 +2,7 @@
 import {
   type ChromeBodySlot,
   type ChromeExtraSlot,
+  type ChromeGroupSlot,
   type ColumnGroupToggleProps,
   columnHeaderControllerFor,
   type CssProperties,
@@ -21,6 +22,11 @@ import {
   renderCell,
   renderHeader,
 } from "../columnDef";
+import type {
+  GroupRowModel,
+  RowDetailModel,
+  TreeCellModel,
+} from "../hierarchy/models";
 import type { SelectionCheckboxAttrs } from "../selection/checkboxControl";
 import type { RowSelection } from "../selection/selection";
 import type { UseDataTableResult } from "../useDataTable";
@@ -28,8 +34,9 @@ import type { RowActionControl } from "./modelChannels";
 export type TableBodySlot<TRow> =
   | Exclude<
       ChromeBodySlot<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>,
-      ChromeExtraSlot<VNodeChild, CssProperties>
+      ChromeExtraSlot<VNodeChild, CssProperties> | ChromeGroupSlot<TRow>
     >
+  | (ChromeGroupSlot<TRow> & { readonly model?: GroupRowModel<TRow> })
   | (ChromeExtraSlot<VNodeChild, CssProperties> & {
       readonly coveredSlots?: ReadonlySet<number>;
     });
@@ -38,12 +45,15 @@ export interface TableCellModel<TRow> {
   readonly attrs: Attrs;
   readonly context: CellContext<TRow>;
   readonly render?: (display: VNodeChild) => VNodeChild;
+  readonly tree?: TreeCellModel<TRow>;
 }
 export interface TableRowModel<TRow> {
   readonly key: string;
   readonly row: TRow;
   readonly summary?: boolean;
+  readonly detail?: RowDetailModel;
   readonly actionControls?: readonly RowActionControl<TRow>[];
+  readonly editActions?: () => VNodeChild;
   readonly index: number;
   readonly attrs: Attrs;
   readonly checkboxAttrs?: SelectionCheckboxAttrs;

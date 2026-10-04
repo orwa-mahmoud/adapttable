@@ -12,8 +12,15 @@ not define Vue signatures.
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@adapttable/vue`          | Source composables, `useDataTable`, column renderers, layout, selection and URL state. Also re-exports framework-neutral types.                                                                                                           |
 | `@adapttable/vue/adapter`  | Everything above plus `useDataTableShell`, structural Chrome, attribute bridges, feature lifecycle/state/model helpers and neutral binding utilities. Adapter code imports its engine contracts here rather than importing core directly. |
-| `@adapttable/vue/features` | Custom feature declarations, patch/slot composition and neutral feature-key helpers. This entry does not install a catalog of ready-made Vue features.                                                                                    |
+| `@adapttable/vue/features` | Binding factories for columns, rows, grouping/tree/details and view controls, plus custom declarations and patch/slot helpers. Factories that need UI require adapter slots.                                                              |
 | `@adapttable/vue-unstyled` | Native `DataTable`, `DataTableProps`, `DataTableSlots`, `DataTableClassNames` and its documented column, context, handle and source type re-exports.                                                                                      |
+
+The binding also has `/filters`, `/header-filters`, `/editing`,
+`/batch-editing`, `/density`, `/fullscreen` and `/saved-views` entries for
+feature models and Chrome. The native kit supplies matching controls through
+its feature entries. See the [feature import map](./features.md#choose-an-entry-point)
+and [feature contracts](./features.md) for every implemented factory,
+composable and required slot.
 
 Type-only re-exports do not imply matching runtime exports. In particular,
 structural/model helpers and feature functions belong to their entries above;
@@ -27,19 +34,19 @@ getter returning `T | undefined`. Required reactive fields use Vue's
 callbacks, including zero-argument `refetch` functions. A whole-options getter
 is the supported way to replace callback identities.
 
-`requireScope(name): void` throws outside component setup or an active effect
-scope. `useScopeActivity(): Readonly<ShallowRef<boolean>>` becomes active after
+`useScopeActivity(): Readonly<ShallowRef<boolean>>` becomes active after
 component mount, pauses on `KeepAlive` deactivation and becomes false on disposal.
 An explicit non-component effect scope starts active immediately and must be
-stopped by its owner. Server component setup stays inactive.
+stopped by its owner. Browser subscriptions and effects remain inactive during server rendering.
 
 `ExternalStore<T>` contains `getSnapshot(): T` and
 `subscribe(listener: () => void): () => void`.
-`useExternalStore(input: MaybeRefOrGetter<ExternalStore<T>>)` returns a readonly
+`useExternalStore(input: MaybeRefOrGetter<ExternalStore<T>>, options?: ExternalStoreOptions)` returns a readonly
 shallow snapshot ref. It rereads after subscribing, follows store replacement,
 releases inactive subscriptions and ignores notifications from replaced or
 disposed subscriptions. Snapshots and their row/engine objects are not deep-proxied.
-These lifecycle helpers are exported from `@adapttable/vue/adapter`.
+`ExternalStoreOptions.active` optionally adds an activity ref/getter to the
+owning scope's lifecycle. These helpers come from `@adapttable/vue/adapter`.
 
 ## Data sources
 
@@ -180,8 +187,9 @@ memory adapter from the request and supply matching state during hydration.
 `setGroupBy`, `initializeGroupBy` and `setGroupAggregateOverrides`, preserving
 the neutral store signatures. It omits subscription/configuration methods.
 Actions remain stable when the options or namespace changes; after scope
-disposal they no longer mutate state. Query-state support does not itself
-provide a visible filter or grouping control.
+disposal they no longer mutate state. Install the native filter/grouping features to add their controls.
+[Additional slices and Saved Views](./features.md#what-a-view-restores) document
+density, pins, explicit group collapse and the state that is not captured.
 
 ## Columns and rendering
 
@@ -232,6 +240,12 @@ const score: ColumnDef<Person, number> = {
   })),
 };
 ```
+
+`computed<TRow extends object, TValue>(spec: VueComputedColumnSpec<TRow, TValue>)`
+from the binding root creates a derived `ColumnDef`. The spec supplies key,
+header, dependency projection, value calculation, formatting and optional Vue
+column options. Import it as `computedColumn` when also using Vue's `computed`.
+It delegates caching/value semantics to the [computed-column contract](../columns.md).
 
 ## Headless table, layout and selection
 
@@ -298,11 +312,21 @@ and localized labels.
 | Selection           | `selectable`, controlled `selectedIds`, initial `defaultSelectedIds`.                                                                                                                                                                                 |
 | Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                |
 | Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                     |
-| Extensions          | `features?: readonly ComposedFeature<TRow>[]`. Only compose features whose required UI is actually supplied; no native advanced-feature catalog is included.                                                                                          |
+| Extensions          | `features?: readonly ComposedFeature<NoInfer<TRow>>[]`. Compose factories from the native feature entries; the row type is inferred from the data/columns contract.                                                                                   |
 
-Events are `update:selectedIds(ids: string[])` and
-`update:columnLayout(layout: ColumnLayoutState)`. They are change requests;
-prop replacement does not itself emit another request. A template ref exposes
+`density?: TableDensity`, `defaultDensity?: TableDensity`,
+`onDensityChange?: (density: TableDensity) => void` and
+`confirm?: ConfirmHandler` also belong to `DataTableProps`. Density is
+`"comfortable" | "compact"`; `confirm` supplies adapter-owned row-action confirmation.
+
+Events are `update:selectedIds(ids: string[])`,
+`update:columnLayout(layout: ColumnLayoutState)` and
+`update:density(density: TableDensity)`. They are change requests;
+prop replacement does not itself emit another request. The corresponding
+models are `v-model:selected-ids`, `v-model:column-layout` and `v-model:density`.
+The host may accept a request by updating the prop or reject it by keeping the
+current value. `onDensityChange` observes the request once; it is separate from
+the model event. A template ref exposes
 `DataTableHandle<TRow>`: `focus()` focuses the scroll surface, `runtime` is the
 table runtime, and `getView()` returns the current `TableRuntimeView` or
 `undefined` after disposal.
@@ -310,7 +334,8 @@ table runtime, and `getView()` returns the current `TableRuntimeView` or
 `DataTableSlots<TRow>` provides `cell(CellContext)`, `header(HeaderContext)`,
 `toolbar()`, `loading()`, `empty({ noResults, clear })` and
 `error(TableErrorState)`. An error slot receives the real error, optional retry
-and retrying state. A source without `refetch` has no retry action. Custom
+and retrying state. The toolbar slot appends to the built-in toolbar; loading,
+empty and error slots replace status content. A source without `refetch` has no retry action. Custom
 headers own their sorting controls; per-column renderers take precedence.
 
 `DataTableClassNames` keys are applied to the corresponding semantic elements:
@@ -323,6 +348,33 @@ headers own their sorting controls; per-column renderers take precedence.
 - Paging: `footer`, `rowsPerPage`, `pager`, `pagePrev`, `pageNext`, `pageNumber`,
   `pageEllipsis`, `loadMore`, `loadMoreButton`.
 - Status: `loading`, `empty`, `emptyClear`, `error`, `retry`, `refreshing`, `status`.
+
+Optional feature controls use these additional semantic class hooks:
+
+- Filters: `filtersButton`, `filtersClear`, `filtersDone`, `filtersForm`,
+  `filtersPanel`, `filtersActions`, `filtersToolbar`, `filtersPopover`,
+  `filtersDrawer`, `filterField`, `filterLabel`, `filterControl`, `filterInput`,
+  `filterSelect`, `filterCheckbox`, `filterHeaderInput`, `filterHeaderButton`,
+  `filterChecklist`,
+  `filterChecklistSearch`, `filterChecklistActions`, `filterChecklistList`,
+  `filterChecklistCount`, `filterTree`, `filterTreeGroup`, `filterTreeCondition`,
+  `filterTreeActions`, `filterTreeRemove`, `filterTreeSummary`.
+- Editing: `editableCell`, `editCellActivate`, `editCellEditor`, `editCellError`,
+  `editCellSaveError`, `editCellRollback`, `editCellConflictButton`,
+  `rowEditActions`, `rowEditButton`, `batchEditBar`, `batchEditButton`,
+  `editHistory`, `undoButton`, `redoButton`.
+- Hierarchy/actions: `groupRow`, `groupLabel`, `groupToggle`, `groupCount`,
+  `groupAggregate`, `groupMore`, `groupCheckbox`, `treeCell`, `treeToggle`,
+  `treeSpacer`, `expandToggle`, `detailRow`, `detailCell`, `actionsHeader`,
+  `actionsCell`, `cardActions`, `rowAction`, `addRow`, `resizeHandle`.
+- View controls: `densitySelect`, `fullscreenButton`, `viewsMenu`, `viewsButton`,
+  `viewsPanel`, `viewsRow`, `viewsItem`, `viewsDelete`, `viewsDivider`,
+  `viewsSaveRow`, `viewsInput`, `viewsSave`.
+
+`filterOperator` styles native operator selects, and `filterCheckboxGroup`
+styles the multi-select group wrapper. `filterCheckbox` applies to each option's
+label; its input retains its own accessible name. `undoButton` and `redoButton`
+style the history controls.
 
 The table is unthemed. Attribute fallthrough applies ordinary host attributes
 and listeners to the root; binding attributes stay on their semantic targets.
@@ -348,8 +400,9 @@ win over feature patches.
 The result includes `table`, `source`, `selection`, `desktop`, `mobile`,
 `state`, `active`, normalized `features`, `featureHost`, model refs,
 `filterRuntime`, `featureOptions`, `density`, `setDensity`,
-`toolbarExtrasProps`, `renderToolbarExtras`, `slotFills`, `runtime`, `handle`,
-`reconcile` and `setSurface`. Pass a `DataTableSurface` with
+`toolbarExtrasProps`, `renderToolbarExtras`, `renderBatchEditBar`, `slotFills`, `runtime`, `handle`,
+`reconcile`, `setSurface`, `rowInventory`, `grouping`, `tree`, `detail`,
+`urlAdapter` and `flushViewState`. Pass a `DataTableSurface` with
 `scrollElement(): HTMLElement | null` to `setSurface` for the exposed focus
 handle. The shell's `confirm` callback must be supplied by the adapter when a
 row action requests confirmation; the binding does not draw a dialog.
@@ -392,7 +445,8 @@ and `onChange(): void`. The model remains the state owner, so a controlled
 host can accept or reject the requested selection without a kit maintaining
 a second selection store.
 
-Slots `RowActions`, `ColumnGroupToggle`, `ResizeHandle` and `GroupRow` are
+Slots `RowActions`, `ColumnGroupToggle`, `ResizeHandle`, `GroupRow`,
+`TreeToggle` and `RowDetailToggle` are
 optional in the type because their features are optional. When a model needs
 one, it becomes required at render time: missing controls throw rather than
 silently rendering native HTML. Optional `cell` and `header` content slots do
@@ -436,7 +490,10 @@ composition; `StaticFeatureHost` omits row-sensitive menu registrations from
 
 `FeatureMountContext<TRow>` supplies `runtime`, `table`, reactive `featureHost`,
 `filterRuntime` and resolved `options`, owned `state`, the feature's `scope`,
-`active`, `reconcile()`, `flushAdmission()` and `flush(run)`. Setup/mount may
+`active`, `reconcile()`, `flushAdmission()` and `flush(run)`. It also exposes
+`root`, `urlAdapter`, `source`, optional `density`/`rowInventory`,
+`flushViewState()` and `registerViewStateFlush(flush)` for state writers that
+need to finish before Saved Views capture/apply. Setup/mount may
 return cleanup callbacks. Guard external effects using `active`: mount runs
 while composing the feature, including server setup, rather than being an alias
 for Vue's `onMounted`.
@@ -496,7 +553,9 @@ bridge must only pass rows obtained from that same runtime.
 ## Optional model channels
 
 These adapter-entry contracts let custom features supply models to the shell.
-A channel export does not install a feature or provide its required controls.
+The implemented feature factories publish these channels; custom features
+can use the same typed contracts. A channel export alone does not install a
+feature or provide its required controls.
 Typed key functions specialize stable channels to the current row type.
 
 | Channel/helper                                        | Published value and integration                                                                                                                                                                                             |
@@ -511,7 +570,10 @@ Typed key functions specialize stable channels to the current row type.
 `TableBodyProjector<TRow>` maps `TableBodyProjectionInput<TRow>` to
 `TableBodyProjection<TRow>`. The input includes `table`, resolved `options`,
 base `desktop`/`mobile` models and optional `pinning`; the result must supply
-both models so custom row structure remains coherent on desktop and mobile.
+both models so custom row structure remains coherent on desktop and mobile. The input also
+includes optional grouping, tree, detail, selection and `TableRowInventory`;
+its `loadedRows` preserve editing liveness while `visibleRows` define rendered
+hierarchy traversal and selection. See [hierarchy row semantics](./features.md#visible-rows-and-loaded-rows).
 
 `RowActionControlsProjector<TRow>` maps `RowActionControlsInput<TRow>` to readonly
 `RowActionControl<TRow>[]`. Inputs are `row`, `actions`, the adapter `confirm`

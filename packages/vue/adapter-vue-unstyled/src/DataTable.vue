@@ -1,15 +1,35 @@
 <script setup lang="ts" generic="TRow">
 import {
   type ColumnLayoutState,
+  defaultConfirm,
+  DENSITY_CONTROL,
   DesktopTableChrome,
+  FULLSCREEN_CONTROL,
   MobileCardsChrome,
+  renderFeatureSlot,
+  SAVED_VIEWS_CONTROL,
   type TableChromeSlots,
+  type TableDensity,
+  TOOLBAR_EXTRAS,
   useDataTableShell,
 } from "@adapttable/vue/adapter";
-import { computed, h, onBeforeUnmount, shallowRef, watchEffect } from "vue";
+import {
+  computed,
+  h,
+  mergeProps,
+  onBeforeUnmount,
+  shallowRef,
+  watch,
+} from "vue";
 
+import { provideClassNames } from "./classNamesContext";
 import { nativeCheckbox } from "./nativeCheckbox";
 import { nativeColumnGroupToggle } from "./nativeColumnGroupToggle";
+import { nativeHierarchyControls } from "./nativeHierarchyControls";
+import {
+  NATIVE_GROUP_ROW,
+  nativeGroupRowSlotKey,
+} from "./nativeHierarchyControlSlots";
 import type { DataTableProps, DataTableSlots } from "./types";
 
 defineOptions({ inheritAttrs: false });
@@ -27,10 +47,16 @@ const props = withDefaults(defineProps<DataTableProps<TRow>>(), {
 const emit = defineEmits<{
   "update:selectedIds": [ids: string[]];
   "update:columnLayout": [layout: ColumnLayoutState];
+  "update:density": [density: TableDensity];
 }>();
 const slots = defineSlots<DataTableSlots<TRow>>();
 const shell = useDataTableShell<TRow>(() => ({
   ...props,
+  confirm: props.confirm ?? defaultConfirm,
+  onDensityChange: (density) => {
+    props.onDensityChange?.(density);
+    emit("update:density", density);
+  },
   onSelectionChange:
     props.selectable ||
     props.selectedIds !== undefined ||
@@ -41,18 +67,59 @@ const shell = useDataTableShell<TRow>(() => ({
 }));
 const { table } = shell;
 const names = computed(() => props.classNames ?? {});
+provideClassNames(() => names.value);
+const hasToolbarExtras = computed(() =>
+  [
+    TOOLBAR_EXTRAS,
+    DENSITY_CONTROL,
+    FULLSCREEN_CONTROL,
+    SAVED_VIEWS_CONTROL,
+  ].some((slot) => Boolean(shell.slotFills.value.get(slot.id)?.length))
+);
+const ToolbarExtras = () => shell.renderToolbarExtras({ ...names.value });
+const BatchEditBar = () => shell.renderBatchEditBar();
 function controls(): TableChromeSlots<TRow> {
   return {
     SortButton: ({ attrs, content }) => h("button", attrs, [content]),
     SelectionCheckbox: ({ attrs }) => nativeCheckbox(attrs),
     ColumnGroupToggle: nativeColumnGroupToggle,
+    ResizeHandle: ({ attrs }) => h("span", attrs),
+    RowActions: ({ controls: actions }) =>
+      actions.map((action) =>
+        h(
+          "button",
+          mergeProps(action.attrs, {
+            key: action.key,
+            class: names.value.rowAction,
+          }),
+          action.label
+        )
+      ),
+    ...nativeHierarchyControls<TRow>(),
+    GroupRow: (props) => {
+      if (!shell.slotFills.value.get(NATIVE_GROUP_ROW.id)?.length)
+        throw new Error(
+          "AdaptTable: native grouping rows require grouping() from @adapttable/vue-unstyled/grouping."
+        );
+      return renderFeatureSlot(
+        nativeGroupRowSlotKey<TRow>(),
+        shell.slotFills.value,
+        props
+      );
+    },
     cell: slots.cell,
     header: slots.header,
   };
 }
+const rootElement = shallowRef<HTMLElement | null>(null);
 const scrollElement = shallowRef<HTMLElement | null>(null);
-watchEffect(() => {
-  shell.setSurface({ scrollElement: () => scrollElement.value });
+const surface = {
+  rootElement: () => rootElement.value,
+  scrollElement: () => scrollElement.value,
+};
+watch([rootElement, scrollElement], () => shell.setSurface(surface), {
+  immediate: true,
+  flush: "sync",
 });
 onBeforeUnmount(() => {
   shell.setSurface(null);
@@ -90,13 +157,21 @@ const liveStyle = {
 
 <template>
   <div
+    ref="rootElement"
     v-bind="$attrs"
     :dir="table.dir.value"
     data-adapttable-part="root"
+    :data-density="shell.density.value"
     :class="names.root"
   >
     <div
-      v-if="searchable !== false || table.isMobile.value || slots.toolbar"
+      v-if="
+        searchable !== false ||
+        table.isMobile.value ||
+        slots.toolbar ||
+        hasToolbarExtras ||
+        shell.rowActions.value?.canAdd
+      "
       data-adapttable-part="toolbar"
       :class="names.toolbar"
     >
@@ -151,8 +226,19 @@ const liveStyle = {
           }}
         </button>
       </template>
+      <ToolbarExtras />
+      <button
+        v-if="shell.rowActions.value?.canAdd"
+        type="button"
+        data-adapttable-part="add-row"
+        :class="names.addRow"
+        @click="shell.rowActions.value.addRow()"
+      >
+        {{ table.labels.value.addRow }}
+      </button>
       <slot name="toolbar" />
     </div>
+    <BatchEditBar />
     <div
       v-if="table.errorState.value"
       role="alert"

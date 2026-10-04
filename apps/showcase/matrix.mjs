@@ -3424,3 +3424,62 @@ export const VUE_NATIVE_BASELINE = Object.freeze({
     "This development preview is not a published package or a complete feature-parity release.",
   entry: "/src/vue/entry-native.ts",
 });
+
+/** Native Vue showcase pages for implemented table surfaces. */
+export const VUE_NATIVE_PAGES = Object.freeze([
+  VUE_NATIVE_BASELINE,
+  {
+    key: "vue-unstyled-filter-editing",
+    dir: "vue/unstyled/filter-editing",
+    path: "unstyled/filter-editing",
+    title: "Filters and editing — Vue Unstyled — AdaptTable",
+    description: "Native filters, validation and host-controlled saves.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-filter-editing.ts",
+  },
+  {
+    key: "vue-unstyled-composition",
+    dir: "vue/unstyled/composition",
+    path: "unstyled/composition",
+    title: "Composed table lifecycles — Vue Unstyled — AdaptTable",
+    description: "Tree selection, editing and native overlay lifecycles.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-composition.ts",
+  },
+  {
+    key: "vue-unstyled-hierarchy",
+    dir: "vue/unstyled/hierarchy",
+    path: "unstyled/hierarchy",
+    title: "Grouping and trees — Vue Unstyled — AdaptTable",
+    description: "Native grouping, tree expansion and row details.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-hierarchy.ts",
+  },
+  {
+    key: "vue-unstyled-rows",
+    dir: "vue/unstyled/rows",
+    path: "unstyled/rows",
+    title: "Rows and columns — Vue Unstyled — AdaptTable",
+    description: "Controlled pinning, row actions, spans and column resize.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-rows.ts",
+  },
+  {
+    key: "vue-unstyled-selection-contract",
+    dir: "vue/unstyled/selection-contract",
+    path: "unstyled/selection-contract",
+    title: "Selection controls — Vue Unstyled — AdaptTable",
+    description: "Native selection, keyboard input and controlled updates.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-selection-contract.ts",
+  },
+  {
+    key: "vue-unstyled-view-controls",
+    dir: "vue/unstyled/view-controls",
+    path: "unstyled/view-controls",
+    title: "View controls — Vue Unstyled — AdaptTable",
+    description: "Density, fullscreen and saved views with native controls.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-view-controls.ts",
+  },
+]);

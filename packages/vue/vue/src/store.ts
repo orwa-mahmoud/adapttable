@@ -1,4 +1,5 @@
 import {
+  computed,
   getCurrentInstance,
   getCurrentScope,
   type MaybeRefOrGetter,
@@ -68,11 +69,18 @@ export function useScopeActivity(): Readonly<ShallowRef<boolean>> {
  * suspended or disposed subscription can never publish a late notification.
  * @public
  */
+export interface ExternalStoreOptions {
+  readonly active?: MaybeRefOrGetter<boolean>;
+}
 export function useExternalStore<T>(
-  input: MaybeRefOrGetter<ExternalStore<T>>
+  input: MaybeRefOrGetter<ExternalStore<T>>,
+  options: ExternalStoreOptions = {}
 ): Readonly<ShallowRef<T>> {
   requireScope("useExternalStore");
-  const active = useScopeActivity();
+  const ownerActive = useScopeActivity();
+  const active = computed(
+    () => ownerActive.value && (toValue(options.active) ?? true)
+  );
   const snapshot = shallowRef<T>(toValue(input).getSnapshot());
   let connecting = false;
   let pending: (() => void) | undefined;

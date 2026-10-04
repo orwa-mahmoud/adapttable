@@ -8,7 +8,14 @@
     "paths": {
       "@adapttable/vue": ["./src/index.ts"],
       "@adapttable/vue/adapter": ["./src/adapter.ts"],
-      "@adapttable/vue/features": ["./src/features.ts"]
+      "@adapttable/vue/features": ["./src/features.ts"],
+      "@adapttable/vue/filters": ["./src/filters.ts"],
+      "@adapttable/vue/header-filters": ["./src/header-filters.ts"],
+      "@adapttable/vue/editing": ["./src/editing.ts"],
+      "@adapttable/vue/batch-editing": ["./src/batch-editing.ts"],
+      "@adapttable/vue/density": ["./src/density.ts"],
+      "@adapttable/vue/fullscreen": ["./src/fullscreen.ts"],
+      "@adapttable/vue/saved-views": ["./src/saved-views.ts"]
     }
   },
   "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts"],

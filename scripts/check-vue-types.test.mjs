@@ -43,6 +43,25 @@ describe("Vue negative type fixture harness", () => {
     assert.match(missing[0], /WrongRow.vue: missing expected TS2322/);
   });
 
+  it("counts repeated intended diagnostics exactly", () => {
+    const repeated = {
+      ...options,
+      output: `${output}\n${output}`,
+      expectations: {
+        "WrongValue.vue": [{ ...expectations["WrongValue.vue"][0], count: 2 }],
+      },
+    };
+    assert.deepEqual(diagnosticProblems(repeated), []);
+    assert.match(
+      diagnosticProblems({ ...repeated, output })[0],
+      /expected 2 occurrence.*got 1/
+    );
+    assert.match(
+      diagnosticProblems({ ...options, output: `${output}\n${output}` })[0],
+      /expected 1 occurrence.*got 2/
+    );
+  });
+
   it("fails when an invalid fixture compiles or the compiler crashes", () => {
     for (const status of [0, 1, null]) {
       const problems = diagnosticProblems({ ...options, status, output: "" });
@@ -135,7 +154,7 @@ describe("Vue negative type fixture harness", () => {
     );
   });
 
-  it("discovers every SFC, including nested fixtures", (t) => {
+  it("discovers every SFC and TypeScript consumer, including nested fixtures", (t) => {
     const root = mkdtempSync(join(tmpdir(), "adapttable-vue-fixtures-"));
     t.after(() => rmSync(root, { recursive: true, force: true }));
     mkdirSync(join(root, "nested"));
@@ -145,7 +164,12 @@ describe("Vue negative type fixture harness", () => {
       "<template><div /></template>"
     );
     writeFileSync(join(root, "tsconfig.json"), "{}");
+    writeFileSync(
+      join(root, "WrongFeature.ts"),
+      "export const invalid = true;"
+    );
     assert.deepEqual(invalidFixtures(root), [
+      "WrongFeature.ts",
       "WrongValue.vue",
       "nested/WrongRows.vue",
     ]);

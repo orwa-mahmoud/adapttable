@@ -17,23 +17,23 @@ repository root, build the binding, native kit and their workspace dependencies:
 pnpm --filter @adapttable/vue-unstyled... build
 ```
 
-The implemented native table includes search, sorting and multi-sort, paged or
-infinite loading, row selection, responsive mobile cards, grouped column
-headings, controlled column layout, loading/refreshing states, empty results,
-and errors with optional retry. The binding also exposes typed renderer,
-custom-feature, model-channel and structural Chrome contracts for adapter authors.
+The native table includes search, sorting and multi-sort, paged or infinite
+loading, row selection, responsive mobile cards, grouped column headings,
+controlled column layout and loading/error states. Optional native features add
+filters and header filters, cell/row/batch editing, grouping, tree data, row
+details and nested tables, resizing, row presentation and actions, density,
+fullscreen and Saved Views. The [Vue feature guide](./features.md) lists their
+imports, signatures and composition boundaries.
 
-This is a limited experimental surface. It does not include the complete
-React/Angular feature catalog, styled Vue kits, a Vue AI binding or a standard
-feature preset. Exported extension types for editing, grouping, filtering and
-other advanced models are building blocks, not installed native controls.
-In particular, the current native kit does not supply resize handles,
-grouped-row controls or row-action menus.
-Do not copy another framework's feature imports into a Vue table.
+The binding also exposes typed renderer, model and structural Chrome contracts
+for adapter authors. Every interactive control belongs to its kit. Use native
+factories from `@adapttable/vue-unstyled` feature subpaths with the native table;
+binding-only factories require the corresponding adapter slots.
 
-Set `collapsibleColumnGroups` to render native desktop group-header buttons.
-They update the same controlled or local column layout. Mobile cards honor the
-collapsed visibility but do not render desktop group-header controls.
+These packages are experimental and do not yet provide the complete
+React/Angular feature catalog or styled Vue kits. There is no standard Vue
+feature preset. Do not copy another framework's feature imports into a Vue
+table; use the documented Vue entry points.
 
 For strict template checking, use Vue tooling with `strictTemplates: true`.
 If your template checker restricts custom data attributes, its
@@ -86,14 +86,56 @@ never owns or mutates the data.
 
 `v-model:selected-ids` accepts selection requests through `update:selectedIds`.
 To inspect or reject a request, pass `:selected-ids` and handle
-`@update:selected-ids` yourself. The same pattern applies to `columnLayout` and
-`update:columnLayout`. Use `selectable` and `defaultSelectedIds` for local
+`@update:selected-ids` yourself. The same pattern applies to `columnLayout`/`update:columnLayout` and
+`density`/`update:density`. Use `selectable` and `defaultSelectedIds` for local
 selection. Initial defaults do not reset later user changes.
 
 The kit supplies native controls and no stylesheet. Its `classNames` target
 semantic table, card and control elements; ordinary class/style/listener
 attributes fall through to the root. See the [Vue API](./api.md#native-table)
 for the complete prop, slot and class-name contracts.
+
+## Add filters, editing and view controls
+
+This extends the first table. Mark a column editable, compose the native
+features and pass the resulting array as `:features="features"`:
+
+```ts
+import { filters } from "@adapttable/vue-unstyled/filters";
+import { headerFilters } from "@adapttable/vue-unstyled/header-filters";
+import { editing } from "@adapttable/vue-unstyled/editing";
+import { densityChooser } from "@adapttable/vue-unstyled/density";
+import { savedViews } from "@adapttable/vue-unstyled/saved-views";
+
+// Replace the first example's columns declaration with this one.
+const columns: ColumnDef<Person>[] = [
+  { key: "name", header: "Name", sortable: true, editable: true },
+  { key: "score", header: "Score", sortable: true },
+];
+const features = [
+  filters<Person>([{ key: "name", type: "text", label: "Name" }]),
+  headerFilters(),
+  editing<Person>((row, key, value) => {
+    rows.value = rows.value.map((item) =>
+      item.id === row.id ? { ...item, [key]: value } : item
+    );
+  }),
+  densityChooser(),
+  savedViews({ storageKey: "people-views" }),
+];
+```
+
+The host applies each edit; for a server write, return its promise and publish
+the new rows when it succeeds. `rowEditing` requests one row patch on Save;
+`batchEditing` stages multiple row patches until the shared Save action.
+See [editing and persistence](./features.md#editing-and-host-persistence) for
+validation, conflict handling and undo/redo requirements.
+
+Saved Views capture the state connected to the table's URL backend, including
+filters and density. With `urlSync: false`, the fallback table source and
+installed view features share an in-memory backend. Column layout, selection,
+tree/detail expansion and edit drafts are not automatically captured; see
+[what a view restores](./features.md#what-a-view-restores).
 
 ## Reactive sources and headless use
 
@@ -189,5 +231,6 @@ For request-specific URL state, pass a request-local memory adapter seeded from
 the incoming URL and reuse the seed on the client. A query library's own SSR and
 `KeepAlive` policies remain that library's responsibility.
 
-Continue with the [Vue API reference](./api.md) for the full experimental
-contracts and the [shared concepts](../concepts.md) for engine ownership.
+Continue with the [Vue feature guide](./features.md) for composition examples,
+the [Vue API reference](./api.md) for component and adapter contracts, and the
+[shared concepts](../concepts.md) for engine ownership.

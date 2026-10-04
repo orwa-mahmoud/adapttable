@@ -65,7 +65,77 @@
         "default": "./dist/features.cjs"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./filters": {
+      "import": {
+        "types": "./dist/filters.d.ts",
+        "default": "./dist/filters.js"
+      },
+      "require": {
+        "types": "./dist/filters.d.cts",
+        "default": "./dist/filters.cjs"
+      }
+    },
+    "./header-filters": {
+      "import": {
+        "types": "./dist/header-filters.d.ts",
+        "default": "./dist/header-filters.js"
+      },
+      "require": {
+        "types": "./dist/header-filters.d.cts",
+        "default": "./dist/header-filters.cjs"
+      }
+    },
+    "./editing": {
+      "import": {
+        "types": "./dist/editing.d.ts",
+        "default": "./dist/editing.js"
+      },
+      "require": {
+        "types": "./dist/editing.d.cts",
+        "default": "./dist/editing.cjs"
+      }
+    },
+    "./batch-editing": {
+      "import": {
+        "types": "./dist/batch-editing.d.ts",
+        "default": "./dist/batch-editing.js"
+      },
+      "require": {
+        "types": "./dist/batch-editing.d.cts",
+        "default": "./dist/batch-editing.cjs"
+      }
+    },
+    "./density": {
+      "import": {
+        "types": "./dist/density.d.ts",
+        "default": "./dist/density.js"
+      },
+      "require": {
+        "types": "./dist/density.d.cts",
+        "default": "./dist/density.cjs"
+      }
+    },
+    "./fullscreen": {
+      "import": {
+        "types": "./dist/fullscreen.d.ts",
+        "default": "./dist/fullscreen.js"
+      },
+      "require": {
+        "types": "./dist/fullscreen.d.cts",
+        "default": "./dist/fullscreen.cjs"
+      }
+    },
+    "./saved-views": {
+      "import": {
+        "types": "./dist/saved-views.d.ts",
+        "default": "./dist/saved-views.js"
+      },
+      "require": {
+        "types": "./dist/saved-views.d.cts",
+        "default": "./dist/saved-views.cjs"
+      }
+    }
   },
   "repository": {
     "type": "git",

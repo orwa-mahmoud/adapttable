@@ -40,6 +40,7 @@ import {
   otherKitsOf,
   snippetFor,
   VUE_NATIVE_BASELINE,
+  VUE_NATIVE_PAGES,
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
 import { appendScript, guarded } from "./analytics-guard.mjs";
@@ -565,9 +566,9 @@ export const angularModePage = (lab = false) => {
   };
 };
 
-/** Native Vue's single implemented development-preview surface. */
-export const nativeVuePage = () => {
-  const { dir, title, description, path, entry, notice } = VUE_NATIVE_BASELINE;
+/** A native Vue showcase surface. */
+export const nativeVuePage = (definition = VUE_NATIVE_BASELINE) => {
+  const { dir, title, description, path, entry, notice } = definition;
   return {
     dir,
     html: htmlDocument(
@@ -587,7 +588,7 @@ export const nativeVuePage = () => {
 
 /** Every HTML file this writes, as `{ dir, html }`. */
 export const showcaseHtmlFiles = () => [
-  nativeVuePage(),
+  ...VUE_NATIVE_PAGES.map(nativeVuePage),
   angularModePage(),
   angularModePage(true),
   ...matrixPages().map((page) => {

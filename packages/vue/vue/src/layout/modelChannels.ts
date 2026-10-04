@@ -7,19 +7,31 @@ import type {
 } from "@adapttable/core";
 /** Typed channels owned by the binding; optional factories publish their models. */
 import {
+  BATCH_EDIT_BAR,
+  type BatchEditBarProps,
   EDITABLE_CELL,
   type EditableCellSlotProps,
   type FeatureSlotKey,
+  featureSlotKey,
   type FeatureStateKey,
   featureStateKey,
   FILTER_HEADER,
   type FilterHeaderControlProps,
+  ROW_EDIT_ACTIONS,
+  type RowEditActionsProps,
   type RowPinningState,
 } from "@adapttable/core/binding";
 import type { VNodeChild } from "vue";
 
 import type { Attrs } from "../attrs";
 import type { ColumnDef } from "../columnDef";
+import type {
+  TableGrouping,
+  TableRowDetail,
+  TableTree,
+} from "../hierarchy/models";
+import type { TableRowInventory } from "../hierarchy/rowInventory";
+import type { RowSelection } from "../selection/selection";
 import type { UseDataTableResult } from "../useDataTable";
 import type { ResolvedTableOptions } from "../useDataTableShell";
 import type { DesktopTableModel, MobileCardsModel } from "./tableModels";
@@ -34,10 +46,15 @@ export function rowPinningModelKey<TRow>(): FeatureStateKey<
 }
 export interface TableBodyProjectionInput<TRow> {
   readonly table: UseDataTableResult<TRow>;
+  readonly rowInventory?: TableRowInventory<TRow>;
   readonly options: ResolvedTableOptions<TRow>;
   readonly desktop: DesktopTableModel<TRow>;
   readonly mobile: MobileCardsModel<TRow>;
   readonly pinning?: RowPinningState<TRow>;
+  readonly grouping?: TableGrouping<TRow>;
+  readonly tree?: TableTree<TRow>;
+  readonly detail?: TableRowDetail<TRow>;
+  readonly selection?: RowSelection;
 }
 export interface TableBodyProjection<TRow> {
   readonly desktop: DesktopTableModel<TRow>;
@@ -50,19 +67,19 @@ export type TableBodyProjector<TRow> = (
 export const EDITING_MODEL =
   featureStateKey<EditingBundle<unknown>>("vue-editing-model");
 export function editingModelKey<TRow>(): FeatureStateKey<EditingBundle<TRow>> {
-  return EDITING_MODEL as unknown as FeatureStateKey<EditingBundle<TRow>>;
+  return featureStateKey<EditingBundle<TRow>>(EDITING_MODEL.id);
 }
 export function editableCellSlotKey<TRow>(): FeatureSlotKey<
   EditableCellSlotProps<TRow, EditingBundle<TRow>, ColumnDef<TRow>, VNodeChild>
 > {
-  return EDITABLE_CELL as unknown as FeatureSlotKey<
+  return featureSlotKey<
     EditableCellSlotProps<
       TRow,
       EditingBundle<TRow>,
       ColumnDef<TRow>,
       VNodeChild
     >
-  >;
+  >(EDITABLE_CELL.id, { single: EDITABLE_CELL.single });
 }
 export interface RowActionsModel<TRow> {
   readonly canAdd: boolean;
@@ -118,16 +135,14 @@ export const HEADER_FILTER_MODEL = featureStateKey<HeaderFilterModel<unknown>>(
 export function headerFilterModelKey<TRow>(): FeatureStateKey<
   HeaderFilterModel<TRow>
 > {
-  return HEADER_FILTER_MODEL as unknown as FeatureStateKey<
-    HeaderFilterModel<TRow>
-  >;
+  return featureStateKey<HeaderFilterModel<TRow>>(HEADER_FILTER_MODEL.id);
 }
 export function headerFilterSlotKey<TRow>(): FeatureSlotKey<
   VueHeaderFilterControlProps<TRow>
 > {
-  return FILTER_HEADER as unknown as FeatureSlotKey<
-    VueHeaderFilterControlProps<TRow>
-  >;
+  return featureSlotKey<VueHeaderFilterControlProps<TRow>>(FILTER_HEADER.id, {
+    single: FILTER_HEADER.single,
+  });
 }
 
 export const EDIT_HISTORY_MODEL = featureStateKey<EditHistoryState<unknown>>(
@@ -137,4 +152,37 @@ export function editHistoryModelKey<TRow>(): FeatureStateKey<
   EditHistoryState<TRow>
 > {
   return EDIT_HISTORY_MODEL;
+}
+
+/** Optional editing structure; the model supplies only props and host actions. */
+export interface EditingChromeModel<TRow> {
+  readonly row?: (
+    row: TRow,
+    rowId: string,
+    actions: readonly RowAction<TRow>[] | undefined
+  ) => {
+    readonly props: RowEditActionsProps<TRow>;
+    readonly actions: readonly RowAction<TRow>[];
+  };
+  readonly batch?: BatchEditBarProps<TRow>;
+}
+export const EDITING_CHROME_MODEL = featureStateKey<
+  EditingChromeModel<unknown>
+>("vue-editing-chrome-model");
+export function editingChromeModelKey<TRow>(): FeatureStateKey<
+  EditingChromeModel<TRow>
+> {
+  return featureStateKey<EditingChromeModel<TRow>>(EDITING_CHROME_MODEL.id);
+}
+export function rowEditActionsSlotKey<TRow>(): FeatureSlotKey<
+  RowEditActionsProps<TRow>
+> {
+  return featureSlotKey<RowEditActionsProps<TRow>>(ROW_EDIT_ACTIONS.id, {
+    single: ROW_EDIT_ACTIONS.single,
+  });
+}
+export function batchEditBarSlotKey<TRow>(): FeatureSlotKey<
+  BatchEditBarProps<TRow>
+> {
+  return BATCH_EDIT_BAR;
 }

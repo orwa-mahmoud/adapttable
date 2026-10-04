@@ -3996,8 +3996,9 @@ DataModeProps`: the base carries every prop except the data mode, which is
 `@adapttable/vue` and `@adapttable/vue-unstyled` are public packages prepared for an
 experimental `0.1.0` release, requiring Vue `^3.5.0`. They have not been published
 to npm. The [Vue getting-started guide](./vue/getting-started.md) and
-[Vue API reference](./vue/api.md) describe the implemented source, rendering,
-lifecycle and native-control surface. The React prop tables above do not define
+[Vue API reference](./vue/api.md) describe the source, rendering, lifecycle
+and native-control surface; the [Vue feature guide](./vue/features.md) covers
+the implemented optional filter, editing, hierarchy, row and view-control composition. The React prop tables above do not define
 Vue's API, and exported Vue extension channels do not imply complete feature
 parity, styled kits or a Vue AI integration.
 
@@ -4035,7 +4036,6 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | `TableHeaderModel`, `TableRowModel`, `TableCellModel`, `TableBodySlot`                                          | Header controls/context, row wiring, cell context/decorations and structural row/group/extra/padding variants.                                                                                                |
 | `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                                                                     | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                                                                     |
 | `elementRef`, `composeElementRefs`                                                                              | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
-| `requireScope(name)`                                                                                            | Reject resource ownership outside setup or an active effect scope.                                                                                                                                            |
 | `useScopeActivity()`                                                                                            | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                                                                               |
 | `useExternalStore(store)`                                                                                       | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                                                                            |
 | `FeatureLifecycle`, `useFeatureLifecycle`                                                                       | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                                                                    |
@@ -4070,3 +4070,69 @@ do not install UI or make the current native kit support every feature.
 See the [Vue reference](./vue/api.md) for signatures, lifecycle details, typed
 examples and the exact native `DataTableProps`, `DataTableSlots` and
 `DataTableClassNames` contracts.
+
+### Vue integrated feature contracts
+
+Use the native import map and examples in [Vue feature composition](./vue/features.md).
+Binding factories provide behavior and require adapter slots; the native kit's
+factories include the corresponding controls. Public entry points are listed
+in the [Vue API](./vue/api.md#entry-points).
+
+| Filter export                                                                             | Signature or role                                                                                                                                            |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FiltersOptions`, `filters`, `filterTypes`                                                | `filters<TRow>(defs?, { mode?, tree? })`; `filterTypes(specs)` registers filter semantics. See [Vue filtering](./vue/features.md#filtering).                 |
+| `FILTER_VIEW`, `filterViewKey`, `FilterPanelModel`                                        | Table-owned panel state: definitions/source/registry, trigger, anchor, mode, optional tree and fullscreen container.                                         |
+| `FilterPanelChrome`, `FilterPanelSlots`, `FilterPanelClassNames`                          | Structural form/panel using required Trigger, Button, Field, Popover and Drawer slots, plus Tree when enabled; wrapper class hooks.                          |
+| `FilterTriggerProps`, `FilterPanelButtonProps`, `FilterPanelSurfaceProps`                 | Trigger count/ref/actions, labeled action button, and open/anchor/content/container/close contracts for kit overlays.                                        |
+| `useTextFilter`, `useRangeFilter`, `useBooleanFilter`                                     | Reactive definition and source inputs to computed widget models with guarded write actions.                                                                  |
+| `useFilterField`, `FilterFieldOptions`, `FilterFieldModel`, `FilterFieldControl`          | Definition/source/labels/registry input to an ID, label, loading/error and discriminated control list; explicit ID required outside a component.             |
+| `FilterFieldChrome`, `FilterFieldSlots`, `FilterFieldClassNames`                          | Structural field with required Input/Select/Checkbox slots and field/label/control class hooks.                                                              |
+| `FilterInputProps`, `FilterSelectProps`, `FilterCheckboxProps`                            | Labels, current values or checked state, semantic attrs and a single value-change action for filter controls.                                                |
+| `useChecklistWindow`, `useChecklistModel`, `ChecklistChromeModel`                         | Reactive virtual choice window and combined checklist state/labels/ref/scroll projection consumed by `ChecklistChrome`. This does not virtualize table rows. |
+| `useFilterTree`, `FilterTreeOptions`                                                      | Definitions and a source with tree writes to refs for disclosure/tree/actions; add, replace, remove and change combinators.                                  |
+| `useFilterTreeModel`, `FilterTreeModel`, `FilterTreeChrome`                               | Resolve labels/registry and render recursive AND/OR structure through Select/Input/Button/Disclosure slots.                                                  |
+| `useHeaderFilter`, `HeaderFilterOptions`, `HeaderFilterChrome`, `HeaderFilterChromeSlots` | Computed header overlay state from neutral props plus optional ID/direction; required Trigger/Popover/Field controls.                                        |
+| `NativeFilterField`, `NativeChecklistFilter`, `NativeFilterTree`, `NativeHeaderFilter`    | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                     |
+
+| Editing export                                                                         | Signature or role                                                                                                                                                                                          |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TableEditingOptions`, `TableEditingModel`, `useTableEditing`                          | Host rows, columns, row key, write callbacks and lifecycle/validation options to computed editing bundle and history. [Vue editing example and contracts](./vue/features.md#editing-and-host-persistence). |
+| `ExternalStoreOptions`                                                                 | Optional reactive `active` input shared by editing composables and `useExternalStore`; the owner scope still gates resources.                                                                              |
+| `useEditValidation`                                                                    | Reactive `EditValidationStoreOptions` to validation state and async check; obsolete checks are invalidated.                                                                                                |
+| `useEditableCell`, `useEditableCellModel`, `VueEditableCellProps`, `EditableCellModel` | Neutral cell-controller input or Vue slot props to guarded controller and activation/editor/focus/error presentation.                                                                                      |
+| `EditableCellChrome`, `EditableCellChromeSlots`, `EditableCellClassNames`              | Structural editable cell using required Activate/Editor/Button slots; wrapper/error class hooks.                                                                                                           |
+| `EditableCellEditorProps`, `editableCustomControl`                                     | Controller, label, semantic attrs, focus/change/blur/keyboard actions; `editableCustomControl(model)` maps them to `CustomCellEditorCtrl`.                                                                 |
+| `EditingActionSlots`, `EditingActionButtonProps`                                       | Required Button contract used by `RowEditActionsChrome`/`BatchEditBarChrome`; label, part, optional icon, semantic attrs and click action.                                                                 |
+| `EDITING_CHROME_MODEL`, `editingChromeModelKey`, `EditingChromeModel`                  | One table-owned row/batch action projection over the editing bundle.                                                                                                                                       |
+| `rowEditActionsSlotKey`, `batchEditBarSlotKey`                                         | Required row-typed feature slots for row Save/Cancel actions and the batch save bar.                                                                                                                       |
+| `NativeEditableCell`, `NativeRowEditActions`, `NativeBatchEditBar`                     | Native implementations of editable-cell, row-action and batch-bar prop contracts.                                                                                                                          |
+
+| Hierarchy, rows and columns export                      | Signature or role                                                                                                                                                                                     |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `groupingModelKey`, `treeModelKey`, `rowDetailModelKey` | Typed state keys for `TableGrouping`, `TableTree` and `TableRowDetail`. See [Vue hierarchy](./vue/features.md#grouping-trees-and-expandable-rows).                                                    |
+| `GroupRowModel`, `TreeCellModel`, `RowDetailModel`      | Group controls/aggregate layout, a tree entry with semantic toggle attrs, and an expanded detail renderer with toggle attrs.                                                                          |
+| `GroupRowChrome`, `GroupRowChromeProps`                 | Desktop/mobile group structure with required Button and Checkbox slots.                                                                                                                               |
+| `mountGrouping`                                         | `mountGrouping(context: FeatureMountContext<TRow>): void` installs the scoped grouping model; ordinary consumers compose `grouping()`.                                                                |
+| `LazyChildrenVueOptions`                                | Neutral lazy-loading options plus reactive `enabled`; `useLazyChildren` returns computed loading/failure state and `loadIfNeeded`.                                                                    |
+| `TableRowInventory`                                     | Separate loaded rows for edit liveness and visible hierarchy rows for selection/runtime traversal. [Visible versus loaded rows](./vue/features.md#visible-rows-and-loaded-rows).                      |
+| `HeadlessRowsOptions`, `HeadlessBodySlot`               | Span, summary, extra-row, appearance and offset inputs for row projection; alias of the Vue structural body-slot union.                                                                               |
+| `RowMutationAction`, `rowActionControls`                | A host mutation action preserving the persistence result, and a projection to semantic controls with guarded confirmation. [Vue row actions](./vue/features.md#columns-rows-and-actions).             |
+| `ColumnResizeHandleOptions`, `ColumnResizeHandleProps`  | Cancellation/options and semantic pointer/keyboard props for a resize handle; the binding owns its interaction lifetime.                                                                              |
+| `resolveCellSpan`                                       | `resolveCellSpan(args, getCellSpan, remainingCols, remainingRows)` resolves/clamps span geometry for a body projector.                                                                                |
+| `VueComputedColumnSpec`, `computed`                     | The Vue root's `computed(spec)` derives a `ColumnDef` with typed Vue column options; alias it on import when also using Vue's reactive `computed`. [Vue columns](./vue/api.md#columns-and-rendering). |
+
+| URL and view-control export                                                                  | Signature or role                                                                                                                                                            |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useUrlSlice`, `UrlSliceOptions`                                                             | Reactive URL adapter/key/sync/SSR seed plus neutral spec/config to a readonly value ref, `set` and `flush`. [Vue state persistence](./vue/features.md#what-a-view-restores). |
+| `DENSITY_URL_WRITE_DEBOUNCE_MS`                                                              | Shared delay used by the density URL slice; call its returned `flush` to finish pending writes.                                                                              |
+| `ViewControlPresentation`, `ViewControlButtonProps`                                          | Resolved labels, direction, optional classes/container; a button receives semantic attrs and label.                                                                          |
+| `DensityControlProps`, `DensityChooserSlots`, `DensityChooserChrome`, `DENSITY_CONTROL`      | Effective density/change action and required Control slot with localized options; installs through `densityChooser()`.                                                       |
+| `FullscreenControlProps`, `FullscreenButtonChrome`, `FULLSCREEN_CONTROL`, `FULLSCREEN_MODEL` | Browser fullscreen state, required Button slot and table-owned model; no control renders when unsupported.                                                                   |
+| `SavedViewsControlProps`, `SAVED_VIEWS_CONTROL`, `SAVED_VIEWS_MODEL`                         | Saved-view model/actions carried by the required native/kit control slot and table state channel.                                                                            |
+| `SavedViewsMenuChrome`, `SavedViewsMenuChromeProps`, `SavedViewsMenuSlots`                   | Disclosure, keyboard and focus structure requiring Trigger/Button/Input/Panel controls. [Vue Saved Views](./vue/features.md#density-fullscreen-and-saved-views).             |
+
+The Vue column-layout controller does not automatically persist to the URL.
+Saved Views restore connected URL slices; controlled props stay authoritative,
+and selection, tree/detail expansion, edit drafts and host data are not captured.
+See [what a view restores](./vue/features.md#what-a-view-restores) before choosing
+which state your application persists.

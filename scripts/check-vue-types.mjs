@@ -19,6 +19,52 @@ import { pathToFileURL } from "node:url";
 /** Every fixture's diagnostic identity, separate from the invalid source. */
 export const VUE_TYPE_EXPECTATIONS = {
   "@adapttable/vue": {
+    "UnsupportedFeatureEnabled.ts": [
+      {
+        code: 2353,
+        message: /'enabled' does not exist in type/,
+        count: 4,
+      },
+    ],
+    "MissingFilterControls.ts": [
+      { code: 2741, message: /Property 'Select' is missing/ },
+    ],
+    "WrongEditing.ts": [
+      {
+        code: 2322,
+        message: /TableFeature<\{ number: number; \}>.*TableFeature<Row>/,
+        count: 2,
+      },
+      { code: 2741, message: /Property 'Button' is missing/ },
+    ],
+    "WrongFilterRow.ts": [
+      {
+        code: 2322,
+        message: /TableFeature<\{ other: number; \}>.*TableFeature<Row>/,
+      },
+    ],
+    "WrongHeadlessFeatures.ts": [
+      {
+        code: 2322,
+        message: /TableFeature<Wrong>.*TableFeature<Row>/,
+        count: 4,
+      },
+      { code: 2322, message: /ColumnDef<Row, string>.*ColumnDef<Row, number>/ },
+      { code: 2322, message: /Type '\(\) => Date' is not assignable/ },
+    ],
+    "WrongHierarchyIds.ts": [
+      {
+        code: 2322,
+        message: /Type 'number' is not assignable to type 'string'/,
+        count: 2,
+      },
+    ],
+    "WrongHierarchyRow.ts": [
+      {
+        code: 2322,
+        message: /TableFeature<Invoice>.*ComposedFeature<NoInfer<Person>>/,
+      },
+    ],
     "WrongSelectionControl.vue": [
       {
         code: 2322,
@@ -41,6 +87,25 @@ export const VUE_TYPE_EXPECTATIONS = {
     ],
   },
   "@adapttable/vue-unstyled": {
+    "hierarchy/UnsupportedFeatureEnabled.ts": [
+      {
+        code: 2353,
+        message: /'enabled' does not exist in type/,
+        count: 4,
+      },
+    ],
+    "filter-editing/UnsupportedHistoryClassNames.ts": [
+      {
+        code: 2561,
+        message:
+          /'editHistoryUndo' does not exist in type 'DataTableClassNames'/,
+      },
+      {
+        code: 2561,
+        message:
+          /'editHistoryRedo' does not exist in type 'DataTableClassNames'/,
+      },
+    ],
     "InvalidSelectionEvent.vue": [
       {
         code: 2322,
@@ -71,6 +136,74 @@ export const VUE_TYPE_EXPECTATIONS = {
       {
         code: 2339,
         message: /Property 'toUpperCase' does not exist on type 'number'/,
+      },
+    ],
+    "hierarchy/InvalidNativeFeatureRow.vue": [
+      {
+        code: 2322,
+        message: /TableFeature<Invoice>\[\].*ComposedFeature<NoInfer<Person>>/,
+      },
+    ],
+    "hierarchy/InvalidNativeRowAction.ts": [
+      { code: 2322, message: /amount: number.*row: Person/ },
+    ],
+    "hierarchy/InvalidNativeTreeIds.ts": [
+      {
+        code: 2322,
+        message: /Type 'number' is not assignable to type 'string'/,
+      },
+    ],
+    "filter-editing/InvalidEditingCallbacks.ts": [
+      { code: 2345, message: /CellEditHandler<Person>/ },
+      { code: 2345, message: /row: Person, patch:/ },
+      { code: 2345, message: /readonly BatchRowEdit<Person>\[\]/ },
+      { code: 2322, message: /floating.*popover.*drawer/ },
+      {
+        code: 2322,
+        message: /Type 'string' is not assignable to type 'number'/,
+      },
+    ],
+    "filter-editing/InvalidEditingRows.vue": [
+      {
+        code: 2322,
+        message: /TableFeature<number>\[\].*ComposedFeature<NoInfer<Person>>/,
+      },
+    ],
+    "view-controls/InvalidDensity.vue": [
+      {
+        code: 2322,
+        message: /Type '"dense"' is not assignable to type 'TableDensity/,
+      },
+      {
+        code: 2322,
+        message: /Type '"tiny"' is not assignable to type 'TableDensity/,
+      },
+    ],
+    "view-controls/InvalidDensityEvent.vue": [
+      {
+        code: 2322,
+        message: /number\) => void.*\(density: TableDensity\) =>/,
+        count: 2,
+      },
+    ],
+    "view-controls/InvalidFeatureOptions.ts": [
+      { code: 2554, message: /Expected 0 arguments, but got 1/, count: 2 },
+      {
+        code: 2322,
+        message: /Type 'number' is not assignable to type 'string'/,
+        count: 2,
+      },
+      {
+        code: 2739,
+        message:
+          /missing the following properties from type 'SavedViewsPanelProps': onApply, onRename, onMove, onSetDefault, onRemove/,
+      },
+    ],
+    "view-controls/InvalidSavedViewCallbacks.vue": [
+      {
+        code: 2322,
+        message: /Type '\(_value: number\) => void' is not assignable/,
+        count: 5,
       },
     ],
   },
@@ -157,17 +290,17 @@ export function diagnosticProblems({
   }
   for (const [file, expected] of Object.entries(expectations)) {
     for (const diagnostic of expected) {
-      if (
-        !byFile
-          .get(file)
-          ?.some(
-            (found) =>
-              found.code === diagnostic.code &&
-              diagnostic.message.test(found.message)
-          )
-      ) {
+      const actual = (byFile.get(file) ?? []).filter(
+        (found) =>
+          found.code === diagnostic.code &&
+          diagnostic.message.test(found.message)
+      ).length;
+      const expectedCount = diagnostic.count ?? 1;
+      if (actual !== expectedCount) {
         problems.push(
-          `${file}: missing expected TS${diagnostic.code} ${diagnostic.message}`
+          actual === 0
+            ? `${file}: missing expected TS${diagnostic.code} ${diagnostic.message}`
+            : `${file}: expected ${expectedCount} occurrence(s) of TS${diagnostic.code} ${diagnostic.message}; got ${actual}`
         );
       }
     }
@@ -182,7 +315,7 @@ export function invalidFixtures(dir, prefix = "") {
       const file = prefix ? `${prefix}/${entry.name}` : entry.name;
       if (entry.isDirectory())
         return invalidFixtures(join(dir, entry.name), file);
-      return entry.name.endsWith(".vue") ? [file] : [];
+      return /\.(vue|ts)$/.test(entry.name) ? [file] : [];
     })
     .sort();
 }

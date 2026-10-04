@@ -1,0 +1,30 @@
+/** Optional host-owned row composition and actions, over the shared binding. */
+export type {
+  CellSpanAppearance,
+  CellSpanRequest,
+  ConfirmHandler,
+  ConfirmRequest,
+  ExtraEntry,
+  ExtraRow,
+  ExtraRowKind,
+  GetCellSpan,
+  GetCellSpanArgs,
+  PinnedRows,
+  PinnedSummaryEntry,
+  RowAction,
+  RowAppearanceOptions,
+  RowHeight,
+  RowMutationHandlers,
+  RowPinningFeatureOptions,
+  RowPinSide,
+  RowPinState,
+  RowStyle,
+} from "@adapttable/vue/features";
+export {
+  cellSpan,
+  extraRows,
+  pinnedSummaryRows,
+  rowActions,
+  rowAppearance,
+  rowPinning,
+} from "@adapttable/vue/features";

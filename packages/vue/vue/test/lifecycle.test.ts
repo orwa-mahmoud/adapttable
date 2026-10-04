@@ -1,4 +1,8 @@
-import type { ColumnLayoutState, TableSource } from "@adapttable/core";
+import {
+  type ColumnLayoutState,
+  createMemoryAdapter,
+  type TableSource,
+} from "@adapttable/core";
 import { featureStateKey, type TableRuntime } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -182,7 +186,15 @@ function modelContext() {
     urlSync: false,
   });
   const table = useDataTable({ source, columns, rowKey });
-  return { table, options, filterRuntime: shallowRef(undefined) };
+  return {
+    table,
+    options,
+    filterRuntime: shallowRef(undefined),
+    root: shallowRef<HTMLElement | null>(null),
+    urlAdapter: shallowRef(createMemoryAdapter()),
+    flushViewState: () => undefined,
+    registerViewStateFlush: () => () => undefined,
+  };
 }
 describe("retained feature resource failures", () => {
   const runtime: TableRuntime<Row> = {

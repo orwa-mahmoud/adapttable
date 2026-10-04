@@ -1,6 +1,5 @@
 /** Structural table markup. Every interactive control is an adapter slot. */
 import {
-  type ChromeGroupSlot,
   columnGroupHeaderCaption,
   type ColumnGroupToggleProps,
   EXTRA_ROW_PARTS,
@@ -16,6 +15,7 @@ import {
   renderCell,
   renderHeader,
 } from "../columnDef";
+import type { GroupRowChromeProps } from "../grouping/groupRowChrome";
 import {
   type SelectionCheckboxAttrs,
   type SelectionCheckboxControl,
@@ -26,6 +26,7 @@ import type {
   DesktopTableModel,
   MobileCardsModel,
   TableBodySlot,
+  TableCellModel,
   TableRowModel,
 } from "./tableModels";
 export interface TableChromeClassNames {
@@ -46,6 +47,19 @@ export interface TableChromeClassNames {
   readonly actionsHeader?: string;
   readonly actionsCell?: string;
   readonly cardActions?: string;
+  readonly groupRow?: string;
+  readonly groupLabel?: string;
+  readonly groupToggle?: string;
+  readonly groupCount?: string;
+  readonly groupAggregate?: string;
+  readonly groupMore?: string;
+  readonly groupCheckbox?: string;
+  readonly treeCell?: string;
+  readonly treeToggle?: string;
+  readonly treeSpacer?: string;
+  readonly expandToggle?: string;
+  readonly detailRow?: string;
+  readonly detailCell?: string;
   readonly cards?: string;
   readonly card?: string;
   readonly cardFields?: string;
@@ -71,8 +85,18 @@ export interface TableChromeSlots<TRow> {
   }) => VNodeChild;
   readonly ColumnGroupToggle?: (props: ColumnGroupToggleProps) => VNodeChild;
   readonly ResizeHandle?: (props: { readonly attrs: Attrs }) => VNodeChild;
+  readonly TreeToggle?: (props: {
+    readonly attrs: Attrs;
+    readonly expanded: boolean;
+    readonly loading: boolean;
+  }) => VNodeChild;
+  readonly RowDetailToggle?: (props: {
+    readonly attrs: Attrs;
+    readonly expanded: boolean;
+  }) => VNodeChild;
   readonly GroupRow?: (props: {
-    readonly slot: ChromeGroupSlot<TRow>;
+    readonly slot: Extract<TableBodySlot<TRow>, { kind: "group" }>;
+    readonly classNames?: NonNullable<GroupRowChromeProps<TRow>["classNames"]>;
     readonly columnCount: number;
     readonly mobile: boolean;
   }) => VNodeChild;
@@ -89,6 +113,54 @@ function control<TProps>(
       `AdaptTable: required adapter control slot "${name}" is missing.`
     );
   return slot(props);
+}
+function cellContent<TRow>(
+  cell: TableCellModel<TRow>,
+  row: TableRowModel<TRow>,
+  slots: TableChromeSlots<TRow>,
+  names: TableChromeClassNames
+): VNodeChild {
+  const display = renderCell(cell.context, slots.cell);
+  const value = cell.render ? cell.render(display) : display;
+  const tree = cell.tree;
+  const content = tree
+    ? h("span", mergeVueAttrs(tree.attrs, { class: names.treeCell }), [
+        tree.toggleAttrs
+          ? control(
+              slots.TreeToggle,
+              {
+                attrs: mergeVueAttrs(tree.toggleAttrs, {
+                  class: names.treeToggle,
+                }),
+                expanded: tree.entry.expanded,
+                loading: tree.entry.loading === true,
+              },
+              "TreeToggle"
+            )
+          : h("span", {
+              "aria-hidden": "true",
+              "data-adapttable-part": "tree-spacer",
+              class: names.treeSpacer,
+              style: { display: "inline-block", width: "1.5em", flexShrink: 0 },
+            }),
+        value,
+      ])
+    : value;
+  return row.detail && cell === row.cells[0]
+    ? h(Fragment, null, [
+        control(
+          slots.RowDetailToggle,
+          {
+            attrs: mergeVueAttrs(row.detail.toggleAttrs, {
+              class: names.expandToggle,
+            }),
+            expanded: row.detail.expanded,
+          },
+          "RowDetailToggle"
+        ),
+        content,
+      ])
+    : content;
 }
 export function DesktopTableChrome<TRow>(props: {
   readonly model: DesktopTableModel<TRow>;
@@ -255,29 +327,29 @@ export function DesktopTableChrome<TRow>(props: {
           ]
         ),
       ];
-  const actionContent = (row: TableRowModel<TRow>): VNodeChild[] =>
-    row.actionControls
-      ? [
-          control(
-            slots.RowActions,
-            { row: row.row, controls: row.actionControls, mobile: false },
-            "RowActions"
-          ),
-        ]
-      : [];
-  const rowContent = (row: TableRowModel<TRow>): VNode =>
-    h(
+  const actionContent = (row: TableRowModel<TRow>): VNodeChild[] => [
+    row.editActions?.(),
+    row.actionControls?.length
+      ? control(
+          slots.RowActions,
+          { row: row.row, controls: row.actionControls, mobile: false },
+          "RowActions"
+        )
+      : null,
+  ];
+  const rowContent = (row: TableRowModel<TRow>): VNode => {
+    const data = h(
       "tr",
       { ...mergeVueAttrs(row.attrs, { class: classNames.tr }), key: row.key },
       [
-        row.checkboxAttrs
+        model.headerCheckboxAttrs
           ? h(
               "td",
               {
                 class: classNames.selectionCell,
                 "data-adapttable-part": "selection-cell",
               },
-              [selection(row.checkboxAttrs, false)]
+              [row.checkboxAttrs ? selection(row.checkboxAttrs, false) : null]
             )
           : null,
         ...row.cells.map((cell) =>
@@ -290,11 +362,7 @@ export function DesktopTableChrome<TRow>(props: {
               }),
               key: cell.key,
             },
-            [
-              cell.render
-                ? cell.render(renderCell(cell.context, slots.cell))
-                : renderCell(cell.context, slots.cell),
-            ]
+            [cellContent(cell, row, slots, classNames)]
           )
         ),
         model.actionsLabel
@@ -309,13 +377,37 @@ export function DesktopTableChrome<TRow>(props: {
           : null,
       ]
     );
+    return row.detail?.expanded
+      ? h(Fragment, { key: row.key }, [
+          data,
+          h(
+            "tr",
+            {
+              "data-adapttable-part": "detail-row",
+              class: classNames.detailRow,
+            },
+            [
+              h(
+                "td",
+                {
+                  colspan: model.columnCount,
+                  "data-adapttable-part": "detail-cell",
+                  class: classNames.detailCell,
+                },
+                [row.detail.render()]
+              ),
+            ]
+          ),
+        ])
+      : data;
+  };
   const bodySlot = (slot: TableBodySlot<TRow>): VNode => {
     if (slot.kind === "row") return rowContent(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         control(
           slots.GroupRow,
-          { slot, columnCount: model.columnCount, mobile: false },
+          { slot, columnCount: model.columnCount, mobile: false, classNames },
           "GroupRow"
         ),
       ]);
@@ -442,17 +534,32 @@ export function MobileCardsChrome<TRow>(props: {
                     key: cell.key,
                     "data-adapttable-part": "card-value",
                   },
-                  [
-                    cell.render
-                      ? cell.render(renderCell(cell.context, slots.cell))
-                      : renderCell(cell.context, slots.cell),
-                  ]
+                  [cellContent(cell, row, slots, classNames)]
                 ),
               ]
             )
           )
         ),
-        row.actionControls
+        row.detail?.expanded
+          ? h(
+              "div",
+              {
+                "data-adapttable-part": "detail-row",
+                class: classNames.detailRow,
+              },
+              [
+                h(
+                  "div",
+                  {
+                    "data-adapttable-part": "detail-cell",
+                    class: classNames.detailCell,
+                  },
+                  [row.detail.render()]
+                ),
+              ]
+            )
+          : null,
+        row.actionControls || row.editActions
           ? h(
               "div",
               {
@@ -460,11 +567,18 @@ export function MobileCardsChrome<TRow>(props: {
                 "data-adapttable-part": "card-actions",
               },
               [
-                control(
-                  slots.RowActions,
-                  { row: row.row, controls: row.actionControls, mobile: true },
-                  "RowActions"
-                ),
+                row.editActions?.(),
+                row.actionControls?.length
+                  ? control(
+                      slots.RowActions,
+                      {
+                        row: row.row,
+                        controls: row.actionControls,
+                        mobile: true,
+                      },
+                      "RowActions"
+                    )
+                  : null,
               ]
             )
           : null,
@@ -476,7 +590,7 @@ export function MobileCardsChrome<TRow>(props: {
       return h(Fragment, { key: slot.key }, [
         control(
           slots.GroupRow,
-          { slot, columnCount: 1, mobile: true },
+          { slot, columnCount: 1, mobile: true, classNames },
           "GroupRow"
         ),
       ]);

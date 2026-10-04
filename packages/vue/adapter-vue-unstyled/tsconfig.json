@@ -6,10 +6,11 @@
     "jsxImportSource": "vue",
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@adapttable/vue-unstyled": ["./src/index.ts"]
+      "@adapttable/vue-unstyled": ["./src/index.ts"],
+      "@adapttable/vue-unstyled/*": ["./src/*"]
     }
   },
-  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts"],
+  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],
   "exclude": ["node_modules", "dist", "coverage", "test/types/invalid"],
   "vueCompilerOptions": {
     "strictTemplates": true,

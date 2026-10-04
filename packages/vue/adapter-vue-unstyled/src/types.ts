@@ -3,9 +3,11 @@ import type {
   ColumnInput,
   ColumnLayoutState,
   ComposedFeature,
+  ConfirmHandler,
   Direction,
   HeaderContext,
   PaginationMode,
+  TableDensity,
   TableErrorState,
   TableLabels,
   TableSource,
@@ -16,6 +18,81 @@ import type { VNodeChild } from "vue";
 
 /** CSS hooks are applied to the corresponding semantic element. */
 export interface DataTableClassNames {
+  readonly resizeHandle?: string;
+  readonly filterHeaderInput?: string;
+  readonly actionsHeader?: string;
+  readonly actionsCell?: string;
+  readonly cardActions?: string;
+  readonly rowAction?: string;
+  readonly addRow?: string;
+  readonly groupRow?: string;
+  readonly groupLabel?: string;
+  readonly groupToggle?: string;
+  readonly groupCount?: string;
+  readonly groupAggregate?: string;
+  readonly groupMore?: string;
+  readonly groupCheckbox?: string;
+  readonly treeCell?: string;
+  readonly treeToggle?: string;
+  readonly treeSpacer?: string;
+  readonly expandToggle?: string;
+  readonly detailRow?: string;
+  readonly detailCell?: string;
+  readonly densitySelect?: string;
+  readonly fullscreenButton?: string;
+  readonly viewsMenu?: string;
+  readonly viewsButton?: string;
+  readonly viewsPanel?: string;
+  readonly viewsRow?: string;
+  readonly viewsItem?: string;
+  readonly viewsDelete?: string;
+  readonly viewsDivider?: string;
+  readonly viewsSaveRow?: string;
+  readonly viewsInput?: string;
+  readonly viewsSave?: string;
+  readonly filtersButton?: string;
+  readonly filtersClear?: string;
+  readonly filtersDone?: string;
+  readonly filtersForm?: string;
+  readonly filtersPanel?: string;
+  readonly filtersActions?: string;
+  readonly filtersToolbar?: string;
+  readonly filtersPopover?: string;
+  readonly filtersDrawer?: string;
+  readonly filterField?: string;
+  readonly filterLabel?: string;
+  readonly filterControl?: string;
+  readonly filterInput?: string;
+  readonly filterSelect?: string;
+  readonly filterCheckbox?: string;
+  readonly filterHeaderButton?: string;
+  readonly editableCell?: string;
+  readonly editCellActivate?: string;
+  readonly editCellEditor?: string;
+  readonly editCellError?: string;
+  readonly editCellSaveError?: string;
+  readonly editCellRollback?: string;
+  readonly editCellConflictButton?: string;
+  readonly rowEditActions?: string;
+  readonly rowEditButton?: string;
+  readonly batchEditBar?: string;
+  readonly batchEditButton?: string;
+  readonly editHistory?: string;
+  readonly undoButton?: string;
+  readonly redoButton?: string;
+  readonly filterChecklist?: string;
+  readonly filterChecklistSearch?: string;
+  readonly filterChecklistActions?: string;
+  readonly filterChecklistList?: string;
+  readonly filterChecklistCount?: string;
+  readonly filterCheckboxGroup?: string;
+  readonly filterTree?: string;
+  readonly filterTreeGroup?: string;
+  readonly filterTreeCondition?: string;
+  readonly filterTreeActions?: string;
+  readonly filterTreeRemove?: string;
+  readonly filterTreeSummary?: string;
+  readonly filterOperator?: string;
   readonly root?: string;
   readonly toolbar?: string;
   readonly searchWrapper?: string;
@@ -94,6 +171,10 @@ export interface DataTableProps<TRow> {
   readonly isFetching?: boolean;
   readonly error?: Error | null;
   readonly refetch?: () => void | Promise<unknown>;
+  readonly density?: TableDensity;
+  readonly defaultDensity?: TableDensity;
+  readonly onDensityChange?: (density: TableDensity) => void;
+  readonly confirm?: ConfirmHandler;
   readonly classNames?: DataTableClassNames;
 }
 

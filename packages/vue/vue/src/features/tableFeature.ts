@@ -1,5 +1,10 @@
 /** Scoped extension contracts; importing these never installs a feature. */
-import { devWarn } from "@adapttable/core";
+import {
+  devWarn,
+  type TableDensity,
+  type TableSource,
+  type UrlStateAdapter,
+} from "@adapttable/core";
 import {
   drawnSlotFills,
   type FeatureApplyInput,
@@ -17,11 +22,19 @@ import {
 import type { EffectScope, ShallowRef, VNodeChild } from "vue";
 
 import type { FeatureState } from "../featureState";
+import type { TableRowInventory } from "../hierarchy/rowInventory";
 import type { UseDataTableResult } from "../useDataTable";
 import type { ResolvedTableOptions } from "../useDataTableShell";
 export interface FeatureMountContext<TRow = unknown> {
   readonly runtime: TableRuntime<TRow>;
+  readonly root: Readonly<ShallowRef<HTMLElement | null>>;
+  readonly urlAdapter: Readonly<ShallowRef<UrlStateAdapter>>;
+  flushViewState(): void;
+  registerViewStateFlush(flush: () => void): void;
+  readonly source: Readonly<ShallowRef<TableSource<TRow>>>;
+  readonly density?: Readonly<ShallowRef<TableDensity>>;
   readonly table: UseDataTableResult<TRow>;
+  readonly rowInventory?: Readonly<ShallowRef<TableRowInventory<TRow>>>;
   readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
   readonly filterRuntime: Readonly<ShallowRef<FilterRuntime<TRow> | undefined>>;
   readonly options: Readonly<ShallowRef<ResolvedTableOptions<TRow>>>;

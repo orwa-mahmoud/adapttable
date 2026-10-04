@@ -4,7 +4,19 @@
 
 ```ts
 
+import { AggregateFormatContext } from '@adapttable/core';
+import { AggregateName } from '@adapttable/core';
+import { AggregateOperationId } from '@adapttable/core';
+import { AggregateOptions as AggregateOptions_2 } from '@adapttable/core';
+import { AggregateOrderedValue } from '@adapttable/core';
+import { BatchEditBarProps } from '@adapttable/core/binding';
+import { BatchEditingState } from '@adapttable/core';
+import { BatchEditStoreOptions } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
+import { CellEditHandler } from '@adapttable/core';
+import { CellEditingState } from '@adapttable/core';
+import { CellSaveState } from '@adapttable/core';
+import { CellSaveStoreOptions } from '@adapttable/core';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { ChromeExtraSlot } from '@adapttable/core/binding';
@@ -19,19 +31,31 @@ import { ColumnLayoutState } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
 import { Component } from 'vue';
 import { ComponentPublicInstance } from 'vue';
+import { ComputedColumnSpec } from '@adapttable/core';
 import { ComputedRef } from 'vue';
 import { ConfirmHandler } from '@adapttable/core';
 import { CssProperties } from '@adapttable/core/binding';
 import { CssProperties as CssProperties_2 } from '@adapttable/core';
+import { URL_SLICE_WRITE_DEBOUNCE_MS as DENSITY_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { DirtyCellState } from '@adapttable/core';
 import { EditableCellSlotProps } from '@adapttable/core/binding';
+import { EditableColumnLike } from '@adapttable/core';
+import { EditCommitSnapshot } from '@adapttable/core';
+import { EditCommitValidationFailure } from '@adapttable/core';
+import { EditConflictHandler } from '@adapttable/core';
+import { EditConflictPolicy } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
+import { EditLifecycle } from '@adapttable/core';
+import { EditValidationState } from '@adapttable/core';
+import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
 import { ExtraFilters } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
+import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -42,8 +66,13 @@ import { FilterHeaderControlProps } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core/binding';
 import { FilterRuntime as FilterRuntime_2 } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
+import { FullscreenState } from '@adapttable/core/binding';
 import { FunctionalComponent } from 'vue';
 import { GroupAggregateOps } from '@adapttable/core';
+import { GroupAggregatesFn } from '@adapttable/core';
+import { GroupByInput } from '@adapttable/core';
+import { GroupCollapseState } from '@adapttable/core/binding';
+import { GroupedFlatEntry } from '@adapttable/core';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { HeaderSelectionState } from '@adapttable/core/binding';
 import { HtmlGroupedHeaderCell } from '@adapttable/core/binding';
@@ -64,8 +93,19 @@ import { QuerySupport } from '@adapttable/core';
 import { Ref } from 'vue';
 import { ResolvedPaginationMode } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
+import { RowEditActionsProps } from '@adapttable/core/binding';
+import { RowEditingState } from '@adapttable/core';
+import { RowEditStoreOptions } from '@adapttable/core';
+import { RowExpansionState } from '@adapttable/core/binding';
 import { RowPinningState } from '@adapttable/core/binding';
+import { RowPinState } from '@adapttable/core';
 import { RuntimeChromeInput } from '@adapttable/core/binding';
+import { SAVED_VIEW_VERSION } from '@adapttable/core';
+import { SavedView } from '@adapttable/core';
+import { SavedViewMigration } from '@adapttable/core';
+import { SavedViewsControllerOptions } from '@adapttable/core';
+import { SavedViewsStore } from '@adapttable/core';
+import { SavedViewVisibility } from '@adapttable/core';
 import { SelectionState } from '@adapttable/core/binding';
 import { ShallowRef } from 'vue';
 import { SlotFill } from '@adapttable/core/binding';
@@ -88,17 +128,50 @@ import { TableViewState } from '@adapttable/core';
 import { TableViewStateConfig } from '@adapttable/core';
 import { TableViewStore } from '@adapttable/core';
 import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
+import { TreeEntry } from '@adapttable/core';
+import { TreeExpansionState } from '@adapttable/core/binding';
+import { UrlSliceSpec } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { VNodeChild } from 'vue';
 import { VNodeProps } from 'vue';
 import { VNodeRef } from 'vue';
 
+// @public
+export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): SummaryRowFn<TRow>;
+
+export { AggregateFormatContext }
+
+export { AggregateName }
+
+export { AggregateOperationId }
+
+// @public (undocumented)
+export interface AggregateOptions<TRow> extends Omit<AggregateOptions_2<TRow>, "format"> {
+    // (undocumented)
+    readonly format?: (value: unknown, key: string) => VNodeChild;
+}
+
+export { AggregateOrderedValue }
+
+// @public (undocumented)
+export type AggregateSpec = Partial<Record<string, AggregateOperationId | Aggregator>>;
+
+// @public (undocumented)
+export type Aggregator<TValue = AggregateOrderedValue> = (values: readonly TValue[]) => VNodeChild;
+
 // @public (undocumented)
 export function assertRequiredSlots<TRow>(features: readonly ComposedFeature<TRow>[], fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>): void;
 
 // @public (undocumented)
 export type Attrs = Readonly<Record<string, unknown>>;
+
+export { BatchEditBarProps }
+
+// @public (undocumented)
+export function batchEditBarSlotKey<TRow>(): FeatureSlotKey<BatchEditBarProps<TRow>>;
+
+export { BatchEditingState }
 
 // @public
 export interface CellContext<TRow, TValue = unknown> {
@@ -111,6 +184,10 @@ export interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly value: TValue;
 }
+
+export { CellEditingState }
+
+export { CellSaveState }
 
 export { ChromeBodyRegion }
 
@@ -207,6 +284,9 @@ export type ComposedFeature<TRow> = TableFeature<TRow>;
 // @public
 export function composeElementRefs<TElement extends Element>(...refs: readonly ElementRef<TElement>[]): ElementRef<TElement>;
 
+// @public
+export function computed<TRow extends object, TValue = SortableValue>(spec: VueComputedColumnSpec<TRow, TValue>): ColumnDef<TRow, TValue>;
+
 // @public (undocumented)
 export function createFeatureState(): TableFeatureState;
 
@@ -225,8 +305,15 @@ export interface DataTableHandle<TRow> {
 // @public (undocumented)
 export interface DataTableSurface {
     // (undocumented)
+    rootElement?(): HTMLElement | null;
+    // (undocumented)
     scrollElement(): HTMLElement | null;
 }
+
+// @public (undocumented)
+export type Density = TableDensity;
+
+export { DENSITY_URL_WRITE_DEBOUNCE_MS }
 
 // @public (undocumented)
 export interface DesktopTableModel<TRow> {
@@ -254,20 +341,52 @@ export interface DesktopTableModel<TRow> {
 
 export { Direction }
 
+export { DirtyCellState }
+
+// @public (undocumented)
+export type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
+
 // @public (undocumented)
 export const EDIT_HISTORY_MODEL: FeatureStateKey<EditHistoryState<unknown>>;
 
 // @public (undocumented)
 export function editableCellSlotKey<TRow>(): FeatureSlotKey<EditableCellSlotProps<TRow, EditingBundle<TRow>, ColumnDef<TRow>, VNodeChild>>;
 
+export { EditCommitSnapshot }
+
+export { EditCommitValidationFailure }
+
 // @public (undocumented)
 export function editHistoryModelKey<TRow>(): FeatureStateKey<EditHistoryState<TRow>>;
+
+export { EditHistoryState }
+
+// @public (undocumented)
+export const EDITING_CHROME_MODEL: FeatureStateKey<EditingChromeModel<unknown>>;
 
 // @public (undocumented)
 export const EDITING_MODEL: FeatureStateKey<EditingBundle<unknown>>;
 
+export { EditingBundle }
+
+// @public
+export interface EditingChromeModel<TRow> {
+    // (undocumented)
+    readonly batch?: BatchEditBarProps<TRow>;
+    // (undocumented)
+    readonly row?: (row: TRow, rowId: string, actions: readonly RowAction<TRow>[] | undefined) => {
+        readonly props: RowEditActionsProps<TRow>;
+        readonly actions: readonly RowAction<TRow>[];
+    };
+}
+
+// @public (undocumented)
+export function editingChromeModelKey<TRow>(): FeatureStateKey<EditingChromeModel<TRow>>;
+
 // @public (undocumented)
 export function editingModelKey<TRow>(): FeatureStateKey<EditingBundle<TRow>>;
+
+export { EditValidationState }
 
 // @public (undocumented)
 export type ElementRef<TElement extends Element = HTMLElement> = (element: TElement | null) => void;
@@ -299,6 +418,8 @@ export interface FeatureMountContext<TRow = unknown> {
     // (undocumented)
     readonly active: Readonly<ShallowRef<boolean>>;
     // (undocumented)
+    readonly density?: Readonly<ShallowRef<TableDensity>>;
+    // (undocumented)
     readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
     // (undocumented)
     readonly filterRuntime: Readonly<ShallowRef<FilterRuntime<TRow> | undefined>>;
@@ -307,17 +428,29 @@ export interface FeatureMountContext<TRow = unknown> {
     // (undocumented)
     flushAdmission(): void | Promise<void>;
     // (undocumented)
+    flushViewState(): void;
+    // (undocumented)
     readonly options: Readonly<ShallowRef<ResolvedTableOptions<TRow>>>;
     // (undocumented)
     reconcile(): void;
+    // (undocumented)
+    registerViewStateFlush(flush: () => void): void;
+    // (undocumented)
+    readonly root: Readonly<ShallowRef<HTMLElement | null>>;
+    // (undocumented)
+    readonly rowInventory?: Readonly<ShallowRef<TableRowInventory<TRow>>>;
     // (undocumented)
     readonly runtime: TableRuntime<TRow>;
     // (undocumented)
     readonly scope: EffectScope;
     // (undocumented)
+    readonly source: Readonly<ShallowRef<TableSource<TRow>>>;
+    // (undocumented)
     readonly state: FeatureState;
     // (undocumented)
     readonly table: UseDataTableResult<TRow>;
+    // (undocumented)
+    readonly urlAdapter: Readonly<ShallowRef<UrlStateAdapter>>;
 }
 
 // @public
@@ -365,7 +498,30 @@ export interface FooterContext<TRow, TValue = unknown> {
 // @public
 export type FrontendDataState<TRow> = Readonly<ShallowRef<TableSource<TRow>>>;
 
+export { FullscreenState }
+
 export { GroupAggregateOps }
+
+// @public (undocumented)
+export function groupingModelKey<TRow>(): FeatureStateKey<TableGrouping<TRow>>;
+
+// @public (undocumented)
+export interface GroupRowModel<TRow> {
+    // (undocumented)
+    readonly columns: readonly ColumnDef<TRow>[];
+    // (undocumented)
+    readonly labels: Required<TableLabels>;
+    // (undocumented)
+    readonly leadingColumns: number;
+    // (undocumented)
+    readonly onShowMore: TableGrouping<TRow>["showMore"];
+    // (undocumented)
+    readonly onToggle: (key: string) => void;
+    // (undocumented)
+    readonly selection: SelectionState | undefined;
+    // (undocumented)
+    readonly trailingColumns: number;
+}
 
 // @public (undocumented)
 export const HEADER_FILTER_MODEL: FeatureStateKey<HeaderFilterModel<unknown>>;
@@ -505,13 +661,15 @@ export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale
 export { ResolvedPaginationMode }
 
 // @public (undocumented)
-export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRow> {
+export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRow>, Partial<Omit<TableEditingOptions<TRow>, "rows" | "columns" | "rowKey" | "featureHost">> {
     // (undocumented)
     readonly [key: string]: unknown;
     // (undocumented)
     readonly bodyModel?: TableBodyProjector<TRow>;
     // (undocumented)
     readonly bulkActions?: readonly BulkAction[];
+    // (undocumented)
+    readonly editingModel?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
     readonly filterEngine?: FilterEngine;
     // (undocumented)
@@ -580,10 +738,32 @@ export interface RowActionsModel<TRow> {
 // @public (undocumented)
 export function rowActionsModelKey<TRow>(): FeatureStateKey<RowActionsModel<TRow>>;
 
+// @public (undocumented)
+export interface RowDetailModel {
+    // (undocumented)
+    readonly expanded: boolean;
+    // (undocumented)
+    readonly render: () => VNodeChild;
+    // (undocumented)
+    readonly toggleAttrs: Attrs;
+}
+
+// @public (undocumented)
+export function rowDetailModelKey<TRow>(): FeatureStateKey<TableRowDetail<TRow>>;
+
+export { RowEditActionsProps }
+
+// @public (undocumented)
+export function rowEditActionsSlotKey<TRow>(): FeatureSlotKey<RowEditActionsProps<TRow>>;
+
+export { RowEditingState }
+
 // @public
 export function rowPinningModelKey<TRow>(): FeatureStateKey<RowPinningState<TRow>>;
 
 export { RowPinningState }
+
+export { RowPinState }
 
 // @public (undocumented)
 export interface RowSelection {
@@ -639,6 +819,16 @@ export interface RowSelectionOptions<TRow> {
 
 export { RuntimeChromeInput }
 
+export { SAVED_VIEW_VERSION }
+
+export { SavedView }
+
+export { SavedViewMigration }
+
+export { SavedViewsStore }
+
+export { SavedViewVisibility }
+
 // @public
 export interface SelectionCheckboxAttrs extends Attrs {
     // (undocumented)
@@ -692,6 +882,9 @@ export interface StaticTableFeature {
 }
 
 // @public (undocumented)
+export type SummaryRowFn<TRow> = (rows: readonly TRow[]) => Record<string, VNodeChild>;
+
+// @public (undocumented)
 export interface TableBodyProjection<TRow> {
     // (undocumented)
     readonly desktop: DesktopTableModel<TRow>;
@@ -704,20 +897,32 @@ export interface TableBodyProjectionInput<TRow> {
     // (undocumented)
     readonly desktop: DesktopTableModel<TRow>;
     // (undocumented)
+    readonly detail?: TableRowDetail<TRow>;
+    // (undocumented)
+    readonly grouping?: TableGrouping<TRow>;
+    // (undocumented)
     readonly mobile: MobileCardsModel<TRow>;
     // (undocumented)
     readonly options: ResolvedTableOptions<TRow>;
     // (undocumented)
     readonly pinning?: RowPinningState<TRow>;
     // (undocumented)
+    readonly rowInventory?: TableRowInventory<TRow>;
+    // (undocumented)
+    readonly selection?: RowSelection;
+    // (undocumented)
     readonly table: UseDataTableResult<TRow>;
+    // (undocumented)
+    readonly tree?: TableTree<TRow>;
 }
 
 // @public (undocumented)
 export type TableBodyProjector<TRow> = (input: TableBodyProjectionInput<TRow>) => TableBodyProjection<TRow>;
 
 // @public (undocumented)
-export type TableBodySlot<TRow> = Exclude<ChromeBodySlot<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>, ChromeExtraSlot<VNodeChild, CssProperties>> | (ChromeExtraSlot<VNodeChild, CssProperties> & {
+export type TableBodySlot<TRow> = Exclude<ChromeBodySlot<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>, ChromeExtraSlot<VNodeChild, CssProperties> | ChromeGroupSlot<TRow>> | (ChromeGroupSlot<TRow> & {
+    readonly model?: GroupRowModel<TRow>;
+}) | (ChromeExtraSlot<VNodeChild, CssProperties> & {
     readonly coveredSlots?: ReadonlySet<number>;
 });
 
@@ -731,6 +936,50 @@ export interface TableCellModel<TRow> {
     readonly key: string;
     // (undocumented)
     readonly render?: (display: VNodeChild) => VNodeChild;
+    // (undocumented)
+    readonly tree?: TreeCellModel<TRow>;
+}
+
+// @public (undocumented)
+export interface TableEditingOptions<TRow> extends EditLifecycle<TRow>, EditValidationStoreOptions<TRow> {
+    // (undocumented)
+    readonly batchEditing?: boolean;
+    // (undocumented)
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    // (undocumented)
+    readonly conflictLabels?: NonNullable<EditingBundle<TRow>["conflictLabels"]>;
+    // (undocumented)
+    readonly dirtyIndicators?: boolean;
+    // (undocumented)
+    readonly editConflictPolicy?: EditConflictPolicy;
+    // (undocumented)
+    readonly editHistory?: boolean | {
+        readonly depth?: number;
+    };
+    // (undocumented)
+    readonly featureHost?: FeatureHostState_2;
+    // (undocumented)
+    readonly formatEditError?: NonNullable<CellSaveStoreOptions<TRow>["formatError"]>;
+    // (undocumented)
+    readonly onBatchEdit?: NonNullable<BatchEditStoreOptions<TRow>["onBatchEdit"]>;
+    // (undocumented)
+    readonly onCellEdit?: CellEditHandler<TRow>;
+    // (undocumented)
+    readonly onDirtyChange?: (dirty: DirtyEdits) => void;
+    // (undocumented)
+    readonly onEditConflict?: EditConflictHandler<TRow>;
+    // (undocumented)
+    readonly onEditRollback?: NonNullable<CellSaveStoreOptions<TRow>["onRollback"]>;
+    // (undocumented)
+    readonly onRowEdit?: NonNullable<RowEditStoreOptions<TRow>["onRowEdit"]>;
+    // (undocumented)
+    readonly rowEditing?: boolean;
+    // (undocumented)
+    readonly rowKey: (row: TRow) => string;
+    // (undocumented)
+    readonly rows: readonly TRow[];
+    // (undocumented)
+    readonly rowVersion?: (row: TRow) => string | number;
 }
 
 export { TableEngine }
@@ -769,6 +1018,31 @@ export interface TableFeatureState extends FeatureState {
 }
 
 // @public (undocumented)
+export interface TableGrouping<TRow> {
+    // (undocumented)
+    readonly aggregates: GroupAggregatesFn<TRow> | undefined;
+    // (undocumented)
+    readonly collapseAll: () => void;
+    // (undocumented)
+    readonly collapsed: GroupCollapseState;
+    // (undocumented)
+    readonly collapseToDepth: (depth: number) => void;
+    // (undocumented)
+    readonly entries: readonly GroupedFlatEntry<TRow>[];
+    // (undocumented)
+    readonly expandAll: () => void;
+    // (undocumented)
+    readonly groupBy: readonly string[];
+    // (undocumented)
+    readonly setGroupBy: (key: GroupByInput) => void;
+    // (undocumented)
+    readonly showMore: (entry: {
+        scope: "groups" | "rows";
+        groupKey?: string;
+    }) => void;
+}
+
+// @public (undocumented)
 export interface TableHeaderModel<TRow> {
     // (undocumented)
     readonly attrs: Attrs;
@@ -802,6 +1076,22 @@ export interface TableQueryInfo {
 }
 
 // @public (undocumented)
+export interface TableRowDetail<TRow> {
+    // (undocumented)
+    readonly expansion: RowExpansionState;
+    // (undocumented)
+    readonly render: (row: TRow) => VNodeChild;
+}
+
+// @public (undocumented)
+export interface TableRowInventory<TRow> {
+    // (undocumented)
+    readonly loadedRows: readonly TRow[];
+    // (undocumented)
+    readonly visibleRows: readonly TRow[];
+}
+
+// @public (undocumented)
 export interface TableRowModel<TRow> {
     // (undocumented)
     readonly actionControls?: readonly RowActionControl<TRow>[];
@@ -811,6 +1101,10 @@ export interface TableRowModel<TRow> {
     readonly cells: readonly TableCellModel<TRow>[];
     // (undocumented)
     readonly checkboxAttrs?: SelectionCheckboxAttrs;
+    // (undocumented)
+    readonly detail?: RowDetailModel;
+    // (undocumented)
+    readonly editActions?: () => VNodeChild;
     // (undocumented)
     readonly index: number;
     // (undocumented)
@@ -830,6 +1124,22 @@ export { TableSource }
 export { TableSourceCapabilities }
 
 export { TableStateMutators }
+
+// @public (undocumented)
+export interface TableTree<TRow> {
+    // (undocumented)
+    readonly allEntries: readonly TreeEntry<TRow>[];
+    // (undocumented)
+    readonly columnKey: string | undefined;
+    // (undocumented)
+    readonly entries: readonly TreeEntry<TRow>[];
+    // (undocumented)
+    readonly expansion: TreeExpansionState;
+    // (undocumented)
+    readonly failedIds: ReadonlySet<string>;
+    // (undocumented)
+    readonly loadingIds: ReadonlySet<string>;
+}
 
 // @public
 export type TableUrlActions = Omit<TableViewStore, "getSnapshot" | "getServerSnapshot" | "subscribe" | "configure" | "claimNamespace">;
@@ -853,6 +1163,30 @@ export function toVueAttrs(attrs: Attrs, options?: {
 
 // @public (undocumented)
 export function toVueStyle(style: unknown): unknown;
+
+// @public (undocumented)
+export interface TreeCellModel<TRow> {
+    // (undocumented)
+    readonly attrs: Attrs;
+    // (undocumented)
+    readonly entry: TreeEntry<TRow>;
+    // (undocumented)
+    readonly toggleAttrs?: Attrs;
+}
+
+// @public (undocumented)
+export function treeModelKey<TRow>(): FeatureStateKey<TableTree<TRow>>;
+
+// @public (undocumented)
+export interface UrlSliceOptions {
+    readonly serverSearch?: MaybeRefOrGetterOptional<string>;
+    // (undocumented)
+    readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
+    // (undocumented)
+    readonly urlKey?: MaybeRefOrGetterOptional<string>;
+    // (undocumented)
+    readonly urlSync?: MaybeRefOrGetterOptional<boolean>;
+}
 
 export { UrlStateAdapter }
 
@@ -1028,6 +1362,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
             onClick: () => void;
         };
     };
+    rowInventory: ComputedRef<TableRowInventory<TRow>>;
     source: ComputedRef<TableSource<TRow>>;
     selection: ComputedRef<RowSelection | undefined>;
     desktop: ComputedRef<    {
@@ -1043,7 +1378,9 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     rows: TableRowModel<TRow>[];
     bodySlots: (ChromeVirtualPadSlot | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
     readonly coveredSlots?: ReadonlySet<number>;
-    }) | ChromeGroupSlot<TRow> | {
+    }) | (ChromeGroupSlot<TRow> & {
+    readonly model?: GroupRowModel<TRow> | undefined;
+    }) | {
     wiring: TableRowModel<TRow>;
     kind: "row";
     key: string;
@@ -1060,7 +1397,9 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     rows: TableRowModel<TRow>[];
     bodySlots: (ChromeVirtualPadSlot | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
     readonly coveredSlots?: ReadonlySet<number>;
-    }) | ChromeGroupSlot<TRow> | {
+    }) | (ChromeGroupSlot<TRow> & {
+    readonly model?: GroupRowModel<TRow> | undefined;
+    }) | {
     wiring: TableRowModel<TRow>;
     kind: "row";
     key: string;
@@ -1072,13 +1411,21 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     features: ComputedRef<readonly ComposedFeature<NoInfer<TRow>>[]>;
     featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
     rowActions: Readonly<ShallowRef<RowActionsModel<TRow> | undefined>>;
+    grouping: Readonly<ShallowRef<TableGrouping<TRow> | undefined>>;
+    tree: Readonly<ShallowRef<TableTree<TRow> | undefined>>;
+    detail: Readonly<ShallowRef<TableRowDetail<TRow> | undefined>>;
     editing: Readonly<ShallowRef<EditingBundle<TRow> | undefined>>;
     filterRuntime: ComputedRef<FilterRuntime_2<TRow> | undefined>;
     featureOptions: ComputedRef<Readonly<Record<string, unknown>>>;
     density: ComputedRef<TableDensity>;
     setDensity: (next: TableDensity) => void;
+    fullscreen: Readonly<ShallowRef<FullscreenState | undefined>>;
+    savedViews: Readonly<ShallowRef<UseSavedViewsResult | undefined>>;
+    urlAdapter: ComputedRef<UrlStateAdapter>;
+    flushViewState: () => void;
     toolbarExtrasProps: ComputedRef<ToolbarExtrasSlotProps>;
     renderToolbarExtras: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
+    renderBatchEditBar: () => VNodeChild[];
     slotFills: ComputedRef<ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>>;
     runtime: TableRuntime<TRow>;
     handle: DataTableHandle<TRow>;
@@ -1116,6 +1463,22 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
 
 // @public (undocumented)
 export type UseDataTableShellResult<TRow> = ReturnType<typeof useDataTableShell<TRow>>;
+
+// @public (undocumented)
+export function useDensityUrlState(input?: MaybeRefOrGetter<UseDensityUrlStateOptions>, activity?: MaybeRefOrGetter<boolean>): {
+    density: Readonly<ShallowRef<TableDensity>>;
+    onDensityChange: (next: TableDensity) => void;
+    flush: () => void;
+};
+
+// @public (undocumented)
+export interface UseDensityUrlStateOptions extends UrlSliceOptions {
+    // (undocumented)
+    readonly defaultDensity?: MaybeRefOrGetterOptional<TableDensity>;
+}
+
+// @public (undocumented)
+export type UseDensityUrlStateResult = ReturnType<typeof useDensityUrlState>;
 
 // @public (undocumented)
 export function useDesktopTableModel<TRow>(table: UseDataTableResult<TRow>, selection?: () => RowSelection | undefined, fitColumns?: () => boolean): ComputedRef<DesktopTableModel<TRow>>;
@@ -1157,6 +1520,26 @@ export interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, S
 }
 
 // @public (undocumented)
+export function useFullscreen(element: MaybeRefOrGetter<HTMLElement | null | undefined>, activity?: MaybeRefOrGetter<boolean>): ComputedRef<FullscreenState>;
+
+// @public
+export function useGroupCollapseUrlState(input?: MaybeRefOrGetter<UseGroupCollapseUrlStateOptions>, activity?: MaybeRefOrGetter<boolean>): UseGroupCollapseUrlStateResult;
+
+// @public (undocumented)
+export interface UseGroupCollapseUrlStateOptions extends UrlSliceOptions {
+    // (undocumented)
+    readonly defaultCollapsedGroupIds?: MaybeRefOrGetterOptional<readonly string[]>;
+}
+
+// @public (undocumented)
+export interface UseGroupCollapseUrlStateResult {
+    // (undocumented)
+    readonly collapsedGroupIds: Readonly<ShallowRef<string[]>>;
+    // (undocumented)
+    readonly onCollapsedGroupIdsChange: (ids: string[]) => void;
+}
+
+// @public (undocumented)
 export function useMobileCardsModel<TRow>(table: UseDataTableResult<TRow>, desktop: ComputedRef<DesktopTableModel<TRow>>): ComputedRef<MobileCardsModel<TRow>>;
 
 // @public
@@ -1187,8 +1570,59 @@ export interface UseQuerySourceOptions<TRow, TParams extends TableQueryParams = 
     readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
 }
 
+// @public
+export function useRowPinningUrlState(input?: MaybeRefOrGetter<UseRowPinningUrlStateOptions>): UseRowPinningUrlStateResult;
+
+// @public (undocumented)
+export interface UseRowPinningUrlStateOptions {
+    // (undocumented)
+    readonly enabled?: MaybeRefOrGetter<boolean>;
+    // (undocumented)
+    readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
+    // (undocumented)
+    readonly urlKey?: MaybeRefOrGetterOptional<string>;
+    // (undocumented)
+    readonly urlSync?: MaybeRefOrGetterOptional<boolean>;
+}
+
+// @public (undocumented)
+export interface UseRowPinningUrlStateResult {
+    // (undocumented)
+    readonly onPinnedRowIdsChange: (next: RowPinState) => void;
+    // (undocumented)
+    readonly pinnedRowIds: ComputedRef<RowPinState>;
+}
+
 // @public (undocumented)
 export function useRowSelection<TRow>(input: MaybeRefOrGetter<RowSelectionOptions<TRow>>): RowSelection;
+
+// @public (undocumented)
+export function useSavedViews(input: MaybeRefOrGetter<UseSavedViewsOptions>, activity?: MaybeRefOrGetter<boolean>): UseSavedViewsResult;
+
+// @public (undocumented)
+export type UseSavedViewsOptions = SavedViewsControllerOptions;
+
+// @public (undocumented)
+export interface UseSavedViewsResult {
+    // (undocumented)
+    readonly apply: (name: string) => void;
+    // (undocumented)
+    readonly defaultView: ComputedRef<SavedView | undefined>;
+    // (undocumented)
+    readonly move: (name: string, delta: -1 | 1) => void;
+    // (undocumented)
+    readonly reload: () => void;
+    // (undocumented)
+    readonly remove: (name: string) => void;
+    // (undocumented)
+    readonly rename: (from: string, to: string) => void;
+    // (undocumented)
+    readonly save: (name: string) => void;
+    // (undocumented)
+    readonly setDefault: (name: string) => void;
+    // (undocumented)
+    readonly views: ComputedRef<readonly SavedView[]>;
+}
 
 // @public
 export function useServerData<TRow>(input: MaybeRefOrGetter<UseServerDataOptions<TRow>>): ServerDataState<TRow>;
@@ -1239,6 +1673,19 @@ export interface UseTableUrlStateOptions {
     readonly urlKey?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly urlSync?: MaybeRefOrGetterOptional<boolean>;
+}
+
+// @public
+export function useUrlSlice<T, TConfig extends object>(input: MaybeRefOrGetter<UrlSliceOptions>, spec: UrlSliceSpec<T, TConfig>, config: MaybeRefOrGetter<TConfig>, activity?: MaybeRefOrGetter<boolean>): {
+    readonly value: Readonly<ShallowRef<T>>;
+    readonly set: (next: T) => void;
+    readonly flush: () => void;
+};
+
+// @public (undocumented)
+export interface VueComputedColumnSpec<TRow, TValue> extends Omit<ComputedColumnSpec<TRow, TValue>, "column"> {
+    // (undocumented)
+    readonly column?: Omit<ColumnDef<TRow, TValue>, "key" | "header" | "sortValue" | "exportValue" | "formatValue" | "accessor" | "cell">;
 }
 
 // @public (undocumented)

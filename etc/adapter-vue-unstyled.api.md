@@ -10,12 +10,15 @@ import { ColumnGroup } from '@adapttable/vue/adapter';
 import { ColumnInput } from '@adapttable/vue/adapter';
 import { ColumnLayoutState } from '@adapttable/vue/adapter';
 import { ComposedFeature } from '@adapttable/vue/adapter';
+import { ConfirmHandler } from '@adapttable/vue/adapter';
 import { DataTableHandle } from '@adapttable/vue/adapter';
+import { DataTableHandle as DataTableHandle_2 } from '@adapttable/vue/features';
 import { Direction } from '@adapttable/vue/adapter';
 import { HeaderContext } from '@adapttable/vue/adapter';
 import { PaginationMode } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
 import { ShallowUnwrapRef } from 'vue';
+import { TableDensity } from '@adapttable/vue/adapter';
 import { TableErrorState } from '@adapttable/vue/adapter';
 import { TableLabels } from '@adapttable/vue/adapter';
 import { TableSource } from '@adapttable/vue/adapter';
@@ -29,13 +32,14 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
     props: PublicProps & __VLS_PrettifyLocal<DataTableProps<TRow> & {
         "onUpdate:selectedIds"?: ((ids: string[]) => any) | undefined;
         "onUpdate:columnLayout"?: ((layout: ColumnLayoutState) => any) | undefined;
+        "onUpdate:density"?: ((density: TableDensity) => any) | undefined;
     }> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
-    expose: (exposed: ShallowUnwrapRef<DataTableHandle<TRow>>) => void;
+    expose: (exposed: ShallowUnwrapRef<DataTableHandle_2<TRow>>) => void;
     attrs: any;
     slots: DataTableSlots<TRow>;
-    emit: ((evt: "update:selectedIds", ids: string[]) => void) & ((evt: "update:columnLayout", layout: ColumnLayoutState) => void);
+    emit: ((evt: "update:selectedIds", ids: string[]) => void) & ((evt: "update:columnLayout", layout: ColumnLayoutState) => void) & ((evt: "update:density", density: TableDensity) => void);
 }>) => VNode & {
     __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
 };
@@ -57,7 +61,19 @@ export const DataTable: typeof __VLS_export;
 // @public
 export interface DataTableClassNames {
     // (undocumented)
+    readonly actionsCell?: string;
+    // (undocumented)
+    readonly actionsHeader?: string;
+    // (undocumented)
+    readonly addRow?: string;
+    // (undocumented)
+    readonly batchEditBar?: string;
+    // (undocumented)
+    readonly batchEditButton?: string;
+    // (undocumented)
     readonly card?: string;
+    // (undocumented)
+    readonly cardActions?: string;
     // (undocumented)
     readonly cardFields?: string;
     // (undocumented)
@@ -73,13 +89,113 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly columnGroupToggle?: string;
     // (undocumented)
+    readonly densitySelect?: string;
+    // (undocumented)
+    readonly detailCell?: string;
+    // (undocumented)
+    readonly detailRow?: string;
+    // (undocumented)
+    readonly editableCell?: string;
+    // (undocumented)
+    readonly editCellActivate?: string;
+    // (undocumented)
+    readonly editCellConflictButton?: string;
+    // (undocumented)
+    readonly editCellEditor?: string;
+    // (undocumented)
+    readonly editCellError?: string;
+    // (undocumented)
+    readonly editCellRollback?: string;
+    // (undocumented)
+    readonly editCellSaveError?: string;
+    // (undocumented)
+    readonly editHistory?: string;
+    // (undocumented)
     readonly empty?: string;
     // (undocumented)
     readonly emptyClear?: string;
     // (undocumented)
     readonly error?: string;
     // (undocumented)
+    readonly expandToggle?: string;
+    // (undocumented)
+    readonly filterCheckbox?: string;
+    // (undocumented)
+    readonly filterCheckboxGroup?: string;
+    // (undocumented)
+    readonly filterChecklist?: string;
+    // (undocumented)
+    readonly filterChecklistActions?: string;
+    // (undocumented)
+    readonly filterChecklistCount?: string;
+    // (undocumented)
+    readonly filterChecklistList?: string;
+    // (undocumented)
+    readonly filterChecklistSearch?: string;
+    // (undocumented)
+    readonly filterControl?: string;
+    // (undocumented)
+    readonly filterField?: string;
+    // (undocumented)
+    readonly filterHeaderButton?: string;
+    // (undocumented)
+    readonly filterHeaderInput?: string;
+    // (undocumented)
+    readonly filterInput?: string;
+    // (undocumented)
+    readonly filterLabel?: string;
+    // (undocumented)
+    readonly filterOperator?: string;
+    // (undocumented)
+    readonly filtersActions?: string;
+    // (undocumented)
+    readonly filtersButton?: string;
+    // (undocumented)
+    readonly filtersClear?: string;
+    // (undocumented)
+    readonly filtersDone?: string;
+    // (undocumented)
+    readonly filtersDrawer?: string;
+    // (undocumented)
+    readonly filterSelect?: string;
+    // (undocumented)
+    readonly filtersForm?: string;
+    // (undocumented)
+    readonly filtersPanel?: string;
+    // (undocumented)
+    readonly filtersPopover?: string;
+    // (undocumented)
+    readonly filtersToolbar?: string;
+    // (undocumented)
+    readonly filterTree?: string;
+    // (undocumented)
+    readonly filterTreeActions?: string;
+    // (undocumented)
+    readonly filterTreeCondition?: string;
+    // (undocumented)
+    readonly filterTreeGroup?: string;
+    // (undocumented)
+    readonly filterTreeRemove?: string;
+    // (undocumented)
+    readonly filterTreeSummary?: string;
+    // (undocumented)
     readonly footer?: string;
+    // (undocumented)
+    readonly fullscreenButton?: string;
+    // (undocumented)
+    readonly groupAggregate?: string;
+    // (undocumented)
+    readonly groupCheckbox?: string;
+    // (undocumented)
+    readonly groupCount?: string;
+    // (undocumented)
+    readonly groupLabel?: string;
+    // (undocumented)
+    readonly groupMore?: string;
+    // (undocumented)
+    readonly groupRow?: string;
+    // (undocumented)
+    readonly groupToggle?: string;
     // (undocumented)
     readonly loading?: string;
     // (undocumented)
@@ -97,11 +213,21 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly pager?: string;
     // (undocumented)
+    readonly redoButton?: string;
+    // (undocumented)
     readonly refreshing?: string;
+    // (undocumented)
+    readonly resizeHandle?: string;
     // (undocumented)
     readonly retry?: string;
     // (undocumented)
     readonly root?: string;
+    // (undocumented)
+    readonly rowAction?: string;
+    // (undocumented)
+    readonly rowEditActions?: string;
+    // (undocumented)
+    readonly rowEditButton?: string;
     // (undocumented)
     readonly rowsPerPage?: string;
     // (undocumented)
@@ -138,6 +264,34 @@ export interface DataTableClassNames {
     readonly toolbar?: string;
     // (undocumented)
     readonly tr?: string;
+    // (undocumented)
+    readonly treeCell?: string;
+    // (undocumented)
+    readonly treeSpacer?: string;
+    // (undocumented)
+    readonly treeToggle?: string;
+    // (undocumented)
+    readonly undoButton?: string;
+    // (undocumented)
+    readonly viewsButton?: string;
+    // (undocumented)
+    readonly viewsDelete?: string;
+    // (undocumented)
+    readonly viewsDivider?: string;
+    // (undocumented)
+    readonly viewsInput?: string;
+    // (undocumented)
+    readonly viewsItem?: string;
+    // (undocumented)
+    readonly viewsMenu?: string;
+    // (undocumented)
+    readonly viewsPanel?: string;
+    // (undocumented)
+    readonly viewsRow?: string;
+    // (undocumented)
+    readonly viewsSave?: string;
+    // (undocumented)
+    readonly viewsSaveRow?: string;
 }
 
 export { DataTableHandle }
@@ -155,13 +309,19 @@ export interface DataTableProps<TRow> {
     // (undocumented)
     readonly columnWidths?: Readonly<Record<string, number>>;
     // (undocumented)
+    readonly confirm?: ConfirmHandler;
+    // (undocumented)
     readonly data?: readonly TRow[];
     // (undocumented)
     readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
     // (undocumented)
+    readonly defaultDensity?: TableDensity;
+    // (undocumented)
     readonly defaults?: NonNullable<TableViewStateConfig["defaults"]>;
     // (undocumented)
     readonly defaultSelectedIds?: readonly string[];
+    // (undocumented)
+    readonly density?: TableDensity;
     // (undocumented)
     readonly dir?: Direction;
     // (undocumented)
@@ -188,6 +348,8 @@ export interface DataTableProps<TRow> {
     readonly multiSort?: boolean;
     // (undocumented)
     readonly onColumnRename?: (key: string, name: string) => void;
+    // (undocumented)
+    readonly onDensityChange?: (density: TableDensity) => void;
     // (undocumented)
     readonly paginationMode?: PaginationMode;
     // (undocumented)
@@ -234,6 +396,8 @@ export interface DataTableSlots<TRow> {
 }
 
 export { HeaderContext }
+
+export { TableDensity }
 
 export { TableSource }
 

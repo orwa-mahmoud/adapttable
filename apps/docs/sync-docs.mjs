@@ -39,6 +39,7 @@ const target = join(here, "src/content/docs");
 export const TITLES = {
   "vue/getting-started.md": "Get started with experimental Vue tables",
   "vue/api.md": "Experimental Vue table API reference",
+  "vue/features.md": "Vue filters, editing and feature composition",
   "angular/angular-cdk.md": "Angular CDK tables",
   "angular/aria.md": "Angular Aria tables",
   "angular/material.md": "Angular Material tables",
@@ -175,7 +176,9 @@ export const TITLES = {
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
   "vue/getting-started.md":
-    "Build a table with the experimental private Vue workspace packages: native controls, reactive sources, controlled selection and SSR lifecycle rules.",
+    "Build an experimental Vue table with native controls, reactive sources, optional features, controlled state and SSR lifecycle rules.",
+  "vue/features.md":
+    "Compose native Vue filters, cell and batch editing, grouped and tree rows, row presentation and view controls with host-owned data and scoped state.",
   "vue/api.md":
     "Reference for the implemented Vue 3.5 sources, renderers, native table, structural Chrome, scoped features and model channels. Experimental workspace API.",
   "angular/angular-cdk.md":

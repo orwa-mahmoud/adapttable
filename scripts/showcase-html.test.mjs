@@ -10,6 +10,7 @@ import {
   MATRIX_FEATURES,
   matrixPages,
   VUE_NATIVE_BASELINE,
+  VUE_NATIVE_PAGES,
 } from "../apps/showcase/matrix.mjs";
 import {
   featurePage,
@@ -47,15 +48,15 @@ describe("the generated showcase pages", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
     // features — across all eight kits; all nine Angular kits' landings
     // plus all twenty-one feature destinations; and the eight replaced top-level
-    // addresses, two Angular modes and one native Vue preview. Kit `/accessibility/` URLs are matrix pages again, not
+    // addresses, two Angular modes and seven native Vue previews. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2 + 1);
+    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2 + 7);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 
-  it("writes the single Vue preview without indexability or parity claims", () => {
+  it("writes the Vue base preview without indexability or parity claims", () => {
     const { dir, html } = nativeVuePage();
     assert.equal(dir, "vue/unstyled");
     assert.match(html, /name="robots" content="noindex, follow"/);
@@ -68,6 +69,34 @@ describe("the generated showcase pages", () => {
       matrixPages().some((page) => page.framework === "vue"),
       false
     );
+  });
+
+  it("registers each implemented Vue feature preview exactly once", () => {
+    assert.deepEqual(
+      VUE_NATIVE_PAGES.map((page) => page.path),
+      [
+        "unstyled",
+        "unstyled/filter-editing",
+        "unstyled/composition",
+        "unstyled/hierarchy",
+        "unstyled/rows",
+        "unstyled/selection-contract",
+        "unstyled/view-controls",
+      ]
+    );
+    for (const page of VUE_NATIVE_PAGES) {
+      const generated = files.filter((file) => file.dir === page.dir);
+      assert.equal(generated.length, 1, page.dir);
+      assert.match(
+        generated[0].html,
+        /name="robots" content="noindex, follow"/
+      );
+      assert.ok(generated[0].html.includes(page.entry.slice(1)), page.dir);
+      assert.ok(
+        generated[0].html.includes(siteUrl(demoRoute(page.path, "vue"))),
+        page.dir
+      );
+    }
   });
 
   it("gives every Angular kit a destination for every matrix feature", () => {
@@ -259,9 +288,10 @@ describe("the generated showcase pages", () => {
         1,
         `${file.dir} serves more than one h1`
       );
-      if (file.dir === VUE_NATIVE_BASELINE.dir) {
-        assert.ok(main.includes(VUE_NATIVE_BASELINE.description), file.dir);
-        assert.ok(main.includes(VUE_NATIVE_BASELINE.notice), file.dir);
+      const vuePage = VUE_NATIVE_PAGES.find((page) => page.dir === file.dir);
+      if (vuePage) {
+        assert.ok(main.includes(vuePage.description), file.dir);
+        assert.ok(main.includes(vuePage.notice), file.dir);
         assert.doesNotMatch(main, /<pre><code>|npm install/);
         continue;
       }

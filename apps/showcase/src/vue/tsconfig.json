@@ -14,6 +14,10 @@
       ],
       "@adapttable/vue-unstyled": [
         "../../../../packages/vue/adapter-vue-unstyled/src/index.ts"
+      ],
+      "@adapttable/vue/*": ["../../../../packages/vue/vue/src/*"],
+      "@adapttable/vue-unstyled/*": [
+        "../../../../packages/vue/adapter-vue-unstyled/src/*"
       ]
     }
   },

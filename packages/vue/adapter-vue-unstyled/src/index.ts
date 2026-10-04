@@ -11,5 +11,6 @@ export type {
   ColumnInput,
   DataTableHandle,
   HeaderContext,
+  TableDensity,
   TableSource,
 } from "@adapttable/vue/adapter";

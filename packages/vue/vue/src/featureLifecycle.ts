@@ -46,7 +46,16 @@ export interface FeatureLifecycle<TRow> {
 }
 export function useFeatureLifecycle<TRow>(options: {
   readonly runtime: TableRuntime<TRow>;
+  readonly root: FeatureMountContext<TRow>["root"];
+  readonly urlAdapter: FeatureMountContext<TRow>["urlAdapter"];
+  readonly flushViewState: () => void;
+  readonly registerViewStateFlush: (flush: () => void) => () => void;
+  readonly source?: FeatureMountContext<TRow>["source"];
+  readonly density?: NonNullable<FeatureMountContext<TRow>["density"]>;
   readonly table: FeatureMountContext<TRow>["table"];
+  readonly rowInventory?: NonNullable<
+    FeatureMountContext<TRow>["rowInventory"]
+  >;
   readonly featureHost?: FeatureMountContext<TRow>["featureHost"];
   readonly filterRuntime: FeatureMountContext<TRow>["filterRuntime"];
   readonly options: FeatureMountContext<TRow>["options"];
@@ -126,7 +135,16 @@ export function useFeatureLifecycle<TRow>(options: {
     let cleanup: (() => void) | undefined;
     const context: FeatureMountContext<TRow> = {
       runtime: options.runtime,
+      root: options.root,
+      urlAdapter: options.urlAdapter,
+      flushViewState: options.flushViewState,
+      registerViewStateFlush: (flush) => {
+        onScopeDispose(options.registerViewStateFlush(flush));
+      },
+      source: options.source ?? options.table.source,
+      density: options.density,
       table: options.table,
+      rowInventory: options.rowInventory,
       filterRuntime: options.filterRuntime,
       featureHost: options.featureHost ?? host,
       options: options.options,
