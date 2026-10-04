@@ -1,5 +1,16 @@
 # @adapttable/shadcn
 
+## 3.3.2
+
+### Patch Changes
+
+- 143d5bf: Bound adapter build memory with sequential JavaScript and production-declaration phases, retaining React Compiler transforms, both module formats, and unchanged full test/typecheck coverage.
+- Updated dependencies [8d1e749]
+- Updated dependencies [143d5bf]
+- Updated dependencies [143d5bf]
+  - @adapttable/react@1.6.0
+  - @adapttable/unstyled@3.3.2
+
 ## 3.3.1
 
 ### Patch Changes

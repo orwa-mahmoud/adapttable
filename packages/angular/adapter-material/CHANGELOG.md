@@ -1,9 +1,17 @@
-# @adapttable/angular-unstyled
+# @adapttable/angular-material
 
-## 0.1.1
+## 0.1.0
+
+### Minor Changes
+
+- 143d5bf: Add the first public Angular Material adapter with Material controls, modal and
+  anchored overlays, the complete Angular feature entrypoints, responsive cards
+  and optional assistant controls. Includes scoped theme integration, documentation,
+  showcase kit wiring and conformance/regression tests.
 
 ### Patch Changes
 
+- 05f9221: Polish the Angular Material and CDK table surfaces, toolbar spacing and mobile card framing. Material editable cells use table-sized native buttons and inherit the content color; CDK borders and hover states adapt to light and dark color schemes.
 - 089d5d5: Share Angular table orchestration and desktop, mobile, filter, column-menu and group models through the binding. All nine adapters inherit the shared signals while retaining their native controls, templates, overlays, styling hooks and public table inputs and outputs. Export the shared model bases and view contracts for adapter authors, and preserve existing adapter type imports as re-exports.
 - 0a9cb40: Keep native Angular filter cards beneath their triggers with readable fields,
   scrolling bodies and reachable dismissal. Correct native portal coordinates
@@ -25,18 +33,3 @@
 - Updated dependencies [8d1e749]
   - @adapttable/angular@0.4.0
   - @adapttable/core@3.8.1
-
-## 0.1.0
-
-### Minor Changes
-
-- 42a4349: Prepare the first public release of `AdaptDataTable` with native HTML controls, desktop tables and mobile cards, kit feature entry points and `standardPreset()`.
-  
-  Support tree/grouped rows, editing and failure recovery, keyboard selection/paste/fill, filtering, menus, exports, saved views and an optional assistant, with localized labels, RTL and SSR. Host callbacks retain ownership of data changes and column widths. XLSX/PDF downloads preserve selected rows and requested visible/all-column scope. Page-size selection survives server rendering, hydration and later input changes.
-
-### Patch Changes
-
-- Updated dependencies [42a4349]
-- Updated dependencies [6fd7108]
-  - @adapttable/core@3.8.0
-  - @adapttable/angular@0.3.0
