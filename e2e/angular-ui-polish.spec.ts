@@ -141,6 +141,11 @@ for (const key of [
           exact: true,
         })
         .first();
+      if (key === "unstyled" || key === "aria") {
+        // Native intrinsic widths vary with platform font metrics. Keep the
+        // controls paired even when the input's intrinsic size is larger.
+        await person.evaluate((input) => input.setAttribute("size", "40"));
+      }
       const personBox = await person.boundingBox();
       const operatorBox = await operator.boundingBox();
       expect(personBox!.width).toBeGreaterThan(80);

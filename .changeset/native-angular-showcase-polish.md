@@ -21,3 +21,6 @@ surfaces, positioning or controls.
 Keep Angular assistants in floating native windows with usable phone sheets,
 readable titles, growing composers and nonblocking tooltip overlays. Preserve
 native search groups and icons, drawer geometry, and accessible filter counts.
+
+Keep Unstyled and Aria text filter controls paired without relying on
+platform-specific native input widths.

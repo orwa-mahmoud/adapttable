@@ -54,6 +54,7 @@ const FIELD_STACK =
           <input
             type="text"
             data-adapttable-part="filter-input"
+            style="flex: 1 1 8rem; min-width: 0; max-width: 100%"
             [attr.aria-label]="w.label"
             [attr.placeholder]="def().placeholder ?? null"
             [value]="w.value"
