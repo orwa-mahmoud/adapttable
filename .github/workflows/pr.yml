@@ -5,7 +5,7 @@ name: PR
 #   Lint · Unit · Package · Playwright
 on:
   push:
-    branches: [main]
+    branches: [main, feat/vue-foundation-and-adapters]
   pull_request:
     branches: [main]
   workflow_dispatch:
