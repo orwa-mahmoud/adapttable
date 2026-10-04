@@ -90,8 +90,24 @@ export class AdaptMaterialPopover {
       fit();
       // Native positioning can stay on the same connection during a resize.
       // Observe its actual pane as well as page movement and viewport changes.
+      let renderedSize = pane.getBoundingClientRect();
       const observer =
-        typeof ResizeObserver === "undefined" ? null : new ResizeObserver(fit);
+        typeof ResizeObserver === "undefined"
+          ? null
+          : new ResizeObserver(() => {
+              // A height signal can change before its binding reaches the DOM.
+              // ResizeObserver confirms the rendered size before CDK measures it.
+              const nextSize = pane.getBoundingClientRect();
+              if (
+                nextSize.width !== renderedSize.width ||
+                nextSize.height !== renderedSize.height
+              ) {
+                connected.overlayRef.updatePosition();
+                // Consume any size change caused by native placement itself.
+                renderedSize = pane.getBoundingClientRect();
+              }
+              fit();
+            });
       observer?.observe(pane);
       observer?.observe(this.overlayContainer.getContainerElement());
       viewport?.addEventListener("resize", fit);

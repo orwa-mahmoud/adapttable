@@ -300,16 +300,26 @@ for (const key of ["angular-cdk", "material", "aria"]) {
           );
           await expect(trigger).toHaveAttribute("aria-expanded", "true");
           await expect(page.locator(".cdk-overlay-backdrop")).toHaveCount(0);
-          await expectHorizontalFit(surface, viewport.width);
-          await expect
-            .poll(async () => {
-              const anchor = (await trigger.boundingBox())!;
-              const card = (await surface.boundingBox())!;
-              const below = card.y >= anchor.y + anchor.height;
-              const above = card.y + card.height <= anchor.y;
-              return below || (key === "material" && above);
-            })
-            .toBe(true);
+          try {
+            await expectHorizontalFit(surface, viewport.width);
+            await expect
+              .poll(async () => {
+                const anchor = (await trigger.boundingBox())!;
+                const card = (await surface.boundingBox())!;
+                const below = card.y >= anchor.y + anchor.height;
+                const above = card.y + card.height <= anchor.y;
+                return below || (key === "material" && above);
+              })
+              .toBe(true);
+          } catch (error) {
+            if (key === "material")
+              await captureMaterialLayout(
+                panel,
+                testInfo,
+                "initial placement failure"
+              );
+            throw error;
+          }
           if (key === "material") {
             await expect(surface).toBeInViewport({ ratio: 1 });
             await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });

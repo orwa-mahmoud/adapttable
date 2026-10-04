@@ -428,6 +428,88 @@ describe("Material overlay ownership", () => {
     expect(card.style.maxHeight).toBe("80px");
   });
 
+  it("settles native separation after the rendered filter height catches up", async () => {
+    let notifyResize: (() => void) | undefined;
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        readonly observe = vi.fn();
+        readonly disconnect = vi.fn();
+        constructor(callback: () => void) {
+          notifyResize = callback;
+        }
+      }
+    );
+    vi.stubGlobal("innerWidth", 1180);
+    vi.stubGlobal("innerHeight", 757);
+    vi.spyOn(document.documentElement, "clientWidth", "get").mockReturnValue(
+      1180
+    );
+    vi.spyOn(document.documentElement, "clientHeight", "get").mockReturnValue(
+      757
+    );
+    const fixture = TestBed.createComponent(PopoverHost);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector(
+      "button"
+    )!;
+    const origin = DOMRect.fromRect({
+      x: 53.5,
+      y: 360.375,
+      width: 82.78125,
+      height: 36,
+    });
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(origin);
+    let renderedHeight = 360;
+    const getRect = HTMLElement.prototype.getBoundingClientRect;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        if (this.classList.contains("cdk-overlay-pane"))
+          return DOMRect.fromRect({
+            x: 53.5,
+            width: 374,
+            height: renderedHeight,
+          });
+        if (this.classList.contains("cdk-overlay-container"))
+          return DOMRect.fromRect({ width: 1165, height: 757 });
+        return getRect.call(this);
+      }
+    );
+    fixture.componentInstance.filterSurface.set(true);
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    const connected = fixture.debugElement
+      .queryAllNodes(By.directive(CdkConnectedOverlay))[0]!
+      .injector.get(CdkConnectedOverlay);
+    const pane = connected.overlayRef.overlayElement;
+    const host = connected.overlayRef.hostElement;
+    const positionedBottom = () =>
+      757 - Number.parseFloat(pane.style.bottom || host.style.bottom) - 4;
+    expect(pane.style.bottom).toBe("389px");
+    expect(positionedBottom()).toBeGreaterThan(origin.top);
+    const positionChanges = vi.fn();
+    const subscription = connected.positionChange.subscribe(positionChanges);
+
+    // Model the actual DOM resize after afterRenderEffect read the new signal.
+    // The same native connection emits no positionChange, but needs reapplying.
+    const reposition = vi.spyOn(connected.overlayRef, "updatePosition");
+    renderedHeight = 344.625;
+    notifyResize?.();
+    expect(pane.style.bottom).toBe("");
+    expect(host.style.bottom).toBe("396.625px");
+    expect(positionedBottom()).toBeLessThanOrEqual(origin.top);
+    expect(positionedBottom() - renderedHeight).toBeGreaterThanOrEqual(8);
+    expect(positionChanges).not.toHaveBeenCalled();
+    expect(reposition).toHaveBeenCalledTimes(1);
+    notifyResize?.();
+    expect(reposition).toHaveBeenCalledTimes(1);
+    expect(host.style.bottom).toBe("396.625px");
+    expect(positionedBottom()).toBeLessThanOrEqual(origin.top);
+    subscription.unsubscribe();
+  });
+
   it("corrects a filter after native positioning and resize, then releases generic menus", async () => {
     const observe = vi.fn();
     const disconnect = vi.fn();
