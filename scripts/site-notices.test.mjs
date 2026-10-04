@@ -3,6 +3,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -302,7 +303,7 @@ describe("website license notices", () => {
       dependency = pkg(host.directory, "static-search");
     assert.equal(
       installedPackage("static-search", host.directory),
-      join(dependency.directory, "package.json")
+      realpathSync(join(dependency.directory, "package.json"))
     );
     assert.throws(() => installedPackage("missing", root), /cannot locate/);
   });

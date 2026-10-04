@@ -4,6 +4,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -112,7 +113,7 @@ export function inlineDeclarationSources(outDir, typesDir, packageDir) {
       if (within(sourceDir, source)) return null;
       if (!within(typesDir, source)) {
         throw new Error(
-          `Unexpected declaration-map source outside staging: ${source}`
+          `Unexpected declaration-map source outside staging ${typesDir}: ${source}`
         );
       }
       const declarationMapFile = `${source}.map`;
@@ -174,7 +175,9 @@ export function buildLibrary({
     tsdown: packageBin("tsdown", "tsdown"),
     tsc: packageBin("typescript", "tsc"),
   };
-  const scratch = mkdtempSync(join(tempParent, "adapttable-library-build-"));
+  const scratch = realpathSync(
+    mkdtempSync(join(tempParent, "adapttable-library-build-"))
+  );
   const typesDir = join(scratch, "types");
   const outDir = join(packageDir, "dist");
   const phase = (name, script, args) => {
