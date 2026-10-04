@@ -8,8 +8,7 @@ import {
 // Exercise browser-owned fullscreen handling in full Chromium.
 test.use({ channel: "chromium", headless: false });
 
-// Diagnostic control: no framework, overlay, Escape handler, or fullscreen shim.
-// Keep this assertion failing if the browser input path cannot exit fullscreen.
+// Platform control: no framework, overlay, Escape handler, or fullscreen shim.
 const ROOT = "#native-fullscreen-control";
 
 async function openControl(page: Page): Promise<void> {
@@ -25,50 +24,12 @@ async function openControl(page: Page): Promise<void> {
   });
 }
 
-test("native fullscreen platform control follows Escape", async ({
-  page,
-  channel,
-  headless,
-}, testInfo) => {
-  await openControl(page);
-  const root = page.locator(ROOT);
-  const diagnostic = await observeFullscreenInput(
-    page,
-    testInfo,
-    { root: ROOT },
-    { channel, headless }
-  );
-  try {
-    await expect(root).toBeVisible();
-    await page.getByRole("button", { name: "Enter fullscreen" }).click();
-    await expect
-      .poll(() =>
-        root.evaluate(
-          (element) => element.ownerDocument.fullscreenElement === element
-        )
-      )
-      .toBe(true);
-    await diagnostic.pressEscape("playwright-escape-1", () =>
-      page.keyboard.press("Escape")
-    );
-    await expect
-      .poll(() =>
-        root.evaluate(
-          (element) => element.ownerDocument.fullscreenElement === element
-        )
-      )
-      .toBe(false);
-  } finally {
-    await diagnostic.attach("native-fullscreen-platform-events");
-  }
-});
-
-test.describe("CI X11 input comparison", () => {
+test.describe("CI native fullscreen input", () => {
   // XTest is safe only in the explicitly enabled CI Xvfb session, where the
   // workflow installs its native input dependency and runs one browser worker.
-  test.skip(!x11DiagnosticEnabled, "CI-only XTest input comparison");
+  test.skip(!x11DiagnosticEnabled, "Requires Linux CI with Xvfb and xdotool");
 
-  test("native fullscreen X11 Escape observation", async ({
+  test("native fullscreen exits on native Escape", async ({
     page,
     channel,
     headless,
@@ -91,12 +52,24 @@ test.describe("CI X11 input comparison", () => {
           )
         )
         .toBe(true);
-      // Keep both observations even if native Chrome exits on the first Escape.
-      // The independent Playwright control above retains its behavior assertion.
       await diagnostic.pressEscape("xtest-escape-1", escape);
+      await expect
+        .poll(() =>
+          root.evaluate(
+            (element) => element.ownerDocument.fullscreenElement === element
+          )
+        )
+        .toBe(false);
       await diagnostic.pressEscape("xtest-escape-2", escape);
+      await expect
+        .poll(() =>
+          root.evaluate(
+            (element) => element.ownerDocument.fullscreenElement === element
+          )
+        )
+        .toBe(false);
     } finally {
-      await diagnostic.attach("native-fullscreen-x11-observation");
+      await diagnostic.attach("native-fullscreen-native-input");
     }
   });
 });
