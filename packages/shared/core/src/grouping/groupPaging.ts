@@ -60,7 +60,9 @@ export function createGroupPagingController(): GroupPagingController {
   const listeners = new Set<() => void>();
   const set = (next: GroupPaging): void => {
     paging = next;
-    for (const listener of [...listeners]) listener();
+    // Subscription changes during a publication apply to the next publication.
+    const pendingListeners = [...listeners];
+    for (const listener of pendingListeners) listener();
   };
   return {
     getSnapshot: () => paging,

@@ -1295,6 +1295,7 @@ export abstract class AdaptBooleanFilterFieldModel<TRow> {
 
 // @public
 export class AdaptCell<TRow> {
+    readonly adaptCellIndex: InputSignal<number>;
     readonly column: InputSignal<ColumnDef<TRow>>;
     protected readonly context: Signal<CellContext<TRow>>;
     protected readonly renderer: Signal<ResolvedRenderer<CellContext<TRow>> | null>;
@@ -1313,7 +1314,7 @@ export class AdaptCell<TRow> {
             "required": true;
             "isSignal": true;
         };
-        "rowIndex": {
+        "adaptCellIndex": {
             "alias": "adaptCellIndex";
             "required": false;
             "isSignal": true;
@@ -1785,6 +1786,12 @@ export class AdaptCommandPaletteChrome {
     }>;
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly listId: string;
+    protected readonly listProps: Signal<    {
+    id: string;
+    role: "listbox";
+    "aria-label": string;
+    "data-adapttable-part": string;
+    }>;
     readonly onClose: InputSignal<() => void>;
     readonly open: InputSignal<boolean>;
     protected readonly rows: Signal<    {
@@ -6266,6 +6273,9 @@ export function injectBatchEditing<TRow>(options: BatchEditingInjectOptions<TRow
 
 // @public
 export function injectBulkActionRunner(options: BulkActionRunnerOptions): BulkActionRunnerState;
+
+// @public
+export function injectBulkBarRunner(props: Signal<BulkBarSlotProps<SelectionState>>): BulkActionRunnerState;
 
 // @public
 export function injectCellEditing<TRow = unknown>(options?: CellEditingOptions<TRow>): Signal<CellEditingState>;

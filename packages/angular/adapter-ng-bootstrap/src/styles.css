@@ -4,7 +4,7 @@
   min-inline-size: 0;
   max-inline-size: 100%;
   color: var(--bs-body-color);
-  background: var(--bs-body-bg);
+  background-color: var(--bs-body-bg);
   font-family: var(--bs-body-font-family);
   font-size: var(--bs-body-font-size);
   line-height: var(--bs-body-line-height);

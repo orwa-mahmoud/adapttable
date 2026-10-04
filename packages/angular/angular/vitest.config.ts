@@ -41,6 +41,10 @@ export default defineConfig({
         replacement: path.resolve(packageDir, "src/index.ts"),
       },
       {
+        find: /^@adapttable\/angular\/(.+)$/,
+        replacement: path.resolve(packageDir, "$1/index.ts"),
+      },
+      {
         find: /^@adapttable\/core$/,
         replacement: path.resolve(packageDir, "../../shared/core/src/index.ts"),
       },

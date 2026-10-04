@@ -5,7 +5,9 @@
     [nzTemplateMode]="true"
     [nzFrontPagination]="false"
     [nzShowPagination]="false"
-    [attr.data-adapttable-part]="tableAttrs()['role'] === 'grid' ? 'grid' : null"
+    [attr.data-adapttable-part]="
+      tableAttrs()['role'] === 'grid' ? 'grid' : null
+    "
     [adaptAttrs]="tableAttrs()"
     [adaptAttrsTarget]="tableElement"
   >
@@ -57,72 +59,72 @@
           [attr.rowspan]="rowSpan > 1 ? rowSpan : null"
         >
           <div class="adapt-header-controls">
-          @if (v.table.canRenameColumns && column.renameable) {
-            <adapt-column-header-rename
-              [columnKey]="column.key"
-              [name]="columnName(column)"
-              [onRename]="renameColumn"
-              [labels]="v.table.labels()"
-            >
+            @if (v.table.canRenameColumns && column.renameable) {
+              <adapt-column-header-rename
+                [columnKey]="column.key"
+                [name]="columnName(column)"
+                [onRename]="renameColumn"
+                [labels]="v.table.labels()"
+              >
+                <ng-container *ngTemplateOutlet="caption" />
+              </adapt-column-header-rename>
+            } @else {
               <ng-container *ngTemplateOutlet="caption" />
-            </adapt-column-header-rename>
-          } @else {
-            <ng-container *ngTemplateOutlet="caption" />
-          }
-          <ng-template #caption>
-            <span data-adapttable-part="header-caption-control">
-              @if (column.sortable) {
-                <button
-                  nz-button
-                  nzType="text"
-                  nzSize="small"
-                  [adaptAttrs]="v.table.sortButtonAttrs(column)"
-                >
+            }
+            <ng-template #caption>
+              <span data-adapttable-part="header-caption-control">
+                @if (column.sortable) {
+                  <button
+                    nz-button
+                    nzType="text"
+                    nzSize="small"
+                    [adaptAttrs]="v.table.sortButtonAttrs(column)"
+                  >
+                    <span [adaptHeader]="column"></span>
+                    @if (sortIndex(column); as index) {
+                      <span>{{ index }}</span>
+                    }
+                    @if (v.table.sortBy() === column.key) {
+                      <span aria-hidden="true">{{
+                        v.table.sortDir() === "desc" ? "▼" : "▲"
+                      }}</span>
+                    }
+                  </button>
+                } @else {
                   <span [adaptHeader]="column"></span>
-                  @if (sortIndex(column); as index) {
-                    <span>{{ index }}</span>
-                  }
-                  @if (v.table.sortBy() === column.key) {
-                    <span aria-hidden="true">{{
-                      v.table.sortDir() === "desc" ? "▼" : "▲"
-                    }}</span>
-                  }
-                </button>
-              } @else {
-                <span [adaptHeader]="column"></span>
-              }
-            </span>
-          </ng-template>
-          @if (column.headerActions) {
-            <span data-adapttable-part="header-actions">{{
-              column.headerActions
-            }}</span>
-          }
-          @if (columnSelects().get(column.key); as select) {
-            <ng-container
-              [adaptSlot]="columnSelectSlot"
-              [adaptSlotProps]="select"
-              [adaptSlotTable]="v.table"
-            />
-          }
-          @if (resizeHandle(column); as handle) {
-            <button
-              nz-button
-              nzType="text"
-              type="button"
-              data-adapttable-part="resize-handle"
-              [adaptAttrs]="handle"
-            ></button>
-          }
-          @if (v.filters?.header) {
-            @if (v.filters.headerProps().get(column.key); as hp) {
+                }
+              </span>
+            </ng-template>
+            @if (column.headerActions) {
+              <span data-adapttable-part="header-actions">{{
+                column.headerActions
+              }}</span>
+            }
+            @if (columnSelects().get(column.key); as select) {
               <ng-container
-                [adaptSlot]="filterSlots.header"
-                [adaptSlotProps]="hp"
+                [adaptSlot]="columnSelectSlot"
+                [adaptSlotProps]="select"
                 [adaptSlotTable]="v.table"
               />
             }
-          }
+            @if (resizeHandle(column); as handle) {
+              <button
+                nz-button
+                nzType="text"
+                type="button"
+                data-adapttable-part="resize-handle"
+                [adaptAttrs]="handle"
+              ></button>
+            }
+            @if (v.filters?.header) {
+              @if (v.filters.headerProps().get(column.key); as hp) {
+                <ng-container
+                  [adaptSlot]="filterSlots.header"
+                  [adaptSlotProps]="hp"
+                  [adaptSlotTable]="v.table"
+                />
+              }
+            }
           </div>
         </th>
       </ng-template>
@@ -210,7 +212,7 @@
       @for (slot of v.body(); track slot.key) {
         @switch (slot.kind) {
           @case ("virtualPad") {
-            <tr aria-hidden="true">
+            <tr inert>
               <td
                 [attr.colspan]="slot.colSpan"
                 [style.height.px]="slot.height"
@@ -228,13 +230,19 @@
               <td
                 [attr.data-adapttable-part]="parts.cell"
                 [attr.colspan]="slot.colSpan"
-                [attr.role]="separator ? 'separator' : null"
-                [attr.aria-label]="
-                  separator ? v.table.labels().rowSeparator : null
-                "
                 [adaptAttrs]="{ style: extraCellStyle(slot.fillStyle) }"
-                [adaptExtraRowContent]="slot.render"
-              ></td>
+              >
+                @if (separator) {
+                  <hr
+                    [attr.aria-label]="v.table.labels().rowSeparator"
+                    style="border: 0; margin: 0"
+                  />
+                }
+                <div
+                  style="display: contents"
+                  [adaptExtraRowContent]="slot.render"
+                ></div>
+              </td>
             </tr>
           }
           @case ("group") {

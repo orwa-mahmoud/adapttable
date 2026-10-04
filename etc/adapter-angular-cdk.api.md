@@ -507,6 +507,8 @@ export class AdaptFilterDrawer {
 // @internal (undocumented)
 export class AdaptFilterPopover {
     // (undocumented)
+    protected readonly availableHeight: Signal<number>;
+    // (undocumented)
     protected keydown(event: KeyboardEvent): void;
     // (undocumented)
     protected outside(event: MouseEvent): void;

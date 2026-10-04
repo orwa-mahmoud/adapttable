@@ -180,6 +180,7 @@
 }
 .adapt-material-overlay .adapt-material-filters-footer {
   justify-content: flex-end;
+  --mat-button-filled-container-shape: 6px;
 }
 .adapt-material-overlay [data-adapttable-part="filter-field"] {
   min-inline-size: 0;
@@ -276,7 +277,4 @@
 }
 .adapt-material-filters-button {
   --mat-button-text-container-shape: 6px;
-}
-.adapt-material-overlay .adapt-material-filters-footer {
-  --mat-button-filled-container-shape: 6px;
 }

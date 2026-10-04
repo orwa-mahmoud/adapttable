@@ -465,6 +465,8 @@ export class AdaptFilterDrawer {
 export class AdaptFilterPopover {
     constructor();
     // (undocumented)
+    protected readonly availableHeight: Signal<number>;
+    // (undocumented)
     protected closed(): void;
     readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
     // (undocumented)
@@ -961,6 +963,7 @@ export function ɵbootstrapModal(options: {
     readonly content: () => TemplateRef<unknown>;
     readonly container: () => HTMLElement;
     readonly titleId: string;
+    readonly sheet?: boolean;
     readonly onClose: () => void;
 }): void;
 

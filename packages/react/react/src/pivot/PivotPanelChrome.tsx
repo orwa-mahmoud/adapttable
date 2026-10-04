@@ -16,14 +16,10 @@
  * from Mantine buttons and an antd panel from antd buttons.
  */
 import {
-  type AggregateName,
   assignField,
   moveField,
   PIVOT_AGGREGATIONS,
-  type PivotConfig,
-  type PivotField,
   pivotPanelZones,
-  type PivotZone,
   removeField,
   resolveLabels,
   setMeasureAgg,
@@ -37,8 +33,12 @@ import type {
 } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
-export type { AggregateName, PivotConfig, PivotField, PivotZone };
-
+export type {
+  AggregateName,
+  PivotConfig,
+  PivotField,
+  PivotZone,
+} from "@adapttable/core";
 export type { PivotAddProps, PivotAggProps } from "@adapttable/core/binding";
 
 /**

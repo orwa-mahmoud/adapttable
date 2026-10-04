@@ -146,10 +146,9 @@ function renderedRowIds(): string[] {
 }
 
 function spacerHeight(): string {
-  const cell = document.querySelector<HTMLElement>(
-    'tbody > tr[aria-hidden="true"] > td'
-  );
+  const cell = document.querySelector<HTMLElement>("tbody > tr[inert] > td");
   expect(cell).not.toBeNull();
+  expect(cell!.closest("tr")?.hasAttribute("inert")).toBe(true);
   return cell!.style.height;
 }
 

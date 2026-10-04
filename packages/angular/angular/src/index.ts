@@ -13,6 +13,7 @@ export {
   type BulkActionRunnerOptions,
   type BulkActionRunnerState,
   injectBulkActionRunner,
+  injectBulkBarRunner,
   rowActionsFor,
   type RowActionsOptions,
 } from "./actions/bulkActionRunner";

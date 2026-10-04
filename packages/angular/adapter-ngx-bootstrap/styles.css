@@ -155,6 +155,7 @@
   --bs-form-valid-border-color: #198754;
   --bs-form-invalid-color: #dc3545;
   --bs-form-invalid-border-color: #dc3545;
+  --bs-btn-close-filter: ;
 }
 
 .adapttable-ngx-bootstrap[data-bs-theme="dark"] {
@@ -251,6 +252,7 @@
     52.4705882353%,
     56.2352941176%
   );
+  --bs-btn-close-filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 .adapttable-ngx-bootstrap *,
@@ -267,15 +269,19 @@
 
 .adapttable-ngx-bootstrap {
   margin: 0;
-  font-family: var(--bs-body-font-family);
-  font-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
-  line-height: var(--bs-body-line-height);
-  color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
-  background-color: var(--bs-body-bg);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  font-family: var(--bs-body-font-family);
+  font-size: var(--bs-body-font-size);
+  line-height: var(--bs-body-line-height);
+  --adapt-cell-padding: 0.625rem 0.75rem;
 }
 
 .adapttable-ngx-bootstrap hr {
@@ -630,15 +636,6 @@
   cursor: pointer;
   filter: grayscale(1);
 }
-
-/* rtl:raw:
-[type="tel"],
-[type="url"],
-[type="email"],
-[type="number"] {
-  direction: ltr;
-}
-*/
 .adapttable-ngx-bootstrap ::-webkit-search-decoration {
   -webkit-appearance: none;
 }
@@ -1902,7 +1899,6 @@
   --bs-btn-disabled-opacity: 0.65;
   --bs-btn-focus-box-shadow: 0 0 0 0.25rem
     rgba(var(--bs-btn-focus-shadow-rgb), 0.5);
-  display: inline-block;
   padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
   font-family: var(--bs-btn-font-family);
   font-size: var(--bs-btn-font-size);
@@ -1922,6 +1918,10 @@
     background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out,
     box-shadow 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
 }
 @media (prefers-reduced-motion: reduce) {
   .adapttable-ngx-bootstrap .btn {
@@ -2408,7 +2408,6 @@
 
 .adapttable-ngx-bootstrap .dropdown-menu {
   --bs-dropdown-zindex: 1000;
-  --bs-dropdown-min-width: 10rem;
   --bs-dropdown-padding-x: 0;
   --bs-dropdown-padding-y: 0.5rem;
   --bs-dropdown-spacer: 0.125rem;
@@ -2436,7 +2435,6 @@
   --bs-dropdown-header-padding-x: 1rem;
   --bs-dropdown-header-padding-y: 0.5rem;
   position: absolute;
-  z-index: var(--bs-dropdown-zindex);
   display: none;
   min-width: var(--bs-dropdown-min-width);
   padding: var(--bs-dropdown-padding-y) var(--bs-dropdown-padding-x);
@@ -2449,6 +2447,9 @@
   background-clip: padding-box;
   border: var(--bs-dropdown-border-width) solid var(--bs-dropdown-border-color);
   border-radius: var(--bs-dropdown-border-radius);
+  --bs-dropdown-min-width: min(20rem, calc(100vw - 1rem));
+  max-inline-size: calc(100vw - 1rem);
+  z-index: 1070;
 }
 .adapttable-ngx-bootstrap .dropdown-menu[data-bs-popper] {
   top: 100%;
@@ -2582,18 +2583,15 @@
 .adapttable-ngx-bootstrap .dropend .dropdown-toggle::after {
   display: inline-block;
   margin-left: 0.255em;
-  vertical-align: 0.255em;
   content: "";
   border-top: 0.3em solid transparent;
   border-right: 0;
   border-bottom: 0.3em solid transparent;
   border-left: 0.3em solid;
+  vertical-align: 0;
 }
 .adapttable-ngx-bootstrap .dropend .dropdown-toggle:empty::after {
   margin-left: 0;
-}
-.adapttable-ngx-bootstrap .dropend .dropdown-toggle::after {
-  vertical-align: 0;
 }
 
 .adapttable-ngx-bootstrap .dropstart .dropdown-menu[data-bs-popper] {
@@ -2604,28 +2602,22 @@
   margin-right: var(--bs-dropdown-spacer);
 }
 .adapttable-ngx-bootstrap .dropstart .dropdown-toggle::after {
-  display: inline-block;
   margin-left: 0.255em;
   vertical-align: 0.255em;
   content: "";
-}
-.adapttable-ngx-bootstrap .dropstart .dropdown-toggle::after {
   display: none;
 }
 .adapttable-ngx-bootstrap .dropstart .dropdown-toggle::before {
   display: inline-block;
   margin-right: 0.255em;
-  vertical-align: 0.255em;
   content: "";
   border-top: 0.3em solid transparent;
   border-right: 0.3em solid;
   border-bottom: 0.3em solid transparent;
+  vertical-align: 0;
 }
 .adapttable-ngx-bootstrap .dropstart .dropdown-toggle:empty::after {
   margin-left: 0;
-}
-.adapttable-ngx-bootstrap .dropstart .dropdown-toggle::before {
-  vertical-align: 0;
 }
 
 .adapttable-ngx-bootstrap .dropdown-divider {
@@ -2942,6 +2934,8 @@
   display: flex;
   padding-left: 0;
   list-style: none;
+  margin: 0;
+  flex-wrap: wrap;
 }
 
 .adapttable-ngx-bootstrap .page-link {
@@ -3249,15 +3243,6 @@
 }
 
 .adapttable-ngx-bootstrap .btn-close-white {
-  --bs-btn-close-filter: invert(1) grayscale(100%) brightness(200%);
-}
-
-.adapttable-ngx-bootstrap,
-.adapttable-ngx-bootstrap[data-bs-theme="light"] {
-  --bs-btn-close-filter: ;
-}
-
-.adapttable-ngx-bootstrap[data-bs-theme="dark"] {
   --bs-btn-close-filter: invert(1) grayscale(100%) brightness(200%);
 }
 
@@ -4452,6 +4437,7 @@
   background-clip: padding-box;
   outline: 0;
   transition: var(--bs-offcanvas-transition);
+  --bs-offcanvas-width: min(28rem, 100vw);
 }
 @media (prefers-reduced-motion: reduce) {
   .adapttable-ngx-bootstrap .offcanvas {
@@ -4999,27 +4985,21 @@
   background-color: currentcolor;
   opacity: 0.25;
 }
+
 /* AdaptTable layout supplements. Every rule stays within the Bootstrap kit. */
-.adapttable-ngx-bootstrap {
-  display: block;
-  min-inline-size: 0;
-  max-inline-size: 100%;
-  color: var(--bs-body-color);
-  background-color: var(--bs-body-bg);
-  font-family: var(--bs-body-font-family);
-  font-size: var(--bs-body-font-size);
-  line-height: var(--bs-body-line-height);
-  --adapt-cell-padding: 0.625rem 0.75rem;
-}
+
 .adapttable-ngx-bootstrap [data-density="compact"] {
   --adapt-cell-padding: 0.25rem 0.5rem;
 }
+
 .adapttable-ngx-bootstrap [data-density="comfortable"] {
   --adapt-cell-padding: 0.875rem 1rem;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="root"] {
   min-inline-size: 0;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="toolbar"],
 .adapttable-ngx-bootstrap [data-adapttable-part="toolbar-extras"],
 .adapttable-ngx-bootstrap [data-adapttable-part="footer"],
@@ -5036,13 +5016,16 @@
   flex-wrap: wrap;
   min-inline-size: 0;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="toolbar"],
 .adapttable-ngx-bootstrap [data-adapttable-part="footer"] {
   padding-block: 0.75rem;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="footer"] {
   justify-content: space-between;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="search-field"] {
   align-items: stretch;
   gap: 0;
@@ -5050,28 +5033,34 @@
   max-inline-size: 24rem;
   min-inline-size: 0;
 }
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-part="rows-per-page"] {
   display: inline-block;
   inline-size: auto;
   margin-inline-start: 0.5rem;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="scroll-box"] {
   overflow: auto;
   max-inline-size: 100%;
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="table"] {
   margin: 0;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="table"] :is(th, td) {
   padding: var(--adapt-cell-padding);
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="header-cell"] {
   white-space: nowrap;
   background: var(--bs-tertiary-bg);
   vertical-align: middle;
 }
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-part="sort-button"] {
   display: inline-flex;
   align-items: center;
@@ -5082,86 +5071,88 @@
   font-weight: 600;
   padding: 0;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="header-filter-button"] {
   display: inline-flex;
   margin-inline-start: 0.375rem;
 }
+
 .adapttable-ngx-bootstrap :is(th, td)[data-pinned] {
   background: var(--bs-body-bg);
 }
+
 .adapttable-ngx-bootstrap th[data-pinned] {
   background: var(--bs-tertiary-bg);
 }
+
 .adapttable-ngx-bootstrap svg {
   inline-size: 1rem;
   block-size: 1rem;
   flex: 0 0 auto;
   vertical-align: middle;
 }
-.adapttable-ngx-bootstrap .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-}
+
 .adapttable-ngx-bootstrap :is(button, input, select, textarea):focus-visible {
   outline: 3px solid var(--bs-primary);
   outline-offset: 2px;
 }
+
 .adapttable-ngx-bootstrap [aria-current="page"],
 .adapttable-ngx-bootstrap .btn[aria-pressed="true"] {
   background: var(--bs-primary);
   color: #fff;
   border-color: var(--bs-primary);
 }
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-title"] {
   font-size: 1rem;
   margin: 0;
   flex: 1;
 }
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-header"],
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-footer"] {
   padding: 0.75rem;
 }
+
 .adapttable-ngx-bootstrap .adapttable-filter-popover {
   --bs-popover-max-width: min(26rem, calc(100vw - 1rem));
   z-index: 1080;
 }
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-popover"] {
   inline-size: min(23rem, calc(100vw - 3rem));
   max-block-size: min(70vh, 40rem);
   overflow-y: auto;
 }
-.adapttable-ngx-bootstrap .offcanvas {
-  --bs-offcanvas-width: min(28rem, 100vw);
-}
+
 .adapttable-ngx-bootstrap .adapttable-filter-panel-content {
   display: flex;
   flex-direction: column;
   block-size: 100%;
   min-block-size: 0;
 }
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-part="filters-body"] {
   min-block-size: 0;
 }
-.adapttable-ngx-bootstrap .dropdown-menu {
-  --bs-dropdown-min-width: min(20rem, calc(100vw - 1rem));
-  max-inline-size: calc(100vw - 1rem);
-  z-index: 1070;
-}
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-part="column-menu-label"] {
   flex: 1;
   min-inline-size: 5rem;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="column-menu-item"] {
   padding-block: 0.35rem;
   flex-wrap: nowrap;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="cards"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="card"] {
   min-inline-size: 0;
   border: var(--bs-border-width) solid var(--bs-border-color);
@@ -5169,12 +5160,14 @@
   padding: 0.75rem;
   background: var(--bs-body-bg);
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="status-bar"] {
   border-block-start: 1px solid var(--bs-border-color);
   padding: 0.5rem;
   font-size: 0.875rem;
   color: var(--bs-secondary-color);
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="context-menu"],
 .adapttable-ngx-bootstrap [data-adapttable-part="command-palette"] {
   border: 1px solid var(--bs-border-color);
@@ -5184,11 +5177,13 @@
   box-shadow: var(--bs-box-shadow);
   padding: 0.5rem;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="error"] {
   color: var(--bs-danger-text-emphasis);
   background: var(--bs-danger-bg-subtle);
   padding: 1rem;
 }
+
 @media (max-width: 575px) {
   .adapttable-ngx-bootstrap [data-adapttable-part="search-field"] {
     max-inline-size: none;
@@ -5214,12 +5209,14 @@
   white-space: nowrap;
   border: 0;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="cards"],
 .adapttable-ngx-bootstrap [data-adapttable-part="chips"] {
   list-style: none;
   margin: 0;
   padding: 0;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="card-row"] {
   display: flex;
   min-inline-size: 0;
@@ -5227,21 +5224,20 @@
   gap: 1rem;
   padding-block: 0.25rem;
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="card-label"] {
   flex: 0 1 35%;
   min-inline-size: 0;
   overflow-wrap: anywhere;
   color: var(--bs-secondary-color);
 }
+
 .adapttable-ngx-bootstrap [data-adapttable-part="card-value"] {
   flex: 1 1 0;
   min-inline-size: 0;
   overflow-wrap: anywhere;
 }
-.adapttable-ngx-bootstrap .pagination {
-  margin: 0;
-  flex-wrap: wrap;
-}
+
 .adapttable-ngx-bootstrap .page-link:disabled {
   color: var(--bs-secondary-color);
   pointer-events: none;
@@ -5255,14 +5251,17 @@
   max-inline-size: 100vw;
   block-size: 100dvh;
 }
+
 .adapttable-ngx-bootstrap .adapttable-edge-drawer .modal-content {
   block-size: 100%;
   border-radius: 0;
 }
+
 .adapttable-ngx-bootstrap .adapttable-edge-drawer .offcanvas-body {
   flex: 1;
   overflow-y: auto;
 }
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-overlay] {
   position: absolute;
   inset: 0;
@@ -5270,9 +5269,11 @@
   z-index: 1070;
   pointer-events: none;
 }
+
 .adapttable-ngx-bootstrap [data-ngx-bootstrap-overlay] > * {
   pointer-events: auto;
 }
+
 .adapttable-ngx-bootstrap [dir="rtl"] .dropdown-menu {
   text-align: right;
 }

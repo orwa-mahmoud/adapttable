@@ -20,7 +20,7 @@ export function injectBootstrapOverlayContainer() {
     if (!boundary) return;
     element = host.nativeElement.ownerDocument.createElement("div");
     const id = `adapt-ngx-bootstrap-overlay-${nextOverlayId++}`;
-    element.setAttribute("data-ngx-bootstrap-overlay", id);
+    element.dataset.ngxBootstrapOverlay = id;
     boundary.append(element);
     container.set(`[data-ngx-bootstrap-overlay="${id}"]`);
   });

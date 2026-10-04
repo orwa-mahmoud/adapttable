@@ -451,11 +451,14 @@ export class AdaptFilterDrawer {
 // @internal (undocumented)
 export class AdaptFilterPopover {
     constructor();
+    // (undocumented)
+    protected readonly availableHeight: Signal<number>;
     protected onVisibleChange(open: boolean): void;
     // (undocumented)
-    protected readonly overlayStyle: {
-        zIndex: string;
-    };
+    protected readonly overlayStyle: Signal<    {
+    zIndex: string;
+    maxHeight: string;
+    }>;
     // (undocumented)
     readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
     // (undocumented)

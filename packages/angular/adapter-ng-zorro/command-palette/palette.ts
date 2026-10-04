@@ -66,7 +66,7 @@ class AdaptCommandSurface {
     afterRenderEffect((onCleanup) => {
       const element = this.modal()?.getElement();
       if (!element) return;
-      element.setAttribute("data-adapttable-part", "command-palette");
+      element.dataset.adapttablePart = "command-palette";
       element.setAttribute("aria-label", this.props().label);
       element.setAttribute("aria-modal", "true");
       const onKey = (event: KeyboardEvent): void => {

@@ -14,7 +14,6 @@
 import {
   CHANGED_CELL_FLASH_MS,
   createChangedCellFlashStore,
-  type RowPatchEvent,
 } from "@adapttable/core";
 import type { ChangedCellFlashState } from "@adapttable/core/binding";
 import {
@@ -26,9 +25,8 @@ import {
 } from "react";
 
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
+export type { RowPatchEvent } from "@adapttable/core";
 export type { ChangedCellFlashState } from "@adapttable/core/binding";
-
-export type { RowPatchEvent };
 
 /**
  * What {@link useChangedCellFlash} needs.

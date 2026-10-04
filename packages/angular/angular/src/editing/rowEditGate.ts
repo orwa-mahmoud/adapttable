@@ -10,7 +10,6 @@ import {
   batchEditBarModel,
   batchEditErrorId,
   type CellConflictAsk,
-  type EditableColumnLike,
   editorSelectOptions,
   handleRowEditorKey,
   resolveCellEditor,
@@ -47,13 +46,9 @@ import {
 } from "./editableCellShared";
 import type { BatchEditingState, RowEditingState } from "./editing";
 
-export type {
-  BatchEditingState,
-  EditableColumnLike,
-  RowEditingState,
-  TableLabels,
-};
 export type { EditableCellEditorCtrl } from "./editableCellShared";
+export type { BatchEditingState, RowEditingState } from "./editing";
+export type { EditableColumnLike, TableLabels } from "@adapttable/core";
 export {
   type RowEditConflict,
   type RowEditControls,

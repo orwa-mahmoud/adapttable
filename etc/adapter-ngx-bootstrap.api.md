@@ -466,6 +466,8 @@ export class AdaptFilterDrawer {
 export class AdaptFilterPopover {
     constructor();
     // (undocumented)
+    protected readonly availableHeight: Signal<number>;
+    // (undocumented)
     protected closed(): void;
     // (undocumented)
     protected keepRemovedContentInside(event: MouseEvent): void;
@@ -968,6 +970,7 @@ export function ɵbootstrapModal(options: {
     readonly content: () => TemplateRef<unknown>;
     readonly container: () => HTMLElement;
     readonly titleId: string;
+    readonly sheet?: boolean;
     readonly onClose: () => void;
     readonly drawer?: boolean;
     readonly label?: () => string;

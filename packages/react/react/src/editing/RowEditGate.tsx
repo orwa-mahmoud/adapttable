@@ -21,7 +21,6 @@ import {
   rowEditControls,
   rowEditErrorId,
   rowEditSaveBlocked,
-  type TableLabels,
 } from "@adapttable/core";
 import type {
   BatchEditBarProps,
@@ -44,13 +43,10 @@ import {
 } from "./EditableCellGate";
 import type { RowEditingState } from "./rowEditing";
 
-export type {
-  BatchEditingState,
-  EditableCellEditorCtrl,
-  EditableColumnLike,
-  RowEditingState,
-  TableLabels,
-};
+export type { BatchEditingState } from "./batchEditing";
+export type { EditableCellEditorCtrl } from "./EditableCellGate";
+export type { RowEditingState } from "./rowEditing";
+export type { EditableColumnLike, TableLabels } from "@adapttable/core";
 export {
   type RowEditConflict,
   type RowEditControls,

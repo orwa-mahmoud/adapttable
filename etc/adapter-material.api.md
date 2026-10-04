@@ -641,7 +641,15 @@ export class AdaptMaterialDialog {
 // @internal
 export class AdaptMaterialPopover {
     // (undocumented)
+    readonly align: InputSignal<"start" | "end">;
+    // (undocumented)
     protected readonly anchor: Signal<ElementRef<HTMLElement>>;
+    // (undocumented)
+    protected readonly availableHeight: Signal<number>;
+    // (undocumented)
+    readonly belowOnly: InputSignal<boolean>;
+    // (undocumented)
+    protected readonly belowPositions: ConnectedPosition[];
     // (undocumented)
     readonly dir: InputSignal<"ltr" | "rtl" | undefined>;
     // (undocumented)
@@ -657,7 +665,7 @@ export class AdaptMaterialPopover {
     // (undocumented)
     protected outside(event: MouseEvent): void;
     // (undocumented)
-    protected readonly positions: ConnectedPosition[];
+    protected readonly positions: Signal<ConnectedPosition[]>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMaterialPopover, "adapt-material-popover", never, {
         "origin": {
@@ -667,6 +675,16 @@ export class AdaptMaterialPopover {
         };
         "open": {
             "alias": "open";
+            "required": false;
+            "isSignal": true;
+        };
+        "belowOnly": {
+            "alias": "belowOnly";
+            "required": false;
+            "isSignal": true;
+        };
+        "align": {
+            "alias": "align";
             "required": false;
             "isSignal": true;
         };

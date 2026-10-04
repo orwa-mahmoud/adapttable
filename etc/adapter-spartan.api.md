@@ -49,6 +49,7 @@ import { FiltersFormSlotProps } from '@adapttable/angular';
 import { FiltersMode } from '@adapttable/angular';
 import { FiltersView } from '@adapttable/angular';
 import { FilterTreeSlots } from '@adapttable/angular';
+import { FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
 import { GlobalPositionStrategy } from '@angular/cdk/overlay';
 import { GroupingPanelSlotProps } from '@adapttable/angular';
 import { GroupingPanelSlots } from '@adapttable/angular';
@@ -451,6 +452,9 @@ export class AdaptFilterDrawer {
 
 // @internal
 export class AdaptFilterPopover {
+    // (undocumented)
+    protected readonly availableHeight: Signal<number>;
+    protected readonly position: Signal<FlexibleConnectedPositionStrategy>;
     // (undocumented)
     readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
     // (undocumented)
@@ -1019,10 +1023,12 @@ export class ɵHlmNativeSelect {
 export class ɵHlmPopoverLabel {
     constructor();
     // (undocumented)
+    readonly adaptHlmPopoverLabel: InputSignal<string>;
+    // (undocumented)
     readonly label: InputSignal<string>;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHlmPopoverLabel, "[brnPopover][adaptHlmPopoverLabel]", never, {
-        "label": {
+        "adaptHlmPopoverLabel": {
             "alias": "adaptHlmPopoverLabel";
             "required": true;
             "isSignal": true;
@@ -1037,6 +1043,8 @@ export class ɵSpartanSelection {
     // (undocumented)
     readonly attrs: InputSignal<Readonly<Record<string, unknown>>>;
     // (undocumented)
+    readonly class: InputSignal<string | undefined>;
+    // (undocumented)
     protected label(): string;
     // (undocumented)
     protected toggle(): void;
@@ -1049,7 +1057,7 @@ export class ɵSpartanSelection {
             "required": true;
             "isSignal": true;
         };
-        "userClass": {
+        "class": {
             "alias": "class";
             "required": false;
             "isSignal": true;

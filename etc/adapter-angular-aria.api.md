@@ -30,6 +30,7 @@ import { ColumnRenameEditorState } from '@adapttable/angular';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/angular';
 import { ColumnSelectCheckboxProps } from '@adapttable/angular';
 import { ColumnSelectSlots } from '@adapttable/angular';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import { DataTableClassNames } from '@adapttable/angular';
 import { EditableCellEditing } from '@adapttable/angular';
 import { EditableCellEditorCtrl } from '@adapttable/angular';
@@ -444,9 +445,13 @@ export class AdaptFilterDrawer {
 // @internal
 export class AdaptFilterPopover {
     // (undocumented)
+    protected readonly availableHeight: Signal<number>;
+    // (undocumented)
     protected key(event: KeyboardEvent): void;
     // (undocumented)
     protected outside(event: MouseEvent): void;
+    // (undocumented)
+    protected readonly positions: ConnectedPosition[];
     readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterPopover, "adapt-filter-popover", never, {

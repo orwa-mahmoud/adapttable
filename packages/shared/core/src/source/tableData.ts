@@ -190,6 +190,12 @@ export function createTableData<TRow>(): TableData<TRow> {
   let emitter: QueryEmitter | undefined;
   let notice: { query: TableQuery; key: string } | undefined;
 
+  const extensionsOf = memoOne(
+    (
+      filterTypes: TableDataConfig<TRow>["filterTypes"],
+      featureHost: TableDataConfig<TRow>["featureHost"]
+    ) => ({ filterTypes, featureHost })
+  );
   const runtimeOf = memoOne(
     (
       engine: FilterEngine | undefined,
@@ -198,8 +204,7 @@ export function createTableData<TRow>(): TableData<TRow> {
       locale: string | undefined,
       data: readonly TRow[] | undefined,
       loaded: Record<string, readonly LoadedFilterOption[]>,
-      filterTypes: readonly FilterTypeSpec[] | undefined,
-      featureHost: FeatureHostState | undefined
+      extensions: ReturnType<typeof extensionsOf>
     ): FilterRuntime<TRow> =>
       engine
         ? engine.buildRuntime({
@@ -208,8 +213,7 @@ export function createTableData<TRow>(): TableData<TRow> {
             locale,
             data: data ?? [],
             loadedOptions: loaded,
-            filterTypes,
-            featureHost,
+            ...extensions,
             optionCache,
           })
         : (EMPTY_RUNTIME as FilterRuntime<TRow>)
@@ -262,8 +266,7 @@ export function createTableData<TRow>(): TableData<TRow> {
       config.locale,
       data,
       loadedOptions,
-      config.filterTypes,
-      config.featureHost
+      extensionsOf(config.filterTypes, config.featureHost)
     );
     const tier = resolveDataTier(source, mode, onQueryChange);
     warnDataTierMisuse(source, mode, data, onQueryChange);

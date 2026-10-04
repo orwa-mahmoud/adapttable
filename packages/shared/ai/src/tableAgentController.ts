@@ -229,7 +229,9 @@ export function createTableAgentController(
   const { options: optionsRef, runtime: runtimeRef } = inputs;
   const listeners = new Set<() => void>();
   const notify = () => {
-    for (const listener of [...listeners]) listener();
+    // Subscription changes during a publication apply to the next publication.
+    const pendingListeners = [...listeners];
+    for (const listener of pendingListeners) listener();
   };
 
   // --- the session -------------------------------------------------------

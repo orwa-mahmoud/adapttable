@@ -22,8 +22,6 @@ import {
 } from "@adapttable/core";
 import type { ReactElement, ReactNode } from "react";
 
-import type { Density } from "../url/useDensityUrlState";
-
 /**
  * Row density, as the table's own prop spells it.
  *
@@ -33,8 +31,7 @@ import type { Density } from "../url/useDensityUrlState";
  * public signature that reaches the copy then names a type no consumer can
  * import.
  */
-export type { Density };
-
+export type { Density } from "../url/useDensityUrlState";
 export {
   type NestedTableDefaults,
   nestedTableDefaults,

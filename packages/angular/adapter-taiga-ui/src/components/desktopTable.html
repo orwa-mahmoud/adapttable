@@ -30,6 +30,7 @@
               [attr.rowspan]="band > 1 ? band : null"
             >
               <input
+                [attr.aria-label]="v.table.labels().selectAll"
                 tuiCheckbox
                 type="checkbox"
                 data-taiga-part="checkbox"
@@ -215,7 +216,7 @@
         @for (slot of v.body(); track slot.key) {
           @switch (slot.kind) {
             @case ("virtualPad") {
-              <tr aria-hidden="true" data-taiga-part="virtual-spacer">
+              <tr inert data-taiga-part="virtual-spacer">
                 <td
                   [attr.colspan]="slot.colSpan"
                   [style.height.px]="slot.height"
@@ -233,13 +234,19 @@
                 <td
                   [attr.data-adapttable-part]="parts.cell"
                   [attr.colspan]="slot.colSpan"
-                  [attr.role]="separator ? 'separator' : null"
-                  [attr.aria-label]="
-                    separator ? v.table.labels().rowSeparator : null
-                  "
                   [adaptAttrs]="{ style: extraCellStyle(slot.fillStyle) }"
-                  [adaptExtraRowContent]="slot.render"
-                ></td>
+                >
+                  @if (separator) {
+                    <hr
+                      [attr.aria-label]="v.table.labels().rowSeparator"
+                      style="border: 0; margin: 0"
+                    />
+                  }
+                  <div
+                    style="display: contents"
+                    [adaptExtraRowContent]="slot.render"
+                  ></div>
+                </td>
               </tr>
             }
             @case ("group") {
@@ -321,6 +328,7 @@
                   <td data-adapttable-part="selection-cell">
                     @if (!summary) {
                       <input
+                        [attr.aria-label]="v.table.labels().selectRow"
                         tuiCheckbox
                         type="checkbox"
                         data-taiga-part="checkbox"

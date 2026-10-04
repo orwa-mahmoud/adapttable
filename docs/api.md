@@ -3055,6 +3055,10 @@ and `AdaptAssistantMenu`. Approval exports are `AdaptAgentApproval`,
 `AdaptApprovalList` and `AGENT_APPROVAL_SLOTS`. These are native controls;
 Chrome owns the structural parts, keyboard rules and localized labels.
 
+`mobileCardRegionProps` from `@adapttable/react/adapter` supplies the mobile
+list's native section attributes: its localized region name, bounded keyboard
+scrolling and focus behavior. Kits keep their own card controls and rendering.
+
 ## The Angular binding
 
 `@adapttable/angular` is the Angular binding for Angular 20 and newer. It
@@ -3062,6 +3066,32 @@ runs the same core stores and controllers as `@adapttable/react`, as
 signals. It lays out structure — rows, cards, headers, keyboard wiring,
 labels, live regions and part names — and every control a reader clicks
 comes from a kit through a slot.
+
+Adapter authors can extend `AdaptDataTableShell` for shared feature assembly,
+source reconciliation, editing history and lifecycle. Its desktop/mobile
+references implement `DataTableSurface`, which exposes the scroll element to
+virtualization. `AdaptDesktopTableModel` and `AdaptMobileCardsModel` build live
+header, row, field and custom-renderer plans while each kit renders its native
+table or cards. `AdaptGroupHeaderRowModel` and `AdaptGroupHeaderCardModel`
+provide group captions, aggregates and expansion props.
+
+`AdaptAutoFilterFormModel` builds field plans. `AdaptTextFilterFieldModel`,
+`AdaptRangeFilterFieldModel`, `AdaptSelectFilterFieldModel`,
+`AdaptMultiSelectFilterFieldModel` and `AdaptBooleanFilterFieldModel` coordinate
+field state and callbacks; `AdaptFilterOptionsModel` retains option-loading
+state. `createFilterFieldId` supplies stable per-field label IDs. `filtersViewFor`
+accepts `FiltersViewInput` and resolves a filter view for the shell. None of
+these models supplies controls: adapters retain their inputs, selects,
+checkboxes and custom renderers.
+
+`AdaptColumnMenuModel`, `AdaptColumnMenuRowModel` and
+`AdaptColumnMenuEdgeRowModel` coordinate menu search, column actions, rename,
+order and start/end pins. The kit owns buttons and native popup integration.
+`injectPopoverSpace({ origin, open, reserve })` returns a signal of available
+room below an open origin, updating on resize and scroll; it does not position
+or draw the overlay. `injectBulkBarRunner(props)` reads live bulk-action labels
+and confirmation options when invoked and clears selection only on success.
+See [building an Angular adapter](./angular/building-an-adapter.md).
 
 - `AdaptTableFeature.mount` receives a `FeatureMountContext`: the live runtime,
   Angular injector, per-table `FeatureState`, and synchronous `flush` /

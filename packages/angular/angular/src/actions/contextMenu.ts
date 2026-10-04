@@ -16,7 +16,6 @@ import {
   type ContextMenuState,
   type ContextMenuTarget,
   type ContextMenuTriggerHandlers,
-  copyContextMenuSelection,
   createContextMenuOpenController,
   type FeatureHostState,
   isContextMenuArmed,
@@ -38,8 +37,8 @@ import {
 import type { ContextMenuOptions } from "../features/factories";
 import { fromStore } from "../store";
 
-export { copyContextMenuSelection };
-export type { ContextMenuRegionHandlers };
+export type { ContextMenuRegionHandlers } from "@adapttable/core";
+export { copyContextMenuSelection } from "@adapttable/core";
 
 /**
  * The region handlers the table binds, or `null` while no menu is armed.

@@ -123,6 +123,10 @@ on resize and scrolling. Adapter authors supply the origin, open state and
 space reserved for their native surface's padding, arrow and viewport gutter.
 The binding renders no controls and does not choose the kit's positioning.
 
+`injectBulkBarRunner` coordinates a kit’s bulk bar from its live props: labels
+and confirmation are read when the action runs, and only success clears
+selection. The kit continues drawing the bar and its native buttons.
+
 ## License
 
 MIT

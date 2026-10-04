@@ -13,7 +13,7 @@ const KIT_SELECTORS: Readonly<Record<string, string>> = {
   "page-ellipsis":
     "nz-pagination .ant-pagination-jump-prev button, nz-pagination .ant-pagination-jump-next button",
   "virtual-spacer":
-    'tbody > tr[aria-hidden="true"], [data-adapttable-part="cards"] > li[aria-hidden="true"]',
+    'tbody > tr[inert], [data-adapttable-part="cards"] > li[aria-hidden="true"]',
   "expand-button": "adapt-expand-toggle button",
   "load-more": "adapt-table-region + div",
   "load-more-button": "adapt-table-region + div > button",
