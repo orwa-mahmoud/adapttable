@@ -45,6 +45,8 @@ jobs:
       needBuild: ${{ steps.flags.outputs.needBuild }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Dedupe against PR-verified trees
         id: dedupe
@@ -106,6 +108,17 @@ jobs:
               --jq '.[].filename' > "$tmp"
             if ! emit "$tmp"; then
               echo "Could not classify the diff — fail-open to the full gate."
+              node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
+            fi
+            exit 0
+          fi
+          if [ "$EVENT" = "push" ] && [ "$GITHUB_REF" = "refs/heads/feat/vue-foundation-and-adapters" ]; then
+            # Check the entire branch: a new checkpoint can supersede a run
+            # whose earlier package and browser jobs have not finished yet.
+            if node scripts/integration-diff.mjs > "$tmp"; then
+              emit "$tmp"
+            else
+              echo "Could not compare the integration branch — running the full gate."
               node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
             fi
             exit 0
