@@ -37,6 +37,23 @@ describe("e2ePlan", () => {
     });
   });
 
+  it("runs the full suite for every Vue library surface", () => {
+    for (const file of [
+      "packages/vue/vue/src/index.ts",
+      "packages/vue/ai-vue/src/assistant.ts",
+      "packages/vue/adapter-vue-unstyled/src/DataTable.vue",
+      "packages\\vue\\vue\\src\\shell.ts",
+    ]) {
+      assert.equal(isE2eRelated(file), true, file);
+      assert.deepEqual(e2ePlan([file]), { kind: "full" }, file);
+      assert.deepEqual(
+        e2ePlan([file, "e2e/vue.spec.ts"]),
+        { kind: "full" },
+        file
+      );
+    }
+  });
+
   it("runs only the spec files when those are all that changed", () => {
     assert.deepEqual(e2ePlan(["e2e/checklist-filter.spec.ts", "README.md"]), {
       kind: "specs",
