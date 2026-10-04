@@ -88,11 +88,11 @@
 
   [data-adapttable-kit="spartan"]
     .at-spartan-checkbox[aria-checked="true"]::after {
-    content: "✓";
+    content: "✓" / "";
   }
   [data-adapttable-kit="spartan"]
     .at-spartan-checkbox[aria-checked="mixed"]::after {
-    content: "−";
+    content: "−" / "";
   }
 
   [data-adapttable-kit="spartan"]
@@ -131,12 +131,22 @@
   }
 
   [data-adapttable-kit="spartan"] [data-adapttable-part="search-field"] {
+    position: relative;
     @apply flex min-w-0 items-center gap-2;
     flex: 1 1 12rem;
+    max-inline-size: min(520px, 100%);
+    margin-inline-end: auto;
   }
   [data-adapttable-kit="spartan"] [data-adapttable-part="search"] {
+    padding-inline-start: 36px;
     inline-size: 100%;
   }
+  [data-adapttable-kit="spartan"] [data-adapttable-part="search-icon"] {
+    position: absolute;
+    inset-inline-start: 12px;
+    pointer-events: none;
+  }
+
   [data-adapttable-kit="spartan"] [data-adapttable-part="scroll-box"] {
     overflow: auto;
     max-inline-size: 100%;
@@ -271,12 +281,20 @@
     box-sizing: border-box;
     inline-size: min(28rem, 100vw);
     block-size: 100dvh;
-    overflow: auto;
+    overflow: hidden;
     border-radius: 0;
   }
   .at-spartan-drawer [data-spartan-part="filters-body"] {
+    min-height: 0;
     flex: 1;
     overflow: auto;
+  }
+  .at-spartan-drawer
+    :is(
+      [data-spartan-part="filters-header"],
+      [data-spartan-part="filters-footer"]
+    ) {
+    flex: none;
   }
   .at-spartan-filter-backdrop {
     background: rgb(0 0 0 / 45%);
@@ -299,4 +317,13 @@
       animation-duration: 0s;
     }
   }
+}
+
+[data-adapttable-kit="spartan"][data-adapttable-part="root"] {
+  border: 1px solid var(--at-spartan-border);
+  border-radius: var(--at-spartan-radius);
+  background: var(--at-spartan-background);
+}
+[data-adapttable-kit="spartan"] [data-adapttable-part="toolbar"] {
+  padding: 0.75rem;
 }

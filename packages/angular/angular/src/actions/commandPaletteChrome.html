@@ -4,12 +4,7 @@
       [adaptControl]="slots().Input"
       [adaptControlProps]="inputProps()"
     />
-    <div
-      [id]="listId"
-      role="listbox"
-      [attr.aria-label]="dialogLabel()"
-      data-adapttable-part="command-list"
-    >
+    <div [adaptAttrs]="listProps()">
       @for (row of rows(); track row.command.key) {
         <ng-container [adaptControl]="slots().Item" [adaptControlProps]="row" />
       }

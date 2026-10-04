@@ -19,11 +19,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 
-import {
-  FRAMEWORK_STORAGE_KEY,
-  frameworkDemoTarget,
-  SITE_FRAMEWORKS,
-} from "../../../../scripts/framework-navigation.mjs";
+import { FRAMEWORK_STORAGE_KEY } from "../../../../scripts/framework-navigation.mjs";
 import {
   docsUrl,
   featuresOf,
@@ -41,6 +37,7 @@ import {
   snippetFor,
 } from "../matrix/content";
 import { AdaptShowcaseLandingTable, FEATURE_BODIES } from "./featureBodies";
+import { AdaptShowcaseNav } from "./nav";
 import { SHOWCASE_DARK, SHOWCASE_KIT } from "./showcaseKit";
 import { AdaptShowcaseWordmark } from "./wordmark";
 
@@ -101,7 +98,12 @@ export const MATRIX_PAGE = new InjectionToken<MatrixPageContext>(
  */
 @Component({
   selector: "adapt-showcase-matrix-page",
-  imports: [AdaptShowcaseWordmark, NgComponentOutlet, NgTemplateOutlet],
+  imports: [
+    AdaptShowcaseNav,
+    AdaptShowcaseWordmark,
+    NgComponentOutlet,
+    NgTemplateOutlet,
+  ],
   templateUrl: "./matrixPage.html",
   styleUrl: "./matrixPage.css",
   // The stylesheet addresses the kit's elements by part name, which lie in
@@ -122,30 +124,12 @@ export class AdaptShowcaseMatrixPage {
   readonly copied = signal<"code" | "install" | null>(null);
 
   readonly siteHome = SITE_HOME;
-  readonly frameworks = SITE_FRAMEWORKS;
   readonly unavailableKit = new URLSearchParams(window.location.search).get(
     "kit-unavailable"
   );
   readonly unavailable = new URLSearchParams(window.location.search).get(
     "unavailable"
   );
-  switchFramework(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLSelectElement)) return;
-    try {
-      window.localStorage.setItem(FRAMEWORK_STORAGE_KEY, target.value);
-    } catch {
-      /* Storage is optional. */
-    }
-    window.location.assign(
-      frameworkDemoTarget(
-        window.location.pathname,
-        target.value,
-        SHOWCASE_ADAPTERS,
-        featuresOf
-      ).href
-    );
-  }
   readonly gettingStarted = docsUrl("getting-started", "angular");
   readonly liveDemo = window.location.pathname.startsWith("/angular/demo/")
     ? "/angular/demo/"

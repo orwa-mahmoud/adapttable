@@ -436,7 +436,7 @@ describe("the NG-ZORRO Angular row actions", () => {
         "action-button",
         part("row-actions-menu", document)!
       )!;
-      expect(document.activeElement).toBe(item);
+      await vi.waitFor(() => expect(document.activeElement).toBe(item));
       expect(pressKey(item, "Tab", shiftKey).defaultPrevented).toBe(false);
       await settle();
       expect(trigger.getAttribute("aria-expanded")).toBe("false");

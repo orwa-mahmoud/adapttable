@@ -27,6 +27,7 @@ import {
   viewChild,
 } from "@angular/core";
 
+import { AdaptAttrs } from "../attrs";
 import { AdaptControl } from "../control";
 import { fromStore } from "../store";
 
@@ -72,7 +73,7 @@ function focusablesIn(root: HTMLElement | undefined): HTMLElement[] {
 @Component({
   selector: "adapt-command-palette-chrome",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AdaptControl],
+  imports: [AdaptAttrs, AdaptControl],
   host: { style: "display: contents" },
   templateUrl: "./commandPaletteChrome.html",
 })
@@ -110,6 +111,13 @@ export class AdaptCommandPaletteChrome {
 
   /** The dialog's accessible name. */
   protected readonly dialogLabel = computed(() => this.copy().commandPalette);
+  /** Semantics of the custom listbox whose options are supplied by the kit. */
+  protected readonly listProps = computed(() => ({
+    id: this.listId,
+    role: "listbox" as const,
+    "aria-label": this.dialogLabel(),
+    "data-adapttable-part": "command-list",
+  }));
   private readonly view = computed(() =>
     commandListView(this.commands(), this.snapshot())
   );

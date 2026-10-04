@@ -50,5 +50,11 @@ import for a host that wires Chrome itself.
 - Chrome components and feature providers — `@adapttable/react/adapter`,
   `@adapttable/react/features`
 
+Adapter authors can spread `mobileCardRegionProps` from
+`@adapttable/react/adapter` on the native `<section>` that owns a mobile
+card list’s overflow. It supplies the localized region name and the Tab stop
+for bounded lists; kit controls, card markup, styles and scroll refs remain
+with the adapter.
+
 See [Upgrading from v2](https://adapttable.orwamahmoud.com/react/migrate-from-v2/)
 for the core → react import map.

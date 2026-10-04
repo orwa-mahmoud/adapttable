@@ -3,6 +3,8 @@ import "@adapttable/spartan/styles.css";
 
 import { AdaptDataTable } from "@adapttable/spartan";
 import {
+  AdaptAssistantButton,
+  AdaptAssistantLanguageChip,
   AdaptTableAssistant,
   agentApproval,
 } from "@adapttable/spartan/assistant";
@@ -48,14 +50,18 @@ import { tree } from "@adapttable/spartan/tree";
 import { virtualize } from "@adapttable/spartan/virtualize";
 
 import type { ShowcaseKit } from "../showcaseKit";
+import { ShowcaseStatus } from "./spartanStatus";
 
 /** Components and feature factories are always from this one kit. */
 export const kit = {
   key: "spartan",
   providers: [],
   table: AdaptDataTable,
+  statusCell: ShowcaseStatus,
   pivotPanel: AdaptPivotPanel,
   assistant: AdaptTableAssistant,
+  assistantButton: AdaptAssistantButton,
+  assistantSelect: AdaptAssistantLanguageChip,
   savedViewsPanel: AdaptSavedViewsPanel,
   bulkActions,
   cellNavigation,

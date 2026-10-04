@@ -36,16 +36,18 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
     @let p = props();
     <div
       data-adapttable-part="filters-form"
-      style="display: flex; flex-direction: column; gap: 16px"
+      style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px"
     >
-      <adapt-filter-tree-chrome
-        [defs]="p.defs"
-        [source]="p.source"
-        [labels]="p.labels"
-        [registry]="p.registry"
-        [defaultExpanded]="p.defaultExpanded ?? false"
-        [slots]="treeSlots"
-      />
+      <div style="grid-column: 1 / -1">
+        <adapt-filter-tree-chrome
+          [defs]="p.defs"
+          [source]="p.source"
+          [labels]="p.labels"
+          [registry]="p.registry"
+          [defaultExpanded]="p.defaultExpanded ?? false"
+          [slots]="treeSlots"
+        />
+      </div>
       @if (p.showSimpleFields) {
         <adapt-auto-filter-form
           [defs]="p.defs"
@@ -85,6 +87,7 @@ const FOCUSABLE =
         type="button"
         data-adapttable-part="filters-backdrop"
         data-state="open"
+        style="position: fixed; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; z-index: 199"
         [attr.aria-label]="p.labels.cancel"
         (click)="p.onClose()"
       ></button>
@@ -98,9 +101,9 @@ const FOCUSABLE =
         [attr.aria-label]="p.labels.filters"
         [attr.dir]="p.dir ?? 'ltr'"
         [attr.data-dir]="p.dir ?? 'ltr'"
-        style="position: fixed; inset-block: 0; inset-inline-end: 0; inset-inline-start: auto; margin: 0; max-height: none; max-width: none; height: 100%; z-index: 200"
+        style="position: fixed; inset-block: 0; inset-inline-end: 0; inset-inline-start: auto; margin: 0; max-height: none; max-width: none; height: 100%; width: 360px; max-width: 100vw; display: flex; flex-direction: column; padding: 0; box-sizing: border-box; z-index: 200"
       >
-        <header data-adapttable-part="filters-header">
+        <header data-adapttable-part="filters-header" style="flex: none">
           <h3 data-adapttable-part="filters-title">
             {{ p.labels.filters
             }}{{
@@ -116,10 +119,13 @@ const FOCUSABLE =
             ×
           </button>
         </header>
-        <div data-adapttable-part="filters-body">
+        <div
+          data-adapttable-part="filters-body"
+          style="min-height: 0; flex: 1; overflow-y: auto"
+        >
           <ng-container [ngTemplateOutlet]="p.filters" />
         </div>
-        <footer data-adapttable-part="filters-footer">
+        <footer data-adapttable-part="filters-footer" style="flex: none">
           <button
             type="button"
             data-adapttable-part="filters-clear"

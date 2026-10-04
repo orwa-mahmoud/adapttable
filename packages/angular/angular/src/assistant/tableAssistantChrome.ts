@@ -8,7 +8,6 @@ import {
   type AgentApprovalButtonProps,
   assistantBadgeTone,
   assistantComposerState,
-  assistantIsBusy,
   assistantLauncherName,
   assistantQuestion,
   assistantRejoinable,
@@ -67,7 +66,7 @@ import { injectConversationScroll } from "./conversationScroll";
 
 export type { TableAssistantBoundary } from "./assistantPlacement";
 export type { TableAssistantProps } from "./assistantSlots";
-export { assistantIsBusy };
+export { assistantIsBusy } from "@adapttable/core/binding";
 
 const ASSISTANT_SURFACE_PARTS = {
   floating: "assistant-window",

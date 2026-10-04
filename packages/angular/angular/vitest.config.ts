@@ -18,11 +18,31 @@ export default defineConfig({
   plugins: [angular({ tsconfig: path.join(packageDir, "tsconfig.spec.json") })],
   resolve: {
     alias: [
+      // The shared shell's integration contracts use native reference-kit
+      // slots, with its feature entries resolving to the same binding source.
+      {
+        find: /^@adapttable\/angular-unstyled$/,
+        replacement: path.resolve(
+          packageDir,
+          "../adapter-angular-unstyled/src/index.ts"
+        ),
+      },
+      {
+        find: /^@adapttable\/angular-unstyled\/(.+)$/,
+        replacement: path.resolve(
+          packageDir,
+          "../adapter-angular-unstyled/$1/index.ts"
+        ),
+      },
       // The router entry reaches the primary entry by package name, as
       // ng-packagr requires; tests resolve it to source.
       {
         find: /^@adapttable\/angular$/,
         replacement: path.resolve(packageDir, "src/index.ts"),
+      },
+      {
+        find: /^@adapttable\/angular\/(.+)$/,
+        replacement: path.resolve(packageDir, "$1/index.ts"),
       },
       {
         find: /^@adapttable\/core$/,
@@ -45,7 +65,10 @@ export default defineConfig({
       "formula/**/*.test.ts",
       "pivot/**/*.test.ts",
       "sparkline/**/*.test.ts",
+      "../adapter-angular-unstyled/src/**/*.test.ts",
     ],
+    // The reference kit's server contracts use their separate Node runner.
+    exclude: ["../adapter-angular-unstyled/src/**/*.ssr.test.ts"],
     clearMocks: true,
     restoreMocks: true,
     pool: "threads",

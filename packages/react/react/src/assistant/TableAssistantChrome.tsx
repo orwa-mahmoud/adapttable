@@ -63,7 +63,6 @@ import type {
   TableAssistantSlots,
 } from "./assistantSlots";
 import {
-  assistantIsBusy,
   type TableAssistantMessageView,
   type TableAssistantView,
 } from "./assistantView";
@@ -71,7 +70,7 @@ import {
 export type { TableAssistantBoundary } from "./assistantPlacement";
 
 /** Whether the panel is mid-turn — re-exported for a host's own chrome. */
-export { assistantIsBusy };
+export { assistantIsBusy } from "./assistantView";
 import { useConversationScroll } from "./useConversationScroll";
 
 export type { TableAssistantPresentation } from "@adapttable/core/binding";

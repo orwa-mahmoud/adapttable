@@ -160,11 +160,11 @@ for (const density of ["comfortable", "compact"]) {
           assert.equal(style(part).paddingLeft, "12px", part);
           assert.equal(style(part).paddingRight, "12px", part);
           // jsdom preserves logical border shorthands without expanding them.
-          assert.match(style(part).borderBlockEnd, /^1px solid /u, part);
+          assert.match(style(part).borderBlockEnd, /^1px\s+solid\s/u, part);
           assert.notEqual(style(part, "outside").paddingTop, padding, part);
           assert.doesNotMatch(
             style(part, "outside").borderBlockEnd,
-            /^1px solid /u,
+            /^1px\s+solid\s/u,
             part
           );
         }
@@ -174,7 +174,7 @@ for (const density of ["comfortable", "compact"]) {
         assert.equal(style("column-spacer-end").width, "100px");
         assert.doesNotMatch(
           style("column-spacer-end").borderBlockEnd,
-          /^1px solid /u
+          /^1px\s+solid\s/u
         );
         const virtualCell = dom.window.document.querySelector(
           '#inside [data-adapttable-part="virtual-spacer"] > td'
@@ -183,7 +183,7 @@ for (const density of ["comfortable", "compact"]) {
         const virtualStyle = dom.window.getComputedStyle(virtualCell);
         assert.equal(virtualStyle.paddingTop, "0px");
         assert.equal(virtualStyle.height, "40px");
-        assert.doesNotMatch(virtualStyle.borderBlockEnd, /^1px solid /u);
+        assert.doesNotMatch(virtualStyle.borderBlockEnd, /^1px\s+solid\s/u);
         assert.equal(style("table").borderCollapse, "separate");
         assert.equal(Number.parseFloat(style("table").borderSpacing), 0);
       } finally {

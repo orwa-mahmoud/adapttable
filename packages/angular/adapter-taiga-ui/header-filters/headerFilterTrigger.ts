@@ -80,18 +80,25 @@ export class AdaptHeaderFilterTrigger {
   readonly props = input.required<FilterHeaderControlProps<never>>();
 
   protected readonly icon = { ...FILTERS_ICON, width: 14, height: 14 };
-  protected readonly registry = undefined as never;
+  protected readonly registry = defaultFilterRegistry;
   protected readonly caption = computed(() => filterLabel(this.props().def));
   protected readonly active = computed(() =>
     hasActiveHeaderFilter(this.props())
   );
   /** The overlay session for this column's funnel. */
-  protected readonly overlay = injectHeaderFilterOverlay({
-    def: computed(() => this.props().def),
-    source: computed(() => this.props().source),
-    closeOnSelect: computed(() => this.props().closeOnSelect === true),
-    registry: computed(() => this.props().registry ?? defaultFilterRegistry),
-  });
+  protected readonly overlay = injectHeaderFilterOverlay(
+    {
+      def: computed(() => this.props().def),
+      source: computed(() => this.props().source),
+      closeOnSelect: computed(() => this.props().closeOnSelect === true),
+      registry: computed(() => this.props().registry ?? defaultFilterRegistry),
+    },
+    {
+      // Taiga owns outside presses for its portaled dropdown. Its checklist is
+      // outside the trigger's DOM subtree but remains inside the native popup.
+      pointerDismiss: false,
+    }
+  );
   /** The source the form writes, still a table source at runtime. */
   protected readonly formSource = computed(
     () => this.overlay.source() as TableSource<never>

@@ -233,23 +233,45 @@ export class AdaptPrintButton {
     @let p = props();
     @if (p.onUndo && p.onRedo) {
       <button
-        mat-button
+        mat-stroked-button
         type="button"
         data-adapttable-part="undo-button"
         [class]="p.classNames?.['undoButton']"
         [disabled]="p.canUndo !== true"
         (click)="p.onUndo()"
       >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12" />
+        </svg>
         {{ p.undoLabel }}
       </button>
       <button
-        mat-button
+        mat-stroked-button
         type="button"
         data-adapttable-part="redo-button"
         [class]="p.classNames?.['redoButton']"
         [disabled]="p.canRedo !== true"
         (click)="p.onRedo()"
       >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="m15 5 5 5-5 5m5-5H10a6 6 0 0 0 0 12" />
+        </svg>
         {{ p.redoLabel }}
       </button>
     }

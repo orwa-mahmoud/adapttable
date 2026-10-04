@@ -13,10 +13,8 @@ import {
   CHECKLIST_ITEM_WIDTH,
   CHECKLIST_LIST_HEIGHT,
   CHECKLIST_OPTION_GAP,
-  type FilterDef,
   filterLabel,
   resolveLabels,
-  type TableSource,
 } from "@adapttable/core";
 import type {
   ChecklistFilterProps,
@@ -27,8 +25,7 @@ import { type CSSProperties, type ReactNode } from "react";
 import { useChecklistFilter } from "./checklist";
 import { useChecklistWindow } from "./checklistWindow";
 
-export type { FilterDef, TableSource };
-
+export type { FilterDef, TableSource } from "@adapttable/core";
 export type {
   ChecklistButtonProps,
   ChecklistCheckboxProps,

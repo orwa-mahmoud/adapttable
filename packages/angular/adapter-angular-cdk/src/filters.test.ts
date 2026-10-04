@@ -25,6 +25,7 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
 import {
   fixtureOverlayProviders,
   focusTrapAnchor,
@@ -374,6 +375,53 @@ describe("the unstyled Angular filters", () => {
     expect(part("filters-panel")).toBeNull();
   });
 
+  it("lets a standalone native header filter use the built-in registry", async () => {
+    @Component({
+      providers: fixtureOverlayProviders,
+      imports: [AdaptHeaderFilterTrigger],
+      template: `<adapt-header-filter-trigger [props]="props()" />`,
+    })
+    class StandaloneHeader {
+      readonly source = injectFrontendData({
+        data: PEOPLE,
+        columns: COLUMNS,
+        urlSync: false,
+        forceMobile: false,
+      });
+      readonly table = injectDataTable({
+        source: this.source,
+        columns: COLUMNS,
+        rowKey: (row: Person) => row.id,
+      });
+      readonly props = computed(() => ({
+        def: { key: "name", type: "text" },
+        labels: this.table.labels(),
+        source: this.source(),
+      }));
+    }
+    const fixture = TestBed.createComponent(StandaloneHeader);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    const trigger = root.querySelector<HTMLButtonElement>(
+      '[data-adapttable-part="filter-header-trigger"] button'
+    )!;
+    trigger.focus();
+    trigger.click();
+    await fixture.whenStable();
+    const field = root.querySelector<HTMLInputElement>(
+      '[data-adapttable-part="filter-input"]'
+    )!;
+    expect(field).not.toBeNull();
+    field.value = "Ada";
+    field.dispatchEvent(new Event("input"));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.source().extra.name).toBe("Ada");
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    fixture.destroy();
+  });
+
   it("puts a funnel on each filterable header", async () => {
     const { part, parts, ids, field, type, settle, element } = await mount([
       filters(DEFS),
@@ -460,6 +508,37 @@ describe("the unstyled Angular filters", () => {
     );
     await settle();
     expect(part("filters-panel")).not.toBeNull();
+  });
+
+  it("lets a focused popover field consume Escape before dismissing", async () => {
+    const { part, openFilters, settle } = await mount();
+    await openFilters();
+    const panel = part("filters-popover")!;
+    const field = panel.querySelector<HTMLInputElement>("input")!;
+    field.focus();
+    field.addEventListener("keydown", (event) => event.preventDefault(), {
+      once: true,
+    });
+    const consumed = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    field.dispatchEvent(consumed);
+    await settle();
+    expect(consumed.defaultPrevented).toBe(true);
+    expect(part("filters-popover")).toBe(panel);
+    expect(document.activeElement).toBe(field);
+    field.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await settle();
+    expect(part("filters-popover")).toBeNull();
+    expect(document.activeElement).toBe(part("filters-button"));
   });
 
   it("offers header funnels without the Filters button", async () => {

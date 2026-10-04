@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { ANGULAR_KITS, angularPart } from "./angular-kit";
+import { ANGULAR_KITS, angularPart, selectAngularOption } from "./angular-kit";
 
 for (const kit of ANGULAR_KITS) {
   test.describe(kit.key, () => {
@@ -18,7 +18,23 @@ for (const kit of ANGULAR_KITS) {
     async function open(page: Page, query = "") {
       await page.goto(`${PAGE}${query}`);
       await expect(page.locator(".ai-demo")).toBeVisible();
+      await expect(part(page, "assistant-launcher")).toBeVisible();
+      await expect(part(page, "assistant-surface")).toHaveCount(0);
+      await part(page, "assistant-launcher").click();
       await expect(part(page, "assistant-input")).toBeEnabled();
+      expect(
+        await part(page, "assistant-surface").evaluate((surface) => {
+          if (surface.closest('[data-adapttable-part="table"]')) return false;
+          for (
+            let element: Element | null = surface;
+            element;
+            element = element.parentElement
+          ) {
+            if (getComputedStyle(element).position === "fixed") return true;
+          }
+          return false;
+        })
+      ).toBe(true);
     }
 
     async function ask(page: Page, text: string) {
@@ -119,9 +135,10 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await open(page);
-      await page
-        .getByLabel("Approval surface", { exact: true })
-        .selectOption("table");
+      await selectAngularOption(
+        page.getByRole("combobox", { name: "Approval surface", exact: true }),
+        { value: "table", label: "Table" }
+      );
       await ask(page, "Propose Grace's salary as 150");
       const strip = part(page, "agent-approval");
       await expect(strip).toBeVisible();
@@ -139,9 +156,10 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await open(page);
-      await page
-        .getByLabel("Approval surface", { exact: true })
-        .selectOption("modal");
+      await selectAngularOption(
+        page.getByRole("combobox", { name: "Approval surface", exact: true }),
+        { value: "modal", label: "Dialog" }
+      );
       await ask(page, "Propose Grace's salary as 150");
       await expect(part(page, "assistant-approval-modal")).toBeVisible();
       await expect(part(page, "agent-approval-approve")).toHaveCount(1);
@@ -189,8 +207,22 @@ for (const kit of ANGULAR_KITS) {
 
       test("questions filter mobile cards and approval controls remain reachable", async ({
         page,
-      }) => {
+      }, testInfo) => {
         await open(page);
+        await expect
+          .poll(
+            async () =>
+              (await part(page, "assistant-surface").boundingBox())!.height
+          )
+          .toBeGreaterThanOrEqual(590);
+        const composer = await part(page, "assistant-input").boundingBox();
+        expect(composer!.width).toBeGreaterThanOrEqual(120);
+        expect(composer!.y).toBeGreaterThanOrEqual(0);
+        expect(composer!.y + composer!.height).toBeLessThanOrEqual(844);
+        await page.screenshot({
+          path: testInfo.outputPath("native-chat-phone.png"),
+          animations: "disabled",
+        });
         await expect(part(page, "card")).toHaveCount(3);
         await ask(page, "Choose a person");
         await part(page, "assistant-question-option")

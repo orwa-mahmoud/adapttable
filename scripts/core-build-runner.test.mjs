@@ -5,7 +5,9 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -301,6 +303,50 @@ it("traces a real TypeScript-emitted export back to its implementation line", ()
       assert.equal(location.line, 4);
       assert.deepEqual(map.sourcesContent, [implementation]);
     }
+  } finally {
+    f.cleanup();
+  }
+});
+
+it("composes canonical declaration sources when the staging parent is a symlink", () => {
+  const f = fixture();
+  const alias = join(f.root, "scratch-alias");
+  try {
+    symlinkSync(f.tempParent, alias, "dir");
+    buildLibrary({
+      ...f,
+      tempParent: alias,
+      tools: { tsdown: "bundler", tsc: "compiler" },
+      run: (script, args, cwd) => {
+        const result = f.run(script, args, cwd);
+        if (f.calls.length >= 3) {
+          const out = join(f.packageDir, "dist");
+          for (const file of readdirSync(out).filter((name) =>
+            name.endsWith(".map")
+          )) {
+            const path = join(out, file);
+            const map = JSON.parse(readFileSync(path, "utf8"));
+            map.sources = map.sources.map((source) =>
+              relative(out, realpathSync(join(out, source)))
+            );
+            writeFileSync(path, JSON.stringify(map));
+          }
+        }
+        return result;
+      },
+    });
+    const compiled = f.calls[1].args;
+    const types = compiled[compiled.indexOf("--outDir") + 1];
+    assert.equal(types.startsWith(realpathSync(f.tempParent)), true);
+    const map = JSON.parse(
+      readFileSync(join(f.packageDir, "dist/index.d.ts.map"), "utf8")
+    );
+    assert.deepEqual(map.sources, ["../src/model.ts"]);
+    assert.equal(
+      originalPositionFor(new TraceMap(map), { line: 1, column: 0 }).line,
+      4
+    );
+    assert.deepEqual(readdirSync(f.tempParent), []);
   } finally {
     f.cleanup();
   }

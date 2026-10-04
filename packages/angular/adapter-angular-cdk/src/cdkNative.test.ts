@@ -1,7 +1,8 @@
 import { A11yModule, FocusMonitor } from "@angular/cdk/a11y";
-import { OverlayContainer } from "@angular/cdk/overlay";
+import { CdkConnectedOverlay, OverlayContainer } from "@angular/cdk/overlay";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { AdaptAssistantSheet } from "../assistant/assistant";
@@ -77,6 +78,43 @@ describe("CDK native primitives", () => {
     expect(container.querySelector('[dir="rtl"]')).not.toBeNull();
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
     inside.focus();
+    const overlay = fixture.debugElement
+      .queryAllNodes(By.directive(CdkConnectedOverlay))[0]!
+      .injector.get(CdkConnectedOverlay);
+    const originPress = new MouseEvent("pointerdown", { bubbles: true });
+    trigger.dispatchEvent(originPress);
+    overlay.overlayOutsideClick.emit(originPress);
+    await fixture.whenStable();
+    expect(container.querySelector('[data-testid="inside"]')).toBe(inside);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    const tab = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+      cancelable: true,
+    });
+    inside.dispatchEvent(tab);
+    // Verify the adapter's public CDK-output contract as well as the native
+    // dispatcher, which may filter keys before forwarding them to a portal.
+    overlay.overlayKeydown.emit(tab);
+    await fixture.whenStable();
+    expect(tab.defaultPrevented).toBe(false);
+    expect(container.querySelector('[data-testid="inside"]')).toBe(inside);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    inside.addEventListener("keydown", (event) => event.preventDefault(), {
+      once: true,
+    });
+    const consumed = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    inside.dispatchEvent(consumed);
+    overlay.overlayKeydown.emit(consumed);
+    await fixture.whenStable();
+    expect(consumed.defaultPrevented).toBe(true);
+    expect(container.querySelector('[data-testid="inside"]')).toBe(inside);
+    expect(document.activeElement).toBe(inside);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
     inside.dispatchEvent(
       new KeyboardEvent("keydown", {
         key: "Escape",

@@ -21,14 +21,13 @@
 import { statusBarItems } from "@adapttable/core";
 import type {
   StatusBarChromeProps as NeutralStatusBarChromeProps,
-  StatusBarItem,
   StatusBarSlotProps as NeutralStatusBarSlotProps,
   StatusBarSlots as NeutralStatusBarSlots,
 } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 export type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
-export type { StatusBarItem };
+export type { StatusBarItem } from "@adapttable/core/binding";
 
 import { SelectionStatsChrome } from "./SelectionStatsBar";
 

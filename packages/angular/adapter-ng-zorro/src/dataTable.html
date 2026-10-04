@@ -38,7 +38,15 @@
       data-adapttable-part="toolbar"
     >
       @if (searchable()) {
-        <nz-input-wrapper data-adapttable-part="search-field">
+        <nz-input-wrapper
+          data-adapttable-part="search-field"
+          style="
+            flex: 1 1 280px;
+            min-width: 0;
+            max-width: min(520px, 100%);
+            margin-inline-end: auto;
+          "
+        >
           <span
             nzInputPrefix
             data-adapttable-part="search-icon"
@@ -48,6 +56,7 @@
           </span>
 
           <input
+            [attr.aria-label]="v.table.labels().search"
             nz-input
             data-adapttable-part="search"
             [adaptAttrs]="v.table.searchInputAttrs()"
@@ -80,6 +89,10 @@
             nz-button
             type="button"
             style="flex-shrink: 0; white-space: nowrap"
+            [attr.aria-label]="
+              v.table.labels().filters +
+              (f.count() ? ' (' + f.count() + ')' : '')
+            "
             [attr.aria-expanded]="f.mode === 'popover' ? f.open() : null"
             [attr.data-active]="f.open() ? '' : null"
             (pointerdown)="f.pointerDown()"
@@ -244,6 +257,7 @@
           }
           @case ("mobile") {
             <adapt-mobile-cards
+              #mobileSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"
@@ -251,6 +265,7 @@
           }
           @case ("desktop") {
             <adapt-desktop-table
+              #desktopSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"

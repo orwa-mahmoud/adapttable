@@ -9,6 +9,7 @@
   display: inline-flex;
   align-items: center;
   min-inline-size: 0;
+  flex: 1 1 auto;
 }
 [data-adapttable-part="header-caption-control"] > button {
   display: inline-flex;
@@ -30,9 +31,6 @@ tr[data-selected] > [data-adapttable-part="cell"][data-pinned] {
 }
 [data-adapttable-part="cell"][data-pinned][data-cell-selected] {
   background: var(--adapttable-ng-zorro-selected, #e6f7ff);
-}
-[data-adapttable-part="header-caption-control"] {
-  flex: 1 1 auto;
 }
 [data-adapttable-part="header-caption-control"] > button > span:first-child {
   min-inline-size: 0;

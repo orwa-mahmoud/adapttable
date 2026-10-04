@@ -117,6 +117,7 @@ function Wordmark({ href }: Readonly<{ href: string }>) {
   );
 }
 
+import { navigationMenuShift } from "./navGeometry";
 /**
  * Which page the nav marks as current: a page id.
  *
@@ -257,7 +258,7 @@ function Chevron() {
  *
  * The links are always in the DOM — the panel is hidden with `visibility`, not
  * unmounted — so a crawler reads every destination from the served markup and a
- * middle click opens one in a new tab. `visibility: hidden` is what takes the
+ * middle click opens one in a new tab. A hidden panel is what takes the
  * closed panel out of the accessibility tree and the tab order at the same
  * time, which conditional rendering would have to do by hand.
  */
@@ -354,11 +355,13 @@ function NavGroup({
     const menu = menuRef.current;
     if (!menu) return;
     const box = menu.getBoundingClientRect();
-    const overRight =
-      box.right - (document.documentElement.clientWidth - EDGE_MARGIN);
-    const overLeft = EDGE_MARGIN - box.left;
-    if (overRight > 0) setShift(-overRight);
-    else if (overLeft > 0) setShift(overLeft);
+    setShift(
+      navigationMenuShift(
+        box,
+        document.documentElement.clientWidth,
+        EDGE_MARGIN
+      )
+    );
   }, [open]);
 
   const openToItem = (index: number) => {
@@ -653,7 +656,21 @@ export function AppNav({
         </label>
         <div className="nav__right">
           <label className="nav__framework">
-            <span aria-hidden="true">⚛</span>
+            <span aria-hidden="true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="-11 -11 22 22"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              >
+                <ellipse rx="10" ry="4" />
+                <ellipse rx="10" ry="4" transform="rotate(60)" />
+                <ellipse rx="10" ry="4" transform="rotate(120)" />
+                <circle r="1.5" fill="currentColor" stroke="none" />
+              </svg>
+            </span>
             <select
               aria-label="Framework"
               value="react"
@@ -666,7 +683,7 @@ export function AppNav({
                 }
                 window.location.assign(
                   frameworkDemoTarget(
-                    window.location.pathname,
+                    window.location.pathname + window.location.search,
                     framework,
                     SHOWCASE_ADAPTERS,
                     featuresOf
@@ -686,6 +703,7 @@ export function AppNav({
             className="nav__icon"
             onClick={onToggleDark}
             aria-label="Toggle dark mode"
+            aria-pressed={dark}
           >
             {dark ? <Sun size={17} /> : <Moon size={17} />}
           </button>

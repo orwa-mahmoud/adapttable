@@ -102,8 +102,9 @@ for (const width of [320, 390]) {
     }));
     expect(focus.style).toBe("solid");
     expect(focus.width).toBeGreaterThanOrEqual(2);
-    await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("Enter");
+    // Native select type-ahead commits on macOS and Linux alike; ArrowDown
+    // may only open the macOS menu without selecting its next option.
+    await page.keyboard.press("a");
     await expect(page).toHaveURL(`${DOCS_URL}/angular/sorting/`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Angular table sorting and multi-sort"
@@ -134,7 +135,7 @@ test("landing switches preserve original markup without parsing mutable DOM text
     await select.selectOption("react");
     await expect(copy).toHaveText(originalText);
     expect(
-      await emphasis!.evaluate(
+      await emphasis.evaluate(
         (element) => element === document.querySelector(".hero__sub em")
       )
     ).toBe(true);
@@ -147,7 +148,7 @@ test("landing switches preserve original markup without parsing mutable DOM text
   await page.evaluate(() =>
     window.dispatchEvent(new PageTransitionEvent("pageshow"))
   );
-  expect(await emphasis!.evaluate((element) => element.isConnected)).toBe(true);
+  expect(await emphasis.evaluate((element) => element.isConnected)).toBe(true);
 });
 
 test("malformed landing and documentation options stay on the site", async ({

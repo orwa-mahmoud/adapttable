@@ -230,7 +230,7 @@ export class PeopleAssistant {
   ];
   readonly rowKey = (row: AgentPerson) =&gt; row.id;
   readonly session = signal&lt;AgentSession | undefined&gt;(undefined);
-  readonly open = signal(true);
+  readonly open = signal(false);
   readonly assistant = injectTableAssistant(computed(() =&gt; ({
     session: this.session(), transport,
   })));
@@ -238,7 +238,7 @@ export class PeopleAssistant {
     assistant: this.assistant(),
     open: this.open(),
     onOpenChange: (open) =&gt; this.open.set(open),
-    presentation: &quot;panel&quot;,
+    presentation: &quot;floating&quot;,
   }));
   readonly features = [tableAgent({
     tableId: &quot;people&quot;, approval: &quot;never&quot;,
@@ -253,12 +253,12 @@ pnpm add @adapttable/angular-material@0.1.0 @adapttable/angular @angular/materia
         <ul>
           <li><a href="../../unstyled/ai/">AI table assistant in Unstyled Angular</a> — Native elements — your own CSS</li>
           <li><a href="../../ng-zorro/ai/">AI table assistant in NG-ZORRO Angular</a> — Ant Design components for Angular</li>
-          <li><a href="../../ng-bootstrap/ai/">AI table assistant in ng-bootstrap Angular</a> — ng-bootstrap controls for Angular</li>
-          <li><a href="../../aria/ai/">AI table assistant in Angular Aria Angular</a> — Angular Aria controls for Angular</li>
-          <li><a href="../../ngx-bootstrap/ai/">AI table assistant in ngx-bootstrap Angular</a> — ngx-bootstrap controls for Angular</li>
-          <li><a href="../../angular-cdk/ai/">AI table assistant in Angular CDK Angular</a> — Angular CDK controls for Angular</li>
-          <li><a href="../../spartan/ai/">AI table assistant in Spartan Angular</a> — Spartan controls for Angular</li>
-          <li><a href="../../taiga-ui/ai/">AI table assistant in Taiga UI Angular</a> — Taiga UI controls for Angular</li>
+          <li><a href="../../ng-bootstrap/ai/">AI table assistant in ng-bootstrap Angular</a> — Bootstrap styling, Angular overlays</li>
+          <li><a href="../../aria/ai/">AI table assistant in Angular Aria Angular</a> — Accessible behavior, precise styling</li>
+          <li><a href="../../ngx-bootstrap/ai/">AI table assistant in ngx-bootstrap Angular</a> — Bootstrap controls and overlays</li>
+          <li><a href="../../angular-cdk/ai/">AI table assistant in Angular CDK Angular</a> — CDK behavior, a neutral theme</li>
+          <li><a href="../../spartan/ai/">AI table assistant in Spartan Angular</a> — Sharp borders, subtle elevation</li>
+          <li><a href="../../taiga-ui/ai/">AI table assistant in Taiga UI Angular</a> — Soft surfaces, expressive controls</li>
         </ul>
         <h2>More Angular Material features</h2>
         <ul>

@@ -1,0 +1,19 @@
+.angular-ai-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-block: 16px;
+}
+.angular-ai-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.ai-demo {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}

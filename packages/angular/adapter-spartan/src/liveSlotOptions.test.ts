@@ -126,7 +126,7 @@ describe("live slot options", () => {
     await settle();
     expect(host.source().extra.team).toBe("new");
     expect(host.source().extra.tags).toEqual(["new"]);
-    expect(check.getAttribute("aria-checked") === "true").toBe(true);
+    expect(check.getAttribute("aria-checked")).toBe("true");
   });
 
   it("keeps replacement choices when the old async options arrive late", async () => {

@@ -6,10 +6,7 @@ import {
   type SavedViewsControllerOptions,
   slotRender,
 } from "@adapttable/angular";
-import {
-  AdaptSavedViewsMenu,
-  AdaptSavedViewsPanel,
-} from "@adapttable/taiga-ui";
+import { AdaptSavedViewsMenu } from "@adapttable/taiga-ui";
 
 /**
  * Named view snapshots — `@adapttable/taiga-ui/saved-views`.
@@ -17,7 +14,7 @@ import {
  * @packageDocumentation
  */
 
-export { AdaptSavedViewsPanel };
+export { AdaptSavedViewsPanel } from "@adapttable/taiga-ui";
 
 /**
  * Named snapshots of the table's view — search, sort, filters, paging and

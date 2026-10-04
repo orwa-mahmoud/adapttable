@@ -26,12 +26,10 @@ import {
   type NeutralFeatureHost,
 } from "@adapttable/core";
 import {
-  applyTableFeatures,
   type FeatureApplyInput,
   type FeaturePatch,
   getAppliedFeatures as coreGetAppliedFeatures,
   type PatchFeature,
-  rememberAppliedFeatures,
 } from "@adapttable/core/binding";
 
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
@@ -198,4 +196,7 @@ export function getAppliedFeatures(
   return coreGetAppliedFeatures<TableFeature>(props);
 }
 
-export { applyTableFeatures, rememberAppliedFeatures };
+export {
+  applyTableFeatures,
+  rememberAppliedFeatures,
+} from "@adapttable/core/binding";

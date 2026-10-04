@@ -117,6 +117,49 @@ function openOn(target: HTMLElement): void {
 }
 
 describe("context menu (unstyled Angular)", () => {
+  it("keeps an empty native menu safe for arrows and closes on Escape", async () => {
+    @Component({
+      imports: [AdaptContextMenuSurface],
+      template: `<adapt-context-menu-surface [props]="props" />`,
+    })
+    class EmptyMenu {
+      readonly closed = vi.fn();
+      readonly props = {
+        at: { x: 10, y: 20 },
+        label: "Actions",
+        onClose: this.closed,
+        rows: [],
+        Item: AdaptContextMenuItem,
+        Separator: AdaptContextMenuSeparator,
+      };
+    }
+    const fixture = TestBed.createComponent(EmptyMenu);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await settleBootstrap(fixture);
+    const root = fixture.nativeElement as HTMLElement;
+    const menu = root.querySelector<HTMLElement>('[role="menu"]')!;
+    expect(menu).not.toBeNull();
+    expect(menu.querySelector('[role="menuitem"]')).toBeNull();
+    menu.focus();
+    for (const key of ["ArrowDown", "ArrowUp", "Home", "End"]) {
+      menu.dispatchEvent(
+        new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true })
+      );
+      expect(document.activeElement).toBe(menu);
+      expect(fixture.componentInstance.closed).not.toHaveBeenCalled();
+    }
+    menu.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    expect(fixture.componentInstance.closed).toHaveBeenCalledExactlyOnceWith();
+    fixture.destroy();
+  });
+
   it("opens on a header, walks, and sorts", async () => {
     const fixture = await mount();
     expect(part("context-menu")).toBeNull();

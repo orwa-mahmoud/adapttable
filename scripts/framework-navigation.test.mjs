@@ -177,3 +177,54 @@ for (const framework of ["react", "angular"]) {
     });
   }
 }
+
+describe("local showcase framework switching", () => {
+  it("uses actual local entry points and retains mode and matching kit", () => {
+    assert.equal(
+      frameworkDemoTarget(
+        "/angular-main/?kit=ng-zorro&locale=ar",
+        "react",
+        adapters,
+        features
+      ).href,
+      "/?kit=antd&locale=ar"
+    );
+    assert.equal(
+      frameworkDemoTarget(
+        "/all-options/?kit=antd",
+        "angular",
+        adapters,
+        features
+      ).href,
+      "/angular-all-options/?kit=ng-zorro"
+    );
+    assert.equal(
+      frameworkDemoTarget("/angular-all-options/", "react", adapters, features)
+        .href,
+      "/all-options/"
+    );
+  });
+  it("retains matrix features on actual local counterparts", () => {
+    assert.equal(
+      frameworkDemoTarget("/ng-zorro/editing/", "react", adapters, features)
+        .href,
+      "/antd/editing/"
+    );
+    assert.equal(
+      frameworkDemoTarget("/antd/filtering/", "angular", adapters, features)
+        .href,
+      "/ng-zorro/filtering/"
+    );
+  });
+  it("retains selected kit and query state on deployed live entries", () => {
+    assert.equal(
+      frameworkDemoTarget(
+        "/react/demo/?kit=antd&locale=ar",
+        "angular",
+        adapters,
+        features
+      ).href,
+      "/angular/demo/?kit=ng-zorro&locale=ar"
+    );
+  });
+});

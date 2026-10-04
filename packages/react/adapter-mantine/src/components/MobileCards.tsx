@@ -11,6 +11,7 @@ import {
   insertExtraRows,
   isExtraEntry,
   mobileCardListStyle,
+  mobileCardRegionProps,
   orderedCardEntries,
   pinnedSummaryPart,
   pinnedSummaryRowId,
@@ -463,11 +464,6 @@ export function MobileCards<TRow>({
   virtualScrollRef,
 }: Readonly<MobileCardsProps<TRow>>) {
   const { columns, selection, labels } = table;
-  const requestedRegionLabel = (
-    table.getTableProps()["aria-label"] ?? labels.table
-  ).trim();
-  const regionLabel =
-    requestedRegionLabel.length > 0 ? requestedRegionLabel : labels.table;
   const compact = density === "compact";
   const cardPadding = compact ? "sm" : "md";
   const cardGap = compact ? 4 : "xs";
@@ -550,10 +546,12 @@ export function MobileCards<TRow>({
   };
 
   return (
-    <div
-      role="region"
-      aria-label={regionLabel}
-      tabIndex={maxHeight == null ? undefined : 0}
+    <section
+      {...mobileCardRegionProps(
+        table.getTableProps()["aria-label"],
+        labels.table,
+        maxHeight
+      )}
       ref={virtualScrollRef}
       style={mobileCardListStyle(maxHeight)}
     >
@@ -685,6 +683,6 @@ export function MobileCards<TRow>({
           </Card>
         )}
       </Stack>
-    </div>
+    </section>
   );
 }

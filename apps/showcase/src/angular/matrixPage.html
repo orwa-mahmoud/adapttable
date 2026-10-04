@@ -1,57 +1,7 @@
-<header class="nav">
-  <div class="nav__inner shell">
-    <adapt-showcase-wordmark [href]="liveDemo" />
-    <nav class="nav__links" aria-label="Demo pages">
-      <a [href]="liveDemo + '?kit=' + adapter().key">Live demo</a>
-      <a [href]="featureLab + '?kit=' + adapter().key">Feature Lab</a>
-      <details class="nav__adapters">
-        <summary>Adapters</summary>
-        <div class="nav__adapter-menu">
-          @for (item of angularAdapters; track item.key) {
-            <a [href]="root() + '/' + item.key + '/'" [attr.aria-current]="item.key === adapter().key && !feature() ? 'page' : null">{{ item.label }}</a>
-          }
-        </div>
-      </details>
-      <a
-        [href]="root() + '/' + adapter().key + '/'"
-        [class.is-on]="!feature()"
-        [attr.aria-current]="feature() ? null : 'page'"
-        >{{ adapter().label }}</a
-      >
-      <a [href]="gettingStarted">Get started</a>
-    </nav>
-    <div class="nav__right">
-      <label class="nav__framework">
-        <span aria-hidden="true">Ⓐ</span>
-        <select aria-label="Framework" (change)="switchFramework($event)">
-          @for (framework of frameworks; track framework.key) {
-            <option
-              [value]="framework.key"
-              [selected]="framework.key === 'angular'"
-            >
-              {{ framework.label }}
-            </option>
-          }
-        </select>
-      </label>
-      <button
-        type="button"
-        class="nav__icon"
-        aria-label="Toggle dark mode"
-        (click)="toggleDark()"
-      >
-        {{ dark() ? "☀" : "☾" }}
-      </button>
-      <a
-        class="nav__docs"
-        [href]="gettingStarted"
-        target="_blank"
-        rel="noreferrer"
-        >Docs</a
-      >
-    </div>
-  </div>
-</header>
+<adapt-showcase-nav
+  [active]="adapter().key + (feature() ? '/' + feature()!.slug : '')"
+  [kit]="adapter().key"
+/>
 
 <main>
   @if (unavailableKit) {
@@ -178,9 +128,18 @@
     <p class="mx-seam">
       rendered by <span class="mx-seam__pkg">{{ adapter().pkg }}</span>
     </p>
-    <ng-template #demoBody><ng-container *ngComponentOutlet="body()" /></ng-template>
+    <ng-template #demoBody
+      ><ng-container *ngComponentOutlet="body()"
+    /></ng-template>
     @if (kit.root; as kitRoot) {
-      <ng-container [ngComponentOutlet]="kitRoot" [ngComponentOutletInputs]="{ content: demoBody, theme: dark() ? 'dark' : 'light', dir: feature()?.slug === 'rtl' ? 'rtl' : 'ltr' }" />
+      <ng-container
+        [ngComponentOutlet]="kitRoot"
+        [ngComponentOutletInputs]="{
+          content: demoBody,
+          theme: dark() ? 'dark' : 'light',
+          dir: feature()?.slug === 'rtl' ? 'rtl' : 'ltr',
+        }"
+      />
     } @else {
       <ng-container [ngTemplateOutlet]="demoBody" />
     }

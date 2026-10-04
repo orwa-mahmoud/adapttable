@@ -1186,3 +1186,4 @@ export {
 // AI contracts. Nothing here decides what an operation means — that is
 // `@adapttable/ai`'s `agentObservation`.
 export { deriveRuntimeOperations } from "./agent/deriveRuntimeOperations";
+export { mobileCardRegionProps } from "./virtual/mobileCardRegion";

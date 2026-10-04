@@ -29,6 +29,7 @@ import { AdaptMaterialPopover } from "./materialPopover";
     <adapt-material-popover
       [origin]="anchor"
       [open]="p.open"
+      [belowOnly]="true"
       [dir]="p.dir ?? 'ltr'"
       (dismiss)="p.onClose()"
     >
@@ -38,11 +39,11 @@ import { AdaptMaterialPopover } from "./materialPopover";
           class="adapt-material-filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
-          [style.width.px]="380"
+          [style.width.px]="340"
           [style.max-width]="'calc(100vw - 48px)'"
-          [style.overflow-y]="'auto'"
+          style="display: flex; flex-direction: column; max-height: calc(var(--adapt-material-popover-height, 560px) - 32px)"
         >
-          <header class="adapt-material-filters-header">
+          <header class="adapt-material-filters-header" style="flex: none">
             <h3 class="adapt-material-filters-title">
               {{ p.labels.filters
               }}{{
@@ -59,9 +60,20 @@ import { AdaptMaterialPopover } from "./materialPopover";
               {{ p.labels.clearAll }}
             </button>
           </header>
-          <div class="adapt-material-filters-body">
+          <div
+            class="adapt-material-filters-body"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+          >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
+          <footer
+            class="adapt-material-filters-footer"
+            style="flex: none; padding-block-start: 8px"
+          >
+            <button mat-flat-button type="button" (click)="p.onClose()">
+              {{ p.labels.filtersDone }}
+            </button>
+          </footer>
         </div>
       }
     </adapt-material-popover>`,

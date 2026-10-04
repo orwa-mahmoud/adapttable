@@ -1,3 +1,4 @@
+import { injectPopoverSpace } from "@adapttable/angular";
 import { BidiModule } from "@angular/cdk/bidi";
 /** Material card surface on the CDK overlay used by Material itself. */
 import { type ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
@@ -23,15 +24,23 @@ import { MatCardModule } from "@angular/material/card";
       [cdkConnectedOverlayOpen]="open()"
       [cdkConnectedOverlayHasBackdrop]="false"
       [cdkConnectedOverlayDisableClose]="true"
-      [cdkConnectedOverlayPositions]="positions"
-      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayPositions]="
+        belowOnly() ? belowPositions : positions()
+      "
+      [cdkConnectedOverlayPush]="!belowOnly()"
       [cdkConnectedOverlayViewportMargin]="8"
       [cdkConnectedOverlayPanelClass]="'adapt-material-overlay'"
       (overlayOutsideClick)="outside($event)"
       (overlayKeydown)="keydown($event)"
     >
       <mat-card
+        appearance="outlined"
         [attr.dir]="direction()"
+        [style.max-height.px]="belowOnly() ? availableHeight() : null"
+        [style.--adapt-material-popover-height]="
+          belowOnly() ? availableHeight() + 'px' : null
+        "
+        [style.overflow-y]="belowOnly() ? 'hidden' : 'auto'"
         style="max-width: calc(100vw - 16px); max-height: min(560px, calc(100vh - 32px)); overflow: auto; padding: 16px"
       >
         <ng-content />
@@ -41,6 +50,22 @@ import { MatCardModule } from "@angular/material/card";
 export class AdaptMaterialPopover {
   readonly origin = input.required<HTMLElement>();
   readonly open = input(true);
+  readonly belowOnly = input(false);
+  readonly align = input<"start" | "end">("end");
+  protected readonly availableHeight = injectPopoverSpace({
+    origin: () => this.origin(),
+    open: () => this.open() && this.belowOnly(),
+    reserve: 16,
+  });
+  protected readonly belowPositions: ConnectedPosition[] = [
+    {
+      originX: "end",
+      originY: "bottom",
+      overlayX: "end",
+      overlayY: "top",
+      offsetY: 4,
+    },
+  ];
   readonly dir = input<"ltr" | "rtl">();
   protected readonly direction = computed(
     () =>
@@ -51,22 +76,29 @@ export class AdaptMaterialPopover {
   );
   readonly dismiss = output<void>();
   protected readonly anchor = computed(() => new ElementRef(this.origin()));
-  protected readonly positions: ConnectedPosition[] = [
+  protected readonly positions = computed<ConnectedPosition[]>(() => [
     {
-      originX: "end",
+      originX: this.align(),
       originY: "bottom",
-      overlayX: "end",
+      overlayX: this.align(),
       overlayY: "top",
       offsetY: 4,
     },
     {
-      originX: "end",
+      originX: this.align(),
       originY: "top",
-      overlayX: "end",
+      overlayX: this.align(),
       overlayY: "bottom",
       offsetY: -4,
     },
-  ];
+    {
+      originX: this.align() === "start" ? "end" : "start",
+      originY: "bottom",
+      overlayX: this.align() === "start" ? "end" : "start",
+      overlayY: "top",
+      offsetY: 4,
+    },
+  ]);
   protected outside(event: MouseEvent): void {
     if (!(event.target instanceof Node) || this.origin().contains(event.target))
       return;

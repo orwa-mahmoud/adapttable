@@ -166,6 +166,7 @@ export class AdaptAssistantPanel {
         data-adapttable-kit="spartan"
         [attr.dir]="props().dir"
         [attr.data-adapttable-part]="props().part"
+        style="inline-size: min(420px, calc(100vw - 16px)); block-size: 80dvh; max-block-size: 80dvh; min-block-size: 0; box-sizing: border-box"
         [class]="props().className"
       >
         <ng-container [ngTemplateOutlet]="props().children" />

@@ -11,12 +11,9 @@ import {
   type SavedViewsControllerOptions,
   slotRender,
 } from "@adapttable/angular";
-import {
-  AdaptSavedViewsMenu,
-  AdaptSavedViewsPanel,
-} from "@adapttable/angular-cdk";
+import { AdaptSavedViewsMenu } from "@adapttable/angular-cdk";
 
-export { AdaptSavedViewsPanel };
+export { AdaptSavedViewsPanel } from "@adapttable/angular-cdk";
 
 /**
  * Named snapshots of the table's view — search, sort, filters, paging and

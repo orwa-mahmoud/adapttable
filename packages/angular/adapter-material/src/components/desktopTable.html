@@ -207,7 +207,7 @@
         @for (slot of v.body(); track slot.key) {
           @switch (slot.kind) {
             @case ("virtualPad") {
-              <tr aria-hidden="true" class="adapt-material-virtual-spacer">
+              <tr inert class="adapt-material-virtual-spacer">
                 <td
                   [attr.colspan]="slot.colSpan"
                   [style.height.px]="slot.height"
@@ -225,13 +225,19 @@
                 <td
                   [attr.data-adapttable-part]="parts.cell"
                   [attr.colspan]="slot.colSpan"
-                  [attr.role]="separator ? 'separator' : null"
-                  [attr.aria-label]="
-                    separator ? v.table.labels().rowSeparator : null
-                  "
                   [adaptAttrs]="{ style: extraCellStyle(slot.fillStyle) }"
-                  [adaptExtraRowContent]="slot.render"
-                ></td>
+                >
+                  @if (separator) {
+                    <hr
+                      [attr.aria-label]="v.table.labels().rowSeparator"
+                      style="border: 0; margin: 0"
+                    />
+                  }
+                  <div
+                    style="display: contents"
+                    [adaptExtraRowContent]="slot.render"
+                  ></div>
+                </td>
               </tr>
             }
             @case ("group") {

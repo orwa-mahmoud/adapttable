@@ -428,10 +428,9 @@ describe("native assistant", () => {
     expect(part("assistant-examples-menu")?.getAttribute("aria-expanded")).toBe(
       "false"
     );
-    expect(part("assistant-examples-list")?.classList.contains("show")).toBe(
-      false
-    );
-    expect(item!.disabled).toBe(true);
+    // A scoped native portal destroys its menu when disconnected.
+    expect(part("assistant-examples-list")).toBeNull();
+    expect(item!.isConnected).toBe(false);
     // A dispatched event can still reach a disabled native element. The
     // component must recheck current availability before running a command.
     item?.dispatchEvent(new MouseEvent("click", { bubbles: true }));

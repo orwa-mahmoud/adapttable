@@ -272,7 +272,9 @@ export function createGroupingPanelController(
       return;
     }
     snapshot = merged;
-    for (const listener of [...listeners]) listener();
+    // Subscription changes during a publication apply to the next publication.
+    const pendingListeners = [...listeners];
+    for (const listener of pendingListeners) listener();
   };
   const setDrag = (
     recipe: (

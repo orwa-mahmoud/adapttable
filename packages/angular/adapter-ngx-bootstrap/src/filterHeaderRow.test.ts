@@ -141,6 +141,28 @@ afterEach(() => {
 });
 
 describe("AdaptFilterHeaderRow", () => {
+  it("keeps a portaled multi-select open through native checkbox clicks", async () => {
+    const { element, labeled, fixture, host } = await mountRow();
+    const trigger = labeled("Tags").find((node) => node.tagName === "BUTTON")!;
+    trigger.click();
+    await fixture.whenStable();
+    const choices = element.querySelectorAll<HTMLInputElement>(
+      '[data-adapttable-part="filter-header-menu"] input'
+    );
+    expect(choices).toHaveLength(2);
+    for (const choice of choices) {
+      choice.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      choice.click();
+      await fixture.whenStable();
+      expect(choice.checked).toBe(true);
+      expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    }
+    expect(host.extra().tags).toEqual(["a", "b"]);
+    document.body.click();
+    await fixture.whenStable();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
   it("closes a portalled multi-select from a focused choice and reopens cleanly", async () => {
     const { element, labeled, fixture, host } = await mountRow();
     const trigger = labeled("Tags").find((node) => node.tagName === "BUTTON")!;
@@ -275,6 +297,42 @@ describe("AdaptFilterHeaderRow", () => {
 });
 
 describe("AdaptHeaderFilterTrigger", () => {
+  it("keeps portaled checkbox choices inside the funnel's overlay session", async () => {
+    const fixture = TestBed.createComponent(AdaptHeaderFilterTrigger);
+    const extra = signal<ExtraFilters>({});
+    fixture.componentRef.setInput("props", {
+      def: DEFS[2]!,
+      source: memory(extra),
+      labels: defaultLabels,
+      closeOnSelect: true,
+    });
+    const boundary = document.createElement("div");
+    boundary.className = "adapttable-ngx-bootstrap";
+    boundary.append(fixture.nativeElement as HTMLElement);
+    document.body.append(boundary);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const trigger = boundary.querySelector<HTMLButtonElement>("button")!;
+    trigger.click();
+    await fixture.whenStable();
+    const choices = boundary.querySelectorAll<HTMLInputElement>(
+      '[data-adapttable-part="filter-header-cell"] input[type="checkbox"]'
+    );
+    expect(choices).toHaveLength(2);
+    for (const choice of choices) {
+      expect(choice.closest("[data-ngx-bootstrap-overlay]")).not.toBeNull();
+      choice.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      choice.click();
+      await fixture.whenStable();
+      expect(choice.checked).toBe(true);
+      expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    }
+    expect(extra().tags).toEqual(["a", "b"]);
+    document.body.click();
+    await fixture.whenStable();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
   it("closes the native dropdown after a finished single-choice write and Escape", async () => {
     const fixture = TestBed.createComponent(AdaptHeaderFilterTrigger);
     const extra = signal<ExtraFilters>({});

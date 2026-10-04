@@ -11,12 +11,9 @@ import {
   type SavedViewsControllerOptions,
   slotRender,
 } from "@adapttable/angular";
-import {
-  AdaptSavedViewsMenu,
-  AdaptSavedViewsPanel,
-} from "@adapttable/ngx-bootstrap";
+import { AdaptSavedViewsMenu } from "@adapttable/ngx-bootstrap";
 
-export { AdaptSavedViewsPanel };
+export { AdaptSavedViewsPanel } from "@adapttable/ngx-bootstrap";
 
 /**
  * Named snapshots of the table's view — search, sort, filters, paging and

@@ -34,7 +34,8 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
     readonly disabled?: boolean;
     readonly current?: boolean;
   }>({ alias: "adaptPaginationLink" });
-  readonly selected = output<number>({ alias: "adaptPageSelect" });
+  readonly adaptPageSelect = output<number>();
+  readonly selected = this.adaptPageSelect;
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly renderer = inject(Renderer2);
   private readonly destroy = inject(DestroyRef);

@@ -32,12 +32,36 @@
     }
     <div data-adapttable-part="toolbar">
       @if (searchable()) {
-        <div data-adapttable-part="search-field">
-          <span data-adapttable-part="search-icon" style="display: inline-flex">
+        <div
+          data-adapttable-part="search-field"
+          style="
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            min-width: 0;
+          "
+        >
+          <span
+            data-adapttable-part="search-icon"
+            aria-hidden="true"
+            style="
+              position: absolute;
+              inset-inline-start: 12px;
+              display: inline-flex;
+              pointer-events: none;
+            "
+          >
             <svg [adaptIcon]="searchIcon"></svg>
           </span>
           <input
+            [attr.aria-label]="v.table.labels().search"
             data-adapttable-part="search"
+            style="
+              padding-inline-start: 36px;
+              min-width: 0;
+              width: 100%;
+              box-sizing: border-box;
+            "
             [adaptAttrs]="v.table.searchInputAttrs()"
           />
         </div>
@@ -230,6 +254,7 @@
           }
           @case ("mobile") {
             <adapt-mobile-cards
+              #mobileSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"
@@ -237,6 +262,7 @@
           }
           @case ("desktop") {
             <adapt-desktop-table
+              #desktopSurface
               [view]="v"
               [rowKey]="rowKey()"
               [maxHeight]="maxHeight()"

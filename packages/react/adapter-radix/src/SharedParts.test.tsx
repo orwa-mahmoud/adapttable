@@ -73,7 +73,7 @@ describe("shared shell styling parts (radix)", () => {
       });
       const region = screen.getByRole("region", { name: "People" });
       const list = within(region).getByRole("list", { name: "People" });
-      expect(region.tagName).toBe("DIV");
+      expect(region.tagName).toBe("SECTION");
       expect(region).toHaveAttribute("tabindex", "0");
       expect(region.style.maxHeight).toBe(`${maxHeight}px`);
       expect(region.style.overflowY).toBe("auto");

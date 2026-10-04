@@ -3,7 +3,10 @@
  * backdrop, closes on an outside click or Escape, and hands focus back to
  * the button on Escape.
  */
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import {
+  type FilterOverlaySlotProps,
+  injectPopoverSpace,
+} from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
@@ -44,14 +47,16 @@ import { OVERLAY_Z, placeOverlayBelowTrigger } from "./overlayPlacement";
       @if (p.open) {
         <div
           #card
+          [style.max-height.px]="availableHeight()"
+          style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
           data-adapttable-part="filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
           [style.position]="'fixed'"
           [style.z-index]="zIndex"
-          [style.width.px]="380"
+          [style.width.px]="340"
           [style.max-width]="'calc(100vw - 16px)'"
-          [style.overflow-y]="'auto'"
+          [style.overflow-y]="'hidden'"
         >
           <header data-adapttable-part="filters-header">
             <h3 data-adapttable-part="filters-title">
@@ -69,9 +74,19 @@ import { OVERLAY_Z, placeOverlayBelowTrigger } from "./overlayPlacement";
               {{ p.labels.clearAll }}
             </button>
           </header>
-          <div data-adapttable-part="filters-body">
+          <div
+            data-adapttable-part="filters-body"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+          >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
+          <footer
+            style="flex: none; display: flex; justify-content: flex-end; padding-block-start: 12px"
+          >
+            <button type="button" (click)="p.onClose()">
+              {{ p.labels.filtersDone }}
+            </button>
+          </footer>
         </div>
       }
     </span>
@@ -85,6 +100,11 @@ export class AdaptFilterPopover {
   protected readonly zIndex = OVERLAY_Z;
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  protected readonly availableHeight = injectPopoverSpace({
+    origin: () => this.anchor()?.nativeElement,
+    open: () => this.props().open,
+    reserve: 16,
+  });
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");
 
   constructor() {

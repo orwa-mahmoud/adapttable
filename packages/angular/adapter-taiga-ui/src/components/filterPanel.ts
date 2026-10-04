@@ -38,16 +38,18 @@ import { TREE_SLOTS } from "./filterTreeBuilder";
     @let p = props();
     <div
       data-adapttable-part="filters-form"
-      style="display: flex; flex-direction: column; gap: 16px"
+      style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px"
     >
-      <adapt-filter-tree-chrome
-        [defs]="p.defs"
-        [source]="p.source"
-        [labels]="p.labels"
-        [registry]="p.registry"
-        [defaultExpanded]="p.defaultExpanded ?? false"
-        [slots]="treeSlots"
-      />
+      <div style="grid-column: 1 / -1">
+        <adapt-filter-tree-chrome
+          [defs]="p.defs"
+          [source]="p.source"
+          [labels]="p.labels"
+          [registry]="p.registry"
+          [defaultExpanded]="p.defaultExpanded ?? false"
+          [slots]="treeSlots"
+        />
+      </div>
       @if (p.showSimpleFields) {
         <adapt-auto-filter-form
           [defs]="p.defs"
@@ -96,9 +98,9 @@ const FOCUSABLE =
         [attr.aria-label]="p.labels.filters"
         [attr.dir]="p.dir ?? 'ltr'"
         [attr.data-dir]="p.dir ?? 'ltr'"
-        style="position: fixed; inset-block: 0; inset-inline-end: 0; inset-inline-start: auto; margin: 0; max-height: none; max-width: none; height: 100%; z-index: 200"
+        style="position: fixed; inset-block: 0; inset-inline-end: 0; inset-inline-start: auto; margin: 0; max-height: none; max-width: none; height: 100%; z-index: 200; display:flex; flex-direction:column; overflow:hidden"
       >
-        <header data-taiga-part="filters-header">
+        <header data-taiga-part="filters-header" style="flex:none">
           <h3 data-taiga-part="filters-title">
             {{ p.labels.filters
             }}{{
@@ -117,10 +119,13 @@ const FOCUSABLE =
             ×
           </button>
         </header>
-        <div data-taiga-part="filters-body">
+        <div
+          data-taiga-part="filters-body"
+          style="min-height:0;flex:1;overflow-y:auto"
+        >
           <ng-container [ngTemplateOutlet]="p.filters" />
         </div>
-        <footer data-taiga-part="filters-footer">
+        <footer data-taiga-part="filters-footer" style="flex:none">
           <button
             tuiButton
             size="s"

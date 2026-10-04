@@ -152,7 +152,7 @@ export class AdaptAssistantPanel {
     <section
       [attr.data-adapttable-part]="props().part"
       [class]="props().className"
-      style="padding:24px;overflow:auto"
+      style="height: 100%; min-height: 0; padding: 16px; box-sizing: border-box; overflow: hidden"
     >
       <ng-container [ngTemplateOutlet]="props().children" /></section
   ></adapt-material-dialog>`,

@@ -102,7 +102,9 @@ export function createLazyChildrenController<TRow>(
 
   const commit = (next: LazyChildrenSnapshot): void => {
     snapshot = next;
-    for (const listener of [...listeners]) listener();
+    // Subscription changes during a publication apply to the next publication.
+    const pendingListeners = [...listeners];
+    for (const listener of pendingListeners) listener();
   };
   const without = (set: ReadonlySet<string>, id: string): Set<string> => {
     const next = new Set(set);

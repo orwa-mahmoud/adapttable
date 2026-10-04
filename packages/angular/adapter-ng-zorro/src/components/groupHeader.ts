@@ -5,30 +5,18 @@
  */
 import {
   AdaptAttrs,
+  AdaptGroupHeaderCardModel,
+  AdaptGroupHeaderRowModel,
   AdaptGroupMoreButtonChrome,
   AdaptGroupToggleSpacer,
   AdaptIcon,
-  type ColumnDef,
-  expandChevronIcon,
-  groupAggregateEntries,
-  type GroupHeaderCardSlotProps,
-  type GroupHeaderRowSlotProps,
-  groupIndentStyle,
-  groupLeafCount,
   type GroupMoreButtonSlotProps,
-  groupRowLayout,
-  groupRowParts,
-  groupSelectionState,
-  type IconDescriptor,
-  resolveMobileLabel,
-  type SelectionState,
 } from "@adapttable/angular";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   input,
-  type Signal,
 } from "@angular/core";
 import { NzButtonModule } from "ng-zorro-antd/button";
 import { NzCardModule } from "ng-zorro-antd/card";
@@ -37,11 +25,6 @@ import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { AdaptSelectionCheckbox } from "./selectionCheckbox";
 
 /** The entry either slot draws. */
-type Entry = GroupHeaderRowSlotProps<
-  never,
-  SelectionState,
-  ColumnDef<never>
->["entry"];
 
 /** Reflect only the decorative wrapper; an open/down chevron remains down. */
 const GROUP_CHEVRON_STYLE = `
@@ -81,52 +64,6 @@ export class AdaptGroupMore {
 }
 
 /** What both the row and the card derive from one entry. */
-function groupEntryView(
-  entry: () => Entry,
-  selection: () => SelectionState | null
-) {
-  const group = computed(() => {
-    const current = entry();
-    return current.kind === "group" ? current : undefined;
-  });
-  return {
-    parts: computed(() => groupRowParts(entry().kind)),
-    /** Neither a footer nor a "show more" row has a toggle or a count. */
-    plain: computed(() => entry().kind !== "group"),
-    expanded: computed(() => {
-      const current = entry();
-      return current.kind !== "group" || !current.collapsed;
-    }),
-    collapsed: computed(() => {
-      const current = entry();
-      return current.kind === "group" && current.collapsed ? "true" : null;
-    }),
-    group,
-    footer: computed(() => {
-      const current = entry();
-      return current.kind === "groupFooter" ? current : undefined;
-    }),
-    more: computed(() => {
-      const current = entry();
-      return current.kind === "groupMore" ? current : undefined;
-    }),
-    selectState: computed(() => {
-      const open = group();
-      const current = selection();
-      return open && current
-        ? groupSelectionState(open.leafIds, current.selectedIds)
-        : undefined;
-    }),
-    count: computed(() => {
-      const open = group();
-      return open ? groupLeafCount(open) : 0;
-    }),
-    aggregateCells: computed(() => {
-      const current = entry();
-      return current.kind === "groupMore" ? undefined : current.aggregateCells;
-    }),
-  };
-}
 
 /**
  * A group's header, footer or "show more" row in the desktop table. One
@@ -237,13 +174,7 @@ function groupEntryView(
     }
   `,
 })
-export class AdaptGroupHeaderRow {
-  /** Slot props from the table's group-header-row fill. */
-  readonly props =
-    input.required<
-      GroupHeaderRowSlotProps<never, SelectionState, ColumnDef<never>>
-    >();
-
+export class AdaptGroupHeaderRow extends AdaptGroupHeaderRowModel {
   /** The kit emits one change from either the label or its native input. */
   protected readonly selectionAttrs = computed(() => ({
     type: "checkbox",
@@ -257,36 +188,7 @@ export class AdaptGroupHeaderRow {
     },
   }));
 
-  protected readonly chevron: Signal<IconDescriptor> = computed(() => ({
-    ...expandChevronIcon({ open: this.view.expanded() }),
-    width: 14,
-    height: 14,
-  }));
   protected readonly moreSlots = { Button: AdaptGroupMore };
-  /** Operations for the current group or footer, retaining the model type. */
-  protected readonly aggregateOps: Signal<
-    Parameters<typeof groupRowLayout>[2]
-  > = computed(() => {
-    const current = this.props().entry;
-    return current.kind === "groupMore" ? undefined : current.aggregateOps;
-  });
-  protected readonly view = groupEntryView(
-    () => this.props().entry,
-    () => this.props().selection
-  );
-
-  protected readonly layout = computed(() =>
-    groupRowLayout<never, ColumnDef<never>>(
-      this.props().columns,
-      this.view.aggregateCells(),
-      this.aggregateOps()
-    )
-  );
-
-  protected readonly labelCellStyle = computed(() => ({
-    fontWeight: 600,
-    ...groupIndentStyle(this.props().entry.level),
-  }));
 }
 
 /**
@@ -376,13 +278,7 @@ export class AdaptGroupHeaderRow {
     </nz-card>
   `,
 })
-export class AdaptGroupHeaderCard {
-  /** Slot props from the table's group-header-card fill. */
-  readonly props =
-    input.required<
-      GroupHeaderCardSlotProps<never, SelectionState, ColumnDef<never>>
-    >();
-
+export class AdaptGroupHeaderCard extends AdaptGroupHeaderCardModel {
   /** The kit emits one change from either the label or its native input. */
   protected readonly selectionAttrs = computed(() => ({
     type: "checkbox",
@@ -396,34 +292,5 @@ export class AdaptGroupHeaderCard {
     },
   }));
 
-  protected readonly chevron: Signal<IconDescriptor> = computed(() => ({
-    ...expandChevronIcon({ open: this.view.expanded() }),
-    width: 14,
-    height: 14,
-  }));
   protected readonly moreSlots = { Button: AdaptGroupMore };
-  /** Operations for the current group or footer, retaining the model type. */
-  protected readonly aggregateOps: Signal<
-    Parameters<typeof groupRowLayout>[2]
-  > = computed(() => {
-    const current = this.props().entry;
-    return current.kind === "groupMore" ? undefined : current.aggregateOps;
-  });
-  protected readonly view = groupEntryView(
-    () => this.props().entry,
-    () => this.props().selection
-  );
-
-  protected readonly aggregates = computed(() =>
-    groupAggregateEntries<never, ColumnDef<never>>(
-      this.props().columns,
-      this.view.aggregateCells(),
-      this.aggregateOps()
-    )
-  );
-
-  /** A subtotal's caption: the column's mobile label. */
-  protected caption(column: ColumnDef<never>): string | undefined {
-    return resolveMobileLabel(column);
-  }
 }

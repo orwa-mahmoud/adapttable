@@ -6,8 +6,6 @@
  * the window is scoped to.
  */
 import {
-  ASSISTANT_FLOATING_MIN_WIDTH,
-  assistantFloatingFits,
   assistantFloatingStyle,
   assistantLauncherStyle,
   type TableAssistantPlacement,
@@ -18,7 +16,7 @@ import type { RefObject } from "react";
  * Below this, a floating window would leave the table unusable behind it, so
  * the modal sheet is the honest presentation.
  */
-export const FLOATING_MIN_WIDTH = ASSISTANT_FLOATING_MIN_WIDTH;
+export { ASSISTANT_FLOATING_MIN_WIDTH as FLOATING_MIN_WIDTH } from "@adapttable/core/binding";
 
 /**
  * Where the window may be placed.
@@ -32,7 +30,7 @@ export const FLOATING_MIN_WIDTH = ASSISTANT_FLOATING_MIN_WIDTH;
 export type TableAssistantBoundary = "viewport" | RefObject<HTMLElement | null>;
 
 /** Whether a floating request can be honoured at this width. @internal */
-export const floatingFits = assistantFloatingFits;
+export { assistantFloatingFits as floatingFits } from "@adapttable/core/binding";
 
 /** The window's placement styles. @internal */
 export function floatingStyle(

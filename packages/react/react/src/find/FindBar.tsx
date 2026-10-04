@@ -11,9 +11,8 @@ import type {
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { focusEditorOnMount } from "../editing/editableCellController";
-import type { FindInTableState } from "./useFindInTable";
 
-export type { FindInTableState };
+export type { FindInTableState } from "./useFindInTable";
 export type {
   FindBarProps,
   FindButtonKind,

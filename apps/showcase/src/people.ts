@@ -276,6 +276,24 @@ export function personStatus(row: Person): DemoStatus {
   return row.status ?? cycle(STATUSES, Number(row.id));
 }
 
+/** Complete derived fields for a summary row whose id is not a person's numeric seed. */
+export function summaryPerson(id: string, name: string, nameAr = name): Person {
+  return {
+    id,
+    name,
+    email: "",
+    role: "",
+    team: "All",
+    nameAr,
+    roleAr: "",
+    teamAr: "الكل",
+    status: "Active",
+    budget: 0,
+    utilization: 0,
+    start: "2026-01-01",
+  };
+}
+
 /**
  * One formatter per locale, built on first use.
  *

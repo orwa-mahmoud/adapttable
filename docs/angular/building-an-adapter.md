@@ -96,7 +96,15 @@ the adapter, including the actual native or kit dialog.
 
 ## Assemble the shell
 
-The full kit shell separates persistent table state from feature composition:
+Extend `AdaptDataTableShell` to reuse feature assembly, source reconciliation,
+editing history, URL/filter composition and per-table lifecycle. The inherited
+inputs and outputs remain the kit's public table contract. Render through
+`AdaptDesktopTableModel` / `AdaptMobileCardsModel` and implement
+`DataTableSurface` on each native surface so virtualization reads its actual
+scroll element. The models supply plans and renderer contexts; the adapter
+still supplies its own native table, cards and every required control.
+
+For a shell assembled directly, keep persistent state separate from feature composition:
 
 1. Resolve inherited and local features, their options and slot fills
 2. Create `injectTableData`, preserving its source and filter runtime

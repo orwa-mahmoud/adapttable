@@ -37,7 +37,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-  padding-block: 0.75rem;
+  padding: 0.75rem;
 }
 [data-adapttable-kit="taiga-ui"] [data-adapttable-part="scroll-box"] {
   max-inline-size: 100%;
@@ -50,15 +50,20 @@
 /* Native textfield inputs are absolutely positioned, so their flex wrappers
    need a preferred width independent of the input's text or clear button. */
 [data-adapttable-kit="taiga-ui"] [data-adapttable-part="search-field"] {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex: 1 1 16rem;
   min-inline-size: 0;
-  max-inline-size: 24rem;
+  max-inline-size: min(520px, 100%);
+  margin-inline-end: auto;
 }
 [data-adapttable-kit="taiga-ui"] [data-adapttable-part="search-icon"] {
-  flex: none;
+  position: absolute;
+  inset-inline-start: 12px;
+  z-index: 1;
+  pointer-events: none;
 }
 [data-adapttable-kit="taiga-ui"] [data-taiga-part="sort-field"] {
   display: flex;
@@ -102,4 +107,13 @@
   [data-adapttable-kit="taiga-ui"] [data-adapttable-part="toolbar"] > * {
     max-inline-size: 100%;
   }
+}
+
+[data-adapttable-kit="taiga-ui"][data-adapttable-part="root"] {
+  border: 1px solid var(--tui-border-normal);
+  border-radius: var(--tui-radius-m);
+}
+
+[data-adapttable-kit="taiga-ui"] [data-adapttable-part="search"] {
+  padding-inline-start: 36px;
 }

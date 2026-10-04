@@ -16,6 +16,9 @@ import { resolveMatrixRoute } from "../matrix/content";
 import { AdaptShowcaseMatrixPage, MATRIX_PAGE } from "./matrixPage";
 import { SHOWCASE_ASSET_ROOT, SHOWCASE_KIT } from "./showcaseKit";
 
+// Keep the approved Angular presentation separate from React’s showcase.
+document.documentElement.dataset.framework = "angular";
+
 const container = document.getElementById("root");
 if (!container) throw new Error("the showcase page has no #root to mount into");
 
