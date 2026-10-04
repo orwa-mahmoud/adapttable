@@ -32,8 +32,9 @@ export function RowEditActionsChrome<TRow>(
       "AdaptTable: RowEditActionsChrome requires the Button control slot."
     );
   const pending =
-    props.rowEditing.commit?.phase === "saving" ||
-    props.rowEditing.commit?.phase === "validating";
+    state.editing &&
+    (props.rowEditing.commit?.phase === "saving" ||
+      props.rowEditing.commit?.phase === "validating");
   const button = (
     label: string,
     part: string,
@@ -87,7 +88,7 @@ export function RowEditActionsChrome<TRow>(
             props.icons?.cancel
           ),
         ];
-  if (props.rowEditing.commit?.error)
+  if (state.editing && props.rowEditing.commit?.error)
     children.push(
       h(
         "span",

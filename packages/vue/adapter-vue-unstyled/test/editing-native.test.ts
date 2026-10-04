@@ -309,6 +309,47 @@ describe("native editing controls", () => {
     await click(view.host, "row-edit-cancel");
     expect(view.host.querySelector(part("edit-cell-input"))).toBeNull();
   });
+  it.each([false, true])(
+    "keeps row save status on its owner in mobile=%s",
+    async (forceMobile) => {
+      const request = deferred<void>();
+      const view = table(
+        [
+          rowEditing<Row>(() => request.promise, {
+            formatEditError: () => "Offline",
+          }),
+        ],
+        { forceMobile }
+      );
+      view.rows.value = [original, { ...original, id: "2", name: "Grace" }];
+      await tick();
+      const activeRow = find(view.host, '[data-row-id="1"]');
+      const otherRow = find(view.host, '[data-row-id="2"]');
+      await click(activeRow, "row-edit-begin");
+      await write(find(activeRow, part("edit-cell-input")), "Changed");
+      await click(activeRow, "row-edit-save");
+      expect(
+        find(activeRow, part("row-edit-actions")).getAttribute("aria-busy")
+      ).toBe("true");
+      expect(
+        find(otherRow, part("row-edit-actions")).hasAttribute("aria-busy")
+      ).toBe(false);
+      expect(
+        find<HTMLButtonElement>(otherRow, part("row-edit-begin")).disabled
+      ).toBe(false);
+      request.reject(new Error("Offline"));
+      await tick();
+      expect(view.host.querySelectorAll(part("row-edit-error"))).toHaveLength(
+        1
+      );
+      expect(find(activeRow, part("row-edit-error")).textContent).toBe(
+        "Offline"
+      );
+      expect(otherRow.querySelector(part("row-edit-error"))).toBeNull();
+      await click(activeRow, "row-edit-cancel");
+      expect(view.host.querySelector(part("row-edit-error"))).toBeNull();
+    }
+  );
   it("batch editing stages all cells and only explicit Save submits the patch", async () => {
     const request = deferred<void>();
     const commit = vi.fn(() => request.promise);
