@@ -100,8 +100,8 @@ const feature = computed(
 const references = computed(() =>
   [
     {
-      label: "React · Unstyled",
-      href: siteUrl(demoRoute(`unstyled/${feature.value}`, "react")),
+      label: "React · Tailwind",
+      href: siteUrl(demoRoute(`tailwind/${feature.value}`, "react")),
     },
     {
       label: "React · Mantine",

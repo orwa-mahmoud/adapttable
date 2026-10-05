@@ -629,7 +629,7 @@ test("range export never falls back without a range and cards require a fresh de
     page
       .getByRole("combobox", { name: "Export", exact: true })
       .locator('option[value="range"]')
-  ).toBeDisabled();
+  ).toHaveJSProperty("disabled", true);
   await expect(
     page.getByRole("combobox", { name: "Export", exact: true })
   ).toHaveValue("range");
@@ -876,6 +876,12 @@ test("retry after authored work preserves orders, selection, pivot and appearanc
     .locator(`${part("selection-cell")} input`)
     .check();
   await markReady(page);
+  const retainedSelection = row(orders, "ORD-1042").locator(
+    `${part("selection-cell")} input`
+  );
+  await expect(retainedSelection).not.toBeChecked();
+  await retainedSelection.check();
+  await expect(retainedSelection).toBeChecked();
   await page
     .getByRole("button", { name: "Revenue review", exact: true })
     .click();
@@ -1229,6 +1235,9 @@ test("feature and framework discovery points to registered pages and keeps the c
     .getByRole("navigation", { name: "Compare a working kit", exact: true })
     .getByRole("link");
   await expect(comparisons).toHaveCount(4);
+  await expect(
+    finder.getByRole("link", { name: "React · Tailwind", exact: true })
+  ).toHaveAttribute("href", /\/react\/demo\/tailwind\/filtering\/$/);
   for (const link of await comparisons.all()) {
     const href = await link.getAttribute("href");
     if (!href) throw new Error("A comparison has no destination.");
@@ -1257,7 +1266,7 @@ for (const mode of [
       page
         .getByRole("combobox", { name: "Export", exact: true })
         .locator('option[value="range"]')
-    ).toBeDisabled();
+    ).toHaveJSProperty("disabled", true);
     await expect(
       page.getByRole("combobox", { name: "Export", exact: true })
     ).toHaveValue("page");

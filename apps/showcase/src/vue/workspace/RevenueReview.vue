@@ -6,7 +6,10 @@ import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { editing } from "@adapttable/vue-unstyled/editing";
 import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
-import { buildFormulaColumns } from "@adapttable/vue-unstyled/formula";
+import {
+  buildFormulaColumns,
+  formulaDisplay,
+} from "@adapttable/vue-unstyled/formula";
 import { useGroupCollapseUrlState } from "@adapttable/vue-unstyled/grouping";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import {
@@ -90,7 +93,9 @@ const columns = computed<readonly ColumnInput<Order>[]>(() => [
           header: text.value.profit,
           formula: "amount-cost",
           format: (value) =>
-            typeof value === "number" ? money(value, props.locale) : "",
+            value.kind === "number"
+              ? money(value.value, props.locale)
+              : formulaDisplay(value),
         },
       ]).columns.map((column) => ({
         ...column,
