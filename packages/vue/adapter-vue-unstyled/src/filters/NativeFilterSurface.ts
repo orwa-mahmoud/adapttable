@@ -14,6 +14,35 @@ import {
 import { useClassNames } from "../classNamesContext";
 import NativeFilterDialog from "./NativeFilterDialog.vue";
 
+function focusInitialControl(root: HTMLElement): void {
+  const current = root.ownerDocument.activeElement;
+  if (current !== root && root.contains(current)) return;
+  const control = [
+    ...root.querySelectorAll<HTMLElement>(
+      "input:not([type='hidden']), select, button, [tabindex='0']"
+    ),
+  ].find(
+    (element) =>
+      !element.matches(":disabled") &&
+      element.getAttribute("aria-disabled") !== "true" &&
+      !element.closest("[hidden], [inert]")
+  );
+  (control ?? root).focus();
+}
+
+function ownsClosingFocus(
+  root: HTMLElement,
+  focused: Element | null,
+  owned: Element | null
+): boolean {
+  return (
+    root.contains(focused) ||
+    (focused === root.ownerDocument.body &&
+      owned !== null &&
+      (!owned.isConnected || owned.matches(":disabled")))
+  );
+}
+
 /** Native popover and modal dialog own their top layer, focus and dismissal. */
 export const NativeFilterSurface = defineComponent(
   (
@@ -67,10 +96,11 @@ export const NativeFilterSurface = defineComponent(
         }
       });
     };
-    const restoreDialogFocus = (
+    const restoreSurfaceFocus = (
       dialog: HTMLDialogElement | undefined,
       focused: Element | null,
-      previous: Element | null
+      previous: Element | null,
+      modal: boolean
     ) => {
       const request = focusRequest;
       const anchor = props.anchor;
@@ -78,7 +108,7 @@ export const NativeFilterSurface = defineComponent(
         if (
           request !== focusRequest ||
           !active.value ||
-          !props.modal ||
+          props.modal !== modal ||
           props.open ||
           dialog?.open ||
           props.anchor !== anchor ||
@@ -146,22 +176,18 @@ export const NativeFilterSurface = defineComponent(
         else if (!props.modal && element.showPopover) element.showPopover();
         else element.setAttribute("open", "");
         place();
-        if (
-          modal &&
-          panel.value &&
-          !panel.value.contains(document.activeElement)
-        )
-          (
-            panel.value.querySelector<HTMLElement>(
-              "input, select, button, [tabindex='0']"
-            ) ?? panel.value
-          ).focus();
-        if (!modal && element.isConnected)
-          (
-            element.querySelector<HTMLElement>(
-              "input, select, button, [tabindex='0']"
-            ) ?? element
-          ).focus();
+        if (modal && panel.value) focusInitialControl(panel.value);
+        if (!modal && element.isConnected) focusInitialControl(element);
+        let ownedFocus = element.contains(document.activeElement)
+          ? document.activeElement
+          : null;
+        const trackFocus = (event: FocusEvent) => {
+          const target = event.target;
+          ownedFocus =
+            target instanceof Element && element.contains(target)
+              ? target
+              : null;
+        };
         const outside = (event: PointerEvent) => {
           focusRequest++;
           backdropPointerLifetime = undefined;
@@ -188,6 +214,7 @@ export const NativeFilterSurface = defineComponent(
         };
         document.addEventListener("pointerdown", outside, true);
         document.addEventListener("keydown", key, true);
+        document.addEventListener("focusin", trackFocus, true);
         window.addEventListener("resize", place);
         window.addEventListener("scroll", place, true);
         const observer = window.ResizeObserver
@@ -197,22 +224,23 @@ export const NativeFilterSurface = defineComponent(
         cleanup(() => {
           document.removeEventListener("pointerdown", outside, true);
           document.removeEventListener("keydown", key, true);
+          document.removeEventListener("focusin", trackFocus, true);
           window.removeEventListener("resize", place);
           window.removeEventListener("scroll", place, true);
           observer?.disconnect();
           const focused = closingFocus ?? document.activeElement;
           const restore =
-            modal &&
             !props.open &&
             active.value &&
             closeReason !== "outside" &&
             (closeRequest === undefined || closeRequest === focusRequest) &&
-            element.contains(focused);
+            ownsClosingFocus(element, focused, ownedFocus);
           if (modal && dialog?.open && dialog.close) dialog.close();
           else if (!modal && element.hidePopover && element.isConnected)
             element.hidePopover();
           element.removeAttribute("open");
-          if (restore) restoreDialogFocus(dialog, focused, previousDialogFocus);
+          if (restore)
+            restoreSurfaceFocus(dialog, focused, previousDialogFocus, modal);
         });
       },
       { flush: "post" }
