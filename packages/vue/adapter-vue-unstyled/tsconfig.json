@@ -4,7 +4,7 @@
     "noEmit": true,
     "jsx": "preserve",
     "jsxImportSource": "vue",
-    "types": ["node", "vitest/globals", "vite/client"],
+    "types": ["node", "vitest/globals"],
     "paths": {
       "@adapttable/vue-unstyled": ["./src/index.ts"],
       "@adapttable/vue-unstyled/features": ["./src/features.ts"],
