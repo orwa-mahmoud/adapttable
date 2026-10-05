@@ -896,7 +896,9 @@ export function createGridFocusController<TRow>(
     },
     trackFocus(cell) {
       // A mouse click or a screen reader can move focus without a key press;
-      // keep state in step rather than fighting it.
+      // keep state in step rather than fighting it. Retire the old request
+      // before notifying subscribers, which may request a different cell.
+      pending = null;
       if (!sameGridCell(cell, snapshot.active)) write({ active: cell });
     },
     clickHeader(col, event, sortable) {
