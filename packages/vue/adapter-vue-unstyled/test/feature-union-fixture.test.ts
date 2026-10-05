@@ -5,6 +5,7 @@ import FeatureUnionDemo from "../../../../apps/showcase/src/vue/feature-union/Fe
 import { find, mountNative, part, tick, write } from "./filter-editing-helpers";
 
 describe("actual combined Vue showcase fixture", () => {
+  // Coverage instrumentation adds work to this full showcase mount.
   it("mounts the real native controls and captures source-page export without host writes", async () => {
     const { host } = mountNative(() => h(FeatureUnionDemo));
     await tick();
@@ -41,5 +42,5 @@ describe("actual combined Vue showcase fixture", () => {
     ).toBe("rtl");
     expect(find(host, "#union-edit-count").textContent).toBe("0");
     expect(find(host, "#union-move-count").textContent).toBe("0");
-  });
+  }, 10_000);
 });
