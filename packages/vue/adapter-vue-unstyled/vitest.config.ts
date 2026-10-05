@@ -14,6 +14,14 @@ export default defineConfig({
     dedupe: ["vue"],
     alias: [
       {
+        // Source tests use the same SFC style block without requiring dist.
+        find: /^@adapttable\/vue-unstyled\/styles\.css$/,
+        replacement:
+          fileURLToPath(
+            new URL("./src/filters/NativeFilterDialog.vue", import.meta.url)
+          ) + "?vue&type=style&index=0&lang.css",
+      },
+      {
         find: /^@adapttable\/core$/,
         replacement: fileURLToPath(
           new URL("../../shared/core/src/index.ts", import.meta.url)

@@ -25,6 +25,7 @@ const VUE_PREVIEW_ENTRIES = new Map([
   ["", "src/vue/entry-native.ts"],
   ["workspace", "src/vue/workspace/entry-workspace.ts"],
   ["assistant", "src/vue/entry-assistant.ts"],
+  ["table-surfaces", "src/vue/entry-table-surfaces.ts"],
   ["table-footers", "src/vue/entry-table-footers.ts"],
   ["filter-editing", "src/vue/entry-filter-editing.ts"],
   ["composition", "src/vue/entry-composition.ts"],

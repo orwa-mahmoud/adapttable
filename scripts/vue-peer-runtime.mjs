@@ -49,6 +49,7 @@ const bindingSourceTests = [
   "url/savedViewsFlush",
 ];
 const nativeTests = [
+  "showcase-entry-mount",
   "assistant-showcase-undo",
   "navigation-find.ssr",
   "layout-persistence",
@@ -75,6 +76,18 @@ export default defineConfig({
   resolve: {
     dedupe: ["vue"],
     alias: [
+      ...(cell
+        ? []
+        : [
+            {
+              find: /^@adapttable\/vue-unstyled\/styles\.css$/,
+              replacement:
+                join(
+                  packageDir("adapter-vue-unstyled"),
+                  "src/filters/NativeFilterDialog.vue"
+                ) + "?vue&type=style&index=0&lang.css",
+            },
+          ]),
       {
         find: /^vue$/,
         replacement: join(vueRoot, "dist/vue.runtime.esm-bundler.js"),
