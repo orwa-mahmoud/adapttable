@@ -14,7 +14,7 @@ import {
 } from "@adapttable/core/binding";
 import { h, isVNode, type VNodeChild } from "vue";
 
-import type { Attrs } from "../attrs";
+import { type Attrs, mergeVueAttrs } from "../attrs";
 import { type ColumnDef, primitiveText } from "../columnDef";
 import type { GroupRowModel } from "../hierarchy/models";
 import {
@@ -24,11 +24,19 @@ import {
 export interface GroupRowChromeProps<TRow> {
   readonly slot: ChromeGroupSlot<TRow> & {
     readonly model?: GroupRowModel<TRow>;
+    readonly attrs?: Attrs;
   };
   readonly columnCount: number;
   readonly mobile: boolean;
   readonly classNames?: {
     readonly groupRow?: string;
+    readonly groupCell?: string;
+    readonly groupCard?: string;
+    readonly groupSelect?: string;
+    readonly groupFooterRow?: string;
+    readonly groupFooterCell?: string;
+    readonly groupMoreRow?: string;
+    readonly groupMoreCell?: string;
     readonly groupLabel?: string;
     readonly groupToggle?: string;
     readonly groupCount?: string;
@@ -86,8 +94,8 @@ function groupCaption<TRow>(
         slots.Checkbox(
           selectionCheckboxControl({
             type: "checkbox",
-            class: names.groupCheckbox,
-            "data-adapttable-part": "group-checkbox",
+            class: [names.groupCheckbox, names.groupSelect],
+            "data-adapttable-part": "group-select",
             "aria-label": `${model.labels.selectRow}: ${entry.label}`,
             checked: state === "all",
             indeterminate: state === "some",
@@ -97,15 +105,35 @@ function groupCaption<TRow>(
       );
     }
     caption.push(
-      entry.label,
+      h(
+        "span",
+        { "data-adapttable-part": "group-label", class: names.groupLabel },
+        entry.label
+      ),
       h(
         "span",
         { "data-adapttable-part": "group-count", class: names.groupCount },
         model.labels.groupCount(groupLeafCount(entry))
       )
     );
-  } else caption.push(model.labels.groupTotal(entry.label));
+  } else
+    caption.push(
+      props.mobile ? null : groupToggleSpacer(),
+      h(
+        "span",
+        { "data-adapttable-part": "group-label", class: names.groupLabel },
+        model.labels.groupTotal(entry.label)
+      ),
+      props.mobile ? null : groupToggleSpacer()
+    );
   return caption;
+}
+function groupToggleSpacer(): VNodeChild {
+  return h("span", {
+    "data-adapttable-part": "group-toggle-spacer",
+    "aria-hidden": "true",
+    style: { display: "inline-block", width: "1.5em" },
+  });
 }
 function collapsedGroupAttr<TRow>(
   entry: ChromeGroupSlot<TRow>["entry"]
@@ -125,13 +153,20 @@ export function GroupRowChrome<TRow>(
     );
   const { entry } = slot;
   const parts = groupRowParts(entry.kind);
-  const rowAttrs = {
+  const { row: rowClass, cell: cellClass } = {
+    group: { row: undefined, cell: names.groupCell },
+    groupFooter: { row: names.groupFooterRow, cell: names.groupFooterCell },
+    groupMore: { row: names.groupMoreRow, cell: names.groupMoreCell },
+  }[entry.kind];
+  const rowAttrs = mergeVueAttrs(slot.attrs ?? {}, {
     "data-adapttable-part": mobile ? parts.card : parts.row,
     "data-group-key": entry.key,
     "data-collapsed": collapsedGroupAttr(entry),
-    class: names.groupRow,
+    class: mobile
+      ? [names.groupRow, names.groupCard]
+      : [names.groupRow, rowClass],
     ...(mobile ? { role: "listitem" } : {}),
-  };
+  });
   const callButton = (
     attrs: Attrs,
     content: VNodeChild,
@@ -143,7 +178,9 @@ export function GroupRowChrome<TRow>(
       );
     return slots.Button({ attrs, content, expanded });
   };
-  if (entry.kind === "groupMore") {
+  const moreRow = (
+    entry: Extract<ChromeGroupSlot<TRow>["entry"], { kind: "groupMore" }>
+  ) => {
     const label =
       entry.scope === "groups"
         ? model.labels.moreGroups(entry.remaining)
@@ -151,7 +188,7 @@ export function GroupRowChrome<TRow>(
     const more = callButton(
       {
         type: "button",
-        "data-adapttable-part": "group-more-button",
+        "data-adapttable-part": "group-more",
         class: names.groupMore,
         onClick: () => model.onShowMore(entry),
       },
@@ -163,12 +200,22 @@ export function GroupRowChrome<TRow>(
         {
           colspan: mobile ? undefined : columnCount,
           style: groupIndentStyle(entry.level),
-          "data-adapttable-part": parts.cell,
+          "data-adapttable-part": mobile ? undefined : parts.cell,
+          class: mobile ? undefined : cellClass,
         },
-        [h("span", { "data-adapttable-part": parts.label }, [more])]
+        [
+          mobile ? null : groupToggleSpacer(),
+          h(
+            "span",
+            { "data-adapttable-part": parts.label, class: names.groupLabel },
+            [more]
+          ),
+          mobile ? null : groupToggleSpacer(),
+        ]
       ),
     ]);
-  }
+  };
+  if (entry.kind === "groupMore") return moreRow(entry);
   const layout = groupRowLayout<TRow, ColumnDef<TRow>>(
     model.columns,
     entry.aggregateCells,
@@ -197,8 +244,6 @@ export function GroupRowChrome<TRow>(
         "div",
         {
           style: groupIndentStyle(entry.level),
-          class: names.groupLabel,
-          "data-adapttable-part": parts.label,
         },
         caption
       ),
@@ -221,10 +266,10 @@ export function GroupRowChrome<TRow>(
       {
         colspan: layout.labelColumns.length + model.leadingColumns,
         style: groupIndentStyle(entry.level),
-        class: names.groupLabel,
+        class: cellClass,
         "data-adapttable-part": parts.cell,
       },
-      [h("span", { "data-adapttable-part": parts.label }, caption)]
+      [h("span", null, caption)]
     ),
     ...layout.cells.map((cell) =>
       h(
@@ -232,16 +277,17 @@ export function GroupRowChrome<TRow>(
         {
           key: cell.column.key,
           "data-column-key": cell.column.key,
-          "data-adapttable-part": parts.cell,
+          "data-adapttable-part":
+            cell.node === undefined ? undefined : "group-aggregate",
+          class: names.groupAggregate,
         },
-        [aggregate(cell.column.key, cell.node)]
+        [isVNode(cell.node) ? cell.node : primitiveText(cell.node)]
       )
     ),
     ...(model.trailingColumns
       ? [
           h("td", {
             colspan: model.trailingColumns,
-            "data-adapttable-part": parts.cell,
           }),
         ]
       : []),

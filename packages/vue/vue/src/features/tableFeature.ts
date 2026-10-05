@@ -23,9 +23,18 @@ import type { EffectScope, ShallowRef, VNodeChild } from "vue";
 
 import type { FeatureState } from "../featureState";
 import type { TableRowInventory } from "../hierarchy/rowInventory";
+import type { TableBodyProjection } from "../layout/modelChannels";
+import type { TableRowModel } from "../layout/tableModels";
+import type { RowSelection } from "../selection/selection";
 import type { UseDataTableResult } from "../useDataTable";
 import type { ResolvedTableOptions } from "../useDataTableShell";
 export interface FeatureMountContext<TRow = unknown> {
+  readonly bodyRows?: Readonly<ShallowRef<readonly TableRowModel<TRow>[]>>;
+  readonly selection?: Readonly<ShallowRef<RowSelection | undefined>>;
+  readonly scrollToRow?: (index: number) => void;
+  readonly scrollToColumn?: (index: number) => void;
+  readonly rowInventory?: Readonly<ShallowRef<TableRowInventory<TRow>>>;
+  readonly bodyProjection?: Readonly<ShallowRef<TableBodyProjection<TRow>>>;
   readonly runtime: TableRuntime<TRow>;
   readonly root: Readonly<ShallowRef<HTMLElement | null>>;
   readonly urlAdapter: Readonly<ShallowRef<UrlStateAdapter>>;
@@ -34,7 +43,6 @@ export interface FeatureMountContext<TRow = unknown> {
   readonly source: Readonly<ShallowRef<TableSource<TRow>>>;
   readonly density?: Readonly<ShallowRef<TableDensity>>;
   readonly table: UseDataTableResult<TRow>;
-  readonly rowInventory?: Readonly<ShallowRef<TableRowInventory<TRow>>>;
   readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
   readonly filterRuntime: Readonly<ShallowRef<FilterRuntime<TRow> | undefined>>;
   readonly options: Readonly<ShallowRef<ResolvedTableOptions<TRow>>>;

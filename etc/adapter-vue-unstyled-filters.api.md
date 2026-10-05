@@ -4,12 +4,7 @@
 
 ```ts
 
-import { AllowedComponentProps } from 'vue';
 import { ChecklistFilterProps } from '@adapttable/vue/filters';
-import { ComponentCustomProps } from 'vue';
-import { ComponentOptionsMixin } from 'vue';
-import { ComponentProvideOptions } from 'vue';
-import { CreateComponentPublicInstanceWithMixins } from 'vue';
 import { FilterDef } from '@adapttable/vue/filters';
 import { FilterFieldOptions } from '@adapttable/vue/filters';
 import { FilterOption } from '@adapttable/vue/filters';
@@ -19,7 +14,55 @@ import { filterTypes } from '@adapttable/vue/filters';
 import { FilterTypeSpec } from '@adapttable/vue/filters';
 import { PublicProps } from 'vue';
 import { TableFeature } from '@adapttable/vue/adapter';
-import { VNodeProps } from 'vue';
+import { VNode } from 'vue';
+
+// @public (undocumented)
+const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$1<FilterFieldOptions<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export$2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$2<ChecklistFilterProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal<FilterTreeBuilderProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$1<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 export { ChecklistFilterProps }
 
@@ -38,35 +81,14 @@ export { filterTypes }
 
 export { FilterTypeSpec }
 
-// @public
-export const NativeChecklistFilter: new <TRow>(props: ChecklistFilterProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<ChecklistFilterProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, ChecklistFilterProps<TRow> & {}, {}, {}, {}, {}, {}>;
+// @public (undocumented)
+export const NativeChecklistFilter: typeof __VLS_export$2;
 
-// @public
-export const NativeFilterField: new <TRow>(props: FilterFieldOptions<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<FilterFieldOptions<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, FilterFieldOptions<TRow> & {}, {}, {}, {}, {}, {}>;
+// @public (undocumented)
+export const NativeFilterField: typeof __VLS_export$1;
 
-// @public
-export const NativeFilterTree: new <TRow>(props: FilterTreeBuilderProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<FilterTreeBuilderProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, FilterTreeBuilderProps<TRow> & {}, {}, {}, {}, {}, {}>;
+// @public (undocumented)
+export const NativeFilterTree: typeof __VLS_export;
 
 // (No @packageDocumentation comment for this package)
 

@@ -59,6 +59,7 @@ export interface TreeCellModel<TRow> {
   readonly toggleAttrs?: Attrs;
 }
 export interface RowDetailModel {
+  readonly measure?: (node: Element | null) => void;
   readonly expanded: boolean;
   readonly toggleAttrs: Attrs;
   readonly render: () => VNodeChild;

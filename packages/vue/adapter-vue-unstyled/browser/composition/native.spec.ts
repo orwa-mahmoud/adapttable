@@ -5,9 +5,9 @@ for (const mode of ["popover", "drawer"] as const) {
     page,
   }) => {
     await page.goto(`/vue/unstyled/composition/?mode=${mode}&rtl`);
-    await page.locator(part("filters-trigger")).click();
+    await page.locator(part("filters-button")).click();
     const surface = page.locator(
-      part(mode === "drawer" ? "filters-drawer" : "filters-popover")
+      part(mode === "drawer" ? "filters-panel" : "filters-popover")
     );
     await expect(surface).toBeVisible();
     if (mode === "popover")
@@ -35,7 +35,7 @@ for (const mode of ["popover", "drawer"] as const) {
     await expect(page.locator("#mounts")).toHaveText("1");
     await page.keyboard.press("Escape");
     await expect(surface).toHaveCount(0);
-    await expect(page.locator(part("filters-trigger"))).toBeFocused();
+    await expect(page.locator(part("filters-button"))).toBeFocused();
   });
 }
 test("tree select-all includes the editable child and Tab reaches it", async ({
@@ -48,10 +48,10 @@ test("tree select-all includes the editable child and Tab reaches it", async ({
   const child = page.locator('[data-row-id="c"]');
   await parent.locator(part("edit-cell-activate")).focus();
   await page.keyboard.press("F2");
-  await parent.locator(part("edit-cell-input")).fill("Changed parent");
+  await parent.locator(part("edit-cell-editor")).fill("Changed parent");
   await page.keyboard.press("Tab");
-  await expect(child.locator(part("edit-cell-input"))).toBeFocused();
-  await child.locator(part("edit-cell-input")).fill("Changed child");
+  await expect(child.locator(part("edit-cell-editor"))).toBeFocused();
+  await child.locator(part("edit-cell-editor")).fill("Changed child");
   await page.keyboard.press("Enter");
   await expect(page.locator("#writes")).toHaveText("2");
 });

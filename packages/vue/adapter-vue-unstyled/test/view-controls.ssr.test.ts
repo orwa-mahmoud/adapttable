@@ -48,7 +48,7 @@ describe("native view-controls server rendering", () => {
     for (const html of [compact, comfortable]) {
       expect(html).toContain('data-adapttable-part="views-button"');
       expect(html).toContain('aria-expanded="false"');
-      expect(html).not.toContain('data-adapttable-part="fullscreen-button"');
+      expect(html).not.toContain('data-adapttable-part="fullscreen-toggle"');
       expect(html).not.toContain('data-adapttable-part="views-panel"');
       expect(html).toContain('data-adapttable-part="cards"');
       expect(html).toContain('dir="rtl"');
@@ -83,6 +83,8 @@ describe("native view-controls server rendering", () => {
     expect(html.match(/ disabled/g) ?? []).toHaveLength(5);
     expect(html).toContain('aria-pressed="true"');
     expect(html).toContain("Protected");
-    expect(html).toMatch(/<small>Footer<\/small><\/section>$/);
+    expect(html).toMatch(
+      /<span data-adapttable-part="saved-views-footer"><small>Footer<\/small><\/span><\/section>$/
+    );
   });
 });

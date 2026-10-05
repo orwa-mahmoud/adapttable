@@ -4,28 +4,32 @@
 
 ```ts
 
-import { AllowedComponentProps } from 'vue';
-import { ComponentCustomProps } from 'vue';
-import { ComponentOptionsMixin } from 'vue';
-import { ComponentProvideOptions } from 'vue';
-import { CreateComponentPublicInstanceWithMixins } from 'vue';
 import { HeaderFilterOptions } from '@adapttable/vue/header-filters';
 import { PublicProps } from 'vue';
 import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { VNodeProps } from 'vue';
+import { VNode } from 'vue';
+
+// @public (undocumented)
+const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal<HeaderFilterOptions<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 // @public
 export function headerFilters(): StaticTableFeature;
 
 // @public (undocumented)
-export const NativeHeaderFilter: new <TRow>(props: HeaderFilterOptions<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<HeaderFilterOptions<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, HeaderFilterOptions<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeHeaderFilter: typeof __VLS_export;
 
 // (No @packageDocumentation comment for this package)
 

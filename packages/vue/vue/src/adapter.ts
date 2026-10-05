@@ -1,3 +1,5 @@
+export * from "./actions/contracts";
+export { SidePanelLayoutChrome } from "./actions/sidePanelChrome";
 export type {
   AggregateOptions,
   AggregateSpec,
@@ -7,9 +9,18 @@ export * from "./attrs";
 export type { ColumnInput } from "./columnDef";
 export type { ColumnGroupToggleSlots } from "./columns/columnGroupToggle";
 export * from "./columns/columnGroupToggle";
+export {
+  COLUMN_HEADER_RENAME,
+  COLUMN_MENU,
+  type ColumnHeaderRenameSlotProps,
+  columnMenuSlotKey,
+  type ColumnMenuSlotProps,
+} from "./columns/columnMenuContracts";
 export * from "./featureLifecycle";
+export type { GroupingExtras } from "./features/grouping";
 export * from "./features/tableFeature";
 export * from "./featureState";
+export type { GroupCollapseOptions } from "./grouping/groupCollapse";
 export {
   GroupRowChrome,
   type GroupRowChromeProps,
@@ -31,11 +42,21 @@ export * from "./index";
 export * from "./layout/modelChannels";
 export * from "./layout/tableChrome";
 export * from "./layout/tableModels";
+export * from "./layout/tableSummaryChrome";
+export * from "./layout/tableSummaryModel";
+export * from "./navigation/contracts";
 export * from "./rows/rowActionControls";
 export type { RowMutationsState } from "./rows/rowMutations";
 export * from "./rows/rowMutations";
 export * from "./rows/rowPinning";
 export * from "./selection/checkboxControl";
+export {
+  bodyWindowModelKey,
+  groupingPanelControlKey,
+  groupingPanelModelKey,
+  rowReorderControlKey,
+  rowReorderModelKey,
+} from "./specialized/contracts";
 export * from "./store";
 export * from "./url/SavedViewsMenuChrome";
 export type {

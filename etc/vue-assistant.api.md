@@ -11,7 +11,9 @@ import { AgentApprovalProps } from '@adapttable/core/binding';
 import { ApprovalReviewSlots as ApprovalReviewSlots_2 } from '@adapttable/core/binding';
 import { BatchEditStoreOptions } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
+import { CellEdit } from '@adapttable/core';
 import { CellEditHandler } from '@adapttable/core';
+import { CellRange } from '@adapttable/core';
 import { CellSaveStoreOptions } from '@adapttable/core';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
@@ -223,6 +225,11 @@ export interface DesktopTableModel<TRow> {
     // (undocumented)
     readonly columnCount: number;
     // (undocumented)
+    readonly columnSpacers?: {
+        readonly start: number;
+        readonly end: number;
+    };
+    // (undocumented)
     readonly groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;
     // (undocumented)
     readonly headerCheckboxAttrs?: SelectionCheckboxAttrs;
@@ -233,7 +240,11 @@ export interface DesktopTableModel<TRow> {
     // (undocumented)
     readonly headers: readonly TableHeaderModel<TRow>[];
     // (undocumented)
+    readonly reorderLabel?: string;
+    // (undocumented)
     readonly rows: readonly TableRowModel<TRow>[];
+    // (undocumented)
+    readonly summary?: TableSummaryModel<TRow>;
 }
 
 // @public (undocumented)
@@ -243,6 +254,10 @@ export type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "co
 export interface FeatureMountContext<TRow = unknown> {
     // (undocumented)
     readonly active: Readonly<ShallowRef<boolean>>;
+    // (undocumented)
+    readonly bodyProjection?: Readonly<ShallowRef<TableBodyProjection<TRow>>>;
+    // (undocumented)
+    readonly bodyRows?: Readonly<ShallowRef<readonly TableRowModel<TRow>[]>>;
     // (undocumented)
     readonly density?: Readonly<ShallowRef<TableDensity>>;
     // (undocumented)
@@ -269,6 +284,12 @@ export interface FeatureMountContext<TRow = unknown> {
     readonly runtime: TableRuntime<TRow>;
     // (undocumented)
     readonly scope: EffectScope;
+    // (undocumented)
+    readonly scrollToColumn?: (index: number) => void;
+    // (undocumented)
+    readonly scrollToRow?: (index: number) => void;
+    // (undocumented)
+    readonly selection?: Readonly<ShallowRef<RowSelection | undefined>>;
     // (undocumented)
     readonly source: Readonly<ShallowRef<TableSource<TRow>>>;
     // (undocumented)
@@ -340,6 +361,8 @@ export interface MobileCardsModel<TRow> {
     readonly bodySlots?: readonly TableBodySlot<TRow>[];
     // (undocumented)
     readonly rows: readonly TableRowModel<TRow>[];
+    // (undocumented)
+    readonly summary?: TableSummaryModel<TRow>;
 }
 
 // @public (undocumented)
@@ -359,7 +382,11 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     // (undocumented)
     readonly bulkActions?: readonly BulkAction[];
     // (undocumented)
+    readonly columnSelectionCheckbox?: boolean;
+    // (undocumented)
     readonly editingModel?: (context: FeatureMountContext<TRow>) => void | (() => void);
+    // (undocumented)
+    readonly enableColumnMenu?: boolean;
     // (undocumented)
     readonly filterEngine?: FilterEngine;
     // (undocumented)
@@ -367,9 +394,19 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     // (undocumented)
     readonly filterTypes?: readonly FilterTypeSpec[];
     // (undocumented)
+    readonly onCellCut?: (range: CellRange) => void;
+    // (undocumented)
+    readonly onCellFill?: (edits: CellEdit<TRow>[]) => void;
+    // (undocumented)
+    readonly onCellPaste?: (edits: CellEdit<TRow>[]) => void;
+    // (undocumented)
+    readonly onCellRangeChange?: (range: CellRange | null) => void;
+    // (undocumented)
     readonly rowActionControls?: RowActionControlsProjector<TRow>;
     // (undocumented)
     readonly rowActions?: readonly RowAction<TRow>[];
+    // (undocumented)
+    readonly statusBar?: boolean;
     // (undocumented)
     readonly undoRedoButtons?: boolean;
 }
@@ -407,6 +444,8 @@ export type RowActionControlsProjector<TRow> = (input: RowActionControlsInput<TR
 export interface RowDetailModel {
     // (undocumented)
     readonly expanded: boolean;
+    // (undocumented)
+    readonly measure?: (node: Element | null) => void;
     // (undocumented)
     readonly render: () => VNodeChild;
     // (undocumented)
@@ -491,6 +530,9 @@ export interface StaticTableFeature {
 }
 
 // @public (undocumented)
+export type SummaryRowFn<TRow> = (rows: readonly TRow[]) => Record<string, VNodeChild>;
+
+// @public (undocumented)
 export type TableAssistantAvatars = TableAssistantAvatars_2<VNodeChild>;
 
 export { TableAssistantBadgeProps }
@@ -570,14 +612,18 @@ export interface TableBodyProjectionInput<TRow> {
 export type TableBodyProjector<TRow> = (input: TableBodyProjectionInput<TRow>) => TableBodyProjection<TRow>;
 
 // @public (undocumented)
-export type TableBodySlot<TRow> = Exclude<ChromeBodySlot<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>, ChromeExtraSlot<VNodeChild, CssProperties> | ChromeGroupSlot<TRow>> | (ChromeGroupSlot<TRow> & {
+export type TableBodySlot<TRow> = (Exclude<ChromeBodySlot<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>, ChromeExtraSlot<VNodeChild, CssProperties> | ChromeGroupSlot<TRow>> | (ChromeGroupSlot<TRow> & {
     readonly model?: GroupRowModel<TRow>;
 }) | (ChromeExtraSlot<VNodeChild, CssProperties> & {
     readonly coveredSlots?: ReadonlySet<number>;
-});
+})) & {
+    readonly attrs?: Attrs;
+};
 
 // @public (undocumented)
 export interface TableCellModel<TRow> {
+    // (undocumented)
+    readonly addon?: (className?: string) => VNodeChild;
     // (undocumented)
     readonly attrs: Attrs;
     // (undocumented)
@@ -693,7 +739,11 @@ export interface TableHeaderModel<TRow> {
     // (undocumented)
     readonly key: string;
     // (undocumented)
+    readonly rename?: (content: VNodeChild, classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild;
+    // (undocumented)
     readonly resizeAttrs?: Attrs;
+    // (undocumented)
+    readonly selection?: (className?: string) => VNodeChild;
     // (undocumented)
     readonly sortAttrs?: Attrs;
 }
@@ -733,9 +783,29 @@ export interface TableRowModel<TRow> {
     // (undocumented)
     readonly key: string;
     // (undocumented)
+    readonly reorder?: (mobile: boolean) => VNodeChild;
+    // (undocumented)
     readonly row: TRow;
     // (undocumented)
     readonly summary?: boolean;
+}
+
+// @public
+export interface TableSummaryCellModel<TRow> {
+    // (undocumented)
+    readonly attrs: Attrs;
+    // (undocumented)
+    readonly context: FooterContext<TRow>;
+    // (undocumented)
+    readonly key: string;
+    // (undocumented)
+    readonly label: string;
+}
+
+// @public
+export interface TableSummaryModel<TRow> {
+    // (undocumented)
+    readonly cells: readonly TableSummaryCellModel<TRow>[];
 }
 
 // @public (undocumented)
@@ -884,6 +954,13 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
     // (undocumented)
     readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
+    readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
+    // (undocumented)
+    readonly onCellCut?: (range: CellRange) => void;
+    // (undocumented)
+    readonly onCellFill?: (edits: CellEdit<TRow>[]) => void;
+    // (undocumented)
+    readonly onCellPaste?: (edits: CellEdit<TRow>[]) => void;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
     // (undocumented)
@@ -896,6 +973,7 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
     // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
+    readonly summaryRow?: SummaryRowFn<TRow>;
 }
 
 // @public

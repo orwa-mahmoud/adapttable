@@ -11,13 +11,41 @@ import {
 export default defineConfig({
   plugins: [vue()],
   resolve: {
+    dedupe: ["vue"],
     alias: [
+      {
+        find: /^@adapttable\/core$/,
+        replacement: fileURLToPath(
+          new URL("../../shared/core/src/index.ts", import.meta.url)
+        ),
+      },
+      {
+        find: /^@adapttable\/core\/(.+)$/,
+        replacement: fileURLToPath(
+          new URL("../../shared/core/src/$1.ts", import.meta.url)
+        ),
+      },
+      {
+        find: /^@adapttable\/vue$/,
+        replacement: fileURLToPath(
+          new URL("../vue/src/index.ts", import.meta.url)
+        ),
+      },
+      {
+        find: /^@adapttable\/vue\/(.+)$/,
+        replacement: fileURLToPath(
+          new URL("../vue/src/$1.ts", import.meta.url)
+        ),
+      },
       {
         find: /^@adapttable\/vue-unstyled$/,
         replacement: fileURLToPath(new URL("./src/index.ts", import.meta.url)),
       },
+      {
+        find: /^@adapttable\/vue-unstyled\/(.+)$/,
+        replacement: fileURLToPath(new URL("./src/$1.ts", import.meta.url)),
+      },
     ],
-    dedupe: ["vue"],
   },
   test: {
     environment: "jsdom",

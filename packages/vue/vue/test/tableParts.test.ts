@@ -182,7 +182,13 @@ it.each(["first", "second"])(
     await nextTick();
     part(root, "cards", "div", "kit-cards");
     part(root, "card", "article", "kit-card");
-    part(root, "card-fields", "dl", "kit-fields");
+    const fields = root.querySelectorAll("dl.kit-fields");
+    expect(fields).toHaveLength(data.length);
+    for (const field of fields)
+      expect(field.hasAttribute("data-adapttable-part")).toBe(false);
+    expect(
+      root.querySelector('[data-adapttable-part="card-fields"]')
+    ).toBeNull();
     part(root, "card-row", "div", "kit-card-row");
     part(root, "card-label", "dt", "kit-label");
     part(root, "card-value", "dd", "kit-value");

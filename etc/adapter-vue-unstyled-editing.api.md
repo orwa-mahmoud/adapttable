@@ -4,15 +4,10 @@
 
 ```ts
 
-import { AllowedComponentProps } from 'vue';
 import { BatchEditBarProps } from '@adapttable/vue/editing';
 import { BatchEditingState } from '@adapttable/vue/editing';
 import { BatchRowEdit } from '@adapttable/vue/editing';
 import { CellEditHandler } from '@adapttable/vue/editing';
-import { ComponentCustomProps } from 'vue';
-import { ComponentOptionsMixin } from 'vue';
-import { ComponentProvideOptions } from 'vue';
-import { CreateComponentPublicInstanceWithMixins } from 'vue';
 import { dirtyIndicators } from '@adapttable/vue/editing';
 import { editHistory } from '@adapttable/vue/editing';
 import { EditingLifecycleExtras } from '@adapttable/vue/editing';
@@ -23,8 +18,56 @@ import { RowEditingState } from '@adapttable/vue/editing';
 import { StaticTableFeature } from '@adapttable/vue/adapter';
 import { TableEditingOptions } from '@adapttable/vue/editing';
 import { TableFeature } from '@adapttable/vue/adapter';
-import { VNodeProps } from 'vue';
+import { VNode } from 'vue';
 import { VueEditableCellProps } from '@adapttable/vue/editing';
+
+// @public (undocumented)
+const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$1<BatchEditBarProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export$2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$2<VueEditableCellProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal<RowEditActionsProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$1<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 // @public
 export function batchEditing<TRow>(onBatchEdit: NonNullable<TableEditingOptions<TRow>["onBatchEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;
@@ -45,34 +88,13 @@ export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Editin
 export { EditingLifecycleExtras }
 
 // @public (undocumented)
-export const NativeBatchEditBar: new <TRow>(props: BatchEditBarProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<BatchEditBarProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, BatchEditBarProps<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeBatchEditBar: typeof __VLS_export$1;
 
 // @public (undocumented)
-export const NativeEditableCell: new <TRow>(props: VueEditableCellProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<VueEditableCellProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, VueEditableCellProps<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeEditableCell: typeof __VLS_export$2;
 
 // @public (undocumented)
-export const NativeRowEditActions: new <TRow>(props: RowEditActionsProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<RowEditActionsProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, RowEditActionsProps<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeRowEditActions: typeof __VLS_export;
 
 export { RowEditIcons }
 

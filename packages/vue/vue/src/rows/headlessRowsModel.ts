@@ -265,7 +265,9 @@ export function projectHeadlessRows<TRow>(
           model: {
             columns,
             labels: table.labels.value,
-            leadingColumns: desktop.headerCheckboxAttrs ? 1 : 0,
+            leadingColumns:
+              (desktop.headerCheckboxAttrs ? 1 : 0) +
+              (desktop.reorderLabel ? 1 : 0),
             trailingColumns: desktop.actionsLabel ? 1 : 0,
             selection: selection?.state.value,
             onToggle: grouping.collapsed.toggle,
@@ -283,7 +285,9 @@ export function projectHeadlessRows<TRow>(
               visualIds,
               cellsByRow: cells,
               extraRows: extras,
-              leadingCells: desktop.headerCheckboxAttrs ? 1 : 0,
+              leadingCells:
+                (desktop.headerCheckboxAttrs ? 1 : 0) +
+                (desktop.reorderLabel ? 1 : 0),
             }),
           }
         : slot;

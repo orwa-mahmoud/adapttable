@@ -18,11 +18,18 @@ import {
   type MaybeRefOrGetter,
   shallowRef,
   toValue,
+  watch,
 } from "vue";
 
-import { type MaybeRefOrGetterOptional, useExternalStore } from "../store";
+import {
+  type MaybeRefOrGetterOptional,
+  useExternalStore,
+  useScopeActivity,
+} from "../store";
 import type { SelectionCheckboxAttrs } from "./checkboxControl";
 export interface RowSelectionOptions<TRow> {
+  /** Suspend selection requests without discarding the controlled or local value. */
+  readonly enabled?: MaybeRefOrGetterOptional<boolean>;
   readonly rows: MaybeRefOrGetter<readonly TRow[]>;
   readonly rowKey: (row: TRow) => string;
   readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
@@ -51,6 +58,17 @@ export function useRowSelection<TRow>(
   input: MaybeRefOrGetter<RowSelectionOptions<TRow>>
 ): RowSelection {
   const options = computed(() => toValue(input));
+  const active = useScopeActivity();
+  const enabled = computed(() => toValue(options.value.enabled) ?? true);
+  const available = computed(() => active.value && enabled.value);
+  const lifetime = shallowRef(0);
+  watch(
+    [active, enabled],
+    ([live, allowed], [wasLive, wasAllowed]) => {
+      if ((wasLive && !live) || (wasAllowed && !allowed)) lifetime.value++;
+    },
+    { flush: "sync" }
+  );
   const own = shallowRef<ReadonlySet<string>>(
     new Set(options.value.defaultSelectedIds)
   );
@@ -58,9 +76,43 @@ export function useRowSelection<TRow>(
   const selectedIds = computed(() =>
     controlled.value === undefined ? own.value : new Set(controlled.value)
   );
-  const visibleIds = computed(() =>
-    toValue(options.value.rows).map(options.value.rowKey)
-  );
+  let previousRows:
+    | { readonly rows: readonly TRow[]; readonly ids: readonly string[] }
+    | undefined;
+  const visibleRows = computed(() => {
+    const previous = previousRows;
+    const rows = [...toValue(options.value.rows)];
+    const rowKey = options.value.rowKey;
+    const ids = rows.map((row) => rowKey(row));
+    const current =
+      previous?.rows.length === rows.length &&
+      rows.every(
+        (row, index) =>
+          Object.is(row, previous.rows[index]) &&
+          ids[index] === previous.ids[index]
+      )
+        ? previous
+        : { rows, ids };
+    previousRows = current;
+    return current;
+  });
+  const visibleIds = computed(() => visibleRows.value.ids);
+  const ownedAction = <TArgs extends unknown[]>(
+    action: (...args: TArgs) => void
+  ) => {
+    const owner = visibleRows.value;
+    const version = lifetime.value;
+    const admitted = enabled.value;
+    return (...args: TArgs): void => {
+      if (
+        admitted &&
+        available.value &&
+        version === lifetime.value &&
+        owner === visibleRows.value
+      )
+        action(...args);
+    };
+  };
   const headerState = computed(() =>
     headerSelectionOf(visibleIds.value, selectedIds.value)
   );
@@ -72,7 +124,15 @@ export function useRowSelection<TRow>(
   const acrossPages = computed(
     () => toValue(options.value.acrossPages) ?? false
   );
+  watch(
+    acrossPages,
+    (enabled) => {
+      if (!enabled) scope.narrow();
+    },
+    { immediate: true, flush: "sync" }
+  );
   const commit = (next: ReadonlySet<string>): void => {
+    if (!available.value) return;
     scope.narrow();
     if (controlled.value === undefined) own.value = next;
     options.value.onSelectionChange?.([...next]);
@@ -87,7 +147,7 @@ export function useRowSelection<TRow>(
   const toggleGroupLeaves = (ids: readonly string[]): void =>
     commit(applyGroupLeafSelection(ids, selectedIds.value));
   const selectAllMatching = (): void => {
-    scope.select(acrossPages.value);
+    if (available.value) scope.select(acrossPages.value);
   };
   return {
     selectedIds,
@@ -105,29 +165,31 @@ export function useRowSelection<TRow>(
       selectedIds: selectedIds.value,
       selectedCount: selectedIds.value.size,
       headerState: headerState.value,
-      visibleIds: visibleIds.value,
+      visibleIds: [...visibleIds.value],
       allMatching: allMatching.value,
       acrossPages: acrossPages.value,
       isSelected,
-      toggle,
-      toggleAll,
-      clear,
-      replace,
-      toggleGroupLeaves,
-      selectAllMatching,
+      toggle: ownedAction(toggle),
+      toggleAll: ownedAction(toggleAll),
+      clear: ownedAction(clear),
+      replace: ownedAction(replace),
+      toggleGroupLeaves: ownedAction(toggleGroupLeaves),
+      selectAllMatching: ownedAction(selectAllMatching),
     })),
     rowCheckboxAttrs: (id) => ({
       type: "checkbox",
       "aria-label": labels.value.selectRow,
       checked: isSelected(id),
-      onChange: () => toggle(id),
+      ...(!enabled.value ? { disabled: true } : {}),
+      onChange: ownedAction(() => toggle(id)),
     }),
     headerCheckboxAttrs: () => ({
       type: "checkbox",
       "aria-label": labels.value.selectAll,
       checked: headerState.value === "all",
       indeterminate: headerState.value === "some",
-      onChange: toggleAll,
+      ...(!enabled.value ? { disabled: true } : {}),
+      onChange: ownedAction(toggleAll),
     }),
   };
 }

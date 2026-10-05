@@ -16,11 +16,13 @@ export interface FilterTriggerProps {
   readonly onClick: () => void;
 }
 export interface FilterPanelButtonProps {
+  readonly disabled?: boolean;
   readonly label: string;
   readonly part: string;
   readonly onClick: () => void;
 }
 export interface FilterPanelSurfaceProps {
+  readonly className?: string;
   readonly open: boolean;
   readonly label: string;
   readonly dir: Direction;
@@ -30,6 +32,7 @@ export interface FilterPanelSurfaceProps {
   readonly onClose: (reason?: "escape" | "outside" | "done") => void;
 }
 export interface FilterPanelModel<TRow> {
+  readonly openPanel?: () => void;
   readonly open: boolean;
   readonly mode: "popover" | "drawer";
   readonly dir: Direction;
@@ -62,8 +65,14 @@ export interface FilterPanelSlots<TRow> {
 export interface FilterPanelClassNames {
   readonly filtersForm?: string;
   readonly filtersPanel?: string;
+  readonly filtersPopover?: string;
   readonly filtersActions?: string;
   readonly filtersToolbar?: string;
+  readonly filtersAnchor?: string;
+  readonly filtersHeader?: string;
+  readonly filtersTitle?: string;
+  readonly filtersBody?: string;
+  readonly filtersFooter?: string;
 }
 export function FilterPanelChrome<TRow>(props: {
   readonly classNames?: FilterPanelClassNames;
@@ -104,46 +113,80 @@ export function FilterPanelChrome<TRow>(props: {
       ])
     )
   );
-  const children = h(
-    "div",
-    {
-      "data-adapttable-part": "filters-panel",
-      class: props.classNames?.filtersPanel,
-    },
-    [
-      fields,
-      model.tree ? controls.Tree?.(model.tree) : null,
-      h(
-        "div",
-        {
-          "data-adapttable-part": "filters-actions",
-          class: props.classNames?.filtersActions,
-        },
-        [
-          controls.Button({
-            label: model.labels.clearAll,
-            part: "filters-clear",
-            onClick: model.clear,
-          }),
-          controls.Button({
-            label: model.labels.filtersDone,
-            part: "filters-done",
-            onClick: () => model.close("done"),
-          }),
-        ]
-      ),
-    ]
-  );
+  const children = h("div", null, [
+    h(
+      "header",
+      {
+        "data-adapttable-part": "filters-header",
+        class: props.classNames?.filtersHeader,
+      },
+      [
+        h(
+          "h3",
+          {
+            "data-adapttable-part": "filters-title",
+            class: props.classNames?.filtersTitle,
+          },
+          model.labels.filters
+        ),
+        model.mode === "drawer"
+          ? controls.Button({
+              label: model.labels.cancel,
+              part: "filters-close",
+              onClick: () => model.close("done"),
+            })
+          : null,
+      ]
+    ),
+    h(
+      "div",
+      {
+        "data-adapttable-part": "filters-body",
+        class: props.classNames?.filtersBody,
+      },
+      [fields, model.tree ? controls.Tree?.(model.tree) : null]
+    ),
+    h(
+      "footer",
+      {
+        "data-adapttable-part": "filters-footer",
+        class: [
+          props.classNames?.filtersActions,
+          props.classNames?.filtersFooter,
+        ],
+      },
+      [
+        controls.Button({
+          label: model.labels.clearAll,
+          part: "filters-clear",
+          disabled: model.count === 0,
+          onClick: model.clear,
+        }),
+        controls.Button({
+          label: model.labels.filtersDone,
+          part: "filters-done",
+          onClick: () => model.close("done"),
+        }),
+      ]
+    ),
+  ]);
   const surface = model.mode === "drawer" ? controls.Drawer : controls.Popover;
   return h(
     "div",
     {
-      "data-adapttable-part": "filter-toolbar",
-      class: props.classNames?.filtersToolbar,
+      "data-adapttable-part": "filters-anchor",
+      class: [
+        props.classNames?.filtersToolbar,
+        props.classNames?.filtersAnchor,
+      ],
     },
     [
       controls.Trigger(model.trigger),
       surface({
+        className:
+          model.mode === "drawer"
+            ? props.classNames?.filtersPanel
+            : props.classNames?.filtersPopover,
         open: model.open,
         label: model.labels.filters,
         dir: model.dir,

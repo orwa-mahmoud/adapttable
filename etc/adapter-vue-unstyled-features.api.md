@@ -5,28 +5,31 @@
 ```ts
 
 import { AgentApprovalProps } from '@adapttable/vue/assistant';
-import { AllowedComponentProps } from 'vue';
 import { BatchEditBarProps } from '@adapttable/vue/editing';
 import { BatchEditingState } from '@adapttable/vue/editing';
 import { BatchRowEdit } from '@adapttable/vue/editing';
+import { bulkActions as bulkActions_2 } from '@adapttable/vue/bulk-actions';
+import { CellEdit } from '@adapttable/vue/cell-navigation';
 import { CellEditHandler } from '@adapttable/vue/editing';
+import { CellNavigationOptions } from '@adapttable/vue/cell-navigation';
+import { CellRange } from '@adapttable/vue/cell-navigation';
 import { cellSpan } from '@adapttable/vue/features';
 import { CellSpanAppearance } from '@adapttable/vue/features';
 import { CellSpanRequest } from '@adapttable/vue/features';
 import { ChecklistFilterProps } from '@adapttable/vue/filters';
 import { collapsibleColumnGroups } from '@adapttable/vue/features';
+import { ColumnMenuSlotProps } from '@adapttable/vue/column-menu';
 import { ColumnResizeHandleOptions } from '@adapttable/vue/features';
 import { ColumnResizeHandleProps } from '@adapttable/vue/features';
-import { ComponentCustomProps } from 'vue';
-import { ComponentOptionsMixin } from 'vue';
-import { ComponentProvideOptions } from 'vue';
+import { commandPalette as commandPalette_2 } from '@adapttable/vue/command-palette';
 import { ConfirmHandler } from '@adapttable/vue/features';
 import { ConfirmRequest } from '@adapttable/vue/features';
-import { CreateComponentPublicInstanceWithMixins } from 'vue';
+import { ContextMenuOptions } from '@adapttable/vue/context-menu';
 import { DefineSetupFnComponent } from 'vue';
 import { dirtyIndicators } from '@adapttable/vue/editing';
 import { editHistory } from '@adapttable/vue/editing';
 import { EditingLifecycleExtras } from '@adapttable/vue/editing';
+import { ExportCsvOptions } from '@adapttable/vue/export-csv';
 import { ExtraEntry } from '@adapttable/vue/features';
 import { ExtraRow } from '@adapttable/vue/features';
 import { ExtraRowKind } from '@adapttable/vue/features';
@@ -41,8 +44,10 @@ import { FilterTypeSpec } from '@adapttable/vue/filters';
 import { fitColumns } from '@adapttable/vue/features';
 import { GetCellSpan } from '@adapttable/vue/features';
 import { GetCellSpanArgs } from '@adapttable/vue/features';
+import { GridCell } from '@adapttable/vue/cell-navigation';
 import { GroupCollapseOptions } from '@adapttable/vue/features';
 import { GroupingExtras } from '@adapttable/vue/features';
+import { GroupingPanelProps } from '@adapttable/vue/features';
 import { GroupNode } from '@adapttable/vue/features';
 import { GroupSort } from '@adapttable/vue/features';
 import { HeaderFilterOptions } from '@adapttable/vue/header-filters';
@@ -72,10 +77,13 @@ import { rowPinning } from '@adapttable/vue/features';
 import { RowPinningFeatureOptions } from '@adapttable/vue/features';
 import { RowPinSide } from '@adapttable/vue/features';
 import { RowPinState } from '@adapttable/vue/features';
+import { RowReorderHandler } from '@adapttable/vue/features';
+import { RowReorderOptions } from '@adapttable/vue/features';
 import { RowStyle } from '@adapttable/vue/features';
 import { SavedView } from '@adapttable/vue/saved-views';
 import { SavedViewsPanelChromeProps } from '@adapttable/vue/saved-views';
 import { SavedViewsStore } from '@adapttable/vue/saved-views';
+import { sidePanel as sidePanel_2 } from '@adapttable/vue/side-panel';
 import { StaticGroupingExtras } from '@adapttable/vue/features';
 import { StaticTableFeature } from '@adapttable/vue/assistant';
 import { StaticTableFeature as StaticTableFeature_2 } from '@adapttable/vue/adapter';
@@ -92,10 +100,125 @@ import { useGroupCollapseUrlState } from '@adapttable/vue/features';
 import { useGroupPaging } from '@adapttable/vue/features';
 import { useLazyChildren } from '@adapttable/vue/features';
 import { useRowExpansion } from '@adapttable/vue/features';
+import { useRowReorder } from '@adapttable/vue/features';
 import { UseSavedViewsOptions } from '@adapttable/vue/saved-views';
 import { useTreeExpansion } from '@adapttable/vue/features';
-import { VNodeProps } from 'vue';
+import { virtualize } from '@adapttable/vue/features';
+import { VirtualizeOptions } from '@adapttable/vue/features';
+import { VNode } from 'vue';
 import { VueEditableCellProps } from '@adapttable/vue/editing';
+
+// @public (undocumented)
+const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$1<BatchEditBarProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export$1_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1_2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$1_2<FilterFieldOptions<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export$2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$2<ChecklistFilterProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export$2_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$2_2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$2_2<VueEditableCellProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal<FilterTreeBuilderProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal_2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal_2<HeaderFilterOptions<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export_3: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal_3<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal_3<RowEditActionsProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$1<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$1_2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$2_2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal_2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal_3<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 // @public (undocumented)
 export const AgentApproval: DefineSetupFnComponent<AgentApprovalProps, {}, {}, AgentApprovalProps & {}, PublicProps>;
@@ -112,7 +235,19 @@ export { BatchEditingState }
 
 export { BatchRowEdit }
 
+// @public (undocumented)
+export function bulkActions(actions: Parameters<typeof bulkActions_2>[0]): StaticTableFeature_2;
+
+export { CellEdit }
+
 export { CellEditHandler }
+
+// @public (undocumented)
+export function cellNavigation(options?: CellNavigationOptions): StaticTableFeature_2;
+
+export { CellNavigationOptions }
+
+export { CellRange }
 
 export { cellSpan }
 
@@ -124,13 +259,509 @@ export { ChecklistFilterProps }
 
 export { collapsibleColumnGroups }
 
+// @public
+export function columnMenu(): StaticTableFeature_2;
+
+export { ColumnMenuSlotProps }
+
 export { ColumnResizeHandleOptions }
 
 export { ColumnResizeHandleProps }
 
+// @public (undocumented)
+export function columnSelectionCheckbox(): StaticTableFeature_2;
+
+// @public (undocumented)
+export function commandPalette(options?: Parameters<typeof commandPalette_2>[0]): StaticTableFeature_2;
+
 export { ConfirmHandler }
 
 export { ConfirmRequest }
+
+// @public (undocumented)
+export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
+
+// @public
+export interface DataTableClassNames {
+    // (undocumented)
+    readonly actionsCell?: string;
+    // (undocumented)
+    readonly actionsHeader?: string;
+    // (undocumented)
+    readonly addRow?: string;
+    // (undocumented)
+    readonly agentApproval?: string;
+    // (undocumented)
+    readonly agentApprovalButton?: string;
+    // (undocumented)
+    readonly batchEditBar?: string;
+    // (undocumented)
+    readonly batchEditButton?: string;
+    // (undocumented)
+    readonly bulkBar?: string;
+    // (undocumented)
+    readonly bulkButton?: string;
+    // (undocumented)
+    readonly bulkClear?: string;
+    // (undocumented)
+    readonly bulkCount?: string;
+    // (undocumented)
+    readonly bulkError?: string;
+    // (undocumented)
+    readonly card?: string;
+    // (undocumented)
+    readonly cardActions?: string;
+    // (undocumented)
+    readonly cardDetail?: string;
+    // (undocumented)
+    readonly cardFields?: string;
+    // (undocumented)
+    readonly cardLabel?: string;
+    // (undocumented)
+    readonly cardRow?: string;
+    // (undocumented)
+    readonly cards?: string;
+    // (undocumented)
+    readonly cardValue?: string;
+    // (undocumented)
+    readonly columnGroup?: string;
+    // (undocumented)
+    readonly columnGroupToggle?: string;
+    // (undocumented)
+    readonly columnMenu?: string;
+    // (undocumented)
+    readonly columnMenuAction?: string;
+    // (undocumented)
+    readonly columnMenuAutoSize?: string;
+    // (undocumented)
+    readonly columnMenuBulk?: string;
+    // (undocumented)
+    readonly columnMenuBulkButton?: string;
+    // (undocumented)
+    readonly columnMenuButton?: string;
+    // (undocumented)
+    readonly columnMenuChoice?: string;
+    // (undocumented)
+    readonly columnMenuChoiceLabel?: string;
+    // (undocumented)
+    readonly columnMenuChoiceSelect?: string;
+    // (undocumented)
+    readonly columnMenuGrip?: string;
+    // (undocumented)
+    readonly columnMenuHeader?: string;
+    // (undocumented)
+    readonly columnMenuItem?: string;
+    // (undocumented)
+    readonly columnMenuLabel?: string;
+    // (undocumented)
+    readonly columnMenuMore?: string;
+    // (undocumented)
+    readonly columnMenuPanel?: string;
+    // (undocumented)
+    readonly columnMenuPin?: string;
+    // (undocumented)
+    readonly columnMenuReset?: string;
+    // (undocumented)
+    readonly columnMenuSearch?: string;
+    // (undocumented)
+    readonly columnMenuSeparator?: string;
+    // (undocumented)
+    readonly columnMenuSubmenu?: string;
+    // (undocumented)
+    readonly columnMenuTitle?: string;
+    // (undocumented)
+    readonly columnMenuVisibility?: string;
+    // (undocumented)
+    readonly columnRenameAnnouncer?: string;
+    // (undocumented)
+    readonly columnRenameCancel?: string;
+    // (undocumented)
+    readonly columnRenameError?: string;
+    // (undocumented)
+    readonly columnRenameForm?: string;
+    // (undocumented)
+    readonly columnRenameInput?: string;
+    // (undocumented)
+    readonly columnRenameLabel?: string;
+    // (undocumented)
+    readonly columnRenameSave?: string;
+    // (undocumented)
+    readonly columnSelect?: string;
+    // (undocumented)
+    readonly commandEmpty?: string;
+    // (undocumented)
+    readonly commandInput?: string;
+    // (undocumented)
+    readonly commandItem?: string;
+    // (undocumented)
+    readonly commandPalette?: string;
+    // (undocumented)
+    readonly commandPaletteButton?: string;
+    // (undocumented)
+    readonly contextMenu?: string;
+    // (undocumented)
+    readonly contextMenuItem?: string;
+    // (undocumented)
+    readonly contextMenuSeparator?: string;
+    // (undocumented)
+    readonly densitySelect?: string;
+    // (undocumented)
+    readonly densityToggle?: string;
+    // (undocumented)
+    readonly detailCell?: string;
+    // (undocumented)
+    readonly detailRow?: string;
+    // (undocumented)
+    readonly editableCell?: string;
+    // (undocumented)
+    readonly editCellActivate?: string;
+    // (undocumented)
+    readonly editCellConflictButton?: string;
+    // (undocumented)
+    readonly editCellEditor?: string;
+    // (undocumented)
+    readonly editCellError?: string;
+    // (undocumented)
+    readonly editCellRollback?: string;
+    // (undocumented)
+    readonly editCellSaveError?: string;
+    // (undocumented)
+    readonly editHistory?: string;
+    // (undocumented)
+    readonly empty?: string;
+    // (undocumented)
+    readonly emptyClear?: string;
+    // (undocumented)
+    readonly error?: string;
+    // (undocumented)
+    readonly expandButton?: string;
+    // (undocumented)
+    readonly expandToggle?: string;
+    // (undocumented)
+    readonly exportCsvButton?: string;
+    // (undocumented)
+    readonly exportProgress?: string;
+    // (undocumented)
+    readonly exportProgressBar?: string;
+    // (undocumented)
+    readonly exportProgressButton?: string;
+    // (undocumented)
+    readonly exportProgressDownload?: string;
+    // (undocumented)
+    readonly exportProgressMessage?: string;
+    // (undocumented)
+    readonly fillHandle?: string;
+    // (undocumented)
+    readonly filterCheckbox?: string;
+    // (undocumented)
+    readonly filterCheckboxGroup?: string;
+    // (undocumented)
+    readonly filterChecklist?: string;
+    // (undocumented)
+    readonly filterChecklistActions?: string;
+    // (undocumented)
+    readonly filterChecklistCount?: string;
+    // (undocumented)
+    readonly filterChecklistList?: string;
+    // (undocumented)
+    readonly filterChecklistSearch?: string;
+    // (undocumented)
+    readonly filterControl?: string;
+    // (undocumented)
+    readonly filterField?: string;
+    // (undocumented)
+    readonly filterHeaderButton?: string;
+    // (undocumented)
+    readonly filterHeaderInput?: string;
+    // (undocumented)
+    readonly filterHeaderTrigger?: string;
+    // (undocumented)
+    readonly filterInput?: string;
+    // (undocumented)
+    readonly filterLabel?: string;
+    // (undocumented)
+    readonly filterOperator?: string;
+    // (undocumented)
+    readonly filterOptionsLoading?: string;
+    // (undocumented)
+    readonly filtersActions?: string;
+    // (undocumented)
+    readonly filtersAnchor?: string;
+    // (undocumented)
+    readonly filtersBody?: string;
+    // (undocumented)
+    readonly filtersButton?: string;
+    // (undocumented)
+    readonly filtersClear?: string;
+    // (undocumented)
+    readonly filtersClose?: string;
+    // (undocumented)
+    readonly filtersCount?: string;
+    // (undocumented)
+    readonly filtersDone?: string;
+    // (undocumented)
+    readonly filtersDrawer?: string;
+    // (undocumented)
+    readonly filterSelect?: string;
+    // (undocumented)
+    readonly filtersFooter?: string;
+    // (undocumented)
+    readonly filtersForm?: string;
+    // (undocumented)
+    readonly filtersHeader?: string;
+    // (undocumented)
+    readonly filtersIcon?: string;
+    // (undocumented)
+    readonly filtersPanel?: string;
+    // (undocumented)
+    readonly filtersPopover?: string;
+    // (undocumented)
+    readonly filtersTitle?: string;
+    // (undocumented)
+    readonly filtersToolbar?: string;
+    // (undocumented)
+    readonly filterTree?: string;
+    // (undocumented)
+    readonly filterTreeActions?: string;
+    // (undocumented)
+    readonly filterTreeCondition?: string;
+    // (undocumented)
+    readonly filterTreeGroup?: string;
+    // (undocumented)
+    readonly filterTreeRemove?: string;
+    // (undocumented)
+    readonly filterTreeSummary?: string;
+    // (undocumented)
+    readonly findBar?: string;
+    // (undocumented)
+    readonly findButton?: string;
+    // (undocumented)
+    readonly findInput?: string;
+    // (undocumented)
+    readonly footer?: string;
+    // (undocumented)
+    readonly fullscreenButton?: string;
+    // (undocumented)
+    readonly fullscreenToggle?: string;
+    // (undocumented)
+    readonly groupAggregate?: string;
+    // (undocumented)
+    readonly groupCard?: string;
+    // (undocumented)
+    readonly groupCell?: string;
+    // (undocumented)
+    readonly groupCheckbox?: string;
+    // (undocumented)
+    readonly groupCount?: string;
+    // (undocumented)
+    readonly groupFooterCell?: string;
+    // (undocumented)
+    readonly groupFooterRow?: string;
+    // (undocumented)
+    readonly groupingAdd?: string;
+    // (undocumented)
+    readonly groupingAggregationAdd?: string;
+    // (undocumented)
+    readonly groupingAggregationItem?: string;
+    // (undocumented)
+    readonly groupingAggregationOperation?: string;
+    // (undocumented)
+    readonly groupingAggregationRemove?: string;
+    // (undocumented)
+    readonly groupingAggregations?: string;
+    // (undocumented)
+    readonly groupingAggregationsRestore?: string;
+    // (undocumented)
+    readonly groupingChip?: string;
+    // (undocumented)
+    readonly groupingChipHandle?: string;
+    // (undocumented)
+    readonly groupingChipRemove?: string;
+    // (undocumented)
+    readonly groupingDropZone?: string;
+    // (undocumented)
+    readonly groupingItem?: string;
+    // (undocumented)
+    readonly groupingPanel?: string;
+    // (undocumented)
+    readonly groupingRemoveZone?: string;
+    // (undocumented)
+    readonly groupLabel?: string;
+    // (undocumented)
+    readonly groupMore?: string;
+    // (undocumented)
+    readonly groupMoreCell?: string;
+    // (undocumented)
+    readonly groupMoreRow?: string;
+    // (undocumented)
+    readonly groupRow?: string;
+    // (undocumented)
+    readonly groupSelect?: string;
+    // (undocumented)
+    readonly groupToggle?: string;
+    // (undocumented)
+    readonly headerRenameAnnouncer?: string;
+    // (undocumented)
+    readonly headerRenameButton?: string;
+    // (undocumented)
+    readonly headerRenameCancel?: string;
+    // (undocumented)
+    readonly headerRenameError?: string;
+    // (undocumented)
+    readonly headerRenameForm?: string;
+    // (undocumented)
+    readonly headerRenameInput?: string;
+    // (undocumented)
+    readonly headerRenameLabel?: string;
+    // (undocumented)
+    readonly headerRenameSave?: string;
+    // (undocumented)
+    readonly loading?: string;
+    // (undocumented)
+    readonly loadMore?: string;
+    // (undocumented)
+    readonly loadMoreButton?: string;
+    // (undocumented)
+    readonly pageEllipsis?: string;
+    // (undocumented)
+    readonly pageNext?: string;
+    // (undocumented)
+    readonly pageNumber?: string;
+    // (undocumented)
+    readonly pagePrev?: string;
+    // (undocumented)
+    readonly pager?: string;
+    // (undocumented)
+    readonly printButton?: string;
+    // (undocumented)
+    readonly redoButton?: string;
+    // (undocumented)
+    readonly refreshing?: string;
+    // (undocumented)
+    readonly reorderCell?: string;
+    // (undocumented)
+    readonly reorderHeader?: string;
+    // (undocumented)
+    readonly resizeHandle?: string;
+    // (undocumented)
+    readonly retry?: string;
+    // (undocumented)
+    readonly root?: string;
+    // (undocumented)
+    readonly rowAction?: string;
+    // (undocumented)
+    readonly rowEditActions?: string;
+    // (undocumented)
+    readonly rowEditButton?: string;
+    // (undocumented)
+    readonly rowReorderButtons?: string;
+    // (undocumented)
+    readonly rowReorderDown?: string;
+    // (undocumented)
+    readonly rowReorderHandle?: string;
+    // (undocumented)
+    readonly rowReorderUp?: string;
+    // (undocumented)
+    readonly rowsPerPage?: string;
+    // (undocumented)
+    readonly scroll?: string;
+    // (undocumented)
+    readonly searchInput?: string;
+    // (undocumented)
+    readonly searchWrapper?: string;
+    // (undocumented)
+    readonly selectAllBanner?: string;
+    // (undocumented)
+    readonly selectAllButton?: string;
+    // (undocumented)
+    readonly selectAllText?: string;
+    // (undocumented)
+    readonly selectionCell?: string;
+    // (undocumented)
+    readonly selectionCheckbox?: string;
+    // (undocumented)
+    readonly selectionHeader?: string;
+    // (undocumented)
+    readonly selectionStats?: string;
+    // (undocumented)
+    readonly sidePanel?: string;
+    // (undocumented)
+    readonly sidePanelBody?: string;
+    // (undocumented)
+    readonly sidePanelClose?: string;
+    // (undocumented)
+    readonly sidePanelHeader?: string;
+    // (undocumented)
+    readonly sidePanelTab?: string;
+    // (undocumented)
+    readonly sidePanelTabs?: string;
+    // (undocumented)
+    readonly sortButton?: string;
+    // (undocumented)
+    readonly sortDirectionButton?: string;
+    // (undocumented)
+    readonly sortSelect?: string;
+    // (undocumented)
+    readonly status?: string;
+    // (undocumented)
+    readonly statusBar?: string;
+    // (undocumented)
+    readonly statusItem?: string;
+    // (undocumented)
+    readonly summary?: string;
+    // (undocumented)
+    readonly summaryCard?: string;
+    // (undocumented)
+    readonly summaryCell?: string;
+    // (undocumented)
+    readonly summaryRow?: string;
+    // (undocumented)
+    readonly table?: string;
+    // (undocumented)
+    readonly tableFooter?: string;
+    // (undocumented)
+    readonly tbody?: string;
+    // (undocumented)
+    readonly td?: string;
+    // (undocumented)
+    readonly th?: string;
+    // (undocumented)
+    readonly thead?: string;
+    // (undocumented)
+    readonly toolbar?: string;
+    // (undocumented)
+    readonly tr?: string;
+    // (undocumented)
+    readonly treeCell?: string;
+    // (undocumented)
+    readonly treeSpacer?: string;
+    // (undocumented)
+    readonly treeToggle?: string;
+    // (undocumented)
+    readonly undoButton?: string;
+    // (undocumented)
+    readonly viewsButton?: string;
+    // (undocumented)
+    readonly viewsDelete?: string;
+    // (undocumented)
+    readonly viewsDivider?: string;
+    // (undocumented)
+    readonly viewsInput?: string;
+    // (undocumented)
+    readonly viewsItem?: string;
+    // (undocumented)
+    readonly viewsMenu?: string;
+    // (undocumented)
+    readonly viewsPanel?: string;
+    // (undocumented)
+    readonly viewsRow?: string;
+    // (undocumented)
+    readonly viewsSave?: string;
+    // (undocumented)
+    readonly viewsSaveRow?: string;
+    // (undocumented)
+    readonly virtualSpacer?: string;
+}
 
 // @public
 export function densityChooser(): StaticTableFeature_2;
@@ -143,6 +774,9 @@ export { editHistory }
 export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;
 
 export { EditingLifecycleExtras }
+
+// @public (undocumented)
+export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;
 
 export { ExtraEntry }
 
@@ -167,6 +801,11 @@ export { filterTypes }
 
 export { FilterTypeSpec }
 
+// @public (undocumented)
+export function findInTable(options?: {
+    readonly button?: boolean;
+}): StaticTableFeature_2;
+
 export { fitColumns }
 
 // @public
@@ -175,6 +814,8 @@ export function fullscreen(): StaticTableFeature_2;
 export { GetCellSpan }
 
 export { GetCellSpanArgs }
+
+export { GridCell }
 
 export { GroupCollapseOptions }
 
@@ -186,6 +827,14 @@ export function grouping<TRow>(groupBy: MaybeRefOrGetter<string | readonly strin
 
 export { GroupingExtras }
 
+// @public (undocumented)
+export function groupingPanel(initialGroupBy?: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature_2;
+
+// @public (undocumented)
+export function groupingPanel<TRow>(initialGroupBy?: string | readonly string[], extras?: GroupingExtras<TRow>): TableFeature<TRow>;
+
+export { GroupingPanelProps }
+
 export { GroupNode }
 
 export { GroupSort }
@@ -196,74 +845,25 @@ export function headerFilters(): StaticTableFeature_2;
 export { multiSort }
 
 // @public (undocumented)
-export const NativeBatchEditBar: new <TRow>(props: BatchEditBarProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<BatchEditBarProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, BatchEditBarProps<TRow> & {}, {}, {}, {}, {}, {}>;
-
-// @public
-export const NativeChecklistFilter: new <TRow>(props: ChecklistFilterProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<ChecklistFilterProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, ChecklistFilterProps<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeBatchEditBar: typeof __VLS_export$1;
 
 // @public (undocumented)
-export const NativeEditableCell: new <TRow>(props: VueEditableCellProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<VueEditableCellProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, VueEditableCellProps<TRow> & {}, {}, {}, {}, {}, {}>;
-
-// @public
-export const NativeFilterField: new <TRow>(props: FilterFieldOptions<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<FilterFieldOptions<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, FilterFieldOptions<TRow> & {}, {}, {}, {}, {}, {}>;
-
-// @public
-export const NativeFilterTree: new <TRow>(props: FilterTreeBuilderProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<FilterTreeBuilderProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, FilterTreeBuilderProps<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeChecklistFilter: typeof __VLS_export$2;
 
 // @public (undocumented)
-export const NativeHeaderFilter: new <TRow>(props: HeaderFilterOptions<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<HeaderFilterOptions<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, HeaderFilterOptions<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeEditableCell: typeof __VLS_export$2_2;
 
 // @public (undocumented)
-export const NativeRowEditActions: new <TRow>(props: RowEditActionsProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<RowEditActionsProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, RowEditActionsProps<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeFilterField: typeof __VLS_export$1_2;
+
+// @public (undocumented)
+export const NativeFilterTree: typeof __VLS_export;
+
+// @public (undocumented)
+export const NativeHeaderFilter: typeof __VLS_export_2;
+
+// @public (undocumented)
+export const NativeRowEditActions: typeof __VLS_export_3;
 
 export { NestedTable }
 
@@ -278,6 +878,10 @@ export { PinnedRows }
 export { PinnedSummaryEntry }
 
 export { pinnedSummaryRows }
+
+// @public (undocumented)
+function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature_2;
+export { print_2 as print }
 
 export { resizableColumns }
 
@@ -312,6 +916,13 @@ export { RowPinSide }
 
 export { RowPinState }
 
+// @public (undocumented)
+export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): TableFeature<TRow>;
+
+export { RowReorderHandler }
+
+export { RowReorderOptions }
+
 export { RowStyle }
 
 export { SavedView }
@@ -323,11 +934,23 @@ export function savedViews(options: MaybeRefOrGetter<UseSavedViewsOptions>): Sta
 export const SavedViewsPanel: DefineSetupFnComponent<SavedViewsPanelProps, {}, {}, SavedViewsPanelProps & {}, PublicProps>;
 
 // @public (undocumented)
-export type SavedViewsPanelProps = Omit<SavedViewsPanelChromeProps, "slots">;
+export interface SavedViewsPanelProps extends Omit<SavedViewsPanelChromeProps, "slots"> {
+    // (undocumented)
+    readonly classNames?: DataTableClassNames;
+}
 
 export { SavedViewsStore }
 
+// @public (undocumented)
+export function selectionStats(): StaticTableFeature_2;
+
+// @public (undocumented)
+export function sidePanel(options: Parameters<typeof sidePanel_2>[0]): StaticTableFeature_2;
+
 export { StaticGroupingExtras }
+
+// @public (undocumented)
+export function statusBar(): StaticTableFeature_2;
 
 // @public (undocumented)
 export const TableAssistant: DefineSetupFnComponent<TableAssistantProps, {}, {}, TableAssistantProps & {}, PublicProps>;
@@ -362,9 +985,15 @@ export { useLazyChildren }
 
 export { useRowExpansion }
 
+export { useRowReorder }
+
 export { UseSavedViewsOptions }
 
 export { useTreeExpansion }
+
+export { virtualize }
+
+export { VirtualizeOptions }
 
 // (No @packageDocumentation comment for this package)
 

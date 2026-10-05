@@ -13,6 +13,7 @@ import {
 } from "@adapttable/core/binding";
 import { computed, watch } from "vue";
 
+import { UNDO_REDO_CONTROL } from "./actions/contracts";
 import {
   type TableEditingOptions,
   useTableEditing,
@@ -154,7 +155,7 @@ export function batchEditing<TRow>(
   };
 }
 export function undoRedoButtons(): StaticTableFeature {
-  return coreUndoRedoButtons();
+  return { ...coreUndoRedoButtons(), requiredSlots: [UNDO_REDO_CONTROL] };
 }
 export function dirtyIndicators(): StaticTableFeature {
   return coreDirtyIndicators();
@@ -216,4 +217,7 @@ export { formatMultiDraft, readMultiDraft } from "@adapttable/core";
 export type { RowEditIcons } from "@adapttable/core/binding";
 
 /** Public feature signatures share the binding's nameable member types. */
+export { UNDO_REDO_CONTROL } from "./actions/contracts";
+export type { HistoryButtonsChromeProps } from "./actions/simpleChrome";
+export { HistoryButtonsChrome } from "./actions/simpleChrome";
 export type * from "./index";

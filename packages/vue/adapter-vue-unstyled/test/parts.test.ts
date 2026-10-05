@@ -181,7 +181,9 @@ describe("native canonical semantic parts", () => {
     const card = part(view.root, "card", "ARTICLE", "card-class");
     expect(card.getAttribute("role")).toBe("listitem");
     part(card, "checkbox", "INPUT", "checkbox-class");
-    const fields = part(card, "card-fields", "DL", "fields-class");
+    const fields = card.querySelector<HTMLDListElement>("dl.fields-class")!;
+    expect(fields).not.toBeNull();
+    expect(fields.hasAttribute("data-adapttable-part")).toBe(false);
     const row = part(fields, "card-row", "DIV", "card-row-class");
     expect(row.children).toHaveLength(2);
     part(row, "card-label", "DT", "label-class");

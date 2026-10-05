@@ -53,7 +53,7 @@ test("Vue semantic mixed header and disabled controls", async ({ page }) => {
   await page.goto(route);
   const header = page.locator('[data-selection-table="model"] thead input');
   await expect(header).toBeChecked({ indeterminate: true });
-  await expect(header).toHaveAccessibleName("Select all");
+  await expect(header).toHaveAccessibleName("Select all rows");
   await header.focus();
   await page.keyboard.press("Space");
   await expect(page.locator("#requests")).toHaveText('[["a","off-page","b"]]');

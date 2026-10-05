@@ -126,7 +126,7 @@ describe("native dialog close focus", () => {
     await tick();
     expect(view.close).toHaveBeenCalledOnce();
     expect(document.activeElement).toBe(view.anchor.value);
-    expect(document.body.querySelector(part("filters-drawer"))).toBeNull();
+    expect(document.body.querySelector(part("filters-panel"))).toBeNull();
   });
   it("restores the trigger after the real Done button closes a resumed drawer", async () => {
     const showing = shallowRef(true);
@@ -155,14 +155,14 @@ describe("native dialog close focus", () => {
       })
     );
     await tick();
-    await click(view.host, "filters-trigger");
+    await click(view.host, "filters-button");
     showing.value = false;
     await tick();
     previous.focus();
     showing.value = true;
     await tick();
     expect(activeModal()?.open).toBe(true);
-    const trigger = find(view.host, part("filters-trigger"));
+    const trigger = find(view.host, part("filters-button"));
     await click(document.body, "filters-done");
     expect(activeModal()).toBeUndefined();
     expect(document.activeElement).toBe(trigger);
@@ -171,7 +171,7 @@ describe("native dialog close focus", () => {
     const view = fixture();
     view.reject();
     await tick();
-    const input = find(document.body, `${part("filters-drawer")} input`);
+    const input = find(document.body, `${part("filters-panel")} input`);
     escape();
     await tick();
     expect(activeModal()?.open).toBe(true);
@@ -229,7 +229,7 @@ describe("native dialog close focus", () => {
       const view = mountNative(() => h(Panel));
       await tick();
       previous.focus();
-      await click(view.host, "filters-trigger");
+      await click(view.host, "filters-button");
       expect(prior).toBe(previous);
       if (reason === "escape") escape();
       else
@@ -244,7 +244,7 @@ describe("native dialog close focus", () => {
       await click(document.body, "filters-done");
       expect(activeModal()).toBeUndefined();
       expect(document.activeElement).toBe(
-        find(view.host, part("filters-trigger"))
+        find(view.host, part("filters-button"))
       );
     }
   );
@@ -252,7 +252,7 @@ describe("native dialog close focus", () => {
     const view = fixture();
     await tick();
     const event = new Event("cancel", { cancelable: true });
-    find(document.body, part("filters-drawer")).dispatchEvent(event);
+    find(document.body, part("filters-panel")).dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
     await tick();
     expect(document.activeElement).toBe(view.anchor.value);
@@ -262,7 +262,7 @@ describe("native dialog close focus", () => {
     async (type) => {
       const view = fixture();
       await tick();
-      const input = find(document.body, `${part("filters-drawer")} input`);
+      const input = find(document.body, `${part("filters-panel")} input`);
       escape();
       input.dispatchEvent(
         type === "keydown"

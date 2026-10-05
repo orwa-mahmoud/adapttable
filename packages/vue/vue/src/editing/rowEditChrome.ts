@@ -6,10 +6,14 @@ import {
   rowEditControls,
 } from "@adapttable/core";
 import type {
-  BatchEditBarProps,
-  RowEditActionsProps,
+  BatchEditBarProps as CoreBatchEditBarProps,
+  RowEditActionsProps as CoreRowEditActionsProps,
 } from "@adapttable/core/binding";
 import { h, type VNodeChild } from "vue";
+
+// Named aliases remain visible to Vue's SFC prop resolver after declaration bundling.
+export type BatchEditBarProps<TRow> = CoreBatchEditBarProps<TRow>;
+export type RowEditActionsProps<TRow> = CoreRowEditActionsProps<TRow>;
 export interface EditingActionButtonProps {
   readonly icon?: DisplayValue | false;
   readonly label: string;
@@ -149,9 +153,13 @@ export function BatchEditBarChrome<TRow>(
       "aria-busy": pending || undefined,
     },
     [
-      h("span", { "data-adapttable-part": "batch-edit-count" }, model.count),
+      h("output", { "data-adapttable-part": "batch-edit-count" }, model.count),
       model.conflictMessage
-        ? h("span", { role: "status" }, model.conflictMessage)
+        ? h(
+            "output",
+            { "data-adapttable-part": "batch-edit-conflict" },
+            model.conflictMessage
+          )
         : button(
             model.saveLabel,
             "batch-edit-save",
@@ -166,17 +174,7 @@ export function BatchEditBarChrome<TRow>(
             props.batch.commit.error
           )
         : null,
-      pending
-        ? h(
-            "span",
-            { role: "status", "data-adapttable-part": "batch-edit-progress" },
-            labels.loading
-          )
-        : null,
+      pending ? h("span", { role: "status" }, labels.loading) : null,
     ]
   );
 }
-export type {
-  BatchEditBarProps,
-  RowEditActionsProps,
-} from "@adapttable/core/binding";

@@ -1,6 +1,6 @@
 import { createMemoryAdapter } from "@adapttable/core";
 import { expect, it, vi } from "vitest";
-import { createSSRApp, effectScope, h, shallowRef } from "vue";
+import { createApp, createSSRApp, effectScope, h, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";
 
 import type { ColumnDef } from "../src/columnDef";
@@ -449,3 +449,61 @@ function required<T>(value: T | undefined): T {
   if (value === undefined) throw new Error("Expected fixture value");
   return value;
 }
+
+it("merges group slot attributes onto the semantic row without repeating its class", () => {
+  const scope = effectScope();
+  const shell = scope.run(() =>
+    useDataTableShell({ ...base, features: [grouping<Row>("team")] })
+  )!;
+  const clicked = vi.fn();
+  const ref = vi.fn();
+  const model = {
+    ...shell.desktop.value,
+    bodySlots: shell.desktop.value.bodySlots?.map((slot) =>
+      slot.kind === "group"
+        ? {
+            ...slot,
+            attrs: {
+              class: "host-group",
+              style: { color: "red" },
+              ref,
+              onClick: clicked,
+              "data-host-group": "retained",
+            },
+          }
+        : slot
+    ),
+  };
+  const root = document.createElement("div");
+  const app = createApp({
+    render: () =>
+      DesktopTableChrome({
+        model,
+        slots: slots(),
+        classNames: { groupRow: "group-style" },
+      }),
+  });
+  try {
+    app.mount(root);
+    const groups = [
+      ...root.querySelectorAll<HTMLTableRowElement>(
+        '[data-adapttable-part="group-row"]'
+      ),
+    ];
+    expect(groups).toHaveLength(2);
+    for (const group of groups) {
+      expect(group.classList.contains("host-group")).toBe(true);
+      expect(
+        group.className.split(/\s+/).filter((name) => name === "group-style")
+      ).toHaveLength(1);
+      expect(group.getAttribute("data-host-group")).toBe("retained");
+      expect(group.style.color).toBe("red");
+      expect(ref.mock.calls.some(([node]) => node === group)).toBe(true);
+    }
+    groups[0]!.click();
+    expect(clicked).toHaveBeenCalledOnce();
+  } finally {
+    app.unmount();
+    scope.stop();
+  }
+});

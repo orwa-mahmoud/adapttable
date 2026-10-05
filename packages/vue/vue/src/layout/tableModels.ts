@@ -31,7 +31,8 @@ import type { SelectionCheckboxAttrs } from "../selection/checkboxControl";
 import type { RowSelection } from "../selection/selection";
 import type { UseDataTableResult } from "../useDataTable";
 import type { RowActionControl } from "./modelChannels";
-export type TableBodySlot<TRow> =
+import type { TableSummaryModel } from "./tableSummaryModel";
+export type TableBodySlot<TRow> = (
   | Exclude<
       ChromeBodySlot<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>,
       ChromeExtraSlot<VNodeChild, CssProperties> | ChromeGroupSlot<TRow>
@@ -39,18 +40,21 @@ export type TableBodySlot<TRow> =
   | (ChromeGroupSlot<TRow> & { readonly model?: GroupRowModel<TRow> })
   | (ChromeExtraSlot<VNodeChild, CssProperties> & {
       readonly coveredSlots?: ReadonlySet<number>;
-    });
+    })
+) & { readonly attrs?: Attrs };
 export interface TableCellModel<TRow> {
   readonly key: string;
   readonly attrs: Attrs;
   readonly context: CellContext<TRow>;
   readonly render?: (display: VNodeChild) => VNodeChild;
   readonly tree?: TreeCellModel<TRow>;
+  readonly addon?: (className?: string) => VNodeChild;
 }
 export interface TableRowModel<TRow> {
   readonly key: string;
   readonly row: TRow;
   readonly summary?: boolean;
+  readonly reorder?: (mobile: boolean) => VNodeChild;
   readonly detail?: RowDetailModel;
   readonly actionControls?: readonly RowActionControl<TRow>[];
   readonly editActions?: () => VNodeChild;
@@ -65,10 +69,16 @@ export interface TableHeaderModel<TRow> {
   readonly attrs: Attrs;
   readonly sortAttrs?: Attrs;
   readonly resizeAttrs?: Attrs;
+  readonly selection?: (className?: string) => VNodeChild;
+  readonly rename?: (
+    content: VNodeChild,
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) => VNodeChild;
   readonly filter?: (className?: string) => VNodeChild;
   readonly context: HeaderContext<TRow>;
 }
 export interface DesktopTableModel<TRow> {
+  readonly summary?: TableSummaryModel<TRow>;
   readonly attrs: Attrs;
   readonly headerRowAttrs: Attrs;
   readonly headers: readonly TableHeaderModel<TRow>[];
@@ -77,12 +87,15 @@ export interface DesktopTableModel<TRow> {
   readonly headerCheckboxAttrs?: SelectionCheckboxAttrs;
   readonly columnCount: number;
   readonly actionsLabel?: string;
+  readonly reorderLabel?: string;
+  readonly columnSpacers?: { readonly start: number; readonly end: number };
   readonly groupToggleProps: (
     cell: HeaderGroupCell
   ) => ColumnGroupToggleProps | undefined;
   readonly headerPlan: HtmlGroupedHeaderCell[][] | null;
 }
 export interface MobileCardsModel<TRow> {
+  readonly summary?: TableSummaryModel<TRow>;
   readonly attrs: Attrs;
   readonly rows: readonly TableRowModel<TRow>[];
   readonly bodySlots?: readonly TableBodySlot<TRow>[];

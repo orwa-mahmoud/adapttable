@@ -197,9 +197,16 @@ describe("native filter controls", () => {
         defaultExpanded: true,
       })
     );
-    await click(view.host, "filter-tree-add-group");
+    find<HTMLButtonElement>(
+      view.host,
+      part("filter-tree-actions") + " button:nth-child(2)"
+    ).click();
+    await tick();
     const groups = view.host.querySelectorAll(part("filter-tree-group"));
-    find(groups[1]!, part("filter-tree-add-condition")).click();
+    find(
+      groups[1]!,
+      part("filter-tree-actions") + " button:first-child"
+    ).click();
     await tick();
     expect(
       view.host.querySelectorAll(part("filter-tree-condition"))
@@ -225,7 +232,7 @@ describe("native filter controls", () => {
         ],
       })
     );
-    await click(view.host, "filters-trigger");
+    await click(view.host, "filters-button");
     const surface = find(document.body, part("filters-popover"));
     expect(surface.getAttribute("dir")).toBe("rtl");
     expect(surface.getAttribute("popover")).toBe("manual");
@@ -240,10 +247,10 @@ describe("native filter controls", () => {
     await tick();
     expect(document.body.querySelector(part("filters-popover"))).toBeNull();
     expect(document.activeElement).toBe(
-      find(view.host, part("filters-trigger"))
+      find(view.host, part("filters-button"))
     );
     expect(
-      find(view.host, part("filters-trigger")).getAttribute("aria-expanded")
+      find(view.host, part("filters-button")).getAttribute("aria-expanded")
     ).toBe("false");
   });
   it("header close-on-select dismisses once and keeps current controlled filter", async () => {
@@ -290,7 +297,7 @@ describe("native filter controls", () => {
     await tick();
     const dialog = find<HTMLDialogElement>(
       document.body,
-      part("filters-drawer")
+      part("filters-panel")
     );
     expect(dialog.getAttribute("aria-modal")).toBe("true");
     dialog.dispatchEvent(
@@ -358,11 +365,22 @@ describe("native filter surface and extra control branches", () => {
     details.dispatchEvent(new Event("toggle"));
     await tick();
     await write(
-      find<HTMLSelectElement>(view.host, part("filter-tree-combinator")),
+      find<HTMLSelectElement>(
+        view.host,
+        part("filter-tree-group") +
+          " > " +
+          part("filter-field") +
+          " " +
+          part("filter-operator")
+      ),
       "or",
       "change"
     );
-    await click(view.host, "filter-tree-add-condition");
+    find<HTMLButtonElement>(
+      view.host,
+      part("filter-tree-actions") + " button:first-child"
+    ).click();
+    await tick();
     const condition = find(view.host, part("filter-tree-condition"));
     await write(
       find<HTMLSelectElement>(condition, part("filter-select")),
@@ -394,14 +412,14 @@ describe("native filter surface and extra control branches", () => {
         ],
       })
     );
-    await click(view.host, "filters-trigger");
-    const surface = find(document.body, part("filters-drawer"));
+    await click(view.host, "filters-button");
+    const surface = find(document.body, part("filters-panel"));
     await write(find(surface, "input"), "Ada");
     await click(surface, "filters-clear");
     expect(find<HTMLInputElement>(surface, "input").value).toBe("");
     expect(find(surface, part("filters-done")).textContent).toBe("Fertig");
     await click(surface, "filters-done");
-    expect(document.body.querySelector(part("filters-drawer"))).toBeNull();
+    expect(document.body.querySelector(part("filters-panel"))).toBeNull();
   });
   it("native popover API positions above a low anchor, observes layout, and cleans up", async () => {
     const open = shallowRef(true);

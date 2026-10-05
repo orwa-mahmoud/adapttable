@@ -100,10 +100,7 @@ describe("native hierarchy contributions", () => {
       });
       await settle();
       expect(view.root.textContent).toContain("Core");
-      const more = node<HTMLButtonElement>(
-        view.root,
-        part("group-more-button")
-      );
+      const more = node<HTMLButtonElement>(view.root, part("group-more"));
       expect(more.classList.contains("group-more-hook")).toBe(true);
       expect(view.root.textContent).not.toContain("Bea");
       more.click();
@@ -120,7 +117,7 @@ describe("native hierarchy contributions", () => {
       await settle();
       expect(view.root.textContent).toContain("Ada");
       expect(
-        node(view.root, part("group-checkbox")).classList.contains(
+        node(view.root, part("group-select")).classList.contains(
           "group-checkbox-hook"
         )
       ).toBe(true);
@@ -140,10 +137,7 @@ describe("native hierarchy contributions", () => {
         { "onUpdate:selectedIds": update }
       );
       await settle();
-      const checkbox = node<HTMLInputElement>(
-        view.root,
-        part("group-checkbox")
-      );
+      const checkbox = node<HTMLInputElement>(view.root, part("group-select"));
       expect(checkbox.indeterminate).toBe(true);
       checkbox.click();
       await settle();
@@ -188,11 +182,11 @@ describe("native hierarchy contributions", () => {
       toggle.click();
       await settle();
       expect(view.root.textContent).toContain("Bea");
-      node<HTMLButtonElement>(view.root, part("expand-toggle")).click();
+      node<HTMLButtonElement>(view.root, part("expand-button")).click();
       await settle();
       expect(view.root.textContent).toContain("Details for Ada");
       expect(click).not.toHaveBeenCalled();
-      node<HTMLButtonElement>(view.root, part("expand-toggle")).click();
+      node<HTMLButtonElement>(view.root, part("expand-button")).click();
       await settle();
       expect(view.root.textContent).not.toContain("Details for Ada");
     }
@@ -282,7 +276,7 @@ describe("native hierarchy contributions", () => {
     });
     await settle();
     node<HTMLButtonElement>(view.root, part("tree-toggle")).click();
-    node<HTMLButtonElement>(view.root, part("expand-toggle")).click();
+    node<HTMLButtonElement>(view.root, part("expand-button")).click();
     await settle();
     expect(treeChange).toHaveBeenCalledExactlyOnceWith(["a"]);
     expect(detailChange).toHaveBeenCalledExactlyOnceWith(["a"]);

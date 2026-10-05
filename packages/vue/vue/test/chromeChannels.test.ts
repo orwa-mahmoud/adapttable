@@ -215,7 +215,7 @@ it("renders optional editing, filter, resize and row-action channels on semantic
   const mobile = shallowRef(false);
   const current = fixture(() => ({
     data,
-    columns,
+    columns: columns.map((column) => ({ ...column, editable: true })),
     rowKey: (row) => row.id,
     urlSync: false,
     features,
@@ -319,7 +319,7 @@ it("renders projected groups, pads, extras and summary rows in desktop/mobile wi
   expect(current.root.querySelector("tbody input")).toBeNull();
   expect(
     current.root
-      .querySelector('[data-adapttable-part="pad-top"] td')
+      .querySelector('[data-adapttable-part="virtual-spacer"] td')
       ?.getAttribute("colspan")
   ).toBe("3");
   mobile.value = true;

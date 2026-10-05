@@ -8,7 +8,7 @@ test("Vue native view controls share a namespace and restore keyboard focus", as
 }) => {
   await page.goto(PREVIEW);
   const table = page.locator('[data-demo-table="view-controls"]');
-  const density = table.locator('[data-adapttable-part="density-select"]');
+  const density = table.locator('[data-adapttable-part="density-toggle"]');
   await density.selectOption("compact");
   await table
     .locator('[data-adapttable-part="views-button"]')
@@ -26,7 +26,7 @@ test("Vue native view controls share a namespace and restore keyboard focus", as
   await expect(density).toHaveValue("compact");
   await expect(
     page.locator(
-      '[data-demo-table="independent"] [data-adapttable-part="density-select"]'
+      '[data-demo-table="independent"] [data-adapttable-part="density-toggle"]'
     )
   ).toHaveValue("comfortable");
   await page.getByRole("checkbox", { name: "Reject density requests" }).check();
@@ -36,6 +36,34 @@ test("Vue native view controls share a namespace and restore keyboard focus", as
   await expect(
     table.locator('[data-adapttable-part="views-button"]')
   ).toHaveCount(0);
+});
+
+test("Vue native fullscreen keeps overlays visible and follows Escape", async ({
+  page,
+}) => {
+  await page.goto(PREVIEW);
+  const table = page.locator('[data-demo-table="view-controls"]');
+  await table.locator('[data-adapttable-part="fullscreen-toggle"]').click();
+  await expect
+    .poll(() =>
+      table.evaluate(
+        (element) => element.ownerDocument.fullscreenElement === element
+      )
+    )
+    .toBe(true);
+  await table.locator('[data-adapttable-part="views-button"]').click();
+  await expect(
+    page.locator('[data-adapttable-part="views-panel"]')
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await expect
+    .poll(() =>
+      table.evaluate(
+        (element) => element.ownerDocument.fullscreenElement === element
+      )
+    )
+    .toBe(false);
 });
 
 test("Vue native view controls preserve RTL, narrow-screen fit and localized labels", async ({
@@ -64,7 +92,7 @@ test("Vue native controlled acceptance and search opt-out retain feature control
 }) => {
   await page.goto(PREVIEW);
   const table = page.locator('[data-demo-table="view-controls"]');
-  const density = table.locator('[data-adapttable-part="density-select"]');
+  const density = table.locator('[data-adapttable-part="density-toggle"]');
   await page.getByRole("checkbox", { name: "Reject density requests" }).check();
   await page
     .getByRole("checkbox", { name: "Accept controlled density" })

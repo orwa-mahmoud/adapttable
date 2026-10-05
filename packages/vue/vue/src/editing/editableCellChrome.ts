@@ -62,6 +62,7 @@ export interface EditableCellChromeSlots<TRow> {
 }
 export interface EditableCellModel<TRow> {
   readonly unit?: "cell" | "row" | "batch";
+  readonly changed?: boolean;
   readonly ask?: CellConflictAsk;
   readonly controller: EditableCellController<TRow>;
   readonly display: VNodeChild;
@@ -234,6 +235,7 @@ export function useEditableCellModel<TRow>(
     return {
       controller,
       unit: unit.value.unit,
+      changed: props.editing?.batch?.isChanged(props.rowId, props.column.key),
       ask: guardedAsk,
       display: props.display,
       errorId,
@@ -274,7 +276,7 @@ export function useEditableCellModel<TRow>(
             conflict: unit.value.ask !== undefined,
           }),
           "aria-label": props.editLabel,
-          "data-adapttable-part": "edit-cell-input",
+          "data-adapttable-part": "edit-cell-editor",
         },
         editorRef: (node) => {
           if (allowed()) editorRef(node);
@@ -321,14 +323,14 @@ export function EditableCellChrome<TRow>(props: {
       ? controls.Editor(model.editor)
       : controls.Activate(model.activate),
   ];
-  if (ctrl.error)
+  if (ctrl.error && !ask)
     children.push(
       h(
         "span",
         {
           id: model.errorId,
           class: props.classNames?.editCellError,
-          role: "status",
+          role: "alert",
           "data-adapttable-part": "edit-cell-error",
         },
         ctrl.error
@@ -346,40 +348,70 @@ export function EditableCellChrome<TRow>(props: {
         },
       });
     children.push(
-      button(ctrl.conflictLabels.keepMine, "edit-cell-keep-mine", ask.keep)
-    );
-    children.push(
-      button(ctrl.conflictLabels.takeTheirs, "edit-cell-take-theirs", ask.take)
-    );
-  }
-  if (ctrl.saveFailure) {
-    children.push(
       h(
         "span",
         {
-          role: "status",
-          class: props.classNames?.editCellSaveError,
-          "data-adapttable-part": "edit-cell-save-error",
+          id: model.errorId,
+          role: "alert",
+          "data-adapttable-part": "edit-cell-conflict",
+          "data-conflict": "",
+          class: props.classNames?.editCellError,
         },
-        ctrl.saveFailure.message
+        [
+          h(
+            "span",
+            { "data-adapttable-part": "edit-cell-conflict-message" },
+            ctrl.conflictLabels.message
+          ),
+          h(
+            "span",
+            {
+              "data-adapttable-part": "edit-cell-incoming",
+              style: { display: "block" },
+            },
+            ctrl.conflictLabels.theirsValue(ask.incomingValue)
+          ),
+          button(ctrl.conflictLabels.keepMine, "edit-cell-keep-mine", ask.keep),
+          button(
+            ctrl.conflictLabels.takeTheirs,
+            "edit-cell-take-theirs",
+            ask.take
+          ),
+        ]
       )
     );
-    if (ctrl.canRollback && model.undoLabel)
-      children.push(
-        controls.Button({
-          label: model.undoLabel,
-          part: "edit-cell-undo",
-          onClick: (event) => {
-            event.stopPropagation();
-            ctrl.rollback();
-          },
-        })
-      );
   }
+  const saveFailure = (): VNodeChild => {
+    if (!ctrl.saveFailure) return null;
+    return h(
+      "span",
+      {
+        role: "alert",
+        class: props.classNames?.editCellSaveError,
+        "data-adapttable-part": "edit-cell-save-error",
+      },
+      [
+        ctrl.saveFailure.message,
+        ctrl.canRollback && model.undoLabel
+          ? controls.Button({
+              label: model.undoLabel,
+              part: "edit-cell-rollback",
+              onClick: (event) => {
+                event.stopPropagation();
+                ctrl.rollback();
+              },
+            })
+          : null,
+      ]
+    );
+  };
+  children.push(saveFailure());
   return h(
     "span",
     {
-      "data-adapttable-part": "editable-cell",
+      "data-adapttable-part":
+        model.unit === "batch" ? "batch-edit-cell" : undefined,
+      "data-changed": model.unit === "batch" && model.changed ? "" : undefined,
       class: props.classNames?.editableCell,
       "data-save-status": ctrl.saveStatus,
       "data-edit-unit": model.unit,

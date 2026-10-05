@@ -276,6 +276,7 @@ export interface FilterFieldClassNames {
   readonly filterLabel?: string;
   readonly filterControl?: string;
   readonly filterCheckboxGroup?: string;
+  readonly filterOptionsLoading?: string;
 }
 export function FilterFieldChrome(props: {
   readonly classNames?: FilterFieldClassNames;
@@ -311,11 +312,22 @@ export function FilterFieldChrome(props: {
       {
         key: control.key,
         class: props.classNames?.filterControl,
-        "data-adapttable-part": "filter-control",
       },
       [node]
     );
   });
+  const checkboxFields = model.loading
+    ? [
+        h(
+          "span",
+          {
+            "data-adapttable-part": "filter-options-loading",
+            class: props.classNames?.filterOptionsLoading,
+          },
+          "…"
+        ),
+      ]
+    : fields;
   return h(
     "div",
     {
@@ -340,7 +352,7 @@ export function FilterFieldChrome(props: {
               ...model.checkboxGroupAttrs,
               class: props.classNames?.filterCheckboxGroup,
             },
-            fields
+            checkboxFields
           )
         : fields,
     ]

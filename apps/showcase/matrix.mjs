@@ -3439,6 +3439,16 @@ export const VUE_NATIVE_PAGES = Object.freeze([
     entry: "/src/vue/entry-assistant.ts",
   },
   {
+    key: "vue-unstyled-table-footers",
+    dir: "vue/unstyled/table-footers",
+    path: "unstyled/table-footers",
+    title: "Summary rows and footers — Vue Unstyled — AdaptTable",
+    description:
+      "Page totals, column footers and review notes across desktop, mobile and RTL layouts.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-table-footers.ts",
+  },
+  {
     key: "vue-unstyled-filter-editing",
     dir: "vue/unstyled/filter-editing",
     path: "unstyled/filter-editing",
@@ -3491,5 +3501,55 @@ export const VUE_NATIVE_PAGES = Object.freeze([
     description: "Density, fullscreen and saved views with native controls.",
     notice: VUE_NATIVE_BASELINE.notice,
     entry: "/src/vue/entry-view-controls.ts",
+  },
+  {
+    key: "vue-unstyled-column-menu",
+    dir: "vue/unstyled/column-menu",
+    path: "unstyled/column-menu",
+    title: "Column menu — Vue Unstyled — AdaptTable",
+    description:
+      "Column visibility, pinning, order and rename with host-controlled state.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/column-menu/entry-column-menu.ts",
+  },
+  {
+    key: "vue-unstyled-navigation",
+    dir: "vue/unstyled/navigation",
+    path: "unstyled/navigation",
+    title: "Navigation and find — Vue Unstyled — AdaptTable",
+    description:
+      "Keyboard ranges, find, clipboard and host-owned fill with native Vue controls.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/navigation/entry-navigation.ts",
+  },
+  {
+    key: "vue-unstyled-actions",
+    dir: "vue/unstyled/actions",
+    path: "unstyled/actions",
+    title: "Actions and export — Vue Unstyled — AdaptTable",
+    description:
+      "Native bulk actions, command palette, context menu, side panel and export controls.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/actions/entry-actions.ts",
+  },
+  {
+    key: "vue-unstyled-specialized",
+    dir: "vue/unstyled/specialized",
+    path: "unstyled/specialized",
+    title: "Specialized data views — Vue Unstyled — AdaptTable",
+    description:
+      "Virtual rows and columns, host-owned row moves, grouping, pivot and sparklines.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/specialized/entry-specialized.ts",
+  },
+  {
+    key: "vue-unstyled-feature-union",
+    dir: "vue/unstyled/feature-union",
+    path: "unstyled/feature-union",
+    title: "Combined features — Vue Unstyled — AdaptTable",
+    description:
+      "Virtual tree rows, keyboard navigation, find, range export and host-owned editing and moves.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/feature-union/entry-feature-union.ts",
   },
 ]);

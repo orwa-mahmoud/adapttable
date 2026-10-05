@@ -4,19 +4,30 @@
 
 ```ts
 
-import { AllowedComponentProps } from 'vue';
 import { BatchEditBarProps } from '@adapttable/vue/editing';
 import { BatchEditingState } from '@adapttable/vue/editing';
 import { BatchRowEdit } from '@adapttable/vue/editing';
-import { ComponentCustomProps } from 'vue';
-import { ComponentOptionsMixin } from 'vue';
-import { ComponentProvideOptions } from 'vue';
-import { CreateComponentPublicInstanceWithMixins } from 'vue';
 import { EditingLifecycleExtras } from '@adapttable/vue/editing';
 import { PublicProps } from 'vue';
 import { TableEditingOptions } from '@adapttable/vue/editing';
 import { TableFeature } from '@adapttable/vue/adapter';
-import { VNodeProps } from 'vue';
+import { VNode } from 'vue';
+
+// @public (undocumented)
+const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$1<BatchEditBarProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$1<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 // @public
 export function batchEditing<TRow>(onBatchEdit: NonNullable<TableEditingOptions<TRow>["onBatchEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;
@@ -28,14 +39,7 @@ export { BatchRowEdit }
 export { EditingLifecycleExtras }
 
 // @public (undocumented)
-export const NativeBatchEditBar: new <TRow>(props: BatchEditBarProps<TRow> & {} & VNodeProps & AllowedComponentProps & ComponentCustomProps) => CreateComponentPublicInstanceWithMixins<BatchEditBarProps<TRow> & {}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, PublicProps, {}, false, {}, {}, {}, {}, string, {}, any, ComponentProvideOptions, {
-P: {};
-B: {};
-D: {};
-C: {};
-M: {};
-Defaults: {};
-}, BatchEditBarProps<TRow> & {}, {}, {}, {}, {}, {}>;
+export const NativeBatchEditBar: typeof __VLS_export$1;
 
 // (No @packageDocumentation comment for this package)
 

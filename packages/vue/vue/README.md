@@ -77,6 +77,12 @@ attribute/ref bridges, structural Chrome and lifecycle/model channels. Every
 visible button, input, select and overlay is supplied by the adapter. Bind
 complete attribute records to the actual semantic element.
 
+The shell composes column-aligned summaries through `useSummaryCells`,
+`useTableSummaryModel`, `TableSummaryChrome` and `MobileSummaryChrome`.
+`TableFooterChrome` places custom content outside the table. Summary mappers
+receive the current source row scope, with reactive Vue values and shared
+neutral incremental aggregates supported.
+
 The shell distinguishes loaded rows from visible hierarchy rows: collapsed
 children keep their editing drafts while select-all follows visible rows.
 Grouped/tree tables refuse data-row pinning; independent summaries still work.

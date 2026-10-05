@@ -274,10 +274,10 @@ describe("grouping pipeline", () => {
       el.querySelector('[data-adapttable-part="group-count"]')?.textContent
     ).toContain("2");
     expect(
-      el.querySelector('[data-adapttable-part="group-more-button"]')
+      el.querySelector('[data-adapttable-part="group-more"]')
     ).not.toBeNull();
     el.querySelector<HTMLButtonElement>(
-      '[data-adapttable-part="group-more-button"]'
+      '[data-adapttable-part="group-more"]'
     )!.click();
     await nextTick();
     expect(el.querySelector('[data-row-id="b"]')).not.toBeNull();
@@ -462,7 +462,8 @@ describe("tree and detail", () => {
           MobileCardsChrome({ model: shell.mobile.value, slots: controls() }),
       })
     );
-    expect(html).toContain('data-adapttable-part="detail-cell"');
+    expect(html).toContain('data-adapttable-part="card-detail"');
+    expect(html).not.toContain('data-adapttable-part="detail-cell"');
     expect(html).toContain('aria-expanded="true"');
     scope.stop();
   });

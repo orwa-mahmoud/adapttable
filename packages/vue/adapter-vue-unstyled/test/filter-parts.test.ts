@@ -71,7 +71,7 @@ function assertGroup(root: ParentNode) {
   expect(input.getAttribute("aria-label")).toBe("Ada Lovelace");
   expect(input.hasAttribute("data-adapttable-part")).toBe(false);
   expect(checkbox.textContent).toBe("Ada Lovelace");
-  expect(group.querySelectorAll(part("filter-control"))).toHaveLength(2);
+  expect(group.querySelectorAll(".control")).toHaveLength(2);
   expect(group.querySelectorAll(part("filter-checkbox"))).toHaveLength(2);
   return { group, input, checkbox };
 }

@@ -6,7 +6,7 @@ test("RTL popover is top-layer, anchored, keyboard reachable and escape restores
   page,
 }) => {
   await page.goto(`${fixture}?rtl`);
-  const trigger = page.locator(part("filters-trigger"));
+  const trigger = page.locator(part("filters-button"));
   await trigger.focus();
   await page.keyboard.press("Enter");
   const surface = page.locator(part("filters-popover"));
@@ -34,8 +34,8 @@ test("mobile drawer traps focus, validates editor and prevents double async comm
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${fixture}?mobile&mode=drawer`);
-  await page.locator(part("filters-trigger")).click();
-  const drawer = page.locator(part("filters-drawer"));
+  await page.locator(part("filters-button")).click();
+  const drawer = page.locator(part("filters-panel"));
   await expect(drawer).toBeVisible();
   await expect(drawer).toHaveAttribute("aria-modal", "true");
   await page.keyboard.press("Escape");
@@ -43,7 +43,7 @@ test("mobile drawer traps focus, validates editor and prevents double async comm
   const activate = page.locator(part("edit-cell-activate")).first();
   await activate.focus();
   await page.keyboard.press("F2");
-  const input = page.locator(part("edit-cell-input")).first();
+  const input = page.locator(part("edit-cell-editor")).first();
   await expect(input).toBeFocused();
   await input.fill("bad");
   await input.press("Enter");
@@ -66,7 +66,7 @@ for (const unit of ["row", "batch"]) {
     await page.goto(`${fixture}?unit=${unit}`);
     if (unit === "row")
       await page.locator(part("row-edit-begin")).first().click();
-    const input = page.locator(part("edit-cell-input")).first();
+    const input = page.locator(part("edit-cell-editor")).first();
     await input.fill("Draft");
     const save = page
       .locator(part(unit === "row" ? "row-edit-save" : "batch-edit-save"))
@@ -84,7 +84,7 @@ for (const unit of ["row", "batch"]) {
       .first()
       .click();
     if (unit === "row")
-      await expect(page.locator(part("edit-cell-input"))).toHaveCount(0);
+      await expect(page.locator(part("edit-cell-editor"))).toHaveCount(0);
     else await expect(input).toHaveValue("Ada");
   });
 }
@@ -93,7 +93,7 @@ test("filter operator and checkbox group classes follow native parts in panel an
   page,
 }) => {
   await page.goto(fixture);
-  await page.locator(part("filters-trigger")).click();
+  await page.locator(part("filters-button")).click();
   const panel = page.locator(part("filters-popover"));
   const operator = panel.locator(`select${part("filter-operator")}`).first();
   await expect(operator).toHaveClass("native-operator");

@@ -2,13 +2,17 @@
 import {
   ACTIONS_COLUMN_KEY,
   type BulkAction,
+  type CellEdit,
+  type CellRange,
   type ConfirmHandler,
   createMemoryAdapter,
   type ExtraFilters,
   type FilterDef,
   type FilterTypeSpec,
   groupedViewSource,
+  isCellEditable,
   type QueryFilterGroup,
+  REORDER_COLUMN_KEY,
   resolveUrlAdapter,
   type RowAction,
   type TableDensity,
@@ -18,11 +22,14 @@ import {
 import {
   AGENT_APPROVAL,
   AGENT_APPROVAL_STATE,
+  COLUMN_SELECT,
   DENSITY_STATE,
   EMPTY_FEATURE_HOST,
   type FeatureHostState,
   type FilterEngine,
+  FIND_BAR,
   type RuntimeChromeInput,
+  STATUS_BAR,
   TABLE_ASSISTANT,
   type TableAssistantProps,
   type TableRuntime,
@@ -45,7 +52,28 @@ import {
   watch,
 } from "vue";
 
-import { flattenColumns } from "./columnDef";
+import {
+  BULK_ACTIONS_CONTROL,
+  BULK_ACTIONS_MODEL,
+  COMMAND_PALETTE_CONTROL,
+  COMMAND_PALETTE_MODEL,
+  CONTEXT_MENU_CONTROL,
+  CONTEXT_MENU_MODEL,
+  EXPORT_CONTROL,
+  EXPORT_MODEL,
+  PRINT_CONTROL,
+  PRINT_MODEL,
+  SIDE_PANEL_CONTROL,
+  SIDE_PANEL_MODEL,
+  UNDO_REDO_CONTROL,
+} from "./actions/contracts";
+import type { SummaryRowFn } from "./aggregate/aggregate";
+import { mergeVueAttrs, toVueAttrs } from "./attrs";
+import { flattenColumns, type FooterContext } from "./columnDef";
+import {
+  COLUMN_HEADER_RENAME,
+  columnMenuSlotKey,
+} from "./columns/columnMenuContracts";
 import type { TableEditingOptions } from "./editing/editingModels";
 import { type FeatureLifecycle, useFeatureLifecycle } from "./featureLifecycle";
 import {
@@ -72,12 +100,14 @@ import {
   editHistoryModelKey,
   editingChromeModelKey,
   editingModelKey,
+  filterViewKey,
   headerFilterModelKey,
   headerFilterSlotKey,
   type RowActionControlsProjector,
   rowActionsModelKey,
   rowEditActionsSlotKey,
   rowPinningModelKey,
+  type TableBodyProjection,
   type TableBodyProjector,
 } from "./layout/modelChannels";
 import {
@@ -86,12 +116,31 @@ import {
   useDesktopTableModel,
   useMobileCardsModel,
 } from "./layout/tableModels";
+import {
+  useSummaryCells,
+  useTableSummaryModel,
+} from "./layout/tableSummaryModel";
+import {
+  FILL_HANDLE_CONTROL,
+  FIND_BUTTON,
+  FIND_MODEL,
+  GRID_ANNOUNCER,
+  GRID_FOCUS_MODEL,
+  SELECTION_STATS_MODEL,
+} from "./navigation/contracts";
 import { useRowSelection } from "./selection/selection";
 import { useViewportMobile } from "./source/sourceLifecycle";
 import {
   useFrontendData,
   type UseFrontendDataOptions,
 } from "./source/useFrontendData";
+import {
+  bodyWindowModelKey,
+  groupingPanelControlKey,
+  groupingPanelModelKey,
+  rowReorderControlKey,
+  rowReorderModelKey,
+} from "./specialized/contracts";
 import { type MaybeRefOrGetterOptional, useScopeActivity } from "./store";
 import { useDataTable, type UseDataTableOptions } from "./useDataTable";
 import {
@@ -125,6 +174,10 @@ export interface UseDataTableShellOptions<TRow>
   readonly assistant?: MaybeRefOrGetterOptional<
     TableAssistantProps<VNodeChild>
   >;
+  /** Maps the current source row scope to rendered footer values. */
+  readonly summaryRow?: SummaryRowFn<TRow>;
+  /** Table-wide fallback for columns without a footer renderer. */
+  readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
   readonly confirm?: ConfirmHandler;
   readonly density?: MaybeRefOrGetterOptional<TableDensity>;
   readonly defaultDensity?: TableDensity;
@@ -133,6 +186,9 @@ export interface UseDataTableShellOptions<TRow>
   readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
   readonly defaultSelectedIds?: readonly string[];
   readonly onSelectionChange?: (ids: string[]) => void;
+  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => void;
+  readonly onCellFill?: (edits: CellEdit<TRow>[]) => void;
+  readonly onCellCut?: (range: CellRange) => void;
   readonly runtimeChannels?: MaybeRefOrGetter<
     Pick<
       RuntimeChromeInput<TRow>,
@@ -163,6 +219,13 @@ export interface ResolvedTableOptions<TRow>
   readonly filterTypes?: readonly FilterTypeSpec[];
   readonly rowActionControls?: RowActionControlsProjector<TRow>;
   readonly undoRedoButtons?: boolean;
+  readonly columnSelectionCheckbox?: boolean;
+  readonly enableColumnMenu?: boolean;
+  readonly statusBar?: boolean;
+  readonly onCellRangeChange?: (range: CellRange | null) => void;
+  readonly onCellCut?: (range: CellRange) => void;
+  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => void;
+  readonly onCellFill?: (edits: CellEdit<TRow>[]) => void;
   readonly rowActions?: readonly RowAction<TRow>[];
   readonly bulkActions?: readonly BulkAction[];
   readonly [key: string]: unknown;
@@ -300,7 +363,14 @@ export function useDataTableShell<TRow>(
       pinning: pinning.value,
     })
   );
+  const selectionEnabled = computed(
+    () =>
+      toValue(resolved.value.selectable) === true ||
+      resolved.value.selectedIds !== undefined ||
+      resolved.value.onSelectionChange !== undefined
+  );
   const selectionState = useRowSelection(() => ({
+    enabled: selectionEnabled,
     rows: rowInventory.value.visibleRows,
     rowKey: resolved.value.rowKey,
     selectedIds: resolved.value.selectedIds,
@@ -312,11 +382,7 @@ export function useDataTableShell<TRow>(
       source.value.allFilteredRows !== undefined,
   }));
   const selection = computed(() =>
-    toValue(resolved.value.selectable) === true ||
-    resolved.value.selectedIds !== undefined ||
-    resolved.value.onSelectionChange !== undefined
-      ? selectionState
-      : undefined
+    selectionEnabled.value ? selectionState : undefined
   );
   const table = useDataTable(() => ({
     ...resolved.value,
@@ -325,6 +391,9 @@ export function useDataTableShell<TRow>(
     selection: selection.value,
   }));
   const editHistory = state.get(editHistoryModelKey<TRow>());
+  const gridFocus = state.get(GRID_FOCUS_MODEL);
+  const find = state.get(FIND_MODEL);
+  const selectionStats = state.get(SELECTION_STATS_MODEL);
   const ownDensity = shallowRef(resolved.value.defaultDensity ?? "comfortable");
   const featureDensity = state.get(DENSITY_STATE);
   const density = computed(
@@ -390,11 +459,124 @@ export function useDataTableShell<TRow>(
     classNames?: Readonly<Record<string, string | undefined>>
   ) => [
     ...renderViewControls(classNames),
+    ...renderActionToolbar(classNames),
+    ...renderFeatureSlot(UNDO_REDO_CONTROL, slotFills.value, {
+      ...toolbarExtrasProps.value,
+      classNames,
+    }),
+    ...(resolved.value.enableColumnMenu
+      ? renderFeatureSlot(columnMenuSlotKey<TRow>(), slotFills.value, {
+          allColumns: table.allColumns.value,
+          layout: table.layout.value,
+          labels: table.labels.value,
+          featureHost: registered.value,
+          classNames,
+          container: fullscreen.value?.container,
+          dir: table.dir.value,
+          hasRowActions: rowActions.value?.hasRowActions,
+          hasRowReorder: resolved.value.rowReorder === true,
+          onAutoSize: () => table.autoSizeColumns(root.value),
+          onAutoSizeColumn: (key) => table.autoSizeColumn(root.value, key),
+          onSortColumn: (key, dir) => source.value.setSort(key, dir),
+          onRenameColumn: (key, name) => table.layout.value.setName(key, name),
+          onFilterColumn: filterPanel.value?.openPanel
+            ? () => filterPanel.value?.openPanel?.()
+            : undefined,
+          sortBy: table.sortBy.value,
+          sortDir: table.sortDir.value,
+        })
+      : []),
+    ...(find.value?.openBar
+      ? renderFeatureSlot(FIND_BUTTON, slotFills.value, {
+          label: table.labels.value.findInTable,
+          onClick: find.value.openBar,
+          className: classNames?.findButton,
+        })
+      : []),
     ...renderFeatureSlot(TOOLBAR_EXTRAS, slotFills.value, {
       ...toolbarExtrasProps.value,
       classNames,
     }),
   ];
+  const publishedReorder = state.get(rowReorderModelKey<TRow>());
+  const rowReorder = computed(() =>
+    table.layout.value.isHidden(REORDER_COLUMN_KEY)
+      ? undefined
+      : publishedReorder.value
+  );
+  const bodyWindow = state.get(bodyWindowModelKey<TRow>());
+  const groupingPanel = state.get(groupingPanelModelKey<TRow>());
+  const renderGroupingPanel = () =>
+    groupingPanel.value
+      ? renderFeatureSlot(
+          groupingPanelControlKey<TRow>(),
+          slotFills.value,
+          groupingPanel.value
+        )
+      : [];
+  const bulkActions = state.get(BULK_ACTIONS_MODEL);
+  const commandPalette = state.get(COMMAND_PALETTE_MODEL);
+  const contextMenu = state.get(CONTEXT_MENU_MODEL);
+  const exporting = state.get(EXPORT_MODEL);
+  const printing = state.get(PRINT_MODEL);
+  const sidePanel = state.get(SIDE_PANEL_MODEL);
+  const actionPresentation = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) => ({
+    labels: table.labels.value,
+    dir: table.dir.value,
+    classNames,
+    container: fullscreen.value?.container,
+  });
+  const renderActionToolbar = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) => [
+    ...(commandPalette.value
+      ? renderFeatureSlot(COMMAND_PALETTE_CONTROL, slotFills.value, {
+          ...actionPresentation(classNames),
+          model: commandPalette.value,
+        })
+      : []),
+    ...(exporting.value
+      ? renderFeatureSlot(EXPORT_CONTROL, slotFills.value, {
+          ...actionPresentation(classNames),
+          model: exporting.value,
+        })
+      : []),
+    ...(printing.value
+      ? renderFeatureSlot(PRINT_CONTROL, slotFills.value, {
+          ...actionPresentation(classNames),
+          onPrint: printing.value,
+        })
+      : []),
+  ];
+  const renderBulkActions = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) =>
+    bulkActions.value
+      ? renderFeatureSlot(BULK_ACTIONS_CONTROL, slotFills.value, {
+          ...actionPresentation(classNames),
+          model: bulkActions.value,
+        })
+      : [];
+  const renderActionOverlays = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) =>
+    contextMenu.value
+      ? renderFeatureSlot(CONTEXT_MENU_CONTROL, slotFills.value, {
+          ...actionPresentation(classNames),
+          model: contextMenu.value,
+        })
+      : [];
+  const renderSidePanel = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) =>
+    sidePanel.value
+      ? renderFeatureSlot(SIDE_PANEL_CONTROL, slotFills.value, {
+          ...actionPresentation(classNames),
+          model: sidePanel.value,
+        })
+      : [];
   const editing = state.get(editingModelKey<TRow>());
   const editingChrome = state.get(editingChromeModelKey<TRow>());
   const approval = state.get(AGENT_APPROVAL_STATE);
@@ -432,6 +614,7 @@ export function useDataTableShell<TRow>(
   const rowActions = state.get(rowActionsModelKey<TRow>());
   const resize = state.get(COLUMN_RESIZE_MODEL);
   const headerFilters = state.get(headerFilterModelKey<TRow>());
+  const filterPanel = state.get(filterViewKey<TRow>());
   const mergedActions = computed(() =>
     withRowPinActions({
       rowActions: rowActions.value?.rowActions,
@@ -454,15 +637,17 @@ export function useDataTableShell<TRow>(
   );
   const actionsDesktop = computed(() => ({
     ...baseDesktop.value,
+    reorderLabel: rowReorder.value ? table.labels.value.reorderRow : undefined,
     actionsLabel:
       mergedActions.value.rowActions || rowEditControlsVisible.value
         ? table.labels.value.actions
         : undefined,
     columnCount:
       baseDesktop.value.columnCount +
+      (rowReorder.value ? 1 : 0) +
       (mergedActions.value.rowActions || rowEditControlsVisible.value ? 1 : 0),
   }));
-  const body = computed(
+  const body = computed<TableBodyProjection<TRow>>(
     () =>
       resolved.value.bodyModel?.({
         table,
@@ -477,6 +662,99 @@ export function useDataTableShell<TRow>(
         selection: selection.value,
       }) ?? { desktop: actionsDesktop.value, mobile: baseMobile.value }
   );
+  const windowedBody = computed(
+    () => bodyWindow.value?.projection ?? body.value
+  );
+  const bodyRows = computed(() =>
+    body.value.desktop.bodySlots
+      ? body.value.desktop.bodySlots.flatMap((slot) =>
+          slot.kind === "row" && !slot.wiring.summary ? [slot.wiring] : []
+        )
+      : body.value.desktop.rows.filter((row) => !row.summary)
+  );
+  const bodyRowPositions = computed(
+    () => new Map(bodyRows.value.map((row, index) => [row.key, index]))
+  );
+  const bodyColumnPositions = computed(
+    () =>
+      new Map(table.columns.value.map((column, index) => [column.key, index]))
+  );
+  const decorateNavigation = (
+    row: TableRowModel<TRow>
+  ): TableRowModel<TRow> => {
+    if (row.summary || (!gridFocus.value && !find.value)) return row;
+    const grid = gridFocus.value;
+    const rowIndex = bodyRowPositions.value.get(row.key);
+    if (rowIndex === undefined) return row;
+    const absolute = table.windowStart.value + rowIndex;
+    return {
+      ...row,
+      attrs: mergeVueAttrs(row.attrs, grid?.getRowProps(absolute) ?? {}),
+      cells: row.cells.map((cell) => {
+        const col = bodyColumnPositions.value.get(cell.key) ?? -1;
+        const address = { row: absolute, col };
+        const key = `${absolute}:${col}`;
+        const current = find.value?.current;
+        const marks = find.value?.open
+          ? {
+              "data-cell-match": find.value.matchKeys.has(key) ? "" : undefined,
+              "data-cell-match-current":
+                current?.row === absolute && current.col === col
+                  ? ""
+                  : undefined,
+            }
+          : {};
+        return {
+          ...cell,
+          attrs: mergeVueAttrs(cell.attrs, {
+            ...grid?.getCellProps(address),
+            ...marks,
+          }),
+          addon: grid?.enabled
+            ? (className?: string) =>
+                renderFeatureSlot(FILL_HANDLE_CONTROL, slotFills.value, {
+                  focus: grid,
+                  windowIndex: rowIndex,
+                  firstRowIndex: table.windowStart.value,
+                  col,
+                  className,
+                })
+            : undefined,
+        };
+      }),
+    };
+  };
+  const renderNavigationBefore = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) =>
+    find.value
+      ? renderFeatureSlot(FIND_BAR, slotFills.value, {
+          find: find.value,
+          labels: table.labels.value,
+          className: classNames?.findBar,
+        })
+      : [];
+  const renderNavigationAfter = (
+    classNames?: Readonly<Record<string, string | undefined>>
+  ) => [
+    ...renderFeatureSlot(STATUS_BAR, slotFills.value, {
+      enabled: resolved.value.statusBar === true,
+      shown: bodyRows.value.length,
+      page: source.value.page,
+      limit: source.value.limit,
+      total: source.value.total,
+      selected: selection.value?.selectedIds.value.size ?? 0,
+      stats: selectionStats.value ?? null,
+      labels: table.labels.value,
+      locale: toValue(resolved.value.locale),
+      className: classNames?.statusBar,
+    }),
+    ...(gridFocus.value
+      ? renderFeatureSlot(GRID_ANNOUNCER, slotFills.value, {
+          focus: gridFocus.value,
+        })
+      : []),
+  ];
   const requestConfirm: ConfirmHandler = (request) => {
     const confirm = resolved.value.confirm;
     if (!confirm)
@@ -486,6 +764,36 @@ export function useDataTableShell<TRow>(
     confirm(request);
   };
   const decorateRow = (original: TableRowModel<TRow>): TableRowModel<TRow> => {
+    const reorder = rowReorder.value;
+    if (reorder && !original.summary) {
+      const localIndex = rowInventory.value.visibleRows.findIndex(
+        (row) => table.rowKey(row) === original.key
+      );
+      const model = original;
+      original = {
+        ...model,
+        attrs: {
+          ...model.attrs,
+          ...reorder.rowAttrs(
+            model.key,
+            localIndex,
+            model.row,
+            table.windowStart.value
+          ),
+        },
+        reorder: (mobile) =>
+          renderFeatureSlot(rowReorderControlKey<TRow>(), slotFills.value, {
+            model: reorder,
+            labels: table.labels.value,
+            row: model.row,
+            rowId: model.key,
+            localIndex,
+            windowStart: table.windowStart.value,
+            rowCount: rowInventory.value.visibleRows.length,
+            mobile,
+          }),
+      };
+    }
     const projector = resolved.value.rowActionControls;
     const rowEditing =
       !original.summary && rowEditControlsVisible.value
@@ -525,57 +833,136 @@ export function useDataTableShell<TRow>(
     if (!editing.value || row.summary) return row;
     return {
       ...row,
-      cells: row.cells.map((cell) => ({
-        ...cell,
-        render: (display) =>
-          renderFeatureSlot(editableCellSlotKey<TRow>(), slotFills.value, {
-            editing: editing.value,
-            row: row.row,
-            rowId: row.key,
-            rowIndex: row.index,
-            column: cell.context.column,
-            rows: rowInventory.value.visibleRows,
-            columns: table.columns.value,
-            rowKey: table.rowKey,
-            editLabel: table.labels.value.editCell,
-            undoLabel: table.labels.value.undoEdit,
-            display,
-          }),
-      })),
+      cells: row.cells.map((cell) =>
+        !isCellEditable(cell.context.column, row.row)
+          ? cell
+          : {
+              ...cell,
+              render: (display) =>
+                renderFeatureSlot(
+                  editableCellSlotKey<TRow>(),
+                  slotFills.value,
+                  {
+                    editing: editing.value,
+                    row: row.row,
+                    rowId: row.key,
+                    rowIndex: row.index,
+                    column: cell.context.column,
+                    rows: rowInventory.value.visibleRows,
+                    columns: table.columns.value,
+                    rowKey: table.rowKey,
+                    editLabel: table.labels.value.editCell,
+                    undoLabel: table.labels.value.undoEdit,
+                    display,
+                  }
+                ),
+            }
+      ),
     };
   };
   const decorateSlots = (slots: readonly TableBodySlot<TRow>[] | undefined) =>
     slots?.map((slot) =>
-      slot.kind === "row" ? { ...slot, wiring: decorateRow(slot.wiring) } : slot
+      slot.kind === "row"
+        ? { ...slot, wiring: decorateNavigation(decorateRow(slot.wiring)) }
+        : slot
     );
+  const renameColumn = (key: string, name: string): void =>
+    table.layout.value.setName(key, name);
+  const columnToggle = (col: number) => () =>
+    gridFocus.value?.toggleColumn(col);
+  const summaryCells = useSummaryCells(
+    () => table.source.value.rows,
+    () => resolved.value.summaryRow
+  );
+  const desktopSummary = useTableSummaryModel(
+    table,
+    () => windowedBody.value.desktop.headers.map((header) => header.column),
+    () => summaryCells.value,
+    () => resolved.value.footer !== undefined
+  );
+  const mobileSummary = useTableSummaryModel(
+    table,
+    () => table.columns.value,
+    () => summaryCells.value,
+    () => resolved.value.footer !== undefined
+  );
   const desktop = computed(() => ({
-    ...body.value.desktop,
-    headers: body.value.desktop.headers.map((header) => ({
-      ...header,
-      filter: headerFilters.value?.controls.has(header.key)
-        ? (className?: string) => {
-            const props = headerFilters.value?.controls.get(header.key);
-            return props
-              ? renderFeatureSlot(
-                  headerFilterSlotKey<TRow>(),
-                  slotFills.value,
-                  { ...props, className }
-                )
-              : null;
-          }
-        : undefined,
-      resizeAttrs: resize.value?.attrs(
-        header.key,
-        `${table.labels.value.resizeColumn}: ${header.context.label}`
-      ),
-    })),
-    rows: body.value.desktop.rows.map(decorateRow),
-    bodySlots: decorateSlots(body.value.desktop.bodySlots),
+    ...windowedBody.value.desktop,
+    summary: desktopSummary.value,
+    attrs: mergeVueAttrs(
+      windowedBody.value.desktop.attrs,
+      gridFocus.value?.getGridProps() ?? {}
+    ),
+    headers: windowedBody.value.desktop.headers.map((header) => {
+      const col = bodyColumnPositions.value.get(header.key) ?? -1;
+      return {
+        ...header,
+        attrs: mergeVueAttrs(
+          mergeVueAttrs(
+            header.attrs,
+            toVueAttrs({
+              ...groupingPanel.value?.state.headerDragProps(header.key),
+            })
+          ),
+          gridFocus.value?.getColumnHeaderProps(col, {
+            sortable: header.column.sortable,
+          }) ?? {}
+        ),
+        selection: gridFocus.value?.columnCheckbox
+          ? (className?: string) =>
+              renderFeatureSlot(COLUMN_SELECT, slotFills.value, {
+                label: `${table.labels.value.selectColumn}: ${header.context.label}`,
+                checked: gridFocus.value?.isColumnSelected(col) ?? false,
+                onToggle: columnToggle(col),
+                className,
+              })
+          : undefined,
+        rename:
+          resolved.value.enableColumnMenu && header.column.renameable
+            ? (
+                children: VNodeChild,
+                classNames?: Readonly<Record<string, string | undefined>>
+              ) =>
+                renderFeatureSlot(COLUMN_HEADER_RENAME, slotFills.value, {
+                  columnKey: header.key,
+                  name: header.context.label,
+                  labels: table.labels.value,
+                  onRenameColumn: renameColumn,
+                  children,
+                  classNames,
+                })
+            : undefined,
+
+        filter: headerFilters.value?.controls.has(header.key)
+          ? (className?: string) => {
+              const props = headerFilters.value?.controls.get(header.key);
+              return props
+                ? renderFeatureSlot(
+                    headerFilterSlotKey<TRow>(),
+                    slotFills.value,
+                    { ...props, className }
+                  )
+                : null;
+            }
+          : undefined,
+        resizeAttrs: resize.value?.attrs(
+          header.key,
+          `${table.labels.value.resizeColumn}: ${header.context.label}`
+        ),
+      };
+    }),
+    rows: windowedBody.value.desktop.rows.map((row) =>
+      decorateNavigation(decorateRow(row))
+    ),
+    bodySlots: decorateSlots(windowedBody.value.desktop.bodySlots),
   }));
   const mobile = computed(() => ({
-    ...body.value.mobile,
-    rows: body.value.mobile.rows.map(decorateRow),
-    bodySlots: decorateSlots(body.value.mobile.bodySlots),
+    ...windowedBody.value.mobile,
+    summary: mobileSummary.value,
+    rows: windowedBody.value.mobile.rows.map((row) =>
+      decorateNavigation(decorateRow(row))
+    ),
+    bodySlots: decorateSlots(windowedBody.value.mobile.bodySlots),
   }));
   if (getCurrentInstance()) provideFeatureState(state);
   const active = useScopeActivity();
@@ -659,7 +1046,18 @@ export function useDataTableShell<TRow>(
     }
   };
   const lifecycleInput = {
+    selection,
+    bodyRows,
+    scrollToRow: (index: number) => {
+      const row = bodyRows.value[index - table.windowStart.value];
+      if (row) bodyWindow.value?.scrollToRow(row.key);
+    },
+    scrollToColumn: (index: number) => {
+      const column = table.columns.value[index];
+      if (column) bodyWindow.value?.scrollToColumn(column.key);
+    },
     runtime,
+    bodyProjection: body,
     root,
     urlAdapter,
     flushViewState,
@@ -713,6 +1111,9 @@ export function useDataTableShell<TRow>(
     selection,
     desktop,
     mobile,
+    bodyProjection: body,
+    bodyWindow,
+    rowReorder,
     state,
     active,
     features: declarations,
@@ -735,6 +1136,28 @@ export function useDataTableShell<TRow>(
     renderBatchEditBar,
     renderAgentApproval,
     renderTableAssistant,
+    renderNavigationBefore,
+    renderNavigationAfter,
+    gridFocus,
+    find,
+    selectionStats,
+    bodyRows,
+    hasActionToolbar: computed(() =>
+      [
+        commandPalette.value?.button,
+        commandPalette.value?.open,
+        exporting.value?.onExportCsv,
+        printing.value,
+        toolbarExtrasProps.value.onUndo,
+        toolbarExtrasProps.value.onRedo,
+      ].some(Boolean)
+    ),
+    renderBulkActions,
+    renderActionOverlays,
+    renderSidePanel,
+    sidePanel,
+    renderGroupingPanel,
+    groupingPanel,
     slotFills,
     runtime,
     handle,

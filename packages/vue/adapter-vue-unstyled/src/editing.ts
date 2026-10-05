@@ -3,7 +3,7 @@ import {
   slotRender,
   type StaticTableFeature,
   type TableFeature,
-  TOOLBAR_EXTRAS,
+  UNDO_REDO_CONTROL,
 } from "@adapttable/vue/adapter";
 import {
   batchEditBarSlotKey,
@@ -85,7 +85,7 @@ export { dirtyIndicators, editHistory } from "@adapttable/vue/editing";
 /** Opt-in native Undo and Redo buttons use the shell's history projection. */
 export function undoRedoButtons(): StaticTableFeature {
   return extendFeature(bindingUndoRedoButtons(), [
-    slotRender(TOOLBAR_EXTRAS, (props) =>
+    slotRender(UNDO_REDO_CONTROL, (props) =>
       h(NativeHistoryButtons, { ...props })
     ),
   ]);

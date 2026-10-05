@@ -13,22 +13,40 @@ import {
 } from "@adapttable/vue/saved-views";
 import { defineComponent, h, type MaybeRefOrGetter } from "vue";
 
+import type { DataTableClassNames } from "./types";
 import {
   nativeSavedViewsMenuSlots,
   nativeSavedViewsPanelSlots,
 } from "./viewControls/nativeControls";
 
+export type { DataTableClassNames } from "./types";
 export type {
   SavedView,
   SavedViewsStore,
   UseSavedViewsOptions,
 } from "@adapttable/vue/saved-views";
-export type SavedViewsPanelProps = Omit<SavedViewsPanelChromeProps, "slots">;
+export interface SavedViewsPanelProps extends Omit<
+  SavedViewsPanelChromeProps,
+  "slots"
+> {
+  readonly classNames?: DataTableClassNames;
+}
 
 /** Native management surface over the binding's rename and ordering model. */
 export const SavedViewsPanel = defineComponent(
-  (props: SavedViewsPanelProps) => () =>
-    h(SavedViewsPanelChrome, { ...props, slots: nativeSavedViewsPanelSlots }),
+  (props: SavedViewsPanelProps) => {
+    const slots = nativeSavedViewsPanelSlots(() => props.classNames ?? {});
+    return () => {
+      const { classNames, ...panelProps } = props;
+      return h(SavedViewsPanelChrome, {
+        ...panelProps,
+        className: [props.className, classNames?.viewsPanel]
+          .filter(Boolean)
+          .join(" "),
+        slots,
+      });
+    };
+  },
   {
     name: "SavedViewsPanel",
     props: [
@@ -41,6 +59,7 @@ export const SavedViewsPanel = defineComponent(
       "labels",
       "footer",
       "className",
+      "classNames",
     ],
   }
 );

@@ -278,6 +278,9 @@ jobs:
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           pnpm typecheck $f $AFFECTED --concurrency=1
+      - name: Verify current and minimum Vue source contracts
+        if: matrix.name == 'vue'
+        run: pnpm check:vue-peer-types
 
   lint:
     name: Lint
@@ -380,6 +383,8 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - name: Restore built packages
         run: pnpm build --concurrency=1
+      - name: Verify current and minimum Vue built contracts and ownership
+        run: pnpm check:vue-built-peers
       - name: Check the engine imports no framework
         run: pnpm check:boundary
       - name: Validate published package configs

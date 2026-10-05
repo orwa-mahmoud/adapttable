@@ -5,6 +5,8 @@
 ```ts
 
 import { CellContext } from '@adapttable/vue/adapter';
+import { CellEdit } from '@adapttable/vue/adapter';
+import { CellRange } from '@adapttable/vue/adapter';
 import { ColumnDef } from '@adapttable/vue/adapter';
 import { ColumnGroup } from '@adapttable/vue/adapter';
 import { ColumnInput } from '@adapttable/vue/adapter';
@@ -13,10 +15,12 @@ import { ComposedFeature } from '@adapttable/vue/adapter';
 import { ConfirmHandler } from '@adapttable/vue/adapter';
 import { DataTableHandle } from '@adapttable/vue/adapter';
 import { Direction } from '@adapttable/vue/adapter';
+import { FooterContext } from '@adapttable/vue/adapter';
 import { HeaderContext } from '@adapttable/vue/adapter';
 import { PaginationMode } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
 import { ShallowUnwrapRef } from 'vue';
+import { SummaryRowFn } from '@adapttable/vue/adapter';
 import { TableAssistantProps } from '@adapttable/vue/assistant';
 import { TableDensity } from '@adapttable/vue/adapter';
 import { TableErrorState } from '@adapttable/vue/adapter';
@@ -49,6 +53,10 @@ type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K 
 
 export { CellContext }
 
+export { CellEdit }
+
+export { CellRange }
+
 export { ColumnDef }
 
 export { ColumnGroup }
@@ -75,9 +83,21 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly batchEditButton?: string;
     // (undocumented)
+    readonly bulkBar?: string;
+    // (undocumented)
+    readonly bulkButton?: string;
+    // (undocumented)
+    readonly bulkClear?: string;
+    // (undocumented)
+    readonly bulkCount?: string;
+    // (undocumented)
+    readonly bulkError?: string;
+    // (undocumented)
     readonly card?: string;
     // (undocumented)
     readonly cardActions?: string;
+    // (undocumented)
+    readonly cardDetail?: string;
     // (undocumented)
     readonly cardFields?: string;
     // (undocumented)
@@ -93,7 +113,85 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly columnGroupToggle?: string;
     // (undocumented)
+    readonly columnMenu?: string;
+    // (undocumented)
+    readonly columnMenuAction?: string;
+    // (undocumented)
+    readonly columnMenuAutoSize?: string;
+    // (undocumented)
+    readonly columnMenuBulk?: string;
+    // (undocumented)
+    readonly columnMenuBulkButton?: string;
+    // (undocumented)
+    readonly columnMenuButton?: string;
+    // (undocumented)
+    readonly columnMenuChoice?: string;
+    // (undocumented)
+    readonly columnMenuChoiceLabel?: string;
+    // (undocumented)
+    readonly columnMenuChoiceSelect?: string;
+    // (undocumented)
+    readonly columnMenuGrip?: string;
+    // (undocumented)
+    readonly columnMenuHeader?: string;
+    // (undocumented)
+    readonly columnMenuItem?: string;
+    // (undocumented)
+    readonly columnMenuLabel?: string;
+    // (undocumented)
+    readonly columnMenuMore?: string;
+    // (undocumented)
+    readonly columnMenuPanel?: string;
+    // (undocumented)
+    readonly columnMenuPin?: string;
+    // (undocumented)
+    readonly columnMenuReset?: string;
+    // (undocumented)
+    readonly columnMenuSearch?: string;
+    // (undocumented)
+    readonly columnMenuSeparator?: string;
+    // (undocumented)
+    readonly columnMenuSubmenu?: string;
+    // (undocumented)
+    readonly columnMenuTitle?: string;
+    // (undocumented)
+    readonly columnMenuVisibility?: string;
+    // (undocumented)
+    readonly columnRenameAnnouncer?: string;
+    // (undocumented)
+    readonly columnRenameCancel?: string;
+    // (undocumented)
+    readonly columnRenameError?: string;
+    // (undocumented)
+    readonly columnRenameForm?: string;
+    // (undocumented)
+    readonly columnRenameInput?: string;
+    // (undocumented)
+    readonly columnRenameLabel?: string;
+    // (undocumented)
+    readonly columnRenameSave?: string;
+    // (undocumented)
+    readonly columnSelect?: string;
+    // (undocumented)
+    readonly commandEmpty?: string;
+    // (undocumented)
+    readonly commandInput?: string;
+    // (undocumented)
+    readonly commandItem?: string;
+    // (undocumented)
+    readonly commandPalette?: string;
+    // (undocumented)
+    readonly commandPaletteButton?: string;
+    // (undocumented)
+    readonly contextMenu?: string;
+    // (undocumented)
+    readonly contextMenuItem?: string;
+    // (undocumented)
+    readonly contextMenuSeparator?: string;
+    // (undocumented)
     readonly densitySelect?: string;
+    // (undocumented)
+    readonly densityToggle?: string;
     // (undocumented)
     readonly detailCell?: string;
     // (undocumented)
@@ -121,7 +219,23 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly error?: string;
     // (undocumented)
+    readonly expandButton?: string;
+    // (undocumented)
     readonly expandToggle?: string;
+    // (undocumented)
+    readonly exportCsvButton?: string;
+    // (undocumented)
+    readonly exportProgress?: string;
+    // (undocumented)
+    readonly exportProgressBar?: string;
+    // (undocumented)
+    readonly exportProgressButton?: string;
+    // (undocumented)
+    readonly exportProgressDownload?: string;
+    // (undocumented)
+    readonly exportProgressMessage?: string;
+    // (undocumented)
+    readonly fillHandle?: string;
     // (undocumented)
     readonly filterCheckbox?: string;
     // (undocumented)
@@ -145,17 +259,29 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly filterHeaderInput?: string;
     // (undocumented)
+    readonly filterHeaderTrigger?: string;
+    // (undocumented)
     readonly filterInput?: string;
     // (undocumented)
     readonly filterLabel?: string;
     // (undocumented)
     readonly filterOperator?: string;
     // (undocumented)
+    readonly filterOptionsLoading?: string;
+    // (undocumented)
     readonly filtersActions?: string;
+    // (undocumented)
+    readonly filtersAnchor?: string;
+    // (undocumented)
+    readonly filtersBody?: string;
     // (undocumented)
     readonly filtersButton?: string;
     // (undocumented)
     readonly filtersClear?: string;
+    // (undocumented)
+    readonly filtersClose?: string;
+    // (undocumented)
+    readonly filtersCount?: string;
     // (undocumented)
     readonly filtersDone?: string;
     // (undocumented)
@@ -163,11 +289,19 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly filterSelect?: string;
     // (undocumented)
+    readonly filtersFooter?: string;
+    // (undocumented)
     readonly filtersForm?: string;
+    // (undocumented)
+    readonly filtersHeader?: string;
+    // (undocumented)
+    readonly filtersIcon?: string;
     // (undocumented)
     readonly filtersPanel?: string;
     // (undocumented)
     readonly filtersPopover?: string;
+    // (undocumented)
+    readonly filtersTitle?: string;
     // (undocumented)
     readonly filtersToolbar?: string;
     // (undocumented)
@@ -183,23 +317,89 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly filterTreeSummary?: string;
     // (undocumented)
+    readonly findBar?: string;
+    // (undocumented)
+    readonly findButton?: string;
+    // (undocumented)
+    readonly findInput?: string;
+    // (undocumented)
     readonly footer?: string;
     // (undocumented)
     readonly fullscreenButton?: string;
     // (undocumented)
+    readonly fullscreenToggle?: string;
+    // (undocumented)
     readonly groupAggregate?: string;
+    // (undocumented)
+    readonly groupCard?: string;
+    // (undocumented)
+    readonly groupCell?: string;
     // (undocumented)
     readonly groupCheckbox?: string;
     // (undocumented)
     readonly groupCount?: string;
     // (undocumented)
+    readonly groupFooterCell?: string;
+    // (undocumented)
+    readonly groupFooterRow?: string;
+    // (undocumented)
+    readonly groupingAdd?: string;
+    // (undocumented)
+    readonly groupingAggregationAdd?: string;
+    // (undocumented)
+    readonly groupingAggregationItem?: string;
+    // (undocumented)
+    readonly groupingAggregationOperation?: string;
+    // (undocumented)
+    readonly groupingAggregationRemove?: string;
+    // (undocumented)
+    readonly groupingAggregations?: string;
+    // (undocumented)
+    readonly groupingAggregationsRestore?: string;
+    // (undocumented)
+    readonly groupingChip?: string;
+    // (undocumented)
+    readonly groupingChipHandle?: string;
+    // (undocumented)
+    readonly groupingChipRemove?: string;
+    // (undocumented)
+    readonly groupingDropZone?: string;
+    // (undocumented)
+    readonly groupingItem?: string;
+    // (undocumented)
+    readonly groupingPanel?: string;
+    // (undocumented)
+    readonly groupingRemoveZone?: string;
+    // (undocumented)
     readonly groupLabel?: string;
     // (undocumented)
     readonly groupMore?: string;
     // (undocumented)
+    readonly groupMoreCell?: string;
+    // (undocumented)
+    readonly groupMoreRow?: string;
+    // (undocumented)
     readonly groupRow?: string;
     // (undocumented)
+    readonly groupSelect?: string;
+    // (undocumented)
     readonly groupToggle?: string;
+    // (undocumented)
+    readonly headerRenameAnnouncer?: string;
+    // (undocumented)
+    readonly headerRenameButton?: string;
+    // (undocumented)
+    readonly headerRenameCancel?: string;
+    // (undocumented)
+    readonly headerRenameError?: string;
+    // (undocumented)
+    readonly headerRenameForm?: string;
+    // (undocumented)
+    readonly headerRenameInput?: string;
+    // (undocumented)
+    readonly headerRenameLabel?: string;
+    // (undocumented)
+    readonly headerRenameSave?: string;
     // (undocumented)
     readonly loading?: string;
     // (undocumented)
@@ -217,9 +417,15 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly pager?: string;
     // (undocumented)
+    readonly printButton?: string;
+    // (undocumented)
     readonly redoButton?: string;
     // (undocumented)
     readonly refreshing?: string;
+    // (undocumented)
+    readonly reorderCell?: string;
+    // (undocumented)
+    readonly reorderHeader?: string;
     // (undocumented)
     readonly resizeHandle?: string;
     // (undocumented)
@@ -233,6 +439,14 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly rowEditButton?: string;
     // (undocumented)
+    readonly rowReorderButtons?: string;
+    // (undocumented)
+    readonly rowReorderDown?: string;
+    // (undocumented)
+    readonly rowReorderHandle?: string;
+    // (undocumented)
+    readonly rowReorderUp?: string;
+    // (undocumented)
     readonly rowsPerPage?: string;
     // (undocumented)
     readonly scroll?: string;
@@ -241,11 +455,31 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly searchWrapper?: string;
     // (undocumented)
+    readonly selectAllBanner?: string;
+    // (undocumented)
+    readonly selectAllButton?: string;
+    // (undocumented)
+    readonly selectAllText?: string;
+    // (undocumented)
     readonly selectionCell?: string;
     // (undocumented)
     readonly selectionCheckbox?: string;
     // (undocumented)
     readonly selectionHeader?: string;
+    // (undocumented)
+    readonly selectionStats?: string;
+    // (undocumented)
+    readonly sidePanel?: string;
+    // (undocumented)
+    readonly sidePanelBody?: string;
+    // (undocumented)
+    readonly sidePanelClose?: string;
+    // (undocumented)
+    readonly sidePanelHeader?: string;
+    // (undocumented)
+    readonly sidePanelTab?: string;
+    // (undocumented)
+    readonly sidePanelTabs?: string;
     // (undocumented)
     readonly sortButton?: string;
     // (undocumented)
@@ -255,7 +489,21 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly status?: string;
     // (undocumented)
+    readonly statusBar?: string;
+    // (undocumented)
+    readonly statusItem?: string;
+    // (undocumented)
+    readonly summary?: string;
+    // (undocumented)
+    readonly summaryCard?: string;
+    // (undocumented)
+    readonly summaryCell?: string;
+    // (undocumented)
+    readonly summaryRow?: string;
+    // (undocumented)
     readonly table?: string;
+    // (undocumented)
+    readonly tableFooter?: string;
     // (undocumented)
     readonly tbody?: string;
     // (undocumented)
@@ -296,6 +544,8 @@ export interface DataTableClassNames {
     readonly viewsSave?: string;
     // (undocumented)
     readonly viewsSaveRow?: string;
+    // (undocumented)
+    readonly virtualSpacer?: string;
 }
 
 export { DataTableHandle }
@@ -353,6 +603,12 @@ export interface DataTableProps<TRow> {
     // (undocumented)
     readonly multiSort?: boolean;
     // (undocumented)
+    readonly onCellCut?: (range: CellRange) => void;
+    // (undocumented)
+    readonly onCellFill?: (edits: CellEdit<TRow>[]) => void;
+    // (undocumented)
+    readonly onCellPaste?: (edits: CellEdit<TRow>[]) => void;
+    // (undocumented)
     readonly onColumnRename?: (key: string, name: string) => void;
     // (undocumented)
     readonly onDensityChange?: (density: TableDensity) => void;
@@ -372,6 +628,7 @@ export interface DataTableProps<TRow> {
     readonly selectedIds?: readonly string[];
     // (undocumented)
     readonly source?: TableSource<TRow>;
+    readonly summaryRow?: SummaryRowFn<TRow>;
     // (undocumented)
     readonly tableLabel?: string;
     // (undocumented)
@@ -393,15 +650,21 @@ export interface DataTableSlots<TRow> {
     }) => VNodeChild;
     // (undocumented)
     error?: (state: TableErrorState) => VNodeChild;
+    footer?: (context: FooterContext<TRow>) => VNodeChild;
     // (undocumented)
     header?: (context: HeaderContext<TRow>) => VNodeChild;
     // (undocumented)
     loading?: () => VNodeChild;
+    tableFooter?: () => VNodeChild;
     // (undocumented)
     toolbar?: () => VNodeChild;
 }
 
+export { FooterContext }
+
 export { HeaderContext }
+
+export { SummaryRowFn }
 
 export { TableDensity }
 

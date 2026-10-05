@@ -91,9 +91,9 @@ describe("native view-control feature fills", () => {
     expect(fixture.root.querySelector(part("toolbar"))).toBeNull();
     fixture.props.value = { ...fixture.props.value, features: definitions };
     await nextTick();
-    expect(fixture.root.querySelector(part("density-select"))).not.toBeNull();
+    expect(fixture.root.querySelector(part("density-toggle"))).not.toBeNull();
     expect(fixture.root.querySelector(part("views-button"))).not.toBeNull();
-    expect(fixture.root.querySelector(part("fullscreen-button"))).toBeNull();
+    expect(fixture.root.querySelector(part("fullscreen-toggle"))).toBeNull();
     expect(fixture.root.querySelector('input[type="search"]')).toBeNull();
   });
 
@@ -131,7 +131,7 @@ describe("native view-control feature fills", () => {
     await nextTick();
     const select = findControl<HTMLSelectElement>(
       fixture.root,
-      part("density-select")
+      part("density-toggle")
     );
     expect(select.tagName).toBe("SELECT");
     expect(select.className).toBe("density");
@@ -183,14 +183,14 @@ describe("native view-control feature fills", () => {
     cleanup.push(fixture.stop);
     await selectDensity(fixture.root, "compact");
     expect(
-      findControl<HTMLSelectElement>(fixture.root, part("density-select")).value
+      findControl<HTMLSelectElement>(fixture.root, part("density-toggle")).value
     ).toBe("comfortable");
     expect(observer).toHaveBeenCalledExactlyOnceWith("compact");
     expect(update).toHaveBeenCalledExactlyOnceWith("compact");
     fixture.props.value = { ...fixture.props.value, density: "compact" };
     await nextTick();
     expect(
-      findControl<HTMLSelectElement>(fixture.root, part("density-select")).value
+      findControl<HTMLSelectElement>(fixture.root, part("density-toggle")).value
     ).toBe("compact");
     expect(update).toHaveBeenCalledTimes(1);
     update.mockImplementation((density: "compact" | "comfortable") => {
@@ -198,7 +198,7 @@ describe("native view-control feature fills", () => {
     });
     await selectDensity(fixture.root, "comfortable");
     expect(
-      findControl<HTMLSelectElement>(fixture.root, part("density-select")).value
+      findControl<HTMLSelectElement>(fixture.root, part("density-toggle")).value
     ).toBe("comfortable");
     expect(update).toHaveBeenCalledTimes(2);
     expect(observer).toHaveBeenCalledTimes(2);
@@ -247,7 +247,7 @@ describe("native view-control feature fills", () => {
     await clickControl(fixture.root, part("views-button"));
     await clickControl(fixture.root, part("views-item"));
     expect(
-      findControl<HTMLSelectElement>(fixture.root, part("density-select")).value
+      findControl<HTMLSelectElement>(fixture.root, part("density-toggle")).value
     ).toBe("compact");
     expect(
       findControl<HTMLInputElement>(fixture.root, 'input[type="search"]').value
@@ -255,7 +255,7 @@ describe("native view-control feature fills", () => {
     expect(fixture.root.querySelectorAll("tbody tr")).toHaveLength(1);
     expect(adapter.getSearch()).toContain("other.q=Grace");
     expect(
-      findControl<HTMLSelectElement>(other.root, part("density-select")).value
+      findControl<HTMLSelectElement>(other.root, part("density-toggle")).value
     ).toBe("comfortable");
     expect(document.activeElement).toBe(trigger);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
@@ -293,13 +293,13 @@ describe("native view-control feature fills", () => {
     expect(storage.getItem("views")).toContain('"search":"density=compact"');
     await clickControl(fixture.root, part("views-item"));
     expect(
-      findControl<HTMLSelectElement>(fixture.root, part("density-select")).value
+      findControl<HTMLSelectElement>(fixture.root, part("density-toggle")).value
     ).toBe("comfortable");
     await clickControl(fixture.root, part("views-button"));
     fixture.props.value = { ...fixture.props.value, features: [] };
     await nextTick();
     expect(fixture.root.querySelector(part("views-menu"))).toBeNull();
-    expect(fixture.root.querySelector(part("density-select"))).toBeNull();
+    expect(fixture.root.querySelector(part("density-toggle"))).toBeNull();
   });
 
   it("uses the real stable fullscreen root and keeps saved-view panels within it through state changes", async () => {
@@ -314,11 +314,11 @@ describe("native view-control feature fills", () => {
     const root = findControl<HTMLElement>(fixture.root, part("root"));
     const button = findControl<HTMLButtonElement>(
       fixture.root,
-      part("fullscreen-button")
+      part("fullscreen-toggle")
     );
     expect(button.className).toBe("fullscreen");
     expect(button.getAttribute("aria-label")).toBe("Agrandir");
-    await clickControl(fixture.root, part("fullscreen-button"));
+    await clickControl(fixture.root, part("fullscreen-toggle"));
     expect(browser.current()).toBe(root);
     expect(browser.request).toHaveBeenCalledTimes(1);
     expect(button.getAttribute("aria-pressed")).toBe("true");
@@ -335,11 +335,11 @@ describe("native view-control feature fills", () => {
     await browser.exit();
     await nextTick();
     expect(button.getAttribute("aria-pressed")).toBe("false");
-    await clickControl(fixture.root, part("fullscreen-button"));
+    await clickControl(fixture.root, part("fullscreen-toggle"));
     fixture.props.value = { ...fixture.props.value, features: [] };
     await nextTick();
     expect(browser.current()).toBeNull();
-    expect(fixture.root.querySelector(part("fullscreen-button"))).toBeNull();
+    expect(fixture.root.querySelector(part("fullscreen-toggle"))).toBeNull();
   });
 
   it("hydrates density and saved-view markup without mismatch, then activates controls", async () => {
@@ -371,7 +371,7 @@ describe("native view-control feature fills", () => {
     expect(warn).not.toHaveBeenCalled();
     expect(error).not.toHaveBeenCalled();
     expect(
-      findControl<HTMLSelectElement>(root, part("density-select")).value
+      findControl<HTMLSelectElement>(root, part("density-toggle")).value
     ).toBe("compact");
     await selectDensity(root, "comfortable");
     expect(findControl(root, part("root")).getAttribute("data-density")).toBe(
@@ -523,7 +523,7 @@ it("ignores detached native control events and invalid select values without iss
     value: "",
     onChange: changed,
   });
-  const panelInput = nativeSavedViewsPanelSlots.Input({
+  const panelInput = nativeSavedViewsPanelSlots(() => ({})).Input({
     label: "Name",
     ref: () => undefined,
     value: "",
@@ -551,7 +551,7 @@ it("ignores detached native control events and invalid select values without iss
   cleanup.push(fixture.stop);
   const select = findControl<HTMLSelectElement>(
     fixture.root,
-    part("density-select")
+    part("density-toggle")
   );
   select.value = "unsupported";
   select.dispatchEvent(new Event("change", { bubbles: true }));

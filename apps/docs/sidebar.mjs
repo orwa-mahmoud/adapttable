@@ -136,6 +136,11 @@ export const sidebar = [
     items: [
       { label: "Get started with Vue", slug: "vue/getting-started" },
       { label: "Vue feature composition", slug: "vue/features" },
+      { label: "Vue actions and exports", slug: "vue/actions" },
+      { label: "Vue column menu", slug: "vue/column-menu" },
+      { label: "Vue navigation, find and status", slug: "vue/navigation" },
+      { label: "Vue specialized data views", slug: "vue/specialized" },
+      { label: "Vue summaries and footers", slug: "vue/summary-row" },
       { label: "Vue API reference", slug: "vue/api" },
       { label: "Vue assistant and approvals", slug: "vue/assistant" },
     ],

@@ -179,6 +179,17 @@ export default defineConfig(
     rules: tseslint.configs.disableTypeChecked.rules,
   },
   {
+    // These fixtures exercise typed CommonJS imports. Plain require calls
+    // remain forbidden, and the consumer profiles still typecheck strictly.
+    files: ["scripts/vue-peer-consumer-fixtures/*.cts"],
+    rules: {
+      "@typescript-eslint/no-require-imports": [
+        "error",
+        { allowAsImport: true },
+      ],
+    },
+  },
+  {
     files: [
       "**/*.{test,spec}.{ts,tsx}",
       "**/*.gaps.test.{ts,tsx}",

@@ -45,6 +45,16 @@ export interface FeatureLifecycle<TRow> {
   dispose(): void;
 }
 export function useFeatureLifecycle<TRow>(options: {
+  readonly bodyRows?: NonNullable<FeatureMountContext<TRow>["bodyRows"]>;
+  readonly selection?: NonNullable<FeatureMountContext<TRow>["selection"]>;
+  readonly scrollToRow?: NonNullable<FeatureMountContext<TRow>["scrollToRow"]>;
+  readonly scrollToColumn?: NonNullable<
+    FeatureMountContext<TRow>["scrollToColumn"]
+  >;
+
+  readonly bodyProjection?: NonNullable<
+    FeatureMountContext<TRow>["bodyProjection"]
+  >;
   readonly runtime: TableRuntime<TRow>;
   readonly root: FeatureMountContext<TRow>["root"];
   readonly urlAdapter: FeatureMountContext<TRow>["urlAdapter"];
@@ -134,7 +144,13 @@ export function useFeatureLifecycle<TRow>(options: {
     const state = options.state.owner();
     let cleanup: (() => void) | undefined;
     const context: FeatureMountContext<TRow> = {
+      bodyRows: options.bodyRows,
+      selection: options.selection,
+      scrollToRow: options.scrollToRow,
+      scrollToColumn: options.scrollToColumn,
+
       runtime: options.runtime,
+      bodyProjection: options.bodyProjection,
       root: options.root,
       urlAdapter: options.urlAdapter,
       flushViewState: options.flushViewState,

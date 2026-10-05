@@ -41,7 +41,7 @@ export function hierarchyDetail<TRow>(
       type: "button",
       "aria-expanded": expanded,
       "aria-label": expanded ? labels.collapseRow : labels.expandRow,
-      "data-adapttable-part": "expand-toggle",
+      "data-adapttable-part": "expand-button",
       onClick: (event: Event) => {
         event.stopPropagation();
         detail.expansion.toggle(id);

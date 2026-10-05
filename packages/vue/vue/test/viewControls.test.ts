@@ -369,14 +369,14 @@ it("wires native density and fullscreen through the same mounted shell", async (
   await nextTick();
   fixture.root
     .querySelector<HTMLButtonElement>(
-      '[data-adapttable-part="fullscreen-button"]'
+      '[data-adapttable-part="fullscreen-toggle"]'
     )
     ?.click();
   await nextTick();
   expect(request).toHaveBeenCalledTimes(1);
   expect(promoted).toBe(fixture.root.querySelector("section"));
   const density = fixture.root.querySelector<HTMLSelectElement>(
-    '[data-adapttable-part="density-select"]'
+    '[data-adapttable-part="density-toggle"]'
   )!;
   density.value = "compact";
   density.dispatchEvent(new Event("change", { bubbles: true }));

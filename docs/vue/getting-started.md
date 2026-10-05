@@ -97,17 +97,28 @@ for the complete prop, slot and class-name contracts.
 
 ## Add filters, editing and view controls
 
-This extends the first table. Mark a column editable, compose the native
-features and pass the resulting array as `:features="features"`:
+The setup below uses the same `Person` rows as the first table. Use its editable
+columns and native feature array in that table, passing `:features="features"`.
+The imports and row declarations are included so the setup is self-contained:
 
 ```ts
+import { shallowRef } from "vue";
+import type { ColumnDef } from "@adapttable/vue-unstyled";
 import { filters } from "@adapttable/vue-unstyled/filters";
 import { headerFilters } from "@adapttable/vue-unstyled/header-filters";
 import { editing } from "@adapttable/vue-unstyled/editing";
 import { densityChooser } from "@adapttable/vue-unstyled/density";
 import { savedViews } from "@adapttable/vue-unstyled/saved-views";
 
-// Replace the first example's columns declaration with this one.
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
+const rows = shallowRef<readonly Person[]>([
+  { id: "ada", name: "Ada", score: 10 },
+  { id: "grace", name: "Grace", score: 20 },
+]);
 const columns: ColumnDef<Person>[] = [
   { key: "name", header: "Name", sortable: true, editable: true },
   { key: "score", header: "Score", sortable: true },
@@ -188,10 +199,16 @@ The `cell` slot receives `{ row, rowIndex, column, value }`; `header` receives
 `{ column, label, sortDir, sortIndex, toggleSort }`. A column's own `cell` or
 `headerCell` renderer takes precedence over the corresponding table slot.
 A custom header owns its sort control: invoke `toggleSort` if it should sort.
+Keep the setup from the first table and replace its template with this one.
 
 ```vue
 <template>
-  <DataTable :data="rows" :columns="columns" :row-key="rowKey">
+  <DataTable
+    v-model:selected-ids="selectedIds"
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+  >
     <template #cell="{ row, column, value }">
       <strong v-if="column.key === 'name'">{{ row.name }}</strong>
       <span v-else>{{ value }}</span>

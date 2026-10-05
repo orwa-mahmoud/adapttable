@@ -1,16 +1,20 @@
 <script setup lang="ts" generic="TRow">
 import {
+  COLUMN_MENU,
   type ColumnLayoutState,
   type DataTableHandle,
   defaultConfirm,
   DENSITY_CONTROL,
   DesktopTableChrome,
+  FIND_BUTTON,
   FULLSCREEN_CONTROL,
   MobileCardsChrome,
   renderFeatureSlot,
   SAVED_VIEWS_CONTROL,
+  SidePanelLayoutChrome,
   type TableChromeSlots,
   type TableDensity,
+  TableFooterChrome,
   TOOLBAR_EXTRAS,
   useDataTableShell,
 } from "@adapttable/vue/adapter";
@@ -19,6 +23,7 @@ import {
   h,
   mergeProps,
   onBeforeUnmount,
+  onBeforeUpdate,
   shallowRef,
   watch,
 } from "vue";
@@ -51,8 +56,13 @@ const emit = defineEmits<{
   "update:density": [density: TableDensity];
 }>();
 const slots = defineSlots<DataTableSlots<TRow>>();
+const footerSlot = shallowRef(slots.footer);
+onBeforeUpdate(() => {
+  footerSlot.value = slots.footer;
+});
 const shell = useDataTableShell<TRow>(() => ({
   ...props,
+  footer: footerSlot.value,
   confirm: props.confirm ?? defaultConfirm,
   onDensityChange: (density) => {
     props.onDensityChange?.(density);
@@ -69,19 +79,29 @@ const shell = useDataTableShell<TRow>(() => ({
 const { table } = shell;
 const names = computed(() => props.classNames ?? {});
 provideClassNames(() => names.value);
-const hasToolbarExtras = computed(() =>
-  [
-    TOOLBAR_EXTRAS,
-    DENSITY_CONTROL,
-    FULLSCREEN_CONTROL,
-    SAVED_VIEWS_CONTROL,
-  ].some((slot) => Boolean(shell.slotFills.value.get(slot.id)?.length))
+const hasToolbarExtras = computed(
+  () =>
+    [
+      TOOLBAR_EXTRAS,
+      DENSITY_CONTROL,
+      FULLSCREEN_CONTROL,
+      SAVED_VIEWS_CONTROL,
+      FIND_BUTTON,
+      COLUMN_MENU,
+    ].some((slot) => Boolean(shell.slotFills.value.get(slot.id)?.length)) ||
+    shell.hasActionToolbar.value
 );
 const ToolbarExtras = () => shell.renderToolbarExtras({ ...names.value });
 const BatchEditBar = () => shell.renderBatchEditBar();
 const AgentApprovalSurface = () =>
   shell.renderAgentApproval({ ...names.value });
 const AssistantSurface = () => shell.renderTableAssistant();
+const NavigationBefore = () => shell.renderNavigationBefore({ ...names.value });
+const NavigationAfter = () => shell.renderNavigationAfter({ ...names.value });
+const BulkActions = () => shell.renderBulkActions({ ...names.value });
+const ActionOverlays = () => shell.renderActionOverlays({ ...names.value });
+const SidePanel = () => shell.renderSidePanel({ ...names.value });
+const GroupingPanel = () => shell.renderGroupingPanel();
 function controls(): TableChromeSlots<TRow> {
   return {
     SortButton: ({ attrs, content }) => h("button", attrs, [content]),
@@ -113,6 +133,7 @@ function controls(): TableChromeSlots<TRow> {
     },
     cell: slots.cell,
     header: slots.header,
+    footer: slots.footer,
   };
 }
 const rootElement = shallowRef<HTMLElement | null>(null);
@@ -168,6 +189,13 @@ const liveStyle = {
     :data-density="shell.density.value"
     :class="names.root"
   >
+    <span
+      v-if="shell.rowReorder.value"
+      role="status"
+      aria-live="polite"
+      :style="liveStyle"
+      >{{ shell.rowReorder.value.snapshot.announcement }}</span
+    >
     <div
       v-if="
         searchable !== false ||
@@ -242,8 +270,10 @@ const liveStyle = {
       </button>
       <slot name="toolbar" />
     </div>
+    <BulkActions />
     <BatchEditBar />
     <AgentApprovalSurface />
+    <NavigationBefore />
     <div
       v-if="table.errorState.value"
       role="alert"
@@ -273,80 +303,102 @@ const liveStyle = {
     >
       {{ table.labels.value.loading }}
     </div>
-    <div
-      ref="scrollElement"
-      tabindex="-1"
-      data-adapttable-part="scroll-box"
-      :class="names.scroll"
-      :aria-busy="
-        shell.source.value.isLoading || table.isRefreshing.value
-          ? 'true'
-          : undefined
-      "
+    <GroupingPanel v-if="shell.groupingPanel.value" />
+    <SidePanelLayoutChrome
+      :open="shell.sidePanel.value?.open != null"
+      :side="shell.sidePanel.value?.side"
+      :mobile="table.isMobile.value"
+      :panel="SidePanel"
     >
       <div
-        v-if="table.bodyRegion.value === 'skeleton'"
-        role="status"
-        data-adapttable-part="loading"
-        :class="names.loading"
-      >
-        <slot name="loading">{{ table.labels.value.loading }}</slot>
-      </div>
-      <output
-        v-else-if="
-          table.bodyRegion.value === 'empty' && !table.errorState.value
+        ref="scrollElement"
+        tabindex="-1"
+        data-adapttable-part="scroll-box"
+        :style="
+          typeof shell.featureOptions.value.maxHeight === 'number'
+            ? {
+                maxHeight: `${shell.featureOptions.value.maxHeight}px`,
+                overflow: 'auto',
+              }
+            : undefined
         "
-        data-adapttable-part="empty"
-        :class="names.empty"
+        :class="names.scroll"
+        :aria-busy="
+          shell.source.value.isLoading || table.isRefreshing.value
+            ? 'true'
+            : undefined
+        "
       >
-        <slot
-          name="empty"
-          :no-results="table.emptyVariant.value === 'noResults'"
-          :clear="table.clearSearchAndFilters"
+        <div
+          v-if="table.bodyRegion.value === 'skeleton'"
+          role="status"
+          data-adapttable-part="loading"
+          :class="names.loading"
         >
-          {{
-            table.emptyVariant.value === "noResults"
-              ? table.labels.value.noResults
-              : table.labels.value.noData
-          }}
-          <button
-            v-if="table.emptyVariant.value === 'noResults'"
-            type="button"
-            data-adapttable-part="empty-clear"
-            :class="names.emptyClear"
-            @click="table.clearSearchAndFilters"
+          <slot name="loading">{{ table.labels.value.loading }}</slot>
+        </div>
+        <output
+          v-else-if="
+            table.bodyRegion.value === 'empty' && !table.errorState.value
+          "
+          data-adapttable-part="empty"
+          :class="names.empty"
+        >
+          <slot
+            name="empty"
+            :no-results="table.emptyVariant.value === 'noResults'"
+            :clear="table.clearSearchAndFilters"
           >
-            {{ table.labels.value.clearAll }}
-          </button>
-        </slot>
-      </output>
-      <MobileCardsChrome
-        v-else-if="table.isMobile.value && table.rows.value.length"
-        :model="shell.mobile.value"
-        :slots="controls()"
-        :class-names="names"
-      />
-      <DesktopTableChrome
-        v-else-if="table.rows.value.length"
-        :model="shell.desktop.value"
-        :slots="controls()"
-        :class-names="names"
-      />
-      <div
-        v-if="table.canLoadMore.value"
-        v-bind="table.loadMoreAttrs()"
-        data-adapttable-part="load-more"
-        :class="names.loadMore"
-      >
-        <button
-          v-bind="table.loadMoreButtonAttrs()"
-          data-adapttable-part="load-more-button"
-          :class="names.loadMoreButton"
+            {{
+              table.emptyVariant.value === "noResults"
+                ? table.labels.value.noResults
+                : table.labels.value.noData
+            }}
+            <button
+              v-if="table.emptyVariant.value === 'noResults'"
+              type="button"
+              data-adapttable-part="empty-clear"
+              :class="names.emptyClear"
+              @click="table.clearSearchAndFilters"
+            >
+              {{ table.labels.value.clearAll }}
+            </button>
+          </slot>
+        </output>
+        <MobileCardsChrome
+          v-else-if="table.isMobile.value && table.rows.value.length"
+          :model="shell.mobile.value"
+          :slots="controls()"
+          :class-names="names"
+        />
+        <DesktopTableChrome
+          v-else-if="table.rows.value.length"
+          :model="shell.desktop.value"
+          :slots="controls()"
+          :class-names="names"
+        />
+        <div
+          v-if="table.canLoadMore.value"
+          v-bind="table.loadMoreAttrs()"
+          data-adapttable-part="load-more"
+          :class="names.loadMore"
         >
-          {{ table.labels.value.loadMore }}
-        </button>
+          <button
+            v-bind="table.loadMoreButtonAttrs()"
+            data-adapttable-part="load-more-button"
+            :class="names.loadMoreButton"
+          >
+            {{ table.labels.value.loadMore }}
+          </button>
+        </div>
       </div>
-    </div>
+    </SidePanelLayoutChrome>
+    <ActionOverlays />
+    <TableFooterChrome
+      v-if="slots.tableFooter"
+      :content="slots.tableFooter"
+      :class-name="names.tableFooter"
+    />
     <div
       v-if="table.showFooter.value"
       data-adapttable-part="footer"
@@ -430,6 +482,7 @@ const liveStyle = {
         </button>
       </div>
     </div>
+    <NavigationAfter />
     <span
       role="status"
       aria-live="polite"

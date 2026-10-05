@@ -37,7 +37,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version && prettier --write \".changeset/*.json\" \"packages/*/*/CHANGELOG.md\" \"packages/*/*/package.json\"",
     "release": "turbo run build && changeset publish",
-    "verify:release": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:api-contract && pnpm run check:package-split && pnpm run typecheck && pnpm run test:coverage && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget && pnpm run consumer:harness && pnpm run migrate:rehearse && pnpm run peer:floors",
+    "verify:release": "pnpm run format:check && pnpm run lint && pnpm run lint:root && pnpm run check:readmes && pnpm run check:docsurface && pnpm run check:parts && pnpm run check:api-contract && pnpm run check:package-split && pnpm run typecheck && pnpm run test:coverage && pnpm run build && pnpm run api:check && pnpm run publint && pnpm run smoke:dist && pnpm run budget && pnpm run consumer:harness && pnpm run migrate:rehearse && pnpm run peer:floors && pnpm run check:vue-peer-types && pnpm run check:vue-built-peers",
     "publint": "pnpm --filter \"./packages/*/*\" exec publint --strict",
     "smoke:dist": "node scripts/smoke-dist.mjs",
     "perf:v3": "node scripts/v3-perf.mjs",
@@ -61,9 +61,11 @@
     "check:boundary": "node scripts/check-framework-boundary.mjs && node scripts/check-boundary-consumers.mjs && node scripts/check-package-split-destinations.mjs",
     "check:api-contract": "node scripts/check-api-contract.mjs",
     "check:package-split": "node scripts/check-package-split-map.mjs",
-    "check:static": "node scripts/run-parallel.mjs format:check lint lint:root check:readmes check:docsurface check:parts check:features check:api-contract check:package-split typecheck test:scripts",
-    "check:packaged": "node scripts/run-parallel.mjs api:check publint smoke:dist budget check:boundary",
-    "build:agent-schema": "node scripts/build-agent-schema.mjs"
+    "check:static": "node scripts/run-parallel.mjs format:check lint lint:root check:readmes check:docsurface check:parts check:features check:api-contract check:package-split typecheck test:scripts check:vue-peer-types",
+    "check:packaged": "node scripts/run-parallel.mjs api:check publint smoke:dist budget check:boundary && pnpm run check:vue-built-peers",
+    "build:agent-schema": "node scripts/build-agent-schema.mjs",
+    "check:vue-peer-types": "node scripts/check-vue-peer-types.mjs",
+    "check:vue-built-peers": "node scripts/check-vue-built-peers.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

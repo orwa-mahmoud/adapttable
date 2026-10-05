@@ -27,7 +27,10 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
     ],
     "MissingFilterControls.ts": [
-      { code: 2741, message: /Property 'Select' is missing/ },
+      {
+        code: 2741,
+        message: /Property 'Select' is missing/,
+      },
     ],
     "WrongEditing.ts": [
       {
@@ -35,7 +38,10 @@ export const VUE_TYPE_EXPECTATIONS = {
         message: /TableFeature<\{ number: number; \}>.*TableFeature<Row>/,
         count: 2,
       },
-      { code: 2741, message: /Property 'Button' is missing/ },
+      {
+        code: 2741,
+        message: /Property 'Button' is missing/,
+      },
     ],
     "WrongFilterRow.ts": [
       {
@@ -49,8 +55,14 @@ export const VUE_TYPE_EXPECTATIONS = {
         message: /TableFeature<Wrong>.*TableFeature<Row>/,
         count: 4,
       },
-      { code: 2322, message: /ColumnDef<Row, string>.*ColumnDef<Row, number>/ },
-      { code: 2322, message: /Type '\(\) => Date' is not assignable/ },
+      {
+        code: 2322,
+        message: /ColumnDef<Row, string>.*ColumnDef<Row, number>/,
+      },
+      {
+        code: 2322,
+        message: /Type '\(\) => Date' is not assignable/,
+      },
     ],
     "WrongHierarchyIds.ts": [
       {
@@ -70,7 +82,10 @@ export const VUE_TYPE_EXPECTATIONS = {
         code: 2322,
         message: /Type 'boolean' is not assignable to type 'number'/,
       },
-      { code: 2554, message: /Expected 0 arguments, but got 1/ },
+      {
+        code: 2554,
+        message: /Expected 0 arguments, but got 1/,
+      },
     ],
     "WrongRenderer.vue": [
       {
@@ -85,8 +100,81 @@ export const VUE_TYPE_EXPECTATIONS = {
           /Type 'TableFeature<Invoice>' is not assignable to type 'ComposedFeature<NoInfer<Person>>'/,
       },
     ],
+    "MissingNavigationControls.ts": [
+      {
+        code: 2741,
+        message: /Property 'Button' is missing/,
+      },
+      {
+        code: 2741,
+        message: /Property 'Checkbox' is missing/,
+      },
+    ],
+    "WrongNavigationCallback.ts": [
+      {
+        code: 2322,
+        message: /range: number.*CellRange/,
+      },
+      {
+        code: 2322,
+        message: /different: boolean.*row: Row/,
+      },
+    ],
+    "MissingColumnMenuControls.ts": [
+      {
+        code: 2741,
+        message: /Property 'Choice' is missing/,
+      },
+    ],
+    "WrongColumnMenuRows.ts": [
+      {
+        code: 2322,
+        message:
+          /ColumnMenuSlotProps(?:\$\d+)?<Person>.*ColumnMenuSlotProps(?:\$\d+)?<Invoice>/,
+      },
+    ],
+    "actions/MissingActionSlots.ts": [
+      {
+        code: 2741,
+        message: /Property 'Input' is missing/,
+      },
+      {
+        code: 2741,
+        message: /Property 'Item' is missing/,
+      },
+      {
+        code: 2741,
+        message: /Property 'Close' is missing/,
+      },
+      {
+        code: 2741,
+        message: /Property 'Button' is missing/,
+      },
+    ],
   },
   "@adapttable/vue-unstyled": {
+    "filter-editing/InvalidNativeGenericRows.ts": [
+      { code: 2322, message: /VueEditableCellProps<Invoice>.*Person/s },
+      { code: 2322, message: /RowEditActionsProps<Invoice>.*Person/s },
+      { code: 2322, message: /BatchEditBarProps<Invoice>.*Person/s },
+      { code: 2322, message: /FilterFieldOptions<Invoice>.*Person/s },
+      { code: 2322, message: /ChecklistFilterProps<Invoice>.*Person/s },
+      { code: 2322, message: /FilterTreeBuilderProps<Invoice>.*Person/s },
+      { code: 2322, message: /HeaderFilterOptions<Invoice>.*Person/s },
+    ],
+    "footers/WrongSummary.vue": [
+      { code: 2322, message: /missing.*SummaryRowFn<Row>/ },
+    ],
+    "footers/WrongFooterSlot.vue": [
+      {
+        code: 2339,
+        message:
+          /Property 'row' does not exist on type 'FooterContext<Row, unknown>'/,
+      },
+    ],
+    "footers/WrongSummaryValue.ts": [
+      { code: 2322, message: /Date.*VNodeChild/ },
+    ],
     "hierarchy/UnsupportedFeatureEnabled.ts": [
       {
         code: 2353,
@@ -130,7 +218,10 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
     ],
     "InvalidSlot.vue": [
-      { code: 2339, message: /Property 'missing' does not exist on type/ },
+      {
+        code: 2339,
+        message: /Property 'missing' does not exist on type/,
+      },
     ],
     "InvalidValue.vue": [
       {
@@ -145,7 +236,10 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
     ],
     "hierarchy/InvalidNativeRowAction.ts": [
-      { code: 2322, message: /amount: number.*row: Person/ },
+      {
+        code: 2322,
+        message: /amount: number.*row: Person/,
+      },
     ],
     "hierarchy/InvalidNativeTreeIds.ts": [
       {
@@ -154,10 +248,22 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
     ],
     "filter-editing/InvalidEditingCallbacks.ts": [
-      { code: 2345, message: /CellEditHandler<Person>/ },
-      { code: 2345, message: /row: Person, patch:/ },
-      { code: 2345, message: /readonly BatchRowEdit<Person>\[\]/ },
-      { code: 2322, message: /floating.*popover.*drawer/ },
+      {
+        code: 2345,
+        message: /CellEditHandler<Person>/,
+      },
+      {
+        code: 2345,
+        message: /row: Person, patch:/,
+      },
+      {
+        code: 2345,
+        message: /readonly BatchRowEdit<Person>\[\]/,
+      },
+      {
+        code: 2322,
+        message: /floating.*popover.*drawer/,
+      },
       {
         code: 2322,
         message: /Type 'string' is not assignable to type 'number'/,
@@ -187,7 +293,11 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
     ],
     "view-controls/InvalidFeatureOptions.ts": [
-      { code: 2554, message: /Expected 0 arguments, but got 1/, count: 2 },
+      {
+        code: 2554,
+        message: /Expected 0 arguments, but got 1/,
+        count: 2,
+      },
       {
         code: 2322,
         message: /Type 'number' is not assignable to type 'string'/,
@@ -204,6 +314,45 @@ export const VUE_TYPE_EXPECTATIONS = {
         code: 2322,
         message: /Type '\(_value: number\) => void' is not assignable/,
         count: 5,
+      },
+    ],
+    "WrongNavigationRow.vue": [
+      {
+        code: 2322,
+        message: /CellEdit<\{ other: string; \}>.*CellEdit<Row>/,
+      },
+    ],
+    "WrongColumnMenuRename.vue": [
+      {
+        code: 2322,
+        message: /key: number.*key: string/,
+      },
+    ],
+    "actions/WrongActionCallbacks.ts": [
+      {
+        code: 2322,
+        message: /Type '\(ids: number\[\]\) => void' is not assignable/,
+      },
+      {
+        code: 2339,
+        message: /Property 'amount' does not exist on type 'Person'/,
+      },
+      {
+        code: 2322,
+        message: /Type '\(_key: number\) => undefined' is not assignable/,
+      },
+    ],
+    "actions/WrongActionRows.vue": [
+      {
+        code: 2322,
+        message: /TableFeature<Invoice>\[\].*ComposedFeature<NoInfer<Person>>/,
+      },
+    ],
+    "specialized/InvalidSpecialized.vue": [
+      {
+        code: 2322,
+        message:
+          /Type 'TableFeature<\{ id: number; \}>' is not assignable to type 'ComposedFeature<NoInfer<Row>>'/,
       },
     ],
   },

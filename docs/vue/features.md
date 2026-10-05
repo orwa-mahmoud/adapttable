@@ -58,6 +58,11 @@ preset, and a React or Angular import does not define a Vue feature.
 import { filters } from "@adapttable/vue-unstyled/filters";
 import { headerFilters } from "@adapttable/vue-unstyled/header-filters";
 
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
 const features = [
   filters<Person>(
     [

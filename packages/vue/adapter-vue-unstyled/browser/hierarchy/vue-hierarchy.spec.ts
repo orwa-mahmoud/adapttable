@@ -7,9 +7,7 @@ test("Vue hierarchy uses native keyboard controls and stable row details", async
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(HIERARCHY_PREVIEW);
   const groups = page.locator('[data-hierarchy-table="groups"]');
-  await groups
-    .locator('[data-adapttable-part="group-more-button"]')
-    .press("Enter");
+  await groups.locator('[data-adapttable-part="group-more"]').press("Enter");
   await expect(groups.locator('[data-row-id="bea"]')).toBeVisible();
   await groups
     .getByRole("button", { name: "Collapse group: Core" })
@@ -24,7 +22,7 @@ test("Vue hierarchy uses native keyboard controls and stable row details", async
     "aria-level",
     "2"
   );
-  await root.locator('[data-adapttable-part="expand-toggle"]').press("Enter");
+  await root.locator('[data-adapttable-part="expand-button"]').press("Enter");
   await expect(
     hierarchy.locator('[data-adapttable-part="detail-cell"]')
   ).toHaveText("Details for Ada");
@@ -52,7 +50,7 @@ test("Vue hierarchy exposes the same controls in mobile cards", async ({
     .click();
   await expect(hierarchy.locator('[data-row-id="bea"]')).toBeVisible();
   await hierarchy
-    .locator('[data-row-id="bea"] [data-adapttable-part="expand-toggle"]')
+    .locator('[data-row-id="bea"] [data-adapttable-part="expand-button"]')
     .click();
   await expect(
     hierarchy.locator('[data-adapttable-part="detail-cell"]')

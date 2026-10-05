@@ -15,12 +15,25 @@ not define Vue signatures.
 | `@adapttable/vue/features` | Binding factories for columns, rows, grouping/tree/details and view controls, plus custom declarations and patch/slot helpers. Factories that need UI require adapter slots.                                                              |
 | `@adapttable/vue-unstyled` | Native `DataTable`, `DataTableProps`, `DataTableSlots`, `DataTableClassNames` and its documented column, context, handle and source type re-exports.                                                                                      |
 
-The binding also has `/filters`, `/header-filters`, `/editing`,
-`/batch-editing`, `/density`, `/fullscreen` and `/saved-views` entries for
-feature models and Chrome. The native kit supplies matching controls through
-its feature entries. See the [feature import map](./features.md#choose-an-entry-point)
-and [feature contracts](./features.md) for every implemented factory,
-composable and required slot.
+The binding also has focused entries for feature models and Chrome. The native
+kit supplies matching controls through its feature entries. Start with the
+[feature import map](./features.md#choose-an-entry-point) for filters, editing,
+columns, hierarchy and view controls, then use the focused contracts for:
+
+- [Actions and exports](./actions.md): bulk actions, command palette, context
+  menu, side panels, history buttons, CSV exports, optional writers and print.
+- [Column menu](./column-menu.md): controlled layout and rename models, menu
+  controls and their required slots.
+- [Navigation, find and status](./navigation.md): grid focus, clipboard/fill,
+  column selection, find state, statistics and adapter channels.
+- [Specialized views](./specialized.md): virtual windows, row reordering,
+  grouping controls, pivot, formulas, streams and sparklines.
+- [Summaries and footers](./summary-row.md): reactive summary values, desktop
+  and mobile projections, footer renderers and structural helpers.
+
+The [root API index](../api.md#vue-actions-and-adapter-channels) also maps these
+Vue exports to their owning entries. Separate formula, pivot, sparkline and
+stream helpers are not automatically loaded by the feature barrel.
 
 Type-only re-exports do not imply matching runtime exports. In particular,
 structural/model helpers and feature functions belong to their entries above;
@@ -34,13 +47,8 @@ getter returning `T | undefined`. Required reactive fields use Vue's
 callbacks, including zero-argument `refetch` functions. A whole-options getter
 is the supported way to replace callback identities.
 
-Adapter authors can call `requireScope(name: string): void` at the start of a
-custom composable to require an active Vue effect scope. It throws outside
-component `setup()` or `effectScope().run()`, using `name` to identify the
-composable in the error. This guard checks ownership; use the activity helper
-below to suspend external effects when the component becomes inactive.
-
-`useScopeActivity(): Readonly<ShallowRef<boolean>>` becomes active after
+`requireScope(name): void` throws outside component setup or an active effect
+scope. `useScopeActivity(): Readonly<ShallowRef<boolean>>` becomes active after
 component mount, pauses on `KeepAlive` deactivation and becomes false on disposal.
 An explicit non-component effect scope starts active immediately and must be
 stopped by its owner. Browser subscriptions and effects remain inactive during server rendering.
@@ -206,21 +214,21 @@ and `footer` renderers. `ColumnGroup<TRow>` contains nested
 `resolveColumns(columns, locale?)` supplies metadata/accessor defaults.
 `flattenColumns(inputs)` returns `leaves` and a `ReadonlyMap` of group records.
 
-| Type/helper                                 | Contract                                                                                                                     |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `CellContext<TRow, TValue>`                 | `row`, `rowIndex`, `column`, and typed `value`.                                                                              |
-| `HeaderContext<TRow, TValue>`               | `column`, text `label`, `sortDir`, `sortIndex`, and `toggleSort(event?)`, including shift-key multi-sort.                    |
-| `FooterContext<TRow, TValue>`               | `column` and optional aggregate `value`. It is a rendering contract; the current native kit has no aggregate footer surface. |
-| `RenderFunction<TContext>`                  | `(context: TContext) => VNodeChild`. A function is a renderer, never a getter-normalized component.                          |
-| `ComponentRenderer<TContext>`               | Explicit `{ component, props(context) }` descriptor.                                                                         |
-| `ComponentProps<TComponent>`                | Infers public props from an SFC, `defineComponent` result or functional component.                                           |
-| `Renderer<TContext>`                        | Union of `RenderFunction` and `ComponentRenderer`.                                                                           |
-| `componentRenderer(component, propsMapper)` | Creates a component descriptor and checks required component props against `ComponentProps`.                                 |
-| `renderContent(renderer, context)`          | Calls a render function or creates the component VNode using mapped props.                                                   |
-| `primitiveText(value): string \| null`      | Formats supported primitive/path values for display; unsupported structured values do not get stringified as cell content.   |
-| `renderCell(context, slot?)`                | Column `cell`, then table slot, then `formatValue(row)`, then primitive text.                                                |
-| `renderHeader(context, slot?)`              | Column `headerCell`, then table slot, then the text label.                                                                   |
-| `renderFooter(context, slot?)`              | Column `footer`, then supplied slot, then primitive aggregate text.                                                          |
+| Type/helper                                 | Contract                                                                                                                   |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `CellContext<TRow, TValue>`                 | `row`, `rowIndex`, `column`, and typed `value`.                                                                            |
+| `HeaderContext<TRow, TValue>`               | `column`, text `label`, `sortDir`, `sortIndex`, and `toggleSort(event?)`, including shift-key multi-sort.                  |
+| `FooterContext<TRow, TValue>`               | `column` and optional aggregate `value`, shared by desktop summary cells and mobile summary fields.                        |
+| `RenderFunction<TContext>`                  | `(context: TContext) => VNodeChild`. A function is a renderer, never a getter-normalized component.                        |
+| `ComponentRenderer<TContext>`               | Explicit `{ component, props(context) }` descriptor.                                                                       |
+| `ComponentProps<TComponent>`                | Infers public props from an SFC, `defineComponent` result or functional component.                                         |
+| `Renderer<TContext>`                        | Union of `RenderFunction` and `ComponentRenderer`.                                                                         |
+| `componentRenderer(component, propsMapper)` | Creates a component descriptor and checks required component props against `ComponentProps`.                               |
+| `renderContent(renderer, context)`          | Calls a render function or creates the component VNode using mapped props.                                                 |
+| `primitiveText(value): string \| null`      | Formats supported primitive/path values for display; unsupported structured values do not get stringified as cell content. |
+| `renderCell(context, slot?)`                | Column `cell`, then table slot, then `formatValue(row)`, then primitive text.                                              |
+| `renderHeader(context, slot?)`              | Column `headerCell`, then table slot, then the text label.                                                                 |
+| `renderFooter(context, slot?)`              | Column `footer`, then supplied slot, then Vue nodes or primitive aggregate text.                                           |
 
 ```ts
 import { defineComponent, h } from "vue";
@@ -294,7 +302,7 @@ silently replace the supplied layout.
 
 `useRowSelection(options: MaybeRefOrGetter<RowSelectionOptions<TRow>>)` returns
 `RowSelection`. Its options require reactive `rows` and a `rowKey`; optional
-inputs are controlled `selectedIds`, `defaultSelectedIds`,
+inputs are `enabled` (default true), controlled `selectedIds`, `defaultSelectedIds`,
 `onSelectionChange(ids)`, `labels` and `acrossPages`. The result exposes refs
 `selectedIds` (a readonly set), `selectedCount`, `headerState`, `allMatching`
 and `state`, plus `isSelected`, `toggle`, `toggleAll`, `clear`, `replace`,
@@ -302,7 +310,13 @@ and `state`, plus `isSelected`, `toggle`, `toggleAll`, `clear`, `replace`,
 `headerCheckboxAttrs`. `toggleAll` acts on visible row IDs. `selectAllMatching`
 marks a broader matching scope when permitted; it does not fetch missing rows
 or enumerate every remote ID. Checkbox attributes include indeterminate state
-and localized labels.
+and localized labels. Disabling selection retains its value and blocks requests.
+Component actions start on mount, suspend during KeepAlive and stop on disposal.
+Published actions and checkbox callbacks retire when their ordered row objects
+or IDs change, or their active lifetime ends. Equivalent row-array wrappers
+preserve ownership, and accepted requests use the current host callback. IDs
+outside the visible row scope remain selected until the host or a live action
+changes them.
 
 ## Native table
 
@@ -319,6 +333,11 @@ and localized labels.
 | Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                |
 | Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                     |
 | Extensions          | `features?: readonly ComposedFeature<NoInfer<TRow>>[]`. Compose factories from the native feature entries; the row type is inferred from the data/columns contract.                                                                                   |
+
+`summaryRow?: SummaryRowFn<TRow>` builds a column-aligned footer from the current
+source row scope. A visible column `footer` or the table `footer` slot also
+creates the summary surface without a mapper. See [summaries and footers](./summary-row.md)
+for page, grouped, server and mobile behavior.
 
 `density?: TableDensity`, `defaultDensity?: TableDensity`,
 `onDensityChange?: (density: TableDensity) => void` and
@@ -338,7 +357,7 @@ table runtime, and `getView()` returns the current `TableRuntimeView` or
 `undefined` after disposal.
 
 `DataTableSlots<TRow>` provides `cell(CellContext)`, `header(HeaderContext)`,
-`toolbar()`, `loading()`, `empty({ noResults, clear })` and
+`footer(FooterContext)`, `tableFooter()`, `toolbar()`, `loading()`, `empty({ noResults, clear })` and
 `error(TableErrorState)`. An error slot receives the real error, optional retry
 and retrying state. The toolbar slot appends to the built-in toolbar; loading,
 empty and error slots replace status content. A source without `refetch` has no retry action. Custom
@@ -350,6 +369,7 @@ headers own their sorting controls; per-column renderers take precedence.
   `sortSelect`, `sortDirectionButton`, `scroll`.
 - Table: `table`, `thead`, `tbody`, `tr`, `th`, `td`, `sortButton`,
   `selectionHeader`, `selectionCell`, `selectionCheckbox`, `columnGroup`, `columnGroupToggle`.
+- Summary: `summary`, `summaryRow`, `summaryCell`, `summaryCard`; custom content uses `tableFooter`.
 - Cards: `cards`, `card`, `cardFields`, `cardRow`, `cardLabel`, `cardValue`.
 - Paging: `footer`, `rowsPerPage`, `pager`, `pagePrev`, `pageNext`, `pageNumber`,
   `pageEllipsis`, `loadMore`, `loadMoreButton`.
@@ -376,6 +396,12 @@ Optional feature controls use these additional semantic class hooks:
 - View controls: `densitySelect`, `fullscreenButton`, `viewsMenu`, `viewsButton`,
   `viewsPanel`, `viewsRow`, `viewsItem`, `viewsDelete`, `viewsDivider`,
   `viewsSaveRow`, `viewsInput`, `viewsSave`.
+
+The standalone `SavedViewsPanel` accepts the same `DataTableClassNames` contract
+through its `classNames` prop. `SavedViewsPanelProps` and `DataTableClassNames` are available from
+`@adapttable/vue-unstyled/saved-views`; for example,
+`const classes: DataTableClassNames = { viewsPanel: "saved-view-panel" }`
+styles the panel without importing the table component.
 
 `filterOperator` styles native operator selects, and `filterCheckboxGroup`
 styles the multi-select group wrapper. `filterCheckbox` applies to each option's

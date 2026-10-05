@@ -6,11 +6,15 @@ export type {
 } from "./types";
 export type {
   CellContext,
+  CellEdit,
+  CellRange,
   ColumnDef,
   ColumnGroup,
   ColumnInput,
   DataTableHandle,
+  FooterContext,
   HeaderContext,
+  SummaryRowFn,
   TableDensity,
   TableSource,
 } from "@adapttable/vue/adapter";

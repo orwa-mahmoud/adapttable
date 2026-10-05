@@ -207,7 +207,12 @@ const {
 
 - [Get started with Vue](https://adapttable.orwamahmoud.com/vue/getting-started/): experimental release availability, Vue 3.5 peers, native first table, reactive sources, controlled state and SSR boundaries
 - [Vue feature composition](https://adapttable.orwamahmoud.com/vue/features/): native import map, filter and editing contracts, grouped/tree/detail rows, layout and row features, required UI slots and URL/Saved Views boundaries
+- [Vue summaries and footers](https://adapttable.orwamahmoud.com/vue/summary-row/): source/page/grouped summary scope, per-column renderers, mobile cards, custom tableFooter content, and shared footer Chrome
 - [Experimental Vue API reference](https://adapttable.orwamahmoud.com/vue/api/): implemented source, renderer, native table, structural Chrome, lifecycle and custom-feature contracts; no full-parity claim
+- [Vue column menu](https://adapttable.orwamahmoud.com/vue/column-menu/): native visibility, pinning, reordering, rename and host-controlled column layout
+- [Vue navigation, find and status](https://adapttable.orwamahmoud.com/vue/navigation/): optional keyboard grid, column selection, host-owned clipboard and fill, find URL state, localized statistics and native slots
+- [Vue actions and export](https://adapttable.orwamahmoud.com/vue/actions/): native bulk actions, palette, context menu, side panel, history and host-controlled export
+- [Vue specialized data views](https://adapttable.orwamahmoud.com/vue/specialized/): windowed rows and columns, host-owned row moves, grouping configuration, pivot, formulas, streams and sparklines
 
 ## Demo
 

@@ -15,6 +15,7 @@ import {
   type Component,
   type FunctionalComponent,
   h,
+  isVNode,
   type VNodeChild,
 } from "vue";
 
@@ -125,7 +126,14 @@ export function renderFooter<TRow, TValue>(
   if (context.column.footer)
     content = renderContent(context.column.footer, context);
   else if (slot) content = slot(context);
-  else content = primitiveText(context.value);
+  else content = footerContent(context.value);
+  return content;
+}
+function footerContent(value: unknown): VNodeChild {
+  let content: VNodeChild;
+  if (typeof value === "boolean" || isVNode(value)) content = value;
+  else if (Array.isArray(value)) content = value.map(footerContent);
+  else content = primitiveText(value);
   return content;
 }
 export function resolveColumns<TRow>(

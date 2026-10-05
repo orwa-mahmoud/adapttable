@@ -99,6 +99,6 @@ describe("native optional rendering without browser globals", () => {
     expect(html).toContain('dir="rtl"');
     expect(html).toContain("Collapse localized: Core");
     expect(html).toContain("Select localized: Core");
-    expect(html).toContain('data-adapttable-part="group-checkbox"');
+    expect(html).toContain('data-adapttable-part="group-select"');
   });
 });

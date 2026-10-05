@@ -1,4 +1,7 @@
+import type * as Binding from "@adapttable/vue";
 import type { RenderFunction } from "@adapttable/vue";
+import type * as Adapter from "@adapttable/vue/adapter";
+import type * as Features from "@adapttable/vue/features";
 import type {
   ColumnDef,
   FeatureState,
@@ -18,3 +21,12 @@ export interface FeatureMembers {
   readonly table: UseDataTableResult<Person>;
   readonly render: RenderFunction<Person>;
 }
+
+type WindowImplementationHelper = "windowBodySlots" | "windowBodyColumns";
+type ExposedWindowHelper = Extract<
+  WindowImplementationHelper,
+  keyof typeof Binding | keyof typeof Adapter | keyof typeof Features
+>;
+export const windowHelpersStayInternal: ExposedWindowHelper extends never
+  ? true
+  : false = true;

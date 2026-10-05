@@ -7,6 +7,8 @@ import {
 } from "@adapttable/vue/adapter";
 import { h, mergeProps, type VNode } from "vue";
 
+import type { DataTableClassNames } from "../types";
+
 /** The binding's attrs include the actual semantic target and focus refs. */
 export function nativeViewButton({
   attrs,
@@ -59,82 +61,120 @@ export const nativeSavedViewsMenuSlots: SavedViewsMenuSlots = {
 };
 
 /** All management controls come from the binding's ordered neutral contract. */
-export const nativeSavedViewsPanelSlots: SavedViewsPanelSlots = {
-  Surface: (props) =>
-    h(
-      "section",
-      {
-        "data-adapttable-part": props["data-adapttable-part"],
-        class: props.className,
-      },
-      [h("h2", props.title), props.children, props.footer]
-    ),
-  Row: (props) =>
-    h(
-      "div",
-      {
-        key: props.viewName,
-        "data-adapttable-part": props["data-adapttable-part"],
-        style: props.layout.row,
-      },
-      [
-        h("div", { style: props.layout.caption }, [
-          props.isEditing
-            ? props.name
-            : h(
+export function nativeSavedViewsPanelSlots(
+  names: () => DataTableClassNames
+): SavedViewsPanelSlots {
+  return {
+    Surface: (props) =>
+      h(
+        "section",
+        {
+          "data-adapttable-part": props["data-adapttable-part"],
+          class: props.className,
+        },
+        [
+          h("h2", { "data-adapttable-part": "saved-views-title" }, props.title),
+          props.children,
+          props.footer
+            ? h("span", { "data-adapttable-part": "saved-views-footer" }, [
+                props.footer,
+              ])
+            : null,
+        ]
+      ),
+    Row: (props) =>
+      h(
+        "div",
+        {
+          key: props.viewName,
+          class: names().viewsRow,
+          "data-adapttable-part": props["data-adapttable-part"],
+          style: props.layout.row,
+        },
+        [
+          h(
+            "div",
+            {
+              "data-adapttable-part": "saved-view-caption",
+              style: props.layout.caption,
+            },
+            [
+              props.isEditing
+                ? props.name
+                : h(
+                    "button",
+                    {
+                      type: "button",
+                      title: props.applyLabel,
+                      class: names().viewsItem,
+                      onClick: props.onApply,
+                    },
+                    [props.name]
+                  ),
+              props.isDefault
+                ? h(
+                    "span",
+                    { "data-adapttable-part": "saved-view-default" },
+                    props.defaultLabel
+                  )
+                : null,
+              props.readOnly
+                ? h(
+                    "span",
+                    { "data-adapttable-part": "saved-view-readonly" },
+                    props.readOnlyLabel
+                  )
+                : null,
+            ]
+          ),
+          h(
+            "div",
+            {
+              "data-adapttable-part": "saved-view-controls",
+              style: props.layout.controls,
+            },
+            props.controls.map((control) =>
+              h(
                 "button",
                 {
+                  key: control.key,
                   type: "button",
-                  title: props.applyLabel,
-                  onClick: props.onApply,
+                  class: names().viewsDelete,
+                  title: control.label,
+                  "aria-label": control.label,
+                  "aria-pressed": control.pressed,
+                  disabled: !control.onPress,
+                  onClick: control.onPress,
+                  style: props.layout.control,
                 },
-                [props.name]
-              ),
-          props.isDefault ? h("span", props.defaultLabel) : null,
-          props.readOnly ? h("span", props.readOnlyLabel) : null,
-        ]),
-        h(
-          "div",
-          { style: props.layout.controls },
-          props.controls.map((control) =>
-            h(
-              "button",
-              {
-                key: control.key,
-                type: "button",
-                title: control.label,
-                "aria-label": control.label,
-                "aria-pressed": control.pressed,
-                disabled: !control.onPress,
-                onClick: control.onPress,
-                style: props.layout.control,
-              },
-              [control.icon]
+                [control.icon]
+              )
             )
-          )
-        ),
-      ]
-    ),
-  Input: (props) =>
-    h("input", {
-      ref: elementRef(props.ref),
-      "aria-label": props.label,
-      value: props.value,
-      onInput: (event: Event): void => {
-        const target = event.currentTarget;
-        if (target instanceof HTMLInputElement) props.onChange(target.value);
-      },
-      onKeydown: (event: KeyboardEvent): void => {
-        if (event.isComposing) return;
-        if (event.key === "Enter") {
-          event.preventDefault();
-          props.onCommit();
-        }
-        if (event.key === "Escape") {
-          event.preventDefault();
-          props.onCancel();
-        }
-      },
-    }),
-  Empty: ({ message }) => h("p", message),
-};
+          ),
+        ]
+      ),
+    Input: (props) =>
+      h("input", {
+        ref: elementRef(props.ref),
+        class: names().viewsInput,
+        "aria-label": props.label,
+        value: props.value,
+        onInput: (event: Event): void => {
+          const target = event.currentTarget;
+          if (target instanceof HTMLInputElement) props.onChange(target.value);
+        },
+        onKeydown: (event: KeyboardEvent): void => {
+          if (event.isComposing) return;
+          if (event.key === "Enter") {
+            event.preventDefault();
+            props.onCommit();
+          }
+          if (event.key === "Escape") {
+            event.preventDefault();
+            props.onCancel();
+          }
+        },
+      }),
+    Empty: ({ message }) => h("p", message),
+  };
+}

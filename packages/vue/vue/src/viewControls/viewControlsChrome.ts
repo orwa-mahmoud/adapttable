@@ -34,9 +34,12 @@ export function DensityChooserChrome(
     "DensityChooser.Control"
   )({
     attrs: {
-      "data-adapttable-part": "density-select",
+      "data-adapttable-part": "density-toggle",
       "aria-label": props.labels.density,
-      class: props.classNames?.densitySelect,
+      class:
+        [props.classNames?.densitySelect, props.classNames?.densityToggle]
+          .filter(Boolean)
+          .join(" ") || undefined,
       dir: props.dir,
     },
     value: props.density,
@@ -66,8 +69,11 @@ export function FullscreenButtonChrome(
       type: "button",
       "aria-label": label,
       "aria-pressed": props.fullscreen.active,
-      "data-adapttable-part": "fullscreen-button",
-      class: props.classNames?.fullscreenButton,
+      "data-adapttable-part": "fullscreen-toggle",
+      class:
+        [props.classNames?.fullscreenButton, props.classNames?.fullscreenToggle]
+          .filter(Boolean)
+          .join(" ") || undefined,
       dir: props.dir,
       onClick: props.fullscreen.toggle,
     },

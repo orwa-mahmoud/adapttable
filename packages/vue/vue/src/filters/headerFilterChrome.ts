@@ -140,7 +140,7 @@ export function HeaderFilterChrome<TRow>(props: {
       throw new Error(
         `AdaptTable: HeaderFilterChrome requires the ${name} control slot.`
       );
-  return h("span", { "data-adapttable-part": "filter-header-control" }, [
+  return h("span", null, [
     controls.Trigger(model.trigger),
     controls.Popover({
       open: model.open,

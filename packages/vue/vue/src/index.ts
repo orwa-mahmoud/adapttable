@@ -1,3 +1,5 @@
+export type * from "./actions/contracts";
+export type { ActionButtonSlots } from "./actions/simpleChrome";
 export type {
   AggregateFormatContext,
   AggregateName,
@@ -16,6 +18,7 @@ export * from "./columnDef";
 export * from "./columns/columnLayout";
 export type { VueComputedColumnSpec } from "./columns/computed";
 export { computed } from "./columns/computed";
+export type { ContextMenuOptions } from "./context-menu";
 export type { DirtyEdits, TableEditingOptions } from "./editing/editingModels";
 export type {
   ComposedFeature,
@@ -24,10 +27,19 @@ export type {
 } from "./features/tableFeature";
 export type * from "./features/tableFeature";
 export type * from "./featureState";
+export type {
+  FilterPanelModel,
+  FilterPanelSurfaceProps,
+  FilterTriggerProps,
+} from "./filters/filterPanelChrome";
 export type * from "./hierarchy/models";
 export type { TableRowInventory } from "./hierarchy/rowInventory";
 export type * from "./layout/modelChannels";
 export type * from "./layout/tableModels";
+export type {
+  TableSummaryCellModel,
+  TableSummaryModel,
+} from "./layout/tableSummaryModel";
 export * from "./layout/useFullscreen";
 export type { SelectionCheckboxAttrs } from "./selection/checkboxControl";
 export * from "./selection/selection";
@@ -35,6 +47,10 @@ export type { SourceViewportOptions } from "./source/sourceLifecycle";
 export * from "./source/useFrontendData";
 export * from "./source/useQuerySource";
 export * from "./source/useServerData";
+export type { GroupingPanelProps } from "./specialized/groupingPanel";
+export type { VueRowReorderModel } from "./specialized/rowReorder";
+export type { RowReorderControlProps } from "./specialized/rowReorder";
+export type { BodyWindowModel } from "./specialized/virtualize";
 export type { MaybeRefOrGetterOptional } from "./store";
 export * from "./url/useDensityUrlState";
 export * from "./url/useGroupCollapseUrlState";

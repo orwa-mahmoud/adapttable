@@ -52,6 +52,14 @@ may accept or reject each request. Prop replacement never emits another request.
 Use `selectable` with `defaultSelectedIds` for local selection. The table does
 not modify the host's rows. Defaults seed initial state only.
 
+`summaryRow` maps the current source rows to column-aligned totals. Column
+`footer` renderers and the `footer` scoped slot also work without a mapper.
+Mobile cards show the same footer values with column labels. Use `tableFooter`
+for free content below the table and above pagination. Summary cells follow
+effective column order, visibility, width and pinning. See the
+[footer guide](https://adapttable.orwamahmoud.com/vue/summary-row/) for row scope
+and styling hooks.
+
 `cell` and `header` scoped slots receive typed row/column contexts. An explicit
 column renderer wins over the matching table slot. A `ColumnDef<Person, number>`
 provides a numeric value to its renderer; a heterogeneous table cell slot has an
@@ -121,6 +129,37 @@ binding and shared core; these contributions provide native controls.
   native toolbar view controls. `SavedViewsPanel`
   exposes the native management surface. Unsupported browsers show no fullscreen
   button. Portalled filter surfaces use the active fullscreen container.
+- `/cell-navigation`, `/find-in-table` and `/status-bar`: keyboard cell navigation,
+  column selection checkboxes, host-owned clipboard/fill actions, find-in-table,
+  selected-cell statistics and a row-status strip. Find remains available on
+  mobile cards; desktop grid controls do not render there. See
+  [navigation and find](https://adapttable.orwamahmoud.com/vue/navigation/).
+- `/column-menu`: controlled column management with search, visibility, pinning,
+  reordering, sizing and optional rename controls. The same menu manages desktop
+  columns and mobile fields. See the
+  [column menu](https://adapttable.orwamahmoud.com/vue/column-menu/).
+- `/bulk-actions`, `/command-palette`, `/context-menu` and `/side-panel`: native
+  bulk actions with pending/error feedback, a keyboard command palette,
+  contextual cell/column actions and host-controlled side panels. Mutations and
+  panel state remain host-owned.
+- `/export-csv` and `/print`: CSV export with loaded, selected, range or
+  host-provided all-row scopes, optional server progress/cancellation, and a host
+  print callback. The optional `/export-pdf` and `/export-xlsx` entries expose
+  `pdfWriter` and `xlsxWriter`; pass either writer to `exportCsv({ writer })`.
+  These writer helpers do not install separate export factories. See
+  [actions and exports](https://adapttable.orwamahmoud.com/vue/actions/).
+- `/virtualize`: row and optional column virtualization with logical navigation
+  and measured expanded content. Pinned rows stay outside the row window; row
+  spans keep all rows mounted, and any cell span keeps all columns mounted.
+- `/row-reorder` and `/grouping-panel`: row reordering requests host writes;
+  native handles, mobile move buttons and controlled group/tree destinations
+  share one move policy. Grouping controls expose group order and permitted
+  aggregations.
+- `/pivot`, `/formula`, `/stream` and `/sparkline`: a controlled native pivot
+  panel and table model, spreadsheet formula columns with explicit errors,
+  lifecycle-scoped row streams, and accessible SVG sparkline columns. These are
+  separate data/rendering entries, not automatically loaded table features. See
+  [specialized data views](https://adapttable.orwamahmoud.com/vue/specialized/).
 - SSR and hydration with request-local state, no browser globals during server
   rendering, and resources activated after mount.
 

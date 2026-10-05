@@ -233,13 +233,13 @@ describe("complete filter control contracts", () => {
     model.trigger.onClick();
     shell.source.value.setExtra("name", "Ada");
     expect(panel.value?.count).toBe(1);
-    const actions: (() => void)[] = [];
+    const actions = new Map<string, () => void>();
     const surface = vi.fn((props) => props.children);
     const controls: FilterPanelSlots<Row> = {
       Trigger: () => null,
       Field: () => null,
       Button: (props) => {
-        actions.push(props.onClick);
+        actions.set(props.part, props.onClick);
         return null;
       },
       Popover: surface,
@@ -256,9 +256,9 @@ describe("complete filter control contracts", () => {
       },
     });
     expect(surface.mock.calls[0]?.[0].open).toBe(true);
-    actions[0]?.();
+    actions.get("filters-clear")?.();
     expect(shell.source.value.extra.name).toBeUndefined();
-    actions[1]?.();
+    actions.get("filters-done")?.();
     expect(panel.value?.open).toBe(false);
     panel.value!.trigger.onClick();
     panel.value!.close("escape");
@@ -452,7 +452,7 @@ describe("tree value editors and checklist lifecycle", () => {
           select.onChange("unknown");
           select.onChange("other");
         }
-        if (select.part === "filter-tree-combinator") select.onChange("or");
+        if (select.label === labels.filterTree) select.onChange("or");
       }
       expect(model.value.expanded).toBe(true);
       expect(tree.value.combinator).toBe("or");

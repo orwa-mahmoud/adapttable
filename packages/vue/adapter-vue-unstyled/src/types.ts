@@ -1,12 +1,16 @@
 import type {
   CellContext,
+  CellEdit,
+  CellRange,
   ColumnInput,
   ColumnLayoutState,
   ComposedFeature,
   ConfirmHandler,
   Direction,
+  FooterContext,
   HeaderContext,
   PaginationMode,
+  SummaryRowFn,
   TableDensity,
   TableErrorState,
   TableLabels,
@@ -21,10 +25,121 @@ import type { VNodeChild } from "vue";
 export interface DataTableClassNames {
   readonly agentApproval?: string;
   readonly agentApprovalButton?: string;
+  readonly summary?: string;
+  readonly summaryRow?: string;
+  readonly summaryCell?: string;
+  readonly summaryCard?: string;
+  readonly tableFooter?: string;
+  readonly densityToggle?: string;
+  readonly fullscreenToggle?: string;
+  readonly filtersAnchor?: string;
+  readonly filtersHeader?: string;
+  readonly filtersTitle?: string;
+  readonly filtersBody?: string;
+  readonly filtersFooter?: string;
+  readonly filtersClose?: string;
+  readonly filtersIcon?: string;
+  readonly filtersCount?: string;
+  readonly filterOptionsLoading?: string;
+  readonly filterHeaderTrigger?: string;
+
+  readonly groupCell?: string;
+  readonly groupCard?: string;
+  readonly groupSelect?: string;
+  readonly groupFooterRow?: string;
+  readonly groupFooterCell?: string;
+  readonly groupMoreRow?: string;
+  readonly groupMoreCell?: string;
+  readonly expandButton?: string;
+
+  readonly selectAllText?: string;
+  readonly commandInput?: string;
+  readonly commandItem?: string;
+  readonly commandEmpty?: string;
+  readonly contextMenuItem?: string;
+  readonly contextMenuSeparator?: string;
+  readonly sidePanelTab?: string;
+  readonly sidePanelClose?: string;
+  readonly exportProgress?: string;
+  readonly exportProgressBar?: string;
+  readonly exportProgressMessage?: string;
+  readonly exportProgressButton?: string;
+  readonly exportProgressDownload?: string;
+
+  readonly bulkBar?: string;
+  readonly bulkCount?: string;
+  readonly bulkButton?: string;
+  readonly bulkClear?: string;
+  readonly bulkError?: string;
+  readonly selectAllBanner?: string;
+  readonly selectAllButton?: string;
+  readonly commandPalette?: string;
+  readonly commandPaletteButton?: string;
+  readonly contextMenu?: string;
+  readonly sidePanel?: string;
+  readonly sidePanelHeader?: string;
+  readonly sidePanelTabs?: string;
+  readonly sidePanelBody?: string;
+  readonly exportCsvButton?: string;
+  readonly printButton?: string;
+
+  readonly columnMenu?: string;
+  readonly columnMenuButton?: string;
+  readonly columnMenuPanel?: string;
+  readonly columnMenuHeader?: string;
+  readonly columnMenuTitle?: string;
+  readonly columnMenuSearch?: string;
+  readonly columnMenuBulk?: string;
+  readonly columnMenuBulkButton?: string;
+  readonly columnMenuItem?: string;
+  readonly columnMenuGrip?: string;
+  readonly columnMenuVisibility?: string;
+  readonly columnMenuLabel?: string;
+  readonly columnMenuPin?: string;
+  readonly columnMenuMore?: string;
+  readonly columnMenuSubmenu?: string;
+  readonly columnMenuAction?: string;
+  readonly columnMenuChoice?: string;
+  readonly columnMenuChoiceLabel?: string;
+  readonly columnMenuChoiceSelect?: string;
+  readonly columnMenuSeparator?: string;
+  readonly columnMenuAutoSize?: string;
+  readonly columnMenuReset?: string;
+  readonly columnRenameForm?: string;
+  readonly columnRenameLabel?: string;
+  readonly columnRenameInput?: string;
+  readonly columnRenameError?: string;
+  readonly columnRenameSave?: string;
+  readonly columnRenameCancel?: string;
+  readonly columnRenameAnnouncer?: string;
+  readonly headerRenameButton?: string;
+  readonly headerRenameForm?: string;
+  readonly headerRenameLabel?: string;
+  readonly headerRenameInput?: string;
+  readonly headerRenameError?: string;
+  readonly headerRenameSave?: string;
+  readonly headerRenameCancel?: string;
+  readonly headerRenameAnnouncer?: string;
+
+  readonly columnSelect?: string;
+  readonly fillHandle?: string;
+  readonly findBar?: string;
+  readonly findInput?: string;
+  readonly findButton?: string;
+  readonly statusBar?: string;
+  readonly statusItem?: string;
+  readonly selectionStats?: string;
   readonly resizeHandle?: string;
   readonly filterHeaderInput?: string;
   readonly actionsHeader?: string;
   readonly actionsCell?: string;
+  readonly reorderHeader?: string;
+  readonly reorderCell?: string;
+  readonly rowReorderHandle?: string;
+  readonly rowReorderButtons?: string;
+  readonly rowReorderUp?: string;
+  readonly rowReorderDown?: string;
+  readonly virtualSpacer?: string;
   readonly cardActions?: string;
   readonly rowAction?: string;
   readonly addRow?: string;
@@ -35,12 +150,27 @@ export interface DataTableClassNames {
   readonly groupAggregate?: string;
   readonly groupMore?: string;
   readonly groupCheckbox?: string;
+  readonly groupingPanel?: string;
+  readonly groupingDropZone?: string;
+  readonly groupingItem?: string;
+  readonly groupingChip?: string;
+  readonly groupingChipHandle?: string;
+  readonly groupingChipRemove?: string;
+  readonly groupingAdd?: string;
+  readonly groupingAggregations?: string;
+  readonly groupingAggregationItem?: string;
+  readonly groupingAggregationOperation?: string;
+  readonly groupingAggregationRemove?: string;
+  readonly groupingAggregationAdd?: string;
+  readonly groupingAggregationsRestore?: string;
+  readonly groupingRemoveZone?: string;
   readonly treeCell?: string;
   readonly treeToggle?: string;
   readonly treeSpacer?: string;
   readonly expandToggle?: string;
   readonly detailRow?: string;
   readonly detailCell?: string;
+  readonly cardDetail?: string;
   readonly densitySelect?: string;
   readonly fullscreenButton?: string;
   readonly viewsMenu?: string;
@@ -142,11 +272,16 @@ export interface DataTableClassNames {
 /** Native-kit props. Query state is owned by the supplied source when present. */
 export interface DataTableProps<TRow> {
   readonly assistant?: TableAssistantProps;
+  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => void;
+  readonly onCellFill?: (edits: CellEdit<TRow>[]) => void;
+  readonly onCellCut?: (range: CellRange) => void;
   readonly data?: readonly TRow[];
   readonly source?: TableSource<TRow>;
   readonly columns: readonly ColumnInput<TRow>[];
   readonly rowKey: (row: TRow) => string;
   readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];
+  /** Build footer values from the current source row scope. */
+  readonly summaryRow?: SummaryRowFn<TRow>;
   readonly tableLabel?: string;
   readonly labels?: TableLabels;
   readonly dir?: Direction;
@@ -186,6 +321,10 @@ export interface DataTableProps<TRow> {
 export interface DataTableSlots<TRow> {
   cell?: (context: CellContext<TRow>) => VNodeChild;
   header?: (context: HeaderContext<TRow>) => VNodeChild;
+  /** Fallback footer cell renderer; a column footer takes precedence. */
+  footer?: (context: FooterContext<TRow>) => VNodeChild;
+  /** Free content below the table and above pagination. */
+  tableFooter?: () => VNodeChild;
   toolbar?: () => VNodeChild;
   loading?: () => VNodeChild;
   empty?: (state: {

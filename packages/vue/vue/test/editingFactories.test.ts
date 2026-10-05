@@ -185,7 +185,7 @@ function mount(features: readonly TableFeature<Row>[], mobile = false) {
         .click(),
     type: (index: number, value: string) => {
       const input = element.querySelectorAll<HTMLInputElement>(
-        '[data-adapttable-part="edit-cell-input"]'
+        '[data-adapttable-part="edit-cell-editor"]'
       )[index]!;
       input.value = value;
       input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -232,8 +232,9 @@ describe("complete composed editing factories", () => {
       save.reject(new Error("Offline"));
       await tick();
       expect(
-        view.element.querySelector('[data-adapttable-part="row-edit-error"]')
-          ?.textContent
+        view.element.querySelector(
+          '[data-adapttable-part="row-edit-actions"] [role="status"]'
+        )?.textContent
       ).toBe("Offline");
       expect(view.shell.editing.value?.rowEditing?.draftFor("name")).toBe(
         "new"
@@ -644,8 +645,9 @@ it("exposes inline row validation and batch failure through required native surf
   batch.click("batch-edit-save");
   await tick();
   expect(
-    batch.element.querySelector('[data-adapttable-part="batch-edit-error"]')
-      ?.textContent
+    batch.element.querySelector(
+      '[data-adapttable-part="batch-edit-bar"] [role="status"]'
+    )?.textContent
   ).toBe("Batch failed");
   expect(batch.shell.editing.value?.batch?.pending).toBe(true);
   batch.click("batch-edit-cancel");

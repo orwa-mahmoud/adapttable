@@ -95,7 +95,7 @@ export async function selectDensity(
   root: ParentNode,
   value: "compact" | "comfortable"
 ) {
-  const select = findControl<HTMLSelectElement>(root, part("density-select"));
+  const select = findControl<HTMLSelectElement>(root, part("density-toggle"));
   select.value = value;
   select.dispatchEvent(new Event("change", { bubbles: true }));
   await nextTick();

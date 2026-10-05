@@ -59,7 +59,7 @@ async function activate(root: ParentNode) {
     new MouseEvent("dblclick", { bubbles: true })
   );
   await tick();
-  return find<HTMLInputElement>(root, part("edit-cell-input"));
+  return find<HTMLInputElement>(root, part("edit-cell-editor"));
 }
 describe("composed hierarchy, editing and selection", () => {
   it("edits a nested child and moves Tab in the visible hierarchy order", async () => {
@@ -76,7 +76,7 @@ describe("composed hierarchy, editing and selection", () => {
     const childRow = find(view.host, '[data-row-id="c"]');
     const childInput = find<HTMLInputElement>(
       childRow,
-      part("edit-cell-input")
+      part("edit-cell-editor")
     );
     expect(document.activeElement).toBe(childInput);
     await write(childInput, "Changed child");
@@ -100,7 +100,7 @@ describe("composed hierarchy, editing and selection", () => {
       await tick();
       const childRow = find(view.host, '[data-row-id="c"]');
       if (unit === "row") await click(childRow, "row-edit-begin");
-      await write(find(childRow, part("edit-cell-input")), "Nested draft");
+      await write(find(childRow, part("edit-cell-editor")), "Nested draft");
       await click(
         unit === "row" ? childRow : view.host,
         unit === "row" ? "row-edit-save" : "batch-edit-save"
@@ -158,7 +158,7 @@ describe("composed hierarchy, editing and selection", () => {
     expect(
       find<HTMLInputElement>(
         view.host,
-        '[data-row-id="c"] ' + part("edit-cell-input")
+        '[data-row-id="c"] ' + part("edit-cell-editor")
       ).value
     ).toBe("Kept draft");
     view.rows.value = [{ ...parent, children: [] }];
@@ -166,7 +166,7 @@ describe("composed hierarchy, editing and selection", () => {
     view.rows.value = [parent];
     await tick();
     expect(
-      view.host.querySelector('[data-row-id="c"] ' + part("edit-cell-input"))
+      view.host.querySelector('[data-row-id="c"] ' + part("edit-cell-editor"))
     ).toBeNull();
     expect(save).not.toHaveBeenCalled();
   });
@@ -228,11 +228,11 @@ describe("native surfaces across KeepAlive", () => {
       await tick();
       await click(
         view.host,
-        mode === "header" ? "filter-header-trigger" : "filters-trigger"
+        mode === "header" ? "filter-header-trigger" : "filters-button"
       );
       const surfacePart = {
         header: "filter-header-popover",
-        drawer: "filters-drawer",
+        drawer: "filters-panel",
         popover: "filters-popover",
       }[mode];
       const surface = find(document.body, part(surfacePart));

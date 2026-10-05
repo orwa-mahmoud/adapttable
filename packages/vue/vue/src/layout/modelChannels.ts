@@ -25,6 +25,7 @@ import type { VNodeChild } from "vue";
 
 import type { Attrs } from "../attrs";
 import type { ColumnDef } from "../columnDef";
+import type { FilterPanelModel } from "../filters/filterPanelChrome";
 import type {
   TableGrouping,
   TableRowDetail,
@@ -185,4 +186,8 @@ export function batchEditBarSlotKey<TRow>(): FeatureSlotKey<
   BatchEditBarProps<TRow>
 > {
   return BATCH_EDIT_BAR;
+}
+
+export function filterViewKey<TRow>(): FeatureStateKey<FilterPanelModel<TRow>> {
+  return featureStateKey("vue-filter-view");
 }

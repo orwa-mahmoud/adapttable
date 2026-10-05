@@ -68,7 +68,7 @@ async function activate(host: ParentNode, index = 0, key = "F2") {
   button.focus();
   button.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
   await tick();
-  return find<HTMLInputElement>(host, part("edit-cell-input"));
+  return find<HTMLInputElement>(host, part("edit-cell-editor"));
 }
 function key(input: HTMLElement, value: string, shiftKey = false) {
   input.dispatchEvent(
@@ -87,7 +87,7 @@ describe("native editing controls", () => {
       await write(input, "Draft");
       key(input, "Escape");
       await tick();
-      expect(view.host.querySelector(part("edit-cell-input"))).toBeNull();
+      expect(view.host.querySelector(part("edit-cell-editor"))).toBeNull();
       expect(document.activeElement).toBe(
         find(view.host, part("edit-cell-activate"))
       );
@@ -106,9 +106,9 @@ describe("native editing controls", () => {
     await tick();
     expect(commit).toHaveBeenCalledExactlyOnceWith(original, "name", "Draft");
     expect(view.rows.value[0]).toBe(original);
-    expect(
-      find(view.host, part("editable-cell")).hasAttribute("data-dirty")
-    ).toBe(true);
+    expect(find(view.host, "[data-edit-unit]").hasAttribute("data-dirty")).toBe(
+      true
+    );
     request.resolve();
     await tick();
     expect(view.host.textContent).toContain("Ada");
@@ -131,10 +131,10 @@ describe("native editing controls", () => {
     await tick();
     request.reject(new Error("offline"));
     await tick();
-    expect(find(view.host, part("edit-cell-save-error")).textContent).toBe(
-      "Offline"
-    );
-    expect(find(view.host, part("edit-cell-undo")).tagName).toBe("BUTTON");
+    expect(
+      find(view.host, part("edit-cell-save-error")).firstChild?.textContent
+    ).toBe("Offline");
+    expect(find(view.host, part("edit-cell-rollback")).tagName).toBe("BUTTON");
     expect(error).toHaveBeenCalledOnce();
     expect(view.rows.value[0]).toBe(original);
   });
@@ -157,7 +157,7 @@ describe("native editing controls", () => {
     expect(input.getAttribute("aria-invalid")).toBe("true");
     const error = find(view.host, part("edit-cell-error"));
     expect(input.getAttribute("aria-describedby")).toBe(error.id);
-    expect(error.getAttribute("role")).toBe("status");
+    expect(error.getAttribute("role")).toBe("alert");
     expect(commit).not.toHaveBeenCalled();
     await write(input, "Valid");
     key(input, "Enter");
@@ -285,7 +285,7 @@ describe("native editing controls", () => {
       rowEditing<Row>(commit, { formatEditError: () => "Row failed" }),
     ]);
     await click(view.host, "row-edit-begin");
-    const input = find<HTMLInputElement>(view.host, part("edit-cell-input"));
+    const input = find<HTMLInputElement>(view.host, part("edit-cell-editor"));
     expect(document.activeElement).toBe(input);
     await write(input, "Row draft");
     await click(view.host, "row-edit-save");
@@ -299,15 +299,15 @@ describe("native editing controls", () => {
     ).toBe(true);
     request.reject(new Error("offline"));
     await tick();
-    expect(find(view.host, part("row-edit-error")).textContent).toBe(
-      "Row failed"
-    );
     expect(
-      find<HTMLInputElement>(view.host, part("edit-cell-input")).value
+      find(view.host, part("row-edit-actions") + ' [role="status"]').textContent
+    ).toBe("Row failed");
+    expect(
+      find<HTMLInputElement>(view.host, part("edit-cell-editor")).value
     ).toBe("Row draft");
     expect(view.rows.value[0]).toBe(original);
     await click(view.host, "row-edit-cancel");
-    expect(view.host.querySelector(part("edit-cell-input"))).toBeNull();
+    expect(view.host.querySelector(part("edit-cell-editor"))).toBeNull();
   });
   it.each([false, true])(
     "keeps row save status on its owner in mobile=%s",
@@ -326,7 +326,7 @@ describe("native editing controls", () => {
       const activeRow = find(view.host, '[data-row-id="1"]');
       const otherRow = find(view.host, '[data-row-id="2"]');
       await click(activeRow, "row-edit-begin");
-      await write(find(activeRow, part("edit-cell-input")), "Changed");
+      await write(find(activeRow, part("edit-cell-editor")), "Changed");
       await click(activeRow, "row-edit-save");
       expect(
         find(activeRow, part("row-edit-actions")).getAttribute("aria-busy")
@@ -354,8 +354,14 @@ describe("native editing controls", () => {
     const request = deferred<void>();
     const commit = vi.fn(() => request.promise);
     const view = table([batchEditing<Row>(commit)]);
-    const input = find<HTMLInputElement>(view.host, part("edit-cell-input"));
+    const input = find<HTMLInputElement>(view.host, part("edit-cell-editor"));
+    expect(
+      input.closest(part("batch-edit-cell"))?.hasAttribute("data-changed")
+    ).toBe(false);
     await write(input, "Batch draft");
+    expect(
+      input.closest(part("batch-edit-cell"))?.hasAttribute("data-changed")
+    ).toBe(true);
     key(input, "Enter");
     input.dispatchEvent(new Event("blur"));
     await tick();
@@ -370,7 +376,9 @@ describe("native editing controls", () => {
       find<HTMLButtonElement>(view.host, part("batch-edit-save")).disabled
     ).toBe(true);
     expect(
-      find(view.host, part("batch-edit-progress")).getAttribute("role")
+      find(view.host, part("batch-edit-bar") + ' [role="status"]').getAttribute(
+        "role"
+      )
     ).toBe("status");
     request.resolve();
     await tick();
@@ -386,25 +394,25 @@ describe("native editing controls", () => {
       dirtyIndicators(),
     ]);
     await tick();
-    expect(find<HTMLButtonElement>(view.host, part("undo")).disabled).toBe(
-      true
-    );
+    expect(
+      find<HTMLButtonElement>(view.host, part("undo-button")).disabled
+    ).toBe(true);
     const input = await activate(view.host);
     await write(input, "Changed");
     key(input, "Enter");
     await tick();
-    expect(find<HTMLButtonElement>(view.host, part("undo")).disabled).toBe(
-      false
-    );
     expect(
-      find(view.host, part("editable-cell")).hasAttribute("data-dirty")
+      find<HTMLButtonElement>(view.host, part("undo-button")).disabled
     ).toBe(false);
-    await click(view.host, "undo");
-    expect(commit).toHaveBeenLastCalledWith(original, "name", "Ada");
-    expect(find<HTMLButtonElement>(view.host, part("redo")).disabled).toBe(
+    expect(find(view.host, "[data-edit-unit]").hasAttribute("data-dirty")).toBe(
       false
     );
-    await click(view.host, "redo");
+    await click(view.host, "undo-button");
+    expect(commit).toHaveBeenLastCalledWith(original, "name", "Ada");
+    expect(
+      find<HTMLButtonElement>(view.host, part("redo-button")).disabled
+    ).toBe(false);
+    await click(view.host, "redo-button");
     expect(commit).toHaveBeenLastCalledWith(original, "name", "Changed");
   });
   it("SSR/hydration runs no commits, preserves editor IDs and has no mismatch", async () => {
@@ -426,7 +434,7 @@ describe("native editing controls", () => {
     const app = createSSRApp({ render });
     app.mount(target);
     await tick();
-    expect(target.querySelectorAll(part("edit-cell-input"))).toHaveLength(2);
+    expect(target.querySelectorAll(part("edit-cell-editor"))).toHaveLength(2);
     expect(commit).not.toHaveBeenCalled();
     expect(warn).not.toHaveBeenCalled();
     app.unmount();
@@ -454,7 +462,7 @@ describe("native editing alternate controls", () => {
       undoButton: "undo",
       redoButton: "redo",
     });
-    await click(view.host, "undo");
+    await click(view.host, "undo-button");
     expect(undo).toHaveBeenCalledOnce();
     props.value = {
       ...props.value,
@@ -463,13 +471,13 @@ describe("native editing alternate controls", () => {
       canRedo: true,
     };
     await tick();
-    expect(view.host.querySelector(part("undo"))).toBeNull();
-    await click(view.host, "redo");
+    expect(view.host.querySelector(part("undo-button"))).toBeNull();
+    await click(view.host, "redo-button");
     expect(redo).toHaveBeenCalledOnce();
-    expect(find(view.host, part("redo")).className).toBe("redo");
+    expect(find(view.host, part("redo-button")).className).toBe("redo");
     props.value = { ...props.value, onRedo: undefined };
     await tick();
-    expect(view.host.querySelector(part("edit-history"))).toBeNull();
+    expect(view.host.querySelector(".history")).toBeNull();
   });
   it("honors icon suppression on native row actions and resolves host edit conflicts", async () => {
     const row = table([
@@ -486,7 +494,18 @@ describe("native editing alternate controls", () => {
     await write(input, "Mine");
     view.rows.value = [{ ...original, name: "Theirs" }];
     await tick();
-    const take = find(view.host, part("edit-cell-take-theirs"));
+    const conflict = find(view.host, part("edit-cell-conflict"));
+    expect(conflict.tagName).toBe("SPAN");
+    expect(conflict.getAttribute("role")).toBe("alert");
+    expect(input.getAttribute("aria-describedby")).toBe(conflict.id);
+    expect(
+      find(conflict, part("edit-cell-conflict-message")).textContent
+    ).toBeTruthy();
+    expect(find(conflict, part("edit-cell-incoming")).textContent).toContain(
+      "Theirs"
+    );
+    expect(view.host.querySelector(part("edit-cell-error"))).toBeNull();
+    const take = find(conflict, part("edit-cell-take-theirs"));
     take.dispatchEvent(
       new MouseEvent("mousedown", { bubbles: true, cancelable: true })
     );
@@ -494,7 +513,7 @@ describe("native editing alternate controls", () => {
     await tick();
     expect(commit).not.toHaveBeenCalled();
     expect(
-      find<HTMLInputElement>(view.host, part("edit-cell-input")).value
+      find<HTMLInputElement>(view.host, part("edit-cell-editor")).value
     ).toBe("Theirs");
   });
 });

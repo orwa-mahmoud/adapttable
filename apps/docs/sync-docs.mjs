@@ -37,6 +37,11 @@ const target = join(here, "src/content/docs");
  * `docs/` to each other.
  */
 export const TITLES = {
+  "vue/actions.md": "Vue actions and exports",
+  "vue/column-menu.md": "Vue column menu",
+  "vue/navigation.md": "Vue navigation, find and status",
+  "vue/specialized.md": "Vue specialized data views",
+  "vue/summary-row.md": "Vue summaries and footers",
   "vue/getting-started.md": "Get started with experimental Vue tables",
   "vue/api.md": "Experimental Vue table API reference",
   "vue/assistant.md": "Vue assistant and approvals",
@@ -176,6 +181,16 @@ export const TITLES = {
 // emits from `description`. Keyword-rich and unique per page so search and
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
+  "vue/actions.md":
+    "Compose Vue bulk actions, command palettes, context menus, panels, CSV exports, optional writers and print controls with host-owned actions.",
+  "vue/column-menu.md":
+    "Manage Vue table column visibility, order, pinning, sizing and names with controlled layouts, native controls and typed adapter slots.",
+  "vue/navigation.md":
+    "Add Vue cell navigation, clipboard and fill actions, find-in-table, column selection and status controls with scoped models and native slots.",
+  "vue/specialized.md":
+    "Compose Vue virtual windows, host-owned row reordering, grouping and pivot controls, formulas, row streams and accessible sparklines.",
+  "vue/summary-row.md":
+    "Render Vue page totals and custom footers with reactive summary values, aligned desktop cells, mobile cards and shared adapter models.",
   "vue/assistant.md":
     "Connect Vue agents and conversations with native controls, explicit approval and host-controlled state.",
   "vue/getting-started.md":

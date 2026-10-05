@@ -59,7 +59,10 @@ export function FilterTreeChrome<TRow>(props: {
   const labels = model.labels;
   const select = (input: FilterTreeSelectProps) =>
     controls.Select({
-      className: names.filterSelect,
+      className:
+        input.part === "filter-operator"
+          ? names.filterOperator
+          : names.filterSelect,
       fieldClassName: names.filterField,
       labelClassName: names.filterLabel,
       ...input,
@@ -193,7 +196,7 @@ export function FilterTreeChrome<TRow>(props: {
       [
         select({
           label: labels.filterTree,
-          part: "filter-tree-combinator",
+          part: "filter-operator",
           value: value.combinator,
           options: filterTreeCombinatorOptions(labels),
           onChange: (op) => model.actions.setCombinator(path, op),
@@ -212,12 +215,10 @@ export function FilterTreeChrome<TRow>(props: {
           [
             controls.Button({
               label: labels.filterAddCondition,
-              part: "filter-tree-add-condition",
               onClick: () => model.actions.addCondition(path),
             }),
             controls.Button({
               label: labels.filterAddGroup,
-              part: "filter-tree-add-group",
               onClick: () => model.actions.addGroup(path),
             }),
             path.length

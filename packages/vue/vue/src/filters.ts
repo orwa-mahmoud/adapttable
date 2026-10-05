@@ -3,11 +3,11 @@ import {
   FILTER_ENGINE_IMPL,
   type FilterDef,
   type FilterTypeSpec,
+  walkFilterTreeConditions,
 } from "@adapttable/core";
 import {
   coreFilters,
   coreFilterTypes,
-  type FeatureStateKey,
   featureStateKey,
   FilterTriggerToggleState,
   TOOLBAR_EXTRAS,
@@ -23,9 +23,8 @@ import type { FilterPanelModel } from "./filters/filterPanelChrome";
 import { FULLSCREEN_MODEL } from "./viewControls/contracts";
 export const FILTER_VIEW =
   featureStateKey<FilterPanelModel<unknown>>("vue-filter-view");
-export function filterViewKey<TRow>(): FeatureStateKey<FilterPanelModel<TRow>> {
-  return featureStateKey<FilterPanelModel<TRow>>(FILTER_VIEW.id);
-}
+export { filterViewKey } from "./layout/modelChannels";
+import { filterViewKey } from "./layout/modelChannels";
 function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
   const open = shallowRef(false);
   const fullscreen = context.state.get(FULLSCREEN_MODEL);
@@ -46,13 +45,21 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
     if (!runtime) return undefined;
     const source = context.table.source.value;
     const labels = context.table.labels.value;
-    const count = activeFilterChips({
+    const fieldCount = activeFilterChips({
       values: source.extra,
       labels: runtime.filterLabels,
       onChange: source.setExtra,
     }).length;
+    const treeCount =
+      source.filterTree && source.setFilterTree
+        ? walkFilterTreeConditions(source.filterTree).length
+        : 0;
+    const count = fieldCount + treeCount;
     return {
       open: open.value,
+      openPanel: () => {
+        if (enabled()) open.value = true;
+      },
       mode:
         context.options.value.filtersMode === "drawer" ? "drawer" : "popover",
       dir: context.table.dir.value,
@@ -77,7 +84,7 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
         attrs: {
           "aria-expanded": open.value,
           "aria-haspopup": "dialog",
-          "data-adapttable-part": "filters-trigger",
+          "data-adapttable-part": "filters-button",
         },
         triggerRef: (element) => {
           if (enabled()) anchor.value = element;

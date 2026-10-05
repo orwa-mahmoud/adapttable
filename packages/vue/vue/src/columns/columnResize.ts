@@ -40,7 +40,7 @@ export function mountColumnResize<TRow>(
             ...columnResizeHandleProps(key, setWidth, label, {
               signal: controller.signal,
             }),
-            "data-adapttable-part": "column-resize-handle",
+            "data-adapttable-part": "resize-handle",
             style: DESKTOP_RESIZE_HANDLE_STYLE,
           }),
       });

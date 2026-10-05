@@ -178,6 +178,9 @@ The canonical definitions remain in the Vue API reference:
   describes resolved table options, row inventory and render projections.
 - [Columns and rendering](./api.md#columns-and-rendering) covers typed cell,
   header and footer contexts and host renderers.
+- [Summaries and footers](./summary-row.md) defines `SummaryRowFn<TRow>`,
+  `TableSummaryModel<TRow>` and `TableSummaryCellModel<TRow>`, forwarded by the
+  assistant entry for the mounted table's summary projection.
 - [Headless table, layout and selection](./api.md#headless-table-layout-and-selection)
   describes the table result and controlled selection/layout models.
 - [Data sources](./api.md#data-sources) and [URL state](./api.md#url-state)

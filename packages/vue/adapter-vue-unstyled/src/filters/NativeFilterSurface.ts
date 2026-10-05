@@ -216,7 +216,7 @@ export const NativeFilterSurface = defineComponent(
         dismiss("outside");
     };
     const partName = () =>
-      props.part ?? (props.modal ? "filters-drawer" : "filters-popover");
+      props.part ?? (props.modal ? "filters-panel" : "filters-popover");
     return () =>
       props.open && mounted.value
         ? h(Teleport, { to: props.container ?? "body" }, [
@@ -234,8 +234,11 @@ export const NativeFilterSurface = defineComponent(
                 "aria-label": props.label,
                 "aria-modal": props.modal ? "true" : undefined,
                 class: props.modal
-                  ? names.value.filtersDrawer
-                  : names.value.filtersPopover,
+                  ? [
+                      names.value.filtersDrawer,
+                      props.className ?? names.value.filtersPanel,
+                    ]
+                  : (props.className ?? names.value.filtersPopover),
                 "data-adapttable-part": partName(),
                 style: {
                   display: active.value ? undefined : "none !important",
@@ -278,6 +281,7 @@ export const NativeFilterSurface = defineComponent(
       "modal",
       "part",
       "container",
+      "className",
     ],
   }
 );
