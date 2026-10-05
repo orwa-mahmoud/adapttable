@@ -12,8 +12,8 @@ describe("social card metadata", () => {
   it("labels every Vue guide as experimental without a React kit claim", () => {
     const cards = ogCardMetadata().filter((card) => card.framework === "vue");
     assert.deepEqual(
-      cards.map((card) => `${card.slug}.md`),
-      VUE_DOCS
+      cards.map((card) => `${card.slug}.md`).sort(),
+      [...VUE_DOCS].sort()
     );
     for (const card of cards) {
       assert.match(card.footer, /Experimental Vue/);

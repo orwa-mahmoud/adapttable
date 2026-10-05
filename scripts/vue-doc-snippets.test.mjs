@@ -102,7 +102,14 @@ function compileExamples(examples) {
             "@adapttable/vue-unstyled": [
               join(REPO_ROOT, "packages/vue/adapter-vue-unstyled/src/index.ts"),
             ],
-            // Only the optional assistant guide needs this source package.
+            // Resolve the complete optional assistant graph from source so a
+            // cold checkout needs no neutral AI build to check these examples.
+            "@adapttable/ai": [
+              join(REPO_ROOT, "packages/shared/ai/src/index.ts"),
+            ],
+            "@adapttable/ai/voice": [
+              join(REPO_ROOT, "packages/shared/ai/src/voice.ts"),
+            ],
             "@adapttable/ai-vue": [
               join(REPO_ROOT, "packages/vue/ai-vue/src/index.ts"),
             ],

@@ -34,6 +34,7 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/ai",
   "@adapttable/ai-angular",
   "@adapttable/ai-react",
+  "@adapttable/ai-vue",
   "@adapttable/angular",
   "@adapttable/angular-aria",
   "@adapttable/angular-cdk",
@@ -57,6 +58,13 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/spartan",
   "@adapttable/taiga-ui",
   "@adapttable/unstyled",
+  "@adapttable/vue",
+  "@adapttable/vue-unstyled",
+];
+const VUE_PUBLIC_PACKAGES = [
+  "@adapttable/ai-vue",
+  "@adapttable/vue",
+  "@adapttable/vue-unstyled",
 ];
 const TAIGA_NATIVE_PEER_NAMES = [
   "@maskito/angular",
@@ -87,7 +95,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares the baseline floor and every Angular 22 native kit floor", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 31);
+    assert.equal(manifests.length, 32);
     for (const manifest of manifests) {
       const pkg = json(manifest);
       const floor = ANGULAR_22_KITS.has(pkg.name) ? ANGULAR_22_FLOOR : FLOOR;
@@ -136,11 +144,10 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 26);
+    assert.equal(names.length, 29);
     assert.ok(!names.includes("@adapttable/bootstrap"));
     assert.ok(!names.includes("@adapttable/primeng"));
-    assert.ok(!names.includes("@adapttable/vue"));
-    assert.ok(!names.includes("@adapttable/vue-unstyled"));
+    for (const name of VUE_PUBLIC_PACKAGES) assert.ok(names.includes(name));
   });
 
   it("fails a planted missing package with the name involved", () => {
@@ -161,9 +168,9 @@ describe("supported Node contract", () => {
     );
   });
 
-  it("rejects each missing Angular 22 kit and each private kit in the packed set", () => {
+  it("rejects each missing Angular 22 or Vue package and each private kit in the packed set", () => {
     const expected = publishedPackageNames();
-    for (const name of ANGULAR_22_KITS) {
+    for (const name of [...ANGULAR_22_KITS, ...VUE_PUBLIC_PACKAGES]) {
       assert.throws(
         () =>
           assertPackedMatchesExpected(
@@ -173,12 +180,7 @@ describe("supported Node contract", () => {
         { message: `missing published package(s): ${name}` }
       );
     }
-    for (const name of [
-      "@adapttable/bootstrap",
-      "@adapttable/primeng",
-      "@adapttable/vue",
-      "@adapttable/vue-unstyled",
-    ]) {
+    for (const name of ["@adapttable/bootstrap", "@adapttable/primeng"]) {
       assert.throws(
         () =>
           assertPackedMatchesExpected([...PUBLISHED_SNAPSHOT, name], expected),
@@ -238,6 +240,19 @@ describe("supported Node contract", () => {
     assert.ok(deps.antd);
     assert.equal(deps.react, undefined);
     assert.equal(deps["@adapttable/core"], undefined);
+  });
+
+  it("installs Vue and probes all three public Vue roots on supported runtimes", () => {
+    for (const version of ["22.12.0", "22.22.3", "24.15.0", "26.0.0"]) {
+      const packages = packagesForRuntime(publishedPackages(), version);
+      const deps = kitLoadDependencies(packages, version);
+      assert.equal(deps.vue, "^3.5.0", version);
+      const routes = probeRoutes(packages.map((entry) => entry.name));
+      for (const name of VUE_PUBLIC_PACKAGES) {
+        assert.ok(routes.includes(name), `${version}: ${name}`);
+        assert.equal(deps[name], undefined, `${name} loads from its tarball`);
+      }
+    }
   });
 
   it("installs and preloads the Angular compiler for the Angular binding", () => {

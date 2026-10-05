@@ -1,5 +1,7 @@
 # @adapttable/vue
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 Headless Vue 3.5 composables over the framework-neutral AdaptTable engine.
 Vue owns reactivity and lifecycle; adapters supply every visible control.
 This public package is experimental, prepared for `0.1.0`, and has not been

@@ -39,7 +39,17 @@ describe("site addresses", () => {
   });
 
   it("registers only implemented Vue guides with framework-aware fallback", () => {
-    assert.deepEqual(VUE_DOCS, ["vue/getting-started.md", "vue/api.md"]);
+    assert.deepEqual(VUE_DOCS, [
+      "vue/getting-started.md",
+      "vue/features.md",
+      "vue/api.md",
+      "vue/assistant.md",
+      "vue/summary-row.md",
+      "vue/column-menu.md",
+      "vue/navigation.md",
+      "vue/actions.md",
+      "vue/specialized.md",
+    ]);
     for (const source of VUE_DOCS) {
       assert.ok(PAGES.includes(source.replace(/\.md$/, "")), source);
       assert.equal(docsRoute(source), `/${source.replace(/\.md$/, "")}/`);

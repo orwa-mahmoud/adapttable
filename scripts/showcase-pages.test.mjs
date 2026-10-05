@@ -21,6 +21,23 @@ const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
 
 const INDEX = "index.html";
 
+const VUE_PREVIEW_ENTRIES = new Map([
+  ["", "src/vue/entry-native.ts"],
+  ["assistant", "src/vue/entry-assistant.ts"],
+  ["table-footers", "src/vue/entry-table-footers.ts"],
+  ["filter-editing", "src/vue/entry-filter-editing.ts"],
+  ["composition", "src/vue/entry-composition.ts"],
+  ["hierarchy", "src/vue/entry-hierarchy.ts"],
+  ["rows", "src/vue/entry-rows.ts"],
+  ["selection-contract", "src/vue/entry-selection-contract.ts"],
+  ["view-controls", "src/vue/entry-view-controls.ts"],
+  ["column-menu", "src/vue/column-menu/entry-column-menu.ts"],
+  ["navigation", "src/vue/navigation/entry-navigation.ts"],
+  ["actions", "src/vue/actions/entry-actions.ts"],
+  ["specialized", "src/vue/specialized/entry-specialized.ts"],
+  ["feature-union", "src/vue/feature-union/entry-feature-union.ts"],
+]);
+
 const STANDALONE_ENTRIES = new Map([
   ["main", "src/main.tsx"],
   ["all-options", "src/entry-all-options.tsx"],
@@ -28,7 +45,10 @@ const STANDALONE_ENTRIES = new Map([
   ["mcp-app", "src/entry-mcp-app.tsx"],
   ["angular-main", "src/angular/entry-demo.ts"],
   ["angular-all-options", "src/angular/entry-demo.ts"],
-  ["vue-unstyled", "src/vue/entry-native.ts"],
+  ...[...VUE_PREVIEW_ENTRIES].map(([slug, entry]) => [
+    slug ? `vue-unstyled-${slug}` : "vue-unstyled",
+    entry,
+  ]),
 ]);
 
 /** Not page directories: build output, dependencies, static assets, source. */
@@ -124,8 +144,15 @@ function assertStandaloneEntry(page, source, entry) {
     assert.ok(source.includes(`data-angular-mode="${lab ? "lab" : "live"}"`));
     assert.doesNotMatch(source, /data-matrix-page/);
   } else if (page.framework === "vue") {
-    assert.equal(page.key, "vue-unstyled");
-    assert.equal(page.route, "/vue/demo/unstyled/");
+    const preview = [...VUE_PREVIEW_ENTRIES].find(
+      ([slug]) => page.key === (slug ? `vue-unstyled-${slug}` : "vue-unstyled")
+    );
+    assert.ok(preview, page.html);
+    const [slug] = preview;
+    assert.equal(
+      page.route,
+      slug ? `/vue/demo/unstyled/${slug}/` : "/vue/demo/unstyled/"
+    );
     assert.equal(page.indexable, false);
     assert.doesNotMatch(source, /data-matrix-page/);
   } else {
@@ -141,24 +168,27 @@ describe("the showcase page manifest", () => {
     );
   });
 
-  it("keeps the one Vue preview distinct from the other unstyled families", () => {
+  it("keeps every implemented Vue preview distinct from the other unstyled families", () => {
     const vue = SHOWCASE_PAGES.filter((page) => page.framework === "vue");
-    assert.deepEqual(vue, [
-      {
-        key: "vue-unstyled",
-        html: "./vue/unstyled/index.html",
-        route: "/vue/demo/unstyled/",
+    assert.deepEqual(
+      vue,
+      [...VUE_PREVIEW_ENTRIES.keys()].map((slug) => ({
+        key: slug ? `vue-unstyled-${slug}` : "vue-unstyled",
+        html: slug
+          ? `./vue/unstyled/${slug}/index.html`
+          : "./vue/unstyled/index.html",
+        route: slug ? `/vue/demo/unstyled/${slug}/` : "/vue/demo/unstyled/",
         indexable: false,
         framework: "vue",
-      },
-    ]);
+      }))
+    );
     assert.ok(
       SHOWCASE_PAGES.some((page) => page.route === "/angular/demo/unstyled/")
     );
-    assert.equal(
-      indexableRoutes(SHOWCASE_PAGES).includes("/vue/demo/unstyled/"),
-      false
-    );
+    const indexed = indexableRoutes(SHOWCASE_PAGES);
+    for (const page of vue) {
+      assert.equal(indexed.includes(page.route), false, page.route);
+    }
     assert.equal(
       matrixPages().some((page) => page.framework === "vue"),
       false

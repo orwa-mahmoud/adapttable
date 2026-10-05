@@ -1,5 +1,7 @@
 # @adapttable/vue-unstyled
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 Native HTML controls for the AdaptTable Vue binding. The table ships no theme;
 style semantic elements with `classNames` or `data-adapttable-part` selectors.
 This public package is experimental, prepared for `0.1.0`, and has not been
