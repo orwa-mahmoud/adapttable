@@ -26,13 +26,11 @@ const sonarRecommended = /** @type {import("eslint").Linter.Config} */ (
 );
 
 /**
- * Where React actually runs: the engine, the nine adapters, and the two apps
- * that mount them. Everything else in this repository is React-free by design
- * or by job — the CLI scaffolds a project before one exists, the server parses
- * a query string, and `scripts/` builds the repo.
+ * React-specific rules apply to the React binding and adapters, the showcase,
+ * and the examples. Framework-neutral packages keep the shared language and
+ * quality rules without React-specific checks.
  */
 const REACT_SOURCES = [
-  "packages/shared/core/**/*.{ts,tsx}",
   "packages/react/**/*.{ts,tsx}",
   "apps/showcase/**/*.{ts,tsx}",
   "examples/**/*.{ts,tsx}",
