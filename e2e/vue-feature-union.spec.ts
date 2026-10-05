@@ -82,13 +82,12 @@ test("find reveals a logical descendant and range export differs from source pag
   await page.goto(route);
   const table = tableOf(page);
   await expect(cellOf(table, "leaf-120", "metric-18")).toHaveCount(0);
-  await openFarMatch(page);
-  await expect(page.locator("#union-range")).toHaveText(
-    JSON.stringify({
-      anchor: { row: 121, col: 19 },
-      head: { row: 121, col: 19 },
-    })
-  );
+  const match = await openFarMatch(page);
+  await expect(match).toHaveAttribute("data-grid-cell", "121:19");
+  await expect(match).toHaveAttribute("data-cell-selected", "");
+  await expect(table.locator("tbody td[data-cell-selected]")).toHaveCount(1);
+  // The callback reports multi-cell rectangles; range export also accepts the focused cell.
+  await expect(page.locator("#union-range")).toHaveText("null");
   await table.locator(part("export-csv-button")).click();
   await expect(page.locator("#union-export")).toHaveText(
     JSON.stringify({
