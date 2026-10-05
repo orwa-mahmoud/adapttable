@@ -1,4 +1,3 @@
-import { createMemoryAdapter } from "@adapttable/core";
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, h } from "vue";
 import { renderToString } from "vue/server-renderer";
@@ -6,6 +5,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { cellNavigation } from "../src/cell-navigation";
 import { findInTable } from "../src/find-in-table";
+import { testUrlAdapter } from "./view-controls.helpers";
 
 interface Row {
   id: string;
@@ -24,7 +24,7 @@ describe("composed navigation and Find SSR", () => {
   it.each(cases)(
     "renders without Vue errors for $query, findFirst=$findFirst, mobile=$mobile",
     async ({ query, findFirst, mobile }) => {
-      const adapter = createMemoryAdapter(query ? `find=${query}` : "");
+      const adapter = testUrlAdapter(query ? `find=${query}` : "");
       const writes = vi.spyOn(adapter, "setSearch");
       const rangeChanged = vi.fn();
       const errors: unknown[] = [];
