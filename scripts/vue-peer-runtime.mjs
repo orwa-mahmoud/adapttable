@@ -61,6 +61,7 @@ const nativeTests = [
   "editing-mount-cost",
   "filter-native",
   "filter-dialog-focus",
+  "filter-focus-browser-contract",
   "composed-features",
   "composition-parts",
   "filter-parts",
