@@ -96,7 +96,9 @@ test("find reveals a logical descendant and range export differs from source pag
       columnKeys: ["metric-18"],
     })
   );
-  await page.getByLabel("Export scope", { exact: true }).selectOption("page");
+  await page
+    .getByRole("combobox", { name: "Export scope", exact: true })
+    .selectOption("page");
   await table.locator(part("export-csv-button")).click();
   const expectedColumns = [
     "name",
