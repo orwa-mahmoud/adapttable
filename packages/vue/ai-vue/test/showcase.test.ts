@@ -75,11 +75,21 @@ describe("real native assistant showcase", () => {
     await host.send("Sort names");
     await vi.waitFor(() =>
       expect(
-        host.root.querySelector(part("assistant-undo-button"))
+        host.root.querySelector(part("assistant-receipts-toggle-button"))
       ).not.toBeNull()
     );
+    host.find(part("assistant-receipts-toggle-button")).click();
+    await vi.waitFor(() =>
+      expect(
+        host.root.querySelectorAll(part("assistant-receipt"))
+      ).toHaveLength(1)
+    );
+    const undo = host.find<HTMLButtonElement>(
+      part("assistant-receipt-undo-button")
+    );
+    expect(undo.disabled).toBe(false);
     expect(host.root.querySelector("tbody tr")?.textContent).toContain("Grace");
-    host.find(part("assistant-undo-button")).click();
+    undo.click();
     await vi.waitFor(() =>
       expect(host.root.querySelector("tbody tr")?.textContent).toContain("Ada")
     );
