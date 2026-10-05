@@ -1,0 +1,22 @@
+body {
+  font:
+    16px/1.5 system-ui,
+    sans-serif;
+  margin: 24px;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+.custom-scrim {
+  background: rgb(30 40 50 / 60%);
+}
+.custom-panel {
+  background: rgb(245 240 220);
+  color: rgb(20 30 40);
+}
+#other-dialog::backdrop {
+  background: rgb(10 20 30 / 40%);
+  backdrop-filter: blur(2px);
+}

@@ -65,7 +65,8 @@
     "check:packaged": "node scripts/run-parallel.mjs api:check publint smoke:dist budget check:boundary && pnpm run check:vue-built-peers",
     "build:agent-schema": "node scripts/build-agent-schema.mjs",
     "check:vue-peer-types": "node scripts/check-vue-peer-types.mjs",
-    "check:vue-built-peers": "node scripts/check-vue-built-peers.mjs"
+    "check:vue-built-peers": "node scripts/check-vue-built-peers.mjs",
+    "build:e2e:vue-consumer": "node scripts/build-vue-browser-consumer.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

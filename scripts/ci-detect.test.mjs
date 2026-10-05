@@ -37,6 +37,7 @@ describe("classify", () => {
       "apps/docs/src/components/FrameworkSwitch.astro",
       "apps/docs/sync-docs.mjs",
       "scripts/angular-docs.mjs",
+      "scripts/build-vue-browser-consumer.mjs",
       "scripts/vue-docs.mjs",
       "scripts/framework-navigation.mjs",
       "scripts/og-cards.mjs",

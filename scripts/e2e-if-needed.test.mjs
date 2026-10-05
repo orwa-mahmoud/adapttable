@@ -23,6 +23,7 @@ describe("e2ePlan", () => {
       "docs/filtering.md",
       "apps/docs/src/components/FrameworkSwitch.astro",
       "scripts/angular-docs.mjs",
+      "scripts/build-vue-browser-consumer.mjs",
       "scripts/vue-docs.mjs",
       "scripts/framework-navigation.mjs",
       "scripts/og-cards.mjs",

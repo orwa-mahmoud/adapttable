@@ -25,7 +25,10 @@ const RELATED =
 
 /** @param {string} file */
 export function isE2eRelated(file) {
-  return RELATED.test(file.replaceAll("\\", "/"));
+  const path = file.replaceAll("\\", "/");
+  return (
+    RELATED.test(path) || path === "scripts/build-vue-browser-consumer.mjs"
+  );
 }
 
 /** @param {string} file */
