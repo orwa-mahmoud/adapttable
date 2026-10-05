@@ -88,7 +88,7 @@ export function readReport(text) {
   return {
     tagged,
     stars,
-    exported: new Set(exported.values()),
+    exported: new Set(exported.map(([, publicName]) => publicName)),
     forwarded,
   };
 }
@@ -110,19 +110,19 @@ function readLine(line, tag, declared, inline, stars) {
   return null;
 }
 
-/** `local name -> public name` for every `export { … }` specifier. */
+/** Every `[local name, public name]` pair, including aliases of one local. */
 function blockExports(text) {
-  const exported = new Map();
+  const exported = [];
   for (const block of text.matchAll(/export \{([^}]*)\}/g)) {
     for (const part of block[1].split(",")) {
       const spec = part.trim();
       if (!spec) continue;
       const renamed =
         /^(?:type )?([A-Za-z_$][\w$]*) as ([A-Za-z_$][\w$]*)$/.exec(spec);
-      if (renamed) exported.set(renamed[1], renamed[2]);
+      if (renamed) exported.push([renamed[1], renamed[2]]);
       else {
         const name = spec.replace(/^type /, "");
-        exported.set(name, name);
+        exported.push([name, name]);
       }
     }
   }

@@ -2723,6 +2723,14 @@
       "behavior": ""
     },
     {
+      "export": "AGENT_HTTP_SCHEMA",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "AGENT_SCHEMA_VERSION",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
