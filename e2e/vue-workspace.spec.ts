@@ -36,6 +36,56 @@ async function contained(page: Page): Promise<void> {
   ).toBeLessThanOrEqual(1);
 }
 
+async function compactAssistantLauncher(page: Page): Promise<void> {
+  const launcher = table(page).locator(part("assistant-launcher"));
+  await expect(launcher).toBeVisible();
+  const bounds = await launcher.boundingBox();
+  if (!bounds) throw new Error("The assistant launcher has no visible bounds.");
+  expect(bounds.width).toBeGreaterThanOrEqual(32);
+  expect(bounds.width).toBeLessThanOrEqual(96);
+  expect(bounds.height).toBeGreaterThanOrEqual(32);
+  expect(bounds.height).toBeLessThanOrEqual(64);
+  const mark = await launcher
+    .locator(part("assistant-launcher-mark"))
+    .boundingBox();
+  if (!mark)
+    throw new Error("The assistant launcher mark has no visible bounds.");
+  expect(mark.width).toBeGreaterThanOrEqual(16);
+  expect(mark.width).toBeLessThanOrEqual(24);
+  expect(mark.height).toBeGreaterThanOrEqual(16);
+  expect(mark.height).toBeLessThanOrEqual(24);
+}
+async function readableActiveTab(page: Page): Promise<void> {
+  const active = page.locator('.workspace-tabs > button[aria-pressed="true"]');
+  await active.hover();
+  const contrast = await active.evaluate((element) => {
+    const luminance = (color: string): number => {
+      const channels = color.match(/\d+(?:\.\d+)?/g)?.map(Number);
+      if (!channels || channels.length < 3)
+        throw new Error(`Unsupported tab color: ${color}`);
+      if (channels.length === 4 && channels[3] !== 1)
+        throw new Error(`The active tab color must be opaque: ${color}`);
+      const [red, green, blue] = channels.slice(0, 3).map((channel) => {
+        const normalized = channel / 255;
+        return normalized <= 0.04045
+          ? normalized / 12.92
+          : ((normalized + 0.055) / 1.055) ** 2.4;
+      });
+      if (red === undefined || green === undefined || blue === undefined)
+        throw new Error(`Incomplete tab color: ${color}`);
+      return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    };
+    const style = getComputedStyle(element);
+    const foreground = luminance(style.color);
+    const background = luminance(style.backgroundColor);
+    return (
+      (Math.max(foreground, background) + 0.05) /
+      (Math.min(foreground, background) + 0.05)
+    );
+  });
+  expect(contrast).toBeGreaterThanOrEqual(4.5);
+}
+
 const errorsByPage = new WeakMap<Page, string[]>();
 test.beforeEach(({ page }) => {
   const errors: string[] = [];
@@ -73,7 +123,11 @@ async function filterOrders(
 }
 async function showPending(page: Page): Promise<void> {
   await table(page).locator(part("command-palette-button")).click();
-  await page.locator(part("command-item")).click();
+  const reviewLabel =
+    (await page.locator("html").getAttribute("lang")) === "ar"
+      ? "عرض الطلبات بانتظار المراجعة"
+      : "Show orders awaiting review";
+  await page.getByRole("option", { name: reviewLabel, exact: true }).click();
   await expect(page.locator(part("command-palette"))).toHaveCount(0);
 }
 async function markReady(page: Page): Promise<void> {
@@ -84,7 +138,7 @@ async function markReady(page: Page): Promise<void> {
 }
 async function editOwner(root: Locator, name: string): Promise<void> {
   const cell = root.locator('[data-column-key="owner"]');
-  await cell.locator(part("edit-cell-activate")).click();
+  await cell.locator(part("edit-cell-activate")).press("Enter");
   await cell.locator(part("edit-cell-editor")).fill(name);
   await cell.locator(part("edit-cell-editor")).press("Enter");
   await expect(cell).toContainText(name);
@@ -116,19 +170,21 @@ test("landing leads to a mounted order workspace with editable details and scope
   expect(response?.status()).toBe(200);
   await page.getByRole("link", { name: "Open the order workspace" }).click();
   expect(new URL(page.url()).pathname).toBe(route);
-  expect(new URL(page.url()).searchParams.get("view")).toBe("orders");
+  await expect
+    .poll(() => new URL(page.url()).searchParams.get("view"))
+    .toBe("orders");
   const orders = table(page);
   await expect(
     orders.getByRole("grid", { name: "Order desk", exact: true })
   ).toBeVisible();
   const first = row(orders, "ORD-1042");
   const owner = first.locator('[data-column-key="owner"]');
-  await owner.locator(part("edit-cell-activate")).click();
+  await owner.locator(part("edit-cell-activate")).press("Enter");
   await owner.locator(part("edit-cell-editor")).fill("Discard this edit");
   await owner.locator(part("edit-cell-editor")).press("Escape");
   await expect(owner).toContainText("Maya Chen");
   await expect(owner.locator(part("edit-cell-editor"))).toHaveCount(0);
-  await owner.locator(part("edit-cell-activate")).click();
+  await owner.locator(part("edit-cell-activate")).press("Enter");
   await owner.locator(part("edit-cell-editor")).fill("A");
   await owner.locator(part("edit-cell-editor")).press("Enter");
   await expect(owner).toContainText("Enter at least two characters");
@@ -138,7 +194,7 @@ test("landing leads to a mounted order workspace with editable details and scope
   await expect(page.locator(".workspace-feedback")).toContainText(
     "Owner updated for ORD-1042"
   );
-  await first.locator(part("expand-toggle")).click();
+  await first.locator(part("expand-button")).click();
   const child = orders.getByRole("table", {
     name: "Line items · ORD-1042",
     exact: true,
@@ -151,11 +207,13 @@ test("landing leads to a mounted order workspace with editable details and scope
   await expect(
     orders.locator(".order-lines").locator(part("root"))
   ).toHaveAttribute("data-density", "compact");
-  await first.locator(part("expand-toggle")).click();
+  await first.locator(part("expand-button")).click();
   const customer = first.locator('td[data-column-key="customer"]');
   await customer.focus();
   await customer.press("Shift+ArrowRight");
-  await page.getByLabel("Export", { exact: true }).selectOption("range");
+  await page
+    .getByRole("combobox", { name: "Export", exact: true })
+    .selectOption("range");
   const download = page.waitForEvent("download");
   await orders.locator(part("export-csv-button")).click();
   const exported = await download;
@@ -185,7 +243,7 @@ test("grouped orders retain summaries, native overlay focus, selection and pause
   await visit(page);
   const orders = table(page);
   await page
-    .getByLabel("Group by region", { exact: true })
+    .getByRole("combobox", { name: "Group by region", exact: true })
     .selectOption("true");
   await expect(orders.locator(part("group-row")).first()).toBeVisible();
   await expect(orders.locator(part("summary"))).toBeVisible();
@@ -228,6 +286,7 @@ test("assistant approval composes with order selection and command overlays", as
 }) => {
   await visit(page);
   const orders = table(page);
+  await compactAssistantLauncher(page);
   await orders.locator(part("assistant-launcher")).click();
   await expect(orders.locator(part("assistant-panel"))).toContainText(
     "Scripted local assistant"
@@ -309,6 +368,7 @@ test("dispatch uses real tree moves and spans, revenue uses the same order data"
   await expect(page.locator(part("pivot-panel"))).toBeVisible();
   await expect(table(page, "pivot").getByRole("table")).toBeVisible();
   await contained(page);
+  await readableActiveTab(page);
   await testInfo.attach("vue-workspace-revenue", {
     body: await page.screenshot({ fullPage: true }),
     contentType: "image/png",
@@ -330,7 +390,7 @@ test("Arabic mobile cards keep details, summaries, controls and the viewport con
   await orders
     .locator(part("card"))
     .first()
-    .locator(part("expand-toggle"))
+    .locator(part("expand-button"))
     .click();
   await expect(orders.locator(part("nested-table"))).toBeVisible();
   await expect(
@@ -344,7 +404,9 @@ test("Arabic mobile cards keep details, summaries, controls and the viewport con
   ).toHaveJSProperty("open", true);
   await page.keyboard.press("Escape");
   await expect(orders.locator(part("filters-button"))).toBeFocused();
-  await page.getByLabel("التخطيط", { exact: true }).selectOption("cards");
+  await page
+    .getByRole("combobox", { name: "التخطيط", exact: true })
+    .selectOption("cards");
   await orders.locator(part("filters-button")).click();
   await expect(
     page.locator("dialog").filter({ has: page.locator(part("filters-header")) })
@@ -440,6 +502,8 @@ test("Arabic desktop navigation mirrors the arrows and keeps pinned columns and 
   await page.keyboard.press("Escape");
   await expect(orders.locator(part("filters-button"))).toBeFocused();
   await contained(page);
+  await compactAssistantLauncher(page);
+  await readableActiveTab(page);
   await testInfo.attach("vue-workspace-arabic-desktop", {
     body: await page.screenshot({ fullPage: true }),
     contentType: "image/png",
@@ -511,7 +575,7 @@ for (const scenario of [
       })
     ).toBe(true);
     await body.getByRole("combobox").first().selectOption("Review");
-    await expect(orders.locator(part("filters-count"))).toHaveText("1");
+    await expect(orders.locator(part("filters-count"))).toHaveText("(1)");
     await testInfo.attach(
       `vue-workspace-filters-${scenario.name.replaceAll(" ", "-")}`,
       { body: await page.screenshot(), contentType: "image/png" }
@@ -539,7 +603,9 @@ test("range export never falls back without a range and cards require a fresh de
   page.on("download", (download) =>
     downloads.push(download.suggestedFilename())
   );
-  await page.getByLabel("Export", { exact: true }).selectOption("range");
+  await page
+    .getByRole("combobox", { name: "Export", exact: true })
+    .selectOption("range");
   await expect(page.locator("[data-workspace-export-blocked]")).toContainText(
     "No file will be created"
   );
@@ -560,17 +626,25 @@ test("range export never falls back without a range and cards require a fresh de
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(orders.locator(part("cards"))).toBeVisible();
   await expect(
-    page.getByLabel("Export", { exact: true }).locator('option[value="range"]')
+    page
+      .getByRole("combobox", { name: "Export", exact: true })
+      .locator('option[value="range"]')
   ).toBeDisabled();
-  await expect(page.getByLabel("Export", { exact: true })).toHaveValue("range");
+  await expect(
+    page.getByRole("combobox", { name: "Export", exact: true })
+  ).toHaveValue("range");
   await expect(orders.locator(part("export-csv-button"))).toHaveCount(0);
   await expect(page.locator("[data-workspace-export-blocked]")).toContainText(
     "unavailable in cards"
   );
-  await page.getByLabel("Layout", { exact: true }).selectOption("cards");
+  await page
+    .getByRole("combobox", { name: "Layout", exact: true })
+    .selectOption("cards");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await expect(orders.locator(part("cards"))).toBeVisible();
-  await page.getByLabel("Layout", { exact: true }).selectOption("auto");
+  await page
+    .getByRole("combobox", { name: "Layout", exact: true })
+    .selectOption("auto");
   await expect(
     orders.getByRole("grid", { name: "Order desk", exact: true })
   ).toBeVisible();
@@ -607,19 +681,25 @@ test("filtered and sorted range export stays distinct from page and all-filtered
   );
   await customer.focus();
   await customer.press("Shift+ArrowRight");
-  await page.getByLabel("Export", { exact: true }).selectOption("range");
+  await page
+    .getByRole("combobox", { name: "Export", exact: true })
+    .selectOption("range");
   const selected = await csvDownload(page, orders);
   expect(selected).toContain("Kindred Goods");
   expect(selected).toContain("Americas");
   expect(selected).not.toContain("Common Ground");
   expect(selected).not.toContain("Owner");
-  await page.getByLabel("Export", { exact: true }).selectOption("page");
+  await page
+    .getByRole("combobox", { name: "Export", exact: true })
+    .selectOption("page");
   const pageCsv = await csvDownload(page, orders);
   expect(pageCsv).toContain("Kindred Goods");
   expect(pageCsv).toContain("Common Ground");
   expect(pageCsv).toContain("Owner");
   await filterOrders(page, "", "");
-  await page.getByLabel("Export", { exact: true }).selectOption("all");
+  await page
+    .getByRole("combobox", { name: "Export", exact: true })
+    .selectOption("all");
   const all = await csvDownload(page, orders);
   for (const id of ["ORD-1042", "ORD-1047", "ORD-1053"])
     expect(all).toContain(id);
@@ -740,7 +820,7 @@ test("editing cost recalculates the real formula and pivot dimensions and measur
   const revenue = table(page, "revenue");
   const first = row(revenue, "ORD-1042");
   const cost = first.locator('td[data-column-key="cost"]');
-  await cost.locator(part("edit-cell-activate")).click();
+  await cost.locator(part("edit-cell-activate")).press("Enter");
   await cost.locator(part("edit-cell-editor")).fill("100");
   await cost.locator(part("edit-cell-editor")).press("Enter");
   await expect(first.locator('td[data-column-key="profit"]')).toHaveText(
@@ -802,7 +882,7 @@ test("retry after authored work preserves orders, selection, pivot and appearanc
   const cost = row(table(page, "revenue"), "ORD-1042").locator(
     'td[data-column-key="cost"]'
   );
-  await cost.locator(part("edit-cell-activate")).click();
+  await cost.locator(part("edit-cell-activate")).press("Enter");
   await cost.locator(part("edit-cell-editor")).fill("100");
   await cost.locator(part("edit-cell-editor")).press("Enter");
   await pivotByStatusAndCost(page);
@@ -948,9 +1028,13 @@ test("presentation history and copied deep links restore actual views without lo
   await expect
     .poll(() => new URL(page.url()).search)
     .toContain("workspace-orders");
-  await page.getByLabel("Language", { exact: true }).selectOption("ar");
+  await page
+    .getByRole("combobox", { name: "Language", exact: true })
+    .selectOption("ar");
   await page.locator('[data-workspace-view="revenue"]').click();
-  await page.getByLabel("التخطيط", { exact: true }).selectOption("cards");
+  await page
+    .getByRole("combobox", { name: "التخطيط", exact: true })
+    .selectOption("cards");
   await page
     .getByRole("button", { name: "المظهر الداكن", exact: true })
     .click();
@@ -975,11 +1059,13 @@ test("presentation history and copied deep links restore actual views without lo
     "light"
   );
   await page.goBack();
-  await expect(page.getByLabel("التخطيط", { exact: true })).toHaveValue("auto");
+  await expect(
+    page.getByRole("combobox", { name: "التخطيط", exact: true })
+  ).toHaveValue("auto");
   await page.goForward();
-  await expect(page.getByLabel("التخطيط", { exact: true })).toHaveValue(
-    "cards"
-  );
+  await expect(
+    page.getByRole("combobox", { name: "التخطيط", exact: true })
+  ).toHaveValue("cards");
   await page.goForward();
   await expect(page.locator("body")).toHaveAttribute(
     "data-workspace-theme",
@@ -1035,6 +1121,7 @@ test("a theme preference survives a fresh link and Back restores the first expli
     "data-workspace-theme",
     "dark"
   );
+  await readableActiveTab(page);
   await visit(page);
   await expect(page.locator("body")).toHaveAttribute(
     "data-workspace-theme",
@@ -1048,7 +1135,7 @@ test("mobile bulk, dispatch moves, cost editing and pivot controls complete the 
   await page.setViewportSize({ width: 390, height: 844 });
   await visit(page);
   const order = table(page).locator(`${part("card")}[data-row-id="ORD-1042"]`);
-  await order.locator(part("edit-cell-activate")).click();
+  await order.locator(part("edit-cell-activate")).press("Enter");
   await order.locator(part("edit-cell-editor")).fill("Sam Rivera");
   await order.locator(part("edit-cell-editor")).press("Enter");
   await order.locator('input[type="checkbox"]').check();
@@ -1079,7 +1166,7 @@ test("mobile bulk, dispatch moves, cost editing and pivot controls complete the 
     .click();
   const revenue = table(page, "revenue");
   const customer = revenue.locator(`${part("card")}[data-row-id="ORD-1042"]`);
-  await customer.locator(part("edit-cell-activate")).click();
+  await customer.locator(part("edit-cell-activate")).press("Enter");
   await customer.locator(part("edit-cell-editor")).fill("100");
   await customer.locator(part("edit-cell-editor")).press("Enter");
   await expect(customer.locator('[data-column-key="profit"]')).toHaveText(
@@ -1168,14 +1255,16 @@ for (const mode of [
     await expect(orders.locator(part("cards"))).toBeVisible();
     await expect(
       page
-        .getByLabel("Export", { exact: true })
+        .getByRole("combobox", { name: "Export", exact: true })
         .locator('option[value="range"]')
     ).toBeDisabled();
-    await expect(page.getByLabel("Export", { exact: true })).toHaveValue(
-      "page"
-    );
     await expect(
-      page.getByLabel("Export", { exact: true }).locator('option[value="page"]')
+      page.getByRole("combobox", { name: "Export", exact: true })
+    ).toHaveValue("page");
+    await expect(
+      page
+        .getByRole("combobox", { name: "Export", exact: true })
+        .locator('option[value="page"]')
     ).toHaveText("Loaded cards");
     const loadedIds = await orders
       .locator(part("card"))
@@ -1185,7 +1274,9 @@ for (const mode of [
     const pageCsv = await csvDownload(page, orders);
     expect(pageCsv.match(/ORD-\d{4}/g)).toEqual(loadedIds);
     expect(pageCsv).toContain("ORD-1042");
-    await page.getByLabel("Export", { exact: true }).selectOption("all");
+    await page
+      .getByRole("combobox", { name: "Export", exact: true })
+      .selectOption("all");
     const all = await csvDownload(page, orders);
     expect(all).toContain("ORD-1053");
     expect(all.match(/ORD-\d{4}/g)).toHaveLength(12);
@@ -1202,7 +1293,9 @@ test("a query change clears the old range and empty-result recovery cannot reviv
   );
   await customer.focus();
   await customer.press("Shift+ArrowRight");
-  await page.getByLabel("Export", { exact: true }).selectOption("range");
+  await page
+    .getByRole("combobox", { name: "Export", exact: true })
+    .selectOption("range");
   await expect(orders.locator(part("export-csv-button"))).toBeVisible();
   await orders.locator(part("search")).fill("no such customer");
   await expect(orders.locator(".workspace-empty")).toContainText(
@@ -1267,7 +1360,7 @@ test("group collapse survives a reload through the binding's own URL state", asy
   await visit(page);
   const orders = table(page);
   await page
-    .getByLabel("Group by region", { exact: true })
+    .getByRole("combobox", { name: "Group by region", exact: true })
     .selectOption("true");
   const europe = orders
     .locator(part("group-row"))
@@ -1328,6 +1421,9 @@ test("Arabic pivot captions localize measures and nested dimensions without chan
     await expect(
       pivot.getByRole("columnheader", { name: caption, exact: true })
     ).toBeVisible();
+  await rows
+    .getByRole("button", { name: "إزالة الحقل: المنطقة", exact: true })
+    .click();
   await columns.getByRole("combobox").selectOption("region");
   await expect(
     pivot
@@ -1350,7 +1446,13 @@ test("Arabic pivot captions localize measures and nested dimensions without chan
   await expect(pivot.locator("thead")).not.toContainText(
     /Review|Ready|Dispatched|Europe|Americas|Middle East|sum/u
   );
+  await columns
+    .getByRole("button", { name: "إزالة الحقل: المنطقة", exact: true })
+    .click();
   await rows.getByRole("combobox").selectOption("region");
+  await columns
+    .getByRole("button", { name: "إزالة الحقل: الحالة", exact: true })
+    .click();
   await rows.getByRole("combobox").selectOption("status");
   await expect(
     pivot
@@ -1364,6 +1466,9 @@ test("Arabic pivot captions localize measures and nested dimensions without chan
       .filter({ hasText: "للمراجعة" })
       .first()
   ).toBeVisible();
+  await rows
+    .getByRole("button", { name: "إزالة الحقل: الحالة", exact: true })
+    .click();
   await columns.getByRole("combobox").selectOption("status");
   const identities = async () => ({
     columns: await pivot

@@ -271,7 +271,7 @@ body.vue-workspace-page[data-workspace-theme="dark"] {
   font-size: 10px;
   font-variant-numeric: tabular-nums;
 }
-.workspace-tabs > button[aria-pressed="true"] {
+.vue-workspace-page .workspace-tabs > button[aria-pressed="true"] {
   background: var(--ws-ink);
   color: var(--ws-surface);
   border-color: var(--ws-ink);
@@ -943,6 +943,34 @@ body.vue-workspace-page[data-workspace-theme="dark"] {
   border-color: transparent;
   font-size: 12px;
 }
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="assistant-launcher-mark"],
+    [data-adapttable-part="assistant-mark"],
+    [data-adapttable-part="assistant-user-mark"],
+    [data-adapttable-part="assistant-message-mark"],
+    [data-adapttable-part="assistant-receipt-icon"]
+  ) {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 22px;
+  block-size: 22px;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="assistant-launcher-mark"],
+    [data-adapttable-part="assistant-mark"],
+    [data-adapttable-part="assistant-user-mark"],
+    [data-adapttable-part="assistant-message-mark"],
+    [data-adapttable-part="assistant-receipt-icon"]
+  )
+  > :is(svg, img) {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
 .vue-workspace-page [data-adapttable-part="assistant-panel"] {
   border-block-start: 1px solid var(--ws-line);
   padding: 18px;
@@ -1282,7 +1310,7 @@ body.vue-workspace-page[data-workspace-theme="dark"] {
 }
 @media (forced-colors: active) {
   .order-status,
-  .workspace-tabs > button[aria-pressed="true"] {
+  .vue-workspace-page .workspace-tabs > button[aria-pressed="true"] {
     border: 1px solid currentColor;
   }
   .workspace-metric-dot {
