@@ -26,7 +26,7 @@ test("Vue DOM Escape dismisses its overlay within fullscreen", async ({
   );
   try {
     const table = page.locator(ROOT);
-    await table.locator('[data-adapttable-part="fullscreen-button"]').click();
+    await table.locator('[data-adapttable-part="fullscreen-toggle"]').click();
     await expect
       .poll(() =>
         table.evaluate(
@@ -56,7 +56,7 @@ test("Vue DOM Escape dismisses its overlay within fullscreen", async ({
       )
       .toBe(true);
     // The native button remains an independently exercised exit path.
-    await table.locator('[data-adapttable-part="fullscreen-button"]').click();
+    await table.locator('[data-adapttable-part="fullscreen-toggle"]').click();
     await expect
       .poll(() =>
         table.evaluate(
@@ -89,7 +89,7 @@ test.describe("CI native fullscreen input", () => {
     try {
       const escape = await diagnostic.prepareX11();
       const table = page.locator(ROOT);
-      await table.locator('[data-adapttable-part="fullscreen-button"]').click();
+      await table.locator('[data-adapttable-part="fullscreen-toggle"]').click();
       await expect
         .poll(() =>
           table.evaluate(
@@ -99,7 +99,7 @@ test.describe("CI native fullscreen input", () => {
         .toBe(true);
       const trigger = table.locator('[data-adapttable-part="views-button"]');
       const fullscreen = table.locator(
-        '[data-adapttable-part="fullscreen-button"]'
+        '[data-adapttable-part="fullscreen-toggle"]'
       );
       await expect(fullscreen).toHaveAttribute("aria-pressed", "true");
       await trigger.click();

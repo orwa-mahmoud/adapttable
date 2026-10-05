@@ -100,6 +100,46 @@ describe("native row-move confirmation ownership", () => {
       dialog.querySelector("p")?.id
     );
     expect(document.activeElement).toBe(find(dialog, "button:last-of-type"));
+    const confirm = find<HTMLButtonElement>(dialog, "button:first-of-type");
+    const cancel = find<HTMLButtonElement>(dialog, "button:last-of-type");
+    for (const [origin, destination, shiftKey] of [
+      [cancel, confirm, false],
+      [confirm, cancel, true],
+    ] as const) {
+      const tab = new KeyboardEvent("keydown", {
+        key: "Tab",
+        shiftKey,
+        bubbles: true,
+        cancelable: true,
+      });
+      origin.dispatchEvent(tab);
+      expect(tab.defaultPrevented).toBe(true);
+      expect(document.activeElement).toBe(destination);
+      expect(view.moved).not.toHaveBeenCalled();
+    }
+    const ownedTab = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+      cancelable: true,
+    });
+    ownedTab.preventDefault();
+    cancel.dispatchEvent(ownedTab);
+    expect(document.activeElement).toBe(cancel);
+    for (const [origin, shiftKey] of [
+      [confirm, false],
+      [cancel, true],
+    ] as const) {
+      origin.focus();
+      const tab = new KeyboardEvent("keydown", {
+        key: "Tab",
+        shiftKey,
+        bubbles: true,
+        cancelable: true,
+      });
+      origin.dispatchEvent(tab);
+      expect(tab.defaultPrevented).toBe(false);
+      expect(document.activeElement).toBe(origin);
+    }
     dialog.dispatchEvent(
       new KeyboardEvent("keydown", {
         key: "ArrowDown",
@@ -263,6 +303,14 @@ describe("native row-move confirmation ownership", () => {
       part("row-move-confirmation") + " button:first-of-type"
     );
     view.stop();
+    const staleTab = new KeyboardEvent("keydown", {
+      key: "Tab",
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    stale.dispatchEvent(staleTab);
+    expect(staleTab.defaultPrevented).toBe(false);
     stale.click();
     trigger.dispatchEvent(new Event("change", { bubbles: true }));
     expect(confirmed).not.toHaveBeenCalled();

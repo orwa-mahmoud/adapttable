@@ -38,34 +38,6 @@ test("Vue native view controls share a namespace and restore keyboard focus", as
   ).toHaveCount(0);
 });
 
-test("Vue native fullscreen keeps overlays visible and follows Escape", async ({
-  page,
-}) => {
-  await page.goto(PREVIEW);
-  const table = page.locator('[data-demo-table="view-controls"]');
-  await table.locator('[data-adapttable-part="fullscreen-toggle"]').click();
-  await expect
-    .poll(() =>
-      table.evaluate(
-        (element) => element.ownerDocument.fullscreenElement === element
-      )
-    )
-    .toBe(true);
-  await table.locator('[data-adapttable-part="views-button"]').click();
-  await expect(
-    page.locator('[data-adapttable-part="views-panel"]')
-  ).toBeVisible();
-  await page.keyboard.press("Escape");
-  await page.keyboard.press("Escape");
-  await expect
-    .poll(() =>
-      table.evaluate(
-        (element) => element.ownerDocument.fullscreenElement === element
-      )
-    )
-    .toBe(false);
-});
-
 test("Vue native view controls preserve RTL, narrow-screen fit and localized labels", async ({
   page,
 }) => {

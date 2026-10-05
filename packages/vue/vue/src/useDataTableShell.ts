@@ -966,11 +966,10 @@ export function useDataTableShell<TRow>(
   }));
   if (getCurrentInstance()) provideFeatureState(state);
   const active = useScopeActivity();
-  const slotFills = computed(() => {
-    const fills = featureSlotFillsOf(declarations.value);
-    assertRequiredSlots(declarations.value, fills);
-    return fills;
-  });
+  // Keep this projection total after Vue captures a required-slot error from
+  // reconciliation. A throwing computed can cache undefined and mask that
+  // contract error on the error boundary's next render.
+  const slotFills = computed(() => featureSlotFillsOf(declarations.value));
   let publisher = new TableRuntimePublisher<TRow>();
   let publishedEngine: TableSource<TRow>["tableEngine"];
   let disposed = false;

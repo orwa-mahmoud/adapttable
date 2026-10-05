@@ -53,6 +53,6 @@ test("Vue hierarchy exposes the same controls in mobile cards", async ({
     .locator('[data-row-id="bea"] [data-adapttable-part="expand-button"]')
     .click();
   await expect(
-    hierarchy.locator('[data-adapttable-part="detail-cell"]')
+    hierarchy.locator('[data-adapttable-part="card-detail"]')
   ).toHaveText("Details for Bea");
 });

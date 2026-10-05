@@ -15,6 +15,7 @@ const NativeRowMoveConfirmation = defineComponent(
     const root = shallowRef<HTMLDialogElement | null>(null);
     const active = useScopeActivity();
     const cancel = shallowRef<HTMLButtonElement | null>(null);
+    const confirm = shallowRef<HTMLButtonElement | null>(null);
     const descriptionId = useId();
     watch(
       [root, active],
@@ -66,7 +67,16 @@ const NativeRowMoveConfirmation = defineComponent(
             finish(owner, "onCancel");
           },
           onKeydown: (event: KeyboardEvent) => {
-            if (event.key === "Escape" && !event.defaultPrevented) {
+            if (!active.value || event.defaultPrevented) return;
+            if (event.key === "Tab") {
+              const boundary = event.shiftKey ? confirm.value : cancel.value;
+              const destination = event.shiftKey ? cancel.value : confirm.value;
+              if (destination && event.target === boundary) {
+                event.preventDefault();
+                destination.focus();
+              }
+            }
+            if (event.key === "Escape") {
               event.preventDefault();
               event.stopPropagation();
               finish(owner, "onCancel");
@@ -79,6 +89,9 @@ const NativeRowMoveConfirmation = defineComponent(
             "button",
             {
               type: "button",
+              ref: elementRef<HTMLButtonElement>((element) => {
+                confirm.value = element;
+              }),
               onClick: () => finish(owner, "onConfirm"),
             },
             owner.confirmLabel
