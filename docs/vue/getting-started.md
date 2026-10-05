@@ -31,9 +31,9 @@ factories from `@adapttable/vue-unstyled` feature subpaths with the native table
 binding-only factories require the corresponding adapter slots.
 
 These packages are experimental and do not yet provide the complete
-React/Angular feature catalog or styled Vue kits. There is no standard Vue
-feature preset. Do not copy another framework's feature imports into a Vue
-table; use the documented Vue entry points.
+React/Angular feature catalog or styled Vue kits. Compose standard native
+controls with `standardFeatures()` from `@adapttable/vue-unstyled/preset`.
+Use the documented Vue entry points for individual features.
 
 For strict template checking, use Vue tooling with `strictTemplates: true`.
 If your template checker restricts custom data attributes, its

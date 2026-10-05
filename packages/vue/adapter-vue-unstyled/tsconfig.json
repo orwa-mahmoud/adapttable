@@ -57,7 +57,9 @@
       "@adapttable/vue-unstyled/sparkline": ["./src/sparkline.ts"],
       "@adapttable/vue-unstyled/row-reorder": ["./src/row-reorder.ts"],
       "@adapttable/vue-unstyled/virtualize": ["./src/virtualize.ts"],
-      "@adapttable/vue-unstyled/grouping-panel": ["./src/grouping-panel.ts"]
+      "@adapttable/vue-unstyled/grouping-panel": ["./src/grouping-panel.ts"],
+      "@adapttable/vue-unstyled/export": ["./src/export.ts"],
+      "@adapttable/vue-unstyled/preset": ["./src/preset.ts"]
     }
   },
   "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],

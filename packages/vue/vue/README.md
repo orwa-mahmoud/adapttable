@@ -27,7 +27,8 @@ published to npm. Use the built workspace packages until publication.
 The binding provides models and structural Chrome. A feature that needs UI
 requires adapter controls; use the native factories from
 `@adapttable/vue-unstyled` with its `DataTable`. This experimental slice does
-not imply complete React/Angular feature parity or a standard Vue preset.
+not imply complete React/Angular feature parity. The native `standardFeatures()`
+preset is available from `@adapttable/vue-unstyled/preset`.
 
 ## Sources and rendering
 

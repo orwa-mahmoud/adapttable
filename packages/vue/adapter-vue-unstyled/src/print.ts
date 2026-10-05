@@ -1,4 +1,8 @@
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
+import {
+  extendFeature,
+  slotRender,
+  type StaticTableFeature,
+} from "@adapttable/vue/adapter";
 import {
   print as bindingPrint,
   PRINT_CONTROL,
@@ -7,7 +11,10 @@ import {
 import { h } from "vue";
 
 import { nativeActionButton } from "./actions/nativeControls";
-export function print(onPrint: () => void, printButton = false) {
+export function print(
+  onPrint: () => void,
+  printButton = false
+): StaticTableFeature {
   return extendFeature(bindingPrint(onPrint, printButton), [
     slotRender(PRINT_CONTROL, (props) =>
       h(PrintChrome, { ...props, slots: { Button: nativeActionButton } })

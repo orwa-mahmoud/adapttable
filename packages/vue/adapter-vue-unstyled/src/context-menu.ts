@@ -1,4 +1,8 @@
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
+import {
+  extendFeature,
+  slotRender,
+  type TableFeature,
+} from "@adapttable/vue/adapter";
 import {
   CONTEXT_MENU_CONTROL,
   contextMenu as bindingContextMenu,
@@ -10,7 +14,7 @@ import { h } from "vue";
 import { nativeContextMenuSlots } from "./actions/nativeControls";
 export function contextMenu<TRow>(
   options: boolean | ContextMenuOptions<TRow> = true
-) {
+): TableFeature<TRow> {
   return extendFeature(bindingContextMenu<TRow>(options), [
     slotRender(CONTEXT_MENU_CONTROL, (props) =>
       h(ContextMenuChrome, {

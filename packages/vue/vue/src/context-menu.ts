@@ -203,3 +203,6 @@ export type { ContextMenuModel } from "./actions/contracts";
 export { CONTEXT_MENU_CONTROL, CONTEXT_MENU_MODEL } from "./actions/contracts";
 export type * from "./index";
 export type { ContextMenuItem, ContextMenuTarget } from "@adapttable/core";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

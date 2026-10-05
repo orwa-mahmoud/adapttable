@@ -1,4 +1,8 @@
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
+import {
+  extendFeature,
+  slotRender,
+  type StaticTableFeature,
+} from "@adapttable/vue/adapter";
 import {
   COMMAND_PALETTE_CONTROL,
   commandPalette as bindingCommandPalette,
@@ -12,7 +16,7 @@ import {
 } from "./actions/nativeControls";
 export function commandPalette(
   options: Parameters<typeof bindingCommandPalette>[0] = true
-) {
+): StaticTableFeature {
   return extendFeature(bindingCommandPalette(options), [
     slotRender(COMMAND_PALETTE_CONTROL, (props) => [
       props.model.button

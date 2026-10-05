@@ -1,20 +1,25 @@
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
+/**
+ * Compatibility entry for native CSV export.
+ *
+ * @deprecated Import from `@adapttable/vue-unstyled/export`.
+ * @packageDocumentation
+ */
+import type { StaticTableFeature, TableFeature } from "@adapttable/vue/adapter";
 import {
-  EXPORT_CONTROL,
-  ExportChrome,
   exportCsv as bindingExportCsv,
   type ExportCsvOptions,
 } from "@adapttable/vue/export-csv";
-import { h } from "vue";
 
-import { nativeExportSlots } from "./actions/nativeControls";
+import { withNativeExport } from "./actions/withNativeExport";
+
+/** Export the current view as CSV with native toolbar and progress controls. @public */
+export function exportCsv(options?: boolean): StaticTableFeature;
+export function exportCsv<TRow>(
+  options?: boolean | ExportCsvOptions<TRow>
+): TableFeature<TRow>;
 export function exportCsv<TRow>(
   options: boolean | ExportCsvOptions<TRow> = true
-) {
-  return extendFeature(bindingExportCsv<TRow>(options), [
-    slotRender(EXPORT_CONTROL, (props) =>
-      h(ExportChrome, { ...props, slots: nativeExportSlots(props.classNames) })
-    ),
-  ]);
+): TableFeature<TRow> {
+  return withNativeExport(bindingExportCsv<TRow>(options));
 }
 export type * from "@adapttable/vue/export-csv";

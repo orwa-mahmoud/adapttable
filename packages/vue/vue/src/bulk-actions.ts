@@ -127,3 +127,6 @@ export type {
 export { BulkActionsChrome } from "./actions/simpleChrome";
 export type * from "./index";
 export type { BulkAction, BulkActionContext } from "@adapttable/core";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

@@ -4222,9 +4222,15 @@ Reading a state key does not install a feature.
 | `PrintChrome`, `PrintChromeProps` (`/print`)                                                                | `PrintChrome(props): VNodeChild` takes presentation, host print callback and `ActionButtonSlots`; it does not choose a document layout.                                                                       |
 | `UNDO_REDO_CONTROL`, `HistoryButtonsChrome`, `HistoryButtonsChromeProps` (`/editing`)                       | Required toolbar control receives `ToolbarExtrasSlotProps`; the Chrome adds Button slots and renders available undo/redo callbacks with current labels and enabled state.                                     |
 
-`exportCsv({ writer })` remains the Vue export feature; the optional native
-`/export-pdf` and `/export-xlsx` entries provide `pdfWriter` and `xlsxWriter`
-helpers for that route. They do not add separate export factories or a preset.
+Native `/export` exposes `exportCsv`; `/export-pdf` and `/export-xlsx` expose
+`exportPdf` and `exportXlsx` with fixed document writers.
+`ExportPdfOptions<TRow>` and `ExportXlsxOptions<TRow>` each use
+`Omit<ExportCsvOptions<TRow>, "writer">`, preserving typed export hooks, scope,
+columns and filename. Their entries also retain `pdfWriter` and `xlsxWriter`
+for custom `exportCsv({ writer })` compositions. Native `/preset` provides
+`standardFeatures` and `StandardFeatureOptions<TRow>`; a later format factory
+replaces the preset's CSV action. See [Vue export options and composition](./vue/actions.md)
+and [standard native features](./vue/features.md#standard-native-features).
 
 ### Vue column menu contracts
 

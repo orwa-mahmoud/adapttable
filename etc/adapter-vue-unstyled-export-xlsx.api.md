@@ -4,6 +4,24 @@
 
 ```ts
 
+import { buildTableXlsx } from '@adapttable/vue/export-xlsx';
+import { ExportXlsxOptions } from '@adapttable/vue/export-xlsx';
+import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { TableFeature } from '@adapttable/vue/adapter';
+import { xlsxWriter } from '@adapttable/vue/export-xlsx';
+
+export { buildTableXlsx }
+
+// @public
+export function exportXlsx(options?: boolean): StaticTableFeature;
+
+// @public (undocumented)
+export function exportXlsx<TRow>(options?: boolean | ExportXlsxOptions<TRow>): TableFeature<TRow>;
+
+export { ExportXlsxOptions }
+
+export { xlsxWriter }
+
 
 export * from "@adapttable/vue/export-xlsx";
 

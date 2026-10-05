@@ -109,6 +109,15 @@ export function checkRuntime(cell, vueRoot, built) {
 }
 
 export function checkVueBuiltPeers(floorRoot) {
+  const exports = run(
+    [
+      "--max-old-space-size=2048",
+      join(REPO_ROOT, "scripts/vue-export-contracts.mjs"),
+    ],
+    REPO_ROOT
+  );
+  assert.equal(exports.status, 0, exports.output);
+  console.log(exports.output.trim());
   const scratch = mkdtempSync(join(tmpdir(), "adapttable-vue-built-peers-"));
   try {
     const floor = declaredFloor();

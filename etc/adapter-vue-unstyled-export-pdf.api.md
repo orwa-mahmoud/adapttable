@@ -4,6 +4,39 @@
 
 ```ts
 
+import { buildPrintDocument } from '@adapttable/vue/export-pdf';
+import { buildPrintTableHtml } from '@adapttable/vue/export-pdf';
+import { buildTablePdf } from '@adapttable/vue/export-pdf';
+import { ExportPdfOptions } from '@adapttable/vue/export-pdf';
+import { openPrintLayout } from '@adapttable/vue/export-pdf';
+import { pdfWriter } from '@adapttable/vue/export-pdf';
+import { printStyles } from '@adapttable/vue/export-pdf';
+import { printTable } from '@adapttable/vue/export-pdf';
+import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { TableFeature } from '@adapttable/vue/adapter';
+
+export { buildPrintDocument }
+
+export { buildPrintTableHtml }
+
+export { buildTablePdf }
+
+// @public
+export function exportPdf(options?: boolean): StaticTableFeature;
+
+// @public (undocumented)
+export function exportPdf<TRow>(options?: boolean | ExportPdfOptions<TRow>): TableFeature<TRow>;
+
+export { ExportPdfOptions }
+
+export { openPrintLayout }
+
+export { pdfWriter }
+
+export { printStyles }
+
+export { printTable }
+
 
 export * from "@adapttable/vue/export-pdf";
 

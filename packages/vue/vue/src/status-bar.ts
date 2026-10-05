@@ -17,3 +17,6 @@ export type {
   StatusBarItem,
 } from "@adapttable/core/binding";
 export { STATUS_BAR } from "@adapttable/core/binding";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

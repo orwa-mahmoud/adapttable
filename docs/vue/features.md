@@ -37,6 +37,9 @@ individual entries to state which behaviors a table needs.
 | `/density`             | `densityChooser`: comfortable/compact toolbar control.                                                                                                       |
 | `/fullscreen`          | `fullscreen`: browser fullscreen for the table's actual root.                                                                                                |
 | `/saved-views`         | `savedViews`, `SavedViewsPanel`: named state captures and an optional management surface.                                                                    |
+| `/export`              | `exportCsv`: export the current scope as CSV with native progress controls. `/export-csv` remains a deprecated compatibility path.                           |
+| `/export-pdf`          | `exportPdf`: export with the optional PDF writer and the same native lifecycle. Also exports PDF and print utilities.                                        |
+| `/export-xlsx`         | `exportXlsx`: export with the optional XLSX writer and the same native lifecycle. Also exports XLSX utilities.                                               |
 
 `/columns` collects the four column factories; `/rows` collects row pinning,
 summary rows, spans, extra rows, appearance and actions. They remain supported
@@ -49,8 +52,54 @@ density, fullscreen and saved views each have matching binding subpaths.
 The focused native column/row entries export their factory; signature types
 come from `@adapttable/vue`, its relevant feature entry, or the native
 `/columns` and `/rows` collections when re-exported there.
-A binding factory does not supply visible controls. There is no standard Vue
-preset, and a React or Angular import does not define a Vue feature.
+A binding factory does not supply visible controls. Use its native counterpart
+with the Unstyled kit. A React or Angular import does not define a Vue feature.
+
+## Standard native features
+
+`standardFeatures()` from `@adapttable/vue-unstyled/preset` returns an ordinary
+array of working native features: columns menu, density chooser, CSV export,
+keyboard Find, fit columns, fullscreen, header filters, multi-sort, resizable
+columns and status bar. Each member is also available from its own public entry.
+On mobile, toolbar controls remain available; header filters and resize handles
+belong to desktop headers. Fullscreen depends on browser support.
+
+```ts
+import { standardFeatures } from "@adapttable/vue-unstyled/preset";
+import { exportPdf } from "@adapttable/vue-unstyled/export-pdf";
+
+interface Person {
+  id: string;
+  name: string;
+  team: string;
+}
+
+const features = [
+  ...standardFeatures<Person>({
+    findButton: true,
+    grouping: "team",
+    filters: [{ key: "name", type: "text", getValue: (row) => row.name }],
+    savedViews: { storageKey: "people-views" },
+  }),
+  exportPdf<Person>({ scope: "page", filename: "people.pdf" }),
+];
+```
+
+Pass this array to `DataTable`. `StandardFeatureOptions<TRow>` types configured
+filter callbacks with the table's row. Grouping, bulk actions, filters and saved
+views join only when their corresponding option is provided; the zero-argument
+preset does not install empty configured controls. `findButton` defaults to
+false, while Ctrl/Cmd+F inside the table opens Find. Selection statistics require
+an explicit cell-navigation feature and are not included.
+
+Append a same-ID declaration to replace a preset member, or filter the ordinary
+array by `id` to omit one. Export factories share the `export-csv` identity, so
+the PDF declaration above replaces CSV with one PDF control. Existing controlled
+values, update events, confirmation and mutation callbacks retain host authority.
+
+The preset imports all members it can compose, including configured members.
+Use individual entries when bundle size matters. PDF and XLSX writers remain
+outside the preset until their format entry is imported.
 
 ## Filtering
 

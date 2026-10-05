@@ -40,6 +40,8 @@ export default defineConfig({
     "src/context-menu.ts",
     "src/side-panel.ts",
     "src/print.ts",
+    "src/export.ts",
+    "src/preset.ts",
     "src/export-csv.ts",
     "src/export-pdf.ts",
     "src/export-xlsx.ts",

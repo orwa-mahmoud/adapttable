@@ -136,3 +136,6 @@ export {
   toggleCollapsedColumnGroup,
   unpinAllColumns,
 } from "@adapttable/core/binding";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

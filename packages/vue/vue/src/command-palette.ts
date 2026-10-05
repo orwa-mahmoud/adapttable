@@ -133,3 +133,6 @@ export {
 } from "./actions/contracts";
 export type * from "./index";
 export type { Command, Shortcut } from "@adapttable/core";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

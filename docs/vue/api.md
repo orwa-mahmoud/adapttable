@@ -35,6 +35,14 @@ The [root API index](../api.md#vue-actions-and-adapter-channels) also maps these
 Vue exports to their owning entries. Separate formula, pivot, sparkline and
 stream helpers are not automatically loaded by the feature barrel.
 
+The native `/preset` entry exports `standardFeatures` and
+`StandardFeatureOptions<TRow>`. Native `/export` is the canonical CSV entry;
+`/export-csv` remains available. Binding and native `/export-pdf` and
+`/export-xlsx` expose `exportPdf` / `exportXlsx`,
+`ExportPdfOptions<TRow>` / `ExportXlsxOptions<TRow>` and writer utilities. Native `/features` also exports these factories.
+See [export scope and lifecycle](./actions.md) and
+[standard native composition](./features.md#standard-native-features).
+
 Type-only re-exports do not imply matching runtime exports. In particular,
 structural/model helpers and feature functions belong to their entries above;
 importing the binding root never installs controls, optional features or AI.

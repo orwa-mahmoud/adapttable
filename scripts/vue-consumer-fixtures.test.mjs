@@ -1,0 +1,178 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import { FIXTURES, PLAIN_ADAPTER_CEILING_KB } from "./consumer-fixtures.mjs";
+import { KITS } from "./kits.mjs";
+import {
+  PDF_WRITER_MARKER,
+  VUE_CONSUMER_SPECS,
+  VUE_RUNTIME_EXTERNALS,
+  vueConsumerCoverageProblems,
+  vueConsumerFixtures,
+  vueForeignImport,
+  vueGraphProblems,
+  XLSX_WRITER_MARKER,
+} from "./vue-consumer-fixtures.mjs";
+
+const vue = FIXTURES.filter((fixture) => fixture.framework === "vue");
+const fixture = (name) => {
+  const found = vue.find((entry) => entry.name === name);
+  assert.ok(found, name);
+  return found;
+};
+
+describe("packed Vue consumers", () => {
+  it("registers every distinct real entry and matches existing comparable ceilings", () => {
+    assert.equal(VUE_CONSUMER_SPECS.length, 9);
+    assert.deepEqual(
+      vue.map((entry) => entry.name),
+      VUE_CONSUMER_SPECS.map((entry) => entry.name)
+    );
+    assert.deepEqual(vueConsumerCoverageProblems(FIXTURES), []);
+    for (const entry of vue) {
+      assert.equal(entry.kind, "vue-consumer");
+      assert.ok(entry.functionality);
+      if (entry.hardBaseCeiling) {
+        assert.equal(entry.budgetKB, PLAIN_ADAPTER_CEILING_KB);
+        assert.equal("item1BaselineKB" in entry, false);
+      } else {
+        const comparable = FIXTURES.find(
+          (candidate) => candidate.name === entry.comparable
+        );
+        assert.ok(comparable);
+        assert.equal(entry.budgetKB, comparable.budgetKB);
+      }
+    }
+    assert.throws(
+      () => vueConsumerFixtures([], PLAIN_ADAPTER_CEILING_KB),
+      /Missing comparable/
+    );
+  });
+
+  it("fails if a Vue entry disappears, duplicates or a registered kit lacks coverage", () => {
+    assert.ok(
+      vueConsumerCoverageProblems(
+        FIXTURES.filter((entry) => entry !== vue[0])
+      ).some((error) => error.includes("exactly one"))
+    );
+    assert.ok(
+      vueConsumerCoverageProblems([...FIXTURES, vue[0]]).some((error) =>
+        error.includes("exactly one")
+      )
+    );
+    assert.ok(
+      vueConsumerCoverageProblems(FIXTURES, [
+        ...KITS,
+        { name: "adapter-vue-new", framework: "vue", role: "native" },
+      ]).some((error) => error.includes("adapter-vue-new"))
+    );
+    assert.deepEqual(
+      vueConsumerCoverageProblems(FIXTURES, [
+        ...KITS,
+        { name: "adapter-vue-private", framework: "vue", role: "private" },
+      ]),
+      []
+    );
+  });
+
+  it("requires own writers and rejects planted sibling or base writer leaks", () => {
+    const base = fixture("vue-unstyled · table");
+    const pdf = fixture("vue-unstyled · + export-pdf");
+    const xlsx = fixture("vue-unstyled · + export-xlsx");
+    const graph = (code) => ({ code, imports: new Set() });
+    assert.ok(
+      vueGraphProblems(
+        base,
+        graph("const DataTable = {}; function pdfWriter() {}")
+      ).some((error) => error.includes(`leaked ${PDF_WRITER_MARKER}`))
+    );
+    assert.ok(
+      vueGraphProblems(pdf, graph("DataTable export-progress-surface")).some(
+        (error) => error.includes(`missing ${PDF_WRITER_MARKER}`)
+      )
+    );
+    assert.ok(
+      vueGraphProblems(
+        pdf,
+        graph(
+          "DataTable export-progress-surface function pdfWriter() {} function xlsxWriter() {}"
+        )
+      ).some((error) => error.includes(`leaked ${XLSX_WRITER_MARKER}`))
+    );
+    assert.deepEqual(
+      vueGraphProblems(
+        xlsx,
+        graph("DataTable export-progress-surface function xlsxWriter() {}")
+      ),
+      []
+    );
+    assert.ok(
+      fixture("vue-unstyled · features barrel").present.includes(
+        PDF_WRITER_MARKER
+      )
+    );
+    assert.ok(
+      fixture("vue-unstyled · features barrel").present.includes(
+        XLSX_WRITER_MARKER
+      )
+    );
+  });
+
+  it("detects bare and resolved cross-kit/framework imports and counts AdaptTable code", () => {
+    const base = fixture("vue-unstyled · table");
+    for (const source of [
+      "react",
+      "react/jsx-runtime",
+      "@angular/core",
+      "@adapttable/react/adapter",
+      "/repo/packages/react/react/dist/index.js",
+      "@adapttable/ng-zorro",
+      "/repo/packages/react/adapter-unstyled/dist/index.js",
+    ])
+      assert.ok(vueForeignImport(source, base), source);
+    for (const source of [
+      "vue",
+      "@adapttable/core",
+      "@adapttable/vue/adapter",
+      "@adapttable/vue-unstyled/export",
+    ])
+      assert.equal(vueForeignImport(source, base), undefined, source);
+    const other = {
+      name: "adapter-vue-other",
+      framework: "vue",
+      role: "native",
+    };
+    assert.match(
+      vueForeignImport("@adapttable/vue-other", base, [...KITS, other]),
+      /another kit/
+    );
+    assert.ok(
+      vueGraphProblems(base, {
+        code: "DataTable",
+        imports: new Set(["react"]),
+      }).some((error) => error.includes("another framework"))
+    );
+    for (const source of [
+      "@adapttable/core",
+      "@adapttable/vue",
+      "@adapttable/vue-unstyled",
+      "@tanstack/virtual-core",
+      "react",
+    ])
+      assert.equal(
+        VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(source)),
+        false,
+        source
+      );
+    assert.equal(
+      VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test("vue")),
+      true
+    );
+    assert.equal(
+      VUE_RUNTIME_EXTERNALS.some((pattern) =>
+        pattern.test("vue/server-renderer")
+      ),
+      true
+    );
+  });
+});

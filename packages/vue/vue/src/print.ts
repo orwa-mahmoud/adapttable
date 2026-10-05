@@ -44,3 +44,6 @@ export {
   printStyles,
   printTable,
 } from "@adapttable/core/pdf";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

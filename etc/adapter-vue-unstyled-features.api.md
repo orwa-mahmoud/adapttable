@@ -30,6 +30,8 @@ import { dirtyIndicators } from '@adapttable/vue/editing';
 import { editHistory } from '@adapttable/vue/editing';
 import { EditingLifecycleExtras } from '@adapttable/vue/editing';
 import { ExportCsvOptions } from '@adapttable/vue/export-csv';
+import { ExportPdfOptions } from '@adapttable/vue/export-pdf';
+import { ExportXlsxOptions } from '@adapttable/vue/export-xlsx';
 import { ExtraEntry } from '@adapttable/vue/features';
 import { ExtraRow } from '@adapttable/vue/features';
 import { ExtraRowKind } from '@adapttable/vue/features';
@@ -775,8 +777,27 @@ export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Editin
 
 export { EditingLifecycleExtras }
 
+// @public
+export function exportCsv(options?: boolean): StaticTableFeature_2;
+
 // @public (undocumented)
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;
+
+// @public
+export function exportPdf(options?: boolean): StaticTableFeature_2;
+
+// @public (undocumented)
+export function exportPdf<TRow>(options?: boolean | ExportPdfOptions<TRow>): TableFeature<TRow>;
+
+export { ExportPdfOptions }
+
+// @public
+export function exportXlsx(options?: boolean): StaticTableFeature_2;
+
+// @public (undocumented)
+export function exportXlsx<TRow>(options?: boolean | ExportXlsxOptions<TRow>): TableFeature<TRow>;
+
+export { ExportXlsxOptions }
 
 export { ExtraEntry }
 

@@ -7,3 +7,6 @@ export { columnMenu } from "./features/columnMenu";
 export type { StaticTableFeature } from "./features/tableFeature";
 export type * from "./index";
 export type { ColumnRenameEditorOptions } from "@adapttable/core";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

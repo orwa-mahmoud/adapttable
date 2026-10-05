@@ -153,6 +153,25 @@ export const VUE_TYPE_EXPECTATIONS = {
     ],
   },
   "@adapttable/vue-unstyled": {
+    "export-preset/WrongBarrelRows.ts": [
+      {
+        code: 2345,
+        message: /ExportPdfOptions<Invoice>.*ExportPdfOptions<Person>/s,
+      },
+      {
+        code: 2345,
+        message: /ExportXlsxOptions<Invoice>.*ExportXlsxOptions<Person>/s,
+      },
+    ],
+    "export-preset/WrongPresetRows.ts": [
+      {
+        code: 2322,
+        message: /TableFeature<Invoice>\[\].*TableFeature<Person>\[\]/,
+      },
+    ],
+    "export-preset/FixedFormatWriter.ts": [
+      { code: 2353, message: /'writer' does not exist in type/, count: 2 },
+    ],
     "filter-editing/InvalidNativeGenericRows.ts": [
       { code: 2322, message: /VueEditableCellProps<Invoice>.*Person/s },
       { code: 2322, message: /RowEditActionsProps<Invoice>.*Person/s },

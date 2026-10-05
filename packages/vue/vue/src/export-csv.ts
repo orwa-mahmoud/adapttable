@@ -17,12 +17,13 @@ import {
   featureStateKey,
   type GridFocusState,
 } from "@adapttable/core/binding";
-import { computed, watch } from "vue";
+import { computed, shallowRef, watch } from "vue";
 
 import { EXPORT_CONTROL, EXPORT_MODEL } from "./actions/contracts";
-import { connectWhileActive, featureActivity } from "./actions/lifecycle";
+import { featureActivity } from "./actions/lifecycle";
 import type {
   FeatureMountContext,
+  StaticTableFeature,
   TableFeature,
 } from "./features/tableFeature";
 import { groupingModelKey, treeModelKey } from "./hierarchy/models";
@@ -103,28 +104,78 @@ function mountExport<TRow>(context: FeatureMountContext<TRow>): void {
     pageOnly: pageOnly.value,
     serverBuilt: serverBuilt(),
   });
-  const controller = createExportController(handler());
-  const snapshot = useExternalStore(controller, { active: context.active });
-  connectWhileActive(context, controller.connect);
-  const start = () => {
-    if (active()) {
-      controller.configure(handler());
-      controller.start();
-    }
-  };
-  // Source replacement abandons a job for the previous source, without coupling
-  // progress to ordinary data/query snapshots from the same engine.
+  const controller = shallowRef(createExportController(handler()));
+  // Built-in sources retain their engine or page mutator across snapshots.
+  // Custom mutator replacement conservatively retires the previous owner;
+  // shared callbacks cannot distinguish unrelated custom sources.
+  const sourceOwner = () =>
+    context.source.value.tableEngine ?? context.source.value.setPage;
+  let acceptedOwner = sourceOwner();
+  let replacing = false;
   watch(
-    () => context.source.value.tableEngine,
-    () => controller.cancel(),
+    () => ({ owner: sourceOwner() }),
+    () => {
+      if (replacing) return;
+      replacing = true;
+      try {
+        // Abort listeners may replace the source while the old owner retires.
+        // Read again after cleanup; do not rely on watch's oldValue ordering.
+        let next = sourceOwner();
+        while (next !== acceptedOwner) {
+          acceptedOwner = next;
+          controller.value = createExportController(handler());
+          next = sourceOwner();
+        }
+      } finally {
+        replacing = false;
+      }
+    },
     { flush: "sync" }
   );
+  let connected: typeof controller.value | undefined;
+  watch(
+    [context.active, controller],
+    ([enabled, owner], _previous, onCleanup) => {
+      // Disconnect can invoke the host's abort listener synchronously. A newer
+      // source admitted by that listener owns the connection, not this frame.
+      if (
+        context.scope.active &&
+        enabled &&
+        context.active.value &&
+        controller.value === owner
+      ) {
+        const disconnect = owner.connect();
+        connected = owner;
+        onCleanup(() => {
+          // Vue 3.5.0 marks a stopping scope inactive after effect cleanup.
+          // Fence retained actions before abort listeners can call them.
+          if (connected === owner) connected = undefined;
+          disconnect();
+        });
+      }
+    },
+    { immediate: true, flush: "sync" }
+  );
+  const snapshot = useExternalStore(controller, { active: context.active });
+  const owns = (owner: typeof controller.value) =>
+    context.scope.active &&
+    active() &&
+    controller.value === owner &&
+    connected === owner;
+  const start = (owner: typeof controller.value) => {
+    if (owns(owner)) {
+      owner.configure(handler());
+      owner.start();
+    }
+  };
   const model = computed<ExportHandlerState>(() => {
+    const owner = controller.value;
+    const runExport = () => start(owner);
     const { status, progress, message, error, downloadUrl, run } =
       snapshot.value;
     const labels = context.table.labels.value;
     return {
-      onExportCsv: resolved.value ? start : undefined,
+      onExportCsv: resolved.value ? runExport : undefined,
       exportBusy: status === "busy",
       exportStatus: status,
       exportAnnouncement: resolveExportAnnouncement({
@@ -142,12 +193,12 @@ function mountExport<TRow>(context: FeatureMountContext<TRow>): void {
         error,
         downloadUrl,
         cancel: () => {
-          if (active()) controller.cancel();
+          if (owns(owner)) owner.cancel();
         },
-        retry: start,
+        retry: runExport,
         dismiss: () => {
-          if (active()) {
-            controller.dismiss();
+          if (owns(owner)) {
+            owner.dismiss();
             context.root.value
               ?.querySelector<HTMLElement>(
                 '[data-adapttable-part="export-csv-button"]'
@@ -169,6 +220,11 @@ function mountExport<TRow>(context: FeatureMountContext<TRow>): void {
     flush: "sync",
   });
 }
+/** Export the current view with the configured writer and shared lifecycle. @public */
+export function exportCsv(options?: boolean): StaticTableFeature;
+export function exportCsv<TRow>(
+  options?: boolean | ExportCsvOptions<TRow>
+): TableFeature<TRow>;
 export function exportCsv<TRow>(
   options: boolean | ExportCsvOptions<TRow> = true
 ): TableFeature<TRow> {
@@ -199,3 +255,6 @@ export type {
   ExportWriter,
 } from "@adapttable/core";
 export type { ExportHandlerState } from "@adapttable/core/binding";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

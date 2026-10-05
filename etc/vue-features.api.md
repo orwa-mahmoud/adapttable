@@ -647,6 +647,9 @@ readonly model: ExportHandlerState;
 // @public (undocumented)
 export const EXPORT_MODEL: FeatureStateKey<ExportHandlerState>;
 
+// @public
+export function exportCsv(options?: boolean): StaticTableFeature;
+
 // @public (undocumented)
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;
 

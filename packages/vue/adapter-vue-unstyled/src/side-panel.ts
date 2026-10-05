@@ -1,4 +1,8 @@
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
+import {
+  extendFeature,
+  slotRender,
+  type StaticTableFeature,
+} from "@adapttable/vue/adapter";
 import {
   SIDE_PANEL_CONTROL,
   sidePanel as bindingSidePanel,
@@ -7,7 +11,9 @@ import {
 import { h } from "vue";
 
 import { nativeSidePanelSlots } from "./actions/nativeControls";
-export function sidePanel(options: Parameters<typeof bindingSidePanel>[0]) {
+export function sidePanel(
+  options: Parameters<typeof bindingSidePanel>[0]
+): StaticTableFeature {
   return extendFeature(bindingSidePanel(options), [
     slotRender(SIDE_PANEL_CONTROL, (props) =>
       h(SidePanelChrome, {

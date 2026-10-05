@@ -590,6 +590,9 @@ export interface ExportChromeProps extends ActionPresentation {
 
 export { ExportContext }
 
+// @public
+export function exportCsv(options?: boolean): StaticTableFeature;
+
 // @public (undocumented)
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;
 

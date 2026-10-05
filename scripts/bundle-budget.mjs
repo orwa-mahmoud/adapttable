@@ -13,7 +13,8 @@
  *
  * Sizes are minified + gzipped bytes of AdaptTable's own share of the graph.
  * React and the UI kits are external because an application already ships
- * them; counting them would drown the number the budget is about.
+ * them; counting them would drown the number the budget is about. Vue fixtures
+ * externalize only the Vue runtime and count all emitted chunks and assets.
  *
  * The bundler is rolldown, re-exported by tsdown, which builds this repo
  * already — the measurement adds no dependency of its own.
@@ -39,6 +40,7 @@ import {
 } from "./consumer-fixtures.mjs";
 import { packageDir, packageRel } from "./packages.mjs";
 import { publishedFigures, staleReason } from "./published-figures.mjs";
+import { VUE_RUNTIME_EXTERNALS } from "./vue-consumer-fixtures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
@@ -100,7 +102,10 @@ export async function measure(fixture, dir) {
   const started = performance.now();
   const bundle = await Rolldown.rolldown({
     input: entry,
-    external: (id) => EXTERNAL.some((re) => re.test(id)),
+    external: (id) =>
+      (fixture.framework === "vue" ? VUE_RUNTIME_EXTERNALS : EXTERNAL).some(
+        (re) => re.test(id)
+      ),
     logLevel: "silent",
   });
   const [min, readable] = await Promise.all([
@@ -110,8 +115,21 @@ export async function measure(fixture, dir) {
   await bundle.close();
   const parseMs = Math.round(performance.now() - started);
 
-  const code = readable.output[0].code;
-  const sizeBytes = gzipSync(min.output[0].code).length;
+  const code =
+    fixture.framework === "vue"
+      ? readable.output
+          .filter((file) => file.type === "chunk")
+          .map((file) => file.code)
+          .join("\n")
+      : readable.output[0].code;
+  // Vue consumers include every emitted chunk/asset. No optional AdaptTable
+  // implementation may disappear from the measured transfer through splitting.
+  const files = fixture.framework === "vue" ? min.output : [min.output[0]];
+  const sizeBytes = files.reduce(
+    (total, file) =>
+      total + gzipSync(file.type === "chunk" ? file.code : file.source).length,
+    0
+  );
   return {
     sizeBytes,
     sizeKB: sizeBytes / 1024,

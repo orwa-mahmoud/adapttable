@@ -7,6 +7,8 @@ import { bulkActions } from "../src/bulk-actions";
 import { commandPalette } from "../src/command-palette";
 import { contextMenu } from "../src/context-menu";
 import { exportCsv } from "../src/export-csv";
+import { exportPdf } from "../src/export-pdf";
+import { exportXlsx } from "../src/export-xlsx";
 import { extendFeature, type TableFeature } from "../src/features/tableFeature";
 import { useRowSelection } from "../src/selection/selection";
 import { sidePanel } from "../src/side-panel";
@@ -37,6 +39,8 @@ describe("UI-free action model ownership and required slots", () => {
     commandPalette(),
     contextMenu<Row>(),
     exportCsv<Row>(),
+    exportPdf<Row>(),
+    exportXlsx<Row>(),
     sidePanel({ panels: [], open: null, onOpenChange: vi.fn() }),
   ])("rejects an unfilled $id feature", (feature) => {
     const scope = effectScope();

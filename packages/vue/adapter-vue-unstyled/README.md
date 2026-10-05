@@ -144,11 +144,12 @@ binding and shared core; these contributions provide native controls.
   bulk actions with pending/error feedback, a keyboard command palette,
   contextual cell/column actions and host-controlled side panels. Mutations and
   panel state remain host-owned.
-- `/export-csv` and `/print`: CSV export with loaded, selected, range or
+- `/export` and `/print`: CSV export with loaded, selected, range or
   host-provided all-row scopes, optional server progress/cancellation, and a host
-  print callback. The optional `/export-pdf` and `/export-xlsx` entries expose
-  `pdfWriter` and `xlsxWriter`; pass either writer to `exportCsv({ writer })`.
-  These writer helpers do not install separate export factories. See
+  print callback. `/export-csv` remains a deprecated compatibility path.
+  `/export-pdf` and `/export-xlsx` provide `exportPdf` and `exportXlsx` with
+  the same native controls and lifetime. Their `pdfWriter` and `xlsxWriter`
+  helpers remain available for `exportCsv({ writer })`. See
   [actions and exports](https://adapttable.orwamahmoud.com/vue/actions/).
 - `/virtualize`: row and optional column virtualization with logical navigation
   and measured expanded content. Pinned rows stay outside the row window; row
@@ -202,7 +203,7 @@ or server-rendering the native package does not require browser globals.
 Provide equivalent server/client rows, controlled state and URL input to hydrate.
 
 This experimental native slice does not yet provide the complete React/Angular
-feature catalog, styled Vue kits or a standard Vue preset.
+feature catalog or styled Vue kits.
 
 Read [getting started](https://adapttable.orwamahmoud.com/vue/getting-started/),
 [feature composition](https://adapttable.orwamahmoud.com/vue/features/) and the
@@ -219,3 +220,21 @@ the `assistant` prop and include `tableAssistant()` when mounting it inside
 reviews have one decision owner. Optional agents, conversations and speech are
 provided by `@adapttable/ai-vue`. See the
 [assistant guide](https://adapttable.orwamahmoud.com/vue/assistant/).
+
+## Standard features and exports
+
+Import `standardFeatures` from `@adapttable/vue-unstyled/preset` for native
+columns, density, CSV export, Find, fit columns, fullscreen, header filters,
+multi-sort, resize handles and status controls. Add typed `grouping`,
+`bulkActions`, `filters` or `savedViews` options only when you need them.
+
+CSV is available from `@adapttable/vue-unstyled/export`; `/export-csv` remains
+compatible. `exportPdf` and `exportXlsx` live in the separate `/export-pdf` and
+`/export-xlsx` entries alongside their writer helpers. All accept `false` to
+disable export. Append either factory after `standardFeatures()` to replace
+its CSV control with that format. Import individual entries to keep unused
+writers out of the application.
+
+See the [feature guide](https://adapttable.orwamahmoud.com/vue/features/) and
+[export guide](https://adapttable.orwamahmoud.com/vue/actions/) for composition,
+selection, range, server jobs and host callbacks.

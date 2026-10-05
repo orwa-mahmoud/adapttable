@@ -221,3 +221,6 @@ export { UNDO_REDO_CONTROL } from "./actions/contracts";
 export type { HistoryButtonsChromeProps } from "./actions/simpleChrome";
 export { HistoryButtonsChrome } from "./actions/simpleChrome";
 export type * from "./index";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

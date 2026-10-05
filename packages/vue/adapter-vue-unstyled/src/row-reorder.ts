@@ -1,4 +1,8 @@
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
+import {
+  extendFeature,
+  slotRender,
+  type TableFeature,
+} from "@adapttable/vue/adapter";
 import {
   rowReorder as bindingRowReorder,
   rowReorderControlKey,
@@ -16,7 +20,7 @@ export {
 export function rowReorder<TRow>(
   onRowReorder: RowReorderHandler<TRow>,
   options?: RowReorderOptions<TRow>
-) {
+): TableFeature<TRow> {
   return extendFeature(bindingRowReorder(onRowReorder, options), [
     slotRender(rowReorderControlKey<TRow>(), (props) =>
       h(NativeRowReorder<TRow>, { ...props })

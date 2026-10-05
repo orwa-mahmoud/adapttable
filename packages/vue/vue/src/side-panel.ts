@@ -62,3 +62,6 @@ export {
   SidePanelLayoutChrome,
 } from "./actions/sidePanelChrome";
 export type * from "./index";
+
+/** Preserve the existing core type-only surface through declaration bundling. */
+export type * from "@adapttable/core";

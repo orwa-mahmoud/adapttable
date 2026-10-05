@@ -13,7 +13,11 @@ import { join } from "node:path";
 
 import { Rolldown } from "tsdown";
 
+import { FIXTURES } from "./consumer-fixtures.mjs";
+import { KITS as REGISTERED_KITS } from "./kits.mjs";
 import { packageDir } from "./packages.mjs";
+import { vueConsumerCoverageProblems } from "./vue-consumer-fixtures.mjs";
+import { checkVueConsumerGraphs } from "./vue-consumer-graphs.mjs";
 
 const KITS = [
   "mui",
@@ -25,7 +29,11 @@ const KITS = [
   "unstyled",
   "shadcn",
 ];
-const KIT_PACKAGES = new Set(KITS.map((kit) => `@adapttable/${kit}`));
+const KIT_PACKAGES = new Set(
+  REGISTERED_KITS.map(
+    (kit) => `@adapttable/${kit.name.replace(/^adapter-/, "")}`
+  )
+);
 const FEATURES = [
   { entry: "editing", marker: "useCellEditing" },
   { entry: "filters", marker: "useFilterTreeChips" },
@@ -101,8 +109,12 @@ async function graphFor(kit, entry, dir) {
 
 const dir = mkdtempSync(join(tmpdir(), "adapttable-feature-graphs-"));
 const failures = [];
+const vueFixtures = FIXTURES.filter((fixture) => fixture.framework === "vue");
 
 try {
+  failures.push(...vueConsumerCoverageProblems(FIXTURES));
+  const vue = await checkVueConsumerGraphs(vueFixtures, dir);
+  failures.push(...vue.failures);
   for (const kit of KITS) {
     for (const feature of FEATURES) {
       const { code, adapterImports } = await graphFor(kit, feature.entry, dir);
@@ -151,5 +163,5 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `✓ adapter feature isolation: ${String(KITS.length * FEATURES.length)} packed graphs, no sibling-feature or unintended cross-kit reachability`
+  `✓ adapter feature isolation: ${String(KITS.length * FEATURES.length + vueFixtures.length)} packed graphs plus planted Vue negatives, no sibling-feature or unintended cross-kit reachability`
 );
