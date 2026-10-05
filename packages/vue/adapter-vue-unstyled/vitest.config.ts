@@ -14,6 +14,24 @@ export default defineConfig({
     dedupe: ["vue"],
     alias: [
       {
+        find: /^@adapttable\/ai-vue$/,
+        replacement: fileURLToPath(
+          new URL("../ai-vue/src/index.ts", import.meta.url)
+        ),
+      },
+      {
+        find: /^@adapttable\/ai$/,
+        replacement: fileURLToPath(
+          new URL("../../shared/ai/src/index.ts", import.meta.url)
+        ),
+      },
+      {
+        find: /^@adapttable\/ai\/voice$/,
+        replacement: fileURLToPath(
+          new URL("../../shared/ai/src/voice.ts", import.meta.url)
+        ),
+      },
+      {
         // Source tests use the same SFC style block without requiring dist.
         find: /^@adapttable\/vue-unstyled\/styles\.css$/,
         replacement:

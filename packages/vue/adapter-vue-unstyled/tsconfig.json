@@ -4,7 +4,7 @@
     "noEmit": true,
     "jsx": "preserve",
     "jsxImportSource": "vue",
-    "types": ["node", "vitest/globals"],
+    "types": ["node", "vitest/globals", "vite/client"],
     "paths": {
       "@adapttable/vue-unstyled": ["./src/index.ts"],
       "@adapttable/vue-unstyled/features": ["./src/features.ts"],
@@ -59,7 +59,10 @@
       "@adapttable/vue-unstyled/virtualize": ["./src/virtualize.ts"],
       "@adapttable/vue-unstyled/grouping-panel": ["./src/grouping-panel.ts"],
       "@adapttable/vue-unstyled/export": ["./src/export.ts"],
-      "@adapttable/vue-unstyled/preset": ["./src/preset.ts"]
+      "@adapttable/vue-unstyled/preset": ["./src/preset.ts"],
+      "@adapttable/ai-vue": ["../ai-vue/src/index.ts"],
+      "@adapttable/ai": ["../../shared/ai/src/index.ts"],
+      "@adapttable/ai/voice": ["../../shared/ai/src/voice.ts"]
     }
   },
   "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],
