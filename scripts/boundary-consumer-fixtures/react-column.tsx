@@ -8,6 +8,7 @@ import type {
 import {
   flattenReactColumnTree,
   type ReactColumnGroupDef,
+  renderedRowsOf,
 } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
@@ -57,3 +58,15 @@ export function groupedColumnKeys(): string[] {
     (column) => column.key
   );
 }
+
+// Native renderers consume the same typed data-leaf inventory as row gestures.
+export function visibleRowNames(rows: readonly Row[]): readonly string[] {
+  const visible: readonly Row[] = renderedRowsOf({
+    source: { rows },
+    tree: { entries: rows.map((row) => ({ row })) },
+  });
+  return visible.map((row) => row.name);
+}
+export type RenderedRowIdentity = Assert<
+  Equal<ReturnType<typeof renderedRowsOf<Row>>, readonly Row[]>
+>;

@@ -2569,6 +2569,11 @@ data tier, builds the declarative-filter runtime, wires the chrome, and
 returns the `tableProps` / `toolbarProps` bundles
 (`DataTableShellTableProps`, `DataTableShellToolbarProps`,
 `DataTableShellChromeProps`, `DataTableShellGroupingPanelProps`).
+`renderedRowsOf(chrome): readonly TRow[]` returns the same data-row inventory
+published by the runtime: grouped leaf rows, tree entries, or source rows.
+Native renderers can map row IDs to that inventory for reorder controls even
+when their widget inserts group headers or windows the displayed rows. Keep
+the widget's structural indexes separate from these data-row indexes.
 `useStickyToolbarLayout`
 and `resolveStickyToolbar` park search and page-size with a sticky header.
 `DataTableShellProps`

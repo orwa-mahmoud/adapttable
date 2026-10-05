@@ -1117,6 +1117,7 @@ export {
   pinnedRowPart,
   pinnedRowSticky,
   pinnedRowStickyStyle,
+  renderedRowsOf,
   resetColumnLayout,
   resolveRowHeight,
   resolveRowStyle,

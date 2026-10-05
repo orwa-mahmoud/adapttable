@@ -5037,6 +5037,7 @@
       "ReconcileLiveEdit",
       "ReconcileLiveRowEdit",
       "rememberFeatureHost",
+      "renderedRowsOf",
       "REORDER_COLUMN_WIDTH",
       "ResizableVirtualizer",
       "ResolvedDensity",

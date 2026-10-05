@@ -482,6 +482,7 @@ import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
 import { RELATIVE_PRESETS } from '@adapttable/core';
+import { renderedRowsOf } from '@adapttable/core/binding';
 import { renderRegisteredFilter } from '@adapttable/core';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
@@ -2935,6 +2936,8 @@ export { RELATIVE_PRESETS }
 
 // @public
 export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
+
+export { renderedRowsOf }
 
 export { renderRegisteredFilter }
 

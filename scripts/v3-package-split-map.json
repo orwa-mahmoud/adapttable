@@ -40715,6 +40715,14 @@
       "behavior": ""
     },
     {
+      "export": "renderedRowsOf",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "REORDER_COLUMN_WIDTH",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
