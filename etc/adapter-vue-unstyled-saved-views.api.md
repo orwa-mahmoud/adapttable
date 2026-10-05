@@ -16,6 +16,8 @@ import { UseSavedViewsOptions } from '@adapttable/vue/saved-views';
 // @public
 export interface DataTableClassNames {
     // (undocumented)
+    readonly actionButton?: string;
+    // (undocumented)
     readonly actionsCell?: string;
     // (undocumented)
     readonly actionsHeader?: string;
@@ -55,6 +57,12 @@ export interface DataTableClassNames {
     readonly cards?: string;
     // (undocumented)
     readonly cardValue?: string;
+    // (undocumented)
+    readonly chip?: string;
+    // (undocumented)
+    readonly chipRemove?: string;
+    // (undocumented)
+    readonly chips?: string;
     // (undocumented)
     readonly columnGroup?: string;
     // (undocumented)
@@ -168,6 +176,10 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly expandButton?: string;
     // (undocumented)
+    readonly expandCell?: string;
+    // (undocumented)
+    readonly expandHeader?: string;
+    // (undocumented)
     readonly expandToggle?: string;
     // (undocumented)
     readonly exportCsvButton?: string;
@@ -181,6 +193,8 @@ export interface DataTableClassNames {
     readonly exportProgressDownload?: string;
     // (undocumented)
     readonly exportProgressMessage?: string;
+    // (undocumented)
+    readonly exportSpinner?: string;
     // (undocumented)
     readonly fillHandle?: string;
     // (undocumented)
@@ -204,7 +218,13 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly filterHeaderButton?: string;
     // (undocumented)
+    readonly filterHeaderCell?: string;
+    // (undocumented)
     readonly filterHeaderInput?: string;
+    // (undocumented)
+    readonly filterHeaderMenu?: string;
+    // (undocumented)
+    readonly filterHeaderRow?: string;
     // (undocumented)
     readonly filterHeaderTrigger?: string;
     // (undocumented)
@@ -219,6 +239,8 @@ export interface DataTableClassNames {
     readonly filtersActions?: string;
     // (undocumented)
     readonly filtersAnchor?: string;
+    // (undocumented)
+    readonly filtersBackdrop?: string;
     // (undocumented)
     readonly filtersBody?: string;
     // (undocumented)
@@ -276,6 +298,8 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly fullscreenToggle?: string;
     // (undocumented)
+    readonly gridAnnouncer?: string;
+    // (undocumented)
     readonly groupAggregate?: string;
     // (undocumented)
     readonly groupCard?: string;
@@ -332,6 +356,10 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly groupToggle?: string;
     // (undocumented)
+    readonly headerActions?: string;
+    // (undocumented)
+    readonly headerCell?: string;
+    // (undocumented)
     readonly headerRenameAnnouncer?: string;
     // (undocumented)
     readonly headerRenameButton?: string;
@@ -349,6 +377,22 @@ export interface DataTableClassNames {
     readonly headerRenameSave?: string;
     // (undocumented)
     readonly loading?: string;
+    // (undocumented)
+    readonly loadingCard?: string;
+    // (undocumented)
+    readonly loadingCards?: string;
+    // (undocumented)
+    readonly loadingCell?: string;
+    // (undocumented)
+    readonly loadingHeaderCell?: string;
+    // (undocumented)
+    readonly loadingHeaderRow?: string;
+    // (undocumented)
+    readonly loadingLine?: string;
+    // (undocumented)
+    readonly loadingRow?: string;
+    // (undocumented)
+    readonly loadingTable?: string;
     // (undocumented)
     readonly loadMore?: string;
     // (undocumented)
@@ -379,12 +423,17 @@ export interface DataTableClassNames {
     readonly retry?: string;
     // (undocumented)
     readonly root?: string;
-    // (undocumented)
     readonly rowAction?: string;
+    // (undocumented)
+    readonly rowActionsMenu?: string;
+    // (undocumented)
+    readonly rowActionsTrigger?: string;
     // (undocumented)
     readonly rowEditActions?: string;
     // (undocumented)
     readonly rowEditButton?: string;
+    // (undocumented)
+    readonly rowReorderAnnouncer?: string;
     // (undocumented)
     readonly rowReorderButtons?: string;
     // (undocumented)
@@ -397,6 +446,8 @@ export interface DataTableClassNames {
     readonly rowsPerPage?: string;
     // (undocumented)
     readonly scroll?: string;
+    // (undocumented)
+    readonly searchIcon?: string;
     // (undocumented)
     readonly searchInput?: string;
     // (undocumented)
@@ -432,8 +483,9 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly sortDirectionButton?: string;
     // (undocumented)
-    readonly sortSelect?: string;
+    readonly sortIndex?: string;
     // (undocumented)
+    readonly sortSelect?: string;
     readonly status?: string;
     // (undocumented)
     readonly statusBar?: string;
@@ -451,6 +503,8 @@ export interface DataTableClassNames {
     readonly table?: string;
     // (undocumented)
     readonly tableFooter?: string;
+    // (undocumented)
+    readonly tableStatusAnnouncer?: string;
     // (undocumented)
     readonly tbody?: string;
     // (undocumented)

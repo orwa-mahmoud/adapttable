@@ -19,6 +19,10 @@ import { pathToFileURL } from "node:url";
 /** Every fixture's diagnostic identity, separate from the invalid source. */
 export const VUE_TYPE_EXPECTATIONS = {
   "@adapttable/vue": {
+    "MissingHeaderFilterControls.ts": [
+      { code: 2741, message: /Property 'Multi' is missing/ },
+      { code: 2741, message: /Property 'Control' is missing/ },
+    ],
     "UnsupportedFeatureEnabled.ts": [
       {
         code: 2353,
@@ -153,6 +157,14 @@ export const VUE_TYPE_EXPECTATIONS = {
     ],
   },
   "@adapttable/vue-unstyled": {
+    "filter-editing/InvalidInlineHeaderRows.ts": [
+      { code: 2322, message: /FilterHeaderControlOptions<Invoice>.*Person/s },
+      {
+        code: 2322,
+        message:
+          /Types of property 'columns' are incompatible.*Type '\(row: Invoice\) => unknown' is not assignable to type '\(row: Person\) => unknown'/s,
+      },
+    ],
     "export-preset/WrongBarrelRows.ts": [
       {
         code: 2345,

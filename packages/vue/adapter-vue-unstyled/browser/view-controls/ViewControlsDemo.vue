@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { getLabels } from "@adapttable/i18n";
-import { DataTable, type TableDensity } from "@adapttable/vue-unstyled";
+import {
+  type ColumnLayoutState,
+  useColumnLayoutUrlState,
+} from "@adapttable/vue";
+import {
+  type ColumnInput,
+  DataTable,
+  type TableDensity,
+} from "@adapttable/vue-unstyled";
 import { densityChooser } from "@adapttable/vue-unstyled/density";
 import { fullscreen } from "@adapttable/vue-unstyled/fullscreen";
 import { savedViews } from "@adapttable/vue-unstyled/saved-views";
@@ -17,21 +25,56 @@ const onDensity = (next: TableDensity): void => {
   if (accept.value) density.value = next;
 };
 const density = shallowRef<TableDensity>("comfortable");
+const rejectLayout = shallowRef(false);
+const {
+  layout: columnLayout,
+  onLayoutChange,
+  flush,
+} = useColumnLayoutUrlState({
+  urlKey: "view-controls",
+});
+const onColumnLayout = (next: ColumnLayoutState): void => {
+  if (!rejectLayout.value) onLayoutChange(next);
+};
+const resetColumns = (): void =>
+  onLayoutChange({ hidden: [], order: [], pinned: {}, widths: {} });
+const applyColumnPreset = (): void =>
+  onLayoutChange({
+    hidden: ["team"],
+    order: ["email", "name", "team"],
+    pinned: { name: "start" },
+    widths: { name: 240 },
+    names: { name: "Owner" },
+  });
 const labels = computed(() => getLabels(rtl.value ? "ar" : "en"));
 const features = computed(() =>
   enabled.value
     ? [
         densityChooser(),
         fullscreen(),
-        savedViews({ storageKey: "vue-view-controls-ci", storage: null }),
+        savedViews({
+          storageKey: "vue-view-controls-ci",
+          storage: null,
+          flushViewState: flush,
+        }),
       ]
     : []
 );
 const rows = [
-  { id: "ada", name: "Ada" },
-  { id: "grace", name: "Grace" },
+  { id: "ada", name: "Ada", email: "ada@example.test", team: "Math" },
+  { id: "grace", name: "Grace", email: "grace@example.test", team: "Navy" },
 ];
-const columns = [{ key: "name", header: "Name" }];
+const columns: readonly ColumnInput<(typeof rows)[number]>[] = [
+  {
+    header: "Contact",
+    collapsedKey: "name",
+    children: [
+      { key: "name", header: "Name", renameable: true },
+      { key: "email", header: "Email" },
+    ],
+  },
+  { key: "team", header: "Team" },
+];
 const rowKey = (row: { id: string }): string => row.id;
 </script>
 <template>
@@ -53,6 +96,14 @@ const rowKey = (row: { id: string }): string => row.id;
       density</label
     >
     <label><input v-model="searchable" type="checkbox" /> Search enabled</label>
+    <label
+      ><input v-model="rejectLayout" type="checkbox" /> Reject column layout
+      requests</label
+    >
+    <button type="button" @click="applyColumnPreset">
+      Apply column preset
+    </button>
+    <button type="button" @click="resetColumns">Reset columns</button>
     <output aria-label="Density requests">{{ requests.join(", ") }}</output>
     <DataTable
       data-demo-table="view-controls"
@@ -61,12 +112,15 @@ const rowKey = (row: { id: string }): string => row.id;
       :row-key="rowKey"
       :features="features"
       :density="controlled ? density : undefined"
+      :column-layout="columnLayout"
+      collapsible-column-groups
       :searchable="searchable"
       :labels="labels"
       :dir="rtl ? 'rtl' : 'ltr'"
       url-key="view-controls"
       :search-debounce-ms="0"
       @update:density="onDensity"
+      @update:column-layout="onColumnLayout"
     />
     <DataTable
       data-demo-table="independent"

@@ -123,7 +123,7 @@ export const EMPTY_PIVOT_CONFIG: PivotConfig;
 export function isPivotReady(config: PivotConfig): boolean;
 
 // @public
-export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[]): string;
+export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[], aggregationLabels?: Readonly<Record<string, string | undefined>>): string;
 
 // @public
 export function moveField(config: PivotConfig, zone: PivotZone, index: number, delta: -1 | 1): PivotConfig;
@@ -214,7 +214,7 @@ export interface PivotOptions<TRow> {
 }
 
 // @public
-export function pivotPanelZones(fields: readonly PivotField[], config: PivotConfig, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">): PivotZoneModel[];
+export function pivotPanelZones(fields: readonly PivotField[], config: PivotConfig, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">, aggregationLabels?: Readonly<Record<string, string | undefined>>): PivotZoneModel[];
 
 // @public
 export interface PivotResult {

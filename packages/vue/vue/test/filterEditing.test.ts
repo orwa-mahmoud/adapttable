@@ -4,7 +4,11 @@ import {
   type FilterFormSource,
   resolveLabels,
 } from "@adapttable/core";
-import { slotRender, TOOLBAR_EXTRAS } from "@adapttable/core/binding";
+import {
+  ACTIVE_FILTER_CHIPS,
+  slotRender,
+  TOOLBAR_EXTRAS,
+} from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import {
   createSSRApp,
@@ -64,6 +68,7 @@ function deferred<T>() {
 function controls<TRow>(feature: TableFeature<TRow>): TableFeature<TRow> {
   return extendFeature(feature, [
     slotRender(TOOLBAR_EXTRAS, () => null),
+    slotRender(ACTIVE_FILTER_CHIPS, () => null),
     slotRender(editableCellSlotKey<TRow>(), () => null),
   ]);
 }

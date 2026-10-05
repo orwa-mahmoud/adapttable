@@ -20,6 +20,7 @@ import {
   withRowPinActions,
 } from "@adapttable/core";
 import {
+  ACTIVE_FILTER_CHIPS,
   AGENT_APPROVAL,
   AGENT_APPROVAL_STATE,
   COLUMN_SELECT,
@@ -615,6 +616,14 @@ export function useDataTableShell<TRow>(
   const resize = state.get(COLUMN_RESIZE_MODEL);
   const headerFilters = state.get(headerFilterModelKey<TRow>());
   const filterPanel = state.get(filterViewKey<TRow>());
+  const renderActiveFilterChips = () =>
+    filterPanel.value?.chips?.length
+      ? renderFeatureSlot(ACTIVE_FILTER_CHIPS, slotFills.value, {
+          chips: filterPanel.value.chips,
+          labels: table.labels.value,
+          onClearAll: filterPanel.value.clear,
+        })
+      : [];
   const mergedActions = computed(() =>
     withRowPinActions({
       rowActions: rowActions.value?.rowActions,
@@ -627,7 +636,8 @@ export function useDataTableShell<TRow>(
   const baseDesktop = useDesktopTableModel(
     table,
     () => selection.value,
-    () => toValue(resolved.value.fitColumns) ?? false
+    () => toValue(resolved.value.fitColumns) ?? false,
+    () => (detail.value ? table.labels.value.expandRow : undefined)
   );
   const baseMobile = useMobileCardsModel(table, baseDesktop);
   const rowEditControlsVisible = computed(
@@ -752,6 +762,7 @@ export function useDataTableShell<TRow>(
     ...(gridFocus.value
       ? renderFeatureSlot(GRID_ANNOUNCER, slotFills.value, {
           focus: gridFocus.value,
+          className: classNames?.gridAnnouncer,
         })
       : []),
   ];
@@ -763,7 +774,46 @@ export function useDataTableShell<TRow>(
       );
     confirm(request);
   };
+  const visibleRowObjects = computed(
+    () => new Set(rowInventory.value.visibleRows)
+  );
+  const rowOwnerRevision = shallowRef(0);
+  const rowSourceOwner = () =>
+    source.value.tableEngine ??
+    source.value.setPage ??
+    supplied.value ??
+    source.value;
+  const rowControlOwner = (row: TRow) => {
+    const owner = rowSourceOwner();
+    const revision = rowOwnerRevision.value;
+    return () =>
+      active.value &&
+      rowOwnerRevision.value === revision &&
+      rowSourceOwner() === owner &&
+      visibleRowObjects.value.has(row);
+  };
   const decorateRow = (original: TableRowModel<TRow>): TableRowModel<TRow> => {
+    const ownsRow =
+      original.detail || resolved.value.rowActionControls
+        ? rowControlOwner(original.row)
+        : undefined;
+    const rowDetail = original.detail;
+    if (rowDetail) {
+      const toggle = rowDetail.toggleAttrs.onClick;
+      original = {
+        ...original,
+        detail: {
+          ...rowDetail,
+          toggleAttrs: {
+            ...rowDetail.toggleAttrs,
+            onClick: (event: Event) => {
+              if (ownsRow?.() && typeof toggle === "function")
+                (toggle as (event: Event) => void)(event);
+            },
+          },
+        },
+      };
+    }
     const reorder = rowReorder.value;
     if (reorder && !original.summary) {
       const localIndex = rowInventory.value.visibleRows.findIndex(
@@ -812,7 +862,8 @@ export function useDataTableShell<TRow>(
             confirm: requestConfirm,
             cancelLabel: table.labels.value.cancel,
             enabled: () =>
-              active.value && resolved.value.rowActionControls === projector,
+              ownsRow?.() === true &&
+              resolved.value.rowActionControls === projector,
           })
         : undefined;
     const row =
@@ -966,6 +1017,13 @@ export function useDataTableShell<TRow>(
   }));
   if (getCurrentInstance()) provideFeatureState(state);
   const active = useScopeActivity();
+  watch(
+    [() => active.value, rowSourceOwner],
+    ([live, owner], [, previousOwner]) => {
+      if (!live || owner !== previousOwner) rowOwnerRevision.value++;
+    },
+    { flush: "sync" }
+  );
   // Keep this projection total after Vue captures a required-slot error from
   // reconciliation. A throwing computed can cache undefined and mask that
   // contract error on the error boundary's next render.
@@ -1132,6 +1190,7 @@ export function useDataTableShell<TRow>(
     flushViewState,
     toolbarExtrasProps,
     renderToolbarExtras,
+    renderActiveFilterChips,
     renderBatchEditBar,
     renderAgentApproval,
     renderTableAssistant,

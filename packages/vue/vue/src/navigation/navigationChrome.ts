@@ -261,7 +261,7 @@ export function GridFocusAnnouncer(props: {
           role: "status",
           "aria-live": "polite",
           "aria-atomic": "true",
-          "data-adapttable-part": "grid-focus-announcer",
+          "data-adapttable-part": "grid-announcer",
           style: LIVE_STYLE,
           class: props.className,
         },

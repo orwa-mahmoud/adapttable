@@ -201,6 +201,30 @@ describe("isPivotReady", () => {
 });
 
 describe("measureLabel", () => {
+  it("optionally localizes aggregation captions without changing measure identity or overrides", () => {
+    const fields = [{ key: "amount", label: "القيمة" }];
+    const captions = { sum: "المجموع", avg: "المتوسط" };
+    const measure = Object.freeze({ key: "amount", agg: "sum" });
+    expect(measureLabel(measure, fields, captions)).toBe("المجموع القيمة");
+    expect(measureLabel(measure, fields)).toBe("sum القيمة");
+    expect(measure).toEqual({ key: "amount", agg: "sum" });
+    expect(
+      measureLabel({ ...measure, label: "My total" }, fields, captions)
+    ).toBe("My total");
+    expect(measureLabel({ ...measure, label: "" }, fields, captions)).toBe("");
+    expect(
+      measureLabel({ key: "amount", agg: "median" }, fields, captions)
+    ).toBe("median القيمة");
+    expect(
+      measureLabel({ key: "amount", agg: "constructor" }, fields, captions)
+    ).toBe("constructor القيمة");
+    expect(measureLabel(measure, fields, { sum: undefined })).toBe(
+      "sum القيمة"
+    );
+    expect(
+      measureLabel({ key: "amount", agg: () => 1 }, fields, captions)
+    ).toBe("القيمة");
+  });
   it("names a measure by its aggregation and its field", () => {
     expect(measureLabel({ key: "amount", agg: "sum" }, FIELDS)).toBe(
       "sum Amount"

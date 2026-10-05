@@ -90,8 +90,11 @@ The shell distinguishes loaded rows from visible hierarchy rows: collapsed
 children keep their editing drafts while select-all follows visible rows.
 Grouped/tree tables refuse data-row pinning; independent summaries still work.
 Saved Views capture connected URL slices, including density and uncontrolled
-pins; group collapse requires explicit wiring. Column layout, selection,
-tree/detail expansion and edit drafts are not automatically captured.
+pins; group collapse and column layout require explicit host wiring.
+`useColumnLayoutUrlState` returns layout/change/flush bindings;
+`useColumnLayoutStorageState` persists an independent browser preference. Pass
+the URL `flush` as the Saved Views `flushViewState` option. Selection,
+tree/detail expansion and edit drafts are not captured.
 
 SSR state is request-local. Browser resources start after mount and suspend
 under KeepAlive. Dispose explicit effect scopes when their owner finishes.

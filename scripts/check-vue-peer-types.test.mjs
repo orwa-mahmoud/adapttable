@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -49,6 +55,32 @@ describe("complete Vue peer source profiles", () => {
     assert.throws(
       () => publishedVueEntries(packageRoot),
       /Missing published source entry.*future-feature/
+    );
+  });
+
+  it("separates a real CSS asset while keeping a CSS-named JavaScript export in the source gate", (t) => {
+    const { packageRoot, entries } = fixture(t);
+    const path = join(packageRoot, "package.json");
+    const manifest = JSON.parse(readFileSync(path, "utf8"));
+    manifest.exports["./styles.css"] = "./dist/styles.css";
+    writeFileSync(path, JSON.stringify(manifest));
+    assert.deepEqual(
+      publishedVueEntries(packageRoot),
+      entries.map((entry) => join(packageRoot, `src/${entry}.ts`))
+    );
+    manifest.exports["./styles.css"] = {
+      import: { types: "./dist/styles.d.ts", default: "./dist/styles.js" },
+    };
+    writeFileSync(path, JSON.stringify(manifest));
+    assert.throws(
+      () => publishedVueEntries(packageRoot),
+      /Missing published source entry.*styles\.css\.ts/
+    );
+    writeFileSync(join(packageRoot, "src/styles.css.ts"), "export {};\n");
+    assert.ok(
+      publishedVueEntries(packageRoot).includes(
+        join(packageRoot, "src/styles.css.ts")
+      )
     );
   });
 

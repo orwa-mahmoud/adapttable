@@ -15,9 +15,10 @@ import {
   type Component,
   type FunctionalComponent,
   h,
-  isVNode,
   type VNodeChild,
 } from "vue";
+
+import { renderDisplayValue } from "./displayValue";
 
 /** A value-aware cell renderer's input. */
 export interface CellContext<TRow, TValue = unknown> {
@@ -74,6 +75,8 @@ export interface ColumnDef<TRow, TValue = unknown> extends Omit<
   readonly accessor?: (row: TRow) => TValue;
   readonly cell?: Renderer<CellContext<TRow, TValue>>;
   readonly headerCell?: Renderer<HeaderContext<TRow, TValue>>;
+  /** Host controls after the caption, before the resize handle. */
+  readonly headerActions?: Renderer<HeaderContext<TRow, TValue>>;
   readonly footer?: Renderer<FooterContext<TRow, TValue>>;
 }
 export interface ColumnGroup<TRow> extends Omit<
@@ -126,14 +129,7 @@ export function renderFooter<TRow, TValue>(
   if (context.column.footer)
     content = renderContent(context.column.footer, context);
   else if (slot) content = slot(context);
-  else content = footerContent(context.value);
-  return content;
-}
-function footerContent(value: unknown): VNodeChild {
-  let content: VNodeChild;
-  if (typeof value === "boolean" || isVNode(value)) content = value;
-  else if (Array.isArray(value)) content = value.map(footerContent);
-  else content = primitiveText(value);
+  else content = renderDisplayValue(context.value);
   return content;
 }
 export function resolveColumns<TRow>(

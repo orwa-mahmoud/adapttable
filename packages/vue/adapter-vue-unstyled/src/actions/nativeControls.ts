@@ -111,7 +111,41 @@ export const nativeSidePanelSlots = (
 export const nativeExportSlots = (
   names: Readonly<Record<string, string | undefined>> = {}
 ): ExportSlots => ({
-  Button: nativeActionButton,
+  Button: ({ attrs, label, icon }) =>
+    h("button", attrs, [
+      attrs["aria-busy"] === true
+        ? h(
+            "svg",
+            {
+              "data-adapttable-part": "export-spinner",
+              class: names.exportSpinner,
+              viewBox: "0 0 24 24",
+              width: 16,
+              height: 16,
+              "aria-hidden": "true",
+              focusable: "false",
+            },
+            [
+              h("circle", {
+                cx: 12,
+                cy: 12,
+                r: 9,
+                fill: "none",
+                stroke: "currentColor",
+                "stroke-width": 3,
+                opacity: 0.2,
+              }),
+              h("path", {
+                d: "M12 3a9 9 0 0 1 9 9",
+                fill: "none",
+                stroke: "currentColor",
+                "stroke-width": 3,
+              }),
+            ]
+          )
+        : icon,
+      label,
+    ]),
   Surface: (props) =>
     h(
       "section",

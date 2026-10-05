@@ -27,6 +27,7 @@ import {
   invalidFixtures,
   VUE_TYPE_EXPECTATIONS,
 } from "./check-vue-types.mjs";
+import { isVueCssExport } from "./vue-export-kind.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packages = ["vue", "adapter-vue-unstyled"];
@@ -35,9 +36,11 @@ const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
 /** Discover exports instead of maintaining a second list of checked barrels. */
 export function publishedVueEntries(packageRoot) {
   const manifest = readJson(join(packageRoot, "package.json"));
-  return Object.keys(manifest.exports)
-    .filter((key) => key !== "./package.json")
-    .map((key) => {
+  return Object.entries(manifest.exports)
+    .filter(
+      ([key, target]) => key !== "./package.json" && !isVueCssExport(target)
+    )
+    .map(([key]) => {
       const entry = join(
         packageRoot,
         "src",

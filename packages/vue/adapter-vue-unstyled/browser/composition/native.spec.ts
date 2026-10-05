@@ -6,9 +6,14 @@ for (const mode of ["popover", "drawer"] as const) {
   }) => {
     await page.goto(`/vue/unstyled/composition/?mode=${mode}&rtl`);
     await page.locator(part("filters-button")).click();
-    const surface = page.locator(
+    const panel = page.locator(
       part(mode === "drawer" ? "filters-panel" : "filters-popover")
     );
+    const surface =
+      mode === "drawer"
+        ? page.locator("dialog[data-adapttable-filter-dialog]")
+        : panel;
+    await expect(panel).toBeVisible();
     await expect(surface).toBeVisible();
     if (mode === "popover")
       expect(

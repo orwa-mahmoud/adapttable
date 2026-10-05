@@ -59,6 +59,13 @@ export type PivotPanelChromeProps = Omit<
 export function PivotPanelChrome(props: PivotPanelChromeProps): VNodeChild {
   const { fields, config, onChange, slots, className } = props;
   const labels = resolveLabels(props.labels);
+  const aggregationLabels = {
+    sum: labels.selectionSum,
+    avg: labels.groupingAverage,
+    count: labels.selectionCount,
+    min: labels.selectionMin,
+    max: labels.selectionMax,
+  };
   for (const key of ["Surface", "Zone", "Field", "Add", "Agg"] as const)
     if (typeof slots[key] !== "function")
       throw new Error(
@@ -67,7 +74,7 @@ export function PivotPanelChrome(props: PivotPanelChromeProps): VNodeChild {
   return slots.Surface({
     className,
     "data-adapttable-part": "pivot-panel",
-    children: pivotPanelZones(fields, config, labels).map(
+    children: pivotPanelZones(fields, config, labels, aggregationLabels).map(
       ({ zone, label, entries, addOptions }) =>
         slots.Zone({
           zone,
@@ -96,13 +103,7 @@ export function PivotPanelChrome(props: PivotPanelChromeProps): VNodeChild {
                         label: labels.pivotAggregation,
                         value: entry.aggregation,
                         options: PIVOT_AGGREGATIONS,
-                        optionLabels: {
-                          sum: labels.selectionSum,
-                          avg: labels.groupingAverage,
-                          count: labels.selectionCount,
-                          min: labels.selectionMin,
-                          max: labels.selectionMax,
-                        },
+                        optionLabels: aggregationLabels,
                         onChange: (next) =>
                           onChange(setMeasureAgg(config, entry.index, next)),
                       }),

@@ -57,6 +57,7 @@ export default defineConfig({
   format: ["esm", "cjs"],
   tsconfig: "./tsconfig.build.json",
   plugins: [Vue({ isProduction: true })],
+  css: { fileName: "styles.css", splitting: false, inject: false },
   dts: { vue: true },
   sourcemap: true,
   clean: true,

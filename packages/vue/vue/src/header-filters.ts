@@ -65,4 +65,7 @@ export {
 export type * from "./index";
 
 /** Preserve the existing core type-only surface through declaration bundling. */
+export * from "./filters/filterHeaderControl";
+export * from "./filters/filterHeaderRow";
 export type * from "@adapttable/core";
+export type { FilterHeaderControlProps } from "@adapttable/core/binding";

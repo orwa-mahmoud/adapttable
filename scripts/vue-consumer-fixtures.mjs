@@ -5,6 +5,7 @@ export const VUE_RUNTIME_EXTERNALS = [/^vue($|\/)/];
 export const PDF_WRITER_MARKER = "function pdfWriter";
 export const XLSX_WRITER_MARKER = "function xlsxWriter";
 const writers = [PDF_WRITER_MARKER, XLSX_WRITER_MARKER];
+const drawerStyles = ["data-adapttable-filter-dialog", "filters-backdrop"];
 
 /** Each row names the actual published entries and functionality being measured. */
 export const VUE_CONSUMER_SPECS = [
@@ -31,7 +32,9 @@ export const VUE_CONSUMER_SPECS = [
     pkg: "adapter-vue-unstyled",
     entryFile: "preset.js",
     comparable: "mui · preset",
-    code: 'export { standardFeatures } from "PKG";',
+    code: 'export { standardFeatures } from "PKG";\nimport "STYLE";',
+    styleEntryFile: "styles.css",
+    presentCss: drawerStyles,
     functionality:
       "All standard preset factories and conditional configured members",
     present: ["standardFeatures", "export-progress-surface"],
@@ -42,7 +45,9 @@ export const VUE_CONSUMER_SPECS = [
     pkg: "adapter-vue-unstyled",
     alsoEntryFile: "preset.js",
     comparable: "mui · table + preset",
-    code: 'export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";',
+    code: 'export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";\nimport "STYLE";',
+    styleEntryFile: "styles.css",
+    presentCss: drawerStyles,
     functionality: "Native table and standard preset",
     present: ["DataTable", "standardFeatures", "export-progress-surface"],
     absent: writers,
@@ -67,7 +72,9 @@ export const VUE_CONSUMER_SPECS = [
     pkg: "adapter-vue-unstyled",
     alsoEntryFile: "features.js",
     comparable: "mui · all features",
-    code: 'export { DataTable } from "PKG";\nexport * from "ALSO";',
+    code: 'export { DataTable } from "PKG";\nexport * from "ALSO";\nimport "STYLE";',
+    styleEntryFile: "styles.css",
+    presentCss: drawerStyles,
     functionality:
       "Native table and every runtime export in its features barrel",
     present: ["DataTable", ...writers],
@@ -146,7 +153,23 @@ export function vueForeignImport(source, fixture, kits = KITS) {
   return undefined;
 }
 
-export function vueGraphProblems(fixture, { code, imports }) {
+/** Read emitted CSS assets, never a matching string in a JavaScript chunk. */
+export function vueEmittedCss(output) {
+  return output
+    .filter((file) => file.type === "asset" && file.fileName.endsWith(".css"))
+    .map((file) =>
+      typeof file.source === "string"
+        ? file.source
+        : new TextDecoder().decode(file.source)
+    )
+    .join("\n");
+}
+
+export function vueMissingCss(fixture, css) {
+  return (fixture.presentCss ?? []).filter((marker) => !css.includes(marker));
+}
+
+export function vueGraphProblems(fixture, { code, imports, css = "" }) {
   const failures = [];
   for (const marker of fixture.present ?? [])
     if (!new RegExp(`\\b${marker}\\b`).test(code))
@@ -154,6 +177,8 @@ export function vueGraphProblems(fixture, { code, imports }) {
   for (const marker of fixture.absent ?? [])
     if (new RegExp(`\\b${marker}\\b`).test(code))
       failures.push(`${fixture.name}: leaked ${marker}`);
+  for (const marker of vueMissingCss(fixture, css))
+    failures.push(`${fixture.name}: missing CSS ${marker}`);
   for (const source of imports) {
     const foreign = vueForeignImport(source, fixture);
     if (foreign) failures.push(`${fixture.name}: reached ${foreign}`);

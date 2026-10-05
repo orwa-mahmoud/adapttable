@@ -318,12 +318,13 @@ describe("TableAssistantChrome", () => {
     );
     await host.click("assistant-receipt-undo-button");
     expect(undoAction).toHaveBeenCalledWith("edit");
-    await host.click("assistant-undo-button");
+    await host.click("assistant-receipts-undo-all-button");
     expect(undo).toHaveBeenCalledOnce();
     await host.click("assistant-message-action-button");
     expect(action).toHaveBeenCalledOnce();
     await host.update({ receipts: false });
     expect(host.find("assistant-receipts")).toBeNull();
+    expect(host.find("assistant-undo-button")).not.toBeNull();
     await host.update({
       assistant: view({
         messages: [{ id: "voice", role: "user", text: "", transcribing: true }],

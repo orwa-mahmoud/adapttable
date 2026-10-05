@@ -163,6 +163,9 @@ export function projectHeadlessRows<TRow>(
       checkboxAttrs: isSummary
         ? undefined
         : (prior?.checkboxAttrs ?? selection?.rowCheckboxAttrs(id)),
+      expandCellAttrs: {
+        style: pinnedRowCellStyle(rowPinSide, options.rowPinOffset ?? 0, false),
+      },
       detail: hierarchyDetail(
         row,
         id,
@@ -234,6 +237,11 @@ export function projectHeadlessRows<TRow>(
       }),
     };
   };
+  const leadingColumns = [
+    desktop.expandLabel,
+    desktop.headerCheckboxAttrs,
+    desktop.reorderLabel,
+  ].filter(Boolean).length;
   const slots = (card: boolean): readonly HeadlessBodySlot<TRow>[] =>
     desktopBodySlots<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>({
       rows,
@@ -265,9 +273,7 @@ export function projectHeadlessRows<TRow>(
           model: {
             columns,
             labels: table.labels.value,
-            leadingColumns:
-              (desktop.headerCheckboxAttrs ? 1 : 0) +
-              (desktop.reorderLabel ? 1 : 0),
+            leadingColumns,
             trailingColumns: desktop.actionsLabel ? 1 : 0,
             selection: selection?.state.value,
             onToggle: grouping.collapsed.toggle,
@@ -285,9 +291,7 @@ export function projectHeadlessRows<TRow>(
               visualIds,
               cellsByRow: cells,
               extraRows: extras,
-              leadingCells:
-                (desktop.headerCheckboxAttrs ? 1 : 0) +
-                (desktop.reorderLabel ? 1 : 0),
+              leadingCells: leadingColumns,
             }),
           }
         : slot;

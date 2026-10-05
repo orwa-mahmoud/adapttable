@@ -15,10 +15,14 @@ import { ComposedFeature } from '@adapttable/vue/adapter';
 import { ConfirmHandler } from '@adapttable/vue/adapter';
 import { DataTableHandle } from '@adapttable/vue/adapter';
 import { Direction } from '@adapttable/vue/adapter';
+import { FilterHeaderControlOptions } from '@adapttable/vue/header-filters';
+import { FilterHeaderControlProps } from '@adapttable/vue/header-filters';
+import { FilterHeaderRowProps } from '@adapttable/vue/header-filters';
 import { FooterContext } from '@adapttable/vue/adapter';
 import { HeaderContext } from '@adapttable/vue/adapter';
 import { PaginationMode } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
+import { RowActionsLayout } from '@adapttable/vue/adapter';
 import { ShallowUnwrapRef } from 'vue';
 import { SummaryRowFn } from '@adapttable/vue/adapter';
 import { TableAssistantProps } from '@adapttable/vue/assistant';
@@ -30,6 +34,19 @@ import { TableViewStateConfig } from '@adapttable/vue/adapter';
 import { UrlStateAdapter } from '@adapttable/vue/adapter';
 import { VNode } from 'vue';
 import { VNodeChild } from 'vue';
+
+// @public (undocumented)
+const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$1<FilterHeaderControlOptions<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
 
 // @public (undocumented)
 const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
@@ -49,7 +66,26 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
 };
 
 // @public (undocumented)
+const __VLS_export_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal_2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal_2<FilterHeaderRowProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal$1<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
 type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal_2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 export { CellContext }
 
@@ -68,6 +104,8 @@ export const DataTable: typeof __VLS_export;
 
 // @public
 export interface DataTableClassNames {
+    // (undocumented)
+    readonly actionButton?: string;
     // (undocumented)
     readonly actionsCell?: string;
     // (undocumented)
@@ -108,6 +146,12 @@ export interface DataTableClassNames {
     readonly cards?: string;
     // (undocumented)
     readonly cardValue?: string;
+    // (undocumented)
+    readonly chip?: string;
+    // (undocumented)
+    readonly chipRemove?: string;
+    // (undocumented)
+    readonly chips?: string;
     // (undocumented)
     readonly columnGroup?: string;
     // (undocumented)
@@ -221,6 +265,10 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly expandButton?: string;
     // (undocumented)
+    readonly expandCell?: string;
+    // (undocumented)
+    readonly expandHeader?: string;
+    // (undocumented)
     readonly expandToggle?: string;
     // (undocumented)
     readonly exportCsvButton?: string;
@@ -234,6 +282,8 @@ export interface DataTableClassNames {
     readonly exportProgressDownload?: string;
     // (undocumented)
     readonly exportProgressMessage?: string;
+    // (undocumented)
+    readonly exportSpinner?: string;
     // (undocumented)
     readonly fillHandle?: string;
     // (undocumented)
@@ -257,7 +307,13 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly filterHeaderButton?: string;
     // (undocumented)
+    readonly filterHeaderCell?: string;
+    // (undocumented)
     readonly filterHeaderInput?: string;
+    // (undocumented)
+    readonly filterHeaderMenu?: string;
+    // (undocumented)
+    readonly filterHeaderRow?: string;
     // (undocumented)
     readonly filterHeaderTrigger?: string;
     // (undocumented)
@@ -272,6 +328,8 @@ export interface DataTableClassNames {
     readonly filtersActions?: string;
     // (undocumented)
     readonly filtersAnchor?: string;
+    // (undocumented)
+    readonly filtersBackdrop?: string;
     // (undocumented)
     readonly filtersBody?: string;
     // (undocumented)
@@ -329,6 +387,8 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly fullscreenToggle?: string;
     // (undocumented)
+    readonly gridAnnouncer?: string;
+    // (undocumented)
     readonly groupAggregate?: string;
     // (undocumented)
     readonly groupCard?: string;
@@ -385,6 +445,10 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly groupToggle?: string;
     // (undocumented)
+    readonly headerActions?: string;
+    // (undocumented)
+    readonly headerCell?: string;
+    // (undocumented)
     readonly headerRenameAnnouncer?: string;
     // (undocumented)
     readonly headerRenameButton?: string;
@@ -402,6 +466,22 @@ export interface DataTableClassNames {
     readonly headerRenameSave?: string;
     // (undocumented)
     readonly loading?: string;
+    // (undocumented)
+    readonly loadingCard?: string;
+    // (undocumented)
+    readonly loadingCards?: string;
+    // (undocumented)
+    readonly loadingCell?: string;
+    // (undocumented)
+    readonly loadingHeaderCell?: string;
+    // (undocumented)
+    readonly loadingHeaderRow?: string;
+    // (undocumented)
+    readonly loadingLine?: string;
+    // (undocumented)
+    readonly loadingRow?: string;
+    // (undocumented)
+    readonly loadingTable?: string;
     // (undocumented)
     readonly loadMore?: string;
     // (undocumented)
@@ -432,12 +512,17 @@ export interface DataTableClassNames {
     readonly retry?: string;
     // (undocumented)
     readonly root?: string;
-    // (undocumented)
     readonly rowAction?: string;
+    // (undocumented)
+    readonly rowActionsMenu?: string;
+    // (undocumented)
+    readonly rowActionsTrigger?: string;
     // (undocumented)
     readonly rowEditActions?: string;
     // (undocumented)
     readonly rowEditButton?: string;
+    // (undocumented)
+    readonly rowReorderAnnouncer?: string;
     // (undocumented)
     readonly rowReorderButtons?: string;
     // (undocumented)
@@ -450,6 +535,8 @@ export interface DataTableClassNames {
     readonly rowsPerPage?: string;
     // (undocumented)
     readonly scroll?: string;
+    // (undocumented)
+    readonly searchIcon?: string;
     // (undocumented)
     readonly searchInput?: string;
     // (undocumented)
@@ -485,8 +572,9 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly sortDirectionButton?: string;
     // (undocumented)
-    readonly sortSelect?: string;
+    readonly sortIndex?: string;
     // (undocumented)
+    readonly sortSelect?: string;
     readonly status?: string;
     // (undocumented)
     readonly statusBar?: string;
@@ -504,6 +592,8 @@ export interface DataTableClassNames {
     readonly table?: string;
     // (undocumented)
     readonly tableFooter?: string;
+    // (undocumented)
+    readonly tableStatusAnnouncer?: string;
     // (undocumented)
     readonly tbody?: string;
     // (undocumented)
@@ -616,6 +706,7 @@ export interface DataTableProps<TRow> {
     readonly paginationMode?: PaginationMode;
     // (undocumented)
     readonly refetch?: () => void | Promise<unknown>;
+    readonly rowActionsLayout?: RowActionsLayout;
     // (undocumented)
     readonly rowKey: (row: TRow) => string;
     // (undocumented)
@@ -626,6 +717,7 @@ export interface DataTableProps<TRow> {
     readonly selectable?: boolean;
     // (undocumented)
     readonly selectedIds?: readonly string[];
+    readonly skeletonRows?: number;
     // (undocumented)
     readonly source?: TableSource<TRow>;
     readonly summaryRow?: SummaryRowFn<TRow>;
@@ -653,12 +745,25 @@ export interface DataTableSlots<TRow> {
     footer?: (context: FooterContext<TRow>) => VNodeChild;
     // (undocumented)
     header?: (context: HeaderContext<TRow>) => VNodeChild;
+    headerActions?: (context: HeaderContext<TRow>) => VNodeChild;
     // (undocumented)
     loading?: () => VNodeChild;
     tableFooter?: () => VNodeChild;
     // (undocumented)
     toolbar?: () => VNodeChild;
 }
+
+// @public (undocumented)
+export const FilterHeaderControl: typeof __VLS_export$1;
+
+export { FilterHeaderControlOptions }
+
+export { FilterHeaderControlProps }
+
+// @public (undocumented)
+export const FilterHeaderRow: typeof __VLS_export_2;
+
+export { FilterHeaderRowProps }
 
 export { FooterContext }
 

@@ -18,6 +18,7 @@ export * from "./columnDef";
 export * from "./columns/columnLayout";
 export type { VueComputedColumnSpec } from "./columns/computed";
 export { computed } from "./columns/computed";
+export * from "./columns/useColumnLayoutStorageState";
 export type { ContextMenuOptions } from "./context-menu";
 export type { DirtyEdits, TableEditingOptions } from "./editing/editingModels";
 export type {
@@ -27,6 +28,8 @@ export type {
 } from "./features/tableFeature";
 export type * from "./features/tableFeature";
 export type * from "./featureState";
+export * from "./filters/filterHeaderControl";
+export * from "./filters/filterHeaderRow";
 export type {
   FilterPanelModel,
   FilterPanelSurfaceProps,
@@ -52,6 +55,7 @@ export type { VueRowReorderModel } from "./specialized/rowReorder";
 export type { RowReorderControlProps } from "./specialized/rowReorder";
 export type { BodyWindowModel } from "./specialized/virtualize";
 export type { MaybeRefOrGetterOptional } from "./store";
+export * from "./url/useColumnLayoutUrlState";
 export * from "./url/useDensityUrlState";
 export * from "./url/useGroupCollapseUrlState";
 export * from "./url/useRowPinningUrlState";

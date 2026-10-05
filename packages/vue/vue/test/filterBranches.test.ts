@@ -7,6 +7,7 @@ import {
   resolveLabels,
 } from "@adapttable/core";
 import {
+  ACTIVE_FILTER_CHIPS,
   type FilterTreeButtonProps,
   type FilterTreeInputProps,
   type FilterTreeSelectProps,
@@ -213,7 +214,10 @@ describe("complete filter control contracts", () => {
     const scope = effectScope();
     const feature = extendFeature(
       filters<Row>([{ key: "name", type: "text" }], { mode: "drawer" }),
-      [slotRender(TOOLBAR_EXTRAS, () => null)]
+      [
+        slotRender(TOOLBAR_EXTRAS, () => null),
+        slotRender(ACTIVE_FILTER_CHIPS, () => null),
+      ]
     );
     const shell = scope.run(() =>
       useDataTableShell<Row>({
@@ -310,7 +314,10 @@ describe("complete filter control contracts", () => {
     const scope = effectScope();
     const feature = extendFeature(
       filters<Row>([{ key: "name", type: "custom-text" }]),
-      [slotRender(TOOLBAR_EXTRAS, () => null)]
+      [
+        slotRender(TOOLBAR_EXTRAS, () => null),
+        slotRender(ACTIVE_FILTER_CHIPS, () => null),
+      ]
     );
     const shell = scope.run(() =>
       useDataTableShell<Row>({

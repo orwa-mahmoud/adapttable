@@ -144,8 +144,9 @@ validation, conflict handling and undo/redo requirements.
 
 Saved Views capture the state connected to the table's URL backend, including
 filters and density. With `urlSync: false`, the fallback table source and
-installed view features share an in-memory backend. Column layout, selection,
-tree/detail expansion and edit drafts are not automatically captured; see
+installed view features share an in-memory backend. Column layout participates when explicitly wired through
+`useColumnLayoutUrlState` and its flush callback; selection, tree/detail
+expansion and edit drafts are not captured. See
 [what a view restores](./features.md#what-a-view-restores).
 
 ## Reactive sources and headless use
@@ -260,3 +261,26 @@ or speech input. It requires Vue `^3.5.0`; publication is a separate release ste
 The base table and assistant UI entries remain usable without AI. See
 [assistant and approvals](./assistant.md). The CLI currently scaffolds React and
 Angular projects; these Vue examples use explicit application setup.
+
+## Explore a connected workspace
+
+The [Vue Unstyled order workspace](/vue/demo/unstyled/workspace/) combines the
+native adapter's controls in three small workflows:
+
+- **Order desk:** search and filter twelve fictional orders, edit an owner, open a
+  real native line-item table, group by region, select rows or a cell range, and
+  export the chosen scope. Save a named filter/sort/grouping/density view for a later
+  visit, then rename, apply or delete it using the native management panel. The assistant uses a local script over the real agent
+  and approval flow; it does not connect to a model or a provider account.
+- **Dispatch plan:** expand delivery runs, select loaded descendants, reorder
+  within a run, and inspect a pickup manifest whose consecutive desktop cells
+  share a window. Mobile cards repeat each delivery's fields.
+- **Revenue review:** inspect grouped totals, an amount-minus-cost formula,
+  fictional sparklines and a configurable pivot derived from the same orders.
+
+The workspace supports English and Arabic, responsive cards, a dark appearance,
+keyboard controls and a pause/resume flow. All data is fictional and all writes
+stay in the browser. Authored orders use this tab’s session storage; named views
+use browser storage when available and survive a later visit. Restore sample data resets the order desk;
+the dispatch plan is rebuilt from the restored Ready orders. Reloading and retry restore authored changes and selections from this tab’s session storage. Presentation, table queries and pivot choices remain shareable in the URL. The package availability notice still
+applies: showcase source is not a published-package or feature-parity claim.

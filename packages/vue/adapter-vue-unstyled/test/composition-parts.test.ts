@@ -290,7 +290,11 @@ describe("canonical composition parts and class targets", () => {
     expectPart(anchor, "filters-button", "BUTTON", "trigger");
     expectPart(anchor, "filters-icon", "svg", "icon");
     await click(view.host, "filters-button");
-    const panel = expectPart(document.body, "filters-panel", "DIALOG", "panel");
+    const panel = expectPart(document.body, "filters-panel", "DIV", "panel");
+    const dialog = panel.closest("dialog");
+    expect(dialog?.hasAttribute("data-adapttable-filter-dialog")).toBe(true);
+    expect(dialog?.getAttribute("aria-modal")).toBe("true");
+    expect(dialog?.open).toBe(true);
     expectPart(panel, "filters-header", "HEADER", "header");
     expectPart(panel, "filters-title", "H3", "title");
     expectPart(panel, "filters-body", "DIV", "body");

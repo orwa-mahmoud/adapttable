@@ -114,7 +114,7 @@ describe("native grid controls", () => {
     await nextTick();
     expect(checkbox.checked).toBe(false);
     expect(
-      element(root, part("grid-focus-announcer")).getAttribute("aria-live")
+      element(root, part("grid-announcer")).getAttribute("aria-live")
     ).toBe("polite");
   });
   it("finds with a toolbar button, walks hits, preserves editor keys and removes models live", async () => {

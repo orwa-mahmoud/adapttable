@@ -7,6 +7,8 @@ import type {
 } from "@adapttable/vue/assistant";
 import { defineComponent, h, shallowRef, watch } from "vue";
 
+import { NativeExamplesMenu } from "./NativeExamplesMenu";
+
 const NativeSheet = defineComponent(
   (props: TableAssistantSheetProps) => {
     const active = useScopeActivity();
@@ -114,38 +116,7 @@ export const nativeAssistantSlots: TableAssistantSlots = {
       [props.children]
     ),
   Sheet: (props) => h(NativeSheet, props),
-  Menu: (props) =>
-    h(
-      "select",
-      {
-        "data-adapttable-part": props.part,
-        "aria-label": props.label,
-        class: props.className,
-        disabled: props.disabled,
-        value: "",
-        onChange: (event: Event) => {
-          if (!(event.target instanceof HTMLSelectElement)) return;
-          const value = event.target.value;
-          event.target.value = "";
-          if (value) props.onSelect(value);
-        },
-      },
-      [
-        h("option", { value: "", disabled: true }, props.label),
-        ...props.items.map((item) =>
-          h(
-            "option",
-            {
-              key: item.id,
-              value: item.id,
-              title: item.description,
-              "data-adapttable-part": item.part,
-            },
-            item.title
-          )
-        ),
-      ]
-    ),
+  Menu: (props) => h(NativeExamplesMenu, props),
   LanguageChip: (props) =>
     h(
       "select",

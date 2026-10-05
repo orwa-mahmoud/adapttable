@@ -71,7 +71,7 @@ describe("native optional rendering without browser globals", () => {
       expect(one).not.toContain("TWO");
       expect(two).not.toContain("ONE");
       expect(two).toContain('data-adapttable-part="tree-toggle"');
-      expect(two).not.toContain('data-adapttable-part="row-action"');
+      expect(two).not.toContain('data-adapttable-part="action-button"');
     }
   );
   it("serializes localized group controls and mixed selection without calling host", async () => {

@@ -5,6 +5,7 @@
 ```ts
 
 import { ActionConfirm } from '@adapttable/core';
+import { ActiveFilterChip } from '@adapttable/core';
 import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { AggregateOperationId } from '@adapttable/core';
@@ -60,12 +61,12 @@ import { ConfirmRequest } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { CSSProperties } from 'vue';
 import { CssProperties } from '@adapttable/core/binding';
 import { CssProperties as CssProperties_2 } from '@adapttable/core';
 import { defaultConfirm } from '@adapttable/core';
 import { DefineSetupFnComponent } from 'vue';
 import { DELETE_ROW_ACTION_KEY } from '@adapttable/core';
-import { URL_SLICE_WRITE_DEBOUNCE_MS as DENSITY_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
 import { DUPLICATE_ROW_ACTION_KEY } from '@adapttable/core';
@@ -104,7 +105,15 @@ import { FillHandleCellSlotProps } from '@adapttable/core/binding';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
 import { FilterEngine } from '@adapttable/core/binding';
+import { FilterHeaderClassNames } from '@adapttable/core/binding';
 import { FilterHeaderControlProps } from '@adapttable/core/binding';
+import { FilterHeaderMultiProps } from '@adapttable/core/binding';
+import { FilterHeaderOption } from '@adapttable/core/binding';
+import { FilterHeaderRangeProps } from '@adapttable/core/binding';
+import { FilterHeaderRowProps as FilterHeaderRowProps_2 } from '@adapttable/core/binding';
+import { FilterHeaderSearchProps } from '@adapttable/core/binding';
+import { FilterHeaderSelectProps } from '@adapttable/core/binding';
+import { FilterHeaderSlots as FilterHeaderSlots_2 } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core/binding';
 import { FilterRuntime as FilterRuntime_2 } from '@adapttable/core';
 import { FilterTreeBuilderProps } from '@adapttable/core/binding';
@@ -143,6 +152,7 @@ import { isColumnGroupRenderKey } from '@adapttable/core/binding';
 import { isColumnGroupStubKey } from '@adapttable/core/binding';
 import { isColumnGroupSummaryKey } from '@adapttable/core/binding';
 import { isExtraEntry } from '@adapttable/core/binding';
+import { LayoutStorage } from '@adapttable/core';
 import { LiveFeatureHost } from '@adapttable/core/binding';
 import { MaybeRefOrGetter } from 'vue';
 import { orderedCardEntries } from '@adapttable/core/binding';
@@ -236,6 +246,7 @@ import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
 import { UNPIN_ROW_ACTION_KEY } from '@adapttable/core';
 import { unpinAllColumns } from '@adapttable/core/binding';
+import { URL_SLICE_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { UrlSliceSpec } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -430,6 +441,7 @@ export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<T
     readonly footer?: Renderer<FooterContext<TRow, TValue>>;
     // (undocumented)
     readonly header?: string;
+    readonly headerActions?: Renderer<HeaderContext<TRow, TValue>>;
     // (undocumented)
     readonly headerCell?: Renderer<HeaderContext<TRow, TValue>>;
 }
@@ -649,8 +661,6 @@ export type Density = TableDensity;
 // @public (undocumented)
 export const DENSITY_CONTROL: FeatureSlotKey<DensityControlProps>;
 
-export { DENSITY_URL_WRITE_DEBOUNCE_MS }
-
 // @public (undocumented)
 export function DensityChooserChrome(props: DensityControlProps & {
     readonly slots: DensityChooserSlots;
@@ -706,6 +716,8 @@ export interface DesktopTableModel<TRow> {
         readonly start: number;
         readonly end: number;
     };
+    // (undocumented)
+    readonly expandLabel?: string;
     // (undocumented)
     readonly groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;
     // (undocumented)
@@ -932,12 +944,75 @@ export { filterColumnMenuRows }
 
 export { FilterEngine }
 
+export { FilterHeaderClassNames }
+
+// @public
+export function FilterHeaderControlChrome(props: {
+    readonly model: FilterHeaderControlModel | undefined;
+    readonly controls: FilterHeaderSlots;
+}): VNodeChild;
+
+// @public
+export type FilterHeaderControlModel = {
+    readonly kind: "text";
+    readonly props: FilterHeaderSearchProps;
+} | {
+    readonly kind: "select";
+    readonly props: FilterHeaderSelectProps;
+} | {
+    readonly kind: "multi";
+    readonly props: FilterHeaderMultiProps;
+} | {
+    readonly kind: "range";
+    readonly className?: string;
+    readonly lower: FilterHeaderRangeProps;
+    readonly upper?: FilterHeaderRangeProps;
+} | {
+    readonly kind: "custom";
+    readonly content: VNodeChild;
+};
+
+// @public
+export interface FilterHeaderControlOptions<TRow> extends FilterHeaderControlProps<TRow> {
+    // (undocumented)
+    readonly menuClassName?: string;
+}
+
 export { FilterHeaderControlProps }
+
+export { FilterHeaderMultiProps }
+
+export { FilterHeaderOption }
+
+export { FilterHeaderRangeProps }
+
+// @public
+export function FilterHeaderRowChrome<TRow>(props: FilterHeaderRowProps<TRow> & {
+    readonly controls: FilterHeaderRowSlots<TRow>;
+}): VNodeChild;
+
+// @public
+export type FilterHeaderRowProps<TRow> = FilterHeaderRowProps_2<TRow, ColumnDef<TRow>, CSSProperties>;
+
+// @public
+export interface FilterHeaderRowSlots<TRow> {
+    // (undocumented)
+    readonly Control: (props: FilterHeaderControlOptions<TRow>) => VNodeChild;
+}
+
+export { FilterHeaderSearchProps }
+
+export { FilterHeaderSelectProps }
+
+// @public
+export type FilterHeaderSlots = FilterHeaderSlots_2<VNodeChild>;
 
 // @public (undocumented)
 export interface FilterPanelModel<TRow> {
     // (undocumented)
     readonly anchor: HTMLElement | null;
+    // (undocumented)
+    readonly chips?: readonly ActiveFilterChip[];
     // (undocumented)
     readonly clear: () => void;
     // (undocumented)
@@ -1068,7 +1143,9 @@ export interface FullscreenControlProps extends ViewControlPresentation {
 export { FullscreenState }
 
 // @public (undocumented)
-export const GRID_ANNOUNCER: FeatureSlotKey<GridFocusAnnouncerSlotProps<GridFocusState>>;
+export const GRID_ANNOUNCER: FeatureSlotKey<GridFocusAnnouncerSlotProps<GridFocusState> & {
+readonly className?: string;
+}>;
 
 // @public (undocumented)
 export const GRID_FOCUS_MODEL: FeatureStateKey<GridFocusState>;
@@ -1275,6 +1352,8 @@ export { isColumnGroupStubKey }
 export { isColumnGroupSummaryKey }
 
 export { isExtraEntry }
+
+export { LayoutStorage }
 
 export { LiveFeatureHost }
 
@@ -2037,11 +2116,17 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
     // (undocumented)
     readonly expandButton?: string;
     // (undocumented)
+    readonly expandCell?: string;
+    // (undocumented)
+    readonly expandHeader?: string;
+    // (undocumented)
     readonly expandToggle?: string;
     // (undocumented)
     readonly fillHandle?: string;
     // (undocumented)
     readonly filterHeaderInput?: string;
+    // (undocumented)
+    readonly filterHeaderTrigger?: string;
     // (undocumented)
     readonly groupAggregate?: string;
     // (undocumented)
@@ -2070,6 +2155,8 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
     readonly groupSelect?: string;
     // (undocumented)
     readonly groupToggle?: string;
+    // (undocumented)
+    readonly headerActions?: string;
     // (undocumented)
     readonly headerRenameAnnouncer?: string;
     // (undocumented)
@@ -2100,6 +2187,8 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
     readonly selectionHeader?: string;
     // (undocumented)
     readonly sortButton?: string;
+    // (undocumented)
+    readonly sortIndex?: string;
     // (undocumented)
     readonly table?: string;
     // (undocumented)
@@ -2141,6 +2230,8 @@ export interface TableChromeSlots<TRow> {
     }) => VNodeChild;
     // (undocumented)
     readonly header?: (context: HeaderContext<TRow>) => VNodeChild;
+    // (undocumented)
+    readonly headerActions?: (context: HeaderContext<TRow>) => VNodeChild;
     // (undocumented)
     readonly ResizeHandle?: (props: {
         readonly attrs: Attrs;
@@ -2348,6 +2439,8 @@ export interface TableRowModel<TRow> {
     // (undocumented)
     readonly editActions?: () => VNodeChild;
     // (undocumented)
+    readonly expandCellAttrs?: Attrs;
+    // (undocumented)
     readonly index: number;
     // (undocumented)
     readonly key: string;
@@ -2494,6 +2587,9 @@ export { UNPIN_ROW_ACTION_KEY }
 
 export { unpinAllColumns }
 
+export { URL_SLICE_WRITE_DEBOUNCE_MS as DENSITY_URL_WRITE_DEBOUNCE_MS }
+export { URL_SLICE_WRITE_DEBOUNCE_MS as LAYOUT_URL_WRITE_DEBOUNCE_MS }
+
 // @public (undocumented)
 export interface UrlSliceOptions {
     readonly serverSearch?: MaybeRefOrGetterOptional<string>;
@@ -2509,6 +2605,42 @@ export interface UrlSliceOptions {
 export function useColumnLayout<TRow>(columns: MaybeRefOrGetter<readonly ColumnDef<TRow>[]>, options: MaybeRefOrGetter<ColumnLayoutOptions>, groups?: MaybeRefOrGetter<ReadonlyMap<string, ColumnGroupRecord<TRow>>>, collapsible?: MaybeRefOrGetter<boolean>): ComputedRef<ColumnLayout<TRow>>;
 
 export { UseColumnLayoutResult }
+
+// @public
+export function useColumnLayoutStorageState(input: MaybeRefOrGetter<UseColumnLayoutStorageStateOptions>, activity?: MaybeRefOrGetter<boolean>): UseColumnLayoutStorageStateResult;
+
+// @public
+export interface UseColumnLayoutStorageStateOptions {
+    // (undocumented)
+    readonly defaultColumnLayout?: MaybeRefOrGetterOptional<Partial<ColumnLayoutState>>;
+    readonly storage?: MaybeRefOrGetterOptional<LayoutStorage>;
+    // (undocumented)
+    readonly storageKey: MaybeRefOrGetter<string>;
+}
+
+// @public
+export interface UseColumnLayoutStorageStateResult {
+    // (undocumented)
+    layout: Readonly<ShallowRef<ColumnLayoutState>>;
+    // (undocumented)
+    onLayoutChange: (next: ColumnLayoutState) => void;
+}
+
+// @public
+export function useColumnLayoutUrlState(input?: MaybeRefOrGetter<UseColumnLayoutUrlStateOptions>, activity?: MaybeRefOrGetter<boolean>): {
+    layout: Readonly<ShallowRef<ColumnLayoutState>>;
+    onLayoutChange: (next: ColumnLayoutState) => void;
+    flush: () => void;
+};
+
+// @public
+export interface UseColumnLayoutUrlStateOptions extends UrlSliceOptions {
+    // (undocumented)
+    readonly defaultColumnLayout?: MaybeRefOrGetterOptional<Partial<ColumnLayoutState>>;
+}
+
+// @public
+export type UseColumnLayoutUrlStateResult = ReturnType<typeof useColumnLayoutUrlState>;
 
 // @public (undocumented)
 export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<TRow>>): {
@@ -2716,6 +2848,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     columnCount: number;
     actionsLabel?: string;
     reorderLabel?: string;
+    expandLabel?: string;
     columnSpacers?: {
     readonly start: number;
     readonly end: number;
@@ -2766,6 +2899,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     flushViewState: () => void;
     toolbarExtrasProps: ComputedRef<ToolbarExtrasSlotProps>;
     renderToolbarExtras: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
+    renderActiveFilterChips: () => VNodeChild[];
     renderBatchEditBar: () => VNodeChild[];
     renderAgentApproval: (classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[];
     renderTableAssistant: () => VNodeChild[];
@@ -2847,7 +2981,7 @@ export interface UseDensityUrlStateOptions extends UrlSliceOptions {
 export type UseDensityUrlStateResult = ReturnType<typeof useDensityUrlState>;
 
 // @public (undocumented)
-export function useDesktopTableModel<TRow>(table: UseDataTableResult<TRow>, selection?: () => RowSelection | undefined, fitColumns?: () => boolean): ComputedRef<DesktopTableModel<TRow>>;
+export function useDesktopTableModel<TRow>(table: UseDataTableResult<TRow>, selection?: () => RowSelection | undefined, fitColumns?: () => boolean, expandLabel?: () => string | undefined): ComputedRef<DesktopTableModel<TRow>>;
 
 // @public (undocumented)
 export function useExternalStore<T>(input: MaybeRefOrGetter<ExternalStore<T>>, options?: ExternalStoreOptions): Readonly<ShallowRef<T>>;
@@ -2879,6 +3013,9 @@ export function useFeatureLifecycle<TRow>(options: {
 
 // @public
 export function useFeatureState<T>(key: FeatureStateKey<T>): Readonly<ShallowRef<T | undefined>>;
+
+// @public
+export function useFilterHeaderControl<TRow>(input: MaybeRefOrGetter<FilterHeaderControlOptions<TRow>>): ComputedRef<FilterHeaderControlModel | undefined>;
 
 // @public
 export function useFrontendData<TRow>(input: MaybeRefOrGetter<UseFrontendDataOptions<TRow>>): FrontendDataState<TRow>;
@@ -3007,8 +3144,10 @@ export function useRowSelection<TRow>(input: MaybeRefOrGetter<RowSelectionOption
 // @public (undocumented)
 export function useSavedViews(input: MaybeRefOrGetter<UseSavedViewsOptions>, activity?: MaybeRefOrGetter<boolean>): UseSavedViewsResult;
 
-// @public (undocumented)
-export type UseSavedViewsOptions = SavedViewsControllerOptions;
+// @public
+export interface UseSavedViewsOptions extends SavedViewsControllerOptions {
+    readonly flushViewState?: () => void;
+}
 
 // @public (undocumented)
 export interface UseSavedViewsResult {

@@ -56,6 +56,7 @@ export interface TableRowModel<TRow> {
   readonly summary?: boolean;
   readonly reorder?: (mobile: boolean) => VNodeChild;
   readonly detail?: RowDetailModel;
+  readonly expandCellAttrs?: Attrs;
   readonly actionControls?: readonly RowActionControl<TRow>[];
   readonly editActions?: () => VNodeChild;
   readonly index: number;
@@ -88,6 +89,7 @@ export interface DesktopTableModel<TRow> {
   readonly columnCount: number;
   readonly actionsLabel?: string;
   readonly reorderLabel?: string;
+  readonly expandLabel?: string;
   readonly columnSpacers?: { readonly start: number; readonly end: number };
   readonly groupToggleProps: (
     cell: HeaderGroupCell
@@ -103,10 +105,12 @@ export interface MobileCardsModel<TRow> {
 export function useDesktopTableModel<TRow>(
   table: UseDataTableResult<TRow>,
   selection?: () => RowSelection | undefined,
-  fitColumns?: () => boolean
+  fitColumns?: () => boolean,
+  expandLabel?: () => string | undefined
 ): ComputedRef<DesktopTableModel<TRow>> {
   return computed(() => {
     const selected = selection?.();
+    const expansion = expandLabel?.();
     const headers = table.columns.value.map((column) => {
       const source = table.source.value;
       const sortLevel = sortLevelOf(source.sortLevels, column.key);
@@ -137,7 +141,7 @@ export function useDesktopTableModel<TRow>(
         ...table.tableAttrs(),
         style: desktopTableStyle(table.columns.value, {
           columnWidths: table.columnWidths.value,
-          extraMinWidth: selected ? 40 : 0,
+          extraMinWidth: (selected ? 40 : 0) + (expansion ? 40 : 0),
           fitColumns: fitColumns?.(),
         }),
       }),
@@ -153,7 +157,8 @@ export function useDesktopTableModel<TRow>(
             }
           : undefined,
       headerCheckboxAttrs: selected?.headerCheckboxAttrs(),
-      columnCount: headers.length + (selected ? 1 : 0),
+      expandLabel: expansion,
+      columnCount: headers.length + (selected ? 1 : 0) + (expansion ? 1 : 0),
       rows: table.rows.value.map((row, index) => ({
         key: table.rowKey(row),
         row,

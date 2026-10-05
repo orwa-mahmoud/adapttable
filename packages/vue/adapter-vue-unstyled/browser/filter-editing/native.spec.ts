@@ -37,7 +37,9 @@ test("mobile drawer traps focus, validates editor and prevents double async comm
   await page.locator(part("filters-button")).click();
   const drawer = page.locator(part("filters-panel"));
   await expect(drawer).toBeVisible();
-  await expect(drawer).toHaveAttribute("aria-modal", "true");
+  await expect(
+    page.locator("dialog[data-adapttable-filter-dialog]")
+  ).toHaveAttribute("aria-modal", "true");
   await page.keyboard.press("Escape");
   await expect(drawer).toHaveCount(0);
   const activate = page.locator(part("edit-cell-activate")).first();

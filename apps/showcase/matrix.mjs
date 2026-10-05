@@ -3412,7 +3412,7 @@ export const adapterByKey = (key) =>
 export const featureBySlug = (slug) =>
   MATRIX_FEATURES.find((feature) => feature.slug === slug);
 
-/** The single implemented Vue development preview, outside the parity matrix. */
+/** The basic native Vue development preview, outside the parity matrix. */
 export const VUE_NATIVE_BASELINE = Object.freeze({
   key: "vue-unstyled",
   dir: "vue/unstyled",
@@ -3429,6 +3429,16 @@ export const VUE_NATIVE_BASELINE = Object.freeze({
 export const VUE_NATIVE_PAGES = Object.freeze([
   VUE_NATIVE_BASELINE,
   {
+    key: "vue-unstyled-workspace",
+    dir: "vue/unstyled/workspace",
+    path: "unstyled/workspace",
+    title: "Order workspace — Vue Unstyled — AdaptTable",
+    description:
+      "Review orders, plan deliveries and compare revenue with native Vue tables, mobile cards, Arabic RTL and an optional local assistant.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/workspace/entry-workspace.ts",
+  },
+  {
     key: "vue-unstyled-assistant",
     dir: "vue/unstyled/assistant",
     path: "unstyled/assistant",
@@ -3437,6 +3447,16 @@ export const VUE_NATIVE_PAGES = Object.freeze([
       "Native conversation, governed actions and controlled-state receipts.",
     notice: VUE_NATIVE_BASELINE.notice,
     entry: "/src/vue/entry-assistant.ts",
+  },
+  {
+    key: "vue-unstyled-table-surfaces",
+    dir: "vue/unstyled/table-surfaces",
+    path: "unstyled/table-surfaces",
+    title: "Native table controls — Vue Unstyled — AdaptTable",
+    description:
+      "Filter chips, header actions, native row menus, loading skeletons and expanded rows across desktop, mobile and RTL layouts.",
+    notice: VUE_NATIVE_BASELINE.notice,
+    entry: "/src/vue/entry-table-surfaces.ts",
   },
   {
     key: "vue-unstyled-table-footers",

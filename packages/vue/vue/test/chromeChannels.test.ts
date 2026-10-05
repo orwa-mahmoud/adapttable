@@ -124,7 +124,7 @@ function fixture(
             cardActions: "actions",
             actionsHeader: "actions-head",
             actionsCell: "actions-cell",
-            filterHeaderInput: "header-filter",
+            filterHeaderTrigger: "header-filter",
           };
           return shell.table.isMobile.value
             ? MobileCardsChrome({

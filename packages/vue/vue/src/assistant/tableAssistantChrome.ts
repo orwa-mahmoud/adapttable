@@ -25,6 +25,7 @@ import {
 } from "vue";
 
 import { useScopeActivity } from "../store";
+import { approvalIdentity } from "./approvalIdentity";
 import { ApprovalReviewChrome } from "./approvalReviewChrome";
 import { AssistantComposer } from "./assistantComposer";
 import { AssistantMessage, speakerMark } from "./assistantMessages";
@@ -53,6 +54,7 @@ interface ChromeState {
   readonly anchor: ShallowRef<HTMLElement | null>;
   readonly conversation: ShallowRef<HTMLElement | null>;
   readonly unseen: Readonly<ShallowRef<boolean>>;
+  readonly reviewExpanded: ShallowRef<boolean>;
   readonly close: () => void;
   readonly jump: () => void;
   readonly onScroll: () => void;
@@ -91,13 +93,20 @@ function reviewSlots(slots: TableAssistantSlots): ApprovalReviewSlots {
       ),
   };
 }
-function review(props: TableAssistantChromeProps, expanded = false) {
+function review(
+  props: TableAssistantChromeProps,
+  expanded?: boolean,
+  onExpand?: () => void,
+  onBack?: () => void
+) {
   return props.approval
     ? h(ApprovalReviewChrome, {
         pending: props.approval,
         labels: props.labels,
         slots: reviewSlots(props.slots),
         expanded,
+        onExpand,
+        onBack,
       })
     : null;
 }
@@ -108,10 +117,16 @@ function modal(
   const pending = props.approval;
   if (pending?.presentation !== "modal") return null;
   const copy = resolveLabels(props.labels);
+  const owner = state.generation.value;
   const close = () => {
     void Promise.resolve().then(() =>
       nextTick(() => {
-        if (state.active.value && props.approval === pending) pending.reject();
+        if (
+          state.active.value &&
+          state.generation.value === owner &&
+          props.approval === pending
+        )
+          pending.reject();
       })
     );
   };
@@ -270,11 +285,25 @@ function messages(props: TableAssistantChromeProps, state: ChromeState) {
   return h("ul", { "data-adapttable-part": "assistant-messages" }, [
     ...rows,
     working
-      ? h(
-          "li",
-          { "data-adapttable-part": "assistant-working" },
-          assistantWorkingText(assistant.progress, copy)
-        )
+      ? h("li", { "data-adapttable-part": "assistant-working" }, [
+          h("span", {
+            "data-adapttable-part": "assistant-working-dot",
+            "aria-hidden": "true",
+            style: {
+              display: "inline-block",
+              inlineSize: "0.5em",
+              blockSize: "0.5em",
+              borderRadius: "50%",
+              background: "currentColor",
+              marginInlineEnd: "0.5em",
+            },
+          }),
+          h(
+            "span",
+            { "data-adapttable-part": "assistant-working-text" },
+            assistantWorkingText(assistant.progress, copy)
+          ),
+        ])
       : null,
   ]);
 }
@@ -289,14 +318,26 @@ function allowances(props: TableAssistantChromeProps) {
       { "data-adapttable-part": "assistant-always-allowed-title" },
       copy.assistantAlwaysAllowedTitle
     ),
-    ...assistant.alwaysAllowed.map(({ capability, name }) =>
-      props.slots.Button({
-        label: copy.assistantAlwaysAllowedRevoke(capability),
-        children:
-          copy.assistantCapabilityName(capability) ?? name ?? capability,
-        part: "assistant-always-allowed-revoke",
-        onClick: () => props.assistant.revokeAlwaysAllow?.(capability),
-      })
+    h(
+      "ul",
+      assistant.alwaysAllowed.map(({ capability, name }) =>
+        h(
+          "li",
+          {
+            key: capability,
+            "data-adapttable-part": "assistant-always-allowed-item",
+          },
+          [
+            props.slots.Button({
+              label: copy.assistantAlwaysAllowedRevoke(capability),
+              children:
+                copy.assistantCapabilityName(capability) ?? name ?? capability,
+              part: "assistant-always-allowed-revoke",
+              onClick: () => props.assistant.revokeAlwaysAllow?.(capability),
+            }),
+          ]
+        )
+      )
     ),
   ]);
 }
@@ -329,11 +370,13 @@ function status(props: TableAssistantChromeProps) {
       )
     : null;
 }
-function approval(props: TableAssistantChromeProps) {
+function approval(props: TableAssistantChromeProps, state: ChromeState) {
   if (!props.approval) return null;
   if (props.approval.presentation === "widget")
     return h("div", { "data-adapttable-part": "assistant-approval" }, [
-      review(props),
+      review(props, false, () => {
+        state.reviewExpanded.value = true;
+      }),
     ]);
   return h(
     "p",
@@ -347,6 +390,8 @@ function contents(
   mode: Mode
 ) {
   const copy = resolveLabels(props.labels);
+  const fullReview =
+    props.approval?.presentation === "widget" && state.reviewExpanded.value;
   return h(
     "div",
     {
@@ -361,62 +406,96 @@ function contents(
         height: "100%",
       },
       onKeydown: (event: KeyboardEvent) => {
+        if (!state.active.value) return;
         if (event.key === "Escape" && !event.defaultPrevented) {
           event.preventDefault();
-          state.close();
+          if (fullReview) state.reviewExpanded.value = false;
+          else state.close();
         }
       },
     },
     [
       header(props, state),
       h(
-        "span",
-        {
-          "data-adapttable-part": "assistant-status",
-          role: "status",
-          "aria-live": "polite",
-          "aria-atomic": "true",
-          style: liveStyle,
-        },
-        copy.assistantConnection(props.assistant.status)
-      ),
-      h(
         "div",
         {
-          ref: state.conversation,
-          "data-adapttable-part": "assistant-conversation",
-          style: { overflowY: "auto", flex: "1 1 auto", minHeight: 0 },
-          onScroll: state.onScroll,
+          "data-adapttable-part": "assistant-conversation-region",
+          style: {
+            position: "relative",
+            flex: "1 1 auto",
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+          },
         },
         [
-          messages(props, state),
-          props.note && !props.assistant.messages.length
+          fullReview
             ? h(
-                "p",
-                { "data-adapttable-part": "assistant-empty-note" },
-                props.note
+                "div",
+                {
+                  "data-adapttable-part": "assistant-approval-full",
+                  style: { overflowY: "auto", height: "100%", minHeight: 0 },
+                },
+                [
+                  review(props, true, undefined, () => {
+                    state.reviewExpanded.value = false;
+                  }),
+                ]
               )
             : null,
-          allowances(props),
+          h(
+            "span",
+            {
+              "data-adapttable-part": "assistant-status",
+              role: "status",
+              "aria-live": "polite",
+              "aria-atomic": "true",
+              style: liveStyle,
+            },
+            copy.assistantConnection(props.assistant.status)
+          ),
+          h(
+            "div",
+            {
+              ref: state.conversation,
+              "data-adapttable-part": "assistant-conversation",
+              hidden: fullReview,
+              style: { overflowY: "auto", flex: "1 1 auto", minHeight: 0 },
+              onScroll: state.onScroll,
+            },
+            [
+              messages(props, state),
+              props.note && !props.assistant.messages.length
+                ? h(
+                    "p",
+                    { "data-adapttable-part": "assistant-empty-note" },
+                    props.note
+                  )
+                : null,
+              allowances(props),
+            ]
+          ),
+          !fullReview && state.unseen.value
+            ? button(
+                props,
+                copy.assistantNewMessages,
+                "assistant-jump-latest",
+                state.jump
+              )
+            : null,
+          !fullReview ? approval(props, state) : null,
         ]
       ),
-      state.unseen.value
-        ? button(
-            props,
-            copy.assistantNewMessages,
-            "assistant-jump-latest",
-            state.jump
-          )
+      !fullReview ? status(props) : null,
+      !fullReview
+        ? h(AssistantComposer, {
+            assistant: props.assistant,
+            labels: copy,
+            slots: props.slots,
+            speech: props.speech,
+            onSend: answerDraft(props, state),
+          })
         : null,
-      approval(props),
-      status(props),
-      h(AssistantComposer, {
-        assistant: props.assistant,
-        labels: copy,
-        slots: props.slots,
-        speech: props.speech,
-        onSend: answerDraft(props, state),
-      }),
       mode === "sheet"
         ? button(
             props,
@@ -511,6 +590,31 @@ export const TableAssistantChrome = defineComponent(
     const anchor = shallowRef<HTMLElement | null>(null);
     const conversation = shallowRef<HTMLElement | null>(null);
     const unseen = shallowRef(false);
+    const reviewExpanded = shallowRef(false);
+    watch(
+      [
+        () => approvalIdentity(props.approval),
+        () => props.approval?.presentation,
+        () => props.assistant.send,
+        () => props.open,
+        () => active.value,
+      ],
+      () => {
+        reviewExpanded.value = false;
+      },
+      { flush: "sync" }
+    );
+    watch(
+      reviewExpanded,
+      (expanded) => {
+        if (!active.value || !props.open) return;
+        const selector = expanded
+          ? '[data-adapttable-part="approval-review-back"]'
+          : '[data-adapttable-part="approval-review-expand"], [data-adapttable-part="assistant-input"]';
+        element.value?.querySelector<HTMLElement>(selector)?.focus();
+      },
+      { flush: "post" }
+    );
     let atBottom = true;
     let previousFocus: HTMLElement | null = null;
     const jump = () => {
@@ -593,6 +697,7 @@ export const TableAssistantChrome = defineComponent(
       anchor,
       conversation,
       unseen,
+      reviewExpanded,
       close,
       jump,
       onScroll,

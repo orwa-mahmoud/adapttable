@@ -19007,8 +19007,16 @@ index, delta)` is the keyboard step within a zone; and `setMeasureAgg(config,
 index, agg)` changes what a measure computes. Each returns a new `PivotConfig`,
 starting from `EMPTY_PIVOT_CONFIG`. `isPivotReady(config)` is false while no
 measure has been chosen — a half-built configuration the panel shows and the
-table waits on, not an error. `measureLabel(measure, fields)` is the caption
-the panel and the column header share. See [pivot tables](./pivot.md).
+table waits on, not an error. `measureLabel(measure, fields, aggregationLabels?)`
+is the caption the panel and the column header share. Its optional read-only map
+changes aggregation captions only, for example `{ sum: labels.selectionSum }`.
+An explicit `measure.label` still wins; an unmapped aggregation keeps its canonical
+name, and a function aggregator uses the field caption.
+`pivotPanelZones(fields, config, labels, aggregationLabels?)` accepts the same map
+for its measure entries. Omitting the map preserves the existing captions. Vue’s
+pivot panel reuses its localized aggregation-option captions for measure chips
+and their move/remove controls. None of these captions changes configuration keys
+or serialized pivot state. See [pivot tables](./pivot.md).
 
 **Pivot state in the URL.** `usePivotUrlState({ urlAdapter, urlSync, urlKey,
 defaultConfig })` from `@adapttable/react/pivot` returns a
@@ -21027,6 +21035,22 @@ in the [Vue API](./vue/api.md#entry-points).
 | `useHeaderFilter`, `HeaderFilterOptions`, `HeaderFilterChrome`, `HeaderFilterChromeSlots` | Computed header overlay state from neutral props plus optional ID/direction; required Trigger/Popover/Field controls.                                        |
 | `NativeFilterField`, `NativeChecklistFilter`, `NativeFilterTree`, `NativeHeaderFilter`    | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                     |
 
+`FilterChipsChrome` from `@adapttable/vue/filters` renders the active chip list
+from `ActiveFilterChipsSlotProps`. Its required `FilterChipsSlots` provide Remove
+and Clear controls, each receiving `FilterChipButtonProps` with semantic attrs
+and a localized label; `FilterChipsClassNames` styles the list and its chips.
+The native filters feature supplies these controls and keeps writes host-owned.
+
+For a compact filter inside a header, `useFilterHeaderControl` accepts
+`FilterHeaderControlOptions` and returns a computed `FilterHeaderControlModel`.
+`FilterHeaderControlChrome` uses required `FilterHeaderSlots`;
+`FilterHeaderRowChrome` combines `FilterHeaderRowProps` and `FilterHeaderRowSlots`
+to align controls with the table's columns. Native `FilterHeaderControl` and
+`FilterHeaderRow` are available from `@adapttable/vue-unstyled/header-filters`.
+The `headerFilters()` feature keeps its header-funnel overlay behavior. See the
+[compact header controls](./vue/features.md#filtering) for composition and the
+native drawer's explicit stylesheet import.
+
 | Editing export                                                                         | Signature or role                                                                                                                                                                                          |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `TableEditingOptions`, `TableEditingModel`, `useTableEditing`                          | Host rows, columns, row key, write callbacks and lifecycle/validation options to computed editing bundle and history. [Vue editing example and contracts](./vue/features.md#editing-and-host-persistence). |
@@ -21064,7 +21088,19 @@ in the [Vue API](./vue/api.md#entry-points).
 | `SavedViewsControlProps`, `SAVED_VIEWS_CONTROL`, `SAVED_VIEWS_MODEL`                         | Saved-view model/actions carried by the required native/kit control slot and table state channel.                                                                            |
 | `SavedViewsMenuChrome`, `SavedViewsMenuChromeProps`, `SavedViewsMenuSlots`                   | Disclosure, keyboard and focus structure requiring Trigger/Button/Input/Panel controls. [Vue Saved Views](./vue/features.md#density-fullscreen-and-saved-views).             |
 
-The Vue column-layout controller does not automatically persist to the URL.
+The Vue root exports `useColumnLayoutUrlState`,
+`UseColumnLayoutUrlStateOptions` and `UseColumnLayoutUrlStateResult` for a
+controlled URL layout: readonly shallow `layout`, `onLayoutChange` and `flush`.
+`LAYOUT_URL_WRITE_DEBOUNCE_MS` names its debounce interval.
+`useColumnLayoutStorageState`, `UseColumnLayoutStorageStateOptions` and
+`UseColumnLayoutStorageStateResult` offer the same layout/change pair for a
+browser preference with reactive storage/key/defaults. Bind either owner to
+the native prop/event explicitly. For URL-backed Saved Views, pass `flush`
+as `UseSavedViewsOptions.flushViewState` so Save/Apply finishes pending layout
+writes. See [Vue layout persistence](./vue/features.md#persist-column-layout-explicitly)
+for complete examples and lifecycle behavior.
+
+The Vue table does not opt into column-layout persistence automatically.
 Saved Views restore connected URL slices; controlled props stay authoritative,
 and selection, tree/detail expansion, edit drafts and host data are not captured.
 See [what a view restores](./vue/features.md#what-a-view-restores) before choosing
@@ -31706,8 +31742,9 @@ validation, conflict handling and undo/redo requirements.
 
 Saved Views capture the state connected to the table's URL backend, including
 filters and density. With `urlSync: false`, the fallback table source and
-installed view features share an in-memory backend. Column layout, selection,
-tree/detail expansion and edit drafts are not automatically captured; see
+installed view features share an in-memory backend. Column layout participates when explicitly wired through
+`useColumnLayoutUrlState` and its flush callback; selection, tree/detail
+expansion and edit drafts are not captured. See
 [what a view restores](./features.md#what-a-view-restores).
 
 ## Reactive sources and headless use
@@ -31822,6 +31859,29 @@ or speech input. It requires Vue `^3.5.0`; publication is a separate release ste
 The base table and assistant UI entries remain usable without AI. See
 [assistant and approvals](./assistant.md). The CLI currently scaffolds React and
 Angular projects; these Vue examples use explicit application setup.
+
+## Explore a connected workspace
+
+The [Vue Unstyled order workspace](/vue/demo/unstyled/workspace/) combines the
+native adapter's controls in three small workflows:
+
+- **Order desk:** search and filter twelve fictional orders, edit an owner, open a
+  real native line-item table, group by region, select rows or a cell range, and
+  export the chosen scope. Save a named filter/sort/grouping/density view for a later
+  visit, then rename, apply or delete it using the native management panel. The assistant uses a local script over the real agent
+  and approval flow; it does not connect to a model or a provider account.
+- **Dispatch plan:** expand delivery runs, select loaded descendants, reorder
+  within a run, and inspect a pickup manifest whose consecutive desktop cells
+  share a window. Mobile cards repeat each delivery's fields.
+- **Revenue review:** inspect grouped totals, an amount-minus-cost formula,
+  fictional sparklines and a configurable pivot derived from the same orders.
+
+The workspace supports English and Arabic, responsive cards, a dark appearance,
+keyboard controls and a pause/resume flow. All data is fictional and all writes
+stay in the browser. Authored orders use this tab’s session storage; named views
+use browser storage when available and survive a later visit. Restore sample data resets the order desk;
+the dispatch plan is rebuilt from the restored Ready orders. Reloading and retry restore authored changes and selections from this tab’s session storage. Presentation, table queries and pivot choices remain shareable in the URL. The package availability notice still
+applies: showcase source is not a published-package or feature-parity claim.
 
 ---
 
@@ -32012,6 +32072,86 @@ and `NativeFilterTree` for standalone native fields/builders, and
 `NativeHeaderFilter` for one column. Their inputs are respectively
 `FilterFieldOptions<TRow>`, `ChecklistFilterProps<TRow>`,
 `FilterTreeBuilderProps<TRow>` and `HeaderFilterOptions<TRow>`.
+
+## Compact inline header controls
+
+`FilterHeaderControl` renders one compact search, select, boolean, range or
+multi-choice control. `FilterHeaderRow` places those controls in a second
+header row under the columns you supply. Import either from the native root
+or `/header-filters`. The existing `headerFilters()` feature keeps its funnel
+buttons and popovers.
+
+`FilterHeaderControlOptions<TRow>` extends `FilterHeaderControlProps<TRow>`
+with an optional `menuClassName` for multi-choice menus. The row accepts
+`FilterHeaderRowProps<TRow>`; its `classNames` follow `FilterHeaderClassNames`.
+
+The compact components read and request writes through the supplied source.
+Use the same source as the rest of your table so URL state, chips and host
+acceptance stay coordinated. A compact select uses the neutral list-valued
+filter representation; a range with no selected operator starts at a lower
+bound. Multi-choice filters use a native disclosure; Escape closes it and
+returns focus to its summary.
+
+```vue
+<script setup lang="ts">
+import { type ColumnDef, type TableSource } from "@adapttable/vue";
+import { resolveLabels } from "@adapttable/vue/adapter";
+import { FilterHeaderRow } from "@adapttable/vue-unstyled/header-filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+const props = defineProps<{ source: TableSource<Person> }>();
+const columns: readonly ColumnDef<Person>[] = [{ key: "name", header: "Name" }];
+const labels = resolveLabels(undefined);
+</script>
+<template>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+      </tr>
+      <FilterHeaderRow
+        :columns="columns"
+        :defs="[{ key: 'name', type: 'text', label: 'Name' }]"
+        :source="props.source"
+        :labels="labels"
+        :class-names="{ filterHeaderInput: 'compact-search' }"
+      />
+    </thead>
+    <tbody>
+      <tr v-for="person in props.source.rows" :key="person.id">
+        <td>{{ person.name }}</td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+```
+
+The row receives projected visible columns, optional start/end column spacers,
+cell styles, pin edges and sticky attributes from its caller. Enable only the
+selection, reorder, expansion and actions pads that your table actually
+renders. It hides when `enabled` is false or no definitions are supplied.
+Mobile cards use standalone controls rather than a table-header row.
+
+The row and cells expose `filter-header-row` and `filter-header-cell`.
+`filter-header-input` targets the real input/select, a range-pair wrapper or
+the multi-choice summary; `filter-header-menu` targets its choices fieldset.
+The matching `filterHeaderRow`, `filterHeaderCell`, `filterHeaderInput` and
+`filterHeaderMenu` class hooks style those same elements. Funnel buttons use
+`filterHeaderTrigger`.
+
+For custom kits, `useFilterHeaderControl` returns a computed
+`FilterHeaderControlModel` whose `kind` identifies the text, select, multi,
+range or custom-content branch. `FilterHeaderControlChrome` requires the
+Search, Select, Range and Multi callbacks in `FilterHeaderSlots`. They receive
+`FilterHeaderSearchProps`, `FilterHeaderSelectProps`, `FilterHeaderRangeProps`
+and `FilterHeaderMultiProps`; select and multi choices use `FilterHeaderOption`.
+`FilterHeaderRowChrome` requires the Control callback in
+`FilterHeaderRowSlots<TRow>`, mounting each field in its own component scope.
+The binding supplies structure and never substitutes a native control for a
+missing slot.
 
 ## Editing and host persistence
 
@@ -32392,6 +32532,9 @@ scope-owned model and native menu. Options require `storageKey`; optional
 `storage` (null for memory only), `store: SavedViewsStore`, `visibility`,
 `migrate`, `urlAdapter`, `urlSync` and `urlKey` configure persistence and the
 captured table namespace. An explicit store replaces browser storage.
+`flushViewState?: () => void` lets the host flush pending URL slices immediately
+before saving or applying a view; the installed feature also flushes its own
+table-owned writers.
 
 `useSavedViews(options, activity?): UseSavedViewsResult` returns computed
 `views` and `defaultView`, plus `save(name)`, `apply(name)`, `remove(name)`,
@@ -32452,14 +32595,95 @@ uses a separately supplied source, align that source's URL backend/namespace
 with the table and view controls, especially when URL sync is disabled and
 memory adapters would otherwise be separate.
 
-The current Vue column-layout controller is controlled or local only; it has
-no built-in URL slice. Column order/widths/visibility/names/pins/collapsed
-column groups therefore are not automatically restored by Saved Views.
-Tree/detail expansion, selected IDs, edit drafts/history, host rows, spans,
-extra content and appearance callbacks are not captured. Controlled state
-always remains authoritative: a saved URL value cannot override an unchanged
-controlled prop. The shared codec recognizing additional features' parameters
-does not install those features or make their state reactive in Vue.
+Column layout participates when the host explicitly binds
+`useColumnLayoutUrlState` as shown below. Tree/detail expansion, selected IDs,
+edit drafts/history, host rows, spans, extra content and appearance callbacks
+are not captured. Controlled state remains authoritative: a saved URL value
+cannot override an unchanged controlled prop. The shared codec recognizing
+additional features' parameters does not install those features or make their
+state reactive in Vue.
+
+### Persist column layout explicitly
+
+The binding root exports both layout-persistence composables. Neither is
+installed automatically by `DataTable`.
+
+```vue
+<script setup lang="ts">
+import { useColumnLayoutUrlState } from "@adapttable/vue";
+import { DataTable, type ColumnDef } from "@adapttable/vue-unstyled";
+import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
+import { savedViews } from "@adapttable/vue-unstyled/saved-views";
+
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
+const rows: Person[] = [{ id: "ada", name: "Ada", score: 10 }];
+const columns: ColumnDef<Person>[] = [{ key: "name" }, { key: "score" }];
+const rowKey = (person: Person) => person.id;
+const { layout, onLayoutChange, flush } = useColumnLayoutUrlState({
+  urlKey: "people",
+});
+const features = [
+  resizableColumns(),
+  savedViews({ storageKey: "people-views", flushViewState: flush }),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    :features="features"
+    :column-layout="layout"
+    url-key="people"
+    @update:column-layout="onLayoutChange"
+  />
+</template>
+```
+
+`useColumnLayoutUrlState(options?, activity?): UseColumnLayoutUrlStateResult`
+accepts `MaybeRefOrGetter<UseColumnLayoutUrlStateOptions>`. The options extend
+`UrlSliceOptions` with reactive optional
+`defaultColumnLayout: Partial<ColumnLayoutState>`. The result contains a
+readonly shallow `layout` ref, `onLayoutChange(next: ColumnLayoutState)` and
+`flush()`. Persisted fields include hidden/order/widths/pinned/names and
+collapsed column groups. `LAYOUT_URL_WRITE_DEBOUNCE_MS` exposes the shared
+write delay; passing `flush` to Saved Views captures the latest resize and
+prevents an older pending write from overwriting an applied view.
+
+Use the same `urlAdapter` and `urlKey` on the layout composable, source/table
+and Saved Views. For `urlSync: false`, provide a shared explicit memory adapter
+when independently created components need the same state. To reject a layout
+request, inspect the event before calling `onLayoutChange`; the table keeps the
+supplied layout until the host accepts it. During SSR, seed a request-local
+adapter and use the same initial state on the client.
+
+For a browser preference that does not join URL/Saved Views, use:
+
+```ts
+import { useColumnLayoutStorageState } from "@adapttable/vue";
+
+const { layout, onLayoutChange } = useColumnLayoutStorageState({
+  storageKey: "people-column-layout",
+  defaultColumnLayout: { hidden: ["score"] },
+});
+// Bind the same column-layout prop and update:column-layout event as above.
+```
+
+`UseColumnLayoutStorageStateOptions` requires reactive `storageKey` and accepts
+reactive optional `storage: LayoutStorage` and `defaultColumnLayout`.
+`useColumnLayoutStorageState(options, activity?)` returns
+`UseColumnLayoutStorageStateResult`: a readonly shallow `layout` ref and
+`onLayoutChange`. Default browser storage is discovered and read only after
+mount; unavailable storage leaves an in-memory preference. SSR and the first
+hydration render use the fallback layout. Changing storage/key switches the
+destination; returning to the default removes its saved entry. This controller
+does not automatically merge a storage preference with a URL layout. Choose
+one authoritative layout owner, or define that precedence in the host.
 
 ### View-control contracts for adapters
 
@@ -32510,6 +32734,63 @@ These UI entries have no dependency on `@adapttable/ai`. Use
 `@adapttable/ai-vue` separately for `tableAgent`, `useTableAssistant` and
 `useSpeechInput`. Read [assistant and approvals](./assistant.md) for the full
 integration and try the [native assistant showcase](/vue/demo/unstyled/assistant/).
+
+## Features together in the showcase
+
+The [order workspace](/vue/demo/unstyled/workspace/) composes the real native
+features without changing their ownership contracts. Its order desk uses
+`nestedTable` to mount another `DataTable` with independent rows and columns.
+`groupingPanel`, the page summary, `cellNavigation`, `findInTable`, filters,
+editing and CSV export remain active on the parent table. Row selection drives
+bulk actions; the independent cell range drives range export.
+
+The local assistant opts into `@adapttable/ai-vue` and the native `/assistant`
+entry. Selecting pending orders across the workspace requires approval. The result
+message comes from the agent receipt after the host accepts the controlled
+selection. The page explicitly identifies its scripted transport and includes no
+provider SDK or model connection.
+
+The dispatch view derives its loaded tree from shared Ready orders. Review orders
+stay at the desk; Dispatched orders are complete. Stable order IDs retain the host’s
+plan order through owner edits and status changes. Tree selection and sibling moves
+compose with a separate pickup manifest that uses real row spans, navigation, selection,
+export and a page summary. Spans are desktop geometry; mobile cards show every
+field. This small demonstration makes no virtual-window or covered-cell Find
+claim. The existing feature-union route retains the larger windowed regression
+scenario.
+
+Switching workspace views keeps each table's state with Vue `KeepAlive`.
+Pausing the order desk deactivates its table and resumes the same view. The host
+owns the data array, so an accepted edit is visible after a view switch; nothing
+is written to a remote service. The binding owns independent `workspace-orders`,
+`workspace-dispatch`, `workspace-manifest`, `workspace-revenue` and
+`workspace-pivot` URL namespaces. The controlled `useGroupCollapseUrlState`
+pairs keep independent order/revenue collapse namespaces; the page owns view, language, layout and theme
+parameters and restores them on Back/Forward. The order desk also mounts the native
+Saved Views menu with a unique browser-storage key. Its management panel uses the
+same table-owned model for rename, reordering, default selection and deletion.
+Saving captures the Orders URL namespace; applying a view leaves edited orders,
+selection and other tables’ parameters intact. A stored default is considered once
+on a fresh Orders link with no explicit table state. User interaction or history
+navigation retires automatic application; tab changes do not reapply it.
+
+Cell-range export is offered only while the binding reports a valid desktop
+range. Cards disable that scope, and layout or query changes clear the prior
+rectangle through the binding’s grid controller. A final before-export guard
+rejects a stale request without creating a file. Page and all-filtered exports
+remain distinct choices; row selection never masquerades as a cell range.
+
+Chunk recovery checkpoints only host-owned authored values, stable plan IDs,
+selection and detail expansion. A retry reloads only after that checkpoint is
+written successfully; if storage is unavailable, it keeps the current workspace
+in memory and explains how to return to another view. Pending approvals and
+transient cell ranges are not replayed. Table queries and pivot configuration
+are restored by the binding’s URL state, not a copied query engine.
+
+Arabic pivot captions use shared aggregation labels and presentational column
+headers derived from the unchanged pivot leaves. Region and Status captions are
+localized in row and nested column dimensions; canonical field names, leaf paths,
+row/column keys and serialized pivot configuration stay unchanged.
 
 ---
 
@@ -32731,8 +33012,8 @@ density, pins, explicit group collapse and the state that is not captured.
 ## Columns and rendering
 
 `ColumnDef<TRow, TValue = unknown>` extends neutral `ColumnMetadata` with a
-string `header`, a typed `accessor(row): TValue`, and Vue `cell`, `headerCell`
-and `footer` renderers. `ColumnGroup<TRow>` contains nested
+string `header`, a typed `accessor(row): TValue`, and Vue `cell`, `headerCell`,
+`headerActions` and `footer` renderers. `ColumnGroup<TRow>` contains nested
 `children: readonly ColumnInput<TRow>[]`; `ColumnInput` is a leaf or group.
 `resolveColumns(columns, locale?)` supplies metadata/accessor defaults.
 `flattenColumns(inputs)` returns `leaves` and a `ReadonlyMap` of group records.
@@ -32823,6 +33104,15 @@ and `onColumnRename(key, name)`. `ColumnLayout` includes `state`, resolved
 `toggleColumnGroup`. A controlled mutation requests a host update; it cannot
 silently replace the supplied layout.
 
+For persistence, the root exports `useColumnLayoutUrlState` with
+`UseColumnLayoutUrlStateOptions`/`UseColumnLayoutUrlStateResult`, and
+`useColumnLayoutStorageState` with
+`UseColumnLayoutStorageStateOptions`/`UseColumnLayoutStorageStateResult`.
+Bind their `layout` ref and `onLayoutChange` to the native prop/event explicitly.
+The URL result also has `flush`; pass it as `UseSavedViewsOptions.flushViewState`
+when using Saved Views. [Layout-persistence examples](./features.md#persist-column-layout-explicitly)
+cover the full options, SSR seed, debounce and storage boundaries.
+
 `useRowSelection(options: MaybeRefOrGetter<RowSelectionOptions<TRow>>)` returns
 `RowSelection`. Its options require reactive `rows` and a `rowKey`; optional
 inputs are `enabled` (default true), controlled `selectedIds`, `defaultSelectedIds`,
@@ -32880,7 +33170,7 @@ table runtime, and `getView()` returns the current `TableRuntimeView` or
 `undefined` after disposal.
 
 `DataTableSlots<TRow>` provides `cell(CellContext)`, `header(HeaderContext)`,
-`footer(FooterContext)`, `tableFooter()`, `toolbar()`, `loading()`, `empty({ noResults, clear })` and
+`headerActions(HeaderContext)`, `footer(FooterContext)`, `tableFooter()`, `toolbar()`, `loading()`, `empty({ noResults, clear })` and
 `error(TableErrorState)`. An error slot receives the real error, optional retry
 and retrying state. The toolbar slot appends to the built-in toolbar; loading,
 empty and error slots replace status content. A source without `refetch` has no retry action. Custom
@@ -32936,6 +33226,85 @@ and listeners to the root; binding attributes stay on their semantic targets.
 The desktop header sort buttons and selection checkboxes are native controls,
 and responsive cards use native mobile sort controls. The public
 `data-adapttable-part` names can also be used as CSS selectors.
+
+### Native table surfaces
+
+`rowActionsLayout?: "buttons" | "menu"` applies to desktop rows and mobile
+cards. Omit it for inline native buttons. The menu uses a native `details` /
+`summary` disclosure; Enter or Space opens it, Escape closes it and restores
+focus to its trigger, and choosing an enabled action closes it. Both layouts
+use the binding's current hidden/disabled/confirmation rules. Pending host
+confirmation never grants an obsolete row action permission to run after its
+source, row or feature has retired.
+
+`ColumnDef.headerActions?: Renderer<HeaderContext<TRow, TValue>>` renders host
+content after the caption and before the resize handle. The table's
+`headerActions(context)` slot is its fallback. These additions preserve the
+default sort button; replacing `headerCell` or the `header` slot still means
+owning that caption's sort controls. Default multi-sort buttons expose their
+one-based priority in a `sort-index` span. Header actions use Vue child
+semantics: `false`, `null` and empty comment/fragment results render no wrapper;
+`0` remains visible, and live renderer/slot changes update the same header.
+
+`filters()` renders a removable list of the active field and tree conditions.
+Removing an array chip retains its other current entries; removing a tree
+chip asks the current source to remove that condition. Clear all clears field
+and tree filters while keeping the search query. These are source requests,
+so a controlled host can reject them. Retained controls are inactive after
+source replacement, feature disposal or suspension. Custom sources use their
+stable `tableEngine` or, without an engine, their stable `setPage` mutator as
+the source identity, matching the bounded built-in export lifecycle contract.
+If neither signal exists, the authored source object is the fallback. Fresh
+wrappers preserving a built-in signal keep current actions usable. Arbitrary
+custom sources sharing the same engine or page callback cannot be distinguished
+by that signal; this is not a universal source-identity protocol.
+
+For another kit, the existing `ACTIVE_FILTER_CHIPS` feature slot is required
+by the binding's `filters()` feature alongside `TOOLBAR_EXTRAS`.
+`FilterChipsChrome` from `@adapttable/vue/filters` accepts
+`ActiveFilterChipsSlotProps` plus `slots: FilterChipsSlots` and optional
+`classNames: FilterChipsClassNames`. `Remove` and `Clear` are required slots;
+each receives `FilterChipButtonProps` with `attrs` and a localized `label`.
+The binding renders the real `ul`/`li` list and supplies event attributes; the
+kit renders every button. No fallback controls are installed by the binding.
+
+`skeletonRows?: number` sets the number of initial-loading desktop rows or
+mobile cards; its default is the current page size. The skeleton appears only
+when the existing body policy selects initial loading with no rows. A
+background refresh keeps available rows visible. The `loading` slot replaces
+the default skeleton. The shapes are hidden from assistive technology, and a
+single localized status reports loading. Search and a busy export also expose
+native SVG affordances.
+
+A desktop `rowDetail()` feature reserves the first utility column for its
+expand controls. `expand-header` is a real `th`; `expand-cell` is a real `td`,
+including an empty placeholder on summary rows. Grouped headers, summary
+footers, extra rows, data-cell spans, pinned rows and virtual windows account
+for that column. Mobile cards retain one inline control in the first field.
+The keyboard grid continues to address data columns; utility columns are not
+added to its data-cell coordinates.
+The shell supplies this geometry. A hand-authored `DesktopTableModel` can opt in
+with `expandLabel` and the matching `columnCount`; `expandCellAttrs` carries
+row-specific layout such as pin styles. `useDesktopTableModel` also accepts an
+optional fourth `expandLabel: () => string | undefined` callback. Existing
+hand-authored `row.detail` models without that label keep their inline toggle.
+
+Additional class hooks land on their corresponding functional elements:
+
+- Chips: `chips`, `chip`, `chipRemove`.
+- Actions and headers: `actionButton`, `rowActionsMenu`, `rowActionsTrigger`,
+  `sortIndex`, `headerActions`, `expandHeader`, `expandCell`.
+- Loading: `loadingTable`, `loadingHeaderRow`, `loadingHeaderCell`, `loadingRow`,
+  `loadingCell`, `loadingCards`, `loadingCard`, `loadingLine`.
+- Affordances and announcements: `searchIcon`, `exportSpinner`,
+  `gridAnnouncer`, `rowReorderAnnouncer`, `tableStatusAnnouncer`.
+
+The experimental Vue targets `row-action`, `grid-focus-announcer` and `status`
+are corrected to the canonical `action-button`, `grid-announcer` and
+`table-status-announcer` targets. Update selectors that used those old part
+names. The existing `rowAction` class hook remains an alias for `actionButton`,
+and `status` remains an alias for `tableStatusAnnouncer`; both old and new
+classes reach the same native element.
 
 ## Adapter shell and structural Chrome
 
@@ -33305,6 +33674,28 @@ values, show per-item decisions only when allowed, and offer session-wide
 permission only when the controller supplies it. That permission remains
 revocable from the assistant.
 
+Expanding a widget review opens its full proposal list in the conversation
+region. The transcript stays mounted and hidden while the review is open.
+Back or Escape returns to the preview and restores focus to its expansion
+control. A new approval, a closed panel, or KeepAlive suspension closes the
+full review. Table approvals announce their summary through a dedicated
+`agent-approval-status` live region that stays mounted before arrival and after
+settlement.
+
+Custom surfaces can control `ApprovalReviewChrome` with `expanded`,
+`onExpand`, and `onBack`. An explicit `expanded: false` remains collapsed
+until the host accepts the request; omitting `expanded` retains the inline,
+uncontrolled review. These callbacks follow the same pending-approval and
+active-scope checks as decision controls.
+
+`AgentApprovalPending.identity` is an optional opaque token for one approval
+transaction. The neutral agent supplies a frozen token that stays the same
+when only decisions change. Hosts supplying approval state directly should
+retain it across decision snapshots and replace it for a new transaction.
+Legacy hosts can omit it, but must provide a new proposal-array or operation
+reference for a new approval; reusing those references cannot identify a
+replacement transaction reliably.
+
 Reactive configuration getters create one computed snapshot per dependency
 change. Read Vue refs or reactive props inside the getter; changing a plain
 closed-over variable is not a reactive update. Raw option objects and ref
@@ -33321,6 +33712,20 @@ Receipts come from actual execution results. Staged writes still ask the user
 to save in the table. Foreign table changes can invalidate undo. Streaming text
 is rendered as text and never interpreted as HTML or proof that an action ran.
 
+The actions disclosure opens a named receipt group with a native list. Each
+undoable receipt can have its own Undo; when multiple receipts can be undone
+individually, the heading offers Undo all for the turn. A single receipt does
+not duplicate its own Undo in the heading. When receipt display is disabled,
+the turn's Undo remains available on its own. Blocked turn undo includes a
+visible explanation next to the disabled control.
+
+Receipt and turn undo controls, and host message actions such as a Save offer,
+capture the callback they were rendered for. Closing their receipt group,
+replacing their owner or callback, suspending KeepAlive, or disposing the
+surface permanently retires retained handlers. Fresh controls after activation
+remain usable. A receipt's save reminder is informational; persistence still
+belongs to the table's normal host-controlled save path.
+
 ## Keyboard, presentation, and speech
 
 Enter sends the draft or answers the active question. Shift+Enter creates a
@@ -33328,6 +33733,10 @@ newline, and IME composition is preserved. The composer reflects disconnected,
 busy, awaiting-user, approval, detached, and error states. Escape closes the
 conversation; focus returns to the launcher. A floating window becomes a modal
 sheet below the neutral minimum width, and RTL is forwarded to modal surfaces.
+Within a full approval, Escape first returns to the conversation. The native
+examples control uses `details`, `summary`, and a `menu` of command buttons.
+Arrow keys, Home, and End move through its commands; Escape closes the list
+and returns focus to its trigger. Busy and disconnected states disable it.
 
 Speech is separately opt-in through `useSpeechInput`. Pass its computed `view`
 to the surface's `speech` prop. Browser dictation only changes the draft.

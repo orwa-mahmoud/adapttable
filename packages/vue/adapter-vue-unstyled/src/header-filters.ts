@@ -19,4 +19,11 @@ export function headerFilters(): StaticTableFeature {
     ),
   ]);
 }
+export { default as FilterHeaderControl } from "./filters/NativeFilterHeaderControl.vue";
+export { default as FilterHeaderRow } from "./filters/NativeFilterHeaderRow.vue";
 export { NativeHeaderFilter } from "./filters/NativeHeaderFilter";
+export type {
+  FilterHeaderControlOptions,
+  FilterHeaderControlProps,
+  FilterHeaderRowProps,
+} from "@adapttable/vue/header-filters";

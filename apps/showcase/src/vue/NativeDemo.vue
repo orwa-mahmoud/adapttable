@@ -7,7 +7,7 @@ import {
 } from "@adapttable/vue-unstyled";
 import { computed, shallowRef } from "vue";
 
-import { VUE_NATIVE_BASELINE } from "../../matrix.mjs";
+import { VUE_NATIVE_BASELINE, VUE_NATIVE_PAGES } from "../../matrix.mjs";
 
 interface Person {
   id: string;
@@ -31,6 +31,9 @@ const rtl = shallowRef(false);
 const labels = computed(() => getLabels(rtl.value ? "ar" : "en"));
 const table = shallowRef<DataTableHandle<Person>>();
 const rowKey = (row: Person): string => row.id;
+const examples = VUE_NATIVE_PAGES.filter(
+  (page) => page.key !== "vue-unstyled" && page.key !== "vue-unstyled-workspace"
+);
 </script>
 
 <template>
@@ -41,6 +44,20 @@ const rowKey = (row: Person): string => row.id;
       <p>{{ VUE_NATIVE_BASELINE.description }}</p>
       <p role="note">{{ VUE_NATIVE_BASELINE.notice }}</p>
     </header>
+    <aside class="vue-baseline__workspace" aria-labelledby="workspace-heading">
+      <div>
+        <p class="vue-baseline__eyebrow">The connected workflow</p>
+        <h2 id="workspace-heading">A real workspace. Room to explore.</h2>
+        <p>
+          Review orders, plan a dispatch, and compare revenue. Try nested
+          tables, grouped totals, keyboard navigation, mobile cards, and a local
+          assistant together.
+        </p>
+      </div>
+      <a href="./workspace/"
+        >Open the order workspace <span aria-hidden="true">↗</span></a
+      >
+    </aside>
     <section aria-labelledby="people-heading">
       <h2 id="people-heading">People</h2>
       <p>
@@ -72,6 +89,25 @@ const rowKey = (row: Person): string => row.id;
         >Selected: {{ selectedIds.join(", ") || "none" }}</output
       >
     </section>
+    <section aria-labelledby="examples-heading" class="vue-baseline__examples">
+      <h2 id="examples-heading">Explore the native features</h2>
+      <p>
+        Focused examples show how each opt-in feature behaves. The workspace
+        above brings them into a connected workflow.
+      </p>
+      <nav
+        class="vue-baseline__example-grid"
+        aria-label="Vue native feature examples"
+      >
+        <a
+          v-for="example in examples"
+          :key="example.key"
+          :href="`./${example.path.replace('unstyled/', '')}/`"
+          ><strong>{{ example.title.split(" — ")[0] }}</strong
+          ><span>{{ example.description }}</span></a
+        >
+      </nav>
+    </section>
     <section aria-labelledby="independent-heading">
       <h2 id="independent-heading">Independent table</h2>
       <p>
@@ -98,6 +134,37 @@ const rowKey = (row: Person): string => row.id;
   background: #fff;
   font-family: system-ui, sans-serif;
   line-height: 1.5;
+}
+.vue-baseline__workspace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  margin-block: 2rem;
+  background: #edf5ef;
+  border: 1px solid #c7d9cd;
+  border-radius: 1rem;
+}
+.vue-baseline__workspace > div {
+  flex: 1 1 24rem;
+}
+.vue-baseline__workspace h2 {
+  margin: 0.25rem 0 0.6rem;
+}
+.vue-baseline__workspace p {
+  margin-block: 0.35rem;
+}
+.vue-baseline__workspace a {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border-radius: 0.55rem;
+  background: #195f45;
+  color: white;
+  font-weight: 650;
+  text-decoration: none;
 }
 .vue-baseline__eyebrow {
   color: #435867;
@@ -154,5 +221,35 @@ const rowKey = (row: Person): string => row.id;
 .vue-baseline :focus-visible {
   outline: 3px solid #2673dc;
   outline-offset: 3px;
+}
+</style>
+
+<style>
+.vue-baseline__examples {
+  margin-block: 2.5rem;
+}
+.vue-baseline__example-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+  gap: 0.75rem;
+}
+.vue-baseline__example-grid a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem;
+  border: 1px solid #d2ded5;
+  border-radius: 0.65rem;
+  color: #193d2f;
+  text-decoration: none;
+}
+.vue-baseline__example-grid a:hover {
+  background: #f0f6f0;
+  border-color: #195f45;
+}
+.vue-baseline__example-grid span {
+  color: #556961;
+  font-size: 0.85rem;
+  line-height: 1.6;
 }
 </style>

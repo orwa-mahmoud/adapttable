@@ -38,6 +38,9 @@ import { ExtraRowKind } from '@adapttable/vue/features';
 import { extraRows } from '@adapttable/vue/features';
 import { FilterDef } from '@adapttable/vue/filters';
 import { FilterFieldOptions } from '@adapttable/vue/filters';
+import { FilterHeaderControlOptions } from '@adapttable/vue/header-filters';
+import { FilterHeaderControlProps } from '@adapttable/vue/header-filters';
+import { FilterHeaderRowProps } from '@adapttable/vue/header-filters';
 import { FilterOption } from '@adapttable/vue/filters';
 import { FiltersOptions } from '@adapttable/vue/filters';
 import { FilterTreeBuilderProps } from '@adapttable/vue/filters';
@@ -112,7 +115,7 @@ import { VueEditableCellProps } from '@adapttable/vue/editing';
 
 // @public (undocumented)
 const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal$1<BatchEditBarProps<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal$1<FilterHeaderControlOptions<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -125,7 +128,20 @@ const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup
 
 // @public (undocumented)
 const __VLS_export$1_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1_2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal$1_2<FilterFieldOptions<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal$1_2<BatchEditBarProps<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export$1_3: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1_3<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal$1_3<FilterFieldOptions<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -164,7 +180,7 @@ const __VLS_export$2_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_set
 
 // @public (undocumented)
 const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal<FilterTreeBuilderProps<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal<FilterHeaderRowProps<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -177,7 +193,7 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
 
 // @public (undocumented)
 const __VLS_export_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal_2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal_2<HeaderFilterOptions<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal_2<FilterTreeBuilderProps<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -190,7 +206,20 @@ const __VLS_export_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup
 
 // @public (undocumented)
 const __VLS_export_3: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal_3<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal_3<RowEditActionsProps<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal_3<HeaderFilterOptions<TRow>> & (typeof globalThis extends {
+        __VLS_PROPS_FALLBACK: infer P;
+    } ? P : {});
+    expose: (exposed: {}) => void;
+    attrs: any;
+    slots: {};
+    emit: {};
+}>) => VNode & {
+    __ctx?: NonNullable<Awaited<typeof __VLS_setup>>;
+};
+
+// @public (undocumented)
+const __VLS_export_4: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal_4<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
+    props: PublicProps & __VLS_PrettifyLocal_4<RowEditActionsProps<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -208,6 +237,9 @@ type __VLS_PrettifyLocal$1<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [
 type __VLS_PrettifyLocal$1_2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 // @public (undocumented)
+type __VLS_PrettifyLocal$1_3<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
 type __VLS_PrettifyLocal$2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 // @public (undocumented)
@@ -221,6 +253,9 @@ type __VLS_PrettifyLocal_2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [
 
 // @public (undocumented)
 type __VLS_PrettifyLocal_3<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+
+// @public (undocumented)
+type __VLS_PrettifyLocal_4<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 // @public (undocumented)
 export const AgentApproval: DefineSetupFnComponent<AgentApprovalProps, {}, {}, AgentApprovalProps & {}, PublicProps>;
@@ -286,6 +321,8 @@ export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>):
 // @public
 export interface DataTableClassNames {
     // (undocumented)
+    readonly actionButton?: string;
+    // (undocumented)
     readonly actionsCell?: string;
     // (undocumented)
     readonly actionsHeader?: string;
@@ -325,6 +362,12 @@ export interface DataTableClassNames {
     readonly cards?: string;
     // (undocumented)
     readonly cardValue?: string;
+    // (undocumented)
+    readonly chip?: string;
+    // (undocumented)
+    readonly chipRemove?: string;
+    // (undocumented)
+    readonly chips?: string;
     // (undocumented)
     readonly columnGroup?: string;
     // (undocumented)
@@ -438,6 +481,10 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly expandButton?: string;
     // (undocumented)
+    readonly expandCell?: string;
+    // (undocumented)
+    readonly expandHeader?: string;
+    // (undocumented)
     readonly expandToggle?: string;
     // (undocumented)
     readonly exportCsvButton?: string;
@@ -451,6 +498,8 @@ export interface DataTableClassNames {
     readonly exportProgressDownload?: string;
     // (undocumented)
     readonly exportProgressMessage?: string;
+    // (undocumented)
+    readonly exportSpinner?: string;
     // (undocumented)
     readonly fillHandle?: string;
     // (undocumented)
@@ -474,7 +523,13 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly filterHeaderButton?: string;
     // (undocumented)
+    readonly filterHeaderCell?: string;
+    // (undocumented)
     readonly filterHeaderInput?: string;
+    // (undocumented)
+    readonly filterHeaderMenu?: string;
+    // (undocumented)
+    readonly filterHeaderRow?: string;
     // (undocumented)
     readonly filterHeaderTrigger?: string;
     // (undocumented)
@@ -489,6 +544,8 @@ export interface DataTableClassNames {
     readonly filtersActions?: string;
     // (undocumented)
     readonly filtersAnchor?: string;
+    // (undocumented)
+    readonly filtersBackdrop?: string;
     // (undocumented)
     readonly filtersBody?: string;
     // (undocumented)
@@ -546,6 +603,8 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly fullscreenToggle?: string;
     // (undocumented)
+    readonly gridAnnouncer?: string;
+    // (undocumented)
     readonly groupAggregate?: string;
     // (undocumented)
     readonly groupCard?: string;
@@ -602,6 +661,10 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly groupToggle?: string;
     // (undocumented)
+    readonly headerActions?: string;
+    // (undocumented)
+    readonly headerCell?: string;
+    // (undocumented)
     readonly headerRenameAnnouncer?: string;
     // (undocumented)
     readonly headerRenameButton?: string;
@@ -619,6 +682,22 @@ export interface DataTableClassNames {
     readonly headerRenameSave?: string;
     // (undocumented)
     readonly loading?: string;
+    // (undocumented)
+    readonly loadingCard?: string;
+    // (undocumented)
+    readonly loadingCards?: string;
+    // (undocumented)
+    readonly loadingCell?: string;
+    // (undocumented)
+    readonly loadingHeaderCell?: string;
+    // (undocumented)
+    readonly loadingHeaderRow?: string;
+    // (undocumented)
+    readonly loadingLine?: string;
+    // (undocumented)
+    readonly loadingRow?: string;
+    // (undocumented)
+    readonly loadingTable?: string;
     // (undocumented)
     readonly loadMore?: string;
     // (undocumented)
@@ -649,12 +728,17 @@ export interface DataTableClassNames {
     readonly retry?: string;
     // (undocumented)
     readonly root?: string;
-    // (undocumented)
     readonly rowAction?: string;
+    // (undocumented)
+    readonly rowActionsMenu?: string;
+    // (undocumented)
+    readonly rowActionsTrigger?: string;
     // (undocumented)
     readonly rowEditActions?: string;
     // (undocumented)
     readonly rowEditButton?: string;
+    // (undocumented)
+    readonly rowReorderAnnouncer?: string;
     // (undocumented)
     readonly rowReorderButtons?: string;
     // (undocumented)
@@ -667,6 +751,8 @@ export interface DataTableClassNames {
     readonly rowsPerPage?: string;
     // (undocumented)
     readonly scroll?: string;
+    // (undocumented)
+    readonly searchIcon?: string;
     // (undocumented)
     readonly searchInput?: string;
     // (undocumented)
@@ -702,8 +788,9 @@ export interface DataTableClassNames {
     // (undocumented)
     readonly sortDirectionButton?: string;
     // (undocumented)
-    readonly sortSelect?: string;
+    readonly sortIndex?: string;
     // (undocumented)
+    readonly sortSelect?: string;
     readonly status?: string;
     // (undocumented)
     readonly statusBar?: string;
@@ -721,6 +808,8 @@ export interface DataTableClassNames {
     readonly table?: string;
     // (undocumented)
     readonly tableFooter?: string;
+    // (undocumented)
+    readonly tableStatusAnnouncer?: string;
     // (undocumented)
     readonly tbody?: string;
     // (undocumented)
@@ -809,6 +898,18 @@ export { extraRows }
 
 export { FilterDef }
 
+// @public (undocumented)
+export const FilterHeaderControl: typeof __VLS_export$1;
+
+export { FilterHeaderControlOptions }
+
+export { FilterHeaderControlProps }
+
+// @public (undocumented)
+export const FilterHeaderRow: typeof __VLS_export;
+
+export { FilterHeaderRowProps }
+
 export { FilterOption }
 
 // @public
@@ -866,7 +967,7 @@ export function headerFilters(): StaticTableFeature_2;
 export { multiSort }
 
 // @public (undocumented)
-export const NativeBatchEditBar: typeof __VLS_export$1;
+export const NativeBatchEditBar: typeof __VLS_export$1_2;
 
 // @public (undocumented)
 export const NativeChecklistFilter: typeof __VLS_export$2;
@@ -875,16 +976,16 @@ export const NativeChecklistFilter: typeof __VLS_export$2;
 export const NativeEditableCell: typeof __VLS_export$2_2;
 
 // @public (undocumented)
-export const NativeFilterField: typeof __VLS_export$1_2;
+export const NativeFilterField: typeof __VLS_export$1_3;
 
 // @public (undocumented)
-export const NativeFilterTree: typeof __VLS_export;
+export const NativeFilterTree: typeof __VLS_export_2;
 
 // @public (undocumented)
-export const NativeHeaderFilter: typeof __VLS_export_2;
+export const NativeHeaderFilter: typeof __VLS_export_3;
 
 // @public (undocumented)
-export const NativeRowEditActions: typeof __VLS_export_3;
+export const NativeRowEditActions: typeof __VLS_export_4;
 
 export { NestedTable }
 

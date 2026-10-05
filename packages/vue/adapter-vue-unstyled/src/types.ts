@@ -10,6 +10,7 @@ import type {
   FooterContext,
   HeaderContext,
   PaginationMode,
+  RowActionsLayout,
   SummaryRowFn,
   TableDensity,
   TableErrorState,
@@ -23,6 +24,9 @@ import type { VNodeChild } from "vue";
 
 /** CSS hooks are applied to the corresponding semantic element. */
 export interface DataTableClassNames {
+  readonly chips?: string;
+  readonly chip?: string;
+  readonly chipRemove?: string;
   readonly agentApproval?: string;
   readonly agentApprovalButton?: string;
   readonly summary?: string;
@@ -51,6 +55,7 @@ export interface DataTableClassNames {
   readonly groupMoreRow?: string;
   readonly groupMoreCell?: string;
   readonly expandButton?: string;
+  readonly expandCell?: string;
 
   readonly selectAllText?: string;
   readonly commandInput?: string;
@@ -81,6 +86,7 @@ export interface DataTableClassNames {
   readonly sidePanelTabs?: string;
   readonly sidePanelBody?: string;
   readonly exportCsvButton?: string;
+  readonly exportSpinner?: string;
   readonly printButton?: string;
 
   readonly columnMenu?: string;
@@ -131,6 +137,11 @@ export interface DataTableClassNames {
   readonly selectionStats?: string;
   readonly resizeHandle?: string;
   readonly filterHeaderInput?: string;
+  readonly headerCell?: string;
+  readonly expandHeader?: string;
+  readonly filterHeaderRow?: string;
+  readonly filterHeaderCell?: string;
+  readonly filterHeaderMenu?: string;
   readonly actionsHeader?: string;
   readonly actionsCell?: string;
   readonly reorderHeader?: string;
@@ -141,7 +152,11 @@ export interface DataTableClassNames {
   readonly rowReorderDown?: string;
   readonly virtualSpacer?: string;
   readonly cardActions?: string;
+  /** Legacy alias for actionButton; both classes reach the action button. */
   readonly rowAction?: string;
+  readonly actionButton?: string;
+  readonly rowActionsMenu?: string;
+  readonly rowActionsTrigger?: string;
   readonly addRow?: string;
   readonly groupRow?: string;
   readonly groupLabel?: string;
@@ -188,6 +203,7 @@ export interface DataTableClassNames {
   readonly filtersDone?: string;
   readonly filtersForm?: string;
   readonly filtersPanel?: string;
+  readonly filtersBackdrop?: string;
   readonly filtersActions?: string;
   readonly filtersToolbar?: string;
   readonly filtersPopover?: string;
@@ -229,6 +245,7 @@ export interface DataTableClassNames {
   readonly root?: string;
   readonly toolbar?: string;
   readonly searchWrapper?: string;
+  readonly searchIcon?: string;
   readonly searchInput?: string;
   readonly sortSelect?: string;
   readonly sortDirectionButton?: string;
@@ -240,6 +257,8 @@ export interface DataTableClassNames {
   readonly th?: string;
   readonly td?: string;
   readonly sortButton?: string;
+  readonly sortIndex?: string;
+  readonly headerActions?: string;
   readonly selectionHeader?: string;
   readonly selectionCell?: string;
   readonly selectionCheckbox?: string;
@@ -259,6 +278,14 @@ export interface DataTableClassNames {
   readonly pageNumber?: string;
   readonly pageEllipsis?: string;
   readonly loading?: string;
+  readonly loadingTable?: string;
+  readonly loadingHeaderRow?: string;
+  readonly loadingHeaderCell?: string;
+  readonly loadingRow?: string;
+  readonly loadingCell?: string;
+  readonly loadingCards?: string;
+  readonly loadingCard?: string;
+  readonly loadingLine?: string;
   readonly loadMore?: string;
   readonly loadMoreButton?: string;
   readonly empty?: string;
@@ -266,6 +293,10 @@ export interface DataTableClassNames {
   readonly error?: string;
   readonly retry?: string;
   readonly refreshing?: string;
+  readonly gridAnnouncer?: string;
+  readonly rowReorderAnnouncer?: string;
+  readonly tableStatusAnnouncer?: string;
+  /** Legacy alias for tableStatusAnnouncer. */
   readonly status?: string;
 }
 
@@ -306,6 +337,8 @@ export interface DataTableProps<TRow> {
   readonly fitColumns?: boolean;
   readonly columnWidths?: Readonly<Record<string, number>>;
   readonly collapsibleColumnGroups?: boolean;
+  /** Number of loading rows or cards; defaults to the current page size. */
+  readonly skeletonRows?: number;
   readonly isLoading?: boolean;
   readonly isFetching?: boolean;
   readonly error?: Error | null;
@@ -314,6 +347,8 @@ export interface DataTableProps<TRow> {
   readonly defaultDensity?: TableDensity;
   readonly onDensityChange?: (density: TableDensity) => void;
   readonly confirm?: ConfirmHandler;
+  /** Omit or use buttons for the inline strip; menu uses a native disclosure. */
+  readonly rowActionsLayout?: RowActionsLayout;
   readonly classNames?: DataTableClassNames;
 }
 
@@ -321,6 +356,8 @@ export interface DataTableProps<TRow> {
 export interface DataTableSlots<TRow> {
   cell?: (context: CellContext<TRow>) => VNodeChild;
   header?: (context: HeaderContext<TRow>) => VNodeChild;
+  /** Column headerActions takes precedence over this fallback. */
+  headerActions?: (context: HeaderContext<TRow>) => VNodeChild;
   /** Fallback footer cell renderer; a column footer takes precedence. */
   footer?: (context: FooterContext<TRow>) => VNodeChild;
   /** Free content below the table and above pagination. */

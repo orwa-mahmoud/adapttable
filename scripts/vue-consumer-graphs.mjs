@@ -8,9 +8,11 @@ import { packageDir } from "./packages.mjs";
 import {
   PDF_WRITER_MARKER,
   VUE_RUNTIME_EXTERNALS,
+  vueEmittedCss,
   vueGraphProblems,
   XLSX_WRITER_MARKER,
 } from "./vue-consumer-fixtures.mjs";
+import { buildVueCssConsumer } from "./vue-css-consumer.mjs";
 
 export async function vueConsumerGraph(fixture, dir) {
   const base = join(packageDir(fixture.pkg), "dist");
@@ -20,31 +22,43 @@ export async function vueConsumerGraph(fixture, dir) {
     entries.push(join(base, fixture.alsoEntryFile));
     code = code.replaceAll("ALSO", entries[1]);
   }
+  if (fixture.styleEntryFile) {
+    const stylesheet = join(base, fixture.styleEntryFile);
+    entries.push(stylesheet);
+    code = code.replaceAll("STYLE", stylesheet);
+  }
   const input = join(
     dir,
     `${fixture.name.replaceAll(/[^a-zA-Z0-9.-]/g, "_")}.mjs`
   );
   writeFileSync(input, code);
   const imports = new Set();
-  const bundle = await Rolldown.rolldown({
-    input,
-    external: (id) => VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(id)),
-    logLevel: "silent",
-    plugins: [
-      {
-        name: "record-vue-consumer-imports",
-        resolveId(source) {
-          imports.add(source);
-          return null;
-        },
+  const plugins = [
+    {
+      name: "record-vue-consumer-imports",
+      resolveId(source) {
+        imports.add(source);
+        return null;
       },
-    ],
-  });
+    },
+  ];
+  const bundle = fixture.styleEntryFile
+    ? undefined
+    : await Rolldown.rolldown({
+        input,
+        external: (id) =>
+          VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(id)),
+        logLevel: "silent",
+        plugins,
+      });
   try {
-    const output = await bundle.generate({ format: "esm" });
+    const output = bundle
+      ? await bundle.generate({ format: "esm" })
+      : await buildVueCssConsumer(input, dir, false, plugins);
     const chunks = output.output.filter((chunk) => chunk.type === "chunk");
     return {
       code: chunks.map((chunk) => chunk.code).join("\n"),
+      css: vueEmittedCss(output.output),
       imports,
       entries,
       modules: chunks.flatMap((chunk) =>
@@ -55,7 +69,7 @@ export async function vueConsumerGraph(fixture, dir) {
       ),
     };
   } finally {
-    await bundle.close();
+    await bundle?.close();
   }
 }
 
@@ -67,11 +81,25 @@ export function plantedVueConsumers(fixtures) {
   const pdf = fixtures.find(
     (fixture) => fixture.name === "vue-unstyled · + export-pdf"
   );
-  if (!base || !pdf)
-    throw new Error("Planted Vue checks require the base and PDF consumers");
+  const preset = fixtures.find(
+    (fixture) => fixture.name === "vue-unstyled · preset"
+  );
+  if (!base || !pdf || !preset)
+    throw new Error(
+      "Planted Vue checks require the base, PDF and preset consumers"
+    );
   const native = join(packageDir("adapter-vue-unstyled"), "dist");
   const react = join(packageDir("adapter-unstyled"), "dist/index.js");
   return [
+    {
+      fixture: {
+        ...preset,
+        name: `${preset.name} · missing stylesheet`,
+        code: preset.code.replace('\nimport "STYLE";', ""),
+        styleEntryFile: undefined,
+      },
+      expected: "missing CSS filters-backdrop",
+    },
     {
       fixture: {
         ...base,

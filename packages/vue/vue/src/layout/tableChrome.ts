@@ -7,9 +7,12 @@ import {
   type HeaderGroupCell,
 } from "@adapttable/core/binding";
 import {
+  Comment,
   type ComponentPublicInstance,
   Fragment,
   h,
+  isVNode,
+  Text,
   type VNode,
   type VNodeChild,
 } from "vue";
@@ -20,6 +23,7 @@ import {
   type FooterContext,
   type HeaderContext,
   renderCell,
+  renderContent,
   renderHeader,
 } from "../columnDef";
 import type { GroupRowChromeProps } from "../grouping/groupRowChrome";
@@ -50,6 +54,8 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
   readonly groupMoreRow?: string;
   readonly groupMoreCell?: string;
   readonly expandButton?: string;
+  readonly expandHeader?: string;
+  readonly expandCell?: string;
 
   readonly columnMenu?: string;
   readonly columnMenuButton?: string;
@@ -96,6 +102,8 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
   readonly th?: string;
   readonly td?: string;
   readonly sortButton?: string;
+  readonly sortIndex?: string;
+  readonly headerActions?: string;
   readonly selectionHeader?: string;
   readonly selectionCell?: string;
   readonly selectionCheckbox?: string;
@@ -105,6 +113,7 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
   readonly columnSelect?: string;
   readonly fillHandle?: string;
   readonly filterHeaderInput?: string;
+  readonly filterHeaderTrigger?: string;
   readonly actionsHeader?: string;
   readonly actionsCell?: string;
   readonly reorderHeader?: string;
@@ -167,6 +176,7 @@ export interface TableChromeSlots<TRow> {
   }) => VNodeChild;
   readonly cell?: (context: CellContext<TRow>) => VNodeChild;
   readonly header?: (context: HeaderContext<TRow>) => VNodeChild;
+  readonly headerActions?: (context: HeaderContext<TRow>) => VNodeChild;
   readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
 }
 function control<TProps>(
@@ -184,7 +194,8 @@ function cellContent<TRow>(
   cell: TableCellModel<TRow>,
   row: TableRowModel<TRow>,
   slots: TableChromeSlots<TRow>,
-  names: TableChromeClassNames
+  names: TableChromeClassNames,
+  inlineDetail = false
 ): VNodeChild {
   const display = renderCell(cell.context, slots.cell);
   const rendered = cell.render ? cell.render(display) : display;
@@ -215,7 +226,7 @@ function cellContent<TRow>(
         value,
       ])
     : value;
-  return row.detail && cell === row.cells[0]
+  return inlineDetail && row.detail && cell === row.cells[0]
     ? h(Fragment, null, [
         control(
           slots.RowDetailToggle,
@@ -230,6 +241,21 @@ function cellContent<TRow>(
         content,
       ])
     : content;
+}
+function hasHeaderActionContent(content: VNodeChild): boolean {
+  if (content == null || typeof content === "boolean") return false;
+  if (Array.isArray(content)) return content.some(hasHeaderActionContent);
+  if (isVNode(content)) {
+    if (content.type === Comment) return false;
+    if (content.type === Fragment || content.type === Text) {
+      const children = content.children;
+      return Array.isArray(children)
+        ? children.some(hasHeaderActionContent)
+        : typeof children === "string" && children.trim().length > 0;
+    }
+    return true;
+  }
+  return typeof content !== "string" || content.trim().length > 0;
 }
 export function DesktopTableChrome<TRow>(props: {
   readonly model: DesktopTableModel<TRow>;
@@ -257,6 +283,22 @@ export function DesktopTableChrome<TRow>(props: {
     const leaf = model.headers.find((item) => item.key === key);
     if (!leaf) return null;
     const content = renderHeader(leaf.context, slots.header);
+    const defaultContent = [
+      content,
+      leaf.context.sortIndex === undefined
+        ? null
+        : h(
+            "span",
+            {
+              "data-adapttable-part": "sort-index",
+              class: classNames.sortIndex,
+            },
+            String(leaf.context.sortIndex)
+          ),
+    ];
+    const actions = leaf.column.headerActions
+      ? renderContent(leaf.column.headerActions, leaf.context)
+      : slots.headerActions?.(leaf.context);
     const caption =
       leaf.sortAttrs && !leaf.column.headerCell && !slots.header
         ? control(
@@ -267,7 +309,7 @@ export function DesktopTableChrome<TRow>(props: {
                 "data-adapttable-part": "sort-button",
               }),
               context: leaf.context,
-              content,
+              content: defaultContent,
             },
             "SortButton"
           )
@@ -285,7 +327,17 @@ export function DesktopTableChrome<TRow>(props: {
       [
         leaf.rename ? leaf.rename(caption, { ...classNames }) : caption,
         leaf.selection?.(classNames.columnSelect),
-        leaf.filter?.(classNames.filterHeaderInput),
+        leaf.filter?.(classNames.filterHeaderTrigger),
+        !hasHeaderActionContent(actions)
+          ? null
+          : h(
+              "span",
+              {
+                "data-adapttable-part": "header-actions",
+                class: classNames.headerActions,
+              },
+              [actions]
+            ),
         leaf.resizeAttrs
           ? control(
               slots.ResizeHandle,
@@ -317,6 +369,17 @@ export function DesktopTableChrome<TRow>(props: {
             padding: 0,
             border: 0,
           },
+        })
+      : null;
+  const expandHeader = (rowspan = 1): VNodeChild =>
+    model.expandLabel
+      ? h("th", {
+          scope: "col",
+          rowspan,
+          "aria-label": model.expandLabel,
+          "data-adapttable-part": "expand-header",
+          class: [classNames.th, classNames.expandHeader],
+          style: { width: "40px" },
         })
       : null;
   const reorderHeader = (rowspan = 1): VNodeChild =>
@@ -373,6 +436,7 @@ export function DesktopTableChrome<TRow>(props: {
             key: rowIndex,
           },
           [
+            rowIndex === 0 ? expandHeader(model.headerPlan?.length) : null,
             rowIndex === 0 && model.headerCheckboxAttrs
               ? h(
                   "th",
@@ -421,6 +485,7 @@ export function DesktopTableChrome<TRow>(props: {
             "data-adapttable-part": "header-row",
           }),
           [
+            expandHeader(),
             model.headerCheckboxAttrs
               ? h(
                   "th",
@@ -455,6 +520,32 @@ export function DesktopTableChrome<TRow>(props: {
       "tr",
       { ...mergeVueAttrs(row.attrs, { class: classNames.tr }), key: row.key },
       [
+        model.expandLabel
+          ? h(
+              "td",
+              mergeVueAttrs(row.expandCellAttrs ?? {}, {
+                class: [classNames.td, classNames.expandCell],
+                "data-adapttable-part": "expand-cell",
+              }),
+              [
+                row.detail
+                  ? control(
+                      slots.RowDetailToggle,
+                      {
+                        attrs: mergeVueAttrs(row.detail.toggleAttrs, {
+                          class: [
+                            classNames.expandButton,
+                            classNames.expandToggle,
+                          ],
+                        }),
+                        expanded: row.detail.expanded,
+                      },
+                      "RowDetailToggle"
+                    )
+                  : null,
+              ]
+            )
+          : null,
         model.headerCheckboxAttrs
           ? h(
               "td",
@@ -486,7 +577,7 @@ export function DesktopTableChrome<TRow>(props: {
               }),
               key: cell.key,
             },
-            [cellContent(cell, row, slots, classNames)]
+            [cellContent(cell, row, slots, classNames, !model.expandLabel)]
           )
         ),
         columnSpacer("td", "end"),
@@ -605,6 +696,7 @@ export function DesktopTableChrome<TRow>(props: {
             footer: slots.footer,
             classNames,
             leading: [
+              ...(model.expandLabel ? ["expand"] : []),
               ...(model.headerCheckboxAttrs ? ["selection"] : []),
               ...(model.reorderLabel ? ["reorder"] : []),
             ],
@@ -676,7 +768,7 @@ export function MobileCardsChrome<TRow>(props: {
                     key: cell.key,
                     "data-adapttable-part": "card-value",
                   },
-                  [cellContent(cell, row, slots, classNames)]
+                  [cellContent(cell, row, slots, classNames, true)]
                 ),
               ]
             )

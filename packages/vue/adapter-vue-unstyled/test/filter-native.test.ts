@@ -295,12 +295,9 @@ describe("native filter controls", () => {
       })
     );
     await tick();
-    const dialog = find<HTMLDialogElement>(
-      document.body,
-      part("filters-panel")
-    );
+    const dialog = find<HTMLDialogElement>(document.body, "dialog");
     expect(dialog.getAttribute("aria-modal")).toBe("true");
-    dialog.dispatchEvent(
+    find(document.body, part("filters-backdrop")).dispatchEvent(
       new MouseEvent("click", { clientX: 20, clientY: 20, bubbles: true })
     );
     expect(close).toHaveBeenCalledExactlyOnceWith("outside");

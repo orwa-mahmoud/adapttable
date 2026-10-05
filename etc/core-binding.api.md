@@ -98,6 +98,7 @@ export interface AgentApprovalPending {
     readonly approve: () => void;
     readonly decideAt?: (index: number, approved: boolean) => void;
     readonly decisions: readonly AgentApprovalDecision[];
+    readonly identity?: object;
     readonly operation?: AgentApprovalOperation;
     readonly presentation: ApprovalPresentation;
     readonly proposals: readonly AgentApprovalProposal[];

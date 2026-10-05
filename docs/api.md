@@ -2133,8 +2133,16 @@ index, delta)` is the keyboard step within a zone; and `setMeasureAgg(config,
 index, agg)` changes what a measure computes. Each returns a new `PivotConfig`,
 starting from `EMPTY_PIVOT_CONFIG`. `isPivotReady(config)` is false while no
 measure has been chosen — a half-built configuration the panel shows and the
-table waits on, not an error. `measureLabel(measure, fields)` is the caption
-the panel and the column header share. See [pivot tables](./pivot.md).
+table waits on, not an error. `measureLabel(measure, fields, aggregationLabels?)`
+is the caption the panel and the column header share. Its optional read-only map
+changes aggregation captions only, for example `{ sum: labels.selectionSum }`.
+An explicit `measure.label` still wins; an unmapped aggregation keeps its canonical
+name, and a function aggregator uses the field caption.
+`pivotPanelZones(fields, config, labels, aggregationLabels?)` accepts the same map
+for its measure entries. Omitting the map preserves the existing captions. Vue’s
+pivot panel reuses its localized aggregation-option captions for measure chips
+and their move/remove controls. None of these captions changes configuration keys
+or serialized pivot state. See [pivot tables](./pivot.md).
 
 **Pivot state in the URL.** `usePivotUrlState({ urlAdapter, urlSync, urlKey,
 defaultConfig })` from `@adapttable/react/pivot` returns a
@@ -4153,6 +4161,22 @@ in the [Vue API](./vue/api.md#entry-points).
 | `useHeaderFilter`, `HeaderFilterOptions`, `HeaderFilterChrome`, `HeaderFilterChromeSlots` | Computed header overlay state from neutral props plus optional ID/direction; required Trigger/Popover/Field controls.                                        |
 | `NativeFilterField`, `NativeChecklistFilter`, `NativeFilterTree`, `NativeHeaderFilter`    | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                     |
 
+`FilterChipsChrome` from `@adapttable/vue/filters` renders the active chip list
+from `ActiveFilterChipsSlotProps`. Its required `FilterChipsSlots` provide Remove
+and Clear controls, each receiving `FilterChipButtonProps` with semantic attrs
+and a localized label; `FilterChipsClassNames` styles the list and its chips.
+The native filters feature supplies these controls and keeps writes host-owned.
+
+For a compact filter inside a header, `useFilterHeaderControl` accepts
+`FilterHeaderControlOptions` and returns a computed `FilterHeaderControlModel`.
+`FilterHeaderControlChrome` uses required `FilterHeaderSlots`;
+`FilterHeaderRowChrome` combines `FilterHeaderRowProps` and `FilterHeaderRowSlots`
+to align controls with the table's columns. Native `FilterHeaderControl` and
+`FilterHeaderRow` are available from `@adapttable/vue-unstyled/header-filters`.
+The `headerFilters()` feature keeps its header-funnel overlay behavior. See the
+[compact header controls](./vue/features.md#filtering) for composition and the
+native drawer's explicit stylesheet import.
+
 | Editing export                                                                         | Signature or role                                                                                                                                                                                          |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `TableEditingOptions`, `TableEditingModel`, `useTableEditing`                          | Host rows, columns, row key, write callbacks and lifecycle/validation options to computed editing bundle and history. [Vue editing example and contracts](./vue/features.md#editing-and-host-persistence). |
@@ -4190,7 +4214,19 @@ in the [Vue API](./vue/api.md#entry-points).
 | `SavedViewsControlProps`, `SAVED_VIEWS_CONTROL`, `SAVED_VIEWS_MODEL`                         | Saved-view model/actions carried by the required native/kit control slot and table state channel.                                                                            |
 | `SavedViewsMenuChrome`, `SavedViewsMenuChromeProps`, `SavedViewsMenuSlots`                   | Disclosure, keyboard and focus structure requiring Trigger/Button/Input/Panel controls. [Vue Saved Views](./vue/features.md#density-fullscreen-and-saved-views).             |
 
-The Vue column-layout controller does not automatically persist to the URL.
+The Vue root exports `useColumnLayoutUrlState`,
+`UseColumnLayoutUrlStateOptions` and `UseColumnLayoutUrlStateResult` for a
+controlled URL layout: readonly shallow `layout`, `onLayoutChange` and `flush`.
+`LAYOUT_URL_WRITE_DEBOUNCE_MS` names its debounce interval.
+`useColumnLayoutStorageState`, `UseColumnLayoutStorageStateOptions` and
+`UseColumnLayoutStorageStateResult` offer the same layout/change pair for a
+browser preference with reactive storage/key/defaults. Bind either owner to
+the native prop/event explicitly. For URL-backed Saved Views, pass `flush`
+as `UseSavedViewsOptions.flushViewState` so Save/Apply finishes pending layout
+writes. See [Vue layout persistence](./vue/features.md#persist-column-layout-explicitly)
+for complete examples and lifecycle behavior.
+
+The Vue table does not opt into column-layout persistence automatically.
 Saved Views restore connected URL slices; controlled props stay authoritative,
 and selection, tree/detail expansion, edit drafts and host data are not captured.
 See [what a view restores](./vue/features.md#what-a-view-restores) before choosing

@@ -3,7 +3,9 @@
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "files": [
     "LICENSE",
     "README.md",
@@ -526,7 +528,8 @@
         "types": "./dist/preset.d.cts",
         "default": "./dist/preset.cjs"
       }
-    }
+    },
+    "./styles.css": "./dist/styles.css"
   },
   "repository": {
     "type": "git",

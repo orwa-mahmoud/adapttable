@@ -235,7 +235,12 @@ describe("native surfaces across KeepAlive", () => {
         drawer: "filters-panel",
         popover: "filters-popover",
       }[mode];
-      const surface = find(document.body, part(surfacePart));
+      const surface = find(
+        document.body,
+        mode === "drawer"
+          ? "dialog[data-adapttable-filter-dialog]"
+          : part(surfacePart)
+      );
       expect(surface.hasAttribute("open")).toBe(true);
       showing.value = false;
       await tick();
@@ -262,7 +267,11 @@ describe("native surfaces across KeepAlive", () => {
           document.body.querySelector(part("filter-header-popover"))
         ).toBeNull();
       view.stop();
-      expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+      expect(
+        document.body.querySelector(
+          '[role="dialog"], dialog[data-adapttable-filter-dialog]'
+        )
+      ).toBeNull();
       style.remove();
     }
   );

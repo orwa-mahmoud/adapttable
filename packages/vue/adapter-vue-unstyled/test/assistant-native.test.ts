@@ -100,11 +100,14 @@ describe("native assistant controls", () => {
     input.value = "new";
     input.dispatchEvent(new Event("input"));
     expect(props.assistant.setDraft).toHaveBeenCalledWith("new");
-    const menu = find<HTMLSelectElement>(root, "assistant-examples-menu");
-    menu.value = "one";
-    menu.dispatchEvent(new Event("change"));
+    const menu = find<HTMLDetailsElement>(root, "assistant-examples");
+    find(root, "assistant-examples-menu").click();
+    find(root, "assistant-examples-item").click();
+    await nextTick();
+    await nextTick();
+    await nextTick();
     expect(props.assistant.runSuggestion).toHaveBeenCalledWith("one");
-    expect(menu.value).toBe("");
+    expect(menu.open).toBe(false);
     const language = find<HTMLSelectElement>(root, "assistant-voice-language");
     language.value = "fr";
     language.dispatchEvent(new Event("change"));
@@ -230,12 +233,6 @@ describe("native assistant controls", () => {
         onChange: change,
         onKeyDown: vi.fn(),
       }),
-      nativeAssistantSlots.Menu({
-        label: "examples",
-        part: "examples",
-        items: [],
-        onSelect: change,
-      }),
       nativeAssistantSlots.LanguageChip({
         label: "language",
         part: "language",
@@ -252,7 +249,12 @@ describe("native assistant controls", () => {
     expect(change).not.toHaveBeenCalled();
     const root = mount(() =>
       h("div", [
-        nodes[1],
+        nativeAssistantSlots.Menu({
+          label: "examples",
+          part: "examples",
+          items: [],
+          onSelect: change,
+        }),
         nativeAssistantSlots.Button({
           label: "fallback",
           part: "content-button",

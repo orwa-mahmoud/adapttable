@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { receiptFromResult } from "@adapttable/ai";
+import { receiptFromResult, subjectFor } from "@adapttable/ai";
 import {
   type AgentApprovalPending,
   type AgentContextInputs,
@@ -21,6 +21,8 @@ import { computed, shallowRef } from "vue";
 const rows = [
   { id: "ada", name: "Ada" },
   { id: "grace", name: "Grace" },
+  { id: "alan", name: "Alan" },
+  { id: "barbara", name: "Barbara" },
 ];
 const columns = [{ key: "name", sortable: true }];
 const rowKey = (row: { id: string }) => row.id;
@@ -40,6 +42,35 @@ const agent = tableAgent(() => ({
   writePolicy: "allow",
   commit: "immediate",
   capabilities: [
+    {
+      key: "demo.selectAll",
+      summary: "Review selection of every person",
+      kind: "write",
+      partial: "supported",
+      guide: {
+        guide: "Select the approved people.",
+        input: { type: "object" },
+        output: { type: "object" },
+      },
+      isEnabled: () => true,
+      plan: () => ({
+        proposals: rows.map((row) => ({
+          rowKey: row.id,
+          rowLabel: row.name,
+          before: selected.value.includes(row.id),
+          after: true,
+        })),
+        payload: rows.map((row) => row.id),
+        perItem: true,
+      }),
+      execute: ({ apply, plan }) => {
+        const ids = Array.isArray(plan?.payload)
+          ? plan.payload.filter((id): id is string => typeof id === "string")
+          : [];
+        apply.setSelection?.(ids);
+        return { applied: true, ids };
+      },
+    },
     {
       key: "demo.select",
       summary: "Select a person after approval",
@@ -86,6 +117,11 @@ const agent = tableAgent(() => ({
   },
 }));
 let turn = 0;
+function selectionRequest(review: boolean, id: string) {
+  return review
+    ? { key: "demo.select", args: { id } }
+    : { key: "view.setSelection", args: { ids: [id] } };
+}
 const transport: AssistantTransport = {
   send: async ({ text, askUser, signal }) => {
     if (text.trim().toLowerCase() === "ask") {
@@ -104,6 +140,22 @@ const transport: AssistantTransport = {
     if (!current) return { text: "The table is not connected." };
     turn += 1;
     const id = text.toLowerCase().includes("grace") ? "grace" : "ada";
+    if (text.toLowerCase().includes("approve all")) {
+      const result = await current.execute(
+        "demo.selectAll",
+        {},
+        current.manifest().viewRevision,
+        `showcase-${turn}`,
+        signal
+      );
+      return {
+        text: result.ok
+          ? "Selected the approved people."
+          : "Selection was not approved.",
+        results: [result],
+        keys: ["demo.selectAll"],
+      };
+    }
     if (text.toLowerCase().includes("sort")) {
       const result = await current.execute(
         "view.setSort",
@@ -112,6 +164,38 @@ const transport: AssistantTransport = {
         `showcase-${turn}`,
         signal
       );
+      if (text.toLowerCase().includes("and search")) {
+        const search = await current.execute(
+          "view.setSearch",
+          { query: "Alan" },
+          current.manifest().viewRevision,
+          `showcase-${turn}-search`,
+          signal
+        );
+        return {
+          text: "The table returned the sort and search results.",
+          results: [result, search],
+          keys: ["view.setSort", "view.setSearch"],
+          subjects: [
+            subjectFor("view.setSort", { key: "name", dir: "desc" }, result),
+            subjectFor("view.setSearch", { query: "Alan" }, search),
+          ],
+        };
+      }
+      if (text.toLowerCase().includes("and select")) {
+        const selection = await current.execute(
+          "view.setSelection",
+          { ids: ["ada"] },
+          current.manifest().viewRevision,
+          `showcase-${turn}-select`,
+          signal
+        );
+        return {
+          text: "The table returned the sort and selection results.",
+          results: [result, selection],
+          keys: ["view.setSort", "view.setSelection"],
+        };
+      }
       return {
         text: result.ok
           ? "The table accepted the sort."
@@ -120,11 +204,13 @@ const transport: AssistantTransport = {
         keys: ["view.setSort"],
       };
     }
-    const review = text.toLowerCase().includes("approve");
-    const key = review ? "demo.select" : "view.setSelection";
+    const { key, args } = selectionRequest(
+      text.toLowerCase().includes("approve"),
+      id
+    );
     const result = await current.execute(
       key,
-      review ? { id } : { ids: [id] },
+      args,
       current.manifest().viewRevision,
       `showcase-${turn}`,
       signal
@@ -149,7 +235,18 @@ const assistant = useTableAssistant(() => ({
   suggestions: [
     { id: "ada", title: "Select Ada", prompt: "Select Ada" },
     { id: "grace", title: "Select Grace", prompt: "Select Grace" },
-    { id: "sort", title: "Sort names", prompt: "Sort names" },
+    {
+      id: "sort",
+      title: "Sort names",
+      description: "Sort the table by name",
+      prompt: "Sort names",
+    },
+    { id: "all", title: "Review all people", prompt: "Approve all" },
+    {
+      id: "sort-search",
+      title: "Sort and search for Alan",
+      prompt: "Sort and search for Alan",
+    },
   ],
   open: open.value,
   onOpenChange: (value) => {

@@ -1,4 +1,5 @@
 import {
+  ACTIVE_FILTER_CHIPS,
   extendFeature,
   slotRender,
   type TableFeature,
@@ -11,6 +12,7 @@ import {
 } from "@adapttable/vue/filters";
 import { h } from "vue";
 
+import { NativeFilterChips } from "./filters/NativeFilterChips";
 import { NativeFiltersPanel } from "./filters/NativeFiltersPanel";
 
 /** Native filter fields and an anchored native popover or modal drawer. */
@@ -20,6 +22,9 @@ export function filters<TRow>(
 ): TableFeature<TRow> {
   return extendFeature(bindingFilters(defs, options), [
     slotRender(TOOLBAR_EXTRAS, () => h(NativeFiltersPanel)),
+    slotRender(ACTIVE_FILTER_CHIPS, (props) =>
+      h(NativeFilterChips, { ...props })
+    ),
   ]);
 }
 export { NativeChecklistFilter } from "./filters/NativeChecklistFilter";

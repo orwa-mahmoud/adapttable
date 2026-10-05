@@ -101,7 +101,7 @@ export function useGridFocus<TRow>(
       event.target instanceof Element &&
       event.target !== event.currentTarget &&
       event.target.closest(
-        "button,input,select,textarea,a[href],[contenteditable=true],[role=button]"
+        "button,input,select,textarea,summary,label,a[href],[contenteditable=true],[role=button]"
       )
     )
       return;
@@ -202,7 +202,7 @@ export function useGridFocus<TRow>(
                 if (
                   !(event.target instanceof Element) ||
                   !event.target.closest(
-                    "button,input,select,textarea,a[href],[contenteditable=true],[role=button]"
+                    "button,input,select,textarea,summary,label,a[href],[contenteditable=true],[role=button]"
                   )
                 )
                   pressCell(cell, event);

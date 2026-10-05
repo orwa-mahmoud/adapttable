@@ -1,4 +1,4 @@
-import { useScopeActivity } from "@adapttable/vue/adapter";
+import { resolveLabels, useScopeActivity } from "@adapttable/vue/adapter";
 import type { FilterPanelSurfaceProps } from "@adapttable/vue/filters";
 import {
   type CSSProperties,
@@ -12,6 +12,7 @@ import {
 } from "vue";
 
 import { useClassNames } from "../classNamesContext";
+import NativeFilterDialog from "./NativeFilterDialog.vue";
 
 /** Native popover and modal dialog own their top layer, focus and dismissal. */
 export const NativeFilterSurface = defineComponent(
@@ -19,14 +20,18 @@ export const NativeFilterSurface = defineComponent(
     props: FilterPanelSurfaceProps & {
       readonly modal: boolean;
       readonly part?: string;
+      readonly backdropLabel?: string;
     }
   ) => {
     const names = useClassNames();
     const active = useScopeActivity();
     const surface = shallowRef<HTMLElement | null>(null);
+    const panel = shallowRef<HTMLElement | null>(null);
     const mounted = shallowRef(false);
     const position = shallowRef<CSSProperties>({});
     let focusRequest = 0;
+    let surfaceLifetime = 0;
+    let backdropPointerLifetime: number | undefined;
     let closeRequest: number | undefined;
     let closingFocus: Element | null | undefined;
     let closeReason: "escape" | "outside" | "done" | undefined;
@@ -41,8 +46,11 @@ export const NativeFilterSurface = defineComponent(
           ready !== previous[0] ||
           anchor !== previous[1] ||
           modal !== previous[2]
-        )
+        ) {
           focusRequest++;
+          surfaceLifetime++;
+          backdropPointerLifetime = undefined;
+        }
       },
       { flush: "sync" }
     );
@@ -138,6 +146,16 @@ export const NativeFilterSurface = defineComponent(
         else if (!props.modal && element.showPopover) element.showPopover();
         else element.setAttribute("open", "");
         place();
+        if (
+          modal &&
+          panel.value &&
+          !panel.value.contains(document.activeElement)
+        )
+          (
+            panel.value.querySelector<HTMLElement>(
+              "input, select, button, [tabindex='0']"
+            ) ?? panel.value
+          ).focus();
         if (!modal && element.isConnected)
           (
             element.querySelector<HTMLElement>(
@@ -146,6 +164,7 @@ export const NativeFilterSurface = defineComponent(
           ).focus();
         const outside = (event: PointerEvent) => {
           focusRequest++;
+          backdropPointerLifetime = undefined;
           if (!active.value) return;
           const target = event.target;
           if (
@@ -202,70 +221,85 @@ export const NativeFilterSurface = defineComponent(
       event.preventDefault();
       if (active.value) dismiss("escape");
     };
-    const backdrop = (event: MouseEvent) => {
-      const element = surface.value;
-      if (!active.value || !props.modal || !element || event.target !== element)
-        return;
-      const rect = element.getBoundingClientRect();
-      if (
-        event.clientX < rect.left ||
-        event.clientX > rect.right ||
-        event.clientY < rect.top ||
-        event.clientY > rect.bottom
-      )
-        dismiss("outside");
-    };
     const partName = () =>
       props.part ?? (props.modal ? "filters-panel" : "filters-popover");
+    const modalSurface = () => {
+      const lifetime = surfaceLifetime;
+      const current = () =>
+        active.value &&
+        props.open &&
+        props.modal &&
+        lifetime === surfaceLifetime;
+      return h(NativeFilterDialog, {
+        active: active.value,
+        dir: props.dir,
+        label: props.label,
+        backdropLabel: props.backdropLabel ?? resolveLabels(undefined).cancel,
+        part: partName(),
+        panelClassName: props.className ?? names.value.filtersPanel,
+        drawerClassName: names.value.filtersDrawer,
+        backdropClassName: names.value.filtersBackdrop,
+        children: props.children,
+        hostRef: (element: HTMLElement | null) => {
+          surface.value = element;
+        },
+        panelRef: (element: HTMLElement | null) => {
+          panel.value = element;
+        },
+        onCancel: (event: Event) => {
+          event.preventDefault();
+          if (current()) dismiss("escape");
+        },
+        onBackdropPointerDown: () => {
+          if (current()) backdropPointerLifetime = lifetime;
+        },
+        onBackdropPointerCancel: () => {
+          if (current()) backdropPointerLifetime = undefined;
+        },
+        onBackdropClick: (event: MouseEvent) => {
+          const beganHere =
+            event.detail === 0 || backdropPointerLifetime === lifetime;
+          backdropPointerLifetime = undefined;
+          if (current() && beganHere) dismiss("outside");
+        },
+      });
+    };
+    const popoverSurface = () =>
+      h(
+        "div",
+        {
+          ref: surface,
+          hidden: !active.value,
+          inert: !active.value,
+          "aria-hidden": !active.value || undefined,
+          dir: props.dir,
+          role: "dialog",
+          popover: "manual",
+          tabindex: -1,
+          "aria-label": props.label,
+          class: props.className ?? names.value.filtersPopover,
+          "data-adapttable-part": partName(),
+          style: {
+            display: active.value ? undefined : "none !important",
+            boxSizing: "border-box",
+            position: "fixed",
+            maxInlineSize: "calc(100vw - 16px)",
+            maxBlockSize: "calc(100dvh - 16px)",
+            overflow: "auto",
+            margin: 0,
+            inset: "auto",
+            inlineSize: "22rem",
+            zIndex: 1000,
+            ...position.value,
+          },
+          onCancel: cancel,
+        },
+        [props.children]
+      );
     return () =>
       props.open && mounted.value
         ? h(Teleport, { to: props.container ?? "body" }, [
-            h(
-              props.modal ? "dialog" : "div",
-              {
-                ref: surface,
-                hidden: !active.value,
-                inert: !active.value,
-                "aria-hidden": !active.value || undefined,
-                dir: props.dir,
-                role: "dialog",
-                popover: props.modal ? undefined : "manual",
-                tabindex: -1,
-                "aria-label": props.label,
-                "aria-modal": props.modal ? "true" : undefined,
-                class: props.modal
-                  ? [
-                      names.value.filtersDrawer,
-                      props.className ?? names.value.filtersPanel,
-                    ]
-                  : (props.className ?? names.value.filtersPopover),
-                "data-adapttable-part": partName(),
-                style: {
-                  display: active.value ? undefined : "none !important",
-                  boxSizing: "border-box",
-                  position: "fixed",
-                  maxInlineSize: "calc(100vw - 16px)",
-                  maxBlockSize: "calc(100dvh - 16px)",
-                  overflow: "auto",
-                  ...(props.modal
-                    ? {
-                        marginInlineStart: "auto",
-                        marginInlineEnd: 0,
-                        blockSize: "100dvh",
-                      }
-                    : {
-                        margin: 0,
-                        inset: "auto",
-                        inlineSize: "22rem",
-                        zIndex: 1000,
-                        ...position.value,
-                      }),
-                },
-                onCancel: cancel,
-                onClick: backdrop,
-              },
-              [props.children]
-            ),
+            props.modal ? modalSurface() : popoverSurface(),
           ])
         : null;
   },
@@ -280,6 +314,7 @@ export const NativeFilterSurface = defineComponent(
       "onClose",
       "modal",
       "part",
+      "backdropLabel",
       "container",
       "className",
     ],

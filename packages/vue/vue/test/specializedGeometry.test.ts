@@ -83,67 +83,75 @@ it("remeasures the real list margin on window resize and surrounding layout chan
     root.remove();
   }
 });
-it("reveals columns inside measured injected controls and both logical pin regions", async () => {
-  const root = document.createElement("div");
-  const box = document.createElement("div");
-  box.dataset.adapttablePart = "scroll-box";
-  const injected = document.createElement("div");
-  injected.dataset.adapttablePart = "selection-header";
-  box.append(injected);
-  root.append(box);
-  document.body.append(root);
-  Object.defineProperty(box, "clientWidth", { value: 300 });
-  vi.spyOn(box, "getBoundingClientRect").mockReturnValue({
-    top: 0,
-    left: 0,
-    right: 300,
-    bottom: 200,
-    width: 300,
-    height: 200,
-    x: 0,
-    y: 0,
-    toJSON: () => ({}),
-  });
-  vi.spyOn(injected, "getBoundingClientRect").mockReturnValue({
-    top: 0,
-    left: 0,
-    right: 40,
-    bottom: 20,
-    width: 40,
-    height: 20,
-    x: 0,
-    y: 0,
-    toJSON: () => ({}),
-  });
-  const rtl = shallowRef(false);
-  const scope = effectScope();
-  try {
-    const shell = scope.run(() =>
-      useDataTableShell(() => ({
-        data: [{ id: "a" }],
-        rowKey: (row: { id: string }) => row.id,
-        columns: [{ key: "start" }, { key: "a" }, { key: "b" }, { key: "end" }],
-        columnWidths: { start: 100, a: 100, b: 100, end: 100 },
-        defaultColumnLayout: { pinned: { start: "start", end: "end" } },
-        dir: rtl.value ? "rtl" : "ltr",
-        urlSync: false,
-        features: [virtualize({ maxHeight: 240, virtualizeColumns: true })],
-      }))
-    )!;
-    shell.setSurface({ rootElement: () => root, scrollElement: () => box });
-    await settle();
-    shell.bodyWindow.value!.scrollToColumn("b");
-    expect(box.scrollLeft).toBe(140);
-    box.scrollLeft = 0;
-    rtl.value = true;
-    await settle();
-    shell.bodyWindow.value!.scrollToColumn("b");
-    expect(box.scrollLeft).toBe(-140);
-    expect(shell.desktop.value.headers.map((header) => header.key).at(-1)).toBe(
-      "end"
-    );
-  } finally {
-    scope.stop();
-    root.remove();
+it.each(["selection-header", "expand-header"])(
+  "reveals columns inside measured %s and both logical pin regions",
+  async (part) => {
+    const root = document.createElement("div");
+    const box = document.createElement("div");
+    box.dataset.adapttablePart = "scroll-box";
+    const injected = document.createElement("div");
+    injected.dataset.adapttablePart = part;
+    box.append(injected);
+    root.append(box);
+    document.body.append(root);
+    Object.defineProperty(box, "clientWidth", { value: 300 });
+    vi.spyOn(box, "getBoundingClientRect").mockReturnValue({
+      top: 0,
+      left: 0,
+      right: 300,
+      bottom: 200,
+      width: 300,
+      height: 200,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    vi.spyOn(injected, "getBoundingClientRect").mockReturnValue({
+      top: 0,
+      left: 0,
+      right: 40,
+      bottom: 20,
+      width: 40,
+      height: 20,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    const rtl = shallowRef(false);
+    const scope = effectScope();
+    try {
+      const shell = scope.run(() =>
+        useDataTableShell(() => ({
+          data: [{ id: "a" }],
+          rowKey: (row: { id: string }) => row.id,
+          columns: [
+            { key: "start" },
+            { key: "a" },
+            { key: "b" },
+            { key: "end" },
+          ],
+          columnWidths: { start: 100, a: 100, b: 100, end: 100 },
+          defaultColumnLayout: { pinned: { start: "start", end: "end" } },
+          dir: rtl.value ? "rtl" : "ltr",
+          urlSync: false,
+          features: [virtualize({ maxHeight: 240, virtualizeColumns: true })],
+        }))
+      )!;
+      shell.setSurface({ rootElement: () => root, scrollElement: () => box });
+      await settle();
+      shell.bodyWindow.value!.scrollToColumn("b");
+      expect(box.scrollLeft).toBe(140);
+      box.scrollLeft = 0;
+      rtl.value = true;
+      await settle();
+      shell.bodyWindow.value!.scrollToColumn("b");
+      expect(box.scrollLeft).toBe(-140);
+      expect(
+        shell.desktop.value.headers.map((header) => header.key).at(-1)
+      ).toBe("end");
+    } finally {
+      scope.stop();
+      root.remove();
+    }
   }
-});
+);

@@ -1,5 +1,9 @@
 import { resolveLabels } from "@adapttable/core";
-import { slotRender, TOOLBAR_EXTRAS } from "@adapttable/core/binding";
+import {
+  ACTIVE_FILTER_CHIPS,
+  slotRender,
+  TOOLBAR_EXTRAS,
+} from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
 import {
   createApp,
@@ -61,7 +65,10 @@ describe("integrated optional feature seams", () => {
     const declarations = shallowRef<readonly ComposedFeature<Row>[]>([
       extendFeature(
         filters<Row>([{ key: "name", type: "text" }], { tree: true }),
-        [slotRender(TOOLBAR_EXTRAS, () => null)]
+        [
+          slotRender(TOOLBAR_EXTRAS, () => null),
+          slotRender(ACTIVE_FILTER_CHIPS, () => null),
+        ]
       ),
     ]);
     const shell = required(
@@ -145,7 +152,10 @@ describe("integrated optional feature seams", () => {
         })
       )
     );
-    expect(shell.desktop.value.columnCount).toBe(4);
+    expect(shell.desktop.value.columnCount).toBe(5);
+    expect(shell.desktop.value.expandLabel).toBe(
+      shell.table.labels.value.expandRow
+    );
     const slots = required(shell.desktop.value.bodySlots);
     const summary = slots.find(
       (slot) => slot.kind === "row" && slot.wiring.summary
@@ -169,6 +179,8 @@ describe("integrated optional feature seams", () => {
     expect(shell.editing.value).toBeUndefined();
     expect(shell.grouping.value).toBeUndefined();
     expect(shell.detail.value).toBeUndefined();
+    expect(shell.desktop.value.expandLabel).toBeUndefined();
+    expect(shell.desktop.value.columnCount).toBe(3);
     scope.stop();
   });
   it("projects custom editors from one model and delegates neutral key/focus handlers", () => {
@@ -227,6 +239,7 @@ it("suspends combined editing, filters and view controls across KeepAlive and in
     ]),
     extendFeature(filters<Row>([{ key: "name", type: "text" }]), [
       slotRender(TOOLBAR_EXTRAS, () => null),
+      slotRender(ACTIVE_FILTER_CHIPS, () => null),
     ]),
     nativeDensity(),
     nativeSavedViews({ storageKey: "combined-views", storage: null }),

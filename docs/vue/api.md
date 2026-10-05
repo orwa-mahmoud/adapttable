@@ -216,8 +216,8 @@ density, pins, explicit group collapse and the state that is not captured.
 ## Columns and rendering
 
 `ColumnDef<TRow, TValue = unknown>` extends neutral `ColumnMetadata` with a
-string `header`, a typed `accessor(row): TValue`, and Vue `cell`, `headerCell`
-and `footer` renderers. `ColumnGroup<TRow>` contains nested
+string `header`, a typed `accessor(row): TValue`, and Vue `cell`, `headerCell`,
+`headerActions` and `footer` renderers. `ColumnGroup<TRow>` contains nested
 `children: readonly ColumnInput<TRow>[]`; `ColumnInput` is a leaf or group.
 `resolveColumns(columns, locale?)` supplies metadata/accessor defaults.
 `flattenColumns(inputs)` returns `leaves` and a `ReadonlyMap` of group records.
@@ -308,6 +308,15 @@ and `onColumnRename(key, name)`. `ColumnLayout` includes `state`, resolved
 `toggleColumnGroup`. A controlled mutation requests a host update; it cannot
 silently replace the supplied layout.
 
+For persistence, the root exports `useColumnLayoutUrlState` with
+`UseColumnLayoutUrlStateOptions`/`UseColumnLayoutUrlStateResult`, and
+`useColumnLayoutStorageState` with
+`UseColumnLayoutStorageStateOptions`/`UseColumnLayoutStorageStateResult`.
+Bind their `layout` ref and `onLayoutChange` to the native prop/event explicitly.
+The URL result also has `flush`; pass it as `UseSavedViewsOptions.flushViewState`
+when using Saved Views. [Layout-persistence examples](./features.md#persist-column-layout-explicitly)
+cover the full options, SSR seed, debounce and storage boundaries.
+
 `useRowSelection(options: MaybeRefOrGetter<RowSelectionOptions<TRow>>)` returns
 `RowSelection`. Its options require reactive `rows` and a `rowKey`; optional
 inputs are `enabled` (default true), controlled `selectedIds`, `defaultSelectedIds`,
@@ -365,7 +374,7 @@ table runtime, and `getView()` returns the current `TableRuntimeView` or
 `undefined` after disposal.
 
 `DataTableSlots<TRow>` provides `cell(CellContext)`, `header(HeaderContext)`,
-`footer(FooterContext)`, `tableFooter()`, `toolbar()`, `loading()`, `empty({ noResults, clear })` and
+`headerActions(HeaderContext)`, `footer(FooterContext)`, `tableFooter()`, `toolbar()`, `loading()`, `empty({ noResults, clear })` and
 `error(TableErrorState)`. An error slot receives the real error, optional retry
 and retrying state. The toolbar slot appends to the built-in toolbar; loading,
 empty and error slots replace status content. A source without `refetch` has no retry action. Custom
@@ -421,6 +430,85 @@ and listeners to the root; binding attributes stay on their semantic targets.
 The desktop header sort buttons and selection checkboxes are native controls,
 and responsive cards use native mobile sort controls. The public
 `data-adapttable-part` names can also be used as CSS selectors.
+
+### Native table surfaces
+
+`rowActionsLayout?: "buttons" | "menu"` applies to desktop rows and mobile
+cards. Omit it for inline native buttons. The menu uses a native `details` /
+`summary` disclosure; Enter or Space opens it, Escape closes it and restores
+focus to its trigger, and choosing an enabled action closes it. Both layouts
+use the binding's current hidden/disabled/confirmation rules. Pending host
+confirmation never grants an obsolete row action permission to run after its
+source, row or feature has retired.
+
+`ColumnDef.headerActions?: Renderer<HeaderContext<TRow, TValue>>` renders host
+content after the caption and before the resize handle. The table's
+`headerActions(context)` slot is its fallback. These additions preserve the
+default sort button; replacing `headerCell` or the `header` slot still means
+owning that caption's sort controls. Default multi-sort buttons expose their
+one-based priority in a `sort-index` span. Header actions use Vue child
+semantics: `false`, `null` and empty comment/fragment results render no wrapper;
+`0` remains visible, and live renderer/slot changes update the same header.
+
+`filters()` renders a removable list of the active field and tree conditions.
+Removing an array chip retains its other current entries; removing a tree
+chip asks the current source to remove that condition. Clear all clears field
+and tree filters while keeping the search query. These are source requests,
+so a controlled host can reject them. Retained controls are inactive after
+source replacement, feature disposal or suspension. Custom sources use their
+stable `tableEngine` or, without an engine, their stable `setPage` mutator as
+the source identity, matching the bounded built-in export lifecycle contract.
+If neither signal exists, the authored source object is the fallback. Fresh
+wrappers preserving a built-in signal keep current actions usable. Arbitrary
+custom sources sharing the same engine or page callback cannot be distinguished
+by that signal; this is not a universal source-identity protocol.
+
+For another kit, the existing `ACTIVE_FILTER_CHIPS` feature slot is required
+by the binding's `filters()` feature alongside `TOOLBAR_EXTRAS`.
+`FilterChipsChrome` from `@adapttable/vue/filters` accepts
+`ActiveFilterChipsSlotProps` plus `slots: FilterChipsSlots` and optional
+`classNames: FilterChipsClassNames`. `Remove` and `Clear` are required slots;
+each receives `FilterChipButtonProps` with `attrs` and a localized `label`.
+The binding renders the real `ul`/`li` list and supplies event attributes; the
+kit renders every button. No fallback controls are installed by the binding.
+
+`skeletonRows?: number` sets the number of initial-loading desktop rows or
+mobile cards; its default is the current page size. The skeleton appears only
+when the existing body policy selects initial loading with no rows. A
+background refresh keeps available rows visible. The `loading` slot replaces
+the default skeleton. The shapes are hidden from assistive technology, and a
+single localized status reports loading. Search and a busy export also expose
+native SVG affordances.
+
+A desktop `rowDetail()` feature reserves the first utility column for its
+expand controls. `expand-header` is a real `th`; `expand-cell` is a real `td`,
+including an empty placeholder on summary rows. Grouped headers, summary
+footers, extra rows, data-cell spans, pinned rows and virtual windows account
+for that column. Mobile cards retain one inline control in the first field.
+The keyboard grid continues to address data columns; utility columns are not
+added to its data-cell coordinates.
+The shell supplies this geometry. A hand-authored `DesktopTableModel` can opt in
+with `expandLabel` and the matching `columnCount`; `expandCellAttrs` carries
+row-specific layout such as pin styles. `useDesktopTableModel` also accepts an
+optional fourth `expandLabel: () => string | undefined` callback. Existing
+hand-authored `row.detail` models without that label keep their inline toggle.
+
+Additional class hooks land on their corresponding functional elements:
+
+- Chips: `chips`, `chip`, `chipRemove`.
+- Actions and headers: `actionButton`, `rowActionsMenu`, `rowActionsTrigger`,
+  `sortIndex`, `headerActions`, `expandHeader`, `expandCell`.
+- Loading: `loadingTable`, `loadingHeaderRow`, `loadingHeaderCell`, `loadingRow`,
+  `loadingCell`, `loadingCards`, `loadingCard`, `loadingLine`.
+- Affordances and announcements: `searchIcon`, `exportSpinner`,
+  `gridAnnouncer`, `rowReorderAnnouncer`, `tableStatusAnnouncer`.
+
+The experimental Vue targets `row-action`, `grid-focus-announcer` and `status`
+are corrected to the canonical `action-button`, `grid-announcer` and
+`table-status-announcer` targets. Update selectors that used those old part
+names. The existing `rowAction` class hook remains an alias for `actionButton`,
+and `status` remains an alias for `tableStatusAnnouncer`; both old and new
+classes reach the same native element.
 
 ## Adapter shell and structural Chrome
 

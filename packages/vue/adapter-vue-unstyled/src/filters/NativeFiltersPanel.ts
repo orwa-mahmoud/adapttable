@@ -82,7 +82,12 @@ export const NativeFiltersPanel = defineComponent({
       Field: (field) => h(NativeFilterField, { ...field }),
       Popover: (surface) =>
         h(NativeFilterSurface, { ...surface, modal: false }),
-      Drawer: (surface) => h(NativeFilterSurface, { ...surface, modal: true }),
+      Drawer: (surface) =>
+        h(NativeFilterSurface, {
+          ...surface,
+          modal: true,
+          backdropLabel: model.value?.labels.cancel,
+        }),
     };
     return () =>
       model.value

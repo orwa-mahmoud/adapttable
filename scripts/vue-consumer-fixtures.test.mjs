@@ -9,6 +9,7 @@ import {
   VUE_RUNTIME_EXTERNALS,
   vueConsumerCoverageProblems,
   vueConsumerFixtures,
+  vueEmittedCss,
   vueForeignImport,
   vueGraphProblems,
   XLSX_WRITER_MARKER,
@@ -175,4 +176,43 @@ describe("packed Vue consumers", () => {
       true
     );
   });
+});
+
+it("includes emitted drawer CSS only in the three drawer-capable Vue consumers", () => {
+  assert.deepEqual(
+    vue.filter((entry) => entry.styleEntryFile).map((entry) => entry.name),
+    [
+      "vue-unstyled · preset",
+      "vue-unstyled · table + preset",
+      "vue-unstyled · features barrel",
+    ]
+  );
+  for (const entry of vue.filter((entry) => entry.styleEntryFile)) {
+    assert.equal(entry.styleEntryFile, "styles.css");
+    assert.match(entry.code, /import "STYLE"/);
+    const code = entry.present.join(" ");
+    assert.ok(
+      vueGraphProblems(entry, { code, imports: new Set() }).some((problem) =>
+        problem.includes("missing CSS filters-backdrop")
+      )
+    );
+    const css = vueEmittedCss([
+      { type: "chunk", fileName: "fake.js", code: "filters-backdrop" },
+      {
+        type: "asset",
+        fileName: "styles.css",
+        source: new TextEncoder().encode(
+          "[data-adapttable-filter-dialog]::backdrop{} [data-adapttable-part=filters-backdrop]{}"
+        ),
+      },
+    ]);
+    assert.deepEqual(
+      vueGraphProblems(entry, { code, imports: new Set(), css }),
+      []
+    );
+    assert.equal(
+      vueEmittedCss([{ type: "chunk", fileName: "fake.js", code: css }]),
+      ""
+    );
+  }
 });

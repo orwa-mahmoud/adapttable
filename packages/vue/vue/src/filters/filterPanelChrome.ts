@@ -1,4 +1,5 @@
 import {
+  type ActiveFilterChip,
   type Direction,
   type FilterDef,
   type FilterTypeRegistry,
@@ -33,6 +34,7 @@ export interface FilterPanelSurfaceProps {
 }
 export interface FilterPanelModel<TRow> {
   readonly openPanel?: () => void;
+  readonly chips?: readonly ActiveFilterChip[];
   readonly open: boolean;
   readonly mode: "popover" | "drawer";
   readonly dir: Direction;

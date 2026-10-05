@@ -8,6 +8,23 @@ This public package is experimental, prepared for `0.1.0`, and has not been
 published to npm. It requires Vue `^3.5.0`; use the built workspace packages
 until publication.
 
+## Native overlay stylesheet
+
+When using filter drawers, load the native stylesheet once from your client
+application entry:
+
+```ts
+import "@adapttable/vue-unstyled/styles.css";
+```
+
+It scopes the native dialog backdrop to this component and provides minimal
+Canvas panel colors plus a 20% black scrim on the real backdrop button.
+`filtersPanel`, `filtersDrawer` and `filtersBackdrop` class hooks style the
+foreground panel and backdrop separately. The package's JavaScript entries
+remain usable by bare ESM, CommonJS and server rendering without a CSS loader.
+Your application or framework owns loading the stylesheet; the library does
+not insert stylesheet elements at runtime.
+
 ## Basic table
 
 ```vue
@@ -99,7 +116,10 @@ binding and shared core; these contributions provide native controls.
   A custom filter type still needs a supported widget or adapter field renderer.
   The popover has no backdrop; the drawer uses a native modal dialog.
 - `/header-filters`: `headerFilters()` supplies native header controls and
-  delegates their actions to the same filter model. Header filters are a desktop
+  delegates their actions to the same filter model. `FilterHeaderControl` and
+  `FilterHeaderRow` provide compact standalone controls and a second header row,
+  exported from this entry and the root. Their class hooks target the actual
+  search/select, range wrapper and multi-choice summary. Header filters are a desktop
   surface; mobile filtering remains available through `/filters`.
 - `/editing`: cell editing with `editing(onCellEdit)`, `rowEditing(onRowEdit)`, `editHistory()`,
   `undoRedoButtons()` and `dirtyIndicators()`. Editors include native text,
@@ -192,8 +212,10 @@ editing, compose `editing(onCellEdit)` to provide the undo/redo replay callback.
 
 Saved Views capture the connected source query state, density and uncontrolled
 row pins. Group collapse requires `useGroupCollapseUrlState` wiring. Column
-layout, selection, tree/detail expansion and edit drafts have no automatic
-Saved Views integration. Grouped/tree tables refuse data-row pinning;
+layout requires binding `useColumnLayoutUrlState` to the column-layout prop and
+update event, with its `flush` passed as the Saved Views `flushViewState` option.
+`useColumnLayoutStorageState` is a separate browser-preference alternative.
+Selection, tree/detail expansion and edit drafts are not captured. Grouped/tree tables refuse data-row pinning;
 independent summaries remain supported. Selection follows visible hierarchy
 rows, while editing preserves drafts for loaded rows hidden by collapse.
 

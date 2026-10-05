@@ -30,6 +30,7 @@ const sourceAliases = [
   },
 ]);
 const bindingTests = [
+  "filterHeaderControl",
   "findDependencies",
   "runtimeSelectionScope",
   "selectionControl",
@@ -38,8 +39,19 @@ const bindingTests = [
   "rowReorderProjection",
   "specializedOwnership",
 ];
+const bindingSourceTests = [
+  "assistant/assistantActionOwnership",
+  "columns/columnLayoutKeepAlive",
+  "columns/columnLayoutPersistence.ssr",
+  "columns/columnLayoutStorage",
+  "url/columnLayoutPersistence",
+  "url/columnLayoutReentry",
+  "url/savedViewsFlush",
+];
 const nativeTests = [
+  "assistant-showcase-undo",
   "navigation-find.ssr",
+  "layout-persistence",
   "selection-lifetime",
   "row-move-host-confirmation",
   "row-move-ownership",
@@ -47,8 +59,14 @@ const nativeTests = [
   "editing-native",
   "editing-mount-cost",
   "filter-native",
+  "filter-dialog-focus",
+  "composed-features",
+  "composition-parts",
   "filter-parts",
   "filter-clear-state",
+  "filter-header-inline",
+  "filter-header-navigation",
+  "filter-backdrop",
   "specialized-native",
 ];
 export default defineConfig({
@@ -81,6 +99,9 @@ export default defineConfig({
       : [
           ...bindingTests.map((name) =>
             join(packageDir("vue"), `test/${name}.test.ts`)
+          ),
+          ...bindingSourceTests.map((name) =>
+            join(packageDir("vue"), `src/${name}.test.ts`)
           ),
           ...nativeTests.map((name) =>
             join(packageDir("adapter-vue-unstyled"), `test/${name}.test.ts`)

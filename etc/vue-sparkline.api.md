@@ -38,6 +38,7 @@ export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<T
     readonly footer?: Renderer<FooterContext<TRow, TValue>>;
     // (undocumented)
     readonly header?: string;
+    readonly headerActions?: Renderer<HeaderContext<TRow, TValue>>;
     // (undocumented)
     readonly headerCell?: Renderer<HeaderContext<TRow, TValue>>;
 }

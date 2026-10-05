@@ -131,6 +131,8 @@ export interface ApprovalReviewChromeProps {
     readonly expanded?: boolean;
     // (undocumented)
     readonly labels?: TableLabels;
+    readonly onBack?: () => void;
+    readonly onExpand?: () => void;
     // (undocumented)
     readonly pending: AgentApprovalPending;
     // (undocumented)
@@ -165,6 +167,7 @@ export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<T
     readonly footer?: Renderer<FooterContext<TRow, TValue>>;
     // (undocumented)
     readonly header?: string;
+    readonly headerActions?: Renderer<HeaderContext<TRow, TValue>>;
     // (undocumented)
     readonly headerCell?: Renderer<HeaderContext<TRow, TValue>>;
 }
@@ -229,6 +232,8 @@ export interface DesktopTableModel<TRow> {
         readonly start: number;
         readonly end: number;
     };
+    // (undocumented)
+    readonly expandLabel?: string;
     // (undocumented)
     readonly groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;
     // (undocumented)
@@ -778,6 +783,8 @@ export interface TableRowModel<TRow> {
     readonly detail?: RowDetailModel;
     // (undocumented)
     readonly editActions?: () => VNodeChild;
+    // (undocumented)
+    readonly expandCellAttrs?: Attrs;
     // (undocumented)
     readonly index: number;
     // (undocumented)

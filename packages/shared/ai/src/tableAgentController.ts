@@ -504,7 +504,18 @@ export function createTableAgentController(
     setTransaction((current) => recordDecision(current, id, index, approved));
   };
 
+  // A presentation token reveals none of the mutable pending entry or resolver.
+  // Weak ownership lets it disappear with the transaction it identifies.
+  const approvalIdentities = new WeakMap<PendingApproval, object>();
+  const approvalIdentity = (entry: PendingApproval): object => {
+    const existing = approvalIdentities.get(entry);
+    if (existing) return existing;
+    const identity = Object.freeze({});
+    approvalIdentities.set(entry, identity);
+    return identity;
+  };
   const approvalFor = (open: ApprovalTransaction): AgentApprovalPending => ({
+    identity: approvalIdentity(open.pending),
     proposals: open.pending.proposals,
     ...(open.pending.operation ? { operation: open.pending.operation } : {}),
     decisions: open.decisions,
@@ -607,7 +618,7 @@ export function createTableAgentController(
 
   // The chrome path is the only one that parks: with `onApprove` the host
   // answers directly and nothing is ever left open here. Rebuilt only when the
-  // transaction moved, because a decision inside it is a new transaction.
+  // transaction snapshot moved; row decisions preserve its presentation identity.
   const approvalNow = (
     hostApproves: boolean,
     kept: AgentApprovalPending | null | undefined

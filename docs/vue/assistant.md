@@ -109,6 +109,28 @@ values, show per-item decisions only when allowed, and offer session-wide
 permission only when the controller supplies it. That permission remains
 revocable from the assistant.
 
+Expanding a widget review opens its full proposal list in the conversation
+region. The transcript stays mounted and hidden while the review is open.
+Back or Escape returns to the preview and restores focus to its expansion
+control. A new approval, a closed panel, or KeepAlive suspension closes the
+full review. Table approvals announce their summary through a dedicated
+`agent-approval-status` live region that stays mounted before arrival and after
+settlement.
+
+Custom surfaces can control `ApprovalReviewChrome` with `expanded`,
+`onExpand`, and `onBack`. An explicit `expanded: false` remains collapsed
+until the host accepts the request; omitting `expanded` retains the inline,
+uncontrolled review. These callbacks follow the same pending-approval and
+active-scope checks as decision controls.
+
+`AgentApprovalPending.identity` is an optional opaque token for one approval
+transaction. The neutral agent supplies a frozen token that stays the same
+when only decisions change. Hosts supplying approval state directly should
+retain it across decision snapshots and replace it for a new transaction.
+Legacy hosts can omit it, but must provide a new proposal-array or operation
+reference for a new approval; reusing those references cannot identify a
+replacement transaction reliably.
+
 Reactive configuration getters create one computed snapshot per dependency
 change. Read Vue refs or reactive props inside the getter; changing a plain
 closed-over variable is not a reactive update. Raw option objects and ref
@@ -125,6 +147,20 @@ Receipts come from actual execution results. Staged writes still ask the user
 to save in the table. Foreign table changes can invalidate undo. Streaming text
 is rendered as text and never interpreted as HTML or proof that an action ran.
 
+The actions disclosure opens a named receipt group with a native list. Each
+undoable receipt can have its own Undo; when multiple receipts can be undone
+individually, the heading offers Undo all for the turn. A single receipt does
+not duplicate its own Undo in the heading. When receipt display is disabled,
+the turn's Undo remains available on its own. Blocked turn undo includes a
+visible explanation next to the disabled control.
+
+Receipt and turn undo controls, and host message actions such as a Save offer,
+capture the callback they were rendered for. Closing their receipt group,
+replacing their owner or callback, suspending KeepAlive, or disposing the
+surface permanently retires retained handlers. Fresh controls after activation
+remain usable. A receipt's save reminder is informational; persistence still
+belongs to the table's normal host-controlled save path.
+
 ## Keyboard, presentation, and speech
 
 Enter sends the draft or answers the active question. Shift+Enter creates a
@@ -132,6 +168,10 @@ newline, and IME composition is preserved. The composer reflects disconnected,
 busy, awaiting-user, approval, detached, and error states. Escape closes the
 conversation; focus returns to the launcher. A floating window becomes a modal
 sheet below the neutral minimum width, and RTL is forwarded to modal surfaces.
+Within a full approval, Escape first returns to the conversation. The native
+examples control uses `details`, `summary`, and a `menu` of command buttons.
+Arrow keys, Home, and End move through its commands; Escape closes the list
+and returns focus to its trigger. Busy and disconnected states disable it.
 
 Speech is separately opt-in through `useSpeechInput`. Pass its computed `view`
 to the surface's `speech` prop. Browser dictation only changes the draft.

@@ -74,6 +74,7 @@ export interface AgentApprovalPending {
     readonly approve: () => void;
     readonly decideAt?: (index: number, approved: boolean) => void;
     readonly decisions: readonly AgentApprovalDecision[];
+    readonly identity?: object;
     readonly operation?: AgentApprovalOperation;
     readonly presentation: ApprovalPresentation;
     readonly proposals: readonly AgentApprovalProposal[];
@@ -5366,7 +5367,7 @@ export function measureColumnWidth(root: Element | null, key: string): number | 
 export function measuredToolbarHeight(element: Pick<Element, "getBoundingClientRect">): number;
 
 // @public
-export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[]): string;
+export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[], aggregationLabels?: Readonly<Record<string, string | undefined>>): string;
 
 // @public
 export interface MergedRowActions<TRow> {
@@ -5960,7 +5961,7 @@ export interface PivotOptions<TRow> {
 }
 
 // @public
-export function pivotPanelZones(fields: readonly PivotField[], config: PivotConfig, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">): PivotZoneModel[];
+export function pivotPanelZones(fields: readonly PivotField[], config: PivotConfig, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">, aggregationLabels?: Readonly<Record<string, string | undefined>>): PivotZoneModel[];
 
 // @public
 export interface PivotResult {

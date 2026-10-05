@@ -21,7 +21,6 @@ import {
 import {
   computed,
   h,
-  mergeProps,
   onBeforeUnmount,
   onBeforeUpdate,
   shallowRef,
@@ -36,6 +35,8 @@ import {
   NATIVE_GROUP_ROW,
   nativeGroupRowSlotKey,
 } from "./nativeHierarchyControlSlots";
+import { NativeLoadingState } from "./NativeLoadingState";
+import { NativeRowActions } from "./NativeRowActions";
 import type { DataTableProps, DataTableSlots } from "./types";
 
 defineOptions({ inheritAttrs: false });
@@ -92,6 +93,7 @@ const hasToolbarExtras = computed(
     shell.hasActionToolbar.value
 );
 const ToolbarExtras = () => shell.renderToolbarExtras({ ...names.value });
+const ActiveFilterChips = () => shell.renderActiveFilterChips();
 const BatchEditBar = () => shell.renderBatchEditBar();
 const AgentApprovalSurface = () =>
   shell.renderAgentApproval({ ...names.value });
@@ -109,16 +111,12 @@ function controls(): TableChromeSlots<TRow> {
     ColumnGroupToggle: nativeColumnGroupToggle,
     ResizeHandle: ({ attrs }) => h("span", attrs),
     RowActions: ({ controls: actions }) =>
-      actions.map((action) =>
-        h(
-          "button",
-          mergeProps(action.attrs, {
-            key: action.key,
-            class: names.value.rowAction,
-          }),
-          action.label
-        )
-      ),
+      h(NativeRowActions<TRow>, {
+        controls: actions,
+        layout: props.rowActionsLayout,
+        label: table.labels.value.rowActionsMenu,
+        classNames: names.value,
+      }),
     ...nativeHierarchyControls<TRow>(),
     GroupRow: (props) => {
       if (!shell.slotFills.value.get(NATIVE_GROUP_ROW.id)?.length)
@@ -133,6 +131,7 @@ function controls(): TableChromeSlots<TRow> {
     },
     cell: slots.cell,
     header: slots.header,
+    headerActions: slots.headerActions,
     footer: slots.footer,
   };
 }
@@ -193,6 +192,9 @@ const liveStyle = {
       v-if="shell.rowReorder.value"
       role="status"
       aria-live="polite"
+      aria-atomic="true"
+      data-adapttable-part="row-reorder-announcer"
+      :class="names.rowReorderAnnouncer"
       :style="liveStyle"
       >{{ shell.rowReorder.value.snapshot.announcement }}</span
     >
@@ -213,6 +215,20 @@ const liveStyle = {
         :class="names.searchWrapper"
       >
         <span :style="liveStyle">{{ table.labels.value.search }}</span>
+        <svg
+          data-adapttable-part="search-icon"
+          :class="names.searchIcon"
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          aria-hidden="true"
+          focusable="false"
+          fill="none"
+          stroke="currentColor"
+        >
+          <circle cx="10" cy="10" r="6" />
+          <path d="m15 15 5 5" />
+        </svg>
         <input
           v-bind="table.searchInputAttrs()"
           data-adapttable-part="search"
@@ -270,6 +286,7 @@ const liveStyle = {
       </button>
       <slot name="toolbar" />
     </div>
+    <ActiveFilterChips />
     <BulkActions />
     <BatchEditBar />
     <AgentApprovalSurface />
@@ -332,10 +349,19 @@ const liveStyle = {
         <div
           v-if="table.bodyRegion.value === 'skeleton'"
           role="status"
+          aria-busy="true"
           data-adapttable-part="loading"
           :class="names.loading"
         >
-          <slot name="loading">{{ table.labels.value.loading }}</slot>
+          <slot name="loading">
+            <NativeLoadingState
+              :rows="skeletonRows ?? shell.source.value.limit"
+              :columns="shell.desktop.value.columnCount"
+              :mobile="table.isMobile.value"
+              :class-names="names"
+            />
+            <span :style="liveStyle">{{ table.labels.value.loading }}</span>
+          </slot>
         </div>
         <output
           v-else-if="
@@ -487,8 +513,8 @@ const liveStyle = {
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      data-adapttable-part="status"
-      :class="names.status"
+      data-adapttable-part="table-status-announcer"
+      :class="[names.tableStatusAnnouncer, names.status]"
       :style="liveStyle"
       >{{ table.statusAnnouncement.value }}</span
     >

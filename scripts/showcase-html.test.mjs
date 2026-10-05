@@ -48,11 +48,11 @@ describe("the generated showcase pages", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
     // features — across all eight kits; all nine Angular kits' landings
     // plus all twenty-one feature destinations; and the eight replaced top-level
-    // addresses, two Angular modes and fourteen native Vue previews. Kit `/accessibility/` URLs are matrix pages again, not
+    // addresses, two Angular modes and fifteen native Vue previews. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2 + 14);
+    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2 + 16);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 
@@ -76,7 +76,9 @@ describe("the generated showcase pages", () => {
       VUE_NATIVE_PAGES.map((page) => page.path),
       [
         "unstyled",
+        "unstyled/workspace",
         "unstyled/assistant",
+        "unstyled/table-surfaces",
         "unstyled/table-footers",
         "unstyled/filter-editing",
         "unstyled/composition",

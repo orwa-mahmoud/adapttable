@@ -200,7 +200,7 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
           measuredMargin.value = nextMargin;
         const leadingWidth = [
           ...node.querySelectorAll(
-            '[data-adapttable-part="selection-header"], [data-adapttable-part="reorder-header"]'
+            '[data-adapttable-part="expand-header"], [data-adapttable-part="selection-header"], [data-adapttable-part="reorder-header"]'
           ),
         ].reduce(
           (width, control) => width + control.getBoundingClientRect().width,

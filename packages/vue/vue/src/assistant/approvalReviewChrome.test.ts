@@ -70,6 +70,13 @@ describe("approval review", () => {
       alwaysAllow,
     };
     const host = mount(pending);
+    expect(host.find("agent-approval")?.hasAttribute("aria-live")).toBe(false);
+    expect(host.find("agent-approval-status")?.getAttribute("aria-live")).toBe(
+      "polite"
+    );
+    expect(host.find("agent-approval-status")?.textContent).toBe(
+      host.find("approval-review-summary")?.textContent
+    );
     expect(host.root.textContent).toContain("$10");
     expect(host.root.textContent).toContain("Salary");
     expect(host.root.textContent).toContain("Unavailable");
@@ -106,6 +113,32 @@ describe("approval review", () => {
     host.input.value = { ...host.input.value, pending: undefined };
     await nextTick();
     expect(host.root.textContent).toBe("");
+  });
+  it("keeps its dedicated live region mounted before arrival and after settlement", async () => {
+    const host = mount();
+    const status = host.find("agent-approval-status");
+    expect(status?.tagName).toBe("DIV");
+    expect(status?.textContent).toBe("");
+    host.input.value = {
+      ...host.input.value,
+      pending: {
+        presentation: "table",
+        proposals: [{ rowKey: "one", after: "new" }],
+        decisions: ["pending"],
+        approve: vi.fn(),
+        reject: vi.fn(),
+      },
+    };
+    await nextTick();
+    expect(host.find("agent-approval-status")).toBe(status);
+    expect(status?.textContent).toBe(
+      host.find("approval-review-summary")?.textContent
+    );
+    host.input.value = { ...host.input.value, pending: undefined };
+    await nextTick();
+    expect(host.find("agent-approval-status")).toBe(status);
+    expect(status?.textContent).toBe("");
+    expect(host.find("agent-approval")).toBeNull();
   });
   it("renders atomic operations without invented row proposals and rejects stale events", async () => {
     const approve = vi.fn();

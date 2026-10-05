@@ -118,7 +118,7 @@ describe("column and custom footers", () => {
     expect(footer.tagName).toBe("TFOOT");
     expect(footer.className).toBe("sum");
     expect(find(footer, part("summary-row")).className).toBe("sum-row");
-    expect(values(footer)).toEqual(["", "", "", "", "60", ""]);
+    expect(values(footer)).toEqual(["", "", "", "", "", "60", ""]);
     expect(
       [...footer.querySelectorAll("td")].every(
         (cell) => cell.className === "sum-cell"

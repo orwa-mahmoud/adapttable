@@ -106,13 +106,13 @@ describe("native optional rows and columns", () => {
       });
       await settle();
       const actions = view.root.querySelectorAll<HTMLButtonElement>(
-        part("row-action")
+        part("action-button")
       );
       expect(actions).toHaveLength(9);
       expect(actions[0]?.classList.contains("action-hook")).toBe(true);
       node<HTMLButtonElement>(
         view.root,
-        `${part("row-action")}[aria-label="Open row"]`
+        `${part("action-button")}[aria-label="Open row"]`
       ).click();
       await settle();
       expect(run).toHaveBeenCalledExactlyOnceWith(rows[0]);
@@ -173,7 +173,7 @@ describe("native optional rows and columns", () => {
     expect(view.root.textContent).not.toContain("Hidden");
     const disabled = node<HTMLButtonElement>(
       view.root,
-      `${part("row-action")}[aria-label="Disabled"]`
+      `${part("action-button")}[aria-label="Disabled"]`
     );
     expect(disabled.disabled).toBe(true);
     expect(disabled.title).toBe("Locked");
@@ -181,7 +181,7 @@ describe("native optional rows and columns", () => {
     expect(run).not.toHaveBeenCalled();
     node<HTMLButtonElement>(
       view.root,
-      `${part("row-action")}[aria-label="Remove"]`
+      `${part("action-button")}[aria-label="Remove"]`
     ).click();
     expect(confirm).toHaveBeenCalledOnce();
     expect(confirm.mock.calls[0]?.[0]).toMatchObject({
@@ -199,7 +199,7 @@ describe("native optional rows and columns", () => {
       ],
     });
     await settle();
-    const button = node<HTMLButtonElement>(view.root, part("row-action"));
+    const button = node<HTMLButtonElement>(view.root, part("action-button"));
     view.props.value = { ...view.props.value, features: [] };
     await settle();
     button.click();
@@ -220,7 +220,7 @@ describe("native optional rows and columns", () => {
       await settle();
       const target = node<HTMLElement>(view.root, '[data-row-id="c"]');
       const pin = [
-        ...target.querySelectorAll<HTMLButtonElement>(part("row-action")),
+        ...target.querySelectorAll<HTMLButtonElement>(part("action-button")),
       ].find((button) => button.getAttribute("aria-label")?.includes("top"));
       if (!pin) throw new Error("Missing top pin");
       pin.click();
@@ -384,7 +384,7 @@ describe("native optional rows and columns", () => {
     expect(error).not.toHaveBeenCalled();
     node<HTMLButtonElement>(
       root,
-      `${part("row-action")}[aria-label="Open"]`
+      `${part("action-button")}[aria-label="Open"]`
     ).click();
     expect(run).toHaveBeenCalledExactlyOnceWith(rows[2]);
   });

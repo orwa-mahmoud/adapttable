@@ -9,6 +9,7 @@ import {
 import { defineComponent, h, nextTick, shallowRef, useId, watch } from "vue";
 
 import { useScopeActivity } from "../store";
+import { approvalIdentity } from "./approvalIdentity";
 import type { AgentApprovalProps, ApprovalReviewSlots } from "./contracts";
 
 /** @public */
@@ -17,6 +18,10 @@ export interface ApprovalReviewChromeProps {
   readonly labels?: TableLabels;
   readonly slots: ApprovalReviewSlots;
   readonly expanded?: boolean;
+  /** Delegate expansion to a containing surface; omitted keeps an inline review. */
+  readonly onExpand?: () => void;
+  /** Return from a controlled full review to its conversation. */
+  readonly onBack?: () => void;
   readonly className?: string;
   readonly buttonClassName?: string;
 }
@@ -65,35 +70,56 @@ export const ApprovalReviewChrome = defineComponent(
     const active = useScopeActivity();
     const expanded = shallowRef(false);
     const heading = useId();
+    const generation = shallowRef(0);
     watch(
-      () =>
-        [
-          props.pending.proposals,
-          props.pending.operation,
-          props.pending.presentation,
-        ] as const,
+      active,
+      (enabled) => {
+        if (!enabled) generation.value += 1;
+      },
+      { flush: "sync" }
+    );
+    watch(
+      [() => approvalIdentity(props.pending), () => props.pending.presentation],
       () => {
         expanded.value = false;
       }
     );
     // Let Vue deliver a replacement approval before an old DOM event can decide it.
-    const decide = (pending: AgentApprovalPending, action: () => void) => {
-      void Promise.resolve().then(() =>
-        nextTick(() => {
-          if (active.value && props.pending === pending) action();
-        })
-      );
+    const runDecision = async (
+      pending: AgentApprovalPending,
+      action: () => void,
+      owner: number
+    ) => {
+      await Promise.resolve();
+      await nextTick();
+      if (
+        active.value &&
+        generation.value === owner &&
+        props.pending === pending
+      )
+        action();
     };
-    const rowDecision =
-      (pending: AgentApprovalPending, index: number, approved: boolean) => () =>
-        decide(pending, () => pending.decideAt?.(index, approved));
+    const decide = (pending: AgentApprovalPending, action: () => void) => {
+      const owner = generation.value;
+      return () => {
+        void runDecision(pending, action, owner);
+      };
+    };
+    const rowDecision = (
+      pending: AgentApprovalPending,
+      index: number,
+      approved: boolean
+    ) => decide(pending, () => pending.decideAt?.(index, approved));
     return () => {
       const pending = props.pending;
       const review = approvalReview(pending, props.labels);
       if (!review) return null;
       const copy = resolveLabels(props.labels);
-      const full = props.expanded === true || expanded.value;
+      const full = props.expanded ?? expanded.value;
+      const uncontrolled = props.expanded === undefined;
       const controls = props.slots;
+      const onExpand = props.onExpand;
+      const onBack = props.onBack;
       const button = (label: string, part: string, onClick: () => void) => ({
         label,
         part,
@@ -196,7 +222,11 @@ export const ApprovalReviewChrome = defineComponent(
                 "div",
                 {
                   "data-adapttable-part": "approval-review-scroll",
-                  style: { overflowY: "auto", maxHeight: "16em", minHeight: 0 },
+                  style: {
+                    overflowY: "auto",
+                    maxHeight: full ? undefined : "16em",
+                    minHeight: 0,
+                  },
                 },
                 [
                   controls.List({
@@ -213,17 +243,26 @@ export const ApprovalReviewChrome = defineComponent(
                 button(
                   review.reviewAllLabel ?? copy.assistantDetail,
                   "approval-review-expand",
-                  () => {
-                    expanded.value = true;
-                  }
+                  decide(pending, () => {
+                    if (props.onExpand !== onExpand) return;
+                    if (onExpand) onExpand();
+                    else if (uncontrolled && props.expanded === undefined)
+                      expanded.value = true;
+                  })
                 )
               )
             : null,
-          full && !props.expanded
+          full && (props.onBack || props.expanded === undefined)
             ? controls.Action(
-                button(copy.backToConversation, "approval-review-back", () => {
-                  expanded.value = false;
-                })
+                button(
+                  copy.backToConversation,
+                  "approval-review-back",
+                  decide(pending, () => {
+                    if (props.onBack !== onBack) return;
+                    if (onBack) onBack();
+                    else expanded.value = false;
+                  })
+                )
               )
             : null,
           h("div", { "data-adapttable-part": "approval-review-actions" }, [
@@ -232,17 +271,21 @@ export const ApprovalReviewChrome = defineComponent(
                   button(
                     copy.alwaysAllowProposal,
                     "agent-approval-always-allow",
-                    () => decide(pending, () => pending.alwaysAllow?.())
+                    decide(pending, () => pending.alwaysAllow?.())
                   )
                 )
               : null,
             controls.Reject(
-              button(review.rejectLabel, "agent-approval-reject", () =>
+              button(
+                review.rejectLabel,
+                "agent-approval-reject",
                 decide(pending, pending.reject)
               )
             ),
             controls.Approve(
-              button(review.approveLabel, "agent-approval-approve", () =>
+              button(
+                review.approveLabel,
+                "agent-approval-approve",
                 decide(pending, pending.approve)
               )
             ),
@@ -258,6 +301,8 @@ export const ApprovalReviewChrome = defineComponent(
       "labels",
       "slots",
       "expanded",
+      "onExpand",
+      "onBack",
       "className",
       "buttonClassName",
     ],
@@ -270,18 +315,41 @@ export interface AgentApprovalChromeProps extends AgentApprovalProps {
 }
 /** @public */
 export const AgentApprovalChrome = defineComponent(
-  (props: AgentApprovalChromeProps) => () =>
-    props.pending?.presentation === "table"
-      ? h(
-          "section",
-          {
-            "data-adapttable-part": "agent-approval",
-            class: props.className,
-            "aria-live": "polite",
+  (props: AgentApprovalChromeProps) => () => {
+    const pending =
+      props.pending?.presentation === "table" ? props.pending : null;
+    const summary = approvalReview(pending, props.labels)?.summary ?? "";
+    return [
+      h(
+        "div",
+        {
+          "data-adapttable-part": "agent-approval-status",
+          "aria-live": "polite",
+          "aria-atomic": "true",
+          style: {
+            position: "absolute",
+            width: "1px",
+            height: "1px",
+            overflow: "hidden",
+            clipPath: "inset(50%)",
+            whiteSpace: "nowrap",
           },
-          [h(ApprovalReviewChrome, { ...props, pending: props.pending })]
-        )
-      : null,
+        },
+        summary
+      ),
+      pending
+        ? h(
+            "section",
+            {
+              "data-adapttable-part": "agent-approval",
+              class: props.className,
+              "aria-label": summary,
+            },
+            [h(ApprovalReviewChrome, { ...props, pending })]
+          )
+        : null,
+    ];
+  },
   {
     name: "AgentApprovalChrome",
     props: ["pending", "labels", "slots", "className", "buttonClassName"],

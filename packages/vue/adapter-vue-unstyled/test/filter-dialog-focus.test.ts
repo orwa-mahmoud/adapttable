@@ -252,7 +252,7 @@ describe("native dialog close focus", () => {
     const view = fixture();
     await tick();
     const event = new Event("cancel", { cancelable: true });
-    find(document.body, part("filters-panel")).dispatchEvent(event);
+    find(document.body, "dialog").dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
     await tick();
     expect(document.activeElement).toBe(view.anchor.value);

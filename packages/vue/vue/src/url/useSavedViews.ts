@@ -23,7 +23,11 @@ export type {
   SavedViewVisibility,
 } from "@adapttable/core";
 export { SAVED_VIEW_VERSION } from "@adapttable/core";
-export type UseSavedViewsOptions = SavedViewsControllerOptions;
+/** Options for the neutral view list and any host-owned pending URL slices. @public */
+export interface UseSavedViewsOptions extends SavedViewsControllerOptions {
+  /** Synchronously commit pending host URL state before saving or applying a view. */
+  readonly flushViewState?: () => void;
+}
 export interface UseSavedViewsResult {
   readonly views: ComputedRef<readonly SavedView[]>;
   readonly defaultView: ComputedRef<SavedView | undefined>;
@@ -34,6 +38,17 @@ export interface UseSavedViewsResult {
   readonly move: (name: string, delta: -1 | 1) => void;
   readonly setDefault: (name: string) => void;
   readonly reload: () => void;
+}
+
+function sameUrlDestination(
+  left: SavedViewsControllerOptions,
+  right: SavedViewsControllerOptions
+): boolean {
+  return (
+    left.urlAdapter === right.urlAdapter &&
+    (left.urlKey ?? "") === (right.urlKey ?? "") &&
+    (left.urlSync ?? true) === (right.urlSync ?? true)
+  );
 }
 
 export function useSavedViews(
@@ -76,6 +91,9 @@ export function useSavedViews(
     unsubscribe();
   });
   let configuring = false;
+  let destinationVersion = 0;
+  let requested = resolved.value;
+  let requestedActive = toValue(active);
   let pending:
     { next: SavedViewsControllerOptions; enabled: boolean } | undefined;
   const configure = (
@@ -109,6 +127,18 @@ export function useSavedViews(
   watch(
     [resolved, () => toValue(active)],
     ([next, enabled]) => {
+      // Record ownership changes when requested, even if configure is
+      // already publishing and this update must wait for its loop.
+      if (
+        next.storageKey !== requested.storageKey ||
+        next.storage !== requested.storage ||
+        next.store !== requested.store ||
+        !sameUrlDestination(next, requested) ||
+        enabled !== requestedActive
+      )
+        destinationVersion += 1;
+      requested = next;
+      requestedActive = enabled;
       pending = { next, enabled };
       if (configuring) return;
       configuring = true;
@@ -128,15 +158,37 @@ export function useSavedViews(
   const run = (action: () => void): void => {
     if (!disposed && toValue(active)) action();
   };
+  let flushing = false;
+  const withFlushedState = (action: () => void): void => {
+    run(() => {
+      if (flushing) return;
+      flushing = true;
+      const current = controller;
+      const version = destinationVersion;
+      const destination = resolved.value;
+      try {
+        options.value.flushViewState?.();
+        if (
+          controller === current &&
+          version === destinationVersion &&
+          sameUrlDestination(destination, resolved.value)
+        )
+          run(action);
+      } finally {
+        flushing = false;
+      }
+    });
+  };
   return {
     views: computed(() => snapshot.value.views),
     defaultView: computed(() => snapshot.value.defaultView),
     save: (name: string): void =>
       run(() => {
         const trimmed = name.trim();
-        if (trimmed) controller.save(trimmed);
+        if (trimmed) withFlushedState(() => controller.save(trimmed));
       }),
-    apply: (name: string): void => run(() => controller.apply(name)),
+    apply: (name: string): void =>
+      withFlushedState(() => controller.apply(name)),
     remove: (name: string): void => run(() => controller.remove(name)),
     rename: (from: string, to: string): void =>
       run(() => controller.rename(from, to)),

@@ -216,15 +216,22 @@ export function isPivotReady(config: PivotConfig): boolean {
 
 /**
  * The display label for one measure, for the panel and the column header.
+ * Optional aggregation captions affect presentation only; authored labels win.
  *
  * @public
  */
 export function measureLabel(
   measure: PivotMeasure,
-  fields: readonly PivotField[]
+  fields: readonly PivotField[],
+  aggregationLabels?: Readonly<Record<string, string | undefined>>
 ): string {
   if (measure.label !== undefined) return measure.label;
   const field = fields.find((candidate) => candidate.key === measure.key);
   const name = field?.label ?? measure.key;
-  return typeof measure.agg === "string" ? `${measure.agg} ${name}` : name;
+  if (typeof measure.agg !== "string") return name;
+  const aggregation =
+    aggregationLabels && Object.hasOwn(aggregationLabels, measure.agg)
+      ? (aggregationLabels[measure.agg] ?? measure.agg)
+      : measure.agg;
+  return `${aggregation} ${name}`;
 }

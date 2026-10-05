@@ -38,6 +38,6 @@ export interface CellNavigationOptions {
 export type { FindInTableState, GridFocusState };
 
 export const GRID_ANNOUNCER = featureSlotKey<
-  GridFocusAnnouncerSlotProps<GridFocusState>
+  GridFocusAnnouncerSlotProps<GridFocusState> & { readonly className?: string }
 >(GRID_FOCUS_ANNOUNCER.id, { single: true });
 export type { CellRange };

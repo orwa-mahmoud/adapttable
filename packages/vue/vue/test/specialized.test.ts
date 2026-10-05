@@ -22,6 +22,7 @@ import {
 import type { TableBodySlot } from "../src/layout/tableModels";
 import {
   pivot,
+  type PivotConfig,
   PivotPanelChrome,
   type PivotPanelSlots,
   pivotTableModel,
@@ -180,6 +181,70 @@ describe("specialized opt-in data entries", () => {
       expect(column.exportValue?.({ values: [2, 5] })).toBe("2, 5");
     }
   );
+  it("shares Arabic aggregation captions with measure controls without translating configuration", () => {
+    const fields: Parameters<PivotPanelSlots["Field"]>[0][] = [];
+    const aggregations: Parameters<PivotPanelSlots["Agg"]>[0][] = [];
+    const config: PivotConfig = {
+      rows: [],
+      columns: [],
+      measures: [
+        { key: "score", agg: "sum" },
+        { key: "score", agg: "avg", label: "Authored total" },
+        { key: "score", agg: "median" },
+        { key: "score", agg: () => 1 },
+      ],
+    };
+    const changed = vi.fn();
+    PivotPanelChrome({
+      fields: [{ key: "score", label: "القيمة" }],
+      config,
+      onChange: changed,
+      labels: {
+        selectionSum: "المجموع",
+        groupingAverage: "المتوسط",
+        selectionCount: "العدد",
+        selectionMin: "الأدنى",
+        selectionMax: "الأعلى",
+      },
+      slots: {
+        Surface: () => null,
+        Zone: () => null,
+        Add: () => null,
+        Field: (props) => {
+          fields.push(props);
+          return null;
+        },
+        Agg: (props) => {
+          aggregations.push(props);
+          return null;
+        },
+      },
+    });
+    expect(fields.map((field) => field.label)).toEqual([
+      "المجموع القيمة",
+      "Authored total",
+      "median القيمة",
+      "القيمة",
+    ]);
+    expect(required(aggregations[0]).optionLabels).toEqual({
+      sum: "المجموع",
+      avg: "المتوسط",
+      count: "العدد",
+      min: "الأدنى",
+      max: "الأعلى",
+    });
+    required(aggregations[0]).onChange("avg");
+    expect(changed).toHaveBeenLastCalledWith({
+      ...config,
+      measures: [{ key: "score", agg: "avg" }, ...config.measures.slice(1)],
+    });
+    required(fields[0]).onRemove();
+    expect(changed).toHaveBeenLastCalledWith({
+      ...config,
+      measures: config.measures.slice(1),
+    });
+    expect(config.measures[0]).toEqual({ key: "score", agg: "sum" });
+  });
   it("calls required pivot controls with authoritative host-owned changes", () => {
     const changed = vi.fn();
     const rendered: Record<string, unknown>[] = [];

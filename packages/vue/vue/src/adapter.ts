@@ -16,10 +16,13 @@ export {
   columnMenuSlotKey,
   type ColumnMenuSlotProps,
 } from "./columns/columnMenuContracts";
+export type { UseColumnLayoutStorageStateResult } from "./columns/useColumnLayoutStorageState";
 export * from "./featureLifecycle";
 export type { GroupingExtras } from "./features/grouping";
 export * from "./features/tableFeature";
 export * from "./featureState";
+export type { FilterHeaderSlots } from "./filters/filterHeaderControl";
+export type { FilterHeaderRowProps } from "./filters/filterHeaderRow";
 export type { GroupCollapseOptions } from "./grouping/groupCollapse";
 export {
   GroupRowChrome,
@@ -64,6 +67,7 @@ export type {
   SavedViewsPanelSlots,
 } from "./url/SavedViewsPanelChrome";
 export * from "./url/SavedViewsPanelChrome";
+export type { UseColumnLayoutUrlStateResult } from "./url/useColumnLayoutUrlState";
 export type { UseDensityUrlStateResult } from "./url/useDensityUrlState";
 export type { UseGroupCollapseUrlStateResult } from "./url/useGroupCollapseUrlState";
 export type { UseRowPinningUrlStateResult } from "./url/useRowPinningUrlState";

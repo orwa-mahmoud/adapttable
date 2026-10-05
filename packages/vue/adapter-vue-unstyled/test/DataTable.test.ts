@@ -133,9 +133,10 @@ describe("native DataTable", () => {
       ).getAttribute("aria-label")
     ).toBe("Search");
     expect(
-      find(fixture.element, '[data-adapttable-part="status"]').getAttribute(
-        "aria-live"
-      )
+      find(
+        fixture.element,
+        '[data-adapttable-part="table-status-announcer"]'
+      ).getAttribute("aria-live")
     ).toBe("polite");
   });
   it("keeps controlled selection authoritative and emits exactly one request per action", async () => {

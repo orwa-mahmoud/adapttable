@@ -12,6 +12,7 @@ import {
 import { join } from "node:path";
 
 import { listPackages, packageDir, REPO_ROOT } from "./packages.mjs";
+import { isVueCssExport } from "./vue-export-kind.mjs";
 
 export const VUE_PACKAGES = ["vue", "adapter-vue-unstyled", "ai-vue"];
 export const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
@@ -22,7 +23,20 @@ export const writeJson = (file, value) =>
 export function builtVueEntries(packageRoot) {
   const manifest = readJson(join(packageRoot, "package.json"));
   return Object.entries(manifest.exports)
-    .filter(([key]) => key !== "./package.json")
+    .filter(([key, target]) => {
+      if (key === "./package.json") return false;
+      if (!isVueCssExport(target)) return true;
+      const css = join(packageRoot, target);
+      assert.ok(
+        existsSync(css),
+        `Build ${manifest.name} before checking CSS: missing ${target}`
+      );
+      assert.ok(
+        readFileSync(css, "utf8").trim(),
+        `${manifest.name}${key}: empty stylesheet`
+      );
+      return false;
+    })
     .map(([key, entry]) => {
       for (const mode of ["import", "require"]) {
         const file = entry[mode]?.types;

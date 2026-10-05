@@ -16,7 +16,6 @@ import {
   builtVueEntries,
   builtVueProfile,
   copyBuiltPackages,
-  prepareVueCell,
 } from "./vue-peer-consumers.mjs";
 
 function workspace(t) {
@@ -87,6 +86,30 @@ describe("built Vue peer consumer isolation", () => {
     );
   });
 
+  it("requires a real nonempty CSS artifact without exempting a CSS-named script", (t) => {
+    const root = workspace(t);
+    const dir = addPackage(
+      root,
+      "adapter-vue-unstyled",
+      "@adapttable/vue-unstyled"
+    );
+    const path = join(dir, "package.json");
+    const manifest = JSON.parse(readFileSync(path, "utf8"));
+    manifest.exports["./styles.css"] = "./dist/styles.css";
+    writeFileSync(path, JSON.stringify(manifest));
+    assert.throws(() => builtVueEntries(dir), /missing.*styles\.css/);
+    writeFileSync(join(dir, "dist/styles.css"), "\n");
+    assert.throws(() => builtVueEntries(dir), /empty stylesheet/);
+    writeFileSync(
+      join(dir, "dist/styles.css"),
+      ".native-overlay { background: Canvas; }\n"
+    );
+    assert.equal(builtVueEntries(dir).length, 3);
+    manifest.exports["./styles.css"] = "./dist/styles.js";
+    writeFileSync(path, JSON.stringify(manifest));
+    assert.throws(() => builtVueEntries(dir), /missing import types/);
+  });
+
   it("copies only built local packages and their dependency closure", (t) => {
     const root = workspace(t);
     addPackage(root, "core", "@adapttable/core");
@@ -129,38 +152,5 @@ describe("built Vue peer consumer isolation", () => {
         );
       }
     }
-  });
-
-  it("removes repository source aliases from copied consumer configuration", (t) => {
-    const root = workspace(t);
-    for (const [folder, name] of [
-      ["vue", "@adapttable/vue"],
-      ["adapter-vue-unstyled", "@adapttable/vue-unstyled"],
-      ["ai-vue", "@adapttable/ai-vue"],
-    ])
-      addPackage(root, folder, name);
-    for (const name of ["vue", "vitest", "@types"])
-      mkdirSync(join(root, "node_modules", name), { recursive: true });
-    const fixtures = join(root, "scripts/vue-peer-consumer-fixtures");
-    mkdirSync(fixtures, { recursive: true });
-    writeFileSync(
-      join(fixtures, "tsconfig.json"),
-      JSON.stringify({
-        compilerOptions: {
-          paths: { "@adapttable/vue": ["../../packages/vue/vue/src/index.ts"] },
-        },
-      })
-    );
-    const cell = join(root, "cell");
-    prepareVueCell(cell, join(root, "node_modules/vue"), root);
-    const copied = JSON.parse(
-      readFileSync(join(cell, "consumers/tsconfig.json"), "utf8")
-    );
-    assert.deepEqual(copied.compilerOptions.paths, {});
-    assert.equal(copied.compilerOptions.skipLibCheck, false);
-    assert.equal(
-      existsSync(join(cell, "node_modules/@adapttable/vue/src")),
-      false
-    );
   });
 });

@@ -42,7 +42,8 @@ export function rowActionControls<TRow>(
           disabled: !allowed(),
           title: reason ?? action.label,
           "aria-label": action.label,
-          "data-adapttable-part": "row-action",
+          "data-adapttable-part": "action-button",
+          "data-color": action.color,
           onClick: () => {
             if (!allowed()) return;
             runRowAction(

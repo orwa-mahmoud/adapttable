@@ -40,7 +40,12 @@ import {
 } from "./consumer-fixtures.mjs";
 import { packageDir, packageRel } from "./packages.mjs";
 import { publishedFigures, staleReason } from "./published-figures.mjs";
-import { VUE_RUNTIME_EXTERNALS } from "./vue-consumer-fixtures.mjs";
+import {
+  VUE_RUNTIME_EXTERNALS,
+  vueEmittedCss,
+  vueMissingCss,
+} from "./vue-consumer-fixtures.mjs";
+import { buildVueCssConsumer } from "./vue-css-consumer.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
@@ -84,6 +89,8 @@ function entryCode(fixture) {
   if (extras[0]) {
     code = code.replaceAll("ALSO", join(dist, extras[0]));
   }
+  if (fixture.styleEntryFile)
+    code = code.replaceAll("STYLE", join(dist, fixture.styleEntryFile));
   return code;
 }
 
@@ -100,19 +107,27 @@ export async function measure(fixture, dir) {
   writeFileSync(entry, entryCode(fixture));
 
   const started = performance.now();
-  const bundle = await Rolldown.rolldown({
-    input: entry,
-    external: (id) =>
-      (fixture.framework === "vue" ? VUE_RUNTIME_EXTERNALS : EXTERNAL).some(
-        (re) => re.test(id)
-      ),
-    logLevel: "silent",
-  });
-  const [min, readable] = await Promise.all([
-    bundle.generate({ format: "esm", minify: true }),
-    bundle.generate({ format: "esm" }),
-  ]);
-  await bundle.close();
+  let min;
+  let readable;
+  if (fixture.styleEntryFile) {
+    // Independent builds keep the stateful CSS collection passes separate.
+    min = await buildVueCssConsumer(entry, dir, true);
+    readable = await buildVueCssConsumer(entry, dir, false);
+  } else {
+    const bundle = await Rolldown.rolldown({
+      input: entry,
+      external: (id) =>
+        (fixture.framework === "vue" ? VUE_RUNTIME_EXTERNALS : EXTERNAL).some(
+          (re) => re.test(id)
+        ),
+      logLevel: "silent",
+    });
+    [min, readable] = await Promise.all([
+      bundle.generate({ format: "esm", minify: true }),
+      bundle.generate({ format: "esm" }),
+    ]);
+    await bundle.close();
+  }
   const parseMs = Math.round(performance.now() - started);
 
   const code =
@@ -137,9 +152,14 @@ export async function measure(fixture, dir) {
     leaked: (fixture.absent ?? []).filter((name) =>
       new RegExp(`\\b${name}`).test(code)
     ),
-    missing: (fixture.present ?? []).filter(
-      (name) => !new RegExp(`\\b${name}`).test(code)
-    ),
+    missing: [
+      ...(fixture.present ?? []).filter(
+        (name) => !new RegExp(`\\b${name}`).test(code)
+      ),
+      ...vueMissingCss(fixture, vueEmittedCss(readable.output)).map(
+        (marker) => `CSS ${marker}`
+      ),
+    ],
   };
 }
 
