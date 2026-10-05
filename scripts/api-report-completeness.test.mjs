@@ -45,6 +45,8 @@ function fixture(t) {
     "api-report-diagnostics.mjs",
     "api-report-references.mjs",
     "api-report-retention.mjs",
+    "api-value-graph.mjs",
+    "api-declaration-origins.mjs",
     "api-report-selection.mjs",
     "api-warnings.mjs",
     "packed-names.mjs",
@@ -56,7 +58,12 @@ function fixture(t) {
   const dependencies = fileURLToPath(
     new URL("../node_modules/", import.meta.url)
   );
-  for (const dependency of ["@microsoft", "@types", "typescript"])
+  for (const dependency of [
+    "@microsoft",
+    "@jridgewell",
+    "@types",
+    "typescript",
+  ])
     symlinkSync(
       realpathSync(join(dependencies, dependency)),
       join(modules, dependency),
@@ -90,9 +97,13 @@ export interface StaticTableFeature {
 }
 
 function run(root, ...args) {
+  return invokeScript(root, [], args);
+}
+
+function invokeScript(root, nodeOptions, args) {
   const result = spawnSync(
     process.execPath,
-    [join(root, "scripts", "api-reports.mjs"), ...args],
+    [...nodeOptions, join(root, "scripts", "api-reports.mjs"), ...args],
     {
       cwd: root,
       encoding: "utf8",
@@ -303,4 +314,120 @@ export { type Mixed };
     readFileSync(join(paths.root, "diagnostics", "fixture.api.md"), "utf8"),
     fresh
   );
+});
+
+test("queued split-module warnings use the fresh report and preserve unrelated private failures", (t) => {
+  const paths = fixture(t);
+  writeFileSync(
+    paths.entry,
+    'export { value as Public } from "./component.js"; export { take } from "./private.js";'
+  );
+  writeFileSync(
+    join(dirname(paths.entry), "component.d.ts"),
+    `
+    type Normalize<T> = (T extends any ? { [K in keyof T]: T[K] } : { [K in keyof T as K]: T[K] }) & {};
+    declare const implementation: <Row>(props: Normalize<{ rows: Row[] }>) => Row;
+    declare const value: typeof implementation;
+    export { value };
+  `
+  );
+  writeFileSync(
+    join(dirname(paths.entry), "private.d.ts"),
+    `
+    interface implementation { secret: string }
+    declare function take(secret: implementation): void;
+    export { take };
+  `
+  );
+  const local = run(paths.root, "--local");
+  assert.equal(local.status, 1, local.output);
+  assert.match(
+    local.output,
+    /1 published-value-alias\(es\), 1 published property normalizer\(s\), 1 at a front door/
+  );
+  const fresh = readFileSync(paths.report, "utf8");
+  assert.match(fresh, /const Public: typeof implementation/);
+  assert.match(fresh, /rows: Row\[\]/);
+  const check = run(paths.root);
+  assert.equal(check.status, 1, check.output);
+  assert.match(check.output, /1 at a front door/);
+  assert.doesNotMatch(check.output, /out of date/);
+});
+
+test("a failed runner drains warnings without borrowing a stale report", (t) => {
+  const paths = fixture(t);
+  writeFileSync(
+    paths.entry,
+    `
+    declare const implementation: <Row>(row: Row) => Row;
+    declare const RuntimeValue: typeof implementation;
+    export { RuntimeValue };
+  `
+  );
+  const first = run(paths.root, "--local");
+  assert.equal(first.status, 0, first.output);
+  const before = readFileSync(paths.report, "utf8");
+  const preload = join(paths.root, "fail-extraction.cjs");
+  // Fault injection exercises the real CLI's no-fresh-output path after a real
+  // successful extraction left a report that would otherwise prove the alias.
+  writeFileSync(
+    preload,
+    `
+    const { Extractor } = require("@microsoft/api-extractor");
+    const ts = require("typescript");
+    const fs = require("node:fs");
+    Extractor.invoke = (config, options) => {
+      const entry = config.mainEntryPointFilePath;
+      const source = ts.createSourceFile(entry, fs.readFileSync(entry, "utf8"), ts.ScriptTarget.Latest, true);
+      const alias = source.statements[1].declarationList.declarations[0];
+      const position = source.getLineAndCharacterOfPosition(alias.getStart(source));
+      for (const symbol of ["implementation", "PrivateMember"]) options.messageCallback({
+        messageId: "ae-forgotten-export", text: 'The symbol "' + symbol + '" needs to be exported',
+        sourceFilePath: entry, sourceFileLine: position.line + 1, sourceFileColumn: position.character + 1,
+      });
+      return { succeeded: false };
+    };
+  `
+  );
+  const failed = invokeScript(paths.root, ["--require", preload], ["--local"]);
+  assert.equal(failed.status, 1, failed.output);
+  assert.match(failed.output, /extraction errored/);
+  assert.match(failed.output, /2 at a front door/);
+  assert.doesNotMatch(failed.output, /published-value-alias/);
+  assert.equal(readFileSync(paths.report, "utf8"), before);
+});
+
+test("the actual runner rejects ambiguous mapped origins even with retained definitions", (t) => {
+  const paths = fixture(t);
+  writeFileSync(
+    paths.entry,
+    'export { local as Public } from "./component.js";'
+  );
+  const component = join(dirname(paths.entry), "component.d.ts");
+  writeFileSync(
+    component,
+    `
+    type Normalize<T> = (T extends any ? { [K in keyof T]: T[K] } : { [K in keyof T as K]: T[K] }) & {};
+    declare const implementation: <Row>(props: Normalize<{ row: Row }>) => Row;
+    declare const local: typeof implementation;
+    export { local };
+    //# sourceMappingURL=component.d.ts.map
+  `
+  );
+  writeFileSync(join(dirname(component), "origin.vue"), "x\n");
+  writeFileSync(
+    component + ".map",
+    JSON.stringify({
+      version: 3,
+      file: "component.d.ts",
+      sources: ["origin.vue"],
+      names: [],
+      mappings: "AAAA,AAAC",
+    })
+  );
+  const result = run(paths.root, "--local");
+  assert.equal(result.status, 1, result.output);
+  assert.match(result.output, /2 at a front door/);
+  assert.doesNotMatch(result.output, /published-value-alias/);
+  assert.doesNotMatch(result.output, /published property normalizer/);
 });

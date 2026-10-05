@@ -281,9 +281,12 @@ export function isClosedPropertyNormalizer(statement) {
  * Closed property normalizers directly referenced by a proved public value alias.
  * A helper beside an unrelated export is not evidence. Only these exact roots
  * receive includeForgottenExports, so the helper and its full use stay reviewed.
+ * The optional aliases map supplies values already proved through local module edges.
  */
-export function publishedPropertyNormalizers(sourceText) {
-  const aliases = publishedValueAliases(sourceText);
+export function publishedPropertyNormalizers(
+  sourceText,
+  aliases = publishedValueAliases(sourceText)
+) {
   if (aliases.size === 0) return new Map();
   const source = ts.createSourceFile(
     "entry.d.ts",

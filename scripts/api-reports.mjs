@@ -41,11 +41,10 @@ import { entrypoints } from "./api-entrypoints.mjs";
 import { finishApiReportOutput } from "./api-report-diagnostics.mjs";
 import { extractWithReportRetention } from "./api-report-retention.mjs";
 import { selectApiReports } from "./api-report-selection.mjs";
+import { entryValueGraph } from "./api-value-graph.mjs";
 import {
   classifyForgottenExport,
   entryExports,
-  entryPropertyNormalizers,
-  entryValueAliases,
   summarize,
 } from "./api-warnings.mjs";
 import { packageDir } from "./packages.mjs";
@@ -113,6 +112,19 @@ const SAID_ONCE = new Set([
 ]);
 const shown = new Set();
 
+function warningProof(proof, symbol) {
+  return {
+    valueAliases:
+      proof?.kind === "published-value-alias"
+        ? new Map([[symbol, proof.exportedAs]])
+        : new Map(),
+    propertyNormalizers:
+      proof?.kind === "published-property-normalizer"
+        ? new Map([[symbol, proof]])
+        : new Map(),
+  };
+}
+
 function extractOne({ dir, report, entry, isMainEntry }) {
   if (!existsSync(entry)) {
     console.error(`✗ ${report}: missing ${entry} — run \`pnpm build\` first.`);
@@ -122,10 +134,15 @@ function extractOne({ dir, report, entry, isMainEntry }) {
   // declaration being extracted, not against a list kept beside it.
   const entryExported = entryExports(entry);
   const publishedBases = new Set();
-  const valueAliases = entryValueAliases(entry);
-  const propertyNormalizers = valueAliases.size
-    ? entryPropertyNormalizers(entry)
-    : new Map();
+  const valueAliases = entryValueGraph(entry, packageDir(dir));
+  const pendingWarnings = [];
+  // Structural warnings cannot be decided until the fresh report is available.
+  // Keep the Extractor warning visible; classify every queued event afterward.
+  const flushWarnings = (fresh) => {
+    const match = valueAliases.forReport(fresh);
+    for (const message of pendingWarnings.splice(0))
+      handleMessage(message, match(message));
+  };
   // Captured BEFORE extraction: in local mode the extractor writes straight
   // into `etc/`, so reading afterwards would compare the file with itself.
   const committed = existsSync(join(ETC, report))
@@ -175,100 +192,111 @@ function extractOne({ dir, report, entry, isMainEntry }) {
     });
   // Always a "local" build: warnings (undocumented symbols, missing release
   // tags) are review information inside the report, never a gate failure.
+  const handleMessage = (message, proof) => {
+    // Both opening lines occur per invocation, including retention retries.
+    // Each is said once for the run, so the version mismatch stays visible,
+    // but not repeated. `console-preamble` is the line naming the bundled
+    // version; the notice beside it is the one comparing it to this project.
+    if (SAID_ONCE.has(message.messageId)) {
+      if (shown.has(message.messageId)) message.logLevel = "none";
+      shown.add(message.messageId);
+      return;
+    }
+    // This repository exports its internal machinery without an underscore
+    // prefix on purpose — renaming a published symbol to `_name` would be a
+    // breaking change. The tag states the support level; the name does not.
+    if (message.messageId === "ae-internal-missing-underscore") {
+      message.logLevel = "none";
+      return;
+    }
+    if (message.messageId === "ae-unresolved-link") {
+      counts.unresolvedLink += 1;
+      return;
+    }
+    if (message.messageId === "ae-missing-release-tag") {
+      counts.missingReleaseTag += 1;
+      return;
+    }
+    if (message.messageId !== "ae-forgotten-export") {
+      // Only api-extractor's own analysis messages are warnings about this
+      // repository; its console chatter is not.
+      if (message.messageId.startsWith("ae-")) counts.other += 1;
+      return;
+    }
+    const named = /"([A-Za-z_$][\w$]*)"/.exec(message.text);
+    const { kind, base, suffix, exportedAs, referencedBy } =
+      classifyForgottenExport({
+        symbol: named?.[1] ?? "",
+        report,
+        isMainEntry,
+        exports: entryExported,
+        ...warningProof(proof, named?.[1]),
+      });
+    if (kind === "published") {
+      counts.published += 1;
+      publishedBases.add(base);
+      message.logLevel = "none";
+      message.text += ` — deferred: ${report} exports ${base}, and ${suffix} is the bundler's private copy`;
+      return;
+    }
+    if (kind === "published-value-alias") {
+      counts.publishedValueAlias += 1;
+      valueAliasEvidence.add(
+        `${report}: ${named?.[1]} is nameable as typeof ${exportedAs}`
+      );
+      message.logLevel = "none";
+      return;
+    }
+    if (kind === "published-property-normalizer") {
+      counts.publishedPropertyNormalizer += 1;
+      propertyNormalizerEvidence.add(
+        `${report}: ${named?.[1]} only normalizes its own argument's properties in ${referencedBy}, nameable through typeof ${exportedAs}; exact definition retained in report`
+      );
+      // Keep the Extractor warning visible; only the separately proved guard
+      // classification changes. A changed helper fails closed next time.
+      message.text +=
+        " — structurally proved closed property normalizer; exact definition retained in the API report";
+      return;
+    }
+    if (kind === "value-backed") {
+      // Counted and named, never silent: the whole point is that the list
+      // cannot grow without someone deciding it should.
+      counts.valueBacked += 1;
+      message.logLevel = "none";
+      message.text += ` — deferred: ${base} is a runtime value a public type is derived from, and ${report} is sold on being small`;
+      return;
+    }
+    if (kind === "front-door") {
+      counts.frontDoor += 1;
+      findings.push(`${report}: ${named?.[1] ?? "?"} (main entry)`);
+      return;
+    }
+    counts.subpath += 1;
+    findings.push(`${report}: ${named?.[1] ?? "?"}`);
+  };
   const { result, fresh, missingTargets, retainedTargets } =
     extractWithReportRetention({
       includeForgottenExports: valueAliases.size > 0,
       publishedBases,
-      readReport: () => readFileSync(join(OUT, report), "utf8"),
-      invoke: ({ includeForgottenExports, compilerState, messageCallback }) =>
-        Extractor.invoke(configFor(includeForgottenExports), {
+      readReport: () => {
+        const fresh = readFileSync(join(OUT, report), "utf8");
+        flushWarnings(fresh);
+        return fresh;
+      },
+      invoke: ({ includeForgottenExports, compilerState, messageCallback }) => {
+        const result = Extractor.invoke(configFor(includeForgottenExports), {
           localBuild: true,
           showVerboseMessages: false,
           compilerState,
           messageCallback,
-        }),
+        });
+        if (!result.succeeded) flushWarnings();
+        return result;
+      },
       onMessage: (message) => {
-        // Both opening lines occur per invocation, including retention retries.
-        // Each is said once for the run, so the version mismatch stays visible,
-        // but not repeated. `console-preamble` is the line naming the bundled
-        // version; the notice beside it is the one comparing it to this project.
-        if (SAID_ONCE.has(message.messageId)) {
-          if (shown.has(message.messageId)) message.logLevel = "none";
-          shown.add(message.messageId);
-          return;
-        }
-        // This repository exports its internal machinery without an underscore
-        // prefix on purpose — renaming a published symbol to `_name` would be a
-        // breaking change. The tag states the support level; the name does not.
-        if (message.messageId === "ae-internal-missing-underscore") {
-          message.logLevel = "none";
-          return;
-        }
-        if (message.messageId === "ae-unresolved-link") {
-          counts.unresolvedLink += 1;
-          return;
-        }
-        if (message.messageId === "ae-missing-release-tag") {
-          counts.missingReleaseTag += 1;
-          return;
-        }
-        if (message.messageId !== "ae-forgotten-export") {
-          // Only api-extractor's own analysis messages are warnings about this
-          // repository; its console chatter is not.
-          if (message.messageId.startsWith("ae-")) counts.other += 1;
-          return;
-        }
-        const named = /"([A-Za-z_$][\w$]*)"/.exec(message.text);
-        const { kind, base, suffix, exportedAs, referencedBy } =
-          classifyForgottenExport({
-            symbol: named?.[1] ?? "",
-            report,
-            isMainEntry,
-            exports: entryExported,
-            valueAliases,
-            propertyNormalizers,
-          });
-        if (kind === "published") {
-          counts.published += 1;
-          publishedBases.add(base);
-          message.logLevel = "none";
-          message.text += ` — deferred: ${report} exports ${base}, and ${suffix} is the bundler's private copy`;
-          return;
-        }
-        if (kind === "published-value-alias") {
-          counts.publishedValueAlias += 1;
-          valueAliasEvidence.add(
-            `${report}: ${named?.[1]} is nameable as typeof ${exportedAs}`
-          );
-          message.logLevel = "none";
-          return;
-        }
-        if (kind === "published-property-normalizer") {
-          counts.publishedPropertyNormalizer += 1;
-          propertyNormalizerEvidence.add(
-            `${report}: ${named?.[1]} only normalizes its own argument's properties in ${referencedBy}, nameable through typeof ${exportedAs}; exact definition retained in report`
-          );
-          // Keep the Extractor warning visible; only the separately proved guard
-          // classification changes. A changed helper fails closed next time.
-          message.text +=
-            " — structurally proved closed property normalizer; exact definition retained in the API report";
-          return;
-        }
-        if (kind === "value-backed") {
-          // Counted and named, never silent: the whole point is that the list
-          // cannot grow without someone deciding it should.
-          counts.valueBacked += 1;
-          message.logLevel = "none";
-          message.text += ` — deferred: ${base} is a runtime value a public type is derived from, and ${report} is sold on being small`;
-          return;
-        }
-        if (kind === "front-door") {
-          counts.frontDoor += 1;
-          findings.push(`${report}: ${named?.[1] ?? "?"} (main entry)`);
-          return;
-        }
-        counts.subpath += 1;
-        findings.push(`${report}: ${named?.[1] ?? "?"}`);
+        if (message.messageId === "ae-forgotten-export")
+          pendingWarnings.push(message);
+        else handleMessage(message);
       },
     });
   if (!result.succeeded) {
