@@ -122,16 +122,20 @@ describe("injectColumnWindow", () => {
     await fixture.whenStable();
     const window = fixture.componentInstance.window();
     expect(window.enabled).toBe(true);
-    // 300px of 100px columns from 0, plus one either side; c19 is pinned.
+    // The full 300px scroll box includes the 100px pin: c0/c1 are
+    // visible in the remaining 200px, with c2 as the one-column overscan.
+    expect(viewport.clientWidth - WIDTHS.c19!).toBe(200);
     expect(window.columns.map((column) => column.key)).toEqual([
       "c19",
       "c0",
       "c1",
       "c2",
-      "c3",
     ]);
     expect(window.paddingStart).toBe(0);
-    expect(window.paddingEnd).toBe((19 - 4) * 100);
+    expect(window.paddingEnd).toBe((19 - 3) * 100);
+    expect(
+      window.paddingStart + window.columns.length * 100 + window.paddingEnd
+    ).toBe(2000);
   });
 
   it("moves with a horizontal scroll, either direction", async () => {
@@ -149,9 +153,15 @@ describe("injectColumnWindow", () => {
       "c10",
       "c11",
       "c12",
-      "c13",
     ]);
+    // At 1000px, c10/c11 occupy the 200px left after the pin. c9/c12
+    // provide one column of overscan on each side.
+    expect(viewport.clientWidth - WIDTHS.c19!).toBe(200);
     expect(window.paddingStart).toBe(900);
+    expect(window.paddingEnd).toBe(600);
+    expect(
+      window.paddingStart + window.columns.length * 100 + window.paddingEnd
+    ).toBe(2000);
   });
 
   it("widens the window when the box grows", async () => {
@@ -163,10 +173,23 @@ describe("injectColumnWindow", () => {
       viewport.clientWidth = 600;
       FakeResizeObserver.fire();
       await fixture.whenStable();
-      // 600px of 100px columns and one either side, plus the pinned c19.
+      // The pin leaves 500px for c0..c4, followed by one overscan c5.
+      expect(viewport.clientWidth - WIDTHS.c19!).toBe(500);
+      const window = fixture.componentInstance.window();
+      expect(window.columns.map((column) => column.key)).toEqual([
+        "c19",
+        "c0",
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5",
+      ]);
+      expect(window.paddingStart).toBe(0);
+      expect(window.paddingEnd).toBe(1300);
       expect(
-        fixture.componentInstance.window().columns.map((column) => column.key)
-      ).toEqual(["c19", "c0", "c1", "c2", "c3", "c4", "c5", "c6"]);
+        window.paddingStart + window.columns.length * 100 + window.paddingEnd
+      ).toBe(2000);
     } finally {
       viewport.clientWidth = 300;
       uninstall();
