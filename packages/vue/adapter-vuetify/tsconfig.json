@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@adapttable/vue": ["../vue/src/index.ts"],
+      "@adapttable/vue/*": ["../vue/src/*.ts"]
+    }
+  },
+  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],
+  "exclude": ["node_modules", "dist", "coverage", "test/types/invalid"],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "dataAttributes": ["data-*"]
+  }
+}
