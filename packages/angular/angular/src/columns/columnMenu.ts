@@ -13,6 +13,7 @@ import {
 import {
   assertInInjectionContext,
   computed,
+  DestroyRef,
   effect,
   inject,
   Injector,
@@ -182,8 +183,13 @@ export function injectColumnRenameEditor(
   let returnFocus: HTMLElement | null = null;
   let cancelRestore: () => void = () => undefined;
   const restoreFocus = (): void => {
+    cancelRestore();
     cancelRestore = restoreFocusSoon(returnFocus);
   };
+  injector.get(DestroyRef).onDestroy(() => {
+    cancelRestore();
+    returnFocus = null;
+  });
   const cancel = (): void => {
     editor.cancel();
     restoreFocus();
