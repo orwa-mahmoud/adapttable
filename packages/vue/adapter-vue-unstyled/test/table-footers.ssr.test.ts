@@ -56,7 +56,7 @@ describe("footer server rendering", () => {
                     {
                       key: "amount",
                       footer: (context) =>
-                        h("strong", `${id}: ${context.value}`),
+                        h("strong", `${id}: ${String(context.value)}`),
                     },
                   ],
                   rowKey: (row) => row.id,
