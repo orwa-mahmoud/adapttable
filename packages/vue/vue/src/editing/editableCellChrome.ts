@@ -279,7 +279,8 @@ export function useEditableCellModel<TRow>(
           "data-adapttable-part": "edit-cell-editor",
         },
         editorRef: (node) => {
-          if (allowed()) editorRef(node);
+          // Refs arrive before mount; only focus itself requires activity.
+          if (!disposed && ticket === revision.value) editorRef(node);
         },
         onChange: controller.setDraft,
         onBlur: controller.commitOnBlur,
