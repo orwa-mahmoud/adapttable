@@ -27,10 +27,10 @@
   "scripts": {
     "build": "tsdown",
     "typecheck": "vue-tsc --noEmit && node ../../../scripts/check-vue-types.mjs",
-    "lint": "eslint .",
+    "lint": "node ../../../scripts/vue-typed-lint.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "clean": "rimraf dist coverage .turbo"
+    "clean": "rimraf dist coverage .turbo .sfc-types"
   },
   "name": "@adapttable/vue-unstyled",
   "description": "Native HTML data table controls for the AdaptTable Vue binding.",

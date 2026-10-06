@@ -49,6 +49,7 @@ export default defineConfig(
       "**/coverage/**",
       "**/.turbo/**",
       "**/node_modules/**",
+      "**/.sfc-types/**",
       "reference/**",
       "**/*.config.{js,cjs,mjs}",
       // tsup writes a transient `tsup.config.bundled_<hash>.mjs` while
@@ -131,6 +132,14 @@ export default defineConfig(
       // intermediate bindings (`const props = applyTableFeatures(incoming)`).
       "react/prop-types": "off",
       ...jsxA11y.flatConfigs.recommended.rules,
+    },
+  },
+  {
+    // Keep one project-service shape for Vue TS imports and SFC scripts.
+    // Changing this per file extension repeatedly reloads the whole project.
+    files: ["packages/vue/**/*.{ts,tsx,vue}"],
+    languageOptions: {
+      parserOptions: { extraFileExtensions: [".vue"] },
     },
   },
   {

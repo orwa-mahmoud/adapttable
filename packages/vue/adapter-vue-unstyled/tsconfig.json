@@ -59,10 +59,17 @@
       "@adapttable/ai-vue": ["../ai-vue/src/index.ts"],
       "@adapttable/ai": ["../../shared/ai/src/index.ts"],
       "@adapttable/ai/voice": ["../../shared/ai/src/voice.ts"]
-    }
+    },
+    "rootDirs": [".", "./.sfc-types"]
   },
   "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],
-  "exclude": ["node_modules", "dist", "coverage", "test/types/invalid"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "test/types/invalid",
+    ".sfc-types"
+  ],
   "vueCompilerOptions": {
     "strictTemplates": true,
     "dataAttributes": ["data-*"]
