@@ -1,13 +1,14 @@
 import type { Attrs, ElementRef } from "@adapttable/vue";
+import { mergeVueAttrs, useElementRef } from "@adapttable/vue/adapter";
 import { NSelect } from "naive-ui";
 import {
   type ComponentPublicInstance,
   defineComponent,
   h,
   shallowRef,
+  useAttrs,
   useId,
   type VNode,
-  watch,
 } from "vue";
 
 import { eventHandler, withoutAttributes } from "./attributes";
@@ -30,34 +31,32 @@ function textAttribute(attrs: Attrs, name: string): string | undefined {
 
 const NaiveSelectControl = defineComponent(
   (props: { readonly control: NaiveSelectControl }) => {
+    const inherited = useAttrs();
     const show = shallowRef(false);
     const select = shallowRef<ComponentPublicInstance | null>(null);
-    watch(
-      [
-        () => props.control.attrs.ref,
-        () => {
-          // SelectInst has no native target ref; inputProps.ref is replaced by the kit.
-          // Vue's public host and our public inputProps role locate the actual input.
-          const host = select.value ? htmlRoot(select.value) : null;
-          return (
-            host?.querySelector<HTMLInputElement>('input[role="combobox"]') ??
-            null
-          );
-        },
-      ],
-      ([ref, target], _previous, onCleanup) => {
-        if (typeof ref !== "function" || !target) return;
-        const receive = ref as ElementRef;
-        receive(target);
-        onCleanup(() => receive(null));
+    useElementRef(
+      () => {
+        // SelectInst has no native target ref; inputProps.ref is replaced by the kit.
+        // Vue's public host and our public inputProps role locate the actual input.
+        const host = select.value ? htmlRoot(select.value) : null;
+        return (
+          host?.querySelector<HTMLInputElement>('input[role="combobox"]') ??
+          null
+        );
       },
-      { immediate: true, flush: "sync" }
+      () =>
+        typeof props.control.attrs.ref === "function"
+          ? (props.control.attrs.ref as ElementRef)
+          : undefined
     );
     const listId = `adapttable-naive-options-${useId()}`;
     let dismissingOwnMenu = false;
     return () => {
       const control = props.control;
-      const { id, onKeydown, onKeydownCapture, ...nativeAttrs } = control.attrs;
+      const { id, onKeydown, onKeydownCapture, ...nativeAttrs } = mergeVueAttrs(
+        control.attrs,
+        inherited
+      );
       const attrs = withoutAttributes(nativeAttrs, [
         "ref",
         "onChange",
@@ -110,7 +109,7 @@ const NaiveSelectControl = defineComponent(
       });
     };
   },
-  { name: "NaiveSelectControl", props: ["control"] }
+  { name: "NaiveSelectControl", inheritAttrs: false, props: ["control"] }
 );
 
 /** Compound host hooks and native input semantics use public Naive pass-throughs. */

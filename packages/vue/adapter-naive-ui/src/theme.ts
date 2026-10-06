@@ -4,6 +4,7 @@ import {
   unstableButtonRtl,
   unstableCardRtl,
   unstableCheckboxRtl,
+  unstableCollapseRtl,
   unstableDrawerRtl,
   unstableInputRtl,
   unstablePopoverRtl,
@@ -17,6 +18,7 @@ import { computed, h, type VNodeChild } from "vue";
 const controlRtl = [
   unstableButtonRtl,
   unstableCheckboxRtl,
+  unstableCollapseRtl,
   unstableDrawerRtl,
   unstableInputRtl,
   unstablePopoverRtl,

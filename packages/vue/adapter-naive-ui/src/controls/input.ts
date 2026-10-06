@@ -1,12 +1,13 @@
 import type { Attrs, ElementRef } from "@adapttable/vue";
+import { mergeVueAttrs, useElementRef } from "@adapttable/vue/adapter";
 import { type InputInst, NInput } from "naive-ui";
 import {
   defineComponent,
   h,
   shallowRef,
+  useAttrs,
   type VNode,
   type VNodeChild,
-  watch,
 } from "vue";
 
 import { eventHandler, withoutAttributes } from "./attributes";
@@ -21,26 +22,24 @@ export interface NaiveInputControl {
 
 const NaiveInputControl = defineComponent(
   (props: { readonly control: NaiveInputControl }) => {
+    const inherited = useAttrs();
     const input = shallowRef<InputInst | null>(null);
-    watch(
-      [
-        () => props.control.attrs.ref,
-        () =>
-          props.control.type === "textarea"
-            ? input.value?.textareaElRef
-            : input.value?.inputElRef,
-      ],
-      ([ref, target], _previous, onCleanup) => {
-        if (typeof ref !== "function" || !target) return;
-        const receive = ref as ElementRef;
-        receive(target);
-        onCleanup(() => receive(null));
-      },
-      { immediate: true, flush: "sync" }
+    useElementRef(
+      () =>
+        props.control.type === "textarea"
+          ? input.value?.textareaElRef
+          : input.value?.inputElRef,
+      () =>
+        typeof props.control.attrs.ref === "function"
+          ? (props.control.attrs.ref as ElementRef)
+          : undefined
     );
     return () => {
       const control = props.control;
-      const { onFocus, onBlur, ...nativeAttrs } = control.attrs;
+      const { onFocus, onBlur, ...nativeAttrs } = mergeVueAttrs(
+        control.attrs,
+        inherited
+      );
       const attrs = withoutAttributes(nativeAttrs, [
         "ref",
         "onInput",
@@ -82,7 +81,7 @@ const NaiveInputControl = defineComponent(
       );
     };
   },
-  { name: "NaiveInputControl", props: ["control"] }
+  { name: "NaiveInputControl", inheritAttrs: false, props: ["control"] }
 );
 
 /** Native attrs use inputProps; target refs use Naive's exported InputInst. */

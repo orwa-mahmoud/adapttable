@@ -50,6 +50,35 @@ import { fullscreen } from "@adapttable/naive-ui/fullscreen";
 const features = [densityChooser(), fullscreen()];
 ```
 
+## Filtering
+
+Import filter contributions only where they are used:
+
+```ts
+import { filters } from "@adapttable/naive-ui/filters";
+import { headerFilters } from "@adapttable/naive-ui/header-filters";
+
+interface Person {
+  name: string;
+}
+const features = [
+  filters<Person>([{ key: "name", type: "text" }], { tree: true }),
+  headerFilters(),
+];
+```
+
+Filter fields use Naive inputs, selects and checkboxes. The advanced builder
+uses a controlled Naive collapse with a native Naive button as its keyboard
+trigger. Filter values, option loading, checklist windows and recursive writes
+remain owned by the Vue binding. Standalone `ChecklistFilter`,
+`FilterTreeBuilder`, `FilterHeaderControl` and `FilterHeaderRow` components use
+the same generic row contracts.
+
+The popover uses Naive's public manual coordinates, placement, portal and
+outside-click APIs. Drawer mode retains Naive's mask, focus trap and scroll
+lock. Escape first dismisses an open nested select, then the filter surface.
+The drawer mask boundary below also applies to filtering.
+
 ## Compatibility
 
 This package targets Vue 3.5 and Naive UI 2.45.3. The package is prepared for an

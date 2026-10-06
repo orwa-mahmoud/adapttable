@@ -5,13 +5,21 @@
     "jsx": "preserve",
     "jsxImportSource": "vue",
     "types": ["node", "vitest/globals"],
+    "rootDirs": [".", "./.sfc-types"],
     "paths": {
       "@adapttable/naive-ui": ["./src/index.ts"],
       "@adapttable/naive-ui/*": ["./src/*.ts"]
     }
   },
+  "files": ["src/styles.d.ts"],
   "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],
-  "exclude": ["node_modules", "dist", "coverage", "test/types/invalid"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "test/types/invalid",
+    ".sfc-types"
+  ],
   "vueCompilerOptions": {
     "strictTemplates": true,
     "dataAttributes": ["data-*"]
