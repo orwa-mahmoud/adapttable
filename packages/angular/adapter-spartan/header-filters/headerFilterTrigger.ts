@@ -21,12 +21,14 @@ import {
   ɵHlmPopoverLabel as HlmPopoverLabel,
 } from "@adapttable/spartan";
 import {
+  afterEveryRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   ElementRef,
   inject,
   input,
+  signal,
 } from "@angular/core";
 import {
   BrnPopover,
@@ -80,6 +82,7 @@ import {
           class="at-spartan-surface at-spartan-popover"
           data-adapttable-kit="spartan"
           data-adapttable-part="filter-header-cell"
+          [attr.dir]="direction()"
         >
           <adapt-auto-filter-form
             [defs]="[p.def]"
@@ -94,11 +97,25 @@ import {
 })
 export class AdaptHeaderFilterTrigger {
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
-  protected readonly direction = computed(() =>
-    this.element.nativeElement.closest<HTMLElement>("[dir]")?.dir === "rtl"
-      ? "rtl"
-      : "ltr"
-  );
+  private readonly directionValue = signal<"ltr" | "rtl">("ltr");
+  protected readonly direction = this.directionValue.asReadonly();
+
+  constructor() {
+    // Native dir inheritance is DOM state, not a computed signal dependency.
+    // Observe inherited DOM changes after an Angular render, not through a
+    // global mutation observer. This read-phase render callback is
+    // browser-only and is retired with the component's injection context.
+    afterEveryRender({
+      read: () => {
+        const next =
+          this.element.nativeElement.closest<HTMLElement>("[dir]")?.dir ===
+          "rtl"
+            ? "rtl"
+            : "ltr";
+        if (next !== this.directionValue()) this.directionValue.set(next);
+      },
+    });
+  }
   /** The slot's props. */
   readonly props = input.required<FilterHeaderControlProps<never>>();
 
