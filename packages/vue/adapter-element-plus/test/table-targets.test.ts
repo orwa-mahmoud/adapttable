@@ -70,7 +70,7 @@ describe("Element Plus mobile semantic targets", () => {
     expect(cellRefs.at(-1)).toBe(value);
     expect(value.textContent).toBe("Ada");
     unmount();
-    expect(rowRefs.at(-1)).toBe(null);
-    expect(cellRefs.at(-1)).toBe(null);
+    expect(rowRefs.at(-1)).toBeNull();
+    expect(cellRefs.at(-1)).toBeNull();
   });
 });

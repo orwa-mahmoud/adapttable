@@ -4,9 +4,9 @@ import { resolveLabels } from "@adapttable/vue/adapter";
 const labels = resolveLabels(undefined);
 import {
   ChecklistFilter,
+  type FilterDef,
   FilterField,
   FilterTreeBuilder,
-  type FilterDef,
 } from "../../src/filters";
 interface Row {
   id: string;

@@ -20,7 +20,7 @@ const props = withDefaults(
     disabled?: boolean;
     inputStyle?: CSSProperties;
   }>(),
-  { type: "text", disabled: false }
+  { type: "text", disabled: false, inputStyle: undefined }
 );
 const emit = defineEmits<{ change: [value: string] }>();
 const control = shallowRef<InputInstance>();

@@ -22,8 +22,8 @@ import {
 } from "vue";
 
 import { provideClassNames } from "./classNamesContext";
-import { elementSelectionCheckbox } from "./controls/checkbox";
 import { elementButton } from "./controls/button";
+import { elementSelectionCheckbox } from "./controls/checkbox";
 import { elementConfirm } from "./elementConfirm";
 import {
   elementColumnGroupToggle,

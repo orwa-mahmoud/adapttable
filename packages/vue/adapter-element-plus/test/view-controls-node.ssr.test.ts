@@ -27,9 +27,8 @@ describe("Element Plus view controls in Node SSR", () => {
     app.provide(ZINDEX_INJECTION_KEY, { current: 0 });
     const html = await renderToString(app);
     expect(html).toContain('data-density="compact"');
-    const control = html.match(
-      /<div\b[^>]*data-adapttable-part="density-toggle"[^>]*>/
-    )?.[0];
+    const control =
+      /<div\b[^>]*data-adapttable-part="density-toggle"[^>]*>/.exec(html)?.[0];
     expect(control).toMatch(/class="[^"]*\bel-select\b/);
     expect(html).toMatch(/<input[^>]*aria-label="Display density"/);
     expect(html).toContain("Compact rows");

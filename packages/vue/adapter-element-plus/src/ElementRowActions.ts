@@ -29,6 +29,12 @@ export function ElementRowActions<TRow>(props: {
       null,
       props.controls.map((action) => elementButton(attrs(action), action.label))
     );
+  const menuItem = (action: RowActionControl<TRow>) =>
+    h(
+      ElDropdownItem,
+      { ...attrs(action), type: undefined },
+      { default: () => action.label }
+    );
   return h(
     ElDropdown,
     {
@@ -54,14 +60,7 @@ export function ElementRowActions<TRow>(props: {
           ElDropdownMenu,
           {},
           {
-            default: () =>
-              props.controls.map((action) =>
-                h(
-                  ElDropdownItem,
-                  { ...attrs(action), type: undefined },
-                  { default: () => action.label }
-                )
-              ),
+            default: () => props.controls.map(menuItem),
           }
         ),
     }

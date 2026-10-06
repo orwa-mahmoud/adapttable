@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, shallowRef } from "vue";
 
-import { DataTable, type ColumnDef, type DataTableHandle } from "../../src";
+import { type ColumnDef, DataTable, type DataTableHandle } from "../../src";
 
 interface Row {
   id: string;

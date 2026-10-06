@@ -81,6 +81,29 @@ an `ElCard` content body. The `filters-popover` part and
 `classNames.filtersPopover` belong to that body. The drawer's `filters-panel`
 part and class belong to the actual `ElDrawer` dialog root.
 
+### Column header filters
+
+Add `headerFilters()` alongside `filters(...)` to place an Element Plus filter
+button in each configured column header:
+
+```ts
+import { filters } from "@adapttable/element-plus/filters";
+import { headerFilters } from "@adapttable/element-plus/header-filters";
+
+const features = [
+  filters<Person>([{ key: "name", type: "text" }]),
+  headerFilters(),
+];
+```
+
+The header popup uses `ElPopover` and the same binding-owned filter fields.
+`FilterHeaderControl`, `FilterHeaderRow` and `ElementHeaderFilter` are available
+from the header-filter entry point for custom layouts. Compact text and range
+fields use `ElInput`; single and Boolean choices use `ElSelect`; multiple choices
+use `ElCheckbox` inside an `ElPopover`. Their menus portal outside the scrolling
+viewport and stay inside the table root during fullscreen. Popup stacking follows
+`ElConfigProvider`'s `zIndex` setting.
+
 ## Optional view controls
 
 Add density and fullscreen controls only where they are needed:

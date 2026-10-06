@@ -1,8 +1,11 @@
-import type { SelectionCheckboxControl } from "@adapttable/vue/adapter";
-import { selectionCheckboxInputAttrs } from "@adapttable/vue/adapter";
+import {
+  type SelectionCheckboxControl,
+  selectionCheckboxInputAttrs,
+} from "@adapttable/vue/adapter";
 import { h, type VNode } from "vue";
 
 import ElementCheckbox from "./ElementCheckbox.vue";
+import { isElementRef } from "./ref";
 
 /** Parts/classes belong to ElCheckbox's label host; focus belongs to its input. */
 export function elementSelectionCheckbox(
@@ -18,7 +21,7 @@ export function elementSelectionCheckbox(
     label: typeof label === "string" ? label : "",
     checked: control.checked,
     indeterminate: control.indeterminate,
-    inputRef: typeof ref === "function" ? (input) => ref(input) : undefined,
+    inputRef: isElementRef(ref) ? (input) => ref(input) : undefined,
     onChange: control.onToggle,
   });
 }

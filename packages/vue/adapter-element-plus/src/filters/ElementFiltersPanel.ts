@@ -48,12 +48,11 @@ export const ElementFiltersPanel = defineComponent({
         elementButton(
           {
             "data-adapttable-part": control.part,
-            class:
-              control.part === "filters-clear"
-                ? names.value.filtersClear
-                : control.part === "filters-close"
-                  ? names.value.filtersClose
-                  : names.value.filtersDone,
+            class: {
+              "filters-clear": names.value.filtersClear,
+              "filters-close": names.value.filtersClose,
+              "filters-done": names.value.filtersDone,
+            }[control.part],
             disabled: control.disabled,
             onClick: control.onClick,
           },

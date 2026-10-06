@@ -1,13 +1,15 @@
 import {
   type FilterPanelSurfaceProps,
+  FULLSCREEN_MODEL,
+  useFeatureState,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
+  type CardInstance,
   ClickOutside,
   ElCard,
   ElDrawer,
   ElPopover,
-  type CardInstance,
 } from "element-plus";
 import {
   defineComponent,
@@ -28,6 +30,7 @@ export const ElementFilterSurface = defineComponent(
   ) => {
     const mounted = shallowRef(false);
     const active = useScopeActivity();
+    const fullscreen = useFeatureState(FULLSCREEN_MODEL);
     const panel = shallowRef<CardInstance>();
     onMounted(() => {
       mounted.value = true;
@@ -85,7 +88,7 @@ export const ElementFilterSurface = defineComponent(
             modelValue: props.open,
             title: props.label,
             direction: props.dir === "rtl" ? "ltr" : "rtl",
-            appendTo: props.container ?? "body",
+            appendTo: props.container ?? fullscreen.value?.container ?? "body",
             appendToBody: true,
             modal: true,
             withHeader: false,
@@ -112,13 +115,13 @@ export const ElementFilterSurface = defineComponent(
           role: "dialog",
           "aria-label": props.label,
           placement: props.dir === "rtl" ? "bottom-end" : "bottom-start",
-          appendTo: props.container ?? "body",
+          appendTo: props.container ?? fullscreen.value?.container ?? "body",
           teleported: true,
           persistent: false,
           showArrow: false,
           width: "min(28rem, calc(100vw - 1rem))",
           popperClass: "adapttable-element-plus-filter-popover",
-          popperStyle: { padding: 0, zIndex: 3000 },
+          popperStyle: { padding: 0 },
           onAfterEnter: focusPanel,
         },
         {

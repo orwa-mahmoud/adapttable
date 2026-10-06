@@ -1,7 +1,7 @@
-import { renderToString } from "vue/server-renderer";
 import { ElButton, ID_INJECTION_KEY } from "element-plus";
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, h, nextTick, ref } from "vue";
+import { renderToString } from "vue/server-renderer";
 
 import { elementButton } from "../src/controls/button";
 import ElementInput from "../src/controls/ElementInput.vue";

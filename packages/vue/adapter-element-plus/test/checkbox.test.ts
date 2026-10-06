@@ -1,7 +1,7 @@
-import { renderToString } from "vue/server-renderer";
 import { ID_INJECTION_KEY } from "element-plus";
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, h, nextTick, ref } from "vue";
+import { renderToString } from "vue/server-renderer";
 
 import ElementCheckbox from "../src/controls/ElementCheckbox.vue";
 import { mount, node } from "./mount";

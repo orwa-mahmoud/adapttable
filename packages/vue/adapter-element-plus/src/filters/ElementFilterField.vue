@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="TRow">
 import {
-  defaultFilterRegistry,
   type DataTableClassNames,
+  defaultFilterRegistry,
   type FilterFieldOptions,
   filterLabel,
   filterWidgetKind,

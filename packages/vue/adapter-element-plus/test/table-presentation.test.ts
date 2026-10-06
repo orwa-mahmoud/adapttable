@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, h, nextTick, ref, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";
 
-import DataTable from "../src/DataTable.vue";
 import { cellSpan } from "../src/cell-span";
+import DataTable from "../src/DataTable.vue";
 import type { DataTableProps } from "../src/types";
 import { mount, node } from "./mount";
 

@@ -1,6 +1,6 @@
 import {
-  FilterTreeChrome,
   type FilterTreeBuilderProps,
+  FilterTreeChrome,
   type FilterTreeSlots,
   useFilterTreeModel,
 } from "@adapttable/vue/adapter";

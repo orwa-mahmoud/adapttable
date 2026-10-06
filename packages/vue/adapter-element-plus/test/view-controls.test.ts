@@ -120,19 +120,21 @@ describe("Element Plus optional view controls", () => {
   });
 
   it("forwards the real button activation to the binding-owned fullscreen root", async () => {
-    let current: Element | null = null;
+    const platform: { current: Element | null } = { current: null };
     const request = vi.fn(function (this: HTMLElement) {
-      current = this;
+      platform.current = this;
       document.dispatchEvent(new Event("fullscreenchange"));
       return Promise.resolve();
     });
     const exit = vi.fn(() => {
-      current = null;
+      platform.current = null;
       document.dispatchEvent(new Event("fullscreenchange"));
       return Promise.resolve();
     });
     platformProperty(document, "fullscreenEnabled", { value: true });
-    platformProperty(document, "fullscreenElement", { get: () => current });
+    platformProperty(document, "fullscreenElement", {
+      get: () => platform.current,
+    });
     platformProperty(document, "exitFullscreen", { value: exit });
     platformProperty(HTMLElement.prototype, "requestFullscreen", {
       value: request,
@@ -159,7 +161,7 @@ describe("Element Plus optional view controls", () => {
     button.click();
     await tick();
     expect(request).toHaveBeenCalledTimes(1);
-    expect(current).toBe(node(root, '[data-adapttable-part="root"]'));
+    expect(platform.current).toBe(node(root, '[data-adapttable-part="root"]'));
     expect(button.getAttribute("aria-pressed")).toBe("true");
     expect(button.getAttribute("aria-label")).toBe("Restore table");
     button.click();

@@ -8,6 +8,7 @@ export default defineConfig({
     "src/density.ts",
     "src/fullscreen.ts",
     "src/filters.ts",
+    "src/header-filters.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],

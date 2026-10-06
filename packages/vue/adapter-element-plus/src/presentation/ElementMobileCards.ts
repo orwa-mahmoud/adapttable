@@ -12,6 +12,8 @@ import {
 import { ElCard } from "element-plus";
 import { Fragment, h, type VNode, type VNodeChild } from "vue";
 
+import { isElementRef } from "../controls/ref";
+
 type MobileModel<TRow> = UseDataTableShellResult<TRow>["mobile"]["value"];
 type MobileRow<TRow> = MobileModel<TRow>["rows"][number];
 type MobileCell<TRow> = MobileRow<TRow>["cells"][number];
@@ -30,16 +32,15 @@ function cardAttrs(attrs: Readonly<Record<string, unknown>>) {
   const { ref, ...rest } = attrs;
   return {
     ...rest,
-    ref:
-      typeof ref === "function"
-        ? elementRef(
-            (element) => ref(element),
-            (component) => {
-              const root: unknown = component.$el;
-              return root instanceof HTMLElement ? root : null;
-            }
-          )
-        : undefined,
+    ref: isElementRef(ref)
+      ? elementRef(
+          (element) => ref(element),
+          (component) => {
+            const root: unknown = component.$el;
+            return root instanceof HTMLElement ? root : null;
+          }
+        )
+      : undefined,
   };
 }
 

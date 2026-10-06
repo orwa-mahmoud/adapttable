@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ElCheckbox, type CheckboxInstance } from "element-plus";
+import { type CheckboxInstance, ElCheckbox } from "element-plus";
 import { computed, mergeProps, shallowRef, watch } from "vue";
 
 defineOptions({ inheritAttrs: false });
@@ -18,6 +18,7 @@ const props = withDefaults(
     disabled: false,
     readonly: false,
     labelVisible: false,
+    inputRef: undefined,
   }
 );
 const emit = defineEmits<{ change: [checked: boolean] }>();

@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="TRow">
 import {
-  FilterFieldChrome,
   type DataTableClassNames,
+  FilterFieldChrome,
   type FilterFieldOptions,
   useFilterField,
 } from "@adapttable/vue/adapter";

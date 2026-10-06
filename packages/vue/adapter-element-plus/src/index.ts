@@ -4,7 +4,6 @@ export type {
   DataTableProps,
   DataTableSlots,
 } from "./types";
-
 export type {
   ColumnDef,
   ColumnInput,
