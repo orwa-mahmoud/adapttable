@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@adapttable/vue": ["../vue/src/index.ts"],
+      "@adapttable/vue/*": ["../vue/src/*.ts"],
+      "@adapttable/core": ["../../shared/core/src/index.ts"],
+      "@adapttable/core/*": ["../../shared/core/src/*.ts"],
+      "@adapttable/reka-ui": ["./src/index.ts"],
+      "@adapttable/reka-ui/*": ["./src/*.ts"]
+    }
+  },
+  "include": ["src", "test", "vitest.config.ts", "tsdown.config.ts", "browser"],
+  "exclude": ["node_modules", "dist", "coverage", "test/types/invalid"],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "dataAttributes": ["data-*"]
+  }
+}
