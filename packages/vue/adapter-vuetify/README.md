@@ -71,6 +71,60 @@ For custom layouts, the Vue binding's headless APIs and optional
 `DataTableSurfaceChrome` remain available. Its desktop and mobile renderers are
 required slots, so the host chooses its table presentation.
 
+## Navigation and status
+
+Optional navigation uses the same binding-owned ranges, find matches and host
+write callbacks as the headless table. Import each feature from its focused
+entry:
+
+```ts
+import { cellNavigation } from "@adapttable/vuetify/cell-navigation";
+import { columnSelectionCheckbox } from "@adapttable/vuetify/column-selection";
+import { findInTable } from "@adapttable/vuetify/find-in-table";
+import { selectionStats, statusBar } from "@adapttable/vuetify/status-bar";
+
+const features = [
+  cellNavigation(),
+  columnSelectionCheckbox(),
+  findInTable({ button: true }),
+  selectionStats(),
+  statusBar(),
+];
+```
+
+Pass `features` to `DataTable`. Find uses `VTextField` and `VBtn`; column
+selection uses `VCheckboxBtn`. Status and range statistics use `VSheet` and
+`VChip`. Typing keeps focus in the find input. With cell navigation, closing
+find returns focus to the matched grid cell; standalone find restores its
+opener. Mobile cards support find without enabling a desktop grid.
+
+## Rows, columns and hierarchy
+
+The `columns` entry supplies `collapsibleColumnGroups`, `fitColumns`,
+`multiSort` and `resizableColumns`. The `rows` entry supplies `cellSpan`,
+`extraRows`, `pinnedSummaryRows`, `rowAppearance`, `rowActions` and `rowPinning`.
+Each factory also has a focused entry with the corresponding kebab-case name.
+The binding resolves order, spans, pins and host callbacks; the Vuetify table
+renders the resulting native rows and cells. Mobile cards retain complete field
+values when desktop cells span multiple rows.
+
+Use `tree` for loaded or lazy children and `rowDetail` for host-rendered detail
+content. Their expand controls are `VBtn` components, with `VProgressCircular`
+for a pending tree load. For example, using the `Person` type above:
+
+```ts
+import { h } from "vue";
+import { rowDetail } from "@adapttable/vuetify/row-detail";
+
+const features = [
+  rowDetail<Person>((person) => h("p", `Team: ${person.team}`)),
+];
+```
+
+`nestedTable` accepts a host callback that renders a child `DataTable`. Child
+row types remain independent and inherit the supplied density and label
+defaults. Expansion and pinning accept the binding's controlled state options.
+
 ## Control ownership
 
 Buttons use `VBtn`. Checkboxes use `VCheckboxBtn` and its documented input slot,

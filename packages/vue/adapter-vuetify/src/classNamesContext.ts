@@ -9,5 +9,5 @@ export function provideClassNames(read: () => DataTableClassNames): void {
 }
 export function useClassNames() {
   const read = inject(classNamesKey, () => ({}));
-  return computed(read);
+  return computed<DataTableClassNames>(read);
 }

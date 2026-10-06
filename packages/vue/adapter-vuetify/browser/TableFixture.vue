@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { h, ref } from "vue";
 import { VApp } from "vuetify/components/VApp";
 import { VMain } from "vuetify/components/VMain";
 
 import { type ColumnDef, DataTable } from "../src";
+import {
+  cellNavigation,
+  columnSelectionCheckbox,
+} from "../src/cell-navigation";
 import VuetifyButton from "../src/controls/VuetifyButton.vue";
+import { findInTable } from "../src/find-in-table";
+import { rowDetail } from "../src/row-detail";
+import { selectionStats, statusBar } from "../src/status-bar";
+import { tree } from "../src/tree";
 
 interface Person {
   id: string;
   name: string;
   team: string;
+  parent?: string;
 }
 const people: readonly Person[] = [
   { id: "beta", name: "Beta", team: "Platform" },
-  { id: "alpha", name: "Alpha", team: "Design" },
+  { id: "alpha", name: "Alpha", team: "Design", parent: "beta" },
   { id: "gamma", name: "Gamma", team: "Operations" },
 ];
 const columns: readonly ColumnDef<Person>[] = [
@@ -26,6 +35,23 @@ const rejectChanges = ref(false);
 const decorated = ref(false);
 const dark = ref(false);
 const rtl = ref(false);
+function pageFeatures() {
+  if (location.pathname === "/navigation")
+    return [
+      cellNavigation(),
+      columnSelectionCheckbox(),
+      findInTable({ button: true }),
+      selectionStats(),
+      statusBar(),
+    ];
+  if (location.pathname === "/hierarchy")
+    return [
+      tree<Person>({ getParentId: (row) => row.parent }),
+      rowDetail<Person>((row) => h("p", `Team: ${row.team}`)),
+    ];
+  return [];
+}
+const features = pageFeatures();
 
 function changeSelection(next: string[]): void {
   selectionRequests.value++;
@@ -65,6 +91,7 @@ function changeSelection(next: string[]): void {
         <DataTable
           :data="people"
           :columns="columns"
+          :features="features"
           :row-key="(row) => row.id"
           :selected-ids="selectedIds"
           :url-sync="false"

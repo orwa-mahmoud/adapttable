@@ -117,3 +117,49 @@
   max-block-size: none;
   border-inline-end-width: 2px;
 }
+
+.adapttable-vuetify [data-adapttable-part="find-bar"] {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-block-end: 1px solid
+    rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.adapttable-vuetify [data-adapttable-part="find-input"] {
+  flex: 1 1 220px;
+  min-inline-size: 0;
+}
+
+.adapttable-vuetify-status,
+.adapttable-vuetify [data-adapttable-part="selection-stats"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.adapttable-vuetify-status {
+  padding: 12px 16px;
+  border-block-start: 1px solid
+    rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.adapttable-vuetify [data-adapttable-part="fill-handle-anchor"] {
+  position: relative;
+  display: block;
+  block-size: 0;
+}
+
+.adapttable-vuetify [data-adapttable-part="fill-handle"] {
+  position: absolute;
+  inset-inline-end: -3px;
+  inset-block-end: -3px;
+  inline-size: 8px;
+  block-size: 8px;
+  cursor: crosshair;
+  border: 1px solid rgb(var(--v-theme-surface));
+  z-index: 1;
+}
