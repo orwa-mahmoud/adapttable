@@ -1,13 +1,14 @@
 import {
   type DataTableClassNames,
   type FilterFieldSlots,
-  toVueAttrs,
 } from "@adapttable/vue/adapter";
 import UCheckbox from "@nuxt/ui/components/Checkbox.vue";
 import { h } from "vue";
 
+import { nuxtCheckboxAttrs } from "../controls/checkboxAttrs";
 import NuxtInput from "../controls/NuxtInput.vue";
 import NuxtSelect from "../controls/NuxtSelect.vue";
+import { nuxtControlSize } from "../densityContext";
 
 export function nuxtFilterSlots(
   names: () => DataTableClassNames
@@ -25,7 +26,8 @@ export function nuxtFilterSlots(
       }),
     Checkbox: (control) =>
       h(UCheckbox, {
-        ...toVueAttrs(control.attrs),
+        ...nuxtCheckboxAttrs(control.attrs),
+        size: nuxtControlSize(),
         modelValue: control.checked,
         label: control.label,
         ui: { base: names().filterCheckbox },

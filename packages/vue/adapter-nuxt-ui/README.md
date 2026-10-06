@@ -20,7 +20,7 @@ import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [vue(), ui({ router: false })],
+  plugins: [vue(), ui({ router: false, prose: true })],
 });
 ```
 
@@ -63,8 +63,68 @@ RTL controls and overlays.
 The Vite plugin generates theme declarations. For Vue type checking, map
 `#build/ui/*` to `./node_modules/.nuxt-ui/ui/*` in the application tsconfig and run
 Vite before the first type check. Keep the generated directory out of source
-control. Import controls from documented `@nuxt/ui/components/*.vue` paths;
+control. `prose: true` generates the public Prose table-part themes used by the
+adapter. Import controls from documented `@nuxt/ui/components/*.vue` paths;
 `@nuxt/ui` itself is the Nuxt module entry, not a component barrel.
+
+## Table rendering
+
+```vue
+<script setup lang="ts">
+import { DataTable } from "@adapttable/nuxt-ui";
+import { densityChooser } from "@adapttable/nuxt-ui/density";
+import "@adapttable/nuxt-ui/styles.css";
+
+const people = [{ id: "ada", name: "Ada", team: "Core" }];
+</script>
+
+<template>
+  <DataTable
+    :data="people"
+    :columns="[{ key: 'name', sortable: true }, { key: 'team' }]"
+    :row-key="(person) => person.id"
+    :features="[densityChooser()]"
+    table-label="People"
+  />
+</template>
+```
+
+The optional outer surface is AdaptTable's shared layout. Nuxt UI owns the
+desktop and mobile body renderers: public `ProseThead`, `ProseTbody`, `ProseTr`,
+`ProseTh` and `ProseTd` components render the prepared headless model, and `UCard`
+renders mobile records. A semantic `table` root and `tfoot` retain native table
+attributes and summary structure. There is one scroll container.
+
+`UTable` always creates its own TanStack table instance, including in manual
+sorting/filtering modes. It does not expose the arbitrary native table, header,
+row and cell attribute/ref hooks needed by AdaptTable's model. `ProseTable` also
+places fallthrough attributes on an outer wrapper rather than the table.
+Therefore this adapter uses a native table root with Nuxt's stateless Prose
+parts, instead of adapting either high-level component with a second engine or
+moving semantic attributes to a different target.
+
+Each table installs a scoped `UApp` with the table's direction, while preserving
+the application's top-level Nuxt UI setup. This matters because `USelect`
+derives its direction from the provider rather than an arbitrary trigger
+attribute. Public element refs are released and reassigned when their callback
+owner changes, without remounting the control.
+
+Compact density changes Nuxt UI's actual control size to `sm`, reduces the
+desktop Prose cell padding and type size, and reduces mobile card-body and field
+spacing. Comfortable density restores the toolkit defaults. Touch buttons retain
+their 44px minimum height in either density.
+The adapter stylesheet declares its compact utility classes with Tailwind's
+`@source inline`, so packaged consumers receive that paint without depending on
+their application to scan the adapter's JavaScript.
+
+Input and Select merge `focusRef` and `attrs.ref` into one memoized set of native
+owners. Identical callbacks are invoked once; moving the same callback between
+channels or rerendering with the same owners does not release it. When membership
+changes, all previous owners are released before the next owners acquire the
+target.
+
+Applications that own all layout and body rendering can use the headless
+`@adapttable/vue` binding directly; the shared outer surface is not required.
 
 ## Control and styling targets
 
@@ -82,7 +142,13 @@ control. Import controls from documented `@nuxt/ui/components/*.vue` paths;
   reach the checkbox button; Nuxt UI owns its surrounding label and root.
   `class`/`ui.root` style that surrounding root instead. Nuxt UI 4.11.3 does not
   expose the checkbox's inner button ref. An eager checkbox focus-ref contract
-  cannot be implemented with that component's current public API.
+  cannot be implemented with that component's current public API. Both selection
+  and filter checkbox adapters reject a non-null `attrs.ref` before rendering,
+  rather than invoking it with a component instance. Empty refs are stripped.
+- The overlay mapping is Nuxt UI's non-modal `UPopover`, and `USlideover` with its
+  real overlay and modal focus handling. `USlideover` exposes an `ui.overlay`
+  class hook, but no public overlay attribute/ref hook. A decorative backdrop
+  part marker is therefore unsupported; no substitute marker is fabricated.
 
 Controlled input requests are repainted through Nuxt UI's public `modelValue`
 prop after the host callback. Rejected requests preserve the same input node and

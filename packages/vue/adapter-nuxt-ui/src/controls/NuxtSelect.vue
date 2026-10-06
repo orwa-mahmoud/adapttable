@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { toVueAttrs } from "@adapttable/vue/adapter";
 import USelect from "@nuxt/ui/components/Select.vue";
-import { computed, onScopeDispose, useTemplateRef, watch } from "vue";
+import { computed, useTemplateRef } from "vue";
 
+import { useNuxtControlSize } from "../densityContext";
+import { controlRef, withoutAttrs } from "./attrs";
 import type { NuxtSelectControl } from "./types";
+import { useControlElementRef } from "./useControlElementRef";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{
@@ -13,6 +16,7 @@ const props = defineProps<{
 const select = useTemplateRef<{ triggerRef: HTMLButtonElement | null }>(
   "select"
 );
+const size = useNuxtControlSize();
 // Reka reserves the empty string for clearing. Numeric presentation keys keep
 // every model string, including an empty-string option, selectable unchanged.
 const items = computed(() =>
@@ -27,15 +31,13 @@ const selected = computed(() => {
   );
   return index < 0 ? undefined : index;
 });
-watch(
+useControlElementRef(
   () => select.value?.triggerRef ?? null,
-  (element, previous) => {
-    if (previous) props.control.focusRef?.(null);
-    if (element) props.control.focusRef?.(element);
-  },
-  { flush: "post" }
+  () => [
+    props.control.focusRef,
+    controlRef<HTMLButtonElement>(props.control.attrs.ref),
+  ]
 );
-onScopeDispose(() => props.control.focusRef?.(null));
 function update(index: unknown): void {
   if (typeof index !== "number") return;
   const option = props.control.options[index];
@@ -46,11 +48,17 @@ function update(index: unknown): void {
 <template>
   <USelect
     ref="select"
-    v-bind="toVueAttrs({ ...control.attrs, 'aria-label': control.label })"
+    v-bind="
+      toVueAttrs({
+        ...withoutAttrs(control.attrs, ['ref']),
+        'aria-label': control.label,
+      })
+    "
     :items="items"
     :model-value="selected"
     :class="className"
     :portal="false"
+    :size="size"
     @update:model-value="update"
   />
 </template>

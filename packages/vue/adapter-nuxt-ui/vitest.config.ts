@@ -18,6 +18,7 @@ export default defineConfig({
       dts: false,
       autoImport: false,
       components: false,
+      prose: true,
     }),
   ],
   resolve: {

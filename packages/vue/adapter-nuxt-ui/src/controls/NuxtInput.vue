@@ -9,7 +9,10 @@ import {
   watch,
 } from "vue";
 
+import { useNuxtControlSize } from "../densityContext";
+import { controlRef, withoutAttrs } from "./attrs";
 import type { NuxtInputControl } from "./types";
+import { useControlElementRef } from "./useControlElementRef";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{
@@ -17,6 +20,7 @@ const props = defineProps<{
   className?: string;
 }>();
 const input = useTemplateRef<{ inputRef: HTMLInputElement | null }>("input");
+const size = useNuxtControlSize();
 const presentation = shallowRef(props.control.value);
 let revision = 0;
 
@@ -26,17 +30,15 @@ watch(
     presentation.value = value;
   }
 );
-watch(
+useControlElementRef(
   () => input.value?.inputRef ?? null,
-  (element, previous) => {
-    if (previous) props.control.focusRef?.(null);
-    if (element) props.control.focusRef?.(element);
-  },
-  { flush: "post" }
+  () => [
+    props.control.focusRef,
+    controlRef<HTMLInputElement>(props.control.attrs.ref),
+  ]
 );
 onScopeDispose(() => {
   revision++;
-  props.control.focusRef?.(null);
 });
 
 function update(value: unknown): void {
@@ -55,9 +57,15 @@ function update(value: unknown): void {
 <template>
   <UInput
     ref="input"
-    v-bind="toVueAttrs({ ...control.attrs, 'aria-label': control.label })"
+    v-bind="
+      toVueAttrs({
+        ...withoutAttrs(control.attrs, ['ref']),
+        'aria-label': control.label,
+      })
+    "
     :model-value="presentation"
     :type="control.type ?? 'text'"
+    :size="size"
     :ui="{ base: className }"
     @update:model-value="update"
   />
