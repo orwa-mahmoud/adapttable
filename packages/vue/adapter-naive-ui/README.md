@@ -57,6 +57,11 @@ initial 0.1.0 release. Registry publication is a separate release step.
 
 ## Native control refs
 
+Button, checkbox, table and card refs resolve their semantic root through Vue's
+public `$el`. Adding or removing a callback keeps the same native element and
+its focus. A public component option that replaces the root, such as
+`NButton.tag`, releases the old target before supplying its replacement.
+
 Input refs use the `inputElRef` and `textareaElRef` fields in Naive UI 2.45.3's
 exported `InputInst` type. These return the actual input or textarea, including
 when the control changes between those two shapes.

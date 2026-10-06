@@ -1,4 +1,5 @@
 import type { Attrs, ElementRef } from "@adapttable/vue";
+import { useElementRef } from "@adapttable/vue/adapter";
 import {
   type Component,
   type ComponentPublicInstance,
@@ -6,7 +7,6 @@ import {
   h,
   shallowRef,
   type VNodeChild,
-  watch,
 } from "vue";
 
 import { withoutAttributes } from "../controls/attributes";
@@ -19,18 +19,12 @@ const NativeElement = defineComponent(
     readonly content: () => VNodeChild;
   }) => {
     const instance = shallowRef<ComponentPublicInstance | null>(null);
-    watch(
-      [
-        () => props.attrs.ref,
-        () => (instance.value ? htmlRoot(instance.value) : null),
-      ],
-      ([ref, element], _previous, cleanup) => {
-        if (typeof ref !== "function" || !element) return;
-        const receive = ref as ElementRef;
-        receive(element);
-        cleanup(() => receive(null));
-      },
-      { immediate: true, flush: "sync" }
+    useElementRef(
+      () => (instance.value ? htmlRoot(instance.value) : null),
+      () =>
+        typeof props.attrs.ref === "function"
+          ? (props.attrs.ref as ElementRef)
+          : undefined
     );
     return () => {
       const attrs = withoutAttributes(props.attrs, ["ref"]);
@@ -44,18 +38,16 @@ const NativeElement = defineComponent(
   { name: "NaiveSemanticElement", props: ["component", "attrs", "content"] }
 );
 
-/** Naive's table primitives have one semantic root; refs resolve through public $el. */
+/** Naive primitives have one semantic root; refs resolve through public $el. */
 export function naiveElement(
   component: Component,
   attrs: Attrs,
   content: () => VNodeChild = () => null
 ) {
-  return typeof attrs.ref === "function"
-    ? h(NativeElement, {
-        key: attrs.key as string | number | symbol | undefined,
-        component,
-        attrs,
-        content,
-      })
-    : h(component, attrs, { default: content });
+  return h(NativeElement, {
+    key: attrs.key as string | number | symbol | undefined,
+    component,
+    attrs,
+    content,
+  });
 }
