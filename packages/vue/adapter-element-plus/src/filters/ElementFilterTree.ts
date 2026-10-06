@@ -4,7 +4,13 @@ import {
   type FilterTreeSlots,
   useFilterTreeModel,
 } from "@adapttable/vue/adapter";
-import { ElCollapse, ElCollapseItem, ElFormItem, ElText } from "element-plus";
+import {
+  type CollapseModelValue,
+  ElCollapse,
+  ElCollapseItem,
+  ElFormItem,
+  ElText,
+} from "element-plus";
 import {
   createVNode,
   defineComponent,
@@ -84,7 +90,7 @@ const controls: FilterTreeSlots<VNodeChild> = {
         modelValue: control.expanded ? ["query"] : [],
         class: control.className,
         "data-adapttable-part": "filter-tree",
-        "onUpdate:modelValue": (value) =>
+        "onUpdate:modelValue": (value: CollapseModelValue) =>
           control.onExpandedChange(
             Array.isArray(value) && value.includes("query")
           ),

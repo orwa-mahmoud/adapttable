@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { useElementRef } from "@adapttable/vue/adapter";
 import { type CheckboxInstance, ElCheckbox } from "element-plus";
-import { computed, mergeProps, shallowRef, watch } from "vue";
+import { computed, mergeProps, shallowRef } from "vue";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(
@@ -37,13 +38,9 @@ const input = computed((): HTMLInputElement | null => {
     );
   return field;
 });
-watch(
-  [input, () => props.inputRef],
-  ([field, callback], _previous, cleanup) => {
-    callback?.(field);
-    cleanup(() => callback?.(null));
-  },
-  { flush: "post" }
+useElementRef(
+  () => input.value,
+  () => props.inputRef
 );
 function requestChange(event: MouseEvent): void {
   const field = input.value;

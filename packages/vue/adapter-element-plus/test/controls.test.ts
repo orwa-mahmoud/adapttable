@@ -21,8 +21,9 @@ describe("Element Plus control bridge", () => {
         },
         "Next"
       );
-    expect(render().type).toBe(ElButton);
-    const { root } = mount(render);
+    const vnode = render();
+    const { root } = mount(() => vnode);
+    expect(vnode.component?.subTree.type).toBe(ElButton);
     const button = node<HTMLButtonElement>(root, "button");
     expect(button.type).toBe("submit");
     expect(button.dataset.adapttablePart).toBe("page-next");

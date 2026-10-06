@@ -21,7 +21,7 @@ export function elementSelectionCheckbox(
     label: typeof label === "string" ? label : "",
     checked: control.checked,
     indeterminate: control.indeterminate,
-    inputRef: isElementRef(ref) ? (input) => ref(input) : undefined,
+    inputRef: isElementRef(ref) ? ref : undefined,
     onChange: control.onToggle,
   });
 }

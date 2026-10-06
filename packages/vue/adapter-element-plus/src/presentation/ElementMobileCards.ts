@@ -1,5 +1,4 @@
 import {
-  elementRef,
   EXTRA_ROW_PARTS,
   mergeVueAttrs,
   MobileSummaryChrome,
@@ -9,10 +8,9 @@ import {
   type TableChromeSlots,
   type UseDataTableShellResult,
 } from "@adapttable/vue/adapter";
-import { ElCard } from "element-plus";
 import { Fragment, h, type VNode, type VNodeChild } from "vue";
 
-import { isElementRef } from "../controls/ref";
+import { ElementCard } from "./ElementCard";
 
 type MobileModel<TRow> = UseDataTableShellResult<TRow>["mobile"]["value"];
 type MobileRow<TRow> = MobileModel<TRow>["rows"][number];
@@ -25,23 +23,6 @@ function required<Props>(
 ): VNodeChild {
   if (!render) throw new Error(`AdaptTable: Element Plus requires ${name}.`);
   return render(props);
-}
-
-/** ElCard's public root is the real list item and row measurement target. */
-function cardAttrs(attrs: Readonly<Record<string, unknown>>) {
-  const { ref, ...rest } = attrs;
-  return {
-    ...rest,
-    ref: isElementRef(ref)
-      ? elementRef(
-          (element) => ref(element),
-          (component) => {
-            const root: unknown = component.$el;
-            return root instanceof HTMLElement ? root : null;
-          }
-        )
-      : undefined,
-  };
 }
 
 /** Only presentation is composed here; prepared models own every interaction. */
@@ -104,15 +85,12 @@ export function ElementMobileCards<TRow>(props: {
   };
   const card = (row: MobileRow<TRow>): VNode =>
     h(
-      ElCard,
+      ElementCard,
       {
-        ...cardAttrs(
-          mergeVueAttrs(row.attrs, {
-            class: ["adapttable-element-plus-mobile-card", names.card],
-          })
-        ),
+        attrs: mergeVueAttrs(row.attrs, {
+          class: ["adapttable-element-plus-mobile-card", names.card],
+        }),
         key: row.key,
-        shadow: "never",
         bodyStyle: { padding: "1rem" },
       },
       {
@@ -219,17 +197,14 @@ export function ElementMobileCards<TRow>(props: {
           });
         const parts = EXTRA_ROW_PARTS[slot.extraKind];
         return h(
-          ElCard,
+          ElementCard,
           {
-            ...cardAttrs(
-              mergeVueAttrs(slot.attrs ?? {}, {
-                role: "listitem",
-                style: slot.fillStyle,
-                "data-adapttable-part": parts.row,
-              })
-            ),
+            attrs: mergeVueAttrs(slot.attrs ?? {}, {
+              role: "listitem",
+              style: slot.fillStyle,
+              "data-adapttable-part": parts.row,
+            }),
             key: slot.key,
-            shadow: "never",
           },
           {
             default: () =>
