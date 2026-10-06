@@ -23,6 +23,19 @@ function fixtureSources(root, mutate = (text) => text) {
   const native = join(root, "packages/vue/adapter-vue-unstyled/src");
   mkdirSync(binding, { recursive: true });
   mkdirSync(native, { recursive: true });
+  for (const [entry, factory] of [
+    ["density", "densityChooser"],
+    ["fullscreen", "fullscreen"],
+  ]) {
+    writeFileSync(
+      join(binding, `${entry}.ts`),
+      [
+        `export { ${factory} } from "./features/${entry}";`,
+        'export { DENSITY_CONTROL, FULLSCREEN_CONTROL, FULLSCREEN_MODEL, SAVED_VIEWS_CONTROL, SAVED_VIEWS_MODEL } from "./viewControls/contracts";',
+        'export { DensityChooserChrome, FullscreenButtonChrome } from "./viewControls/viewControlsChrome";',
+      ].join("\n")
+    );
+  }
   writeFileSync(
     join(binding, "export-csv.ts"),
     'export type * from "./index";'

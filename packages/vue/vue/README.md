@@ -73,7 +73,11 @@ ignoring a request preserves the supplied state.
 `@adapttable/vue/features` exports column/row/hierarchy factories and custom
 feature contracts. `/filters`, `/header-filters`, `/editing`, `/batch-editing`,
 `/density`, `/fullscreen` and `/saved-views` provide their specific factories,
-models and required Chrome slot contracts.
+models and required Chrome slot contracts. Shared types for `/density` and
+`/fullscreen` have canonical owners: import `StaticTableFeature` and
+`FeatureMountContext` from the root, control/Chrome props from `/adapter`,
+and table/source/view-state types from the root. These two focused entries
+retain their runtime values without forwarding unrelated types.
 
 Adapter authors use `@adapttable/vue/adapter` for `useDataTableShell`, semantic
 attribute/ref bridges, structural Chrome and lifecycle/model channels. Every

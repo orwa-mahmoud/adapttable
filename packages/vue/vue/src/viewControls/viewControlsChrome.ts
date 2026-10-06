@@ -1,8 +1,13 @@
 /** Structural controls: adapter slots supply every interactive element. */
+import type {
+  DensityChooserSlots as CanonicalDensityChooserSlots,
+  DensityControlProps,
+  FullscreenControlProps,
+  ViewControlButtonProps as CanonicalViewControlButtonProps,
+} from "@adapttable/vue/adapter";
 import type { VNodeChild } from "vue";
 
 import type { Attrs } from "../attrs";
-import type { DensityControlProps, FullscreenControlProps } from "./contracts";
 
 export interface ViewControlButtonProps {
   readonly attrs: Attrs;
@@ -27,7 +32,7 @@ function requireControl<T>(slot: T | undefined, name: string): T {
   return slot;
 }
 export function DensityChooserChrome(
-  props: DensityControlProps & { readonly slots: DensityChooserSlots }
+  props: DensityControlProps & { readonly slots: CanonicalDensityChooserSlots }
 ): VNodeChild {
   return requireControl(
     props.slots.Control,
@@ -53,7 +58,7 @@ export function DensityChooserChrome(
 export function FullscreenButtonChrome(
   props: FullscreenControlProps & {
     readonly slots: {
-      readonly Button: (props: ViewControlButtonProps) => VNodeChild;
+      readonly Button: (props: CanonicalViewControlButtonProps) => VNodeChild;
     };
   }
 ): VNodeChild {

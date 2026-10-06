@@ -2,7 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "paths": {},
+    "paths": {
+      "@adapttable/vue": ["./src/index.ts"],
+      "@adapttable/vue/adapter": ["./src/adapter.ts"]
+    },
     "types": ["node"]
   },
   "include": ["src"],

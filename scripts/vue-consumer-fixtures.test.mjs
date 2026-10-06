@@ -24,7 +24,7 @@ const fixture = (name) => {
 
 describe("packed Vue consumers", () => {
   it("registers every distinct real entry and matches existing comparable ceilings", () => {
-    assert.equal(VUE_CONSUMER_SPECS.length, 9);
+    assert.equal(VUE_CONSUMER_SPECS.length, 11);
     assert.deepEqual(
       vue.map((entry) => entry.name),
       VUE_CONSUMER_SPECS.map((entry) => entry.name)
@@ -117,6 +117,40 @@ describe("packed Vue consumers", () => {
         XLSX_WRITER_MARKER
       )
     );
+  });
+
+  it("covers both view controls and rejects optional writers and AI", () => {
+    for (const [entry, factory, marker] of [
+      ["density", "densityChooser", "density-toggle"],
+      ["fullscreen", "fullscreen", "fullscreen-toggle"],
+    ]) {
+      const consumer = fixture(`vue-unstyled · + ${entry}`);
+      const code = `DataTable ${factory} ${marker}`;
+      assert.deepEqual(
+        vueGraphProblems(consumer, { code, imports: new Set() }),
+        []
+      );
+      for (const leak of [PDF_WRITER_MARKER, XLSX_WRITER_MARKER, "tableAgent"])
+        assert.ok(
+          vueGraphProblems(consumer, {
+            code: `${code} ${leak}`,
+            imports: new Set(),
+          }).some((error) => error.includes("leaked"))
+        );
+      for (const imported of [
+        "@adapttable/ai",
+        "@adapttable/ai-vue",
+        "/cell/node_modules/@adapttable/ai-vue/dist/index.js",
+        "/repo/packages/shared/ai/dist/index.js",
+        "/repo/packages/vue/ai-vue/dist/index.js",
+      ])
+        assert.ok(
+          vueGraphProblems(consumer, {
+            code,
+            imports: new Set([imported]),
+          }).some((error) => error.includes("optional AI runtime"))
+        );
+    }
   });
 
   it("detects bare and resolved cross-kit/framework imports and counts AdaptTable code", () => {

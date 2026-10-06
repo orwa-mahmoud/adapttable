@@ -1,12 +1,13 @@
-export type { Attrs } from "./attrs";
-export * from "./features/density";
-export type { StaticTableFeature } from "./features/tableFeature";
-export type { UseSavedViewsResult } from "./url/useSavedViews";
-export * from "./viewControls/contracts";
-export * from "./viewControls/viewControlsChrome";
-
-/** Public feature signatures share the binding's nameable member types. */
-export type * from "./index";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";
+/** Focused entry; shared types live on the root and /adapter. */
+export { densityChooser } from "./features/density";
+export {
+  DENSITY_CONTROL,
+  FULLSCREEN_CONTROL,
+  FULLSCREEN_MODEL,
+  SAVED_VIEWS_CONTROL,
+  SAVED_VIEWS_MODEL,
+} from "./viewControls/contracts";
+export {
+  DensityChooserChrome,
+  FullscreenButtonChrome,
+} from "./viewControls/viewControlsChrome";

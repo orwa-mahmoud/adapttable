@@ -1,9 +1,9 @@
 import { coreDensityChooser, DENSITY_STATE } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { toValue, watch } from "vue";
 
 import { useDensityUrlState } from "../url/useDensityUrlState";
 import { DENSITY_CONTROL } from "../viewControls/contracts";
-import type { FeatureMountContext, StaticTableFeature } from "./tableFeature";
 
 function mountDensity<TRow>(context: FeatureMountContext<TRow>): void {
   const density = useDensityUrlState(

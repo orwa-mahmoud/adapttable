@@ -39,7 +39,9 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
-  deps: { neverBundle: ["vue", "@adapttable/core"] },
+  deps: {
+    neverBundle: ["vue", "@adapttable/core", /^@adapttable\/vue(?:\/.*)?$/],
+  },
   outExtensions: ({ format }) => ({
     js: format === "es" ? ".js" : ".cjs",
     dts: format === "es" ? ".d.ts" : ".d.cts",

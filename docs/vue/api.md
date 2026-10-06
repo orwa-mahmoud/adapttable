@@ -8,6 +8,22 @@ not define Vue signatures.
 
 ## Entry points
 
+Shared contracts have a documented owner: import table, column, source and
+view-state types and feature composition, host and mount types from
+`@adapttable/vue`; structural Chrome and slot types from
+`@adapttable/vue/adapter`; and factories plus feature-specific options from
+`@adapttable/vue/features`. In particular, `StaticTableFeature`,
+`FeatureMountContext<TRow>` and `StaticFeatureHost` belong to the root,
+while `DensityControlProps`, `DensityChooserSlots`,
+`FullscreenControlProps` and `ViewControlButtonProps` belong to `/adapter`.
+
+The `/density` and `/fullscreen` focused entries retain their runtime
+values, including their control keys and Chrome functions. They reference these
+canonical contracts without re-exporting the binding's full type surface.
+Use `densityChooser` and `fullscreen` from `@adapttable/vue/features` for new
+binding compositions. Native kit factory imports remain
+`@adapttable/vue-unstyled/density` and `@adapttable/vue-unstyled/fullscreen`.
+
 | Import                     | Purpose                                                                                                                                                                                                                                   |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@adapttable/vue`          | Source composables, `useDataTable`, column renderers, layout, selection and URL state. Also re-exports framework-neutral types.                                                                                                           |

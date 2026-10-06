@@ -1,8 +1,5 @@
-import {
-  extendFeature,
-  slotRender,
-  type StaticTableFeature,
-} from "@adapttable/vue/adapter";
+import type { StaticTableFeature } from "@adapttable/vue";
+import { extendFeature, slotRender } from "@adapttable/vue/adapter";
 import {
   fullscreen as bindingFullscreen,
   FULLSCREEN_CONTROL,

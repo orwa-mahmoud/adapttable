@@ -84,13 +84,25 @@ export function plantedVueConsumers(fixtures) {
   const preset = fixtures.find(
     (fixture) => fixture.name === "vue-unstyled · preset"
   );
-  if (!base || !pdf || !preset)
+  const density = fixtures.find(
+    (fixture) => fixture.name === "vue-unstyled · + density"
+  );
+  if (!base || !pdf || !preset || !density)
     throw new Error(
-      "Planted Vue checks require the base, PDF and preset consumers"
+      "Planted Vue checks require the base, PDF, preset and density consumers"
     );
   const native = join(packageDir("adapter-vue-unstyled"), "dist");
   const react = join(packageDir("adapter-unstyled"), "dist/index.js");
+  const ai = join(packageDir("ai-vue"), "dist/index.js");
   return [
+    {
+      fixture: {
+        ...density,
+        name: `${density.name} · planted AI`,
+        code: `${density.code}\nexport { tableAgent } from ${JSON.stringify(ai)};`,
+      },
+      expected: "leaked tableAgent",
+    },
     {
       fixture: {
         ...preset,

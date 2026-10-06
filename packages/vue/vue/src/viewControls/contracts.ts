@@ -5,8 +5,12 @@ import {
   featureStateKey,
   type FullscreenState,
 } from "@adapttable/core/binding";
-
-import type { UseSavedViewsResult } from "../url/useSavedViews";
+import type { UseSavedViewsResult } from "@adapttable/vue";
+import type {
+  DensityControlProps as CanonicalDensityControlProps,
+  FullscreenControlProps as CanonicalFullscreenControlProps,
+  SavedViewsControlProps as CanonicalSavedViewsControlProps,
+} from "@adapttable/vue/adapter";
 
 export interface ViewControlPresentation {
   readonly labels: Required<TableLabels>;
@@ -24,15 +28,13 @@ export interface FullscreenControlProps extends ViewControlPresentation {
 export interface SavedViewsControlProps extends ViewControlPresentation {
   readonly savedViews: UseSavedViewsResult;
 }
-export const DENSITY_CONTROL = featureSlotKey<DensityControlProps>(
+export const DENSITY_CONTROL = featureSlotKey<CanonicalDensityControlProps>(
   "vue-density-control"
 );
-export const FULLSCREEN_CONTROL = featureSlotKey<FullscreenControlProps>(
-  "vue-fullscreen-control"
-);
-export const SAVED_VIEWS_CONTROL = featureSlotKey<SavedViewsControlProps>(
-  "vue-saved-views-control"
-);
+export const FULLSCREEN_CONTROL =
+  featureSlotKey<CanonicalFullscreenControlProps>("vue-fullscreen-control");
+export const SAVED_VIEWS_CONTROL =
+  featureSlotKey<CanonicalSavedViewsControlProps>("vue-saved-views-control");
 export const FULLSCREEN_MODEL = featureStateKey<FullscreenState>(
   "vue-fullscreen-model"
 );

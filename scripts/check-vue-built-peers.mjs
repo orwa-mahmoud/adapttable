@@ -109,15 +109,6 @@ export function checkRuntime(cell, vueRoot, built) {
 }
 
 export function checkVueBuiltPeers(floorRoot) {
-  const exports = run(
-    [
-      "--max-old-space-size=2048",
-      join(REPO_ROOT, "scripts/vue-export-contracts.mjs"),
-    ],
-    REPO_ROOT
-  );
-  assert.equal(exports.status, 0, exports.output);
-  console.log(exports.output.trim());
   const scratch = mkdtempSync(join(tmpdir(), "adapttable-vue-built-peers-"));
   try {
     const floor = declaredFloor();
@@ -138,6 +129,17 @@ export function checkVueBuiltPeers(floorRoot) {
       const cell = join(scratch, label);
       const entries = prepareVueCell(cell, vueRoot);
       console.log(`${label}: checking ${entries.length} published Vue entries`);
+      const exports = run(
+        [
+          "--max-old-space-size=2048",
+          join(REPO_ROOT, "scripts/vue-export-contracts.mjs"),
+          "--cell",
+          cell,
+        ],
+        REPO_ROOT
+      );
+      assert.equal(exports.status, 0, exports.output);
+      console.log(`${label}: ${exports.output.trim()}`);
       for (const name of VUE_PACKAGES) {
         checkConsumer(cell, vueRoot, name, "positive");
         const manifest = readJson(join(packageDir(name), "package.json"));

@@ -27,6 +27,25 @@ export const VUE_CONSUMER_SPECS = [
     present: ["DataTable"],
     absent: [...writers, "export-progress-surface"],
   },
+  ...[
+    ["density", "densityChooser", "density-toggle"],
+    ["fullscreen", "fullscreen", "fullscreen-toggle"],
+  ].map(([entry, factory, marker]) => ({
+    name: `vue-unstyled · + ${entry}`,
+    pkg: "adapter-vue-unstyled",
+    alsoEntryFile: `${entry}.js`,
+    comparable: `mui · + ${entry}`,
+    code: `export { DataTable } from "PKG";\nexport { ${factory} } from "ALSO";`,
+    functionality: `Native table with the ${factory} control`,
+    present: ["DataTable", factory, marker],
+    absent: [
+      ...writers,
+      "tableAgent",
+      "createTableAssistant",
+      "adapttable.agent.v1",
+    ],
+    rejectOptionalAi: true,
+  })),
   {
     name: "vue-unstyled · preset",
     pkg: "adapter-vue-unstyled",
@@ -182,6 +201,15 @@ export function vueGraphProblems(fixture, { code, imports, css = "" }) {
   for (const source of imports) {
     const foreign = vueForeignImport(source, fixture);
     if (foreign) failures.push(`${fixture.name}: reached ${foreign}`);
+    const imported = source.replaceAll("\\", "/");
+    if (
+      fixture.rejectOptionalAi &&
+      (/(?:^|\/node_modules\/)@adapttable\/ai(?:-vue)?(?:$|\/)/.test(
+        imported
+      ) ||
+        /\/packages\/(?:shared\/ai|vue\/ai-vue)\//.test(imported))
+    )
+      failures.push(`${fixture.name}: reached optional AI runtime ${source}`);
   }
   return failures;
 }

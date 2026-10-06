@@ -1,11 +1,17 @@
 import type {
   DirtyEdits,
+  FeatureMountContext as DensityMountContext,
+  FeatureMountContext as FullscreenMountContext,
+  StaticFeatureHost as DensityStaticHost,
+  StaticFeatureHost as FullscreenStaticHost,
   useGroupCollapseUrlState,
   UseGroupCollapseUrlStateOptions,
   UseGroupCollapseUrlStateResult,
   useRowPinningUrlState,
   UseRowPinningUrlStateOptions,
   UseRowPinningUrlStateResult,
+  UseSavedViewsResult as DensityViews,
+  UseSavedViewsResult as FullscreenViews,
 } from "@adapttable/vue";
 import type { DirtyEdits as AdapterDirtyEdits } from "@adapttable/vue/adapter";
 import type {
@@ -13,11 +19,6 @@ import type {
   FeatureMountContext as BatchMountContext,
   TableFeatureHost as BatchHost,
 } from "@adapttable/vue/batch-editing";
-import type {
-  FeatureMountContext as DensityMountContext,
-  StaticFeatureHost as DensityStaticHost,
-  UseSavedViewsResult as DensityViews,
-} from "@adapttable/vue/density";
 import type {
   CellContext,
   FeatureMountContext as EditingMountContext,
@@ -33,11 +34,6 @@ import type {
   StaticFeatureHost as FilterStaticHost,
   TableFeatureHost as FilterHost,
 } from "@adapttable/vue/filters";
-import type {
-  FeatureMountContext as FullscreenMountContext,
-  StaticFeatureHost as FullscreenStaticHost,
-  UseSavedViewsResult as FullscreenViews,
-} from "@adapttable/vue/fullscreen";
 import type {
   FeatureMountContext as HeaderMountContext,
   StaticFeatureHost as HeaderStaticHost,

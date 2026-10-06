@@ -15,6 +15,11 @@ import { pathToFileURL } from "node:url";
 import ts from "typescript";
 
 import { packageDir, REPO_ROOT } from "./packages.mjs";
+import {
+  checkBuiltFeatureOwnership,
+  FOCUSED_FACTORIES,
+  VIEW_CONTROL_VALUES,
+} from "./vue-feature-contracts.mjs";
 import { prepareVueCell } from "./vue-peer-consumers.mjs";
 
 const WRITERS = {
@@ -67,6 +72,26 @@ const star = (from, typeOnly) => ({ from, typeOnly, names: "*" });
 export function checkExportSources(repository) {
   const binding = join(repository, "packages/vue/vue/src");
   const native = join(repository, "packages/vue/adapter-vue-unstyled/src");
+  for (const [entry, factory] of Object.entries(FOCUSED_FACTORIES)) {
+    assert.deepEqual(
+      sourceExports(readFileSync(join(binding, `${entry}.ts`), "utf8")),
+      [
+        named(`./features/${entry}`, [factory]),
+        named("./viewControls/contracts", [
+          "DENSITY_CONTROL",
+          "FULLSCREEN_CONTROL",
+          "FULLSCREEN_MODEL",
+          "SAVED_VIEWS_CONTROL",
+          "SAVED_VIEWS_MODEL",
+        ]),
+        named("./viewControls/viewControlsChrome", [
+          "DensityChooserChrome",
+          "FullscreenButtonChrome",
+        ]),
+      ],
+      `${entry}: retain named values without forwarding shared type ownership`
+    );
+  }
   for (const kind of ["pdf", "xlsx"]) {
     const canonical = `@adapttable/core/${kind}`;
     const route = `@adapttable/vue/export-${kind}`;
@@ -314,6 +339,24 @@ export async function checkBuiltExportRuntime(cell) {
         manifest.exports[subpath ? `./${subpath}` : "."].import.default;
       return import(pathToFileURL(join(root, target)).href);
     };
+    const featureOwner = await load("@adapttable/vue/features");
+    const adapterOwner = await load("@adapttable/vue/adapter");
+    for (const [entry, factory] of Object.entries(FOCUSED_FACTORIES)) {
+      const route = `@adapttable/vue/${entry}`;
+      const actual = await load(route);
+      assert.deepEqual(
+        Object.keys(actual).sort(),
+        [...VIEW_CONTROL_VALUES, factory].sort(),
+        `${mode} ${route}: the focused runtime surface changed`
+      );
+      assert.equal(actual[factory], featureOwner[factory]);
+      for (const name of VIEW_CONTROL_VALUES)
+        assert.equal(
+          actual[name],
+          adapterOwner[name],
+          `${mode} ${route}: ${name} lost canonical runtime identity`
+        );
+    }
     for (const kind of ["pdf", "xlsx"]) {
       const canonical = await load(`@adapttable/core/${kind}`);
       const modules = [];
@@ -348,22 +391,32 @@ export async function checkBuiltExportRuntime(cell) {
   }
 }
 
-/** Standalone post-build proof; writes only an isolated temporary consumer cell. */
-export async function checkVueExportContracts(
+/** Run the same ownership proof against either peer's existing built-only cell. */
+export async function checkVueCellExportContracts(
+  cell,
   repository = REPO_ROOT,
   manifestFile = join(repository, "etc/api-contract.json")
 ) {
   checkExportSources(repository);
   const manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
+  checkBuiltExportTypes(cell, manifest);
+  checkBuiltFeatureOwnership(cell);
+  checkBuiltTypeOnlyValues(cell);
+  await checkBuiltExportRuntime(cell);
+}
+
+/** Standalone post-build proof; writes only an isolated temporary consumer cell. */
+export async function checkVueExportContracts(
+  repository = REPO_ROOT,
+  manifestFile = join(repository, "etc/api-contract.json")
+) {
   const cell = mkdtempSync(join(tmpdir(), "vue-export-contracts-"));
   try {
     const vueRoot = realpathSync(
       join(packageDir("vue", repository), "node_modules/vue")
     );
     prepareVueCell(cell, vueRoot, repository);
-    checkBuiltExportTypes(cell, manifest);
-    checkBuiltTypeOnlyValues(cell);
-    await checkBuiltExportRuntime(cell);
+    await checkVueCellExportContracts(cell, repository, manifestFile);
   } finally {
     rmSync(cell, { recursive: true, force: true });
   }
@@ -373,11 +426,25 @@ if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
-  const [repository, manifest] = process.argv.slice(2);
-  await checkVueExportContracts(
-    repository ? resolve(repository) : REPO_ROOT,
-    manifest && resolve(manifest)
-  );
+  const args = process.argv.slice(2);
+  if (args[0] === "--cell") {
+    assert.equal(
+      args.length,
+      2,
+      "Usage: vue-export-contracts.mjs --cell /path/to/cell"
+    );
+    await checkVueCellExportContracts(resolve(args[1]));
+  } else {
+    assert.ok(
+      args.length <= 2,
+      "Usage: vue-export-contracts.mjs [repository] [manifest]"
+    );
+    const [repository, manifest] = args;
+    await checkVueExportContracts(
+      repository ? resolve(repository) : REPO_ROOT,
+      manifest && resolve(manifest)
+    );
+  }
   console.log(
     "Vue export contracts: source type-only provenance, strict ESM/CJS canonical declarations, all-entry type-only value negatives and exact runtime identities passed."
   );

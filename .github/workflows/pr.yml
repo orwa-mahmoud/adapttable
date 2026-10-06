@@ -382,6 +382,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Restore built packages
+        id: built-packages
         run: pnpm build --concurrency=1
       - name: Verify current and minimum Vue built contracts and ownership
         run: pnpm check:vue-built-peers
@@ -391,7 +392,7 @@ jobs:
         run: pnpm publint
       - name: Check the extracted API reports are current
         id: api-reports
-        if: needs.detect.outputs.runPackage == 'true'
+        if: ${{ !cancelled() && steps.built-packages.outcome == 'success' && needs.detect.outputs.runPackage == 'true' }}
         env:
           ADAPTTABLE_API_REPORTS_DIAGNOSTICS_DIR: ${{ runner.temp }}/adapttable-api-reports
         run: pnpm api:check
@@ -407,7 +408,7 @@ jobs:
         if: needs.detect.outputs.runPackage == 'true'
         run: pnpm smoke:dist
       - name: Bundle-size budget
-        if: needs.detect.outputs.runPackage == 'true'
+        if: ${{ !cancelled() && steps.built-packages.outcome == 'success' && needs.detect.outputs.runPackage == 'true' }}
         run: pnpm budget
 
   consumer:
