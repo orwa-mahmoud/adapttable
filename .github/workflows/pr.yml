@@ -224,7 +224,7 @@ jobs:
     needs: detect
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: ${{ matrix.name == 'vue' && 15 || 10 }}
     strategy:
       fail-fast: false
       matrix:
@@ -236,6 +236,7 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
       - name: Lint
+        id: package-lint
         env:
           LANE: ${{ matrix.name }}
           # Pull requests check only the packages the diff affects and their
@@ -255,6 +256,20 @@ jobs:
           esac
           # 2-core runner: two packages at once, each lint is one process.
           pnpm lint $f $AFFECTED --concurrency=1 --continue=dependencies-successful
+
+      - name: Capture proposed Vue lint fixes
+        id: vue-lint-fixes
+        if: ${{ !cancelled() && matrix.name == 'vue' && steps.package-lint.outcome == 'failure' }}
+        timeout-minutes: 5
+        run: node scripts/capture-vue-lint-fixes.mjs
+      - name: Retain proposed Vue lint fixes for review
+        if: ${{ !cancelled() && matrix.name == 'vue' && steps.package-lint.outcome == 'failure' && hashFiles('reports/vue-eslint-fix-dry-run.json') != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vue-eslint-fix-dry-run
+          path: reports/vue-eslint-fix-dry-run.json
+          if-no-files-found: error
+          retention-days: 7
 
   typescript:
     name: TypeScript
