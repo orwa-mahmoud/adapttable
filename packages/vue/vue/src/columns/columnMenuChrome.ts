@@ -368,6 +368,15 @@ export const ColumnMenuChrome = defineComponent(
     let generation = 0;
     let surfaceLifetime = 0;
     let disposed = false;
+    const rootRef = elementRef<HTMLElement>((element) => {
+      if (element === null || !disposed) root.value = element;
+    });
+    const triggerRef = elementRef<HTMLElement>((element) => {
+      if (element === null || !disposed) trigger.value = element;
+    });
+    const panelRef = elementRef<HTMLElement>((element) => {
+      if (element === null || !disposed) panel.value = element;
+    });
     watch(
       [() => props.slots.Panel, () => props.model],
       () => {
@@ -534,9 +543,7 @@ export const ColumnMenuChrome = defineComponent(
         {
           ...part("column-menu", names),
           dir,
-          ref: elementRef<HTMLElement>((element) => {
-            root.value = element;
-          }),
+          ref: rootRef,
           style: { position: "relative" },
         },
         [
@@ -548,9 +555,7 @@ export const ColumnMenuChrome = defineComponent(
               "aria-haspopup": "dialog",
               "aria-controls": open.value ? panelId : undefined,
               "data-active": open.value || undefined,
-              ref: elementRef<HTMLElement>((element) => {
-                trigger.value = element;
-              }),
+              ref: triggerRef,
               onClick: (): void => {
                 if (open.value) close();
                 else show();
@@ -572,9 +577,7 @@ export const ColumnMenuChrome = defineComponent(
                   role: "dialog",
                   "aria-label": labels.columns,
                   dir,
-                  ref: elementRef<HTMLElement>((element) => {
-                    panel.value = element;
-                  }),
+                  ref: panelRef,
                   style: isManagedOverlayPanel(driver)
                     ? undefined
                     : {
