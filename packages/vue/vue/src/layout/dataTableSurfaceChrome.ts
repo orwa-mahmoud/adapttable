@@ -227,8 +227,8 @@ function toolbarContent<TRow>(
           : null,
         table.isMobile.value && table.sortByOptions.value.length
           ? [
-              h("label", [
-                labels.sortBy,
+              h("div", [
+                h("span", labels.sortBy),
                 slots.Select({
                   attrs: {
                     "aria-label": labels.sortBy,
@@ -449,8 +449,8 @@ export const DataTableSurfaceChrome = /* @__PURE__ */ Object.assign(
               "div",
               { "data-adapttable-part": "footer", class: names.footer },
               [
-                h("label", [
-                  labels.rowsPerPage,
+                h("div", [
+                  h("span", labels.rowsPerPage),
                   slots.Select({
                     attrs: {
                       "aria-label": labels.rowsPerPage,

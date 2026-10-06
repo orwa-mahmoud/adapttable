@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,
   createCommentVNode,
+  createSSRApp,
   defineComponent,
   effectScope,
   h,
@@ -10,6 +11,7 @@ import {
   onUnmounted,
   shallowRef,
 } from "vue";
+import { renderToString } from "vue/server-renderer";
 
 import {
   DataTableSurfaceChrome,
@@ -46,6 +48,82 @@ function paint(): DataTableSurfaceSlots<Row> {
     Mobile: () => h("kit-mobile-body"),
   };
 }
+
+it.each([false, true])(
+  "keeps compound select labels valid through SSR and hydration (mobile=%s)",
+  async (forceMobile) => {
+    const props = shallowRef<DataTableProps<Row>>({
+      ...options,
+      forceMobile,
+      columns: [{ key: "name", sortable: true }],
+    });
+    const slots: DataTableSurfaceSlots<Row> = {
+      ...paint(),
+      Select: ({ attrs, label, value, options: choices, onChange }) =>
+        h("label", { "data-kit-select": true }, [
+          h("span", label),
+          h(
+            "select",
+            {
+              ...attrs,
+              value,
+              onChange: (event: Event) => {
+                if (event.target instanceof HTMLSelectElement)
+                  onChange(event.target.value);
+              },
+            },
+            choices.map((choice) =>
+              h("option", { value: choice.value }, choice.label)
+            )
+          ),
+        ]),
+    };
+    const Table = defineComponent({
+      setup() {
+        const model = useDataTableShell(() => props.value);
+        return () =>
+          h(DataTableSurfaceChrome<Row>, {
+            model,
+            options: props.value,
+            slots,
+            content: {},
+            rootRef: () => undefined,
+            scrollRef: () => undefined,
+          });
+      },
+    });
+    const root = document.createElement("div");
+    root.innerHTML = await renderToString(createSSRApp(Table));
+    document.body.append(root);
+    const selects = [...root.querySelectorAll("select")];
+    expect(selects).toHaveLength(forceMobile ? 2 : 1);
+    expect(root.querySelector("label label")).toBeNull();
+    for (const select of selects) {
+      expect(select.labels).toHaveLength(1);
+      expect(select.getAttribute("aria-label")).toBeTruthy();
+    }
+    const warn = vi.spyOn(console, "warn");
+    const error = vi.spyOn(console, "error");
+    const app = createSSRApp(Table);
+    app.mount(root);
+    cleanup.push(() => {
+      app.unmount();
+      root.remove();
+      warn.mockRestore();
+      error.mockRestore();
+    });
+    await nextTick();
+    expect([...root.querySelectorAll("select")]).toEqual(selects);
+    selects[0]?.focus();
+    props.value = { ...props.value, classNames: { root: "updated" } };
+    await nextTick();
+    expect(document.activeElement).toBe(selects[0]);
+    expect([...root.querySelectorAll("select")]).toEqual(selects);
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
+  }
+);
+
 describe("required table surface paint", () => {
   it.each([
     "Search",

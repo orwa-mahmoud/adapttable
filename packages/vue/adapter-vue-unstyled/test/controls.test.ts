@@ -90,10 +90,13 @@ describe("native control and slot contracts", () => {
       view.root,
       '[data-adapttable-part="rows-per-page"]'
     );
+    expect(size.getAttribute("aria-label")).toBe("Rows per page");
+    size.focus();
     size.value = "25";
     size.dispatchEvent(new Event("change"));
     await nextTick();
     expect(view.root.querySelectorAll("tbody tr")).toHaveLength(12);
+    expect(document.activeElement).toBe(size);
   });
   it("uses the live page for repeated pagination clicks before rerender", async () => {
     const view = mount({ defaults: { limit: 1 } });
@@ -181,9 +184,12 @@ describe("native control and slot contracts", () => {
       view.root,
       '[data-adapttable-part="sort-select"]'
     );
+    expect(select.getAttribute("aria-label")).toBe("Sort by");
+    select.focus();
     select.value = "score";
     select.dispatchEvent(new Event("change"));
     await nextTick();
+    expect(document.activeElement).toBe(select);
     const direction = node<HTMLButtonElement>(
       view.root,
       '[data-adapttable-part="sort-direction"]'
