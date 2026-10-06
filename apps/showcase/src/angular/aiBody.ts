@@ -7,12 +7,12 @@ import {
   receiptFromResult,
 } from "@adapttable/ai";
 import { injectTableAssistant, tableAgent } from "@adapttable/ai-angular";
+import type { ColumnDef, TableAssistantProps } from "@adapttable/angular";
 import type {
   AgentApprovalPending,
   TableAssistantButtonProps,
   TableAssistantLanguageChipProps,
 } from "@adapttable/angular/adapter";
-import type { ColumnDef, TableAssistantProps } from "@adapttable/angular";
 import { Component, computed, inject, signal } from "@angular/core";
 
 import { SHOWCASE_PRESENTATION } from "./data";
