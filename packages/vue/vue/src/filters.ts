@@ -144,8 +144,10 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
   const open = shallowRef(false);
   const fullscreen = context.state.get(FULLSCREEN_MODEL);
   let disposed = false;
+  const mountedAnchor = shallowRef<HTMLElement | null>(null);
   onScopeDispose(() => {
     disposed = true;
+    mountedAnchor.value = null;
   });
   const enabled = () => !disposed && context.active.value;
   const ownerRevision = shallowRef(0);
@@ -161,7 +163,12 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
     },
     { flush: "sync" }
   );
-  const anchor = shallowRef<HTMLElement | null>(null);
+  // Child refs arrive before the parent activates. Registration is passive;
+  // only the active feature may expose or act on the retained target.
+  const anchor = computed(() => (enabled() ? mountedAnchor.value : null));
+  const triggerRef = (element: HTMLElement | null) => {
+    if (element === null || !disposed) mountedAnchor.value = element;
+  };
   const toggle = new FilterTriggerToggleState();
   const close = (reason?: "escape" | "outside" | "done") => {
     if (!enabled()) return;
@@ -262,9 +269,7 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
           "aria-haspopup": "dialog",
           "data-adapttable-part": "filters-button",
         },
-        triggerRef: (element) => {
-          if (enabled()) anchor.value = element;
-        },
+        triggerRef,
         onPointerDown: () => {
           if (enabled()) toggle.pointerDown(open.value);
         },

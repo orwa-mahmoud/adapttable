@@ -43,8 +43,13 @@ export function useHeaderFilter<TRow>(
   const active = useScopeActivity();
   const store = createHeaderFilterOverlay({ key: toValue(input).def.key });
   const snapshot = useExternalStore(store);
-  const anchor = shallowRef<HTMLElement | null>(null);
+  const mountedAnchor = shallowRef<HTMLElement | null>(null);
   let disposed = false;
+  // Retain child registration before mount and while suspended, without
+  // exposing an anchor to an inactive or disposed header filter.
+  const anchor = computed(() =>
+    !disposed && active.value ? mountedAnchor.value : null
+  );
   watch(
     () => toValue(input).def.key,
     (key) => {
@@ -55,7 +60,7 @@ export function useHeaderFilter<TRow>(
   );
   onScopeDispose(() => {
     disposed = true;
-    anchor.value = null;
+    mountedAnchor.value = null;
     store.dismiss();
   });
   watch(
@@ -65,6 +70,9 @@ export function useHeaderFilter<TRow>(
     },
     { flush: "sync" }
   );
+  const triggerRef = (element: HTMLElement | null) => {
+    if (element === null || !disposed) mountedAnchor.value = element;
+  };
   const close: FilterPanelSurfaceProps["onClose"] = (reason) => {
     if (disposed || !active.value) return;
     store.dismiss();
@@ -94,9 +102,7 @@ export function useHeaderFilter<TRow>(
         "data-adapttable-header-filter": id,
         class: options.className,
       },
-      triggerRef: (element) => {
-        anchor.value = element;
-      },
+      triggerRef,
       onPointerDown: () => undefined,
       onClick: () => {
         if (!disposed && active.value) store.setOpen(!open);
