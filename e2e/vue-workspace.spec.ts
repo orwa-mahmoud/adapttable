@@ -1669,29 +1669,71 @@ for (const scenario of [
     if (scenario.width > 768) {
       const scroll = orders.locator(part("scroll-box"));
       const current = record("ORD-1042");
-      const badge = current.locator('[data-column-key="status"] .order-status');
+      const statusCell = current.locator('td[data-column-key="status"]');
+      const badge = statusCell.locator(".order-status");
       const pinnedId = current.locator('td[data-column-key="id"]');
       const pinnedAmount = current.locator('td[data-column-key="amount"]');
-      await expect(badge).toHaveText("Review");
-      await expect(pinnedId).toHaveCSS("position", "sticky");
-      await expect(pinnedAmount).toHaveCSS("position", "sticky");
       const previousScroll = await scroll.evaluate((element) => ({
         left: element.scrollLeft,
         top: element.scrollTop,
       }));
-      try {
-        expect(
-          await scroll.evaluate(
-            (element) => element.scrollWidth - element.clientWidth
-          )
-        ).toBeGreaterThan(0);
-        await scroll.evaluate((element) => {
-          element.scrollLeft = element.scrollWidth;
+      const previousPageScroll = await page.evaluate(() => ({
+        x: window.scrollX,
+        y: window.scrollY,
+      }));
+      const geometry = async (name: string) => {
+        const value = {
+          badge: await badge.boundingBox(),
+          statusCell: await statusCell.boundingBox(),
+          pinnedId: await pinnedId.boundingBox(),
+          pinnedAmount: await pinnedAmount.boundingBox(),
+          scrollBox: await scroll.boundingBox(),
+          scroll: await scroll.evaluate((element) => ({
+            left: element.scrollLeft,
+            top: element.scrollTop,
+            width: element.scrollWidth,
+            viewportWidth: element.clientWidth,
+          })),
+          page: await page.evaluate(() => ({
+            x: window.scrollX,
+            y: window.scrollY,
+          })),
+          viewport: page.viewportSize(),
+        };
+        await testInfo.attach(name, {
+          body: Buffer.from(JSON.stringify(value, null, 2)),
+          contentType: "application/json",
         });
+        return value;
+      };
+      try {
+        const before = await geometry(
+          "vue-workspace-saved-views-before-scroll"
+        );
+        expect(
+          before.scroll.width - before.scroll.viewportWidth
+        ).toBeGreaterThan(0);
+        await badge.scrollIntoViewIfNeeded();
+        const target = await badge.boundingBox();
+        const start = await pinnedId.boundingBox();
+        const end = await pinnedAmount.boundingBox();
+        if (!target || !start || !end)
+          throw new Error(
+            "The saved-view status or pinned cells have no bounds."
+          );
+        const offset =
+          target.x + target.width / 2 - (start.x + start.width + end.x) / 2;
+        await scroll.evaluate((element, delta) => {
+          element.scrollLeft += delta;
+        }, offset);
+        const after = await geometry("vue-workspace-saved-views-after-scroll");
         await expect(badge).toBeInViewport({ ratio: 1 });
-        const badgeBounds = await badge.boundingBox();
-        const idBounds = await pinnedId.boundingBox();
-        const amountBounds = await pinnedAmount.boundingBox();
+        await expect(badge).toHaveText("Review");
+        await expect(pinnedId).toHaveCSS("position", "sticky");
+        await expect(pinnedAmount).toHaveCSS("position", "sticky");
+        const badgeBounds = after.badge;
+        const idBounds = after.pinnedId;
+        const amountBounds = after.pinnedAmount;
         if (!badgeBounds || !idBounds || !amountBounds)
           throw new Error(
             "The saved-view status or pinned cells have no bounds."
@@ -1712,13 +1754,13 @@ for (const scenario of [
           contentType: "image/png",
         });
       } finally {
-        await scroll.evaluate(
-          (element, position) => {
-            element.scrollLeft = position.left;
-            element.scrollTop = position.top;
-          },
-          previousScroll
-        );
+        await scroll.evaluate((element, position) => {
+          element.scrollLeft = position.left;
+          element.scrollTop = position.top;
+        }, previousScroll);
+        await page.evaluate((position) => {
+          window.scrollTo(position.x, position.y);
+        }, previousPageScroll);
       }
     }
   });

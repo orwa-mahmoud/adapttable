@@ -227,7 +227,6 @@ test("rejects incomplete or duplicated peer expectations", () => {
     assert.throws(() => assertVueRuntimeCells(completed(), expected));
 });
 
-
 test("rejects missing expected roots and versions even if completions match", () => {
   for (const key of ["root", "version"]) {
     for (const value of [undefined, "", null]) {

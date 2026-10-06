@@ -198,7 +198,9 @@ describe("canonical composition parts and class targets", () => {
         }
       }
       captions[2]!.classList.remove("caption");
-      expect(() => expectPart(root, "group-label", "SPAN", "caption")).toThrow();
+      expect(() =>
+        expectPart(root, "group-label", "SPAN", "caption")
+      ).toThrow();
     }
   );
 

@@ -428,9 +428,9 @@ function serverQueryFixture(exports) {
     types: [],
   });
   assert.deepEqual(
-    ts.getPreEmitDiagnostics(program).map((item) =>
-      ts.flattenDiagnosticMessageText(item.messageText, "\n")
-    ),
+    ts
+      .getPreEmitDiagnostics(program)
+      .map((item) => ts.flattenDiagnosticMessageText(item.messageText, "\n")),
     []
   );
   return serverQueryHandlerErrors(program, program.getSourceFile(file));
