@@ -24,10 +24,7 @@ import {
   featureActivity,
   ownsTableEvent,
 } from "./actions/lifecycle";
-import type {
-  FeatureMountContext,
-  TableFeature,
-} from "./features/tableFeature";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 import { rowPinningModelKey } from "./layout/modelChannels";
 import { useExternalStore } from "./store";
 export interface ContextMenuOptions<TRow> {
@@ -201,8 +198,4 @@ export type {
 export { ContextMenuChrome } from "./actions/contextMenuChrome";
 export type { ContextMenuModel } from "./actions/contracts";
 export { CONTEXT_MENU_CONTROL, CONTEXT_MENU_MODEL } from "./actions/contracts";
-export type * from "./index";
 export type { ContextMenuItem, ContextMenuTarget } from "@adapttable/core";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

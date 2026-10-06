@@ -1,7 +1,5 @@
-import {
-  cellNavigation,
-  type GridFocusOptions,
-} from "@adapttable/vue/cell-navigation";
+import { cellNavigation } from "@adapttable/vue/features";
+import type { UseGridFocusOptions as GridFocusOptions } from "@adapttable/vue";
 interface Row {
   id: string;
   score: number;

@@ -10,11 +10,13 @@ import {
   AGENT_APPROVAL_STATE,
   AGENT_PROGRESS_STATE,
   AGENT_VIEW_STATE,
-  type AgentApprovalPending,
   eraseTableRuntime,
-  type FeatureMountContext,
 } from "@adapttable/vue/adapter";
-import type { StaticTableFeature } from "@adapttable/vue/features";
+import type {
+  AgentApprovalPending,
+  FeatureMountContext,
+  StaticTableFeature,
+} from "@adapttable/vue";
 import {
   computed,
   type MaybeRefOrGetter,

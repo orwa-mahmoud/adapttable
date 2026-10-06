@@ -1,4 +1,4 @@
-/** Canonical ownership proof for focused Vue entries. */
+/** Canonical ownership proof for Vue feature and adapter entries. */
 import assert from "node:assert/strict";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -27,17 +27,6 @@ function unalias(checker, symbol) {
     symbol = checker.getAliasedSymbol(symbol);
   }
   return symbol?.declarations?.length ? symbol : undefined;
-}
-
-function exportsOf(checker, source) {
-  const module = checker.getSymbolAtLocation(source);
-  return module
-    ? new Map(
-        checker
-          .getExportsOfModule(module)
-          .map((symbol) => [symbol.name, unalias(checker, symbol)])
-      )
-    : new Map();
 }
 
 /**
@@ -254,21 +243,6 @@ export function canonicalChromeErrors(
   return errors;
 }
 
-/** The narrowed entries must have their exact runtime surface and no type stars. */
-export function focusedSurfaceErrors(program, source, factory) {
-  const checker = program.getTypeChecker();
-  const exports = exportsOf(checker, source);
-  const expected = [...VIEW_CONTROL_VALUES, factory].sort();
-  const errors = [];
-  if (JSON.stringify([...exports.keys()].sort()) !== JSON.stringify(expected))
-    errors.push("focused entry must expose exactly its eight existing values");
-  for (const [name, symbol] of exports) {
-    if (!(symbol?.flags & ts.SymbolFlags.Value))
-      errors.push(`${name} is not a runtime value`);
-  }
-  return errors;
-}
-
 /** Strict consumers use only copied package exports; no source path aliases. */
 export function checkBuiltFeatureOwnership(cell) {
   for (const extension of ["ts", "cts"]) {
@@ -279,12 +253,12 @@ export function checkBuiltFeatureOwnership(cell) {
         'import type { FeatureMountContext, StaticTableFeature, TableSource, UseDataTableResult } from "@adapttable/vue";',
         'import * as features from "@adapttable/vue/features";',
         'import * as adapter from "@adapttable/vue/adapter";',
-        'import * as density from "@adapttable/vue/density";',
-        'import * as fullscreen from "@adapttable/vue/fullscreen";',
+        'import * as nativeDensity from "@adapttable/vue-unstyled/density";',
+        'import * as nativeFullscreen from "@adapttable/vue-unstyled/fullscreen";',
         "type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;",
         "type Assert<T extends true> = T;",
-        "const densityResult: Assert<Equal<ReturnType<typeof density.densityChooser>, StaticTableFeature>> = true;",
-        "const fullscreenResult: Assert<Equal<ReturnType<typeof fullscreen.fullscreen>, StaticTableFeature>> = true;",
+        "const densityResult: Assert<Equal<ReturnType<typeof features.densityChooser>, StaticTableFeature>> = true;",
+        "const fullscreenResult: Assert<Equal<ReturnType<typeof features.fullscreen>, StaticTableFeature>> = true;",
         "function verifyMembers<TRow>(context: FeatureMountContext<TRow>): void {",
         "  const table: UseDataTableResult<TRow> = context.table;",
         "  const source: TableSource<TRow> = context.source.value;",
@@ -292,7 +266,9 @@ export function checkBuiltFeatureOwnership(cell) {
         "  void [table, source, result];",
         "}",
         "void [densityResult, fullscreenResult, verifyMembers];",
-        "void [features, adapter, density, fullscreen];",
+        "const nativeDensityResult: Assert<Equal<ReturnType<typeof nativeDensity.densityChooser>, StaticTableFeature>> = true;",
+        "const nativeFullscreenResult: Assert<Equal<ReturnType<typeof nativeFullscreen.fullscreen>, StaticTableFeature>> = true;",
+        "void [features, adapter, nativeDensityResult, nativeFullscreenResult];",
       ].join("\n")
     );
     const program = ts.createProgram([file], {
@@ -315,36 +291,27 @@ export function checkBuiltFeatureOwnership(cell) {
     );
     const consumer = program.getSourceFile(file);
     assert.ok(consumer);
-    const checker = program.getTypeChecker();
-    const modules = importedModules(checker, consumer);
     for (const [entry, factory] of Object.entries(FOCUSED_FACTORIES)) {
-      const route = `@adapttable/vue/${entry}`;
-      assert.deepEqual(
-        canonicalFactoryErrors(program, consumer, {
-          route,
-          owner: "@adapttable/vue/features",
-          contractOwner: "@adapttable/vue",
-          factory,
-        }),
-        []
-      );
-      assert.deepEqual(canonicalChromeErrors(program, consumer, { route }), []);
-      const module = consumer.statements.find(
-        (statement) =>
-          ts.isImportDeclaration(statement) &&
-          statement.moduleSpecifier.text === route
-      );
-      const source = checker
-        .getSymbolAtLocation(module.moduleSpecifier)
-        ?.declarations?.find(ts.isSourceFile);
-      assert.ok(source);
-      assert.deepEqual(focusedSurfaceErrors(program, source, factory), []);
-      for (const name of VIEW_CONTROL_VALUES)
-        assert.equal(
-          modules.get(route)?.get(name),
-          modules.get("@adapttable/vue/adapter")?.get(name),
-          `${extension} ${route}: ${name} lost canonical declaration identity`
+      for (const route of [
+        "@adapttable/vue/features",
+        `@adapttable/vue-unstyled/${entry}`,
+      ]) {
+        assert.deepEqual(
+          canonicalFactoryErrors(program, consumer, {
+            route,
+            owner: route,
+            contractOwner: "@adapttable/vue",
+            factory,
+          }),
+          []
         );
+      }
     }
+    assert.deepEqual(
+      canonicalChromeErrors(program, consumer, {
+        route: "@adapttable/vue/adapter",
+      }),
+      []
+    );
   }
 }

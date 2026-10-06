@@ -1,16 +1,13 @@
 import {
   extendFeature,
-  slotRender,
-  type StaticTableFeature,
-} from "@adapttable/vue/adapter";
-import {
   SAVED_VIEWS_CONTROL,
-  savedViews as bindingSavedViews,
   SavedViewsMenuChrome,
   SavedViewsPanelChrome,
   type SavedViewsPanelChromeProps,
-  type UseSavedViewsOptions,
-} from "@adapttable/vue/saved-views";
+  slotRender,
+} from "@adapttable/vue/adapter";
+import type { StaticTableFeature, UseSavedViewsOptions } from "@adapttable/vue";
+import { savedViews as bindingSavedViews } from "@adapttable/vue/features";
 import { defineComponent, h, type MaybeRefOrGetter } from "vue";
 
 import type { DataTableClassNames } from "./types";
@@ -24,7 +21,7 @@ export type {
   SavedView,
   SavedViewsStore,
   UseSavedViewsOptions,
-} from "@adapttable/vue/saved-views";
+} from "@adapttable/vue";
 export interface SavedViewsPanelProps extends Omit<
   SavedViewsPanelChromeProps,
   "slots"

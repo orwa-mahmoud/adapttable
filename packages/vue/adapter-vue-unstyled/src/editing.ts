@@ -1,22 +1,24 @@
 import {
+  batchEditBarSlotKey,
+  editableCellSlotKey,
   extendFeature,
+  rowEditActionsSlotKey,
   slotRender,
-  type StaticTableFeature,
-  type TableFeature,
   UNDO_REDO_CONTROL,
 } from "@adapttable/vue/adapter";
+import type {
+  CellEditHandler,
+  StaticTableFeature,
+  TableEditingOptions,
+  TableFeature,
+} from "@adapttable/vue";
 import {
-  batchEditBarSlotKey,
   batchEditing as bindingBatchEditing,
-  type CellEditHandler,
-  editableCellSlotKey,
   editing as bindingEditing,
   type EditingLifecycleExtras,
-  rowEditActionsSlotKey,
   rowEditing as bindingRowEditing,
-  type TableEditingOptions,
   undoRedoButtons as bindingUndoRedoButtons,
-} from "@adapttable/vue/editing";
+} from "@adapttable/vue/features";
 import { h } from "vue";
 
 import { NativeEditableCell } from "./editing/NativeEditableCell";
@@ -75,12 +77,12 @@ export type {
   BatchEditingState,
   BatchRowEdit,
   CellEditHandler,
-  EditingLifecycleExtras,
-  RowEditIcons,
   RowEditingState,
   TableEditingOptions,
-} from "@adapttable/vue/editing";
-export { dirtyIndicators, editHistory } from "@adapttable/vue/editing";
+} from "@adapttable/vue";
+export type { EditingLifecycleExtras } from "@adapttable/vue/features";
+export type { RowEditIcons } from "@adapttable/vue/adapter";
+export { dirtyIndicators, editHistory } from "@adapttable/vue/features";
 
 /** Opt-in native Undo and Redo buttons use the shell's history projection. */
 export function undoRedoButtons(): StaticTableFeature {

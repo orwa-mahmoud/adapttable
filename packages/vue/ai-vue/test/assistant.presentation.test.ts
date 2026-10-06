@@ -1,8 +1,5 @@
 import type { AgentSession, AssistantTransportReply } from "@adapttable/ai";
-import type {
-  AgentApprovalPending,
-  AgentProgress,
-} from "@adapttable/vue/adapter";
+import type { AgentApprovalPending, AgentProgress } from "@adapttable/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 

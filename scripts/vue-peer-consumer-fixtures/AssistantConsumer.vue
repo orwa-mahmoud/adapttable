@@ -8,9 +8,11 @@ import {
   useTableAssistant,
 } from "@adapttable/ai-vue";
 import type { SummaryRowFn, TableSummaryModel } from "@adapttable/vue";
-import { useFeatureState } from "@adapttable/vue/adapter";
-import type * as assistantContract from "@adapttable/vue/assistant";
-import type { TableAssistantSlots } from "@adapttable/vue/assistant";
+import {
+  type TableAssistantSlots,
+  useFeatureState,
+} from "@adapttable/vue/adapter";
+import type * as assistantContract from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
 import {
   agentApproval,

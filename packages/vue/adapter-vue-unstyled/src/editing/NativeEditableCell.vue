@@ -1,14 +1,14 @@
 <script setup lang="ts" generic="TRow">
-import { elementRef } from "@adapttable/vue/adapter";
 import {
   EditableCellChrome,
   type EditableCellChromeSlots,
   editableCustomControl,
+  elementRef,
   formatMultiDraft,
   readMultiDraft,
   useEditableCellModel,
   type VueEditableCellProps,
-} from "@adapttable/vue/editing";
+} from "@adapttable/vue/adapter";
 import { Fragment, h, mergeProps, type VNodeChild } from "vue";
 
 import { useClassNames } from "../classNamesContext";

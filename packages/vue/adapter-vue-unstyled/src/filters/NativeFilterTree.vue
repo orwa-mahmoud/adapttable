@@ -4,7 +4,7 @@ import {
   FilterTreeChrome,
   type FilterTreeSlots,
   useFilterTreeModel,
-} from "@adapttable/vue/filters";
+} from "@adapttable/vue/adapter";
 import { h, type VNodeChild } from "vue";
 
 /** The binding owns recursive layout and tree writes; this kit supplies native controls. */

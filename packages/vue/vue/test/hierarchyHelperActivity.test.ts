@@ -1,14 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { effectScope, shallowRef } from "vue";
 
+import { grouping, rowDetail, tree } from "../src/features";
 import {
-  grouping,
-  rowDetail,
-  tree,
   useGroupCollapse,
   useRowExpansion,
   useTreeExpansion,
-} from "../src/features";
+} from "../src/index";
 import { useDataTableShell } from "../src/useDataTableShell";
 
 describe("hierarchy helper activity", () => {

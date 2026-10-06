@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@adapttable/vue";
-import type { PivotRow } from "@adapttable/vue/pivot";
+import { pivot, type PivotRow, pivotTableModel } from "@adapttable/vue/pivot";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,
@@ -13,7 +13,7 @@ import { renderToString } from "vue/server-renderer";
 
 import { DataTable } from "../src";
 import { groupingPanel } from "../src/grouping-panel";
-import { pivot, PivotPanel, pivotTableModel } from "../src/pivot";
+import { PivotPanel } from "../src/pivot";
 import { rowDetail } from "../src/row-detail";
 import { rowReorder } from "../src/row-reorder";
 import { pinnedSummaryRows } from "../src/rows";

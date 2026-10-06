@@ -21,7 +21,26 @@ import {
 } from "vue";
 
 import { requireScope, useScopeActivity } from "./store";
-export * from "@adapttable/core/stream";
+export type {
+  InsertPatch,
+  OpenRowPatchStreamOptions,
+  RemovePatch,
+  RowPatch,
+  RowPatchEvent,
+  RowPatchStreamHandle,
+  RowPatchStreamReconnect,
+  RowPatchStreamStatus,
+  StreamSocket,
+  StreamSocketEvent,
+  UpdatePatch,
+  UpsertPatch,
+} from "@adapttable/core/stream";
+export {
+  isStreamLive,
+  isStreamSettled,
+  openRowPatchStream,
+  parseRowPatchFrame,
+} from "@adapttable/core/stream";
 export interface UseRowPatchStreamOptions<TRow> {
   readonly websocket?: string;
   readonly eventSource?: string;

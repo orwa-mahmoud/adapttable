@@ -1,4 +1,4 @@
-import type { ColumnLayoutState } from "@adapttable/vue/adapter";
+import type { ColumnLayoutState } from "@adapttable/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,

@@ -1,8 +1,5 @@
-import {
-  type FeatureSlotKey,
-  featureSlotKey,
-  type TableChromeSlots,
-} from "@adapttable/vue/adapter";
+import { type FeatureSlotKey } from "@adapttable/vue";
+import { featureSlotKey, type TableChromeSlots } from "@adapttable/vue/adapter";
 
 /** Structural group props are defined by the binding; this key carries native paint only. */
 export type NativeGroupRowProps<TRow> = Parameters<

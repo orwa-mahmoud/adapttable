@@ -1,5 +1,5 @@
 import type { TableAgentControllerOptions } from "@adapttable/ai";
-import type { TableRuntimeView } from "@adapttable/vue/adapter";
+import type { TableRuntimeView } from "@adapttable/vue";
 import { afterEach, describe, expect, it } from "vitest";
 import { createApp, defineComponent, h, shallowRef } from "vue";
 

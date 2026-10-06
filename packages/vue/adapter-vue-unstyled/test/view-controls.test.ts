@@ -1,4 +1,4 @@
-import type { SavedView } from "@adapttable/vue/adapter";
+import type { SavedView } from "@adapttable/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSSRApp, defineComponent, h, nextTick, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";

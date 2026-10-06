@@ -1,10 +1,10 @@
 import {
   type BulkAction,
   type ConfirmHandler,
+  type ExportAllControls,
   useFrontendData,
   useServerData,
-} from "@adapttable/vue/adapter";
-import { type ExportAllControls } from "@adapttable/vue/export-csv";
+} from "@adapttable/vue";
 import { describe, expect, it, vi } from "vitest";
 import { defineComponent, effectScope, h, KeepAlive, shallowRef } from "vue";
 

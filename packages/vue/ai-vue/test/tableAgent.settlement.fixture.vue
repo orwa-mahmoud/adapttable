@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ColumnLayoutState } from "@adapttable/core";
+import type { ColumnLayoutState } from "@adapttable/vue";
 import { useDataTableShell } from "@adapttable/vue/adapter";
 
 import {

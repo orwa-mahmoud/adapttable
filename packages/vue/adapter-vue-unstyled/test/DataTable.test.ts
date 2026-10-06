@@ -1,9 +1,10 @@
 import {
   type ColumnDef,
+  type ComposedFeature,
+  type TableRuntime,
   type TableSource,
   useFrontendData,
 } from "@adapttable/vue";
-import type { ComposedFeature, TableRuntime } from "@adapttable/vue/adapter";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,

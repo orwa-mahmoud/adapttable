@@ -75,7 +75,7 @@ cancellation. It cannot undo host side effects already started.
 
 ## Render export progress with the kit's controls
 
-`ExportChrome` from `@adapttable/vue/export-csv` accepts an `ExportChromeProps`
+`ExportChrome` from `@adapttable/vue/adapter` accepts an `ExportChromeProps`
 model and an `ExportSlots` object with Button and Surface. Button receives the
 localized export caption and complete disabled, busy and click attributes.
 Surface receives the neutral progress view, including only the actions currently
@@ -87,11 +87,11 @@ example shows the complete state and action wiring; another kit substitutes its
 own progress, button and surface components.
 
 ```ts
-import {
-  ExportProgressChrome,
-  type ExportProgressChromeProps,
-  type ExportProgressSlots,
-} from "@adapttable/vue/export-csv";
+import { ExportProgressChrome } from "@adapttable/vue/adapter";
+import type {
+  ExportProgressChromeProps,
+  ExportProgressSlots,
+} from "@adapttable/vue/adapter";
 import { h } from "vue";
 
 const progressSlots = {
@@ -142,7 +142,7 @@ feature handles table-local focus restoration when the surface closes.
 ## Build action controls for another Vue kit
 
 Application code uses the factories from `@adapttable/vue-unstyled`. A kit author
-instead imports the binding factory from its `@adapttable/vue/<feature>` entry,
+instead imports the binding factory from `@adapttable/vue/features`,
 then fills its required control channel with `extendFeature` and `slotRender`.
 The factory owns the controller and publishes the current model; the shell
 passes that model and its presentation to the registered control. Do not create
@@ -154,9 +154,8 @@ and the table's optional overlay `container`. `ActionButton` carries `label`,
 optional Vue `icon`, and complete semantic `attrs`. `ActionButtonSlots` requires
 `Button(props: ActionButton): VNodeChild`. Forward those attributes, including
 disabled state and event handlers, to the kit's actual button and render both
-the icon and label. These shared types are available from `@adapttable/vue`;
-runtime state and control keys come from `@adapttable/vue/adapter` or their
-focused feature entries.
+the icon and label. These presentation contracts, runtime state keys and control keys come from
+`@adapttable/vue/adapter`.
 
 This factory lets an adapter supply its own button component while reusing the
 complete bulk-action behavior:
@@ -165,11 +164,11 @@ complete bulk-action behavior:
 import { extendFeature, slotRender } from "@adapttable/vue/adapter";
 import {
   BULK_ACTIONS_CONTROL,
-  bulkActions,
   BulkActionsChrome,
-  type BulkAction,
-  type BulkActionsSlots,
-} from "@adapttable/vue/bulk-actions";
+} from "@adapttable/vue/adapter";
+import { bulkActions } from "@adapttable/vue/features";
+import type { BulkAction } from "@adapttable/vue";
+import type { BulkActionsSlots } from "@adapttable/vue/adapter";
 
 export function kitBulkActions(
   actions: readonly BulkAction[],
@@ -198,21 +197,20 @@ A state key is read with `context.state.get(key)` in a feature or
 `useFeatureState(key)` in a descendant component; both return a readonly shallow
 ref whose value can be undefined before the feature is available. A control key
 is filled with `slotRender(key, render)`. Reading a key does not install its
-feature. The following pairs are exported at runtime by the named Vue binding
-entry and by `/adapter`:
+feature. The following pairs are exported at runtime by `/adapter`:
 
-| Binding entry      | State key and value                                                                                                                                  | Required control key and input                                                                               |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `/bulk-actions`    | `BULK_ACTIONS_MODEL`: `BulkActionsModel`                                                                                                             | `BULK_ACTIONS_CONTROL`: presentation plus `model`; render `BulkActionsChrome`.                               |
-| `/command-palette` | `COMMAND_PALETTE_MODEL`: `CommandPaletteModel`, with `open`, toolbar `button`, current `commands`, `show()` and `close()`.                           | `COMMAND_PALETTE_CONTROL`: presentation plus `model`; render `CommandPaletteChrome` with the kit's controls. |
-| `/context-menu`    | `CONTEXT_MENU_MODEL`: `ContextMenuModel`, with target point `at` or null, current `items` and `close()`.                                             | `CONTEXT_MENU_CONTROL`: presentation plus `model`; render `ContextMenuChrome`.                               |
-| `/side-panel`      | `SIDE_PANEL_MODEL`: `SidePanelControlModel`, with resolved `open` panel key or null, `panels`, optional logical `side` and host `onOpenChange(key)`. | `SIDE_PANEL_CONTROL`: presentation plus `model`; render `SidePanelChrome`.                                   |
-| `/export-csv`      | `EXPORT_MODEL`: `ExportHandlerState`, including export action, busy/disabled state, caption, announcement and progress.                              | `EXPORT_CONTROL`: presentation plus `model`; render `ExportChrome` with Button and Surface.                  |
-| `/print`           | `PRINT_MODEL`: the guarded print callback, present when the print button is enabled.                                                                 | `PRINT_CONTROL`: presentation plus `onPrint`; render `PrintChrome`.                                          |
+| Binding entry | State key and value                                                                                                                                  | Required control key and input                                                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `/adapter`    | `BULK_ACTIONS_MODEL`: `BulkActionsModel`                                                                                                             | `BULK_ACTIONS_CONTROL`: presentation plus `model`; render `BulkActionsChrome`.                               |
+| `/adapter`    | `COMMAND_PALETTE_MODEL`: `CommandPaletteModel`, with `open`, toolbar `button`, current `commands`, `show()` and `close()`.                           | `COMMAND_PALETTE_CONTROL`: presentation plus `model`; render `CommandPaletteChrome` with the kit's controls. |
+| `/adapter`    | `CONTEXT_MENU_MODEL`: `ContextMenuModel`, with target point `at` or null, current `items` and `close()`.                                             | `CONTEXT_MENU_CONTROL`: presentation plus `model`; render `ContextMenuChrome`.                               |
+| `/adapter`    | `SIDE_PANEL_MODEL`: `SidePanelControlModel`, with resolved `open` panel key or null, `panels`, optional logical `side` and host `onOpenChange(key)`. | `SIDE_PANEL_CONTROL`: presentation plus `model`; render `SidePanelChrome`.                                   |
+| `/adapter`    | `EXPORT_MODEL`: `ExportHandlerState`, including export action, busy/disabled state, caption, announcement and progress.                              | `EXPORT_CONTROL`: presentation plus `model`; render `ExportChrome` with Button and Surface.                  |
+| `/adapter`    | `PRINT_MODEL`: the guarded print callback, present when the print button is enabled.                                                                 | `PRINT_CONTROL`: presentation plus `onPrint`; render `PrintChrome`.                                          |
 
 The side-panel model resolves the reactive `SidePanelOptions.open` input; it
 does not turn controlled state into local state. `SidePanelLayoutChrome`, from
-`/side-panel` or `/adapter`, wraps the default table slot with the supplied
+`/adapter`, wraps the default table slot with the supplied
 `panel(): VNodeChild` when `open` is true. Its optional `side: "start" | "end"`
 sets desktop placement and `mobile` stacks the panel below the table. The panel
 itself still requires the Frame, Tab and Close controls of `SidePanelChrome`.
@@ -221,9 +219,9 @@ itself still requires the Frame, Tab and Close controls of `SidePanelChrome`.
 presentation, an `onPrint` callback and `ActionButtonSlots`. It renders only the
 kit's print button; the host callback decides what gets printed.
 
-`UNDO_REDO_CONTROL`, exported by `/editing` and `/adapter`, is a control channel
+`UNDO_REDO_CONTROL`, exported by `/adapter`, is a control channel
 for `ToolbarExtrasSlotProps`, not a second history model. Fill it using
-`HistoryButtonsChrome` from `/editing`. Its `HistoryButtonsChromeProps` adds
+`HistoryButtonsChrome` from `/adapter`. Its `HistoryButtonsChromeProps` adds
 `ActionButtonSlots` to those toolbar props, including `onUndo`, `onRedo`,
 `canUndo`, `canRedo` and optional operation labels. The Chrome renders only the
 available actions, disables unavailable operations, and returns nothing without

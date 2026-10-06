@@ -1,24 +1,22 @@
 <script setup lang="ts">
 import type {
   BatchEditBarProps,
-  RowEditActionsProps,
-  VueEditableCellProps,
-} from "@adapttable/vue/editing";
-import type {
   ChecklistFilterProps,
   FilterFieldOptions,
   FilterTreeBuilderProps,
-} from "@adapttable/vue/filters";
-import type { HeaderFilterOptions } from "@adapttable/vue/header-filters";
+  HeaderFilterOptions,
+  RowEditActionsProps,
+  VueEditableCellProps,
+} from "@adapttable/vue/adapter";
 import { NativeBatchEditBar } from "@adapttable/vue-unstyled/batch-editing";
 import {
   NativeEditableCell,
   NativeRowEditActions,
 } from "@adapttable/vue-unstyled/editing";
 import {
-  NativeChecklistFilter,
+  ChecklistFilter as NativeChecklistFilter,
   NativeFilterField,
-  NativeFilterTree,
+  FilterTreeBuilder as NativeFilterTree,
 } from "@adapttable/vue-unstyled/filters";
 import { NativeHeaderFilter } from "@adapttable/vue-unstyled/header-filters";
 

@@ -8,7 +8,7 @@ import {
   useRowExpansion,
 } from "../rows/rowExpansion";
 import { nestedTableDetail, type NestedTableFor } from "../tree/nestedTable";
-import type { FeatureMountContext, TableFeature } from "./tableFeature";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 interface DetailPatch<TRow> extends Omit<RowExpansionOptions, "enabled"> {
   readonly renderRowDetail?: (row: TRow) => VNodeChild;
   readonly nestedTable?: NestedTableFor<TRow>;

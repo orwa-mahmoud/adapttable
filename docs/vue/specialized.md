@@ -67,8 +67,8 @@ and `groupingAdd`. Aggregation hooks are `groupingAggregations`,
 `virtualSpacer` styles the row-window spacers; `cardDetail` styles expanded
 mobile details.
 
-`PivotPanel`, `pivot`, `pivotTableModel` and `usePivotUrlState` are exported from
-`@adapttable/vue-unstyled/pivot`. The panel is controlled: `onChange(next)` requests
+`PivotPanel` is exported from `@adapttable/vue-unstyled/pivot`; `pivot`,
+`pivotTableModel` and `usePivotUrlState` come from `@adapttable/vue/pivot`. The panel is controlled: `onChange(next)` requests
 a configuration change, and the host must pass the accepted `config` back. Native
 selects and buttons carry localized labels. The pivot table model yields ordinary
 Vue columns, stable row keys and optional `pinnedRows` for the grand total. Pass
@@ -103,7 +103,7 @@ the SVG. Supply a `label` when a domain-specific or translated summary is needed
 ```ts
 import type { ColumnDef } from "@adapttable/vue-unstyled";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
-import { sparklineColumn } from "@adapttable/vue-unstyled/sparkline";
+import { sparklineColumn } from "@adapttable/vue/sparkline";
 import { virtualize } from "@adapttable/vue-unstyled/virtualize";
 
 interface Sale {
@@ -138,10 +138,8 @@ pending interaction. The host supplies the write and authoritative row order.
 
 ```ts
 import { resolveLabels } from "@adapttable/vue/adapter";
-import {
-  type RowReorderHandler,
-  useRowReorder,
-} from "@adapttable/vue/features";
+import type { RowReorderHandler } from "@adapttable/vue";
+import { useRowReorder } from "@adapttable/vue";
 import { type MaybeRefOrGetter, toValue } from "vue";
 
 interface Person {
@@ -185,13 +183,13 @@ following adapter factory accepts the kit's complete typed control set:
 
 ```ts
 import { extendFeature, slotRender } from "@adapttable/vue/adapter";
+import { groupingPanel } from "@adapttable/vue/features";
 import {
-  groupingPanel,
   GroupingPanelChrome,
   groupingPanelControlKey,
-  type GroupingPanelSlots,
-  type TableFeature,
-} from "@adapttable/vue/features";
+} from "@adapttable/vue/adapter";
+import type { GroupingPanelSlots } from "@adapttable/vue/adapter";
+import type { TableFeature } from "@adapttable/vue";
 
 export function kitGroupingPanel<TRow>(
   slots: GroupingPanelSlots
@@ -232,7 +230,7 @@ supplies the current row context; the kit fills the control key with
 `GroupingPanelProps<TRow>`. Read it from the same registry when placing a panel
 in a custom shell. Fill `groupingPanelControlKey<TRow>()`, as shown above, to
 render that model with the kit's controls. Both grouping keys are available
-from `/features` and `/adapter`. The returned state refs can be undefined
+from `/adapter`. The returned state refs can be undefined
 before a feature mounts or after its owner is removed; reading a key alone
 does not install grouping, reorder or virtualization.
 
@@ -242,7 +240,7 @@ does not install grouping, reorder or virtualization.
 `Omit<PivotPanelChromeProps, "slots">`: required `fields`, `config` and
 `onChange(next)`, with optional `labels` and `className`. The native panel
 supplies the slots. A different kit uses `PivotPanelChrome` from
-`@adapttable/vue/pivot` with all five `PivotPanelSlots`: Surface, Zone, Field,
+`@adapttable/vue/adapter` with all five `PivotPanelSlots`: Surface, Zone, Field,
 Add and Agg. The Agg slot receives `VuePivotAggProps`, extending the neutral
 `PivotAggProps` with localized `optionLabels: Readonly<Record<AggregateName,
 string>>`. Use those labels for the supplied aggregation `options`; pass a

@@ -70,7 +70,7 @@ its event handlers.
 
 ## Building a Vue kit
 
-Import the model and Chrome from `@adapttable/vue/column-menu`. The binding
+Import the model and Chrome from `@adapttable/vue/adapter`. The binding
 provides `useColumnMenu`, `useColumnRenameEditor`, `ColumnMenuChrome`, and
 `ColumnHeaderRenameChrome`. The `column-menu` and `column-header-rename`
 feature slots are required. Use `columnMenuSlotKey<TRow>()` when rendering
@@ -115,7 +115,7 @@ and an optional semantic icon name. Input receives controlled `value` and
 `container`, semantic `attrs` and `onClose`. `ColumnRenameSlots` is the Button
 and Input subset used by `ColumnHeaderRenameChrome`, whose other props are
 `ColumnHeaderRenameSlotProps`. These binding contracts all belong to
-`@adapttable/vue/column-menu`.
+`@adapttable/vue/adapter`.
 
 The native `ColumnMenu` component belongs to
 `@adapttable/vue-unstyled/column-menu`. It accepts `ColumnMenuSlotProps<TRow>`,

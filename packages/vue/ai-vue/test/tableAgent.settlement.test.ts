@@ -1,5 +1,5 @@
 import type { AgentCapabilityDefinition } from "@adapttable/ai";
-import type { ColumnLayoutState } from "@adapttable/core";
+import type { ColumnLayoutState } from "@adapttable/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 

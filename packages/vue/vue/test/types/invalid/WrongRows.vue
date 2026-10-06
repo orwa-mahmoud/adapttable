@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TableFeature } from "@adapttable/vue/features";
+import type { TableFeature } from "@adapttable/vue";
 
 import GenericTable from "../GenericTable.vue";
 interface Person {

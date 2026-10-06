@@ -1,9 +1,10 @@
 import {
+  EXPORT_CONTROL,
+  ExportChrome,
   extendFeature,
   slotRender,
-  type TableFeature,
 } from "@adapttable/vue/adapter";
-import { EXPORT_CONTROL, ExportChrome } from "@adapttable/vue/export-csv";
+import { type TableFeature } from "@adapttable/vue";
 import { h } from "vue";
 
 import { nativeExportSlots } from "./nativeControls";

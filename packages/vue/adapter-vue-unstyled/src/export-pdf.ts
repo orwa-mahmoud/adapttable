@@ -1,8 +1,8 @@
-import type { StaticTableFeature, TableFeature } from "@adapttable/vue/adapter";
+import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 import {
   exportPdf as bindingExportPdf,
   type ExportPdfOptions,
-} from "@adapttable/vue/export-pdf";
+} from "@adapttable/vue/pdf";
 
 import { withNativeExport } from "./actions/withNativeExport";
 
@@ -16,8 +16,7 @@ export function exportPdf<TRow>(
 ): TableFeature<TRow> {
   return withNativeExport(bindingExportPdf<TRow>(options));
 }
-export type * from "@adapttable/vue/export-pdf";
-export type { ExportPdfOptions } from "@adapttable/vue/export-pdf";
+export type { ExportPdfOptions } from "@adapttable/vue/pdf";
 export {
   buildPrintDocument,
   buildPrintTableHtml,
@@ -26,4 +25,4 @@ export {
   pdfWriter,
   printStyles,
   printTable,
-} from "@adapttable/vue/export-pdf";
+} from "@adapttable/vue/pdf";

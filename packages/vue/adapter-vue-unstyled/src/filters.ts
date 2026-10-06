@@ -2,14 +2,13 @@ import {
   ACTIVE_FILTER_CHIPS,
   extendFeature,
   slotRender,
-  type TableFeature,
   TOOLBAR_EXTRAS,
 } from "@adapttable/vue/adapter";
+import type { FilterDef, TableFeature } from "@adapttable/vue";
 import {
-  type FilterDef,
   filters as bindingFilters,
   type FiltersOptions,
-} from "@adapttable/vue/filters";
+} from "@adapttable/vue/features";
 import { h } from "vue";
 
 import { NativeFilterChips } from "./filters/NativeFilterChips";
@@ -27,14 +26,14 @@ export function filters<TRow>(
     ),
   ]);
 }
-export { NativeChecklistFilter } from "./filters/NativeChecklistFilter";
+export { NativeChecklistFilter as ChecklistFilter } from "./filters/NativeChecklistFilter";
 export { NativeFilterField } from "./filters/NativeFilterField";
-export { NativeFilterTree } from "./filters/NativeFilterTree";
-export type { FilterDef, FiltersOptions } from "@adapttable/vue/filters";
+export { NativeFilterTree as FilterTreeBuilder } from "./filters/NativeFilterTree";
+export type { FilterDef } from "@adapttable/vue";
+export type { FiltersOptions } from "@adapttable/vue/features";
 export type {
   ChecklistFilterProps,
-  FilterOption,
   FilterTreeBuilderProps,
-  FilterTypeSpec,
-} from "@adapttable/vue/filters";
-export { filterTypes } from "@adapttable/vue/filters";
+} from "@adapttable/vue/adapter";
+export type { FilterOption, FilterTypeSpec } from "@adapttable/vue";
+export { filterTypes } from "@adapttable/vue/features";

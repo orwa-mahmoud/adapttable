@@ -4,11 +4,11 @@
  * @deprecated Import from `@adapttable/vue-unstyled/export`.
  * @packageDocumentation
  */
-import type { StaticTableFeature, TableFeature } from "@adapttable/vue/adapter";
+import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 import {
   exportCsv as bindingExportCsv,
   type ExportCsvOptions,
-} from "@adapttable/vue/export-csv";
+} from "@adapttable/vue/features";
 
 import { withNativeExport } from "./actions/withNativeExport";
 
@@ -22,4 +22,4 @@ export function exportCsv<TRow>(
 ): TableFeature<TRow> {
   return withNativeExport(bindingExportCsv<TRow>(options));
 }
-export type * from "@adapttable/vue/export-csv";
+export type { ExportCsvOptions } from "@adapttable/vue/features";

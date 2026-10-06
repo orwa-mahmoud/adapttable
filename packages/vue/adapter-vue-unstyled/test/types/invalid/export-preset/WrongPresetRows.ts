@@ -1,7 +1,5 @@
-import {
-  standardFeatures,
-  type TableFeature,
-} from "@adapttable/vue-unstyled/preset";
+import type { TableFeature } from "@adapttable/vue";
+import { standardFeatures } from "@adapttable/vue-unstyled/preset";
 interface Person {
   name: string;
 }

@@ -1,7 +1,7 @@
 import type {
   FilterHeaderRowSlots,
   FilterHeaderSlots,
-} from "@adapttable/vue/header-filters";
+} from "@adapttable/vue/adapter";
 
 export const missingMulti: FilterHeaderSlots = {
   Search: () => null,

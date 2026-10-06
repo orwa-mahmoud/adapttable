@@ -1,10 +1,11 @@
 import type { StaticTableFeature } from "@adapttable/vue";
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
 import {
   DENSITY_CONTROL,
-  densityChooser as bindingDensityChooser,
   DensityChooserChrome,
-} from "@adapttable/vue/density";
+  extendFeature,
+  slotRender,
+} from "@adapttable/vue/adapter";
+import { densityChooser as bindingDensityChooser } from "@adapttable/vue/features";
 
 import { nativeDensityControl } from "./viewControls/nativeControls";
 

@@ -1,8 +1,6 @@
 <script setup lang="ts" generic="TRow">
 import {
   COLUMN_MENU,
-  type ColumnLayoutState,
-  type DataTableHandle,
   defaultConfirm,
   DENSITY_CONTROL,
   DesktopTableChrome,
@@ -13,11 +11,15 @@ import {
   SAVED_VIEWS_CONTROL,
   SidePanelLayoutChrome,
   type TableChromeSlots,
-  type TableDensity,
   TableFooterChrome,
   TOOLBAR_EXTRAS,
   useDataTableShell,
 } from "@adapttable/vue/adapter";
+import {
+  type ColumnLayoutState,
+  type DataTableHandle,
+  type TableDensity,
+} from "@adapttable/vue";
 import {
   computed,
   h,

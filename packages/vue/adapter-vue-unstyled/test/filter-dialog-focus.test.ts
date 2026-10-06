@@ -1,9 +1,9 @@
 import {
   createFeatureState,
+  filterViewKey,
   provideFeatureState,
   useDataTableShell,
 } from "@adapttable/vue/adapter";
-import { filterViewKey } from "@adapttable/vue/filters";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   defineComponent,

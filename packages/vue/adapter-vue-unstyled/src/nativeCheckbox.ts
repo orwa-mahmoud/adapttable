@@ -1,4 +1,4 @@
-import type { Attrs } from "@adapttable/vue/adapter";
+import type { Attrs } from "@adapttable/vue";
 import { h, mergeProps, type VNode } from "vue";
 
 /** Restore a native toggle when its controlled request is rejected by the host. */

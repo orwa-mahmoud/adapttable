@@ -13,10 +13,7 @@ import {
   shallowRef,
 } from "vue";
 
-import type {
-  ComposedFeature,
-  FeatureMountContext,
-} from "./features/tableFeature";
+import type { ComposedFeature, FeatureMountContext } from "@adapttable/vue";
 import { type OwnedFeatureState, type TableFeatureState } from "./featureState";
 import { requireScope } from "./store";
 interface MountedFeature<TRow> {

@@ -1,4 +1,9 @@
-import { aggregate, type ColumnDef, computed } from "@adapttable/vue";
+import {
+  aggregate,
+  type ColumnDef,
+  computed,
+  type TableFeature,
+} from "@adapttable/vue";
 import {
   cellSpan,
   collapsibleColumnGroups,
@@ -10,7 +15,6 @@ import {
   rowActions,
   rowAppearance,
   rowPinning,
-  type TableFeature,
 } from "@adapttable/vue/features";
 import { h, type VNodeChild } from "vue";
 interface Row {

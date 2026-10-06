@@ -1,7 +1,7 @@
 # Vue assistant and approvals
 
 The Vue packages are experimental and unreleased. `@adapttable/ai-vue`
-connects neutral AI stores to Vue 3.5. `@adapttable/vue/assistant` provides
+connects neutral AI stores to Vue 3.5. `@adapttable/vue/adapter` provides
 structural Chrome and required control slots; a kit such as
 `@adapttable/vue-unstyled/assistant` supplies the visible controls.
 

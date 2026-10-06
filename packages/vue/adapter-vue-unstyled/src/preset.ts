@@ -1,10 +1,10 @@
 /** The standard native table, composed from the public individual features. */
 import {
   type BulkAction,
-  standardFeatureList,
   type StaticTableFeature,
   type TableFeature,
-} from "@adapttable/vue/adapter";
+} from "@adapttable/vue";
+import { standardFeatureList } from "@adapttable/vue/adapter";
 
 import { bulkActions } from "./bulk-actions";
 import { columnMenu } from "./column-menu";
@@ -68,6 +68,5 @@ export function standardFeatures<TRow>(
     options
   );
 }
-export type * from "@adapttable/vue/adapter";
-export type { FilterDef } from "@adapttable/vue/filters";
-export type { UseSavedViewsOptions } from "@adapttable/vue/saved-views";
+export type { FilterDef } from "@adapttable/vue";
+export type { UseSavedViewsOptions } from "@adapttable/vue";

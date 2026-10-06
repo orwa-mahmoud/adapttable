@@ -1,7 +1,7 @@
 import {
   type ActiveFilterChipsSlotProps,
   FilterChipsChrome,
-} from "@adapttable/vue/filters";
+} from "@adapttable/vue/adapter";
 import { defineComponent, h } from "vue";
 
 import { useClassNames } from "../classNamesContext";

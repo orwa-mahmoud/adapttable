@@ -1,7 +1,9 @@
-import type { CommandPaletteSlots } from "@adapttable/vue/command-palette";
-import type { ContextMenuSlots } from "@adapttable/vue/context-menu";
-import type { ExportSlots } from "@adapttable/vue/export-csv";
-import type { SidePanelSlots } from "@adapttable/vue/side-panel";
+import type {
+  CommandPaletteSlots,
+  ContextMenuSlots,
+  ExportSlots,
+  SidePanelSlots,
+} from "@adapttable/vue/adapter";
 export const palette: CommandPaletteSlots = {
   Surface: () => null,
   Item: () => null,

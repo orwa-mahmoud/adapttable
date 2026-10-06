@@ -1,13 +1,11 @@
 import {
   extendFeature,
-  slotRender,
-  type StaticTableFeature,
-} from "@adapttable/vue/adapter";
-import {
   FIND_BAR,
   FIND_BUTTON,
-  findInTable as bindingFindInTable,
-} from "@adapttable/vue/find-in-table";
+  slotRender,
+} from "@adapttable/vue/adapter";
+import { type StaticTableFeature } from "@adapttable/vue";
+import { findInTable as bindingFindInTable } from "@adapttable/vue/features";
 import { h } from "vue";
 
 import { NativeFindBar } from "./navigation/nativeNavigation";

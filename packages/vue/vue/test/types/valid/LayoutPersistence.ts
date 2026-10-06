@@ -2,16 +2,14 @@ import {
   type ColumnLayoutState,
   useColumnLayoutStorageState,
   type UseColumnLayoutStorageStateOptions,
+  type UseColumnLayoutStorageStateResult as AdapterStorageResult,
   type UseColumnLayoutStorageStateResult,
   useColumnLayoutUrlState,
   type UseColumnLayoutUrlStateOptions,
+  type UseColumnLayoutUrlStateResult as AdapterUrlResult,
   type UseColumnLayoutUrlStateResult,
   useSavedViews,
 } from "@adapttable/vue";
-import type {
-  UseColumnLayoutStorageStateResult as AdapterStorageResult,
-  UseColumnLayoutUrlStateResult as AdapterUrlResult,
-} from "@adapttable/vue/adapter";
 import { computed, effectScope, shallowRef } from "vue";
 
 const scope = effectScope();

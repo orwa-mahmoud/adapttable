@@ -14,10 +14,7 @@ import {
   type BulkActionsModel,
 } from "./actions/contracts";
 import { featureActivity } from "./actions/lifecycle";
-import type {
-  FeatureMountContext,
-  StaticTableFeature,
-} from "./features/tableFeature";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { useExternalStore } from "./store";
 function mountBulkActions<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
@@ -125,8 +122,4 @@ export type {
   BulkActionsSlots,
 } from "./actions/simpleChrome";
 export { BulkActionsChrome } from "./actions/simpleChrome";
-export type * from "./index";
 export type { BulkAction, BulkActionContext } from "@adapttable/core";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

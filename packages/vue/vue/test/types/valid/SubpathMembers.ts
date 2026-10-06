@@ -1,9 +1,28 @@
 import type {
+  CellContext,
+  DirtyEdits as AdapterDirtyEdits,
+  DirtyEdits as BatchDirtyEdits,
   DirtyEdits,
+  DirtyEdits as FeatureDirtyEdits,
+  FeatureMountContext as BatchMountContext,
   FeatureMountContext as DensityMountContext,
+  FeatureMountContext as EditingMountContext,
+  FeatureMountContext as FilterMountContext,
   FeatureMountContext as FullscreenMountContext,
+  FeatureMountContext as HeaderMountContext,
+  FeatureMountContext as SavedViewsMountContext,
+  FooterContext,
+  HeaderContext,
+  Renderer,
   StaticFeatureHost as DensityStaticHost,
+  StaticFeatureHost as EditingStaticHost,
+  StaticFeatureHost as FilterStaticHost,
   StaticFeatureHost as FullscreenStaticHost,
+  StaticFeatureHost as HeaderStaticHost,
+  StaticFeatureHost as SavedViewsStaticHost,
+  TableFeatureHost as BatchHost,
+  TableFeatureHost as EditingHost,
+  TableFeatureHost as FilterHost,
   useGroupCollapseUrlState,
   UseGroupCollapseUrlStateOptions,
   UseGroupCollapseUrlStateResult,
@@ -13,35 +32,6 @@ import type {
   UseSavedViewsResult as DensityViews,
   UseSavedViewsResult as FullscreenViews,
 } from "@adapttable/vue";
-import type { DirtyEdits as AdapterDirtyEdits } from "@adapttable/vue/adapter";
-import type {
-  DirtyEdits as BatchDirtyEdits,
-  FeatureMountContext as BatchMountContext,
-  TableFeatureHost as BatchHost,
-} from "@adapttable/vue/batch-editing";
-import type {
-  CellContext,
-  FeatureMountContext as EditingMountContext,
-  FooterContext,
-  HeaderContext,
-  Renderer,
-  StaticFeatureHost as EditingStaticHost,
-  TableFeatureHost as EditingHost,
-} from "@adapttable/vue/editing";
-import type { DirtyEdits as FeatureDirtyEdits } from "@adapttable/vue/features";
-import type {
-  FeatureMountContext as FilterMountContext,
-  StaticFeatureHost as FilterStaticHost,
-  TableFeatureHost as FilterHost,
-} from "@adapttable/vue/filters";
-import type {
-  FeatureMountContext as HeaderMountContext,
-  StaticFeatureHost as HeaderStaticHost,
-} from "@adapttable/vue/header-filters";
-import type {
-  FeatureMountContext as SavedViewsMountContext,
-  StaticFeatureHost as SavedViewsStaticHost,
-} from "@adapttable/vue/saved-views";
 interface Row {
   readonly id: string;
 }

@@ -1,6 +1,9 @@
-import type { ColumnDef } from "@adapttable/vue";
-import { type ComposedFeature, resolveLabels } from "@adapttable/vue/adapter";
-import type { CustomCellEditorCtrl } from "@adapttable/vue/editing";
+import type {
+  ColumnDef,
+  ComposedFeature,
+  CustomCellEditorCtrl,
+} from "@adapttable/vue";
+import { resolveLabels } from "@adapttable/vue/adapter";
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, h, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";

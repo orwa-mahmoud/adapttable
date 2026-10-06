@@ -2,7 +2,7 @@
 export type {
   ColumnResizeHandleOptions,
   ColumnResizeHandleProps,
-} from "@adapttable/vue/features";
+} from "@adapttable/vue/adapter";
 export {
   collapsibleColumnGroups,
   fitColumns,

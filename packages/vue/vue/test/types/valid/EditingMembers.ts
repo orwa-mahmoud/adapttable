@@ -1,21 +1,23 @@
 import type {
   BatchEditBarProps,
+  RowEditActionsProps,
+} from "@adapttable/core/binding";
+import type {
   BatchEditingState,
   EditCommitSnapshot,
   EditingBundle,
-  RowEditActionsProps,
+  ExternalStoreOptions,
   RowEditingState,
+  TableEditingOptions,
+  TableFeature,
 } from "@adapttable/vue";
-import { batchEditing as batchSubpath } from "@adapttable/vue/batch-editing";
 import {
   batchEditing,
+  batchEditing as batchSubpath,
   editing,
-  type EditingActionSlots,
-  type ExternalStoreOptions,
   rowEditing,
-  type TableEditingOptions,
-} from "@adapttable/vue/editing";
-import type { TableFeature } from "@adapttable/vue/features";
+} from "@adapttable/vue/features";
+import type { EditingActionSlots } from "@adapttable/vue/adapter";
 interface Row {
   id: string;
   name: string;

@@ -9,7 +9,6 @@ export type {
 export type {
   CellContext,
   CellEdit,
-  CellRange,
   ColumnDef,
   ColumnGroup,
   ColumnInput,
@@ -19,9 +18,10 @@ export type {
   SummaryRowFn,
   TableDensity,
   TableSource,
-} from "@adapttable/vue/adapter";
+} from "@adapttable/vue";
+export type { CellRange } from "@adapttable/vue/adapter";
 export type {
   FilterHeaderControlOptions,
   FilterHeaderControlProps,
   FilterHeaderRowProps,
-} from "@adapttable/vue/header-filters";
+} from "@adapttable/vue/adapter";

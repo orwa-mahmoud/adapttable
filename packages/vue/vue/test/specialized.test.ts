@@ -12,6 +12,8 @@ import {
   type VNodeChild,
 } from "vue";
 
+import { PivotPanelChrome, type PivotPanelSlots } from "../src/adapter";
+
 import { extendFeature } from "../src/features/tableFeature";
 import {
   buildFormulaColumns,
@@ -23,8 +25,6 @@ import type { TableBodySlot } from "../src/layout/tableModels";
 import {
   pivot,
   type PivotConfig,
-  PivotPanelChrome,
-  type PivotPanelSlots,
   pivotTableModel,
   usePivotUrlState,
 } from "../src/pivot";

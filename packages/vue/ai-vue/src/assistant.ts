@@ -13,13 +13,12 @@ import {
   AGENT_APPROVAL_STATE,
   AGENT_PROGRESS_STATE,
   AGENT_VIEW_STATE,
-  type AgentApprovalPending,
-  type AgentProgress,
   type TableAssistantView,
   useExternalStore,
   useFeatureState,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
+import { type AgentApprovalPending, type AgentProgress } from "@adapttable/vue";
 import {
   computed,
   type ComputedRef,

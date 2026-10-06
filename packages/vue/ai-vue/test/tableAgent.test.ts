@@ -1,6 +1,6 @@
 import type { AgentCapabilityDefinition } from "@adapttable/ai";
 import { createNeutralTable, createTableEngine } from "@adapttable/core";
-import type { TableRuntimeView } from "@adapttable/core/binding";
+import type { TableRuntimeView } from "@adapttable/vue";
 import {
   AGENT_APPROVAL_STATE,
   createFeatureState,

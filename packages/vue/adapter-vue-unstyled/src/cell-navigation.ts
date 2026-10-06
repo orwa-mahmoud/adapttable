@@ -1,15 +1,15 @@
 import {
+  COLUMN_SELECT,
   extendFeature,
+  FILL_HANDLE_CONTROL,
   slotRender,
-  type StaticTableFeature,
 } from "@adapttable/vue/adapter";
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   cellNavigation as bindingCellNavigation,
   type CellNavigationOptions,
-  COLUMN_SELECT,
   columnSelectionCheckbox as bindingColumnSelectionCheckbox,
-  FILL_HANDLE_CONTROL,
-} from "@adapttable/vue/cell-navigation";
+} from "@adapttable/vue/features";
 import { h } from "vue";
 
 import {
@@ -28,9 +28,6 @@ export function columnSelectionCheckbox(): StaticTableFeature {
     slotRender(COLUMN_SELECT, (props) => h(NativeColumnSelect, props)),
   ]);
 }
-export type {
-  CellEdit,
-  CellNavigationOptions,
-  CellRange,
-  GridCell,
-} from "@adapttable/vue/cell-navigation";
+export type { CellEdit, GridCell } from "@adapttable/vue";
+export type { CellNavigationOptions } from "@adapttable/vue/features";
+export type { CellRange } from "@adapttable/vue/adapter";

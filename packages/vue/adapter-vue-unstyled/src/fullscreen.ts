@@ -1,10 +1,11 @@
 import type { StaticTableFeature } from "@adapttable/vue";
-import { extendFeature, slotRender } from "@adapttable/vue/adapter";
 import {
-  fullscreen as bindingFullscreen,
+  extendFeature,
   FULLSCREEN_CONTROL,
   FullscreenButtonChrome,
-} from "@adapttable/vue/fullscreen";
+  slotRender,
+} from "@adapttable/vue/adapter";
+import { fullscreen as bindingFullscreen } from "@adapttable/vue/features";
 
 import { nativeViewButton } from "./viewControls/nativeControls";
 

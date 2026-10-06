@@ -3,9 +3,8 @@ import {
   PivotPanelChrome,
   type PivotPanelChromeProps,
   type PivotPanelSlots,
-} from "@adapttable/vue/pivot";
+} from "@adapttable/vue/adapter";
 import { h, type VNodeChild } from "vue";
-export * from "@adapttable/vue/pivot";
 export type PivotPanelProps = Omit<PivotPanelChromeProps, "slots">;
 const controls: PivotPanelSlots = {
   Surface: ({ children, className, ...attrs }) =>

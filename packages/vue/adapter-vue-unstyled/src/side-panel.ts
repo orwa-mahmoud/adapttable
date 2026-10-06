@@ -1,13 +1,11 @@
 import {
   extendFeature,
-  slotRender,
-  type StaticTableFeature,
-} from "@adapttable/vue/adapter";
-import {
   SIDE_PANEL_CONTROL,
-  sidePanel as bindingSidePanel,
   SidePanelChrome,
-} from "@adapttable/vue/side-panel";
+  slotRender,
+} from "@adapttable/vue/adapter";
+import { type StaticTableFeature } from "@adapttable/vue";
+import { sidePanel as bindingSidePanel } from "@adapttable/vue/features";
 import { h } from "vue";
 
 import { nativeSidePanelSlots } from "./actions/nativeControls";
@@ -23,4 +21,7 @@ export function sidePanel(
     ),
   ]);
 }
-export type * from "@adapttable/vue/side-panel";
+export type {
+  SidePanelOptions,
+  SidePanelPanel,
+} from "@adapttable/vue/features";

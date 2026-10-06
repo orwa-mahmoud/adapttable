@@ -2,7 +2,7 @@
 import { xlsxWriter } from "@adapttable/core/xlsx";
 
 import { exportCsv, type ExportCsvOptions } from "./export-csv";
-import type { StaticTableFeature, TableFeature } from "./features/tableFeature";
+import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 
 /** Export scope, columns, filename and host hooks, with the XLSX writer fixed. @public */
 export type ExportXlsxOptions<TRow> = Omit<ExportCsvOptions<TRow>, "writer">;
@@ -21,10 +21,3 @@ export function exportXlsx<TRow>(
       : { ...(options === true ? {} : options), writer: xlsxWriter() }
   );
 }
-export type * from "./export-csv";
-export type { Aggregator } from "@adapttable/core/xlsx";
-export * from "@adapttable/core/xlsx";
-export { buildTableXlsx, xlsxWriter } from "@adapttable/core/xlsx";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

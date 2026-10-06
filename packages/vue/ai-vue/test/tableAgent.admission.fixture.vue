@@ -3,7 +3,7 @@ import {
   createTableAgentController,
   type TableAgentControllerOptions,
 } from "@adapttable/ai";
-import type { TableRuntimeView } from "@adapttable/vue/adapter";
+import type { TableRuntimeView } from "@adapttable/vue";
 import { nextTick, onScopeDispose, watch } from "vue";
 const props = defineProps<{
   options: TableAgentControllerOptions;

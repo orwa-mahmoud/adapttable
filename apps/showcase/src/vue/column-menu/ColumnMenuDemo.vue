@@ -5,7 +5,7 @@ import {
   type ColumnLayoutState,
   useFrontendData,
 } from "@adapttable/vue";
-import { columnMenu as bindingColumnMenu } from "@adapttable/vue/column-menu";
+import { columnMenu as bindingColumnMenu } from "@adapttable/vue/features";
 import { DataTable } from "@adapttable/vue-unstyled";
 import { columnMenu } from "@adapttable/vue-unstyled/column-menu";
 import { computed, defineComponent, h, onErrorCaptured, shallowRef } from "vue";

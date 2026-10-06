@@ -2,7 +2,7 @@
 import {
   BatchEditBarChrome,
   type BatchEditBarProps,
-} from "@adapttable/vue/editing";
+} from "@adapttable/vue/adapter";
 
 import { useClassNames } from "../classNamesContext";
 import { nativeEditingButton } from "./nativeEditingButton";

@@ -1,37 +1,33 @@
-import type {
-  ColumnDef,
-  UseDataTableShellOptions,
-} from "@adapttable/vue/adapter";
 import {
   type CellEdit,
-  cellNavigation,
-  type CellRange,
-  columnSelectionCheckbox,
-  type ColumnSelectSlots,
-  type FillHandleSlots,
-  type GridFocusOptions,
-  type GridFocusState,
-  useGridFocus,
-} from "@adapttable/vue/cell-navigation";
-import {
-  columnMenu,
-  type ColumnMenuSlotProps,
-  type ColumnMenuSlots,
-} from "@adapttable/vue/column-menu";
-import type { TableFeature } from "@adapttable/vue/features";
-import {
-  type FindBarSlots,
-  findInTable,
-  type FindInTableOptions,
+  type ColumnDef,
   type FindInTableState,
+  type GridFocusState,
+  type TableFeature,
+  type UseDataTableShellOptions,
   useFindInTable,
-} from "@adapttable/vue/find-in-table";
+  type UseFindInTableOptions as FindInTableOptions,
+  useGridFocus,
+  type UseGridFocusOptions as GridFocusOptions,
+} from "@adapttable/vue";
 import {
+  cellNavigation,
+  columnMenu,
+  columnSelectionCheckbox,
+  findInTable,
   selectionStats,
-  type SelectionStatsChromeProps,
   statusBar,
-  type StatusBarChromeProps,
-} from "@adapttable/vue/status-bar";
+} from "@adapttable/vue/features";
+import type {
+  CellRange,
+  ColumnMenuSlotProps,
+  ColumnMenuSlots,
+  ColumnSelectSlots,
+  FillHandleSlots,
+  FindBarSlots,
+  SelectionStatsChromeProps,
+  StatusBarChromeProps,
+} from "@adapttable/vue/adapter";
 interface Row {
   id: string;
   score: number;

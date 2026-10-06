@@ -1,4 +1,4 @@
-import type { EditingActionButtonProps } from "@adapttable/vue/editing";
+import type { EditingActionButtonProps } from "@adapttable/vue/adapter";
 import { h, mergeProps, type VNodeChild } from "vue";
 
 export function nativeEditingButton(

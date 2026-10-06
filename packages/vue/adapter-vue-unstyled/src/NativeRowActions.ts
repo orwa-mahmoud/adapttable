@@ -1,7 +1,5 @@
-import type {
-  RowActionControl,
-  RowActionsLayout,
-} from "@adapttable/vue/adapter";
+import type { RowActionControl } from "@adapttable/vue";
+import type { RowActionsLayout } from "@adapttable/vue/adapter";
 import { Fragment, h, mergeProps, type VNodeChild } from "vue";
 
 import type { DataTableClassNames } from "./types";

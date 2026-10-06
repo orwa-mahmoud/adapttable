@@ -1,4 +1,4 @@
-import type { ComposedFeature } from "@adapttable/vue/adapter";
+import type { ComposedFeature } from "@adapttable/vue";
 import { batchEditing } from "@adapttable/vue-unstyled/batch-editing";
 import {
   type BatchRowEdit,

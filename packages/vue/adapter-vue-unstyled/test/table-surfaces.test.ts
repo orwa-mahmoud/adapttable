@@ -1,5 +1,6 @@
 import {
   type ColumnDef,
+  type ConfirmRequest,
   type HeaderContext,
   type TableSource,
   useFrontendData,
@@ -7,12 +8,11 @@ import {
 import {
   ACTIVE_FILTER_CHIPS,
   type ActiveFilterChipsSlotProps,
-  type ConfirmRequest,
   extendFeature,
   slotRender,
   TOOLBAR_EXTRAS,
 } from "@adapttable/vue/adapter";
-import { filters as bindingFilters } from "@adapttable/vue/filters";
+import { filters as bindingFilters } from "@adapttable/vue/features";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   computed,

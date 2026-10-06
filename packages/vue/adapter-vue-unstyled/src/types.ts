@@ -1,7 +1,6 @@
 import type {
   CellContext,
   CellEdit,
-  CellRange,
   ColumnInput,
   ColumnLayoutState,
   ComposedFeature,
@@ -10,7 +9,6 @@ import type {
   FooterContext,
   HeaderContext,
   PaginationMode,
-  RowActionsLayout,
   SummaryRowFn,
   TableDensity,
   TableErrorState,
@@ -18,8 +16,12 @@ import type {
   TableSource,
   TableViewStateConfig,
   UrlStateAdapter,
+} from "@adapttable/vue";
+import type {
+  CellRange,
+  RowActionsLayout,
+  TableAssistantProps,
 } from "@adapttable/vue/adapter";
-import type { TableAssistantProps } from "@adapttable/vue/assistant";
 import type { VNodeChild } from "vue";
 
 /** CSS hooks are applied to the corresponding semantic element. */

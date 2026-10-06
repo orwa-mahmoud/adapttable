@@ -7,7 +7,6 @@ import type {
   FeatureState,
   FeatureStateKey,
   FilterRuntime,
-  HeaderFilterModel,
   ResolvedTableOptions,
   RowActionControlsProjector,
   StaticFeatureHost,
@@ -16,9 +15,12 @@ import type {
   TableSummaryCellModel,
   TableSummaryModel,
   UseDataTableShellOptions,
+} from "@adapttable/vue";
+import type {
+  HeaderFilterModel,
   UseDataTableShellResult,
   VueHeaderFilterControlProps,
-} from "@adapttable/vue";
+} from "@adapttable/vue/adapter";
 interface Row {
   id: string;
   value: number;

@@ -1,8 +1,8 @@
-import type { StaticTableFeature, TableFeature } from "@adapttable/vue/adapter";
+import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 import {
   exportXlsx as bindingExportXlsx,
   type ExportXlsxOptions,
-} from "@adapttable/vue/export-xlsx";
+} from "@adapttable/vue/xlsx";
 
 import { withNativeExport } from "./actions/withNativeExport";
 
@@ -16,6 +16,5 @@ export function exportXlsx<TRow>(
 ): TableFeature<TRow> {
   return withNativeExport(bindingExportXlsx<TRow>(options));
 }
-export type * from "@adapttable/vue/export-xlsx";
-export type { ExportXlsxOptions } from "@adapttable/vue/export-xlsx";
-export { buildTableXlsx, xlsxWriter } from "@adapttable/vue/export-xlsx";
+export type { ExportXlsxOptions } from "@adapttable/vue/xlsx";
+export { buildTableXlsx, xlsxWriter } from "@adapttable/vue/xlsx";

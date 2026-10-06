@@ -23,26 +23,30 @@ function fixtureSources(root, mutate = (text) => text) {
   const native = join(root, "packages/vue/adapter-vue-unstyled/src");
   mkdirSync(binding, { recursive: true });
   mkdirSync(native, { recursive: true });
-  for (const [entry, factory] of [
-    ["density", "densityChooser"],
-    ["fullscreen", "fullscreen"],
-  ]) {
-    writeFileSync(
-      join(binding, `${entry}.ts`),
-      [
-        `export { ${factory} } from "./features/${entry}";`,
-        'export { DENSITY_CONTROL, FULLSCREEN_CONTROL, FULLSCREEN_MODEL, SAVED_VIEWS_CONTROL, SAVED_VIEWS_MODEL } from "./viewControls/contracts";',
-        'export { DensityChooserChrome, FullscreenButtonChrome } from "./viewControls/viewControlsChrome";',
-      ].join("\n")
-    );
-  }
   writeFileSync(
-    join(binding, "export-csv.ts"),
-    'export type * from "./index";'
+    join(binding, "../package.json"),
+    JSON.stringify({
+      exports: {
+        ".": {},
+        "./adapter": {},
+        "./features": {},
+        "./pdf": {},
+        "./xlsx": {},
+        "./package.json": "./package.json",
+      },
+    })
   );
   writeFileSync(
     join(binding, "index.ts"),
-    'export type * from "@adapttable/core";'
+    'export type { StaticTableFeature } from "./features/tableFeature";'
+  );
+  writeFileSync(
+    join(binding, "adapter.ts"),
+    'export type { DensityControlProps } from "./viewControls/contracts";'
+  );
+  writeFileSync(
+    join(binding, "features.ts"),
+    'export { densityChooser } from "./features/density";\nexport { fullscreen } from "./features/fullscreen";'
   );
   const writers = {
     pdf: [
@@ -58,31 +62,30 @@ function fixtureSources(root, mutate = (text) => text) {
   };
   for (const kind of ["pdf", "xlsx"]) {
     const canonical = `@adapttable/core/${kind}`;
-    const route = `@adapttable/vue/export-${kind}`;
+    const route = `@adapttable/vue/${kind}`;
+    const option = kind === "pdf" ? "ExportPdfOptions" : "ExportXlsxOptions";
+    const factory = kind === "pdf" ? "exportPdf" : "exportXlsx";
     const source = [
-      'export type * from "./export-csv";',
-      `export type { Aggregator } from "${canonical}";`,
-      `export * from "${canonical}";`,
+      `export type { ${option} } from "./export-${kind}";`,
+      `export { ${factory} } from "./export-${kind}";`,
+      `export { ${writers[kind].join(", ")} } from "${canonical}";`,
     ];
-    if (kind === "xlsx")
-      source.push(`export { buildTableXlsx, xlsxWriter } from "${canonical}";`);
-    source.push('export type * from "@adapttable/core";');
-    writeFileSync(
-      join(binding, `export-${kind}.ts`),
-      mutate(source.join("\n"))
-    );
+    if (kind === "pdf")
+      source.push(
+        `export type { PdfWriterOptions, PrintLayoutOptions, PrintPageBreak, PrintPageSize } from "${canonical}";`
+      );
+    writeFileSync(join(binding, `${kind}.ts`), mutate(source.join("\n")));
     writeFileSync(
       join(native, `export-${kind}.ts`),
       [
-        `export type * from "${route}";`,
-        `export type { ${kind === "pdf" ? "ExportPdfOptions" : "ExportXlsxOptions"} } from "${route}";`,
+        `export type { ${option} } from "${route}";`,
         `export { ${writers[kind].join(", ")} } from "${route}";`,
       ].join("\n")
     );
   }
 }
 
-describe("mixed Vue source forwarding proof", () => {
+describe("canonical Vue source ownership proof", () => {
   it("preserves type-only stars and individual type-only specifiers", () => {
     assert.deepEqual(
       sourceExports(
@@ -102,19 +105,17 @@ describe("mixed Vue source forwarding proof", () => {
     );
   });
 
-  it("proves the extra core wildcard traverses only type-only edges", () => {
+  it("proves explicit owner exports without forwarding shared closures", () => {
     const root = join(scratch, "source-positive");
     fixtureSources(root);
     assert.doesNotThrow(() => checkExportSources(root));
   });
 
-  it("rejects changing the local CSV type star into runtime forwarding", () => {
+  it("rejects adding a CSV runtime export to an optional writer entry", () => {
     const root = join(scratch, "source-runtime-leak");
-    fixtureSources(root, (text) =>
-      text.replace(
-        'export type * from "./export-csv"',
-        'export * from "./export-csv"'
-      )
+    fixtureSources(
+      root,
+      (text) => `${text}\nexport { exportCsv } from "./export-csv";`
     );
     assert.throws(
       () => checkExportSources(root),
@@ -122,7 +123,7 @@ describe("mixed Vue source forwarding proof", () => {
     );
   });
 
-  it("rejects changing the transitive core type star into runtime forwarding", () => {
+  it("rejects wildcard forwarding from the root canonical entry", () => {
     const root = join(scratch, "source-transitive-leak");
     fixtureSources(root);
     writeFileSync(
@@ -131,16 +132,16 @@ describe("mixed Vue source forwarding proof", () => {
     );
     assert.throws(
       () => checkExportSources(root),
-      /extra core wildcard must remain type-only/
+      /canonical entries cannot forward wildcard closures/
     );
   });
 
-  it("rejects replacing the explicit canonical Aggregator with a wrong origin", () => {
+  it("rejects replacing a writer option contract with a wrong origin", () => {
     const root = join(scratch, "source-wrong-origin");
     fixtureSources(root, (text) =>
       text.replace(
-        /export type \{ Aggregator \} from [^;]+;/,
-        'export type { Aggregator } from "./aggregate/aggregate";'
+        /export type \{ PdfWriterOptions, PrintLayoutOptions, PrintPageBreak, PrintPageSize \} from [^;]+;/,
+        'export type { PdfWriterOptions, PrintLayoutOptions, PrintPageBreak, PrintPageSize } from "./private-options";'
       )
     );
     assert.throws(
@@ -361,7 +362,7 @@ describe("published binding entry coverage", () => {
       JSON.stringify({
         exports: {
           ".": {},
-          "./export-csv": {},
+          "./features": {},
           "./feature.v2": {
             import: {
               types: "./dist/feature.v2.d.ts",
@@ -378,7 +379,7 @@ describe("published binding entry coverage", () => {
     );
     assert.deepEqual(publishedBindingEntries(cell), [
       "@adapttable/vue",
-      "@adapttable/vue/export-csv",
+      "@adapttable/vue/features",
       "@adapttable/vue/feature.v2",
     ]);
     assert.deepEqual(dottedValueFixture(true), [[], []]);

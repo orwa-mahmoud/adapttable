@@ -1,5 +1,7 @@
-import type { ToolbarExtrasSlotProps } from "@adapttable/vue/adapter";
-import { HistoryButtonsChrome } from "@adapttable/vue/editing";
+import {
+  HistoryButtonsChrome,
+  type ToolbarExtrasSlotProps,
+} from "@adapttable/vue/adapter";
 import { defineComponent, h } from "vue";
 
 import { useClassNames } from "../classNamesContext";

@@ -3,8 +3,7 @@ import {
   type QueryFilterGroup,
   useFrontendData,
 } from "@adapttable/vue";
-import { useDataTableShell } from "@adapttable/vue/adapter";
-import { filterViewKey } from "@adapttable/vue/filters";
+import { filterViewKey, useDataTableShell } from "@adapttable/vue/adapter";
 import { describe, expect, it, vi } from "vitest";
 import { effectScope, shallowRef } from "vue";
 

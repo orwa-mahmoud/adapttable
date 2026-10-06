@@ -1,9 +1,9 @@
-import type * as BindingEditing from "@adapttable/vue/editing";
+import type * as BindingEditing from "@adapttable/vue/adapter";
 import { describe, expect, it, vi } from "vitest";
 import { h, shallowRef } from "vue";
 
 const mounts = vi.hoisted(() => vi.fn());
-vi.mock("@adapttable/vue/editing", async (load) => {
+vi.mock("@adapttable/vue/adapter", async (load) => {
   const actual = await load<typeof BindingEditing>();
   return {
     ...actual,

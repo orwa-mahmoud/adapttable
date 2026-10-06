@@ -39,10 +39,7 @@ import {
   watchEffect,
 } from "vue";
 
-import type {
-  FeatureMountContext,
-  StaticTableFeature,
-} from "../features/tableFeature";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import type { TableBodyProjection } from "../layout/modelChannels";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
 export type VirtualizeOptions = VirtualizeInput &

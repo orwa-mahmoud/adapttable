@@ -1,5 +1,7 @@
-import type { UseGroupCollapseUrlStateResult } from "@adapttable/vue";
-import type { UseGroupCollapseUrlStateResult as AdapterCollapseResult } from "@adapttable/vue/adapter";
+import type {
+  UseGroupCollapseUrlStateResult as AdapterCollapseResult,
+  UseGroupCollapseUrlStateResult,
+} from "@adapttable/vue";
 
 export function exchangeCollapseState(
   root: UseGroupCollapseUrlStateResult,

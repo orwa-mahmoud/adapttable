@@ -2,7 +2,8 @@ import { getLabels } from "@adapttable/i18n";
 import { expect, it } from "vitest";
 import { createApp, h, nextTick, shallowRef } from "vue";
 
-import { type PivotConfig, PivotPanel } from "../src/pivot";
+import { type PivotConfig } from "@adapttable/vue/pivot";
+import { PivotPanel } from "../src/pivot";
 
 it("removes and re-adds an Arabic measure through the real native controls", async () => {
   const config = shallowRef<PivotConfig>({

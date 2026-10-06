@@ -34,7 +34,7 @@ import {
 } from "vue";
 
 import type { Attrs } from "../attrs";
-import type { TableFeature } from "../features/tableFeature";
+import type { TableFeature } from "@adapttable/vue";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
 import { useExternalStore, useScopeActivity } from "../store";
 export type {

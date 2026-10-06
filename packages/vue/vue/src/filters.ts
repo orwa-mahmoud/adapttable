@@ -24,7 +24,7 @@ import type {
   FeatureMountContext,
   StaticTableFeature,
   TableFeature,
-} from "./features/tableFeature";
+} from "@adapttable/vue";
 import type { FilterPanelModel } from "./filters/filterPanelChrome";
 import { FULLSCREEN_MODEL } from "./viewControls/contracts";
 export const FILTER_VIEW =
@@ -328,9 +328,3 @@ export {
   filterWidgetKind,
 } from "@adapttable/core";
 export { resolveLabels } from "@adapttable/core";
-
-/** Public feature signatures share the binding's nameable member types. */
-export type * from "./index";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

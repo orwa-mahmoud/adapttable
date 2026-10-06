@@ -9,10 +9,7 @@ import {
   type SidePanelPanel,
 } from "./actions/contracts";
 import { featureActivity } from "./actions/lifecycle";
-import type {
-  FeatureMountContext,
-  StaticTableFeature,
-} from "./features/tableFeature";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 function mountSidePanel<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
   const model = computed(() => {
@@ -61,7 +58,3 @@ export {
   SidePanelChrome,
   SidePanelLayoutChrome,
 } from "./actions/sidePanelChrome";
-export type * from "./index";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

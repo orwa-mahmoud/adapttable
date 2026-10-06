@@ -18,8 +18,5 @@ export {
   type TableAgentOptions,
 } from "./tableAgent";
 export type * from "@adapttable/ai";
-export type {
-  AgentApprovalPending,
-  AgentProgress,
-} from "@adapttable/vue/adapter";
-export type { StaticTableFeature } from "@adapttable/vue/features";
+export type { AgentApprovalPending, AgentProgress } from "@adapttable/vue";
+export type { StaticTableFeature } from "@adapttable/vue";

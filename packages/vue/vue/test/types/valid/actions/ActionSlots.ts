@@ -1,8 +1,11 @@
-import { elementRef, toVueAttrs } from "@adapttable/vue/adapter";
-import type { CommandPaletteSlots } from "@adapttable/vue/command-palette";
-import type { ContextMenuSlots } from "@adapttable/vue/context-menu";
-import type { ExportSlots } from "@adapttable/vue/export-csv";
-import type { SidePanelSlots } from "@adapttable/vue/side-panel";
+import {
+  type CommandPaletteSlots,
+  type ContextMenuSlots,
+  elementRef,
+  type ExportSlots,
+  type SidePanelSlots,
+  toVueAttrs,
+} from "@adapttable/vue/adapter";
 import { h } from "vue";
 export const palette: CommandPaletteSlots = {
   Surface: (p) => h("section", null, [p.children]),

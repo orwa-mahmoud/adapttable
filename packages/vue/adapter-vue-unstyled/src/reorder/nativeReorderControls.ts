@@ -1,4 +1,4 @@
-import type { RowReorderControlSlots } from "@adapttable/vue/features";
+import type { RowReorderControlSlots } from "@adapttable/vue/adapter";
 import { h } from "vue";
 
 import { NativeRowMoveMenu } from "./NativeRowMoveMenu";

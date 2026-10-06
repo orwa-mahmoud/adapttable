@@ -2,7 +2,7 @@ import type {
   FilterCheckboxProps,
   FilterInputProps,
   FilterSelectProps,
-} from "@adapttable/vue/filters";
+} from "@adapttable/vue/adapter";
 import { h } from "vue";
 
 import { nativeCheckbox } from "../nativeCheckbox";

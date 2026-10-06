@@ -157,7 +157,8 @@ a top-level ref is unwrapped automatically in a Vue template.
 
 ```ts
 import { shallowRef } from "vue";
-import { useDataTable, useFrontendData, type ColumnDef } from "@adapttable/vue";
+import { useDataTable, useFrontendData } from "@adapttable/vue";
+import type { ColumnDef } from "@adapttable/vue";
 
 interface Person {
   id: string;

@@ -18,10 +18,7 @@ import {
 } from "@adapttable/core/binding";
 import { computed, toValue, watch } from "vue";
 
-import type {
-  FeatureMountContext,
-  StaticTableFeature,
-} from "../features/tableFeature";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { editHistoryModelKey, editingModelKey } from "../layout/modelChannels";
 import {
   type CellNavigationOptions,

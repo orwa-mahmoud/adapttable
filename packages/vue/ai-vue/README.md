@@ -65,7 +65,7 @@ kit surface so it can render the requested widget, table, or modal review.
 Use `TableAssistant` and `AgentApproval`, or the `tableAssistant()` and
 `agentApproval()` table features, from `@adapttable/vue-unstyled/assistant` for
 native controls. A different Vue kit fills the same required slots from
-`@adapttable/vue/assistant` with its own controls.
+`@adapttable/vue/adapter` with its own controls.
 
 ## Optional speech
 

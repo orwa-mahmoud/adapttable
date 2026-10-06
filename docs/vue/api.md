@@ -6,6 +6,35 @@ They require Vue `^3.5.0` and have not been published to npm. See
 native table. Identically named APIs in the React and Angular references do
 not define Vue signatures.
 
+## Updating preview imports
+
+The unpublished Vue entry layout follows the React binding's public roles.
+Move ordinary binding factories from focused paths such as `/density`,
+`/editing` and `/column-menu` to `/features`; move their Chrome, slot props,
+model keys and adapter helpers to `/adapter`. Table, column, source,
+view-state and shared feature contracts belong to the binding root.
+
+Consumer names align with the matching React concepts: `useSelection`,
+`UseSelectionOptions`, `UseTableUrlStateResult`, `useTextFilterWidget`,
+`useRangeFilterWidget`, `useBooleanFilterWidget`, `ResolvedFilterOptions`,
+`UseGridFocusOptions` and `UseFindInTableOptions`. The inline header row Chrome
+is `FilterHeaderChrome`; the popover `HeaderFilterChrome` remains distinct.
+Native standalone filter controls are `ChecklistFilter` and `FilterTreeBuilder`.
+
+Use individual native column/row feature entries instead of `/columns` or
+`/rows`. Formula, stream and sparkline helpers come directly from their binding
+entries. Native `/pivot` supplies `PivotPanel`; pivot data and URL state come
+from binding `/pivot`. Optional binding writer factories moved from
+`/export-pdf` and `/export-xlsx` to `/pdf` and `/xlsx`; the native writer entries
+retain their existing names and control contributions.
+
+Framework-neutral contracts retain their original `@adapttable/core` or
+`@adapttable/core/binding` names. The Vue binding forwards the contracts its
+consumer and adapter APIs expose; it no longer forwards every neutral export
+through every focused entry. Vue renderer contracts keep their Vue member and
+generic types. In particular, Vue's `Aggregator` returns `VNodeChild` and is a
+different contract from the neutral writer's `Aggregator`.
+
 ## Entry points
 
 Shared contracts have a documented owner: import table, column, source and
@@ -17,24 +46,22 @@ view-state types and feature composition, host and mount types from
 while `DensityControlProps`, `DensityChooserSlots`,
 `FullscreenControlProps` and `ViewControlButtonProps` belong to `/adapter`.
 
-The `/density` and `/fullscreen` focused entries retain their runtime
-values, including their control keys and Chrome functions. They reference these
-canonical contracts without re-exporting the binding's full type surface.
-Use `densityChooser` and `fullscreen` from `@adapttable/vue/features` for new
-binding compositions. Native kit factory imports remain
-`@adapttable/vue-unstyled/density` and `@adapttable/vue-unstyled/fullscreen`.
+Import `densityChooser` and `fullscreen` from `@adapttable/vue/features`.
+Their Chrome and control keys are available from `/adapter`. Native kit
+factory imports remain `@adapttable/vue-unstyled/density` and
+`@adapttable/vue-unstyled/fullscreen`.
 
-| Import                     | Purpose                                                                                                                                                                                                                                   |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@adapttable/vue`          | Source composables, `useDataTable`, column renderers, layout, selection and URL state. Also re-exports framework-neutral types.                                                                                                           |
-| `@adapttable/vue/adapter`  | Everything above plus `useDataTableShell`, structural Chrome, attribute bridges, feature lifecycle/state/model helpers and neutral binding utilities. Adapter code imports its engine contracts here rather than importing core directly. |
-| `@adapttable/vue/features` | Binding factories for columns, rows, grouping/tree/details and view controls, plus custom declarations and patch/slot helpers. Factories that need UI require adapter slots.                                                              |
-| `@adapttable/vue-unstyled` | Native `DataTable`, `DataTableProps`, `DataTableSlots`, `DataTableClassNames` and its documented column, context, handle and source type re-exports.                                                                                      |
+| Import                     | Purpose                                                                                                                                                                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@adapttable/vue`          | Source composables, `useDataTable`, column renderers, layout, selection and URL state. Also re-exports framework-neutral types.                                                                                                                                     |
+| `@adapttable/vue/adapter`  | `useDataTableShell`, structural Chrome, attribute bridges, feature lifecycle/state/model helpers and neutral binding utilities. Adapter code imports its engine contracts here rather than importing core directly.                                                 |
+| `@adapttable/vue/features` | Binding factories for columns, rows, grouping/tree/details and view controls, and custom feature declarations. Shared composition contracts belong to the root; patch/slot construction helpers belong to `/adapter`. Factories that need UI require adapter slots. |
+| `@adapttable/vue-unstyled` | Native `DataTable`, `DataTableProps`, `DataTableSlots`, `DataTableClassNames` and its documented column, context, handle and source type re-exports.                                                                                                                |
 
-The binding also has focused entries for feature models and Chrome. The native
-kit supplies matching controls through its feature entries. Start with the
+The native kit supplies controls through its feature entries. Binding models,
+Chrome and slots use the canonical owners above. Start with the
 [feature import map](./features.md#choose-an-entry-point) for filters, editing,
-columns, hierarchy and view controls, then use the focused contracts for:
+columns, hierarchy and view controls, then use these contract guides for:
 
 - [Actions and exports](./actions.md): bulk actions, command palette, context
   menu, side panels, history buttons, CSV exports, optional writers and print.
@@ -53,8 +80,8 @@ stream helpers are not automatically loaded by the feature barrel.
 
 The native `/preset` entry exports `standardFeatures` and
 `StandardFeatureOptions<TRow>`. Native `/export` is the canonical CSV entry;
-`/export-csv` remains available. Binding and native `/export-pdf` and
-`/export-xlsx` expose `exportPdf` / `exportXlsx`,
+`/export-csv` remains available. Binding `/pdf` and `/xlsx`, and native `/export-pdf` and
+`/export-xlsx`, expose `exportPdf` / `exportXlsx`,
 `ExportPdfOptions<TRow>` / `ExportXlsxOptions<TRow>` and writer utilities. Native `/features` also exports these factories.
 See [export scope and lifecycle](./actions.md) and
 [standard native composition](./features.md#standard-native-features).
@@ -142,7 +169,8 @@ and does not prevent an obsolete same-query response from overwriting host state
 
 ```ts
 import { shallowRef } from "vue";
-import { useServerData, type TableQuery } from "@adapttable/vue";
+import { useServerData } from "@adapttable/vue";
+import type { TableQuery } from "@adapttable/vue";
 
 interface Person {
   id: string;
@@ -211,7 +239,7 @@ library owns its requests, cancellation, SSR and deactivation policy.
 ## URL state
 
 `useTableUrlState(options?: MaybeRefOrGetter<UseTableUrlStateOptions>)` returns
-`TableUrlState`: a readonly shallow `state` ref plus `TableUrlActions`.
+`UseTableUrlStateResult`: a readonly shallow `state` ref plus `TableUrlActions`.
 
 `UseTableUrlStateOptions` contains reactive optional `urlAdapter`, `urlSync`,
 `urlKey`, `numberExtraKeys`, `arrayExtraKeys`, and reactive `defaults`.
@@ -256,11 +284,8 @@ string `header`, a typed `accessor(row): TValue`, and Vue `cell`, `headerCell`,
 
 ```ts
 import { defineComponent, h } from "vue";
-import {
-  componentRenderer,
-  type CellContext,
-  type ColumnDef,
-} from "@adapttable/vue";
+import { componentRenderer } from "@adapttable/vue";
+import type { CellContext, ColumnDef } from "@adapttable/vue";
 
 interface Person {
   id: string;
@@ -333,7 +358,7 @@ The URL result also has `flush`; pass it as `UseSavedViewsOptions.flushViewState
 when using Saved Views. [Layout-persistence examples](./features.md#persist-column-layout-explicitly)
 cover the full options, SSR seed, debounce and storage boundaries.
 
-`useRowSelection(options: MaybeRefOrGetter<RowSelectionOptions<TRow>>)` returns
+`useSelection(options: MaybeRefOrGetter<UseSelectionOptions<TRow>>)` returns
 `RowSelection`. Its options require reactive `rows` and a `rowKey`; optional
 inputs are `enabled` (default true), controlled `selectedIds`, `defaultSelectedIds`,
 `onSelectionChange(ids)`, `labels` and `acrossPages`. The result exposes refs
@@ -481,7 +506,7 @@ by that signal; this is not a universal source-identity protocol.
 
 For another kit, the existing `ACTIVE_FILTER_CHIPS` feature slot is required
 by the binding's `filters()` feature alongside `TOOLBAR_EXTRAS`.
-`FilterChipsChrome` from `@adapttable/vue/filters` accepts
+`FilterChipsChrome` from `@adapttable/vue/adapter` accepts
 `ActiveFilterChipsSlotProps` plus `slots: FilterChipsSlots` and optional
 `classNames: FilterChipsClassNames`. `Remove` and `Clear` are required slots;
 each receives `FilterChipButtonProps` with `attrs` and a localized `label`.
@@ -654,7 +679,8 @@ feature entry to create typed neutral keys and fills.
 
 ```ts
 import { watch } from "vue";
-import { featureStateKey, type TableFeature } from "@adapttable/vue/features";
+import { featureStateKey } from "@adapttable/vue/adapter";
+import type { TableFeature } from "@adapttable/vue";
 
 interface Person {
   id: string;
@@ -744,7 +770,7 @@ stopping, resuming, clearing, undoing and revoking permissions.
 controls. Neutral AI types are forwarded as type-only exports; the binding also
 forwards `AgentApprovalPending`, `AgentProgress` and `StaticTableFeature`.
 
-`@adapttable/vue/assistant` exports `TableAssistantChrome` /
+`@adapttable/vue/adapter` exports `TableAssistantChrome` /
 `TableAssistantChromeProps`, `AgentApprovalChrome` / `AgentApprovalChromeProps`,
 and `ApprovalReviewChrome` / `ApprovalReviewChromeProps`. These structural
 components require kit controls. `createAdapterTableAssistantFeature(render)` and

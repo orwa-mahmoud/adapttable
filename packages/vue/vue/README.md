@@ -33,7 +33,8 @@ preset is available from `@adapttable/vue-unstyled/preset`.
 ## Sources and rendering
 
 ```ts
-import { useFrontendData, useDataTable, type ColumnDef } from "@adapttable/vue";
+import { useFrontendData, useDataTable } from "@adapttable/vue";
+import type { ColumnDef } from "@adapttable/vue";
 
 interface Person {
   id: string;
@@ -70,14 +71,14 @@ ignoring a request preserves the supplied state.
 
 ## Feature and adapter entries
 
-`@adapttable/vue/features` exports column/row/hierarchy factories and custom
-feature contracts. `/filters`, `/header-filters`, `/editing`, `/batch-editing`,
-`/density`, `/fullscreen` and `/saved-views` provide their specific factories,
-models and required Chrome slot contracts. Shared types for `/density` and
-`/fullscreen` have canonical owners: import `StaticTableFeature` and
-`FeatureMountContext` from the root, control/Chrome props from `/adapter`,
-and table/source/view-state types from the root. These two focused entries
-retain their runtime values without forwarding unrelated types.
+`@adapttable/vue/features` exports opt-in factories and feature-specific options.
+Import shared table, source, column, view-state and feature composition contracts
+from `@adapttable/vue`. Structural Chrome, required slot props and adapter
+construction helpers belong to `@adapttable/vue/adapter`.
+
+Formula, pivot, stream and sparkline integrations keep their matching binding
+entries. Optional PDF and XLSX factories and writers live at `/pdf` and `/xlsx`;
+CSV and callback-driven print factories live at `/features`.
 
 Adapter authors use `@adapttable/vue/adapter` for `useDataTableShell`, semantic
 attribute/ref bridges, structural Chrome and lifecycle/model channels. Every
@@ -112,7 +113,7 @@ examples, required slots and state-persistence boundaries.
 
 ## Optional assistant UI
 
-`@adapttable/vue/assistant` exports `TableAssistantChrome`, `AgentApprovalChrome`,
+`@adapttable/vue/adapter` exports `TableAssistantChrome`, `AgentApprovalChrome`,
 `ApprovalReviewChrome` and their required kit control contracts. It imports no
 AI runtime. The separately opt-in `@adapttable/ai-vue` package connects agents,
 conversations and speech to Vue scopes. See the

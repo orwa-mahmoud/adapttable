@@ -6,10 +6,7 @@ import { cellNavigation } from "@adapttable/vue-unstyled/cell-navigation";
 import { editing } from "@adapttable/vue-unstyled/editing";
 import { exportCsv } from "@adapttable/vue-unstyled/export-csv";
 import { findInTable } from "@adapttable/vue-unstyled/find-in-table";
-import {
-  buildFormulaColumns,
-  formulaDisplay,
-} from "@adapttable/vue-unstyled/formula";
+import { buildFormulaColumns, formulaDisplay } from "@adapttable/vue/formula";
 import { useGroupCollapseUrlState } from "@adapttable/vue-unstyled/grouping";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import {
@@ -21,8 +18,8 @@ import {
   pivotTableModel,
   usePivotUrlState,
 } from "@adapttable/vue-unstyled/pivot";
-import { pinnedSummaryRows } from "@adapttable/vue-unstyled/rows";
-import { sparklineColumn } from "@adapttable/vue-unstyled/sparkline";
+import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
+import { sparklineColumn } from "@adapttable/vue/sparkline";
 import { statusBar } from "@adapttable/vue-unstyled/status-bar";
 import { computed, shallowRef } from "vue";
 

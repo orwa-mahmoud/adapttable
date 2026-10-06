@@ -1,4 +1,4 @@
-import { useRowSelection } from "@adapttable/vue";
+import { useSelection as useRowSelection } from "@adapttable/vue";
 import { type ColumnInput, DataTable } from "@adapttable/vue-unstyled";
 import { editing } from "@adapttable/vue-unstyled/editing";
 import { filters } from "@adapttable/vue-unstyled/filters";

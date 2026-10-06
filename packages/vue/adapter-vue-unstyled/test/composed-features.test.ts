@@ -1,5 +1,8 @@
-import type { ColumnDef, DataTableHandle } from "@adapttable/vue";
-import type { ComposedFeature } from "@adapttable/vue/adapter";
+import type {
+  ColumnDef,
+  ComposedFeature,
+  DataTableHandle,
+} from "@adapttable/vue";
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, defineComponent, h, KeepAlive, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";

@@ -1,11 +1,9 @@
 import type {
   FeatureMountContext,
+  GridFocusState,
   StaticTableFeature,
-} from "@adapttable/vue/adapter";
-import {
-  GRID_FOCUS_MODEL,
-  type GridFocusState,
-} from "@adapttable/vue/cell-navigation";
+} from "@adapttable/vue";
+import { GRID_FOCUS_MODEL } from "@adapttable/vue/adapter";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { h, type ShallowRef } from "vue";
 

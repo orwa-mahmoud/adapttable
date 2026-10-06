@@ -1,4 +1,4 @@
-import type { TableAssistantMenuProps } from "@adapttable/vue/assistant";
+import type { TableAssistantMenuProps } from "@adapttable/vue/adapter";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,

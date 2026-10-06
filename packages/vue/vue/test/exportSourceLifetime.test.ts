@@ -14,7 +14,7 @@ import {
   exportCsv,
   type ExportCsvOptions,
 } from "../src/export-csv";
-import { extendFeature, slotRender } from "../src/features";
+import { extendFeature, slotRender } from "../src/adapter";
 import type { ComposedFeature } from "../src/features/tableFeature";
 import { tree } from "../src/features/tree";
 import { useFrontendData } from "../src/source/useFrontendData";

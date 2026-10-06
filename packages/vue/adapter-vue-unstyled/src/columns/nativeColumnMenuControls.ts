@@ -1,7 +1,7 @@
 import type {
   ColumnMenuButtonProps,
   ColumnMenuSlots,
-} from "@adapttable/vue/column-menu";
+} from "@adapttable/vue/adapter";
 import { h, mergeProps, type VNode } from "vue";
 
 import { NativeColumnMenuPanel } from "./NativeColumnMenuPanel";

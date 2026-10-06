@@ -1,7 +1,5 @@
-import {
-  ColumnGroupToggleChrome,
-  type ColumnGroupToggleProps,
-} from "@adapttable/vue/adapter";
+import { ColumnGroupToggleChrome } from "@adapttable/vue/adapter";
+import { type ColumnGroupToggleProps } from "@adapttable/vue";
 import { h, type VNode } from "vue";
 
 /** Native button semantics supply Enter/Space activation without a second handler. */

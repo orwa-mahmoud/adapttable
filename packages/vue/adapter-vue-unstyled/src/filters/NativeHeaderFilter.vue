@@ -1,11 +1,11 @@
 <script setup lang="ts" generic="TRow">
-import { elementRef } from "@adapttable/vue/adapter";
 import {
+  elementRef,
   HeaderFilterChrome,
   type HeaderFilterChromeSlots,
   type HeaderFilterOptions,
   useHeaderFilter,
-} from "@adapttable/vue/header-filters";
+} from "@adapttable/vue/adapter";
 import { h, mergeProps } from "vue";
 
 import { useClassNames } from "../classNamesContext";

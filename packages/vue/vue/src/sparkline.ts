@@ -14,7 +14,6 @@ import {
 import { h, type VNodeChild } from "vue";
 
 import type { ColumnDef } from "./columnDef";
-export type { ColumnDef } from "./columnDef";
 export {
   finiteSparklineValues,
   sparklineExportValue,
@@ -108,5 +107,3 @@ export function sparklineColumn<TRow>(
     exportValue: (row) => sparklineExportValue(spec.values(row)),
   };
 }
-
-export type * from "./columnDef";

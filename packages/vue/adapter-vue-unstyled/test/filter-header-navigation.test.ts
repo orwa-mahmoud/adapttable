@@ -1,4 +1,5 @@
-import { type FilterFormSource, resolveLabels } from "@adapttable/vue/adapter";
+import { type FilterFormSource } from "@adapttable/vue";
+import { resolveLabels } from "@adapttable/vue/adapter";
 import { expect, it, vi } from "vitest";
 import { h } from "vue";
 

@@ -3,7 +3,7 @@ import {
   FilterFieldChrome,
   type FilterFieldOptions,
   useFilterField,
-} from "@adapttable/vue/filters";
+} from "@adapttable/vue/adapter";
 
 import { useClassNames } from "../classNamesContext";
 import { nativeFilterSlots } from "./nativeFilterSlots";

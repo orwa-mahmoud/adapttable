@@ -10,8 +10,34 @@ import { type MaybeRefOrGetter, toValue } from "vue";
 import type { ColumnDef } from "./columnDef";
 import type { MaybeRefOrGetterOptional } from "./store";
 import { type UrlSliceOptions, useUrlSlice } from "./url/useUrlSlice";
-export type { ColumnDef } from "./columnDef";
-export * from "@adapttable/core/formula";
+export type {
+  BinaryOp,
+  FormulaColumnSpec,
+  FormulaColumnsResult,
+  FormulaErrorCode,
+  FormulaNode,
+  FormulaScope,
+  FormulaValue,
+  ParseResult,
+} from "@adapttable/core/formula";
+export {
+  FORMULA_BLANK,
+  FORMULA_ERRORS,
+  FORMULA_FUNCTIONS,
+  deserializeFormulaColumns,
+  evaluateFormula,
+  formulaBoolean,
+  formulaDisplay,
+  formulaError,
+  formulaNumber,
+  formulaRefs,
+  formulaSortValue,
+  formulaText,
+  isFormulaError,
+  parseFormula,
+  serializeFormulaColumns,
+  toFormulaValue,
+} from "@adapttable/core/formula";
 export interface VueFormulaColumnsResult<TRow> extends Omit<
   FormulaColumnsResult<TRow>,
   "columns"
@@ -52,7 +78,3 @@ export function useFormulaUrlState(
   };
 }
 export type UseFormulaUrlStateResult = ReturnType<typeof useFormulaUrlState>;
-
-export type * from "./columnDef";
-export type { MaybeRefOrGetterOptional } from "./store";
-export type { UrlSliceOptions } from "./url/useUrlSlice";

@@ -1,13 +1,11 @@
 import {
   extendFeature,
-  slotRender,
-  type StaticTableFeature,
-} from "@adapttable/vue/adapter";
-import {
-  print as bindingPrint,
   PRINT_CONTROL,
   PrintChrome,
-} from "@adapttable/vue/print";
+  slotRender,
+} from "@adapttable/vue/adapter";
+import { type StaticTableFeature } from "@adapttable/vue";
+import { print as bindingPrint } from "@adapttable/vue/features";
 import { h } from "vue";
 
 import { nativeActionButton } from "./actions/nativeControls";
@@ -21,4 +19,3 @@ export function print(
     ),
   ]);
 }
-export type * from "@adapttable/vue/print";

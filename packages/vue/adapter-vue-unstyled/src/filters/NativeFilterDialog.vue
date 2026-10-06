@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type Direction, elementRef } from "@adapttable/vue/adapter";
+import { type Direction } from "@adapttable/vue";
+import { elementRef } from "@adapttable/vue/adapter";
 import type { VNodeChild } from "vue";
 
 defineOptions({ name: "NativeFilterDialog", inheritAttrs: false });

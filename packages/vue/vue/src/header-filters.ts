@@ -2,10 +2,7 @@ import { FILTER_ENGINE_IMPL, filterDefForColumn } from "@adapttable/core";
 import { coreHeaderFilters, FILTER_HEADER } from "@adapttable/core/binding";
 import { computed, watch } from "vue";
 
-import type {
-  FeatureMountContext,
-  StaticTableFeature,
-} from "./features/tableFeature";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import {
   headerFilterModelKey,
   type VueHeaderFilterControlProps,
@@ -61,11 +58,7 @@ export {
   headerFilterSlotKey,
 } from "./layout/modelChannels";
 
-/** Public feature signatures share the binding's nameable member types. */
-export type * from "./index";
-
 /** Preserve the existing core type-only surface through declaration bundling. */
 export * from "./filters/filterHeaderControl";
 export * from "./filters/filterHeaderRow";
-export type * from "@adapttable/core";
 export type { FilterHeaderControlProps } from "@adapttable/core/binding";

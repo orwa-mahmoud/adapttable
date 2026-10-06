@@ -1,7 +1,7 @@
 /** Framework resource ownership only; interaction state stays in core. */
 import { onScopeDispose, watch } from "vue";
 
-import type { FeatureMountContext } from "../features/tableFeature";
+import type { FeatureMountContext } from "@adapttable/vue";
 export function featureActivity<TRow>(
   context: FeatureMountContext<TRow>
 ): () => boolean {

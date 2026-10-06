@@ -1,13 +1,13 @@
 import type * as Binding from "@adapttable/vue";
-import type { RenderFunction } from "@adapttable/vue";
-import type * as Adapter from "@adapttable/vue/adapter";
-import type * as Features from "@adapttable/vue/features";
 import type {
   ColumnDef,
   FeatureState,
+  RenderFunction,
   ResolvedTableOptions,
   UseDataTableResult,
-} from "@adapttable/vue/features";
+} from "@adapttable/vue";
+import type * as Adapter from "@adapttable/vue/adapter";
+import type * as Features from "@adapttable/vue/features";
 
 interface Person {
   readonly id: string;

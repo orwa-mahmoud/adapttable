@@ -1,19 +1,18 @@
 <script setup lang="ts" generic="TRow extends { id: string; name: string }">
-import type { ColumnDef } from "@adapttable/vue";
+import type {
+  ColumnDef,
+  EditingBundle,
+  FilterFormSource,
+  TableFeature,
+  TableLabels,
+} from "@adapttable/vue";
 import {
   EditableCellChrome,
-  editing as editingFeature,
-  type EditingBundle,
-  useEditableCellModel,
-} from "@adapttable/vue/editing";
-import type { TableFeature } from "@adapttable/vue/features";
-import {
   FilterFieldChrome,
-  type FilterFormSource,
-  filters,
-  type TableLabels,
+  useEditableCellModel,
   useFilterField,
-} from "@adapttable/vue/filters";
+} from "@adapttable/vue/adapter";
+import { editing as editingFeature, filters } from "@adapttable/vue/features";
 import { computed, h } from "vue";
 const props = defineProps<{
   row: TRow;

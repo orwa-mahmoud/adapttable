@@ -1,7 +1,7 @@
 import type {
   FilterHeaderControlOptions,
   FilterHeaderRowProps,
-} from "@adapttable/vue/header-filters";
+} from "@adapttable/vue/adapter";
 import type {
   FilterHeaderControl,
   FilterHeaderRow,

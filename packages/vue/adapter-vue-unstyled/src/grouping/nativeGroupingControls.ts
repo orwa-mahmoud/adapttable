@@ -1,5 +1,4 @@
-import { toVueAttrs } from "@adapttable/vue/adapter";
-import type { GroupingPanelSlots } from "@adapttable/vue/features";
+import { type GroupingPanelSlots, toVueAttrs } from "@adapttable/vue/adapter";
 import { type ComputedRef, h } from "vue";
 
 import type { DataTableClassNames } from "../types";

@@ -1,5 +1,5 @@
-import type { TableFeature } from "@adapttable/vue/features";
-import { filters } from "@adapttable/vue/filters";
+import type { TableFeature } from "@adapttable/vue";
+import { filters } from "@adapttable/vue/features";
 interface Row {
   id: string;
   name: string;

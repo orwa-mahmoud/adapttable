@@ -11,67 +11,11 @@ import type {
   AgentApprovalProps,
   TableAssistantProps,
 } from "./assistant/contracts";
-import type { StaticTableFeature } from "./features/tableFeature";
+import type { StaticTableFeature } from "@adapttable/vue";
 export * from "./assistant/approvalReviewChrome";
 export * from "./assistant/contracts";
 export * from "./assistant/tableAssistantChrome";
 export type { StaticTableFeature } from "./features/tableFeature";
-/** Named member types of the full feature contract; these add no runtime exports. */
-export type {
-  Attrs,
-  CellContext,
-  ColumnDef,
-  ColumnGroup,
-  ColumnInput,
-  ColumnLayout,
-  ColumnLayoutOptions,
-  ComponentRenderer,
-  ComposedFeature,
-  DesktopTableModel,
-  DirtyEdits,
-  FeatureMountContext,
-  FeatureState,
-  FooterContext,
-  GroupRowModel,
-  HeaderContext,
-  MaybeRefOrGetterOptional,
-  MobileCardsModel,
-  Renderer,
-  RenderFunction,
-  ResolvedTableOptions,
-  RowActionControl,
-  RowActionControlsInput,
-  RowActionControlsProjector,
-  RowDetailModel,
-  RowSelection,
-  SelectionCheckboxAttrs,
-  SourceViewportOptions,
-  StaticFeatureHost,
-  SummaryRowFn,
-  TableBodyProjection,
-  TableBodyProjectionInput,
-  TableBodyProjector,
-  TableBodySlot,
-  TableCellModel,
-  TableEditingOptions,
-  TableFeature,
-  TableFeatureHost,
-  TableGrouping,
-  TableHeaderModel,
-  TableRowDetail,
-  TableRowInventory,
-  TableRowModel,
-  TableSummaryCellModel,
-  TableSummaryModel,
-  TableTree,
-  TreeCellModel,
-  useDataTable,
-  UseDataTableOptions,
-  UseDataTableResult,
-  UseDataTableShellOptions,
-  UseFrontendDataOptions,
-  UseTableUrlStateOptions,
-} from "./index";
 
 /** Required single assistant surface channel. @public */
 export function tableAssistantSlotKey() {

@@ -3,7 +3,7 @@ import type {
   ColumnLayoutState,
   ComposedFeature,
   UseDataTableResult,
-} from "@adapttable/vue/adapter";
+} from "@adapttable/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,

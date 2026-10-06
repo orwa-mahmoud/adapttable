@@ -127,7 +127,7 @@ const snippet = computed(
       dispatch:
         'import { tree } from "@adapttable/vue-unstyled/tree";\nimport { rowReorder } from "@adapttable/vue-unstyled/row-reorder";\n\nconst hierarchy = tree({ getChildren: run => run.children });\nconst moves = rowReorder((from, to, order) => {\n  // The host updates the plan of stable order IDs.\n  move(from, to, order);\n});',
       revenue:
-        'import { buildFormulaColumns } from "@adapttable/vue-unstyled/formula";\nimport { usePivotUrlState } from "@adapttable/vue-unstyled/pivot";\n\nconst formula = buildFormulaColumns([{\n  key: "profit", header: "Gross profit", formula: "amount-cost",\n}]);\nconst pivot = usePivotUrlState({ urlKey: "workspace-pivot" });',
+        'import { buildFormulaColumns } from "@adapttable/vue/formula";\nimport { usePivotUrlState } from "@adapttable/vue-unstyled/pivot";\n\nconst formula = buildFormulaColumns([{\n  key: "profit", header: "Gross profit", formula: "amount-cost",\n}]);\nconst pivot = usePivotUrlState({ urlKey: "workspace-pivot" });',
     })[props.view]
 );
 </script>

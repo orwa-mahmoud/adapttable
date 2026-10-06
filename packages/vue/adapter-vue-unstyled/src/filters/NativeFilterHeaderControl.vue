@@ -1,11 +1,11 @@
 <script setup lang="ts" generic="TRow">
-import { useScopeActivity } from "@adapttable/vue/adapter";
 import {
   FilterHeaderControlChrome,
   type FilterHeaderControlOptions,
   type FilterHeaderSlots,
   useFilterHeaderControl,
-} from "@adapttable/vue/header-filters";
+  useScopeActivity,
+} from "@adapttable/vue/adapter";
 import { h, onScopeDispose, shallowRef, watch } from "vue";
 
 import { nativeFilterSlots } from "./nativeFilterSlots";

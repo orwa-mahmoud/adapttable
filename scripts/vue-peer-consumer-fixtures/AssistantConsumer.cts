@@ -1,8 +1,9 @@
 import ai = require("@adapttable/ai-vue");
-import binding = require("@adapttable/vue/assistant");
+import binding1 = require("@adapttable/vue/adapter");
+import binding2 = require("@adapttable/vue");
 import kit = require("@adapttable/vue-unstyled/assistant");
 import vue = require("vue");
-import type { StaticTableFeature } from "@adapttable/vue/features";
+import type { StaticTableFeature } from "@adapttable/vue";
 
 const agent: StaticTableFeature = ai.tableAgent({ tableId: "consumer" });
 const session = vue.shallowRef<ai.AgentSession>();
@@ -13,7 +14,7 @@ const assistant: ai.TableAssistantState = ai.useTableAssistant(() => ({
 const speech: ai.SpeechInputState = ai.useSpeechInput({
   setDraft: assistant.setDraft,
 });
-const props: binding.TableAssistantProps = {
+const props: binding1.TableAssistantProps = {
   assistant: assistant.view.value,
   speech: speech.view.value,
   open: false,
@@ -25,8 +26,8 @@ const controls = [
   props,
   kit.TableAssistant,
   kit.AgentApproval,
-  binding.TableAssistantChrome,
-  binding.AgentApprovalChrome,
+  binding1.TableAssistantChrome,
+  binding1.AgentApprovalChrome,
   ai.TABLE_AGENT_STATE,
 ];
 
@@ -41,23 +42,23 @@ type Equal<A, B> =
 type Expect<T extends true> = T;
 const rowTypeIsPreserved: Expect<
   Equal<
-    ReturnType<binding.FeatureMountContext<ConsumerRow>["runtime"]["rowAt"]>,
+    ReturnType<binding2.FeatureMountContext<ConsumerRow>["runtime"]["rowAt"]>,
     ConsumerRow | undefined
   >
 > = true;
 const hostTypeIsPreserved: Expect<
   Equal<
-    Parameters<NonNullable<binding.StaticTableFeature["setup"]>>[0],
-    binding.StaticFeatureHost
+    Parameters<NonNullable<binding2.StaticTableFeature["setup"]>>[0],
+    binding2.StaticFeatureHost
   >
 > = true;
 const contextName = (
-  context: binding.FeatureMountContext<ConsumerRow>
+  context: binding2.FeatureMountContext<ConsumerRow>
 ): string | undefined => context.runtime.rowAt(0)?.name;
-const typedFeature: binding.StaticTableFeature = {
+const typedFeature: binding2.StaticTableFeature = {
   id: "typed-assistant-consumer",
-  setup: (host: binding.StaticFeatureHost) => host.onDispose(() => undefined),
-  mount: <TRow,>(context: binding.FeatureMountContext<TRow>) => {
+  setup: (host: binding2.StaticFeatureHost) => host.onDispose(() => undefined),
+  mount: <TRow,>(context: binding2.FeatureMountContext<TRow>) => {
     const row: TRow | undefined = context.runtime.rowAt(0);
     return () => row;
   },

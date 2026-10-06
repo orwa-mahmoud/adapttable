@@ -16,10 +16,10 @@ import {
   exportPdf as barrelPdf,
   exportXlsx as barrelXlsx,
 } from "@adapttable/vue-unstyled/features";
+import type { TableFeature } from "@adapttable/vue";
 import {
   type StandardFeatureOptions,
   standardFeatures,
-  type TableFeature,
 } from "@adapttable/vue-unstyled/preset";
 
 interface Person {

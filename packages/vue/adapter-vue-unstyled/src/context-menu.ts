@@ -1,14 +1,14 @@
 import {
+  CONTEXT_MENU_CONTROL,
+  ContextMenuChrome,
   extendFeature,
   slotRender,
-  type TableFeature,
 } from "@adapttable/vue/adapter";
+import { type TableFeature } from "@adapttable/vue";
 import {
-  CONTEXT_MENU_CONTROL,
   contextMenu as bindingContextMenu,
-  ContextMenuChrome,
   type ContextMenuOptions,
-} from "@adapttable/vue/context-menu";
+} from "@adapttable/vue/features";
 import { h } from "vue";
 
 import { nativeContextMenuSlots } from "./actions/nativeControls";
@@ -29,4 +29,4 @@ export function contextMenu<TRow>(
     ),
   ]);
 }
-export type * from "@adapttable/vue/context-menu";
+export type { ContextMenuOptions } from "@adapttable/vue/features";

@@ -15,7 +15,7 @@ import {
   type TreeExpansionOptions,
   useTreeExpansion,
 } from "../tree/treeExpansion";
-import type { FeatureMountContext, TableFeature } from "./tableFeature";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 export interface TreeFeatureOptions<TRow> extends Omit<
   TreeExpansionOptions,
   "enabled"

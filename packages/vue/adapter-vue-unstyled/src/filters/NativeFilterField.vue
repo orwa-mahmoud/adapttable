@@ -4,7 +4,7 @@ import {
   type FilterFieldOptions,
   filterLabel,
   filterWidgetKind,
-} from "@adapttable/vue/filters";
+} from "@adapttable/vue/adapter";
 import { h } from "vue";
 
 import { useClassNames } from "../classNamesContext";

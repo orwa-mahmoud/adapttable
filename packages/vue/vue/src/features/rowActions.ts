@@ -12,7 +12,7 @@ import {
   type RowMutationHandlers,
   useRowMutations,
 } from "../rows/rowMutations";
-import type { FeatureMountContext, TableFeature } from "./tableFeature";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 export type { RowActionsModel } from "../layout/modelChannels";
 export { ROW_ACTIONS_MODEL, rowActionsModelKey } from "../layout/modelChannels";
 export type {

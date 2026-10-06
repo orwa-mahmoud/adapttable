@@ -1,12 +1,10 @@
 import {
   extendFeature,
-  slotRender,
-  type StaticTableFeature,
-} from "@adapttable/vue/adapter";
-import {
-  headerFilters as bindingHeaderFilters,
   headerFilterSlotKey,
-} from "@adapttable/vue/header-filters";
+  slotRender,
+} from "@adapttable/vue/adapter";
+import { type StaticTableFeature } from "@adapttable/vue";
+import { headerFilters as bindingHeaderFilters } from "@adapttable/vue/features";
 import { h } from "vue";
 
 import { NativeHeaderFilter } from "./filters/NativeHeaderFilter";
@@ -26,4 +24,4 @@ export type {
   FilterHeaderControlOptions,
   FilterHeaderControlProps,
   FilterHeaderRowProps,
-} from "@adapttable/vue/header-filters";
+} from "@adapttable/vue/adapter";

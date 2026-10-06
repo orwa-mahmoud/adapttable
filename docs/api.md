@@ -4083,7 +4083,7 @@ assistant surfaces are covered by the [Vue assistant guide](./vue/assistant.md).
 | `ComponentRenderer<TContext>`, `componentRenderer`                            | Explicit component-plus-props-mapper descriptor and its required-prop-checking factory.                                                                      |
 | `renderContent`, `renderCell`, `renderHeader`, `renderFooter`                 | Render a typed context. Column renderers win over table slots; text fallback is last.                                                                        |
 | `primitiveText(value)`                                                        | Primitive/path-value text fallback, returning a string or null for unsupported structured values.                                                            |
-| `useRowSelection(options)`                                                    | Controlled or local selected IDs, header state, all-matching scope, selection actions and native-control attribute records.                                  |
+| `useSelection(options)`                                                       | Controlled or local selected IDs, header state, all-matching scope, selection actions and native-control attribute records.                                  |
 | `DataTableHandle<TRow>`                                                       | `runtime`, `getView()` and `focus()`; the native kit exposes this through its component ref.                                                                 |
 | `UseDataTableShellOptions`, `ResolvedTableOptions`, `UseDataTableShellResult` | Shell input, merged feature/explicit options and composed source/table/model/runtime result types. Runtime `useDataTableShell` comes from the adapter entry. |
 
@@ -4110,10 +4110,10 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 
 ### Vue feature composition and model channels
 
-`@adapttable/vue/features` exports `ComposedFeature`, `TableFeature`,
-`StaticTableFeature`, `feature`, `extendFeature`, `normalizeFeatures`,
-`featureOptionsOf`, `featureSlotFillsOf`, `renderFeatureSlot`,
-`assertRequiredSlots` and `eraseTableRuntime`. Normalization validates stable
+`@adapttable/vue` exports `ComposedFeature`, `TableFeature` and
+`StaticTableFeature`. `/features` exports `feature`; `/adapter` exports
+`extendFeature`, `normalizeFeatures`, `featureOptionsOf`, `featureSlotFillsOf`,
+`renderFeatureSlot`, `assertRequiredSlots` and `eraseTableRuntime`. Normalization validates stable
 IDs and keeps the last duplicate before patch/slot composition. Required slots
 are enforced; setup/mount resources are scoped to feature identity and
 dependencies. Runtime erasure preserves identity and permits only rows from
@@ -4151,7 +4151,7 @@ in the [Vue API](./vue/api.md#entry-points).
 | `FILTER_VIEW`, `filterViewKey`, `FilterPanelModel`                                        | Table-owned panel state: definitions/source/registry, trigger, anchor, mode, optional tree and fullscreen container.                                         |
 | `FilterPanelChrome`, `FilterPanelSlots`, `FilterPanelClassNames`                          | Structural form/panel using required Trigger, Button, Field, Popover and Drawer slots, plus Tree when enabled; wrapper class hooks.                          |
 | `FilterTriggerProps`, `FilterPanelButtonProps`, `FilterPanelSurfaceProps`                 | Trigger count/ref/actions, labeled action button, and open/anchor/content/container/close contracts for kit overlays.                                        |
-| `useTextFilter`, `useRangeFilter`, `useBooleanFilter`                                     | Reactive definition and source inputs to computed widget models with guarded write actions.                                                                  |
+| `useTextFilterWidget`, `useRangeFilterWidget`, `useBooleanFilterWidget`                   | Reactive definition and source inputs to computed widget models with guarded write actions.                                                                  |
 | `useFilterField`, `FilterFieldOptions`, `FilterFieldModel`, `FilterFieldControl`          | Definition/source/labels/registry input to an ID, label, loading/error and discriminated control list; explicit ID required outside a component.             |
 | `FilterFieldChrome`, `FilterFieldSlots`, `FilterFieldClassNames`                          | Structural field with required Input/Select/Checkbox slots and field/label/control class hooks.                                                              |
 | `FilterInputProps`, `FilterSelectProps`, `FilterCheckboxProps`                            | Labels, current values or checked state, semantic attrs and a single value-change action for filter controls.                                                |
@@ -4159,9 +4159,9 @@ in the [Vue API](./vue/api.md#entry-points).
 | `useFilterTree`, `FilterTreeOptions`                                                      | Definitions and a source with tree writes to refs for disclosure/tree/actions; add, replace, remove and change combinators.                                  |
 | `useFilterTreeModel`, `FilterTreeModel`, `FilterTreeChrome`                               | Resolve labels/registry and render recursive AND/OR structure through Select/Input/Button/Disclosure slots.                                                  |
 | `useHeaderFilter`, `HeaderFilterOptions`, `HeaderFilterChrome`, `HeaderFilterChromeSlots` | Computed header overlay state from neutral props plus optional ID/direction; required Trigger/Popover/Field controls.                                        |
-| `NativeFilterField`, `NativeChecklistFilter`, `NativeFilterTree`, `NativeHeaderFilter`    | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                     |
+| `NativeFilterField`, `ChecklistFilter`, `FilterTreeBuilder`, `NativeHeaderFilter`         | Native components accepting the corresponding field, checklist, tree-builder and header-filter props; exported by native filter entries.                     |
 
-`FilterChipsChrome` from `@adapttable/vue/filters` renders the active chip list
+`FilterChipsChrome` from `@adapttable/vue/adapter` renders the active chip list
 from `ActiveFilterChipsSlotProps`. Its required `FilterChipsSlots` provide Remove
 and Clear controls, each receiving `FilterChipButtonProps` with semantic attrs
 and a localized label; `FilterChipsClassNames` styles the list and its chips.
@@ -4170,7 +4170,7 @@ The native filters feature supplies these controls and keeps writes host-owned.
 For a compact filter inside a header, `useFilterHeaderControl` accepts
 `FilterHeaderControlOptions` and returns a computed `FilterHeaderControlModel`.
 `FilterHeaderControlChrome` uses required `FilterHeaderSlots`;
-`FilterHeaderRowChrome` combines `FilterHeaderRowProps` and `FilterHeaderRowSlots`
+`FilterHeaderChrome` combines `FilterHeaderRowProps` and `FilterHeaderRowSlots`
 to align controls with the table's columns. Native `FilterHeaderControl` and
 `FilterHeaderRow` are available from `@adapttable/vue-unstyled/header-filters`.
 The `headerFilters()` feature keeps its header-funnel overlay behavior. See the
@@ -4239,24 +4239,24 @@ kits import the corresponding binding factory and fill its required control
 slot. The [Vue action adapter guide](./vue/actions.md#build-action-controls-for-another-vue-kit)
 shows a complete bulk-action factory and explains the table-local state/control
 pairing. The Vue root forwards shared action contracts as types; runtime keys are
-available from `@adapttable/vue/adapter` and the focused binding entries below.
+available from `@adapttable/vue/adapter`.
 Reading a state key does not install a feature.
 
-| Export and owner                                                                                            | Signature or role                                                                                                                                                                                             |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ActionPresentation` (`@adapttable/vue`)                                                                    | Resolved labels and direction, optional class names and table overlay container passed to action controls.                                                                                                    |
-| `ActionButton`, `ActionButtonSlots` (`@adapttable/vue`)                                                     | Button label, optional Vue icon and complete semantic attrs; the required `Button(props): VNodeChild` fill renders the kit's control.                                                                         |
-| `BulkActionsModel`, `BULK_ACTIONS_MODEL` (`/bulk-actions`)                                                  | Selected count, pending/error state, all-matching banner and actions; `run`, `clear` and `selectAllMatching` use the current selection. The key reads its table-local ref.                                    |
-| `BULK_ACTIONS_CONTROL`, `BulkActionsChrome`, `BulkActionsChromeProps`, `BulkActionsSlots` (`/bulk-actions`) | The slot carries presentation plus model; the Chrome adds the required Button fill and renders selection actions, pending/error feedback and the scope banner.                                                |
-| `CommandPaletteModel`, `COMMAND_PALETTE_MODEL`, `COMMAND_PALETTE_CONTROL` (`/command-palette`)              | Model has `open`, `button`, `commands`, `show()` and `close()`; the state key publishes it and the control slot adds presentation for `CommandPaletteChrome`.                                                 |
-| `ContextMenuModel`, `CONTEXT_MENU_MODEL`, `CONTEXT_MENU_CONTROL` (`/context-menu`)                          | Current target point `at` or null, menu items and close action; paired state/control keys connect it to `ContextMenuChrome`.                                                                                  |
-| `SidePanelControlModel`, `SIDE_PANEL_MODEL`, `SIDE_PANEL_CONTROL` (`/side-panel`)                           | Resolved open panel key, panels, logical side and host change callback; paired keys supply `SidePanelChrome` with presentation and current model.                                                             |
-| `SidePanelLayoutChrome` (`/side-panel`, `/adapter`)                                                         | Component taking `open`, `panel(): VNodeChild`, optional `side` and `mobile`; wraps the default table slot with a side panel or stacks it below mobile content.                                               |
-| `EXPORT_MODEL`, `EXPORT_CONTROL` (`/export-csv`)                                                            | Table-local `ExportHandlerState` and its presentation/control channel: current action, caption, disabled/busy state, announcement and progress.                                                               |
-| `ExportChrome`, `ExportChromeProps`, `ExportSlots` (`/export-csv`)                                          | `ExportChrome(props): VNodeChild` consumes presentation, export model and required Button/Surface fills. See the [complete progress example](./vue/actions.md#render-export-progress-with-the-kits-controls). |
-| `PRINT_MODEL`, `PRINT_CONTROL` (`/print`)                                                                   | State key holds the guarded callback when the print button is enabled; the control receives presentation and `onPrint`.                                                                                       |
-| `PrintChrome`, `PrintChromeProps` (`/print`)                                                                | `PrintChrome(props): VNodeChild` takes presentation, host print callback and `ActionButtonSlots`; it does not choose a document layout.                                                                       |
-| `UNDO_REDO_CONTROL`, `HistoryButtonsChrome`, `HistoryButtonsChromeProps` (`/editing`)                       | Required toolbar control receives `ToolbarExtrasSlotProps`; the Chrome adds Button slots and renders available undo/redo callbacks with current labels and enabled state.                                     |
+| Export and owner                                                                                       | Signature or role                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ActionPresentation` (`@adapttable/vue/adapter`)                                                       | Resolved labels and direction, optional class names and table overlay container passed to action controls.                                                                                                    |
+| `ActionButton`, `ActionButtonSlots` (`@adapttable/vue/adapter`)                                        | Button label, optional Vue icon and complete semantic attrs; the required `Button(props): VNodeChild` fill renders the kit's control.                                                                         |
+| `BulkActionsModel`, `BULK_ACTIONS_MODEL` (`/adapter`)                                                  | Selected count, pending/error state, all-matching banner and actions; `run`, `clear` and `selectAllMatching` use the current selection. The key reads its table-local ref.                                    |
+| `BULK_ACTIONS_CONTROL`, `BulkActionsChrome`, `BulkActionsChromeProps`, `BulkActionsSlots` (`/adapter`) | The slot carries presentation plus model; the Chrome adds the required Button fill and renders selection actions, pending/error feedback and the scope banner.                                                |
+| `CommandPaletteModel`, `COMMAND_PALETTE_MODEL`, `COMMAND_PALETTE_CONTROL` (`/adapter`)                 | Model has `open`, `button`, `commands`, `show()` and `close()`; the state key publishes it and the control slot adds presentation for `CommandPaletteChrome`.                                                 |
+| `ContextMenuModel`, `CONTEXT_MENU_MODEL`, `CONTEXT_MENU_CONTROL` (`/adapter`)                          | Current target point `at` or null, menu items and close action; paired state/control keys connect it to `ContextMenuChrome`.                                                                                  |
+| `SidePanelControlModel`, `SIDE_PANEL_MODEL`, `SIDE_PANEL_CONTROL` (`/adapter`)                         | Resolved open panel key, panels, logical side and host change callback; paired keys supply `SidePanelChrome` with presentation and current model.                                                             |
+| `SidePanelLayoutChrome` (`/adapter`)                                                                   | Component taking `open`, `panel(): VNodeChild`, optional `side` and `mobile`; wraps the default table slot with a side panel or stacks it below mobile content.                                               |
+| `EXPORT_MODEL`, `EXPORT_CONTROL` (`/adapter`)                                                          | Table-local `ExportHandlerState` and its presentation/control channel: current action, caption, disabled/busy state, announcement and progress.                                                               |
+| `ExportChrome`, `ExportChromeProps`, `ExportSlots` (`/adapter`)                                        | `ExportChrome(props): VNodeChild` consumes presentation, export model and required Button/Surface fills. See the [complete progress example](./vue/actions.md#render-export-progress-with-the-kits-controls). |
+| `PRINT_MODEL`, `PRINT_CONTROL` (`/adapter`)                                                            | State key holds the guarded callback when the print button is enabled; the control receives presentation and `onPrint`.                                                                                       |
+| `PrintChrome`, `PrintChromeProps` (`/adapter`)                                                         | `PrintChrome(props): VNodeChild` takes presentation, host print callback and `ActionButtonSlots`; it does not choose a document layout.                                                                       |
+| `UNDO_REDO_CONTROL`, `HistoryButtonsChrome`, `HistoryButtonsChromeProps` (`/adapter`)                  | Required toolbar control receives `ToolbarExtrasSlotProps`; the Chrome adds Button slots and renders available undo/redo callbacks with current labels and enabled state.                                     |
 
 Native `/export` exposes `exportCsv`; `/export-pdf` and `/export-xlsx` expose
 `exportPdf` and `exportXlsx` with fixed document writers.
@@ -4270,7 +4270,7 @@ and [standard native features](./vue/features.md#standard-native-features).
 
 ### Vue column menu contracts
 
-The following binding exports belong to `@adapttable/vue/column-menu` unless
+The following binding exports belong to `@adapttable/vue/adapter` unless
 another owner is shown. See the [Vue column-menu guide](./vue/column-menu.md)
 for controlled state, keyboard behavior and the native composition example.
 
@@ -4285,16 +4285,15 @@ for controlled state, keyboard behavior and the native composition example.
 
 ### Vue navigation channels
 
-These runtime keys are available from `@adapttable/vue/adapter` and the focused
-entries shown below. The [navigation guide](./vue/navigation.md#connect-a-custom-shell-to-navigation-state)
+These runtime keys are available from `@adapttable/vue/adapter`. The [navigation guide](./vue/navigation.md#connect-a-custom-shell-to-navigation-state)
 explains logical coordinates, mounting, clipboard ownership and kit wiring.
 
 | Export and focused entry                                    | Signature or role                                                                                                                                                 |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GRID_FOCUS_MODEL` (`/cell-navigation`)                     | State key for the current `GridFocusState`, shared by navigation, clipboard and range consumers.                                                                  |
-| `FILL_HANDLE_CONTROL` (`/cell-navigation`)                  | Slot for `FillHandleCellSlotProps<GridFocusState>` plus optional `firstRowIndex` and `className`; the kit renders the required Handle through `FillHandleChrome`. |
-| `FIND_MODEL` (`/find-in-table`)                             | State key for the current `FindInTableState`; read the ref rather than retaining a search snapshot.                                                               |
-| `FIND_BUTTON`, `FindButtonControlProps` (`/find-in-table`)  | Single toolbar slot with label, opening action `onClick` and optional class name for the kit's find button.                                                       |
+| `GRID_FOCUS_MODEL` (`/adapter`)                             | State key for the current `GridFocusState`, shared by navigation, clipboard and range consumers.                                                                  |
+| `FILL_HANDLE_CONTROL` (`/adapter`)                          | Slot for `FillHandleCellSlotProps<GridFocusState>` plus optional `firstRowIndex` and `className`; the kit renders the required Handle through `FillHandleChrome`. |
+| `FIND_MODEL` (`/adapter`)                                   | State key for the current `FindInTableState`; read the ref rather than retaining a search snapshot.                                                               |
+| `FIND_BUTTON`, `FindButtonControlProps` (`/adapter`)        | Single toolbar slot with label, opening action `onClick` and optional class name for the kit's find button.                                                       |
 | `SELECTION_STATS_MODEL` (`/selection-stats`, `/status-bar`) | State key for `SelectionStats \| null`, consumed by the current selected-cell statistics surface.                                                                 |
 | `GRID_ANNOUNCER` (`/adapter`)                               | Single structural slot carrying `GridFocusAnnouncerSlotProps<GridFocusState>` for the live announcement. The binding navigation feature already installs it.      |
 
@@ -4350,7 +4349,7 @@ stopping, resuming, clearing, undoing and revoking permissions.
 controls. Neutral AI types are forwarded as type-only exports; the binding also
 forwards `AgentApprovalPending`, `AgentProgress` and `StaticTableFeature`.
 
-`@adapttable/vue/assistant` exports `TableAssistantChrome` /
+`@adapttable/vue/adapter` exports `TableAssistantChrome` /
 `TableAssistantChromeProps`, `AgentApprovalChrome` / `AgentApprovalChromeProps`,
 and `ApprovalReviewChrome` / `ApprovalReviewChromeProps`. These structural
 components require kit controls. `createAdapterTableAssistantFeature(render)` and

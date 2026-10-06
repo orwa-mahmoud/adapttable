@@ -2,7 +2,7 @@ import type {
   LayoutStorage,
   SavedView,
   UrlStateAdapter,
-} from "@adapttable/vue/adapter";
+} from "@adapttable/vue";
 import {
   createApp,
   defineComponent,

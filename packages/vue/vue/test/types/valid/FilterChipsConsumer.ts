@@ -1,9 +1,9 @@
-import { resolveLabels } from "@adapttable/vue/adapter";
 import {
   type ActiveFilterChipsSlotProps,
   FilterChipsChrome,
   type FilterChipsSlots,
-} from "@adapttable/vue/filters";
+  resolveLabels,
+} from "@adapttable/vue/adapter";
 import { h, type VNodeChild } from "vue";
 
 const slots: FilterChipsSlots = {

@@ -1,4 +1,4 @@
-/** Source provenance and built identities behind the mixed Vue export policies. */
+/** Source ownership and built identities for the canonical Vue entries. */
 import assert from "node:assert/strict";
 import {
   mkdtempSync,
@@ -15,11 +15,7 @@ import { pathToFileURL } from "node:url";
 import ts from "typescript";
 
 import { packageDir, REPO_ROOT } from "./packages.mjs";
-import {
-  checkBuiltFeatureOwnership,
-  FOCUSED_FACTORIES,
-  VIEW_CONTROL_VALUES,
-} from "./vue-feature-contracts.mjs";
+import { checkBuiltFeatureOwnership } from "./vue-feature-contracts.mjs";
 import { prepareVueCell } from "./vue-peer-consumers.mjs";
 
 const WRITERS = {
@@ -66,70 +62,117 @@ function named(from, names, typeOnly = false) {
     names: names.map((name) => ({ name, original: name, typeOnly })),
   };
 }
-const star = (from, typeOnly) => ({ from, typeOnly, names: "*" });
-
-/** Exact four boundary barrels, plus every edge of the extra core type-star path. */
+/** Public binding barrels name their exports explicitly at their canonical role. */
 export function checkExportSources(repository) {
   const binding = join(repository, "packages/vue/vue/src");
   const native = join(repository, "packages/vue/adapter-vue-unstyled/src");
-  for (const [entry, factory] of Object.entries(FOCUSED_FACTORIES)) {
+  const manifest = JSON.parse(
+    readFileSync(join(binding, "../package.json"), "utf8")
+  );
+  for (const entry of Object.keys(manifest.exports)) {
+    if (entry === "./package.json") continue;
+    const file = `${entry === "." ? "index" : entry.slice(2)}.ts`;
+    const edges = sourceExports(readFileSync(join(binding, file), "utf8"));
+    assert.ok(
+      edges.every((edge) => edge.names !== "*"),
+      `${file}: canonical entries cannot forward wildcard closures`
+    );
+  }
+  const features = sourceExports(
+    readFileSync(join(binding, "features.ts"), "utf8")
+  );
+  for (const [entry, factory] of [
+    ["density", "densityChooser"],
+    ["fullscreen", "fullscreen"],
+  ]) {
     assert.deepEqual(
-      sourceExports(readFileSync(join(binding, `${entry}.ts`), "utf8")),
-      [
-        named(`./features/${entry}`, [factory]),
-        named("./viewControls/contracts", [
-          "DENSITY_CONTROL",
-          "FULLSCREEN_CONTROL",
-          "FULLSCREEN_MODEL",
-          "SAVED_VIEWS_CONTROL",
-          "SAVED_VIEWS_MODEL",
-        ]),
-        named("./viewControls/viewControlsChrome", [
-          "DensityChooserChrome",
-          "FullscreenButtonChrome",
-        ]),
-      ],
-      `${entry}: retain named values without forwarding shared type ownership`
+      features.filter((edge) =>
+        edge.names.some((name) => name.name === factory)
+      ),
+      [named(`./features/${entry}`, [factory])],
+      `${factory}: retain the original factory declaration`
     );
   }
   for (const kind of ["pdf", "xlsx"]) {
     const canonical = `@adapttable/core/${kind}`;
-    const route = `@adapttable/vue/export-${kind}`;
+    const route = `@adapttable/vue/${kind}`;
+    const contracts =
+      kind === "pdf"
+        ? [
+            "PdfWriterOptions",
+            "PrintLayoutOptions",
+            "PrintPageBreak",
+            "PrintPageSize",
+          ]
+        : [];
     const expected = [
-      star("./export-csv", true),
-      named(canonical, ["Aggregator"], true),
-      star(canonical, false),
+      named(`./export-${kind}`, [OPTIONS[kind]], true),
+      named(`./export-${kind}`, [FACTORIES[kind]]),
+      ...(contracts.length ? [named(canonical, contracts, true)] : []),
+      named(canonical, WRITERS[kind]),
     ];
-    if (kind === "xlsx") expected.push(named(canonical, WRITERS.xlsx));
-    expected.push(star("@adapttable/core", true));
+    const normalize = (edges) =>
+      edges
+        .flatMap((edge) =>
+          edge.names.map((name) => ({ from: edge.from, ...name }))
+        )
+        .sort((a, b) => a.name.localeCompare(b.name));
     assert.deepEqual(
-      sourceExports(readFileSync(join(binding, `export-${kind}.ts`), "utf8")),
-      expected,
+      normalize(
+        sourceExports(readFileSync(join(binding, `${kind}.ts`), "utf8"))
+      ),
+      normalize(expected),
       `${kind}: binding source export origin or type-only mode changed`
     );
     assert.deepEqual(
-      sourceExports(readFileSync(join(native, `export-${kind}.ts`), "utf8")),
-      [
-        star(route, true),
+      normalize(
+        sourceExports(readFileSync(join(native, `export-${kind}.ts`), "utf8"))
+      ),
+      normalize([
         named(route, [OPTIONS[kind]], true),
         named(route, WRITERS[kind]),
-      ],
+      ]),
       `${kind}: native source export origin or type-only mode changed`
     );
   }
-  for (const [file, target] of [
-    ["export-csv.ts", "./index"],
-    ["index.ts", "@adapttable/core"],
-  ]) {
-    const edges = sourceExports(
-      readFileSync(join(binding, file), "utf8")
-    ).filter((edge) => edge.from === target && edge.names === "*");
-    assert.deepEqual(
-      edges,
-      [star(target, true)],
-      `${file}: extra core wildcard must remain type-only`
-    );
+}
+
+/** Source declarations distinguish runtime exports from named type contracts. */
+export function runtimeSourceNames(text) {
+  const source = ts.createSourceFile(
+    "entry.ts",
+    text,
+    ts.ScriptTarget.Latest,
+    true
+  );
+  const names = new Set();
+  for (const statement of source.statements) {
+    if (ts.isExportDeclaration(statement)) {
+      assert.ok(
+        statement.exportClause && ts.isNamedExports(statement.exportClause)
+      );
+      for (const item of statement.exportClause.elements)
+        if (!statement.isTypeOnly && !item.isTypeOnly)
+          names.add(item.name.text);
+    } else if (
+      statement.modifiers?.some(
+        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+      )
+    ) {
+      if (
+        ts.isFunctionDeclaration(statement) ||
+        ts.isClassDeclaration(statement) ||
+        ts.isEnumDeclaration(statement)
+      )
+        names.add(statement.name.text);
+      else if (ts.isVariableStatement(statement))
+        for (const declaration of statement.declarationList.declarations) {
+          assert.ok(ts.isIdentifier(declaration.name));
+          names.add(declaration.name.text);
+        }
+    }
   }
+  return [...names].sort();
 }
 
 /** TypeScript symbol flags are a bitmask, including possible composite flags. */
@@ -181,26 +224,46 @@ export function canonicalAliasErrors(program, consumer, pairs) {
   return errors;
 }
 
-function consumerInputs(manifest) {
+function consumerInputs() {
   const pairs = [];
   const modules = new Map();
   for (const kind of ["pdf", "xlsx"]) {
     const canonical = `@adapttable/core/${kind}`;
-    const names = manifest.surfaces[`vue-export-${kind}`];
-    assert.ok(
-      Array.isArray(names) && names.length > 0,
-      `Missing canonical ${kind} surface`
-    );
-    modules.set(canonical, names);
-    for (const binding of ["vue", "vue-unstyled"]) {
-      const route = `@adapttable/${binding}/export-${kind}`;
-      modules.set(route, names);
-      pairs.push({ canonical, route, names });
+    const names = WRITERS[kind];
+    const contracts =
+      kind === "pdf"
+        ? [
+            "PdfWriterOptions",
+            "PrintLayoutOptions",
+            "PrintPageBreak",
+            "PrintPageSize",
+          ]
+        : [];
+    const canonicalNames = [...names, ...contracts];
+    modules.set(canonical, canonicalNames);
+    for (const route of [
+      `@adapttable/vue/${kind}`,
+      `@adapttable/vue-unstyled/export-${kind}`,
+    ]) {
+      const retainedNames = route.startsWith("@adapttable/vue/")
+        ? canonicalNames
+        : names;
+      modules.set(route, retainedNames);
+      pairs.push({ canonical, route, names: retainedNames });
     }
+    pairs.push({
+      canonical: `@adapttable/vue/${kind}`,
+      route: `@adapttable/vue-unstyled/export-${kind}`,
+      names: [OPTIONS[kind]],
+    });
   }
   const text = [...modules]
     .map(([module, names], index) => {
-      const imports = names
+      const kind = module.endsWith("pdf") ? "pdf" : "xlsx";
+      const imports = [
+        ...names,
+        ...(module.startsWith("@adapttable/core/") ? [] : [OPTIONS[kind]]),
+      ]
         .map((name) => `${name} as entry${index}_${name}`)
         .join(", ");
       return `import type { ${imports} } from ${JSON.stringify(module)};`;
@@ -210,8 +273,8 @@ function consumerInputs(manifest) {
 }
 
 /** Named imports trigger ambiguity diagnostics in both package export conditions. */
-export function checkBuiltExportTypes(cell, manifest) {
-  const { pairs, text } = consumerInputs(manifest);
+export function checkBuiltExportTypes(cell) {
+  const { pairs, text } = consumerInputs();
   for (const extension of ["ts", "cts"]) {
     const file = join(cell, `canonical-export-consumer.${extension}`);
     writeFileSync(file, text);
@@ -235,6 +298,60 @@ export function checkBuiltExportTypes(cell, manifest) {
     const consumer = program.getSourceFile(file);
     assert.ok(consumer, `Missing consumer ${file}`);
     assert.deepEqual(canonicalAliasErrors(program, consumer, pairs), []);
+  }
+}
+
+/** Every advertised ESM/CJS entry must expose its exact reviewed public surface. */
+export function checkBuiltEntrySurfaces(cell, manifest) {
+  const entries = publishedBindingEntries(cell);
+  for (const extension of ["ts", "cts"]) {
+    const file = join(cell, `entry-surfaces.${extension}`);
+    writeFileSync(
+      file,
+      entries
+        .map(
+          (entry, index) =>
+            `import * as entry${index} from ${JSON.stringify(entry)};`
+        )
+        .join("\n")
+    );
+    const program = ts.createProgram([file], {
+      strict: true,
+      skipLibCheck: false,
+      noEmit: true,
+      target: ts.ScriptTarget.ES2022,
+      module: ts.ModuleKind.NodeNext,
+      moduleResolution: ts.ModuleResolutionKind.NodeNext,
+      types: [],
+    });
+    assert.deepEqual(
+      ts
+        .getPreEmitDiagnostics(program)
+        .map((item) => ts.flattenDiagnosticMessageText(item.messageText, "\n")),
+      [],
+      `${extension}: complete advertised export inventory must compile`
+    );
+    const checker = program.getTypeChecker();
+    for (const statement of program.getSourceFile(file).statements) {
+      if (!ts.isImportDeclaration(statement)) continue;
+      const entry = statement.moduleSpecifier.text;
+      const surface =
+        entry === "@adapttable/vue"
+          ? "vue"
+          : `vue-${entry.slice("@adapttable/vue/".length)}`;
+      const expected = manifest.surfaces[surface];
+      assert.ok(Array.isArray(expected), `${entry}: missing reviewed surface`);
+      const symbol = checker.getSymbolAtLocation(statement.moduleSpecifier);
+      assert.ok(symbol, `${entry}: missing module declaration`);
+      assert.deepEqual(
+        checker
+          .getExportsOfModule(symbol)
+          .map((item) => item.name)
+          .sort(),
+        [...expected].sort(),
+        `${extension} ${entry}: complete public export inventory changed`
+      );
+    }
   }
 }
 
@@ -325,7 +442,7 @@ export function runtimeExportErrors(actual, canonical, expected, label) {
   return errors;
 }
 
-export async function checkBuiltExportRuntime(cell) {
+export async function checkBuiltExportRuntime(cell, repository = REPO_ROOT) {
   const require = createRequire(join(cell, "consumer.cjs"));
   for (const mode of ["import", "require"]) {
     const load = async (specifier) => {
@@ -339,29 +456,14 @@ export async function checkBuiltExportRuntime(cell) {
         manifest.exports[subpath ? `./${subpath}` : "."].import.default;
       return import(pathToFileURL(join(root, target)).href);
     };
-    const featureOwner = await load("@adapttable/vue/features");
-    const adapterOwner = await load("@adapttable/vue/adapter");
-    for (const [entry, factory] of Object.entries(FOCUSED_FACTORIES)) {
-      const route = `@adapttable/vue/${entry}`;
-      const actual = await load(route);
-      assert.deepEqual(
-        Object.keys(actual).sort(),
-        [...VIEW_CONTROL_VALUES, factory].sort(),
-        `${mode} ${route}: the focused runtime surface changed`
-      );
-      assert.equal(actual[factory], featureOwner[factory]);
-      for (const name of VIEW_CONTROL_VALUES)
-        assert.equal(
-          actual[name],
-          adapterOwner[name],
-          `${mode} ${route}: ${name} lost canonical runtime identity`
-        );
-    }
     for (const kind of ["pdf", "xlsx"]) {
       const canonical = await load(`@adapttable/core/${kind}`);
       const modules = [];
       for (const binding of ["vue", "vue-unstyled"]) {
-        const route = `@adapttable/${binding}/export-${kind}`;
+        const route =
+          binding === "vue"
+            ? `@adapttable/vue/${kind}`
+            : `@adapttable/vue-unstyled/export-${kind}`;
         const actual = await load(route);
         modules.push(actual);
         assert.deepEqual(
@@ -382,6 +484,19 @@ export async function checkBuiltExportRuntime(cell) {
     }
     for (const entry of publishedBindingEntries(cell)) {
       const actual = await load(entry);
+      const stem =
+        entry === "@adapttable/vue"
+          ? "index"
+          : entry.slice("@adapttable/vue/".length);
+      const source = readFileSync(
+        join(repository, "packages/vue/vue/src", `${stem}.ts`),
+        "utf8"
+      );
+      assert.deepEqual(
+        Object.keys(actual).sort(),
+        runtimeSourceNames(source),
+        `${mode} ${entry}: runtime export inventory differs from its explicit source declarations`
+      );
       assert.equal(
         Object.hasOwn(actual, "createExportController"),
         false,
@@ -399,10 +514,11 @@ export async function checkVueCellExportContracts(
 ) {
   checkExportSources(repository);
   const manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
-  checkBuiltExportTypes(cell, manifest);
+  checkBuiltExportTypes(cell);
+  checkBuiltEntrySurfaces(cell, manifest);
   checkBuiltFeatureOwnership(cell);
   checkBuiltTypeOnlyValues(cell);
-  await checkBuiltExportRuntime(cell);
+  await checkBuiltExportRuntime(cell, repository);
 }
 
 /** Standalone post-build proof; writes only an isolated temporary consumer cell. */

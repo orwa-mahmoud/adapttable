@@ -1,4 +1,4 @@
-import type { ColumnMenuSlotProps } from "@adapttable/vue/column-menu";
+import type { ColumnMenuSlotProps } from "@adapttable/vue/adapter";
 interface Person {
   readonly name: string;
 }

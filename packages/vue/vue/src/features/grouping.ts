@@ -32,7 +32,7 @@ import type {
   FeatureMountContext,
   StaticTableFeature,
   TableFeature,
-} from "./tableFeature";
+} from "@adapttable/vue";
 export interface GroupingExtras<TRow = unknown> extends Omit<
   GroupCollapseOptions,
   "enabled"

@@ -1,6 +1,5 @@
-import { type TableSource, useFrontendData } from "@adapttable/vue";
-import { type Attrs, useDataTableShell } from "@adapttable/vue/adapter";
-import { filterViewKey } from "@adapttable/vue/filters";
+import { type Attrs, type TableSource, useFrontendData } from "@adapttable/vue";
+import { filterViewKey, useDataTableShell } from "@adapttable/vue/adapter";
 import { describe, expect, it, vi } from "vitest";
 import { effectScope, shallowRef } from "vue";
 

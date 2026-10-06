@@ -2,7 +2,7 @@
 import {
   RowReorderChrome,
   type RowReorderControlProps,
-} from "@adapttable/vue/features";
+} from "@adapttable/vue/adapter";
 
 import { useClassNames } from "../classNamesContext";
 import { nativeReorderControls } from "./nativeReorderControls";

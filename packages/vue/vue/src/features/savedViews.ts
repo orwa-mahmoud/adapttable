@@ -6,7 +6,7 @@ import {
   SAVED_VIEWS_CONTROL,
   SAVED_VIEWS_MODEL,
 } from "../viewControls/contracts";
-import type { FeatureMountContext, StaticTableFeature } from "./tableFeature";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 
 function mountSavedViews<TRow>(context: FeatureMountContext<TRow>): void {
   let live = true;

@@ -1,5 +1,7 @@
-import { useScopeActivity } from "@adapttable/vue/adapter";
-import type { TableAssistantMenuProps } from "@adapttable/vue/assistant";
+import {
+  type TableAssistantMenuProps,
+  useScopeActivity,
+} from "@adapttable/vue/adapter";
 import { defineComponent, h, nextTick, shallowRef, useId, watch } from "vue";
 
 /** A native disclosure of commands. The browser retains ordinary Tab navigation. */

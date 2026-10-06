@@ -4,7 +4,7 @@ import { DESKTOP_RESIZE_HANDLE_STYLE } from "@adapttable/core/binding";
 import { watch } from "vue";
 
 import { toVueAttrs } from "../attrs";
-import type { FeatureMountContext } from "../features/tableFeature";
+import type { FeatureMountContext } from "@adapttable/vue";
 import { COLUMN_RESIZE_MODEL } from "../layout/modelChannels";
 export type {
   ColumnResizeHandleOptions,

@@ -1,5 +1,5 @@
 import { resolveLabels } from "@adapttable/vue/adapter";
-import { useBatchEditing, useRowEditing } from "@adapttable/vue/editing";
+import { useBatchEditing, useRowEditing } from "@adapttable/vue";
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, defineComponent, effectScope, h, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";

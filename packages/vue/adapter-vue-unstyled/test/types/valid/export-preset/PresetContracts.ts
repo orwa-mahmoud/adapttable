@@ -1,5 +1,7 @@
-import type { FilterDef as BindingFilterDef } from "@adapttable/vue/filters";
-import type { UseSavedViewsOptions as BindingSavedViewsOptions } from "@adapttable/vue/saved-views";
+import type {
+  FilterDef as BindingFilterDef,
+  UseSavedViewsOptions as BindingSavedViewsOptions,
+} from "@adapttable/vue";
 import type {
   FilterDef,
   StandardFeatureOptions,

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { BulkActionContext, ColumnDef } from "@adapttable/vue/adapter";
 import type {
+  BulkActionContext,
+  ColumnDef,
   ExportAllControls,
   ExportAllResult,
-} from "@adapttable/vue/export-csv";
+} from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
 import { bulkActions } from "@adapttable/vue-unstyled/bulk-actions";
 import { commandPalette } from "@adapttable/vue-unstyled/command-palette";

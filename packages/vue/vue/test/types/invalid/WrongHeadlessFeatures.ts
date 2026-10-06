@@ -1,10 +1,14 @@
-import { aggregate, type ColumnDef, computed } from "@adapttable/vue";
+import {
+  aggregate,
+  type ColumnDef,
+  computed,
+  type TableFeature,
+} from "@adapttable/vue";
 import {
   cellSpan,
   pinnedSummaryRows,
   rowActions,
   rowAppearance,
-  type TableFeature,
 } from "@adapttable/vue/features";
 interface Row {
   id: string;

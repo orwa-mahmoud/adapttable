@@ -1,9 +1,9 @@
 <script setup lang="ts" generic="TRow">
 import {
-  FilterHeaderRowChrome,
+  FilterHeaderChrome as FilterHeaderRowChrome,
   type FilterHeaderRowProps,
   type FilterHeaderRowSlots,
-} from "@adapttable/vue/header-filters";
+} from "@adapttable/vue/adapter";
 import { h } from "vue";
 
 import NativeFilterHeaderControl from "./NativeFilterHeaderControl.vue";

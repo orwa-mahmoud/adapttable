@@ -131,12 +131,12 @@ binding and shared core; these contributions provide native controls.
 - `/multi-sort`, `/fit-columns`, `/resizable-columns` and `/column-groups`:
   `multiSort()`, `fitColumns()`, `resizableColumns()` and
   `collapsibleColumnGroups()` for collapsible column groups; also collected in
-  `/columns`. Native desktop resize handles preserve pointer,
+  the corresponding individual column entry. Native desktop resize handles preserve pointer,
   keyboard and RTL semantics. Cards do not render desktop resize handles.
 - `/row-actions`, `/row-pinning`, `/pinned-summary-rows`, `/extra-rows`,
   `/cell-span` and `/row-appearance`: row actions, row pinning, independent
   summary rows, full-width/separator rows, cell spanning and row styling.
-  Their factories are also collected in `/rows`. Add, duplicate and delete request host callbacks.
+  Add, duplicate and delete request host callbacks.
   Confirmed actions use the native browser confirmation, or the `confirm` prop.
   Independent summaries are outside selection. Cards render complete cell
   values rather than attempting desktop row/column spans.

@@ -26,7 +26,7 @@ import type {
   FeatureMountContext,
   StaticTableFeature,
   TableFeature,
-} from "./features/tableFeature";
+} from "@adapttable/vue";
 import { groupingModelKey, treeModelKey } from "./hierarchy/models";
 import { useExternalStore } from "./store";
 const GRID_FOCUS_MODEL = featureStateKey<GridFocusState>(
@@ -259,7 +259,6 @@ export type {
   ExportSlots,
 } from "./export/exportChrome";
 export { ExportChrome, ExportProgressChrome } from "./export/exportChrome";
-export type * from "./index";
 export type {
   ExportAllControls,
   ExportAllResult,
@@ -269,6 +268,3 @@ export type {
   ExportWriter,
 } from "@adapttable/core";
 export type { ExportHandlerState } from "@adapttable/core/binding";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

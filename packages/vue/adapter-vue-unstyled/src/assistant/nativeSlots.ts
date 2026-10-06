@@ -1,10 +1,10 @@
 /** Native HTML is this kit. Other kits fill the same required binding slots. */
-import { useScopeActivity } from "@adapttable/vue/adapter";
-import type {
-  ApprovalReviewSlots,
-  TableAssistantSheetProps,
-  TableAssistantSlots,
-} from "@adapttable/vue/assistant";
+import {
+  type ApprovalReviewSlots,
+  type TableAssistantSheetProps,
+  type TableAssistantSlots,
+  useScopeActivity,
+} from "@adapttable/vue/adapter";
 import { defineComponent, h, shallowRef, watch } from "vue";
 
 import { NativeExamplesMenu } from "./NativeExamplesMenu";

@@ -1,4 +1,4 @@
-import { rowActions } from "@adapttable/vue-unstyled/rows";
+import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 interface Person {
   id: string;
   name: string;

@@ -4,7 +4,7 @@ import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
 import {
   buildFormulaColumns,
   useFormulaUrlState,
-} from "@adapttable/vue-unstyled/formula";
+} from "@adapttable/vue/formula";
 import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import {
   pivot,
@@ -14,8 +14,8 @@ import {
 } from "@adapttable/vue-unstyled/pivot";
 import { rowDetail } from "@adapttable/vue-unstyled/row-detail";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
-import { pinnedSummaryRows } from "@adapttable/vue-unstyled/rows";
-import { sparklineColumn } from "@adapttable/vue-unstyled/sparkline";
+import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
+import { sparklineColumn } from "@adapttable/vue/sparkline";
 import { virtualize } from "@adapttable/vue-unstyled/virtualize";
 import { computed, h, shallowRef } from "vue";
 interface Sale {

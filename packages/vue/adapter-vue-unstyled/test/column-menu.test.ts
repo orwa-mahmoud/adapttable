@@ -4,19 +4,17 @@ import {
   useColumnLayout,
 } from "@adapttable/vue";
 import {
-  featureSlotFillsOf,
-  renderFeatureSlot,
-  resolveLabels,
-} from "@adapttable/vue/adapter";
-import {
   COLUMN_HEADER_RENAME,
   ColumnHeaderRenameChrome,
   ColumnMenuChrome,
   columnMenuSlotKey,
   type ColumnMenuSlotProps,
   type ColumnMenuSlots,
+  featureSlotFillsOf,
+  renderFeatureSlot,
+  resolveLabels,
   useColumnMenu,
-} from "@adapttable/vue/column-menu";
+} from "@adapttable/vue/adapter";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,

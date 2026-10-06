@@ -1,7 +1,10 @@
 <script setup lang="ts" generic="TRow">
-import type { CellContext, ColumnInput } from "@adapttable/vue";
+import type {
+  CellContext,
+  ColumnInput,
+  ComposedFeature,
+} from "@adapttable/vue";
 import { useDataTableShell } from "@adapttable/vue/adapter";
-import type { ComposedFeature } from "@adapttable/vue/features";
 const props = defineProps<{
   data: readonly TRow[];
   columns: readonly ColumnInput<TRow>[];

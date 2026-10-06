@@ -1,5 +1,8 @@
-import { resolveLabels, useScopeActivity } from "@adapttable/vue/adapter";
-import type { FilterPanelSurfaceProps } from "@adapttable/vue/filters";
+import {
+  type FilterPanelSurfaceProps,
+  resolveLabels,
+  useScopeActivity,
+} from "@adapttable/vue/adapter";
 import {
   type CSSProperties,
   defineComponent,

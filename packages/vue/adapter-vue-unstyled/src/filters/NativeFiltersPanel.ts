@@ -1,9 +1,10 @@
-import { elementRef, useFeatureState } from "@adapttable/vue/adapter";
 import {
+  elementRef,
   FilterPanelChrome,
   type FilterPanelSlots,
   filterViewKey,
-} from "@adapttable/vue/filters";
+  useFeatureState,
+} from "@adapttable/vue/adapter";
 import { defineComponent, h } from "vue";
 
 import { useClassNames } from "../classNamesContext";

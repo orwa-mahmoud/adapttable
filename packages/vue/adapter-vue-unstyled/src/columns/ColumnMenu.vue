@@ -3,7 +3,7 @@ import {
   ColumnMenuChrome,
   type ColumnMenuSlotProps,
   useColumnMenu,
-} from "@adapttable/vue/column-menu";
+} from "@adapttable/vue/adapter";
 
 import { nativeColumnMenuSlots } from "./nativeColumnMenuControls";
 const props = defineProps<ColumnMenuSlotProps<TRow>>();

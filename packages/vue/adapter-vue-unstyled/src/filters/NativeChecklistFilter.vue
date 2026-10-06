@@ -4,7 +4,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSlots,
   useChecklistModel,
-} from "@adapttable/vue/filters";
+} from "@adapttable/vue/adapter";
 import { h, type VNodeChild } from "vue";
 
 import { nativeCheckbox } from "../nativeCheckbox";

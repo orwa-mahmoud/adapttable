@@ -1,4 +1,4 @@
-import { columnMenu as bindingColumnMenu } from "@adapttable/vue/column-menu";
+import { columnMenu as bindingColumnMenu } from "@adapttable/vue/features";
 import { describe, expect, it } from "vitest";
 import { defineComponent, h, onErrorCaptured, shallowRef } from "vue";
 

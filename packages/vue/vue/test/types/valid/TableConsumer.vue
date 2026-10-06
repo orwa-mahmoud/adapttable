@@ -4,11 +4,9 @@ import {
   type ColumnDef,
   componentRenderer,
   type HeaderContext,
+  type StaticTableFeature,
+  type TableFeature,
 } from "@adapttable/vue";
-import type {
-  StaticTableFeature,
-  TableFeature,
-} from "@adapttable/vue/features";
 import { defineComponent, h, shallowRef } from "vue";
 
 import GenericTable from "../GenericTable.vue";

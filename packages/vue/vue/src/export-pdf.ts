@@ -2,7 +2,7 @@
 import { pdfWriter } from "@adapttable/core/pdf";
 
 import { exportCsv, type ExportCsvOptions } from "./export-csv";
-import type { StaticTableFeature, TableFeature } from "./features/tableFeature";
+import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 
 /** Export scope, columns, filename and host hooks, with the PDF writer fixed. @public */
 export type ExportPdfOptions<TRow> = Omit<ExportCsvOptions<TRow>, "writer">;
@@ -21,9 +21,3 @@ export function exportPdf<TRow>(
       : { ...(options === true ? {} : options), writer: pdfWriter() }
   );
 }
-export type * from "./export-csv";
-export type { Aggregator } from "@adapttable/core/pdf";
-export * from "@adapttable/core/pdf";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

@@ -6,8 +6,7 @@ import type {
   TableSource,
   UseDataTableResult,
 } from "@adapttable/vue";
-import { densityChooser } from "@adapttable/vue/density";
-import { fullscreen } from "@adapttable/vue/fullscreen";
+import { densityChooser, fullscreen } from "@adapttable/vue/features";
 import { DataTable } from "@adapttable/vue-unstyled";
 import { densityChooser as nativeDensity } from "@adapttable/vue-unstyled/density";
 import { fullscreen as nativeFullscreen } from "@adapttable/vue-unstyled/fullscreen";

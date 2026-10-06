@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type FilterFormSource, resolveLabels } from "@adapttable/vue/adapter";
+import { type FilterFormSource } from "@adapttable/vue";
+import { resolveLabels } from "@adapttable/vue/adapter";
 import {
   FilterHeaderControl,
   FilterHeaderRow,

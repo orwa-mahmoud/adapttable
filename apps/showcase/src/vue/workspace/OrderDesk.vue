@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { getLabels } from "@adapttable/i18n";
-import { aggregate, type TableFeature } from "@adapttable/vue";
-import { GRID_FOCUS_MODEL } from "@adapttable/vue/cell-navigation";
 import {
-  SAVED_VIEWS_MODEL,
+  aggregate,
+  type TableFeature,
   type UseSavedViewsResult,
-} from "@adapttable/vue/saved-views";
+} from "@adapttable/vue";
+import { GRID_FOCUS_MODEL, SAVED_VIEWS_MODEL } from "@adapttable/vue/adapter";
 import {
   type ColumnDef,
   DataTable,

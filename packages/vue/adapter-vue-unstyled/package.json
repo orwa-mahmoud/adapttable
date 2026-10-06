@@ -58,26 +58,6 @@
         "default": "./dist/features.cjs"
       }
     },
-    "./columns": {
-      "import": {
-        "types": "./dist/columns.d.ts",
-        "default": "./dist/columns.js"
-      },
-      "require": {
-        "types": "./dist/columns.d.cts",
-        "default": "./dist/columns.cjs"
-      }
-    },
-    "./rows": {
-      "import": {
-        "types": "./dist/rows.d.ts",
-        "default": "./dist/rows.js"
-      },
-      "require": {
-        "types": "./dist/rows.d.cts",
-        "default": "./dist/rows.cjs"
-      }
-    },
     "./grouping": {
       "import": {
         "types": "./dist/grouping.d.ts",
@@ -439,16 +419,6 @@
         "default": "./dist/export-xlsx.cjs"
       }
     },
-    "./formula": {
-      "import": {
-        "types": "./dist/formula.d.ts",
-        "default": "./dist/formula.js"
-      },
-      "require": {
-        "types": "./dist/formula.d.cts",
-        "default": "./dist/formula.cjs"
-      }
-    },
     "./pivot": {
       "import": {
         "types": "./dist/pivot.d.ts",
@@ -457,26 +427,6 @@
       "require": {
         "types": "./dist/pivot.d.cts",
         "default": "./dist/pivot.cjs"
-      }
-    },
-    "./stream": {
-      "import": {
-        "types": "./dist/stream.d.ts",
-        "default": "./dist/stream.js"
-      },
-      "require": {
-        "types": "./dist/stream.d.cts",
-        "default": "./dist/stream.cjs"
-      }
-    },
-    "./sparkline": {
-      "import": {
-        "types": "./dist/sparkline.d.ts",
-        "default": "./dist/sparkline.js"
-      },
-      "require": {
-        "types": "./dist/sparkline.d.cts",
-        "default": "./dist/sparkline.cjs"
       }
     },
     "./row-reorder": {

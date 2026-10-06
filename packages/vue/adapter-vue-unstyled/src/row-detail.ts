@@ -4,10 +4,7 @@ export type {
   NestedTableFor,
   RowExpansionOptions,
   TableRowDetail,
-} from "@adapttable/vue/features";
-export {
-  nestedTable,
-  nestedTableDetail,
-  rowDetail,
-  useRowExpansion,
-} from "@adapttable/vue/features";
+} from "@adapttable/vue";
+export { nestedTable, rowDetail } from "@adapttable/vue/features";
+export { nestedTableDetail } from "@adapttable/vue/adapter";
+export { useRowExpansion } from "@adapttable/vue";

@@ -1,13 +1,11 @@
 import {
+  COMMAND_PALETTE_CONTROL,
+  CommandPaletteChrome,
   extendFeature,
   slotRender,
-  type StaticTableFeature,
 } from "@adapttable/vue/adapter";
-import {
-  COMMAND_PALETTE_CONTROL,
-  commandPalette as bindingCommandPalette,
-  CommandPaletteChrome,
-} from "@adapttable/vue/command-palette";
+import { type StaticTableFeature } from "@adapttable/vue";
+import { commandPalette as bindingCommandPalette } from "@adapttable/vue/features";
 import { h } from "vue";
 
 import {
@@ -43,4 +41,4 @@ export function commandPalette(
     ]),
   ]);
 }
-export type * from "@adapttable/vue/command-palette";
+export type { CommandPaletteOptions } from "@adapttable/vue/features";

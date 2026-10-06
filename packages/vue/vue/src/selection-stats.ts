@@ -1,4 +1,3 @@
-export type * from "./index";
 export { SELECTION_STATS_MODEL } from "./navigation/contracts";
 export { selectionStats } from "./navigation/features";
 export {
@@ -11,6 +10,3 @@ export type {
   SelectionStatPart,
   SelectionStatsSlotProps,
 } from "@adapttable/core/binding";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

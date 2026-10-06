@@ -1,13 +1,11 @@
 import {
+  BULK_ACTIONS_CONTROL,
+  BulkActionsChrome,
   extendFeature,
   slotRender,
-  type StaticTableFeature,
 } from "@adapttable/vue/adapter";
-import {
-  BULK_ACTIONS_CONTROL,
-  bulkActions as bindingBulkActions,
-  BulkActionsChrome,
-} from "@adapttable/vue/bulk-actions";
+import { type StaticTableFeature } from "@adapttable/vue";
+import { bulkActions as bindingBulkActions } from "@adapttable/vue/features";
 import { h } from "vue";
 
 import { nativeActionButton } from "./actions/nativeControls";
@@ -20,4 +18,3 @@ export function bulkActions(
     ),
   ]);
 }
-export type * from "@adapttable/vue/bulk-actions";

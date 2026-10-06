@@ -1,4 +1,3 @@
-export type * from "./index";
 export {
   FIND_BUTTON,
   FIND_MODEL,
@@ -22,6 +21,3 @@ export type {
   FindSearchProps,
 } from "@adapttable/core/binding";
 export { FIND_BAR } from "@adapttable/core/binding";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

@@ -76,15 +76,15 @@ The stable parts include `column-select`, `find-bar`, `find-input`, `find-count`
 ## A grid model for a custom Vue adapter
 
 `useGridFocus<TRow>(input, activity?)` accepts a ref or getter of
-`GridFocusOptions<TRow>` and returns `ComputedRef<GridFocusState>`. Create it in
+`UseGridFocusOptions<TRow>` and returns `ComputedRef<GridFocusState>`. Create it in
 component setup or an active effect scope. Its own component lifetime and the
 optional `ExternalStoreOptions.active` guard both have to be active before it
 handles input. Supply logical loaded rows and all visible columns, including
 columns temporarily outside a horizontal render window.
 
 ```ts
-import { type ColumnDef } from "@adapttable/vue";
-import { useGridFocus } from "@adapttable/vue/cell-navigation";
+import type { ColumnDef } from "@adapttable/vue";
+import { useGridFocus } from "@adapttable/vue";
 import { type MaybeRefOrGetter, toValue } from "vue";
 
 interface Person {
@@ -120,22 +120,22 @@ also supplies row/column reveal callbacks and the correct coordinate origin;
 a grouped/tree adapter uses its projected data-row order. `reportRange` reports
 the normalized multi-cell rectangle; a single focused cell reports `null`.
 
-The focused binding entries expose the corresponding Chrome and slot types.
+`@adapttable/vue/adapter` exposes the corresponding Chrome and slot types.
 `FindBarSlots` requires Search and Button, `ColumnSelectSlots` requires Checkbox,
 `FillHandleSlots` requires Handle, and `SelectionStatsSlots` requires Stats.
 `StatusBarSlots` requires Bar plus its nested stats slots. Supply the kit's
 controls and forward the supplied labels, attributes and callbacks. The grid
 announcer is structural and needs no visible-control slot.
 
-`useFindInTable(input, activity?)` takes a ref/getter of `FindInTableOptions`,
+`useFindInTable(input, activity?)` takes a ref/getter of `UseFindInTableOptions`,
 including rows, columns and a URL adapter, and returns a computed `state` plus
 `flush()`. Its `state` is the model accepted by `FindBarChrome`. Keep these
 composables owned by the table scope instead of recreating them in render calls.
 
 ### Connect a custom shell to navigation state
 
-`GRID_FOCUS_MODEL` from `@adapttable/vue/cell-navigation` identifies the current
-`GridFocusState`. `FIND_MODEL` from `/find-in-table` identifies the current
+`GRID_FOCUS_MODEL` from `@adapttable/vue/adapter` identifies the current
+`GridFocusState`. `FIND_MODEL` from `/adapter` identifies the current
 `FindInTableState`. `SELECTION_STATS_MODEL` from `/selection-stats` or
 `/status-bar` identifies `SelectionStats | null`. The three keys are also
 available from `/adapter`. Read them through the table's feature state registry
@@ -144,10 +144,10 @@ not published a model. These channels do not create controllers or fetch data.
 
 Use `slotRender` with the following `/adapter` control keys when building a kit:
 
-- `FIND_BUTTON` (also `/find-in-table`) is a single toolbar fill. Its
+- `FIND_BUTTON` is a single toolbar fill. Its
   `FindButtonControlProps` contains `label`, `onClick` and optional `className`.
   Render the kit's button and call that action to open the existing find model.
-- `FILL_HANDLE_CONTROL` (also `/cell-navigation`) receives
+- `FILL_HANDLE_CONTROL` receives
   `FillHandleCellSlotProps<GridFocusState>` plus optional `firstRowIndex` and
   `className`. It places the fill affordance for the selected logical cell;
   pass its input and the kit's required Handle slot to `FillHandleChrome`.

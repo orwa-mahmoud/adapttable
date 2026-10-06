@@ -1,18 +1,14 @@
-import { elementRef } from "@adapttable/vue/adapter";
 import {
   ColumnSelectCheckboxChrome,
   type ColumnSelectCheckboxChromeProps,
+  elementRef,
   FillHandleChrome,
   type FillHandleChromeProps,
-} from "@adapttable/vue/cell-navigation";
-import {
   FindBarChrome,
   type FindBarProps,
-} from "@adapttable/vue/find-in-table";
-import {
   StatusBarChrome,
   type StatusBarChromeProps,
-} from "@adapttable/vue/status-bar";
+} from "@adapttable/vue/adapter";
 import { defineComponent, h, mergeProps } from "vue";
 
 import { useClassNames } from "../classNamesContext";

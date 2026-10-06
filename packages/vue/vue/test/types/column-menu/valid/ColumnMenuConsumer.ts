@@ -1,11 +1,11 @@
-import type { ColumnDef, ColumnLayout } from "@adapttable/vue";
+import type { ColumnDef, ColumnLayout, TableFeature } from "@adapttable/vue";
+import { columnMenu } from "@adapttable/vue/features";
 import {
-  columnMenu,
   columnMenuSlotKey,
   type ColumnMenuSlotProps,
   type ColumnMenuSlots,
-} from "@adapttable/vue/column-menu";
-import { slotRender, type TableFeature } from "@adapttable/vue/features";
+  slotRender,
+} from "@adapttable/vue/adapter";
 import { h } from "vue";
 interface Person {
   readonly id: string;

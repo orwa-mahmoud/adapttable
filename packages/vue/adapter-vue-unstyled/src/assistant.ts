@@ -4,10 +4,10 @@ import {
   type AgentApprovalProps,
   createAdapterAgentApprovalFeature,
   createAdapterTableAssistantFeature,
-  type StaticTableFeature,
   TableAssistantChrome,
   type TableAssistantProps,
-} from "@adapttable/vue/assistant";
+} from "@adapttable/vue/adapter";
+import { type StaticTableFeature } from "@adapttable/vue";
 import { defineComponent, h } from "vue";
 
 import {
@@ -17,7 +17,7 @@ import {
 export type {
   AgentApprovalProps,
   TableAssistantProps,
-} from "@adapttable/vue/assistant";
+} from "@adapttable/vue/adapter";
 /** @public */
 export const TableAssistant = defineComponent(
   (props: TableAssistantProps) => () =>

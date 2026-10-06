@@ -1,4 +1,4 @@
-import type { ColumnMenuSlots } from "@adapttable/vue/column-menu";
+import type { ColumnMenuSlots } from "@adapttable/vue/adapter";
 import {
   defineComponent,
   h,

@@ -1,8 +1,4 @@
-import type {
-  ColumnDef,
-  DataTableHandle,
-  RowPinState,
-} from "@adapttable/vue/adapter";
+import type { ColumnDef, DataTableHandle, RowPinState } from "@adapttable/vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,

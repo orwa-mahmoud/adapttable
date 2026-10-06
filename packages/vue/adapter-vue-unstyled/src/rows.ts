@@ -4,21 +4,22 @@ export type {
   CellSpanRequest,
   ConfirmHandler,
   ConfirmRequest,
-  ExtraEntry,
-  ExtraRow,
   ExtraRowKind,
   GetCellSpan,
   GetCellSpanArgs,
   PinnedRows,
   PinnedSummaryEntry,
   RowAction,
-  RowAppearanceOptions,
   RowHeight,
   RowMutationHandlers,
-  RowPinningFeatureOptions,
   RowPinSide,
   RowPinState,
   RowStyle,
+} from "@adapttable/vue";
+export type { ExtraEntry, ExtraRow } from "@adapttable/vue/adapter";
+export type {
+  RowAppearanceOptions,
+  RowPinningFeatureOptions,
 } from "@adapttable/vue/features";
 export {
   cellSpan,

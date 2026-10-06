@@ -1,5 +1,4 @@
-import type * as BindingEditing from "@adapttable/vue/editing";
-import type * as BindingFilters from "@adapttable/vue/filters";
+import type * as BindingAdapter from "@adapttable/vue/adapter";
 import { describe, expect, it, vi } from "vitest";
 import { type ComponentPublicInstance, h, shallowRef } from "vue";
 
@@ -8,8 +7,8 @@ const mounts = vi.hoisted(() => ({
   field: vi.fn(),
   checklist: vi.fn(),
 }));
-vi.mock("@adapttable/vue/editing", async (load) => {
-  const actual = await load<typeof BindingEditing>();
+vi.mock("@adapttable/vue/adapter", async (load) => {
+  const actual = await load<typeof BindingAdapter>();
   return {
     ...actual,
     useEditableCellModel: (
@@ -18,12 +17,6 @@ vi.mock("@adapttable/vue/editing", async (load) => {
       mounts.cell();
       return actual.useEditableCellModel(input);
     },
-  };
-});
-vi.mock("@adapttable/vue/filters", async (load) => {
-  const actual = await load<typeof BindingFilters>();
-  return {
-    ...actual,
     useFilterField: (input: Parameters<typeof actual.useFilterField>[0]) => {
       mounts.field();
       return actual.useFilterField(input);
@@ -37,11 +30,14 @@ vi.mock("@adapttable/vue/filters", async (load) => {
   };
 });
 import { resolveLabels } from "@adapttable/vue/adapter";
-import type { FilterDef, FilterFormSource } from "@adapttable/vue/filters";
+import type { FilterDef, FilterFormSource } from "@adapttable/vue";
 
 import { DataTable } from "../src";
 import { editing } from "../src/editing";
-import { NativeFilterField, NativeFilterTree } from "../src/filters";
+import {
+  NativeFilterField,
+  FilterTreeBuilder as NativeFilterTree,
+} from "../src/filters";
 import { find, mountNative, part, tick, write } from "./filter-editing-helpers";
 
 interface Row {

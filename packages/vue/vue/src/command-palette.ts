@@ -16,10 +16,7 @@ import {
   EXPORT_MODEL,
 } from "./actions/contracts";
 import { featureActivity, ownsTableEvent } from "./actions/lifecycle";
-import type {
-  FeatureMountContext,
-  StaticTableFeature,
-} from "./features/tableFeature";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { useExternalStore } from "./store";
 function mountPalette<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
@@ -131,8 +128,4 @@ export {
   COMMAND_PALETTE_CONTROL,
   COMMAND_PALETTE_MODEL,
 } from "./actions/contracts";
-export type * from "./index";
 export type { Command, Shortcut } from "@adapttable/core";
-
-/** Preserve the existing core type-only surface through declaration bundling. */
-export type * from "@adapttable/core";

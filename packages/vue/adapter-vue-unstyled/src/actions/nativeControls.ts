@@ -1,12 +1,12 @@
 import {
   type ActionButton,
+  type CommandPaletteSlots,
+  type ContextMenuSlots,
   elementRef,
+  type ExportSlots,
+  type SidePanelSlots,
   toVueAttrs,
 } from "@adapttable/vue/adapter";
-import type { CommandPaletteSlots } from "@adapttable/vue/command-palette";
-import type { ContextMenuSlots } from "@adapttable/vue/context-menu";
-import type { ExportSlots } from "@adapttable/vue/export-csv";
-import type { SidePanelSlots } from "@adapttable/vue/side-panel";
 import { h } from "vue";
 
 import { NativeContextMenuSurface } from "./NativeContextMenuSurface";
