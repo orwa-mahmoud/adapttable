@@ -660,6 +660,7 @@ import { treeCardStyle } from '@adapttable/core';
 import { TreeCellProps as TreeCellProps_2 } from '@adapttable/core/binding';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
+import { TreeShape } from '@adapttable/core';
 import { TreeToggleButtonProps } from '@adapttable/core/binding';
 import { TreeToggleProps } from '@adapttable/core/binding';
 import { TreeToggleSlots as TreeToggleSlots_2 } from '@adapttable/core/binding';
@@ -3663,6 +3664,8 @@ export interface TableChrome<TRow> {
     tree?: {
         entries: readonly TreeEntry<TRow>[];
         allEntries?: readonly TreeEntry<TRow>[];
+        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
         expansion: TreeExpansionState;
         columnKey?: string;
     };

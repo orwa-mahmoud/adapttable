@@ -3106,6 +3106,8 @@ export interface ExportContext<TRow> {
     tree?: {
         entries: readonly TreeEntry<TRow>[];
         allEntries?: readonly TreeEntry<TRow>[];
+        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
     };
 }
 

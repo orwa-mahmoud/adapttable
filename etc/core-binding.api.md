@@ -2555,6 +2555,8 @@ export interface ExportContext<TRow> {
     tree?: {
         entries: readonly TreeEntry<TRow>[];
         allEntries?: readonly TreeEntry<TRow>[];
+        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
     };
 }
 
@@ -6759,6 +6761,13 @@ export interface TreeExpansionState {
     expandedIds: ReadonlySet<string>;
     isExpanded: (id: string) => boolean;
     toggle: (id: string) => void;
+}
+
+// @public
+interface TreeShape<TRow> {
+    getChildren?: (row: TRow) => readonly TRow[] | undefined;
+    getParentId?: (row: TRow) => string | undefined;
+    hasChildren?: (row: TRow) => boolean;
 }
 
 // @public

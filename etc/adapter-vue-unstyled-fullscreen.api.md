@@ -4,7 +4,7 @@
 
 ```ts
 
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { StaticTableFeature } from '@adapttable/vue';
 
 // @public
 export function fullscreen(): StaticTableFeature;

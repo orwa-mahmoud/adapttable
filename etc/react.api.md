@@ -226,6 +226,7 @@ import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
+import { TreeShape } from '@adapttable/core';
 import { UNPIN_ROW_ACTION_KEY } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
@@ -1080,6 +1081,8 @@ export interface TableChrome<TRow> {
     tree?: {
         entries: readonly TreeEntry<TRow>[];
         allEntries?: readonly TreeEntry<TRow>[];
+        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
         expansion: TreeExpansionState;
         columnKey?: string;
     };

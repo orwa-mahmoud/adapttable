@@ -92,6 +92,7 @@ import { sidePanel as sidePanel_2 } from '@adapttable/vue/side-panel';
 import { StaticGroupingExtras } from '@adapttable/vue/features';
 import { StaticTableFeature } from '@adapttable/vue/assistant';
 import { StaticTableFeature as StaticTableFeature_2 } from '@adapttable/vue/adapter';
+import { StaticTableFeature as StaticTableFeature_3 } from '@adapttable/vue';
 import { TableAssistantProps } from '@adapttable/vue/assistant';
 import { TableEditingOptions } from '@adapttable/vue/editing';
 import { TableFeature } from '@adapttable/vue/adapter';
@@ -855,7 +856,7 @@ export interface DataTableClassNames {
 }
 
 // @public
-export function densityChooser(): StaticTableFeature_2;
+export function densityChooser(): StaticTableFeature_3;
 
 export { dirtyIndicators }
 
@@ -931,7 +932,7 @@ export function findInTable(options?: {
 export { fitColumns }
 
 // @public
-export function fullscreen(): StaticTableFeature_2;
+export function fullscreen(): StaticTableFeature_3;
 
 export { GetCellSpan }
 
