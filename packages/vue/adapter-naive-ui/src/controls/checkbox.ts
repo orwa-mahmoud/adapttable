@@ -7,13 +7,16 @@ import {
 import { NCheckbox } from "naive-ui";
 import { h, type VNode } from "vue";
 
+import { withoutAttributes } from "./attributes";
+import { htmlRoot } from "./elementTarget";
+
 /** NCheckbox's focusable root is its ARIA checkbox, not a native input. */
 export function naiveCheckbox(control: SelectionCheckboxControl): VNode {
-  const {
-    type: _type,
-    ref,
-    ...attrs
-  } = selectionCheckboxInputAttrs(control.attrs);
+  const ref = control.attrs.ref;
+  const attrs = withoutAttributes(selectionCheckboxInputAttrs(control.attrs), [
+    "type",
+    "ref",
+  ]);
   return h(NCheckbox, {
     ...attrs,
     checked: control.checked,
@@ -23,7 +26,7 @@ export function naiveCheckbox(control: SelectionCheckboxControl): VNode {
     "onUpdate:checked": () => control.onToggle(),
     ref:
       typeof ref === "function"
-        ? elementRef(ref as ElementRef, (instance) => instance.$el)
+        ? elementRef(ref as ElementRef, htmlRoot)
         : undefined,
   });
 }

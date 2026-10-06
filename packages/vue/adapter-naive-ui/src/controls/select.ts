@@ -1,4 +1,4 @@
-import type { Attrs } from "@adapttable/vue";
+import type { Attrs, ElementRef } from "@adapttable/vue";
 import { NSelect } from "naive-ui";
 import {
   type ComponentPublicInstance,
@@ -6,9 +6,12 @@ import {
   h,
   shallowRef,
   useId,
-  watch,
   type VNode,
+  watch,
 } from "vue";
+
+import { eventHandler, withoutAttributes } from "./attributes";
+import { htmlRoot } from "./elementTarget";
 
 export interface NaiveSelectControl {
   readonly attrs: Attrs;
@@ -18,6 +21,11 @@ export interface NaiveSelectControl {
     readonly label: string;
   }[];
   readonly onChange: (value: string) => void;
+}
+
+function textAttribute(attrs: Attrs, name: string): string | undefined {
+  const value = attrs[name];
+  return typeof value === "string" ? value : undefined;
 }
 
 const NaiveSelectControl = defineComponent(
@@ -30,7 +38,7 @@ const NaiveSelectControl = defineComponent(
         () => {
           // SelectInst has no native target ref; inputProps.ref is replaced by the kit.
           // Vue's public host and our public inputProps role locate the actual input.
-          const host: Element | undefined = select.value?.$el;
+          const host = select.value ? htmlRoot(select.value) : null;
           return (
             host?.querySelector<HTMLInputElement>('input[role="combobox"]') ??
             null
@@ -39,8 +47,9 @@ const NaiveSelectControl = defineComponent(
       ],
       ([ref, target], _previous, onCleanup) => {
         if (typeof ref !== "function" || !target) return;
-        ref(target);
-        onCleanup(() => ref(null));
+        const receive = ref as ElementRef;
+        receive(target);
+        onCleanup(() => receive(null));
       },
       { immediate: true, flush: "sync" }
     );
@@ -48,15 +57,14 @@ const NaiveSelectControl = defineComponent(
     let dismissingOwnMenu = false;
     return () => {
       const control = props.control;
-      const {
-        ref: _ref,
-        id,
-        onChange: _onChange,
-        onInput: _onInput,
-        onKeydown,
-        onKeydownCapture,
-        ...attrs
-      } = control.attrs;
+      const { id, onKeydown, onKeydownCapture, ...nativeAttrs } = control.attrs;
+      const attrs = withoutAttributes(nativeAttrs, [
+        "ref",
+        "onChange",
+        "onInput",
+      ]);
+      const keydown = eventHandler<KeyboardEvent>(onKeydown);
+      const keydownCapture = eventHandler<KeyboardEvent>(onKeydownCapture);
       return h(NSelect, {
         ...attrs,
         size: "small",
@@ -71,15 +79,15 @@ const NaiveSelectControl = defineComponent(
           "aria-autocomplete": "list",
           "aria-expanded": show.value,
           "aria-controls": listId,
-          "aria-label": attrs["aria-label"],
-          "aria-labelledby": attrs["aria-labelledby"],
-          "aria-describedby": attrs["aria-describedby"],
-          name: attrs.name,
+          "aria-label": textAttribute(attrs, "aria-label"),
+          "aria-labelledby": textAttribute(attrs, "aria-labelledby"),
+          "aria-describedby": textAttribute(attrs, "aria-describedby"),
+          name: textAttribute(attrs, "name"),
         },
         menuProps: {
           id: listId,
           role: "listbox",
-          "aria-label": attrs["aria-label"],
+          "aria-label": textAttribute(attrs, "aria-label"),
         },
         nodeProps: (option) => ({
           role: "option",
@@ -91,10 +99,10 @@ const NaiveSelectControl = defineComponent(
         },
         onKeydownCapture: (event: KeyboardEvent) => {
           dismissingOwnMenu = event.key === "Escape" && show.value;
-          if (typeof onKeydownCapture === "function") onKeydownCapture(event);
+          keydownCapture?.(event);
         },
         onKeydown: (event: KeyboardEvent) => {
-          if (typeof onKeydown === "function") onKeydown(event);
+          keydown?.(event);
           if (dismissingOwnMenu) event.stopPropagation();
           dismissingOwnMenu = false;
         },

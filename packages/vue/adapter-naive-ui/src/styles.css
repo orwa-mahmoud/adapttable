@@ -1,0 +1,56 @@
+.adapttable-naive {
+  color: var(--adapttable-naive-text);
+  background: var(--adapttable-naive-background);
+  font-family: var(--adapttable-naive-font);
+  line-height: 1.6;
+  min-inline-size: 0;
+}
+.adapttable-naive [data-adapttable-part="toolbar"],
+.adapttable-naive [data-adapttable-part="footer"],
+.adapttable-naive [data-adapttable-part="pager"] {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.adapttable-naive [data-adapttable-part="toolbar"],
+.adapttable-naive [data-adapttable-part="footer"] {
+  padding-block: 0.75rem;
+}
+.adapttable-naive [data-adapttable-part="search-field"] {
+  flex: 1 1 15rem;
+  max-inline-size: 24rem;
+}
+.adapttable-naive [data-adapttable-part="scroll-box"] {
+  overflow: auto;
+  border: 1px solid var(--adapttable-naive-border);
+  border-radius: var(--adapttable-naive-radius);
+}
+.adapttable-naive [data-adapttable-part="card"] {
+  margin-block: 0.5rem;
+}
+.adapttable-naive [data-adapttable-part="card-row"] {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) minmax(0, 2fr);
+  gap: 0.75rem;
+  padding-block: 0.25rem;
+}
+.adapttable-naive [data-adapttable-part="card-label"] {
+  color: var(--adapttable-naive-muted);
+}
+.adapttable-naive [data-adapttable-part="rows-per-page"] {
+  min-inline-size: 5rem;
+}
+@media (max-width: 767px) {
+  .adapttable-naive .n-button {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+  }
+  .adapttable-naive [data-adapttable-part="toolbar"] {
+    align-items: stretch;
+  }
+  .adapttable-naive [data-adapttable-part="search-field"] {
+    max-inline-size: none;
+    flex-basis: 100%;
+  }
+}

@@ -3,6 +3,8 @@ import { elementRef } from "@adapttable/vue/adapter";
 import { type ButtonProps, NButton } from "naive-ui";
 import { h, type VNode, type VNodeChild } from "vue";
 
+import { htmlRoot } from "./elementTarget";
+
 /** NButton's public attrType forwards the native type to its button. */
 export function naiveButton(
   attrs: Attrs,
@@ -19,7 +21,7 @@ export function naiveButton(
       size: "small",
       ref:
         typeof ref === "function"
-          ? elementRef(ref as ElementRef, (instance) => instance.$el)
+          ? elementRef(ref as ElementRef, htmlRoot)
           : undefined,
     },
     { default: () => content }
