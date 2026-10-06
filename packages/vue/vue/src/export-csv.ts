@@ -60,31 +60,37 @@ function mountExport<TRow>(context: FeatureMountContext<TRow>): void {
       })
     )
   );
-  const exportContext = (): ExportContext<TRow> => ({
-    selectedIds: context.selection?.value?.selectedIds.value,
-    getRowId: context.table.rowKey,
-    allColumns: context.table.allColumns.value,
-    range: grid.value?.range,
-    firstRowIndex: context.table.windowStart.value,
-    grouping: grouping.value
-      ? { groupBy: grouping.value.groupBy, entries: grouping.value.entries }
-      : undefined,
-    tree: tree.value
-      ? {
-          entries: tree.value.entries,
-          allEntries: tree.value.allEntries,
-          getChildren: context.options.value
-            .getChildren as TreeShape<TRow>["getChildren"],
-          getParentId: context.options.value
-            .getParentId as TreeShape<TRow>["getParentId"],
-        }
-      : undefined,
-    groupTotal: context.table.labels.value.groupTotal,
-    getCellSpan: context.options.value
-      .getCellSpan as ExportContext<TRow>["getCellSpan"],
-    summaryRow: context.options.value
-      .summaryRow as ExportContext<TRow>["summaryRow"],
-  });
+  const exportContext = (): ExportContext<TRow> => {
+    const currentTree = tree.value;
+    const shape = currentTree
+      ? (context.options.value as TreeShape<TRow>)
+      : undefined;
+    const getChildren = shape?.getChildren;
+    const getParentId = shape?.getParentId;
+    return {
+      selectedIds: context.selection?.value?.selectedIds.value,
+      getRowId: context.table.rowKey,
+      allColumns: context.table.allColumns.value,
+      range: grid.value?.range,
+      firstRowIndex: context.table.windowStart.value,
+      grouping: grouping.value
+        ? { groupBy: grouping.value.groupBy, entries: grouping.value.entries }
+        : undefined,
+      tree: currentTree
+        ? {
+            entries: currentTree.entries,
+            allEntries: currentTree.allEntries,
+            ...(getChildren ? { getChildren } : {}),
+            ...(getParentId ? { getParentId } : {}),
+          }
+        : undefined,
+      groupTotal: context.table.labels.value.groupTotal,
+      getCellSpan: context.options.value
+        .getCellSpan as ExportContext<TRow>["getCellSpan"],
+      summaryRow: context.options.value
+        .summaryRow as ExportContext<TRow>["summaryRow"],
+    };
+  };
   const exportSource = () => {
     const source = context.source.value;
     if (resolved.value?.scope !== "range") return source;

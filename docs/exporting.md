@@ -58,8 +58,13 @@ source. Export does not fetch lazy children, change expansion, or add off-page
 rows to the table's runtime inventory. `fetchAll` applies the same rules to its
 fetched rows; its cap still counts source records, which may be roots.
 
-Local export hooks and `request(info).rows` receive the data rows that the
-resolved tree file contains. `summaryRow` keeps a separate contract: it receives
+For `all` and `selected`, local export hooks and `request(info).rows` receive
+the resolved tree data rows. Page metadata keeps the existing source contract:
+`onBeforeExport`, `onAfterExport`, and `request(info).rows` receive `source.rows`,
+even when the page file includes visible descendants from expanded tree rows.
+Collapsing a tree changes the page file, not that source-shaped metadata.
+
+`summaryRow` keeps a separate contract: it receives
 the original source rows for the scope, before descendants are expanded. A root
 may already contain a rollup, so summing roots and children would count the same
 values twice. A child-only selection can therefore export a child while the

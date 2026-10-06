@@ -91,9 +91,13 @@ function LiveTree({
   );
   const tree = useMemo(() => {
     if (!treeEntries) return undefined;
+    const getChildren = props.getChildren;
+    const getParentId = props.getParentId;
     return {
       entries: treeEntries,
       allEntries: treeExportEntries,
+      ...(getChildren ? { getChildren } : {}),
+      ...(getParentId ? { getParentId } : {}),
       expansion: {
         ...treeExpansion,
         toggle: (id: string) => {
@@ -115,6 +119,8 @@ function LiveTree({
     treeExportEntries,
     treeExpansion,
     lazyChildren,
+    props.getChildren,
+    props.getParentId,
     props.treeColumn,
     chrome.columnLayout.visibleColumns,
   ]);

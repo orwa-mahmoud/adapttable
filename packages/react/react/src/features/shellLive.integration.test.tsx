@@ -1,4 +1,4 @@
-import type { ExportRequest } from "@adapttable/core";
+import type { ExportRequest, TreeShape } from "@adapttable/core";
 import { act, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -362,16 +362,11 @@ it.each(["nested", "parent-id"] as const)(
         </FeatureProviders>
       );
     };
-    const result = render(
-      table([
-        tree<TreeExportRow>(
-          kind === "nested"
-            ? { getChildren: (row) => row.children }
-            : { getParentId: (row) => row.parent }
-        ),
-        exporter,
-      ])
-    );
+    const initialShape: TreeShape<TreeExportRow> =
+      kind === "nested"
+        ? { getChildren: (row) => row.children }
+        : { getParentId: (row) => row.parent };
+    const result = render(table([tree<TreeExportRow>(initialShape), exporter]));
     const exportedIds = () =>
       request.mock.lastCall?.[0].rows.map((row) => row.id);
     const run = () => {
@@ -381,8 +376,17 @@ it.each(["nested", "parent-id"] as const)(
       expect(current?.chrome.source.rows.map((row) => row.id)).toEqual([
         "first",
       ]);
-      expect(current?.chrome.tree).toBeDefined();
-      const runtimeEntries = current?.chrome.tree?.allEntries;
+      const initialTree = current?.chrome.tree;
+      expect(initialTree).toBeDefined();
+      expect(initialTree?.getChildren).toBe(initialShape.getChildren);
+      expect(initialTree?.getParentId).toBe(initialShape.getParentId);
+      expect(Object.hasOwn(initialTree ?? {}, "getChildren")).toBe(
+        kind === "nested"
+      );
+      expect(Object.hasOwn(initialTree ?? {}, "getParentId")).toBe(
+        kind === "parent-id"
+      );
+      const runtimeEntries = initialTree?.allEntries;
       run();
       expect(exportedIds()).toEqual([
         "first",
@@ -391,16 +395,19 @@ it.each(["nested", "parent-id"] as const)(
         "second-child",
       ]);
       expect(current?.chrome.tree?.allEntries).toBe(runtimeEntries);
-      result.rerender(
-        table([
-          tree<TreeExportRow>(
-            kind === "nested"
-              ? { getChildren: () => undefined }
-              : { getParentId: () => undefined }
-          ),
-          exporter,
-        ])
+      const replacementShape: TreeShape<TreeExportRow> =
+        kind === "nested"
+          ? { getChildren: () => undefined }
+          : { getParentId: () => undefined };
+      result.rerender(table([tree<TreeExportRow>(replacementShape), exporter]));
+      expect(current?.chrome.tree?.getChildren).toBe(
+        replacementShape.getChildren
       );
+      expect(current?.chrome.tree?.getParentId).toBe(
+        replacementShape.getParentId
+      );
+      expect(initialTree?.getChildren).toBe(initialShape.getChildren);
+      expect(initialTree?.getParentId).toBe(initialShape.getParentId);
       run();
       expect(exportedIds()).toEqual(data.map((row) => row.id));
       result.rerender(table([exporter]));

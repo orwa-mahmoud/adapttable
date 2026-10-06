@@ -12,6 +12,7 @@ import {
   downloadTableCsv,
   type ExportContext,
   type ExportCsvOptions,
+  type ExportQuery,
   type ExportRowScope,
   makeExportCsvHandler,
 } from "./tableCsv";
@@ -180,6 +181,42 @@ describe("source-scoped tree exports", () => {
     }
   );
 
+  it.each([false, true])(
+    "keeps page metadata on source rows when expanded is %s",
+    async (expanded) => {
+      const rows = [r1];
+      const current = tree(rows, new Set(expanded ? ["R1"] : []));
+      const context = { getRowId, tree: current };
+      const before =
+        vi.fn<NonNullable<ExportCsvOptions<Row>["onBeforeExport"]>>();
+      const after =
+        vi.fn<NonNullable<ExportCsvOptions<Row>["onAfterExport"]>>();
+      const request = vi.fn<NonNullable<ExportCsvOptions<Row>["request"]>>();
+      downloadTableCsv({
+        source: source(rows, roots),
+        columns,
+        scope: "page",
+        context,
+        onBeforeExport: before,
+        onAfterExport: after,
+      });
+      const handler = makeExportCsvHandler(
+        { scope: "page", request },
+        source(rows, roots),
+        columns,
+        context
+      );
+      expect(handler).toBeDefined();
+      await handler?.();
+      expect(before.mock.lastCall?.[0].rows).toEqual(rows);
+      expect(after.mock.lastCall?.[0].rows).toEqual(rows);
+      expect(request.mock.lastCall?.[0].rows).toEqual(rows);
+      expect(after.mock.lastCall?.[0].csv).toBe(
+        expanded ? "ID,Parcels\r\nR1,6\r\nA,3\r\nB,3" : "ID,Parcels\r\nR1,6"
+      );
+    }
+  );
+
   it("keeps filtered roots and their current pruned nested shape", () => {
     const filtered = { ...r2, children: [d] };
     expect(
@@ -203,13 +240,20 @@ describe("source-scoped tree exports", () => {
     ]);
   });
 
-  it.each([[], ["unknown"], ["E"], ["F", "R1", "E"]])(
-    "selects exactly checked IDs %j in tree order",
-    (selected) => {
+  it.each([
+    { selected: [], expectedIds: [] },
+    { selected: ["unknown"], expectedIds: [] },
+    { selected: ["E"], expectedIds: ["E"] },
+    { selected: ["F", "R1", "E"], expectedIds: ["R1", "E", "F"] },
+  ])(
+    "selects exactly checked IDs $selected in tree order",
+    ({ selected, expectedIds }) => {
       const selectedIds = new Set(selected);
-      expect(
-        csvIds(csv("selected", { getRowId, selectedIds, tree: tree([r1]) }))
-      ).toEqual(allIds.filter((id) => selectedIds.has(id)));
+      const exportedIds = csvIds(
+        csv("selected", { getRowId, selectedIds, tree: tree([r1]) })
+      );
+      expect(exportedIds).toEqual(allIds.filter((id) => selectedIds.has(id)));
+      expect(exportedIds).toEqual(expectedIds);
     }
   );
 
@@ -421,23 +465,16 @@ describe("source-scoped tree exports", () => {
       await handler?.();
       const payload = request.mock.calls[0]?.[0];
       if (!payload) throw new Error("The export request was not called");
-      expect(Object.keys(payload).sort()).toEqual([
-        "columns",
-        "filename",
-        "format",
-        "query",
-        "rows",
-        "scope",
-      ]);
-      expect(ids(payload.rows)).toEqual(
-        scope === "all"
-          ? allIds
-          : scope === "page"
-            ? ["R1", "A", "B"]
-            : scope === "selected"
-              ? ["E"]
-              : ["R1"]
-      );
+      expect(
+        Object.keys(payload).sort((left, right) => left.localeCompare(right))
+      ).toEqual(["columns", "filename", "format", "query", "rows", "scope"]);
+      const expectedIds: Record<ExportRowScope, readonly string[]> = {
+        all: allIds,
+        page: ["R1"],
+        selected: ["E"],
+        range: ["R1"],
+      };
+      expect(ids(payload.rows)).toEqual(expectedIds[scope]);
       expect(summaryRow).not.toHaveBeenCalled();
       expect(before).not.toHaveBeenCalled();
       expect(after).not.toHaveBeenCalled();
@@ -481,9 +518,12 @@ describe("source-scoped tree exports", () => {
       parcels: rows.reduce((total, row) => total + row.parcels, 0),
     }));
     const after = vi.fn();
-    const fetchPage = vi.fn((query: { page: number }) =>
-      Promise.resolve(roots.slice(query.page - 1, query.page))
-    );
+    const fetchPage = vi.fn((query: ExportQuery) => {
+      if (query.page === undefined) {
+        throw new Error("The fetchAll fixture requires a page number");
+      }
+      return Promise.resolve(roots.slice(query.page - 1, query.page));
+    });
     const handler = makeExportCsvHandler(
       {
         scope: "all",
@@ -491,7 +531,13 @@ describe("source-scoped tree exports", () => {
         onAfterExport: after,
       },
       source([r1], undefined, {
-        capabilities: { exportScope: "page" },
+        capabilities: {
+          fullDataset: false,
+          grouping: false,
+          selectAcrossPages: false,
+          exportScope: "page",
+          totalCount: "exact",
+        },
         total: 3,
       }),
       columns,

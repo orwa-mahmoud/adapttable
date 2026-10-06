@@ -11036,8 +11036,13 @@ source. Export does not fetch lazy children, change expansion, or add off-page
 rows to the table's runtime inventory. `fetchAll` applies the same rules to its
 fetched rows; its cap still counts source records, which may be roots.
 
-Local export hooks and `request(info).rows` receive the data rows that the
-resolved tree file contains. `summaryRow` keeps a separate contract: it receives
+For `all` and `selected`, local export hooks and `request(info).rows` receive
+the resolved tree data rows. Page metadata keeps the existing source contract:
+`onBeforeExport`, `onAfterExport`, and `request(info).rows` receive `source.rows`,
+even when the page file includes visible descendants from expanded tree rows.
+Collapsing a tree changes the page file, not that source-shaped metadata.
+
+`summaryRow` keeps a separate contract: it receives
 the original source rows for the scope, before descendants are expanded. A root
 may already contain a rollup, so summing roots and children would count the same
 values twice. A child-only selection can therefore export a child while the
@@ -21468,13 +21473,13 @@ Every package declares its side effects — none, or only its stylesheet in
 `@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-10-04 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-10-06 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~25 kB    |
-| every core export                          | ~99 kB    |
+| every core export                          | ~100 kB   |
 | `DataTable` from an adapter                | ~73–80 kB |
 
 The first row is the one to read: a headless table costs about a quarter of the

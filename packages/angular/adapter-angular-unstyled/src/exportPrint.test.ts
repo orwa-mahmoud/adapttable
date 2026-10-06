@@ -17,8 +17,12 @@ import {
 } from "@adapttable/angular-unstyled/export";
 import { grouping } from "@adapttable/angular-unstyled/grouping";
 import { tree } from "@adapttable/angular-unstyled/tree";
-import { type ExportProgressState, type ExportTable } from "@adapttable/core";
-import { Component, input } from "@angular/core";
+import {
+  type ExportProgressState,
+  type ExportRequest,
+  type ExportTable,
+} from "@adapttable/core";
+import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -489,6 +493,111 @@ describe.each(["xlsx", "pdf"] as const)("%s downloads", (format) => {
     }
   );
 });
+
+interface TreeExportRow {
+  id: string;
+  name: string;
+  children?: readonly TreeExportRow[];
+  parent?: string;
+}
+
+it.each(["nested", "parent-id"] as const)(
+  "exports off-page %s rows with current readers and retires removed trees",
+  async (kind) => {
+    const firstChild: TreeExportRow = {
+      id: "first-child",
+      name: "First child",
+      parent: "first",
+    };
+    const secondChild: TreeExportRow = {
+      id: "second-child",
+      name: "Second child",
+      parent: "second",
+    };
+    const roots: readonly TreeExportRow[] = [
+      { id: "first", name: "First", children: [firstChild] },
+      { id: "second", name: "Second", children: [secondChild] },
+    ];
+    const data =
+      kind === "nested" ? roots : [...roots, firstChild, secondChild];
+    const request = vi.fn<(info: ExportRequest<TreeExportRow>) => void>();
+    const exporter = exportCsv<TreeExportRow>({ scope: "all", request });
+    @Component({
+      imports: [AdaptDataTable],
+      template: `
+        <adapt-data-table
+          [data]="rows"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [urlSync]="false"
+          [forceMobile]="false"
+          [defaults]="defaults"
+          [features]="features()"
+        />
+      `,
+    })
+    class Host {
+      readonly rows = data;
+      readonly columns = [
+        { key: "name", accessor: (row: TreeExportRow) => row.name },
+      ];
+      readonly rowKey = (row: TreeExportRow) => row.id;
+      readonly defaults = { limit: 1 };
+      readonly features = signal<readonly AdaptTableFeature[]>([
+        tree<TreeExportRow>(
+          kind === "nested"
+            ? { getChildren: (row) => row.children }
+            : { getParentId: (row) => row.parent }
+        ),
+        exporter,
+      ]);
+    }
+    const fixture = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    const exportedIds = () =>
+      request.mock.lastCall?.[0].rows.map((row) => row.id);
+    const run = async () => {
+      const button = element.querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="export-csv-button"]'
+      );
+      expect(button).not.toBeNull();
+      button?.click();
+      await fixture.whenStable();
+    };
+    try {
+      expect(
+        element.querySelectorAll('[data-adapttable-part="row"]')
+      ).toHaveLength(1);
+      await run();
+      expect(exportedIds()).toEqual([
+        "first",
+        "first-child",
+        "second",
+        "second-child",
+      ]);
+      fixture.componentInstance.features.set([
+        tree<TreeExportRow>(
+          kind === "nested"
+            ? { getChildren: () => undefined }
+            : { getParentId: () => undefined }
+        ),
+        exporter,
+      ]);
+      await fixture.whenStable();
+      await run();
+      expect(exportedIds()).toEqual(data.map((row) => row.id));
+      fixture.componentInstance.features.set([exporter]);
+      await fixture.whenStable();
+      await run();
+      expect(exportedIds()).toEqual(data.map((row) => row.id));
+      expect(request).toHaveBeenCalledTimes(3);
+    } finally {
+      fixture.destroy();
+    }
+  }
+);
 
 afterEach(() => {
   document.body.replaceChildren();

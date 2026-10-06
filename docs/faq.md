@@ -173,13 +173,13 @@ Every package declares its side effects — none, or only its stylesheet in
 `@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-10-04 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-10-06 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~25 kB    |
-| every core export                          | ~99 kB    |
+| every core export                          | ~100 kB   |
 | `DataTable` from an adapter                | ~73–80 kB |
 
 The first row is the one to read: a headless table costs about a quarter of the

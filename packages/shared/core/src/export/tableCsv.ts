@@ -367,7 +367,10 @@ export interface ExportQuery {
  * @public
  */
 export interface ExportInfo<TRow> {
-  /** The rows the chosen scope resolved to, in table order. */
+  /**
+   * The rows the chosen scope resolved to, in table order. Page metadata
+   * retains source.rows, even when a tree writer includes visible children.
+   */
   rows: readonly TRow[];
   /** The columns the chosen scope resolved to, in file order. */
   columns: readonly ColumnMetadata<TRow>[];
@@ -501,12 +504,12 @@ export interface ExportContext<TRow> {
      * No lazy children are fetched. Without shape readers, exports retain
      * the existing entries-only scope filtering.
      */
-    getChildren?: TreeShape<TRow>["getChildren"];
+    getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
     /**
      * Flat data: reconstruct ancestry within the scope's source rows.
      * Filtered-out rows are never recovered from stale tree entries.
      */
-    getParentId?: TreeShape<TRow>["getParentId"];
+    getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
   };
   /** Caption for a group footer — the table's `labels.groupTotal`. */
   groupTotal?: (label: string) => string;
@@ -655,8 +658,9 @@ interface ResolvedExport<TRow> {
 }
 
 /**
- * Resolve file, hook and request data together. Summary input retains the
- * original source shape; it can contain rollup roots rather than data leaves.
+ * Resolve scope metadata alongside the writer view. Page metadata retains
+ * source rows; all / selected metadata follows the resolved hierarchy.
+ * Summary input retains the original source shape, including rollup roots.
  */
 function resolveExport<TRow>(options: {
   source: TableSource<TRow>;
@@ -675,7 +679,8 @@ function resolveExport<TRow>(options: {
     summaryRows
   );
   return {
-    rows: tree ? tree.map((entry) => entry.row) : summaryRows,
+    rows:
+      tree && scope !== "page" ? tree.map((entry) => entry.row) : summaryRows,
     treeView: tree ? viewFromTreeEntries(tree) : undefined,
     summaryRows,
     // A rectangle names its own columns. Asking for one and then exporting

@@ -2041,6 +2041,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               columns: table.columns,
               context: computed(() => {
                 const currentTree = tree?.();
+                const getChildren = currentTree
+                  ? treeShape.getChildren
+                  : undefined;
+                const getParentId = currentTree
+                  ? treeShape.getParentId
+                  : undefined;
                 return {
                   selectedIds: selection?.selectedIds(),
                   getRowId: (row: TRow) => this.rowKey()(row),
@@ -2052,8 +2058,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
                   tree: currentTree
                     ? {
                         ...currentTree,
-                        getChildren: treeShape.getChildren,
-                        getParentId: treeShape.getParentId,
+                        ...(getChildren ? { getChildren } : {}),
+                        ...(getParentId ? { getParentId } : {}),
                       }
                     : undefined,
                   groupTotal: table.labels().groupTotal,
