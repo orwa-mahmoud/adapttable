@@ -399,4 +399,79 @@ describe("command palette (Spartan Angular)", () => {
     expect(part("command-input")).toBe(input);
     fixture.destroy();
   });
+  it("opens the default palette from its shortcut without adding a toolbar button", async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.features[0] = commandPalette();
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(part("command-palette-button")).toBeNull();
+    expect(part("command-palette")).toBeNull();
+
+    const shortcut = new KeyboardEvent("keydown", {
+      key: "k",
+      ctrlKey: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(shortcut);
+    await fixture.whenStable();
+    expect(shortcut.defaultPrevented).toBe(true);
+    expect(part("command-palette")).not.toBeNull();
+    expect(part("command-input")?.getAttribute("role")).toBe("combobox");
+    expect(part("command-palette-button")).toBeNull();
+    part("command-input")!.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await fixture.whenStable();
+    expect(part("command-palette")).toBeNull();
+    fixture.destroy();
+  });
+
+  it("preserves ordinary input key bubbling while the palette owns handled navigation", async () => {
+    const fixture = TestBed.createComponent(ControlledHost);
+    fixture.componentInstance.paletteOpen.set(true);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const surface = part("command-palette")!;
+    const bubbled = vi.fn();
+    surface.addEventListener("keydown", bubbled);
+    const ordinary = new KeyboardEvent("keydown", {
+      key: "a",
+      bubbles: true,
+      cancelable: true,
+    });
+    part("command-input")!.dispatchEvent(ordinary);
+    await fixture.whenStable();
+    expect(ordinary.defaultPrevented).toBe(false);
+    expect(bubbled).toHaveBeenCalledOnce();
+    expect(bubbled).toHaveBeenLastCalledWith(ordinary);
+    expect(fixture.componentInstance.paletteOpen()).toBe(true);
+    expect(fixture.componentInstance.onOpenChange).not.toHaveBeenCalled();
+
+    const navigation = new KeyboardEvent("keydown", {
+      key: "ArrowDown",
+      bubbles: true,
+      cancelable: true,
+    });
+    part("command-input")!.dispatchEvent(navigation);
+    await fixture.whenStable();
+    expect(navigation.defaultPrevented).toBe(true);
+    expect(bubbled).toHaveBeenCalledOnce();
+    const greet = [
+      ...surface.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="command-item"]'
+      ),
+    ].find((item) => item.textContent?.trim() === "Greet")!;
+    expect(greet.getAttribute("aria-selected")).toBe("true");
+    expect(part("command-input")?.getAttribute("aria-activedescendant")).toBe(
+      greet.id
+    );
+    surface.removeEventListener("keydown", bubbled);
+    fixture.destroy();
+  });
 });

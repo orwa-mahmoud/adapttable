@@ -13,8 +13,11 @@ import {
 } from "@adapttable/spartan/header-filters";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
+import { BrnPopover } from "@spartan-ng/brain/popover";
 import { describe, expect, it } from "vitest";
 
+import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
 import { expectNamedPopover } from "../testUtils";
 
 interface Row {
@@ -240,5 +243,70 @@ describe("AdaptFilterHeaderRow", () => {
     select.dispatchEvent(new Event("change"));
     await fixture.whenStable();
     expect(select.value).toBe("Core");
+  });
+});
+
+describe("standalone header-filter trigger", () => {
+  it("aligns an RTL popover and writes through the default registry", async () => {
+    const extra = signal<ExtraFilters>({});
+    const fixture = TestBed.createComponent(AdaptHeaderFilterTrigger);
+    fixture.componentRef.setInput("props", {
+      def: DEFS[1],
+      source: memory(extra),
+      labels: defaultLabels,
+    });
+    const container = document.createElement("div");
+    container.dir = "rtl";
+    container.append(fixture.nativeElement);
+    document.body.append(container);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const popover = fixture.debugElement
+      .query(By.directive(BrnPopover))
+      .injector.get(BrnPopover);
+    expect(popover.align()).toBe("end");
+    const trigger = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLButtonElement>('button[aria-label="Team"]')!;
+    trigger.focus();
+    trigger.click();
+    await fixture.whenStable();
+    const surface = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="filter-header-cell"]'
+    )!;
+    expectNamedPopover(surface, "Team");
+    const select = surface.querySelector<HTMLSelectElement>(
+      '[data-adapttable-part="filter-select"]'
+    )!;
+    expect([...select.options].map((option) => option.value)).toEqual([
+      "",
+      "Core",
+      "Web",
+    ]);
+    select.value = "Web";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    await fixture.whenStable();
+    expect(extra().team).toBe("Web");
+    expect(select.value).toBe("Web");
+    expect(trigger.hasAttribute("data-active")).toBe(true);
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).toBe(surface);
+
+    select.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        keyCode: 27,
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await fixture.whenStable();
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).toBeNull();
+    expect(extra().team).toBe("Web");
+    fixture.destroy();
+    container.remove();
   });
 });
