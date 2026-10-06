@@ -178,7 +178,16 @@ export const sidebar = [
   },
 ];
 
-/** Every leaf with its nearest group, at any nesting depth. */
+/** @typedef {{ label: string, slug: string }} SidebarPage */
+/** @typedef {{ label: string, items: readonly SidebarItem[] }} SidebarGroup */
+/** @typedef {SidebarPage | SidebarGroup} SidebarItem */
+
+/**
+ * Every leaf with its nearest group, at any nesting depth.
+ * @param {readonly SidebarItem[]} [items]
+ * @param {string} [group]
+ * @returns {(SidebarPage & { group: string })[]}
+ */
 export function sidebarPages(items = sidebar, group = "") {
   return items.flatMap((item) =>
     "items" in item
@@ -187,7 +196,11 @@ export function sidebarPages(items = sidebar, group = "") {
   );
 }
 
-/** Every canonical source slug the sidebar links, flattened recursively. */
+/**
+ * Every canonical source slug the sidebar links, flattened recursively.
+ * @param {readonly SidebarItem[]} [items]
+ * @returns {string[]}
+ */
 export function sidebarSlugs(items = sidebar) {
   return sidebarPages(items).map((item) => item.slug);
 }
