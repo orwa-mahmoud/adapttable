@@ -30,6 +30,7 @@ const sourceAliases = [
   },
 ]);
 const bindingTests = [
+  "tableParts",
   "filterHeaderControl",
   "findDependencies",
   "runtimeSelectionScope",
@@ -49,6 +50,7 @@ const bindingSourceTests = [
   "url/savedViewsFlush",
 ];
 const nativeTests = [
+  "parts",
   "showcase-entry-mount",
   "assistant-showcase-undo",
   "navigation-find.ssr",

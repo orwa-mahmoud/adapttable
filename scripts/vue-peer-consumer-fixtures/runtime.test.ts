@@ -1,5 +1,5 @@
 import { useRowSelection } from "@adapttable/vue";
-import { DataTable } from "@adapttable/vue-unstyled";
+import { type ColumnInput, DataTable } from "@adapttable/vue-unstyled";
 import { editing } from "@adapttable/vue-unstyled/editing";
 import { filters } from "@adapttable/vue-unstyled/filters";
 import { describe, expect, it, vi } from "vitest";
@@ -19,6 +19,122 @@ function button(host: ParentNode, name: string) {
   if (!value) throw new Error(`Missing ${name}`);
   return value;
 }
+
+const nativeParts = [
+  ["table", "TABLE", "peer-table"],
+  ["header-cell", "TH", "peer-head"],
+  ["cell", "TD", "peer-cell"],
+] as const;
+function expectNativeParts(host: ParentNode) {
+  for (const [name, tag, className] of nativeParts) {
+    const nodes = [...host.querySelectorAll<HTMLElement>(part(name))];
+    expect(nodes.length, name).toBeGreaterThan(0);
+    for (const node of nodes) {
+      expect(node.tagName, name).toBe(tag);
+      expect(node.classList.contains(className), name).toBe(true);
+    }
+  }
+}
+function mountNativeParts(mode: "basic" | "grouped") {
+  const columns: readonly ColumnInput<Row>[] =
+    mode === "grouped"
+      ? [
+          { key: "id", header: "ID" },
+          { header: "Person", children: [{ key: "name", header: "Name" }] },
+        ]
+      : [
+          { key: "id", header: "ID" },
+          { key: "name", header: "Name" },
+        ];
+  const host = document.createElement("div");
+  document.body.append(host);
+  const app = createApp({
+    render: () =>
+      h(DataTable<Row>, {
+        data: [{ id: "1", name: "Ada" }],
+        columns,
+        rowKey: (row: Row) => row.id,
+        urlSync: false,
+        forceMobile: false,
+        classNames: { table: "peer-table", th: "peer-head", td: "peer-cell" },
+      }),
+  });
+  app.mount(host);
+  return {
+    host,
+    release: () => {
+      app.unmount();
+      host.remove();
+    },
+  };
+}
+
+describe("packed DataTable canonical native targets", () => {
+  it.each(["basic", "grouped"] as const)(
+    "retains marker, tag and class ownership for %s columns",
+    async (mode) => {
+      expect(version).toBe(process.env.ADAPTTABLE_VUE_PEER_VERSION);
+      const view = mountNativeParts(mode);
+      try {
+        await tick();
+        expectNativeParts(view.host);
+        expect(view.host.querySelectorAll(part("table"))).toHaveLength(1);
+        expect(view.host.querySelectorAll(part("header-cell"))).toHaveLength(2);
+        expect(view.host.querySelectorAll(part("cell"))).toHaveLength(2);
+        expect(view.host.querySelectorAll("thead tr")).toHaveLength(
+          mode === "grouped" ? 2 : 1
+        );
+        if (mode === "grouped")
+          expect(
+            view.host
+              .querySelector('th[data-column-key="id"]')
+              ?.getAttribute("rowspan")
+          ).toBe("2");
+      } finally {
+        view.release();
+      }
+    }
+  );
+
+  it.each(
+    (["basic", "grouped"] as const).flatMap((mode) =>
+      nativeParts.flatMap(([name, , className]) =>
+        (["marker", "target", "class"] as const).map((fault) => ({
+          mode,
+          name,
+          className,
+          fault,
+        }))
+      )
+    )
+  )(
+    "rejects a wrong $fault for $name in the packed $mode table",
+    async ({ mode, name, className, fault }) => {
+      expect(version).toBe(process.env.ADAPTTABLE_VUE_PEER_VERSION);
+      const view = mountNativeParts(mode);
+      try {
+        await tick();
+        expectNativeParts(view.host);
+        const nodes = [...view.host.querySelectorAll<HTMLElement>(part(name))];
+        if (fault === "target") {
+          const wrong = document.createElement("div");
+          wrong.setAttribute("data-adapttable-part", name);
+          wrong.className = className;
+          view.host.append(wrong);
+        } else if (fault === "marker") {
+          for (const node of nodes)
+            node.setAttribute("data-adapttable-part", `${name}-wrong`);
+        } else {
+          for (const node of nodes) node.classList.remove(className);
+          view.host.classList.add(className);
+        }
+        expect(() => expectNativeParts(view.host)).toThrow();
+      } finally {
+        view.release();
+      }
+    }
+  );
+});
 
 describe("built native packages at the minimum Vue runtime", () => {
   it("keeps the editor identity, draft and focus and renders optional filters", async () => {

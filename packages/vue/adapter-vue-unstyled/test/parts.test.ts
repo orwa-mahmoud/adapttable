@@ -41,13 +41,16 @@ function part(
   tag: string,
   className?: string
 ): HTMLElement {
-  const node = root.querySelector<HTMLElement>(
-    `[data-adapttable-part="${name}"]`
-  );
-  if (!node) throw new Error(`Missing ${name}`);
-  expect(node.tagName).toBe(tag);
-  if (className) expect(node.classList.contains(className)).toBe(true);
-  return node;
+  const nodes = [
+    ...root.querySelectorAll<HTMLElement>(`[data-adapttable-part="${name}"]`),
+  ];
+  const [first] = nodes;
+  if (!first) throw new Error(`Missing ${name}`);
+  for (const node of nodes) {
+    expect(node.tagName, name).toBe(tag);
+    if (className) expect(node.classList.contains(className), name).toBe(true);
+  }
+  return first;
 }
 
 describe("native canonical semantic parts", () => {
@@ -55,6 +58,9 @@ describe("native canonical semantic parts", () => {
     const view = mount({
       selectable: true,
       classNames: {
+        table: "table-class",
+        th: "header-cell-class",
+        td: "cell-class",
         searchWrapper: "search-field-class",
         searchInput: "search-class",
         selectionCheckbox: "checkbox-class",
@@ -72,7 +78,9 @@ describe("native canonical semantic parts", () => {
     ).toBe(true);
     const scroll = part(view.root, "scroll-box", "DIV", "scroll-class");
     expect(scroll.tabIndex).toBe(-1);
-    const table = part(view.root, "table", "TABLE");
+    const table = part(view.root, "table", "TABLE", "table-class");
+    part(view.root, "header-cell", "TH", "header-cell-class");
+    part(view.root, "cell", "TD", "cell-class");
     expect(table.getAttribute("aria-colcount")).toBeNull();
     expect(table.querySelector("tbody tr")?.children).toHaveLength(3);
     const checkbox = part(view.root, "checkbox", "INPUT", "checkbox-class");
@@ -86,6 +94,52 @@ describe("native canonical semantic parts", () => {
       )
     ).toBeNull();
   });
+
+  const targets = [
+    ["table", "TABLE", "table-class"],
+    ["header-cell", "TH", "header-cell-class"],
+    ["cell", "TD", "cell-class"],
+  ] as const;
+  it.each(
+    targets.flatMap(([name, tag, className]) =>
+      (["marker", "target", "class"] as const).map((fault) => ({
+        name,
+        tag,
+        className,
+        fault,
+      }))
+    )
+  )(
+    "rejects a wrong $fault on the native $name target",
+    ({ name, tag, className, fault }) => {
+      const view = mount({
+        classNames: {
+          table: "table-class",
+          th: "header-cell-class",
+          td: "cell-class",
+        },
+      });
+      part(view.root, name, tag, className);
+      const nodes = [
+        ...view.root.querySelectorAll<HTMLElement>(
+          `[data-adapttable-part="${name}"]`
+        ),
+      ];
+      if (fault === "target") {
+        const wrong = document.createElement("div");
+        wrong.setAttribute("data-adapttable-part", name);
+        wrong.className = className;
+        view.root.append(wrong);
+      } else if (fault === "marker") {
+        for (const node of nodes)
+          node.setAttribute("data-adapttable-part", `${name}-wrong`);
+      } else {
+        for (const node of nodes) node.classList.remove(className);
+        view.root.classList.add(className);
+      }
+      expect(() => part(view.root, name, tag, className)).toThrow();
+    }
+  );
 
   it("places loading, refresh and retry parts on their status and button targets", async () => {
     const retry = vi.fn();
