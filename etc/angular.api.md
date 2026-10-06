@@ -1793,6 +1793,7 @@ export class AdaptCommandPaletteChrome {
     "data-adapttable-part": string;
     }>;
     readonly onClose: InputSignal<() => void>;
+    protected onSurfaceKeyDown(event: KeyboardEvent): void;
     readonly open: InputSignal<boolean>;
     protected readonly rows: Signal<    {
     command: ContextMenuItem;

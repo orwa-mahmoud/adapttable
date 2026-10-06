@@ -21,6 +21,8 @@ import {
   computed,
   effect,
   type ElementRef,
+  inject,
+  Injector,
   input,
   type TemplateRef,
   type Type,
@@ -29,6 +31,7 @@ import {
 
 import { AdaptAttrs } from "../attrs";
 import { AdaptControl } from "../control";
+import { onBrowser } from "../hooks/platform";
 import { fromStore } from "../store";
 
 /** The kit owns its dialog and outlets the binding's structured content. @public */
@@ -92,6 +95,7 @@ export class AdaptCommandPaletteChrome {
   /** The kit's input, row and empty line. */
   readonly slots = input.required<CommandPaletteSlots>();
 
+  private readonly browser = onBrowser(inject(Injector));
   private readonly list = createCommandList();
   private readonly snapshot = fromStore(this.list);
   private readonly surface = viewChild<ElementRef<HTMLElement>>("surface");
@@ -178,7 +182,7 @@ export class AdaptCommandPaletteChrome {
 
   constructor() {
     effect((onCleanup) => {
-      if (!this.open()) return;
+      if (!this.browser || !this.open()) return;
       this.list.reset();
       const onDown = (event: PointerEvent) => {
         const node = this.surfaceBounds();
@@ -211,17 +215,26 @@ export class AdaptCommandPaletteChrome {
     });
   }
 
-  /** Arrows move the highlight; Enter runs it; Escape closes; Tab stays in. */
+  /** Only the search box drives the highlighted command. */
   private onKeyDown(event: KeyboardEvent): void {
+    if (event.defaultPrevented || event.isComposing) return;
     const action = commandListKeyAction(event.key, this.view());
-    if (action) {
+    if (!action || action.kind === "close") return;
+    event.preventDefault();
+    if (action.kind === "run") this.run(action.command);
+    else this.list.setActive(action.to);
+  }
+
+  /** Escape and the Tab trap also work from a focused command button. */
+  protected onSurfaceKeyDown(event: KeyboardEvent): void {
+    if (event.defaultPrevented || event.isComposing) return;
+    if (event.key === "Escape") {
       event.preventDefault();
-      if (action.kind === "close") this.onClose()();
-      else if (action.kind === "run") this.run(action.command);
-      else this.list.setActive(action.to);
+      event.stopPropagation();
+      this.onClose()();
       return;
     }
-    if (event.key !== "Tab") return;
+    if (event.key !== "Tab" || !this.browser) return;
     const target = tabTrapTarget(
       focusablesIn(this.surfaceBounds()),
       document.activeElement instanceof HTMLElement
@@ -236,7 +249,7 @@ export class AdaptCommandPaletteChrome {
 
   /** Focus the input when it arrives, and remember who opened the palette. */
   private focusInput(element: HTMLInputElement | null): void {
-    if (!element) return;
+    if (!this.browser || !element) return;
     this.opener ??=
       document.activeElement instanceof HTMLElement
         ? document.activeElement
