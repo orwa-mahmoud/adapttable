@@ -3,6 +3,7 @@ import {
   EditableCellChrome,
   type EditableCellChromeSlots,
   editableCustomControl,
+  editorInputType,
   elementRef,
   formatMultiDraft,
   readMultiDraft,
@@ -76,9 +77,7 @@ const controls: EditableCellChromeSlots<TRow> = {
         )
       );
     }
-    let type: string = editor ?? "text";
-    if (editor === "boolean") type = "checkbox";
-    if (editor === "datetime") type = "datetime-local";
+    const type = editor === "boolean" ? "checkbox" : editorInputType(editor);
     return h("input", {
       ...attrs,
       type,

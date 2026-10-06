@@ -663,6 +663,14 @@ an adapter supplies every visible control and its appearance.
 receives `ColumnGroupToggleButtonProps`: the localized label, expanded state,
 class name and click action. No button fallback is provided.
 
+### Native editor input types
+
+`editorInputType(editor)` re-exports the core's canonical input-type mapping from
+`@adapttable/vue/adapter`. It accepts a `CellEditor` or `null` and returns `"text"`,
+`"number"`, `"date"`, `"datetime-local"` or `"time"`. Boolean and structured editors
+use their own checkbox, select or custom controls; the text-input fallback is
+`"text"`.
+
 ### Attribute and element-ref helpers
 
 `managedOverlayPanel(render)` lets `ColumnMenuChrome` and

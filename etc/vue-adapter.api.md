@@ -104,6 +104,7 @@ import { EditConflictPolicy } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
+import { editorInputType } from '@adapttable/core';
 import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
 import { ExportHandlerState } from '@adapttable/core/binding';
@@ -1795,6 +1796,8 @@ export function editingChromeModelKey<TRow>(): FeatureStateKey<EditingChromeMode
 
 // @public (undocumented)
 export function editingModelKey<TRow>(): FeatureStateKey<EditingBundle<TRow>>;
+
+export { editorInputType }
 
 // @public (undocumented)
 type ElementRef<TElement extends Element = HTMLElement> = (element: TElement | null) => void;

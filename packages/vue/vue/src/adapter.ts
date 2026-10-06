@@ -421,6 +421,7 @@ export type {
 export {
   defaultConfirm,
   defaultFilterRegistry,
+  editorInputType,
   filterLabel,
   filterWidgetKind,
   formatMultiDraft,

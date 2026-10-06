@@ -80,6 +80,28 @@ function key(input: HTMLElement, value: string, shiftKey = false) {
 }
 
 describe("native editing controls", () => {
+  it.each([
+    [undefined, "text"],
+    ["text", "text"],
+    ["number", "number"],
+    ["date", "date"],
+    ["datetime", "datetime-local"],
+    ["time", "time"],
+    ["boolean", "checkbox"],
+  ] as const)(
+    "preserves the native input kind for %s",
+    async (editor, type) => {
+      const commit = vi.fn();
+      const view = table([editing<Row>(commit)], {
+        columns: [{ key: "name", editable: true, editor }],
+      });
+      const input = await activate(view.host);
+      expect(input.type).toBe(type);
+      expect(document.activeElement).toBe(input);
+      expect(commit).not.toHaveBeenCalled();
+      expect(view.rows.value[0]).toBe(original);
+    }
+  );
   for (const mobile of [false, true]) {
     it(`preserves keyboard activation, focus, cancellation and host ownership in ${mobile ? "cards" : "rows"}`, async () => {
       const commit = vi.fn();
