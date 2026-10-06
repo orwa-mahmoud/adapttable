@@ -593,10 +593,10 @@ export function DesktopTableChrome<TRow>(props: {
           : null,
       ]
     );
-    return row.detail?.expanded
-      ? h(Fragment, { key: row.key }, [
-          data,
-          h(
+    return h(Fragment, { key: row.key }, [
+      data,
+      row.detail?.expanded
+        ? h(
             "tr",
             {
               "data-adapttable-part": "detail-row",
@@ -615,9 +615,9 @@ export function DesktopTableChrome<TRow>(props: {
                 [row.detail.render()]
               ),
             ]
-          ),
-        ])
-      : data;
+          )
+        : null,
+    ]);
   };
   const bodySlot = (slot: TableBodySlot<TRow>): VNode => {
     if (slot.kind === "row") return rowContent(slot.wiring);
