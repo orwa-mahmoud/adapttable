@@ -183,11 +183,17 @@ describe("Vue negative type fixture harness", () => {
   });
 });
 
-const captured = JSON.parse(
+const capturedDiagnostics = JSON.parse(
   readFileSync(
     new URL("./fixtures/vue-type-suffix-diagnostics.json", import.meta.url),
     "utf8"
   )
+);
+const captured = capturedDiagnostics.filter(
+  ({ packageName }) => packageName === "@adapttable/vue-unstyled"
+);
+const bindingCaptured = capturedDiagnostics.filter(
+  ({ packageName }) => packageName === "@adapttable/vue"
 );
 const nativeExpectations = Object.fromEntries(
   captured.map(({ file }) => {
@@ -199,12 +205,12 @@ const nativeExpectations = Object.fromEntries(
   })
 );
 
-function replayCaptured(diagnostics = captured) {
+function replayCaptured(diagnostics = captured, profile = nativeExpectations) {
   return diagnosticProblems({
     cwd,
     fixtureDir,
-    files: Object.keys(nativeExpectations),
-    expectations: nativeExpectations,
+    files: Object.keys(profile),
+    expectations: profile,
     // The failure log omits coordinates; this parser discards them.
     output: diagnostics
       .map(
@@ -215,8 +221,8 @@ function replayCaptured(diagnostics = captured) {
   });
 }
 
-function withSuffix(suffix) {
-  return captured.map((diagnostic) => ({
+function withSuffix(suffix, diagnostics = captured) {
+  return diagnostics.map((diagnostic) => ({
     ...diagnostic,
     message: diagnostic.message
       .replaceAll("TableFeature$1", `TableFeature${suffix}`)
@@ -312,5 +318,101 @@ describe("emitted native feature diagnostic names", () => {
       replayCaptured([...captured, unrelated])[0],
       /src\/index.ts: unexpected TS2307/
     );
+  });
+});
+
+const bindingExpectations = Object.fromEntries(
+  bindingCaptured.map(({ file }) => {
+    const fixture = file.slice("test/types/invalid/".length);
+    // This capture contains only the rejected feature-row diagnostics.
+    return [
+      fixture,
+      VUE_TYPE_EXPECTATIONS["@adapttable/vue"][fixture].slice(0, 1),
+    ];
+  })
+);
+const replayBinding = (diagnostics = bindingCaptured) =>
+  replayCaptured(diagnostics, bindingExpectations);
+
+describe("emitted binding feature diagnostic names", () => {
+  it("accepts the nine captured diagnostics and numeric collision suffixes", () => {
+    assert.equal(bindingCaptured.length, 9);
+    assert.deepEqual(
+      Object.fromEntries(
+        Object.entries(bindingExpectations).map(([file, [expected]]) => [
+          file,
+          expected.count ?? 1,
+        ])
+      ),
+      {
+        "WrongEditing.ts": 2,
+        "WrongFilterRow.ts": 1,
+        "WrongHeadlessFeatures.ts": 4,
+        "WrongHierarchyRow.ts": 1,
+        "WrongRows.vue": 1,
+      }
+    );
+    for (const suffix of ["", "$1", "$2", "$12", "$100"])
+      assert.deepEqual(replayBinding(withSuffix(suffix, bindingCaptured)), []);
+  });
+
+  it("retains the exact diagnostic code, row contracts and suffix bounds", () => {
+    const changed = (mutate) => bindingCaptured.map(mutate);
+    for (const diagnostics of [
+      changed((diagnostic) => ({ ...diagnostic, code: 2345 })),
+      changed((diagnostic) => ({
+        ...diagnostic,
+        message: diagnostic.message
+          .replaceAll("Invoice", "OtherInvoice")
+          .replaceAll("<Wrong>", "<OtherWrong>")
+          .replaceAll("{ number: number; }", "{ number: string; }")
+          .replaceAll("{ other: number; }", "{ other: string; }"),
+      })),
+      changed((diagnostic) => ({
+        ...diagnostic,
+        message: diagnostic.message
+          .replaceAll("<Row>", "<OtherRow>")
+          .replaceAll("<Person>", "<OtherPerson>"),
+      })),
+      ...["$x", "$0", "$01", "$1x", "$1$2", "_1"].map((suffix) =>
+        withSuffix(suffix, bindingCaptured)
+      ),
+    ]) {
+      const problems = replayBinding(diagnostics);
+      assert.equal(problems.length, 14);
+      assert.equal(problems.filter((p) => /unexpected TS/.test(p)).length, 9);
+      assert.equal(
+        problems.filter((p) => /missing expected TS2322/.test(p)).length,
+        5
+      );
+    }
+  });
+
+  it("keeps exact repeated counts and rejects unrelated diagnostics", () => {
+    for (const [index, diagnostic] of bindingCaptured.entries()) {
+      const file = diagnostic.file.slice("test/types/invalid/".length);
+      const count = bindingExpectations[file][0].count ?? 1;
+      for (const [diagnostics, actual] of [
+        [bindingCaptured.filter((_, current) => current !== index), count - 1],
+        [[...bindingCaptured, diagnostic], count + 1],
+      ]) {
+        const problems = replayBinding(diagnostics);
+        assert.equal(problems.length, 1);
+        assert.match(
+          problems[0],
+          actual === 0
+            ? /missing expected TS2322/
+            : new RegExp(`expected ${count} occurrence.*got ${actual}$`)
+        );
+      }
+    }
+    const unrelated = {
+      file: "src/index.ts",
+      code: 2307,
+      message: "Cannot find module 'missing'.",
+    };
+    const problems = replayBinding([...bindingCaptured, unrelated]);
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /src\/index.ts: unexpected TS2307/);
   });
 });

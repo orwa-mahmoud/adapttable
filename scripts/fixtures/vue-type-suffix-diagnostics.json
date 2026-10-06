@@ -1,27 +1,86 @@
 [
   {
+    "packageName": "@adapttable/vue-unstyled",
     "file": "test/types/invalid/actions/WrongActionRows.vue",
     "code": 2322,
     "message": "Type 'TableFeature$1<Invoice>[]' is not assignable to type 'readonly ComposedFeature$1<NoInfer<Person>>[]'."
   },
   {
+    "packageName": "@adapttable/vue-unstyled",
     "file": "test/types/invalid/export-preset/WrongPresetRows.ts",
     "code": 2322,
     "message": "Type 'TableFeature$1<Invoice>[]' is not assignable to type 'TableFeature$1<Person>[]'."
   },
   {
+    "packageName": "@adapttable/vue-unstyled",
     "file": "test/types/invalid/filter-editing/InvalidEditingRows.vue",
     "code": 2322,
     "message": "Type 'TableFeature$1<number>[]' is not assignable to type 'readonly ComposedFeature$1<NoInfer<Person>>[]'."
   },
   {
+    "packageName": "@adapttable/vue-unstyled",
     "file": "test/types/invalid/hierarchy/InvalidNativeFeatureRow.vue",
     "code": 2322,
     "message": "Type 'TableFeature$1<Invoice>[]' is not assignable to type 'readonly ComposedFeature$1<NoInfer<Person>>[]'."
   },
   {
+    "packageName": "@adapttable/vue-unstyled",
     "file": "test/types/invalid/specialized/InvalidSpecialized.vue",
     "code": 2322,
     "message": "Type 'TableFeature$1<{ id: number; }>' is not assignable to type 'ComposedFeature$1<NoInfer<Row>>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongEditing.ts",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<{ number: number; }>' is not assignable to type 'TableFeature$1<Row>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongEditing.ts",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<{ number: number; }>' is not assignable to type 'TableFeature$1<Row>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongFilterRow.ts",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<{ other: number; }>' is not assignable to type 'TableFeature$1<Row>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongHeadlessFeatures.ts",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<Wrong>' is not assignable to type 'TableFeature$1<Row>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongHeadlessFeatures.ts",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<Wrong>' is not assignable to type 'TableFeature$1<Row>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongHeadlessFeatures.ts",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<Wrong>' is not assignable to type 'TableFeature$1<Row>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongHeadlessFeatures.ts",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<Wrong>' is not assignable to type 'TableFeature$1<Row>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongHierarchyRow.ts",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<Invoice>' is not assignable to type 'ComposedFeature$1<NoInfer<Person>>'."
+  },
+  {
+    "packageName": "@adapttable/vue",
+    "file": "test/types/invalid/WrongRows.vue",
+    "code": 2322,
+    "message": "Type 'TableFeature$1<Invoice>' is not assignable to type 'ComposedFeature$1<NoInfer<Person>>'."
   }
 ]

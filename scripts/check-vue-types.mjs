@@ -39,7 +39,8 @@ export const VUE_TYPE_EXPECTATIONS = {
     "WrongEditing.ts": [
       {
         code: 2322,
-        message: /TableFeature<\{ number: number; \}>.*TableFeature<Row>/,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<\{ number: number; \}>.*TableFeature(?:\$[1-9]\d*)?<Row>/,
         count: 2,
       },
       {
@@ -50,13 +51,15 @@ export const VUE_TYPE_EXPECTATIONS = {
     "WrongFilterRow.ts": [
       {
         code: 2322,
-        message: /TableFeature<\{ other: number; \}>.*TableFeature<Row>/,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<\{ other: number; \}>.*TableFeature(?:\$[1-9]\d*)?<Row>/,
       },
     ],
     "WrongHeadlessFeatures.ts": [
       {
         code: 2322,
-        message: /TableFeature<Wrong>.*TableFeature<Row>/,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Wrong>.*TableFeature(?:\$[1-9]\d*)?<Row>/,
         count: 4,
       },
       {
@@ -78,7 +81,8 @@ export const VUE_TYPE_EXPECTATIONS = {
     "WrongHierarchyRow.ts": [
       {
         code: 2322,
-        message: /TableFeature<Invoice>.*ComposedFeature<NoInfer<Person>>/,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Invoice>.*ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Person>>/,
       },
     ],
     "WrongSelectionControl.vue": [
@@ -101,7 +105,7 @@ export const VUE_TYPE_EXPECTATIONS = {
       {
         code: 2322,
         message:
-          /Type 'TableFeature<Invoice>' is not assignable to type 'ComposedFeature<NoInfer<Person>>'/,
+          /Type 'TableFeature(?:\$[1-9]\d*)?<Invoice>' is not assignable to type 'ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Person>>'/,
       },
     ],
     "MissingNavigationControls.ts": [

@@ -78,6 +78,21 @@ export function checkExportSources(repository) {
       `${file}: canonical entries cannot forward wildcard closures`
     );
   }
+  const queryHandler = sourceExports(
+    readFileSync(join(binding, "index.ts"), "utf8")
+  ).flatMap((edge) =>
+    edge.names
+      .filter((name) => name.name === "TableQueryHandler")
+      .map((name) => ({ from: edge.from, ...name }))
+  );
+  assert.deepEqual(queryHandler, [
+    {
+      from: "./source/useServerData",
+      name: "TableQueryHandler",
+      original: "TableQueryHandler",
+      typeOnly: true,
+    },
+  ]);
   const features = sourceExports(
     readFileSync(join(binding, "features.ts"), "utf8")
   );
@@ -224,6 +239,43 @@ export function canonicalAliasErrors(program, consumer, pairs) {
   return errors;
 }
 
+/** The root callback name must be the actual public option member contract. */
+export function serverQueryHandlerErrors(program, consumer) {
+  const checker = program.getTypeChecker();
+  const statement = consumer.statements.find(
+    (node) =>
+      ts.isImportDeclaration(node) &&
+      node.moduleSpecifier.text === "@adapttable/vue"
+  );
+  const owner =
+    statement && checker.getSymbolAtLocation(statement.moduleSpecifier);
+  const exports = new Map(
+    owner
+      ? checker
+          .getExportsOfModule(owner)
+          .map((symbol) => [symbol.name, finalAlias(checker, symbol)])
+      : []
+  );
+  const handler = exports.get("TableQueryHandler");
+  const options = exports.get("UseServerDataOptions");
+  const member =
+    options &&
+    checker.getPropertyOfType(
+      checker.getDeclaredTypeOfSymbol(options),
+      "onQueryChange"
+    );
+  const reference = member?.declarations?.find(ts.isPropertySignature)?.type;
+  return handler?.declarations?.length &&
+    reference &&
+    ts.isTypeReferenceNode(reference) &&
+    finalAlias(checker, checker.getSymbolAtLocation(reference.typeName)) ===
+      handler
+    ? []
+    : [
+        "@adapttable/vue: TableQueryHandler must name the exact UseServerDataOptions.onQueryChange declaration",
+      ];
+}
+
 function consumerInputs() {
   const pairs = [];
   const modules = new Map();
@@ -269,7 +321,10 @@ function consumerInputs() {
       return `import type { ${imports} } from ${JSON.stringify(module)};`;
     })
     .join("\n");
-  return { pairs, text };
+  return {
+    pairs,
+    text: `${text}\nimport type { TableQueryHandler, UseServerDataOptions } from "@adapttable/vue";`,
+  };
 }
 
 /** Named imports trigger ambiguity diagnostics in both package export conditions. */
@@ -298,6 +353,7 @@ export function checkBuiltExportTypes(cell) {
     const consumer = program.getSourceFile(file);
     assert.ok(consumer, `Missing consumer ${file}`);
     assert.deepEqual(canonicalAliasErrors(program, consumer, pairs), []);
+    assert.deepEqual(serverQueryHandlerErrors(program, consumer), []);
   }
 }
 

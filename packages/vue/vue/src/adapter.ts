@@ -330,7 +330,6 @@ export {
   selectionCheckboxControl,
   selectionCheckboxInputAttrs,
 } from "./selection/checkboxControl";
-export type { TableQueryHandler } from "./source/useServerData";
 export {
   bodyWindowModelKey,
   groupingPanelControlKey,

@@ -1666,6 +1666,61 @@ for (const scenario of [
         contentType: "image/png",
       }
     );
+    if (scenario.width > 768) {
+      const scroll = orders.locator(part("scroll-box"));
+      const current = record("ORD-1042");
+      const badge = current.locator('[data-column-key="status"] .order-status');
+      const pinnedId = current.locator('td[data-column-key="id"]');
+      const pinnedAmount = current.locator('td[data-column-key="amount"]');
+      await expect(badge).toHaveText("Review");
+      await expect(pinnedId).toHaveCSS("position", "sticky");
+      await expect(pinnedAmount).toHaveCSS("position", "sticky");
+      const previousScroll = await scroll.evaluate((element) => ({
+        left: element.scrollLeft,
+        top: element.scrollTop,
+      }));
+      try {
+        expect(
+          await scroll.evaluate(
+            (element) => element.scrollWidth - element.clientWidth
+          )
+        ).toBeGreaterThan(0);
+        await scroll.evaluate((element) => {
+          element.scrollLeft = element.scrollWidth;
+        });
+        await expect(badge).toBeInViewport({ ratio: 1 });
+        const badgeBounds = await badge.boundingBox();
+        const idBounds = await pinnedId.boundingBox();
+        const amountBounds = await pinnedAmount.boundingBox();
+        if (!badgeBounds || !idBounds || !amountBounds)
+          throw new Error(
+            "The saved-view status or pinned cells have no bounds."
+          );
+        expect(badgeBounds.x).toBeGreaterThanOrEqual(
+          idBounds.x + idBounds.width - 1
+        );
+        expect(badgeBounds.x + badgeBounds.width).toBeLessThanOrEqual(
+          amountBounds.x + 1
+        );
+        expect(
+          await badge.evaluate(
+            (element) => element.scrollWidth - element.clientWidth
+          )
+        ).toBeLessThanOrEqual(1);
+        await testInfo.attach("vue-workspace-saved-views-status-after-scroll", {
+          body: await orders.screenshot(),
+          contentType: "image/png",
+        });
+      } finally {
+        await scroll.evaluate(
+          (element, position) => {
+            element.scrollLeft = position.left;
+            element.scrollTop = position.top;
+          },
+          previousScroll
+        );
+      }
+    }
   });
 }
 

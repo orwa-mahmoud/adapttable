@@ -32,6 +32,14 @@
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
+    "@adapttable/vue#test": {
+      "dependsOn": ["^build", "build"],
+      "outputs": []
+    },
+    "@adapttable/vue#test:coverage": {
+      "dependsOn": ["^build", "build"],
+      "outputs": ["coverage/**"]
+    },
     "lint": {
       "dependsOn": ["^build"],
       "outputs": []

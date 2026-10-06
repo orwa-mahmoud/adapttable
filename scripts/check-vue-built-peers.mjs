@@ -29,6 +29,10 @@ import {
   VUE_PACKAGES,
   writeJson,
 } from "./vue-peer-consumers.mjs";
+import {
+  assertVueRuntimeCases,
+  assertVueRuntimeCells,
+} from "./vue-runtime-results.mjs";
 
 const require = createRequire(import.meta.url);
 function run(args, cwd, env = process.env) {
@@ -85,6 +89,9 @@ export function checkConsumer(cell, vueRoot, name, mode) {
 
 export function checkRuntime(cell, vueRoot, built) {
   const version = readJson(join(vueRoot, "package.json")).version;
+  const kind = built ? "built" : "source";
+  const reportFile = join(cell, `${kind}-runtime.json`);
+  rmSync(reportFile, { force: true });
   const result = run(
     [
       "--max-old-space-size=2048",
@@ -92,6 +99,9 @@ export function checkRuntime(cell, vueRoot, built) {
       "run",
       "--config",
       join(REPO_ROOT, "scripts/vue-peer-runtime.mjs"),
+      "--reporter=default",
+      "--reporter=json",
+      `--outputFile.json=${reportFile}`,
     ],
     built ? cell : REPO_ROOT,
     {
@@ -102,10 +112,12 @@ export function checkRuntime(cell, vueRoot, built) {
     }
   );
   assert.equal(result.status, 0, result.output);
+  assertVueRuntimeCases(readJson(reportFile), built ? cell : REPO_ROOT, kind);
   console.log(result.output.trim());
   console.log(
     `Vue ${version}: ${built ? "isolated built" : "source ownership"} runtime passed`
   );
+  return { cell: kind, root: realpathSync(vueRoot), version };
 }
 
 export function checkVueBuiltPeers(floorRoot) {
@@ -122,10 +134,15 @@ export function checkVueBuiltPeers(floorRoot) {
     const currentRoot = realpathSync(
       join(packageDir("vue"), "node_modules/vue")
     );
-    for (const [label, vueRoot] of [
-      ["current", currentRoot],
-      ["floor", realpathSync(minimumRoot)],
-    ]) {
+    const peers = [
+      { label: "current", root: currentRoot },
+      { label: "floor", root: realpathSync(minimumRoot) },
+    ].map((peer) => ({
+      ...peer,
+      version: readJson(join(peer.root, "package.json")).version,
+    }));
+    const completed = [];
+    for (const { label, root: vueRoot } of peers) {
       const cell = join(scratch, label);
       const entries = prepareVueCell(cell, vueRoot);
       console.log(`${label}: checking ${entries.length} published Vue entries`);
@@ -150,9 +167,10 @@ export function checkVueBuiltPeers(floorRoot) {
           checkConsumer(cell, vueRoot, name, "negative");
       }
       checkConsumer(cell, vueRoot, "all", "cjs");
-      checkRuntime(cell, vueRoot, true);
-      checkRuntime(cell, vueRoot, false);
+      completed.push({ peer: label, ...checkRuntime(cell, vueRoot, true) });
+      completed.push({ peer: label, ...checkRuntime(cell, vueRoot, false) });
     }
+    assertVueRuntimeCells(completed, peers);
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }

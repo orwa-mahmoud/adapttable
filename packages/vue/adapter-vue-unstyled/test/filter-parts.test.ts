@@ -51,10 +51,12 @@ function assertPart(
   tag: string,
   className: string
 ) {
-  const element = find<HTMLElement>(root, part(name));
-  expect(element.tagName).toBe(tag);
-  expect(element.className).toBe(className);
-  return element;
+  const first = find<HTMLElement>(root, part(name));
+  for (const element of root.querySelectorAll(part(name))) {
+    expect(element.tagName, name).toBe(tag);
+    expect(element.className, name).toBe(className);
+  }
+  return first;
 }
 function assertGroup(root: ParentNode) {
   const field = assertPart(root, "filter-field", "DIV", "field");
@@ -66,13 +68,18 @@ function assertGroup(root: ParentNode) {
   expect(caption.textContent).toBe("Name");
   const checkbox = assertPart(group, "filter-checkbox", "LABEL", "checkbox");
   const input = find<HTMLInputElement>(checkbox, "input");
-  expect(input.type).toBe("checkbox");
-  expect(input.id).toContain("-ada");
-  expect(input.getAttribute("aria-label")).toBe("Ada Lovelace");
-  expect(input.hasAttribute("data-adapttable-part")).toBe(false);
-  expect(checkbox.textContent).toBe("Ada Lovelace");
-  expect(group.querySelectorAll(".control")).toHaveLength(2);
-  expect(group.querySelectorAll(part("filter-checkbox"))).toHaveLength(2);
+  const checkboxes = [...group.querySelectorAll(part("filter-checkbox"))];
+  expect(checkboxes).toHaveLength(choices.length);
+  for (const [index, option] of checkboxes.entries()) {
+    const choice = choices[index]!;
+    const control = find<HTMLInputElement>(option, "input");
+    expect(control.type).toBe("checkbox");
+    expect(control.id).toContain(`-${choice.value}`);
+    expect(control.getAttribute("aria-label")).toBe(choice.label);
+    expect(control.hasAttribute("data-adapttable-part")).toBe(false);
+    expect(option.textContent).toBe(choice.label);
+  }
+  expect(group.querySelectorAll(".control")).toHaveLength(choices.length);
   return { group, input, checkbox };
 }
 
@@ -154,6 +161,9 @@ describe("canonical native filter classes and parts", () => {
     const markup = document.createElement("div");
     markup.innerHTML = await renderToString(createSSRApp(Root));
     assertGroup(markup);
+    const serverChoices = markup.querySelectorAll(part("filter-checkbox"));
+    serverChoices[1]!.classList.remove("checkbox");
+    expect(() => assertGroup(markup)).toThrow();
     const view = mountNative(render, classNames);
     const { checkbox, input } = assertGroup(view.host);
     checkbox.click();

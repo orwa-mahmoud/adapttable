@@ -141,6 +141,7 @@ export type {
 export { useQuerySource } from "./source/useQuerySource";
 export type {
   ServerDataState,
+  TableQueryHandler,
   TableQueryInfo,
   UseServerDataOptions,
 } from "./source/useServerData";

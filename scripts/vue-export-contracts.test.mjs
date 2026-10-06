@@ -11,6 +11,7 @@ import {
   checkExportSources,
   publishedBindingEntries,
   runtimeExportErrors,
+  serverQueryHandlerErrors,
   sourceExports,
   typeOnlyValueErrors,
 } from "./vue-export-contracts.mjs";
@@ -38,7 +39,7 @@ function fixtureSources(root, mutate = (text) => text) {
   );
   writeFileSync(
     join(binding, "index.ts"),
-    'export type { StaticTableFeature } from "./features/tableFeature";'
+    'export type { StaticTableFeature } from "./features/tableFeature";\nexport type { TableQueryHandler } from "./source/useServerData";'
   );
   writeFileSync(
     join(binding, "adapter.ts"),
@@ -390,5 +391,85 @@ describe("published binding entry coverage", () => {
         /feature.v2.*must reject the core-only runtime value import/
       );
     }
+  });
+});
+
+function serverQueryFixture(exports) {
+  const root = mkdtempSync(join(scratch, "server-query-"));
+  const owner = join(root, "node_modules/@adapttable/vue");
+  mkdirSync(owner, { recursive: true });
+  writeFileSync(
+    join(owner, "package.json"),
+    JSON.stringify({
+      name: "@adapttable/vue",
+      types: "./index.d.ts",
+    })
+  );
+  const contract =
+    "export type TableQueryHandler = (query: { page: number }) => void;";
+  writeFileSync(
+    join(owner, "contract.d.ts"),
+    contract +
+      "\nexport interface UseServerDataOptions<TRow> { rows: readonly TRow[]; onQueryChange?: TableQueryHandler }"
+  );
+  writeFileSync(join(owner, "copy.d.ts"), contract);
+  writeFileSync(join(owner, "index.d.ts"), exports);
+  const file = join(root, "consumer.ts");
+  writeFileSync(
+    file,
+    'import type { UseServerDataOptions } from "@adapttable/vue";'
+  );
+  const program = ts.createProgram([file], {
+    strict: true,
+    skipLibCheck: false,
+    noEmit: true,
+    module: ts.ModuleKind.NodeNext,
+    moduleResolution: ts.ModuleResolutionKind.NodeNext,
+    types: [],
+  });
+  assert.deepEqual(
+    ts.getPreEmitDiagnostics(program).map((item) =>
+      ts.flattenDiagnosticMessageText(item.messageText, "\n")
+    ),
+    []
+  );
+  return serverQueryHandlerErrors(program, program.getSourceFile(file));
+}
+
+describe("root server query callback identity", () => {
+  it("accepts the original callback used by the public option member", () => {
+    assert.deepEqual(
+      serverQueryFixture(
+        'export type { TableQueryHandler, UseServerDataOptions } from "./contract";'
+      ),
+      []
+    );
+  });
+
+  it("rejects a missing root callback export", () => {
+    assert.equal(
+      serverQueryFixture(
+        'export type { UseServerDataOptions } from "./contract";'
+      ).length,
+      1
+    );
+  });
+
+  it("rejects an equally shaped callback from a different declaration", () => {
+    assert.equal(
+      serverQueryFixture(
+        'export type { UseServerDataOptions } from "./contract";\nexport type { TableQueryHandler } from "./copy";'
+      ).length,
+      1
+    );
+  });
+
+  it("rejects a public alias that only copies the actual private contract", () => {
+    assert.equal(
+      serverQueryFixture(
+        'export type { UseServerDataOptions } from "./contract";\nimport type { TableQueryHandler as Original } from "./contract";\nexport type TableQueryHandler = Original;'
+      ).length,
+      1
+    );
   });
 });

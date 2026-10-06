@@ -2,6 +2,8 @@ import "@adapttable/vue-unstyled/styles.css";
 import "./consumer.css";
 
 import { ar } from "@adapttable/i18n";
+import type { FilterFormSource } from "@adapttable/vue";
+import { resolveLabels } from "@adapttable/vue/adapter";
 import {
   type ColumnDef,
   DataTable,
@@ -9,7 +11,6 @@ import {
   FilterHeaderRow,
 } from "@adapttable/vue-unstyled";
 import { filters } from "@adapttable/vue-unstyled/filters";
-import { type FilterFormSource, resolveLabels } from "@adapttable/vue/adapter";
 import { computed, createApp, defineComponent, h, shallowRef } from "vue";
 
 interface Person {
