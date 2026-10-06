@@ -125,6 +125,22 @@ const features = [
 row types remain independent and inherit the supplied density and label
 defaults. Expansion and pinning accept the binding's controlled state options.
 
+## Editing
+
+Mark editable columns with `editable: true`, then add `editing(onCellEdit)` from
+`@adapttable/vuetify/editing`. The callback receives the row, column key and
+parsed value. `rowEditing(onRowEdit)` submits a row patch through Save and
+Cancel controls; `batchEditing(onBatchEdit)` stages changes across rows until
+the batch Save action. Return a promise for asynchronous saves and supply new
+rows after the host accepts a write.
+
+Text, number and date/time editors use `VTextField`; booleans use
+`VCheckboxBtn`; select and multi-select editors use `VSelect`, including its
+menu, keyboard handling and native focus target. Validation remains in the
+binding and its accessible error message is associated with the actual input.
+Custom editors receive the existing binding controller. `editHistory`,
+`undoRedoButtons` and `dirtyIndicators` compose through the same optional entry.
+
 ## Control ownership
 
 Buttons use `VBtn`. Checkboxes use `VCheckboxBtn` and its documented input slot,

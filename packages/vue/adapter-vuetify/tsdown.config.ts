@@ -27,6 +27,8 @@ export default defineConfig({
     "src/rows.ts",
     "src/tree.ts",
     "src/row-detail.ts",
+    "src/editing.ts",
+    "src/batch-editing.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],

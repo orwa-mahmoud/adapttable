@@ -31,8 +31,21 @@ class TestIntersectionObserver implements IntersectionObserver {
   }
 }
 
+class TestVisualViewport extends EventTarget implements VisualViewport {
+  readonly width = 1024;
+  readonly height = 768;
+  readonly offsetLeft = 0;
+  readonly offsetTop = 0;
+  readonly pageLeft = 0;
+  readonly pageTop = 0;
+  readonly scale = 1;
+  onresize: VisualViewport["onresize"] = null;
+  onscroll: VisualViewport["onscroll"] = null;
+}
+
 vi.stubGlobal("ResizeObserver", TestResizeObserver);
 vi.stubGlobal("IntersectionObserver", TestIntersectionObserver);
+vi.stubGlobal("visualViewport", new TestVisualViewport());
 vi.stubGlobal("matchMedia", (query: string) => ({
   media: query,
   matches: false,

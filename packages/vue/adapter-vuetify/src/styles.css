@@ -163,3 +163,32 @@
   border: 1px solid rgb(var(--v-theme-surface));
   z-index: 1;
 }
+
+.adapttable-vuetify [data-adapttable-part="edit-cell-activate"] {
+  justify-content: flex-start;
+  min-inline-size: 0;
+  inline-size: 100%;
+  text-transform: none;
+}
+
+.adapttable-vuetify [data-adapttable-part="row-edit-actions"],
+.adapttable-vuetify [data-adapttable-part="batch-edit-bar"] {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adapttable-vuetify [data-adapttable-part="batch-edit-bar"] {
+  padding: 12px 16px;
+  border-block: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.adapttable-vuetify [data-adapttable-part="edit-cell-error"],
+.adapttable-vuetify [data-adapttable-part="edit-cell-save-error"],
+.adapttable-vuetify [data-adapttable-part="row-edit-error"] {
+  display: block;
+  color: rgb(var(--v-theme-error));
+  font-size: 0.75rem;
+  padding-block-start: 4px;
+}

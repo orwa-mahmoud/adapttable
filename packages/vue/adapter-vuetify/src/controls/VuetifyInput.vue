@@ -21,6 +21,11 @@ onBeforeUnmount(() => {
 const input = shallowRef<InstanceType<typeof VTextField> | null>(null);
 const textarea = shallowRef<InstanceType<typeof VTextarea> | null>(null);
 const attrs = computed(() => valueControlAttrs(props.attrs));
+const invalid = computed(
+  () =>
+    props.attrs["aria-invalid"] === true ||
+    props.attrs["aria-invalid"] === "true"
+);
 useControlRef(
   () =>
     props.multiline ? textarea.value?.controlRef : input.value?.controlRef,
@@ -51,6 +56,7 @@ function change(value: unknown): void {
     ref="textarea"
     v-bind="attrs"
     :model-value="value"
+    :error="invalid"
     variant="outlined"
     density="compact"
     hide-details
@@ -63,6 +69,7 @@ function change(value: unknown): void {
     v-bind="attrs"
     :type="type ?? 'text'"
     :model-value="value"
+    :error="invalid"
     variant="outlined"
     density="compact"
     hide-details

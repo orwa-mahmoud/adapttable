@@ -9,7 +9,14 @@ import ControlsFixture from "./ControlsFixture.vue";
 import TableFixture from "./TableFixture.vue";
 
 createApp(
-  ["/table", "/navigation", "/hierarchy"].includes(location.pathname)
+  [
+    "/table",
+    "/navigation",
+    "/hierarchy",
+    "/editing",
+    "/row-editing",
+    "/batch-editing",
+  ].includes(location.pathname)
     ? TableFixture
     : ControlsFixture
 )
