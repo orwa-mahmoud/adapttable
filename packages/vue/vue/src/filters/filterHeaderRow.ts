@@ -10,7 +10,10 @@ export type FilterHeaderRowProps<TRow> = NeutralFilterHeaderRowProps<
   TRow,
   ColumnDef<TRow>,
   CSSProperties
->;
+> & {
+  /** Explicit presentation direction for the row and portaled kit controls. */
+  readonly dir?: "ltr" | "rtl";
+};
 /** Each kit supplies a component-owned compact control for each filter. */
 export interface FilterHeaderRowSlots<TRow> {
   readonly Control: (props: FilterHeaderControlOptions<TRow>) => VNodeChild;
@@ -51,6 +54,7 @@ export function FilterHeaderRowChrome<TRow>(
     "tr",
     {
       "data-adapttable-part": "filter-header-row",
+      dir: props.dir,
       "aria-label": props.labels.headerFilters,
       class: names.filterHeaderRow,
     },
@@ -76,6 +80,7 @@ export function FilterHeaderRowChrome<TRow>(
             def
               ? props.controls.Control({
                   def,
+                  dir: props.dir,
                   source: props.source,
                   labels: props.labels,
                   registry: props.registry,

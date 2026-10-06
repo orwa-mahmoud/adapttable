@@ -43,6 +43,64 @@ function form() {
   };
 }
 describe("native compact header filters", () => {
+  it.each<{ def: FilterDef<Row>; selector: string }>([
+    { def: { key: "name", type: "text" }, selector: "input" },
+    {
+      def: {
+        key: "name",
+        type: "select",
+        options: [{ value: "Ada", label: "Ada" }],
+      },
+      selector: "select",
+    },
+    { def: { key: "amount", type: "numberRange" }, selector: "input" },
+    {
+      def: {
+        key: "name",
+        type: "multiSelect",
+        options: [{ value: "Ada", label: "Ada" }],
+      },
+      selector: "details",
+    },
+  ])(
+    "applies live standalone direction to $def.type without replacing its native control",
+    async ({ def, selector }) => {
+      const f = form();
+      const dir = shallowRef<"ltr" | "rtl" | undefined>("rtl");
+      const view = mountNative(() =>
+        h("div", { dir: "rtl" }, [
+          h(FilterHeaderControl<Row>, {
+            def,
+            source: f.source.value,
+            labels,
+            dir: dir.value,
+          }),
+        ])
+      );
+      const control = find<HTMLElement>(view.host, selector);
+      const focused = control.querySelector<HTMLElement>("summary") ?? control;
+      const value = f.extra.value;
+      if (control instanceof HTMLDetailsElement) control.open = true;
+      focused.focus();
+      expect(control.getAttribute("dir")).toBe("rtl");
+      for (const direction of ["ltr", "rtl", undefined] as const) {
+        dir.value = direction;
+        await tick();
+        expect(find(view.host, selector)).toBe(control);
+        expect(control.getAttribute("dir")).toBe(direction ?? null);
+        expect(document.activeElement).toBe(focused);
+        if (control instanceof HTMLDetailsElement)
+          expect(control.open).toBe(true);
+      }
+      expect(control.parentElement?.closest("[dir]")?.getAttribute("dir")).toBe(
+        "rtl"
+      );
+      expect(f.extra.value).toBe(value);
+      expect(f.setExtra).not.toHaveBeenCalled();
+      expect(f.setExtras).not.toHaveBeenCalled();
+    }
+  );
+
   it("keeps the funnel class on its button and the inline class off that target", () => {
     const view = mountNative(() =>
       h(DataTable<Row>, {

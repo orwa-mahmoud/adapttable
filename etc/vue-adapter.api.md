@@ -2160,6 +2160,7 @@ export type FilterHeaderControlModel = {
 
 // @public
 export interface FilterHeaderControlOptions<TRow> extends FilterHeaderControlProps<TRow> {
+    readonly dir?: "ltr" | "rtl";
     // (undocumented)
     readonly menuClassName?: string;
 }
@@ -2173,7 +2174,9 @@ export { FilterHeaderOption }
 export { FilterHeaderRangeProps }
 
 // @public
-export type FilterHeaderRowProps<TRow> = FilterHeaderRowProps_2<TRow, ColumnDef<TRow>, CSSProperties>;
+export type FilterHeaderRowProps<TRow> = FilterHeaderRowProps_2<TRow, ColumnDef<TRow>, CSSProperties> & {
+    readonly dir?: "ltr" | "rtl";
+};
 
 // @public
 export interface FilterHeaderRowSlots<TRow> {

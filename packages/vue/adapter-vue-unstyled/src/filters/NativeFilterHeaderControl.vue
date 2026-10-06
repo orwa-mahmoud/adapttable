@@ -37,6 +37,7 @@ const controls: FilterHeaderSlots = {
       ...control,
       type: "search",
       attrs: {
+        dir: props.dir,
         "data-adapttable-part": "filter-header-input",
         "aria-label": control.label,
         placeholder: control.placeholder,
@@ -47,18 +48,23 @@ const controls: FilterHeaderSlots = {
     native.Select({
       ...control,
       attrs: {
+        dir: props.dir,
         "data-adapttable-part": "filter-header-input",
         "aria-label": control.label,
         class: control.className,
       },
     }),
   Range: (control) =>
-    native.Input({ ...control, attrs: { "aria-label": control.label } }),
+    native.Input({
+      ...control,
+      attrs: { "aria-label": control.label, dir: props.dir },
+    }),
   Multi: (control) =>
     h(
       "details",
       {
         ref: disclosure,
+        dir: props.dir,
         style: { position: "relative", inlineSize: "100%" },
         onKeydown: (event: KeyboardEvent) => {
           if (

@@ -32290,6 +32290,11 @@ buttons and popovers.
 with an optional `menuClassName` for multi-choice menus. The row accepts
 `FilterHeaderRowProps<TRow>`; its `classNames` follow `FilterHeaderClassNames`.
 
+Both shared inputs accept an optional `dir` (`"ltr"` or `"rtl"`). Pass the
+table's current direction when a kit portals its compact controls. The row
+forwards direction to every `Control` slot and its native row. Omission stays
+undefined so standalone controls can preserve their inherited direction.
+
 The compact components read and request writes through the supplied source.
 Use the same source as the rest of your table so URL state, chips and host
 acceptance stay coordinated. A compact select uses the neutral list-valued

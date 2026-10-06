@@ -39,6 +39,8 @@ export interface FilterHeaderControlOptions<
   TRow,
 > extends FilterHeaderControlProps<TRow> {
   readonly menuClassName?: string;
+  /** Explicit presentation direction; omission preserves inherited direction. */
+  readonly dir?: "ltr" | "rtl";
 }
 /** A compact header control projected from the shared filter models. */
 export type FilterHeaderControlModel =
