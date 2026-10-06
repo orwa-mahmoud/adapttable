@@ -371,7 +371,7 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/angular-material",
     peer: "@angular/material",
     install:
-      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/angular-material@0.1.0 @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.0",
+      "# Follow the kit setup guide for compatible peers\npnpm add @adapttable/angular-material @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.0",
     provider: "",
     tagline:
       "Angular Material controls and overlays with optional features and host-owned data.",
@@ -384,7 +384,7 @@ export const SHOWCASE_ADAPTERS = [
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
+      "This adapter is available on npm. Follow its Angular setup guide for compatible peers, providers, styles and assets. Upgrade the binding and adapter together using their declared dependency ranges.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -422,7 +422,7 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/ng-bootstrap",
     peer: "@ng-bootstrap/ng-bootstrap",
     install:
-      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/ng-bootstrap@0.1.0 @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0",
+      "# Follow the kit setup guide for compatible peers\npnpm add @adapttable/ng-bootstrap @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0",
     provider: "",
     tagline:
       "ng-bootstrap controls and overlays with optional features and host-owned data.",
@@ -435,7 +435,7 @@ export const SHOWCASE_ADAPTERS = [
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
+      "This adapter is available on npm. Follow its Angular setup guide for compatible peers, providers, styles and assets. Upgrade the binding and adapter together using their declared dependency ranges.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -473,7 +473,7 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/angular-aria",
     peer: "@angular/aria",
     install:
-      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/angular-aria@0.1.0 @adapttable/angular @angular/aria@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2",
+      "# Follow the kit setup guide for compatible peers\npnpm add @adapttable/angular-aria @adapttable/angular @angular/aria@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2",
     provider: "",
     tagline:
       "Angular Aria controls and overlays with optional features and host-owned data.",
@@ -486,7 +486,7 @@ export const SHOWCASE_ADAPTERS = [
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
+      "This adapter is available on npm. Follow its Angular setup guide for compatible peers, providers, styles and assets. Upgrade the binding and adapter together using their declared dependency ranges.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -524,7 +524,7 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/ngx-bootstrap",
     peer: "ngx-bootstrap",
     install:
-      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/ngx-bootstrap@0.1.0 @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0",
+      "# Follow the kit setup guide for compatible peers\npnpm add @adapttable/ngx-bootstrap @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0",
     provider: "",
     tagline:
       "ngx-bootstrap controls and overlays with optional features and host-owned data.",
@@ -537,7 +537,7 @@ export const SHOWCASE_ADAPTERS = [
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
+      "This adapter is available on npm. Follow its Angular setup guide for compatible peers, providers, styles and assets. Upgrade the binding and adapter together using their declared dependency ranges.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -575,7 +575,7 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/angular-cdk",
     peer: "@angular/cdk",
     install:
-      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/angular-cdk@0.1.0 @adapttable/angular @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2",
+      "# Follow the kit setup guide for compatible peers\npnpm add @adapttable/angular-cdk @adapttable/angular @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2",
     provider: "",
     tagline:
       "Angular CDK controls and overlays with optional features and host-owned data.",
@@ -588,7 +588,7 @@ export const SHOWCASE_ADAPTERS = [
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
+      "This adapter is available on npm. Follow its Angular setup guide for compatible peers, providers, styles and assets. Upgrade the binding and adapter together using their declared dependency ranges.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -626,7 +626,7 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/spartan",
     peer: "@spartan-ng/brain",
     install:
-      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/spartan@0.1.0 @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1",
+      "# Follow the kit setup guide for compatible peers\npnpm add @adapttable/spartan @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1",
     provider: "",
     tagline:
       "Spartan controls and overlays with optional features and host-owned data.",
@@ -639,7 +639,7 @@ export const SHOWCASE_ADAPTERS = [
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
+      "This adapter is available on npm. Follow its Angular setup guide for compatible peers, providers, styles and assets. Upgrade the binding and adapter together using their declared dependency ranges.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,
@@ -677,7 +677,7 @@ export const SHOWCASE_ADAPTERS = [
     pkg: "@adapttable/taiga-ui",
     peer: "@taiga-ui/core",
     install:
-      "# After 0.1.0 publication completes; follow the kit setup guide\npnpm add @adapttable/taiga-ui@0.1.0 @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2",
+      "# Follow the kit setup guide for compatible peers\npnpm add @adapttable/taiga-ui @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2",
     provider: "AdaptTaigaRoot",
     tagline:
       "Taiga UI controls and overlays with optional features and host-owned data.",
@@ -690,7 +690,7 @@ export const SHOWCASE_ADAPTERS = [
     },
     landingIntro: [
       "{tagline}",
-      "This adapter is being prepared for its first public 0.1.0 release. The registry install command requires npm publication to complete. Follow its Angular setup guide for peers, providers, styles and assets.",
+      "This adapter is available on npm. Follow its Angular setup guide for compatible peers, providers, styles and assets. Upgrade the binding and adapter together using their declared dependency ranges.",
       "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. The visible controls are {surface}.",
     ],
     built: true,

@@ -1,8 +1,7 @@
 # Angular ngx-bootstrap adapter
 
-`@adapttable/ngx-bootstrap` is being prepared for its first public **0.1.0**
-release. Registry installation requires the owner-controlled npm publication
-to complete; release preparation does not confirm npm availability.
+`@adapttable/ngx-bootstrap` is available on npm. Keep the kit and
+binding releases compatible with the dependencies declared by the kit.
 
 ## Setup
 
@@ -13,10 +12,10 @@ The adapter compiles Bootstrap **5.3.8** into a host-scoped stylesheet and
 ships its MIT license. Do not add global Bootstrap CSS or its JavaScript bundle.
 No Angular localize initializer or Popper dependency is required by this kit.
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/ngx-bootstrap@0.1.0 @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0
+npm install @adapttable/ngx-bootstrap @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0
 ```
 
 Keep the host's Angular Common and Core packages on compatible Angular 22

@@ -1,8 +1,8 @@
 # AdaptTable — full documentation
 
-> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React and Angular bindings, and native table adapters. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Angular has unstyled and NG-ZORRO kits. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
+> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React and Angular bindings, and native table adapters. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Angular kits include native unstyled, NG-ZORRO, Material, ng-bootstrap, ngx-bootstrap, Spartan, Taiga UI, Aria and CDK. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
 
-Start with your framework's getting-started and the shared concepts for package ownership, then features for opt-in composition. Angular kits and @adapttable/ai-angular are prepared for their first public 0.1.0 release; npm publication is a separate owner-controlled step. Verify registry availability before installing, or use built local packages until publication. Vue has an experimental, unreleased 0.1.0 public binding and native unstyled kit for reactive sources, desktop/cards, filters, editing, hierarchy, row presentation, view controls and optional agents, assistant UI and speech through @adapttable/ai-vue. The Vue packages are not published to npm; full feature parity and styled kits are not included. Use the v2-to-v3 migration guide when upgrading React; historical migration examples describe their named versions, not current import paths. This file is generated from the canonical guides; the linked index is at https://adapttable.orwamahmoud.com/llms.txt.
+Start with your framework's getting-started and the shared concepts for package ownership, then features for opt-in composition. The Angular binding, all nine native kits and @adapttable/ai-angular are available on npm. The upcoming Angular 0.5 binding changes canonical import paths; use its migration guide and compatible kit releases when upgrading. Vue has an experimental, unreleased 0.1.0 public binding and native unstyled kit for reactive sources, desktop/cards, filters, editing, hierarchy, row presentation, view controls and optional agents, assistant UI and speech through @adapttable/ai-vue. The Vue packages are not published to npm; full feature parity and styled kits are not included. Use the v2-to-v3 migration guide when upgrading React; historical migration examples describe their named versions, not current import paths. This file is generated from the canonical guides; the linked index is at https://adapttable.orwamahmoud.com/llms.txt.
 
 
 ---
@@ -24049,20 +24049,20 @@ AdaptTable combines a headless Angular binding with a kit that draws the
 controls. Start with `AdaptDataTable`, an array of rows, column definitions and
 a stable row key. Add feature imports when the table needs them.
 
-## First public releases in preparation
+Upgrading an existing binding? Read the [0.5 migration guide](migrating-to-0-5.md)
+before changing imports. The new entry paths require the 0.5 release.
 
-Seven additional kits are being prepared for their first public **0.1.0**
-releases: [Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
+## Published Angular kits
+
+All nine Angular kits are available on npm. The additional native choices are
+[Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
 [Spartan](spartan.md), [Taiga UI](taiga-ui.md), [Angular Aria](aria.md),
 [Angular CDK](angular-cdk.md) and [ngx-bootstrap](ngx-bootstrap.md).
-Their registry installation commands apply only after the owner-controlled npm
-publication completes. Release preparation and working showcase routes do not
-confirm npm availability.
 
 Each kit guide includes its registry command, Angular 22 peers, provider setup,
-styling and assets. Use the source showcase while publication is pending; the
-local routes are `/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`,
-`/aria/`, `/angular-cdk/` and `/ngx-bootstrap/`. ngx-bootstrap also has a
+styling and assets. Their local showcase routes are `/material/`,
+`/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`, `/angular-cdk/` and
+`/ngx-bootstrap/`. ngx-bootstrap also has a
 [documented upstream pre-hydration pagination replay limitation](ngx-bootstrap.md#known-upstream-event-replay-limitation).
 
 ## Choose a kit
@@ -24075,8 +24075,9 @@ local routes are `/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`,
 - `@adapttable/angular` supplies signals, column types and structural Chrome
   for any Angular kit or your own renderer
 
-The Angular binding, Unstyled, NG-ZORRO and the optional AI binding are available
-on npm; the seven new kits have the publication requirement described above.
+The Angular binding, all nine kits and the optional AI binding are available
+on npm. Features described for the upcoming 0.5 binding require that release;
+see the migration guide before upgrading an existing installation.
 Package versions are independent; each kit declares its compatible binding and
 engine dependencies. Do not force core, binding and kit to share a version.
 
@@ -24271,6 +24272,131 @@ Continue with [Data tiers](./data-tiers.md), [Columns](./columns.md),
 
 ---
 
+# Migrate the Angular binding to 0.5
+
+The 0.5 release gives each Angular API one public home. It preserves the
+existing Angular names and feature behavior while separating application
+contracts, opt-in feature factories and adapter construction. This is a
+pre-1.0 breaking import-path change. The new paths require the 0.5 binding;
+they are not available in the published 0.4 binding.
+
+## Choose the entry by its role
+
+- `@adapttable/angular` owns application hooks, column and renderer contracts,
+  `AdaptTableFeature`, feature state, mount contracts and composition helpers.
+  `AdaptCellTemplate` remains here for application templates.
+- `@adapttable/angular/features` owns headless feature factories and their
+  feature-specific options. For example, import `grouping`, `virtualize`,
+  `rowEditing` and `GroupingExtras` here when building your own adapter.
+- `@adapttable/angular/adapter` owns structural Chrome, rendering directives,
+  kit slots, table models, `AdaptDataTableShell` and kit controllers such as
+  `injectBulkBarRunner`. It supplies no native control library or kit theme.
+- `/formula`, `/pivot`, `/router`, `/sparkline` and `/stream` keep their
+  existing specialized entry points.
+
+Import application types from their canonical owner rather than relying on a
+feature entry to re-export them. For example, `ColumnDef`, `AdaptTableFeature`,
+`FeatureMountContext`, `SlotTable` and `RowSelectionOptions` belong at the root.
+
+## Update a headless renderer
+
+Application hooks stay at the root. Structural rendering directives move to
+`/adapter`:
+
+```diff
+- import { AdaptAttrs, AdaptCell, AdaptHeader } from "@adapttable/angular";
++ import { AdaptAttrs, AdaptCell, AdaptHeader } from "@adapttable/angular/adapter";
+```
+
+Application imports stay unchanged:
+
+```diff
+import {
+  AdaptCellTemplate,
+  injectDataTable,
+  injectFrontendData,
+  type ColumnDef,
+} from "@adapttable/angular";
+import {
+  AdaptAttrs,
+  AdaptCell,
+  AdaptHeader,
+} from "@adapttable/angular/adapter";
+```
+
+Keep the same Angular component imports and templates. A custom renderer can
+also use the root's headless state and attribute getters with its own markup,
+without using structural Chrome or a complete kit.
+
+## Update an adapter
+
+A previously combined root import becomes explicit imports from the three
+owners. Composition helpers stay at the root:
+
+```diff
+import { extendFeature, slotRender } from "@adapttable/angular";
+import { collapsibleColumnGroups } from "@adapttable/angular/features";
+import {
+  AdaptColumnGroupToggleChrome,
+  COLUMN_GROUP_TOGGLE,
+  type ColumnGroupToggleSlots,
+} from "@adapttable/angular/adapter";
+```
+
+The existing [adapter guide](building-an-adapter.md) contains a complete
+component example. All nine native kits use these same binding entries; they
+retain their own controls, table and mobile templates, overlays and styling.
+Do not import a binding's private source files or copy its DI tokens or
+directive classes. The public entries share the original declarations.
+
+## Keep kit feature imports
+
+Consumers of a native kit still import its table and feature entry points:
+
+```ts
+import { Component } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "@adapttable/angular-unstyled";
+import { grouping } from "@adapttable/angular-unstyled/grouping";
+
+interface Person {
+  id: string;
+  team: string;
+}
+
+@Component({
+  selector: "migrated-people-table",
+  imports: [AdaptDataTable],
+  template: `<adapt-data-table
+    [data]="people"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [features]="features"
+    [urlSync]="false"
+    tableLabel="People"
+  />`,
+})
+export class MigratedPeopleTable {
+  readonly people: Person[] = [{ id: "one", team: "Support" }];
+  readonly columns: ColumnDef<Person>[] = [{ key: "team" }];
+  readonly rowKey = (person: Person) => person.id;
+  readonly features = [grouping("team")];
+}
+```
+
+Use the kit's factory when you want its native controls. The binding's
+`/features` factories remain headless building blocks and do not substitute
+for the kit's feature composition.
+
+Upgrade the binding and the affected kit releases together, following their
+published dependency ranges. Package versions remain independent: this
+binding change targets 0.5, while the native kits' new header-action support
+targets their next 0.2 minor. The release changesets also update Angular AI's
+binding dependency without adding an unrelated AI capability. No package is
+moved to 1.0 by this migration.
+
+---
+
 # Angular Material table
 
 Angular Material controls over the headless `@adapttable/angular` binding.
@@ -24279,19 +24405,18 @@ labels; this kit owns buttons, fields, checkboxes, chips, cards, menus and overl
 
 ## Availability and compatibility
 
-`@adapttable/angular-material` is being prepared for its first public **0.1.0**
-release. Registry installation requires the owner-controlled npm publication
-to complete; release preparation does not confirm npm availability.
+`@adapttable/angular-material` is available on npm. Keep the kit and
+binding releases compatible with the dependencies declared by the kit.
 
 The initial integration targets Angular **22**, Angular Material **22.2.1**
 and CDK **22.2.1**. Material requires the same CDK version. Keep Material and
 CDK together; AdaptTable packages have independent versions. Node.js must meet
 Angular 22's supported floor: 22.22.3+, 24.15.0+, or Node 26+.
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/angular-material@0.1.0 @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.0
+npm install @adapttable/angular-material @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.0
 ```
 
 The host must also provide compatible `@angular/common`, `@angular/core`,
@@ -24472,20 +24597,18 @@ source-level checks alone are not a release-readiness claim.
 # ng-bootstrap Angular data table
 
 `@adapttable/ng-bootstrap` uses the Angular binding's signals, feature factories
-and Chrome with ng-bootstrap overlays and Bootstrap controls. It is being
-prepared for its first public **0.1.0** release. Registry installation requires
-the owner-controlled npm publication to complete; release preparation does not
-confirm npm availability.
+and Chrome with ng-bootstrap overlays and Bootstrap controls. The kit is available on npm.
+Keep the kit and binding releases compatible with their declared dependencies.
 
 ## Dependencies
 
 Use Angular 22, ng-bootstrap 21, Bootstrap CSS 5.3.8 and Popper 2.11.8, matching
 [the official compatibility table](https://github.com/ng-bootstrap/ng-bootstrap#dependencies).
 ng-bootstrap also requires `@angular/forms`, `@angular/localize` and RxJS.
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/ng-bootstrap@0.1.0 @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0
+npm install @adapttable/ng-bootstrap @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0
 ```
 
 Keep the host's Angular Common and Core packages on compatible Angular 22
@@ -24589,9 +24712,8 @@ release; the registry installation example does not claim they have passed.
 # Spartan Angular table
 
 `@adapttable/spartan` renders AdaptTable through Spartan Brain and an owned
-Helm layer. It is being prepared for its first public **0.1.0** release.
-Registry installation requires the owner-controlled npm publication to complete;
-release preparation does not confirm npm availability.
+Helm layer. The kit is available on npm.
+Keep the kit and binding releases compatible with their declared dependencies.
 
 ## Architecture and supported versions
 
@@ -24605,10 +24727,10 @@ and CDK compatibility with `>=21.0.0 <23.0.0`. This kit targets Angular 22. See
 
 ## Application setup
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/spartan@0.1.0 @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1
+npm install @adapttable/spartan @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1
 ```
 
 Keep the host's Angular Common and Core packages on compatible Angular 22
@@ -24721,9 +24843,8 @@ remain in the shared engine/binding. Styling does not change those contracts.
 # Taiga UI for Angular
 
 `@adapttable/taiga-ui` renders the Angular binding's table and feature slots
-with Taiga UI 5.26.0. It is being prepared for its first public **0.1.0** release.
-Registry installation requires the owner-controlled npm publication to complete;
-release preparation does not confirm npm availability. Taiga UI is Apache-2.0;
+with Taiga UI 5.26.0. The kit is available on npm.
+Keep the kit and binding releases compatible with their declared dependencies. Taiga UI is Apache-2.0;
 the adapter source is MIT.
 
 ## Setup
@@ -24738,10 +24859,10 @@ bootstrap providers. It enables Taiga's event plugins and stable options without
 writing theme attributes to `document.body`, disabling scrollbars globally, or
 adding document metadata. Use `AdaptTaigaRoot` for the scoped theme instead.
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/taiga-ui@0.1.0 @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2
+npm install @adapttable/taiga-ui @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2
 npm install --save-dev less@^4
 ```
 
@@ -24852,9 +24973,8 @@ for the full entry inventory and application setup.
 # Angular CDK adapter
 
 `@adapttable/angular-cdk` is an Angular 22 adapter based on MIT-licensed
-`@angular/cdk` 22.2.1. It is being prepared for its first public **0.1.0** release.
-Registry installation requires the owner-controlled npm publication to complete;
-release preparation does not confirm npm availability.
+`@angular/cdk` 22.2.1. The kit is available on npm.
+Keep the kit and binding releases compatible with their declared dependencies.
 
 CDK provides accessibility and overlay primitives, not a visual component theme.
 This adapter owns neutral controls, styles, table/card layouts and all required
@@ -24870,10 +24990,10 @@ remain available on the same public elements.
 
 ## Minimal table
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/angular-cdk@0.1.0 @adapttable/angular @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2
+npm install @adapttable/angular-cdk @adapttable/angular @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2
 ```
 
 Keep the host's Angular Common, Core and Platform Browser packages on compatible
@@ -24945,9 +25065,8 @@ compiler, coverage and browser verification before any release claim.
 
 # Angular ngx-bootstrap adapter
 
-`@adapttable/ngx-bootstrap` is being prepared for its first public **0.1.0**
-release. Registry installation requires the owner-controlled npm publication
-to complete; release preparation does not confirm npm availability.
+`@adapttable/ngx-bootstrap` is available on npm. Keep the kit and
+binding releases compatible with the dependencies declared by the kit.
 
 ## Setup
 
@@ -24958,10 +25077,10 @@ The adapter compiles Bootstrap **5.3.8** into a host-scoped stylesheet and
 ships its MIT license. Do not add global Bootstrap CSS or its JavaScript bundle.
 No Angular localize initializer or Popper dependency is required by this kit.
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/ngx-bootstrap@0.1.0 @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0
+npm install @adapttable/ngx-bootstrap @adapttable/angular ngx-bootstrap@22.0.0 @angular/forms@^22 rxjs@^7.4.0
 ```
 
 Keep the host's Angular Common and Core packages on compatible Angular 22
@@ -25074,9 +25193,8 @@ Release preparation is not a claim that those gates have passed.
 # Angular Aria adapter
 
 `@adapttable/angular-aria` targets Angular 22 and the MIT-licensed Angular
-Aria/CDK 22.2.1 pair. It is being prepared for its first public **0.1.0** release.
-Registry installation requires the owner-controlled npm publication to complete;
-release preparation does not confirm npm availability.
+Aria/CDK 22.2.1 pair. The kit is available on npm.
+Keep the kit and binding releases compatible with their declared dependencies.
 
 ## Architecture and controls
 
@@ -25098,10 +25216,10 @@ tokens or use the common part attributes and class-name hooks.
 
 ## Minimal table
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/angular-aria@0.1.0 @adapttable/angular @angular/aria@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2
+npm install @adapttable/angular-aria @adapttable/angular @angular/aria@22.2.1 @angular/cdk@22.2.1 @angular/forms@^22 rxjs@^7.8.2
 ```
 
 Keep the host's Angular Common, Core and Platform Browser packages on compatible
@@ -25608,6 +25726,8 @@ import {
   AdaptCell,
   AdaptHeader,
   AdaptTableStatusAnnouncer,
+} from "@adapttable/angular/adapter";
+import {
   injectDataTable,
   injectFrontendData,
   type ColumnDef,
@@ -25931,13 +26051,12 @@ import { Component, input } from "@angular/core";
 import {
   AdaptColumnGroupToggleChrome,
   COLUMN_GROUP_TOGGLE,
-  collapsibleColumnGroups,
-  extendFeature,
-  slotRender,
   type ColumnGroupToggleButtonProps,
   type ColumnGroupToggleProps,
   type ColumnGroupToggleSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
+import { collapsibleColumnGroups } from "@adapttable/angular/features";
+import { extendFeature, slotRender } from "@adapttable/angular";
 
 @Component({
   selector: "example-group-button",
@@ -26443,7 +26562,7 @@ export class InvoiceTable {
     {
       key: "amount",
       sortable: true,
-      accessor: (row) => `$${row.amount.toFixed(2)}`,
+      accessor: (row) => `${row.amount.toFixed(2)}`,
       sortValue: (row) => row.amount,
       exportValue: (row) => row.amount,
     },
@@ -26933,9 +27052,9 @@ import type {
   FilterDef,
   FilterFormSource,
   FilterTypeSpec,
-  FilterWidgetRenderProps,
   TableLabels,
 } from "@adapttable/angular";
+import type { FilterWidgetRenderProps } from "@adapttable/angular/adapter";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 import { filters, filterTypes } from "@adapttable/angular-unstyled/filters";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
@@ -29028,7 +29147,7 @@ export class InvoiceTotals {
       header: "Amount",
       sortValue: (row) => row.amount,
       formatAggregate: (value) =>
-        typeof value === "number" ? `$${value.toFixed(2)}` : value,
+        typeof value === "number" ? `${value.toFixed(2)}` : value,
     },
   ];
   readonly summary = aggregate<Invoice>(
@@ -29036,7 +29155,7 @@ export class InvoiceTotals {
     {
       columns: this.columns,
       format: (value) =>
-        typeof value === "number" ? `$${value.toFixed(2)}` : value,
+        typeof value === "number" ? `${value.toFixed(2)}` : value,
     }
   );
   readonly features = [
@@ -31266,6 +31385,14 @@ and first-release status. A command is
 `{ key, label, onSelect }`, with optional `disabled`, `danger` and
 `separatorBefore`. `onSelect` is a function, not an Angular event output. Labels
 for custom commands are already-localized text supplied by the application.
+
+## Writing direction
+
+The palette follows the table's current `dir`, including kit-owned overlays
+rendered through portals. Switching between RTL and LTR while it is open keeps
+the mounted palette and search text intact. Custom adapters can forward `dir`
+through `CommandPaletteInjectOptions` and `AdaptCommandPaletteChrome`; omitting
+it preserves the kit's inherited or native direction.
 
 ## Shortcuts and focus
 

@@ -2,8 +2,8 @@
 
 Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matching Angular 22.
 
-Prepared for its first public `0.1.0` release. Publication to npm is a separate
-owner-controlled step; package metadata does not imply registry availability.
+Available on npm. Install a compatible binding and kit release together; their
+versions are independent and the kit declares its binding/core dependencies.
 
 AdaptTable's Angular binding and structural Chrome, rendered with Bootstrap form
 controls and ng-bootstrap overlays. The kit includes scoped Bootstrap 5.3.8 CSS;
@@ -19,15 +19,15 @@ This matches [ng-bootstrap's official compatibility table](https://github.com/ng
 Do not import `bootstrap/dist/css/bootstrap.css`, its RTL variant, or Bootstrap's
 JavaScript bundle for this adapter. ng-bootstrap owns widget behavior.
 
-After publication, install the kit and its native peers in an Angular 22 app:
+Install the kit and its native peers in an Angular 22 app:
 
 ```sh
 pnpm add @ng-bootstrap/ng-bootstrap@^21 @angular/forms@^22 @angular/localize@^22 @popperjs/core@^2.11.8 rxjs@^7.4
 pnpm add @adapttable/ng-bootstrap @adapttable/angular
 ```
 
-Before publication, link `@adapttable/ng-bootstrap@workspace:*` and
-`@adapttable/angular@workspace:*` from this monorepo instead. AdaptTable package
+For local source development, link `@adapttable/ng-bootstrap@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo. AdaptTable package
 versions are independent; the adapter resolves its exact binding/core dependencies.
 
 Import the package CSS once in the application entry or global stylesheet pipeline:

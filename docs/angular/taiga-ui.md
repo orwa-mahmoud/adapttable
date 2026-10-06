@@ -1,9 +1,8 @@
 # Taiga UI for Angular
 
 `@adapttable/taiga-ui` renders the Angular binding's table and feature slots
-with Taiga UI 5.26.0. It is being prepared for its first public **0.1.0** release.
-Registry installation requires the owner-controlled npm publication to complete;
-release preparation does not confirm npm availability. Taiga UI is Apache-2.0;
+with Taiga UI 5.26.0. The kit is available on npm.
+Keep the kit and binding releases compatible with their declared dependencies. Taiga UI is Apache-2.0;
 the adapter source is MIT.
 
 ## Setup
@@ -18,10 +17,10 @@ bootstrap providers. It enables Taiga's event plugins and stable options without
 writing theme attributes to `document.body`, disabling scrollbars globally, or
 adding document metadata. Use `AdaptTaigaRoot` for the scoped theme instead.
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/taiga-ui@0.1.0 @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2
+npm install @adapttable/taiga-ui @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/event-plugins@^5 @taiga-ui/design-tokens@~0.320.0 @angular/cdk@^22 @angular/forms@^22 @angular/router@^22 rxjs@^7.8.2
 npm install --save-dev less@^4
 ```
 

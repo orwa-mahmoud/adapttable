@@ -1,20 +1,18 @@
 # ng-bootstrap Angular data table
 
 `@adapttable/ng-bootstrap` uses the Angular binding's signals, feature factories
-and Chrome with ng-bootstrap overlays and Bootstrap controls. It is being
-prepared for its first public **0.1.0** release. Registry installation requires
-the owner-controlled npm publication to complete; release preparation does not
-confirm npm availability.
+and Chrome with ng-bootstrap overlays and Bootstrap controls. The kit is available on npm.
+Keep the kit and binding releases compatible with their declared dependencies.
 
 ## Dependencies
 
 Use Angular 22, ng-bootstrap 21, Bootstrap CSS 5.3.8 and Popper 2.11.8, matching
 [the official compatibility table](https://github.com/ng-bootstrap/ng-bootstrap#dependencies).
 ng-bootstrap also requires `@angular/forms`, `@angular/localize` and RxJS.
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/ng-bootstrap@0.1.0 @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0
+npm install @adapttable/ng-bootstrap @adapttable/angular @ng-bootstrap/ng-bootstrap@21.0.0 @popperjs/core@2.11.8 @angular/forms@^22 @angular/localize@^22 rxjs@^7.4.0
 ```
 
 Keep the host's Angular Common and Core packages on compatible Angular 22

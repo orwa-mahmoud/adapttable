@@ -4,8 +4,8 @@ Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matc
 
 An Angular 22 adapter using MIT-licensed `@angular/cdk` 22.2.1.
 
-Prepared for its first public `0.1.0` release. Publication to npm is a separate
-owner-controlled step; package metadata does not imply registry availability.
+Available on npm. Install a compatible binding and kit release together; their
+versions are independent and the kit declares its binding/core dependencies.
 
 CDK is headless: this adapter supplies neutral native HTML controls enhanced
 with CDK FocusMonitor, connected overlays, menu behavior and focus traps.
@@ -14,14 +14,14 @@ The Angular binding owns structural Chrome and behavior models.
 
 ## Installation and styles
 
-After publication, install the kit and its native peers in an Angular 22 app:
+Install the kit and its native peers in an Angular 22 app:
 
 ```sh
 pnpm add @adapttable/angular-cdk @adapttable/angular @angular/cdk@^22.2.1 @angular/forms@^22 rxjs@^7.8.2
 ```
 
-Before publication, link `@adapttable/angular-cdk@workspace:*` and
-`@adapttable/angular@workspace:*` from this monorepo instead. The host must also
+For local source development, link `@adapttable/angular-cdk@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo. The host must also
 provide compatible Angular 22 `common`, `core` and `platform-browser` peers.
 AdaptTable package versions are independent; the adapter resolves its exact
 binding/core dependencies.

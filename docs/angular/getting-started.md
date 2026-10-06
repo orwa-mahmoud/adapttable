@@ -7,20 +7,17 @@ a stable row key. Add feature imports when the table needs them.
 Upgrading an existing binding? Read the [0.5 migration guide](migrating-to-0-5.md)
 before changing imports. The new entry paths require the 0.5 release.
 
-## First public releases in preparation
+## Published Angular kits
 
-Seven additional kits are being prepared for their first public **0.1.0**
-releases: [Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
+All nine Angular kits are available on npm. The additional native choices are
+[Angular Material](material.md), [ng-bootstrap](ng-bootstrap.md),
 [Spartan](spartan.md), [Taiga UI](taiga-ui.md), [Angular Aria](aria.md),
 [Angular CDK](angular-cdk.md) and [ngx-bootstrap](ngx-bootstrap.md).
-Their registry installation commands apply only after the owner-controlled npm
-publication completes. Release preparation and working showcase routes do not
-confirm npm availability.
 
 Each kit guide includes its registry command, Angular 22 peers, provider setup,
-styling and assets. Use the source showcase while publication is pending; the
-local routes are `/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`,
-`/aria/`, `/angular-cdk/` and `/ngx-bootstrap/`. ngx-bootstrap also has a
+styling and assets. Their local showcase routes are `/material/`,
+`/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`, `/aria/`, `/angular-cdk/` and
+`/ngx-bootstrap/`. ngx-bootstrap also has a
 [documented upstream pre-hydration pagination replay limitation](ngx-bootstrap.md#known-upstream-event-replay-limitation).
 
 ## Choose a kit
@@ -33,8 +30,9 @@ local routes are `/material/`, `/ng-bootstrap/`, `/spartan/`, `/taiga-ui/`,
 - `@adapttable/angular` supplies signals, column types and structural Chrome
   for any Angular kit or your own renderer
 
-The Angular binding, Unstyled, NG-ZORRO and the optional AI binding are available
-on npm; the seven new kits have the publication requirement described above.
+The Angular binding, all nine kits and the optional AI binding are available
+on npm. Features described for the upcoming 0.5 binding require that release;
+see the migration guide before upgrading an existing installation.
 Package versions are independent; each kit declares its compatible binding and
 engine dependencies. Do not force core, binding and kit to share a version.
 

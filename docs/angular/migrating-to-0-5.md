@@ -106,7 +106,7 @@ export class MigratedPeopleTable {
   readonly people: Person[] = [{ id: "one", team: "Support" }];
   readonly columns: ColumnDef<Person>[] = [{ key: "team" }];
   readonly rowKey = (person: Person) => person.id;
-  readonly features = [grouping()];
+  readonly features = [grouping("team")];
 }
 ```
 
