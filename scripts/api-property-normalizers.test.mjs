@@ -313,7 +313,7 @@ test("keeps the normalizer warning visible and counts its distinct structural ev
   );
   assert.match(
     generator,
-    /includeForgottenExports: includeForgottenExports \|\| valueAliases.size > 0/
+    /includeForgottenExports:\s*includeForgottenExports \|\| dir === "vue" \|\| valueAliases.size > 0/
   );
   assert.match(generator, /counts.publishedPropertyNormalizer \+= 1/);
   assert.match(generator, /published-property-normalizer evidence:/);

@@ -367,7 +367,7 @@ describe("the structurally proved published-value-alias class", () => {
     );
     assert.match(
       generator,
-      /includeForgottenExports: includeForgottenExports \|\| valueAliases.size > 0/
+      /includeForgottenExports:\s*includeForgottenExports \|\| dir === "vue" \|\| valueAliases.size > 0/
     );
     assert.match(generator, /counts.publishedValueAlias \+= 1/);
     assert.match(generator, /published-value-alias evidence:/);

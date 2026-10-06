@@ -293,7 +293,10 @@ function extractOne({ dir, report, entry, isMainEntry }) {
   };
   const { result, fresh, missingTargets, retainedTargets } =
     extractWithReportRetention({
-      includeForgottenExports: includeForgottenExports || valueAliases.size > 0,
+      // Vue entries import shared contracts from sibling entry points.
+      // Retain their definitions so each report remains self-contained.
+      includeForgottenExports:
+        includeForgottenExports || dir === "vue" || valueAliases.size > 0,
       publishedBases,
       readReport: () => {
         const fresh = readFileSync(join(OUT, report), "utf8");
