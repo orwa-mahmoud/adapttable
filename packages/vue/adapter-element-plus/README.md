@@ -119,6 +119,28 @@ Pass `features` to `DataTable`. Use `v-model:density` to keep density in host
 state. The fullscreen button appears only when the browser supports fullscreen;
 it promotes the existing table root.
 
+## Grouped, tree and detail rows
+
+```ts
+import { grouping } from "@adapttable/element-plus/grouping";
+import { rowDetail } from "@adapttable/element-plus/row-detail";
+
+const features = [
+  grouping("score", { groupFooters: true }),
+  rowDetail<Person>((person) => `Details for ${person.name}`),
+];
+```
+
+Group expansion, paging and selection use Element Plus buttons and checkboxes
+in both desktop and mobile layouts. Group aggregates receive the original host
+rows. The `tree` entry point exports `tree`, `useTreeExpansion` and
+`useLazyChildren`; expansion and loading remain in the Vue binding.
+
+`rowDetail`, `nestedTable`, `nestedTableDetail` and `useRowExpansion` are exported
+from `row-detail`. The `nested-table` entry point also exports `nestedTable`.
+Supply this kit's `DataTable` in a nested renderer to keep its controls and
+inherited density consistent with the parent.
+
 ## Server rendering
 
 Use Element Plus's documented per-request `ID_INJECTION_KEY` and

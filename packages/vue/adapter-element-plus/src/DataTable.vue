@@ -340,4 +340,33 @@ function setScrollElement(element: HTMLElement | null): void {
   background: transparent;
   cursor: col-resize;
 }
+
+.adapttable-element-plus [data-adapttable-part="group-cell"] > span,
+.adapttable-element-plus [data-adapttable-part="group-card"] > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.adapttable-element-plus
+  :is(
+    [data-adapttable-part="group-card"],
+    [data-adapttable-part="group-footer-card"],
+    [data-adapttable-part="group-more-card"]
+  ) {
+  padding: 0.75rem;
+  border: 1px solid var(--el-border-color-light);
+  border-radius: var(--el-border-radius-base);
+  background: var(--el-fill-color-light);
+}
+
+.adapttable-element-plus [data-adapttable-part="group-label"] {
+  font-weight: 600;
+}
+
+.adapttable-element-plus [data-adapttable-part="group-count"] {
+  color: var(--el-text-color-secondary);
+  font-size: var(--el-font-size-small);
+}
 </style>
