@@ -52,6 +52,7 @@ const { presentation, update } = useQuasarPresentation(
     :class="className"
     :model-value="presentation"
     :options="control.options"
+    dropdown-icon="M7 10l5 5 5-5z"
     emit-value
     map-options
     outlined

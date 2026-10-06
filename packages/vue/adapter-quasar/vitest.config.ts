@@ -24,36 +24,13 @@ export default defineConfig({
             },
           ]
         : []),
-      {
-        find: /^@adapttable\/vue$/,
-        replacement: fileURLToPath(
-          new URL("../vue/src/index.ts", import.meta.url)
-        ),
-      },
-      {
-        find: /^@adapttable\/vue\/(.+)$/,
-        replacement: fileURLToPath(
-          new URL("../vue/src/$1.ts", import.meta.url)
-        ),
-      },
-      {
-        find: /^@adapttable\/core$/,
-        replacement: fileURLToPath(
-          new URL("../../shared/core/src/index.ts", import.meta.url)
-        ),
-      },
-      {
-        find: /^@adapttable\/core\/(.+)$/,
-        replacement: fileURLToPath(
-          new URL("../../shared/core/src/$1.ts", import.meta.url)
-        ),
-      },
     ],
   },
   test: {
     environment: ssr ? "node" : "jsdom",
     setupFiles: ssr ? [] : ["./test/setup.ts"],
-    include: ssr ? ["test/controls.ssr.test.ts"] : ["test/controls.test.ts"],
+    include: ssr ? ["test/**/*.ssr.test.ts"] : ["test/**/*.test.ts"],
+    exclude: ssr ? [] : ["test/**/*.ssr.test.ts"],
     globals: true,
     clearMocks: true,
     restoreMocks: true,

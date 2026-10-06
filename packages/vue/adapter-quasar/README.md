@@ -12,6 +12,8 @@ load its stylesheet in your application entry:
 import { createApp } from "vue";
 import { Quasar } from "quasar";
 import "quasar/dist/quasar.css";
+import "@adapttable/quasar/styles.css";
+import App from "./App.vue";
 
 createApp(App).use(Quasar, { config: {} }).mount("#app");
 ```
@@ -39,6 +41,41 @@ not support SSR/SSG through its standalone Vite plugin. Component-level Node
 SSR and hydration tests do not establish support for that unsupported build
 mode. In a Quasar CLI application, let the CLI install Quasar and manage its
 server context; do not install a second application instance.
+
+## Optional assembled table
+
+`DataTable` composes the binding's optional layout with Quasar-owned desktop
+and mobile renderers. It keeps a single scroll container and consumes the
+binding's prepared row order, column spans, selection state and callbacks.
+
+```vue
+<script setup lang="ts">
+import { DataTable } from "@adapttable/quasar";
+const rows = [{ id: "ada", name: "Ada" }];
+const columns = [{ key: "name", header: "Name", sortable: true }];
+</script>
+
+<template>
+  <DataTable :data="rows" :columns="columns" :row-key="(row) => row.id" />
+</template>
+```
+
+The desktop renderer uses genuine `QCard`, `QTr`, `QTh` and `QTd` primitives
+around an adapter-owned native table. Model attributes and refs reach that
+actual table, row, header or cell. It does not use `QTable` or `QMarkupTable`:
+those components do not publicly forward arbitrary attributes and refs to
+their internal table. `QTable` also owns a separate data engine that is not
+needed here. Mobile rows use `QCard` and `QCardSection` with list-item and
+label/value semantics.
+
+The adapter includes its own table presentation stylesheet, uses Quasar's
+public theme colors, and draws select arrows through Quasar's documented SVG
+icon API, without requiring an icon font for the adapter's controls. The app
+still owns its Quasar stylesheet, language pack and RTL configuration.
+
+For complete layout control, import the models and controllers directly from
+`@adapttable/vue` and `@adapttable/vue/adapter` and provide your own renderer.
+Neither `DataTable` nor its optional surface is required for headless usage.
 
 ## Control targets
 

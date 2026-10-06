@@ -1,6 +1,6 @@
 import type { Attrs, ElementRef } from "@adapttable/vue";
-import { toVueAttrs } from "@adapttable/vue/adapter";
-import { onScopeDispose, watch } from "vue";
+import { toVueAttrs, useElementRef } from "@adapttable/vue/adapter";
+import { computed, onScopeDispose } from "vue";
 
 /** Translate native contract names through Quasar's public component props. */
 export function quasarAttrs(attrs: Attrs): Record<string, unknown> {
@@ -35,28 +35,54 @@ export function quasarFieldAttrs(attrs: Attrs): Record<string, unknown> {
   return output;
 }
 
-/** Deliver only actual DOM targets and release both old owners on replacement. */
+interface RefGroup<T extends HTMLElement> {
+  readonly owners: readonly ElementRef<T>[];
+  readonly callback: ElementRef<T>;
+}
+
+/** Project the kit's two optional ref channels onto the binding's one owner. */
 export function useQuasarControlRef<T extends HTMLElement>(
   target: () => T | null,
   attrs: () => Attrs,
   focusRef: () => ElementRef<T> | undefined = () => undefined
 ): void {
-  let release: () => void = () => undefined;
-  watch(
-    [target, () => attrs().ref, focusRef],
-    ([element, attrRef, focus]) => {
-      release();
-      release = () => undefined;
-      if (!element) return;
-      const refs = new Set<ElementRef<T>>();
-      if (typeof attrRef === "function") refs.add(attrRef as ElementRef<T>);
-      if (focus) refs.add(focus);
-      for (const ref of refs) ref(element);
-      release = () => {
-        for (const ref of refs) ref(null);
-      };
-    },
-    { flush: "post" }
-  );
-  onScopeDispose(() => release());
+  let active = true;
+  onScopeDispose(() => {
+    active = false;
+  });
+  const group = computed<RefGroup<T>>((previous) => {
+    const attrRef = attrs().ref;
+    const focus = focusRef();
+    const owners = [
+      ...new Set([
+        ...(typeof attrRef === "function" ? [attrRef as ElementRef<T>] : []),
+        ...(focus ? [focus] : []),
+      ]),
+    ];
+    if (
+      owners.length === previous?.owners.length &&
+      owners.every((owner, index) => owner === previous.owners[index])
+    )
+      return previous;
+    const attached = new Set<ElementRef<T>>();
+    return {
+      owners,
+      callback: (element) => {
+        if (element === null) {
+          const retiring = [...attached];
+          attached.clear();
+          for (const owner of retiring) owner(null);
+          return;
+        }
+        for (const owner of owners) {
+          // An owner may synchronously dispose the control while receiving its
+          // target. Never attach a later channel after that disposal.
+          if (!active) return;
+          attached.add(owner);
+          owner(element);
+        }
+      },
+    };
+  });
+  useElementRef(target, () => group.value.callback);
 }
