@@ -7,6 +7,7 @@
     "types": ["node", "vitest/globals"],
     "paths": {
       "@adapttable/vue-unstyled": ["./src/index.ts"],
+      "@adapttable/vue-unstyled/assistant": ["./src/assistant.ts"],
       "@adapttable/vue-unstyled/features": ["./src/features.ts"],
       "@adapttable/vue-unstyled/columns": ["./src/columns.ts"],
       "@adapttable/vue-unstyled/rows": ["./src/rows.ts"],
