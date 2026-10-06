@@ -1766,6 +1766,7 @@ export class AdaptCommandPaletteChrome {
     // (undocumented)
     protected readonly copy: Signal<Required<TableLabels>>;
     protected readonly dialogLabel: Signal<string>;
+    readonly dir: InputSignal<Direction | undefined>;
     protected readonly emptyProps: Signal<    {
     message: string;
     }>;
@@ -1829,6 +1830,11 @@ export class AdaptCommandPaletteChrome {
         };
         "labels": {
             "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "dir": {
+            "alias": "dir";
             "required": false;
             "isSignal": true;
         };
@@ -4484,7 +4490,7 @@ export class AdaptTableAssistantChrome {
     protected readonly modalReview: Signal<ApprovalReview | null>;
     // (undocumented)
     protected readonly modalSheet: Signal<{
-        dir?: "rtl" | "ltr" | undefined;
+        dir?: "ltr" | "rtl" | undefined;
         label: string;
         part: string;
         open: boolean;
@@ -4526,7 +4532,7 @@ export class AdaptTableAssistantChrome {
         part: string;
         children: TemplateRef<unknown>;
     } | {
-        dir?: "rtl" | "ltr" | undefined;
+        dir?: "ltr" | "rtl" | undefined;
         open: boolean;
         onClose: () => void;
         className?: string | undefined;
@@ -5228,6 +5234,7 @@ export function commandPalette(options?: boolean | CommandPaletteOptions): Adapt
 // @public
 export interface CommandPaletteInjectOptions extends TableCommandOptions {
     readonly commandPalette?: boolean | CommandPaletteOptions;
+    readonly dir?: Direction;
     readonly featureHost?: FeatureHostState;
     readonly labels: TableLabels;
 }
@@ -5250,7 +5257,9 @@ export interface CommandPaletteSlots {
 }
 
 // @public
-export type CommandPaletteSurfaceProps = CommandPaletteSurfaceProps_2<TemplateRef<unknown> | undefined>;
+export type CommandPaletteSurfaceProps = CommandPaletteSurfaceProps_2<TemplateRef<unknown> | undefined> & {
+    readonly dir?: Direction;
+};
 
 // @public
 export function commitBooleanDraft(ctrl: EditableCellEditorCtrl, checked: boolean): void;

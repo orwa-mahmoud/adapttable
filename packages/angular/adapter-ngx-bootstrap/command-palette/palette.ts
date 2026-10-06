@@ -37,6 +37,7 @@ let nextPaletteId = 0;
       <div
         [attr.aria-label]="props().label"
         [class]="props().className"
+        [attr.dir]="props().dir"
         data-adapttable-part="command-palette"
       >
         <span class="visually-hidden" [id]="titleId">{{ props().label }}</span>
@@ -57,6 +58,7 @@ class AdaptCommandSurface {
       content: () => this.content(),
       container: () => this.element.nativeElement,
       titleId: this.titleId,
+      dir: () => this.props().dir ?? "ltr",
       onClose: () => this.props().onClose(),
     });
   }
@@ -188,6 +190,7 @@ const SLOTS: CommandPaletteSlots = {
       [open]="palette().open"
       [onClose]="palette().close"
       [labels]="props().labels"
+      [dir]="props().dir"
       [slots]="slots"
     />
   `,

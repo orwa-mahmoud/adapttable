@@ -9,6 +9,7 @@ import {
   commandListKeyAction,
   commandListView,
   createCommandList,
+  type Direction,
   resolveLabels,
   runCommand,
   type TableLabels,
@@ -37,7 +38,10 @@ import { fromStore } from "../store";
 /** The kit owns its dialog and outlets the binding's structured content. @public */
 export type CommandPaletteSurfaceProps = NeutralCommandPaletteSurfaceProps<
   TemplateRef<unknown> | undefined
->;
+> & {
+  /** The table's current writing direction, including portaled surfaces. */
+  readonly dir?: Direction;
+};
 
 let nextListId = 0;
 
@@ -89,6 +93,8 @@ export class AdaptCommandPaletteChrome {
   readonly onClose = input.required<() => void>();
   /** Labels; gaps fall back to English. */
   readonly labels = input<TableLabels | undefined>(undefined);
+  /** Direction for the overlay; omission preserves the kit's native direction. */
+  readonly dir = input<Direction | undefined>(undefined);
   protected readonly copy = computed(() => resolveLabels(this.labels()));
   /** A kit's own class for the surface. */
   readonly className = input<string | undefined>(undefined);
@@ -101,14 +107,16 @@ export class AdaptCommandPaletteChrome {
   private readonly surface = viewChild<ElementRef<HTMLElement>>("surface");
   private readonly body = viewChild<TemplateRef<unknown>>("body");
   /** The surface can render through a portal without duplicating this structure. */
-  protected readonly surfaceProps = computed(
-    (): CommandPaletteSurfaceProps => ({
+  protected readonly surfaceProps = computed((): CommandPaletteSurfaceProps => {
+    const dir = this.dir();
+    return {
       label: this.dialogLabel(),
+      ...(dir === undefined ? {} : { dir }),
       onClose: this.onClose(),
       children: this.body(),
       className: this.className(),
-    })
-  );
+    };
+  });
   private opener: HTMLElement | null = null;
   /** The listbox id the input points at. */
   readonly listId = `command-list-${String(++nextListId)}`;

@@ -29,11 +29,13 @@ const ROWS: Row[] = [{ id: "1", name: "Ada" }];
       [urlSync]="false"
       [forceMobile]="false"
       [features]="features"
+      [dir]="dir()"
     />
   `,
 })
 class Host {
   readonly rows = ROWS;
+  readonly dir = signal<"ltr" | "rtl">("ltr");
   readonly columns = [
     { key: "name", header: "Name", accessor: (row: Row) => row.name },
   ];
@@ -66,6 +68,7 @@ class Host {
       [forceMobile]="false"
       [features]="features"
       [labels]="labels()"
+      [dir]="dir()"
     />
   `,
 })
@@ -328,6 +331,48 @@ describe("command palette (Angular Material)", () => {
     const fixture = TestBed.createComponent(BareButton);
     fixture.detectChanges();
     expect(part("command-palette-button")).toBeNull();
+    fixture.destroy();
+  });
+  it("keeps the actual palette surface in the table's live direction while open", async () => {
+    const fixture = TestBed.createComponent(ControlledHost);
+    const host = fixture.componentInstance;
+    host.dir.set("rtl");
+    host.paletteOpen.set(true);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const surface = part("command-palette")!;
+    const input = part("command-input") as HTMLInputElement;
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("rtl");
+    // CDK sets initial direction on this overlay host, not document ancestry.
+    const pane = surface.closest<HTMLElement>(".cdk-overlay-pane")!;
+    expect(pane).not.toBeNull();
+    const overlayHost = pane.parentElement!;
+    expect(overlayHost.classList.contains("cdk-global-overlay-wrapper")).toBe(
+      true
+    );
+    const nativeOwner = () => pane.closest<HTMLElement>("[dir]");
+    expect(nativeOwner()).toBe(overlayHost);
+    expect(nativeOwner()?.dir).toBe("rtl");
+    input.value = "Greet";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await fixture.whenStable();
+    host.dir.set("ltr");
+    await fixture.whenStable();
+    expect(part("command-palette")).toBe(surface);
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("ltr");
+    expect(nativeOwner()).toBe(pane);
+    expect(nativeOwner()?.dir).toBe("ltr");
+    expect(part("command-input")).toBe(input);
+    expect(input.value).toBe("Greet");
+    expect(host.paletteOpen()).toBe(true);
+    expect(host.onOpenChange).not.toHaveBeenCalled();
+    host.dir.set("rtl");
+    await fixture.whenStable();
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("rtl");
+    expect(nativeOwner()).toBe(pane);
+    expect(nativeOwner()?.dir).toBe("rtl");
+    expect(part("command-input")).toBe(input);
     fixture.destroy();
   });
 });

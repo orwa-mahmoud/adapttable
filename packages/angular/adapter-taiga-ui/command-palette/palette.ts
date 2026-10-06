@@ -39,6 +39,7 @@ import {
         aria-modal="true"
         [attr.aria-label]="props().label"
         [class]="props().className"
+        [attr.dir]="props().dir"
         data-adapttable-part="command-palette"
         style="min-inline-size: min(360px, 100%); max-inline-size: 520px; inline-size: 100%"
       >
@@ -183,6 +184,7 @@ const SLOTS: CommandPaletteSlots = {
       [open]="palette().open"
       [onClose]="palette().close"
       [labels]="props().labels"
+      [dir]="props().dir"
       [slots]="slots"
     />
   `,

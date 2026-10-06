@@ -33,10 +33,12 @@ import { MatInputModule } from "@angular/material/input";
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<adapt-material-dialog
     [label]="props().label"
+    [dir]="props().dir ?? 'ltr'"
     (dismiss)="props().onClose()"
   >
     <div
       [class]="props().className"
+      [attr.dir]="props().dir"
       data-adapttable-part="command-palette"
       style="padding:20px"
     >
@@ -176,6 +178,7 @@ const SLOTS: CommandPaletteSlots = {
       [open]="palette().open"
       [onClose]="palette().close"
       [labels]="props().labels"
+      [dir]="props().dir"
       [slots]="slots"
     />
   `,

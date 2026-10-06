@@ -821,6 +821,7 @@ function commandPalettePropsFor(options: {
   readonly commandPalette: CommandPaletteInjectOptions["commandPalette"];
   readonly onPrint: CommandPaletteInjectOptions["onPrint"];
   readonly labels: Signal<TableLabels>;
+  readonly dir: Signal<Direction>;
   readonly clearFilters: () => void;
   readonly featureHost: CommandPaletteInjectOptions["featureHost"];
   readonly exportCsv:
@@ -839,6 +840,7 @@ function commandPalettePropsFor(options: {
     return {
       commandPalette: options.commandPalette,
       labels: options.labels(),
+      dir: options.dir(),
       onPrint: options.onPrint,
       onExport: exported?.onExportCsv,
       exportLabel: exported?.exportLabel,
@@ -2602,6 +2604,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         featureOptions.commandPalette as CommandPaletteInjectOptions["commandPalette"],
       onPrint: featureOptions.onPrint as (() => void) | undefined,
       labels: table.labels,
+      dir: table.dir,
       clearFilters: table.clearFilters,
       featureHost: table.featureHost,
       exportCsv: exporter,

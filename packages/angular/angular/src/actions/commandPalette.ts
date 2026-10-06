@@ -6,6 +6,7 @@ import {
   type Command,
   commandPaletteCommands,
   createCommandPaletteController,
+  type Direction,
   type FeatureHostState,
   isCommandPaletteArmed,
   OPEN_PALETTE_COMMAND,
@@ -38,6 +39,8 @@ export interface CommandPaletteInjectOptions extends TableCommandOptions {
   readonly commandPalette?: boolean | CommandPaletteOptions;
   /** Label overrides; gaps fall back to English. */
   readonly labels: TableLabels;
+  /** The table's current writing direction, including portaled surfaces. */
+  readonly dir?: Direction;
   /** The host of this table, for commands a feature registered. */
   readonly featureHost?: FeatureHostState;
 }
