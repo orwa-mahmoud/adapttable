@@ -1,0 +1,116 @@
+{
+  "repository": "https://github.com/unovue/shadcn-vue",
+  "commit": "b251d9fd92aa496495e127137a7734704fb34a29",
+  "license": "MIT",
+  "style": "new-york-v4",
+  "files": [
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/button/Button.vue",
+      "gitBlob": "3763470a1a2c365db7dbf2cb94c52211a75664e9"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/button/index.ts",
+      "gitBlob": "0a62178892b4311c78de821093bc4666ecc9cd05"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/checkbox/Checkbox.vue",
+      "gitBlob": "b8e04851f5bfedb1672275f80bc27dd103bde972"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/checkbox/index.ts",
+      "gitBlob": "3391a85758f2411b43bf86a917e49e50c7aab7ff"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/input/Input.vue",
+      "gitBlob": "9db9e85fbd36abc610d4ea3344ba90dae89462ac"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/input/index.ts",
+      "gitBlob": "9976b86f52dab75932ee176adb52b3a915743ff5"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/native-select/NativeSelect.vue",
+      "gitBlob": "c54623c8212d26e12218281fd2d5b8ea2cbdb91e"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/native-select/NativeSelectOptGroup.vue",
+      "gitBlob": "d70cb6be6051d812e3c8d732af0d7c2d7b4bb144"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/native-select/NativeSelectOption.vue",
+      "gitBlob": "5fe52c6a05662d7311c825000e6bb4f0ef47774c"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/native-select/index.ts",
+      "gitBlob": "04e92c7ee27a170522fcf0c485f80aa671d02b71"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/popover/Popover.vue",
+      "gitBlob": "4efdb98a0ea6859a9339cbb674cd21106e0cefaf"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/popover/PopoverAnchor.vue",
+      "gitBlob": "49e01dbc569367bd05f7c860530ef914ce396c29"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/popover/PopoverContent.vue",
+      "gitBlob": "27ebbc87f036361b795e9daffc1de59df2960ac3"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/popover/PopoverTrigger.vue",
+      "gitBlob": "fd3b4974daec764b5cb7ac32a3933027bca31ee9"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/popover/index.ts",
+      "gitBlob": "66edf89f6bdf03adbe3a178a5a5b06e109c8c6ee"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/Sheet.vue",
+      "gitBlob": "8522f84db114d6f75e1b180828781e89b7321a16"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/SheetClose.vue",
+      "gitBlob": "39a942c4d6255269cf937bf2e948316ed220a08b"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/SheetContent.vue",
+      "gitBlob": "77fd5d4f293b6d2d07314df5b58222cc84f26d8c"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/SheetDescription.vue",
+      "gitBlob": "6c8ba0a99b7ba26f5751eb207e4b88ddcef1282d"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/SheetFooter.vue",
+      "gitBlob": "5fcf751dd2f985ed2448087dc290402e4daf3b39"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/SheetHeader.vue",
+      "gitBlob": "b6305ab6c1d699006c76b270303c9fcf54d83d9b"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/SheetOverlay.vue",
+      "gitBlob": "220452a7dfb1a5ee461b5659e08adffbfe9e8fd1"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/SheetTitle.vue",
+      "gitBlob": "889ae54a2b7c9d6e86a7223d5471dace666b388f"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/SheetTrigger.vue",
+      "gitBlob": "41b121dba14f2ce92aae9bde3e3f691cfab2d0ab"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet/index.ts",
+      "gitBlob": "7c70e5d7ee976aac5d5a91cda09bdb7bbe20293e"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/textarea/Textarea.vue",
+      "gitBlob": "3a4ddf3028209b8e576e067d3b61726d3779ed52"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/textarea/index.ts",
+      "gitBlob": "8ce91e9c3ede657ed4944f4a5e38ace1aecdd35a"
+    }
+  ]
+}

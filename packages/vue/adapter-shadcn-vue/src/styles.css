@@ -1,0 +1,33 @@
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css" source(".");
+
+/* No preflight: the adapter does not reset its host application's elements. */
+@theme inline {
+  --color-background: var(--background, #ffffff);
+  --color-foreground: var(--foreground, #18181b);
+  --color-primary: var(--primary, #18181b);
+  --color-primary-foreground: var(--primary-foreground, #fafafa);
+  --color-secondary: var(--secondary, #f4f4f5);
+  --color-secondary-foreground: var(--secondary-foreground, #18181b);
+  --color-muted: var(--muted, #f4f4f5);
+  --color-muted-foreground: var(--muted-foreground, #71717a);
+  --color-accent: var(--accent, #f4f4f5);
+  --color-accent-foreground: var(--accent-foreground, #18181b);
+  --color-popover: var(--popover, #ffffff);
+  --color-popover-foreground: var(--popover-foreground, #18181b);
+  --color-destructive: var(--destructive, #dc2626);
+  --color-border: var(--border, #e4e4e7);
+  --color-input: var(--input, #e4e4e7);
+  --color-ring: var(--ring, #a1a1aa);
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="popover-content"],
+  [data-slot="sheet-content"],
+  [data-slot="sheet-overlay"] {
+    animation: none;
+    transition: none;
+  }
+}
