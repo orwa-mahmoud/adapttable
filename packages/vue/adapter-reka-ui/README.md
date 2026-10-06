@@ -83,6 +83,27 @@ CheckboxRoot. Single choices use Select, and multiple choices use Listbox.
 The binding owns drafts, validation, cancellation, save state and focus return.
 Row and batch changes are written only through their explicit Save controls.
 
+## Navigation and status
+
+`cellNavigation()` reuses the binding's keyboard and range controller;
+`columnSelectionCheckbox()` adds real Reka checkboxes to the column headers.
+`selectionStats()` and `statusBar()` share one localized statistics strip.
+`findInTable({ button: true })` adds the optional search action and find bar.
+These features are separate imports from their matching package subpaths.
+Sparklines and host-owned row streams are available through `/sparkline` and
+`/stream` without adding another table controller.
+
+## Host-owned actions and exports
+
+`bulkActions()` keeps writes behind the host's callbacks and confirmation
+handler. `print()` calls the supplied print action. `exportCsv()` supports
+current selection and server-built jobs, rendered with Reka Progress and
+localized cancel, retry, download and dismiss controls.
+
+PDF and XLSX writers are separate `/export-pdf` and `/export-xlsx` imports.
+They reuse the binding's optional integrations; ordinary table and CSV imports
+do not load those writer entry points.
+
 ## Attribute and ref ownership
 
 Selection markers, classes, ARIA and DOM refs target the `CheckboxRoot` button.
@@ -104,3 +125,13 @@ patching is used.
 - [Reka documentation](https://reka-ui.com/docs/overview/introduction)
 - [Composition](https://reka-ui.com/docs/guides/composition)
 - [Reka source and MIT license](https://github.com/unovue/reka-ui)
+
+### Column menus, saved views, and context actions
+
+The `column-menu` and `saved-views` entries use Reka Popover with genuine
+Primitive controls. The `context-menu` entry uses controlled ContextMenu
+Root, Trigger, Portal, Content, Item, and Separator primitives. Its documented
+trigger is mounted into the binding's zero-size coordinate anchor; Reka owns
+menu focus and dismissal, while the binding owns opening gestures and restores
+the invoking cell before running an action. Disabled actions remain announced
+and cannot execute. Host callbacks continue to own writes.

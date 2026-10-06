@@ -32,7 +32,11 @@ import { rekaButton } from "./controls/basic";
 import { rekaSelectionCheckbox } from "./controls/checkbox";
 import { RekaRowActions } from "./controls/RekaRowActions";
 import { rekaSurfaceControls } from "./surfaceControls";
-import { rekaColumnGroupToggle, rekaHierarchyControls } from "./tableControls";
+import {
+  rekaColumnGroupToggle,
+  rekaHierarchyControls,
+  rekaResizeHandle,
+} from "./tableControls";
 
 // The binding owns the table state. This component only chooses Reka paint.
 defineOptions({ inheritAttrs: false });
@@ -84,7 +88,7 @@ function controls(): TableChromeSlots<TRow> {
     SortButton: ({ attrs, content }) => rekaButton(attrs, content),
     SelectionCheckbox: rekaSelectionCheckbox,
     ColumnGroupToggle: rekaColumnGroupToggle,
-    ResizeHandle: ({ attrs }) => h("span", attrs),
+    ResizeHandle: rekaResizeHandle,
     RowActions: ({ controls }) =>
       h(RekaRowActions<TRow>, {
         controls,

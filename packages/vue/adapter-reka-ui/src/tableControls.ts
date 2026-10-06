@@ -1,11 +1,13 @@
-import type { ColumnGroupToggleProps } from "@adapttable/vue";
+import type { Attrs, ColumnGroupToggleProps } from "@adapttable/vue";
 import {
   ColumnGroupToggleChrome,
   type TableChromeSlots,
 } from "@adapttable/vue/adapter";
+import { Primitive } from "reka-ui";
 import { h } from "vue";
 
 import { rekaButton } from "./controls/basic";
+import { rekaTarget } from "./controls/target";
 
 const glyph = (expanded: boolean) =>
   h("span", { "aria-hidden": true }, expanded ? "−" : "+");
@@ -43,4 +45,13 @@ export function rekaHierarchyControls<TRow>(): Pick<
     RowDetailToggle: ({ attrs, expanded }) =>
       rekaButton(attrs, glyph(expanded)),
   };
+}
+
+/** Reka delegates column resizing to a semantic primitive and the binding's handlers. */
+export function rekaResizeHandle({ attrs }: { readonly attrs: Attrs }) {
+  return rekaTarget(Primitive, {
+    ...attrs,
+    as: "span",
+    class: ["at-reka-resize-handle", attrs.class],
+  });
 }

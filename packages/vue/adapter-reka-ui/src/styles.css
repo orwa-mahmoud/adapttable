@@ -420,3 +420,100 @@
   outline: 2px solid #8b5cf6;
   outline-offset: -2px;
 }
+
+.at-reka-status-bar,
+.at-reka-selection-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  font-variant-numeric: tabular-nums;
+}
+.at-reka-status-bar {
+  padding: 0.625rem 1rem;
+  border-block-start: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 0.8125rem;
+}
+.at-reka-fill-handle {
+  position: absolute;
+  inset-inline-end: -3px;
+  inset-block-end: -3px;
+  inline-size: 7px;
+  block-size: 7px;
+  border: 1px solid white;
+  background: #7c3aed;
+  cursor: crosshair;
+  z-index: 2;
+}
+
+.at-reka-resize-handle::after {
+  content: "";
+  position: absolute;
+  inset-block: 20%;
+  inset-inline-start: 50%;
+  inline-size: 1px;
+  background: var(--at-reka-border, #dce2eb);
+}
+.at-reka-resize-handle:hover::after,
+.at-reka-resize-handle:focus-visible::after {
+  inline-size: 2px;
+  background: var(--at-reka-accent, #6d28d9);
+}
+.at-reka-resize-handle:focus-visible {
+  outline: 2px solid var(--at-reka-accent, #6d28d9);
+  outline-offset: -1px;
+}
+
+.at-reka [data-adapttable-part="export-progress-surface"] {
+  padding: 1rem;
+  border: 1px solid var(--at-reka-border);
+  border-radius: var(--at-reka-radius);
+  background: var(--at-reka-background);
+}
+.at-reka-progress {
+  overflow: hidden;
+  block-size: 6px;
+  border-radius: 999px;
+  background: var(--at-reka-subtle, #f8fafc);
+}
+.at-reka-progress-indicator {
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--at-reka-accent, #6d28d9);
+}
+.at-reka [data-adapttable-part="export-progress-actions"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block-start: 0.75rem;
+}
+.at-reka-progress-indicator[data-state="indeterminate"] {
+  animation: at-reka-progress 1.3s ease-in-out infinite;
+}
+[dir="rtl"] .at-reka-progress-indicator[data-state="indeterminate"] {
+  animation-direction: reverse;
+}
+@keyframes at-reka-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .at-reka-progress-indicator[data-state="indeterminate"] {
+    animation: none;
+  }
+}
+
+.at-reka-menu-separator {
+  margin: 4px;
+  block-size: 1px;
+  background: var(--at-reka-border, #dce2eb);
+}
+.at-reka-menu-item[data-danger] {
+  color: #b91c1c;
+}
