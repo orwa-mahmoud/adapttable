@@ -1,5 +1,19 @@
 import { missingDeferredReportTargets } from "./api-report-references.mjs";
 
+/** Keep split binding contracts complete without changing their public owners. */
+export function shouldRetainEntryDeclarations({
+  dir,
+  includeForgottenExports,
+  hasValueAliases,
+}) {
+  return (
+    includeForgottenExports ||
+    dir === "vue" ||
+    dir === "angular" ||
+    hasValueAliases
+  );
+}
+
 function messageKey(message) {
   return JSON.stringify([
     message.messageId,

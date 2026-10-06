@@ -42,7 +42,10 @@ import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
 
 import { entrypoints } from "./api-entrypoints.mjs";
 import { finishApiReportOutput } from "./api-report-diagnostics.mjs";
-import { extractWithReportRetention } from "./api-report-retention.mjs";
+import {
+  extractWithReportRetention,
+  shouldRetainEntryDeclarations,
+} from "./api-report-retention.mjs";
 import { selectApiReports } from "./api-report-selection.mjs";
 import { entryValueGraph } from "./api-value-graph.mjs";
 import {
@@ -293,10 +296,13 @@ function extractOne({ dir, report, entry, isMainEntry }) {
   };
   const { result, fresh, missingTargets, retainedTargets } =
     extractWithReportRetention({
-      // Vue entries import shared contracts from sibling entry points.
-      // Retain their definitions so each report remains self-contained.
-      includeForgottenExports:
-        includeForgottenExports || dir === "vue" || valueAliases.size > 0,
+      // Angular and Vue entries import contracts from their canonical siblings.
+      // Retention completes the reports; ownership findings remain visible.
+      includeForgottenExports: shouldRetainEntryDeclarations({
+        dir,
+        includeForgottenExports,
+        hasValueAliases: valueAliases.size > 0,
+      }),
       publishedBases,
       readReport: () => {
         const fresh = readFileSync(join(OUT, report), "utf8");

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { extractWithReportRetention } from "./api-report-retention.mjs";
+import {
+  extractWithReportRetention,
+  shouldRetainEntryDeclarations,
+} from "./api-report-retention.mjs";
 import { classifyForgottenExport } from "./api-warnings.mjs";
 
 const report = (body) => `\n\`\`\`ts\n${body}\n\`\`\`\n`;
@@ -183,4 +186,69 @@ test("warning events with changed origins remain distinct without declaration id
     },
   });
   assert.equal(otherEntry.calls.length, 1);
+});
+
+test("split Angular and Vue bindings retain canonical sibling declarations by default", () => {
+  for (const dir of ["angular", "vue"]) {
+    assert.equal(
+      shouldRetainEntryDeclarations({
+        dir,
+        includeForgottenExports: false,
+        hasValueAliases: false,
+      }),
+      true
+    );
+  }
+});
+
+test("binding retention does not include unrelated packages or native kits", () => {
+  for (const dir of [
+    "core",
+    "react",
+    "ai-angular",
+    "adapter-angular-unstyled",
+    "adapter-vue-unstyled",
+    "adapter-spartan",
+    "angular-extra",
+  ]) {
+    assert.equal(
+      shouldRetainEntryDeclarations({
+        dir,
+        includeForgottenExports: false,
+        hasValueAliases: false,
+      }),
+      false
+    );
+    assert.equal(
+      shouldRetainEntryDeclarations({
+        dir,
+        includeForgottenExports: true,
+        hasValueAliases: false,
+      }),
+      true
+    );
+    assert.equal(
+      shouldRetainEntryDeclarations({
+        dir,
+        includeForgottenExports: false,
+        hasValueAliases: true,
+      }),
+      true
+    );
+  }
+});
+
+test("default binding retention keeps unresolved ownership warnings visible", () => {
+  for (const dir of ["angular", "vue"]) {
+    const run = extract([complete], [[warning("CanonicalSibling")]], {
+      includeForgottenExports: shouldRetainEntryDeclarations({
+        dir,
+        includeForgottenExports: false,
+        hasValueAliases: false,
+      }),
+    });
+    assert.equal(run.calls.length, 1);
+    assert.equal(run.calls[0].includeForgottenExports, true);
+    assert.deepEqual(run.findings, [warning("CanonicalSibling").text]);
+  }
 });
