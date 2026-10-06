@@ -10259,7 +10259,6 @@
       "renderFeatureSlot",
       "renderFooter",
       "renderHeader",
-      "requireScope",
       "resetColumnLayout",
       "resolveCellSpan",
       "resolveLabels",

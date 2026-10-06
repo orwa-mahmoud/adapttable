@@ -353,7 +353,7 @@ export type {
 } from "./specialized/rowReorder";
 export { RowReorderChrome } from "./specialized/rowReorder";
 export type { ExternalStore } from "./store";
-export { requireScope, useExternalStore, useScopeActivity } from "./store";
+export { useExternalStore, useScopeActivity } from "./store";
 export { nestedTableDetail } from "./tree/nestedTable";
 export type {
   SavedViewsMenuChromeProps,

@@ -98,8 +98,8 @@ getter returning `T | undefined`. Required reactive fields use Vue's
 callbacks, including zero-argument `refetch` functions. A whole-options getter
 is the supported way to replace callback identities.
 
-`requireScope(name): void` throws outside component setup or an active effect
-scope. `useScopeActivity(): Readonly<ShallowRef<boolean>>` becomes active after
+Resource-owning composables require component setup or an active effect scope.
+`useScopeActivity(): Readonly<ShallowRef<boolean>>` becomes active after
 component mount, pauses on `KeepAlive` deactivation and becomes false on disposal.
 An explicit non-component effect scope starts active immediately and must be
 stopped by its owner. Browser subscriptions and effects remain inactive during server rendering.

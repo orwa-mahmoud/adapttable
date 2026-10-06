@@ -2117,9 +2117,6 @@ export function renderHeader<TRow, TValue>(context: HeaderContext<TRow, TValue>,
 
 export { REORDER_COLUMN_WIDTH }
 
-// @internal
-export function requireScope(name: string): void;
-
 export { resetColumnLayout }
 
 export { resolveCellSpan }

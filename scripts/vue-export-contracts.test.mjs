@@ -8,6 +8,7 @@ import ts from "typescript";
 
 import {
   canonicalAliasErrors,
+  checkBuiltEntrySurfaces,
   checkExportSources,
   publishedBindingEntries,
   runtimeExportErrors,
@@ -110,6 +111,35 @@ describe("canonical Vue source ownership proof", () => {
     const root = join(scratch, "source-positive");
     fixtureSources(root);
     assert.doesNotThrow(() => checkExportSources(root));
+  });
+
+  it("allows internal modules to use the scope guard", () => {
+    const root = join(scratch, "source-private-scope");
+    fixtureSources(root);
+    writeFileSync(
+      join(root, "packages/vue/vue/src/store.ts"),
+      "export function requireScope(name: string): void { void name; }"
+    );
+    writeFileSync(
+      join(root, "packages/vue/vue/src/private-lifecycle.ts"),
+      'import { requireScope } from "./store"; requireScope("privateLifecycle");'
+    );
+    assert.doesNotThrow(() => checkExportSources(root));
+  });
+
+  it("rejects public scope guard exports and renamed aliases", () => {
+    for (const name of ["requireScope", "requireScope as adapterScope"]) {
+      const root = mkdtempSync(join(scratch, "source-public-scope-"));
+      fixtureSources(root);
+      writeFileSync(
+        join(root, "packages/vue/vue/src/adapter.ts"),
+        `export { ${name} } from "./store";`
+      );
+      assert.throws(
+        () => checkExportSources(root),
+        /adapter\.ts: requireScope is internal to the binding/
+      );
+    }
   });
 
   it("rejects adding a CSV runtime export to an optional writer entry", () => {
@@ -353,7 +383,63 @@ function dottedValueFixture(typeOnly) {
   });
 }
 
+function scopeSurfaceFixture(published = "", exposedDeclaration = "ts") {
+  const cell = mkdtempSync(join(scratch, "scope-surface-"));
+  const owner = join(cell, "node_modules/@adapttable/vue");
+  mkdirSync(join(owner, "dist"), { recursive: true });
+  writeFileSync(join(cell, "package.json"), '{"type":"module"}');
+  writeFileSync(
+    join(owner, "package.json"),
+    JSON.stringify({
+      name: "@adapttable/vue",
+      type: "module",
+      exports: {
+        "./adapter": {
+          import: { types: "./dist/adapter.d.ts" },
+          require: { types: "./dist/adapter.d.cts" },
+        },
+      },
+    })
+  );
+  for (const [declaration, runtime] of [
+    ["ts", "js"],
+    ["cts", "cjs"],
+  ]) {
+    writeFileSync(
+      join(owner, `dist/store.d.${declaration}`),
+      "export declare function requireScope(name: string): void;\n" +
+        "export declare function useScopeActivity(): boolean;"
+    );
+    writeFileSync(
+      join(owner, `dist/adapter.d.${declaration}`),
+      `export { useScopeActivity } from "./store.${runtime}";` +
+        (published && declaration === exposedDeclaration
+          ? `\nexport { ${published} } from "./store.${runtime}";`
+          : "")
+    );
+  }
+  return () =>
+    checkBuiltEntrySurfaces(cell, {
+      surfaces: { "vue-adapter": ["useScopeActivity"] },
+    });
+}
+
 describe("published binding entry coverage", () => {
+  it("rejects public exposure while permitting private declarations", () => {
+    assert.doesNotThrow(scopeSurfaceFixture());
+    for (const declaration of ["ts", "cts"]) {
+      for (const published of [
+        "requireScope",
+        "requireScope as adapterScope",
+      ]) {
+        assert.throws(
+          scopeSurfaceFixture(published, declaration),
+          /complete public export inventory changed/
+        );
+      }
+    }
+  });
+
   it("covers exact dotted typed entries and enforces their ESM/CJS value boundary", () => {
     const cell = join(scratch, "dotted-entry");
     const packageRoot = join(cell, "node_modules/@adapttable/vue");

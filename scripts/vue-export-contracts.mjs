@@ -77,6 +77,15 @@ export function checkExportSources(repository) {
       edges.every((edge) => edge.names !== "*"),
       `${file}: canonical entries cannot forward wildcard closures`
     );
+    assert.ok(
+      edges.every((edge) =>
+        edge.names.every(
+          (name) =>
+            name.name !== "requireScope" && name.original !== "requireScope"
+        )
+      ),
+      `${file}: requireScope is internal to the binding`
+    );
   }
   const queryHandler = sourceExports(
     readFileSync(join(binding, "index.ts"), "utf8")
