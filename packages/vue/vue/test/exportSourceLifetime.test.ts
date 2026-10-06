@@ -1,4 +1,4 @@
-import type { TableSource } from "@adapttable/core";
+import type { ExportRequest, TableSource } from "@adapttable/core";
 import { describe, expect, it, vi } from "vitest";
 import {
   computed,
@@ -15,6 +15,8 @@ import {
   type ExportCsvOptions,
 } from "../src/export-csv";
 import { extendFeature, slotRender } from "../src/features";
+import type { ComposedFeature } from "../src/features/tableFeature";
+import { tree } from "../src/features/tree";
 import { useFrontendData } from "../src/source/useFrontendData";
 import { useServerData } from "../src/source/useServerData";
 import { useDataTableShell } from "../src/useDataTableShell";
@@ -452,3 +454,89 @@ describe("reentrant feature replacement", () => {
     expect(required(controls[1]).signal.aborted).toBe(true);
   });
 });
+
+interface TreeExportRow extends Row {
+  children?: readonly TreeExportRow[];
+  parent?: string;
+}
+
+it.each(["nested", "parent-id"] as const)(
+  "exports off-page %s rows with current readers and retires removed trees",
+  (kind) => {
+    const firstChild: TreeExportRow = {
+      id: "first-child",
+      name: "First child",
+      parent: "first",
+    };
+    const secondChild: TreeExportRow = {
+      id: "second-child",
+      name: "Second child",
+      parent: "second",
+    };
+    const roots: readonly TreeExportRow[] = [
+      { id: "first", name: "First", children: [firstChild] },
+      { id: "second", name: "Second", children: [secondChild] },
+    ];
+    const data =
+      kind === "nested" ? roots : [...roots, firstChild, secondChild];
+    const request = vi.fn<(info: ExportRequest<TreeExportRow>) => void>();
+    const exporter = extendFeature(
+      exportCsv<TreeExportRow>({ scope: "all", request }),
+      [slotRender(EXPORT_CONTROL, () => null)]
+    );
+    const features = shallowRef<readonly ComposedFeature<TreeExportRow>[]>([
+      tree<TreeExportRow>(
+        kind === "nested"
+          ? { getChildren: (row) => row.children }
+          : { getParentId: (row) => row.parent }
+      ),
+      exporter,
+    ]);
+    const scope = effectScope();
+    const shell = required(
+      scope.run(() =>
+        useDataTableShell({
+          data,
+          columns: [{ key: "name" }],
+          rowKey: (row: TreeExportRow) => row.id,
+          defaults: { limit: 1 },
+          features,
+          urlSync: false,
+        })
+      )
+    );
+    const exportedIds = () =>
+      request.mock.lastCall?.[0].rows.map((row) => row.id);
+    const run = () =>
+      required(shell.state.get(EXPORT_MODEL).value).onExportCsv?.();
+    try {
+      expect(shell.source.value.rows.map((row) => row.id)).toEqual(["first"]);
+      const runtimeEntries = required(shell.tree.value).allEntries;
+      run();
+      expect(exportedIds()).toEqual([
+        "first",
+        "first-child",
+        "second",
+        "second-child",
+      ]);
+      expect(required(shell.tree.value).allEntries).toBe(runtimeEntries);
+      features.value = [
+        tree<TreeExportRow>(
+          kind === "nested"
+            ? { getChildren: () => undefined }
+            : { getParentId: () => undefined }
+        ),
+        exporter,
+      ];
+      run();
+      expect(exportedIds()).toEqual(data.map((row) => row.id));
+      features.value = [exporter];
+      expect(shell.tree.value).toBeUndefined();
+      run();
+      expect(exportedIds()).toEqual(data.map((row) => row.id));
+      expect(request).toHaveBeenCalledTimes(3);
+    } finally {
+      scope.stop();
+    }
+  }
+);

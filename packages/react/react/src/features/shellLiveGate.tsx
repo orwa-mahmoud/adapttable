@@ -233,7 +233,13 @@ function ExportStage<TRow>({
       firstRowIndex: windowStartOf(shell),
       getCellSpan: props.getCellSpan,
       grouping: chrome.grouping,
-      tree: chrome.tree,
+      tree: chrome.tree
+        ? {
+            ...chrome.tree,
+            getChildren: props.getChildren,
+            getParentId: props.getParentId,
+          }
+        : undefined,
       groupTotal: shell.labels.groupTotal,
       summaryRow: props.summaryRow,
     },

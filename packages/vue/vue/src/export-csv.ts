@@ -8,6 +8,7 @@ import {
   resolveExportCsv,
   resolveExportDisabledReason,
   resolveExportProgressState,
+  type TreeShape,
 } from "@adapttable/core";
 import {
   chromeFeatureNotices,
@@ -69,7 +70,14 @@ function mountExport<TRow>(context: FeatureMountContext<TRow>): void {
       ? { groupBy: grouping.value.groupBy, entries: grouping.value.entries }
       : undefined,
     tree: tree.value
-      ? { entries: tree.value.entries, allEntries: tree.value.allEntries }
+      ? {
+          entries: tree.value.entries,
+          allEntries: tree.value.allEntries,
+          getChildren: context.options.value
+            .getChildren as TreeShape<TRow>["getChildren"],
+          getParentId: context.options.value
+            .getParentId as TreeShape<TRow>["getParentId"],
+        }
       : undefined,
     groupTotal: context.table.labels.value.groupTotal,
     getCellSpan: context.options.value

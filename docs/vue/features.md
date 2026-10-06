@@ -49,6 +49,13 @@ renderer is included.
 Binding-only feature factories for rows, columns and hierarchy come from
 `@adapttable/vue/features`. Filters, header filters, editing, batch editing,
 density, fullscreen and saved views each have matching binding subpaths.
+Tree exports use the current shape readers: page follows visible expansion,
+all includes loaded children under filtered off-page roots, and selected keeps
+only checked IDs in tree order. `summaryRow` continues to receive the original
+source-shaped rows, so root rollups are not counted twice. See the shared
+[tree scope and summary contract](../exporting.md#tree-scopes-and-summaries),
+including the reader requirement for headless export calls.
+
 The focused native column/row entries export their factory; signature types
 come from `@adapttable/vue`, its relevant feature entry, or the native
 `/columns` and `/rows` collections when re-exported there.

@@ -16,13 +16,19 @@ import {
 } from "../source/capabilities";
 import type { QueryFilterGroup } from "../source/queryContract";
 import type { TableSource } from "../source/TableSource";
-import type { TreeEntry } from "../tree/treeRows";
+import {
+  buildTreeEntries,
+  type TreeEntry,
+  type TreeShape,
+} from "../tree/treeRows";
+import { treeExportExpandedIds } from "../tree/treeRuntime";
 import type { ExtraFilters, SortDirection } from "../types";
 import { devWarn } from "../utils/devWarn";
 import {
   exportViewFromChrome,
   filterExportView,
   summaryExportValues,
+  viewFromTreeEntries,
 } from "./exportView";
 import {
   buildExportTable,
@@ -30,6 +36,7 @@ import {
   defaultExportFilename,
   downloadExportFile,
   type ExportPayload,
+  type ExportViewEntry,
   type ExportWriter,
 } from "./exportWriter";
 
@@ -488,12 +495,27 @@ export interface ExportContext<TRow> {
      * collapsed subtree is silently missing from the file.
      */
     allEntries?: readonly TreeEntry<TRow>[];
+    /**
+     * Nested data: read loaded descendants from the scope's source roots.
+     * Together with getRowId, lets all / selected include off-page children.
+     * No lazy children are fetched. Without shape readers, exports retain
+     * the existing entries-only scope filtering.
+     */
+    getChildren?: TreeShape<TRow>["getChildren"];
+    /**
+     * Flat data: reconstruct ancestry within the scope's source rows.
+     * Filtered-out rows are never recovered from stale tree entries.
+     */
+    getParentId?: TreeShape<TRow>["getParentId"];
   };
   /** Caption for a group footer — the table's `labels.groupTotal`. */
   groupTotal?: (label: string) => string;
   /**
-   * The table's `summaryRow` mapper. Called on the scoped rows so a grand
-   * total in the file matches the rows that actually left.
+   * The table's `summaryRow` mapper, called on the original source rows for
+   * the scope, before tree expansion. Nested roots can already carry rollup
+   * totals, so adding their descendants here would count those values twice.
+   * A selected child absent from the raw source array does not contribute to
+   * this input; the mapper retains the source's shape and summary semantics.
    */
   summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
 }
@@ -583,14 +605,58 @@ function resolveExportRows<TRow>(
   return searchable.filter((row) => selectedIds.has(getRowId(row)));
 }
 
+/** Resolve only the export hierarchy; runtime inventories stay page-scoped. */
+function resolveExportTree<TRow>(
+  scope: ExportRowScope,
+  source: TableSource<TRow>,
+  context: ExportContext<TRow> | undefined,
+  sourceRows: readonly TRow[]
+): readonly TreeEntry<TRow>[] | undefined {
+  const { tree, getRowId, selectedIds } = context ?? {};
+  if (!tree || scope === "range") return undefined;
+  const unfold = scope === "all" || scope === "selected";
+  if (
+    unfold &&
+    getRowId &&
+    (tree.getChildren || tree.getParentId) &&
+    (scope !== "selected" || selectedIds)
+  ) {
+    const shape = {
+      rows: source.allFilteredRows ?? source.rows,
+      getRowId,
+      getChildren: tree.getChildren,
+      getParentId: tree.getParentId,
+    };
+    const folded = buildTreeEntries({
+      ...shape,
+      expandedIds: new Set<string>(),
+    });
+    const entries = buildTreeEntries({
+      ...shape,
+      expandedIds: treeExportExpandedIds(folded),
+    });
+    return scope === "selected" && selectedIds
+      ? entries.filter((entry) => selectedIds.has(entry.key))
+      : entries;
+  }
+  const entries = unfold ? (tree.allEntries ?? tree.entries) : tree.entries;
+  if (!unfold || !getRowId) return entries;
+  // Without shape readers, a nested child and a stale excluded flat row are
+  // indistinguishable. Preserve the conservative source-membership filter.
+  const ids = new Set(sourceRows.map((row) => getRowId(row)));
+  return entries.filter((entry) => ids.has(getRowId(entry.row)));
+}
+
+interface ResolvedExport<TRow> {
+  rows: readonly TRow[];
+  columns: ColumnMetadata<TRow>[];
+  treeView?: readonly ExportViewEntry<TRow>[];
+  summaryRows: readonly TRow[];
+}
+
 /**
- * What an export resolves to: the rows a scope asks for and the columns a
- * scope asks for.
- *
- * Three call sites need exactly this pair — the pure builder, the download
- * path (which brackets it with hooks) and the backend-request path (which
- * sends it instead of writing a file). Resolving it once is what keeps them
- * from drifting apart.
+ * Resolve file, hook and request data together. Summary input retains the
+ * original source shape; it can contain rollup roots rather than data leaves.
  */
 function resolveExport<TRow>(options: {
   source: TableSource<TRow>;
@@ -598,11 +664,20 @@ function resolveExport<TRow>(options: {
   scope?: ExportRowScope;
   columnScope?: ExportColumnScope;
   context?: ExportContext<TRow>;
-}): { rows: readonly TRow[]; columns: ColumnMetadata<TRow>[] } {
+}): ResolvedExport<TRow> {
   const scope = options.scope ?? "page";
   const range = options.context?.range;
+  const summaryRows = resolveExportRows(scope, options.source, options.context);
+  const tree = resolveExportTree(
+    scope,
+    options.source,
+    options.context,
+    summaryRows
+  );
   return {
-    rows: resolveExportRows(scope, options.source, options.context),
+    rows: tree ? tree.map((entry) => entry.row) : summaryRows,
+    treeView: tree ? viewFromTreeEntries(tree) : undefined,
+    summaryRows,
     // A rectangle names its own columns. Asking for one and then exporting
     // every visible column would ignore half of what the user selected, so the
     // range decides here and `columns` is not consulted.
@@ -635,7 +710,7 @@ function columnsInRange<TRow>(
 
 /** Structure and spans for the resolved rows, when the context has them. */
 function exportTableOptions<TRow>(
-  rows: readonly TRow[],
+  resolved: ResolvedExport<TRow>,
   scope: ExportRowScope | undefined,
   context: ExportContext<TRow> | undefined
 ) {
@@ -644,18 +719,21 @@ function exportTableOptions<TRow>(
   // folded leaves stay out. All / selected unfold those leaves first so a
   // ticked row inside a closed group still leaves the table, then prune.
   const includeHiddenLeaves = scope === "all" || scope === "selected";
-  const fullView = exportViewFromChrome({
-    grouping: context?.grouping,
-    tree: context?.tree,
-    groupTotal: context?.groupTotal,
-    includeHiddenLeaves,
-  });
+  const fullView =
+    scope === "range"
+      ? undefined
+      : (resolved.treeView ??
+        exportViewFromChrome({
+          grouping: context?.grouping,
+          groupTotal: context?.groupTotal,
+          includeHiddenLeaves,
+        }));
   let view = fullView;
   if (scope === "range" || !fullView) view = undefined;
-  else if (includeHiddenLeaves && getRowId) {
+  else if (!resolved.treeView && includeHiddenLeaves && getRowId) {
     view = filterExportView(
       fullView,
-      new Set(rows.map((row) => getRowId(row))),
+      new Set(resolved.rows.map((row) => getRowId(row))),
       getRowId
     );
   }
@@ -663,7 +741,7 @@ function exportTableOptions<TRow>(
     getCellSpan: context?.getCellSpan,
     firstRowIndex: context?.firstRowIndex,
     view,
-    summary: summaryExportValues(context?.summaryRow?.(rows)),
+    summary: summaryExportValues(context?.summaryRow?.(resolved.summaryRows)),
   };
 }
 
@@ -682,12 +760,13 @@ export function buildTableCsv<TRow>(options: {
   escapeFormulas?: boolean;
   context?: ExportContext<TRow>;
 }): string {
-  const { rows, columns } = resolveExport(options);
+  const resolved = resolveExport(options);
+  const { rows, columns } = resolved;
   return csvWriter.build({
     table: buildExportTable(
       rows,
       columns,
-      exportTableOptions(rows, options.scope, options.context)
+      exportTableOptions(resolved, options.scope, options.context)
     ),
     filename: "export.csv",
     escapeFormulas: options.escapeFormulas,
@@ -714,7 +793,8 @@ export function downloadTableCsv<TRow>(options: {
   onBeforeExport?: NonNullable<ExportCsvOptions<TRow>["onBeforeExport"]>;
   onAfterExport?: NonNullable<ExportCsvOptions<TRow>["onAfterExport"]>;
 }): void {
-  const { rows, columns } = resolveExport(options);
+  const resolved = resolveExport(options);
+  const { rows, columns } = resolved;
   const writer = options.writer ?? csvWriter;
 
   let filename = options.filename ?? defaultExportFilename(writer);
@@ -730,7 +810,7 @@ export function downloadTableCsv<TRow>(options: {
     table: buildExportTable(
       rows,
       columns,
-      exportTableOptions(rows, options.scope, options.context)
+      exportTableOptions(resolved, options.scope, options.context)
     ),
     filename,
     escapeFormulas: options.escapeFormulas,
@@ -774,20 +854,23 @@ export function makeExportCsvHandler<TRow>(
   // the browser neither assembles a file nor downloads one.
   const { request } = options;
   if (request) {
-    return () =>
-      request({
-        ...resolveExport({
-          source,
-          columns,
-          scope: options.scope,
-          columnScope: options.columns,
-          context,
-        }),
+    return () => {
+      const resolved = resolveExport({
+        source,
+        columns,
+        scope: options.scope,
+        columnScope: options.columns,
+        context,
+      });
+      return request({
+        rows: resolved.rows,
+        columns: resolved.columns,
         filename: options.filename ?? defaultExportFilename(writer),
         scope: options.scope ?? "page",
         format: writer.extension,
         query: exportQueryOf(source, options.scope ?? "page"),
       });
+    };
   }
 
   // "All" over a server source: the browser holds one page, so it has to be

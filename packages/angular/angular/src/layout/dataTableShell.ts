@@ -47,6 +47,7 @@ import {
   type TableSource,
   type TableVirtualization,
   type TreeEntry,
+  type TreeShape,
   windowGroupedEntries,
   withRowMutationActions,
   withRowPinActions,
@@ -2019,6 +2020,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       GetCellSpan<TRow> | undefined;
     const exportOption = featureOptions.exportCsv as
       boolean | ExportCsvOptions<TRow> | undefined;
+    const treeShape = featureOptions as TreeShape<TRow>;
     const exporter = resources.use(
       "export",
       [
@@ -2037,18 +2039,27 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               exportCsv: exportOption,
               source: table.source,
               columns: table.columns,
-              context: computed(() => ({
-                selectedIds: selection?.selectedIds(),
-                getRowId: (row: TRow) => this.rowKey()(row),
-                allColumns: table.allColumns(),
-                range: grid?.range(),
-                firstRowIndex: table.windowStart(),
-                getCellSpan,
-                grouping: grouping?.(),
-                tree: tree?.(),
-                groupTotal: table.labels().groupTotal,
-                summaryRow: this.summaryRow(),
-              })),
+              context: computed(() => {
+                const currentTree = tree?.();
+                return {
+                  selectedIds: selection?.selectedIds(),
+                  getRowId: (row: TRow) => this.rowKey()(row),
+                  allColumns: table.allColumns(),
+                  range: grid?.range(),
+                  firstRowIndex: table.windowStart(),
+                  getCellSpan,
+                  grouping: grouping?.(),
+                  tree: currentTree
+                    ? {
+                        ...currentTree,
+                        getChildren: treeShape.getChildren,
+                        getParentId: treeShape.getParentId,
+                      }
+                    : undefined,
+                  groupTotal: table.labels().groupTotal,
+                  summaryRow: this.summaryRow(),
+                };
+              }),
               labels: table.labels,
               featureHost: table.featureHost,
               injector,

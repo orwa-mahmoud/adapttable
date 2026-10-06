@@ -5,6 +5,11 @@ Export scope is resolved from the current source, selection and column layout
 when the reader activates it. The file uses column values, not Angular template
 markup. XLSX and PDF use the same row/column scope contract.
 
+For trees, page export follows visible expansion; all and selected resolve
+loaded descendants from the full filtered source. Summary callbacks retain the
+original source-shaped rows, including rollup roots. See the shared
+[tree scope and summary contract](../exporting.md#tree-scopes-and-summaries).
+
 ## Export the current view
 
 ```ts
