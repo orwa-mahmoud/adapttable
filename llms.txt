@@ -153,6 +153,7 @@ const {
 ## Angular docs
 
 - [Get started with Angular](https://adapttable.orwamahmoud.com/angular/getting-started/): workspace availability, peers, AdaptDataTable, signals and first table
+- [Migrate to Angular 0.5](https://adapttable.orwamahmoud.com/angular/migrating-to-0-5/): Move binding imports to their canonical root, features and adapter entries.
 - [Angular feature composition](https://adapttable.orwamahmoud.com/angular/features/): kit subpaths, TableFeature and standardPreset
 - [Angular data tiers](https://adapttable.orwamahmoud.com/angular/data-tiers/): client data, server queries and query-library signals
 - [Headless Angular tables](https://adapttable.orwamahmoud.com/angular/headless/): injectDataTable, signal readers and attribute helpers

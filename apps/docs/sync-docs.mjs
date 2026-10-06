@@ -37,6 +37,7 @@ const target = join(here, "src/content/docs");
  * `docs/` to each other.
  */
 export const TITLES = {
+  "angular/migrating-to-0-5.md": "Migrate Angular table imports to 0.5",
   "vue/actions.md": "Vue actions and exports",
   "vue/column-menu.md": "Vue column menu",
   "vue/navigation.md": "Vue navigation, find and status",
@@ -181,6 +182,8 @@ export const TITLES = {
 // emits from `description`. Keyword-rich and unique per page so search and
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
+  "angular/migrating-to-0-5.md":
+    "Move Angular table imports to their 0.5 root, features and adapter entries. Preserve native kit controls and upgrade independently versioned packages.",
   "vue/actions.md":
     "Compose Vue bulk actions, command palettes, context menus, panels, CSV exports, optional writers and print controls with host-owned actions.",
   "vue/column-menu.md":
