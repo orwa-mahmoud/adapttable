@@ -689,6 +689,13 @@ See the [managed panel contract](./column-menu.md#building-a-vue-kit).
   guessing is performed.
 - `composeElementRefs(...refs)` returns one `ElementRef` and releases the previous
   target with `null` before publishing a replacement to all refs.
+- `useElementRef(target, owner)` is a setup composable for a kit component whose
+  native target or callback may change. Supply getters for the actual element
+  and its `ElementRef` callback; either getter may return `null` or `undefined`.
+  The previous callback receives `null` before a replacement receives the current
+  element. Removing the callback or ending the setup scope releases the target.
+  Unchanged renders do not repeat notifications. The kit still resolves its
+  native element through its own public component API.
 
 ## Custom features and scoped state
 

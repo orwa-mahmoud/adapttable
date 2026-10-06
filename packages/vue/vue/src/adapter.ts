@@ -390,6 +390,7 @@ export type {
 export { SavedViewsPanelChrome } from "./url/SavedViewsPanelChrome";
 export type { UseDataTableShellResult } from "./useDataTableShell";
 export { useDataTableShell } from "./useDataTableShell";
+export { useElementRef } from "./useElementRef";
 export type {
   DensityControlProps,
   FullscreenControlProps,

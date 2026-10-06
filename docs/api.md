@@ -4105,7 +4105,7 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | `DesktopTableModel`, `MobileCardsModel`                                                                         | Complete semantic attributes, rows, header/card layout and optional body-slot projections.                                                                                                                    |
 | `TableHeaderModel`, `TableRowModel`, `TableCellModel`, `TableBodySlot`                                          | Header controls/context, row wiring, cell context/decorations and structural row/group/extra/padding variants.                                                                                                |
 | `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                                                                     | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                                                                     |
-| `elementRef`, `composeElementRefs`                                                                              | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
+| `elementRef`, `composeElementRefs`, `useElementRef`                                                             | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
 | `useScopeActivity()`                                                                                            | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                                                                               |
 | `useExternalStore(store)`                                                                                       | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                                                                            |
 | `FeatureLifecycle`, `useFeatureLifecycle`                                                                       | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                                                                    |
@@ -4289,6 +4289,12 @@ Root composables remain usable with completely custom UI; see
 The following binding exports belong to `@adapttable/vue/adapter` unless
 another owner is shown. See the [Vue column-menu guide](./vue/column-menu.md)
 for controlled state, keyboard behavior and the native composition example.
+
+`managedOverlayPanel(render)` lets a kit own the positioning, dismissal and
+focus of column and saved-view panels. `OverlayPanelSlot` and
+`OverlayPanelProps` preserve ordinary callable panel renderers;
+`ManagedOverlayPanelProps` adds the current anchor, open state and lifetime
+check. `OverlayCloseReason` names `"escape"`, `"outside"` and `"done"` requests.
 
 | Export                                                         | Signature or role                                                                                                                                                                         |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

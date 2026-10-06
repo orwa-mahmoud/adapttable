@@ -10312,6 +10312,7 @@
       "useDataTableShell",
       "useDesktopTableModel",
       "useEditableCellModel",
+      "useElementRef",
       "useExternalStore",
       "useFeatureLifecycle",
       "useFeatureState",

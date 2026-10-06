@@ -4369,6 +4369,9 @@ export function useDesktopTableModel<TRow>(table: UseDataTableResult<TRow>, sele
 // @public
 export function useEditableCellModel<TRow>(input: MaybeRefOrGetter<VueEditableCellProps<TRow>>): ComputedRef<EditableCellModel<TRow>>;
 
+// @public
+export function useElementRef<TElement extends Element>(target: () => TElement | null | undefined, owner: () => ElementRef<TElement> | null | undefined): void;
+
 // @public (undocumented)
 export function useExternalStore<T>(input: MaybeRefOrGetter<ExternalStore<T>>, options?: ExternalStoreOptions): Readonly<ShallowRef<T>>;
 
