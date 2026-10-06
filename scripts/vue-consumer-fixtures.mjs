@@ -16,7 +16,7 @@ export const VUE_CONSUMER_SPECS = [
     code: 'export { useFrontendData, useDataTable } from "PKG";',
     functionality: "Source composable and headless table model",
     present: ["useFrontendData", "useDataTable"],
-    absent: writers,
+    absent: [...writers, "DataTableSurfaceChrome"],
   },
   {
     name: "vue-unstyled · table",
@@ -98,6 +98,26 @@ export const VUE_CONSUMER_SPECS = [
       "Native table and every runtime export in its features barrel",
     present: ["DataTable", ...writers],
     absent: [],
+  },
+];
+
+/** Optional rendering is checked independently from the existing size budgets. */
+export const VUE_LAYOUT_GRAPH_SPECS = [
+  {
+    name: "vue · headless adapter shell",
+    pkg: "vue",
+    entryFile: "adapter.js",
+    code: 'export { useDataTableShell } from "PKG";',
+    present: ["useDataTableShell"],
+    absent: [...writers, "DataTableSurfaceChrome"],
+  },
+  {
+    name: "vue · optional table surface",
+    pkg: "vue",
+    entryFile: "adapter.js",
+    code: 'export { DataTableSurfaceChrome } from "PKG";',
+    present: ["DataTableSurfaceChrome"],
+    absent: writers,
   },
 ];
 

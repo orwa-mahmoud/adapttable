@@ -5,21 +5,12 @@ import {
   type TableDensity,
 } from "@adapttable/vue";
 import {
-  COLUMN_MENU,
   type DataTableProps,
   type DataTableSlots,
+  DataTableSurfaceChrome,
   defaultConfirm,
-  DENSITY_CONTROL,
-  DesktopTableChrome,
-  FIND_BUTTON,
-  FULLSCREEN_CONTROL,
-  MobileCardsChrome,
   renderFeatureSlot,
-  SAVED_VIEWS_CONTROL,
-  SidePanelLayoutChrome,
   type TableChromeSlots,
-  TableFooterChrome,
-  TOOLBAR_EXTRAS,
   useDataTableShell,
 } from "@adapttable/vue/adapter";
 import {
@@ -39,8 +30,8 @@ import {
   NATIVE_GROUP_ROW,
   nativeGroupRowSlotKey,
 } from "./nativeHierarchyControlSlots";
-import { NativeLoadingState } from "./NativeLoadingState";
 import { NativeRowActions } from "./NativeRowActions";
+import { nativeSurfaceControls } from "./nativeSurfaceControls";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(defineProps<DataTableProps<TRow>>(), {
@@ -83,30 +74,6 @@ const shell = useDataTableShell<TRow>(() => ({
 const { table } = shell;
 const names = computed(() => props.classNames ?? {});
 provideClassNames(() => names.value);
-const hasToolbarExtras = computed(
-  () =>
-    [
-      TOOLBAR_EXTRAS,
-      DENSITY_CONTROL,
-      FULLSCREEN_CONTROL,
-      SAVED_VIEWS_CONTROL,
-      FIND_BUTTON,
-      COLUMN_MENU,
-    ].some((slot) => Boolean(shell.slotFills.value.get(slot.id)?.length)) ||
-    shell.hasActionToolbar.value
-);
-const ToolbarExtras = () => shell.renderToolbarExtras({ ...names.value });
-const ActiveFilterChips = () => shell.renderActiveFilterChips();
-const BatchEditBar = () => shell.renderBatchEditBar();
-const AgentApprovalSurface = () =>
-  shell.renderAgentApproval({ ...names.value });
-const AssistantSurface = () => shell.renderTableAssistant();
-const NavigationBefore = () => shell.renderNavigationBefore({ ...names.value });
-const NavigationAfter = () => shell.renderNavigationAfter({ ...names.value });
-const BulkActions = () => shell.renderBulkActions({ ...names.value });
-const ActionOverlays = () => shell.renderActionOverlays({ ...names.value });
-const SidePanel = () => shell.renderSidePanel({ ...names.value });
-const GroupingPanel = () => shell.renderGroupingPanel();
 function controls(): TableChromeSlots<TRow> {
   return {
     SortButton: ({ attrs, content }) => h("button", attrs, [content]),
@@ -152,375 +119,22 @@ onBeforeUnmount(() => {
   shell.setSurface(null);
 });
 defineExpose<DataTableHandle<TRow>>(shell.handle);
-function changeLimit(event: Event): void {
-  if (event.target instanceof HTMLSelectElement)
-    table.setLimit(Number(event.target.value));
+function setRootElement(element: HTMLElement | null): void {
+  rootElement.value = element;
 }
-function changeSort(event: Event): void {
-  if (event.target instanceof HTMLSelectElement)
-    shell.source.value.setSort(
-      event.target.value || undefined,
-      table.sortDir.value
-    );
+function setScrollElement(element: HTMLElement | null): void {
+  scrollElement.value = element;
 }
-function toggleDirection(): void {
-  shell.source.value.setSort(
-    table.sortBy.value,
-    table.sortDir.value === "asc" ? "desc" : "asc"
-  );
-}
-const liveStyle = {
-  position: "absolute",
-  width: "1px",
-  height: "1px",
-  padding: 0,
-  margin: "-1px",
-  overflow: "hidden",
-  clipPath: "inset(50%)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;
 </script>
 
 <template>
-  <div
-    ref="rootElement"
+  <DataTableSurfaceChrome
     v-bind="$attrs"
-    :dir="table.dir.value"
-    data-adapttable-part="root"
-    :data-density="shell.density.value"
-    :class="names.root"
-  >
-    <span
-      v-if="shell.rowReorder.value"
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      data-adapttable-part="row-reorder-announcer"
-      :class="names.rowReorderAnnouncer"
-      :style="liveStyle"
-      >{{ shell.rowReorder.value.snapshot.announcement }}</span
-    >
-    <div
-      v-if="
-        searchable !== false ||
-        table.isMobile.value ||
-        slots.toolbar ||
-        hasToolbarExtras ||
-        shell.rowActions.value?.canAdd
-      "
-      data-adapttable-part="toolbar"
-      :class="names.toolbar"
-    >
-      <label
-        v-if="searchable !== false"
-        data-adapttable-part="search-field"
-        :class="names.searchWrapper"
-      >
-        <span :style="liveStyle">{{ table.labels.value.search }}</span>
-        <svg
-          data-adapttable-part="search-icon"
-          :class="names.searchIcon"
-          viewBox="0 0 24 24"
-          width="16"
-          height="16"
-          aria-hidden="true"
-          focusable="false"
-          fill="none"
-          stroke="currentColor"
-        >
-          <circle cx="10" cy="10" r="6" />
-          <path d="m15 15 5 5" />
-        </svg>
-        <input
-          v-bind="table.searchInputAttrs()"
-          data-adapttable-part="search"
-          :class="names.searchInput"
-        />
-      </label>
-      <template v-if="table.isMobile.value && table.sortByOptions.value.length">
-        <label>
-          {{ table.labels.value.sortBy }}
-          <select
-            :aria-label="table.labels.value.sortBy"
-            :value="table.sortBy.value ?? ''"
-            data-adapttable-part="sort-select"
-            :class="names.sortSelect"
-            @change="changeSort"
-          >
-            <option value="">{{ table.labels.value.sortBy }}</option>
-            <option
-              v-for="option in table.sortByOptions.value"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-        <button
-          type="button"
-          :disabled="!table.sortBy.value"
-          :aria-label="
-            table.sortDir.value === 'asc'
-              ? table.labels.value.sortDescending
-              : table.labels.value.sortAscending
-          "
-          data-adapttable-part="sort-direction"
-          :class="names.sortDirectionButton"
-          @click="toggleDirection"
-        >
-          {{
-            table.sortDir.value === "asc"
-              ? table.labels.value.sortAscending
-              : table.labels.value.sortDescending
-          }}
-        </button>
-      </template>
-      <ToolbarExtras />
-      <button
-        v-if="shell.rowActions.value?.canAdd"
-        type="button"
-        data-adapttable-part="add-row"
-        :class="names.addRow"
-        @click="shell.rowActions.value.addRow()"
-      >
-        {{ table.labels.value.addRow }}
-      </button>
-      <slot name="toolbar" />
-    </div>
-    <ActiveFilterChips />
-    <BulkActions />
-    <BatchEditBar />
-    <AgentApprovalSurface />
-    <NavigationBefore />
-    <div
-      v-if="table.errorState.value"
-      role="alert"
-      data-adapttable-part="error"
-      :class="names.error"
-    >
-      <slot name="error" v-bind="table.errorState.value">
-        <strong>{{ table.labels.value.errorTitle }}</strong>
-        <p>{{ table.labels.value.errorMessage }}</p>
-        <button
-          v-if="table.errorState.value.retry"
-          type="button"
-          :disabled="table.errorState.value.retrying"
-          data-adapttable-part="retry-button"
-          :class="names.retry"
-          @click="table.errorState.value.retry()"
-        >
-          {{ table.labels.value.retry }}
-        </button>
-      </slot>
-    </div>
-    <div
-      v-if="table.isRefreshing.value"
-      role="status"
-      data-adapttable-part="refresh-indicator"
-      :class="names.refreshing"
-    >
-      {{ table.labels.value.loading }}
-    </div>
-    <GroupingPanel v-if="shell.groupingPanel.value" />
-    <SidePanelLayoutChrome
-      :open="shell.sidePanel.value?.open != null"
-      :side="shell.sidePanel.value?.side"
-      :mobile="table.isMobile.value"
-      :panel="SidePanel"
-    >
-      <div
-        ref="scrollElement"
-        tabindex="-1"
-        data-adapttable-part="scroll-box"
-        :style="
-          typeof shell.featureOptions.value.maxHeight === 'number'
-            ? {
-                maxHeight: `${shell.featureOptions.value.maxHeight}px`,
-                overflow: 'auto',
-              }
-            : undefined
-        "
-        :class="names.scroll"
-        :aria-busy="
-          shell.source.value.isLoading || table.isRefreshing.value
-            ? 'true'
-            : undefined
-        "
-      >
-        <div
-          v-if="table.bodyRegion.value === 'skeleton'"
-          role="status"
-          aria-busy="true"
-          data-adapttable-part="loading"
-          :class="names.loading"
-        >
-          <slot name="loading">
-            <NativeLoadingState
-              :rows="skeletonRows ?? shell.source.value.limit"
-              :columns="shell.desktop.value.columnCount"
-              :mobile="table.isMobile.value"
-              :class-names="names"
-            />
-            <span :style="liveStyle">{{ table.labels.value.loading }}</span>
-          </slot>
-        </div>
-        <output
-          v-else-if="
-            table.bodyRegion.value === 'empty' && !table.errorState.value
-          "
-          data-adapttable-part="empty"
-          :class="names.empty"
-        >
-          <slot
-            name="empty"
-            :no-results="table.emptyVariant.value === 'noResults'"
-            :clear="table.clearSearchAndFilters"
-          >
-            {{
-              table.emptyVariant.value === "noResults"
-                ? table.labels.value.noResults
-                : table.labels.value.noData
-            }}
-            <button
-              v-if="table.emptyVariant.value === 'noResults'"
-              type="button"
-              data-adapttable-part="empty-clear"
-              :class="names.emptyClear"
-              @click="table.clearSearchAndFilters"
-            >
-              {{ table.labels.value.clearAll }}
-            </button>
-          </slot>
-        </output>
-        <MobileCardsChrome
-          v-else-if="table.isMobile.value && table.rows.value.length"
-          :model="shell.mobile.value"
-          :slots="controls()"
-          :class-names="names"
-        />
-        <DesktopTableChrome
-          v-else-if="table.rows.value.length"
-          :model="shell.desktop.value"
-          :slots="controls()"
-          :class-names="names"
-        />
-        <div
-          v-if="table.canLoadMore.value"
-          v-bind="table.loadMoreAttrs()"
-          data-adapttable-part="load-more"
-          :class="names.loadMore"
-        >
-          <button
-            v-bind="table.loadMoreButtonAttrs()"
-            data-adapttable-part="load-more-button"
-            :class="names.loadMoreButton"
-          >
-            {{ table.labels.value.loadMore }}
-          </button>
-        </div>
-      </div>
-    </SidePanelLayoutChrome>
-    <ActionOverlays />
-    <TableFooterChrome
-      v-if="slots.tableFooter"
-      :content="slots.tableFooter"
-      :class-name="names.tableFooter"
-    />
-    <div
-      v-if="table.showFooter.value"
-      data-adapttable-part="footer"
-      :class="names.footer"
-    >
-      <label
-        >{{ table.labels.value.rowsPerPage }}
-        <select
-          :value="shell.source.value.limit"
-          :aria-label="table.labels.value.rowsPerPage"
-          data-adapttable-part="rows-per-page"
-          :class="names.rowsPerPage"
-          @change="changeLimit"
-        >
-          <option
-            v-for="size in table.pageSizeOptions.value"
-            :key="size"
-            :value="size"
-          >
-            {{ size }}
-          </option>
-        </select>
-      </label>
-      <span>{{
-        table.labels.value.showing({
-          from: table.pagination.value.fromIndex,
-          to: table.pagination.value.toIndex,
-          total: shell.source.value.total,
-        })
-      }}</span>
-      <div data-adapttable-part="pager" :class="names.pager">
-        <span>{{
-          table.labels.value.pageOf({
-            page: table.pagination.value.safePage,
-            total: table.pagination.value.totalPages,
-          })
-        }}</span>
-        <button
-          type="button"
-          :aria-label="table.labels.value.previousPage"
-          :disabled="table.pagination.value.safePage <= 1"
-          data-adapttable-part="page-prev"
-          :class="names.pagePrev"
-          @click="table.setPage(table.pagination.value.safePage - 1)"
-        >
-          {{ table.labels.value.previousPage }}
-        </button>
-        <template v-for="page in table.pagerSlots.value" :key="page.key">
-          <span
-            v-if="page.item === 'ellipsis'"
-            aria-hidden="true"
-            data-adapttable-part="page-ellipsis"
-            :class="names.pageEllipsis"
-            >…</span
-          >
-          <button
-            v-else
-            type="button"
-            :aria-label="table.labels.value.goToPage(page.item)"
-            :aria-current="
-              page.item === table.pagination.value.safePage ? 'page' : undefined
-            "
-            data-adapttable-part="page-number"
-            :class="names.pageNumber"
-            @click="table.setPage(page.item)"
-          >
-            {{ page.item }}
-          </button>
-        </template>
-        <button
-          type="button"
-          :aria-label="table.labels.value.nextPage"
-          :disabled="
-            table.pagination.value.safePage >= table.pagination.value.totalPages
-          "
-          data-adapttable-part="page-next"
-          :class="names.pageNext"
-          @click="table.setPage(table.pagination.value.safePage + 1)"
-        >
-          {{ table.labels.value.nextPage }}
-        </button>
-      </div>
-    </div>
-    <NavigationAfter />
-    <span
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      data-adapttable-part="table-status-announcer"
-      :class="[names.tableStatusAnnouncer, names.status]"
-      :style="liveStyle"
-      >{{ table.statusAnnouncement.value }}</span
-    >
-    <AssistantSurface />
-  </div>
+    :model="shell"
+    :options="props"
+    :slots="nativeSurfaceControls(controls())"
+    :content="slots"
+    :root-ref="setRootElement"
+    :scroll-ref="setScrollElement"
+  />
 </template>

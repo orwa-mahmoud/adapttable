@@ -90,6 +90,39 @@ Type-only re-exports do not imply matching runtime exports. In particular,
 structural/model helpers and feature functions belong to their entries above;
 importing the binding root never installs controls, optional features or AI.
 
+## Optional adapter layout
+
+`DataTableSurfaceChrome` from `@adapttable/vue/adapter` renders a shared outer
+layout over an existing `useDataTableShell` result. It does not create another
+source or own table state. `DataTableSurfaceChromeProps<TRow>` connects that
+model, presentation options, application content slots, and the actual root and
+scroll element refs.
+
+Every `DataTableSurfaceSlots<TRow>` renderer is required: `Search`, `Select`,
+`Button`, `Loading`, `Desktop`, and `Mobile`. The kit owns its controls, styling,
+and table/card rendering. `Desktop` and `Mobile` receive the prepared binding
+models and class names; they can use the structural Chrome or their own
+renderer. No native control or table renderer is selected implicitly.
+
+`Search` receives both native attributes and explicit `value` / `onChange`
+properties. Native inputs can use the attributes. A kit with model-value events
+uses the explicit request callback and consumes the native input handler, so
+one edit sends one request. The binding retains its existing debounced search
+draft behavior. `Select` uses the same value/request boundary.
+
+The shared layout is optional. Build a custom UI with root composables such as
+`useFrontendData` and `useDataTable`, or render an existing `useDataTableShell`
+result directly. Neither path requires the shared layout's renderers. Named
+headless imports do not retain `DataTableSurfaceChrome` unless it is selected.
+The framework-neutral core remains independent of rendered UI.
+
+`DataTableProps<TRow>`, `DataTableSlots<TRow>`, and `DataTableClassNames` are
+canonical adapter contracts. `provideDataTableClassNames` and
+`useDataTableClassNames` share reactive presentation hooks with feature controls.
+`GROUP_ROW`, `groupRowSlotKey<TRow>()`, and `GroupRowSlotProps<TRow>` let a grouping
+feature supply its row renderer lazily; importing the table surface does not
+install a grouping renderer or another optional feature.
+
 ## Reactive input and lifecycle rules
 
 `MaybeRefOrGetterOptional<T>` means `T`, a readonly `Ref<T | undefined>`, or a

@@ -261,6 +261,7 @@ import { SelectionStats } from '@adapttable/core';
 import { SelectionStatsChromeProps as SelectionStatsChromeProps_2 } from '@adapttable/core/binding';
 import { SelectionStatsSlotProps } from '@adapttable/core/binding';
 import { SelectionStatsSlots as SelectionStatsSlots_2 } from '@adapttable/core/binding';
+import { SetupContext } from 'vue';
 import { ShallowRef } from 'vue';
 import { showAllColumns } from '@adapttable/core/binding';
 import { SidePanelSlots as SidePanelSlots_2 } from '@adapttable/core/binding';
@@ -1520,6 +1521,73 @@ interface DataTableSurface {
     scrollElement(): HTMLElement | null;
 }
 
+// @public
+export const DataTableSurfaceChrome: (<TRow>(props: DataTableSurfaceChromeProps<TRow>, context: Pick<SetupContext, "attrs">) => VNodeChild) & {
+    props: string[];
+    inheritAttrs: boolean;
+};
+
+// @public
+export interface DataTableSurfaceChromeProps<TRow> {
+    // (undocumented)
+    readonly content: DataTableSlots<TRow>;
+    // (undocumented)
+    readonly model: UseDataTableShellResult<TRow>;
+    // (undocumented)
+    readonly options: Pick<DataTableProps<TRow>, "searchable" | "skeletonRows" | "classNames">;
+    // (undocumented)
+    readonly rootRef: ElementRef;
+    // (undocumented)
+    readonly scrollRef: ElementRef;
+    // (undocumented)
+    readonly slots: DataTableSurfaceSlots<TRow>;
+}
+
+// @public
+export interface DataTableSurfaceSlots<TRow> {
+    // (undocumented)
+    readonly Button: (props: {
+        readonly attrs: Attrs;
+        readonly content: VNodeChild;
+    }) => VNodeChild;
+    // (undocumented)
+    readonly Desktop: (props: {
+        readonly model: UseDataTableShellResult<TRow>["desktop"]["value"];
+        readonly classNames: DataTableClassNames;
+    }) => VNodeChild;
+    // (undocumented)
+    readonly Loading: (props: {
+        readonly rows: number;
+        readonly columns: number;
+        readonly mobile: boolean;
+        readonly classNames: DataTableClassNames;
+    }) => VNodeChild;
+    // (undocumented)
+    readonly Mobile: (props: {
+        readonly model: UseDataTableShellResult<TRow>["mobile"]["value"];
+        readonly classNames: DataTableClassNames;
+    }) => VNodeChild;
+    // (undocumented)
+    readonly Search: (props: {
+        readonly attrs: Attrs;
+        readonly label: string;
+        readonly value: string;
+        readonly onChange: (value: string) => void;
+        readonly classNames: DataTableClassNames;
+    }) => VNodeChild;
+    // (undocumented)
+    readonly Select: (props: {
+        readonly attrs: Attrs;
+        readonly label: string;
+        readonly value: string;
+        readonly options: readonly {
+            readonly value: string;
+            readonly label: string;
+        }[];
+        readonly onChange: (value: string) => void;
+    }) => VNodeChild;
+}
+
 export { defaultConfirm }
 
 export { defaultFilterRegistry }
@@ -2403,6 +2471,9 @@ export function GridFocusAnnouncer(props: {
     readonly className?: string;
 }): VNodeChild;
 
+// @public (undocumented)
+export const GROUP_ROW: FeatureSlotKey<GroupRowSlotProps<unknown>>;
+
 export { groupedHeaderAlign }
 
 export { groupedHeaderCellStyle }
@@ -2505,6 +2576,12 @@ interface GroupRowModel<TRow> {
     // (undocumented)
     readonly trailingColumns: number;
 }
+
+// @public (undocumented)
+export function groupRowSlotKey<TRow>(): FeatureSlotKey<GroupRowSlotProps<TRow>>;
+
+// @public
+export type GroupRowSlotProps<TRow> = Parameters<NonNullable<TableChromeSlots<TRow>["GroupRow"]>>[0];
 
 // @public (undocumented)
 export const HEADER_FILTER_MODEL: FeatureStateKey<HeaderFilterModel<unknown>>;
@@ -2736,6 +2813,9 @@ export interface PrintChromeProps extends ActionPresentation {
     // (undocumented)
     readonly slots: ActionButtonSlots;
 }
+
+// @public (undocumented)
+export function provideDataTableClassNames(read: () => DataTableClassNames): void;
 
 // @public (undocumented)
 export function provideFeatureState(state: FeatureState): void;
@@ -3989,6 +4069,9 @@ function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<TRow>>):
         onClick: () => void;
     };
 };
+
+// @public (undocumented)
+export function useDataTableClassNames(): ComputedRef<DataTableClassNames>;
 
 // @public (undocumented)
 interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {

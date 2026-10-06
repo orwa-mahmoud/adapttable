@@ -87,6 +87,10 @@ export {
   toVueStyle,
 } from "./attrs";
 export {
+  provideDataTableClassNames,
+  useDataTableClassNames,
+} from "./classNamesContext";
+export {
   renderCell,
   renderContent,
   renderFooter,
@@ -237,6 +241,13 @@ export {
   rowDetailModelKey,
   treeModelKey,
 } from "./hierarchy/models";
+export type {
+  DataTableSurfaceChromeProps,
+  DataTableSurfaceSlots,
+} from "./layout/dataTableSurfaceChrome";
+export { DataTableSurfaceChrome } from "./layout/dataTableSurfaceChrome";
+export type { GroupRowSlotProps } from "./layout/groupRowSlot";
+export { GROUP_ROW, groupRowSlotKey } from "./layout/groupRowSlot";
 export type {
   ColumnResizeModel,
   EditingChromeModel,

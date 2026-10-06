@@ -7,6 +7,7 @@ import { Rolldown } from "tsdown";
 import { packageDir } from "./packages.mjs";
 import {
   PDF_WRITER_MARKER,
+  VUE_LAYOUT_GRAPH_SPECS,
   VUE_RUNTIME_EXTERNALS,
   vueEmittedCss,
   vueGraphProblems,
@@ -94,7 +95,19 @@ export function plantedVueConsumers(fixtures) {
   const native = join(packageDir("adapter-vue-unstyled"), "dist");
   const react = join(packageDir("adapter-unstyled"), "dist/index.js");
   const ai = join(packageDir("ai-vue"), "dist/index.js");
+  const shell = VUE_LAYOUT_GRAPH_SPECS.find(
+    (fixture) => fixture.name === "vue · headless adapter shell"
+  );
+  if (!shell) throw new Error("Missing headless adapter shell graph");
   return [
+    {
+      fixture: {
+        ...shell,
+        name: `${shell.name} · planted table surface`,
+        code: `${shell.code}\nexport { DataTableSurfaceChrome } from "PKG";`,
+      },
+      expected: "leaked DataTableSurfaceChrome",
+    },
     {
       fixture: {
         ...density,
@@ -143,7 +156,7 @@ export async function checkVueConsumerGraphs(fixtures, dir) {
   const failures = [];
   const evidence = [];
   const negativeEvidence = [];
-  for (const fixture of fixtures) {
+  for (const fixture of [...fixtures, ...VUE_LAYOUT_GRAPH_SPECS]) {
     const graph = await vueConsumerGraph(fixture, dir);
     failures.push(...vueGraphProblems(fixture, graph));
     evidence.push({

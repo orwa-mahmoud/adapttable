@@ -95,6 +95,26 @@ describe("native control and slot contracts", () => {
     await nextTick();
     expect(view.root.querySelectorAll("tbody tr")).toHaveLength(12);
   });
+  it("uses the live page for repeated pagination clicks before rerender", async () => {
+    const view = mount({ defaults: { limit: 1 } });
+    await nextTick();
+    const next = node<HTMLButtonElement>(
+      view.root,
+      '[data-adapttable-part="page-next"]'
+    );
+    next.click();
+    next.click();
+    await nextTick();
+    expect(node(view.root, "tbody").textContent).toContain("Person 2");
+    const previous = node<HTMLButtonElement>(
+      view.root,
+      '[data-adapttable-part="page-prev"]'
+    );
+    previous.click();
+    previous.click();
+    await nextTick();
+    expect(node(view.root, "tbody").textContent).toContain("Person 0");
+  });
   it("exposes the real focus surface and maps controlled column layout to one update event", async () => {
     let model: UseDataTableResult<Row> | undefined;
     let focus: (() => void) | undefined;

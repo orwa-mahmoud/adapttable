@@ -4267,6 +4267,19 @@ for custom `exportCsv({ writer })` compositions. Native `/preset` provides
 replaces the preset's CSV action. See [Vue export options and composition](./vue/actions.md)
 and [standard native features](./vue/features.md#standard-native-features).
 
+### Vue adapter layout
+
+These optional construction helpers belong to `@adapttable/vue/adapter`.
+Root composables remain usable with completely custom UI; see
+[the optional layout contract](./vue/api.md#optional-adapter-layout).
+
+| Export                                                            | Purpose                                                                                                                |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `DataTableSurfaceChrome`, `DataTableSurfaceChromeProps<TRow>`     | Shared outer layout over an existing shell model, with explicit application slots and real root/scroll refs.           |
+| `DataTableSurfaceSlots<TRow>`                                     | Required kit Search, Select, Button, Loading, Desktop and Mobile renderers; no implicit native controls or table body. |
+| `provideDataTableClassNames`, `useDataTableClassNames`            | Reactive presentation hooks shared between an adapter and its feature controls.                                        |
+| `GROUP_ROW`, `groupRowSlotKey<TRow>()`, `GroupRowSlotProps<TRow>` | Typed lazy grouping-row contribution, independent of a specific kit renderer.                                          |
+
 ### Vue column menu contracts
 
 The following binding exports belong to `@adapttable/vue/adapter` unless

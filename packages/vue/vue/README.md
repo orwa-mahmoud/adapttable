@@ -85,6 +85,13 @@ attribute/ref bridges, structural Chrome and lifecycle/model channels. Every
 visible button, input, select and overlay is supplied by the adapter. Bind
 complete attribute records to the actual semantic element.
 
+`DataTableSurfaceChrome` is an optional shared outer layout. Its required
+Search, Select, Button, Loading, Desktop and Mobile renderers let each kit own
+its controls, table/card markup and appearance. `DataTableSurfaceSlots` and
+`DataTableSurfaceChromeProps` describe that construction boundary. Root
+composables and direct shell rendering remain available for completely custom
+UI without selecting this layout. See the [optional layout reference](../../../docs/vue/api.md#optional-adapter-layout).
+
 The shell composes column-aligned summaries through `useSummaryCells`,
 `useTableSummaryModel`, `TableSummaryChrome` and `MobileSummaryChrome`.
 `TableFooterChrome` places custom content outside the table. Summary mappers

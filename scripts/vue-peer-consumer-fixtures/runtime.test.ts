@@ -5,6 +5,9 @@ import { filters } from "@adapttable/vue-unstyled/filters";
 import { describe, expect, it, vi } from "vitest";
 import { createApp, effectScope, h, nextTick, shallowRef, version } from "vue";
 
+import CustomHeadlessConsumer from "./CustomHeadlessConsumer.vue";
+import CustomShellConsumer from "./CustomShellConsumer.vue";
+
 interface Row {
   id: string;
   name: string;
@@ -226,5 +229,69 @@ it("keeps equivalent selection owners live and retires replaced rows and dispose
     expect([...selected.selectedIds.value]).toEqual(["1"]);
   } finally {
     scope.stop();
+  }
+});
+
+it.each([
+  ["headless", CustomHeadlessConsumer],
+  ["shell", CustomShellConsumer],
+] as const)(
+  "renders a custom layout from %s without shared-layout controls",
+  async (kind, Consumer) => {
+    expect(version).toBe(process.env.ADAPTTABLE_VUE_PEER_VERSION);
+    const host = document.createElement("div");
+    const app = createApp(Consumer);
+    app.mount(host);
+    try {
+      expect(
+        host.querySelector(`[data-custom-layout="${kind}"]`)
+      ).not.toBeNull();
+      expect(
+        [...host.querySelectorAll("li")].map((row) => row.textContent)
+      ).toEqual(["Ada", "Bea"]);
+      expect(host.querySelector("table, [data-adapttable-part]")).toBeNull();
+      host.querySelector<HTMLButtonElement>("button")?.click();
+      await tick();
+      expect(
+        [...host.querySelectorAll("li")].map((row) => row.textContent)
+      ).toEqual(["Bea", "Ada"]);
+    } finally {
+      app.unmount();
+    }
+  }
+);
+
+it("advances and reverses the packed native table for repeated clicks before rerender", async () => {
+  const host = document.createElement("div");
+  const app = createApp({
+    render: () =>
+      h(DataTable<Row>, {
+        data: [
+          { id: "a", name: "Ada" },
+          { id: "b", name: "Bea" },
+          { id: "c", name: "Clio" },
+        ],
+        columns: [{ key: "name" }],
+        rowKey: (row: Row) => row.id,
+        defaults: { limit: 1 },
+        paginationMode: "paged",
+        urlSync: false,
+        forceMobile: false,
+      }),
+  });
+  app.mount(host);
+  try {
+    const next = button(host, "page-next");
+    next.click();
+    next.click();
+    await tick();
+    expect(host.querySelector("tbody")?.textContent).toBe("Clio");
+    const previous = button(host, "page-prev");
+    previous.click();
+    previous.click();
+    await tick();
+    expect(host.querySelector("tbody")?.textContent).toBe("Ada");
+  } finally {
+    app.unmount();
   }
 });

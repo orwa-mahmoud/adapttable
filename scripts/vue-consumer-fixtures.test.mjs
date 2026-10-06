@@ -6,6 +6,7 @@ import { KITS } from "./kits.mjs";
 import {
   PDF_WRITER_MARKER,
   VUE_CONSUMER_SPECS,
+  VUE_LAYOUT_GRAPH_SPECS,
   VUE_RUNTIME_EXTERNALS,
   vueConsumerCoverageProblems,
   vueConsumerFixtures,
@@ -249,4 +250,55 @@ it("includes emitted drawer CSS only in the three drawer-capable Vue consumers",
       ""
     );
   }
+});
+
+describe("optional Vue layout graphs", () => {
+  it("keeps headless and named shell consumers separate from optional rendering", () => {
+    const root = fixture("vue · simple table");
+    const shell = VUE_LAYOUT_GRAPH_SPECS.find(
+      (entry) => entry.name === "vue · headless adapter shell"
+    );
+    assert.ok(shell);
+    assert.equal(shell.entryFile, "adapter.js");
+    assert.equal(shell.code, 'export { useDataTableShell } from "PKG";');
+    for (const entry of [root, shell]) {
+      assert.ok(entry.absent.includes("DataTableSurfaceChrome"));
+      assert.ok(
+        vueGraphProblems(entry, {
+          code: `${entry.present.join(" ")} function DataTableSurfaceChrome() {}`,
+          imports: new Set(),
+        }).some((problem) => problem.includes("leaked DataTableSurfaceChrome"))
+      );
+    }
+    assert.deepEqual(
+      vueGraphProblems(shell, {
+        code: "useDataTableShell DesktopTableChrome MobileCardsChrome",
+        imports: new Set(),
+      }),
+      []
+    );
+  });
+
+  it("requires the real helper when explicitly selected without adding a size budget", () => {
+    const surface = VUE_LAYOUT_GRAPH_SPECS.find(
+      (entry) => entry.name === "vue · optional table surface"
+    );
+    assert.ok(surface);
+    assert.equal(surface.entryFile, "adapter.js");
+    assert.equal(surface.code, 'export { DataTableSurfaceChrome } from "PKG";');
+    assert.equal("budgetKB" in surface, false);
+    assert.deepEqual(
+      vueGraphProblems(surface, {
+        code: "function DataTableSurfaceChrome() {}",
+        imports: new Set(),
+      }),
+      []
+    );
+    assert.ok(
+      vueGraphProblems(surface, {
+        code: "function useDataTableShell() {}",
+        imports: new Set(),
+      }).some((problem) => problem.includes("missing DataTableSurfaceChrome"))
+    );
+  });
 });
