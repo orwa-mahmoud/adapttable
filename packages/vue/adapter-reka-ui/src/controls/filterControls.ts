@@ -46,7 +46,7 @@ export function rekaFilterControls(names: () => FilterClassNames) {
         },
         {
           default: () => [rekaCheckbox({ ...control, attrs }), control.label],
-        },
+        }
       );
     },
   };

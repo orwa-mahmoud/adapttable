@@ -10,9 +10,9 @@ export function rekaButton(attrs: Attrs, children: VNodeChild) {
     Primitive,
     mergeProps(
       { as: "button", type: "button", class: "at-reka-button" },
-      targetAttrs(attrs),
+      targetAttrs(attrs)
     ),
-    { default: () => children },
+    { default: () => children }
   );
 }
 
@@ -39,6 +39,6 @@ export function rekaInput(control: RekaInputControl) {
         // Reset the native draft when the controlled host rejects the request.
         input.value = control.value;
       },
-    }),
+    })
   );
 }

@@ -42,8 +42,8 @@ describe("Reka interactive targets", () => {
           "aria-label": "Sort name",
           onClick: click,
         },
-        "Name",
-      ),
+        "Name"
+      )
     );
     const button = host.querySelector("button");
     expect(button?.getAttribute("data-adapttable-part")).toBe("sort-button");
@@ -78,7 +78,7 @@ describe("Reka interactive targets", () => {
         checked: checked.value,
         indeterminate: mixed.value,
         onToggle: toggle,
-      }),
+      })
     );
     const checkbox = host.querySelector<HTMLButtonElement>('[role="checkbox"]');
     expect(checkbox?.getAttribute("aria-checked")).toBe("mixed");
@@ -115,15 +115,15 @@ describe("Reka interactive targets", () => {
           "data-adapttable-part": "filter-checkbox",
           "aria-label": "Active",
         },
-      }),
+      })
     );
     const label = host.querySelector(
-      '[data-adapttable-part="filter-checkbox"]',
+      '[data-adapttable-part="filter-checkbox"]'
     );
     expect(label?.tagName).toBe("LABEL");
     expect(label?.classList.contains("consumer-label")).toBe(true);
     expect(
-      label?.querySelector('[role="checkbox"]')?.getAttribute("aria-checked"),
+      label?.querySelector('[role="checkbox"]')?.getAttribute("aria-checked")
     ).toBe("true");
   });
 
@@ -134,7 +134,7 @@ describe("Reka interactive targets", () => {
         attrs: { "aria-label": "Search" },
         value: "old",
         onChange: change,
-      }),
+      })
     );
     const input = host.querySelector("input");
     if (!input) throw new Error("Missing input");
@@ -160,12 +160,12 @@ describe("Reka interactive targets", () => {
           { value: "active", label: "Active" },
         ],
         onChange: vi.fn(),
-      }),
+      })
     );
     const trigger = host.querySelector('[role="combobox"]');
     expect(trigger?.textContent).toContain("Any");
     expect(trigger?.getAttribute("data-adapttable-part")).toBe(
-      "filter-operator",
+      "filter-operator"
     );
     expect(trigger?.classList.contains("consumer-select")).toBe(true);
     expect(ref).toHaveBeenCalledWith(trigger);
@@ -201,16 +201,16 @@ describe("Reka interactive targets", () => {
     await nextTick();
     expect(
       warn.mock.calls.filter((args) =>
-        args.some((arg) => String(arg).includes("Hydration")),
-      ),
+        args.some((arg) => String(arg).includes("Hydration"))
+      )
     ).toEqual([]);
     expect(
       error.mock.calls.filter((args) =>
-        args.some((arg) => String(arg).includes("Hydration")),
-      ),
+        args.some((arg) => String(arg).includes("Hydration"))
+      )
     ).toEqual([]);
     expect(
-      host.querySelector('[role="checkbox"]')?.getAttribute("aria-checked"),
+      host.querySelector('[role="checkbox"]')?.getAttribute("aria-checked")
     ).toBe("mixed");
   });
 });

@@ -47,7 +47,7 @@ export function rekaSelect(control: RekaSelectControl) {
       "onUpdate:open": control.onOpenChange,
       "onUpdate:modelValue": (value: unknown) => {
         const option = control.options.find(
-          (item) => optionKey(item.value) === value,
+          (item) => optionKey(item.value) === value
         );
         if (option) control.onChange(option.value);
       },
@@ -65,7 +65,7 @@ export function rekaSelect(control: RekaSelectControl) {
               h(SelectValue, null, {
                 default: () =>
                   control.options.find(
-                    (option) => option.value === control.value,
+                    (option) => option.value === control.value
                   )?.label ?? control.value,
               }),
               h(SelectIcon, {
@@ -73,7 +73,7 @@ export function rekaSelect(control: RekaSelectControl) {
                 "aria-hidden": true,
               }),
             ],
-          },
+          }
         ),
         h(SelectPortal, null, {
           default: () =>
@@ -109,18 +109,18 @@ export function rekaSelect(control: RekaSelectControl) {
                                 h(
                                   SelectItemIndicator,
                                   { "aria-hidden": true },
-                                  { default: () => "✓" },
+                                  { default: () => "✓" }
                                 ),
                               ],
-                            },
-                          ),
+                            }
+                          )
                         ),
-                    },
+                    }
                   ),
-              },
+              }
             ),
         }),
       ],
-    },
+    }
   );
 }

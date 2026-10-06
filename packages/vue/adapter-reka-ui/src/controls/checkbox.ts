@@ -33,9 +33,9 @@ export function rekaCheckbox(control: {
           { class: "at-reka-checkbox-indicator" },
           {
             default: () => (control.indeterminate ? "−" : "✓"),
-          },
+          }
         ),
-    },
+    }
   );
 }
 

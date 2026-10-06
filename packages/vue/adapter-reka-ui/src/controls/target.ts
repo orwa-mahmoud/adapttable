@@ -4,7 +4,7 @@ import type { ComponentPublicInstance } from "vue";
 
 /** Reka forwards its public $el to the primitive's semantic DOM target. */
 export function rekaElement(
-  component: ComponentPublicInstance,
+  component: ComponentPublicInstance
 ): HTMLElement | null {
   const element: unknown = component.$el;
   return typeof HTMLElement !== "undefined" && element instanceof HTMLElement

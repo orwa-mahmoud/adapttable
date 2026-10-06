@@ -16,25 +16,25 @@ export default defineConfig({
       {
         find: /^@adapttable\/vue$/,
         replacement: fileURLToPath(
-          new URL("../vue/src/index.ts", import.meta.url),
+          new URL("../vue/src/index.ts", import.meta.url)
         ),
       },
       {
         find: /^@adapttable\/vue\/(.+)$/,
         replacement: fileURLToPath(
-          new URL("../vue/src/$1.ts", import.meta.url),
+          new URL("../vue/src/$1.ts", import.meta.url)
         ),
       },
       {
         find: /^@adapttable\/core$/,
         replacement: fileURLToPath(
-          new URL("../../shared/core/src/index.ts", import.meta.url),
+          new URL("../../shared/core/src/index.ts", import.meta.url)
         ),
       },
       {
         find: /^@adapttable\/core\/(.+)$/,
         replacement: fileURLToPath(
-          new URL("../../shared/core/src/$1.ts", import.meta.url),
+          new URL("../../shared/core/src/$1.ts", import.meta.url)
         ),
       },
       {
