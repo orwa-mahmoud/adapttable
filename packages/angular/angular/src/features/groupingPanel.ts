@@ -1,9 +1,9 @@
 /**
  * The interactive grouping panel feature for Angular.
  */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import { coreGroupingPanel } from "@adapttable/core/binding";
 
-import type { AdaptTableFeature } from "../featureHost";
 import type { GroupingExtras } from "./grouping";
 
 /**

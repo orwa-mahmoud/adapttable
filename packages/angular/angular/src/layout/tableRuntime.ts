@@ -4,6 +4,12 @@
  * same path React's chrome extras gate uses.
  */
 import {
+  type AdaptTableFeature,
+  type DataTable,
+  type MaybeSignal,
+  readMaybe,
+} from "@adapttable/angular";
+import {
   type BulkAction,
   type GroupedFlatEntry,
   type RowAction,
@@ -15,10 +21,6 @@ import {
   TableRuntimePublisher,
 } from "@adapttable/core/binding";
 import { computed, type Signal, untracked } from "@angular/core";
-
-import type { DataTable } from "../dataTable";
-import type { AdaptTableFeature } from "../featureHost";
-import { type MaybeSignal, readMaybe } from "../store";
 
 /**
  * The chrome fields {@link TableRuntimePublisher} needs from an Angular

@@ -1,4 +1,5 @@
 /** Core owns every assistant glyph; Angular only draws its descriptor. */
+import type { TableAssistantNode } from "@adapttable/angular";
 import type { IconDescriptor } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -10,7 +11,6 @@ import {
 } from "@angular/core";
 
 import { AdaptIcon } from "../icon";
-import type { TableAssistantNode } from "./assistantSlots";
 
 export {
   ASSISTANT_ACTIONS_ICON,

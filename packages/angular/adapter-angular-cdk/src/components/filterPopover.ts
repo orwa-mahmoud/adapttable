@@ -2,7 +2,7 @@
 import {
   type FilterOverlaySlotProps,
   injectPopoverSpace,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { BidiModule } from "@angular/cdk/bidi";
 import { type ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";

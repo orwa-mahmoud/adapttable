@@ -8,9 +8,9 @@ import {
   injectChangedCellFlash,
   type MobileCardField,
   type RowAction,
-  runRowAction,
   type TableLabels,
 } from "@adapttable/angular";
+import { runRowAction } from "@adapttable/angular/adapter";
 import { cellNavigation } from "@adapttable/spartan/cell-navigation";
 import { dirtyIndicators, editing } from "@adapttable/spartan/editing";
 import { pinnedSummaryRows } from "@adapttable/spartan/pinned-summary-rows";

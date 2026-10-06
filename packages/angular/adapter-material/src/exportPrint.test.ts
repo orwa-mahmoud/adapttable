@@ -5,8 +5,8 @@ import type {
   AdaptTableFeature,
   ColumnDef,
   ExportCsvOptions,
-  ToolbarExtrasSlotProps,
 } from "@adapttable/angular";
+import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
 import { bulkActions } from "@adapttable/angular-material/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-material/cell-navigation";
 import { columnMenu } from "@adapttable/angular-material/column-menu";

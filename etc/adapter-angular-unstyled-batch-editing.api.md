@@ -5,8 +5,8 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { BatchEditBarProps } from '@adapttable/angular';
-import { BatchEditBarSlots } from '@adapttable/angular';
+import { BatchEditBarProps } from '@adapttable/angular/adapter';
+import { BatchEditBarSlots } from '@adapttable/angular/adapter';
 import { BatchEditHandler } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';

@@ -4,19 +4,21 @@
  * the structure; Material supplies the visible controls and overlays.
  */
 import {
+  ADAPTTABLE_FIND_STATE,
+  type ContextMenuRegionHandlers,
+  type FindInTableState,
+} from "@adapttable/angular";
+import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
   ADAPTTABLE_CONTEXT_MENU,
-  ADAPTTABLE_FIND_STATE,
   ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
   type PaletteOpenState,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
@@ -36,7 +38,7 @@ export type {
   BodySlot,
   RowActionsCell,
   TableView,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 
 @Component({
   selector: "adapt-data-table",

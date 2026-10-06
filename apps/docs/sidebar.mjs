@@ -149,6 +149,7 @@ export const sidebar = [
   {
     label: "Angular",
     items: [
+      { label: "Migrate to Angular 0.5", slug: "angular/migrating-to-0-5" },
       {
         label: "UI kits",
         items: [

@@ -1,11 +1,13 @@
 import {
   type AdaptTableFeature,
-  CONTEXT_MENU_LIVE,
-  contextMenu as bindingContextMenu,
-  type ContextMenuOptions,
   extendFeature,
   slotRender,
 } from "@adapttable/angular";
+import { CONTEXT_MENU_LIVE } from "@adapttable/angular/adapter";
+import {
+  contextMenu as bindingContextMenu,
+  type ContextMenuOptions,
+} from "@adapttable/angular/features";
 
 import { AdaptContextMenuLive } from "./menu";
 

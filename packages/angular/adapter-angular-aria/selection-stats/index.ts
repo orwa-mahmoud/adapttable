@@ -8,10 +8,10 @@
 import {
   type AdaptTableFeature,
   extendFeature,
-  selectionStats as bindingSelectionStats,
   slotRender,
-  STATUS_BAR,
 } from "@adapttable/angular";
+import { STATUS_BAR } from "@adapttable/angular/adapter";
+import { selectionStats as bindingSelectionStats } from "@adapttable/angular/features";
 import { AdaptStatusBarLive } from "@adapttable/angular-aria/status-bar";
 
 /**

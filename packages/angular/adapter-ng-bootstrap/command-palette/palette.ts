@@ -9,7 +9,7 @@ import {
   type CommandPaletteSurfaceProps,
   injectCommandPalette,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵbootstrapModal as bootstrapModal } from "@adapttable/ng-bootstrap";
 import { NgTemplateOutlet } from "@angular/common";
 import {

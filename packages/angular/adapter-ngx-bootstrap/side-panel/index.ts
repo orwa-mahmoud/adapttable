@@ -4,16 +4,20 @@
  * @packageDocumentation
  */
 import {
-  AdaptSidePanelChrome,
   type AdaptTableFeature,
   extendFeature,
-  SIDE_PANEL,
-  sidePanel as bindingSidePanel,
-  type SidePanelOptions,
-  type SidePanelSlots,
   slotRender,
   type TableLabels,
 } from "@adapttable/angular";
+import {
+  AdaptSidePanelChrome,
+  SIDE_PANEL,
+  type SidePanelSlots,
+} from "@adapttable/angular/adapter";
+import {
+  sidePanel as bindingSidePanel,
+  type SidePanelOptions,
+} from "@adapttable/angular/features";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 import {

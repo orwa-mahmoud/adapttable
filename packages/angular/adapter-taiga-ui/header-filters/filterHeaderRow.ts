@@ -1,17 +1,19 @@
+import type {
+  FilterDef,
+  FilterFormSource,
+  FilterTypeRegistry,
+  TableLabels,
+} from "@adapttable/angular";
 import {
   AdaptFilterHeaderChrome,
   AdaptFilterHeaderControlChrome,
-  type FilterDef,
-  type FilterFormSource,
   type FilterHeaderClassNames,
   type FilterHeaderMultiProps,
   type FilterHeaderRangeProps,
   type FilterHeaderSearchProps,
   type FilterHeaderSelectProps,
   type FilterHeaderSlots,
-  type FilterTypeRegistry,
-  type TableLabels,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵTAIGA_CONTROLS as TAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import {
   ChangeDetectionStrategy,

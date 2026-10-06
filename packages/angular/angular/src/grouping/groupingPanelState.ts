@@ -4,6 +4,13 @@
  * {@link GROUPING_PANEL} slot draw from.
  */
 import {
+  type AdaptTableFeature,
+  type ColumnDef,
+  type DataTable,
+  fromStore,
+} from "@adapttable/angular";
+import type { GroupingPanelExtras } from "@adapttable/angular/features";
+import {
   createGroupingPanelController,
   declaredAggregates,
   groupingPanelAggregations,
@@ -24,12 +31,7 @@ import {
   untracked,
 } from "@angular/core";
 
-import type { ColumnDef } from "../columnDef";
-import type { DataTable } from "../dataTable";
-import type { AdaptTableFeature } from "../featureHost";
-import type { GroupingPanelExtras } from "../features/groupingPanel";
 import { type RuntimeGrouping, tableRuntimeFor } from "../layout/tableRuntime";
-import { fromStore } from "../store";
 
 /**
  * A grouping-panel feature that also carries the seed keys and extras the

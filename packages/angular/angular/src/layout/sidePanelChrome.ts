@@ -5,6 +5,7 @@
  * closes. The kit draws the frame, each tab and the close control. The
  * header, the strip and the body stay here so every kit shares them.
  */
+import type { SidePanelPanel } from "@adapttable/angular/features";
 import {
   DEFAULT_SIDE_PANEL_ID_PREFIX,
   handleSidePanelBodyKey,
@@ -25,7 +26,6 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
-import type { SidePanelPanel } from "../features/factories";
 
 /**
  * The kit's controls for {@link AdaptSidePanelChrome}. Each is a standalone

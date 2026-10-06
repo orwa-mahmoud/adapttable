@@ -12,7 +12,7 @@ import {
   type Type,
 } from "@angular/core";
 
-import { primitiveText } from "../columnDef";
+import { primitiveText } from "../primitiveText";
 
 // A compiled Angular component carries its definition as `ɵcmp`.
 function isComponentType(value: unknown): value is Type<unknown> {

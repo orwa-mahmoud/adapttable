@@ -3,6 +3,11 @@
  * as a signal so the grip and drop targets stay in sync with the table.
  */
 import {
+  type AdaptTableFeature,
+  type DataTable,
+  fromStore,
+} from "@adapttable/angular";
+import {
   createRowReorderController,
   isRowMovePending,
   type RowDragEvent,
@@ -22,11 +27,8 @@ import {
   type Signal,
 } from "@angular/core";
 
-import type { DataTable } from "../dataTable";
-import type { AdaptTableFeature } from "../featureHost";
-import type { RowReorderFeature } from "../features/rowReorder";
+import type { RowReorderFeature } from "../features/rowReorderContracts";
 import { type RuntimeGrouping, tableRuntimeFor } from "../layout/tableRuntime";
-import { fromStore } from "../store";
 
 /**
  * Headless reorder state — core's contract with Angular's drag and key events.

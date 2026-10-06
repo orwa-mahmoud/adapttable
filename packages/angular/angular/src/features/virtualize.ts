@@ -1,9 +1,8 @@
 /**
  * Virtualize feature factory for Angular.
  */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import { coreVirtualize, type VirtualizeInput } from "@adapttable/core/binding";
-
-import type { AdaptTableFeature } from "../featureHost";
 
 /**
  * Options the factory accepts — a boolean or the windowing knobs.

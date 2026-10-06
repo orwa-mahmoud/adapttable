@@ -1,3 +1,4 @@
+import { type DataTable, filterChipsFor } from "@adapttable/angular";
 import {
   type ActiveFilterChip,
   type Direction,
@@ -14,9 +15,6 @@ import {
   FilterTriggerToggleState,
 } from "@adapttable/core/binding";
 import { computed, type Signal, signal, type TemplateRef } from "@angular/core";
-
-import { type DataTable } from "../dataTable";
-import { filterChipsFor } from "./filters";
 
 /** Where the Filters button's panel opens. @public */
 export type FiltersMode = "popover" | "drawer";

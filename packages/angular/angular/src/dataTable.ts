@@ -64,9 +64,9 @@ import {
   type TemplateRef,
 } from "@angular/core";
 
-import { trackTableStatus } from "./a11y/tableStatusAnnouncer";
-import type { Attrs } from "./attrs";
-import type { AdaptCellTemplate } from "./cell";
+import { trackTableStatus } from "./a11y/tableStatusState";
+import type { Attrs } from "./attrContracts";
+import type { AdaptCellTemplate } from "./cellTemplate";
 import {
   type CellContext,
   type ColumnDef,
@@ -89,7 +89,7 @@ import {
 import { createFeatureState, type FeatureState } from "./featureState";
 import { createSearchInput } from "./searchInput";
 import type { RowSelection } from "./selection/selection";
-import type { SlotFills } from "./slots";
+import type { SlotFills } from "./slotContracts";
 import { type MaybeSignal, type MaybeSignalOptional, readMaybe } from "./store";
 
 /**

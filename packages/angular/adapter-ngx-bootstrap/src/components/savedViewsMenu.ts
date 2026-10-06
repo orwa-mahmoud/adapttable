@@ -6,9 +6,9 @@
 import {
   injectSavedViews,
   type SavedViewsControllerOptions,
-  type SavedViewsSlotProps,
   type SavedViewsState,
 } from "@adapttable/angular";
+import type { SavedViewsSlotProps } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

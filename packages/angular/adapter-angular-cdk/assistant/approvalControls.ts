@@ -3,7 +3,7 @@ import type {
   AgentApprovalButtonProps,
   AgentApprovalListProps,
   AgentApprovalSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";

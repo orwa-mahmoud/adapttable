@@ -1,17 +1,11 @@
-/**
- * Named positions a table asks features to fill.
- *
- * A kit's table marks a position with {@link AdaptSlot}; a feature fills it
- * with a component through `renders`. Nothing is the ordinary answer: a
- * table without the feature draws nothing there, and the component's code is
- * not in the build unless the feature is imported.
- */
 import {
-  drawnSlotFills,
-  type FeatureHostState,
-  type FeatureSlotKey,
-  type SlotFill,
-} from "@adapttable/core/binding";
+  ADAPTTABLE_FEATURE_STATE,
+  ADAPTTABLE_SLOT_TABLE,
+  createFeatureState,
+  type SlotComponent,
+  type SlotTable,
+} from "@adapttable/angular";
+import { drawnSlotFills, type FeatureSlotKey } from "@adapttable/core/binding";
 import {
   type ComponentRef,
   type DestroyableInjector,
@@ -19,50 +13,11 @@ import {
   Directive,
   effect,
   inject,
-  InjectionToken,
   Injector,
   input,
   untracked,
   ViewContainerRef,
 } from "@angular/core";
-
-import type { SlotComponent } from "./featureHost";
-import {
-  ADAPTTABLE_FEATURE_STATE,
-  createFeatureState,
-  type FeatureState,
-} from "./featureState";
-
-/**
- * Which components draw each slot — `DataTable.slotFills`.
- *
- * @public
- */
-export type SlotFills = ReadonlyMap<string, readonly SlotFill<SlotComponent>[]>;
-
-/**
- * What a slot component can ask of the table it draws in.
- *
- * @public
- */
-export interface SlotTable {
-  /** Which components the features draw into each slot. */
-  readonly slotFills: SlotFills;
-  /** The features' registrations: menu items, commands, writers. */
-  readonly featureHost: FeatureHostState;
-  /** Reactive values published by the table's mounted features. */
-  readonly featureState?: FeatureState;
-}
-
-/**
- * The table a slot component draws in, for a component that needs more than
- * its props — the feature host a menu reads its plugin items from.
- *
- * @public
- */
-export const ADAPTTABLE_SLOT_TABLE = new InjectionToken<SlotTable>(
-  "ADAPTTABLE_SLOT_TABLE"
-);
 
 /** Whether two draws name the same components in the same order. */
 function sameDraw(

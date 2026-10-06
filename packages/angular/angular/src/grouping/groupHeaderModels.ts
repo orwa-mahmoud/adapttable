@@ -1,3 +1,4 @@
+import { type ColumnDef } from "@adapttable/angular";
 import {
   groupAggregateEntries,
   groupLeafCount,
@@ -15,8 +16,6 @@ import {
   type SelectionState,
 } from "@adapttable/core/binding";
 import { computed, Directive, input, type Signal } from "@angular/core";
-
-import { type ColumnDef } from "../columnDef";
 type Entry = GroupHeaderRowSlotProps<
   never,
   SelectionState,

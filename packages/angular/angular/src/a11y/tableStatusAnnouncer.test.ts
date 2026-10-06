@@ -13,10 +13,8 @@ import { describe, expect, it } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import { injectFrontendData } from "../source/frontendData";
 import { ADAPTTABLE_URL_ADAPTER } from "../url/tableUrlState";
-import {
-  AdaptTableStatusAnnouncer,
-  trackTableStatus,
-} from "./tableStatusAnnouncer";
+import { AdaptTableStatusAnnouncer } from "./tableStatusAnnouncer";
+import { trackTableStatus } from "./tableStatusState";
 
 interface Row {
   id: string;

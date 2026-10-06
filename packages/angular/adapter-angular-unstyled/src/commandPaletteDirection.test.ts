@@ -1,5 +1,5 @@
 /** Standalone kit controls retain ambient direction when no override is supplied. */
-import type { CommandPaletteInjectOptions } from "@adapttable/angular";
+import type { CommandPaletteInjectOptions } from "@adapttable/angular/adapter";
 import { AdaptCommandPaletteLive } from "@adapttable/angular-unstyled/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";

@@ -1,5 +1,5 @@
 /** Backdrop-free Material filter card, anchored and dismissed by CDK. */
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import type { FilterOverlaySlotProps } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

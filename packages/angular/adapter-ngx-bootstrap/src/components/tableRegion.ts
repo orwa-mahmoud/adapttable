@@ -4,7 +4,7 @@
  * The row itself is {@link AdaptSidePanelLayout}. This keeps the selector
  * the table already uses.
  */
-import { AdaptSidePanelLayout } from "@adapttable/angular";
+import { AdaptSidePanelLayout } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

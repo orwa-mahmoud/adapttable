@@ -12,10 +12,8 @@ import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  injectBulkActionRunner,
-  injectBulkBarRunner,
-} from "./bulkActionRunner";
+import { injectBulkActionRunner } from "./bulkActionRunner";
+import { injectBulkBarRunner } from "./bulkBarRunner";
 
 function pendingWrite() {
   let resolve!: () => void;

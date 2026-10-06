@@ -14,9 +14,9 @@ import { describe, expect, it, vi } from "vitest";
 import { featureOptionsOf } from "../featureHost";
 import {
   injectTableRowPinning,
-  rowPinning,
   type TableRowPinningOptions,
-} from "./rowPinning";
+} from "../rows/tableRowPinning";
+import { rowPinning } from "./rowPinning";
 
 interface Row {
   id: string;

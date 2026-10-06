@@ -1,4 +1,5 @@
 /** The assistant's structure, keyboard behavior and announcements; controls belong to the kit. */
+import type { TableAssistantProps } from "@adapttable/angular";
 import {
   type AgentApprovalPending,
   approvalReview,
@@ -59,13 +60,12 @@ import {
 } from "./assistantPlacement";
 import type {
   TableAssistantButtonProps,
-  TableAssistantProps,
   TableAssistantSlots,
 } from "./assistantSlots";
 import { injectConversationScroll } from "./conversationScroll";
 
-export type { TableAssistantBoundary } from "./assistantPlacement";
-export type { TableAssistantProps } from "./assistantSlots";
+export type { TableAssistantProps } from "@adapttable/angular";
+export type { TableAssistantBoundary } from "@adapttable/core/binding";
 export { assistantIsBusy } from "@adapttable/core/binding";
 
 const ASSISTANT_SURFACE_PARTS = {

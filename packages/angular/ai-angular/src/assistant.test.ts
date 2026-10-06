@@ -19,11 +19,13 @@ import {
 } from "@adapttable/ai";
 import {
   ADAPTTABLE_FEATURE_STATE,
-  AGENT_VIEW_STATE,
-  type AgentViewState,
   createFeatureState,
   type FeatureState,
 } from "@adapttable/angular";
+import {
+  AGENT_VIEW_STATE,
+  type AgentViewState,
+} from "@adapttable/angular/adapter";
 import {
   computed,
   Injector,

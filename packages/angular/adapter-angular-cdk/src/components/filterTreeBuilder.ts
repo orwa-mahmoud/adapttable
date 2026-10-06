@@ -2,13 +2,13 @@
  * The filter tree's native controls: select, input, button and disclosure.
  * CDK supplies accessibility behavior; the adapter owns neutral controls.
  */
-import {
-  type AngularFilterTreeDisclosureProps,
-  type FilterTreeButtonProps,
-  type FilterTreeInputProps,
-  type FilterTreeSelectProps,
-  type FilterTreeSlots,
-} from "@adapttable/angular";
+import type {
+  AngularFilterTreeDisclosureProps,
+  FilterTreeButtonProps,
+  FilterTreeInputProps,
+  FilterTreeSelectProps,
+  FilterTreeSlots,
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";

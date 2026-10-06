@@ -1,15 +1,17 @@
 import {
   type ColumnDef,
-  defaultFilterRegistry,
   type FilterDef,
   type FilterFormSource,
   filterRuntimeFor,
   type FilterTypeSpec,
-  type FilterWidgetRenderProps,
   injectDataTable,
   injectFrontendData,
   type TableLabels,
 } from "@adapttable/angular";
+import {
+  defaultFilterRegistry,
+  type FilterWidgetRenderProps,
+} from "@adapttable/angular/adapter";
 import { filters, filterTypes } from "@adapttable/ng-zorro/filters";
 import { headerFilters } from "@adapttable/ng-zorro/header-filters";
 import {

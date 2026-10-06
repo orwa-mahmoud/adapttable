@@ -1,8 +1,6 @@
 /** Mounted native controls: no browser interaction is delegated to the binding. */
-import type {
-  TableAssistantProps,
-  TableAssistantView,
-} from "@adapttable/angular";
+import type { TableAssistantProps } from "@adapttable/angular";
+import type { TableAssistantView } from "@adapttable/angular/adapter";
 import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { within } from "@testing-library/dom";

@@ -5,11 +5,11 @@
  */
 import {
   type AdaptTableFeature,
-  collapsibleColumnGroups as bindingCollapsibleColumnGroups,
-  COLUMN_GROUP_TOGGLE,
   extendFeature,
   slotRender,
 } from "@adapttable/angular";
+import { COLUMN_GROUP_TOGGLE } from "@adapttable/angular/adapter";
+import { collapsibleColumnGroups as bindingCollapsibleColumnGroups } from "@adapttable/angular/features";
 import { AdaptColumnGroupToggle } from "@adapttable/spartan";
 
 export type { ColumnGroup, ColumnInput } from "@adapttable/angular";

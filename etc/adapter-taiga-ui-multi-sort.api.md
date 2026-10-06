@@ -4,7 +4,7 @@
 
 ```ts
 
-import { multiSort } from '@adapttable/angular';
+import { multiSort } from '@adapttable/angular/features';
 
 export { multiSort }
 

@@ -4,6 +4,9 @@ AdaptTable combines a headless Angular binding with a kit that draws the
 controls. Start with `AdaptDataTable`, an array of rows, column definitions and
 a stable row key. Add feature imports when the table needs them.
 
+Upgrading an existing binding? Read the [0.5 migration guide](migrating-to-0-5.md)
+before changing imports. The new entry paths require the 0.5 release.
+
 ## First public releases in preparation
 
 Seven additional kits are being prepared for their first public **0.1.0**

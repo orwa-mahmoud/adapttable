@@ -1,9 +1,9 @@
-import {
-  type AdaptTableFeature,
-  type ColumnDef,
-  type TableLabels,
-  tree as bindingTree,
+import type {
+  AdaptTableFeature,
+  ColumnDef,
+  TableLabels,
 } from "@adapttable/angular";
+import { tree as bindingTree } from "@adapttable/angular/features";
 import { tree } from "@adapttable/taiga-ui/tree";
 import { virtualize } from "@adapttable/taiga-ui/virtualize";
 import { Component, signal } from "@angular/core";

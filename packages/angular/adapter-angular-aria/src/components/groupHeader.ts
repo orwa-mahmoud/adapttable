@@ -11,7 +11,7 @@ import {
   AdaptGroupToggleSpacer,
   AdaptIcon,
   type GroupMoreButtonSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 /** The entry either slot draws. */

@@ -8,7 +8,7 @@ import {
   type ContextMenuSlots,
   injectTableContextMenu,
   type TableContextMenuOptions,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵbootstrapPopperOptions as bootstrapPopperOptions } from "@adapttable/ng-bootstrap";
 import {
   afterEveryRender,

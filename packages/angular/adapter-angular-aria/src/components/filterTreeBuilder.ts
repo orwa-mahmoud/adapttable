@@ -2,13 +2,13 @@
  * The filter tree's native controls: select, input, button and disclosure.
  * Simple controls are styled by this adapter; Aria supplies composite behavior.
  */
-import {
-  type AngularFilterTreeDisclosureProps,
-  type FilterTreeButtonProps,
-  type FilterTreeInputProps,
-  type FilterTreeSelectProps,
-  type FilterTreeSlots,
-} from "@adapttable/angular";
+import type {
+  AngularFilterTreeDisclosureProps,
+  FilterTreeButtonProps,
+  FilterTreeInputProps,
+  FilterTreeSelectProps,
+  FilterTreeSlots,
+} from "@adapttable/angular/adapter";
 import {
   AccordionContent,
   AccordionGroup,

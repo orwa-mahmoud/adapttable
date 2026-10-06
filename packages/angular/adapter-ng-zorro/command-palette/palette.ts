@@ -9,7 +9,7 @@ import {
   type CommandPaletteSurfaceProps,
   injectCommandPalette,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { Directionality } from "@angular/cdk/bidi";
 import { NgTemplateOutlet } from "@angular/common";
 import {

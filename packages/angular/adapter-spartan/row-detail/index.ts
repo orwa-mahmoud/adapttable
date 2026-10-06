@@ -5,15 +5,17 @@
  */
 import {
   type AdaptTableFeature,
-  EXPAND_TOGGLE,
   extendFeature,
-  nestedTable as bindingNestedTable,
   type NestedTableFor,
   type Renderer,
-  rowDetail as bindingRowDetail,
   type RowDetailContext,
   slotRender,
 } from "@adapttable/angular";
+import { EXPAND_TOGGLE } from "@adapttable/angular/adapter";
+import {
+  nestedTable as bindingNestedTable,
+  rowDetail as bindingRowDetail,
+} from "@adapttable/angular/features";
 import { AdaptExpandToggle } from "@adapttable/spartan";
 
 export type {

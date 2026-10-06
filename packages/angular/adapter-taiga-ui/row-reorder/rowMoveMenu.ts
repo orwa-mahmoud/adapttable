@@ -1,7 +1,7 @@
 import {
   restoreFocusSoon,
   type RowMoveMenuSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵTAIGA_CONTROLS as TAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import {
   ChangeDetectionStrategy,

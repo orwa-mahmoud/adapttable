@@ -5,12 +5,11 @@
  */
 import {
   type AdaptTableFeature,
-  BULK_BAR,
   type BulkAction,
-  coreBulkActions,
   extendFeature,
   slotRender,
 } from "@adapttable/angular";
+import { BULK_BAR, coreBulkActions } from "@adapttable/angular/adapter";
 import { AdaptBulkBar } from "@adapttable/spartan";
 
 /**

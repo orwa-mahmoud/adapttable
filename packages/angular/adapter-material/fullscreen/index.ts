@@ -5,11 +5,10 @@
  */
 import {
   type AdaptTableFeature,
-  coreFullscreen,
   extendFeature,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/angular";
+import { coreFullscreen, TOOLBAR_EXTRAS } from "@adapttable/angular/adapter";
 import { AdaptFullscreenButton } from "@adapttable/angular-material";
 
 /**

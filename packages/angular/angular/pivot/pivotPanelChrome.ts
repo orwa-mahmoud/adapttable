@@ -16,7 +16,7 @@
  * kit stamps, because an Angular slot cannot project children through the
  * control outlet.
  */
-import { AdaptControl } from "@adapttable/angular";
+import { AdaptControl } from "@adapttable/angular/adapter";
 import {
   type AggregateName,
   assignField,

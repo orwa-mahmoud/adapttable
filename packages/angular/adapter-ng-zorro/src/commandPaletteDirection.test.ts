@@ -1,5 +1,5 @@
 /** A standalone native modal keeps its scoped CDK direction when no override is supplied. */
-import type { CommandPaletteInjectOptions } from "@adapttable/angular";
+import type { CommandPaletteInjectOptions } from "@adapttable/angular/adapter";
 import { AdaptCommandPaletteLive } from "@adapttable/ng-zorro/command-palette";
 import { BidiModule } from "@angular/cdk/bidi";
 import { Component } from "@angular/core";

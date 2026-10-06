@@ -1,10 +1,10 @@
 import {
   type AdaptTableFeature,
   extendFeature,
-  print as bindingPrint,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/angular";
+import { TOOLBAR_EXTRAS } from "@adapttable/angular/adapter";
+import { print as bindingPrint } from "@adapttable/angular/features";
 import { AdaptPrintButton } from "@adapttable/taiga-ui";
 
 /**

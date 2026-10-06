@@ -1,8 +1,8 @@
-import {
-  type AgentApprovalButtonProps,
-  type AgentApprovalListProps,
-  type AgentApprovalSlots,
-} from "@adapttable/angular";
+import type {
+  AgentApprovalButtonProps,
+  AgentApprovalListProps,
+  AgentApprovalSlots,
+} from "@adapttable/angular/adapter";
 import { ɵTAIGA_CONTROLS as TAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";

@@ -1,54 +1,23 @@
-/**
- * Cell and header content: a column's template or component when it has
- * one, its text otherwise. Structure only — the element the content lands in
- * is the host's own `<td>` or `<th>`.
- */
+import {
+  type CellContext,
+  type ColumnDef,
+  type FooterContext,
+  type HeaderContext,
+  type Renderer,
+} from "@adapttable/angular";
 import { cellValue } from "@adapttable/core";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  Directive,
-  inject,
   input,
   reflectComponentType,
   TemplateRef,
   type Type,
 } from "@angular/core";
 
-import {
-  type CellContext,
-  type ColumnDef,
-  type FooterContext,
-  type HeaderContext,
-  primitiveText,
-  type Renderer,
-} from "./columnDef";
-
-/**
- * A cell template declared in a component's own template:
- * `<ng-template adaptCellTemplate="status" let-row>…</ng-template>`. Collect
- * them with `viewChildren(AdaptCellTemplate)` and pass them to
- * `injectDataTable` as `cellTemplates`.
- *
- * @public
- */
-@Directive({ selector: "ng-template[adaptCellTemplate]" })
-export class AdaptCellTemplate {
-  /** The key of the column this template renders. */
-  readonly key = input.required<string>({ alias: "adaptCellTemplate" });
-  /** The template. */
-  readonly template = inject<TemplateRef<CellContext<unknown>>>(TemplateRef);
-
-  /** Type the template's `let-` variables. */
-  static ngTemplateContextGuard(
-    _directive: AdaptCellTemplate,
-    _context: unknown
-  ): _context is CellContext<unknown> {
-    return true;
-  }
-}
+import { primitiveText } from "./primitiveText";
 
 /**
  * A column renderer split by kind: the template to stamp, or the component

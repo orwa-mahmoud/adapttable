@@ -5,7 +5,7 @@
 import {
   restoreFocusSoon,
   type RowMoveMenuSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵinjectBootstrapOverlayContainer as injectBootstrapOverlayContainer } from "@adapttable/ngx-bootstrap";
 import {
   afterNextRender,

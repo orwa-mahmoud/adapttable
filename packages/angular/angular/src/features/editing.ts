@@ -2,6 +2,13 @@
  * Editing feature factories for Angular: cell, row and batch editing, and
  * the marks on unsaved edits, over core's binding factories.
  */
+import {
+  type AdaptTableFeature,
+  type BatchEditHandler,
+  type CellEditHandler,
+  type DirtyEdits,
+  type RowEditHandler,
+} from "@adapttable/angular";
 import type {
   EditConflictHandler,
   EditConflictPolicy,
@@ -14,14 +21,6 @@ import {
   coreEditing,
   coreRowEditing,
 } from "@adapttable/core/binding";
-
-import type { DirtyEdits } from "../editing/dirtyCells";
-import type {
-  BatchEditHandler,
-  CellEditHandler,
-  RowEditHandler,
-} from "../editing/editing";
-import type { AdaptTableFeature } from "../featureHost";
 
 /**
  * Lifecycle observers a host may pass to {@link editing}.
@@ -134,4 +133,4 @@ export type {
   BatchEditHandler,
   CellEditHandler,
   RowEditHandler,
-} from "../editing/editing";
+} from "@adapttable/angular";

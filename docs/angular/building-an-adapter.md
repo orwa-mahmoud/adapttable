@@ -34,13 +34,12 @@ import { Component, input } from "@angular/core";
 import {
   AdaptColumnGroupToggleChrome,
   COLUMN_GROUP_TOGGLE,
-  collapsibleColumnGroups,
-  extendFeature,
-  slotRender,
   type ColumnGroupToggleButtonProps,
   type ColumnGroupToggleProps,
   type ColumnGroupToggleSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
+import { collapsibleColumnGroups } from "@adapttable/angular/features";
+import { extendFeature, slotRender } from "@adapttable/angular";
 
 @Component({
   selector: "example-group-button",

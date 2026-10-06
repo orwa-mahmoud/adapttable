@@ -80,6 +80,8 @@ function projectConfig(files) {
         "@adapttable/ai/*": [join(ai, "src", "*.ts")],
         "@adapttable/ai-angular": [join(aiAngular, "src", "index.ts")],
         "@adapttable/angular": [join(angular, "src", "index.ts")],
+        "@adapttable/angular/features": [join(angular, "src", "features.ts")],
+        "@adapttable/angular/adapter": [join(angular, "src", "adapter.ts")],
         "@adapttable/angular/*": [join(angular, "*", "index.ts")],
         ...angularKitSourcePaths(),
         "@adapttable/core": [join(core, "src", "index.ts")],

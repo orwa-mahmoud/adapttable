@@ -7,15 +7,17 @@ import {
 } from "@adapttable/ai";
 import {
   type AdaptTableFeature,
+  type FeatureMountContext,
+  type MaybeSignal,
+  readMaybe,
+} from "@adapttable/angular";
+import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
   AGENT_PROGRESS_STATE,
   AGENT_VIEW_STATE,
   type AgentApprovalPending,
-  type FeatureMountContext,
-  type MaybeSignal,
-  readMaybe,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { effect, PendingTasks, untracked } from "@angular/core";
 
 export type { SharedApproval, TableAgentColumnPatch } from "@adapttable/ai";

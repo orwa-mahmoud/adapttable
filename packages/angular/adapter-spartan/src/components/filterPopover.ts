@@ -2,7 +2,7 @@
 import {
   type FilterOverlaySlotProps,
   injectPopoverSpace,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { OverlayPositionBuilder } from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
 import {

@@ -5,7 +5,7 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { GroupingPanelExtras } from '@adapttable/angular';
+import { GroupingPanelExtras } from '@adapttable/angular/features';
 
 // @public
 export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string[], extras?: GroupingPanelExtras<TRow>): AdaptTableFeature;

@@ -1,6 +1,7 @@
 /**
  * The desktop table body: header, rows, reorder handles and cell editors.
  */
+import type { Attrs } from "@adapttable/angular";
 import {
   AdaptAttrs,
   AdaptCell,
@@ -12,8 +13,7 @@ import {
   AdaptHeaderActions,
   AdaptRowDetail,
   AdaptSlot,
-  type Attrs,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

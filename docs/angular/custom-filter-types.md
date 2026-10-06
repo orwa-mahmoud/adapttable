@@ -24,9 +24,9 @@ import type {
   FilterDef,
   FilterFormSource,
   FilterTypeSpec,
-  FilterWidgetRenderProps,
   TableLabels,
 } from "@adapttable/angular";
+import type { FilterWidgetRenderProps } from "@adapttable/angular/adapter";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 import { filters, filterTypes } from "@adapttable/angular-unstyled/filters";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";

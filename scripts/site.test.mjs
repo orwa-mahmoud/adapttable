@@ -94,7 +94,8 @@ describe("site addresses", () => {
     assert.equal(docsRoute("data-tiers"), "/data-tiers/");
     assert.equal(docsRoute("custom-table-source"), "/custom-table-source/");
     assert.equal(docsRoute("concepts", "angular"), "/concepts/");
-    assert.equal(ANGULAR_DOCS.length, 57);
+    assert.equal(ANGULAR_DOCS.length, 58);
+    assert.ok(ANGULAR_DOCS.includes("angular/migrating-to-0-5.md"));
     for (const kit of [
       "material",
       "ng-bootstrap",

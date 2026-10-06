@@ -7,14 +7,15 @@ import {
   type AdaptTableFeature,
   extendFeature,
   slotRender,
-  tree as bindingTree,
-  TREE_CELL,
-  TREE_TOGGLE,
-  type TreeFeatureOptions,
 } from "@adapttable/angular";
+import { TREE_CELL, TREE_TOGGLE } from "@adapttable/angular/adapter";
+import {
+  tree as bindingTree,
+  type TreeFeatureOptions,
+} from "@adapttable/angular/features";
 import { AdaptTreeCell, AdaptTreeToggle } from "@adapttable/ng-bootstrap";
 
-export type { TreeFeatureOptions } from "@adapttable/angular";
+export type { TreeFeatureOptions } from "@adapttable/angular/features";
 
 /**
  * Render rows as an expandable tree, with a native chevron in the tree

@@ -1,4 +1,12 @@
 import {
+  type Attrs,
+  type CellContext,
+  type ColumnDef,
+  type DataTableClassNames,
+  type MobileCardContext,
+  type MobileCardField,
+} from "@adapttable/angular";
+import {
   mobileCardListStyle,
   type TableLabels,
   treeCardStyle,
@@ -22,17 +30,10 @@ import {
   viewChild,
 } from "@angular/core";
 
-import { type Attrs } from "../attrs";
 import { resolveRenderer } from "../cell";
-import { type CellContext, type ColumnDef } from "../columnDef";
-import {
-  type MobileCardContext,
-  type MobileCardField,
-} from "../rows/mobileCard";
 import { type RowReorderState } from "../rows/rowReorder";
 import { type RowReorderButtonsProps } from "../rows/rowReorderHandle";
 import { type TreeToggleProps } from "../tree/treeToggle";
-import { type DataTableClassNames } from "./dataTableClassNames";
 import { type TableView } from "./dataTableShell";
 
 /** Shared AdaptMobileCards signals; adapters supply native templates and controls. @public */

@@ -3,6 +3,7 @@
  * host or a kit-supplied inner element, so a template writes
  * `[adaptAttrs]="table.tableAttrs()"` instead of binding each attribute by hand.
  */
+import type { Attrs } from "@adapttable/angular";
 import {
   afterEveryRender,
   type AfterRenderRef,
@@ -18,16 +19,7 @@ import {
   RendererStyleFlags2,
 } from "@angular/core";
 
-import { primitiveText } from "./columnDef";
-
-/**
- * An attribute record: attribute values, an optional `style` object, event
- * handlers (`onClick`, `onChange`, `onKeyDown`, `onFocus` and the mouse
- * presses) and an optional `ref` that receives the element.
- *
- * @public
- */
-export type Attrs = Readonly<Record<string, unknown>>;
+import { primitiveText } from "./primitiveText";
 
 /** The DOM event each handler key listens to. */
 const EVENTS: Readonly<Record<string, string>> = {

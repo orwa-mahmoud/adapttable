@@ -1,4 +1,9 @@
 /** Conversation structure and factual receipts, with all actions supplied by a kit. */
+import {
+  injectPrefersReducedMotion,
+  type TableAssistantAvatars,
+  type TableAssistantNode,
+} from "@adapttable/angular";
 import { resolveLabels, type TableLabels } from "@adapttable/core";
 import {
   assistantActionsName,
@@ -32,7 +37,6 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
-import { injectPrefersReducedMotion } from "../hooks/prefersReducedMotion";
 import { AdaptIcon } from "../icon";
 import {
   AdaptAssistantContent,
@@ -43,9 +47,7 @@ import {
   PERSON_AVATAR_ICON,
 } from "./assistantIcons";
 import type {
-  TableAssistantAvatars,
   TableAssistantButtonProps,
-  TableAssistantNode,
   TableAssistantSlots,
 } from "./assistantSlots";
 

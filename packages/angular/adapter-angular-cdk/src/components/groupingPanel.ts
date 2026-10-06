@@ -2,11 +2,11 @@
  * The grouping strip in native HTML: the binding's Chrome, filled with the
  * browser's own controls.
  */
+import type { ColumnDef } from "@adapttable/angular";
 import {
   AdaptGroupingPanelChrome,
   type AngularGroupingPanelAggregationItemProps,
   type AngularGroupingPanelSurfaceProps,
-  type ColumnDef,
   type GroupingPanelAggregationRemoveProps,
   type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
@@ -16,7 +16,7 @@ import {
   type GroupingPanelSelectProps,
   type GroupingPanelSlotProps,
   type GroupingPanelSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";

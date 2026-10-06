@@ -9,11 +9,10 @@ import {
 import { injectTableAssistant, tableAgent } from "@adapttable/ai-angular";
 import type {
   AgentApprovalPending,
-  ColumnDef,
   TableAssistantButtonProps,
   TableAssistantLanguageChipProps,
-  TableAssistantProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
+import type { ColumnDef, TableAssistantProps } from "@adapttable/angular";
 import { Component, computed, inject, signal } from "@angular/core";
 
 import { SHOWCASE_PRESENTATION } from "./data";

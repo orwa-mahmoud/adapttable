@@ -4,6 +4,7 @@
  * Focus, the Tab trap and the highlighted option live here. The kit draws
  * the input, each row and the empty line.
  */
+import { fromStore } from "@adapttable/angular";
 import {
   type Command,
   commandListKeyAction,
@@ -33,7 +34,6 @@ import {
 import { AdaptAttrs } from "../attrs";
 import { AdaptControl } from "../control";
 import { onBrowser } from "../hooks/platform";
-import { fromStore } from "../store";
 
 /** The kit owns its dialog and outlets the binding's structured content. @public */
 export type CommandPaletteSurfaceProps = NeutralCommandPaletteSurfaceProps<

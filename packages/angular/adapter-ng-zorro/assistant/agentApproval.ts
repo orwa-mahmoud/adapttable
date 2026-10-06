@@ -1,10 +1,10 @@
 /** The table approval strip, composed entirely from NG-ZORRO kit controls. */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import {
   AdaptAgentApprovalChrome,
-  type AdaptTableFeature,
   type AgentApprovalProps,
   createAdapterAgentApprovalFeature,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 import { AGENT_APPROVAL_SLOTS } from "./approvalControls";

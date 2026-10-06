@@ -1,15 +1,17 @@
 import {
-  AdaptStatusBarChrome,
   type AdaptTableFeature,
   extendFeature,
-  type FeatureNotice,
   type SelectionStats,
   slotRender,
-  STATUS_BAR,
-  statusBar as bindingStatusBar,
-  type StatusBarSlots,
   type TableLabels,
 } from "@adapttable/angular";
+import {
+  AdaptStatusBarChrome,
+  type FeatureNotice,
+  STATUS_BAR,
+  type StatusBarSlots,
+} from "@adapttable/angular/adapter";
+import { statusBar as bindingStatusBar } from "@adapttable/angular/features";
 import { ɵTAIGA_CONTROLS as TAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 

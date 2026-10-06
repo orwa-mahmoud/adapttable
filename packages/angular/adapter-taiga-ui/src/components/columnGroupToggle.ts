@@ -5,7 +5,7 @@ import {
   type ColumnGroupToggleProps,
   type ColumnGroupToggleSlots,
   expandChevronIcon,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

@@ -1,3 +1,4 @@
+import type { TableAssistantProps } from "@adapttable/angular";
 import {
   AdaptAssistantContent,
   AdaptTableAssistantChrome,
@@ -8,11 +9,10 @@ import {
   type TableAssistantLanguageChipProps,
   type TableAssistantMenuProps,
   type TableAssistantPanelProps,
-  type TableAssistantProps,
   type TableAssistantSheetProps,
   type TableAssistantSlots,
   type TableAssistantWindowProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵTAIGA_CONTROLS as TAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import { NgTemplateOutlet } from "@angular/common";
 import {

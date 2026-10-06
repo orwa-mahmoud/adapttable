@@ -1,10 +1,10 @@
 import {
   type AdaptTableFeature,
-  COLUMN_SELECT,
-  columnSelectionCheckbox as bindingColumnSelectionCheckbox,
   extendFeature,
   slotRender,
 } from "@adapttable/angular";
+import { COLUMN_SELECT } from "@adapttable/angular/adapter";
+import { columnSelectionCheckbox as bindingColumnSelectionCheckbox } from "@adapttable/angular/features";
 import { AdaptColumnSelectCheckbox } from "@adapttable/taiga-ui";
 
 /**

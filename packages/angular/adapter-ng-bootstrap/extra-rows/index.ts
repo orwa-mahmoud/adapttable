@@ -6,4 +6,4 @@
  *
  * @packageDocumentation
  */
-export { extraRows } from "@adapttable/angular";
+export { extraRows } from "@adapttable/angular/features";

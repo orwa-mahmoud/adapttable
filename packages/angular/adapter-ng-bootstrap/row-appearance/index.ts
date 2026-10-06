@@ -5,4 +5,7 @@
  *
  * @packageDocumentation
  */
-export { rowAppearance, type RowAppearanceOptions } from "@adapttable/angular";
+export {
+  rowAppearance,
+  type RowAppearanceOptions,
+} from "@adapttable/angular/features";

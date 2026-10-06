@@ -24,6 +24,12 @@
       "@adapttable/angular": [
         "../../../../packages/angular/angular/src/index.ts"
       ],
+      "@adapttable/angular/features": [
+        "../../../../packages/angular/angular/src/features.ts"
+      ],
+      "@adapttable/angular/adapter": [
+        "../../../../packages/angular/angular/src/adapter.ts"
+      ],
       "@adapttable/angular/*": [
         "../../../../packages/angular/angular/*/index.ts"
       ],

@@ -1,4 +1,5 @@
 /** Native HTML is this kit: buttons, textarea, disclosure and dialog. */
+import type { TableAssistantProps } from "@adapttable/angular";
 import {
   AdaptAssistantContent,
   AdaptTableAssistantChrome,
@@ -9,11 +10,10 @@ import {
   type TableAssistantLanguageChipProps,
   type TableAssistantMenuProps,
   type TableAssistantPanelProps,
-  type TableAssistantProps,
   type TableAssistantSheetProps,
   type TableAssistantSlots,
   type TableAssistantWindowProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ɵbootstrapModal as bootstrapModal,
   ɵbootstrapPopperOptions as bootstrapPopperOptions,

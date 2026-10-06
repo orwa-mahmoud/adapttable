@@ -7,7 +7,7 @@ import {
   type TreeToggleButtonProps,
   type TreeToggleProps,
   type TreeToggleSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

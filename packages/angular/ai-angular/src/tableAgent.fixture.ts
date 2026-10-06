@@ -2,7 +2,6 @@
 import type { AgentSession } from "@adapttable/ai";
 import {
   type AdaptTableFeature,
-  AGENT_VIEW_STATE,
   createFeatureState,
   type FeatureState,
   injectDataTable,
@@ -11,6 +10,7 @@ import {
   type TableRuntime,
   type TableRuntimeView,
 } from "@adapttable/angular";
+import { AGENT_VIEW_STATE } from "@adapttable/angular/adapter";
 import {
   createNeutralTable,
   createTableEngine,

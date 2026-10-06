@@ -1,4 +1,11 @@
 import {
+  booleanFilterFor,
+  filterOptionsFor,
+  type FilterOptionsState,
+  rangeFilterFor,
+  textFilterFor,
+} from "@adapttable/angular";
+import {
   defaultFilterRegistry,
   type FilterDef,
   filterLabel,
@@ -31,13 +38,6 @@ import {
 } from "@angular/core";
 
 import { resolveRenderer } from "../cell";
-import {
-  booleanFilterFor,
-  filterOptionsFor,
-  type FilterOptionsState,
-  rangeFilterFor,
-  textFilterFor,
-} from "./filters";
 let nextFieldId = 0;
 /** Allocate a caption ID shared by adapter-native filter controls. @public */
 export function createFilterFieldId(): string {

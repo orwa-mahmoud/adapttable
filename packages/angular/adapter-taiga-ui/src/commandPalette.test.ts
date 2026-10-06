@@ -1,7 +1,5 @@
-import {
-  type TableLabels,
-  type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+import type { TableLabels } from "@adapttable/angular";
+import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
 import { commandPalette } from "@adapttable/taiga-ui/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";

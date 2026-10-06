@@ -4,10 +4,9 @@
  * The specs register on the feature host, and the filter runtime merges them
  * into the types the panel can render.
  */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import type { FilterTypeSpec } from "@adapttable/core";
 import { coreFilterTypes } from "@adapttable/core/binding";
-
-import type { AdaptTableFeature } from "../featureHost";
 
 /**
  * Register custom filter types the panel can render.

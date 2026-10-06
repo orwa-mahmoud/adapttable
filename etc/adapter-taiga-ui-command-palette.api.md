@@ -5,15 +5,15 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { CommandPaletteInjectOptions } from '@adapttable/angular';
-import { CommandPaletteOptions } from '@adapttable/angular';
-import { CommandPaletteSlots } from '@adapttable/angular';
+import { CommandPaletteInjectOptions } from '@adapttable/angular/adapter';
+import { CommandPaletteOptions } from '@adapttable/angular/features';
+import { CommandPaletteSlots } from '@adapttable/angular/adapter';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
-import { PaletteOpenState } from '@adapttable/angular';
+import { PaletteOpenState } from '@adapttable/angular/adapter';
 import { Signal } from '@angular/core';
-import { TableCommandPalette } from '@adapttable/angular';
-import { ToolbarExtrasSlotProps } from '@adapttable/angular';
+import { TableCommandPalette } from '@adapttable/angular/adapter';
+import { ToolbarExtrasSlotProps } from '@adapttable/angular/adapter';
 import { WritableSignal } from '@angular/core';
 
 // @internal

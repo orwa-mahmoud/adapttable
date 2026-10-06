@@ -2,12 +2,12 @@
  * Direct rename of a column from its header: a pencil, then the name field,
  * over the binding's rename editor.
  */
+import type { TableLabels } from "@adapttable/angular";
 import {
   AdaptAttrs,
   AdaptLiveRegion,
   injectColumnRenameEditor,
-  type TableLabels,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { Component, computed, input } from "@angular/core";
 
 /**

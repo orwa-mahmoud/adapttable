@@ -5,6 +5,7 @@
  * components that fill its slots; a host plugin is the same type through
  * {@link feature}.
  */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import type {
   BulkAction,
   CellSpanAppearance,
@@ -44,8 +45,6 @@ import {
   type SidePanelEntry,
 } from "@adapttable/core/binding";
 import type { Signal, TemplateRef } from "@angular/core";
-
-import type { AdaptTableFeature } from "../featureHost";
 
 /**
  * Options for {@link commandPalette}.

@@ -1,10 +1,9 @@
 import {
   type AdaptTableFeature,
-  COLUMN_MENU,
-  coreColumnMenu,
   extendFeature,
   slotRender,
 } from "@adapttable/angular";
+import { COLUMN_MENU, coreColumnMenu } from "@adapttable/angular/adapter";
 import { AdaptColumnMenu } from "@adapttable/taiga-ui";
 
 /**

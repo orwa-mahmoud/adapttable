@@ -3,6 +3,7 @@
  * Ctrl/Cmd+click on a header makes, reachable by a finger and by a screen
  * reader. Kits pass the checkbox.
  */
+import { injectMediaQuery } from "@adapttable/angular";
 import { defaultLabels } from "@adapttable/core";
 import type { ColumnSelectCheckboxProps } from "@adapttable/core/binding";
 import {
@@ -15,7 +16,6 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
-import { injectMediaQuery } from "../hooks/mediaQuery";
 
 export type { ColumnSelectCheckboxProps } from "@adapttable/core/binding";
 

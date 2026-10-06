@@ -1,4 +1,5 @@
 /** The selection-corner gate; the kit owns the visible fill handle. */
+import type { GridFocus } from "@adapttable/angular";
 import { sameGridCell } from "@adapttable/core";
 import type { FillHandleSlotProps } from "@adapttable/core/binding";
 import {
@@ -10,7 +11,6 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
-import type { GridFocus } from "./gridFocus";
 
 export type { FillHandleSlotProps } from "@adapttable/core/binding";
 

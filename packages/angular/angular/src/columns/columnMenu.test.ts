@@ -6,7 +6,8 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { injectColumnDrag, injectColumnRenameEditor } from "./columnMenu";
+import { injectColumnDrag } from "./columnDrag";
+import { injectColumnRenameEditor } from "./columnMenu";
 
 type Handler = (event: Event) => void;
 

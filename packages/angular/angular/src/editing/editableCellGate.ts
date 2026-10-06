@@ -7,13 +7,20 @@
  * lifecycle observers all run.
  */
 import {
+  type ColumnDef,
+  editableCellController,
+  type EditableCellEditing,
+} from "@adapttable/angular";
+import {
   cellConflictAsk,
   controllerConflictAsk,
   editableCellErrorId,
   editableCellPresentation,
   editorKeyRestoresFocus,
+  focusEditorOnMount,
   isEditActivateKey,
   isFirstEditableColumn,
+  stopCellEditKeyboard,
 } from "@adapttable/core";
 import type {
   EditableCellActivateProps as NeutralEditableCellActivateProps,
@@ -31,14 +38,7 @@ import {
   type Type,
 } from "@angular/core";
 
-import type { ColumnDef } from "../columnDef";
 import { AdaptControl } from "../control";
-import {
-  editableCellController,
-  type EditableCellEditing,
-  focusEditorOnMount,
-  stopCellEditKeyboard,
-} from "./editableCellController";
 import {
   AdaptCellConflictNotice,
   AdaptEditableCellDisplay,

@@ -1,4 +1,4 @@
-import { type ActiveFilterChipsSlotProps } from "@adapttable/angular";
+import type { ActiveFilterChipsSlotProps } from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";

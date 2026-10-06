@@ -1,7 +1,5 @@
-import {
-  type TableAssistantProps,
-  type TableAssistantView,
-} from "@adapttable/angular";
+import type { TableAssistantProps } from "@adapttable/angular";
+import type { TableAssistantView } from "@adapttable/angular/adapter";
 import { Component, computed, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";

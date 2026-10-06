@@ -11,8 +11,8 @@ import {
   injectFrontendData,
   injectRowSelection,
   mountTableFeatures,
-  tableRuntimeFor,
 } from "@adapttable/angular";
+import { tableRuntimeFor } from "@adapttable/angular/adapter";
 import {
   Component,
   computed,

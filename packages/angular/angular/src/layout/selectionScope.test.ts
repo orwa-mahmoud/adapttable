@@ -4,7 +4,7 @@ import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
-import { ADAPTTABLE_CONTEXT_MENU } from "../actions/contextMenu";
+import { ADAPTTABLE_CONTEXT_MENU } from "../actions/tableContextMenu";
 import { injectFrontendData } from "../source/frontendData";
 import { AdaptDataTableShell } from "./dataTableShell";
 

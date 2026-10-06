@@ -16,6 +16,16 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
 Angular 20 supports that floor; Angular 22 requires Node 22.22.3+, 24.15.0+, or 26+ instead.
 Requires Angular 20 or newer (`@angular/core` and `@angular/common`).
 
+## Public entries
+
+The 0.5 binding keeps application hooks and composition contracts at the root.
+Use `@adapttable/angular/features` for headless feature factories and
+`@adapttable/angular/adapter` for structural Chrome, rendering directives, kit
+models and controllers. `AdaptCellTemplate` stays at the root. The specialized
+formula, pivot, router, sparkline and stream entries retain their paths.
+See the [0.5 migration guide](../../../docs/angular/migrating-to-0-5.md) for
+the breaking import changes and native-kit upgrade guidance.
+
 ## Usage
 
 ```ts
@@ -24,6 +34,8 @@ import {
   AdaptAttrs,
   AdaptCell,
   AdaptHeader,
+} from "@adapttable/angular/adapter";
+import {
   type ColumnDef,
   injectDataTable,
   injectFrontendData,

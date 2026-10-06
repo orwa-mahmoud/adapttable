@@ -4,6 +4,7 @@
  * Every control is the kit's: the kit hands its surface, zones, chips and
  * selects in `slots`.
  */
+import type { ColumnDef } from "@adapttable/angular";
 import {
   deferGroupingDropToInner,
   type Direction,
@@ -40,7 +41,6 @@ import {
 } from "@angular/core";
 
 import { AdaptLiveRegion } from "../a11y/liveRegion";
-import type { ColumnDef } from "../columnDef";
 import { AdaptControl } from "../control";
 
 /**

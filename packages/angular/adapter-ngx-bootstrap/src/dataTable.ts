@@ -4,19 +4,21 @@
  * this kit's kit, so every control a reader uses is the browser's own.
  */
 import {
+  ADAPTTABLE_FIND_STATE,
+  type ContextMenuRegionHandlers,
+  type FindInTableState,
+} from "@adapttable/angular";
+import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
   ADAPTTABLE_CONTEXT_MENU,
-  ADAPTTABLE_FIND_STATE,
   ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
   type PaletteOpenState,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
@@ -38,7 +40,7 @@ export type {
   BodySlot,
   RowActionsCell,
   TableView,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 
 @Component({
   selector: "adapt-data-table, adapt-ngx-bootstrap-table",

@@ -14,6 +14,8 @@ import {
   AdaptCell,
   AdaptHeader,
   AdaptTableStatusAnnouncer,
+} from "@adapttable/angular/adapter";
+import {
   injectDataTable,
   injectFrontendData,
   type ColumnDef,

@@ -132,8 +132,6 @@ export function injectFullscreen(
 
 export {
   type ExportCsvHandlerOptions,
-  exportPdf,
-  exportXlsx,
   injectExportCsv,
   injectExportHandler,
 } from "../export/exportHandler";

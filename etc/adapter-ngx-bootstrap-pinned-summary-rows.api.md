@@ -4,7 +4,7 @@
 
 ```ts
 
-import { pinnedSummaryRows } from '@adapttable/angular';
+import { pinnedSummaryRows } from '@adapttable/angular/features';
 
 export { pinnedSummaryRows }
 

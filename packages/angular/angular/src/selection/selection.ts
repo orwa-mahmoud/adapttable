@@ -31,7 +31,7 @@ import {
   untracked,
 } from "@angular/core";
 
-import type { Attrs } from "../attrs";
+import type { Attrs } from "../attrContracts";
 import {
   fromStore,
   type MaybeSignal,

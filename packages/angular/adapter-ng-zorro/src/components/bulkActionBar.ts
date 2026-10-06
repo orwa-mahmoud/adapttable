@@ -2,14 +2,14 @@
  * The selection bar that acts on the selected rows, drawn with NG-ZORRO
  * controls.
  */
+import type { SelectionState } from "@adapttable/angular";
 import {
   bulkActionErrorMessage,
   type BulkBarSlotProps,
   injectBulkBarRunner,
   offersAllMatching,
   resolveDisabledReason,
-  type SelectionState,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

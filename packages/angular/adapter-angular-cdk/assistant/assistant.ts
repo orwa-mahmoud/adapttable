@@ -1,4 +1,5 @@
 /** CDK-backed neutral controls and overlays; the adapter owns their appearance. */
+import type { TableAssistantProps } from "@adapttable/angular";
 import {
   AdaptAssistantContent,
   AdaptTableAssistantChrome,
@@ -9,11 +10,10 @@ import {
   type TableAssistantLanguageChipProps,
   type TableAssistantMenuProps,
   type TableAssistantPanelProps,
-  type TableAssistantProps,
   type TableAssistantSheetProps,
   type TableAssistantSlots,
   type TableAssistantWindowProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { AdaptCdkPopover } from "@adapttable/angular-cdk";
 import { A11yModule } from "@angular/cdk/a11y";
 import { Dir, Directionality } from "@angular/cdk/bidi";

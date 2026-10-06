@@ -7,11 +7,12 @@ import { Component, input, signal, type TemplateRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
-import { selectionStats, selectionStatsOf } from "../features/selectionStats";
+import { selectionStats } from "../features/selectionStats";
 import {
   AdaptGridFocusAnnouncer,
   type GridFocusAnnouncement,
 } from "./gridFocusAnnouncer";
+import { selectionStatsOf } from "./selectionStats";
 import {
   AdaptSelectionStatsChrome,
   type SelectionStatsSlots,

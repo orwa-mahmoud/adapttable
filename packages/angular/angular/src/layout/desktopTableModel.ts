@@ -1,3 +1,4 @@
+import { type Attrs } from "@adapttable/angular";
 import { type TableLabels } from "@adapttable/core";
 import {
   COLUMN_GROUP_TOGGLE,
@@ -33,13 +34,12 @@ import {
   viewChild,
 } from "@angular/core";
 
-import { type Attrs } from "../attrs";
 import { type ColumnGroupToggleProps } from "../columns/columnGroupToggle";
 import { injectColumnResize } from "../columns/columnResize";
-import { type TableTree } from "../features/tree";
 import { columnSelectLabel } from "../focus/columnSelectCheckbox";
 import { type RowReorderState } from "../rows/rowReorder";
 import { type RowReorderHandleProps } from "../rows/rowReorderHandle";
+import { type TableTree } from "../tree/tableTree";
 import {
   type BodyCellView,
   type BodyRow,

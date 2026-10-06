@@ -1,12 +1,16 @@
 import {
   type AdaptTableFeature,
-  COMMAND_PALETTE_LIVE,
-  commandPalette as bindingCommandPalette,
-  type CommandPaletteOptions,
   extendFeature,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/angular";
+import {
+  COMMAND_PALETTE_LIVE,
+  TOOLBAR_EXTRAS,
+} from "@adapttable/angular/adapter";
+import {
+  commandPalette as bindingCommandPalette,
+  type CommandPaletteOptions,
+} from "@adapttable/angular/features";
 
 import { AdaptCommandPaletteButton, AdaptCommandPaletteLive } from "./palette";
 

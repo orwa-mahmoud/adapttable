@@ -1,16 +1,16 @@
 /**
  * The find bar and its toolbar button, drawn with NG-ZORRO controls.
  */
+import { ADAPTTABLE_FIND_STATE } from "@adapttable/angular";
 import {
   AdaptFindBarChrome,
-  ADAPTTABLE_FIND_STATE,
   type FindBarProps,
   type FindBarSlots,
   type FindButtonKind,
   type FindButtonProps,
   type FindSearchProps,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   afterNextRender,
   ChangeDetectionStrategy,

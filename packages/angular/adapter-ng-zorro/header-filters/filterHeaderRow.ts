@@ -1,20 +1,22 @@
 /**
  * The compact header-filter row, drawn with NG-ZORRO controls.
  */
+import type {
+  FilterDef,
+  FilterFormSource,
+  FilterTypeRegistry,
+  TableLabels,
+} from "@adapttable/angular";
 import {
   AdaptFilterHeaderChrome,
   AdaptFilterHeaderControlChrome,
-  type FilterDef,
-  type FilterFormSource,
   type FilterHeaderClassNames,
   type FilterHeaderMultiProps,
   type FilterHeaderRangeProps,
   type FilterHeaderSearchProps,
   type FilterHeaderSelectProps,
   type FilterHeaderSlots,
-  type FilterTypeRegistry,
-  type TableLabels,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { AdaptOverlayOrigin, OVERLAY_Z } from "@adapttable/ng-zorro";
 import {
   ChangeDetectionStrategy,

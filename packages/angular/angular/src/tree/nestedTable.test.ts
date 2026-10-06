@@ -15,12 +15,12 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { Renderer } from "../columnDef";
+import { AdaptRowDetail } from "./nestedTable";
 import {
-  AdaptRowDetail,
   type NestedTableContext,
   type NestedTableFor,
   type RowDetailContext,
-} from "./nestedTable";
+} from "./nestedTableContracts";
 
 interface Person {
   id: string;

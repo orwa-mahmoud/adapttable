@@ -5,26 +5,26 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { AgentApprovalButtonProps } from '@adapttable/angular';
-import { AgentApprovalListProps } from '@adapttable/angular';
-import { AgentApprovalProps } from '@adapttable/angular';
-import { AgentApprovalSlots } from '@adapttable/angular';
-import { ApprovalReviewSlots } from '@adapttable/angular';
+import { AgentApprovalButtonProps } from '@adapttable/angular/adapter';
+import { AgentApprovalListProps } from '@adapttable/angular/adapter';
+import { AgentApprovalProps } from '@adapttable/angular/adapter';
+import { AgentApprovalSlots } from '@adapttable/angular/adapter';
+import { ApprovalReviewSlots } from '@adapttable/angular/adapter';
 import { BlockScrollStrategy } from '@angular/cdk/overlay';
 import { Directionality } from '@angular/cdk/bidi';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { Signal } from '@angular/core';
-import { TableAssistantBadgeProps } from '@adapttable/angular';
-import { TableAssistantButtonProps } from '@adapttable/angular';
-import { TableAssistantComposerProps } from '@adapttable/angular';
-import { TableAssistantLanguageChipProps } from '@adapttable/angular';
-import { TableAssistantMenuProps } from '@adapttable/angular';
-import { TableAssistantPanelProps } from '@adapttable/angular';
+import { TableAssistantBadgeProps } from '@adapttable/angular/adapter';
+import { TableAssistantButtonProps } from '@adapttable/angular/adapter';
+import { TableAssistantComposerProps } from '@adapttable/angular/adapter';
+import { TableAssistantLanguageChipProps } from '@adapttable/angular/adapter';
+import { TableAssistantMenuProps } from '@adapttable/angular/adapter';
+import { TableAssistantPanelProps } from '@adapttable/angular/adapter';
 import { TableAssistantProps } from '@adapttable/angular';
-import { TableAssistantSheetProps } from '@adapttable/angular';
-import { TableAssistantSlots } from '@adapttable/angular';
-import { TableAssistantWindowProps } from '@adapttable/angular';
+import { TableAssistantSheetProps } from '@adapttable/angular/adapter';
+import { TableAssistantSlots } from '@adapttable/angular/adapter';
+import { TableAssistantWindowProps } from '@adapttable/angular/adapter';
 
 // @public
 export class AdaptAgentApproval {

@@ -2,12 +2,12 @@
  * The checklist's native controls: search box, button and checkbox. Native
  * is this kit's kit.
  */
-import {
-  type ChecklistButtonProps,
-  type ChecklistCheckboxProps,
-  type ChecklistSearchProps,
-  type ChecklistSlots,
-} from "@adapttable/angular";
+import type {
+  ChecklistButtonProps,
+  ChecklistCheckboxProps,
+  ChecklistSearchProps,
+  ChecklistSlots,
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 /** The checklist's search box. @internal */

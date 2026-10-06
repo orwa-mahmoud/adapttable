@@ -496,7 +496,8 @@ function bindingImports(source, declarations, importedName, modules) {
   for (const statement of source.statements) {
     if (
       !ts.isImportDeclaration(statement) ||
-      !ts.isStringLiteral(statement.moduleSpecifier)
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.importClause?.isTypeOnly
     ) {
       continue;
     }
@@ -505,6 +506,7 @@ function bindingImports(source, declarations, importedName, modules) {
     if (!bindings || !ts.isNamedImports(bindings)) continue;
     for (const imported of bindings.elements) {
       if (
+        !imported.isTypeOnly &&
         (imported.propertyName ?? imported.name).text === importedName &&
         declarations.get(imported.name.text)?.length === 1
       ) {
@@ -758,7 +760,7 @@ function angularPartNames(sources) {
       source,
       declarations,
       "AdaptLiveRegion",
-      ["@adapttable/angular"]
+      ["@adapttable/angular", "@adapttable/angular/adapter"]
     );
     function visit(node) {
       const entry = componentTemplate(node, components, liveRegions);

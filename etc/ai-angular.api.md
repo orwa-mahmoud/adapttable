@@ -5,9 +5,9 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { AgentApprovalPending } from '@adapttable/angular';
+import { AgentApprovalPending } from '@adapttable/angular/adapter';
 import { AgentContextInputs } from '@adapttable/ai';
-import { AgentProgress } from '@adapttable/angular';
+import { AgentProgress } from '@adapttable/angular/adapter';
 import { AgentSession } from '@adapttable/ai';
 import { AlwaysAllowedState } from '@adapttable/ai';
 import { ApprovalPolicy } from '@adapttable/ai';
@@ -34,7 +34,7 @@ import { RowAddressScope } from '@adapttable/ai';
 import { SharedApproval } from '@adapttable/ai';
 import { Signal } from '@angular/core';
 import { SpeechClip } from '@adapttable/ai/voice';
-import { SpeechInputHandle } from '@adapttable/angular';
+import { SpeechInputHandle } from '@adapttable/angular/adapter';
 import { TABLE_AGENT_STATE } from '@adapttable/ai';
 import { TableAgentBridge as TableAgentBridge_2 } from '@adapttable/ai';
 import { TableAgentColumnPatch } from '@adapttable/ai';

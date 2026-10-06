@@ -5,7 +5,7 @@ import {
   type RowEditActionsProps,
   type RowEditActionsSlots,
   type RowEditButtonProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵTAIGA_CONTROLS as TAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import {
   ChangeDetectionStrategy,

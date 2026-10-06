@@ -8,7 +8,7 @@ import {
   type RowEditActionsProps,
   type RowEditActionsSlots,
   type RowEditButtonProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵHlmButton as HlmButton } from "@adapttable/spartan";
 import {
   ChangeDetectionStrategy,

@@ -1,7 +1,5 @@
-import {
-  type ColumnDef,
-  type GroupingPanelSlotProps,
-} from "@adapttable/angular";
+import type { ColumnDef } from "@adapttable/angular";
+import type { GroupingPanelSlotProps } from "@adapttable/angular/adapter";
 import { type GroupingPanelState, resolveLabels } from "@adapttable/core";
 import { groupingPanel } from "@adapttable/spartan/grouping-panel";
 import { Component, signal } from "@angular/core";

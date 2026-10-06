@@ -1,5 +1,6 @@
 /** The structural renderer also supports a headless host without a wrapper guard. */
-import { AdaptHeaderActions, type ColumnDef } from "@adapttable/angular";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptHeaderActions } from "@adapttable/angular/adapter";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";

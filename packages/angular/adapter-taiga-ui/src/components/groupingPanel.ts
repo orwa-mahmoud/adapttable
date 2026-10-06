@@ -1,8 +1,8 @@
+import type { ColumnDef } from "@adapttable/angular";
 import {
   AdaptGroupingPanelChrome,
   type AngularGroupingPanelAggregationItemProps,
   type AngularGroupingPanelSurfaceProps,
-  type ColumnDef,
   type GroupingPanelAggregationRemoveProps,
   type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
@@ -12,7 +12,7 @@ import {
   type GroupingPanelSelectProps,
   type GroupingPanelSlotProps,
   type GroupingPanelSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

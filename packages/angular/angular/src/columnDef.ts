@@ -8,7 +8,6 @@ import type {
   ColumnMetadata,
 } from "@adapttable/core";
 import {
-  columnPathText,
   flattenColumnTree,
   resolveColumnDefaults,
 } from "@adapttable/core/binding";
@@ -86,14 +85,6 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
    * receive the same context as `headerCell`.
    */
   headerActions?: string | Renderer<HeaderContext<TRow>>;
-}
-
-/**
- * The text of a primitive value; `null` for anything else — an object has no
- * text a cell or an attribute should show.
- */
-export function primitiveText(value: unknown): string | null {
-  return columnPathText(value);
 }
 
 /**

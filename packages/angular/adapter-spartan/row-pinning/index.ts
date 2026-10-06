@@ -6,4 +6,7 @@
  *
  * @packageDocumentation
  */
-export { rowPinning, type RowPinningFeatureOptions } from "@adapttable/angular";
+export {
+  rowPinning,
+  type RowPinningFeatureOptions,
+} from "@adapttable/angular/features";

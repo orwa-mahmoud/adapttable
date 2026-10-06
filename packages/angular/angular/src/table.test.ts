@@ -3,7 +3,8 @@ import { Component, signal, viewChildren } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptAttrs } from "./attrs";
-import { AdaptCell, AdaptCellTemplate, AdaptHeader } from "./cell";
+import { AdaptCell, AdaptHeader } from "./cell";
+import { AdaptCellTemplate } from "./cellTemplate";
 import type { ColumnDef } from "./columnDef";
 import { injectDataTable } from "./dataTable";
 import { injectFrontendData } from "./source/frontendData";

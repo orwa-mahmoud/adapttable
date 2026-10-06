@@ -1,15 +1,17 @@
 import {
-  AdaptRowReorderAnnouncer,
   type AdaptTableFeature,
   extendFeature,
-  ROW_REORDER_ANNOUNCER,
-  ROW_REORDER_BUTTONS,
-  ROW_REORDER_HANDLE,
-  rowReorder as coreAngularRowReorder,
   type RowReorderHandler,
   type RowReorderOptions,
   slotRender,
 } from "@adapttable/angular";
+import {
+  AdaptRowReorderAnnouncer,
+  ROW_REORDER_ANNOUNCER,
+  ROW_REORDER_BUTTONS,
+  ROW_REORDER_HANDLE,
+} from "@adapttable/angular/adapter";
+import { rowReorder as coreAngularRowReorder } from "@adapttable/angular/features";
 
 import { AdaptRowReorderButtons } from "./rowReorderButtons";
 import { AdaptRowReorderGrip } from "./rowReorderGrip";

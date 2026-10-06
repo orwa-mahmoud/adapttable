@@ -2,6 +2,8 @@
  * The command palette, armed: open state, the shortcut that opens it, and
  * the commands it lists.
  */
+import { fromStore, injectShortcuts, readMaybe } from "@adapttable/angular";
+import type { CommandPaletteOptions } from "@adapttable/angular/features";
 import {
   type Command,
   commandPaletteCommands,
@@ -22,10 +24,7 @@ import {
   type Signal,
 } from "@angular/core";
 
-import type { CommandPaletteOptions } from "../features/factories";
-import { fromStore, readMaybe } from "../store";
 import { ADAPTTABLE_PALETTE_OPEN } from "./paletteState";
-import { injectShortcuts } from "./shortcuts";
 
 export { OPEN_PALETTE_COMMAND };
 

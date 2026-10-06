@@ -4,15 +4,17 @@
  * finishes, when the table asks for that.
  */
 import {
+  injectHeaderFilterOverlay,
+  type TableSource,
+} from "@adapttable/angular";
+import {
   AdaptIcon,
   defaultFilterRegistry,
   type FilterHeaderControlProps,
   filterLabel,
   FILTERS_ICON,
   hasActiveHeaderFilter,
-  injectHeaderFilterOverlay,
-  type TableSource,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   AdaptAutoFilterForm,
   ɵHlmButton as HlmButton,

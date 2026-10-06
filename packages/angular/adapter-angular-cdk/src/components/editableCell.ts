@@ -1,15 +1,14 @@
 /**
  * Native editable cell — the kit fill for {@link EDITABLE_CELL}.
  */
+import type { ColumnDef, EditableCellEditing } from "@adapttable/angular";
 import {
   AdaptCell,
   AdaptEditableCellGate,
   AdaptMultiSelectEditorChrome,
-  type ColumnDef,
   commitBooleanDraft,
   type EditableCellActivateProps,
   type EditableCellButtonProps,
-  type EditableCellEditing,
   type EditableCellEditorCtrl,
   type EditableCellSlotProps,
   type EditableCellSlots,
@@ -25,7 +24,7 @@ import {
   readMultiDraft,
   stopCellEditKeyboard,
   stopEditKeys,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {

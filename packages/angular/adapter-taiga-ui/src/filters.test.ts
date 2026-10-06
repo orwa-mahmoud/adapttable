@@ -1,15 +1,17 @@
 import {
   type ColumnDef,
-  defaultFilterRegistry,
   type FilterDef,
   type FilterFormSource,
   filterRuntimeFor,
   type FilterTypeSpec,
-  type FilterWidgetRenderProps,
   injectDataTable,
   injectFrontendData,
   type TableLabels,
 } from "@adapttable/angular";
+import {
+  defaultFilterRegistry,
+  type FilterWidgetRenderProps,
+} from "@adapttable/angular/adapter";
 import { filters, filterTypes } from "@adapttable/taiga-ui/filters";
 import { headerFilters } from "@adapttable/taiga-ui/header-filters";
 import {

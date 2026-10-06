@@ -1,4 +1,5 @@
 /** NG-ZORRO surfaces and controls for the shared assistant Chrome. */
+import type { TableAssistantProps } from "@adapttable/angular";
 import {
   AdaptAssistantContent,
   AdaptTableAssistantChrome,
@@ -9,11 +10,10 @@ import {
   type TableAssistantLanguageChipProps,
   type TableAssistantMenuProps,
   type TableAssistantPanelProps,
-  type TableAssistantProps,
   type TableAssistantSheetProps,
   type TableAssistantSlots,
   type TableAssistantWindowProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { AdaptOverlayOrigin } from "@adapttable/ng-zorro";
 import { NgTemplateOutlet } from "@angular/common";
 import {

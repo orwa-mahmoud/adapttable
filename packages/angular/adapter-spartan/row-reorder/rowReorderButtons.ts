@@ -7,7 +7,7 @@ import {
   type RowReorderButtonsProps,
   type RowReorderButtonsSlots,
   type RowReorderMoveButtonProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵHlmButton as HlmButton } from "@adapttable/spartan";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 

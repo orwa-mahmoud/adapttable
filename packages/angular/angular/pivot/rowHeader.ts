@@ -6,11 +6,11 @@
  * footer never uses this component — its caption stays the localized label.
  */
 import {
-  AdaptCell,
   type CellContext,
   type ColumnDef,
   type Renderer,
 } from "@adapttable/angular";
+import { AdaptCell } from "@adapttable/angular/adapter";
 import { type PivotRow, pivotRowIndentStyle } from "@adapttable/core";
 import {
   ChangeDetectionStrategy,

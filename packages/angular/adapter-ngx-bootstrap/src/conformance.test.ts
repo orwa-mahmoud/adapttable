@@ -1,12 +1,14 @@
 import type {
   AdaptTableFeature,
-  AgentApprovalPending,
-  AgentApprovalProps,
   ColumnDef,
   TableAssistantProps,
-  TableAssistantView,
   TableLabels,
 } from "@adapttable/angular";
+import type {
+  AgentApprovalPending,
+  AgentApprovalProps,
+  TableAssistantView,
+} from "@adapttable/angular/adapter";
 import {
   type ConformanceDriver,
   type ConformanceRow,

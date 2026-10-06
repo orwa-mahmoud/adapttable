@@ -1,12 +1,12 @@
 /**
  * The checklist's NG-ZORRO search, action buttons and checkbox controls.
  */
-import {
-  type ChecklistButtonProps,
-  type ChecklistCheckboxProps,
-  type ChecklistSearchProps,
-  type ChecklistSlots,
-} from "@adapttable/angular";
+import type {
+  ChecklistButtonProps,
+  ChecklistCheckboxProps,
+  ChecklistSearchProps,
+  ChecklistSlots,
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { NzButtonModule } from "ng-zorro-antd/button";

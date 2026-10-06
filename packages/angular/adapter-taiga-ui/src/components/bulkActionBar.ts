@@ -1,11 +1,11 @@
+import type { SelectionState } from "@adapttable/angular";
 import {
   bulkActionErrorMessage,
   type BulkBarSlotProps,
   injectBulkBarRunner,
   offersAllMatching,
   resolveDisabledReason,
-  type SelectionState,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

@@ -1,15 +1,17 @@
 import {
   type ColumnDef,
-  defaultFilterRegistry,
   type FilterDef,
   type FilterFormSource,
   filterRuntimeFor,
   type FilterTypeSpec,
-  type FilterWidgetRenderProps,
   injectDataTable,
   injectFrontendData,
   type TableLabels,
 } from "@adapttable/angular";
+import {
+  defaultFilterRegistry,
+  type FilterWidgetRenderProps,
+} from "@adapttable/angular/adapter";
 import { filters, filterTypes } from "@adapttable/spartan/filters";
 import { headerFilters } from "@adapttable/spartan/header-filters";
 import {

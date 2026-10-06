@@ -1,13 +1,15 @@
+import type {
+  AdaptTableFeature,
+  ColumnDef,
+  FeatureMountContext,
+  TableLabels,
+} from "@adapttable/angular";
 import {
-  type AdaptTableFeature,
   AGENT_APPROVAL,
   AGENT_APPROVAL_STATE,
   type AgentApprovalPending,
   type AgentApprovalProps,
-  type ColumnDef,
-  type FeatureMountContext,
-  type TableLabels,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";

@@ -36,7 +36,7 @@ import {
   untracked,
 } from "@angular/core";
 
-import type { Attrs } from "../attrs";
+import type { Attrs } from "../attrContracts";
 import type { ColumnDef } from "../columnDef";
 import type { DataTable } from "../dataTable";
 import type { FindInTableState } from "../find/findInTable";

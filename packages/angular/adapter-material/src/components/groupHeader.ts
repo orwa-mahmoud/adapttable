@@ -11,7 +11,7 @@ import {
   AdaptGroupToggleSpacer,
   AdaptIcon,
   type GroupMoreButtonSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";

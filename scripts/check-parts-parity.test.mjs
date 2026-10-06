@@ -428,6 +428,33 @@ describe("inherited Angular row contracts", () => {
   it("follows a kit's actual binding shell base to the canonical getter", () => {
     assert.deepEqual(rowParity(inheritedRowsRoot()).failures, []);
   });
+  it("follows a runtime alias through the adapter entry's shared src file", () => {
+    const root = inheritedRowsRoot();
+    writePackage(root, "angular", "angular", {
+      "package.json": JSON.stringify({
+        name: "@adapttable/angular",
+        exports: { ".": "./index.js", "./adapter": "./adapter.js" },
+      }),
+      "ng-package.json": JSON.stringify({ lib: { entryFile: "src/index.ts" } }),
+      "adapter/ng-package.json": JSON.stringify({
+        lib: { entryFile: "../src/adapter.ts" },
+      }),
+      "src/adapter.ts":
+        'export { AdaptDataTableShell as Shell } from "./layout/dataTableShell";',
+    });
+    writePackage(root, "angular", "adapter-verdant", {
+      "src/dataTable.ts":
+        'import { Shell as Base } from "@adapttable/angular/adapter"; export class AdaptDataTable extends Base {}',
+    });
+    assert.deepEqual(rowParity(root).failures, []);
+    writePackage(root, "angular", "angular", {
+      "src/adapter.ts":
+        'export type { AdaptDataTableShell as Shell } from "./layout/dataTableShell";',
+    });
+    assert.deepEqual(rowParity(root).failures[0].lines, [
+      "row — adapter-verdant: neither names it nor calls rowAttrs",
+    ]);
+  });
   for (const [name, root] of [
     ["an unused shell import", () => inheritedRowsRoot(false)],
     [
@@ -686,9 +713,13 @@ const ANGULAR_GROUP_ROW = `<tr
 ></tr>`;
 
 /** The directive is imported by the component that owns the template. */
-const angularComponent = (template, imports = "AdaptLiveRegion") => `
+const angularComponent = (
+  template,
+  imports = "AdaptLiveRegion",
+  module = "@adapttable/angular"
+) => `
 import { Component } from "@angular/core";
-import { AdaptLiveRegion } from "@adapttable/angular";
+import { AdaptLiveRegion } from "${module}";
 @Component({
   imports: [${imports}],
   template: \`${template}\`,
@@ -716,6 +747,63 @@ describe("rendered Angular part expressions and directives", () => {
       "column-rename-announcer",
     ]);
   });
+
+  for (const module of ["@adapttable/angular", "@adapttable/angular/adapter"]) {
+    it(`follows a registered runtime alias from ${module}`, () => {
+      const source = angularComponent(ANGULAR_REGION, "Region", module).replace(
+        "import { AdaptLiveRegion }",
+        "import { AdaptLiveRegion as Region }"
+      );
+      assert.deepEqual(angularExpressionGap(source), [
+        "column-rename-announcer",
+      ]);
+    });
+
+    for (const [name, source] of [
+      ["an unused directive", angularComponent(ANGULAR_REGION, "", module)],
+      [
+        "a type-only import declaration",
+        angularComponent(ANGULAR_REGION, "AdaptLiveRegion", module).replace(
+          "import { AdaptLiveRegion }",
+          "import type { AdaptLiveRegion }"
+        ),
+      ],
+      [
+        "a type-only import specifier",
+        angularComponent(ANGULAR_REGION, "AdaptLiveRegion", module).replace(
+          "import { AdaptLiveRegion }",
+          "import { type AdaptLiveRegion }"
+        ),
+      ],
+      [
+        "a shadowed local alias",
+        angularComponent(ANGULAR_REGION, "Region", module).replace(
+          "import { AdaptLiveRegion }",
+          "import { AdaptLiveRegion as Region }"
+        ) + "\nfunction unrelated(Region) {}",
+      ],
+    ]) {
+      it(`does not infer a directive part from ${name} in ${module}`, () => {
+        assert.deepEqual(angularExpressionGap(source), []);
+      });
+    }
+  }
+
+  for (const module of [
+    "@adapttable/angular/private",
+    "@adapttable/angular/src/adapter",
+    "@adapttable/angular/adapter/private",
+    "@adapttable/angular/features",
+  ]) {
+    it(`rejects a directive lookalike imported from ${module}`, () => {
+      assert.deepEqual(
+        angularExpressionGap(
+          angularComponent(ANGULAR_REGION, "AdaptLiveRegion", module)
+        ),
+        []
+      );
+    });
+  }
 
   it("follows a registered directive into its paired external template", () => {
     const source = angularComponent("").replace(

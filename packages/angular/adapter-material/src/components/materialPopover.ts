@@ -1,4 +1,4 @@
-import { injectPopoverSpace } from "@adapttable/angular";
+import { injectPopoverSpace } from "@adapttable/angular/adapter";
 import { BidiModule } from "@angular/cdk/bidi";
 /** Material card surface on the CDK overlay used by Material itself. */
 import {

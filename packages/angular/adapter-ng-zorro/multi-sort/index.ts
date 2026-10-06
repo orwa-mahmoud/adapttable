@@ -1,1 +1,1 @@
-export { multiSort } from "@adapttable/angular";
+export { multiSort } from "@adapttable/angular/features";

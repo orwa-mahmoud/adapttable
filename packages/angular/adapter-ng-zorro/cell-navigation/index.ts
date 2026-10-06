@@ -5,12 +5,14 @@
  */
 import {
   type AdaptTableFeature,
-  cellNavigation as coreAngularCellNavigation,
-  type CellNavigationOptions,
   extendFeature,
-  FILL_HANDLE,
   slotRender,
 } from "@adapttable/angular";
+import { FILL_HANDLE } from "@adapttable/angular/adapter";
+import {
+  cellNavigation as coreAngularCellNavigation,
+  type CellNavigationOptions,
+} from "@adapttable/angular/features";
 import { AdaptFillHandle } from "@adapttable/ng-zorro";
 
 /**

@@ -1,7 +1,5 @@
-import {
-  type ColumnDef,
-  type GroupingPanelSlotProps,
-} from "@adapttable/angular";
+import type { ColumnDef } from "@adapttable/angular";
+import type { GroupingPanelSlotProps } from "@adapttable/angular/adapter";
 import { type GroupingPanelState, resolveLabels } from "@adapttable/core";
 import { groupingPanel } from "@adapttable/taiga-ui/grouping-panel";
 import { Component, getDebugNode, signal } from "@angular/core";

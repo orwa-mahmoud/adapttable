@@ -1,10 +1,9 @@
 import {
   type AdaptTableFeature,
-  coreHeaderFilters,
   extendFeature,
-  FILTER_HEADER,
   slotRender,
 } from "@adapttable/angular";
+import { coreHeaderFilters, FILTER_HEADER } from "@adapttable/angular/adapter";
 
 import { AdaptHeaderFilterTrigger } from "./headerFilterTrigger";
 

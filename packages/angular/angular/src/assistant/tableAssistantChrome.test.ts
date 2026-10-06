@@ -16,6 +16,10 @@ import {
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type {
+  TableAssistantNode,
+  TableAssistantProps,
+} from "./assistantContracts";
 import { AdaptAssistantContent } from "./assistantIcons";
 import {
   AdaptAssistantMessage,
@@ -27,8 +31,6 @@ import type {
   TableAssistantButtonProps,
   TableAssistantComposerProps,
   TableAssistantMenuProps,
-  TableAssistantNode,
-  TableAssistantProps,
   TableAssistantSlots,
 } from "./assistantSlots";
 import { AdaptTableAssistantChrome } from "./tableAssistantChrome";
