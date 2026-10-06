@@ -2,7 +2,7 @@ import { defineConfig } from "tsdown";
 import Vue from "unplugin-vue/rolldown";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/cell-span.ts"],
   platform: "neutral",
   format: ["esm", "cjs"],
   tsconfig: "./tsconfig.build.json",
