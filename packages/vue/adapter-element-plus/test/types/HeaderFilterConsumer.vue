@@ -25,11 +25,12 @@ const source: FilterFormSource<Row> = {
 const labels = resolveLabels(undefined);
 </script>
 <template>
-  <FilterHeaderControl :def="def" :source="source" :labels="labels" />
+  <FilterHeaderControl dir="rtl" :def="def" :source="source" :labels="labels" />
   <ElementHeaderFilter :def="def" :source="source" :labels="labels" />
   <table>
     <thead>
       <FilterHeaderRow
+        dir="rtl"
         :columns="[{ key: 'name' }]"
         :defs="[def]"
         :source="source"

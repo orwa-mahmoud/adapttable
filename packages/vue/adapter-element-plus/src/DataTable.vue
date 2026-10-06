@@ -14,6 +14,7 @@ import {
 } from "@adapttable/vue/adapter";
 import {
   computed,
+  getCurrentInstance,
   h,
   onBeforeUnmount,
   onBeforeUpdate,
@@ -24,7 +25,7 @@ import {
 import { provideClassNames } from "./classNamesContext";
 import { elementButton } from "./controls/button";
 import { elementSelectionCheckbox } from "./controls/checkbox";
-import { elementConfirm } from "./elementConfirm";
+import { useElementConfirm } from "./elementConfirm";
 import {
   elementColumnGroupToggle,
   elementHierarchyControls,
@@ -58,10 +59,19 @@ const footerSlot = shallowRef(slots.footer);
 onBeforeUpdate(() => {
   footerSlot.value = slots.footer;
 });
+const rootElement = shallowRef<HTMLElement | null>(null);
+const scrollElement = shallowRef<HTMLElement | null>(null);
+const appContext = getCurrentInstance()?.appContext;
+const confirmRequest = useElementConfirm(() => ({
+  active: shell.active.value,
+  appContext,
+  container: rootElement.value ?? undefined,
+  dir: props.dir,
+}));
 const shell = useDataTableShell<TRow>(() => ({
   ...props,
   footer: footerSlot.value,
-  confirm: props.confirm ?? elementConfirm,
+  confirm: props.confirm ?? confirmRequest,
   onDensityChange: (density) => {
     props.onDensityChange?.(density);
     emit("update:density", density);
@@ -113,8 +123,7 @@ function controls(): TableChromeSlots<TRow> {
     footer: slots.footer,
   };
 }
-const rootElement = shallowRef<HTMLElement | null>(null);
-const scrollElement = shallowRef<HTMLElement | null>(null);
+
 const surface = {
   rootElement: () => rootElement.value,
   scrollElement: () => scrollElement.value,

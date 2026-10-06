@@ -13,6 +13,7 @@ export default defineConfig({
     "src/tree.ts",
     "src/row-detail.ts",
     "src/nested-table.ts",
+    "src/row-actions.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],

@@ -9,7 +9,7 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { ElPopover, ElSpace, type PopoverInstance } from "element-plus";
-import { h, shallowRef } from "vue";
+import { computed, h, shallowRef } from "vue";
 
 import { elementButton } from "../controls/button";
 import ElementCheckbox from "../controls/ElementCheckbox.vue";
@@ -25,6 +25,19 @@ const active = useScopeActivity();
 const fullscreen = useFeatureState(FULLSCREEN_MODEL);
 const popover = shallowRef<PopoverInstance>();
 const trigger = shallowRef<HTMLElement | null>(null);
+const inheritedDirection = shallowRef<"ltr" | "rtl">();
+const popupDirection = computed(() => props.dir ?? inheritedDirection.value);
+const setTrigger = (element: HTMLElement | null) => {
+  trigger.value = element;
+};
+const readInheritedDirection = () => {
+  if (props.dir !== undefined || !trigger.value) return;
+  const target = trigger.value;
+  const direction =
+    target.ownerDocument.defaultView?.getComputedStyle(target).direction;
+  inheritedDirection.value =
+    direction === "rtl" || direction === "ltr" ? direction : undefined;
+};
 const dismiss = (event: KeyboardEvent) => {
   if (
     event.key !== "Escape" ||
@@ -52,6 +65,7 @@ const controls: FilterHeaderSlots = {
   Search: (control) =>
     h(ElementInput, {
       type: "search",
+      dir: props.dir,
       value: control.value,
       "data-adapttable-part": "filter-header-input",
       "aria-label": control.label,
@@ -62,6 +76,7 @@ const controls: FilterHeaderSlots = {
   Select: (control) =>
     h(ElementSelect, {
       value: control.value,
+      dir: props.dir,
       options: control.options,
       "data-adapttable-part": "filter-header-input",
       "aria-label": control.label,
@@ -72,6 +87,7 @@ const controls: FilterHeaderSlots = {
     h(ElementInput, {
       value: control.value,
       type: control.type,
+      dir: props.dir,
       "aria-label": control.label,
       onChange: control.onChange,
     }),
@@ -88,16 +104,18 @@ const controls: FilterHeaderSlots = {
         hideAfter: 0,
         teleported: true,
         appendTo: fullscreen.value?.container ?? "body",
-        placement: "bottom-start",
+        placement:
+          popupDirection.value === "rtl" ? "bottom-end" : "bottom-start",
+        popperStyle: { direction: popupDirection.value },
+        onBeforeEnter: readInheritedDirection,
         width: "auto",
       },
       {
         reference: () =>
           elementButton(
             {
-              ref: (element: HTMLElement | null) => {
-                trigger.value = element;
-              },
+              ref: setTrigger,
+              dir: props.dir,
               "data-adapttable-part": "filter-header-input",
               class: control.className,
               "aria-label": control.label,
@@ -112,6 +130,7 @@ const controls: FilterHeaderSlots = {
               direction: "vertical",
               alignment: "start",
               role: "group",
+              dir: popupDirection.value,
               "data-adapttable-part": "filter-header-menu",
               class: control.menuClassName,
               "aria-label": control.label,

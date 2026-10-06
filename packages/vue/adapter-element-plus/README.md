@@ -104,6 +104,12 @@ use `ElCheckbox` inside an `ElPopover`. Their menus portal outside the scrolling
 viewport and stay inside the table root during fullscreen. Popup stacking follows
 `ElConfigProvider`'s `zIndex` setting.
 
+Pass `dir="rtl"` or `dir="ltr"` to a standalone `FilterHeaderControl` or
+`FilterHeaderRow` to keep its open popup synchronized with your reactive layout.
+When `dir` is omitted, the multiselect menu reads its native trigger's computed
+direction each time it opens. Inherited CSS direction is not observed while the
+menu stays open.
+
 ## Optional view controls
 
 Add density and fullscreen controls only where they are needed:
@@ -156,3 +162,31 @@ Applications that use external `label[for]` associations should account for
 those IDs becoming available after hydration.
 
 [Element Plus SSR documentation](https://element-plus.org/en-US/guide/ssr.html)
+
+## Row actions
+
+```ts
+import { rowActions } from "@adapttable/element-plus/row-actions";
+
+const features = [
+  rowActions<Person>([
+    {
+      key: "remove",
+      label: "Remove",
+      onClick: (person) => removePerson(person.id),
+      confirm: {
+        title: "Remove person?",
+        message: () => "This cannot be undone.",
+        confirmLabel: "Remove",
+      },
+    },
+  ]),
+];
+```
+
+Row-action controls activate after client mount, following the Vue binding's
+server-rendering lifecycle. Actions receive the original host row. Element Plus buttons request the action;
+the host performs the change. Confirmation uses `ElMessageBox`, stays inside the
+fullscreen table and uses the owning Vue app's providers. Dismissal, table
+deactivation and unmount cancel that table's pending dialogs. Supply `confirm`
+on `DataTable` to use your own confirmation handler.
