@@ -5,7 +5,7 @@ import {
   type CellNavigationChannelsOptions,
   createMemoryAdapter,
 } from "@adapttable/core";
-import { Component, PLATFORM_ID, signal } from "@angular/core";
+import { Component, PLATFORM_ID, type Signal, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -38,7 +38,8 @@ let editHost: CellNavigationChannelsOptions<Pair>["host"] | undefined;
 let recordEdits: GridFocusOptions<Pair>["recordEdits"];
 let undo: GridFocusOptions<Pair>["onUndo"];
 let redo: GridFocusOptions<Pair>["onRedo"];
-let features: readonly AdaptTableFeature[] = [];
+let features:
+  readonly AdaptTableFeature[] | Signal<readonly AdaptTableFeature[]> = [];
 let explicit: ((range: unknown) => void) | undefined;
 
 @Component({
@@ -144,6 +145,79 @@ describe("injectGridFocus range reporting", () => {
       anchor: { row: 0, col: 0 },
       head: { row: 1, col: 0 },
     });
+  });
+});
+
+describe("injectGridFocus live range callbacks", () => {
+  const down = { anchor: { row: 0, col: 0 }, head: { row: 1, col: 0 } };
+  const across = { anchor: { row: 0, col: 0 }, head: { row: 1, col: 1 } };
+
+  it("uses a replacement callback on the next range change without replaying it", async () => {
+    const first = vi.fn();
+    const replacement = vi.fn();
+    const composed = signal([cellNavigation({ onRangeChange: first })]);
+    features = composed;
+    const fixture = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { grid } = fixture.componentInstance;
+    grid.selectRange(down);
+    await fixture.whenStable();
+    expect(first).toHaveBeenLastCalledWith(down);
+    first.mockClear();
+    composed.set([cellNavigation({ onRangeChange: replacement })]);
+    await fixture.whenStable();
+    expect(first).not.toHaveBeenCalled();
+    expect(replacement).not.toHaveBeenCalled();
+    expect(grid.range()).toEqual(down);
+    grid.selectRange(across);
+    await fixture.whenStable();
+    expect(first).not.toHaveBeenCalled();
+    expect(replacement).toHaveBeenCalledExactlyOnceWith(across);
+  });
+
+  it("reports the current range when a callback is added and stops when removed", async () => {
+    const onRangeChange = vi.fn();
+    const composed = signal([cellNavigation()]);
+    features = composed;
+    const fixture = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { grid } = fixture.componentInstance;
+    grid.selectRange(down);
+    await fixture.whenStable();
+    composed.set([cellNavigation({ onRangeChange })]);
+    await fixture.whenStable();
+    expect(onRangeChange).toHaveBeenCalledExactlyOnceWith(down);
+    onRangeChange.mockClear();
+    composed.set([cellNavigation()]);
+    await fixture.whenStable();
+    grid.selectRange(across);
+    await fixture.whenStable();
+    expect(onRangeChange).not.toHaveBeenCalled();
+    composed.set([cellNavigation({ onRangeChange })]);
+    await fixture.whenStable();
+    expect(onRangeChange).toHaveBeenCalledExactlyOnceWith(across);
+  });
+
+  it("keeps an explicit callback ahead of live composed callbacks", async () => {
+    const direct = vi.fn();
+    const composedCallback = vi.fn();
+    explicit = direct;
+    const composed = signal([cellNavigation()]);
+    features = composed;
+    const fixture = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(direct).toHaveBeenCalledExactlyOnceWith(null);
+    direct.mockClear();
+    composed.set([cellNavigation({ onRangeChange: composedCallback })]);
+    await fixture.whenStable();
+    expect(direct).not.toHaveBeenCalled();
+    fixture.componentInstance.grid.selectRange(down);
+    await fixture.whenStable();
+    expect(direct).toHaveBeenCalledExactlyOnceWith(down);
+    expect(composedCallback).not.toHaveBeenCalled();
   });
 });
 

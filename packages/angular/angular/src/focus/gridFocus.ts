@@ -206,24 +206,24 @@ export function injectGridFocus<TRow>(
 
   // A lone focused cell is not a selection, so it reports `null`, and the
   // host hears only when the reported rectangle changes.
-  const onRangeChange =
+  const onRangeChange = () =>
     options.onRangeChange ??
     (table.featureOptions.onCellRangeChange as
       ((range: CellRange | null) => void) | undefined);
-  if (onRangeChange) {
-    const reported = computed(() => reportedCellRange(snapshot().range), {
-      equal: (left, right) => cellRangeKey(left) === cellRangeKey(right),
-    });
-    effect(
-      () => {
-        const range = reported();
-        untracked(() => {
-          onRangeChange(range);
-        });
-      },
-      { injector }
-    );
-  }
+  const wired = computed(() => onRangeChange() !== undefined);
+  const reported = computed(() => reportedCellRange(snapshot().range), {
+    equal: (left, right) => cellRangeKey(left) === cellRangeKey(right),
+  });
+  effect(
+    () => {
+      const range = reported();
+      if (!wired()) return;
+      untracked(() => {
+        onRangeChange()?.(range);
+      });
+    },
+    { injector }
+  );
 
   // A pointer released outside the table would leave a drag armed.
   effect(
