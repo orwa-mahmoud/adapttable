@@ -6,7 +6,7 @@ import {
 import { CheckboxIndicator, CheckboxRoot } from "reka-ui";
 import { h, mergeProps } from "vue";
 
-import { targetAttrs } from "./target";
+import { rekaTarget } from "./target";
 
 export function rekaCheckbox(control: {
   readonly attrs: Attrs;
@@ -16,9 +16,9 @@ export function rekaCheckbox(control: {
 }) {
   const attrs = selectionCheckboxInputAttrs(control.attrs);
   const state = control.indeterminate ? "indeterminate" : control.checked;
-  return h(
+  return rekaTarget(
     CheckboxRoot,
-    mergeProps(targetAttrs(attrs), {
+    mergeProps(attrs, {
       as: "button",
       type: "button",
       class: "at-reka-checkbox",

@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {}
+  },
+  "include": [
+    "src/DataTable.vue",
+    "src/index.ts",
+    "src/context.ts",
+    "src/tableControls.ts",
+    "src/surfaceControls.ts",
+    "src/RekaLoading.ts",
+    "src/controls/*.ts",
+    "test/table-integration.test.ts",
+    "test/controls.test.ts",
+    "test/types/GenericConsumer.vue"
+  ],
+  "exclude": []
+}

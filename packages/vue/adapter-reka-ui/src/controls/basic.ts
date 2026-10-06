@@ -1,16 +1,16 @@
 import type { Attrs } from "@adapttable/vue";
 import { Primitive } from "reka-ui";
-import { h, mergeProps, type VNodeChild } from "vue";
+import { mergeProps, type VNodeChild } from "vue";
 
-import { targetAttrs } from "./target";
+import { rekaTarget } from "./target";
 
 /** Reka has no Button component; Primitive preserves real button semantics. */
 export function rekaButton(attrs: Attrs, children: VNodeChild) {
-  return h(
+  return rekaTarget(
     Primitive,
     mergeProps(
       { as: "button", type: "button", class: "at-reka-button" },
-      targetAttrs(attrs)
+      attrs
     ),
     { default: () => children }
   );
@@ -25,9 +25,9 @@ export interface RekaInputControl {
 
 /** A native field is Reka's documented Primitive composition for text input. */
 export function rekaInput(control: RekaInputControl) {
-  return h(
+  return rekaTarget(
     Primitive,
-    mergeProps(targetAttrs(control.attrs), {
+    mergeProps(control.attrs, {
       as: "input",
       type: control.type ?? "text",
       class: "at-reka-input",

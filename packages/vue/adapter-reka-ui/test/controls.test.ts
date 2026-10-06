@@ -1,4 +1,3 @@
-import { renderToString } from "vue/server-renderer";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createApp,
@@ -8,6 +7,7 @@ import {
   nextTick,
   shallowRef,
 } from "vue";
+import { renderToString } from "vue/server-renderer";
 
 import { rekaButton, rekaInput } from "../src/controls/basic";
 import { rekaCheckbox, rekaSelectionCheckbox } from "../src/controls/checkbox";
