@@ -1522,8 +1522,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           left.every((feature, index) => feature === right[index]),
       }
     );
+    const inScrollBox = computed(() => this.maxHeight() != null);
     const configuration = computed(() => ({
       features: features(),
+      inScrollBox: inScrollBox(),
       selectable: this.selectable(),
       cellNavigation: this.cellNavigation(),
       filtersMode: this.filtersMode(),
@@ -2245,6 +2247,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         featureOptions.rowHeight,
         featureOptions.virtualOverscan,
         featureOptions.virtualScrollMargin,
+        this.maxHeight() != null,
       ],
       (injector) =>
         bodyWindowFor({
