@@ -2,11 +2,13 @@ import {
   ColumnGroupToggleChrome,
   type TableChromeSlots,
 } from "@adapttable/vue/adapter";
-import { h } from "vue";
+import { Fragment, h } from "vue";
+import { VDivider } from "vuetify/components/VDivider";
 import { VIcon } from "vuetify/components/VIcon";
 import { VProgressCircular } from "vuetify/components/VProgressCircular";
 
 import { vuetifyButton, vuetifySelectionCheckbox } from "./controls";
+import { VuetifySurface } from "./table/VuetifySurface";
 
 function expandIcon(expanded: boolean) {
   return h(VIcon, {
@@ -24,10 +26,32 @@ export function vuetifyTableControls<TRow>(): Pick<
   | "ColumnGroupToggle"
   | "TreeToggle"
   | "RowDetailToggle"
+  | "ResizeHandle"
 > {
   return {
-    SortButton: ({ attrs, content }) => vuetifyButton(attrs, content),
+    SortButton: ({ attrs, content, context }) =>
+      vuetifyButton(
+        attrs,
+        h(Fragment, [
+          content,
+          h(VIcon, {
+            icon: context.sortDir === "desc" ? "$sortDesc" : "$sortAsc",
+            size: 16,
+            "aria-hidden": "true",
+            style: { opacity: context.sortDir ? 1 : 0.45 },
+          }),
+        ])
+      ),
     SelectionCheckbox: vuetifySelectionCheckbox,
+    ResizeHandle: ({ attrs }) =>
+      h(VuetifySurface, {
+        component: VDivider,
+        attrs: {
+          ...attrs,
+          vertical: true,
+          class: ["adapttable-vuetify-resize-handle", attrs.class],
+        },
+      }),
     ColumnGroupToggle: (props) =>
       ColumnGroupToggleChrome({
         ...props,

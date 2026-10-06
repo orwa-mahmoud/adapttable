@@ -5,7 +5,7 @@ import {
   FullscreenButtonChrome,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { fullscreen as bindingFullscreen } from "@adapttable/vue/fullscreen";
+import { fullscreen as bindingFullscreen } from "@adapttable/vue/features";
 
 import { vuetifyButton } from "./controls";
 

@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { computed, shallowRef, type VNodeChild } from "vue";
+import {
+  type ButtonHTMLAttributes,
+  computed,
+  shallowRef,
+  type VNodeChild,
+} from "vue";
 import { VBtn } from "vuetify/components/VBtn";
 
 import { controlAttrs, useControlRef } from "./controlRef";
@@ -10,7 +15,8 @@ const props = defineProps<{
   readonly content: VNodeChild;
 }>();
 const button = shallowRef<InstanceType<typeof VBtn> | null>(null);
-const attrs = computed(() => controlAttrs(props.attrs));
+const defaults = { type: "button" } satisfies ButtonHTMLAttributes;
+const attrs = computed(() => ({ ...defaults, ...controlAttrs(props.attrs) }));
 useControlRef(
   () => {
     const element: unknown = button.value?.$el;
@@ -23,7 +29,7 @@ const Content = () => props.content;
 </script>
 
 <template>
-  <VBtn ref="button" type="button" variant="text" size="small" v-bind="attrs">
+  <VBtn ref="button" variant="text" size="small" v-bind="attrs">
     <Content />
   </VBtn>
 </template>

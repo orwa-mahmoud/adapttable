@@ -5,7 +5,7 @@ import {
   extendFeature,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { densityChooser as bindingDensityChooser } from "@adapttable/vue/density";
+import { densityChooser as bindingDensityChooser } from "@adapttable/vue/features";
 import { h } from "vue";
 
 import VuetifySelect from "./controls/VuetifySelect.vue";
@@ -22,7 +22,7 @@ export function densityChooser(): StaticTableFeature {
               attrs: control.attrs,
               value: control.value,
               options: control.options,
-              onChange: (value) => {
+              onChange: (value: string) => {
                 if (value === "comfortable" || value === "compact")
                   control.onChange(value);
               },

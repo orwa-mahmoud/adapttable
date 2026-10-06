@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, shallowRef } from "vue";
+import { computed, nextTick, onBeforeUnmount, shallowRef } from "vue";
 import { VTextarea } from "vuetify/components/VTextarea";
 import { VTextField } from "vuetify/components/VTextField";
 
-import { controlAttrs, useControlRef } from "./controlRef";
+import { useControlRef, valueControlAttrs } from "./controlRef";
 
 /** Vuetify owns its compound host; controlRef remains the native focus target. */
 defineOptions({ inheritAttrs: false });
@@ -14,16 +14,34 @@ const props = defineProps<{
   readonly multiline?: boolean;
   readonly onChange: (value: string) => void;
 }>();
+let active = true;
+onBeforeUnmount(() => {
+  active = false;
+});
 const input = shallowRef<InstanceType<typeof VTextField> | null>(null);
 const textarea = shallowRef<InstanceType<typeof VTextarea> | null>(null);
-const attrs = computed(() => controlAttrs(props.attrs));
+const attrs = computed(() => valueControlAttrs(props.attrs));
 useControlRef(
   () =>
     props.multiline ? textarea.value?.controlRef : input.value?.controlRef,
   () => props.attrs
 );
 function change(value: unknown): void {
+  const owner = props.multiline ? textarea.value : input.value;
   props.onChange(typeof value === "string" ? value : "");
+  // Repaint a rejected native edit through Vue's public component API.
+  void nextTick(() => {
+    if (!active || owner !== (props.multiline ? textarea.value : input.value))
+      return;
+    const control = owner?.controlRef;
+    if (!control?.isConnected) return;
+    if (
+      (control instanceof HTMLInputElement ||
+        control instanceof HTMLTextAreaElement) &&
+      control.value !== props.value
+    )
+      owner?.$forceUpdate();
+  });
 }
 </script>
 

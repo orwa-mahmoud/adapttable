@@ -1,0 +1,119 @@
+.adapttable-vuetify-field {
+  min-inline-size: 0;
+  --v-field-input-min-height: 40px;
+  --v-field-input-padding-top: 8px;
+  --v-field-input-padding-bottom: 8px;
+}
+
+.adapttable-vuetify-field .v-field__input {
+  min-inline-size: 0;
+  inline-size: 100%;
+  color: inherit;
+  font: inherit;
+}
+
+.adapttable-vuetify-checkbox {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 600px) {
+  .adapttable-vuetify-field {
+    --v-field-input-min-height: 44px;
+  }
+}
+
+.adapttable-vuetify {
+  color: rgb(var(--v-theme-on-surface));
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 12px;
+  min-inline-size: 0;
+}
+
+.adapttable-vuetify [data-adapttable-part="toolbar"],
+.adapttable-vuetify [data-adapttable-part="footer"],
+.adapttable-vuetify [data-adapttable-part="pager"] {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.adapttable-vuetify [data-adapttable-part="toolbar"],
+.adapttable-vuetify [data-adapttable-part="footer"] {
+  padding: 16px;
+}
+
+.adapttable-vuetify [data-adapttable-part="search-field"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 240px;
+  max-inline-size: 420px;
+}
+
+.adapttable-vuetify [data-adapttable-part="search-field"] .v-input {
+  flex: 1 1 auto;
+}
+
+.adapttable-vuetify [data-adapttable-part="rows-per-page"] {
+  flex: 0 0 110px;
+}
+
+.adapttable-vuetify [data-adapttable-part="pager"] {
+  margin-inline-start: auto;
+}
+
+.adapttable-vuetify [data-adapttable-part="scroll-box"] {
+  overflow: auto;
+  min-inline-size: 0;
+}
+
+/* The binding's scroll surface is the single scrolling and measuring owner. */
+.adapttable-vuetify-table.v-table > .v-table__wrapper {
+  overflow: visible;
+}
+
+.adapttable-vuetify [data-adapttable-part="table"],
+.adapttable-vuetify [data-adapttable-part="loading-table"] {
+  inline-size: 100%;
+}
+
+.adapttable-vuetify [data-adapttable-part="header-cell"] {
+  font-weight: 600;
+}
+
+.adapttable-vuetify [data-adapttable-part="tree-spacer"] {
+  display: inline-block;
+  inline-size: 1.5em;
+  flex-shrink: 0;
+}
+
+.adapttable-vuetify-cards {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.adapttable-vuetify-card [data-adapttable-part="card-row"] {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) minmax(0, 2fr);
+  gap: 12px;
+  padding-block: 6px;
+}
+
+.adapttable-vuetify-card [data-adapttable-part="card-label"] {
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+
+@media (max-width: 600px) {
+  .adapttable-vuetify .v-btn {
+    min-block-size: 44px;
+  }
+}
+
+.adapttable-vuetify-resize-handle.v-divider {
+  margin: 0;
+  max-block-size: none;
+  border-inline-end-width: 2px;
+}

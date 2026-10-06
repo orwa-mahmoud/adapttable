@@ -1,5 +1,5 @@
 import type { Attrs, ElementRef } from "@adapttable/vue";
-import { onScopeDispose, watch } from "vue";
+import { useElementRef } from "@adapttable/vue/adapter";
 
 function isElementRef(value: unknown): value is ElementRef {
   return typeof value === "function";
@@ -10,24 +10,27 @@ export function useControlRef(
   element: () => HTMLElement | undefined,
   attrs: () => Attrs
 ): void {
-  let release: (() => void) | undefined;
-  watch(
-    [element, () => attrs().ref],
-    ([target, callback]) => {
-      release?.();
-      release = undefined;
-      if (isElementRef(callback)) {
-        callback(target ?? null);
-        if (target) release = () => callback(null);
-      }
-    },
-    { flush: "post", immediate: true }
-  );
-  onScopeDispose(() => release?.());
+  useElementRef(element, () => {
+    const callback = attrs().ref;
+    return isElementRef(callback) ? callback : undefined;
+  });
 }
 
 export function controlAttrs(attrs: Attrs): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(attrs).filter(([key]) => key !== "ref")
+  );
+}
+
+/** v-model owns value updates; legacy native listeners must not request twice. */
+export function valueControlAttrs(attrs: Attrs): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(attrs).filter(
+      ([key]) =>
+        key !== "ref" &&
+        key !== "value" &&
+        key !== "onInput" &&
+        key !== "onChange"
+    )
   );
 }

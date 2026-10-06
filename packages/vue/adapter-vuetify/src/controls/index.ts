@@ -1,8 +1,8 @@
 import type { Attrs } from "@adapttable/vue";
 import {
   type FilterFieldSlots,
-  selectionCheckboxInputAttrs,
   type SelectionCheckboxControl,
+  selectionCheckboxInputAttrs,
 } from "@adapttable/vue/adapter";
 import { h, type VNode, type VNodeChild } from "vue";
 

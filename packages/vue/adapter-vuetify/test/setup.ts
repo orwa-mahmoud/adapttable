@@ -1,16 +1,31 @@
 class TestResizeObserver implements ResizeObserver {
-  observe(): void {}
-  unobserve(): void {}
-  disconnect(): void {}
+  private readonly targets = new Set<Element>();
+  observe(target: Element): void {
+    this.targets.add(target);
+  }
+  unobserve(target: Element): void {
+    this.targets.delete(target);
+  }
+  disconnect(): void {
+    this.targets.clear();
+  }
 }
 
 class TestIntersectionObserver implements IntersectionObserver {
   readonly root = null;
   readonly rootMargin = "0px";
+  readonly scrollMargin = "0px";
   readonly thresholds = [0];
-  observe(): void {}
-  unobserve(): void {}
-  disconnect(): void {}
+  private readonly targets = new Set<Element>();
+  observe(target: Element): void {
+    this.targets.add(target);
+  }
+  unobserve(target: Element): void {
+    this.targets.delete(target);
+  }
+  disconnect(): void {
+    this.targets.clear();
+  }
   takeRecords(): IntersectionObserverEntry[] {
     return [];
   }

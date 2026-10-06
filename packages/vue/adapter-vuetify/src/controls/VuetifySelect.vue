@@ -2,7 +2,7 @@
 import { computed, shallowRef } from "vue";
 import { VSelect } from "vuetify/components/VSelect";
 
-import { controlAttrs, useControlRef } from "./controlRef";
+import { useControlRef, valueControlAttrs } from "./controlRef";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{
@@ -16,7 +16,7 @@ const props = defineProps<{
   readonly onChange: (value: string) => void;
 }>();
 const select = shallowRef<InstanceType<typeof VSelect> | null>(null);
-const attrs = computed(() => controlAttrs(props.attrs));
+const attrs = computed(() => valueControlAttrs(props.attrs));
 useControlRef(
   () => select.value?.controlRef,
   () => props.attrs

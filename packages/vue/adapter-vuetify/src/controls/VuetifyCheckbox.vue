@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { cloneVNode, mergeProps, nextTick, shallowRef, type VNode } from "vue";
+import {
+  cloneVNode,
+  type HTMLAttributes,
+  mergeProps,
+  nextTick,
+  onBeforeUnmount,
+  shallowRef,
+  type VNode,
+} from "vue";
 import { VCheckboxBtn } from "vuetify/components/VCheckbox";
 import { VIcon } from "vuetify/components/VIcon";
 
@@ -12,7 +20,12 @@ const props = defineProps<{
   readonly indeterminate?: boolean;
   readonly onChange: (checked: boolean) => void;
 }>();
+const decorativeAttrs: HTMLAttributes = { "aria-hidden": true };
 const input = shallowRef<HTMLElement>();
+let active = true;
+onBeforeUnmount(() => {
+  active = false;
+});
 useControlRef(
   () => input.value,
   () => props.attrs
@@ -24,6 +37,7 @@ function restoreControlledState(event: Event): void {
   const target = event.currentTarget;
   if (!(target instanceof HTMLInputElement)) return;
   void nextTick(() => {
+    if (!active || input.value !== target || !target.isConnected) return;
     target.checked = props.checked;
     target.indeterminate = props.indeterminate === true;
   });
@@ -56,7 +70,11 @@ function InputNode({ node }: { readonly node: VNode }): VNode {
     @update:indeterminate="() => undefined"
   >
     <template #input="control">
-      <VIcon v-if="control.icon" :icon="control.icon" aria-hidden="true" />
+      <VIcon
+        v-if="control.icon"
+        :icon="control.icon"
+        v-bind="decorativeAttrs"
+      />
       <InputNode :node="control.inputNode" />
     </template>
   </VCheckboxBtn>

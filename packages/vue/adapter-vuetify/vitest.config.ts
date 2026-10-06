@@ -1,5 +1,3 @@
-import { fileURLToPath } from "node:url";
-
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vitest/config";
 
@@ -12,20 +10,6 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     dedupe: ["vue"],
-    alias: [
-      {
-        find: /^@adapttable\/vue$/,
-        replacement: fileURLToPath(
-          new URL("../vue/src/index.ts", import.meta.url)
-        ),
-      },
-      {
-        find: /^@adapttable\/vue\/(.+)$/,
-        replacement: fileURLToPath(
-          new URL("../vue/src/$1.ts", import.meta.url)
-        ),
-      },
-    ],
   },
   test: {
     environment: "jsdom",

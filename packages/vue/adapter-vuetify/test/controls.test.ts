@@ -15,6 +15,7 @@ import VuetifyButton from "../src/controls/VuetifyButton.vue";
 import VuetifyCheckbox from "../src/controls/VuetifyCheckbox.vue";
 import VuetifyInput from "../src/controls/VuetifyInput.vue";
 import VuetifySelect from "../src/controls/VuetifySelect.vue";
+import { vuetifyTableControls } from "../src/tableControls";
 
 function vuetify() {
   return createVuetify({
@@ -268,4 +269,148 @@ it("renders compound ownership on the server and hydrates without relocating mar
   expect(inputIn(host)).toBe(input);
   expect(warning).not.toHaveBeenCalled();
   expect(error).not.toHaveBeenCalled();
+});
+
+it("does not restore detached checkbox paint after unmount before nextTick", async () => {
+  const host = mount(() =>
+    h(VuetifyCheckbox, {
+      attrs: { "aria-label": "Select row" },
+      checked: false,
+      onChange: () => undefined,
+    })
+  );
+  await nextTick();
+  const input = inputIn(host);
+  input.click();
+  expect(input.checked).toBe(true);
+  cleanups.pop()?.();
+  await nextTick();
+  expect(input.isConnected).toBe(false);
+  expect(input.checked).toBe(true);
+});
+
+it("does not let queued checkbox paint affect a replacement owner", async () => {
+  const owner = ref("first");
+  const changed = vi.fn(() => {
+    owner.value = "second";
+  });
+  const host = mount(() =>
+    h(VuetifyCheckbox, {
+      key: owner.value,
+      attrs: { id: owner.value, "aria-label": "Select row" },
+      checked: false,
+      onChange: changed,
+    })
+  );
+  await nextTick();
+  const previous = inputIn(host);
+  previous.click();
+  await nextTick();
+  const current = inputIn(host);
+  expect(changed).toHaveBeenCalledExactlyOnceWith(true);
+  expect(current).not.toBe(previous);
+  expect(current.id).toBe("second");
+  expect(current.checked).toBe(false);
+  expect(previous.isConnected).toBe(false);
+  expect(previous.checked).toBe(true);
+});
+
+it("releases the input ref if its owner unmounts before pending post-flush work", async () => {
+  const target = vi.fn();
+  mount(() =>
+    h(VuetifyInput, {
+      attrs: { ref: target, "aria-label": "Search" },
+      value: "",
+      onChange: () => undefined,
+    })
+  );
+  cleanups.pop()?.();
+  const afterUnmount = target.mock.calls.length;
+  await nextTick();
+  expect(
+    target.mock.calls
+      .slice(afterUnmount)
+      .some(([value]) => value instanceof HTMLElement)
+  ).toBe(false);
+  expect(target).toHaveBeenLastCalledWith(null);
+});
+
+it("uses one model request for search and restores rejected edits without resetting accepted text", async () => {
+  const value = ref("Ada");
+  const decoration = ref("first");
+  let accept = true;
+  const legacyInput = vi.fn();
+  const changed = vi.fn((next: string) => {
+    if (accept) value.value = next;
+  });
+  const host = mount(() =>
+    h(VuetifyInput, {
+      attrs: {
+        "aria-label": "Search",
+        class: decoration.value,
+        value: "stale native value",
+        onInput: legacyInput,
+      },
+      value: value.value,
+      onChange: changed,
+    })
+  );
+  await nextTick();
+  const input = inputIn(host);
+  expect(input.value).toBe("Ada");
+  input.focus();
+  input.value = "Bea";
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  await nextTick();
+  expect(changed).toHaveBeenCalledExactlyOnceWith("Bea");
+  expect(legacyInput).not.toHaveBeenCalled();
+  expect(input.value).toBe("Bea");
+  accept = false;
+  input.value = "Mira";
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  await nextTick();
+  await nextTick();
+  expect(value.value).toBe("Bea");
+  expect(input.value).toBe("Bea");
+  decoration.value = "second";
+  await nextTick();
+  expect(inputIn(host)).toBe(input);
+  expect(input.value).toBe("Bea");
+  expect(document.activeElement).toBe(input);
+});
+
+it("uses a native Vuetify divider target for keyboard and pointer resizing", async () => {
+  const target = vi.fn();
+  const keydown = vi.fn();
+  const controls = vuetifyTableControls<unknown>();
+  const render = controls.ResizeHandle;
+  if (!render) throw new Error("Missing Vuetify resize control");
+  const host = mount(() =>
+    h("div", [
+      render({
+        attrs: {
+          role: "separator",
+          tabindex: 0,
+          "aria-orientation": "vertical",
+          "aria-label": "Resize Name",
+          "data-adapttable-part": "resize-handle",
+          ref: target,
+          onKeydown: keydown,
+          style: { width: "8px" },
+        },
+      }),
+    ])
+  );
+  await nextTick();
+  const divider = host.querySelector("hr.v-divider");
+  expect(divider?.getAttribute("data-adapttable-part")).toBe("resize-handle");
+  expect(divider?.getAttribute("role")).toBe("separator");
+  expect(divider?.getAttribute("tabindex")).toBe("0");
+  expect(target).toHaveBeenLastCalledWith(divider);
+  divider?.dispatchEvent(
+    new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
+  );
+  expect(keydown).toHaveBeenCalledOnce();
+  cleanups.pop()?.();
+  expect(target).toHaveBeenLastCalledWith(null);
 });
