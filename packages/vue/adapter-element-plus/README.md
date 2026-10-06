@@ -61,6 +61,21 @@ attribute API:
 - `ElSelect`: the kit host owns the styling class; its native combobox owns the
   accessible name and focus behavior.
 
+## Optional view controls
+
+Add density and fullscreen controls only where they are needed:
+
+```ts
+import { densityChooser } from "@adapttable/element-plus/density";
+import { fullscreen } from "@adapttable/element-plus/fullscreen";
+
+const features = [densityChooser(), fullscreen()];
+```
+
+Pass `features` to `DataTable`. Use `v-model:density` to keep density in host
+state. The fullscreen button appears only when the browser supports fullscreen;
+it promotes the existing table root.
+
 ## Server rendering
 
 Use Element Plus's documented per-request `ID_INJECTION_KEY` and
