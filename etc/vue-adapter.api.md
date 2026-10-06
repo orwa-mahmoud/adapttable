@@ -289,6 +289,7 @@ import { TableAssistantSlots as TableAssistantSlots_2 } from '@adapttable/core/b
 import { TableAssistantView } from '@adapttable/core/binding';
 import { TableAssistantWindowProps as TableAssistantWindowProps_2 } from '@adapttable/core/binding';
 import { TableDensity } from '@adapttable/core';
+import { TableDensity as TableDensity_2 } from '@adapttable/core/binding';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core/binding';
@@ -852,6 +853,542 @@ export function createAdapterTableAssistantFeature(render: (props: TableAssistan
 // @public (undocumented)
 export function createFeatureState(): TableFeatureState;
 
+// @public
+export interface DataTableClassNames {
+    // (undocumented)
+    readonly actionButton?: string;
+    // (undocumented)
+    readonly actionsCell?: string;
+    // (undocumented)
+    readonly actionsHeader?: string;
+    // (undocumented)
+    readonly addRow?: string;
+    // (undocumented)
+    readonly agentApproval?: string;
+    // (undocumented)
+    readonly agentApprovalButton?: string;
+    // (undocumented)
+    readonly batchEditBar?: string;
+    // (undocumented)
+    readonly batchEditButton?: string;
+    // (undocumented)
+    readonly bulkBar?: string;
+    // (undocumented)
+    readonly bulkButton?: string;
+    // (undocumented)
+    readonly bulkClear?: string;
+    // (undocumented)
+    readonly bulkCount?: string;
+    // (undocumented)
+    readonly bulkError?: string;
+    // (undocumented)
+    readonly card?: string;
+    // (undocumented)
+    readonly cardActions?: string;
+    // (undocumented)
+    readonly cardDetail?: string;
+    // (undocumented)
+    readonly cardFields?: string;
+    // (undocumented)
+    readonly cardLabel?: string;
+    // (undocumented)
+    readonly cardRow?: string;
+    // (undocumented)
+    readonly cards?: string;
+    // (undocumented)
+    readonly cardValue?: string;
+    // (undocumented)
+    readonly chip?: string;
+    // (undocumented)
+    readonly chipRemove?: string;
+    // (undocumented)
+    readonly chips?: string;
+    // (undocumented)
+    readonly columnGroup?: string;
+    // (undocumented)
+    readonly columnGroupToggle?: string;
+    // (undocumented)
+    readonly columnMenu?: string;
+    // (undocumented)
+    readonly columnMenuAction?: string;
+    // (undocumented)
+    readonly columnMenuAutoSize?: string;
+    // (undocumented)
+    readonly columnMenuBulk?: string;
+    // (undocumented)
+    readonly columnMenuBulkButton?: string;
+    // (undocumented)
+    readonly columnMenuButton?: string;
+    // (undocumented)
+    readonly columnMenuChoice?: string;
+    // (undocumented)
+    readonly columnMenuChoiceLabel?: string;
+    // (undocumented)
+    readonly columnMenuChoiceSelect?: string;
+    // (undocumented)
+    readonly columnMenuGrip?: string;
+    // (undocumented)
+    readonly columnMenuHeader?: string;
+    // (undocumented)
+    readonly columnMenuItem?: string;
+    // (undocumented)
+    readonly columnMenuLabel?: string;
+    // (undocumented)
+    readonly columnMenuMore?: string;
+    // (undocumented)
+    readonly columnMenuPanel?: string;
+    // (undocumented)
+    readonly columnMenuPin?: string;
+    // (undocumented)
+    readonly columnMenuReset?: string;
+    // (undocumented)
+    readonly columnMenuSearch?: string;
+    // (undocumented)
+    readonly columnMenuSeparator?: string;
+    // (undocumented)
+    readonly columnMenuSubmenu?: string;
+    // (undocumented)
+    readonly columnMenuTitle?: string;
+    // (undocumented)
+    readonly columnMenuVisibility?: string;
+    // (undocumented)
+    readonly columnRenameAnnouncer?: string;
+    // (undocumented)
+    readonly columnRenameCancel?: string;
+    // (undocumented)
+    readonly columnRenameError?: string;
+    // (undocumented)
+    readonly columnRenameForm?: string;
+    // (undocumented)
+    readonly columnRenameInput?: string;
+    // (undocumented)
+    readonly columnRenameLabel?: string;
+    // (undocumented)
+    readonly columnRenameSave?: string;
+    // (undocumented)
+    readonly columnSelect?: string;
+    // (undocumented)
+    readonly commandEmpty?: string;
+    // (undocumented)
+    readonly commandInput?: string;
+    // (undocumented)
+    readonly commandItem?: string;
+    // (undocumented)
+    readonly commandPalette?: string;
+    // (undocumented)
+    readonly commandPaletteButton?: string;
+    // (undocumented)
+    readonly contextMenu?: string;
+    // (undocumented)
+    readonly contextMenuItem?: string;
+    // (undocumented)
+    readonly contextMenuSeparator?: string;
+    // (undocumented)
+    readonly densitySelect?: string;
+    // (undocumented)
+    readonly densityToggle?: string;
+    // (undocumented)
+    readonly detailCell?: string;
+    // (undocumented)
+    readonly detailRow?: string;
+    // (undocumented)
+    readonly editableCell?: string;
+    // (undocumented)
+    readonly editCellActivate?: string;
+    // (undocumented)
+    readonly editCellConflictButton?: string;
+    // (undocumented)
+    readonly editCellEditor?: string;
+    // (undocumented)
+    readonly editCellError?: string;
+    // (undocumented)
+    readonly editCellRollback?: string;
+    // (undocumented)
+    readonly editCellSaveError?: string;
+    // (undocumented)
+    readonly editHistory?: string;
+    // (undocumented)
+    readonly empty?: string;
+    // (undocumented)
+    readonly emptyClear?: string;
+    // (undocumented)
+    readonly error?: string;
+    // (undocumented)
+    readonly expandButton?: string;
+    // (undocumented)
+    readonly expandCell?: string;
+    // (undocumented)
+    readonly expandHeader?: string;
+    // (undocumented)
+    readonly expandToggle?: string;
+    // (undocumented)
+    readonly exportCsvButton?: string;
+    // (undocumented)
+    readonly exportProgress?: string;
+    // (undocumented)
+    readonly exportProgressBar?: string;
+    // (undocumented)
+    readonly exportProgressButton?: string;
+    // (undocumented)
+    readonly exportProgressDownload?: string;
+    // (undocumented)
+    readonly exportProgressMessage?: string;
+    // (undocumented)
+    readonly exportSpinner?: string;
+    // (undocumented)
+    readonly fillHandle?: string;
+    // (undocumented)
+    readonly filterCheckbox?: string;
+    // (undocumented)
+    readonly filterCheckboxGroup?: string;
+    // (undocumented)
+    readonly filterChecklist?: string;
+    // (undocumented)
+    readonly filterChecklistActions?: string;
+    // (undocumented)
+    readonly filterChecklistCount?: string;
+    // (undocumented)
+    readonly filterChecklistList?: string;
+    // (undocumented)
+    readonly filterChecklistSearch?: string;
+    // (undocumented)
+    readonly filterControl?: string;
+    // (undocumented)
+    readonly filterField?: string;
+    // (undocumented)
+    readonly filterHeaderButton?: string;
+    // (undocumented)
+    readonly filterHeaderCell?: string;
+    // (undocumented)
+    readonly filterHeaderInput?: string;
+    // (undocumented)
+    readonly filterHeaderMenu?: string;
+    // (undocumented)
+    readonly filterHeaderRow?: string;
+    // (undocumented)
+    readonly filterHeaderTrigger?: string;
+    // (undocumented)
+    readonly filterInput?: string;
+    // (undocumented)
+    readonly filterLabel?: string;
+    // (undocumented)
+    readonly filterOperator?: string;
+    // (undocumented)
+    readonly filterOptionsLoading?: string;
+    // (undocumented)
+    readonly filtersActions?: string;
+    // (undocumented)
+    readonly filtersAnchor?: string;
+    // (undocumented)
+    readonly filtersBackdrop?: string;
+    // (undocumented)
+    readonly filtersBody?: string;
+    // (undocumented)
+    readonly filtersButton?: string;
+    // (undocumented)
+    readonly filtersClear?: string;
+    // (undocumented)
+    readonly filtersClose?: string;
+    // (undocumented)
+    readonly filtersCount?: string;
+    // (undocumented)
+    readonly filtersDone?: string;
+    // (undocumented)
+    readonly filtersDrawer?: string;
+    // (undocumented)
+    readonly filterSelect?: string;
+    // (undocumented)
+    readonly filtersFooter?: string;
+    // (undocumented)
+    readonly filtersForm?: string;
+    // (undocumented)
+    readonly filtersHeader?: string;
+    // (undocumented)
+    readonly filtersIcon?: string;
+    // (undocumented)
+    readonly filtersPanel?: string;
+    // (undocumented)
+    readonly filtersPopover?: string;
+    // (undocumented)
+    readonly filtersTitle?: string;
+    // (undocumented)
+    readonly filtersToolbar?: string;
+    // (undocumented)
+    readonly filterTree?: string;
+    // (undocumented)
+    readonly filterTreeActions?: string;
+    // (undocumented)
+    readonly filterTreeCondition?: string;
+    // (undocumented)
+    readonly filterTreeGroup?: string;
+    // (undocumented)
+    readonly filterTreeRemove?: string;
+    // (undocumented)
+    readonly filterTreeSummary?: string;
+    // (undocumented)
+    readonly findBar?: string;
+    // (undocumented)
+    readonly findButton?: string;
+    // (undocumented)
+    readonly findInput?: string;
+    // (undocumented)
+    readonly footer?: string;
+    // (undocumented)
+    readonly fullscreenButton?: string;
+    // (undocumented)
+    readonly fullscreenToggle?: string;
+    // (undocumented)
+    readonly gridAnnouncer?: string;
+    // (undocumented)
+    readonly groupAggregate?: string;
+    // (undocumented)
+    readonly groupCard?: string;
+    // (undocumented)
+    readonly groupCell?: string;
+    // (undocumented)
+    readonly groupCheckbox?: string;
+    // (undocumented)
+    readonly groupCount?: string;
+    // (undocumented)
+    readonly groupFooterCell?: string;
+    // (undocumented)
+    readonly groupFooterRow?: string;
+    // (undocumented)
+    readonly groupingAdd?: string;
+    // (undocumented)
+    readonly groupingAggregationAdd?: string;
+    // (undocumented)
+    readonly groupingAggregationItem?: string;
+    // (undocumented)
+    readonly groupingAggregationOperation?: string;
+    // (undocumented)
+    readonly groupingAggregationRemove?: string;
+    // (undocumented)
+    readonly groupingAggregations?: string;
+    // (undocumented)
+    readonly groupingAggregationsRestore?: string;
+    // (undocumented)
+    readonly groupingChip?: string;
+    // (undocumented)
+    readonly groupingChipHandle?: string;
+    // (undocumented)
+    readonly groupingChipRemove?: string;
+    // (undocumented)
+    readonly groupingDropZone?: string;
+    // (undocumented)
+    readonly groupingItem?: string;
+    // (undocumented)
+    readonly groupingPanel?: string;
+    // (undocumented)
+    readonly groupingRemoveZone?: string;
+    // (undocumented)
+    readonly groupLabel?: string;
+    // (undocumented)
+    readonly groupMore?: string;
+    // (undocumented)
+    readonly groupMoreCell?: string;
+    // (undocumented)
+    readonly groupMoreRow?: string;
+    // (undocumented)
+    readonly groupRow?: string;
+    // (undocumented)
+    readonly groupSelect?: string;
+    // (undocumented)
+    readonly groupToggle?: string;
+    // (undocumented)
+    readonly headerActions?: string;
+    // (undocumented)
+    readonly headerCell?: string;
+    // (undocumented)
+    readonly headerRenameAnnouncer?: string;
+    // (undocumented)
+    readonly headerRenameButton?: string;
+    // (undocumented)
+    readonly headerRenameCancel?: string;
+    // (undocumented)
+    readonly headerRenameError?: string;
+    // (undocumented)
+    readonly headerRenameForm?: string;
+    // (undocumented)
+    readonly headerRenameInput?: string;
+    // (undocumented)
+    readonly headerRenameLabel?: string;
+    // (undocumented)
+    readonly headerRenameSave?: string;
+    // (undocumented)
+    readonly loading?: string;
+    // (undocumented)
+    readonly loadingCard?: string;
+    // (undocumented)
+    readonly loadingCards?: string;
+    // (undocumented)
+    readonly loadingCell?: string;
+    // (undocumented)
+    readonly loadingHeaderCell?: string;
+    // (undocumented)
+    readonly loadingHeaderRow?: string;
+    // (undocumented)
+    readonly loadingLine?: string;
+    // (undocumented)
+    readonly loadingRow?: string;
+    // (undocumented)
+    readonly loadingTable?: string;
+    // (undocumented)
+    readonly loadMore?: string;
+    // (undocumented)
+    readonly loadMoreButton?: string;
+    // (undocumented)
+    readonly pageEllipsis?: string;
+    // (undocumented)
+    readonly pageNext?: string;
+    // (undocumented)
+    readonly pageNumber?: string;
+    // (undocumented)
+    readonly pagePrev?: string;
+    // (undocumented)
+    readonly pager?: string;
+    // (undocumented)
+    readonly printButton?: string;
+    // (undocumented)
+    readonly redoButton?: string;
+    // (undocumented)
+    readonly refreshing?: string;
+    // (undocumented)
+    readonly reorderCell?: string;
+    // (undocumented)
+    readonly reorderHeader?: string;
+    // (undocumented)
+    readonly resizeHandle?: string;
+    // (undocumented)
+    readonly retry?: string;
+    // (undocumented)
+    readonly root?: string;
+    readonly rowAction?: string;
+    // (undocumented)
+    readonly rowActionsMenu?: string;
+    // (undocumented)
+    readonly rowActionsTrigger?: string;
+    // (undocumented)
+    readonly rowEditActions?: string;
+    // (undocumented)
+    readonly rowEditButton?: string;
+    // (undocumented)
+    readonly rowReorderAnnouncer?: string;
+    // (undocumented)
+    readonly rowReorderButtons?: string;
+    // (undocumented)
+    readonly rowReorderDown?: string;
+    // (undocumented)
+    readonly rowReorderHandle?: string;
+    // (undocumented)
+    readonly rowReorderUp?: string;
+    // (undocumented)
+    readonly rowsPerPage?: string;
+    // (undocumented)
+    readonly scroll?: string;
+    // (undocumented)
+    readonly searchIcon?: string;
+    // (undocumented)
+    readonly searchInput?: string;
+    // (undocumented)
+    readonly searchWrapper?: string;
+    // (undocumented)
+    readonly selectAllBanner?: string;
+    // (undocumented)
+    readonly selectAllButton?: string;
+    // (undocumented)
+    readonly selectAllText?: string;
+    // (undocumented)
+    readonly selectionCell?: string;
+    // (undocumented)
+    readonly selectionCheckbox?: string;
+    // (undocumented)
+    readonly selectionHeader?: string;
+    // (undocumented)
+    readonly selectionStats?: string;
+    // (undocumented)
+    readonly sidePanel?: string;
+    // (undocumented)
+    readonly sidePanelBody?: string;
+    // (undocumented)
+    readonly sidePanelClose?: string;
+    // (undocumented)
+    readonly sidePanelHeader?: string;
+    // (undocumented)
+    readonly sidePanelTab?: string;
+    // (undocumented)
+    readonly sidePanelTabs?: string;
+    // (undocumented)
+    readonly sortButton?: string;
+    // (undocumented)
+    readonly sortDirectionButton?: string;
+    // (undocumented)
+    readonly sortIndex?: string;
+    // (undocumented)
+    readonly sortSelect?: string;
+    readonly status?: string;
+    // (undocumented)
+    readonly statusBar?: string;
+    // (undocumented)
+    readonly statusItem?: string;
+    // (undocumented)
+    readonly summary?: string;
+    // (undocumented)
+    readonly summaryCard?: string;
+    // (undocumented)
+    readonly summaryCell?: string;
+    // (undocumented)
+    readonly summaryRow?: string;
+    // (undocumented)
+    readonly table?: string;
+    // (undocumented)
+    readonly tableFooter?: string;
+    // (undocumented)
+    readonly tableStatusAnnouncer?: string;
+    // (undocumented)
+    readonly tbody?: string;
+    // (undocumented)
+    readonly td?: string;
+    // (undocumented)
+    readonly th?: string;
+    // (undocumented)
+    readonly thead?: string;
+    // (undocumented)
+    readonly toolbar?: string;
+    // (undocumented)
+    readonly tr?: string;
+    // (undocumented)
+    readonly treeCell?: string;
+    // (undocumented)
+    readonly treeSpacer?: string;
+    // (undocumented)
+    readonly treeToggle?: string;
+    // (undocumented)
+    readonly undoButton?: string;
+    // (undocumented)
+    readonly viewsButton?: string;
+    // (undocumented)
+    readonly viewsDelete?: string;
+    // (undocumented)
+    readonly viewsDivider?: string;
+    // (undocumented)
+    readonly viewsInput?: string;
+    // (undocumented)
+    readonly viewsItem?: string;
+    // (undocumented)
+    readonly viewsMenu?: string;
+    // (undocumented)
+    readonly viewsPanel?: string;
+    // (undocumented)
+    readonly viewsRow?: string;
+    // (undocumented)
+    readonly viewsSave?: string;
+    // (undocumented)
+    readonly viewsSaveRow?: string;
+    // (undocumented)
+    readonly virtualSpacer?: string;
+}
+
 // @public (undocumented)
 interface DataTableHandle<TRow> {
     // (undocumented)
@@ -860,6 +1397,119 @@ interface DataTableHandle<TRow> {
     readonly getView: () => TableRuntimeView<TRow> | undefined;
     // (undocumented)
     readonly runtime: TableRuntime<TRow>;
+}
+
+// @public
+export interface DataTableProps<TRow> {
+    // (undocumented)
+    readonly assistant?: TableAssistantProps;
+    // (undocumented)
+    readonly classNames?: DataTableClassNames;
+    // (undocumented)
+    readonly collapsibleColumnGroups?: boolean;
+    // (undocumented)
+    readonly columnLayout?: ColumnLayoutState;
+    // (undocumented)
+    readonly columns: readonly ColumnInput<TRow>[];
+    // (undocumented)
+    readonly columnWidths?: Readonly<Record<string, number>>;
+    // (undocumented)
+    readonly confirm?: ConfirmHandler;
+    // (undocumented)
+    readonly data?: readonly TRow[];
+    // (undocumented)
+    readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
+    // (undocumented)
+    readonly defaultDensity?: TableDensity_2;
+    // (undocumented)
+    readonly defaults?: NonNullable<TableViewStateConfig["defaults"]>;
+    // (undocumented)
+    readonly defaultSelectedIds?: readonly string[];
+    // (undocumented)
+    readonly density?: TableDensity_2;
+    // (undocumented)
+    readonly dir?: Direction;
+    // (undocumented)
+    readonly error?: Error | null;
+    // (undocumented)
+    readonly features?: readonly ComposedFeature$1<NoInfer<TRow>>[];
+    // (undocumented)
+    readonly fitColumns?: boolean;
+    // (undocumented)
+    readonly forceMobile?: boolean;
+    // (undocumented)
+    readonly getSearchText?: (row: TRow) => string;
+    // (undocumented)
+    readonly isFetching?: boolean;
+    // (undocumented)
+    readonly isLoading?: boolean;
+    // (undocumented)
+    readonly labels?: TableLabels;
+    // (undocumented)
+    readonly locale?: string;
+    // (undocumented)
+    readonly mobileBreakpoint?: number;
+    // (undocumented)
+    readonly multiSort?: boolean;
+    // (undocumented)
+    readonly onCellCut?: (range: CellRange) => void;
+    // (undocumented)
+    readonly onCellFill?: (edits: CellEdit<TRow>[]) => void;
+    // (undocumented)
+    readonly onCellPaste?: (edits: CellEdit<TRow>[]) => void;
+    // (undocumented)
+    readonly onColumnRename?: (key: string, name: string) => void;
+    // (undocumented)
+    readonly onDensityChange?: (density: TableDensity_2) => void;
+    // (undocumented)
+    readonly paginationMode?: PaginationMode;
+    // (undocumented)
+    readonly refetch?: () => void | Promise<unknown>;
+    readonly rowActionsLayout?: RowActionsLayout;
+    // (undocumented)
+    readonly rowKey: (row: TRow) => string;
+    // (undocumented)
+    readonly searchable?: boolean;
+    // (undocumented)
+    readonly searchDebounceMs?: number;
+    // (undocumented)
+    readonly selectable?: boolean;
+    // (undocumented)
+    readonly selectedIds?: readonly string[];
+    readonly skeletonRows?: number;
+    // (undocumented)
+    readonly source?: TableSource<TRow>;
+    readonly summaryRow?: SummaryRowFn<TRow>;
+    // (undocumented)
+    readonly tableLabel?: string;
+    // (undocumented)
+    readonly urlAdapter?: UrlStateAdapter;
+    // (undocumented)
+    readonly urlKey?: string;
+    // (undocumented)
+    readonly urlSync?: boolean;
+}
+
+// @public
+export interface DataTableSlots<TRow> {
+    // (undocumented)
+    cell?: (context: CellContext<TRow>) => VNodeChild;
+    // (undocumented)
+    empty?: (state: {
+        readonly noResults: boolean;
+        readonly clear: () => void;
+    }) => VNodeChild;
+    // (undocumented)
+    error?: (state: TableErrorState) => VNodeChild;
+    footer?: (context: FooterContext<TRow>) => VNodeChild;
+    // (undocumented)
+    header?: (context: HeaderContext<TRow>) => VNodeChild;
+    headerActions?: (context: HeaderContext<TRow>) => VNodeChild;
+    // (undocumented)
+    loading?: () => VNodeChild;
+    tableFooter?: () => VNodeChild;
+    // (undocumented)
+    toolbar?: () => VNodeChild;
 }
 
 // @public (undocumented)
