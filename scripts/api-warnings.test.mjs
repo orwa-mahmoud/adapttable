@@ -365,7 +365,10 @@ describe("the structurally proved published-value-alias class", () => {
       join(REPO_ROOT, "scripts/api-reports.mjs"),
       "utf8"
     );
-    assert.match(generator, /includeForgottenExports: valueAliases.size > 0/);
+    assert.match(
+      generator,
+      /includeForgottenExports: includeForgottenExports \|\| valueAliases.size > 0/
+    );
     assert.match(generator, /counts.publishedValueAlias \+= 1/);
     assert.match(generator, /published-value-alias evidence:/);
     assert.match(generator, /is nameable as typeof \$\{exportedAs\}/);

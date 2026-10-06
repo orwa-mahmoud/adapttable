@@ -311,7 +311,10 @@ test("keeps the normalizer warning visible and counts its distinct structural ev
     new URL("./api-reports.mjs", import.meta.url),
     "utf8"
   );
-  assert.match(generator, /includeForgottenExports: valueAliases.size > 0/);
+  assert.match(
+    generator,
+    /includeForgottenExports: includeForgottenExports \|\| valueAliases.size > 0/
+  );
   assert.match(generator, /counts.publishedPropertyNormalizer \+= 1/);
   assert.match(generator, /published-property-normalizer evidence:/);
   const handler = generator.slice(
