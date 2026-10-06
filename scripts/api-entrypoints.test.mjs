@@ -112,8 +112,12 @@ describe("entrypoints", () => {
     }
   });
 
-  it("reports every public Vue package and assistant entry", () => {
-    for (const dir of ["vue", "adapter-vue-unstyled", "ai-vue"]) {
+  it("reports canonical Vue binding, native assistant and AI entries", () => {
+    for (const [dir, subpaths] of [
+      ["vue", [".", "./features", "./adapter"]],
+      ["adapter-vue-unstyled", ["./assistant"]],
+      ["ai-vue", ["."]],
+    ]) {
       const entries = ENTRIES.filter((entry) => entry.dir === dir);
       assert.ok(entries.length > 0, `${dir} exposes a public entry`);
       assert.ok(
@@ -121,12 +125,11 @@ describe("entrypoints", () => {
         dir
       );
       assert.equal(packageJson(dir).publishConfig?.access, "public", dir);
-      assert.ok(
-        entries.some(
-          (entry) => entry.subpath === (dir === "ai-vue" ? "." : "./assistant")
-        ),
-        `${dir} exposes its optional assistant entry`
-      );
+      for (const subpath of subpaths)
+        assert.ok(
+          entries.some((entry) => entry.subpath === subpath),
+          `${dir} exposes ${subpath}`
+        );
     }
   });
 

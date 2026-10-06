@@ -393,6 +393,7 @@ export type {
   ColumnRenameEditorOptions,
   ColumnResizeHandleOptions,
   ColumnResizeHandleProps,
+  RowActionsLayout,
 } from "@adapttable/core";
 export {
   defaultConfirm,
@@ -528,5 +529,4 @@ export {
   TOOLBAR_EXTRAS,
   unpinAllColumns,
 } from "@adapttable/core/binding";
-export type { RowActionsLayout } from "@adapttable/core/binding";
 export { resolveCellSpan } from "@adapttable/core/binding";
