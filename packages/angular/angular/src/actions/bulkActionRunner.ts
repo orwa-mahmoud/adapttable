@@ -20,6 +20,7 @@ import type {
 import {
   assertInInjectionContext,
   computed,
+  DestroyRef,
   inject,
   Injector,
   type Signal,
@@ -75,12 +76,31 @@ export function injectBulkActionRunner(
 ): BulkActionRunnerState {
   if (!options.injector) assertInInjectionContext(injectBulkActionRunner);
   const injector = options.injector ?? inject(Injector);
-  const runner = createBulkActionRunner(options);
+  const destroyRef = injector.get(DestroyRef);
+  const runner = createBulkActionRunner({
+    confirm: (request) => {
+      options.confirm({
+        ...request,
+        onConfirm: () => {
+          if (!destroyRef.destroyed) request.onConfirm();
+        },
+      });
+    },
+    get cancelLabel() {
+      return options.cancelLabel;
+    },
+    // An already-started host write still owns its completion outcome.
+    get onComplete() {
+      return options.onComplete;
+    },
+  });
   const snapshot = fromStore(runner, { injector });
   return {
     pending: computed(() => snapshot().pending),
     error: computed(() => snapshot().error),
-    run: runner.run,
+    run: (action, ids, context) => {
+      if (!destroyRef.destroyed) runner.run(action, ids, context);
+    },
   };
 }
 
@@ -142,13 +162,16 @@ export function rowActionsFor<TRow>(options: RowActionsOptions<TRow>): Signal<{
 export function injectBulkBarRunner(
   props: Signal<BulkBarSlotProps<SelectionState>>
 ): BulkActionRunnerState {
+  const destroyRef = inject(DestroyRef);
   return injectBulkActionRunner({
     confirm: (request) => props().confirm(request),
     get cancelLabel() {
       return props().labels.cancel;
     },
     onComplete: (outcome) => {
-      if (outcome.status === "success") props().selection.clear();
+      if (!destroyRef.destroyed && outcome.status === "success") {
+        props().selection.clear();
+      }
     },
   });
 }
