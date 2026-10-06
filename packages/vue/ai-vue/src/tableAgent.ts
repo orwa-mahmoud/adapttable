@@ -5,6 +5,11 @@ import {
   type TableAgentBridge as NeutralBridge,
   type TableAgentControllerOptions,
 } from "@adapttable/ai";
+import type {
+  AgentApprovalPending,
+  FeatureMountContext,
+  StaticTableFeature,
+} from "@adapttable/vue";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
@@ -12,11 +17,6 @@ import {
   AGENT_VIEW_STATE,
   eraseTableRuntime,
 } from "@adapttable/vue/adapter";
-import type {
-  AgentApprovalPending,
-  FeatureMountContext,
-  StaticTableFeature,
-} from "@adapttable/vue";
 import {
   computed,
   type MaybeRefOrGetter,

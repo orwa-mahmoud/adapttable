@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { getLabels } from "@adapttable/i18n";
-import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
 import {
   buildFormulaColumns,
   useFormulaUrlState,
 } from "@adapttable/vue/formula";
-import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
 import {
   pivot,
-  PivotPanel,
   pivotTableModel,
   usePivotUrlState,
-} from "@adapttable/vue-unstyled/pivot";
+} from "@adapttable/vue/pivot";
+import { sparklineColumn } from "@adapttable/vue/sparkline";
+import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
+import { groupingPanel } from "@adapttable/vue-unstyled/grouping-panel";
+import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
+import { PivotPanel } from "@adapttable/vue-unstyled/pivot";
 import { rowDetail } from "@adapttable/vue-unstyled/row-detail";
 import { rowReorder } from "@adapttable/vue-unstyled/row-reorder";
-import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
-import { sparklineColumn } from "@adapttable/vue/sparkline";
 import { virtualize } from "@adapttable/vue-unstyled/virtualize";
 import { computed, h, shallowRef } from "vue";
 interface Sale {

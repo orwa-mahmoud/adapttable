@@ -8,6 +8,7 @@ import {
   type TableAssistantSnapshot,
   type TableAssistantStore,
 } from "@adapttable/ai";
+import { type AgentApprovalPending, type AgentProgress } from "@adapttable/vue";
 import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
@@ -18,7 +19,6 @@ import {
   useFeatureState,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { type AgentApprovalPending, type AgentProgress } from "@adapttable/vue";
 import {
   computed,
   type ComputedRef,

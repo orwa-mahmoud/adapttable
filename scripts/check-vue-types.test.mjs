@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -8,6 +14,7 @@ import {
   diagnosticProblems,
   invalidFixtures,
   parseDiagnostics,
+  VUE_TYPE_EXPECTATIONS,
 } from "./check-vue-types.mjs";
 
 const cwd = join(tmpdir(), "adapttable-vue-type-consumer");
@@ -173,5 +180,137 @@ describe("Vue negative type fixture harness", () => {
       "WrongValue.vue",
       "nested/WrongRows.vue",
     ]);
+  });
+});
+
+const captured = JSON.parse(
+  readFileSync(
+    new URL("./fixtures/vue-type-suffix-diagnostics.json", import.meta.url),
+    "utf8"
+  )
+);
+const nativeExpectations = Object.fromEntries(
+  captured.map(({ file }) => {
+    const fixture = file.slice("test/types/invalid/".length);
+    return [
+      fixture,
+      VUE_TYPE_EXPECTATIONS["@adapttable/vue-unstyled"][fixture],
+    ];
+  })
+);
+
+function replayCaptured(diagnostics = captured) {
+  return diagnosticProblems({
+    cwd,
+    fixtureDir,
+    files: Object.keys(nativeExpectations),
+    expectations: nativeExpectations,
+    // The failure log omits coordinates; this parser discards them.
+    output: diagnostics
+      .map(
+        ({ file, code, message }) => `${file}(1,1): error TS${code}: ${message}`
+      )
+      .join("\n"),
+    status: 2,
+  });
+}
+
+function withSuffix(suffix) {
+  return captured.map((diagnostic) => ({
+    ...diagnostic,
+    message: diagnostic.message
+      .replaceAll("TableFeature$1", `TableFeature${suffix}`)
+      .replaceAll("ComposedFeature$1", `ComposedFeature${suffix}`),
+  }));
+}
+
+describe("emitted native feature diagnostic names", () => {
+  it("accepts all five exact CI file/code/message records", () => {
+    assert.equal(captured.length, 5);
+    assert.deepEqual(replayCaptured(), []);
+  });
+
+  it("accepts original names and positive numeric collision suffixes", () => {
+    for (const suffix of ["", "$1", "$2", "$12", "$100"])
+      assert.deepEqual(replayCaptured(withSuffix(suffix)), [], suffix);
+  });
+
+  it("rejects nonnumeric, zero, padded and compound suffixes", () => {
+    for (const suffix of ["$x", "$0", "$01", "$1x", "$1$2", "_1"])
+      assert.equal(replayCaptured(withSuffix(suffix)).length, 10, suffix);
+  });
+
+  it("retains the exact TS2322 code for every fixture", () => {
+    for (let index = 0; index < captured.length; index++) {
+      const changed = captured.map((diagnostic, current) =>
+        current === index ? { ...diagnostic, code: 2345 } : diagnostic
+      );
+      const problems = replayCaptured(changed);
+      assert.equal(problems.length, 2);
+      assert.match(problems[0], /unexpected TS2345/);
+      assert.match(problems[1], /missing expected TS2322/);
+    }
+  });
+
+  it("rejects different source or target row contracts", () => {
+    for (const mutate of [
+      (message) =>
+        message
+          .replaceAll("Invoice", "OtherInvoice")
+          .replaceAll("<number>", "<boolean>")
+          .replaceAll("{ id: number; }", "{ id: boolean; }"),
+      (message) =>
+        message
+          .replaceAll("Person", "OtherPerson")
+          .replaceAll("NoInfer<Row>", "NoInfer<OtherRow>"),
+    ]) {
+      assert.equal(
+        replayCaptured(
+          captured.map((diagnostic) => ({
+            ...diagnostic,
+            message: mutate(diagnostic.message),
+          }))
+        ).length,
+        10
+      );
+    }
+  });
+
+  it("rejects different feature shapes even with valid numeric suffixes", () => {
+    assert.equal(
+      replayCaptured(
+        captured.map((diagnostic) => ({
+          ...diagnostic,
+          message: diagnostic.message.replace(
+            /TableFeature\$1<[^>]+>/g,
+            (type) => `Readonly<${type}>`
+          ),
+        }))
+      ).length,
+      10
+    );
+  });
+
+  it("still rejects duplicate, missing and unrelated diagnostics", () => {
+    assert.equal(replayCaptured([...captured, captured[0]]).length, 1);
+    assert.match(
+      replayCaptured([...captured, captured[0]])[0],
+      /expected 1 occurrence.*got 2/
+    );
+    assert.equal(replayCaptured(captured.slice(1)).length, 1);
+    assert.match(
+      replayCaptured(captured.slice(1))[0],
+      /missing expected TS2322/
+    );
+    const unrelated = {
+      file: "src/index.ts",
+      code: 2307,
+      message: "Cannot find module 'missing'.",
+    };
+    assert.equal(replayCaptured([...captured, unrelated]).length, 1);
+    assert.match(
+      replayCaptured([...captured, unrelated])[0],
+      /src\/index.ts: unexpected TS2307/
+    );
   });
 });

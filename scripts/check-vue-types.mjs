@@ -178,7 +178,8 @@ export const VUE_TYPE_EXPECTATIONS = {
     "export-preset/WrongPresetRows.ts": [
       {
         code: 2322,
-        message: /TableFeature<Invoice>\[\].*TableFeature<Person>\[\]/,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Invoice>\[\].*TableFeature(?:\$[1-9]\d*)?<Person>\[\]/,
       },
     ],
     "export-preset/FixedFormatWriter.ts": [
@@ -263,7 +264,8 @@ export const VUE_TYPE_EXPECTATIONS = {
     "hierarchy/InvalidNativeFeatureRow.vue": [
       {
         code: 2322,
-        message: /TableFeature<Invoice>\[\].*ComposedFeature<NoInfer<Person>>/,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Invoice>\[\].*ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Person>>/,
       },
     ],
     "hierarchy/InvalidNativeRowAction.ts": [
@@ -303,7 +305,8 @@ export const VUE_TYPE_EXPECTATIONS = {
     "filter-editing/InvalidEditingRows.vue": [
       {
         code: 2322,
-        message: /TableFeature<number>\[\].*ComposedFeature<NoInfer<Person>>/,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<number>\[\].*ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Person>>/,
       },
     ],
     "view-controls/InvalidDensity.vue": [
@@ -376,14 +379,15 @@ export const VUE_TYPE_EXPECTATIONS = {
     "actions/WrongActionRows.vue": [
       {
         code: 2322,
-        message: /TableFeature<Invoice>\[\].*ComposedFeature<NoInfer<Person>>/,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Invoice>\[\].*ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Person>>/,
       },
     ],
     "specialized/InvalidSpecialized.vue": [
       {
         code: 2322,
         message:
-          /Type 'TableFeature<\{ id: number; \}>' is not assignable to type 'ComposedFeature<NoInfer<Row>>'/,
+          /Type 'TableFeature(?:\$[1-9]\d*)?<\{ id: number; \}>' is not assignable to type 'ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Row>>'/,
       },
     ],
   },
