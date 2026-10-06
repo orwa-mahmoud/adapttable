@@ -7093,9 +7093,11 @@ export interface RowSelection {
 
 // @public
 export interface RowSelectionOptions<TRow> {
-    readonly acrossPages?: boolean;
+    readonly acrossPages?: MaybeSignal<boolean>;
+    readonly injector?: Injector;
     readonly labels?: MaybeSignalOptional<TableLabels>;
     readonly onSelectionChange?: (ids: string[]) => void;
+    readonly resetKey?: MaybeSignal<unknown>;
     readonly rowKey: (row: TRow) => string;
     readonly rows: Signal<readonly TRow[]>;
     readonly selectedIds?: MaybeSignalOptional<readonly string[]>;

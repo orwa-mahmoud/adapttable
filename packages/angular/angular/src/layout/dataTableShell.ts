@@ -41,6 +41,8 @@ import {
   type RowHeight,
   type RowStyle,
   type SavedViewsControllerOptions,
+  sourceCapabilities,
+  stableKey,
   type TableDensity,
   type TableLabels,
   type TableQueryParams,
@@ -1640,7 +1642,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const selectable = this.selectable() || bulk !== undefined;
     const selectionController =
       selectable || selectionState.controller !== undefined
-        ? resources.use("selection", [], () =>
+        ? resources.use("selection", [], (injector) =>
             injectRowSelection<TRow>({
               rows: computed(() => source().rows),
               rowKey: (row) => this.rowKey()(row),
@@ -1649,6 +1651,19 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
                 this.selectionChange.emit(ids);
               },
               labels,
+              acrossPages: computed(
+                () => sourceCapabilities(source()).selectAcrossPages
+              ),
+              resetKey: computed(() => {
+                const current = source();
+                return stableKey([
+                  current.search,
+                  current.extra,
+                  current.filterTree,
+                  current.groupBy,
+                ]);
+              }),
+              injector,
             })
           )
         : undefined;
