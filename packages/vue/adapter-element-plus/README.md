@@ -61,6 +61,26 @@ attribute API:
 - `ElSelect`: the kit host owns the styling class; its native combobox owns the
   accessible name and focus behavior.
 
+## Filtering
+
+```ts
+import { filters } from "@adapttable/element-plus/filters";
+
+const features = [
+  filters<Person>([{ key: "name", type: "text" }], { tree: true }),
+];
+```
+
+Pass `features` to `DataTable`. Use `{ mode: "drawer" }` for an Element Plus
+modal drawer. `FilterField`, `ChecklistFilter` and `FilterTreeBuilder` are also
+available from the filtering entry point for custom layouts over the same
+binding models.
+
+The nonmodal popup uses `ElPopover` for positioning and dialog semantics, with
+an `ElCard` content body. The `filters-popover` part and
+`classNames.filtersPopover` belong to that body. The drawer's `filters-panel`
+part and class belong to the actual `ElDrawer` dialog root.
+
 ## Optional view controls
 
 Add density and fullscreen controls only where they are needed:
@@ -80,6 +100,10 @@ it promotes the existing table root.
 
 Use Element Plus's documented per-request `ID_INJECTION_KEY` and
 `ZINDEX_INJECTION_KEY` setup, with the same seeds on the server and client.
+Also inject the actual `ssrContext.teleports` payload into its reported targets
+before hydration, as described in the Element Plus SSR guide. Internal select
+anchors can be present in that payload even when `teleported` is false.
+
 Element Plus 2.14.7 assigns supplied form-control IDs after mounting. Checkbox
 labels therefore use their native nested-label association during server
 rendering. Input accessible names remain available through `aria-label`.

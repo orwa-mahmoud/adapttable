@@ -7,6 +7,7 @@ export default defineConfig({
     "src/cell-span.ts",
     "src/density.ts",
     "src/fullscreen.ts",
+    "src/filters.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],
