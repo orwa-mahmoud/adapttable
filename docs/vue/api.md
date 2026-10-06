@@ -665,6 +665,15 @@ class name and click action. No button fallback is provided.
 
 ### Attribute and element-ref helpers
 
+`managedOverlayPanel(render)` lets `ColumnMenuChrome` and
+`SavedViewsMenuChrome` use an adapter's own overlay positioning, dismissal and
+focus behavior. `OverlayPanelSlot` remains callable for ordinary inline
+panels. Its `OverlayPanelProps` include the panel attributes, content, container
+and close request. The managed renderer receives `ManagedOverlayPanelProps`,
+which additionally requires the current anchor, open state and `isCurrent()`
+lifetime check. `OverlayCloseReason` is `"escape" | "outside" | "done"`.
+See the [managed panel contract](./column-menu.md#building-a-vue-kit).
+
 - `Attrs` is a readonly string-keyed attribute record.
   `toVueAttrs(attrs, { changeEvent? })` maps neutral class/for/event names to Vue
   DOM conventions. Neutral text `onChange` becomes `onInput`; checkboxes/radios

@@ -3,6 +3,7 @@ import {
   defineComponent,
   h,
   nextTick,
+  onScopeDispose,
   shallowRef,
   useId,
   type VNodeChild,
@@ -10,6 +11,7 @@ import {
 } from "vue";
 
 import { type Attrs, elementRef } from "../attrs";
+import { isManagedOverlayPanel, type OverlayPanelSlot } from "../overlayPanel";
 import { useScopeActivity } from "../store";
 import type { SavedViewsControlProps } from "../viewControls/contracts";
 import type { ViewControlButtonProps } from "../viewControls/viewControlsChrome";
@@ -22,12 +24,7 @@ export interface SavedViewsMenuSlots {
     readonly value: string;
     readonly onChange: (value: string) => void;
   }) => VNodeChild;
-  readonly Panel: (props: {
-    readonly attrs: Attrs;
-    readonly content: VNodeChild;
-    readonly container?: HTMLElement;
-    readonly onClose: () => void;
-  }) => VNodeChild;
+  readonly Panel: OverlayPanelSlot;
 }
 export interface SavedViewsMenuChromeProps extends SavedViewsControlProps {
   readonly slots: SavedViewsMenuSlots;
@@ -42,13 +39,31 @@ export const SavedViewsMenuChrome = defineComponent(
     const panel = shallowRef<HTMLElement | null>(null);
     const panelId = `adapttable-views-${useId()}`;
     let focusPanel = false;
+    let surfaceLifetime = 0;
+    watch(
+      [() => props.slots.Panel, () => props.savedViews],
+      () => {
+        surfaceLifetime += 1;
+        focusPanel = false;
+      },
+      { flush: "sync" }
+    );
+    onScopeDispose(() => {
+      surfaceLifetime += 1;
+      focusPanel = false;
+      open.value = false;
+    });
     const close = (restore = false): void => {
       open.value = false;
       focusPanel = false;
       if (restore && active.value) trigger.value?.focus();
     };
     const focusFirst = (): void => {
-      if (focusPanel && active.value) {
+      if (
+        focusPanel &&
+        active.value &&
+        !isManagedOverlayPanel(props.slots.Panel)
+      ) {
         panel.value
           ?.querySelector<HTMLElement>(
             'button:not([disabled]), input:not([disabled]), [tabindex="0"]'
@@ -59,7 +74,8 @@ export const SavedViewsMenuChrome = defineComponent(
     };
     const show = (): void => {
       if (!active.value) return;
-      focusPanel = true;
+      if (!open.value) surfaceLifetime += 1;
+      focusPanel = !isManagedOverlayPanel(props.slots.Panel);
       open.value = true;
       void nextTick(focusFirst);
     };
@@ -71,13 +87,15 @@ export const SavedViewsMenuChrome = defineComponent(
       }
     };
     watch(
-      [open, active, root],
+      [open, active, root, () => props.slots.Panel],
       ([expanded, live, element], _previous, onCleanup) => {
         if (!live) {
+          surfaceLifetime += 1;
           close();
           return;
         }
-        if (!expanded || !element) return;
+        if (!expanded || !element || isManagedOverlayPanel(props.slots.Panel))
+          return;
         const doc = element.ownerDocument;
         const outside = (event: PointerEvent): void => {
           const path = event.composedPath();
@@ -122,6 +140,14 @@ export const SavedViewsMenuChrome = defineComponent(
           throw new Error(
             `AdaptTable: required adapter control slot "SavedViewsMenu.${key}" is missing.`
           );
+      const lifetime = surfaceLifetime;
+      const driver = props.slots.Panel;
+      const model = props.savedViews;
+      const isCurrent = () =>
+        active.value &&
+        lifetime === surfaceLifetime &&
+        driver === props.slots.Panel &&
+        model === props.savedViews;
       const names = props.classNames ?? {};
       const control = props.slots;
       const parts = (part: string, className: string | undefined): Attrs => ({
@@ -245,17 +271,28 @@ export const SavedViewsMenuChrome = defineComponent(
                   "aria-label": props.labels.savedViews,
                   dir: props.dir,
                   ref: panelRef,
-                  style: {
-                    position: "absolute",
-                    insetInlineStart: 0,
-                    top: "100%",
-                    zIndex: 100,
-                    maxWidth: "min(24rem, 90vw)",
-                  },
+                  style: isManagedOverlayPanel(driver)
+                    ? undefined
+                    : {
+                        position: "absolute",
+                        insetInlineStart: 0,
+                        top: "100%",
+                        zIndex: 100,
+                        maxWidth: "min(24rem, 90vw)",
+                      },
                 },
                 content,
                 container: props.container,
-                onClose: () => close(true),
+                anchor: trigger.value,
+                open: open.value,
+                isCurrent,
+                onClose: () => {
+                  if (!isManagedOverlayPanel(driver)) {
+                    close(true);
+                    return;
+                  }
+                  if (isCurrent() && open.value) close();
+                },
               })
             : null,
         ]

@@ -4,6 +4,7 @@ import {
   Fragment,
   h,
   nextTick,
+  onScopeDispose,
   shallowRef,
   useId,
   type VNodeChild,
@@ -11,6 +12,7 @@ import {
 } from "vue";
 
 import { type Attrs, elementRef } from "../attrs";
+import { isManagedOverlayPanel, type OverlayPanelSlot } from "../overlayPanel";
 import type {
   ColumnHeaderRenameSlotProps,
   ColumnMenuLabels,
@@ -43,12 +45,7 @@ export interface ColumnMenuSlots {
     }[];
     readonly onChange: (value: string) => void;
   }) => VNodeChild;
-  readonly Panel: (props: {
-    readonly attrs: Attrs;
-    readonly content: VNodeChild;
-    readonly container?: HTMLElement;
-    readonly onClose: () => void;
-  }) => VNodeChild;
+  readonly Panel: OverlayPanelSlot;
 }
 export type ColumnRenameSlots = Pick<ColumnMenuSlots, "Button" | "Input">;
 type Names = Readonly<Record<string, string | undefined>>;
@@ -369,17 +366,41 @@ export const ColumnMenuChrome = defineComponent(
     const panel = shallowRef<HTMLElement | null>(null);
     const panelId = `adapttable-columns-${useId()}`;
     let generation = 0;
+    let surfaceLifetime = 0;
+    let disposed = false;
+    watch(
+      [() => props.slots.Panel, () => props.model],
+      () => {
+        surfaceLifetime += 1;
+        generation += 1;
+      },
+      { flush: "sync" }
+    );
+    onScopeDispose(() => {
+      disposed = true;
+      surfaceLifetime += 1;
+      generation += 1;
+      open.value = false;
+    });
     const close = (restore = false): void => {
       generation += 1;
       open.value = false;
-      if (restore && props.model.active.value) trigger.value?.focus();
+      if (restore && !disposed && props.model.active.value)
+        trigger.value?.focus();
     };
     const show = (): void => {
-      if (!props.model.active.value) return;
+      if (disposed || !props.model.active.value) return;
+      if (!open.value) surfaceLifetime += 1;
       open.value = true;
       const ticket = ++generation;
       void nextTick(() => {
-        if (ticket === generation && open.value && props.model.active.value)
+        if (
+          !disposed &&
+          ticket === generation &&
+          open.value &&
+          props.model.active.value &&
+          !isManagedOverlayPanel(props.slots.Panel)
+        )
           panel.value
             ?.querySelector<HTMLElement>(
               'input:not([disabled]),button:not([disabled]),[tabindex="0"]'
@@ -388,13 +409,15 @@ export const ColumnMenuChrome = defineComponent(
       });
     };
     watch(
-      [open, () => props.model.active.value, root],
+      [open, () => props.model.active.value, root, () => props.slots.Panel],
       ([expanded, active, element], _previous, cleanup) => {
         if (!active) {
+          surfaceLifetime += 1;
           close();
           return;
         }
-        if (!expanded || !element) return;
+        if (!expanded || !element || isManagedOverlayPanel(props.slots.Panel))
+          return;
         const doc = element.ownerDocument;
         const outside = (event: PointerEvent): void => {
           const path = event.composedPath();
@@ -421,6 +444,14 @@ export const ColumnMenuChrome = defineComponent(
     );
     return () => {
       const { model, slots } = props;
+      const lifetime = surfaceLifetime;
+      const driver = slots.Panel;
+      const isCurrent = () =>
+        !disposed &&
+        model.active.value &&
+        lifetime === surfaceLifetime &&
+        driver === props.slots.Panel &&
+        model === props.model;
       for (const name of [
         "Trigger",
         "Button",
@@ -544,19 +575,30 @@ export const ColumnMenuChrome = defineComponent(
                   ref: elementRef<HTMLElement>((element) => {
                     panel.value = element;
                   }),
-                  style: {
-                    position: "absolute",
-                    insetInlineEnd: 0,
-                    top: "100%",
-                    zIndex: 100,
-                    maxWidth: "min(28rem, 90vw)",
-                    maxHeight: "70vh",
-                    overflow: "auto",
-                  },
+                  style: isManagedOverlayPanel(driver)
+                    ? undefined
+                    : {
+                        position: "absolute",
+                        insetInlineEnd: 0,
+                        top: "100%",
+                        zIndex: 100,
+                        maxWidth: "min(28rem, 90vw)",
+                        maxHeight: "70vh",
+                        overflow: "auto",
+                      },
                 },
                 content,
                 container,
-                onClose: () => close(true),
+                anchor: trigger.value,
+                open: open.value,
+                isCurrent,
+                onClose: () => {
+                  if (!isManagedOverlayPanel(driver)) {
+                    close(true);
+                    return;
+                  }
+                  if (isCurrent() && open.value) close();
+                },
               })
             : null,
         ]

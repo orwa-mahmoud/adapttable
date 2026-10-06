@@ -84,6 +84,20 @@ target. A choice control receives a controlled value, options, and a change
 request; after a rejected request, it must restore the supplied value.
 The native adapter supplies HTML controls for these slots.
 
+For a kit with its own popover or dialog, wrap the required `Panel` renderer
+with `managedOverlayPanel()` from `@adapttable/vue/adapter`. The renderer
+receives the current trigger `anchor`, controlled `open` state, panel `content`,
+semantic `attrs`, optional `container`, `onClose(reason?)` and `isCurrent()`.
+The close reason can be `"escape"`, `"outside"` or `"done"`.
+
+Managed panels use the kit's positioning, portal-aware dismissal and focus
+behavior. Chrome keeps the open state and ignores close requests from retired
+panel renderers. Check `isCurrent()` before deferred focus work; it becomes
+false after the model or renderer is replaced, the panel reopens, the feature
+deactivates or the owning scope is disposed. Ordinary panel functions retain
+the native positioning, outside-click, Escape and initial-focus behavior.
+`SavedViewsMenuChrome` supports the same managed panel contract.
+
 The public CSS hooks include `columnMenu`, `columnMenuButton`,
 `columnMenuPanel`, `columnMenuSearch`, `columnMenuItem`,
 `columnMenuVisibility`, `columnMenuPin`, `columnMenuGrip`,

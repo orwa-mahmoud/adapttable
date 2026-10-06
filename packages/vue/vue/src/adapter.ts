@@ -330,6 +330,13 @@ export {
   SelectionStatsChrome,
   StatusBarChrome,
 } from "./navigation/navigationChrome";
+export type {
+  ManagedOverlayPanelProps,
+  OverlayCloseReason,
+  OverlayPanelProps,
+  OverlayPanelSlot,
+} from "./overlayPanel";
+export { managedOverlayPanel } from "./overlayPanel";
 export type { ExtraEntry, ExtraRow } from "./rows/extraRows";
 export type {
   HeadlessBodySlot,

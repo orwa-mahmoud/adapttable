@@ -725,12 +725,7 @@ export interface ColumnMenuSlots {
         readonly onChange: (value: string) => void;
     }) => VNodeChild;
     // (undocumented)
-    readonly Panel: (props: {
-        readonly attrs: Attrs;
-        readonly content: VNodeChild;
-        readonly container?: HTMLElement;
-        readonly onClose: () => void;
-    }) => VNodeChild;
+    readonly Panel: OverlayPanelSlot;
     // (undocumented)
     readonly Trigger: (props: ColumnMenuButtonProps) => VNodeChild;
 }
@@ -2693,6 +2688,18 @@ export { isColumnGroupSummaryKey }
 export { isExtraEntry }
 
 // @public
+export function managedOverlayPanel(render: (props: ManagedOverlayPanelProps) => VNodeChild): OverlayPanelSlot;
+
+// @public (undocumented)
+export interface ManagedOverlayPanelProps extends OverlayPanelProps {
+    // (undocumented)
+    readonly anchor: HTMLElement | null;
+    readonly isCurrent: () => boolean;
+    // (undocumented)
+    readonly open: boolean;
+}
+
+// @public
 type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
 
 // @public
@@ -2757,6 +2764,35 @@ type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 export function normalizeFeatures<TRow>(features: readonly ComposedFeature$1<TRow>[]): readonly ComposedFeature$1<TRow>[];
 
 export { orderedCardEntries }
+
+// @public (undocumented)
+export type OverlayCloseReason = "escape" | "outside" | "done";
+
+// @public
+export interface OverlayPanelProps {
+    // (undocumented)
+    readonly anchor?: HTMLElement | null;
+    // (undocumented)
+    readonly attrs: Attrs;
+    // (undocumented)
+    readonly container?: HTMLElement;
+    // (undocumented)
+    readonly content: VNodeChild;
+    // (undocumented)
+    readonly isCurrent?: () => boolean;
+    // (undocumented)
+    readonly onClose: (reason?: OverlayCloseReason) => void;
+    // (undocumented)
+    readonly open?: boolean;
+}
+
+// @public (undocumented)
+export interface OverlayPanelSlot {
+    // (undocumented)
+    (props: OverlayPanelProps): VNodeChild;
+    // (undocumented)
+    readonly interactionOwner?: "kit";
+}
 
 // @public (undocumented)
 export interface OwnedFeatureState extends FeatureState {
@@ -3102,12 +3138,7 @@ export interface SavedViewsMenuSlots {
         readonly onChange: (value: string) => void;
     }) => VNodeChild;
     // (undocumented)
-    readonly Panel: (props: {
-        readonly attrs: Attrs;
-        readonly content: VNodeChild;
-        readonly container?: HTMLElement;
-        readonly onClose: () => void;
-    }) => VNodeChild;
+    readonly Panel: OverlayPanelSlot;
     // (undocumented)
     readonly Trigger: (props: ViewControlButtonProps) => VNodeChild;
 }
