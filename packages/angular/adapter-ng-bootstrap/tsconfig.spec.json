@@ -9,6 +9,8 @@
       "@adapttable/ng-bootstrap": ["./src/index.ts"],
       "@adapttable/ng-bootstrap/*": ["./*/index.ts"],
       "@adapttable/angular": ["../angular/src/index.ts"],
+      "@adapttable/angular/features": ["../angular/src/features.ts"],
+      "@adapttable/angular/adapter": ["../angular/src/adapter.ts"],
       "@adapttable/angular/*": ["../angular/*/index.ts"],
       "@adapttable/core": ["../../shared/core/src/index.ts"],
       "@adapttable/core/*": ["../../shared/core/src/*"]
