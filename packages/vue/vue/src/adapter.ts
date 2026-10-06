@@ -354,6 +354,11 @@ export type {
 export { RowReorderChrome } from "./specialized/rowReorder";
 export type { ExternalStore } from "./store";
 export { useExternalStore, useScopeActivity } from "./store";
+export type {
+  DataTableClassNames,
+  DataTableProps,
+  DataTableSlots,
+} from "./tableAdapterContracts";
 export { nestedTableDetail } from "./tree/nestedTable";
 export type {
   SavedViewsMenuChromeProps,

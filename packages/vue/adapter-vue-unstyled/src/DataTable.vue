@@ -6,6 +6,8 @@ import {
 } from "@adapttable/vue";
 import {
   COLUMN_MENU,
+  type DataTableProps,
+  type DataTableSlots,
   defaultConfirm,
   DENSITY_CONTROL,
   DesktopTableChrome,
@@ -39,7 +41,6 @@ import {
 } from "./nativeHierarchyControlSlots";
 import { NativeLoadingState } from "./NativeLoadingState";
 import { NativeRowActions } from "./NativeRowActions";
-import type { DataTableProps, DataTableSlots } from "./types";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(defineProps<DataTableProps<TRow>>(), {
