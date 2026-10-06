@@ -9,6 +9,7 @@ import {
   AdaptExtraRowContent,
   AdaptFooter,
   AdaptHeader,
+  AdaptHeaderActions,
   AdaptRowDetail,
   AdaptSlot,
 } from "@adapttable/angular";
@@ -37,6 +38,7 @@ import { AdaptRowActions } from "./rowActionButtons";
     AdaptExtraRowContent,
     AdaptFooter,
     AdaptHeader,
+    AdaptHeaderActions,
     AdaptRowActions,
     AdaptRowDetail,
     AdaptSlot,

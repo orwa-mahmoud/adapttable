@@ -81,10 +81,11 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
   /** Renders the footer content, handed the summary row's value. */
   footer?: Renderer<FooterContext<TRow>>;
   /**
-   * Extra text drawn after the header caption, in a `header-actions` part.
-   * A control of your own goes in `headerCell`.
+   * Host-provided text or controls after the header caption, in a
+   * `header-actions` part outside the sort button. Templates and components
+   * receive the same context as `headerCell`.
    */
-  headerActions?: string;
+  headerActions?: string | Renderer<HeaderContext<TRow>>;
 }
 
 /**

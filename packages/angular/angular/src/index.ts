@@ -109,6 +109,7 @@ export {
   AdaptCellTemplate,
   AdaptFooter,
   AdaptHeader,
+  AdaptHeaderActions,
   type ResolvedRenderer,
   resolveRenderer,
 } from "./cell";

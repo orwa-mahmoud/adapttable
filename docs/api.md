@@ -3368,6 +3368,10 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   `AdaptTableStatusAnnouncer` is that region for the table's own row changes:
   present from the first paint, polite and atomic, and without `role="status"`
   so the empty state and the other announcers can still be the status.
+- `AdaptHeaderActions` renders plain text, Angular templates or components in a
+  header-actions host outside the sortable caption, using the current column
+  context. It is also available when constructing a custom Angular adapter.
+
 - `formatMultiDraft(values)` serializes a multi-select editor's values with
   the neutral format consumed by `readMultiDraft`, preserving values that
   contain commas instead of rebuilding the encoding in a kit.

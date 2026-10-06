@@ -3320,6 +3320,24 @@ export class AdaptHeader<TRow> {
 }
 
 // @public
+export class AdaptHeaderActions<TRow> {
+    readonly column: InputSignal<ColumnDef<TRow>>;
+    protected readonly context: Signal<HeaderContext<TRow>>;
+    protected readonly renderer: Signal<ResolvedRenderer<HeaderContext<TRow>> | null>;
+    protected readonly text: Signal<string>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptHeaderActions<any>, "[adaptHeaderActions]", never, {
+        "column": {
+            "alias": "adaptHeaderActions";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptHeaderActions<any>, never>;
+}
+
+// @public
 export class AdaptIcon {
     readonly adaptIcon: InputSignal<IconDescriptor>;
     // (undocumented)
@@ -5061,7 +5079,7 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
     cell?: Renderer<CellContext<TRow>>;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
-    headerActions?: string;
+    headerActions?: string | Renderer<HeaderContext<TRow>>;
     headerCell?: Renderer<HeaderContext<TRow>>;
 }
 

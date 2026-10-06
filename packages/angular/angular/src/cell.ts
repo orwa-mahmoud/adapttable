@@ -196,6 +196,60 @@ export class AdaptHeader<TRow> {
 }
 
 /**
+ * Renders a column's extra header content into its host element:
+ * `<span [adaptHeaderActions]="column">`. Kits place this after the header
+ * caption, outside the sort button, so host-provided controls stay independent.
+ *
+ * @public
+ */
+@Component({
+  selector: "[adaptHeaderActions]",
+  imports: [NgTemplateOutlet, NgComponentOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `@let content = renderer();
+    @if (content?.template; as template) {
+      <ng-container
+        [ngTemplateOutlet]="template"
+        [ngTemplateOutletContext]="context()"
+      />
+    } @else if (content?.component; as component) {
+      <ng-container
+        [ngComponentOutlet]="component"
+        [ngComponentOutletInputs]="content?.inputs"
+      />
+    } @else {
+      {{ text() }}
+    }`,
+})
+export class AdaptHeaderActions<TRow> {
+  /** The column. */
+  readonly column = input.required<ColumnDef<TRow>>({
+    alias: "adaptHeaderActions",
+  });
+
+  /** What the renderer receives. */
+  protected readonly context = computed<HeaderContext<TRow>>(() => ({
+    $implicit: this.column(),
+    column: this.column(),
+  }));
+
+  /** The column's extra header renderer, resolved. */
+  protected readonly renderer = computed(() => {
+    const actions = this.column().headerActions;
+    return resolveRenderer(
+      typeof actions === "string" ? undefined : actions,
+      this.context()
+    );
+  });
+
+  /** Plain text remains supported without being interpreted as markup. */
+  protected readonly text = computed(() => {
+    const actions = this.column().headerActions;
+    return typeof actions === "string" ? actions : "";
+  });
+}
+
+/**
  * Renders a footer cell's content into the element it sits on:
  * `<td [adaptFooter]="column" [adaptFooterValue]="summary[column.key]">`.
  * The column's `footer` when it has one, the summary value otherwise.
