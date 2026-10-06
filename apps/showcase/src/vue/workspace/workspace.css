@@ -712,6 +712,51 @@ body.vue-workspace-page[data-workspace-theme="dark"] {
   padding: 3px 6px;
   font-size: 11px;
 }
+/* Card reorder controls keep full labels and reserve a separate native menu row. */
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  [data-adapttable-part="row-reorder-buttons"] {
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 8px;
+}
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  :is(
+    [data-adapttable-part="row-reorder-up"],
+    [data-adapttable-part="row-reorder-down"]
+  ) {
+  flex: 1 1 auto;
+  min-block-size: 44px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  [data-adapttable-part="row-move-menu"] {
+  flex-basis: 100%;
+  min-inline-size: 0;
+}
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  :is(
+    [data-adapttable-part="row-move-menu-content"],
+    [data-adapttable-part="row-move-menu-trigger"]
+  ) {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  [data-adapttable-part="row-move-menu-trigger"] {
+  min-block-size: 44px;
+}
 .vue-workspace-page [data-adapttable-part="grouping-panel"] {
   display: flex;
   flex-wrap: wrap;

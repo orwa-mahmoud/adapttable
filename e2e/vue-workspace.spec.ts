@@ -1730,3 +1730,118 @@ test("interaction during a delayed Orders load retires automatic defaults and hi
   await expect(row(table(page), "ORD-1042")).toBeVisible();
   await expect(row(table(page), "ORD-1043")).toHaveCount(0);
 });
+
+async function containedDispatchControls(
+  page: Page,
+  labels: { up: string; down: string; menu: string }
+): Promise<void> {
+  const cards = table(page, "dispatch").locator(part("card"));
+  await expect(cards.first()).toBeVisible();
+  expect(await cards.count()).toBeGreaterThan(3);
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error("The mobile viewport is missing.");
+  for (const card of await cards.all()) {
+    const controls = card.locator(part("row-reorder-buttons"));
+    await expect(controls).toBeVisible();
+    await controls.evaluate((element) =>
+      element.scrollIntoView({ block: "center", inline: "nearest" })
+    );
+    const up = controls.getByRole("button", { name: labels.up, exact: true });
+    const down = controls.getByRole("button", {
+      name: labels.down,
+      exact: true,
+    });
+    const menu = controls.getByRole("combobox", {
+      name: labels.menu,
+      exact: true,
+    });
+    await expect(up).toHaveText(labels.up);
+    await expect(down).toHaveText(labels.down);
+    const cardBounds = await card.boundingBox();
+    if (!cardBounds)
+      throw new Error("The Dispatch card has no visible bounds.");
+    const bounds = [];
+    for (const control of [up, down, menu]) {
+      await expect(control).toBeVisible();
+      await expect(control).toBeInViewport();
+      const box = await control.boundingBox();
+      if (!box) throw new Error("The reorder control has no visible bounds.");
+      expect(box.x).toBeGreaterThanOrEqual(Math.max(0, cardBounds.x) - 1);
+      expect(box.x + box.width).toBeLessThanOrEqual(
+        Math.min(viewport.width, cardBounds.x + cardBounds.width) + 1
+      );
+      expect(box.y).toBeGreaterThanOrEqual(Math.max(0, cardBounds.y) - 1);
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        Math.min(viewport.height, cardBounds.y + cardBounds.height) + 1
+      );
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeLessThanOrEqual(48);
+      bounds.push(box);
+    }
+    const [upBounds, downBounds, menuBounds] = bounds;
+    if (!upBounds || !downBounds || !menuBounds)
+      throw new Error("The complete reorder control group is missing.");
+    expect(menuBounds.y).toBeGreaterThanOrEqual(
+      Math.max(upBounds.y + upBounds.height, downBounds.y + downBounds.height) -
+        1
+    );
+    for (const button of [up, down]) {
+      const text = await button.evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return {
+          lines: [...range.getClientRects()].filter((rect) => rect.width > 0)
+            .length,
+          overflow: element.scrollWidth - element.clientWidth,
+        };
+      });
+      expect(text.lines).toBe(1);
+      expect(text.overflow).toBeLessThanOrEqual(1);
+    }
+    expect(
+      await menu.evaluate((element) => getComputedStyle(element).appearance)
+    ).not.toBe("none");
+    expect(
+      await card.evaluate(
+        (element) => element.scrollWidth - element.clientWidth
+      )
+    ).toBeLessThanOrEqual(1);
+  }
+}
+
+for (const scenario of [
+  {
+    locale: "en",
+    up: "Move row up",
+    down: "Move row down",
+    menu: "Move under…",
+  },
+  {
+    locale: "ar",
+    up: "نقل الصف لأعلى",
+    down: "نقل الصف لأسفل",
+    menu: "نقل تحت…",
+  },
+]) {
+  test(`Dispatch card controls fit every card at narrow mobile widths in ${scenario.locale}`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await visit(page, `?view=dispatch&lang=${scenario.locale}`);
+    for (const width of [390, 320]) {
+      await page.setViewportSize({ width, height: 844 });
+      await containedDispatchControls(page, scenario);
+      await contained(page);
+      const representative = table(page, "dispatch").locator(
+        `${part("card")}[data-row-id="ORD-1043"]`
+      );
+      await testInfo.attach(
+        `vue-workspace-dispatch-controls-${scenario.locale}-${width}`,
+        {
+          body: await representative.screenshot(),
+          contentType: "image/png",
+        }
+      );
+    }
+  });
+}
