@@ -111,6 +111,14 @@
     {
       "path": "apps/v4/registry/new-york-v4/ui/textarea/index.ts",
       "gitBlob": "8ce91e9c3ede657ed4944f4a5e38ace1aecdd35a"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/card/Card.vue",
+      "gitBlob": "f5a070702a8b2693d783ba33ad785369fb53dffe"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/skeleton/Skeleton.vue",
+      "gitBlob": "0dadcef9a230ff272e8f5bebf57624553e8542c2"
     }
   ]
 }

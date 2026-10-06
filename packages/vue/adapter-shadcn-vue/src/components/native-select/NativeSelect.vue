@@ -2,7 +2,7 @@
 import { ChevronDownIcon } from "@lucide/vue";
 import type { HTMLAttributes } from "vue";
 
-import { forwardControlTarget } from "../../lib/forwardControlTarget";
+import { useControlTarget } from "../../lib/useControlTarget";
 import { cn } from "../../lib/utils";
 
 defineOptions({ inheritAttrs: false });
@@ -21,6 +21,7 @@ function onChange(event: Event): void {
   // Reconcile an unchanged controlled value after a rejected request.
   select.value = props.modelValue;
 }
+const targetRef = useControlTarget(() => props.elementRef);
 </script>
 
 <template>
@@ -35,7 +36,7 @@ function onChange(event: Event): void {
     :dir="props.dir"
   >
     <select
-      :ref="forwardControlTarget(props.elementRef)"
+      :ref="targetRef"
       v-bind="$attrs"
       :value="props.modelValue"
       data-slot="native-select"

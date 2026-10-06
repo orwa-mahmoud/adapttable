@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type HTMLAttributes, ref } from "vue";
 
-import { forwardControlTarget } from "../../lib/forwardControlTarget";
+import { useControlTarget } from "../../lib/useControlTarget";
 import { cn } from "../../lib/utils";
 
 const props = defineProps<{
@@ -24,11 +24,12 @@ function onInput(event: Event): void {
   input.value = String(props.modelValue ?? ownValue.value);
 }
 defineOptions({ name: "ShadcnInput" });
+const targetRef = useControlTarget(() => props.elementRef);
 </script>
 
 <template>
   <input
-    :ref="forwardControlTarget(props.elementRef)"
+    :ref="targetRef"
     :value="props.modelValue ?? ownValue"
     data-slot="input"
     :class="

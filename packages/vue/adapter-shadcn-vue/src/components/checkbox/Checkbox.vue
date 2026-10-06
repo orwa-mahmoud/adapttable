@@ -10,7 +10,7 @@ import {
 } from "reka-ui";
 import type { HTMLAttributes } from "vue";
 
-import { forwardControlTarget } from "../../lib/forwardControlTarget";
+import { useControlTarget } from "../../lib/useControlTarget";
 import { cn } from "../../lib/utils";
 
 const props = defineProps<
@@ -25,11 +25,12 @@ const delegatedProps = reactiveOmit(props, "class", "elementRef");
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
 defineOptions({ name: "ShadcnCheckbox" });
+const targetRef = useControlTarget(() => props.elementRef);
 </script>
 
 <template>
   <CheckboxRoot
-    :ref="forwardControlTarget(props.elementRef)"
+    :ref="targetRef"
     v-slot="slotProps"
     data-slot="checkbox"
     v-bind="forwarded"

@@ -257,7 +257,7 @@ describe("copied shadcn controls", () => {
     expect(textarea.value).toBe("notes");
   });
 
-  it("renders controls without a DOM during SSR", async () => {
+  it("renders controls through the server renderer", async () => {
     const app = createSSRApp({
       render: () =>
         h("div", [

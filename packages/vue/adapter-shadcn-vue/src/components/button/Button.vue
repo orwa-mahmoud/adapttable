@@ -2,7 +2,7 @@
 import { Primitive, type PrimitiveProps } from "reka-ui";
 import type { HTMLAttributes } from "vue";
 
-import { forwardControlTarget } from "../../lib/forwardControlTarget";
+import { useControlTarget } from "../../lib/useControlTarget";
 import { cn } from "../../lib/utils";
 import { type ButtonVariants, buttonVariants } from ".";
 
@@ -21,11 +21,12 @@ const props = withDefaults(defineProps<Props>(), {
   class: undefined,
 });
 defineOptions({ name: "ShadcnButton" });
+const targetRef = useControlTarget(() => props.elementRef);
 </script>
 
 <template>
   <Primitive
-    :ref="forwardControlTarget(props.elementRef)"
+    :ref="targetRef"
     data-slot="button"
     :data-variant="variant"
     :data-size="size"
