@@ -171,7 +171,7 @@ function slotProps(symbol) {
   const declaration = symbol?.declarations?.find(ts.isVariableDeclaration);
   const type = unparenthesized(declaration?.type);
   return type &&
-    ts.isTypeReferenceNode(type) &&
+    (ts.isTypeReferenceNode(type) || ts.isImportTypeNode(type)) &&
     type.typeArguments?.length === 1
     ? unparenthesized(type.typeArguments[0])
     : undefined;

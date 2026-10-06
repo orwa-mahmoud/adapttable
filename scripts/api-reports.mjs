@@ -21,7 +21,10 @@
  * select package folders with repeated `--package` flags, for example:
  * `pnpm api:reports --package vue --package adapter-vue-unstyled`.
  * The default and CI commands still extract every package.
- * A scoped check proves only the selected packages.
+ * A scoped check proves only the selected packages or reports.
+ * Use repeated --report flags to select exact report filenames.
+ * --include-forgotten-exports retains all referenced declarations while
+ * preserving the same warning, completeness and comparison checks.
  */
 import {
   copyFileSync,
@@ -58,11 +61,25 @@ try {
   console.error(`api-reports: ${error.message}`);
   process.exit(2);
 }
-const { local: LOCAL, targets, packages: selectedPackages } = selection;
-const scoped = selectedPackages.length > 0;
-if (scoped) {
+const {
+  local: LOCAL,
+  includeForgottenExports,
+  targets,
+  packages: selectedPackages,
+  reports: selectedReports,
+} = selection;
+const scoped = selectedPackages.length > 0 || selectedReports.length > 0;
+if (selectedPackages.length > 0) {
   console.log(
     `api-reports: selected package folders: ${selectedPackages.join(", ")}`
+  );
+}
+if (selectedReports.length > 0) {
+  console.log(`api-reports: selected reports: ${selectedReports.join(", ")}`);
+}
+if (includeForgottenExports) {
+  console.log(
+    "api-reports: retaining forgotten declarations; warning and contract checks remain enabled."
   );
 }
 // Check mode extracts into a throwaway folder and byte-compares against the
@@ -276,7 +293,7 @@ function extractOne({ dir, report, entry, isMainEntry }) {
   };
   const { result, fresh, missingTargets, retainedTargets } =
     extractWithReportRetention({
-      includeForgottenExports: valueAliases.size > 0,
+      includeForgottenExports: includeForgottenExports || valueAliases.size > 0,
       publishedBases,
       readReport: () => {
         const fresh = readFileSync(join(OUT, report), "utf8");

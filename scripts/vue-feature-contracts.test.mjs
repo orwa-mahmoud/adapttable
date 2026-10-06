@@ -175,9 +175,20 @@ const chromeContracts = {
   ViewControlButtonProps: "interface ViewControlButtonProps { label: string }",
 };
 
-function chromeFixture(target, mode) {
+function chromeFixture(target, mode, importTypeSlot = false) {
   const root = mkdtempSync(join(scratch, "chrome-"));
-  writeFileSync(join(root, "package.json"), '{"type":"module"}');
+  writeFileSync(
+    join(root, "package.json"),
+    JSON.stringify({
+      name: "@adapttable/vue",
+      type: "module",
+      exports: { ".": "./root.ts" },
+    })
+  );
+  writeFileSync(
+    join(root, "root.ts"),
+    "export interface FeatureSlotKey<TProps> { readonly id: string; readonly __props?: (value: TProps) => void }"
+  );
   const contracts = Object.values(chromeContracts)
     .map((declaration) => "export " + declaration)
     .join("\n");
@@ -224,7 +235,7 @@ function chromeFixture(target, mode) {
     ["DENSITY_CONTROL", "DensityControlProps"],
     ["FULLSCREEN_CONTROL", "FullscreenControlProps"],
   ])
-    declarations += `\nexport declare const ${value}: SlotKey<${mode === "slot-private" && props === target ? "PrivateSlotProps" : props}>;`;
+    declarations += `\nexport declare const ${value}: ${importTypeSlot ? 'import("@adapttable/vue").FeatureSlotKey' : "SlotKey"}<${mode === "slot-private" && props === target ? "PrivateSlotProps" : mode === "slot-opaque" && props === target ? "unknown" : props}>;`;
   writeFileSync(
     join(root, "chrome.ts"),
     imports.join("\n") + "\n" + declarations
@@ -265,6 +276,28 @@ describe("canonical emitted Chrome and nested slot contracts", () => {
     assert.deepEqual(result.diagnostics, []);
     assert.deepEqual(result.errors, []);
   });
+
+  it("accepts the produced import-type FeatureSlotKey syntax", () => {
+    const result = chromeFixture(undefined, undefined, true);
+    assert.deepEqual(result.diagnostics, []);
+    assert.deepEqual(result.errors, []);
+  });
+
+  for (const contract of ["DensityControlProps", "FullscreenControlProps"]) {
+    for (const mode of ["slot-private", "slot-opaque"]) {
+      it(`rejects ${mode} ${contract} inside an import-type slot key`, () => {
+        const result = chromeFixture(contract, mode, true);
+        assert.deepEqual(result.diagnostics, []);
+        assert.ok(result.errors.length > 0);
+        assert.ok(
+          result.errors.every(
+            (error) =>
+              error.includes("CONTROL slot") && error.includes(contract)
+          )
+        );
+      });
+    }
+  }
 
   for (const contract of Object.keys(chromeContracts)) {
     for (const mode of [

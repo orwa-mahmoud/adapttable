@@ -19,12 +19,16 @@ describe("scoped API reports", () => {
   it("keeps unfiltered checks and local regeneration on every entry", () => {
     assert.deepEqual(selectApiReports(entries), {
       local: false,
+      includeForgottenExports: false,
       packages: [],
+      reports: [],
       targets: entries,
     });
     assert.deepEqual(selectApiReports(entries, ["--local"]), {
       local: true,
+      includeForgottenExports: false,
       packages: [],
+      reports: [],
       targets: entries,
     });
   });
@@ -40,7 +44,9 @@ describe("scoped API reports", () => {
       ]),
       {
         local: true,
+        includeForgottenExports: false,
         packages: ["adapter-vue-unstyled", "vue"],
+        reports: [],
         targets: entries.slice(1),
       }
     );
@@ -49,8 +55,73 @@ describe("scoped API reports", () => {
   it("does not extract duplicate package requests twice", () => {
     assert.deepEqual(
       selectApiReports(entries, ["--package", "vue", "--package", "vue"]),
-      { local: false, packages: ["vue"], targets: entries.slice(1, 4) }
+      {
+        local: false,
+        includeForgottenExports: false,
+        packages: ["vue"],
+        reports: [],
+        targets: entries.slice(1, 4),
+      }
     );
+  });
+
+  it("selects exact reports without changing discovery order", () => {
+    const selected = selectApiReports(entries, [
+      "--package",
+      "vue",
+      "--report",
+      "vue-features.api.md",
+      "--report",
+      "vue-adapter.api.md",
+      "--report",
+      "vue-features.api.md",
+      "--include-forgotten-exports",
+    ]);
+    assert.deepEqual(selected, {
+      local: false,
+      includeForgottenExports: true,
+      packages: ["vue"],
+      reports: ["vue-features.api.md", "vue-adapter.api.md"],
+      targets: entries.slice(2, 4),
+    });
+  });
+
+  it("fails closed for missing, unknown, and cross-package report selections", () => {
+    for (const args of [
+      ["--report"],
+      ["--report", "--include-forgotten-exports"],
+      ["--report", ""],
+    ]) {
+      assert.throws(
+        () => selectApiReports(entries, args),
+        /requires an exact report filename/
+      );
+    }
+    for (const args of [
+      ["--report", "missing.api.md"],
+      ["--package", "vue", "--report", "core.api.md"],
+      ["--report", "../vue.api.md"],
+      ["--report", "vue.api.md", "--report", "missing.api.md"],
+      [
+        "--include-forgotten-exports",
+        "--package",
+        "vue",
+        "--report",
+        "core.api.md",
+      ],
+    ]) {
+      assert.throws(
+        () => selectApiReports(entries, args),
+        /No API report in selected packages/
+      );
+    }
+  });
+
+  it("retains an unfiltered default when only report retention is requested", () => {
+    const selected = selectApiReports(entries, ["--include-forgotten-exports"]);
+    assert.equal(selected.includeForgottenExports, true);
+    assert.deepEqual(selected.targets, entries);
+    assert.deepEqual(selected.reports, []);
   });
 
   it("rejects unknown packages instead of reporting a vacuous pass", () => {

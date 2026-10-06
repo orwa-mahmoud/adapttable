@@ -404,6 +404,20 @@ jobs:
           path: ${{ runner.temp }}/adapttable-api-reports/*.api.md
           if-no-files-found: warn
           retention-days: 7
+      - name: Diagnose canonical Vue report definitions
+        id: retained-vue-api-reports
+        if: ${{ !cancelled() && steps.built-packages.outcome == 'success' && steps.api-reports.outcome == 'failure' }}
+        env:
+          ADAPTTABLE_API_REPORTS_DIAGNOSTICS_DIR: ${{ runner.temp }}/adapttable-vue-retained-api-reports
+        run: node scripts/api-reports.mjs --package vue --report vue-density.api.md --report vue-fullscreen.api.md --include-forgotten-exports
+      - name: Retain complete Vue report diagnostics
+        if: ${{ !cancelled() && steps.retained-vue-api-reports.outcome == 'failure' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vue-retained-api-report-diagnostics
+          path: ${{ runner.temp }}/adapttable-vue-retained-api-reports/*.api.md
+          if-no-files-found: warn
+          retention-days: 7
       - name: Smoke-check built package artifacts
         if: needs.detect.outputs.runPackage == 'true'
         run: pnpm smoke:dist
