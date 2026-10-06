@@ -18,6 +18,7 @@ import {
 } from "@adapttable/core";
 import { computed, effect, inject, Injector, type Signal } from "@angular/core";
 
+import { onBrowser } from "../hooks/platform";
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
 
 let nextSession = 0;
@@ -108,7 +109,7 @@ export function injectHeaderFilterOverlay<TRow>(
     (onCleanup) => {
       const host = sync();
       const watch = readOptional(options?.pointerDismiss) !== false;
-      if (!watch || !open()) return;
+      if (!onBrowser(injector) || !watch || !open()) return;
       onCleanup(
         watchOverlayDismiss(
           document,

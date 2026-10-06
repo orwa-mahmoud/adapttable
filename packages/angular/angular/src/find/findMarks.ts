@@ -29,6 +29,7 @@ import {
 } from "@angular/core";
 
 import type { Attrs } from "../attrs";
+import { onBrowser } from "../hooks/platform";
 
 /**
  * Lay find's match marks over one cell's attributes.
@@ -82,7 +83,7 @@ export function injectFindShortcut(options: {
   effect(
     (onCleanup) => {
       const openBar = options.openBar();
-      if (!openBar || typeof document === "undefined") return;
+      if (!openBar || !onBrowser(injector)) return;
       const scope = createFindShortcutScope({
         contains: (target) =>
           target instanceof Node && options.root()?.contains(target) === true,

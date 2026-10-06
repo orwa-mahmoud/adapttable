@@ -10,9 +10,13 @@ import {
   assertInInjectionContext,
   DestroyRef,
   inject,
+  Injector,
   type Signal,
   signal,
 } from "@angular/core";
+
+import { onBrowser } from "../hooks/platform";
+
 export type { TableAssistantBoundary } from "@adapttable/core/binding";
 export const FLOATING_MIN_WIDTH = ASSISTANT_FLOATING_MIN_WIDTH;
 export const floatingFits = assistantFloatingFits;
@@ -28,10 +32,9 @@ export function launcherStyle(boundary: TableAssistantBoundary) {
 export function injectAssistantFloatingFits(): Signal<boolean> {
   assertInInjectionContext(injectAssistantFloatingFits);
   const destroy = inject(DestroyRef);
-  const fits = signal(
-    typeof window === "undefined" || floatingFits(window.innerWidth)
-  );
-  if (typeof window !== "undefined") {
+  const browser = onBrowser(inject(Injector));
+  const fits = signal(!browser || floatingFits(window.innerWidth));
+  if (browser) {
     const notify = () => {
       fits.set(floatingFits(window.innerWidth));
     };

@@ -3,9 +3,12 @@ import {
   afterRenderEffect,
   DestroyRef,
   inject,
+  Injector,
   type Signal,
   signal,
 } from "@angular/core";
+
+import { onBrowser } from "../hooks/platform";
 
 /**
  * Track room below an open popover's origin. The adapter retains its native
@@ -20,7 +23,9 @@ export function injectPopoverSpace(options: {
   /** Include room above the origin for a native overlay that can flip. */
   readonly allowAbove?: () => boolean;
 }): Signal<number> {
-  const viewport = inject(DOCUMENT).defaultView;
+  const viewport = onBrowser(inject(Injector))
+    ? inject(DOCUMENT).defaultView
+    : null;
   const height = signal(360);
   const measure = (): void => {
     const origin = options.origin();
