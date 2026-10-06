@@ -4,25 +4,48 @@
 
 ```ts
 
-import { ColumnGroupDef } from '@adapttable/core';
-import { ColumnGroupRecord } from '@adapttable/core';
+import { BinaryOp } from '@adapttable/core/formula';
 import { ColumnMetadata } from '@adapttable/core';
 import { Component } from 'vue';
-import { FormulaColumnSpec } from '@adapttable/core';
-import { FormulaColumnsResult } from '@adapttable/core';
-import { FunctionalComponent } from 'vue';
+import { deserializeFormulaColumns } from '@adapttable/core/formula';
+import { evaluateFormula } from '@adapttable/core/formula';
+import { FORMULA_BLANK } from '@adapttable/core/formula';
+import { FORMULA_ERRORS } from '@adapttable/core/formula';
+import { FORMULA_FUNCTIONS } from '@adapttable/core/formula';
+import { formulaBoolean } from '@adapttable/core/formula';
+import { FormulaColumnSpec } from '@adapttable/core/formula';
+import { FormulaColumnSpec as FormulaColumnSpec_2 } from '@adapttable/core';
+import { FormulaColumnsResult } from '@adapttable/core/formula';
+import { FormulaColumnsResult as FormulaColumnsResult_2 } from '@adapttable/core';
+import { formulaDisplay } from '@adapttable/core/formula';
+import { formulaError } from '@adapttable/core/formula';
+import { FormulaErrorCode } from '@adapttable/core/formula';
+import { FormulaNode } from '@adapttable/core/formula';
+import { formulaNumber } from '@adapttable/core/formula';
+import { formulaRefs } from '@adapttable/core/formula';
+import { FormulaScope } from '@adapttable/core/formula';
+import { formulaSortValue } from '@adapttable/core/formula';
+import { formulaText } from '@adapttable/core/formula';
+import { FormulaValue } from '@adapttable/core/formula';
+import { isFormulaError } from '@adapttable/core/formula';
 import { MaybeRefOrGetter } from 'vue';
+import { parseFormula } from '@adapttable/core/formula';
+import { ParseResult } from '@adapttable/core/formula';
 import { Ref } from 'vue';
+import { serializeFormulaColumns } from '@adapttable/core/formula';
 import { ShallowRef } from 'vue';
 import { SortDirection } from '@adapttable/core';
+import { toFormulaValue } from '@adapttable/core/formula';
 import { UrlStateAdapter } from '@adapttable/core';
 import { VNodeChild } from 'vue';
 
+export { BinaryOp }
+
 // @public (undocumented)
-export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec[]): VueFormulaColumnsResult<TRow>;
+export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec_2[]): VueFormulaColumnsResult<TRow>;
 
 // @public
-export interface CellContext<TRow, TValue = unknown> {
+interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -34,7 +57,7 @@ export interface CellContext<TRow, TValue = unknown> {
 }
 
 // @public
-export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
+interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
     // (undocumented)
     readonly accessor?: (row: TRow) => TValue;
     // (undocumented)
@@ -48,22 +71,8 @@ export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<T
     readonly headerCell?: Renderer<HeaderContext<TRow, TValue>>;
 }
 
-// @public (undocumented)
-export interface ColumnGroup<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
-    // (undocumented)
-    readonly children: readonly ColumnInput<TRow>[];
-}
-
-// @public (undocumented)
-export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
-
 // @public
-export type ComponentProps<TComponent> = TComponent extends (new (...args: never[]) => {
-    $props: infer TProps;
-}) ? TProps : TComponent extends FunctionalComponent<infer TProps> ? TProps : never;
-
-// @public
-export interface ComponentRenderer<TContext> {
+interface ComponentRenderer<TContext> {
     // (undocumented)
     readonly component: Component;
     // (undocumented)
@@ -72,25 +81,52 @@ export interface ComponentRenderer<TContext> {
     }["map"];
 }
 
-// @public
-export function componentRenderer<TContext, TComponent extends Component>(component: TComponent, props: (context: TContext) => ComponentProps<TComponent> & object): ComponentRenderer<TContext>;
+export { deserializeFormulaColumns }
 
-// @public (undocumented)
-export function flattenColumns<TRow>(columns: readonly ColumnInput<TRow>[]): {
-    readonly leaves: readonly ColumnDef<TRow>[];
-    readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
-};
+export { evaluateFormula }
 
 // @public
-export interface FooterContext<TRow, TValue = unknown> {
+interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
     readonly value: TValue | undefined;
 }
 
+export { FORMULA_BLANK }
+
+export { FORMULA_ERRORS }
+
+export { FORMULA_FUNCTIONS }
+
+export { formulaBoolean }
+
+export { FormulaColumnSpec }
+
+export { FormulaColumnsResult }
+
+export { formulaDisplay }
+
+export { formulaError }
+
+export { FormulaErrorCode }
+
+export { FormulaNode }
+
+export { formulaNumber }
+
+export { formulaRefs }
+
+export { FormulaScope }
+
+export { formulaSortValue }
+
+export { formulaText }
+
+export { FormulaValue }
+
 // @public
-export interface HeaderContext<TRow, TValue = unknown> {
+interface HeaderContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -105,37 +141,29 @@ export interface HeaderContext<TRow, TValue = unknown> {
     }) => void;
 }
 
-// @public
-export type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
-
-// @public (undocumented)
-export function primitiveText(value: unknown): string | null;
-
-// @public (undocumented)
-export function renderCell<TRow, TValue>(context: CellContext<TRow, TValue>, slot?: RenderFunction<CellContext<TRow, TValue>>): VNodeChild;
-
-// @public (undocumented)
-export function renderContent<TContext>(renderer: Renderer<TContext>, context: TContext): VNodeChild;
-
-// @public (undocumented)
-export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
-
-// @public (undocumented)
-export function renderFooter<TRow, TValue>(context: FooterContext<TRow, TValue>, slot?: RenderFunction<FooterContext<TRow, TValue>>): VNodeChild;
+export { isFormulaError }
 
 // @public
-export type RenderFunction<TContext> = {
+type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
+
+export { parseFormula }
+
+export { ParseResult }
+
+// @public (undocumented)
+type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
+
+// @public
+type RenderFunction<TContext> = {
     render(context: TContext): VNodeChild;
 }["render"];
 
-// @public (undocumented)
-export function renderHeader<TRow, TValue>(context: HeaderContext<TRow, TValue>, slot?: RenderFunction<HeaderContext<TRow, TValue>>): VNodeChild;
+export { serializeFormulaColumns }
+
+export { toFormulaValue }
 
 // @public (undocumented)
-export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
-
-// @public (undocumented)
-export interface UrlSliceOptions {
+interface UrlSliceOptions {
     readonly serverSearch?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
@@ -147,28 +175,25 @@ export interface UrlSliceOptions {
 
 // @public (undocumented)
 export function useFormulaUrlState(input?: MaybeRefOrGetter<UseFormulaUrlStateOptions>, activity?: MaybeRefOrGetter<boolean>): {
-    formulas: Readonly<ShallowRef<readonly FormulaColumnSpec[]>>;
-    onFormulasChange: (next: readonly FormulaColumnSpec[]) => void;
+    formulas: Readonly<ShallowRef<readonly FormulaColumnSpec_2[]>>;
+    onFormulasChange: (next: readonly FormulaColumnSpec_2[]) => void;
     flush: () => void;
 };
 
 // @public (undocumented)
 export interface UseFormulaUrlStateOptions extends UrlSliceOptions {
     // (undocumented)
-    readonly defaultFormulas?: MaybeRefOrGetterOptional<readonly FormulaColumnSpec[]>;
+    readonly defaultFormulas?: MaybeRefOrGetterOptional<readonly FormulaColumnSpec_2[]>;
 }
 
 // @public (undocumented)
 export type UseFormulaUrlStateResult = ReturnType<typeof useFormulaUrlState>;
 
 // @public (undocumented)
-export interface VueFormulaColumnsResult<TRow> extends Omit<FormulaColumnsResult<TRow>, "columns"> {
+export interface VueFormulaColumnsResult<TRow> extends Omit<FormulaColumnsResult_2<TRow>, "columns"> {
     // (undocumented)
     readonly columns: readonly ColumnDef<TRow>[];
 }
-
-
-export * from "@adapttable/core/formula";
 
 // (No @packageDocumentation comment for this package)
 

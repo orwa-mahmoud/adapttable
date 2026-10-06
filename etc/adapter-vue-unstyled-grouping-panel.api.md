@@ -5,10 +5,10 @@
 ```ts
 
 import { GroupingExtras } from '@adapttable/vue/features';
-import { GroupingPanelProps } from '@adapttable/vue/features';
+import { GroupingPanelProps } from '@adapttable/vue';
 import { StaticGroupingExtras } from '@adapttable/vue/features';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { TableFeature } from '@adapttable/vue/adapter';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
 
 export { GroupingExtras }
 

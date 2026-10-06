@@ -4,9 +4,9 @@
 
 ```ts
 
-import { ExportCsvOptions } from '@adapttable/vue/export-csv';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { TableFeature } from '@adapttable/vue/adapter';
+import { ExportCsvOptions } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
 
 // @public
 export function exportCsv(options?: boolean): StaticTableFeature;
@@ -14,8 +14,7 @@ export function exportCsv(options?: boolean): StaticTableFeature;
 // @public (undocumented)
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;
 
-
-export * from "@adapttable/vue/export-csv";
+export { ExportCsvOptions }
 
 // (No @packageDocumentation comment for this package)
 

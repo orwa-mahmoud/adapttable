@@ -4,14 +4,17 @@
 
 ```ts
 
-import { sidePanel as sidePanel_2 } from '@adapttable/vue/side-panel';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { sidePanel as sidePanel_2 } from '@adapttable/vue/features';
+import { SidePanelOptions } from '@adapttable/vue/features';
+import { SidePanelPanel } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue';
 
 // @public (undocumented)
 export function sidePanel(options: Parameters<typeof sidePanel_2>[0]): StaticTableFeature;
 
+export { SidePanelOptions }
 
-export * from "@adapttable/vue/side-panel";
+export { SidePanelPanel }
 
 // (No @packageDocumentation comment for this package)
 

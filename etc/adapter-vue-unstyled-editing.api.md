@@ -4,22 +4,22 @@
 
 ```ts
 
-import { BatchEditBarProps } from '@adapttable/vue/editing';
-import { BatchEditingState } from '@adapttable/vue/editing';
-import { BatchRowEdit } from '@adapttable/vue/editing';
-import { CellEditHandler } from '@adapttable/vue/editing';
-import { dirtyIndicators } from '@adapttable/vue/editing';
-import { editHistory } from '@adapttable/vue/editing';
-import { EditingLifecycleExtras } from '@adapttable/vue/editing';
+import { BatchEditBarProps } from '@adapttable/vue/adapter';
+import { BatchEditingState } from '@adapttable/vue';
+import { BatchRowEdit } from '@adapttable/vue';
+import { CellEditHandler } from '@adapttable/vue';
+import { dirtyIndicators } from '@adapttable/vue/features';
+import { editHistory } from '@adapttable/vue/features';
+import { EditingLifecycleExtras } from '@adapttable/vue/features';
 import { PublicProps } from 'vue';
-import { RowEditActionsProps } from '@adapttable/vue/editing';
-import { RowEditIcons } from '@adapttable/vue/editing';
-import { RowEditingState } from '@adapttable/vue/editing';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { TableEditingOptions } from '@adapttable/vue/editing';
-import { TableFeature } from '@adapttable/vue/adapter';
+import { RowEditActionsProps } from '@adapttable/vue/adapter';
+import { RowEditIcons } from '@adapttable/vue/adapter';
+import { RowEditingState } from '@adapttable/vue';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableEditingOptions } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
-import { VueEditableCellProps } from '@adapttable/vue/editing';
+import { VueEditableCellProps } from '@adapttable/vue/adapter';
 
 // @public (undocumented)
 const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{

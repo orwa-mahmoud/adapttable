@@ -4,14 +4,11 @@
 
 ```ts
 
-import { bulkActions as bulkActions_2 } from '@adapttable/vue/bulk-actions';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { bulkActions as bulkActions_2 } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue';
 
 // @public (undocumented)
 export function bulkActions(actions: Parameters<typeof bulkActions_2>[0]): StaticTableFeature;
-
-
-export * from "@adapttable/vue/bulk-actions";
 
 // (No @packageDocumentation comment for this package)
 

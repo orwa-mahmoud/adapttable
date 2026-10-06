@@ -4,12 +4,10 @@
 
 ```ts
 
-import { AgentApprovalButtonProps } from '@adapttable/core/binding';
-import { AgentApprovalListProps as AgentApprovalListProps_2 } from '@adapttable/core/binding';
-import { AgentApprovalPending } from '@adapttable/core';
-import { AgentApprovalProps } from '@adapttable/core/binding';
-import { ApprovalReviewSlots as ApprovalReviewSlots_2 } from '@adapttable/core/binding';
 import { BatchEditStoreOptions } from '@adapttable/core';
+import { buildPrintDocument } from '@adapttable/core/pdf';
+import { buildPrintTableHtml } from '@adapttable/core/pdf';
+import { buildTablePdf } from '@adapttable/core/pdf';
 import { BulkAction } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditHandler } from '@adapttable/core';
@@ -27,9 +25,7 @@ import { ColumnMetadata } from '@adapttable/core';
 import { Component } from 'vue';
 import { ComputedRef } from 'vue';
 import { ConfirmHandler } from '@adapttable/core';
-import { CSSProperties } from 'vue';
 import { CssProperties } from '@adapttable/core/binding';
-import { DefineSetupFnComponent } from 'vue';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
 import { EditableColumnLike } from '@adapttable/core';
@@ -39,6 +35,7 @@ import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
+import { ExportCsvOptions } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
@@ -60,10 +57,17 @@ import { HeaderSelectionState } from '@adapttable/core/binding';
 import { HtmlGroupedHeaderCell } from '@adapttable/core/binding';
 import { LiveFeatureHost } from '@adapttable/core/binding';
 import { MaybeRefOrGetter } from 'vue';
+import { openPrintLayout } from '@adapttable/core/pdf';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
-import { PublicProps } from 'vue';
+import { pdfWriter } from '@adapttable/core/pdf';
+import { PdfWriterOptions } from '@adapttable/core/pdf';
+import { PrintLayoutOptions } from '@adapttable/core/pdf';
+import { PrintPageBreak } from '@adapttable/core/pdf';
+import { PrintPageSize } from '@adapttable/core/pdf';
+import { printStyles } from '@adapttable/core/pdf';
+import { printTable } from '@adapttable/core/pdf';
 import { QueryFilterGroup } from '@adapttable/core';
 import { Ref } from 'vue';
 import { RowAction } from '@adapttable/core';
@@ -76,19 +80,7 @@ import { ShallowRef } from 'vue';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
-import { SpeechInputHandle } from '@adapttable/core/binding';
-import { TableAssistantAvatars as TableAssistantAvatars_2 } from '@adapttable/core/binding';
-import { TableAssistantBadgeProps } from '@adapttable/core/binding';
-import { TableAssistantButtonProps as TableAssistantButtonProps_2 } from '@adapttable/core/binding';
-import { TableAssistantComposerProps } from '@adapttable/core/binding';
-import { TableAssistantLanguageChipProps } from '@adapttable/core/binding';
-import { TableAssistantMenuProps as TableAssistantMenuProps_2 } from '@adapttable/core/binding';
-import { TableAssistantPanelProps as TableAssistantPanelProps_2 } from '@adapttable/core/binding';
-import { TableAssistantProps as TableAssistantProps_2 } from '@adapttable/core/binding';
-import { TableAssistantSheetProps as TableAssistantSheetProps_2 } from '@adapttable/core/binding';
-import { TableAssistantSlots as TableAssistantSlots_2 } from '@adapttable/core/binding';
-import { TableAssistantView } from '@adapttable/core/binding';
-import { TableAssistantWindowProps as TableAssistantWindowProps_2 } from '@adapttable/core/binding';
+import { TableAssistantProps } from '@adapttable/core/binding';
 import { TableDensity } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
@@ -102,51 +94,17 @@ import { UseColumnLayoutResult } from '@adapttable/core';
 import { VNodeChild } from 'vue';
 import { VNodeRef } from 'vue';
 
-export { AgentApprovalButtonProps }
-
 // @public (undocumented)
-export const AgentApprovalChrome: DefineSetupFnComponent<AgentApprovalChromeProps, {}, {}, AgentApprovalChromeProps & {}, PublicProps>;
+type Attrs = Readonly<Record<string, unknown>>;
 
-// @public (undocumented)
-export interface AgentApprovalChromeProps extends AgentApprovalProps {
-    // (undocumented)
-    readonly slots: ApprovalReviewSlots;
-}
+export { buildPrintDocument }
 
-// @public (undocumented)
-export type AgentApprovalListProps = AgentApprovalListProps_2<VNodeChild>;
+export { buildPrintTableHtml }
 
-export { AgentApprovalProps }
-
-// @public (undocumented)
-export const ApprovalReviewChrome: DefineSetupFnComponent<ApprovalReviewChromeProps, {}, {}, ApprovalReviewChromeProps & {}, PublicProps>;
-
-// @public (undocumented)
-export interface ApprovalReviewChromeProps {
-    // (undocumented)
-    readonly buttonClassName?: string;
-    // (undocumented)
-    readonly className?: string;
-    // (undocumented)
-    readonly expanded?: boolean;
-    // (undocumented)
-    readonly labels?: TableLabels;
-    readonly onBack?: () => void;
-    readonly onExpand?: () => void;
-    // (undocumented)
-    readonly pending: AgentApprovalPending;
-    // (undocumented)
-    readonly slots: ApprovalReviewSlots;
-}
-
-// @public (undocumented)
-export type ApprovalReviewSlots = ApprovalReviewSlots_2<VNodeChild>;
-
-// @public (undocumented)
-export type Attrs = Readonly<Record<string, unknown>>;
+export { buildTablePdf }
 
 // @public
-export interface CellContext<TRow, TValue = unknown> {
+interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -158,7 +116,7 @@ export interface CellContext<TRow, TValue = unknown> {
 }
 
 // @public
-export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
+interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
     // (undocumented)
     readonly accessor?: (row: TRow) => TValue;
     // (undocumented)
@@ -173,21 +131,21 @@ export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<T
 }
 
 // @public (undocumented)
-export interface ColumnGroup<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
+interface ColumnGroup<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
     // (undocumented)
     readonly children: readonly ColumnInput<TRow>[];
 }
 
 // @public (undocumented)
-export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
+type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
 
 // @public (undocumented)
-export type ColumnLayout<TRow> = Omit<UseColumnLayoutResult<TRow>, "visibleColumns"> & {
+type ColumnLayout<TRow> = Omit<UseColumnLayoutResult<TRow>, "visibleColumns"> & {
     readonly visibleColumns: readonly ColumnDef<TRow>[];
 };
 
 // @public (undocumented)
-export interface ColumnLayoutOptions {
+interface ColumnLayoutOptions {
     // (undocumented)
     readonly columnLayout?: MaybeRefOrGetterOptional<ColumnLayoutState>;
     // (undocumented)
@@ -199,7 +157,7 @@ export interface ColumnLayoutOptions {
 }
 
 // @public
-export interface ComponentRenderer<TContext> {
+interface ComponentRenderer<TContext> {
     // (undocumented)
     readonly component: Component;
     // (undocumented)
@@ -209,16 +167,10 @@ export interface ComponentRenderer<TContext> {
 }
 
 // @public (undocumented)
-export type ComposedFeature<TRow> = TableFeature<TRow>;
-
-// @public
-export function createAdapterAgentApprovalFeature(render: (props: AgentApprovalProps) => VNodeChild): StaticTableFeature;
-
-// @public
-export function createAdapterTableAssistantFeature(render: (props: TableAssistantProps) => VNodeChild): StaticTableFeature;
+type ComposedFeature$1<TRow> = TableFeature$1<TRow>;
 
 // @public (undocumented)
-export interface DesktopTableModel<TRow> {
+interface DesktopTableModel<TRow> {
     // (undocumented)
     readonly actionsLabel?: string;
     // (undocumented)
@@ -253,10 +205,19 @@ export interface DesktopTableModel<TRow> {
 }
 
 // @public (undocumented)
-export type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
+type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
+
+// @public
+export function exportPdf(options?: boolean): StaticTableFeature$1;
 
 // @public (undocumented)
-export interface FeatureMountContext<TRow = unknown> {
+export function exportPdf<TRow>(options?: boolean | ExportPdfOptions<TRow>): TableFeature$1<TRow>;
+
+// @public
+export type ExportPdfOptions<TRow> = Omit<ExportCsvOptions<TRow>, "writer">;
+
+// @public (undocumented)
+interface FeatureMountContext$1<TRow = unknown> {
     // (undocumented)
     readonly active: Readonly<ShallowRef<boolean>>;
     // (undocumented)
@@ -306,7 +267,7 @@ export interface FeatureMountContext<TRow = unknown> {
 }
 
 // @public (undocumented)
-export interface FeatureState {
+interface FeatureState {
     // (undocumented)
     get<T>(key: FeatureStateKey<T>): Readonly<ShallowRef<T | undefined>>;
     // (undocumented)
@@ -314,7 +275,7 @@ export interface FeatureState {
 }
 
 // @public
-export interface FooterContext<TRow, TValue = unknown> {
+interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -322,7 +283,7 @@ export interface FooterContext<TRow, TValue = unknown> {
 }
 
 // @public (undocumented)
-export interface GroupRowModel<TRow> {
+interface GroupRowModel<TRow> {
     // (undocumented)
     readonly columns: readonly ColumnDef<TRow>[];
     // (undocumented)
@@ -340,7 +301,7 @@ export interface GroupRowModel<TRow> {
 }
 
 // @public
-export interface HeaderContext<TRow, TValue = unknown> {
+interface HeaderContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -356,10 +317,10 @@ export interface HeaderContext<TRow, TValue = unknown> {
 }
 
 // @public
-export type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
+type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
 
 // @public (undocumented)
-export interface MobileCardsModel<TRow> {
+interface MobileCardsModel<TRow> {
     // (undocumented)
     readonly attrs: Attrs;
     // (undocumented)
@@ -370,16 +331,32 @@ export interface MobileCardsModel<TRow> {
     readonly summary?: TableSummaryModel<TRow>;
 }
 
+export { openPrintLayout }
+
+export { pdfWriter }
+
+export { PdfWriterOptions }
+
+export { PrintLayoutOptions }
+
+export { PrintPageBreak }
+
+export { PrintPageSize }
+
+export { printStyles }
+
+export { printTable }
+
 // @public (undocumented)
-export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
+type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
 // @public
-export type RenderFunction<TContext> = {
+type RenderFunction<TContext> = {
     render(context: TContext): VNodeChild;
 }["render"];
 
 // @public (undocumented)
-export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRow>, Partial<Omit<TableEditingOptions<TRow>, "rows" | "columns" | "rowKey" | "featureHost">> {
+interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRow>, Partial<Omit<TableEditingOptions<TRow>, "rows" | "columns" | "rowKey" | "featureHost">> {
     // (undocumented)
     readonly [key: string]: unknown;
     // (undocumented)
@@ -389,7 +366,7 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
     // (undocumented)
     readonly columnSelectionCheckbox?: boolean;
     // (undocumented)
-    readonly editingModel?: (context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly editingModel?: (context: FeatureMountContext$1<TRow>) => void | (() => void);
     // (undocumented)
     readonly enableColumnMenu?: boolean;
     // (undocumented)
@@ -417,7 +394,7 @@ export interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRo
 }
 
 // @public (undocumented)
-export interface RowActionControl<TRow> {
+interface RowActionControl<TRow> {
     // (undocumented)
     readonly action: RowAction<TRow>;
     // (undocumented)
@@ -429,7 +406,7 @@ export interface RowActionControl<TRow> {
 }
 
 // @public (undocumented)
-export interface RowActionControlsInput<TRow> {
+interface RowActionControlsInput<TRow> {
     // (undocumented)
     readonly actions: readonly RowAction<TRow>[];
     // (undocumented)
@@ -443,10 +420,10 @@ export interface RowActionControlsInput<TRow> {
 }
 
 // @public (undocumented)
-export type RowActionControlsProjector<TRow> = (input: RowActionControlsInput<TRow>) => readonly RowActionControl<TRow>[];
+type RowActionControlsProjector<TRow> = (input: RowActionControlsInput<TRow>) => readonly RowActionControl<TRow>[];
 
 // @public (undocumented)
-export interface RowDetailModel {
+interface RowDetailModel {
     // (undocumented)
     readonly expanded: boolean;
     // (undocumented)
@@ -458,7 +435,7 @@ export interface RowDetailModel {
 }
 
 // @public (undocumented)
-export interface RowSelection {
+interface RowSelection {
     // (undocumented)
     readonly allMatching: Readonly<{
         readonly value: boolean;
@@ -492,7 +469,7 @@ export interface RowSelection {
 }
 
 // @public
-export interface SelectionCheckboxAttrs extends Attrs {
+interface SelectionCheckboxAttrs extends Attrs {
     // (undocumented)
     readonly checked: boolean;
     // (undocumented)
@@ -502,7 +479,7 @@ export interface SelectionCheckboxAttrs extends Attrs {
 }
 
 // @public
-export interface SourceViewportOptions {
+interface SourceViewportOptions {
     // (undocumented)
     readonly forceMobile?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
@@ -511,13 +488,11 @@ export interface SourceViewportOptions {
     readonly paginationMode?: MaybeRefOrGetterOptional<PaginationMode>;
 }
 
-export { SpeechInputHandle }
-
 // @public
-export type StaticFeatureHost = Omit<TableFeatureHost<unknown>, "registerColumnMenuAction" | "registerContextMenuItems" | "columnMenuActions" | "contextMenuItems">;
+type StaticFeatureHost = Omit<TableFeatureHost<unknown>, "registerColumnMenuAction" | "registerContextMenuItems" | "columnMenuActions" | "contextMenuItems">;
 
 // @public (undocumented)
-export interface StaticTableFeature {
+interface StaticTableFeature$1 {
     // (undocumented)
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     // (undocumented)
@@ -525,7 +500,7 @@ export interface StaticTableFeature {
     // (undocumented)
     readonly id: string;
     // (undocumented)
-    readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly mount?: <TRow>(context: FeatureMountContext$1<TRow>) => void | (() => void);
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
@@ -535,54 +510,10 @@ export interface StaticTableFeature {
 }
 
 // @public (undocumented)
-export type SummaryRowFn<TRow> = (rows: readonly TRow[]) => Record<string, VNodeChild>;
+type SummaryRowFn<TRow> = (rows: readonly TRow[]) => Record<string, VNodeChild>;
 
 // @public (undocumented)
-export type TableAssistantAvatars = TableAssistantAvatars_2<VNodeChild>;
-
-export { TableAssistantBadgeProps }
-
-// @public (undocumented)
-export type TableAssistantButtonProps = TableAssistantButtonProps_2<VNodeChild>;
-
-// @public (undocumented)
-export const TableAssistantChrome: DefineSetupFnComponent<TableAssistantChromeProps, {}, {}, TableAssistantChromeProps & {}, PublicProps>;
-
-// @public (undocumented)
-export interface TableAssistantChromeProps extends TableAssistantProps {
-    // (undocumented)
-    readonly slots: TableAssistantSlots;
-}
-
-export { TableAssistantComposerProps }
-
-export { TableAssistantLanguageChipProps }
-
-// @public (undocumented)
-export type TableAssistantMenuProps = TableAssistantMenuProps_2<VNodeChild>;
-
-// @public (undocumented)
-export type TableAssistantPanelProps = TableAssistantPanelProps_2<VNodeChild>;
-
-// @public (undocumented)
-export type TableAssistantProps = TableAssistantProps_2<VNodeChild>;
-
-// @public (undocumented)
-export type TableAssistantSheetProps = TableAssistantSheetProps_2<VNodeChild>;
-
-// @public
-export function tableAssistantSlotKey(): FeatureSlotKey<TableAssistantProps>;
-
-// @public (undocumented)
-export type TableAssistantSlots = Required<TableAssistantSlots_2<VNodeChild, KeyboardEvent, CSSProperties>>;
-
-export { TableAssistantView }
-
-// @public (undocumented)
-export type TableAssistantWindowProps = TableAssistantWindowProps_2<VNodeChild, CSSProperties>;
-
-// @public (undocumented)
-export interface TableBodyProjection<TRow> {
+interface TableBodyProjection<TRow> {
     // (undocumented)
     readonly desktop: DesktopTableModel<TRow>;
     // (undocumented)
@@ -590,7 +521,7 @@ export interface TableBodyProjection<TRow> {
 }
 
 // @public (undocumented)
-export interface TableBodyProjectionInput<TRow> {
+interface TableBodyProjectionInput<TRow> {
     // (undocumented)
     readonly desktop: DesktopTableModel<TRow>;
     // (undocumented)
@@ -614,10 +545,10 @@ export interface TableBodyProjectionInput<TRow> {
 }
 
 // @public (undocumented)
-export type TableBodyProjector<TRow> = (input: TableBodyProjectionInput<TRow>) => TableBodyProjection<TRow>;
+type TableBodyProjector<TRow> = (input: TableBodyProjectionInput<TRow>) => TableBodyProjection<TRow>;
 
 // @public (undocumented)
-export type TableBodySlot<TRow> = (Exclude<ChromeBodySlot<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>, ChromeExtraSlot<VNodeChild, CssProperties> | ChromeGroupSlot<TRow>> | (ChromeGroupSlot<TRow> & {
+type TableBodySlot<TRow> = (Exclude<ChromeBodySlot<TRow, TableRowModel<TRow>, VNodeChild, CssProperties>, ChromeExtraSlot<VNodeChild, CssProperties> | ChromeGroupSlot<TRow>> | (ChromeGroupSlot<TRow> & {
     readonly model?: GroupRowModel<TRow>;
 }) | (ChromeExtraSlot<VNodeChild, CssProperties> & {
     readonly coveredSlots?: ReadonlySet<number>;
@@ -626,7 +557,7 @@ export type TableBodySlot<TRow> = (Exclude<ChromeBodySlot<TRow, TableRowModel<TR
 };
 
 // @public (undocumented)
-export interface TableCellModel<TRow> {
+interface TableCellModel<TRow> {
     // (undocumented)
     readonly addon?: (className?: string) => VNodeChild;
     // (undocumented)
@@ -642,7 +573,7 @@ export interface TableCellModel<TRow> {
 }
 
 // @public (undocumented)
-export interface TableEditingOptions<TRow> extends EditLifecycle<TRow>, EditValidationStoreOptions<TRow> {
+interface TableEditingOptions<TRow> extends EditLifecycle<TRow>, EditValidationStoreOptions<TRow> {
     // (undocumented)
     readonly batchEditing?: boolean;
     // (undocumented)
@@ -684,7 +615,7 @@ export interface TableEditingOptions<TRow> extends EditLifecycle<TRow>, EditVali
 }
 
 // @public (undocumented)
-export interface TableFeature<TRow> {
+interface TableFeature$1<TRow> {
     // (undocumented)
     readonly __row?: (row: TRow) => TRow;
     // (undocumented)
@@ -694,7 +625,7 @@ export interface TableFeature<TRow> {
     // (undocumented)
     readonly id: string;
     // (undocumented)
-    readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
+    readonly mount?: (context: FeatureMountContext$1<TRow>) => void | (() => void);
     // (undocumented)
     readonly renders?: readonly FeatureRender<never, VNodeChild>[];
     // (undocumented)
@@ -704,10 +635,10 @@ export interface TableFeature<TRow> {
 }
 
 // @public (undocumented)
-export type TableFeatureHost<TRow = unknown> = LiveFeatureHost<TRow>;
+type TableFeatureHost<TRow = unknown> = LiveFeatureHost<TRow>;
 
 // @public (undocumented)
-export interface TableGrouping<TRow> {
+interface TableGrouping<TRow> {
     // (undocumented)
     readonly aggregates: GroupAggregatesFn<TRow> | undefined;
     // (undocumented)
@@ -732,7 +663,7 @@ export interface TableGrouping<TRow> {
 }
 
 // @public (undocumented)
-export interface TableHeaderModel<TRow> {
+interface TableHeaderModel<TRow> {
     // (undocumented)
     readonly attrs: Attrs;
     // (undocumented)
@@ -754,7 +685,7 @@ export interface TableHeaderModel<TRow> {
 }
 
 // @public (undocumented)
-export interface TableRowDetail<TRow> {
+interface TableRowDetail<TRow> {
     // (undocumented)
     readonly expansion: RowExpansionState;
     // (undocumented)
@@ -762,7 +693,7 @@ export interface TableRowDetail<TRow> {
 }
 
 // @public (undocumented)
-export interface TableRowInventory<TRow> {
+interface TableRowInventory<TRow> {
     // (undocumented)
     readonly loadedRows: readonly TRow[];
     // (undocumented)
@@ -770,7 +701,7 @@ export interface TableRowInventory<TRow> {
 }
 
 // @public (undocumented)
-export interface TableRowModel<TRow> {
+interface TableRowModel<TRow> {
     // (undocumented)
     readonly actionControls?: readonly RowActionControl<TRow>[];
     // (undocumented)
@@ -798,7 +729,7 @@ export interface TableRowModel<TRow> {
 }
 
 // @public
-export interface TableSummaryCellModel<TRow> {
+interface TableSummaryCellModel<TRow> {
     // (undocumented)
     readonly attrs: Attrs;
     // (undocumented)
@@ -810,13 +741,13 @@ export interface TableSummaryCellModel<TRow> {
 }
 
 // @public
-export interface TableSummaryModel<TRow> {
+interface TableSummaryModel<TRow> {
     // (undocumented)
     readonly cells: readonly TableSummaryCellModel<TRow>[];
 }
 
 // @public (undocumented)
-export interface TableTree<TRow> {
+interface TableTree<TRow> {
     // (undocumented)
     readonly allEntries: readonly TreeEntry<TRow>[];
     // (undocumented)
@@ -832,7 +763,7 @@ export interface TableTree<TRow> {
 }
 
 // @public (undocumented)
-export interface TreeCellModel<TRow> {
+interface TreeCellModel<TRow> {
     // (undocumented)
     readonly attrs: Attrs;
     // (undocumented)
@@ -842,7 +773,7 @@ export interface TreeCellModel<TRow> {
 }
 
 // @public (undocumented)
-export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<TRow>>): {
+function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<TRow>>): {
     source: ComputedRef<TableSource<TRow>>;
     rows: ComputedRef<readonly TRow[]>;
     columns: ComputedRef<readonly ColumnDef<TRow, unknown>[]>;
@@ -905,7 +836,7 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
 };
 
 // @public (undocumented)
-export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
+interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     // (undocumented)
     readonly activeFilterCount?: MaybeRefOrGetter<number>;
     // (undocumented)
@@ -943,12 +874,12 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
 }
 
 // @public (undocumented)
-export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
+type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 
 // @public (undocumented)
-export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
+interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     // (undocumented)
-    readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps_2<VNodeChild>>;
+    readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
     readonly confirm?: ConfirmHandler;
     // (undocumented)
@@ -960,7 +891,7 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
     // (undocumented)
-    readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
+    readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature$1<NoInfer<TRow>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     // (undocumented)
     readonly onCellCut?: (range: CellRange) => void;
@@ -984,7 +915,7 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
 }
 
 // @public
-export interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, SourceViewportOptions {
+interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, SourceViewportOptions {
     // (undocumented)
     readonly columns?: MaybeRefOrGetterOptional<readonly ColumnMetadata<TRow>[]>;
     // (undocumented)
@@ -1014,7 +945,7 @@ export interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, S
 }
 
 // @public
-export interface UseTableUrlStateOptions {
+interface UseTableUrlStateOptions {
     // (undocumented)
     readonly arrayExtraKeys?: MaybeRefOrGetterOptional<readonly string[]>;
     // (undocumented)

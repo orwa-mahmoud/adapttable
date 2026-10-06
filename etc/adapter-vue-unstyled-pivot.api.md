@@ -4,7 +4,7 @@
 
 ```ts
 
-import { PivotPanelChromeProps } from '@adapttable/vue/pivot';
+import { PivotPanelChromeProps } from '@adapttable/vue/adapter';
 import { VNodeChild } from 'vue';
 
 // @public (undocumented)
@@ -18,9 +18,6 @@ export namespace PivotPanel {
 
 // @public (undocumented)
 export type PivotPanelProps = Omit<PivotPanelChromeProps, "slots">;
-
-
-export * from "@adapttable/vue/pivot";
 
 // (No @packageDocumentation comment for this package)
 

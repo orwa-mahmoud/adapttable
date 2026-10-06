@@ -4,10 +4,10 @@
 
 ```ts
 
-import { RowReorderHandler } from '@adapttable/vue/features';
-import { RowReorderOptions } from '@adapttable/vue/features';
-import { TableFeature } from '@adapttable/vue/adapter';
-import { useRowReorder } from '@adapttable/vue/features';
+import { RowReorderHandler } from '@adapttable/vue';
+import { RowReorderOptions } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
+import { useRowReorder } from '@adapttable/vue';
 
 // @public (undocumented)
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): TableFeature<TRow>;

@@ -4,14 +4,11 @@
 
 ```ts
 
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { StaticTableFeature } from '@adapttable/vue';
 
 // @public (undocumented)
 function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature;
 export { print_2 as print }
-
-
-export * from "@adapttable/vue/print";
 
 // (No @packageDocumentation comment for this package)
 

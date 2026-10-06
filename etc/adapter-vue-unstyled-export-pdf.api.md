@@ -4,16 +4,16 @@
 
 ```ts
 
-import { buildPrintDocument } from '@adapttable/vue/export-pdf';
-import { buildPrintTableHtml } from '@adapttable/vue/export-pdf';
-import { buildTablePdf } from '@adapttable/vue/export-pdf';
-import { ExportPdfOptions } from '@adapttable/vue/export-pdf';
-import { openPrintLayout } from '@adapttable/vue/export-pdf';
-import { pdfWriter } from '@adapttable/vue/export-pdf';
-import { printStyles } from '@adapttable/vue/export-pdf';
-import { printTable } from '@adapttable/vue/export-pdf';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { TableFeature } from '@adapttable/vue/adapter';
+import { buildPrintDocument } from '@adapttable/vue/pdf';
+import { buildPrintTableHtml } from '@adapttable/vue/pdf';
+import { buildTablePdf } from '@adapttable/vue/pdf';
+import { ExportPdfOptions } from '@adapttable/vue/pdf';
+import { openPrintLayout } from '@adapttable/vue/pdf';
+import { pdfWriter } from '@adapttable/vue/pdf';
+import { printStyles } from '@adapttable/vue/pdf';
+import { printTable } from '@adapttable/vue/pdf';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
 
 export { buildPrintDocument }
 
@@ -36,9 +36,6 @@ export { pdfWriter }
 export { printStyles }
 
 export { printTable }
-
-
-export * from "@adapttable/vue/export-pdf";
 
 // (No @packageDocumentation comment for this package)
 

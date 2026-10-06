@@ -4,14 +4,14 @@
 
 ```ts
 
-import { commandPalette as commandPalette_2 } from '@adapttable/vue/command-palette';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { commandPalette as commandPalette_2 } from '@adapttable/vue/features';
+import { CommandPaletteOptions } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue';
 
 // @public (undocumented)
 export function commandPalette(options?: Parameters<typeof commandPalette_2>[0]): StaticTableFeature;
 
-
-export * from "@adapttable/vue/command-palette";
+export { CommandPaletteOptions }
 
 // (No @packageDocumentation comment for this package)
 

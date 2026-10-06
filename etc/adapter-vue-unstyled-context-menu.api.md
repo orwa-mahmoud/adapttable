@@ -4,14 +4,13 @@
 
 ```ts
 
-import { ContextMenuOptions } from '@adapttable/vue/context-menu';
-import { TableFeature } from '@adapttable/vue/adapter';
+import { ContextMenuOptions } from '@adapttable/vue/features';
+import { TableFeature } from '@adapttable/vue';
 
 // @public (undocumented)
 export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature<TRow>;
 
-
-export * from "@adapttable/vue/context-menu";
+export { ContextMenuOptions }
 
 // (No @packageDocumentation comment for this package)
 

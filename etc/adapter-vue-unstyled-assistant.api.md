@@ -4,11 +4,11 @@
 
 ```ts
 
-import { AgentApprovalProps } from '@adapttable/vue/assistant';
+import { AgentApprovalProps } from '@adapttable/vue/adapter';
 import { DefineSetupFnComponent } from 'vue';
 import { PublicProps } from 'vue';
-import { StaticTableFeature } from '@adapttable/vue/assistant';
-import { TableAssistantProps } from '@adapttable/vue/assistant';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableAssistantProps } from '@adapttable/vue/adapter';
 
 // @public (undocumented)
 export const AgentApproval: DefineSetupFnComponent<AgentApprovalProps, {}, {}, AgentApprovalProps & {}, PublicProps>;

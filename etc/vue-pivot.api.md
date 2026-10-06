@@ -5,32 +5,77 @@
 ```ts
 
 import { AggregateName } from '@adapttable/core';
-import { ColumnGroupDef } from '@adapttable/core';
-import { ColumnGroupRecord } from '@adapttable/core';
+import { assignField } from '@adapttable/core/pivot';
+import { availableFields } from '@adapttable/core/pivot';
 import { ColumnMetadata } from '@adapttable/core';
 import { Component } from 'vue';
 import { ComputedRef } from 'vue';
-import { FunctionalComponent } from 'vue';
+import { deserializePivot } from '@adapttable/core/pivot';
+import { deserializePivotState } from '@adapttable/core/pivot';
+import { EMPTY_PIVOT_CONFIG } from '@adapttable/core/pivot';
+import { isPivotReady } from '@adapttable/core/pivot';
 import { MaybeRefOrGetter } from 'vue';
+import { measureLabel } from '@adapttable/core/pivot';
+import { moveField } from '@adapttable/core/pivot';
+import { pivot } from '@adapttable/core/pivot';
+import { PIVOT_AGGREGATIONS } from '@adapttable/core/pivot';
+import { PIVOT_BLANK } from '@adapttable/core/pivot';
+import { PIVOT_GRAND_TOTAL_KEY } from '@adapttable/core/pivot';
+import { PIVOT_ROW_COLUMN_KEY } from '@adapttable/core/pivot';
+import { PIVOT_ROW_INDENT } from '@adapttable/core/pivot';
+import { PIVOT_ZONES } from '@adapttable/core/pivot';
 import { PivotAddProps } from '@adapttable/core/binding';
 import { PivotAggProps } from '@adapttable/core/binding';
-import { PivotConfig } from '@adapttable/core';
-import { PivotField } from '@adapttable/core';
+import { PivotColumnLeaf } from '@adapttable/core/pivot';
+import { PivotColumnNode } from '@adapttable/core/pivot';
+import { PivotConfig } from '@adapttable/core/pivot';
+import { PivotConfig as PivotConfig_2 } from '@adapttable/core';
+import { PivotField } from '@adapttable/core/pivot';
+import { PivotField as PivotField_2 } from '@adapttable/core';
 import { PivotFieldProps } from '@adapttable/core/binding';
-import { PivotPanelChromeProps as PivotPanelChromeProps_2 } from '@adapttable/core/binding';
-import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
+import { pivotLeafColumnKey } from '@adapttable/core/pivot';
+import { PivotLeafColumnLayout } from '@adapttable/core/pivot';
+import { pivotLeafGroup } from '@adapttable/core/pivot';
+import { PivotMeasure } from '@adapttable/core/pivot';
+import { pivotMeasureAggName } from '@adapttable/core/pivot';
+import { PivotOptions } from '@adapttable/core/pivot';
 import { PivotPanelSurfaceProps } from '@adapttable/core/binding';
-import { PivotResult } from '@adapttable/core';
-import { PivotRow } from '@adapttable/core';
+import { pivotPanelZones } from '@adapttable/core/pivot';
+import { PivotResult } from '@adapttable/core/pivot';
+import { PivotResult as PivotResult_2 } from '@adapttable/core';
+import { PivotRow } from '@adapttable/core/pivot';
+import { PivotRow as PivotRow_2 } from '@adapttable/core';
+import { pivotRowCaption } from '@adapttable/core/pivot';
+import { pivotRowIndentStyle } from '@adapttable/core/pivot';
+import { PivotRowKind } from '@adapttable/core/pivot';
+import { PivotTableLayout } from '@adapttable/core/pivot';
+import { pivotTableLayout } from '@adapttable/core/pivot';
+import { PivotUrlState } from '@adapttable/core/pivot';
+import { PivotZone } from '@adapttable/core/pivot';
+import { PivotZoneEntry } from '@adapttable/core/pivot';
+import { pivotZoneLabel } from '@adapttable/core/pivot';
+import { PivotZoneModel } from '@adapttable/core/pivot';
 import { PivotZoneProps } from '@adapttable/core/binding';
+import { QueryPivotPage } from '@adapttable/core/pivot';
+import { QueryPivotRow } from '@adapttable/core/pivot';
 import { Ref } from 'vue';
+import { removeField } from '@adapttable/core/pivot';
+import { serializePivot } from '@adapttable/core/pivot';
+import { serializePivotState } from '@adapttable/core/pivot';
+import { ServerPivotOptions } from '@adapttable/core/pivot';
+import { serverPivotResult } from '@adapttable/core/pivot';
+import { setMeasureAgg } from '@adapttable/core/pivot';
 import { SortDirection } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { VNodeChild } from 'vue';
 
+export { assignField }
+
+export { availableFields }
+
 // @public
-export interface CellContext<TRow, TValue = unknown> {
+interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -42,7 +87,7 @@ export interface CellContext<TRow, TValue = unknown> {
 }
 
 // @public
-export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
+interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
     // (undocumented)
     readonly accessor?: (row: TRow) => TValue;
     // (undocumented)
@@ -56,22 +101,8 @@ export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<T
     readonly headerCell?: Renderer<HeaderContext<TRow, TValue>>;
 }
 
-// @public (undocumented)
-export interface ColumnGroup<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
-    // (undocumented)
-    readonly children: readonly ColumnInput<TRow>[];
-}
-
-// @public (undocumented)
-export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
-
 // @public
-export type ComponentProps<TComponent> = TComponent extends (new (...args: never[]) => {
-    $props: infer TProps;
-}) ? TProps : TComponent extends FunctionalComponent<infer TProps> ? TProps : never;
-
-// @public
-export interface ComponentRenderer<TContext> {
+interface ComponentRenderer<TContext> {
     // (undocumented)
     readonly component: Component;
     // (undocumented)
@@ -80,17 +111,14 @@ export interface ComponentRenderer<TContext> {
     }["map"];
 }
 
-// @public
-export function componentRenderer<TContext, TComponent extends Component>(component: TComponent, props: (context: TContext) => ComponentProps<TComponent> & object): ComponentRenderer<TContext>;
+export { deserializePivot }
 
-// @public (undocumented)
-export function flattenColumns<TRow>(columns: readonly ColumnInput<TRow>[]): {
-    readonly leaves: readonly ColumnDef<TRow>[];
-    readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
-};
+export { deserializePivotState }
+
+export { EMPTY_PIVOT_CONFIG }
 
 // @public
-export interface FooterContext<TRow, TValue = unknown> {
+interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -98,7 +126,7 @@ export interface FooterContext<TRow, TValue = unknown> {
 }
 
 // @public
-export interface HeaderContext<TRow, TValue = unknown> {
+interface HeaderContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -113,97 +141,142 @@ export interface HeaderContext<TRow, TValue = unknown> {
     }) => void;
 }
 
+export { isPivotReady }
+
 // @public
-export type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
+type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
+
+export { measureLabel }
+
+export { moveField }
+
+export { pivot }
+
+export { PIVOT_AGGREGATIONS }
+
+export { PIVOT_BLANK }
+
+export { PIVOT_GRAND_TOTAL_KEY }
+
+export { PIVOT_ROW_COLUMN_KEY }
+
+export { PIVOT_ROW_INDENT }
+
+export { PIVOT_ZONES }
 
 export { PivotAddProps }
 
 export { PivotAggProps }
 
+export { PivotColumnLeaf }
+
+export { PivotColumnNode }
+
+export { PivotConfig }
+
+export { PivotField }
+
 export { PivotFieldProps }
 
-// @public (undocumented)
-export function PivotPanelChrome(props: PivotPanelChromeProps): VNodeChild;
+export { pivotLeafColumnKey }
 
-// @public (undocumented)
-export namespace PivotPanelChrome {
-    var // (undocumented)
-    props: string[];
-}
+export { PivotLeafColumnLayout }
 
-// @public (undocumented)
-export type PivotPanelChromeProps = Omit<PivotPanelChromeProps_2<VNodeChild>, "slots"> & {
-    readonly slots: PivotPanelSlots;
-};
+export { pivotLeafGroup }
 
-// @public (undocumented)
-export type PivotPanelSlots = Omit<PivotPanelSlots_2<VNodeChild>, "Agg"> & {
-    readonly Agg: (props: VuePivotAggProps) => VNodeChild;
-};
+export { PivotMeasure }
+
+export { pivotMeasureAggName }
+
+export { PivotOptions }
 
 export { PivotPanelSurfaceProps }
+
+export { pivotPanelZones }
+
+export { PivotResult }
+
+export { PivotRow }
+
+export { pivotRowCaption }
+
+export { pivotRowIndentStyle }
+
+export { PivotRowKind }
+
+export { PivotTableLayout }
+
+export { pivotTableLayout }
 
 // @public (undocumented)
 export interface PivotTableModel {
     // (undocumented)
-    readonly columns: readonly ColumnDef<PivotRow>[];
+    readonly columns: readonly ColumnDef<PivotRow_2>[];
     // (undocumented)
     readonly pinnedRows?: {
-        readonly bottom: readonly PivotRow[];
+        readonly bottom: readonly PivotRow_2[];
     };
     // (undocumented)
-    readonly rowKey: (row: PivotRow) => string;
+    readonly rowKey: (row: PivotRow_2) => string;
     // (undocumented)
-    readonly rows: readonly PivotRow[];
+    readonly rows: readonly PivotRow_2[];
 }
 
 // @public (undocumented)
-export function pivotTableModel(result: PivotResult, options?: PivotTableModelOptions): PivotTableModel;
+export function pivotTableModel(result: PivotResult_2, options?: PivotTableModelOptions): PivotTableModel;
 
 // @public (undocumented)
 export interface PivotTableModelOptions {
     // (undocumented)
-    readonly fields?: readonly PivotField[];
+    readonly fields?: readonly PivotField_2[];
     // (undocumented)
     readonly indent?: number;
     // (undocumented)
     readonly labels?: TableLabels;
     // (undocumented)
-    readonly renderRowHeader?: (row: PivotRow) => VNodeChild;
+    readonly renderRowHeader?: (row: PivotRow_2) => VNodeChild;
     // (undocumented)
     readonly rowHeader?: string;
 }
 
+export { PivotUrlState }
+
+export { PivotZone }
+
+export { PivotZoneEntry }
+
+export { pivotZoneLabel }
+
+export { PivotZoneModel }
+
 export { PivotZoneProps }
 
-// @public (undocumented)
-export function primitiveText(value: unknown): string | null;
+export { QueryPivotPage }
+
+export { QueryPivotRow }
+
+export { removeField }
 
 // @public (undocumented)
-export function renderCell<TRow, TValue>(context: CellContext<TRow, TValue>, slot?: RenderFunction<CellContext<TRow, TValue>>): VNodeChild;
-
-// @public (undocumented)
-export function renderContent<TContext>(renderer: Renderer<TContext>, context: TContext): VNodeChild;
-
-// @public (undocumented)
-export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
-
-// @public (undocumented)
-export function renderFooter<TRow, TValue>(context: FooterContext<TRow, TValue>, slot?: RenderFunction<FooterContext<TRow, TValue>>): VNodeChild;
+type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
 // @public
-export type RenderFunction<TContext> = {
+type RenderFunction<TContext> = {
     render(context: TContext): VNodeChild;
 }["render"];
 
-// @public (undocumented)
-export function renderHeader<TRow, TValue>(context: HeaderContext<TRow, TValue>, slot?: RenderFunction<HeaderContext<TRow, TValue>>): VNodeChild;
+export { serializePivot }
+
+export { serializePivotState }
+
+export { ServerPivotOptions }
+
+export { serverPivotResult }
+
+export { setMeasureAgg }
 
 // @public (undocumented)
-export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
-
-// @public (undocumented)
-export interface UrlSliceOptions {
+interface UrlSliceOptions {
     readonly serverSearch?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
@@ -215,9 +288,9 @@ export interface UrlSliceOptions {
 
 // @public (undocumented)
 export function usePivotUrlState(input?: MaybeRefOrGetter<UsePivotUrlStateOptions>, activity?: MaybeRefOrGetter<boolean>): {
-    config: ComputedRef<PivotConfig>;
+    config: ComputedRef<PivotConfig_2>;
     collapsed: ComputedRef<Set<string>>;
-    onConfigChange: (next: PivotConfig) => void;
+    onConfigChange: (next: PivotConfig_2) => void;
     onCollapsedChange: (next: ReadonlySet<string>) => void;
     flush: () => void;
 };
@@ -225,7 +298,7 @@ export function usePivotUrlState(input?: MaybeRefOrGetter<UsePivotUrlStateOption
 // @public (undocumented)
 export interface UsePivotUrlStateOptions extends UrlSliceOptions {
     // (undocumented)
-    readonly defaultConfig?: MaybeRefOrGetterOptional<PivotConfig>;
+    readonly defaultConfig?: MaybeRefOrGetterOptional<PivotConfig_2>;
 }
 
 // @public (undocumented)
@@ -236,9 +309,6 @@ export interface VuePivotAggProps extends PivotAggProps {
     // (undocumented)
     readonly optionLabels: Readonly<Record<AggregateName, string>>;
 }
-
-
-export * from "@adapttable/core/pivot";
 
 // (No @packageDocumentation comment for this package)
 

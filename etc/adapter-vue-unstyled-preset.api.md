@@ -4,11 +4,11 @@
 
 ```ts
 
-import { BulkAction } from '@adapttable/vue/adapter';
-import { FilterDef } from '@adapttable/vue/filters';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { TableFeature } from '@adapttable/vue/adapter';
-import { UseSavedViewsOptions } from '@adapttable/vue/saved-views';
+import { BulkAction } from '@adapttable/vue';
+import { FilterDef } from '@adapttable/vue';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
+import { UseSavedViewsOptions } from '@adapttable/vue';
 
 export { FilterDef }
 
@@ -28,9 +28,6 @@ export function standardFeatures(): StaticTableFeature[];
 export function standardFeatures<TRow>(options?: StandardFeatureOptions<TRow>): TableFeature<TRow>[];
 
 export { UseSavedViewsOptions }
-
-
-export * from "@adapttable/vue/adapter";
 
 // (No @packageDocumentation comment for this package)
 

@@ -4,9 +4,9 @@
 
 ```ts
 
-import { ColumnMenuSlotProps } from '@adapttable/vue/column-menu';
+import { ColumnMenuSlotProps } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { StaticTableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)

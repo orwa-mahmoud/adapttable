@@ -4,16 +4,18 @@
 
 ```ts
 
-import { ChecklistFilterProps } from '@adapttable/vue/filters';
-import { FilterDef } from '@adapttable/vue/filters';
-import { FilterFieldOptions } from '@adapttable/vue/filters';
-import { FilterOption } from '@adapttable/vue/filters';
-import { FiltersOptions } from '@adapttable/vue/filters';
-import { FilterTreeBuilderProps } from '@adapttable/vue/filters';
-import { filterTypes } from '@adapttable/vue/filters';
-import { FilterTypeSpec } from '@adapttable/vue/filters';
+import { ChecklistFilterProps } from '@adapttable/vue/adapter';
+import { ChecklistFilterProps as ChecklistFilterProps_2 } from '@adapttable/core/binding';
+import { FilterDef } from '@adapttable/vue';
+import { FilterFieldOptions } from '@adapttable/vue/adapter';
+import { FilterOption } from '@adapttable/vue';
+import { FiltersOptions } from '@adapttable/vue/features';
+import { FilterTreeBuilderProps } from '@adapttable/vue/adapter';
+import { FilterTreeBuilderProps as FilterTreeBuilderProps_2 } from '@adapttable/core/binding';
+import { filterTypes } from '@adapttable/vue/features';
+import { FilterTypeSpec } from '@adapttable/vue';
 import { PublicProps } from 'vue';
-import { TableFeature } from '@adapttable/vue/adapter';
+import { TableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)
@@ -31,7 +33,7 @@ const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup
 
 // @public (undocumented)
 const __VLS_export$2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal$2<ChecklistFilterProps<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal$2<ChecklistFilterProps_2<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -44,7 +46,7 @@ const __VLS_export$2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup
 
 // @public (undocumented)
 const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal<FilterTreeBuilderProps<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal<FilterTreeBuilderProps_2<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -64,6 +66,9 @@ type __VLS_PrettifyLocal$2<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [
 // @public (undocumented)
 type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
+// @public (undocumented)
+export const ChecklistFilter: typeof __VLS_export$2;
+
 export { ChecklistFilterProps }
 
 export { FilterDef }
@@ -75,6 +80,9 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: Filte
 
 export { FiltersOptions }
 
+// @public (undocumented)
+export const FilterTreeBuilder: typeof __VLS_export;
+
 export { FilterTreeBuilderProps }
 
 export { filterTypes }
@@ -82,13 +90,7 @@ export { filterTypes }
 export { FilterTypeSpec }
 
 // @public (undocumented)
-export const NativeChecklistFilter: typeof __VLS_export$2;
-
-// @public (undocumented)
 export const NativeFilterField: typeof __VLS_export$1;
-
-// @public (undocumented)
-export const NativeFilterTree: typeof __VLS_export;
 
 // (No @packageDocumentation comment for this package)
 

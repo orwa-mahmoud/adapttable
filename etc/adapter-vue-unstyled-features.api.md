@@ -4,115 +4,115 @@
 
 ```ts
 
-import { AgentApprovalProps } from '@adapttable/vue/assistant';
-import { BatchEditBarProps } from '@adapttable/vue/editing';
-import { BatchEditingState } from '@adapttable/vue/editing';
-import { BatchRowEdit } from '@adapttable/vue/editing';
-import { bulkActions as bulkActions_2 } from '@adapttable/vue/bulk-actions';
-import { CellEdit } from '@adapttable/vue/cell-navigation';
-import { CellEditHandler } from '@adapttable/vue/editing';
-import { CellNavigationOptions } from '@adapttable/vue/cell-navigation';
-import { CellRange } from '@adapttable/vue/cell-navigation';
+import { AgentApprovalProps } from '@adapttable/vue/adapter';
+import { BatchEditBarProps } from '@adapttable/vue/adapter';
+import { BatchEditingState } from '@adapttable/vue';
+import { BatchRowEdit } from '@adapttable/vue';
+import { bulkActions as bulkActions_2 } from '@adapttable/vue/features';
+import { CellEdit } from '@adapttable/vue';
+import { CellEditHandler } from '@adapttable/vue';
+import { CellNavigationOptions } from '@adapttable/vue/features';
+import { CellRange } from '@adapttable/vue/adapter';
 import { cellSpan } from '@adapttable/vue/features';
-import { CellSpanAppearance } from '@adapttable/vue/features';
-import { CellSpanRequest } from '@adapttable/vue/features';
-import { ChecklistFilterProps } from '@adapttable/vue/filters';
+import { CellSpanAppearance } from '@adapttable/vue';
+import { CellSpanRequest } from '@adapttable/vue';
+import { ChecklistFilterProps } from '@adapttable/vue/adapter';
+import { ChecklistFilterProps as ChecklistFilterProps_2 } from '@adapttable/core/binding';
 import { collapsibleColumnGroups } from '@adapttable/vue/features';
-import { ColumnMenuSlotProps } from '@adapttable/vue/column-menu';
-import { ColumnResizeHandleOptions } from '@adapttable/vue/features';
-import { ColumnResizeHandleProps } from '@adapttable/vue/features';
-import { commandPalette as commandPalette_2 } from '@adapttable/vue/command-palette';
-import { ConfirmHandler } from '@adapttable/vue/features';
-import { ConfirmRequest } from '@adapttable/vue/features';
-import { ContextMenuOptions } from '@adapttable/vue/context-menu';
+import { ColumnMenuSlotProps } from '@adapttable/vue/adapter';
+import { ColumnResizeHandleOptions } from '@adapttable/vue/adapter';
+import { ColumnResizeHandleProps } from '@adapttable/vue/adapter';
+import { commandPalette as commandPalette_2 } from '@adapttable/vue/features';
+import { ConfirmHandler } from '@adapttable/vue';
+import { ConfirmRequest } from '@adapttable/vue';
+import { ContextMenuOptions } from '@adapttable/vue/features';
 import { DefineSetupFnComponent } from 'vue';
-import { dirtyIndicators } from '@adapttable/vue/editing';
-import { editHistory } from '@adapttable/vue/editing';
-import { EditingLifecycleExtras } from '@adapttable/vue/editing';
-import { ExportCsvOptions } from '@adapttable/vue/export-csv';
-import { ExportPdfOptions } from '@adapttable/vue/export-pdf';
-import { ExportXlsxOptions } from '@adapttable/vue/export-xlsx';
-import { ExtraEntry } from '@adapttable/vue/features';
-import { ExtraRow } from '@adapttable/vue/features';
-import { ExtraRowKind } from '@adapttable/vue/features';
+import { dirtyIndicators } from '@adapttable/vue/features';
+import { editHistory } from '@adapttable/vue/features';
+import { EditingLifecycleExtras } from '@adapttable/vue/features';
+import { ExportCsvOptions } from '@adapttable/vue/features';
+import { ExportPdfOptions } from '@adapttable/vue/pdf';
+import { ExportXlsxOptions } from '@adapttable/vue/xlsx';
+import { ExtraEntry } from '@adapttable/vue/adapter';
+import { ExtraRow } from '@adapttable/vue/adapter';
+import { ExtraRowKind } from '@adapttable/vue';
 import { extraRows } from '@adapttable/vue/features';
-import { FilterDef } from '@adapttable/vue/filters';
-import { FilterFieldOptions } from '@adapttable/vue/filters';
-import { FilterHeaderControlOptions } from '@adapttable/vue/header-filters';
-import { FilterHeaderControlProps } from '@adapttable/vue/header-filters';
-import { FilterHeaderRowProps } from '@adapttable/vue/header-filters';
-import { FilterOption } from '@adapttable/vue/filters';
-import { FiltersOptions } from '@adapttable/vue/filters';
-import { FilterTreeBuilderProps } from '@adapttable/vue/filters';
-import { filterTypes } from '@adapttable/vue/filters';
-import { FilterTypeSpec } from '@adapttable/vue/filters';
+import { FilterDef } from '@adapttable/vue';
+import { FilterFieldOptions } from '@adapttable/vue/adapter';
+import { FilterHeaderControlOptions } from '@adapttable/vue/adapter';
+import { FilterHeaderControlProps } from '@adapttable/vue/adapter';
+import { FilterHeaderRowProps } from '@adapttable/vue/adapter';
+import { FilterOption } from '@adapttable/vue';
+import { FiltersOptions } from '@adapttable/vue/features';
+import { FilterTreeBuilderProps } from '@adapttable/vue/adapter';
+import { FilterTreeBuilderProps as FilterTreeBuilderProps_2 } from '@adapttable/core/binding';
+import { filterTypes } from '@adapttable/vue/features';
+import { FilterTypeSpec } from '@adapttable/vue';
 import { fitColumns } from '@adapttable/vue/features';
-import { GetCellSpan } from '@adapttable/vue/features';
-import { GetCellSpanArgs } from '@adapttable/vue/features';
-import { GridCell } from '@adapttable/vue/cell-navigation';
-import { GroupCollapseOptions } from '@adapttable/vue/features';
+import { GetCellSpan } from '@adapttable/vue';
+import { GetCellSpanArgs } from '@adapttable/vue';
+import { GridCell } from '@adapttable/vue';
+import { GroupCollapseOptions } from '@adapttable/vue';
 import { GroupingExtras } from '@adapttable/vue/features';
-import { GroupingPanelProps } from '@adapttable/vue/features';
-import { GroupNode } from '@adapttable/vue/features';
-import { GroupSort } from '@adapttable/vue/features';
-import { HeaderFilterOptions } from '@adapttable/vue/header-filters';
+import { GroupingPanelProps } from '@adapttable/vue';
+import { GroupNode } from '@adapttable/vue';
+import { GroupSort } from '@adapttable/vue';
+import { HeaderFilterOptions } from '@adapttable/vue/adapter';
 import { MaybeRefOrGetter } from 'vue';
 import { multiSort } from '@adapttable/vue/features';
-import { NestedTable } from '@adapttable/vue/features';
+import { NestedTable } from '@adapttable/vue';
 import { nestedTable } from '@adapttable/vue/features';
-import { nestedTableDetail } from '@adapttable/vue/features';
-import { NestedTableFor } from '@adapttable/vue/features';
-import { PinnedRows } from '@adapttable/vue/features';
-import { PinnedSummaryEntry } from '@adapttable/vue/features';
+import { nestedTableDetail } from '@adapttable/vue/adapter';
+import { NestedTableFor } from '@adapttable/vue';
+import { PinnedRows } from '@adapttable/vue';
+import { PinnedSummaryEntry } from '@adapttable/vue';
 import { pinnedSummaryRows } from '@adapttable/vue/features';
 import { PublicProps } from 'vue';
 import { resizableColumns } from '@adapttable/vue/features';
-import { RowAction } from '@adapttable/vue/features';
+import { RowAction } from '@adapttable/vue';
 import { rowActions } from '@adapttable/vue/features';
 import { rowAppearance } from '@adapttable/vue/features';
 import { RowAppearanceOptions } from '@adapttable/vue/features';
 import { rowDetail } from '@adapttable/vue/features';
-import { RowEditActionsProps } from '@adapttable/vue/editing';
-import { RowEditIcons } from '@adapttable/vue/editing';
-import { RowEditingState } from '@adapttable/vue/editing';
-import { RowExpansionOptions } from '@adapttable/vue/features';
-import { RowHeight } from '@adapttable/vue/features';
-import { RowMutationHandlers } from '@adapttable/vue/features';
+import { RowEditActionsProps } from '@adapttable/vue/adapter';
+import { RowEditIcons } from '@adapttable/vue/adapter';
+import { RowEditingState } from '@adapttable/vue';
+import { RowExpansionOptions } from '@adapttable/vue';
+import { RowHeight } from '@adapttable/vue';
+import { RowMutationHandlers } from '@adapttable/vue';
 import { rowPinning } from '@adapttable/vue/features';
 import { RowPinningFeatureOptions } from '@adapttable/vue/features';
-import { RowPinSide } from '@adapttable/vue/features';
-import { RowPinState } from '@adapttable/vue/features';
-import { RowReorderHandler } from '@adapttable/vue/features';
-import { RowReorderOptions } from '@adapttable/vue/features';
-import { RowStyle } from '@adapttable/vue/features';
-import { SavedView } from '@adapttable/vue/saved-views';
-import { SavedViewsPanelChromeProps } from '@adapttable/vue/saved-views';
-import { SavedViewsStore } from '@adapttable/vue/saved-views';
-import { sidePanel as sidePanel_2 } from '@adapttable/vue/side-panel';
+import { RowPinSide } from '@adapttable/vue';
+import { RowPinState } from '@adapttable/vue';
+import { RowReorderHandler } from '@adapttable/vue';
+import { RowReorderOptions } from '@adapttable/vue';
+import { RowStyle } from '@adapttable/vue';
+import { SavedView } from '@adapttable/vue';
+import { SavedViewsPanelChromeProps } from '@adapttable/vue/adapter';
+import { SavedViewsStore } from '@adapttable/vue';
+import { sidePanel as sidePanel_2 } from '@adapttable/vue/features';
 import { StaticGroupingExtras } from '@adapttable/vue/features';
-import { StaticTableFeature } from '@adapttable/vue/assistant';
-import { StaticTableFeature as StaticTableFeature_2 } from '@adapttable/vue/adapter';
-import { StaticTableFeature as StaticTableFeature_3 } from '@adapttable/vue';
-import { TableAssistantProps } from '@adapttable/vue/assistant';
-import { TableEditingOptions } from '@adapttable/vue/editing';
-import { TableFeature } from '@adapttable/vue/adapter';
-import { TableRowDetail } from '@adapttable/vue/features';
-import { TableTree } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableAssistantProps } from '@adapttable/vue/adapter';
+import { TableEditingOptions } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
+import { TableRowDetail } from '@adapttable/vue';
+import { TableTree } from '@adapttable/vue';
 import { tree } from '@adapttable/vue/features';
-import { TreeExpansionOptions } from '@adapttable/vue/features';
+import { TreeExpansionOptions } from '@adapttable/vue';
 import { TreeFeatureOptions } from '@adapttable/vue/features';
-import { useGroupCollapse } from '@adapttable/vue/features';
-import { useGroupCollapseUrlState } from '@adapttable/vue/features';
-import { useGroupPaging } from '@adapttable/vue/features';
-import { useLazyChildren } from '@adapttable/vue/features';
-import { useRowExpansion } from '@adapttable/vue/features';
-import { useRowReorder } from '@adapttable/vue/features';
-import { UseSavedViewsOptions } from '@adapttable/vue/saved-views';
-import { useTreeExpansion } from '@adapttable/vue/features';
+import { useGroupCollapse } from '@adapttable/vue';
+import { useGroupCollapseUrlState } from '@adapttable/vue';
+import { useGroupPaging } from '@adapttable/vue';
+import { useLazyChildren } from '@adapttable/vue';
+import { useRowExpansion } from '@adapttable/vue';
+import { useRowReorder } from '@adapttable/vue';
+import { UseSavedViewsOptions } from '@adapttable/vue';
+import { useTreeExpansion } from '@adapttable/vue';
 import { virtualize } from '@adapttable/vue/features';
 import { VirtualizeOptions } from '@adapttable/vue/features';
 import { VNode } from 'vue';
-import { VueEditableCellProps } from '@adapttable/vue/editing';
+import { VueEditableCellProps } from '@adapttable/vue/adapter';
 
 // @public (undocumented)
 const __VLS_export$1: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$1<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
@@ -155,7 +155,7 @@ const __VLS_export$1_3: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_set
 
 // @public (undocumented)
 const __VLS_export$2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal$2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal$2<ChecklistFilterProps<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal$2<ChecklistFilterProps_2<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -194,7 +194,7 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
 
 // @public (undocumented)
 const __VLS_export_2: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>["props"], __VLS_ctx?: __VLS_PrettifyLocal_2<Pick<NonNullable<Awaited<typeof __VLS_setup>>, "attrs" | "emit" | "slots">>, __VLS_exposed?: NonNullable<Awaited<typeof __VLS_setup>>["expose"], __VLS_setup?: Promise<{
-    props: PublicProps & __VLS_PrettifyLocal_2<FilterTreeBuilderProps<TRow>> & (typeof globalThis extends {
+    props: PublicProps & __VLS_PrettifyLocal_2<FilterTreeBuilderProps_2<TRow>> & (typeof globalThis extends {
         __VLS_PROPS_FALLBACK: infer P;
     } ? P : {});
     expose: (exposed: {}) => void;
@@ -274,14 +274,14 @@ export { BatchEditingState }
 export { BatchRowEdit }
 
 // @public (undocumented)
-export function bulkActions(actions: Parameters<typeof bulkActions_2>[0]): StaticTableFeature_2;
+export function bulkActions(actions: Parameters<typeof bulkActions_2>[0]): StaticTableFeature;
 
 export { CellEdit }
 
 export { CellEditHandler }
 
 // @public (undocumented)
-export function cellNavigation(options?: CellNavigationOptions): StaticTableFeature_2;
+export function cellNavigation(options?: CellNavigationOptions): StaticTableFeature;
 
 export { CellNavigationOptions }
 
@@ -293,12 +293,15 @@ export { CellSpanAppearance }
 
 export { CellSpanRequest }
 
+// @public (undocumented)
+export const ChecklistFilter: typeof __VLS_export$2;
+
 export { ChecklistFilterProps }
 
 export { collapsibleColumnGroups }
 
 // @public
-export function columnMenu(): StaticTableFeature_2;
+export function columnMenu(): StaticTableFeature;
 
 export { ColumnMenuSlotProps }
 
@@ -307,10 +310,10 @@ export { ColumnResizeHandleOptions }
 export { ColumnResizeHandleProps }
 
 // @public (undocumented)
-export function columnSelectionCheckbox(): StaticTableFeature_2;
+export function columnSelectionCheckbox(): StaticTableFeature;
 
 // @public (undocumented)
-export function commandPalette(options?: Parameters<typeof commandPalette_2>[0]): StaticTableFeature_2;
+export function commandPalette(options?: Parameters<typeof commandPalette_2>[0]): StaticTableFeature;
 
 export { ConfirmHandler }
 
@@ -856,7 +859,7 @@ export interface DataTableClassNames {
 }
 
 // @public
-export function densityChooser(): StaticTableFeature_3;
+export function densityChooser(): StaticTableFeature;
 
 export { dirtyIndicators }
 
@@ -868,13 +871,13 @@ export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Editin
 export { EditingLifecycleExtras }
 
 // @public
-export function exportCsv(options?: boolean): StaticTableFeature_2;
+export function exportCsv(options?: boolean): StaticTableFeature;
 
 // @public (undocumented)
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature<TRow>;
 
 // @public
-export function exportPdf(options?: boolean): StaticTableFeature_2;
+export function exportPdf(options?: boolean): StaticTableFeature;
 
 // @public (undocumented)
 export function exportPdf<TRow>(options?: boolean | ExportPdfOptions<TRow>): TableFeature<TRow>;
@@ -882,7 +885,7 @@ export function exportPdf<TRow>(options?: boolean | ExportPdfOptions<TRow>): Tab
 export { ExportPdfOptions }
 
 // @public
-export function exportXlsx(options?: boolean): StaticTableFeature_2;
+export function exportXlsx(options?: boolean): StaticTableFeature;
 
 // @public (undocumented)
 export function exportXlsx<TRow>(options?: boolean | ExportXlsxOptions<TRow>): TableFeature<TRow>;
@@ -918,6 +921,9 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: Filte
 
 export { FiltersOptions }
 
+// @public (undocumented)
+export const FilterTreeBuilder: typeof __VLS_export_2;
+
 export { FilterTreeBuilderProps }
 
 export { filterTypes }
@@ -927,12 +933,12 @@ export { FilterTypeSpec }
 // @public (undocumented)
 export function findInTable(options?: {
     readonly button?: boolean;
-}): StaticTableFeature_2;
+}): StaticTableFeature;
 
 export { fitColumns }
 
 // @public
-export function fullscreen(): StaticTableFeature_3;
+export function fullscreen(): StaticTableFeature;
 
 export { GetCellSpan }
 
@@ -943,7 +949,7 @@ export { GridCell }
 export { GroupCollapseOptions }
 
 // @public
-export function grouping(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: StaticGroupingExtras): StaticTableFeature_2;
+export function grouping(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: StaticGroupingExtras): StaticTableFeature;
 
 // @public (undocumented)
 export function grouping<TRow>(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: GroupingExtras<TRow>): TableFeature<TRow>;
@@ -951,7 +957,7 @@ export function grouping<TRow>(groupBy: MaybeRefOrGetter<string | readonly strin
 export { GroupingExtras }
 
 // @public (undocumented)
-export function groupingPanel(initialGroupBy?: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature_2;
+export function groupingPanel(initialGroupBy?: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature;
 
 // @public (undocumented)
 export function groupingPanel<TRow>(initialGroupBy?: string | readonly string[], extras?: GroupingExtras<TRow>): TableFeature<TRow>;
@@ -963,7 +969,7 @@ export { GroupNode }
 export { GroupSort }
 
 // @public
-export function headerFilters(): StaticTableFeature_2;
+export function headerFilters(): StaticTableFeature;
 
 export { multiSort }
 
@@ -971,16 +977,10 @@ export { multiSort }
 export const NativeBatchEditBar: typeof __VLS_export$1_2;
 
 // @public (undocumented)
-export const NativeChecklistFilter: typeof __VLS_export$2;
-
-// @public (undocumented)
 export const NativeEditableCell: typeof __VLS_export$2_2;
 
 // @public (undocumented)
 export const NativeFilterField: typeof __VLS_export$1_3;
-
-// @public (undocumented)
-export const NativeFilterTree: typeof __VLS_export_2;
 
 // @public (undocumented)
 export const NativeHeaderFilter: typeof __VLS_export_3;
@@ -1003,7 +1003,7 @@ export { PinnedSummaryEntry }
 export { pinnedSummaryRows }
 
 // @public (undocumented)
-function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature_2;
+function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature;
 export { print_2 as print }
 
 export { resizableColumns }
@@ -1051,7 +1051,7 @@ export { RowStyle }
 export { SavedView }
 
 // @public
-export function savedViews(options: MaybeRefOrGetter<UseSavedViewsOptions>): StaticTableFeature_2;
+export function savedViews(options: MaybeRefOrGetter<UseSavedViewsOptions>): StaticTableFeature;
 
 // @public
 export const SavedViewsPanel: DefineSetupFnComponent<SavedViewsPanelProps, {}, {}, SavedViewsPanelProps & {}, PublicProps>;
@@ -1065,15 +1065,15 @@ export interface SavedViewsPanelProps extends Omit<SavedViewsPanelChromeProps, "
 export { SavedViewsStore }
 
 // @public (undocumented)
-export function selectionStats(): StaticTableFeature_2;
+export function selectionStats(): StaticTableFeature;
 
 // @public (undocumented)
-export function sidePanel(options: Parameters<typeof sidePanel_2>[0]): StaticTableFeature_2;
+export function sidePanel(options: Parameters<typeof sidePanel_2>[0]): StaticTableFeature;
 
 export { StaticGroupingExtras }
 
 // @public (undocumented)
-export function statusBar(): StaticTableFeature_2;
+export function statusBar(): StaticTableFeature;
 
 // @public (undocumented)
 export const TableAssistant: DefineSetupFnComponent<TableAssistantProps, {}, {}, TableAssistantProps & {}, PublicProps>;
@@ -1096,7 +1096,7 @@ export { TreeExpansionOptions }
 export { TreeFeatureOptions }
 
 // @public
-export function undoRedoButtons(): StaticTableFeature_2;
+export function undoRedoButtons(): StaticTableFeature;
 
 export { useGroupCollapse }
 

@@ -5,12 +5,12 @@
 ```ts
 
 import { BatchEditStoreOptions } from '@adapttable/core';
+import { buildTableXlsx } from '@adapttable/core/xlsx';
 import { BulkAction } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditHandler } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSaveStoreOptions } from '@adapttable/core';
-import { CellSpanAppearance } from '@adapttable/core';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { ChromeExtraSlot } from '@adapttable/core/binding';
@@ -20,12 +20,9 @@ import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnGroupToggleProps } from '@adapttable/core/binding';
 import { ColumnLayoutState } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
-import { Command } from '@adapttable/core';
 import { Component } from 'vue';
 import { ComputedRef } from 'vue';
 import { ConfirmHandler } from '@adapttable/core';
-import { ContextMenuItem } from '@adapttable/core';
-import { ContextMenuTarget } from '@adapttable/core';
 import { CssProperties } from '@adapttable/core/binding';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
@@ -38,10 +35,9 @@ import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
-import { ExtraRow } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
-import { FeatureHostState } from '@adapttable/core';
-import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core/binding';
+import { FeatureHostState } from '@adapttable/core/binding';
+import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
@@ -50,41 +46,27 @@ import { FilterDef } from '@adapttable/core';
 import { FilterEngine } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core/binding';
 import { FilterTypeSpec } from '@adapttable/core';
-import { GetCellSpan } from '@adapttable/core';
 import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
 import { GroupedFlatEntry } from '@adapttable/core';
-import { GroupNode } from '@adapttable/core';
-import { GroupSort } from '@adapttable/core';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { HeaderSelectionState } from '@adapttable/core/binding';
 import { HtmlGroupedHeaderCell } from '@adapttable/core/binding';
 import { LiveFeatureHost } from '@adapttable/core/binding';
 import { MaybeRefOrGetter } from 'vue';
-import { NestedTableDefaults } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
-import { PinnedRows } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { Ref } from 'vue';
 import { RowAction } from '@adapttable/core';
-import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditStoreOptions } from '@adapttable/core';
 import { RowExpansionState } from '@adapttable/core/binding';
-import { RowHeight } from '@adapttable/core';
 import { RowPinningState } from '@adapttable/core/binding';
-import { RowPinState } from '@adapttable/core';
-import { RowReorderHandler } from '@adapttable/core';
-import { RowReorderOptions } from '@adapttable/core';
-import { RowStyle } from '@adapttable/core';
 import { RuntimeChromeInput } from '@adapttable/core/binding';
-import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SelectionState } from '@adapttable/core/binding';
-import { SelectionStatsOptions } from '@adapttable/core';
 import { ShallowRef } from 'vue';
-import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
@@ -99,18 +81,14 @@ import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
-import { VirtualizeInput } from '@adapttable/core/binding';
 import { VNodeChild } from 'vue';
 import { VNodeRef } from 'vue';
+import { xlsxWriter } from '@adapttable/core/xlsx';
 
 // @public (undocumented)
 type Attrs = Readonly<Record<string, unknown>>;
 
-// @public (undocumented)
-export function batchEditing<TRow>(onBatchEdit: NonNullable<TableEditingOptions<TRow>["onBatchEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature$1<TRow>;
-
-// @public (undocumented)
-export function bulkActions(actions: readonly BulkAction[]): StaticTableFeature$1;
+export { buildTableXlsx }
 
 // @public
 interface CellContext<TRow, TValue = unknown> {
@@ -123,21 +101,6 @@ interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly value: TValue;
 }
-
-// @public (undocumented)
-export function cellNavigation(options?: CellNavigationOptions): StaticTableFeature$1;
-
-// @public (undocumented)
-export interface CellNavigationOptions {
-    // (undocumented)
-    readonly onRangeChange?: (range: CellRange | null) => void;
-}
-
-// @public
-export function cellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppearance?: CellSpanAppearance): TableFeature$1<TRow>;
-
-// @public
-export function collapsibleColumnGroups(): StaticTableFeature$1;
 
 // @public
 interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
@@ -181,29 +144,6 @@ interface ColumnLayoutOptions {
 }
 
 // @public
-export function columnMenu(): StaticTableFeature$1;
-
-// @public (undocumented)
-export function columnSelectionCheckbox(): StaticTableFeature$1;
-
-// @public (undocumented)
-export function commandPalette(options?: boolean | CommandPaletteOptions): StaticTableFeature$1;
-
-// @public (undocumented)
-export interface CommandPaletteOptions {
-    // (undocumented)
-    readonly button?: boolean;
-    // (undocumented)
-    readonly commands?: readonly Command[];
-    // (undocumented)
-    readonly onOpenChange?: (open: boolean) => void;
-    // (undocumented)
-    readonly open?: MaybeRefOrGetter<boolean>;
-    // (undocumented)
-    readonly shortcuts?: readonly Shortcut[];
-}
-
-// @public
 interface ComponentRenderer<TContext> {
     // (undocumented)
     readonly component: Component;
@@ -215,20 +155,6 @@ interface ComponentRenderer<TContext> {
 
 // @public (undocumented)
 type ComposedFeature$1<TRow> = TableFeature$1<TRow>;
-
-// @public (undocumented)
-export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): TableFeature$1<TRow>;
-
-// @public (undocumented)
-export interface ContextMenuOptions<TRow> {
-    // (undocumented)
-    readonly items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
-    // (undocumented)
-    readonly onFilter?: (key: string) => void;
-}
-
-// @public
-export function densityChooser(): StaticTableFeature$1;
 
 // @public (undocumented)
 interface DesktopTableModel<TRow> {
@@ -268,41 +194,14 @@ interface DesktopTableModel<TRow> {
 // @public (undocumented)
 type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
 
-// @public (undocumented)
-export function dirtyIndicators(): StaticTableFeature$1;
+// @public
+export function exportXlsx(options?: boolean): StaticTableFeature$1;
 
 // @public (undocumented)
-export function editHistory(options?: boolean | {
-    readonly depth?: number;
-}): StaticTableFeature$1;
-
-// @public (undocumented)
-export function editing<TRow>(onCellEdit: NonNullable<TableEditingOptions<TRow>["onCellEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature$1<TRow>;
-
-// @public (undocumented)
-export type EditingLifecycleExtras<TRow> = Omit<TableEditingOptions<TRow>, "rows" | "columns" | "rowKey" | "onCellEdit" | "onRowEdit" | "onBatchEdit" | "rowEditing" | "batchEditing"> & {
-    readonly rowEditIcons?: RowEditIcons;
-};
+export function exportXlsx<TRow>(options?: boolean | ExportXlsxOptions<TRow>): TableFeature$1<TRow>;
 
 // @public
-export function exportCsv(options?: boolean): StaticTableFeature$1;
-
-// @public (undocumented)
-export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): TableFeature$1<TRow>;
-
-export { ExportCsvOptions }
-
-// @public
-interface ExtraRow$1 extends Omit<ExtraRow, "render"> {
-    // (undocumented)
-    readonly render?: () => VNodeChild;
-}
-
-// @public
-export function extraRows(rows: readonly ExtraRow$1[]): StaticTableFeature$1;
-
-// @public (undocumented)
-export function feature<TRow>(id: string, patch?: FeaturePatch<TRow>, setup?: TableFeature$1<TRow>["setup"]): TableFeature$1<TRow>;
+export type ExportXlsxOptions<TRow> = Omit<ExportCsvOptions<TRow>, "writer">;
 
 // @public (undocumented)
 interface FeatureMountContext$1<TRow = unknown> {
@@ -315,7 +214,7 @@ interface FeatureMountContext$1<TRow = unknown> {
     // (undocumented)
     readonly density?: Readonly<ShallowRef<TableDensity>>;
     // (undocumented)
-    readonly featureHost: Readonly<ShallowRef<FeatureHostState_2<TRow>>>;
+    readonly featureHost: Readonly<ShallowRef<FeatureHostState<TRow>>>;
     // (undocumented)
     readonly filterRuntime: Readonly<ShallowRef<FilterRuntime<TRow> | undefined>>;
     // (undocumented)
@@ -362,25 +261,6 @@ interface FeatureState {
     set<T>(key: FeatureStateKey<T>, value: T | undefined): void;
 }
 
-// @public (undocumented)
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: FiltersOptions): TableFeature$1<TRow>;
-
-// @public (undocumented)
-export interface FiltersOptions {
-    // (undocumented)
-    readonly mode?: "popover" | "drawer";
-    readonly tree?: boolean;
-}
-
-// @public (undocumented)
-export function filterTypes(specs: readonly FilterTypeSpec[]): StaticTableFeature$1;
-
-// @public (undocumented)
-export function findInTable(): StaticTableFeature$1;
-
-// @public
-export function fitColumns(): StaticTableFeature$1;
-
 // @public
 interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
@@ -388,53 +268,6 @@ interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly value: TValue | undefined;
 }
-
-// @public
-export function fullscreen(): StaticTableFeature$1;
-
-// @public (undocumented)
-interface GroupCollapseOptions {
-    // (undocumented)
-    readonly collapsedGroupIds?: MaybeRefOrGetterOptional<readonly string[]>;
-    // (undocumented)
-    readonly defaultCollapsedGroupIds?: readonly string[];
-    // (undocumented)
-    readonly enabled?: MaybeRefOrGetter<boolean>;
-    // (undocumented)
-    readonly onCollapsedGroupIdsChange?: (ids: string[]) => void;
-}
-
-// @public
-export function grouping(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: StaticGroupingExtras): StaticTableFeature$1;
-
-// @public (undocumented)
-export function grouping<TRow>(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: GroupingExtras<TRow>): TableFeature$1<TRow>;
-
-// @public (undocumented)
-export interface GroupingExtras<TRow = unknown> extends Omit<GroupCollapseOptions, "enabled"> {
-    // (undocumented)
-    readonly groupAggregates?: (rows: readonly TRow[]) => unknown;
-    // (undocumented)
-    readonly groupFilter?: (group: GroupNode<TRow>) => boolean;
-    // (undocumented)
-    readonly groupFooters?: boolean;
-    // (undocumented)
-    readonly groupPageSize?: number;
-    // (undocumented)
-    readonly groupRowPageSize?: number;
-    // (undocumented)
-    readonly groupSort?: GroupSort<TRow>;
-    // (undocumented)
-    readonly onGroupByChange?: (keys: readonly string[]) => void;
-    // (undocumented)
-    readonly onGroupLoadMore?: (groupKey: string) => void;
-}
-
-// @public (undocumented)
-export function groupingPanel(initialGroupBy?: string | readonly string[], extras?: StaticGroupingExtras): StaticTableFeature$1;
-
-// @public (undocumented)
-export function groupingPanel<TRow>(initialGroupBy?: string | readonly string[], extras?: GroupingExtras<TRow>): TableFeature$1<TRow>;
 
 // @public (undocumented)
 interface GroupRowModel<TRow> {
@@ -470,9 +303,6 @@ interface HeaderContext<TRow, TValue = unknown> {
     }) => void;
 }
 
-// @public (undocumented)
-export function headerFilters(): StaticTableFeature$1;
-
 // @public
 type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
 
@@ -488,30 +318,6 @@ interface MobileCardsModel<TRow> {
     readonly summary?: TableSummaryModel<TRow>;
 }
 
-// @public
-export function multiSort(): StaticTableFeature$1;
-
-// @public (undocumented)
-interface NestedTable {
-    // (undocumented)
-    readonly label?: string;
-    // (undocumented)
-    readonly table: (defaults: NestedTableDefaults) => VNodeChild;
-}
-
-// @public
-export function nestedTable<TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[], options?: Omit<RowExpansionOptions, "defaultExpandedRowIds" | "enabled">): TableFeature$1<TRow>;
-
-// @public (undocumented)
-type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
-
-// @public
-export function pinnedSummaryRows<TRow>(pinnedRows: PinnedRows<TRow>): TableFeature$1<TRow>;
-
-// @public (undocumented)
-function print_2(onPrint: () => void, printButton?: boolean): StaticTableFeature$1;
-export { print_2 as print }
-
 // @public (undocumented)
 type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
@@ -519,9 +325,6 @@ type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>
 type RenderFunction<TContext> = {
     render(context: TContext): VNodeChild;
 }["render"];
-
-// @public
-export function resizableColumns(): StaticTableFeature$1;
 
 // @public (undocumented)
 interface ResolvedTableOptions<TRow> extends UseDataTableShellOptions<TRow>, Partial<Omit<TableEditingOptions<TRow>, "rows" | "columns" | "rowKey" | "featureHost">> {
@@ -590,25 +393,6 @@ interface RowActionControlsInput<TRow> {
 // @public (undocumented)
 type RowActionControlsProjector<TRow> = (input: RowActionControlsInput<TRow>) => readonly RowActionControl<TRow>[];
 
-// @public
-export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], handlers?: RowMutationHandlers<TRow>): TableFeature$1<TRow>;
-
-// @public
-export function rowAppearance<TRow>(options: RowAppearanceOptions<TRow>): TableFeature$1<TRow>;
-
-// @public
-export interface RowAppearanceOptions<TRow> {
-    // (undocumented)
-    readonly rowClassName?: (row: TRow, index: number) => string | undefined;
-    // (undocumented)
-    readonly rowHeight?: RowHeight<TRow>;
-    // (undocumented)
-    readonly rowStyle?: RowStyle<TRow>;
-}
-
-// @public
-export function rowDetail<TRow>(render: (row: TRow) => VNodeChild, defaultExpandedRowIds?: readonly string[], options?: Omit<RowExpansionOptions, "defaultExpandedRowIds" | "enabled">): TableFeature$1<TRow>;
-
 // @public (undocumented)
 interface RowDetailModel {
     // (undocumented)
@@ -620,47 +404,6 @@ interface RowDetailModel {
     // (undocumented)
     readonly toggleAttrs: Attrs;
 }
-
-// @public (undocumented)
-export function rowEditing<TRow>(onRowEdit: NonNullable<TableEditingOptions<TRow>["onRowEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature$1<TRow>;
-
-// @public (undocumented)
-interface RowExpansionOptions {
-    // (undocumented)
-    readonly defaultExpandedRowIds?: readonly string[];
-    // (undocumented)
-    readonly enabled?: MaybeRefOrGetter<boolean>;
-    // (undocumented)
-    readonly expandedRowIds?: MaybeRefOrGetterOptional<readonly string[]>;
-    // (undocumented)
-    readonly onExpandedRowIdsChange?: (ids: string[]) => void;
-}
-
-// @public
-interface RowMutationHandlers<TRow> {
-    // (undocumented)
-    readonly confirmDeleteRow?: boolean;
-    // (undocumented)
-    readonly onAddRow?: () => unknown;
-    // (undocumented)
-    readonly onDeleteRow?: (row: TRow) => unknown;
-    // (undocumented)
-    readonly onDuplicateRow?: (row: TRow) => unknown;
-}
-
-// @public
-export function rowPinning(options?: RowPinningFeatureOptions): StaticTableFeature$1;
-
-// @public
-export interface RowPinningFeatureOptions {
-    // (undocumented)
-    readonly onPinnedRowIdsChange?: (next: RowPinState) => void;
-    // (undocumented)
-    readonly pinnedRowIds?: MaybeRefOrGetterOptional<RowPinState>;
-}
-
-// @public (undocumented)
-export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): TableFeature$1<TRow>;
 
 // @public (undocumented)
 interface RowSelection {
@@ -697,9 +440,6 @@ interface RowSelection {
 }
 
 // @public
-export function savedViews(options: MaybeRefOrGetter<UseSavedViewsOptions>): StaticTableFeature$1;
-
-// @public
 interface SelectionCheckboxAttrs extends Attrs {
     // (undocumented)
     readonly checked: boolean;
@@ -707,36 +447,6 @@ interface SelectionCheckboxAttrs extends Attrs {
     readonly indeterminate?: boolean;
     // (undocumented)
     readonly onChange: () => void;
-}
-
-// @public (undocumented)
-export function selectionStats(): StaticTableFeature$1;
-
-export { SelectionStatsOptions }
-
-// @public (undocumented)
-export function sidePanel(options: SidePanelOptions): StaticTableFeature$1;
-
-// @public (undocumented)
-export interface SidePanelOptions {
-    // (undocumented)
-    readonly onOpenChange: (key: string | null) => void;
-    // (undocumented)
-    readonly open: MaybeRefOrGetter<string | null>;
-    // (undocumented)
-    readonly panels: readonly SidePanelPanel[];
-    // (undocumented)
-    readonly side?: "start" | "end";
-}
-
-// @public (undocumented)
-export interface SidePanelPanel {
-    // (undocumented)
-    readonly content: VNodeChild | (() => VNodeChild);
-    // (undocumented)
-    readonly key: string;
-    // (undocumented)
-    readonly label: string;
 }
 
 // @public
@@ -751,9 +461,6 @@ interface SourceViewportOptions {
 
 // @public
 type StaticFeatureHost = Omit<TableFeatureHost<unknown>, "registerColumnMenuAction" | "registerContextMenuItems" | "columnMenuActions" | "contextMenuItems">;
-
-// @public
-export type StaticGroupingExtras = Omit<GroupingExtras<unknown>, "groupSort" | "groupAggregates" | "groupFilter">;
 
 // @public (undocumented)
 interface StaticTableFeature$1 {
@@ -772,9 +479,6 @@ interface StaticTableFeature$1 {
     // (undocumented)
     readonly setup?: (host: StaticFeatureHost) => void | (() => void);
 }
-
-// @public (undocumented)
-export function statusBar(): StaticTableFeature$1;
 
 // @public (undocumented)
 type SummaryRowFn<TRow> = (rows: readonly TRow[]) => Record<string, VNodeChild>;
@@ -856,7 +560,7 @@ interface TableEditingOptions<TRow> extends EditLifecycle<TRow>, EditValidationS
         readonly depth?: number;
     };
     // (undocumented)
-    readonly featureHost?: FeatureHostState;
+    readonly featureHost?: FeatureHostState_2;
     // (undocumented)
     readonly formatEditError?: NonNullable<CellSaveStoreOptions<TRow>["formatError"]>;
     // (undocumented)
@@ -1029,9 +733,6 @@ interface TableTree<TRow> {
     readonly loadingIds: ReadonlySet<string>;
 }
 
-// @public
-export function tree<TRow>(options?: TreeFeatureOptions<TRow>): TableFeature$1<TRow>;
-
 // @public (undocumented)
 interface TreeCellModel<TRow> {
     // (undocumented)
@@ -1041,35 +742,6 @@ interface TreeCellModel<TRow> {
     // (undocumented)
     readonly toggleAttrs?: Attrs;
 }
-
-// @public (undocumented)
-interface TreeExpansionOptions {
-    // (undocumented)
-    readonly defaultExpandedIds?: readonly string[];
-    // (undocumented)
-    readonly enabled?: MaybeRefOrGetter<boolean>;
-    // (undocumented)
-    readonly expandedIds?: MaybeRefOrGetterOptional<readonly string[]>;
-    // (undocumented)
-    readonly onExpandedIdsChange?: (ids: string[]) => void;
-}
-
-// @public (undocumented)
-export interface TreeFeatureOptions<TRow> extends Omit<TreeExpansionOptions, "enabled"> {
-    // (undocumented)
-    readonly getChildren?: (row: TRow) => readonly TRow[] | undefined;
-    // (undocumented)
-    readonly getParentId?: (row: TRow) => string | undefined;
-    // (undocumented)
-    readonly hasChildren?: (row: TRow) => boolean;
-    // (undocumented)
-    readonly onLoadChildren?: (row: TRow) => void | Promise<void>;
-    // (undocumented)
-    readonly treeColumn?: string;
-}
-
-// @public (undocumented)
-export function undoRedoButtons(): StaticTableFeature$1;
 
 // @public (undocumented)
 function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<TRow>>): {
@@ -1244,11 +916,6 @@ interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, SourceVi
 }
 
 // @public
-interface UseSavedViewsOptions extends SavedViewsControllerOptions {
-    readonly flushViewState?: () => void;
-}
-
-// @public
 interface UseTableUrlStateOptions {
     // (undocumented)
     readonly arrayExtraKeys?: MaybeRefOrGetterOptional<readonly string[]>;
@@ -1264,13 +931,7 @@ interface UseTableUrlStateOptions {
     readonly urlSync?: MaybeRefOrGetterOptional<boolean>;
 }
 
-// @public (undocumented)
-export function virtualize(options?: VirtualizeOptions): StaticTableFeature$1;
-
-// @public (undocumented)
-export type VirtualizeOptions = VirtualizeInput & (boolean | {
-    readonly maxHeight?: number;
-});
+export { xlsxWriter }
 
 // (No @packageDocumentation comment for this package)
 

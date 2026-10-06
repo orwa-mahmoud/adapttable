@@ -4,12 +4,12 @@
 
 ```ts
 
-import { FilterHeaderControlOptions } from '@adapttable/vue/header-filters';
-import { FilterHeaderControlProps } from '@adapttable/vue/header-filters';
-import { FilterHeaderRowProps } from '@adapttable/vue/header-filters';
-import { HeaderFilterOptions } from '@adapttable/vue/header-filters';
+import { FilterHeaderControlOptions } from '@adapttable/vue/adapter';
+import { FilterHeaderControlProps } from '@adapttable/vue/adapter';
+import { FilterHeaderRowProps } from '@adapttable/vue/adapter';
+import { HeaderFilterOptions } from '@adapttable/vue/adapter';
 import { PublicProps } from 'vue';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { StaticTableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)

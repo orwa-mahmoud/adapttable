@@ -4,8 +4,8 @@
 
 ```ts
 
-import { AgentApprovalPending } from '@adapttable/vue/adapter';
-import { AgentProgress } from '@adapttable/vue/adapter';
+import { AgentApprovalPending } from '@adapttable/vue';
+import { AgentProgress } from '@adapttable/vue';
 import { AgentSession } from '@adapttable/ai';
 import { AlwaysAllowedState } from '@adapttable/ai';
 import { ComputedRef } from 'vue';
@@ -15,7 +15,7 @@ import { SharedApproval } from '@adapttable/ai';
 import { SpeechClip } from '@adapttable/ai/voice';
 import { SpeechInputHandle } from '@adapttable/vue/adapter';
 import { SpeechState } from '@adapttable/ai/voice';
-import { StaticTableFeature } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue';
 import { TABLE_AGENT_STATE } from '@adapttable/ai';
 import { TableAgentBridge as TableAgentBridge_2 } from '@adapttable/ai';
 import { TableAgentColumnPatch } from '@adapttable/ai';

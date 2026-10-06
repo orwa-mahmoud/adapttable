@@ -4,11 +4,11 @@
 
 ```ts
 
-import { buildTableXlsx } from '@adapttable/vue/export-xlsx';
-import { ExportXlsxOptions } from '@adapttable/vue/export-xlsx';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { TableFeature } from '@adapttable/vue/adapter';
-import { xlsxWriter } from '@adapttable/vue/export-xlsx';
+import { buildTableXlsx } from '@adapttable/vue/xlsx';
+import { ExportXlsxOptions } from '@adapttable/vue/xlsx';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
+import { xlsxWriter } from '@adapttable/vue/xlsx';
 
 export { buildTableXlsx }
 
@@ -21,9 +21,6 @@ export function exportXlsx<TRow>(options?: boolean | ExportXlsxOptions<TRow>): T
 export { ExportXlsxOptions }
 
 export { xlsxWriter }
-
-
-export * from "@adapttable/vue/export-xlsx";
 
 // (No @packageDocumentation comment for this package)
 

@@ -7,11 +7,11 @@
 import { DefineSetupFnComponent } from 'vue';
 import { MaybeRefOrGetter } from 'vue';
 import { PublicProps } from 'vue';
-import { SavedView } from '@adapttable/vue/saved-views';
-import { SavedViewsPanelChromeProps } from '@adapttable/vue/saved-views';
-import { SavedViewsStore } from '@adapttable/vue/saved-views';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { UseSavedViewsOptions } from '@adapttable/vue/saved-views';
+import { SavedView } from '@adapttable/vue';
+import { SavedViewsPanelChromeProps } from '@adapttable/vue/adapter';
+import { SavedViewsStore } from '@adapttable/vue';
+import { StaticTableFeature } from '@adapttable/vue';
+import { UseSavedViewsOptions } from '@adapttable/vue';
 
 // @public
 export interface DataTableClassNames {

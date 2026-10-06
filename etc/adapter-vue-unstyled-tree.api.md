@@ -4,12 +4,12 @@
 
 ```ts
 
-import { TableTree } from '@adapttable/vue/features';
+import { TableTree } from '@adapttable/vue';
 import { tree } from '@adapttable/vue/features';
-import { TreeExpansionOptions } from '@adapttable/vue/features';
+import { TreeExpansionOptions } from '@adapttable/vue';
 import { TreeFeatureOptions } from '@adapttable/vue/features';
-import { useLazyChildren } from '@adapttable/vue/features';
-import { useTreeExpansion } from '@adapttable/vue/features';
+import { useLazyChildren } from '@adapttable/vue';
+import { useTreeExpansion } from '@adapttable/vue';
 
 export { TableTree }
 

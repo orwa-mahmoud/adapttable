@@ -4,17 +4,17 @@
 
 ```ts
 
-import { GroupCollapseOptions } from '@adapttable/vue/features';
+import { GroupCollapseOptions } from '@adapttable/vue';
 import { GroupingExtras } from '@adapttable/vue/features';
-import { GroupNode } from '@adapttable/vue/features';
-import { GroupSort } from '@adapttable/vue/features';
+import { GroupNode } from '@adapttable/vue';
+import { GroupSort } from '@adapttable/vue';
 import { MaybeRefOrGetter } from 'vue';
 import { StaticGroupingExtras } from '@adapttable/vue/features';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
-import { TableFeature } from '@adapttable/vue/adapter';
-import { useGroupCollapse } from '@adapttable/vue/features';
-import { useGroupCollapseUrlState } from '@adapttable/vue/features';
-import { useGroupPaging } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
+import { useGroupCollapse } from '@adapttable/vue';
+import { useGroupCollapseUrlState } from '@adapttable/vue';
+import { useGroupPaging } from '@adapttable/vue';
 
 export { GroupCollapseOptions }
 

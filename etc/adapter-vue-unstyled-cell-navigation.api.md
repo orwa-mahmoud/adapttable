@@ -4,11 +4,11 @@
 
 ```ts
 
-import { CellEdit } from '@adapttable/vue/cell-navigation';
-import { CellNavigationOptions } from '@adapttable/vue/cell-navigation';
-import { CellRange } from '@adapttable/vue/cell-navigation';
-import { GridCell } from '@adapttable/vue/cell-navigation';
-import { StaticTableFeature } from '@adapttable/vue/adapter';
+import { CellEdit } from '@adapttable/vue';
+import { CellNavigationOptions } from '@adapttable/vue/features';
+import { CellRange } from '@adapttable/vue/adapter';
+import { GridCell } from '@adapttable/vue';
+import { StaticTableFeature } from '@adapttable/vue';
 
 export { CellEdit }
 

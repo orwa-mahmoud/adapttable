@@ -4,13 +4,13 @@
 
 ```ts
 
-import { BatchEditBarProps } from '@adapttable/vue/editing';
-import { BatchEditingState } from '@adapttable/vue/editing';
-import { BatchRowEdit } from '@adapttable/vue/editing';
-import { EditingLifecycleExtras } from '@adapttable/vue/editing';
+import { BatchEditBarProps } from '@adapttable/vue/adapter';
+import { BatchEditingState } from '@adapttable/vue';
+import { BatchRowEdit } from '@adapttable/vue';
+import { EditingLifecycleExtras } from '@adapttable/vue/features';
 import { PublicProps } from 'vue';
-import { TableEditingOptions } from '@adapttable/vue/editing';
-import { TableFeature } from '@adapttable/vue/adapter';
+import { TableEditingOptions } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)

@@ -4,12 +4,9 @@
 
 ```ts
 
-import { ColumnGroupDef } from '@adapttable/core';
-import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
 import { Component } from 'vue';
 import { finiteSparklineValues } from '@adapttable/core';
-import { FunctionalComponent } from 'vue';
 import { SortDirection } from '@adapttable/core';
 import { sparklineExportValue } from '@adapttable/core';
 import { SparklineKind } from '@adapttable/core';
@@ -17,7 +14,7 @@ import { sparklineSummary } from '@adapttable/core';
 import { VNodeChild } from 'vue';
 
 // @public
-export interface CellContext<TRow, TValue = unknown> {
+interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -29,7 +26,7 @@ export interface CellContext<TRow, TValue = unknown> {
 }
 
 // @public
-export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
+interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
     // (undocumented)
     readonly accessor?: (row: TRow) => TValue;
     // (undocumented)
@@ -43,22 +40,8 @@ export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<T
     readonly headerCell?: Renderer<HeaderContext<TRow, TValue>>;
 }
 
-// @public (undocumented)
-export interface ColumnGroup<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
-    // (undocumented)
-    readonly children: readonly ColumnInput<TRow>[];
-}
-
-// @public (undocumented)
-export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
-
 // @public
-export type ComponentProps<TComponent> = TComponent extends (new (...args: never[]) => {
-    $props: infer TProps;
-}) ? TProps : TComponent extends FunctionalComponent<infer TProps> ? TProps : never;
-
-// @public
-export interface ComponentRenderer<TContext> {
+interface ComponentRenderer<TContext> {
     // (undocumented)
     readonly component: Component;
     // (undocumented)
@@ -67,19 +50,10 @@ export interface ComponentRenderer<TContext> {
     }["map"];
 }
 
-// @public
-export function componentRenderer<TContext, TComponent extends Component>(component: TComponent, props: (context: TContext) => ComponentProps<TComponent> & object): ComponentRenderer<TContext>;
-
 export { finiteSparklineValues }
 
-// @public (undocumented)
-export function flattenColumns<TRow>(columns: readonly ColumnInput<TRow>[]): {
-    readonly leaves: readonly ColumnDef<TRow>[];
-    readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
-};
-
 // @public
-export interface FooterContext<TRow, TValue = unknown> {
+interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -87,7 +61,7 @@ export interface FooterContext<TRow, TValue = unknown> {
 }
 
 // @public
-export interface HeaderContext<TRow, TValue = unknown> {
+interface HeaderContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -103,30 +77,12 @@ export interface HeaderContext<TRow, TValue = unknown> {
 }
 
 // @public (undocumented)
-export function primitiveText(value: unknown): string | null;
-
-// @public (undocumented)
-export function renderCell<TRow, TValue>(context: CellContext<TRow, TValue>, slot?: RenderFunction<CellContext<TRow, TValue>>): VNodeChild;
-
-// @public (undocumented)
-export function renderContent<TContext>(renderer: Renderer<TContext>, context: TContext): VNodeChild;
-
-// @public (undocumented)
-export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
-
-// @public (undocumented)
-export function renderFooter<TRow, TValue>(context: FooterContext<TRow, TValue>, slot?: RenderFunction<FooterContext<TRow, TValue>>): VNodeChild;
+type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
 // @public
-export type RenderFunction<TContext> = {
+type RenderFunction<TContext> = {
     render(context: TContext): VNodeChild;
 }["render"];
-
-// @public (undocumented)
-export function renderHeader<TRow, TValue>(context: HeaderContext<TRow, TValue>, slot?: RenderFunction<HeaderContext<TRow, TValue>>): VNodeChild;
-
-// @public (undocumented)
-export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
 
 // @public (undocumented)
 export function Sparkline(input: SparklineProps): VNodeChild;
