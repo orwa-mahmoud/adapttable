@@ -7,6 +7,10 @@ import { NativeFilterSurface } from "../src/filters/NativeFilterSurface";
 import { find, mountNative, part, tick, write } from "./filter-editing-helpers";
 
 const originalFocus = HTMLElement.prototype.focus;
+const inertDescriptor = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  "inert"
+);
 const methods = ["showModal", "close"] as const;
 const descriptors = methods.map((name) =>
   Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, name)
@@ -15,6 +19,17 @@ const prior = new WeakMap<HTMLDialogElement, Element | null>();
 const dispose: (() => void)[] = [];
 
 beforeEach(() => {
+  // Match the browser's boolean reflection when jsdom lacks this property.
+  if (!inertDescriptor)
+    Object.defineProperty(HTMLElement.prototype, "inert", {
+      configurable: true,
+      get(this: HTMLElement) {
+        return this.hasAttribute("inert");
+      },
+      set(this: HTMLElement, value: boolean) {
+        this.toggleAttribute("inert", value);
+      },
+    });
   Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
     configurable: true,
     value(this: HTMLDialogElement) {
@@ -44,14 +59,35 @@ beforeEach(() => {
   });
 });
 afterEach(() => {
-  for (const stop of dispose.splice(0)) stop();
-  methods.forEach((name, index) => {
-    const descriptor = descriptors[index];
-    if (descriptor)
-      Object.defineProperty(HTMLDialogElement.prototype, name, descriptor);
-    else Reflect.deleteProperty(HTMLDialogElement.prototype, name);
-  });
+  try {
+    for (const stop of dispose.splice(0)) stop();
+  } finally {
+    methods.forEach((name, index) => {
+      const descriptor = descriptors[index];
+      if (descriptor)
+        Object.defineProperty(HTMLDialogElement.prototype, name, descriptor);
+      else Reflect.deleteProperty(HTMLDialogElement.prototype, name);
+    });
+    if (inertDescriptor)
+      Object.defineProperty(HTMLElement.prototype, "inert", inertDescriptor);
+    else Reflect.deleteProperty(HTMLElement.prototype, "inert");
+  }
 });
+
+function blurDisabledControl(element: HTMLElement): void {
+  const disabled = element.getAttribute("disabled");
+  if (element.ownerDocument.activeElement !== element || disabled === null) {
+    element.blur();
+    return;
+  }
+  // jsdom refuses blur after disabling; use its real blur/focusout events.
+  element.removeAttribute("disabled");
+  try {
+    element.blur();
+  } finally {
+    element.setAttribute("disabled", disabled);
+  }
+}
 
 function escape() {
   document.dispatchEvent(
@@ -186,7 +222,7 @@ describe("native filter browser focus contract", () => {
     await tick();
     expect(clear.disabled).toBe(true);
     // jsdom keeps disabled controls focused; Chromium blurs them to body.
-    clear.blur();
+    blurDisabledControl(clear);
     expect(document.activeElement).toBe(document.body);
     escape();
     await tick();
@@ -203,7 +239,7 @@ describe("native filter browser focus contract", () => {
         owned.focus();
         view[loss].value = true;
         await tick();
-        owned.blur();
+        blurDisabledControl(owned);
         expect(document.activeElement).toBe(document.body);
         escape();
         await tick();
@@ -218,7 +254,7 @@ describe("native filter browser focus contract", () => {
       owned.focus();
       view.disabled.value = true;
       await tick();
-      owned.blur();
+      blurDisabledControl(owned);
       view.afterClose(() => {
         void nextTick(() => view.other.focus());
       });
@@ -235,7 +271,7 @@ describe("native filter browser focus contract", () => {
     owned.focus();
     view.disabled.value = true;
     await tick();
-    owned.blur();
+    blurDisabledControl(owned);
     view.other.focus();
     view.other.blur();
     expect(document.activeElement).toBe(document.body);
@@ -251,7 +287,7 @@ describe("native filter browser focus contract", () => {
     owned.focus();
     view.disabled.value = true;
     await tick();
-    owned.blur();
+    blurDisabledControl(owned);
     view.reject();
     escape();
     await tick();
