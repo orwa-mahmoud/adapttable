@@ -1,3 +1,4 @@
+import type { StaticTableFeature, UseSavedViewsOptions } from "@adapttable/vue";
 import {
   extendFeature,
   SAVED_VIEWS_CONTROL,
@@ -6,7 +7,6 @@ import {
   type SavedViewsPanelChromeProps,
   slotRender,
 } from "@adapttable/vue/adapter";
-import type { StaticTableFeature, UseSavedViewsOptions } from "@adapttable/vue";
 import { savedViews as bindingSavedViews } from "@adapttable/vue/features";
 import { defineComponent, h, type MaybeRefOrGetter } from "vue";
 

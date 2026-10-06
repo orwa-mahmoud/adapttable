@@ -1,9 +1,9 @@
+import { type StaticTableFeature, type TableFeature } from "@adapttable/vue";
 import {
   extendFeature,
   groupingPanelControlKey,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature, type TableFeature } from "@adapttable/vue";
 import {
   type GroupingExtras,
   groupingPanel as bindingGroupingPanel,
@@ -13,8 +13,8 @@ import { h } from "vue";
 
 import { grouping } from "./grouping";
 import NativeGroupingPanel from "./grouping/NativeGroupingPanel.vue";
-export type { GroupingExtras } from "@adapttable/vue/features";
 export type { GroupingPanelProps } from "@adapttable/vue";
+export type { GroupingExtras } from "@adapttable/vue/features";
 export function groupingPanel(
   initialGroupBy?: string | readonly string[],
   extras?: StaticGroupingExtras

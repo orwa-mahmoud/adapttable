@@ -13,7 +13,6 @@ import {
 } from "vue";
 
 import { PivotPanelChrome, type PivotPanelSlots } from "../src/adapter";
-
 import { extendFeature } from "../src/features/tableFeature";
 import {
   buildFormulaColumns,

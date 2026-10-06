@@ -23,6 +23,7 @@ import {
   type RowReorderHandleSlotProps,
   type RowReorderMoveButtonProps,
 } from "@adapttable/core/binding";
+import type { TableFeature } from "@adapttable/vue";
 import {
   computed,
   h,
@@ -34,7 +35,6 @@ import {
 } from "vue";
 
 import type { Attrs } from "../attrs";
-import type { TableFeature } from "@adapttable/vue";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
 import { useExternalStore, useScopeActivity } from "../store";
 export type {

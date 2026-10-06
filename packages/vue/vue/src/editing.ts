@@ -11,6 +11,11 @@ import {
   ROW_EDIT_ACTIONS,
   type RowEditIcons,
 } from "@adapttable/core/binding";
+import type {
+  FeatureMountContext,
+  StaticTableFeature,
+  TableFeature,
+} from "@adapttable/vue";
 import { computed, watch } from "vue";
 
 import { UNDO_REDO_CONTROL } from "./actions/contracts";
@@ -18,11 +23,6 @@ import {
   type TableEditingOptions,
   useTableEditing,
 } from "./editing/editingModels";
-import type {
-  FeatureMountContext,
-  StaticTableFeature,
-  TableFeature,
-} from "@adapttable/vue";
 import {
   editHistoryModelKey,
   type EditingChromeModel,

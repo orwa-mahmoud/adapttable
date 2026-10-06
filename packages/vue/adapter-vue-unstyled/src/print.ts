@@ -1,10 +1,10 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   extendFeature,
   PRINT_CONTROL,
   PrintChrome,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import { print as bindingPrint } from "@adapttable/vue/features";
 import { h } from "vue";
 

@@ -1,13 +1,13 @@
-import {
-  extendFeature,
-  rowReorderControlKey,
-  slotRender,
-} from "@adapttable/vue/adapter";
 import type {
   RowReorderHandler,
   RowReorderOptions,
   TableFeature,
 } from "@adapttable/vue";
+import {
+  extendFeature,
+  rowReorderControlKey,
+  slotRender,
+} from "@adapttable/vue/adapter";
 import { rowReorder as bindingRowReorder } from "@adapttable/vue/features";
 import { h } from "vue";
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { TableFeature } from "@adapttable/vue";
 import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
 import { exportCsv } from "@adapttable/vue-unstyled/export";
 import { exportCsv as compatibleCsv } from "@adapttable/vue-unstyled/export-csv";
@@ -16,7 +17,6 @@ import {
   exportPdf as barrelPdf,
   exportXlsx as barrelXlsx,
 } from "@adapttable/vue-unstyled/features";
-import type { TableFeature } from "@adapttable/vue";
 import {
   type StandardFeatureOptions,
   standardFeatures,

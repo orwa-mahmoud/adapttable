@@ -1,10 +1,10 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   extendFeature,
   FIND_BAR,
   FIND_BUTTON,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import { findInTable as bindingFindInTable } from "@adapttable/vue/features";
 import { h } from "vue";
 

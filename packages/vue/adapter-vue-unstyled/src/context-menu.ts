@@ -1,10 +1,10 @@
+import { type TableFeature } from "@adapttable/vue";
 import {
   CONTEXT_MENU_CONTROL,
   ContextMenuChrome,
   extendFeature,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type TableFeature } from "@adapttable/vue";
 import {
   contextMenu as bindingContextMenu,
   type ContextMenuOptions,

@@ -1,10 +1,10 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   COMMAND_PALETTE_CONTROL,
   CommandPaletteChrome,
   extendFeature,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import { commandPalette as bindingCommandPalette } from "@adapttable/vue/features";
 import { h } from "vue";
 

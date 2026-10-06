@@ -1,3 +1,4 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   COLUMN_HEADER_RENAME,
   COLUMN_MENU,
@@ -5,7 +6,6 @@ import {
   extendFeature,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import { columnMenu as bindingColumnMenu } from "@adapttable/vue/features";
 import { h } from "vue";
 

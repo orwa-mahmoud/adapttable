@@ -29,14 +29,14 @@ vi.mock("@adapttable/vue/adapter", async (load) => {
     },
   };
 });
-import { resolveLabels } from "@adapttable/vue/adapter";
 import type { FilterDef, FilterFormSource } from "@adapttable/vue";
+import { resolveLabels } from "@adapttable/vue/adapter";
 
 import { DataTable } from "../src";
 import { editing } from "../src/editing";
 import {
-  NativeFilterField,
   FilterTreeBuilder as NativeFilterTree,
+  NativeFilterField,
 } from "../src/filters";
 import { find, mountNative, part, tick, write } from "./filter-editing-helpers";
 

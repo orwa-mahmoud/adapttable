@@ -35,6 +35,7 @@
   "name": "@adapttable/vue-unstyled",
   "description": "Native HTML data table controls for the AdaptTable Vue binding.",
   "dependencies": {
+    "@adapttable/core": "3.8.1",
     "@adapttable/vue": "0.1.0"
   },
   "exports": {

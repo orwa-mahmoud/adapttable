@@ -1,9 +1,9 @@
+import { type StaticTableFeature, type TableFeature } from "@adapttable/vue";
 import {
   extendFeature,
   GroupRowChrome,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature, type TableFeature } from "@adapttable/vue";
 import {
   grouping as bindingGrouping,
   type GroupingExtras,
@@ -51,12 +51,12 @@ export type {
   GroupNode,
   GroupSort,
 } from "@adapttable/vue";
-export type {
-  GroupingExtras,
-  StaticGroupingExtras,
-} from "@adapttable/vue/features";
 export {
   useGroupCollapse,
   useGroupCollapseUrlState,
   useGroupPaging,
 } from "@adapttable/vue";
+export type {
+  GroupingExtras,
+  StaticGroupingExtras,
+} from "@adapttable/vue/features";

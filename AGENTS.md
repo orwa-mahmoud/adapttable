@@ -43,7 +43,12 @@ Unify the **model**, never the **pixels**. The standing pattern is
   When a kit needs a core name its binding lacks, add the re-export to the
   binding — never import core from the kit. Core's deprecation notes point to
   core (`@adapttable/core/binding`), never to a framework package. ESLint
-  enforces this on kit sources.
+  enforces this on kit sources. The two Vue generic filter SFCs are a type-only
+  exception: `NativeChecklistFilter.vue` imports its original
+  `ChecklistFilterProps`, and `NativeFilterTree.vue` imports its original
+  `FilterTreeBuilderProps`, from `@adapttable/core/binding`. Vue's macro resolver
+  needs these original declarations directly. Their runtime Chrome, models and
+  helpers still come from the Vue binding; other core imports remain restricted.
 
 ## Framework packages
 

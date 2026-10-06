@@ -17,11 +17,11 @@ import {
   coreResizableColumns,
   coreRowAppearance,
 } from "@adapttable/core/binding";
+import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 
 import { mountColumnResize } from "../columns/columnResize";
 import type { ExtraRow } from "../rows/extraRows";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
-import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "../rows/extraRows";
 export type {

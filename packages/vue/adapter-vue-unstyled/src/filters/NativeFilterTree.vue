@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="TRow">
+import type { FilterTreeBuilderProps } from "@adapttable/core/binding";
 import {
-  type FilterTreeBuilderProps,
   FilterTreeChrome,
   type FilterTreeSlots,
   useFilterTreeModel,

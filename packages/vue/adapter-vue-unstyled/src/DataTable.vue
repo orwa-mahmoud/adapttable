@@ -1,5 +1,10 @@
 <script setup lang="ts" generic="TRow">
 import {
+  type ColumnLayoutState,
+  type DataTableHandle,
+  type TableDensity,
+} from "@adapttable/vue";
+import {
   COLUMN_MENU,
   defaultConfirm,
   DENSITY_CONTROL,
@@ -15,11 +20,6 @@ import {
   TOOLBAR_EXTRAS,
   useDataTableShell,
 } from "@adapttable/vue/adapter";
-import {
-  type ColumnLayoutState,
-  type DataTableHandle,
-  type TableDensity,
-} from "@adapttable/vue";
 import {
   computed,
   h,

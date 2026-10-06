@@ -1,5 +1,5 @@
-import { resolveLabels } from "@adapttable/vue/adapter";
 import type { FilterDef, FilterFormSource } from "@adapttable/vue";
+import { resolveLabels } from "@adapttable/vue/adapter";
 import { describe, expect, it, vi } from "vitest";
 import { computed, createSSRApp, defineComponent, h, shallowRef } from "vue";
 import { renderToString } from "vue/server-renderer";

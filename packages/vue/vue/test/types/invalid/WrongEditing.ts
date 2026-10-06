@@ -1,6 +1,6 @@
-import { batchEditing, rowEditing } from "@adapttable/vue/features";
-import type { EditingActionSlots } from "@adapttable/vue/adapter";
 import type { TableFeature } from "@adapttable/vue";
+import type { EditingActionSlots } from "@adapttable/vue/adapter";
+import { batchEditing, rowEditing } from "@adapttable/vue/features";
 interface Row {
   id: string;
 }

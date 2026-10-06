@@ -6,6 +6,7 @@ import {
   OPEN_PALETTE_COMMAND,
 } from "@adapttable/core";
 import { coreCommandPalette } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watch } from "vue";
 
 import {
@@ -16,7 +17,6 @@ import {
   EXPORT_MODEL,
 } from "./actions/contracts";
 import { featureActivity, ownsTableEvent } from "./actions/lifecycle";
-import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { useExternalStore } from "./store";
 function mountPalette<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);

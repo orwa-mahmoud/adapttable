@@ -1,8 +1,8 @@
 /** Optional XLSX export; the writer stays outside the base and CSV entries. */
 import { xlsxWriter } from "@adapttable/core/xlsx";
+import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 
 import { exportCsv, type ExportCsvOptions } from "./export-csv";
-import type { StaticTableFeature, TableFeature } from "@adapttable/vue";
 
 /** Export scope, columns, filename and host hooks, with the XLSX writer fixed. @public */
 export type ExportXlsxOptions<TRow> = Omit<ExportCsvOptions<TRow>, "writer">;

@@ -154,12 +154,6 @@ export type {
 export { ExportChrome, ExportProgressChrome } from "./export/exportChrome";
 export type { FeatureLifecycle } from "./featureLifecycle";
 export { useFeatureLifecycle } from "./featureLifecycle";
-export type { OwnedFeatureState, TableFeatureState } from "./featureState";
-export {
-  createFeatureState,
-  provideFeatureState,
-  useFeatureState,
-} from "./featureState";
 export { mountGrouping } from "./features/grouping";
 export {
   assertRequiredSlots,
@@ -170,6 +164,12 @@ export {
   normalizeFeatures,
   renderFeatureSlot,
 } from "./features/tableFeature";
+export type { OwnedFeatureState, TableFeatureState } from "./featureState";
+export {
+  createFeatureState,
+  provideFeatureState,
+  useFeatureState,
+} from "./featureState";
 export { FILTER_VIEW } from "./filters";
 export type { ChecklistChromeModel } from "./filters/checklistChrome";
 export {

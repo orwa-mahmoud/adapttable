@@ -1,10 +1,10 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   extendFeature,
   SIDE_PANEL_CONTROL,
   SidePanelChrome,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import { sidePanel as bindingSidePanel } from "@adapttable/vue/features";
 import { h } from "vue";
 

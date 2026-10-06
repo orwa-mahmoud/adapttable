@@ -1,10 +1,10 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   COLUMN_SELECT,
   extendFeature,
   FILL_HANDLE_CONTROL,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import {
   cellNavigation as bindingCellNavigation,
   type CellNavigationOptions,
@@ -29,5 +29,5 @@ export function columnSelectionCheckbox(): StaticTableFeature {
   ]);
 }
 export type { CellEdit, GridCell } from "@adapttable/vue";
-export type { CellNavigationOptions } from "@adapttable/vue/features";
 export type { CellRange } from "@adapttable/vue/adapter";
+export type { CellNavigationOptions } from "@adapttable/vue/features";

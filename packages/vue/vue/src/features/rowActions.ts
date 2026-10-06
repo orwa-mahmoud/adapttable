@@ -5,6 +5,7 @@ import {
   withRowMutationActions,
 } from "@adapttable/core";
 import { coreRowActions } from "@adapttable/core/binding";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 import { computed, onScopeDispose, watchEffect } from "vue";
 
 import { rowActionControls } from "../rows/rowActionControls";
@@ -12,7 +13,6 @@ import {
   type RowMutationHandlers,
   useRowMutations,
 } from "../rows/rowMutations";
-import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 export type { RowActionsModel } from "../layout/modelChannels";
 export { ROW_ACTIONS_MODEL, rowActionsModelKey } from "../layout/modelChannels";
 export type {

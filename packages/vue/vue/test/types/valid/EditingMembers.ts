@@ -11,13 +11,13 @@ import type {
   TableEditingOptions,
   TableFeature,
 } from "@adapttable/vue";
+import type { EditingActionSlots } from "@adapttable/vue/adapter";
 import {
   batchEditing,
   batchEditing as batchSubpath,
   editing,
   rowEditing,
 } from "@adapttable/vue/features";
-import type { EditingActionSlots } from "@adapttable/vue/adapter";
 interface Row {
   id: string;
   name: string;

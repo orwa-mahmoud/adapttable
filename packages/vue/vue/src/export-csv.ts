@@ -18,15 +18,15 @@ import {
   featureStateKey,
   type GridFocusState,
 } from "@adapttable/core/binding";
-import { computed, shallowRef, watch } from "vue";
-
-import { EXPORT_CONTROL, EXPORT_MODEL } from "./actions/contracts";
-import { featureActivity } from "./actions/lifecycle";
 import type {
   FeatureMountContext,
   StaticTableFeature,
   TableFeature,
 } from "@adapttable/vue";
+import { computed, shallowRef, watch } from "vue";
+
+import { EXPORT_CONTROL, EXPORT_MODEL } from "./actions/contracts";
+import { featureActivity } from "./actions/lifecycle";
 import { groupingModelKey, treeModelKey } from "./hierarchy/models";
 import { useExternalStore } from "./store";
 const GRID_FOCUS_MODEL = featureStateKey<GridFocusState>(

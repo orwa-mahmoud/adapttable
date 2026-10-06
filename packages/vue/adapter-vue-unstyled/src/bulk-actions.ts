@@ -1,10 +1,10 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   BULK_ACTIONS_CONTROL,
   BulkActionsChrome,
   extendFeature,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import { bulkActions as bindingBulkActions } from "@adapttable/vue/features";
 import { h } from "vue";
 

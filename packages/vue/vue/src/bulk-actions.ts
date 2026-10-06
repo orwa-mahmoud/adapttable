@@ -6,6 +6,7 @@ import {
   resolveDisabledReason,
 } from "@adapttable/core";
 import { coreBulkActions } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, watch } from "vue";
 
 import {
@@ -14,7 +15,6 @@ import {
   type BulkActionsModel,
 } from "./actions/contracts";
 import { featureActivity } from "./actions/lifecycle";
-import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { useExternalStore } from "./store";
 function mountBulkActions<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);

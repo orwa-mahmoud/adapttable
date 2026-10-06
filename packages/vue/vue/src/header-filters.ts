@@ -1,8 +1,8 @@
 import { FILTER_ENGINE_IMPL, filterDefForColumn } from "@adapttable/core";
 import { coreHeaderFilters, FILTER_HEADER } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, watch } from "vue";
 
-import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import {
   headerFilterModelKey,
   type VueHeaderFilterControlProps,

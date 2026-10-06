@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="TRow">
-import { GroupingPanelChrome } from "@adapttable/vue/adapter";
 import { type GroupingPanelProps } from "@adapttable/vue";
+import { GroupingPanelChrome } from "@adapttable/vue/adapter";
 
 import { useClassNames } from "../classNamesContext";
 import { nativeGroupingControls } from "./nativeGroupingControls";

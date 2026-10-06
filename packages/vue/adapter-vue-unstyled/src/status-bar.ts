@@ -1,5 +1,5 @@
-import { extendFeature, slotRender, STATUS_BAR } from "@adapttable/vue/adapter";
 import { type StaticTableFeature } from "@adapttable/vue";
+import { extendFeature, slotRender, STATUS_BAR } from "@adapttable/vue/adapter";
 import {
   selectionStats as bindingSelectionStats,
   statusBar as bindingStatusBar,

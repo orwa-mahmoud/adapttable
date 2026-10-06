@@ -1,4 +1,5 @@
 import { coreNestedTable, coreRowDetail } from "@adapttable/core/binding";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 import { computed, toValue, type VNodeChild, watchEffect } from "vue";
 
 import { rowDetailModelKey } from "../hierarchy/models";
@@ -8,7 +9,6 @@ import {
   useRowExpansion,
 } from "../rows/rowExpansion";
 import { nestedTableDetail, type NestedTableFor } from "../tree/nestedTable";
-import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 interface DetailPatch<TRow> extends Omit<RowExpansionOptions, "enabled"> {
   readonly renderRowDetail?: (row: TRow) => VNodeChild;
   readonly nestedTable?: NestedTableFor<TRow>;

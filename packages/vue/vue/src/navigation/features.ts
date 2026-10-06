@@ -16,9 +16,9 @@ import {
   slotRender,
   STATUS_BAR,
 } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watch } from "vue";
 
-import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { editHistoryModelKey, editingModelKey } from "../layout/modelChannels";
 import {
   type CellNavigationOptions,

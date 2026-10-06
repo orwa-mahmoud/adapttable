@@ -15,8 +15,8 @@ import {
 } from "@adapttable/vue-unstyled/editing";
 import {
   ChecklistFilter as NativeChecklistFilter,
-  NativeFilterField,
   FilterTreeBuilder as NativeFilterTree,
+  NativeFilterField,
 } from "@adapttable/vue-unstyled/filters";
 import { NativeHeaderFilter } from "@adapttable/vue-unstyled/header-filters";
 

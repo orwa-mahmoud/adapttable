@@ -1,5 +1,6 @@
 import { appendByKey } from "@adapttable/core";
 import { coreSidePanel } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watch } from "vue";
 
 import {
@@ -9,7 +10,6 @@ import {
   type SidePanelPanel,
 } from "./actions/contracts";
 import { featureActivity } from "./actions/lifecycle";
-import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 function mountSidePanel<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
   const model = computed(() => {

@@ -1,10 +1,10 @@
+import type { FilterDef, TableFeature } from "@adapttable/vue";
 import {
   ACTIVE_FILTER_CHIPS,
   extendFeature,
   slotRender,
   TOOLBAR_EXTRAS,
 } from "@adapttable/vue/adapter";
-import type { FilterDef, TableFeature } from "@adapttable/vue";
 import {
   filters as bindingFilters,
   type FiltersOptions,
@@ -30,10 +30,10 @@ export { NativeChecklistFilter as ChecklistFilter } from "./filters/NativeCheckl
 export { NativeFilterField } from "./filters/NativeFilterField";
 export { NativeFilterTree as FilterTreeBuilder } from "./filters/NativeFilterTree";
 export type { FilterDef } from "@adapttable/vue";
-export type { FiltersOptions } from "@adapttable/vue/features";
+export type { FilterOption, FilterTypeSpec } from "@adapttable/vue";
 export type {
   ChecklistFilterProps,
   FilterTreeBuilderProps,
 } from "@adapttable/vue/adapter";
-export type { FilterOption, FilterTypeSpec } from "@adapttable/vue";
+export type { FiltersOptions } from "@adapttable/vue/features";
 export { filterTypes } from "@adapttable/vue/features";

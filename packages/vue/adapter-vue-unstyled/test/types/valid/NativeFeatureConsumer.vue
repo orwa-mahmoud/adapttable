@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
-import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
-import { grouping } from "@adapttable/vue-unstyled/grouping";
-import { rowDetail } from "@adapttable/vue-unstyled/row-detail";
 import { cellSpan } from "@adapttable/vue-unstyled/cell-span";
 import { extraRows } from "@adapttable/vue-unstyled/extra-rows";
+import { grouping } from "@adapttable/vue-unstyled/grouping";
 import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
+import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
 import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import { rowAppearance } from "@adapttable/vue-unstyled/row-appearance";
+import { rowDetail } from "@adapttable/vue-unstyled/row-detail";
 import { rowPinning } from "@adapttable/vue-unstyled/row-pinning";
 import { tree } from "@adapttable/vue-unstyled/tree";
 import { h, shallowRef } from "vue";

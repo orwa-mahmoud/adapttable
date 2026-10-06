@@ -1,8 +1,8 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   AGENT_APPROVAL_STATE,
   type TableAssistantProps,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import {
   afterAll,
   afterEach,

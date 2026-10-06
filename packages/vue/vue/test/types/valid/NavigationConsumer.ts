@@ -10,14 +10,6 @@ import {
   useGridFocus,
   type UseGridFocusOptions as GridFocusOptions,
 } from "@adapttable/vue";
-import {
-  cellNavigation,
-  columnMenu,
-  columnSelectionCheckbox,
-  findInTable,
-  selectionStats,
-  statusBar,
-} from "@adapttable/vue/features";
 import type {
   CellRange,
   ColumnMenuSlotProps,
@@ -28,6 +20,14 @@ import type {
   SelectionStatsChromeProps,
   StatusBarChromeProps,
 } from "@adapttable/vue/adapter";
+import {
+  cellNavigation,
+  columnMenu,
+  columnSelectionCheckbox,
+  findInTable,
+  selectionStats,
+  statusBar,
+} from "@adapttable/vue/features";
 interface Row {
   id: string;
   score: number;

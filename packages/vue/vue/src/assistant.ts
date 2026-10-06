@@ -5,13 +5,13 @@ import {
   slotRender,
   TABLE_ASSISTANT,
 } from "@adapttable/core/binding";
+import type { StaticTableFeature } from "@adapttable/vue";
 import type { VNodeChild } from "vue";
 
 import type {
   AgentApprovalProps,
   TableAssistantProps,
 } from "./assistant/contracts";
-import type { StaticTableFeature } from "@adapttable/vue";
 export * from "./assistant/approvalReviewChrome";
 export * from "./assistant/contracts";
 export * from "./assistant/tableAssistantChrome";

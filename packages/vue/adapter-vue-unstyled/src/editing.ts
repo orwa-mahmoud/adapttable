@@ -1,3 +1,9 @@
+import type {
+  CellEditHandler,
+  StaticTableFeature,
+  TableEditingOptions,
+  TableFeature,
+} from "@adapttable/vue";
 import {
   batchEditBarSlotKey,
   editableCellSlotKey,
@@ -6,12 +12,6 @@ import {
   slotRender,
   UNDO_REDO_CONTROL,
 } from "@adapttable/vue/adapter";
-import type {
-  CellEditHandler,
-  StaticTableFeature,
-  TableEditingOptions,
-  TableFeature,
-} from "@adapttable/vue";
 import {
   batchEditing as bindingBatchEditing,
   editing as bindingEditing,
@@ -80,8 +80,8 @@ export type {
   RowEditingState,
   TableEditingOptions,
 } from "@adapttable/vue";
-export type { EditingLifecycleExtras } from "@adapttable/vue/features";
 export type { RowEditIcons } from "@adapttable/vue/adapter";
+export type { EditingLifecycleExtras } from "@adapttable/vue/features";
 export { dirtyIndicators, editHistory } from "@adapttable/vue/features";
 
 /** Opt-in native Undo and Redo buttons use the shell's history projection. */

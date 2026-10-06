@@ -51,7 +51,6 @@ export {
   useRowEditing,
   useTableEditing,
 } from "./editing/editingModels";
-export type { FeatureState } from "./featureState";
 export type {
   ComposedFeature,
   FeatureMountContext,
@@ -60,9 +59,10 @@ export type {
   TableFeature,
   TableFeatureHost,
 } from "./features/tableFeature";
+export type { FeatureState } from "./featureState";
 export type {
-  FilterOptionsState as ResolvedFilterOptions,
   FilterTreeOptions,
+  FilterOptionsState as ResolvedFilterOptions,
 } from "./filters/filterModels";
 export {
   useBooleanFilter as useBooleanFilterWidget,
@@ -160,6 +160,7 @@ export type {
   UseColumnLayoutUrlStateResult,
 } from "./url/useColumnLayoutUrlState";
 export { useColumnLayoutUrlState } from "./url/useColumnLayoutUrlState";
+export { LAYOUT_URL_WRITE_DEBOUNCE_MS } from "./url/useColumnLayoutUrlState";
 export type {
   Density,
   UseDensityUrlStateOptions,
@@ -183,8 +184,8 @@ export type {
 export { useSavedViews } from "./url/useSavedViews";
 export type {
   TableUrlActions,
-  TableUrlState as UseTableUrlStateResult,
   UseTableUrlStateOptions,
+  TableUrlState as UseTableUrlStateResult,
 } from "./url/useTableUrlState";
 export { useTableUrlState } from "./url/useTableUrlState";
 export type { UrlSliceOptions } from "./url/useUrlSlice";
@@ -336,9 +337,11 @@ export type {
   UrlStateAdapter,
   UseColumnLayoutResult,
 } from "@adapttable/core";
+export type { QueryCondition } from "@adapttable/core";
 export {
   applyRowPin,
   DELETE_ROW_ACTION_KEY,
+  URL_SLICE_WRITE_DEBOUNCE_MS as DENSITY_URL_WRITE_DEBOUNCE_MS,
   DUPLICATE_ROW_ACTION_KEY,
   EMPTY_ROW_PIN_STATE,
   partitionPinnedRows,
@@ -346,7 +349,6 @@ export {
   PIN_TOP_ACTION_KEY,
   SAVED_VIEW_VERSION,
   UNPIN_ROW_ACTION_KEY,
-  URL_SLICE_WRITE_DEBOUNCE_MS as DENSITY_URL_WRITE_DEBOUNCE_MS,
 } from "@adapttable/core";
 export type {
   AgentApprovalPending,
@@ -372,5 +374,3 @@ export type {
   TableRuntime,
   TableRuntimeView,
 } from "@adapttable/core/binding";
-export type { QueryCondition } from "@adapttable/core";
-export { LAYOUT_URL_WRITE_DEBOUNCE_MS } from "./url/useColumnLayoutUrlState";

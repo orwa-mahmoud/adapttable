@@ -233,5 +233,41 @@ export default defineConfig(
       ],
     },
   },
+  // Vue's SFC macro resolver cannot follow renamed imported types in shared
+  // declaration chunks. These two original neutral prop contracts stay type-only.
+  ...[
+    ["NativeChecklistFilter.vue", "ChecklistFilterProps"],
+    ["NativeFilterTree.vue", "FilterTreeBuilderProps"],
+  ].flatMap(([file, propType]) =>
+    defineConfig({
+      files: [`packages/vue/adapter-vue-unstyled/src/filters/${file}`],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "@adapttable/core/binding",
+                allowTypeImports: true,
+                message: "Runtime imports must use the Vue binding.",
+              },
+              {
+                name: "@adapttable/core/binding",
+                allowImportNames: [propType],
+                message:
+                  "Only this SFC's original generic prop contract may come directly from core.",
+              },
+            ],
+            patterns: [
+              {
+                regex: "^@adapttable/core(?:$|/(?!binding$))",
+                message: "Other core imports must use the Vue binding.",
+              },
+            ],
+          },
+        ],
+      },
+    })
+  ),
   prettier
 );

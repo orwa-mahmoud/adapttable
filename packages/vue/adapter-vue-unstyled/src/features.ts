@@ -28,6 +28,6 @@ export * from "./status-bar";
 export * from "./tree";
 export * from "./virtualize";
 export type { ColumnMenuSlotProps } from "@adapttable/vue/adapter";
+export type { GroupingExtras } from "@adapttable/vue/features";
 export type { ExportPdfOptions } from "@adapttable/vue/pdf";
 export type { ExportXlsxOptions } from "@adapttable/vue/xlsx";
-export type { GroupingExtras } from "@adapttable/vue/features";

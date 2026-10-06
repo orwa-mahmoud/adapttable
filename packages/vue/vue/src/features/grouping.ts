@@ -12,6 +12,11 @@ import {
   parseGroupBy,
 } from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
+import type {
+  FeatureMountContext,
+  StaticTableFeature,
+  TableFeature,
+} from "@adapttable/vue";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -28,11 +33,6 @@ import {
 import { useGroupPaging } from "../grouping/groupPaging";
 import { groupingModelKey, type TableGrouping } from "../hierarchy/models";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
-import type {
-  FeatureMountContext,
-  StaticTableFeature,
-  TableFeature,
-} from "@adapttable/vue";
 export interface GroupingExtras<TRow = unknown> extends Omit<
   GroupCollapseOptions,
   "enabled"

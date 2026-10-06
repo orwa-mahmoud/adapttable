@@ -7,6 +7,7 @@ import {
   type RowPinState,
 } from "@adapttable/core";
 import { coreRowPinning } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watchEffect } from "vue";
 
 import { rowPinningModelKey } from "../layout/modelChannels";
@@ -18,7 +19,6 @@ import {
   useRowPinningUrlState,
   type UseRowPinningUrlStateOptions,
 } from "../url/useRowPinningUrlState";
-import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 export type { RowPinningOptions } from "../rows/rowPinning";
 export { useRowPinning } from "../rows/rowPinning";
 export type {

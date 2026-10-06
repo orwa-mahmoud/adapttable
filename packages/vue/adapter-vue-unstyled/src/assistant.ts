@@ -1,4 +1,5 @@
 /** Optional native assistant and approval surfaces; no AI runtime is imported. */
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   AgentApprovalChrome,
   type AgentApprovalProps,
@@ -7,7 +8,6 @@ import {
   TableAssistantChrome,
   type TableAssistantProps,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import { defineComponent, h } from "vue";
 
 import {

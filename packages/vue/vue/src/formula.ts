@@ -21,11 +21,11 @@ export type {
   ParseResult,
 } from "@adapttable/core/formula";
 export {
+  deserializeFormulaColumns,
+  evaluateFormula,
   FORMULA_BLANK,
   FORMULA_ERRORS,
   FORMULA_FUNCTIONS,
-  deserializeFormulaColumns,
-  evaluateFormula,
   formulaBoolean,
   formulaDisplay,
   formulaError,

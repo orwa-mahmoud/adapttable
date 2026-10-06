@@ -4,6 +4,7 @@ import {
   LiveFeatureHost,
   type TableRuntime,
 } from "@adapttable/core/binding";
+import type { ComposedFeature, FeatureMountContext } from "@adapttable/vue";
 import {
   type EffectScope,
   effectScope,
@@ -13,7 +14,6 @@ import {
   shallowRef,
 } from "vue";
 
-import type { ComposedFeature, FeatureMountContext } from "@adapttable/vue";
 import { type OwnedFeatureState, type TableFeatureState } from "./featureState";
 import { requireScope } from "./store";
 interface MountedFeature<TRow> {

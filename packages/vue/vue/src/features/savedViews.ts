@@ -1,4 +1,5 @@
 import { coreSavedViews } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { type MaybeRefOrGetter, onScopeDispose, toValue } from "vue";
 
 import { useSavedViews, type UseSavedViewsOptions } from "../url/useSavedViews";
@@ -6,7 +7,6 @@ import {
   SAVED_VIEWS_CONTROL,
   SAVED_VIEWS_MODEL,
 } from "../viewControls/contracts";
-import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 
 function mountSavedViews<TRow>(context: FeatureMountContext<TRow>): void {
   let live = true;

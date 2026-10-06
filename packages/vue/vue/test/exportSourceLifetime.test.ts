@@ -9,12 +9,12 @@ import {
 } from "vue";
 
 import { EXPORT_CONTROL, EXPORT_MODEL } from "../src/actions/contracts";
+import { extendFeature, slotRender } from "../src/adapter";
 import {
   type ExportAllControls,
   exportCsv,
   type ExportCsvOptions,
 } from "../src/export-csv";
-import { extendFeature, slotRender } from "../src/adapter";
 import type { ComposedFeature } from "../src/features/tableFeature";
 import { tree } from "../src/features/tree";
 import { useFrontendData } from "../src/source/useFrontendData";

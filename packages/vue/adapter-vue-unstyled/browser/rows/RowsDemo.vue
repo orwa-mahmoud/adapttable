@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { type ColumnDef, DataTable } from "@adapttable/vue-unstyled";
-import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
 import { extraRows } from "@adapttable/vue-unstyled/extra-rows";
 import { pinnedSummaryRows } from "@adapttable/vue-unstyled/pinned-summary-rows";
+import { resizableColumns } from "@adapttable/vue-unstyled/resizable-columns";
 import { rowActions } from "@adapttable/vue-unstyled/row-actions";
 import { rowAppearance } from "@adapttable/vue-unstyled/row-appearance";
 import { rowPinning } from "@adapttable/vue-unstyled/row-pinning";

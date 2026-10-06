@@ -1,9 +1,9 @@
+import { type StaticTableFeature } from "@adapttable/vue";
 import {
   extendFeature,
   headerFilterSlotKey,
   slotRender,
 } from "@adapttable/vue/adapter";
-import { type StaticTableFeature } from "@adapttable/vue";
 import { headerFilters as bindingHeaderFilters } from "@adapttable/vue/features";
 import { h } from "vue";
 

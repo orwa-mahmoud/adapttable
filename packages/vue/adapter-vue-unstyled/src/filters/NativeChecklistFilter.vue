@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="TRow">
+import type { ChecklistFilterProps } from "@adapttable/core/binding";
 import {
   ChecklistChrome,
-  type ChecklistFilterProps,
   type ChecklistSlots,
   useChecklistModel,
 } from "@adapttable/vue/adapter";

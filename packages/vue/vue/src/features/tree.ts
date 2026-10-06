@@ -6,6 +6,7 @@ import {
   treeExportExpandedIds,
 } from "@adapttable/core";
 import { coreTree, hasLoadedChildren } from "@adapttable/core/binding";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 import { computed, nextTick, onScopeDispose, watchEffect } from "vue";
 
 import { type TableTree, treeModelKey } from "../hierarchy/models";
@@ -15,7 +16,6 @@ import {
   type TreeExpansionOptions,
   useTreeExpansion,
 } from "../tree/treeExpansion";
-import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 export interface TreeFeatureOptions<TRow> extends Omit<
   TreeExpansionOptions,
   "enabled"

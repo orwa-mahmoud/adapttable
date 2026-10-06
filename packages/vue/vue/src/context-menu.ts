@@ -12,6 +12,7 @@ import {
   featureStateKey,
   type GridFocusState,
 } from "@adapttable/core/binding";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 import { computed, onScopeDispose, watch } from "vue";
 
 import {
@@ -24,7 +25,6 @@ import {
   featureActivity,
   ownsTableEvent,
 } from "./actions/lifecycle";
-import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 import { rowPinningModelKey } from "./layout/modelChannels";
 import { useExternalStore } from "./store";
 export interface ContextMenuOptions<TRow> {

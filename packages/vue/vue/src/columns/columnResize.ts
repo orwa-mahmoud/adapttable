@@ -1,10 +1,10 @@
 /** Resize interaction ownership belongs to the feature's mounted Vue scope. */
 import { columnResizeHandleProps } from "@adapttable/core";
 import { DESKTOP_RESIZE_HANDLE_STYLE } from "@adapttable/core/binding";
+import type { FeatureMountContext } from "@adapttable/vue";
 import { watch } from "vue";
 
 import { toVueAttrs } from "../attrs";
-import type { FeatureMountContext } from "@adapttable/vue";
 import { COLUMN_RESIZE_MODEL } from "../layout/modelChannels";
 export type {
   ColumnResizeHandleOptions,

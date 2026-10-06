@@ -18,13 +18,13 @@ import {
   FilterTriggerToggleState,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
-import { computed, onScopeDispose, shallowRef, toValue, watch } from "vue";
-
 import type {
   FeatureMountContext,
   StaticTableFeature,
   TableFeature,
 } from "@adapttable/vue";
+import { computed, onScopeDispose, shallowRef, toValue, watch } from "vue";
+
 import type { FilterPanelModel } from "./filters/filterPanelChrome";
 import { FULLSCREEN_MODEL } from "./viewControls/contracts";
 export const FILTER_VIEW =

@@ -1,9 +1,9 @@
 import { corePrint } from "@adapttable/core/binding";
+import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { watchEffect } from "vue";
 
 import { PRINT_CONTROL, PRINT_MODEL } from "./actions/contracts";
 import { featureActivity } from "./actions/lifecycle";
-import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 function mountPrint<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
   watchEffect(() => {
