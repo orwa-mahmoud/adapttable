@@ -1,5 +1,6 @@
 /** Framework-aware navigation shared by documentation, landing, and demos. */
-import { ANGULAR_DOCS, ANGULAR_KIT_DOCS } from "./angular-docs.mjs";
+import { sidebarPages } from "../apps/docs/sidebar.mjs";
+import { ANGULAR_DOCS } from "./angular-docs.mjs";
 import { docsRoute, SHARED_DOCS } from "./site.mjs";
 import { VUE_DOCS } from "./vue-docs.mjs";
 
@@ -20,6 +21,14 @@ export function normalizeFramework(value) {
 const angular = new Set(ANGULAR_DOCS.map((page) => page.replace(/\.md$/, "")));
 const vue = new Set(VUE_DOCS.map((page) => page.replace(/\.md$/, "")));
 const shared = new Set(SHARED_DOCS);
+// This module also runs in the browser. Reuse the rendered sidebar inventory
+// rather than inventing a React page for every framework-specific basename.
+const react = new Set(
+  sidebarPages()
+    .map(({ slug }) => slug)
+    .filter((slug) => !/^(angular|vue)\//.test(slug))
+    .map((slug) => slug.replace(/^react\//, ""))
+);
 
 /** @param {string} path @param {string | null} [preferred] */
 export function selectedFramework(path, preferred = null) {
@@ -46,7 +55,7 @@ export function frameworkDocsTarget(path, framework) {
   if (framework === "vue" && vue.has(`vue/${slug}`))
     return { href: docsRoute(`vue/${slug}`), equivalent: true };
   if (shared.has(slug)) return { href: docsRoute(slug), equivalent: true };
-  if (framework === "react" && !ANGULAR_KIT_DOCS.includes(slug))
+  if (framework === "react" && react.has(slug || "getting-started"))
     return { href: docsRoute(slug || "getting-started"), equivalent: true };
   return {
     href: `${docsRoute("getting-started", framework)}?unavailable=${encodeURIComponent(slug)}`,

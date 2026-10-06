@@ -265,3 +265,35 @@ describe("local showcase framework switching", () => {
     );
   });
 });
+
+it("keeps the Angular migration guide on registered framework destinations", () => {
+  assert.deepEqual(
+    frameworkDocsTarget("/angular/migrating-to-0-5/", "angular"),
+    {
+      href: "/angular/migrating-to-0-5/",
+      equivalent: true,
+    }
+  );
+  for (const framework of ["react", "vue"]) {
+    assert.deepEqual(
+      frameworkDocsTarget("/angular/migrating-to-0-5/", framework),
+      {
+        href: `/${framework}/getting-started/?unavailable=migrating-to-0-5`,
+        equivalent: false,
+      }
+    );
+  }
+});
+
+it("does not fabricate a React counterpart for an unregistered guide", () => {
+  assert.deepEqual(frameworkDocsTarget("/angular/not-a-guide/", "react"), {
+    href: "/react/getting-started/?unavailable=not-a-guide",
+    equivalent: false,
+  });
+  for (const page of ["features", "filtering", "api"]) {
+    assert.deepEqual(frameworkDocsTarget(`/angular/${page}/`, "react"), {
+      href: `/react/${page}/`,
+      equivalent: true,
+    });
+  }
+});
