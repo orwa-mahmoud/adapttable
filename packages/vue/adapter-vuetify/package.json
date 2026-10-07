@@ -304,7 +304,47 @@
       }
     },
     "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./filters": {
+      "import": {
+        "types": "./dist/filters.d.ts",
+        "default": "./dist/filters.js"
+      },
+      "require": {
+        "types": "./dist/filters.d.cts",
+        "default": "./dist/filters.cjs"
+      }
+    },
+    "./header-filters": {
+      "import": {
+        "types": "./dist/header-filters.d.ts",
+        "default": "./dist/header-filters.js"
+      },
+      "require": {
+        "types": "./dist/header-filters.d.cts",
+        "default": "./dist/header-filters.cjs"
+      }
+    },
+    "./column-menu": {
+      "import": {
+        "types": "./dist/column-menu.d.ts",
+        "default": "./dist/column-menu.js"
+      },
+      "require": {
+        "types": "./dist/column-menu.d.cts",
+        "default": "./dist/column-menu.cjs"
+      }
+    },
+    "./saved-views": {
+      "import": {
+        "types": "./dist/saved-views.d.ts",
+        "default": "./dist/saved-views.js"
+      },
+      "require": {
+        "types": "./dist/saved-views.d.cts",
+        "default": "./dist/saved-views.cjs"
+      }
+    }
   },
   "repository": {
     "type": "git",

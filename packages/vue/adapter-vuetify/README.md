@@ -125,6 +125,16 @@ const features = [
 row types remain independent and inherit the supplied density and label
 defaults. Expansion and pinning accept the binding's controlled state options.
 
+## Column menu
+
+Add `columnMenu()` from `@adapttable/vuetify/column-menu` to enable the Columns
+manager and direct header rename controls. The binding owns search, order,
+visibility, pinning and rename validation. Buttons and icons use `VBtn` and
+`VIcon`, rename fields use `VTextField`, and choice actions use `VSelect`.
+The anchored `VMenu` positions against the binding's native trigger target;
+the trigger keeps its binding-owned accessibility attributes when the panel
+closes. `ColumnMenu` is also exported for custom toolbar layouts.
+
 ## Editing
 
 Mark editable columns with `editable: true`, then add `editing(onCellEdit)` from
@@ -141,6 +151,52 @@ binding and its accessible error message is associated with the actual input.
 Custom editors receive the existing binding controller. `editHistory`,
 `undoRedoButtons` and `dirtyIndicators` compose through the same optional entry.
 
+## Filters
+
+Import `filters` from `@adapttable/vuetify/filters` and supply the binding's
+filter definitions. Text, numeric and date fields use `VTextField`; operators
+and single choices use `VSelect`; multiple choices use `VCheckboxBtn`. The
+searchable checklist uses binding-owned facets and windowing, with `VChip`
+counts. Set `{ tree: true }` to include the advanced AND/OR builder inside a
+Vuetify expansion panel.
+
+The default filter surface is a `VMenu` anchored to its trigger with no
+backdrop. Set `{ mode: "drawer" }` for a `VDialog` whose content contains the
+actual dimming `VSheet` backdrop and a `VCard` side panel. Vuetify owns the
+portal, scroll blocking, focus trap and overlay stack. The binding owns open
+state and filter writes. Nested select menus retain their keyboard and
+pointer behavior.
+
+`headerFilters()` from `@adapttable/vuetify/header-filters` adds anchored
+column filters. `FilterHeaderControl` and `FilterHeaderRow` support custom
+header layouts; compact multi-choice controls retain the genuine Vuetify
+select menu. `ChecklistFilter`, `FilterTreeBuilder` and `VuetifyFilterField`
+are also available from the filters entry for custom filter layouts.
+
+## Saved views
+
+Add `savedViews({ storageKey: "people-views" })` from
+`@adapttable/vuetify/saved-views` to the table's `features`. Options also accept
+a Vue ref or getter. The binding owns capture, URL namespaces, persistence and
+the model's lifetime. The menu uses a `VMenu` and `VCard`, with `VBtn` actions
+and a `VTextField` name input. It supports RTL and the table's overlay container,
+including fullscreen layouts; Escape restores focus to its native trigger.
+
+For a standalone manager, import `SavedViewsPanel` from the same entry. Pass
+the `views` array and `onApply`, `onRename`, `onMove`, `onSetDefault`, and
+`onRemove` callbacks, for example from the Vue binding's `useSavedViews` result.
+The host owns the list: callbacks request changes, and accepted changes arrive
+through `views`. Rename sends the entered draft to `onRename`; the binding's
+model supplies trimming and validation. Enter commits and Escape cancels;
+composing text does neither. `VChip` badges show default and read-only views,
+and unavailable row actions remain visible as disabled Vuetify buttons.
+
+`labels`, `className`, `classNames`, and a Vue `footer` node customize the panel.
+`SavedView`, `SavedViewsStore`, `UseSavedViewsOptions`, and
+`SavedViewsPanelProps` are exported from the saved-views entry. Menu and panel
+controls work in mobile layouts and render without browser-only ref calls on
+the server.
+
 ## Control ownership
 
 Buttons use `VBtn`. Checkboxes use `VCheckboxBtn` and its documented input slot,
@@ -156,6 +212,9 @@ hydrated application.
 
 - [Vuetify installation and SSR](https://vuetifyjs.com/en/getting-started/installation/)
 - [VTextField API](https://vuetifyjs.com/en/api/v-text-field/)
+- [VMenu API](https://vuetifyjs.com/en/api/v-menu/)
+- [VDialog API](https://vuetifyjs.com/en/api/v-dialog/)
+- [Expansion panels](https://vuetifyjs.com/en/components/expansion-panels/)
 - [VSelect API](https://vuetifyjs.com/en/api/v-select/)
 - [VCheckboxBtn API and slots](https://vuetifyjs.com/en/api/v-checkbox-btn/)
 
