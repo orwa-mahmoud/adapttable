@@ -130,6 +130,12 @@ Compact density changes Nuxt UI's actual control size to `sm`, reduces the
 desktop Prose cell padding and type size, and reduces mobile card-body and field
 spacing. Comfortable density restores the toolkit defaults. Touch buttons retain
 their 44px minimum height in either density.
+The chooser keeps both Comfortable and Compact visible in Nuxt UI's horizontal
+RadioGroup using its adjoining `table` variant. These are mutually exclusive
+settings with native radio semantics, arrow-key navigation and visible focus.
+Both option labels retain 44px touch targets. The binding owns the value and
+change requests, including rejected controlled updates; pagination keeps its
+separate Select control.
 The adapter stylesheet declares its compact utility classes with Tailwind's
 `@source inline`, so packaged consumers receive that paint without depending on
 their application to scan the adapter's JavaScript.

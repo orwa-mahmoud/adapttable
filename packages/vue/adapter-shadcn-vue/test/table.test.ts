@@ -247,15 +247,18 @@ describe("shadcn-vue table surface", () => {
         "onUpdate:density": update,
       })
     );
-    const select = node<HTMLSelectElement>(root, part("density-toggle"));
-    select.value = "compact";
-    select.dispatchEvent(new Event("change"));
+    const group = node(root, part("density-toggle"));
+    const compact = node<HTMLButtonElement>(
+      group,
+      '[role="radio"][value="compact"]'
+    );
+    compact.click();
     await nextTick();
     expect(update).toHaveBeenCalledExactlyOnceWith("compact");
-    expect(select.value).toBe("comfortable");
+    expect(compact.getAttribute("aria-checked")).toBe("false");
     density.value = "compact";
     await nextTick();
-    expect(select.value).toBe("compact");
+    expect(compact.getAttribute("aria-checked")).toBe("true");
     expect(node<HTMLElement>(root, part("root")).dataset.density).toBe(
       "compact"
     );

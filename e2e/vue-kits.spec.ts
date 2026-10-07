@@ -217,38 +217,167 @@ for (const kit of VUE_KIT_PAGES) {
       }
     }
 
-    test("density selector keeps keyboard focus and updates the actual table", async ({
-      page,
-    }, info) => {
-      await page.goto(`${route}?theme=light`);
-      const density = page.getByRole("combobox", {
-        name: "Density",
-        exact: true,
+    for (const scenario of [scenarios[0], scenarios[3]]) {
+      test(`${scenario.name}: visible density choices retain focus and update the table`, async ({
+        page,
+      }, info) => {
+        await page.setViewportSize({
+          width: scenario.width,
+          height: scenario.height,
+        });
+        await page.goto(
+          `${route}?theme=${scenario.theme}&lang=${scenario.lang}`
+        );
+        const labels = getLabels(scenario.lang);
+        const surface = page.locator(".vue-kit-preview__table");
+        const root = surface.locator(part("root"));
+        const radio = ["element-plus", "nuxt-ui", "shadcn-vue"].includes(
+          kit.path
+        );
+        const density = surface.getByRole(radio ? "radiogroup" : "group", {
+          name: labels.density,
+          exact: true,
+        });
+        const comfortable = density.getByRole(radio ? "radio" : "button", {
+          name: labels.densityComfortable,
+          exact: true,
+        });
+        const compact = density.getByRole(radio ? "radio" : "button", {
+          name: labels.densityCompact,
+          exact: true,
+        });
+        await expect(density).toHaveAttribute(
+          "data-adapttable-part",
+          "density-toggle"
+        );
+        await expect(density).toHaveAttribute(
+          "dir",
+          scenario.lang === "ar" ? "rtl" : "ltr"
+        );
+        await expect(density.getByRole(radio ? "radio" : "button")).toHaveCount(
+          2
+        );
+        await expect(density.getByRole("combobox")).toHaveCount(0);
+        const originalGroup = await density.elementHandle();
+        const originalComfortable = await comfortable.elementHandle();
+        const originalCompact = await compact.elementHandle();
+        if (!originalGroup || !originalComfortable || !originalCompact)
+          throw new Error("Density must mount its group and both choices");
+        const expectDensity = async (value: "comfortable" | "compact") => {
+          await expect(root).toHaveAttribute("data-density", value);
+          await expect(
+            density.getByText(labels.densityComfortable, { exact: true })
+          ).toBeVisible();
+          await expect(
+            density.getByText(labels.densityCompact, { exact: true })
+          ).toBeVisible();
+          await expect(comfortable).toBeEnabled();
+          await expect(compact).toBeEnabled();
+          if (radio) {
+            await expect(comfortable).toBeChecked({
+              checked: value === "comfortable",
+            });
+            await expect(compact).toBeChecked({ checked: value === "compact" });
+          } else {
+            await expect(comfortable).toHaveAttribute(
+              "aria-pressed",
+              String(value === "comfortable")
+            );
+            await expect(compact).toHaveAttribute(
+              "aria-pressed",
+              String(value === "compact")
+            );
+          }
+          expect(
+            await density.evaluate(
+              (node, original) => node === original,
+              originalGroup
+            )
+          ).toBe(true);
+          expect(
+            await comfortable.evaluate(
+              (node, original) => node === original,
+              originalComfortable
+            )
+          ).toBe(true);
+          expect(
+            await compact.evaluate(
+              (node, original) => node === original,
+              originalCompact
+            )
+          ).toBe(true);
+        };
+        await expectDensity("comfortable");
+        const pageSize = surface.getByRole("combobox", {
+          name: labels.rowsPerPage,
+          exact: true,
+        });
+        await expect(pageSize).toBeVisible();
+        const originalPageSize = await pageSize.elementHandle();
+        if (!originalPageSize)
+          throw new Error("Pagination must retain its select");
+        await compact.focus();
+        await page.keyboard.press("Space");
+        await expectDensity("compact");
+        await expect(compact).toBeFocused();
+        await page.keyboard.press("Space");
+        await expectDensity("compact");
+        await expect(compact).toBeFocused();
+        await comfortable.focus();
+        await page.keyboard.press(radio ? "Space" : "Enter");
+        await expectDensity("comfortable");
+        await expect(comfortable).toBeFocused();
+        await compact.focus();
+        await page.keyboard.press("Space");
+        await expectDensity("compact");
+        await expect(compact).toBeFocused();
+        expect(
+          await pageSize.evaluate(
+            (node, original) => node === original,
+            originalPageSize
+          )
+        ).toBe(true);
+        if (scenario.cards) {
+          await expect(surface.locator(part("card"))).toHaveCount(5);
+          await expect(surface.locator(part("table"))).toHaveCount(0);
+          expect(
+            await page.evaluate(
+              () =>
+                document.documentElement.scrollWidth -
+                document.documentElement.clientWidth
+            )
+          ).toBeLessThanOrEqual(1);
+        } else {
+          const rows = surface.locator("tbody [data-row-id]");
+          await expect(rows).toHaveCount(5);
+          await pageSize.focus();
+          if (kit.path === "shadcn-vue") {
+            await pageSize.selectOption("10");
+          } else {
+            await pageSize.press("Enter");
+            const ten = page.getByRole("option", { name: "10", exact: true });
+            await expect(ten).toBeVisible();
+            await page.keyboard.press("Escape");
+            await expect(ten).toBeHidden();
+            await expect(pageSize).toBeFocused();
+            await pageSize.press("Enter");
+            await ten.click();
+          }
+          await expect(rows).toHaveCount(10);
+          await expectDensity("compact");
+          expect(
+            await pageSize.evaluate(
+              (node, original) => node === original,
+              originalPageSize
+            )
+          ).toBe(true);
+        }
+        await screenshot(
+          page,
+          info,
+          `${kit.path}-${scenario.name}-density-toggle`
+        );
       });
-      await density.focus();
-      if (kit.path === "shadcn-vue") {
-        await density.selectOption("compact");
-        await expect(density).toBeFocused();
-      } else {
-        await density.press("Enter");
-        await expect(
-          page.getByRole("option", { name: "Compact", exact: true })
-        ).toBeVisible();
-        await screenshot(page, info, `${kit.path}-density-popup`);
-        await page.keyboard.press("Escape");
-        await expect(
-          page.getByRole("option", { name: "Compact", exact: true })
-        ).toBeHidden();
-        await expect(density).toBeFocused();
-        await density.press("Enter");
-        await page
-          .getByRole("option", { name: "Compact", exact: true })
-          .click();
-      }
-      await expect(
-        page.locator(".vue-kit-preview__table").locator(part("root"))
-      ).toHaveAttribute("data-density", "compact");
-      await screenshot(page, info, `${kit.path}-compact`);
-    });
+    }
   });
 }

@@ -8,7 +8,7 @@ import {
 import { densityChooser as bindingDensityChooser } from "@adapttable/vue/features";
 import { h } from "vue";
 
-import ElementSelect from "./controls/ElementSelect.vue";
+import ElementDensityControl from "./controls/ElementDensityControl.vue";
 
 /** Element Plus chooses the value; the binding owns density and URL state. */
 export function densityChooser(): StaticTableFeature {
@@ -17,16 +17,7 @@ export function densityChooser(): StaticTableFeature {
       DensityChooserChrome({
         ...props,
         slots: {
-          Control: (control) =>
-            h(ElementSelect, {
-              ...control.attrs,
-              value: control.value,
-              options: control.options,
-              onChange: (value) => {
-                if (value === "compact" || value === "comfortable")
-                  control.onChange(value);
-              },
-            }),
+          Control: (control) => h(ElementDensityControl, { control }),
         },
       })
     ),

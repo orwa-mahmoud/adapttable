@@ -121,9 +121,13 @@ import { fullscreen } from "@adapttable/element-plus/fullscreen";
 const features = [densityChooser(), fullscreen()];
 ```
 
-Pass `features` to `DataTable`. Use `v-model:density` to keep density in host
-state. The fullscreen button appears only when the browser supports fullscreen;
-it promotes the existing table root.
+Pass `features` to `DataTable`. Density uses two visible Element Plus radio
+buttons, Comfortable and Compact, with native radio-group keyboard behavior.
+Their labels follow the table locale. Use `v-model:density` to keep density in
+host state; a rejected request leaves the accepted choice checked. The same
+toggle is available in desktop tables and mobile cards, including RTL layouts.
+The fullscreen button appears only when the browser supports fullscreen; it
+promotes the existing table root.
 
 ## Grouped, tree and detail rows
 

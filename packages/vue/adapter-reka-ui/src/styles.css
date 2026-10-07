@@ -517,3 +517,21 @@
 .at-reka-menu-item[data-danger] {
   color: #b91c1c;
 }
+
+.at-reka-density {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--at-reka-border, #dce2eb);
+  border-radius: var(--at-reka-radius, 9px);
+  background: var(--at-reka-subtle, #f8fafc);
+}
+.at-reka-density-option {
+  border-color: transparent;
+  background: transparent;
+}
+.at-reka-density-option[aria-pressed="true"] {
+  border-color: var(--at-reka-border, #dce2eb);
+  background: var(--at-reka-background, #fff);
+  color: var(--at-reka-accent, #6d28d9);
+}

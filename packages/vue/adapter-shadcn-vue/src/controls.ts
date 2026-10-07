@@ -6,12 +6,14 @@ import {
   type ViewControlButtonProps,
 } from "@adapttable/vue/adapter";
 import { Minus } from "@lucide/vue";
+import { RadioGroupItem, RadioGroupRoot } from "reka-ui";
 import { h, type VNode } from "vue";
 
 import { Button } from "./components/button";
 import { Checkbox } from "./components/checkbox";
 import { Input } from "./components/input";
 import { NativeSelect, NativeSelectOption } from "./components/native-select";
+import { cn } from "./lib/utils";
 
 /** Chrome callback refs are forwarded by each registry component to its target. */
 export function shadcnControlAttrs(attrs: Attrs): Attrs {
@@ -81,14 +83,47 @@ export function shadcnSelect(control: {
   );
 }
 
+function shadcnDensityOption(option: {
+  readonly value: string;
+  readonly label: string;
+}): VNode {
+  return h(
+    RadioGroupItem,
+    { key: option.value, value: option.value, asChild: true },
+    () =>
+      h(
+        Button,
+        {
+          variant: "ghost",
+          class:
+            "h-8 border-0 px-3 text-muted-foreground shadow-none data-[state=checked]:bg-background data-[state=checked]:text-foreground data-[state=checked]:shadow-sm",
+        },
+        () => option.label
+      )
+  );
+}
+
 export const shadcnDensityControl: DensityChooserSlots["Control"] = (control) =>
-  shadcnSelect({
-    ...control,
-    onChange: (value) => {
-      if (value === "comfortable" || value === "compact")
-        control.onChange(value);
+  h(
+    RadioGroupRoot,
+    {
+      ...control.attrs,
+      class: cn(
+        "inline-flex w-fit items-center gap-1 rounded-md border border-input bg-muted p-1",
+        control.attrs.class as string | undefined
+      ),
+      orientation: "horizontal",
+      modelValue: control.value,
+      "onUpdate:modelValue": (value: unknown) => {
+        if (
+          (value === "comfortable" || value === "compact") &&
+          value !== control.value
+        )
+          control.onChange(value);
+      },
     },
-  });
+    () => control.options.map(shadcnDensityOption)
+  );
 
 /** One model-update event equals one selection request, including mixed state. */
 export function shadcnSelectionCheckbox(

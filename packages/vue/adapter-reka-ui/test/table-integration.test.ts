@@ -124,13 +124,21 @@ describe("Reka table over the packed binding", () => {
     await flush();
     expect(host.querySelector(part("table"))).toBeNull();
     expect(host.querySelectorAll("article")).toHaveLength(3);
-    for (const name of ["sort-select", "rows-per-page", "density-toggle"]) {
+    for (const name of ["sort-select", "rows-per-page"]) {
       const trigger = element<HTMLButtonElement>(host, part(name));
       expect(trigger.getAttribute("role")).toBe("combobox");
       expect(trigger.tagName).toBe("BUTTON");
       expect(trigger.closest("label")).toBeNull();
       expect(trigger.getAttribute("aria-label")).toBeTruthy();
     }
+    const density = element(host, part("density-toggle"));
+    expect(density.getAttribute("role")).toBe("group");
+    expect(density.getAttribute("aria-label")).toBeTruthy();
+    expect(density.getAttribute("dir")).toBe("rtl");
+    expect(density.querySelectorAll("button[aria-pressed]")).toHaveLength(2);
+    expect(density.closest("label")).toBeNull();
+    expect(density.textContent).toContain("Comfortable");
+    expect(density.textContent).toContain("Compact");
     expect(
       element(host, part("sort-select")).classList.contains("custom-sort")
     ).toBe(true);

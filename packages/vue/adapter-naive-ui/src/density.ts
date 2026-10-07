@@ -7,7 +7,9 @@ import {
 } from "@adapttable/vue/adapter";
 import { densityChooser as bindingDensityChooser } from "@adapttable/vue/features";
 
-import { naiveSelect } from "./controls/select";
+import { h } from "vue";
+
+import { NaiveDensityControl } from "./controls/NaiveDensityControl";
 
 /** Naive UI density chooser; the Vue binding owns state and persistence. */
 export function densityChooser(): StaticTableFeature {
@@ -16,14 +18,7 @@ export function densityChooser(): StaticTableFeature {
       DensityChooserChrome({
         ...props,
         slots: {
-          Control: (control) =>
-            naiveSelect({
-              ...control,
-              onChange: (value) => {
-                if (value === "comfortable" || value === "compact")
-                  control.onChange(value);
-              },
-            }),
+          Control: (control) => h(NaiveDensityControl, { ...control }),
         },
       })
     ),

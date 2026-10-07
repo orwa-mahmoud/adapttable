@@ -31,16 +31,12 @@ async function tick() {
   await nextTick();
 }
 async function choose(root: ParentNode, label: string) {
-  node<HTMLInputElement>(
-    root,
-    '[data-adapttable-part="density-toggle"] input[role="combobox"]'
-  ).click();
-  await tick();
-  const option = [
-    ...root.querySelectorAll<HTMLElement>('[role="option"]'),
+  const labelNode = [
+    ...root.querySelectorAll<HTMLLabelElement>(".el-radio-button"),
   ].find((item) => item.textContent?.trim() === label);
-  if (!option) throw new Error(`Missing density option ${label}`);
-  option.click();
+  if (!(labelNode?.control instanceof HTMLInputElement))
+    throw new Error(`Missing density option ${label}`);
+  labelNode.control.click();
   await tick();
 }
 function platformProperty(
@@ -75,10 +71,12 @@ describe("Element Plus optional view controls", () => {
     enabled.value = true;
     await tick();
     const control = node(root, '[data-adapttable-part="density-toggle"]');
-    expect(control.classList.contains("el-select")).toBe(true);
+    expect(control.classList.contains("el-radio-group")).toBe(true);
     expect(control.classList.contains("host-density")).toBe(true);
     expect(control.getAttribute("dir")).toBe("rtl");
-    expect(node(root, 'input[aria-label="Density choice"]')).not.toBeNull();
+    expect(control.getAttribute("aria-label")).toBe("Density choice");
+    expect(control.getAttribute("role")).toBe("radiogroup");
+    expect(control.querySelectorAll('input[type="radio"]')).toHaveLength(2);
     enabled.value = false;
     await tick();
     expect(

@@ -12,6 +12,7 @@ import TableFixture from "./TableFixture.vue";
 const filterSurface = location.pathname.startsWith("/filter-surface");
 const tableFixture = [
   "/table",
+  "/density",
   "/columns",
   "/filters",
   "/filters-drawer",

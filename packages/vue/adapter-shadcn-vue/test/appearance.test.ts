@@ -352,9 +352,9 @@ describe("compiled shadcn appearance contracts", () => {
         '[data-adapttable-part="sort-direction"]'
       );
       const input = target(view.root, '[data-adapttable-part="search"]');
-      const select = target(
+      const densityChoice = target(
         view.root,
-        '[data-adapttable-part="density-toggle"]'
+        '[data-adapttable-part="density-toggle"] [role="radio"]'
       );
       expect(compactPaint(card, "padding")).toEqual([]);
       expect(compactPaint(button, "block-size")).toEqual([]);
@@ -368,24 +368,26 @@ describe("compiled shadcn appearance contracts", () => {
       expect(compactPaint(button, "block-size")).toEqual(["2rem"]);
       expect(compactPaint(button, "padding-inline")).toEqual([".625rem"]);
       expect(compactPaint(input, "padding-block").at(-1)).toBe(".125rem");
-      expect(compactPaint(select, "padding-inline-start")).toEqual([".625rem"]);
+      expect(compactPaint(densityChoice, "padding-inline")).toEqual([
+        ".625rem",
+      ]);
       const tapMinima: Element[] = [];
       stylesheet.walkAtRules("media", (media) => {
         if (media.params !== "(max-width:640px)") return;
         media.walkRules((rule) => {
           if (!declarations(rule, "min-block-size").includes("2.75rem")) return;
           tapMinima.push(
-            ...[button, input, select].filter((element) =>
+            ...[button, input, densityChoice].filter((element) =>
               element.matches(rule.selector)
             )
           );
         });
       });
-      expect(tapMinima).toEqual([button, input, select]);
+      expect(tapMinima).toEqual([button, input, densityChoice]);
       view.props.value = { ...view.props.value, density: "comfortable" };
       await nextTick();
       expect(compactPaint(card, "padding")).toEqual([]);
-      expect(compactPaint(select, "padding-inline-start")).toEqual([]);
+      expect(compactPaint(densityChoice, "padding-inline")).toEqual([]);
     }
   );
 });

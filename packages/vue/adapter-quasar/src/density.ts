@@ -8,7 +8,7 @@ import {
 import { densityChooser as bindingDensityChooser } from "@adapttable/vue/features";
 import { h } from "vue";
 
-import QuasarSelect from "./controls/QuasarSelect.vue";
+import { QuasarDensityToggle } from "./controls/QuasarDensityToggle";
 
 /** Quasar presentation for the binding-owned controlled density model. */
 export function densityChooser(): StaticTableFeature {
@@ -17,20 +17,7 @@ export function densityChooser(): StaticTableFeature {
       DensityChooserChrome({
         ...props,
         slots: {
-          Control: (control) =>
-            h(QuasarSelect, {
-              control: {
-                ...control,
-                label:
-                  typeof control.attrs["aria-label"] === "string"
-                    ? control.attrs["aria-label"]
-                    : "",
-                onChange: (value: string) => {
-                  if (value === "comfortable" || value === "compact")
-                    control.onChange(value);
-                },
-              },
-            }),
+          Control: (control) => h(QuasarDensityToggle, { control }),
         },
       })
     ),

@@ -21,6 +21,13 @@
   min-block-size: 44px;
   min-inline-size: 44px;
 }
+.adapttable-quasar-density-toggle {
+  max-inline-size: 100%;
+}
+.adapttable-quasar-density-toggle .q-btn {
+  min-block-size: 44px;
+  min-inline-size: 44px;
+}
 .adapttable-quasar .q-field {
   min-inline-size: 8rem;
 }

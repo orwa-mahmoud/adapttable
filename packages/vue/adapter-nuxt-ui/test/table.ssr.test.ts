@@ -45,6 +45,10 @@ describe("Nuxt table server rendering", () => {
       expect(html).toContain('dir="rtl"');
       expect(html.match(/data-adapttable-part="scroll-box"/g)).toHaveLength(1);
       expect(html).toContain('data-adapttable-part="density-toggle"');
+      expect(html).toContain('role="radiogroup"');
+      expect(html.match(/role="radio"/g)).toHaveLength(2);
+      expect(html).toContain("Comfortable");
+      expect(html).toContain("Compact");
     }
   });
 });

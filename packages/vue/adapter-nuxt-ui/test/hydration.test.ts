@@ -29,6 +29,12 @@ describe("Nuxt table hydration", () => {
       document.body.append(root);
       const input = root.querySelector("input");
       const row = root.querySelector('[data-row-id="a"]');
+      const densityOptions = Array.from(
+        root.querySelectorAll(
+          '[data-adapttable-part="density-toggle"] [role="radio"]'
+        )
+      );
+      expect(densityOptions).toHaveLength(2);
       const warnings: string[] = [];
       const app = create();
       app.config.warnHandler = (message) => {
@@ -41,6 +47,13 @@ describe("Nuxt table hydration", () => {
         expect(warnings).toEqual([]);
         expect(root.querySelector("input")).toBe(input);
         expect(root.querySelector('[data-row-id="a"]')).toBe(row);
+        expect(
+          Array.from(
+            root.querySelectorAll(
+              '[data-adapttable-part="density-toggle"] [role="radio"]'
+            )
+          )
+        ).toEqual(densityOptions);
         expect(
           root.querySelectorAll('[data-adapttable-part="scroll-box"]')
         ).toHaveLength(1);

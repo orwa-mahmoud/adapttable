@@ -143,6 +143,15 @@ After an intentional vendor markup update, regenerate the fixture with
 `ADAPTTABLE_UPDATE_SSR_FIXTURE=1` on the server command and rerun both suites.
 These low-level tests do not replace Quasar CLI SSR application verification.
 
+## Density
+
+`densityChooser()` from `@adapttable/quasar/density` displays Comfortable and
+Compact together in a native QBtnToggle. The localized group label and each
+button's pressed state identify the current density. Tab reaches both buttons;
+Enter or Space requests a change. Rejected controlled requests preserve the
+selected density and focused button. The same toggle appears in mobile cards
+and RTL layouts, with 44px minimum button targets.
+
 ## Filters and editing
 
 Import `filters` from `@adapttable/quasar/filters` and `headerFilters` from

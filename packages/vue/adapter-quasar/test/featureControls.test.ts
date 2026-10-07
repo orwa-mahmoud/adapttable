@@ -6,7 +6,7 @@ import {
   resolveLabels,
 } from "@adapttable/vue/adapter";
 import { mount } from "@vue/test-utils";
-import { QSelect, Quasar } from "quasar";
+import { QBtnToggle, QSelect, Quasar } from "quasar";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { defineComponent, h, nextTick } from "vue";
 
@@ -70,22 +70,22 @@ describe("Quasar binding feature fills", () => {
       )
     );
     await settle();
-    expect(
-      wrapper.get('[data-adapttable-part="density-toggle"]').element.tagName
-    ).toBe("INPUT");
-    expect(wrapper.get("label").classes()).toContain("density-paint");
-    wrapper.getComponent(QSelect).vm.toggleOption({
-      value: "comfortable",
-      label: labels.densityComfortable,
-    });
+    const density = wrapper.get('[data-adapttable-part="density-toggle"]');
+    expect(density.attributes("role")).toBe("group");
+    expect(density.classes()).toContain("density-paint");
+    expect(wrapper.findComponent(QBtnToggle).exists()).toBe(true);
+    const options = density.findAll("button");
+    expect(options.map((button) => button.text())).toEqual([
+      labels.densityComfortable,
+      labels.densityCompact,
+    ]);
+    await options[0]!.trigger("click");
     await settle();
     expect(changed).toHaveBeenCalledExactlyOnceWith("comfortable");
-    expect(
-      (
-        wrapper.get('[data-adapttable-part="density-toggle"]')
-          .element as HTMLInputElement
-      ).value
-    ).toBe(labels.densityCompact);
+    expect(options.map((button) => button.attributes("aria-pressed"))).toEqual([
+      "false",
+      "true",
+    ]);
     await wrapper
       .get('[data-adapttable-part="fullscreen-toggle"]')
       .trigger("click");
@@ -111,9 +111,9 @@ describe("Quasar binding feature fills", () => {
       },
     });
     await settle();
-    wrapper
-      .getComponent(QSelect)
-      .vm.toggleOption({ value: "comfortable", label: "Comfortable" });
+    await wrapper
+      .get('[data-adapttable-part="density-toggle"] button')
+      .trigger("click");
     await settle();
     expect(callback).toHaveBeenCalledExactlyOnceWith("comfortable");
     expect(wrapper.emitted("update:density")).toEqual([["comfortable"]]);
@@ -121,9 +121,9 @@ describe("Quasar binding feature fills", () => {
       wrapper.get('[data-adapttable-part="root"]').attributes("data-density")
     ).toBe("compact");
     await wrapper.setProps({ onDensityChange: undefined });
-    wrapper
-      .getComponent(QSelect)
-      .vm.toggleOption({ value: "comfortable", label: "Comfortable" });
+    await wrapper
+      .get('[data-adapttable-part="density-toggle"] button')
+      .trigger("click");
     await settle();
     expect(callback).toHaveBeenCalledTimes(1);
     expect(wrapper.emitted("update:density")).toEqual([

@@ -83,11 +83,13 @@ describe("Nuxt UI controls with the official Vue plugin", () => {
     const density = host.querySelector(
       '[data-adapttable-part="density-toggle"]'
     );
-    expect(density?.getAttribute("role")).toBe("combobox");
+    expect(density?.getAttribute("role")).toBe("radiogroup");
     expect(density?.classList.contains("density-select-paint")).toBe(true);
     expect(density?.classList.contains("density-toggle-paint")).toBe(true);
     expect(density?.getAttribute("dir")).toBe("rtl");
     expect(density?.textContent).toContain(labels.densityCompact);
+    expect(density?.textContent).toContain(labels.densityComfortable);
+    expect(density?.querySelectorAll('[role="radio"]')).toHaveLength(2);
     const button = host.querySelector<HTMLButtonElement>(
       '[data-adapttable-part="fullscreen-toggle"]'
     );

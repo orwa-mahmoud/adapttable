@@ -71,6 +71,15 @@ For custom layouts, the Vue binding's headless APIs and optional
 `DataTableSurfaceChrome` remain available. Its desktop and mobile renderers are
 required slots, so the host chooses its table presentation.
 
+## Density
+
+Add `densityChooser()` from `@adapttable/vuetify/density` to expose Comfortable
+and Compact together in a Vuetify button toggle. The named group uses native
+buttons with pressed states; Tab moves between choices and Enter or Space
+requests the focused choice. Labels, direction and density state come from the
+binding. With a controlled `density` prop, the selected choice changes only
+after the host accepts `onDensityChange` or `update:density`.
+
 ## Navigation and status
 
 Optional navigation uses the same binding-owned ranges, find matches and host

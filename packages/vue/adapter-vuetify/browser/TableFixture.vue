@@ -3,13 +3,14 @@ import { h, ref } from "vue";
 import { VApp } from "vuetify/components/VApp";
 import { VMain } from "vuetify/components/VMain";
 
-import { type ColumnDef, DataTable } from "../src";
+import { type ColumnDef, DataTable, type TableDensity } from "../src";
 import {
   cellNavigation,
   columnSelectionCheckbox,
 } from "../src/cell-navigation";
 import { columnMenu } from "../src/column-menu";
 import VuetifyButton from "../src/controls/VuetifyButton.vue";
+import { densityChooser } from "../src/density";
 import {
   batchEditing,
   type BatchRowEdit,
@@ -64,6 +65,14 @@ const decorated = ref(false);
 const dark = ref(false);
 const rtl = ref(false);
 const editRequests = ref(0);
+const densityPage = location.pathname === "/density";
+const density = ref<TableDensity>("comfortable");
+const densityRequests = ref(0);
+const rejectDensity = ref(false);
+function changeDensity(value: TableDensity): void {
+  densityRequests.value++;
+  if (!rejectDensity.value) density.value = value;
+}
 function applyPatch(
   id: string,
   patch: Readonly<Record<string, unknown>>
@@ -93,6 +102,7 @@ function commitBatch(rows: readonly BatchRowEdit<Person>[]): void {
   for (const row of rows) applyPatch(row.rowId, row.patch);
 }
 function pageFeatures() {
+  if (densityPage) return [densityChooser()];
   if (location.pathname === "/columns") return [columnMenu()];
   if (["/filters", "/filters-drawer"].includes(location.pathname))
     return [
@@ -177,12 +187,21 @@ function changeSelection(next: string[]): void {
               :attrs="{ onClick: () => (decorated = !decorated) }"
               content="Update decoration"
             />
+            <VuetifyButton
+              v-if="densityPage"
+              :attrs="{
+                'aria-pressed': rejectDensity,
+                onClick: () => (rejectDensity = !rejectDensity),
+              }"
+              content="Reject density"
+            />
           </nav>
         </header>
         <DataTable
           :data="people"
           :columns="columns"
           :features="features"
+          :density="density"
           :row-key="(row) => row.id"
           :selected-ids="selectedIds"
           :url-sync="false"
@@ -191,11 +210,15 @@ function changeSelection(next: string[]): void {
           :class-names="{ root: decorated ? 'decorated' : undefined }"
           table-label="People"
           @update:selected-ids="changeSelection"
+          @update:density="changeDensity"
         />
         <output aria-label="Selected row IDs">{{
           selectedIds.join(",")
         }}</output>
         <output aria-label="Selection requests">{{ selectionRequests }}</output>
+        <output v-if="densityPage" aria-label="Density requests">{{
+          densityRequests
+        }}</output>
         <output v-if="editable" aria-label="Edit requests">{{
           editRequests
         }}</output>

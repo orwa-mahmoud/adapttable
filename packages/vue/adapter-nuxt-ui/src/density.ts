@@ -8,7 +8,7 @@ import {
 import { densityChooser as bindingDensityChooser } from "@adapttable/vue/features";
 import { h } from "vue";
 
-import NuxtSelect from "./controls/NuxtSelect.vue";
+import NuxtDensityControl from "./controls/NuxtDensityControl.vue";
 
 /** Nuxt UI density control over the binding's controlled view model. */
 export function densityChooser(): StaticTableFeature {
@@ -17,20 +17,7 @@ export function densityChooser(): StaticTableFeature {
       DensityChooserChrome({
         ...props,
         slots: {
-          Control: (control) =>
-            h(NuxtSelect, {
-              control: {
-                ...control,
-                label:
-                  typeof control.attrs["aria-label"] === "string"
-                    ? control.attrs["aria-label"]
-                    : "",
-                onChange: (value: string) => {
-                  if (value === "comfortable" || value === "compact")
-                    control.onChange(value);
-                },
-              },
-            }),
+          Control: (control) => h(NuxtDensityControl, { control }),
         },
       })
     ),

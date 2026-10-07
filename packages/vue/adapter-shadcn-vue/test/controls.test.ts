@@ -306,6 +306,12 @@ describe("copied shadcn controls", () => {
             options: [{ value: "compact", label: "Compact" }],
             onChange: vi.fn(),
           }),
+          shadcnSelect({
+            attrs: {},
+            value: "5",
+            options: [{ value: "5", label: "5 rows" }],
+            onChange: vi.fn(),
+          }),
         ]),
     });
     const html = await renderToString(app);

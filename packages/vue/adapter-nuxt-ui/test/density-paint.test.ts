@@ -55,7 +55,10 @@ describe("Nuxt density presentation", () => {
         await settle();
         const row = element(root, '[data-row-id="a"]');
         const input = element(root, '[data-adapttable-part="search"]');
-        const select = element(root, '[data-adapttable-part="density-toggle"]');
+        const densityItem = element(
+          root,
+          '[data-adapttable-part="density-toggle"] [data-slot="item"]'
+        );
         const button = element(
           root,
           mobile
@@ -65,7 +68,7 @@ describe("Nuxt density presentation", () => {
         const checkbox = element(row, 'button[role="checkbox"]');
         const controlClasses = [
           input.className,
-          select.className,
+          densityItem.className,
           button.className,
           checkbox.className,
         ];
@@ -89,7 +92,7 @@ describe("Nuxt density presentation", () => {
             element(root, "th[data-column-key]").classList.contains("py-1.5")
           ).toBe(true);
         }
-        [input, select, button, checkbox].forEach((target, index) =>
+        [input, densityItem, button, checkbox].forEach((target, index) =>
           expect(target.className).not.toBe(controlClasses[index])
         );
         expect(element(root, '[data-row-id="a"]')).toBe(row);
@@ -97,7 +100,7 @@ describe("Nuxt density presentation", () => {
         density.value = "comfortable";
         await settle();
         expect(paint.className).toBe(comfortablePaint);
-        [input, select, button, checkbox].forEach((target, index) =>
+        [input, densityItem, button, checkbox].forEach((target, index) =>
           expect(target.className).toBe(controlClasses[index])
         );
       } finally {
