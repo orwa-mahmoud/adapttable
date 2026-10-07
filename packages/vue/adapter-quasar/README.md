@@ -5,6 +5,30 @@ Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 
 Quasar controls for AdaptTable's headless Vue binding. The Vue binding owns
 state and feature behavior; Quasar supplies the interactive components.
 
+## Features
+
+- Feature composition with 41 canonical factories and focused, opt-in imports.
+- Sorting, multi-sort, pagination, global search, selection and selection
+  statistics, with host-controlled state.
+- Filtering, custom filter types, the AND/OR filter tree and header filters.
+- Cell editing, row and batch editing, dirty indicators, undo/redo and
+  host-owned save callbacks.
+- Column management, collapsible column groups, resizing and fit-to-width.
+- Grouping and aggregation, tree data, row expansion and nested tables.
+- Row reordering, row pinning, pinned summary rows, row and column spanning,
+  full-width separator rows, row styling and virtualization.
+- Keyboard navigation, cell ranges, column selection and host-owned fill requests.
+- Saved views, row actions, bulk actions, Find, a command palette, context menus
+  and side-panel view controls.
+- CSV export, optional PDF export and XLSX writers, plus host-owned printing.
+- Mobile card layouts, localized labels, RTL and component-level server-side
+  rendering (SSR) with hydration.
+
+Quasar supplies the visible fields, buttons, menus and dialogs; the Vue binding
+owns state and interactions. Changes to rows always go through host callbacks.
+The optional PDF/XLSX writers stay out of the base table entry. No feature barrel
+or preset is exported: compose the imports you need, as shown below.
+
 ## Application setup
 
 The supported Vue range starts at 3.5.0. This package targets Quasar 2.34.0.
@@ -120,8 +144,9 @@ Quasar is MIT licensed. The controls are tested against Quasar 2.34.0.
 
 ## Package formats
 
-The root entry and the implemented `density`, `fullscreen`, `grouping`,
-`filters`, `header-filters`, `editing`, and `batch-editing` entries provide ESM and CommonJS, each with matching TypeScript declarations.
+The root entry and every feature entry documented below provide ESM and
+CommonJS, each with matching TypeScript declarations. There are 41 canonical
+feature factories plus the optional PDF and XLSX export factories.
 The `styles.css` export is a separate stylesheet and is marked as a side effect
 so bundlers retain its import. Package consumers are checked with Vue 3.5.0
 and Vue 3.5.43 using the real Quasar 2.34.0 SDK.
@@ -176,6 +201,57 @@ within a QCheckbox remains in the same edit session; leaving the entire
 control invokes the binding's blur action. Editor refs point to the actual
 input or QCheckbox role host, including QSelect's responsive dialog target.
 
+## Column management
+
+Import `columnMenu` from `@adapttable/quasar/column-menu` and include
+`columnMenu()` in the table's features. The same entry exports a generic
+`ColumnMenu<TRow>` for a standalone column-layout control. QMenu positions
+the popup, QCard carries its dialog ID and native ref, and QBtn, QInput,
+and QSelect render the controls. The binding owns visibility, pinning,
+reordering, names, choice values, and validation.
+
+The first Escape closes an open choice, the second closes its column
+submenu, and the third closes the panel and returns focus to its visible
+trigger. Controlled requests remain subject to host acceptance. Deactivation
+retires the portal and native refs; reactivation requires a new opening
+gesture and retains the binding's search query. Header rename uses the same
+binding validation and draft controller. Fullscreen uses the host plugin
+setup below; arbitrary per-instance portal containers are not supported.
+
+## Actions, find and status
+
+The optional `print`, `bulk-actions`, `find-in-table`, `status-bar`, and
+`selection-stats` entries supply native QBtn, QInput, QBar, and QBadge fills.
+Use `print(callback, true)` for a print toolbar button and
+`findInTable({ button: true })` for a find toolbar button. Without these
+flags, the binding keeps the corresponding behavior available without
+adding the optional toolbar control.
+
+`bulkActions(actions)` follows the binding's confirmation, pending, error,
+retry, and selection-clear behavior. The table's `confirm` callback stays
+authoritative. The adapter sends requests without changing host rows.
+`statusBar()` and `selectionStats()` share one status surface, so combining
+them does not duplicate the statistics.
+
+Import `savedViews` and `SavedViewsPanel` from `@adapttable/quasar/saved-views`.
+The toolbar menu uses QMenu and the management panel uses QCard, QBtn,
+QBadge, and QInput. Storage, readonly/default metadata, ordering, apply,
+rename and removal requests remain with the binding and host callbacks.
+Both surfaces release native refs when removed. A deactivated toolbar menu
+stays closed until another gesture; retired input callbacks cannot change
+its retained draft after reactivation.
+
+## Export
+
+Import `exportCsv` from `@adapttable/quasar/export`, `exportPdf` from
+`@adapttable/quasar/export-pdf`, or `exportXlsx` from
+`@adapttable/quasar/export-xlsx`. Each factory supplies QBtn, QSpinner, QCard,
+and QLinearProgress controls to the binding's shared export lifecycle.
+The PDF and XLSX writers stay in their separate optional entries.
+Selected rows, filenames, host export callbacks, cancellation, retry, and
+late-result protection follow the binding. Server-built exports display a
+native progress card with localized actions and a native download link.
+
 ### Fullscreen and portals
 
 Register Quasar's public `AppFullscreen` plugin in the host application when
@@ -200,3 +276,94 @@ and visual acceptance still require a browser with native fullscreen support.
 See [Quasar AppFullscreen](https://quasar.dev/quasar-plugins/app-fullscreen/),
 [QMenu](https://quasar.dev/vue-components/menu/), and
 [QDialog](https://quasar.dev/vue-components/dialog/) for host setup.
+
+## Row and hierarchy features
+
+Row features are separate opt-in imports. Their factories use the Vue binding's
+state and models; the table renders disclosures, actions, loading indicators,
+column controls and menus with Quasar components.
+
+```ts
+import { tree } from "@adapttable/quasar/tree";
+import { rowDetail, nestedTable } from "@adapttable/quasar/row-detail";
+import { rowActions } from "@adapttable/quasar/row-actions";
+import { rowPinning } from "@adapttable/quasar/row-pinning";
+import { pinnedSummaryRows } from "@adapttable/quasar/pinned-summary-rows";
+import { cellSpan } from "@adapttable/quasar/cell-span";
+import { extraRows } from "@adapttable/quasar/extra-rows";
+import { rowAppearance } from "@adapttable/quasar/row-appearance";
+import { virtualize } from "@adapttable/quasar/virtualize";
+```
+
+- `tree({ getChildren, expandedIds, onExpandedIdsChange })` supports nested or
+  parent-id data. Use refs or getters for controlled expansion. Lazy children
+  come from the host's `onLoadChildren` callback and updated data; pending loads
+  use `QSpinner`. Tree arrow keys follow the table's direction.
+- `rowDetail(render, defaultExpandedRowIds, options)` renders a panel beneath a
+  desktop row or inside a mobile card. `nestedTable(factory, defaults, options)`
+  accepts a host-rendered child table, so the child keeps its own row type and kit.
+- `rowActions(actions, handlers)` requests host actions, duplication and deletion.
+  The host updates its data after accepting a request. Set `rowActionsLayout` to
+  `"menu"` for a `QMenu`; the default renders inline `QBtn` controls.
+- `rowPinning({ pinnedRowIds, onPinnedRowIdsChange })` keeps controlled pin lists
+  authoritative. Tree and grouped tables refuse data-row pins.
+- `pinnedSummaryRows({ top, bottom })` renders independent summary objects outside
+  data-row selection, sorting and filtering.
+- `cellSpan(callback, appearance)` merges desktop cells. Mobile cards display
+  each field separately. `extraRows` inserts host content or separators;
+  `rowAppearance` supplies host row classes, styles and heights.
+- `virtualize({ maxHeight, estimateRowSize, estimateCardSize, virtualOverscan })`
+  windows infinite-scroll rows while retaining pinned summaries. Ordinary paged
+  tables keep their page intact. A vertical row span disables row virtualization.
+
+The thin column entries are `multiSort` from `@adapttable/quasar/multi-sort`,
+`fitColumns` from `@adapttable/quasar/fit-columns`, `resizableColumns` from
+`@adapttable/quasar/resizable-columns`, and `collapsibleColumnGroups` from
+`@adapttable/quasar/column-groups`. They use the existing Quasar header controls.
+
+Server rendering includes tree/detail content, nested tables, summaries and
+injected rows. The binding keeps row actions, data-row pinning and resize
+interactions inactive until the table mounts. Hydration then activates their
+Quasar controls and the controlled pin order. Deactivation and disposal retire
+their callbacks without changing host data.
+
+## Navigation and native action surfaces
+
+```ts
+import {
+  cellNavigation,
+  columnSelectionCheckbox,
+} from "@adapttable/quasar/cell-navigation";
+import { commandPalette } from "@adapttable/quasar/command-palette";
+import { contextMenu } from "@adapttable/quasar/context-menu";
+import { groupingPanel } from "@adapttable/quasar/grouping-panel";
+import { rowReorder } from "@adapttable/quasar/row-reorder";
+import { sidePanel } from "@adapttable/quasar/side-panel";
+```
+
+- `cellNavigation(options)` keeps grid ranges, keyboard shortcuts, clipboard and
+  fill requests in the binding. Quasar supplies the fill marker;
+  `columnSelectionCheckbox()` adds a native `QCheckbox` for each column.
+  Mobile cards retain their normal card controls rather than a desktop grid.
+- `commandPalette({ button, commands, open, onOpenChange })` uses `QDialog`,
+  `QInput` and `QItem`. The binding owns filtering and the active command,
+  including disabled commands. Controlled open state remains authoritative.
+  Quasar owns modal focus containment, Escape and backdrop dismissal.
+- `contextMenu({ items })` uses `QMenu`, `QList`, `QItem` and `QSeparator`.
+  The binding resolves the cell/header/row target and retains the original
+  opener. Native menu items support arrows, Home/End and Enter.
+- `groupingPanel(initialGroupBy, extras)` includes the Quasar group-row fill.
+  It uses `QChip`, `QSelect`, `QCheckbox` and `QBtn` for column grouping and
+  aggregate operations. Drag/drop and RTL keyboard behavior stay in the
+  binding. `onGroupByChange` reports the accepted grouping update once.
+- `rowReorder(onRowReorder, options)` uses a desktop grip or mobile up/down
+  buttons. Destination selection uses `QMenu`; a confirm move policy uses
+  `QDialog`. Reorders and group/parent moves request host callbacks only.
+- `sidePanel({ panels, open, onOpenChange, side })` uses a `QCard` frame and
+  `QBtn` tabs. The binding owns controlled selection and logical RTL keys.
+  The panel moves below the table in mobile layout.
+
+These optional controls activate after mount. Dialog teardown restores an
+eligible opener after its portal disappears, while preserving focus claimed by
+a newer surface. The
+fullscreen host setup above applies to these native Quasar overlays too.

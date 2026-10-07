@@ -18,6 +18,39 @@ import { pathToFileURL } from "node:url";
 
 /** Every fixture's diagnostic identity, separate from the invalid source. */
 export const VUE_TYPE_EXPECTATIONS = {
+  "@adapttable/quasar": {
+    "WrongRemainingContracts.ts": [
+      { code: 2345, message: /RowReorderHandler<Row>/ },
+      {
+        code: 2322,
+        message:
+          /Type 'true' is not assignable to type 'MaybeRefOrGetter<string \| null>'/,
+      },
+      { code: 2322, message: /target: number.*ContextMenuTarget<Row>/s },
+      { code: 2322, message: /key: number.*keys: readonly string\[\]/s },
+      { code: 2554, message: /Expected 0 arguments, but got 1/ },
+    ],
+    "WrongColumnRows.ts": [
+      {
+        code: 2322,
+        message: /ColumnMenuSlotProps(?:\$\d+)?<Invoice>.*Person/s,
+      },
+      { code: 2322, message: /id: number.*row: Person/s },
+    ],
+    "WrongFeatureRow.vue": [
+      {
+        code: 2322,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Invoice>\[\].*ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Person>>/,
+      },
+    ],
+    "WrongCellRow.vue": [
+      {
+        code: 2339,
+        message: /Property 'amount' does not exist on type 'Person'/,
+      },
+    ],
+  },
   "@adapttable/naive-ui": {
     "WrongEditingRows.ts": [
       {
@@ -512,13 +545,13 @@ export function diagnosticProblems({
   problems.push(...fixtureProblems(files, expectations));
   const { diagnostics, unexpected } = parseDiagnostics(output);
   problems.push(
-    ...unexpected.map((line) => `Unexpected compiler output: ${line}`),
+    ...unexpected.map((line) => `Unexpected compiler output: ${line}`)
   );
   const byFile = new Map();
   for (const diagnostic of diagnostics) {
     const file = relative(fixtureDir, resolve(cwd, diagnostic.file)).replaceAll(
       "\\",
-      "/",
+      "/"
     );
     const found = byFile.get(file) ?? [];
     found.push(diagnostic);
@@ -527,11 +560,11 @@ export function diagnosticProblems({
       !expectations[file]?.some(
         (expected) =>
           expected.code === diagnostic.code &&
-          expected.message.test(diagnostic.message),
+          expected.message.test(diagnostic.message)
       )
     ) {
       problems.push(
-        `${diagnostic.file}: unexpected TS${diagnostic.code}: ${diagnostic.message}`,
+        `${diagnostic.file}: unexpected TS${diagnostic.code}: ${diagnostic.message}`
       );
     }
   }
@@ -540,14 +573,14 @@ export function diagnosticProblems({
       const actual = (byFile.get(file) ?? []).filter(
         (found) =>
           found.code === diagnostic.code &&
-          diagnostic.message.test(found.message),
+          diagnostic.message.test(found.message)
       ).length;
       const expectedCount = diagnostic.count ?? 1;
       if (actual !== expectedCount) {
         problems.push(
           actual === 0
             ? `${file}: missing expected TS${diagnostic.code} ${diagnostic.message}`
-            : `${file}: expected ${expectedCount} occurrence(s) of TS${diagnostic.code} ${diagnostic.message}; got ${actual}`,
+            : `${file}: expected ${expectedCount} occurrence(s) of TS${diagnostic.code} ${diagnostic.message}; got ${actual}`
         );
       }
     }
@@ -575,7 +608,7 @@ export function checkVueTypes(cwd = process.cwd()) {
   const fixtureDir = join(cwd, "test/types/invalid");
   const files = invalidFixtures(fixtureDir);
   const compiler = createRequire(import.meta.url).resolve(
-    "vue-tsc/bin/vue-tsc.js",
+    "vue-tsc/bin/vue-tsc.js"
   );
   const result = spawnSync(
     process.execPath,
@@ -587,7 +620,7 @@ export function checkVueTypes(cwd = process.cwd()) {
       "-p",
       join(fixtureDir, "tsconfig.json"),
     ],
-    { cwd, encoding: "utf8" },
+    { cwd, encoding: "utf8" }
   );
   if (result.error) throw result.error;
   if (result.signal) throw new Error(`vue-tsc terminated by ${result.signal}`);

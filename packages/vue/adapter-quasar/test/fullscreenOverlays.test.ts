@@ -4,6 +4,7 @@ import { afterAll, afterEach, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 
 import { DataTable } from "../src";
+import { columnMenu } from "../src/column-menu";
 import { filters } from "../src/filters";
 import { fullscreen } from "../src/fullscreen";
 
@@ -105,6 +106,34 @@ function table(mode: "popover" | "drawer" = "popover") {
   wrappers.push(wrapper);
   return wrapper;
 }
+it("contains the column-manager native dialog in table fullscreen through the public host plugin", async () => {
+  const wrapper = mount(DataTable<{ id: string; name: string }>, {
+    attachTo: document.body,
+    global: { plugins: [[Quasar, { plugins: { AppFullscreen } }]] },
+    props: {
+      data: [{ id: "a", name: "Ada" }],
+      columns: [{ key: "name", renameable: true }],
+      rowKey: (row) => row.id,
+      urlSync: false,
+      forceMobile: false,
+      features: [fullscreen(), columnMenu()],
+    },
+  });
+  wrappers.push(wrapper);
+  await settle();
+  const root = wrapper.get(part("root")).element;
+  await wrapper.get(part("fullscreen-toggle")).trigger("click");
+  await settle();
+  await wrapper.get(part("column-menu-button")).trigger("click");
+  await settle();
+  const panel = document.body.querySelector(part("column-menu-panel"));
+  expect(panel?.getAttribute("role")).toBe("dialog");
+  expect(root.contains(panel)).toBe(true);
+  await document.exitFullscreen();
+  await settle();
+  expect(document.body.querySelector(part("column-menu-panel"))).toBe(panel);
+  expect(root.contains(panel)).toBe(false);
+});
 it("observes the binding's native table fullscreen request and contains QMenu and QSelect portals", async () => {
   const wrapper = table();
   await settle();

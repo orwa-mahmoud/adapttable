@@ -8,7 +8,13 @@
     "rootDirs": [".", "./.sfc-types"]
   },
   "include": ["src", "test", "vitest.config.ts", "tsdown.config.ts"],
-  "exclude": ["node_modules", "dist", "coverage", ".sfc-types"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".sfc-types",
+    "test/types/invalid"
+  ],
   "vueCompilerOptions": {
     "strictTemplates": true,
     "dataAttributes": ["data-*"]
