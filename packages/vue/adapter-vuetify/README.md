@@ -1,5 +1,9 @@
 # @adapttable/vuetify
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Vuetify imports CSS: Node SSR uses Vite host compilation with `vuetify` and
+`@adapttable/vuetify` in `ssr.noExternal`, for both ESM and CommonJS entries.
+
 Vuetify controls for the headless AdaptTable Vue binding. AdaptTable owns query
 state and requests changes from the host; Vuetify supplies Material Design
 presentation. The adapter does not introduce a second table data engine.

@@ -1,5 +1,7 @@
 # @adapttable/naive-ui
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 Naive UI controls for the AdaptTable Vue binding. AdaptTable owns table state,
 feature composition and semantic table structure. Naive UI supplies the visible
 controls and their styling.

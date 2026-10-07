@@ -1,5 +1,7 @@
 # @adapttable/shadcn-vue
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 shadcn-vue presentation for AdaptTable's headless Vue binding. Table state,
 feature lifetimes, query ownership, and structural Chrome belong to
 `@adapttable/vue`; this package supplies copied, licensed shadcn-vue controls.

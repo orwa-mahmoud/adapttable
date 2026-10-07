@@ -1,5 +1,7 @@
 # @adapttable/reka-ui
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 A Vue data table with accessible Reka UI controls and a compact, neutral theme.
 AdaptTable owns the data models and interactions; the host owns the data. Reka
 provides real selection, choices, popovers, dialogs and menu primitives.

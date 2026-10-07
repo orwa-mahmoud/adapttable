@@ -4,23 +4,28 @@
  *
  * `pack` runs under the repository's Node 24 + pnpm toolchain after `pnpm
  * build`. `verify` runs directly under each advertised Node version and uses
- * only that Node's npm to install and load the packed artifacts.
+ * that Node's npm to install the packed artifacts. Plain JavaScript entries
+ * load natively; Vue vendors that ship SFCs/CSS use their official Vite host
+ * compilation pipeline under the same advertised Node runtime.
  *
  * Expected package names come from non-private workspace manifests, never
  * from the packed manifest being judged.
  */
 import { execFileSync } from "node:child_process";
 import {
+  copyFileSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { VUE_HOST_PACKAGES, vueHostRoutes } from "./node-support-vue-host.mjs";
 import {
   listPackages,
   packageDir as packageDirOf,
@@ -213,8 +218,79 @@ export function kitLoadDependencies(
     deps["@angular/compiler"] ??= deps["@angular/core"];
     deps.rxjs ??= "^7.4.0";
   }
+  if (deps["element-plus"]) {
+    // Preserve an explicit real-Popper co-install regression on every runtime.
+    deps["@popperjs/core"] ??= "^2.11.8";
+  }
+  if (packages.some((entry) => VUE_HOST_PACKAGES.includes(entry.name))) {
+    deps.vite = "^8.3.0";
+  }
+  if (deps["@nuxt/ui"]) deps["@vitejs/plugin-vue"] = "^6.0.9";
   useCompatibleAngularPeers(deps, packages, nodeVersion);
   return deps;
+}
+
+/**
+ * npm 10 legacy peer resolution can collapse Element Plus's declared alias
+ * onto a co-installed real @popperjs/core. The official alias tarball preserves
+ * that vendor edge; scope it to the verified vendor release, not future ones.
+ */
+export function kitLoadOverrides(tarballs, deps) {
+  return {
+    ...tarballs,
+    ...(deps["element-plus"]
+      ? {
+          "element-plus@2.14.7": {
+            "@popperjs/core":
+              "https://registry.npmjs.org/@sxzz/popperjs-es/-/popperjs-es-2.11.8.tgz",
+          },
+        }
+      : {}),
+  };
+}
+
+/** Vue adapters expose a table and feature entries, all of which must load. */
+export function vueKits(packages) {
+  return packages.filter(
+    (entry) =>
+      entry.directory.startsWith("adapter-") &&
+      entry.manifest.peerDependencies?.vue
+  );
+}
+
+export function runtimeProbeRoutes(packages) {
+  return [
+    ...new Set([
+      ...probeRoutes(packages.map((entry) => entry.name)),
+      ...vueKits(packages).flatMap((entry) =>
+        vueHostRoutes(entry.name, entry.manifest)
+      ),
+    ]),
+  ].sort();
+}
+
+function assertElementAlias(scratch, deps) {
+  if (!deps["element-plus"]) return;
+  const fromConsumer = createRequire(join(scratch, "package.json"));
+  const vendorPath = fromConsumer.resolve("element-plus/package.json");
+  const vendor = JSON.parse(readFileSync(vendorPath, "utf8"));
+  if (vendor.version !== "2.14.7") return;
+  const fromVendor = createRequire(vendorPath);
+  const aliasPath = fromVendor.resolve("@popperjs/core/package.json");
+  const alias = JSON.parse(readFileSync(aliasPath, "utf8"));
+  const realPath = fromConsumer.resolve("@popperjs/core/package.json");
+  const real = JSON.parse(readFileSync(realPath, "utf8"));
+  if (
+    vendor.dependencies["@popperjs/core"] !== "npm:@sxzz/popperjs-es@^2.11.8" ||
+    alias.name !== "@sxzz/popperjs-es" ||
+    alias.version !== "2.11.8" ||
+    real.name !== "@popperjs/core" ||
+    realPath === aliasPath
+  ) {
+    throw new Error(
+      "Element Plus alias and co-installed real Popper must retain their distinct vendor identities"
+    );
+  }
 }
 
 /** Keep the Angular peer major compatible with the probed Node runtime. */
@@ -315,7 +391,13 @@ function verify() {
   const tarballs = Object.fromEntries(
     runtimeNames.map((name) => [name, `file:${join(PACK_DIR, packages[name])}`])
   );
-  const routes = probeRoutes(runtimeNames);
+  const hostNames = runtimeNames.filter((name) =>
+    VUE_HOST_PACKAGES.includes(name)
+  );
+  const routes = runtimeProbeRoutes(compatible).filter(
+    (route) =>
+      !hostNames.some((name) => route === name || route.startsWith(`${name}/`))
+  );
   const loadDependencies = kitLoadDependencies(compatible);
   const prelude = probePrelude(loadDependencies);
 
@@ -333,7 +415,7 @@ function verify() {
           "react-dom": "^19.0.0",
           ...loadDependencies,
         },
-        overrides: tarballs,
+        overrides: kitLoadOverrides(tarballs, loadDependencies),
       },
       null,
       2
@@ -376,8 +458,53 @@ for (const route of routes) {
     scratch,
     "npm install"
   );
+  assertElementAlias(scratch, loadDependencies);
   run(process.execPath, ["probe.mjs"], scratch, "ESM probe");
   run(process.execPath, ["probe.cjs"], scratch, "CommonJS probe");
+
+  for (const script of [
+    "node-support-vue-host.mjs",
+    "node-support-vue-ssr.mjs",
+  ]) {
+    copyFileSync(join(ROOT, "scripts", script), join(scratch, script));
+  }
+  const nativeVueKits = vueKits(compatible)
+    .map((entry) => entry.name)
+    .filter((name) => !hostNames.includes(name));
+  if (nativeVueKits.length) {
+    process.stdout.write(
+      run(
+        process.execPath,
+        ["node-support-vue-ssr.mjs", ...nativeVueKits],
+        scratch,
+        "Vue native SSR"
+      )
+    );
+  }
+  if (hostNames.length) {
+    const expectedHostRoutes = Object.fromEntries(
+      compatible
+        .filter((entry) => hostNames.includes(entry.name))
+        .map((entry) => [entry.name, vueHostRoutes(entry.name, entry.manifest)])
+    );
+    writeFileSync(
+      join(scratch, "node-support-vue-routes.json"),
+      JSON.stringify(expectedHostRoutes)
+    );
+    process.stdout.write(
+      run(
+        process.execPath,
+        [
+          "node-support-vue-host.mjs",
+          "--routes",
+          "node-support-vue-routes.json",
+          ...hostNames,
+        ],
+        scratch,
+        "Vue host import/require and SSR"
+      )
+    );
+  }
 
   for (const { name, manifest } of compatible) {
     const installed = JSON.parse(

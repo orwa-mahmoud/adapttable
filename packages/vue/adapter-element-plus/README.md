@@ -1,5 +1,7 @@
 # @adapttable/element-plus
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 AdaptTable's Vue data table with Element Plus controls and card surfaces.
 
 ```vue
@@ -166,6 +168,30 @@ Applications that use external `label[for]` associations should account for
 those IDs becoming available after hydration.
 
 [Element Plus SSR documentation](https://element-plus.org/en-US/guide/ssr.html)
+
+### npm 10 co-installation with Popper
+
+The packed Node harness uses npm's `--legacy-peer-deps` consumer profile.
+With npm 10.9.8, Element Plus 2.14.7's declared
+`@popperjs/core: npm:@sxzz/popperjs-es@^2.11.8` dependency can be collapsed
+onto a co-installed real `@popperjs/core`, causing an ESM `placements` error.
+For that specific resolver profile, preserve the declared vendor identity
+with this consumer `package.json` override:
+
+```json
+{
+  "overrides": {
+    "element-plus@2.14.7": {
+      "@popperjs/core": "https://registry.npmjs.org/@sxzz/popperjs-es/-/popperjs-es-2.11.8.tgz"
+    }
+  }
+}
+```
+
+This is the official `@sxzz/popperjs-es` tarball required by Element Plus;
+it does not change vendor files or replace another kit's real Popper.
+The selector applies only to Element Plus 2.14.7, leaving future releases
+on their own declared dependency graph.
 
 ## Row actions
 

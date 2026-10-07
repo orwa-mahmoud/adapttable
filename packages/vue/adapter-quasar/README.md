@@ -1,5 +1,7 @@
 # @adapttable/quasar
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
 Quasar controls for AdaptTable's headless Vue binding. The Vue binding owns
 state and feature behavior; Quasar supplies the interactive components.
 

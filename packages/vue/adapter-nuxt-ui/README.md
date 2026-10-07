@@ -1,5 +1,9 @@
 # @adapttable/nuxt-ui
 
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Nuxt UI ships Vue SFCs: Node SSR uses the official `@nuxt/ui/vite` and
+`@vitejs/plugin-vue` host compilation pipeline for both ESM and CommonJS entries.
+
 Nuxt UI controls for AdaptTable's headless Vue binding. The binding owns table
 state, callbacks and structural Chrome; this adapter supplies Nuxt UI components.
 It does not use Nuxt UI's separate `UTable` engine.

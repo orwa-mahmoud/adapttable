@@ -45,26 +45,40 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/chakra",
   "@adapttable/cli",
   "@adapttable/core",
+  "@adapttable/element-plus",
   "@adapttable/i18n",
   "@adapttable/mantine",
   "@adapttable/mui",
+  "@adapttable/naive-ui",
   "@adapttable/ng-bootstrap",
   "@adapttable/ng-zorro",
   "@adapttable/ngx-bootstrap",
+  "@adapttable/nuxt-ui",
+  "@adapttable/quasar",
   "@adapttable/radix",
   "@adapttable/react",
+  "@adapttable/reka-ui",
   "@adapttable/server",
   "@adapttable/shadcn",
+  "@adapttable/shadcn-vue",
   "@adapttable/spartan",
   "@adapttable/taiga-ui",
   "@adapttable/unstyled",
   "@adapttable/vue",
   "@adapttable/vue-unstyled",
+  "@adapttable/vuetify",
 ];
 const VUE_PUBLIC_PACKAGES = [
   "@adapttable/ai-vue",
+  "@adapttable/element-plus",
+  "@adapttable/naive-ui",
+  "@adapttable/nuxt-ui",
+  "@adapttable/quasar",
+  "@adapttable/reka-ui",
+  "@adapttable/shadcn-vue",
   "@adapttable/vue",
   "@adapttable/vue-unstyled",
+  "@adapttable/vuetify",
 ];
 const TAIGA_NATIVE_PEER_NAMES = [
   "@maskito/angular",
@@ -95,7 +109,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares the baseline floor and every Angular 22 native kit floor", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 32);
+    assert.equal(manifests.length, 39);
     for (const manifest of manifests) {
       const pkg = json(manifest);
       const floor = ANGULAR_22_KITS.has(pkg.name) ? ANGULAR_22_FLOOR : FLOOR;
@@ -144,7 +158,7 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 29);
+    assert.equal(names.length, 36);
     assert.ok(!names.includes("@adapttable/bootstrap"));
     assert.ok(!names.includes("@adapttable/primeng"));
     for (const name of VUE_PUBLIC_PACKAGES) assert.ok(names.includes(name));
@@ -242,7 +256,7 @@ describe("supported Node contract", () => {
     assert.equal(deps["@adapttable/core"], undefined);
   });
 
-  it("installs Vue and probes all three public Vue roots on supported runtimes", () => {
+  it("installs Vue and probes every public Vue root on supported runtimes", () => {
     for (const version of ["22.12.0", "22.22.3", "24.15.0", "26.0.0"]) {
       const packages = packagesForRuntime(publishedPackages(), version);
       const deps = kitLoadDependencies(packages, version);
