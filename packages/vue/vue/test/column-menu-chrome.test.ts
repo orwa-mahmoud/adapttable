@@ -87,11 +87,15 @@ function fixture(
     })
   );
   app.mount(root);
-  stops.push(() => {
+  let mounted = true;
+  const stop = (): void => {
+    if (!mounted) return;
+    mounted = false;
     app.unmount();
     root.remove();
-  });
-  return { root, options, visible, state, changed, renamed, onAutoSize };
+  };
+  stops.push(stop);
+  return { root, options, visible, state, changed, renamed, onAutoSize, stop };
 }
 function row(root: ParentNode, name: string): HTMLElement {
   const item = [
@@ -121,6 +125,132 @@ function dispatchAttribute(
   if (typeof handler !== "function") throw new Error(`Missing handler ${key}`);
   handler(event);
 }
+it.each([false, true])(
+  "keeps the visible action trigger focused after a pin request, accepted=%s",
+  async (accept) => {
+    const f = fixture(
+      {},
+      { value: { order: [], hidden: [], pinned: {}, widths: {} }, accept }
+    );
+    await clickControl(f.root, part("column-menu-button"));
+    const more = findControl<HTMLButtonElement>(
+      row(f.root, "Name"),
+      part("column-menu-more")
+    );
+    more.click();
+    await nextTick();
+    await action(f.root, resolveLabels(undefined).pinStart);
+    expect(f.changed).toHaveBeenCalledOnce();
+    expect(f.root.querySelector(part("column-menu-submenu"))).toBeNull();
+    expect(more.isConnected).toBe(true);
+    expect(document.activeElement).toBe(more);
+    expect(row(f.root, "Name").getAttribute("data-pinned")).toBe(
+      accept ? "start" : null
+    );
+  }
+);
+
+it("retires the column action when returning focus synchronously disposes its owner", async () => {
+  const f = fixture();
+  await clickControl(f.root, part("column-menu-button"));
+  const more = findControl<HTMLButtonElement>(
+    row(f.root, "Name"),
+    part("column-menu-more")
+  );
+  more.click();
+  await nextTick();
+  more.addEventListener("focus", f.stop, { once: true });
+  await action(f.root, resolveLabels(undefined).pinStart);
+  expect(more.isConnected).toBe(false);
+  expect(f.changed).not.toHaveBeenCalled();
+});
+
+it("preserves deliberate focus movement performed by a column action", async () => {
+  const outside = document.createElement("input");
+  document.body.append(outside);
+  stops.push(() => outside.remove());
+  const host: NonNullable<ColumnMenuSlotProps<Row>["featureHost"]> = {
+    filterTypes: [],
+    filterExtends: [],
+    editors: new Map(),
+    aggregators: new Map(),
+    writers: [],
+    panels: [],
+    commands: [],
+    contextMenuItems: [],
+    columnMenuActions: [
+      () => ({
+        id: "open-details",
+        label: "Open details",
+        disabled: false,
+        run: () => outside.focus(),
+      }),
+    ],
+  };
+  const f = fixture({ featureHost: host });
+  await clickControl(f.root, part("column-menu-button"));
+  await clickControl(row(f.root, "Name"), part("column-menu-more"));
+  await action(f.root, "Open details");
+  expect(f.root.querySelector(part("column-menu-submenu"))).toBeNull();
+  expect(document.activeElement).toBe(outside);
+});
+
+it("rechecks the current action after a focus handler retires it", async () => {
+  let available = true;
+  const run = vi.fn();
+  const host: NonNullable<ColumnMenuSlotProps<Row>["featureHost"]> = {
+    filterTypes: [],
+    filterExtends: [],
+    editors: new Map(),
+    aggregators: new Map(),
+    writers: [],
+    panels: [],
+    commands: [],
+    contextMenuItems: [],
+    columnMenuActions: [
+      () =>
+        available
+          ? { id: "open-details", label: "Open details", disabled: false, run }
+          : undefined,
+    ],
+  };
+  const f = fixture({ featureHost: host });
+  await clickControl(f.root, part("column-menu-button"));
+  const more = findControl<HTMLButtonElement>(
+    row(f.root, "Name"),
+    part("column-menu-more")
+  );
+  more.click();
+  await nextTick();
+  more.addEventListener(
+    "focus",
+    () => {
+      available = false;
+    },
+    { once: true }
+  );
+  await action(f.root, "Open details");
+  expect(document.activeElement).toBe(more);
+  expect(run).not.toHaveBeenCalled();
+});
+
+it("does not move external focus when an unfocused action is invoked", async () => {
+  const outside = document.createElement("input");
+  document.body.append(outside);
+  stops.push(() => outside.remove());
+  const f = fixture();
+  await clickControl(f.root, part("column-menu-button"));
+  await clickControl(row(f.root, "Name"), part("column-menu-more"));
+  const button = [
+    ...f.root.querySelectorAll<HTMLButtonElement>(part("column-menu-action")),
+  ].find((item) => item.textContent === resolveLabels(undefined).pinStart);
+  if (!button) throw new Error("Missing native pin action");
+  outside.focus();
+  button.click();
+  await nextTick();
+  expect(f.root.querySelector(part("column-menu-submenu"))).toBeNull();
+  expect(document.activeElement).toBe(outside);
+});
 describe("Vue column-menu Chrome", () => {
   it("forwards controls, localized labels, classes and RTL; closes outside and restores Escape focus", async () => {
     const f = fixture({

@@ -64,7 +64,7 @@ interface ReceiptProps {
   readonly slots: TableAssistantSlots;
   readonly onUndo?: () => void;
 }
-export const AssistantReceipt = defineComponent(
+export const AssistantReceipt = /*#__PURE__*/ defineComponent(
   (props: ReceiptProps) => {
     const expanded = shallowRef(false);
     const actions = useAssistantActionOwnership();
@@ -338,7 +338,7 @@ function receiptGroup(
     ]
   );
 }
-export const AssistantMessage = defineComponent(
+export const AssistantMessage = /*#__PURE__*/ defineComponent(
   (props: AssistantMessageProps) => {
     const expanded = shallowRef(false);
     const actions = useAssistantActionOwnership();

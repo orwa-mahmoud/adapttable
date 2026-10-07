@@ -60,7 +60,7 @@ function panelDirection(
   if (mobile) return "column";
   return side === "start" ? "row-reverse" : "row";
 }
-export const SidePanelChrome = defineComponent(
+export const SidePanelChrome = /*#__PURE__*/ defineComponent(
   (props: SidePanelChromeProps) => {
     const id = `adapttable-side-panel-${useId()}`;
     const active = useScopeActivity();
@@ -247,7 +247,7 @@ export const SidePanelChrome = defineComponent(
     ],
   }
 );
-export const SidePanelLayoutChrome = defineComponent(
+export const SidePanelLayoutChrome = /*#__PURE__*/ defineComponent(
   (
     props: {
       readonly open: boolean;
