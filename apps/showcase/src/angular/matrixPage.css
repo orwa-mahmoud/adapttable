@@ -38,6 +38,42 @@ adapt-showcase-matrix-page *::after {
   flex-wrap: wrap;
 }
 
+/* Keep the overview's search and native workspace actions on distinct rows. */
+.mx-ng .mx-demo--overview [data-adapttable-part="toolbar"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.mx-ng .mx-demo--overview [data-adapttable-part="search-field"] {
+  flex: 1 1 100%;
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+/* Use Bootstrap's theme variables so enabled outline actions stay readable. */
+.mx-ng[data-bs-theme="dark"]:is(
+    [data-angular-kit="ng-bootstrap"],
+    [data-angular-kit="ngx-bootstrap"]
+  )
+  .btn-outline-secondary {
+  --bs-btn-color: var(--bs-body-color);
+  --bs-btn-border-color: var(--bs-secondary-color);
+  --bs-btn-hover-color: var(--bs-body-bg);
+  --bs-btn-hover-bg: var(--bs-body-color);
+  --bs-btn-hover-border-color: var(--bs-body-color);
+  --bs-btn-active-color: var(--bs-body-bg);
+  --bs-btn-active-bg: var(--bs-body-color);
+  --bs-btn-active-border-color: var(--bs-body-color);
+}
+
+.mx-ng--zorro[data-bs-theme="dark"]
+  adapt-demo-ngzorro-status
+  nz-tag.ant-tag-error {
+  color: #ff7875;
+}
+
 .mx-ng--unstyled [data-adapttable-part="root"] {
   border: 1px solid var(--ng-line);
   border-radius: var(--r-md);

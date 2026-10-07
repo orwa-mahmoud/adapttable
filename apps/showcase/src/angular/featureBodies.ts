@@ -723,23 +723,25 @@ class SavedViewsBody {
   ];
 }
 
-/** The landing page's table: filters, sorting and paging, nothing to explain. */
+/** The landing page composes the kit's real controls into a useful workspace. */
 @Component({
   selector: "adapt-showcase-landing-table",
   imports: [AdaptShowcaseTable],
   template: `
-    <div class="mx-demo">
+    <div class="mx-demo mx-demo--overview">
       <div class="mx-demo__body">
         <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
-          [urlSync]="false"
-          [data]="rows"
+          urlKey="overview"
+          [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
+          [selectable]="true"
           [defaults]="{ limit: 10 }"
+          [summaryRow]="summary"
           [features]="features"
         />
       </div>
@@ -749,11 +751,43 @@ class SavedViewsBody {
 export class AdaptShowcaseLandingTable {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
-  readonly columns = COLUMNS;
+  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
+  readonly summary = aggregate<Person>(
+    { budget: "sum" },
+    {
+      columns: this.columns,
+      format: (value) =>
+        typeof value === "number" ? formatMoney(value) : value,
+    }
+  );
   readonly features: readonly AdaptTableFeature[] = [
     this.kit.filters(FILTER_DEFS),
+    this.kit.columnMenu(),
+    this.kit.resizableColumns(),
+    this.kit.savedViews({
+      storageKey: `adapttable-angular-${this.kit.key}-overview-views`,
+      urlKey: "overview",
+    }),
+    this.kit.groupingPanel<Person>([], {
+      groupAggregates: aggregate<Person>(
+        { budget: "sum" },
+        { columns: this.columns }
+      ),
+      groupFooters: true,
+    }),
+    this.kit.editing<Person>((row, key, value) => {
+      this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
+    }),
+    this.kit.editHistory(),
+    this.kit.undoRedoButtons(),
+    this.kit.cellNavigation(),
+    this.kit.bulkActions([]),
+    this.kit.exportCsv<Person>({ filename: "people-workspace.csv" }),
+    this.kit.densityChooser(),
+    this.kit.fullscreen(),
+    this.kit.statusBar(),
   ];
 }
 
