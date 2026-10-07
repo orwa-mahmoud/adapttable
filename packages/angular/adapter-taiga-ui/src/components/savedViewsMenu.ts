@@ -39,6 +39,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
     @let l = props().labels;
     <div
       [tuiDropdown]="menuContent"
+      [tuiDropdownOffset]="8"
       tuiDropdownRole="dialog"
       [adaptTaigaDropdownLabel]="l.savedViews"
       [tuiDropdownOpen]="popover.open()"

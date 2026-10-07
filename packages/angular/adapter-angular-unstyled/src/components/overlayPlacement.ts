@@ -9,9 +9,9 @@ export const OVERLAY_Z = 10050;
 const VIEWPORT_GUTTER = 8;
 
 /**
- * Put a fixed-position overlay under its trigger: end-aligned in LTR,
- * start-aligned in RTL, height capped to the room below, and shifted back
- * inside the viewport.
+ * End-align in LTR and start-align in RTL. Prefer the space below the
+ * trigger, flip above when it fits better, and keep the scrollable panel
+ * within the viewport gutters.
  */
 export function placeOverlayBelowTrigger(
   overlay: HTMLElement,
@@ -21,11 +21,34 @@ export function placeOverlayBelowTrigger(
   overlay.style.transform = "";
   const triggerRect = trigger.getBoundingClientRect();
   const viewportWidth = document.documentElement.clientWidth;
-  const top = triggerRect.bottom + 4;
-  overlay.style.top = `${String(Math.round(top))}px`;
-  overlay.style.maxHeight = `${String(
-    Math.max(120, Math.min(560, window.innerHeight - top - VIEWPORT_GUTTER))
+  const viewportHeight = window.innerHeight;
+  overlay.style.boxSizing = "border-box";
+  overlay.style.maxWidth = `${String(
+    Math.max(0, viewportWidth - VIEWPORT_GUTTER * 2)
   )}px`;
+  overlay.style.maxHeight = `${String(
+    Math.max(0, Math.min(560, viewportHeight - VIEWPORT_GUTTER * 2))
+  )}px`;
+  const desiredHeight = Math.min(
+    560,
+    Math.max(overlay.scrollHeight, overlay.getBoundingClientRect().height || 0)
+  );
+  const below = Math.max(
+    0,
+    viewportHeight - triggerRect.bottom - 4 - VIEWPORT_GUTTER
+  );
+  const above = Math.max(0, triggerRect.top - 4 - VIEWPORT_GUTTER);
+  const placeBelow = below >= desiredHeight || below >= above;
+  overlay.style.maxHeight = `${String(Math.min(560, placeBelow ? below : above))}px`;
+  const height = overlay.getBoundingClientRect().height || 0;
+  const proposedTop = placeBelow
+    ? triggerRect.bottom + 4
+    : triggerRect.top - 4 - height;
+  const top = Math.max(
+    VIEWPORT_GUTTER,
+    Math.min(proposedTop, viewportHeight - VIEWPORT_GUTTER - height)
+  );
+  overlay.style.top = `${String(Math.round(top))}px`;
   const measured = overlay.offsetWidth;
   const width = Math.min(
     measured > 0 ? measured : 380,
