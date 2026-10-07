@@ -1,6 +1,8 @@
 import { expect, type Page, test, type TestInfo } from "@playwright/test";
 
 import { VUE_KIT_PAGES } from "../apps/showcase/matrix.mjs";
+import { workspaceCopy } from "../apps/showcase/src/vue/workspace/copy";
+import { getLabels } from "../packages/shared/i18n/src/index";
 
 const part = (name: string) => `[data-adapttable-part="${name}"]`;
 const scenarios = [
@@ -109,7 +111,7 @@ for (const kit of VUE_KIT_PAGES) {
         exact: true,
       });
       const customer = table.getByRole("button", {
-        name: "Customer",
+        name: `${getLabels("en").sortBy}: ${workspaceCopy.en.customer}`,
         exact: true,
       });
       await customer.focus();

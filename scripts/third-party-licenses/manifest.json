@@ -67,5 +67,29 @@
     "files": ["taiga-ui-font-watcher-0.6.0.txt"],
     "packageMetadata": "https://registry.npmjs.org/@taiga-ui/font-watcher/0.6.0",
     "note": "The npm tarball omits its declared Apache-2.0 license. The registry identifies taiga-family/utils and gitHead c819dfc25b2b5173dc2002f3360c9866e247abaf; this is that immutable revision's complete root LICENSE, including its Acpekt attribution. The committed font-watcher package.json at that registry-reported gitHead still says 0.5.0; provenance follows npm 0.6.0 publication metadata, not an inferred version tag."
+  },
+  "css-render@0.15.14": {
+    "source": "https://raw.githubusercontent.com/07akioni/css-render/9345145da71707d1d05a99c1d3a6e89315ac0574/LICENSE",
+    "files": ["css-render-0.15.14.txt"],
+    "packageMetadata": "https://registry.npmjs.org/css-render/0.15.14",
+    "note": "The exact npm version declares MIT and reports gitHead 9345145da71707d1d05a99c1d3a6e89315ac0574. This is that immutable monorepo revision’s complete root MIT license with its original 2020 07akioni notice. The release metadata identifies this source revision even though some committed package version fields precede publication."
+  },
+  "@css-render/plugin-bem@0.15.14": {
+    "source": "https://raw.githubusercontent.com/07akioni/css-render/9345145da71707d1d05a99c1d3a6e89315ac0574/LICENSE",
+    "files": ["css-render-0.15.14.txt"],
+    "packageMetadata": "https://registry.npmjs.org/@css-render/plugin-bem/0.15.14",
+    "note": "The exact npm version declares MIT and reports gitHead 9345145da71707d1d05a99c1d3a6e89315ac0574. This is that immutable monorepo revision’s complete root MIT license with its original 2020 07akioni notice. The release metadata identifies this source revision even though some committed package version fields precede publication."
+  },
+  "@css-render/vue3-ssr@0.15.14": {
+    "source": "https://raw.githubusercontent.com/07akioni/css-render/9345145da71707d1d05a99c1d3a6e89315ac0574/LICENSE",
+    "files": ["css-render-0.15.14.txt"],
+    "packageMetadata": "https://registry.npmjs.org/@css-render/vue3-ssr/0.15.14",
+    "note": "The exact npm version declares MIT and reports gitHead 9345145da71707d1d05a99c1d3a6e89315ac0574. This is that immutable monorepo revision’s complete root MIT license with its original 2020 07akioni notice. The release metadata identifies this source revision even though some committed package version fields precede publication."
+  },
+  "vdirs@0.1.8": {
+    "source": "https://raw.githubusercontent.com/spdx/license-list-data/279b7e997a87c09be00dd6bdda189519ade502cf/text/MIT.txt",
+    "files": ["vdirs-0.1.8-mit-terms.txt"],
+    "packageMetadata": "https://registry.npmjs.org/vdirs/0.1.8",
+    "note": "The exact npm package declares MIT and author 07akioni but omits license text. Its reported gitHead a437193b3399502247732fc448bf2ddaa39916d7 is unavailable upstream; the current upstream tree 8a95663e628030c6d014b8a3aa51df3c267e739b also contains no license file. This notice states that limited basis and includes verbatim canonical SPDX MIT permission/warranty terms only. It is not represented as a recovered upstream LICENSE or copyright notice; no year or copyright holder is invented."
   }
 }
