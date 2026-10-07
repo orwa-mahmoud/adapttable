@@ -91,6 +91,7 @@ import { OVERLAY_Z } from "./overlayPlacement";
             <nz-divider />
             <div [style]="rowStyle">
               <input
+                #nameInput
                 nz-input
                 [attr.aria-label]="l.viewName"
                 [attr.placeholder]="l.viewName"
@@ -131,6 +132,8 @@ export class AdaptSavedViewsMenu implements OnInit {
   protected readonly views = signal<SavedViewsState | undefined>(undefined);
 
   private readonly injector = inject(Injector);
+  private readonly nameInput =
+    viewChild<ElementRef<HTMLInputElement>>("nameInput");
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
   private readonly trigger = viewChild<
     ElementRef<HTMLElement>,
@@ -174,5 +177,6 @@ export class AdaptSavedViewsMenu implements OnInit {
   protected save(): void {
     this.views()?.save(this.trimmed());
     this.name.set("");
+    this.nameInput()?.nativeElement.focus();
   }
 }

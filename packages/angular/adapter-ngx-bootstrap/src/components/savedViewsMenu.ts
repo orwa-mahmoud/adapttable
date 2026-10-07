@@ -13,6 +13,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  type ElementRef,
   inject,
   Injector,
   input,
@@ -108,6 +109,7 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
             <hr data-ngx-bootstrap-part="views-divider" />
             <div data-ngx-bootstrap-part="views-save-row" [style]="rowStyle">
               <input
+                #nameInput
                 class="form-control form-control-sm"
                 data-ngx-bootstrap-part="views-input"
                 [attr.aria-label]="l.viewName"
@@ -154,6 +156,8 @@ export class AdaptSavedViewsMenu implements OnInit {
   protected readonly views = signal<SavedViewsState | undefined>(undefined);
 
   private readonly injector = inject(Injector);
+  private readonly nameInput =
+    viewChild<ElementRef<HTMLInputElement>>("nameInput");
   protected readonly menuOpen = signal(false);
   private readonly dropdown = viewChild(BsDropdownDirective);
   protected readonly popover = {
@@ -179,5 +183,6 @@ export class AdaptSavedViewsMenu implements OnInit {
   protected save(): void {
     this.views()?.save(this.trimmed());
     this.name.set("");
+    this.nameInput()?.nativeElement.focus();
   }
 }
