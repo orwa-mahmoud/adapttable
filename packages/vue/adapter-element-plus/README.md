@@ -265,3 +265,83 @@ authoritative until the host updates it.
 Mobile cards follow the accepted column layout and sort order. They omit the
 desktop group and resize controls. Header groups keep their native table spans
 and their localized toggle names during server rendering and hydration.
+
+## Find in table
+
+```ts
+import { findInTable } from "@adapttable/element-plus/find-in-table";
+
+const features = [findInTable({ button: true })];
+```
+
+Find searches the prepared rows without filtering them. Its optional toolbar
+button opens an `ElInput` search field with `ElButton` previous, next and close
+controls. Ctrl/Cmd+F is scoped to the active table. Enter and Shift+Enter move
+between matches; Escape closes the bar and restores the preceding focus target.
+The same controls and match markers work with mobile cards.
+
+The field's `find-input` part and accessible name belong to its native input;
+`classNames.findInput` styles the Element Plus host. Its focus target uses the
+documented native `input`/`textarea` exposures and the binding's ref lifecycle.
+`findBar` and `findButton` customize the remaining controls. Labels come from
+the shared table labels. With URL synchronization enabled, the shared `find`
+query restores the open bar and its value during server rendering and hydration.
+
+## Cell navigation and status
+
+```ts
+import {
+  cellNavigation,
+  columnSelectionCheckbox,
+} from "@adapttable/element-plus/cell-navigation";
+import { selectionStats, statusBar } from "@adapttable/element-plus/status-bar";
+
+const features = [
+  cellNavigation(),
+  columnSelectionCheckbox(),
+  statusBar(),
+  selectionStats(),
+];
+```
+
+Desktop cells use the binding's direction-aware keyboard navigation and range
+selection. Column selection uses `ElCheckbox`; selecting a column moves focus
+into its first grid cell. Status figures use `ElText`, with selection statistics
+inside a polite native `output` live region. Both status features share one strip.
+Standalone aliases are available at `/column-selection` and `/selection-stats`.
+
+Fill requires `onCellFill` and editable columns. The host receives cell edit
+requests and decides whether to apply them. The pointer-only fill square uses
+Element Plus theme variables; keyboard fill remains in the shared grid model.
+The handle is hidden from assistive technology and does not add a tab stop.
+
+Mobile cards show the status figures and Find controls while omitting desktop
+grid selection and fill handles. `classNames.statusBar`, `statusItem`,
+`selectionStats`, and `fillHandle` style their corresponding semantic parts.
+
+## Columns menu and renaming
+
+```ts
+import { columnMenu } from "@adapttable/element-plus/column-menu";
+
+const features = [columnMenu()];
+```
+
+The Columns button opens an Element Plus popover containing a named `ElCard`
+dialog, real search and action buttons, and `ElSelect` plugin choices. Use it to
+show, hide, pin, reorder, resize or rename supported columns. Columns marked
+`renameable: true` also receive a direct header rename action. Menu and header
+renaming share the binding's validation, announcements and host callbacks.
+
+Use `v-model:column-layout` to accept controlled layout changes. Until the host
+updates the supplied layout, rejected pin, visibility and rename requests leave
+the rendered columns unchanged. Renaming changes the display name, not the row
+field key. The same Columns menu is available with mobile cards.
+
+The real card content owns the panel part, id, accessible dialog name and native
+ref. A documented virtual positioning reference lets the binding retain the
+actual trigger's ARIA relationship and events. Nested choice popups attach beside
+the scrolling card body, retaining its direction and dismissal boundary. The
+managed panel follows its supplied container, including fullscreen containers.
+The generic `ColumnMenu` component and `ColumnMenuSlotProps` are also exported
+for headless compositions.
