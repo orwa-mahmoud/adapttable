@@ -126,34 +126,34 @@
         </select></label
       >
       <div class="angular-options-switches">
-      @if (!lab) {
+        @if (!lab) {
+          <label
+            ><input
+              type="checkbox"
+              [checked]="grouping"
+              [disabled]="server"
+              (change)="change('grouping', $event)"
+              data-demo-control="grouping"
+            />Grouping</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              [checked]="editing"
+              [disabled]="server"
+              (change)="change('editing', $event)"
+              data-demo-control="editing"
+            />Editing</label
+          >
+        }
         <label
           ><input
             type="checkbox"
-            [checked]="grouping"
-            [disabled]="server"
-            (change)="change('grouping', $event)"
-            data-demo-control="grouping"
-          />Grouping</label
+            [checked]="motion"
+            (change)="change('motion', $event)"
+            data-demo-control="motion"
+          />Motion</label
         >
-        <label
-          ><input
-            type="checkbox"
-            [checked]="editing"
-            [disabled]="server"
-            (change)="change('editing', $event)"
-            data-demo-control="editing"
-          />Editing</label
-        >
-      }
-      <label
-        ><input
-          type="checkbox"
-          [checked]="motion"
-          (change)="change('motion', $event)"
-          data-demo-control="motion"
-        />Motion</label
-      >
       </div>
     </div>
     @if (server) {
@@ -381,6 +381,8 @@
             [loading]="loading()"
             [defaults]="{ limit: large ? 100 : 10 }"
             [columns]="columns()"
+            [columnLayout]="columnState.layout()"
+            (columnLayoutChange)="setColumnLayout($event)"
             [rowKey]="rowKey"
             [labels]="presentation.labels"
             [dir]="presentation.dir"

@@ -216,11 +216,17 @@ adapt-showcase-matrix-page *::after {
   border-bottom: 1px solid var(--ng-soft);
 }
 
+.mx-ng--unstyled [data-adapttable-part="cell"][data-pinned] {
+  background: var(--ng-row-surface, var(--ng-surface));
+}
+
 .mx-ng--unstyled [data-adapttable-part="row"]:hover {
+  --ng-row-surface: var(--ng-raised);
   background: var(--ng-raised);
 }
 
-.mx-ng--unstyled [data-adapttable-part="row"][data-selected] {
+.mx-ng--unstyled [data-adapttable-part="row"][aria-selected="true"] {
+  --ng-row-surface: var(--ng-wash);
   background: var(--ng-wash);
 }
 

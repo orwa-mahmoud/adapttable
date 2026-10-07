@@ -126,11 +126,18 @@
   inline-size: 56px;
   padding: 4px;
 }
+/* Keep Material's 48px touch target inside the header, including at the edge. */
+.adapt-material
+  [data-adapttable-part="header-cell"]:has(
+    [data-adapttable-part="resize-handle"]
+  ) {
+  padding-inline-end: 56px;
+}
 .adapt-material [data-adapttable-part="resize-handle"] {
   position: absolute;
   inset-inline-end: 0;
   inset-block: 0;
-  inline-size: 8px;
+  inline-size: 48px;
   min-inline-size: 0;
   block-size: 100%;
   padding: 0;

@@ -5,7 +5,9 @@ import {
   type CellContext,
   type ColumnDef,
   type ColumnInput,
+  type ColumnLayoutState,
   type FacetMap,
+  injectColumnLayoutUrlState,
   injectHighlight,
   injectPrefersReducedMotion,
   injectSavedViews,
@@ -52,6 +54,7 @@ import {
   personSkills,
   personStatus,
   SKILLS,
+  strings,
   summaryPerson,
 } from "../people";
 import {
@@ -214,6 +217,25 @@ export class AdaptShowcaseDemoPage {
   readonly editingMode = initialEditingMode(this.canWrite, this.lab);
   readonly editing = this.editingMode !== "off";
   readonly grouping = this.structure === "grouped";
+  readonly columnState = injectColumnLayoutUrlState({
+    urlKey: this.urlKey,
+    defaultColumnLayout: {
+      hidden:
+        this.grouping || enabled("cell-span") || enabled("column-groups")
+          ? ["email"]
+          : ["email", "team"],
+    },
+  });
+  /** A new pin reveals the wide arrangement so its stickiness is visible. */
+  setColumnLayout(next: ColumnLayoutState): void {
+    const previous = this.columnState.layout();
+    const pinAdded = Object.keys(next.pinned).some(
+      (key) => !(key in previous.pinned)
+    );
+    this.columnState.onLayoutChange(
+      pinAdded && next.hidden.length ? { ...next, hidden: [] } : next
+    );
+  }
   readonly reducedMotion = injectPrefersReducedMotion();
   readonly motion = enabled("motion", true);
   readonly highlight = injectHighlight(
@@ -233,11 +255,20 @@ export class AdaptShowcaseDemoPage {
   readonly flashCell = viewChild<TemplateRef<CellContext<Person>>>("flashCell");
   readonly leafColumns = computed<readonly ColumnDef<Person>[]>(() => {
     const flash = this.flashCell();
+    const columns = peopleColumns({ editable: this.editing }).map((column) => ({
+      ...column,
+      minWidth: typeof column.width === "number" ? column.width : undefined,
+      ...(enabled("cell-flash") && flash ? { cell: flash } : {}),
+    }));
+    columns.splice(1, 0, {
+      key: "email",
+      header: strings(this.presentation.locale === "ar" ? "ar" : "en").email,
+      accessor: (row: Person) => row.email,
+      width: 280,
+      minWidth: 280,
+    });
     return [
-      ...peopleColumns({ editable: this.editing }).map((column) => ({
-        ...column,
-        ...(enabled("cell-flash") && flash ? { cell: flash } : {}),
-      })),
+      ...columns,
       ...(enabled("formula")
         ? buildFormulaColumns<Person>([
             {
@@ -302,7 +333,7 @@ export class AdaptShowcaseDemoPage {
       result = [
         ...groupedPeopleColumns().map(replace),
         ...columns.filter((column) =>
-          ["tag", "trend", "remote", "skills"].includes(column.key)
+          ["email", "tag", "trend", "remote", "skills"].includes(column.key)
         ),
       ];
     }
