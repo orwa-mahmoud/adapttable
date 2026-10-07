@@ -305,7 +305,7 @@ const ColumnMenuRowChrome = defineComponent(
                 ...actions.map((item) =>
                   "kind" in item
                     ? h(
-                        "label",
+                        "div",
                         { ...part("column-menu-choice", names), key: item.id },
                         [
                           h(
