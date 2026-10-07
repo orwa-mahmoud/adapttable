@@ -1858,6 +1858,9 @@ importers:
       '@tailwindcss/cli':
         specifier: ^4.3.3
         version: 4.3.3
+      '@vue/server-renderer':
+        specifier: ^3.5.43
+        version: 3.5.43
       reka-ui:
         specifier: ^2.11.0
         version: 2.11.0(vue@3.5.43(typescript@6.0.3))
@@ -1893,6 +1896,9 @@ importers:
       '@adapttable/i18n':
         specifier: workspace:*
         version: link:../../shared/i18n
+      '@vue/server-renderer':
+        specifier: ^3.5.43
+        version: 3.5.43
       vite:
         specifier: ^8.3.0
         version: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.0)

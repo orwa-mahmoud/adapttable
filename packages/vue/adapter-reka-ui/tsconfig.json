@@ -8,7 +8,8 @@
     "paths": {
       "@adapttable/reka-ui": ["./src/index.ts"],
       "@adapttable/reka-ui/*": ["./src/*.ts"]
-    }
+    },
+    "rootDirs": [".", "./.sfc-types"]
   },
   "include": [
     "src",
@@ -18,9 +19,16 @@
     "browser",
     "vitest.packed-binding.config.ts"
   ],
-  "exclude": ["node_modules", "dist", "coverage", "test/types/invalid"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "test/types/invalid",
+    ".sfc-types"
+  ],
   "vueCompilerOptions": {
     "strictTemplates": true,
     "dataAttributes": ["data-*"]
-  }
+  },
+  "files": ["src/styles.d.ts"]
 }
