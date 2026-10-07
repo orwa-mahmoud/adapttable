@@ -11,6 +11,7 @@ import {
   type DataTableSlots,
   DataTableSurfaceChrome,
   defaultConfirm,
+  FULLSCREEN_MODEL,
   GROUP_ROW,
   groupRowSlotKey,
   renderFeatureSlot,
@@ -30,6 +31,7 @@ import {
 import { provideRekaClasses } from "./context";
 import { rekaButton } from "./controls/basic";
 import { rekaSelectionCheckbox } from "./controls/checkbox";
+import { provideRekaPortalContainer } from "./controls/portal";
 import { RekaRowActions } from "./controls/RekaRowActions";
 import { rekaSurfaceControls } from "./surfaceControls";
 import {
@@ -82,6 +84,8 @@ const names = computed(() => ({
   root: ["at-reka", props.classNames?.root].filter(Boolean).join(" "),
 }));
 provideRekaClasses(() => names.value);
+const fullscreen = shell.state.get(FULLSCREEN_MODEL);
+provideRekaPortalContainer(() => fullscreen.value?.container);
 const options = computed(() => ({ ...props, classNames: names.value }));
 function controls(): TableChromeSlots<TRow> {
   return {
