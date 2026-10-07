@@ -100,6 +100,87 @@ function mount(options: Partial<DataTableProps<Person>>) {
 }
 
 describe("compiled shadcn appearance contracts", () => {
+  it.each(["ltr", "rtl"] as const)(
+    "keeps native pinned cells on opaque row and header theme paint (%s)",
+    async (dir) => {
+      const view = mount({
+        forceMobile: false,
+        dir,
+        columnLayout: {
+          hidden: [],
+          order: [],
+          pinned: { name: "start" },
+          widths: { name: 240 },
+        },
+      });
+      await nextTick();
+      const row = target(view.root, '[data-row-id="a"]');
+      const cell = target<HTMLElement>(
+        row,
+        '[data-adapttable-part="cell"][data-pinned="start"]'
+      );
+      const header = target<HTMLElement>(
+        view.root,
+        '[data-adapttable-part="header-cell"][data-pinned="start"]'
+      );
+      expect(cell.style.position).toBe("sticky");
+      const paint = (element: Element) => {
+        const values: string[] = [];
+        stylesheet.walkRules((rule) => {
+          if (
+            [".bg-inherit", ".bg-background"].includes(rule.selector) &&
+            element.matches(rule.selector)
+          )
+            values.push(...declarations(rule, "background-color"));
+        });
+        return values;
+      };
+      expect(paint(cell)).toContain("inherit");
+      expect(
+        paint(row).some((value) => value.startsWith("var(--background,"))
+      ).toBe(true);
+      expect(
+        paint(header).some((value) => value.startsWith("var(--background,"))
+      ).toBe(true);
+      const hover = [...row.classList].find((name) =>
+        name.startsWith("hover:bg-[color-mix")
+      );
+      expect(hover).toContain("var(--muted,");
+      expect(hover).toContain("var(--background,");
+      expect(hover).not.toContain("transparent");
+      view.props.value = { ...view.props.value, selectedIds: ["a"] };
+      await nextTick();
+      expect(
+        target(row, '[data-adapttable-part="cell"][data-pinned="start"]')
+      ).toBe(cell);
+      expect(row.getAttribute("aria-selected")).toBe("true");
+      expect(row.classList.contains("aria-selected:bg-muted")).toBe(true);
+    }
+  );
+
+  it("lets caller row, header and cell color utilities override kit defaults", async () => {
+    const view = mount({
+      forceMobile: false,
+      classNames: {
+        tr: "bg-red-500 hover:bg-blue-500",
+        th: "bg-yellow-500",
+        td: "bg-green-500",
+      },
+    });
+    await nextTick();
+    const row = target(view.root, '[data-row-id="a"]');
+    const cell = target(row, '[data-adapttable-part="cell"]');
+    const header = target(view.root, '[data-adapttable-part="header-cell"]');
+    expect(row.classList.contains("bg-red-500")).toBe(true);
+    expect(
+      [...row.classList].some((name) => name.startsWith("hover:bg-[color-mix"))
+    ).toBe(false);
+    expect(cell.classList.contains("bg-green-500")).toBe(true);
+    expect(cell.classList.contains("bg-inherit")).toBe(false);
+    expect(header.classList.contains("bg-yellow-500")).toBe(true);
+    expect(header.classList.contains("bg-background")).toBe(false);
+  });
+
   it("paints selected and unselected desktop rows from their rendered ARIA state", async () => {
     const view = mount({ forceMobile: false, selectedIds: ["a"] });
     await nextTick();
