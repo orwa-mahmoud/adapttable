@@ -200,6 +200,35 @@ function setScrollElement(element: HTMLElement | null): void {
   border-block-end: 1px solid var(--el-border-color-lighter);
 }
 
+/* Unspecified utility tracks must not absorb the data columns' spare width. */
+:where(.adapttable-element-plus)
+  :is(
+    [data-adapttable-part="selection-header"],
+    [data-adapttable-part="selection-cell"]
+  ) {
+  inline-size: 1%;
+  white-space: nowrap;
+}
+
+:where(.adapttable-element-plus)
+  [data-adapttable-part="footer"]
+  > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+:where(.adapttable-element-plus)
+  [data-adapttable-part="footer"]
+  > div:first-child
+  > span {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+:where(.adapttable-element-plus) [data-adapttable-part="rows-per-page"] {
+  flex: 0 0 5rem;
+  inline-size: 5rem;
+}
+
 .adapttable-element-plus th {
   color: var(--el-text-color-secondary);
   background: var(--el-fill-color-light);

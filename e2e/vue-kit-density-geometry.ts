@@ -54,11 +54,11 @@ export async function expectDensityGeometry(
     expect(option.height).toBeGreaterThan(0);
     expect(option.clipped).toBeLessThanOrEqual(1);
   }
-  expect(Math.abs(options[0].centerY - options[1].centerY)).toBeLessThanOrEqual(
-    1
-  );
+  const [first, second] = options;
+  if (!first || !second)
+    throw new Error("Density geometry requires both native choices");
+  expect(Math.abs(first.centerY - second.centerY)).toBeLessThanOrEqual(1);
   expect(
-    Math.min(options[0].right, options[1].right) -
-      Math.max(options[0].left, options[1].left)
+    Math.min(first.right, second.right) - Math.max(first.left, second.left)
   ).toBeLessThanOrEqual(1);
 }

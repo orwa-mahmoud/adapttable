@@ -26,6 +26,38 @@ async function visit(page: Page, query = ""): Promise<void> {
   );
   await expect(page.locator(".workspace-error")).toHaveCount(0);
 }
+async function choosePreference(
+  page: Page,
+  group: string,
+  name: string
+): Promise<void> {
+  const choices = page.getByRole("group", { name: group, exact: true });
+  await expect(
+    choices.getByRole("button", { name, exact: true })
+  ).toBeVisible();
+  const choice = choices.getByRole("button", { name, exact: true });
+  const native = await choice.elementHandle();
+  if (!native) throw new Error("Preference choice has no native button");
+  await choice.focus();
+  await choice.press("Space");
+  // Language changes the group's accessible name; keep checking its same node.
+  await expect.poll(() => native.getAttribute("aria-pressed")).toBe("true");
+  await expect
+    .poll(() =>
+      native.evaluate(
+        (node) => node.isConnected && document.activeElement === node
+      )
+    )
+    .toBe(true);
+  expect(
+    await native.evaluate(
+      (node) =>
+        node.parentElement?.querySelectorAll('button[aria-pressed="false"]')
+          .length
+    )
+  ).toBe(1);
+}
+
 async function contained(page: Page): Promise<void> {
   expect(
     await page.evaluate(
@@ -242,9 +274,7 @@ test("grouped orders retain summaries, native overlay focus, selection and pause
   await page.setViewportSize({ width: 1280, height: 900 });
   await visit(page);
   const orders = table(page);
-  await page
-    .getByRole("combobox", { name: "Group by region", exact: true })
-    .selectOption("true");
+  await choosePreference(page, "Group by region", "By region");
   await expect(orders.locator(part("group-row")).first()).toBeVisible();
   await expect(orders.locator(part("summary"))).toBeVisible();
   const filters = orders.locator(part("filters-button"));
@@ -404,9 +434,7 @@ test("Arabic mobile cards keep details, summaries, controls and the viewport con
   ).toHaveJSProperty("open", true);
   await page.keyboard.press("Escape");
   await expect(orders.locator(part("filters-button"))).toBeFocused();
-  await page
-    .getByRole("combobox", { name: "التخطيط", exact: true })
-    .selectOption("cards");
+  await choosePreference(page, "التخطيط", "بطاقات");
   await orders.locator(part("filters-button")).click();
   await expect(
     page.locator("dialog").filter({ has: page.locator(part("filters-header")) })
@@ -637,14 +665,10 @@ test("range export never falls back without a range and cards require a fresh de
   await expect(page.locator("[data-workspace-export-blocked]")).toContainText(
     "unavailable in cards"
   );
-  await page
-    .getByRole("combobox", { name: "Layout", exact: true })
-    .selectOption("cards");
+  await choosePreference(page, "Layout", "Cards");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await expect(orders.locator(part("cards"))).toBeVisible();
-  await page
-    .getByRole("combobox", { name: "Layout", exact: true })
-    .selectOption("auto");
+  await choosePreference(page, "Layout", "Responsive");
   await expect(
     orders.getByRole("grid", { name: "Order desk", exact: true })
   ).toBeVisible();
@@ -1034,13 +1058,9 @@ test("presentation history and copied deep links restore actual views without lo
   await expect
     .poll(() => new URL(page.url()).search)
     .toContain("workspace-orders");
-  await page
-    .getByRole("combobox", { name: "Language", exact: true })
-    .selectOption("ar");
+  await choosePreference(page, "Language", "العربية");
   await page.locator('[data-workspace-view="revenue"]').click();
-  await page
-    .getByRole("combobox", { name: "التخطيط", exact: true })
-    .selectOption("cards");
+  await choosePreference(page, "التخطيط", "بطاقات");
   await page
     .getByRole("button", { name: "المظهر الداكن", exact: true })
     .click();
@@ -1066,12 +1086,16 @@ test("presentation history and copied deep links restore actual views without lo
   );
   await page.goBack();
   await expect(
-    page.getByRole("combobox", { name: "التخطيط", exact: true })
-  ).toHaveValue("auto");
+    page
+      .getByRole("group", { name: "التخطيط", exact: true })
+      .getByRole("button", { name: "متجاوب", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
   await page.goForward();
   await expect(
-    page.getByRole("combobox", { name: "التخطيط", exact: true })
-  ).toHaveValue("cards");
+    page
+      .getByRole("group", { name: "التخطيط", exact: true })
+      .getByRole("button", { name: "بطاقات", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
   await page.goForward();
   await expect(page.locator("body")).toHaveAttribute(
     "data-workspace-theme",
@@ -1368,9 +1392,7 @@ test("group collapse survives a reload through the binding's own URL state", asy
 }) => {
   await visit(page);
   const orders = table(page);
-  await page
-    .getByRole("combobox", { name: "Group by region", exact: true })
-    .selectOption("true");
+  await choosePreference(page, "Group by region", "By region");
   const europe = orders
     .locator(part("group-row"))
     .filter({ hasText: "Europe" });
@@ -1500,7 +1522,7 @@ test("Arabic pivot captions localize measures and nested dimensions without chan
     .poll(() => new URL(page.url()).searchParams.get("workspace-pivot.pivot"))
     .toBe("rows:region;cols:status;sum:amount");
   const canonical = configParams();
-  await page.locator(".workspace-nav select").first().selectOption("en");
+  await choosePreference(page, "اللغة", "English");
   await expect(
     pivot.getByRole("columnheader", { name: "Review", exact: true })
   ).toBeVisible();
@@ -1509,7 +1531,7 @@ test("Arabic pivot captions localize measures and nested dimensions without chan
   );
   expect(await identities()).toEqual(original);
   expect(configParams()).toEqual(canonical);
-  await page.locator(".workspace-nav select").first().selectOption("ar");
+  await choosePreference(page, "Language", "العربية");
   await page.reload();
   await expect(
     table(page, "pivot").getByRole("columnheader", {

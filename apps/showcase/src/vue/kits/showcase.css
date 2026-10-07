@@ -21,6 +21,34 @@ body[data-workspace-theme="dark"] .vue-kit-preview {
   --preview-muted: #a6afbb;
   --preview-line: #333a44;
 }
+/* VApp's viewport floor would separate the generated footer from this demo. */
+.v-application__wrap:has(> .vue-kit-preview) {
+  min-block-size: 0;
+}
+
+/* The generated legal footer shares the preview shell's spacing and palette. */
+body:has(.vue-kit-preview) > .vue-baseline {
+  box-sizing: border-box;
+  max-inline-size: 1440px;
+  margin-inline: auto;
+  padding: 0 32px 28px;
+  color: #626c79;
+  font:
+    12px/1.5 system-ui,
+    sans-serif;
+}
+body[data-workspace-theme="dark"]:has(.vue-kit-preview) > .vue-baseline {
+  color: #a6afbb;
+}
+body:has(.vue-kit-preview) > .vue-baseline a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+body:has(.vue-kit-preview) > .vue-baseline a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
 .vue-kit-preview__header {
   display: flex;
   align-items: flex-end;
@@ -266,6 +294,9 @@ body[data-workspace-theme="dark"]
 @media (max-width: 640px) {
   .vue-kit-preview {
     padding: 20px 16px;
+  }
+  body:has(.vue-kit-preview) > .vue-baseline {
+    padding-inline: 16px;
   }
   .vue-kit-preview__header {
     gap: 16px;

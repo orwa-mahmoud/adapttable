@@ -146,22 +146,48 @@ for (const kit of VUE_KIT_PAGES) {
       await expect(
         surface.getByRole("columnheader", { name: /Owner/ })
       ).toBeVisible();
+      const scroll = surface.locator(part("scroll-box"));
+      const header = surface.locator('th[data-column-key="customer"]');
+      await expect(header).toHaveAttribute("data-pinned", "start");
       const before = await customer.boundingBox();
-      const overflow = await surface
-        .locator(part("scroll-box"))
-        .evaluate((element) => {
-          element.scrollLeft = 180;
-          return {
-            available: element.scrollWidth - element.clientWidth,
-            moved: element.scrollLeft,
-          };
-        });
-      expect(overflow.available).toBeGreaterThan(30);
-      expect(overflow.moved).toBeGreaterThan(30);
-      const after = await customer.boundingBox();
       expect(before).not.toBeNull();
-      expect(after).not.toBeNull();
-      expect(Math.abs(before!.x - after!.x)).toBeLessThanOrEqual(1);
+      const geometry = await scroll.evaluate((element) => ({
+        edge: element.getBoundingClientRect().left + element.clientLeft,
+        available: element.scrollWidth - element.clientWidth,
+      }));
+      // Customer follows Order, so it moves normally until it reaches the edge.
+      const threshold = before!.x - geometry.edge;
+      expect(threshold).toBeGreaterThan(0);
+      expect(geometry.available).toBeGreaterThan(threshold + 20);
+      const firstScroll = await scroll.evaluate(
+        (element, position) => {
+          element.scrollLeft = position;
+          return element.scrollLeft;
+        },
+        (threshold + geometry.available) / 2
+      );
+      expect(firstScroll).toBeGreaterThan(threshold);
+      const expectPinnedAtEdge = async () => {
+        for (const target of [header, customer]) {
+          await expect
+            .poll(async () =>
+              Math.abs((await target.boundingBox())!.x - geometry.edge)
+            )
+            .toBeLessThanOrEqual(1);
+        }
+      };
+      await expectPinnedAtEdge();
+      const finalScroll = await scroll.evaluate((element) => {
+        element.scrollLeft = element.scrollWidth;
+        return element.scrollLeft;
+      });
+      expect(finalScroll).toBeGreaterThan(firstScroll + 9);
+      await expectPinnedAtEdge();
+      await expect
+        .poll(() =>
+          new URL(page.url()).searchParams.get(`kit-${kit.path}-orders.colPin`)
+        )
+        .toBe("customer:start");
       await capture(page, info, `${kit.path}-native-columns-pinned`);
       await page.reload();
       await expect(customer).toHaveAttribute("data-pinned", "start");
@@ -234,8 +260,20 @@ test("Angular live settings expose binary choices and preserve URL history", asy
   await expect(page).toHaveURL(/density=compact/);
   await page.getByRole("radio", { name: "Cards", exact: true }).check();
   await expect(page).toHaveURL(/mobile=on/);
+  await expect(
+    page.getByRole("radio", { name: "Cards", exact: true })
+  ).toBeChecked();
+  await expect(
+    page.getByRole("radio", { name: "Cards", exact: true })
+  ).toBeFocused();
   await page.getByRole("radio", { name: "العربية", exact: true }).check();
   await expect(page).toHaveURL(/locale=ar/);
+  await expect(
+    page.getByRole("radio", { name: "العربية", exact: true })
+  ).toBeChecked();
+  await expect(
+    page.getByRole("radio", { name: "العربية", exact: true })
+  ).toBeFocused();
   await expect(page.locator(part("root")).first()).toHaveAttribute(
     "dir",
     "rtl"

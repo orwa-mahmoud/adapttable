@@ -131,7 +131,7 @@ const render = createLatestDemoTask(async (isCurrent) => {
             .querySelector<HTMLElement>(
               active === "kit"
                 ? 'input[name="kit"]:checked'
-                : `[data-demo-control="${CSS.escape(active)}"]`
+                : `[data-demo-control="${CSS.escape(active)}"]:is(:not(input[type="radio"]), :checked)`
             )
             ?.focus({ preventScroll: true });
         window.scrollTo({ left: scroll.x, top: scroll.y, behavior: "instant" });

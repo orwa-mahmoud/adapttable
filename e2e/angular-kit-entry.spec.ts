@@ -10,7 +10,7 @@ import {
 for (const kit of ANGULAR_KITS) {
   test(`${kit.key}: the overview edits, exports and restores real people`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.goto(`/${kit.key}/`);
     const root = page.locator(
       '.mx-demo--overview [data-adapttable-part="root"]'
@@ -18,8 +18,52 @@ for (const kit of ANGULAR_KITS) {
     const rows = root.locator('[data-adapttable-part="row"]');
     await expect(rows).toHaveCount(10);
     const name = rows.first().locator('[data-column-key="person"]');
-    await name.dblclick();
+    // The native edit button owns activation; the cell also contains row padding.
+    const activate = name.getByRole("button", {
+      name: "Ada Lovelace",
+      exact: true,
+    });
+    await expect(activate).toHaveAttribute(
+      "data-adapttable-part",
+      "edit-cell-activate"
+    );
+    if (kit.key === "ng-bootstrap") {
+      await name.scrollIntoViewIfNeeded();
+      const geometry = await name.evaluate((cell) => {
+        const button = cell.querySelector(
+          '[data-adapttable-part="edit-cell-activate"]'
+        )!;
+        const cellBox = cell.getBoundingClientRect();
+        const buttonBox = button.getBoundingClientRect();
+        const center = (box: DOMRect) => ({
+          x: box.x + box.width / 2,
+          y: box.y + box.height / 2,
+        });
+        const cellPoint = center(cellBox);
+        const buttonPoint = center(buttonBox);
+        return {
+          cell: cellBox.toJSON(),
+          button: buttonBox.toJSON(),
+          cellPoint,
+          buttonPoint,
+          cellCenterHitsButton: button.contains(
+            document.elementFromPoint(cellPoint.x, cellPoint.y)
+          ),
+          buttonCenterHitsButton: button.contains(
+            document.elementFromPoint(buttonPoint.x, buttonPoint.y)
+          ),
+        };
+      });
+      await testInfo.attach("native-edit-activation-geometry", {
+        body: JSON.stringify(geometry, null, 2),
+        contentType: "application/json",
+      });
+      expect(geometry.buttonCenterHitsButton).toBe(true);
+    }
+    await activate.dblclick();
     const editor = angularPart(kit, page, "edit-cell-editor");
+    await expect(editor).toBeVisible();
+    await expect(editor).toBeFocused();
     await editor.fill("Ada Workspace");
     await editor.press("Enter");
     await expect(name).toContainText("Ada Workspace");

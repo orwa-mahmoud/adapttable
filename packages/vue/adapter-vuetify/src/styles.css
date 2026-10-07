@@ -79,6 +79,16 @@
   inline-size: 100%;
 }
 
+/* Keep the native checkbox track at its content width in the auto table. */
+:where(.adapttable-vuetify)
+  :is(
+    [data-adapttable-part="selection-header"],
+    [data-adapttable-part="selection-cell"]
+  ) {
+  inline-size: 1%;
+  white-space: nowrap;
+}
+
 .adapttable-vuetify [data-adapttable-part="header-cell"] {
   font-weight: 600;
 }

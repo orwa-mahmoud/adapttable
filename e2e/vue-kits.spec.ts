@@ -24,6 +24,94 @@ async function paginationControl(
   return { pageSize, originalPageSize };
 }
 
+const selectionVisual: Readonly<Record<string, string>> = {
+  "element-plus": ".el-checkbox__inner",
+  vuetify: ".v-selection-control__input",
+  "shadcn-vue": '[role="checkbox"]',
+};
+async function expectUtilityGeometry(page: Page, kit: string): Promise<void> {
+  const visual = selectionVisual[kit];
+  if (!visual) return;
+  const surface = page.locator(".vue-kit-preview__table");
+  const header = surface.locator(part("selection-header"));
+  const cells = surface.locator(part("selection-cell"));
+  const headerBox = (await header.boundingBox())!;
+  expect(headerBox.width).toBeGreaterThan(24);
+  expect(headerBox.width).toBeLessThanOrEqual(96);
+  const headerControl = (await header.locator(visual).boundingBox())!;
+  expect(headerControl.width).toBeGreaterThan(0);
+  for (const cell of await cells.all()) {
+    const box = (await cell.boundingBox())!;
+    expect(Math.abs(box.width - headerBox.width)).toBeLessThanOrEqual(1);
+    const control = (await cell.locator(visual).boundingBox())!;
+    expect(control.width).toBeGreaterThan(0);
+    expect(
+      Math.abs(
+        control.x +
+          control.width / 2 -
+          headerControl.x -
+          headerControl.width / 2
+      )
+    ).toBeLessThanOrEqual(1);
+  }
+  const pageSizeGroup = surface.locator(`${part("footer")} > div:first-child`);
+  const label = pageSizeGroup.locator(":scope > span").first();
+  const labelBox = (await label.boundingBox())!;
+  const selectBox = (await pageSizeGroup
+    .locator(part("rows-per-page"))
+    .boundingBox())!;
+  const lines = await label.evaluate((element) => {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return range.getClientRects().length;
+  });
+  expect(lines).toBe(1);
+  expect(
+    Math.abs(
+      labelBox.y + labelBox.height / 2 - selectBox.y - selectBox.height / 2
+    )
+  ).toBeLessThanOrEqual(2);
+}
+
+async function expectLegalFooter(page: Page): Promise<void> {
+  const link = page.getByRole("link", {
+    name: "Third-party notices",
+    exact: true,
+  });
+  await expect(link).toHaveAttribute("href", "../../third-party-notices.txt");
+  const layout = await link.evaluate((element) => {
+    const preview = document.querySelector<HTMLElement>(".vue-kit-preview")!;
+    const footer = element.closest("footer")!;
+    const box = footer.getBoundingClientRect();
+    const shell = preview.getBoundingClientRect();
+    const style = getComputedStyle(footer);
+    const shellStyle = getComputedStyle(preview);
+    const linkBox = element.getBoundingClientRect();
+    return {
+      start: box.x + parseFloat(style.paddingLeft),
+      shellStart: shell.x + parseFloat(shellStyle.paddingLeft),
+      right: box.right - parseFloat(style.paddingRight),
+      shellRight: shell.right - parseFloat(shellStyle.paddingRight),
+      linkLeft: linkBox.left,
+      linkRight: linkBox.right,
+      gap:
+        box.top -
+        preview.querySelector("footer")!.getBoundingClientRect().bottom,
+      fontSize: parseFloat(getComputedStyle(element).fontSize),
+      color: getComputedStyle(element).color,
+      footerColor: style.color,
+    };
+  });
+  expect(Math.abs(layout.start - layout.shellStart)).toBeLessThanOrEqual(1);
+  expect(Math.abs(layout.right - layout.shellRight)).toBeLessThanOrEqual(1);
+  expect(layout.linkLeft).toBeGreaterThanOrEqual(layout.start);
+  expect(layout.linkRight).toBeLessThanOrEqual(layout.right);
+  expect(layout.gap).toBeGreaterThanOrEqual(16);
+  expect(layout.gap).toBeLessThanOrEqual(32);
+  expect(layout.fontSize).toBe(12);
+  expect(layout.color).toBe(layout.footerColor);
+}
+
 const scenarios = [
   {
     name: "desktop-light",
@@ -56,6 +144,14 @@ const scenarios = [
     theme: "dark",
     lang: "ar",
     cards: true,
+  },
+  {
+    name: "desktop-rtl-dark",
+    width: 1440,
+    height: 1000,
+    theme: "dark",
+    lang: "ar",
+    cards: false,
   },
 ] as const;
 
@@ -107,7 +203,9 @@ for (const kit of VUE_KIT_PAGES) {
         } else {
           await expect(surface.getByRole("table")).toBeVisible();
           await expect(surface.locator("tbody [data-row-id]")).toHaveCount(5);
+          await expectUtilityGeometry(page, kit.path);
         }
+        await expectLegalFooter(page);
         await expect(surface.getByRole("searchbox")).toBeVisible();
         expect(
           await page.evaluate(
@@ -146,6 +244,8 @@ for (const kit of VUE_KIT_PAGES) {
       await page.keyboard.press("Space");
       await expect(selected).toBeChecked();
       await expect(selected).toBeFocused();
+      await first.hover();
+      await expectUtilityGeometry(page, kit.path);
       await expect(page.getByTestId("selection-status")).toHaveText(
         "1 selected"
       );
@@ -236,7 +336,7 @@ for (const kit of VUE_KIT_PAGES) {
       }
     }
 
-    for (const scenario of [scenarios[0], scenarios[3]]) {
+    for (const scenario of [scenarios[0], scenarios[3], scenarios[4]]) {
       test(`${scenario.name}: visible density choices retain focus and update the table`, async ({
         page,
       }, info) => {
@@ -284,6 +384,7 @@ for (const kit of VUE_KIT_PAGES) {
           throw new Error("Density must mount its group and both choices");
         const expectDensity = async (value: "comfortable" | "compact") => {
           await expect(root).toHaveAttribute("data-density", value);
+          if (!scenario.cards) await expectUtilityGeometry(page, kit.path);
           await expect(
             density.getByText(labels.densityComfortable, { exact: true })
           ).toBeVisible();

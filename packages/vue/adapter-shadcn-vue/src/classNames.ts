@@ -20,7 +20,7 @@ export const shadcnClassNames: DataTableClassNames = {
   sortButton:
     "h-auto min-h-9 justify-start border-0 p-0 shadow-none hover:bg-transparent",
   sortIndex: "text-xs tabular-nums text-muted-foreground",
-  selectionHeader: "w-12 bg-background px-3 align-middle",
+  selectionHeader: "w-12 bg-background px-3 text-start align-middle",
   selectionCell: "w-12 bg-inherit px-3 align-middle",
   selectionCheckbox: "align-middle",
   columnGroup: "h-11 border-b border-border px-3 text-start font-medium",
