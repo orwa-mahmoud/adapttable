@@ -35,6 +35,7 @@ export default defineConfig({
     "src/bulk-actions.ts",
     "src/print.ts",
     "src/export.ts",
+    "src/grouping-panel.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],

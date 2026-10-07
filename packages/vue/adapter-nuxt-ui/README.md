@@ -12,7 +12,7 @@ It does not use Nuxt UI's separate `UTable` engine.
 
 ## Features
 
-The Nuxt UI adapter currently exports 35 canonical feature factories. Its base
+The Nuxt UI adapter currently exports 36 canonical feature factories. Its base
 DataTable provides sorting, pagination, global search, row selection, desktop
 tables and mobile cards through the shared Vue model and genuine Nuxt controls.
 Feature composition is opt-in through the following factories:
@@ -31,7 +31,7 @@ Feature composition is opt-in through the following factories:
 - Rows: `rowActions`, `rowAppearance`, `rowPinning`, `extraRows`,
   `pinnedSummaryRows` and `cellSpan`. These cover row actions, row styling, row
   pinning, full-width rows, pinned summary rows and row and column spanning.
-- Hierarchy: `grouping`, `tree`, `rowDetail` and `nestedTable`. Nuxt expansion,
+- Hierarchy: `groupingPanel`, `grouping`, `tree`, `rowDetail` and `nestedTable`. Nuxt expansion,
   selection and load-more buttons present group rows, hierarchical rows, row
   expansion and nested tables using the binding's models.
 - Actions: `bulkActions`, `print` and `exportCsv`. Nuxt Button presents host
@@ -348,3 +348,14 @@ hook for the inner semantic bar. The native composition keeps the part marker,
 accessible name and numeric value on the progressbar itself. An absent value
 stays indeterminate; zero remains determinate. The shared export view owns all
 progress state, and custom spinner animation respects reduced motion.
+
+## Grouping panel
+
+Import `groupingPanel` from `@adapttable/nuxt-ui/grouping-panel`. Nuxt Card,
+Badge, Button, Select and Checkbox present the grouping fields and aggregation
+choices. The shared controller owns drag/drop, keyboard order, controlled group
+and aggregation requests, notifications and activity. The panel composes the
+ordinary Nuxt grouping row controls without mounting a second grouping model.
+
+Grouping selects portal through the scoped Nuxt provider, outside the card
+clipping boundary and inside the fullscreen container when active.
