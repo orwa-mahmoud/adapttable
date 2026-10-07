@@ -16,7 +16,7 @@ styles once.
 
 ```ts
 import { createApp } from "vue";
-import { createVuetify } from "vuetify";
+import { createVuetify } from "vuetify/framework";
 import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
 import "vuetify/styles";
 import "@adapttable/vuetify/styles.css";
@@ -209,6 +209,42 @@ and unavailable row actions remain visible as disabled Vuetify buttons.
 `SavedViewsPanelProps` are exported from the saved-views entry. Menu and panel
 controls work in mobile layouts and render without browser-only ref calls on
 the server.
+
+## Actions and export
+
+Import `bulkActions` from `@adapttable/vuetify/bulk-actions` and `print` from
+`@adapttable/vuetify/print`. Both use native `VBtn` controls. Bulk actions keep
+the shared confirmation, pending, disabled and error behavior. Selection clears
+only after accepted successful work. `print(callback, true)` adds the optional
+print button; the callback remains host-owned.
+
+`exportCsv` is available from the canonical `@adapttable/vuetify/export` entry.
+The shared controller owns CSV generation, server export jobs, cancellation,
+retry and stale-completion handling. `VCard` displays server progress with
+`VProgressLinear`, and `VBtn` renders cancel, retry, dismiss and download actions.
+No export runs while the feature is inactive. Import `virtualize` from
+`@adapttable/vuetify/virtualize` to window the existing desktop rows or mobile
+cards; the binding keeps pinned summaries outside the scrolling row window.
+
+## Grouping, reordering and panels
+
+`groupingPanel` from `@adapttable/vuetify/grouping-panel` uses `VCard`, `VChip`,
+`VSelect`, `VCheckboxBtn` and `VBtn` over the shared grouping model. Group order,
+aggregation choices, drag/drop, RTL keyboard movement and change notifications
+stay in the binding. `rowReorder` from `@adapttable/vuetify/row-reorder` requests
+host changes through native grip and move buttons. Cross-group destination
+menus use `VMenu`/`VList`; requested approval uses a `VDialog`.
+
+`commandPalette` and `contextMenu` are available from their corresponding
+`command-palette` and `context-menu` entries. The command dialog uses `VDialog`,
+`VField` and `VListItem`; its actual input owns the combobox ID, active option
+and keyboard handlers. Context menus use `VMenu` and `VList` with native
+keyboard navigation. Both preserve binding-owned action admission and stale
+lifetime guards; overlays attach to the supplied fullscreen container.
+
+`sidePanel` from `@adapttable/vuetify/side-panel` uses a `VCard` aside and native
+`VBtn` tabs. Its `open` value and `onOpenChange` callback remain controlled by
+the host. Rejected selection or close requests leave the accepted panel visible.
 
 ## Control ownership
 

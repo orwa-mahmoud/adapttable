@@ -344,6 +344,96 @@
         "types": "./dist/saved-views.d.cts",
         "default": "./dist/saved-views.cjs"
       }
+    },
+    "./bulk-actions": {
+      "import": {
+        "types": "./dist/bulk-actions.d.ts",
+        "default": "./dist/bulk-actions.js"
+      },
+      "require": {
+        "types": "./dist/bulk-actions.d.cts",
+        "default": "./dist/bulk-actions.cjs"
+      }
+    },
+    "./print": {
+      "import": {
+        "types": "./dist/print.d.ts",
+        "default": "./dist/print.js"
+      },
+      "require": {
+        "types": "./dist/print.d.cts",
+        "default": "./dist/print.cjs"
+      }
+    },
+    "./export": {
+      "import": {
+        "types": "./dist/export.d.ts",
+        "default": "./dist/export.js"
+      },
+      "require": {
+        "types": "./dist/export.d.cts",
+        "default": "./dist/export.cjs"
+      }
+    },
+    "./virtualize": {
+      "import": {
+        "types": "./dist/virtualize.d.ts",
+        "default": "./dist/virtualize.js"
+      },
+      "require": {
+        "types": "./dist/virtualize.d.cts",
+        "default": "./dist/virtualize.cjs"
+      }
+    },
+    "./grouping-panel": {
+      "import": {
+        "types": "./dist/grouping-panel.d.ts",
+        "default": "./dist/grouping-panel.js"
+      },
+      "require": {
+        "types": "./dist/grouping-panel.d.cts",
+        "default": "./dist/grouping-panel.cjs"
+      }
+    },
+    "./row-reorder": {
+      "import": {
+        "types": "./dist/row-reorder.d.ts",
+        "default": "./dist/row-reorder.js"
+      },
+      "require": {
+        "types": "./dist/row-reorder.d.cts",
+        "default": "./dist/row-reorder.cjs"
+      }
+    },
+    "./command-palette": {
+      "import": {
+        "types": "./dist/command-palette.d.ts",
+        "default": "./dist/command-palette.js"
+      },
+      "require": {
+        "types": "./dist/command-palette.d.cts",
+        "default": "./dist/command-palette.cjs"
+      }
+    },
+    "./context-menu": {
+      "import": {
+        "types": "./dist/context-menu.d.ts",
+        "default": "./dist/context-menu.js"
+      },
+      "require": {
+        "types": "./dist/context-menu.d.cts",
+        "default": "./dist/context-menu.cjs"
+      }
+    },
+    "./side-panel": {
+      "import": {
+        "types": "./dist/side-panel.d.ts",
+        "default": "./dist/side-panel.js"
+      },
+      "require": {
+        "types": "./dist/side-panel.d.cts",
+        "default": "./dist/side-panel.cjs"
+      }
     }
   },
   "repository": {

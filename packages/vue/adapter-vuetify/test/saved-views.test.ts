@@ -244,6 +244,7 @@ it("requests apply, order, default and removal without mutating the controlled l
 
 it("focuses the native rename input and submits the exact draft only after IME composition", async () => {
   const f = panelFixture();
+  await settle();
   action(row(f.host, "Second"), labels.renameView).click();
   await settle();
   const input = node<HTMLInputElement>(f.host, "input");
@@ -262,6 +263,7 @@ it("focuses the native rename input and submits the exact draft only after IME c
 
 it("cancels rename on Escape or externally changed read-only ownership", async () => {
   const f = panelFixture();
+  await settle();
   action(row(f.host, "Second"), labels.renameView).click();
   await settle();
   let input = node<HTMLInputElement>(f.host, "input");
@@ -565,4 +567,27 @@ it("server-renders genuine empty and populated panels and a closed toolbar witho
   expect(html).toContain('data-adapttable-part="views-button"');
   expect(html).not.toContain('data-adapttable-part="views-panel"');
   expect(owner).not.toHaveBeenCalled();
+});
+
+it("preserves a native rename draft, caret and focus through parent styling updates", async () => {
+  const f = panelFixture();
+  await settle();
+  action(row(f.host, "Second"), labels.renameView).click();
+  await settle();
+  const input = node<HTMLInputElement>(f.host, "input");
+  await write(input, "Unsent draft");
+  input.setSelectionRange(2, 4);
+  f.names.value = {
+    ...f.names.value,
+    viewsInput: "updated-input",
+    viewsPanel: "updated-panel",
+  };
+  await settle();
+  expect(node(f.host, "input")).toBe(input);
+  expect(input.value).toBe("Unsent draft");
+  expect(input.closest(".updated-input.v-text-field")).not.toBeNull();
+  expect(document.activeElement).toBe(input);
+  expect([input.selectionStart, input.selectionEnd]).toEqual([2, 4]);
+  await key(input, "Enter");
+  expect(f.onRename).toHaveBeenCalledExactlyOnceWith("Second", "Unsent draft");
 });
