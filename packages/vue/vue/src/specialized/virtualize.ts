@@ -42,6 +42,7 @@ import {
 
 import type { TableBodyProjection } from "../layout/modelChannels";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
+import { VirtualRowRefs } from "./virtualRowRefs";
 export type VirtualizeOptions = VirtualizeInput &
   (boolean | { readonly maxHeight?: number });
 export interface BodyWindowModel<TRow> {
@@ -76,7 +77,11 @@ export function windowBodySlots<TRow>(
   slots: readonly TableBodySlot<TRow>[],
   window: KeyedVirtualization,
   columnCount: number,
-  measure: (index: number, detail: boolean) => (node: Element | null) => void,
+  measure: (
+    index: number,
+    detail: boolean,
+    key: string
+  ) => (node: Element | null) => void,
   sections = bodySections(slots)
 ): readonly TableBodySlot<TRow>[] {
   if (!window.enabled) return slots;
@@ -84,7 +89,7 @@ export function windowBodySlots<TRow>(
   const visible = window.indices.flatMap((index): TableBodySlot<TRow>[] => {
     const slot = scroll[index];
     if (!slot) return [];
-    const attrs = { "data-index": index, ref: measure(index, false) };
+    const attrs = { "data-index": index, ref: measure(index, false, slot.key) };
     return [
       slot.kind === "row"
         ? {
@@ -93,7 +98,10 @@ export function windowBodySlots<TRow>(
               ...slot.wiring,
               attrs: { ...slot.wiring.attrs, ...attrs },
               detail: slot.wiring.detail
-                ? { ...slot.wiring.detail, measure: measure(index, true) }
+                ? {
+                    ...slot.wiring.detail,
+                    measure: measure(index, true, slot.key),
+                  }
                 : undefined,
             },
           }
@@ -297,6 +305,11 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
   const pairs = new RowPairMeasureController((index, size) =>
     current().resizeItem(index, size)
   );
+  const refs = new VirtualRowRefs(
+    (index, half, node) => pairs.attach(index, half, node),
+    () => enabled.value && !disposed,
+    () => (mobile.value ? "mobile" : "desktop")
+  );
   watchEffect(
     () => {
       if (disposed) return;
@@ -353,6 +366,7 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
       context.table.loadMore();
   });
   const model: ComputedRef<BodyWindowModel<TRow>> = computed(() => {
+    refs.begin();
     const window = keyedWindow({
       enabled: enabled.value,
       count: scrollSlots.value.length,
@@ -360,9 +374,8 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
       items: items.value,
       estimateSize: estimate,
     });
-    const measure =
-      (index: number, detail: boolean) => (node: Element | null) =>
-        pairs.attach(index, detail ? "detail" : "row", node);
+    const measure = (index: number, detail: boolean, key: string) =>
+      refs.ref("desktop", key, index, detail ? "detail" : "row");
     const desktopSlots = windowBodySlots(
       body.value.desktop.bodySlots ?? [],
       window,
@@ -374,7 +387,7 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
       body.value.mobile.bodySlots ?? [],
       window,
       1,
-      (index) => (node) => pairs.attach(index, "row", node),
+      (index, _detail, key) => refs.ref("mobile", key, index, "row"),
       mobileSections.value
     );
     const desktopRows = window.enabled
@@ -383,6 +396,7 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
     const mobileRows = window.enabled
       ? slotRows(mobileSlots)
       : body.value.mobile.rows;
+    refs.finish();
     const desktopColumns = windowBodyColumns(
       { ...body.value.desktop, rows: desktopRows, bodySlots: desktopSlots },
       {
@@ -449,6 +463,7 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
   );
   onScopeDispose(() => {
     disposed = true;
+    refs.dispose();
     elementVirtualizer.setOptions({
       ...elementVirtualizer.options,
       enabled: false,

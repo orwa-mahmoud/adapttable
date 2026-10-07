@@ -346,10 +346,28 @@ export function groupingPanel<TRow>(
         disposed = true;
       });
       const neutralRuntime = eraseTableRuntime(context.runtime);
+      const setGroupBy: typeof context.source.value.setGroupBy = (value) => {
+        if (disposed || !context.active.value) return;
+        const state = neutralRuntime.view()?.groupingState;
+        if (!state) return;
+        state.setGroupBy(value);
+        if (disposed || !context.active.value) return;
+        (context.options.value as GroupingExtras<TRow>).onGroupByChange?.(
+          parseGroupBy(value)
+        );
+      };
       const runtime = {
         ...neutralRuntime,
-        view: () =>
-          !disposed && context.active.value ? neutralRuntime.view() : undefined,
+        view: () => {
+          if (disposed || !context.active.value) return undefined;
+          const view = neutralRuntime.view();
+          return view?.groupingState
+            ? {
+                ...view,
+                groupingState: { ...view.groupingState, setGroupBy },
+              }
+            : view;
+        },
       };
       const controller = createGroupingPanelController({
         runtime,
