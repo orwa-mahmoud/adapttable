@@ -207,6 +207,14 @@ const ColumnMenuRowChrome = defineComponent(
     const open = shallowRef(false);
     const editor = useColumnRenameEditor(() => props.row.rename);
     const actionTrigger = shallowRef<HTMLElement | null>(null);
+    const onKeydown = (event: KeyboardEvent): void => {
+      if (event.key === "Escape" && open.value) {
+        event.preventDefault();
+        event.stopPropagation();
+        open.value = false;
+        actionTrigger.value?.focus();
+      }
+    };
     watch(
       () => props.active,
       (active) => {
@@ -226,14 +234,7 @@ const ColumnMenuRowChrome = defineComponent(
           "data-pinned": row.pinned,
           "data-actions": row.edge === "actions" ? "" : undefined,
           "data-reorder": row.edge === "reorder" ? "" : undefined,
-          onKeydown: (event: KeyboardEvent): void => {
-            if (event.key === "Escape" && open.value) {
-              event.preventDefault();
-              event.stopPropagation();
-              open.value = false;
-              actionTrigger.value?.focus();
-            }
-          },
+          onKeydown,
         },
         [
           row.edge
@@ -317,6 +318,7 @@ const ColumnMenuRowChrome = defineComponent(
                               ...part("column-menu-choice-select", names),
                               "aria-label": item.label,
                               disabled: item.disabled,
+                              onKeydown,
                             },
                             value: item.value,
                             options: item.options,
