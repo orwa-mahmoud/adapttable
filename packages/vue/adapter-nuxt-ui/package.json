@@ -308,6 +308,36 @@
         "types": "./dist/virtualize.d.cts",
         "default": "./dist/virtualize.cjs"
       }
+    },
+    "./bulk-actions": {
+      "import": {
+        "types": "./dist/bulk-actions.d.ts",
+        "default": "./dist/bulk-actions.js"
+      },
+      "require": {
+        "types": "./dist/bulk-actions.d.cts",
+        "default": "./dist/bulk-actions.cjs"
+      }
+    },
+    "./print": {
+      "import": {
+        "types": "./dist/print.d.ts",
+        "default": "./dist/print.js"
+      },
+      "require": {
+        "types": "./dist/print.d.cts",
+        "default": "./dist/print.cjs"
+      }
+    },
+    "./export": {
+      "import": {
+        "types": "./dist/export.d.ts",
+        "default": "./dist/export.js"
+      },
+      "require": {
+        "types": "./dist/export.d.cts",
+        "default": "./dist/export.cjs"
+      }
     }
   },
   "dependencies": {
@@ -315,7 +345,7 @@
   },
   "peerDependencies": {
     "@nuxt/ui": "^4.11.3",
-    "vue": "^3.5.2"
+    "vue": "^3.5.18"
   },
   "devDependencies": {
     "@nuxt/ui": "4.11.3",

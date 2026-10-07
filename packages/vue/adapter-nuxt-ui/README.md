@@ -12,7 +12,7 @@ It does not use Nuxt UI's separate `UTable` engine.
 
 ## Features
 
-The Nuxt UI adapter currently exports 32 canonical feature factories. Its base
+The Nuxt UI adapter currently exports 35 canonical feature factories. Its base
 DataTable provides sorting, pagination, global search, row selection, desktop
 tables and mobile cards through the shared Vue model and genuine Nuxt controls.
 Feature composition is opt-in through the following factories:
@@ -34,6 +34,9 @@ Feature composition is opt-in through the following factories:
 - Hierarchy: `grouping`, `tree`, `rowDetail` and `nestedTable`. Nuxt expansion,
   selection and load-more buttons present group rows, hierarchical rows, row
   expansion and nested tables using the binding's models.
+- Actions: `bulkActions`, `print` and `exportCsv`. Nuxt Button presents host
+  actions, while Nuxt Card, Icon and a native progress element present progress,
+  cancellation, retry and download controls. The binding owns job lifetimes.
 - Navigation and status: `cellNavigation`, `columnSelectionCheckbox`,
   `findInTable`, `statusBar`, `selectionStats` and `virtualize`. Nuxt Input,
   Button, Checkbox and Badge present Find, column selection and status figures.
@@ -48,9 +51,7 @@ surface; it does not imply full feature parity or completed browser validation.
 
 Nuxt UI 4 is MIT-licensed, including the components previously offered as Pro.
 This adapter uses the public `@nuxt/ui` package and requires no Pro license or
-Nuxt server runtime. The supported minimums are Nuxt UI 4.11.3 and Vue 3.5.2.
-Vue 3.5.2 includes the `useTemplateRef` fix required by Nuxt UI’s unmodified
-components during hydration; this requirement is specific to the Nuxt UI kit.
+Nuxt server runtime. The supported minimums are Nuxt UI 4.11.3 and Vue 3.5.18.
 
 For npm applications on Node 22.12–22.18, add `unifont@0.7.4` as an exact dependency
 (`npm install --save-exact unifont@0.7.4`). Nuxt UI 4.11.3's `@nuxt/fonts@0.14.0`
@@ -329,3 +330,21 @@ Import `cellNavigation` and `columnSelectionCheckbox` from `@adapttable/nuxt-ui/
 The shared Vue binding owns keyboard navigation, range selection, fill requests, Find state and localized status text. Host fill callbacks remain requests; the adapter never changes row data itself. Desktop navigation attaches after hydration and stays disabled on mobile. The fill handle is a positioned span carrying the binding's pointer handlers. All canonical part markers and class names remain on their semantic targets.
 
 Import `virtualize` from `@adapttable/nuxt-ui/virtualize` to use the binding's row and column windowing with the same Nuxt table/card surface and single scroll owner. The feature preserves measured expanded details and releases their observers on removal or layout changes. Flat paged tables retain the binding's existing virtualization eligibility rules.
+
+## Bulk actions, print and CSV export
+
+Use `bulkActions` from `@adapttable/nuxt-ui/bulk-actions` for selection actions
+and `print` from `@adapttable/nuxt-ui/print` for a host-provided print handler.
+Bulk confirmation, selected/all-matching scope, pending state and errors stay
+in the binding. No row mutation or browser print call is implied by the kit.
+
+Import `exportCsv` from `@adapttable/nuxt-ui/export`. Current-view,
+selected-row and server
+export callbacks keep the shared Vue types and lifecycle. The progress surface
+uses genuine Nuxt Card, Button and Icon controls around a native `progress`
+element styled with Nuxt's public theme tokens. Nuxt UI 4.11.3's Progress
+component forwards attributes to its outer wrapper and has no public attribute
+hook for the inner semantic bar. The native composition keeps the part marker,
+accessible name and numeric value on the progressbar itself. An absent value
+stays indeterminate; zero remains determinate. The shared export view owns all
+progress state, and custom spinner animation respects reduced motion.
