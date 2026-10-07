@@ -107,7 +107,10 @@ export const NaiveManagedPopover = defineComponent(
         const search = element.querySelector<HTMLElement>(
           'input[data-adapttable-part="column-menu-search"]'
         );
-        (search ?? element).focus({ preventScroll: true });
+        const first = element.querySelector<HTMLElement>(
+          "button:not([disabled]), input:not([disabled])"
+        );
+        (search ?? first ?? element).focus({ preventScroll: true });
       },
       { flush: "post" }
     );

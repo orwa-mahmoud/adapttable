@@ -17,9 +17,13 @@ import { htmlRoot } from "./elementTarget";
 export interface NaiveSelectControl {
   readonly attrs: Attrs;
   readonly value: string;
+  readonly optionPart?: string;
+  readonly virtualScroll?: boolean;
   readonly options: readonly {
     readonly value: string;
     readonly label: string;
+    readonly disabled?: boolean;
+    readonly title?: string;
   }[];
   readonly onChange: (value: string) => void;
 }
@@ -70,6 +74,7 @@ const NaiveSelectControl = defineComponent(
         ...attrs,
         size: "small",
         filterable: true,
+        virtualScroll: control.virtualScroll,
         to: false,
         show: show.value,
         value: control.value,
@@ -91,6 +96,9 @@ const NaiveSelectControl = defineComponent(
           "aria-label": textAttribute(attrs, "aria-label"),
         },
         nodeProps: (option) => ({
+          "data-adapttable-part": control.optionPart,
+          title: typeof option.title === "string" ? option.title : undefined,
+          "aria-disabled": option.disabled === true,
           role: "option",
           "aria-selected": option.value === control.value,
         }),

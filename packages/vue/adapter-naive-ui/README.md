@@ -204,3 +204,42 @@ the controls. The Vue binding owns selection ranges, find matches, action
 requests and export jobs. Printing and data changes remain host callbacks.
 Find and utility controls work in mobile cards; cell ranges and fill handles
 are desktop-grid features.
+
+## Command and context surfaces
+
+Import `commandPalette` from `command-palette` and `contextMenu` from
+`context-menu`. The command palette uses native Naive inputs and buttons
+inside an `NModal` and `NCard`; native modal focus and dismissal are guarded
+against nested or already-handled Escape events.
+
+The context menu uses `NPopover`, `NCard`, and real `NButton` menu items. The
+shared binding's menu controller owns wrapped navigation, disabled-item
+skipping, and prefix typeahead. Tab and Shift+Tab dismiss without cancelling
+native traversal. Both surfaces retain the binding's lifecycle and fullscreen
+container contracts.
+
+## Grouping panel and row movement
+
+Import `groupingPanel` from `grouping-panel` and `rowReorder` from
+`row-reorder`. Naive grouping choices, buttons, checkboxes and tags fill the
+shared grouping controller. Group ordering, aggregation capabilities, defaults,
+and announcements stay in the binding. Declare numeric aggregation operations
+explicitly, or supply a numeric column filter/editor for implied operations.
+
+Row handles and mobile move buttons issue host requests. Cross-group destination
+choices use `NSelect`, retain disabled choices and their reasons, and keep the
+selector within the table. The optional native confirmation modal starts on
+Cancel and restores the real destination input. Confirmation and stale-session
+decisions stay with the shared row model.
+
+## Saved views and side panels
+
+Import `savedViews` and `SavedViewsPanel` from `saved-views`, and `sidePanel`
+from `side-panel`. Native Naive buttons, inputs, cards and tags render the
+binding's saved-view disclosure and management controls. Read-only views,
+renaming, ordering and persistence remain owned by the shared controller.
+
+Side panels use native card and button presentation over the shared tab,
+selection, identity and lifecycle contract. Host-controlled open state stays
+authoritative. Managed saved-view popovers use the table's fullscreen container
+and semantic trigger/input refs.

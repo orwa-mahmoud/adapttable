@@ -4,6 +4,12 @@ import Vue from "unplugin-vue/rolldown";
 export default defineConfig({
   entry: [
     "src/index.ts",
+    "src/saved-views.ts",
+    "src/side-panel.ts",
+    "src/grouping-panel.ts",
+    "src/row-reorder.ts",
+    "src/command-palette.ts",
+    "src/context-menu.ts",
     "src/bulk-actions.ts",
     "src/cell-navigation.ts",
     "src/export.ts",
