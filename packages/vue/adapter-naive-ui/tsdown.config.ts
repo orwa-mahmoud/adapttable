@@ -23,6 +23,7 @@ export default defineConfig({
     "src/row-detail.ts",
     "src/filters.ts",
     "src/header-filters.ts",
+    "src/column-menu.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],

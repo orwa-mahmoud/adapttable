@@ -19,6 +19,15 @@ import { pathToFileURL } from "node:url";
 /** Every fixture's diagnostic identity, separate from the invalid source. */
 export const VUE_TYPE_EXPECTATIONS = {
   "@adapttable/naive-ui": {
+    "WrongColumnRows.ts": [
+      {
+        code: 2322,
+        message: /ColumnMenuSlotProps(?:\$\d+)?<Invoice>.*Person/s,
+      },
+    ],
+    "WrongColumnMenuRename.vue": [
+      { code: 2322, message: /_key: number.*key: string/s },
+    ],
     "WrongFilterRows.ts": [
       { code: 2322, message: /FilterFieldOptions<Invoice>.*Person/s },
       { code: 2322, message: /ChecklistFilterProps<Invoice>.*Person/s },

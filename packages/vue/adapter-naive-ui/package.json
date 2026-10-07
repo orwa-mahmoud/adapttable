@@ -242,7 +242,17 @@
       }
     },
     "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./column-menu": {
+      "import": {
+        "types": "./dist/column-menu.d.ts",
+        "default": "./dist/column-menu.js"
+      },
+      "require": {
+        "types": "./dist/column-menu.d.cts",
+        "default": "./dist/column-menu.cjs"
+      }
+    }
   },
   "repository": {
     "type": "git",
