@@ -207,3 +207,66 @@ describe("focus after removing an aggregation", () => {
     expect(document.activeElement).toBe(before);
   });
 });
+
+describe("compound aggregation focus targets", () => {
+  it("resolves a native field inside its owned choice part and skips disabled choices", () => {
+    const root = document.createElement("fieldset");
+    root.innerHTML =
+      '<label data-adapttable-part="grouping-aggregation-option"><input disabled type="checkbox"></label><label data-adapttable-part="grouping-aggregation-option"><input type="checkbox"></label><button data-adapttable-part="grouping-aggregations-restore">Restore</button>';
+    document.body.append(root);
+    try {
+      const input = root.querySelector<HTMLInputElement>(
+        "input:not(:disabled)"
+      )!;
+      focusAfterAggregationRemoval(root, [], 0);
+      expect(document.activeElement).toBe(input);
+      input.disabled = true;
+      focusAfterAggregationRemoval(root, [], 0);
+      expect(document.activeElement?.textContent).toBe("Restore");
+    } finally {
+      root.remove();
+    }
+  });
+  it("preserves remove-before-picker ordering and never chooses an unrelated field", () => {
+    const root = document.createElement("fieldset");
+    root.innerHTML =
+      '<span data-adapttable-aggregation="next"><button data-adapttable-part="grouping-aggregation-remove">Remove next</button></span><label data-adapttable-part="grouping-aggregation-option"><input disabled type="checkbox"></label><input id="unrelated"><button data-adapttable-part="grouping-aggregations-restore">Restore</button>';
+    document.body.append(root);
+    try {
+      const remove = root.querySelector<HTMLButtonElement>("button")!;
+      focusAfterAggregationRemoval(root, ["next"], 0);
+      expect(document.activeElement).toBe(remove);
+      remove.remove();
+      focusAfterAggregationRemoval(root, ["next"], 0);
+      expect(document.activeElement?.textContent).toBe("Restore");
+    } finally {
+      root.remove();
+    }
+  });
+});
+describe("hidden aggregation choice descendants", () => {
+  it("skips aria-disabled, hidden, inert, CSS-hidden and nonfocusable owned candidates", () => {
+    const root = document.createElement("fieldset");
+    root.innerHTML =
+      '<label data-adapttable-part="grouping-aggregation-option"><input aria-disabled="true" type="checkbox"><input hidden type="checkbox"><span inert><input type="checkbox"></span><span style="display:none"><input type="checkbox"></span><input style="visibility:hidden" type="checkbox"><input type="hidden"><span>Unfocusable</span><input id="enabled-choice" type="checkbox"></label>';
+    document.body.append(root);
+    try {
+      focusAfterAggregationRemoval(root, [], 0);
+      expect(document.activeElement?.id).toBe("enabled-choice");
+    } finally {
+      root.remove();
+    }
+  });
+  it("falls through hidden parts to the restore control without changing remove-before-picker order", () => {
+    const root = document.createElement("fieldset");
+    root.innerHTML =
+      '<span data-adapttable-aggregation="next"><button data-adapttable-part="grouping-aggregation-remove" hidden>Hidden remove</button></span><label data-adapttable-part="grouping-aggregation-option" aria-hidden="true"><input type="checkbox"></label><span data-adapttable-part="grouping-aggregation-option">Unfocusable</span><button data-adapttable-part="grouping-aggregations-restore">Restore</button>';
+    document.body.append(root);
+    try {
+      focusAfterAggregationRemoval(root, ["next"], 0);
+      expect(document.activeElement?.textContent).toBe("Restore");
+    } finally {
+      root.remove();
+    }
+  });
+});

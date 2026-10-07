@@ -278,6 +278,50 @@ export function aggregationRemovalFocusSelectors(
   return selectors;
 }
 
+const AGGREGATION_FOCUS_CONTROLS =
+  'input:not([type="hidden"]),button,select,textarea,[tabindex]';
+
+function aggregationControlIsHidden(target: HTMLElement): boolean {
+  if (
+    target.closest(
+      '[hidden],[inert],[aria-hidden="true"],[aria-disabled="true"]'
+    )
+  )
+    return true;
+  const view = target.ownerDocument.defaultView;
+  for (
+    let ancestor: HTMLElement | null = target;
+    ancestor;
+    ancestor = ancestor.parentElement
+  ) {
+    const style = view?.getComputedStyle(ancestor);
+    if (
+      style?.display === "none" ||
+      style?.visibility === "hidden" ||
+      style?.visibility === "collapse"
+    )
+      return true;
+  }
+  return false;
+}
+
+function focusOwnedAggregationControl(part: HTMLElement): boolean {
+  const candidates = part.matches(AGGREGATION_FOCUS_CONTROLS)
+    ? [part]
+    : part.querySelectorAll(AGGREGATION_FOCUS_CONTROLS);
+  for (const target of candidates) {
+    if (
+      !(target instanceof HTMLElement) ||
+      target.matches(":disabled") ||
+      aggregationControlIsHidden(target)
+    )
+      continue;
+    target.focus();
+    if (target.ownerDocument.activeElement === target) return true;
+  }
+  return false;
+}
+
 /**
  * Move focus after an aggregation was removed, following
  * {@link aggregationRemovalFocusSelectors} inside `root`.
@@ -297,10 +341,14 @@ export function focusAfterAggregationRemoval(
     remainingKeys,
     removedIndex
   )) {
-    const node = root?.querySelector(selector);
-    if (typeof HTMLElement !== "undefined" && node instanceof HTMLElement) {
-      node.focus();
-      return;
+    for (const part of root?.querySelectorAll(selector) ?? []) {
+      if (
+        typeof HTMLElement !== "undefined" &&
+        part instanceof HTMLElement &&
+        !part.matches(':disabled,[aria-disabled="true"]') &&
+        focusOwnedAggregationControl(part)
+      )
+        return;
     }
   }
 }
