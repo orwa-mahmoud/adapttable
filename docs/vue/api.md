@@ -663,6 +663,26 @@ an adapter supplies every visible control and its appearance.
 receives `ColumnGroupToggleButtonProps`: the localized label, expanded state,
 class name and click action. No button fallback is provided.
 
+### Compound side panels and command surfaces
+
+`SidePanelChrome` accepts either its required `SidePanelSlots` or a complete
+`SidePanelPresentation`. The presentation receives `SidePanelPresentationProps`:
+the existing panel view, logical side, labels, direction and container, plus
+`onSelect`, `onClose`, `onBodyKeyDown` and `isCurrent` callbacks. It owns the tab
+structure and tab navigation. The binding retains controlled panel selection and
+rejects callbacks from replaced or disposed presentations.
+
+`managedCommandPaletteSurface(render)` marks a complete command surface whose
+kit owns dialog focus, Tab trapping, Escape and outside dismissal. Its renderer
+receives `ManagedCommandPaletteSurfaceProps`, including `open`, `isCurrent` and
+`getOpener`; use the guarded lifetime when restoring the opener after dismissal.
+`CommandPaletteSurfaceSlot` remains compatible with ordinary generic surfaces,
+and `CommandPaletteSurfaceSlotProps` describes their common input. The binding
+continues to own matching, active command selection and execution, including
+Arrow/Home/End/Enter handling and disabled-command behavior. Switching the
+surface retires the previous focus owner and stale callbacks. Ordinary surfaces
+keep the existing generic behavior.
+
 ### Native editor input types
 
 `editorInputType(editor)` re-exports the core's canonical input-type mapping from

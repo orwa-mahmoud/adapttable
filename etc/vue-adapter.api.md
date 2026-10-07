@@ -265,6 +265,7 @@ import { SelectionStatsSlots as SelectionStatsSlots_2 } from '@adapttable/core/b
 import { SetupContext } from 'vue';
 import { ShallowRef } from 'vue';
 import { showAllColumns } from '@adapttable/core/binding';
+import { SidePanelModel } from '@adapttable/core';
 import { SidePanelSlots as SidePanelSlots_2 } from '@adapttable/core/binding';
 import { SlotFill } from '@adapttable/core/binding';
 import { slotRender } from '@adapttable/core/binding';
@@ -775,7 +776,10 @@ export const COMMAND_PALETTE_MODEL: FeatureStateKey<CommandPaletteModel>;
 export const CommandPaletteChrome: DefineSetupFnComponent<CommandPaletteChromeProps, {}, {}, CommandPaletteChromeProps & {}, PublicProps>;
 
 // @public (undocumented)
-export type CommandPaletteChromeProps = CommandPaletteChromeProps_2<VNodeChild, KeyboardEvent>;
+export interface CommandPaletteChromeProps extends Omit<CommandPaletteChromeProps_2<VNodeChild, KeyboardEvent>, "slots"> {
+    // (undocumented)
+    readonly slots: CommandPaletteSlots;
+}
 
 // @public (undocumented)
 export interface CommandPaletteModel {
@@ -792,9 +796,27 @@ export interface CommandPaletteModel {
 }
 
 // @public (undocumented)
-export type CommandPaletteSlots = CommandPaletteSlots_2<VNodeChild, KeyboardEvent>;
+export interface CommandPaletteSlots extends Omit<CommandPaletteSlots_2<VNodeChild, KeyboardEvent>, "Surface"> {
+    // (undocumented)
+    readonly Surface: CommandPaletteSurfaceSlot;
+}
 
 export { CommandPaletteSurfaceProps }
+
+// @public (undocumented)
+export interface CommandPaletteSurfaceSlot {
+    // (undocumented)
+    (props: CommandPaletteSurfaceSlotProps): VNodeChild;
+    // (undocumented)
+    readonly interactionOwner?: "kit";
+}
+
+// @public (undocumented)
+export type CommandPaletteSurfaceSlotProps = Parameters<CommandPaletteSlots_2<VNodeChild, KeyboardEvent>["Surface"]>[0] & {
+    readonly open?: boolean;
+    readonly isCurrent?: () => boolean;
+    readonly getOpener?: () => HTMLElement | null;
+};
 
 // @public
 interface ComponentRenderer<TContext> {
@@ -2694,6 +2716,19 @@ export { isColumnGroupSummaryKey }
 export { isExtraEntry }
 
 // @public
+export function managedCommandPaletteSurface(render: (props: ManagedCommandPaletteSurfaceProps) => VNodeChild): CommandPaletteSurfaceSlot;
+
+// @public (undocumented)
+export interface ManagedCommandPaletteSurfaceProps extends CommandPaletteSurfaceSlotProps {
+    // (undocumented)
+    readonly getOpener: () => HTMLElement | null;
+    // (undocumented)
+    readonly isCurrent: () => boolean;
+    // (undocumented)
+    readonly open: boolean;
+}
+
+// @public
 export function managedOverlayPanel(render: (props: ManagedOverlayPanelProps) => VNodeChild): OverlayPanelSlot;
 
 // @public (undocumented)
@@ -3225,12 +3260,15 @@ export const SIDE_PANEL_MODEL: FeatureStateKey<SidePanelControlModel>;
 export const SidePanelChrome: DefineSetupFnComponent<SidePanelChromeProps, {}, {}, SidePanelChromeProps & {}, PublicProps>;
 
 // @public (undocumented)
-export interface SidePanelChromeProps extends ActionPresentation {
-    // (undocumented)
+export type SidePanelChromeProps = ActionPresentation & {
     readonly model: SidePanelControlModel;
-    // (undocumented)
+} & ({
     readonly slots: SidePanelSlots;
-}
+    readonly presentation?: undefined;
+} | {
+    readonly slots?: never;
+    readonly presentation: SidePanelPresentation;
+});
 
 // @public (undocumented)
 export interface SidePanelControlModel extends Omit<SidePanelOptions, "open"> {
@@ -3271,6 +3309,25 @@ interface SidePanelPanel {
     readonly key: string;
     // (undocumented)
     readonly label: string;
+}
+
+// @public (undocumented)
+export type SidePanelPresentation = (props: SidePanelPresentationProps) => VNodeChild;
+
+// @public
+export interface SidePanelPresentationProps extends ActionPresentation {
+    // (undocumented)
+    readonly isCurrent: () => boolean;
+    // (undocumented)
+    readonly onBodyKeyDown: (event: KeyboardEvent) => void;
+    // (undocumented)
+    readonly onClose: () => void;
+    // (undocumented)
+    readonly onSelect: (key: string) => void;
+    // (undocumented)
+    readonly side: "start" | "end";
+    // (undocumented)
+    readonly view: SidePanelModel<SidePanelPanel>;
 }
 
 // @public (undocumented)

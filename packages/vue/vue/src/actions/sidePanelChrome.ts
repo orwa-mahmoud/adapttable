@@ -1,12 +1,21 @@
 import {
   handleSidePanelBodyKey,
   handleSidePanelTabKey,
+  type SidePanelModel,
   sidePanelModel,
 } from "@adapttable/core";
 import type { SidePanelSlots as NeutralSlots } from "@adapttable/core/binding";
-import { defineComponent, h, nextTick, useId, type VNodeChild } from "vue";
+import {
+  defineComponent,
+  h,
+  nextTick,
+  useId,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import { toVueAttrs } from "../attrs";
+import { useScopeActivity } from "../store";
 import type {
   ActionPresentation,
   SidePanelControlModel,
@@ -17,10 +26,24 @@ export type SidePanelSlots = NeutralSlots<
   SidePanelPanel,
   KeyboardEvent
 >;
-export interface SidePanelChromeProps extends ActionPresentation {
-  readonly model: SidePanelControlModel;
-  readonly slots: SidePanelSlots;
+/** A complete compound presentation; the binding retains controlled selection. */
+export interface SidePanelPresentationProps extends ActionPresentation {
+  readonly view: SidePanelModel<SidePanelPanel>;
+  readonly side: "start" | "end";
+  readonly onSelect: (key: string) => void;
+  readonly onClose: () => void;
+  readonly onBodyKeyDown: (event: KeyboardEvent) => void;
+  readonly isCurrent: () => boolean;
 }
+export type SidePanelPresentation = (
+  props: SidePanelPresentationProps
+) => VNodeChild;
+export type SidePanelChromeProps = ActionPresentation & {
+  readonly model: SidePanelControlModel;
+} & (
+    | { readonly slots: SidePanelSlots; readonly presentation?: undefined }
+    | { readonly slots?: never; readonly presentation: SidePanelPresentation }
+  );
 function logicalKey(key: string, rtl: boolean): string {
   if (!rtl) return key;
   if (key === "ArrowLeft") return "ArrowRight";
@@ -40,12 +63,34 @@ function panelDirection(
 export const SidePanelChrome = defineComponent(
   (props: SidePanelChromeProps) => {
     const id = `adapttable-side-panel-${useId()}`;
+    const active = useScopeActivity();
+    let revision = 0;
+    watch(
+      [
+        active,
+        () => props.model,
+        () => props.model.open,
+        () => props.presentation,
+      ],
+      () => {
+        revision++;
+      },
+      { flush: "sync" }
+    );
     return () => {
-      for (const name of ["Frame", "Tab", "Close"] as const)
-        if (typeof props.slots[name] !== "function")
-          throw new Error(
-            `AdaptTable: SidePanelChrome requires the ${name} control slot.`
-          );
+      if (
+        props.presentation !== undefined &&
+        typeof props.presentation !== "function"
+      )
+        throw new Error(
+          "AdaptTable: SidePanelChrome requires a complete presentation renderer."
+        );
+      if (!props.presentation)
+        for (const name of ["Frame", "Tab", "Close"] as const)
+          if (typeof props.slots[name] !== "function")
+            throw new Error(
+              `AdaptTable: SidePanelChrome requires the ${name} control slot.`
+            );
       if (props.model.open === null) return null;
       const model = sidePanelModel({
         panels: props.model.panels,
@@ -54,6 +99,45 @@ export const SidePanelChrome = defineComponent(
         labels: props.labels,
       });
       if (!model) return null;
+      if (props.presentation) {
+        const source = props.model;
+        const presentation = props.presentation;
+        const ticket = revision;
+        const live = active.value;
+        const isCurrent = () =>
+          live &&
+          active.value &&
+          ticket === revision &&
+          props.model === source &&
+          props.presentation === presentation &&
+          props.model.open !== null;
+        const onClose = () => {
+          if (isCurrent()) source.onOpenChange(null);
+        };
+        return presentation({
+          view: model,
+          side: source.side ?? "end",
+          labels: props.labels,
+          dir: props.dir,
+          classNames: props.classNames,
+          container: props.container,
+          isCurrent,
+          onSelect: (key) => {
+            if (isCurrent() && source.panels.some((panel) => panel.key === key))
+              source.onOpenChange(key);
+          },
+          onClose,
+          onBodyKeyDown: (event) => {
+            if (!isCurrent() || event.defaultPrevented) return;
+            if (
+              event.target instanceof Element &&
+              event.target.closest('[role="dialog"],[role="menu"]')
+            )
+              return;
+            handleSidePanelBodyKey(event, onClose);
+          },
+        });
+      }
       const close = () => props.model.onOpenChange(null);
       const onTabKey = (event: KeyboardEvent) => {
         if (event.defaultPrevented) return;
@@ -152,7 +236,15 @@ export const SidePanelChrome = defineComponent(
   },
   {
     name: "SidePanelChrome",
-    props: ["model", "slots", "labels", "dir", "classNames", "container"],
+    props: [
+      "model",
+      "slots",
+      "labels",
+      "dir",
+      "classNames",
+      "container",
+      "presentation",
+    ],
   }
 );
 export const SidePanelLayoutChrome = defineComponent(

@@ -11,6 +11,7 @@ import type {
   CommandPaletteSlots as NeutralSlots,
 } from "@adapttable/core/binding";
 import {
+  computed,
   defineComponent,
   h,
   nextTick,
@@ -23,11 +24,86 @@ import {
 
 import { elementRef } from "../attrs";
 import { useExternalStore, useScopeActivity } from "../store";
-export type CommandPaletteSlots = NeutralSlots<VNodeChild, KeyboardEvent>;
-export type CommandPaletteChromeProps = NeutralProps<VNodeChild, KeyboardEvent>;
+export type CommandPaletteSurfaceSlotProps = Parameters<
+  NeutralSlots<VNodeChild, KeyboardEvent>["Surface"]
+>[0] & {
+  readonly open?: boolean;
+  readonly isCurrent?: () => boolean;
+  readonly getOpener?: () => HTMLElement | null;
+};
+export interface ManagedCommandPaletteSurfaceProps extends CommandPaletteSurfaceSlotProps {
+  readonly open: boolean;
+  readonly isCurrent: () => boolean;
+  readonly getOpener: () => HTMLElement | null;
+}
+export interface CommandPaletteSurfaceSlot {
+  (props: CommandPaletteSurfaceSlotProps): VNodeChild;
+  readonly interactionOwner?: "kit";
+}
+export interface CommandPaletteSlots extends Omit<
+  NeutralSlots<VNodeChild, KeyboardEvent>,
+  "Surface"
+> {
+  readonly Surface: CommandPaletteSurfaceSlot;
+}
+export interface CommandPaletteChromeProps extends Omit<
+  NeutralProps<VNodeChild, KeyboardEvent>,
+  "slots"
+> {
+  readonly slots: CommandPaletteSlots;
+}
+/** A complete surface owns focus, Tab trapping, Escape and outside dismissal. */
+export function managedCommandPaletteSurface(
+  render: (props: ManagedCommandPaletteSurfaceProps) => VNodeChild
+): CommandPaletteSurfaceSlot {
+  return Object.assign(
+    (props: CommandPaletteSurfaceSlotProps) => {
+      if (props.open === undefined || !props.isCurrent || !props.getOpener)
+        throw new Error(
+          "AdaptTable: a managed command surface requires its Chrome lifetime contract."
+        );
+      return render({
+        ...props,
+        open: props.open,
+        isCurrent: props.isCurrent,
+        getOpener: props.getOpener,
+      });
+    },
+    { interactionOwner: "kit" as const }
+  );
+}
 export const CommandPaletteChrome = defineComponent(
   (props: CommandPaletteChromeProps) => {
     const active = useScopeActivity();
+    const managed = computed(
+      () =>
+        typeof props.slots.Surface === "function" &&
+        props.slots.Surface.interactionOwner === "kit"
+    );
+    let generation = 0;
+    watch(
+      [() => props.slots.Surface, () => props.commands],
+      () => {
+        generation++;
+      },
+      { flush: "sync" }
+    );
+    watch(
+      active,
+      (live) => {
+        if (!live) generation++;
+      },
+      { flush: "sync" }
+    );
+    onScopeDispose(() => {
+      generation++;
+    });
+    const lifetime = () => {
+      const at = generation;
+      const driver = props.slots.Surface;
+      return () =>
+        active.value && at === generation && driver === props.slots.Surface;
+    };
     const list = createCommandList();
     const snapshot = useExternalStore(list);
     const surface = shallowRef<HTMLElement | null>(null);
@@ -35,6 +111,7 @@ export const CommandPaletteChrome = defineComponent(
     let opener: HTMLElement | null = null;
     const id = `adapttable-commands-${useId()}`;
     const restore = () => {
+      if (managed.value) return;
       const back = opener;
       opener = null;
       const doc = back?.ownerDocument;
@@ -49,15 +126,18 @@ export const CommandPaletteChrome = defineComponent(
     watch(
       () => props.open,
       (open) => {
-        if (open) list.reset();
-        else restore();
+        if (open) {
+          opener = null;
+          generation++;
+          list.reset();
+        } else restore();
       },
       { flush: "sync" }
     );
     watch(
-      [active, surface, () => props.open],
-      ([live, root, open], _previous, onCleanup) => {
-        if (!live || !root || !open) return;
+      [active, surface, () => props.open, managed],
+      ([live, root, open, owned], _previous, onCleanup) => {
+        if (!live || !root || !open || owned) return;
         const down = (event: PointerEvent) => {
           if (!event.composedPath().includes(root)) props.onClose();
         };
@@ -81,13 +161,21 @@ export const CommandPaletteChrome = defineComponent(
       if (!arrived || !props.open || !active.value) return;
       const current = element.ownerDocument.activeElement;
       if (opener === null && current instanceof HTMLElement) opener = current;
+      if (managed.value) return;
+      const currentLifetime = lifetime();
       void nextTick(() => {
-        if (active.value && props.open && input.value === element)
+        if (
+          currentLifetime() &&
+          props.open &&
+          !managed.value &&
+          input.value === element
+        )
           element.focus();
       });
     };
     watch(active, (live) => {
-      if (live && props.open && input.value) focusInputAfterMount();
+      if (live && props.open && input.value && !managed.value)
+        focusInputAfterMount();
     });
     function focusInputAfterMount() {
       const element = input.value;
@@ -104,14 +192,16 @@ export const CommandPaletteChrome = defineComponent(
     const run = (
       command: ReturnType<typeof commandListView>["matches"][number] | undefined
     ) => {
-      if (!active.value) return;
+      if (!active.value || (managed.value && !props.open)) return;
+      const current = lifetime();
+      const owned = managed.value;
       runCommand(
         command
           ? {
               ...command,
               onSelect: () => {
                 void nextTick(() => {
-                  if (active.value) command.onSelect();
+                  if (active.value && (!owned || current())) command.onSelect();
                 });
               },
             }
@@ -120,7 +210,13 @@ export const CommandPaletteChrome = defineComponent(
       );
     };
     const key = (event: KeyboardEvent) => {
-      if (!active.value || event.defaultPrevented || event.isComposing) return;
+      if (
+        !active.value ||
+        event.defaultPrevented ||
+        event.isComposing ||
+        (managed.value && !props.open)
+      )
+        return;
       const root = surface.value;
       if (
         event.target instanceof Element &&
@@ -132,6 +228,7 @@ export const CommandPaletteChrome = defineComponent(
         event.key,
         commandListView(props.commands, snapshot.value)
       );
+      if (action?.kind === "close" && managed.value) return;
       if (action) {
         event.preventDefault();
         event.stopPropagation();
@@ -140,7 +237,7 @@ export const CommandPaletteChrome = defineComponent(
         else list.setActive(action.to);
         return;
       }
-      if (event.key !== "Tab" || !root) return;
+      if (event.key !== "Tab" || !root || managed.value) return;
       const targets = [
         ...root.querySelectorAll<HTMLElement>(
           'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
@@ -168,15 +265,24 @@ export const CommandPaletteChrome = defineComponent(
         snapshot.value
       );
       const slots = props.slots;
+      const isCurrent = lifetime();
+      const close = () => {
+        if (isCurrent() && props.open) props.onClose();
+      };
       return slots.Surface({
         label: props.labels?.commandPalette ?? "Command palette",
-        onClose: props.onClose,
+        onClose: managed.value ? close : props.onClose,
+        ...(managed.value
+          ? { open: props.open, isCurrent, getOpener: () => opener }
+          : {}),
         className: props.className,
         children: h("div", { ref: surfaceRef, onKeydown: key }, [
           slots.Input({
             inputProps: {
               value: snapshot.value.query,
-              onChange: (next) => list.setQuery(next),
+              onChange: (next) => {
+                if (isCurrent() && props.open) list.setQuery(next);
+              },
               onKeyDown: key,
               ref: focusInput,
               role: "combobox",
@@ -209,8 +315,12 @@ export const CommandPaletteChrome = defineComponent(
                     "aria-selected": index === at,
                     "aria-disabled": command.disabled,
                     "data-adapttable-part": "command-item",
-                    onClick: () => run(command),
-                    onMouseEnter: () => list.setActive(index),
+                    onClick: () => {
+                      if (isCurrent() && props.open) run(command);
+                    },
+                    onMouseEnter: () => {
+                      if (isCurrent() && props.open) list.setActive(index);
+                    },
                   },
                 }),
               ])

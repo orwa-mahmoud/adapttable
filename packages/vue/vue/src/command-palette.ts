@@ -55,12 +55,8 @@ function mountPalette<TRow>(context: FeatureMountContext<TRow>): void {
     { flush: "sync" }
   );
   const exporting = context.state.get(EXPORT_MODEL);
-  const model = computed<CommandPaletteModel>(() => ({
-    open: enabled() && (toValue(config()?.open) ?? snapshot.value.open),
-    button: config()?.button === true,
-    show: () => setOpen(true),
-    close: () => setOpen(false),
-    commands: commandPaletteCommands({
+  const commands = computed(() =>
+    commandPaletteCommands({
       enabled: context.options.value.commandPalette !== false,
       labels: context.table.labels.value,
       onPrint:
@@ -80,7 +76,14 @@ function mountPalette<TRow>(context: FeatureMountContext<TRow>): void {
       hasFilters: Object.keys(context.source.value.extra).length > 0,
       commands: config()?.commands,
       registered: context.featureHost.value.commands,
-    }),
+    })
+  );
+  const model = computed<CommandPaletteModel>(() => ({
+    open: enabled() && (toValue(config()?.open) ?? snapshot.value.open),
+    button: config()?.button === true,
+    show: () => setOpen(true),
+    close: () => setOpen(false),
+    commands: commands.value,
   }));
   watch(model, (value) => context.state.set(COMMAND_PALETTE_MODEL, value), {
     immediate: true,
@@ -118,8 +121,14 @@ export function commandPalette(
 export type {
   CommandPaletteChromeProps,
   CommandPaletteSlots,
+  CommandPaletteSurfaceSlot,
+  CommandPaletteSurfaceSlotProps,
+  ManagedCommandPaletteSurfaceProps,
 } from "./actions/commandPaletteChrome";
-export { CommandPaletteChrome } from "./actions/commandPaletteChrome";
+export {
+  CommandPaletteChrome,
+  managedCommandPaletteSurface,
+} from "./actions/commandPaletteChrome";
 export type {
   CommandPaletteModel,
   CommandPaletteOptions,

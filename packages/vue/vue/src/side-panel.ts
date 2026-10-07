@@ -52,6 +52,8 @@ export type {
 export { SIDE_PANEL_CONTROL, SIDE_PANEL_MODEL } from "./actions/contracts";
 export type {
   SidePanelChromeProps,
+  SidePanelPresentation,
+  SidePanelPresentationProps,
   SidePanelSlots,
 } from "./actions/sidePanelChrome";
 export {

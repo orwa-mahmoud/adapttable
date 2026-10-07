@@ -2,8 +2,14 @@
 export type {
   CommandPaletteChromeProps,
   CommandPaletteSlots,
+  CommandPaletteSurfaceSlot,
+  CommandPaletteSurfaceSlotProps,
+  ManagedCommandPaletteSurfaceProps,
 } from "./actions/commandPaletteChrome";
-export { CommandPaletteChrome } from "./actions/commandPaletteChrome";
+export {
+  CommandPaletteChrome,
+  managedCommandPaletteSurface,
+} from "./actions/commandPaletteChrome";
 export type {
   ContextMenuChromeProps,
   ContextMenuSlots,
@@ -34,6 +40,8 @@ export {
 } from "./actions/contracts";
 export type {
   SidePanelChromeProps,
+  SidePanelPresentation,
+  SidePanelPresentationProps,
   SidePanelSlots,
 } from "./actions/sidePanelChrome";
 export {

@@ -4305,6 +4305,18 @@ check. `OverlayCloseReason` names `"escape"`, `"outside"` and `"done"` requests.
 | `columnMenuSlotKey<TRow>()`                                    | Typed single control key carrying `ColumnMenuSlotProps<TRow>` for a shell's menu placement; also exported by `/adapter`.                                                                  |
 | `ColumnMenu` (`@adapttable/vue-unstyled/column-menu`)          | Native component accepting complete `ColumnMenuSlotProps<TRow>`, creating the model in setup and filling the binding Chrome. Ordinary tables use the native `columnMenu()` factory.       |
 
+### Vue compound presentations
+
+`SidePanelPresentation` receives `SidePanelPresentationProps` to render a
+complete kit tab interface while the binding retains controlled panel selection.
+`managedCommandPaletteSurface(render)` marks a complete dialog surface that
+owns focus, Tab trapping and dismissal. `CommandPaletteSurfaceSlot` and
+`CommandPaletteSurfaceSlotProps` preserve ordinary callable surfaces;
+`ManagedCommandPaletteSurfaceProps` additionally requires the current open
+state, guarded lifetime and original-opener access. Matching, active command
+selection and execution remain in the binding. See the
+[Vue compound presentation contract](./vue/api.md#compound-side-panels-and-command-surfaces).
+
 ### Vue navigation channels
 
 These runtime keys are available from `@adapttable/vue/adapter`. The [navigation guide](./vue/navigation.md#connect-a-custom-shell-to-navigation-state)
