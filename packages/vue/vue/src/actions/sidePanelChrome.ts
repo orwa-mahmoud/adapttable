@@ -9,6 +9,7 @@ import {
   defineComponent,
   h,
   nextTick,
+  onScopeDispose,
   useId,
   type VNodeChild,
   watch,
@@ -44,6 +45,12 @@ export type SidePanelChromeProps = ActionPresentation & {
     | { readonly slots: SidePanelSlots; readonly presentation?: undefined }
     | { readonly slots?: never; readonly presentation: SidePanelPresentation }
   );
+function tabDomId(prefix: string, key: string): string {
+  return `${prefix}-tab-${key
+    .split("")
+    .map((character) => character.charCodeAt(0).toString(16))
+    .join("-")}`;
+}
 function logicalKey(key: string, rtl: boolean): string {
   if (!rtl) return key;
   if (key === "ArrowLeft") return "ArrowRight";
@@ -65,12 +72,33 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
     const id = `adapttable-side-panel-${useId()}`;
     const active = useScopeActivity();
     let revision = 0;
+    let focusGeneration = 0;
+    let disposed = false;
+    watch(
+      [
+        () => active.value,
+        () => props.model.onOpenChange,
+        () => props.model.open === null,
+        () => props.model.side,
+        () => props.presentation,
+        () => props.slots,
+      ],
+      () => {
+        focusGeneration++;
+      },
+      { flush: "sync" }
+    );
+    onScopeDispose(() => {
+      disposed = true;
+      revision++;
+    });
     watch(
       [
         active,
         () => props.model,
         () => props.model.open,
         () => props.presentation,
+        () => props.slots,
       ],
       () => {
         revision++;
@@ -92,28 +120,51 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
               `AdaptTable: SidePanelChrome requires the ${name} control slot.`
             );
       if (props.model.open === null) return null;
-      const model = sidePanelModel({
+      const view = sidePanelModel({
         panels: props.model.panels,
         openPanel: props.model.open,
         idPrefix: id,
         labels: props.labels,
       });
-      if (!model) return null;
-      if (props.presentation) {
-        const source = props.model;
-        const presentation = props.presentation;
-        const ticket = revision;
-        const live = active.value;
-        const isCurrent = () =>
-          live &&
-          active.value &&
-          ticket === revision &&
-          props.model === source &&
-          props.presentation === presentation &&
-          props.model.open !== null;
-        const onClose = () => {
-          if (isCurrent()) source.onOpenChange(null);
-        };
+      if (!view) return null;
+      const model = {
+        ...view,
+        tabs: view.tabs.map((tab) => ({ ...tab, id: tabDomId(id, tab.key) })),
+        bodyLabelledBy: view.tabbed
+          ? tabDomId(id, view.selected.key)
+          : undefined,
+      };
+      const source = props.model;
+      const presentation = props.presentation;
+      const slots = props.slots;
+      const ticket = revision;
+      const live = active.value;
+      const isCurrent = () =>
+        !disposed &&
+        live &&
+        active.value &&
+        ticket === revision &&
+        props.model === source &&
+        props.presentation === presentation &&
+        props.slots === slots &&
+        props.model.open !== null;
+      const onSelect = (key: string) => {
+        if (isCurrent() && source.panels.some((panel) => panel.key === key))
+          source.onOpenChange(key);
+      };
+      const onClose = () => {
+        if (isCurrent()) source.onOpenChange(null);
+      };
+      const onBodyKeyDown = (event: KeyboardEvent) => {
+        if (!isCurrent() || event.defaultPrevented) return;
+        if (
+          event.target instanceof Element &&
+          event.target.closest('[role="dialog"],[role="menu"]')
+        )
+          return;
+        handleSidePanelBodyKey(event, onClose);
+      };
+      if (presentation) {
         return presentation({
           view: model,
           side: source.side ?? "end",
@@ -122,25 +173,18 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
           classNames: props.classNames,
           container: props.container,
           isCurrent,
-          onSelect: (key) => {
-            if (isCurrent() && source.panels.some((panel) => panel.key === key))
-              source.onOpenChange(key);
-          },
+          onSelect,
           onClose,
-          onBodyKeyDown: (event) => {
-            if (!isCurrent() || event.defaultPrevented) return;
-            if (
-              event.target instanceof Element &&
-              event.target.closest('[role="dialog"],[role="menu"]')
-            )
-              return;
-            handleSidePanelBodyKey(event, onClose);
-          },
+          onBodyKeyDown,
         });
       }
-      const close = () => props.model.onOpenChange(null);
       const onTabKey = (event: KeyboardEvent) => {
-        if (event.defaultPrevented) return;
+        if (!isCurrent() || event.defaultPrevented) return;
+        const ownedFocus = focusGeneration;
+        const origin =
+          event.currentTarget instanceof HTMLElement
+            ? event.currentTarget
+            : null;
         const root =
           event.currentTarget instanceof Element
             ? event.currentTarget.closest('[role="tablist"]')
@@ -153,14 +197,26 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
             stopPropagation: () => event.stopPropagation(),
           },
           {
-            panels: props.model.panels,
+            panels: source.panels,
             selectedIndex: model.selectedIndex,
-            onOpenPanel: props.model.onOpenChange,
-            onClose: close,
+            onOpenPanel: onSelect,
+            onClose,
           }
         );
-        if (chosen !== undefined)
-          void nextTick(() => focusPanelTab(root, `${id}-tab-${chosen}`));
+        const target = model.tabs.find((tab) => tab.key === chosen);
+        if (target)
+          void nextTick(async () => {
+            await nextTick();
+            if (
+              !disposed &&
+              active.value &&
+              focusGeneration === ownedFocus &&
+              root?.isConnected &&
+              origin?.isConnected &&
+              origin.ownerDocument.activeElement === origin
+            )
+              focusPanelTab(root, target.id);
+          });
       };
       return props.slots.Frame({
         side: props.model.side ?? "end",
@@ -195,14 +251,14 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
                           "aria-selected": tab.selected,
                           "aria-controls": tab.controls,
                           "data-adapttable-part": "side-panel-tab",
-                          onClick: () => props.model.onOpenChange(tab.key),
+                          onClick: () => onSelect(tab.key),
                           onKeyDown: onTabKey,
                         },
                       })
                     )
                   )
                 : null,
-              props.slots.Close({ label: model.closeLabel, onClose: close }),
+              props.slots.Close({ label: model.closeLabel, onClose }),
             ]
           ),
           h(
@@ -214,15 +270,7 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
               "aria-label": model.bodyLabel,
               "data-adapttable-part": "side-panel-body",
               class: props.classNames?.sidePanelBody,
-              onKeyDown: (event: KeyboardEvent) => {
-                if (event.defaultPrevented) return;
-                if (
-                  event.target instanceof Element &&
-                  event.target.closest('[role="dialog"],[role="menu"]')
-                )
-                  return;
-                handleSidePanelBodyKey(event, close);
-              },
+              onKeyDown: onBodyKeyDown,
             }),
             [
               typeof model.selected.content === "function"

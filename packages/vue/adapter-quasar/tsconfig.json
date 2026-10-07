@@ -5,7 +5,48 @@
     "jsx": "preserve",
     "jsxImportSource": "vue",
     "types": ["node", "vitest/globals"],
-    "rootDirs": [".", "./.sfc-types"]
+    "rootDirs": [".", "./.sfc-types"],
+    "paths": {
+      "@adapttable/quasar": ["./src/index.ts"],
+      "@adapttable/quasar/density": ["./src/density.ts"],
+      "@adapttable/quasar/fullscreen": ["./src/fullscreen.ts"],
+      "@adapttable/quasar/grouping": ["./src/grouping.ts"],
+      "@adapttable/quasar/filters": ["./src/filters.ts"],
+      "@adapttable/quasar/header-filters": ["./src/header-filters.ts"],
+      "@adapttable/quasar/editing": ["./src/editing.ts"],
+      "@adapttable/quasar/batch-editing": ["./src/batch-editing.ts"],
+      "@adapttable/quasar/column-menu": ["./src/column-menu.ts"],
+      "@adapttable/quasar/print": ["./src/print.ts"],
+      "@adapttable/quasar/bulk-actions": ["./src/bulk-actions.ts"],
+      "@adapttable/quasar/find-in-table": ["./src/find-in-table.ts"],
+      "@adapttable/quasar/status-bar": ["./src/status-bar.ts"],
+      "@adapttable/quasar/selection-stats": ["./src/selection-stats.ts"],
+      "@adapttable/quasar/saved-views": ["./src/saved-views.ts"],
+      "@adapttable/quasar/export": ["./src/export.ts"],
+      "@adapttable/quasar/export-pdf": ["./src/export-pdf.ts"],
+      "@adapttable/quasar/export-xlsx": ["./src/export-xlsx.ts"],
+      "@adapttable/quasar/tree": ["./src/tree.ts"],
+      "@adapttable/quasar/row-detail": ["./src/row-detail.ts"],
+      "@adapttable/quasar/row-actions": ["./src/row-actions.ts"],
+      "@adapttable/quasar/row-pinning": ["./src/row-pinning.ts"],
+      "@adapttable/quasar/pinned-summary-rows": [
+        "./src/pinned-summary-rows.ts"
+      ],
+      "@adapttable/quasar/cell-span": ["./src/cell-span.ts"],
+      "@adapttable/quasar/extra-rows": ["./src/extra-rows.ts"],
+      "@adapttable/quasar/row-appearance": ["./src/row-appearance.ts"],
+      "@adapttable/quasar/virtualize": ["./src/virtualize.ts"],
+      "@adapttable/quasar/column-groups": ["./src/column-groups.ts"],
+      "@adapttable/quasar/fit-columns": ["./src/fit-columns.ts"],
+      "@adapttable/quasar/resizable-columns": ["./src/resizable-columns.ts"],
+      "@adapttable/quasar/multi-sort": ["./src/multi-sort.ts"],
+      "@adapttable/quasar/cell-navigation": ["./src/cell-navigation.ts"],
+      "@adapttable/quasar/side-panel": ["./src/side-panel.ts"],
+      "@adapttable/quasar/grouping-panel": ["./src/grouping-panel.ts"],
+      "@adapttable/quasar/command-palette": ["./src/command-palette.ts"],
+      "@adapttable/quasar/context-menu": ["./src/context-menu.ts"],
+      "@adapttable/quasar/row-reorder": ["./src/row-reorder.ts"]
+    }
   },
   "include": ["src", "test", "vitest.config.ts", "tsdown.config.ts"],
   "exclude": [
@@ -18,5 +59,6 @@
   "vueCompilerOptions": {
     "strictTemplates": true,
     "dataAttributes": ["data-*"]
-  }
+  },
+  "files": ["src/styles.d.ts"]
 }

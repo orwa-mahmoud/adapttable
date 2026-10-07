@@ -12,6 +12,30 @@ import {
 import { featureActivity } from "./actions/lifecycle";
 function mountSidePanel<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
+  let requestOwner:
+    | {
+        config: SidePanelOptions;
+        callback: SidePanelOptions["onOpenChange"];
+        request: SidePanelOptions["onOpenChange"];
+      }
+    | undefined;
+  const requestFor = (config: SidePanelOptions) => {
+    const callback = config.onOpenChange;
+    if (requestOwner?.config !== config || requestOwner.callback !== callback) {
+      const request = (key: string | null) => {
+        const current = context.options.value.sidePanel as SidePanelOptions;
+        if (
+          active() &&
+          requestOwner?.request === request &&
+          current === config &&
+          current.onOpenChange === callback
+        )
+          callback(key);
+      };
+      requestOwner = { config, callback, request };
+    }
+    return requestOwner.request;
+  };
   const model = computed(() => {
     const config = context.options.value.sidePanel as SidePanelOptions;
     const registered = context.featureHost.value.panels;
@@ -27,9 +51,8 @@ function mountSidePanel<TRow>(context: FeatureMountContext<TRow>): void {
       panels,
       open: active() ? toValue(config.open) : null,
       side: config.side,
-      onOpenChange: (key: string | null) => {
-        if (active()) config.onOpenChange(key);
-      },
+      // A controlled open update retains the same callback owner.
+      onOpenChange: requestFor(config),
     };
   });
   watch(model, (value) => context.state.set(SIDE_PANEL_MODEL, value), {
