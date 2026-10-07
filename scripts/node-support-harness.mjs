@@ -241,6 +241,9 @@ export function kitLoadOverrides(tarballs, deps) {
     ...(deps["element-plus"]
       ? {
           "element-plus@2.14.7": {
+            // npm requires an override of a direct dependency to retain its
+            // requested spec, including the generated peer range's caret.
+            ".": "$element-plus",
             "@popperjs/core":
               "https://registry.npmjs.org/@sxzz/popperjs-es/-/popperjs-es-2.11.8.tgz",
           },

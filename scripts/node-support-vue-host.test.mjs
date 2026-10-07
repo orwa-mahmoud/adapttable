@@ -78,6 +78,7 @@ describe("packed Vue host contracts", () => {
     assert.equal(override["@adapttable/core"], packed["@adapttable/core"]);
     assert.equal(override["element-plus"], undefined);
     assert.deepEqual(override["element-plus@2.14.7"], {
+      ".": "$element-plus",
       "@popperjs/core":
         "https://registry.npmjs.org/@sxzz/popperjs-es/-/popperjs-es-2.11.8.tgz",
     });

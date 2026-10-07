@@ -7,6 +7,7 @@ import {
   assertPackedMatchesExpected,
   EXTRA_PROBE_ROUTES,
   kitLoadDependencies,
+  kitLoadOverrides,
   packagesForRuntime,
   probePrelude,
   probeRoutes,
@@ -254,6 +255,36 @@ describe("supported Node contract", () => {
     assert.ok(deps.antd);
     assert.equal(deps.react, undefined);
     assert.equal(deps["@adapttable/core"], undefined);
+  });
+
+  it("preserves the generated direct Element Plus spec in its scoped override", () => {
+    const packages = publishedPackages();
+    const tarballs = Object.fromEntries(
+      packages.map(({ name, directory }) => [
+        name,
+        `file:/packs/${directory}.tgz`,
+      ])
+    );
+    for (const version of ["22.12.0", "22.22.3", "24.15.0"]) {
+      const deps = kitLoadDependencies(
+        packagesForRuntime(packages, version),
+        version
+      );
+      assert.equal(deps["element-plus"], "^2.14.7");
+      const overrides = kitLoadOverrides(tarballs, deps);
+      assert.deepEqual(overrides, {
+        ...tarballs,
+        "element-plus@2.14.7": {
+          ".": "$element-plus",
+          "@popperjs/core":
+            "https://registry.npmjs.org/@sxzz/popperjs-es/-/popperjs-es-2.11.8.tgz",
+        },
+      });
+      const reference = overrides["element-plus@2.14.7"]["."];
+      assert.equal(deps[reference.slice(1)], deps["element-plus"]);
+      assert.equal(deps["@popperjs/core"], "^2.11.8");
+    }
+    assert.deepEqual(kitLoadOverrides(tarballs, {}), tarballs);
   });
 
   it("installs Vue and probes every public Vue root on supported runtimes", () => {
