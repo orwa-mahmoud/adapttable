@@ -8,6 +8,7 @@ import {
   cellNavigation,
   columnSelectionCheckbox,
 } from "../src/cell-navigation";
+import { columnMenu } from "../src/column-menu";
 import VuetifyButton from "../src/controls/VuetifyButton.vue";
 import {
   batchEditing,
@@ -18,7 +19,9 @@ import {
   rowEditing,
   undoRedoButtons,
 } from "../src/editing";
+import { filters } from "../src/filters";
 import { findInTable } from "../src/find-in-table";
+import { headerFilters } from "../src/header-filters";
 import { rowDetail } from "../src/row-detail";
 import { selectionStats, statusBar } from "../src/status-bar";
 import { tree } from "../src/tree";
@@ -41,6 +44,7 @@ const columns: readonly ColumnDef<Person>[] = [
   {
     key: "name",
     header: "Name",
+    renameable: true,
     sortable: true,
     editable,
     validate: (value) => (value === "" ? "A name is required" : undefined),
@@ -89,6 +93,29 @@ function commitBatch(rows: readonly BatchRowEdit<Person>[]): void {
   for (const row of rows) applyPatch(row.rowId, row.patch);
 }
 function pageFeatures() {
+  if (location.pathname === "/columns") return [columnMenu()];
+  if (["/filters", "/filters-drawer"].includes(location.pathname))
+    return [
+      filters<Person>(
+        [
+          { key: "name", label: "Name", type: "text" },
+          {
+            key: "team",
+            label: "Team",
+            type: "multiSelect",
+            options: ["Platform", "Design", "Operations"].map((value) => ({
+              value,
+              label: value,
+            })),
+          },
+        ],
+        {
+          mode: location.pathname === "/filters-drawer" ? "drawer" : "popover",
+          tree: true,
+        }
+      ),
+      headerFilters(),
+    ];
   if (location.pathname === "/editing")
     return [
       editing<Person>(commitCell),
