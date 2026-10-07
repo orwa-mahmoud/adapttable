@@ -31,6 +31,7 @@ const controls: FilterHeaderSlots = {
       type: "search",
       attrs: {
         "data-adapttable-part": "filter-header-input",
+        dir: props.dir,
         "aria-label": control.label,
         placeholder: control.placeholder,
         class: control.className,
@@ -41,12 +42,16 @@ const controls: FilterHeaderSlots = {
       ...control,
       attrs: {
         "data-adapttable-part": "filter-header-input",
+        dir: props.dir,
         "aria-label": control.label,
         class: control.className,
       },
     }),
   Range: (control) =>
-    rekaInput({ ...control, attrs: { "aria-label": control.label } }),
+    rekaInput({
+      ...control,
+      attrs: { "aria-label": control.label, dir: props.dir },
+    }),
   Multi: (control) => {
     if (!active.value) return null;
     const item = (option: (typeof control.options)[number]) =>
@@ -91,13 +96,14 @@ const controls: FilterHeaderSlots = {
         {
           "data-adapttable-part": "filter-header-input",
           "aria-label": control.label,
+          dir: props.dir,
           class: ["at-reka-select", control.className],
         },
         { default: () => control.summary }
       );
     return h(
       DropdownMenuRoot,
-      { key: `${props.def.key}:${props.def.type}` },
+      { key: `${props.def.key}:${props.def.type}`, dir: props.dir },
       {
         default: () => [
           trigger(),
@@ -113,5 +119,5 @@ Render.props = [] as string[];
 </script>
 
 <template>
-  <Render />
+  <Render :dir="props.dir" />
 </template>

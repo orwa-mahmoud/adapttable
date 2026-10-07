@@ -60,6 +60,40 @@ and `@adapttable/vue/adapter` for control contracts.
 A binding factory does not supply visible controls. Use its native counterpart
 with the Unstyled kit. A React or Angular import does not define a Vue feature.
 
+## Reka UI feature entries
+
+`@adapttable/reka-ui` renders the Vue table with Reka primitives and its own
+stylesheet. Its 41 canonical feature factories use the same table model and
+host-owned callbacks as the binding. Import factories from their focused kit
+entries, or opt into the `/features` barrel. The root `DataTable` entry does not
+import that barrel, optional writer integrations or assistant controls.
+
+The kit includes filtering and header filters; cell, row and batch editing;
+column management, grouping, tree data and nested tables; keyboard navigation,
+selection and status; row reordering and row pinning; and host-owned actions and
+exports. Column groups, spanning, summary rows, row styling, virtualization,
+formulas and sparklines use their corresponding entries. Desktop headers own
+resize handles and header filters; mobile cards retain row move buttons and
+applicable toolbar controls.
+
+- `/command-palette`: `commandPalette()` with Reka Dialog and command controls.
+- `/side-panel`: `sidePanel()` with controlled Reka Tabs.
+- `/grouping-panel`: `groupingPanel()` with Select, Checkbox and grouping handles.
+- `/row-reorder`: `rowReorder()` with keyboard grips, mobile move buttons,
+  DropdownMenu destinations and AlertDialog confirmation.
+- `/pivot`: a controlled `PivotPanel`.
+- `/assistant`: `TableAssistant`, `AgentApproval`, `tableAssistant()` and
+  `agentApproval()`; the host supplies transport and approval decisions.
+- `/preset`: `standardFeatures()` and `StandardFeatureOptions<TRow>`.
+
+The Reka preset installs the same ten zero-argument features described below,
+using Reka controls. Its `filters`, `savedViews`, `grouping` and `bulkActions`
+options add their configured features; `findButton` controls the optional Find
+button. Import it from `@adapttable/reka-ui/preset` and import
+`@adapttable/reka-ui/styles.css` once in the application. Fullscreen depends on
+browser support. Keep PDF and XLSX writers on their separate optional entries
+when the table needs those formats.
+
 ## Standard native features
 
 `standardFeatures()` from `@adapttable/vue-unstyled/preset` returns an ordinary

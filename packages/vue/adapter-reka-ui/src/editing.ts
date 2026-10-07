@@ -29,7 +29,7 @@ import RowEditActions from "./editing/RowEditActions.vue";
 
 const cell = <TRow>() =>
   slotRender(editableCellSlotKey<TRow>(), (props) =>
-    h(EditableCell<TRow>, props)
+    h(EditableCell<TRow>, { ...props })
   );
 export function editing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
@@ -44,7 +44,7 @@ export function rowEditing<TRow>(
   return extendFeature(bindingRowEditing(onRowEdit, extras), [
     cell<TRow>(),
     slotRender(rowEditActionsSlotKey<TRow>(), (props) =>
-      h(RowEditActions<TRow>, props)
+      h(RowEditActions<TRow>, { ...props })
     ),
   ]);
 }
@@ -55,7 +55,7 @@ export function batchEditing<TRow>(
   return extendFeature(bindingBatchEditing(onBatchEdit, extras), [
     cell<TRow>(),
     slotRender(batchEditBarSlotKey<TRow>(), (props) =>
-      h(BatchEditBar<TRow>, props)
+      h(BatchEditBar<TRow>, { ...props })
     ),
   ]);
 }

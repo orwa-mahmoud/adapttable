@@ -12,7 +12,7 @@ import HeaderFilter from "./filters/HeaderFilter.vue";
 export function headerFilters(): StaticTableFeature {
   return extendFeature(bindingHeaderFilters(), [
     slotRender(headerFilterSlotKey<unknown>(), (props) =>
-      h(HeaderFilter, props)
+      h(HeaderFilter, { ...props })
     ),
   ]);
 }

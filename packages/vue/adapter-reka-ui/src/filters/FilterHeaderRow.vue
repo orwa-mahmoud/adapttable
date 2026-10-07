@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<FilterHeaderRowProps<TRow>>(), {
   stickyAttr: undefined,
 });
 const controls: FilterHeaderRowSlots<TRow> = {
-  Control: (control) => h(FilterHeaderControl<TRow>, control),
+  Control: (control) => h(FilterHeaderControl<TRow>, { ...control }),
 };
 const Render = () => FilterHeaderChrome({ ...props, controls });
 Render.props = [] as string[];

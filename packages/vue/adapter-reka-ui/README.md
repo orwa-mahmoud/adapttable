@@ -9,6 +9,33 @@ provides real selection, choices, popovers, dialogs and menu primitives.
 This package is being prepared for its first release. Repository availability
 does not imply npm publication.
 
+## Features
+
+- Feature composition with 41 canonical factories, focused imports, an optional
+  `/features` barrel and the `standardFeatures()` preset.
+- Sorting, multi-sort, pagination, global search and selection with controlled
+  updates; keyboard navigation, range selection, Find and selection statistics.
+- Filtering, custom filter types, the AND/OR filter tree and header filters.
+- Cell editing, row editing, batch editing, dirty indicators, undo/redo and
+  host-owned save callbacks.
+- Column management, column groups, resizing, fit-to-width and visibility.
+- Grouping and aggregation, tree data, row expansion, nested tables and a
+  controlled pivot panel.
+- Row reordering, row pinning, pinned summary rows, row and column spanning,
+  full-width separator rows, row styling and virtualization.
+- A spreadsheet formula engine, sparklines and host-owned row streams.
+- CSV export, optional PDF export and XLSX writers, plus host-owned print layout.
+- Saved views, row actions, bulk actions, a command palette, context menus and
+  side-panel view controls.
+- Mobile card layouts, localized labels, RTL and server-side rendering (SSR).
+- Optional assistant and approval surfaces with host-owned transport and decisions.
+
+Each visible control uses Reka primitives. Browser fullscreen depends on browser
+support; resize handles and header filters belong to desktop headers. Optional
+writers, assistant surfaces and the feature barrel stay outside the base entry.
+See the [Vue feature guide](https://adapttable.orwamahmoud.com/vue/features/#reka-ui-feature-entries)
+for imports and preset composition.
+
 ## Usage
 
 Requires Vue 3.5 or later and Reka UI 2.11 or later within their current majors.
@@ -137,3 +164,29 @@ trigger is mounted into the binding's zero-size coordinate anchor; Reka owns
 menu focus and dismissal, while the binding owns opening gestures and restores
 the invoking cell before running an action. Disabled actions remain announced
 and cannot execute. Host callbacks continue to own writes.
+
+### Commands, settings, grouping, and row moves
+
+`commandPalette()` renders a Reka Dialog with Primitive input and option
+controls. The Vue binding supplies command matching and navigation, including
+announcing a disabled active command without executing it. `sidePanel()` uses
+compound Reka Tabs; tab changes and closing remain controlled by the host.
+
+`groupingPanel()` supplies Reka Select and Checkbox controls plus Primitive
+grouping handles. `rowReorder()` renders a keyboard grip on desktop and move
+buttons in mobile cards. Cross-group and tree destinations use DropdownMenu;
+confirmation uses AlertDialog. Every accepted move is a request to the host,
+which continues to own row data.
+
+`standardFeatures()` composes the ordinary toolbar and navigation features.
+Optional filters, saved views, grouping, and bulk actions can be supplied through
+its options. Individual entry points remain available for smaller bundles.
+
+### Optional assistant and pivot controls
+
+The `assistant` entry provides `TableAssistant`, `AgentApproval`,
+`tableAssistant()`, and `agentApproval()` using the binding's conversation and
+approval contracts. Its sheet is a Reka Dialog, examples use DropdownMenu, and
+speech language choices use Select. It does not import an AI transport or own
+approval decisions. The `pivot` entry provides a controlled `PivotPanel` with
+Reka Select and Primitive controls.

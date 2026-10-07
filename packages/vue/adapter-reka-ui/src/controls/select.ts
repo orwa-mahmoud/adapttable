@@ -43,11 +43,16 @@ function renderSelect(
     readonly open: boolean;
     readonly live: () => boolean;
     readonly current: () => boolean;
+    readonly isOpen: () => boolean;
     readonly onOpenChange: (open: boolean) => void;
   }
 ) {
   const { disabled, required, name, form, dir, ...triggerAttrs } =
     control.attrs;
+  // Retained native events can outlive the item's component-level emits.
+  const admitItem = (event: Event) => {
+    if (!state.current() || !state.isOpen()) event.preventDefault();
+  };
   const item = (option: RekaSelectControl["options"][number]) =>
     h(
       SelectItem,
@@ -56,6 +61,9 @@ function renderSelect(
         value: optionKey(option.value),
         disabled: option.disabled,
         class: "at-reka-select-item",
+        onSelect: admitItem,
+        onKeydownCapture: admitItem,
+        onPointerupCapture: admitItem,
       },
       {
         default: () => [
@@ -132,10 +140,10 @@ const RekaSelect = defineComponent(
     const open = shallowRef(false);
     let generation = 0;
     watch(
-      active,
-      (live) => {
+      [active, () => props.control.attrs.disabled === true],
+      ([live, disabled]) => {
         generation++;
-        if (!live && open.value) {
+        if ((!live || disabled) && open.value) {
           open.value = false;
           props.control.onOpenChange?.(false);
         }
@@ -145,11 +153,15 @@ const RekaSelect = defineComponent(
     return () => {
       const control = props.control;
       const ticket = generation;
-      const live = () => active.value && ticket === generation;
+      const live = () =>
+        active.value &&
+        props.control.attrs.disabled !== true &&
+        ticket === generation;
       return renderSelect(control, {
-        open: active.value && open.value,
+        open: live() && open.value,
         live,
         current: () => live() && props.control === control,
+        isOpen: () => open.value,
         onOpenChange: (value) => {
           if (!live()) return;
           if (value && !open.value) generation++;

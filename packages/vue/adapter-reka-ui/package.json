@@ -451,7 +451,87 @@
       }
     },
     "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./command-palette": {
+      "import": {
+        "types": "./dist/command-palette.d.ts",
+        "default": "./dist/command-palette.js"
+      },
+      "require": {
+        "types": "./dist/command-palette.d.cts",
+        "default": "./dist/command-palette.cjs"
+      }
+    },
+    "./side-panel": {
+      "import": {
+        "types": "./dist/side-panel.d.ts",
+        "default": "./dist/side-panel.js"
+      },
+      "require": {
+        "types": "./dist/side-panel.d.cts",
+        "default": "./dist/side-panel.cjs"
+      }
+    },
+    "./grouping-panel": {
+      "import": {
+        "types": "./dist/grouping-panel.d.ts",
+        "default": "./dist/grouping-panel.js"
+      },
+      "require": {
+        "types": "./dist/grouping-panel.d.cts",
+        "default": "./dist/grouping-panel.cjs"
+      }
+    },
+    "./row-reorder": {
+      "import": {
+        "types": "./dist/row-reorder.d.ts",
+        "default": "./dist/row-reorder.js"
+      },
+      "require": {
+        "types": "./dist/row-reorder.d.cts",
+        "default": "./dist/row-reorder.cjs"
+      }
+    },
+    "./pivot": {
+      "import": {
+        "types": "./dist/pivot.d.ts",
+        "default": "./dist/pivot.js"
+      },
+      "require": {
+        "types": "./dist/pivot.d.cts",
+        "default": "./dist/pivot.cjs"
+      }
+    },
+    "./assistant": {
+      "import": {
+        "types": "./dist/assistant.d.ts",
+        "default": "./dist/assistant.js"
+      },
+      "require": {
+        "types": "./dist/assistant.d.cts",
+        "default": "./dist/assistant.cjs"
+      }
+    },
+    "./features": {
+      "import": {
+        "types": "./dist/features.d.ts",
+        "default": "./dist/features.js"
+      },
+      "require": {
+        "types": "./dist/features.d.cts",
+        "default": "./dist/features.cjs"
+      }
+    },
+    "./preset": {
+      "import": {
+        "types": "./dist/preset.d.ts",
+        "default": "./dist/preset.js"
+      },
+      "require": {
+        "types": "./dist/preset.d.cts",
+        "default": "./dist/preset.cjs"
+      }
+    }
   },
   "repository": {
     "type": "git",
