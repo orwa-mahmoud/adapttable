@@ -90,6 +90,62 @@ describe("Element Plus compound checkbox", () => {
     }
   });
 
+  it("lets native input activation finish and emits one request for keyboard-style and label clicks", async () => {
+    const value = ref(false);
+    const change = vi.fn((next: boolean) => {
+      value.value = next;
+    });
+    const { root } = mount(() =>
+      h(ElementCheckbox, {
+        checked: value.value,
+        label: "Select row",
+        onChange: change,
+      })
+    );
+    const input = node<HTMLInputElement>(root, "input");
+    const nativeChange = vi.fn();
+    input.addEventListener("change", nativeChange);
+    input.focus();
+    const activation = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      detail: 0,
+    });
+    expect(input.dispatchEvent(activation)).toBe(true);
+    await settle();
+    expect(activation.defaultPrevented).toBe(false);
+    expect(change).toHaveBeenCalledExactlyOnceWith(true);
+    expect(nativeChange).toHaveBeenCalledTimes(1);
+    expect(input.checked).toBe(true);
+    expect(document.activeElement).toBe(input);
+    node<HTMLLabelElement>(root, "label").click();
+    await settle();
+    expect(change.mock.calls).toEqual([[true], [false]]);
+    expect(nativeChange).toHaveBeenCalledTimes(2);
+    expect(input.checked).toBe(false);
+  });
+
+  it("restores rejected mixed state after every real native change", async () => {
+    const change = vi.fn();
+    const { root } = mount(() =>
+      h(ElementCheckbox, {
+        checked: false,
+        indeterminate: true,
+        label: "Select all",
+        onChange: change,
+      })
+    );
+    const input = node<HTMLInputElement>(root, "input");
+    for (let count = 1; count <= 2; count += 1) {
+      input.click();
+      await settle();
+      expect(change).toHaveBeenCalledTimes(count);
+      expect(change).toHaveBeenLastCalledWith(true);
+      expect(input.checked).toBe(false);
+      expect(input.indeterminate).toBe(true);
+    }
+  });
+
   it("forwards its associated input ref and clears it on destruction", async () => {
     const inputRef = vi.fn();
     const { root, unmount } = mount(() =>

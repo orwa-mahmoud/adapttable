@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useElementRef } from "@adapttable/vue/adapter";
+import { useElementRef, useScopeActivity } from "@adapttable/vue/adapter";
 import { type CheckboxInstance, ElCheckbox } from "element-plus";
-import { computed, mergeProps, shallowRef } from "vue";
+import { computed, nextTick, shallowRef, watch } from "vue";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(
@@ -23,6 +23,8 @@ const props = withDefaults(
   }
 );
 const emit = defineEmits<{ change: [checked: boolean] }>();
+const active = useScopeActivity();
+let ownerGeneration = 0;
 const control = shallowRef<CheckboxInstance>();
 const input = computed((): HTMLInputElement | null => {
   const host: unknown = control.value?.$el;
@@ -42,14 +44,48 @@ useElementRef(
   () => input.value,
   () => props.inputRef
 );
-function requestChange(event: MouseEvent): void {
+function reconcile(
+  field = input.value,
+  owner = props.inputRef,
+  generation = ownerGeneration
+): void {
+  // A replacement control or activity session owns its own reconciliation.
+  void nextTick(() => {
+    if (
+      !field ||
+      !active.value ||
+      generation !== ownerGeneration ||
+      input.value !== field ||
+      props.inputRef !== owner ||
+      !field.isConnected
+    )
+      return;
+    field.checked = props.checked;
+    field.indeterminate = props.indeterminate;
+  });
+}
+watch(
+  [active, input, () => props.inputRef],
+  () => {
+    ownerGeneration += 1;
+    if (active.value) reconcile();
+  },
+  { flush: "sync" }
+);
+function requestChange(value: unknown): void {
+  if (
+    !active.value ||
+    props.disabled ||
+    props.readonly ||
+    typeof value !== "boolean"
+  )
+    return;
   const field = input.value;
-  if (event.defaultPrevented || event.target !== field || !field) return;
-  // Native checkbox pre-activation supplies the proposed value. Canceling its
-  // default activation restores checked/mixed state when the host rejects the
-  // request; accepted props are rendered by ElCheckbox's own v-model.
-  event.preventDefault();
-  if (!props.disabled && !props.readonly) emit("change", field.checked);
+  const owner = props.inputRef;
+  const generation = ownerGeneration;
+  emit("change", value);
+  // Let native activation finish before reconciling the controlled state.
+  reconcile(field, owner, generation);
 }
 defineExpose({ input, focus: () => input.value?.focus() });
 </script>
@@ -57,11 +93,12 @@ defineExpose({ input, focus: () => input.value?.focus() });
 <template>
   <ElCheckbox
     ref="control"
-    v-bind="mergeProps($attrs, { onClickCapture: requestChange })"
+    v-bind="$attrs"
     :model-value="props.checked"
     :indeterminate="props.indeterminate"
     :disabled="props.disabled || props.readonly"
     :validate-event="false"
+    @update:model-value="requestChange"
   >
     <span
       :class="{
