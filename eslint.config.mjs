@@ -137,7 +137,10 @@ export default defineConfig(
   {
     // Keep one project-service shape for Vue TS imports and SFC scripts.
     // Changing this per file extension repeatedly reloads the whole project.
-    files: ["packages/vue/**/*.{ts,tsx,vue}"],
+    files: [
+      "packages/vue/**/*.{ts,tsx,vue}",
+      "apps/showcase/src/vue/**/*.{ts,tsx,vue}",
+    ],
     languageOptions: {
       parserOptions: { extraFileExtensions: [".vue"] },
     },

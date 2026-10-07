@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "lint": "node ../../scripts/lint-showcase.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p src/angular && vue-tsc --noEmit -p src/vue"
   },
   "dependencies": {
