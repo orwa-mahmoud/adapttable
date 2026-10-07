@@ -5,8 +5,9 @@ state and feature behavior; Quasar supplies the interactive components.
 
 ## Application setup
 
-The adapter requires Vue 3 and Quasar 2. Register the Quasar plugin once and
-load its stylesheet in your application entry:
+The supported Vue range starts at 3.5.0. This package targets Quasar 2.34.0.
+Register the Quasar plugin once and load both stylesheets in your application
+entry:
 
 ```ts
 import { createApp } from "vue";
@@ -115,7 +116,20 @@ by Quasar, alongside AdaptTable's localized labels.
 
 Quasar is MIT licensed. The controls are tested against Quasar 2.34.0.
 
+## Package formats
+
+The root entry and the implemented `density`, `fullscreen`, and `grouping`
+entries provide ESM and CommonJS, each with matching TypeScript declarations.
+The `styles.css` export is a separate stylesheet and is marked as a side effect
+so bundlers retain its import. Package consumers are checked with Vue 3.5.0
+and Vue 3.5.43 using the real Quasar 2.34.0 SDK.
+
 ## Control verification
+
+From this workspace package, use `pnpm build`, `pnpm test`, `pnpm test:ssr`,
+`pnpm test:coverage`, `pnpm typecheck`, and `pnpm lint`. The coverage script
+keeps the package's existing coverage thresholds; the separate SSR command
+runs against Quasar's server entry.
 
 Run the client suite with `vitest run --config vitest.config.ts`. Run the
 server suite separately with `ADAPTTABLE_QUASAR_SSR=1 vitest run --config

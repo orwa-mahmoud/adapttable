@@ -1,0 +1,257 @@
+{
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "peerDependencies": {
+    "vue": "^3.5.0",
+    "naive-ui": "^2.45.3"
+  },
+  "devDependencies": {
+    "vue": "^3.5.43",
+    "@adapttable/i18n": "workspace:*",
+    "naive-ui": "2.45.3",
+    "@css-render/vue3-ssr": "0.15.14"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "vue-tsc --noEmit && node ../../../scripts/check-vue-types.mjs",
+    "lint": "node ../../../scripts/vue-typed-lint.mjs src test browser tsdown.config.ts vitest.config.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf dist coverage .sfc-types .turbo"
+  },
+  "name": "@adapttable/naive-ui",
+  "description": "Naive UI data table controls for the AdaptTable Vue binding.",
+  "dependencies": {
+    "@adapttable/vue": "0.1.0"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./renderers": {
+      "import": {
+        "types": "./dist/renderers.d.ts",
+        "default": "./dist/renderers.js"
+      },
+      "require": {
+        "types": "./dist/renderers.d.cts",
+        "default": "./dist/renderers.cjs"
+      }
+    },
+    "./density": {
+      "import": {
+        "types": "./dist/density.d.ts",
+        "default": "./dist/density.js"
+      },
+      "require": {
+        "types": "./dist/density.d.cts",
+        "default": "./dist/density.cjs"
+      }
+    },
+    "./fullscreen": {
+      "import": {
+        "types": "./dist/fullscreen.d.ts",
+        "default": "./dist/fullscreen.js"
+      },
+      "require": {
+        "types": "./dist/fullscreen.d.cts",
+        "default": "./dist/fullscreen.cjs"
+      }
+    },
+    "./resizable-columns": {
+      "import": {
+        "types": "./dist/resizable-columns.d.ts",
+        "default": "./dist/resizable-columns.js"
+      },
+      "require": {
+        "types": "./dist/resizable-columns.d.cts",
+        "default": "./dist/resizable-columns.cjs"
+      }
+    },
+    "./column-groups": {
+      "import": {
+        "types": "./dist/column-groups.d.ts",
+        "default": "./dist/column-groups.js"
+      },
+      "require": {
+        "types": "./dist/column-groups.d.cts",
+        "default": "./dist/column-groups.cjs"
+      }
+    },
+    "./multi-sort": {
+      "import": {
+        "types": "./dist/multi-sort.d.ts",
+        "default": "./dist/multi-sort.js"
+      },
+      "require": {
+        "types": "./dist/multi-sort.d.cts",
+        "default": "./dist/multi-sort.cjs"
+      }
+    },
+    "./fit-columns": {
+      "import": {
+        "types": "./dist/fit-columns.d.ts",
+        "default": "./dist/fit-columns.js"
+      },
+      "require": {
+        "types": "./dist/fit-columns.d.cts",
+        "default": "./dist/fit-columns.cjs"
+      }
+    },
+    "./row-pinning": {
+      "import": {
+        "types": "./dist/row-pinning.d.ts",
+        "default": "./dist/row-pinning.js"
+      },
+      "require": {
+        "types": "./dist/row-pinning.d.cts",
+        "default": "./dist/row-pinning.cjs"
+      }
+    },
+    "./pinned-summary-rows": {
+      "import": {
+        "types": "./dist/pinned-summary-rows.d.ts",
+        "default": "./dist/pinned-summary-rows.js"
+      },
+      "require": {
+        "types": "./dist/pinned-summary-rows.d.cts",
+        "default": "./dist/pinned-summary-rows.cjs"
+      }
+    },
+    "./cell-span": {
+      "import": {
+        "types": "./dist/cell-span.d.ts",
+        "default": "./dist/cell-span.js"
+      },
+      "require": {
+        "types": "./dist/cell-span.d.cts",
+        "default": "./dist/cell-span.cjs"
+      }
+    },
+    "./extra-rows": {
+      "import": {
+        "types": "./dist/extra-rows.d.ts",
+        "default": "./dist/extra-rows.js"
+      },
+      "require": {
+        "types": "./dist/extra-rows.d.cts",
+        "default": "./dist/extra-rows.cjs"
+      }
+    },
+    "./row-appearance": {
+      "import": {
+        "types": "./dist/row-appearance.d.ts",
+        "default": "./dist/row-appearance.js"
+      },
+      "require": {
+        "types": "./dist/row-appearance.d.cts",
+        "default": "./dist/row-appearance.cjs"
+      }
+    },
+    "./row-actions": {
+      "import": {
+        "types": "./dist/row-actions.d.ts",
+        "default": "./dist/row-actions.js"
+      },
+      "require": {
+        "types": "./dist/row-actions.d.cts",
+        "default": "./dist/row-actions.cjs"
+      }
+    },
+    "./nested-table": {
+      "import": {
+        "types": "./dist/nested-table.d.ts",
+        "default": "./dist/nested-table.js"
+      },
+      "require": {
+        "types": "./dist/nested-table.d.cts",
+        "default": "./dist/nested-table.cjs"
+      }
+    },
+    "./virtualize": {
+      "import": {
+        "types": "./dist/virtualize.d.ts",
+        "default": "./dist/virtualize.js"
+      },
+      "require": {
+        "types": "./dist/virtualize.d.cts",
+        "default": "./dist/virtualize.cjs"
+      }
+    },
+    "./tree": {
+      "import": {
+        "types": "./dist/tree.d.ts",
+        "default": "./dist/tree.js"
+      },
+      "require": {
+        "types": "./dist/tree.d.cts",
+        "default": "./dist/tree.cjs"
+      }
+    },
+    "./row-detail": {
+      "import": {
+        "types": "./dist/row-detail.d.ts",
+        "default": "./dist/row-detail.js"
+      },
+      "require": {
+        "types": "./dist/row-detail.d.cts",
+        "default": "./dist/row-detail.cjs"
+      }
+    },
+    "./filters": {
+      "import": {
+        "types": "./dist/filters.d.ts",
+        "default": "./dist/filters.js"
+      },
+      "require": {
+        "types": "./dist/filters.d.cts",
+        "default": "./dist/filters.cjs"
+      }
+    },
+    "./header-filters": {
+      "import": {
+        "types": "./dist/header-filters.d.ts",
+        "default": "./dist/header-filters.js"
+      },
+      "require": {
+        "types": "./dist/header-filters.d.cts",
+        "default": "./dist/header-filters.cjs"
+      }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/vue/adapter-naive-ui"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/orwa-mahmoud/adapttable"
+}

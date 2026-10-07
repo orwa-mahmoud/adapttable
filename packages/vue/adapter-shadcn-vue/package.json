@@ -1,0 +1,223 @@
+{
+  "name": "@adapttable/shadcn-vue",
+  "version": "0.1.0",
+  "description": "shadcn-vue data table presentation for the headless AdaptTable Vue binding.",
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "README.md",
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsdown && tailwindcss -i src/styles.css -o dist/styles.css --minify",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "node ../../../scripts/vue-typed-lint.mjs",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf dist coverage .turbo .sfc-types"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0",
+    "reka-ui": "^2.11.0"
+  },
+  "dependencies": {
+    "@adapttable/vue": "0.1.0",
+    "@vueuse/core": "^14.4.0",
+    "@lucide/vue": "^1.28.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "vue": "^3.5.43",
+    "reka-ui": "^2.11.0",
+    "tailwindcss": "^4.3.3",
+    "@tailwindcss/cli": "^4.3.3"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./density": {
+      "import": {
+        "types": "./dist/density.d.ts",
+        "default": "./dist/density.js"
+      },
+      "require": {
+        "types": "./dist/density.d.cts",
+        "default": "./dist/density.cjs"
+      }
+    },
+    "./fullscreen": {
+      "import": {
+        "types": "./dist/fullscreen.d.ts",
+        "default": "./dist/fullscreen.js"
+      },
+      "require": {
+        "types": "./dist/fullscreen.d.cts",
+        "default": "./dist/fullscreen.cjs"
+      }
+    },
+    "./grouping": {
+      "import": {
+        "types": "./dist/grouping.d.ts",
+        "default": "./dist/grouping.js"
+      },
+      "require": {
+        "types": "./dist/grouping.d.cts",
+        "default": "./dist/grouping.cjs"
+      }
+    },
+    "./tree": {
+      "import": {
+        "types": "./dist/tree.d.ts",
+        "default": "./dist/tree.js"
+      },
+      "require": {
+        "types": "./dist/tree.d.cts",
+        "default": "./dist/tree.cjs"
+      }
+    },
+    "./row-detail": {
+      "import": {
+        "types": "./dist/row-detail.d.ts",
+        "default": "./dist/row-detail.js"
+      },
+      "require": {
+        "types": "./dist/row-detail.d.cts",
+        "default": "./dist/row-detail.cjs"
+      }
+    },
+    "./nested-table": {
+      "import": {
+        "types": "./dist/nested-table.d.ts",
+        "default": "./dist/nested-table.js"
+      },
+      "require": {
+        "types": "./dist/nested-table.d.cts",
+        "default": "./dist/nested-table.cjs"
+      }
+    },
+    "./editing": {
+      "import": {
+        "types": "./dist/editing.d.ts",
+        "default": "./dist/editing.js"
+      },
+      "require": {
+        "types": "./dist/editing.d.cts",
+        "default": "./dist/editing.cjs"
+      }
+    },
+    "./batch-editing": {
+      "import": {
+        "types": "./dist/batch-editing.d.ts",
+        "default": "./dist/batch-editing.js"
+      },
+      "require": {
+        "types": "./dist/batch-editing.d.cts",
+        "default": "./dist/batch-editing.cjs"
+      }
+    },
+    "./filters": {
+      "import": {
+        "types": "./dist/filters.d.ts",
+        "default": "./dist/filters.js"
+      },
+      "require": {
+        "types": "./dist/filters.d.cts",
+        "default": "./dist/filters.cjs"
+      }
+    },
+    "./header-filters": {
+      "import": {
+        "types": "./dist/header-filters.d.ts",
+        "default": "./dist/header-filters.js"
+      },
+      "require": {
+        "types": "./dist/header-filters.d.cts",
+        "default": "./dist/header-filters.cjs"
+      }
+    },
+    "./cell-navigation": {
+      "import": {
+        "types": "./dist/cell-navigation.d.ts",
+        "default": "./dist/cell-navigation.js"
+      },
+      "require": {
+        "types": "./dist/cell-navigation.d.cts",
+        "default": "./dist/cell-navigation.cjs"
+      }
+    },
+    "./column-selection": {
+      "import": {
+        "types": "./dist/column-selection.d.ts",
+        "default": "./dist/column-selection.js"
+      },
+      "require": {
+        "types": "./dist/column-selection.d.cts",
+        "default": "./dist/column-selection.cjs"
+      }
+    },
+    "./find-in-table": {
+      "import": {
+        "types": "./dist/find-in-table.d.ts",
+        "default": "./dist/find-in-table.js"
+      },
+      "require": {
+        "types": "./dist/find-in-table.d.cts",
+        "default": "./dist/find-in-table.cjs"
+      }
+    },
+    "./status-bar": {
+      "import": {
+        "types": "./dist/status-bar.d.ts",
+        "default": "./dist/status-bar.js"
+      },
+      "require": {
+        "types": "./dist/status-bar.d.cts",
+        "default": "./dist/status-bar.cjs"
+      }
+    },
+    "./selection-stats": {
+      "import": {
+        "types": "./dist/selection-stats.d.ts",
+        "default": "./dist/selection-stats.js"
+      },
+      "require": {
+        "types": "./dist/selection-stats.d.cts",
+        "default": "./dist/selection-stats.cjs"
+      }
+    },
+    "./column-menu": {
+      "import": {
+        "types": "./dist/column-menu.d.ts",
+        "default": "./dist/column-menu.js"
+      },
+      "require": {
+        "types": "./dist/column-menu.d.cts",
+        "default": "./dist/column-menu.cjs"
+      }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  }
+}

@@ -115,6 +115,13 @@ export const KITS = Object.freeze([
   { name: "adapter-primeng", framework: "angular", role: "private" },
   { name: "adapter-ng-zorro", framework: "angular", role: "shell" },
   { name: "adapter-vue-unstyled", framework: "vue", role: "native" },
+  { name: "adapter-element-plus", framework: "vue", role: "shell" },
+  { name: "adapter-quasar", framework: "vue", role: "shell" },
+  { name: "adapter-nuxt-ui", framework: "vue", role: "shell" },
+  { name: "adapter-shadcn-vue", framework: "vue", role: "shell" },
+  { name: "adapter-reka-ui", framework: "vue", role: "shell" },
+  { name: "adapter-naive-ui", framework: "vue", role: "shell" },
+  { name: "adapter-vuetify", framework: "vue", role: "shell" },
 ]);
 
 /** The folder-name prefix every kit package carries. */

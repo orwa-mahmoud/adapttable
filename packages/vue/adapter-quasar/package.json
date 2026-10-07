@@ -1,0 +1,95 @@
+{
+  "name": "@adapttable/quasar",
+  "version": "0.1.0",
+  "description": "Quasar primitives and controls for the AdaptTable Vue binding.",
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@adapttable/vue": "0.1.0"
+  },
+  "peerDependencies": {
+    "quasar": "2.34.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "quasar": "2.34.0",
+    "vue": "3.5.43",
+    "@quasar/vite-plugin": "2.0.2",
+    "@vitejs/plugin-vue": "6.0.9",
+    "@vue/test-utils": "2.4.6"
+  },
+  "scripts": {
+    "lint": "node ../../../scripts/vue-typed-lint.mjs",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "test:ssr": "ADAPTTABLE_QUASAR_SSR=1 vitest run --config vitest.config.ts",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test:coverage": "vitest run --coverage --config vitest.config.ts",
+    "clean": "rimraf dist coverage .turbo .sfc-types"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./density": {
+      "import": {
+        "types": "./dist/density.d.ts",
+        "default": "./dist/density.js"
+      },
+      "require": {
+        "types": "./dist/density.d.cts",
+        "default": "./dist/density.cjs"
+      }
+    },
+    "./fullscreen": {
+      "import": {
+        "types": "./dist/fullscreen.d.ts",
+        "default": "./dist/fullscreen.js"
+      },
+      "require": {
+        "types": "./dist/fullscreen.d.cts",
+        "default": "./dist/fullscreen.cjs"
+      }
+    },
+    "./grouping": {
+      "import": {
+        "types": "./dist/grouping.d.ts",
+        "default": "./dist/grouping.js"
+      },
+      "require": {
+        "types": "./dist/grouping.d.cts",
+        "default": "./dist/grouping.cjs"
+      }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/vue/adapter-quasar"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

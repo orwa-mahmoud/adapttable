@@ -1,0 +1,85 @@
+{
+  "name": "@adapttable/nuxt-ui",
+  "version": "0.1.0",
+  "description": "Nuxt UI components for the AdaptTable headless Vue binding.",
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./density": {
+      "import": {
+        "types": "./dist/density.d.ts",
+        "default": "./dist/density.js"
+      },
+      "require": {
+        "types": "./dist/density.d.cts",
+        "default": "./dist/density.cjs"
+      }
+    },
+    "./fullscreen": {
+      "import": {
+        "types": "./dist/fullscreen.d.ts",
+        "default": "./dist/fullscreen.js"
+      },
+      "require": {
+        "types": "./dist/fullscreen.d.cts",
+        "default": "./dist/fullscreen.cjs"
+      }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@adapttable/vue": "0.1.0"
+  },
+  "peerDependencies": {
+    "@nuxt/ui": "^4.11.3",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@nuxt/ui": "4.11.3",
+    "vue": "^3.5.43",
+    "@iconify-json/lucide": "1.2.140"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "node ../../../scripts/vue-typed-lint.mjs",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf dist coverage .turbo .sfc-types"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/vue/adapter-nuxt-ui"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -69,9 +69,23 @@
     "@adapttable/vue": "workspace:*",
     "@adapttable/vue-unstyled": "workspace:*",
     "vue": "^3.5.43",
-    "@adapttable/ai-vue": "workspace:*"
+    "@adapttable/ai-vue": "workspace:*",
+    "@adapttable/element-plus": "workspace:*",
+    "@adapttable/vuetify": "workspace:*",
+    "@adapttable/naive-ui": "workspace:*",
+    "@adapttable/reka-ui": "workspace:*",
+    "@adapttable/shadcn-vue": "workspace:*",
+    "@adapttable/nuxt-ui": "workspace:*",
+    "@adapttable/quasar": "workspace:*",
+    "element-plus": "2.14.7",
+    "vuetify": "4.2.4",
+    "naive-ui": "2.45.3",
+    "reka-ui": "2.11.0",
+    "@nuxt/ui": "4.11.3",
+    "quasar": "2.34.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.7",
     "@analogjs/vite-plugin-angular": "^2.7.5",
     "@angular/build": "^22.2.0",
     "@angular/common": "^22.2.0",
@@ -96,6 +110,8 @@
     "less": "^4.6.3",
     "@taiga-ui/design-tokens": "~0.320.0",
     "@vitejs/plugin-vue": "^6.0.9",
-    "vue-tsc": "^3.3.12"
+    "vue-tsc": "^3.3.12",
+    "@quasar/vite-plugin": "2.0.2",
+    "@iconify-json/lucide": "1.2.140"
   }
 }
