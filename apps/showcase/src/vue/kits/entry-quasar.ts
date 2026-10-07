@@ -1,4 +1,5 @@
 import "quasar/dist/quasar.rtl.css";
+import "@adapttable/quasar/styles.css";
 
 import { Quasar } from "quasar";
 import ar from "quasar/lang/ar";

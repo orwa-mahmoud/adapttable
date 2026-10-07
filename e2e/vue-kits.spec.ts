@@ -55,22 +55,41 @@ async function expectUtilityGeometry(page: Page, kit: string): Promise<void> {
     ).toBeLessThanOrEqual(1);
   }
   const pageSizeGroup = surface.locator(`${part("footer")} > div:first-child`);
-  const label = pageSizeGroup.locator(":scope > span").first();
-  const labelBox = (await label.boundingBox())!;
-  const selectBox = (await pageSizeGroup
-    .locator(part("rows-per-page"))
-    .boundingBox())!;
-  const lines = await label.evaluate((element) => {
-    const range = document.createRange();
-    range.selectNodeContents(element);
-    return range.getClientRects().length;
-  });
-  expect(lines).toBe(1);
-  expect(
-    Math.abs(
-      labelBox.y + labelBox.height / 2 - selectBox.y - selectBox.height / 2
-    )
-  ).toBeLessThanOrEqual(2);
+  // Native table density transitions move the whole footer. Measure its label
+  // and select in one frame, then retry the unchanged alignment bound.
+  await expect
+    .poll(async () => {
+      const geometry = await pageSizeGroup.evaluate((group) => {
+        const label = group.querySelector(":scope > span");
+        const select = group.querySelector(
+          '[data-adapttable-part="rows-per-page"]'
+        );
+        if (!label || !select)
+          throw new Error(
+            "Desktop pagination must retain its label and select"
+          );
+        const labelBox = label.getBoundingClientRect();
+        const selectBox = select.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(label);
+        return {
+          lines: range.getClientRects().length,
+          labelWidth: labelBox.width,
+          selectWidth: selectBox.width,
+          centerDelta: Math.abs(
+            labelBox.y +
+              labelBox.height / 2 -
+              selectBox.y -
+              selectBox.height / 2
+          ),
+        };
+      });
+      expect(geometry.lines).toBe(1);
+      expect(geometry.labelWidth).toBeGreaterThan(0);
+      expect(geometry.selectWidth).toBeGreaterThan(0);
+      return geometry.centerDelta;
+    })
+    .toBeLessThanOrEqual(2);
 }
 
 async function expectLegalFooter(page: Page): Promise<void> {
@@ -203,6 +222,15 @@ for (const kit of VUE_KIT_PAGES) {
         } else {
           await expect(surface.getByRole("table")).toBeVisible();
           await expect(surface.locator("tbody [data-row-id]")).toHaveCount(5);
+          if (kit.path === "quasar") {
+            await expect(surface.getByRole("table")).toHaveCSS(
+              "border-spacing",
+              "0px"
+            );
+            await expect(
+              surface.locator("tbody [data-row-id]").first()
+            ).toHaveClass(/\bq-tr\b/);
+          }
           await expectUtilityGeometry(page, kit.path);
         }
         await expectLegalFooter(page);
