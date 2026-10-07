@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { type ColumnInput, DataTable } from "@adapttable/reka-ui";
+import { filters } from "@adapttable/reka-ui/filters";
 import { ref } from "vue";
-
-import { type ColumnInput, DataTable } from "../../src";
 
 interface Person {
   id: string;
@@ -13,6 +13,7 @@ const columns: readonly ColumnInput<Person>[] = [
   { key: "name" },
   { key: "age" },
 ];
+const features = [filters<Person>()];
 const selected = ref<string[]>([]);
 const rowKey = (person: Person) => person.id;
 </script>
@@ -21,6 +22,7 @@ const rowKey = (person: Person) => person.id;
     v-model:selected-ids="selected"
     :data="rows"
     :columns="columns"
+    :features="features"
     :row-key="rowKey"
     selectable
     :url-sync="false"
