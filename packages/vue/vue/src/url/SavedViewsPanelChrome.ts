@@ -88,11 +88,15 @@ export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
       { flush: "sync" }
     );
     let generation = 0;
+    // Getter sources avoid forcing retirement when only a slot wrapper changes.
     watch(
       [
-        active,
+        () => active.value,
         () => props.views,
-        () => props.slots,
+        () => props.slots.Surface,
+        () => props.slots.Row,
+        () => props.slots.Input,
+        () => props.slots.Empty,
         () => props.onApply,
         () => props.onRename,
         () => props.onMove,
@@ -117,6 +121,7 @@ export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
     const rowFor = (view: SavedView, index: number): VNodeChild => {
       const labels = resolveLabels(props.labels);
       const controls = props.slots;
+      const { Surface, Row, Input, Empty } = controls;
       const isEditing = state.value.editing === view.name;
       const ticket = generation;
       const live = active.value;
@@ -127,7 +132,10 @@ export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
           active.value &&
           ticket === generation &&
           props.views === views &&
-          props.slots === controls &&
+          props.slots.Surface === Surface &&
+          props.slots.Row === Row &&
+          props.slots.Input === Input &&
+          props.slots.Empty === Empty &&
           views.includes(view)
         )
           callback();

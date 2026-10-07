@@ -81,7 +81,9 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
         () => props.model.open === null,
         () => props.model.side,
         () => props.presentation,
-        () => props.slots,
+        () => props.slots?.Frame,
+        () => props.slots?.Tab,
+        () => props.slots?.Close,
       ],
       () => {
         focusGeneration++;
@@ -92,13 +94,16 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
       disposed = true;
       revision++;
     });
+    // Getter sources avoid forcing retirement when only a slot wrapper changes.
     watch(
       [
-        active,
+        () => active.value,
         () => props.model,
         () => props.model.open,
         () => props.presentation,
-        () => props.slots,
+        () => props.slots?.Frame,
+        () => props.slots?.Tab,
+        () => props.slots?.Close,
       ],
       () => {
         revision++;
@@ -136,17 +141,23 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
       };
       const source = props.model;
       const presentation = props.presentation;
-      const slots = props.slots;
+      const frame = props.slots?.Frame;
+      const tab = props.slots?.Tab;
+      const close = props.slots?.Close;
       const ticket = revision;
       const live = active.value;
+      const ownsRenderers = () =>
+        props.presentation === presentation &&
+        props.slots?.Frame === frame &&
+        props.slots?.Tab === tab &&
+        props.slots?.Close === close;
       const isCurrent = () =>
         !disposed &&
         live &&
         active.value &&
         ticket === revision &&
         props.model === source &&
-        props.presentation === presentation &&
-        props.slots === slots &&
+        ownsRenderers() &&
         props.model.open !== null;
       const onSelect = (key: string) => {
         if (isCurrent() && source.panels.some((panel) => panel.key === key))
@@ -211,6 +222,7 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
               !disposed &&
               active.value &&
               focusGeneration === ownedFocus &&
+              ownsRenderers() &&
               root?.isConnected &&
               origin?.isConnected &&
               origin.ownerDocument.activeElement === origin

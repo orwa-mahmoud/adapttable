@@ -126,3 +126,27 @@ AI runtime. The separately opt-in `@adapttable/ai-vue` package connects agents,
 conversations and speech to Vue scopes. See the
 [assistant guide](https://adapttable.orwamahmoud.com/vue/assistant/) for approvals,
 controlled updates and lifecycle behavior. These public packages are unreleased.
+
+## Popup control slot ownership
+
+Create popup renderer functions once in component setup and read current
+presentation props through getters. A new `slots` object containing the same
+renderer functions is a harmless render wrapper; it does not begin a new
+logical session. Creating new renderer closures during each render replaces
+their owner and retires callbacks captured by the previous owner.
+
+`SidePanelChrome` tracks the `Frame`, `Tab`, and `Close` renderers (or its
+complete `presentation` renderer). `SavedViewsPanelChrome` tracks `Surface`,
+`Row`, `Input`, and `Empty`. Context menus track their `Surface` driver;
+saved-view menus track their `Panel` driver. A replaced context-menu `onClose`
+callback also retires captured callbacks and queued commands. Keep these
+functions stable across style, label, and other ordinary presentation updates. Slot objects may be
+recreated, and getters may read updated classes or direction without replacing
+the functions. Replaced models or callback owners, replaced renderers, closed
+sessions, KeepAlive deactivation, and disposal still retire stale callbacks.
+Context-menu commands whose close was accepted remain one-shot dispatches even
+when the closed projection clears its items or recreates its Surface wrapper.
+
+Controls become active after their mounted render has flushed. In mounted
+interaction tests, await Vue's next tick before invoking a control for the
+first time; a callback captured from an inactive render remains retired.

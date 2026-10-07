@@ -1,20 +1,22 @@
 import type { StaticTableFeature } from "@adapttable/vue";
 import {
+  type ActionPresentation,
   extendFeature,
   SIDE_PANEL_CONTROL,
   SidePanelChrome,
+  type SidePanelControlModel,
   type SidePanelSlots,
   slotRender,
 } from "@adapttable/vue/adapter";
 import { sidePanel as bindingSidePanel } from "@adapttable/vue/features";
 import { QCard } from "quasar";
-import { h } from "vue";
+import { defineComponent, h } from "vue";
 
 import QuasarButton from "./controls/QuasarButton.vue";
 
 /** Chrome is the sole tab keyboard owner; QBtn supplies every visible action. */
 function controls(
-  names: Readonly<Record<string, string | undefined>> = {}
+  names: () => Readonly<Record<string, string | undefined>>
 ): SidePanelSlots {
   return {
     Frame: ({ children, className, side }) =>
@@ -33,7 +35,7 @@ function controls(
       ),
     Tab: ({ panel, buttonProps }) =>
       h(QuasarButton, {
-        attrs: { ...buttonProps, class: names.sidePanelTab },
+        attrs: { ...buttonProps, class: names().sidePanelTab },
         label: panel.label,
       }),
     Close: ({ label, onClose }) =>
@@ -41,20 +43,28 @@ function controls(
         label,
         attrs: {
           "data-adapttable-part": "side-panel-close",
-          class: names.sidePanelClose,
+          class: names().sidePanelClose,
           "aria-label": label,
           onClick: onClose,
         },
       }),
   };
 }
+const QuasarSidePanelControl = /*#__PURE__*/ defineComponent(
+  (props: ActionPresentation & { readonly model: SidePanelControlModel }) => {
+    const slots = controls(() => props.classNames ?? {});
+    return () => h(SidePanelChrome, { ...props, slots });
+  },
+  {
+    name: "QuasarSidePanelControl",
+    props: ["model", "labels", "dir", "container", "classNames"],
+  }
+);
 export function sidePanel(
   options: Parameters<typeof bindingSidePanel>[0]
 ): StaticTableFeature {
   return extendFeature(bindingSidePanel(options), [
-    slotRender(SIDE_PANEL_CONTROL, (props) =>
-      h(SidePanelChrome, { ...props, slots: controls(props.classNames) })
-    ),
+    slotRender(SIDE_PANEL_CONTROL, (props) => h(QuasarSidePanelControl, props)),
   ]);
 }
 export type {

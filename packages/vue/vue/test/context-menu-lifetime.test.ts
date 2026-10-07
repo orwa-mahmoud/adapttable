@@ -39,6 +39,7 @@ function fixture(
       items.value = [];
     }
   });
+  const closeOwner = shallowRef(closed);
   const slots: ContextMenuSlots = {
     Surface: (props) => {
       closes.push(props.onClose);
@@ -51,12 +52,14 @@ function fixture(
     Separator: () => h("hr"),
   };
   const driver = shallowRef(slots.Surface);
+  const className = shallowRef("first-style");
   const Child = defineComponent(
     () => () =>
       h(ContextMenuChrome, {
         at: at.value,
         items: items.value,
-        onClose: closed,
+        onClose: closeOwner.value,
+        className: className.value,
         slots: {
           ...slots,
           Surface: freshDrivers ? (props) => driver.value(props) : driver.value,
@@ -78,7 +81,19 @@ function fixture(
     }
   };
   stops.push(stop);
-  return { driver, ran, at, items, shown, callbacks, closes, closed, stop };
+  return {
+    driver,
+    ran,
+    at,
+    items,
+    shown,
+    callbacks,
+    closes,
+    closed,
+    stop,
+    className,
+    closeOwner,
+  };
 }
 it.each(["target", "items", "reactivated", "disposed"] as const)(
   "retires context-menu callbacks after %s",
@@ -187,4 +202,44 @@ it("releases pending selection ownership if the host close callback throws", asy
   await tick();
   expect(f.closed).toHaveBeenCalledTimes(2);
   expect(f.ran).toHaveBeenCalledTimes(1);
+});
+
+it.each([false, true])(
+  "keeps current selection through harmless wrapper rerenders, rejected close=%s",
+  async (rejected) => {
+    const f = fixture(false, rejected);
+    await tick();
+    const select = f.callbacks.at(-1)!;
+    f.className.value = "new-style";
+    await tick();
+    select();
+    await tick();
+    expect(f.closed).toHaveBeenCalledTimes(1);
+    expect(f.ran).toHaveBeenCalledTimes(1);
+  }
+);
+
+it("retires captured callbacks when the close callback owner changes", async () => {
+  const f = fixture();
+  await tick();
+  const select = f.callbacks.at(-1)!;
+  const close = f.closes.at(-1)!;
+  const replacement = vi.fn();
+  f.closeOwner.value = replacement;
+  await tick();
+  select();
+  close();
+  await tick();
+  expect(f.ran).not.toHaveBeenCalled();
+  expect(f.closed).not.toHaveBeenCalled();
+  expect(replacement).not.toHaveBeenCalled();
+});
+it("retires queued selection when its close callback owner is replaced", async () => {
+  const f = fixture();
+  await tick();
+  f.callbacks.at(-1)!();
+  f.closeOwner.value = vi.fn();
+  await tick();
+  expect(f.closed).toHaveBeenCalledTimes(1);
+  expect(f.ran).not.toHaveBeenCalled();
 });

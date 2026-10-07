@@ -42,6 +42,14 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
       { flush: "sync" }
     );
     watch(
+      () => props.onClose,
+      () => {
+        generation++;
+        if (pendingSelection) pendingSelection.cancelled = true;
+      },
+      { flush: "sync" }
+    );
+    watch(
       () => props.at,
       (at) => {
         generation++;
@@ -65,8 +73,12 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
       const at = props.at;
       const items = props.items;
       const driver = props.slots.Surface;
+      const owner = props.onClose;
       const ownsLifetime = () =>
-        active.value && ticket === generation && props.slots.Surface === driver;
+        active.value &&
+        ticket === generation &&
+        props.slots.Surface === driver &&
+        props.onClose === owner;
       const isCurrent = () =>
         ownsLifetime() && props.at === at && props.items === items;
       const close = () => {

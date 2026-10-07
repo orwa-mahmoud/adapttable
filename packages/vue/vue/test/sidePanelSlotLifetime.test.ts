@@ -234,3 +234,54 @@ it("does not hand queued focus to a replacement model owner on the same DOM", as
   expect(f.tabs()[0]).toBe(first);
   expect(document.activeElement).toBe(first);
 });
+
+it("keeps current callbacks when only the slots object wrapper changes", async () => {
+  const f = fixture();
+  await settle();
+  const tab = f.captured.at(-1)!;
+  const close = f.closes.at(-1)!;
+  f.slots.value = { ...f.slots.value };
+  await settle();
+  tab.buttonProps.onClick();
+  close();
+  expect(f.calls.mock.calls).toEqual([[panels[2]!.key], [null]]);
+});
+it("keeps accepted keyboard focus through a new wrapper with identical renderers", async () => {
+  const f = fixture();
+  const change = vi.fn((open: string | null) => {
+    f.model.value = { ...f.model.value, open };
+    f.slots.value = { ...f.slots.value };
+  });
+  f.model.value = { ...f.model.value, onOpenChange: change };
+  await settle();
+  f.tabs()[0]!.focus();
+  f.key(f.tabs()[0]!, "ArrowRight");
+  await settle();
+  expect(document.activeElement).toBe(f.tabs()[1]);
+  expect(change).toHaveBeenCalledExactlyOnceWith(panels[1]!.key);
+});
+it.each(["Frame", "Tab", "Close"] as const)(
+  "retires callbacks when the %s renderer changes even inside the same wrapper",
+  async (name) => {
+    const f = fixture();
+    await settle();
+    const close = f.closes.at(-1)!;
+    Object.assign(f.slots.value, { [name]: f.makeSlots()[name] });
+    close();
+    expect(f.calls).not.toHaveBeenCalled();
+  }
+);
+
+it.each(["Frame", "Tab", "Close"] as const)(
+  "retires queued focus when the %s renderer is replaced inside the same wrapper",
+  async (name) => {
+    const f = fixture();
+    await settle();
+    const first = f.tabs()[0]!;
+    first.focus();
+    f.key(first, "ArrowRight");
+    Object.assign(f.slots.value, { [name]: f.makeSlots()[name] });
+    await settle();
+    expect(document.activeElement).toBe(first);
+  }
+);

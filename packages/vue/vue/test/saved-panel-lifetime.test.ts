@@ -23,6 +23,8 @@ function fixture() {
   const rename = vi.fn();
   const remove = vi.fn();
   const applied = shallowRef(apply);
+  const move = vi.fn();
+  const setDefault = vi.fn();
   const views = shallowRef([{ name: "First", search: "" }]);
   const shown = shallowRef(true);
   const rows: Parameters<SavedViewsPanelSlots["Row"]>[0][] = [];
@@ -39,16 +41,17 @@ function fixture() {
     },
     Empty: (props) => h("p", props.message),
   };
+  const slotOwner = shallowRef(slots);
   const Child = defineComponent(
     () => () =>
       h(SavedViewsPanelChrome, {
         views: views.value,
         onApply: applied.value,
         onRename: rename,
-        onMove: vi.fn(),
-        onSetDefault: vi.fn(),
+        onMove: move,
+        onSetDefault: setDefault,
         onRemove: remove,
-        slots,
+        slots: slotOwner.value,
       })
   );
   const root = document.createElement("div");
@@ -66,7 +69,19 @@ function fixture() {
     }
   };
   stops.push(stop);
-  return { apply, rename, remove, applied, views, shown, rows, inputs, stop };
+  return {
+    apply,
+    rename,
+    remove,
+    applied,
+    views,
+    shown,
+    rows,
+    inputs,
+    stop,
+    slots,
+    slotOwner,
+  };
 }
 it.each(["replace", "remove", "reactivate", "owner", "dispose"] as const)(
   "retires management callbacks after %s",
@@ -123,3 +138,37 @@ it("retires old rename input callbacks when a new editing session begins", async
   await tick();
   expect(f.rename).toHaveBeenCalledExactlyOnceWith("First", "Current draft");
 });
+
+it("keeps row callbacks through a new wrapper with identical renderers", async () => {
+  const f = fixture();
+  await tick();
+  const row = f.rows.at(-1)!;
+  f.slotOwner.value = { ...f.slotOwner.value };
+  await tick();
+  row.onApply();
+  expect(f.apply).toHaveBeenCalledExactlyOnceWith("First");
+});
+it("keeps a current rename input through harmless wrapper rerenders", async () => {
+  const f = fixture();
+  await tick();
+  f.rows.at(-1)!.controls.find((control) => control.key === "rename")!
+    .onPress!();
+  await tick();
+  const input = f.inputs.at(-1)!;
+  input.onChange("Kept draft");
+  f.slotOwner.value = { ...f.slotOwner.value };
+  await tick();
+  input.onCommit();
+  expect(f.rename).toHaveBeenCalledExactlyOnceWith("First", "Kept draft");
+});
+it.each(["Surface", "Row", "Input", "Empty"] as const)(
+  "retires callbacks when the %s renderer changes even inside the same wrapper",
+  async (name) => {
+    const f = fixture();
+    await tick();
+    const row = f.rows.at(-1)!;
+    Object.assign(f.slots, { [name]: () => null });
+    row.onApply();
+    expect(f.apply).not.toHaveBeenCalled();
+  }
+);
