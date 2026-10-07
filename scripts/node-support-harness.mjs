@@ -226,8 +226,20 @@ export function kitLoadDependencies(
     deps.vite = "^8.3.0";
   }
   if (deps["@nuxt/ui"]) deps["@vitejs/plugin-vue"] = "^6.0.9";
+  useCompatibleNuxtFonts(deps, nodeVersion);
   useCompatibleAngularPeers(deps, packages, nodeVersion);
   return deps;
+}
+
+function useCompatibleNuxtFonts(deps, nodeVersion) {
+  const [major, minor] = nodeVersion.replace(/^v/, "").split(".").map(Number);
+  if (deps["@nuxt/ui"] && major === 22 && minor < 19) {
+    // @nuxt/fonts 0.14.0 and fontless 0.2.1 both accept ^0.7.4.
+    // unifont 0.7.5 introduced Undici 8, which requires Node >=22.19.
+    // Use the preceding normal dependency on the baseline runtime only;
+    // never force Undici 7 outside unifont 0.7.5's declared range.
+    deps.unifont = "0.7.4";
+  }
 }
 
 /**

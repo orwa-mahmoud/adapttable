@@ -257,6 +257,30 @@ describe("supported Node contract", () => {
     assert.equal(deps["@adapttable/core"], undefined);
   });
 
+  it("keeps Nuxt's generated consumer compatible below Node 22.19", () => {
+    const published = publishedPackages();
+    for (const version of ["22.12.0", "v22.12.0", "22.18.9"]) {
+      const packages = packagesForRuntime(published, version);
+      const deps = kitLoadDependencies(packages, version);
+      assert.equal(deps["@nuxt/ui"], "^4.11.3");
+      assert.equal(deps.unifont, "0.7.4");
+      assert.equal(deps.undici, undefined);
+      assert.equal(kitLoadOverrides({}, deps).unifont, undefined);
+      assert.equal(kitLoadOverrides({}, deps).undici, undefined);
+      const withoutNuxt = packages.filter(
+        (entry) => entry.name !== "@adapttable/nuxt-ui"
+      );
+      assert.equal(
+        kitLoadDependencies(withoutNuxt, version).unifont,
+        undefined
+      );
+    }
+    for (const version of ["22.19.0", "22.22.3", "24.15.0", "26.0.0"]) {
+      const packages = packagesForRuntime(published, version);
+      assert.equal(kitLoadDependencies(packages, version).unifont, undefined);
+    }
+  });
+
   it("preserves the generated direct Element Plus spec in its scoped override", () => {
     const packages = publishedPackages();
     const tarballs = Object.fromEntries(

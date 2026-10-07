@@ -3,6 +3,8 @@
 Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
 Nuxt UI ships Vue SFCs: Node SSR uses the official `@nuxt/ui/vite` and
 `@vitejs/plugin-vue` host compilation pipeline for both ESM and CommonJS entries.
+Node 22.12–22.18 also requires the explicit font-tooling dependency constraint
+below; a default fresh Nuxt UI installation currently fails its engine check.
 
 Nuxt UI controls for AdaptTable's headless Vue binding. The binding owns table
 state, callbacks and structural Chrome; this adapter supplies Nuxt UI components.
@@ -15,6 +17,17 @@ This adapter uses the public `@nuxt/ui` package and requires no Pro license or
 Nuxt server runtime. The supported minimums are Nuxt UI 4.11.3 and Vue 3.5.2.
 Vue 3.5.2 includes the `useTemplateRef` fix required by Nuxt UI’s unmodified
 components during hydration; this requirement is specific to the Nuxt UI kit.
+
+For npm applications on Node 22.12–22.18, add `unifont@0.7.4` as an exact dependency
+(`npm install --save-exact unifont@0.7.4`). Nuxt UI 4.11.3's `@nuxt/fonts@0.14.0`
+and `fontless@0.2.1` both accept this version through their `^0.7.4` ranges.
+[unifont 0.7.5](https://github.com/unjs/unifont/releases/tag/v0.7.5) replaced
+its fetch dependency with Undici 8, whose Node floor is 22.19. The preceding
+[0.7.4 manifest](https://github.com/unjs/unifont/blob/v0.7.4/package.json)
+uses `ofetch` without an Undici dependency. The packed-consumer harness applies
+this same dependency constraint only below Node 22.19; later runtimes use the
+unconstrained Nuxt dependency tree. Keep engine checks enabled and do not
+override Undici to a major outside its parent's declared range.
 
 Install `@iconify-json/lucide` alongside Nuxt UI for its default icons. The
 official Vite plugin bundles the configured icons from that local collection,
