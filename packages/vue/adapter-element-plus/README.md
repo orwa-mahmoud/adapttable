@@ -375,3 +375,82 @@ the scrolling card body, retaining its direction and dismissal boundary. The
 managed panel follows its supplied container, including fullscreen containers.
 The generic `ColumnMenu` component and `ColumnMenuSlotProps` are also exported
 for headless compositions.
+
+## Windowed rows and individual feature entries
+
+```ts
+import { virtualize } from "@adapttable/element-plus/virtualize";
+
+const features = [
+  virtualize({ maxHeight: 360, estimateRowSize: 48, estimateCardSize: 160 }),
+];
+```
+
+Windowing belongs to the Vue binding. The Element Plus renderer retains its
+single native scroll viewport, semantic table spacer rows and kit mobile cards.
+It does not run a second table or virtualization engine. Omit the feature to
+render every row in the current source scope.
+
+Column features are available individually at `/column-groups`, `/fit-columns`,
+`/multi-sort` and `/resizable-columns`, as well as through `/columns`.
+`FilterHeaderControl` and `FilterHeaderRow` are available from the package root
+and `/header-filters`; both routes retain the same component identities and
+row-generic contracts.
+
+## Bulk actions and print
+
+```ts
+import { bulkActions } from "@adapttable/element-plus/bulk-actions";
+import { print } from "@adapttable/element-plus/print";
+
+const features = [
+  bulkActions([{ key: "archive", label: "Archive", onClick: archiveRows }]),
+  print(printTable, true),
+];
+```
+
+Bulk selection, matching-row scope, confirmation, pending state and errors are
+owned by the Vue binding. Element Plus supplies the real action buttons; the
+table's confirmation handler is used when an action requests confirmation.
+Controlled selection changes take effect when the host updates selected IDs.
+The same action bar works with desktop tables and mobile cards.
+
+Print calls the supplied host callback. Pass `true` as the second argument to
+show the Element Plus print button; the default registers the capability without
+adding a toolbar button. Importing the package root does not load either feature.
+
+## Cell, row and batch editing
+
+```ts
+import {
+  editing,
+  editHistory,
+  undoRedoButtons,
+} from "@adapttable/element-plus/editing";
+import { batchEditing } from "@adapttable/element-plus/batch-editing";
+
+const features = [editing(saveCell), editHistory(), undoRedoButtons()];
+const stagedFeatures = [batchEditing(saveRows)];
+```
+
+Mark a column `editable: true` and choose its editor: text, number, date, datetime,
+time, boolean, select, multi-select, or a host custom editor. Element Plus supplies
+`ElInput`, `ElSelect`, `ElCheckbox` and `ElButton`; the binding owns drafts,
+validation, parsing, save state, conflicts and host callbacks. The table never
+mutates host rows.
+
+Double-click a cell or press F2 to edit. Enter commits a cell; Escape cancels and
+returns focus to its activation button. An open select consumes its own first
+Escape, preserving the outer edit. Moving focus within a select does not save the
+cell. The native input or the kit's supported focus method receives focus.
+
+`rowEditing(saveRow)` provides row Save and Cancel buttons. `batchEditing(saveRows)`
+keeps changes staged until the batch Save action. Both modes also work in mobile
+cards. Failed host saves retain the shared error and retry/rollback behavior.
+Custom editors receive the binding's guarded draft, keyboard and focus contract.
+Compose `editing` with `editHistory` when row or batch history needs cell replay;
+`undoRedoButtons` adds genuine Element Plus history controls.
+
+Editors retain server-rendered structure for hydration and retire open kit
+popups and stale callbacks when their table is cached or unmounted. Importing the
+package root does not activate or load editing controls.

@@ -1,4 +1,6 @@
 export { default as DataTable } from "./DataTable.vue";
+export { default as FilterHeaderControl } from "./filters/ElementFilterHeaderControl.vue";
+export { default as FilterHeaderRow } from "./filters/ElementFilterHeaderRow.vue";
 export type {
   DataTableClassNames,
   DataTableProps,
