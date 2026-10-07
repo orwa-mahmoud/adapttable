@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useElementRef } from "@adapttable/vue/adapter";
 import { ElInput, type InputInstance } from "element-plus";
 import { computed, type CSSProperties, mergeProps, shallowRef } from "vue";
 
@@ -19,12 +20,17 @@ const props = withDefaults(
       | "textarea";
     disabled?: boolean;
     inputStyle?: CSSProperties;
+    inputRef?: (element: HTMLInputElement | HTMLTextAreaElement | null) => void;
   }>(),
-  { type: "text", disabled: false, inputStyle: undefined }
+  { type: "text", disabled: false, inputStyle: undefined, inputRef: undefined }
 );
 const emit = defineEmits<{ change: [value: string] }>();
 const control = shallowRef<InputInstance>();
 const input = computed(() => control.value?.input ?? control.value?.textarea);
+useElementRef(
+  () => input.value,
+  () => props.inputRef
+);
 defineExpose({ input, focus: () => control.value?.focus() });
 </script>
 

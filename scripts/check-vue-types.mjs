@@ -18,6 +18,48 @@ import { pathToFileURL } from "node:url";
 
 /** Every fixture's diagnostic identity, separate from the invalid source. */
 export const VUE_TYPE_EXPECTATIONS = {
+  "@adapttable/naive-ui": {
+    "WrongFilterRows.ts": [
+      { code: 2322, message: /FilterFieldOptions<Invoice>.*Person/s },
+      { code: 2322, message: /ChecklistFilterProps<Invoice>.*Person/s },
+      { code: 2322, message: /FilterTreeBuilderProps<Invoice>.*Person/s },
+      { code: 2322, message: /HeaderFilterOptions<Invoice>.*Person/s },
+      { code: 2322, message: /FilterHeaderControlOptions<Invoice>.*Person/s },
+      {
+        code: 2322,
+        message: /FilterHeaderRowProps(?:\$\d+)?<Invoice>.*Person/s,
+      },
+    ],
+    "WrongTableFeature.vue": [
+      {
+        code: 2322,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Invoice>.*ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Person>>/,
+      },
+    ],
+  },
+  "@adapttable/reka-ui": {
+    "WrongCellRow.vue": [
+      {
+        code: 2339,
+        message: /Property 'amount' does not exist on type 'Person'/,
+      },
+    ],
+    "WrongFeatureRow.vue": [
+      {
+        code: 2322,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Invoice>\[\].*ComposedFeature(?:\$[1-9]\d*)?<NoInfer<Person>>/,
+      },
+    ],
+    "WrongRowKey.vue": [
+      {
+        code: 2322,
+        message:
+          /Type 'Person\[\]' is not assignable to type 'readonly number\[\]'/,
+      },
+    ],
+  },
   "@adapttable/vue": {
     "MissingHeaderFilterControls.ts": [
       { code: 2741, message: /Property 'Multi' is missing/ },

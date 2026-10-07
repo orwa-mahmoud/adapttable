@@ -1,6 +1,6 @@
 import type { Attrs, ElementRef } from "@adapttable/vue";
 import { mergeVueAttrs, useElementRef } from "@adapttable/vue/adapter";
-import { NSelect } from "naive-ui";
+import { NSelect, type SelectInst } from "naive-ui";
 import {
   type ComponentPublicInstance,
   defineComponent,
@@ -33,7 +33,9 @@ const NaiveSelectControl = defineComponent(
   (props: { readonly control: NaiveSelectControl }) => {
     const inherited = useAttrs();
     const show = shallowRef(false);
-    const select = shallowRef<ComponentPublicInstance | null>(null);
+    const select = shallowRef<(ComponentPublicInstance & SelectInst) | null>(
+      null
+    );
     useElementRef(
       () => {
         // SelectInst has no native target ref; inputProps.ref is replaced by the kit.
@@ -102,7 +104,11 @@ const NaiveSelectControl = defineComponent(
         },
         onKeydown: (event: KeyboardEvent) => {
           keydown?.(event);
-          if (dismissingOwnMenu) event.stopPropagation();
+          if (dismissingOwnMenu) {
+            event.stopPropagation();
+            // Naive restores its selection label; our canonical control is the input.
+            select.value?.focusInput();
+          }
           dismissingOwnMenu = false;
         },
         ref: select,

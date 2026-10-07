@@ -211,6 +211,66 @@
         "types": "./dist/columns.d.cts",
         "default": "./dist/columns.cjs"
       }
+    },
+    "./find-in-table": {
+      "import": {
+        "types": "./dist/find-in-table.d.ts",
+        "default": "./dist/find-in-table.js"
+      },
+      "require": {
+        "types": "./dist/find-in-table.d.cts",
+        "default": "./dist/find-in-table.cjs"
+      }
+    },
+    "./cell-navigation": {
+      "import": {
+        "types": "./dist/cell-navigation.d.ts",
+        "default": "./dist/cell-navigation.js"
+      },
+      "require": {
+        "types": "./dist/cell-navigation.d.cts",
+        "default": "./dist/cell-navigation.cjs"
+      }
+    },
+    "./column-selection": {
+      "import": {
+        "types": "./dist/column-selection.d.ts",
+        "default": "./dist/column-selection.js"
+      },
+      "require": {
+        "types": "./dist/column-selection.d.cts",
+        "default": "./dist/column-selection.cjs"
+      }
+    },
+    "./status-bar": {
+      "import": {
+        "types": "./dist/status-bar.d.ts",
+        "default": "./dist/status-bar.js"
+      },
+      "require": {
+        "types": "./dist/status-bar.d.cts",
+        "default": "./dist/status-bar.cjs"
+      }
+    },
+    "./selection-stats": {
+      "import": {
+        "types": "./dist/selection-stats.d.ts",
+        "default": "./dist/selection-stats.js"
+      },
+      "require": {
+        "types": "./dist/selection-stats.d.cts",
+        "default": "./dist/selection-stats.cjs"
+      }
+    },
+    "./column-menu": {
+      "import": {
+        "types": "./dist/column-menu.d.ts",
+        "default": "./dist/column-menu.js"
+      },
+      "require": {
+        "types": "./dist/column-menu.d.cts",
+        "default": "./dist/column-menu.cjs"
+      }
     }
   },
   "repository": {

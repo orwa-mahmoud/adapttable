@@ -20,7 +20,18 @@ onBeforeUnmount(() => {
 });
 const input = shallowRef<InstanceType<typeof VTextField> | null>(null);
 const textarea = shallowRef<InstanceType<typeof VTextarea> | null>(null);
-const attrs = computed(() => valueControlAttrs(props.attrs));
+const attrs = computed(() => {
+  const forwarded = valueControlAttrs(props.attrs);
+  // VTextField copies its role prop to both VField and the native input.
+  // A search input already has the searchbox role; keep that role native.
+  if (
+    !props.multiline &&
+    props.type === "search" &&
+    forwarded.role === "searchbox"
+  )
+    delete forwarded.role;
+  return forwarded;
+});
 const invalid = computed(
   () =>
     props.attrs["aria-invalid"] === true ||

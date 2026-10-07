@@ -2,14 +2,14 @@
 import type { Attrs, ElementRef } from "@adapttable/vue";
 import { toVueAttrs, useElementRef } from "@adapttable/vue/adapter";
 import UCard from "@nuxt/ui/components/Card.vue";
-import { computed, useTemplateRef } from "vue";
+import { computed, shallowRef } from "vue";
 
 import { useNuxtDensity } from "../densityContext";
 import { withoutAttrs } from "./attrs";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{ attrs: Attrs }>();
-const card = useTemplateRef<{ $el: unknown }>("card");
+const card = shallowRef<{ $el: unknown } | null>(null);
 const density = useNuxtDensity();
 const cardUi = computed(() =>
   density.value === "compact" ? { body: "p-3 sm:p-3" } : undefined

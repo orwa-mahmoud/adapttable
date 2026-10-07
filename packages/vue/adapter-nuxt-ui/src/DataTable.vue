@@ -10,6 +10,7 @@ import {
   type DataTableSlots,
   DataTableSurfaceChrome,
   defaultConfirm,
+  FULLSCREEN_MODEL,
   GROUP_ROW,
   groupRowSlotKey,
   mergeVueAttrs,
@@ -29,6 +30,7 @@ import {
 } from "vue";
 
 import NuxtButton from "./controls/NuxtButton.vue";
+import { provideNuxtPortalContainer } from "./controls/portalContext";
 import { nuxtSelection } from "./controls/selection";
 import { provideNuxtDensity } from "./densityContext";
 import { nuxtSurface } from "./surface";
@@ -72,6 +74,10 @@ const shell = useDataTableShell<TRow>(() => ({
   onColumnLayoutChange: (layout) => emit("update:columnLayout", layout),
 }));
 const names = computed(() => props.classNames ?? {});
+const fullscreen = shell.state.get(FULLSCREEN_MODEL);
+const portalContainer = provideNuxtPortalContainer(
+  () => fullscreen.value?.container
+);
 provideDataTableClassNames(() => names.value);
 provideNuxtDensity(() => shell.density.value);
 function controls(): TableChromeSlots<TRow> {
@@ -162,7 +168,11 @@ function scrollRef(element: HTMLElement | null): void {
 </script>
 
 <template>
-  <UApp :dir="shell.table.dir.value" :toaster="null">
+  <UApp
+    :dir="shell.table.dir.value"
+    :portal="portalContainer ?? 'body'"
+    :toaster="null"
+  >
     <DataTableSurfaceChrome
       v-bind="$attrs"
       class="adapttable-nuxt"
