@@ -673,6 +673,16 @@ jobs:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 7
+      - name: Upload Vue kit screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vue-kit-screenshots-${{ matrix.shard }}
+          path: |
+            test-results/**/vue-kit-*.png
+            test-results/**/naive-filter-*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Upload Material filter diagnostics
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

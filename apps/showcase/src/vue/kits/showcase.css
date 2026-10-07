@@ -1,0 +1,88 @@
+body {
+  margin: 0;
+  background: #f6f5f1;
+  color: #24332e;
+}
+body[data-workspace-theme="dark"] {
+  background: #151d1a;
+  color: #edf3ee;
+}
+.vue-kit-preview {
+  box-sizing: border-box;
+  max-inline-size: 1440px;
+  padding: 48px 40px;
+  margin-inline: auto;
+  font-family: system-ui, sans-serif;
+}
+.vue-kit-preview__header {
+  max-inline-size: 860px;
+  margin-block-end: 28px;
+}
+.vue-kit-preview__eyebrow {
+  color: #69796e;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+.vue-kit-preview h1 {
+  margin-block: 12px;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.15;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.vue-kit-preview p {
+  line-height: 1.65;
+}
+.vue-kit-preview__notice {
+  border-inline-start: 3px solid #c59d54;
+  padding-inline-start: 14px;
+  font-size: 13px;
+}
+.vue-kit-preview__presentation,
+.vue-kit-preview__kits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+.vue-kit-preview a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+.vue-kit-preview a:focus-visible {
+  outline: 3px solid #5c8972;
+  outline-offset: 4px;
+}
+.vue-kit-preview__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 52px;
+  margin-block: 28px;
+}
+.vue-kit-preview__summary dt {
+  font-size: 13px;
+}
+.vue-kit-preview__summary dd {
+  margin-inline: 0;
+  margin-block: 5px 0;
+  font-size: 25px;
+  font-weight: 650;
+}
+.vue-kit-preview__table {
+  min-inline-size: 0;
+}
+.vue-kit-preview__keyboard,
+.vue-kit-preview__kits {
+  font-size: 13px;
+  margin-block-start: 24px;
+}
+@media (max-width: 640px) {
+  .vue-kit-preview {
+    padding: 28px 16px;
+  }
+  .vue-kit-preview__summary {
+    gap: 20px;
+  }
+  .vue-kit-preview__summary div {
+    flex: 1 1 120px;
+  }
+}

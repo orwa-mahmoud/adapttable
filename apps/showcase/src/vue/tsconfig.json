@@ -19,7 +19,48 @@
       "@adapttable/vue-unstyled/*": [
         "../../../../packages/vue/adapter-vue-unstyled/src/*"
       ],
-      "@adapttable/ai-vue": ["../../../../packages/vue/ai-vue/src/index.ts"]
+      "@adapttable/ai-vue": ["../../../../packages/vue/ai-vue/src/index.ts"],
+      "#build/ui/*": ["../../node_modules/.nuxt-ui/ui/*"],
+      "@adapttable/element-plus": [
+        "../../../../packages/vue/adapter-element-plus/src/index.ts"
+      ],
+      "@adapttable/element-plus/*": [
+        "../../../../packages/vue/adapter-element-plus/src/*"
+      ],
+      "@adapttable/vuetify": [
+        "../../../../packages/vue/adapter-vuetify/src/index.ts"
+      ],
+      "@adapttable/vuetify/*": [
+        "../../../../packages/vue/adapter-vuetify/src/*"
+      ],
+      "@adapttable/naive-ui": [
+        "../../../../packages/vue/adapter-naive-ui/src/index.ts"
+      ],
+      "@adapttable/naive-ui/*": [
+        "../../../../packages/vue/adapter-naive-ui/src/*"
+      ],
+      "@adapttable/reka-ui": [
+        "../../../../packages/vue/adapter-reka-ui/src/index.ts"
+      ],
+      "@adapttable/reka-ui/*": [
+        "../../../../packages/vue/adapter-reka-ui/src/*"
+      ],
+      "@adapttable/shadcn-vue": [
+        "../../../../packages/vue/adapter-shadcn-vue/src/index.ts"
+      ],
+      "@adapttable/shadcn-vue/*": [
+        "../../../../packages/vue/adapter-shadcn-vue/src/*"
+      ],
+      "@adapttable/nuxt-ui": [
+        "../../../../packages/vue/adapter-nuxt-ui/src/index.ts"
+      ],
+      "@adapttable/nuxt-ui/*": [
+        "../../../../packages/vue/adapter-nuxt-ui/src/*"
+      ],
+      "@adapttable/quasar": [
+        "../../../../packages/vue/adapter-quasar/src/index.ts"
+      ],
+      "@adapttable/quasar/*": ["../../../../packages/vue/adapter-quasar/src/*"]
     }
   },
   "include": ["./**/*.ts", "./**/*.vue"],

@@ -3573,3 +3573,84 @@ export const VUE_NATIVE_PAGES = Object.freeze([
     entry: "/src/vue/feature-union/entry-feature-union.ts",
   },
 ]);
+
+/** Genuine kit previews stay outside the feature-parity marketing matrix. */
+export const VUE_KIT_PAGES = Object.freeze([
+  {
+    key: "vue-element-plus",
+    dir: "vue/element-plus",
+    path: "element-plus",
+    title: "Element Plus order desk — Vue — AdaptTable",
+    description:
+      "Explore real Element Plus Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-element-plus.ts",
+  },
+  {
+    key: "vue-vuetify",
+    dir: "vue/vuetify",
+    path: "vuetify",
+    title: "Vuetify order desk — Vue — AdaptTable",
+    description:
+      "Explore real Vuetify Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-vuetify.ts",
+  },
+  {
+    key: "vue-naive-ui",
+    dir: "vue/naive-ui",
+    path: "naive-ui",
+    title: "Naive UI order desk — Vue — AdaptTable",
+    description:
+      "Explore real Naive UI Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-naive-ui.ts",
+  },
+  {
+    key: "vue-reka-ui",
+    dir: "vue/reka-ui",
+    path: "reka-ui",
+    title: "Reka UI order desk — Vue — AdaptTable",
+    description:
+      "Explore real Reka UI Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-reka-ui.ts",
+  },
+  {
+    key: "vue-shadcn-vue",
+    dir: "vue/shadcn-vue",
+    path: "shadcn-vue",
+    title: "shadcn-vue order desk — Vue — AdaptTable",
+    description:
+      "Explore real shadcn-vue Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-shadcn-vue.ts",
+  },
+  {
+    key: "vue-nuxt-ui",
+    dir: "vue/nuxt-ui",
+    path: "nuxt-ui",
+    title: "Nuxt UI order desk — Vue — AdaptTable",
+    description:
+      "Explore real Nuxt UI Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-nuxt-ui.ts",
+  },
+  {
+    key: "vue-quasar",
+    dir: "vue/quasar",
+    path: "quasar",
+    title: "Quasar order desk — Vue — AdaptTable",
+    description:
+      "Explore real Quasar Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
+    notice:
+      "Preview of table controls, selection, search, pagination and presentation settings.",
+    entry: "/src/vue/kits/entry-quasar.ts",
+  },
+]);

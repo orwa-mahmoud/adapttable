@@ -42,7 +42,7 @@
  */
 
 import { demoRoute } from "../../scripts/site.mjs";
-import { matrixPages, VUE_NATIVE_PAGES } from "./matrix.mjs";
+import { matrixPages, VUE_KIT_PAGES, VUE_NATIVE_PAGES } from "./matrix.mjs";
 
 /** The framework the showcase's own pages — landing, labs — are written in. */
 const SHOWCASE_FRAMEWORK = "react";
@@ -107,7 +107,7 @@ export const SHOWCASE_PAGES = [
     framework: SHOWCASE_FRAMEWORK,
   },
   demo("all-options"),
-  ...VUE_NATIVE_PAGES.map((page) => ({
+  ...[...VUE_NATIVE_PAGES, ...VUE_KIT_PAGES].map((page) => ({
     key: page.key,
     html: `./${page.dir}/index.html`,
     route: demoRoute(page.path, "vue"),

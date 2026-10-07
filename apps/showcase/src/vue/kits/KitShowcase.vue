@@ -1,0 +1,183 @@
+<script setup lang="ts">
+import "./showcase.css";
+
+import { getLabels } from "@adapttable/i18n";
+import type { ColumnDef } from "@adapttable/vue";
+import type { DataTableProps } from "@adapttable/vue/adapter";
+import { computed, shallowRef, watch } from "vue";
+
+import { workspaceCopy } from "../workspace/copy";
+import {
+  date,
+  makeOrders,
+  money,
+  type Order,
+  orderKey,
+  regionLabel,
+  statusLabel,
+} from "../workspace/data";
+import { useWorkspacePresentation } from "../workspace/presentation";
+import { kitPreviewCopy, kitPreviews } from "./copy";
+
+const props = defineProps<{ name: string; kit: string }>();
+const presentation = useWorkspacePresentation();
+const query = window.location.search;
+watch(
+  () => presentation.state.value.dark,
+  (dark) => {
+    document.documentElement.classList.toggle("dark", dark);
+  },
+  { immediate: true }
+);
+const locale = computed(() => presentation.state.value.locale);
+const text = computed(() => workspaceCopy[locale.value]);
+const preview = computed(() => kitPreviewCopy[locale.value]);
+const rows = makeOrders();
+const selected = shallowRef<string[]>([]);
+const columns = computed<readonly ColumnDef<Order>[]>(() => [
+  { key: "id", header: text.value.order, width: 120, sortable: true },
+  { key: "customer", header: text.value.customer, width: 200, sortable: true },
+  {
+    key: "region",
+    header: text.value.region,
+    width: 145,
+    sortable: true,
+    formatValue: (row) => regionLabel(row.region, locale.value),
+  },
+  { key: "owner", header: text.value.owner, width: 155, sortable: true },
+  {
+    key: "status",
+    header: text.value.status,
+    width: 115,
+    sortable: true,
+    formatValue: (row) => statusLabel(row.status, locale.value),
+  },
+  {
+    key: "due",
+    header: text.value.due,
+    width: 130,
+    sortable: true,
+    formatValue: (row) => date(row.due, locale.value),
+  },
+  {
+    key: "amount",
+    header: text.value.amount,
+    width: 105,
+    sortable: true,
+    formatValue: (row) => money(row.amount, locale.value),
+  },
+]);
+const tableProps = computed(
+  () =>
+    ({
+      data: rows,
+      columns: columns.value,
+      rowKey: orderKey,
+      labels: getLabels(locale.value),
+      dir: locale.value === "ar" ? "rtl" : "ltr",
+      tableLabel: text.value.orders,
+      searchDebounceMs: 0,
+      defaults: { limit: 5 },
+      selectedIds: selected.value,
+      selectable: true,
+      forceMobile:
+        presentation.state.value.layout === "cards" ? true : undefined,
+      urlKey: `kit-${props.kit}-orders`,
+    }) satisfies DataTableProps<Order>
+);
+function changeSelection(ids: string[]): void {
+  selected.value = ids;
+}
+function presentationLink(key: string, value: string): string {
+  const url = new URL(window.location.href);
+  url.searchParams.set(key, value);
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+</script>
+
+<template>
+  <main class="vue-kit-preview" :data-kit="kit">
+    <header class="vue-kit-preview__header">
+      <p class="vue-kit-preview__eyebrow">AdaptTable / Vue / {{ name }}</p>
+      <h1>{{ text.ordersTitle }}</h1>
+      <p>{{ preview.lead }}</p>
+      <p class="vue-kit-preview__notice" data-testid="parity-notice">
+        {{ preview.notice }}
+      </p>
+      <nav
+        class="vue-kit-preview__presentation"
+        :aria-label="preview.presentation"
+      >
+        <a
+          :href="
+            presentationLink(
+              'theme',
+              presentation.state.value.dark ? 'light' : 'dark'
+            )
+          "
+        >
+          {{ presentation.state.value.dark ? preview.light : text.theme }}
+        </a>
+        <a
+          :href="presentationLink('lang', locale === 'ar' ? 'en' : 'ar')"
+          lang="en"
+          >{{ locale === "ar" ? "English" : "العربية" }}</a
+        >
+        <a
+          :href="
+            presentationLink(
+              'layout',
+              presentation.state.value.layout === 'cards' ? 'auto' : 'cards'
+            )
+          "
+        >
+          {{
+            presentation.state.value.layout === "cards" ? text.auto : text.cards
+          }}
+        </a>
+      </nav>
+    </header>
+    <dl class="vue-kit-preview__summary">
+      <div>
+        <dt>{{ text.total }}</dt>
+        <dd>{{ rows.length }}</dd>
+      </div>
+      <div>
+        <dt>{{ text.needsReview }}</dt>
+        <dd>{{ rows.filter((row) => row.status === "Review").length }}</dd>
+      </div>
+      <div>
+        <dt>{{ text.value }}</dt>
+        <dd>
+          {{
+            money(
+              rows.reduce((sum, row) => sum + row.amount, 0),
+              locale
+            )
+          }}
+        </dd>
+      </div>
+    </dl>
+    <section :aria-label="text.orders" class="vue-kit-preview__table">
+      <slot
+        :table-props="tableProps"
+        :on-selection-change="changeSelection"
+        :dark="presentation.state.value.dark"
+      />
+    </section>
+    <p role="status" data-testid="selection-status">
+      {{ selected.length }} {{ text.selected }}
+    </p>
+    <p class="vue-kit-preview__keyboard">{{ preview.keyboard }}</p>
+    <nav class="vue-kit-preview__kits" :aria-label="text.compare">
+      <a
+        v-for="item in kitPreviews"
+        :key="item.key"
+        :href="`../${item.key}/${query}`"
+        :aria-current="kit === item.key ? 'page' : undefined"
+        >{{ item.name }}</a
+      >
+      <a href="../unstyled/workspace/">{{ preview.workspace }}</a>
+    </nav>
+  </main>
+</template>

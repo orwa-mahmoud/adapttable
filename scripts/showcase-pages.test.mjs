@@ -40,11 +40,22 @@ const VUE_PREVIEW_ENTRIES = new Map([
   ["feature-union", "src/vue/feature-union/entry-feature-union.ts"],
 ]);
 
+const VUE_KIT_PREVIEW_ENTRIES = new Map([
+  ["element-plus", "src/vue/kits/entry-element-plus.ts"],
+  ["vuetify", "src/vue/kits/entry-vuetify.ts"],
+  ["naive-ui", "src/vue/kits/entry-naive-ui.ts"],
+  ["reka-ui", "src/vue/kits/entry-reka-ui.ts"],
+  ["shadcn-vue", "src/vue/kits/entry-shadcn-vue.ts"],
+  ["nuxt-ui", "src/vue/kits/entry-nuxt-ui.ts"],
+  ["quasar", "src/vue/kits/entry-quasar.ts"],
+]);
+
 const STANDALONE_ENTRIES = new Map([
   ["main", "src/main.tsx"],
   ["all-options", "src/entry-all-options.tsx"],
   ["agent-approval", "src/entry-agent-approval.tsx"],
   ["mcp-app", "src/entry-mcp-app.tsx"],
+  ...[...VUE_KIT_PREVIEW_ENTRIES].map(([kit, entry]) => [`vue-${kit}`, entry]),
   ["angular-main", "src/angular/entry-demo.ts"],
   ["angular-all-options", "src/angular/entry-demo.ts"],
   ...[...VUE_PREVIEW_ENTRIES].map(([slug, entry]) => [
@@ -146,6 +157,15 @@ function assertStandaloneEntry(page, source, entry) {
     assert.ok(source.includes(`data-angular-mode="${lab ? "lab" : "live"}"`));
     assert.doesNotMatch(source, /data-matrix-page/);
   } else if (page.framework === "vue") {
+    const kit = [...VUE_KIT_PREVIEW_ENTRIES.keys()].find(
+      (key) => page.key === `vue-${key}`
+    );
+    if (kit) {
+      assert.equal(page.route, `/vue/demo/${kit}/`);
+      assert.equal(page.indexable, false);
+      assert.doesNotMatch(source, /data-matrix-page/);
+      return;
+    }
     const preview = [...VUE_PREVIEW_ENTRIES].find(
       ([slug]) => page.key === (slug ? `vue-unstyled-${slug}` : "vue-unstyled")
     );
@@ -171,7 +191,9 @@ describe("the showcase page manifest", () => {
   });
 
   it("keeps every implemented Vue preview distinct from the other unstyled families", () => {
-    const vue = SHOWCASE_PAGES.filter((page) => page.framework === "vue");
+    const vue = SHOWCASE_PAGES.filter(
+      (page) => page.framework === "vue" && page.key.startsWith("vue-unstyled")
+    );
     assert.deepEqual(
       vue,
       [...VUE_PREVIEW_ENTRIES.keys()].map((slug) => ({
@@ -204,6 +226,27 @@ describe("the showcase page manifest", () => {
       component,
       /@adapttable\/(?:core|react|angular|unstyled)["/]/
     );
+  });
+
+  it("registers each actual Vue kit entry separately from complete feature parity", () => {
+    for (const [kit, entry] of VUE_KIT_PREVIEW_ENTRIES) {
+      const pages = SHOWCASE_PAGES.filter((page) => page.key === `vue-${kit}`);
+      assert.deepEqual(pages, [
+        {
+          key: `vue-${kit}`,
+          html: `./vue/${kit}/index.html`,
+          route: `/vue/demo/${kit}/`,
+          indexable: false,
+          framework: "vue",
+        },
+      ]);
+      const source = readFileSync(join(SHOWCASE, entry), "utf8");
+      assert.match(source, /createApp/);
+      assert.doesNotMatch(
+        source,
+        /@adapttable\/(?:core|react|angular|unstyled)["/]/
+      );
+    }
   });
 
   it("registers row-reordering and aggregation for every published adapter", () => {

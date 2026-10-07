@@ -9,6 +9,7 @@ import {
   frameworkOf,
   MATRIX_FEATURES,
   matrixPages,
+  VUE_KIT_PAGES,
   VUE_NATIVE_BASELINE,
   VUE_NATIVE_PAGES,
 } from "../apps/showcase/matrix.mjs";
@@ -48,11 +49,11 @@ describe("the generated showcase pages", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
     // features — across all eight kits; all nine Angular kits' landings
     // plus all twenty-one feature destinations; and the eight replaced top-level
-    // addresses, two Angular modes and fifteen native Vue previews. Kit `/accessibility/` URLs are matrix pages again, not
+    // addresses, two Angular modes, sixteen native Vue previews and seven kit previews. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2 + 16);
+    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2 + 16 + 7);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 
@@ -104,6 +105,38 @@ describe("the generated showcase pages", () => {
       assert.ok(
         generated[0].html.includes(siteUrl(demoRoute(page.path, "vue"))),
         page.dir
+      );
+    }
+  });
+
+  it("generates seven genuine Vue kit previews without a parity claim", () => {
+    assert.deepEqual(
+      VUE_KIT_PAGES.map((page) => page.path),
+      [
+        "element-plus",
+        "vuetify",
+        "naive-ui",
+        "reka-ui",
+        "shadcn-vue",
+        "nuxt-ui",
+        "quasar",
+      ]
+    );
+    for (const page of VUE_KIT_PAGES) {
+      const generated = files.filter((file) => file.dir === page.dir);
+      assert.equal(generated.length, 1, page.dir);
+      assert.match(
+        generated[0].html,
+        /name="robots" content="noindex, follow"/
+      );
+      assert.ok(
+        generated[0].html.includes(siteUrl(demoRoute(page.path, "vue"))),
+        page.dir
+      );
+      assert.ok(generated[0].html.includes(page.entry.slice(1)), page.dir);
+      assert.match(
+        generated[0].html,
+        /Preview of table controls, selection, search, pagination and presentation settings/
       );
     }
   });
@@ -297,7 +330,9 @@ describe("the generated showcase pages", () => {
         1,
         `${file.dir} serves more than one h1`
       );
-      const vuePage = VUE_NATIVE_PAGES.find((page) => page.dir === file.dir);
+      const vuePage = [...VUE_NATIVE_PAGES, ...VUE_KIT_PAGES].find(
+        (page) => page.dir === file.dir
+      );
       if (vuePage) {
         assert.ok(main.includes(vuePage.description), file.dir);
         assert.ok(main.includes(vuePage.notice), file.dir);

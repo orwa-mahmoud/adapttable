@@ -3,7 +3,8 @@ import { dirname, join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import angular from "@analogjs/vite-plugin-angular";
-import tailwindcss from "@tailwindcss/vite";
+import ui from "@nuxt/ui/vite";
+import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 import react from "@vitejs/plugin-react";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig, type Plugin } from "vite";
@@ -268,6 +269,13 @@ const VUE_SOURCES = [
   `${packageDir("vue")}${sep}`,
   `${packageDir("adapter-vue-unstyled")}${sep}`,
   `${packageDir("ai-vue")}${sep}`,
+  `${packageDir("adapter-element-plus")}${sep}`,
+  `${packageDir("adapter-vuetify")}${sep}`,
+  `${packageDir("adapter-naive-ui")}${sep}`,
+  `${packageDir("adapter-reka-ui")}${sep}`,
+  `${packageDir("adapter-shadcn-vue")}${sep}`,
+  `${packageDir("adapter-nuxt-ui")}${sep}`,
+  `${packageDir("adapter-quasar")}${sep}`,
 ];
 
 /** Whether a module is Angular source the Angular compiler owns. */
@@ -285,11 +293,20 @@ export default defineConfig({
       tsconfig: page("./src/angular/tsconfig.json"),
       transformFilter: (_code, id) => isAngularSource(id),
     }),
-    vue(),
+    vue({ template: { transformAssetUrls } }),
+    ui({
+      router: false,
+      colorMode: false,
+      prose: true,
+      autoImport: false,
+      components: false,
+      dts: false,
+    }),
+    quasar(),
     react({
       exclude: [...ANGULAR_SOURCES, ...VUE_SOURCES].map((dir) => `${dir}**`),
     }),
-    tailwindcss(),
+    // Nuxt UI installs the shared Tailwind Vite integration once.
     taigaAssets(),
     siteNotices({
       extraPackages: [
@@ -337,6 +354,22 @@ export default defineConfig({
     // the file rather than listing 100-odd entries that go stale one import
     // at a time.
     alias: [
+      ...[
+        "element-plus",
+        "vuetify",
+        "naive-ui",
+        "reka-ui",
+        "shadcn-vue",
+        "nuxt-ui",
+        "quasar",
+      ].map((kit) => ({
+        find: new RegExp(`^@adapttable/${kit}$`),
+        replacement: pkg(`adapter-${kit}`),
+      })),
+      {
+        find: "@adapttable/shadcn-vue/styles.css",
+        replacement: `${packageDir("adapter-shadcn-vue")}/src/styles.css`,
+      },
       { find: /^@adapttable\/core$/, replacement: pkg("core") },
       { find: /^@adapttable\/react$/, replacement: pkg("react") },
       { find: /^@adapttable\/vue$/, replacement: pkg("vue") },
@@ -413,8 +446,11 @@ export default defineConfig({
         replacement: pkg("adapter-angular-unstyled"),
       },
     ],
+    // Nuxt UI’s Vue plugin rewrites components from its own physical runtime.
+    // Share that application instance across pnpm peer contexts.
     dedupe: [
       "vue",
+      "@nuxt/ui",
       "react",
       "react-dom",
       "@mui/material",
