@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { Attrs, ElementRef } from "@adapttable/vue";
 import { toVueAttrs, useElementRef } from "@adapttable/vue/adapter";
-import { computed, useTemplateRef } from "vue";
+import { computed, shallowRef } from "vue";
 
 import { withoutAttrs } from "./attrs";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{ attrs: Attrs }>();
-const table = useTemplateRef<HTMLTableElement>("table");
+const table = shallowRef<HTMLTableElement | null>(null);
 const attrs = computed(() => toVueAttrs(withoutAttrs(props.attrs, ["ref"])));
 function owner(): ElementRef<HTMLTableElement> | undefined {
   const ref = props.attrs.ref;

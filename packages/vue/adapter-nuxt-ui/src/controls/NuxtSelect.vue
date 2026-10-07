@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { toVueAttrs } from "@adapttable/vue/adapter";
+import { toVueAttrs, useScopeActivity } from "@adapttable/vue/adapter";
 import USelect from "@nuxt/ui/components/Select.vue";
-import { computed, useTemplateRef } from "vue";
+import { computed, onMounted, shallowRef } from "vue";
 
 import { useNuxtControlSize } from "../densityContext";
 import { controlRef, withoutAttrs } from "./attrs";
@@ -12,11 +12,19 @@ defineOptions({ inheritAttrs: false });
 const props = defineProps<{
   control: NuxtSelectControl;
   className?: string;
+  portal?: boolean | HTMLElement;
 }>();
-const select = useTemplateRef<{ triggerRef: HTMLButtonElement | null }>(
-  "select"
+const select = shallowRef<{ triggerRef: HTMLButtonElement | null } | null>(
+  null
 );
 const size = useNuxtControlSize();
+const active = useScopeActivity();
+const mounted = shallowRef(false);
+onMounted(() => {
+  mounted.value = true;
+});
+// Cached tables retire the vendor popup and resume with a fresh closed Select.
+const present = computed(() => !mounted.value || active.value);
 // Reka reserves the empty string for clearing. Numeric presentation keys keep
 // every model string, including an empty-string option, selectable unchanged.
 const items = computed(() =>
@@ -47,6 +55,7 @@ function update(index: unknown): void {
 
 <template>
   <USelect
+    v-if="present"
     ref="select"
     v-bind="
       toVueAttrs({
@@ -57,7 +66,7 @@ function update(index: unknown): void {
     :items="items"
     :model-value="selected"
     :class="className"
-    :portal="false"
+    :portal="portal ?? false"
     :size="size"
     @update:model-value="update"
   />

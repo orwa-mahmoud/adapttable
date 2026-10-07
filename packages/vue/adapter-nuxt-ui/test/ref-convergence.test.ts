@@ -1,10 +1,12 @@
 import type { ElementRef } from "@adapttable/vue";
+import { formatMultiDraft } from "@adapttable/vue/adapter";
 import UApp from "@nuxt/ui/components/App.vue";
 import ui from "@nuxt/ui/vue-plugin";
 import { describe, expect, it } from "vitest";
 import { createApp, h, nextTick, ref, shallowRef } from "vue";
 
 import NuxtInput from "../src/controls/NuxtInput.vue";
+import NuxtMultiSelect from "../src/controls/NuxtMultiSelect";
 import NuxtSelect from "../src/controls/NuxtSelect.vue";
 
 async function settle(): Promise<void> {
@@ -13,7 +15,7 @@ async function settle(): Promise<void> {
 }
 
 describe("Nuxt control native-ref owner composition", () => {
-  it.each(["input", "select"] as const)(
+  it.each(["input", "select", "multi"] as const)(
     "reconciles converging, diverging, swapped and removed %s owners once",
     async (kind) => {
       const events: [string, HTMLElement | null][] = [];
@@ -40,6 +42,15 @@ describe("Nuxt control native-ref owner composition", () => {
           focusRef: focus.value,
           onChange: () => undefined,
         };
+        if (kind === "multi")
+          return h(NuxtMultiSelect, {
+            attrs: control.attrs,
+            draft: formatMultiDraft(["one"]),
+            label: control.label,
+            focusRef: control.focusRef,
+            onChange: control.onChange,
+            options: [{ value: "one", label: "One" }],
+          });
         return kind === "input"
           ? h(NuxtInput, { control })
           : h(NuxtSelect, {

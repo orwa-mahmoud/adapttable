@@ -22,7 +22,7 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    dedupe: ["vue"],
+    dedupe: ["vue", "@nuxt/ui"],
     alias: [
       {
         find: /^@adapttable\/vue$/,
@@ -52,6 +52,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    setupFiles: ["./test/no-external-icons.ts"],
     include: ["src/**/*.test.ts", "test/**/*.test.ts"],
     globals: true,
     clearMocks: true,

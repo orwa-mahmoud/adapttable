@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { toVueAttrs } from "@adapttable/vue/adapter";
 import UInput from "@nuxt/ui/components/Input.vue";
-import {
-  nextTick,
-  onScopeDispose,
-  shallowRef,
-  useTemplateRef,
-  watch,
-} from "vue";
+import { nextTick, onScopeDispose, shallowRef, watch } from "vue";
 
 import { useNuxtControlSize } from "../densityContext";
 import { controlRef, withoutAttrs } from "./attrs";
@@ -19,7 +13,7 @@ const props = defineProps<{
   control: NuxtInputControl;
   className?: string;
 }>();
-const input = useTemplateRef<{ inputRef: HTMLInputElement | null }>("input");
+const input = shallowRef<{ inputRef: HTMLInputElement | null } | null>(null);
 const size = useNuxtControlSize();
 const presentation = shallowRef(props.control.value);
 let revision = 0;

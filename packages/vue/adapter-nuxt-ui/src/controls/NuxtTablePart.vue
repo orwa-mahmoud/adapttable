@@ -6,7 +6,7 @@ import UProseTd from "@nuxt/ui/components/prose/Td.vue";
 import UProseTh from "@nuxt/ui/components/prose/Th.vue";
 import UProseThead from "@nuxt/ui/components/prose/Thead.vue";
 import UProseTr from "@nuxt/ui/components/prose/Tr.vue";
-import { computed, useTemplateRef } from "vue";
+import { computed, shallowRef } from "vue";
 
 import { useNuxtDensity } from "../densityContext";
 import { withoutAttrs } from "./attrs";
@@ -16,7 +16,7 @@ const props = defineProps<{
   part: "thead" | "tbody" | "tr" | "th" | "td";
   attrs: Attrs;
 }>();
-const target = useTemplateRef<{ $el: unknown }>("target");
+const target = shallowRef<{ $el: unknown } | null>(null);
 const density = useNuxtDensity();
 const cellUi = computed(() =>
   density.value === "compact" ? { base: "px-2 py-1.5 text-xs" } : undefined
