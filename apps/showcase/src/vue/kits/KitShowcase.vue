@@ -2,7 +2,11 @@
 import "./showcase.css";
 
 import { getLabels } from "@adapttable/i18n";
-import type { ColumnDef } from "@adapttable/vue";
+import {
+  type ColumnDef,
+  type ColumnLayoutState,
+  useColumnLayoutUrlState,
+} from "@adapttable/vue";
 import type { DataTableProps } from "@adapttable/vue/adapter";
 import { computed, shallowRef, watch } from "vue";
 
@@ -19,9 +23,12 @@ import {
 import { useWorkspacePresentation } from "../workspace/presentation";
 import { kitPreviewCopy, kitPreviews } from "./copy";
 
-const props = defineProps<{ name: string; kit: string }>();
+const props = withDefaults(
+  defineProps<{ name: string; kit: string; columnsDemo?: boolean }>(),
+  { columnsDemo: false }
+);
 const presentation = useWorkspacePresentation();
-const query = window.location.search;
+const query = shallowRef(window.location.search);
 watch(
   () => presentation.state.value.dark,
   (dark) => {
@@ -34,39 +41,72 @@ const text = computed(() => workspaceCopy[locale.value]);
 const preview = computed(() => kitPreviewCopy[locale.value]);
 const rows = makeOrders();
 const selected = shallowRef<string[]>([]);
-const columns = computed<readonly ColumnDef<Order>[]>(() => [
-  { key: "id", header: text.value.order, width: 120, sortable: true },
-  { key: "customer", header: text.value.customer, width: 200, sortable: true },
-  {
-    key: "region",
-    header: text.value.region,
-    width: 145,
-    sortable: true,
-    formatValue: (row) => regionLabel(row.region, locale.value),
+const columnState = useColumnLayoutUrlState({
+  urlKey: `kit-${props.kit}-orders`,
+  defaultColumnLayout: {
+    hidden: props.columnsDemo ? ["region", "owner"] : [],
   },
-  { key: "owner", header: text.value.owner, width: 155, sortable: true },
-  {
-    key: "status",
-    header: text.value.status,
-    width: 115,
-    sortable: true,
-    formatValue: (row) => statusLabel(row.status, locale.value),
-  },
-  {
-    key: "due",
-    header: text.value.due,
-    width: 130,
-    sortable: true,
-    formatValue: (row) => date(row.due, locale.value),
-  },
-  {
-    key: "amount",
-    header: text.value.amount,
-    width: 105,
-    sortable: true,
-    formatValue: (row) => money(row.amount, locale.value),
-  },
-]);
+});
+watch(columnState.layout, () => {
+  columnState.flush();
+  query.value = window.location.search;
+});
+const demoWidths: Readonly<Record<string, number>> = {
+  id: 140,
+  customer: 280,
+  region: 220,
+  owner: 260,
+  status: 140,
+  due: 160,
+  amount: 130,
+};
+const columns = computed<readonly ColumnDef<Order>[]>(() => {
+  const values: readonly ColumnDef<Order>[] = [
+    { key: "id", header: text.value.order, width: 120, sortable: true },
+    {
+      key: "customer",
+      header: text.value.customer,
+      width: 200,
+      sortable: true,
+    },
+    {
+      key: "region",
+      header: text.value.region,
+      width: 145,
+      sortable: true,
+      formatValue: (row) => regionLabel(row.region, locale.value),
+    },
+    { key: "owner", header: text.value.owner, width: 155, sortable: true },
+    {
+      key: "status",
+      header: text.value.status,
+      width: 115,
+      sortable: true,
+      formatValue: (row) => statusLabel(row.status, locale.value),
+    },
+    {
+      key: "due",
+      header: text.value.due,
+      width: 130,
+      sortable: true,
+      formatValue: (row) => date(row.due, locale.value),
+    },
+    {
+      key: "amount",
+      header: text.value.amount,
+      width: 105,
+      sortable: true,
+      formatValue: (row) => money(row.amount, locale.value),
+    },
+  ];
+  return props.columnsDemo
+    ? values.map((column) => ({
+        ...column,
+        width: demoWidths[column.key],
+        minWidth: demoWidths[column.key],
+      }))
+    : values;
+});
 const tableProps = computed(
   () =>
     ({
@@ -83,10 +123,20 @@ const tableProps = computed(
       forceMobile:
         presentation.state.value.layout === "cards" ? true : undefined,
       urlKey: `kit-${props.kit}-orders`,
+      ...(props.columnsDemo ? { columnLayout: columnState.layout.value } : {}),
     }) satisfies DataTableProps<Order>
 );
 function changeSelection(ids: string[]): void {
   selected.value = ids;
+}
+function changeColumnLayout(next: ColumnLayoutState): void {
+  const previous = columnState.layout.value;
+  const pinAdded = Object.keys(next.pinned).some(
+    (key) => !(key in previous.pinned)
+  );
+  columnState.onLayoutChange(
+    pinAdded && next.hidden.length ? { ...next, hidden: [] } : next
+  );
 }
 function presentationLink(key: string, value: string): string {
   const url = new URL(window.location.href);
@@ -158,10 +208,15 @@ function presentationLink(key: string, value: string): string {
         </dd>
       </div>
     </dl>
+    <p v-if="columnsDemo" class="vue-kit-preview__column-hint">
+      {{ preview.columns }}
+    </p>
     <section :aria-label="text.orders" class="vue-kit-preview__table">
       <slot
         :table-props="tableProps"
         :on-selection-change="changeSelection"
+        :on-column-layout-change="changeColumnLayout"
+        :locale="locale"
         :dark="presentation.state.value.dark"
       />
     </section>

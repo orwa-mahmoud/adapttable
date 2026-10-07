@@ -23,6 +23,9 @@ body[data-workspace-theme="dark"] {
   font-size: 13px;
   letter-spacing: 0.08em;
 }
+body[data-workspace-theme="dark"] .vue-kit-preview__eyebrow {
+  color: #a5b7ab;
+}
 .vue-kit-preview h1 {
   margin-block: 12px;
   font-size: clamp(28px, 4vw, 44px);
@@ -70,6 +73,25 @@ body[data-workspace-theme="dark"] {
 .vue-kit-preview__table {
   min-inline-size: 0;
 }
+.vue-kit-preview__table [data-adapttable-part="toolbar"] {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.vue-kit-preview__table [data-adapttable-part="search-field"] {
+  flex: 1 1 18rem;
+  min-inline-size: 0;
+}
+.vue-kit-preview__table [data-adapttable-part="density-toggle"] {
+  flex: 0 1 12rem;
+  inline-size: 12rem;
+  max-inline-size: 100%;
+}
+.vue-kit-preview__table [data-adapttable-part="scroll-box"] {
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
 .vue-kit-preview__keyboard,
 .vue-kit-preview__kits {
   font-size: 13px;
@@ -84,5 +106,8 @@ body[data-workspace-theme="dark"] {
   }
   .vue-kit-preview__summary div {
     flex: 1 1 120px;
+  }
+  .vue-kit-preview__table [data-adapttable-part="search-field"] {
+    flex-basis: 100%;
   }
 }

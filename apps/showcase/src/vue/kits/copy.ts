@@ -18,6 +18,8 @@ export const kitPreviewCopy = {
     keyboard:
       "Tab reaches table controls. Enter sorts a column; Space changes a focused checkbox. Escape dismisses a kit selector and returns focus to its trigger.",
     workspace: "Explore the native workspace",
+    columns:
+      "Open Columns and pin Customer to the start. Region and Owner appear so you can scroll horizontally and compare the pinned column with the moving cells. Your column choices stay in the URL.",
   },
   ar: {
     lead: "نفس مكتب الطلبات بعناصر الجدول الخاصة بهذه المكتبة. ابحث عن العملاء ورتب الأعمدة وحدد الطلبات وجرب البطاقات المتجاوبة.",
@@ -28,5 +30,7 @@ export const kitPreviewCopy = {
     keyboard:
       "ينقل Tab التركيز بين عناصر الجدول. يرتب Enter العمود ويغير Space مربع الاختيار المحدد. يغلق Escape قائمة الاختيار ويعيد التركيز إلى مشغلها.",
     workspace: "استكشف مساحة العمل الأصلية",
+    columns:
+      "افتح الأعمدة وثبّت العميل في البداية. تظهر المنطقة والمسؤول لتتمكن من التمرير أفقيًا ومقارنة العمود المثبّت بالخلايا المتحركة. تبقى اختيارات الأعمدة محفوظة في الرابط.",
   },
 };
