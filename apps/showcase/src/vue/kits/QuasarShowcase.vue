@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DataTable } from "@adapttable/quasar";
+import { columnMenu } from "@adapttable/quasar/column-menu";
 import { densityChooser } from "@adapttable/quasar/density";
 import { fullscreen } from "@adapttable/quasar/fullscreen";
 import { QBadge, QBtn } from "quasar";
@@ -7,7 +8,7 @@ import { h } from "vue";
 
 import type { Order } from "../workspace/data";
 import KitShowcase from "./KitShowcase.vue";
-const features = [densityChooser(), fullscreen()];
+const features = [columnMenu(), densityChooser(), fullscreen()];
 const statusType = {
   Review: "amber-9",
   Ready: "positive",
@@ -25,7 +26,12 @@ function renderStatus(row: Order, label: string) {
 </script>
 
 <template>
-  <KitShowcase name="Quasar" kit="quasar" :render-status="renderStatus">
+  <KitShowcase
+    name="Quasar"
+    kit="quasar"
+    :render-status="renderStatus"
+    columns-demo
+  >
     <template #presentation="{ controls, onChange }">
       <div
         v-for="control in controls"
@@ -54,11 +60,14 @@ function renderStatus(row: Order, label: string) {
         </div>
       </div>
     </template>
-    <template #default="{ tableProps, onSelectionChange }">
+    <template
+      #default="{ tableProps, onSelectionChange, onColumnLayoutChange }"
+    >
       <DataTable
         v-bind="tableProps"
         :features="features"
         @update:selected-ids="onSelectionChange"
+        @update:column-layout="onColumnLayoutChange"
       />
     </template>
   </KitShowcase>

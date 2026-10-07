@@ -28,6 +28,7 @@ const selectionVisual: Readonly<Record<string, string>> = {
   "element-plus": ".el-checkbox__inner",
   vuetify: ".v-selection-control__input",
   "shadcn-vue": '[role="checkbox"]',
+  quasar: '[role="checkbox"] .q-checkbox__inner',
 };
 async function expectUtilityGeometry(page: Page, kit: string): Promise<void> {
   const visual = selectionVisual[kit];

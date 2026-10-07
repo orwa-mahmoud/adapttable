@@ -53,6 +53,14 @@
   background: var(--adapttable-quasar-surface);
   border-block-end: 1px solid var(--adapttable-quasar-border);
 }
+:where(.adapttable-quasar)
+  :is(
+    [data-adapttable-part="selection-header"],
+    [data-adapttable-part="selection-cell"]
+  ) {
+  inline-size: 1%;
+  white-space: nowrap;
+}
 .adapttable-quasar-table th {
   position: relative;
   font-weight: 600;

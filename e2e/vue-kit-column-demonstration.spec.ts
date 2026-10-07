@@ -1,8 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-const kits = ["reka-ui", "shadcn-vue"] as const;
+const kits = [
+  ["reka-ui", "Reka UI"],
+  ["shadcn-vue", "shadcn-vue"],
+  ["quasar", "Quasar"],
+] as const;
 
-for (const kit of kits) {
+for (const [kit, name] of kits) {
   for (const theme of ["light", "dark"]) {
     test(`${kit}: ${theme} pinning reveals a scrollable arrangement and keeps sticky cells opaque`, async ({
       page,
@@ -58,7 +62,7 @@ for (const kit of kits) {
         .toBe("customer:start");
       await expect(
         page.getByRole("link", {
-          name: kit === "reka-ui" ? "Reka UI" : "shadcn-vue",
+          name,
           exact: true,
         })
       ).toHaveAttribute("href", /colPin=customer%3Astart/);
