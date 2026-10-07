@@ -33,7 +33,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "typecheck": "vue-tsc --noEmit && node ../../../scripts/check-vue-types.mjs",
+    "typecheck": "vue-tsc --noEmit && vue-tsc --noEmit -p tsconfig.source-consumer.json && node ../../../scripts/check-vue-types.mjs",
     "lint": "node ../../../scripts/vue-typed-lint.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

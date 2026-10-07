@@ -1,0 +1,18 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node"],
+    "paths": {
+      "@adapttable/vue": ["../vue/src/index.ts"],
+      "@adapttable/vue/adapter": ["../vue/src/adapter.ts"],
+      "@adapttable/vue/features": ["../vue/src/features.ts"],
+      "@adapttable/vue/*": ["../vue/src/*"],
+      "@adapttable/reka-ui": ["./src/index.ts"],
+      "@adapttable/reka-ui/*": ["./src/*"]
+    }
+  },
+  "include": ["test/types/source/column-menu.vue", "src/styles.d.ts"]
+}
