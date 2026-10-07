@@ -10,27 +10,34 @@ export const kitPreviews = [
 
 export const kitPreviewCopy = {
   en: {
-    lead: "The same order desk, rendered with this kit’s own table controls. Search customers, sort columns, select orders, and try the responsive cards.",
-    notice:
-      "Preview of table controls, selection, search, pagination and presentation settings.",
+    title: "Orders",
+    total: "Orders",
+    lead: "Review, search and organize your orders.",
+    notice: "Interactive preview",
     presentation: "Preview appearance",
-    light: "Light appearance",
+    appearance: "Appearance",
+    light: "Light",
+    dark: "Dark",
     keyboard:
-      "Tab reaches table controls. Enter sorts a column; Space changes a focused checkbox. Escape dismisses a kit selector and returns focus to its trigger.",
-    workspace: "Explore the native workspace",
+      "Tab to navigate · Enter to sort · Space to select · Esc to close menus",
+    compare: "Compare kits",
+    workspace: "Explore workspace",
     columns:
-      "Open Columns and pin Customer to the start. Region and Owner appear so you can scroll horizontally and compare the pinned column with the moving cells. Your column choices stay in the URL.",
+      "Try Columns → pin Customer. Extra columns appear for scrolling; your layout stays in the URL.",
   },
   ar: {
-    lead: "نفس مكتب الطلبات بعناصر الجدول الخاصة بهذه المكتبة. ابحث عن العملاء ورتب الأعمدة وحدد الطلبات وجرب البطاقات المتجاوبة.",
-    notice:
-      "معاينة لعناصر الجدول والتحديد والبحث وترقيم الصفحات وإعدادات العرض.",
+    title: "الطلبات",
+    total: "الطلبات",
+    lead: "راجع طلباتك وابحث فيها ونظّمها.",
+    notice: "معاينة تفاعلية",
     presentation: "مظهر المعاينة",
-    light: "المظهر الفاتح",
-    keyboard:
-      "ينقل Tab التركيز بين عناصر الجدول. يرتب Enter العمود ويغير Space مربع الاختيار المحدد. يغلق Escape قائمة الاختيار ويعيد التركيز إلى مشغلها.",
-    workspace: "استكشف مساحة العمل الأصلية",
+    appearance: "المظهر",
+    light: "فاتح",
+    dark: "داكن",
+    keyboard: "Tab للتنقل · Enter للترتيب · Space للتحديد · Esc لإغلاق القوائم",
+    compare: "قارن المكتبات",
+    workspace: "استكشف مساحة العمل",
     columns:
-      "افتح الأعمدة وثبّت العميل في البداية. تظهر المنطقة والمسؤول لتتمكن من التمرير أفقيًا ومقارنة العمود المثبّت بالخلايا المتحركة. تبقى اختيارات الأعمدة محفوظة في الرابط.",
+      "جرّب الأعمدة ← تثبيت العميل. تظهر أعمدة إضافية للتمرير، ويُحفظ تخطيطك في الرابط.",
   },
 };

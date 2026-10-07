@@ -8,7 +8,7 @@ import {
   useColumnLayoutUrlState,
 } from "@adapttable/vue";
 import type { DataTableProps } from "@adapttable/vue/adapter";
-import { computed, shallowRef, watch } from "vue";
+import { computed, shallowRef, type VNodeChild, watch } from "vue";
 
 import { workspaceCopy } from "../workspace/copy";
 import {
@@ -24,7 +24,12 @@ import { useWorkspacePresentation } from "../workspace/presentation";
 import { kitPreviewCopy, kitPreviews } from "./copy";
 
 const props = withDefaults(
-  defineProps<{ name: string; kit: string; columnsDemo?: boolean }>(),
+  defineProps<{
+    name: string;
+    kit: string;
+    columnsDemo?: boolean;
+    renderStatus: (row: Order, label: string) => VNodeChild;
+  }>(),
   { columnsDemo: false }
 );
 const presentation = useWorkspacePresentation();
@@ -83,6 +88,8 @@ const columns = computed<readonly ColumnDef<Order>[]>(() => {
       width: 115,
       sortable: true,
       formatValue: (row) => statusLabel(row.status, locale.value),
+      cell: ({ row }) =>
+        props.renderStatus(row, statusLabel(row.status, locale.value)),
     },
     {
       key: "due",
@@ -138,6 +145,43 @@ function changeColumnLayout(next: ColumnLayoutState): void {
     pinAdded && next.hidden.length ? { ...next, hidden: [] } : next
   );
 }
+const presentationControls = computed(() => [
+  {
+    key: "theme",
+    label: preview.value.appearance,
+    value: presentation.state.value.dark ? "dark" : "light",
+    options: [
+      { value: "light", label: preview.value.light },
+      { value: "dark", label: preview.value.dark },
+    ],
+  },
+  {
+    key: "lang",
+    label: text.value.language,
+    value: locale.value,
+    options: [
+      { value: "en", label: "English" },
+      { value: "ar", label: "العربية" },
+    ],
+  },
+  {
+    key: "layout",
+    label: text.value.layout,
+    value: presentation.state.value.layout,
+    options: [
+      { value: "auto", label: text.value.auto },
+      { value: "cards", label: text.value.cards },
+    ],
+  },
+]);
+function changePresentation(key: string, value: string): void {
+  const target = presentationLink(key, value);
+  if (
+    target !==
+    `${window.location.pathname}${window.location.search}${window.location.hash}`
+  )
+    window.location.assign(target);
+}
 function presentationLink(key: string, value: string): string {
   const url = new URL(window.location.href);
   url.searchParams.set(key, value);
@@ -148,70 +192,64 @@ function presentationLink(key: string, value: string): string {
 <template>
   <main class="vue-kit-preview" :data-kit="kit">
     <header class="vue-kit-preview__header">
-      <p class="vue-kit-preview__eyebrow">AdaptTable / Vue / {{ name }}</p>
-      <h1>{{ text.ordersTitle }}</h1>
-      <p>{{ preview.lead }}</p>
-      <p class="vue-kit-preview__notice" data-testid="parity-notice">
-        {{ preview.notice }}
-      </p>
-      <nav
+      <div class="vue-kit-preview__heading">
+        <p class="vue-kit-preview__eyebrow">AdaptTable / Vue / {{ name }}</p>
+        <div class="vue-kit-preview__title">
+          <h1>{{ preview.title }}</h1>
+          <span class="vue-kit-preview__notice" data-testid="parity-notice">{{
+            preview.notice
+          }}</span>
+        </div>
+        <p class="vue-kit-preview__lead">{{ preview.lead }}</p>
+      </div>
+      <div
         class="vue-kit-preview__presentation"
         :aria-label="preview.presentation"
+        role="group"
       >
-        <a
-          :href="
-            presentationLink(
-              'theme',
-              presentation.state.value.dark ? 'light' : 'dark'
-            )
-          "
-        >
-          {{ presentation.state.value.dark ? preview.light : text.theme }}
-        </a>
-        <a
-          :href="presentationLink('lang', locale === 'ar' ? 'en' : 'ar')"
-          lang="en"
-          >{{ locale === "ar" ? "English" : "العربية" }}</a
-        >
-        <a
-          :href="
-            presentationLink(
-              'layout',
-              presentation.state.value.layout === 'cards' ? 'auto' : 'cards'
-            )
-          "
-        >
-          {{
-            presentation.state.value.layout === "cards" ? text.auto : text.cards
-          }}
-        </a>
-      </nav>
+        <slot
+          name="presentation"
+          :controls="presentationControls"
+          :on-change="changePresentation"
+          :dark="presentation.state.value.dark"
+          :locale="locale"
+        />
+      </div>
     </header>
-    <dl class="vue-kit-preview__summary">
-      <div>
-        <dt>{{ text.total }}</dt>
-        <dd>{{ rows.length }}</dd>
-      </div>
-      <div>
-        <dt>{{ text.needsReview }}</dt>
-        <dd>{{ rows.filter((row) => row.status === "Review").length }}</dd>
-      </div>
-      <div>
-        <dt>{{ text.value }}</dt>
-        <dd>
-          {{
-            money(
-              rows.reduce((sum, row) => sum + row.amount, 0),
-              locale
-            )
-          }}
-        </dd>
-      </div>
-    </dl>
-    <p v-if="columnsDemo" class="vue-kit-preview__column-hint">
-      {{ preview.columns }}
-    </p>
+    <div class="vue-kit-preview__overview">
+      <dl class="vue-kit-preview__summary">
+        <div>
+          <dt>{{ preview.total }}</dt>
+          <dd>{{ rows.length }}</dd>
+        </div>
+        <div>
+          <dt>{{ text.needsReview }}</dt>
+          <dd>{{ rows.filter((row) => row.status === "Review").length }}</dd>
+        </div>
+        <div>
+          <dt>{{ text.value }}</dt>
+          <dd>
+            {{
+              money(
+                rows.reduce((sum, row) => sum + row.amount, 0),
+                locale
+              )
+            }}
+          </dd>
+        </div>
+      </dl>
+      <p
+        class="vue-kit-preview__selection"
+        role="status"
+        data-testid="selection-status"
+      >
+        {{ selected.length }} {{ text.selected }}
+      </p>
+    </div>
     <section :aria-label="text.orders" class="vue-kit-preview__table">
+      <p v-if="columnsDemo" class="vue-kit-preview__column-hint">
+        {{ preview.columns }}
+      </p>
       <slot
         :table-props="tableProps"
         :on-selection-change="changeSelection"
@@ -220,19 +258,21 @@ function presentationLink(key: string, value: string): string {
         :dark="presentation.state.value.dark"
       />
     </section>
-    <p role="status" data-testid="selection-status">
-      {{ selected.length }} {{ text.selected }}
-    </p>
-    <p class="vue-kit-preview__keyboard">{{ preview.keyboard }}</p>
-    <nav class="vue-kit-preview__kits" :aria-label="text.compare">
-      <a
-        v-for="item in kitPreviews"
-        :key="item.key"
-        :href="`../${item.key}/${query}`"
-        :aria-current="kit === item.key ? 'page' : undefined"
-        >{{ item.name }}</a
-      >
-      <a href="../unstyled/workspace/">{{ preview.workspace }}</a>
-    </nav>
+    <footer class="vue-kit-preview__footer">
+      <p class="vue-kit-preview__keyboard">{{ preview.keyboard }}</p>
+      <nav class="vue-kit-preview__kits" :aria-label="text.compare">
+        <span>{{ preview.compare }}</span>
+        <a
+          v-for="item in kitPreviews"
+          :key="item.key"
+          :href="`../${item.key}/${query}`"
+          :aria-current="kit === item.key ? 'page' : undefined"
+          >{{ item.name }}</a
+        >
+        <a class="vue-kit-preview__workspace" href="../unstyled/workspace/"
+          >{{ preview.workspace }} <span aria-hidden="true">↗</span></a
+        >
+      </nav>
+    </footer>
   </main>
 </template>

@@ -1,15 +1,18 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import {
   access,
   mkdir,
   mkdtemp,
   readFile,
   rm,
+  symlink,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, test } from "node:test";
+import { fileURLToPath } from "node:url";
 
 import { ESLint } from "eslint";
 
@@ -35,6 +38,68 @@ const exists = async (path) =>
     () => true,
     () => false
   );
+
+for (const invocation of ["direct", "symlink"]) {
+  test(`${invocation} CLI invocation runs lint and reports an outside-repository error`, async () => {
+    const cwd = await fixture();
+    const script = fileURLToPath(
+      new URL("./vue-typed-lint.mjs", import.meta.url)
+    );
+    let entry = script;
+    if (invocation === "symlink") {
+      entry = join(cwd, "linked lint runner.mjs");
+      await symlink(script, entry);
+    }
+    const result = spawnSync(process.execPath, [entry], {
+      cwd,
+      encoding: "utf8",
+      timeout: 10_000,
+    });
+    assert.ifError(result.error);
+    assert.equal(result.status, 1);
+    assert.match(
+      result.stderr,
+      /The Vue package must be inside the repository/
+    );
+    assert.equal(
+      await readFile(join(cwd, ".sfc-types", "stale.vue.d.ts"), "utf8"),
+      "stale"
+    );
+  });
+}
+
+for (const invocation of ["eval", "stdin", "module"]) {
+  test(`importing from ${invocation} has no CLI side effects`, async () => {
+    const cwd = await fixture();
+    const script = new URL("./vue-typed-lint.mjs", import.meta.url).href;
+    const source = `import { lintVuePackage } from ${JSON.stringify(script)};\nprocess.stdout.write(typeof lintVuePackage);\n`;
+    let args;
+    if (invocation === "module") {
+      const importer = join(cwd, "importer.mjs");
+      await writeFile(importer, source);
+      args = [importer];
+    } else {
+      args =
+        invocation === "stdin"
+          ? ["--input-type=module", "-"]
+          : ["--input-type=module", "--eval", source];
+    }
+    const result = spawnSync(process.execPath, args, {
+      cwd,
+      encoding: "utf8",
+      input: invocation === "stdin" ? source : undefined,
+      timeout: 10_000,
+    });
+    assert.ifError(result.error);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout, "function");
+    assert.equal(result.stderr, "");
+    assert.equal(
+      await readFile(join(cwd, ".sfc-types", "stale.vue.d.ts"), "utf8"),
+      "stale"
+    );
+  });
+}
 
 test("removes stale declarations and generates exact fresh types before ordinary lint", async () => {
   const cwd = await fixture();

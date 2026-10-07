@@ -5,6 +5,24 @@ import { workspaceCopy } from "../apps/showcase/src/vue/workspace/copy";
 import { getLabels } from "../packages/shared/i18n/src/index";
 
 const part = (name: string) => `[data-adapttable-part="${name}"]`;
+async function paginationControl(
+  surface: ReturnType<Page["locator"]>,
+  name: string,
+  cards: boolean
+) {
+  const pageSize = surface.getByRole("combobox", { name, exact: true });
+  // Auto pagination uses incremental loading for cards and pages for tables.
+  if (cards) {
+    await expect(pageSize).toHaveCount(0);
+    return { pageSize, originalPageSize: null };
+  }
+  await expect(pageSize).toBeVisible();
+  const originalPageSize = await pageSize.elementHandle();
+  if (!originalPageSize)
+    throw new Error("Desktop pagination must retain its select");
+  return { pageSize, originalPageSize };
+}
+
 const scenarios = [
   {
     name: "desktop-light",
@@ -308,14 +326,11 @@ for (const kit of VUE_KIT_PAGES) {
           ).toBe(true);
         };
         await expectDensity("comfortable");
-        const pageSize = surface.getByRole("combobox", {
-          name: labels.rowsPerPage,
-          exact: true,
-        });
-        await expect(pageSize).toBeVisible();
-        const originalPageSize = await pageSize.elementHandle();
-        if (!originalPageSize)
-          throw new Error("Pagination must retain its select");
+        const { pageSize, originalPageSize } = await paginationControl(
+          surface,
+          labels.rowsPerPage,
+          scenario.cards
+        );
         await compact.focus();
         await page.keyboard.press("Space");
         await expectDensity("compact");
@@ -331,13 +346,20 @@ for (const kit of VUE_KIT_PAGES) {
         await page.keyboard.press("Space");
         await expectDensity("compact");
         await expect(compact).toBeFocused();
-        expect(
-          await pageSize.evaluate(
-            (node, original) => node === original,
-            originalPageSize
-          )
-        ).toBe(true);
+        if (originalPageSize)
+          expect(
+            await pageSize.evaluate(
+              (node, original) => node === original,
+              originalPageSize
+            )
+          ).toBe(true);
         if (scenario.cards) {
+          const loadMore = surface.getByRole("button", {
+            name: labels.loadMore,
+            exact: true,
+          });
+          await expect(loadMore).toBeVisible();
+          await expect(loadMore).toBeEnabled();
           await expect(surface.locator(part("card"))).toHaveCount(5);
           await expect(surface.locator(part("table"))).toHaveCount(0);
           expect(

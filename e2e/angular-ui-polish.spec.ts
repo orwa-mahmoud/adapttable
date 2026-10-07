@@ -148,9 +148,7 @@ for (const key of [
       await page.setViewportSize({ width: 1440, height: 856 });
       await page.goto(`/angular-main/?kit=${key}`);
       if (locale === "ar")
-        await page
-          .getByRole("combobox", { name: "Locale", exact: true })
-          .selectOption("ar");
+        await page.getByRole("radio", { name: "العربية", exact: true }).check();
       const trigger = page.getByRole("button", {
         name: locale === "ar" ? "عوامل التصفية" : "Filters",
         exact: true,

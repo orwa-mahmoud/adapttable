@@ -179,7 +179,9 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
-      await page.getByRole("button", { name: "Drawer", exact: true }).click();
+      await page
+        .getByRole("combobox", { name: "Filter layout", exact: true })
+        .selectOption("drawer");
       await part(page, "filters-button").click();
       const drawer = part(page, "filters-panel");
       await expect(drawer).toBeVisible();
@@ -208,7 +210,9 @@ for (const kit of ANGULAR_KITS) {
 
     test("filters one column from its header funnel", async ({ page }) => {
       await page.goto(PAGE);
-      await page.getByRole("button", { name: "Header", exact: true }).click();
+      await page
+        .getByRole("combobox", { name: "Filter layout", exact: true })
+        .selectOption("header");
       const funnels = part(page, "filter-header-trigger");
       // Person, Team, Status, Timeline, Budget, Load — every column with a filter.
       await expect(funnels).toHaveCount(6);
@@ -226,7 +230,9 @@ for (const kit of ANGULAR_KITS) {
         page,
       }) => {
         await page.goto(PAGE);
-        await page.getByRole("button", { name: "Header", exact: true }).click();
+        await page
+          .getByRole("combobox", { name: "Filter layout", exact: true })
+          .selectOption("header");
         await part(page, "filter-header-trigger").nth(1).click();
         const core = page.getByRole("checkbox", { name: "Core", exact: true });
         const platform = page.getByRole("checkbox", {

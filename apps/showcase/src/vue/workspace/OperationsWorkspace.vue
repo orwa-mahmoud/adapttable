@@ -155,19 +155,55 @@ const keyboard = computed(
           >{{ text.brand }}<span>Vue</span></a
         >
         <div class="workspace-preferences">
-          <label
-            ><span>{{ text.language }}</span
-            ><select v-model="locale">
-              <option value="en">English</option>
-              <option value="ar">العربية</option>
-            </select></label
-          ><label
-            ><span>{{ text.layout }}</span
-            ><select v-model="layout">
-              <option value="auto">{{ text.auto }}</option>
-              <option value="cards">{{ text.cards }}</option>
-            </select></label
-          ><button
+          <div class="workspace-preference">
+            <span>{{ text.language }}</span>
+            <div
+              class="workspace-choice"
+              role="group"
+              :aria-label="text.language"
+            >
+              <button
+                type="button"
+                lang="en"
+                :aria-pressed="locale === 'en'"
+                @click="locale = 'en'"
+              >
+                English
+              </button>
+              <button
+                type="button"
+                lang="ar"
+                :aria-pressed="locale === 'ar'"
+                @click="locale = 'ar'"
+              >
+                العربية
+              </button>
+            </div>
+          </div>
+          <div class="workspace-preference">
+            <span>{{ text.layout }}</span>
+            <div
+              class="workspace-choice"
+              role="group"
+              :aria-label="text.layout"
+            >
+              <button
+                type="button"
+                :aria-pressed="layout === 'auto'"
+                @click="layout = 'auto'"
+              >
+                {{ text.auto }}
+              </button>
+              <button
+                type="button"
+                :aria-pressed="layout === 'cards'"
+                @click="layout = 'cards'"
+              >
+                {{ text.cards }}
+              </button>
+            </div>
+          </div>
+          <button
             class="workspace-theme"
             type="button"
             :aria-label="text.theme"

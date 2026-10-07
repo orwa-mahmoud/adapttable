@@ -15,14 +15,17 @@
         {{
           lab
             ? "Every option. Your combination."
-            : "Same features. Any kit. Watch it switch."
+            : "Same features. Any kit.
+        Watch it switch."
         }}
       </h1>
       <p class="sec__lead">
         {{
           lab
-            ? "Compose real features on one table. Every table and control is rendered by the selected Angular adapter."
-            : "One dataset, one feature set, rendered by each real Angular adapter."
+            ? "Compose real features on one table. Every table and control is
+        rendered by the selected Angular adapter."
+            : "One dataset, one feature
+        set, rendered by each real Angular adapter."
         }}
       </p>
     </div>
@@ -33,6 +36,7 @@
             type="button"
             class="lab-recipe"
             [class.is-on]="option('recipe', 'baseline') === recipe"
+            [attr.aria-pressed]="option('recipe', 'baseline') === recipe"
             (click)="applyRecipe(recipe)"
           >
             {{ recipe }}
@@ -80,40 +84,114 @@
       npm publication to complete. See each kit's setup guide in the docs.
     </p>
     <div class="controls angular-options">
-      <label
-        >Data<select
-          [value]="server ? 'server' : 'frontend'"
-          (change)="change('mode', $event)"
-          data-demo-control="mode"
-        >
-          <option value="frontend">Frontend</option>
-          <option value="server">Server</option>
-        </select></label
-      >
-      <label
-        >Locale<select
-          [value]="presentation.locale"
-          (change)="change('locale', $event)"
-          data-demo-control="locale"
-        >
-          <option value="en">English</option>
-          <option value="ar">العربية</option>
-          <option value="de">Deutsch</option>
-          <option value="es">Español</option>
-          <option value="fr">Français</option>
-          <option value="ja">日本語</option>
-        </select></label
-      >
-      <label
-        >Density<select
-          [value]="density()"
-          (change)="change('density', $event)"
-          data-demo-control="density"
-        >
-          <option value="comfortable">Comfortable</option>
-          <option value="compact">Compact</option>
-        </select></label
-      >
+      <fieldset class="angular-choice">
+        <legend>Data</legend>
+        <div class="angular-choice__options">
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="frontend"
+              [checked]="!server"
+              (change)="change('mode', $event)"
+              data-demo-control="mode"
+            />
+            <span>Frontend</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="server"
+              [checked]="server"
+              (change)="change('mode', $event)"
+              data-demo-control="mode"
+            />
+            <span>Server</span>
+          </label>
+        </div>
+      </fieldset>
+      <fieldset class="angular-choice">
+        <legend>Locale</legend>
+        <div class="angular-choice__options">
+          <label>
+            <input
+              type="radio"
+              name="locale"
+              value="en"
+              [checked]="presentation.locale === 'en'"
+              (change)="change('locale', $event)"
+              data-demo-control="locale"
+            />
+            <span>English</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="locale"
+              value="ar"
+              [checked]="presentation.locale === 'ar'"
+              (change)="change('locale', $event)"
+              data-demo-control="locale"
+            />
+            <span>العربية</span>
+          </label>
+        </div>
+      </fieldset>
+      <fieldset class="angular-choice">
+        <legend>Density</legend>
+        <div class="angular-choice__options">
+          <label>
+            <input
+              type="radio"
+              name="density"
+              value="comfortable"
+              [checked]="density() === 'comfortable'"
+              (change)="change('density', $event)"
+              data-demo-control="density"
+            />
+            <span>Comfortable</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="density"
+              value="compact"
+              [checked]="density() === 'compact'"
+              (change)="change('density', $event)"
+              data-demo-control="density"
+            />
+            <span>Compact</span>
+          </label>
+        </div>
+      </fieldset>
+      <fieldset class="angular-choice">
+        <legend>Layout</legend>
+        <div class="angular-choice__options">
+          <label>
+            <input
+              type="radio"
+              name="mobile"
+              value="off"
+              [checked]="!mobile"
+              (change)="change('mobile', $event)"
+              data-demo-control="mobile"
+            />
+            <span>Responsive</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="mobile"
+              value="on"
+              [checked]="mobile"
+              (change)="change('mobile', $event)"
+              data-demo-control="mobile"
+            />
+            <span>Cards</span>
+          </label>
+        </div>
+      </fieldset>
       <label
         >Filters<select
           [value]="filterMode"
@@ -131,7 +209,7 @@
             ><input
               type="checkbox"
               [checked]="grouping"
-              [disabled]="server"
+              [disabled]="!canWrite"
               (change)="change('grouping', $event)"
               data-demo-control="grouping"
             />Grouping</label
@@ -140,7 +218,7 @@
             ><input
               type="checkbox"
               [checked]="editing"
-              [disabled]="server"
+              [disabled]="!canWrite"
               (change)="change('editing', $event)"
               data-demo-control="editing"
             />Editing</label
@@ -203,28 +281,63 @@
               </option>
             </select></label
           >
-          <label
-            >Pagination<select
-              [value]="pagination"
-              (change)="change('pagination', $event)"
-              data-demo-control="pagination"
-            >
-              <option value="paged">Paged</option>
-              <option value="infinite">Infinite</option>
-            </select></label
-          >
-          <label
-            >Filter definitions<select
-              [value]="option('filter-set', 'live')"
-              (change)="change('filter-set', $event)"
-              data-demo-control="filter-set"
-            >
-              <option value="live">Live demo</option>
-              <option value="kitchen">
-                Checklist, facets and advanced operators
-              </option>
-            </select></label
-          >
+          <fieldset class="angular-choice">
+            <legend>Pagination</legend>
+            <div class="angular-choice__options">
+              <label>
+                <input
+                  type="radio"
+                  name="pagination"
+                  value="paged"
+                  [checked]="pagination === 'paged'"
+                  (change)="change('pagination', $event)"
+                  data-demo-control="pagination"
+                  [disabled]="large"
+                />
+                <span>Paged</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="pagination"
+                  value="infinite"
+                  [checked]="pagination === 'infinite'"
+                  (change)="change('pagination', $event)"
+                  data-demo-control="pagination"
+                />
+                <span>Infinite</span>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset class="angular-choice">
+            <legend>Filter definitions</legend>
+            <div class="angular-choice__options">
+              <label>
+                <input
+                  type="radio"
+                  name="filter-set"
+                  value="live"
+                  [checked]="filterSet === 'live'"
+                  (change)="change('filter-set', $event)"
+                  data-demo-control="filter-set"
+                  [disabled]="large"
+                />
+                <span>Live demo</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="filter-set"
+                  value="kitchen"
+                  [checked]="filterSet === 'kitchen'"
+                  (change)="change('filter-set', $event)"
+                  data-demo-control="filter-set"
+                  title="Checklist, facets and advanced operators"
+                />
+                <span>Checklist &amp; facets</span>
+              </label>
+            </div>
+          </fieldset>
           <label
             >Row structure<select
               [value]="structure"
@@ -272,6 +385,12 @@
             >
           }
         </div>
+        @if (large) {
+          <p class="hint">
+            The 40,000-row dataset uses infinite scrolling and checklist
+            filters.
+          </p>
+        }
         @if (!canWrite) {
           <p class="hint">
             Server and large-data modes keep query, filters and column features
@@ -368,6 +487,7 @@
             [labels]="presentation.labels"
             [dir]="presentation.dir"
             [density]="density()"
+            [forceMobile]="mobile ? true : undefined"
             [defaults]="{ limit: 100 }"
             [maxHeight]="560"
           />

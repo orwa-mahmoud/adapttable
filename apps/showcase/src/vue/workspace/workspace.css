@@ -147,22 +147,32 @@ body.vue-workspace-page[data-workspace-theme="dark"] {
   align-items: flex-end;
   gap: 10px;
 }
-.workspace-preferences label {
+.workspace-preference {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-.workspace-preferences label > span {
+.workspace-preference > span {
   font-size: 10px;
   color: var(--ws-muted);
   font-weight: 650;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
-.workspace-preferences select {
+.workspace-choice {
+  display: flex;
+  gap: 3px;
+}
+.workspace-choice button {
   min-block-size: 32px;
-  padding-block: 4px;
+  padding: 4px 9px;
   font-size: 12px;
+}
+.workspace-choice button[aria-pressed="true"],
+.workspace-choice button[aria-pressed="true"]:hover:not(:disabled) {
+  border-color: var(--ws-accent);
+  background: var(--ws-accent);
+  color: var(--ws-on-accent);
 }
 .workspace-theme {
   display: grid;

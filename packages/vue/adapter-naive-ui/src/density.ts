@@ -6,7 +6,6 @@ import {
   slotRender,
 } from "@adapttable/vue/adapter";
 import { densityChooser as bindingDensityChooser } from "@adapttable/vue/features";
-
 import { h } from "vue";
 
 import { NaiveDensityControl } from "./controls/NaiveDensityControl";

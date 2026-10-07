@@ -36,6 +36,7 @@ import {
   SITE_HOME,
   snippetFor,
 } from "../matrix/content";
+import { SHOWCASE_PRESENTATION } from "./data";
 import { AdaptShowcaseLandingTable, FEATURE_BODIES } from "./featureBodies";
 import { AdaptShowcaseNav } from "./nav";
 import { SHOWCASE_DARK, SHOWCASE_KIT } from "./showcaseKit";
@@ -120,6 +121,7 @@ export class AdaptShowcaseMatrixPage {
 
   /** Whether the page is dark. */
   readonly dark = inject(SHOWCASE_DARK);
+  readonly presentation = SHOWCASE_PRESENTATION;
   /** Which copy button last copied, for its "Copied" state. */
   readonly copied = signal<"code" | "install" | null>(null);
 
@@ -220,6 +222,17 @@ export class AdaptShowcaseMatrixPage {
     inject(DestroyRef).onDestroy(() => {
       window.clearTimeout(this.copyTimer);
     });
+  }
+
+  /** Reload the selected label set while retaining the table's URL state. */
+  changeLocale(event: Event): void {
+    if (!(event.target instanceof HTMLInputElement)) return;
+    const locale = event.target.value;
+    if (locale !== "en" && locale !== "ar") return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("locale", locale);
+    url.searchParams.delete("dir");
+    window.location.assign(url.href);
   }
 
   /** Flip the theme. */

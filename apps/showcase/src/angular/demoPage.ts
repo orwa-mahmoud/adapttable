@@ -202,6 +202,7 @@ export class AdaptShowcaseDemoPage {
     option("density", "comfortable") === "compact" ? "compact" : "comfortable"
   );
   readonly filterMode = option("filters", "popover");
+  readonly filterSet = this.large ? "kitchen" : option("filter-set", "live");
   readonly pagination: PaginationMode =
     this.large || option("pagination", "paged") === "infinite"
       ? "infinite"
@@ -427,7 +428,7 @@ export class AdaptShowcaseDemoPage {
     : "en";
   readonly baseFeatures: readonly AdaptTableFeature[] = [
     this.kit.filters(
-      option("filter-set", "live") === "kitchen" || this.large
+      this.filterSet === "kitchen"
         ? kitchenFilterDefs(this.dataLocale).map((def) =>
             def.type === "personText" ? { ...def, type: "text" } : def
           )
@@ -811,7 +812,6 @@ export class AdaptShowcaseDemoPage {
     ["extra-rows", "Attached extra row"],
     ["row-style", "Row style"],
     ["virtualize", "Virtualization"],
-    ["mobile", "Mobile cards"],
   ];
   readonly optionsDialog =
     viewChild<ElementRef<HTMLDialogElement>>("optionsDialog");
@@ -972,7 +972,21 @@ export class AdaptShowcaseDemoPage {
     // in the demo session, and the binding restores its URL-backed state.
     navigateDemo(url);
   }
+  private normalizePresentationChange(
+    url: URL,
+    key: string,
+    value: string
+  ): void {
+    if (key === "locale") url.searchParams.delete("dir");
+    if (key === "grouping") {
+      url.searchParams.set("structure", value === "on" ? "grouped" : "flat");
+      if (value === "on") url.searchParams.set("row-pinning", "off");
+    }
+    if (key === "editing")
+      url.searchParams.set("editing-mode", value === "on" ? "cell" : "off");
+  }
   private normalizeOptionChange(url: URL, key: string, value: string): void {
+    this.normalizePresentationChange(url, key, value);
     if (key === "structure" && ["grouped", "tree"].includes(value))
       url.searchParams.set("row-pinning", "off");
     if (key === "dataset" && value === "large") {
@@ -1018,10 +1032,11 @@ export class AdaptShowcaseDemoPage {
       mode: this.server ? "server" : "frontend",
       locale: this.presentation.locale,
       density: this.density(),
+      mobile: this.mobile ? "on" : "off",
       filters: this.filterMode,
       dataset: this.dataset,
       pagination: this.pagination,
-      "filter-set": this.mountedOptions.get("filter-set") ?? "live",
+      "filter-set": this.filterSet,
       structure: this.structure,
       "editing-mode": this.editingMode,
       failure: this.failure(),
@@ -1033,7 +1048,7 @@ export class AdaptShowcaseDemoPage {
       if (element instanceof HTMLInputElement) {
         element.checked =
           element.type === "radio"
-            ? element.value === this.kit.key
+            ? element.value === (values[key] ?? this.mountedOptions.get(key))
             : this.checkedControl(key);
       } else if (element instanceof HTMLSelectElement) {
         element.value = values[key] ?? this.mountedOptions.get(key) ?? "";

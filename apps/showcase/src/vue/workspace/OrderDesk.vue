@@ -498,13 +498,27 @@ function restore(): void {
       >
     </header>
     <div class="workspace-controls">
-      <label
-        >{{ text.group
-        }}<select v-model="grouped" :disabled="!shown">
-          <option :value="false">{{ text.groupingOff }}</option>
-          <option :value="true">{{ text.groupingOn }}</option>
-        </select></label
-      >
+      <div class="workspace-preference">
+        <span>{{ text.group }}</span>
+        <div class="workspace-choice" role="group" :aria-label="text.group">
+          <button
+            type="button"
+            :disabled="!shown"
+            :aria-pressed="!grouped"
+            @click="grouped = false"
+          >
+            {{ text.groupingOff }}
+          </button>
+          <button
+            type="button"
+            :disabled="!shown"
+            :aria-pressed="grouped"
+            @click="grouped = true"
+          >
+            {{ text.groupingOn }}
+          </button>
+        </div>
+      </div>
       <label
         >{{ text.exportScope
         }}<select v-model="scope">

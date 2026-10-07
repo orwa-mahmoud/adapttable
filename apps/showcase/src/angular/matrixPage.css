@@ -550,3 +550,106 @@ adapt-showcase-matrix-page *::after {
   opacity: 0.5;
   cursor: default;
 }
+
+/* Page presentation controls live outside each adapter's table and toolbar. */
+.angular-choice {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.angular-choice legend,
+.angular-select {
+  color: var(--ink-2);
+  font-size: 11px;
+  font-weight: 500;
+}
+.angular-choice legend {
+  padding: 0;
+  margin-block-end: 4px;
+}
+.angular-choice__options {
+  display: inline-flex;
+  max-inline-size: 100%;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--page-border);
+  border-radius: 7px;
+  background: var(--page-surface);
+}
+.angular-choice__options > label {
+  position: relative;
+  display: flex;
+  min-inline-size: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.angular-choice__options input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+  z-index: 1;
+}
+.angular-choice__options span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 30px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.angular-choice__options input:checked + span {
+  color: var(--ink);
+  background: color-mix(
+    in srgb,
+    var(--kit, var(--brand)) 12%,
+    var(--page-surface)
+  );
+  border-color: var(--kit, var(--brand));
+}
+.angular-choice__options input:focus-visible + span {
+  outline: 2px solid var(--kit, var(--brand));
+  outline-offset: 2px;
+}
+.angular-choice__options label:has(input:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.angular-presentation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-block-end: 16px;
+}
+.angular-select {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.angular-select select {
+  min-block-size: 34px;
+  border: 1px solid var(--page-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--ink);
+  background: var(--page-surface);
+  font: inherit;
+  font-size: 13px;
+}
+.angular-select select:focus-visible {
+  outline: 2px solid var(--kit, var(--brand));
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .angular-choice__options input:checked + span {
+    border-color: Highlight;
+  }
+}

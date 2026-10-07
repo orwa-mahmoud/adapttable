@@ -3,8 +3,8 @@ import { renderToString } from "vue/server-renderer";
 import { createVuetify } from "vuetify/framework";
 import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
 
-import VuetifyInput from "../src/controls/VuetifyInput.vue";
 import { DataTable } from "../src";
+import VuetifyInput from "../src/controls/VuetifyInput.vue";
 
 const cleanups: (() => void)[] = [];
 function kit() {

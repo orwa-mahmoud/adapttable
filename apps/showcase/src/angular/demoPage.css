@@ -28,7 +28,7 @@ adapt-showcase-demo-page *::after {
 .angular-options {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: end;
   justify-content: flex-start;
   gap: 16px 20px;
   padding: 14px 16px;
@@ -192,7 +192,8 @@ dialog.angular-lab-options header {
 dialog.angular-lab-options .angular-options {
   align-items: flex-start;
 }
-dialog.angular-lab-options .angular-options > label {
+dialog.angular-lab-options .angular-options > label,
+dialog.angular-lab-options .angular-choice {
   flex: 1 1 230px;
   min-width: 0;
   max-width: 100%;
@@ -304,4 +305,21 @@ mat-chip.demo-status[data-tone] {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+.angular-options .angular-choice__options > label {
+  flex: 1 1 auto;
+  gap: 0;
+}
+.angular-options .angular-choice__options span {
+  flex: 1;
+}
+.angular-options-switches {
+  min-block-size: 40px;
+}
+@media (max-width: 700px) {
+  .angular-options-switches {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
 }

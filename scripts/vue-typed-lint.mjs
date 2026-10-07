@@ -1,9 +1,17 @@
 /** Generate exact SFC module types before the unchanged typed ESLint rules run. */
 import { spawnSync } from "node:child_process";
-import { access, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  access,
+  cp,
+  mkdir,
+  readFile,
+  realpath,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -107,10 +115,12 @@ export async function lintVuePackage(
   }
 }
 
-if (
-  process.argv[1] &&
-  pathToFileURL(resolve(process.argv[1])).href === import.meta.url
-) {
+// Node resolves module URLs through symlinks but keeps the invoked argv path.
+// Eval and stdin imports may have no filesystem entrypoint to resolve.
+const entrypoint = process.argv[1]
+  ? await realpath(process.argv[1]).catch(() => undefined)
+  : undefined;
+if (entrypoint === (await realpath(fileURLToPath(import.meta.url)))) {
   try {
     process.exitCode = await lintVuePackage({
       lintArgs: process.argv.slice(2),

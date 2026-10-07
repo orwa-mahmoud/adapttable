@@ -125,6 +125,36 @@
       </div>
     }
 
+    <div class="angular-presentation">
+      <fieldset class="angular-choice">
+        <legend>Locale</legend>
+        <div class="angular-choice__options">
+          <label>
+            <input
+              type="radio"
+              name="locale"
+              value="en"
+              [checked]="presentation.locale === 'en'"
+              (change)="changeLocale($event)"
+              data-demo-control="locale"
+            />
+            <span>English</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="locale"
+              value="ar"
+              [checked]="presentation.locale === 'ar'"
+              (change)="changeLocale($event)"
+              data-demo-control="locale"
+            />
+            <span>العربية</span>
+          </label>
+        </div>
+      </fieldset>
+    </div>
+
     <p class="mx-seam">
       rendered by <span class="mx-seam__pkg">{{ adapter().pkg }}</span>
     </p>
@@ -137,13 +167,12 @@
         [ngComponentOutletInputs]="{
           content: demoBody,
           theme: dark() ? 'dark' : 'light',
-          dir: feature()?.slug === 'rtl' ? 'rtl' : 'ltr',
+          dir: presentation.dir,
         }"
       />
     } @else {
       <ng-container [ngTemplateOutlet]="demoBody" />
     }
-
     @if (feature(); as current) {
       <section class="mx-section">
         <div class="mx-section__head">
