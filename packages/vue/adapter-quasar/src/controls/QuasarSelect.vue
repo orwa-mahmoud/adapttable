@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { QSelect } from "quasar";
-import { computed, shallowRef, useId, useTemplateRef } from "vue";
+import { computed, shallowRef, useId } from "vue";
 
 import { quasarFieldAttrs, useQuasarControlRef } from "./controlAttrs";
 import { useQuasarPresentation } from "./presentation";
@@ -11,7 +11,7 @@ const props = defineProps<{
   control: QuasarSelectControl;
   className?: string;
 }>();
-const select = useTemplateRef<InstanceType<typeof QSelect>>("select");
+const select = shallowRef<InstanceType<typeof QSelect> | null>(null);
 const id = `adapttable-quasar-${useId()}`;
 const targetRevision = shallowRef(0);
 function refreshTarget(): void {

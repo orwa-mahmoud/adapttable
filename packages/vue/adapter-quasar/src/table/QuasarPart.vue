@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Attrs } from "@adapttable/vue";
 import { QCard, QCardSection, QSeparator, QTd, QTh, QTr } from "quasar";
-import { type ComponentPublicInstance, computed, useTemplateRef } from "vue";
+import { type ComponentPublicInstance, computed, shallowRef } from "vue";
 
 import { quasarAttrs, useQuasarControlRef } from "../controls/controlAttrs";
 
@@ -18,7 +18,7 @@ const components = {
   section: QCardSection,
   separator: QSeparator,
 };
-const native = useTemplateRef<ComponentPublicInstance>("native");
+const native = shallowRef<ComponentPublicInstance | null>(null);
 const attrs = computed(() => quasarAttrs(props.attrs));
 useQuasarControlRef(
   () => {

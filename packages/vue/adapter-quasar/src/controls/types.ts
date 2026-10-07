@@ -4,7 +4,14 @@ export interface QuasarInputControl {
   readonly attrs: Attrs;
   readonly value: string;
   readonly label: string;
-  readonly type?: "text" | "number" | "date" | "search" | "textarea";
+  readonly type?:
+    | "text"
+    | "number"
+    | "date"
+    | "datetime-local"
+    | "time"
+    | "search"
+    | "textarea";
   readonly onChange: (value: string) => void;
   readonly focusRef?: ElementRef<HTMLInputElement | HTMLTextAreaElement>;
 }

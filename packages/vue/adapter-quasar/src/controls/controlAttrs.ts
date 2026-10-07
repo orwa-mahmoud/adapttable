@@ -50,7 +50,10 @@ export function useQuasarControlRef<T extends HTMLElement>(
   onScopeDispose(() => {
     active = false;
   });
-  const group = computed<RefGroup<T>>((previous) => {
+  // Keep this memo outside computed: Vue 3.5.0 does not supply the previous
+  // computed value, so callback ownership must not depend on that argument.
+  let previous: RefGroup<T> | undefined;
+  const group = computed<RefGroup<T>>(() => {
     const attrRef = attrs().ref;
     const focus = focusRef();
     const owners = [
@@ -59,13 +62,14 @@ export function useQuasarControlRef<T extends HTMLElement>(
         ...(focus ? [focus] : []),
       ]),
     ];
+    const current = previous;
     if (
-      owners.length === previous?.owners.length &&
-      owners.every((owner, index) => owner === previous.owners[index])
+      owners.length === current?.owners.length &&
+      owners.every((owner, index) => owner === current.owners[index])
     )
-      return previous;
+      return current;
     const attached = new Set<ElementRef<T>>();
-    return {
+    const next: RefGroup<T> = {
       owners,
       callback: (element) => {
         if (element === null) {
@@ -83,6 +87,8 @@ export function useQuasarControlRef<T extends HTMLElement>(
         }
       },
     };
+    previous = next;
+    return next;
   });
   useElementRef(target, () => group.value.callback);
 }

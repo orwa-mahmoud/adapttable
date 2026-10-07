@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Attrs, ElementRef } from "@adapttable/vue";
 import { QBtn } from "quasar";
-import { computed, useTemplateRef } from "vue";
+import { computed, shallowRef } from "vue";
 
 import { quasarAttrs, useQuasarControlRef } from "./controlAttrs";
 
@@ -11,7 +11,7 @@ const props = defineProps<{
   label?: string;
   focusRef?: ElementRef<HTMLButtonElement>;
 }>();
-const button = useTemplateRef<InstanceType<typeof QBtn>>("button");
+const button = shallowRef<InstanceType<typeof QBtn> | null>(null);
 const attrs = computed(() => quasarAttrs(props.attrs));
 useQuasarControlRef(
   () => {

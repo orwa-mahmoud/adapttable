@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { QInput, type QInputProps } from "quasar";
-import { computed, useId, useTemplateRef } from "vue";
+import { computed, shallowRef, useId } from "vue";
 
 import { quasarFieldAttrs, useQuasarControlRef } from "./controlAttrs";
 import { useQuasarPresentation } from "./presentation";
@@ -11,7 +11,7 @@ const props = defineProps<{
   control: QuasarInputControl;
   className?: string;
 }>();
-const input = useTemplateRef<InstanceType<typeof QInput>>("input");
+const input = shallowRef<InstanceType<typeof QInput> | null>(null);
 const id = `adapttable-quasar-${useId()}`;
 const attrs = computed(() => {
   const {

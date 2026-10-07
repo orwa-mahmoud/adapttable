@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { QCheckbox } from "quasar";
-import { computed, useTemplateRef } from "vue";
+import { computed, shallowRef } from "vue";
 
 import { quasarAttrs, useQuasarControlRef } from "./controlAttrs";
 import type { QuasarCheckboxControl } from "./types";
@@ -10,7 +10,7 @@ const props = defineProps<{
   control: QuasarCheckboxControl;
   className?: string;
 }>();
-const checkbox = useTemplateRef<InstanceType<typeof QCheckbox>>("checkbox");
+const checkbox = shallowRef<InstanceType<typeof QCheckbox> | null>(null);
 const attrs = computed(() =>
   Object.fromEntries(
     Object.entries(quasarAttrs(props.control.attrs)).filter(

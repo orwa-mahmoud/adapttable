@@ -118,3 +118,58 @@
 .adapttable-quasar[data-density="compact"] .adapttable-quasar-table td {
   padding-block: 0.25rem;
 }
+
+.adapttable-quasar-filter-popover {
+  inline-size: 22rem;
+  max-inline-size: calc(100vw - 1rem);
+  max-block-size: calc(100dvh - 1rem);
+  overflow: auto;
+}
+.adapttable-quasar-filter-drawer {
+  inline-size: 24rem;
+  max-inline-size: 100vw;
+  block-size: 100dvh;
+  overflow: auto;
+}
+:is(.adapttable-quasar-filter-popover, .adapttable-quasar-filter-drawer)
+  .q-btn {
+  min-block-size: 44px;
+  min-inline-size: 44px;
+}
+:is(
+    .adapttable-quasar,
+    .adapttable-quasar-filter-popover,
+    .adapttable-quasar-filter-drawer
+  )
+  [data-adapttable-part="filter-field"] {
+  display: grid;
+  gap: 0.5rem;
+  min-inline-size: 0;
+  margin-block-end: 1rem;
+}
+:is(.adapttable-quasar-filter-popover, .adapttable-quasar-filter-drawer)
+  :is(
+    [data-adapttable-part="filters-header"],
+    [data-adapttable-part="filters-footer"]
+  ) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.adapttable-quasar-checklist-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.adapttable-quasar
+  :is([data-adapttable-part="chips"], [data-adapttable-part="batch-edit-bar"]) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-inline: 0;
+  list-style: none;
+}
