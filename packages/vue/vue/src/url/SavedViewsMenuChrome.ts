@@ -56,7 +56,18 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
     const close = (restore = false): void => {
       open.value = false;
       focusPanel = false;
-      if (restore && active.value) trigger.value?.focus();
+      if (!restore || !active.value) return;
+      const anchor = trigger.value;
+      if (!anchor) return;
+      const doc = anchor.ownerDocument;
+      const focused = doc.activeElement;
+      // Apply may navigate and focus a new host surface before closing.
+      if (
+        focused === doc.body ||
+        focused === anchor ||
+        panel.value?.contains(focused)
+      )
+        anchor.focus();
     };
     const focusFirst = (): void => {
       if (
@@ -129,11 +140,6 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
       !props.savedViews.views.value.some(
         (view) => view.name === name.value.trim() && view.readOnly
       );
-    const save = (): void => {
-      if (!active.value || !canSave()) return;
-      props.savedViews.save(name.value.trim());
-      name.value = "";
-    };
     return () => {
       for (const key of ["Trigger", "Button", "Input", "Panel"] as const)
         if (!props.slots[key])
@@ -148,6 +154,17 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
         lifetime === surfaceLifetime &&
         driver === props.slots.Panel &&
         model === props.savedViews;
+      const canAct = () => isCurrent() && open.value;
+      // The trigger survives popup sessions; only its owner must remain live.
+      const canToggle = () =>
+        active.value &&
+        driver === props.slots.Panel &&
+        model === props.savedViews;
+      const save = (): void => {
+        if (!canAct() || !canSave()) return;
+        model.save(name.value.trim());
+        name.value = "";
+      };
       const names = props.classNames ?? {};
       const control = props.slots;
       const parts = (part: string, className: string | undefined): Attrs => ({
@@ -168,8 +185,8 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
                 ...parts("views-item", names.viewsItem),
                 type: "button",
                 onClick: () => {
-                  if (!active.value) return;
-                  props.savedViews.apply(view.name);
+                  if (!canAct() || !model.views.value.includes(view)) return;
+                  model.apply(view.name);
                   close(true);
                 },
               },
@@ -182,8 +199,12 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
                 disabled: view.readOnly === true,
                 "aria-label": `${props.labels.deleteView}: ${view.name}`,
                 onClick: () => {
-                  if (active.value && !view.readOnly)
-                    props.savedViews.remove(view.name);
+                  if (
+                    canAct() &&
+                    model.views.value.includes(view) &&
+                    !view.readOnly
+                  )
+                    model.remove(view.name);
                 },
               },
               label: "×",
@@ -220,7 +241,7 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
               },
               value: name.value,
               onChange: (next) => {
-                if (active.value) name.value = next;
+                if (canAct()) name.value = next;
               },
             }),
             control.Button({
@@ -252,9 +273,14 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
               "aria-haspopup": "dialog",
               "aria-controls": open.value ? panelId : undefined,
               ref: triggerRef,
-              onClick: () => (open.value ? close() : show()),
+              onClick: () => {
+                if (canToggle()) {
+                  if (open.value) close();
+                  else show();
+                }
+              },
               onKeydown: (event: KeyboardEvent) => {
-                if (event.key === "ArrowDown") {
+                if (canToggle() && event.key === "ArrowDown") {
                   event.preventDefault();
                   show();
                 }

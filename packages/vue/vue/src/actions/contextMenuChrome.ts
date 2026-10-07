@@ -2,7 +2,15 @@ import type {
   ContextMenuChromeProps as NeutralProps,
   ContextMenuSlots as NeutralSlots,
 } from "@adapttable/core/binding";
-import { defineComponent, Fragment, h, nextTick, type VNodeChild } from "vue";
+import {
+  defineComponent,
+  Fragment,
+  h,
+  nextTick,
+  onScopeDispose,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import { elementRef } from "../attrs";
 import { useScopeActivity } from "../store";
@@ -12,13 +20,40 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
   (props: ContextMenuChromeProps) => {
     const active = useScopeActivity();
     const anchorRef: { current: HTMLElement | null } = { current: null };
-    const select = (item: ContextMenuChromeProps["items"][number]) => {
-      if (!active.value || item.disabled) return;
-      props.onClose();
-      void nextTick(() => {
-        if (active.value) item.onSelect();
-      });
-    };
+    let generation = 0;
+    let activityLifetime = 0;
+    let pendingSelection:
+      { cancelled: boolean; projectionChanged: boolean } | undefined;
+    watch(
+      active,
+      () => {
+        generation++;
+        activityLifetime++;
+        if (pendingSelection) pendingSelection.cancelled = true;
+      },
+      { flush: "sync" }
+    );
+    watch(
+      [() => props.items, () => props.slots.Surface],
+      () => {
+        generation++;
+        if (pendingSelection) pendingSelection.projectionChanged = true;
+      },
+      { flush: "sync" }
+    );
+    watch(
+      () => props.at,
+      (at) => {
+        generation++;
+        if (at !== null && pendingSelection) pendingSelection.cancelled = true;
+      },
+      { flush: "sync" }
+    );
+    onScopeDispose(() => {
+      generation++;
+      activityLifetime++;
+      if (pendingSelection) pendingSelection.cancelled = true;
+    });
     return () => {
       for (const name of ["Surface", "Item", "Separator"] as const)
         if (typeof props.slots[name] !== "function")
@@ -26,6 +61,51 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
             `AdaptTable: ContextMenuChrome requires the ${name} control slot.`
           );
       if (!active.value || !props.at || props.items.length === 0) return null;
+      const ticket = generation;
+      const at = props.at;
+      const items = props.items;
+      const driver = props.slots.Surface;
+      const ownsLifetime = () =>
+        active.value && ticket === generation && props.slots.Surface === driver;
+      const isCurrent = () =>
+        ownsLifetime() && props.at === at && props.items === items;
+      const close = () => {
+        if (isCurrent()) props.onClose();
+      };
+      const select = (item: ContextMenuChromeProps["items"][number]) => {
+        if (!isCurrent() || item.disabled || pendingSelection) return;
+        const selection = { cancelled: false, projectionChanged: false };
+        const activity = activityLifetime;
+        pendingSelection = selection;
+        try {
+          close();
+        } catch (error) {
+          pendingSelection = undefined;
+          throw error;
+        }
+        void nextTick(async () => {
+          // The close may be rejected without scheduling a render. Allow any
+          // synchronous parent replacement to flush before reading its props.
+          await nextTick();
+          if (pendingSelection !== selection) return;
+          pendingSelection = undefined;
+          // Closed projections may clear items and recreate their slot functions.
+          // A completed close owns dispatch regardless of that render order.
+          // A rejected close must retain its open projection; a newer menu or
+          // an inactive/replaced component scope always retires dispatch.
+          if (
+            !selection.cancelled &&
+            active.value &&
+            activity === activityLifetime &&
+            (props.at === null ||
+              (!selection.projectionChanged &&
+                props.at === at &&
+                props.items === items &&
+                props.slots.Surface === driver))
+          )
+            item.onSelect();
+        });
+      };
       return h(Fragment, null, [
         h("span", {
           ref: elementRef<HTMLElement>((element) => {
@@ -46,7 +126,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
           at: props.at,
           anchorRef,
           label: props.labels?.contextMenu ?? "Table actions",
-          onClose: props.onClose,
+          onClose: close,
           container: props.container,
           className: props.className,
           children: props.items.map((item) =>

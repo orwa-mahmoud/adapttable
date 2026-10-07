@@ -10,7 +10,13 @@ import type {
   SavedViewsPanelChromeProps as NeutralPanelProps,
   SavedViewsPanelSlots as NeutralPanelSlots,
 } from "@adapttable/core/binding";
-import { defineComponent, h, type VNodeChild, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  onScopeDispose,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import { useExternalStore, useScopeActivity } from "../store";
 export type SavedViewsPanelSlots = NeutralPanelSlots<VNodeChild>;
@@ -81,16 +87,54 @@ export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
       },
       { flush: "sync" }
     );
-    const run = (callback: () => void): void => {
-      if (active.value) callback();
-    };
-    const focus = (element: HTMLInputElement | null): void => {
-      if (active.value) element?.focus();
-    };
+    let generation = 0;
+    watch(
+      [
+        active,
+        () => props.views,
+        () => props.slots,
+        () => props.onApply,
+        () => props.onRename,
+        () => props.onMove,
+        () => props.onSetDefault,
+        () => props.onRemove,
+      ],
+      () => {
+        generation++;
+      },
+      { flush: "sync" }
+    );
+    watch(
+      () => state.value.editing,
+      () => {
+        generation++;
+      },
+      { flush: "sync" }
+    );
+    onScopeDispose(() => {
+      generation++;
+    });
     const rowFor = (view: SavedView, index: number): VNodeChild => {
       const labels = resolveLabels(props.labels);
       const controls = props.slots;
       const isEditing = state.value.editing === view.name;
+      const ticket = generation;
+      const live = active.value;
+      const views = props.views;
+      const run = (callback: () => void): void => {
+        if (
+          live &&
+          active.value &&
+          ticket === generation &&
+          props.views === views &&
+          props.slots === controls &&
+          views.includes(view)
+        )
+          callback();
+      };
+      const focus = (element: HTMLInputElement | null): void => {
+        run(() => element?.focus());
+      };
       return controls.Row({
         "data-adapttable-part": "saved-view-row",
         layout,
