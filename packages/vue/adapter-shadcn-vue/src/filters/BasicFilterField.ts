@@ -1,0 +1,57 @@
+import {
+  type DataTableClassNames,
+  FilterFieldChrome,
+  type FilterFieldOptions,
+  useFilterField,
+} from "@adapttable/vue/adapter";
+import { createVNode, defineComponent, type SetupContext } from "vue";
+
+import { shadcnFilterControls } from "../filterControls";
+import { filterClassNames } from "./presentation";
+
+export interface BasicFilterFieldProps<TRow> extends FilterFieldOptions<TRow> {
+  readonly classNames?: DataTableClassNames;
+  readonly className?: string;
+  readonly dir?: "ltr" | "rtl";
+}
+
+const propNames: (keyof BasicFilterFieldProps<unknown>)[] = [
+  "id",
+  "def",
+  "source",
+  "labels",
+  "registry",
+  "classNames",
+  "className",
+  "dir",
+];
+const BasicFieldPresentation = defineComponent(
+  (props: BasicFilterFieldProps<unknown>) => {
+    const model = useFilterField(() => props);
+    const controls = shadcnFilterControls(
+      () => filterClassNames(props.classNames),
+      () => props.dir
+    );
+    return () =>
+      FilterFieldChrome({
+        model: model.value,
+        controls,
+        classNames: filterClassNames(props.classNames),
+        className: props.className,
+      });
+  },
+  { name: "ShadcnBasicFilterField", props: propNames }
+);
+
+/** Generic boundary keeps filter accessors tied to the host's row type. */
+export function BasicFilterField<TRow>(
+  props: BasicFilterFieldProps<TRow>,
+  context: Pick<SetupContext, "attrs">
+) {
+  return createVNode(BasicFieldPresentation, {
+    ...context.attrs,
+    ...props,
+    dir: props.dir,
+  });
+}
+BasicFilterField.props = propNames;

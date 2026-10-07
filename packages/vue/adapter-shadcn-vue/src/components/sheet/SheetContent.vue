@@ -20,6 +20,8 @@ interface SheetContentProps extends DialogContentProps {
   portalTo?: string | HTMLElement;
   closeLabel: string;
   overlayClass?: NonNullable<HTMLAttributes["class"]>;
+  showClose?: boolean;
+  overlayPart?: string;
 }
 
 defineOptions({
@@ -31,6 +33,8 @@ const props = withDefaults(defineProps<SheetContentProps>(), {
   class: undefined,
   portalTo: undefined,
   overlayClass: undefined,
+  showClose: true,
+  overlayPart: undefined,
 });
 const emits = defineEmits<DialogContentEmits>();
 
@@ -40,7 +44,9 @@ const delegatedProps = reactiveOmit(
   "side",
   "portalTo",
   "closeLabel",
-  "overlayClass"
+  "overlayClass",
+  "showClose",
+  "overlayPart"
 );
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
@@ -48,7 +54,10 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
 
 <template>
   <DialogPortal :to="props.portalTo">
-    <SheetOverlay :class="props.overlayClass" />
+    <SheetOverlay
+      :class="props.overlayClass"
+      :data-adapttable-part="props.overlayPart"
+    />
     <DialogContent
       data-slot="sheet-content"
       :class="
@@ -70,6 +79,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
       <slot />
 
       <DialogClose
+        v-if="props.showClose"
         class="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 end-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"
       >
         <X class="size-4" />

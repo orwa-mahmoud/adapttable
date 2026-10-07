@@ -17,6 +17,7 @@ import {
   shadcnInput,
   shadcnSelectionCheckbox,
 } from "../controls";
+import { filterClassNames } from "./presentation";
 
 const controls: ChecklistSlots<VNodeChild> = {
   Search: (control) =>
@@ -31,7 +32,11 @@ const controls: ChecklistSlots<VNodeChild> = {
     }),
   Button: (control) =>
     shadcnButton({
-      attrs: { type: "button", onClick: control.onClick },
+      attrs: {
+        type: "button",
+        class: "min-h-11 sm:min-h-9",
+        onClick: control.onClick,
+      },
       label: control.label,
     }),
   Checkbox: (control) =>
@@ -46,7 +51,7 @@ const controls: ChecklistSlots<VNodeChild> = {
       },
       [
         shadcnSelectionCheckbox({
-          attrs: {},
+          attrs: { "aria-label": control.label },
           checked: control.checked,
           indeterminate: false,
           onToggle: () => control.onChange(!control.checked),
@@ -66,7 +71,10 @@ const controls: ChecklistSlots<VNodeChild> = {
 
 const ChecklistPresentation = defineComponent(
   (props: ChecklistFilterProps<unknown>) => {
-    const model = useChecklistModel(() => props);
+    const model = useChecklistModel(() => ({
+      ...props,
+      classNames: filterClassNames(props.classNames),
+    }));
     return () => ChecklistChrome({ model: model.value, controls });
   },
   {

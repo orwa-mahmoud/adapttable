@@ -54,6 +54,27 @@ export const shadcnClassNames: DataTableClassNames = {
   summaryCell: "p-3",
   summaryCard: "rounded-xl border border-border bg-muted/50 p-4",
   tableFooter: "text-sm text-muted-foreground",
+  groupRow: "bg-muted/40",
+  groupCell: "p-3",
+  groupCard: "rounded-xl border border-border p-3",
+  groupLabel: "font-medium",
+  groupCount: "ms-2 text-xs text-muted-foreground",
+  groupAggregate: "ms-3 text-sm tabular-nums",
+  groupToggle: "align-middle",
+  groupCheckbox: "mx-2 align-middle",
+  groupMore: "text-muted-foreground",
+  groupFooterCell: "border-t border-border p-3 font-medium",
+  groupMoreCell: "px-3 py-2",
+  editableCell: "inline-flex min-w-0 flex-col gap-1",
+  editCellActivate:
+    "min-w-0 max-w-full justify-start whitespace-normal px-2 text-start",
+  editCellEditor: "min-w-20",
+  editCellError: "text-xs text-destructive",
+  editCellSaveError: "text-xs text-destructive",
+  rowEditActions: "inline-flex flex-wrap gap-2",
+  batchEditBar:
+    "flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/40 p-3",
+  editHistory: "inline-flex gap-2",
 };
 
 /** Preserve every caller hook while allowing Tailwind utilities to override defaults. */

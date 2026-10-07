@@ -18,13 +18,17 @@ interface SelectControl extends FilterSelectProps {
 }
 
 /** Field models and their callbacks remain owned by the Vue binding. */
-export function shadcnFilterControls(names: () => DataTableClassNames) {
+export function shadcnFilterControls(
+  names: () => DataTableClassNames,
+  dir: () => "ltr" | "rtl" | undefined = () => undefined
+) {
   return {
     Input: (control: InputControl) =>
       shadcnInput({
         ...control,
         attrs: {
           ...control.attrs,
+          dir: dir(),
           type: control.type,
           class: control.className ?? names().filterInput,
         },
@@ -34,6 +38,7 @@ export function shadcnFilterControls(names: () => DataTableClassNames) {
         ...control,
         attrs: {
           ...control.attrs,
+          dir: dir(),
           class:
             control.className ??
             (control.attrs["data-adapttable-part"] === "filter-operator"
@@ -55,6 +60,7 @@ export function shadcnFilterControls(names: () => DataTableClassNames) {
         [
           h(Checkbox, {
             ...shadcnControlAttrs(attrs),
+            dir: dir(),
             modelValue: control.checked,
             "onUpdate:modelValue": (checked: boolean | "indeterminate") =>
               control.onChange(checked === true),

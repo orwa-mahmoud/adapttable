@@ -61,7 +61,9 @@ export function shadcnSelect(control: {
     {
       ...shadcnControlAttrs(control.attrs),
       modelValue: control.value,
-      "onUpdate:modelValue": control.onChange,
+      "onUpdate:modelValue": (value: string | readonly string[]): void => {
+        if (typeof value === "string") control.onChange(value);
+      },
     },
     () =>
       control.options.map((option) =>
@@ -70,6 +72,7 @@ export function shadcnSelect(control: {
           {
             key: option.value,
             value: option.value,
+            selected: option.value === control.value,
             disabled: option.disabled,
           },
           () => option.label
@@ -106,5 +109,40 @@ export function shadcnSelectionCheckbox(
     control.indeterminate
       ? () => h(Minus, { class: "size-3.5", "aria-hidden": true })
       : undefined
+  );
+}
+
+/** Native Select's multiple mode remains a controlled presentation value. */
+export function shadcnMultiSelect(control: {
+  readonly attrs: Attrs;
+  readonly value: readonly string[];
+  readonly options: readonly {
+    readonly value: string;
+    readonly label: string;
+  }[];
+  readonly onChange: (value: readonly string[]) => void;
+}): VNode {
+  return h(
+    NativeSelect,
+    {
+      ...shadcnControlAttrs(control.attrs),
+      multiple: true,
+      modelValue: control.value,
+      "onUpdate:modelValue": (value: string | readonly string[]): void => {
+        if (typeof value !== "string") control.onChange(value);
+      },
+    },
+    () =>
+      control.options.map((option) =>
+        h(
+          NativeSelectOption,
+          {
+            key: option.value,
+            value: option.value,
+            selected: control.value.includes(option.value),
+          },
+          () => option.label
+        )
+      )
   );
 }

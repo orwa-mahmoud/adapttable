@@ -4,15 +4,7 @@
     "noEmit": true,
     "jsx": "preserve",
     "jsxImportSource": "vue",
-    "types": ["node", "vitest/globals"],
-    "paths": {
-      "@adapttable/vue": ["../vue/src/index.ts"],
-      "@adapttable/vue/*": ["../vue/src/*.ts"],
-      "@adapttable/core": ["../../shared/core/src/index.ts"],
-      "@adapttable/core/*": ["../../shared/core/src/*.ts"],
-      "@adapttable/ai": ["../../shared/ai/src/index.ts"],
-      "@adapttable/ai/*": ["../../shared/ai/src/*.ts"]
-    }
+    "types": ["node", "vitest/globals"]
   },
   "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist", "coverage"],

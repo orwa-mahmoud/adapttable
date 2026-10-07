@@ -16,6 +16,7 @@ import {
   shadcnButton,
   shadcnDensityControl,
   shadcnInput,
+  shadcnMultiSelect,
   shadcnSelect,
   shadcnSelectionCheckbox,
 } from "../src/controls";
@@ -255,6 +256,36 @@ describe("copied shadcn controls", () => {
     await nextTick();
     expect(input.value).toBe("notes");
     expect(textarea.value).toBe("notes");
+  });
+
+  it("restores a rejected multi-select request and retires detached controls", async () => {
+    const changed = vi.fn();
+    const host = mount(() =>
+      shadcnMultiSelect({
+        attrs: { "aria-label": "Tags" },
+        value: ["a"],
+        onChange: changed,
+        options: [
+          { value: "a", label: "Alpha" },
+          { value: "b", label: "Beta" },
+        ],
+      })
+    );
+    const select = query<HTMLSelectElement>(host, "select");
+    expect(
+      Array.from(select.selectedOptions, (option) => option.value)
+    ).toEqual(["a"]);
+    for (const option of select.options) option.selected = true;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    await nextTick();
+    expect(changed).toHaveBeenCalledExactlyOnceWith(["a", "b"]);
+    expect(
+      Array.from(select.selectedOptions, (option) => option.value)
+    ).toEqual(["a"]);
+    cleanups.splice(0).forEach((cleanup) => cleanup());
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    await nextTick();
+    expect(changed).toHaveBeenCalledOnce();
   });
 
   it("renders controls through the server renderer", async () => {
