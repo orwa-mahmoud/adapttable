@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "rootDirs": [".", "../../.sfc-types/src/vue"],
     "jsx": "preserve",
     "jsxImportSource": "vue",
     "types": ["vite/client", "node"],

@@ -9,7 +9,6 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -27,10 +26,24 @@ afterEach(async () => {
 });
 
 async function fixture(files = {}) {
-  const root = await mkdtemp(join(tmpdir(), "showcase lint test "));
+  const temporary = join(repositoryRoot, ".turbo", "showcase-lint-tests");
+  await mkdir(temporary, { recursive: true });
+  const root = await mkdtemp(join(temporary, "fixture "));
   roots.push(root);
   const contents = {
     "package.json": '{"type":"module"}',
+    "src/vue/tsconfig.json": JSON.stringify({
+      compilerOptions: {
+        strict: true,
+        target: "ES2022",
+        module: "ESNext",
+        moduleResolution: "Bundler",
+        skipLibCheck: true,
+        types: [],
+        rootDirs: [".", "../../.sfc-types/src/vue"],
+      },
+      include: ["**/*.ts", "**/*.vue"],
+    }),
     "eslint.config.mjs": `export default [
       { ignores: ["**/dist/**", "**/build/**", "**/.sfc-types/**", "**/*.bundled_*.mjs", "**/ignored.ts"] },
       { files: ["**/*.{js,cjs,mjs,ts,tsx,vue}"], rules: { "no-undef": "error" } }
@@ -42,14 +55,17 @@ async function fixture(files = {}) {
     await mkdir(dirname(path), { recursive: true });
     await writeFile(path, content);
   }
-  const require = createRequire(import.meta.url);
-  const modules = dirname(dirname(require.resolve("eslint/package.json")));
-  await mkdir(join(root, "node_modules"));
-  await symlink(
-    join(modules, "eslint"),
-    join(root, "node_modules/eslint"),
-    "dir"
+  const require = createRequire(
+    join(repositoryRoot, "apps/showcase/package.json")
   );
+  await mkdir(join(root, "node_modules"));
+  for (const tool of ["eslint", "vue-tsc", "vue"]) {
+    await symlink(
+      dirname(require.resolve(`${tool}/package.json`)),
+      join(root, "node_modules", tool),
+      "dir"
+    );
+  }
   return root;
 }
 
@@ -140,7 +156,7 @@ test("empty Angular and Vue groups are harmless", async () => {
   const { groups } = await assertPartition(cwd);
   assert.equal(groups[1].length, 0);
   assert.equal(groups[2].length, 0);
-  assert.equal(lintShowcase({ cwd }), 0);
+  assert.equal(await lintShowcase({ cwd }), 0);
 });
 
 test("an empty React group does not skip an eligible Vue file", async () => {
@@ -149,24 +165,26 @@ test("an empty React group does not skip an eligible Vue file", async () => {
       { ignores: ["**/*.config.mjs"] },
       { files: ["**/*.vue"], rules: { "no-undef": "error" } }
     ];`,
-    "src/vue/only file.vue": "missing();",
+    "src/vue/only file.vue": "<template><div /></template>",
   });
   const { groups } = await assertPartition(cwd);
   assert.equal(groups[0].length, 0);
   assert.equal(groups[1].length, 0);
   assert.equal(groups[2].length, 1);
-  assert.equal(lintShowcase({ cwd }), 1);
+  assert.equal(await lintShowcase({ cwd }), 1);
 });
 
-test("every group runs and any nonzero exit is preserved", () => {
+test("every group runs and any nonzero exit is preserved", async () => {
   const calls = [];
   const statuses = [1, 2, 0];
-  const code = lintShowcase(
+  const run = (args, cwd) => {
+    calls.push({ args, cwd });
+    return statuses[calls.length - 1];
+  };
+  const code = await lintShowcase(
     { cwd: "/showcase", lintArgs: ["--", "--fix"] },
-    (args, cwd) => {
-      calls.push({ args, cwd });
-      return statuses[calls.length - 1];
-    }
+    run,
+    run
   );
   assert.equal(code, 2);
   assert.equal(calls.length, 3);
@@ -174,11 +192,11 @@ test("every group runs and any nonzero exit is preserved", () => {
   assert.ok(calls.every((call) => call.cwd === "/showcase"));
 });
 
-test("custom CLI options keep whole-run semantics", () => {
+test("custom CLI options keep whole-run semantics", async () => {
   const calls = [];
   const args = ["--max-warnings", "1", "--format", "json"];
   assert.equal(
-    lintShowcase({ lintArgs: args }, (received) => {
+    await lintShowcase({ lintArgs: args }, undefined, (received) => {
       calls.push(received);
       return 1;
     }),
@@ -191,7 +209,7 @@ for (const invocation of ["direct", "symlink"]) {
   test(`${invocation} CLI invocation performs real lint and propagates failure`, async () => {
     const cwd = await fixture({
       "src/angular/bad file.js": "missing();",
-      "src/vue/good file.vue": "",
+      "src/vue/good file.vue": "<template><div /></template>",
     });
     const script = fileURLToPath(
       new URL("./lint-showcase.mjs", import.meta.url)
@@ -207,6 +225,13 @@ for (const invocation of ["direct", "symlink"]) {
     assert.match(result.stdout, /bad file\.js/);
     assert.match(result.stdout, /no-undef/);
     assert.match(result.stdout, /Showcase ESLint: Vue/);
+    assert.match(
+      await readFile(
+        join(cwd, ".sfc-types/src/vue/good file.vue.d.ts"),
+        "utf8"
+      ),
+      /DefineComponent/
+    );
   });
 }
 

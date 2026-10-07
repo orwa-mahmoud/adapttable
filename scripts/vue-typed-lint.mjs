@@ -42,14 +42,19 @@ async function runProjectTool(tool, args, cwd) {
  * ordinary TypeScript, including ESLint's project service.
  */
 export async function lintVuePackage(
-  { cwd = process.cwd(), lintArgs = [], root = repositoryRoot } = {},
+  {
+    cwd = process.cwd(),
+    lintArgs = [],
+    root = repositoryRoot,
+    tsconfig = "tsconfig.json",
+  } = {},
   runTool = runProjectTool
 ) {
   const directory = resolve(cwd);
   const projectPath = relative(root, directory);
   if (projectPath.startsWith("..") || isAbsolute(projectPath))
     throw new Error("The Vue package must be inside the repository.");
-  const project = join(directory, "tsconfig.json");
+  const project = resolve(directory, tsconfig);
   const output = join(directory, ".sfc-types");
   const emitted = join(output, ".emit");
   await access(project);
@@ -68,7 +73,7 @@ export async function lintVuePackage(
           extends: project,
           // This is the SFC declaration producer, not a second package test
           // typecheck. ESLint still visits the complete ordinary package target.
-          include: [join(directory, "**/*.vue")],
+          include: [join(dirname(project), "**/*.vue")],
           compilerOptions: {
             noEmit: false,
             declaration: true,
