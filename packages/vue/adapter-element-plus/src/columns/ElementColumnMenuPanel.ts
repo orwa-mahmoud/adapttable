@@ -20,7 +20,10 @@ import { ElementCard } from "../presentation/ElementCard";
 import { columnMenuContainer } from "./panelContext";
 
 export const ElementColumnMenuPanel = defineComponent(
-  (props: { readonly control: ManagedOverlayPanelProps }) => {
+  (props: {
+    readonly control: ManagedOverlayPanelProps;
+    readonly initialFocus?: string;
+  }) => {
     const active = useScopeActivity();
     const inheritedDirection = shallowRef<"ltr" | "rtl">();
     const readDirection = () => {
@@ -92,7 +95,7 @@ export const ElementColumnMenuPanel = defineComponent(
       if (!active.value || !props.control.open || !props.control.isCurrent())
         return;
       const search = panel.value?.querySelector<HTMLInputElement>(
-        'input[data-adapttable-part="column-menu-search"]'
+        props.initialFocus ?? 'input[data-adapttable-part="column-menu-search"]'
       );
       (search ?? panel.value)?.focus();
     };
@@ -157,5 +160,5 @@ export const ElementColumnMenuPanel = defineComponent(
       );
     };
   },
-  { name: "ElementColumnMenuPanel", props: ["control"] }
+  { name: "ElementColumnMenuPanel", props: ["control", "initialFocus"] }
 );

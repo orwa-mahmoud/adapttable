@@ -454,3 +454,37 @@ Compose `editing` with `editHistory` when row or batch history needs cell replay
 Editors retain server-rendered structure for hydration and retire open kit
 popups and stale callbacks when their table is cached or unmounted. Importing the
 package root does not activate or load editing controls.
+
+### Commands, saved views, grouping, and row moves
+
+The canonical `command-palette`, `context-menu`, `export`, `grouping-panel`,
+`row-reorder`, `saved-views`, and `side-panel` entries fill the shared Vue feature
+contracts with Element Plus controls. Import the factories from those subpaths
+and pass them to `DataTable` through `features`.
+
+```ts
+import { commandPalette } from "@adapttable/element-plus/command-palette";
+import { contextMenu } from "@adapttable/element-plus/context-menu";
+import { exportCsv } from "@adapttable/element-plus/export";
+import { groupingPanel } from "@adapttable/element-plus/grouping-panel";
+import { rowReorder } from "@adapttable/element-plus/row-reorder";
+import { savedViews } from "@adapttable/element-plus/saved-views";
+import { sidePanel } from "@adapttable/element-plus/side-panel";
+```
+
+Command search and active items remain in the shared command model; `ElDialog`
+owns the palette's modal interaction. Context menus use `ElDropdown` and
+`ElDropdownItem` for native menu navigation. Both surfaces honor their table's
+fullscreen container. `ElButton`, `ElInput`, `ElSelect`, `ElCheckbox`, `ElTag`,
+`ElCard`, `ElProgress`, and `ElLink` render the other controls without introducing
+another feature store.
+
+Grouping chips forward drag and keyboard interactions to the shared grouping
+controller. Aggregation changes use the same shared operations and host
+notifications. Row reorder requests preserve host row ownership; cross-group
+and tree moves use the shared confirmation model rendered through `ElDialog`.
+
+The `saved-views` entry also exports `SavedViewsPanel` and `SavedViewsPanelProps`
+for management surfaces. Rename drafts, read-only/default rules, ordering, URL
+state, and storage remain owned by the shared saved-view models. `sidePanel`
+retains controlled panel selection, with native buttons and a native card frame.
