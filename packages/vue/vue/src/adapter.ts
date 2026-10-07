@@ -562,3 +562,10 @@ export {
   unpinAllColumns,
 } from "@adapttable/core/binding";
 export { resolveCellSpan } from "@adapttable/core/binding";
+export {
+  createMenuNavigation,
+  type MenuNavigationAction,
+  type MenuNavigationController,
+  type MenuNavigationItem,
+  type MenuNavigationKey,
+} from "@adapttable/core/binding";

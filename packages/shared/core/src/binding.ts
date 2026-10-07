@@ -995,6 +995,13 @@ export type {
   UseTableUrlStateResult,
 } from "./url/urlBindingState";
 // Types the shared state shapes above hand back.
+export {
+  createMenuNavigation,
+  type MenuNavigationAction,
+  type MenuNavigationController,
+  type MenuNavigationItem,
+  type MenuNavigationKey,
+} from "./actions/menuNavigation";
 export type { EditableColumnLike } from "./editing/cellEditing";
 export type {
   EditCommitSnapshot,

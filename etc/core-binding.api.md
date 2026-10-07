@@ -1719,6 +1719,9 @@ export function coreVirtualize(options?: VirtualizeInput): CoreFeature;
 export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry>(features: readonly FeatureSetup<unknown, TPanel>[] | undefined): FeatureHostState;
 
 // @public
+export function createMenuNavigation(): MenuNavigationController;
+
+// @public
 export type CssProperties = Record<string, string | number | undefined>;
 
 // @public
@@ -4184,6 +4187,49 @@ export function measureRowDetailAsPair(isMobile: boolean, renderRowDetail: unkno
 
 // @public
 export function measureWindowScrollMargin(root: Element | null): number;
+
+// @public
+export type MenuNavigationAction = {
+    readonly kind: "close";
+    readonly key: "Escape" | "Tab";
+} | {
+    readonly kind: "focus";
+    readonly index: number;
+};
+
+// @public
+export interface MenuNavigationController {
+    // (undocumented)
+    readonly key: (event: MenuNavigationKey, items: readonly MenuNavigationItem[], focused: number, now?: number) => MenuNavigationAction | undefined;
+    // (undocumented)
+    readonly reset: () => void;
+}
+
+// @public
+export interface MenuNavigationItem {
+    // (undocumented)
+    readonly disabled?: boolean;
+    // (undocumented)
+    readonly label: string;
+}
+
+// @public
+export interface MenuNavigationKey {
+    // (undocumented)
+    readonly altKey?: boolean;
+    // (undocumented)
+    readonly ctrlKey?: boolean;
+    // (undocumented)
+    readonly defaultPrevented?: boolean;
+    // (undocumented)
+    readonly isComposing?: boolean;
+    // (undocumented)
+    readonly key: string;
+    // (undocumented)
+    readonly metaKey?: boolean;
+    // (undocumented)
+    readonly shiftKey?: boolean;
+}
 
 // @public
 export interface MergedCellStyle {

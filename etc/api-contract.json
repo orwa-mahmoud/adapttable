@@ -6294,7 +6294,12 @@
       "VirtualTableRow",
       "WindowVirtualizer",
       "WiringReorder",
-      "withSourceIndices"
+      "withSourceIndices",
+      "createMenuNavigation",
+      "MenuNavigationAction",
+      "MenuNavigationController",
+      "MenuNavigationItem",
+      "MenuNavigationKey"
     ],
     "core-conformance": [
       "CONFORMANCE_COLUMNS",
@@ -10002,7 +10007,12 @@
       "useMobileCardsModel",
       "useScopeActivity",
       "useSummaryCells",
-      "useTableSummaryModel"
+      "useTableSummaryModel",
+      "createMenuNavigation",
+      "MenuNavigationAction",
+      "MenuNavigationController",
+      "MenuNavigationItem",
+      "MenuNavigationKey"
     ],
     "adapter-vue-unstyled": [
       "CellContext",

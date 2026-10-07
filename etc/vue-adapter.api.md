@@ -84,6 +84,7 @@ import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuSlots as ContextMenuSlots_2 } from '@adapttable/core/binding';
 import { ContextMenuSurfaceProps } from '@adapttable/core/binding';
+import { createMenuNavigation } from '@adapttable/core/binding';
 import { CSSProperties } from 'vue';
 import { CssProperties } from '@adapttable/core/binding';
 import { CssProperties as CssProperties_2 } from '@adapttable/core';
@@ -197,6 +198,10 @@ import { isColumnGroupSummaryKey } from '@adapttable/core/binding';
 import { isExtraEntry } from '@adapttable/core/binding';
 import { LiveFeatureHost } from '@adapttable/core/binding';
 import { MaybeRefOrGetter } from 'vue';
+import { MenuNavigationAction } from '@adapttable/core/binding';
+import { MenuNavigationController } from '@adapttable/core/binding';
+import { MenuNavigationItem } from '@adapttable/core/binding';
+import { MenuNavigationKey } from '@adapttable/core/binding';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
 import { orderedCardEntries } from '@adapttable/core/binding';
@@ -871,6 +876,8 @@ export function createAdapterTableAssistantFeature(render: (props: TableAssistan
 
 // @public (undocumented)
 export function createFeatureState(): TableFeatureState;
+
+export { createMenuNavigation }
 
 // @public
 export interface DataTableClassNames {
@@ -2742,6 +2749,14 @@ export interface ManagedOverlayPanelProps extends OverlayPanelProps {
 
 // @public
 type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
+
+export { MenuNavigationAction }
+
+export { MenuNavigationController }
+
+export { MenuNavigationItem }
+
+export { MenuNavigationKey }
 
 // @public
 export function mergeVueAttrs(binding: Attrs, host: Attrs): Record<string, unknown>;

@@ -683,6 +683,17 @@ Arrow/Home/End/Enter handling and disabled-command behavior. Switching the
 surface retires the previous focus owner and stale callbacks. Ordinary surfaces
 keep the existing generic behavior.
 
+### Flat-menu keyboard navigation
+
+`createMenuNavigation()` from `@adapttable/vue/adapter` creates a
+`MenuNavigationController` for an adapter-owned flat menu. Its `key()` method
+reads `MenuNavigationKey`, the current `MenuNavigationItem` list and focused
+index, then returns a `MenuNavigationAction` or `undefined`. It skips disabled
+items, wraps arrow navigation, supports Home/End and incremental typeahead,
+and requests closure for Escape or Tab. Apply focus to the real semantic menu
+item, keep Enter/Space activation native, and let Tab continue normal focus
+traversal. Reset the controller when its owning menu session retires.
+
 ### Native editor input types
 
 `editorInputType(editor)` re-exports the core's canonical input-type mapping from

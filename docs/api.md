@@ -882,6 +882,12 @@ CommandPaletteController` — the palette's open state, controlled or its own.
   (`CommandListView`), `commandListKeyAction` (`CommandListKeyAction`),
   `nextCommandIndex`, `runCommand`, `tabTrapTarget`.
 
+- `createMenuNavigation(): MenuNavigationController` — flat-menu keyboard
+  navigation with disabled-item skipping and incremental typeahead.
+  `MenuNavigationItem` and `MenuNavigationKey` describe its inputs;
+  `MenuNavigationAction` requests focus or an Escape/Tab close. The controller
+  leaves Enter/Space activation and native Tab traversal to the real control.
+
 ### Column and filter controllers
 
 The rules behind the column menu and the filter panel, for a binding to wire
