@@ -81,6 +81,47 @@ outside-click APIs. Drawer mode retains Naive's mask, focus trap and scroll
 lock. Escape first dismisses an open nested select, then the filter surface.
 The drawer mask boundary below also applies to filtering.
 
+## Editing and grouping
+
+The proposed `editing`, `batch-editing` and `grouping` subpaths add opt-in
+controls. Cell, row and batch editing use `NInput`, `NInputNumber`, `NCheckbox`
+and `NSelect`; Save, Cancel, conflict resolution, rollback, Undo and Redo use
+`NButton`. Group collapse, paging and selection fill the shared group chrome
+with Naive buttons and checkboxes on desktop and cards.
+
+```ts
+import {
+  editing,
+  editHistory,
+  dirtyIndicators,
+  undoRedoButtons,
+} from "@adapttable/naive-ui/editing";
+
+const features = [
+  editing<Person>((row, columnKey, value) => {
+    // Update your authoritative data here.
+  }),
+  editHistory(),
+  dirtyIndicators(),
+  undoRedoButtons(),
+];
+```
+
+Validation, raw drafts, pending saves, conflicts, history and stale callback
+ownership remain in the Vue binding. Row editing saves through Save or Enter;
+batch editing requires its explicit Save. Blur keeps staged drafts. History with
+row or batch editing also needs an `editing()` callback to
+replay values. Custom editors receive the binding's existing editor contract.
+
+Numeric inputs use the public `inputProps` and `format` APIs so the binding's
+raw draft survives vendor blur formatting. Numeric and choice editor refs
+resolve `input[role="spinbutton"]` and `input[role="combobox"]` beneath Vue's
+public `$el`; the roles are supplied through `inputProps`. Editing part markers,
+validation ARIA attributes and class hooks land on these native inputs. This
+editing select differs from the general compound-select host contract above.
+An open select owns its navigation, selection and first Escape; a second Escape
+cancels the edit and restores the activation button's focus.
+
 ## Compatibility
 
 This package targets Vue 3.5 and Naive UI 2.45.3. The package is prepared for an

@@ -140,3 +140,33 @@
   :where([data-adapttable-part="column-menu-label"]) {
   overflow-wrap: anywhere;
 }
+
+.adapttable-naive [data-edit-unit] {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  max-inline-size: 100%;
+}
+.adapttable-naive [data-edit-unit][data-dirty] {
+  border-inline-start: 3px solid var(--adapttable-naive-selected);
+  padding-inline-start: 0.375rem;
+}
+.adapttable-naive
+  :where(
+    [data-adapttable-part="row-edit-actions"],
+    [data-adapttable-part="batch-edit-bar"]
+  ) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.adapttable-naive
+  :where(
+    [data-adapttable-part="edit-cell-error"],
+    [data-adapttable-part="edit-cell-conflict"],
+    [data-adapttable-part="edit-cell-save-error"]
+  ) {
+  flex-basis: 100%;
+}

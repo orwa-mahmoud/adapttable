@@ -19,6 +19,14 @@ import { pathToFileURL } from "node:url";
 /** Every fixture's diagnostic identity, separate from the invalid source. */
 export const VUE_TYPE_EXPECTATIONS = {
   "@adapttable/naive-ui": {
+    "WrongEditingRows.ts": [
+      {
+        code: 2322,
+        message:
+          /TableFeature(?:\$[1-9]\d*)?<Order>.*TableFeature(?:\$[1-9]\d*)?<Person>/,
+        count: 3,
+      },
+    ],
     "WrongColumnRows.ts": [
       {
         code: 2322,
@@ -504,13 +512,13 @@ export function diagnosticProblems({
   problems.push(...fixtureProblems(files, expectations));
   const { diagnostics, unexpected } = parseDiagnostics(output);
   problems.push(
-    ...unexpected.map((line) => `Unexpected compiler output: ${line}`)
+    ...unexpected.map((line) => `Unexpected compiler output: ${line}`),
   );
   const byFile = new Map();
   for (const diagnostic of diagnostics) {
     const file = relative(fixtureDir, resolve(cwd, diagnostic.file)).replaceAll(
       "\\",
-      "/"
+      "/",
     );
     const found = byFile.get(file) ?? [];
     found.push(diagnostic);
@@ -519,11 +527,11 @@ export function diagnosticProblems({
       !expectations[file]?.some(
         (expected) =>
           expected.code === diagnostic.code &&
-          expected.message.test(diagnostic.message)
+          expected.message.test(diagnostic.message),
       )
     ) {
       problems.push(
-        `${diagnostic.file}: unexpected TS${diagnostic.code}: ${diagnostic.message}`
+        `${diagnostic.file}: unexpected TS${diagnostic.code}: ${diagnostic.message}`,
       );
     }
   }
@@ -532,14 +540,14 @@ export function diagnosticProblems({
       const actual = (byFile.get(file) ?? []).filter(
         (found) =>
           found.code === diagnostic.code &&
-          diagnostic.message.test(found.message)
+          diagnostic.message.test(found.message),
       ).length;
       const expectedCount = diagnostic.count ?? 1;
       if (actual !== expectedCount) {
         problems.push(
           actual === 0
             ? `${file}: missing expected TS${diagnostic.code} ${diagnostic.message}`
-            : `${file}: expected ${expectedCount} occurrence(s) of TS${diagnostic.code} ${diagnostic.message}; got ${actual}`
+            : `${file}: expected ${expectedCount} occurrence(s) of TS${diagnostic.code} ${diagnostic.message}; got ${actual}`,
         );
       }
     }
@@ -567,7 +575,7 @@ export function checkVueTypes(cwd = process.cwd()) {
   const fixtureDir = join(cwd, "test/types/invalid");
   const files = invalidFixtures(fixtureDir);
   const compiler = createRequire(import.meta.url).resolve(
-    "vue-tsc/bin/vue-tsc.js"
+    "vue-tsc/bin/vue-tsc.js",
   );
   const result = spawnSync(
     process.execPath,
@@ -579,7 +587,7 @@ export function checkVueTypes(cwd = process.cwd()) {
       "-p",
       join(fixtureDir, "tsconfig.json"),
     ],
-    { cwd, encoding: "utf8" }
+    { cwd, encoding: "utf8" },
   );
   if (result.error) throw result.error;
   if (result.signal) throw new Error(`vue-tsc terminated by ${result.signal}`);
