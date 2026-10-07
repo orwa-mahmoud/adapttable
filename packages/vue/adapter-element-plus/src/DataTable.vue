@@ -378,4 +378,45 @@ function setScrollElement(element: HTMLElement | null): void {
   color: var(--el-text-color-secondary);
   font-size: var(--el-font-size-small);
 }
+
+.adapttable-element-plus
+  :is(
+    [data-adapttable-part="pinned-top"],
+    [data-adapttable-part="pinned-bottom"]
+  ) {
+  background: var(--el-bg-color);
+}
+
+.adapttable-element-plus
+  :is(
+    [data-adapttable-part="pinned-summary-top"],
+    [data-adapttable-part="pinned-summary-bottom"]
+  ) {
+  background: var(--el-fill-color-light);
+  font-weight: 600;
+}
+
+.adapttable-element-plus
+  :is(
+    [data-adapttable-part="pinned-top"],
+    [data-adapttable-part="pinned-bottom"],
+    [data-adapttable-part="pinned-summary-top"],
+    [data-adapttable-part="pinned-summary-bottom"]
+  )
+  > td {
+  background: inherit;
+}
+
+.adapttable-element-plus [data-adapttable-part="separator-cell"] {
+  border-block-start: 1px solid var(--el-border-color-light);
+}
+
+.adapttable-element-plus
+  :is(
+    .adapttable-element-plus-table,
+    .adapttable-element-plus-card,
+    .adapttable-element-plus-card-body
+  ) {
+  overflow: visible;
+}
 </style>

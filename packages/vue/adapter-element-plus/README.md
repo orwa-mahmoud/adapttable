@@ -190,3 +190,78 @@ the host performs the change. Confirmation uses `ElMessageBox`, stays inside the
 fullscreen table and uses the owning Vue app's providers. Dismissal, table
 deactivation and unmount cancel that table's pending dialogs. Supply `confirm`
 on `DataTable` to use your own confirmation handler.
+
+## Pinned, summary and supplementary rows
+
+```ts
+import {
+  extraRows,
+  pinnedSummaryRows,
+  rowAppearance,
+  rowPinning,
+} from "@adapttable/element-plus/rows";
+
+const features = [
+  rowPinning(),
+  pinnedSummaryRows<Person>({
+    bottom: [{ id: "total", name: "Total", score: 179 }],
+  }),
+  extraRows([
+    { key: "note", kind: "fullWidth", render: () => "Latest scores" },
+  ]),
+  rowAppearance<Person>({
+    rowClassName: (person) => (person.score >= 90 ? "high-score" : undefined),
+  }),
+];
+```
+
+Data-row pin controls use Element Plus row actions. Pass a ref or getter through
+`pinnedRowIds` and handle `onPinnedRowIdsChange` to control their state. A rejected
+request leaves the rendered pin order unchanged. Grouped and tree tables do not
+support data-row pinning. Independent summary rows remain outside selection,
+sorting and filtering.
+
+Desktop summaries and extras retain native table geometry, including spans.
+Mobile summaries and supplementary content use `ElCard`; their data rows keep
+all fields visible. Host row classes, styles and heights apply to the actual
+row or card. Individual optional entries are also available at `/row-pinning`,
+`/pinned-summary-rows`, `/extra-rows` and `/row-appearance`.
+
+## Column controls
+
+```ts
+import { type ColumnInput } from "@adapttable/element-plus";
+import {
+  collapsibleColumnGroups,
+  fitColumns,
+  multiSort,
+  resizableColumns,
+} from "@adapttable/element-plus/columns";
+
+const columns: ColumnInput<Person>[] = [
+  {
+    header: "Scorecard",
+    collapsedKey: "name",
+    children: [
+      { key: "name", sortable: true },
+      { key: "score", sortable: true },
+    ],
+  },
+];
+const features = [
+  collapsibleColumnGroups(),
+  fitColumns(),
+  multiSort(),
+  resizableColumns(),
+];
+```
+
+Column-group toggles, sort actions and resize handles use `ElButton`. Shift-click
+a desktop sort heading to add another priority. Resize handles support native
+pointer interaction and direction-aware Arrow keys through the shared binding.
+Use `v-model:column-layout` to accept layout requests; a supplied layout remains
+authoritative until the host updates it.
+
+Mobile cards follow the accepted column layout and sort order. They omit the
+desktop group and resize controls. Header groups keep their native table spans
+and their localized toggle names during server rendering and hydration.

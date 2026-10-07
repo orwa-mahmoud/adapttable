@@ -18,6 +18,7 @@ export function ElementDesktopTable<TRow>(props: {
     {
       shadow: "never",
       class: "adapttable-element-plus-table",
+      bodyClass: "adapttable-element-plus-card-body",
       bodyStyle: { padding: 0 },
     },
     {

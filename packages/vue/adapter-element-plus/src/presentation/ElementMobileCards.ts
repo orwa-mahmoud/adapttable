@@ -205,6 +205,9 @@ export function ElementMobileCards<TRow>(props: {
               "data-adapttable-part": parts.row,
             }),
             key: slot.key,
+            bodyStyle: {
+              padding: slot.extraKind === "separator" ? "0.5rem 1rem" : "1rem",
+            },
           },
           {
             default: () =>

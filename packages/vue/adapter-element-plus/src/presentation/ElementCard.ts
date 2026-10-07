@@ -34,8 +34,9 @@ export const ElementCard = defineComponent(
       return h(
         ElCard,
         {
-          ...nativeAttrs,
+          ...mergeProps({ class: "adapttable-element-plus-card" }, nativeAttrs),
           shadow: "never",
+          bodyClass: "adapttable-element-plus-card-body",
           bodyStyle: props.bodyStyle,
           ref: control,
         },
