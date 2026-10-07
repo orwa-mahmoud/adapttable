@@ -1,0 +1,30 @@
+@layer components {
+  .adapttable-nuxt [data-adapttable-part="find-bar"],
+  .adapttable-nuxt [data-adapttable-part="status-bar"],
+  .adapttable-nuxt [data-adapttable-part="selection-stats"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .adapttable-nuxt [data-adapttable-part="find-previous"],
+  .adapttable-nuxt [data-adapttable-part="find-next"],
+  .adapttable-nuxt [data-adapttable-part="find-close"] {
+    min-height: 2.75rem;
+  }
+  .adapttable-nuxt [data-adapttable-part="fill-handle-anchor"] {
+    position: relative;
+    display: block;
+    height: 0;
+  }
+  .adapttable-nuxt [data-adapttable-part="fill-handle"] {
+    position: absolute;
+    inset-inline-end: -3px;
+    bottom: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    background: var(--ui-primary);
+    cursor: crosshair;
+  }
+}

@@ -258,6 +258,56 @@
         "types": "./dist/header-filters.d.cts",
         "default": "./dist/header-filters.cjs"
       }
+    },
+    "./cell-navigation": {
+      "import": {
+        "types": "./dist/cell-navigation.d.ts",
+        "default": "./dist/cell-navigation.js"
+      },
+      "require": {
+        "types": "./dist/cell-navigation.d.cts",
+        "default": "./dist/cell-navigation.cjs"
+      }
+    },
+    "./find-in-table": {
+      "import": {
+        "types": "./dist/find-in-table.d.ts",
+        "default": "./dist/find-in-table.js"
+      },
+      "require": {
+        "types": "./dist/find-in-table.d.cts",
+        "default": "./dist/find-in-table.cjs"
+      }
+    },
+    "./status-bar": {
+      "import": {
+        "types": "./dist/status-bar.d.ts",
+        "default": "./dist/status-bar.js"
+      },
+      "require": {
+        "types": "./dist/status-bar.d.cts",
+        "default": "./dist/status-bar.cjs"
+      }
+    },
+    "./selection-stats": {
+      "import": {
+        "types": "./dist/selection-stats.d.ts",
+        "default": "./dist/selection-stats.js"
+      },
+      "require": {
+        "types": "./dist/selection-stats.d.cts",
+        "default": "./dist/selection-stats.cjs"
+      }
+    },
+    "./virtualize": {
+      "import": {
+        "types": "./dist/virtualize.d.ts",
+        "default": "./dist/virtualize.js"
+      },
+      "require": {
+        "types": "./dist/virtualize.d.cts",
+        "default": "./dist/virtualize.cjs"
+      }
     }
   },
   "dependencies": {

@@ -10,6 +10,40 @@ Nuxt UI controls for AdaptTable's headless Vue binding. The binding owns table
 state, callbacks and structural Chrome; this adapter supplies Nuxt UI components.
 It does not use Nuxt UI's separate `UTable` engine.
 
+## Features
+
+The Nuxt UI adapter currently exports 32 canonical feature factories. Its base
+DataTable provides sorting, pagination, global search, row selection, desktop
+tables and mobile cards through the shared Vue model and genuine Nuxt controls.
+Feature composition is opt-in through the following factories:
+
+- View controls: `densityChooser` and `fullscreen`. Comfortable and Compact stay
+  visible in a native RadioGroup; fullscreen uses Nuxt Button.
+- Filtering: `filters`, `filterTypes` and `headerFilters`. Nuxt Input, Select,
+  Checkbox, Popover and Slideover support toolbar and header filters, custom
+  filter types, checklist choices and an AND/OR filter tree.
+- Editing: `editing`, `rowEditing`, `batchEditing`, `dirtyIndicators`,
+  `editHistory` and `undoRedoButtons`. Nuxt editors and action buttons use the
+  binding's cell editing, row editing, validation and host write contracts.
+- Column management: `columnMenu`, `multiSort`, `resizableColumns`, `fitColumns`
+  and `collapsibleColumnGroups`. Nuxt controls present column layout, rename,
+  visibility, pinning and column groups.
+- Rows: `rowActions`, `rowAppearance`, `rowPinning`, `extraRows`,
+  `pinnedSummaryRows` and `cellSpan`. These cover row actions, row styling, row
+  pinning, full-width rows, pinned summary rows and row and column spanning.
+- Hierarchy: `grouping`, `tree`, `rowDetail` and `nestedTable`. Nuxt expansion,
+  selection and load-more buttons present group rows, hierarchical rows, row
+  expansion and nested tables using the binding's models.
+- Navigation and status: `cellNavigation`, `columnSelectionCheckbox`,
+  `findInTable`, `statusBar`, `selectionStats` and `virtualize`. Nuxt Input,
+  Button, Checkbox and Badge present Find, column selection and status figures.
+  The binding owns keyboard navigation, range selection, fill requests and
+  virtualization with one scroll container.
+
+The implemented controls retain localized labels, RTL direction and the shared
+SSR and hydration contracts. This inventory describes the available source
+surface; it does not imply full feature parity or completed browser validation.
+
 ## Nuxt UI setup
 
 Nuxt UI 4 is MIT-licensed, including the components previously offered as Pro.
@@ -287,3 +321,11 @@ state.
 - [Input](https://ui.nuxt.com/docs/components/input),
   [Select](https://ui.nuxt.com/docs/components/select),
   [Checkbox](https://ui.nuxt.com/docs/components/checkbox)
+
+## Navigation and status
+
+Import `cellNavigation` and `columnSelectionCheckbox` from `@adapttable/nuxt-ui/cell-navigation`, `findInTable` from `@adapttable/nuxt-ui/find-in-table`, and `statusBar` or `selectionStats` from `@adapttable/nuxt-ui/status-bar`. The `selection-stats` entry also exports `selectionStats`. `findInTable({ button: true })` adds a genuine Nuxt toolbar button; its search field and actions use Nuxt Input and Button. Column selection uses Nuxt Checkbox, and status figures use Nuxt Badge.
+
+The shared Vue binding owns keyboard navigation, range selection, fill requests, Find state and localized status text. Host fill callbacks remain requests; the adapter never changes row data itself. Desktop navigation attaches after hydration and stays disabled on mobile. The fill handle is a positioned span carrying the binding's pointer handlers. All canonical part markers and class names remain on their semantic targets.
+
+Import `virtualize` from `@adapttable/nuxt-ui/virtualize` to use the binding's row and column windowing with the same Nuxt table/card surface and single scroll owner. The feature preserves measured expanded details and releases their observers on removal or layout changes. Flat paged tables retain the binding's existing virtualization eligibility rules.
