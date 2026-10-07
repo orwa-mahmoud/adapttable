@@ -4,6 +4,14 @@ import Vue from "unplugin-vue/rolldown";
 export default defineConfig({
   entry: [
     "src/index.ts",
+    "src/bulk-actions.ts",
+    "src/cell-navigation.ts",
+    "src/export.ts",
+    "src/find-in-table.ts",
+    "src/print.ts",
+    "src/selection-stats.ts",
+    "src/status-bar.ts",
+
     "src/renderers.ts",
     "src/density.ts",
     "src/fullscreen.ts",

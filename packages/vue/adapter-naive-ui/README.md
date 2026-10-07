@@ -192,3 +192,15 @@ customizable.
 ## License
 
 MIT.
+
+## Navigation and utility controls
+
+Opt in through `bulk-actions`, `cell-navigation`, `export`, `find-in-table`,
+`print`, `selection-stats`, and `status-bar`. The `cell-navigation` entry also
+exports `columnSelectionCheckbox`; `status-bar` also exports `selectionStats`.
+
+Naive buttons, checkboxes, inputs, text, cards and progress indicators render
+the controls. The Vue binding owns selection ranges, find matches, action
+requests and export jobs. Printing and data changes remain host callbacks.
+Find and utility controls work in mobile cards; cell ranges and fill handles
+are desktop-grid features.

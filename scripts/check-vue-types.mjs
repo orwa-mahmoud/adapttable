@@ -52,6 +52,7 @@ export const VUE_TYPE_EXPECTATIONS = {
     ],
   },
   "@adapttable/naive-ui": {
+    "WrongUtilityRows.ts": [{ code: 2322, message: /TableFeature(?:\$[1-9]\d*)?<Invoice>.*TableFeature(?:\$[1-9]\d*)?<Person>/ }],
     "WrongEditingRows.ts": [
       {
         code: 2322,
