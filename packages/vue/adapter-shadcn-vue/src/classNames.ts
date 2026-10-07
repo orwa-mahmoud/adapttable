@@ -36,7 +36,7 @@ export const shadcnClassNames: DataTableClassNames = {
     "flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground",
   pager: "flex flex-wrap items-center gap-2",
   pageNumber:
-    "aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground",
+    "aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground dark:aria-[current=page]:bg-primary",
   loadingCards: "grid gap-3 sm:grid-cols-2",
   loadingCard: "gap-4 border-border p-4",
   loadingTable: "w-full border-collapse",

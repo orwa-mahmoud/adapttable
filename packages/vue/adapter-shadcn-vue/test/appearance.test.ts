@@ -11,6 +11,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 
 import { DataTable, type DataTableProps } from "../src";
+import { Button } from "../src/components/button";
 import { densityChooser } from "../src/density";
 
 interface Person {
@@ -73,6 +74,20 @@ function compactPaint(element: Element, property: string): string[] {
   });
   return values;
 }
+function matchingPaint(element: Element, property: string): string[] {
+  const values: string[] = [];
+  stylesheet.walkRules((rule) => {
+    // Neither pseudo-elements nor keyframe offsets select the control itself.
+    if (
+      rule.selector.includes("::") ||
+      (rule.parent?.type === "atrule" && rule.parent.name === "keyframes")
+    )
+      return;
+    const paint = declarations(rule, property);
+    if (paint.length && element.matches(rule.selector)) values.push(...paint);
+  });
+  return values;
+}
 function target<T extends Element>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Missing ${selector}`);
@@ -100,6 +115,116 @@ function mount(options: Partial<DataTableProps<Person>>) {
 }
 
 describe("compiled shadcn appearance contracts", () => {
+  it.each(["light", "dark"])(
+    "resets native sortable-button paint without host preflight (%s)",
+    async (theme) => {
+      const view = mount({ forceMobile: false });
+      view.root.classList.toggle("dark", theme === "dark");
+      await nextTick();
+      const button = target(view.root, '[data-adapttable-part="sort-button"]');
+      expect(matchingPaint(button, "background-color").at(-1)).toBe("#0000");
+      expect(matchingPaint(button, "color").at(-1)).toBe("inherit");
+      const hostButton = document.createElement("button");
+      view.root.append(hostButton);
+      expect(matchingPaint(hostButton, "background-color")).toEqual([]);
+      expect(matchingPaint(hostButton, "color")).toEqual([]);
+    }
+  );
+
+  it.each(["light", "dark"])(
+    "keeps the current page's compiled foreground and background paired (%s)",
+    async (theme) => {
+      const view = mount({
+        forceMobile: false,
+        paginationMode: "paged",
+        defaults: { limit: 1 },
+      });
+      view.root.classList.toggle("dark", theme === "dark");
+      await nextTick();
+      const current = () => target(view.root, '[aria-current="page"]');
+      const expectCurrentPaint = () => {
+        expect(matchingPaint(current(), "background-color").at(-1)).toBe(
+          "var(--primary,#18181b)"
+        );
+        expect(matchingPaint(current(), "color").at(-1)).toBe(
+          "var(--primary-foreground,#fafafa)"
+        );
+      };
+      expect(current().textContent).toBe("1");
+      expectCurrentPaint();
+      const previous = current();
+      target<HTMLButtonElement>(
+        view.root,
+        '[data-adapttable-part="page-next"]'
+      ).click();
+      await nextTick();
+      expect(current().textContent).toBe("2");
+      expectCurrentPaint();
+      expect(matchingPaint(previous, "color").at(-1)).toBe("inherit");
+    }
+  );
+
+  it("preserves copied Button variants and caller color overrides", () => {
+    const root = document.createElement("div");
+    document.body.append(root);
+    const variants = [
+      "default",
+      "destructive",
+      "outline",
+      "secondary",
+      "ghost",
+      "link",
+    ] as const;
+    const app = createApp({
+      render: () =>
+        h("div", [
+          ...variants.map((variant) => h(Button, { variant }, () => variant)),
+          h(
+            Button,
+            {
+              variant: "ghost",
+              class: "bg-destructive text-white",
+              disabled: true,
+            },
+            () => "Custom"
+          ),
+        ]),
+    });
+    app.mount(root);
+    cleanups.push(() => {
+      app.unmount();
+      root.remove();
+    });
+    const paint = (variant: string, property: string) =>
+      matchingPaint(target(root, `[data-variant="${variant}"]`), property).at(
+        -1
+      );
+    expect(paint("default", "background-color")).toBe("var(--primary,#18181b)");
+    expect(paint("default", "color")).toBe("var(--primary-foreground,#fafafa)");
+    expect(paint("destructive", "background-color")).toBe(
+      "var(--destructive,#dc2626)"
+    );
+    expect(paint("destructive", "color")).toBe("var(--color-white)");
+    expect(paint("outline", "background-color")).toBe("var(--background,#fff)");
+    expect(paint("outline", "color")).toBe("inherit");
+    expect(paint("secondary", "background-color")).toBe(
+      "var(--secondary,#f4f4f5)"
+    );
+    expect(paint("secondary", "color")).toBe(
+      "var(--secondary-foreground,#18181b)"
+    );
+    expect(paint("ghost", "background-color")).toBe("#0000");
+    expect(paint("link", "background-color")).toBe("#0000");
+    expect(paint("link", "color")).toBe("var(--primary,#18181b)");
+    const custom = target(root, "button:disabled");
+    expect(matchingPaint(custom, "background-color").at(-1)).toBe(
+      "var(--destructive,#dc2626)"
+    );
+    expect(matchingPaint(custom, "color").at(-1)).toBe("var(--color-white)");
+    expect(matchingPaint(custom, "pointer-events").at(-1)).toBe("none");
+    expect(matchingPaint(custom, "opacity").at(-1)).toBe(".5");
+  });
+
   it.each(["ltr", "rtl"] as const)(
     "keeps native pinned cells on opaque row and header theme paint (%s)",
     async (dir) => {

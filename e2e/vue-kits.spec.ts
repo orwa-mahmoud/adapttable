@@ -152,6 +152,71 @@ for (const kit of VUE_KIT_PAGES) {
       await screenshot(page, info, `${kit.path}-keyboard-selection`);
     });
 
+    if (kit.path === "shadcn-vue") {
+      for (const theme of ["light", "dark"] as const) {
+        test(`${theme}: native Button paint and current page contrast`, async ({
+          page,
+        }, info) => {
+          await page.goto(`${route}?theme=${theme}`);
+          const surface = page.locator(".vue-kit-preview__table");
+          const sort = surface.locator(part("sort-button"));
+          await expect(sort.first()).toBeVisible();
+          const headers = await sort.evaluateAll((buttons) =>
+            buttons.map((button) => {
+              const header = button.closest("th");
+              if (!header) throw new Error("Sortable button has no header");
+              return {
+                background: getComputedStyle(button).backgroundColor,
+                foreground: getComputedStyle(button).color,
+                headerForeground: getComputedStyle(header).color,
+              };
+            })
+          );
+          expect(headers.length).toBeGreaterThan(0);
+          for (const header of headers) {
+            expect(header.background).toBe("rgba(0, 0, 0, 0)");
+            expect(header.foreground).toBe(header.headerForeground);
+          }
+          const current = surface.locator(
+            `${part("page-number")}[aria-current="page"]`
+          );
+          const expected = await current.evaluate((button) => {
+            const probe = document.createElement("span");
+            probe.style.backgroundColor = "var(--primary)";
+            probe.style.color = "var(--primary-foreground)";
+            button.append(probe);
+            const style = getComputedStyle(probe);
+            const paint = {
+              background: style.backgroundColor,
+              foreground: style.color,
+            };
+            probe.remove();
+            return paint;
+          });
+          const expectCurrentPaint = async () => {
+            await expect(current).toHaveCSS(
+              "background-color",
+              expected.background
+            );
+            await expect(current).toHaveCSS("color", expected.foreground);
+            expect(expected.background).not.toBe(expected.foreground);
+          };
+          await expectCurrentPaint();
+          await current.hover();
+          await expectCurrentPaint();
+          await page
+            .getByRole("button", { name: "Next page", exact: true })
+            .press("Enter");
+          await expect(current).toHaveText("2");
+          await expectCurrentPaint();
+          await sort.first().focus();
+          await expect(sort.first()).toBeFocused();
+          await expect(sort.first()).not.toHaveCSS("box-shadow", "none");
+          await screenshot(page, info, `shadcn-vue-${theme}-button-paint`);
+        });
+      }
+    }
+
     test("density selector keeps keyboard focus and updates the actual table", async ({
       page,
     }, info) => {
