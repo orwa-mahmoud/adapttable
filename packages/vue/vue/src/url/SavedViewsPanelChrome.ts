@@ -63,7 +63,7 @@ function glyph({ paths, filled }: SavedViewGlyph): VNodeChild {
     paths.map((d) => h("path", { key: d, d }))
   );
 }
-export const SavedViewsPanelChrome = defineComponent(
+export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
   (props: SavedViewsPanelChromeProps) => {
     const active = useScopeActivity();
     const rename = createSavedViewRenameController();

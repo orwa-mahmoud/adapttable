@@ -560,7 +560,7 @@ function draw(
     : children;
 }
 /** @public */
-export const TableAssistantChrome = defineComponent(
+export const TableAssistantChrome = /*#__PURE__*/ defineComponent(
   (props: TableAssistantChromeProps) => {
     const active = useScopeActivity();
     const generation = shallowRef(0);

@@ -65,7 +65,7 @@ function describe(
   });
 }
 /** @public */
-export const ApprovalReviewChrome = defineComponent(
+export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
   (props: ApprovalReviewChromeProps) => {
     const active = useScopeActivity();
     const expanded = shallowRef(false);
@@ -314,7 +314,7 @@ export interface AgentApprovalChromeProps extends AgentApprovalProps {
   readonly slots: ApprovalReviewSlots;
 }
 /** @public */
-export const AgentApprovalChrome = defineComponent(
+export const AgentApprovalChrome = /*#__PURE__*/ defineComponent(
   (props: AgentApprovalChromeProps) => () => {
     const pending =
       props.pending?.presentation === "table" ? props.pending : null;

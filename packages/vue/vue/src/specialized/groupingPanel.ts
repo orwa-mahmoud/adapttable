@@ -62,7 +62,7 @@ export interface GroupingPanelChromeProps<
   };
 }
 /** DOM refs are per rendered panel; nothing is retained across tables. */
-const GroupingPanelSurface = defineComponent({
+const GroupingPanelSurface = /*#__PURE__*/ defineComponent({
   props: {
     model: {
       type: Object as PropType<GroupingPanelChromeProps<unknown>>,

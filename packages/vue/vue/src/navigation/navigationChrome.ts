@@ -83,7 +83,7 @@ function findBarStructure(
     }),
   ]);
 }
-const FindBarStructure = defineComponent(
+const FindBarStructure = /*#__PURE__*/ defineComponent(
   (props: FindBarChromeProps) => {
     let input: { focus(): void } | null = null;
     let previous: HTMLElement | null = null;
@@ -123,7 +123,7 @@ export type ColumnSelectSlots = NeutralColumnSelectSlots<VNodeChild>;
 export interface ColumnSelectCheckboxChromeProps extends NeutralColumnSelectCheckboxChromeProps {
   readonly slots: ColumnSelectSlots;
 }
-const ColumnSelectStructure = defineComponent(
+const ColumnSelectStructure = /*#__PURE__*/ defineComponent(
   (props: ColumnSelectCheckboxChromeProps) => {
     const active = useScopeActivity();
     const canHover = shallowRef(false);

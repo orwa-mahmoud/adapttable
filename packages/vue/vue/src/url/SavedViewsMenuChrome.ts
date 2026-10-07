@@ -29,7 +29,7 @@ export interface SavedViewsMenuSlots {
 export interface SavedViewsMenuChromeProps extends SavedViewsControlProps {
   readonly slots: SavedViewsMenuSlots;
 }
-export const SavedViewsMenuChrome = defineComponent(
+export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
   (props: SavedViewsMenuChromeProps) => {
     const active = useScopeActivity();
     const open = shallowRef(false);

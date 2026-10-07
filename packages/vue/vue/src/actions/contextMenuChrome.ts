@@ -8,7 +8,7 @@ import { elementRef } from "../attrs";
 import { useScopeActivity } from "../store";
 export type ContextMenuSlots = NeutralSlots<VNodeChild>;
 export type ContextMenuChromeProps = NeutralProps<VNodeChild>;
-export const ContextMenuChrome = defineComponent(
+export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
   (props: ContextMenuChromeProps) => {
     const active = useScopeActivity();
     const anchorRef: { current: HTMLElement | null } = { current: null };

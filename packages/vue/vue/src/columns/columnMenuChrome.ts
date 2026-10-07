@@ -149,7 +149,7 @@ function announcement(
     editor.snapshot.value.announcement
   );
 }
-export const ColumnHeaderRenameChrome = defineComponent(
+export const ColumnHeaderRenameChrome = /*#__PURE__*/ defineComponent(
   (
     props: ColumnHeaderRenameSlotProps & { readonly slots: ColumnRenameSlots }
   ) => {
@@ -196,7 +196,7 @@ export const ColumnHeaderRenameChrome = defineComponent(
   }
 );
 
-const ColumnMenuRowChrome = defineComponent(
+const ColumnMenuRowChrome = /*#__PURE__*/ defineComponent(
   (props: {
     readonly row: ColumnMenuDisplayRow;
     readonly labels: ColumnMenuLabels;
@@ -207,6 +207,10 @@ const ColumnMenuRowChrome = defineComponent(
     const open = shallowRef(false);
     const editor = useColumnRenameEditor(() => props.row.rename);
     const actionTrigger = shallowRef<HTMLElement | null>(null);
+    const submenu = shallowRef<HTMLElement | null>(null);
+    const submenuRef = elementRef<HTMLElement>((element) => {
+      submenu.value = element;
+    });
     const onKeydown = (event: KeyboardEvent): void => {
       if (event.key === "Escape" && open.value) {
         event.preventDefault();
@@ -301,50 +305,67 @@ const ColumnMenuRowChrome = defineComponent(
                 icon: "more",
               }),
           open.value
-            ? h("div", part("column-menu-submenu", names), [
-                ...actions.map((item) =>
-                  "kind" in item
-                    ? h(
-                        "div",
-                        { ...part("column-menu-choice", names), key: item.id },
-                        [
-                          h(
-                            "span",
-                            part("column-menu-choice-label", names),
-                            item.label
-                          ),
-                          slots.Choice({
-                            attrs: {
-                              ...part("column-menu-choice-select", names),
-                              "aria-label": item.label,
-                              disabled: item.disabled,
-                              onKeydown,
-                            },
-                            value: item.value,
-                            options: item.options,
-                            onChange: item.onChange,
-                          }),
-                        ]
-                      )
-                    : slots.Button({
-                        attrs: {
-                          ...part("column-menu-action", names),
-                          key: item.id,
-                          type: "button",
-                          disabled:
-                            item.disabled ||
-                            (item.id === "rename" && editor.editing.value),
-                          onClick: (): void => {
-                            if (!props.active || item.disabled) return;
-                            item.run();
-                            if (item.id !== "rename") open.value = false;
+            ? h(
+                "div",
+                { ...part("column-menu-submenu", names), ref: submenuRef },
+                [
+                  ...actions.map((item) =>
+                    "kind" in item
+                      ? h(
+                          "div",
+                          {
+                            ...part("column-menu-choice", names),
+                            key: item.id,
                           },
-                        },
-                        label: item.label,
-                      })
-                ),
-                renameForm(editor, labels, slots, names, "column"),
-              ])
+                          [
+                            h(
+                              "span",
+                              part("column-menu-choice-label", names),
+                              item.label
+                            ),
+                            slots.Choice({
+                              attrs: {
+                                ...part("column-menu-choice-select", names),
+                                "aria-label": item.label,
+                                disabled: item.disabled,
+                                onKeydown,
+                              },
+                              value: item.value,
+                              options: item.options,
+                              onChange: item.onChange,
+                            }),
+                          ]
+                        )
+                      : slots.Button({
+                          attrs: {
+                            ...part("column-menu-action", names),
+                            key: item.id,
+                            type: "button",
+                            disabled:
+                              item.disabled ||
+                              (item.id === "rename" && editor.editing.value),
+                            onClick: (): void => {
+                              if (!props.active || item.disabled) return;
+                              if (item.id !== "rename") {
+                                const trigger = actionTrigger.value;
+                                if (
+                                  trigger?.isConnected &&
+                                  submenu.value?.contains(
+                                    trigger.ownerDocument.activeElement
+                                  )
+                                )
+                                  trigger.focus();
+                              }
+                              item.run();
+                              if (item.id !== "rename") open.value = false;
+                            },
+                          },
+                          label: item.label,
+                        })
+                  ),
+                  renameForm(editor, labels, slots, names, "column"),
+                ]
+              )
             : null,
           announcement(editor, names, "column"),
         ]
@@ -357,7 +378,7 @@ const ColumnMenuRowChrome = defineComponent(
   }
 );
 
-export const ColumnMenuChrome = defineComponent(
+export const ColumnMenuChrome = /*#__PURE__*/ defineComponent(
   (props: {
     readonly model: ColumnMenuModel;
     readonly slots: ColumnMenuSlots;

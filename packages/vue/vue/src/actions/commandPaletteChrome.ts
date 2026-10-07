@@ -72,7 +72,7 @@ export function managedCommandPaletteSurface(
     { interactionOwner: "kit" as const }
   );
 }
-export const CommandPaletteChrome = defineComponent(
+export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
   (props: CommandPaletteChromeProps) => {
     const active = useScopeActivity();
     const managed = computed(
