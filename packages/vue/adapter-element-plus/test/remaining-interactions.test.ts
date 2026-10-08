@@ -192,3 +192,28 @@ it("renders native export progress and forwards cancel, retry and dismiss", asyn
   expect(retry).toHaveBeenCalledTimes(1);
   expect(dismiss).toHaveBeenCalledTimes(1);
 });
+it("replaces the busy export button's icon with the named spinner", async () => {
+  const busy = shallowRef(true);
+  const { Button } = elementExportSlots({ exportSpinner: "custom-spinner" });
+  const view = mount(() =>
+    Button({
+      attrs: {
+        "data-adapttable-part": "export-csv-button",
+        "aria-busy": busy.value || undefined,
+      },
+      label: "Export CSV",
+      icon: h("span", { "data-icon": "" }),
+    })
+  );
+  await tick();
+  const button = node<HTMLButtonElement>(view.root, part("export-csv-button"));
+  const spinner = node(button, part("export-spinner"));
+  expect(spinner.getAttribute("aria-hidden")).toBe("true");
+  expect(spinner.classList.contains("is-loading")).toBe(true);
+  expect(spinner.classList.contains("custom-spinner")).toBe(true);
+  expect(button.querySelector("[data-icon]")).toBeNull();
+  busy.value = false;
+  await tick();
+  expect(button.querySelector(part("export-spinner"))).toBeNull();
+  expect(button.querySelector("[data-icon]")).not.toBeNull();
+});

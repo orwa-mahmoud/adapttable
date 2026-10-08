@@ -1,5 +1,5 @@
 import type { ExportSlots } from "@adapttable/vue/adapter";
-import { ElLink, ElProgress } from "element-plus";
+import { ElIcon, ElLink, ElProgress } from "element-plus";
 import { h } from "vue";
 
 import { elementButton } from "../controls/button";
@@ -8,10 +8,32 @@ export const elementExportSlots = (
   names: Readonly<Record<string, string | undefined>> = {}
 ): ExportSlots => ({
   Button: ({ attrs, label, icon }) =>
-    elementButton({ ...attrs, loading: attrs["aria-busy"] === true }, [
-      icon,
-      label,
-    ]),
+    elementButton(
+      { ...attrs, loading: attrs["aria-busy"] === true },
+      [attrs["aria-busy"] === true ? null : icon, label],
+      () =>
+        h(
+          ElIcon,
+          {
+            "aria-hidden": "true",
+            "data-adapttable-part": "export-spinner",
+            class: ["is-loading", names.exportSpinner],
+          },
+          {
+            default: () =>
+              h(
+                "svg",
+                {
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  "stroke-width": 2,
+                },
+                [h("path", { d: "M21 12a9 9 0 1 1-6.22-8.56" })]
+              ),
+          }
+        )
+    ),
   Surface: (props) =>
     h(
       ElementCard,

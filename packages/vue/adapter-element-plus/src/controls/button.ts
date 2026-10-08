@@ -14,7 +14,11 @@ import { isElementRef } from "./ref";
 
 const ElementButton = defineComponent(
   (
-    props: { readonly attrs: Attrs; readonly content: VNodeChild },
+    props: {
+      readonly attrs: Attrs;
+      readonly content: VNodeChild;
+      readonly loading?: () => VNodeChild;
+    },
     { attrs }
   ) => {
     const control = shallowRef<ButtonInstance>();
@@ -39,15 +43,28 @@ const ElementButton = defineComponent(
       return h(
         ElButton,
         { ...nativeAttrs, nativeType, ref: control },
-        { default: () => props.content }
+        props.loading
+          ? { default: () => props.content, loading: props.loading }
+          : { default: () => props.content }
       );
     };
   },
-  { name: "ElementButton", props: ["attrs", "content"], inheritAttrs: false }
+  {
+    name: "ElementButton",
+    props: ["attrs", "content", "loading"],
+    inheritAttrs: false,
+  }
 );
 
-/** Element Plus retains its native button; one setup scope owns its DOM ref. */
-export function elementButton(attrs: Attrs, content: VNodeChild): VNode {
+/**
+ * Element Plus retains its native button; one setup scope owns its DOM ref.
+ * `loading` replaces ElButton's busy icon while its `loading` prop is set.
+ */
+export function elementButton(
+  attrs: Attrs,
+  content: VNodeChild,
+  loading?: () => VNodeChild
+): VNode {
   const key = attrs.key;
   return h(ElementButton, {
     key:
@@ -58,5 +75,6 @@ export function elementButton(attrs: Attrs, content: VNodeChild): VNode {
         : undefined,
     attrs,
     content,
+    loading,
   });
 }
