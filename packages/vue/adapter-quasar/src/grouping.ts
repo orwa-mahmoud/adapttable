@@ -56,6 +56,16 @@ export function grouping<TRow>(
   ]);
 }
 export type {
+  GroupCollapseOptions,
+  GroupNode,
+  GroupSort,
+} from "@adapttable/vue";
+export {
+  useGroupCollapse,
+  useGroupCollapseUrlState,
+  useGroupPaging,
+} from "@adapttable/vue";
+export type {
   GroupingExtras,
   StaticGroupingExtras,
 } from "@adapttable/vue/features";

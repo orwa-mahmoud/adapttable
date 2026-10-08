@@ -4,14 +4,24 @@
 
 ```ts
 
+import { CellContext } from '@adapttable/vue';
+import { CellEdit } from '@adapttable/vue';
+import { CellRange } from '@adapttable/vue/adapter';
+import { ColumnDef } from '@adapttable/vue';
+import { ColumnGroup } from '@adapttable/vue';
+import { ColumnInput } from '@adapttable/vue';
 import { ColumnLayoutState } from '@adapttable/vue';
 import { DataTableClassNames } from '@adapttable/vue/adapter';
 import { DataTableHandle } from '@adapttable/vue';
 import { DataTableProps } from '@adapttable/vue/adapter';
 import { DataTableSlots } from '@adapttable/vue/adapter';
+import { FooterContext } from '@adapttable/vue';
+import { HeaderContext } from '@adapttable/vue';
 import { PublicProps } from 'vue';
 import { ShallowUnwrapRef } from 'vue';
+import { SummaryRowFn } from '@adapttable/vue';
 import { TableDensity } from '@adapttable/vue';
+import { TableSource } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)
@@ -34,6 +44,18 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
 // @public (undocumented)
 type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
+export { CellContext }
+
+export { CellEdit }
+
+export { CellRange }
+
+export { ColumnDef }
+
+export { ColumnGroup }
+
+export { ColumnInput }
+
 // @public (undocumented)
 export const DataTable: typeof __VLS_export;
 
@@ -44,6 +66,16 @@ export { DataTableHandle }
 export { DataTableProps }
 
 export { DataTableSlots }
+
+export { FooterContext }
+
+export { HeaderContext }
+
+export { SummaryRowFn }
+
+export { TableDensity }
+
+export { TableSource }
 
 // (No @packageDocumentation comment for this package)
 

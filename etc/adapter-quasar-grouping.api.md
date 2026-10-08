@@ -4,11 +4,19 @@
 
 ```ts
 
+import { GroupCollapseOptions } from '@adapttable/vue';
 import { GroupingExtras } from '@adapttable/vue/features';
+import { GroupNode } from '@adapttable/vue';
+import { GroupSort } from '@adapttable/vue';
 import { MaybeRefOrGetter } from 'vue';
 import { StaticGroupingExtras } from '@adapttable/vue/features';
 import { StaticTableFeature } from '@adapttable/vue';
 import { TableFeature } from '@adapttable/vue';
+import { useGroupCollapse } from '@adapttable/vue';
+import { useGroupCollapseUrlState } from '@adapttable/vue';
+import { useGroupPaging } from '@adapttable/vue';
+
+export { GroupCollapseOptions }
 
 // @public
 export function grouping(groupBy: MaybeRefOrGetter<string | readonly string[]>, extras?: StaticGroupingExtras): StaticTableFeature;
@@ -18,7 +26,17 @@ export function grouping<TRow>(groupBy: MaybeRefOrGetter<string | readonly strin
 
 export { GroupingExtras }
 
+export { GroupNode }
+
+export { GroupSort }
+
 export { StaticGroupingExtras }
+
+export { useGroupCollapse }
+
+export { useGroupCollapseUrlState }
+
+export { useGroupPaging }
 
 // (No @packageDocumentation comment for this package)
 

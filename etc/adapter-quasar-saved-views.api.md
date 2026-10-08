@@ -14,6 +14,8 @@ import { SavedViewsStore } from '@adapttable/vue';
 import { StaticTableFeature } from '@adapttable/vue';
 import { UseSavedViewsOptions } from '@adapttable/vue';
 
+export { DataTableClassNames }
+
 export { SavedView }
 
 // @public (undocumented)

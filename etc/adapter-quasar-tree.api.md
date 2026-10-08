@@ -4,12 +4,24 @@
 
 ```ts
 
+import { TableTree } from '@adapttable/vue';
 import { tree } from '@adapttable/vue/features';
+import { TreeExpansionOptions } from '@adapttable/vue';
 import { TreeFeatureOptions } from '@adapttable/vue/features';
+import { useLazyChildren } from '@adapttable/vue';
+import { useTreeExpansion } from '@adapttable/vue';
+
+export { TableTree }
 
 export { tree }
 
+export { TreeExpansionOptions }
+
 export { TreeFeatureOptions }
+
+export { useLazyChildren }
+
+export { useTreeExpansion }
 
 // (No @packageDocumentation comment for this package)
 

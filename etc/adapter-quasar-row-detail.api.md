@@ -4,12 +4,30 @@
 
 ```ts
 
+import { NestedTable } from '@adapttable/vue';
 import { nestedTable } from '@adapttable/vue/features';
+import { nestedTableDetail } from '@adapttable/vue/adapter';
+import { NestedTableFor } from '@adapttable/vue';
 import { rowDetail } from '@adapttable/vue/features';
+import { RowExpansionOptions } from '@adapttable/vue';
+import { TableRowDetail } from '@adapttable/vue';
+import { useRowExpansion } from '@adapttable/vue';
+
+export { NestedTable }
 
 export { nestedTable }
 
+export { nestedTableDetail }
+
+export { NestedTableFor }
+
 export { rowDetail }
+
+export { RowExpansionOptions }
+
+export { TableRowDetail }
+
+export { useRowExpansion }
 
 // (No @packageDocumentation comment for this package)
 
