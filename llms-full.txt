@@ -31862,9 +31862,9 @@ factories from `@adapttable/vue-unstyled` feature subpaths with the native table
 binding-only factories require the corresponding adapter slots.
 
 The seven styled adapters expose the same 41 canonical feature factories, with
-kit-specific controls. Optional convenience APIs still vary: a preset, feature
-barrel, assistant surface or pivot configuration panel is available only where
-the package exports it. See the [adapter entry map](./features.md#styled-adapter-feature-entries)
+kit-specific controls, and every one exports `standardFeatures()` from its
+`/preset` entry. A feature barrel, assistant surface or pivot configuration panel
+is available only where the package exports it. See the [adapter entry map](./features.md#styled-adapter-feature-entries)
 for those boundaries. Compose standard Unstyled controls with `standardFeatures()`
 from `@adapttable/vue-unstyled/preset`, or choose individual feature entries.
 
@@ -32860,13 +32860,13 @@ second feature or require a migration of saved state.
 
 | Adapter                    | Feature barrel and preset | Kit-specific optional surfaces and writers                                          |
 | -------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
-| `@adapttable/element-plus` | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
-| `@adapttable/vuetify`      | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
-| `@adapttable/naive-ui`     | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/element-plus` | `/preset`                 | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/vuetify`      | `/preset`                 | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/naive-ui`     | `/preset`                 | CSV controls accept optional binding PDF/XLSX writers.                              |
 | `@adapttable/reka-ui`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`. |
 | `@adapttable/shadcn-vue`   | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`. |
-| `@adapttable/nuxt-ui`      | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
-| `@adapttable/quasar`       | Use focused imports       | `/export-pdf`, `/export-xlsx`; pivot controls are host-composed.                    |
+| `@adapttable/nuxt-ui`      | `/preset`                 | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/quasar`       | `/preset`                 | `/export-pdf`, `/export-xlsx`; pivot controls are host-composed.                    |
 
 All adapters can render data prepared by binding `/pivot`, `/formula`, `/sparkline`
 and `/stream` helpers. That does not imply a kit-specific pivot configuration
@@ -32930,8 +32930,8 @@ applicable toolbar controls.
   `agentApproval()`; the host supplies transport and approval decisions.
 - `/preset`: `standardFeatures()` and `StandardFeatureOptions<TRow>`.
 
-The Reka and shadcn-vue presets install the same ten zero-argument features
-described below, each using its own kit's controls. Their `filters`, `savedViews`,
+Every Vue kit's preset installs the same ten zero-argument features described
+below, each using its own kit's controls. Their `filters`, `savedViews`,
 `grouping` and `bulkActions` options add configured features; `findButton` controls
 the optional Find button. Import from the chosen kit's `/preset` and load that
 kit's `/styles.css` once in the application. Fullscreen depends on
@@ -33960,8 +33960,8 @@ binding factory alone does not do so. Use `/column-selection` for
 `columnSelectionCheckbox` and `/nested-table` for `nestedTable` on every kit.
 Older aliases remain available where they were already exported.
 
-Only Unstyled, Reka UI and shadcn-vue currently expose the documented `/features`
-barrel, `/preset`, `/assistant` and controlled `/pivot` panel. Quasar additionally
+Every Vue kit exports `/preset`. Only Unstyled, Reka UI and shadcn-vue expose the
+documented `/features` barrel, `/assistant` and controlled `/pivot` panel. Quasar additionally
 provides dedicated `/export-pdf` and `/export-xlsx` entries. Element Plus,
 Vuetify, Naive UI and Nuxt UI use their own `/export` feature with optional
 `pdfWriter` or `xlsxWriter` from binding `/pdf` or `/xlsx`.

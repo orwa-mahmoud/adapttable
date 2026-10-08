@@ -36,9 +36,9 @@ factories from `@adapttable/vue-unstyled` feature subpaths with the native table
 binding-only factories require the corresponding adapter slots.
 
 The seven styled adapters expose the same 41 canonical feature factories, with
-kit-specific controls. Optional convenience APIs still vary: a preset, feature
-barrel, assistant surface or pivot configuration panel is available only where
-the package exports it. See the [adapter entry map](./features.md#styled-adapter-feature-entries)
+kit-specific controls, and every one exports `standardFeatures()` from its
+`/preset` entry. A feature barrel, assistant surface or pivot configuration panel
+is available only where the package exports it. See the [adapter entry map](./features.md#styled-adapter-feature-entries)
 for those boundaries. Compose standard Unstyled controls with `standardFeatures()`
 from `@adapttable/vue-unstyled/preset`, or choose individual feature entries.
 

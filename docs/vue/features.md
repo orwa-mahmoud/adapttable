@@ -97,13 +97,13 @@ second feature or require a migration of saved state.
 
 | Adapter                    | Feature barrel and preset | Kit-specific optional surfaces and writers                                          |
 | -------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
-| `@adapttable/element-plus` | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
-| `@adapttable/vuetify`      | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
-| `@adapttable/naive-ui`     | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/element-plus` | `/preset`                 | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/vuetify`      | `/preset`                 | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/naive-ui`     | `/preset`                 | CSV controls accept optional binding PDF/XLSX writers.                              |
 | `@adapttable/reka-ui`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`. |
 | `@adapttable/shadcn-vue`   | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`. |
-| `@adapttable/nuxt-ui`      | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
-| `@adapttable/quasar`       | Use focused imports       | `/export-pdf`, `/export-xlsx`; pivot controls are host-composed.                    |
+| `@adapttable/nuxt-ui`      | `/preset`                 | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/quasar`       | `/preset`                 | `/export-pdf`, `/export-xlsx`; pivot controls are host-composed.                    |
 
 All adapters can render data prepared by binding `/pivot`, `/formula`, `/sparkline`
 and `/stream` helpers. That does not imply a kit-specific pivot configuration
@@ -167,8 +167,8 @@ applicable toolbar controls.
   `agentApproval()`; the host supplies transport and approval decisions.
 - `/preset`: `standardFeatures()` and `StandardFeatureOptions<TRow>`.
 
-The Reka and shadcn-vue presets install the same ten zero-argument features
-described below, each using its own kit's controls. Their `filters`, `savedViews`,
+Every Vue kit's preset installs the same ten zero-argument features described
+below, each using its own kit's controls. Their `filters`, `savedViews`,
 `grouping` and `bulkActions` options add configured features; `findButton` controls
 the optional Find button. Import from the chosen kit's `/preset` and load that
 kit's `/styles.css` once in the application. Fullscreen depends on

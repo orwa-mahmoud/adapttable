@@ -663,6 +663,7 @@
       "adapter-element-plus-tree",
       "adapter-element-plus-virtualize",
       "adapter-element-plus",
+      "adapter-element-plus-preset",
       "adapter-naive-ui-batch-editing",
       "adapter-naive-ui-bulk-actions",
       "adapter-naive-ui-cell-navigation",
@@ -701,6 +702,7 @@
       "adapter-naive-ui-tree",
       "adapter-naive-ui-virtualize",
       "adapter-naive-ui",
+      "adapter-naive-ui-preset",
       "adapter-nuxt-ui-batch-editing",
       "adapter-nuxt-ui-bulk-actions",
       "adapter-nuxt-ui-cell-navigation",
@@ -740,6 +742,7 @@
       "adapter-nuxt-ui-tree",
       "adapter-nuxt-ui-virtualize",
       "adapter-nuxt-ui",
+      "adapter-nuxt-ui-preset",
       "adapter-quasar-batch-editing",
       "adapter-quasar-bulk-actions",
       "adapter-quasar-cell-navigation",
@@ -779,6 +782,7 @@
       "adapter-quasar-tree",
       "adapter-quasar-virtualize",
       "adapter-quasar",
+      "adapter-quasar-preset",
       "adapter-reka-ui-assistant",
       "adapter-reka-ui-batch-editing",
       "adapter-reka-ui-bulk-actions",
@@ -915,7 +919,8 @@
       "adapter-vuetify-status-bar",
       "adapter-vuetify-tree",
       "adapter-vuetify-virtualize",
-      "adapter-vuetify"
+      "adapter-vuetify",
+      "adapter-vuetify-preset"
     ]
   },
   "surfaces": {
@@ -11818,6 +11823,12 @@
       "TableDensity",
       "TableSource"
     ],
+    "adapter-element-plus-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
+    ],
     "adapter-naive-ui-batch-editing": [
       "batchEditing",
       "BatchEditingState",
@@ -12028,6 +12039,12 @@
       "SummaryRowFn",
       "TableDensity",
       "TableSource"
+    ],
+    "adapter-naive-ui-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
     ],
     "adapter-nuxt-ui-batch-editing": [
       "batchEditing",
@@ -12256,6 +12273,12 @@
       "DataTableProps",
       "DataTableSlots"
     ],
+    "adapter-nuxt-ui-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
+    ],
     "adapter-quasar-batch-editing": [
       "batchEditing",
       "BatchEditingState",
@@ -12462,6 +12485,12 @@
       "DataTableHandle",
       "DataTableProps",
       "DataTableSlots"
+    ],
+    "adapter-quasar-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
     ],
     "adapter-reka-ui-assistant": [
       "agentApproval",
@@ -13549,6 +13578,12 @@
       "SummaryRowFn",
       "TableDensity",
       "TableSource"
+    ],
+    "adapter-vuetify-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
     ]
   },
   "entrypoints": {
@@ -16083,6 +16118,9 @@
     "adapter-element-plus.api.md": {
       "surface": "adapter-element-plus"
     },
+    "adapter-element-plus-preset.api.md": {
+      "surface": "adapter-element-plus-preset"
+    },
     "adapter-naive-ui-batch-editing.api.md": {
       "surface": "adapter-naive-ui-batch-editing"
     },
@@ -16196,6 +16234,9 @@
     },
     "adapter-naive-ui.api.md": {
       "surface": "adapter-naive-ui"
+    },
+    "adapter-naive-ui-preset.api.md": {
+      "surface": "adapter-naive-ui-preset"
     },
     "adapter-nuxt-ui-batch-editing.api.md": {
       "surface": "adapter-nuxt-ui-batch-editing"
@@ -16314,6 +16355,9 @@
     "adapter-nuxt-ui.api.md": {
       "surface": "adapter-nuxt-ui"
     },
+    "adapter-nuxt-ui-preset.api.md": {
+      "surface": "adapter-nuxt-ui-preset"
+    },
     "adapter-quasar-batch-editing.api.md": {
       "surface": "adapter-quasar-batch-editing"
     },
@@ -16430,6 +16474,9 @@
     },
     "adapter-quasar.api.md": {
       "surface": "adapter-quasar"
+    },
+    "adapter-quasar-preset.api.md": {
+      "surface": "adapter-quasar-preset"
     },
     "adapter-reka-ui-assistant.api.md": {
       "surface": "adapter-reka-ui-assistant"
@@ -16841,6 +16888,9 @@
     },
     "adapter-vuetify.api.md": {
       "surface": "adapter-vuetify"
+    },
+    "adapter-vuetify-preset.api.md": {
+      "surface": "adapter-vuetify-preset"
     }
   }
 }

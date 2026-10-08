@@ -105,8 +105,8 @@ binding factory alone does not do so. Use `/column-selection` for
 `columnSelectionCheckbox` and `/nested-table` for `nestedTable` on every kit.
 Older aliases remain available where they were already exported.
 
-Only Unstyled, Reka UI and shadcn-vue currently expose the documented `/features`
-barrel, `/preset`, `/assistant` and controlled `/pivot` panel. Quasar additionally
+Every Vue kit exports `/preset`. Only Unstyled, Reka UI and shadcn-vue expose the
+documented `/features` barrel, `/assistant` and controlled `/pivot` panel. Quasar additionally
 provides dedicated `/export-pdf` and `/export-xlsx` entries. Element Plus,
 Vuetify, Naive UI and Nuxt UI use their own `/export` feature with optional
 `pdfWriter` or `xlsxWriter` from binding `/pdf` or `/xlsx`.
