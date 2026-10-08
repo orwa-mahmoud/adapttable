@@ -64,3 +64,16 @@ export {
   serverPivotResult,
   setMeasureAgg,
 } from "@adapttable/core/pivot";
+
+// Types this entry's own signatures hand back.
+export type {
+  CellContext,
+  ColumnDef,
+  ComponentRenderer,
+  FooterContext,
+  HeaderContext,
+  Renderer,
+  RenderFunction,
+} from "./columnDef";
+export type { MaybeRefOrGetterOptional } from "./store";
+export type { UrlSliceOptions } from "./url/useUrlSlice";

@@ -571,3 +571,83 @@ export {
   type MenuNavigationItem,
   type MenuNavigationKey,
 } from "@adapttable/core/binding";
+
+// Types this entry's own signatures hand back.
+export type { SidePanelOptions, SidePanelPanel } from "./actions/contracts";
+export type { SummaryRowFn } from "./aggregate/aggregate";
+export type { Attrs, ElementRef } from "./attrs";
+export type {
+  CellContext,
+  ColumnDef,
+  ColumnGroup,
+  ColumnInput,
+  ComponentRenderer,
+  FooterContext,
+  HeaderContext,
+  Renderer,
+  RenderFunction,
+} from "./columnDef";
+export type { ColumnLayout, ColumnLayoutOptions } from "./columns/columnLayout";
+export type { DirtyEdits, TableEditingOptions } from "./editing/editingModels";
+export type { FeatureState } from "./featureState";
+export type {
+  ComposedFeature,
+  FeatureMountContext,
+  StaticFeatureHost,
+  StaticTableFeature,
+  TableFeature,
+  TableFeatureHost,
+} from "./features/tableFeature";
+export type {
+  GroupRowModel,
+  RowDetailModel,
+  TableGrouping,
+  TableRowDetail,
+  TableTree,
+  TreeCellModel,
+} from "./hierarchy/models";
+export type { TableRowInventory } from "./hierarchy/rowInventory";
+export type {
+  RowActionControl,
+  RowActionControlsInput,
+  RowActionControlsProjector,
+  TableBodyProjection,
+  TableBodyProjectionInput,
+  TableBodyProjector,
+} from "./layout/modelChannels";
+export type {
+  DesktopTableModel,
+  MobileCardsModel,
+  TableBodySlot,
+  TableCellModel,
+  TableHeaderModel,
+  TableRowModel,
+} from "./layout/tableModels";
+export type {
+  SummaryCells,
+  TableSummaryCellModel,
+  TableSummaryModel,
+} from "./layout/tableSummaryModel";
+export type { SelectionCheckboxAttrs } from "./selection/checkboxControl";
+export type { RowSelection } from "./selection/selection";
+export type { SourceViewportOptions } from "./source/sourceLifecycle";
+export type { UseFrontendDataOptions } from "./source/useFrontendData";
+export type { GroupingPanelProps } from "./specialized/groupingPanel";
+export type { VuePivotAggProps } from "./specialized/pivot";
+export type { VueRowReorderModel } from "./specialized/rowReorder";
+export type { BodyWindowModel } from "./specialized/virtualize";
+export type { ExternalStoreOptions, MaybeRefOrGetterOptional } from "./store";
+export type { NestedTable, NestedTableFor } from "./tree/nestedTable";
+export type { UseSavedViewsResult } from "./url/useSavedViews";
+export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
+export type {
+  useDataTable,
+  UseDataTableOptions,
+  UseDataTableResult,
+} from "./useDataTable";
+export type {
+  DataTableHandle,
+  DataTableSurface,
+  ResolvedTableOptions,
+  UseDataTableShellOptions,
+} from "./useDataTableShell";

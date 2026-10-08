@@ -150,8 +150,17 @@ describe("canonical Vue source ownership proof", () => {
     );
     assert.throws(
       () => checkExportSources(root),
-      /source export origin or type-only mode changed/
+      /names beyond the pinned contract only route returned types/
     );
+  });
+
+  it("accepts a type-only route for a type the entry returns", () => {
+    const root = join(scratch, "source-type-route");
+    fixtureSources(
+      root,
+      (text) => `${text}\nexport type { ColumnDef } from "./columnDef";`
+    );
+    assert.doesNotThrow(() => checkExportSources(root));
   });
 
   it("rejects wildcard forwarding from the root canonical entry", () => {

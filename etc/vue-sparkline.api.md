@@ -14,7 +14,7 @@ import { sparklineSummary } from '@adapttable/core';
 import { VNodeChild } from 'vue';
 
 // @public
-interface CellContext<TRow, TValue = unknown> {
+export interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -26,7 +26,7 @@ interface CellContext<TRow, TValue = unknown> {
 }
 
 // @public
-interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
+export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
     // (undocumented)
     readonly accessor?: (row: TRow) => TValue;
     // (undocumented)
@@ -41,7 +41,7 @@ interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "
 }
 
 // @public
-interface ComponentRenderer<TContext> {
+export interface ComponentRenderer<TContext> {
     // (undocumented)
     readonly component: Component;
     // (undocumented)
@@ -53,7 +53,7 @@ interface ComponentRenderer<TContext> {
 export { finiteSparklineValues }
 
 // @public
-interface FooterContext<TRow, TValue = unknown> {
+export interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -61,7 +61,7 @@ interface FooterContext<TRow, TValue = unknown> {
 }
 
 // @public
-interface HeaderContext<TRow, TValue = unknown> {
+export interface HeaderContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -77,10 +77,10 @@ interface HeaderContext<TRow, TValue = unknown> {
 }
 
 // @public (undocumented)
-type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
+export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
 // @public
-type RenderFunction<TContext> = {
+export type RenderFunction<TContext> = {
     render(context: TContext): VNodeChild;
 }["render"];
 

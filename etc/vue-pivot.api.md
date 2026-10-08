@@ -75,7 +75,7 @@ export { assignField }
 export { availableFields }
 
 // @public
-interface CellContext<TRow, TValue = unknown> {
+export interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -87,7 +87,7 @@ interface CellContext<TRow, TValue = unknown> {
 }
 
 // @public
-interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
+export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
     // (undocumented)
     readonly accessor?: (row: TRow) => TValue;
     // (undocumented)
@@ -102,7 +102,7 @@ interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "
 }
 
 // @public
-interface ComponentRenderer<TContext> {
+export interface ComponentRenderer<TContext> {
     // (undocumented)
     readonly component: Component;
     // (undocumented)
@@ -118,7 +118,7 @@ export { deserializePivotState }
 export { EMPTY_PIVOT_CONFIG }
 
 // @public
-interface FooterContext<TRow, TValue = unknown> {
+export interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -126,7 +126,7 @@ interface FooterContext<TRow, TValue = unknown> {
 }
 
 // @public
-interface HeaderContext<TRow, TValue = unknown> {
+export interface HeaderContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -144,7 +144,7 @@ interface HeaderContext<TRow, TValue = unknown> {
 export { isPivotReady }
 
 // @public
-type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
+export type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
 
 export { measureLabel }
 
@@ -258,10 +258,10 @@ export { QueryPivotRow }
 export { removeField }
 
 // @public (undocumented)
-type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
+export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
 // @public
-type RenderFunction<TContext> = {
+export type RenderFunction<TContext> = {
     render(context: TContext): VNodeChild;
 }["render"];
 
@@ -276,7 +276,7 @@ export { serverPivotResult }
 export { setMeasureAgg }
 
 // @public (undocumented)
-interface UrlSliceOptions {
+export interface UrlSliceOptions {
     readonly serverSearch?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;

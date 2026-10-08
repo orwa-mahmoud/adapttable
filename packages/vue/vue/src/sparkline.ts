@@ -107,3 +107,14 @@ export function sparklineColumn<TRow>(
     exportValue: (row) => sparklineExportValue(spec.values(row)),
   };
 }
+
+// Types this entry's own signatures hand back.
+export type {
+  CellContext,
+  ColumnDef,
+  ComponentRenderer,
+  FooterContext,
+  HeaderContext,
+  Renderer,
+  RenderFunction,
+} from "./columnDef";

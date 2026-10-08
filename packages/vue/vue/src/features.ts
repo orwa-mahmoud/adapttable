@@ -60,3 +60,80 @@ export { rowReorder } from "./specialized/rowReorder";
 export type { VirtualizeOptions } from "./specialized/virtualize";
 export { virtualize } from "./specialized/virtualize";
 export type { ExportCsvOptions, SelectionStatsOptions } from "@adapttable/core";
+
+// Types this entry's own signatures hand back.
+export type { SummaryRowFn } from "./aggregate/aggregate";
+export type { Attrs } from "./attrs";
+export type {
+  CellContext,
+  ColumnDef,
+  ColumnGroup,
+  ColumnInput,
+  ComponentRenderer,
+  FooterContext,
+  HeaderContext,
+  Renderer,
+  RenderFunction,
+} from "./columnDef";
+export type { ColumnLayout, ColumnLayoutOptions } from "./columns/columnLayout";
+export type { DirtyEdits, TableEditingOptions } from "./editing/editingModels";
+export type { FeatureState } from "./featureState";
+export type {
+  ComposedFeature,
+  FeatureMountContext,
+  StaticFeatureHost,
+  StaticTableFeature,
+  TableFeature,
+  TableFeatureHost,
+} from "./features/tableFeature";
+export type { GroupCollapseOptions } from "./grouping/groupCollapse";
+export type {
+  GroupRowModel,
+  RowDetailModel,
+  TableGrouping,
+  TableRowDetail,
+  TableTree,
+  TreeCellModel,
+} from "./hierarchy/models";
+export type { TableRowInventory } from "./hierarchy/rowInventory";
+export type {
+  RowActionControl,
+  RowActionControlsInput,
+  RowActionControlsProjector,
+  TableBodyProjection,
+  TableBodyProjectionInput,
+  TableBodyProjector,
+} from "./layout/modelChannels";
+export type {
+  DesktopTableModel,
+  MobileCardsModel,
+  TableBodySlot,
+  TableCellModel,
+  TableHeaderModel,
+  TableRowModel,
+} from "./layout/tableModels";
+export type {
+  TableSummaryCellModel,
+  TableSummaryModel,
+} from "./layout/tableSummaryModel";
+export type { ExtraRow } from "./rows/extraRows";
+export type { RowExpansionOptions } from "./rows/rowExpansion";
+export type { RowMutationHandlers } from "./rows/rowMutations";
+export type { SelectionCheckboxAttrs } from "./selection/checkboxControl";
+export type { RowSelection } from "./selection/selection";
+export type { SourceViewportOptions } from "./source/sourceLifecycle";
+export type { UseFrontendDataOptions } from "./source/useFrontendData";
+export type { MaybeRefOrGetterOptional } from "./store";
+export type { NestedTable, NestedTableFor } from "./tree/nestedTable";
+export type { TreeExpansionOptions } from "./tree/treeExpansion";
+export type { UseSavedViewsOptions } from "./url/useSavedViews";
+export type { UseTableUrlStateOptions } from "./url/useTableUrlState";
+export type {
+  useDataTable,
+  UseDataTableOptions,
+  UseDataTableResult,
+} from "./useDataTable";
+export type {
+  ResolvedTableOptions,
+  UseDataTableShellOptions,
+} from "./useDataTableShell";

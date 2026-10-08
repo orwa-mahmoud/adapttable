@@ -141,12 +141,21 @@ export function checkExportSources(repository) {
           edge.names.map((name) => ({ from: edge.from, ...name }))
         )
         .sort((a, b) => a.name.localeCompare(b.name));
+    const pinned = new Set(
+      expected.flatMap((edge) => edge.names.map((name) => name.name))
+    );
+    const actual = normalize(
+      sourceExports(readFileSync(join(binding, `${kind}.ts`), "utf8"))
+    );
     assert.deepEqual(
-      normalize(
-        sourceExports(readFileSync(join(binding, `${kind}.ts`), "utf8"))
-      ),
+      actual.filter((name) => pinned.has(name.name)),
       normalize(expected),
       `${kind}: binding source export origin or type-only mode changed`
+    );
+    assert.deepEqual(
+      actual.filter((name) => !pinned.has(name.name) && !name.typeOnly),
+      [],
+      `${kind}: names beyond the pinned contract only route returned types`
     );
     assert.deepEqual(
       normalize(

@@ -45,7 +45,7 @@ export { BinaryOp }
 export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec_2[]): VueFormulaColumnsResult<TRow>;
 
 // @public
-interface CellContext<TRow, TValue = unknown> {
+export interface CellContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -57,7 +57,7 @@ interface CellContext<TRow, TValue = unknown> {
 }
 
 // @public
-interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
+export interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "accessor" | "header"> {
     // (undocumented)
     readonly accessor?: (row: TRow) => TValue;
     // (undocumented)
@@ -72,7 +72,7 @@ interface ColumnDef<TRow, TValue = unknown> extends Omit<ColumnMetadata<TRow>, "
 }
 
 // @public
-interface ComponentRenderer<TContext> {
+export interface ComponentRenderer<TContext> {
     // (undocumented)
     readonly component: Component;
     // (undocumented)
@@ -86,7 +86,7 @@ export { deserializeFormulaColumns }
 export { evaluateFormula }
 
 // @public
-interface FooterContext<TRow, TValue = unknown> {
+export interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -126,7 +126,7 @@ export { formulaText }
 export { FormulaValue }
 
 // @public
-interface HeaderContext<TRow, TValue = unknown> {
+export interface HeaderContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly column: ColumnDef<TRow, TValue>;
     // (undocumented)
@@ -144,17 +144,17 @@ interface HeaderContext<TRow, TValue = unknown> {
 export { isFormulaError }
 
 // @public
-type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
+export type MaybeRefOrGetterOptional<T> = T | Readonly<Ref<T | undefined>> | (() => T | undefined);
 
 export { parseFormula }
 
 export { ParseResult }
 
 // @public (undocumented)
-type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
+export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
 // @public
-type RenderFunction<TContext> = {
+export type RenderFunction<TContext> = {
     render(context: TContext): VNodeChild;
 }["render"];
 
@@ -163,7 +163,7 @@ export { serializeFormulaColumns }
 export { toFormulaValue }
 
 // @public (undocumented)
-interface UrlSliceOptions {
+export interface UrlSliceOptions {
     readonly serverSearch?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;

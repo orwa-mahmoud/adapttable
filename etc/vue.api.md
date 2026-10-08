@@ -2115,6 +2115,7 @@ export interface VueRowReorderModel<TRow> {
     readonly controller: RowReorderActions<TRow>;
     // (undocumented)
     readonly enabled: boolean;
+    readonly moveMenu?: RowReorderActions<TRow>["moveMenu"];
     // (undocumented)
     readonly ownsPending: (row: TRow) => boolean;
     // (undocumented)
