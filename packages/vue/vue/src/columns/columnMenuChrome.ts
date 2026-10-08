@@ -62,6 +62,28 @@ function requireSlots(slots: ColumnRenameSlots): void {
         `AdaptTable: required adapter control slot "ColumnRename.${name}" is missing.`
       );
 }
+/** Each rename surface's part names, one record per prefix. */
+const RENAME_PARTS = {
+  column: {
+    form: "column-rename-form",
+    label: "column-rename-label",
+    input: "column-rename-input",
+    error: "column-rename-error",
+    save: "column-rename-save",
+    cancel: "column-rename-cancel",
+    announcer: "column-rename-announcer",
+  },
+  header: {
+    form: "header-rename-form",
+    label: "header-rename-label",
+    input: "header-rename-input",
+    error: "header-rename-error",
+    save: "header-rename-save",
+    cancel: "header-rename-cancel",
+    announcer: "header-rename-announcer",
+  },
+} as const;
+
 function renameForm(
   editor: ColumnRenameEditorState,
   labels: ColumnMenuLabels,
@@ -70,12 +92,12 @@ function renameForm(
   prefix: "column" | "header"
 ): VNodeChild {
   if (!editor.editing.value) return null;
-  const stem = `${prefix}-rename`;
+  const parts = RENAME_PARTS[prefix];
   const error = editor.snapshot.value.error;
   return h(
     "form",
     {
-      ...part(`${stem}-form`, names),
+      ...part(parts.form, names),
       onSubmit: (event: SubmitEvent): void => {
         event.preventDefault();
         event.stopPropagation();
@@ -91,11 +113,11 @@ function renameForm(
     [
       h(
         "label",
-        { ...part(`${stem}-label`, names), for: editor.inputId },
+        { ...part(parts.label, names), for: editor.inputId },
         labels.columnName
       ),
       slots.Input({
-        attrs: { ...part(`${stem}-input`, names), ...editor.inputAttrs() },
+        attrs: { ...part(parts.input, names), ...editor.inputAttrs() },
         value: editor.snapshot.value.draft,
         onChange: editor.setDraft,
       }),
@@ -103,7 +125,7 @@ function renameForm(
         ? h(
             "span",
             {
-              ...part(`${stem}-error`, names),
+              ...part(parts.error, names),
               id: editor.errorId,
               role: "alert",
             },
@@ -111,12 +133,12 @@ function renameForm(
           )
         : null,
       slots.Button({
-        attrs: { ...part(`${stem}-save`, names), type: "submit" },
+        attrs: { ...part(parts.save, names), type: "submit" },
         label: labels.saveColumnName,
       }),
       slots.Button({
         attrs: {
-          ...part(`${stem}-cancel`, names),
+          ...part(parts.cancel, names),
           type: "button",
           onClick: editor.cancel,
         },
@@ -133,7 +155,7 @@ function announcement(
   return h(
     "span",
     {
-      ...part(`${prefix}-rename-announcer`, names),
+      ...part(RENAME_PARTS[prefix].announcer, names),
       "aria-live": "polite",
       "aria-atomic": true,
       style: {

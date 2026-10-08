@@ -190,18 +190,35 @@ export const nativeExportSlots = (
         h("div", { "data-adapttable-part": "export-progress-actions" }, [
           ...(
             [
-              ["cancel", props.cancel],
-              ["retry", props.retry],
-              ["dismiss", props.dismiss],
+              [
+                props.cancel,
+                {
+                  key: "cancel",
+                  "data-adapttable-part": "export-progress-cancel",
+                },
+              ],
+              [
+                props.retry,
+                {
+                  key: "retry",
+                  "data-adapttable-part": "export-progress-retry",
+                },
+              ],
+              [
+                props.dismiss,
+                {
+                  key: "dismiss",
+                  "data-adapttable-part": "export-progress-dismiss",
+                },
+              ],
             ] as const
-          ).map(([key, action]) =>
+          ).map(([action, identity]) =>
             action
               ? h(
                   "button",
                   {
-                    key,
+                    ...identity,
                     type: "button",
-                    "data-adapttable-part": `export-progress-${key}`,
                     class: names.exportProgressButton,
                     onClick: action.onAction,
                   },
