@@ -7,12 +7,12 @@ import {
   useSpeechInput,
   useTableAssistant,
 } from "@adapttable/ai-vue";
+import type * as assistantContract from "@adapttable/vue";
 import type { SummaryRowFn, TableSummaryModel } from "@adapttable/vue";
 import {
   type TableAssistantSlots,
   useFeatureState,
 } from "@adapttable/vue/adapter";
-import type * as assistantContract from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
 import {
   agentApproval,

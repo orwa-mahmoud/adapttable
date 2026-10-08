@@ -6,7 +6,7 @@ import type {
   TableSource,
   UseDataTableResult,
 } from "@adapttable/vue";
-import { densityChooser, fullscreen } from "@adapttable/vue/features";
+import type { densityChooser, fullscreen } from "@adapttable/vue/features";
 import { DataTable } from "@adapttable/vue-unstyled";
 import { densityChooser as nativeDensity } from "@adapttable/vue-unstyled/density";
 import { fullscreen as nativeFullscreen } from "@adapttable/vue-unstyled/fullscreen";
@@ -24,14 +24,17 @@ type FactoryIdentity = [
   Assert<Equal<ReturnType<typeof densityChooser>, StaticTableFeature>>,
   Assert<Equal<ReturnType<typeof fullscreen>, StaticTableFeature>>,
 ];
-const identities: FactoryIdentity = [true, true];
+/** Compiles only when the value is assignable to `T`. */
+function expectType<T>(value: T): T {
+  return value;
+}
+expectType<FactoryIdentity>([true, true]);
 const probe: StaticTableFeature = {
   id: "typed-owner",
   mount<TRow>(context: FeatureMountContext<TRow>) {
-    const table: UseDataTableResult<TRow> = context.table;
-    const source: TableSource<TRow> = context.source.value;
-    const result: number = context.flush(() => 42);
-    void [table, source, result];
+    expectType<UseDataTableResult<TRow>>(context.table);
+    expectType<TableSource<TRow>>(context.source.value);
+    expectType<number>(context.flush(() => 42));
   },
 };
 const features: readonly TableFeature<Person>[] = [
@@ -40,7 +43,6 @@ const features: readonly TableFeature<Person>[] = [
   probe,
 ];
 const rows: Person[] = [{ id: "1", name: "Ada" }];
-void identities;
 </script>
 
 <template>
