@@ -126,7 +126,7 @@ export class AdaptSavedViewsMenu implements OnInit {
   readonly props =
     input.required<SavedViewsSlotProps<SavedViewsControllerOptions>>();
 
-  protected readonly panelStyle = {
+  protected readonly panelStyle: Readonly<Record<string, string>> = {
     ...MENU_PANEL_STYLE,
     "inline-size": "min(380px, calc(100vw - 32px))",
   };
