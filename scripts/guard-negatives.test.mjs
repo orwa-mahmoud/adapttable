@@ -374,7 +374,34 @@ describe("check-parts-parity reads each kit in its own framework", () => {
     );
   });
 
-  it("rejects a Vue template that drops a part the other kits name", () => {
+  it("rejects a Vue template that drops a part another Vue kit names", () => {
+    const template = VERDANT_TEMPLATE.replace(
+      `    <div v-bind:data-adapttable-part="'bulk-bar'" />\n`,
+      ""
+    );
+    const root = partsRoot({
+      "adapter-verdant": { "src/DataTable.vue": template },
+    });
+    fixtureKit(root, "vue", "adapter-sage", {
+      "src/DataTable.vue": VERDANT_TEMPLATE,
+    });
+    const { failures } = partsParity(root, {
+      kits: [
+        ...PARTS_KITS,
+        { name: "adapter-sage", framework: "vue", role: "shell" },
+      ],
+    });
+    assert.equal(failures.length, 1);
+    assert.match(failures[0].headline, /rendered by some adapters and not/);
+    assert.deepEqual(failures[0].lines, [
+      "bulk-bar — missing from adapter-verdant",
+    ]);
+  });
+
+  it("holds themed kits to their own framework's themed kits", () => {
+    // Frameworks are compared through their native kits; a themed kit that
+    // alone in its framework lacks a part another framework's themed kits
+    // name is not a themed-parity difference.
     const template = VERDANT_TEMPLATE.replace(
       `    <div v-bind:data-adapttable-part="'bulk-bar'" />\n`,
       ""
@@ -382,11 +409,7 @@ describe("check-parts-parity reads each kit in its own framework", () => {
     const { failures } = partsParity(
       partsRoot({ "adapter-verdant": { "src/DataTable.vue": template } })
     );
-    assert.equal(failures.length, 1);
-    assert.match(failures[0].headline, /rendered by some adapters and not/);
-    assert.deepEqual(failures[0].lines, [
-      "bulk-bar — missing from adapter-verdant",
-    ]);
+    assert.deepEqual(failures, []);
   });
 
   it("rejects a Vue kit missing a contract part, with no getter to fall back on", () => {
@@ -402,16 +425,24 @@ describe("check-parts-parity reads each kit in its own framework", () => {
   });
 
   it("rejects an Angular kit whose host binding is gone", () => {
-    const { failures } = partsParity(
-      partsRoot({
-        "adapter-meridian": {
-          "src/bulk-bar.component.ts": MERIDIAN_COMPONENT.replace(
-            `  host: { "[attr.data-adapttable-part]": "'bulk-bar'" },\n`,
-            ""
-          ),
-        },
-      })
-    );
+    const root = partsRoot({
+      "adapter-meridian": {
+        "src/bulk-bar.component.ts": MERIDIAN_COMPONENT.replace(
+          `  host: { "[attr.data-adapttable-part]": "'bulk-bar'" },\n`,
+          ""
+        ),
+      },
+    });
+    fixtureKit(root, "angular", "adapter-cedar", {
+      "src/data-table.component.html": MERIDIAN_TEMPLATE,
+      "src/bulk-bar.component.ts": MERIDIAN_COMPONENT,
+    });
+    const { failures } = partsParity(root, {
+      kits: [
+        ...PARTS_KITS,
+        { name: "adapter-cedar", framework: "angular", role: "shell" },
+      ],
+    });
     assert.deepEqual(failures[0].lines, [
       "bulk-bar — missing from adapter-meridian",
     ]);
