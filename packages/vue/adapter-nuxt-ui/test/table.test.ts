@@ -75,6 +75,7 @@ describe("Nuxt UI table surface prototype", () => {
         th: "header-paint",
         td: "cell-paint",
         searchInput: "query-paint",
+        searchIcon: "icon-paint",
         selectionCheckbox: "selection-paint",
       },
     });
@@ -100,6 +101,13 @@ describe("Nuxt UI table surface prototype", () => {
     const input = find<HTMLInputElement>(view.root, part("search"));
     expect(input.tagName).toBe("INPUT");
     expect(input.classList.contains("query-paint")).toBe(true);
+    const icon = find(
+      find(view.root, part("search-field")),
+      part("search-icon")
+    );
+    expect(icon.getAttribute("aria-hidden")).toBe("true");
+    expect(icon.classList.contains("icon-paint")).toBe(true);
+    expect(icon.closest('[data-slot="leading"]')).not.toBeNull();
     input.value = "Ada";
     input.dispatchEvent(new Event("input", { bubbles: true }));
     await settle();

@@ -24,10 +24,40 @@ export function nuxtSurface<TRow>(
           "data-adapttable-part": "search-field",
         },
         [
-          h(NuxtInput, {
-            control: { attrs: input, label, value, onChange, type: "search" },
-            className: classNames.searchInput,
-          }),
+          h(
+            NuxtInput,
+            {
+              control: {
+                attrs: input,
+                label,
+                value,
+                onChange,
+                type: "search",
+              },
+              className: classNames.searchInput,
+            },
+            {
+              leading: () =>
+                h(
+                  "svg",
+                  {
+                    "aria-hidden": "true",
+                    "data-adapttable-part": "search-icon",
+                    class: classNames.searchIcon,
+                    viewBox: "0 0 24 24",
+                    width: 16,
+                    height: 16,
+                    fill: "none",
+                    stroke: "currentColor",
+                    "stroke-width": 2,
+                  },
+                  [
+                    h("circle", { cx: 10, cy: 10, r: 6 }),
+                    h("path", { d: "m15 15 5 5" }),
+                  ]
+                ),
+            }
+          ),
         ]
       );
     },

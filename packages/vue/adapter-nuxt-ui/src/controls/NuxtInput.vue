@@ -62,5 +62,7 @@ function update(value: unknown): void {
     :size="size"
     :ui="{ base: className }"
     @update:model-value="update"
-  />
+  >
+    <template v-if="$slots.leading" #leading><slot name="leading" /></template>
+  </UInput>
 </template>
