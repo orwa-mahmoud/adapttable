@@ -623,7 +623,299 @@
       "adapter-vue-unstyled-grouping-panel",
       "adapter-vue-unstyled-export",
       "adapter-vue-unstyled-preset",
-      "ai-vue"
+      "ai-vue",
+      "adapter-element-plus-batch-editing",
+      "adapter-element-plus-bulk-actions",
+      "adapter-element-plus-cell-navigation",
+      "adapter-element-plus-cell-span",
+      "adapter-element-plus-column-groups",
+      "adapter-element-plus-column-menu",
+      "adapter-element-plus-column-selection",
+      "adapter-element-plus-columns",
+      "adapter-element-plus-command-palette",
+      "adapter-element-plus-context-menu",
+      "adapter-element-plus-density",
+      "adapter-element-plus-editing",
+      "adapter-element-plus-export",
+      "adapter-element-plus-extra-rows",
+      "adapter-element-plus-filters",
+      "adapter-element-plus-find-in-table",
+      "adapter-element-plus-fit-columns",
+      "adapter-element-plus-fullscreen",
+      "adapter-element-plus-grouping-panel",
+      "adapter-element-plus-grouping",
+      "adapter-element-plus-header-filters",
+      "adapter-element-plus-multi-sort",
+      "adapter-element-plus-nested-table",
+      "adapter-element-plus-pinned-summary-rows",
+      "adapter-element-plus-print",
+      "adapter-element-plus-resizable-columns",
+      "adapter-element-plus-row-actions",
+      "adapter-element-plus-row-appearance",
+      "adapter-element-plus-row-detail",
+      "adapter-element-plus-row-pinning",
+      "adapter-element-plus-row-reorder",
+      "adapter-element-plus-rows",
+      "adapter-element-plus-saved-views",
+      "adapter-element-plus-selection-stats",
+      "adapter-element-plus-side-panel",
+      "adapter-element-plus-status-bar",
+      "adapter-element-plus-tree",
+      "adapter-element-plus-virtualize",
+      "adapter-element-plus",
+      "adapter-naive-ui-batch-editing",
+      "adapter-naive-ui-bulk-actions",
+      "adapter-naive-ui-cell-navigation",
+      "adapter-naive-ui-cell-span",
+      "adapter-naive-ui-column-groups",
+      "adapter-naive-ui-column-menu",
+      "adapter-naive-ui-column-selection",
+      "adapter-naive-ui-command-palette",
+      "adapter-naive-ui-context-menu",
+      "adapter-naive-ui-density",
+      "adapter-naive-ui-editing",
+      "adapter-naive-ui-export",
+      "adapter-naive-ui-extra-rows",
+      "adapter-naive-ui-filters",
+      "adapter-naive-ui-find-in-table",
+      "adapter-naive-ui-fit-columns",
+      "adapter-naive-ui-fullscreen",
+      "adapter-naive-ui-grouping-panel",
+      "adapter-naive-ui-grouping",
+      "adapter-naive-ui-header-filters",
+      "adapter-naive-ui-multi-sort",
+      "adapter-naive-ui-nested-table",
+      "adapter-naive-ui-pinned-summary-rows",
+      "adapter-naive-ui-print",
+      "adapter-naive-ui-renderers",
+      "adapter-naive-ui-resizable-columns",
+      "adapter-naive-ui-row-actions",
+      "adapter-naive-ui-row-appearance",
+      "adapter-naive-ui-row-detail",
+      "adapter-naive-ui-row-pinning",
+      "adapter-naive-ui-row-reorder",
+      "adapter-naive-ui-saved-views",
+      "adapter-naive-ui-selection-stats",
+      "adapter-naive-ui-side-panel",
+      "adapter-naive-ui-status-bar",
+      "adapter-naive-ui-tree",
+      "adapter-naive-ui-virtualize",
+      "adapter-naive-ui",
+      "adapter-nuxt-ui-batch-editing",
+      "adapter-nuxt-ui-bulk-actions",
+      "adapter-nuxt-ui-cell-navigation",
+      "adapter-nuxt-ui-cell-span",
+      "adapter-nuxt-ui-column-groups",
+      "adapter-nuxt-ui-column-menu",
+      "adapter-nuxt-ui-column-selection",
+      "adapter-nuxt-ui-columns",
+      "adapter-nuxt-ui-command-palette",
+      "adapter-nuxt-ui-context-menu",
+      "adapter-nuxt-ui-density",
+      "adapter-nuxt-ui-editing",
+      "adapter-nuxt-ui-export",
+      "adapter-nuxt-ui-extra-rows",
+      "adapter-nuxt-ui-filters",
+      "adapter-nuxt-ui-find-in-table",
+      "adapter-nuxt-ui-fit-columns",
+      "adapter-nuxt-ui-fullscreen",
+      "adapter-nuxt-ui-grouping-panel",
+      "adapter-nuxt-ui-grouping",
+      "adapter-nuxt-ui-header-filters",
+      "adapter-nuxt-ui-multi-sort",
+      "adapter-nuxt-ui-nested-table",
+      "adapter-nuxt-ui-pinned-summary-rows",
+      "adapter-nuxt-ui-print",
+      "adapter-nuxt-ui-resizable-columns",
+      "adapter-nuxt-ui-row-actions",
+      "adapter-nuxt-ui-row-appearance",
+      "adapter-nuxt-ui-row-detail",
+      "adapter-nuxt-ui-row-pinning",
+      "adapter-nuxt-ui-row-reorder",
+      "adapter-nuxt-ui-rows",
+      "adapter-nuxt-ui-saved-views",
+      "adapter-nuxt-ui-selection-stats",
+      "adapter-nuxt-ui-side-panel",
+      "adapter-nuxt-ui-status-bar",
+      "adapter-nuxt-ui-tree",
+      "adapter-nuxt-ui-virtualize",
+      "adapter-nuxt-ui",
+      "adapter-quasar-batch-editing",
+      "adapter-quasar-bulk-actions",
+      "adapter-quasar-cell-navigation",
+      "adapter-quasar-cell-span",
+      "adapter-quasar-column-groups",
+      "adapter-quasar-column-menu",
+      "adapter-quasar-column-selection",
+      "adapter-quasar-command-palette",
+      "adapter-quasar-context-menu",
+      "adapter-quasar-density",
+      "adapter-quasar-editing",
+      "adapter-quasar-export-pdf",
+      "adapter-quasar-export-xlsx",
+      "adapter-quasar-export",
+      "adapter-quasar-extra-rows",
+      "adapter-quasar-filters",
+      "adapter-quasar-find-in-table",
+      "adapter-quasar-fit-columns",
+      "adapter-quasar-fullscreen",
+      "adapter-quasar-grouping-panel",
+      "adapter-quasar-grouping",
+      "adapter-quasar-header-filters",
+      "adapter-quasar-multi-sort",
+      "adapter-quasar-nested-table",
+      "adapter-quasar-pinned-summary-rows",
+      "adapter-quasar-print",
+      "adapter-quasar-resizable-columns",
+      "adapter-quasar-row-actions",
+      "adapter-quasar-row-appearance",
+      "adapter-quasar-row-detail",
+      "adapter-quasar-row-pinning",
+      "adapter-quasar-row-reorder",
+      "adapter-quasar-saved-views",
+      "adapter-quasar-selection-stats",
+      "adapter-quasar-side-panel",
+      "adapter-quasar-status-bar",
+      "adapter-quasar-tree",
+      "adapter-quasar-virtualize",
+      "adapter-quasar",
+      "adapter-reka-ui-assistant",
+      "adapter-reka-ui-batch-editing",
+      "adapter-reka-ui-bulk-actions",
+      "adapter-reka-ui-cell-navigation",
+      "adapter-reka-ui-cell-span",
+      "adapter-reka-ui-column-groups",
+      "adapter-reka-ui-column-menu",
+      "adapter-reka-ui-column-selection",
+      "adapter-reka-ui-columns",
+      "adapter-reka-ui-command-palette",
+      "adapter-reka-ui-context-menu",
+      "adapter-reka-ui-density",
+      "adapter-reka-ui-editing",
+      "adapter-reka-ui-export-csv",
+      "adapter-reka-ui-export-pdf",
+      "adapter-reka-ui-export-xlsx",
+      "adapter-reka-ui-export",
+      "adapter-reka-ui-extra-rows",
+      "adapter-reka-ui-features",
+      "adapter-reka-ui-filters",
+      "adapter-reka-ui-find-in-table",
+      "adapter-reka-ui-fit-columns",
+      "adapter-reka-ui-formula",
+      "adapter-reka-ui-fullscreen",
+      "adapter-reka-ui-grouping-panel",
+      "adapter-reka-ui-grouping",
+      "adapter-reka-ui-header-filters",
+      "adapter-reka-ui-multi-sort",
+      "adapter-reka-ui-nested-table",
+      "adapter-reka-ui-pinned-summary-rows",
+      "adapter-reka-ui-pivot",
+      "adapter-reka-ui-preset",
+      "adapter-reka-ui-print",
+      "adapter-reka-ui-resizable-columns",
+      "adapter-reka-ui-row-actions",
+      "adapter-reka-ui-row-appearance",
+      "adapter-reka-ui-row-detail",
+      "adapter-reka-ui-row-pinning",
+      "adapter-reka-ui-row-reorder",
+      "adapter-reka-ui-rows",
+      "adapter-reka-ui-saved-views",
+      "adapter-reka-ui-selection-stats",
+      "adapter-reka-ui-side-panel",
+      "adapter-reka-ui-sparkline",
+      "adapter-reka-ui-status-bar",
+      "adapter-reka-ui-stream",
+      "adapter-reka-ui-tree",
+      "adapter-reka-ui-virtualize",
+      "adapter-reka-ui",
+      "adapter-shadcn-vue-assistant",
+      "adapter-shadcn-vue-batch-editing",
+      "adapter-shadcn-vue-bulk-actions",
+      "adapter-shadcn-vue-cell-navigation",
+      "adapter-shadcn-vue-cell-span",
+      "adapter-shadcn-vue-column-groups",
+      "adapter-shadcn-vue-column-menu",
+      "adapter-shadcn-vue-column-selection",
+      "adapter-shadcn-vue-columns",
+      "adapter-shadcn-vue-command-palette",
+      "adapter-shadcn-vue-context-menu",
+      "adapter-shadcn-vue-density",
+      "adapter-shadcn-vue-editing",
+      "adapter-shadcn-vue-export-csv",
+      "adapter-shadcn-vue-export-pdf",
+      "adapter-shadcn-vue-export-xlsx",
+      "adapter-shadcn-vue-export",
+      "adapter-shadcn-vue-extra-rows",
+      "adapter-shadcn-vue-features",
+      "adapter-shadcn-vue-filters",
+      "adapter-shadcn-vue-find-in-table",
+      "adapter-shadcn-vue-fit-columns",
+      "adapter-shadcn-vue-formula",
+      "adapter-shadcn-vue-fullscreen",
+      "adapter-shadcn-vue-grouping-panel",
+      "adapter-shadcn-vue-grouping",
+      "adapter-shadcn-vue-header-filters",
+      "adapter-shadcn-vue-multi-sort",
+      "adapter-shadcn-vue-nested-table",
+      "adapter-shadcn-vue-pinned-summary-rows",
+      "adapter-shadcn-vue-pivot",
+      "adapter-shadcn-vue-preset",
+      "adapter-shadcn-vue-print",
+      "adapter-shadcn-vue-resizable-columns",
+      "adapter-shadcn-vue-row-actions",
+      "adapter-shadcn-vue-row-appearance",
+      "adapter-shadcn-vue-row-detail",
+      "adapter-shadcn-vue-row-pinning",
+      "adapter-shadcn-vue-row-reorder",
+      "adapter-shadcn-vue-rows",
+      "adapter-shadcn-vue-saved-views",
+      "adapter-shadcn-vue-selection-stats",
+      "adapter-shadcn-vue-side-panel",
+      "adapter-shadcn-vue-sparkline",
+      "adapter-shadcn-vue-status-bar",
+      "adapter-shadcn-vue-stream",
+      "adapter-shadcn-vue-tree",
+      "adapter-shadcn-vue-virtualize",
+      "adapter-shadcn-vue",
+      "adapter-vuetify-batch-editing",
+      "adapter-vuetify-bulk-actions",
+      "adapter-vuetify-cell-navigation",
+      "adapter-vuetify-cell-span",
+      "adapter-vuetify-column-groups",
+      "adapter-vuetify-column-menu",
+      "adapter-vuetify-column-selection",
+      "adapter-vuetify-columns",
+      "adapter-vuetify-command-palette",
+      "adapter-vuetify-context-menu",
+      "adapter-vuetify-density",
+      "adapter-vuetify-editing",
+      "adapter-vuetify-export",
+      "adapter-vuetify-extra-rows",
+      "adapter-vuetify-filters",
+      "adapter-vuetify-find-in-table",
+      "adapter-vuetify-fit-columns",
+      "adapter-vuetify-fullscreen",
+      "adapter-vuetify-grouping-panel",
+      "adapter-vuetify-grouping",
+      "adapter-vuetify-header-filters",
+      "adapter-vuetify-multi-sort",
+      "adapter-vuetify-nested-table",
+      "adapter-vuetify-pinned-summary-rows",
+      "adapter-vuetify-print",
+      "adapter-vuetify-resizable-columns",
+      "adapter-vuetify-row-actions",
+      "adapter-vuetify-row-appearance",
+      "adapter-vuetify-row-detail",
+      "adapter-vuetify-row-pinning",
+      "adapter-vuetify-row-reorder",
+      "adapter-vuetify-rows",
+      "adapter-vuetify-saved-views",
+      "adapter-vuetify-selection-stats",
+      "adapter-vuetify-side-panel",
+      "adapter-vuetify-status-bar",
+      "adapter-vuetify-tree",
+      "adapter-vuetify-virtualize",
+      "adapter-vuetify"
     ]
   },
   "surfaces": {
@@ -11276,6 +11568,1987 @@
       "TableAssistantNode",
       "TableAssistantProps",
       "TableQueryHandler"
+    ],
+    "adapter-element-plus-batch-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "EditingLifecycleExtras",
+      "ElementBatchEditBar"
+    ],
+    "adapter-element-plus-bulk-actions": [
+      "BulkAction",
+      "BulkActionContext",
+      "bulkActions"
+    ],
+    "adapter-element-plus-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell"
+    ],
+    "adapter-element-plus-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-element-plus-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-element-plus-column-menu": [
+      "ColumnMenu",
+      "columnMenu",
+      "ColumnMenuSlotProps"
+    ],
+    "adapter-element-plus-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-element-plus-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
+    "adapter-element-plus-command-palette": [
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
+    "adapter-element-plus-context-menu": [
+      "contextMenu",
+      "ContextMenuOptions"
+    ],
+    "adapter-element-plus-density": [
+      "densityChooser"
+    ],
+    "adapter-element-plus-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "ElementBatchEditBar",
+      "ElementEditableCell",
+      "ElementRowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons"
+    ],
+    "adapter-element-plus-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-element-plus-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-element-plus-filters": [
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "FilterDef",
+      "FilterField",
+      "FilterFieldOptions",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec"
+    ],
+    "adapter-element-plus-find-in-table": [
+      "findInTable"
+    ],
+    "adapter-element-plus-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-element-plus-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-element-plus-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps"
+    ],
+    "adapter-element-plus-grouping": [
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "GroupNode",
+      "GroupSort",
+      "StaticGroupingExtras",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging"
+    ],
+    "adapter-element-plus-header-filters": [
+      "ElementHeaderFilter",
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "headerFilters"
+    ],
+    "adapter-element-plus-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-element-plus-nested-table": [
+      "nestedTable"
+    ],
+    "adapter-element-plus-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-element-plus-print": [
+      "print"
+    ],
+    "adapter-element-plus-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-element-plus-row-actions": [
+      "rowActions"
+    ],
+    "adapter-element-plus-row-appearance": [
+      "rowAppearance"
+    ],
+    "adapter-element-plus-row-detail": [
+      "nestedTable",
+      "NestedTable",
+      "nestedTableDetail",
+      "NestedTableFor",
+      "rowDetail",
+      "RowExpansionOptions",
+      "TableRowDetail",
+      "useRowExpansion"
+    ],
+    "adapter-element-plus-row-pinning": [
+      "rowPinning"
+    ],
+    "adapter-element-plus-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
+    "adapter-element-plus-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
+    ],
+    "adapter-element-plus-saved-views": [
+      "DataTableClassNames",
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-element-plus-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-element-plus-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
+    "adapter-element-plus-status-bar": [
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-element-plus-tree": [
+      "TableTree",
+      "tree",
+      "TreeExpansionOptions",
+      "TreeFeatureOptions",
+      "useLazyChildren",
+      "useTreeExpansion"
+    ],
+    "adapter-element-plus-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-element-plus": [
+      "CellContext",
+      "CellEdit",
+      "CellRange",
+      "ColumnDef",
+      "ColumnGroup",
+      "ColumnInput",
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableHandle",
+      "DataTableProps",
+      "DataTableSlots",
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "FooterContext",
+      "HeaderContext",
+      "SummaryRowFn",
+      "TableDensity",
+      "TableSource"
+    ],
+    "adapter-naive-ui-batch-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "EditingLifecycleExtras",
+      "NaiveBatchEditBar"
+    ],
+    "adapter-naive-ui-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-naive-ui-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell"
+    ],
+    "adapter-naive-ui-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-naive-ui-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-naive-ui-column-menu": [
+      "ColumnMenu",
+      "columnMenu",
+      "ColumnMenuSlotProps"
+    ],
+    "adapter-naive-ui-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-naive-ui-command-palette": [
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
+    "adapter-naive-ui-context-menu": [
+      "contextMenu",
+      "ContextMenuOptions"
+    ],
+    "adapter-naive-ui-density": [
+      "densityChooser"
+    ],
+    "adapter-naive-ui-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "NaiveBatchEditBar",
+      "NaiveEditableCell",
+      "NaiveRowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons"
+    ],
+    "adapter-naive-ui-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-naive-ui-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-naive-ui-filters": [
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "FilterDef",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec",
+      "NaiveFilterField"
+    ],
+    "adapter-naive-ui-find-in-table": [
+      "findInTable"
+    ],
+    "adapter-naive-ui-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-naive-ui-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-naive-ui-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps"
+    ],
+    "adapter-naive-ui-grouping": [
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "GroupNode",
+      "GroupSort",
+      "StaticGroupingExtras",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging"
+    ],
+    "adapter-naive-ui-header-filters": [
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "headerFilters",
+      "NaiveHeaderFilter"
+    ],
+    "adapter-naive-ui-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-naive-ui-nested-table": [
+      "nestedTable"
+    ],
+    "adapter-naive-ui-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-naive-ui-print": [
+      "print"
+    ],
+    "adapter-naive-ui-renderers": [
+      "DataTableClassNames",
+      "NaiveDesktopTable",
+      "NaiveMobileCards",
+      "naiveTableControls"
+    ],
+    "adapter-naive-ui-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-naive-ui-row-actions": [
+      "rowActions"
+    ],
+    "adapter-naive-ui-row-appearance": [
+      "rowAppearance"
+    ],
+    "adapter-naive-ui-row-detail": [
+      "nestedTable",
+      "NestedTable",
+      "nestedTableDetail",
+      "NestedTableFor",
+      "rowDetail",
+      "RowExpansionOptions",
+      "TableRowDetail",
+      "useRowExpansion"
+    ],
+    "adapter-naive-ui-row-pinning": [
+      "rowPinning"
+    ],
+    "adapter-naive-ui-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
+    "adapter-naive-ui-saved-views": [
+      "DataTableClassNames",
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-naive-ui-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-naive-ui-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
+    "adapter-naive-ui-status-bar": [
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-naive-ui-tree": [
+      "TableTree",
+      "tree",
+      "TreeExpansionOptions",
+      "TreeFeatureOptions",
+      "useLazyChildren",
+      "useTreeExpansion"
+    ],
+    "adapter-naive-ui-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-naive-ui": [
+      "CellContext",
+      "CellEdit",
+      "ColumnDef",
+      "ColumnGroup",
+      "ColumnInput",
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableHandle",
+      "DataTableProps",
+      "DataTableSlots",
+      "FooterContext",
+      "HeaderContext",
+      "SummaryRowFn",
+      "TableDensity",
+      "TableSource"
+    ],
+    "adapter-nuxt-ui-batch-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit"
+    ],
+    "adapter-nuxt-ui-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-nuxt-ui-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell"
+    ],
+    "adapter-nuxt-ui-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-nuxt-ui-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-nuxt-ui-column-menu": [
+      "ColumnMenu",
+      "columnMenu",
+      "ColumnMenuSlotProps"
+    ],
+    "adapter-nuxt-ui-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-nuxt-ui-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
+    "adapter-nuxt-ui-command-palette": [
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
+    "adapter-nuxt-ui-context-menu": [
+      "contextMenu",
+      "ContextMenuOptions"
+    ],
+    "adapter-nuxt-ui-density": [
+      "densityChooser"
+    ],
+    "adapter-nuxt-ui-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "NuxtBatchEditBar",
+      "NuxtEditableCell",
+      "NuxtRowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons"
+    ],
+    "adapter-nuxt-ui-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-nuxt-ui-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-nuxt-ui-filters": [
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "FilterDef",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec",
+      "NuxtFilterField"
+    ],
+    "adapter-nuxt-ui-find-in-table": [
+      "findInTable"
+    ],
+    "adapter-nuxt-ui-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-nuxt-ui-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-nuxt-ui-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps"
+    ],
+    "adapter-nuxt-ui-grouping": [
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "GroupNode",
+      "GroupSort",
+      "StaticGroupingExtras",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging"
+    ],
+    "adapter-nuxt-ui-header-filters": [
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "headerFilters",
+      "NuxtHeaderFilter"
+    ],
+    "adapter-nuxt-ui-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-nuxt-ui-nested-table": [
+      "nestedTable"
+    ],
+    "adapter-nuxt-ui-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-nuxt-ui-print": [
+      "print"
+    ],
+    "adapter-nuxt-ui-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-nuxt-ui-row-actions": [
+      "rowActions"
+    ],
+    "adapter-nuxt-ui-row-appearance": [
+      "rowAppearance"
+    ],
+    "adapter-nuxt-ui-row-detail": [
+      "nestedTable",
+      "NestedTable",
+      "nestedTableDetail",
+      "NestedTableFor",
+      "rowDetail",
+      "RowExpansionOptions",
+      "TableRowDetail",
+      "useRowExpansion"
+    ],
+    "adapter-nuxt-ui-row-pinning": [
+      "rowPinning"
+    ],
+    "adapter-nuxt-ui-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
+    "adapter-nuxt-ui-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
+    ],
+    "adapter-nuxt-ui-saved-views": [
+      "DataTableClassNames",
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-nuxt-ui-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-nuxt-ui-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
+    "adapter-nuxt-ui-status-bar": [
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-nuxt-ui-tree": [
+      "TableTree",
+      "tree",
+      "TreeExpansionOptions",
+      "TreeFeatureOptions",
+      "useLazyChildren",
+      "useTreeExpansion"
+    ],
+    "adapter-nuxt-ui-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-nuxt-ui": [
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableProps",
+      "DataTableSlots"
+    ],
+    "adapter-quasar-batch-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "EditingLifecycleExtras",
+      "QuasarBatchEditBar"
+    ],
+    "adapter-quasar-bulk-actions": [
+      "BulkAction",
+      "BulkActionContext",
+      "bulkActions"
+    ],
+    "adapter-quasar-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell"
+    ],
+    "adapter-quasar-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-quasar-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-quasar-column-menu": [
+      "ColumnMenu",
+      "columnMenu",
+      "ColumnMenuSlotProps"
+    ],
+    "adapter-quasar-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-quasar-command-palette": [
+      "CommandPalette",
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
+    "adapter-quasar-context-menu": [
+      "contextMenu",
+      "ContextMenuItem",
+      "ContextMenuOptions",
+      "ContextMenuTarget"
+    ],
+    "adapter-quasar-density": [
+      "densityChooser"
+    ],
+    "adapter-quasar-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "QuasarBatchEditBar",
+      "QuasarEditableCell",
+      "QuasarRowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons"
+    ],
+    "adapter-quasar-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-quasar-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
+    ],
+    "adapter-quasar-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-quasar-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-quasar-filters": [
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "FilterDef",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec",
+      "QuasarFilterField"
+    ],
+    "adapter-quasar-find-in-table": [
+      "FindBar",
+      "FindBarProps",
+      "findInTable"
+    ],
+    "adapter-quasar-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-quasar-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-quasar-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps",
+      "StaticGroupingExtras"
+    ],
+    "adapter-quasar-grouping": [
+      "grouping",
+      "GroupingExtras",
+      "StaticGroupingExtras"
+    ],
+    "adapter-quasar-header-filters": [
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "headerFilters",
+      "QuasarHeaderFilter"
+    ],
+    "adapter-quasar-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-quasar-nested-table": [
+      "nestedTable"
+    ],
+    "adapter-quasar-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-quasar-print": [
+      "print"
+    ],
+    "adapter-quasar-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-quasar-row-actions": [
+      "rowActions"
+    ],
+    "adapter-quasar-row-appearance": [
+      "rowAppearance",
+      "RowAppearanceOptions"
+    ],
+    "adapter-quasar-row-detail": [
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-quasar-row-pinning": [
+      "rowPinning",
+      "RowPinningFeatureOptions"
+    ],
+    "adapter-quasar-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
+    "adapter-quasar-saved-views": [
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-quasar-selection-stats": [
+      "SelectionStats",
+      "selectionStats"
+    ],
+    "adapter-quasar-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
+    "adapter-quasar-status-bar": [
+      "SelectionStats",
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-quasar-tree": [
+      "tree",
+      "TreeFeatureOptions"
+    ],
+    "adapter-quasar-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-quasar": [
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableHandle",
+      "DataTableProps",
+      "DataTableSlots"
+    ],
+    "adapter-reka-ui-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
+    ],
+    "adapter-reka-ui-batch-editing": [
+      "BatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "EditingLifecycleExtras"
+    ],
+    "adapter-reka-ui-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-reka-ui-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell",
+      "GridFocusState"
+    ],
+    "adapter-reka-ui-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-reka-ui-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-reka-ui-column-menu": [
+      "ColumnMenu",
+      "columnMenu",
+      "ColumnMenuSlotProps"
+    ],
+    "adapter-reka-ui-column-selection": [
+      "ColumnSelectCheckboxProps",
+      "columnSelectionCheckbox"
+    ],
+    "adapter-reka-ui-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
+    "adapter-reka-ui-command-palette": [
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
+    "adapter-reka-ui-context-menu": [
+      "contextMenu",
+      "ContextMenuItem",
+      "ContextMenuOptions",
+      "ContextMenuTarget"
+    ],
+    "adapter-reka-ui-density": [
+      "densityChooser"
+    ],
+    "adapter-reka-ui-editing": [
+      "BatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "EditableCell",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "RowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons"
+    ],
+    "adapter-reka-ui-export-csv": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-reka-ui-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-reka-ui-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
+    ],
+    "adapter-reka-ui-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-reka-ui-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-reka-ui-features": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "BatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "bulkActions",
+      "CellEdit",
+      "CellEditHandler",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "ColumnMenuSlotProps",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "EditableCell",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "exportCsv",
+      "exportPdf",
+      "ExportPdfOptions",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "FilterDef",
+      "FilterField",
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "GridCell",
+      "GridFocusState",
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps",
+      "GroupNode",
+      "GroupSort",
+      "HeaderFilter",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "rowDetail",
+      "RowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "RowStyle",
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "SelectionStats",
+      "selectionStats",
+      "sidePanel",
+      "StaticGroupingExtras",
+      "statusBar",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps",
+      "TableEditingOptions",
+      "tree",
+      "undoRedoButtons",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging",
+      "useRowReorder",
+      "UseSavedViewsOptions",
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-reka-ui-filters": [
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "FilterDef",
+      "FilterField",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec"
+    ],
+    "adapter-reka-ui-find-in-table": [
+      "findInTable"
+    ],
+    "adapter-reka-ui-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-reka-ui-formula": [],
+    "adapter-reka-ui-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-reka-ui-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps"
+    ],
+    "adapter-reka-ui-grouping": [
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "GroupNode",
+      "GroupSort",
+      "StaticGroupingExtras",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging"
+    ],
+    "adapter-reka-ui-header-filters": [
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "HeaderFilter",
+      "headerFilters"
+    ],
+    "adapter-reka-ui-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-reka-ui-nested-table": [
+      "nestedTable"
+    ],
+    "adapter-reka-ui-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-reka-ui-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
+    "adapter-reka-ui-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-reka-ui-print": [
+      "print"
+    ],
+    "adapter-reka-ui-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-reka-ui-row-actions": [
+      "rowActions"
+    ],
+    "adapter-reka-ui-row-appearance": [
+      "rowAppearance"
+    ],
+    "adapter-reka-ui-row-detail": [
+      "nestedTable",
+      "rowDetail"
+    ],
+    "adapter-reka-ui-row-pinning": [
+      "rowPinning"
+    ],
+    "adapter-reka-ui-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
+    "adapter-reka-ui-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
+    ],
+    "adapter-reka-ui-saved-views": [
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-reka-ui-selection-stats": [
+      "SelectionStats",
+      "selectionStats"
+    ],
+    "adapter-reka-ui-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
+    "adapter-reka-ui-sparkline": [],
+    "adapter-reka-ui-status-bar": [
+      "SelectionStats",
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-reka-ui-stream": [],
+    "adapter-reka-ui-tree": [
+      "tree"
+    ],
+    "adapter-reka-ui-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-reka-ui": [
+      "CellContext",
+      "CellEdit",
+      "CellRange",
+      "ColumnDef",
+      "ColumnGroup",
+      "ColumnInput",
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableHandle",
+      "DataTableProps",
+      "DataTableSlots",
+      "FooterContext",
+      "HeaderContext",
+      "SummaryRowFn",
+      "TableDensity",
+      "TableSource"
+    ],
+    "adapter-shadcn-vue-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
+    ],
+    "adapter-shadcn-vue-batch-editing": [
+      "BatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "EditingLifecycleExtras"
+    ],
+    "adapter-shadcn-vue-bulk-actions": [
+      "bulkActions"
+    ],
+    "adapter-shadcn-vue-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell"
+    ],
+    "adapter-shadcn-vue-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-shadcn-vue-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-shadcn-vue-column-menu": [
+      "ColumnMenu",
+      "columnMenu",
+      "ColumnMenuSlotProps"
+    ],
+    "adapter-shadcn-vue-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-shadcn-vue-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
+    "adapter-shadcn-vue-command-palette": [
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
+    "adapter-shadcn-vue-context-menu": [
+      "contextMenu",
+      "ContextMenuItem",
+      "ContextMenuOptions",
+      "ContextMenuTarget"
+    ],
+    "adapter-shadcn-vue-density": [
+      "densityChooser"
+    ],
+    "adapter-shadcn-vue-editing": [
+      "BatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "EditableCell",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "RowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons"
+    ],
+    "adapter-shadcn-vue-export-csv": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-shadcn-vue-export-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable"
+    ],
+    "adapter-shadcn-vue-export-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "xlsxWriter"
+    ],
+    "adapter-shadcn-vue-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-shadcn-vue-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-shadcn-vue-features": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "BasicFilterField",
+      "BasicFilterFieldProps",
+      "BatchEditBar",
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "bulkActions",
+      "CellEdit",
+      "CellEditHandler",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "collapsibleColumnGroups",
+      "columnMenu",
+      "ColumnMenuSlotProps",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "columnSelectionCheckbox",
+      "commandPalette",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "contextMenu",
+      "densityChooser",
+      "dirtyIndicators",
+      "EditableCell",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "exportCsv",
+      "exportPdf",
+      "ExportPdfOptions",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "FilterChips",
+      "FilterChipsProps",
+      "FilterDef",
+      "FilterField",
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "FilterOption",
+      "FilterPanel",
+      "FilterPanelProps",
+      "filters",
+      "FiltersOptions",
+      "FilterTree",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec",
+      "findInTable",
+      "fitColumns",
+      "fullscreen",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "GridCell",
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps",
+      "GroupNode",
+      "GroupSort",
+      "HeaderFilter",
+      "HeaderFilterProps",
+      "headerFilters",
+      "multiSort",
+      "nestedTable",
+      "NestedTable",
+      "nestedTableDetail",
+      "NestedTableFor",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "print",
+      "resizableColumns",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "rowDetail",
+      "RowEditActions",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "RowExpansionOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "RowStyle",
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "selectionStats",
+      "sidePanel",
+      "StaticGroupingExtras",
+      "statusBar",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps",
+      "TableEditingOptions",
+      "TableRowDetail",
+      "TableTree",
+      "tree",
+      "TreeExpansionOptions",
+      "TreeFeatureOptions",
+      "undoRedoButtons",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging",
+      "useLazyChildren",
+      "useRowExpansion",
+      "useRowReorder",
+      "UseSavedViewsOptions",
+      "useTreeExpansion",
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-shadcn-vue-filters": [
+      "BasicFilterField",
+      "BasicFilterFieldProps",
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "FilterChips",
+      "FilterChipsProps",
+      "FilterDef",
+      "FilterField",
+      "FilterOption",
+      "FilterPanel",
+      "FilterPanelProps",
+      "filters",
+      "FiltersOptions",
+      "FilterTree",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec"
+    ],
+    "adapter-shadcn-vue-find-in-table": [
+      "findInTable"
+    ],
+    "adapter-shadcn-vue-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-shadcn-vue-formula": [],
+    "adapter-shadcn-vue-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-shadcn-vue-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps"
+    ],
+    "adapter-shadcn-vue-grouping": [
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "GroupNode",
+      "GroupSort",
+      "StaticGroupingExtras",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging"
+    ],
+    "adapter-shadcn-vue-header-filters": [
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "HeaderFilter",
+      "HeaderFilterProps",
+      "headerFilters"
+    ],
+    "adapter-shadcn-vue-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-shadcn-vue-nested-table": [
+      "nestedTable"
+    ],
+    "adapter-shadcn-vue-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-shadcn-vue-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
+    "adapter-shadcn-vue-preset": [
+      "FilterDef",
+      "StandardFeatureOptions",
+      "standardFeatures",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-shadcn-vue-print": [
+      "print"
+    ],
+    "adapter-shadcn-vue-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-shadcn-vue-row-actions": [
+      "rowActions"
+    ],
+    "adapter-shadcn-vue-row-appearance": [
+      "rowAppearance"
+    ],
+    "adapter-shadcn-vue-row-detail": [
+      "nestedTable",
+      "NestedTable",
+      "nestedTableDetail",
+      "NestedTableFor",
+      "rowDetail",
+      "RowExpansionOptions",
+      "TableRowDetail",
+      "useRowExpansion"
+    ],
+    "adapter-shadcn-vue-row-pinning": [
+      "rowPinning",
+      "RowPinningFeatureOptions"
+    ],
+    "adapter-shadcn-vue-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
+    "adapter-shadcn-vue-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
+    ],
+    "adapter-shadcn-vue-saved-views": [
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-shadcn-vue-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-shadcn-vue-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
+    "adapter-shadcn-vue-sparkline": [],
+    "adapter-shadcn-vue-status-bar": [
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-shadcn-vue-stream": [],
+    "adapter-shadcn-vue-tree": [
+      "TableTree",
+      "tree",
+      "TreeExpansionOptions",
+      "TreeFeatureOptions",
+      "useLazyChildren",
+      "useTreeExpansion"
+    ],
+    "adapter-shadcn-vue-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-shadcn-vue": [
+      "CellContext",
+      "ColumnDef",
+      "ColumnInput",
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableHandle",
+      "DataTableProps",
+      "DataTableSlots",
+      "FooterContext",
+      "HeaderContext",
+      "shadcnClassNames",
+      "TableSource"
+    ],
+    "adapter-vuetify-batch-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "EditingLifecycleExtras",
+      "VuetifyBatchEditBar"
+    ],
+    "adapter-vuetify-bulk-actions": [
+      "BulkAction",
+      "BulkActionContext",
+      "bulkActions"
+    ],
+    "adapter-vuetify-cell-navigation": [
+      "CellEdit",
+      "cellNavigation",
+      "CellNavigationOptions",
+      "CellRange",
+      "columnSelectionCheckbox",
+      "GridCell"
+    ],
+    "adapter-vuetify-cell-span": [
+      "cellSpan"
+    ],
+    "adapter-vuetify-column-groups": [
+      "collapsibleColumnGroups"
+    ],
+    "adapter-vuetify-column-menu": [
+      "ColumnMenu",
+      "columnMenu",
+      "ColumnMenuSlotProps"
+    ],
+    "adapter-vuetify-column-selection": [
+      "columnSelectionCheckbox"
+    ],
+    "adapter-vuetify-columns": [
+      "collapsibleColumnGroups",
+      "ColumnResizeHandleOptions",
+      "ColumnResizeHandleProps",
+      "fitColumns",
+      "multiSort",
+      "resizableColumns"
+    ],
+    "adapter-vuetify-command-palette": [
+      "CommandPalette",
+      "commandPalette",
+      "CommandPaletteOptions"
+    ],
+    "adapter-vuetify-context-menu": [
+      "contextMenu",
+      "ContextMenuItem",
+      "ContextMenuOptions",
+      "ContextMenuTarget"
+    ],
+    "adapter-vuetify-density": [
+      "densityChooser"
+    ],
+    "adapter-vuetify-editing": [
+      "batchEditing",
+      "BatchEditingState",
+      "BatchRowEdit",
+      "CellEditHandler",
+      "dirtyIndicators",
+      "editHistory",
+      "editing",
+      "EditingLifecycleExtras",
+      "RowEditIcons",
+      "rowEditing",
+      "RowEditingState",
+      "TableEditingOptions",
+      "undoRedoButtons",
+      "VuetifyBatchEditBar",
+      "VuetifyEditableCell",
+      "VuetifyRowEditActions"
+    ],
+    "adapter-vuetify-export": [
+      "exportCsv",
+      "ExportCsvOptions"
+    ],
+    "adapter-vuetify-extra-rows": [
+      "extraRows"
+    ],
+    "adapter-vuetify-filters": [
+      "ChecklistFilter",
+      "ChecklistFilterProps",
+      "FilterDef",
+      "FilterOption",
+      "filters",
+      "FiltersOptions",
+      "FilterTreeBuilder",
+      "FilterTreeBuilderProps",
+      "filterTypes",
+      "FilterTypeSpec",
+      "VuetifyFilterField"
+    ],
+    "adapter-vuetify-find-in-table": [
+      "findInTable"
+    ],
+    "adapter-vuetify-fit-columns": [
+      "fitColumns"
+    ],
+    "adapter-vuetify-fullscreen": [
+      "fullscreen"
+    ],
+    "adapter-vuetify-grouping-panel": [
+      "GroupingExtras",
+      "groupingPanel",
+      "GroupingPanelProps",
+      "StaticGroupingExtras"
+    ],
+    "adapter-vuetify-grouping": [
+      "GroupCollapseOptions",
+      "grouping",
+      "GroupingExtras",
+      "GroupNode",
+      "GroupSort",
+      "StaticGroupingExtras",
+      "useGroupCollapse",
+      "useGroupCollapseUrlState",
+      "useGroupPaging"
+    ],
+    "adapter-vuetify-header-filters": [
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "headerFilters",
+      "VuetifyHeaderFilter"
+    ],
+    "adapter-vuetify-multi-sort": [
+      "multiSort"
+    ],
+    "adapter-vuetify-nested-table": [
+      "nestedTable"
+    ],
+    "adapter-vuetify-pinned-summary-rows": [
+      "pinnedSummaryRows"
+    ],
+    "adapter-vuetify-print": [
+      "print"
+    ],
+    "adapter-vuetify-resizable-columns": [
+      "resizableColumns"
+    ],
+    "adapter-vuetify-row-actions": [
+      "rowActions"
+    ],
+    "adapter-vuetify-row-appearance": [
+      "rowAppearance"
+    ],
+    "adapter-vuetify-row-detail": [
+      "nestedTable",
+      "NestedTable",
+      "nestedTableDetail",
+      "NestedTableFor",
+      "rowDetail",
+      "RowExpansionOptions",
+      "TableRowDetail",
+      "useRowExpansion"
+    ],
+    "adapter-vuetify-row-pinning": [
+      "rowPinning"
+    ],
+    "adapter-vuetify-row-reorder": [
+      "rowReorder",
+      "RowReorderHandler",
+      "RowReorderOptions",
+      "useRowReorder"
+    ],
+    "adapter-vuetify-rows": [
+      "cellSpan",
+      "CellSpanAppearance",
+      "CellSpanRequest",
+      "ConfirmHandler",
+      "ConfirmRequest",
+      "ExtraEntry",
+      "ExtraRow",
+      "ExtraRowKind",
+      "extraRows",
+      "GetCellSpan",
+      "GetCellSpanArgs",
+      "PinnedRows",
+      "PinnedSummaryEntry",
+      "pinnedSummaryRows",
+      "RowAction",
+      "rowActions",
+      "rowAppearance",
+      "RowAppearanceOptions",
+      "RowHeight",
+      "RowMutationHandlers",
+      "rowPinning",
+      "RowPinningFeatureOptions",
+      "RowPinSide",
+      "RowPinState",
+      "RowStyle"
+    ],
+    "adapter-vuetify-saved-views": [
+      "DataTableClassNames",
+      "SavedView",
+      "savedViews",
+      "SavedViewsPanel",
+      "SavedViewsPanelProps",
+      "SavedViewsStore",
+      "UseSavedViewsOptions"
+    ],
+    "adapter-vuetify-selection-stats": [
+      "selectionStats"
+    ],
+    "adapter-vuetify-side-panel": [
+      "sidePanel",
+      "SidePanelOptions",
+      "SidePanelPanel"
+    ],
+    "adapter-vuetify-status-bar": [
+      "selectionStats",
+      "statusBar"
+    ],
+    "adapter-vuetify-tree": [
+      "TableTree",
+      "tree",
+      "TreeExpansionOptions",
+      "TreeFeatureOptions",
+      "useLazyChildren",
+      "useTreeExpansion"
+    ],
+    "adapter-vuetify-virtualize": [
+      "virtualize",
+      "VirtualizeOptions"
+    ],
+    "adapter-vuetify": [
+      "CellContext",
+      "CellEdit",
+      "CellRange",
+      "ColumnDef",
+      "ColumnGroup",
+      "ColumnInput",
+      "DataTable",
+      "DataTableClassNames",
+      "DataTableHandle",
+      "DataTableProps",
+      "DataTableSlots",
+      "FilterHeaderControl",
+      "FilterHeaderControlOptions",
+      "FilterHeaderControlProps",
+      "FilterHeaderRow",
+      "FilterHeaderRowProps",
+      "FooterContext",
+      "HeaderContext",
+      "SummaryRowFn",
+      "TableDensity",
+      "TableSource"
     ]
   },
   "entrypoints": {
@@ -13692,6 +15965,882 @@
     },
     "angular-adapter.api.md": {
       "surface": "angular-adapter"
+    },
+    "adapter-element-plus-batch-editing.api.md": {
+      "surface": "adapter-element-plus-batch-editing"
+    },
+    "adapter-element-plus-bulk-actions.api.md": {
+      "surface": "adapter-element-plus-bulk-actions"
+    },
+    "adapter-element-plus-cell-navigation.api.md": {
+      "surface": "adapter-element-plus-cell-navigation"
+    },
+    "adapter-element-plus-cell-span.api.md": {
+      "surface": "adapter-element-plus-cell-span"
+    },
+    "adapter-element-plus-column-groups.api.md": {
+      "surface": "adapter-element-plus-column-groups"
+    },
+    "adapter-element-plus-column-menu.api.md": {
+      "surface": "adapter-element-plus-column-menu"
+    },
+    "adapter-element-plus-column-selection.api.md": {
+      "surface": "adapter-element-plus-column-selection"
+    },
+    "adapter-element-plus-columns.api.md": {
+      "surface": "adapter-element-plus-columns"
+    },
+    "adapter-element-plus-command-palette.api.md": {
+      "surface": "adapter-element-plus-command-palette"
+    },
+    "adapter-element-plus-context-menu.api.md": {
+      "surface": "adapter-element-plus-context-menu"
+    },
+    "adapter-element-plus-density.api.md": {
+      "surface": "adapter-element-plus-density"
+    },
+    "adapter-element-plus-editing.api.md": {
+      "surface": "adapter-element-plus-editing"
+    },
+    "adapter-element-plus-export.api.md": {
+      "surface": "adapter-element-plus-export"
+    },
+    "adapter-element-plus-extra-rows.api.md": {
+      "surface": "adapter-element-plus-extra-rows"
+    },
+    "adapter-element-plus-filters.api.md": {
+      "surface": "adapter-element-plus-filters"
+    },
+    "adapter-element-plus-find-in-table.api.md": {
+      "surface": "adapter-element-plus-find-in-table"
+    },
+    "adapter-element-plus-fit-columns.api.md": {
+      "surface": "adapter-element-plus-fit-columns"
+    },
+    "adapter-element-plus-fullscreen.api.md": {
+      "surface": "adapter-element-plus-fullscreen"
+    },
+    "adapter-element-plus-grouping-panel.api.md": {
+      "surface": "adapter-element-plus-grouping-panel"
+    },
+    "adapter-element-plus-grouping.api.md": {
+      "surface": "adapter-element-plus-grouping"
+    },
+    "adapter-element-plus-header-filters.api.md": {
+      "surface": "adapter-element-plus-header-filters"
+    },
+    "adapter-element-plus-multi-sort.api.md": {
+      "surface": "adapter-element-plus-multi-sort"
+    },
+    "adapter-element-plus-nested-table.api.md": {
+      "surface": "adapter-element-plus-nested-table"
+    },
+    "adapter-element-plus-pinned-summary-rows.api.md": {
+      "surface": "adapter-element-plus-pinned-summary-rows"
+    },
+    "adapter-element-plus-print.api.md": {
+      "surface": "adapter-element-plus-print"
+    },
+    "adapter-element-plus-resizable-columns.api.md": {
+      "surface": "adapter-element-plus-resizable-columns"
+    },
+    "adapter-element-plus-row-actions.api.md": {
+      "surface": "adapter-element-plus-row-actions"
+    },
+    "adapter-element-plus-row-appearance.api.md": {
+      "surface": "adapter-element-plus-row-appearance"
+    },
+    "adapter-element-plus-row-detail.api.md": {
+      "surface": "adapter-element-plus-row-detail"
+    },
+    "adapter-element-plus-row-pinning.api.md": {
+      "surface": "adapter-element-plus-row-pinning"
+    },
+    "adapter-element-plus-row-reorder.api.md": {
+      "surface": "adapter-element-plus-row-reorder"
+    },
+    "adapter-element-plus-rows.api.md": {
+      "surface": "adapter-element-plus-rows"
+    },
+    "adapter-element-plus-saved-views.api.md": {
+      "surface": "adapter-element-plus-saved-views"
+    },
+    "adapter-element-plus-selection-stats.api.md": {
+      "surface": "adapter-element-plus-selection-stats"
+    },
+    "adapter-element-plus-side-panel.api.md": {
+      "surface": "adapter-element-plus-side-panel"
+    },
+    "adapter-element-plus-status-bar.api.md": {
+      "surface": "adapter-element-plus-status-bar"
+    },
+    "adapter-element-plus-tree.api.md": {
+      "surface": "adapter-element-plus-tree"
+    },
+    "adapter-element-plus-virtualize.api.md": {
+      "surface": "adapter-element-plus-virtualize"
+    },
+    "adapter-element-plus.api.md": {
+      "surface": "adapter-element-plus"
+    },
+    "adapter-naive-ui-batch-editing.api.md": {
+      "surface": "adapter-naive-ui-batch-editing"
+    },
+    "adapter-naive-ui-bulk-actions.api.md": {
+      "surface": "adapter-naive-ui-bulk-actions"
+    },
+    "adapter-naive-ui-cell-navigation.api.md": {
+      "surface": "adapter-naive-ui-cell-navigation"
+    },
+    "adapter-naive-ui-cell-span.api.md": {
+      "surface": "adapter-naive-ui-cell-span"
+    },
+    "adapter-naive-ui-column-groups.api.md": {
+      "surface": "adapter-naive-ui-column-groups"
+    },
+    "adapter-naive-ui-column-menu.api.md": {
+      "surface": "adapter-naive-ui-column-menu"
+    },
+    "adapter-naive-ui-column-selection.api.md": {
+      "surface": "adapter-naive-ui-column-selection"
+    },
+    "adapter-naive-ui-command-palette.api.md": {
+      "surface": "adapter-naive-ui-command-palette"
+    },
+    "adapter-naive-ui-context-menu.api.md": {
+      "surface": "adapter-naive-ui-context-menu"
+    },
+    "adapter-naive-ui-density.api.md": {
+      "surface": "adapter-naive-ui-density"
+    },
+    "adapter-naive-ui-editing.api.md": {
+      "surface": "adapter-naive-ui-editing"
+    },
+    "adapter-naive-ui-export.api.md": {
+      "surface": "adapter-naive-ui-export"
+    },
+    "adapter-naive-ui-extra-rows.api.md": {
+      "surface": "adapter-naive-ui-extra-rows"
+    },
+    "adapter-naive-ui-filters.api.md": {
+      "surface": "adapter-naive-ui-filters"
+    },
+    "adapter-naive-ui-find-in-table.api.md": {
+      "surface": "adapter-naive-ui-find-in-table"
+    },
+    "adapter-naive-ui-fit-columns.api.md": {
+      "surface": "adapter-naive-ui-fit-columns"
+    },
+    "adapter-naive-ui-fullscreen.api.md": {
+      "surface": "adapter-naive-ui-fullscreen"
+    },
+    "adapter-naive-ui-grouping-panel.api.md": {
+      "surface": "adapter-naive-ui-grouping-panel"
+    },
+    "adapter-naive-ui-grouping.api.md": {
+      "surface": "adapter-naive-ui-grouping"
+    },
+    "adapter-naive-ui-header-filters.api.md": {
+      "surface": "adapter-naive-ui-header-filters"
+    },
+    "adapter-naive-ui-multi-sort.api.md": {
+      "surface": "adapter-naive-ui-multi-sort"
+    },
+    "adapter-naive-ui-nested-table.api.md": {
+      "surface": "adapter-naive-ui-nested-table"
+    },
+    "adapter-naive-ui-pinned-summary-rows.api.md": {
+      "surface": "adapter-naive-ui-pinned-summary-rows"
+    },
+    "adapter-naive-ui-print.api.md": {
+      "surface": "adapter-naive-ui-print"
+    },
+    "adapter-naive-ui-renderers.api.md": {
+      "surface": "adapter-naive-ui-renderers"
+    },
+    "adapter-naive-ui-resizable-columns.api.md": {
+      "surface": "adapter-naive-ui-resizable-columns"
+    },
+    "adapter-naive-ui-row-actions.api.md": {
+      "surface": "adapter-naive-ui-row-actions"
+    },
+    "adapter-naive-ui-row-appearance.api.md": {
+      "surface": "adapter-naive-ui-row-appearance"
+    },
+    "adapter-naive-ui-row-detail.api.md": {
+      "surface": "adapter-naive-ui-row-detail"
+    },
+    "adapter-naive-ui-row-pinning.api.md": {
+      "surface": "adapter-naive-ui-row-pinning"
+    },
+    "adapter-naive-ui-row-reorder.api.md": {
+      "surface": "adapter-naive-ui-row-reorder"
+    },
+    "adapter-naive-ui-saved-views.api.md": {
+      "surface": "adapter-naive-ui-saved-views"
+    },
+    "adapter-naive-ui-selection-stats.api.md": {
+      "surface": "adapter-naive-ui-selection-stats"
+    },
+    "adapter-naive-ui-side-panel.api.md": {
+      "surface": "adapter-naive-ui-side-panel"
+    },
+    "adapter-naive-ui-status-bar.api.md": {
+      "surface": "adapter-naive-ui-status-bar"
+    },
+    "adapter-naive-ui-tree.api.md": {
+      "surface": "adapter-naive-ui-tree"
+    },
+    "adapter-naive-ui-virtualize.api.md": {
+      "surface": "adapter-naive-ui-virtualize"
+    },
+    "adapter-naive-ui.api.md": {
+      "surface": "adapter-naive-ui"
+    },
+    "adapter-nuxt-ui-batch-editing.api.md": {
+      "surface": "adapter-nuxt-ui-batch-editing"
+    },
+    "adapter-nuxt-ui-bulk-actions.api.md": {
+      "surface": "adapter-nuxt-ui-bulk-actions"
+    },
+    "adapter-nuxt-ui-cell-navigation.api.md": {
+      "surface": "adapter-nuxt-ui-cell-navigation"
+    },
+    "adapter-nuxt-ui-cell-span.api.md": {
+      "surface": "adapter-nuxt-ui-cell-span"
+    },
+    "adapter-nuxt-ui-column-groups.api.md": {
+      "surface": "adapter-nuxt-ui-column-groups"
+    },
+    "adapter-nuxt-ui-column-menu.api.md": {
+      "surface": "adapter-nuxt-ui-column-menu"
+    },
+    "adapter-nuxt-ui-column-selection.api.md": {
+      "surface": "adapter-nuxt-ui-column-selection"
+    },
+    "adapter-nuxt-ui-columns.api.md": {
+      "surface": "adapter-nuxt-ui-columns"
+    },
+    "adapter-nuxt-ui-command-palette.api.md": {
+      "surface": "adapter-nuxt-ui-command-palette"
+    },
+    "adapter-nuxt-ui-context-menu.api.md": {
+      "surface": "adapter-nuxt-ui-context-menu"
+    },
+    "adapter-nuxt-ui-density.api.md": {
+      "surface": "adapter-nuxt-ui-density"
+    },
+    "adapter-nuxt-ui-editing.api.md": {
+      "surface": "adapter-nuxt-ui-editing"
+    },
+    "adapter-nuxt-ui-export.api.md": {
+      "surface": "adapter-nuxt-ui-export"
+    },
+    "adapter-nuxt-ui-extra-rows.api.md": {
+      "surface": "adapter-nuxt-ui-extra-rows"
+    },
+    "adapter-nuxt-ui-filters.api.md": {
+      "surface": "adapter-nuxt-ui-filters"
+    },
+    "adapter-nuxt-ui-find-in-table.api.md": {
+      "surface": "adapter-nuxt-ui-find-in-table"
+    },
+    "adapter-nuxt-ui-fit-columns.api.md": {
+      "surface": "adapter-nuxt-ui-fit-columns"
+    },
+    "adapter-nuxt-ui-fullscreen.api.md": {
+      "surface": "adapter-nuxt-ui-fullscreen"
+    },
+    "adapter-nuxt-ui-grouping-panel.api.md": {
+      "surface": "adapter-nuxt-ui-grouping-panel"
+    },
+    "adapter-nuxt-ui-grouping.api.md": {
+      "surface": "adapter-nuxt-ui-grouping"
+    },
+    "adapter-nuxt-ui-header-filters.api.md": {
+      "surface": "adapter-nuxt-ui-header-filters"
+    },
+    "adapter-nuxt-ui-multi-sort.api.md": {
+      "surface": "adapter-nuxt-ui-multi-sort"
+    },
+    "adapter-nuxt-ui-nested-table.api.md": {
+      "surface": "adapter-nuxt-ui-nested-table"
+    },
+    "adapter-nuxt-ui-pinned-summary-rows.api.md": {
+      "surface": "adapter-nuxt-ui-pinned-summary-rows"
+    },
+    "adapter-nuxt-ui-print.api.md": {
+      "surface": "adapter-nuxt-ui-print"
+    },
+    "adapter-nuxt-ui-resizable-columns.api.md": {
+      "surface": "adapter-nuxt-ui-resizable-columns"
+    },
+    "adapter-nuxt-ui-row-actions.api.md": {
+      "surface": "adapter-nuxt-ui-row-actions"
+    },
+    "adapter-nuxt-ui-row-appearance.api.md": {
+      "surface": "adapter-nuxt-ui-row-appearance"
+    },
+    "adapter-nuxt-ui-row-detail.api.md": {
+      "surface": "adapter-nuxt-ui-row-detail"
+    },
+    "adapter-nuxt-ui-row-pinning.api.md": {
+      "surface": "adapter-nuxt-ui-row-pinning"
+    },
+    "adapter-nuxt-ui-row-reorder.api.md": {
+      "surface": "adapter-nuxt-ui-row-reorder"
+    },
+    "adapter-nuxt-ui-rows.api.md": {
+      "surface": "adapter-nuxt-ui-rows"
+    },
+    "adapter-nuxt-ui-saved-views.api.md": {
+      "surface": "adapter-nuxt-ui-saved-views"
+    },
+    "adapter-nuxt-ui-selection-stats.api.md": {
+      "surface": "adapter-nuxt-ui-selection-stats"
+    },
+    "adapter-nuxt-ui-side-panel.api.md": {
+      "surface": "adapter-nuxt-ui-side-panel"
+    },
+    "adapter-nuxt-ui-status-bar.api.md": {
+      "surface": "adapter-nuxt-ui-status-bar"
+    },
+    "adapter-nuxt-ui-tree.api.md": {
+      "surface": "adapter-nuxt-ui-tree"
+    },
+    "adapter-nuxt-ui-virtualize.api.md": {
+      "surface": "adapter-nuxt-ui-virtualize"
+    },
+    "adapter-nuxt-ui.api.md": {
+      "surface": "adapter-nuxt-ui"
+    },
+    "adapter-quasar-batch-editing.api.md": {
+      "surface": "adapter-quasar-batch-editing"
+    },
+    "adapter-quasar-bulk-actions.api.md": {
+      "surface": "adapter-quasar-bulk-actions"
+    },
+    "adapter-quasar-cell-navigation.api.md": {
+      "surface": "adapter-quasar-cell-navigation"
+    },
+    "adapter-quasar-cell-span.api.md": {
+      "surface": "adapter-quasar-cell-span"
+    },
+    "adapter-quasar-column-groups.api.md": {
+      "surface": "adapter-quasar-column-groups"
+    },
+    "adapter-quasar-column-menu.api.md": {
+      "surface": "adapter-quasar-column-menu"
+    },
+    "adapter-quasar-column-selection.api.md": {
+      "surface": "adapter-quasar-column-selection"
+    },
+    "adapter-quasar-command-palette.api.md": {
+      "surface": "adapter-quasar-command-palette"
+    },
+    "adapter-quasar-context-menu.api.md": {
+      "surface": "adapter-quasar-context-menu"
+    },
+    "adapter-quasar-density.api.md": {
+      "surface": "adapter-quasar-density"
+    },
+    "adapter-quasar-editing.api.md": {
+      "surface": "adapter-quasar-editing"
+    },
+    "adapter-quasar-export-pdf.api.md": {
+      "surface": "adapter-quasar-export-pdf"
+    },
+    "adapter-quasar-export-xlsx.api.md": {
+      "surface": "adapter-quasar-export-xlsx"
+    },
+    "adapter-quasar-export.api.md": {
+      "surface": "adapter-quasar-export"
+    },
+    "adapter-quasar-extra-rows.api.md": {
+      "surface": "adapter-quasar-extra-rows"
+    },
+    "adapter-quasar-filters.api.md": {
+      "surface": "adapter-quasar-filters"
+    },
+    "adapter-quasar-find-in-table.api.md": {
+      "surface": "adapter-quasar-find-in-table"
+    },
+    "adapter-quasar-fit-columns.api.md": {
+      "surface": "adapter-quasar-fit-columns"
+    },
+    "adapter-quasar-fullscreen.api.md": {
+      "surface": "adapter-quasar-fullscreen"
+    },
+    "adapter-quasar-grouping-panel.api.md": {
+      "surface": "adapter-quasar-grouping-panel"
+    },
+    "adapter-quasar-grouping.api.md": {
+      "surface": "adapter-quasar-grouping"
+    },
+    "adapter-quasar-header-filters.api.md": {
+      "surface": "adapter-quasar-header-filters"
+    },
+    "adapter-quasar-multi-sort.api.md": {
+      "surface": "adapter-quasar-multi-sort"
+    },
+    "adapter-quasar-nested-table.api.md": {
+      "surface": "adapter-quasar-nested-table"
+    },
+    "adapter-quasar-pinned-summary-rows.api.md": {
+      "surface": "adapter-quasar-pinned-summary-rows"
+    },
+    "adapter-quasar-print.api.md": {
+      "surface": "adapter-quasar-print"
+    },
+    "adapter-quasar-resizable-columns.api.md": {
+      "surface": "adapter-quasar-resizable-columns"
+    },
+    "adapter-quasar-row-actions.api.md": {
+      "surface": "adapter-quasar-row-actions"
+    },
+    "adapter-quasar-row-appearance.api.md": {
+      "surface": "adapter-quasar-row-appearance"
+    },
+    "adapter-quasar-row-detail.api.md": {
+      "surface": "adapter-quasar-row-detail"
+    },
+    "adapter-quasar-row-pinning.api.md": {
+      "surface": "adapter-quasar-row-pinning"
+    },
+    "adapter-quasar-row-reorder.api.md": {
+      "surface": "adapter-quasar-row-reorder"
+    },
+    "adapter-quasar-saved-views.api.md": {
+      "surface": "adapter-quasar-saved-views"
+    },
+    "adapter-quasar-selection-stats.api.md": {
+      "surface": "adapter-quasar-selection-stats"
+    },
+    "adapter-quasar-side-panel.api.md": {
+      "surface": "adapter-quasar-side-panel"
+    },
+    "adapter-quasar-status-bar.api.md": {
+      "surface": "adapter-quasar-status-bar"
+    },
+    "adapter-quasar-tree.api.md": {
+      "surface": "adapter-quasar-tree"
+    },
+    "adapter-quasar-virtualize.api.md": {
+      "surface": "adapter-quasar-virtualize"
+    },
+    "adapter-quasar.api.md": {
+      "surface": "adapter-quasar"
+    },
+    "adapter-reka-ui-assistant.api.md": {
+      "surface": "adapter-reka-ui-assistant"
+    },
+    "adapter-reka-ui-batch-editing.api.md": {
+      "surface": "adapter-reka-ui-batch-editing"
+    },
+    "adapter-reka-ui-bulk-actions.api.md": {
+      "surface": "adapter-reka-ui-bulk-actions"
+    },
+    "adapter-reka-ui-cell-navigation.api.md": {
+      "surface": "adapter-reka-ui-cell-navigation"
+    },
+    "adapter-reka-ui-cell-span.api.md": {
+      "surface": "adapter-reka-ui-cell-span"
+    },
+    "adapter-reka-ui-column-groups.api.md": {
+      "surface": "adapter-reka-ui-column-groups"
+    },
+    "adapter-reka-ui-column-menu.api.md": {
+      "surface": "adapter-reka-ui-column-menu"
+    },
+    "adapter-reka-ui-column-selection.api.md": {
+      "surface": "adapter-reka-ui-column-selection"
+    },
+    "adapter-reka-ui-columns.api.md": {
+      "surface": "adapter-reka-ui-columns"
+    },
+    "adapter-reka-ui-command-palette.api.md": {
+      "surface": "adapter-reka-ui-command-palette"
+    },
+    "adapter-reka-ui-context-menu.api.md": {
+      "surface": "adapter-reka-ui-context-menu"
+    },
+    "adapter-reka-ui-density.api.md": {
+      "surface": "adapter-reka-ui-density"
+    },
+    "adapter-reka-ui-editing.api.md": {
+      "surface": "adapter-reka-ui-editing"
+    },
+    "adapter-reka-ui-export-csv.api.md": {
+      "surface": "adapter-reka-ui-export-csv"
+    },
+    "adapter-reka-ui-export-pdf.api.md": {
+      "surface": "adapter-reka-ui-export-pdf"
+    },
+    "adapter-reka-ui-export-xlsx.api.md": {
+      "surface": "adapter-reka-ui-export-xlsx"
+    },
+    "adapter-reka-ui-export.api.md": {
+      "surface": "adapter-reka-ui-export"
+    },
+    "adapter-reka-ui-extra-rows.api.md": {
+      "surface": "adapter-reka-ui-extra-rows"
+    },
+    "adapter-reka-ui-features.api.md": {
+      "surface": "adapter-reka-ui-features"
+    },
+    "adapter-reka-ui-filters.api.md": {
+      "surface": "adapter-reka-ui-filters"
+    },
+    "adapter-reka-ui-find-in-table.api.md": {
+      "surface": "adapter-reka-ui-find-in-table"
+    },
+    "adapter-reka-ui-fit-columns.api.md": {
+      "surface": "adapter-reka-ui-fit-columns"
+    },
+    "adapter-reka-ui-formula.api.md": {
+      "surface": "adapter-reka-ui-formula"
+    },
+    "adapter-reka-ui-fullscreen.api.md": {
+      "surface": "adapter-reka-ui-fullscreen"
+    },
+    "adapter-reka-ui-grouping-panel.api.md": {
+      "surface": "adapter-reka-ui-grouping-panel"
+    },
+    "adapter-reka-ui-grouping.api.md": {
+      "surface": "adapter-reka-ui-grouping"
+    },
+    "adapter-reka-ui-header-filters.api.md": {
+      "surface": "adapter-reka-ui-header-filters"
+    },
+    "adapter-reka-ui-multi-sort.api.md": {
+      "surface": "adapter-reka-ui-multi-sort"
+    },
+    "adapter-reka-ui-nested-table.api.md": {
+      "surface": "adapter-reka-ui-nested-table"
+    },
+    "adapter-reka-ui-pinned-summary-rows.api.md": {
+      "surface": "adapter-reka-ui-pinned-summary-rows"
+    },
+    "adapter-reka-ui-pivot.api.md": {
+      "surface": "adapter-reka-ui-pivot"
+    },
+    "adapter-reka-ui-preset.api.md": {
+      "surface": "adapter-reka-ui-preset"
+    },
+    "adapter-reka-ui-print.api.md": {
+      "surface": "adapter-reka-ui-print"
+    },
+    "adapter-reka-ui-resizable-columns.api.md": {
+      "surface": "adapter-reka-ui-resizable-columns"
+    },
+    "adapter-reka-ui-row-actions.api.md": {
+      "surface": "adapter-reka-ui-row-actions"
+    },
+    "adapter-reka-ui-row-appearance.api.md": {
+      "surface": "adapter-reka-ui-row-appearance"
+    },
+    "adapter-reka-ui-row-detail.api.md": {
+      "surface": "adapter-reka-ui-row-detail"
+    },
+    "adapter-reka-ui-row-pinning.api.md": {
+      "surface": "adapter-reka-ui-row-pinning"
+    },
+    "adapter-reka-ui-row-reorder.api.md": {
+      "surface": "adapter-reka-ui-row-reorder"
+    },
+    "adapter-reka-ui-rows.api.md": {
+      "surface": "adapter-reka-ui-rows"
+    },
+    "adapter-reka-ui-saved-views.api.md": {
+      "surface": "adapter-reka-ui-saved-views"
+    },
+    "adapter-reka-ui-selection-stats.api.md": {
+      "surface": "adapter-reka-ui-selection-stats"
+    },
+    "adapter-reka-ui-side-panel.api.md": {
+      "surface": "adapter-reka-ui-side-panel"
+    },
+    "adapter-reka-ui-sparkline.api.md": {
+      "surface": "adapter-reka-ui-sparkline"
+    },
+    "adapter-reka-ui-status-bar.api.md": {
+      "surface": "adapter-reka-ui-status-bar"
+    },
+    "adapter-reka-ui-stream.api.md": {
+      "surface": "adapter-reka-ui-stream"
+    },
+    "adapter-reka-ui-tree.api.md": {
+      "surface": "adapter-reka-ui-tree"
+    },
+    "adapter-reka-ui-virtualize.api.md": {
+      "surface": "adapter-reka-ui-virtualize"
+    },
+    "adapter-reka-ui.api.md": {
+      "surface": "adapter-reka-ui"
+    },
+    "adapter-shadcn-vue-assistant.api.md": {
+      "surface": "adapter-shadcn-vue-assistant"
+    },
+    "adapter-shadcn-vue-batch-editing.api.md": {
+      "surface": "adapter-shadcn-vue-batch-editing"
+    },
+    "adapter-shadcn-vue-bulk-actions.api.md": {
+      "surface": "adapter-shadcn-vue-bulk-actions"
+    },
+    "adapter-shadcn-vue-cell-navigation.api.md": {
+      "surface": "adapter-shadcn-vue-cell-navigation"
+    },
+    "adapter-shadcn-vue-cell-span.api.md": {
+      "surface": "adapter-shadcn-vue-cell-span"
+    },
+    "adapter-shadcn-vue-column-groups.api.md": {
+      "surface": "adapter-shadcn-vue-column-groups"
+    },
+    "adapter-shadcn-vue-column-menu.api.md": {
+      "surface": "adapter-shadcn-vue-column-menu"
+    },
+    "adapter-shadcn-vue-column-selection.api.md": {
+      "surface": "adapter-shadcn-vue-column-selection"
+    },
+    "adapter-shadcn-vue-columns.api.md": {
+      "surface": "adapter-shadcn-vue-columns"
+    },
+    "adapter-shadcn-vue-command-palette.api.md": {
+      "surface": "adapter-shadcn-vue-command-palette"
+    },
+    "adapter-shadcn-vue-context-menu.api.md": {
+      "surface": "adapter-shadcn-vue-context-menu"
+    },
+    "adapter-shadcn-vue-density.api.md": {
+      "surface": "adapter-shadcn-vue-density"
+    },
+    "adapter-shadcn-vue-editing.api.md": {
+      "surface": "adapter-shadcn-vue-editing"
+    },
+    "adapter-shadcn-vue-export-csv.api.md": {
+      "surface": "adapter-shadcn-vue-export-csv"
+    },
+    "adapter-shadcn-vue-export-pdf.api.md": {
+      "surface": "adapter-shadcn-vue-export-pdf"
+    },
+    "adapter-shadcn-vue-export-xlsx.api.md": {
+      "surface": "adapter-shadcn-vue-export-xlsx"
+    },
+    "adapter-shadcn-vue-export.api.md": {
+      "surface": "adapter-shadcn-vue-export"
+    },
+    "adapter-shadcn-vue-extra-rows.api.md": {
+      "surface": "adapter-shadcn-vue-extra-rows"
+    },
+    "adapter-shadcn-vue-features.api.md": {
+      "surface": "adapter-shadcn-vue-features"
+    },
+    "adapter-shadcn-vue-filters.api.md": {
+      "surface": "adapter-shadcn-vue-filters"
+    },
+    "adapter-shadcn-vue-find-in-table.api.md": {
+      "surface": "adapter-shadcn-vue-find-in-table"
+    },
+    "adapter-shadcn-vue-fit-columns.api.md": {
+      "surface": "adapter-shadcn-vue-fit-columns"
+    },
+    "adapter-shadcn-vue-formula.api.md": {
+      "surface": "adapter-shadcn-vue-formula"
+    },
+    "adapter-shadcn-vue-fullscreen.api.md": {
+      "surface": "adapter-shadcn-vue-fullscreen"
+    },
+    "adapter-shadcn-vue-grouping-panel.api.md": {
+      "surface": "adapter-shadcn-vue-grouping-panel"
+    },
+    "adapter-shadcn-vue-grouping.api.md": {
+      "surface": "adapter-shadcn-vue-grouping"
+    },
+    "adapter-shadcn-vue-header-filters.api.md": {
+      "surface": "adapter-shadcn-vue-header-filters"
+    },
+    "adapter-shadcn-vue-multi-sort.api.md": {
+      "surface": "adapter-shadcn-vue-multi-sort"
+    },
+    "adapter-shadcn-vue-nested-table.api.md": {
+      "surface": "adapter-shadcn-vue-nested-table"
+    },
+    "adapter-shadcn-vue-pinned-summary-rows.api.md": {
+      "surface": "adapter-shadcn-vue-pinned-summary-rows"
+    },
+    "adapter-shadcn-vue-pivot.api.md": {
+      "surface": "adapter-shadcn-vue-pivot"
+    },
+    "adapter-shadcn-vue-preset.api.md": {
+      "surface": "adapter-shadcn-vue-preset"
+    },
+    "adapter-shadcn-vue-print.api.md": {
+      "surface": "adapter-shadcn-vue-print"
+    },
+    "adapter-shadcn-vue-resizable-columns.api.md": {
+      "surface": "adapter-shadcn-vue-resizable-columns"
+    },
+    "adapter-shadcn-vue-row-actions.api.md": {
+      "surface": "adapter-shadcn-vue-row-actions"
+    },
+    "adapter-shadcn-vue-row-appearance.api.md": {
+      "surface": "adapter-shadcn-vue-row-appearance"
+    },
+    "adapter-shadcn-vue-row-detail.api.md": {
+      "surface": "adapter-shadcn-vue-row-detail"
+    },
+    "adapter-shadcn-vue-row-pinning.api.md": {
+      "surface": "adapter-shadcn-vue-row-pinning"
+    },
+    "adapter-shadcn-vue-row-reorder.api.md": {
+      "surface": "adapter-shadcn-vue-row-reorder"
+    },
+    "adapter-shadcn-vue-rows.api.md": {
+      "surface": "adapter-shadcn-vue-rows"
+    },
+    "adapter-shadcn-vue-saved-views.api.md": {
+      "surface": "adapter-shadcn-vue-saved-views"
+    },
+    "adapter-shadcn-vue-selection-stats.api.md": {
+      "surface": "adapter-shadcn-vue-selection-stats"
+    },
+    "adapter-shadcn-vue-side-panel.api.md": {
+      "surface": "adapter-shadcn-vue-side-panel"
+    },
+    "adapter-shadcn-vue-sparkline.api.md": {
+      "surface": "adapter-shadcn-vue-sparkline"
+    },
+    "adapter-shadcn-vue-status-bar.api.md": {
+      "surface": "adapter-shadcn-vue-status-bar"
+    },
+    "adapter-shadcn-vue-stream.api.md": {
+      "surface": "adapter-shadcn-vue-stream"
+    },
+    "adapter-shadcn-vue-tree.api.md": {
+      "surface": "adapter-shadcn-vue-tree"
+    },
+    "adapter-shadcn-vue-virtualize.api.md": {
+      "surface": "adapter-shadcn-vue-virtualize"
+    },
+    "adapter-shadcn-vue.api.md": {
+      "surface": "adapter-shadcn-vue"
+    },
+    "adapter-vuetify-batch-editing.api.md": {
+      "surface": "adapter-vuetify-batch-editing"
+    },
+    "adapter-vuetify-bulk-actions.api.md": {
+      "surface": "adapter-vuetify-bulk-actions"
+    },
+    "adapter-vuetify-cell-navigation.api.md": {
+      "surface": "adapter-vuetify-cell-navigation"
+    },
+    "adapter-vuetify-cell-span.api.md": {
+      "surface": "adapter-vuetify-cell-span"
+    },
+    "adapter-vuetify-column-groups.api.md": {
+      "surface": "adapter-vuetify-column-groups"
+    },
+    "adapter-vuetify-column-menu.api.md": {
+      "surface": "adapter-vuetify-column-menu"
+    },
+    "adapter-vuetify-column-selection.api.md": {
+      "surface": "adapter-vuetify-column-selection"
+    },
+    "adapter-vuetify-columns.api.md": {
+      "surface": "adapter-vuetify-columns"
+    },
+    "adapter-vuetify-command-palette.api.md": {
+      "surface": "adapter-vuetify-command-palette"
+    },
+    "adapter-vuetify-context-menu.api.md": {
+      "surface": "adapter-vuetify-context-menu"
+    },
+    "adapter-vuetify-density.api.md": {
+      "surface": "adapter-vuetify-density"
+    },
+    "adapter-vuetify-editing.api.md": {
+      "surface": "adapter-vuetify-editing"
+    },
+    "adapter-vuetify-export.api.md": {
+      "surface": "adapter-vuetify-export"
+    },
+    "adapter-vuetify-extra-rows.api.md": {
+      "surface": "adapter-vuetify-extra-rows"
+    },
+    "adapter-vuetify-filters.api.md": {
+      "surface": "adapter-vuetify-filters"
+    },
+    "adapter-vuetify-find-in-table.api.md": {
+      "surface": "adapter-vuetify-find-in-table"
+    },
+    "adapter-vuetify-fit-columns.api.md": {
+      "surface": "adapter-vuetify-fit-columns"
+    },
+    "adapter-vuetify-fullscreen.api.md": {
+      "surface": "adapter-vuetify-fullscreen"
+    },
+    "adapter-vuetify-grouping-panel.api.md": {
+      "surface": "adapter-vuetify-grouping-panel"
+    },
+    "adapter-vuetify-grouping.api.md": {
+      "surface": "adapter-vuetify-grouping"
+    },
+    "adapter-vuetify-header-filters.api.md": {
+      "surface": "adapter-vuetify-header-filters"
+    },
+    "adapter-vuetify-multi-sort.api.md": {
+      "surface": "adapter-vuetify-multi-sort"
+    },
+    "adapter-vuetify-nested-table.api.md": {
+      "surface": "adapter-vuetify-nested-table"
+    },
+    "adapter-vuetify-pinned-summary-rows.api.md": {
+      "surface": "adapter-vuetify-pinned-summary-rows"
+    },
+    "adapter-vuetify-print.api.md": {
+      "surface": "adapter-vuetify-print"
+    },
+    "adapter-vuetify-resizable-columns.api.md": {
+      "surface": "adapter-vuetify-resizable-columns"
+    },
+    "adapter-vuetify-row-actions.api.md": {
+      "surface": "adapter-vuetify-row-actions"
+    },
+    "adapter-vuetify-row-appearance.api.md": {
+      "surface": "adapter-vuetify-row-appearance"
+    },
+    "adapter-vuetify-row-detail.api.md": {
+      "surface": "adapter-vuetify-row-detail"
+    },
+    "adapter-vuetify-row-pinning.api.md": {
+      "surface": "adapter-vuetify-row-pinning"
+    },
+    "adapter-vuetify-row-reorder.api.md": {
+      "surface": "adapter-vuetify-row-reorder"
+    },
+    "adapter-vuetify-rows.api.md": {
+      "surface": "adapter-vuetify-rows"
+    },
+    "adapter-vuetify-saved-views.api.md": {
+      "surface": "adapter-vuetify-saved-views"
+    },
+    "adapter-vuetify-selection-stats.api.md": {
+      "surface": "adapter-vuetify-selection-stats"
+    },
+    "adapter-vuetify-side-panel.api.md": {
+      "surface": "adapter-vuetify-side-panel"
+    },
+    "adapter-vuetify-status-bar.api.md": {
+      "surface": "adapter-vuetify-status-bar"
+    },
+    "adapter-vuetify-tree.api.md": {
+      "surface": "adapter-vuetify-tree"
+    },
+    "adapter-vuetify-virtualize.api.md": {
+      "surface": "adapter-vuetify-virtualize"
+    },
+    "adapter-vuetify.api.md": {
+      "surface": "adapter-vuetify"
     }
   }
 }
