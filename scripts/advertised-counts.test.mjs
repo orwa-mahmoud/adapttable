@@ -140,11 +140,19 @@ describe("advertised adapter count", () => {
     assert.ok(count > 0);
   });
 
-  checkAdvertised(
-    [{ file: "CONTRIBUTING.md", occurrences: 1 }],
-    count,
-    "adapters?|kits?"
-  );
+  it("CONTRIBUTING.md names no adapter count", () => {
+    const text = readFileSync(join(ROOT, "CONTRIBUTING.md"), "utf8");
+    const words = WORDS.slice(2).join("|");
+    const claim = new RegExp(
+      `\\b(?:\\d+|${words})(?:-\\w+)?[ -](?:UI )?(?:adapters?|kits?)\\b`,
+      "gi"
+    );
+    assert.deepEqual(
+      text.match(claim) ?? [],
+      [],
+      `CONTRIBUTING.md covers every adapter; ${count} publish today, so say "every adapter" rather than a number.`
+    );
+  });
 
   // These claims describe the React binding's adapter surface.
   // Publishing another framework's kit must not change that React-only count.
