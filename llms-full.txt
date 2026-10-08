@@ -31813,17 +31813,22 @@ See [Data tiers](./data-tiers.md), [SSR](./ssr-rsc.md) and the
 # Get started with Vue tables
 
 The experimental Vue integration provides reactive data sources, a headless
-table controller and an unstyled table with native HTML controls. It uses the
-same framework-neutral engine as AdaptTable's other bindings, with Vue-native
-refs, renderers, effect scopes and component lifecycles.
+table controller and adapters for Vue Unstyled, Element Plus, Vuetify, Naive UI,
+Reka UI, shadcn-vue, Nuxt UI and Quasar. They share AdaptTable's framework-neutral
+engine, with Vue-native refs, renderers, effect scopes and component lifecycles.
+Each adapter supplies its own controls; the binding owns the table model.
 
 ## Availability and scope
 
-`@adapttable/vue` and `@adapttable/vue-unstyled` are public packages prepared for an
-experimental `0.1.0` release. They have not been published to npm. These examples
-require a checkout or an application already linked to the built workspace packages. The peer dependency
-is Vue `^3.5.0`; the workspace build requires Node `>=22.12.0` and pnpm. From the
-repository root, build the binding, native kit and their workspace dependencies:
+The Vue binding, Unstyled adapter and all seven styled adapters are public
+packages prepared for an experimental `0.1.0` release. They have not been
+published to npm. These examples require a checkout or an application linked to
+the built workspace packages; the available source and preview routes do not
+establish npm availability or a completed browser-validation gate.
+
+The binding requires Vue `^3.5.0`; adapters can require a newer Vue patch through
+their UI-kit peers. The workspace build requires Node `>=22.12.0` and pnpm. From
+the repository root, build the binding, native kit and their workspace dependencies:
 
 ```sh
 pnpm --filter @adapttable/vue-unstyled... build
@@ -31842,16 +31847,49 @@ for adapter authors. Every interactive control belongs to its kit. Use native
 factories from `@adapttable/vue-unstyled` feature subpaths with the native table;
 binding-only factories require the corresponding adapter slots.
 
-These packages are experimental and do not yet provide the complete
-React/Angular feature catalog or styled Vue kits. Compose standard native
-controls with `standardFeatures()` from `@adapttable/vue-unstyled/preset`.
-Use the documented Vue entry points for individual features.
+The seven styled adapters expose the same 41 canonical feature factories, with
+kit-specific controls. Optional convenience APIs still vary: a preset, feature
+barrel, assistant surface or pivot configuration panel is available only where
+the package exports it. See the [adapter entry map](./features.md#styled-adapter-feature-entries)
+for those boundaries. Compose standard Unstyled controls with `standardFeatures()`
+from `@adapttable/vue-unstyled/preset`, or choose individual feature entries.
 
 For strict template checking, use Vue tooling with `strictTemplates: true`.
 If your template checker restricts custom data attributes, its
 `vueCompilerOptions.dataAttributes` can include `"data-*"` for the documented
 semantic hooks. Row types, renderer props and selection model events remain
 checked in both directions.
+
+## Choose a UI kit
+
+Use the table and its feature factories from the same adapter. For example,
+`DataTable` from `@adapttable/nuxt-ui` pairs with
+`@adapttable/nuxt-ui/command-palette`; a binding-only factory does not supply
+Nuxt controls. Switching adapters does not transfer ownership of row data or
+create a second query, selection or editing engine.
+
+| Adapter package            | Application setup                                                                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@adapttable/vue-unstyled` | Native HTML controls; no stylesheet or UI-kit provider.                                                                                            |
+| `@adapttable/element-plus` | Element Plus theme CSS and the adapter's `/styles.css`; use Element Plus configuration for locale and SSR providers.                               |
+| `@adapttable/vuetify`      | Register Vuetify, provide its application context, and load `vuetify/styles` plus the adapter's `/styles.css`.                                     |
+| `@adapttable/naive-ui`     | Load the adapter's `/styles.css`; configure Naive UI's theme and locale providers as needed. Collect Naive UI styles when rendering on the server. |
+| `@adapttable/reka-ui`      | Load the adapter's `/styles.css`; the adapter uses Reka primitives.                                                                                |
+| `@adapttable/shadcn-vue`   | Load the adapter's `/styles.css` and provide shadcn theme tokens. The package includes its licensed, copied controls and compiled CSS.             |
+| `@adapttable/nuxt-ui`      | Use Nuxt UI's module in Nuxt, or its official Vite and Vue plugins in a plain Vue app; load theme CSS and provide `UApp`.                          |
+| `@adapttable/quasar`       | Register Quasar and load Quasar CSS plus the adapter's `/styles.css`; configure Quasar's locale and RTL support.                                   |
+
+Each package README contains its exact peer versions and complete host setup.
+For example, build a styled adapter and its workspace dependencies with
+`pnpm --filter @adapttable/shadcn-vue... build`. A workspace build is preparation
+for linked development, not an npm installation command.
+
+A component's SSR support does not replace the UI kit's application pipeline.
+Element Plus needs request-local ID/z-index providers and its teleport handling;
+Naive UI needs CSS-render collection. Vuetify and Nuxt UI require host compilation
+for their CSS or Vue SFC imports. For production Quasar SSR/SSG, use Quasar CLI
+with Vite; its standalone Vite plugin does not support that mode. Keep identical
+initial rows, IDs, locale, direction and responsive settings on server and client.
 
 ## First table
 
@@ -32102,12 +32140,12 @@ applies: showcase source is not a published-package or feature-parity claim.
 
 # Compose Vue table features
 
-The experimental `@adapttable/vue` binding and `@adapttable/vue-unstyled`
-kit share one table model. Add optional behavior through the native kit's
-feature factories; each factory contributes its own native controls while
-the binding owns state, validation, row projection and lifecycle. These are
-public, unreleased `0.1.0` packages. See [getting started](./getting-started.md)
-for workspace setup.
+The experimental Vue adapters share the `@adapttable/vue` table model. Add
+optional behavior through the chosen kit's feature factories: the adapter
+contributes its own controls while the binding owns state, validation, row
+projection and lifecycle. The binding, Unstyled kit and seven styled adapters
+are public, unreleased `0.1.0` packages. See [getting started](./getting-started.md)
+for workspace setup and UI-kit providers.
 
 ## Choose an entry point
 
@@ -32162,6 +32200,87 @@ and `@adapttable/vue/adapter` for control contracts.
 A binding factory does not supply visible controls. Use its native counterpart
 with the Unstyled kit. A React or Angular import does not define a Vue feature.
 
+## Styled adapter feature entries
+
+Element Plus, Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar each
+export the same 41 canonical feature factories. This describes their callable
+feature surface, not identical optional helper exports or a completed browser
+validation run. Import a factory from the selected adapter's focused path; every
+visible field, button, menu and dialog belongs to that adapter's kit.
+
+The common entries include the native import map above through `/export`, plus:
+
+| Import suffix       | Canonical factories       |
+| ------------------- | ------------------------- |
+| `/column-menu`      | `columnMenu`              |
+| `/cell-navigation`  | `cellNavigation`          |
+| `/column-selection` | `columnSelectionCheckbox` |
+| `/find-in-table`    | `findInTable`             |
+| `/status-bar`       | `statusBar`               |
+| `/selection-stats`  | `selectionStats`          |
+| `/grouping-panel`   | `groupingPanel`           |
+| `/row-reorder`      | `rowReorder`              |
+| `/virtualize`       | `virtualize`              |
+| `/bulk-actions`     | `bulkActions`             |
+| `/command-palette`  | `commandPalette`          |
+| `/context-menu`     | `contextMenu`             |
+| `/side-panel`       | `sidePanel`               |
+| `/print`            | `print`                   |
+
+`SavedViewsPanel` is also available from each adapter's `/saved-views` entry.
+`/column-selection` is the canonical path even where `/cell-navigation` also
+exports `columnSelectionCheckbox`. Use `/nested-table` for `nestedTable`; older
+exports from `/row-detail` remain available. These aliases do not install a
+second feature or require a migration of saved state.
+
+### Optional helpers differ by adapter
+
+| Adapter                    | Feature barrel and preset | Kit-specific optional surfaces and writers                                          |
+| -------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| `@adapttable/element-plus` | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/vuetify`      | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/naive-ui`     | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/reka-ui`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`. |
+| `@adapttable/shadcn-vue`   | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`. |
+| `@adapttable/nuxt-ui`      | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/quasar`       | Use focused imports       | `/export-pdf`, `/export-xlsx`; pivot controls are host-composed.                    |
+
+All adapters can render data prepared by binding `/pivot`, `/formula`, `/sparkline`
+and `/stream` helpers. That does not imply a kit-specific pivot configuration
+panel or assistant export. Unstyled, Reka UI and shadcn-vue provide the documented
+assistant surfaces; a different kit can fill the binding's required assistant
+slots. [Actions and exports](./actions.md) and [specialized views](./specialized.md)
+show the shared writer and data-model boundaries.
+
+### One state model, kit-owned presentation
+
+Factories retain the table's controlled state and host callbacks. An edit, row
+move, delete or panel-selection request does not become authoritative until the
+host accepts it. Stateful filters, sort, grouping, density and explicitly wired
+layout use the existing URL/Saved Views contracts. Menu visibility, focus,
+pending export progress and edit drafts are temporary interaction state.
+
+The binding's Chrome provides structure, typed slots, localized labels and
+lifecycle ownership. Adapters fill those slots and forward semantic attributes,
+class hooks and real element refs. The Unstyled kit uses native HTML controls;
+styled adapters use their own kit components. Importing a base table does not
+install a feature barrel, optional writers or an AI runtime.
+
+Desktop headers own header filters and resize handles. Mobile cards retain
+applicable toolbar controls, row actions and move buttons; side panels stack
+below the table. Desktop-only geometry such as spans and pinned columns does
+not turn card fields into a grid. Direction-aware controls use the table's `dir`;
+configure the UI kit's own provider and RTL styling too. Kit overlays target the
+owning table's portal container so dialogs and menus remain usable in fullscreen.
+Fullscreen still depends on browser support.
+
+Server rendering keeps browser listeners and measurement resources inactive.
+Use the kit's documented SSR integration and stable hydration inputs. Mounted
+features release their observers, shortcuts and temporary overlays when their
+owner is removed or suspended under `KeepAlive`. Component-level tests and
+registered browser fixtures are distinct evidence; neither alone proves a full
+application's SSR or browser gate is complete.
+
 ## Reka UI feature entries
 
 `@adapttable/reka-ui` renders the Vue table with Reka primitives and its own
@@ -32188,13 +32307,50 @@ applicable toolbar controls.
   `agentApproval()`; the host supplies transport and approval decisions.
 - `/preset`: `standardFeatures()` and `StandardFeatureOptions<TRow>`.
 
-The Reka preset installs the same ten zero-argument features described below,
-using Reka controls. Its `filters`, `savedViews`, `grouping` and `bulkActions`
-options add their configured features; `findButton` controls the optional Find
-button. Import it from `@adapttable/reka-ui/preset` and import
-`@adapttable/reka-ui/styles.css` once in the application. Fullscreen depends on
+The Reka and shadcn-vue presets install the same ten zero-argument features
+described below, each using its own kit's controls. Their `filters`, `savedViews`,
+`grouping` and `bulkActions` options add configured features; `findButton` controls
+the optional Find button. Import from the chosen kit's `/preset` and load that
+kit's `/styles.css` once in the application. Fullscreen depends on
 browser support. Keep PDF and XLSX writers on their separate optional entries
 when the table needs those formats.
+
+## Compose a styled workspace
+
+This Nuxt UI example uses only focused exports. Use it after the
+[application setup](./getting-started.md#choose-a-ui-kit), then pass `features`
+to the Nuxt `DataTable` with the matching rows and columns.
+
+```ts
+import { shallowRef } from "vue";
+import { commandPalette } from "@adapttable/nuxt-ui/command-palette";
+import { contextMenu } from "@adapttable/nuxt-ui/context-menu";
+import { rowReorder } from "@adapttable/nuxt-ui/row-reorder";
+import { savedViews } from "@adapttable/nuxt-ui/saved-views";
+
+interface Person {
+  id: string;
+  name: string;
+}
+const rows = shallowRef<readonly Person[]>([{ id: "ada", name: "Ada" }]);
+const features = [
+  commandPalette({ button: true }),
+  contextMenu<Person>(),
+  savedViews({ storageKey: "people-views", urlSync: false }),
+  rowReorder<Person>((from, to, row) => {
+    const next = [...rows.value];
+    next.splice(from, 1);
+    next.splice(to, 0, row);
+    rows.value = next;
+  }),
+];
+```
+
+The row callback publishes the accepted order. For grouped or tree rows, follow
+the [move policy and host-index contract](./specialized.md#host-owned-row-moves)
+rather than treating every visual position as a source-array index. A real
+[Nuxt UI workspace lab](/vue/demo/nuxt-ui/workspace/) also exercises controlled
+side panels, Saved Views, keyboard actions and mobile moves.
 
 ## Standard native features
 
@@ -33054,6 +33210,24 @@ headers derived from the unchanged pivot leaves. Region and Status captions are
 localized in row and nested column dimensions; canonical field names, leaf paths,
 row/column keys and serialized pivot configuration stay unchanged.
 
+## Styled feature labs
+
+The seven basic kit previews remain small order-desk examples. Separate,
+non-indexed feature labs mount the actual adapter fixtures and are registered
+with the existing showcase browser suite:
+
+- [shadcn-vue filters](/vue/demo/shadcn-vue/filter-panel/): real filter controls,
+  popover/drawer dismissal, focus, RTL and mobile behavior.
+- [shadcn-vue table features](/vue/demo/shadcn-vue/feature-parity/): grouping,
+  Saved Views, row menus, keyboard moves and commands.
+- [shadcn-vue action surfaces](/vue/demo/shadcn-vue/action-surfaces/): assistant,
+  context and command surfaces, plus controlled side panels.
+- [Nuxt UI workspace](/vue/demo/nuxt-ui/workspace/): command/context actions,
+  Saved Views, controlled panels, row reordering and suspension/resume.
+
+These are integration fixtures, not npm releases or a claim that browser CI has
+passed. They use fictional in-browser data and host-owned writes.
+
 ---
 
 # Experimental Vue API reference
@@ -33147,6 +33321,34 @@ See [export scope and lifecycle](./actions.md) and
 Type-only re-exports do not imply matching runtime exports. In particular,
 structural/model helpers and feature functions belong to their entries above;
 importing the binding root never installs controls, optional features or AI.
+
+## Styled adapter entry points
+
+`@adapttable/element-plus`, `@adapttable/vuetify`, `@adapttable/naive-ui`,
+`@adapttable/reka-ui`, `@adapttable/shadcn-vue`, `@adapttable/nuxt-ui` and
+`@adapttable/quasar` export their own `DataTable` and 41 canonical feature
+factories through focused entries. All remain unreleased `0.1.0` packages.
+Their controls consume the shared Vue model and Chrome contracts; they do not
+import another framework binding or replace the table engine.
+
+The binding's root, `/features` and `/adapter` remain the canonical owners for
+shared contracts. A kit's factory adds that kit's required control slots; a
+binding factory alone does not do so. Use `/column-selection` for
+`columnSelectionCheckbox` and `/nested-table` for `nestedTable` on every kit.
+Older aliases remain available where they were already exported.
+
+Only Unstyled, Reka UI and shadcn-vue currently expose the documented `/features`
+barrel, `/preset`, `/assistant` and controlled `/pivot` panel. Quasar additionally
+provides dedicated `/export-pdf` and `/export-xlsx` entries. Element Plus,
+Vuetify, Naive UI and Nuxt UI use their own `/export` feature with optional
+`pdfWriter` or `xlsxWriter` from binding `/pdf` or `/xlsx`.
+
+Shared pivot data, formulas, streams and sparkline helpers remain available from
+`@adapttable/vue/pivot`, `/formula`, `/stream` and `/sparkline` regardless of the
+chosen kit. A callable feature inventory does not imply every kit exports the
+same convenience components. See the [full entry map](./features.md#styled-adapter-feature-entries)
+and [host setup](./getting-started.md#choose-a-ui-kit) before selecting optional
+surfaces or an SSR pipeline.
 
 ## Optional adapter layout
 
@@ -33741,6 +33943,19 @@ Arrow/Home/End/Enter handling and disabled-command behavior. Switching the
 surface retires the previous focus owner and stale callbacks. Ordinary surfaces
 keep the existing generic behavior.
 
+### Compound context menus
+
+`ContextMenuChrome` accepts either the required `ContextMenuSlots` or a complete
+`ContextMenuPresentation`. These options are mutually exclusive. A complete
+presentation receives `ContextMenuPresentationProps`: the viewport point,
+invisible anchor ref, localized label, fullscreen container and class name,
+plus `onClose`, `isCurrent` and an ordered list of `{ item, onSelect }` entries.
+Use each entry's guarded `onSelect`, rather than calling `item.onSelect`
+directly. The binding closes first and dispatches a current enabled action once;
+replaced menus, presentation owners and inactive component scopes retire stale
+callbacks. Native menu components own their keyboard navigation, positioning
+and dismissal presentation without copying table interaction state.
+
 ### Flat-menu keyboard navigation
 
 `createMenuNavigation()` from `@adapttable/vue/adapter` creates a
@@ -33959,8 +34174,11 @@ complete signatures are retained in the assistant API report.
 
 The Vue packages are experimental and unreleased. `@adapttable/ai-vue`
 connects neutral AI stores to Vue 3.5. `@adapttable/vue/adapter` provides
-structural Chrome and required control slots; a kit such as
-`@adapttable/vue-unstyled/assistant` supplies the visible controls.
+structural Chrome and required control slots. Unstyled, Reka UI and shadcn-vue
+supply the visible controls through their optional `/assistant` entries.
+Element Plus, Vuetify, Naive UI, Nuxt UI and Quasar do not currently export an
+assistant surface; their tables can use the headless agent feature or a
+host-composed surface built from the binding's required slots.
 
 ## Choose the integration
 
@@ -34055,6 +34273,33 @@ const rowKey = (row: { id: string }) => row.id;
 surface feature is an error. `agentApproval()` registers the table review
 strip. These kit features import no AI runtime, so a host can also provide its
 own structurally compatible conversation state.
+
+## Choose an assistant presentation
+
+The same `TableAssistant`, `AgentApproval`, `tableAssistant()` and
+`agentApproval()` API is exported by:
+
+- `@adapttable/vue-unstyled/assistant`, with native HTML controls.
+- `@adapttable/reka-ui/assistant`, with Reka primitives.
+- `@adapttable/shadcn-vue/assistant`, with shadcn Sheet, input, button and other
+  copied kit controls.
+
+Replace both the table and assistant imports when adapting the example above.
+Keep `tableAgent`, `useTableAssistant` and optional `useSpeechInput` on
+`@adapttable/ai-vue`. A kit's assistant entry does not load that AI binding, select
+a model, supply a transport or authorize host writes. The host provides its
+conversation state, backend connection and approval decisions.
+
+Kit surfaces consume the same controlled open state, localized labels, approval
+ownership and revoked-session guards. Overlay presentation follows the table's
+fullscreen container; RTL follows the resolved direction. Compact screens use
+the chosen kit's responsive surface. During SSR, keep the initial state stable
+and defer browser transport, focus and speech resources until mounting. Removing
+or suspending the owning component retires its pending UI work.
+
+The [shadcn-vue action lab](/vue/demo/shadcn-vue/action-surfaces/) uses a local
+fixture to exercise the real assistant controls. It is not a live model session
+or a statement that browser CI has passed.
 
 ## Approval and controlled state
 
@@ -34351,8 +34596,10 @@ binding's `/adapter` entry; ordinary native tables use the `summaryRow`,
 
 # Vue column menu
 
-Add `columnMenu()` from the Vue kit's `column-menu` entry to the table's
-`features` list. The menu provides column search, visibility, pinning,
+Add `columnMenu()` from the chosen Vue kit's `/column-menu` entry to the table's
+`features` list. It is available in Unstyled, Element Plus, Vuetify, Naive UI,
+Reka UI, shadcn-vue, Nuxt UI and Quasar; use the same kit for the table and feature.
+These packages remain experimental and unreleased. The menu provides column search, visibility, pinning,
 reordering, sorting, sizing, and reset. Rename controls appear for columns
 that declare `renameable: true` when the table provides its rename channel.
 
@@ -34418,6 +34665,20 @@ stays inside the table's DOM subtree, so it also stays inside a fullscreen
 table. Escape closes a submenu first, then the menu; outside pointer presses
 close the menu. Leaving a kept-alive table dismisses the menu and suspends
 its event handlers.
+
+## Styled menus use the same layout contract
+
+The example above uses Unstyled; change both imports to the selected adapter
+for styled controls. Each adapter reuses the binding's column model, rename
+validation, controlled requests and localized labels. It supplies its own search
+field, choices, buttons and menu surface. Switching a kit does not create a new
+layout or change the persisted column keys.
+
+Kit popovers use their supported portal and focus APIs. Their target follows the
+owning table's fullscreen container, and direction-aware placement and controls
+follow `dir` plus the application's UI-kit provider. No binding fallback installs
+native inputs into a styled menu. For custom adapter work, keep the required
+attribute and element-ref forwarding described below.
 
 ## Building a Vue kit
 
@@ -34658,7 +34919,14 @@ for the same `extendFeature` and `slotRender` pattern.
 
 # Vue actions and exports
 
-`@adapttable/vue` and `@adapttable/vue-unstyled` are experimental, unreleased `0.1.0` packages. They have not been published to npm. These examples require a checkout or an application linked to their built workspace packages. This guide covers the Unstyled kit. Features are opt-in and use the existing names: `bulkActions`, `commandPalette`, `contextMenu`, `sidePanel`, `undoRedoButtons`, `exportCsv`, `exportPdf`, `exportXlsx` and `print`.
+The Vue binding, Unstyled kit and seven styled adapters are experimental,
+unreleased `0.1.0` packages. They have not been published to npm. These examples
+require a checkout or an application linked to their built workspace packages.
+The action factories are opt-in: `bulkActions`, `commandPalette`, `contextMenu`,
+`sidePanel`, `undoRedoButtons`, `exportCsv` and `print` are available through each
+adapter's focused entries. Dedicated `exportPdf` and `exportXlsx` factories are
+exported by Unstyled, Reka UI, shadcn-vue and Quasar; the other kits accept those
+writers through their own `exportCsv` factory.
 
 The binding owns structural Chrome and reads the neutral engine's state. A kit supplies every visible control through required typed slots. The native adapter fills these slots with native buttons, inputs, a dialog and a manual popover. No visible HTML-control fallback is installed by the binding.
 
@@ -34679,7 +34947,8 @@ writer. The writer utilities remain available for custom compositions such as
 `Omit<ExportCsvOptions<TRow>, "writer">`. They preserve typed hook rows and the
 shared `scope`, `columns`, `filename`, `onBeforeExport` and `onAfterExport`
 options while fixing the document writer. Import each type from its matching
-`/export-pdf` or `/export-xlsx` binding or native entry. See the
+`@adapttable/vue/pdf` or `@adapttable/vue/xlsx` binding entry, or the matching
+adapter `/export-pdf` or `/export-xlsx` entry where it exists. See the
 [export options](../exporting.md) for the shared fields and server routes.
 
 A table has one current export format. These factories share the `export-csv`
@@ -34688,8 +34957,8 @@ feature identity, so a later declaration replaces an earlier one. For example,
 XLSX. The `export-csv-button` part and `exportCsvButton` class hook stay stable
 across formats. The command palette uses the same current export action.
 
-The base table, `/export`, `/export-csv`, and `/preset` do not import PDF or XLSX
-writers. Import a format entry only when needed. The optional `/features` barrel
+The base table and `/export` do not import PDF or XLSX writers. The compatibility
+`/export-csv` path and `/preset`, where exported, also keep those writers optional. Import a format entry only when needed. The optional `/features` barrel
 exposes all three factories and is broader; individual entries provide the
 smallest import graph.
 
@@ -34698,6 +34967,47 @@ Selection, range, hidden columns, grouping, tree entries, spans and summary data
 `print(onPrint, true)` renders the button and `print(onPrint)` makes printing available to the command palette. The host owns that callback. The existing print helpers are available through the print/PDF paths. History buttons read the existing editing history and remain unavailable without an edit history model.
 
 All new captions reuse existing localized labels. Host-authored action names and panel content are localized by the host. No action state introduces a new persisted URL field: command/menu visibility and export progress are transient; side-panel selection is host-owned.
+
+## Use the controls from your adapter
+
+Use the same package for `DataTable` and its action factories. A Nuxt UI table
+uses Nuxt modal, input, button, popover and panel controls; a shadcn-vue table uses
+its copied shadcn components. The binding supplies shared actions, state,
+localized labels and lifecycle guards. It does not silently draw a different
+kit's controls. [The feature entry map](./features.md#styled-adapter-feature-entries)
+lists each package's optional surfaces.
+
+For Element Plus, Vuetify, Naive UI and Nuxt UI, keep the adapter's export feature
+and select the optional binding writer explicitly:
+
+```ts
+import { exportCsv } from "@adapttable/nuxt-ui/export";
+import { pdfWriter } from "@adapttable/vue/pdf";
+
+interface Person {
+  id: string;
+  name: string;
+}
+const features = [
+  exportCsv<Person>({
+    filename: "people.pdf",
+    scope: "page",
+    writer: pdfWriter({ direction: "rtl" }),
+  }),
+];
+```
+
+`xlsxWriter` from `@adapttable/vue/xlsx` follows the same pattern. Writer choice
+changes the output, while the adapter retains its own button, progress, retry
+and cancellation controls. Do not add binding-only export factories to a kit
+table and expect them to install those controls.
+
+Command palettes, context menus and export progress are transient; none creates
+a second query or persistence model. Side-panel selection remains host-controlled.
+Mobile panels stack beneath cards, and contextual actions use the current row
+or cell target. Desktop grid actions remain subject to the active navigation
+model. Overlay ownership follows the table's fullscreen container and current
+lifetime; deactivation or replacement retires stale focus and close callbacks.
 
 ## Compose the controls
 
@@ -34893,10 +35203,19 @@ shown in the [editing guide](./features.md#editing-and-host-persistence).
 These packages are experimental and unreleased. Use a checkout or built workspace
 packages until they are available on npm.
 
-The Vue Unstyled adapter provides native controls for grouping configuration,
-row reordering and pivot configuration. The optional Vue entries use the same
+Every Vue adapter provides kit-owned grouping configuration and row-reordering
+controls, plus the shared virtualization feature. Unstyled, Reka UI and shadcn-vue
+also export a controlled `PivotPanel`; the other styled adapters leave pivot
+configuration controls to the host. Optional Vue entries use the same
 framework-neutral formula, pivot, stream, sparkline, reorder and virtualization
 models as the other bindings.
+
+The examples below use Unstyled. For another kit, import `groupingPanel`,
+`rowReorder` and `virtualize` from that adapter's corresponding focused entries.
+Use `@adapttable/vue/pivot`, `/formula`, `/sparkline` and `/stream` for shared data
+helpers. Reka UI and shadcn-vue also forward formula, sparkline and stream helpers
+through their matching kit entries; other kits do not need to export aliases
+to render those results.
 
 ## Rows and columns in a window
 
@@ -34929,7 +35248,7 @@ to replace its array. The controls never mutate the host's rows.
 Desktop handles support pointer drag and Space/arrow/Space keyboard moves. Mobile
 cards offer native move-up/down buttons. A nested destination menu supports group
 and tree moves under the neutral move policy. The default cross-boundary policy
-is `never`; `confirm` opens a native confirmation dialog unless the host supplies
+is `never`; `confirm` opens the adapter's confirmation dialog unless the host supplies
 its own confirmation callback. The dialog focuses Cancel, Escape cancels the
 decision, and completion returns focus to the live destination control. `onGroupMove` and `onTreeMove` own the resulting
 writes. Pending asynchronous decisions and retained controls are canceled when
@@ -34968,6 +35287,28 @@ that last field to `pinnedSummaryRows` when composing the rendered table.
 slice. Adjacent configuration/collapse updates preserve each other. Changing the
 adapter or namespace replaces the subscription rather than borrowing another
 table's state. Saved Views may capture this same URL slice.
+
+### Styled pivot and reorder surfaces
+
+Import `PivotPanel` from `@adapttable/reka-ui/pivot` or
+`@adapttable/shadcn-vue/pivot` for those kits' controls. Pass `fields`, the current
+`config` and `onChange(next)`, plus optional labels and a class name. Accept a
+change by passing the new configuration back. Build the data with
+`pivotTableModel` from `@adapttable/vue/pivot`; the configuration panel does not
+own a second pivot model.
+
+For Element Plus, Vuetify, Naive UI, Nuxt UI and Quasar, prepare the same pivot
+rows and columns in the binding and render them with the chosen `DataTable`.
+Compose configuration controls in the host, or fill `PivotPanelChrome`'s required
+slots with that kit. No kit-specific `/pivot` export is implied.
+
+Row-reorder controls share the move policy and current row identities, while
+menus and confirmations remain native to the adapter. Desktop drag and keyboard
+handles and mobile up/down buttons invoke the same host write contract. Group
+and tree moves additionally need their corresponding host callbacks. Direction,
+localized move announcements, fullscreen overlays and owner teardown are part of
+the shared interaction contract; rendering a server component never starts a
+pointer session or measurement observer.
 
 ## Formulas, streams and sparklines
 
