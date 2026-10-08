@@ -11,6 +11,7 @@ export default defineConfig({
     "src/column-selection.ts",
     "src/find-in-table.ts",
     "src/status-bar.ts",
+    "src/preset.ts",
     "src/selection-stats.ts",
     "src/cell-span.ts",
     "src/column-groups.ts",
