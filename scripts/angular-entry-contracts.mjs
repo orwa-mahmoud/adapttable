@@ -73,38 +73,75 @@ function entryTargetErrors(dir, manifest, entry, file) {
   return errors;
 }
 
-/** An entry's exported names match the reviewed list exactly. */
-function entryNameErrors(entry, source, expected) {
+/**
+ * A type-only re-export of a name another entry owns, through that entry's
+ * public specifier, makes a returned type nameable without moving ownership.
+ */
+function nameabilityRoute(entry, edge) {
+  const owner = entryFor(edge.from);
+  if (!owner || owner === entry || !edge.names.every((name) => name.typeOnly)) {
+    return undefined;
+  }
+  return owner;
+}
+
+/** Splits exported names into owned names and nameability routes. */
+function classifyEntryNames(entry, exports, ownership) {
+  const errors = [];
+  const owned = [];
+  const routed = [];
+  for (const edge of exports) {
+    const owner = nameabilityRoute(entry, edge);
+    for (const { name, original } of edge.names) {
+      if (!owner) {
+        owned.push(name);
+      } else if (name === original && ownership[owner]?.includes(name)) {
+        routed.push(name);
+      } else {
+        errors.push(`${entry}: ${name} is not owned by ${routeFor(owner)}`);
+      }
+    }
+  }
+  return { errors, owned, routed };
+}
+
+/** An entry's owned names match the reviewed list exactly. */
+function entryNameErrors(entry, source, ownership) {
+  const expected = ownership[entry];
   const exports = sourceExports(source);
   if (exports.some((edge) => edge.names === "*")) {
     return [`${entry}: wildcard closure hides export ownership`];
   }
-  const actual = exports.flatMap((edge) => edge.names.map((name) => name.name));
-  const errors = [];
+  const { errors, owned, routed } = classifyEntryNames(
+    entry,
+    exports,
+    ownership
+  );
+  const actual = [...owned, ...routed];
   if (new Set(actual).size !== actual.length) {
     errors.push(`${entry}: duplicate public names`);
   }
   for (const name of expected) {
-    if (!actual.includes(name)) errors.push(`${entry}: missing ${name}`);
+    if (!owned.includes(name)) errors.push(`${entry}: missing ${name}`);
   }
-  for (const name of actual) {
+  for (const name of owned) {
     if (!expected.includes(name)) errors.push(`${entry}: unexpected ${name}`);
   }
   return errors;
 }
 
-export function angularSourceOwnershipErrors(repository) {
-  const expected = angularOwnership(repository);
+export function angularSourceOwnershipErrors(
+  repository,
+  overrides = new Map()
+) {
+  const ownership = angularOwnership(repository);
   const dir = binding(repository);
+  const read = (file) => overrides.get(file) ?? readFileSync(file, "utf8");
   const manifest = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
   return Object.entries(ANGULAR_ENTRIES).flatMap(([entry, file]) => [
     ...entryTargetErrors(dir, manifest, entry, file),
-    ...(entry in expected
-      ? entryNameErrors(
-          entry,
-          readFileSync(join(dir, file), "utf8"),
-          expected[entry]
-        )
+    ...(entry in ownership
+      ? entryNameErrors(entry, read(join(dir, file)), ownership)
       : []),
   ]);
 }

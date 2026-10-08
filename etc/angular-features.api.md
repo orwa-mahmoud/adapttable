@@ -46,7 +46,7 @@ import { Type } from '@angular/core';
 import { VirtualizeInput } from '@adapttable/core/binding';
 
 // @public
-interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
+export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
     mount?(context: FeatureMountContext): void | (() => void);
@@ -54,7 +54,7 @@ interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
 }
 
 // @public
-type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => void | Promise<void>;
+export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => void | Promise<void>;
 
 // @public
 export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
@@ -63,7 +63,7 @@ export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?:
 export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
 
 // @public
-type CellEditHandler<TRow> = (row: TRow, columnKey: string, value: unknown) => void | Promise<void>;
+export type CellEditHandler<TRow> = (row: TRow, columnKey: string, value: unknown) => void | Promise<void>;
 
 // @public
 export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
@@ -106,7 +106,7 @@ export interface ContextMenuOptions<TRow> {
 }
 
 // @public
-type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
+export type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
 
 // @public
 export function dirtyIndicators(): AdaptTableFeature;
@@ -115,7 +115,7 @@ export function dirtyIndicators(): AdaptTableFeature;
 export function editHistory(options?: boolean | EditHistoryOptions): AdaptTableFeature;
 
 // @public
-interface EditHistoryHandle {
+export interface EditHistoryHandle {
     readonly canRedo: boolean;
     readonly canUndo: boolean;
     readonly clear: () => void;
@@ -124,7 +124,7 @@ interface EditHistoryHandle {
 }
 
 // @public
-interface EditHistoryOptions {
+export interface EditHistoryOptions {
     readonly depth?: number;
     readonly onChange?: (history: EditHistoryHandle) => void;
 }
@@ -163,7 +163,7 @@ export function extraRows(rows: readonly ExtraRow[]): AdaptTableFeature;
 export function feature(id: string, patch?: FeaturePatch, setup?: AdaptTableFeature["setup"]): AdaptTableFeature;
 
 // @public
-interface FeatureMountContext {
+export interface FeatureMountContext {
     flush<T>(run: () => T): T;
     flushAdmission(): void;
     readonly injector: Injector;
@@ -172,7 +172,7 @@ interface FeatureMountContext {
 }
 
 // @public
-interface FeatureState {
+export interface FeatureState {
     get<T>(key: FeatureStateKey<T>): Signal<T | undefined>;
     set<T>(key: FeatureStateKey<T>, value: T | undefined): void;
 }
@@ -213,13 +213,13 @@ export type GroupingPanelExtras<TRow = unknown> = GroupingExtras<TRow>;
 export function headerFilters(): AdaptTableFeature;
 
 // @public
-type MaybeSignal<T> = T | Signal<T>;
+export type MaybeSignal<T> = T | Signal<T>;
 
 // @public
 export function multiSort(): AdaptTableFeature;
 
 // @public
-interface NestedTable<TRow = unknown> {
+export interface NestedTable<TRow = unknown> {
     readonly label?: string;
     readonly table: Renderer<NestedTableContext<TRow>>;
 }
@@ -228,14 +228,14 @@ interface NestedTable<TRow = unknown> {
 export function nestedTable<TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[]): AdaptTableFeature;
 
 // @public
-interface NestedTableContext<TRow = unknown> {
+export interface NestedTableContext<TRow = unknown> {
     readonly $implicit: NestedTableDefaults;
     readonly defaults: NestedTableDefaults;
     readonly row: TRow;
 }
 
 // @public
-type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
+export type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
 
 // @public
 export function pinnedSummaryRows<TRow>(pinnedRows: PinnedRows<TRow>): AdaptTableFeature;
@@ -245,7 +245,7 @@ function print_2(onPrint: () => void, printButton?: boolean): AdaptTableFeature;
 export { print_2 as print }
 
 // @public
-type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
+export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
 
 // @public
 export function resizableColumns(): AdaptTableFeature;
@@ -264,13 +264,13 @@ export interface RowAppearanceOptions<TRow> {
 export function rowDetail<TRow>(renderRowDetail: Renderer<RowDetailContext<TRow>>, defaultExpandedRowIds?: readonly string[]): AdaptTableFeature;
 
 // @public
-interface RowDetailContext<TRow> {
+export interface RowDetailContext<TRow> {
     readonly $implicit: TRow;
     readonly row: TRow;
 }
 
 // @public
-type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => void | Promise<void>;
+export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => void | Promise<void>;
 
 // @public
 export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
@@ -313,7 +313,7 @@ export interface SidePanelPanel extends SidePanelEntry {
 }
 
 // @public
-type SlotComponent = Type<unknown>;
+export type SlotComponent = Type<unknown>;
 
 // @public
 export function statusBar(): AdaptTableFeature;

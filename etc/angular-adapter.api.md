@@ -1281,7 +1281,7 @@ export class AdaptCellConflictNotice {
 }
 
 // @public
-class AdaptCellTemplate {
+export class AdaptCellTemplate {
     readonly key: InputSignal<string>;
     static ngTemplateContextGuard(_directive: AdaptCellTemplate, _context: unknown): _context is CellContext<unknown>;
     readonly template: TemplateRef<CellContext<unknown>>;
@@ -4466,7 +4466,7 @@ export class AdaptTableAssistantChrome {
 }
 
 // @public
-interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
+export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
     mount?(context: FeatureMountContext): void | (() => void);
@@ -4759,7 +4759,7 @@ export { assistantIsBusy }
 export { assistantIsUsable }
 
 // @public
-type Attrs = Readonly<Record<string, unknown>>;
+export type Attrs = Readonly<Record<string, unknown>>;
 
 export { BATCH_EDIT_BAR }
 
@@ -4800,7 +4800,7 @@ export { BULK_BAR }
 export { bulkActionErrorMessage }
 
 // @public
-interface BulkActionRunnerState {
+export interface BulkActionRunnerState {
     readonly error: Signal<unknown>;
     readonly pending: Signal<string | null>;
     readonly run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
@@ -4822,7 +4822,7 @@ export interface CellConflictNoticeProps {
 }
 
 // @public
-interface CellContext<TRow> {
+export interface CellContext<TRow> {
     readonly $implicit: TRow;
     readonly column: ColumnDef<TRow>;
     readonly row: TRow;
@@ -4865,7 +4865,7 @@ export { COLUMN_MENU }
 export { COLUMN_SELECT }
 
 // @public
-interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
     cell?: Renderer<CellContext<TRow>>;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
@@ -4874,13 +4874,13 @@ interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
 }
 
 // @public
-interface ColumnDrag {
+export interface ColumnDrag {
     readonly gripAttrs: (key: string, index: number, move: (key: string, toIndex: number) => void, label: string) => Attrs;
     readonly rowAttrs: (key: string, index: number, move: (key: string, toIndex: number) => void) => Attrs;
 }
 
 // @public
-interface ColumnGroup<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
+export interface ColumnGroup<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
     readonly children: readonly ColumnInput<TRow>[];
 }
 
@@ -4896,10 +4896,10 @@ export interface ColumnGroupToggleSlots {
 }
 
 // @public
-type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
+export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
 
 // @public
-type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
+export type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
 
 export { columnMenuActions }
 
@@ -4990,7 +4990,7 @@ export interface CommandPaletteInjectOptions extends TableCommandOptions {
 }
 
 // @public
-interface CommandPaletteOptions {
+export interface CommandPaletteOptions {
     readonly button?: boolean;
     readonly commands?: readonly Command[];
     readonly onOpenChange?: (open: boolean) => void;
@@ -5017,7 +5017,7 @@ export function commitBooleanDraft(ctrl: EditableCellEditorCtrl, checked: boolea
 export { CONTEXT_MENU_LIVE }
 
 // @public
-interface ContextMenuOptions<TRow> {
+export interface ContextMenuOptions<TRow> {
     readonly items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 }
 
@@ -5080,7 +5080,7 @@ export function createAdapterTableAssistantFeature(component: Type<unknown>): Ad
 export function createFilterFieldId(): string;
 
 // @public
-interface DataTable<TRow> {
+export interface DataTable<TRow> {
     readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
     readonly autoSizeColumn: (root: Element | null, key: string) => void;
     readonly autoSizeColumns: (root: Element | null) => void;
@@ -5144,7 +5144,7 @@ interface DataTable<TRow> {
 }
 
 // @public
-interface DataTableClassNames {
+export interface DataTableClassNames {
     readonly actionButton?: string;
     readonly card?: string;
     readonly cardActions?: string;
@@ -5199,7 +5199,7 @@ export type EditableCellActivateProps = EditableCellActivateProps_2<unknown>;
 export { EditableCellButtonProps }
 
 // @public
-function editableCellController<TRow>(options: {
+export function editableCellController<TRow>(options: {
     editing: EditableCellEditing<TRow> | undefined;
     row: TRow;
     column: ColumnDef<TRow>;
@@ -5210,7 +5210,7 @@ function editableCellController<TRow>(options: {
 }): EditableCellController;
 
 // @public
-interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
+export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
     rowEditIcons?: RowEditIcons;
 }
 
@@ -5276,7 +5276,7 @@ export { extraHostFillStyle }
 export { eyeIcon }
 
 // @public
-interface FeatureMountContext {
+export interface FeatureMountContext {
     flush<T>(run: () => T): T;
     flushAdmission(): void;
     readonly injector: Injector;
@@ -5287,7 +5287,7 @@ interface FeatureMountContext {
 export { FeatureNotice }
 
 // @public
-interface FeatureState {
+export interface FeatureState {
     get<T>(key: FeatureStateKey<T>): Signal<T | undefined>;
     set<T>(key: FeatureStateKey<T>, value: T | undefined): void;
 }
@@ -5352,7 +5352,7 @@ export { filterLabel }
 export { filterOpLabel }
 
 // @public
-interface FilterOptionsState {
+export interface FilterOptionsState {
     readonly loading: boolean;
     readonly options: readonly FilterOption[];
 }
@@ -5461,14 +5461,14 @@ export function floatingStyle(boundary: TableAssistantBoundary): TableAssistantP
 export { focusEditorOnMount }
 
 // @public
-interface FooterContext<TRow> extends HeaderContext<TRow> {
+export interface FooterContext<TRow> extends HeaderContext<TRow> {
     readonly value: unknown;
 }
 
 export { formatMultiDraft }
 
 // @public
-interface GridFocus<TRow> {
+export interface GridFocus<TRow> {
     readonly active: Signal<GridCell | null>;
     readonly announcement: Signal<string>;
     readonly cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
@@ -5588,7 +5588,7 @@ export { groupSelectionState }
 export { hasActiveHeaderFilter }
 
 // @public
-interface HeaderContext<TRow> {
+export interface HeaderContext<TRow> {
     readonly $implicit: ColumnDef<TRow>;
     readonly column: ColumnDef<TRow>;
 }
@@ -5688,10 +5688,10 @@ export function launcherStyle(boundary: TableAssistantBoundary): TableAssistantP
 export { listFilterValues }
 
 // @public
-type MaybeSignal<T> = T | Signal<T>;
+export type MaybeSignal<T> = T | Signal<T>;
 
 // @public
-type MaybeSignalOptional<T> = T | Signal<T | undefined>;
+export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
 
 // @public
 export interface MeasuredWindowScrollMarginOptions {
@@ -5705,14 +5705,14 @@ export { MergedCellStyle }
 export { mergedCellStyle }
 
 // @public
-interface MobileCardContext<TRow> extends Readonly<Omit<MobileCardModel<TRow>, "fields">> {
+export interface MobileCardContext<TRow> extends Readonly<Omit<MobileCardModel<TRow>, "fields">> {
     readonly $implicit: TRow;
     readonly fields: readonly MobileCardField<TRow>[];
     readonly row: TRow;
 }
 
 // @public
-interface MobileCardField<TRow> extends Omit<MobileCardField_2<TRow>, "column" | "label" | "value"> {
+export interface MobileCardField<TRow> extends Omit<MobileCardField_2<TRow>, "column" | "label" | "value"> {
     readonly column: ColumnDef<TRow>;
     readonly context: CellContext<TRow>;
     readonly label: string | undefined;
@@ -5722,7 +5722,7 @@ interface MobileCardField<TRow> extends Omit<MobileCardField_2<TRow>, "column" |
 export { mobileCardListStyle }
 
 // @public
-type MobileCardRenderer<TRow> = Renderer<MobileCardContext<TRow>>;
+export type MobileCardRenderer<TRow> = Renderer<MobileCardContext<TRow>>;
 
 // @public
 export function multiDraftFromSelect(select: HTMLSelectElement): string;
@@ -5736,20 +5736,20 @@ export interface MultiSelectEditorSlots {
 }
 
 // @public
-interface NestedTable<TRow = unknown> {
+export interface NestedTable<TRow = unknown> {
     readonly label?: string;
     readonly table: Renderer<NestedTableContext<TRow>>;
 }
 
 // @public
-interface NestedTableContext<TRow = unknown> {
+export interface NestedTableContext<TRow = unknown> {
     readonly $implicit: NestedTableDefaults;
     readonly defaults: NestedTableDefaults;
     readonly row: TRow;
 }
 
 // @public
-type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
+export type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
 
 // @public
 export function nextChecklistViewport(current: {
@@ -5797,7 +5797,7 @@ export { RELATIVE_PRESETS }
 export { renderedRowsOf }
 
 // @public
-type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
+export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
 
 export { renderRegisteredFilter }
 
@@ -5850,7 +5850,7 @@ export interface RowActionsCell<TRow> {
 }
 
 // @public
-interface RowActionsContext<TRow> extends Readonly<RowActionsRenderContext<TRow>> {
+export interface RowActionsContext<TRow> extends Readonly<RowActionsRenderContext<TRow>> {
     readonly $implicit: TRow;
 }
 
@@ -5871,14 +5871,14 @@ export interface RowActionsOptions<TRow> {
 }
 
 // @public
-type RowActionsRenderer<TRow> = Renderer<RowActionsContext<TRow>>;
+export type RowActionsRenderer<TRow> = Renderer<RowActionsContext<TRow>>;
 
 export { RowClickProps }
 
 export { rowClickProps }
 
 // @public
-interface RowDetailContext<TRow> {
+export interface RowDetailContext<TRow> {
     readonly $implicit: TRow;
     readonly row: TRow;
 }
@@ -5954,7 +5954,7 @@ export interface RowReorderStateOptions<TRow> {
 }
 
 // @public
-interface RowSelection {
+export interface RowSelection {
     readonly allMatching: Signal<boolean>;
     readonly clear: () => void;
     readonly headerCheckboxAttrs: () => Attrs;
@@ -6014,7 +6014,7 @@ export { showSimpleFilterFields }
 export { SIDE_PANEL }
 
 // @public
-interface SidePanelPanel extends SidePanelEntry {
+export interface SidePanelPanel extends SidePanelEntry {
     readonly content?: TemplateRef<unknown> | string;
     readonly label?: string;
 }
@@ -6027,13 +6027,13 @@ export interface SidePanelSlots {
 }
 
 // @public
-type SlotComponent = Type<unknown>;
+export type SlotComponent = Type<unknown>;
 
 // @public
-type SlotFills = ReadonlyMap<string, readonly SlotFill<SlotComponent>[]>;
+export type SlotFills = ReadonlyMap<string, readonly SlotFill<SlotComponent>[]>;
 
 // @public
-interface SlotTable {
+export interface SlotTable {
     readonly featureHost: FeatureHostState_2;
     readonly featureState?: FeatureState;
     readonly slotFills: SlotFills;
@@ -6064,7 +6064,7 @@ export { TABLE_ASSISTANT }
 export { TableAssistantAllowanceView }
 
 // @public
-type TableAssistantAvatars = TableAssistantAvatars_2<TableAssistantNode>;
+export type TableAssistantAvatars = TableAssistantAvatars_2<TableAssistantNode>;
 
 export { TableAssistantBadgeProps }
 
@@ -6091,7 +6091,7 @@ export type TableAssistantMenuProps = TableAssistantMenuProps_2<TableAssistantNo
 export { TableAssistantMessageView }
 
 // @public
-type TableAssistantNode = string | TemplateRef<unknown> | IconDescriptor | null;
+export type TableAssistantNode = string | TemplateRef<unknown> | IconDescriptor | null;
 
 // @public
 export type TableAssistantPanelProps = TableAssistantPanelProps_2<TemplateRef<unknown>>;
@@ -6099,7 +6099,7 @@ export type TableAssistantPanelProps = TableAssistantPanelProps_2<TemplateRef<un
 export { TableAssistantProgressView }
 
 // @public
-type TableAssistantProps = TableAssistantProps_2<TableAssistantNode>;
+export type TableAssistantProps = TableAssistantProps_2<TableAssistantNode>;
 
 export { TableAssistantQuestionOption }
 
@@ -6191,7 +6191,7 @@ export interface TableGrouping<TRow> {
 }
 
 // @public
-type TableQueryHandler = (query: TableQuery, info: {
+export type TableQueryHandler = (query: TableQuery, info: {
     signal: AbortSignal;
     key: string;
 }) => void | Promise<void>;

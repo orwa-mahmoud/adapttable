@@ -28,6 +28,43 @@ describe("Angular canonical entries", () => {
     assert.equal(names.length, 826);
   });
 
+  it("routes returned types through their owner without moving ownership", () => {
+    const adapter = join(dir, "src/adapter.ts");
+    const features = join(dir, "src/features.ts");
+    const plant = (file, statement) =>
+      angularSourceOwnershipErrors(
+        REPO_ROOT,
+        new Map([[file, `${readFileSync(file, "utf8")}\n${statement}\n`]])
+      );
+    assert.ok(
+      plant(adapter, 'export { ColumnDef } from "@adapttable/angular";').some(
+        (error) => error === "adapter: unexpected ColumnDef"
+      ),
+      "a value re-export claims ownership"
+    );
+    assert.ok(
+      plant(
+        features,
+        'export type { AdaptDataTableShell } from "@adapttable/angular";'
+      ).some(
+        (error) =>
+          error ===
+          "features: AdaptDataTableShell is not owned by @adapttable/angular"
+      ),
+      "a route must name the entry that owns the type"
+    );
+    assert.ok(
+      plant(
+        adapter,
+        'export type { ColumnDef as RowColumn } from "@adapttable/angular";'
+      ).some(
+        (error) =>
+          error === "adapter: RowColumn is not owned by @adapttable/angular"
+      ),
+      "a route keeps the owner's name"
+    );
+  });
+
   it("has an acyclic packaging graph including type-only edges", () => {
     assert.deepEqual(angularEntryGraphErrors(REPO_ROOT), []);
   });

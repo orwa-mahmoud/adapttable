@@ -56,3 +56,23 @@ export { selectionStats } from "./features/selectionStats";
 export { tree, type TreeFeatureOptions } from "./features/tree";
 export { virtualize, type VirtualizeOptions } from "./features/virtualize";
 export { type SelectionStatsOptions } from "@adapttable/core";
+
+// Types this entry's own signatures hand back, named from their owning entry.
+export type {
+  AdaptTableFeature,
+  BatchEditHandler,
+  CellEditHandler,
+  DirtyEdits,
+  EditHistoryHandle,
+  EditHistoryOptions,
+  FeatureMountContext,
+  FeatureState,
+  MaybeSignal,
+  NestedTable,
+  NestedTableContext,
+  NestedTableFor,
+  Renderer,
+  RowDetailContext,
+  RowEditHandler,
+  SlotComponent,
+} from "@adapttable/angular";
