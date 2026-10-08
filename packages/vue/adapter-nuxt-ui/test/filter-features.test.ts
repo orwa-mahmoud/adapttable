@@ -283,6 +283,7 @@ describe("Nuxt filtering feature", () => {
     await click(part("filters-button"));
     const tree = target(part("filter-tree"));
     const toggle = tree.querySelector<HTMLButtonElement>("button");
+    expect(toggle?.dataset.adapttablePart).toBe("filter-tree-summary");
     expect(toggle?.getAttribute("aria-expanded")).toBe("false");
     toggle?.click();
     await settle();

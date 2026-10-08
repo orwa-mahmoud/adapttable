@@ -5,7 +5,7 @@ import {
   type FilterTreeSlots,
   useFilterTreeModel,
 } from "@adapttable/vue/adapter";
-import { QExpansionItem } from "quasar";
+import { QExpansionItem, QItemLabel, QItemSection } from "quasar";
 import { h, type VNodeChild } from "vue";
 
 import QuasarButton from "../controls/QuasarButton.vue";
@@ -110,7 +110,17 @@ const controls: FilterTreeSlots<VNodeChild> = {
         expandIcon: "M7 10l5 5 5-5z",
         "data-adapttable-part": "filter-tree",
       },
-      () => control.children
+      {
+        header: () =>
+          h(QItemSection, () =>
+            h(
+              QItemLabel,
+              { "data-adapttable-part": "filter-tree-summary" },
+              () => control.label
+            )
+          ),
+        default: () => control.children,
+      }
     ),
 };
 const Render = () => FilterTreeChrome({ model: model.value, controls });

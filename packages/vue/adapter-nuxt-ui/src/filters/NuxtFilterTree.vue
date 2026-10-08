@@ -101,7 +101,12 @@ const controls: FilterTreeSlots<VNodeChild> = {
         default: () =>
           h(
             NuxtButton,
-            { attrs: { class: control.summaryClassName } },
+            {
+              attrs: {
+                class: control.summaryClassName,
+                "data-adapttable-part": "filter-tree-summary",
+              },
+            },
             () => control.label
           ),
         content: () => control.children,

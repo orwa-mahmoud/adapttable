@@ -474,6 +474,9 @@ describe("Quasar filters and editors", () => {
       })
     );
     await settle();
+    expect(wrapper.get(part("filter-tree-summary")).text()).toBe(
+      labels.filterTree
+    );
     await wrapper
       .findAllComponents(QBtn)
       .find((button) => button.text() === labels.filterAddCondition)!
