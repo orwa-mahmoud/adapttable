@@ -7,6 +7,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -25,7 +26,9 @@ import {
 import { REPO_ROOT } from "./packages.mjs";
 
 function scratch(t) {
-  const root = mkdtempSync(join(tmpdir(), "vue-browser-test-"));
+  // The builder reports real paths; macOS serves the temporary directory
+  // through a symlink, so the fixture root is resolved once up front.
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "vue-browser-test-")));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
 }
