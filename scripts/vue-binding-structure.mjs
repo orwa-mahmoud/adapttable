@@ -381,14 +381,59 @@ export function vueKitWithBindingSources(files, root) {
 export function vueForwardsAttributeApi(sources, element, api) {
   const flow = attributeFlow(sources);
   const collection = element === "tr" ? "rows" : "headers";
+  const fromCollection = (value) => flow.attrsFromCollection(value, collection);
   return (
     flow.modelRetains(collection, api) &&
-    renderedProps(sources, element).some((props) =>
-      flow.carries(props, (value) =>
-        flow.attrsFromCollection(value, collection)
-      )
-    )
+    [
+      ...renderedProps(sources, element),
+      ...partRecords(sources, CONTRACT_PART[element]),
+    ].some((props) => flow.carries(props, fromCollection))
   );
+}
+
+/** The contract part that names each element a model collection renders. */
+const CONTRACT_PART = { tr: "row", th: "header-cell" };
+
+/**
+ * The records that name a contract part: the object literal setting
+ * `data-adapttable-part`, or the call it is merged through. A kit that renders
+ * the element through its own component (Naive UI's `NTh`, Nuxt UI's Prose
+ * parts) still names it with the part, so the record carrying that name is the
+ * element's props whatever renders it.
+ */
+function partRecords(sources, part) {
+  const found = [];
+  for (const { node } of sources) {
+    for (const record of descendantsOf(node, ts.isObjectLiteralExpression)) {
+      const names = record.properties.some(
+        (property) =>
+          ts.isPropertyAssignment(property) &&
+          ts.isStringLiteral(property.name) &&
+          property.name.text === "data-adapttable-part" &&
+          ts.isStringLiteral(property.initializer) &&
+          property.initializer.text === part
+      );
+      if (!names) continue;
+      const parent = record.parent;
+      found.push(
+        ts.isCallExpression(parent) && parent.arguments.includes(record)
+          ? parent
+          : record
+      );
+    }
+  }
+  return found;
+}
+
+/** Every node below `node` that satisfies `predicate`. */
+function descendantsOf(node, predicate) {
+  const found = [];
+  function visit(child) {
+    if (predicate(child)) found.push(child);
+    ts.forEachChild(child, visit);
+  }
+  visit(node);
+  return found;
 }
 
 /** Only part attributes actually retained in Vue h() props count as rendered. */

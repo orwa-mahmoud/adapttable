@@ -321,6 +321,64 @@ export function KitRows() {
     );
   });
 
+  it("credits kit-owned header cells that carry each leaf's binding attrs under the header-cell part", () => {
+    const structure = STRUCTURE.replace(
+      'h("th", mergeVueAttrs(leaf.attrs, { "data-adapttable-part": "header-cell" }))',
+      'h("th", { "data-adapttable-part": "header-cell" })'
+    );
+    const adapter =
+      'export { Desktop } from "./structure"; export { useModel } from "./model"; export { mergeVueAttrs } from "./attrs";';
+    const kitHeaders = (record, extraCall = "") => ({
+      "headers.ts": `import { h } from "vue";
+import { mergeVueAttrs, useModel } from "@adapttable/vue/adapter";
+import KitTh from "./KitTh.vue";
+export function KitHeaders() {
+  const model = useModel();
+  const lookup = new Map(model.headers.map((leaf) => [leaf.key, leaf]));
+  function cell(leaf) {
+    return h(KitTh, { ...${record}, key: "k" });
+  }
+  const found = lookup.get("name");
+  const first = model.headers.find((leaf) => leaf.key === "name");
+  return [...model.headers.map((leaf) => cell(leaf)), cell(found), cell(first)${extraCall}];
+}`,
+    });
+    const headerProblem = (root) =>
+      features(root).some((problem) =>
+        problem.includes("never passes core's header-cell props")
+      );
+    const forwarded =
+      'mergeVueAttrs(leaf.attrs, { "data-adapttable-part": "header-cell" })';
+    assert.equal(
+      headerProblem(
+        fixture({ structure, adapter, kitModules: kitHeaders(forwarded) })
+      ),
+      false
+    );
+    assert.equal(
+      headerProblem(
+        fixture({
+          structure,
+          adapter,
+          kitModules: kitHeaders(forwarded, ", cell({ attrs: {} })"),
+        })
+      ),
+      true,
+      "a helper also fed an unrelated record does not prove the leaf attrs"
+    );
+    assert.equal(
+      headerProblem(
+        fixture({
+          structure,
+          adapter,
+          kitModules: kitHeaders('{ "data-adapttable-part": "header-cell" }'),
+        })
+      ),
+      true,
+      "a header-cell record that drops the leaf attrs keeps the gap visible"
+    );
+  });
+
   it("rejects missing neutral header calls and lookalikes from another module", () => {
     for (const model of [
       MODEL.replace("headerCellAttributes({})", "{}"),

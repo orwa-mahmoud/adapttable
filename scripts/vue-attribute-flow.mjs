@@ -234,6 +234,26 @@ function parameterCollection(parameter, collection) {
     ).length > 0
   );
 }
+/** `lookup.get(key)` where `lookup` is a `Map` built from a model collection. */
+function mapLookup(value, collection) {
+  if (
+    !ts.isCallExpression(value) ||
+    !ts.isPropertyAccessExpression(value.expression) ||
+    value.expression.name.text !== "get" ||
+    !ts.isIdentifier(value.expression.expression)
+  )
+    return false;
+  const lookup = value.expression.expression;
+  const built = unwrap(localValue(lookup, lookup.text));
+  return (
+    built !== undefined &&
+    ts.isNewExpression(built) &&
+    ts.isIdentifier(built.expression) &&
+    built.expression.text === "Map" &&
+    built.arguments?.length === 1 &&
+    mapsCollection(unwrap(built.arguments[0]), collection)
+  );
+}
 function attrsFromCollection(expression, collection) {
   if (
     !ts.isPropertyAccessExpression(expression) ||
@@ -306,6 +326,63 @@ export function createAttributeFlow(sources, resolveFunction) {
       owner = owner.parent;
     }
     return undefined;
+  }
+  /** Every argument a function's callers pass at one parameter position. */
+  function callerArguments(fn, index) {
+    return calls
+      .filter((call) => sameFunction(callTarget(call), fn))
+      .map((call) => call.arguments[index]);
+  }
+  /**
+   * Whether an identifier holds one item of a model collection: a local bound
+   * to `<model>.<collection>.find(...)`, to `.get(...)` on a `Map` built from
+   * `<model>.<collection>.map(...)`, or a parameter every caller fills with
+   * such an item.
+   */
+  function collectionItem(identifier, collection, seen = new Set()) {
+    if (seen.has(identifier)) return false;
+    const next = new Set([...seen, identifier]);
+    const local = localValue(identifier, identifier.text);
+    if (local) {
+      const value = unwrap(local);
+      if (mapsCollection(value, collection)) return true;
+      return mapLookup(value, collection);
+    }
+    let owner = identifier.parent;
+    let index = -1;
+    while (owner) {
+      if (ts.isFunctionLike(owner)) {
+        index = owner.parameters.findIndex(
+          (parameter) => nameOf(parameter.name) === identifier.text
+        );
+        if (index >= 0) break;
+      }
+      owner = owner.parent;
+    }
+    if (!owner) return false;
+    if (parameterCollection(owner.parameters[index], collection)) return true;
+    const inputs = callerArguments(owner, index);
+    return (
+      inputs.length > 0 &&
+      inputs.every((input) => {
+        const value = unwrap(input);
+        return (
+          value !== undefined &&
+          ts.isIdentifier(value) &&
+          collectionItem(value, collection, next)
+        );
+      })
+    );
+  }
+  /** `.attrs` read off one item of a model collection, traced through callers. */
+  function collectionAttrs(expression, collection) {
+    if (attrsFromCollection(expression, collection)) return true;
+    return (
+      ts.isPropertyAccessExpression(expression) &&
+      expression.name.text === "attrs" &&
+      ts.isIdentifier(expression.expression) &&
+      collectionItem(expression.expression, collection)
+    );
   }
   function objectRecords(expression, seen) {
     expression = unwrap(expression);
@@ -467,5 +544,5 @@ export function createAttributeFlow(sources, resolveFunction) {
     }
     return false;
   }
-  return { carries, modelRetains, attrsFromCollection };
+  return { carries, modelRetains, attrsFromCollection: collectionAttrs };
 }
