@@ -1,5 +1,3 @@
-import "./actions/nuxtWorkspace.css";
-
 import type { StaticTableFeature } from "@adapttable/vue";
 import {
   extendFeature,

@@ -1,5 +1,3 @@
-import "./nuxtWorkspace.css";
-
 import {
   type ActionPresentation,
   CommandPaletteChrome,
