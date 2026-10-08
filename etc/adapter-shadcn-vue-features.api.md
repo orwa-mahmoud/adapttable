@@ -220,6 +220,8 @@ export { ConfirmRequest }
 // @public (undocumented)
 export function contextMenu<TRow>(options?: ContextMenuOptions<TRow>): TableFeature<TRow>;
 
+export { DataTableClassNames }
+
 // @public
 export function densityChooser(): StaticTableFeature;
 

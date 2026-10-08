@@ -77,3 +77,4 @@ export type {
   SavedViewsStore,
   UseSavedViewsOptions,
 } from "@adapttable/vue";
+export type { DataTableClassNames } from "@adapttable/vue/adapter";
