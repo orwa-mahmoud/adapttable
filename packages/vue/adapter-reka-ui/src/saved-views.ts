@@ -57,6 +57,7 @@ export function savedViews(
     ),
   ]);
 }
+export type { DataTableClassNames } from "./types";
 export type {
   SavedView,
   SavedViewsStore,

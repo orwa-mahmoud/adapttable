@@ -60,7 +60,10 @@ import { GroupSort } from '@adapttable/vue';
 import { HeaderFilterOptions } from '@adapttable/vue/adapter';
 import { MaybeRefOrGetter } from 'vue';
 import { multiSort } from '@adapttable/vue/features';
+import { NestedTable } from '@adapttable/vue';
 import { nestedTable } from '@adapttable/vue/features';
+import { nestedTableDetail } from '@adapttable/vue/adapter';
+import { NestedTableFor } from '@adapttable/vue';
 import { PinnedRows } from '@adapttable/vue';
 import { PinnedSummaryEntry } from '@adapttable/vue';
 import { pinnedSummaryRows } from '@adapttable/vue/features';
@@ -73,6 +76,7 @@ import { rowDetail } from '@adapttable/vue/features';
 import { RowEditActionsProps } from '@adapttable/vue/adapter';
 import { RowEditIcons } from '@adapttable/vue/adapter';
 import { RowEditingState } from '@adapttable/vue';
+import { RowExpansionOptions } from '@adapttable/vue';
 import { RowHeight } from '@adapttable/vue';
 import { RowMutationHandlers } from '@adapttable/vue';
 import { RowPinningFeatureOptions } from '@adapttable/vue/features';
@@ -91,12 +95,19 @@ import { StaticTableFeature } from '@adapttable/vue';
 import { TableAssistantProps } from '@adapttable/vue/adapter';
 import { TableEditingOptions } from '@adapttable/vue';
 import { TableFeature } from '@adapttable/vue';
+import { TableRowDetail } from '@adapttable/vue';
+import { TableTree } from '@adapttable/vue';
 import { tree } from '@adapttable/vue/features';
+import { TreeExpansionOptions } from '@adapttable/vue';
+import { TreeFeatureOptions } from '@adapttable/vue/features';
 import { useGroupCollapse } from '@adapttable/vue';
 import { useGroupCollapseUrlState } from '@adapttable/vue';
 import { useGroupPaging } from '@adapttable/vue';
+import { useLazyChildren } from '@adapttable/vue';
+import { useRowExpansion } from '@adapttable/vue';
 import { useRowReorder } from '@adapttable/vue';
 import { UseSavedViewsOptions } from '@adapttable/vue';
+import { useTreeExpansion } from '@adapttable/vue';
 import { virtualize } from '@adapttable/vue/features';
 import { VirtualizeOptions } from '@adapttable/vue/features';
 import { VNode } from 'vue';
@@ -325,6 +336,8 @@ export { ConfirmRequest }
 // @public (undocumented)
 export function contextMenu<TRow>(options?: ContextMenuOptions<TRow>): TableFeature<TRow>;
 
+export { DataTableClassNames }
+
 // @public (undocumented)
 export function densityChooser(): StaticTableFeature;
 
@@ -451,7 +464,13 @@ export function headerFilters(): StaticTableFeature;
 
 export { multiSort }
 
+export { NestedTable }
+
 export { nestedTable }
+
+export { nestedTableDetail }
+
+export { NestedTableFor }
 
 export { PinnedRows }
 
@@ -485,6 +504,8 @@ export { RowEditIcons }
 export function rowEditing<TRow>(onRowEdit: NonNullable<TableEditingOptions<TRow>["onRowEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;
 
 export { RowEditingState }
+
+export { RowExpansionOptions }
 
 export { RowHeight }
 
@@ -547,7 +568,15 @@ export { TableAssistantProps }
 
 export { TableEditingOptions }
 
+export { TableRowDetail }
+
+export { TableTree }
+
 export { tree }
+
+export { TreeExpansionOptions }
+
+export { TreeFeatureOptions }
 
 // @public (undocumented)
 export function undoRedoButtons(): StaticTableFeature;
@@ -558,9 +587,15 @@ export { useGroupCollapseUrlState }
 
 export { useGroupPaging }
 
+export { useLazyChildren }
+
+export { useRowExpansion }
+
 export { useRowReorder }
 
 export { UseSavedViewsOptions }
+
+export { useTreeExpansion }
 
 export { virtualize }
 
