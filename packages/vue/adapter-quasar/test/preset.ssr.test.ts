@@ -7,37 +7,7 @@ import { renderToString } from "vue/server-renderer";
 import { DataTable } from "../src";
 import { standardFeatures } from "../src/preset";
 
-const ZERO_CONFIGURATION = [
-  "column-menu",
-  "density-chooser",
-  "export-csv",
-  "find-in-table",
-  "fit-columns",
-  "fullscreen",
-  "header-filters",
-  "multi-sort",
-  "resizable-columns",
-  "status-bar",
-];
-
-describe("standard features", () => {
-  it("composes zero-configuration features and only configured optional members", () => {
-    expect(standardFeatures().map(({ id }) => id)).toEqual(ZERO_CONFIGURATION);
-    const configured = standardFeatures<{ id: string; team: string }>({
-      grouping: "team",
-      bulkActions: [],
-      filters: [],
-      savedViews: { storageKey: "people", storage: null },
-    });
-    expect(configured.map(({ id }) => id)).toEqual([
-      ...ZERO_CONFIGURATION,
-      "grouping",
-      "bulk-actions",
-      "filters",
-      "saved-views",
-    ]);
-  });
-
+describe("standard features on the server", () => {
   it("renders the preset's controls with this kit", async () => {
     const app = createSSRApp({
       render: () =>
