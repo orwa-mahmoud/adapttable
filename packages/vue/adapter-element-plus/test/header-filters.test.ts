@@ -267,7 +267,7 @@ describe("Element Plus header filters", () => {
     expect(root.querySelector(".inline")).toBeNull();
     trigger.click();
     await tick();
-    const surface = node<HTMLElement>(document, part("filter-header-popover"));
+    const surface = node<HTMLElement>(document, part("filter-header-cell"));
     const dialog = surface.closest<HTMLElement>('[role="dialog"]');
     expect(dialog).not.toBeNull();
     expect(Number(dialog!.style.zIndex)).toBeGreaterThanOrEqual(8000);
@@ -319,7 +319,7 @@ describe("Element Plus header filters", () => {
     node<HTMLButtonElement>(root, part("filter-header-trigger")).click();
     await tick();
     const table = node<HTMLElement>(root, part("root"));
-    const panel = () => node(document, part("filter-header-popover"));
+    const panel = () => node(document, part("filter-header-cell"));
     expect(table.contains(panel())).toBe(false);
     node<HTMLButtonElement>(root, part("fullscreen-toggle")).click();
     await tick();
@@ -459,7 +459,7 @@ describe("Element Plus header filters", () => {
     await tick();
     const input = node<HTMLInputElement>(
       document,
-      `${part("filter-header-popover")} input[role="combobox"]`
+      `${part("filter-header-cell")} input[role="combobox"]`
     );
     input.click();
     await tick();
@@ -477,7 +477,7 @@ describe("Element Plus header filters", () => {
     enabled.value = false;
     await tick();
     expect(root.querySelector(part("filter-header-trigger"))).toBeNull();
-    expect(document.querySelector(part("filter-header-popover"))).toBeNull();
+    expect(document.querySelector(part("filter-header-cell"))).toBeNull();
   });
   it("dismisses compact choices from their focused trigger without swallowing closed Escape", async () => {
     const state = form();

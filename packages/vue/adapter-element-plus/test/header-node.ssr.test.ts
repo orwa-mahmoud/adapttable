@@ -43,7 +43,7 @@ describe("Element Plus header filter Node SSR", () => {
       /<button[^>]*data-adapttable-part="filter-header-trigger"/
     );
     expect(html).toContain('aria-expanded="false"');
-    expect(html).not.toContain('data-adapttable-part="filter-header-popover"');
+    expect(html).not.toContain('data-adapttable-part="filter-header-cell"');
   });
   it("renders actual compact kit fields over the supplied source", async () => {
     const source: FilterFormSource<Row> = {

@@ -9,9 +9,15 @@ import { VLocaleProvider } from "vuetify/components/VLocaleProvider";
 import { VMenu } from "vuetify/components/VMenu";
 
 defineOptions({ inheritAttrs: false });
-const props = defineProps<FilterPanelSurfaceProps>();
+const props = defineProps<
+  FilterPanelSurfaceProps & {
+    /** The surface's part name; a column header's filter names its own. */
+    readonly part?: string;
+  }
+>();
 const active = useScopeActivity();
 const panelAttrs = computed(() => ({
+  "data-adapttable-part": props.part ?? "filters-popover",
   role: "dialog",
   "aria-label": props.label,
   dir: props.dir,
@@ -76,7 +82,6 @@ const Content = () => props.children;
     >
       <VCard
         v-bind="panelAttrs"
-        data-adapttable-part="filters-popover"
         :class="['adapttable-vuetify-filter-popover', className]"
         elevation="8"
       >

@@ -108,7 +108,7 @@ test("filter operator and checkbox group classes follow native parts in panel an
   await page.keyboard.press("Escape");
   await page.goto(`${fixture}?choices`);
   await page.locator(part("filter-header-trigger")).first().click();
-  const header = page.locator(part("filter-header-popover"));
+  const header = page.locator(part("filter-header-cell"));
   const group = header.locator(`div${part("filter-checkbox-group")}`);
   await expect(group).toHaveClass("native-checkbox-group");
   await expect(group).toHaveAttribute("role", "group");

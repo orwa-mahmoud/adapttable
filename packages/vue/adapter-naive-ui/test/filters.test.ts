@@ -251,7 +251,7 @@ describe("Naive filter contributions", () => {
       find(view.host, part("filter-header-trigger")).click();
       await tick();
       expect(
-        find(document.body, part("filter-header-popover")).classList.contains(
+        find(document.body, part("filter-header-cell")).classList.contains(
           "n-popover"
         )
       ).toBe(true);

@@ -37,7 +37,7 @@ const controls: HeaderFilterChromeSlots<TRow> = {
     ),
   Field: (control) => h(FilterField<TRow>, { ...control }),
   Popover: (control) =>
-    h(RekaSurface, { ...control, modal: false, part: "filter-header-popover" }),
+    h(RekaSurface, { ...control, modal: false, part: "filter-header-cell" }),
 };
 const Render = () => HeaderFilterChrome({ model: model.value, controls });
 Render.props = [] as string[];

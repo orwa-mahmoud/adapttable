@@ -269,14 +269,12 @@ describe("native filter controls", () => {
     );
     await click(view.host, "filter-header-trigger");
     await write(
-      find(document.body, `${part("filter-header-popover")} select`),
+      find(document.body, `${part("filter-header-cell")} select`),
       "Ada",
       "change"
     );
     expect(state.request).toHaveBeenCalledExactlyOnceWith("name", "Ada");
-    expect(
-      document.body.querySelector(part("filter-header-popover"))
-    ).toBeNull();
+    expect(document.body.querySelector(part("filter-header-cell"))).toBeNull();
     expect(
       find(view.host, part("filter-header-trigger")).hasAttribute("data-active")
     ).toBe(true);

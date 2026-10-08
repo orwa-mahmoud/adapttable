@@ -95,6 +95,7 @@ const HeaderPresentation = defineComponent(
           Popover: (control) =>
             h(FilterPopover, {
               ...control,
+              part: "filter-header-cell",
               className: cn(
                 "w-80 max-w-[calc(100vw-2rem)]",
                 props.classNames?.filtersPopover

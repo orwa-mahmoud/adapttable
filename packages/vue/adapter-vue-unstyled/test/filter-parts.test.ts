@@ -222,7 +222,7 @@ describe("canonical native filter classes and parts", () => {
       classNames
     );
     await click(view.host, "filter-header-trigger");
-    const surface = find(document.body, part("filter-header-popover"));
+    const surface = find(document.body, part("filter-header-cell"));
     const operator = assertPart(
       surface,
       "filter-operator",

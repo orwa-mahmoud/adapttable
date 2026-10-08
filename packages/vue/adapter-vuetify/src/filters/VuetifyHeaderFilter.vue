@@ -35,7 +35,8 @@ const controls: HeaderFilterChromeSlots<TRow> = {
       }),
     }),
   Field: (field) => h(VuetifyFilterField<TRow>, { ...field }),
-  Popover: (surface) => h(VuetifyFilterPopover, { ...surface }),
+  Popover: (surface) =>
+    h(VuetifyFilterPopover, { ...surface, part: "filter-header-cell" }),
 };
 const Render = () => HeaderFilterChrome({ model: model.value, controls });
 const renderProps: string[] = [];

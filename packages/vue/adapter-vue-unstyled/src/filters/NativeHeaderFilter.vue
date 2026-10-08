@@ -40,7 +40,7 @@ const controls: HeaderFilterChromeSlots<TRow> = {
     h(NativeFilterSurface, {
       ...surface,
       modal: false,
-      part: "filter-header-popover",
+      part: "filter-header-cell",
     }),
 };
 const Render = () => HeaderFilterChrome({ model: model.value, controls });

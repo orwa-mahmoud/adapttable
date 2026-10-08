@@ -140,7 +140,7 @@ it("filters the genuine table through the anchored header surface and restores i
   trigger.focus();
   trigger.click();
   await settle();
-  const panel = find(document, part("filter-header-popover"));
+  const panel = find(document, part("filter-header-cell"));
   expect(panel.getAttribute("role")).toBe("dialog");
   expect(panel.getAttribute("dir")).toBe("rtl");
   const input = find<HTMLInputElement>(panel, "input");
@@ -151,17 +151,17 @@ it("filters the genuine table through the anchored header surface and restores i
   expect(find(root, "tbody").textContent).not.toContain("Bea");
   key(input, "Escape");
   await settle();
-  expect(document.querySelector(part("filter-header-popover"))).toBeNull();
+  expect(document.querySelector(part("filter-header-cell"))).toBeNull();
   expect(document.activeElement).toBe(trigger);
   trigger.click();
   await settle();
   trigger.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
   trigger.focus();
   await settle();
-  expect(document.querySelector(part("filter-header-popover"))).not.toBeNull();
+  expect(document.querySelector(part("filter-header-cell"))).not.toBeNull();
   trigger.click();
   await settle();
-  expect(document.querySelector(part("filter-header-popover"))).toBeNull();
+  expect(document.querySelector(part("filter-header-cell"))).toBeNull();
 });
 
 it("keeps nested Select Escape vendor-owned and closes after an accepted single choice", async () => {
@@ -190,7 +190,7 @@ it("keeps nested Select Escape vendor-owned and closes after an accepted single 
   await settle();
   const select = find<HTMLButtonElement>(
     document,
-    `${part("filter-header-popover")} [role="combobox"]`
+    `${part("filter-header-cell")} [role="combobox"]`
   );
   select.focus();
   key(select, "ArrowDown");
@@ -198,7 +198,7 @@ it("keeps nested Select Escape vendor-owned and closes after an accepted single 
   key(find(document, '[role="listbox"]'), "Escape");
   await settle();
   expect(document.querySelector('[role="listbox"]')).toBeNull();
-  expect(document.querySelector(part("filter-header-popover"))).not.toBeNull();
+  expect(document.querySelector(part("filter-header-cell"))).not.toBeNull();
   key(select, "Escape");
   await settle();
   expect(document.activeElement).toBe(trigger);
@@ -207,7 +207,7 @@ it("keeps nested Select Escape vendor-owned and closes after an accepted single 
   trigger.click();
   await settle();
   await choose(
-    find(document, `${part("filter-header-popover")} [role="combobox"]`),
+    find(document, `${part("filter-header-cell")} [role="combobox"]`),
     "Ada"
   );
   expect(state.setExtra).toHaveBeenCalledExactlyOnceWith("name", "Ada");
@@ -344,11 +344,11 @@ it("retires stale header controls when their definition and source are replaced"
   await settle();
   const previous = find<HTMLInputElement>(
     document,
-    `${part("filter-header-popover")} input`
+    `${part("filter-header-cell")} input`
   );
   revision.value = 1;
   await settle();
-  expect(document.querySelector(part("filter-header-popover"))).toBeNull();
+  expect(document.querySelector(part("filter-header-cell"))).toBeNull();
   previous.value = "stale";
   previous.dispatchEvent(new Event("input", { bubbles: true }));
   await settle();
@@ -358,12 +358,12 @@ it("retires stale header controls when their definition and source are replaced"
   await settle();
   const current = find<HTMLInputElement>(
     document,
-    `${part("filter-header-popover")} input`
+    `${part("filter-header-cell")} input`
   );
   expect(current).not.toBe(previous);
   key(previous, "Escape");
   await settle();
-  expect(document.querySelector(part("filter-header-popover"))).not.toBeNull();
+  expect(document.querySelector(part("filter-header-cell"))).not.toBeNull();
   current.value = "2";
   current.dispatchEvent(new Event("input", { bubbles: true }));
   await settle();

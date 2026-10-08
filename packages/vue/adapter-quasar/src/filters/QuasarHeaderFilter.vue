@@ -38,7 +38,7 @@ const controls: HeaderFilterChromeSlots<TRow> = {
     h(QuasarFilterSurface, {
       ...surface,
       modal: false,
-      part: "filter-header-popover",
+      part: "filter-header-cell",
     }),
 };
 const Render = () => HeaderFilterChrome({ model: model.value, controls });

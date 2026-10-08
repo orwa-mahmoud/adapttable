@@ -5,6 +5,8 @@ import { Popover, PopoverAnchor, PopoverContent } from "../components/popover";
 
 interface PopoverProps extends FilterPanelSurfaceProps {
   readonly onCloseAutoFocus?: (event: Event) => void;
+  /** The surface's part name; a column header's filter names its own. */
+  readonly part?: string;
 }
 
 /** Reusable copied shadcn surface. Reka owns positioning and the dismiss stack. */
@@ -43,7 +45,7 @@ export const FilterPopover = defineComponent(
               align: "start",
               portalTo: props.container ?? undefined,
               "aria-label": props.label,
-              "data-adapttable-part": "filters-popover",
+              "data-adapttable-part": props.part ?? "filters-popover",
               onEscapeKeyDown: escape,
               onInteractOutside: outside,
               onCloseAutoFocus: (event: Event) => {
@@ -68,6 +70,7 @@ export const FilterPopover = defineComponent(
       "children",
       "onClose",
       "onCloseAutoFocus",
+      "part",
     ],
   }
 );

@@ -149,14 +149,14 @@ describe("Naive filter SSR hydration", () => {
         header.focus();
         header.click();
         await tick();
-        const headerDialog = find(document.body, part("filter-header-popover"));
+        const headerDialog = find(document.body, part("filter-header-cell"));
         expect(headerDialog.classList.contains("n-popover")).toBe(true);
         const input = find<HTMLInputElement>(headerDialog, "input");
         input.focus();
         await escape(input);
         await settle();
         expect(
-          document.body.querySelector(part("filter-header-popover"))
+          document.body.querySelector(part("filter-header-cell"))
         ).toBeNull();
         expect(document.activeElement).toBe(header);
       }

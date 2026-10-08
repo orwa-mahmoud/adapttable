@@ -144,13 +144,13 @@ it.each([false, true])(
     trigger.focus();
     trigger.click();
     await flush();
-    const list = element(part("filter-header-popover"));
+    const list = element(part("filter-header-cell"));
     expect(list.getAttribute("role")).toBe("dialog");
     expect(current.value?.contains(list)).toBe(true);
     const fullscreenRoot = current.value;
     await document.exitFullscreen();
     await flush();
-    const resumed = element(part("filter-header-popover"));
+    const resumed = element(part("filter-header-cell"));
     expect(resumed).toBe(list);
     expect(fullscreenRoot?.contains(resumed)).toBe(false);
     expect(document.body.contains(resumed)).toBe(true);

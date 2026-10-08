@@ -621,7 +621,7 @@ describe("shadcn compact and popover header filters", () => {
     trigger.click();
     await settle();
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    const panel = get<HTMLElement>(document, part("filters-popover"));
+    const panel = get<HTMLElement>(document, part("filter-header-cell"));
     expect(panel.dir).toBe("rtl");
     expect(panel.querySelector("input.header-value")).not.toBeNull();
     await input(get(panel, "input"), "Ada");
@@ -655,14 +655,14 @@ describe("shadcn compact and popover header filters", () => {
     );
     get<HTMLButtonElement>(root, "button").click();
     await settle();
-    await select(get(document, `${part("filters-popover")} select`), "Ada");
+    await select(get(document, `${part("filter-header-cell")} select`), "Ada");
     await settle();
     expect(get(root, "button").getAttribute("aria-expanded")).toBe("false");
     get<HTMLButtonElement>(root, "button").click();
     await settle();
     visible.value = false;
     await settle();
-    expect(document.querySelector(part("filters-popover"))).toBeNull();
+    expect(document.querySelector(part("filter-header-cell"))).toBeNull();
   });
 
   it("mounts the opt-in feature in the real DataTable and filters host rows", async () => {
@@ -678,7 +678,7 @@ describe("shadcn compact and popover header filters", () => {
     );
     get<HTMLButtonElement>(root, part("filter-header-trigger")).click();
     await settle();
-    await input(get(document, `${part("filters-popover")} input`), "Ada");
+    await input(get(document, `${part("filter-header-cell")} input`), "Ada");
     await settle();
     expect(root.textContent).toContain("Ada");
     expect(root.querySelector("tbody")?.textContent).not.toContain("Bea");

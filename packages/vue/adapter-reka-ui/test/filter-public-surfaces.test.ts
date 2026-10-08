@@ -262,7 +262,7 @@ it("filters the actual table through header popovers, then clears the visible fi
   trigger.focus();
   trigger.click();
   await flush();
-  const popup = element(part("filter-header-popover"));
+  const popup = element(part("filter-header-cell"));
   expect(host.contains(popup)).toBe(false);
   const field = element<HTMLInputElement>('input[type="text"]', popup);
   await input(field, "Ada");

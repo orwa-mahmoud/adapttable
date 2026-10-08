@@ -234,7 +234,7 @@ describe("native surfaces across KeepAlive", () => {
         mode === "header" ? "filter-header-trigger" : "filters-button"
       );
       const surfacePart = {
-        header: "filter-header-popover",
+        header: "filter-header-cell",
         drawer: "filters-panel",
         popover: "filters-popover",
       }[mode];
@@ -267,7 +267,7 @@ describe("native surfaces across KeepAlive", () => {
         expect(surface.hidden).toBe(false);
       } else
         expect(
-          document.body.querySelector(part("filter-header-popover"))
+          document.body.querySelector(part("filter-header-cell"))
         ).toBeNull();
       view.stop();
       expect(

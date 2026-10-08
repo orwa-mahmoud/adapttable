@@ -419,3 +419,45 @@ it.each(["popover", "drawer"] as const)(
     expect(document.activeElement).toBe(trigger);
   }
 );
+
+it("names a column header's filter panel apart from the toolbar popover", async () => {
+  const host = document.createElement("div");
+  document.body.append(host);
+  const app = createApp({
+    render: () =>
+      h(DataTable<{ id: string; name: string }>, {
+        data: [
+          { id: "a", name: "Ada" },
+          { id: "g", name: "Grace" },
+        ],
+        columns: [{ key: "name", header: "Person" }],
+        rowKey: (row) => row.id,
+        urlSync: false,
+        forceMobile: false,
+        searchable: false,
+        features: [
+          filters<{ id: string; name: string }>([
+            { key: "name", type: "text", label: "Person" },
+          ]),
+          headerFilters(),
+        ],
+      }),
+  }).use(vuetify());
+  app.mount(host);
+  cleanups.push(() => {
+    app.unmount();
+    host.remove();
+  });
+  await settle();
+  node<HTMLButtonElement>(host, part("filter-header-trigger")).click();
+  await delay();
+  const panel = node(document, part("filter-header-cell"));
+  expect(panel.classList.contains("v-card")).toBe(true);
+  expect(panel.getAttribute("role")).toBe("dialog");
+  expect(document.querySelector(part("filters-popover"))).toBeNull();
+  const input = node<HTMLInputElement>(panel, `${part("filter-input")} input`);
+  input.value = "Grace";
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  await settle();
+  expect(host.querySelectorAll("tbody [data-row-id]")).toHaveLength(1);
+});

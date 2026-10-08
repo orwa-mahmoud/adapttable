@@ -40,7 +40,7 @@ const controls: HeaderFilterChromeSlots<TRow> = {
     h(NaiveFilterSurface, {
       ...surface,
       modal: false,
-      part: "filter-header-popover",
+      part: "filter-header-cell",
       className: names.value.filtersPopover,
     }),
 };
