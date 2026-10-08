@@ -121,6 +121,8 @@ const EXPECTED_GAPS = {
   "adapter-element-plus": {
     "filters-backdrop":
       "ElDrawer renders its modal mask internally and exposes only `modalClass` (which carries `filtersBackdrop`), no attribute or ref hook.",
+    "row-move-menu-content":
+      "The move destinations are an ElSelect, whose option dropdown is rendered internally with only `popperClass`, no attribute or ref hook; each ElOption still carries `row-move-menu-item`.",
   },
   "adapter-naive-ui": {
     "filters-backdrop":
@@ -179,106 +181,16 @@ const CORE_GETTER_PARTS = {
 };
 
 /**
- * Parts adapter-unstyled names because adapter-unstyled builds the thing.
- *
- * Native controls and native structure are that adapter's kit, so it assembles
- * a popover, a menu, a pager and a skeleton out of elements it owns. The themed
- * kits reach the same affordance through their kit's Popover, Menu, Pagination
- * and Skeleton, whose internals are the kit's — there is no element of theirs
- * that the same name would belong on. Grouped by the widget, with the reason
- * per group.
+ * Parts only the native kits name, because native controls are their kit: they
+ * build a widget from elements they own where every themed kit reaches the
+ * same affordance through its kit's component, whose internals are the kit's.
+ * Each entry is grouped by widget with its reason; the guard rejects an entry
+ * once any themed kit names the part.
  */
 const FALLBACK_ONLY = {
   // Its own shortcuts menu: a native disclosure wrapping a <menu> of buttons,
   // where a themed kit reaches the same affordance through its own Menu.
   "assistant shortcuts": ["assistant-examples-list"],
-  // Its own anchored card and drawer, built from divs and a backdrop.
-  filters: [
-    "filters-anchor",
-    "filters-backdrop",
-    "filters-body",
-    "filters-button",
-    "filters-clear",
-    "filters-close",
-    "filters-count",
-    "filters-done",
-    "filters-footer",
-    "filters-header",
-    "filters-icon",
-    "filters-panel",
-    "filters-popover",
-    "filters-title",
-    "filter-checkbox-group",
-    "filter-options-loading",
-  ],
-  // Its own column menu: a panel of native buttons and separators.
-  "column menu": [
-    "column-menu",
-    "column-menu-auto-size",
-    "column-menu-choice-label",
-    "column-menu-choice-select",
-    "column-menu-grip",
-    "column-menu-header",
-    "column-menu-label",
-    "column-menu-panel",
-    "column-menu-pin",
-    "column-menu-reset",
-    "column-menu-separator",
-    "column-menu-title",
-    "column-menu-visibility",
-  ],
-  // Its own saved-views menu, down to the save row and the divider.
-  "views menu": [
-    "views-button",
-    "views-delete",
-    "views-divider",
-    "views-input",
-    "views-item",
-    "views-menu",
-    "views-panel",
-    "views-row",
-    "views-save",
-    "views-save-row",
-  ],
-  // Its own pager: numbered buttons, an ellipsis, a rows-per-page select.
-  pager: [
-    "page-ellipsis",
-    "page-next",
-    "page-number",
-    "page-prev",
-    "pager",
-    "rows-per-page",
-    "load-more",
-    "load-more-button",
-  ],
-  // Its own loading skeleton, drawn as lines and blocks.
-  skeleton: [
-    "loading",
-    "loading-card",
-    "loading-cards",
-    "loading-cell",
-    "loading-header-cell",
-    "loading-header-row",
-    "loading-line",
-    "loading-row",
-    "loading-table",
-    "refresh-indicator",
-  ],
-  // Native controls: a select for sorting where a kit has a Select, a bare
-  // checkbox where a kit has a Checkbox, a button where a kit has a Button.
-  "native controls": [
-    "checkbox",
-    "empty-clear",
-    "expand-button",
-    "export-spinner",
-    "retry-button",
-    "sort-button",
-    "sort-index",
-    "sort-select",
-  ],
-  // Structure only the native shell has: the spacer that gives a virtualized
-  // column window its width.
-  virtualization: ["virtual-spacer"],
 };
 
 /**
