@@ -6810,7 +6810,7 @@ export interface TreeExpansionState {
 }
 
 // @public
-interface TreeShape<TRow> {
+export interface TreeShape<TRow> {
     getChildren?: (row: TRow) => readonly TRow[] | undefined;
     getParentId?: (row: TRow) => string | undefined;
     hasChildren?: (row: TRow) => boolean;

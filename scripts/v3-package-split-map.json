@@ -18723,6 +18723,14 @@
       "behavior": ""
     },
     {
+      "export": "TreeShape",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "TreeToggleButtonProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",

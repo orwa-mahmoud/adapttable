@@ -6299,7 +6299,8 @@
       "MenuNavigationAction",
       "MenuNavigationController",
       "MenuNavigationItem",
-      "MenuNavigationKey"
+      "MenuNavigationKey",
+      "TreeShape"
     ],
     "core-conformance": [
       "CONFORMANCE_COLUMNS",

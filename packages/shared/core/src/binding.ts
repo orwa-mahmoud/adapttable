@@ -880,7 +880,7 @@ export {
 } from "./style/icons";
 export { MOUNT_STAGGER, OVERLAY_MOTION } from "./style/motion";
 export type { TableStateMutators } from "./tableStateMutators";
-export type { TreeEntry } from "./tree/treeRows";
+export type { TreeEntry, TreeShape } from "./tree/treeRows";
 export type {
   ActionAiOptions,
   ActionApprovalPolicy,
