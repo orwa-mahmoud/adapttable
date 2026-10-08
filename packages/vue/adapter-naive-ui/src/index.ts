@@ -17,3 +17,4 @@ export type {
   TableDensity,
   TableSource,
 } from "@adapttable/vue";
+export type { CellRange } from "@adapttable/vue/adapter";

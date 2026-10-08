@@ -353,6 +353,16 @@
         "default": "./dist/status-bar.cjs"
       }
     },
+    "./preset": {
+      "import": {
+        "types": "./dist/preset.d.ts",
+        "default": "./dist/preset.js"
+      },
+      "require": {
+        "types": "./dist/preset.d.cts",
+        "default": "./dist/preset.cjs"
+      }
+    },
     "./command-palette": {
       "import": {
         "types": "./dist/command-palette.d.ts",

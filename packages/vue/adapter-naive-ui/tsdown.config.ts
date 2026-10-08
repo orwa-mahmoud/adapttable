@@ -18,6 +18,7 @@ export default defineConfig({
     "src/print.ts",
     "src/selection-stats.ts",
     "src/status-bar.ts",
+    "src/preset.ts",
 
     "src/renderers.ts",
     "src/density.ts",

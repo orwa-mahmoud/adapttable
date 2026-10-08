@@ -6,6 +6,7 @@
 
 import { CellContext } from '@adapttable/vue';
 import { CellEdit } from '@adapttable/vue';
+import { CellRange } from '@adapttable/vue/adapter';
 import { ColumnDef } from '@adapttable/vue';
 import { ColumnGroup } from '@adapttable/vue';
 import { ColumnInput } from '@adapttable/vue';
@@ -46,6 +47,8 @@ type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K 
 export { CellContext }
 
 export { CellEdit }
+
+export { CellRange }
 
 export { ColumnDef }
 
