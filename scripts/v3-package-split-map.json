@@ -14315,6 +14315,14 @@
       "behavior": ""
     },
     {
+      "export": "createMenuNavigation",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "CssProperties",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -16679,6 +16687,38 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "MenuNavigationAction",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "MenuNavigationController",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "MenuNavigationItem",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "MenuNavigationKey",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
