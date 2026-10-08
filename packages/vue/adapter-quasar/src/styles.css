@@ -17,6 +17,16 @@
   gap: 0.5rem;
   padding-block: 0.75rem;
 }
+.adapttable-quasar [data-adapttable-part="search-field"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-inline-size: 0;
+}
+.adapttable-quasar [data-adapttable-part="search-icon"] {
+  flex: none;
+  opacity: 0.7;
+}
 .adapttable-quasar .q-btn {
   min-block-size: 44px;
   min-inline-size: 44px;

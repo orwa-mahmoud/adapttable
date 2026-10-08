@@ -30,7 +30,7 @@
   "scripts": {
     "lint": "node ../../../scripts/vue-typed-lint.mjs",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json && node ../../../scripts/check-vue-types.mjs",
-    "test": "vitest run --config vitest.config.ts && pnpm run test:ssr",
+    "test": "pnpm run test:ssr && vitest run --config vitest.config.ts",
     "test:ssr": "ADAPTTABLE_QUASAR_SSR=1 vitest run --config vitest.config.ts",
     "build": "tsdown",
     "dev": "tsdown --watch",
