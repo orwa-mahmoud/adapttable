@@ -47,6 +47,15 @@ describe("AI isolation", () => {
       "packages/react/react/dist/index.js",
       "packages/vue/vue/dist/index.js",
       "packages/vue/adapter-vue-unstyled/dist/index.js",
+      ...[
+        "element-plus",
+        "naive-ui",
+        "nuxt-ui",
+        "quasar",
+        "reka-ui",
+        "shadcn-vue",
+        "vuetify",
+      ].map((kit) => `packages/vue/adapter-${kit}/dist/index.js`),
       "packages/angular/angular/dist/fesm2022/adapttable-angular.mjs",
       "packages/shared/server/dist/index.js",
       ...[
