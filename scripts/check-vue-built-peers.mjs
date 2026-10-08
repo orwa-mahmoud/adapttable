@@ -121,7 +121,11 @@ export function checkRuntime(cell, vueRoot, built) {
 }
 
 export function checkVueBuiltPeers(floorRoot) {
-  const scratch = mkdtempSync(join(tmpdir(), "adapttable-vue-built-peers-"));
+  // Resolved once, so cell paths compare equal to the real paths Vitest
+  // reports (macOS serves the temporary directory through a symlink).
+  const scratch = realpathSync(
+    mkdtempSync(join(tmpdir(), "adapttable-vue-built-peers-"))
+  );
   try {
     const floor = declaredFloor();
     for (const name of VUE_PACKAGES)
