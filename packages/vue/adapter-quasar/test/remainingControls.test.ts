@@ -521,6 +521,7 @@ it("uses a native destination menu and confirmation dialog with cancel and host-
   wrappers.push(wrapper);
   await settle();
   const trigger = element(`[data-row-id="a"] ${part("row-move-menu-trigger")}`);
+  expect(trigger.closest(part("row-move-menu"))).not.toBeNull();
   const request = async () => {
     trigger.focus();
     trigger.click();

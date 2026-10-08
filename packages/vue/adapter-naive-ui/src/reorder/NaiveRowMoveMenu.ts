@@ -61,11 +61,17 @@ export const NaiveRowMoveMenu = /*#__PURE__*/ defineComponent(
             h("p", { id: descriptionId }, confirmation.description),
             // Native modal autofocus begins on the non-destructive choice.
             naiveButton(
-              { onClick: () => finish(false) },
+              {
+                "data-adapttable-part": "row-move-cancel",
+                onClick: () => finish(false),
+              },
               confirmation.cancelLabel
             ),
             naiveButton(
-              { onClick: () => finish(true) },
+              {
+                "data-adapttable-part": "row-move-confirm",
+                onClick: () => finish(true),
+              },
               confirmation.confirmLabel
             ),
           ]

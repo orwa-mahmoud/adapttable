@@ -149,7 +149,7 @@ export const VuetifyMoveMenu = defineComponent(
       const fullscreen =
         typeof document === "undefined" ? null : document.fullscreenElement;
       const attach = fullscreen instanceof HTMLElement ? fullscreen : false;
-      return [
+      return h("span", { "data-adapttable-part": "row-move-menu" }, [
         h(
           VMenu,
           {
@@ -186,7 +186,7 @@ export const VuetifyMoveMenu = defineComponent(
         props.control.confirmation
           ? confirmation(props.control.confirmation, dir, attach)
           : null,
-      ];
+      ]);
     };
   },
   { name: "VuetifyMoveMenu", props: ["control"] }

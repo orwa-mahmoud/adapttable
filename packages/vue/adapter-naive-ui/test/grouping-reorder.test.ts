@@ -249,6 +249,12 @@ it("uses shared grouped-row confirmation and restores the native destination inp
     return button;
   };
   const pending = await open();
+  expect(action(pending, "Cancel").dataset.adapttablePart).toBe(
+    "row-move-cancel"
+  );
+  expect(action(pending, "Move").dataset.adapttablePart).toBe(
+    "row-move-confirm"
+  );
   expect(document.activeElement).toBe(action(pending, "Cancel"));
   action(pending, "Cancel").click();
   await tick();

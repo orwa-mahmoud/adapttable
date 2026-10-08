@@ -387,9 +387,11 @@ describe("Element remaining feature controls", () => {
         part("row-move-confirmation")
       );
       expect(modal.closest(".el-dialog")).not.toBeNull();
-      const confirm = [
-        ...modal.querySelectorAll<HTMLButtonElement>("button"),
-      ].find((button) => button.textContent?.trim() === "Move")!;
+      expect(
+        node(modal, part("row-move-cancel")).textContent?.trim()
+      ).toBeTruthy();
+      const confirm = node<HTMLButtonElement>(modal, part("row-move-confirm"));
+      expect(confirm.textContent?.trim()).toBe("Move");
       confirm.click();
       await tick();
       expect(moved).toHaveBeenCalledTimes(1);

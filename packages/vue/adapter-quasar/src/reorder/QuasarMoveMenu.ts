@@ -171,7 +171,7 @@ export const QuasarMoveMenu = defineComponent(
     return () =>
       !active.value
         ? null
-        : [
+        : h("span", { "data-adapttable-part": "row-move-menu" }, [
             h(
               QBtn,
               {
@@ -188,7 +188,7 @@ export const QuasarMoveMenu = defineComponent(
             props.control.confirmation
               ? renderConfirmation(props.control.confirmation)
               : null,
-          ];
+          ]);
   },
   { name: "QuasarMoveMenu", props: ["control"] }
 );

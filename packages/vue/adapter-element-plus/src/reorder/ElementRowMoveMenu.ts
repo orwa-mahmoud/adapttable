@@ -86,11 +86,19 @@ export const ElementRowMoveMenu = defineComponent(
                 default: () => h("p", { id: description }, owner.description),
                 footer: () => [
                   elementButton(
-                    { type: "button", onClick: () => finish("onCancel") },
+                    {
+                      type: "button",
+                      "data-adapttable-part": "row-move-cancel",
+                      onClick: () => finish("onCancel"),
+                    },
                     owner.cancelLabel
                   ),
                   elementButton(
-                    { type: "button", onClick: () => finish("onConfirm") },
+                    {
+                      type: "button",
+                      "data-adapttable-part": "row-move-confirm",
+                      onClick: () => finish("onConfirm"),
+                    },
                     owner.confirmLabel
                   ),
                 ],
