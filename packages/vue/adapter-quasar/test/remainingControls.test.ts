@@ -153,6 +153,9 @@ it("uses QCheckbox and a binding-owned range, mirrors RTL navigation and request
   await key(element('[data-grid-cell="0:2"]'), "ArrowDown", { shiftKey: true });
   expect(wrapper.findComponent(QBadge).exists()).toBe(true);
   expect(element(part("fill-handle")).getAttribute("aria-hidden")).toBe("true");
+  expect(
+    element(part("fill-handle")).parentElement?.dataset.adapttablePart
+  ).toBe("fill-handle-anchor");
   await key(element('[data-grid-cell="1:2"]'), "d", { ctrlKey: true });
   expect(fill).toHaveBeenCalledExactlyOnceWith([
     { row: rows[1], columnKey: "amount", value: "4" },

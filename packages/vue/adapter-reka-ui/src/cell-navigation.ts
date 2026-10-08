@@ -21,13 +21,22 @@ export function cellNavigation(
         ...props,
         slots: {
           Handle: (control) =>
-            h(Primitive, {
-              ...control.handleProps,
-              as: "span",
-              title: control.label,
-              "data-adapttable-part": "fill-handle",
-              class: ["at-reka-fill-handle", control.className],
-            }),
+            h(
+              "span",
+              {
+                "data-adapttable-part": "fill-handle-anchor",
+                style: { position: "relative", display: "block", height: 0 },
+              },
+              [
+                h(Primitive, {
+                  ...control.handleProps,
+                  as: "span",
+                  title: control.label,
+                  "data-adapttable-part": "fill-handle",
+                  class: ["at-reka-fill-handle", control.className],
+                }),
+              ]
+            ),
         },
       })
     ),

@@ -106,6 +106,9 @@ it("uses shared keyboard ranges and genuine Reka column checkboxes with one stat
   expect(host.querySelectorAll(part("status-bar"))).toHaveLength(1);
   const handle = element(host, part("fill-handle"));
   expect(handle.classList.contains("at-reka-fill-handle")).toBe(true);
+  expect(handle.parentElement?.dataset.adapttablePart).toBe(
+    "fill-handle-anchor"
+  );
   expect(handle.getAttribute("title")).toBeTruthy();
   expect(element(host, part("selection-stats")).textContent).toContain("40");
   const checkbox = element(

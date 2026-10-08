@@ -28,26 +28,35 @@ export function cellNavigation(
         ...props,
         slots: {
           Handle: ({ handleProps, label, className }) =>
-            h(QBadge, {
-              ...quasarAttrs(handleProps),
-              color: "primary",
-              rounded: false,
-              "data-adapttable-part": "fill-handle",
-              "aria-hidden": true,
-              title: label,
-              class: className,
-              style: {
-                position: "absolute",
-                width: "8px",
-                height: "8px",
-                minHeight: "8px",
-                padding: 0,
-                insetInlineEnd: "-4px",
-                bottom: "-4px",
-                cursor: "crosshair",
-                zIndex: 1,
+            h(
+              "span",
+              {
+                "data-adapttable-part": "fill-handle-anchor",
+                style: { position: "relative", display: "block", height: 0 },
               },
-            }),
+              [
+                h(QBadge, {
+                  ...quasarAttrs(handleProps),
+                  color: "primary",
+                  rounded: false,
+                  "data-adapttable-part": "fill-handle",
+                  "aria-hidden": true,
+                  title: label,
+                  class: className,
+                  style: {
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    minHeight: "8px",
+                    padding: 0,
+                    insetInlineEnd: "-4px",
+                    bottom: "-4px",
+                    cursor: "crosshair",
+                    zIndex: 1,
+                  },
+                }),
+              ]
+            ),
         },
       })
     ),
