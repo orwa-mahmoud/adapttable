@@ -84,6 +84,7 @@ import {
   frameworkFiles,
   FRAMEWORKS,
   frameworksIn,
+  kitDir,
   kitRegistryErrors,
   KITS,
   kitSourceDirs,
@@ -95,6 +96,7 @@ import { REPO_ROOT } from "./packages.mjs";
 import {
   vueBindingSources,
   vueForwardsAttributeApi,
+  vueKitWithBindingSources,
   vueRenderedParts,
 } from "./vue-binding-structure.mjs";
 
@@ -389,6 +391,236 @@ function factoryPartNames(file, text) {
     visit(statement.body);
   }
   return found;
+}
+
+/**
+ * A sixth way to name a part: a helper whose returned record sets
+ * `data-adapttable-part` from one of its own parameters, as
+ * `part(name, names)` does. Each call to that helper in the same file with a
+ * string literal in that position names the part. Only a helper that really
+ * returns the parameter as the part counts; its name is irrelevant.
+ */
+function helperPartNames(file, text) {
+  const found = new Set();
+  if (!/\.tsx?$/.test(file)) return found;
+  const source = ts.createSourceFile(
+    file,
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  );
+  const helpers = declaredPartHelpers(source);
+  for (const [name, index] of importedPartHelpers(file, source))
+    if (!helpers.has(name)) helpers.set(name, index);
+  function visit(node) {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+      const index = helpers.get(node.expression.text);
+      if (index !== undefined)
+        for (const name of literalBranches(node.arguments[index]))
+          found.add(name);
+    }
+    const value = partPropertyValue(node);
+    if (value && !ts.isIdentifier(value) && namesRenderedPart(node))
+      for (const name of literalBranches(value)) found.add(name);
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return found;
+}
+
+/**
+ * A source file's part helpers, at any depth, by declared name. A helper that
+ * hands its parameter to another part helper is one too, so this repeats until
+ * no new helper appears.
+ */
+function declaredPartHelpers(source) {
+  const helpers = new Map();
+  const functions = [];
+  function visit(node) {
+    const fn = helperFunction(node);
+    if (fn) functions.push(fn);
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const fn of functions) {
+      if (helpers.has(fn.name)) continue;
+      const index = partParameterIndex(fn.node, helpers);
+      if (index >= 0) {
+        helpers.set(fn.name, index);
+        grew = true;
+      }
+    }
+  }
+  return helpers;
+}
+
+/** The argument a call hands to a known part helper's part position. */
+function forwardedPart(node, helpers) {
+  if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression))
+    return undefined;
+  const index = helpers.get(node.expression.text);
+  return index === undefined ? undefined : node.arguments[index];
+}
+
+/** A named function declaration, or a variable initialized with a function. */
+function helperFunction(node) {
+  if (ts.isFunctionDeclaration(node) && node.name)
+    return { name: node.name.text, node };
+  if (
+    ts.isVariableDeclaration(node) &&
+    ts.isIdentifier(node.name) &&
+    node.initializer &&
+    (ts.isArrowFunction(node.initializer) ||
+      ts.isFunctionExpression(node.initializer))
+  )
+    return { name: node.name.text, node: node.initializer };
+  return undefined;
+}
+
+/**
+ * Part helpers a file imports by relative path, resolved to the declaring file
+ * rather than matched by name, so a same-named function elsewhere never counts.
+ */
+function importedPartHelpers(file, source) {
+  const helpers = new Map();
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      !statement.moduleSpecifier.text.startsWith(".") ||
+      statement.importClause?.isTypeOnly
+    )
+      continue;
+    const bindings = statement.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings)) continue;
+    const base = join(dirname(file), statement.moduleSpecifier.text);
+    const target = [`${base}.ts`, join(base, "index.ts"), base].find(
+      (candidate) => /\.tsx?$/.test(candidate) && existsSync(candidate)
+    );
+    if (!target) continue;
+    const declared = localPartHelpers(target);
+    for (const element of bindings.elements) {
+      const original = (element.propertyName ?? element.name).text;
+      if (declared.has(original))
+        helpers.set(element.name.text, declared.get(original));
+    }
+  }
+  return helpers;
+}
+
+const localHelperCache = new Map();
+/** A file's own part helpers, by declared name. */
+function localPartHelpers(file) {
+  if (!localHelperCache.has(file)) {
+    const source = ts.createSourceFile(
+      file,
+      readFileSync(file, "utf8"),
+      ts.ScriptTarget.Latest,
+      true
+    );
+    localHelperCache.set(file, declaredPartHelpers(source));
+  }
+  return localHelperCache.get(file);
+}
+
+/** Which parameter a function returns as its record's `data-adapttable-part`. */
+function partParameterIndex(fn, helpers = new Map()) {
+  const parameters = fn.parameters.map((parameter) =>
+    ts.isIdentifier(parameter.name) ? parameter.name.text : undefined
+  );
+  let index = -1;
+  function visit(node) {
+    if (index >= 0 || (node !== fn && ts.isFunctionLike(node))) return;
+    const value = partPropertyValue(node) ?? forwardedPart(node, helpers);
+    if (value && ts.isIdentifier(value) && isReturned(node)) {
+      index = parameters.indexOf(value.text);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(fn);
+  return index;
+}
+
+/**
+ * The value an object property gives a part: `"data-adapttable-part": value`
+ * on an element, or `part: value` handed to a kit's slot, shorthand included.
+ */
+function partPropertyValue(node) {
+  if (ts.isShorthandPropertyAssignment(node) && node.name.text === "part")
+    return node.name;
+  if (!ts.isPropertyAssignment(node)) return undefined;
+  const named = ts.isStringLiteral(node.name) || ts.isIdentifier(node.name);
+  const key = named ? node.name.text : undefined;
+  return key === "data-adapttable-part" || key === "part"
+    ? node.initializer
+    : undefined;
+}
+
+/**
+ * An element's `data-adapttable-part` names a part wherever it is written; a
+ * `part` key only does when its record is handed straight to a call — a kit's
+ * slot or a part helper — rather than sitting in an unrelated object.
+ */
+function namesRenderedPart(property) {
+  const key = property.name.text;
+  if (key === "data-adapttable-part") return true;
+  const record = property.parent;
+  return (
+    ts.isObjectLiteralExpression(record) &&
+    ts.isCallExpression(record.parent) &&
+    record.parent.arguments.includes(record)
+  );
+}
+
+/** The string literals an expression can evaluate to, through ternaries. */
+function literalBranches(expression) {
+  if (!expression) return [];
+  if (ts.isParenthesizedExpression(expression))
+    return literalBranches(expression.expression);
+  if (ts.isStringLiteralLike(expression)) return [expression.text];
+  if (ts.isConditionalExpression(expression))
+    return [
+      ...literalBranches(expression.whenTrue),
+      ...literalBranches(expression.whenFalse),
+    ];
+  if (
+    ts.isBinaryExpression(expression) &&
+    (expression.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken ||
+      expression.operatorToken.kind === ts.SyntaxKind.BarBarToken)
+  )
+    return [
+      ...literalBranches(expression.left),
+      ...literalBranches(expression.right),
+    ];
+  return [];
+}
+
+/** Whether an object property belongs to a record the function returns. */
+function isReturned(property) {
+  let node = property.parent;
+  while (node && !ts.isFunctionLike(node)) {
+    if (ts.isReturnStatement(node)) return true;
+    if (ts.isArrowFunction(node.parent) && node.parent.body === node)
+      return true;
+    if (ts.isParenthesizedExpression(node)) {
+      node = node.parent;
+      continue;
+    }
+    if (ts.isObjectLiteralExpression(node) || ts.isCallExpression(node)) {
+      node = node.parent;
+      continue;
+    }
+    if (ts.isSpreadAssignment(node) || ts.isPropertyAssignment(node)) {
+      node = node.parent;
+      continue;
+    }
+    return false;
+  }
+  return false;
 }
 
 /** A value declaration that can introduce or shadow a JSX identifier. */
@@ -810,6 +1042,9 @@ const kitFiles = (kit, root) =>
 function partsOf(kit, root) {
   const files = kitFiles(kit, root);
   const found = namesIn(files, KIT_PART_PATTERNS);
+  for (const file of files)
+    for (const part of helperPartNames(file, readFileSync(file, "utf8")))
+      found.add(part);
   if (kit.framework === "vue") {
     for (const part of vueRenderedParts(vueBindingSources(files, root)))
       found.add(part);
@@ -833,6 +1068,7 @@ function chromeNamesIn(files) {
   for (const file of files) {
     const text = readFileSync(file, "utf8");
     for (const part of factoryPartNames(file, text)) found.add(part);
+    for (const part of helperPartNames(file, text)) found.add(part);
     for (const match of text.matchAll(PARTS_TABLE)) {
       for (const name of match[1].matchAll(/["']([a-z0-9-]+)["']/g)) {
         found.add(name[1]);
@@ -879,7 +1115,7 @@ function chromeByFramework(frameworks, root) {
 /** Whether a kit's files call one of its binding's prop-getters by name. */
 function callsCoreGetter(kit, getter, root) {
   if (kit.framework === "vue") {
-    const sources = vueBindingSources(kitFiles(kit, root), root);
+    const sources = vueKitWithBindingSources(kitFiles(kit, root), root);
     return vueForwardsAttributeApi(sources, "tr", getter);
   }
   // Angular also uses `rowAttrs` for the assembled record and for reorder
@@ -902,8 +1138,42 @@ function callsCoreGetter(kit, getter, root) {
  * How one kit accounts for one contract part: its own literal, a binding
  * prop-getter it spreads, an EXPECTED_GAPS entry — or nothing, which fails.
  */
+/**
+ * The structural parts a Vue kit's own server-rendered contract test asserts.
+ * A Vue kit can forward the binding's attrs through its kit's own wrapper
+ * components, where no static trace can follow them; the rendered table is the
+ * proof then, as each React kit's `RowParts.test.tsx` is. Only a test that lists
+ * the parts and asserts the rendered list equals them counts.
+ */
+const VUE_CONTRACT_TEST = "test/structural-parts.ssr.test.ts";
+function renderedContractParts(kit, root) {
+  const file = join(kitDir(kit, root), VUE_CONTRACT_TEST);
+  if (kit.framework !== "vue" || !existsSync(file)) return new Set();
+  const source = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.Latest,
+    true
+  );
+  const listed = source.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => statement.declarationList.declarations)
+    .filter((declaration) => declaration.name.getText() === "STRUCTURAL_PARTS")
+    .flatMap((declaration) => {
+      let value = declaration.initializer;
+      while (value && ts.isAsExpression(value)) value = value.expression;
+      return value && ts.isArrayLiteralExpression(value)
+        ? value.elements.filter(ts.isStringLiteral).map((item) => item.text)
+        : [];
+    });
+  return source.text.includes("toEqual([...STRUCTURAL_PARTS])")
+    ? new Set(listed)
+    : new Set();
+}
+
 function contractAccount(kit, part, parts, context) {
   if (parts.has(part)) return null;
+  if (renderedContractParts(kit, context.root).has(part)) return null;
   const routes = context.getterParts[kit.framework]?.[part];
   if (routes?.some((getter) => callsCoreGetter(kit, getter, context.root))) {
     return null;

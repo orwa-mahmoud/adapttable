@@ -509,6 +509,48 @@ function expressionGap(source, layer = "kit", extension = "tsx") {
   return report(root)[0].missing;
 }
 
+describe("part helpers and conditional part names", () => {
+  for (const [name, source, expected] of [
+    [
+      "a helper that returns its parameter as the part",
+      'function part(name, names) { return { "data-adapttable-part": name, class: names }; }\nexport const View = () => h("div", part("helper-part", {}));',
+      ["helper-part"],
+    ],
+    [
+      "a helper that hands its parameter to a kit slot",
+      'function button(props, label, part) { return props.slots.Button({ label, part }); }\nexport const View = (props) => button(props, "Close", "slot-part");',
+      ["slot-part"],
+    ],
+    [
+      "a helper that forwards its parameter to another part helper",
+      'const part = (name) => ({ "data-adapttable-part": name });\nfunction control(name) { return h("button", { ...part(name) }); }\nexport const View = () => control("forwarded-part");',
+      ["forwarded-part"],
+    ],
+    [
+      "both branches of a conditional part",
+      'export const View = (up) => h("button", { "data-adapttable-part": up ? "move-up" : "move-down" });',
+      ["move-down", "move-up"],
+    ],
+    [
+      "a helper that does not return its parameter as the part",
+      'function label(name) { return { title: name }; }\nexport const View = () => h("div", label("not-a-part"));',
+      [],
+    ],
+    [
+      "a same-named helper from another package",
+      'import { part } from "@elsewhere/parts";\nexport const View = () => h("div", part("foreign-part"));',
+      [],
+    ],
+  ]) {
+    it(`reads ${name}`, () => {
+      assert.deepEqual(
+        [...expressionGap(source, "kit", "ts")].sort(),
+        expected
+      );
+    });
+  }
+});
+
 describe("rendered JSX part expressions", () => {
   it("reads every literal branch of a nullish conditional on a Chrome element", () => {
     assert.deepEqual(
