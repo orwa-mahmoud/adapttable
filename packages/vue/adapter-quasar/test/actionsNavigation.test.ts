@@ -287,6 +287,9 @@ it("renders binding-computed selection statistics in native badges without dupli
   wrappers.push(wrapper);
   expect(wrapper.findAll(part("selection-stats"))).toHaveLength(1);
   expect(wrapper.get('[data-stat="sum"]').text()).toContain("60");
+  expect(
+    wrapper.get('[data-stat="sum"]').attributes("data-adapttable-part")
+  ).toBe("selection-stat");
   expect(wrapper.findAllComponents(QBadge).length).toBeGreaterThan(3);
   expect(wrapper.get(part("status-bar")).text()).toContain("2");
 });

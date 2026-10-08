@@ -13,7 +13,12 @@ import { defineComponent, h } from "vue";
 function statBadge(part: SelectionStatPart) {
   return h(
     QBadge,
-    { key: part.key, "data-stat": part.key, outline: true },
+    {
+      key: part.key,
+      "data-adapttable-part": "selection-stat",
+      "data-stat": part.key,
+      outline: true,
+    },
     () => part.text
   );
 }

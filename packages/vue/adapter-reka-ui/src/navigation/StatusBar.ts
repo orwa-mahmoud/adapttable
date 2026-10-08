@@ -28,7 +28,15 @@ export const RekaStatusBar = defineComponent(
           {
             default: () =>
               control.parts.map((part) =>
-                h("span", { key: part.key, "data-stat": part.key }, part.text)
+                h(
+                  "span",
+                  {
+                    key: part.key,
+                    "data-adapttable-part": "selection-stat",
+                    "data-stat": part.key,
+                  },
+                  part.text
+                )
               ),
           }
         ),

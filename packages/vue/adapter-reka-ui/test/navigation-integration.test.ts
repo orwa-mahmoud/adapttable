@@ -111,6 +111,11 @@ it("uses shared keyboard ranges and genuine Reka column checkboxes with one stat
   );
   expect(handle.getAttribute("title")).toBeTruthy();
   expect(element(host, part("selection-stats")).textContent).toContain("40");
+  expect(
+    element(host, part("selection-stats")).querySelectorAll(
+      part("selection-stat")
+    ).length
+  ).toBeGreaterThan(0);
   const checkbox = element(
     host,
     '[role="checkbox"][aria-label="Select column: Name"]'
