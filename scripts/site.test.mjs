@@ -41,6 +41,13 @@ describe("site addresses", () => {
   it("registers only implemented Vue guides with framework-aware fallback", () => {
     assert.deepEqual(VUE_DOCS, [
       "vue/getting-started.md",
+      "vue/element-plus.md",
+      "vue/naive-ui.md",
+      "vue/nuxt-ui.md",
+      "vue/quasar.md",
+      "vue/reka-ui.md",
+      "vue/shadcn-vue.md",
+      "vue/vuetify.md",
       "vue/features.md",
       "vue/api.md",
       "vue/assistant.md",
