@@ -135,6 +135,18 @@ export const sidebar = [
     label: "Vue (experimental)",
     items: [
       { label: "Get started with Vue", slug: "vue/getting-started" },
+      {
+        label: "UI kits",
+        items: [
+          { label: "Element Plus", slug: "vue/element-plus" },
+          { label: "Naive UI", slug: "vue/naive-ui" },
+          { label: "Nuxt UI", slug: "vue/nuxt-ui" },
+          { label: "Quasar", slug: "vue/quasar" },
+          { label: "Reka UI", slug: "vue/reka-ui" },
+          { label: "shadcn-vue", slug: "vue/shadcn-vue" },
+          { label: "Vuetify", slug: "vue/vuetify" },
+        ],
+      },
       { label: "Vue feature composition", slug: "vue/features" },
       { label: "Vue actions and exports", slug: "vue/actions" },
       { label: "Vue column menu", slug: "vue/column-menu" },

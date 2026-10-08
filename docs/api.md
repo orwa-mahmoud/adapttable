@@ -4066,17 +4066,30 @@ DataModeProps`: the base carries every prop except the data mode, which is
   class joiner) and shadcn additionally ships `shadcnClassNames`, the
   preset map behind its default look.
 
-## Experimental Vue binding and native kit
+## Experimental Vue binding and kits
 
-`@adapttable/vue` and `@adapttable/vue-unstyled` are public packages prepared for an
-experimental `0.1.0` release, requiring Vue `^3.5.0`. They have not been published
-to npm. The [Vue getting-started guide](./vue/getting-started.md) and
+`@adapttable/vue`, `@adapttable/vue-unstyled` and the seven Vue UI kits below are
+public packages prepared for an experimental `0.1.0` release, requiring Vue
+`^3.5.0` or a kit's newer floor. They have not been published to npm. The
+[Vue getting-started guide](./vue/getting-started.md) and
 [Vue API reference](./vue/api.md) describe the source, rendering, lifecycle
 and native-control surface; the [Vue feature guide](./vue/features.md) covers
-the implemented optional filter, editing, hierarchy, row and view-control composition. The React prop tables above do not define
-Vue's API, and exported Vue extension channels do not imply complete feature
-parity or styled kits. The optional `@adapttable/ai-vue` package and native
-assistant surfaces are covered by the [Vue assistant guide](./vue/assistant.md).
+optional feature composition. The React prop tables above do not define Vue's
+API. The optional `@adapttable/ai-vue` package and native assistant surfaces are
+covered by the [Vue assistant guide](./vue/assistant.md).
+
+### Vue UI kits
+
+Each kit renders the same Vue `DataTable` props, public parts and feature-factory
+contracts with its own controls. Follow each guide's peers, styles and setup:
+
+- [Element Plus](./vue/element-plus.md): `@adapttable/element-plus` — `ElementEditableCell`, `ElementRowEditActions`, `ElementBatchEditBar`, `FilterField`, `ElementHeaderFilter`.
+- [Naive UI](./vue/naive-ui.md): `@adapttable/naive-ui` — `NaiveEditableCell`, `NaiveRowEditActions`, `NaiveBatchEditBar`, `NaiveFilterField`, `NaiveHeaderFilter`, and the `/renderers` entry's `NaiveDesktopTable`, `NaiveMobileCards` and `naiveTableControls`.
+- [Nuxt UI](./vue/nuxt-ui.md): `@adapttable/nuxt-ui` — `NuxtEditableCell`, `NuxtRowEditActions`, `NuxtBatchEditBar`, `NuxtFilterField`, `NuxtHeaderFilter`.
+- [Quasar](./vue/quasar.md): `@adapttable/quasar` — `QuasarEditableCell`, `QuasarRowEditActions`, `QuasarBatchEditBar`, `QuasarFilterField`, `QuasarHeaderFilter`.
+- [Reka UI](./vue/reka-ui.md): `@adapttable/reka-ui` — `FilterField`, `HeaderFilter`.
+- [shadcn-vue](./vue/shadcn-vue.md): `@adapttable/shadcn-vue` — `FilterField`, `BasicFilterField`, `FilterTree`, `FilterChips`, `HeaderFilter`, with `BasicFilterFieldProps`, `FilterChipsProps` and `HeaderFilterProps`.
+- [Vuetify](./vue/vuetify.md): `@adapttable/vuetify` — `VuetifyEditableCell`, `VuetifyRowEditActions`, `VuetifyBatchEditBar`, `VuetifyFilterField`, `VuetifyHeaderFilter`.
 
 ### Sources, rendering and controllers
 
@@ -4259,6 +4272,7 @@ Reading a state key does not install a feature.
 | `BULK_ACTIONS_CONTROL`, `BulkActionsChrome`, `BulkActionsChromeProps`, `BulkActionsSlots` (`/adapter`) | The slot carries presentation plus model; the Chrome adds the required Button fill and renders selection actions, pending/error feedback and the scope banner.                                                |
 | `CommandPaletteModel`, `COMMAND_PALETTE_MODEL`, `COMMAND_PALETTE_CONTROL` (`/adapter`)                 | Model has `open`, `button`, `commands`, `show()` and `close()`; the state key publishes it and the control slot adds presentation for `CommandPaletteChrome`.                                                 |
 | `ContextMenuModel`, `CONTEXT_MENU_MODEL`, `CONTEXT_MENU_CONTROL` (`/adapter`)                          | Current target point `at` or null, menu items and close action; paired state/control keys connect it to `ContextMenuChrome`.                                                                                  |
+| `ContextMenuPresentation`, `ContextMenuPresentationProps` (`/adapter`)                                 | A complete menu presentation `ContextMenuChrome` accepts instead of slots; it receives the point, anchor ref, label, container, `onClose`, `isCurrent` and guarded `{ item, onSelect }` entries.              |
 | `SidePanelControlModel`, `SIDE_PANEL_MODEL`, `SIDE_PANEL_CONTROL` (`/adapter`)                         | Resolved open panel key, panels, logical side and host change callback; paired keys supply `SidePanelChrome` with presentation and current model.                                                             |
 | `SidePanelLayoutChrome` (`/adapter`)                                                                   | Component taking `open`, `panel(): VNodeChild`, optional `side` and `mobile`; wraps the default table slot with a side panel or stacks it below mobile content.                                               |
 | `EXPORT_MODEL`, `EXPORT_CONTROL` (`/adapter`)                                                          | Table-local `ExportHandlerState` and its presentation/control channel: current action, caption, disabled/busy state, announcement and progress.                                                               |

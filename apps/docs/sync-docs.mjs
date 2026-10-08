@@ -44,6 +44,13 @@ export const TITLES = {
   "vue/specialized.md": "Vue specialized data views",
   "vue/summary-row.md": "Vue summaries and footers",
   "vue/getting-started.md": "Get started with experimental Vue tables",
+  "vue/element-plus.md": "Element Plus Vue tables",
+  "vue/naive-ui.md": "Naive UI Vue tables",
+  "vue/nuxt-ui.md": "Nuxt UI Vue tables",
+  "vue/quasar.md": "Quasar Vue tables",
+  "vue/reka-ui.md": "Reka UI Vue tables",
+  "vue/shadcn-vue.md": "shadcn-vue tables",
+  "vue/vuetify.md": "Vuetify Vue tables",
   "vue/api.md": "Experimental Vue table API reference",
   "vue/assistant.md": "Vue assistant and approvals",
   "vue/features.md": "Vue filters, editing and feature composition",
@@ -198,6 +205,20 @@ export const DESCRIPTIONS = {
     "Connect Vue agents and conversations with native controls, explicit approval and host-controlled state.",
   "vue/getting-started.md":
     "Build an experimental Vue table with native controls, reactive sources, optional features, controlled state and SSR lifecycle rules.",
+  "vue/element-plus.md":
+    "Build Vue tables with Element Plus controls and card surfaces, host-owned data and composable features.",
+  "vue/naive-ui.md":
+    "Build Vue tables with Naive UI controls and semantic table primitives, host-owned data and composable features.",
+  "vue/nuxt-ui.md":
+    "Build Vue tables with Nuxt UI components, Tailwind theming, host-owned data and composable features.",
+  "vue/quasar.md":
+    "Build Vue tables with Quasar controls, host-owned data and composable features.",
+  "vue/reka-ui.md":
+    "Build accessible Vue tables with Reka UI primitives, a neutral theme, host-owned data and composable features.",
+  "vue/shadcn-vue.md":
+    "Build Vue tables with shadcn-vue presentation over Reka UI, standard shadcn tokens and composable features.",
+  "vue/vuetify.md":
+    "Build Vue tables with Vuetify controls, the host Vuetify theme, host-owned data and composable features.",
   "vue/features.md":
     "Compose native Vue filters, cell and batch editing, grouped and tree rows, row presentation and view controls with host-owned data and scoped state.",
   "vue/api.md":

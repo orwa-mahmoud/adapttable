@@ -20975,17 +20975,30 @@ DataModeProps`: the base carries every prop except the data mode, which is
   class joiner) and shadcn additionally ships `shadcnClassNames`, the
   preset map behind its default look.
 
-## Experimental Vue binding and native kit
+## Experimental Vue binding and kits
 
-`@adapttable/vue` and `@adapttable/vue-unstyled` are public packages prepared for an
-experimental `0.1.0` release, requiring Vue `^3.5.0`. They have not been published
-to npm. The [Vue getting-started guide](./vue/getting-started.md) and
+`@adapttable/vue`, `@adapttable/vue-unstyled` and the seven Vue UI kits below are
+public packages prepared for an experimental `0.1.0` release, requiring Vue
+`^3.5.0` or a kit's newer floor. They have not been published to npm. The
+[Vue getting-started guide](./vue/getting-started.md) and
 [Vue API reference](./vue/api.md) describe the source, rendering, lifecycle
 and native-control surface; the [Vue feature guide](./vue/features.md) covers
-the implemented optional filter, editing, hierarchy, row and view-control composition. The React prop tables above do not define
-Vue's API, and exported Vue extension channels do not imply complete feature
-parity or styled kits. The optional `@adapttable/ai-vue` package and native
-assistant surfaces are covered by the [Vue assistant guide](./vue/assistant.md).
+optional feature composition. The React prop tables above do not define Vue's
+API. The optional `@adapttable/ai-vue` package and native assistant surfaces are
+covered by the [Vue assistant guide](./vue/assistant.md).
+
+### Vue UI kits
+
+Each kit renders the same Vue `DataTable` props, public parts and feature-factory
+contracts with its own controls. Follow each guide's peers, styles and setup:
+
+- [Element Plus](./vue/element-plus.md): `@adapttable/element-plus` — `ElementEditableCell`, `ElementRowEditActions`, `ElementBatchEditBar`, `FilterField`, `ElementHeaderFilter`.
+- [Naive UI](./vue/naive-ui.md): `@adapttable/naive-ui` — `NaiveEditableCell`, `NaiveRowEditActions`, `NaiveBatchEditBar`, `NaiveFilterField`, `NaiveHeaderFilter`, and the `/renderers` entry's `NaiveDesktopTable`, `NaiveMobileCards` and `naiveTableControls`.
+- [Nuxt UI](./vue/nuxt-ui.md): `@adapttable/nuxt-ui` — `NuxtEditableCell`, `NuxtRowEditActions`, `NuxtBatchEditBar`, `NuxtFilterField`, `NuxtHeaderFilter`.
+- [Quasar](./vue/quasar.md): `@adapttable/quasar` — `QuasarEditableCell`, `QuasarRowEditActions`, `QuasarBatchEditBar`, `QuasarFilterField`, `QuasarHeaderFilter`.
+- [Reka UI](./vue/reka-ui.md): `@adapttable/reka-ui` — `FilterField`, `HeaderFilter`.
+- [shadcn-vue](./vue/shadcn-vue.md): `@adapttable/shadcn-vue` — `FilterField`, `BasicFilterField`, `FilterTree`, `FilterChips`, `HeaderFilter`, with `BasicFilterFieldProps`, `FilterChipsProps` and `HeaderFilterProps`.
+- [Vuetify](./vue/vuetify.md): `@adapttable/vuetify` — `VuetifyEditableCell`, `VuetifyRowEditActions`, `VuetifyBatchEditBar`, `VuetifyFilterField`, `VuetifyHeaderFilter`.
 
 ### Sources, rendering and controllers
 
@@ -21168,6 +21181,7 @@ Reading a state key does not install a feature.
 | `BULK_ACTIONS_CONTROL`, `BulkActionsChrome`, `BulkActionsChromeProps`, `BulkActionsSlots` (`/adapter`) | The slot carries presentation plus model; the Chrome adds the required Button fill and renders selection actions, pending/error feedback and the scope banner.                                                |
 | `CommandPaletteModel`, `COMMAND_PALETTE_MODEL`, `COMMAND_PALETTE_CONTROL` (`/adapter`)                 | Model has `open`, `button`, `commands`, `show()` and `close()`; the state key publishes it and the control slot adds presentation for `CommandPaletteChrome`.                                                 |
 | `ContextMenuModel`, `CONTEXT_MENU_MODEL`, `CONTEXT_MENU_CONTROL` (`/adapter`)                          | Current target point `at` or null, menu items and close action; paired state/control keys connect it to `ContextMenuChrome`.                                                                                  |
+| `ContextMenuPresentation`, `ContextMenuPresentationProps` (`/adapter`)                                 | A complete menu presentation `ContextMenuChrome` accepts instead of slots; it receives the point, anchor ref, label, container, `onClose`, `isCurrent` and guarded `{ item, onSelect }` entries.              |
 | `SidePanelControlModel`, `SIDE_PANEL_MODEL`, `SIDE_PANEL_CONTROL` (`/adapter`)                         | Resolved open panel key, panels, logical side and host change callback; paired keys supply `SidePanelChrome` with presentation and current model.                                                             |
 | `SidePanelLayoutChrome` (`/adapter`)                                                                   | Component taking `open`, `panel(): VNodeChild`, optional `side` and `mobile`; wraps the default table slot with a side panel or stacks it below mobile content.                                               |
 | `EXPORT_MODEL`, `EXPORT_CONTROL` (`/adapter`)                                                          | Table-local `ExportHandlerState` and its presentation/control channel: current action, caption, disabled/busy state, announcement and progress.                                                               |
@@ -32135,6 +32149,615 @@ stay in the browser. Authored orders use this tab’s session storage; named vie
 use browser storage when available and survive a later visit. Restore sample data resets the order desk;
 the dispatch plan is rebuilt from the restored Ready orders. Reloading and retry restore authored changes and selections from this tab’s session storage. Presentation, table queries and pivot choices remain shareable in the URL. The package availability notice still
 applies: showcase source is not a published-package or feature-parity claim.
+
+---
+
+# Element Plus Vue table
+
+`@adapttable/element-plus` renders AdaptTable's Vue binding with Element Plus
+controls and card surfaces. The binding owns table state, feature lifetimes,
+query ownership and host-write callbacks; this kit supplies buttons, fields,
+checkboxes, selects, popovers, drawers and message boxes.
+
+## Availability and versions
+
+The package is prepared for its first experimental `0.1.0` release and is not
+yet published to npm. Until it is, link the built workspace packages as
+described in [Get started with Vue](./getting-started.md).
+
+Peers: Vue `^3.5.0` and Element Plus `^2.14.7`. Node.js 22.12.0 or newer.
+
+## Application setup
+
+Register Element Plus the way your application already does, then load its
+stylesheet and the kit's stylesheet once:
+
+```ts
+import "element-plus/dist/index.css";
+import "@adapttable/element-plus/styles.css";
+```
+
+Load Element Plus's dark-theme CSS variables when using its dark theme. Popup
+stacking follows `ElConfigProvider`'s `zIndex` setting.
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { DataTable, type ColumnDef } from "@adapttable/element-plus";
+import { filters } from "@adapttable/element-plus/filters";
+
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
+
+const rows: Person[] = [
+  { id: "ada", name: "Ada", score: 92 },
+  { id: "bea", name: "Bea", score: 87 },
+];
+const columns: ColumnDef<Person>[] = [
+  { key: "name", header: "Name", sortable: true },
+  { key: "score", header: "Score", sortable: true },
+];
+const features = [filters<Person>([{ key: "name", type: "text" }])];
+const selectedIds = ref<string[]>([]);
+</script>
+
+<template>
+  <DataTable
+    v-model:selected-ids="selectedIds"
+    :data="rows"
+    :columns="columns"
+    :row-key="(row) => row.id"
+    :features="features"
+    :url-sync="false"
+    selectable
+  />
+</template>
+```
+
+## Kit components
+
+Each feature entry exports the kit component it renders, for custom layouts over
+the same binding models:
+
+| Component               | Entry points                 | Renders                                                |
+| ----------------------- | ---------------------------- | ------------------------------------------------------ |
+| `ElementEditableCell`   | `/editing`                   | An editable cell with Element Plus inputs and selects. |
+| `ElementRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.             |
+| `ElementBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.    |
+| `FilterField`           | `/filters`                   | A filter definition's field with the kit's controls.   |
+| `ElementHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.         |
+
+## Controls and styling
+
+- The desktop renderer places a semantic HTML table inside `ElCard`; mobile
+  cards use one `ElCard` per row.
+- Sorting, selection, search and paging use Element Plus components. Filter
+  popovers use `ElPopover`; `{ mode: "drawer" }` uses a modal `ElDrawer`.
+- Row-action confirmation uses `ElMessageBox`, inside the fullscreen table.
+- `classNames` styles the named part; compound controls follow Element Plus's
+  public attribute API for checkboxes, inputs and selects.
+
+Server rendering needs Element Plus's per-request `ID_INJECTION_KEY` and
+`ZINDEX_INJECTION_KEY` setup and the injected teleport payload, as described in
+the [Element Plus SSR guide](https://element-plus.org/en-US/guide/ssr.html).
+
+The [Vue feature guide](./features.md) covers feature composition. The
+package README lists every feature entry point and its Element Plus control.
+
+---
+
+# Naive UI Vue table
+
+`@adapttable/naive-ui` renders AdaptTable's Vue binding with Naive UI controls.
+AdaptTable owns table state, feature composition and semantic table structure;
+Naive UI supplies the visible controls and their styling.
+
+## Availability and versions
+
+The package is prepared for its first experimental `0.1.0` release and is not
+yet published to npm. Until it is, link the built workspace packages as
+described in [Get started with Vue](./getting-started.md).
+
+Peers: Vue `^3.5.0` and Naive UI `^2.45.3`. Node.js 22.12.0 or newer.
+
+## Application setup
+
+Load the kit's stylesheet once; Naive UI styles its own components:
+
+```ts
+import "@adapttable/naive-ui/styles.css";
+```
+
+```vue
+<script setup lang="ts">
+import { DataTable, type ColumnDef } from "@adapttable/naive-ui";
+import { filters } from "@adapttable/naive-ui/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+const rows: Person[] = [{ id: "ada", name: "Ada" }];
+const columns: ColumnDef<Person>[] = [
+  { key: "name", header: "Name", sortable: true },
+];
+const features = [filters<Person>([{ key: "name", type: "text" }])];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="(row) => row.id"
+    :features="features"
+    :url-sync="false"
+  />
+</template>
+```
+
+## Kit components
+
+| Component             | Entry points                 | Renders                                              |
+| --------------------- | ---------------------------- | ---------------------------------------------------- |
+| `NaiveEditableCell`   | `/editing`                   | An editable cell with Naive UI inputs and selects.   |
+| `NaiveRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.           |
+| `NaiveBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.  |
+| `NaiveFilterField`    | `/filters`                   | A filter definition's field with the kit's controls. |
+| `NaiveHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.       |
+| `NaiveDesktopTable`   | `/renderers`                 | The desktop table over `NTable` semantic primitives. |
+| `NaiveMobileCards`    | `/renderers`                 | The mobile card list over `NCard`.                   |
+| `naiveTableControls`  | `/renderers`                 | The required table controls as Naive components.     |
+
+`/renderers` also exports the kit's `DataTableClassNames`. Applications that
+compose their own outer layout can use the desktop and mobile renderers directly,
+or use the headless binding with their own presentation.
+
+## Controls and styling
+
+- The desktop renderer uses Naive UI's `NTable`, `NThead`, `NTbody`, `NTr`, `NTh`
+  and `NTd` primitives; the mobile renderer uses `NCard`. Attributes, element
+  refs, ARIA metadata and prepared cell spans stay on the semantic targets.
+- The renderer consumes the binding's prepared models; it does not ask
+  `NDataTable` to sort, filter, paginate, select or virtualize rows again.
+- `DataTable` uses the binding's outer layout for search, status, loading and
+  pagination.
+
+The [Vue feature guide](./features.md) covers feature composition. The package
+README lists every feature entry point and its Naive UI control.
+
+---
+
+# Nuxt UI Vue table
+
+`@adapttable/nuxt-ui` renders AdaptTable's Vue binding with Nuxt UI components.
+The binding owns table state, callbacks and structural Chrome; this kit supplies
+the buttons, inputs, selects, checkboxes, popovers, drawers and menus.
+
+## Availability and versions
+
+The package is prepared for its first experimental `0.1.0` release and is not
+yet published to npm. Until it is, link the built workspace packages as
+described in [Get started with Vue](./getting-started.md).
+
+Peers: Vue `^3.5.18` and Nuxt UI `^4.11.3`. Nuxt UI 4 is MIT-licensed; the kit
+uses the public `@nuxt/ui` package and needs no Pro license or Nuxt server
+runtime. Node.js 22.12.0 or newer; on Node 22.12–22.18, npm applications add
+`unifont@0.7.4` as an exact dependency, as the package README explains.
+
+## Application setup
+
+A plain Vue application follows Nuxt UI's
+[Vue installation guide](https://ui.nuxt.com/docs/getting-started/installation/vue):
+
+```ts
+// vite.config.ts
+import ui from "@nuxt/ui/vite";
+import vue from "@vitejs/plugin-vue";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [vue(), ui({ router: false, prose: true })],
+  resolve: { dedupe: ["vue", "@nuxt/ui"] },
+});
+```
+
+```ts
+// main.ts
+import ui from "@nuxt/ui/vue-plugin";
+import { createApp } from "vue";
+import App from "./App.vue";
+import "./main.css";
+import "@adapttable/nuxt-ui/styles.css";
+
+createApp(App).use(ui).mount("#app");
+```
+
+```css
+/* main.css */
+@import "tailwindcss";
+@import "@nuxt/ui";
+```
+
+Wrap the application in `UApp`, give the mounting element `class="isolate"`, and
+install `@iconify-json/lucide` for Nuxt UI's default icons. Keep Nuxt UI's router
+integration when the application uses Vue Router. Nuxt applications use the
+official `@nuxt/ui` module instead of the Vue plugin.
+
+```vue
+<script setup lang="ts">
+import { DataTable } from "@adapttable/nuxt-ui";
+import { densityChooser } from "@adapttable/nuxt-ui/density";
+
+const people = [{ id: "ada", name: "Ada", team: "Core" }];
+</script>
+
+<template>
+  <DataTable
+    :data="people"
+    :columns="[{ key: 'name', sortable: true }, { key: 'team' }]"
+    :row-key="(person) => person.id"
+    :features="[densityChooser()]"
+    :url-sync="false"
+  />
+</template>
+```
+
+## Kit components
+
+| Component            | Entry points      | Renders                                              |
+| -------------------- | ----------------- | ---------------------------------------------------- |
+| `NuxtEditableCell`   | `/editing`        | An editable cell with Nuxt UI inputs and selects.    |
+| `NuxtRowEditActions` | `/editing`        | Edit, save and cancel buttons for one row.           |
+| `NuxtBatchEditBar`   | `/editing`        | The unsaved-row count with Save all and Cancel all.  |
+| `NuxtFilterField`    | `/filters`        | A filter definition's field with the kit's controls. |
+| `NuxtHeaderFilter`   | `/header-filters` | A column header filter button and its popover.       |
+
+## Controls and styling
+
+- Visible controls are Nuxt UI components, styled by the host's Nuxt UI theme
+  and Tailwind build.
+- Command palette, context menu, side panel, saved views and row reordering
+  each come from their own feature entry with Nuxt UI surfaces.
+- `classNames` and `data-adapttable-part` attributes are the styling targets;
+  the package README lists each control and its target.
+
+The [Vue feature guide](./features.md) covers feature composition. The package
+README lists every feature entry point and its Nuxt UI control.
+
+---
+
+# Quasar Vue table
+
+`@adapttable/quasar` renders AdaptTable's Vue binding with Quasar controls. The
+binding owns state and feature behavior; Quasar supplies the interactive
+components.
+
+## Availability and versions
+
+The package is prepared for its first experimental `0.1.0` release and is not
+yet published to npm. Until it is, link the built workspace packages as
+described in [Get started with Vue](./getting-started.md).
+
+Peers: Vue `^3.5.0` and Quasar `2.34.0`. Node.js 22.12.0 or newer.
+
+## Application setup
+
+Register the Quasar plugin once and load both stylesheets in the application
+entry:
+
+```ts
+import { createApp } from "vue";
+import { Quasar } from "quasar";
+import "quasar/dist/quasar.css";
+import "@adapttable/quasar/styles.css";
+import App from "./App.vue";
+
+createApp(App).use(Quasar, { config: {} }).mount("#app");
+```
+
+A plain Vue/Vite application uses Quasar's official Vite plugin and asset
+transform configuration:
+
+```ts
+import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
+import vue from "@vitejs/plugin-vue";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [vue({ template: { transformAssetUrls } }), quasar()],
+});
+```
+
+```vue
+<script setup lang="ts">
+import { DataTable } from "@adapttable/quasar";
+import { filters } from "@adapttable/quasar/filters";
+
+interface Person {
+  id: string;
+  name: string;
+}
+
+const rows: Person[] = [{ id: "ada", name: "Ada" }];
+const features = [filters<Person>([{ key: "name", type: "text" }])];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="[{ key: 'name', header: 'Name', sortable: true }]"
+    :row-key="(row) => row.id"
+    :features="features"
+    :url-sync="false"
+  />
+</template>
+```
+
+## Kit components
+
+| Component              | Entry points                 | Renders                                              |
+| ---------------------- | ---------------------------- | ---------------------------------------------------- |
+| `QuasarEditableCell`   | `/editing`                   | An editable cell with Quasar inputs and selects.     |
+| `QuasarRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.           |
+| `QuasarBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.  |
+| `QuasarFilterField`    | `/filters`                   | A filter definition's field with the kit's controls. |
+| `QuasarHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.       |
+
+## Controls and styling
+
+- Visible controls are Quasar components; the package README's control table
+  names the Quasar component behind each part.
+- The `styles.css` export is a separate stylesheet, marked as a side effect so
+  bundlers retain its import.
+- `classNames` and `data-adapttable-part` attributes are the styling targets.
+
+The [Vue feature guide](./features.md) covers feature composition. The package
+README lists every feature entry point and its Quasar control.
+
+---
+
+# Reka UI Vue table
+
+`@adapttable/reka-ui` is a Vue data table with accessible Reka UI controls and a
+compact, neutral theme. AdaptTable owns the data models and interactions; the
+host owns the data. Reka provides real selection, choices, popovers, dialogs and
+menu primitives.
+
+## Availability and versions
+
+The package is prepared for its first experimental `0.1.0` release and is not
+yet published to npm. Until it is, link the built workspace packages as
+described in [Get started with Vue](./getting-started.md).
+
+Peers: Vue `^3.5.0` and Reka UI `^2.11.0`. Node.js 22.12.0 or newer.
+
+## Application setup
+
+Load the kit's stylesheet once:
+
+```vue
+<script setup lang="ts">
+import { DataTable, type ColumnInput } from "@adapttable/reka-ui";
+import { filters } from "@adapttable/reka-ui/filters";
+import "@adapttable/reka-ui/styles.css";
+
+interface Person {
+  id: string;
+  name: string;
+  team: string;
+}
+
+const rows: Person[] = [{ id: "ada", name: "Ada", team: "Engineering" }];
+const columns: readonly ColumnInput<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+];
+const features = [filters<Person>([{ key: "name", type: "text" }])];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :features="features"
+    :row-key="(row) => row.id"
+  />
+</template>
+```
+
+## Kit components
+
+| Component      | Entry points                   | Renders                                             |
+| -------------- | ------------------------------ | --------------------------------------------------- |
+| `FilterField`  | `/filters`, `/features`        | A filter definition's field with Reka controls.     |
+| `HeaderFilter` | `/header-filters`, `/features` | A column header filter button and its Reka popover. |
+
+## Controls and styling
+
+Reka does not supply a table or card widget, so the kit uses the binding's
+semantic table and card Chrome and fills its controls with Reka primitives:
+
+- Selection and Boolean fields: `CheckboxRoot` and `CheckboxIndicator`.
+- Choices: `SelectRoot`, `SelectTrigger`, `SelectContent` and related primitives.
+- Row action menus: `DropdownMenuRoot` with its trigger, portal, content and items.
+- Filter popovers: a non-modal `PopoverRoot`; filter drawers: a modal `DialogRoot`.
+- Plain buttons and text inputs: Reka `Primitive` with their native tags.
+
+The stylesheet provides custom properties including `--at-reka-background`,
+`--at-reka-border`, `--at-reka-text`, `--at-reka-muted` and `--at-reka-accent`.
+Portal surfaces carry `at-reka-surface`, `at-reka-select-content` and
+`at-reka-menu` classes so overrides reach content outside the table root. RTL
+uses logical spacing and Reka's direction provider.
+
+The [Vue feature guide](./features.md#reka-ui-feature-entries) lists the Reka
+feature entries and preset composition.
+
+---
+
+# shadcn-vue table
+
+`@adapttable/shadcn-vue` is shadcn-vue presentation for AdaptTable's headless
+Vue binding. Table state, feature lifetimes, query ownership and structural
+Chrome belong to `@adapttable/vue`; this package supplies copied, licensed
+shadcn-vue controls built on Reka UI.
+
+## Availability and versions
+
+The package is prepared for its first experimental `0.1.0` release and is not
+yet published to npm. Until it is, link the built workspace packages as
+described in [Get started with Vue](./getting-started.md).
+
+Peers: Vue `^3.5.0` and Reka UI `^2.11.0`. Node.js 22.12.0 or newer.
+
+## Application setup
+
+Import `@adapttable/shadcn-vue/styles.css` once. It ships compiled utilities
+without Tailwind Preflight, so consumers do not need a Tailwind build. The
+stylesheet reads the standard shadcn CSS tokens (`--background`, `--foreground`,
+`--primary`, `--border`, `--input` and `--ring`) with neutral fallbacks.
+
+```vue
+<script setup lang="ts">
+import { DataTable, type ColumnDef } from "@adapttable/shadcn-vue";
+import { densityChooser } from "@adapttable/shadcn-vue/density";
+import "@adapttable/shadcn-vue/styles.css";
+
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
+
+const data: readonly Person[] = [{ id: "ada", name: "Ada", score: 42 }];
+const columns: readonly ColumnDef<Person>[] = [
+  { key: "name", header: "Name", sortable: true },
+  { key: "score", header: "Score", sortable: true },
+];
+const features = [densityChooser()];
+</script>
+
+<template>
+  <DataTable
+    :data="data"
+    :columns="columns"
+    :row-key="(row) => row.id"
+    :features="features"
+    selectable
+  />
+</template>
+```
+
+## Kit components
+
+| Component                                   | Entry points                   | Renders                                                                       |
+| ------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `FilterField`                               | `/filters`, `/features`        | A filter field whose widget the registry chooses: custom, checklist or basic. |
+| `BasicFilterField`, `BasicFilterFieldProps` | `/filters`, `/features`        | A definition's built-in field, without the registry lookup.                   |
+| `FilterTree`                                | `/filters`, `/features`        | The AND/OR filter tree builder with shadcn controls.                          |
+| `FilterChips`, `FilterChipsProps`           | `/filters`, `/features`        | The active filter chips with remove and clear buttons.                        |
+| `HeaderFilter`, `HeaderFilterProps`         | `/header-filters`, `/features` | A column header filter button and its popover.                                |
+
+## Controls and styling
+
+- Desktop output is a semantic table; mobile output uses shadcn Card components
+  with article, definition-list and selection semantics.
+- The adapter vendors shadcn-vue's New York v4 registry; its components compose
+  Reka UI, and the upstream MIT license ships in `THIRD_PARTY_NOTICES.md`.
+- `classNames` are merged with the kit's presentation classes. Set `dir="rtl"`
+  for right-to-left layout or `forceMobile` for the card presentation.
+
+The [Vue feature guide](./features.md) covers feature composition. The package
+README lists every feature entry point and its shadcn-vue control.
+
+---
+
+# Vuetify Vue table
+
+`@adapttable/vuetify` renders AdaptTable's Vue binding with Vuetify controls.
+AdaptTable owns query state, feature lifetimes and structural Chrome; Vuetify
+supplies the buttons, fields, selects, checkboxes, menus and dialogs.
+
+## Availability and versions
+
+The package is prepared for its first experimental `0.1.0` release and is not
+yet published to npm. Until it is, link the built workspace packages as
+described in [Get started with Vue](./getting-started.md).
+
+Peers: Vue `^3.5.0` and Vuetify `^4.2.4`. Node.js 22.12.0 or newer.
+
+## Application setup
+
+Install and register the Vuetify plugin in the host application, and import
+Vuetify's base styles and the kit's stylesheet once:
+
+```ts
+import { createApp } from "vue";
+import { createVuetify } from "vuetify/framework";
+import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
+import "vuetify/styles";
+import "@adapttable/vuetify/styles.css";
+import App from "./App.vue";
+
+const vuetify = createVuetify({
+  icons: { defaultSet: "mdi", aliases, sets: { mdi } },
+});
+
+createApp(App).use(vuetify).mount("#app");
+```
+
+```vue
+<script setup lang="ts">
+import { DataTable, type ColumnDef } from "@adapttable/vuetify";
+
+interface Person {
+  id: string;
+  name: string;
+  team: string;
+}
+
+const people: readonly Person[] = [
+  { id: "ada", name: "Ada", team: "Platform" },
+  { id: "bea", name: "Bea", team: "Design" },
+];
+const columns: readonly ColumnDef<Person>[] = [
+  { key: "name", header: "Name", sortable: true },
+  { key: "team", header: "Team", sortable: true },
+];
+</script>
+
+<template>
+  <DataTable
+    :data="people"
+    :columns="columns"
+    :row-key="(person) => person.id"
+    :url-sync="false"
+  />
+</template>
+```
+
+## Kit components
+
+| Component               | Entry points                 | Renders                                              |
+| ----------------------- | ---------------------------- | ---------------------------------------------------- |
+| `VuetifyEditableCell`   | `/editing`                   | An editable cell with Vuetify fields and selects.    |
+| `VuetifyRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.           |
+| `VuetifyBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.  |
+| `VuetifyFilterField`    | `/filters`                   | A filter definition's field with the kit's controls. |
+| `VuetifyHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.       |
+
+## Controls and styling
+
+- Visible controls are Vuetify components; the package README's control
+  ownership section names the Vuetify component behind each part.
+- The host owns its Vuetify theme, icon set and locale configuration.
+- `classNames` and `data-adapttable-part` attributes are the styling targets.
+
+The [Vue feature guide](./features.md) covers feature composition. The package
+README lists every feature entry point and its Vuetify control.
 
 ---
 

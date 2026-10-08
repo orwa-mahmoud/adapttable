@@ -207,6 +207,13 @@ const {
 ## Experimental Vue docs
 
 - [Get started with Vue](https://adapttable.orwamahmoud.com/vue/getting-started/): experimental release availability, Vue 3.5 peers, native first table, reactive sources, controlled state and SSR boundaries
+- [Element Plus Vue table](https://adapttable.orwamahmoud.com/vue/element-plus/): Element Plus controls and card surfaces, setup, peers and kit components
+- [Naive UI Vue table](https://adapttable.orwamahmoud.com/vue/naive-ui/): Naive UI controls over semantic table primitives, setup, peers, renderers and kit components
+- [Nuxt UI Vue table](https://adapttable.orwamahmoud.com/vue/nuxt-ui/): Nuxt UI components and Tailwind theming, Vue and Nuxt setup, peers and kit components
+- [Quasar Vue table](https://adapttable.orwamahmoud.com/vue/quasar/): Quasar controls, plugin and Vite setup, peers and kit components
+- [Reka UI Vue table](https://adapttable.orwamahmoud.com/vue/reka-ui/): accessible Reka UI primitives with a neutral theme, setup, peers and kit components
+- [shadcn-vue table](https://adapttable.orwamahmoud.com/vue/shadcn-vue/): shadcn-vue presentation over Reka UI, standard shadcn tokens, setup and kit components
+- [Vuetify Vue table](https://adapttable.orwamahmoud.com/vue/vuetify/): Vuetify controls, plugin setup, peers and kit components
 - [Vue feature composition](https://adapttable.orwamahmoud.com/vue/features/): native import map, filter and editing contracts, grouped/tree/detail rows, layout and row features, required UI slots and URL/Saved Views boundaries
 - [Vue summaries and footers](https://adapttable.orwamahmoud.com/vue/summary-row/): source/page/grouped summary scope, per-column renderers, mobile cards, custom tableFooter content, and shared footer Chrome
 - [Experimental Vue API reference](https://adapttable.orwamahmoud.com/vue/api/): implemented source, renderer, native table, structural Chrome, lifecycle and custom-feature contracts; no full-parity claim
