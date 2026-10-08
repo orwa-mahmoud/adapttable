@@ -540,5 +540,15 @@
         "default": "./dist/preset.cjs"
       }
     }
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/vue/adapter-shadcn-vue"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://adapttable.orwamahmoud.com/vue/demo/shadcn-vue/"
 }

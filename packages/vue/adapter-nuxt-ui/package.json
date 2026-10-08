@@ -441,5 +441,6 @@
   "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "homepage": "https://adapttable.orwamahmoud.com/vue/demo/nuxt-ui/"
 }

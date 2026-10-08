@@ -441,5 +441,10 @@
   "types": "./dist/index.d.ts",
   "engines": {
     "node": ">=22.12.0"
-  }
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://adapttable.orwamahmoud.com/vue/demo/quasar/"
 }
