@@ -17,9 +17,23 @@ export const ANGULAR_ENTRIES = {
   stream: "stream/index.ts",
 };
 
+/** Named entries each entry may import; everything else is a forbidden edge. */
+const ALLOWED_EDGES = {
+  root: [],
+  features: ["root"],
+  adapter: ["root", "features"],
+  formula: ["root", "adapter"],
+  pivot: ["root", "adapter"],
+  router: ["root", "adapter"],
+  sparkline: ["root", "adapter"],
+  stream: ["root", "adapter"],
+};
+
+const OWNED_ENTRIES = ["root", "features", "adapter"];
+
 const binding = (repository) => join(repository, "packages/angular/angular");
 const routeFor = (entry) =>
-  `@adapttable/angular${entry === "root" ? "" : `/${entry}`}`;
+  entry === "root" ? "@adapttable/angular" : `@adapttable/angular/${entry}`;
 const entryFor = (specifier) =>
   Object.keys(ANGULAR_ENTRIES).find((entry) => routeFor(entry) === specifier);
 
@@ -37,61 +51,68 @@ export function angularOwnership(repository) {
   );
 }
 
-export function angularSourceOwnershipErrors(repository) {
+/** The package export and ng-packagr entry both point at the canonical source. */
+function entryTargetErrors(dir, manifest, entry, file) {
   const errors = [];
-  const expected = angularOwnership(repository);
-  const dir = binding(repository);
-  const manifest = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
-  for (const [entry, file] of Object.entries(ANGULAR_ENTRIES)) {
-    const key = entry === "root" ? "." : `./${entry}`;
-    const suffix = entry === "root" ? "" : `-${entry}`;
-    if (
-      manifest.exports[key]?.types !==
-        `./dist/types/adapttable-angular${suffix}.d.ts` ||
-      manifest.exports[key]?.default !==
-        `./dist/fesm2022/adapttable-angular${suffix}.mjs`
-    ) {
-      errors.push(`${key}: missing canonical package export targets`);
-    }
-    const entryDir = entry === "root" ? dir : join(dir, entry);
-    const pack = JSON.parse(
-      readFileSync(join(entryDir, "ng-package.json"), "utf8")
-    );
-    if (resolve(entryDir, pack.lib.entryFile) !== join(dir, file)) {
-      errors.push(
-        `${entry}: ng-packagr does not use the canonical source entry`
-      );
-    }
-    if (!(entry in expected)) continue;
-    const exports = sourceExports(readFileSync(join(dir, file), "utf8"));
-    if (exports.some((edge) => edge.names === "*")) {
-      errors.push(`${entry}: wildcard closure hides export ownership`);
-      continue;
-    }
-    const actual = exports.flatMap((edge) =>
-      edge.names.map((name) => name.name)
-    );
-    if (new Set(actual).size !== actual.length) {
-      errors.push(`${entry}: duplicate public names`);
-    }
-    for (const name of expected[entry]) {
-      if (!actual.includes(name)) errors.push(`${entry}: missing ${name}`);
-    }
-    for (const name of actual) {
-      if (!expected[entry].includes(name))
-        errors.push(`${entry}: unexpected ${name}`);
-    }
+  const key = entry === "root" ? "." : `./${entry}`;
+  const suffix = entry === "root" ? "" : `-${entry}`;
+  const target = manifest.exports[key];
+  if (
+    target?.types !== `./dist/types/adapttable-angular${suffix}.d.ts` ||
+    target?.default !== `./dist/fesm2022/adapttable-angular${suffix}.mjs`
+  ) {
+    errors.push(`${key}: missing canonical package export targets`);
+  }
+  const entryDir = entry === "root" ? dir : join(dir, entry);
+  const pack = JSON.parse(
+    readFileSync(join(entryDir, "ng-package.json"), "utf8")
+  );
+  if (resolve(entryDir, pack.lib.entryFile) !== join(dir, file)) {
+    errors.push(`${entry}: ng-packagr does not use the canonical source entry`);
   }
   return errors;
 }
 
-/** Includes type-only imports, as ng-packagr's source analysis does. */
-export function angularEntryGraphErrors(repository, overrides = new Map()) {
-  const dir = binding(repository);
+/** An entry's exported names match the reviewed list exactly. */
+function entryNameErrors(entry, source, expected) {
+  const exports = sourceExports(source);
+  if (exports.some((edge) => edge.names === "*")) {
+    return [`${entry}: wildcard closure hides export ownership`];
+  }
+  const actual = exports.flatMap((edge) => edge.names.map((name) => name.name));
   const errors = [];
-  const read = (file) => overrides.get(file) ?? readFileSync(file, "utf8");
+  if (new Set(actual).size !== actual.length) {
+    errors.push(`${entry}: duplicate public names`);
+  }
+  for (const name of expected) {
+    if (!actual.includes(name)) errors.push(`${entry}: missing ${name}`);
+  }
+  for (const name of actual) {
+    if (!expected.includes(name)) errors.push(`${entry}: unexpected ${name}`);
+  }
+  return errors;
+}
+
+export function angularSourceOwnershipErrors(repository) {
+  const expected = angularOwnership(repository);
+  const dir = binding(repository);
+  const manifest = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
+  return Object.entries(ANGULAR_ENTRIES).flatMap(([entry, file]) => [
+    ...entryTargetErrors(dir, manifest, entry, file),
+    ...(entry in expected
+      ? entryNameErrors(
+          entry,
+          readFileSync(join(dir, file), "utf8"),
+          expected[entry]
+        )
+      : []),
+  ]);
+}
+
+/** Which owned entry re-exports each relative source module. */
+function sourceOwners(dir, read, errors) {
   const owners = new Map();
-  for (const entry of ["root", "features", "adapter"]) {
+  for (const entry of OWNED_ENTRIES) {
     const file = join(dir, ANGULAR_ENTRIES[entry]);
     for (const edge of sourceExports(read(file))) {
       if (!edge.from?.startsWith(".")) continue;
@@ -102,74 +123,96 @@ export function angularEntryGraphErrors(repository, overrides = new Map()) {
       owners.set(source, entry);
     }
   }
-  const allowed = {
-    root: [],
-    features: ["root"],
-    adapter: ["root", "features"],
-    formula: ["root", "adapter"],
-    pivot: ["root", "adapter"],
-    router: ["root", "adapter"],
-    sparkline: ["root", "adapter"],
-    stream: ["root", "adapter"],
-  };
-  for (const [entry, source] of Object.entries(ANGULAR_ENTRIES)) {
-    const seen = new Set();
-    const visit = (file) => {
-      if (seen.has(file)) return;
-      seen.add(file);
-      const text = read(file);
-      for (const imported of ts.preProcessFile(text, true, true)
-        .importedFiles) {
-        const target = entryFor(imported.fileName);
-        if (target) {
-          if (!allowed[entry].includes(target)) {
-            errors.push(
-              `${entry}: forbidden named edge to ${target} in ${file}`
-            );
-          }
-          continue;
-        }
-        if (!imported.fileName.startsWith(".")) continue;
-        const next = relativeSource(file, imported.fileName);
-        if (!next) {
-          errors.push(`${file}: unresolved ${imported.fileName}`);
-          continue;
-        }
-        const owner = owners.get(next);
-        if (owner && owner !== entry) {
-          errors.push(
-            `${entry}: relative cross-entry edge to ${owner} in ${file}`
-          );
-          continue;
-        }
-        visit(next);
-      }
-      if (entry !== "adapter") return;
-      const ast = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
-      for (const statement of ast.statements) {
-        if (
-          !ts.isImportDeclaration(statement) ||
-          statement.moduleSpecifier.text !== "@adapttable/angular/features"
-        )
-          continue;
-        const clause = statement.importClause;
-        const names = clause?.namedBindings;
-        if (
-          clause &&
-          !clause.isTypeOnly &&
-          (!names ||
-            !ts.isNamedImports(names) ||
-            names.elements.some((name) => !name.isTypeOnly))
-        ) {
-          errors.push(
-            `${file}: adapter has a runtime dependency on feature factories`
-          );
-        }
-      }
-    };
-    visit(join(dir, source));
+  return owners;
+}
+
+/** The adapter entry may name feature types, never feature runtime values. */
+function adapterFeatureImportErrors(file, text) {
+  const ast = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
+  return ast.statements
+    .filter(
+      (statement) =>
+        ts.isImportDeclaration(statement) &&
+        statement.moduleSpecifier.text === "@adapttable/angular/features" &&
+        importsRuntimeValue(statement.importClause)
+    )
+    .map(
+      () => `${file}: adapter has a runtime dependency on feature factories`
+    );
+}
+
+function importsRuntimeValue(clause) {
+  if (!clause || clause.isTypeOnly) return false;
+  const names = clause.namedBindings;
+  if (!names || !ts.isNamedImports(names)) return true;
+  return names.elements.some((name) => !name.isTypeOnly);
+}
+
+/** Walks one entry's relative import closure, reporting forbidden edges. */
+function entryClosureErrors(entry, start, owners, read) {
+  const errors = [];
+  const seen = new Set();
+  const pending = [start];
+  while (pending.length > 0) {
+    const file = pending.pop();
+    if (seen.has(file)) continue;
+    seen.add(file);
+    const text = read(file);
+    for (const imported of ts.preProcessFile(text, true, true).importedFiles) {
+      const next = importEdge(entry, file, imported.fileName, owners, errors);
+      if (next) pending.push(next);
+    }
+    if (entry === "adapter") {
+      errors.push(...adapterFeatureImportErrors(file, text));
+    }
   }
   return errors;
+}
+
+/** Classifies one import; returns the next file to visit when it stays in the entry. */
+function importEdge(entry, file, specifier, owners, errors) {
+  const target = entryFor(specifier);
+  if (target) {
+    if (!ALLOWED_EDGES[entry].includes(target)) {
+      errors.push(`${entry}: forbidden named edge to ${target} in ${file}`);
+    }
+    return undefined;
+  }
+  if (!specifier.startsWith(".")) return undefined;
+  const next = relativeSource(file, specifier);
+  if (!next) {
+    errors.push(`${file}: unresolved ${specifier}`);
+    return undefined;
+  }
+  const owner = owners.get(next);
+  if (owner && owner !== entry) {
+    errors.push(`${entry}: relative cross-entry edge to ${owner} in ${file}`);
+    return undefined;
+  }
+  return next;
+}
+
+/** Includes type-only imports, as ng-packagr's source analysis does. */
+export function angularEntryGraphErrors(repository, overrides = new Map()) {
+  const dir = binding(repository);
+  const errors = [];
+  const read = (file) => overrides.get(file) ?? readFileSync(file, "utf8");
+  const owners = sourceOwners(dir, read, errors);
+  for (const [entry, source] of Object.entries(ANGULAR_ENTRIES)) {
+    errors.push(...entryClosureErrors(entry, join(dir, source), owners, read));
+  }
+  return errors;
+}
+
+/** The named import or export elements of a statement, or none. */
+function namedElements(statement) {
+  const names = ts.isImportDeclaration(statement)
+    ? statement.importClause?.namedBindings
+    : statement.exportClause;
+  if (!names || (!ts.isNamedImports(names) && !ts.isNamedExports(names))) {
+    return [];
+  }
+  return names.elements;
 }
 
 /** Mixed, renamed, type-only imports and re-exports all retain their owner. */
@@ -193,13 +236,8 @@ export function angularConsumerOwnershipErrors(text, ownership) {
     )
       continue;
     const entry = entryFor(statement.moduleSpecifier?.text);
-    if (!entry || !["root", "features", "adapter"].includes(entry)) continue;
-    const names = ts.isImportDeclaration(statement)
-      ? statement.importClause?.namedBindings
-      : statement.exportClause;
-    if (!names || (!ts.isNamedImports(names) && !ts.isNamedExports(names)))
-      continue;
-    for (const element of names.elements) {
+    if (!OWNED_ENTRIES.includes(entry)) continue;
+    for (const element of namedElements(statement)) {
       const name = element.propertyName?.text ?? element.name.text;
       const owner = expected.get(name);
       if (owner && owner !== entry) {

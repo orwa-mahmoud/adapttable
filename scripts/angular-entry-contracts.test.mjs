@@ -148,17 +148,19 @@ describe("Angular canonical entries", () => {
     const original = host.getSourceFile.bind(host);
     const fileExists = host.fileExists.bind(host);
     host.fileExists = (name) => name === lookalike || fileExists(name);
+    const overrides = new Map([
+      [file, text],
+      [lookalike, copy],
+    ]);
     host.getSourceFile = (
       name,
       languageVersion,
       onError,
       shouldCreateNewSourceFile
     ) =>
-      name === file
-        ? ts.createSourceFile(name, text, languageVersion, true)
-        : name === lookalike
-          ? ts.createSourceFile(name, copy, languageVersion, true)
-          : original(name, languageVersion, onError, shouldCreateNewSourceFile);
+      overrides.has(name)
+        ? ts.createSourceFile(name, overrides.get(name), languageVersion, true)
+        : original(name, languageVersion, onError, shouldCreateNewSourceFile);
     const program = ts.createProgram([file], parsed.options, host);
     assert.deepEqual(
       canonicalAliasErrors(program, program.getSourceFile(file), pairs),

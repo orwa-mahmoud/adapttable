@@ -19,9 +19,14 @@ export const FOCUSED_FACTORIES = {
   fullscreen: "fullscreen",
 };
 
+/** TypeScript symbol flags are a bitmask, including composite flags. */
+function isAliasSymbol(symbol) {
+  return (symbol.flags & ts.SymbolFlags.Alias) !== 0;
+}
+
 function unalias(checker, symbol) {
   const seen = new Set();
-  while (symbol?.flags & ts.SymbolFlags.Alias) {
+  while (symbol && isAliasSymbol(symbol)) {
     if (seen.has(symbol)) return undefined;
     seen.add(symbol);
     symbol = checker.getAliasedSymbol(symbol);

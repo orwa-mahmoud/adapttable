@@ -169,34 +169,37 @@ export function runtimeSourceNames(text) {
     ts.ScriptTarget.Latest,
     true
   );
-  const names = new Set();
-  for (const statement of source.statements) {
-    if (ts.isExportDeclaration(statement)) {
-      assert.ok(
-        statement.exportClause && ts.isNamedExports(statement.exportClause)
-      );
-      for (const item of statement.exportClause.elements)
-        if (!statement.isTypeOnly && !item.isTypeOnly)
-          names.add(item.name.text);
-    } else if (
-      statement.modifiers?.some(
-        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
-      )
-    ) {
-      if (
-        ts.isFunctionDeclaration(statement) ||
-        ts.isClassDeclaration(statement) ||
-        ts.isEnumDeclaration(statement)
-      )
-        names.add(statement.name.text);
-      else if (ts.isVariableStatement(statement))
-        for (const declaration of statement.declarationList.declarations) {
-          assert.ok(ts.isIdentifier(declaration.name));
-          names.add(declaration.name.text);
-        }
-    }
-  }
+  const names = new Set(source.statements.flatMap(runtimeStatementNames));
   return [...names].sort();
+}
+
+/** Runtime names one top-level statement exports; type-only exports carry none. */
+function runtimeStatementNames(statement) {
+  if (ts.isExportDeclaration(statement)) {
+    assert.ok(
+      statement.exportClause && ts.isNamedExports(statement.exportClause)
+    );
+    if (statement.isTypeOnly) return [];
+    return statement.exportClause.elements
+      .filter((item) => !item.isTypeOnly)
+      .map((item) => item.name.text);
+  }
+  const exported = statement.modifiers?.some(
+    (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+  );
+  if (!exported) return [];
+  if (
+    ts.isFunctionDeclaration(statement) ||
+    ts.isClassDeclaration(statement) ||
+    ts.isEnumDeclaration(statement)
+  ) {
+    return [statement.name.text];
+  }
+  if (!ts.isVariableStatement(statement)) return [];
+  return statement.declarationList.declarations.map((declaration) => {
+    assert.ok(ts.isIdentifier(declaration.name));
+    return declaration.name.text;
+  });
 }
 
 /** TypeScript symbol flags are a bitmask, including possible composite flags. */

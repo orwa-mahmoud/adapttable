@@ -74,7 +74,7 @@ for (const cell of ["source", "built"]) {
     value.testResults[0].assertionResults.push(passed("another scenario"));
     value.testResults.push(result("other.test.ts", ["another module"]));
     value.numTotalTests += 2;
-    assertVueRuntimeCases(value, root, cell);
+    assert.doesNotThrow(() => assertVueRuntimeCases(value, root, cell));
   });
 
   test(`${cell}: rejects unsuccessful, empty or malformed reports`, () => {
@@ -178,12 +178,16 @@ const completed = () =>
   );
 
 test("requires four cells with their selected roots and versions", () => {
-  assertVueRuntimeCells(completed(), peers);
-  assertVueRuntimeCells(completed().reverse(), peers);
+  assert.doesNotThrow(() => assertVueRuntimeCells(completed(), peers));
+  assert.doesNotThrow(() =>
+    assertVueRuntimeCells(completed().reverse(), peers)
+  );
   const sameVersion = peers.map((peer) => ({ ...peer, version: "3.5.0" }));
-  assertVueRuntimeCells(
-    completed().map((cell) => ({ ...cell, version: "3.5.0" })),
-    sameVersion
+  assert.doesNotThrow(() =>
+    assertVueRuntimeCells(
+      completed().map((cell) => ({ ...cell, version: "3.5.0" })),
+      sameVersion
+    )
   );
 });
 

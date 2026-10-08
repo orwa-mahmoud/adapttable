@@ -213,12 +213,11 @@ function chromeFixture(target, mode, importTypeSlot = false) {
   );
   const imports = Object.keys(chromeContracts).flatMap((name) => {
     if (name === target && mode === "local") return [chromeContracts[name]];
-    const origin =
-      name === target && mode === "private"
-        ? "./private.js"
-        : name === target && mode === "wrong-origin"
-          ? "./other.js"
-          : "./adapter.js";
+    const targetOrigins = {
+      private: "./private.js",
+      "wrong-origin": "./other.js",
+    };
+    const origin = (name === target && targetOrigins[mode]) || "./adapter.js";
     return [`import type { ${name} } from "${origin}";`];
   });
   if (mode === "slot-private")
@@ -231,11 +230,20 @@ function chromeFixture(target, mode, importTypeSlot = false) {
     "export function FullscreenButtonChrome(props: FullscreenControlProps & { readonly slots: { readonly Button: (props: ViewControlButtonProps) => string } }): string { return 'fullscreen'; }",
   ].join("\n");
   if (mode === "opaque") declarations = declarations.replace(target, "unknown");
+  const slotKey = importTypeSlot
+    ? 'import("@adapttable/vue").FeatureSlotKey'
+    : "SlotKey";
+  const targetSlotProps = {
+    "slot-private": "PrivateSlotProps",
+    "slot-opaque": "unknown",
+  };
   for (const [value, props] of [
     ["DENSITY_CONTROL", "DensityControlProps"],
     ["FULLSCREEN_CONTROL", "FullscreenControlProps"],
-  ])
-    declarations += `\nexport declare const ${value}: ${importTypeSlot ? 'import("@adapttable/vue").FeatureSlotKey' : "SlotKey"}<${mode === "slot-private" && props === target ? "PrivateSlotProps" : mode === "slot-opaque" && props === target ? "unknown" : props}>;`;
+  ]) {
+    const slotProps = (props === target && targetSlotProps[mode]) || props;
+    declarations += `\nexport declare const ${value}: ${slotKey}<${slotProps}>;`;
+  }
   writeFileSync(
     join(root, "chrome.ts"),
     imports.join("\n") + "\n" + declarations
