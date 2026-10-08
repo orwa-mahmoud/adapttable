@@ -19,7 +19,6 @@ export type {
 } from "./columnDef";
 export type { ColumnLayout, ColumnLayoutOptions } from "./columns/columnLayout";
 export type { DirtyEdits, TableEditingOptions } from "./editing/editingModels";
-export type { FeatureState } from "./featureState";
 export type {
   ComposedFeature,
   FeatureMountContext,
@@ -28,6 +27,7 @@ export type {
   TableFeature,
   TableFeatureHost,
 } from "./features/tableFeature";
+export type { FeatureState } from "./featureState";
 export type {
   GroupRowModel,
   RowDetailModel,
