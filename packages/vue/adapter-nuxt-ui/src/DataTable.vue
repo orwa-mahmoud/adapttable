@@ -13,7 +13,6 @@ import {
   FULLSCREEN_MODEL,
   GROUP_ROW,
   groupRowSlotKey,
-  mergeVueAttrs,
   provideDataTableClassNames,
   renderFeatureSlot,
   type TableChromeSlots,
@@ -33,6 +32,7 @@ import NuxtButton from "./controls/NuxtButton.vue";
 import { provideNuxtPortalContainer } from "./controls/portalContext";
 import { nuxtSelection } from "./controls/selection";
 import { provideNuxtDensity } from "./densityContext";
+import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { nuxtSurface } from "./surface";
 
 defineOptions({ inheritAttrs: false });
@@ -116,20 +116,22 @@ function controls(): TableChromeSlots<TRow> {
       h(NuxtButton, { attrs }, () =>
         h("span", { "aria-hidden": "true" }, expanded ? "−" : "+")
       ),
-    RowActions: ({ controls: actions }) =>
-      actions.map((action) =>
-        h(
-          NuxtButton,
-          {
-            key: action.key,
-            attrs: mergeVueAttrs(action.attrs, {
-              class: [names.value.actionButton, names.value.rowAction],
-              onClick: (event: MouseEvent) => event.stopPropagation(),
-            }),
-          },
-          () => action.label
-        )
-      ),
+    RowActions: ({ controls: actions }) => {
+      if (!shell.slotFills.value.get(ROW_ACTIONS_CONTROL.id)?.length)
+        throw new Error(
+          "AdaptTable: Nuxt UI row actions require rowActions() or rowPinning() from @adapttable/nuxt-ui."
+        );
+      return renderFeatureSlot(
+        rowActionsControlKey<TRow>(),
+        shell.slotFills.value,
+        {
+          controls: actions,
+          layout: props.rowActionsLayout,
+          label: shell.table.labels.value.rowActionsMenu,
+          classNames: names.value,
+        }
+      );
+    },
     GroupRow: (control) => {
       if (!shell.slotFills.value.get(GROUP_ROW.id)?.length)
         throw new Error(

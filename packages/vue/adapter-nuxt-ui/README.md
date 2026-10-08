@@ -289,7 +289,10 @@ layout and expansion changes remain requests until the host accepts them.
 
 `@adapttable/nuxt-ui/rows` exposes `rowActions`, `rowAppearance`, `rowPinning`,
 `extraRows`, `pinnedSummaryRows` and `cellSpan`, also available through dedicated
-entries. Row callbacks receive the original records. Summary and extra rows do
+entries. Set `rowActionsLayout` to `"menu"` to gather a row's actions and pin
+controls behind one trigger in a Nuxt UI popover menu with arrow-key
+navigation; the default renders inline Nuxt buttons. Row callbacks receive the
+original records. Summary and extra rows do
 not become selectable records. Mobile cards retain all field values when a
 desktop cell span would cover another row.
 
