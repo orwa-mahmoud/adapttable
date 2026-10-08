@@ -273,7 +273,21 @@ export function createAttributeFlow(sources, resolveFunction) {
     left &&
     left.pos === right.pos &&
     left.getSourceFile().fileName === right.getSourceFile().fileName;
-  function parameterInput(identifier, seen) {
+  // Which function each call reaches never changes, and parameterInput asks it
+  // of every call for every parameter it traces, so resolve each call once. A
+  // call whose resolution leads back to itself resolves to nothing.
+  const callTargets = new Map();
+  const RESOLVING = Symbol("resolving");
+  function callTarget(call) {
+    const known = callTargets.get(call);
+    if (known === RESOLVING) return undefined;
+    if (callTargets.has(call)) return known;
+    callTargets.set(call, RESOLVING);
+    const target = callee(call.expression);
+    callTargets.set(call, target);
+    return target;
+  }
+  function parameterInput(identifier) {
     let owner = identifier.parent;
     while (owner) {
       if (ts.isFunctionLike(owner)) {
@@ -282,9 +296,7 @@ export function createAttributeFlow(sources, resolveFunction) {
         );
         if (index >= 0) {
           const argumentsAtCalls = calls
-            .filter((call) =>
-              sameFunction(callee(call.expression, seen), owner)
-            )
+            .filter((call) => sameFunction(callTarget(call), owner))
             .map((call) => call.arguments[index]);
           return argumentsAtCalls.length === 1
             ? argumentsAtCalls[0]
@@ -302,8 +314,7 @@ export function createAttributeFlow(sources, resolveFunction) {
     if (ts.isObjectLiteralExpression(expression)) return [expression];
     if (ts.isIdentifier(expression)) {
       const value =
-        localValue(expression, expression.text) ??
-        parameterInput(expression, next);
+        localValue(expression, expression.text) ?? parameterInput(expression);
       return objectRecords(value, next);
     }
     if (ts.isCallExpression(expression)) {
