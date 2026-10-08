@@ -2,7 +2,10 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
+  mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   symlinkSync,
@@ -58,14 +61,72 @@ function documentedExamples() {
   );
 }
 
+const VUE_PACKAGES = join(REPO_ROOT, "packages/vue");
+
+/** Every Vue kit package: its published name and source folder. */
+function vueKits() {
+  return readdirSync(VUE_PACKAGES)
+    .filter((dir) => dir.startsWith("adapter-"))
+    .sort()
+    .map((dir) => ({
+      name: JSON.parse(
+        readFileSync(join(VUE_PACKAGES, dir, "package.json"), "utf8")
+      ).name,
+      src: join(VUE_PACKAGES, dir, "src"),
+    }));
+}
+
+/**
+ * One flat `node_modules`, as an application installs it: the binding's, every
+ * kit's and the workspace root's dependencies, the first of each name winning.
+ */
+function linkAppDependencies(target) {
+  const sources = [
+    join(VUE_PACKAGES, "vue/node_modules"),
+    ...vueKits().map(({ src }) => join(src, "../node_modules")),
+    join(REPO_ROOT, "node_modules"),
+  ].filter((dir) => existsSync(dir));
+  mkdirSync(target);
+  const link = (from, to) => {
+    if (!existsSync(to)) symlinkSync(from, to, "junction");
+  };
+  for (const source of sources) {
+    for (const entry of readdirSync(source)) {
+      if (entry.startsWith(".")) continue;
+      if (!entry.startsWith("@")) {
+        link(join(source, entry), join(target, entry));
+        continue;
+      }
+      mkdirSync(join(target, entry), { recursive: true });
+      for (const scoped of readdirSync(join(source, entry)))
+        link(join(source, entry, scoped), join(target, entry, scoped));
+    }
+  }
+}
+
+/** Source paths for every Vue kit, its root entry and each feature entry. */
+function kitPaths() {
+  return Object.fromEntries(
+    vueKits().flatMap(({ name, src }) => [
+      [name, [join(src, "index.ts")]],
+      [`${name}/*`, [join(src, "*.ts")]],
+    ])
+  );
+}
+
+/** The application files a setup example imports beside itself. */
+const APP_FILES = {
+  "App.vue": "<template><div /></template>\n",
+  "main.css": "",
+};
+
 function compileExamples(examples) {
   const scratch = mkdtempSync(join(tmpdir(), "adapttable-vue-docs-"));
   try {
-    symlinkSync(
-      join(REPO_ROOT, "packages/vue/vue/node_modules"),
-      join(scratch, "node_modules"),
-      "junction"
-    );
+    linkAppDependencies(join(scratch, "node_modules"));
+    for (const [file, source] of Object.entries(APP_FILES))
+      if (!examples.some((example) => example.file === file))
+        writeFileSync(join(scratch, file), source);
     for (const { file, source } of examples) {
       writeFileSync(join(scratch, file), source);
     }
@@ -78,7 +139,14 @@ function compileExamples(examples) {
           skipLibCheck: false,
           jsx: "preserve",
           jsxImportSource: "vue",
+          types: ["vite/client"],
           paths: {
+            ...kitPaths(),
+            // Nuxt UI's Vite plugin generates its theme types where the kit's
+            // own tsconfig maps them.
+            "#build/ui/*": [
+              join(VUE_PACKAGES, "adapter-nuxt-ui/node_modules/.nuxt-ui/ui/*"),
+            ],
             vue: [join(REPO_ROOT, "packages/vue/vue/node_modules/vue")],
             "@adapttable/core": [
               join(REPO_ROOT, "packages/shared/core/src/index.ts"),
@@ -87,9 +155,6 @@ function compileExamples(examples) {
               join(REPO_ROOT, "packages/shared/core/src/*.ts"),
             ],
             "@adapttable/vue/*": [join(REPO_ROOT, "packages/vue/vue/src/*.ts")],
-            "@adapttable/vue-unstyled/*": [
-              join(REPO_ROOT, "packages/vue/adapter-vue-unstyled/src/*.ts"),
-            ],
             "@adapttable/vue": [
               join(REPO_ROOT, "packages/vue/vue/src/index.ts"),
             ],
@@ -98,9 +163,6 @@ function compileExamples(examples) {
             ],
             "@adapttable/vue/features": [
               join(REPO_ROOT, "packages/vue/vue/src/features.ts"),
-            ],
-            "@adapttable/vue-unstyled": [
-              join(REPO_ROOT, "packages/vue/adapter-vue-unstyled/src/index.ts"),
             ],
             // Resolve the complete optional assistant graph from source so a
             // cold checkout needs no neutral AI build to check these examples.
