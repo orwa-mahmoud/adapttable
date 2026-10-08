@@ -109,9 +109,22 @@ function declarationsIn(source) {
 }
 
 /** Runtime references exclude comments, import declarations and type positions. */
+/**
+ * `Component<TRow>` in expression position is an instantiation expression:
+ * TypeScript files it as a type node, but it names the component value.
+ */
+function instantiatedValue(node) {
+  return ts.isExpressionWithTypeArguments(node) &&
+    !ts.isHeritageClause(node.parent)
+    ? node.expression
+    : undefined;
+}
+
 function referencesIn(node) {
   const names = new Set();
   function visit(child) {
+    const value = instantiatedValue(child);
+    if (value) return visit(value);
     if (ts.isTypeNode(child) || ts.isImportDeclaration(child)) return;
     if (ts.isIdentifier(child)) names.add(child.text);
     ts.forEachChild(child, visit);
@@ -128,15 +141,20 @@ function directCalls(source, imports) {
       .map(([local]) => local)
   );
   function visit(node) {
+    const value = instantiatedValue(node);
+    if (value) return visit(value);
     if (ts.isTypeNode(node) || ts.isImportDeclaration(node)) return;
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       names.add(node.expression.text);
+      const component =
+        node.arguments[0] &&
+        (instantiatedValue(node.arguments[0]) ?? node.arguments[0]);
       if (
         hNames.has(node.expression.text) &&
-        node.arguments[0] &&
-        ts.isIdentifier(node.arguments[0])
+        component &&
+        ts.isIdentifier(component)
       )
-        names.add(node.arguments[0].text);
+        names.add(component.text);
     }
     ts.forEachChild(node, visit);
   }
@@ -281,7 +299,9 @@ export function vueBindingSources(files, root) {
       if (exported) follow(exported.file, exported.node);
     }
   }
-  return [...found.values()];
+  // The binding's location travels with its sources so attribute flow can
+  // follow a kit's package-entry imports (`@adapttable/vue/adapter`) as well.
+  return Object.assign([...found.values()], { binding, packageName });
 }
 
 function attributeFlow(sources) {
@@ -290,7 +310,10 @@ function attributeFlow(sources) {
     const file = identifier.getSourceFile().fileName;
     const imported = moduleInfo(file, cache).imports.get(identifier.text);
     if (!imported) return undefined;
-    const target = relativeSource(file, imported.module);
+    const target =
+      relativeSource(file, imported.module) ??
+      (sources.binding &&
+        entrySource(imported.module, sources.binding, sources.packageName));
     const found = target && exportNode(target, imported.name, cache);
     return found?.node;
   });
@@ -318,6 +341,24 @@ function renderedProps(sources, element) {
     visit(node);
   }
   return found;
+}
+
+/**
+ * A kit's own modules together with the binding sources they reach. A kit that
+ * renders its own rows forwards the binding's row attrs from its own files, so
+ * an analysis of that forwarding has to read both.
+ */
+export function vueKitWithBindingSources(files, root) {
+  const binding = vueBindingSources(files, root);
+  const cache = new Map();
+  const own = files.map((file) => {
+    const { source } = moduleInfo(file, cache);
+    return { file, node: source, sourceFile: source, source: source.text };
+  });
+  return Object.assign([...own, ...binding], {
+    binding: binding.binding,
+    packageName: binding.packageName,
+  });
 }
 
 /**

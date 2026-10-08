@@ -45,6 +45,7 @@ function fixture({
   structure = STRUCTURE,
   model = MODEL,
   adapter = 'export { Desktop } from "./structure"; export { useModel } from "./model";',
+  kitModules = {},
 } = {}) {
   const root = mkdtempSync(join(tmpdir(), "vue-structure-"));
   roots.push(root);
@@ -83,6 +84,8 @@ function fixture({
     "export function mergeVueAttrs(...attrs) { return Object.assign({}, ...attrs); }"
   );
   write(root, `packages/vue/${KIT.name}/src/DataTable.vue`, table);
+  for (const [file, source] of Object.entries(kitModules))
+    write(root, `packages/vue/${KIT.name}/src/${file}`, source);
   return root;
 }
 const parts = (root, contract) =>
@@ -268,6 +271,53 @@ const model = useModel();
     });
     assert(
       features(header).some((problem) => problem.includes("never passes"))
+    );
+  });
+
+  it("follows an instantiated component in a render function", () => {
+    assert.deepEqual(
+      parts(
+        fixture({
+          table: TABLE.replace(
+            "const model = useModel();",
+            'import { h } from "vue";\nconst model = useModel();\nexport const View = () => h(Frame<{ id: string }>, { model });'
+          ).replace('<Frame :model="model" />', ""),
+        })
+      ),
+      []
+    );
+  });
+
+  it("credits a kit that forwards the binding's row attrs on its own rows", () => {
+    const kitRows = (attrs) => ({
+      "rows.ts": `import { h } from "vue";
+import { mergeVueAttrs, useModel } from "@adapttable/vue/adapter";
+export function KitRows() {
+  const model = useModel();
+  return model.rows.map((row) => h("tr", { ...${attrs}, key: "k" }));
+}`,
+    });
+    const structure = STRUCTURE.replace(
+      'h("tr", mergeVueAttrs(entry.attrs, {}), ',
+      'h("tr", {}, '
+    );
+    const adapter =
+      'export { Desktop } from "./structure"; export { useModel } from "./model"; export { mergeVueAttrs } from "./attrs";';
+    assert.deepEqual(
+      parts(
+        fixture({
+          structure,
+          adapter,
+          kitModules: kitRows('mergeVueAttrs(row.attrs, { class: "r" })'),
+        })
+      ),
+      []
+    );
+    assert(
+      parts(
+        fixture({ structure, adapter, kitModules: kitRows('{ class: "r" }') })
+      ).some((problem) => problem.startsWith(`row — ${KIT.name}:`)),
+      "rows that drop the binding's attrs keep the gap visible"
     );
   });
 

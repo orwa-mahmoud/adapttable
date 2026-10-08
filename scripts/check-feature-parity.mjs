@@ -37,8 +37,8 @@ import {
 } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
 import {
-  vueBindingSources,
   vueForwardsAttributeApi,
+  vueKitWithBindingSources,
 } from "./vue-binding-structure.mjs";
 
 /** `/preset` ships on every kit but is not a feature entry in the manifest. */
@@ -287,7 +287,7 @@ function fileProblems(kit, kits, root) {
   }
   if (rule?.assembly?.(code, kit, root)) passesHeaderProps = true;
   if (kit.framework === "vue") {
-    const inherited = vueBindingSources(files, root);
+    const inherited = vueKitWithBindingSources(files, root);
     if (vueForwardsAttributeApi(inherited, "th", "headerCellAttributes"))
       passesHeaderProps = true;
   }
