@@ -3,10 +3,19 @@
 These packages are experimental and unreleased. Use a checkout or built workspace
 packages until they are available on npm.
 
-The Vue Unstyled adapter provides native controls for grouping configuration,
-row reordering and pivot configuration. The optional Vue entries use the same
+Every Vue adapter provides kit-owned grouping configuration and row-reordering
+controls, plus the shared virtualization feature. Unstyled, Reka UI and shadcn-vue
+also export a controlled `PivotPanel`; the other styled adapters leave pivot
+configuration controls to the host. Optional Vue entries use the same
 framework-neutral formula, pivot, stream, sparkline, reorder and virtualization
 models as the other bindings.
+
+The examples below use Unstyled. For another kit, import `groupingPanel`,
+`rowReorder` and `virtualize` from that adapter's corresponding focused entries.
+Use `@adapttable/vue/pivot`, `/formula`, `/sparkline` and `/stream` for shared data
+helpers. Reka UI and shadcn-vue also forward formula, sparkline and stream helpers
+through their matching kit entries; other kits do not need to export aliases
+to render those results.
 
 ## Rows and columns in a window
 
@@ -39,7 +48,7 @@ to replace its array. The controls never mutate the host's rows.
 Desktop handles support pointer drag and Space/arrow/Space keyboard moves. Mobile
 cards offer native move-up/down buttons. A nested destination menu supports group
 and tree moves under the neutral move policy. The default cross-boundary policy
-is `never`; `confirm` opens a native confirmation dialog unless the host supplies
+is `never`; `confirm` opens the adapter's confirmation dialog unless the host supplies
 its own confirmation callback. The dialog focuses Cancel, Escape cancels the
 decision, and completion returns focus to the live destination control. `onGroupMove` and `onTreeMove` own the resulting
 writes. Pending asynchronous decisions and retained controls are canceled when
@@ -78,6 +87,28 @@ that last field to `pinnedSummaryRows` when composing the rendered table.
 slice. Adjacent configuration/collapse updates preserve each other. Changing the
 adapter or namespace replaces the subscription rather than borrowing another
 table's state. Saved Views may capture this same URL slice.
+
+### Styled pivot and reorder surfaces
+
+Import `PivotPanel` from `@adapttable/reka-ui/pivot` or
+`@adapttable/shadcn-vue/pivot` for those kits' controls. Pass `fields`, the current
+`config` and `onChange(next)`, plus optional labels and a class name. Accept a
+change by passing the new configuration back. Build the data with
+`pivotTableModel` from `@adapttable/vue/pivot`; the configuration panel does not
+own a second pivot model.
+
+For Element Plus, Vuetify, Naive UI, Nuxt UI and Quasar, prepare the same pivot
+rows and columns in the binding and render them with the chosen `DataTable`.
+Compose configuration controls in the host, or fill `PivotPanelChrome`'s required
+slots with that kit. No kit-specific `/pivot` export is implied.
+
+Row-reorder controls share the move policy and current row identities, while
+menus and confirmations remain native to the adapter. Desktop drag and keyboard
+handles and mobile up/down buttons invoke the same host write contract. Group
+and tree moves additionally need their corresponding host callbacks. Direction,
+localized move announcements, fullscreen overlays and owner teardown are part of
+the shared interaction contract; rendering a server component never starts a
+pointer session or measurement observer.
 
 ## Formulas, streams and sparklines
 

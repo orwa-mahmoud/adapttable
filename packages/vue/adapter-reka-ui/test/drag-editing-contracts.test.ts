@@ -304,7 +304,7 @@ it("closes a compact multiple-choice header menu when the host requests close-on
   await key(item, "Enter");
   expect(extra.value.team).toEqual(["Core"]);
   expect(document.querySelector('[role="menu"]')).toBeNull();
-  expect(document.activeElement).toBe(trigger);
+  await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
 });
 it("changes density in both directions using the table's current controlled value", async () => {
   const density = shallowRef<"comfortable" | "compact">("comfortable");

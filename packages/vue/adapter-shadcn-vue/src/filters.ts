@@ -53,7 +53,9 @@ export { FilterField } from "./filters/FilterField";
 export type { FilterPanelProps } from "./filters/FilterPanel";
 export { FilterPanel } from "./filters/FilterPanel";
 export { FilterTree } from "./filters/FilterTree";
+export type { FilterDef, FilterOption, FilterTypeSpec } from "@adapttable/vue";
 export type {
   ChecklistFilterProps,
   FilterTreeBuilderProps,
 } from "@adapttable/vue/adapter";
+export { filterTypes } from "@adapttable/vue/features";

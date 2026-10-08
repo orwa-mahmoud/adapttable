@@ -27,7 +27,7 @@ const ManagedPanel = defineComponent(
           {
             ...shadcnControlAttrs(props.control.attrs),
             class: cn(
-              "w-96 max-w-[calc(100vw-2rem)] max-h-[min(80vh,40rem)] overflow-y-auto",
+              "adapttable-shadcn-vue w-96 max-w-[calc(100vw-2rem)] max-h-[min(80vh,40rem)] overflow-y-auto",
               props.control.attrs.class as string | undefined
             ),
             align: "end",

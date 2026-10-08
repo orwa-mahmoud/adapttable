@@ -1,6 +1,5 @@
 import { type StaticTableFeature } from "@adapttable/vue";
 import {
-  COLUMN_SELECT,
   extendFeature,
   FILL_HANDLE_CONTROL,
   slotRender,
@@ -8,11 +7,10 @@ import {
 import {
   cellNavigation as bindingCellNavigation,
   type CellNavigationOptions,
-  columnSelectionCheckbox as bindingColumnSelectionCheckbox,
 } from "@adapttable/vue/features";
 import { h } from "vue";
 
-import { NuxtColumnSelect, NuxtFillHandle } from "./navigation/nuxtNavigation";
+import { NuxtFillHandle } from "./navigation/nuxtNavigation";
 export function cellNavigation(
   options: CellNavigationOptions = {}
 ): StaticTableFeature {
@@ -20,11 +18,8 @@ export function cellNavigation(
     slotRender(FILL_HANDLE_CONTROL, (props) => h(NuxtFillHandle, props)),
   ]);
 }
-export function columnSelectionCheckbox(): StaticTableFeature {
-  return extendFeature(bindingColumnSelectionCheckbox(), [
-    slotRender(COLUMN_SELECT, (props) => h(NuxtColumnSelect, props)),
-  ]);
-}
+/** @deprecated Prefer the canonical @adapttable/nuxt-ui/column-selection entry. */
+export { columnSelectionCheckbox } from "./column-selection";
 export type { CellEdit, GridCell } from "@adapttable/vue";
 export type { CellRange } from "@adapttable/vue/adapter";
 export type { CellNavigationOptions } from "@adapttable/vue/features";

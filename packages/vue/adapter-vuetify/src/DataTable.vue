@@ -33,7 +33,7 @@ import VuetifyInput from "./controls/VuetifyInput.vue";
 import VuetifySelect from "./controls/VuetifySelect.vue";
 import { VUETIFY_GROUP_ROW, vuetifyGroupRowSlotKey } from "./groupRowSlot";
 import LoadingState from "./LoadingState.vue";
-import RowActions from "./RowActions.vue";
+import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { VuetifyDesktop } from "./table/Desktop";
 import { VuetifyMobile } from "./table/Mobile";
 import { vuetifyTableControls } from "./tableControls";
@@ -95,13 +95,22 @@ defineExpose<DataTableHandle<TRow>>(shell.handle);
 function controls(): TableChromeSlots<TRow> {
   return {
     ...vuetifyTableControls<TRow>(),
-    RowActions: ({ controls }) =>
-      h(RowActions<TRow>, {
-        controls,
-        layout: props.rowActionsLayout,
-        label: table.labels.value.rowActionsMenu,
-        classNames: names.value,
-      }),
+    RowActions: ({ controls: actions }) => {
+      if (!shell.slotFills.value.get(ROW_ACTIONS_CONTROL.id)?.length)
+        throw new Error(
+          "AdaptTable: Vuetify row actions require rowActions() or rowPinning() from @adapttable/vuetify."
+        );
+      return renderFeatureSlot(
+        rowActionsControlKey<TRow>(),
+        shell.slotFills.value,
+        {
+          controls: actions,
+          layout: props.rowActionsLayout,
+          label: table.labels.value.rowActionsMenu,
+          classNames: names.value,
+        }
+      );
+    },
     GroupRow: (group) => {
       if (!shell.slotFills.value.get(VUETIFY_GROUP_ROW.id)?.length)
         throw new Error(

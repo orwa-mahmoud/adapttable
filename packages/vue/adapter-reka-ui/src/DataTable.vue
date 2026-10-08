@@ -21,7 +21,6 @@ import {
 import { ConfigProvider } from "reka-ui";
 import {
   computed,
-  h,
   onBeforeUnmount,
   onBeforeUpdate,
   shallowRef,
@@ -32,7 +31,7 @@ import { provideRekaClasses } from "./context";
 import { rekaButton } from "./controls/basic";
 import { rekaSelectionCheckbox } from "./controls/checkbox";
 import { provideRekaPortalContainer } from "./controls/portal";
-import { RekaRowActions } from "./controls/RekaRowActions";
+import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { rekaSurfaceControls } from "./surfaceControls";
 import {
   rekaColumnGroupToggle,
@@ -93,13 +92,22 @@ function controls(): TableChromeSlots<TRow> {
     SelectionCheckbox: rekaSelectionCheckbox,
     ColumnGroupToggle: rekaColumnGroupToggle,
     ResizeHandle: rekaResizeHandle,
-    RowActions: ({ controls }) =>
-      h(RekaRowActions<TRow>, {
-        controls,
-        layout: props.rowActionsLayout,
-        label: shell.table.labels.value.rowActionsMenu,
-        classNames: names.value,
-      }),
+    RowActions: ({ controls: actions }) => {
+      if (!shell.slotFills.value.get(ROW_ACTIONS_CONTROL.id)?.length)
+        throw new Error(
+          "AdaptTable: Reka UI row actions require rowActions() or rowPinning() from @adapttable/reka-ui."
+        );
+      return renderFeatureSlot(
+        rowActionsControlKey<TRow>(),
+        shell.slotFills.value,
+        {
+          controls: actions,
+          layout: props.rowActionsLayout,
+          label: shell.table.labels.value.rowActionsMenu,
+          classNames: names.value,
+        }
+      );
+    },
     ...rekaHierarchyControls<TRow>(),
     GroupRow: (control) => {
       if (!shell.slotFills.value.get(GROUP_ROW.id)?.length)

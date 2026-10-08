@@ -76,7 +76,10 @@ export const ElementFilterSurface = defineComponent(
     };
     const focusPanel = () => {
       const element: unknown = panel.value?.$el;
-      if (active.value && props.open && element instanceof HTMLElement)
+      if (!active.value || !props.open || !(element instanceof HTMLElement))
+        return;
+      const focused = element.ownerDocument.activeElement;
+      if (focused === props.anchor || focused === element.ownerDocument.body)
         element.focus();
     };
     return () => {

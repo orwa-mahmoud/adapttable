@@ -1,11 +1,11 @@
 # Compose Vue table features
 
-The experimental `@adapttable/vue` binding and `@adapttable/vue-unstyled`
-kit share one table model. Add optional behavior through the native kit's
-feature factories; each factory contributes its own native controls while
-the binding owns state, validation, row projection and lifecycle. These are
-public, unreleased `0.1.0` packages. See [getting started](./getting-started.md)
-for workspace setup.
+The experimental Vue adapters share the `@adapttable/vue` table model. Add
+optional behavior through the chosen kit's feature factories: the adapter
+contributes its own controls while the binding owns state, validation, row
+projection and lifecycle. The binding, Unstyled kit and seven styled adapters
+are public, unreleased `0.1.0` packages. See [getting started](./getting-started.md)
+for workspace setup and UI-kit providers.
 
 ## Choose an entry point
 
@@ -60,6 +60,87 @@ and `@adapttable/vue/adapter` for control contracts.
 A binding factory does not supply visible controls. Use its native counterpart
 with the Unstyled kit. A React or Angular import does not define a Vue feature.
 
+## Styled adapter feature entries
+
+Element Plus, Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar each
+export the same 41 canonical feature factories. This describes their callable
+feature surface, not identical optional helper exports or a completed browser
+validation run. Import a factory from the selected adapter's focused path; every
+visible field, button, menu and dialog belongs to that adapter's kit.
+
+The common entries include the native import map above through `/export`, plus:
+
+| Import suffix       | Canonical factories       |
+| ------------------- | ------------------------- |
+| `/column-menu`      | `columnMenu`              |
+| `/cell-navigation`  | `cellNavigation`          |
+| `/column-selection` | `columnSelectionCheckbox` |
+| `/find-in-table`    | `findInTable`             |
+| `/status-bar`       | `statusBar`               |
+| `/selection-stats`  | `selectionStats`          |
+| `/grouping-panel`   | `groupingPanel`           |
+| `/row-reorder`      | `rowReorder`              |
+| `/virtualize`       | `virtualize`              |
+| `/bulk-actions`     | `bulkActions`             |
+| `/command-palette`  | `commandPalette`          |
+| `/context-menu`     | `contextMenu`             |
+| `/side-panel`       | `sidePanel`               |
+| `/print`            | `print`                   |
+
+`SavedViewsPanel` is also available from each adapter's `/saved-views` entry.
+`/column-selection` is the canonical path even where `/cell-navigation` also
+exports `columnSelectionCheckbox`. Use `/nested-table` for `nestedTable`; older
+exports from `/row-detail` remain available. These aliases do not install a
+second feature or require a migration of saved state.
+
+### Optional helpers differ by adapter
+
+| Adapter                    | Feature barrel and preset | Kit-specific optional surfaces and writers                                          |
+| -------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| `@adapttable/element-plus` | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/vuetify`      | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/naive-ui`     | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/reka-ui`      | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`. |
+| `@adapttable/shadcn-vue`   | `/features`, `/preset`    | `/assistant`, controlled `PivotPanel` from `/pivot`, `/export-pdf`, `/export-xlsx`. |
+| `@adapttable/nuxt-ui`      | Use focused imports       | CSV controls accept optional binding PDF/XLSX writers.                              |
+| `@adapttable/quasar`       | Use focused imports       | `/export-pdf`, `/export-xlsx`; pivot controls are host-composed.                    |
+
+All adapters can render data prepared by binding `/pivot`, `/formula`, `/sparkline`
+and `/stream` helpers. That does not imply a kit-specific pivot configuration
+panel or assistant export. Unstyled, Reka UI and shadcn-vue provide the documented
+assistant surfaces; a different kit can fill the binding's required assistant
+slots. [Actions and exports](./actions.md) and [specialized views](./specialized.md)
+show the shared writer and data-model boundaries.
+
+### One state model, kit-owned presentation
+
+Factories retain the table's controlled state and host callbacks. An edit, row
+move, delete or panel-selection request does not become authoritative until the
+host accepts it. Stateful filters, sort, grouping, density and explicitly wired
+layout use the existing URL/Saved Views contracts. Menu visibility, focus,
+pending export progress and edit drafts are temporary interaction state.
+
+The binding's Chrome provides structure, typed slots, localized labels and
+lifecycle ownership. Adapters fill those slots and forward semantic attributes,
+class hooks and real element refs. The Unstyled kit uses native HTML controls;
+styled adapters use their own kit components. Importing a base table does not
+install a feature barrel, optional writers or an AI runtime.
+
+Desktop headers own header filters and resize handles. Mobile cards retain
+applicable toolbar controls, row actions and move buttons; side panels stack
+below the table. Desktop-only geometry such as spans and pinned columns does
+not turn card fields into a grid. Direction-aware controls use the table's `dir`;
+configure the UI kit's own provider and RTL styling too. Kit overlays target the
+owning table's portal container so dialogs and menus remain usable in fullscreen.
+Fullscreen still depends on browser support.
+
+Server rendering keeps browser listeners and measurement resources inactive.
+Use the kit's documented SSR integration and stable hydration inputs. Mounted
+features release their observers, shortcuts and temporary overlays when their
+owner is removed or suspended under `KeepAlive`. Component-level tests and
+registered browser fixtures are distinct evidence; neither alone proves a full
+application's SSR or browser gate is complete.
+
 ## Reka UI feature entries
 
 `@adapttable/reka-ui` renders the Vue table with Reka primitives and its own
@@ -86,13 +167,50 @@ applicable toolbar controls.
   `agentApproval()`; the host supplies transport and approval decisions.
 - `/preset`: `standardFeatures()` and `StandardFeatureOptions<TRow>`.
 
-The Reka preset installs the same ten zero-argument features described below,
-using Reka controls. Its `filters`, `savedViews`, `grouping` and `bulkActions`
-options add their configured features; `findButton` controls the optional Find
-button. Import it from `@adapttable/reka-ui/preset` and import
-`@adapttable/reka-ui/styles.css` once in the application. Fullscreen depends on
+The Reka and shadcn-vue presets install the same ten zero-argument features
+described below, each using its own kit's controls. Their `filters`, `savedViews`,
+`grouping` and `bulkActions` options add configured features; `findButton` controls
+the optional Find button. Import from the chosen kit's `/preset` and load that
+kit's `/styles.css` once in the application. Fullscreen depends on
 browser support. Keep PDF and XLSX writers on their separate optional entries
 when the table needs those formats.
+
+## Compose a styled workspace
+
+This Nuxt UI example uses only focused exports. Use it after the
+[application setup](./getting-started.md#choose-a-ui-kit), then pass `features`
+to the Nuxt `DataTable` with the matching rows and columns.
+
+```ts
+import { shallowRef } from "vue";
+import { commandPalette } from "@adapttable/nuxt-ui/command-palette";
+import { contextMenu } from "@adapttable/nuxt-ui/context-menu";
+import { rowReorder } from "@adapttable/nuxt-ui/row-reorder";
+import { savedViews } from "@adapttable/nuxt-ui/saved-views";
+
+interface Person {
+  id: string;
+  name: string;
+}
+const rows = shallowRef<readonly Person[]>([{ id: "ada", name: "Ada" }]);
+const features = [
+  commandPalette({ button: true }),
+  contextMenu<Person>(),
+  savedViews({ storageKey: "people-views", urlSync: false }),
+  rowReorder<Person>((from, to, row) => {
+    const next = [...rows.value];
+    next.splice(from, 1);
+    next.splice(to, 0, row);
+    rows.value = next;
+  }),
+];
+```
+
+The row callback publishes the accepted order. For grouped or tree rows, follow
+the [move policy and host-index contract](./specialized.md#host-owned-row-moves)
+rather than treating every visual position as a source-array index. A real
+[Nuxt UI workspace lab](/vue/demo/nuxt-ui/workspace/) also exercises controlled
+side panels, Saved Views, keyboard actions and mobile moves.
 
 ## Standard native features
 
@@ -951,3 +1069,21 @@ Arabic pivot captions use shared aggregation labels and presentational column
 headers derived from the unchanged pivot leaves. Region and Status captions are
 localized in row and nested column dimensions; canonical field names, leaf paths,
 row/column keys and serialized pivot configuration stay unchanged.
+
+## Styled feature labs
+
+The seven basic kit previews remain small order-desk examples. Separate,
+non-indexed feature labs mount the actual adapter fixtures and are registered
+with the existing showcase browser suite:
+
+- [shadcn-vue filters](/vue/demo/shadcn-vue/filter-panel/): real filter controls,
+  popover/drawer dismissal, focus, RTL and mobile behavior.
+- [shadcn-vue table features](/vue/demo/shadcn-vue/feature-parity/): grouping,
+  Saved Views, row menus, keyboard moves and commands.
+- [shadcn-vue action surfaces](/vue/demo/shadcn-vue/action-surfaces/): assistant,
+  context and command surfaces, plus controlled side panels.
+- [Nuxt UI workspace](/vue/demo/nuxt-ui/workspace/): command/context actions,
+  Saved Views, controlled panels, row reordering and suspension/resume.
+
+These are integration fixtures, not npm releases or a claim that browser CI has
+passed. They use fictional in-browser data and host-owned writes.

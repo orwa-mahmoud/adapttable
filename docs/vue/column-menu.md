@@ -1,7 +1,9 @@
 # Vue column menu
 
-Add `columnMenu()` from the Vue kit's `column-menu` entry to the table's
-`features` list. The menu provides column search, visibility, pinning,
+Add `columnMenu()` from the chosen Vue kit's `/column-menu` entry to the table's
+`features` list. It is available in Unstyled, Element Plus, Vuetify, Naive UI,
+Reka UI, shadcn-vue, Nuxt UI and Quasar; use the same kit for the table and feature.
+These packages remain experimental and unreleased. The menu provides column search, visibility, pinning,
 reordering, sorting, sizing, and reset. Rename controls appear for columns
 that declare `renameable: true` when the table provides its rename channel.
 
@@ -67,6 +69,20 @@ stays inside the table's DOM subtree, so it also stays inside a fullscreen
 table. Escape closes a submenu first, then the menu; outside pointer presses
 close the menu. Leaving a kept-alive table dismisses the menu and suspends
 its event handlers.
+
+## Styled menus use the same layout contract
+
+The example above uses Unstyled; change both imports to the selected adapter
+for styled controls. Each adapter reuses the binding's column model, rename
+validation, controlled requests and localized labels. It supplies its own search
+field, choices, buttons and menu surface. Switching a kit does not create a new
+layout or change the persisted column keys.
+
+Kit popovers use their supported portal and focus APIs. Their target follows the
+owning table's fullscreen container, and direction-aware placement and controls
+follow `dir` plus the application's UI-kit provider. No binding fallback installs
+native inputs into a styled menu. For custom adapter work, keep the required
+attribute and element-ref forwarding described below.
 
 ## Building a Vue kit
 

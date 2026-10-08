@@ -39,6 +39,7 @@ import {
   matrixPages,
   otherKitsOf,
   snippetFor,
+  VUE_KIT_LAB_PAGES,
   VUE_KIT_PAGES,
   VUE_NATIVE_BASELINE,
   VUE_NATIVE_PAGES,
@@ -589,7 +590,9 @@ export const nativeVuePage = (definition = VUE_NATIVE_BASELINE) => {
 
 /** Every HTML file this writes, as `{ dir, html }`. */
 export const showcaseHtmlFiles = () => [
-  ...[...VUE_NATIVE_PAGES, ...VUE_KIT_PAGES].map(nativeVuePage),
+  ...[...VUE_NATIVE_PAGES, ...VUE_KIT_PAGES, ...VUE_KIT_LAB_PAGES].map(
+    nativeVuePage
+  ),
   angularModePage(),
   angularModePage(true),
   ...matrixPages().map((page) => {

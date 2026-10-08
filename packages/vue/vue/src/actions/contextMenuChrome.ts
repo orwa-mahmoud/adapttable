@@ -15,7 +15,25 @@ import {
 import { elementRef } from "../attrs";
 import { useScopeActivity } from "../store";
 export type ContextMenuSlots = NeutralSlots<VNodeChild>;
-export type ContextMenuChromeProps = NeutralProps<VNodeChild>;
+/** A complete native menu presentation with binding-owned selection lifetimes. */
+export interface ContextMenuPresentationProps extends Omit<
+  Parameters<ContextMenuSlots["Surface"]>[0],
+  "children"
+> {
+  readonly items: readonly {
+    readonly item: NeutralProps<VNodeChild>["items"][number];
+    readonly onSelect: () => void;
+  }[];
+  readonly isCurrent: () => boolean;
+}
+export type ContextMenuPresentation = (
+  props: ContextMenuPresentationProps
+) => VNodeChild;
+export type ContextMenuChromeProps = Omit<NeutralProps<VNodeChild>, "slots"> &
+  (
+    | { readonly slots: ContextMenuSlots; readonly presentation?: undefined }
+    | { readonly slots?: never; readonly presentation: ContextMenuPresentation }
+  );
 export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
   (props: ContextMenuChromeProps) => {
     const active = useScopeActivity();
@@ -34,7 +52,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
       { flush: "sync" }
     );
     watch(
-      [() => props.items, () => props.slots.Surface],
+      [() => props.items, () => props.slots?.Surface, () => props.presentation],
       () => {
         generation++;
         if (pendingSelection) pendingSelection.projectionChanged = true;
@@ -63,21 +81,29 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
       if (pendingSelection) pendingSelection.cancelled = true;
     });
     return () => {
-      for (const name of ["Surface", "Item", "Separator"] as const)
-        if (typeof props.slots[name] !== "function")
-          throw new Error(
-            `AdaptTable: ContextMenuChrome requires the ${name} control slot.`
-          );
+      if (
+        props.presentation !== undefined &&
+        typeof props.presentation !== "function"
+      )
+        throw new Error(
+          "AdaptTable: ContextMenuChrome requires a complete presentation renderer."
+        );
+      if (!props.presentation)
+        for (const name of ["Surface", "Item", "Separator"] as const)
+          if (typeof props.slots?.[name] !== "function")
+            throw new Error(
+              `AdaptTable: ContextMenuChrome requires the ${name} control slot.`
+            );
       if (!active.value || !props.at || props.items.length === 0) return null;
       const ticket = generation;
       const at = props.at;
       const items = props.items;
-      const driver = props.slots.Surface;
+      const driver = props.presentation ?? props.slots?.Surface;
       const owner = props.onClose;
       const ownsLifetime = () =>
         active.value &&
         ticket === generation &&
-        props.slots.Surface === driver &&
+        (props.presentation ?? props.slots?.Surface) === driver &&
         props.onClose === owner;
       const isCurrent = () =>
         ownsLifetime() && props.at === at && props.items === items;
@@ -113,11 +139,46 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
               (!selection.projectionChanged &&
                 props.at === at &&
                 props.items === items &&
-                props.slots.Surface === driver))
+                (props.presentation ?? props.slots?.Surface) === driver))
           )
             item.onSelect();
         });
       };
+      let surface: VNodeChild;
+      if (props.presentation)
+        surface = props.presentation({
+          at: props.at,
+          anchorRef,
+          label: props.labels?.contextMenu ?? "Table actions",
+          onClose: close,
+          container: props.container,
+          className: props.className,
+          items: props.items.map((item) => ({
+            item,
+            onSelect: () => select(item),
+          })),
+          isCurrent,
+        });
+      else {
+        const slots = props.slots;
+        surface = slots.Surface({
+          at: props.at,
+          anchorRef,
+          label: props.labels?.contextMenu ?? "Table actions",
+          onClose: close,
+          container: props.container,
+          className: props.className,
+          children: props.items.map((item) =>
+            h(Fragment, { key: item.key }, [
+              item.separatorBefore ? slots.Separator() : null,
+              slots.Item({
+                item,
+                onSelect: () => select(item),
+              }),
+            ])
+          ),
+        });
+      }
       return h(Fragment, null, [
         h("span", {
           ref: elementRef<HTMLElement>((element) => {
@@ -134,23 +195,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
             pointerEvents: "none",
           },
         }),
-        props.slots.Surface({
-          at: props.at,
-          anchorRef,
-          label: props.labels?.contextMenu ?? "Table actions",
-          onClose: close,
-          container: props.container,
-          className: props.className,
-          children: props.items.map((item) =>
-            h(Fragment, { key: item.key }, [
-              item.separatorBefore ? props.slots.Separator() : null,
-              props.slots.Item({
-                item,
-                onSelect: () => select(item),
-              }),
-            ])
-          ),
-        }),
+        surface,
       ]);
     };
   },
@@ -164,6 +209,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
       "className",
       "container",
       "slots",
+      "presentation",
     ],
   }
 );

@@ -1,8 +1,8 @@
 import {
   cellNavigation,
   type CellRange,
-  columnSelectionCheckbox,
 } from "@adapttable/quasar/cell-navigation";
+import { columnSelectionCheckbox } from "@adapttable/quasar/column-selection";
 import { commandPalette } from "@adapttable/quasar/command-palette";
 import { contextMenu } from "@adapttable/quasar/context-menu";
 import { groupingPanel } from "@adapttable/quasar/grouping-panel";

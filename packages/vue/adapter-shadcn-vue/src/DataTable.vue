@@ -9,6 +9,7 @@ import {
   type DataTableSlots,
   DataTableSurfaceChrome,
   defaultConfirm,
+  FULLSCREEN_MODEL,
   GROUP_ROW,
   groupRowSlotKey,
   provideDataTableClassNames,
@@ -26,6 +27,8 @@ import {
 } from "vue";
 
 import { resolveShadcnClassNames } from "./classNames";
+import { provideShadcnPortalContainer } from "./lib/portal";
+import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rows/slot";
 import { shadcnSurfaceControls } from "./surfaceControls";
 import { shadcnTableControls } from "./tableControls";
 
@@ -69,9 +72,27 @@ const shell = useDataTableShell<TRow>(() => ({
 }));
 const names = computed(() => resolveShadcnClassNames(props.classNames));
 provideDataTableClassNames(() => names.value);
+const fullscreen = shell.state.get(FULLSCREEN_MODEL);
+provideShadcnPortalContainer(() => fullscreen.value?.container);
 function controls(): TableChromeSlots<TRow> {
   return {
     ...shadcnTableControls<TRow>(),
+    RowActions: ({ controls }) => {
+      if (!shell.slotFills.value.get(ROW_ACTIONS_CONTROL.id)?.length)
+        throw new Error(
+          "AdaptTable: shadcn-vue row actions require the kit rowActions feature."
+        );
+      return renderFeatureSlot(
+        rowActionsControlKey<TRow>(),
+        shell.slotFills.value,
+        {
+          controls,
+          layout: props.rowActionsLayout,
+          label: shell.table.labels.value.rowActionsMenu,
+          classNames: names.value,
+        }
+      );
+    },
     GroupRow: (group) => {
       if (!shell.slotFills.value.get(GROUP_ROW.id)?.length)
         throw new Error(

@@ -133,6 +133,56 @@ describe("Vue binding structural ownership", () => {
     );
   });
 
+  it("parses both script blocks and quoted markup boundaries", () => {
+    const table = `<script lang="ts" data-note="a > b">
+import { Desktop as Frame } from "@adapttable/vue/adapter";
+</script>
+<script setup lang="ts" generic="TRow extends { id: string }">
+import { useModel } from "@adapttable/vue/adapter";
+const model = useModel();
+</script>
+<template><Frame :model="model" data-note="a > b" /><div data-adapttable-part="toolbar" /></template>`;
+    assert.deepEqual(parts(fixture({ table })), []);
+    assert.deepEqual(features(fixture({ table })), []);
+  });
+
+  it("does not mistake comments, custom blocks or attribute text for rendered components", () => {
+    const table = TABLE.replace(
+      "Desktop as Frame, useModel",
+      "Desktop as Frame, useModel, UnusedChrome"
+    ).replace(
+      '<Frame :model="model" />',
+      `<Frame :model="model" data-note="<UnusedChrome />" />
+<!-- <UnusedChrome /> -->
+<div>{{ "<UnusedChrome />" }}</div>`
+    ).concat(`
+<docs><UnusedChrome /></docs>
+<!-- <script>import { UnusedChrome } from "@adapttable/vue/adapter";</script> -->`);
+    const root = fixture({
+      table,
+      adapter:
+        'export { Desktop, UnusedChrome } from "./structure"; export { useModel } from "./model";',
+    });
+    assert.deepEqual(parts(root), []);
+    assert(parts(root, ["decoy"]).includes(`decoy — ${KIT.name}: not named`));
+  });
+
+  it("ignores component text in scripts and commented-out script blocks", () => {
+    for (const table of [
+      TABLE.replace('<Frame :model="model" />', "").replace(
+        "const model = useModel();",
+        'const model = useModel(); const sample = "<Frame />";'
+      ),
+      TABLE.replace("<script setup", "<!-- <script setup").replace(
+        "</script>",
+        "</script> -->"
+      ),
+    ]) {
+      const root = fixture({ table });
+      assert(parts(root).includes(`table — ${KIT.name}: not named`));
+    }
+  });
+
   for (const part of ["table", "thead", "tbody", "cell", "header-cell"]) {
     it(`rejects a rendered binding that drops ${part}`, () => {
       const root = fixture({

@@ -8,7 +8,6 @@ import {
   type TableChromeSlots,
   useDataTableShell,
 } from "@adapttable/vue/adapter";
-import { rowActions } from "@adapttable/vue/features";
 import { mount } from "@vue/test-utils";
 import { QCard, QMarkupTable, QTable, QTd, QTh, QTr, Quasar } from "quasar";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -26,6 +25,7 @@ import {
 import { DataTable } from "../src";
 import QuasarButton from "../src/controls/QuasarButton.vue";
 import { grouping } from "../src/grouping";
+import { rowActions } from "../src/row-actions";
 import { quasarTableControls } from "../src/table/controls";
 import { QuasarDesktop } from "../src/table/desktop";
 import { quasarLoading } from "../src/table/loading";

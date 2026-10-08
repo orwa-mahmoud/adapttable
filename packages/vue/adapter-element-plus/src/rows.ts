@@ -1,4 +1,6 @@
 /** Optional host-owned row composition and actions, over the shared binding. */
+export { rowActions } from "./row-actions";
+export { rowPinning } from "./row-pinning";
 export type {
   CellSpanAppearance,
   CellSpanRequest,
@@ -25,7 +27,5 @@ export {
   cellSpan,
   extraRows,
   pinnedSummaryRows,
-  rowActions,
   rowAppearance,
-  rowPinning,
 } from "@adapttable/vue/features";

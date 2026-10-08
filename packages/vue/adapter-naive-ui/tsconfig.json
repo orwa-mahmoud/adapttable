@@ -8,7 +8,8 @@
     "rootDirs": [".", "./.sfc-types"],
     "paths": {
       "@adapttable/naive-ui": ["./src/index.ts"],
-      "@adapttable/naive-ui/*": ["./src/*.ts"]
+      "@adapttable/naive-ui/*": ["./src/*.ts"],
+      "@adapttable/naive-ui/column-selection": ["./src/column-selection.ts"]
     }
   },
   "files": ["src/styles.d.ts"],

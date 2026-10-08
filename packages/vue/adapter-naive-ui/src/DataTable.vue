@@ -29,7 +29,7 @@ import {
 
 import { naiveClassNames } from "./classNames";
 import { naiveTableControls } from "./controls/table";
-import NaiveRowActions from "./NaiveRowActions.vue";
+import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { naiveSurfaceControls } from "./surface";
 import { naiveDirection, useNaiveTableStyle } from "./theme";
 import type { DataTableProps, DataTableSlots } from "./types";
@@ -92,14 +92,23 @@ const style = useNaiveTableStyle();
 function controls(): TableChromeSlots<TRow> {
   return {
     ...naiveTableControls<TRow>(),
-    RowActions: ({ controls: actions }) =>
-      h(NaiveRowActions<TRow>, {
-        controls: actions,
-        layout: props.rowActionsLayout,
-        label: shell.table.labels.value.rowActionsMenu,
-        dir: shell.table.dir.value,
-        classNames: names.value,
-      }),
+    RowActions: ({ controls: actions }) => {
+      if (!shell.slotFills.value.get(ROW_ACTIONS_CONTROL.id)?.length)
+        throw new Error(
+          "AdaptTable: Naive UI row actions require rowActions() or rowPinning() from @adapttable/naive-ui."
+        );
+      return renderFeatureSlot(
+        rowActionsControlKey<TRow>(),
+        shell.slotFills.value,
+        {
+          controls: actions,
+          layout: props.rowActionsLayout,
+          label: shell.table.labels.value.rowActionsMenu,
+          dir: shell.table.dir.value,
+          classNames: names.value,
+        }
+      );
+    },
     GroupRow: (group) => {
       if (!shell.slotFills.value.get(GROUP_ROW.id)?.length)
         throw new Error(

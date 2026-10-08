@@ -6,6 +6,25 @@ shadcn-vue presentation for AdaptTable's headless Vue binding. Table state,
 feature lifetimes, query ownership, and structural Chrome belong to
 `@adapttable/vue`; this package supplies copied, licensed shadcn-vue controls.
 
+## Features
+
+- Feature composition with 41 canonical factories, focused imports, an optional
+  `/features` barrel, and the `standardFeatures()` preset.
+- Global search, sorting, multi-sort, pagination, controlled selection, and mobile cards.
+- Filtering, custom filter types, header filters, active chips, and AND/OR filter trees.
+- Cell editing, row and batch editing, validation, dirty state, undo/redo, and edit history.
+- Column management: visibility, pinning, resizing, fit-to-width, and column groups.
+- Keyboard cell navigation, column selection, find-in-table, and selection statistics.
+- Row grouping and aggregation, tree data, row expansion, nested tables, and a controlled pivot panel.
+- Row reordering, row pinning, pinned summary rows, cell spanning, full-width extra rows, row styling, and virtualization.
+- A spreadsheet formula engine, sparklines, and host-owned row streams.
+- CSV export, optional PDF export and XLSX writers, and host-owned print layout.
+- Toolbar and view controls for density, fullscreen, and saved views, plus row actions, bulk actions, a command palette, context menus, and side panels.
+- Localized labels, RTL, SSR, and optional assistant and approval controls.
+
+Feature factories are separate opt-in entry points. The base table does not import
+the feature barrel, export writers, formula engine, or assistant surfaces.
+
 ## Usage
 
 ```vue
@@ -151,3 +170,58 @@ for visibility, pinning, search, renaming, and binding-provided column actions.
 It respects the table's portal container and live direction. Escape closes a
 nested action group before its outer popover, and outer dismissal returns focus
 only to a connected, visible opener. Hidden or disposed controls are never focused.
+
+## Columns, rows, and calculations
+
+`resizableColumns`, `fitColumns`, `multiSort`, and `collapsibleColumnGroups` are
+available from their named entries or `/columns`. They use the binding's models
+and the table's shadcn Button controls. Resize handles and column groups are
+desktop-header presentations; mobile cards retain ordinary sorting and data.
+
+`rowActions` supports inline Buttons or a DropdownMenu. `rowPinning`,
+`pinnedSummaryRows`, `cellSpan`, `extraRows`, and `rowAppearance` use the existing
+semantic row and card Chrome. Their factories live in matching entries and
+`/rows`. Cell spanning is a desktop table behavior; cards keep each field's value.
+`virtualize` is a separate import. `/formula`, `/stream`, and `/sparkline` forward
+the binding's optional calculation and rendering APIs without creating state.
+
+## Grouping, saved views, and row moves
+
+`groupingPanel` uses shadcn NativeSelect, Checkbox, and Button controls around the
+shared grouping Chrome. Logical keyboard moves support RTL. Grouping controls
+remain available on mobile; aggregation computed by the host is read-only.
+
+`savedViews` adds a managed Popover with shadcn Input and Button controls.
+`SavedViewsPanel` is also available for host-owned settings. The binding owns
+serialization, storage, rename, ordering, default selection, and read-only views.
+Escape restores a connected visible trigger; outside dismissal keeps outside focus.
+
+`rowReorder` renders a keyboard/drag grip on desktop and up/down controls in
+mobile cards. Cross-group and tree moves use a DropdownMenu, with AlertDialog
+confirmation when requested by the binding's policy. All moves request changes
+through host callbacks. The adapter never mutates rows.
+
+## Actions, export, and optional surfaces
+
+`bulkActions` renders selection actions with shadcn Buttons. `print` calls the
+host's print callback. `exportCsv` includes the binding's selection and server-job
+workflow with styled progress and cancel, retry, download, and dismiss controls.
+`exportPdf` and `exportXlsx` are separate imports; their optional writers remain
+outside ordinary table and CSV imports.
+
+`contextMenu` combines the shared coordinate/keyboard model with styled Reka
+ContextMenu primitives and shadcn controls. `commandPalette` uses a dialog with
+shadcn Input and styled command options, and `sidePanel` uses compound Tabs. The binding
+owns matching, command navigation, disabled guards, tab selection, and open state.
+Portaled surfaces use the fullscreen host and inherit the current direction.
+
+`TableAssistant`, `AgentApproval`, `tableAssistant`, and `agentApproval` live in
+`/assistant`. They use shadcn Sheet, Textarea, Input, NativeSelect, and Button
+presentations over the binding's conversation and approval contracts. Transport,
+conversation, speech, and decisions stay host-owned. `/pivot` supplies the
+controlled `PivotPanel` with NativeSelect and Button controls.
+
+`standardFeatures` from `/preset` composes the ordinary toolbar and navigation
+features, with optional filters, saved views, grouping, and bulk actions. The
+`/features` barrel is an explicit convenience import; individual entries remain
+available for smaller bundles. Every feature stays absent until requested.

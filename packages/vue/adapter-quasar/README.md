@@ -21,6 +21,8 @@ state and feature behavior; Quasar supplies the interactive components.
 - Saved views, row actions, bulk actions, Find, a command palette, context menus
   and side-panel view controls.
 - CSV export, optional PDF export and XLSX writers, plus host-owned printing.
+- Pivot data, a spreadsheet formula engine and sparklines through the shared
+  Vue binding's opt-in entries.
 - Mobile card layouts, localized labels, RTL and component-level server-side
   rendering (SSR) with hydration.
 
@@ -28,6 +30,17 @@ Quasar supplies the visible fields, buttons, menus and dialogs; the Vue binding
 owns state and interactions. Changes to rows always go through host callbacks.
 The optional PDF/XLSX writers stay out of the base table entry. No feature barrel
 or preset is exported: compose the imports you need, as shown below.
+
+## Shared data integrations
+
+Import `pivot` and `pivotTableModel` from `@adapttable/vue/pivot` to prepare
+pivot rows and columns for the Quasar table. Pivot configuration controls are
+host-composed; `@adapttable/quasar` does not export a Quasar pivot panel.
+
+Use `buildFormulaColumns` from `@adapttable/vue/formula` for spreadsheet formula
+columns, and `sparklineColumn` from `@adapttable/vue/sparkline` for accessible
+SVG charts in cells. These opt-in data integrations reuse the Vue binding and
+remain separate from the base adapter import.
 
 ## Application setup
 

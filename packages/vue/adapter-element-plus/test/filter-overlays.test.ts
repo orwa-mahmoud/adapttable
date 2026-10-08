@@ -122,7 +122,32 @@ describe("Element Plus filter overlays", () => {
     expect(dialog.getAttribute("aria-modal")).not.toBe("true");
     expect(surface.getAttribute("dir")).toBe("rtl");
     expect(document.querySelector(".el-overlay")).toBeNull();
+    await vi.waitFor(() => expect(document.activeElement).toBe(surface));
   });
+
+  it.each(["control", "outside"])(
+    "preserves %s focus when the popover finishes opening",
+    async (destination) => {
+      fixture(false);
+      await tick();
+      const input = node<HTMLInputElement>(
+        document,
+        'input[aria-label="Filter name"]'
+      );
+      const outside = document.createElement("button");
+      document.body.append(outside);
+      anchors.push(outside);
+      const target = destination === "control" ? input : outside;
+      target.focus();
+      await vi.waitFor(() =>
+        expect(
+          document.querySelector(".fade-in-linear-enter-active")
+        ).toBeNull()
+      );
+      await new Promise((resolve) => setTimeout(resolve, 60));
+      expect(document.activeElement).toBe(target);
+    }
+  );
 
   it("requests accepted Escape once and restores the connected trigger", async () => {
     const state = fixture(false);

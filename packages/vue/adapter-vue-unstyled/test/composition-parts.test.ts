@@ -271,6 +271,8 @@ describe("canonical composition parts and class targets", () => {
     expectPart(panel, "saved-view-readonly", "SPAN");
     expectPart(panel, "saved-view-default", "SPAN");
     const view = mountNative(render);
+    // Mounted ownership refreshes the guarded callbacks before interaction.
+    await tick();
     find(view.host, `button[aria-label="${labels.renameView}"]`).click();
     await tick();
     const input = find<HTMLInputElement>(view.host, "input.rename");

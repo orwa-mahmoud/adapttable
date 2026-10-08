@@ -409,6 +409,26 @@
         "types": "./dist/row-reorder.d.cts",
         "default": "./dist/row-reorder.cjs"
       }
+    },
+    "./column-selection": {
+      "import": {
+        "types": "./dist/column-selection.d.ts",
+        "default": "./dist/column-selection.js"
+      },
+      "require": {
+        "types": "./dist/column-selection.d.cts",
+        "default": "./dist/column-selection.cjs"
+      }
+    },
+    "./nested-table": {
+      "import": {
+        "types": "./dist/nested-table.d.ts",
+        "default": "./dist/nested-table.js"
+      },
+      "require": {
+        "types": "./dist/nested-table.d.cts",
+        "default": "./dist/nested-table.cjs"
+      }
     }
   },
   "repository": {

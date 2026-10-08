@@ -4,10 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
 
 import { DataTable, type DataTableProps } from "../src";
-import {
-  cellNavigation,
-  columnSelectionCheckbox,
-} from "../src/cell-navigation";
+import { cellNavigation } from "../src/cell-navigation";
+import { columnSelectionCheckbox } from "../src/column-selection";
 import { editing } from "../src/editing";
 import { findInTable } from "../src/find-in-table";
 import { selectionStats, statusBar } from "../src/status-bar";

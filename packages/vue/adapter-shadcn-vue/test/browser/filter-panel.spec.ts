@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const fixture =
-  process.env.SHADCN_FILTER_FIXTURE_URL ?? "/shadcn-filter-panel-fixture/";
+  process.env.SHADCN_FILTER_FIXTURE_URL ?? "/vue/shadcn-vue/filter-panel/";
 const part = (name: string) => `[data-adapttable-part="${name}"]`;
 
 for (const mode of ["popover", "drawer"] as const) {

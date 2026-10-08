@@ -3,6 +3,7 @@ import Vue from "unplugin-vue/rolldown";
 
 export default defineConfig({
   entry: [
+    "src/column-selection.ts",
     "src/index.ts",
     "src/saved-views.ts",
     "src/side-panel.ts",

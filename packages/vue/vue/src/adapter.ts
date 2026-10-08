@@ -12,6 +12,8 @@ export {
 } from "./actions/commandPaletteChrome";
 export type {
   ContextMenuChromeProps,
+  ContextMenuPresentation,
+  ContextMenuPresentationProps,
   ContextMenuSlots,
 } from "./actions/contextMenuChrome";
 export { ContextMenuChrome } from "./actions/contextMenuChrome";

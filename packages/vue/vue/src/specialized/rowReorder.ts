@@ -49,6 +49,8 @@ export interface VueRowReorderModel<TRow> {
   readonly snapshot: RowReorderSnapshot<TRow>;
   readonly controller: RowReorderActions<TRow>;
   readonly enabled: boolean;
+  /** Read-only destination projection, including disabled server controls. */
+  readonly moveMenu?: RowReorderActions<TRow>["moveMenu"];
   readonly rowAttrs: (
     rowId: string,
     index: number,
@@ -118,9 +120,18 @@ export function useRowReorder<TRow>(
   }));
   const controller = createRowReorderController(configuration.value);
   const snapshot = useExternalStore(controller, { active });
-  watch(configuration, (next) => controller.configure(next), {
-    flush: "sync",
-  });
+  let projectionRevision = 0;
+  let disposed = false;
+  watch(
+    configuration,
+    (next) => {
+      projectionRevision++;
+      controller.configure(next);
+    },
+    {
+      flush: "sync",
+    }
+  );
   watch(
     active,
     (enabled, _previous, cleanup) => {
@@ -128,17 +139,27 @@ export function useRowReorder<TRow>(
     },
     { immediate: true, flush: "sync" }
   );
-  onScopeDispose(() =>
-    controller.configure({ ...options.value, enabled: false })
-  );
+  onScopeDispose(() => {
+    disposed = true;
+    projectionRevision++;
+    controller.configure({ ...options.value, enabled: false });
+  });
   return computed((): VueRowReorderModel<TRow> => {
     const enabled = active.value && options.value.enabled;
     const current = snapshot.value;
     const actions = controller.forSession();
+    const source = options.value;
+    const revision = projectionRevision;
     return {
       controller: actions,
       snapshot: current,
       enabled,
+      moveMenu: (row) => {
+        if (disposed || revision !== projectionRevision) return undefined;
+        // Read the existing neutral projection for SSR. Mutating callbacks
+        // still come only from the controller's active, owned session.
+        return enabled ? actions.moveMenu(row) : source.getMoveMenu?.(row);
+      },
       ownsPending: (row) =>
         isRowMovePending(current.pendingMove, row, options.value.getRowId),
       rowAttrs: (id, index, row, windowStart) => ({
@@ -193,7 +214,7 @@ export function RowReorderChrome<TRow>(
     !model.enabled ||
     snapshot.hostConfirmPending ||
     snapshot.pendingMove !== null;
-  const menu = controller.moveMenu(row);
+  const menu = model.moveMenu ? model.moveMenu(row) : controller.moveMenu(row);
   const pending = model.ownsPending(row) ? snapshot.pendingMove : null;
   const from =
     pending?.kind === "group"

@@ -3654,3 +3654,51 @@ export const VUE_KIT_PAGES = Object.freeze([
     entry: "/src/vue/kits/entry-quasar.ts",
   },
 ]);
+
+/** Real-control feature labs run in browser CI, separate from basic previews. */
+export const VUE_KIT_LAB_PAGES = Object.freeze([
+  {
+    key: "vue-shadcn-vue-filter-panel",
+    dir: "vue/shadcn-vue/filter-panel",
+    path: "shadcn-vue/filter-panel",
+    title: "shadcn-vue filter panel lab — Vue — AdaptTable",
+    description:
+      "Exercise shadcn-vue filter fields, nested filter groups, focus and controlled state with the real adapter controls.",
+    notice:
+      "Experimental feature lab for browser checks. The Vue packages are not yet published to npm.",
+    entry: "/src/vue/kits/entry-shadcn-filter-panel.ts",
+  },
+  {
+    key: "vue-shadcn-vue-feature-parity",
+    dir: "vue/shadcn-vue/feature-parity",
+    path: "shadcn-vue/feature-parity",
+    title: "shadcn-vue table features lab — Vue — AdaptTable",
+    description:
+      "Exercise shadcn-vue grouping, pivot configuration, row moves and Saved Views with the real adapter controls.",
+    notice:
+      "Experimental feature lab for browser checks. The Vue packages are not yet published to npm.",
+    entry: "/src/vue/kits/entry-shadcn-feature-parity.ts",
+  },
+  {
+    key: "vue-shadcn-vue-action-surfaces",
+    dir: "vue/shadcn-vue/action-surfaces",
+    path: "shadcn-vue/action-surfaces",
+    title: "shadcn-vue action surfaces lab — Vue — AdaptTable",
+    description:
+      "Exercise shadcn-vue command and context menus, side panels and assistant controls with the real adapter.",
+    notice:
+      "Experimental feature lab for browser checks. The Vue packages are not yet published to npm.",
+    entry: "/src/vue/kits/entry-shadcn-action-surfaces.ts",
+  },
+  {
+    key: "vue-nuxt-ui-workspace",
+    dir: "vue/nuxt-ui/workspace",
+    path: "nuxt-ui/workspace",
+    title: "Nuxt UI workspace lab — Vue — AdaptTable",
+    description:
+      "Exercise Nuxt UI command and context menus, Saved Views, controlled side panels and host-owned row moves.",
+    notice:
+      "Experimental feature lab for browser checks. The Vue packages are not yet published to npm.",
+    entry: "/src/vue/kits/entry-nuxt-workspace.ts",
+  },
+]);

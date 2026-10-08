@@ -18,15 +18,14 @@ import {
 } from "@adapttable/vue/adapter";
 import {
   computed,
-  h,
   onBeforeUnmount,
   onBeforeUpdate,
   shallowRef,
   watch,
 } from "vue";
 
+import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { quasarTableControls } from "./table/controls";
-import QuasarRowActions from "./table/QuasarRowActions.vue";
 import { quasarSurfaceControls } from "./table/surface";
 
 defineOptions({ inheritAttrs: false });
@@ -72,13 +71,22 @@ provideDataTableClassNames(() => names.value);
 function controls(): TableChromeSlots<TRow> {
   return {
     ...quasarTableControls<TRow>(),
-    RowActions: ({ controls: actions }) =>
-      h(QuasarRowActions<TRow>, {
-        controls: actions,
-        layout: props.rowActionsLayout,
-        label: shell.table.labels.value.rowActionsMenu,
-        classNames: names.value,
-      }),
+    RowActions: ({ controls: actions }) => {
+      if (!shell.slotFills.value.get(ROW_ACTIONS_CONTROL.id)?.length)
+        throw new Error(
+          "AdaptTable: Quasar row actions require rowActions() or rowPinning() from @adapttable/quasar."
+        );
+      return renderFeatureSlot(
+        rowActionsControlKey<TRow>(),
+        shell.slotFills.value,
+        {
+          controls: actions,
+          layout: props.rowActionsLayout,
+          label: shell.table.labels.value.rowActionsMenu,
+          classNames: names.value,
+        }
+      );
+    },
     GroupRow: (props) => {
       if (!shell.slotFills.value.get(GROUP_ROW.id)?.length)
         throw new Error(

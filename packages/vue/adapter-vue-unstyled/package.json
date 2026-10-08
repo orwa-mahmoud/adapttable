@@ -19,7 +19,8 @@
   },
   "devDependencies": {
     "vue": "^3.5.43",
-    "@adapttable/i18n": "workspace:*"
+    "@adapttable/i18n": "workspace:*",
+    "@vue/test-utils": "2.4.6"
   },
   "engines": {
     "node": ">=22.12.0"

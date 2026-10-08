@@ -32,7 +32,7 @@ const columns: ColumnDef<Row>[] = [
   { key: "amount", aggregatable: { operations: ["sum", "avg"] } },
 ];
 async function render(label: string, mobile: boolean) {
-  const noop = () => undefined;
+  const noop = vi.fn();
   const app = createSSRApp({
     render: () => [
       h(DataTable<Row>, {
@@ -91,7 +91,7 @@ async function render(label: string, mobile: boolean) {
   });
   const { collect } = setup(app);
   const html = await renderToString(app);
-  return { html, styles: collect() };
+  return { html, styles: collect(), onRequest: noop };
 }
 it.each([false, true])(
   "renders native remaining controls without DOM access or request leakage (mobile=%s)",
@@ -108,8 +108,9 @@ it.each([false, true])(
     for (const result of [first, second]) {
       expect(result.html).toContain('data-adapttable-part="grouping-panel"');
       expect(result.html).toContain('data-adapttable-part="saved-views-panel"');
-      // The binding activates model-driven side panels only after mounting.
-      expect(result.html).not.toContain('data-adapttable-part="side-panel"');
+      expect(result.html).toContain('data-adapttable-part="side-panel"');
+      expect(result.html).toContain('data-adapttable-part="side-panel-body"');
+      expect(result.onRequest).not.toHaveBeenCalled();
       expect(result.html).toContain("n-card");
       expect(result.html).toContain("n-button");
       expect(result.html).not.toContain("n-data-table");

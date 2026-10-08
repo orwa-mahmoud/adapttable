@@ -348,6 +348,66 @@
         "types": "./dist/grouping-panel.d.cts",
         "default": "./dist/grouping-panel.cjs"
       }
+    },
+    "./command-palette": {
+      "import": {
+        "types": "./dist/command-palette.d.ts",
+        "default": "./dist/command-palette.js"
+      },
+      "require": {
+        "types": "./dist/command-palette.d.cts",
+        "default": "./dist/command-palette.cjs"
+      }
+    },
+    "./context-menu": {
+      "import": {
+        "types": "./dist/context-menu.d.ts",
+        "default": "./dist/context-menu.js"
+      },
+      "require": {
+        "types": "./dist/context-menu.d.cts",
+        "default": "./dist/context-menu.cjs"
+      }
+    },
+    "./saved-views": {
+      "import": {
+        "types": "./dist/saved-views.d.ts",
+        "default": "./dist/saved-views.js"
+      },
+      "require": {
+        "types": "./dist/saved-views.d.cts",
+        "default": "./dist/saved-views.cjs"
+      }
+    },
+    "./side-panel": {
+      "import": {
+        "types": "./dist/side-panel.d.ts",
+        "default": "./dist/side-panel.js"
+      },
+      "require": {
+        "types": "./dist/side-panel.d.cts",
+        "default": "./dist/side-panel.cjs"
+      }
+    },
+    "./row-reorder": {
+      "import": {
+        "types": "./dist/row-reorder.d.ts",
+        "default": "./dist/row-reorder.js"
+      },
+      "require": {
+        "types": "./dist/row-reorder.d.cts",
+        "default": "./dist/row-reorder.cjs"
+      }
+    },
+    "./column-selection": {
+      "import": {
+        "types": "./dist/column-selection.d.ts",
+        "default": "./dist/column-selection.js"
+      },
+      "require": {
+        "types": "./dist/column-selection.d.cts",
+        "default": "./dist/column-selection.cjs"
+      }
     }
   },
   "dependencies": {

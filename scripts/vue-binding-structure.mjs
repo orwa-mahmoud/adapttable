@@ -3,27 +3,39 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 import ts from "typescript";
+import { parseForESLint } from "vue-eslint-parser";
 
 import { bindingDir, packageNameAt } from "./kits.mjs";
 import { createAttributeFlow } from "./vue-attribute-flow.mjs";
 
 const printer = ts.createPrinter({ removeComments: true });
 
-/** SFC scripts are TypeScript; markup is used only to find rendered imports. */
+/** Read SFC block boundaries and rendered elements from Vue's markup AST. */
 function scriptSource(file) {
   const text = readFileSync(file, "utf8");
-  const script = file.endsWith(".vue")
-    ? [...text.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)]
-        .map((match) => match[1])
-        .join("\n")
-    : text;
+  if (!file.endsWith(".vue"))
+    return {
+      source: ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true),
+      template: undefined,
+    };
+  // TypeScript is parsed below. Skipping the script parser here keeps valid TS
+  // and generic SFC macros intact while Vue owns all markup boundaries.
+  const parsed = parseForESLint(text, {
+    filePath: file,
+    parser: false,
+    sourceType: "module",
+    ecmaVersion: "latest",
+  });
+  const document = parsed.services.getDocumentFragment();
+  const script = document.children
+    .filter((node) => node.type === "VElement" && node.name === "script")
+    .map((node) =>
+      text.slice(node.startTag.range[1], node.endTag?.range[0] ?? node.range[1])
+    )
+    .join("\n");
   return {
     source: ts.createSourceFile(file, script, ts.ScriptTarget.Latest, true),
-    template: file.endsWith(".vue")
-      ? text
-          .replace(/<!--[\s\S]*?-->/g, "")
-          .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "")
-      : "",
+    template: parsed.ast.templateBody,
   };
 }
 
@@ -133,11 +145,13 @@ function directCalls(source, imports) {
 }
 
 function renderedNames(template, imports) {
-  const tags = new Set(
-    [...template.matchAll(/<([A-Za-z][\w-]*)(?=[\s/>])/g)].map(
-      (match) => match[1]
-    )
-  );
+  const tags = new Set();
+  function visit(node) {
+    if (node?.type !== "VElement") return;
+    tags.add(node.rawName);
+    for (const child of node.children) visit(child);
+  }
+  visit(template);
   return [...imports.keys()].filter((name) => {
     const kebab = name.replace(/\B([A-Z])/g, "-$1").toLowerCase();
     return tags.has(name) || tags.has(kebab);

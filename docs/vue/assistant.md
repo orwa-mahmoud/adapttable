@@ -2,8 +2,11 @@
 
 The Vue packages are experimental and unreleased. `@adapttable/ai-vue`
 connects neutral AI stores to Vue 3.5. `@adapttable/vue/adapter` provides
-structural Chrome and required control slots; a kit such as
-`@adapttable/vue-unstyled/assistant` supplies the visible controls.
+structural Chrome and required control slots. Unstyled, Reka UI and shadcn-vue
+supply the visible controls through their optional `/assistant` entries.
+Element Plus, Vuetify, Naive UI, Nuxt UI and Quasar do not currently export an
+assistant surface; their tables can use the headless agent feature or a
+host-composed surface built from the binding's required slots.
 
 ## Choose the integration
 
@@ -98,6 +101,33 @@ const rowKey = (row: { id: string }) => row.id;
 surface feature is an error. `agentApproval()` registers the table review
 strip. These kit features import no AI runtime, so a host can also provide its
 own structurally compatible conversation state.
+
+## Choose an assistant presentation
+
+The same `TableAssistant`, `AgentApproval`, `tableAssistant()` and
+`agentApproval()` API is exported by:
+
+- `@adapttable/vue-unstyled/assistant`, with native HTML controls.
+- `@adapttable/reka-ui/assistant`, with Reka primitives.
+- `@adapttable/shadcn-vue/assistant`, with shadcn Sheet, input, button and other
+  copied kit controls.
+
+Replace both the table and assistant imports when adapting the example above.
+Keep `tableAgent`, `useTableAssistant` and optional `useSpeechInput` on
+`@adapttable/ai-vue`. A kit's assistant entry does not load that AI binding, select
+a model, supply a transport or authorize host writes. The host provides its
+conversation state, backend connection and approval decisions.
+
+Kit surfaces consume the same controlled open state, localized labels, approval
+ownership and revoked-session guards. Overlay presentation follows the table's
+fullscreen container; RTL follows the resolved direction. Compact screens use
+the chosen kit's responsive surface. During SSR, keep the initial state stable
+and defer browser transport, focus and speech resources until mounting. Removing
+or suspending the owning component retires its pending UI work.
+
+The [shadcn-vue action lab](/vue/demo/shadcn-vue/action-surfaces/) uses a local
+fixture to exercise the real assistant controls. It is not a live model session
+or a statement that browser CI has passed.
 
 ## Approval and controlled state
 

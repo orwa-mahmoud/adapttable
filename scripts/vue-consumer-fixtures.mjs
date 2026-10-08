@@ -7,6 +7,58 @@ export const XLSX_WRITER_MARKER = "function xlsxWriter";
 const writers = [PDF_WRITER_MARKER, XLSX_WRITER_MARKER];
 const drawerStyles = ["data-adapttable-filter-dialog", "filters-backdrop"];
 
+/** Runtime implementations only: shared feature keys and erased types are allowed. */
+export const VUE_OPTIONAL_BASE_MARKERS = [
+  "createCommandPaletteController",
+  "CommandPaletteChrome",
+  "createContextMenuOpenController",
+  "ContextMenuChrome",
+  "createSavedViewsController",
+  "createSavedViewRenameController",
+  "SavedViewsMenuChrome",
+  "SavedViewsPanelChrome",
+  "groupedEntriesForStrategy",
+  "createGroupingPanelController",
+  "GroupingPanelChrome",
+  "createRowReorderController",
+  "RowReorderChrome",
+  "row-actions-trigger",
+  "row-actions-menu",
+  "TableAssistantChrome",
+  "AgentApprovalChrome",
+  "createTableAssistant",
+  "tableAgent",
+  "adapttable.agent.v1",
+];
+
+const nativeConsumerHosts = {
+  "nuxt-ui": "nuxt-vite",
+  quasar: "quasar-vite",
+};
+
+/** Styled base consumers include their actual shipped CSS and native kit graph. */
+export const VUE_NATIVE_BASE_SPECS = [
+  ["element-plus", "adapttable-element-plus"],
+  ["naive-ui", "adapttable-naive"],
+  ["nuxt-ui", "adapttable-nuxt"],
+  ["shadcn-vue", "adapttable-shadcn-vue"],
+  ["quasar", "adapttable-quasar"],
+  ["reka-ui", "at-reka"],
+  ["vuetify", "adapttable-vuetify"],
+].map(([kit, css]) => ({
+  name: `${kit} · table`,
+  pkg: `adapter-${kit}`,
+  consumerHost: nativeConsumerHosts[kit],
+  hardBaseCeiling: true,
+  code: 'export { DataTable } from "PKG";\nimport "STYLE";',
+  styleEntryFile: "styles.css",
+  presentCss: [css],
+  functionality: `${kit} table, native controls and published adapter stylesheet`,
+  present: ["DataTable"],
+  absent: [...writers, "export-progress-surface", ...VUE_OPTIONAL_BASE_MARKERS],
+  rejectOptionalAi: true,
+}));
+
 /** Each row names the actual published entries and functionality being measured. */
 export const VUE_CONSUMER_SPECS = [
   {
@@ -99,6 +151,7 @@ export const VUE_CONSUMER_SPECS = [
     present: ["DataTable", ...writers],
     absent: [],
   },
+  ...VUE_NATIVE_BASE_SPECS,
 ];
 
 /** Optional rendering is checked independently from the existing size budgets. */
@@ -132,7 +185,7 @@ export function vueConsumerFixtures(comparables, hardBaseCeiling) {
       ...spec,
       framework: "vue",
       kind: "vue-consumer",
-      kit: spec.pkg === "vue" ? undefined : "vue-unstyled",
+      kit: spec.pkg === "vue" ? undefined : spec.pkg.replace(/^adapter-/, ""),
       budgetKB: spec.hardBaseCeiling ? hardBaseCeiling : comparable.budgetKB,
     };
   });

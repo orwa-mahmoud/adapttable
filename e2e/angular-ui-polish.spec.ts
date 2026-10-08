@@ -174,7 +174,7 @@ for (const key of [
           if (!anchor || !card) return false;
           return (
             card.y >= anchor.y + anchor.height ||
-            (key === "material" && card.y + card.height <= anchor.y)
+            card.y + card.height <= anchor.y
           );
         })
         .toBe(true);

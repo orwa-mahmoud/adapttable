@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { JSDOM } from "jsdom";
 import { describe, expect, it } from "vitest";
 import { createSSRApp, h } from "vue";
 import { renderToString } from "vue/server-renderer";
@@ -27,13 +28,12 @@ describe("footer server rendering", () => {
             }),
         })
       );
-      const markup = forceMobile
-        ? /<article[^>]*data-adapttable-part="summary-card"[^>]*>([\s\S]*?)<\/article>/.exec(
-            html
-          )?.[1]
-        : /<tfoot[^>]*>([\s\S]*?)<\/tfoot>/.exec(html)?.[1];
-      expect(markup).toBeDefined();
-      const text = markup?.replace(/<[^<>]*>/g, "");
+      const document = JSDOM.fragment(html);
+      const summary = document.querySelector(
+        forceMobile ? '[data-adapttable-part="summary-card"]' : "tfoot"
+      );
+      expect(summary).not.toBeNull();
+      const text = summary?.textContent;
       expect(text).toContain("0");
       expect(text).not.toMatch(/false|true/);
     }

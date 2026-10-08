@@ -54,6 +54,8 @@ it("keeps Context Surface ownership and current presentation props through paren
   direction.value = "rtl";
   await settle();
   const current = wrapper.findComponent(ContextMenuChrome).props("slots");
+  if (!first || !current)
+    throw new Error("Expected the kit to provide context-menu control slots.");
   expect(current.Surface).toBe(first.Surface);
   expect(current.Item).toBe(first.Item);
   expect(current.Separator).toBe(first.Separator);

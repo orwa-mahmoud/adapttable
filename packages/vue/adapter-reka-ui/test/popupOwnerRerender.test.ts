@@ -1,8 +1,8 @@
-import { resolveLabels } from "@adapttable/core";
 import {
   CONTEXT_MENU_CONTROL,
   ContextMenuChrome,
   type ContextMenuModel,
+  resolveLabels,
 } from "@adapttable/vue/adapter";
 import { mount } from "@vue/test-utils";
 import { afterEach, expect, it, vi } from "vitest";
@@ -54,6 +54,8 @@ it("keeps Context Surface ownership and current presentation props through paren
   direction.value = "rtl";
   await settle();
   const current = wrapper.findComponent(ContextMenuChrome).props("slots");
+  if (!first || !current)
+    throw new Error("Expected the kit to provide context-menu control slots.");
   expect(current.Surface).toBe(first.Surface);
   expect(current.Item).toBe(first.Item);
   expect(current.Separator).toBe(first.Separator);

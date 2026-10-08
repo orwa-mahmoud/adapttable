@@ -58,6 +58,26 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./filters": {
+      "import": {
+        "types": "./dist/filters.d.ts",
+        "default": "./dist/filters.js"
+      },
+      "require": {
+        "types": "./dist/filters.d.cts",
+        "default": "./dist/filters.cjs"
+      }
+    },
+    "./grouping": {
+      "import": {
+        "types": "./dist/grouping.d.ts",
+        "default": "./dist/grouping.js"
+      },
+      "require": {
+        "types": "./dist/grouping.d.cts",
+        "default": "./dist/grouping.cjs"
+      }
+    },
     "./density": {
       "import": {
         "types": "./dist/density.d.ts",
@@ -78,24 +98,24 @@
         "default": "./dist/fullscreen.cjs"
       }
     },
-    "./grouping": {
+    "./header-filters": {
       "import": {
-        "types": "./dist/grouping.d.ts",
-        "default": "./dist/grouping.js"
+        "types": "./dist/header-filters.d.ts",
+        "default": "./dist/header-filters.js"
       },
       "require": {
-        "types": "./dist/grouping.d.cts",
-        "default": "./dist/grouping.cjs"
+        "types": "./dist/header-filters.d.cts",
+        "default": "./dist/header-filters.cjs"
       }
     },
-    "./tree": {
+    "./row-actions": {
       "import": {
-        "types": "./dist/tree.d.ts",
-        "default": "./dist/tree.js"
+        "types": "./dist/row-actions.d.ts",
+        "default": "./dist/row-actions.js"
       },
       "require": {
-        "types": "./dist/tree.d.cts",
-        "default": "./dist/tree.cjs"
+        "types": "./dist/row-actions.d.cts",
+        "default": "./dist/row-actions.cjs"
       }
     },
     "./row-detail": {
@@ -108,14 +128,14 @@
         "default": "./dist/row-detail.cjs"
       }
     },
-    "./nested-table": {
+    "./tree": {
       "import": {
-        "types": "./dist/nested-table.d.ts",
-        "default": "./dist/nested-table.js"
+        "types": "./dist/tree.d.ts",
+        "default": "./dist/tree.js"
       },
       "require": {
-        "types": "./dist/nested-table.d.cts",
-        "default": "./dist/nested-table.cjs"
+        "types": "./dist/tree.d.cts",
+        "default": "./dist/tree.cjs"
       }
     },
     "./editing": {
@@ -138,26 +158,6 @@
         "default": "./dist/batch-editing.cjs"
       }
     },
-    "./filters": {
-      "import": {
-        "types": "./dist/filters.d.ts",
-        "default": "./dist/filters.js"
-      },
-      "require": {
-        "types": "./dist/filters.d.cts",
-        "default": "./dist/filters.cjs"
-      }
-    },
-    "./header-filters": {
-      "import": {
-        "types": "./dist/header-filters.d.ts",
-        "default": "./dist/header-filters.js"
-      },
-      "require": {
-        "types": "./dist/header-filters.d.cts",
-        "default": "./dist/header-filters.cjs"
-      }
-    },
     "./cell-navigation": {
       "import": {
         "types": "./dist/cell-navigation.d.ts",
@@ -176,16 +176,6 @@
       "require": {
         "types": "./dist/column-selection.d.cts",
         "default": "./dist/column-selection.cjs"
-      }
-    },
-    "./find-in-table": {
-      "import": {
-        "types": "./dist/find-in-table.d.ts",
-        "default": "./dist/find-in-table.js"
-      },
-      "require": {
-        "types": "./dist/find-in-table.d.cts",
-        "default": "./dist/find-in-table.cjs"
       }
     },
     "./status-bar": {
@@ -208,6 +198,236 @@
         "default": "./dist/selection-stats.cjs"
       }
     },
+    "./find-in-table": {
+      "import": {
+        "types": "./dist/find-in-table.d.ts",
+        "default": "./dist/find-in-table.js"
+      },
+      "require": {
+        "types": "./dist/find-in-table.d.cts",
+        "default": "./dist/find-in-table.cjs"
+      }
+    },
+    "./sparkline": {
+      "import": {
+        "types": "./dist/sparkline.d.ts",
+        "default": "./dist/sparkline.js"
+      },
+      "require": {
+        "types": "./dist/sparkline.d.cts",
+        "default": "./dist/sparkline.cjs"
+      }
+    },
+    "./stream": {
+      "import": {
+        "types": "./dist/stream.d.ts",
+        "default": "./dist/stream.js"
+      },
+      "require": {
+        "types": "./dist/stream.d.cts",
+        "default": "./dist/stream.cjs"
+      }
+    },
+    "./cell-span": {
+      "import": {
+        "types": "./dist/cell-span.d.ts",
+        "default": "./dist/cell-span.js"
+      },
+      "require": {
+        "types": "./dist/cell-span.d.cts",
+        "default": "./dist/cell-span.cjs"
+      }
+    },
+    "./column-groups": {
+      "import": {
+        "types": "./dist/column-groups.d.ts",
+        "default": "./dist/column-groups.js"
+      },
+      "require": {
+        "types": "./dist/column-groups.d.cts",
+        "default": "./dist/column-groups.cjs"
+      }
+    },
+    "./extra-rows": {
+      "import": {
+        "types": "./dist/extra-rows.d.ts",
+        "default": "./dist/extra-rows.js"
+      },
+      "require": {
+        "types": "./dist/extra-rows.d.cts",
+        "default": "./dist/extra-rows.cjs"
+      }
+    },
+    "./fit-columns": {
+      "import": {
+        "types": "./dist/fit-columns.d.ts",
+        "default": "./dist/fit-columns.js"
+      },
+      "require": {
+        "types": "./dist/fit-columns.d.cts",
+        "default": "./dist/fit-columns.cjs"
+      }
+    },
+    "./formula": {
+      "import": {
+        "types": "./dist/formula.d.ts",
+        "default": "./dist/formula.js"
+      },
+      "require": {
+        "types": "./dist/formula.d.cts",
+        "default": "./dist/formula.cjs"
+      }
+    },
+    "./multi-sort": {
+      "import": {
+        "types": "./dist/multi-sort.d.ts",
+        "default": "./dist/multi-sort.js"
+      },
+      "require": {
+        "types": "./dist/multi-sort.d.cts",
+        "default": "./dist/multi-sort.cjs"
+      }
+    },
+    "./pinned-summary-rows": {
+      "import": {
+        "types": "./dist/pinned-summary-rows.d.ts",
+        "default": "./dist/pinned-summary-rows.js"
+      },
+      "require": {
+        "types": "./dist/pinned-summary-rows.d.cts",
+        "default": "./dist/pinned-summary-rows.cjs"
+      }
+    },
+    "./resizable-columns": {
+      "import": {
+        "types": "./dist/resizable-columns.d.ts",
+        "default": "./dist/resizable-columns.js"
+      },
+      "require": {
+        "types": "./dist/resizable-columns.d.cts",
+        "default": "./dist/resizable-columns.cjs"
+      }
+    },
+    "./row-appearance": {
+      "import": {
+        "types": "./dist/row-appearance.d.ts",
+        "default": "./dist/row-appearance.js"
+      },
+      "require": {
+        "types": "./dist/row-appearance.d.cts",
+        "default": "./dist/row-appearance.cjs"
+      }
+    },
+    "./row-pinning": {
+      "import": {
+        "types": "./dist/row-pinning.d.ts",
+        "default": "./dist/row-pinning.js"
+      },
+      "require": {
+        "types": "./dist/row-pinning.d.cts",
+        "default": "./dist/row-pinning.cjs"
+      }
+    },
+    "./virtualize": {
+      "import": {
+        "types": "./dist/virtualize.d.ts",
+        "default": "./dist/virtualize.js"
+      },
+      "require": {
+        "types": "./dist/virtualize.d.cts",
+        "default": "./dist/virtualize.cjs"
+      }
+    },
+    "./columns": {
+      "import": {
+        "types": "./dist/columns.d.ts",
+        "default": "./dist/columns.js"
+      },
+      "require": {
+        "types": "./dist/columns.d.cts",
+        "default": "./dist/columns.cjs"
+      }
+    },
+    "./rows": {
+      "import": {
+        "types": "./dist/rows.d.ts",
+        "default": "./dist/rows.js"
+      },
+      "require": {
+        "types": "./dist/rows.d.cts",
+        "default": "./dist/rows.cjs"
+      }
+    },
+    "./nested-table": {
+      "import": {
+        "types": "./dist/nested-table.d.ts",
+        "default": "./dist/nested-table.js"
+      },
+      "require": {
+        "types": "./dist/nested-table.d.cts",
+        "default": "./dist/nested-table.cjs"
+      }
+    },
+    "./bulk-actions": {
+      "import": {
+        "types": "./dist/bulk-actions.d.ts",
+        "default": "./dist/bulk-actions.js"
+      },
+      "require": {
+        "types": "./dist/bulk-actions.d.cts",
+        "default": "./dist/bulk-actions.cjs"
+      }
+    },
+    "./print": {
+      "import": {
+        "types": "./dist/print.d.ts",
+        "default": "./dist/print.js"
+      },
+      "require": {
+        "types": "./dist/print.d.cts",
+        "default": "./dist/print.cjs"
+      }
+    },
+    "./export": {
+      "import": {
+        "types": "./dist/export.d.ts",
+        "default": "./dist/export.js"
+      },
+      "require": {
+        "types": "./dist/export.d.cts",
+        "default": "./dist/export.cjs"
+      }
+    },
+    "./export-csv": {
+      "import": {
+        "types": "./dist/export-csv.d.ts",
+        "default": "./dist/export-csv.js"
+      },
+      "require": {
+        "types": "./dist/export-csv.d.cts",
+        "default": "./dist/export-csv.cjs"
+      }
+    },
+    "./export-pdf": {
+      "import": {
+        "types": "./dist/export-pdf.d.ts",
+        "default": "./dist/export-pdf.js"
+      },
+      "require": {
+        "types": "./dist/export-pdf.d.cts",
+        "default": "./dist/export-pdf.cjs"
+      }
+    },
+    "./export-xlsx": {
+      "import": {
+        "types": "./dist/export-xlsx.d.ts",
+        "default": "./dist/export-xlsx.js"
+      },
+      "require": {
+        "types": "./dist/export-xlsx.d.cts",
+        "default": "./dist/export-xlsx.cjs"
+      }
+    },
     "./column-menu": {
       "import": {
         "types": "./dist/column-menu.d.ts",
@@ -218,7 +438,107 @@
         "default": "./dist/column-menu.cjs"
       }
     },
+    "./saved-views": {
+      "import": {
+        "types": "./dist/saved-views.d.ts",
+        "default": "./dist/saved-views.js"
+      },
+      "require": {
+        "types": "./dist/saved-views.d.cts",
+        "default": "./dist/saved-views.cjs"
+      }
+    },
+    "./context-menu": {
+      "import": {
+        "types": "./dist/context-menu.d.ts",
+        "default": "./dist/context-menu.js"
+      },
+      "require": {
+        "types": "./dist/context-menu.d.cts",
+        "default": "./dist/context-menu.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./command-palette": {
+      "import": {
+        "types": "./dist/command-palette.d.ts",
+        "default": "./dist/command-palette.js"
+      },
+      "require": {
+        "types": "./dist/command-palette.d.cts",
+        "default": "./dist/command-palette.cjs"
+      }
+    },
+    "./side-panel": {
+      "import": {
+        "types": "./dist/side-panel.d.ts",
+        "default": "./dist/side-panel.js"
+      },
+      "require": {
+        "types": "./dist/side-panel.d.cts",
+        "default": "./dist/side-panel.cjs"
+      }
+    },
+    "./grouping-panel": {
+      "import": {
+        "types": "./dist/grouping-panel.d.ts",
+        "default": "./dist/grouping-panel.js"
+      },
+      "require": {
+        "types": "./dist/grouping-panel.d.cts",
+        "default": "./dist/grouping-panel.cjs"
+      }
+    },
+    "./row-reorder": {
+      "import": {
+        "types": "./dist/row-reorder.d.ts",
+        "default": "./dist/row-reorder.js"
+      },
+      "require": {
+        "types": "./dist/row-reorder.d.cts",
+        "default": "./dist/row-reorder.cjs"
+      }
+    },
+    "./pivot": {
+      "import": {
+        "types": "./dist/pivot.d.ts",
+        "default": "./dist/pivot.js"
+      },
+      "require": {
+        "types": "./dist/pivot.d.cts",
+        "default": "./dist/pivot.cjs"
+      }
+    },
+    "./assistant": {
+      "import": {
+        "types": "./dist/assistant.d.ts",
+        "default": "./dist/assistant.js"
+      },
+      "require": {
+        "types": "./dist/assistant.d.cts",
+        "default": "./dist/assistant.cjs"
+      }
+    },
+    "./features": {
+      "import": {
+        "types": "./dist/features.d.ts",
+        "default": "./dist/features.js"
+      },
+      "require": {
+        "types": "./dist/features.d.cts",
+        "default": "./dist/features.cjs"
+      }
+    },
+    "./preset": {
+      "import": {
+        "types": "./dist/preset.d.ts",
+        "default": "./dist/preset.js"
+      },
+      "require": {
+        "types": "./dist/preset.d.cts",
+        "default": "./dist/preset.cjs"
+      }
+    }
   }
 }

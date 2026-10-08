@@ -12,7 +12,7 @@ It does not use Nuxt UI's separate `UTable` engine.
 
 ## Features
 
-The Nuxt UI adapter currently exports 36 canonical feature factories. Its base
+The Nuxt UI adapter currently exports 41 canonical feature factories. Its base
 DataTable provides sorting, pagination, global search, row selection, desktop
 tables and mobile cards through the shared Vue model and genuine Nuxt controls.
 Feature composition is opt-in through the following factories:
@@ -34,7 +34,7 @@ Feature composition is opt-in through the following factories:
 - Hierarchy: `groupingPanel`, `grouping`, `tree`, `rowDetail` and `nestedTable`. Nuxt expansion,
   selection and load-more buttons present group rows, hierarchical rows, row
   expansion and nested tables using the binding's models.
-- Actions: `bulkActions`, `print` and `exportCsv`. Nuxt Button presents host
+- Actions: `bulkActions`, `print`, `exportCsv`, `commandPalette` and `contextMenu`. Nuxt Button presents host
   actions, while Nuxt Card, Icon and a native progress element present progress,
   cancellation, retry and download controls. The binding owns job lifetimes.
 - Navigation and status: `cellNavigation`, `columnSelectionCheckbox`,
@@ -42,10 +42,30 @@ Feature composition is opt-in through the following factories:
   Button, Checkbox and Badge present Find, column selection and status figures.
   The binding owns keyboard navigation, range selection, fill requests and
   virtualization with one scroll container.
+- Workspace: `savedViews` and `sidePanel`. Nuxt Popover, Card, Input, Badge and
+  Button present saved-view management and controlled side panels.
+- Reordering: `rowReorder`. Nuxt controls present desktop drag/keyboard handles,
+  mobile move buttons and group/tree move confirmations over the core controller.
+
+These kit entries cover row expansion, row pinning, row reordering, saved views,
+custom filter types and the command palette with Nuxt controls.
+
+Binding-hosted helpers and writers are available through separate Vue imports:
+
+- Pivot models from `@adapttable/vue/pivot` prepare rows and columns for host-owned compositions.
+- The spreadsheet formula engine from `@adapttable/vue/formula` prepares formula columns.
+- Sparkline components and column helpers come from `@adapttable/vue/sparkline`.
+- Aggregation uses `aggregate` from `@adapttable/vue` with the table's `summaryRow` prop.
+- PDF export and print layout helpers come from `@adapttable/vue/pdf`.
+- XLSX writers come from `@adapttable/vue/xlsx`.
+
+Supply the PDF or XLSX writer to the adapter's `exportCsv` flow to reuse its
+Nuxt progress, cancellation and download controls. These binding-hosted helpers
+and writers are separate from the 41 kit feature factories listed above.
 
 The implemented controls retain localized labels, RTL direction and the shared
 SSR and hydration contracts. This inventory describes the available source
-surface; it does not imply full feature parity or completed browser validation.
+surface; it does not imply completed browser validation.
 
 ## Nuxt UI setup
 
@@ -359,3 +379,38 @@ ordinary Nuxt grouping row controls without mounting a second grouping model.
 
 Grouping selects portal through the scoped Nuxt provider, outside the card
 clipping boundary and inside the fullscreen container when active.
+
+## Command palette, context menu and side panel
+
+Import `commandPalette` from `@adapttable/nuxt-ui/command-palette`. Its optional
+`button` and keyboard shortcuts open a Nuxt Modal containing Nuxt Input and
+Button controls. The shared command model owns filtering, keyboard selection
+and dispatch; Nuxt owns modal focus, Escape, outside dismissal and portals.
+`contextMenu` from `@adapttable/nuxt-ui/context-menu` presents the shared cell,
+row and header actions with Nuxt Popover, Card, Button and Separator controls.
+The shared core menu-navigation controller owns keyboard navigation and typeahead. Both features honor disabled
+commands, localized labels, custom class names and the table's portal container.
+
+Import `sidePanel` from `@adapttable/nuxt-ui/side-panel` and supply `panels`,
+`open` and `onOpenChange`. Nuxt Card and Button fill the shared side-panel Chrome.
+Selection stays host-controlled, including rejected tab and close requests.
+The shared layout places the panel beside desktop tables and below mobile cards;
+logical start/end placement and tab arrow keys follow the table direction.
+
+## Saved views and row reordering
+
+Import `savedViews` and `SavedViewsPanel` from `@adapttable/nuxt-ui/saved-views`.
+The feature takes the binding's `UseSavedViewsOptions` and reuses the table's
+single saved-view store. The standalone panel exposes rename, ordering, default
+and removal controls through its callbacks. Read-only views retain their guards.
+
+Import `rowReorder` from `@adapttable/nuxt-ui/row-reorder` and pass the host's
+`onRowReorder` callback plus optional `RowReorderOptions`. The table never moves
+host data itself. Nuxt buttons support desktop drag/keyboard interactions and
+mobile up/down requests; group/tree destination menus and confirmation dialogs
+use Nuxt primitives. `useRowReorder` is re-exported for custom compositions.
+
+The canonical column-selection import is
+`@adapttable/nuxt-ui/column-selection`. The existing `columnSelectionCheckbox`
+export from `@adapttable/nuxt-ui/cell-navigation` remains available. All these
+features are separate opt-in entries and are absent from the base barrel.

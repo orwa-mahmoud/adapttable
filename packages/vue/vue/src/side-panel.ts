@@ -12,16 +12,30 @@ import {
 import { featureActivity } from "./actions/lifecycle";
 function mountSidePanel<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
+  let hasActivated = context.active.value;
+  watch(
+    context.active,
+    (value) => {
+      if (value) hasActivated = true;
+    },
+    { flush: "sync" }
+  );
   let requestOwner:
     | {
         config: SidePanelOptions;
         callback: SidePanelOptions["onOpenChange"];
+        active: boolean;
         request: SidePanelOptions["onOpenChange"];
       }
     | undefined;
   const requestFor = (config: SidePanelOptions) => {
     const callback = config.onOpenChange;
-    if (requestOwner?.config !== config || requestOwner.callback !== callback) {
+    const activity = active();
+    if (
+      requestOwner?.config !== config ||
+      requestOwner.callback !== callback ||
+      requestOwner.active !== activity
+    ) {
       const request = (key: string | null) => {
         const current = context.options.value.sidePanel as SidePanelOptions;
         if (
@@ -32,7 +46,7 @@ function mountSidePanel<TRow>(context: FeatureMountContext<TRow>): void {
         )
           callback(key);
       };
-      requestOwner = { config, callback, request };
+      requestOwner = { config, callback, active: activity, request };
     }
     return requestOwner.request;
   };
@@ -49,7 +63,9 @@ function mountSidePanel<TRow>(context: FeatureMountContext<TRow>): void {
     );
     return {
       panels,
-      open: active() ? toValue(config.open) : null,
+      // Read the initial controlled projection for SSR and hydration. A later
+      // suspension removes the panel, so retained DOM controls cannot revive.
+      open: active() || !hasActivated ? toValue(config.open) : null,
       side: config.side,
       // A controlled open update retains the same callback owner.
       onOpenChange: requestFor(config),

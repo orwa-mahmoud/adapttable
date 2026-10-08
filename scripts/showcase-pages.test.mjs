@@ -50,12 +50,26 @@ const VUE_KIT_PREVIEW_ENTRIES = new Map([
   ["quasar", "src/vue/kits/entry-quasar.ts"],
 ]);
 
+const VUE_KIT_LAB_ENTRIES = new Map([
+  ["shadcn-vue/filter-panel", "src/vue/kits/entry-shadcn-filter-panel.ts"],
+  ["shadcn-vue/feature-parity", "src/vue/kits/entry-shadcn-feature-parity.ts"],
+  [
+    "shadcn-vue/action-surfaces",
+    "src/vue/kits/entry-shadcn-action-surfaces.ts",
+  ],
+  ["nuxt-ui/workspace", "src/vue/kits/entry-nuxt-workspace.ts"],
+]);
+
 const STANDALONE_ENTRIES = new Map([
   ["main", "src/main.tsx"],
   ["all-options", "src/entry-all-options.tsx"],
   ["agent-approval", "src/entry-agent-approval.tsx"],
   ["mcp-app", "src/entry-mcp-app.tsx"],
   ...[...VUE_KIT_PREVIEW_ENTRIES].map(([kit, entry]) => [`vue-${kit}`, entry]),
+  ...[...VUE_KIT_LAB_ENTRIES].map(([path, entry]) => [
+    `vue-${path.replaceAll("/", "-")}`,
+    entry,
+  ]),
   ["angular-main", "src/angular/entry-demo.ts"],
   ["angular-all-options", "src/angular/entry-demo.ts"],
   ...[...VUE_PREVIEW_ENTRIES].map(([slug, entry]) => [
@@ -157,6 +171,15 @@ function assertStandaloneEntry(page, source, entry) {
     assert.ok(source.includes(`data-angular-mode="${lab ? "lab" : "live"}"`));
     assert.doesNotMatch(source, /data-matrix-page/);
   } else if (page.framework === "vue") {
+    const lab = [...VUE_KIT_LAB_ENTRIES.keys()].find(
+      (path) => page.key === `vue-${path.replaceAll("/", "-")}`
+    );
+    if (lab) {
+      assert.equal(page.route, `/vue/demo/${lab}/`);
+      assert.equal(page.indexable, false);
+      assert.doesNotMatch(source, /data-matrix-page/);
+      return;
+    }
     const kit = [...VUE_KIT_PREVIEW_ENTRIES.keys()].find(
       (key) => page.key === `vue-${key}`
     );
@@ -247,6 +270,53 @@ describe("the showcase page manifest", () => {
         /@adapttable\/(?:core|react|angular|unstyled)["/]/
       );
     }
+  });
+
+  it("boots real-control Vue labs separately from the seven basic kit previews", () => {
+    const indexed = indexableRoutes(SHOWCASE_PAGES);
+    for (const [path, entry] of VUE_KIT_LAB_ENTRIES) {
+      const key = `vue-${path.replaceAll("/", "-")}`;
+      assert.deepEqual(
+        SHOWCASE_PAGES.filter((page) => page.key === key),
+        [
+          {
+            key,
+            html: `./vue/${path}/index.html`,
+            route: `/vue/demo/${path}/`,
+            indexable: false,
+            framework: "vue",
+          },
+        ]
+      );
+      assert.equal(indexed.includes(`/vue/demo/${path}/`), false);
+      const source = readFileSync(join(SHOWCASE, entry), "utf8");
+      assert.match(source, /createApp\(Fixture\)/);
+      if (path.startsWith("shadcn-vue/")) {
+        assert.match(source, /packages\/vue\/adapter-shadcn-vue\//);
+      } else {
+        assert.match(source, /from "\.\/NuxtWorkspaceShowcase\.vue"/);
+      }
+      assert.doesNotMatch(
+        source,
+        /@adapttable\/(?:core|react|angular|unstyled)["/]/
+      );
+    }
+    const nuxt = readFileSync(
+      join(SHOWCASE, VUE_KIT_LAB_ENTRIES.get("nuxt-ui/workspace")),
+      "utf8"
+    );
+    assert.match(nuxt, /import "\.\/nuxt-ui\.css"/);
+    assert.match(nuxt, /from "@nuxt\/ui\/vue-plugin"/);
+    assert.match(nuxt, /\.use\(ui\)\.mount\("#root"\)/);
+    const fixture = readFileSync(
+      join(SHOWCASE, "src/vue/kits/NuxtWorkspaceShowcase.vue"),
+      "utf8"
+    );
+    assert.match(
+      fixture,
+      /packages\/vue\/adapter-nuxt-ui\/browser\/workspace\/NuxtWorkspaceFixture\.vue/
+    );
+    assert.match(fixture, /<Fixture \/>/);
   });
 
   it("registers row-reordering and aggregation for every published adapter", () => {

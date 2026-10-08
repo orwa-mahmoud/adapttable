@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { type ColumnDef, DataTable } from "@adapttable/naive-ui";
 import { bulkActions } from "@adapttable/naive-ui/bulk-actions";
-import {
-  cellNavigation,
-  columnSelectionCheckbox,
-} from "@adapttable/naive-ui/cell-navigation";
+import { cellNavigation } from "@adapttable/naive-ui/cell-navigation";
+import { columnSelectionCheckbox } from "@adapttable/naive-ui/column-selection";
 import { exportCsv } from "@adapttable/naive-ui/export";
 import { findInTable } from "@adapttable/naive-ui/find-in-table";
 import { print } from "@adapttable/naive-ui/print";

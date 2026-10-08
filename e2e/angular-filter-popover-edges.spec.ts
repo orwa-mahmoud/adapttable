@@ -373,10 +373,12 @@ for (const key of ["angular-cdk", "material", "aria"]) {
           if (viewport.width === 390) {
             // Consumer toolbars can center the trigger, where neither edge
             // alignment can contain a full-width card on a narrow screen.
+            // The synthetic floating trigger owns its stacking level so
+            // unrelated toolbar siblings cannot intercept its real pointer.
             await angularPart(kit, page, "filters-anchor").evaluate(
               (anchor) => {
                 anchor.style.cssText =
-                  "position: fixed; left: 50%; top: 120px; transform: translateX(-50%); display: inline-flex";
+                  "position: fixed; left: 50%; top: 120px; transform: translateX(-50%); display: inline-flex; z-index: 1";
               }
             );
             await trigger.click();

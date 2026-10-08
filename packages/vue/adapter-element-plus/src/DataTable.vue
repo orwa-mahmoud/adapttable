@@ -15,7 +15,6 @@ import {
 import {
   computed,
   getCurrentInstance,
-  h,
   onBeforeUnmount,
   onBeforeUpdate,
   shallowRef,
@@ -34,8 +33,8 @@ import {
   ELEMENT_GROUP_ROW,
   elementGroupRowSlotKey,
 } from "./elementHierarchyControlSlots";
-import { ElementRowActions } from "./ElementRowActions";
 import { elementSurfaceControls } from "./elementSurfaceControls";
+import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(defineProps<DataTableProps<TRow>>(), {
@@ -98,13 +97,22 @@ function controls(): TableChromeSlots<TRow> {
     SelectionCheckbox: elementSelectionCheckbox,
     ColumnGroupToggle: elementColumnGroupToggle,
     ResizeHandle: ({ attrs }) => elementButton(attrs, null),
-    RowActions: ({ controls: actions }) =>
-      h(ElementRowActions<TRow>, {
-        controls: actions,
-        layout: props.rowActionsLayout,
-        label: table.labels.value.rowActionsMenu,
-        classNames: names.value,
-      }),
+    RowActions: ({ controls: actions }) => {
+      if (!shell.slotFills.value.get(ROW_ACTIONS_CONTROL.id)?.length)
+        throw new Error(
+          "AdaptTable: Element Plus row actions require rowActions() or rowPinning() from @adapttable/element-plus."
+        );
+      return renderFeatureSlot(
+        rowActionsControlKey<TRow>(),
+        shell.slotFills.value,
+        {
+          controls: actions,
+          layout: props.rowActionsLayout,
+          label: table.labels.value.rowActionsMenu,
+          classNames: names.value,
+        }
+      );
+    },
     ...elementHierarchyControls<TRow>(),
     GroupRow: (props) => {
       if (!shell.slotFills.value.get(ELEMENT_GROUP_ROW.id)?.length)

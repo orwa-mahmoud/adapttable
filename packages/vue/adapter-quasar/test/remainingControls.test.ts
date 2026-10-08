@@ -15,10 +15,8 @@ import { afterEach, expect, it, vi } from "vitest";
 import { defineComponent, h, KeepAlive, nextTick, shallowRef } from "vue";
 
 import { DataTable } from "../src";
-import {
-  cellNavigation,
-  columnSelectionCheckbox,
-} from "../src/cell-navigation";
+import { cellNavigation } from "../src/cell-navigation";
+import { columnSelectionCheckbox } from "../src/column-selection";
 import { commandPalette } from "../src/command-palette";
 import { contextMenu } from "../src/context-menu";
 import { groupingPanel } from "../src/grouping-panel";

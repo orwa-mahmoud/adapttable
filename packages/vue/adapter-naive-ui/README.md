@@ -13,6 +13,38 @@ import { DataTable } from "@adapttable/naive-ui";
 import "@adapttable/naive-ui/styles.css";
 ```
 
+## Features
+
+- Feature composition with 41 canonical factories and focused, opt-in imports.
+- Sorting, multi-sort, pagination, global search, selection and selection
+  statistics, with host-controlled state.
+- Filtering, custom filter types, the AND/OR filter tree and header filters.
+- Cell editing, row and batch editing, dirty indicators, undo/redo and
+  host-owned save callbacks.
+- Column management, column groups, resizing and fit-to-width.
+- Grouping and aggregation, tree data, row expansion and nested tables.
+- Row reordering, row pinning, pinned summary rows, row and column spanning,
+  full-width separator rows, row styling and virtualization.
+- Keyboard navigation, cell ranges, Find, saved views, row actions, bulk actions,
+  a command palette, context menus and side-panel view controls.
+- CSV export and host-owned print layout; PDF export and XLSX use optional
+  writers supplied to the export feature.
+- Pivot data, a spreadsheet formula engine and sparklines through the shared
+  Vue binding's opt-in entries.
+- Mobile card layouts, localized labels, RTL and server-side rendering (SSR)
+  with the host setup described below.
+
+Import `pdfWriter` from `@adapttable/vue/pdf` or `xlsxWriter` from
+`@adapttable/vue/xlsx` and pass it as the `writer` option to this adapter's
+`exportCsv` factory. The adapter retains its own export controls.
+
+For pivot data, import `pivot` and `pivotTableModel` from
+`@adapttable/vue/pivot` and render the prepared rows and columns with this
+adapter. Pivot configuration controls are host-composed; this package does not
+export a kit-specific pivot panel. Formula columns come from
+`buildFormulaColumns` in `@adapttable/vue/formula`, and SVG sparkline columns
+from `sparklineColumn` in `@adapttable/vue/sparkline`.
+
 ## Table rendering
 
 The desktop renderer uses Naive UI's `NTable`, `NThead`, `NTbody`, `NTr`, `NTh`

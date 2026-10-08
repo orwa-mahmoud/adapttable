@@ -45,7 +45,9 @@
       "@adapttable/quasar/grouping-panel": ["./src/grouping-panel.ts"],
       "@adapttable/quasar/command-palette": ["./src/command-palette.ts"],
       "@adapttable/quasar/context-menu": ["./src/context-menu.ts"],
-      "@adapttable/quasar/row-reorder": ["./src/row-reorder.ts"]
+      "@adapttable/quasar/row-reorder": ["./src/row-reorder.ts"],
+      "@adapttable/quasar/column-selection": ["./src/column-selection.ts"],
+      "@adapttable/quasar/nested-table": ["./src/nested-table.ts"]
     }
   },
   "include": ["src", "test", "vitest.config.ts", "tsdown.config.ts"],

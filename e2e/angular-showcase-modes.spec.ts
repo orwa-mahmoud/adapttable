@@ -313,6 +313,13 @@ for (const kit of ANGULAR_KITS) {
         "Load",
       ]);
       const columns = angularPart(kit, page, "column-menu-button", surface);
+      // Column-layout editing belongs to the desktop table. The accepted
+      // layout still drives mobile cards when the host crosses the breakpoint.
+      await expect(columns).toHaveCount(0);
+      await page.setViewportSize({ width: 1280, height: 844 });
+      await expect(surface.locator('[data-adapttable-part="row"]')).toHaveCount(
+        10
+      );
       await columns.click();
       const menu = angularPart(kit, page, "column-menu-panel");
       await expect(menu).toBeVisible();
@@ -328,6 +335,9 @@ for (const kit of ANGULAR_KITS) {
       await page.keyboard.press("Escape");
       await expect(menu).toBeHidden();
       await expect(columns).toBeFocused();
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect(columns).toHaveCount(0);
+      await expect(cards).toHaveCount(10);
       await expect(cardLabels).toHaveText([
         "Team",
         "Status",

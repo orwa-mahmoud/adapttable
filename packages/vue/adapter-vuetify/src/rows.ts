@@ -1,4 +1,6 @@
 /** Row models and host write requests remain in the Vue binding. */
+export { rowActions } from "./row-actions";
+export { rowPinning } from "./row-pinning";
 export type {
   CellSpanAppearance,
   CellSpanRequest,
@@ -25,7 +27,5 @@ export {
   cellSpan,
   extraRows,
   pinnedSummaryRows,
-  rowActions,
   rowAppearance,
-  rowPinning,
 } from "@adapttable/vue/features";

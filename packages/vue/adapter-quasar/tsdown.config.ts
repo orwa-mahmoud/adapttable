@@ -3,6 +3,8 @@ import Vue from "unplugin-vue/rolldown";
 
 export default defineConfig({
   entry: [
+    "src/column-selection.ts",
+    "src/nested-table.ts",
     "src/cell-navigation.ts",
     "src/side-panel.ts",
     "src/grouping-panel.ts",

@@ -7,6 +7,8 @@ import {
   PDF_WRITER_MARKER,
   VUE_CONSUMER_SPECS,
   VUE_LAYOUT_GRAPH_SPECS,
+  VUE_NATIVE_BASE_SPECS,
+  VUE_OPTIONAL_BASE_MARKERS,
   VUE_RUNTIME_EXTERNALS,
   vueConsumerCoverageProblems,
   vueConsumerFixtures,
@@ -25,7 +27,7 @@ const fixture = (name) => {
 
 describe("packed Vue consumers", () => {
   it("registers every distinct real entry and matches existing comparable ceilings", () => {
-    assert.equal(VUE_CONSUMER_SPECS.length, 11);
+    assert.equal(VUE_CONSUMER_SPECS.length, 18);
     assert.deepEqual(
       vue.map((entry) => entry.name),
       VUE_CONSUMER_SPECS.map((entry) => entry.name)
@@ -49,6 +51,82 @@ describe("packed Vue consumers", () => {
       () => vueConsumerFixtures([], PLAIN_ADAPTER_CEILING_KB),
       /Missing comparable/
     );
+  });
+
+  it("measures all seven native kit roots with real adapter CSS and the 80 KiB ceiling", () => {
+    assert.deepEqual(
+      VUE_NATIVE_BASE_SPECS.map((entry) => entry.pkg).sort(),
+      KITS.filter((kit) => kit.framework === "vue" && kit.role === "shell")
+        .map((kit) => kit.name)
+        .sort()
+    );
+    assert.equal(VUE_NATIVE_BASE_SPECS.length, 7);
+    for (const spec of VUE_NATIVE_BASE_SPECS) {
+      const entry = fixture(spec.name);
+      assert.equal(entry.kit, spec.pkg.replace(/^adapter-/, ""));
+      assert.equal(entry.budgetKB, PLAIN_ADAPTER_CEILING_KB);
+      assert.equal(entry.styleEntryFile, "styles.css");
+      assert.equal(
+        entry.code,
+        'export { DataTable } from "PKG";\nimport "STYLE";'
+      );
+      assert.deepEqual(entry.absent, [
+        PDF_WRITER_MARKER,
+        XLSX_WRITER_MARKER,
+        "export-progress-surface",
+        ...VUE_OPTIONAL_BASE_MARKERS,
+      ]);
+      assert.ok(
+        vueGraphProblems(entry, {
+          code: "DataTable",
+          css: "",
+          imports: new Set(),
+        }).some((problem) => problem.includes("missing CSS"))
+      );
+      assert.deepEqual(
+        vueGraphProblems(entry, {
+          code: "DataTable",
+          css: `.${entry.presentCss[0]} { display: block; }`,
+          imports: new Set(),
+        }),
+        []
+      );
+      assert.ok(
+        vueConsumerCoverageProblems(
+          FIXTURES.filter((candidate) => candidate !== entry)
+        ).some((problem) =>
+          problem.includes(`Missing Vue kit base consumer: ${entry.pkg}`)
+        )
+      );
+    }
+  });
+
+  it("rejects optional native feature machinery while permitting lightweight shared channels", () => {
+    for (const spec of VUE_NATIVE_BASE_SPECS) {
+      const entry = fixture(spec.name);
+      const graph = {
+        code: `DataTable COMMAND_PALETTE_MODEL CONTEXT_MENU_MODEL SAVED_VIEWS_MODEL
+          groupingPanelModelKey rowReorderModelKey TABLE_ASSISTANT
+          vue-command-palette-model vue-context-menu-model table-assistant`,
+        css: entry.presentCss.join(" "),
+        imports: new Set(),
+      };
+      assert.deepEqual(vueGraphProblems(entry, graph), []);
+      for (const marker of VUE_OPTIONAL_BASE_MARKERS)
+        assert.ok(
+          vueGraphProblems(entry, {
+            ...graph,
+            code: `${graph.code} ${marker}`,
+          }).some((problem) => problem.includes(`leaked ${marker}`)),
+          `${entry.name} must reject ${marker}`
+        );
+      assert.ok(
+        vueGraphProblems(entry, {
+          ...graph,
+          imports: new Set(["@adapttable/ai-vue"]),
+        }).some((problem) => problem.includes("optional AI runtime"))
+      );
+    }
   });
 
   it("fails if a Vue entry disappears, duplicates or a registered kit lacks coverage", () => {
@@ -213,16 +291,19 @@ describe("packed Vue consumers", () => {
   });
 });
 
-it("includes emitted drawer CSS only in the three drawer-capable Vue consumers", () => {
+it("includes emitted drawer CSS in the three drawer-capable unstyled consumers", () => {
+  const drawerConsumers = vue.filter(
+    (entry) => entry.pkg === "adapter-vue-unstyled" && entry.styleEntryFile
+  );
   assert.deepEqual(
-    vue.filter((entry) => entry.styleEntryFile).map((entry) => entry.name),
+    drawerConsumers.map((entry) => entry.name),
     [
       "vue-unstyled · preset",
       "vue-unstyled · table + preset",
       "vue-unstyled · features barrel",
     ]
   );
-  for (const entry of vue.filter((entry) => entry.styleEntryFile)) {
+  for (const entry of drawerConsumers) {
     assert.equal(entry.styleEntryFile, "styles.css");
     assert.match(entry.code, /import "STYLE"/);
     const code = entry.present.join(" ");

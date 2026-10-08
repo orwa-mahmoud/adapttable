@@ -1,17 +1,22 @@
 # Get started with Vue tables
 
 The experimental Vue integration provides reactive data sources, a headless
-table controller and an unstyled table with native HTML controls. It uses the
-same framework-neutral engine as AdaptTable's other bindings, with Vue-native
-refs, renderers, effect scopes and component lifecycles.
+table controller and adapters for Vue Unstyled, Element Plus, Vuetify, Naive UI,
+Reka UI, shadcn-vue, Nuxt UI and Quasar. They share AdaptTable's framework-neutral
+engine, with Vue-native refs, renderers, effect scopes and component lifecycles.
+Each adapter supplies its own controls; the binding owns the table model.
 
 ## Availability and scope
 
-`@adapttable/vue` and `@adapttable/vue-unstyled` are public packages prepared for an
-experimental `0.1.0` release. They have not been published to npm. These examples
-require a checkout or an application already linked to the built workspace packages. The peer dependency
-is Vue `^3.5.0`; the workspace build requires Node `>=22.12.0` and pnpm. From the
-repository root, build the binding, native kit and their workspace dependencies:
+The Vue binding, Unstyled adapter and all seven styled adapters are public
+packages prepared for an experimental `0.1.0` release. They have not been
+published to npm. These examples require a checkout or an application linked to
+the built workspace packages; the available source and preview routes do not
+establish npm availability or a completed browser-validation gate.
+
+The binding requires Vue `^3.5.0`; adapters can require a newer Vue patch through
+their UI-kit peers. The workspace build requires Node `>=22.12.0` and pnpm. From
+the repository root, build the binding, native kit and their workspace dependencies:
 
 ```sh
 pnpm --filter @adapttable/vue-unstyled... build
@@ -30,16 +35,49 @@ for adapter authors. Every interactive control belongs to its kit. Use native
 factories from `@adapttable/vue-unstyled` feature subpaths with the native table;
 binding-only factories require the corresponding adapter slots.
 
-These packages are experimental and do not yet provide the complete
-React/Angular feature catalog or styled Vue kits. Compose standard native
-controls with `standardFeatures()` from `@adapttable/vue-unstyled/preset`.
-Use the documented Vue entry points for individual features.
+The seven styled adapters expose the same 41 canonical feature factories, with
+kit-specific controls. Optional convenience APIs still vary: a preset, feature
+barrel, assistant surface or pivot configuration panel is available only where
+the package exports it. See the [adapter entry map](./features.md#styled-adapter-feature-entries)
+for those boundaries. Compose standard Unstyled controls with `standardFeatures()`
+from `@adapttable/vue-unstyled/preset`, or choose individual feature entries.
 
 For strict template checking, use Vue tooling with `strictTemplates: true`.
 If your template checker restricts custom data attributes, its
 `vueCompilerOptions.dataAttributes` can include `"data-*"` for the documented
 semantic hooks. Row types, renderer props and selection model events remain
 checked in both directions.
+
+## Choose a UI kit
+
+Use the table and its feature factories from the same adapter. For example,
+`DataTable` from `@adapttable/nuxt-ui` pairs with
+`@adapttable/nuxt-ui/command-palette`; a binding-only factory does not supply
+Nuxt controls. Switching adapters does not transfer ownership of row data or
+create a second query, selection or editing engine.
+
+| Adapter package            | Application setup                                                                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@adapttable/vue-unstyled` | Native HTML controls; no stylesheet or UI-kit provider.                                                                                            |
+| `@adapttable/element-plus` | Element Plus theme CSS and the adapter's `/styles.css`; use Element Plus configuration for locale and SSR providers.                               |
+| `@adapttable/vuetify`      | Register Vuetify, provide its application context, and load `vuetify/styles` plus the adapter's `/styles.css`.                                     |
+| `@adapttable/naive-ui`     | Load the adapter's `/styles.css`; configure Naive UI's theme and locale providers as needed. Collect Naive UI styles when rendering on the server. |
+| `@adapttable/reka-ui`      | Load the adapter's `/styles.css`; the adapter uses Reka primitives.                                                                                |
+| `@adapttable/shadcn-vue`   | Load the adapter's `/styles.css` and provide shadcn theme tokens. The package includes its licensed, copied controls and compiled CSS.             |
+| `@adapttable/nuxt-ui`      | Use Nuxt UI's module in Nuxt, or its official Vite and Vue plugins in a plain Vue app; load theme CSS and provide `UApp`.                          |
+| `@adapttable/quasar`       | Register Quasar and load Quasar CSS plus the adapter's `/styles.css`; configure Quasar's locale and RTL support.                                   |
+
+Each package README contains its exact peer versions and complete host setup.
+For example, build a styled adapter and its workspace dependencies with
+`pnpm --filter @adapttable/shadcn-vue... build`. A workspace build is preparation
+for linked development, not an npm installation command.
+
+A component's SSR support does not replace the UI kit's application pipeline.
+Element Plus needs request-local ID/z-index providers and its teleport handling;
+Naive UI needs CSS-render collection. Vuetify and Nuxt UI require host compilation
+for their CSS or Vue SFC imports. For production Quasar SSR/SSG, use Quasar CLI
+with Vite; its standalone Vite plugin does not support that mode. Keep identical
+initial rows, IDs, locale, direction and responsive settings on server and client.
 
 ## First table
 

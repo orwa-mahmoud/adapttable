@@ -90,6 +90,34 @@ Type-only re-exports do not imply matching runtime exports. In particular,
 structural/model helpers and feature functions belong to their entries above;
 importing the binding root never installs controls, optional features or AI.
 
+## Styled adapter entry points
+
+`@adapttable/element-plus`, `@adapttable/vuetify`, `@adapttable/naive-ui`,
+`@adapttable/reka-ui`, `@adapttable/shadcn-vue`, `@adapttable/nuxt-ui` and
+`@adapttable/quasar` export their own `DataTable` and 41 canonical feature
+factories through focused entries. All remain unreleased `0.1.0` packages.
+Their controls consume the shared Vue model and Chrome contracts; they do not
+import another framework binding or replace the table engine.
+
+The binding's root, `/features` and `/adapter` remain the canonical owners for
+shared contracts. A kit's factory adds that kit's required control slots; a
+binding factory alone does not do so. Use `/column-selection` for
+`columnSelectionCheckbox` and `/nested-table` for `nestedTable` on every kit.
+Older aliases remain available where they were already exported.
+
+Only Unstyled, Reka UI and shadcn-vue currently expose the documented `/features`
+barrel, `/preset`, `/assistant` and controlled `/pivot` panel. Quasar additionally
+provides dedicated `/export-pdf` and `/export-xlsx` entries. Element Plus,
+Vuetify, Naive UI and Nuxt UI use their own `/export` feature with optional
+`pdfWriter` or `xlsxWriter` from binding `/pdf` or `/xlsx`.
+
+Shared pivot data, formulas, streams and sparkline helpers remain available from
+`@adapttable/vue/pivot`, `/formula`, `/stream` and `/sparkline` regardless of the
+chosen kit. A callable feature inventory does not imply every kit exports the
+same convenience components. See the [full entry map](./features.md#styled-adapter-feature-entries)
+and [host setup](./getting-started.md#choose-a-ui-kit) before selecting optional
+surfaces or an SSR pipeline.
+
 ## Optional adapter layout
 
 `DataTableSurfaceChrome` from `@adapttable/vue/adapter` renders a shared outer
@@ -682,6 +710,19 @@ continues to own matching, active command selection and execution, including
 Arrow/Home/End/Enter handling and disabled-command behavior. Switching the
 surface retires the previous focus owner and stale callbacks. Ordinary surfaces
 keep the existing generic behavior.
+
+### Compound context menus
+
+`ContextMenuChrome` accepts either the required `ContextMenuSlots` or a complete
+`ContextMenuPresentation`. These options are mutually exclusive. A complete
+presentation receives `ContextMenuPresentationProps`: the viewport point,
+invisible anchor ref, localized label, fullscreen container and class name,
+plus `onClose`, `isCurrent` and an ordered list of `{ item, onSelect }` entries.
+Use each entry's guarded `onSelect`, rather than calling `item.onSelect`
+directly. The binding closes first and dispatches a current enabled action once;
+replaced menus, presentation owners and inactive component scopes retire stale
+callbacks. Native menu components own their keyboard navigation, positioning
+and dismissal presentation without copying table interaction state.
 
 ### Flat-menu keyboard navigation
 

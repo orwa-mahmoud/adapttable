@@ -1,6 +1,13 @@
 # Vue actions and exports
 
-`@adapttable/vue` and `@adapttable/vue-unstyled` are experimental, unreleased `0.1.0` packages. They have not been published to npm. These examples require a checkout or an application linked to their built workspace packages. This guide covers the Unstyled kit. Features are opt-in and use the existing names: `bulkActions`, `commandPalette`, `contextMenu`, `sidePanel`, `undoRedoButtons`, `exportCsv`, `exportPdf`, `exportXlsx` and `print`.
+The Vue binding, Unstyled kit and seven styled adapters are experimental,
+unreleased `0.1.0` packages. They have not been published to npm. These examples
+require a checkout or an application linked to their built workspace packages.
+The action factories are opt-in: `bulkActions`, `commandPalette`, `contextMenu`,
+`sidePanel`, `undoRedoButtons`, `exportCsv` and `print` are available through each
+adapter's focused entries. Dedicated `exportPdf` and `exportXlsx` factories are
+exported by Unstyled, Reka UI, shadcn-vue and Quasar; the other kits accept those
+writers through their own `exportCsv` factory.
 
 The binding owns structural Chrome and reads the neutral engine's state. A kit supplies every visible control through required typed slots. The native adapter fills these slots with native buttons, inputs, a dialog and a manual popover. No visible HTML-control fallback is installed by the binding.
 
@@ -21,7 +28,8 @@ writer. The writer utilities remain available for custom compositions such as
 `Omit<ExportCsvOptions<TRow>, "writer">`. They preserve typed hook rows and the
 shared `scope`, `columns`, `filename`, `onBeforeExport` and `onAfterExport`
 options while fixing the document writer. Import each type from its matching
-`/export-pdf` or `/export-xlsx` binding or native entry. See the
+`@adapttable/vue/pdf` or `@adapttable/vue/xlsx` binding entry, or the matching
+adapter `/export-pdf` or `/export-xlsx` entry where it exists. See the
 [export options](../exporting.md) for the shared fields and server routes.
 
 A table has one current export format. These factories share the `export-csv`
@@ -30,8 +38,8 @@ feature identity, so a later declaration replaces an earlier one. For example,
 XLSX. The `export-csv-button` part and `exportCsvButton` class hook stay stable
 across formats. The command palette uses the same current export action.
 
-The base table, `/export`, `/export-csv`, and `/preset` do not import PDF or XLSX
-writers. Import a format entry only when needed. The optional `/features` barrel
+The base table and `/export` do not import PDF or XLSX writers. The compatibility
+`/export-csv` path and `/preset`, where exported, also keep those writers optional. Import a format entry only when needed. The optional `/features` barrel
 exposes all three factories and is broader; individual entries provide the
 smallest import graph.
 
@@ -40,6 +48,47 @@ Selection, range, hidden columns, grouping, tree entries, spans and summary data
 `print(onPrint, true)` renders the button and `print(onPrint)` makes printing available to the command palette. The host owns that callback. The existing print helpers are available through the print/PDF paths. History buttons read the existing editing history and remain unavailable without an edit history model.
 
 All new captions reuse existing localized labels. Host-authored action names and panel content are localized by the host. No action state introduces a new persisted URL field: command/menu visibility and export progress are transient; side-panel selection is host-owned.
+
+## Use the controls from your adapter
+
+Use the same package for `DataTable` and its action factories. A Nuxt UI table
+uses Nuxt modal, input, button, popover and panel controls; a shadcn-vue table uses
+its copied shadcn components. The binding supplies shared actions, state,
+localized labels and lifecycle guards. It does not silently draw a different
+kit's controls. [The feature entry map](./features.md#styled-adapter-feature-entries)
+lists each package's optional surfaces.
+
+For Element Plus, Vuetify, Naive UI and Nuxt UI, keep the adapter's export feature
+and select the optional binding writer explicitly:
+
+```ts
+import { exportCsv } from "@adapttable/nuxt-ui/export";
+import { pdfWriter } from "@adapttable/vue/pdf";
+
+interface Person {
+  id: string;
+  name: string;
+}
+const features = [
+  exportCsv<Person>({
+    filename: "people.pdf",
+    scope: "page",
+    writer: pdfWriter({ direction: "rtl" }),
+  }),
+];
+```
+
+`xlsxWriter` from `@adapttable/vue/xlsx` follows the same pattern. Writer choice
+changes the output, while the adapter retains its own button, progress, retry
+and cancellation controls. Do not add binding-only export factories to a kit
+table and expect them to install those controls.
+
+Command palettes, context menus and export progress are transient; none creates
+a second query or persistence model. Side-panel selection remains host-controlled.
+Mobile panels stack beneath cards, and contextual actions use the current row
+or cell target. Desktop grid actions remain subject to the active navigation
+model. Overlay ownership follows the table's fullscreen container and current
+lifetime; deactivation or replacement retires stale focus and close callbacks.
 
 ## Compose the controls
 

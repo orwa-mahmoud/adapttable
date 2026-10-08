@@ -3,12 +3,11 @@ import {
   defaultFilterRegistry,
   type FilterHeaderControlOptions,
 } from "@adapttable/vue/adapter";
-import { filterTypes } from "@adapttable/vue/features";
 import { computed, defineComponent, h, ref } from "vue";
 
 import { DataTable } from "../../src";
 import { shadcnButton } from "../../src/controls";
-import { filters } from "../../src/filters";
+import { filters, filterTypes } from "../../src/filters";
 import { FilterHeaderControl } from "../../src/filters/FilterHeaderControl";
 import { fullscreen } from "../../src/fullscreen";
 

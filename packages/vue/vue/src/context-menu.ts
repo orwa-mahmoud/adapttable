@@ -193,6 +193,8 @@ export function contextMenu<TRow>(
 }
 export type {
   ContextMenuChromeProps,
+  ContextMenuPresentation,
+  ContextMenuPresentationProps,
   ContextMenuSlots,
 } from "./actions/contextMenuChrome";
 export { ContextMenuChrome } from "./actions/contextMenuChrome";

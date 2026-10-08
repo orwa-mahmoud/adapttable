@@ -255,6 +255,13 @@ export const VUE_TYPE_EXPECTATIONS = {
           /ColumnMenuSlotProps(?:\$\d+)?<Person>.*ColumnMenuSlotProps(?:\$\d+)?<Invoice>/,
       },
     ],
+    "actions/ConflictingContextMenuControls.ts": [
+      {
+        code: 2322,
+        message: /not assignable to type 'ContextMenuChromeProps'/,
+        count: 2,
+      },
+    ],
     "actions/MissingActionSlots.ts": [
       {
         code: 2741,

@@ -8,12 +8,14 @@ import { packageDir } from "./packages.mjs";
 import {
   PDF_WRITER_MARKER,
   VUE_LAYOUT_GRAPH_SPECS,
+  VUE_OPTIONAL_BASE_MARKERS,
   VUE_RUNTIME_EXTERNALS,
   vueEmittedCss,
   vueGraphProblems,
   XLSX_WRITER_MARKER,
 } from "./vue-consumer-fixtures.mjs";
 import { buildVueCssConsumer } from "./vue-css-consumer.mjs";
+import { buildVueNativeConsumer } from "./vue-native-consumer.mjs";
 
 export async function vueConsumerGraph(fixture, dir) {
   const base = join(packageDir(fixture.pkg), "dist");
@@ -43,19 +45,28 @@ export async function vueConsumerGraph(fixture, dir) {
       },
     },
   ];
-  const bundle = fixture.styleEntryFile
-    ? undefined
-    : await Rolldown.rolldown({
-        input,
-        external: (id) =>
-          VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(id)),
-        logLevel: "silent",
-        plugins,
-      });
+  const bundle =
+    fixture.styleEntryFile || fixture.consumerHost
+      ? undefined
+      : await Rolldown.rolldown({
+          input,
+          external: (id) =>
+            VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(id)),
+          logLevel: "silent",
+          plugins,
+        });
   try {
-    const output = bundle
-      ? await bundle.generate({ format: "esm" })
-      : await buildVueCssConsumer(input, dir, false, plugins);
+    let output;
+    if (fixture.consumerHost)
+      output = await buildVueNativeConsumer(
+        fixture,
+        input,
+        dir,
+        false,
+        plugins
+      );
+    else if (bundle) output = await bundle.generate({ format: "esm" });
+    else output = await buildVueCssConsumer(input, dir, false, plugins);
     const chunks = output.output.filter((chunk) => chunk.type === "chunk");
     return {
       code: chunks.map((chunk) => chunk.code).join("\n"),
@@ -92,6 +103,13 @@ export function plantedVueConsumers(fixtures) {
     throw new Error(
       "Planted Vue checks require the base, PDF, preset and density consumers"
     );
+  const rowActionsBase = fixtures.find(
+    (fixture) => fixture.name === "shadcn-vue · table"
+  );
+  if (!rowActionsBase)
+    throw new Error(
+      "Planted row-actions checks require the Shadcn Vue base consumer"
+    );
   const native = join(packageDir("adapter-vue-unstyled"), "dist");
   const react = join(packageDir("adapter-unstyled"), "dist/index.js");
   const ai = join(packageDir("ai-vue"), "dist/index.js");
@@ -99,7 +117,34 @@ export function plantedVueConsumers(fixtures) {
     (fixture) => fixture.name === "vue · headless adapter shell"
   );
   if (!shell) throw new Error("Missing headless adapter shell graph");
+  const binding = join(packageDir("vue"), "dist/adapter.js");
+  const optionalChrome = [
+    "CommandPaletteChrome",
+    "ContextMenuChrome",
+    "SavedViewsPanelChrome",
+    "GroupingPanelChrome",
+    "RowReorderChrome",
+    "TableAssistantChrome",
+  ];
   return [
+    ...["row-actions-trigger", "row-actions-menu"].map((marker) => ({
+      fixture: {
+        ...rowActionsBase,
+        name: `${rowActionsBase.name} · planted ${marker}`,
+        alsoEntryFile: "row-actions.js",
+        code: `${rowActionsBase.code}\nexport { rowActions } from "ALSO";`,
+      },
+      expected: `leaked ${marker}`,
+    })),
+    ...optionalChrome.map((component) => ({
+      fixture: {
+        ...base,
+        name: `${base.name} · planted ${component}`,
+        absent: [...base.absent, ...VUE_OPTIONAL_BASE_MARKERS],
+        code: `${base.code}\nexport { ${component} } from ${JSON.stringify(binding)};`,
+      },
+      expected: `leaked ${component}`,
+    })),
     {
       fixture: {
         ...shell,

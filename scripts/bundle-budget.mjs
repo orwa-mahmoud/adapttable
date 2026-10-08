@@ -42,10 +42,12 @@ import { packageDir, packageRel } from "./packages.mjs";
 import { publishedFigures, staleReason } from "./published-figures.mjs";
 import {
   VUE_RUNTIME_EXTERNALS,
+  vueConsumerCoverageProblems,
   vueEmittedCss,
   vueMissingCss,
 } from "./vue-consumer-fixtures.mjs";
 import { buildVueCssConsumer } from "./vue-css-consumer.mjs";
+import { buildVueNativeConsumer } from "./vue-native-consumer.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
@@ -109,7 +111,10 @@ export async function measure(fixture, dir) {
   const started = performance.now();
   let min;
   let readable;
-  if (fixture.styleEntryFile) {
+  if (fixture.consumerHost) {
+    min = await buildVueNativeConsumer(fixture, entry, dir, true);
+    readable = await buildVueNativeConsumer(fixture, entry, dir, false);
+  } else if (fixture.styleEntryFile) {
     // Independent builds keep the stateful CSS collection passes separate.
     min = await buildVueCssConsumer(entry, dir, true);
     readable = await buildVueCssConsumer(entry, dir, false);
@@ -328,6 +333,8 @@ function exitIfFailed(over, stale) {
 }
 
 async function main() {
+  const coverageProblems = vueConsumerCoverageProblems(FIXTURES);
+  if (coverageProblems.length) throw new Error(coverageProblems.join("\n"));
   const dir = mkdtempSync(join(tmpdir(), "adapttable-budget-"));
   const rows = [];
   let over = 0;
