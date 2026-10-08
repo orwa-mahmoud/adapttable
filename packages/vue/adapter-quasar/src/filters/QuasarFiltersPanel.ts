@@ -6,7 +6,7 @@ import {
   useDataTableClassNames,
   useFeatureState,
 } from "@adapttable/vue/adapter";
-import { QBadge } from "quasar";
+import { QBadge, QIcon } from "quasar";
 import { defineComponent, h } from "vue";
 
 import QuasarButton from "../controls/QuasarButton.vue";
@@ -31,6 +31,25 @@ export const QuasarFiltersPanel = defineComponent({
             focusRef: trigger.triggerRef,
           },
           () => [
+            h(
+              QIcon,
+              {
+                "data-adapttable-part": "filters-icon",
+                class: names.value.filtersIcon,
+                "aria-hidden": "true",
+                size: "18px",
+              },
+              {
+                default: () =>
+                  h("svg", { viewBox: "0 0 24 24", focusable: "false" }, [
+                    h("path", {
+                      d: "M3 4h18l-7 8v7l-4 2v-9z",
+                      fill: "none",
+                      stroke: "currentColor",
+                    }),
+                  ]),
+              }
+            ),
             trigger.label,
             trigger.count
               ? h(

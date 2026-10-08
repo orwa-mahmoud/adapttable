@@ -115,7 +115,10 @@ describe("Element Plus table filters", () => {
     const { root } = mount(() =>
       h(DataTable<Row>, {
         ...base,
-        classNames: { filtersBackdrop: "custom-backdrop" },
+        classNames: {
+          filtersBackdrop: "custom-backdrop",
+          filtersIcon: "custom-icon",
+        },
         features: [
           filters<Row>([{ key: "name", type: "text" }], { mode: "drawer" }),
         ],
@@ -123,6 +126,9 @@ describe("Element Plus table filters", () => {
     );
     await tick();
     const trigger = await open(root);
+    const icon = node(trigger, '[data-adapttable-part="filters-icon"]');
+    expect(icon.getAttribute("aria-hidden")).toBe("true");
+    expect(icon.classList.contains("custom-icon")).toBe(true);
     const panel = node<HTMLElement>(
       document,
       '[data-adapttable-part="filters-panel"]'

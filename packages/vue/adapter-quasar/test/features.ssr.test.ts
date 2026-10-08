@@ -21,6 +21,9 @@ it.each([false, true])(
     const html = await renderToString(app, context);
     expect(html).toContain('data-adapttable-part="edit-cell-activate"');
     expect(html).toContain('data-adapttable-part="filters-button"');
+    expect(html).toMatch(
+      /<i[^>]*aria-hidden="true"[^>]*data-adapttable-part="filters-icon"/
+    );
     expect(html).not.toContain('data-adapttable-part="filters-popover"');
     const path = `${import.meta.dirname}/server-features-${mobile ? "mobile" : "desktop"}.html`;
     if (process.env.ADAPTTABLE_UPDATE_SSR_FIXTURE === "1")

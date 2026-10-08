@@ -15,6 +15,16 @@ const active = useScopeActivity();
 // Quasar does not offer a per-instance portal container; see the host setup notes.
 const visible = computed(() => active.value && props.open);
 const Content = () => props.children;
+const drawerAttrs = computed(() => ({
+  dir: props.dir,
+  "data-adapttable-part": props.part ?? "filters-panel",
+}));
+const popoverAttrs = computed(() => ({
+  role: "dialog",
+  "aria-label": props.label,
+  dir: props.dir,
+  "data-adapttable-part": props.part ?? "filters-popover",
+}));
 const close = () => {
   if (active.value && props.open) props.onClose();
 };
@@ -33,9 +43,8 @@ const close = () => {
     "
   >
     <QCard
-      v-bind="{ dir }"
+      v-bind="drawerAttrs"
       :class="['adapttable-quasar-filter-drawer', className]"
-      :data-adapttable-part="part ?? 'filters-panel'"
     >
       <QCardSection><Content /></QCardSection>
     </QCard>
@@ -48,9 +57,8 @@ const close = () => {
     :anchor="dir === 'rtl' ? 'bottom right' : 'bottom left'"
     :self="dir === 'rtl' ? 'top right' : 'top left'"
     :transition-duration="0"
-    v-bind="{ role: 'dialog', 'aria-label': label, dir }"
+    v-bind="popoverAttrs"
     :class="['adapttable-quasar-filter-popover', className]"
-    :data-adapttable-part="part ?? 'filters-popover'"
     @update:model-value="
       (value) => {
         if (!value) close();

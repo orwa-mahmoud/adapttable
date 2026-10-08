@@ -4,7 +4,7 @@ import {
   filterViewKey,
   useFeatureState,
 } from "@adapttable/vue/adapter";
-import { ElTag } from "element-plus";
+import { ElIcon, ElTag } from "element-plus";
 import { defineComponent, h } from "vue";
 
 import { useClassNames } from "../classNamesContext";
@@ -29,6 +29,24 @@ export const ElementFiltersPanel = defineComponent({
             onClick: control.onClick,
           },
           [
+            h(
+              ElIcon,
+              {
+                "data-adapttable-part": "filters-icon",
+                class: names.value.filtersIcon,
+                "aria-hidden": "true",
+              },
+              {
+                default: () =>
+                  h("svg", { viewBox: "0 0 24 24", focusable: "false" }, [
+                    h("path", {
+                      d: "M3 4h18l-7 8v7l-4 2v-9z",
+                      fill: "none",
+                      stroke: "currentColor",
+                    }),
+                  ]),
+              }
+            ),
             control.label,
             control.count
               ? h(
