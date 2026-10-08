@@ -258,7 +258,7 @@ export const VUE_TYPE_EXPECTATIONS = {
     "actions/ConflictingContextMenuControls.ts": [
       {
         code: 2322,
-        message: /not assignable to type 'ContextMenuChromeProps'/,
+        message: /not assignable to type 'ContextMenuChromeProps(?:\$\d+)?'/,
         count: 2,
       },
     ],
