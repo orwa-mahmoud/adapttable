@@ -86,7 +86,12 @@ const controls: FilterPanelSlots<unknown> = {
   Tree: (control) =>
     h(NuxtFilterTree<unknown>, { ...control, classNames: names.value }),
   Popover: (control) => h(NuxtFilterSurface, { ...control, modal: false }),
-  Drawer: (control) => h(NuxtFilterSurface, { ...control, modal: true }),
+  Drawer: (control) =>
+    h(NuxtFilterSurface, {
+      ...control,
+      modal: true,
+      backdropClassName: names.value.filtersBackdrop,
+    }),
 };
 const Render = () =>
   model.value

@@ -11,6 +11,8 @@ import { defineComponent, h } from "vue";
 type Props = FilterPanelSurfaceProps & {
   readonly modal: boolean;
   readonly part?: string;
+  /** Class for USlideover's overlay, through its `ui.overlay` hook. */
+  readonly backdropClassName?: string;
 };
 export default defineComponent(
   (props: Props) => {
@@ -52,7 +54,10 @@ export default defineComponent(
             content,
             transition: false,
             close: false,
-            ui: { content: ["adapttable-nuxt-filter-drawer", props.className] },
+            ui: {
+              content: ["adapttable-nuxt-filter-drawer", props.className],
+              overlay: props.backdropClassName,
+            },
             "onUpdate:open": update,
           },
           children
@@ -85,6 +90,7 @@ export default defineComponent(
       "className",
       "modal",
       "part",
+      "backdropClassName",
     ],
   }
 );

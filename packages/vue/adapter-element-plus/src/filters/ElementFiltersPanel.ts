@@ -64,7 +64,12 @@ export const ElementFiltersPanel = defineComponent({
         h(ElementFilterTree, { ...tree, classNames: names.value }),
       Popover: (surface) =>
         h(ElementFilterSurface, { ...surface, modal: false }),
-      Drawer: (surface) => h(ElementFilterSurface, { ...surface, modal: true }),
+      Drawer: (surface) =>
+        h(ElementFilterSurface, {
+          ...surface,
+          modal: true,
+          backdropClassName: names.value.filtersBackdrop,
+        }),
     };
     return () =>
       model.value

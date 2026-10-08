@@ -85,6 +85,7 @@ describe("Nuxt filtering feature", () => {
           forceMobile: false,
           searchable: false,
           dir: dir.value,
+          classNames: { filtersBackdrop: "custom-backdrop" },
           features: [
             filters<Row>(
               [
@@ -113,6 +114,9 @@ describe("Nuxt filtering feature", () => {
       );
       expect(surface.getAttribute("role")).toBe("dialog");
       expect(surface.getAttribute("dir")).toBe("ltr");
+      expect(document.querySelectorAll(".custom-backdrop")).toHaveLength(
+        mode === "drawer" ? 1 : 0
+      );
       dir.value = "rtl";
       await settle();
       expect(surface.getAttribute("dir")).toBe("rtl");

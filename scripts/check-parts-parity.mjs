@@ -118,6 +118,22 @@ const EXPECTED_GAPS = {
     "header-group-row":
       "antd nests group columns as `children` on the column def; it exposes one `header.row` seam, not a separate group-row element.",
   },
+  "adapter-element-plus": {
+    "filters-backdrop":
+      "ElDrawer renders its modal mask internally and exposes only `modalClass` (which carries `filtersBackdrop`), no attribute or ref hook.",
+  },
+  "adapter-naive-ui": {
+    "filters-backdrop":
+      "NDrawer keeps its mask internal with no attribute, class or ref hook, and its focus trap requires that mask.",
+  },
+  "adapter-nuxt-ui": {
+    "filters-backdrop":
+      "USlideover renders its overlay internally and exposes only `ui.overlay` (which carries `filtersBackdrop`), no attribute or ref hook.",
+  },
+  "adapter-quasar": {
+    "filters-backdrop":
+      "QDialog renders its backdrop internally with no attribute, class or ref hook.",
+  },
 };
 
 /**

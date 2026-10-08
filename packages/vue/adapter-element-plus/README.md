@@ -113,7 +113,10 @@ binding models.
 The nonmodal popup uses `ElPopover` for positioning and dialog semantics, with
 an `ElCard` content body. The `filters-popover` part and
 `classNames.filtersPopover` belong to that body. The drawer's `filters-panel`
-part and class belong to the actual `ElDrawer` dialog root.
+part and class belong to the actual `ElDrawer` dialog root. `ElDrawer` renders
+its modal mask internally and exposes only `modalClass`, so
+`classNames.filtersBackdrop` styles the mask and no `filters-backdrop` part is
+written to it.
 
 ### Column header filters
 

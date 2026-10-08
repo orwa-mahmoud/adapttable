@@ -26,6 +26,8 @@ export const ElementFilterSurface = defineComponent(
     props: FilterPanelSurfaceProps & {
       readonly modal: boolean;
       readonly part?: string;
+      /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+      readonly backdropClassName?: string;
     }
   ) => {
     const mounted = shallowRef(false);
@@ -94,6 +96,7 @@ export const ElementFilterSurface = defineComponent(
             appendTo: props.container ?? fullscreen.value?.container ?? "body",
             appendToBody: true,
             modal: true,
+            modalClass: props.backdropClassName,
             withHeader: false,
             showClose: false,
             destroyOnClose: true,
@@ -164,6 +167,7 @@ export const ElementFilterSurface = defineComponent(
       "onClose",
       "modal",
       "part",
+      "backdropClassName",
     ],
   }
 );

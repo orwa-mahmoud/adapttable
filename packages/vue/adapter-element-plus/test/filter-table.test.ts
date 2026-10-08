@@ -115,6 +115,7 @@ describe("Element Plus table filters", () => {
     const { root } = mount(() =>
       h(DataTable<Row>, {
         ...base,
+        classNames: { filtersBackdrop: "custom-backdrop" },
         features: [
           filters<Row>([{ key: "name", type: "text" }], { mode: "drawer" }),
         ],
@@ -126,6 +127,9 @@ describe("Element Plus table filters", () => {
       document,
       '[data-adapttable-part="filters-panel"]'
     );
+    expect(
+      panel.closest(".el-overlay")?.classList.contains("custom-backdrop")
+    ).toBe(true);
     const done = node<HTMLButtonElement>(
       panel,
       'button[data-adapttable-part="filters-done"]'

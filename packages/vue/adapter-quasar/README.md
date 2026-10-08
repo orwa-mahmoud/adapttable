@@ -199,7 +199,9 @@ Import `filters` from `@adapttable/quasar/filters` and `headerFilters` from
 QDialog side drawer; both reuse binding-owned field, checklist, and advanced
 AND/OR tree models. `FilterHeaderControl` and `FilterHeaderRow` are available
 for compact header layouts. Localized labels and explicit table direction
-are forwarded to portaled controls.
+are forwarded to portaled controls. QDialog renders its backdrop internally
+with no attribute, class or ref hook, so the drawer has no `filters-backdrop`
+part and `classNames.filtersBackdrop` does not apply.
 
 Import `editing`, `rowEditing`, `batchEditing`, `editHistory`, and
 `undoRedoButtons` from `@adapttable/quasar/editing`. QInput, QSelect, and
