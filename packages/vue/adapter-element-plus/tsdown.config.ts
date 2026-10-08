@@ -24,6 +24,7 @@ export default defineConfig({
     "src/cell-navigation.ts",
     "src/column-selection.ts",
     "src/status-bar.ts",
+    "src/preset.ts",
     "src/selection-stats.ts",
     "src/column-menu.ts",
     "src/column-groups.ts",
