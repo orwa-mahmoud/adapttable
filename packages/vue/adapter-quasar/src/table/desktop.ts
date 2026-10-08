@@ -168,7 +168,10 @@ export function QuasarDesktop<TRow>({
     return part(
       "header",
       {
-        ...paint(leaf.attrs, "header-cell", names.th),
+        ...mergeVueAttrs(leaf.attrs, {
+          "data-adapttable-part": "header-cell",
+          class: names.th,
+        }),
         ...extra,
         key: leaf.key,
       },
@@ -314,7 +317,13 @@ export function QuasarDesktop<TRow>({
           ...item.cells.map((cell) =>
             part(
               "cell",
-              { ...paint(cell.attrs, "cell", names.td), key: cell.key },
+              {
+                ...mergeVueAttrs(cell.attrs, {
+                  "data-adapttable-part": "cell",
+                  class: names.td,
+                }),
+                key: cell.key,
+              },
               quasarCellContent(cell, item, slots, names, !model.expandLabel)
             )
           ),
@@ -449,7 +458,10 @@ export function QuasarDesktop<TRow>({
     { flat: true, bordered: true, class: "adapttable-quasar-table-surface" },
     nativePart(
       "table",
-      paint(model.attrs, "table", ["adapttable-quasar-table", names.table]),
+      mergeVueAttrs(model.attrs, {
+        "data-adapttable-part": "table",
+        class: ["adapttable-quasar-table", names.table],
+      }),
       [
         h(
           "thead",
