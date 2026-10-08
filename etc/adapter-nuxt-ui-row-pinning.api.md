@@ -4,9 +4,11 @@
 
 ```ts
 
-import { rowPinning } from '@adapttable/vue/features';
+import { RowPinningFeatureOptions } from '@adapttable/vue/features';
+import { StaticTableFeature } from '@adapttable/vue';
 
-export { rowPinning }
+// @public
+export function rowPinning(options?: RowPinningFeatureOptions): StaticTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

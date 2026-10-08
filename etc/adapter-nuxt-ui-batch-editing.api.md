@@ -17,6 +17,8 @@ export { BatchEditingState }
 
 export { BatchRowEdit }
 
+export { EditingLifecycleExtras }
+
 // (No @packageDocumentation comment for this package)
 
 ```

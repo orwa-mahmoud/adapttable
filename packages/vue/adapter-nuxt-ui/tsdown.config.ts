@@ -30,6 +30,7 @@ export default defineConfig({
     "src/cell-navigation.ts",
     "src/find-in-table.ts",
     "src/status-bar.ts",
+    "src/preset.ts",
     "src/selection-stats.ts",
     "src/virtualize.ts",
     "src/bulk-actions.ts",

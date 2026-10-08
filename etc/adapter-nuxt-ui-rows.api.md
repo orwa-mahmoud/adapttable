@@ -19,16 +19,16 @@ import { PinnedRows } from '@adapttable/vue';
 import { PinnedSummaryEntry } from '@adapttable/vue';
 import { pinnedSummaryRows } from '@adapttable/vue/features';
 import { RowAction } from '@adapttable/vue';
-import { rowActions } from '@adapttable/vue/features';
 import { rowAppearance } from '@adapttable/vue/features';
 import { RowAppearanceOptions } from '@adapttable/vue/features';
 import { RowHeight } from '@adapttable/vue';
 import { RowMutationHandlers } from '@adapttable/vue';
-import { rowPinning } from '@adapttable/vue/features';
 import { RowPinningFeatureOptions } from '@adapttable/vue/features';
 import { RowPinSide } from '@adapttable/vue';
 import { RowPinState } from '@adapttable/vue';
 import { RowStyle } from '@adapttable/vue';
+import { StaticTableFeature } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
 
 export { cellSpan }
 
@@ -60,7 +60,8 @@ export { pinnedSummaryRows }
 
 export { RowAction }
 
-export { rowActions }
+// @public
+export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], handlers?: RowMutationHandlers<TRow>): TableFeature<TRow>;
 
 export { rowAppearance }
 
@@ -70,7 +71,8 @@ export { RowHeight }
 
 export { RowMutationHandlers }
 
-export { rowPinning }
+// @public
+export function rowPinning(options?: RowPinningFeatureOptions): StaticTableFeature;
 
 export { RowPinningFeatureOptions }
 

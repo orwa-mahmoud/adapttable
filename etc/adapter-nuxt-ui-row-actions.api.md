@@ -4,9 +4,12 @@
 
 ```ts
 
-import { rowActions } from '@adapttable/vue/features';
+import { RowAction } from '@adapttable/vue';
+import { RowMutationHandlers } from '@adapttable/vue';
+import { TableFeature } from '@adapttable/vue';
 
-export { rowActions }
+// @public
+export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], handlers?: RowMutationHandlers<TRow>): TableFeature<TRow>;
 
 // (No @packageDocumentation comment for this package)
 
