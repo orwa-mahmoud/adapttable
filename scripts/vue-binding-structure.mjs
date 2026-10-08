@@ -10,16 +10,10 @@ import { createAttributeFlow } from "./vue-attribute-flow.mjs";
 
 const printer = ts.createPrinter({ removeComments: true });
 
-/** Read SFC block boundaries and rendered elements from Vue's markup AST. */
-function scriptSource(file) {
-  const text = readFileSync(file, "utf8");
-  if (!file.endsWith(".vue"))
-    return {
-      source: ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true),
-      template: undefined,
-    };
-  // TypeScript is parsed below. Skipping the script parser here keeps valid TS
-  // and generic SFC macros intact while Vue owns all markup boundaries.
+/** An SFC's script blocks and template, split by Vue's markup AST. */
+function parseSfc(file, text) {
+  // TypeScript is parsed by the caller. Skipping the script parser here keeps
+  // valid TS and generic SFC macros intact while Vue owns all markup boundaries.
   const parsed = parseForESLint(text, {
     filePath: file,
     parser: false,
@@ -33,9 +27,26 @@ function scriptSource(file) {
       text.slice(node.startTag.range[1], node.endTag?.range[0] ?? node.range[1])
     )
     .join("\n");
+  return { script, template: parsed.ast.templateBody };
+}
+
+/** The TypeScript of an SFC's script blocks, joined in source order. */
+export function sfcScriptText(file, text) {
+  return parseSfc(file, text).script;
+}
+
+/** Read SFC block boundaries and rendered elements from Vue's markup AST. */
+function scriptSource(file) {
+  const text = readFileSync(file, "utf8");
+  if (!file.endsWith(".vue"))
+    return {
+      source: ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true),
+      template: undefined,
+    };
+  const { script, template } = parseSfc(file, text);
   return {
     source: ts.createSourceFile(file, script, ts.ScriptTarget.Latest, true),
-    template: parsed.ast.templateBody,
+    template,
   };
 }
 

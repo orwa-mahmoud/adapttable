@@ -94,6 +94,7 @@ import {
 } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
 import {
+  sfcScriptText,
   vueBindingSources,
   vueForwardsAttributeApi,
   vueKitWithBindingSources,
@@ -413,6 +414,12 @@ function factoryPartNames(file, text) {
   return found;
 }
 
+/** A file's TypeScript: the whole of a `.ts`/`.tsx`, an SFC's script blocks. */
+function scriptText(file, text) {
+  if (/\.tsx?$/.test(file)) return text;
+  return file.endsWith(".vue") ? sfcScriptText(file, text) : undefined;
+}
+
 /**
  * A sixth way to name a part: a helper whose returned record sets
  * `data-adapttable-part` from one of its own parameters, as
@@ -422,10 +429,11 @@ function factoryPartNames(file, text) {
  */
 function helperPartNames(file, text) {
   const found = new Set();
-  if (!/\.tsx?$/.test(file)) return found;
+  const script = scriptText(file, text);
+  if (script === undefined) return found;
   const source = ts.createSourceFile(
     file,
-    text,
+    script,
     ts.ScriptTarget.Latest,
     true,
     file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
@@ -614,9 +622,15 @@ function partParameterIndex(fn, helpers = new Map()) {
   return index;
 }
 
+/** `part`, or a prop naming the part of one element a component renders. */
+const PART_PROP = /^(?:part|[a-z][A-Za-z]*Part)$/;
+
 /**
  * The value an object property gives a part: `"data-adapttable-part": value`
  * on an element, or `part: value` handed to a kit's slot, shorthand included.
+ * A component that renders several elements takes one prop per element —
+ * `menuPart`, `optionPart`, `overlayPart` — and forwards each as that
+ * element's `data-adapttable-part`.
  */
 function partPropertyValue(node) {
   if (ts.isShorthandPropertyAssignment(node) && node.name.text === "part")
@@ -624,15 +638,16 @@ function partPropertyValue(node) {
   if (!ts.isPropertyAssignment(node)) return undefined;
   const named = ts.isStringLiteral(node.name) || ts.isIdentifier(node.name);
   const key = named ? node.name.text : undefined;
-  return key === "data-adapttable-part" || key === "part"
+  return key === "data-adapttable-part" || PART_PROP.test(key ?? "")
     ? node.initializer
     : undefined;
 }
 
 /**
  * An element's `data-adapttable-part` names a part wherever it is written; a
- * `part` key only does when its record is handed straight to a call — a kit's
- * slot or a part helper — rather than sitting in an unrelated object.
+ * part prop only does when its record is handed straight to a call — a kit's
+ * slot, a component or a part helper — rather than sitting in an unrelated
+ * object.
  */
 function namesRenderedPart(property) {
   const key = property.name.text;

@@ -628,6 +628,16 @@ describe("part helpers and conditional part names", () => {
       [],
     ],
     [
+      "a component prop that names one of its elements",
+      'export const View = () => h(Select, { value: "", optionPart: "option-part" });',
+      ["option-part"],
+    ],
+    [
+      "a part-named key in an object no call receives",
+      'export const config = { menuPart: "unhanded-part" };',
+      [],
+    ],
+    [
       "a same-named helper from another package",
       'import { part } from "@elsewhere/parts";\nexport const View = () => h("div", part("foreign-part"));',
       [],
@@ -640,6 +650,58 @@ describe("part helpers and conditional part names", () => {
       );
     });
   }
+});
+
+describe("Vue single-file component scripts", () => {
+  /** The parts a Vue kit's files name, as a private Vue kit's gap against it. */
+  function vueGap(files) {
+    const root = mkdtempSync(join(tmpdir(), "adapttable-parts-sfc-"));
+    temps.push(root);
+    writePackage(root, "shared", "core", { "src/index.ts": "export {};\n" });
+    writePackage(root, "vue", "vue", { "src/index.ts": "export {};\n" });
+    writePackage(root, "vue", "adapter-plain", files);
+    writePackage(root, "vue", "adapter-draft", {
+      "src/index.ts": "export {};\n",
+    });
+    return partsGapReport({
+      root,
+      kits: [
+        { name: "adapter-plain", framework: "vue", role: "native" },
+        { name: "adapter-draft", framework: "vue", role: "private" },
+      ],
+      references: { "adapter-draft": "adapter-plain" },
+    })[0].missing;
+  }
+
+  it("reads part props and helpers in an SFC's script blocks", () => {
+    assert.deepEqual(
+      vueGap({
+        "src/Menu.vue": [
+          '<script setup lang="ts">',
+          'const part = (name: string) => ({ "data-adapttable-part": name });',
+          'const view = () => [h(Select, { menuPart: "sfc-menu" }), h("li", part("sfc-item"))];',
+          "</script>",
+          "<template><div /></template>",
+        ].join("\n"),
+      }),
+      ["sfc-item", "sfc-menu"]
+    );
+  });
+
+  it("ignores part-like text outside an SFC's script blocks", () => {
+    assert.deepEqual(
+      vueGap({
+        "src/Note.vue": [
+          '<script setup lang="ts">',
+          "const label = 1;",
+          "</script>",
+          '<template><p>{{ label }} h(Select, { menuPart: "template-text" })</p></template>',
+          '<docs>h(Select, { menuPart: "docs-text" })</docs>',
+        ].join("\n"),
+      }),
+      []
+    );
+  });
 });
 
 describe("rendered JSX part expressions", () => {
