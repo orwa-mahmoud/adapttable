@@ -11,11 +11,12 @@ import { shadcnControlAttrs } from "../controls";
 import { cn } from "../lib/utils";
 import { filterClassNames } from "./presentation";
 
-interface ChipsProps extends ActiveFilterChipsSlotProps {
+/** Props for the shadcn-vue active filter chips. */
+export interface FilterChipsProps extends ActiveFilterChipsSlotProps {
   readonly classNames?: DataTableClassNames;
 }
 export const FilterChips = defineComponent(
-  (props: ChipsProps) => () =>
+  (props: FilterChipsProps) => () =>
     FilterChipsChrome({
       ...props,
       classNames: filterClassNames(props.classNames),

@@ -2,3 +2,4 @@
 export { naiveTableControls } from "./controls/table";
 export { NaiveDesktopTable } from "./renderers/desktop";
 export { NaiveMobileCards } from "./renderers/mobile";
+export type { DataTableClassNames } from "./types";

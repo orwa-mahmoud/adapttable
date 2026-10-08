@@ -49,6 +49,7 @@ export type { BasicFilterFieldProps } from "./filters/BasicFilterField";
 export { BasicFilterField } from "./filters/BasicFilterField";
 export { ChecklistFilter } from "./filters/ChecklistFilter";
 export { FilterChips } from "./filters/FilterChips";
+export type { FilterChipsProps } from "./filters/FilterChips";
 export { FilterField } from "./filters/FilterField";
 export type { FilterPanelProps } from "./filters/FilterPanel";
 export { FilterPanel } from "./filters/FilterPanel";
