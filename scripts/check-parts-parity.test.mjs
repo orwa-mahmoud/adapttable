@@ -363,6 +363,97 @@ function themedOwnership(themedSource = SCROLL_BOX_REF) {
   });
 }
 
+describe("native extras and per-framework themed parity", () => {
+  const withExtras = (root, nativeExtras) =>
+    checkPartsParity({
+      root,
+      kits: NATIVE_KITS,
+      contract: ["table", "cell"],
+      expectedGaps: {},
+      getterParts: {},
+      fallbackOnly: { "native elements": ["table", "cell", "bulk-bar"] },
+      unnamedInKits: {},
+      nativeExtras,
+    }).failures.map(({ headline, lines }) => ({ headline, lines }));
+
+  it("accepts a part only one native kit renders when it is listed with a reason", () => {
+    assert.deepEqual(
+      withExtras(fixtureRoot(), {
+        "adapter-plain": {
+          "bulk-bar": "only the React native kit has a bulk bar",
+        },
+      }),
+      []
+    );
+  });
+
+  it("reports a listed extra that every native kit renders or its kit no longer renders", () => {
+    assert.deepEqual(
+      withExtras(contractRoot(), {
+        "adapter-plain": { table: "stale", ghost: "removed" },
+      }),
+      [
+        {
+          headline: "2 native extra(s) in NATIVE_EXTRAS are stale:",
+          lines: [
+            "table — every native kit renders it now",
+            "ghost — adapter-plain no longer renders it",
+          ],
+        },
+      ]
+    );
+  });
+
+  it("holds themed kits to their own framework's themed parts", () => {
+    const root = mkdtempSync(join(tmpdir(), "adapttable-parts-themed-"));
+    temps.push(root);
+    writePackage(root, "shared", "core", { "src/index.ts": "export {};\n" });
+    writePackage(root, "react", "react", { "src/index.ts": "export {};\n" });
+    writePackage(root, "angular", "angular", {
+      "src/index.ts": "export {};\n",
+    });
+    const table = (extra = "") =>
+      `export const T = () => <table data-adapttable-part="table"><td data-adapttable-part="cell" />${extra}</table>;\n`;
+    const kits = [
+      { name: "adapter-red", framework: "react", role: "shell" },
+      { name: "adapter-blue", framework: "react", role: "shell" },
+      { name: "adapter-gold", framework: "angular", role: "shell" },
+      { name: "adapter-jade", framework: "angular", role: "shell" },
+      { name: "adapter-onyx", framework: "angular", role: "shell" },
+    ];
+    for (const kit of kits) {
+      const gold =
+        kit.name === "adapter-onyx"
+          ? ""
+          : '<div data-adapttable-part="gold-only"></div>';
+      writePackage(
+        root,
+        kit.framework,
+        kit.name,
+        kit.framework === "react"
+          ? { "src/Table.tsx": table() }
+          : {
+              "src/table.component.html": `<table data-adapttable-part="table"><td data-adapttable-part="cell"></td>${gold}</table>\n`,
+            }
+      );
+    }
+    const failures = checkPartsParity({
+      root,
+      kits,
+      contract: ["table", "cell"],
+      expectedGaps: {},
+      getterParts: {},
+      fallbackOnly: {},
+      unnamedInKits: {},
+      nativeExtras: {},
+    }).failures;
+    assert.deepEqual(
+      failures.flatMap(({ lines }) => lines),
+      ["gold-only — missing from adapter-onyx"]
+    );
+  });
+});
+
 describe("native-only accounting uses effective themed parts", () => {
   it("accepts a name provided by themed Chrome and another framework's native kit", () => {
     assert.deepEqual(themedOwnership().failures, []);

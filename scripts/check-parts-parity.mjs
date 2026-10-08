@@ -272,6 +272,24 @@ const FALLBACK_ONLY = {
  */
 const UNNAMED_IN_KITS = {};
 
+/**
+ * Parts one native kit renders for UI the other frameworks' native kits do not
+ * have, each with the reason. A listed part must still be rendered by its kit
+ * and still be missing from another native kit; otherwise the entry is stale.
+ */
+const NATIVE_EXTRAS = {
+  "adapter-vue-unstyled": {
+    "row-edit-error":
+      "Vue's row-edit actions show the host's failed commit as a status; React and Angular surface edit errors on the cell editors only.",
+    "batch-edit-error":
+      "Vue's batch-edit bar shows the host's failed batch commit as a status; React and Angular have no batch-level error status.",
+    "assistant-voice-error":
+      "Vue's assistant composer names its voice-input error; React and Angular assistants show no voice-input error element.",
+    "sort-direction":
+      "Vue's mobile sort control toggles the direction with its own button; React and Angular mobile sorting uses the sort select alone.",
+  },
+};
+
 /** Every part named in one of the two accounted-for lists. */
 function accountedFor(groups) {
   return new Set(Object.values(groups).flat());
@@ -290,7 +308,9 @@ const DATASET_PART =
 const KIT_PART_PATTERNS = [
   // `data-adapttable-part="x"` as a JSX or template attribute, and
   // `{ "data-adapttable-part": "x" }` handed through a prop object.
-  /["']?data-adapttable-part["']?\s*[=:]\s*["'](?<part>[a-z0-9-]+)["']/g,
+  // A Vue `:data-adapttable-part="name"` (or `v-bind:`) binds an expression,
+  // not a literal, so a leading colon does not name a part.
+  /(?<!:)["']?data-adapttable-part["']?\s*[=:]\s*["'](?<part>[a-z0-9-]+)["']/g,
   // A template binding to a string literal: Vue's
   // `:data-adapttable-part="'x'"` (and `v-bind:`), Angular's
   // `[attr.data-adapttable-part]="'x'"`, and the same binding as a key of an
@@ -411,22 +431,57 @@ function helperPartNames(file, text) {
     file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
   );
   const helpers = declaredPartHelpers(source);
+  helpers.local = new Set(helpers.keys());
   for (const [name, index] of importedPartHelpers(file, source))
     if (!helpers.has(name)) helpers.set(name, index);
+  const thunks = localThunks(source);
   function visit(node) {
-    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
-      const index = helpers.get(node.expression.text);
-      if (index !== undefined)
-        for (const name of literalBranches(node.arguments[index]))
-          found.add(name);
-    }
+    const helper = ts.isCallExpression(node) && calledHelper(node, helpers);
+    if (helper !== undefined && helper !== false)
+      for (const name of literalBranches(node.arguments[helper], thunks))
+        found.add(name);
     const value = partPropertyValue(node);
     if (value && !ts.isIdentifier(value) && namesRenderedPart(node))
-      for (const name of literalBranches(value)) found.add(name);
+      for (const name of literalBranches(value, thunks)) found.add(name);
     ts.forEachChild(node, visit);
   }
   visit(source);
   return found;
+}
+
+/**
+ * The part position of a call to a known helper: `helper(...)`, or
+ * `record.helper(...)` when the file itself declares a part helper of that
+ * name and hands it around in a record.
+ */
+function calledHelper(call, helpers) {
+  const callee = call.expression;
+  if (ts.isIdentifier(callee)) return helpers.get(callee.text);
+  if (
+    ts.isPropertyAccessExpression(callee) &&
+    helpers.local?.has(callee.name.text)
+  )
+    return helpers.get(callee.name.text);
+  return undefined;
+}
+
+/** Zero-parameter local arrow functions with an expression body. */
+function localThunks(source) {
+  const thunks = new Map();
+  function visit(node) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.initializer &&
+      ts.isArrowFunction(node.initializer) &&
+      node.initializer.parameters.length === 0 &&
+      !ts.isBlock(node.initializer.body)
+    )
+      thunks.set(node.name.text, node.initializer.body);
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return thunks;
 }
 
 /**
@@ -456,6 +511,18 @@ function declaredPartHelpers(source) {
     }
   }
   return helpers;
+}
+
+/** `part ?? fallback` sets the part from `part` first; that is its subject. */
+function fallbackSubject(expression) {
+  if (
+    expression &&
+    ts.isBinaryExpression(expression) &&
+    (expression.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken ||
+      expression.operatorToken.kind === ts.SyntaxKind.BarBarToken)
+  )
+    return expression.left;
+  return expression;
 }
 
 /** The argument a call hands to a known part helper's part position. */
@@ -535,7 +602,9 @@ function partParameterIndex(fn, helpers = new Map()) {
   let index = -1;
   function visit(node) {
     if (index >= 0 || (node !== fn && ts.isFunctionLike(node))) return;
-    const value = partPropertyValue(node) ?? forwardedPart(node, helpers);
+    const value = fallbackSubject(
+      partPropertyValue(node) ?? forwardedPart(node, helpers)
+    );
     if (value && ts.isIdentifier(value) && isReturned(node)) {
       index = parameters.indexOf(value.text);
     }
@@ -577,15 +646,27 @@ function namesRenderedPart(property) {
 }
 
 /** The string literals an expression can evaluate to, through ternaries. */
-function literalBranches(expression) {
-  if (!expression) return [];
+function literalBranches(expression, thunks = new Map(), seen = new Set()) {
+  if (!expression || seen.has(expression)) return [];
+  const next = new Set([...seen, expression]);
   if (ts.isParenthesizedExpression(expression))
-    return literalBranches(expression.expression);
+    return literalBranches(expression.expression, thunks, next);
   if (ts.isStringLiteralLike(expression)) return [expression.text];
+  if (
+    ts.isCallExpression(expression) &&
+    ts.isIdentifier(expression.expression) &&
+    expression.arguments.length === 0 &&
+    thunks.has(expression.expression.text)
+  )
+    return literalBranches(
+      thunks.get(expression.expression.text),
+      thunks,
+      next
+    );
   if (ts.isConditionalExpression(expression))
     return [
-      ...literalBranches(expression.whenTrue),
-      ...literalBranches(expression.whenFalse),
+      ...literalBranches(expression.whenTrue, thunks, next),
+      ...literalBranches(expression.whenFalse, thunks, next),
     ];
   if (
     ts.isBinaryExpression(expression) &&
@@ -593,8 +674,8 @@ function literalBranches(expression) {
       expression.operatorToken.kind === ts.SyntaxKind.BarBarToken)
   )
     return [
-      ...literalBranches(expression.left),
-      ...literalBranches(expression.right),
+      ...literalBranches(expression.left, thunks, next),
+      ...literalBranches(expression.right, thunks, next),
     ];
   return [];
 }
@@ -1273,8 +1354,38 @@ function nativeParityFailures(byKit, chrome, context) {
     const missing = native
       .filter((kit) => !rendered.get(kit.name).has(part))
       .map((kit) => kit.name);
-    return missing.length > 0 ? [{ part, missing }] : [];
+    if (missing.length === 0) return [];
+    const owners = native.filter((kit) => !missing.includes(kit.name));
+    const accounted = owners.every(
+      (kit) => context.nativeExtras[kit.name]?.[part] !== undefined
+    );
+    return accounted ? [] : [{ part, missing }];
   });
+}
+
+/**
+ * Every native extra still describes the kits as they are: the listed kit
+ * renders the part and at least one other native kit still does not.
+ */
+function staleNativeExtras(byKit, chrome, context) {
+  const rendered = (kit) =>
+    new Set([...byKit.get(kit.name), ...chrome.get(kit.framework)]);
+  return Object.entries(context.nativeExtras).flatMap(([name, parts]) =>
+    Object.keys(parts).flatMap((part) => {
+      const kit = context.nativeKits.find((item) => item.name === name);
+      // A run over a subset of the registry (a fixture) judges only its kits.
+      if (!kit)
+        return context.registered.has(name)
+          ? [`${part} — ${name} is not a native kit`]
+          : [];
+      if (!rendered(kit).has(part))
+        return [`${part} — ${name} no longer renders it`];
+      const others = context.nativeKits.filter((item) => item !== kit);
+      return others.every((item) => rendered(item).has(part))
+        ? [`${part} — every native kit renders it now`]
+        : [];
+    })
+  );
 }
 
 /**
@@ -1292,12 +1403,19 @@ function themedFailures(byKit, nativeParts, everyPart, chrome, context) {
     )
   );
   const failures = [];
+  const renders = (kit, part) =>
+    byKit.get(kit.name).has(part) || chrome.get(kit.framework).has(part);
   for (const part of [...everyPart].sort()) {
     if (getterNames.has(part)) continue;
+    // Themed kits are held to the parts their own framework's themed kits
+    // render; frameworks are held to each other through their native kits.
+    const frameworks = new Set(
+      shell.filter((kit) => renders(kit, part)).map((kit) => kit.framework)
+    );
     const missing = shell.filter(
       (kit) =>
-        !byKit.get(kit.name).has(part) &&
-        !chrome.get(kit.framework).has(part) &&
+        frameworks.has(kit.framework) &&
+        !renders(kit, part) &&
         context.expectedGaps[kit.name]?.[part] === undefined
     );
     if (missing.length === 0) continue;
@@ -1306,7 +1424,8 @@ function themedFailures(byKit, nativeParts, everyPart, chrome, context) {
     // simply never named. `cards` sat in exactly that state: antd and
     // unstyled emitted it, five kits rendered the list without naming it, and
     // treating "one kit" as "kit-specific" hid it.
-    if (!nativeParts.has(part) && missing.length === shell.length - 1) {
+    const peers = shell.filter((kit) => frameworks.has(kit.framework));
+    if (!nativeParts.has(part) && missing.length === peers.length - 1) {
       continue;
     }
     failures.push({ part, missing: missing.map((kit) => kit.name) });
@@ -1330,6 +1449,7 @@ function themedFailures(byKit, nativeParts, everyPart, chrome, context) {
  * @param {Record<string, Record<string, string[]>>} [options.getterParts]
  * @param {Record<string, string[]>} [options.fallbackOnly]
  * @param {Record<string, string[]>} [options.unnamedInKits]
+ * @param {Record<string, Record<string, string>>} [options.nativeExtras]
  * @returns {{ failures: { headline: string, lines: string[], advice: string }[], summary: string }}
  */
 export function checkPartsParity({
@@ -1340,6 +1460,7 @@ export function checkPartsParity({
   getterParts = CORE_GETTER_PARTS,
   fallbackOnly = FALLBACK_ONLY,
   unnamedInKits = UNNAMED_IN_KITS,
+  nativeExtras = NATIVE_EXTRAS,
 } = {}) {
   const registry = kitRegistryErrors(root, kits);
   if (registry.length > 0) {
@@ -1364,6 +1485,8 @@ export function checkPartsParity({
     getterParts,
     fallbackOnly,
     unnamedInKits,
+    nativeExtras,
+    registered: new Set(kits.map((kit) => kit.name)),
     // The adapters that render the shared shell's chrome with their own kit's
     // components. They should agree part-for-part.
     shellKits: shellKits(kits),
@@ -1395,6 +1518,7 @@ export function checkPartsParity({
 
   const contractMissing = contractFailures(byKit, chrome, context);
   const native = nativeParityFailures(byKit, chrome, context);
+  const staleExtras = staleNativeExtras(byKit, chrome, context);
   const themed = themedFailures(byKit, nativeParts, everyPart, chrome, context);
   const { unaccounted, stale, unnamed } = nativeOnlyFailures(
     byKit,
@@ -1425,6 +1549,14 @@ export function checkPartsParity({
         "own elements or its binding's Chrome. Restore each missing part " +
         "where that element renders; another native kit naming it does not " +
         "satisfy this kit's contract.",
+    },
+    {
+      headline: `${staleExtras.length} native extra(s) in NATIVE_EXTRAS are stale:`,
+      lines: staleExtras,
+      advice:
+        "Each NATIVE_EXTRAS entry names a part only its native kit renders. " +
+        "Remove an entry once every native kit renders the part, or when its " +
+        "kit stops rendering it.",
     },
     {
       headline: `${themed.length} part(s) are rendered by some adapters and not others:`,
