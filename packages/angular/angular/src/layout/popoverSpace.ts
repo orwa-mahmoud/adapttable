@@ -31,20 +31,15 @@ export function injectPopoverSpace(options: {
     const origin = options.origin();
     if (!viewport || !options.open() || !origin) return;
     const rect = origin.getBoundingClientRect();
-    const below = viewport.innerHeight - rect.bottom - options.reserve;
+    // An origin scrolled past an edge leaves at most the whole viewport.
+    const clamp = (edge: number) =>
+      Math.max(0, Math.min(viewport.innerHeight, edge));
+    const below = viewport.innerHeight - clamp(rect.bottom) - options.reserve;
     if (!options.allowAbove?.()) {
       height.set(Math.max(80, below));
       return;
     }
-    const clamp = (edge: number) =>
-      Math.max(0, Math.min(viewport.innerHeight, edge));
-    height.set(
-      Math.max(
-        80,
-        viewport.innerHeight - clamp(rect.bottom) - options.reserve,
-        clamp(rect.top) - options.reserve
-      )
-    );
+    height.set(Math.max(80, below, clamp(rect.top) - options.reserve));
   };
   afterRenderEffect(measure);
   viewport?.addEventListener("resize", measure);

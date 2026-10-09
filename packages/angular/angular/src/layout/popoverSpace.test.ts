@@ -93,6 +93,24 @@ describe("native popover viewport space", () => {
     expect(remove).toHaveBeenCalledWith("scroll", expect.any(Function), true);
   });
 
+  it("keeps below-only room within the viewport when the origin scrolls above it", () => {
+    const fixture = TestBed.createComponent(Host);
+    const host = fixture.componentInstance;
+    const origin = document.createElement("button");
+    let bottom = -184;
+    vi.spyOn(origin, "getBoundingClientRect").mockImplementation(() =>
+      DOMRect.fromRect({ y: bottom - 36, height: 36 })
+    );
+    host.origin.set(origin);
+    host.open.set(true);
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(host.height()).toBe(window.innerHeight - 32);
+    bottom = 36;
+    document.dispatchEvent(new Event("scroll"));
+    expect(host.height()).toBe(window.innerHeight - 36 - 32);
+  });
+
   it("does not require a browser window when rendered on the server", () => {
     TestBed.configureTestingModule({
       providers: [{ provide: DOCUMENT, useValue: { defaultView: null } }],
