@@ -92,6 +92,8 @@ for (const kit of KITS) {
     await expect(status).toBeAttached();
     await expect(status).toHaveText("");
 
+    await expect(transcript(page)).toContainText("Nothing yet");
+
     // Each kit puts the sort affordance somewhere else, and names it its own
     // way: most render a button labelled "Sort by: <column>", MUI a
     // `<span role="button">` named by the column text, and antd makes the header
@@ -106,6 +108,11 @@ for (const kit of KITS) {
     // that a real press on a real header reaches the region at all.
     await expect(status).toContainText("Sorted by");
     await expect(status).toContainText("ascending");
+    await expect(transcript(page)).toContainText("Sorted by");
+    await expect(transcript(page)).not.toContainText("Priya Nair");
+    await page.screenshot({
+      path: test.info().outputPath(`${kit}-sort-announcement.png`),
+    });
   });
 }
 

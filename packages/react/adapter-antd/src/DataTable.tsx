@@ -174,6 +174,10 @@ import { SkeletonTable } from "./components/SkeletonTable";
 import { Toolbar } from "./components/Toolbar";
 import type { DataTableProps } from "./types";
 
+// Table always nests its rows in Spin, even when loading is false. Its
+// default live region would repeat every cell beside our status announcer.
+const SILENT_TABLE_LOADING = { spinning: false, "aria-live": "off" };
+
 /**
  * antd renders virtual rows inside its own fixed-height scroll container, so
  * the page-level infinite-scroll sentinel never reaches the viewport. This
@@ -1463,6 +1467,7 @@ function DesktopTableBody<TRow>({
       expandable={expandable}
       summary={summary}
       pagination={false}
+      loading={SILENT_TABLE_LOADING}
       rowClassName={rowClassName ? buildRowClassName(rowClassName) : undefined}
       onChange={handleChange as TableProps<GroupedDataRecord<TRow>>["onChange"]}
       onRow={(record, rowIndex) =>

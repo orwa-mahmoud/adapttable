@@ -25,7 +25,7 @@ function useAnnouncements(root: HTMLElement | null): string[] {
     if (!root) return undefined;
     const read = () => {
       const regions = root.querySelectorAll<HTMLElement>(
-        '[aria-live], [role="status"], [role="alert"]'
+        '[aria-live="polite"], [aria-live="assertive"], [role="status"]:not([aria-live="off"]), [role="alert"]:not([aria-live="off"])'
       );
       for (const region of regions) {
         const text = region.textContent?.trim() ?? "";
