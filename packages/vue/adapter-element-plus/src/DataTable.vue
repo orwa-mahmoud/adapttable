@@ -364,6 +364,15 @@ function setScrollElement(element: HTMLElement | null): void {
   min-inline-size: 0;
 }
 
+.adapttable-element-plus
+  [data-adapttable-part="card-value"]
+  [data-adapttable-part="edit-cell-activate"] {
+  max-inline-size: 100%;
+  height: auto;
+  min-block-size: var(--el-component-size);
+  white-space: normal;
+}
+
 .adapttable-element-plus [data-adapttable-part="search-field"] {
   display: flex;
   align-items: center;
