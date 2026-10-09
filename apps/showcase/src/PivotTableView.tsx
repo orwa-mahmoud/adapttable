@@ -19,7 +19,9 @@ import { sidePanel as shadcnSidePanel } from "@adapttable/shadcn/side-panel";
 import { sidePanel as unstyledSidePanel } from "@adapttable/unstyled/side-panel";
 import { Suspense, useMemo } from "react";
 
+import { initialDemoLocale } from "./demoPresentation";
 import { kitClassNames, kitTable } from "./kitProviders";
+import type { Locale } from "./people";
 
 /** Max minus min — a named aggregator the URL can carry as `range:budget`. */
 function rangeOf(values: readonly unknown[]): number | undefined {
@@ -71,6 +73,8 @@ export interface PivotTableViewProps<TRow> {
    * on this page needs the same one, so it wraps both.
    */
   kit: string;
+  /** The native labels and direction chosen by the host page. */
+  locale?: Locale;
   /** The rows to pivot — already materialized, filtering happens upstream. */
   rows: readonly TRow[];
   /** The fields the panel offers, for the column captions. */
@@ -152,8 +156,9 @@ export function PivotTableView<TRow>({
   collapsed,
   onToggleFold,
   sidePanel,
+  locale = initialDemoLocale(),
 }: Readonly<PivotTableViewProps<TRow>>) {
-  const labels = getLabels("en");
+  const labels = getLabels(locale);
   const model = useMemo(() => {
     const result = pivot(rows, config, {
       collapsed,
@@ -185,6 +190,7 @@ export function PivotTableView<TRow>({
     <div className="pivot-table-wrap" data-testid="pivot-table">
       <Suspense fallback={null}>
         <Table
+          dir={locale === "ar" ? "rtl" : "ltr"}
           // The docked builder is what pivoted this table, so it travels with
           // it — and a panel is drawn by the kit, which means importing the
           // kit's own feature rather than passing a prop.

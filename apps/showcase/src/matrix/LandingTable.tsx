@@ -8,6 +8,7 @@
 import { Suspense, useState } from "react";
 
 import { DemoScenarioProvider } from "../Demo";
+import { initialDemoLocale } from "../demoPresentation";
 import { ADAPTERS, DemoFallback } from "../kitDemos";
 import type { FeatureBodyProps } from "./featureBodies";
 
@@ -41,7 +42,7 @@ export function LandingTable({ dark, adapter }: Readonly<FeatureBodyProps>) {
           <DemoScenarioProvider value="landing">
             <Demo
               mode="frontend"
-              locale="en"
+              locale={initialDemoLocale()}
               dark={dark}
               urlKey="live"
               filterControls

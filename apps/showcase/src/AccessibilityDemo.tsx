@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Keyboard } from "./sectionIcons";
@@ -80,7 +81,7 @@ export function AccessibilityDemo({
             <DemoScenarioProvider value="accessibility">
               <Demo
                 mode="frontend"
-                locale="en"
+                locale={initialDemoLocale()}
                 dark={dark}
                 urlKey="a11y"
                 cellNavigation

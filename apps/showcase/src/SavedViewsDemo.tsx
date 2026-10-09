@@ -18,6 +18,7 @@ import { Suspense, useMemo, useState } from "react";
 
 import { layoutFor, rosterFor } from "./casts";
 import { BASE_COLUMNS, type Person } from "./data";
+import { initialDemoDirection, initialDemoLocale } from "./demoPresentation";
 import {
   kitClassNames,
   KitProvider,
@@ -135,8 +136,8 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const classNames = kitClassNames(adapter);
 
   return (
-    <div className="mx-demo">
-      <KitProvider kit={adapter} dark={dark}>
+    <div className="mx-demo" dir={initialDemoDirection()}>
+      <KitProvider kit={adapter} dark={dark} dir={initialDemoDirection()}>
         {/* The panel column hugs its card rather than reserving a third of the
             width for it: a management list is as wide as its longest view
             name, and the table is what the rest of the row is for. */}
@@ -154,7 +155,7 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 onMove={views.move}
                 onSetDefault={views.setDefault}
                 onRemove={views.remove}
-                labels={getLabels("en")}
+                labels={getLabels(initialDemoLocale())}
                 classNames={classNames}
                 footer={
                   migrated.length > 0 ? (
@@ -169,6 +170,7 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
           <div>
             <Suspense fallback={null}>
               <Table
+                dir={initialDemoDirection()}
                 data={rosterFor("saved-views")}
                 columns={BASE_COLUMNS}
                 rowKey={(row) => row.id}
@@ -177,7 +179,7 @@ export function SavedViewsDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 defaultColumnLayout={layoutFor("saved-views")}
                 // The feature owns both the views menu and its runtime state.
                 features={[kitSavedViewsFeature(adapter, savedViewsOptions)]}
-                labels={getLabels("en")}
+                labels={getLabels(initialDemoLocale())}
                 classNames={classNames}
               />
             </Suspense>

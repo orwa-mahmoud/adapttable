@@ -371,6 +371,7 @@ function LabRows({
   pivoted,
   kit,
   dark,
+  locale,
   sidePanel,
   children,
 }: Readonly<{
@@ -378,14 +379,16 @@ function LabRows({
   pivoted: boolean;
   kit: string;
   dark: boolean;
+  locale: Locale;
   sidePanel: FeatureProps<Person>["sidePanel"];
   children: ReactNode;
 }>) {
   if (!pivoted) return <>{children}</>;
   return (
-    <KitProvider kit={kit} dark={dark}>
+    <KitProvider kit={kit} dark={dark} dir={locale === "ar" ? "rtl" : "ltr"}>
       <PivotTableView
         kit={kit}
+        locale={locale}
         rows={PIVOT_PEOPLE}
         fields={PIVOT_FIELDS}
         config={pivot.config}
@@ -968,6 +971,7 @@ export function AllOptionsDemo({ dark }: Readonly<{ dark: boolean }>) {
               data-adapter={adapter}
             >
               <LabRows
+                locale={locale}
                 pivot={pivot}
                 pivoted={pivoted}
                 kit={adapter}

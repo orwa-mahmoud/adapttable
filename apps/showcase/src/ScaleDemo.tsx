@@ -18,6 +18,7 @@ import {
 } from "@adapttable/react/features";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { initialDemoDirection, initialDemoLocale } from "./demoPresentation";
 import { kitClassNames, KitProvider, kitTable } from "./kitProviders";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { useNavHeight } from "./sections";
@@ -313,12 +314,13 @@ function ServerScaleTable({
   const Table = kitTable<BigPerson>(kit);
   const navHeight = useNavHeight();
   return (
-    <KitProvider kit={kit} dark={dark}>
+    <KitProvider kit={kit} dark={dark} dir={initialDemoDirection()}>
       <Table
+        dir={initialDemoDirection()}
         source={source}
         columns={columns}
         rowKey={(r) => String(r.id)}
-        labels={getLabels("en")}
+        labels={getLabels(initialDemoLocale())}
         urlSync={false}
         searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
         // The window is what this page exists to show, so it is imported —
@@ -525,7 +527,7 @@ function FrontendScaleTable({
     );
   };
   return (
-    <KitProvider kit={kit} dark={dark}>
+    <KitProvider kit={kit} dark={dark} dir={initialDemoDirection()}>
       {/* The benchmark reads these to know the burst finished and how long
           it took: the count to wait on, the elapsed time to report. */}
       <div
@@ -536,10 +538,11 @@ function FrontendScaleTable({
         data-bench-pipeline={patches > 0 ? pipelineName : undefined}
       >
         <Table
+          dir={initialDemoDirection()}
           source={source}
           columns={columns}
           rowKey={(r) => String(r.id)}
-          labels={getLabels("en")}
+          labels={getLabels(initialDemoLocale())}
           urlSync={false}
           searchPlaceholder={`Filter ${total.toLocaleString("en-US")} rows…`}
           // Imported, not switched on: the window, the tree and the editor

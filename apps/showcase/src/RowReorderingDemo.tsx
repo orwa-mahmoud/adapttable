@@ -1,6 +1,7 @@
 import { Suspense, useState } from "react";
 
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Rows, Tree } from "./sectionIcons";
@@ -16,7 +17,7 @@ export function RowReorderingDemo({
   adapter,
 }: Readonly<FeatureBodyProps>) {
   const [shape, setShape] = useState<Shape>("flat");
-  const [rtl, setRtl] = useState(false);
+  const [rtl, setRtl] = useState(() => initialDemoLocale() === "ar");
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
   return (
     <div className="mx-demo">

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { GROUPS_DEFAULT_LAYOUT } from "./data";
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Columns } from "./sectionIcons";
@@ -28,7 +29,7 @@ export function ColumnGroupsDemo({
             <DemoScenarioProvider value="column-groups">
               <Demo
                 mode="frontend"
-                locale="en"
+                locale={initialDemoLocale()}
                 dark={dark}
                 urlKey="cgrp"
                 columnGroups

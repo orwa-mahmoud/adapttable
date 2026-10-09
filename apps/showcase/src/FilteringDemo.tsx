@@ -6,6 +6,7 @@ import {
   type FiltersUi,
 } from "./Demo";
 import { DemoFilterSetProvider } from "./demoFilters";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Layers } from "./sectionIcons";
@@ -90,7 +91,7 @@ export function FilteringDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
                 <AdvancedFiltersProvider value={advanced}>
                   <Demo
                     mode="frontend"
-                    locale="en"
+                    locale={initialDemoLocale()}
                     dark={dark}
                     urlKey="flt"
                     filterControls

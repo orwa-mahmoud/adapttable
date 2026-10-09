@@ -7,6 +7,7 @@ import { Suspense, useMemo, useState } from "react";
 
 import type { Person } from "./data";
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Warning } from "./sectionIcons";
@@ -242,7 +243,7 @@ export function FormulasDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             <DemoScenarioProvider value="formulas">
               <Demo
                 mode="frontend"
-                locale="en"
+                locale={initialDemoLocale()}
                 dark={dark}
                 urlKey="fx"
                 formulaColumns={columns}

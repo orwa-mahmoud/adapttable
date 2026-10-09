@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Layers } from "./sectionIcons";
@@ -33,7 +34,7 @@ export function SelectionDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
             <DemoScenarioProvider value="selection">
               <Demo
                 mode="frontend"
-                locale="en"
+                locale={initialDemoLocale()}
                 dark={dark}
                 urlKey="sel"
                 bulkActions

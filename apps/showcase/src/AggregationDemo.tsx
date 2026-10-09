@@ -1,6 +1,7 @@
 import { Suspense, useState } from "react";
 
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Pin } from "./sectionIcons";
@@ -11,7 +12,7 @@ import { Check, Pin } from "./sectionIcons";
  * recompute from the remaining rows.
  */
 export function AggregationDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
-  const [rtl, setRtl] = useState(false);
+  const [rtl, setRtl] = useState(() => initialDemoLocale() === "ar");
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
   return (
     <div className="mx-demo">
