@@ -12,7 +12,7 @@
   border: 1px solid var(--el-border-color);
   border-radius: var(--el-border-radius-base);
 }
-.adapttable-element-plus-pivot fieldset > div {
+.adapttable-element-plus-pivot [data-adapttable-part="pivot-field"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
