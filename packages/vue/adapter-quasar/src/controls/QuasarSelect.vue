@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { useScopeActivity } from "@adapttable/vue/adapter";
 import { QSelect } from "quasar";
-import { computed, shallowRef, useId } from "vue";
+import { computed, shallowRef, useId, watchEffect } from "vue";
 
 import { quasarFieldAttrs, useQuasarControlRef } from "./controlAttrs";
 import { useQuasarPresentation } from "./presentation";
@@ -12,6 +13,30 @@ const props = defineProps<{
   className?: string;
 }>();
 const select = shallowRef<InstanceType<typeof QSelect> | null>(null);
+const active = useScopeActivity();
+const popupOpen = shallowRef(false);
+function popupShown(): void {
+  popupOpen.value = true;
+  refreshTarget();
+}
+function popupHidden(): void {
+  popupOpen.value = false;
+  refreshTarget();
+}
+watchEffect((onCleanup) => {
+  const component = select.value;
+  if (!active.value || !popupOpen.value || !component) return;
+  const root: unknown = component.$el;
+  if (!(root instanceof HTMLElement)) return;
+  const view = root.ownerDocument.defaultView;
+  if (!view) return;
+  const updatePosition = () => {
+    if (active.value && popupOpen.value) component.updateMenuPosition();
+  };
+  updatePosition();
+  view.addEventListener("scroll", updatePosition, true);
+  onCleanup(() => view.removeEventListener("scroll", updatePosition, true));
+});
 const id = `adapttable-quasar-${useId()}`;
 const targetRevision = shallowRef(0);
 function refreshTarget(): void {
@@ -59,8 +84,8 @@ const { presentation, update } = useQuasarPresentation(
     dense
     hide-bottom-space
     @update:model-value="update"
-    @popup-show="refreshTarget"
-    @popup-hide="refreshTarget"
+    @popup-show="popupShown"
+    @popup-hide="popupHidden"
     @blur="refreshTarget"
   />
 </template>

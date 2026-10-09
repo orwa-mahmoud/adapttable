@@ -101,8 +101,7 @@ export const QuasarColumnPanel = defineComponent(
     let disposed = false;
     const updatePosition = () => {
       const control = props.control;
-      if (!active.value || disposed || !control.open || !control.isCurrent())
-        return;
+      if (!active.value || !control.open || !control.isCurrent()) return;
       menu.value?.updatePosition();
     };
     watchEffect((onCleanup) => {

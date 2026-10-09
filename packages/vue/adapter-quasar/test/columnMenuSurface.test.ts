@@ -80,6 +80,32 @@ it("updates native placement through ancestor scrolling and retires its tracker"
   await settle();
   expect(update).toHaveBeenCalledOnce();
 });
+it("rejects scroll positioning as soon as the overlay owner becomes obsolete", async () => {
+  const f = fixture();
+  await settle();
+  const update = vi.spyOn(f.wrapper.getComponent(QMenu).vm, "updatePosition");
+  f.current.value = false;
+  window.dispatchEvent(new Event("scroll"));
+  expect(update).not.toHaveBeenCalled();
+  await settle();
+  window.dispatchEvent(new Event("scroll"));
+  expect(update).not.toHaveBeenCalled();
+  expect(document.getElementById("native-panel")).toBeNull();
+});
+it("rejects a native show callback retained after the panel is unmounted", async () => {
+  const f = fixture();
+  await settle();
+  const native = f.wrapper.getComponent(QMenu);
+  const update = vi.spyOn(native.vm, "updatePosition");
+  const show: unknown = native.vm.$.vnode.props?.onShow;
+  if (typeof show !== "function")
+    throw new Error("Missing native show handler");
+  f.wrapper.unmount();
+  wrappers.pop();
+  show();
+  window.dispatchEvent(new Event("scroll"));
+  expect(update).not.toHaveBeenCalled();
+});
 it("changes callback owners without replacing the native dialog and retires each exactly once", async () => {
   const f = fixture();
   const first = vi.fn();

@@ -3,7 +3,14 @@ import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { QSelect, Quasar } from "quasar";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createSSRApp, defineComponent, h, nextTick, ref } from "vue";
+import {
+  createSSRApp,
+  defineComponent,
+  h,
+  KeepAlive,
+  nextTick,
+  ref,
+} from "vue";
 
 import {
   QuasarButton,
@@ -237,6 +244,77 @@ describe("Quasar control targets", () => {
     wrapper.unmount();
     mounts.pop();
     expect(target).toHaveBeenLastCalledWith(null);
+  });
+
+  it("rechecks native select placement while its popup is open and retires the scroll listener", async () => {
+    const wrapper = host(QuasarSelect, {
+      props: {
+        control: {
+          value: "small",
+          label: "Size",
+          options: [{ value: "small", label: "Small" }],
+          attrs: {},
+          onChange: vi.fn(),
+        },
+      },
+    });
+    const native = wrapper.getComponent(QSelect);
+    const update = vi.spyOn(native.vm, "updateMenuPosition");
+    native.vm.$emit("popupShow");
+    await settle();
+    update.mockClear();
+    wrapper.element.dispatchEvent(new Event("scroll"));
+    expect(update).toHaveBeenCalledOnce();
+    native.vm.$emit("popupHide");
+    wrapper.element.dispatchEvent(new Event("scroll"));
+    expect(update).toHaveBeenCalledOnce();
+    await settle();
+    wrapper.element.dispatchEvent(new Event("scroll"));
+    expect(update).toHaveBeenCalledOnce();
+    native.vm.$emit("popupShow");
+    await settle();
+    expect(update).toHaveBeenCalledTimes(2);
+    wrapper.unmount();
+    mounts.pop();
+    window.dispatchEvent(new Event("scroll"));
+    expect(update).toHaveBeenCalledTimes(2);
+  });
+
+  it("suspends popup positioning while cached by KeepAlive and resumes on activation", async () => {
+    const visible = ref(true);
+    const wrapper = host(
+      defineComponent(
+        () => () =>
+          h(KeepAlive, null, {
+            default: () =>
+              visible.value
+                ? h(QuasarSelect, {
+                    control: {
+                      value: "small",
+                      label: "Size",
+                      options: [{ value: "small", label: "Small" }],
+                      attrs: {},
+                      onChange: vi.fn(),
+                    },
+                  })
+                : null,
+          })
+      )
+    );
+    const native = wrapper.getComponent(QSelect);
+    const update = vi.spyOn(native.vm, "updateMenuPosition");
+    native.vm.$emit("popupShow");
+    await settle();
+    update.mockClear();
+    visible.value = false;
+    await settle();
+    window.dispatchEvent(new Event("scroll"));
+    expect(update).not.toHaveBeenCalled();
+    visible.value = true;
+    await settle();
+    update.mockClear();
+    window.dispatchEvent(new Event("scroll"));
+    expect(update).toHaveBeenCalledOnce();
   });
 
   it("retargets select refs for Quasar's mobile dialog and restores the original combobox", async () => {
