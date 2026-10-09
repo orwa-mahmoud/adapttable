@@ -102,6 +102,52 @@ export interface MobileCardsModel<TRow> {
   readonly rows: readonly TableRowModel<TRow>[];
   readonly bodySlots?: readonly TableBodySlot<TRow>[];
 }
+/**
+ * A row's cells, built the first time they are read and current after that.
+ *
+ * A row model is created for every row of the table, but a windowed body
+ * renders only the rows on screen. Building each row's cells — a value and
+ * attributes per column — on first read means a large dataset builds cells for
+ * the rows that are drawn, not for every row. The cells are a computed, so a
+ * host accessor or layout change still reaches the rows that were read.
+ */
+export function lazyCells<TRow>(
+  build: () => readonly TableCellModel<TRow>[]
+): () => readonly TableCellModel<TRow>[] {
+  let cells: ComputedRef<readonly TableCellModel<TRow>[]> | undefined;
+  return () => {
+    cells ??= computed(build);
+    return cells.value;
+  };
+}
+
+/** One desktop row's cells: each column's value and cell attributes. */
+function desktopCells<TRow>(
+  table: UseDataTableResult<TRow>,
+  row: TRow,
+  index: number
+): readonly TableCellModel<TRow>[] {
+  return table.columns.value.map((column) => ({
+    key: column.key,
+    attrs: table.cellAttrs(column),
+    context: {
+      row,
+      rowIndex: index,
+      column,
+      value: table.cellValue(column, row),
+    },
+  }));
+}
+
+/** A card's cells: the desktop row's, addressed by column key. */
+function cardCells<TRow>(
+  row: TableRowModel<TRow>
+): readonly TableCellModel<TRow>[] {
+  return row.cells.map((cell) => ({
+    ...cell,
+    attrs: { "data-column-key": cell.key },
+  }));
+}
 export function useDesktopTableModel<TRow>(
   table: UseDataTableResult<TRow>,
   selection?: () => RowSelection | undefined,
@@ -159,23 +205,19 @@ export function useDesktopTableModel<TRow>(
       headerCheckboxAttrs: selected?.headerCheckboxAttrs(),
       expandLabel: expansion,
       columnCount: headers.length + (selected ? 1 : 0) + (expansion ? 1 : 0),
-      rows: table.rows.value.map((row, index) => ({
-        key: table.rowKey(row),
-        row,
-        index,
-        attrs: table.rowAttrs(row, index),
-        checkboxAttrs: selected?.rowCheckboxAttrs(table.rowKey(row)),
-        cells: table.columns.value.map((column) => ({
-          key: column.key,
-          attrs: table.cellAttrs(column),
-          context: {
-            row,
-            rowIndex: index,
-            column,
-            value: table.cellValue(column, row),
+      rows: table.rows.value.map((row, index) => {
+        const cells = lazyCells(() => desktopCells(table, row, index));
+        return {
+          key: table.rowKey(row),
+          row,
+          index,
+          attrs: table.rowAttrs(row, index),
+          checkboxAttrs: selected?.rowCheckboxAttrs(table.rowKey(row)),
+          get cells() {
+            return cells();
           },
-        })),
-      })),
+        };
+      }),
     };
   });
 }
@@ -191,14 +233,19 @@ export function useMobileCardsModel<TRow>(
       "aria-colcount": undefined,
       "data-adapttable-part": "cards",
     },
-    rows: desktop.value.rows.map((row) => ({
-      ...row,
-      cells: row.cells.map((cell) => ({
-        ...cell,
-        attrs: { "data-column-key": cell.key },
-      })),
-      attrs: { ...table.cardAttrs(row.row, row.index), role: "listitem" },
-    })),
+    rows: desktop.value.rows.map((row) => {
+      const cells = lazyCells(() => cardCells(row));
+      return {
+        key: row.key,
+        row: row.row,
+        index: row.index,
+        checkboxAttrs: row.checkboxAttrs,
+        attrs: { ...table.cardAttrs(row.row, row.index), role: "listitem" },
+        get cells() {
+          return cells();
+        },
+      };
+    }),
   }));
 }
 export { renderCell, renderHeader };

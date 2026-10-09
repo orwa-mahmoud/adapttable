@@ -42,7 +42,12 @@ import type {
   TableBodyProjection,
   TableBodyProjectionInput,
 } from "../layout/modelChannels";
-import type { TableBodySlot, TableRowModel } from "../layout/tableModels";
+import {
+  lazyCells,
+  type TableBodySlot,
+  type TableCellModel,
+  type TableRowModel,
+} from "../layout/tableModels";
 import type { ExtraRow } from "./extraRows";
 export interface HeadlessRowsOptions<TRow> {
   readonly getCellSpan?: GetCellSpan<TRow>;
@@ -54,6 +59,17 @@ export interface HeadlessRowsOptions<TRow> {
   readonly rowHeight?: RowHeight<TRow>;
   readonly rowPinOffset?: number;
 }
+/**
+ * Whether a projected row has a cell spanning more than one row, known from
+ * the body geometry without building the row's cells.
+ */
+const ROW_SPANS = new WeakMap<object, boolean>();
+
+/** Whether this projected row has a cell spanning rows, if the projection knows. */
+export function projectedRowSpans(row: object): boolean | undefined {
+  return ROW_SPANS.get(row);
+}
+
 /** A body slot keeps native-to-Vue content without rendering controls. @public */
 export type HeadlessBodySlot<TRow> = TableBodySlot<TRow>;
 /** Geometry, extras and presentation use the existing neutral body assembler. @public */
@@ -155,7 +171,60 @@ export function projectHeadlessRows<TRow>(
         "data-row-id": id,
         ...(card ? { role: "listitem" } : {}),
       };
-    return {
+    const cellModel = (cell: BodyCell<TRow>): TableCellModel<TRow> => {
+      const column = cell.column as ColumnDef<TRow>;
+      const span = !card ? cellSpanMark(cell.colSpan, cell.rowSpan) : undefined;
+      const spanAttrs = !card
+        ? {
+            colspan: cell.colSpan,
+            rowspan: cell.rowSpan,
+            "data-cell-span": span,
+            "data-cell-span-appearance": span
+              ? (options.cellSpanAppearance ?? "merged")
+              : undefined,
+          }
+        : {};
+      return {
+        key: column.key,
+        tree: hierarchyCell({
+          columnKey: column.key,
+          entry: treeEntry,
+          tree,
+          labels: table.labels.value,
+          dir: () => table.dir.value,
+          card,
+        }),
+        context: {
+          row,
+          rowIndex: index,
+          column,
+          value: table.cellValue(column, row),
+        },
+        attrs: mergeVueAttrs(
+          card ? { "data-column-key": column.key } : table.cellAttrs(column),
+          {
+            ...spanAttrs,
+            ...(!card && tree && !grouping ? { role: "gridcell" } : {}),
+            style: card
+              ? undefined
+              : {
+                  ...pinnedRowCellStyle(
+                    rowPinSide,
+                    options.rowPinOffset ?? 0,
+                    table.layout.value.pinOffset(column.key) !== undefined
+                  ),
+                  ...mergedCellStyle(
+                    cell.colSpan,
+                    cell.rowSpan,
+                    options.cellSpanAppearance
+                  ),
+                },
+          }
+        ),
+      };
+    };
+    const cellModels = lazyCells(() => rowCells.map(cellModel));
+    const model = {
       key: id,
       row,
       index,
@@ -181,61 +250,15 @@ export function projectHeadlessRows<TRow>(
         },
         ...(part ? { "data-adapttable-part": part } : {}),
       }),
-      cells: rowCells.map((cell) => {
-        const column = cell.column as ColumnDef<TRow>;
-        const span = !card
-          ? cellSpanMark(cell.colSpan, cell.rowSpan)
-          : undefined;
-        const spanAttrs = !card
-          ? {
-              colspan: cell.colSpan,
-              rowspan: cell.rowSpan,
-              "data-cell-span": span,
-              "data-cell-span-appearance": span
-                ? (options.cellSpanAppearance ?? "merged")
-                : undefined,
-            }
-          : {};
-        return {
-          key: column.key,
-          tree: hierarchyCell({
-            columnKey: column.key,
-            entry: treeEntry,
-            tree,
-            labels: table.labels.value,
-            dir: () => table.dir.value,
-            card,
-          }),
-          context: {
-            row,
-            rowIndex: index,
-            column,
-            value: table.cellValue(column, row),
-          },
-          attrs: mergeVueAttrs(
-            card ? { "data-column-key": column.key } : table.cellAttrs(column),
-            {
-              ...spanAttrs,
-              ...(!card && tree && !grouping ? { role: "gridcell" } : {}),
-              style: card
-                ? undefined
-                : {
-                    ...pinnedRowCellStyle(
-                      rowPinSide,
-                      options.rowPinOffset ?? 0,
-                      table.layout.value.pinOffset(column.key) !== undefined
-                    ),
-                    ...mergedCellStyle(
-                      cell.colSpan,
-                      cell.rowSpan,
-                      options.cellSpanAppearance
-                    ),
-                  },
-            }
-          ),
-        };
-      }),
+      get cells() {
+        return cellModels();
+      },
     };
+    ROW_SPANS.set(
+      model,
+      rowCells.some((cell) => cell.rowSpan > 1)
+    );
+    return model;
   };
   const leadingColumns = [
     desktop.expandLabel,

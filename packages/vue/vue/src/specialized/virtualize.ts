@@ -41,7 +41,10 @@ import {
 } from "vue";
 
 import type { TableBodyProjection } from "../layout/modelChannels";
-import { projectHeadlessRows } from "../rows/headlessRowsModel";
+import {
+  projectedRowSpans,
+  projectHeadlessRows,
+} from "../rows/headlessRowsModel";
 import { VirtualRowRefs } from "./virtualRowRefs";
 export type VirtualizeOptions = VirtualizeInput &
   (boolean | { readonly maxHeight?: number });
@@ -126,6 +129,36 @@ export function windowBodySlots<TRow>(
     ...after,
   ];
 }
+/**
+ * The viewport a page-scrolled window assumes before it can measure one. A
+ * fixed height keeps the server render and the client's first render the same.
+ */
+const INITIAL_VIEWPORT = 800;
+
+/**
+ * The first rows a viewport of this height shows, plus the overscan, with the
+ * rest of the body as padding below them.
+ */
+function initialWindow(
+  count: number,
+  estimate: (index: number) => number,
+  viewport: number,
+  overscan: number
+): KeyedVirtualization {
+  const indices: number[] = [];
+  let height = 0;
+  while (indices.length < count && height < viewport) {
+    height += estimate(indices.length);
+    indices.push(indices.length);
+  }
+  for (let extra = 0; extra < overscan && indices.length < count; extra++)
+    indices.push(indices.length);
+  let paddingBottom = 0;
+  for (let index = indices.length; index < count; index++)
+    paddingBottom += estimate(index);
+  return { enabled: true, indices, paddingTop: 0, paddingBottom };
+}
+
 function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
   let disposed = false;
   const body = context.bodyProjection;
@@ -162,22 +195,25 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
   const logicalRows = computed(() =>
     slotRows(allSlots.value).filter((row) => !row.summary)
   );
+  // The projection knows each row's spans from the body geometry, so this
+  // check does not build the cells of rows that will never be drawn.
   const hasSpan = computed(() =>
     allSlots.value.some(
       (slot) =>
         slot.kind === "row" &&
-        slot.wiring.cells.some((cell) => Number(cell.attrs.rowspan ?? 1) > 1)
+        (projectedRowSpans(slot.wiring) ??
+          slot.wiring.cells.some((cell) => Number(cell.attrs.rowspan ?? 1) > 1))
     )
   );
-  const enabled = computed(
+  const requested = computed(
     () =>
-      context.active.value &&
       options.value.virtualize !== false &&
       !hasSpan.value &&
       (context.source.value.paginationMode !== "paged" ||
         allSlots.value.some((slot) => slot.kind === "group") ||
         body.value.desktop.attrs.role === "treegrid")
   );
+  const enabled = computed(() => context.active.value && requested.value);
   const elementMode = computed(() => options.value.maxHeight !== undefined);
   const element = computed(
     () =>
@@ -260,23 +296,37 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
     { immediate: true, flush: "post" }
   );
   const items = shallowRef<readonly VirtualItem[]>([]);
-  const estimate = (index: number): number => {
-    const slot = scrollSlots.value[index];
-    const style =
-      slot?.kind === "row"
-        ? (slot.wiring.attrs.style as { height?: number | string } | undefined)
-        : undefined;
-    const measured = Number.parseFloat(String(style?.height ?? ""));
-    if (Number.isFinite(measured) && measured > 0) return measured;
-    return mobile.value
+  // The virtualizer asks for every row's size and key again after each
+  // measurement, so both are plain tables built once per body, not reactive
+  // reads per row.
+  const sizing = computed(() => {
+    const fallback = mobile.value
       ? (options.value.estimateCardSize ?? 240)
       : (options.value.estimateRowSize ?? 56);
-  };
+    const slots = scrollSlots.value;
+    const sizes = new Float64Array(slots.length);
+    const keys = new Array<string>(slots.length);
+    slots.forEach((slot, index) => {
+      const style =
+        slot.kind === "row"
+          ? (slot.wiring.attrs.style as
+              { height?: number | string } | undefined)
+          : undefined;
+      const measured = Number.parseFloat(String(style?.height ?? ""));
+      sizes[index] =
+        Number.isFinite(measured) && measured > 0 ? measured : fallback;
+      keys[index] = slot.key;
+    });
+    return {
+      estimate: (index: number): number => sizes[index] ?? fallback,
+      key: (index: number): string | number => keys[index] ?? index,
+    };
+  });
   const common = () => ({
     count: scrollSlots.value.length,
     enabled: enabled.value,
-    estimateSize: estimate,
-    getItemKey: (index: number) => scrollSlots.value[index]?.key ?? index,
+    estimateSize: sizing.value.estimate,
+    getItemKey: sizing.value.key,
     overscan: options.value.virtualOverscan ?? 5,
     onChange: () => {
       items.value = current().getVirtualItems();
@@ -367,13 +417,25 @@ function mountVirtualize<TRow>(context: FeatureMountContext<TRow>): void {
   });
   const model: ComputedRef<BodyWindowModel<TRow>> = computed(() => {
     refs.begin();
-    const window = keyedWindow({
-      enabled: enabled.value,
-      count: scrollSlots.value.length,
-      virtualizer: current(),
-      items: items.value,
-      estimateSize: estimate,
-    });
+    const { estimate } = sizing.value;
+    // Until the table is live and measured — the first client render, a
+    // server render — a requested window holds the first rows that fit, not
+    // every row of the body.
+    const window =
+      requested.value && !enabled.value
+        ? initialWindow(
+            scrollSlots.value.length,
+            estimate,
+            options.value.maxHeight ?? INITIAL_VIEWPORT,
+            options.value.virtualOverscan ?? 5
+          )
+        : keyedWindow({
+            enabled: enabled.value,
+            count: scrollSlots.value.length,
+            virtualizer: current(),
+            items: items.value,
+            estimateSize: estimate,
+          });
     const measure = (index: number, detail: boolean, key: string) =>
       refs.ref("desktop", key, index, detail ? "detail" : "row");
     const desktopSlots = windowBodySlots(
@@ -502,15 +564,19 @@ export function windowBodyColumns<TRow>(
     readonly collapsible?: boolean;
   }
 ): DesktopTableModel<TRow> {
-  const hasSpans = (desktop.bodySlots ?? []).some(
-    (slot) =>
-      slot.kind === "row" &&
-      slot.wiring.cells.some(
-        (cell) =>
-          Number(cell.attrs.colspan ?? 1) > 1 ||
-          Number(cell.attrs.rowspan ?? 1) > 1
-      )
-  );
+  // Only a column window needs to know about spans; asking every row for its
+  // cells otherwise builds cells for rows that are never drawn.
+  const hasSpans =
+    options.enabled &&
+    (desktop.bodySlots ?? []).some(
+      (slot) =>
+        slot.kind === "row" &&
+        slot.wiring.cells.some(
+          (cell) =>
+            Number(cell.attrs.colspan ?? 1) > 1 ||
+            Number(cell.attrs.rowspan ?? 1) > 1
+        )
+    );
   const plan = columnWindowPlan({
     columns: desktop.headers.map((header) => header.column),
     ...options,
