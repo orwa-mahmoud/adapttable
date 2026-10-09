@@ -22,6 +22,8 @@ presentation. The adapter does not introduce a second table data engine.
   full-width separator rows, row styling and virtualization.
 - Keyboard navigation, cell ranges, Find, saved views, row actions, bulk actions,
   a command palette, context menus and side-panel view controls.
+- Optional assistant and approval surfaces with host-owned transport and
+  decisions.
 - CSV export and host-owned print layout; PDF export and XLSX use optional
   writers supplied to the export feature.
 - Pivot data, a spreadsheet formula engine and sparklines through the shared
@@ -35,8 +37,8 @@ Import `pdfWriter` from `@adapttable/vue/pdf` or `xlsxWriter` from
 
 For pivot data, import `pivot` and `pivotTableModel` from
 `@adapttable/vue/pivot` and render the prepared rows and columns with this
-adapter. Pivot configuration controls are host-composed; this package does not
-export a kit-specific pivot panel. Formula columns come from
+adapter; the `pivot` entry's `PivotPanel` edits the axes and measures with
+Vuetify controls. Formula columns come from
 `buildFormulaColumns` in `@adapttable/vue/formula`, and SVG sparkline columns
 from `sparklineColumn` in `@adapttable/vue/sparkline`.
 
@@ -277,6 +279,15 @@ lifetime guards; overlays attach to the supplied fullscreen container.
 `sidePanel` from `@adapttable/vuetify/side-panel` uses a `VCard` aside and native
 `VBtn` tabs. Its `open` value and `onOpenChange` callback remain controlled by
 the host. Rejected selection or close requests leave the accepted panel visible.
+
+The `assistant` entry provides `TableAssistant`, `AgentApproval`,
+`tableAssistant()`, and `agentApproval()` using the binding's conversation and
+approval contracts. Its sheet is a `VDialog`, examples open in a `VMenu` with a
+`VList`, and speech language choices use `VSelect`. The composer is a native
+textarea inside `VField`; like the command palette input, the textarea carries
+the part, accessible name and keyboard handling. It does not import an AI
+transport or own approval decisions. The `pivot` entry provides a controlled
+`PivotPanel` with `VSelect` and `VBtn` controls.
 
 ## Control ownership
 

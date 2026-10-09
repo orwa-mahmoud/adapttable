@@ -1,0 +1,52 @@
+.adapttable-vuetify-assistant-panel,
+.adapttable-vuetify-assistant-window {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 18rem;
+}
+.v-dialog > .v-overlay__content.adapttable-vuetify-assistant-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  display: block;
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: 100dvh;
+  max-block-size: none;
+  margin: 0;
+  pointer-events: none;
+}
+.adapttable-vuetify-assistant-sheet-overlay
+  > .adapttable-vuetify-assistant-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 38%);
+  pointer-events: auto;
+}
+.adapttable-vuetify-assistant-sheet-overlay
+  > .adapttable-vuetify-assistant-sheet {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(28rem, 100%);
+  padding: 1rem;
+  overflow: auto;
+  pointer-events: auto;
+}
+.adapttable-vuetify-assistant-input {
+  inline-size: 100%;
+}
+.adapttable-vuetify-assistant-input textarea {
+  resize: vertical;
+}
+.adapttable-vuetify-assistant-menu {
+  overflow-y: auto;
+}
+.adapttable-vuetify-approval-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

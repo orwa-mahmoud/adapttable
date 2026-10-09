@@ -64,13 +64,16 @@ const columns: readonly ColumnDef<Person>[] = [
 
 ## Kit components
 
-| Component               | Entry points                 | Renders                                              |
-| ----------------------- | ---------------------------- | ---------------------------------------------------- |
-| `VuetifyEditableCell`   | `/editing`                   | An editable cell with Vuetify fields and selects.    |
-| `VuetifyRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.           |
-| `VuetifyBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.  |
-| `VuetifyFilterField`    | `/filters`                   | A filter definition's field with the kit's controls. |
-| `VuetifyHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.       |
+| Component               | Entry points                 | Renders                                               |
+| ----------------------- | ---------------------------- | ----------------------------------------------------- |
+| `VuetifyEditableCell`   | `/editing`                   | An editable cell with Vuetify fields and selects.     |
+| `VuetifyRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.            |
+| `VuetifyBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.   |
+| `VuetifyFilterField`    | `/filters`                   | A filter definition's field with the kit's controls.  |
+| `VuetifyHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.        |
+| `PivotPanel`            | `/pivot`                     | The pivot axes and measures with Vuetify selects.     |
+| `TableAssistant`        | `/assistant`                 | The optional assistant in a panel, window or drawer.  |
+| `AgentApproval`         | `/assistant`                 | Proposed row changes with approve and reject buttons. |
 
 ## Controls and styling
 

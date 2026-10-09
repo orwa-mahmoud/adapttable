@@ -928,7 +928,9 @@
       "adapter-vuetify-tree",
       "adapter-vuetify-virtualize",
       "adapter-vuetify",
-      "adapter-vuetify-preset"
+      "adapter-vuetify-preset",
+      "adapter-vuetify-pivot",
+      "adapter-vuetify-assistant"
     ]
   },
   "surfaces": {
@@ -13640,6 +13642,18 @@
       "StandardFeatureOptions",
       "standardFeatures",
       "UseSavedViewsOptions"
+    ],
+    "adapter-vuetify-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
+    "adapter-vuetify-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
     ]
   },
   "entrypoints": {
@@ -16971,6 +16985,12 @@
     },
     "adapter-vuetify-preset.api.md": {
       "surface": "adapter-vuetify-preset"
+    },
+    "adapter-vuetify-pivot.api.md": {
+      "surface": "adapter-vuetify-pivot"
+    },
+    "adapter-vuetify-assistant.api.md": {
+      "surface": "adapter-vuetify-assistant"
     }
   }
 }

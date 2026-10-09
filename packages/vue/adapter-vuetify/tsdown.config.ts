@@ -43,6 +43,8 @@ export default defineConfig({
     "src/command-palette.ts",
     "src/context-menu.ts",
     "src/side-panel.ts",
+    "src/pivot.ts",
+    "src/assistant.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],

@@ -1,0 +1,20 @@
+.adapttable-vuetify-pivot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.adapttable-vuetify-pivot fieldset {
+  display: grid;
+  gap: 0.5rem;
+  min-inline-size: 12rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.75rem;
+  border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 4px;
+}
+.adapttable-vuetify-pivot fieldset > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
