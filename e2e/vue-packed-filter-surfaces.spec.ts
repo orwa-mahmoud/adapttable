@@ -231,8 +231,18 @@ test("packed compact controls support keyboard editing, multi-selection and Esca
     await page.keyboard.press("Tab");
     const choice = row.getByRole("combobox");
     await expect(choice).toBeFocused();
-    await page.keyboard.press("Home");
-    await page.keyboard.press("ArrowDown");
+    // Send a real localized key: Playwright's keyboard.type uses insertText
+    // for Arabic, which never reaches a native select's type-ahead handler.
+    const key = (await choice.locator('option[value="true"]').innerText())[0]!;
+    const keyboard = await page.context().newCDPSession(page);
+    await keyboard.send("Input.dispatchKeyEvent", {
+      type: "keyDown",
+      key,
+      text: key,
+      unmodifiedText: key,
+    });
+    await keyboard.send("Input.dispatchKeyEvent", { type: "keyUp", key });
+    await keyboard.detach();
     await page.keyboard.press("Tab");
     await expect(choice).toHaveValue("true");
     await expect(page.locator("#compact-values")).toContainText(
