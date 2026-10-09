@@ -38,6 +38,21 @@ function Harness() {
 }
 
 describe("base-ui chrome styles", () => {
+  it("a plain table receives theme tokens before a drawer", () => {
+    render(<Harness />);
+    const root = document.querySelector<HTMLElement>(".adapttable-base-ui");
+    expect(root).toBeInTheDocument();
+    expect(
+      getComputedStyle(root!).getPropertyValue("--adapttable-overlay-z").trim()
+    ).toBe("10050");
+    expect(
+      getComputedStyle(root!).getPropertyValue("--adapttable-surface").trim()
+    ).toBe("#ffffff");
+    expect(
+      document.head.querySelector("style[data-adapttable-base-ui-drawer]")
+    ).toBeNull();
+  });
+
   it("rendering the table injects the stylesheet once", () => {
     render(<Harness />);
     const styles = document.head.querySelectorAll(
@@ -63,7 +78,8 @@ describe("base-ui chrome styles", () => {
       .replace(/\s+/g, " ")
       .replace(/ ?([{};,>]) ?/g, "$1")
       .trim();
-    const start = rules.indexOf(".adapttable-drawer-backdrop{");
+    const start = rules.indexOf("}.adapttable-drawer-backdrop{") + 1;
+    expect(start).toBeGreaterThan(1);
     const end = rules.indexOf(
       '.adapttable-btn[data-slot="select-trigger"]',
       start
@@ -96,7 +112,7 @@ describe("base-ui chrome styles", () => {
     ).toBeNull();
     expect(
       document.head.querySelector("style[data-adapttable-base-ui]")?.textContent
-    ).not.toContain(".adapttable-drawer-backdrop{");
+    ).not.toContain("--drawer-swipe-movement-x");
   });
 
   it("rendering the native drawer injects its motion rules once", () => {
