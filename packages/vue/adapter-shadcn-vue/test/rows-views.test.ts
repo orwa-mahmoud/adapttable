@@ -124,7 +124,8 @@ it("renders native row action targets, menu disabled semantics and guarded host 
   await key(document.activeElement as HTMLElement, "Enter");
   expect(chosen).toHaveBeenCalledTimes(2);
   expect(document.querySelector('[role="menu"]')).toBeNull();
-  expect(document.activeElement).toBe(trigger);
+  // Reka's native focus scope restores focus in its unmount timer.
+  await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
 });
 it("retires an open row-actions portal when its table is deactivated", async () => {
   const visible = shallowRef(true);
