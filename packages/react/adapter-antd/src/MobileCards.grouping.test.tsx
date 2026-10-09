@@ -5,7 +5,7 @@
  * host-inserted extra rows, and pinned summaries — has to be proven to reach
  * the cards too. Losing one of them there is invisible on a desktop run.
  */
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
@@ -58,6 +58,42 @@ function mount() {
 }
 
 describe("grouped card list (antd)", () => {
+  it("formats and captions mobile subtotals through their declared columns", () => {
+    renderAntd(
+      <DataTable
+        data={ROWS}
+        columns={COLS.map((column) =>
+          column.key === "title"
+            ? {
+                ...column,
+                mobileLabel: "Completed tasks",
+                formatAggregate: (value) =>
+                  typeof value === "number" ? `${value} tasks` : undefined,
+              }
+            : column
+        )}
+        rowKey={(row) => row.id}
+        urlSync={false}
+        forceMobile
+        features={[
+          grouping(["team"], {
+            groupAggregates: (rows: readonly Task[]) => ({
+              title: rows.length,
+            }),
+          }),
+        ]}
+      />
+    );
+    const core = parts("group-card").find((card) =>
+      card.textContent?.includes("Core")
+    )!;
+    expect(within(core).getByText("Completed tasks")).toBeInTheDocument();
+    expect(within(core).getByText("2 tasks")).toHaveAttribute(
+      "data-column",
+      "title"
+    );
+  });
+
   it("gives every group its own header card and keeps its rows", () => {
     mount();
     const headers = parts("group-card").map((el) => el.textContent ?? "");
