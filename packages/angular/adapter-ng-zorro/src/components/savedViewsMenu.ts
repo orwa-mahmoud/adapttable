@@ -58,7 +58,9 @@ import { OVERLAY_Z } from "./overlayPlacement";
         [nzPopoverBackdrop]="false"
         [nzPopoverContent]="content"
         [nzPopoverPlacement]="
-          direction() === 'rtl' ? 'bottomLeft' : 'bottomRight'
+          direction() === 'rtl'
+            ? ['bottomLeft', 'bottomRight', 'topLeft', 'topRight']
+            : ['bottomRight', 'bottomLeft', 'topRight', 'topLeft']
         "
         [nzPopoverOverlayStyle]="overlayStyle"
         type="button"
