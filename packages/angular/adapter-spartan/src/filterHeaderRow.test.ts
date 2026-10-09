@@ -18,7 +18,7 @@ import { BrnPopover } from "@spartan-ng/brain/popover";
 import { describe, expect, it } from "vitest";
 
 import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
-import { expectNamedPopover } from "../testUtils";
+import { clickOutside, expectNamedPopover } from "../testUtils";
 
 interface Row {
   name: string;
@@ -247,6 +247,56 @@ describe("AdaptFilterHeaderRow", () => {
 });
 
 describe("standalone header-filter trigger", () => {
+  it("keeps pointer checklist selections inside the native header popover", async () => {
+    const extra = signal<ExtraFilters>({});
+    const fixture = TestBed.createComponent(AdaptHeaderFilterTrigger);
+    fixture.componentRef.setInput("props", {
+      def: DEFS[2],
+      source: memory(extra),
+      labels: defaultLabels,
+    });
+    document.body.append(fixture.nativeElement as HTMLElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const trigger = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLButtonElement>('button[aria-label="Tags"]')!;
+    trigger.focus();
+    trigger.click();
+    await fixture.whenStable();
+    const surface = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="filter-header-cell"]'
+    )!;
+    expectNamedPopover(surface, "Tags");
+    const checkboxes = [
+      ...surface.querySelectorAll<HTMLButtonElement>('button[role="checkbox"]'),
+    ];
+    expect(checkboxes).toHaveLength(2);
+    for (const checkbox of checkboxes) {
+      checkbox.dispatchEvent(
+        new MouseEvent("pointerdown", { bubbles: true, cancelable: true })
+      );
+      checkbox.dispatchEvent(
+        new MouseEvent("mousedown", { bubbles: true, cancelable: true })
+      );
+      checkbox.focus();
+      checkbox.click();
+      await fixture.whenStable();
+      expect(
+        document.querySelector('[data-adapttable-part="filter-header-cell"]')
+      ).toBe(surface);
+      expect(checkbox.getAttribute("aria-checked")).toBe("true");
+    }
+    expect(extra().tags).toEqual(["a", "b"]);
+    clickOutside();
+    await fixture.whenStable();
+    expect(
+      document.querySelector('[data-adapttable-part="filter-header-cell"]')
+    ).toBeNull();
+    expect(extra().tags).toEqual(["a", "b"]);
+    fixture.destroy();
+  });
+
   it("aligns an RTL popover and writes through the default registry", async () => {
     const extra = signal<ExtraFilters>({});
     const fixture = TestBed.createComponent(AdaptHeaderFilterTrigger);

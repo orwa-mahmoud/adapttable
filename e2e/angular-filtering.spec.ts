@@ -229,7 +229,7 @@ for (const kit of ANGULAR_KITS) {
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
     });
 
-    if (kit.key === "ngx-bootstrap") {
+    if (kit.key === "ngx-bootstrap" || kit.key === "spartan") {
       test("keeps multiple checkbox choices open in its native header menu", async ({
         page,
       }) => {
@@ -243,10 +243,10 @@ for (const kit of ANGULAR_KITS) {
           name: "Platform",
           exact: true,
         });
-        await core.check();
+        await checkAngularCheckbox(kit, core);
         await expect(core).toBeChecked();
         await expect(platform).toBeVisible();
-        await platform.check();
+        await checkAngularCheckbox(kit, platform);
         await expect(platform).toBeChecked();
         await expect(part(page, "row")).toHaveCount(12);
         expect(new Set(await teams(page))).toEqual(
