@@ -747,6 +747,8 @@
       "adapter-nuxt-ui-virtualize",
       "adapter-nuxt-ui",
       "adapter-nuxt-ui-preset",
+      "adapter-nuxt-ui-pivot",
+      "adapter-nuxt-ui-assistant",
       "adapter-quasar-batch-editing",
       "adapter-quasar-bulk-actions",
       "adapter-quasar-cell-navigation",
@@ -12307,6 +12309,18 @@
       "standardFeatures",
       "UseSavedViewsOptions"
     ],
+    "adapter-nuxt-ui-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
+    "adapter-nuxt-ui-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
+    ],
     "adapter-quasar-batch-editing": [
       "batchEditing",
       "BatchEditingState",
@@ -16397,6 +16411,12 @@
     },
     "adapter-nuxt-ui-preset.api.md": {
       "surface": "adapter-nuxt-ui-preset"
+    },
+    "adapter-nuxt-ui-pivot.api.md": {
+      "surface": "adapter-nuxt-ui-pivot"
+    },
+    "adapter-nuxt-ui-assistant.api.md": {
+      "surface": "adapter-nuxt-ui-assistant"
     },
     "adapter-quasar-batch-editing.api.md": {
       "surface": "adapter-quasar-batch-editing"

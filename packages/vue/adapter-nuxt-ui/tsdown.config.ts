@@ -43,6 +43,8 @@ export default defineConfig({
     "src/side-panel.ts",
     "src/row-reorder.ts",
     "src/column-selection.ts",
+    "src/pivot.ts",
+    "src/assistant.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],

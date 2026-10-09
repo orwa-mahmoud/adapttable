@@ -46,13 +46,17 @@ Feature composition is opt-in through the following factories:
   Button present saved-view management and controlled side panels.
 - Reordering: `rowReorder`. Nuxt controls present desktop drag/keyboard handles,
   mobile move buttons and group/tree move confirmations over the core controller.
+- Assistant: `tableAssistant` and `agentApproval`. Optional assistant and
+  approval surfaces with host-owned transport and decisions.
 
 These kit entries cover row expansion, row pinning, row reordering, saved views,
 custom filter types and the command palette with Nuxt controls.
 
 Binding-hosted helpers and writers are available through separate Vue imports:
 
-- Pivot models from `@adapttable/vue/pivot` prepare rows and columns for host-owned compositions.
+- Pivot models from `@adapttable/vue/pivot` prepare rows and columns; this
+  adapter's `pivot` entry adds a `PivotPanel` that edits the axes and measures
+  with Nuxt UI controls.
 - The spreadsheet formula engine from `@adapttable/vue/formula` prepares formula columns.
 - Sparkline components and column helpers come from `@adapttable/vue/sparkline`.
 - Aggregation uses `aggregate` from `@adapttable/vue` with the table's `summaryRow` prop.
@@ -417,3 +421,12 @@ The canonical column-selection import is
 `@adapttable/nuxt-ui/column-selection`. The existing `columnSelectionCheckbox`
 export from `@adapttable/nuxt-ui/cell-navigation` remains available. All these
 features are separate opt-in entries and are absent from the base barrel.
+
+### Optional assistant and pivot controls
+
+The `assistant` entry provides `TableAssistant`, `AgentApproval`,
+`tableAssistant()`, and `agentApproval()` using the binding's conversation and
+approval contracts. Its sheet is a `USlideover`, examples open in a `UPopover`
+menu, the composer is a `UTextarea`, and speech language choices use `USelect`.
+It does not import an AI transport or own approval decisions. The `pivot` entry
+provides a controlled `PivotPanel` with `USelect` and `UButton` controls.
