@@ -324,6 +324,7 @@ export function GroupHeaderCard({
       data-adapttable-part="group-card"
       style={{
         display: "flex",
+        flexWrap: "wrap",
         alignItems: "center",
         gap: 8,
         padding: "8px 12px",
