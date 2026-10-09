@@ -35,8 +35,14 @@ async function choose(
       "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' el-select ') or contains(concat(' ', normalize-space(@class), ' '), ' v-field ')]"
     )
     .first();
-  if (await nativeRoot.count()) await nativeRoot.click();
-  else await field.click();
+  const trigger = (await nativeRoot.count()) ? nativeRoot : field;
+  // A grouping write changes page height. Finish positioning the native
+  // control before pressing it, so smooth page scroll cannot move the
+  // wrapper away from the pointer between actionability and mousedown.
+  await trigger.evaluate((element) =>
+    element.scrollIntoView({ block: "center", behavior: "instant" })
+  );
+  await trigger.click();
   await page.getByRole("option", { name: option, exact: true }).click();
 }
 
