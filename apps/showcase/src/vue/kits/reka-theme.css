@@ -1,3 +1,4 @@
+.dark [data-vue-kit="reka-ui"],
 .dark :is(.at-reka, .at-reka-surface, .at-reka-select-content, .at-reka-menu) {
   --at-reka-background: #1c202b;
   --at-reka-subtle: #252b38;
