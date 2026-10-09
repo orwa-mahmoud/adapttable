@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 
 import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
-import { DEMO_ROOTS } from "../scripts/site.mjs";
 
 /**
  * No demo page scrolls the document sideways on a desktop.
@@ -19,13 +18,9 @@ import { DEMO_ROOTS } from "../scripts/site.mjs";
  * here without being listed twice.
  */
 
-/** The local showcase serves every framework's HTML entries at the root. */
-const devPath = (route: string) => {
-  const root = Object.values(DEMO_ROOTS).find((prefix) =>
-    route.startsWith(prefix)
-  );
-  return root ? `/${route.slice(root.length)}` : route;
-};
+/** Built entries retain their manifest HTML folders on the local server. */
+const devPath = (html: string) =>
+  html.replace(/^\./, "").replace(/index\.html$/, "");
 
 /**
  * Both above the nav's 920px mobile breakpoint, where the `<select>` takes over:
@@ -43,13 +38,13 @@ const VIEWPORTS = [
  */
 const PAGES = SHOWCASE_PAGES.filter((page) => page.indexable);
 
-for (const { key, route } of PAGES) {
+for (const { key, html } of PAGES) {
   for (const { width, height } of VIEWPORTS) {
     test(`${key}: the document does not scroll sideways at ${width}px`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height });
-      await page.goto(devPath(route));
+      await page.goto(devPath(html));
       await expect(page.locator(".nav__inner")).toBeVisible();
 
       const measured = await page.evaluate(() => {
@@ -66,7 +61,7 @@ for (const { key, route } of PAGES) {
 
       expect(
         measured.overflow,
-        `${devPath(route)} overflows its viewport by ${measured.overflow}px at ${width}px`
+        `${devPath(html)} overflows its viewport by ${measured.overflow}px at ${width}px`
       ).toBeLessThanOrEqual(1);
       for (const overflowX of measured.clipped) {
         expect(overflowX).not.toBe("hidden");
@@ -83,12 +78,12 @@ for (const { key, route } of PAGES) {
  * 320px is the whole loop on purpose: a page that fits there fits the wider
  * phones, and the suite stays a suite rather than a matrix.
  */
-for (const { key, route } of PAGES) {
+for (const { key, html } of PAGES) {
   test(`${key}: the document does not scroll sideways at 320px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width: 320, height: 800 });
-    await page.goto(devPath(route));
+    await page.goto(devPath(html));
     await expect(page.locator(".nav__inner")).toBeVisible();
 
     const measured = await page.evaluate(() => {
@@ -112,7 +107,7 @@ for (const { key, route } of PAGES) {
 
     expect(
       measured.overflow,
-      `${devPath(route)} overflows its viewport by ${measured.overflow}px at 320px: ${JSON.stringify(measured.outliers)}`
+      `${devPath(html)} overflows its viewport by ${measured.overflow}px at 320px: ${JSON.stringify(measured.outliers)}`
     ).toBeLessThanOrEqual(1);
     for (const overflowX of measured.clipped) {
       expect(overflowX).not.toBe("hidden");
