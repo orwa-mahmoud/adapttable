@@ -381,3 +381,96 @@ it.each([
     expect(callbacks.every((callback) => callback === onChange)).toBe(true);
   }
 );
+
+describe("paged footer", () => {
+  it("moves between pages and page sizes through the kit's buttons and select", async () => {
+    const data = Array.from({ length: 12 }, (_, index) => ({
+      id: String(index),
+      name: `Person ${index}`,
+    }));
+    const props: DataTableProps<Row> = {
+      ...options,
+      data,
+      forceMobile: false,
+    };
+    const slots: DataTableSurfaceSlots<Row> = {
+      ...paint(),
+      Button: ({ attrs, content }) => h("button", attrs, [content]),
+      Select: ({ attrs, value, options: choices, onChange }) =>
+        h(
+          "select",
+          {
+            ...attrs,
+            value,
+            onChange: (event: Event) => {
+              if (event.target instanceof HTMLSelectElement)
+                onChange(event.target.value);
+            },
+          },
+          choices.map((choice) =>
+            h("option", { value: choice.value }, choice.label)
+          )
+        ),
+    };
+    const Table = defineComponent({
+      setup() {
+        const model = useDataTableShell(() => props);
+        return () =>
+          h(DataTableSurfaceChrome<Row>, {
+            model,
+            options: props,
+            slots,
+            content: {},
+            rootRef: () => undefined,
+            scrollRef: () => undefined,
+          });
+      },
+    });
+    const root = document.createElement("div");
+    document.body.append(root);
+    const app = createApp(Table);
+    app.mount(root);
+    cleanup.push(() => {
+      app.unmount();
+      root.remove();
+    });
+    await nextTick();
+    const part = (name: string) =>
+      root.querySelector<HTMLElement>(`[data-adapttable-part="${name}"]`);
+    const current = () =>
+      root.querySelector('[data-adapttable-part="page-number"][aria-current]')
+        ?.textContent;
+    expect(current()).toBe("1");
+    expect(part("page-prev")?.hasAttribute("disabled")).toBe(true);
+    expect(part("page-ellipsis")?.textContent).toBe("…");
+    part("page-next")?.click();
+    await nextTick();
+    expect(current()).toBe("2");
+    part("page-prev")?.click();
+    await nextTick();
+    expect(current()).toBe("1");
+    const last = [
+      ...root.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="page-number"]'
+      ),
+    ].at(-1);
+    last?.click();
+    await nextTick();
+    expect(current()).toBe("12");
+    expect(part("page-next")?.hasAttribute("disabled")).toBe(true);
+    const size = root.querySelector<HTMLSelectElement>(
+      'select[data-adapttable-part="rows-per-page"]'
+    );
+    if (!size) throw new Error("Missing rows-per-page select");
+    const larger = [...size.options]
+      .map((option) => Number(option.value))
+      .find((value) => value > 1 && value < data.length);
+    if (larger === undefined) throw new Error("Missing a larger page size");
+    size.value = String(larger);
+    size.dispatchEvent(new Event("change"));
+    await nextTick();
+    expect(
+      root.querySelectorAll('[data-adapttable-part="page-number"]')
+    ).toHaveLength(Math.ceil(data.length / larger));
+  });
+});
