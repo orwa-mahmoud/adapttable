@@ -59,7 +59,7 @@ const PanelPresentation = defineComponent(
           ...control,
           onCloseAutoFocus,
           className: cn(
-            "w-96 max-w-[calc(100vw-2rem)] max-h-[min(80vh,40rem)] overflow-y-auto",
+            "w-96 max-w-[calc(100vw-2rem)] max-h-[min(40rem,var(--reka-popover-content-available-height))] overflow-y-auto",
             control.className
           ),
         }),
