@@ -8,13 +8,16 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { FilterDrawer } from "./components/FilterDrawer";
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import {
   ADAPTTABLE_BASE_UI_CSS,
+  ADAPTTABLE_BASE_UI_DRAWER_CSS,
   ADAPTTABLE_BASE_UI_GROUPING_CSS,
 } from "./injectStyles";
 
@@ -60,9 +63,17 @@ describe("base-ui chrome styles", () => {
       .replace(/\s+/g, " ")
       .replace(/ ?([{};,>]) ?/g, "$1")
       .trim();
-    expect(ADAPTTABLE_BASE_UI_CSS + ADAPTTABLE_BASE_UI_GROUPING_CSS).toBe(
-      rules
+    const start = rules.indexOf(".adapttable-drawer-backdrop{");
+    const end = rules.indexOf(
+      '.adapttable-btn[data-slot="select-trigger"]',
+      start
     );
+    const grouping = rules.indexOf(".adapttable-grouping-panel{", end);
+    expect(ADAPTTABLE_BASE_UI_CSS).toBe(
+      rules.slice(0, start) + rules.slice(end, grouping)
+    );
+    expect(ADAPTTABLE_BASE_UI_DRAWER_CSS).toBe(rules.slice(start, end));
+    expect(ADAPTTABLE_BASE_UI_GROUPING_CSS).toBe(rules.slice(grouping));
     expect(
       ADAPTTABLE_BASE_UI_GROUPING_CSS.startsWith(".adapttable-grouping-panel{")
     ).toBe(true);
@@ -76,5 +87,34 @@ describe("base-ui chrome styles", () => {
     expect(
       document.head.querySelector("style[data-adapttable-base-ui]")?.textContent
     ).not.toContain(".adapttable-grouping-panel");
+  });
+
+  it("a plain table carries no optional drawer motion rules", () => {
+    render(<Harness />);
+    expect(
+      document.head.querySelector("style[data-adapttable-base-ui-drawer]")
+    ).toBeNull();
+    expect(
+      document.head.querySelector("style[data-adapttable-base-ui]")?.textContent
+    ).not.toContain(".adapttable-drawer-backdrop{");
+  });
+
+  it("rendering the native drawer injects its motion rules once", () => {
+    const props = {
+      open: true,
+      onClose: vi.fn(),
+      filters: <div>Filters</div>,
+      activeFilterCount: 0,
+      onClearFilters: vi.fn(),
+      labels: defaultLabels,
+    };
+    render(<FilterDrawer {...props} />);
+    render(<FilterDrawer {...props} />);
+    const styles = document.head.querySelectorAll(
+      "style[data-adapttable-base-ui-drawer]"
+    );
+    expect(styles).toHaveLength(1);
+    expect(styles[0]!.textContent).toContain(".adapttable-drawer-backdrop{");
+    expect(styles[0]!.textContent).toContain("--drawer-swipe-movement-x");
   });
 });
