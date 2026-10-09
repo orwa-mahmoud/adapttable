@@ -81,9 +81,17 @@ for (const kit of ANGULAR_KITS) {
     await page
       .getByRole("button", { name: "Unpin: Person", exact: true })
       .press("Escape");
+    // The earlier hide may already be in the URL while the final pin is
+    // still debouncing. Reload only after the whole arrangement is written.
     await expect
-      .poll(() => new URL(page.url()).searchParams.get("live.colHide"))
-      .toBe("email");
+      .poll(() => {
+        const params = new URL(page.url()).searchParams;
+        return {
+          hidden: params.get("live.colHide"),
+          pinned: params.get("live.colPin"),
+        };
+      })
+      .toEqual({ hidden: "email", pinned: "person:start" });
     await page.reload();
     await expect(header("email")).toHaveCount(0);
     await expect(header("person")).toHaveAttribute("data-pinned", "start");
