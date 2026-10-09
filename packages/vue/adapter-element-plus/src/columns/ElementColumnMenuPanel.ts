@@ -12,6 +12,7 @@ import {
   onScopeDispose,
   provide,
   shallowRef,
+  watch,
   withDirectives,
 } from "vue";
 
@@ -85,7 +86,13 @@ export const ElementColumnMenuPanel = defineComponent(
       close("outside");
     };
     const keydown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
+      if (
+        !active.value ||
+        !props.control.open ||
+        !props.control.isCurrent() ||
+        event.key !== "Escape"
+      )
+        return;
       // Element's focus trap releases on any Escape that reaches the document,
       // including one an inner control handled or an IME composition owns, so
       // the panel keeps those Escapes inside itself.
@@ -97,13 +104,34 @@ export const ElementColumnMenuPanel = defineComponent(
       event.stopPropagation();
       close("escape");
     };
+    // The virtual reference leaves the trigger outside ElPopover's event tree.
+    // It remains the keyboard owner until the native enter handoff finishes.
+    watch(
+      [active, () => props.control.anchor],
+      ([enabled, anchor], _previous, cleanup) => {
+        if (!enabled || !anchor) return;
+        anchor.addEventListener("keydown", keydown);
+        cleanup(() => anchor.removeEventListener("keydown", keydown));
+      },
+      { immediate: true }
+    );
     const focus = () => {
       if (!active.value || !props.control.open || !props.control.isCurrent())
+        return;
+      const element = panel.value;
+      if (!element) return;
+      const focused = element.ownerDocument.activeElement;
+      if (
+        focused !== props.control.anchor &&
+        focused !== element.ownerDocument.body &&
+        focused !== element &&
+        focused !== element.closest(".el-popper")
+      )
         return;
       const search = panel.value?.querySelector<HTMLInputElement>(
         props.initialFocus ?? 'input[data-adapttable-part="column-menu-search"]'
       );
-      (search ?? panel.value)?.focus();
+      (search ?? element).focus({ preventScroll: true });
     };
     return () => {
       const control = props.control;
