@@ -46,7 +46,9 @@ for (const kit of builtAdapters("react")) {
           exact: true,
         });
         await expect(input).toBeVisible();
-        expect((await input.boundingBox())!.width).toBeGreaterThanOrEqual(120);
+        await expect
+          .poll(async () => (await input.boundingBox())?.width ?? 0)
+          .toBeGreaterThanOrEqual(120);
         await input.fill("Evaluator view");
         await page
           .getByRole("button", { name: names.save, exact: true })
