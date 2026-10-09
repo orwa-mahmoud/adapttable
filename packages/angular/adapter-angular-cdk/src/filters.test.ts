@@ -37,6 +37,7 @@ import {
   focusTrapAnchor,
 } from "../testing/overlayFixture";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
+import { AdaptFilterPopover } from "./components/filterPopover";
 import { AdaptDataTable } from "./dataTable";
 import type { FiltersMode } from "./tableFilters";
 
@@ -236,7 +237,7 @@ describe("the unstyled Angular filters", () => {
   });
 
   it.each(["ltr", "rtl"] as const)(
-    "keeps edge and centered alignments below the trigger without search in %s",
+    "prefers below alignments and allows above placement without search in %s",
     async (dir) => {
       const { fixture, part, openFilters, settle } = await mount();
       fixture.componentRef.setInput("searchable", false);
@@ -275,6 +276,30 @@ describe("the unstyled Angular filters", () => {
           overlayX: "center",
           overlayY: "top",
           offsetY: 4,
+          panelClass: "adapt-cdk-filter-overlay",
+        },
+        {
+          originX: "end",
+          originY: "top",
+          overlayX: "end",
+          overlayY: "bottom",
+          offsetY: -4,
+          panelClass: "adapt-cdk-filter-overlay",
+        },
+        {
+          originX: "start",
+          originY: "top",
+          overlayX: "start",
+          overlayY: "bottom",
+          offsetY: -4,
+          panelClass: "adapt-cdk-filter-overlay",
+        },
+        {
+          originX: "center",
+          originY: "top",
+          overlayX: "center",
+          overlayY: "bottom",
+          offsetY: -4,
           panelClass: "adapt-cdk-filter-overlay",
         },
       ]);
@@ -929,4 +954,30 @@ describe("registered Angular form renderers", () => {
       }
     }
   );
+});
+
+describe("filter card viewport space", () => {
+  it("uses above-origin room for a low opener and updates to below room on scroll", async () => {
+    const { fixture, part, openFilters, settle } = await mount();
+    const host = fixture.debugElement.query(By.directive(AdaptFilterPopover));
+    const anchor = (host.nativeElement as HTMLElement).querySelector("span")!;
+    let top = window.innerHeight - 48;
+    const measurement = vi
+      .spyOn(anchor, "getBoundingClientRect")
+      .mockImplementation(() =>
+        DOMRect.fromRect({ x: 300, y: top, width: 100, height: 32 })
+      );
+    try {
+      await openFilters();
+      const panel = part("filters-popover")!;
+      expect(panel).not.toBeNull();
+      expect(panel.style.maxHeight).toBe("560px");
+      top = window.innerHeight - 332;
+      window.dispatchEvent(new Event("scroll"));
+      await settle();
+      expect(panel.style.maxHeight).toBe("284px");
+    } finally {
+      measurement.mockRestore();
+    }
+  });
 });

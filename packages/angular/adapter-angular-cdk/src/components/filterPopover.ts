@@ -10,6 +10,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   type ElementRef,
   input,
   type TemplateRef,
@@ -81,7 +82,7 @@ import {
           </header>
           <div
             data-adapttable-part="filters-body"
-            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px"
           >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
@@ -107,12 +108,23 @@ export class AdaptFilterPopover {
     input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
-  protected readonly availableHeight = injectPopoverSpace({
+  private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
     reserve: 16,
+    allowAbove: () => {
+      const origin = this.anchor()?.nativeElement;
+      const viewport = origin?.ownerDocument.defaultView;
+      return (
+        viewport != null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom - 16 < 160
+      );
+    },
   });
-  protected readonly positions: ConnectedPosition[] = [
+  protected readonly availableHeight = computed(() =>
+    Math.min(560, this.viewportSpace())
+  );
+  private readonly belowPositions: ConnectedPosition[] = [
     {
       originX: "end",
       originY: "bottom",
@@ -139,6 +151,15 @@ export class AdaptFilterPopover {
       offsetY: 4,
       panelClass: "adapt-cdk-filter-overlay",
     },
+  ];
+  protected readonly positions: ConnectedPosition[] = [
+    ...this.belowPositions,
+    ...this.belowPositions.map<ConnectedPosition>((position) => ({
+      ...position,
+      originY: "top",
+      overlayY: "bottom",
+      offsetY: -4,
+    })),
   ];
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");
 
