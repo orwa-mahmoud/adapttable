@@ -1,10 +1,10 @@
-import { Portal } from "@chakra-ui/react";
+import { Portal, Theme } from "@chakra-ui/react";
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 
 /**
- * Chakra v3 `_dark` tokens only resolve under a `.dark` ancestor. Toolbar
- * menus, drawers, and dialogs portal to `document.body`, so they would stay
- * light unless the host class is copied onto the floating surface.
+ * Portaled controls need Chakra's native theme scope for both `_dark` styles
+ * and semantic color tokens. Follow the host's appearance when menus, drawers,
+ * and dialogs move to `document.body`.
  */
 export function KitPortal({ children }: { readonly children: ReactNode }) {
   const probeRef = useRef<HTMLSpanElement>(null);
@@ -30,13 +30,13 @@ export function KitPortal({ children }: { readonly children: ReactNode }) {
     <>
       <span ref={probeRef} hidden aria-hidden="true" />
       <Portal>
-        <div
-          className={mode}
+        <Theme
+          appearance={mode}
           data-adapttable-color-mode={mode}
           style={{ display: "contents" }}
         >
           {children}
-        </div>
+        </Theme>
       </Portal>
     </>
   );
