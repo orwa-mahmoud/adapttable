@@ -242,7 +242,7 @@ async function diagnoseMaterialHeader(
   testInfo: TestInfo
 ): Promise<void> {
   await trigger.evaluate((button) =>
-    button.scrollIntoView({ block: "center" })
+    button.scrollIntoView({ block: "center", behavior: "instant" })
   );
   await trigger.click();
   await expect(panel).toBeVisible();
@@ -290,7 +290,7 @@ for (const key of ["angular-cdk", "material", "aria"]) {
           else await expect(searchable).toBeVisible();
           await expect(trigger).toHaveAttribute("aria-expanded", "false");
           await trigger.evaluate((button) =>
-            button.scrollIntoView({ block: "center" })
+            button.scrollIntoView({ block: "center", behavior: "instant" })
           );
           await trigger.click();
           await expect(panel).toBeVisible();
@@ -429,7 +429,9 @@ for (const locale of ["en", "ar"]) {
     const trigger = angularPart({ key: "material" }, page, "filters-button");
     const panel = angularPart({ key: "material" }, page, "filters-popover");
     const surface = page.locator(".cdk-overlay-pane mat-card");
-    await trigger.evaluate((button) => button.scrollIntoView({ block: "end" }));
+    await trigger.evaluate((button) =>
+      button.scrollIntoView({ block: "end", behavior: "instant" })
+    );
     const initialAnchor = await trigger.boundingBox();
     expect(initialAnchor).not.toBeNull();
     expect(720 - initialAnchor!.y - initialAnchor!.height).toBeLessThan(80);
@@ -493,7 +495,7 @@ for (const locale of ["en", "ar"]) {
       const panel = angularPart({ key: "material" }, page, "filters-popover");
       const surface = page.locator(".cdk-overlay-pane mat-card");
       await trigger.evaluate((button) =>
-        button.scrollIntoView({ block: "center" })
+        button.scrollIntoView({ block: "center", behavior: "instant" })
       );
       await trigger.click();
       await expect(panel).toBeVisible();
