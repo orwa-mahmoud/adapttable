@@ -59,16 +59,24 @@ test("no two pages share a title or a description", async ({ browser }) => {
   const titles = new Set<string>();
   const descriptions = new Set<string>();
   const context = await browser.newContext({ javaScriptEnabled: false });
-  const page = await context.newPage();
-  for (const { path } of PAGES) {
-    await page.goto(path, { waitUntil: "domcontentloaded" });
-    titles.add(await page.title());
-    descriptions.add(
-      (await page
-        .locator('meta[name="description"]')
-        .getAttribute("content")) ?? ""
-    );
-  }
+  // Keep every served page in the uniqueness check without serializing
+  // hundreds of navigations into one test's wall-clock budget.
+  const lanes = 4;
+  await Promise.all(
+    Array.from({ length: lanes }, async (_, lane) => {
+      const page = await context.newPage();
+      for (let index = lane; index < PAGES.length; index += lanes) {
+        await page.goto(PAGES[index]!.path, { waitUntil: "domcontentloaded" });
+        titles.add(await page.title());
+        descriptions.add(
+          (await page
+            .locator('meta[name="description"]')
+            .getAttribute("content")) ?? ""
+        );
+      }
+      await page.close();
+    })
+  );
   await context.close();
   // Duplicates make two pages compete for the same search, and one loses.
   expect(titles.size).toBe(PAGES.length);
