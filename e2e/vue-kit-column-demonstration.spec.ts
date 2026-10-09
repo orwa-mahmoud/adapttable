@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { VUE_KIT_PAGES } from "../apps/showcase/matrix.mjs";
+
 const kits = [
   ["reka-ui", "Reka UI"],
   ["shadcn-vue", "shadcn-vue"],
@@ -7,12 +9,14 @@ const kits = [
 ] as const;
 
 for (const [kit, name] of kits) {
+  const registration = VUE_KIT_PAGES.find((page) => page.kit === kit);
+  if (!registration) throw new Error(`No registered order desk for ${kit}`);
   for (const theme of ["light", "dark"]) {
     test(`${kit}: ${theme} pinning reveals a scrollable arrangement and keeps sticky cells opaque`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: 1200, height: 814 });
-      await page.goto(`/vue/${kit}/?theme=${theme}`);
+      await page.goto(`/${registration.dir}/?theme=${theme}`);
       const header = (key: string) =>
         page.locator(
           `[data-adapttable-part="header-cell"][data-column-key="${key}"]`
