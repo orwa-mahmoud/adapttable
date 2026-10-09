@@ -25,7 +25,8 @@ export const NaiveManagedPopover = defineComponent(
   (props: { readonly control: ManagedOverlayPanelProps }) => {
     const mounted = shallowRef(false);
     const card = shallowRef<ComponentPublicInstance | null>(null);
-    const position = shallowRef<{ x: number; y: number }>();
+    const position = shallowRef<{ x: number; y: number; maxHeight: number }>();
+    let acquiredFocus = false;
     const panel = () => (card.value ? htmlRoot(card.value) : null);
     useElementRef(panel, () =>
       typeof props.control.attrs.ref === "function"
@@ -71,9 +72,29 @@ export const NaiveManagedPopover = defineComponent(
         const place = () => {
           if (!owner.isCurrent()) return;
           const rect = anchor.getBoundingClientRect();
+          const width =
+            panel()?.offsetWidth ??
+            Math.min(
+              26 *
+                Number.parseFloat(
+                  view.getComputedStyle(anchor.ownerDocument.documentElement)
+                    .fontSize
+                ),
+              view.innerWidth - 16
+            );
+          const rtl = owner.attrs.dir === "rtl";
           position.value = {
-            x: owner.attrs.dir === "rtl" ? rect.right : rect.left,
+            x: rtl
+              ? Math.max(width + 8, Math.min(rect.right, view.innerWidth - 8))
+              : Math.max(8, Math.min(rect.left, view.innerWidth - width - 8)),
             y: rect.bottom,
+            maxHeight: Math.max(
+              0,
+              Math.min(
+                560,
+                Math.max(rect.top, view.innerHeight - rect.bottom) - 8
+              )
+            ),
           };
         };
         place();
@@ -99,8 +120,10 @@ export const NaiveManagedPopover = defineComponent(
       [card, () => props.control.open],
       () => {
         const owner = props.control;
+        if (!owner.open) acquiredFocus = false;
         const element = panel();
-        if (!owner.open || !owner.isCurrent() || !element) return;
+        if (!owner.open || !owner.isCurrent() || !element || acquiredFocus)
+          return;
         const focused = element.ownerDocument.activeElement;
         if (focused !== owner.anchor && focused !== element.ownerDocument.body)
           return;
@@ -111,6 +134,7 @@ export const NaiveManagedPopover = defineComponent(
           "button:not([disabled]), input:not([disabled])"
         );
         (search ?? first ?? element).focus({ preventScroll: true });
+        acquiredFocus = true;
       },
       { flush: "post" }
     );
@@ -167,8 +191,9 @@ export const NaiveManagedPopover = defineComponent(
                 class: "adapttable-naive-column-surface",
                 style: {
                   width: "26rem",
+                  boxSizing: "border-box",
                   maxWidth: "calc(100vw - 16px)",
-                  maxHeight: "calc(100dvh - 16px)",
+                  maxHeight: `${String(position.value?.maxHeight ?? 0)}px`,
                   overflow: "auto",
                 },
                 onKeydown: (event: KeyboardEvent) => keydown(event, owner),
