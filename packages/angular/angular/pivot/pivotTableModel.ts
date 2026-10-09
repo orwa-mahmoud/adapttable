@@ -136,6 +136,7 @@ export function pivotTableModel(
       key,
       header,
       group,
+      mobileLabel: [...(group ?? []), header].join(" / "),
       align: "end" as const,
       accessor: (row: PivotRow) => row.cells[index],
       // The leaf a column renders, for a host that needs to know which
