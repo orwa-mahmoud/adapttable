@@ -76,6 +76,10 @@ export const SHOWCASE_PRESENTATION = readShowcasePresentation();
 const currentDataLocale = (): "ar" | "en" =>
   SHOWCASE_PRESENTATION.locale.split("-")[0] === "ar" ? "ar" : "en";
 
+/** The same localized field the matrix's person cells and editors display. */
+export const personDisplayName = (row: Person): string =>
+  personName(row, currentDataLocale());
+
 /** Every page keys its rows by the person's id. */
 export const rowKey = (row: Person): string => row.id;
 

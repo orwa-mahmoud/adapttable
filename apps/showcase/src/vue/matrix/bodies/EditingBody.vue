@@ -7,6 +7,7 @@ import {
   peopleColumns,
   peopleRows,
   type Person,
+  personDisplayName,
   rowKey,
   TABLE_PRESENTATION,
 } from "../data";
@@ -32,10 +33,10 @@ const editingFeature = kit.editing<Person>(
     rows.value = applyPersonEdit(rows.value, row, key, value);
     if (rejectNext.value) {
       rejectNext.value = false;
-      log.value = `Save rejected for ${row.name}; undo the optimistic change.`;
+      log.value = `Save rejected for ${personDisplayName(row)}; undo the optimistic change.`;
       return Promise.reject(new Error("The demo server rejected this change"));
     }
-    log.value = `Saved ${key} for ${row.name}: ${String(value)}`;
+    log.value = `Saved ${key} for ${personDisplayName(row)}: ${String(value)}`;
     return undefined;
   },
   {
@@ -46,7 +47,7 @@ const editingFeature = kit.editing<Person>(
       rows.value = rows.value.map((row) =>
         row.id === previous.id ? previous : row
       );
-      log.value = `Restored ${previous.name} after the rejected save.`;
+      log.value = `Restored ${personDisplayName(previous)} after the rejected save.`;
     },
   }
 );
