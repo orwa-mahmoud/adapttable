@@ -460,7 +460,7 @@ export function createAttributeFlow(sources, resolveFunction) {
     const next = new Set(
       [...seen].filter((node) => {
         for (let owner = node; owner; owner = owner.parent)
-          if (sameFunction(owner, fn)) return false;
+          if (ts.isFunctionLike(owner) && sameFunction(owner, fn)) return false;
         return true;
       })
     );
