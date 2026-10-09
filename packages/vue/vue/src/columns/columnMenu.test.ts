@@ -43,6 +43,62 @@ function call(
   handler(event);
 }
 describe("Vue column menu model", () => {
+  it.each([false, true])(
+    "keeps keyboard reorder ownership and respects host focus redirection: %s",
+    async (redirect) => {
+      const host = document.createElement("div");
+      const grip = document.createElement("button");
+      const other = document.createElement("button");
+      host.append(grip, other);
+      document.body.append(host);
+      const parentKeys = vi.fn();
+      host.addEventListener("keydown", parentKeys);
+      const fixture = scopeValue(() => {
+        const layout = useColumnLayout(columns, {
+          onColumnLayoutChange: () => {
+            grip.remove();
+            host.append(grip);
+            if (redirect) other.focus();
+          },
+        });
+        return useColumnMenu(() => ({
+          allColumns: columns,
+          layout: layout.value,
+          labels: resolveLabels(undefined),
+          onAutoSize: vi.fn(),
+        }));
+      });
+      try {
+        const first = fixture.value.rows.value[0];
+        if (!first) throw new Error("Missing row");
+        grip.addEventListener("keydown", (event) =>
+          call(first.gripAttrs, "onKeydown", event)
+        );
+        grip.focus();
+        const event = new KeyboardEvent("keydown", {
+          key: "ArrowDown",
+          bubbles: true,
+          cancelable: true,
+        });
+        grip.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(true);
+        expect(parentKeys).not.toHaveBeenCalled();
+        await nextTick();
+        expect(document.activeElement).toBe(redirect ? other : grip);
+        grip.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: "Tab",
+            bubbles: true,
+            cancelable: true,
+          })
+        );
+        expect(parentKeys).toHaveBeenCalledTimes(1);
+      } finally {
+        fixture.stop();
+        host.remove();
+      }
+    }
+  );
   it("uses the public feature identity and both required adapter positions", () => {
     const feature = columnMenu();
     expect(feature.id).toBe("column-menu");

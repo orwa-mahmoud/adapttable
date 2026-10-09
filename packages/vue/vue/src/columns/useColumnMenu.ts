@@ -27,6 +27,7 @@ import {
 import {
   computed,
   type MaybeRefOrGetter,
+  nextTick,
   type ShallowRef,
   shallowRef,
   toValue,
@@ -172,8 +173,30 @@ export function useColumnMenu<TRow>(
       disabled: !row.canMove,
       onKeydown: (event: KeyboardEvent): void => {
         const current = currentRow(row.key);
-        if (!active.value || !current?.canMove || event.isComposing) return;
+        if (
+          !active.value ||
+          !current?.canMove ||
+          event.isComposing ||
+          event.defaultPrevented
+        )
+          return;
+        const grip = event.currentTarget;
+        const ownedFocus =
+          grip instanceof HTMLElement &&
+          grip.ownerDocument.activeElement === grip;
         columnReorderKeyDown(event, row.key, current.index, move, isRtl);
+        if (!event.defaultPrevented) return;
+        event.stopPropagation();
+        if (ownedFocus)
+          void nextTick(() => {
+            if (
+              active.value &&
+              currentRow(row.key)?.canMove &&
+              grip.isConnected &&
+              grip.ownerDocument.activeElement === grip.ownerDocument.body
+            )
+              grip.focus({ preventScroll: true });
+          });
       },
     },
     pinLabel: pinActionLabel(row.pinned, props.value.labels),
