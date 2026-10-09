@@ -80,10 +80,13 @@ const PROVIDERS: Record<string, Provider> = {
     };
   }),
   chakra: lazy(async () => {
-    const { ChakraProvider, defaultSystem } = await import("@chakra-ui/react");
+    const { ChakraProvider, defaultSystem, Theme } =
+      await import("@chakra-ui/react");
     return {
-      default: ({ children }: KitProviderProps) => (
-        <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
+      default: ({ dark, children }: KitProviderProps) => (
+        <ChakraProvider value={defaultSystem}>
+          <Theme appearance={dark ? "dark" : "light"}>{children}</Theme>
+        </ChakraProvider>
       ),
     };
   }),

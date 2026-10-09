@@ -1,16 +1,102 @@
 import { readFile } from "node:fs/promises";
 
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test, type TestInfo } from "@playwright/test";
 
 import { builtAdapters } from "../apps/showcase/matrix.mjs";
+
+/** Record how a kit's entry workspace looks, for the review of every kit. */
+async function attachEntry(page: Page, testInfo: TestInfo, name: string) {
+  const path = testInfo.outputPath(`${name}.png`);
+  await page.screenshot({ path, fullPage: true, animations: "disabled" });
+  await testInfo.attach(name, {
+    path,
+    contentType: "image/png",
+  });
+  const workspacePath = testInfo.outputPath(`${name}-workspace.png`);
+  await page
+    .locator('.mx-demo [data-adapttable-part="root"]')
+    .evaluate((element) => {
+      window.scrollBy({
+        top: element.getBoundingClientRect().top - 80,
+        behavior: "instant",
+      });
+    });
+  await page.screenshot({
+    path: workspacePath,
+    animations: "disabled",
+  });
+  await testInfo.attach(`${name}-workspace`, {
+    path: workspacePath,
+    contentType: "image/png",
+  });
+}
+
+test("chakra: native entry buttons retain contrast through theme changes", async ({
+  page,
+}) => {
+  await page.goto("/chakra/");
+  const views = page
+    .locator('.mx-demo [data-adapttable-part="root"]')
+    .getByRole("button", { name: "Saved views", exact: true });
+  for (const mode of ["light", "dark", "light"]) {
+    if (
+      mode !== "light" ||
+      (await page.locator("html").getAttribute("data-theme")) === "dark"
+    ) {
+      await page
+        .getByRole("button", { name: "Toggle dark mode", exact: true })
+        .click();
+    }
+    await expect(page.locator("html")).toHaveAttribute("data-theme", mode);
+    await expect
+      .poll(
+        () =>
+          views.evaluate((button) => {
+            const luminance = (color: string) => {
+              const rgb = color
+                .match(/[\d.]+/g)!
+                .slice(0, 3)
+                .map(Number);
+              const linear = rgb.map((channel) => {
+                const value = channel / 255;
+                return value <= 0.04045
+                  ? value / 12.92
+                  : ((value + 0.055) / 1.055) ** 2.4;
+              });
+              return (
+                linear[0]! * 0.2126 + linear[1]! * 0.7152 + linear[2]! * 0.0722
+              );
+            };
+            const foreground = luminance(getComputedStyle(button).color);
+            let surface: Element | null = button;
+            while (
+              surface &&
+              getComputedStyle(surface).backgroundColor === "rgba(0, 0, 0, 0)"
+            ) {
+              surface = surface.parentElement;
+            }
+            const background = luminance(
+              getComputedStyle(surface!).backgroundColor
+            );
+            return (
+              (Math.max(foreground, background) + 0.05) /
+              (Math.min(foreground, background) + 0.05)
+            );
+          }),
+        { message: `${mode} native Saved views contrast` }
+      )
+      .toBeGreaterThanOrEqual(4.5);
+  }
+});
 
 for (const kit of builtAdapters("react")) {
   test(`${kit.key}: entry editing, CSV and history use the real directory`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.goto(`/${kit.key}/`);
     const root = page.locator('.mx-demo [data-adapttable-part="root"]');
     await expect(root).toBeVisible();
+    await attachEntry(page, testInfo, `${kit.key}-entry-desktop-light`);
     await root
       .getByRole("button", { name: /Priya Nair/ })
       .first()
@@ -82,8 +168,11 @@ for (const kit of builtAdapters("react")) {
     ).toHaveCount(0);
 
     const search = root.getByRole("searchbox", { name: "Search", exact: true });
+    const rows = root.locator('[data-adapttable-part="row"][data-row-id]');
+    await expect(rows).toHaveCount(5);
     await search.fill("Priya");
     await expect(root.getByText("Priya Nair", { exact: true })).toBeVisible();
+    await expect(rows).toHaveCount(1);
     await expect
       .poll(() => new URL(page.url()).searchParams.get("live.q"))
       .toBe("Priya");
@@ -107,20 +196,33 @@ for (const kit of builtAdapters("react")) {
       .getByRole("button", { name: "Directory view", exact: true })
       .click();
     await expect(search).toHaveValue("Priya");
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText("Priya Nair");
     await page.reload();
     await expect(search).toHaveValue("Priya");
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText("Priya Nair");
     const savedUrl = page.url();
     const otherKit = kit.key === "mantine" ? "MUI" : "Mantine";
-    await page.getByRole("link", { name: otherKit, exact: true }).click();
+    await page.getByRole("button", { name: "Adapters", exact: true }).click();
+    await page
+      .getByRole("menu", { name: "Adapters", exact: true })
+      .getByRole("menuitem", { name: new RegExp(`^${otherKit} `) })
+      .click();
     await expect(search).toHaveValue("");
+    await expect(rows).toHaveCount(5);
     expect(new URL(page.url()).searchParams.has("live.q")).toBe(false);
     await page.goBack();
     await expect(page).toHaveURL(savedUrl);
     await expect(search).toHaveValue("Priya");
+    await expect(rows).toHaveCount(1);
     await page.goForward();
     await expect(search).toHaveValue("");
+    await expect(rows).toHaveCount(5);
     await page.goBack();
     await expect(search).toHaveValue("Priya");
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText("Priya Nair");
     await search.fill("");
 
     for (let repeat = 0; repeat < 2; repeat++) {
@@ -148,7 +250,7 @@ for (const kit of builtAdapters("react")) {
 
   test(`${kit.key}: enriched entry fits a dark phone and recovers from empty search`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/${kit.key}/`);
     await page
@@ -157,6 +259,7 @@ for (const kit of builtAdapters("react")) {
     const root = page.locator('.mx-demo [data-adapttable-part="root"]');
     await expect(root).toBeVisible();
     await expect(root.locator('[data-adapttable-part="card"]')).toHaveCount(5);
+    await attachEntry(page, testInfo, `${kit.key}-entry-phone-dark`);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth)
     ).toBeLessThanOrEqual(390);
