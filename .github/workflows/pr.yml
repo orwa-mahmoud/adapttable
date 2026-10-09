@@ -414,6 +414,8 @@ jobs:
         run: pnpm build --concurrency=1
       - name: Verify current and minimum Vue built contracts and ownership
         run: pnpm check:vue-built-peers
+      - name: Run every Vue kit on its minimum and current Vue
+        run: pnpm check:vue-kit-peers
       - name: Check the engine imports no framework
         run: pnpm check:boundary
       - name: Validate published package configs

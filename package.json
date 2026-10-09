@@ -62,10 +62,11 @@
     "check:api-contract": "node scripts/check-api-contract.mjs",
     "check:package-split": "node scripts/check-package-split-map.mjs",
     "check:static": "node scripts/run-parallel.mjs format:check lint lint:root check:readmes check:docsurface check:parts check:features check:api-contract check:package-split typecheck test:scripts check:vue-peer-types",
-    "check:packaged": "node scripts/run-parallel.mjs api:check publint smoke:dist budget check:boundary && pnpm run check:vue-built-peers",
+    "check:packaged": "node scripts/run-parallel.mjs api:check publint smoke:dist budget check:boundary && pnpm run check:vue-built-peers && pnpm run check:vue-kit-peers",
     "build:agent-schema": "node scripts/build-agent-schema.mjs",
     "check:vue-peer-types": "node scripts/check-vue-peer-types.mjs",
     "check:vue-built-peers": "node scripts/check-vue-built-peers.mjs",
+    "check:vue-kit-peers": "node scripts/check-vue-kit-peers.mjs",
     "build:e2e:vue-consumer": "node scripts/build-vue-browser-consumer.mjs"
   },
   "devDependencies": {
