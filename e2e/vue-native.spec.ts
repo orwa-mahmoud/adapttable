@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 // The browser runner serves the raw showcase build. Site composition relocates
-// this input to the canonical /vue/demo/unstyled/ URL without changing its kit.
-const VUE_PREVIEW = "/vue/unstyled/";
+// this input to the canonical /vue/demo/unstyled/preview/ URL without changing
+// its kit.
+const VUE_PREVIEW = "/vue/unstyled/preview/";
 
 test("Vue native table has real keyboard, controlled selection, search and paging", async ({
   page,

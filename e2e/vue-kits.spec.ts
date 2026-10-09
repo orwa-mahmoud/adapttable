@@ -98,7 +98,10 @@ async function expectLegalFooter(page: Page): Promise<void> {
     name: "Third-party notices",
     exact: true,
   });
-  await expect(link).toHaveAttribute("href", "../../third-party-notices.txt");
+  await expect(link).toHaveAttribute(
+    "href",
+    "../../../third-party-notices.txt"
+  );
   const layout = await link.evaluate((element) => {
     const preview = document.querySelector<HTMLElement>(".vue-kit-preview")!;
     const footer = element.closest("footer")!;
@@ -204,7 +207,7 @@ for (const kit of VUE_KIT_PAGES) {
         expect(response?.status()).toBe(200);
         await expect(page.locator(".vue-kit-preview")).toHaveAttribute(
           "data-kit",
-          kit.path
+          kit.kit
         );
         await expect(page.getByTestId("parity-notice")).toBeVisible();
         await expect(page.locator("html")).toHaveAttribute(
@@ -223,7 +226,7 @@ for (const kit of VUE_KIT_PAGES) {
         } else {
           await expect(surface.getByRole("table")).toBeVisible();
           await expect(surface.locator("tbody [data-row-id]")).toHaveCount(5);
-          if (kit.path === "quasar") {
+          if (kit.kit === "quasar") {
             await expect(surface.getByRole("table")).toHaveCSS(
               "border-spacing",
               "0px"
@@ -232,7 +235,7 @@ for (const kit of VUE_KIT_PAGES) {
               surface.locator("tbody [data-row-id]").first()
             ).toHaveClass(/\bq-tr\b/);
           }
-          await expectUtilityGeometry(page, kit.path);
+          await expectUtilityGeometry(page, kit.kit);
         }
         await expectLegalFooter(page);
         await expect(surface.getByRole("searchbox")).toBeVisible();
@@ -243,7 +246,7 @@ for (const kit of VUE_KIT_PAGES) {
               document.documentElement.clientWidth
           )
         ).toBeLessThanOrEqual(1);
-        await screenshot(page, info, `${kit.path}-${scenario.name}`);
+        await screenshot(page, info, `${kit.kit}-${scenario.name}`);
         expect(errors).toEqual([]);
       });
     }
@@ -274,7 +277,7 @@ for (const kit of VUE_KIT_PAGES) {
       await expect(selected).toBeChecked();
       await expect(selected).toBeFocused();
       await first.hover();
-      await expectUtilityGeometry(page, kit.path);
+      await expectUtilityGeometry(page, kit.kit);
       await expect(page.getByTestId("selection-status")).toHaveText(
         "1 selected"
       );
@@ -297,10 +300,10 @@ for (const kit of VUE_KIT_PAGES) {
       await expect(
         table.locator('tbody [data-row-id="ORD-1042"]').getByRole("checkbox")
       ).toBeChecked();
-      await screenshot(page, info, `${kit.path}-keyboard-selection`);
+      await screenshot(page, info, `${kit.kit}-keyboard-selection`);
     });
 
-    if (kit.path === "shadcn-vue") {
+    if (kit.kit === "shadcn-vue") {
       for (const theme of ["light", "dark"] as const) {
         test(`${theme}: native Button paint and current page contrast`, async ({
           page,
@@ -380,7 +383,7 @@ for (const kit of VUE_KIT_PAGES) {
         const surface = page.locator(".vue-kit-preview__table");
         const root = surface.locator(part("root"));
         const radio = ["element-plus", "nuxt-ui", "shadcn-vue"].includes(
-          kit.path
+          kit.kit
         );
         const density = surface.getByRole(radio ? "radiogroup" : "group", {
           name: labels.density,
@@ -413,7 +416,7 @@ for (const kit of VUE_KIT_PAGES) {
           throw new Error("Density must mount its group and both choices");
         const expectDensity = async (value: "comfortable" | "compact") => {
           await expect(root).toHaveAttribute("data-density", value);
-          if (!scenario.cards) await expectUtilityGeometry(page, kit.path);
+          if (!scenario.cards) await expectUtilityGeometry(page, kit.kit);
           await expect(
             density.getByText(labels.densityComfortable, { exact: true })
           ).toBeVisible();
@@ -508,7 +511,7 @@ for (const kit of VUE_KIT_PAGES) {
           const rows = surface.locator("tbody [data-row-id]");
           await expect(rows).toHaveCount(5);
           await pageSize.focus();
-          if (kit.path === "shadcn-vue") {
+          if (kit.kit === "shadcn-vue") {
             await pageSize.selectOption("10");
           } else {
             await pageSize.press("Enter");
@@ -532,7 +535,7 @@ for (const kit of VUE_KIT_PAGES) {
         await screenshot(
           page,
           info,
-          `${kit.path}-${scenario.name}-density-toggle`
+          `${kit.kit}-${scenario.name}-density-toggle`
         );
       });
     }

@@ -198,7 +198,7 @@ test("landing leads to a mounted order workspace with editable details and scope
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
-  const response = await page.goto("/vue/unstyled/");
+  const response = await page.goto("/vue/unstyled/preview/");
   expect(response?.status()).toBe(200);
   await page.getByRole("link", { name: "Open the order workspace" }).click();
   expect(new URL(page.url()).pathname).toBe(route);

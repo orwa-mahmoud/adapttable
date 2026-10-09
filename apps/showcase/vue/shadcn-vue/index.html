@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Explore real shadcn-vue Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen." />
+    <meta name="description" content="Explore shadcn-vue Vue table examples for filtering, editing, grouping, pivot and export. Native controls, optional feature imports and MIT licensing." />
     <link rel="canonical" href="https://adapttable.orwamahmoud.com/vue/demo/shadcn-vue/" />
-    <meta name="robots" content="noindex, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="shadcn-vue order desk — Vue — AdaptTable" />
-    <meta property="og:description" content="Explore real shadcn-vue Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen." />
+    <meta property="og:title" content="shadcn-vue Vue data table examples — AdaptTable" />
+    <meta property="og:description" content="Explore shadcn-vue Vue table examples for filtering, editing, grouping, pivot and export. Native controls, optional feature imports and MIT licensing." />
     <meta property="og:url" content="https://adapttable.orwamahmoud.com/vue/demo/shadcn-vue/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="shadcn-vue order desk — Vue — AdaptTable" />
-    <meta name="twitter:description" content="Explore real shadcn-vue Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen." />
+    <meta name="twitter:title" content="shadcn-vue Vue data table examples — AdaptTable" />
+    <meta name="twitter:description" content="Explore shadcn-vue Vue table examples for filtering, editing, grouping, pivot and export. Native controls, optional feature imports and MIT licensing." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Explore real shadcn-vue Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.","url":"https://adapttable.orwamahmoud.com/vue/demo/shadcn-vue/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Explore shadcn-vue Vue table examples for filtering, editing, grouping, pivot and export. Native controls, optional feature imports and MIT licensing.","url":"https://adapttable.orwamahmoud.com/vue/demo/shadcn-vue/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>shadcn-vue order desk — Vue — AdaptTable</title>
+    <title>shadcn-vue Vue data table examples — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -152,11 +152,75 @@
       [data-theme="dark"] .at-fallback a {
         color: #a5b4fc;
       }
+      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
     </style>
   </head>
   <body>
-<div id="root"><main class="at-fallback"><h1>shadcn-vue order desk — Vue — AdaptTable</h1><p>Explore real shadcn-vue Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.</p><p>Preview of table controls, selection, search, pagination and presentation settings.</p></main></div>
-    <footer class="vue-baseline"><a href="../../third-party-notices.txt">Third-party notices</a></footer>
-    <script type="module" src="../../src/vue/kits/entry-shadcn-vue.ts"></script>
+    <!-- Replaced by Vue on mount — see the note on a feature page for why the
+         served markup carries content. Written by
+         scripts/build-showcase-html.mjs. -->
+    <div id="root" data-matrix-page="shadcn-vue">
+      <main class="at-fallback">
+        <p class="at-fallback__kicker">@adapttable/shadcn-vue</p>
+        <h1>AdaptTable for shadcn-vue</h1>
+        <p>A shadcn-vue data table, styled by the tokens you already own.</p>
+        <p>A framework-neutral @adapttable/core provides the data engine; @adapttable/vue connects it to Vue. Add features through explicit imports. The visible controls are shadcn-vue's own controls over Reka UI primitives, styled with shadcn's class conventions.</p>
+        <p>That is the whole trade: one model to learn, and a table that belongs in a shadcn-vue app rather than sitting inside one.</p>
+        <h2>Install</h2>
+        <pre><code># Runs once the Vue packages are published to npm
+pnpm add @adapttable/shadcn-vue @adapttable/vue @adapttable/core reka-ui</code></pre>
+        <h2>Every feature, on its own page</h2>
+        <ul>
+          <li><a href="./filtering/">Filtering in shadcn-vue</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
+          <li><a href="./columns/">Column management in shadcn-vue</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="./column-groups/">Column groups in shadcn-vue</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="./selection/">Row selection in shadcn-vue</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="./rows/">Rows in shadcn-vue</a> — Pin rows from a 3-dot menu, and merge a team that runs down the page.</li>
+          <li><a href="./row-reordering/">Row reordering in shadcn-vue</a> — Drag or keyboard moves, announced — the host writes.</li>
+          <li><a href="./editing/">Inline cell editing in shadcn-vue</a> — Native editors in the cell; every write goes through your handler.</li>
+          <li><a href="./grouping/">Row grouping in shadcn-vue</a> — Drag, select or keyboard grouping, with totals in the headers.</li>
+          <li><a href="./aggregation/">Aggregation in shadcn-vue</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="./nested-tables/">Nested tables in shadcn-vue</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="./export/">CSV export in shadcn-vue</a> — One toolbar button, a CSV of the table as it stands.</li>
+          <li><a href="./scale/">Row and column virtualization in shadcn-vue</a> — 40,000 rows in a scroll box, only the visible ones rendered.</li>
+          <li><a href="./tree/">Tree data in shadcn-vue</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
+          <li><a href="./mobile-cards/">Mobile cards in shadcn-vue</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="./pivot/">Pivot tables in shadcn-vue</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="./saved-views/">Saved views in shadcn-vue</a> — Name an arrangement and restore it from the menu.</li>
+          <li><a href="./formulas/">Spreadsheet formulas in shadcn-vue</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="./rtl/">Right-to-left shadcn-vue data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="./realtime/">Live updates in shadcn-vue</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="./accessibility/">Accessible shadcn-vue data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="./ai/">AI table assistant in shadcn-vue Vue</a> — Local sort, questions and approved edits with real table outcomes.</li>
+        </ul>
+        <h2>The same table, in seven other kits</h2>
+        <p>Switching kit changes the components, never the model — the props on this page are the props there.</p>
+        <ul>
+          <li><a href="../unstyled/">AdaptTable for Vue Unstyled</a> — Native elements — your own CSS</li>
+          <li><a href="../element-plus/">AdaptTable for Element Plus</a> — Element blue, crisp form controls</li>
+          <li><a href="../vuetify/">AdaptTable for Vuetify</a> — Material Design, Vuetify blue</li>
+          <li><a href="../naive-ui/">AdaptTable for Naive UI</a> — Clean, compact, green accent</li>
+          <li><a href="../reka-ui/">AdaptTable for Reka UI</a> — Accessible primitives, neutral theme</li>
+          <li><a href="../nuxt-ui/">AdaptTable for Nuxt UI</a> — Tailwind-native, Nuxt green</li>
+          <li><a href="../quasar/">AdaptTable for Quasar</a> — Material-flavoured, Quasar blue</li>
+        </ul>
+        <p>
+          Reference: <a href="https://adapttable.orwamahmoud.com/vue/getting-started/">getting started</a>. Or
+          open <a href="/vue/demo/shadcn-vue/">the live demo</a> and switch kits on
+          the same table.
+        </p>
+      </main>
+    </div>
+    <script type="module" src="/src/vue/matrix/entry-matrix.ts"></script>
   </body>
 </html>

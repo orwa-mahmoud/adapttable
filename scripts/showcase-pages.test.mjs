@@ -22,7 +22,7 @@ const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
 const INDEX = "index.html";
 
 const VUE_PREVIEW_ENTRIES = new Map([
-  ["", "src/vue/entry-native.ts"],
+  ["preview", "src/vue/entry-native.ts"],
   ["workspace", "src/vue/workspace/entry-workspace.ts"],
   ["assistant", "src/vue/entry-assistant.ts"],
   ["table-surfaces", "src/vue/entry-table-surfaces.ts"],
@@ -30,7 +30,7 @@ const VUE_PREVIEW_ENTRIES = new Map([
   ["filter-editing", "src/vue/entry-filter-editing.ts"],
   ["composition", "src/vue/entry-composition.ts"],
   ["hierarchy", "src/vue/entry-hierarchy.ts"],
-  ["rows", "src/vue/entry-rows.ts"],
+  ["row-controls", "src/vue/entry-rows.ts"],
   ["selection-contract", "src/vue/entry-selection-contract.ts"],
   ["view-controls", "src/vue/entry-view-controls.ts"],
   ["column-menu", "src/vue/column-menu/entry-column-menu.ts"],
@@ -58,6 +58,12 @@ const VUE_KIT_LAB_ENTRIES = new Map([
     "src/vue/kits/entry-shadcn-action-surfaces.ts",
   ],
   ["nuxt-ui/workspace", "src/vue/kits/entry-nuxt-workspace.ts"],
+  ["naive-ui/filter-panel", "src/vue/kits/entry-naive-filter-panel.ts"],
+]);
+
+const VUE_KIT_LAB_WRAPPERS = new Map([
+  ["nuxt-ui/workspace", "NuxtWorkspaceShowcase.vue"],
+  ["naive-ui/filter-panel", "NaiveFilterPanelShowcase.vue"],
 ]);
 
 const STANDALONE_ENTRIES = new Map([
@@ -65,7 +71,10 @@ const STANDALONE_ENTRIES = new Map([
   ["all-options", "src/entry-all-options.tsx"],
   ["agent-approval", "src/entry-agent-approval.tsx"],
   ["mcp-app", "src/entry-mcp-app.tsx"],
-  ...[...VUE_KIT_PREVIEW_ENTRIES].map(([kit, entry]) => [`vue-${kit}`, entry]),
+  ...[...VUE_KIT_PREVIEW_ENTRIES].map(([kit, entry]) => [
+    `vue-${kit}-orders`,
+    entry,
+  ]),
   ...[...VUE_KIT_LAB_ENTRIES].map(([path, entry]) => [
     `vue-${path.replaceAll("/", "-")}`,
     entry,
@@ -73,7 +82,7 @@ const STANDALONE_ENTRIES = new Map([
   ["angular-main", "src/angular/entry-demo.ts"],
   ["angular-all-options", "src/angular/entry-demo.ts"],
   ...[...VUE_PREVIEW_ENTRIES].map(([slug, entry]) => [
-    slug ? `vue-unstyled-${slug}` : "vue-unstyled",
+    `vue-unstyled-${slug}`,
     entry,
   ]),
 ]);
@@ -181,23 +190,20 @@ function assertStandaloneEntry(page, source, entry) {
       return;
     }
     const kit = [...VUE_KIT_PREVIEW_ENTRIES.keys()].find(
-      (key) => page.key === `vue-${key}`
+      (key) => page.key === `vue-${key}-orders`
     );
     if (kit) {
-      assert.equal(page.route, `/vue/demo/${kit}/`);
+      assert.equal(page.route, `/vue/demo/${kit}/orders/`);
       assert.equal(page.indexable, false);
       assert.doesNotMatch(source, /data-matrix-page/);
       return;
     }
     const preview = [...VUE_PREVIEW_ENTRIES].find(
-      ([slug]) => page.key === (slug ? `vue-unstyled-${slug}` : "vue-unstyled")
+      ([slug]) => page.key === `vue-unstyled-${slug}`
     );
     assert.ok(preview, page.html);
     const [slug] = preview;
-    assert.equal(
-      page.route,
-      slug ? `/vue/demo/unstyled/${slug}/` : "/vue/demo/unstyled/"
-    );
+    assert.equal(page.route, `/vue/demo/unstyled/${slug}/`);
     assert.equal(page.indexable, false);
     assert.doesNotMatch(source, /data-matrix-page/);
   } else {
@@ -214,17 +220,16 @@ describe("the showcase page manifest", () => {
   });
 
   it("keeps every implemented Vue preview distinct from the other unstyled families", () => {
-    const vue = SHOWCASE_PAGES.filter(
-      (page) => page.framework === "vue" && page.key.startsWith("vue-unstyled")
+    const previewKeys = new Set(
+      [...VUE_PREVIEW_ENTRIES.keys()].map((slug) => `vue-unstyled-${slug}`)
     );
+    const vue = SHOWCASE_PAGES.filter((page) => previewKeys.has(page.key));
     assert.deepEqual(
       vue,
       [...VUE_PREVIEW_ENTRIES.keys()].map((slug) => ({
-        key: slug ? `vue-unstyled-${slug}` : "vue-unstyled",
-        html: slug
-          ? `./vue/unstyled/${slug}/index.html`
-          : "./vue/unstyled/index.html",
-        route: slug ? `/vue/demo/unstyled/${slug}/` : "/vue/demo/unstyled/",
+        key: `vue-unstyled-${slug}`,
+        html: `./vue/unstyled/${slug}/index.html`,
+        route: `/vue/demo/unstyled/${slug}/`,
         indexable: false,
         framework: "vue",
       }))
@@ -236,10 +241,16 @@ describe("the showcase page manifest", () => {
     for (const page of vue) {
       assert.equal(indexed.includes(page.route), false, page.route);
     }
-    assert.equal(
-      matrixPages().some((page) => page.framework === "vue"),
-      false
+    // The previews sit beside the Vue Unstyled kit's indexed matrix pages,
+    // which own the kit's own address and the feature addresses.
+    const matrix = matrixPages().filter(
+      (page) => page.framework === "vue" && page.adapter === "vue-unstyled"
     );
+    assert.equal(matrix.length, MATRIX_FEATURES.length + 1);
+    for (const page of matrix) {
+      assert.ok(indexed.includes(demoRoute(page.path, "vue")), page.path);
+      assert.equal(previewKeys.has(page.dir.replaceAll("/", "-")), false);
+    }
     const component = readFileSync(
       join(SHOWCASE, "src/vue/NativeDemo.vue"),
       "utf8"
@@ -253,12 +264,14 @@ describe("the showcase page manifest", () => {
 
   it("registers each actual Vue kit entry separately from complete feature parity", () => {
     for (const [kit, entry] of VUE_KIT_PREVIEW_ENTRIES) {
-      const pages = SHOWCASE_PAGES.filter((page) => page.key === `vue-${kit}`);
+      const pages = SHOWCASE_PAGES.filter(
+        (page) => page.key === `vue-${kit}-orders`
+      );
       assert.deepEqual(pages, [
         {
-          key: `vue-${kit}`,
-          html: `./vue/${kit}/index.html`,
-          route: `/vue/demo/${kit}/`,
+          key: `vue-${kit}-orders`,
+          html: `./vue/${kit}/orders/index.html`,
+          route: `/vue/demo/${kit}/orders/`,
           indexable: false,
           framework: "vue",
         },
@@ -291,11 +304,17 @@ describe("the showcase page manifest", () => {
       assert.equal(indexed.includes(`/vue/demo/${path}/`), false);
       const source = readFileSync(join(SHOWCASE, entry), "utf8");
       assert.match(source, /createApp\(Fixture\)/);
-      if (path.startsWith("shadcn-vue/")) {
-        assert.match(source, /packages\/vue\/adapter-shadcn-vue\//);
-      } else {
-        assert.match(source, /from "\.\/NuxtWorkspaceShowcase\.vue"/);
-      }
+      // Each lab mounts its own kit's fixture, directly or through a showcase
+      // wrapper component.
+      const wrapper = VUE_KIT_LAB_WRAPPERS.get(path);
+      if (wrapper) assert.ok(source.includes(`from "./${wrapper}"`), path);
+      const mounted = wrapper
+        ? readFileSync(join(SHOWCASE, "src/vue/kits", wrapper), "utf8")
+        : source;
+      assert.ok(
+        mounted.includes(`packages/vue/adapter-${path.split("/")[0]}/`),
+        path
+      );
       assert.doesNotMatch(
         source,
         /@adapttable\/(?:core|react|angular|unstyled)["/]/

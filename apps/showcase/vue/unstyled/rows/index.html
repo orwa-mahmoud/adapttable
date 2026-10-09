@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../../favicon.svg" />
-    <meta name="description" content="Controlled pinning, row actions, spans and column resize." />
+    <meta name="description" content="Try Vue Unstyled Vue table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once." />
     <link rel="canonical" href="https://adapttable.orwamahmoud.com/vue/demo/unstyled/rows/" />
-    <meta name="robots" content="noindex, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Rows and columns — Vue Unstyled — AdaptTable" />
-    <meta property="og:description" content="Controlled pinning, row actions, spans and column resize." />
+    <meta property="og:title" content="Vue Unstyled table row pinning and cell spanning — AdaptTable" />
+    <meta property="og:description" content="Try Vue Unstyled Vue table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once." />
     <meta property="og:url" content="https://adapttable.orwamahmoud.com/vue/demo/unstyled/rows/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Rows and columns — Vue Unstyled — AdaptTable" />
-    <meta name="twitter:description" content="Controlled pinning, row actions, spans and column resize." />
+    <meta name="twitter:title" content="Vue Unstyled table row pinning and cell spanning — AdaptTable" />
+    <meta name="twitter:description" content="Try Vue Unstyled Vue table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Controlled pinning, row actions, spans and column resize.","url":"https://adapttable.orwamahmoud.com/vue/demo/unstyled/rows/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Vue Unstyled Vue table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once.","url":"https://adapttable.orwamahmoud.com/vue/demo/unstyled/rows/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Rows and columns — Vue Unstyled — AdaptTable</title>
+    <title>Vue Unstyled table row pinning and cell spanning — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -152,11 +152,115 @@
       [data-theme="dark"] .at-fallback a {
         color: #a5b4fc;
       }
+      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
     </style>
   </head>
   <body>
-<div id="root"><main class="at-fallback"><h1>Rows and columns — Vue Unstyled — AdaptTable</h1><p>Controlled pinning, row actions, spans and column resize.</p><p>This development preview is not a published package or a complete feature-parity release.</p></main></div>
-    <footer class="vue-baseline"><a href="../../../third-party-notices.txt">Third-party notices</a></footer>
-    <script type="module" src="../../../src/vue/entry-rows.ts"></script>
+    <!-- Replaced by Vue on mount — the served markup carries the page's
+         own words so a crawler, and anyone whose bundle has not arrived, reads
+         a real page. Written by scripts/build-showcase-html.mjs. -->
+    <div id="root" data-matrix-page="unstyled/rows">
+      <main class="at-fallback">
+        <p class="at-fallback__kicker">AdaptTable for Vue Unstyled</p>
+        <h1>Rows in Vue Unstyled</h1>
+        <p>A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and merge a team that runs down consecutive rows so the name is written once.</p>
+        <p><code>rowPinning()</code>, <code>cellSpan()</code> and a <code>&quot;menu&quot;</code> row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass <code>pinnedRowIds</code> to hold them yourself.</p>
+        <p>Grouping and trees refuse pinning: a nested list is not a flat pin stack. The pin keeps a team merge together — the person moves, the team stays one cell.</p>
+        <h2>The code</h2>
+        <pre><code>&lt;script setup lang=&quot;ts&quot;&gt;
+import type { ColumnDef } from &quot;@adapttable/vue&quot;;
+import { DataTable } from &quot;@adapttable/vue-unstyled&quot;;
+import { cellSpan } from &quot;@adapttable/vue-unstyled/cell-span&quot;;
+import { rowActions } from &quot;@adapttable/vue-unstyled/row-actions&quot;;
+import { rowPinning } from &quot;@adapttable/vue-unstyled/row-pinning&quot;;
+
+defineProps&lt;{ rows: readonly Person[] }&gt;();
+
+const columns: ColumnDef&lt;Person&gt;[] = [{ key: &quot;name&quot; }, { key: &quot;team&quot; }];
+const rowKey = (row: Person) =&gt; row.id;
+
+function spanTeam({
+  column,
+  sectionRows,
+  sectionRowIndex,
+}: {
+  column: { key: string };
+  sectionRows: readonly Person[];
+  sectionRowIndex: number;
+}) {
+  if (column.key !== &quot;team&quot;) return undefined;
+  const team = sectionRows[sectionRowIndex]?.team;
+  if (sectionRows[sectionRowIndex - 1]?.team === team) return undefined;
+  let rowSpan = 1;
+  while (sectionRows[sectionRowIndex + rowSpan]?.team === team) rowSpan += 1;
+  return rowSpan &gt; 1 ? { rowSpan } : undefined;
+}
+
+const features = [rowPinning(), cellSpan(spanTeam), rowActions&lt;Person&gt;([])];
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;DataTable
+    :data=&quot;rows&quot;
+    :columns=&quot;columns&quot;
+    :row-key=&quot;rowKey&quot;
+    row-actions-layout=&quot;menu&quot;
+    :features=&quot;features&quot;
+  /&gt;
+&lt;/template&gt;</code></pre>
+        <h2>Install</h2>
+        <pre><code># Runs once the Vue packages are published to npm
+pnpm add @adapttable/vue-unstyled @adapttable/vue @adapttable/core</code></pre>
+        <h2>The same feature in the other kits</h2>
+        <ul>
+          <li><a href="../../element-plus/rows/">Rows in Element Plus</a> — Element blue, crisp form controls</li>
+          <li><a href="../../vuetify/rows/">Rows in Vuetify</a> — Material Design, Vuetify blue</li>
+          <li><a href="../../naive-ui/rows/">Rows in Naive UI</a> — Clean, compact, green accent</li>
+          <li><a href="../../reka-ui/rows/">Rows in Reka UI</a> — Accessible primitives, neutral theme</li>
+          <li><a href="../../shadcn-vue/rows/">Rows in shadcn-vue</a> — Monochrome, ring focus</li>
+          <li><a href="../../nuxt-ui/rows/">Rows in Nuxt UI</a> — Tailwind-native, Nuxt green</li>
+          <li><a href="../../quasar/rows/">Rows in Quasar</a> — Material-flavoured, Quasar blue</li>
+        </ul>
+        <h2>More Vue Unstyled features</h2>
+        <ul>
+          <li><a href="../filtering/">Filtering in Vue Unstyled</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
+          <li><a href="../columns/">Column management in Vue Unstyled</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="../column-groups/">Column groups in Vue Unstyled</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="../selection/">Row selection in Vue Unstyled</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="../row-reordering/">Row reordering in Vue Unstyled</a> — Drag or keyboard moves, announced — the host writes.</li>
+          <li><a href="../editing/">Inline cell editing in Vue Unstyled</a> — Native editors in the cell; every write goes through your handler.</li>
+          <li><a href="../grouping/">Row grouping in Vue Unstyled</a> — Drag, select or keyboard grouping, with totals in the headers.</li>
+          <li><a href="../aggregation/">Aggregation in Vue Unstyled</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="../nested-tables/">Nested tables in Vue Unstyled</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="../export/">CSV export in Vue Unstyled</a> — One toolbar button, a CSV of the table as it stands.</li>
+          <li><a href="../scale/">Row and column virtualization in Vue Unstyled</a> — 40,000 rows in a scroll box, only the visible ones rendered.</li>
+          <li><a href="../tree/">Tree data in Vue Unstyled</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
+          <li><a href="../mobile-cards/">Mobile cards in Vue Unstyled</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="../pivot/">Pivot tables in Vue Unstyled</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="../saved-views/">Saved views in Vue Unstyled</a> — Name an arrangement and restore it from the menu.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Vue Unstyled</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="../rtl/">Right-to-left Vue Unstyled data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="../realtime/">Live updates in Vue Unstyled</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="../accessibility/">Accessible Vue Unstyled data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="../ai/">AI table assistant in Vue Unstyled Vue</a> — Local sort, questions and approved edits with real table outcomes.</li>
+        </ul>
+        <p>
+          Reference: <a href="https://adapttable.orwamahmoud.com/vue/getting-started/?unavailable=row-pinning">row-pinning</a>, <a href="https://adapttable.orwamahmoud.com/vue/getting-started/?unavailable=row-reordering">row-reordering</a>, <a href="https://adapttable.orwamahmoud.com/vue/getting-started/?unavailable=row-spanning">row-spanning</a>. More of this kit:
+          <a href="../">AdaptTable for Vue Unstyled</a>, or
+          <a href="/vue/demo/unstyled/">the live demo</a>.
+        </p>
+      </main>
+    </div>
+    <script type="module" src="/src/vue/matrix/entry-matrix.ts"></script>
   </body>
 </html>

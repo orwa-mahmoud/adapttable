@@ -37,7 +37,7 @@ const catalog = computed(() =>
           ? text.value.featureMoves
           : text.value.featureFormulas,
     },
-    { key: "rows", label: text.value.featureSpans },
+    { key: "row-controls", label: text.value.featureSpans },
     { key: "navigation", label: text.value.featureNavigation },
     { key: "column-menu", label: text.value.featureColumns },
     { key: "table-footers", label: text.value.featureFooters },
@@ -63,7 +63,7 @@ const activeKeys = computed(
         "assistant",
         "view-controls",
       ],
-      dispatch: ["hierarchy", "specialized", "rows", "navigation"],
+      dispatch: ["hierarchy", "specialized", "row-controls", "navigation"],
       revenue: [
         "hierarchy",
         "specialized",

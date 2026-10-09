@@ -25,7 +25,7 @@ const nativeStatus: Readonly<Record<string, string>> = {
 } as const;
 
 for (const kit of VUE_KIT_PAGES) {
-  test(`${kit.path}: compact orders, native status and visible presentation choices`, async ({
+  test(`${kit.kit}: compact orders, native status and visible presentation choices`, async ({
     page,
   }, info) => {
     const errors: string[] = [];
@@ -56,12 +56,12 @@ for (const kit of VUE_KIT_PAGES) {
     const bounds = await table.boundingBox();
     expect(bounds).not.toBeNull();
     expect(bounds!.y).toBeLessThan(340);
-    const statusSelector = nativeStatus[kit.path];
+    const statusSelector = nativeStatus[kit.kit];
     if (!statusSelector)
-      throw new Error(`Missing status selector for ${kit.path}`);
+      throw new Error(`Missing status selector for ${kit.kit}`);
     await expect(table.locator(statusSelector).first()).toBeVisible();
     await expect(page.getByTestId("selection-status")).toHaveText("0 selected");
-    await capture(page, info, `${kit.path}-compact-orders-light`);
+    await capture(page, info, `${kit.kit}-compact-orders-light`);
 
     await page.getByRole("searchbox").fill("Cedar");
     await expect(table.locator("tbody [data-row-id]")).toHaveCount(1);
@@ -77,7 +77,7 @@ for (const kit of VUE_KIT_PAGES) {
     await expect(page.getByRole("searchbox")).toHaveValue("Cedar");
     await expect(table.locator("tbody [data-row-id]")).toHaveCount(1);
     await expect(page).toHaveURL(/presentation-proof=keep/);
-    await capture(page, info, `${kit.path}-compact-orders-dark`);
+    await capture(page, info, `${kit.kit}-compact-orders-dark`);
 
     const layout = page.getByRole("group", { name: "Layout", exact: true });
     await layout.getByRole("button", { name: "Cards", exact: true }).click();
@@ -102,7 +102,7 @@ for (const kit of VUE_KIT_PAGES) {
           document.documentElement.clientWidth
       )
     ).toBeLessThanOrEqual(1);
-    await capture(page, info, `${kit.path}-compact-orders-mobile-rtl`);
+    await capture(page, info, `${kit.kit}-compact-orders-mobile-rtl`);
 
     await page.goBack();
     await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
@@ -113,10 +113,10 @@ for (const kit of VUE_KIT_PAGES) {
   });
   if (
     ["element-plus", "vuetify", "reka-ui", "shadcn-vue", "nuxt-ui"].includes(
-      kit.path
+      kit.kit
     )
   ) {
-    test(`${kit.path}: native column menu pins and retains the visible column demo`, async ({
+    test(`${kit.kit}: native column menu pins and retains the visible column demo`, async ({
       page,
     }, info) => {
       await page.setViewportSize({ width: 1024, height: 900 });
@@ -185,10 +185,10 @@ for (const kit of VUE_KIT_PAGES) {
       await expectPinnedAtEdge();
       await expect
         .poll(() =>
-          new URL(page.url()).searchParams.get(`kit-${kit.path}-orders.colPin`)
+          new URL(page.url()).searchParams.get(`kit-${kit.kit}-orders.colPin`)
         )
         .toBe("customer:start");
-      await capture(page, info, `${kit.path}-native-columns-pinned`);
+      await capture(page, info, `${kit.kit}-native-columns-pinned`);
       await page.reload();
       await expect(customer).toHaveAttribute("data-pinned", "start");
       await expect(

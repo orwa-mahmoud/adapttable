@@ -55,9 +55,11 @@ function renderStatus(row: Order, label: string) {
             :type="control.value === option.value ? 'primary' : undefined"
             native-type="button"
             size="small"
-            :aria-pressed="control.value === option.value"
-            :lang="control.key === 'lang' ? option.value : undefined"
-            @click="onChange(control.key, option.value)"
+            v-bind="{
+              'aria-pressed': control.value === option.value,
+              lang: control.key === 'lang' ? option.value : undefined,
+              onClick: () => onChange(control.key, option.value),
+            }"
             >{{ option.label }}</ElButton
           >
         </div>

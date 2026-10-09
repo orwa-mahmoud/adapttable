@@ -52,9 +52,11 @@ function renderStatus(row: Order, label: string) {
             size="sm"
             no-caps
             unelevated
-            :aria-pressed="control.value === option.value"
-            :lang="control.key === 'lang' ? option.value : undefined"
-            @click="onChange(control.key, option.value)"
+            v-bind="{
+              'aria-pressed': control.value === option.value,
+              lang: control.key === 'lang' ? option.value : undefined,
+              onClick: () => onChange(control.key, option.value),
+            }"
             >{{ option.label }}</QBtn
           >
         </div>

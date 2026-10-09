@@ -265,11 +265,11 @@ function presentationLink(key: string, value: string): string {
         <a
           v-for="item in kitPreviews"
           :key="item.key"
-          :href="`../${item.key}/${query}`"
+          :href="`../../${item.key}/orders/${query}`"
           :aria-current="kit === item.key ? 'page' : undefined"
           >{{ item.name }}</a
         >
-        <a class="vue-kit-preview__workspace" href="../unstyled/workspace/"
+        <a class="vue-kit-preview__workspace" href="../../unstyled/workspace/"
           >{{ preview.workspace }} <span aria-hidden="true">↗</span></a
         >
       </nav>

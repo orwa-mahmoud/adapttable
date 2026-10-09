@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const route = "/vue/naive-ui/filtering/";
+const route = "/vue/naive-ui/filter-panel/";
 const part = (name: string) => `[data-adapttable-part="${name}"]`;
 for (const scenario of [
   { name: "desktop", query: "", width: 1365, height: 900, modal: false },
@@ -39,11 +39,18 @@ for (const scenario of [
     );
     await expect(surface).toBeVisible();
     await expect(surface).toHaveAttribute("role", "dialog");
-    const box = await surface.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(scenario.width + 1);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(scenario.height + 1);
+    // The drawer slides in from the edge; measure where it comes to rest.
+    await expect
+      .poll(async () => {
+        const box = await surface.boundingBox();
+        return (
+          box !== null &&
+          box.x >= 0 &&
+          box.x + box.width <= scenario.width + 1 &&
+          box.y + box.height <= scenario.height + 1
+        );
+      })
+      .toBe(true);
     if (scenario.modal) {
       await expect(surface).toHaveAttribute("aria-modal", "true");
       await expect(page.locator(".n-drawer-mask")).toBeVisible();

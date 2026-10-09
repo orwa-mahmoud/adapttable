@@ -1,0 +1,64 @@
+/*
+ * The Vue pages' own additions to the shared matrix and native-kit styles:
+ * border-box chrome (the React pages get it from Tailwind's base layer), the
+ * status marks and demo controls of the kits that draw no badge or button of
+ * their own, and the scroll box a long demo table sits in.
+ */
+#root:has(> .nav),
+#root:has(> .nav) *,
+#root:has(> .nav) *::before,
+#root:has(> .nav) *::after {
+  box-sizing: border-box;
+}
+
+.mx-vue .mx-scroll {
+  max-block-size: 420px;
+  overflow: auto;
+}
+
+.mx-vue .mx-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1em 0.55em;
+  border-radius: 999px;
+  border: 1px solid var(--page-border);
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+.mx-vue .mx-status[data-status-tone="success"] {
+  border-color: color-mix(in oklch, oklch(0.62 0.16 150) 50%, transparent);
+  background: color-mix(in oklch, oklch(0.62 0.16 150) 14%, transparent);
+}
+.mx-vue .mx-status[data-status-tone="error"] {
+  border-color: color-mix(in oklch, oklch(0.6 0.2 25) 50%, transparent);
+  background: color-mix(in oklch, oklch(0.6 0.2 25) 14%, transparent);
+}
+.mx-vue .mx-status[data-status-tone="info"] {
+  border-color: color-mix(in oklch, var(--kit) 50%, transparent);
+  background: color-mix(in oklch, var(--kit) 14%, transparent);
+}
+
+.mx-vue .mx-kit-button,
+.mx-vue .mx-kit-choice > button {
+  min-block-size: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--page-border);
+  border-radius: 0.375rem;
+  background: var(--page-surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.mx-vue .mx-kit-button:disabled,
+.mx-vue .mx-kit-choice[data-disabled] > button {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.mx-vue .mx-kit-choice {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+.mx-vue .mx-kit-choice > button[data-state="on"] {
+  border-color: var(--kit);
+  background: color-mix(in oklch, var(--kit) 14%, var(--page-surface));
+}

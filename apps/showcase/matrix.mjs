@@ -45,6 +45,13 @@
  *   the framework — `@adapttable/react`.
  * @property {string} entry The module every matrix page of the framework's kits
  *   boots, addressed from the showcase root as the served HTML loads it.
+ * @property {string} [dir] The showcase folder that holds the framework's
+ *   pages, where they do not sit at the showcase root. The compose step serves
+ *   them at the framework's demo root all the same.
+ * @property {string} [copy] The framework whose framework-level page copy this
+ *   one's pages read where a feature states none of its own — set when this
+ *   framework's demos are ports of that framework's, so the same sentences
+ *   are true of both.
  */
 
 /**
@@ -65,6 +72,14 @@ export const SHOWCASE_FRAMEWORKS = [
     binding: "@adapttable/angular",
     entry: "/src/angular/entry-matrix.ts",
   },
+  {
+    key: "vue",
+    label: "Vue",
+    binding: "@adapttable/vue",
+    entry: "/src/vue/matrix/entry-matrix.ts",
+    dir: "vue",
+    copy: "angular",
+  },
 ];
 
 /** The framework every feature's `snippet` is written for. */
@@ -74,7 +89,11 @@ const SNIPPET_FRAMEWORK = "react";
  * One UI kit AdaptTable adapts to.
  *
  * @typedef {object} ShowcaseAdapter
- * @property {string} key URL segment and switcher id — `mantine`.
+ * @property {string} key Switcher id, and the URL segment unless `path` names
+ *   another — `mantine`. Unique across every framework.
+ * @property {string} [path] The URL segment under the framework's demo root,
+ *   where it differs from `key` — two frameworks can both have an `unstyled`
+ *   kit, but not two adapters the key `unstyled`.
  * @property {string} framework The framework the kit is built on — a key of
  *   {@link SHOWCASE_FRAMEWORKS}. Its pages boot that framework's entry.
  * @property {string} label The kit's own name — `Mantine`.
@@ -114,7 +133,7 @@ const SNIPPET_FRAMEWORK = "react";
 
 /**
  * Every adapter: React's eight in the order the switcher and the nav show
- * them, then the Angular kits.
+ * them, then the Angular kits, then the Vue kits.
  *
  * `label`, `blurb` and the two accents are the switcher's tokens — the same
  * values `src/themeTokens.ts` re-exports, kept here so the nav, the landing
@@ -718,6 +737,155 @@ export const SHOWCASE_ADAPTERS = [
       "ai",
     ],
   },
+  {
+    key: "vue-unstyled",
+    path: "unstyled",
+    framework: "vue",
+    label: "Vue Unstyled",
+    blurb: "Native elements — your own CSS",
+    accentLight: "oklch(0.55 0.13 160)",
+    accentDark: "oklch(0.74 0.13 160)",
+    pkg: "@adapttable/vue-unstyled",
+    peer: "vue",
+    install:
+      "# Runs once the Vue packages are published to npm\npnpm add @adapttable/vue-unstyled @adapttable/vue @adapttable/core",
+    provider: "",
+    tagline:
+      "Native elements and no opinions — every style is yours, addressed by part name.",
+    surface:
+      "native HTML elements, each carrying a `data-adapttable-part` name your CSS selects",
+    landing: {
+      title: "Vue Unstyled data table examples — AdaptTable",
+      description:
+        "Explore an unstyled Vue data table: native elements you style yourself, with filtering, editing, grouping, virtualization and export. MIT licensed.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. Add features through explicit imports. The visible controls are {surface}.",
+      "That is the whole trade: one model to learn, and a table that looks like the rest of your app because your own stylesheet draws it.",
+    ],
+    built: true,
+  },
+  {
+    key: "element-plus",
+    framework: "vue",
+    label: "Element Plus",
+    blurb: "Element blue, crisp form controls",
+    accentLight: "oklch(0.58 0.17 252)",
+    accentDark: "oklch(0.72 0.14 252)",
+    pkg: "@adapttable/element-plus",
+    peer: "element-plus",
+    install:
+      "# Runs once the Vue packages are published to npm\npnpm add @adapttable/element-plus @adapttable/vue @adapttable/core element-plus",
+    provider: "",
+    tagline: "An Element Plus data table, in Element Plus's own controls.",
+    surface:
+      "Element Plus's ElPopover, ElDrawer, ElCard, ElSelect, ElCheckbox, ElDropdown and ElTag",
+    built: true,
+  },
+  {
+    key: "vuetify",
+    framework: "vue",
+    label: "Vuetify",
+    blurb: "Material Design, Vuetify blue",
+    accentLight: "oklch(0.53 0.16 258)",
+    accentDark: "oklch(0.7 0.14 258)",
+    pkg: "@adapttable/vuetify",
+    peer: "vuetify",
+    install:
+      "# Runs once the Vue packages are published to npm\npnpm add @adapttable/vuetify @adapttable/vue @adapttable/core vuetify",
+    provider: "VApp",
+    tagline: "A Material Design data table, drawn by Vuetify's own components.",
+    surface:
+      "Vuetify's VTable, VMenu, VDialog, VCard, VSelect, VCheckboxBtn and VBtn",
+    built: true,
+  },
+  {
+    key: "naive-ui",
+    framework: "vue",
+    label: "Naive UI",
+    blurb: "Clean, compact, green accent",
+    accentLight: "oklch(0.58 0.14 152)",
+    accentDark: "oklch(0.74 0.14 152)",
+    pkg: "@adapttable/naive-ui",
+    peer: "naive-ui",
+    install:
+      "# Runs once the Vue packages are published to npm\npnpm add @adapttable/naive-ui @adapttable/vue @adapttable/core naive-ui",
+    provider: "",
+    tagline: "A Naive UI data table, drawn with Naive UI's own components.",
+    surface:
+      "Naive UI's NTable, NPopover, NDrawer, NCard, NSelect, NCheckbox and NButton",
+    built: true,
+  },
+  {
+    key: "reka-ui",
+    framework: "vue",
+    label: "Reka UI",
+    blurb: "Accessible primitives, neutral theme",
+    accentLight: "oklch(0.56 0.12 175)",
+    accentDark: "oklch(0.74 0.11 175)",
+    pkg: "@adapttable/reka-ui",
+    peer: "reka-ui",
+    install:
+      "# Runs once the Vue packages are published to npm\npnpm add @adapttable/reka-ui @adapttable/vue @adapttable/core reka-ui",
+    provider: "",
+    tagline:
+      "A Reka UI data table — accessible primitives in a compact, neutral theme.",
+    surface:
+      "Reka UI's Popover, Dialog, Select, Checkbox, Tabs and Listbox primitives",
+    built: true,
+  },
+  {
+    key: "shadcn-vue",
+    framework: "vue",
+    label: "shadcn-vue",
+    blurb: "Monochrome, ring focus",
+    accentLight: "oklch(0.28 0.01 264)",
+    accentDark: "oklch(0.92 0.004 264)",
+    pkg: "@adapttable/shadcn-vue",
+    peer: "reka-ui",
+    install:
+      "# Runs once the Vue packages are published to npm\npnpm add @adapttable/shadcn-vue @adapttable/vue @adapttable/core reka-ui",
+    provider: "",
+    tagline: "A shadcn-vue data table, styled by the tokens you already own.",
+    surface:
+      "shadcn-vue's own controls over Reka UI primitives, styled with shadcn's class conventions",
+    built: true,
+  },
+  {
+    key: "nuxt-ui",
+    framework: "vue",
+    label: "Nuxt UI",
+    blurb: "Tailwind-native, Nuxt green",
+    accentLight: "oklch(0.58 0.15 158)",
+    accentDark: "oklch(0.78 0.16 158)",
+    pkg: "@adapttable/nuxt-ui",
+    peer: "@nuxt/ui",
+    install:
+      "# Runs once the Vue packages are published to npm\npnpm add @adapttable/nuxt-ui @adapttable/vue @adapttable/core @nuxt/ui",
+    provider: "UApp",
+    tagline: "A Nuxt UI data table, built from Nuxt UI components.",
+    surface:
+      "Nuxt UI's Popover, Slideover, Card, Select, Checkbox, Button and Badge",
+    built: true,
+  },
+  {
+    key: "quasar",
+    framework: "vue",
+    label: "Quasar",
+    blurb: "Material-flavoured, Quasar blue",
+    accentLight: "oklch(0.55 0.15 255)",
+    accentDark: "oklch(0.7 0.13 255)",
+    pkg: "@adapttable/quasar",
+    peer: "quasar",
+    install:
+      "# Runs once the Vue packages are published to npm\npnpm add @adapttable/quasar @adapttable/vue @adapttable/core quasar@2.34.0",
+    provider: "",
+    tagline: "A Quasar data table, in Quasar's own components.",
+    surface:
+      "Quasar's QMenu, QDialog, QCard, QSelect, QCheckbox, QBtn and QBadge",
+    built: true,
+  },
 ];
 
 /**
@@ -847,6 +1015,35 @@ export class People {
     savedViews({ storageKey: "people-views", urlKey: "people" }),
   ];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+import { savedViews } from "{pkg}/saved-views";
+
+defineProps<{ rows: readonly Person[] }>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+const rowKey = (row: Person) => row.id;
+const features = [
+  filters<Person>([]),
+  savedViews({ storageKey: "people-views", urlKey: "people" }),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    url-key="people"
+    :features="features"
+  />
+</template>`,
     },
     label: "Saved views",
     h1: "Saved views in {kit}",
@@ -983,6 +1180,44 @@ export class Spend {
     { fields: this.fields },
   ));
 }`,
+      vue: `<script setup lang="ts">
+import { computed } from "vue";
+import {
+  pivot, pivotTableModel, usePivotUrlState, type PivotField,
+} from "{binding}/pivot";
+import { DataTable } from "{pkg}";
+import { pinnedSummaryRows } from "{pkg}/pinned-summary-rows";
+import { PivotPanel } from "{pkg}/pivot";
+
+const props = defineProps<{ rows: readonly Person[] }>();
+
+const fields: readonly PivotField[] = [
+  { key: "team", label: "Team" }, { key: "status", label: "Status" },
+  { key: "budget", label: "Budget" },
+];
+const state = usePivotUrlState({
+  urlKey: "p",
+  defaultConfig: {
+    rows: ["team"], columns: ["status"],
+    measures: [{ key: "budget", agg: "sum" }],
+  },
+});
+const model = computed(() => pivotTableModel(
+  pivot(props.rows, state.config.value, { collapsed: state.collapsed.value }),
+  { fields },
+));
+</script>
+
+<template>
+  <PivotPanel
+    :fields="fields" :config="state.config.value"
+    :on-change="state.onConfigChange"
+  />
+  <DataTable
+    :data="model.rows" :columns="model.columns" :row-key="model.rowKey"
+    :features="[pinnedSummaryRows(model.pinnedRows ?? {})]"
+  />
+</template>`,
     },
     label: "Pivot",
     h1: "Pivot tables in {kit}",
@@ -1076,6 +1311,33 @@ export class ComputedPeople {
     ...buildFormulaColumns<Person>(this.state.formulas()).columns,
   ]);
 }`,
+      vue: `<script setup lang="ts">
+import { computed } from "vue";
+import type { ColumnDef } from "{binding}";
+import { buildFormulaColumns, useFormulaUrlState } from "{binding}/formula";
+import { DataTable } from "{pkg}";
+
+const props = defineProps<{
+  rows: readonly Person[];
+  baseColumns: readonly ColumnDef<Person>[];
+}>();
+
+const rowKey = (row: Person) => row.id;
+const state = useFormulaUrlState({
+  urlKey: "fx",
+  defaultFormulas: [
+    { key: "margin", header: "Margin", formula: "=ROUND(budget * 0.15, 0)" },
+  ],
+});
+const columns = computed(() => [
+  ...props.baseColumns,
+  ...buildFormulaColumns<Person>(state.formulas.value).columns,
+]);
+</script>
+
+<template>
+  <DataTable :data="rows" :columns="columns" :row-key="rowKey" />
+</template>`,
     },
     label: "Formulas",
     h1: "Spreadsheet formulas in {kit}",
@@ -1178,6 +1440,46 @@ export class People {
     cellNavigation(),
   ];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { cellNavigation } from "{pkg}/cell-navigation";
+import { editing } from "{pkg}/editing";
+
+defineProps<{ rows: readonly Person[] }>();
+const emit = defineEmits<{
+  save: [row: Person, key: string, value: unknown];
+}>();
+
+const columns: ColumnDef<Person>[] = [
+  {
+    key: "name",
+    editable: true,
+    editor: "text",
+    validate: (value) => (String(value).trim() ? undefined : "Required"),
+  },
+  { key: "budget", editable: true, editor: "number" },
+  {
+    key: "status",
+    editable: true,
+    editor: { type: "select", options: ["Active", "Planned", "Blocked"] },
+  },
+];
+const rowKey = (row: Person) => row.id;
+const features = [
+  editing<Person>((row, key, value) => emit("save", row, key, value)),
+  cellNavigation(),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -1310,6 +1612,35 @@ export class Org {
     tree<Employee>({ getParentId: (row) => row.managerId, treeColumn: "name" }),
   ];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { tree } from "{pkg}/tree";
+
+interface Employee {
+  id: string;
+  name: string;
+  team: string;
+  managerId?: string;
+}
+
+defineProps<{ people: readonly Employee[] }>();
+
+const columns: ColumnDef<Employee>[] = [{ key: "name" }, { key: "team" }];
+const rowKey = (row: Employee) => row.id;
+const features = [
+  tree<Employee>({ getParentId: (row) => row.managerId, treeColumn: "name" }),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="people"
+    :columns="columns"
+    :row-key="rowKey"
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -1400,6 +1731,23 @@ export class People {
   readonly rowKey = (row: Person) => row.id;
   readonly features = [];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+
+defineProps<{ rows: readonly Person[] }>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", mobileLabel: "" },
+  { key: "team", mobileLabel: "Team" },
+  { key: "email", hideOnMobile: true },
+];
+const rowKey = (row: Person) => row.id;
+</script>
+
+<template>
+  <DataTable :data="rows" :columns="columns" :row-key="rowKey" />
+</template>`,
     },
     heads: {
       angular: {
@@ -1500,6 +1848,31 @@ export class People {
   readonly rowKey = (row: Person) => row.id;
   readonly features = [virtualize()];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { virtualize } from "{pkg}/virtualize";
+
+defineProps<{ rows: readonly Person[] }>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+const rowKey = (row: Person) => row.id;
+const features = [virtualize({ maxHeight: 480 })];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    pagination-mode="infinite"
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -1596,6 +1969,31 @@ export class People {
   });
   readonly features = [columnMenu(), resizableColumns()];
 }`,
+      vue: `<script setup lang="ts">
+import { ref } from "vue";
+import type { ColumnDef, ColumnLayoutState } from "{binding}";
+import { DataTable } from "{pkg}";
+import { columnMenu } from "{pkg}/column-menu";
+import { resizableColumns } from "{pkg}/resizable-columns";
+
+defineProps<{
+  rows: readonly Person[];
+  columns: readonly ColumnDef<Person>[];
+}>();
+
+const rowKey = (row: Person) => row.id;
+const layout = ref<ColumnLayoutState>({
+  hidden: [], order: [], widths: {}, pinned: { name: "start" },
+});
+const features = [columnMenu(), resizableColumns()];
+</script>
+
+<template>
+  <DataTable
+    v-model:column-layout="layout"
+    :data="rows" :columns="columns" :row-key="rowKey" :features="features"
+  />
+</template>`,
     },
     label: "Columns",
     h1: "Column management in {kit}",
@@ -1678,6 +2076,33 @@ export class People {
   readonly rowKey = (row: Person) => row.id;
   readonly features = [filters([]), headerFilters()];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+import { headerFilters } from "{pkg}/header-filters";
+
+defineProps<{ rows: readonly Person[] }>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", filter: "text" },
+  { key: "team", filter: { type: "multiSelect", options: "auto" } },
+  { key: "budget", filter: "numberRange" },
+  { key: "hiredAt", filter: "dateRange" },
+];
+const rowKey = (row: Person) => row.id;
+const features = [filters<Person>([], { mode: "popover" }), headerFilters()];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    url-key="f"
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -1799,6 +2224,30 @@ export class People {
   readonly rowKey = (row: Person) => row.id;
   readonly features = [exportCsv()];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { exportCsv } from "{pkg}/export";
+
+defineProps<{ rows: readonly Person[] }>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+const rowKey = (row: Person) => row.id;
+const features = [exportCsv()];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -1919,6 +2368,36 @@ export class People {
     ]),
   ];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { bulkActions } from "{pkg}/bulk-actions";
+
+defineProps<{ rows: readonly Person[] }>();
+const emit = defineEmits<{ archive: [ids: string[]] }>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+const rowKey = (row: Person) => row.id;
+const features = [
+  bulkActions([
+    { key: "archive", label: "Archive", onClick: (ids) => emit("archive", ids) },
+  ]),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    selectable
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -2029,6 +2508,32 @@ export class People {
   readonly rowKey = (row: Person) => row.id;
   readonly features = [groupingPanel(["team", "status"])];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { groupingPanel } from "{pkg}/grouping-panel";
+
+defineProps<{ rows: readonly Person[] }>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name" },
+  { key: "team" },
+  { key: "status" },
+  { key: "budget", aggregatable: { operations: ["sum", "avg"] } },
+];
+const rowKey = (row: Person) => row.id;
+const features = [groupingPanel(["team", "status"])];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    url-key="g"
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -2161,6 +2666,49 @@ export class Members {
   readonly rowKey = (row: Member) => row.id;
   readonly features = [collapsibleColumnGroups()];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnInput } from "{binding}";
+import { DataTable } from "{pkg}";
+import { collapsibleColumnGroups } from "{pkg}/column-groups";
+
+interface Member {
+  id: string;
+  name: string;
+  team: string;
+  status: string;
+  budget: number;
+}
+
+defineProps<{ rows: readonly Member[] }>();
+
+const columns: ColumnInput<Member>[] = [
+  { key: "name", header: "Name" },
+  {
+    header: "Assignment",
+    collapsedKey: "team",
+    children: [
+      { key: "team", header: "Team" },
+      { key: "status", header: "Status" },
+    ],
+  },
+  {
+    header: "Budget",
+    collapsedRender: (row) => \`$\${row.budget}\`,
+    children: [{ key: "budget", header: "Amount" }],
+  },
+];
+const rowKey = (row: Member) => row.id;
+const features = [collapsibleColumnGroups()];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    :features="features"
+  />
+</template>`,
     },
     intros: {
       angular: [
@@ -2235,6 +2783,11 @@ export function People({ rows }) {
   {
     slug: "rtl",
     intros: {
+      vue: [
+        "Arabic labels and cell values mirror the table, its pager and the filter popover. Pinning uses logical edges, so start is the right edge.",
+        'Pass `getLabels("ar")` to `labels` and `getDirection("ar")` to `dir`. Every table, including nested tables, receives the same presentation settings.',
+        "Append `?locale=ar&dir=rtl` to any Vue feature page to exercise its real table in Arabic and right-to-left layout.",
+      ],
       angular: [
         "Arabic labels and cell values mirror the table, its pager and the filter popover. Pinning uses logical edges, so start is the right edge.",
         'Pass `getLabels("ar")` to `labels` and `getDirection("ar")` to `dir`. Every table, including nested tables, receives the same presentation settings.',
@@ -2272,6 +2825,33 @@ export class ArabicPeople {
   readonly labels = getLabels("ar");
   readonly features = [filters([{ key: "name", type: "text", label: "الاسم" }])];
 }`,
+      vue: `<script setup lang="ts">
+import { getDirection, getLabels } from "@adapttable/i18n";
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+
+defineProps<{
+  rows: readonly Person[];
+  columns: readonly ColumnDef<Person>[];
+}>();
+
+const rowKey = (row: Person) => row.id;
+const dir = getDirection("ar");
+const labels = getLabels("ar");
+const features = [
+  filters<Person>([{ key: "name", type: "text", label: "الاسم" }], {
+    mode: "popover",
+  }),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="rows" :columns="columns" :row-key="rowKey"
+    :dir="dir" :labels="labels" :features="features"
+  />
+</template>`,
     },
     label: "RTL",
     h1: "Right-to-left {kit} data table",
@@ -2343,6 +2923,28 @@ export class LivePeople {
     ));
   }
 }`,
+      vue: `<script setup lang="ts">
+import { applyRowPatches, updateRow } from "@adapttable/core";
+import { shallowRef } from "vue";
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+
+defineProps<{ columns: readonly ColumnDef<Person>[] }>();
+
+const rows = shallowRef<readonly Person[]>([]);
+const rowKey = (row: Person) => row.id;
+
+function patchBudget(id: string, budget: number) {
+  rows.value = applyRowPatches(
+    rows.value, [updateRow<Person>(id, { budget })], rowKey,
+  );
+}
+defineExpose({ patchBudget });
+</script>
+
+<template>
+  <DataTable :data="rows" :columns="columns" :row-key="rowKey" />
+</template>`,
     },
     label: "Realtime",
     h1: "Live updates in {kit}",
@@ -2455,6 +3057,47 @@ export class People {
     rowActions<Person>([], { layout: "menu" }),
   ];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { cellSpan } from "{pkg}/cell-span";
+import { rowActions } from "{pkg}/row-actions";
+import { rowPinning } from "{pkg}/row-pinning";
+
+defineProps<{ rows: readonly Person[] }>();
+
+const columns: ColumnDef<Person>[] = [{ key: "name" }, { key: "team" }];
+const rowKey = (row: Person) => row.id;
+
+function spanTeam({
+  column,
+  sectionRows,
+  sectionRowIndex,
+}: {
+  column: { key: string };
+  sectionRows: readonly Person[];
+  sectionRowIndex: number;
+}) {
+  if (column.key !== "team") return undefined;
+  const team = sectionRows[sectionRowIndex]?.team;
+  if (sectionRows[sectionRowIndex - 1]?.team === team) return undefined;
+  let rowSpan = 1;
+  while (sectionRows[sectionRowIndex + rowSpan]?.team === team) rowSpan += 1;
+  return rowSpan > 1 ? { rowSpan } : undefined;
+}
+
+const features = [rowPinning(), cellSpan(spanTeam), rowActions<Person>([])];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    row-actions-layout="menu"
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -2592,6 +3235,50 @@ export class Customers {
     })),
   ];
 }`,
+      vue: `<script setup lang="ts">
+import { h } from "vue";
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { nestedTable } from "{pkg}/nested-table";
+
+interface Order {
+  id: string;
+  item: string;
+}
+
+interface Customer {
+  id: string;
+  name: string;
+  orders: Order[];
+}
+
+defineProps<{ rows: readonly Customer[] }>();
+
+const columns: ColumnDef<Customer>[] = [{ key: "name" }];
+const orderColumns: ColumnDef<Order>[] = [{ key: "item" }];
+const rowKey = (row: Customer) => row.id;
+const features = [
+  nestedTable<Customer>((row) => ({
+    label: \`Orders for \${row.name}\`,
+    table: (defaults) =>
+      h(DataTable<Order>, {
+        ...defaults,
+        data: row.orders,
+        columns: orderColumns,
+        rowKey: (order: Order) => order.id,
+      }),
+  })),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    :features="features"
+  />
+</template>`,
     },
     snippet: `import { DataTable } from "{pkg}";
 import { nestedTable } from "{pkg}/nested-table";
@@ -2662,6 +3349,28 @@ export class KeyboardPeople {
   readonly rowKey = (row: Person) => row.id;
   readonly features = [cellNavigation(), columnSelectionCheckbox()];
 }`,
+      vue: `<script setup lang="ts">
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { cellNavigation } from "{pkg}/cell-navigation";
+import { columnSelectionCheckbox } from "{pkg}/column-selection";
+
+defineProps<{
+  rows: readonly Person[];
+  columns: readonly ColumnDef<Person>[];
+}>();
+
+const rowKey = (row: Person) => row.id;
+const features = [cellNavigation(), columnSelectionCheckbox()];
+</script>
+
+<template>
+  <DataTable
+    table-label="People keyboard grid"
+    :data="rows" :columns="columns" :row-key="rowKey"
+    :features="features"
+  />
+</template>`,
     },
     label: "Accessibility",
     h1: "Accessible {kit} data table",
@@ -2744,6 +3453,37 @@ export class People {
     ),
   ];
 }`,
+      vue: `<script setup lang="ts">
+import { applyRowReorder } from "@adapttable/core";
+import { shallowRef } from "vue";
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { rowReorder } from "{pkg}/row-reorder";
+
+const props = defineProps<{ rows: readonly Person[] }>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+const rowKey = (row: Person) => row.id;
+const order = shallowRef<readonly Person[] | null>(null);
+const features = [
+  rowReorder<Person>((from, to) => {
+    order.value = applyRowReorder(order.value ?? props.rows, from, to);
+  }),
+];
+</script>
+
+<template>
+  <DataTable
+    :data="order ?? rows"
+    :columns="columns"
+    :row-key="rowKey"
+    :features="features"
+  />
+</template>`,
     },
     heads: {
       angular: {
@@ -2860,6 +3600,37 @@ export class Totals {
     pinnedSummaryRows<Person>({ top: this.totals() }),
   ]);
 }`,
+      vue: `<script setup lang="ts">
+import { computed } from "vue";
+import { aggregate, type ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { groupingPanel } from "{pkg}/grouping-panel";
+import { pinnedSummaryRows } from "{pkg}/pinned-summary-rows";
+
+const props = defineProps<{
+  rows: readonly Person[];
+  totals: readonly Person[];
+}>();
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name" }, { key: "team" }, { key: "budget" },
+];
+const rowKey = (row: Person) => row.id;
+const budgetSum = aggregate<Person>({ budget: "sum" });
+const features = computed(() => [
+  groupingPanel<Person>("team", {
+    groupAggregates: budgetSum, groupFooters: true,
+  }),
+  pinnedSummaryRows<Person>({ top: props.totals }),
+]);
+</script>
+
+<template>
+  <DataTable
+    :data="rows" :columns="columns" :row-key="rowKey"
+    :summary-row="budgetSum" :features="features"
+  />
+</template>`,
     },
     label: "Aggregation",
     h1: "Aggregation in {kit}",
@@ -2937,6 +3708,11 @@ export function Sales({ rows, columns, teamTotal, grandTotal }) {
       },
     },
     intros: {
+      vue: [
+        "This deterministic local demo mounts a real {kit} {framework} table and its {kit} assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.",
+        "A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.",
+        "`tableAgent` and `useTableAssistant` from `@adapttable/ai-vue` share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.",
+      ],
       angular: [
         "This deterministic local demo mounts a real {kit} {framework} table and its {kit} assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.",
         "A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.",
@@ -3079,6 +3855,76 @@ export class PeopleAssistant {
     bridge: { attach: (session) => this.session.set(session) },
   })];
 }`,
+      vue: `<script setup lang="ts">
+import type { AgentSession, AssistantTransport } from "@adapttable/ai";
+import { tableAgent, useTableAssistant } from "@adapttable/ai-vue";
+import { shallowRef } from "vue";
+import type { ColumnDef } from "{binding}";
+import { DataTable } from "{pkg}";
+import { TableAssistant } from "{pkg}/assistant";
+
+interface AgentPerson { id: string; name: string; salary: number }
+
+// A minimal local transport: no model, endpoint or API key.
+const transport: AssistantTransport = {
+  send: async ({ session, text, signal }) => {
+    if (!text.toLowerCase().includes("sort")) {
+      return { text: "Try: sort salaries highest first." };
+    }
+    const key = "view.setSort";
+    const result = await session.execute(
+      key,
+      { key: "salary", dir: "desc" },
+      session.manifest().viewRevision,
+      crypto.randomUUID(),
+      signal
+    );
+    return {
+      text: result.ok ? "Highest salary first." : "The sort was not applied.",
+      keys: [key],
+      results: [result],
+    };
+  },
+};
+
+const rows: readonly AgentPerson[] = [
+  { id: "ada", name: "Ada Lovelace", salary: 120 },
+  { id: "grace", name: "Grace Hopper", salary: 140 },
+];
+const columns: readonly ColumnDef<AgentPerson>[] = [
+  { key: "name", header: "Person" },
+  { key: "salary", header: "Salary", sortable: true },
+];
+const rowKey = (row: AgentPerson) => row.id;
+const session = shallowRef<AgentSession>();
+const open = shallowRef(false);
+const assistant = useTableAssistant(() => ({
+  session: session.value,
+  transport,
+  open: open.value,
+  onOpenChange: (value) => {
+    open.value = value;
+  },
+}));
+const features = [tableAgent({
+  tableId: "people", approval: "never",
+  columns: { salary: { type: "number", sortable: true } },
+  bridge: { attach: (value) => { session.value = value; } },
+})];
+</script>
+
+<template>
+  <DataTable
+    :data="rows" :columns="columns" :row-key="rowKey"
+    :features="features" :url-sync="false"
+  />
+  <TableAssistant
+    :assistant="assistant.view.value"
+    :open="assistant.open.value"
+    :on-open-change="assistant.setOpen"
+    presentation="floating"
+  />
+</template>`,
     },
     notes: {
       unstyled:
@@ -3265,29 +4111,44 @@ export const snippetFor = (
  *
  * @param {MatrixFeature} feature
  * @param {ShowcaseAdapter} adapter
+ * @param {ShowcaseFramework} [framework] the adapter's framework
  * @returns {Required<FeatureHead>}
  */
-export const headFor = (feature, adapter) => ({
-  label: feature.label,
-  h1: feature.h1,
-  title: feature.title,
-  description: feature.description,
-  card: feature.card,
-  ...feature.heads?.[adapter.framework],
-  ...feature.heads?.[adapter.key],
-});
+export const headFor = (feature, adapter, framework = frameworkOf(adapter)) => {
+  const copy = framework.copy;
+  return {
+    label: feature.label,
+    h1: feature.h1,
+    title: feature.title,
+    description: feature.description,
+    card: feature.card,
+    ...(copy ? feature.heads?.[copy] : undefined),
+    ...feature.heads?.[adapter.framework],
+    ...feature.heads?.[adapter.key],
+  };
+};
 
 /**
  * The paragraphs a feature page opens with, for the kit it is written for.
  *
  * @param {MatrixFeature} feature
  * @param {ShowcaseAdapter} adapter
+ * @param {ShowcaseFramework} [framework] the adapter's framework
  * @returns {string[]}
  */
-export const introFor = (feature, adapter) =>
-  feature.intros?.[adapter.key] ??
-  feature.intros?.[adapter.framework] ??
-  feature.intro;
+export const introFor = (
+  feature,
+  adapter,
+  framework = frameworkOf(adapter)
+) => {
+  const copy = framework.copy;
+  return (
+    feature.intros?.[adapter.key] ??
+    feature.intros?.[adapter.framework] ??
+    (copy ? feature.intros?.[copy] : undefined) ??
+    feature.intro
+  );
+};
 
 /**
  * The landing page's `<title>` and meta description for this kit.
@@ -3358,6 +4219,44 @@ export const featuresOf = (adapter) =>
 export const isIndexable = (adapter) => adapter.indexable !== false;
 
 /**
+ * The URL segment an adapter's pages live under in its framework's demo root.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {string}
+ */
+export const pathOf = (adapter) => adapter.path ?? adapter.key;
+
+/**
+ * Where a matrix page is served from inside its framework's demo root —
+ * `element-plus/pivot` — and which page a page's markup names itself.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @param {string | null} [slug] The feature slug; omitted for the landing.
+ * @returns {string}
+ */
+export const pagePathOf = (adapter, slug = null) =>
+  slug ? `${pathOf(adapter)}/${slug}` : pathOf(adapter);
+
+/**
+ * Where a matrix page's HTML sits inside the showcase: its path, under the
+ * framework's folder when the framework keeps one.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @param {string | null} [slug] The feature slug; omitted for the landing.
+ * @param {ShowcaseFramework} [framework] the adapter's framework
+ * @returns {string}
+ */
+export const pageDirOf = (
+  adapter,
+  slug = null,
+  framework = frameworkOf(adapter)
+) => {
+  const folder = framework.dir;
+  const path = pagePathOf(adapter, slug);
+  return folder ? `${folder}/${path}` : path;
+};
+
+/**
  * One built page of the matrix: an adapter landing, or an adapter's feature.
  *
  * @typedef {object} MatrixPageSpec
@@ -3366,6 +4265,7 @@ export const isIndexable = (adapter) => adapter.indexable !== false;
  *   whose entry the page boots.
  * @property {string | null} feature The feature slug, or `null` for the landing.
  * @property {string} dir The directory under the showcase root.
+ * @property {string} path The page's address under its framework's demo root.
  * @property {boolean} indexable Whether the page belongs in the sitemap.
  */
 
@@ -3381,14 +4281,16 @@ export const matrixPages = () =>
         adapter: adapter.key,
         framework: framework.key,
         feature: null,
-        dir: adapter.key,
+        dir: pageDirOf(adapter),
+        path: pagePathOf(adapter),
         indexable: isIndexable(adapter),
       },
       ...featuresOf(adapter).map((feature) => ({
         adapter: adapter.key,
         framework: framework.key,
         feature: feature.slug,
-        dir: `${adapter.key}/${feature.slug}`,
+        dir: pageDirOf(adapter, feature.slug),
+        path: pagePathOf(adapter, feature.slug),
         indexable: isIndexable(adapter),
       })),
     ])
@@ -3414,9 +4316,9 @@ export const featureBySlug = (slug) =>
 
 /** The basic native Vue development preview, outside the parity matrix. */
 export const VUE_NATIVE_BASELINE = Object.freeze({
-  key: "vue-unstyled",
-  dir: "vue/unstyled",
-  path: "unstyled",
+  key: "vue-unstyled-preview",
+  dir: "vue/unstyled/preview",
+  path: "unstyled/preview",
   title: "Vue Unstyled table preview — AdaptTable",
   description:
     "Explore native Vue table search, sorting, pagination, selection and responsive cards.",
@@ -3496,9 +4398,9 @@ export const VUE_NATIVE_PAGES = Object.freeze([
     entry: "/src/vue/entry-hierarchy.ts",
   },
   {
-    key: "vue-unstyled-rows",
-    dir: "vue/unstyled/rows",
-    path: "unstyled/rows",
+    key: "vue-unstyled-row-controls",
+    dir: "vue/unstyled/row-controls",
+    path: "unstyled/row-controls",
     title: "Rows and columns — Vue Unstyled — AdaptTable",
     description: "Controlled pinning, row actions, spans and column resize.",
     notice: VUE_NATIVE_BASELINE.notice,
@@ -3574,12 +4476,17 @@ export const VUE_NATIVE_PAGES = Object.freeze([
   },
 ]);
 
-/** Genuine kit previews stay outside the feature-parity marketing matrix. */
+/**
+ * Each Vue kit's order desk: one table of shared order data with search,
+ * sorting, selection, responsive cards, density and fullscreen, under the
+ * kit's matrix landing. `kit` is the kit's matrix key.
+ */
 export const VUE_KIT_PAGES = Object.freeze([
   {
-    key: "vue-element-plus",
-    dir: "vue/element-plus",
-    path: "element-plus",
+    key: "vue-element-plus-orders",
+    kit: "element-plus",
+    dir: "vue/element-plus/orders",
+    path: "element-plus/orders",
     title: "Element Plus order desk — Vue — AdaptTable",
     description:
       "Explore real Element Plus Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
@@ -3588,9 +4495,10 @@ export const VUE_KIT_PAGES = Object.freeze([
     entry: "/src/vue/kits/entry-element-plus.ts",
   },
   {
-    key: "vue-vuetify",
-    dir: "vue/vuetify",
-    path: "vuetify",
+    key: "vue-vuetify-orders",
+    kit: "vuetify",
+    dir: "vue/vuetify/orders",
+    path: "vuetify/orders",
     title: "Vuetify order desk — Vue — AdaptTable",
     description:
       "Explore real Vuetify Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
@@ -3599,9 +4507,10 @@ export const VUE_KIT_PAGES = Object.freeze([
     entry: "/src/vue/kits/entry-vuetify.ts",
   },
   {
-    key: "vue-naive-ui",
-    dir: "vue/naive-ui",
-    path: "naive-ui",
+    key: "vue-naive-ui-orders",
+    kit: "naive-ui",
+    dir: "vue/naive-ui/orders",
+    path: "naive-ui/orders",
     title: "Naive UI order desk — Vue — AdaptTable",
     description:
       "Explore real Naive UI Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
@@ -3610,9 +4519,10 @@ export const VUE_KIT_PAGES = Object.freeze([
     entry: "/src/vue/kits/entry-naive-ui.ts",
   },
   {
-    key: "vue-reka-ui",
-    dir: "vue/reka-ui",
-    path: "reka-ui",
+    key: "vue-reka-ui-orders",
+    kit: "reka-ui",
+    dir: "vue/reka-ui/orders",
+    path: "reka-ui/orders",
     title: "Reka UI order desk — Vue — AdaptTable",
     description:
       "Explore real Reka UI Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
@@ -3621,9 +4531,10 @@ export const VUE_KIT_PAGES = Object.freeze([
     entry: "/src/vue/kits/entry-reka-ui.ts",
   },
   {
-    key: "vue-shadcn-vue",
-    dir: "vue/shadcn-vue",
-    path: "shadcn-vue",
+    key: "vue-shadcn-vue-orders",
+    kit: "shadcn-vue",
+    dir: "vue/shadcn-vue/orders",
+    path: "shadcn-vue/orders",
     title: "shadcn-vue order desk — Vue — AdaptTable",
     description:
       "Explore real shadcn-vue Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
@@ -3632,9 +4543,10 @@ export const VUE_KIT_PAGES = Object.freeze([
     entry: "/src/vue/kits/entry-shadcn-vue.ts",
   },
   {
-    key: "vue-nuxt-ui",
-    dir: "vue/nuxt-ui",
-    path: "nuxt-ui",
+    key: "vue-nuxt-ui-orders",
+    kit: "nuxt-ui",
+    dir: "vue/nuxt-ui/orders",
+    path: "nuxt-ui/orders",
     title: "Nuxt UI order desk — Vue — AdaptTable",
     description:
       "Explore real Nuxt UI Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
@@ -3643,9 +4555,10 @@ export const VUE_KIT_PAGES = Object.freeze([
     entry: "/src/vue/kits/entry-nuxt-ui.ts",
   },
   {
-    key: "vue-quasar",
-    dir: "vue/quasar",
-    path: "quasar",
+    key: "vue-quasar-orders",
+    kit: "quasar",
+    dir: "vue/quasar/orders",
+    path: "quasar/orders",
     title: "Quasar order desk — Vue — AdaptTable",
     description:
       "Explore real Quasar Vue table controls with shared order data, search, sorting, selection, responsive cards, density and fullscreen.",
@@ -3700,5 +4613,16 @@ export const VUE_KIT_LAB_PAGES = Object.freeze([
     notice:
       "Experimental feature lab for browser checks. The Vue packages are not yet published to npm.",
     entry: "/src/vue/kits/entry-nuxt-workspace.ts",
+  },
+  {
+    key: "vue-naive-ui-filter-panel",
+    dir: "vue/naive-ui/filter-panel",
+    path: "naive-ui/filter-panel",
+    title: "Naive UI filter panel lab — Vue — AdaptTable",
+    description:
+      "Exercise Naive UI filter fields, header filters, nested selects, the filter drawer and controlled state with the real adapter controls.",
+    notice:
+      "Experimental feature lab for browser checks. The Vue packages are not yet published to npm.",
+    entry: "/src/vue/kits/entry-naive-filter-panel.ts",
   },
 ]);

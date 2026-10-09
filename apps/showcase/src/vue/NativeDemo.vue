@@ -32,7 +32,9 @@ const labels = computed(() => getLabels(rtl.value ? "ar" : "en"));
 const table = shallowRef<DataTableHandle<Person>>();
 const rowKey = (row: Person): string => row.id;
 const examples = VUE_NATIVE_PAGES.filter(
-  (page) => page.key !== "vue-unstyled" && page.key !== "vue-unstyled-workspace"
+  (page) =>
+    page.key !== VUE_NATIVE_BASELINE.key &&
+    page.key !== "vue-unstyled-workspace"
 );
 </script>
 
@@ -54,7 +56,7 @@ const examples = VUE_NATIVE_PAGES.filter(
           assistant together.
         </p>
       </div>
-      <a href="./workspace/"
+      <a href="../workspace/"
         >Open the order workspace <span aria-hidden="true">↗</span></a
       >
     </aside>
@@ -81,7 +83,7 @@ const examples = VUE_NATIVE_PAGES.filter(
         :search-debounce-ms="0"
         :dir="rtl ? 'rtl' : 'ltr'"
         :labels="labels"
-        :lang="rtl ? 'ar' : 'en'"
+        v-bind="{ lang: rtl ? 'ar' : 'en' }"
         table-label="People"
         data-demo-table="people"
       />
@@ -102,7 +104,7 @@ const examples = VUE_NATIVE_PAGES.filter(
         <a
           v-for="example in examples"
           :key="example.key"
-          :href="`./${example.path.replace('unstyled/', '')}/`"
+          :href="`../${example.path.replace('unstyled/', '')}/`"
           ><strong>{{ example.title.split(" — ")[0] }}</strong
           ><span>{{ example.description }}</span></a
         >

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-const route = "/vue/unstyled/rows/";
+const route = "/vue/unstyled/row-controls/";
 test("Vue native rows preserve controlled pins, keyboard actions and resize", async ({
   page,
 }) => {

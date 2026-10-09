@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
-import { SHOWCASE_ADAPTERS } from "../apps/showcase/matrix.mjs";
+import { pathOf, SHOWCASE_ADAPTERS } from "../apps/showcase/matrix.mjs";
 import { listPackages } from "./packages.mjs";
 import { demoRoute, siteUrl } from "./site.mjs";
 
@@ -52,7 +52,7 @@ describe("published package homepages", () => {
         VUE_HOMEPAGES.get(pkg.name) ??
         (pkg.name === "@adapttable/ai-angular" ? ANGULAR_AI_HOME : HUB);
       const expected = kit
-        ? siteUrl(demoRoute(kit.key, kit.framework))
+        ? siteUrl(demoRoute(pathOf(kit), kit.framework))
         : bindingHome;
       if (
         !kit &&
@@ -78,7 +78,7 @@ describe("published package homepages", () => {
       if (pkg.private !== true || !kit) continue;
       assert.equal(
         pkg.homepage,
-        siteUrl(demoRoute(kit.key, kit.framework)),
+        siteUrl(demoRoute(pathOf(kit), kit.framework)),
         path
       );
     }

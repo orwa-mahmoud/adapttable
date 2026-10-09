@@ -45,11 +45,13 @@ function renderStatus(row: Order, label: string) {
             v-for="option in control.options"
             :key="option.value"
             as="button"
-            type="button"
             class="vue-kit-preview__shadcn-choice"
-            :aria-pressed="control.value === option.value"
-            :lang="control.key === 'lang' ? option.value : undefined"
-            @click="onChange(control.key, option.value)"
+            v-bind="{
+              type: 'button',
+              'aria-pressed': control.value === option.value,
+              lang: control.key === 'lang' ? option.value : undefined,
+              onClick: () => onChange(control.key, option.value),
+            }"
             >{{ option.label }}</Primitive
           >
         </div>

@@ -23,6 +23,7 @@ import {
   landingIntro,
   MATRIX_FEATURES,
   otherKitsOf,
+  pathOf,
   SHOWCASE_ADAPTERS,
   SHOWCASE_FRAMEWORKS,
   snippetFor,
@@ -43,6 +44,7 @@ export {
   landingIntro,
   MATRIX_FEATURES,
   otherKitsOf,
+  pathOf,
   SHOWCASE_ADAPTERS,
   SHOWCASE_FRAMEWORKS,
   snippetFor,
@@ -62,8 +64,9 @@ export interface MatrixRoute {
 }
 
 /**
- * Resolve `mantine` or `mantine/saved-views` to the adapter and feature it
- * names, for an entry that serves one framework's kits.
+ * Resolve `mantine` or `mantine/saved-views` — a page's path under its
+ * framework's demo root — to the adapter and feature it names, for an entry
+ * that serves one framework's kits.
  *
  * The identifier is written into `#root`'s `data-matrix-page` by the HTML
  * generator, so the page knows what it is from its own markup rather than by
@@ -79,9 +82,11 @@ export function resolveMatrixRoute(
   id: string,
   framework: string
 ): MatrixRoute | null {
-  const [adapterKey, featureSlug] = id.split("/");
-  const adapter = adapterKey ? adapterByKey(adapterKey) : undefined;
-  if (adapter?.framework !== framework) return null;
+  const [adapterPath, featureSlug] = id.split("/");
+  const adapter = adaptersOf(framework).find(
+    (candidate) => pathOf(candidate) === adapterPath
+  );
+  if (!adapter) return null;
   const route = { adapter, framework: frameworkOf(adapter) };
   if (!featureSlug) return { ...route, feature: null };
   const feature = featureBySlug(featureSlug);

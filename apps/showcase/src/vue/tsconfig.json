@@ -65,5 +65,9 @@
     }
   },
   "include": ["./**/*.ts", "./**/*.vue"],
-  "exclude": []
+  "exclude": [],
+  "vueCompilerOptions": {
+    "checkUnknownProps": true,
+    "dataAttributes": ["data-*"]
+  }
 }
