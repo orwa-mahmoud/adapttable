@@ -156,23 +156,29 @@ function launcher(
           label: assistantLauncherName(copy, Boolean(pending)),
           part: "assistant-launcher",
           onClick: () => props.onOpenChange(true),
-          children: [
-            speakerMark(
-              props.avatars?.assistant,
-              "assistant",
-              "assistant-launcher-mark"
-            ),
-            pending
-              ? h(
-                  "span",
-                  {
-                    "aria-hidden": "true",
-                    "data-adapttable-part": "assistant-launcher-waiting",
-                  },
-                  "•"
-                )
-              : null,
-          ],
+          iconOnly: true,
+          tooltip: copy.assistantOpen,
+          icon: h(
+            "span",
+            { style: { display: "inline-flex", alignItems: "center" } },
+            [
+              speakerMark(
+                props.avatars?.assistant,
+                "assistant",
+                "assistant-launcher-mark"
+              ),
+              pending
+                ? h(
+                    "span",
+                    {
+                      "aria-hidden": "true",
+                      "data-adapttable-part": "assistant-launcher-waiting",
+                    },
+                    "•"
+                  )
+                : null,
+            ]
+          ),
         })
       : null;
   return h(

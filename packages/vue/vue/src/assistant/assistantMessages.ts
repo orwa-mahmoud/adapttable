@@ -54,6 +54,17 @@ export function speakerMark(
         part ??
         (role === "user" ? "assistant-user-mark" : "assistant-message-mark"),
       "aria-hidden": "true",
+      // The descriptor fills its mark; a percentage SVG needs a definite
+      // containing box instead of the browser's 300px intrinsic fallback.
+      style: {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        inlineSize: "1.9em",
+        blockSize: "1.9em",
+        flexShrink: 0,
+        overflow: "hidden",
+      },
     },
     [content]
   );
