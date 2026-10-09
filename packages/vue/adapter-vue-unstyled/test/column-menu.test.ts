@@ -619,6 +619,37 @@ describe("native column manager", () => {
     expect(panel.style.transform).toBe("");
     vi.restoreAllMocks();
   });
+  it("repositions after a nested editor changes the native panel size and releases its observer", async () => {
+    let resize: ResizeObserverCallback | undefined;
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    class Observer {
+      constructor(callback: ResizeObserverCallback) {
+        resize = callback;
+      }
+      observe = observe;
+      disconnect = disconnect;
+    }
+    vi.stubGlobal("ResizeObserver", Observer);
+    let left = 20;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      () => new DOMRect(left, 40, 200, 200)
+    );
+    try {
+      const f = fixture();
+      await clickControl(f.root, part("column-menu-button"));
+      const panel = findControl<HTMLElement>(f.root, part("column-menu-panel"));
+      expect(observe).toHaveBeenCalledWith(panel);
+      left = -50;
+      resize?.([], {} as ResizeObserver);
+      expect(panel.style.transform).toBe("translateX(58px)");
+      await clickControl(f.root, part("column-menu-button"));
+      expect(disconnect).toHaveBeenCalledOnce();
+    } finally {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    }
+  });
   it("can render into a detached document without a window or global listeners", async () => {
     const doc = document.implementation.createHTMLDocument("Detached");
     const root = doc.createElement("main");

@@ -33,9 +33,14 @@ export const NativeColumnMenuPanel = defineComponent(
       const view = panel?.ownerDocument.defaultView;
       if (!view) return;
       place();
+      const observer = view.ResizeObserver
+        ? new view.ResizeObserver(place)
+        : undefined;
+      if (panel) observer?.observe(panel);
       view.addEventListener("resize", place);
       view.addEventListener("scroll", place, true);
       detach = () => {
+        observer?.disconnect();
         view.removeEventListener("resize", place);
         view.removeEventListener("scroll", place, true);
       };
@@ -49,6 +54,7 @@ export const NativeColumnMenuPanel = defineComponent(
       h(
         "div",
         mergeProps(props.control.attrs, {
+          style: { inlineSize: "28rem", boxSizing: "border-box" },
           onVnodeMounted: (node: VNode): void => {
             panel = node.el instanceof HTMLElement ? node.el : null;
           },
