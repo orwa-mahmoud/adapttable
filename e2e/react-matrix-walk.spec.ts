@@ -84,6 +84,17 @@ for (const kit of builtAdapters("react")) {
             .first()
         ).toBeVisible();
         await page.evaluate(() => document.fonts.ready.then(() => undefined));
+        if (slug === "pivot" && presentation.width === 390) {
+          const names = await root
+            .locator('[data-adapttable-part="card"]')
+            .first()
+            .locator('[data-adapttable-part="card-label"]')
+            .allTextContents();
+          expect(names).toHaveLength(6);
+          expect(new Set(names).size).toBe(names.length);
+          expect(names.join(" ")).toContain("Planned / sum Budget");
+          expect(names.join(" ")).toContain("Active / sum Budget");
+        }
         expect(
           await page.evaluate(
             () =>
