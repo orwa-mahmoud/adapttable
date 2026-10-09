@@ -158,6 +158,7 @@ export function pivotTableModel(
     ...layout.leafColumns.map(({ key, index, header, group, leaf }) => ({
       key,
       header,
+      mobileLabel: [...(group ?? []), header].join(" / "),
       group,
       align: "end" as const,
       accessor: (row: PivotRow) => row.cells[index],

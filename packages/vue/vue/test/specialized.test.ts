@@ -153,6 +153,41 @@ describe("specialized opt-in data entries", () => {
       ).pinnedRows
     ).toBeUndefined();
   });
+  it("preserves pivot column paths in card captions without repeating desktop groups", () => {
+    const result = pivot(
+      [
+        { team: "A", quarter: "Q1", region: "EU", score: 4 },
+        { team: "A", quarter: "Q2", region: "US", score: 6 },
+      ],
+      {
+        rows: ["team"],
+        columns: ["quarter", "region"],
+        measures: [{ key: "score", agg: "sum", label: "المجموع" }],
+      }
+    );
+    const model = pivotTableModel(result, {
+      labels: { pivotTotal: "الإجمالي" },
+    });
+    expect(model.columns.slice(1).map((column) => column.mobileLabel)).toEqual([
+      "Q1 / EU / المجموع",
+      "Q2 / US / المجموع",
+      "الإجمالي / المجموع",
+    ]);
+    expect(model.columns.slice(1).map((column) => column.header)).toEqual([
+      "المجموع",
+      "المجموع",
+      "المجموع",
+    ]);
+    const flat = pivotTableModel(
+      pivot([{ team: "A", score: 4 }], {
+        rows: ["team"],
+        columns: [],
+        measures: [{ key: "score", agg: "sum" }],
+        grandTotals: false,
+      })
+    );
+    expect(flat.columns[1]?.mobileLabel).toBe("sum score");
+  });
   it.each(["line", "bar", "area"] as const)(
     "draws accessible %s sparklines from finite numbers",
     (kind) => {
