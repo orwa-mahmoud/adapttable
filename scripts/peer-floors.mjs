@@ -17,10 +17,16 @@
  */
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
 import { packageDir } from "./packages.mjs";
+
+// Keep nested optional test peers on the workspace's actual test runner.
+const VITEST_VERSION = createRequire(import.meta.url)(
+  "vitest/package.json"
+).version;
 
 const NPM_BIN = join(
   dirname(process.execPath),
@@ -261,7 +267,7 @@ function runCell(cell, workspaceTarballs, packDir) {
         "@types/react": "^18.3.0",
         "@vitejs/plugin-react": "^5.0.0",
         jsdom: "^29.0.0",
-        vitest: "^4.0.0",
+        vitest: VITEST_VERSION,
       },
       // The adapter's ^-ranged workspace dependencies must resolve to the
       // LOCAL build, not the registry — and `@adapttable/react` is not
@@ -269,6 +275,8 @@ function runCell(cell, workspaceTarballs, packDir) {
       overrides: {
         "@adapttable/core": `file:${workspaceTarballs.core}`,
         "@adapttable/react": `file:${workspaceTarballs.react}`,
+        // Nested optional test-tool peers must use the selected test runner.
+        vitest: VITEST_VERSION,
       },
     };
     writeFileSync(join(dir, "package.json"), JSON.stringify(pkg, null, 2));
