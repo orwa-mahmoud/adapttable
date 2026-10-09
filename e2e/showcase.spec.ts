@@ -359,6 +359,7 @@ for (const adapter of ADAPTERS) {
     }) => {
       await openDemo(page, adapter);
       await setFiltersMode(page, "Popover");
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
       const trigger = filtersTrigger(page);
 
       // Open it with the toolbar already on screen. An anchored popover is
@@ -366,7 +367,10 @@ for (const adapter of ADAPTERS) {
       // hovering something out of view — which would close the card under the
       // very assertions below rather than testing them.
       await trigger.evaluate((node) => {
-        window.scrollBy(0, node.getBoundingClientRect().top - 60);
+        window.scrollBy({
+          top: node.getBoundingClientRect().top - 60,
+          behavior: "instant",
+        });
       });
       await trigger.click();
       await expect(trigger).toHaveAttribute("aria-expanded", "true");
