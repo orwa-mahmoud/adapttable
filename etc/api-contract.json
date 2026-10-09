@@ -664,6 +664,8 @@
       "adapter-element-plus-virtualize",
       "adapter-element-plus",
       "adapter-element-plus-preset",
+      "adapter-element-plus-pivot",
+      "adapter-element-plus-assistant",
       "adapter-naive-ui-batch-editing",
       "adapter-naive-ui-bulk-actions",
       "adapter-naive-ui-cell-navigation",
@@ -11829,6 +11831,18 @@
       "standardFeatures",
       "UseSavedViewsOptions"
     ],
+    "adapter-element-plus-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
+    "adapter-element-plus-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
+    ],
     "adapter-naive-ui-batch-editing": [
       "batchEditing",
       "BatchEditingState",
@@ -16120,6 +16134,12 @@
     },
     "adapter-element-plus-preset.api.md": {
       "surface": "adapter-element-plus-preset"
+    },
+    "adapter-element-plus-pivot.api.md": {
+      "surface": "adapter-element-plus-pivot"
+    },
+    "adapter-element-plus-assistant.api.md": {
+      "surface": "adapter-element-plus-assistant"
     },
     "adapter-naive-ui-batch-editing.api.md": {
       "surface": "adapter-naive-ui-batch-editing"

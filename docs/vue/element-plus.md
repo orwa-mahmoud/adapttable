@@ -75,6 +75,9 @@ the same binding models:
 | `ElementBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.    |
 | `FilterField`           | `/filters`                   | A filter definition's field with the kit's controls.   |
 | `ElementHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.         |
+| `PivotPanel`            | `/pivot`                     | The pivot axes and measures with Element Plus selects. |
+| `TableAssistant`        | `/assistant`                 | The optional assistant in a panel, window or drawer.   |
+| `AgentApproval`         | `/assistant`                 | Proposed row changes with approve and reject buttons.  |
 
 ## Controls and styling
 

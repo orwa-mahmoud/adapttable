@@ -1,0 +1,16 @@
+.adapttable-element-plus-assistant-panel,
+.adapttable-element-plus-assistant-window {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 18rem;
+}
+.adapttable-element-plus-assistant-input {
+  inline-size: 100%;
+}
+.adapttable-element-plus-approval-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

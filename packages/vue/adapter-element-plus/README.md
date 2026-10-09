@@ -55,6 +55,8 @@ const rowKey = (row: Person) => row.id;
   full-width separator rows, row styling and virtualization.
 - Keyboard navigation, cell ranges, Find, saved views, row actions, bulk actions,
   a command palette, context menus and side-panel view controls.
+- Optional assistant and approval surfaces with host-owned transport and
+  decisions.
 - CSV export and host-owned print layout; PDF export and XLSX use optional
   writers supplied to the export feature.
 - Pivot data, a spreadsheet formula engine and sparklines through the shared
@@ -68,8 +70,8 @@ Import `pdfWriter` from `@adapttable/vue/pdf` or `xlsxWriter` from
 
 For pivot data, import `pivot` and `pivotTableModel` from
 `@adapttable/vue/pivot` and render the prepared rows and columns with this
-adapter. Pivot configuration controls are host-composed; this package does not
-export a kit-specific pivot panel. Formula columns come from
+adapter; the `pivot` entry's `PivotPanel` edits the axes and measures with
+Element Plus controls. Formula columns come from
 `buildFormulaColumns` in `@adapttable/vue/formula`, and SVG sparkline columns
 from `sparklineColumn` in `@adapttable/vue/sparkline`.
 
@@ -523,3 +525,12 @@ The `saved-views` entry also exports `SavedViewsPanel` and `SavedViewsPanelProps
 for management surfaces. Rename drafts, read-only/default rules, ordering, URL
 state, and storage remain owned by the shared saved-view models. `sidePanel`
 retains controlled panel selection, with native buttons and a native card frame.
+
+### Optional assistant and pivot controls
+
+The `assistant` entry provides `TableAssistant`, `AgentApproval`,
+`tableAssistant()`, and `agentApproval()` using the binding's conversation and
+approval contracts. Its sheet is an `ElDrawer`, examples use `ElDropdown`, the
+composer is an `ElInput` textarea, and speech language choices use `ElSelect`.
+It does not import an AI transport or own approval decisions. The `pivot` entry
+provides a controlled `PivotPanel` with `ElSelect` and `ElButton` controls.

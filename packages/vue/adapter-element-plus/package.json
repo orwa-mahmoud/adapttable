@@ -441,6 +441,26 @@
         "types": "./dist/export.d.cts",
         "default": "./dist/export.cjs"
       }
+    },
+    "./pivot": {
+      "import": {
+        "types": "./dist/pivot.d.ts",
+        "default": "./dist/pivot.js"
+      },
+      "require": {
+        "types": "./dist/pivot.d.cts",
+        "default": "./dist/pivot.cjs"
+      }
+    },
+    "./assistant": {
+      "import": {
+        "types": "./dist/assistant.d.ts",
+        "default": "./dist/assistant.js"
+      },
+      "require": {
+        "types": "./dist/assistant.d.cts",
+        "default": "./dist/assistant.cjs"
+      }
     }
   },
   "repository": {
