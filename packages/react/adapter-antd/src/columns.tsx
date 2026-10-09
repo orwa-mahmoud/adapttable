@@ -975,12 +975,6 @@ export function buildColumns<TRow>({
       title: "",
       width: REORDER_COLUMN_WIDTH,
       fixed: reorderFixed ? "left" : undefined,
-      onCell: (record: GroupedDataRecord<TRow>) => {
-        if (isAdaptTableGroupRow(record) || isAdaptTableExtraRow(record)) {
-          return { colSpan: 0 };
-        }
-        return {};
-      },
       onHeaderCell: () => ({
         "data-adapttable-part": "reorder-header",
         "aria-label": labels.reorderRow,

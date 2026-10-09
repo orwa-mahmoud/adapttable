@@ -39,6 +39,77 @@ const part = (page: Page, name: string) =>
 const pagePart = (page: Page, name: string) =>
   page.locator(`[data-adapttable-part="${name}"]`);
 
+for (const locale of ["en", "ar"]) {
+  test(`antd: grouped and extra rows retain native column alignment (${locale})`, async ({
+    page,
+  }, testInfo) => {
+    await openDemo(page, "antd");
+    await configureFeatureLab(page, "row structure", "Grouped");
+    await enable(page, "reorder");
+    await enable(page, "Extra attached to a person");
+    if (locale === "ar") await configureFeatureLab(page, "locale", "العربية");
+    await expect(part(page, "group-row").first()).toBeVisible();
+    await expect(part(page, "full-width-row")).toHaveCount(1);
+    await expect
+      .poll(() =>
+        demo(page).evaluate((root) => {
+          const headers = [
+            ...root.querySelectorAll<HTMLTableCellElement>(
+              "th[data-column-key]"
+            ),
+          ];
+          const person = headers.find(
+            (header) => header.dataset.columnKey === "person"
+          );
+          const budget = headers.find(
+            (header) => header.dataset.columnKey === "budget"
+          );
+          if (!person || !budget)
+            throw new Error("Missing native data headers");
+          let mismatch = 0;
+          for (const group of root.querySelectorAll(
+            '[data-adapttable-part="group-row"]'
+          )) {
+            for (const header of [person, budget]) {
+              const cell = group.querySelector(
+                `td[data-column-key="${header.dataset.columnKey}"]`
+              );
+              if (!cell) throw new Error("Missing native aggregate cell");
+              const expected = header.getBoundingClientRect();
+              const actual = cell.getBoundingClientRect();
+              mismatch = Math.max(
+                mismatch,
+                Math.abs(actual.left - expected.left),
+                Math.abs(actual.width - expected.width)
+              );
+            }
+          }
+          const extra = root.querySelector(
+            '[data-adapttable-part="full-width-cell"]'
+          );
+          if (!extra) throw new Error("Missing native extra cell");
+          const tracks = headers.map((header) =>
+            header.getBoundingClientRect()
+          );
+          const bounds = extra.getBoundingClientRect();
+          return Math.max(
+            mismatch,
+            Math.abs(
+              bounds.left - Math.min(...tracks.map((track) => track.left))
+            ),
+            Math.abs(
+              bounds.right - Math.max(...tracks.map((track) => track.right))
+            )
+          );
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    await demo(page).screenshot({
+      path: testInfo.outputPath(`antd-synthetic-grid-${locale}.png`),
+    });
+  });
+}
+
 function nameIn(text: string): string {
   return NAMES.find((name) => text.includes(name)) ?? "";
 }

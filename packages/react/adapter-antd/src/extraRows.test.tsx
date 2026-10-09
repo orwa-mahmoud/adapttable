@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { rowReorder } from "./row-reorder";
 
 interface Task {
   id: string;
@@ -18,6 +19,45 @@ const COLS: ColumnDef<Task>[] = [
 ];
 
 describe("extra rows (antd)", () => {
+  it.each([false, true])(
+    "keeps extras in the data tracks when reordering (selection=%s)",
+    (selection) => {
+      render(
+        <DataTable
+          data={ROWS}
+          columns={COLS}
+          rowKey={(row) => row.id}
+          urlSync={false}
+          features={[rowReorder(vi.fn())]}
+          bulkActions={
+            selection
+              ? [{ key: "x", label: "Archive", onClick: vi.fn() }]
+              : undefined
+          }
+          extraRows={[
+            { key: "s", kind: "separator", beforeRowId: "2" },
+            { key: "n", kind: "fullWidth", render: () => "Team note" },
+          ]}
+        />
+      );
+      const dataCells = document
+        .querySelector('[data-adapttable-part="row"]')!
+        .querySelectorAll(":scope > td");
+      const dataIndex = [...dataCells].findIndex(
+        (cell) => cell.getAttribute("data-column-key") === "title"
+      );
+      for (const part of ["separator-row", "full-width-row"]) {
+        const row = document.querySelector(`[data-adapttable-part="${part}"]`)!;
+        const cells = row.querySelectorAll(":scope > td");
+        expect(cells).toHaveLength(dataCells.length);
+        expect(cells[dataIndex]).toHaveProperty("colSpan", 1);
+        expect(
+          row.querySelector('[data-adapttable-part="row-reorder-handle"]')
+        ).toBeNull();
+      }
+    }
+  );
+
   it("renders nothing extra until the host asks", () => {
     render(
       <DataTable
