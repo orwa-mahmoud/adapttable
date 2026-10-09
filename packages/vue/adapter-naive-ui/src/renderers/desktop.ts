@@ -1,5 +1,6 @@
 import type {
   Attrs,
+  ColumnDef,
   DesktopTableModel,
   TableBodySlot,
   TableDensity,
@@ -17,11 +18,31 @@ import {
   type TableChromeSlots,
 } from "@adapttable/vue/adapter";
 import { NTable, NTbody, NTd, NTh, NThead, NTr } from "naive-ui";
-import { Fragment, h, type VNode, type VNodeChild } from "vue";
+import { Fragment, h, normalizeStyle, type VNode, type VNodeChild } from "vue";
 
 import type { DataTableClassNames } from "../types";
 import { naiveCellContent, requireControl } from "./content";
 import { naiveElement } from "./nativeElement";
+
+/** NTable's automatic layout may shrink a preferred width; a user override is a floor. */
+function userSizedAttrs<TRow>(attrs: Attrs, column: ColumnDef<TRow>): Attrs {
+  const style = normalizeStyle(attrs.style);
+  if (!style || typeof style !== "object" || !("width" in style)) return attrs;
+  const raw = style.width;
+  let width: number | undefined;
+  if (typeof raw === "number") width = raw;
+  else if (typeof raw === "string" && /^\d+(?:\.\d+)?px$/.test(raw))
+    width = Number.parseFloat(raw);
+  if (
+    width === undefined ||
+    raw === column.width ||
+    raw === `${String(column.width)}px`
+  )
+    return attrs;
+  return mergeVueAttrs(attrs, {
+    style: { minWidth: Math.max(width, column.minWidth ?? 0) },
+  });
+}
 
 /** A kit-owned semantic renderer over the binding's already-prepared table model. */
 export function NaiveDesktopTable<TRow>(props: {
@@ -143,7 +164,7 @@ export function NaiveDesktopTable<TRow>(props: {
       ? renderContent(item.column.headerActions, item.context)
       : controls.headerActions?.(item.context);
     return head(
-      mergeVueAttrs(item.attrs, {
+      mergeVueAttrs(userSizedAttrs(item.attrs, item.column), {
         ...extra,
         key,
         class: [names.th, names.headerCell],
@@ -239,7 +260,7 @@ export function NaiveDesktopTable<TRow>(props: {
   const row = (item: TableRowModel<TRow>): VNode => {
     const rowCells = item.cells.map((entry) =>
       cell(
-        mergeVueAttrs(entry.attrs, {
+        mergeVueAttrs(userSizedAttrs(entry.attrs, entry.context.column), {
           key: entry.key,
           class: names.td,
           "data-adapttable-part": "cell",

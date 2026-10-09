@@ -52,6 +52,32 @@ afterEach(() => {
 });
 
 describe("Naive DataTable optional shared outer layout", () => {
+  it("keeps user column widths as native table floors while preserving declared bounds", async () => {
+    const widths = shallowRef({ name: 216 });
+    const host = mount(() =>
+      h(DataTable<Row>, {
+        ...base,
+        forceMobile: false,
+        columns: [
+          { key: "name", width: 200, minWidth: 200 },
+          { key: "team", width: 150, minWidth: 120 },
+        ],
+        columnWidths: widths.value,
+      })
+    );
+    const name = () => [
+      ...host.querySelectorAll<HTMLElement>('[data-column-key="name"]'),
+    ];
+    expect(name()).toHaveLength(3);
+    expect(name().every((cell) => cell.style.minWidth === "216px")).toBe(true);
+    expect(
+      host.querySelector<HTMLElement>('th[data-column-key="team"]')?.style
+        .minWidth
+    ).toBe("120px");
+    widths.value = { name: 180 };
+    await nextTick();
+    expect(name().every((cell) => cell.style.minWidth === "200px")).toBe(true);
+  });
   it("uses native kit table paint, shared search/sort state and one scroll owner", async () => {
     const host = mount(() =>
       h(DataTable<Row>, {
