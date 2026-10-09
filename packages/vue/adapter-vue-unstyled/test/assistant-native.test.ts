@@ -92,6 +92,20 @@ const find = <T extends HTMLElement>(root: ParentNode, part: string): T => {
   return value;
 };
 describe("native assistant controls", () => {
+  it("focuses the composer after native modal autofocus runs", async () => {
+    vi.spyOn(HTMLDialogElement.prototype, "showModal").mockImplementationOnce(
+      function (this: HTMLDialogElement) {
+        this.open = true;
+        this.querySelector("button")?.focus();
+      }
+    );
+    const root = mount(() =>
+      h(TableAssistant, { ...options(), presentation: "sheet" })
+    );
+    await nextTick();
+    await nextTick();
+    expect(document.activeElement).toBe(find(root, "assistant-input"));
+  });
   it("wires actual native input, menu, language and button events", async () => {
     const props = options();
     const root = mount(() => h(TableAssistant, props));

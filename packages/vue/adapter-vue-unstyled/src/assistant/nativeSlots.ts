@@ -18,6 +18,13 @@ const NativeSheet = defineComponent(
       ([open, enabled, element], _previous, cleanup) => {
         if (!element || !enabled || !open) return;
         element.showModal();
+        // showModal applies native autofocus after Chrome's initial focus.
+        // Finish opening on the composer, inside the now-active modal.
+        element
+          .querySelector<HTMLTextAreaElement>(
+            '[data-adapttable-part="assistant-input"]'
+          )
+          ?.focus();
         cleanup(() => {
           if (element.open) element.close();
         });
