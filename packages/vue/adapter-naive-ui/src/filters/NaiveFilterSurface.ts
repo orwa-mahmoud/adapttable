@@ -29,7 +29,7 @@ export const NaiveFilterSurface = defineComponent(
     const active = useScopeActivity();
     const mounted = shallowRef(false);
     const content = shallowRef<HTMLElement | null>(null);
-    const position = shallowRef<{ x: number; y: number }>();
+    const position = shallowRef<{ x: number; y: number; maxHeight: number }>();
     let lifetime = 0;
     let reason: OverlayCloseReason | undefined;
     const dismiss = (
@@ -112,6 +112,13 @@ export const NaiveFilterSurface = defineComponent(
           position.value = {
             x: dir === "rtl" ? rect.right : rect.left,
             y: rect.bottom,
+            maxHeight: Math.max(
+              0,
+              Math.min(
+                560,
+                Math.max(rect.top, view.innerHeight - rect.bottom) - 8
+              )
+            ),
           };
         };
         place();
@@ -172,7 +179,7 @@ export const NaiveFilterSurface = defineComponent(
             node.getAttribute("aria-disabled") !== "true" &&
             !node.closest("[hidden], [inert]")
         );
-        (target ?? element).focus();
+        (target ?? element).focus({ preventScroll: true });
       },
       { flush: "post" }
     );
@@ -252,9 +259,10 @@ export const NaiveFilterSurface = defineComponent(
           placement: props.dir === "rtl" ? "bottom-end" : "bottom-start",
           showArrow: false,
           style: {
+            boxSizing: "border-box",
             width: "22rem",
             maxWidth: "calc(100vw - 16px)",
-            maxHeight: "calc(100dvh - 16px)",
+            maxHeight: `${position.value.maxHeight}px`,
             overflow: "auto",
           },
           onClickoutside: (event: MouseEvent) => {
