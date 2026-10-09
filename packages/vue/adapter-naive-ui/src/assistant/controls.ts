@@ -57,7 +57,8 @@ export const naiveAssistantControls: TableAssistantSlots = {
       [
         props.icon,
         props.iconOnly && props.icon ? null : (props.children ?? props.label),
-      ]
+      ],
+      { size: props.part === "assistant-launcher" ? "medium" : "small" }
     ),
   Composer: (props) =>
     naiveInput({
