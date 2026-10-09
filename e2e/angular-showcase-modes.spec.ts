@@ -411,7 +411,7 @@ for (const kit of ANGULAR_KITS) {
         .toBeLessThanOrEqual(1);
       await attachView(page, testInfo, `${kit.key}-phone-lab-controls-top`);
       const finalControl = dialog.getByRole("checkbox", {
-        name: "Mobile cards",
+        name: "Virtualization",
         exact: true,
       });
       await expect(finalControl).toBeEnabled();
