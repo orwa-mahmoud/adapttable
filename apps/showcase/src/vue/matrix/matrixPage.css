@@ -4,6 +4,11 @@
  * status marks and demo controls of the kits that draw no badge or button of
  * their own, and the scroll box a long demo table sits in.
  */
+/* Kit globals must leave document overflow observable, not clip the page. */
+html[data-framework="vue"] {
+  overflow-x: visible;
+}
+
 #root:has(> .nav),
 #root:has(> .nav) *,
 #root:has(> .nav) *::before,
