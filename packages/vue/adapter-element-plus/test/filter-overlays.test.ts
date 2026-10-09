@@ -62,6 +62,32 @@ function escape(element: HTMLElement) {
 describe("Element Plus filter overlays", () => {
   for (const modal of [false, true]) {
     const mode = modal ? "drawer" : "popover";
+    it(`${mode}: keeps focus in the field for a composing or already-handled Escape`, async () => {
+      const state = fixture(modal);
+      await tick();
+      const input = node<HTMLInputElement>(
+        document,
+        'input[aria-label="Filter name"]'
+      );
+      input.focus();
+      await tick();
+      for (const init of [{ isComposing: true }, {}]) {
+        const event = new KeyboardEvent("keydown", {
+          key: "Escape",
+          bubbles: true,
+          cancelable: true,
+          ...init,
+        });
+        if (!init.isComposing) event.preventDefault();
+        input.dispatchEvent(event);
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        await tick();
+      }
+      expect(state.close).not.toHaveBeenCalled();
+      expect(state.open.value).toBe(true);
+      expect(document.activeElement).toBe(input);
+    });
+
     it(`${mode}: first Escape closes an open select and the next closes only the outer layer`, async () => {
       const state = fixture(modal, true, true);
       await tick();

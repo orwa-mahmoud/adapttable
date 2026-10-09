@@ -85,8 +85,14 @@ export const ElementColumnMenuPanel = defineComponent(
       close("outside");
     };
     const keydown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || event.defaultPrevented || event.isComposing)
+      if (event.key !== "Escape") return;
+      // Element's focus trap releases on any Escape that reaches the document,
+      // including one an inner control handled or an IME composition owns, so
+      // the panel keeps those Escapes inside itself.
+      if (event.defaultPrevented || event.isComposing) {
+        event.stopPropagation();
         return;
+      }
       event.preventDefault();
       event.stopPropagation();
       close("escape");
