@@ -11,7 +11,6 @@ import {
   type ConfirmHandler,
   EXTRA_ROW_PARTS,
   type ExtraRow,
-  groupAggregateEntries,
   type GroupedFlatEntry,
   insertExtraRows,
   isExtraEntry,
@@ -41,14 +40,7 @@ import {
   useSummaryCells,
   type VirtualTableRow,
 } from "@adapttable/react/adapter";
-import {
-  Card,
-  Checkbox,
-  ConfigProvider,
-  Descriptions,
-  Space,
-  Typography,
-} from "antd";
+import { Card, Checkbox, ConfigProvider, Descriptions, Space } from "antd";
 import {
   type CSSProperties,
   memo,
@@ -753,23 +745,13 @@ export function MobileCards<TRow>({
                       onShowMore={grouping.showMore}
                       aggregateNodes={
                         entry.kind !== "groupMore" && entry.aggregateCells
-                          ? groupAggregateEntries<TRow, ColumnDef<TRow>>(
-                              columns,
-                              entry.aggregateCells,
-                              entry.aggregateOps
-                            ).map(({ column, node }) => (
-                              <Space key={column.key} size="small">
-                                <Typography.Text type="secondary">
-                                  {resolveMobileLabel(column)}
-                                </Typography.Text>
-                                <Typography.Text
-                                  data-column={column.key}
-                                  data-adapttable-part="group-aggregate"
-                                >
+                          ? Object.entries(entry.aggregateCells).map(
+                              ([colKey, node]) => (
+                                <span key={colKey} data-column={colKey}>
                                   {node as ReactNode}
-                                </Typography.Text>
-                              </Space>
-                            ))
+                                </span>
+                              )
+                            )
                           : undefined
                       }
                     />

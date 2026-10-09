@@ -302,15 +302,10 @@ export function reconfigureIncrementalView<TRow>(
     queryConfigFingerprint(state.config) !== queryConfigFingerprint(merged);
   const derivedChanged =
     derivedConfigFingerprint(state.config) !== derivedConfigFingerprint(merged);
-  if (!queryChanged && !derivedChanged) {
-    state.config = merged;
-    return view;
-  }
+  state.config = merged;
+  if (!queryChanged && !derivedChanged) return view;
   if (queryChanged) return createIncrementalView(view.rows, merged);
-  // A table's grouping projection shares the source rows, but must keep
-  // its derived configuration separate from the source snapshot. Otherwise
-  // a later call can mistake that source's uncomputed groups for current totals.
-  return republishDerived(view, { ...state, config: merged }, merged);
+  return republishDerived(view, state, merged);
 }
 
 /**
