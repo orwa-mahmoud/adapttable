@@ -52,6 +52,7 @@ export const vuetifyAssistantControls: TableAssistantSlots = {
         class: props.className,
         disabled: props.disabled,
         onClick: props.onClick,
+        size: props.part === "assistant-launcher" ? "default" : "small",
       },
       [
         props.icon,
