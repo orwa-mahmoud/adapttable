@@ -7,6 +7,49 @@ const positionedKits = ANGULAR_KITS.filter((kit) =>
   ["unstyled", "aria", "angular-cdk", "taiga-ui"].includes(kit.key)
 );
 
+for (const kit of positionedKits.filter((kit) =>
+  ["unstyled", "aria"].includes(kit.key)
+)) {
+  test(`${kit.key}: scrolling a tall column menu preserves its position and pointer target`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto(`/${kit.key}/columns/`);
+    const trigger = angularPart(kit, page, "column-menu-button");
+    await trigger.evaluate((button) =>
+      button.scrollIntoView({ block: "center", behavior: "instant" })
+    );
+    await trigger.click();
+    const panel = angularPart(kit, page, "column-menu-panel");
+    await expect(panel).toBeVisible();
+    const scroll = await panel.evaluate(async (element) => {
+      const expected = Math.min(
+        100,
+        element.scrollHeight - element.clientHeight
+      );
+      element.scrollTop = expected;
+      // Let the native scroll listener and layout run before reading the offset.
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+      return { expected, actual: element.scrollTop };
+    });
+    expect(scroll.expected).toBeGreaterThan(0);
+    expect(scroll.actual).toBe(scroll.expected);
+    const emailHeader = page
+      .getByRole("columnheader")
+      .and(page.locator('.mx-demo [data-column-key="email"]'));
+    await page
+      .getByRole("button", { name: "Hide column: Email", exact: true })
+      .click();
+    await expect(emailHeader).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Show column: Email", exact: true })
+      .click();
+    await expect(emailHeader).toHaveCount(1);
+  });
+}
+
 async function alignTriggerAtEdge(
   page: Page,
   trigger: Locator,

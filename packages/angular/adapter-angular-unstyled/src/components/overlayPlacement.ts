@@ -26,9 +26,8 @@ export function placeOverlayBelowTrigger(
   overlay.style.maxWidth = `${String(
     Math.max(0, viewportWidth - VIEWPORT_GUTTER * 2)
   )}px`;
-  overlay.style.maxHeight = `${String(
-    Math.max(0, Math.min(560, viewportHeight - VIEWPORT_GUTTER * 2))
-  )}px`;
+  // scrollHeight measures all content while the menu remains constrained.
+  // Expanding it temporarily would clamp scrollTop during a scroll event.
   const desiredHeight = Math.min(
     560,
     Math.max(overlay.scrollHeight, overlay.getBoundingClientRect().height || 0)
