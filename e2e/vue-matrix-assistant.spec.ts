@@ -8,7 +8,7 @@ for (const kit of builtAdapters("vue")) {
     for (const locale of ["en", "ar"]) {
       test(`${kit.key}: ${width}px ${locale} assistant launcher fits and restores keyboard focus`, async ({
         page,
-      }) => {
+      }, info) => {
         await page.setViewportSize({ width, height: 900 });
         await page.addInitScript(() =>
           localStorage.setItem("adapttable-demo-theme", "dark")
@@ -50,10 +50,34 @@ for (const kit of builtAdapters("vue")) {
           );
           await expect(composer).toBeVisible();
           await expect(composer).toBeFocused();
+          if (repeat === 0) {
+            const path = info.outputPath(
+              `${kit.key}-${width}-${locale}-assistant-open.png`
+            );
+            await page.screenshot({ path, animations: "disabled" });
+            await info.attach("native assistant open", {
+              path,
+              contentType: "image/png",
+            });
+          }
           await page.keyboard.press("Escape");
           await expect(composer).toHaveCount(0);
           await expect(launcher).toBeFocused();
         }
+        await page.locator(".mx-demo").evaluate((element) =>
+          window.scrollBy({
+            top: element.getBoundingClientRect().top - 80,
+            behavior: "instant",
+          })
+        );
+        const path = info.outputPath(
+          `${kit.key}-${width}-${locale}-assistant-closed.png`
+        );
+        await page.screenshot({ path, animations: "disabled" });
+        await info.attach("native assistant closed", {
+          path,
+          contentType: "image/png",
+        });
       });
     }
   }
