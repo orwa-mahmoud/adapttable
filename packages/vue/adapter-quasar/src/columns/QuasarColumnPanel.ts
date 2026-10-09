@@ -76,6 +76,7 @@ function finishFocus(
 export const QuasarColumnPanel = defineComponent(
   (props: { readonly control: ManagedOverlayPanelProps }) => {
     const active = useScopeActivity();
+    const menu = shallowRef<InstanceType<typeof QMenu> | null>(null);
     const card = shallowRef<InstanceType<typeof QCard> | null>(null);
     const inheritedDirection = shallowRef<"ltr" | "rtl">();
     const target = (): HTMLElement | null => {
@@ -98,6 +99,23 @@ export const QuasarColumnPanel = defineComponent(
       { flush: "post" }
     );
     let disposed = false;
+    const updatePosition = () => {
+      const control = props.control;
+      if (!active.value || disposed || !control.open || !control.isCurrent())
+        return;
+      menu.value?.updatePosition();
+    };
+    watchEffect((onCleanup) => {
+      const control = props.control;
+      const view = control.anchor?.ownerDocument.defaultView;
+      if (!active.value || !control.open || !control.isCurrent() || !view)
+        return;
+      // QMenu's CSS anchor follows scrolling, but its viewport flip is a
+      // measured decision. Recheck it through the native public API when
+      // the trigger moves in any ancestor scroller.
+      view.addEventListener("scroll", updatePosition, true);
+      onCleanup(() => view.removeEventListener("scroll", updatePosition, true));
+    });
     let requestedClose = false;
     let acquired: ManagedOverlayPanelProps | undefined;
     onBeforeUnmount(() => {
@@ -168,6 +186,7 @@ export const QuasarColumnPanel = defineComponent(
       return h(
         QMenu,
         {
+          ref: menu,
           modelValue: true,
           target: control.anchor,
           noParentEvent: true,
@@ -181,6 +200,7 @@ export const QuasarColumnPanel = defineComponent(
           maxHeight: "min(70vh, 32rem)",
           maxWidth: "min(28rem, calc(100vw - 1rem))",
           dir,
+          onShow: updatePosition,
           "onUpdate:modelValue": (open: boolean) => {
             if (!open) close(control, "outside");
           },

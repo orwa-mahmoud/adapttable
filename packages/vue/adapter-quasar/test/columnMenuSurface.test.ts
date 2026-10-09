@@ -67,6 +67,19 @@ function escape(target: HTMLElement, options: KeyboardEventInit = {}) {
   });
   target.dispatchEvent(event);
 }
+it("updates native placement through ancestor scrolling and retires its tracker", async () => {
+  const f = fixture();
+  await settle();
+  const update = vi.spyOn(f.wrapper.getComponent(QMenu).vm, "updatePosition");
+  window.dispatchEvent(new Event("scroll"));
+  await settle();
+  expect(update).toHaveBeenCalledOnce();
+  f.open.value = false;
+  await settle();
+  window.dispatchEvent(new Event("scroll"));
+  await settle();
+  expect(update).toHaveBeenCalledOnce();
+});
 it("changes callback owners without replacing the native dialog and retires each exactly once", async () => {
   const f = fixture();
   const first = vi.fn();
