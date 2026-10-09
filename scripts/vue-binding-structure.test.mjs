@@ -105,6 +105,39 @@ const features = (root) =>
   }).problems;
 
 describe("Vue binding structural ownership", () => {
+  it("traces kit header attrs through a conditional sizing helper", () => {
+    const structure = STRUCTURE.replace(
+      "mergeVueAttrs(leaf.attrs,",
+      "mergeVueAttrs(sized(leaf.attrs),"
+    ).replace(
+      "export function Desktop(props)",
+      `function sized(attrs) {
+        if (!attrs.style) return attrs;
+        return mergeVueAttrs(attrs, { style: { minWidth: 100 } });
+      }
+      export function Desktop(props)`
+    );
+    assert.deepEqual(features(fixture({ structure })), []);
+    const dropped = structure.replace(
+      "return mergeVueAttrs(attrs, { style: { minWidth: 100 } });",
+      "return { style: { minWidth: 100 } };"
+    );
+    assert(
+      features(fixture({ structure: dropped })).some((problem) =>
+        problem.includes("never passes core's header-cell props")
+      )
+    );
+    const recursive = structure.replace(
+      "return mergeVueAttrs(attrs, { style: { minWidth: 100 } });",
+      "return sized(attrs);"
+    );
+    assert(
+      features(fixture({ structure: recursive })).some((problem) =>
+        problem.includes("never passes core's header-cell props")
+      )
+    );
+  });
+
   it("follows rendered import aliases through binding barrels and attribute APIs", () => {
     const root = fixture();
     assert.deepEqual(parts(root), []);

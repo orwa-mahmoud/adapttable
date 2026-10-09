@@ -435,6 +435,7 @@ export function createAttributeFlow(sources, resolveFunction) {
     const resolved = resolveFunction(expression);
     return resolved ? callee(resolved, next) : undefined;
   }
+  const activeCalls = new Set();
   function throughCall(call, predicate, seen) {
     if (officialCall(call, "vue", "mergeProps"))
       return call.arguments.some((arg) => carries(arg, predicate, seen));
@@ -442,9 +443,27 @@ export function createAttributeFlow(sources, resolveFunction) {
       return call.arguments.some((arg) =>
         carries(ts.isSpreadElement(arg) ? arg.expression : arg, predicate, seen)
       );
+    if (activeCalls.has(call)) return false;
+    activeCalls.add(call);
+    try {
+      return throughFunction(call, predicate, seen);
+    } finally {
+      activeCalls.delete(call);
+    }
+  }
+  function throughFunction(call, predicate, seen) {
     const fn = callee(call.expression);
-    if (!fn || seen.has(fn)) return false;
-    const next = new Set([...seen, fn]);
+    if (!fn) return false;
+    // A helper can be composed with another invocation of itself (for example
+    // mergeAttrs(sizeAttrs(attrs), host)). Its body must be traced anew with
+    // this call's arguments. Keep call-site recursion bounded independently.
+    const next = new Set(
+      [...seen].filter((node) => {
+        for (let owner = node; owner; owner = owner.parent)
+          if (sameFunction(owner, fn)) return false;
+        return true;
+      })
+    );
     const bound = (value) => {
       if (predicate(value)) return true;
       if (!ts.isIdentifier(value)) return false;
