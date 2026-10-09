@@ -34,6 +34,16 @@
   }
 }
 
+/* Tailwind's width and padding utilities assume border boxes. The adapter's
+   own surfaces — the table and the overlays it portals — size that way, at
+   zero specificity, and the rest of the page keeps its own box model. */
+:where(.adapttable-shadcn-vue, [data-slot$="-content"]),
+:where(.adapttable-shadcn-vue, [data-slot$="-content"]) *,
+:where(.adapttable-shadcn-vue, [data-slot$="-content"]) ::before,
+:where(.adapttable-shadcn-vue, [data-slot$="-content"]) ::after {
+  box-sizing: border-box;
+}
+
 .adapttable-shadcn-vue {
   font-family: inherit;
 }
