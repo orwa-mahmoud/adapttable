@@ -135,7 +135,7 @@
 }
 .adapttable-quasar-column-panel {
   inline-size: 28rem;
-  max-inline-size: calc(100vw - 1rem);
+  max-inline-size: min(100%, calc(100vw - 1rem));
 }
 .adapttable-quasar-column-panel .q-btn {
   min-block-size: 44px;
@@ -172,6 +172,18 @@
   flex-wrap: wrap;
   gap: 0.25rem;
   padding-block: 0.5rem;
+}
+@media (max-width: 600px) {
+  .adapttable-quasar-column-panel [data-adapttable-part="column-menu-item"] {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+  .adapttable-quasar-column-panel [data-adapttable-part="column-menu-pin"] {
+    grid-column: 2;
+  }
+  .adapttable-quasar-column-panel [data-adapttable-part="column-menu-more"] {
+    grid-column: 3;
+    justify-self: end;
+  }
 }
 .adapttable-quasar [data-adapttable-part="find-bar"],
 .adapttable-quasar [data-adapttable-part="bulk-bar"] {
