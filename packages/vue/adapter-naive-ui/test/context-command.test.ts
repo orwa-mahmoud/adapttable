@@ -277,3 +277,56 @@ it("retires an open context menu and retained actions across KeepAlive", async (
   expect(selected).not.toHaveBeenCalled();
   expect(host.querySelector('[role="menu"]')).toBeNull();
 });
+
+it("marks a destructive context menu item", async () => {
+  const { host } = mount(() =>
+    h(DataTable<Row>, {
+      ...base,
+      features: [
+        contextMenu<Row>({
+          items: () => [
+            { key: "open", label: "Open", onSelect: vi.fn() },
+            { key: "delete", label: "Delete", danger: true, onSelect: vi.fn() },
+          ],
+        }),
+      ],
+    })
+  );
+  await tick();
+  find(host, part("cell")).dispatchEvent(
+    new MouseEvent("contextmenu", { bubbles: true, cancelable: true })
+  );
+  await tick();
+  const items = [
+    ...host.querySelectorAll<HTMLButtonElement>(part("context-menu-item")),
+  ];
+  const item = (label: string) => {
+    const found = items.find((entry) => entry.textContent?.trim() === label);
+    if (!found) throw new Error(`Missing menu item ${label}`);
+    return found;
+  };
+  expect(item("Delete").hasAttribute("data-danger")).toBe(true);
+  expect(item("Open").hasAttribute("data-danger")).toBe(false);
+});
+
+it("opens a button-less command palette from its keyboard shortcut", async () => {
+  const selected = vi.fn();
+  const { host } = mount(() =>
+    h(DataTable<Row>, {
+      ...base,
+      features: [
+        commandPalette({
+          commands: [
+            { key: "record", label: "Record command", onSelect: selected },
+          ],
+        }),
+      ],
+    })
+  );
+  await tick();
+  expect(host.querySelector(part("command-palette-button"))).toBeNull();
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
+  await key(find(host, part("cell")), "k", { ctrlKey: !mac, metaKey: mac });
+  const dialog = await vi.waitFor(() => find(document.body, '[role="dialog"]'));
+  expect(dialog.textContent).toContain("Record command");
+});

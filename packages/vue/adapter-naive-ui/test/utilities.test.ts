@@ -132,3 +132,42 @@ it("shows unknown and numeric native progress, cancels stale results, and restor
   await click(host, "export-progress-dismiss");
   expect(document.activeElement).toBe(trigger);
 });
+
+it("offers the finished export as a download and reports a failed one", async () => {
+  const outcome = deferred<{ url: string }>();
+  const { host } = mount(() =>
+    h(DataTable<Row>, {
+      ...base,
+      features: [
+        exportCsv<Row>({ scope: "all", onExportAll: () => outcome.promise }),
+      ],
+    })
+  );
+  await tick();
+  await click(host, "export-csv-button");
+  outcome.resolve({ url: "/people.csv" });
+  await tick();
+  const download = await vi.waitFor(() =>
+    find<HTMLAnchorElement>(host, part("export-progress-download"))
+  );
+  expect(download.getAttribute("href")).toBe("/people.csv");
+  expect(download.hasAttribute("download")).toBe(true);
+  await click(host, "export-progress-dismiss");
+
+  const failure = deferred<{ url: string }>();
+  const failed = mount(() =>
+    h(DataTable<Row>, {
+      ...base,
+      features: [
+        exportCsv<Row>({ scope: "all", onExportAll: () => failure.promise }),
+      ],
+    })
+  );
+  await tick();
+  await click(failed.host, "export-csv-button");
+  failure.reject(new Error("Server unavailable"));
+  await tick();
+  const alert = await vi.waitFor(() => find(failed.host, '[role="alert"]'));
+  expect(alert.textContent).toContain("Server unavailable");
+  expect(find(failed.host, part("export-progress-retry"))).toBeTruthy();
+});

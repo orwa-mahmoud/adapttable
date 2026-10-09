@@ -168,3 +168,20 @@ it("retires cached density callbacks until the table is active again", async () 
   await nextTick();
   expect(changed).toHaveBeenCalledExactlyOnceWith("compact");
 });
+
+it("requests nothing when the current density is chosen again", async () => {
+  const changed = vi.fn();
+  const { host } = mount(() =>
+    h(DataTable<Row>, {
+      ...base,
+      density: "comfortable",
+      onDensityChange: changed,
+    })
+  );
+  await nextTick();
+  const { comfortable } = density(host);
+  expect(comfortable.getAttribute("aria-pressed")).toBe("true");
+  comfortable.click();
+  await nextTick();
+  expect(changed).not.toHaveBeenCalled();
+});
