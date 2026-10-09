@@ -163,6 +163,14 @@
   gap: 0.5rem;
 }
 .adapttable-naive
+  [data-adapttable-part="card-value"]
+  [data-adapttable-part="edit-cell-activate"] {
+  max-inline-size: 100%;
+  height: auto;
+  min-block-size: var(--n-height);
+  white-space: normal;
+}
+.adapttable-naive
   :where(
     [data-adapttable-part="edit-cell-error"],
     [data-adapttable-part="edit-cell-conflict"],
