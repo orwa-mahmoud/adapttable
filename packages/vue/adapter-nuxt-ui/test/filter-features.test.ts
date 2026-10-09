@@ -73,6 +73,34 @@ async function click(selector: string) {
 
 describe("Nuxt filtering feature", () => {
   it.each(["popover", "drawer"] as const)(
+    "restores the external trigger after Done closes the native %s",
+    async (mode) => {
+      mount(() =>
+        h(DataTable<Row>, {
+          data: rows,
+          columns,
+          rowKey: (row) => row.id,
+          urlSync: false,
+          forceMobile: false,
+          features: [filters<Row>([{ key: "name", type: "text" }], { mode })],
+        })
+      );
+      await settle();
+      const trigger = target<HTMLButtonElement>(part("filters-button"));
+      for (let repeat = 0; repeat < 2; repeat++) {
+        trigger.focus();
+        trigger.click();
+        await settle();
+        const done = target<HTMLButtonElement>(part("filters-done"));
+        done.focus();
+        done.click();
+        await settle();
+        expect(document.querySelector(part("filters-done"))).toBeNull();
+        expect(document.activeElement).toBe(trigger);
+      }
+    }
+  );
+  it.each(["popover", "drawer"] as const)(
     "uses a genuine %s surface with live RTL, nested select dismissal and focus restoration",
     async (mode) => {
       const dir = shallowRef<"ltr" | "rtl">("ltr");
