@@ -13,9 +13,16 @@ async function alignTriggerAtEdge(
   bottom: number
 ) {
   await expect(trigger).toBeVisible();
-  const initial = (await trigger.boundingBox())!;
   await page.mouse.move(900, 200);
-  await page.mouse.wheel(0, initial.y + initial.height - bottom);
+  // Place the test's anchor from one layout read rather than relying on
+  // an asynchronous wheel gesture to land on an exact pixel. The checks
+  // below still exercise native pointer opening and wheel scrolling.
+  await trigger.evaluate((element, edge) => {
+    window.scrollBy({
+      top: element.getBoundingClientRect().bottom - edge,
+      behavior: "instant",
+    });
+  }, bottom);
   await expect
     .poll(async () => {
       const box = (await trigger.boundingBox())!;
@@ -101,16 +108,7 @@ for (const kit of positionedKits) {
     await page.setViewportSize({ width: 800, height: 320 });
     await page.goto(`/${kit.key}/`);
     const trigger = angularPart(kit, page, "column-menu-button");
-    await expect(trigger).toBeVisible();
-    const initial = (await trigger.boundingBox())!;
-    await page.mouse.move(780, 180);
-    await page.mouse.wheel(0, initial.y + initial.height - 280);
-    await expect
-      .poll(async () => {
-        const box = (await trigger.boundingBox())!;
-        return Math.abs(box.y + box.height - 280);
-      })
-      .toBeLessThanOrEqual(2);
+    await alignTriggerAtEdge(page, trigger, 280);
     const box = (await trigger.boundingBox())!;
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     const panel = angularPart(kit, page, "column-menu-panel");
