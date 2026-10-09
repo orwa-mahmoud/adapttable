@@ -14,6 +14,9 @@ async function alignTriggerAtEdge(
 ) {
   await expect(trigger).toBeVisible();
   await page.mouse.move(900, 200);
+  // The install card above the table uses a web font. Its late swap moves
+  // the anchor even when the button's own font and height have settled.
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   // Place the test's anchor from one layout read rather than relying on
   // an asynchronous wheel gesture to land on an exact pixel. The checks
   // below still exercise native pointer opening and wheel scrolling.
