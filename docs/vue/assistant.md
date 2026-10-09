@@ -2,11 +2,11 @@
 
 The Vue packages are experimental and unreleased. `@adapttable/ai-vue`
 connects neutral AI stores to Vue 3.5. `@adapttable/vue/adapter` provides
-structural Chrome and required control slots. Unstyled, Reka UI and shadcn-vue
-supply the visible controls through their optional `/assistant` entries.
-Element Plus, Vuetify, Naive UI, Nuxt UI and Quasar do not currently export an
-assistant surface; their tables can use the headless agent feature or a
-host-composed surface built from the binding's required slots.
+structural Chrome and required control slots. Every Vue kit — Unstyled,
+Element Plus, Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar —
+supplies the visible controls through its optional `/assistant` entry, built
+from that kit's own components. A table can also use the headless agent feature
+on its own.
 
 ## Choose the integration
 
