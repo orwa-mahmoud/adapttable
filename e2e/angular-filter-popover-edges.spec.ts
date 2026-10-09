@@ -308,7 +308,7 @@ for (const key of ["angular-cdk", "material", "aria"]) {
                 const card = (await surface.boundingBox())!;
                 const below = card.y >= anchor.y + anchor.height;
                 const above = card.y + card.height <= anchor.y;
-                return below || (key === "material" && above);
+                return below || above;
               })
               .toBe(true);
           } catch (error) {

@@ -6,8 +6,10 @@ import { ANGULAR_KITS, angularPart } from "./angular-kit";
 /** Keep production browser views with the report for visual review. */
 async function attachView(page: Page, testInfo: TestInfo, name: string) {
   if (testInfo.project.name !== "chromium") return;
+  const path = testInfo.outputPath(`${name}.png`);
+  await page.screenshot({ path, fullPage: true, animations: "disabled" });
   await testInfo.attach(name, {
-    body: await page.screenshot({ fullPage: true, animations: "disabled" }),
+    path,
     contentType: "image/png",
   });
 }
