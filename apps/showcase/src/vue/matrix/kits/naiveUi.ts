@@ -37,7 +37,7 @@ import {
   NSelect,
   NTag,
 } from "naive-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, shallowRef, useId } from "vue";
 
 import type { ShowcaseKit } from "../showcaseKit";
 import DataTable from "./tables/NaiveUiDataTable.vue";
@@ -64,6 +64,48 @@ const Root = defineComponent(
   { name: "NaiveUiShowcaseRoot", props: ["dark", "dir"] }
 );
 
+/** Native selector semantics live on its actual input, menu and option nodes. */
+const Select = defineComponent(
+  (props: Parameters<ShowcaseKit["select"]>[0]) => {
+    const open = shallowRef(false);
+    const listId = useId();
+    return () =>
+      h(NSelect, {
+        "data-adapttable-part": props.part,
+        value: props.value,
+        disabled: props.disabled,
+        filterable: true,
+        inputProps: {
+          role: "combobox",
+          "aria-label": props.label,
+          "aria-autocomplete": "list",
+          "aria-expanded": open.value,
+          "aria-controls": listId,
+        },
+        menuProps: { id: listId, role: "listbox", "aria-label": props.label },
+        nodeProps: (option) => ({
+          role: "option",
+          "aria-selected": option.value === props.value,
+        }),
+        options: props.options.map((option) => ({
+          label: option.label,
+          value: option.value,
+        })),
+        style: { width: "10rem" },
+        "onUpdate:show": (next: boolean) => {
+          open.value = next;
+        },
+        "onUpdate:value": (next: unknown) => {
+          if (typeof next === "string") props.onChange(next);
+        },
+      });
+  },
+  {
+    name: "NaiveUiShowcaseSelect",
+    props: ["label", "part", "value", "options", "disabled", "onChange"],
+  }
+);
+
 /** Components and feature factories are always from this one kit. */
 export const kit: ShowcaseKit = {
   key: "naive-ui",
@@ -80,21 +122,7 @@ export const kit: ShowcaseKit = {
       { "data-adapttable-part": part, disabled, onClick },
       () => label
     ),
-  select: ({ label, part, value, options, disabled, onChange }) =>
-    h(NSelect, {
-      "aria-label": label,
-      "data-adapttable-part": part,
-      value,
-      disabled,
-      options: options.map((option) => ({
-        label: option.label,
-        value: option.value,
-      })),
-      style: { width: "10rem" },
-      "onUpdate:value": (next: unknown) => {
-        if (typeof next === "string") onChange(next);
-      },
-    }),
+  select: (props) => h(Select, props),
   DataTable,
   PivotPanel,
   TableAssistant,
