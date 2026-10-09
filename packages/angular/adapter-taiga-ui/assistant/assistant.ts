@@ -210,6 +210,8 @@ export class AdaptAssistantWindow {
   template: `<tui-textfield
     [tuiTextfieldCleaner]="false"
     [stringify]="props().options | taigaLabels"
+    [style.inline-size]="optionWidth()"
+    style="max-inline-size: 100%; flex-shrink: 0"
     ><input
       tuiSelect
       [attr.aria-label]="props().label"
@@ -229,6 +231,13 @@ export class AdaptAssistantWindow {
 })
 export class AdaptAssistantLanguageChip {
   readonly props = input.required<TableAssistantLanguageChipProps>();
+  protected readonly optionWidth = computed(() => {
+    const length = this.props().options.reduce(
+      (longest, option) => Math.max(longest, option.label.length),
+      0
+    );
+    return `calc(${String(length)}ch + 4rem)`;
+  });
   protected changed(value: string | null): void {
     if (value !== null) this.props().onChange(value);
   }
