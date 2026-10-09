@@ -32,6 +32,7 @@ import {
   chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
+  commitSearchOnBlur,
   fetchNextBodyPage,
   headerCellAttributes,
   headerRowAttributes,
@@ -178,11 +179,14 @@ export function useDataTable<TRow>(
   const search = computed(() => source.value.search);
   const searchValue = shallowRef(search.value);
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let disarmBlur: (() => void) | undefined;
   const cancelSearch = (): void => {
     if (timer !== undefined) {
       clearTimeout(timer);
     }
     timer = undefined;
+    disarmBlur?.();
+    disarmBlur = undefined;
   };
   watch(
     [search, () => source.value.tableEngine, () => source.value.setSearch],
@@ -215,9 +219,15 @@ export function useDataTable<TRow>(
     }
     if (!active.value) return;
     timer = setTimeout(() => {
-      timer = undefined;
+      cancelSearch();
       source.value.setSearch(value);
     }, delay);
+    // Leaving the box commits now, so the next control the user reaches acts
+    // on the term they typed rather than racing the delay.
+    disarmBlur = commitSearchOnBlur(() => {
+      cancelSearch();
+      source.value.setSearch(value);
+    });
   };
   const windowStart = computed(() => sourceWindowStart(source.value));
   const windowed = computed(() => source.value.total > rows.value.length);

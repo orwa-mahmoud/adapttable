@@ -827,6 +827,7 @@ export type {
   QueryFilterGroup,
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
+export { commitSearchOnBlur } from "./source/searchInputFlush";
 export type { TableSource } from "./source/TableSource";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";

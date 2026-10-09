@@ -82,4 +82,43 @@ describe("useSearchInput", () => {
     // The echoed "ab" must NOT reset the live "abc".
     expect(result.current.value).toBe("abc");
   });
+
+  it("commits a pending term when the box loses focus, so a saved view can restore its own", () => {
+    let search = "Priya";
+    const setSearch = vi.fn((s: string) => {
+      search = s;
+    });
+    const { result, rerender } = renderHook(() =>
+      useSearchInput(search, setSearch, 300)
+    );
+    const input = document.createElement("input");
+    document.body.append(input);
+    input.focus();
+    // Clear the box, then reach for a saved view before the debounce ticks.
+    act(() => result.current.setValue(""));
+    act(() => input.blur());
+    expect(setSearch).toHaveBeenLastCalledWith("");
+    rerender();
+    // The view brings back the term the box held before.
+    search = "Priya";
+    rerender();
+    expect(result.current.value).toBe("Priya");
+    act(() => vi.advanceTimersByTime(300));
+    expect(setSearch).toHaveBeenCalledTimes(1);
+    expect(result.current.value).toBe("Priya");
+    input.remove();
+  });
+
+  it("does not commit on blur once the debounce has committed the term", () => {
+    const setSearch = vi.fn();
+    const { result } = renderHook(() => useSearchInput("", setSearch, 300));
+    const input = document.createElement("input");
+    document.body.append(input);
+    input.focus();
+    act(() => result.current.setValue("ali"));
+    act(() => vi.advanceTimersByTime(300));
+    act(() => input.blur());
+    expect(setSearch).toHaveBeenCalledTimes(1);
+    input.remove();
+  });
 });

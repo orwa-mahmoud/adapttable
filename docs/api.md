@@ -1069,6 +1069,9 @@ engine does not rebuild for an inline array.
   `searchInputAttributes` — the prop getters, with `data-adapttable-part` names.
   `ChromeSortState`, `ChromeCellSizing`, `columnAriaSort`, `columnTextAlign`,
   `sortLevelOf`, `sortIndexOf`.
+- `commitSearchOnBlur` — commits a debounced search box's pending term once
+  the box loses focus, so the next control acts on the typed term; returns a
+  function that disarms it.
 - `desktopChromeMetrics`, `desktopHasPinned`, `desktopScrollBoxStyle`
   (`DesktopScrollBoxStyle`), `desktopBodyPinStyle` (`DesktopBodyPinStyle`),
   `desktopHeadCellGeometry` (`DesktopHeadCellGeometry`), `desktopEdgeHeadPin`,

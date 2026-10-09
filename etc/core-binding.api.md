@@ -1432,6 +1432,9 @@ export interface CommandPaletteSurfaceProps<TNode = unknown> {
 }
 
 // @public
+export function commitSearchOnBlur(commit: () => void): () => void;
+
+// @public
 export type ConfirmHandler = (request: ConfirmRequest) => void;
 
 // @public

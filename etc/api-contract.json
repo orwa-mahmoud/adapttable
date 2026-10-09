@@ -5972,6 +5972,7 @@
       "CommandPaletteItemProps",
       "CommandPaletteSlots",
       "CommandPaletteSurfaceProps",
+      "commitSearchOnBlur",
       "ConfirmHandler",
       "ConfirmRequest",
       "CONTEXT_MENU",

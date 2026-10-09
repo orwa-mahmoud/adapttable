@@ -67,6 +67,43 @@ it("debounces the latest search and cancels on external source replacement and u
   await vi.advanceTimersByTimeAsync(100);
   expect(values.second).not.toHaveBeenCalled();
 });
+it("commits a pending search when the box loses focus, so a saved view can restore its own", async () => {
+  vi.useFakeTimers();
+  const scope = effectScope();
+  const values = scope.run(() => {
+    const source = useFrontendData({
+      data: rows,
+      columns,
+      getRowId: rowKey,
+      urlSync: false,
+    });
+    return {
+      source,
+      table: useDataTable({ source, columns, rowKey, searchDebounceMs: 300 }),
+    };
+  });
+  if (!values) throw new Error("missing scope");
+  values.source.value.setSearch("Ada");
+  await nextTick();
+  expect(values.table.searchValue.value).toBe("Ada");
+  const box = document.createElement("input");
+  document.body.append(box);
+  box.focus();
+  // Clear the box, then reach for a saved view before the delay ends.
+  values.table.setSearchValue("");
+  box.blur();
+  await nextTick();
+  expect(values.source.value.search).toBe("");
+  // The view brings back the term the box held before.
+  values.source.value.setSearch("Ada");
+  await nextTick();
+  expect(values.table.searchValue.value).toBe("Ada");
+  await vi.advanceTimersByTimeAsync(300);
+  expect(values.source.value.search).toBe("Ada");
+  expect(values.table.searchValue.value).toBe("Ada");
+  scope.stop();
+  box.remove();
+});
 it("does not create a delayed search while component setup is inactive", () => {
   vi.useFakeTimers();
   let timerValue = "";
