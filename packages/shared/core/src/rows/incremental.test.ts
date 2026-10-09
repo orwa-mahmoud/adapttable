@@ -579,6 +579,24 @@ describe("createIncrementalView / applyRowPatchesToView", () => {
 });
 
 describe("configureIncrementalView", () => {
+  it("retains computed subtotals when an attached snapshot is configured again", () => {
+    const view = createIncrementalView(ROWS, {
+      getRowId: byId,
+      columns: COLS,
+      groupBy: "team",
+    });
+    const options = {
+      groupAggregates: (rows: readonly Person[]) => ({ n: rows.length }),
+      derivedKey: "count",
+    };
+    const withTotals = configureIncrementalView(view, options);
+    const again = configureIncrementalView(view, options);
+    expect(again.groups).toEqual(withTotals.groups);
+    expect(
+      again.groups?.find((entry) => entry.kind === "group")?.aggregateCells
+    ).toEqual({ n: expect.any(Number) });
+  });
+
   it("keeps the same view when only columns / callbacks change identity", () => {
     const view = createIncrementalView(ROWS, {
       getRowId: byId,
