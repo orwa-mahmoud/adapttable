@@ -205,6 +205,9 @@ for (const adapter of ADAPTERS) {
       const groupedRows = demo(page).locator("[data-stagger][data-row-id]");
       await expect(groupedRows).toHaveCount(30);
       const groupedGrip = part(page, "row-reorder-handle").first();
+      const movedRowId = await groupedGrip.evaluate((node) =>
+        node.closest("[data-row-id]")?.getAttribute("data-row-id")
+      );
       await groupedGrip.evaluate((element) =>
         element.scrollIntoView({ block: "center" })
       );
@@ -223,6 +226,12 @@ for (const adapter of ADAPTERS) {
       await expect(
         page.locator('[data-adapttable-part="row-move-confirmation"]:visible')
       ).toHaveCount(0);
+      if (adapter === "antd")
+        await expect(
+          demo(page).locator(
+            `[data-row-id="${movedRowId}"] [data-adapttable-part="row-move-menu-trigger"]`
+          )
+        ).toBeFocused();
 
       const trigger = part(page, "row-move-menu-trigger").first();
       await expect(trigger).toBeVisible();
@@ -230,6 +239,14 @@ for (const adapter of ADAPTERS) {
         node.closest("[data-row-id]")?.getAttribute("data-row-id")
       );
       expect(triggerRowId).toBeTruthy();
+      // The previous focus restore can start the page's smooth scroll.
+      // Position this row immediately so the click reaches its trigger.
+      await trigger.evaluate((element) =>
+        window.scrollBy({
+          top: element.getBoundingClientRect().top - 300,
+          behavior: "instant",
+        })
+      );
       // Click, not Space: after the confirm dialog closes, Space is eaten by
       // a kit overlay that is no longer :visible but still intercepts keys.
       await trigger.click();
