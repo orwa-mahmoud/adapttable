@@ -62,7 +62,10 @@ css.walkRules((rule) => {
   rule.selectors = [
     ...new Set(
       rule.selectors.flatMap((selector) => {
-        if (selector === ":root" || selector === "body") return [scope];
+        // Nested feature hosts inherit the enclosing table's color mode.
+        // An explicit light host still initializes its own native variables.
+        if (selector === ":root") return [`${scope}:not(:where(${scope} *))`];
+        if (selector === "body") return [scope];
         if (selector === "[data-bs-theme=light]")
           return [`${scope}[data-bs-theme="light"]`];
         if (selector === "[data-bs-theme=dark]")

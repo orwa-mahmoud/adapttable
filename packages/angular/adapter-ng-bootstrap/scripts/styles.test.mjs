@@ -44,7 +44,12 @@ await test("base variables apply to both themes and dark overrides stay on the h
   assert.ok(
     roots.some(
       (rule) =>
-        rule.selectors.includes(".adapttable-ng-bootstrap") &&
+        rule.selectors.includes(
+          ".adapttable-ng-bootstrap:not(:where(.adapttable-ng-bootstrap *))"
+        ) &&
+        rule.selectors.includes(
+          '.adapttable-ng-bootstrap[data-bs-theme="light"]'
+        ) &&
         rule.nodes.some(
           (node) =>
             node.type === "decl" && node.prop === "--bs-body-font-family"
