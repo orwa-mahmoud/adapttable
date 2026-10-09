@@ -35928,17 +35928,12 @@ table's state. Saved Views may capture this same URL slice.
 
 ### Styled pivot and reorder surfaces
 
-Import `PivotPanel` from `@adapttable/reka-ui/pivot` or
-`@adapttable/shadcn-vue/pivot` for those kits' controls. Pass `fields`, the current
-`config` and `onChange(next)`, plus optional labels and a class name. Accept a
-change by passing the new configuration back. Build the data with
+Import `PivotPanel` from the kit's own `/pivot` entry — Element Plus, Vuetify,
+Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar each build it from their
+controls. Pass `fields`, the current `config` and `onChange(next)`, plus optional
+labels and a class name. Accept a change by passing the new configuration back. Build the data with
 `pivotTableModel` from `@adapttable/vue/pivot`; the configuration panel does not
 own a second pivot model.
-
-For Element Plus, Vuetify, Naive UI, Nuxt UI and Quasar, prepare the same pivot
-rows and columns in the binding and render them with the chosen `DataTable`.
-Compose configuration controls in the host, or fill `PivotPanelChrome`'s required
-slots with that kit. No kit-specific `/pivot` export is implied.
 
 Row-reorder controls share the move policy and current row identities, while
 menus and confirmations remain native to the adapter. Desktop drag and keyboard
