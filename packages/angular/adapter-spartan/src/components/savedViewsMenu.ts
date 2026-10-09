@@ -50,6 +50,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
     <div
       #root
       brnPopover
+      align="end"
       [adaptHlmPopoverLabel]="l.savedViews"
       [state]="popover.open() ? 'open' : 'closed'"
       (stateChanged)="popover.setOpen($event === 'open')"
@@ -128,7 +129,11 @@ export class AdaptSavedViewsMenu implements OnInit {
   readonly props =
     input.required<SavedViewsSlotProps<SavedViewsControllerOptions>>();
 
-  protected readonly panelStyle = MENU_PANEL_STYLE;
+  protected readonly panelStyle = {
+    ...MENU_PANEL_STYLE,
+    "inline-size": "min(320px, calc(100vw - 16px))",
+    "box-sizing": "border-box",
+  };
   protected readonly rowStyle = {
     display: "flex",
     "align-items": "center",
