@@ -7,6 +7,7 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  computed,
   type ElementRef,
   input,
   signal,
@@ -43,6 +44,7 @@ import { TAIGA_CONTROLS } from "../taigaControls";
       tuiDropdownRole="dialog"
       [adaptTaigaDropdownLabel]="p.labels.filters"
       [tuiDropdownOpen]="p.open"
+      [tuiDropdownMaxHeight]="availableHeight() + 32"
       (tuiDropdownOpenChange)="onOpenChange($event)"
       data-taiga-part="filters-anchor"
       style="position: relative; display: inline-flex"
@@ -56,7 +58,7 @@ import { TAIGA_CONTROLS } from "../taigaControls";
         <div
           #card
           [style.max-height.px]="availableHeight()"
-          style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
+          style="box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
           data-taiga-part="filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
@@ -85,7 +87,7 @@ import { TAIGA_CONTROLS } from "../taigaControls";
           </header>
           <div
             data-taiga-part="filters-body"
-            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px"
           >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
@@ -114,11 +116,22 @@ export class AdaptFilterPopover {
 
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
-  protected readonly availableHeight = injectPopoverSpace({
+  private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
     reserve: 32,
+    allowAbove: () => {
+      const origin = this.anchor()?.nativeElement;
+      const viewport = origin?.ownerDocument.defaultView;
+      return (
+        viewport != null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom - 32 < 160
+      );
+    },
   });
+  protected readonly availableHeight = computed(() =>
+    Math.min(560, this.viewportSpace())
+  );
   protected readonly triggerReady = signal(false);
 
   constructor() {

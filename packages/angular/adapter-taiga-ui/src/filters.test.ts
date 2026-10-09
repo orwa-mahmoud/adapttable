@@ -26,9 +26,11 @@ import {
   viewChild,
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 
 import { AdaptHeaderFilterTrigger } from "../header-filters/headerFilterTrigger";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
+import { AdaptFilterPopover } from "./components/filterPopover";
 import { AdaptDataTable } from "./dataTable";
 import { type FiltersMode } from "./tableFilters";
 import { AdaptTaigaRoot } from "./taigaRoot";
@@ -964,4 +966,41 @@ describe("registered Angular form renderers", () => {
       }
     }
   );
+});
+
+describe("filter card viewport space", () => {
+  it("uses above-origin room for a low opener and updates to below room on scroll", async () => {
+    const { fixture, part, openFilters, settle } = await mount();
+    const host = fixture.debugElement.query(By.directive(AdaptFilterPopover));
+    const anchor = (host.nativeElement as HTMLElement).querySelector("span")!;
+    // jsdom has no hit testing; the measured opener remains unobscured here.
+    const hitTest = Object.getOwnPropertyDescriptor(
+      document,
+      "elementFromPoint"
+    );
+    Object.defineProperty(document, "elementFromPoint", {
+      configurable: true,
+      value: () => anchor,
+    });
+    let top = window.innerHeight - 48;
+    const measurement = vi
+      .spyOn(anchor, "getBoundingClientRect")
+      .mockImplementation(() =>
+        DOMRect.fromRect({ x: 300, y: top, width: 100, height: 32 })
+      );
+    try {
+      await openFilters();
+      const panel = part("filters-popover")!;
+      expect(panel).not.toBeNull();
+      expect(panel.style.maxHeight).toBe("560px");
+      top = window.innerHeight - 332;
+      window.dispatchEvent(new Event("resize"));
+      await settle();
+      expect(panel.style.maxHeight).toBe("268px");
+    } finally {
+      measurement.mockRestore();
+      if (hitTest) Object.defineProperty(document, "elementFromPoint", hitTest);
+      else Reflect.deleteProperty(document, "elementFromPoint");
+    }
+  });
 });
