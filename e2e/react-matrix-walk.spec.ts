@@ -84,6 +84,22 @@ for (const kit of builtAdapters("react")) {
             .first()
         ).toBeVisible();
         await page.evaluate(() => document.fonts.ready.then(() => undefined));
+        if (
+          presentation.width === 390 &&
+          ["grouping", "aggregation", "export"].includes(slug)
+        ) {
+          const group = root
+            .locator('[data-adapttable-part="group-card"]')
+            .first();
+          const budget = group.locator(
+            '[data-adapttable-part="group-aggregate"][data-column="budget"]'
+          );
+          await expect(budget).toBeVisible();
+          await expect(budget).toContainText("$");
+          await expect(group).toContainText(
+            locale === "ar" ? "الميزانية" : "Budget"
+          );
+        }
         if (slug === "pivot" && presentation.width === 390) {
           const names = await root
             .locator('[data-adapttable-part="card"]')
