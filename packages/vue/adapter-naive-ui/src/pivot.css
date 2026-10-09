@@ -1,0 +1,20 @@
+.adapttable-naive-pivot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.adapttable-naive-pivot fieldset {
+  display: grid;
+  gap: 8px;
+  min-inline-size: 12rem;
+  margin: 0;
+  padding: 8px 12px 12px;
+  border: 1px solid var(--n-border-color, rgb(224 224 230));
+  border-radius: 4px;
+}
+.adapttable-naive-pivot fieldset > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}

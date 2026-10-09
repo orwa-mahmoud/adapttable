@@ -27,6 +27,8 @@ import "@adapttable/naive-ui/styles.css";
   full-width separator rows, row styling and virtualization.
 - Keyboard navigation, cell ranges, Find, saved views, row actions, bulk actions,
   a command palette, context menus and side-panel view controls.
+- Optional assistant and approval surfaces with host-owned transport and
+  decisions.
 - CSV export and host-owned print layout; PDF export and XLSX use optional
   writers supplied to the export feature.
 - Pivot data, a spreadsheet formula engine and sparklines through the shared
@@ -40,8 +42,8 @@ Import `pdfWriter` from `@adapttable/vue/pdf` or `xlsxWriter` from
 
 For pivot data, import `pivot` and `pivotTableModel` from
 `@adapttable/vue/pivot` and render the prepared rows and columns with this
-adapter. Pivot configuration controls are host-composed; this package does not
-export a kit-specific pivot panel. Formula columns come from
+adapter; the `pivot` entry's `PivotPanel` edits the axes and measures with
+Naive UI controls. Formula columns come from
 `buildFormulaColumns` in `@adapttable/vue/formula`, and SVG sparkline columns
 from `sparklineColumn` in `@adapttable/vue/sparkline`.
 
@@ -275,3 +277,13 @@ Side panels use native card and button presentation over the shared tab,
 selection, identity and lifecycle contract. Host-controlled open state stays
 authoritative. Managed saved-view popovers use the table's fullscreen container
 and semantic trigger/input refs.
+
+### Optional assistant and pivot controls
+
+The `assistant` entry provides `TableAssistant`, `AgentApproval`,
+`tableAssistant()`, and `agentApproval()` using the binding's conversation and
+approval contracts. Its sheet is an `NDrawer`, examples use an `NPopover` menu,
+the composer is an `NInput` textarea, and speech language choices use
+`NSelect`. It does not import an AI transport or own approval decisions. The
+`pivot` entry provides a controlled `PivotPanel` with `NSelect` and `NButton`
+controls.

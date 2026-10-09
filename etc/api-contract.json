@@ -705,6 +705,8 @@
       "adapter-naive-ui-virtualize",
       "adapter-naive-ui",
       "adapter-naive-ui-preset",
+      "adapter-naive-ui-pivot",
+      "adapter-naive-ui-assistant",
       "adapter-nuxt-ui-batch-editing",
       "adapter-nuxt-ui-bulk-actions",
       "adapter-nuxt-ui-cell-navigation",
@@ -12060,6 +12062,18 @@
       "standardFeatures",
       "UseSavedViewsOptions"
     ],
+    "adapter-naive-ui-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
+    "adapter-naive-ui-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
+    ],
     "adapter-nuxt-ui-batch-editing": [
       "batchEditing",
       "BatchEditingState",
@@ -16257,6 +16271,12 @@
     },
     "adapter-naive-ui-preset.api.md": {
       "surface": "adapter-naive-ui-preset"
+    },
+    "adapter-naive-ui-pivot.api.md": {
+      "surface": "adapter-naive-ui-pivot"
+    },
+    "adapter-naive-ui-assistant.api.md": {
+      "surface": "adapter-naive-ui-assistant"
     },
     "adapter-nuxt-ui-batch-editing.api.md": {
       "surface": "adapter-nuxt-ui-batch-editing"

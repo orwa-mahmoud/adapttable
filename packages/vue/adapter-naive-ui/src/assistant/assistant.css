@@ -1,0 +1,16 @@
+.adapttable-naive-assistant-panel,
+.adapttable-naive-assistant-window {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 18rem;
+}
+.adapttable-naive-assistant-input {
+  inline-size: 100%;
+}
+.adapttable-naive-approval-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

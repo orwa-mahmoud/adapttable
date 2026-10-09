@@ -50,16 +50,19 @@ const features = [filters<Person>([{ key: "name", type: "text" }])];
 
 ## Kit components
 
-| Component             | Entry points                 | Renders                                              |
-| --------------------- | ---------------------------- | ---------------------------------------------------- |
-| `NaiveEditableCell`   | `/editing`                   | An editable cell with Naive UI inputs and selects.   |
-| `NaiveRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.           |
-| `NaiveBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.  |
-| `NaiveFilterField`    | `/filters`                   | A filter definition's field with the kit's controls. |
-| `NaiveHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.       |
-| `NaiveDesktopTable`   | `/renderers`                 | The desktop table over `NTable` semantic primitives. |
-| `NaiveMobileCards`    | `/renderers`                 | The mobile card list over `NCard`.                   |
-| `naiveTableControls`  | `/renderers`                 | The required table controls as Naive components.     |
+| Component             | Entry points                 | Renders                                               |
+| --------------------- | ---------------------------- | ----------------------------------------------------- |
+| `NaiveEditableCell`   | `/editing`                   | An editable cell with Naive UI inputs and selects.    |
+| `NaiveRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.            |
+| `NaiveBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.   |
+| `NaiveFilterField`    | `/filters`                   | A filter definition's field with the kit's controls.  |
+| `NaiveHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.        |
+| `PivotPanel`          | `/pivot`                     | The pivot axes and measures with Naive UI selects.    |
+| `TableAssistant`      | `/assistant`                 | The optional assistant in a panel, window or drawer.  |
+| `AgentApproval`       | `/assistant`                 | Proposed row changes with approve and reject buttons. |
+| `NaiveDesktopTable`   | `/renderers`                 | The desktop table over `NTable` semantic primitives.  |
+| `NaiveMobileCards`    | `/renderers`                 | The mobile card list over `NCard`.                    |
+| `naiveTableControls`  | `/renderers`                 | The required table controls as Naive components.      |
 
 `/renderers` also exports the kit's `DataTableClassNames`. Applications that
 compose their own outer layout can use the desktop and mobile renderers directly,

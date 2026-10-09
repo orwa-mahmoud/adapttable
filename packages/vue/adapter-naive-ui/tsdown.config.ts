@@ -43,6 +43,8 @@ export default defineConfig({
     "src/editing.ts",
     "src/batch-editing.ts",
     "src/grouping.ts",
+    "src/pivot.ts",
+    "src/assistant.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],
