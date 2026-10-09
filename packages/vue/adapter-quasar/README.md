@@ -20,6 +20,8 @@ state and feature behavior; Quasar supplies the interactive components.
 - Keyboard navigation, cell ranges, column selection and host-owned fill requests.
 - Saved views, row actions, bulk actions, Find, a command palette, context menus
   and side-panel view controls.
+- Optional assistant and approval surfaces with host-owned transport and
+  decisions.
 - CSV export, optional PDF export and XLSX writers, plus host-owned printing.
 - Pivot data, a spreadsheet formula engine and sparklines through the shared
   Vue binding's opt-in entries.
@@ -28,14 +30,15 @@ state and feature behavior; Quasar supplies the interactive components.
 
 Quasar supplies the visible fields, buttons, menus and dialogs; the Vue binding
 owns state and interactions. Changes to rows always go through host callbacks.
-The optional PDF/XLSX writers stay out of the base table entry. No feature barrel
-or preset is exported: compose the imports you need, as shown below.
+The optional PDF/XLSX writers stay out of the base table entry. Compose the
+feature imports you need, as shown below, or start from `standardFeatures()` in
+the `preset` entry.
 
 ## Shared data integrations
 
 Import `pivot` and `pivotTableModel` from `@adapttable/vue/pivot` to prepare
-pivot rows and columns for the Quasar table. Pivot configuration controls are
-host-composed; `@adapttable/quasar` does not export a Quasar pivot panel.
+pivot rows and columns for the Quasar table; the `pivot` entry's `PivotPanel`
+edits the axes and measures with Quasar controls.
 
 Use `buildFormulaColumns` from `@adapttable/vue/formula` for spreadsheet formula
 columns, and `sparklineColumn` from `@adapttable/vue/sparkline` for accessible
@@ -382,3 +385,12 @@ These optional controls activate after mount. Dialog teardown restores an
 eligible opener after its portal disappears, while preserving focus claimed by
 a newer surface. The
 fullscreen host setup above applies to these native Quasar overlays too.
+
+### Optional assistant and pivot controls
+
+The `assistant` entry provides `TableAssistant`, `AgentApproval`,
+`tableAssistant()`, and `agentApproval()` using the binding's conversation and
+approval contracts. Its sheet is a `QDialog`, examples open in a `QMenu` list,
+the composer is a `QInput` textarea, and speech language choices use `QSelect`.
+It does not import an AI transport or own approval decisions. The `pivot` entry
+provides a controlled `PivotPanel` with `QSelect` and `QBtn` controls.

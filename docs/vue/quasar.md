@@ -67,13 +67,16 @@ const features = [filters<Person>([{ key: "name", type: "text" }])];
 
 ## Kit components
 
-| Component              | Entry points                 | Renders                                              |
-| ---------------------- | ---------------------------- | ---------------------------------------------------- |
-| `QuasarEditableCell`   | `/editing`                   | An editable cell with Quasar inputs and selects.     |
-| `QuasarRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.           |
-| `QuasarBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.  |
-| `QuasarFilterField`    | `/filters`                   | A filter definition's field with the kit's controls. |
-| `QuasarHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.       |
+| Component              | Entry points                 | Renders                                               |
+| ---------------------- | ---------------------------- | ----------------------------------------------------- |
+| `QuasarEditableCell`   | `/editing`                   | An editable cell with Quasar inputs and selects.      |
+| `QuasarRowEditActions` | `/editing`                   | Edit, save and cancel buttons for one row.            |
+| `QuasarBatchEditBar`   | `/editing`, `/batch-editing` | The unsaved-row count with Save all and Cancel all.   |
+| `QuasarFilterField`    | `/filters`                   | A filter definition's field with the kit's controls.  |
+| `QuasarHeaderFilter`   | `/header-filters`            | A column header filter button and its popover.        |
+| `PivotPanel`           | `/pivot`                     | The pivot axes and measures with Quasar selects.      |
+| `TableAssistant`       | `/assistant`                 | The optional assistant in a panel, window or drawer.  |
+| `AgentApproval`        | `/assistant`                 | Proposed row changes with approve and reject buttons. |
 
 ## Controls and styling
 

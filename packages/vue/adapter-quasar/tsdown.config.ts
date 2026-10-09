@@ -44,6 +44,8 @@ export default defineConfig({
     "src/export.ts",
     "src/export-pdf.ts",
     "src/export-xlsx.ts",
+    "src/pivot.ts",
+    "src/assistant.ts",
   ],
   platform: "neutral",
   format: ["esm", "cjs"],

@@ -789,6 +789,8 @@
       "adapter-quasar-virtualize",
       "adapter-quasar",
       "adapter-quasar-preset",
+      "adapter-quasar-pivot",
+      "adapter-quasar-assistant",
       "adapter-reka-ui-assistant",
       "adapter-reka-ui-batch-editing",
       "adapter-reka-ui-bulk-actions",
@@ -12534,6 +12536,18 @@
       "standardFeatures",
       "UseSavedViewsOptions"
     ],
+    "adapter-quasar-pivot": [
+      "PivotPanel",
+      "PivotPanelProps"
+    ],
+    "adapter-quasar-assistant": [
+      "agentApproval",
+      "AgentApproval",
+      "AgentApprovalProps",
+      "tableAssistant",
+      "TableAssistant",
+      "TableAssistantProps"
+    ],
     "adapter-reka-ui-assistant": [
       "agentApproval",
       "AgentApproval",
@@ -16537,6 +16551,12 @@
     },
     "adapter-quasar-preset.api.md": {
       "surface": "adapter-quasar-preset"
+    },
+    "adapter-quasar-pivot.api.md": {
+      "surface": "adapter-quasar-pivot"
+    },
+    "adapter-quasar-assistant.api.md": {
+      "surface": "adapter-quasar-assistant"
     },
     "adapter-reka-ui-assistant.api.md": {
       "surface": "adapter-reka-ui-assistant"
