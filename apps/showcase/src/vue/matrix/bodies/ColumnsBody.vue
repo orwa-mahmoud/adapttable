@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** Column management, matching ColumnsDemo.tsx through the selected kit. */
-import type { ColumnDef, ColumnLayoutState } from "@adapttable/vue";
+import { type ColumnDef, useColumnLayoutUrlState } from "@adapttable/vue";
 import { xlsxWriter } from "@adapttable/vue/xlsx";
 import { shallowRef } from "vue";
 
@@ -16,19 +16,23 @@ import { useShowcaseKit } from "../showcaseKit";
 const kit = useShowcaseKit();
 // This deliberately wide demo needs width floors: automatic table layout
 // may shrink preferred widths until there is no overflow to demonstrate.
-const columns: readonly ColumnDef<Person>[] = [
+const columns = shallowRef<readonly ColumnDef<Person>[]>([
   ...peopleColumns({ status: kit.status }).map((column) => ({
     ...column,
+    renameable: true,
     minWidth: typeof column.width === "number" ? column.width : undefined,
   })),
   { key: "email", header: "Email", width: 280, minWidth: 280 },
   { key: "role", header: "Role", width: 220, minWidth: 220 },
-];
-const layout = shallowRef<ColumnLayoutState>({
-  hidden: [],
-  order: [],
-  widths: {},
-  pinned: { person: "start" },
+]);
+function renameColumn(key: string, name: string): void {
+  columns.value = columns.value.map((column) =>
+    column.key === key ? { ...column, header: name } : column
+  );
+}
+const { layout, onLayoutChange } = useColumnLayoutUrlState({
+  urlKey: "cols",
+  defaultColumnLayout: { pinned: { person: "start" } },
 });
 const features = [
   kit.columnMenu(),
@@ -53,7 +57,8 @@ const features = [
       <component
         :is="kit.DataTable"
         v-bind="TABLE_PRESENTATION"
-        v-model:column-layout="layout"
+        :column-layout="layout"
+        :on-column-rename="renameColumn"
         table-label="People"
         url-key="cols"
         :data="PEOPLE"
@@ -61,6 +66,7 @@ const features = [
         :row-key="rowKey"
         :defaults="{ limit: 10 }"
         :features="features"
+        @update:column-layout="onLayoutChange"
       />
     </div>
   </div>

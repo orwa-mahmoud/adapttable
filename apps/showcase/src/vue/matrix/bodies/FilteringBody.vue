@@ -23,8 +23,8 @@ const layouts: readonly { value: FilterLayout; label: string }[] = [
 const layout = shallowRef<FilterLayout>("popover");
 const features = computed(() =>
   layout.value === "header"
-    ? [kit.filters(FILTER_DEFS), kit.headerFilters()]
-    : [kit.filters(FILTER_DEFS, { mode: layout.value })]
+    ? [kit.filters(FILTER_DEFS, { tree: true }), kit.headerFilters()]
+    : [kit.filters(FILTER_DEFS, { mode: layout.value, tree: true })]
 );
 function changeLayout(event: Event): void {
   if (!(event.target instanceof HTMLSelectElement)) return;
