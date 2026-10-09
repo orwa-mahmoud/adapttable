@@ -16,6 +16,28 @@
   overflow: auto;
 }
 
+.mx-vue.mx-ng--unstyled [data-adapttable-part="column-menu-item"] {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+}
+.mx-vue.mx-ng--unstyled [data-adapttable-part="root"] {
+  overflow: visible;
+}
+.mx-vue.mx-ng--unstyled [data-adapttable-part="column-menu-submenu"] {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+.mx-vue.mx-ng--unstyled [data-adapttable-part="column-rename-form"] {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+.mx-vue.mx-ng--unstyled [data-adapttable-part="column-rename-input"] {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
 .mx-vue .mx-status {
   display: inline-flex;
   align-items: center;
