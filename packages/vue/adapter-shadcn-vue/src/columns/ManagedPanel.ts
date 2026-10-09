@@ -31,6 +31,10 @@ const ManagedPanel = defineComponent(
               props.control.attrs.class as string | undefined
             ),
             align: "end",
+            style: {
+              maxHeight:
+                "min(80vh, 40rem, var(--reka-popover-content-available-height))",
+            },
             portalTo: props.control.container,
             onEscapeKeyDown: (event: KeyboardEvent) => {
               event.preventDefault();
