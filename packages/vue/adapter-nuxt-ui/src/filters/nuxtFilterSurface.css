@@ -1,7 +1,11 @@
 @layer components {
   .adapttable-nuxt-filter-popover {
     width: min(26rem, calc(100vw - 2rem));
-    max-height: min(38rem, calc(100dvh - 4rem));
+    max-height: min(
+      38rem,
+      var(--reka-popover-content-available-height, calc(100dvh - 4rem)),
+      calc(100dvh - 4rem)
+    );
     overflow-y: auto;
     padding: 1rem;
   }
