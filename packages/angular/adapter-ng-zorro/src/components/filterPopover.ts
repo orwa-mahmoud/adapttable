@@ -40,7 +40,11 @@ import {
       (nzPopoverVisibleChange)="onVisibleChange($event)"
       [nzPopoverBackdrop]="false"
       [nzPopoverContent]="content"
-      nzPopoverPlacement="bottomRight"
+      [nzPopoverPlacement]="
+        p.dir === 'rtl'
+          ? ['bottomLeft', 'topLeft']
+          : ['bottomRight', 'topRight']
+      "
       [nzPopoverOverlayStyle]="overlayStyle()"
       style="display: inline-flex"
     >
@@ -78,7 +82,7 @@ import {
             </button>
           </header>
           <div
-            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-inline-end: 4px"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px; padding-inline-end: 4px"
           >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
@@ -108,11 +112,22 @@ export class AdaptFilterPopover {
   }));
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
-  protected readonly availableHeight = injectPopoverSpace({
+  private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
     reserve: 64,
+    allowAbove: () => {
+      const origin = this.anchor()?.nativeElement;
+      const viewport = origin?.ownerDocument.defaultView;
+      return (
+        viewport != null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom - 64 < 160
+      );
+    },
   });
+  protected readonly availableHeight = computed(() =>
+    Math.min(560, this.viewportSpace())
+  );
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");
 
   /** Synchronize native dismissal with host state and restore the opener. */
