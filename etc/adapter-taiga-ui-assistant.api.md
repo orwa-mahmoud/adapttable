@@ -159,6 +159,8 @@ export class AdaptAssistantLanguageChip {
     // (undocumented)
     protected changed(value: string | null): void;
     // (undocumented)
+    protected readonly optionWidth: Signal<string>;
+    // (undocumented)
     readonly props: InputSignal<TableAssistantLanguageChipProps>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAssistantLanguageChip, "adapt-assistant-language-chip", never, {

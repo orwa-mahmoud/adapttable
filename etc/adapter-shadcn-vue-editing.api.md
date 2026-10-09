@@ -53,7 +53,7 @@ export function EditableCell<TRow>(props: VueEditableCellProps<TRow>, context: P
 // @public (undocumented)
 export namespace EditableCell {
     var // (undocumented)
-    props: ("rows" | "columns" | "rowKey" | "row" | "rowId" | "undoLabel" | "display" | "editing" | "column" | "rowIndex" | "editLabel")[];
+    props: ("rows" | "row" | "rowId" | "undoLabel" | "display" | "editing" | "column" | "rowIndex" | "columns" | "rowKey" | "editLabel")[];
 }
 
 export { editHistory }

@@ -702,6 +702,7 @@ export class AdaptPrintButton {
 
 // @internal
 export class AdaptSavedViewsMenu implements OnInit {
+    constructor();
     // (undocumented)
     protected apply(name: string): void;
     // (undocumented)
@@ -713,6 +714,8 @@ export class AdaptSavedViewsMenu implements OnInit {
     protected readonly overlayContainer: Signal<string | undefined>;
     // (undocumented)
     protected readonly panelStyle: {
+        "max-inline-size": string;
+        "box-sizing": string;
         "max-height": string;
         "overflow-y": string;
         border: string;
