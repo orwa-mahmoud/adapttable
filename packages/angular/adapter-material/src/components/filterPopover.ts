@@ -62,7 +62,7 @@ import { AdaptMaterialPopover } from "./materialPopover";
           </header>
           <div
             class="adapt-material-filters-body"
-            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px"
           >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
