@@ -25,7 +25,7 @@ export default defineConfig({
       reporter: ["text", "lcov", "html"],
       include: ["src/**/*.ts", "src/**/*.vue"],
       exclude: ["src/**/index.ts", "src/**/*.d.ts"],
-      thresholds: { statements: 95, branches: 90, functions: 95, lines: 95 },
+      thresholds: { statements: 96, branches: 90, functions: 95, lines: 97 },
     },
   },
 });

@@ -72,7 +72,7 @@ export default defineConfig({
         "src/**/*.d.ts",
         "src/**/types.ts",
       ],
-      thresholds: { statements: 95, branches: 90, functions: 95, lines: 95 },
+      thresholds: { statements: 96, branches: 90, functions: 95, lines: 97 },
     },
   },
 });
