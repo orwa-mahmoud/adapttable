@@ -163,7 +163,11 @@ for (const kit of ANGULAR_KITS) {
       await tree
         .locator('[data-adapttable-part="filter-tree-summary"]')
         .click();
-      await tree.getByRole("button", { name: "Add condition" }).click();
+      const addCondition = tree.getByRole("button", { name: "Add condition" });
+      // A kit can reveal the tree by animating its panel open; the button is
+      // clickable once the panel no longer clips it.
+      await expect(addCondition).toBeInViewport({ ratio: 1 });
+      await addCondition.click();
       const condition = tree.locator(
         '[data-adapttable-part="filter-tree-condition"]'
       );
