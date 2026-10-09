@@ -400,7 +400,7 @@ export function demoFilterDefs(locale: Locale): FilterDef<Person>[] {
       column: "person",
       type: "personText",
       label: s.person,
-      getValue: (row) => row.name,
+      getValue: (row) => personName(row, locale),
     },
     {
       key: "team",
