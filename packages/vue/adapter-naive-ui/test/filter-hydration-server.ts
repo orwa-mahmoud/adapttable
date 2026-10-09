@@ -5,10 +5,14 @@ import { renderToString } from "vue/server-renderer";
 
 // Compile the same SFC fixture with the suite's real Vue plugin and aliases.
 // Middleware mode uses no listening browser server or WebSocket endpoint.
+// Stdout carries only the JSON result: Vite's info messages (such as a
+// dependency re-optimization) would print there, while its warnings and
+// errors still reach stderr, which the suite requires to be empty.
 const server = await createViteServer({
   configFile: process.argv[2],
   server: { middlewareMode: true, hmr: false, watch: null },
   appType: "custom",
+  logLevel: "warn",
 });
 try {
   const { filterHydrationTable, filterHydrationOverlay } =
