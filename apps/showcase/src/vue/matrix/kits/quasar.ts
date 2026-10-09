@@ -81,6 +81,7 @@ export const kit: ShowcaseKit = {
       })),
       emitValue: true,
       mapOptions: true,
+      dropdownIcon: "M7 10l5 5 5-5z",
       dense: true,
       outlined: true,
       style: { minWidth: "10rem" },
