@@ -299,7 +299,13 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
     <Card
       size="small"
       className={className}
-      style={style}
+      style={{
+        ...style,
+        // Ant Design's block card cannot use an intrinsic min-height to
+        // override a fixed desktop row height. Keep that height as a floor.
+        height: style?.height === undefined ? undefined : "auto",
+        minHeight: style?.height ?? style?.minHeight,
+      }}
       data-stagger=""
       data-selected={selected ? "" : undefined}
       data-dirty={rowIsDirty(editing, id) ? "" : undefined}
@@ -599,10 +605,7 @@ export function MobileCards<TRow>({
         aria-setsize={cardSetSize > rows.length ? cardSetSize : undefined}
         data-adapttable-part={side ? pinnedSummaryPart(side) : "card"}
         aria-label={side ? labels.pinnedSummaryRow : undefined}
-        style={{
-          ...treeCardStyle(treeEntry?.level ?? 0),
-          ...resolveRowStyle(rowStyle, rowHeight, row, index),
-        }}
+        style={treeCardStyle(treeEntry?.level ?? 0)}
       >
         <CardItem
           row={row}

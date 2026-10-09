@@ -282,7 +282,11 @@ function MobileCardBase<TRow>({
       aria-label={ariaLabel}
       className={className}
       {...rowClickProps(row, onRowClick, index)}
-      style={{ ...treeCardStyle(treeEntry?.level ?? 0), ...style }}
+      style={{
+        minHeight: "max-content",
+        ...treeCardStyle(treeEntry?.level ?? 0),
+        ...style,
+      }}
     >
       <CardContent
         sx={compact ? { p: 1.25, "&:last-child": { pb: 1.25 } } : undefined}
