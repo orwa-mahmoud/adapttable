@@ -10,6 +10,7 @@ import {
 } from "@adapttable/angular";
 import type { SavedViewsSlotProps } from "@adapttable/angular/adapter";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -28,6 +29,7 @@ import {
 } from "ngx-bootstrap/dropdown";
 
 import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
+import { fitBootstrapPopoverHorizontally } from "./bootstrapPopoverGeometry";
 
 /**
  * The saved-views toolbar control.
@@ -140,6 +142,8 @@ export class AdaptSavedViewsMenu implements OnInit {
     input.required<SavedViewsSlotProps<SavedViewsControllerOptions>>();
 
   protected readonly panelStyle = {
+    "max-inline-size": "100%",
+    "box-sizing": "border-box",
     "max-height": "min(70vh, 32rem)",
     "overflow-y": "auto",
     border: "0",
@@ -158,6 +162,7 @@ export class AdaptSavedViewsMenu implements OnInit {
   private readonly injector = inject(Injector);
   private readonly nameInput =
     viewChild<ElementRef<HTMLInputElement>>("nameInput");
+  private readonly panel = viewChild<ElementRef<HTMLElement>>("panel");
   protected readonly menuOpen = signal(false);
   private readonly dropdown = viewChild(BsDropdownDirective);
   protected readonly popover = {
@@ -165,6 +170,28 @@ export class AdaptSavedViewsMenu implements OnInit {
     toggle: (): void => this.dropdown()?.toggle(),
     close: (): void => this.dropdown()?.hide(),
   };
+
+  constructor() {
+    afterRenderEffect((cleanup) => {
+      const pane =
+        this.panel()?.nativeElement.closest<HTMLElement>(".dropdown-menu");
+      if (!this.menuOpen() || !pane) return;
+      const viewport = pane.ownerDocument.defaultView;
+      const fit = () => fitBootstrapPopoverHorizontally(pane);
+      fit();
+      const resize =
+        typeof ResizeObserver === "undefined" ? null : new ResizeObserver(fit);
+      resize?.observe(pane);
+      viewport?.addEventListener("resize", fit);
+      viewport?.addEventListener("scroll", fit, true);
+      cleanup(() => {
+        resize?.disconnect();
+        viewport?.removeEventListener("resize", fit);
+        viewport?.removeEventListener("scroll", fit, true);
+        pane.style.translate = "";
+      });
+    });
+  }
 
   /** Open the views where the props say they are kept. */
   ngOnInit(): void {
