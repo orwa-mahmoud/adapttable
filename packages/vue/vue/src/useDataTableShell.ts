@@ -239,18 +239,16 @@ export function useDataTableShell<TRow>(
     normalizeFeatures(toValue(options.value.features) ?? [])
   );
   const patches = computed(() => featureOptionsOf(declarations.value));
-  const resolved = computed(
-    () =>
-      Object.assign(
-        {},
-        patches.value,
-        Object.fromEntries(
-          Object.entries(options.value).filter(
-            ([, value]) => value !== undefined
-          )
-        )
-      ) as unknown as ResolvedTableOptions<TRow>
-  );
+  const resolved = computed(() => {
+    const featureValues = patches.value;
+    const explicitValues = Object.fromEntries(
+      Object.entries(options.value).filter(([, value]) => value !== undefined)
+    );
+    return {
+      ...featureValues,
+      ...explicitValues,
+    } as unknown as ResolvedTableOptions<TRow>;
+  });
   const localUrlAdapter = createMemoryAdapter();
   const urlAdapter = computed(() =>
     resolveUrlAdapter(
@@ -313,7 +311,7 @@ export function useDataTableShell<TRow>(
     columns: flattenColumns(toValue(resolved.value.columns)).leaves,
     getRowId: resolved.value.rowKey,
     urlAdapter: supplied.value ? undefined : urlAdapter,
-    urlSync: supplied.value ? false : true,
+    urlSync: !supplied.value,
     filterFn: filterRuntime.value ? filterRows : resolved.value.filterFn,
     filterTreeFn: filterRuntime.value
       ? filterTree
