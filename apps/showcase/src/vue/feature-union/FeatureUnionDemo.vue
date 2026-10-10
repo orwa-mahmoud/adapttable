@@ -230,7 +230,7 @@ function replaceRows(): void {
   <main class="feature-union-demo">
     <h1>Vue Unstyled combined features</h1>
     <p>
-      Experimental, unreleased Vue packages. Explore a tree with loaded
+      Experimental Vue packages. Explore a tree with loaded
       descendants, virtual rows and columns, keyboard navigation and host-owned
       changes.
     </p>

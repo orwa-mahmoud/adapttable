@@ -1,6 +1,6 @@
 # Vue assistant and approvals
 
-The Vue packages are experimental and unreleased. `@adapttable/ai-vue`
+The Vue packages are experimental. `@adapttable/ai-vue`
 connects neutral AI stores to Vue 3.5. `@adapttable/vue/adapter` provides
 structural Chrome and required control slots. Every Vue kit — Unstyled,
 Element Plus, Vuetify, Naive UI, Reka UI, shadcn-vue, Nuxt UI and Quasar —

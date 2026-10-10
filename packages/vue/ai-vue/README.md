@@ -3,8 +3,7 @@
 Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
 
 Optional Vue 3.5 bindings for AdaptTable agents, conversations, and speech.
-This package is experimental and prepared for an unreleased public `0.1.0`
-version. Registry publication is a separate release step.
+This package is an experimental public `0.1.0` release.
 
 The framework-neutral `@adapttable/ai` owns policy, approval transactions,
 capability execution, conversation state, and speech. This package connects

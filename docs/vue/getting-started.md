@@ -295,9 +295,9 @@ the [Vue API reference](./api.md) for component and adapter contracts, and the
 
 ## Optional AI binding
 
-The public, unreleased `@adapttable/ai-vue` package is built and linked alongside
+The public `@adapttable/ai-vue` package is published alongside
 the Vue binding and native kit when your application needs an agent, conversation
-or speech input. It requires Vue `^3.5.0`; publication is a separate release step.
+or speech input. It requires Vue `^3.5.0`.
 The base table and assistant UI entries remain usable without AI. See
 [assistant and approvals](./assistant.md). The CLI currently scaffolds React and
 Angular projects; these Vue examples use explicit application setup.

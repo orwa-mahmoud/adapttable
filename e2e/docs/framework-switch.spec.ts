@@ -194,7 +194,7 @@ test("experimental Vue docs expose only implemented counterparts", async ({
     "public packages"
   );
   await expect(page.locator("main .sl-markdown-content")).toContainText(
-    "have not been published to npm"
+    "are published on npm"
   );
   await expect(
     page.locator(

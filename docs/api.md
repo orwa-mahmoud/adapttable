@@ -4072,8 +4072,8 @@ DataModeProps`: the base carries every prop except the data mode, which is
 ## Experimental Vue binding and kits
 
 `@adapttable/vue`, `@adapttable/vue-unstyled` and the seven Vue UI kits below are
-public packages prepared for an experimental `0.1.0` release, requiring Vue
-`^3.5.0` or a kit's newer floor. They have not been published to npm. The
+public experimental `0.1.0` packages on npm, requiring Vue
+`^3.5.0` or a kit's newer floor. The
 [Vue getting-started guide](./vue/getting-started.md) and
 [Vue API reference](./vue/api.md) describe the source, rendering, lifecycle
 and native-control surface; the [Vue feature guide](./vue/features.md) covers
@@ -4391,7 +4391,7 @@ for data scope and how the shell aligns footer columns with its body.
 
 ## Optional Vue assistant contracts
 
-`@adapttable/ai-vue` is the optional public, unreleased Vue 3.5 binding to neutral
+`@adapttable/ai-vue` is the optional experimental Vue 3.5 binding to neutral
 AI stores. `tableAgent(options: MaybeRefOrGetter<TableAgentOptions>)` returns a
 `StaticTableFeature`; `TableAgentBridge` and `TableAgentColumnPatch` describe
 host notifications and column patches. `TABLE_AGENT_STATE` is the typed feature
