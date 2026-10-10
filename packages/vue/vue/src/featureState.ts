@@ -27,7 +27,7 @@ export function createFeatureState(): TableFeatureState {
   const getRef = (id: string): ShallowRef<unknown> => {
     let result = values.get(id);
     if (!result) {
-      result = shallowRef();
+      result = shallowRef<unknown>();
       values.set(id, result);
     }
     return result;
