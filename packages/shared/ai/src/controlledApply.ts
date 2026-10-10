@@ -143,10 +143,11 @@ function beginCall(
       for (const token of ownedLegacy) lane.legacyPending.delete(token);
       ownedLegacy.clear();
     }
-    for (const job of [...lane.queue])
+    // Cancelling an owned job splices the queue; retain the admission snapshot.
+    for (const job of lane.queue.slice())
       if (job.owner === owner) job.cancel(error);
     if (lane.active?.owner === owner) lane.active.cancel(error);
-    for (const reject of [...failures]) reject(error);
+    for (const reject of failures) reject(error);
   };
   const assertActive = (): void => {
     if (failure) throw failure;
@@ -242,7 +243,7 @@ function beginCall(
   };
   const drain = (): Promise<void> | void => {
     if (settlements.length === 0) return complete();
-    return race(Promise.all([...settlements]).then(complete));
+    return race(Promise.all(settlements).then(complete));
   };
   return {
     get invoked() {
