@@ -24,6 +24,7 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { stripVTControlCharacters } from "node:util";
 
 import { installFloor } from "./check-vue-peer-types.mjs";
 import { packageDir, REPO_ROOT } from "./packages.mjs";
@@ -208,7 +209,10 @@ export function runKitPeer(scratch, folder, vueRoot, label) {
       }
     );
     if (result.error) throw result.error;
-    const output = `${result.stdout}\n${result.stderr}`;
+    // CI forces colour, which splits the summary line with escape codes.
+    const output = stripVTControlCharacters(
+      `${result.stdout}\n${result.stderr}`
+    );
     assert.equal(result.status, 0, `${folder} on Vue ${version}:\n${output}`);
     const files = /Test Files\s+(\d+) passed/.exec(output)?.[1];
     assert.equal(
