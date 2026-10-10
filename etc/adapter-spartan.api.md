@@ -687,10 +687,11 @@ export class AdaptSavedViewsMenu implements OnInit {
     protected readonly name: WritableSignal<string>;
     ngOnInit(): void;
     // (undocumented)
-    protected readonly panelStyle: {
-        "inline-size": string;
-        "box-sizing": string;
-    };
+    protected readonly panelStyle: Signal<    {
+    "inline-size": string;
+    "box-sizing": string;
+    translate: string;
+    }>;
     // (undocumented)
     protected readonly popover: MenuPopover;
     readonly props: InputSignal<SavedViewsSlotProps<SavedViewsControllerOptions>>;

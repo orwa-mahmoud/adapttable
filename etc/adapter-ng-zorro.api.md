@@ -730,6 +730,11 @@ export class AdaptSavedViewsMenu implements OnInit {
     protected apply(name: string): void;
     // (undocumented)
     protected readonly direction: WritableSignal<"rtl" | "ltr">;
+    protected readonly inputStyle: {
+        flex: string;
+        "inline-size": string;
+        "min-inline-size": string;
+    };
     // (undocumented)
     protected readonly name: WritableSignal<string>;
     ngOnInit(): void;
