@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type CommandPaletteSlots, toVueAttrs } from "@adapttable/vue/adapter";
-import { computed } from "vue";
+import { computed, type HTMLAttributes } from "vue";
 import { VField } from "vuetify/components/VField";
 
 defineOptions({ inheritAttrs: false });
@@ -26,6 +26,12 @@ const attrs = computed(() => {
     <template #default="field">
       <input
         v-bind="{ ...field.props, ...attrs }"
+        :aria-label="
+          ({ ...field.props, ...attrs } as HTMLAttributes)['aria-label']
+        "
+        :aria-labelledby="
+          ({ ...field.props, ...attrs } as HTMLAttributes)['aria-labelledby']
+        "
         :class="className"
         autofocus
       />

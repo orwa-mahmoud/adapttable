@@ -30,6 +30,10 @@ const targetRef = useControlTarget(() => props.elementRef);
 <template>
   <input
     :ref="targetRef"
+    :aria-label="$attrs['aria-label'] as HTMLAttributes['aria-label']"
+    :aria-labelledby="
+      $attrs['aria-labelledby'] as HTMLAttributes['aria-labelledby']
+    "
     :value="props.modelValue ?? ownValue"
     data-slot="input"
     :class="

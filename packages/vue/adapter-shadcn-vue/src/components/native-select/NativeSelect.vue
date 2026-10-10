@@ -62,6 +62,10 @@ const targetRef = useControlTarget(() => props.elementRef);
     <select
       :ref="targetRef"
       v-bind="$attrs"
+      :aria-label="$attrs['aria-label'] as HTMLAttributes['aria-label']"
+      :aria-labelledby="
+        $attrs['aria-labelledby'] as HTMLAttributes['aria-labelledby']
+      "
       v-model="selectedValue"
       :multiple="props.multiple"
       data-slot="native-select"
