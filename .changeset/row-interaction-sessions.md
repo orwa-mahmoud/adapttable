@@ -2,9 +2,8 @@
 "@adapttable/core": minor
 ---
 
-Add session-bound row-reorder callbacks and authoritative host row indices.
-Pending drag, menu and confirmation actions cannot act on replacement rows or
-continue after their interaction is retired.
+Add session-bound row-reorder callbacks and authoritative host row indices so
+pending drag, menu and confirmation actions cannot target replacement rows.
 
-Add `columnScrollTarget` and pinned-side/control-width inputs for column
-windowing, so revealed columns occupy the usable space beside sticky columns.
+Column windowing accepts `columnScrollTarget` and pinned-side/control-width
+inputs, revealing columns within the usable space beside sticky columns.

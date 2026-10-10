@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/quasar",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Quasar primitives and controls for the AdaptTable Vue binding.",
   "license": "MIT",
   "author": "Orwa Mahmoud",
@@ -14,7 +14,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@adapttable/vue": "0.1.0"
+    "@adapttable/vue": "0.0.0"
   },
   "peerDependencies": {
     "quasar": "2.34.0",

@@ -1,10 +1,15 @@
 ---
-"@adapttable/core": patch
+"@adapttable/core": minor
 ---
 
-Keep context-menu targets within their owning table, including nested mobile
-cards, and exclude summary rows from data-row actions.
+Expose a flat-menu keyboard controller for native presentations with disabled-item
+navigation, incremental typeahead and close requests that preserve native Tab.
+Context menus keep targets inside their owning table, including nested mobile
+cards, and exclude summary rows. Grouping controls keep focus within enabled,
+visible semantic controls and accept remove-target dragenter events.
 
-Retire pending export results when their controller disconnects. Preserve a new
-export started during cancellation, and ignore synchronous results from a run
-that was retired while its host callback was executing.
+Disconnected or reentrant export runs cannot deliver retired results or cancel
+a newly started run. Feature cleanup releases each resource once even when a
+cleanup fails, and setup failures roll back completed/partial resources while
+preserving the original error. Source memoization preserves argument-count and
+identity semantics; incremental metadata avoids redundant engine publications.

@@ -1,10 +1,19 @@
 ---
 "@adapttable/vue": minor
 "@adapttable/vue-unstyled": minor
+"@adapttable/element-plus": minor
+"@adapttable/naive-ui": minor
+"@adapttable/nuxt-ui": minor
+"@adapttable/quasar": minor
+"@adapttable/reka-ui": minor
+"@adapttable/shadcn-vue": minor
+"@adapttable/vuetify": minor
 ---
 
-Add native standardFeatures composition and a canonical Vue Unstyled export
-entry while preserving export-csv. Add PDF and XLSX feature factories with
-shared export lifecycle, typed fixed-format options and native controls.
-Keep format writers outside the base, CSV and preset import graphs. These
-Vue packages remain public, experimental and unreleased until publication.
+Add Vue kit standard-feature presets, bulk actions, print and export factories.
+The canonical export entry retains the CSV alias; focused PDF and XLSX entries
+keep format writers out of plain-table, CSV and preset bundles.
+
+Exports follow the active source and ignore late outcomes after replacement or
+retirement. Native bulk confirmations cannot write through a retired owner.
+All data changes remain host-controlled.

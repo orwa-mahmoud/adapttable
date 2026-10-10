@@ -11,4 +11,8 @@
 "@adapttable/taiga-ui": minor
 ---
 
-Support Angular templates and component renderers in column `headerActions`, alongside existing plain text. All nine Angular kits render these host-owned actions outside the sortable caption and pass the current header context. Export `AdaptHeaderActions` for custom adapter structure. Header actions remain a desktop-header surface; mobile cards do not render them.
+Allow Angular column `headerActions` to render host templates or components,
+alongside plain text. All nine native kits pass the current header context and
+place the action outside the sortable caption. Export `AdaptHeaderActions` for
+custom adapter structure. Header actions appear in desktop headers; mobile cards
+keep their existing presentation.

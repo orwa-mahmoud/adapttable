@@ -2,4 +2,7 @@
 "@adapttable/core": patch
 ---
 
-Preserve collapsed column groups and explicitly empty column layouts when restoring saved layout state. Keep the newest URL slice update when host callbacks synchronously write, flush or dispose the current binding.
+Restore collapsed column groups and explicitly empty layouts from saved state.
+Preserve the newest URL slice when host callbacks synchronously write, flush or
+dispose the binding. Earlier Saved Views loads cannot overwrite newer list edits;
+read-only views cannot be overwritten, and explicit reloads remain authoritative.

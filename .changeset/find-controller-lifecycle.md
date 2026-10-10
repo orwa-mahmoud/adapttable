@@ -3,9 +3,12 @@
 "@adapttable/react": patch
 ---
 
-Add `FindController.flush()` so view capture can include a query still waiting
-for its URL debounce. Keep each pending write attached to the adapter and
-namespace that accepted it, and synchronize React source changes after render.
+Add `FindController.flush()` so captured views include queries waiting for the
+URL debounce. Pending writes stay with the adapter/namespace that accepted them;
+React synchronizes source changes after render.
 
-Retire pending grid clipboard results when their row or column context changes
-or the controller disconnects, without redirecting them to a replacement view.
+Find and grid announcements use supported primitive/Date accessor values before
+sort/backing fields, preserving explicit format/export projections and avoiding
+object stringification. Retire clipboard results when row/column context changes
+and deferred focus when another cell receives focus, while preserving newly
+issued requests.

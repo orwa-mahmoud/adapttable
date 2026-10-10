@@ -5,12 +5,10 @@
 "@adapttable/vue": patch
 ---
 
-Add optional tree shape readers to export contexts and use them in the React,
-Angular and Vue bindings to export loaded descendants across filtered roots and
-pages. All and selected exports now resolve the complete available hierarchy;
-page files follow visible expansion while page hook and request metadata retain
-source rows. All/selected file, hook and request data rows agree, while summary
-callbacks retain the original source-shaped rows, preserving root rollups.
-Headless contexts without shape readers retain conservative source membership
-filtering. Runtime tree inventories and server export routes are
-unchanged.
+Add optional tree-shape readers to export contexts. React, Angular and Vue all
+and selected exports include loaded descendants across filtered roots/pages;
+page files follow visible expansion. File, hook and request data agree, while
+summary callbacks and page request metadata retain original source-shaped rows.
+
+Headless contexts without shape readers retain conservative membership filtering.
+Runtime tree inventories and server export routes keep their existing behavior.

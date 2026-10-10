@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.0.0",
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
@@ -37,7 +37,7 @@
   "description": "Native HTML data table controls for the AdaptTable Vue binding.",
   "dependencies": {
     "@adapttable/core": "3.8.1",
-    "@adapttable/vue": "0.1.0"
+    "@adapttable/vue": "0.0.0"
   },
   "exports": {
     ".": {
