@@ -48,9 +48,8 @@ export type SidePanelChromeProps = ActionPresentation & {
     | { readonly slots?: never; readonly presentation: SidePanelPresentation }
   );
 function tabDomId(prefix: string, key: string): string {
-  return `${prefix}-tab-${key
-    .split("")
-    .map((character) => character.charCodeAt(0).toString(16))
+  return `${prefix}-tab-${Array.from(key)
+    .map((character) => character.codePointAt(0)!.toString(16))
     .join("-")}`;
 }
 function logicalKey(key: string, rtl: boolean): string {

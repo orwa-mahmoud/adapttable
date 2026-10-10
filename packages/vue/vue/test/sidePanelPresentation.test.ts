@@ -35,6 +35,38 @@ function mount(render: () => ReturnType<typeof h>) {
   stops.push(() => app.unmount());
   return { host, stop: () => app.unmount() };
 }
+it("associates Unicode panel tabs with the selected body", async () => {
+  const unicodePanels = [
+    { key: "😀", label: "Smile", content: "Smile content" },
+    { key: "ع", label: "Arabic", content: "Arabic content" },
+  ];
+  const open = shallowRef("😀");
+  const { host } = mount(() =>
+    h(SidePanelChrome, {
+      model: {
+        panels: unicodePanels,
+        open: open.value,
+        onOpenChange: (key) => {
+          if (key !== null) open.value = key;
+        },
+      },
+      labels: currentLabels,
+      slots,
+      dir: "rtl",
+    })
+  );
+  await nextTick();
+  const tabs = host.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+  const body = host.querySelector('[data-adapttable-part="side-panel-body"]')!;
+  expect(tabs[0]!.id).toMatch(/-tab-1f600$/);
+  expect(body.getAttribute("aria-labelledby")).toBe(tabs[0]!.id);
+  expect(tabs[0]!.getAttribute("aria-controls")).toBe(body.id);
+  tabs[1]!.click();
+  await nextTick();
+  expect(body.textContent).toBe("Arabic content");
+  expect(body.getAttribute("aria-labelledby")).toBe(tabs[1]!.id);
+  expect(tabs[1]!.getAttribute("aria-controls")).toBe(body.id);
+});
 it("requires a complete renderer and keeps controlled selection rejectable", async () => {
   const requests = vi.fn();
   const model = shallowRef<SidePanelControlModel>({
