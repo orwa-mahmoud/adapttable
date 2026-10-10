@@ -144,6 +144,12 @@ function compileExamples(examples) {
             ...kitPaths(),
             // Nuxt UI's Vite plugin generates its theme types where the kit's
             // own tsconfig maps them.
+            "#build/ui": [
+              join(
+                VUE_PACKAGES,
+                "adapter-nuxt-ui/node_modules/.nuxt-ui/ui/index.ts"
+              ),
+            ],
             "#build/ui/*": [
               join(VUE_PACKAGES, "adapter-nuxt-ui/node_modules/.nuxt-ui/ui/*"),
             ],

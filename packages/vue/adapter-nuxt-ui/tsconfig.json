@@ -6,6 +6,7 @@
     "jsxImportSource": "vue",
     "types": ["node", "vitest/globals"],
     "paths": {
+      "#build/ui": ["./node_modules/.nuxt-ui/ui/index.ts"],
       "#build/ui/*": ["./node_modules/.nuxt-ui/ui/*"]
     }
   },
