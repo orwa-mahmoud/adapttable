@@ -113,7 +113,7 @@ export function useGridFocus<TRow>(
     if (
       target instanceof Element &&
       target !== event.currentTarget &&
-      !target.hasAttribute("data-grid-cell")
+      !target.matches("[data-grid-cell]")
     )
       return;
     run(() => controller.keyDown(event));
