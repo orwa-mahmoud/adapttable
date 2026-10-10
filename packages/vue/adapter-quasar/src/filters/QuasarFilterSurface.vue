@@ -4,7 +4,16 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { QCard, QCardSection, QDialog, QMenu } from "quasar";
-import { computed } from "vue";
+import { computed, watch } from "vue";
+
+/** See `rtlScrollbarGutter` in the Element Plus adapter: same gutter gap. */
+function rtlScrollbarGutter(dir: string | undefined): string {
+  const view = globalThis.document?.defaultView;
+  if (dir !== "rtl" || !view) return "0px";
+  const layout = view.document.documentElement.getBoundingClientRect().width;
+  const gutter = view.innerWidth - layout;
+  return `${gutter > 0 ? gutter : 0}px`;
+}
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<
@@ -28,6 +37,16 @@ const popoverAttrs = computed(() => ({
 const close = () => {
   if (active.value && props.open) props.onClose();
 };
+watch(visible, (open) => {
+  const root = globalThis.document?.documentElement;
+  if (!open || props.dir !== "rtl" || !root) return;
+  // QMenu rewrites its own inline style while positioning, so the shift
+  // lives in the stylesheet and only the length is set here.
+  root.style.setProperty(
+    "--adapttable-rtl-gutter",
+    rtlScrollbarGutter(props.dir)
+  );
+});
 </script>
 <template>
   <QDialog

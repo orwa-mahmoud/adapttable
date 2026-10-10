@@ -225,9 +225,17 @@
   max-block-size: calc(100dvh - 1rem);
   overflow: auto;
 }
+.adapttable-quasar-filter-popover[dir="rtl"] {
+  translate: var(--adapttable-rtl-gutter, 0px) 0;
+}
+/* The fixed dialog box is bounded by the viewport it is fixed to, which
+   excludes a classic scrollbar or a reserved gutter; 100vw does not. */
+.q-dialog__inner:has(> .adapttable-quasar-filter-drawer) {
+  max-inline-size: 100%;
+}
 .adapttable-quasar-filter-drawer {
   inline-size: 24rem;
-  max-inline-size: 100vw;
+  max-inline-size: 100%;
   block-size: 100dvh;
   overflow: auto;
 }
