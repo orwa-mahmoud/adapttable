@@ -42,7 +42,7 @@ export default defineComponent(
         // The public Vue ref can expose a positioning wrapper. Resolve only
         // our own marker below that ref, without vendor selectors or mutation.
         const target =
-          root.getAttribute("data-adapttable-managed-surface") === surfaceId
+          root.dataset.adapttableManagedSurface === surfaceId
             ? root
             : Array.from(
                 root.querySelectorAll<HTMLElement>(
@@ -50,8 +50,7 @@ export default defineComponent(
                 )
               ).find(
                 (element) =>
-                  element.getAttribute("data-adapttable-managed-surface") ===
-                  surfaceId
+                  element.dataset.adapttableManagedSurface === surfaceId
               );
         if (!target) return null;
         const role = props.control.attrs.role;
