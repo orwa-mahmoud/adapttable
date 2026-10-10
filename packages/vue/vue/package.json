@@ -1,5 +1,5 @@
 {
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
@@ -32,7 +32,7 @@
   "name": "@adapttable/vue",
   "description": "Headless Vue composables and structural table contracts for AdaptTable.",
   "dependencies": {
-    "@adapttable/core": "3.8.1",
+    "@adapttable/core": "3.9.0",
     "@tanstack/virtual-core": "^3.17.11"
   },
   "exports": {

@@ -1,5 +1,39 @@
 # @adapttable/ai
 
+## 0.6.0
+
+### Minor Changes
+
+- 0120bd4: Add optional `settleApply` delivery hooks and
+  `AgentCapabilityContext.whenApplied()` for custom handlers. Binding-owned column
+  visibility/order/pinning and explicit selection confirm the delivered model
+  before reporting success; result revisions reflect real updates and no-ops.
+  Synchronous bindings and void-compatible setters remain supported.
+  
+  Bindings can await pending state publication before call admission. Retired table
+  identities/capability registries reject queued work, and cancellation/replay
+  preserve callback ownership and custom revision numbering. Neutral engine view
+  revisions include layout, pinning and selection; optional all-matching/cross-page
+  selection scope does not grant additional access.
+  
+  Pending approvals can carry a stable frozen transaction token across snapshots,
+  with a fresh token for each transaction, so presentations distinguish reused
+  proposals. Hosts may continue to omit it.
+
+### Patch Changes
+
+- Updated dependencies [0120bd4]
+- Updated dependencies [f3240c8]
+- Updated dependencies [19da962]
+- Updated dependencies [d32983f]
+- Updated dependencies [da5d11b]
+- Updated dependencies [1946b61]
+- Updated dependencies [05b436c]
+- Updated dependencies [88840eb]
+- Updated dependencies [d32983f]
+- Updated dependencies [aebbd39]
+  - @adapttable/core@3.9.0
+
 ## 0.5.2
 
 ### Patch Changes

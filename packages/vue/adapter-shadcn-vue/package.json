@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/shadcn-vue",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "shadcn-vue data table presentation for the headless AdaptTable Vue binding.",
   "license": "MIT",
   "author": "Orwa Mahmoud",
@@ -33,7 +33,7 @@
     "reka-ui": "^2.11.0"
   },
   "dependencies": {
-    "@adapttable/vue": "0.0.0",
+    "@adapttable/vue": "0.1.0",
     "@vueuse/core": "^14.4.0",
     "@lucide/vue": "^1.28.0",
     "class-variance-authority": "^0.7.1",

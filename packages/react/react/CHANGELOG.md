@@ -1,5 +1,53 @@
 # @adapttable/react
 
+## 1.7.0
+
+### Minor Changes
+
+- f187f9e: Expose `renderedRowsOf` from the React adapter entry and retain row-only reorder
+  compatibility with loaded-row/session safety. Ant Design uses that inventory for
+  handles/drop targets, so synthetic group headers cannot redirect a row move.
+  
+  Ant Design, Base UI, Chakra, Mantine, MUI, Radix and Unstyled mobile cards retain
+  their full content height in constrained layouts. Base UI loads drawer motion CSS
+  only when its drawer renders while preserving shared theme tokens. Chakra native
+  portals retain dark semantic colors and rename inputs focus on each open.
+  MUI restores saved-view name focus after saving. Radix header filters preserve
+  native nested Select interactions. Unstyled search and filter popovers fit narrow
+  viewports and flip above low triggers while keeping keyboard dismissal/focus.
+- 11cea28: Export `ReactColumnGroupDef` from `@adapttable/react/adapter` so custom adapters
+  can name grouped-column inputs accepted by `flattenReactColumnTree`.
+- aebbd39: Add optional tree-shape readers to export contexts. React, Angular and Vue all
+  and selected exports include loaded descendants across filtered roots/pages;
+  page files follow visible expansion. File, hook and request data agree, while
+  summary callbacks and page request metadata retain original source-shaped rows.
+  
+  Headless contexts without shape readers retain conservative membership filtering.
+  Runtime tree inventories and server export routes keep their existing behavior.
+
+### Patch Changes
+
+- d32983f: Add `FindController.flush()` so captured views include queries waiting for the
+  URL debounce. Pending writes stay with the adapter/namespace that accepted them;
+  React synchronizes source changes after render.
+  
+  Find and grid announcements use supported primitive/Date accessor values before
+  sort/backing fields, preserving explicit format/export projections and avoiding
+  object stringification. Retire clipboard results when row/column context changes
+  and deferred focus when another cell receives focus, while preserving newly
+  issued requests.
+- Updated dependencies [0120bd4]
+- Updated dependencies [f3240c8]
+- Updated dependencies [19da962]
+- Updated dependencies [d32983f]
+- Updated dependencies [da5d11b]
+- Updated dependencies [1946b61]
+- Updated dependencies [05b436c]
+- Updated dependencies [88840eb]
+- Updated dependencies [d32983f]
+- Updated dependencies [aebbd39]
+  - @adapttable/core@3.9.0
+
 ## 1.6.0
 
 ### Minor Changes

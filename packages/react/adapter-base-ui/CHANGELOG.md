@@ -1,5 +1,35 @@
 # @adapttable/base-ui
 
+## 3.3.3
+
+### Patch Changes
+
+- f187f9e: Expose `renderedRowsOf` from the React adapter entry and retain row-only reorder
+  compatibility with loaded-row/session safety. Ant Design uses that inventory for
+  handles/drop targets, so synthetic group headers cannot redirect a row move.
+  
+  Ant Design, Base UI, Chakra, Mantine, MUI, Radix and Unstyled mobile cards retain
+  their full content height in constrained layouts. Base UI loads drawer motion CSS
+  only when its drawer renders while preserving shared theme tokens. Chakra native
+  portals retain dark semantic colors and rename inputs focus on each open.
+  MUI restores saved-view name focus after saving. Radix header filters preserve
+  native nested Select interactions. Unstyled search and filter popovers fit narrow
+  viewports and flip above low triggers while keeping keyboard dismissal/focus.
+- Updated dependencies [0120bd4]
+- Updated dependencies [f3240c8]
+- Updated dependencies [19da962]
+- Updated dependencies [d32983f]
+- Updated dependencies [da5d11b]
+- Updated dependencies [1946b61]
+- Updated dependencies [f187f9e]
+- Updated dependencies [11cea28]
+- Updated dependencies [05b436c]
+- Updated dependencies [88840eb]
+- Updated dependencies [d32983f]
+- Updated dependencies [aebbd39]
+  - @adapttable/core@3.9.0
+  - @adapttable/react@1.7.0
+
 ## 3.3.2
 
 ### Patch Changes

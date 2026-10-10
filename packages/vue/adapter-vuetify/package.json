@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/vuetify",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Vuetify controls for the AdaptTable Vue binding.",
   "license": "MIT",
   "author": "Orwa Mahmoud",
@@ -29,7 +29,7 @@
     "@vue/test-utils": "2.4.6"
   },
   "dependencies": {
-    "@adapttable/vue": "0.0.0"
+    "@adapttable/vue": "0.1.0"
   },
   "engines": {
     "node": ">=22.12.0"
