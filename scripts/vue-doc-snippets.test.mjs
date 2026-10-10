@@ -136,7 +136,6 @@ function compileExamples(examples) {
         extends: join(REPO_ROOT, "tsconfig.base.json"),
         compilerOptions: {
           noEmit: true,
-          skipLibCheck: false,
           jsx: "preserve",
           jsxImportSource: "vue",
           types: ["vite/client"],
