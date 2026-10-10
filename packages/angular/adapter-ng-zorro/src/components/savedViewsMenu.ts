@@ -95,6 +95,7 @@ import { OVERLAY_Z } from "./overlayPlacement";
               <input
                 #nameInput
                 nz-input
+                [style]="inputStyle"
                 [attr.aria-label]="l.viewName"
                 [attr.placeholder]="l.viewName"
                 [value]="name()"
@@ -127,6 +128,12 @@ export class AdaptSavedViewsMenu implements OnInit {
     display: "flex",
     "align-items": "center",
     gap: "6px",
+  };
+  /** The input's intrinsic size would set the panel wider than a phone. */
+  protected readonly inputStyle = {
+    flex: "1 1 10rem",
+    "inline-size": "10rem",
+    "min-inline-size": "0",
   };
   protected readonly name = signal("");
   protected readonly trimmed = computed(() => this.name().trim());
