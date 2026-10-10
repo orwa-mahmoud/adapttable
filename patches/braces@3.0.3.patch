@@ -1,0 +1,94 @@
+diff --git a/lib/compile.js b/lib/compile.js
+index dce69beb90ece5c3b0ca234a949418f9f34eedbc..3d4afb83c16c1363561321cf774da95166b9d831 100644
+--- a/lib/compile.js
++++ b/lib/compile.js
+@@ -4,7 +4,11 @@ const fill = require('fill-range');
+ const utils = require('./utils');
+ 
+ const compile = (ast, options = {}) => {
+-  const walk = (node, parent = {}) => {
++  const depthLimit = utils.braceDepthLimit(options);
++  const walk = (node, parent = {}, depth = 0) => {
++    if (depth > depthLimit) {
++      throw new SyntaxError(`brace depth (${depth}) exceeds max depth (${depthLimit})`);
++    }
+     const invalidBlock = utils.isInvalidBrace(parent);
+     const invalidNode = node.invalid === true && options.escapeInvalid === true;
+     const invalid = invalidBlock === true || invalidNode === true;
+@@ -47,7 +51,7 @@ const compile = (ast, options = {}) => {
+ 
+     if (node.nodes) {
+       for (const child of node.nodes) {
+-        output += walk(child, node);
++        output += walk(child, node, depth + 1);
+       }
+     }
+ 
+diff --git a/lib/expand.js b/lib/expand.js
+index 35b2c41d6afdb8f0197959e26079f266e48370d3..e69afbaff14f63a7e321ec7734b4223225689a12 100644
+--- a/lib/expand.js
++++ b/lib/expand.js
+@@ -32,8 +32,12 @@ const append = (queue = '', stash = '', enclose = false) => {
+ 
+ const expand = (ast, options = {}) => {
+   const rangeLimit = options.rangeLimit === undefined ? 1000 : options.rangeLimit;
++  const depthLimit = utils.braceDepthLimit(options);
+ 
+-  const walk = (node, parent = {}) => {
++  const walk = (node, parent = {}, depth = 0) => {
++    if (depth > depthLimit) {
++      throw new SyntaxError(`brace depth (${depth}) exceeds max depth (${depthLimit})`);
++    }
+     node.queue = [];
+ 
+     let p = parent;
+@@ -100,7 +104,7 @@ const expand = (ast, options = {}) => {
+       }
+ 
+       if (child.nodes) {
+-        walk(child, node);
++        walk(child, node, depth + 1);
+       }
+     }
+ 
+diff --git a/lib/parse.js b/lib/parse.js
+index 3a6988e629f52aee6609dc5ec290a5e9ff47cecb..f2d669e7babbb9912558b6fd7dd23d8a6b35112d 100644
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -1,6 +1,7 @@
+ 'use strict';
+ 
+ const stringify = require('./stringify');
++const utils = require('./utils');
+ 
+ /**
+  * Constants
+@@ -196,6 +197,10 @@ const parse = (input, options = {}) => {
+ 
+     if (value === CHAR_LEFT_CURLY_BRACE) {
+       depth++;
++      const depthLimit = utils.braceDepthLimit(opts);
++      if (depth > depthLimit) {
++        throw new SyntaxError(`brace depth (${depth}) exceeds max depth (${depthLimit})`);
++      }
+ 
+       const dollar = prev.value && prev.value.slice(-1) === '$' || block.dollar === true;
+       const brace = {
+diff --git a/lib/utils.js b/lib/utils.js
+index d19311fe044ad5157624077670dc297e8b53da49..b57f79941287dee782faa19581d58da3963151a5 100644
+--- a/lib/utils.js
++++ b/lib/utils.js
+@@ -1,5 +1,13 @@
+ 'use strict';
+ 
++const MAX_BRACE_DEPTH = 100;
++
++exports.braceDepthLimit = (options = {}) => {
++  const requested = options.maxDepth;
++  const limit = Number.isInteger(requested) && requested > 0 ? requested : MAX_BRACE_DEPTH;
++  return Math.min(limit, MAX_BRACE_DEPTH);
++};
++
+ exports.isInteger = num => {
+   if (typeof num === 'number') {
+     return Number.isInteger(num);

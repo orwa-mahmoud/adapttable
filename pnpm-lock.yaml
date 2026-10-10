@@ -5,49 +5,63 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@rolldown/plugin-babel>@babel/core': ^7.29.7
+  '@adapttable/ai': workspace:*
+  '@adapttable/ai-angular': workspace:*
+  '@adapttable/ai-react': workspace:*
+  '@adapttable/angular': workspace:*
+  '@adapttable/angular-unstyled': workspace:*
   '@adapttable/antd': workspace:*
-  '@adapttable/element-plus': workspace:*
-  '@adapttable/naive-ui': workspace:*
-  '@adapttable/nuxt-ui': workspace:*
-  '@adapttable/quasar': workspace:*
-  '@adapttable/reka-ui': workspace:*
-  '@adapttable/shadcn-vue': workspace:*
-  '@adapttable/vuetify': workspace:*
   '@adapttable/base-ui': workspace:*
   '@adapttable/chakra': workspace:*
   '@adapttable/core': workspace:*
-  '@adapttable/react': workspace:*
+  '@adapttable/element-plus': workspace:*
   '@adapttable/mantine': workspace:*
   '@adapttable/mui': workspace:*
-  '@adapttable/radix': workspace:*
-  '@adapttable/shadcn': workspace:*
-  '@adapttable/unstyled': workspace:*
-  '@adapttable/ai': workspace:*
-  '@adapttable/ai-react': workspace:*
-  '@adapttable/ai-angular': workspace:*
-  '@adapttable/angular': workspace:*
-  '@adapttable/angular-unstyled': workspace:*
+  '@adapttable/naive-ui': workspace:*
   '@adapttable/ng-zorro': workspace:*
-  eslint-plugin-sonarjs>minimatch: ^10.2.3
-  undici: ^7.29.1
-  devalue: ^5.9.3
-  fast-uri: ^3.1.8
-  postcss: ^8.5.23
-  svgo: ^4.0.2
-  sharp: ^0.35.0
-  js-yaml@3: ^3.15.0
-  js-yaml@4: ^4.3.2
+  '@adapttable/nuxt-ui': workspace:*
+  '@adapttable/quasar': workspace:*
+  '@adapttable/radix': workspace:*
+  '@adapttable/react': workspace:*
+  '@adapttable/reka-ui': workspace:*
+  '@adapttable/shadcn': workspace:*
+  '@adapttable/shadcn-vue': workspace:*
+  '@adapttable/unstyled': workspace:*
+  '@adapttable/vuetify': workspace:*
+  '@rolldown/plugin-babel>@babel/core': ^7.29.7
   brace-expansion@1: ^1.1.21
   brace-expansion@2: ^2.1.7
   brace-expansion@5: ^5.0.12
+  devalue: ^5.9.3
+  esbuild: ^0.28.1
+  eslint-plugin-sonarjs>minimatch: ^10.2.3
+  fast-uri: ^3.1.8
+  js-yaml@3: ^3.15.0
+  js-yaml@4: ^4.3.2
   nanoid: ^3.3.18
+  postcss: ^8.5.23
+  postcss-selector-parser: ^7.1.6
   qs: ^6.16.0
+  seroval: 1.6.8
+  seroval-plugins: 1.6.8
+  sharp: ^0.35.0
+  shell-quote: ^1.11.0
+  smol-toml: ^1.9.0
+  solid-js: 1.9.17
+  source-map-js: ^1.2.2
+  svgo: ^4.0.2
+  undici: ^7.29.1
 
 patchedDependencies:
+  braces@3.0.3:
+    hash: 12b3afb4032ebba3dd220649eb52fc5669988940685976f06bdf5bbb6a672624
+    path: patches/braces@3.0.3.patch
   http-cache-semantics@4.2.0:
     hash: 8022a142dee2f4e7432ee4f7c7f75b830122d5f6fd1342bf0bc312e395b87ad7
     path: patches/http-cache-semantics@4.2.0.patch
+  sprintf-js@1.0.3:
+    hash: a36d797b1226e3b8d9dca863d1f28719a752fd43adc8c46788bd6dce05fdbff8
+    path: patches/sprintf-js@1.0.3.patch
 
 importers:
 
@@ -3183,7 +3197,7 @@ packages:
   '@corvu/utils@0.4.2':
     resolution: {integrity: sha512-Ox2kYyxy7NoXdKWdHeDEjZxClwzO4SKM8plAaVwmAJPxHMqA0rLOoAsa+hBDwRLpctf+ZRnAd/ykguuJidnaTA==}
     peerDependencies:
-      solid-js: ^1.8
+      solid-js: 1.9.17
 
   '@css-render/plugin-bem@0.15.14':
     resolution: {integrity: sha512-QK513CJ7yEQxm/P3EwsI+d+ha8kSOcjGvD6SevM41neEMxdULE+18iuQK6tEChAWMOQNQPLG/Rw3Khb69r5neg==}
@@ -3335,34 +3349,16 @@ packages:
   '@emotion/weak-memoize@0.4.0':
     resolution: {integrity: sha512-snKqtPW01tN0ui7yu9rGv69aJXr/a/Ywvl11sUjNtEcRc+ng/mQriFL0wLXMef74iHa/EkftbDzU9F8iFbH+zg==}
 
-  '@esbuild/aix-ppc64@0.27.7':
-    resolution: {integrity: sha512-EKX3Qwmhz1eMdEJokhALr0YiD0lhQNwDqkPYyPhiSwKrh7/4KRjQc04sZ8db+5DVVnZ1LmbNDI1uAMPEUBnQPg==}
-    engines: {node: '>=18'}
-    cpu: [ppc64]
-    os: [aix]
-
   '@esbuild/aix-ppc64@0.28.2':
     resolution: {integrity: sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==}
     engines: {node: '>=18'}
     cpu: [ppc64]
     os: [aix]
 
-  '@esbuild/android-arm64@0.27.7':
-    resolution: {integrity: sha512-62dPZHpIXzvChfvfLJow3q5dDtiNMkwiRzPylSCfriLvZeq0a1bWChrGx/BbUbPwOrsWKMn8idSllklzBy+dgQ==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [android]
-
   '@esbuild/android-arm64@0.28.2':
     resolution: {integrity: sha512-5YfKeeI8qWfBZIX+u2xZC3Zlb3Os/gLS2sbEKM+I4ZOcsWmHS2WLysCcQZDAFRslDUU5Oiq44gf6PYN1vGwG5A==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [android]
-
-  '@esbuild/android-arm@0.27.7':
-    resolution: {integrity: sha512-jbPXvB4Yj2yBV7HUfE2KHe4GJX51QplCN1pGbYjvsyCZbQmies29EoJbkEc+vYuU5o45AfQn37vZlyXy4YJ8RQ==}
-    engines: {node: '>=18'}
-    cpu: [arm]
     os: [android]
 
   '@esbuild/android-arm@0.28.2':
@@ -3371,34 +3367,16 @@ packages:
     cpu: [arm]
     os: [android]
 
-  '@esbuild/android-x64@0.27.7':
-    resolution: {integrity: sha512-x5VpMODneVDb70PYV2VQOmIUUiBtY3D3mPBG8NxVk5CogneYhkR7MmM3yR/uMdITLrC1ml/NV1rj4bMJuy9MCg==}
-    engines: {node: '>=18'}
-    cpu: [x64]
-    os: [android]
-
   '@esbuild/android-x64@0.28.2':
     resolution: {integrity: sha512-O387ite7SzUyCcy3JQX4P4bLtEA7bLLkx+esve5JHnyYfNTxcVpXZo9jhdB0lTKN44gztELTdU7nS8Nr16Fs1Q==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [android]
 
-  '@esbuild/darwin-arm64@0.27.7':
-    resolution: {integrity: sha512-5lckdqeuBPlKUwvoCXIgI2D9/ABmPq3Rdp7IfL70393YgaASt7tbju3Ac+ePVi3KDH6N2RqePfHnXkaDtY9fkw==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [darwin]
-
   '@esbuild/darwin-arm64@0.28.2':
     resolution: {integrity: sha512-n4KqkOQrraxHJcgjM1RvwbigfQKIKJVpM7xp+KsxiyUSrRdIXnt73VhrPAx0fV44hgfmIVKjxMN9J1t5jySVkw==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [darwin]
-
-  '@esbuild/darwin-x64@0.27.7':
-    resolution: {integrity: sha512-rYnXrKcXuT7Z+WL5K980jVFdvVKhCHhUwid+dDYQpH+qu+TefcomiMAJpIiC2EM3Rjtq0sO3StMV/+3w3MyyqQ==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [darwin]
 
   '@esbuild/darwin-x64@0.28.2':
@@ -3407,22 +3385,10 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@esbuild/freebsd-arm64@0.27.7':
-    resolution: {integrity: sha512-B48PqeCsEgOtzME2GbNM2roU29AMTuOIN91dsMO30t+Ydis3z/3Ngoj5hhnsOSSwNzS+6JppqWsuhTp6E82l2w==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [freebsd]
-
   '@esbuild/freebsd-arm64@0.28.2':
     resolution: {integrity: sha512-n+I0BTSRIoy+d6RPKnEVwql5UwBJolytvY4mAOIEJorKlqgPII8ix6slVVrfZ5Tnj7glIZvloylbB/EJPMWEXw==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [freebsd]
-
-  '@esbuild/freebsd-x64@0.27.7':
-    resolution: {integrity: sha512-jOBDK5XEjA4m5IJK3bpAQF9/Lelu/Z9ZcdhTRLf4cajlB+8VEhFFRjWgfy3M1O4rO2GQ/b2dLwCUGpiF/eATNQ==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [freebsd]
 
   '@esbuild/freebsd-x64@0.28.2':
@@ -3431,22 +3397,10 @@ packages:
     cpu: [x64]
     os: [freebsd]
 
-  '@esbuild/linux-arm64@0.27.7':
-    resolution: {integrity: sha512-RZPHBoxXuNnPQO9rvjh5jdkRmVizktkT7TCDkDmQ0W2SwHInKCAV95GRuvdSvA7w4VMwfCjUiPwDi0ZO6Nfe9A==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [linux]
-
   '@esbuild/linux-arm64@0.28.2':
     resolution: {integrity: sha512-pW4AC0P3it8c7do9MVM4p51FzHzdM/TZrerurgRcHJ2WTa1VQ1CIq18xncfpBJw4ojkiZZrKW2yIBWBP92j6Ug==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [linux]
-
-  '@esbuild/linux-arm@0.27.7':
-    resolution: {integrity: sha512-RkT/YXYBTSULo3+af8Ib0ykH8u2MBh57o7q/DAs3lTJlyVQkgQvlrPTnjIzzRPQyavxtPtfg0EopvDyIt0j1rA==}
-    engines: {node: '>=18'}
-    cpu: [arm]
     os: [linux]
 
   '@esbuild/linux-arm@0.28.2':
@@ -3455,22 +3409,10 @@ packages:
     cpu: [arm]
     os: [linux]
 
-  '@esbuild/linux-ia32@0.27.7':
-    resolution: {integrity: sha512-GA48aKNkyQDbd3KtkplYWT102C5sn/EZTY4XROkxONgruHPU72l+gW+FfF8tf2cFjeHaRbWpOYa/uRBz/Xq1Pg==}
-    engines: {node: '>=18'}
-    cpu: [ia32]
-    os: [linux]
-
   '@esbuild/linux-ia32@0.28.2':
     resolution: {integrity: sha512-CYbnj78HsIeA+DhgUKgFCfvNsTHFhMMrinUrMZpDXJXKN8T3XViTZ/+wtHeVxEWY8ewSzTFN+nRmSwO2tZaLUQ==}
     engines: {node: '>=18'}
     cpu: [ia32]
-    os: [linux]
-
-  '@esbuild/linux-loong64@0.27.7':
-    resolution: {integrity: sha512-a4POruNM2oWsD4WKvBSEKGIiWQF8fZOAsycHOt6JBpZ+JN2n2JH9WAv56SOyu9X5IqAjqSIPTaJkqN8F7XOQ5Q==}
-    engines: {node: '>=18'}
-    cpu: [loong64]
     os: [linux]
 
   '@esbuild/linux-loong64@0.28.2':
@@ -3479,22 +3421,10 @@ packages:
     cpu: [loong64]
     os: [linux]
 
-  '@esbuild/linux-mips64el@0.27.7':
-    resolution: {integrity: sha512-KabT5I6StirGfIz0FMgl1I+R1H73Gp0ofL9A3nG3i/cYFJzKHhouBV5VWK1CSgKvVaG4q1RNpCTR2LuTVB3fIw==}
-    engines: {node: '>=18'}
-    cpu: [mips64el]
-    os: [linux]
-
   '@esbuild/linux-mips64el@0.28.2':
     resolution: {integrity: sha512-ZVykbDyk7519VwiNb9Lcj9m8XM6v5V9uKPvrEMkkEedVewf+0itkhahp4HDpgERXhwLRpWFypsGbG/J8s0QjJA==}
     engines: {node: '>=18'}
     cpu: [mips64el]
-    os: [linux]
-
-  '@esbuild/linux-ppc64@0.27.7':
-    resolution: {integrity: sha512-gRsL4x6wsGHGRqhtI+ifpN/vpOFTQtnbsupUF5R5YTAg+y/lKelYR1hXbnBdzDjGbMYjVJLJTd2OFmMewAgwlQ==}
-    engines: {node: '>=18'}
-    cpu: [ppc64]
     os: [linux]
 
   '@esbuild/linux-ppc64@0.28.2':
@@ -3503,22 +3433,10 @@ packages:
     cpu: [ppc64]
     os: [linux]
 
-  '@esbuild/linux-riscv64@0.27.7':
-    resolution: {integrity: sha512-hL25LbxO1QOngGzu2U5xeXtxXcW+/GvMN3ejANqXkxZ/opySAZMrc+9LY/WyjAan41unrR3YrmtTsUpwT66InQ==}
-    engines: {node: '>=18'}
-    cpu: [riscv64]
-    os: [linux]
-
   '@esbuild/linux-riscv64@0.28.2':
     resolution: {integrity: sha512-GeXCej4IQtU1B+QlDV8W/RRvbzI3O/Stss+/bCXv4lZls5WGRtu2a+3JkA3i4qIUlMXpcHebWpF8AkJhATowuA==}
     engines: {node: '>=18'}
     cpu: [riscv64]
-    os: [linux]
-
-  '@esbuild/linux-s390x@0.27.7':
-    resolution: {integrity: sha512-2k8go8Ycu1Kb46vEelhu1vqEP+UeRVj2zY1pSuPdgvbd5ykAw82Lrro28vXUrRmzEsUV0NzCf54yARIK8r0fdw==}
-    engines: {node: '>=18'}
-    cpu: [s390x]
     os: [linux]
 
   '@esbuild/linux-s390x@0.28.2':
@@ -3527,34 +3445,16 @@ packages:
     cpu: [s390x]
     os: [linux]
 
-  '@esbuild/linux-x64@0.27.7':
-    resolution: {integrity: sha512-hzznmADPt+OmsYzw1EE33ccA+HPdIqiCRq7cQeL1Jlq2gb1+OyWBkMCrYGBJ+sxVzve2ZJEVeePbLM2iEIZSxA==}
-    engines: {node: '>=18'}
-    cpu: [x64]
-    os: [linux]
-
   '@esbuild/linux-x64@0.28.2':
     resolution: {integrity: sha512-4xTZr1FUmSoQW4XIWmit3tzQrUTZM+N3P0XV8xROKYF50XfI7xeO90+1bZvNwxIufQ9hDQVRJH5YhgPVF8A/HQ==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [linux]
 
-  '@esbuild/netbsd-arm64@0.27.7':
-    resolution: {integrity: sha512-b6pqtrQdigZBwZxAn1UpazEisvwaIDvdbMbmrly7cDTMFnw/+3lVxxCTGOrkPVnsYIosJJXAsILG9XcQS+Yu6w==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [netbsd]
-
   '@esbuild/netbsd-arm64@0.28.2':
     resolution: {integrity: sha512-sSATRjPeDBg3pdgHoQfoYBob11Kk1FGa9lui5RIHZCoCkJa9QKlvl3/vKz2usCmYYjs7ymJR/2Nnsqe+Hjt5nw==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [netbsd]
-
-  '@esbuild/netbsd-x64@0.27.7':
-    resolution: {integrity: sha512-OfatkLojr6U+WN5EDYuoQhtM+1xco+/6FSzJJnuWiUw5eVcicbyK3dq5EeV/QHT1uy6GoDhGbFpprUiHUYggrw==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [netbsd]
 
   '@esbuild/netbsd-x64@0.28.2':
@@ -3563,22 +3463,10 @@ packages:
     cpu: [x64]
     os: [netbsd]
 
-  '@esbuild/openbsd-arm64@0.27.7':
-    resolution: {integrity: sha512-AFuojMQTxAz75Fo8idVcqoQWEHIXFRbOc1TrVcFSgCZtQfSdc1RXgB3tjOn/krRHENUB4j00bfGjyl2mJrU37A==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [openbsd]
-
   '@esbuild/openbsd-arm64@0.28.2':
     resolution: {integrity: sha512-AL2qJILH7lNjrDmCQDvdxMfAUIv8KMNZOvrwAQ8i8//ntL9FflhOyMJ8OZSMBb8/AWXe3/5v5S20y3zCoZWKoQ==}
     engines: {node: '>=18'}
     cpu: [arm64]
-    os: [openbsd]
-
-  '@esbuild/openbsd-x64@0.27.7':
-    resolution: {integrity: sha512-+A1NJmfM8WNDv5CLVQYJ5PshuRm/4cI6WMZRg1by1GwPIQPCTs1GLEUHwiiQGT5zDdyLiRM/l1G0Pv54gvtKIg==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [openbsd]
 
   '@esbuild/openbsd-x64@0.28.2':
@@ -3587,23 +3475,11 @@ packages:
     cpu: [x64]
     os: [openbsd]
 
-  '@esbuild/openharmony-arm64@0.27.7':
-    resolution: {integrity: sha512-+KrvYb/C8zA9CU/g0sR6w2RBw7IGc5J2BPnc3dYc5VJxHCSF1yNMxTV5LQ7GuKteQXZtspjFbiuW5/dOj7H4Yw==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [openharmony]
-
   '@esbuild/openharmony-arm64@0.28.2':
     resolution: {integrity: sha512-WkhYDmpTjLvGlScA1rwjRUmhl4k8oXR3cIbtqWmELgU/dFeHHlEllxDvdWcNJV9rbzCexB5vz8gtNewWLgCT7Q==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [openharmony]
-
-  '@esbuild/sunos-x64@0.27.7':
-    resolution: {integrity: sha512-ikktIhFBzQNt/QDyOL580ti9+5mL/YZeUPKU2ivGtGjdTYoqz6jObj6nOMfhASpS4GU4Q/Clh1QtxWAvcYKamA==}
-    engines: {node: '>=18'}
-    cpu: [x64]
-    os: [sunos]
 
   '@esbuild/sunos-x64@0.28.2':
     resolution: {integrity: sha512-GPMSkTOtMnv2U2F8gxe4Io6qmVs+YKyp832Etqqxr0hFngmXQ3rzwytelm3GIn7T4VviRUlf3sOgBOiTdvaf7g==}
@@ -3611,34 +3487,16 @@ packages:
     cpu: [x64]
     os: [sunos]
 
-  '@esbuild/win32-arm64@0.27.7':
-    resolution: {integrity: sha512-7yRhbHvPqSpRUV7Q20VuDwbjW5kIMwTHpptuUzV+AA46kiPze5Z7qgt6CLCK3pWFrHeNfDd1VKgyP4O+ng17CA==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [win32]
-
   '@esbuild/win32-arm64@0.28.2':
     resolution: {integrity: sha512-PIhhEkE9uPBleRBrQEJpUn7MBnibZzbGzYWPmY3x+YoVg/95zbjB4CxPPOQ8l5tYYM4mMaCthF8/1DIfBQQyWQ==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [win32]
 
-  '@esbuild/win32-ia32@0.27.7':
-    resolution: {integrity: sha512-SmwKXe6VHIyZYbBLJrhOoCJRB/Z1tckzmgTLfFYOfpMAx63BJEaL9ExI8x7v0oAO3Zh6D/Oi1gVxEYr5oUCFhw==}
-    engines: {node: '>=18'}
-    cpu: [ia32]
-    os: [win32]
-
   '@esbuild/win32-ia32@0.28.2':
     resolution: {integrity: sha512-YmJbfTlvU7Sdn9BB+4PRES4oB6pxgS37MAONj+hBr/cpXS1aBPKXxNnDbu+QCWPj0o9dgyxeq79g6c5P8KeuYA==}
     engines: {node: '>=18'}
     cpu: [ia32]
-    os: [win32]
-
-  '@esbuild/win32-x64@0.27.7':
-    resolution: {integrity: sha512-56hiAJPhwQ1R4i+21FVF7V8kSD5zZTdHcVuRFMW0hn753vVfQN8xlx4uOPT4xoGH0Z/oVATuR82AiqSTDIpaHg==}
-    engines: {node: '>=18'}
-    cpu: [x64]
     os: [win32]
 
   '@esbuild/win32-x64@0.28.2':
@@ -4138,12 +3996,12 @@ packages:
   '@kobalte/core@0.13.14':
     resolution: {integrity: sha512-SBVB1lnvYbYt2x3t7fG0lo5fGLEbHQ6PII3NDPva8vD5e2v53On84ZVQiuIk0XI/55R4GQhden7Yem+R/XR8uQ==}
     peerDependencies:
-      solid-js: ^1.9.8
+      solid-js: 1.9.17
 
   '@kobalte/utils@0.9.2':
     resolution: {integrity: sha512-jRVXr+zsVHxzDXRoh+CDeXzvCsFJ6uiHhqqNQ26Cw9ZsZ3D6nqPUBt1gGVtj2ZPmRL3a9Uk1v8D1aJ8/I12Dow==}
     peerDependencies:
-      solid-js: ^1.8.8
+      solid-js: 1.9.17
 
   '@lmdb/lmdb-darwin-arm64@3.5.6':
     resolution: {integrity: sha512-mY5FG4TjPAkY4P0w+OhHaUka5mDh2TX2WKYIwuKzJ1zeW3VvRgxdam/lGJTquI+bthTx5CSHDW+BAQCnNAzkEA==}
@@ -6840,67 +6698,67 @@ packages:
   '@solid-primitives/event-listener@2.4.6':
     resolution: {integrity: sha512-5I0YJcTVYIWoMmgBSROBZGcz+ymhew/pGTg2dHW74BUjFKsV8Li4bOZYl0YAGP4mHw5o4UBd9/BEesqBci3wxw==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/keyed@1.5.3':
     resolution: {integrity: sha512-zNadtyYBhJSOjXtogkGHmRxjGdz9KHc8sGGVAGlUABkE8BED2tbIZoxkwSqzOwde8OcUEH0bb5DLZUWIMvyBSA==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/map@0.4.13':
     resolution: {integrity: sha512-B1zyFbsiTQvqPr+cuPCXO72sRuczG9Swncqk5P74NCGw1VE8qa/Ry9GlfI1e/VdeQYHjan+XkbE3rO2GW/qKew==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/media@2.3.6':
     resolution: {integrity: sha512-pk49gPOq/UMRUJ+pTSrOfBiR8xJjRYHXIf1iR/jSnyQ/KroU+ZXhkZzavC7hvfp2vJeOTW5k2/HN0r3Q1VJ7Pw==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/props@3.2.4':
     resolution: {integrity: sha512-MXXdvi2TSB6d+0N6ueA/HP1j/Kh9SEc4WdF1ZDMLwPagxW6pIHHSS9xbRO0RjqSVpNP4j0nxCWT1hx3CkJNhNA==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/refs@1.1.4':
     resolution: {integrity: sha512-bLjwIs6ZPu8NQnuw04sU3Zc8qKSpbc0umUU/O4SHf6oWOdO4+dHY8vb1T7C4b/Tg103+9WGr6sEE0+NFlbaB/A==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/resize-observer@2.2.0':
     resolution: {integrity: sha512-9Fuu/EWBeGj+atGHRJp70HKhdfalmpjwxY8a32NZixdLNmfCJ45AfhLQNr6uOzETbbiMx4iCKlTrJ8KZCHC2Ww==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/rootless@1.5.4':
     resolution: {integrity: sha512-TOIZa1VUfVJ+9nkCcRajw3U4t9vBOP1HxX1WHNTbXq32mXwlqTvUnC4CRIilohcryBkT9u2ZkhUDSHRTaGp55g==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/static-store@0.1.4':
     resolution: {integrity: sha512-LgtVaVBtB7EbmS4+M0b8xY5Iq6pUWXBsIC4VgtrFKDGDdyCaDt88sHk0fUlx1Enxm/XZnZyLXJABRoa39RjJqA==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/storage@1.3.11':
     resolution: {integrity: sha512-PpQWR3TaTxHIJFbI9ZssYTM4Aa67g1vJIgps4TPhcXzHqqomrPAIveFC2FG7SDQoi9YQia8FVBjigELziJpfIg==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/transition-group@1.1.2':
     resolution: {integrity: sha512-gnHS0OmcdjeoHN9n7Khu8KNrOlRc8a2weETDt2YT6o1zeW/XtUC6Db3Q9pkMU/9cCKdEmN4b0a/41MKAHRhzWA==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/trigger@1.2.4':
     resolution: {integrity: sha512-Ju0e+ZOD7hpOp7nptJimvDSZHWFvIvF9iBWMvuwt30smX7c5wmB8Kmc0AdDuv0wOTi06PQ1J5IrP1WJbH2yUBQ==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@solid-primitives/utils@6.4.1':
     resolution: {integrity: sha512-ISSB5QX1qP2ynrheIpYwc4oKR5Ny4siNuUyf1qZniy+Il+p/PtDB0QK1Dnle8noiHpwRD3gpPdubOC3qI/Zamg==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
   '@spartan-ng/brain@1.5.0':
     resolution: {integrity: sha512-h/8PhelvtU5Evdbj1n8pgQfli8GPAWpHSJrsYMMpMNyM8o5bHRHot2nOD7k9aQGZp1JkClzcwSb9Au//p7jIAQ==}
@@ -7718,7 +7576,7 @@ packages:
     peerDependencies:
       '@unhead/cli': ^3.4.2
       '@vitejs/devtools-kit': ^0.4.1
-      esbuild: '>=0.17.0'
+      esbuild: ^0.28.1
       lightningcss: '>=1.20.0'
       oxc-parser: '>=0.98.0'
       rolldown: '>=1.0.0'
@@ -9509,11 +9367,6 @@ packages:
 
   esast-util-from-js@2.0.1:
     resolution: {integrity: sha512-8Ja+rNJ0Lt56Pcf3TAmpBZjmx8ZcK5Ts4cAzIOjsjevg9oSXJnl6SUQ2EevU8tv3h6ZLWmoKL5H4fgWvdvfETw==}
-
-  esbuild@0.27.7:
-    resolution: {integrity: sha512-IxpibTjyVnmrIQo5aqNpCgoACA/dTKLTlhMHihVHhdkxKyPO1uBBthumT0rdHmcsk9uMonIWS0m4FljWzILh3w==}
-    engines: {node: '>=18'}
-    hasBin: true
 
   esbuild@0.28.2:
     resolution: {integrity: sha512-HKVLS8dvII+xoKW9kmqxbRKrnWEXfJJr/FZhhJmiqIB0e053QNYFqOBouTMO/k5sID4MvCiUCvv8b9M4h32wIA==}
@@ -11531,10 +11384,6 @@ packages:
     peerDependencies:
       postcss: ^8.5.23
 
-  postcss-selector-parser@6.1.4:
-    resolution: {integrity: sha512-bIoJLOmjCO1S9XdY/DcnR5hJxvrDir1PbGChrzXG3vw0/FOliy/fA3dmdhQ441kah4gKv+TwckGzex6wNS5cnQ==}
-    engines: {node: '>=4'}
-
   postcss-selector-parser@7.1.6:
     resolution: {integrity: sha512-7qASPzhKF2l2KLboRZux8CCTRMdGiV08vWmyKzPz22qZ7ZjQBOeY7rNzNoCLSUiftJ7HUq0GERHmxw/t0dCdMw==}
     engines: {node: '>=4'}
@@ -12318,14 +12167,14 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  seroval-plugins@1.5.6:
-    resolution: {integrity: sha512-HXuLAX2pu/UByPpaeo/TaMfvMIi+1QqIoPJYCcAtU8QkVNwgR6MPlGuCQTErV1JwraaMbYaWVIBX7mppzGLATQ==}
+  seroval-plugins@1.6.8:
+    resolution: {integrity: sha512-N7mWAMydj89EnYTHtRpS3LBrAz3J9O6oVrqpuXuvlAHfAUG8WEKqtbAd7SBiJNY5NfCAFhSdyAh7wI4Shjqy4g==}
     engines: {node: '>=10'}
     peerDependencies:
-      seroval: ^1.0
+      seroval: 1.6.8
 
-  seroval@1.5.6:
-    resolution: {integrity: sha512-rVQVWjjSvlINzaQPZH5JFqsqEsIWdTxY3iJZCnTL/5gQbXIRooVZKI60tVCkOVfzcRPejboxO2t0P89dg5mQaA==}
+  seroval@1.6.8:
+    resolution: {integrity: sha512-HlSgSAkTk4EqHcje1ptJjfZi1YDv5KbhVJ/d3P7T/nAXua2VmDu+AKDX5VTdFfZf48nDkWB2TKYt0DrCSa+3wg==}
     engines: {node: '>=10'}
 
   set-function-length@1.2.2:
@@ -12357,8 +12206,8 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  shell-quote@1.10.0:
-    resolution: {integrity: sha512-w1aiOKwKuRgtwAReIIj89puqg+I7GvX4IbLrvmhXbzQsj1+Zwi4VO3+fa6ZF91TWSjIxoEkKnMeHcLEODK5ZXA==}
+  shell-quote@1.12.0:
+    resolution: {integrity: sha512-PcByqNyT/38F2kDNi006HAMRJaULuBzq/FOsw3qdZvX/GA9W/jamDaRskgHjubHiftXK5sIFxLNkvrXUwcof6Q==}
     engines: {node: '>= 0.4'}
 
   shiki@4.4.3:
@@ -12404,31 +12253,31 @@ packages:
     resolution: {integrity: sha512-aBY19bn/XA+hKOKX0qL7Z0UfdBsbQvc9hn993U8ALUjzxCvDcuZqLoRXjGJrUARWAlwMnsRVD9sw2AFNOYvalA==}
     engines: {node: '>=22'}
 
-  smol-toml@1.8.0:
-    resolution: {integrity: sha512-kCZr2V3ch9i00x8zXRhjUNVcjG9ijES5dDudkXvUVCT5QlJNQWElSJdZqyPemffHoLNUYwOcou0Fy+ojN0uHSQ==}
+  smol-toml@1.9.1:
+    resolution: {integrity: sha512-j7WyPdf0CJoutMzMoPLF/bVXHtKZIT9Rb4eGeEbWw8X2t5oirjPgpL+OpaENZrILYaXqYwnVH+qgUwVbl+pUJQ==}
     engines: {node: '>= 18'}
 
-  solid-js@1.9.15:
-    resolution: {integrity: sha512-EeiY2xfpZJqPLjXspVEKjAII4yv8NyG//NxZ3IpOFHdUNnnTyL0uJOeS9LWGvA7cFCz5y94cjFwYlmw5Luncsg==}
+  solid-js@1.9.17:
+    resolution: {integrity: sha512-4GAmLOWPfNV8H9Jfn2LSFTpNEG6jiOKPiwd5lnLGQtehHaX6l3TOLzJqQ7mqwB/3k1Yy3zyumFVopmc/tm34ow==}
 
   solid-presence@0.2.0:
     resolution: {integrity: sha512-YM92o+jvpzX3XGaD4rLYmq/Kc2ZVh47GSCLEufHBFQQIurvZTs8SoGJxO8BJGNDxBKdcS8F3dYhW1SDXp4BNjA==}
     peerDependencies:
-      solid-js: ^1.8
+      solid-js: 1.9.17
 
   solid-prevent-scroll@0.1.11:
     resolution: {integrity: sha512-2PComVCDHaQN/5t7ogEqUYeHasritZKXZ8Sb/VLkl0Web8o9YhEwOo8LSujJEahvMlYCNyKt0zRJeHldOAeWZg==}
     peerDependencies:
-      solid-js: ^1.8
+      solid-js: 1.9.17
 
   solid-transition-group@0.2.3:
     resolution: {integrity: sha512-iB72c9N5Kz9ykRqIXl0lQohOau4t0dhel9kjwFvx81UZJbVwaChMuBuyhiZmK24b8aKEK0w3uFM96ZxzcyZGdg==}
     engines: {node: '>=18.0.0', pnpm: '>=8.6.0'}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: 1.9.17
 
-  source-map-js@1.2.1:
-    resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
+  source-map-js@1.2.2:
+    resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
 
   source-map-support@0.5.21:
@@ -12992,7 +12841,7 @@ packages:
       '@rsbuild/core': '*'
       '@rspack/core': '*'
       bun-types-no-globals: '*'
-      esbuild: '*'
+      esbuild: ^0.28.1
       rolldown: '*'
       rollup: '*'
       unloader: '*'
@@ -13177,7 +13026,7 @@ packages:
     peerDependencies:
       '@types/node': ^20.19.0 || >=22.12.0
       '@vitejs/devtools': ^0.4.0 || ^0.5.0
-      esbuild: ^0.27.0 || ^0.28.0
+      esbuild: ^0.28.1
       jiti: '>=1.21.0'
       less: ^4.0.0
       sass: ^1.70.0
@@ -13220,7 +13069,7 @@ packages:
     peerDependencies:
       '@types/node': ^20.19.0 || >=22.12.0
       '@vitejs/devtools': ^0.7.1
-      esbuild: ^0.27.0 || ^0.28.0
+      esbuild: ^0.28.1
       jiti: '>=1.21.0'
       less: ^4.0.0
       sass: ^1.70.0
@@ -14028,7 +13877,7 @@ snapshots:
       picomatch: 4.0.7
       retext-smartypants: 6.2.0
       shiki: 4.4.3
-      smol-toml: 1.8.0
+      smol-toml: 1.9.1
       unified: 11.0.5
 
   '@astrojs/markdown-remark@7.2.4':
@@ -14728,10 +14577,10 @@ snapshots:
       fast-wrap-ansi: 0.2.2
       sisteransi: 1.0.5
 
-  '@corvu/utils@0.4.2(solid-js@1.9.15)':
+  '@corvu/utils@0.4.2(solid-js@1.9.17)':
     dependencies:
       '@floating-ui/dom': 1.8.0
-      solid-js: 1.9.15
+      solid-js: 1.9.17
     optional: true
 
   '@css-render/plugin-bem@0.15.14(css-render@0.15.14)':
@@ -14911,157 +14760,79 @@ snapshots:
 
   '@emotion/weak-memoize@0.4.0': {}
 
-  '@esbuild/aix-ppc64@0.27.7':
-    optional: true
-
   '@esbuild/aix-ppc64@0.28.2':
-    optional: true
-
-  '@esbuild/android-arm64@0.27.7':
     optional: true
 
   '@esbuild/android-arm64@0.28.2':
     optional: true
 
-  '@esbuild/android-arm@0.27.7':
-    optional: true
-
   '@esbuild/android-arm@0.28.2':
-    optional: true
-
-  '@esbuild/android-x64@0.27.7':
     optional: true
 
   '@esbuild/android-x64@0.28.2':
     optional: true
 
-  '@esbuild/darwin-arm64@0.27.7':
-    optional: true
-
   '@esbuild/darwin-arm64@0.28.2':
-    optional: true
-
-  '@esbuild/darwin-x64@0.27.7':
     optional: true
 
   '@esbuild/darwin-x64@0.28.2':
     optional: true
 
-  '@esbuild/freebsd-arm64@0.27.7':
-    optional: true
-
   '@esbuild/freebsd-arm64@0.28.2':
-    optional: true
-
-  '@esbuild/freebsd-x64@0.27.7':
     optional: true
 
   '@esbuild/freebsd-x64@0.28.2':
     optional: true
 
-  '@esbuild/linux-arm64@0.27.7':
-    optional: true
-
   '@esbuild/linux-arm64@0.28.2':
-    optional: true
-
-  '@esbuild/linux-arm@0.27.7':
     optional: true
 
   '@esbuild/linux-arm@0.28.2':
     optional: true
 
-  '@esbuild/linux-ia32@0.27.7':
-    optional: true
-
   '@esbuild/linux-ia32@0.28.2':
-    optional: true
-
-  '@esbuild/linux-loong64@0.27.7':
     optional: true
 
   '@esbuild/linux-loong64@0.28.2':
     optional: true
 
-  '@esbuild/linux-mips64el@0.27.7':
-    optional: true
-
   '@esbuild/linux-mips64el@0.28.2':
-    optional: true
-
-  '@esbuild/linux-ppc64@0.27.7':
     optional: true
 
   '@esbuild/linux-ppc64@0.28.2':
     optional: true
 
-  '@esbuild/linux-riscv64@0.27.7':
-    optional: true
-
   '@esbuild/linux-riscv64@0.28.2':
-    optional: true
-
-  '@esbuild/linux-s390x@0.27.7':
     optional: true
 
   '@esbuild/linux-s390x@0.28.2':
     optional: true
 
-  '@esbuild/linux-x64@0.27.7':
-    optional: true
-
   '@esbuild/linux-x64@0.28.2':
-    optional: true
-
-  '@esbuild/netbsd-arm64@0.27.7':
     optional: true
 
   '@esbuild/netbsd-arm64@0.28.2':
     optional: true
 
-  '@esbuild/netbsd-x64@0.27.7':
-    optional: true
-
   '@esbuild/netbsd-x64@0.28.2':
-    optional: true
-
-  '@esbuild/openbsd-arm64@0.27.7':
     optional: true
 
   '@esbuild/openbsd-arm64@0.28.2':
     optional: true
 
-  '@esbuild/openbsd-x64@0.27.7':
-    optional: true
-
   '@esbuild/openbsd-x64@0.28.2':
-    optional: true
-
-  '@esbuild/openharmony-arm64@0.27.7':
     optional: true
 
   '@esbuild/openharmony-arm64@0.28.2':
     optional: true
 
-  '@esbuild/sunos-x64@0.27.7':
-    optional: true
-
   '@esbuild/sunos-x64@0.28.2':
-    optional: true
-
-  '@esbuild/win32-arm64@0.27.7':
     optional: true
 
   '@esbuild/win32-arm64@0.28.2':
     optional: true
 
-  '@esbuild/win32-ia32@0.27.7':
-    optional: true
-
   '@esbuild/win32-ia32@0.28.2':
-    optional: true
-
-  '@esbuild/win32-x64@0.27.7':
     optional: true
 
   '@esbuild/win32-x64@0.28.2':
@@ -15523,28 +15294,28 @@ snapshots:
 
   '@juggle/resize-observer@3.4.0': {}
 
-  '@kobalte/core@0.13.14(solid-js@1.9.15)':
+  '@kobalte/core@0.13.14(solid-js@1.9.17)':
     dependencies:
       '@floating-ui/dom': 1.8.0
       '@internationalized/number': 3.6.7
-      '@kobalte/utils': 0.9.2(solid-js@1.9.15)
-      '@solid-primitives/props': 3.2.4(solid-js@1.9.15)
-      '@solid-primitives/resize-observer': 2.2.0(solid-js@1.9.15)
-      solid-js: 1.9.15
-      solid-presence: 0.2.0(solid-js@1.9.15)
-      solid-prevent-scroll: 0.1.11(solid-js@1.9.15)
+      '@kobalte/utils': 0.9.2(solid-js@1.9.17)
+      '@solid-primitives/props': 3.2.4(solid-js@1.9.17)
+      '@solid-primitives/resize-observer': 2.2.0(solid-js@1.9.17)
+      solid-js: 1.9.17
+      solid-presence: 0.2.0(solid-js@1.9.17)
+      solid-prevent-scroll: 0.1.11(solid-js@1.9.17)
     optional: true
 
-  '@kobalte/utils@0.9.2(solid-js@1.9.15)':
+  '@kobalte/utils@0.9.2(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/event-listener': 2.4.6(solid-js@1.9.15)
-      '@solid-primitives/keyed': 1.5.3(solid-js@1.9.15)
-      '@solid-primitives/map': 0.4.13(solid-js@1.9.15)
-      '@solid-primitives/media': 2.3.6(solid-js@1.9.15)
-      '@solid-primitives/props': 3.2.4(solid-js@1.9.15)
-      '@solid-primitives/refs': 1.1.4(solid-js@1.9.15)
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/event-listener': 2.4.6(solid-js@1.9.17)
+      '@solid-primitives/keyed': 1.5.3(solid-js@1.9.17)
+      '@solid-primitives/map': 0.4.13(solid-js@1.9.17)
+      '@solid-primitives/media': 2.3.6(solid-js@1.9.17)
+      '@solid-primitives/props': 3.2.4(solid-js@1.9.17)
+      '@solid-primitives/refs': 1.1.4(solid-js@1.9.17)
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
   '@lmdb/lmdb-darwin-arm64@3.5.6':
@@ -18377,85 +18148,85 @@ snapshots:
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
-  '@solid-primitives/event-listener@2.4.6(solid-js@1.9.15)':
+  '@solid-primitives/event-listener@2.4.6(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/keyed@1.5.3(solid-js@1.9.15)':
+  '@solid-primitives/keyed@1.5.3(solid-js@1.9.17)':
     dependencies:
-      solid-js: 1.9.15
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/map@0.4.13(solid-js@1.9.15)':
+  '@solid-primitives/map@0.4.13(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/trigger': 1.2.4(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/trigger': 1.2.4(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/media@2.3.6(solid-js@1.9.15)':
+  '@solid-primitives/media@2.3.6(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/event-listener': 2.4.6(solid-js@1.9.15)
-      '@solid-primitives/rootless': 1.5.4(solid-js@1.9.15)
-      '@solid-primitives/static-store': 0.1.4(solid-js@1.9.15)
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/event-listener': 2.4.6(solid-js@1.9.17)
+      '@solid-primitives/rootless': 1.5.4(solid-js@1.9.17)
+      '@solid-primitives/static-store': 0.1.4(solid-js@1.9.17)
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/props@3.2.4(solid-js@1.9.15)':
+  '@solid-primitives/props@3.2.4(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/refs@1.1.4(solid-js@1.9.15)':
+  '@solid-primitives/refs@1.1.4(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/resize-observer@2.2.0(solid-js@1.9.15)':
+  '@solid-primitives/resize-observer@2.2.0(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/event-listener': 2.4.6(solid-js@1.9.15)
-      '@solid-primitives/rootless': 1.5.4(solid-js@1.9.15)
-      '@solid-primitives/static-store': 0.1.4(solid-js@1.9.15)
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/event-listener': 2.4.6(solid-js@1.9.17)
+      '@solid-primitives/rootless': 1.5.4(solid-js@1.9.17)
+      '@solid-primitives/static-store': 0.1.4(solid-js@1.9.17)
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/rootless@1.5.4(solid-js@1.9.15)':
+  '@solid-primitives/rootless@1.5.4(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/static-store@0.1.4(solid-js@1.9.15)':
+  '@solid-primitives/static-store@0.1.4(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/storage@1.3.11(solid-js@1.9.15)':
+  '@solid-primitives/storage@1.3.11(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/transition-group@1.1.2(solid-js@1.9.15)':
+  '@solid-primitives/transition-group@1.1.2(solid-js@1.9.17)':
     dependencies:
-      solid-js: 1.9.15
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/trigger@1.2.4(solid-js@1.9.15)':
+  '@solid-primitives/trigger@1.2.4(solid-js@1.9.17)':
     dependencies:
-      '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/utils': 6.4.1(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  '@solid-primitives/utils@6.4.1(solid-js@1.9.15)':
+  '@solid-primitives/utils@6.4.1(solid-js@1.9.17)':
     dependencies:
-      solid-js: 1.9.15
+      solid-js: 1.9.17
     optional: true
 
   '@spartan-ng/brain@1.5.0(047650e4970c8ac2e1be9cfebbefb553)':
@@ -18664,7 +18435,7 @@ snapshots:
       jiti: 2.7.0
       lightningcss: 1.32.0
       magic-string: 0.30.21
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
       tailwindcss: 4.3.3
 
   '@tailwindcss/oxide-android-arm64@4.3.3':
@@ -18773,16 +18544,16 @@ snapshots:
 
   '@tanstack/query-devtools@5.104.0(csstype@3.2.3)':
     dependencies:
-      '@kobalte/core': 0.13.14(solid-js@1.9.15)
-      '@solid-primitives/keyed': 1.5.3(solid-js@1.9.15)
-      '@solid-primitives/resize-observer': 2.2.0(solid-js@1.9.15)
-      '@solid-primitives/storage': 1.3.11(solid-js@1.9.15)
+      '@kobalte/core': 0.13.14(solid-js@1.9.17)
+      '@solid-primitives/keyed': 1.5.3(solid-js@1.9.17)
+      '@solid-primitives/resize-observer': 2.2.0(solid-js@1.9.17)
+      '@solid-primitives/storage': 1.3.11(solid-js@1.9.17)
       '@tanstack/match-sorter-utils': 9.1.2
       '@tanstack/query-core': 5.104.0
       clsx: 2.1.1
       goober: 2.1.19(csstype@3.2.3)
-      solid-js: 1.9.15
-      solid-transition-group: 0.2.3(solid-js@1.9.15)
+      solid-js: 1.9.17
+      solid-transition-group: 0.2.3(solid-js@1.9.17)
       superjson: 2.2.6
     transitivePeerDependencies:
       - csstype
@@ -19659,7 +19430,7 @@ snapshots:
       '@vue/shared': 3.5.43
       entities: 7.0.1
       estree-walker: 2.0.2
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   '@vue/compiler-dom@3.5.43':
     dependencies:
@@ -19676,7 +19447,7 @@ snapshots:
       estree-walker: 2.0.2
       magic-string: 0.30.21
       postcss: 8.5.26
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   '@vue/compiler-ssr@3.5.43':
     dependencies:
@@ -20635,7 +20406,7 @@ snapshots:
 
   argparse@1.0.10:
     dependencies:
-      sprintf-js: 1.0.3
+      sprintf-js: 1.0.3(patch_hash=a36d797b1226e3b8d9dca863d1f28719a752fd43adc8c46788bd6dce05fdbff8)
 
   argparse@2.0.1: {}
 
@@ -20774,7 +20545,7 @@ snapshots:
       picomatch: 4.0.7
       semver: 7.8.5
       shiki: 4.4.3
-      smol-toml: 1.8.0
+      smol-toml: 1.9.1
       svgo: 4.1.0
       tinyclip: 0.1.15
       tinyexec: 1.3.0
@@ -20909,7 +20680,7 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  braces@3.0.3:
+  braces@3.0.3(patch_hash=12b3afb4032ebba3dd220649eb52fc5669988940685976f06bdf5bbb6a672624):
     dependencies:
       fill-range: 7.1.1
 
@@ -21111,12 +20882,12 @@ snapshots:
   css-tree@2.2.1:
     dependencies:
       mdn-data: 2.0.28
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   css-tree@3.2.1:
     dependencies:
       mdn-data: 2.27.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   css-what@7.0.0: {}
 
@@ -21514,35 +21285,6 @@ snapshots:
       acorn: 8.18.0
       esast-util-from-estree: 2.0.0
       vfile-message: 4.0.3
-
-  esbuild@0.27.7:
-    optionalDependencies:
-      '@esbuild/aix-ppc64': 0.27.7
-      '@esbuild/android-arm': 0.27.7
-      '@esbuild/android-arm64': 0.27.7
-      '@esbuild/android-x64': 0.27.7
-      '@esbuild/darwin-arm64': 0.27.7
-      '@esbuild/darwin-x64': 0.27.7
-      '@esbuild/freebsd-arm64': 0.27.7
-      '@esbuild/freebsd-x64': 0.27.7
-      '@esbuild/linux-arm': 0.27.7
-      '@esbuild/linux-arm64': 0.27.7
-      '@esbuild/linux-ia32': 0.27.7
-      '@esbuild/linux-loong64': 0.27.7
-      '@esbuild/linux-mips64el': 0.27.7
-      '@esbuild/linux-ppc64': 0.27.7
-      '@esbuild/linux-riscv64': 0.27.7
-      '@esbuild/linux-s390x': 0.27.7
-      '@esbuild/linux-x64': 0.27.7
-      '@esbuild/netbsd-arm64': 0.27.7
-      '@esbuild/netbsd-x64': 0.27.7
-      '@esbuild/openbsd-arm64': 0.27.7
-      '@esbuild/openbsd-x64': 0.27.7
-      '@esbuild/openharmony-arm64': 0.27.7
-      '@esbuild/sunos-x64': 0.27.7
-      '@esbuild/win32-arm64': 0.27.7
-      '@esbuild/win32-ia32': 0.27.7
-      '@esbuild/win32-x64': 0.27.7
 
   esbuild@0.28.2:
     optionalDependencies:
@@ -21945,7 +21687,7 @@ snapshots:
       consola: 3.4.2
       css-tree: 3.2.1
       defu: 6.1.7
-      esbuild: 0.27.7
+      esbuild: 0.28.2
       fontaine: 0.8.0
       jiti: 2.7.0
       lightningcss: 1.33.0
@@ -21983,7 +21725,7 @@ snapshots:
       consola: 3.4.2
       css-tree: 3.2.1
       defu: 6.1.7
-      esbuild: 0.27.7
+      esbuild: 0.28.2
       fontaine: 0.8.0
       jiti: 2.7.0
       lightningcss: 1.33.0
@@ -22823,7 +22565,7 @@ snapshots:
       oxc-parser: 0.143.0
       oxc-resolver: 11.24.2
       picomatch: 4.0.7
-      smol-toml: 1.8.0
+      smol-toml: 1.9.1
       strip-json-comments: 5.0.3
       tinyglobby: 0.2.17
       unbash: 4.0.10
@@ -22841,7 +22583,7 @@ snapshots:
   launch-editor@2.14.1:
     dependencies:
       picocolors: 1.1.1
-      shell-quote: 1.10.0
+      shell-quote: 1.12.0
 
   less@4.9.1:
     dependencies:
@@ -23085,7 +22827,7 @@ snapshots:
     dependencies:
       '@babel/parser': 7.29.8
       '@babel/types': 7.29.8
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   make-dir@4.0.0:
     dependencies:
@@ -23589,7 +23331,7 @@ snapshots:
 
   micromatch@4.0.8:
     dependencies:
-      braces: 3.0.3
+      braces: 3.0.3(patch_hash=12b3afb4032ebba3dd220649eb52fc5669988940685976f06bdf5bbb6a672624)
       picomatch: 2.3.2
 
   mime@1.6.0:
@@ -24248,16 +23990,11 @@ snapshots:
   postcss-nested@6.2.0(postcss@8.5.26):
     dependencies:
       postcss: 8.5.26
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 7.1.6
 
   postcss-safe-parser@7.1.0(postcss@8.5.26):
     dependencies:
       postcss: 8.5.26
-
-  postcss-selector-parser@6.1.4:
-    dependencies:
-      cssesc: 3.0.0
-      util-deprecate: 1.0.2
 
   postcss-selector-parser@7.1.6:
     dependencies:
@@ -24268,7 +24005,7 @@ snapshots:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   prelude-ls@1.2.1: {}
 
@@ -25201,7 +24938,7 @@ snapshots:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.9
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
     optionalDependencies:
       '@parcel/watcher': 2.6.0
 
@@ -25209,7 +24946,7 @@ snapshots:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.9
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
     optionalDependencies:
       '@parcel/watcher': 2.6.0
 
@@ -25277,12 +25014,12 @@ snapshots:
 
   semver@7.8.5: {}
 
-  seroval-plugins@1.5.6(seroval@1.5.6):
+  seroval-plugins@1.6.8(seroval@1.6.8):
     dependencies:
-      seroval: 1.5.6
+      seroval: 1.6.8
     optional: true
 
-  seroval@1.5.6:
+  seroval@1.6.8:
     optional: true
 
   set-function-length@1.2.2:
@@ -25346,7 +25083,7 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  shell-quote@1.10.0: {}
+  shell-quote@1.12.0: {}
 
   shiki@4.4.3:
     dependencies:
@@ -25411,35 +25148,35 @@ snapshots:
       ansi-styles: 6.2.3
       is-fullwidth-code-point: 5.1.0
 
-  smol-toml@1.8.0: {}
+  smol-toml@1.9.1: {}
 
-  solid-js@1.9.15:
+  solid-js@1.9.17:
     dependencies:
       csstype: 3.2.3
-      seroval: 1.5.6
-      seroval-plugins: 1.5.6(seroval@1.5.6)
+      seroval: 1.6.8
+      seroval-plugins: 1.6.8(seroval@1.6.8)
     optional: true
 
-  solid-presence@0.2.0(solid-js@1.9.15):
+  solid-presence@0.2.0(solid-js@1.9.17):
     dependencies:
-      '@corvu/utils': 0.4.2(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@corvu/utils': 0.4.2(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  solid-prevent-scroll@0.1.11(solid-js@1.9.15):
+  solid-prevent-scroll@0.1.11(solid-js@1.9.17):
     dependencies:
-      '@corvu/utils': 0.4.2(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@corvu/utils': 0.4.2(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  solid-transition-group@0.2.3(solid-js@1.9.15):
+  solid-transition-group@0.2.3(solid-js@1.9.17):
     dependencies:
-      '@solid-primitives/refs': 1.1.4(solid-js@1.9.15)
-      '@solid-primitives/transition-group': 1.1.2(solid-js@1.9.15)
-      solid-js: 1.9.15
+      '@solid-primitives/refs': 1.1.4(solid-js@1.9.17)
+      '@solid-primitives/transition-group': 1.1.2(solid-js@1.9.17)
+      solid-js: 1.9.17
     optional: true
 
-  source-map-js@1.2.1: {}
+  source-map-js@1.2.2: {}
 
   source-map-support@0.5.21:
     dependencies:
@@ -25456,7 +25193,7 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
-  sprintf-js@1.0.3: {}
+  sprintf-js@1.0.3(patch_hash=a36d797b1226e3b8d9dca863d1f28719a752fd43adc8c46788bd6dce05fdbff8): {}
 
   stable-hash-x@0.2.0: {}
 

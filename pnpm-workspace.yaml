@@ -9,80 +9,98 @@ packages:
 onlyBuiltDependencies:
   - esbuild
 
-peerDependencyRules:
-  allowedVersions:
-    react: "18 || 19"
-    react-dom: "18 || 19"
-
 # Transitive dependencies pinned by their parents' ranges, forced to patched
 # versions. None reach a published package — every @adapttable/* package ships
 # only @adapttable/* deps plus react-compiler-runtime, @tanstack/react-virtual,
 # @tanstack/angular-virtual and tslib — so these are build/dev tooling only.
 overrides:
-  # React/Vite tooling retains the baseline Node 22.12 contract. Angular owns
-  # its separate Babel 8 dependency and higher Node floor. Reuse the root
-  # Babel 7 peer instead of allowing workspace peer resolution to select 8.
-  "@rolldown/plugin-babel>@babel/core": "$@babel/core"
+  "@adapttable/ai": "workspace:*"
+  "@adapttable/ai-angular": "workspace:*"
+  "@adapttable/ai-react": "workspace:*"
+  "@adapttable/angular": "workspace:*"
+  "@adapttable/angular-unstyled": "workspace:*"
   # Starters declare ^2.0.0 so StackBlitz installs from npm. The monorepo
   # must still typecheck them against workspace packages. Turbo `^build`
   # only follows a matching semver range, so each starter also names the
   # workspace `#build` it needs (see starters/*/turbo.json).
   "@adapttable/antd": "workspace:*"
-  "@adapttable/element-plus": "workspace:*"
-  "@adapttable/naive-ui": "workspace:*"
-  "@adapttable/nuxt-ui": "workspace:*"
-  "@adapttable/quasar": "workspace:*"
-  "@adapttable/reka-ui": "workspace:*"
-  "@adapttable/shadcn-vue": "workspace:*"
-  "@adapttable/vuetify": "workspace:*"
   "@adapttable/base-ui": "workspace:*"
   "@adapttable/chakra": "workspace:*"
   "@adapttable/core": "workspace:*"
-  "@adapttable/react": "workspace:*"
+  "@adapttable/element-plus": "workspace:*"
   "@adapttable/mantine": "workspace:*"
   "@adapttable/mui": "workspace:*"
-  "@adapttable/radix": "workspace:*"
-  "@adapttable/shadcn": "workspace:*"
-  "@adapttable/unstyled": "workspace:*"
-  "@adapttable/ai": "workspace:*"
-  "@adapttable/ai-react": "workspace:*"
-  "@adapttable/ai-angular": "workspace:*"
-  "@adapttable/angular": "workspace:*"
-  "@adapttable/angular-unstyled": "workspace:*"
+  "@adapttable/naive-ui": "workspace:*"
   "@adapttable/ng-zorro": "workspace:*"
-  "eslint-plugin-sonarjs>minimatch": "^10.2.3"
-  # CRLF injection, cache-control disclosure, cookie injection, response
-  # desync, private-cache crash, TLS validation bypass in BalancedPool,
-  # shared-cache cookie disclosure, RetryHandler DoS, retry response
-  # splitting, dump-interceptor truncation, unsafe-method cache replay
-  undici: "^7.29.1"
-  # shared-memory serialization, quadratic and sparse-array expansion in
-  # uneval, unhandled rejection in stringifyAsync, __proto__ key bypass
-  devalue: "^5.9.3"
-  # host confusion via backslash authority introducer, and via an unclosed
-  # bracket in the authority
-  fast-uri: "^3.1.8"
-  # sourceMappingURL path traversal → arbitrary .map disclosure
-  postcss: "^8.5.23"
-  # removeScripts plugin left executable scripts intact
-  svgo: "^4.0.2"
-  # inherited libvips CVEs (2026-33327/33328/35590/35591)
-  sharp: "^0.35.0"
-  # merge-key chains force quadratic CPU; 4.3.1 still burns on empty sources
-  "js-yaml@3": "^3.15.0"
-  "js-yaml@4": "^4.3.2"
+  "@adapttable/nuxt-ui": "workspace:*"
+  "@adapttable/quasar": "workspace:*"
+  "@adapttable/radix": "workspace:*"
+  "@adapttable/react": "workspace:*"
+  "@adapttable/reka-ui": "workspace:*"
+  "@adapttable/shadcn": "workspace:*"
+  "@adapttable/shadcn-vue": "workspace:*"
+  "@adapttable/unstyled": "workspace:*"
+  "@adapttable/vuetify": "workspace:*"
+  # React/Vite tooling retains the baseline Node 22.12 contract. Angular owns
+  # its separate Babel 8 dependency and higher Node floor. Reuse the root
+  # Babel 7 peer instead of allowing workspace peer resolution to select 8.
+  "@rolldown/plugin-babel>@babel/core": "$@babel/core"
   # DoS via exponential-time expansion of consecutive non-expanding {} groups
   # and quadratic-time expansion of the `{a},b}` rewrite; three majors are in
   # the tree (glob/minimatch transitives)
   "brace-expansion@1": "^1.1.21"
   "brace-expansion@2": "^2.1.7"
   "brace-expansion@5": "^5.0.12"
+  # shared-memory serialization, quadratic and sparse-array expansion in
+  # uneval, unhandled rejection in stringifyAsync, __proto__ key bypass
+  devalue: "^5.9.3"
+  # development-server file read on Windows; 0.28.2 is already in the tree
+  esbuild: "^0.28.1"
+  "eslint-plugin-sonarjs>minimatch": "^10.2.3"
+  # host confusion via backslash authority introducer, and via an unclosed
+  # bracket in the authority
+  fast-uri: "^3.1.8"
+  # merge-key chains force quadratic CPU; 4.3.1 still burns on empty sources
+  "js-yaml@3": "^3.15.0"
+  "js-yaml@4": "^4.3.2"
   # predictable output in the browser via unsanitized comment / ID
   nanoid: "^3.3.18"
+  # sourceMappingURL path traversal → arbitrary .map disclosure
+  postcss: "^8.5.23"
+  # quadratic flat-selector parsing. postcss-nested 6.2.0 asks for ^6.1.1;
+  # 7.1.6 keeps the processSync API that plugin calls.
+  postcss-selector-parser: "^7.1.6"
   # array-limit / prototype pollution advisories; 6.15.1 is the last
   # vulnerable line Dependabot could not raise past a parent range
   qs: "^6.16.0"
+  seroval: "1.6.8"
+  seroval-plugins: "1.6.8"
+  # inherited libvips CVEs (2026-33327/33328/35590/35591)
+  sharp: "^0.35.0"
+  # command injection via a line terminator in a token after a comment token
+  shell-quote: "^1.11.0"
+  # quadratic parseKey rescan to the end of the document
+  smol-toml: "^1.9.0"
+  # fromJSON thenable assimilation and unchecked TypedArray length.
+  # solid-js 1.9.15 declares seroval ~1.5.4; 1.9.17 declares ~1.6.8.
+  solid-js: "1.9.17"
+  # event-loop stall through indexed source-map section offsets
+  source-map-js: "^1.2.2"
+  # removeScripts plugin left executable scripts intact
+  svgo: "^4.0.2"
+  # CRLF injection, cache-control disclosure, cookie injection, response
+  # desync, private-cache crash, TLS validation bypass in BalancedPool,
+  # shared-cache cookie disclosure, RetryHandler DoS, retry response
+  # splitting, dump-interceptor truncation, unsafe-method cache replay
+  undici: "^7.29.1"
 
 # Local security remedy until a patched upstream release exists; see patches/README.md.
 patchedDependencies:
+  braces@3.0.3: patches/braces@3.0.3.patch
   http-cache-semantics@4.2.0: patches/http-cache-semantics@4.2.0.patch
+  sprintf-js@1.0.3: patches/sprintf-js@1.0.3.patch
+
+peerDependencyRules:
+  allowedVersions:
+    react: "18 || 19"
+    react-dom: "18 || 19"
