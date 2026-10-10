@@ -30,7 +30,12 @@ export const NaiveFilterSurface = defineComponent(
     const active = useScopeActivity();
     const mounted = shallowRef(false);
     const content = shallowRef<HTMLElement | null>(null);
-    const position = shallowRef<{ x: number; y: number; maxHeight: number }>();
+    const position = shallowRef<{
+      x: number;
+      y: number;
+      maxWidth: number;
+      maxHeight: number;
+    }>();
     let lifetime = 0;
     let reason: OverlayCloseReason | undefined;
     const dismiss = (
@@ -110,8 +115,17 @@ export const NaiveFilterSurface = defineComponent(
         if (!view) return;
         const place = () => {
           const rect = anchor.getBoundingClientRect();
+          const root = anchor.ownerDocument.documentElement;
+          // The follower flips but never shifts, so keep the card on screen here.
+          const viewport = root.clientWidth;
+          const rem = Number.parseFloat(view.getComputedStyle(root).fontSize);
+          const width = Math.min(22 * (rem || 16), viewport - 16);
           position.value = {
-            x: dir === "rtl" ? rect.right : rect.left,
+            x:
+              dir === "rtl"
+                ? Math.min(viewport - 8, Math.max(rect.right, width + 8))
+                : Math.max(8, Math.min(rect.left, viewport - 8 - width)),
+            maxWidth: viewport - 16,
             y: rect.bottom,
             maxHeight: Math.max(
               0,
@@ -262,7 +276,7 @@ export const NaiveFilterSurface = defineComponent(
           style: {
             boxSizing: "border-box",
             width: "22rem",
-            maxWidth: "calc(100vw - 16px)",
+            maxWidth: `${position.value.maxWidth}px`,
             maxHeight: `${position.value.maxHeight}px`,
             overflow: "auto",
           },
