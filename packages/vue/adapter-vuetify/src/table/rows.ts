@@ -82,8 +82,8 @@ export function vuetifyBodyRows<TRow>(
           [row.reorder?.(false)]
         )
       );
-    cells.push(vuetifyColumnSpacer(model, "td", "start"));
     cells.push(
+      vuetifyColumnSpacer(model, "td", "start"),
       ...row.cells.map((cell) =>
         h(
           "td",
@@ -96,9 +96,9 @@ export function vuetifyBodyRows<TRow>(
           },
           [vuetifyCellContent(cell, row, controls, names, !model.expandLabel)]
         )
-      )
+      ),
+      vuetifyColumnSpacer(model, "td", "end")
     );
-    cells.push(vuetifyColumnSpacer(model, "td", "end"));
     if (model.actionsLabel)
       cells.push(
         h(
