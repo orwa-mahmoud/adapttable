@@ -5,6 +5,7 @@ import {
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -16,12 +17,13 @@ import {
 } from "@angular/core";
 import { NzButtonModule } from "ng-zorro-antd/button";
 import { NzCardModule } from "ng-zorro-antd/card";
-import { NzPopoverModule } from "ng-zorro-antd/popover";
+import { NzPopoverDirective, NzPopoverModule } from "ng-zorro-antd/popover";
 
 import {
   OVERLAY_Z,
   overlayContains,
   overlayEscapeHandled,
+  pushPopoverIntoViewport,
 } from "./overlayPlacement";
 
 /** @internal */
@@ -112,6 +114,7 @@ export class AdaptFilterPopover {
   }));
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
+  private readonly popover = viewChild.required(NzPopoverDirective);
   private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
@@ -142,6 +145,9 @@ export class AdaptFilterPopover {
   }
 
   constructor() {
+    afterNextRender(() => {
+      pushPopoverIntoViewport(this.popover());
+    });
     effect((onCleanup) => {
       const { open, onClose } = this.props();
       if (!open) return;

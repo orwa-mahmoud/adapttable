@@ -7,6 +7,7 @@ import {
   ElementRef,
   inject,
 } from "@angular/core";
+import type { NzPopoverDirective } from "ng-zorro-antd/popover";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 
 /** Above the table's sticky headers and pinned cells. @internal */
@@ -31,6 +32,16 @@ export function registerOverlayOrigin(
   return () => {
     origins.delete(entry);
   };
+}
+
+/**
+ * Let CDK push a popover back inside the viewport when no anchored placement
+ * fits, as on a phone where the card is nearly as wide as the screen.
+ * NG-ZORRO does not bind `cdkConnectedOverlayPush`. @internal
+ */
+export function pushPopoverIntoViewport(popover: NzPopoverDirective): void {
+  const overlay = popover.component?.overlay;
+  if (overlay) overlay.push = true;
 }
 
 /** Whether a target belongs to a panel or one of its own child portals. @internal */
