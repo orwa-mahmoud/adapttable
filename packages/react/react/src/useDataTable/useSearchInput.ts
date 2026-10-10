@@ -26,8 +26,8 @@ export function useSearchInput(
   setSearch: (next: string) => void,
   debounceMs = 300
 ): SearchInputState {
-  const [value, setTyped] = useState(search);
-  const debounced = useDebounce(value, debounceMs);
+  const [typed, setTyped] = useState(search);
+  const debounced = useDebounce(typed, debounceMs);
   // The last value we committed, so we can tell our own echo (the committed
   // value coming back as `search`) from a genuine external change.
   const committedRef = useRef(search);
@@ -100,5 +100,5 @@ export function useSearchInput(
     [commit, disarm]
   );
 
-  return { value, setValue };
+  return { value: typed, setValue };
 }
