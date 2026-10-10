@@ -21,6 +21,8 @@ import {
   withDirectives,
 } from "vue";
 
+import { rtlScrollbarGutter } from "../scrollbarGutter";
+
 /** Kit overlays retain their own positioning, focus trap and modal backdrop. */
 export const ElementFilterSurface = defineComponent(
   (
@@ -107,7 +109,9 @@ export const ElementFilterSurface = defineComponent(
             withHeader: false,
             showClose: false,
             destroyOnClose: true,
-            size: "min(30rem, 100vw)",
+            // Relative to the drawer's overlay, which excludes a classic
+            // scrollbar or a reserved gutter; 100vw does not.
+            size: "min(30rem, 100%)",
             dir: props.dir,
             class: props.className,
             "data-adapttable-part": "filters-panel",
@@ -134,7 +138,10 @@ export const ElementFilterSurface = defineComponent(
           showArrow: false,
           width: "min(28rem, calc(100vw - 1rem))",
           popperClass: "adapttable-element-plus-filter-popover",
-          popperStyle: { padding: 0 },
+          popperStyle: {
+            padding: 0,
+            translate: `${rtlScrollbarGutter(props.dir, props.anchor?.ownerDocument.defaultView)} 0`,
+          },
           onAfterEnter: focusPanel,
         },
         {

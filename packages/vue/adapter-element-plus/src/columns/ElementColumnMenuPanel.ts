@@ -19,6 +19,7 @@ import {
 
 import { isElementRef } from "../controls/ref";
 import { ElementCard } from "../presentation/ElementCard";
+import { rtlScrollbarGutter } from "../scrollbarGutter";
 import { columnMenuContainer } from "./panelContext";
 
 export const ElementColumnMenuPanel = defineComponent(
@@ -163,7 +164,11 @@ export const ElementColumnMenuPanel = defineComponent(
           persistent: false,
           showArrow: false,
           width: "min(28rem, calc(100vw - 1rem))",
-          popperStyle: { padding: 0, direction: dir },
+          popperStyle: {
+            padding: 0,
+            direction: dir,
+            translate: `${rtlScrollbarGutter(dir, props.control.anchor?.ownerDocument.defaultView)} 0`,
+          },
           onBeforeEnter: readDirection,
           onAfterEnter: focus,
         },
