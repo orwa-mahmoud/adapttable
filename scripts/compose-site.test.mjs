@@ -190,3 +190,46 @@ it("relocates only the Vue preview and keeps its assets and framework isolation"
   ])
     assert.equal(existsSync(join(site, rel)), false, rel);
 });
+
+it("rebases links between relocated pages to where each one now lives", () => {
+  const { dist, site } = fixture();
+  const landing = "vue/element-plus/index.html";
+  const feature = "vue/element-plus/filtering/index.html";
+  const other = "vue/unstyled/index.html";
+  for (const file of [landing, feature, other]) write(dist, file);
+  writeFileSync(
+    join(dist, landing),
+    '<a href="./filtering/">f</a><a href="../unstyled/?q=1#top">u</a><link href="../../assets/vue.css">'
+  );
+  writeFileSync(join(dist, feature), '<a href="../">kit</a>');
+  composeDemos({
+    dist,
+    site,
+    pages: [
+      ...PAGES,
+      ...[
+        [landing, "/vue/demo/element-plus/"],
+        [feature, "/vue/demo/element-plus/filtering/"],
+        [other, "/vue/demo/unstyled/"],
+      ].map(([html, route]) => ({
+        html: `./${html}`,
+        framework: "vue",
+        route,
+      })),
+    ],
+  });
+  const html = readFileSync(
+    join(site, "vue/demo/element-plus/index.html"),
+    "utf8"
+  );
+  assert.match(html, /href="\.\/filtering\/"/);
+  assert.match(html, /href="\.\.\/unstyled\/\?q=1#top"/);
+  assert.match(html, /href="\.\.\/assets\/vue\.css"/);
+  assert.match(
+    readFileSync(
+      join(site, "vue/demo/element-plus/filtering/index.html"),
+      "utf8"
+    ),
+    /href="\.\.\/"/
+  );
+});
