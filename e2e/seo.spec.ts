@@ -55,28 +55,48 @@ for (const { path, name } of PAGES) {
   });
 }
 
-test("no two pages share a title or a description", async ({ browser }) => {
+test("no two pages share a title or a description", async ({
+  browser,
+  request,
+}) => {
   const titles = new Set<string>();
   const descriptions = new Set<string>();
   const context = await browser.newContext({ javaScriptEnabled: false });
-  // Keep every served page in the uniqueness check without serializing
-  // hundreds of navigations into one test's wall-clock budget.
-  const lanes = 4;
+  const page = await context.newPage();
+  const documents = new Array<string>(PAGES.length);
+  // Read actual served HTML without loading every page's fonts and styles
+  // again. The individual page tests above already cover native navigation.
+  const lanes = 8;
   await Promise.all(
     Array.from({ length: lanes }, async (_, lane) => {
-      const page = await context.newPage();
       for (let index = lane; index < PAGES.length; index += lanes) {
-        await page.goto(PAGES[index]!.path, { waitUntil: "domcontentloaded" });
-        titles.add(await page.title());
-        descriptions.add(
-          (await page
-            .locator('meta[name="description"]')
-            .getAttribute("content")) ?? ""
-        );
+        const response = await request.get(PAGES[index]!.path);
+        expect(response.ok(), PAGES[index]!.path).toBe(true);
+        documents[index] = await response.text();
+        await response.dispose();
       }
-      await page.close();
     })
   );
+  // Chromium parses the same response HTML a crawler receives. Keep HTML
+  // entity decoding and metadata selection in the browser's DOM parser.
+  const metadata = await page.evaluate(
+    (documents) =>
+      documents.map((html) => {
+        const document = new DOMParser().parseFromString(html, "text/html");
+        return {
+          title: document.title,
+          description:
+            document
+              .querySelector('meta[name="description"]')
+              ?.getAttribute("content") ?? "",
+        };
+      }),
+    documents
+  );
+  for (const entry of metadata) {
+    titles.add(entry.title);
+    descriptions.add(entry.description);
+  }
   await context.close();
   // Duplicates make two pages compete for the same search, and one loses.
   expect(titles.size).toBe(PAGES.length);
