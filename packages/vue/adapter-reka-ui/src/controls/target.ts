@@ -5,6 +5,7 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
+  type PropType,
   shallowRef,
   type VNodeChild,
 } from "vue";
@@ -53,7 +54,10 @@ const RekaTarget = defineComponent(
   },
   {
     name: "RekaTarget",
-    props: ["component", "targetAttrs"],
+    props: {
+      component: { type: [Object, Function] as PropType<Component> },
+      targetAttrs: { type: Object as PropType<Attrs> },
+    },
     inheritAttrs: false,
   }
 );

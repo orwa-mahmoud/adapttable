@@ -1,5 +1,5 @@
 import { useScopeActivity } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import QuasarInput from "../controls/QuasarInput.vue";
 import type { QuasarInputControl } from "../controls/types";
@@ -18,5 +18,10 @@ export const QuasarViewInput = defineComponent(
         },
       });
   },
-  { name: "QuasarViewInput", props: ["control"] }
+  {
+    name: "QuasarViewInput",
+    props: {
+      control: { type: Object as PropType<QuasarInputControl> },
+    },
+  }
 );

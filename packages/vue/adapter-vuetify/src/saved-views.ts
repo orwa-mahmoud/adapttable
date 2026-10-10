@@ -8,7 +8,7 @@ import {
   slotRender,
 } from "@adapttable/vue/adapter";
 import { savedViews as bindingSavedViews } from "@adapttable/vue/features";
-import { defineComponent, h, type MaybeRefOrGetter } from "vue";
+import { defineComponent, h, type MaybeRefOrGetter, type PropType } from "vue";
 
 import type { DataTableClassNames } from "./types";
 import {
@@ -47,18 +47,33 @@ export const SavedViewsPanel = defineComponent(
   },
   {
     name: "VuetifySavedViewsPanel",
-    props: [
-      "views",
-      "onApply",
-      "onRename",
-      "onMove",
-      "onSetDefault",
-      "onRemove",
-      "labels",
-      "footer",
-      "className",
-      "classNames",
-    ],
+    props: {
+      views: { type: Array as PropType<SavedViewsPanelProps["views"]> },
+      onApply: { type: Function as PropType<SavedViewsPanelProps["onApply"]> },
+      onRename: {
+        type: Function as PropType<SavedViewsPanelProps["onRename"]>,
+      },
+      onMove: { type: Function as PropType<SavedViewsPanelProps["onMove"]> },
+      onSetDefault: {
+        type: Function as PropType<SavedViewsPanelProps["onSetDefault"]>,
+      },
+      onRemove: {
+        type: Function as PropType<SavedViewsPanelProps["onRemove"]>,
+      },
+      labels: { type: Object as PropType<SavedViewsPanelProps["labels"]> },
+      footer: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          SavedViewsPanelProps["footer"]
+        >,
+        default: undefined,
+      },
+      className: {
+        type: String as PropType<SavedViewsPanelProps["className"]>,
+      },
+      classNames: {
+        type: Object as PropType<SavedViewsPanelProps["classNames"]>,
+      },
+    },
   }
 );
 

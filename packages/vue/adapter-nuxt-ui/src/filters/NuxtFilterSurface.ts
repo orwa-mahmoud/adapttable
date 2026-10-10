@@ -6,7 +6,7 @@ import {
 } from "@adapttable/vue/adapter";
 import UPopover from "@nuxt/ui/components/Popover.vue";
 import USlideover from "@nuxt/ui/components/Slideover.vue";
-import { defineComponent, h, nextTick, watch } from "vue";
+import { defineComponent, h, nextTick, type PropType, watch } from "vue";
 
 type Props = FilterPanelSurfaceProps & {
   readonly modal: boolean;
@@ -117,18 +117,25 @@ export default defineComponent(
   {
     name: "NuxtFilterSurface",
     inheritAttrs: false,
-    props: [
-      "open",
-      "label",
-      "dir",
-      "anchor",
-      "container",
-      "children",
-      "onClose",
-      "className",
-      "modal",
-      "part",
-      "backdropClassName",
-    ],
+    props: {
+      open: { type: Boolean as PropType<Props["open"]>, default: undefined },
+      label: { type: String as PropType<Props["label"]> },
+      dir: { type: String as PropType<Props["dir"]> },
+      anchor: { type: Object as PropType<Props["anchor"]> },
+      container: { type: Object as PropType<Props["container"]> },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          Props["children"]
+        >,
+        default: undefined,
+      },
+      onClose: { type: Function as PropType<Props["onClose"]> },
+      className: { type: String as PropType<Props["className"]> },
+      modal: { type: Boolean as PropType<Props["modal"]>, default: undefined },
+      part: { type: String as PropType<Props["part"]> },
+      backdropClassName: {
+        type: String as PropType<Props["backdropClassName"]>,
+      },
+    },
   }
 );

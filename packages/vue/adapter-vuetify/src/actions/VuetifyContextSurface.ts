@@ -2,7 +2,14 @@ import {
   type ContextMenuSurfaceProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, onMounted, shallowRef, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  onMounted,
+  type PropType,
+  shallowRef,
+  watch,
+} from "vue";
 import { VList } from "vuetify/components/VList";
 import { VMenu } from "vuetify/components/VMenu";
 
@@ -64,5 +71,11 @@ export const VuetifyContextSurface = defineComponent(
         : null;
     };
   },
-  { name: "VuetifyContextSurface", props: ["control", "dir"] }
+  {
+    name: "VuetifyContextSurface",
+    props: {
+      control: { type: Object as PropType<ContextMenuSurfaceProps> },
+      dir: { type: String as PropType<"ltr" | "rtl"> },
+    },
+  }
 );

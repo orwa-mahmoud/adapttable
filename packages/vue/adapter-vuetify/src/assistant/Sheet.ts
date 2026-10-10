@@ -2,7 +2,7 @@ import {
   type TableAssistantSheetProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, shallowRef } from "vue";
+import { defineComponent, h, type PropType, shallowRef } from "vue";
 import { VCard } from "vuetify/components/VCard";
 import { VDialog } from "vuetify/components/VDialog";
 import { VLocaleProvider } from "vuetify/components/VLocaleProvider";
@@ -94,6 +94,26 @@ export const VuetifyAssistantSheet = defineComponent(
   },
   {
     name: "VuetifyAssistantSheet",
-    props: ["label", "part", "className", "dir", "open", "onClose", "children"],
+    props: {
+      label: { type: String as PropType<TableAssistantSheetProps["label"]> },
+      part: { type: String as PropType<TableAssistantSheetProps["part"]> },
+      className: {
+        type: String as PropType<TableAssistantSheetProps["className"]>,
+      },
+      dir: { type: String as PropType<TableAssistantSheetProps["dir"]> },
+      open: {
+        type: Boolean as PropType<TableAssistantSheetProps["open"]>,
+        default: undefined,
+      },
+      onClose: {
+        type: Function as PropType<TableAssistantSheetProps["onClose"]>,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          TableAssistantSheetProps["children"]
+        >,
+        default: undefined,
+      },
+    },
   }
 );

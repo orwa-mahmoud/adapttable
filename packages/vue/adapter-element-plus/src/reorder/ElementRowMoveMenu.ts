@@ -8,7 +8,15 @@ import {
   ElSelect,
   type SelectInstance,
 } from "element-plus";
-import { defineComponent, h, nextTick, shallowRef, useId, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  nextTick,
+  type PropType,
+  shallowRef,
+  useId,
+  watch,
+} from "vue";
 
 import { elementButton } from "../controls/button";
 /** The shared controller owns target selection and pending confirmation. */
@@ -108,5 +116,14 @@ export const ElementRowMoveMenu = defineComponent(
       ]);
     };
   },
-  { name: "ElementRowMoveMenu", props: ["label", "items", "confirmation"] }
+  {
+    name: "ElementRowMoveMenu",
+    props: {
+      label: { type: String as PropType<RowMoveMenuSlotProps["label"]> },
+      items: { type: Array as PropType<RowMoveMenuSlotProps["items"]> },
+      confirmation: {
+        type: Object as PropType<RowMoveMenuSlotProps["confirmation"]>,
+      },
+    },
+  }
 );

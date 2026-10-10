@@ -2,7 +2,7 @@ import {
   FillHandleChrome,
   type FillHandleChromeProps,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, mergeProps } from "vue";
+import { defineComponent, h, mergeProps, type PropType } from "vue";
 import { VSheet } from "vuetify/components/VSheet";
 
 import { VuetifySurface } from "../table/VuetifySurface";
@@ -34,5 +34,29 @@ export const VuetifyFillHandle = defineComponent(
           ),
       },
     }),
-  { props: ["focus", "windowIndex", "col", "firstRowIndex", "className"] }
+  {
+    props: {
+      focus: {
+        type: Object as PropType<Omit<FillHandleChromeProps, "slots">["focus"]>,
+      },
+      windowIndex: {
+        type: Number as PropType<
+          Omit<FillHandleChromeProps, "slots">["windowIndex"]
+        >,
+      },
+      col: {
+        type: Number as PropType<Omit<FillHandleChromeProps, "slots">["col"]>,
+      },
+      firstRowIndex: {
+        type: Number as PropType<
+          Omit<FillHandleChromeProps, "slots">["firstRowIndex"]
+        >,
+      },
+      className: {
+        type: String as PropType<
+          Omit<FillHandleChromeProps, "slots">["className"]
+        >,
+      },
+    },
+  }
 );

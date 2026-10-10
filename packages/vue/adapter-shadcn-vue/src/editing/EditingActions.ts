@@ -12,6 +12,7 @@ import {
   createVNode,
   defineComponent,
   mergeProps,
+  type PropType,
   type SetupContext,
   type VNodeChild,
 } from "vue";
@@ -28,17 +29,28 @@ function editingButton(control: EditingActionButtonProps, className?: string) {
     ]
   );
 }
-const rowProps = [
-  "rowEditing",
-  "row",
-  "rowId",
-  "labels",
-  "className",
-  "buttonClassName",
-  "icons",
-  "conflict",
-  "showBegin",
-] satisfies (keyof RowEditActionsProps<unknown>)[];
+const rowProps = {
+  rowEditing: {
+    type: Object as PropType<RowEditActionsProps<unknown>["rowEditing"]>,
+  },
+  row: { type: null },
+  rowId: { type: String as PropType<RowEditActionsProps<unknown>["rowId"]> },
+  labels: { type: Object as PropType<RowEditActionsProps<unknown>["labels"]> },
+  className: {
+    type: String as PropType<RowEditActionsProps<unknown>["className"]>,
+  },
+  buttonClassName: {
+    type: String as PropType<RowEditActionsProps<unknown>["buttonClassName"]>,
+  },
+  icons: { type: Object as PropType<RowEditActionsProps<unknown>["icons"]> },
+  conflict: {
+    type: Object as PropType<RowEditActionsProps<unknown>["conflict"]>,
+  },
+  showBegin: {
+    type: Boolean as PropType<RowEditActionsProps<unknown>["showBegin"]>,
+    default: undefined,
+  },
+};
 const RowActionsPresentation = defineComponent(
   (props: RowEditActionsProps<unknown>) => {
     const names = useDataTableClassNames();
@@ -62,15 +74,22 @@ export function RowEditActions<TRow>(
 ) {
   return createVNode(RowActionsPresentation, { ...context.attrs, ...props });
 }
-RowEditActions.props = rowProps;
+RowEditActions.props = Object.keys(rowProps) as (keyof typeof rowProps)[];
 
-const batchProps = [
-  "batch",
-  "contested",
-  "labels",
-  "className",
-  "buttonClassName",
-] satisfies (keyof BatchEditBarProps<unknown>)[];
+const batchProps = {
+  batch: { type: Object as PropType<BatchEditBarProps<unknown>["batch"]> },
+  contested: {
+    type: Boolean as PropType<BatchEditBarProps<unknown>["contested"]>,
+    default: undefined,
+  },
+  labels: { type: Object as PropType<BatchEditBarProps<unknown>["labels"]> },
+  className: {
+    type: String as PropType<BatchEditBarProps<unknown>["className"]>,
+  },
+  buttonClassName: {
+    type: String as PropType<BatchEditBarProps<unknown>["buttonClassName"]>,
+  },
+};
 const BatchBarPresentation = defineComponent(
   (props: BatchEditBarProps<unknown>) => {
     const names = useDataTableClassNames();
@@ -94,7 +113,7 @@ export function BatchEditBar<TRow>(
 ) {
   return createVNode(BatchBarPresentation, { ...context.attrs, ...props });
 }
-BatchEditBar.props = batchProps;
+BatchEditBar.props = Object.keys(batchProps) as (keyof typeof batchProps)[];
 
 export const HistoryButtons = defineComponent(
   (props: ToolbarExtrasSlotProps) => {
@@ -108,17 +127,31 @@ export const HistoryButtons = defineComponent(
   },
   {
     name: "ShadcnHistoryButtons",
-    props: [
-      "onUndo",
-      "onRedo",
-      "canUndo",
-      "canRedo",
-      "undoLabel",
-      "redoLabel",
-      "density",
-      "onDensityChange",
-      "labels",
-      "classNames",
-    ],
+    props: {
+      onUndo: { type: Function as PropType<ToolbarExtrasSlotProps["onUndo"]> },
+      onRedo: { type: Function as PropType<ToolbarExtrasSlotProps["onRedo"]> },
+      canUndo: {
+        type: Boolean as PropType<ToolbarExtrasSlotProps["canUndo"]>,
+        default: undefined,
+      },
+      canRedo: {
+        type: Boolean as PropType<ToolbarExtrasSlotProps["canRedo"]>,
+        default: undefined,
+      },
+      undoLabel: {
+        type: String as PropType<ToolbarExtrasSlotProps["undoLabel"]>,
+      },
+      redoLabel: {
+        type: String as PropType<ToolbarExtrasSlotProps["redoLabel"]>,
+      },
+      density: { type: String as PropType<ToolbarExtrasSlotProps["density"]> },
+      onDensityChange: {
+        type: Function as PropType<ToolbarExtrasSlotProps["onDensityChange"]>,
+      },
+      labels: { type: Object as PropType<ToolbarExtrasSlotProps["labels"]> },
+      classNames: {
+        type: Object as PropType<ToolbarExtrasSlotProps["classNames"]>,
+      },
+    },
   }
 );

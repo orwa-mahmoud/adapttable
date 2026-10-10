@@ -11,6 +11,7 @@ import {
   h,
   nextTick,
   onMounted,
+  type PropType,
   shallowRef,
   useId,
   watch,
@@ -288,5 +289,14 @@ export const NuxtRowMoveMenu = /*#__PURE__*/ defineComponent(
       ]);
     };
   },
-  { name: "NuxtRowMoveMenu", props: ["label", "items", "confirmation"] }
+  {
+    name: "NuxtRowMoveMenu",
+    props: {
+      label: { type: String as PropType<RowMoveMenuSlotProps["label"]> },
+      items: { type: Array as PropType<RowMoveMenuSlotProps["items"]> },
+      confirmation: {
+        type: Object as PropType<RowMoveMenuSlotProps["confirmation"]>,
+      },
+    },
+  }
 );

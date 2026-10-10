@@ -2,7 +2,14 @@ import {
   type ManagedCommandPaletteSurfaceProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, nextTick, onBeforeUnmount, shallowRef } from "vue";
+import {
+  defineComponent,
+  h,
+  nextTick,
+  onBeforeUnmount,
+  type PropType,
+  shallowRef,
+} from "vue";
 import { VCard, VCardText } from "vuetify/components/VCard";
 import { VDialog } from "vuetify/components/VDialog";
 
@@ -80,5 +87,12 @@ export const VuetifyCommandSurface = defineComponent(
       );
     };
   },
-  { name: "VuetifyCommandSurface", props: ["control", "dir", "container"] }
+  {
+    name: "VuetifyCommandSurface",
+    props: {
+      control: { type: Object as PropType<ManagedCommandPaletteSurfaceProps> },
+      dir: { type: String as PropType<"ltr" | "rtl"> },
+      container: { type: Object as PropType<HTMLElement | undefined> },
+    },
+  }
 );

@@ -10,6 +10,7 @@ import {
   createVNode,
   defineComponent,
   h,
+  type PropType,
   type SetupContext,
   shallowRef,
   watch,
@@ -102,28 +103,45 @@ const Multi = defineComponent(
   },
   {
     name: "ShadcnHeaderMulti",
-    props: [
-      "label",
-      "summary",
-      "options",
-      "selected",
-      "className",
-      "menuClassName",
-      "onToggle",
-      "dir",
-    ],
+    props: {
+      label: { type: String as PropType<MultiProps["label"]> },
+      summary: { type: String as PropType<MultiProps["summary"]> },
+      options: { type: Array as PropType<MultiProps["options"]> },
+      selected: { type: Array as PropType<MultiProps["selected"]> },
+      className: { type: String as PropType<MultiProps["className"]> },
+      menuClassName: { type: String as PropType<MultiProps["menuClassName"]> },
+      onToggle: { type: Function as PropType<MultiProps["onToggle"]> },
+      dir: { type: String as PropType<MultiProps["dir"]> },
+    },
   }
 );
-const propNames: (keyof FilterHeaderControlOptions<unknown>)[] = [
-  "def",
-  "source",
-  "labels",
-  "registry",
-  "className",
-  "menuClassName",
-  "closeOnSelect",
-  "dir",
-];
+const propNames = {
+  def: { type: Object as PropType<FilterHeaderControlOptions<unknown>["def"]> },
+  source: {
+    type: Object as PropType<FilterHeaderControlOptions<unknown>["source"]>,
+  },
+  labels: {
+    type: Object as PropType<FilterHeaderControlOptions<unknown>["labels"]>,
+  },
+  registry: {
+    type: Object as PropType<FilterHeaderControlOptions<unknown>["registry"]>,
+  },
+  className: {
+    type: String as PropType<FilterHeaderControlOptions<unknown>["className"]>,
+  },
+  menuClassName: {
+    type: String as PropType<
+      FilterHeaderControlOptions<unknown>["menuClassName"]
+    >,
+  },
+  closeOnSelect: {
+    type: Boolean as PropType<
+      FilterHeaderControlOptions<unknown>["closeOnSelect"]
+    >,
+    default: undefined,
+  },
+  dir: { type: String as PropType<FilterHeaderControlOptions<unknown>["dir"]> },
+};
 const HeaderControlPresentation = defineComponent(
   (props: FilterHeaderControlOptions<unknown>) => {
     const model = useFilterHeaderControl(() => props);
@@ -174,4 +192,6 @@ export function FilterHeaderControl<TRow>(
 ) {
   return createVNode(HeaderControlPresentation, { ...context.attrs, ...props });
 }
-FilterHeaderControl.props = propNames;
+FilterHeaderControl.props = Object.keys(
+  propNames
+) as (keyof FilterHeaderControlOptions<unknown>)[];

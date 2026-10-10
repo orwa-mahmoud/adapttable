@@ -11,6 +11,7 @@ import {
   type HTMLAttributes,
   nextTick,
   onMounted,
+  type PropType,
   shallowRef,
   watch,
 } from "vue";
@@ -277,17 +278,90 @@ export const NaiveFilterSurface = defineComponent(
   },
   {
     name: "NaiveFilterSurface",
-    props: [
-      "open",
-      "label",
-      "dir",
-      "anchor",
-      "container",
-      "children",
-      "onClose",
-      "className",
-      "modal",
-      "part",
-    ],
+    props: {
+      open: {
+        type: Boolean as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["open"]
+        >,
+        default: undefined,
+      },
+      label: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["label"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["dir"]
+        >,
+      },
+      anchor: {
+        type: Object as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["anchor"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["container"]
+        >,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["children"]
+        >,
+        default: undefined,
+      },
+      onClose: {
+        type: Function as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["onClose"]
+        >,
+      },
+      className: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["className"]
+        >,
+      },
+      modal: {
+        type: Boolean as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["modal"]
+        >,
+        default: undefined,
+      },
+      part: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+          })["part"]
+        >,
+      },
+    },
   }
 );

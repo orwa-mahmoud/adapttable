@@ -3,7 +3,14 @@ import {
   elementRef,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, shallowRef, type VNodeChild, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  type PropType,
+  shallowRef,
+  type VNodeChild,
+  watch,
+} from "vue";
 /** The native dialog joins the top layer, including within a native filter popover. */
 export const NativePaletteSurface = defineComponent(
   (props: CommandPaletteSurfaceProps<VNodeChild>) => {
@@ -58,6 +65,28 @@ export const NativePaletteSurface = defineComponent(
   },
   {
     name: "NativePaletteSurface",
-    props: ["label", "onClose", "children", "className"],
+    props: {
+      label: {
+        type: String as PropType<
+          CommandPaletteSurfaceProps<VNodeChild>["label"]
+        >,
+      },
+      onClose: {
+        type: Function as PropType<
+          CommandPaletteSurfaceProps<VNodeChild>["onClose"]
+        >,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          CommandPaletteSurfaceProps<VNodeChild>["children"]
+        >,
+        default: undefined,
+      },
+      className: {
+        type: String as PropType<
+          CommandPaletteSurfaceProps<VNodeChild>["className"]
+        >,
+      },
+    },
   }
 );

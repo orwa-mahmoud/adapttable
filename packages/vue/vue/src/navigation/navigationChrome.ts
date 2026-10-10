@@ -25,6 +25,7 @@ import {
   h,
   nextTick,
   onScopeDispose,
+  type PropType,
   shallowRef,
   type VNodeChild,
   watch,
@@ -113,7 +114,14 @@ const FindBarStructure = /*#__PURE__*/ defineComponent(
     });
     return () => findBarStructure(props, focusRef);
   },
-  { props: ["find", "labels", "className", "slots"] }
+  {
+    props: {
+      find: { type: Object as PropType<FindBarChromeProps["find"]> },
+      labels: { type: Object as PropType<FindBarChromeProps["labels"]> },
+      className: { type: String as PropType<FindBarChromeProps["className"]> },
+      slots: { type: Object as PropType<FindBarChromeProps["slots"]> },
+    },
+  }
 );
 export function FindBarChrome(props: FindBarChromeProps): VNodeChild {
   return props.find.open ? h(FindBarStructure, props) : null;
@@ -191,7 +199,26 @@ const ColumnSelectStructure = /*#__PURE__*/ defineComponent(
       );
     };
   },
-  { props: ["label", "checked", "onToggle", "className", "slots"] }
+  {
+    props: {
+      label: {
+        type: String as PropType<ColumnSelectCheckboxChromeProps["label"]>,
+      },
+      checked: {
+        type: Boolean as PropType<ColumnSelectCheckboxChromeProps["checked"]>,
+        default: undefined,
+      },
+      onToggle: {
+        type: Function as PropType<ColumnSelectCheckboxChromeProps["onToggle"]>,
+      },
+      className: {
+        type: String as PropType<ColumnSelectCheckboxChromeProps["className"]>,
+      },
+      slots: {
+        type: Object as PropType<ColumnSelectCheckboxChromeProps["slots"]>,
+      },
+    },
+  }
 );
 export function ColumnSelectCheckboxChrome(
   props: ColumnSelectCheckboxChromeProps

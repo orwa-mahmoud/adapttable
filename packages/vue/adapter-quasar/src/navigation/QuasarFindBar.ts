@@ -4,7 +4,7 @@ import {
   type FindBarSlots,
   useDataTableClassNames,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import QuasarButton from "../controls/QuasarButton.vue";
 import QuasarInput from "../controls/QuasarInput.vue";
@@ -43,5 +43,20 @@ export const QuasarFindBar = defineComponent(
     };
     return () => FindBarChrome({ ...props, slots });
   },
-  { name: "QuasarFindBar", props: ["find", "labels", "className"] }
+  {
+    name: "QuasarFindBar",
+    props: {
+      find: {
+        type: Object as PropType<Omit<FindBarChromeProps, "slots">["find"]>,
+      },
+      labels: {
+        type: Object as PropType<Omit<FindBarChromeProps, "slots">["labels"]>,
+      },
+      className: {
+        type: String as PropType<
+          Omit<FindBarChromeProps, "slots">["className"]
+        >,
+      },
+    },
+  }
 );

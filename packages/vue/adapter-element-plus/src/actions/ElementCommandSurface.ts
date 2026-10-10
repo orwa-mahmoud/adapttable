@@ -3,7 +3,7 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { ElDialog } from "element-plus";
-import { defineComponent, h, shallowRef } from "vue";
+import { defineComponent, h, type PropType, shallowRef } from "vue";
 /** ElDialog owns focus trapping, Escape and outside dismissal. */
 export const ElementCommandSurface = defineComponent(
   (props: {
@@ -42,5 +42,12 @@ export const ElementCommandSurface = defineComponent(
       );
     };
   },
-  { name: "ElementCommandSurface", props: ["control", "container", "dir"] }
+  {
+    name: "ElementCommandSurface",
+    props: {
+      control: { type: Object as PropType<ManagedCommandPaletteSurfaceProps> },
+      container: { type: Object as PropType<HTMLElement | undefined> },
+      dir: { type: String as PropType<("ltr" | "rtl") | undefined> },
+    },
+  }
 );

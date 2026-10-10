@@ -4,7 +4,7 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { QItem, QItemLabel, QItemSection, QList, QMenu } from "quasar";
-import { defineComponent, h, shallowRef, watch } from "vue";
+import { defineComponent, h, type PropType, shallowRef, watch } from "vue";
 
 import QuasarButton from "../controls/QuasarButton.vue";
 
@@ -155,15 +155,29 @@ export const QuasarExamplesMenu = defineComponent(
   },
   {
     name: "QuasarExamplesMenu",
-    props: [
-      "label",
-      "part",
-      "className",
-      "icon",
-      "disabled",
-      "items",
-      "onSelect",
-      "maxHeight",
-    ],
+    props: {
+      label: { type: String as PropType<TableAssistantMenuProps["label"]> },
+      part: { type: String as PropType<TableAssistantMenuProps["part"]> },
+      className: {
+        type: String as PropType<TableAssistantMenuProps["className"]>,
+      },
+      icon: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          TableAssistantMenuProps["icon"]
+        >,
+        default: undefined,
+      },
+      disabled: {
+        type: Boolean as PropType<TableAssistantMenuProps["disabled"]>,
+        default: undefined,
+      },
+      items: { type: Array as PropType<TableAssistantMenuProps["items"]> },
+      onSelect: {
+        type: Function as PropType<TableAssistantMenuProps["onSelect"]>,
+      },
+      maxHeight: {
+        type: String as PropType<TableAssistantMenuProps["maxHeight"]>,
+      },
+    },
   }
 );

@@ -3,7 +3,7 @@ import {
   FilterChipsChrome,
   useDataTableClassNames,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import QuasarButton from "../controls/QuasarButton.vue";
 export const QuasarFilterChips = defineComponent(
@@ -19,5 +19,16 @@ export const QuasarFilterChips = defineComponent(
         },
       });
   },
-  { name: "QuasarFilterChips", props: ["chips", "labels", "onClearAll"] }
+  {
+    name: "QuasarFilterChips",
+    props: {
+      chips: { type: Array as PropType<ActiveFilterChipsSlotProps["chips"]> },
+      labels: {
+        type: Object as PropType<ActiveFilterChipsSlotProps["labels"]>,
+      },
+      onClearAll: {
+        type: Function as PropType<ActiveFilterChipsSlotProps["onClearAll"]>,
+      },
+    },
+  }
 );

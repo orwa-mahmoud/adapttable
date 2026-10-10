@@ -5,7 +5,7 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import UPopover from "@nuxt/ui/components/Popover.vue";
-import { defineComponent, h, shallowRef, useId } from "vue";
+import { defineComponent, h, type PropType, shallowRef, useId } from "vue";
 
 import { controlRef, withoutAttrs } from "./attrs";
 import { useControlElementRef } from "./useControlElementRef";
@@ -119,6 +119,12 @@ export default defineComponent(
   {
     name: "NuxtManagedPopover",
     inheritAttrs: false,
-    props: ["control", "className", "onElement"],
+    props: {
+      control: { type: Object as PropType<ManagedOverlayPanelProps> },
+      className: { type: String as PropType<string | undefined> },
+      onElement: {
+        type: Function as PropType<ElementRef<HTMLElement> | undefined>,
+      },
+    },
   }
 );

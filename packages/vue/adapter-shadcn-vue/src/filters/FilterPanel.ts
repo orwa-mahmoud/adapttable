@@ -4,7 +4,13 @@ import {
   type FilterPanelModel,
   type FilterPanelSlots,
 } from "@adapttable/vue/adapter";
-import { createVNode, defineComponent, h, type SetupContext } from "vue";
+import {
+  createVNode,
+  defineComponent,
+  h,
+  type PropType,
+  type SetupContext,
+} from "vue";
 
 import { shadcnButton } from "../controls";
 import { cn } from "../lib/utils";
@@ -20,6 +26,15 @@ export interface FilterPanelProps<TRow> {
   readonly model: FilterPanelModel<TRow>;
   readonly classNames?: DataTableClassNames;
 }
+// The presentation validates values; its key list preserves generic public
+// components and Vue fallthrough attribute inference.
+const filterPanelRuntimeProps = {
+  model: { type: Object as PropType<FilterPanelProps<unknown>["model"]> },
+  classNames: {
+    type: Object as PropType<FilterPanelProps<unknown>["classNames"]>,
+  },
+};
+
 const PanelPresentation = defineComponent(
   (props: FilterPanelProps<unknown>) => {
     const { close, onCloseAutoFocus } = usePanelClose(() => props.model);
@@ -78,7 +93,7 @@ const PanelPresentation = defineComponent(
         controls,
       });
   },
-  { name: "ShadcnFilterPanel", props: ["model", "classNames"] }
+  { name: "ShadcnFilterPanel", props: filterPanelRuntimeProps }
 );
 
 export function FilterPanel<TRow>(
@@ -87,4 +102,4 @@ export function FilterPanel<TRow>(
 ) {
   return createVNode(PanelPresentation, { ...context.attrs, ...props });
 }
-FilterPanel.props = ["model", "classNames"];
+FilterPanel.props = Object.keys(filterPanelRuntimeProps);

@@ -1,5 +1,12 @@
 import type { TableAssistantComposerProps } from "@adapttable/vue/adapter";
-import { defineComponent, h, nextTick, onScopeDispose, shallowRef } from "vue";
+import {
+  defineComponent,
+  h,
+  nextTick,
+  onScopeDispose,
+  type PropType,
+  shallowRef,
+} from "vue";
 import { VField } from "vuetify/components/VField";
 
 /**
@@ -64,15 +71,26 @@ export const VuetifyAssistantComposer = defineComponent(
   },
   {
     name: "VuetifyAssistantComposer",
-    props: [
-      "value",
-      "label",
-      "placeholder",
-      "part",
-      "className",
-      "disabled",
-      "onChange",
-      "onKeyDown",
-    ],
+    props: {
+      value: { type: String as PropType<TableAssistantComposerProps["value"]> },
+      label: { type: String as PropType<TableAssistantComposerProps["label"]> },
+      placeholder: {
+        type: String as PropType<TableAssistantComposerProps["placeholder"]>,
+      },
+      part: { type: String as PropType<TableAssistantComposerProps["part"]> },
+      className: {
+        type: String as PropType<TableAssistantComposerProps["className"]>,
+      },
+      disabled: {
+        type: Boolean as PropType<TableAssistantComposerProps["disabled"]>,
+        default: undefined,
+      },
+      onChange: {
+        type: Function as PropType<TableAssistantComposerProps["onChange"]>,
+      },
+      onKeyDown: {
+        type: Function as PropType<TableAssistantComposerProps["onKeyDown"]>,
+      },
+    },
   }
 );

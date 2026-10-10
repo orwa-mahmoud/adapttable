@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
   useDirection,
 } from "reka-ui";
-import { defineComponent, h, shallowRef, watch } from "vue";
+import { defineComponent, h, type PropType, shallowRef, watch } from "vue";
 
 import { rekaButton } from "../controls/basic";
 import { rekaPortal } from "../controls/portal";
@@ -171,5 +171,14 @@ export const RekaMoveMenu = defineComponent(
       ]);
     };
   },
-  { name: "RekaMoveMenu", props: ["label", "items", "confirmation"] }
+  {
+    name: "RekaMoveMenu",
+    props: {
+      label: { type: String as PropType<RowMoveMenuSlotProps["label"]> },
+      items: { type: Array as PropType<RowMoveMenuSlotProps["items"]> },
+      confirmation: {
+        type: Object as PropType<RowMoveMenuSlotProps["confirmation"]>,
+      },
+    },
+  }
 );

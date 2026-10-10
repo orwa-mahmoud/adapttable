@@ -8,6 +8,7 @@ import {
   createVNode,
   defineComponent,
   h,
+  type PropType,
   type SetupContext,
   type VNodeChild,
 } from "vue";
@@ -92,14 +93,27 @@ const controls: FilterTreeSlots<VNodeChild> = {
       ]
     ),
 };
-const propNames: (keyof FilterTreeBuilderProps<unknown>)[] = [
-  "defs",
-  "source",
-  "labels",
-  "classNames",
-  "registry",
-  "defaultExpanded",
-];
+const propNames = {
+  defs: { type: Array as PropType<FilterTreeBuilderProps<unknown>["defs"]> },
+  source: {
+    type: Object as PropType<FilterTreeBuilderProps<unknown>["source"]>,
+  },
+  labels: {
+    type: Object as PropType<FilterTreeBuilderProps<unknown>["labels"]>,
+  },
+  classNames: {
+    type: Object as PropType<FilterTreeBuilderProps<unknown>["classNames"]>,
+  },
+  registry: {
+    type: Object as PropType<FilterTreeBuilderProps<unknown>["registry"]>,
+  },
+  defaultExpanded: {
+    type: Boolean as PropType<
+      FilterTreeBuilderProps<unknown>["defaultExpanded"]
+    >,
+    default: undefined,
+  },
+};
 const FilterTreePresentation = defineComponent(
   (props: FilterTreeBuilderProps<unknown>) => {
     const model = useFilterTreeModel(() => ({
@@ -117,4 +131,6 @@ export function FilterTree<TRow>(
 ) {
   return createVNode(FilterTreePresentation, { ...context.attrs, ...props });
 }
-FilterTree.props = propNames;
+FilterTree.props = Object.keys(
+  propNames
+) as (keyof FilterTreeBuilderProps<unknown>)[];

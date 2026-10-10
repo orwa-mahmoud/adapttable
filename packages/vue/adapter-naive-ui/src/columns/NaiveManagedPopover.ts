@@ -13,6 +13,7 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
+  type PropType,
   shallowRef,
   watch,
 } from "vue";
@@ -204,5 +205,11 @@ export const NaiveManagedPopover = defineComponent(
       );
     };
   },
-  { name: "NaiveManagedPopover", inheritAttrs: false, props: ["control"] }
+  {
+    name: "NaiveManagedPopover",
+    inheritAttrs: false,
+    props: {
+      control: { type: Object as PropType<ManagedOverlayPanelProps> },
+    },
+  }
 );

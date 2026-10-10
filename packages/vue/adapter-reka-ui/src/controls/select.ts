@@ -12,7 +12,14 @@ import {
   SelectValue,
   SelectViewport,
 } from "reka-ui";
-import { defineComponent, h, mergeProps, shallowRef, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  mergeProps,
+  type PropType,
+  shallowRef,
+  watch,
+} from "vue";
 
 import { rekaPortal } from "./portal";
 import { rekaTarget } from "./target";
@@ -171,7 +178,13 @@ const RekaSelect = defineComponent(
       });
     };
   },
-  { name: "RekaSelect", props: ["control"], inheritAttrs: false }
+  {
+    name: "RekaSelect",
+    props: {
+      control: { type: Object as PropType<RekaSelectControl> },
+    },
+    inheritAttrs: false,
+  }
 );
 
 export function rekaSelect(control: RekaSelectControl) {

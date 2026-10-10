@@ -5,6 +5,7 @@ import {
   defineComponent,
   h,
   mergeProps,
+  type PropType,
   shallowRef,
   type VNode,
   type VNodeChild,
@@ -51,7 +52,14 @@ const ElementButton = defineComponent(
   },
   {
     name: "ElementButton",
-    props: ["attrs", "content", "loading"],
+    props: {
+      attrs: { type: Object as PropType<Attrs> },
+      content: {
+        type: [String, Number, Boolean, Array, Object] as PropType<VNodeChild>,
+        default: undefined,
+      },
+      loading: { type: Function as PropType<(() => VNodeChild) | undefined> },
+    },
     inheritAttrs: false,
   }
 );

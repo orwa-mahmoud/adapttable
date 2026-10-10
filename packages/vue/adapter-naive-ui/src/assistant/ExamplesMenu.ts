@@ -9,6 +9,7 @@ import {
   defineComponent,
   h,
   nextTick,
+  type PropType,
   type ShallowRef,
   shallowRef,
   watch,
@@ -180,15 +181,29 @@ export const NaiveExamplesMenu = defineComponent(
   },
   {
     name: "NaiveExamplesMenu",
-    props: [
-      "label",
-      "part",
-      "className",
-      "icon",
-      "disabled",
-      "items",
-      "onSelect",
-      "maxHeight",
-    ],
+    props: {
+      label: { type: String as PropType<TableAssistantMenuProps["label"]> },
+      part: { type: String as PropType<TableAssistantMenuProps["part"]> },
+      className: {
+        type: String as PropType<TableAssistantMenuProps["className"]>,
+      },
+      icon: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          TableAssistantMenuProps["icon"]
+        >,
+        default: undefined,
+      },
+      disabled: {
+        type: Boolean as PropType<TableAssistantMenuProps["disabled"]>,
+        default: undefined,
+      },
+      items: { type: Array as PropType<TableAssistantMenuProps["items"]> },
+      onSelect: {
+        type: Function as PropType<TableAssistantMenuProps["onSelect"]>,
+      },
+      maxHeight: {
+        type: String as PropType<TableAssistantMenuProps["maxHeight"]>,
+      },
+    },
   }
 );

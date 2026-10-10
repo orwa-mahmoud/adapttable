@@ -1,9 +1,11 @@
 /** Saved-view disclosure and keyboard wiring, shared by every Vue kit. */
+/** Saved-view disclosure and keyboard wiring, shared by every Vue kit. */
 import {
   defineComponent,
   h,
   nextTick,
   onScopeDispose,
+  type PropType,
   shallowRef,
   useId,
   type VNodeChild,
@@ -327,6 +329,19 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "SavedViewsMenuChrome",
-    props: ["savedViews", "labels", "dir", "classNames", "container", "slots"],
+    props: {
+      savedViews: {
+        type: Object as PropType<SavedViewsMenuChromeProps["savedViews"]>,
+      },
+      labels: { type: Object as PropType<SavedViewsMenuChromeProps["labels"]> },
+      dir: { type: String as PropType<SavedViewsMenuChromeProps["dir"]> },
+      classNames: {
+        type: Object as PropType<SavedViewsMenuChromeProps["classNames"]>,
+      },
+      container: {
+        type: Object as PropType<SavedViewsMenuChromeProps["container"]>,
+      },
+      slots: { type: Object as PropType<SavedViewsMenuChromeProps["slots"]> },
+    },
   }
 );

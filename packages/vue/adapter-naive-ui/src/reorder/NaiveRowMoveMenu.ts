@@ -9,6 +9,7 @@ import {
   defineComponent,
   h,
   nextTick,
+  type PropType,
   shallowRef,
   useId,
   watch,
@@ -150,5 +151,14 @@ export const NaiveRowMoveMenu = /*#__PURE__*/ defineComponent(
       );
     };
   },
-  { name: "NaiveRowMoveMenu", props: ["label", "items", "confirmation"] }
+  {
+    name: "NaiveRowMoveMenu",
+    props: {
+      label: { type: String as PropType<RowMoveMenuSlotProps["label"]> },
+      items: { type: Array as PropType<RowMoveMenuSlotProps["items"]> },
+      confirmation: {
+        type: Object as PropType<RowMoveMenuSlotProps["confirmation"]>,
+      },
+    },
+  }
 );

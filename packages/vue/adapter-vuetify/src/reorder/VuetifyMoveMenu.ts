@@ -2,7 +2,7 @@ import {
   type RowMoveMenuSlotProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, shallowRef, watch } from "vue";
+import { defineComponent, h, type PropType, shallowRef, watch } from "vue";
 import { VBtn } from "vuetify/components/VBtn";
 import {
   VCard,
@@ -189,5 +189,10 @@ export const VuetifyMoveMenu = defineComponent(
       ]);
     };
   },
-  { name: "VuetifyMoveMenu", props: ["control"] }
+  {
+    name: "VuetifyMoveMenu",
+    props: {
+      control: { type: Object as PropType<RowMoveMenuSlotProps> },
+    },
+  }
 );

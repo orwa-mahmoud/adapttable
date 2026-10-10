@@ -14,6 +14,7 @@ import {
   defineComponent,
   h,
   onScopeDispose,
+  type PropType,
   type VNodeChild,
   watch,
 } from "vue";
@@ -202,17 +203,36 @@ export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "SavedViewsPanelChrome",
-    props: [
-      "views",
-      "onApply",
-      "onRename",
-      "onMove",
-      "onSetDefault",
-      "onRemove",
-      "labels",
-      "footer",
-      "slots",
-      "className",
-    ],
+    props: {
+      views: { type: Array as PropType<SavedViewsPanelChromeProps["views"]> },
+      onApply: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onApply"]>,
+      },
+      onRename: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onRename"]>,
+      },
+      onMove: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onMove"]>,
+      },
+      onSetDefault: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onSetDefault"]>,
+      },
+      onRemove: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onRemove"]>,
+      },
+      labels: {
+        type: Object as PropType<SavedViewsPanelChromeProps["labels"]>,
+      },
+      footer: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          SavedViewsPanelChromeProps["footer"]
+        >,
+        default: undefined,
+      },
+      slots: { type: Object as PropType<SavedViewsPanelChromeProps["slots"]> },
+      className: {
+        type: String as PropType<SavedViewsPanelChromeProps["className"]>,
+      },
+    },
   }
 );

@@ -17,6 +17,7 @@ import {
   h,
   nextTick,
   onScopeDispose,
+  type PropType,
   type ShallowRef,
   shallowRef,
   Teleport,
@@ -712,26 +713,57 @@ export const TableAssistantChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "TableAssistantChrome",
-    props: [
-      "assistant",
-      "speech",
-      "open",
-      "onOpenChange",
-      "presentation",
-      "labels",
-      "accent",
-      "receipts",
-      "className",
-      "launcher",
-      "onSettings",
-      "boundary",
-      "note",
-      "greeting",
-      "avatars",
-      "messageAction",
-      "approval",
-      "dir",
-      "slots",
-    ],
+    props: {
+      assistant: {
+        type: Object as PropType<TableAssistantChromeProps["assistant"]>,
+      },
+      speech: { type: Object as PropType<TableAssistantChromeProps["speech"]> },
+      open: {
+        type: Boolean as PropType<TableAssistantChromeProps["open"]>,
+        default: undefined,
+      },
+      onOpenChange: {
+        type: Function as PropType<TableAssistantChromeProps["onOpenChange"]>,
+      },
+      presentation: {
+        type: String as PropType<TableAssistantChromeProps["presentation"]>,
+      },
+      labels: { type: Object as PropType<TableAssistantChromeProps["labels"]> },
+      accent: { type: String as PropType<TableAssistantChromeProps["accent"]> },
+      receipts: {
+        type: Boolean as PropType<TableAssistantChromeProps["receipts"]>,
+        default: undefined,
+      },
+      className: {
+        type: String as PropType<TableAssistantChromeProps["className"]>,
+      },
+      launcher: {
+        type: Boolean as PropType<TableAssistantChromeProps["launcher"]>,
+        default: undefined,
+      },
+      onSettings: {
+        type: Function as PropType<TableAssistantChromeProps["onSettings"]>,
+      },
+      boundary: {
+        type: [String, Object] as PropType<
+          TableAssistantChromeProps["boundary"]
+        >,
+      },
+      note: { type: String as PropType<TableAssistantChromeProps["note"]> },
+      greeting: {
+        type: String as PropType<TableAssistantChromeProps["greeting"]>,
+      },
+      avatars: {
+        type: Object as PropType<TableAssistantChromeProps["avatars"]>,
+      },
+      messageAction: {
+        type: Function as PropType<TableAssistantChromeProps["messageAction"]>,
+      },
+      approval: {
+        type: Object as PropType<TableAssistantChromeProps["approval"]>,
+      },
+      dir: { type: String as PropType<TableAssistantChromeProps["dir"]> },
+      slots: { type: Object as PropType<TableAssistantChromeProps["slots"]> },
+    },
   }
 );

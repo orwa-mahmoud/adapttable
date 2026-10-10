@@ -11,6 +11,7 @@ import {
   defineComponent,
   h,
   type InputHTMLAttributes,
+  type PropType,
   shallowRef,
   useId,
   watch,
@@ -138,14 +139,17 @@ export const NaiveChoiceEditor = defineComponent(
   {
     name: "NaiveChoiceEditor",
     inheritAttrs: false,
-    props: [
-      "attrs",
-      "draft",
-      "multiple",
-      "options",
-      "onChange",
-      "onBlur",
-      "onKeyDown",
-    ],
+    props: {
+      attrs: { type: Object as PropType<ChoiceEditorProps["attrs"]> },
+      draft: { type: String as PropType<ChoiceEditorProps["draft"]> },
+      multiple: {
+        type: Boolean as PropType<ChoiceEditorProps["multiple"]>,
+        default: undefined,
+      },
+      options: { type: Array as PropType<ChoiceEditorProps["options"]> },
+      onChange: { type: Function as PropType<ChoiceEditorProps["onChange"]> },
+      onBlur: { type: Function as PropType<ChoiceEditorProps["onBlur"]> },
+      onKeyDown: { type: Function as PropType<ChoiceEditorProps["onKeyDown"]> },
+    },
   }
 );

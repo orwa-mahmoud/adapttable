@@ -16,6 +16,7 @@ import {
   h,
   nextTick,
   onScopeDispose,
+  type PropType,
   shallowRef,
   useId,
   type VNodeChild,
@@ -337,6 +338,22 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "CommandPaletteChrome",
-    props: ["commands", "open", "onClose", "labels", "className", "slots"],
+    props: {
+      commands: {
+        type: Array as PropType<CommandPaletteChromeProps["commands"]>,
+      },
+      open: {
+        type: Boolean as PropType<CommandPaletteChromeProps["open"]>,
+        default: undefined,
+      },
+      onClose: {
+        type: Function as PropType<CommandPaletteChromeProps["onClose"]>,
+      },
+      labels: { type: Object as PropType<CommandPaletteChromeProps["labels"]> },
+      className: {
+        type: String as PropType<CommandPaletteChromeProps["className"]>,
+      },
+      slots: { type: Object as PropType<CommandPaletteChromeProps["slots"]> },
+    },
   }
 );

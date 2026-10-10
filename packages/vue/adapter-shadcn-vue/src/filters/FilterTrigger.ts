@@ -3,7 +3,7 @@ import type {
   FilterTriggerProps,
 } from "@adapttable/vue/adapter";
 import { ListFilter } from "@lucide/vue";
-import { defineComponent, h, shallowRef, watch } from "vue";
+import { defineComponent, h, type PropType, shallowRef, watch } from "vue";
 
 import { Button } from "../components/button";
 import { shadcnControlAttrs } from "../controls";
@@ -64,5 +64,11 @@ export const FilterTrigger = defineComponent(
         ]
       );
   },
-  { name: "ShadcnFilterTrigger", props: ["control", "classNames"] }
+  {
+    name: "ShadcnFilterTrigger",
+    props: {
+      control: { type: Object as PropType<TriggerProps["control"]> },
+      classNames: { type: Object as PropType<TriggerProps["classNames"]> },
+    },
+  }
 );

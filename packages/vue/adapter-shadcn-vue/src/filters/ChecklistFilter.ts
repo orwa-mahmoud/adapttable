@@ -8,6 +8,7 @@ import {
   createVNode,
   defineComponent,
   h,
+  type PropType,
   type SetupContext,
   type VNodeChild,
 } from "vue";
@@ -69,6 +70,17 @@ const controls: ChecklistSlots<VNodeChild> = {
     ),
 };
 
+// The presentation validates values; its key list preserves generic public
+// components and Vue fallthrough attribute inference.
+const checklistRuntimeProps = {
+  def: { type: Object as PropType<ChecklistFilterProps<unknown>["def"]> },
+  source: { type: Object as PropType<ChecklistFilterProps<unknown>["source"]> },
+  labels: { type: Object as PropType<ChecklistFilterProps<unknown>["labels"]> },
+  classNames: {
+    type: Object as PropType<ChecklistFilterProps<unknown>["classNames"]>,
+  },
+};
+
 const ChecklistPresentation = defineComponent(
   (props: ChecklistFilterProps<unknown>) => {
     const model = useChecklistModel(() => ({
@@ -79,7 +91,7 @@ const ChecklistPresentation = defineComponent(
   },
   {
     name: "ShadcnChecklistPresentation",
-    props: ["def", "source", "labels", "classNames"],
+    props: checklistRuntimeProps,
   }
 );
 
@@ -90,4 +102,4 @@ export function ChecklistFilter<TRow>(
 ) {
   return createVNode(ChecklistPresentation, { ...context.attrs, ...props });
 }
-ChecklistFilter.props = ["def", "source", "labels", "classNames"];
+ChecklistFilter.props = Object.keys(checklistRuntimeProps);

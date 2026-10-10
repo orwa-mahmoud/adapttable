@@ -11,7 +11,7 @@ import {
 } from "@adapttable/vue/adapter";
 import { commandPalette as bindingCommandPalette } from "@adapttable/vue/features";
 import { QItem, QItemSection } from "quasar";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { QuasarCommandSurface } from "./actions/QuasarCommandSurface";
 import { quasarAttrs } from "./controls/controlAttrs";
@@ -86,7 +86,41 @@ export const CommandPalette = defineComponent(
   },
   {
     name: "QuasarCommandPalette",
-    props: ["model", "labels", "dir", "classNames", "container"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & { readonly model: CommandPaletteModel })["dir"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["classNames"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["container"]
+        >,
+      },
+    },
   }
 );
 export function commandPalette(

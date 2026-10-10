@@ -7,10 +7,12 @@ import {
 } from "@adapttable/vue/adapter";
 import {
   computed,
+  createVNode,
   defineComponent,
   h,
   nextTick,
   onMounted,
+  type PropType,
   shallowRef,
   watch,
 } from "vue";
@@ -22,8 +24,61 @@ import ElementSelect from "../controls/ElementSelect.vue";
 import { focusControlRef } from "../controls/focusRef";
 
 /** The kit owns its nested popup; draft and commit transitions stay in Chrome. */
-export default defineComponent(
-  <TRow>(props: EditableCellEditorProps<TRow> & { className?: string }) => {
+const editorRuntimeProps = {
+  controller: {
+    type: Object as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["controller"]
+    >,
+  },
+  label: {
+    type: String as PropType<
+      (EditableCellEditorProps<unknown> & { className?: string })["label"]
+    >,
+  },
+  attrs: {
+    type: Object as PropType<
+      (EditableCellEditorProps<unknown> & { className?: string })["attrs"]
+    >,
+  },
+  editorRef: {
+    type: Function as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["editorRef"]
+    >,
+  },
+  onChange: {
+    type: Function as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["onChange"]
+    >,
+  },
+  onBlur: {
+    type: Function as PropType<
+      (EditableCellEditorProps<unknown> & { className?: string })["onBlur"]
+    >,
+  },
+  onKeyDown: {
+    type: Function as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["onKeyDown"]
+    >,
+  },
+  className: {
+    type: String as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["className"]
+    >,
+  },
+};
+
+const ElementCellEditorPresentation = defineComponent(
+  (props: EditableCellEditorProps<unknown> & { className?: string }) => {
     const active = useScopeActivity();
     const mounted = shallowRef(false);
     const host = shallowRef<HTMLElement | null>(null);
@@ -157,15 +212,19 @@ export default defineComponent(
   {
     name: "ElementCellEditor",
     inheritAttrs: false,
-    props: [
-      "controller",
-      "label",
-      "attrs",
-      "editorRef",
-      "onChange",
-      "onBlur",
-      "onKeyDown",
-      "className",
-    ],
+    props: editorRuntimeProps,
   }
 );
+
+// Keep the row type at the functional boundary; the presentation validates
+// values and owns the editor's reactive lifecycle.
+function ElementCellEditor<TRow>(
+  props: EditableCellEditorProps<TRow> & { className?: string }
+) {
+  return createVNode(ElementCellEditorPresentation, { ...props });
+}
+ElementCellEditor.props = Object.keys(
+  editorRuntimeProps
+) as (keyof typeof editorRuntimeProps)[];
+ElementCellEditor.inheritAttrs = false;
+export default ElementCellEditor;

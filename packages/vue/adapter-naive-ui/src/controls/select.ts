@@ -5,6 +5,7 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
+  type PropType,
   shallowRef,
   useAttrs,
   useId,
@@ -123,7 +124,13 @@ const NaiveSelectControl = defineComponent(
       });
     };
   },
-  { name: "NaiveSelectControl", inheritAttrs: false, props: ["control"] }
+  {
+    name: "NaiveSelectControl",
+    inheritAttrs: false,
+    props: {
+      control: { type: Object as PropType<NaiveSelectControl> },
+    },
+  }
 );
 
 /** Compound host hooks and native input semantics use public Naive pass-throughs. */

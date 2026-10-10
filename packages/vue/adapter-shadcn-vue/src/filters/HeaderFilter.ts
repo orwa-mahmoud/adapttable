@@ -10,6 +10,7 @@ import {
   createVNode,
   defineComponent,
   h,
+  type PropType,
   type SetupContext,
   shallowRef,
   watch,
@@ -64,19 +65,33 @@ const Trigger = defineComponent(
         ]
       );
   },
-  { name: "ShadcnHeaderFilterTrigger", props: ["control"] }
+  {
+    name: "ShadcnHeaderFilterTrigger",
+    props: {
+      control: { type: Object as PropType<FilterTriggerProps> },
+    },
+  }
 );
-const propNames: (keyof HeaderFilterProps<unknown>)[] = [
-  "id",
-  "def",
-  "source",
-  "labels",
-  "registry",
-  "className",
-  "classNames",
-  "closeOnSelect",
-  "dir",
-];
+const propNames = {
+  id: { type: String as PropType<HeaderFilterProps<unknown>["id"]> },
+  def: { type: Object as PropType<HeaderFilterProps<unknown>["def"]> },
+  source: { type: Object as PropType<HeaderFilterProps<unknown>["source"]> },
+  labels: { type: Object as PropType<HeaderFilterProps<unknown>["labels"]> },
+  registry: {
+    type: Object as PropType<HeaderFilterProps<unknown>["registry"]>,
+  },
+  className: {
+    type: String as PropType<HeaderFilterProps<unknown>["className"]>,
+  },
+  classNames: {
+    type: Object as PropType<HeaderFilterProps<unknown>["classNames"]>,
+  },
+  closeOnSelect: {
+    type: Boolean as PropType<HeaderFilterProps<unknown>["closeOnSelect"]>,
+    default: undefined,
+  },
+  dir: { type: String as PropType<HeaderFilterProps<unknown>["dir"]> },
+};
 const HeaderPresentation = defineComponent(
   (props: HeaderFilterProps<unknown>) => {
     const model = useHeaderFilter(() => ({
@@ -119,4 +134,6 @@ export function HeaderFilter<TRow>(
 ) {
   return createVNode(HeaderPresentation, { ...context.attrs, ...props });
 }
-HeaderFilter.props = propNames;
+HeaderFilter.props = Object.keys(
+  propNames
+) as (keyof HeaderFilterProps<unknown>)[];

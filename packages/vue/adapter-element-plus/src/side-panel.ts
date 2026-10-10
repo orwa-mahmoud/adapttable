@@ -8,7 +8,7 @@ import {
   slotRender,
 } from "@adapttable/vue/adapter";
 import { sidePanel as bindingSidePanel } from "@adapttable/vue/features";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { elementSidePanelSlots } from "./actions/elementRemainingControls";
 const ElementSidePanelControl = defineComponent(
@@ -18,7 +18,43 @@ const ElementSidePanelControl = defineComponent(
   },
   {
     name: "ElementSidePanelControl",
-    props: ["model", "labels", "dir", "container", "classNames"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["dir"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["container"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["classNames"]
+        >,
+      },
+    },
   }
 );
 export function sidePanel(

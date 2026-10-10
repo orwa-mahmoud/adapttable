@@ -3,7 +3,7 @@ import {
   type FindBarChromeProps,
   type FindBarSlots,
 } from "@adapttable/vue/adapter";
-import { defineComponent } from "vue";
+import { defineComponent, type PropType } from "vue";
 
 import { useRekaClasses } from "../context";
 import { rekaButton, rekaInput } from "../controls/basic";
@@ -40,5 +40,20 @@ export const RekaFindBar = defineComponent(
     };
     return () => FindBarChrome({ ...props, slots });
   },
-  { name: "RekaFindBar", props: ["find", "labels", "className"] }
+  {
+    name: "RekaFindBar",
+    props: {
+      find: {
+        type: Object as PropType<Omit<FindBarChromeProps, "slots">["find"]>,
+      },
+      labels: {
+        type: Object as PropType<Omit<FindBarChromeProps, "slots">["labels"]>,
+      },
+      className: {
+        type: String as PropType<
+          Omit<FindBarChromeProps, "slots">["className"]
+        >,
+      },
+    },
+  }
 );

@@ -11,7 +11,7 @@ import {
 import UCard from "@nuxt/ui/components/Card.vue";
 import UPopover from "@nuxt/ui/components/Popover.vue";
 import USeparator from "@nuxt/ui/components/Separator.vue";
-import { defineComponent, h, onMounted, watch } from "vue";
+import { defineComponent, h, onMounted, type PropType, watch } from "vue";
 
 import NuxtButton from "../controls/NuxtButton.vue";
 
@@ -188,7 +188,18 @@ export const NuxtContextMenuSurface = /*#__PURE__*/ defineComponent(
       );
     };
   },
-  { name: "NuxtContextMenuSurface", props: ["control", "dir", "classNames"] }
+  {
+    name: "NuxtContextMenuSurface",
+    props: {
+      control: { type: Object as PropType<ContextMenuPresentationProps> },
+      dir: { type: String as PropType<("ltr" | "rtl") | undefined> },
+      classNames: {
+        type: Object as PropType<
+          Readonly<Record<string, string | undefined>> | undefined
+        >,
+      },
+    },
+  }
 );
 
 export default /*#__PURE__*/ defineComponent(
@@ -212,6 +223,36 @@ export default /*#__PURE__*/ defineComponent(
   },
   {
     name: "NuxtContextMenu",
-    props: ["model", "labels", "dir", "container", "classNames"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["dir"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: ContextMenuModel;
+          })["container"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: ContextMenuModel;
+          })["classNames"]
+        >,
+      },
+    },
   }
 );

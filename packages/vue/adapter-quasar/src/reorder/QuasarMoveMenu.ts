@@ -13,7 +13,7 @@ import {
   QList,
   QMenu,
 } from "quasar";
-import { defineComponent, h, shallowRef, watch } from "vue";
+import { defineComponent, h, type PropType, shallowRef, watch } from "vue";
 
 import { finishOverlayFocus } from "../actions/focusHandoff";
 import { focusMenuItem, moveMenuFocus } from "../actions/menuFocus";
@@ -190,5 +190,10 @@ export const QuasarMoveMenu = defineComponent(
               : null,
           ]);
   },
-  { name: "QuasarMoveMenu", props: ["control"] }
+  {
+    name: "QuasarMoveMenu",
+    props: {
+      control: { type: Object as PropType<RowMoveMenuSlotProps> },
+    },
+  }
 );

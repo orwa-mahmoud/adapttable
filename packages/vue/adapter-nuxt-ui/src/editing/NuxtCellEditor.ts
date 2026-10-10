@@ -5,10 +5,12 @@ import {
 } from "@adapttable/vue/adapter";
 import {
   computed,
+  createVNode,
   defineComponent,
   h,
   nextTick,
   onMounted,
+  type PropType,
   shallowRef,
   watch,
 } from "vue";
@@ -18,8 +20,61 @@ import NuxtInput from "../controls/NuxtInput.vue";
 import NuxtMultiSelect from "../controls/NuxtMultiSelect";
 import NuxtSelect from "../controls/NuxtSelect.vue";
 
-export default defineComponent(
-  <TRow>(props: EditableCellEditorProps<TRow> & { className?: string }) => {
+const editorRuntimeProps = {
+  controller: {
+    type: Object as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["controller"]
+    >,
+  },
+  label: {
+    type: String as PropType<
+      (EditableCellEditorProps<unknown> & { className?: string })["label"]
+    >,
+  },
+  attrs: {
+    type: Object as PropType<
+      (EditableCellEditorProps<unknown> & { className?: string })["attrs"]
+    >,
+  },
+  editorRef: {
+    type: Function as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["editorRef"]
+    >,
+  },
+  onChange: {
+    type: Function as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["onChange"]
+    >,
+  },
+  onBlur: {
+    type: Function as PropType<
+      (EditableCellEditorProps<unknown> & { className?: string })["onBlur"]
+    >,
+  },
+  onKeyDown: {
+    type: Function as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["onKeyDown"]
+    >,
+  },
+  className: {
+    type: String as PropType<
+      (EditableCellEditorProps<unknown> & {
+        className?: string;
+      })["className"]
+    >,
+  },
+};
+
+const NuxtCellEditorPresentation = defineComponent(
+  (props: EditableCellEditorProps<unknown> & { className?: string }) => {
     const active = useScopeActivity();
     const mounted = shallowRef(false);
     onMounted(() => {
@@ -130,15 +185,19 @@ export default defineComponent(
   {
     name: "NuxtCellEditor",
     inheritAttrs: false,
-    props: [
-      "controller",
-      "label",
-      "attrs",
-      "editorRef",
-      "onChange",
-      "onBlur",
-      "onKeyDown",
-      "className",
-    ],
+    props: editorRuntimeProps,
   }
 );
+
+// Keep the row type at the functional boundary; the presentation validates
+// values and owns the editor's reactive lifecycle.
+function NuxtCellEditor<TRow>(
+  props: EditableCellEditorProps<TRow> & { className?: string }
+) {
+  return createVNode(NuxtCellEditorPresentation, { ...props });
+}
+NuxtCellEditor.props = Object.keys(
+  editorRuntimeProps
+) as (keyof typeof editorRuntimeProps)[];
+NuxtCellEditor.inheritAttrs = false;
+export default NuxtCellEditor;

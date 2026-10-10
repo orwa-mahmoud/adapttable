@@ -5,7 +5,7 @@ import {
   toVueAttrs,
 } from "@adapttable/vue/adapter";
 import USelect from "@nuxt/ui/components/Select.vue";
-import { computed, defineComponent, h, shallowRef } from "vue";
+import { computed, defineComponent, h, type PropType, shallowRef } from "vue";
 
 import { useNuxtControlSize } from "../densityContext";
 import { controlRef, withoutAttrs } from "./attrs";
@@ -86,17 +86,17 @@ export default defineComponent(
   {
     name: "NuxtMultiSelect",
     inheritAttrs: false,
-    props: [
-      "attrs",
-      "draft",
-      "label",
-      "options",
-      "onChange",
-      "focusRef",
-      "className",
-      "summary",
-      "menuClassName",
-      "menuPart",
-    ],
+    props: {
+      attrs: { type: Object as PropType<Props["attrs"]> },
+      draft: { type: String as PropType<Props["draft"]> },
+      label: { type: String as PropType<Props["label"]> },
+      options: { type: Array as PropType<Props["options"]> },
+      onChange: { type: Function as PropType<Props["onChange"]> },
+      focusRef: { type: Function as PropType<Props["focusRef"]> },
+      className: { type: String as PropType<Props["className"]> },
+      summary: { type: String as PropType<Props["summary"]> },
+      menuClassName: { type: String as PropType<Props["menuClassName"]> },
+      menuPart: { type: String as PropType<Props["menuPart"]> },
+    },
   }
 );

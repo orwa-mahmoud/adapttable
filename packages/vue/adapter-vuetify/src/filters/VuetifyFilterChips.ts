@@ -2,7 +2,7 @@ import {
   type ActiveFilterChipsSlotProps,
   FilterChipsChrome,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 import { VBtn } from "vuetify/components/VBtn";
 import { VIcon } from "vuetify/components/VIcon";
 
@@ -43,5 +43,16 @@ export const VuetifyFilterChips = defineComponent(
         },
       });
   },
-  { name: "VuetifyFilterChips", props: ["chips", "labels", "onClearAll"] }
+  {
+    name: "VuetifyFilterChips",
+    props: {
+      chips: { type: Array as PropType<ActiveFilterChipsSlotProps["chips"]> },
+      labels: {
+        type: Object as PropType<ActiveFilterChipsSlotProps["labels"]>,
+      },
+      onClearAll: {
+        type: Function as PropType<ActiveFilterChipsSlotProps["onClearAll"]>,
+      },
+    },
+  }
 );

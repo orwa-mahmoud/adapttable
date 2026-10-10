@@ -2,7 +2,7 @@ import {
   FillHandleChrome,
   type FillHandleChromeProps,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, mergeProps } from "vue";
+import { defineComponent, h, mergeProps, type PropType } from "vue";
 
 /** Pointer affordance only; the binding supplies the accessible keyboard fill action. */
 export const ElementFillHandle = defineComponent(
@@ -43,6 +43,28 @@ export const ElementFillHandle = defineComponent(
     }),
   {
     name: "ElementFillHandle",
-    props: ["focus", "windowIndex", "col", "firstRowIndex", "className"],
+    props: {
+      focus: {
+        type: Object as PropType<Omit<FillHandleChromeProps, "slots">["focus"]>,
+      },
+      windowIndex: {
+        type: Number as PropType<
+          Omit<FillHandleChromeProps, "slots">["windowIndex"]
+        >,
+      },
+      col: {
+        type: Number as PropType<Omit<FillHandleChromeProps, "slots">["col"]>,
+      },
+      firstRowIndex: {
+        type: Number as PropType<
+          Omit<FillHandleChromeProps, "slots">["firstRowIndex"]
+        >,
+      },
+      className: {
+        type: String as PropType<
+          Omit<FillHandleChromeProps, "slots">["className"]
+        >,
+      },
+    },
   }
 );

@@ -9,6 +9,7 @@ import {
   defineComponent,
   h,
   nextTick,
+  type PropType,
   shallowRef,
   type VNodeChild,
   watch,
@@ -121,14 +122,39 @@ export const NaiveContextMenuSurface = /*#__PURE__*/ defineComponent(
   },
   {
     name: "NaiveContextMenuSurface",
-    props: [
-      "at",
-      "anchorRef",
-      "label",
-      "onClose",
-      "container",
-      "children",
-      "className",
-    ],
+    props: {
+      at: {
+        type: Object as PropType<ContextMenuSurfaceProps<VNodeChild>["at"]>,
+      },
+      anchorRef: {
+        type: Object as PropType<
+          ContextMenuSurfaceProps<VNodeChild>["anchorRef"]
+        >,
+      },
+      label: {
+        type: String as PropType<ContextMenuSurfaceProps<VNodeChild>["label"]>,
+      },
+      onClose: {
+        type: Function as PropType<
+          ContextMenuSurfaceProps<VNodeChild>["onClose"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          ContextMenuSurfaceProps<VNodeChild>["container"]
+        >,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          ContextMenuSurfaceProps<VNodeChild>["children"]
+        >,
+        default: undefined,
+      },
+      className: {
+        type: String as PropType<
+          ContextMenuSurfaceProps<VNodeChild>["className"]
+        >,
+      },
+    },
   }
 );

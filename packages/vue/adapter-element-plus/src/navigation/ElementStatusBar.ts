@@ -4,7 +4,7 @@ import {
   type StatusBarChromeProps,
 } from "@adapttable/vue/adapter";
 import { ElText } from "element-plus";
-import { defineComponent, h, type VNode } from "vue";
+import { defineComponent, h, type PropType, type VNode } from "vue";
 
 import { useClassNames } from "../classNamesContext";
 
@@ -65,18 +65,47 @@ export const ElementStatusBar = defineComponent(
   },
   {
     name: "ElementStatusBar",
-    props: [
-      "enabled",
-      "shown",
-      "page",
-      "limit",
-      "total",
-      "selected",
-      "stats",
-      "labels",
-      "locale",
-      "className",
-      "notices",
-    ],
+    props: {
+      enabled: {
+        type: Boolean as PropType<
+          Omit<StatusBarChromeProps, "slots">["enabled"]
+        >,
+        default: undefined,
+      },
+      shown: {
+        type: Number as PropType<Omit<StatusBarChromeProps, "slots">["shown"]>,
+      },
+      page: {
+        type: Number as PropType<Omit<StatusBarChromeProps, "slots">["page"]>,
+      },
+      limit: {
+        type: Number as PropType<Omit<StatusBarChromeProps, "slots">["limit"]>,
+      },
+      total: {
+        type: Number as PropType<Omit<StatusBarChromeProps, "slots">["total"]>,
+      },
+      selected: {
+        type: Number as PropType<
+          Omit<StatusBarChromeProps, "slots">["selected"]
+        >,
+      },
+      stats: {
+        type: Object as PropType<Omit<StatusBarChromeProps, "slots">["stats"]>,
+      },
+      labels: {
+        type: Object as PropType<Omit<StatusBarChromeProps, "slots">["labels"]>,
+      },
+      locale: {
+        type: String as PropType<Omit<StatusBarChromeProps, "slots">["locale"]>,
+      },
+      className: {
+        type: String as PropType<
+          Omit<StatusBarChromeProps, "slots">["className"]
+        >,
+      },
+      notices: {
+        type: Array as PropType<Omit<StatusBarChromeProps, "slots">["notices"]>,
+      },
+    },
   }
 );

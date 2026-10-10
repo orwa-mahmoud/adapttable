@@ -4,7 +4,7 @@ import {
   FilterChipsChrome,
 } from "@adapttable/vue/adapter";
 import { X } from "@lucide/vue";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { Button } from "../components/button";
 import { shadcnControlAttrs } from "../controls";
@@ -52,6 +52,13 @@ export const FilterChips = defineComponent(
     }),
   {
     name: "ShadcnFilterChips",
-    props: ["chips", "labels", "onClearAll", "classNames"],
+    props: {
+      chips: { type: Array as PropType<FilterChipsProps["chips"]> },
+      labels: { type: Object as PropType<FilterChipsProps["labels"]> },
+      onClearAll: {
+        type: Function as PropType<FilterChipsProps["onClearAll"]>,
+      },
+      classNames: { type: Object as PropType<FilterChipsProps["classNames"]> },
+    },
   }
 );

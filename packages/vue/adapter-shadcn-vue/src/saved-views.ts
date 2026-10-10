@@ -10,7 +10,7 @@ import {
   slotRender,
 } from "@adapttable/vue/adapter";
 import { savedViews as bindingSavedViews } from "@adapttable/vue/features";
-import { defineComponent, h, type MaybeRefOrGetter } from "vue";
+import { defineComponent, h, type MaybeRefOrGetter, type PropType } from "vue";
 
 import {
   shadcnSavedPanelSlots,
@@ -37,18 +37,33 @@ export const SavedViewsPanel = defineComponent(
   },
   {
     name: "SavedViewsPanel",
-    props: [
-      "views",
-      "onApply",
-      "onRename",
-      "onMove",
-      "onSetDefault",
-      "onRemove",
-      "labels",
-      "footer",
-      "className",
-      "classNames",
-    ],
+    props: {
+      views: { type: Array as PropType<SavedViewsPanelProps["views"]> },
+      onApply: { type: Function as PropType<SavedViewsPanelProps["onApply"]> },
+      onRename: {
+        type: Function as PropType<SavedViewsPanelProps["onRename"]>,
+      },
+      onMove: { type: Function as PropType<SavedViewsPanelProps["onMove"]> },
+      onSetDefault: {
+        type: Function as PropType<SavedViewsPanelProps["onSetDefault"]>,
+      },
+      onRemove: {
+        type: Function as PropType<SavedViewsPanelProps["onRemove"]>,
+      },
+      labels: { type: Object as PropType<SavedViewsPanelProps["labels"]> },
+      footer: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          SavedViewsPanelProps["footer"]
+        >,
+        default: undefined,
+      },
+      className: {
+        type: String as PropType<SavedViewsPanelProps["className"]>,
+      },
+      classNames: {
+        type: Object as PropType<SavedViewsPanelProps["classNames"]>,
+      },
+    },
   }
 );
 
@@ -59,7 +74,19 @@ const SavedViewsControl = defineComponent(
   },
   {
     name: "ShadcnSavedViewsControl",
-    props: ["savedViews", "labels", "dir", "container", "classNames"],
+    props: {
+      savedViews: {
+        type: Object as PropType<SavedViewsControlProps["savedViews"]>,
+      },
+      labels: { type: Object as PropType<SavedViewsControlProps["labels"]> },
+      dir: { type: String as PropType<SavedViewsControlProps["dir"]> },
+      container: {
+        type: Object as PropType<SavedViewsControlProps["container"]>,
+      },
+      classNames: {
+        type: Object as PropType<SavedViewsControlProps["classNames"]>,
+      },
+    },
   }
 );
 

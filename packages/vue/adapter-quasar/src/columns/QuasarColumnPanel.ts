@@ -10,6 +10,7 @@ import {
   nextTick,
   onBeforeUnmount,
   onScopeDispose,
+  type PropType,
   shallowRef,
   watchEffect,
 } from "vue";
@@ -208,5 +209,10 @@ export const QuasarColumnPanel = defineComponent(
       );
     };
   },
-  { name: "QuasarColumnPanel", props: ["control"] }
+  {
+    name: "QuasarColumnPanel",
+    props: {
+      control: { type: Object as PropType<ManagedOverlayPanelProps> },
+    },
+  }
 );

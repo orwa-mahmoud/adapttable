@@ -16,6 +16,7 @@ import {
   h,
   nextTick,
   onMounted,
+  type PropType,
   shallowRef,
   withDirectives,
 } from "vue";
@@ -162,18 +163,120 @@ export const ElementFilterSurface = defineComponent(
   },
   {
     name: "ElementFilterSurface",
-    props: [
-      "className",
-      "open",
-      "label",
-      "dir",
-      "anchor",
-      "container",
-      "children",
-      "onClose",
-      "modal",
-      "part",
-      "backdropClassName",
-    ],
+    props: {
+      className: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["className"]
+        >,
+      },
+      open: {
+        type: Boolean as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["open"]
+        >,
+        default: undefined,
+      },
+      label: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["label"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["dir"]
+        >,
+      },
+      anchor: {
+        type: Object as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["anchor"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["container"]
+        >,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["children"]
+        >,
+        default: undefined,
+      },
+      onClose: {
+        type: Function as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["onClose"]
+        >,
+      },
+      modal: {
+        type: Boolean as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["modal"]
+        >,
+        default: undefined,
+      },
+      part: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["part"]
+        >,
+      },
+      backdropClassName: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            /** Class for ElDrawer's modal mask, through its `modalClass` hook. */
+            readonly backdropClassName?: string;
+          })["backdropClassName"]
+        >,
+      },
+    },
   }
 );

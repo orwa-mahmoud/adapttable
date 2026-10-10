@@ -2,7 +2,7 @@ import {
   type TableAssistantSheetProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { Sheet, SheetContent, SheetTitle } from "../components/sheet";
 import { useShadcnPortalContainer } from "../lib/portal";
@@ -54,6 +54,26 @@ export const ShadcnAssistantSheet = defineComponent(
   },
   {
     name: "ShadcnAssistantSheet",
-    props: ["label", "part", "className", "dir", "open", "onClose", "children"],
+    props: {
+      label: { type: String as PropType<TableAssistantSheetProps["label"]> },
+      part: { type: String as PropType<TableAssistantSheetProps["part"]> },
+      className: {
+        type: String as PropType<TableAssistantSheetProps["className"]>,
+      },
+      dir: { type: String as PropType<TableAssistantSheetProps["dir"]> },
+      open: {
+        type: Boolean as PropType<TableAssistantSheetProps["open"]>,
+        default: undefined,
+      },
+      onClose: {
+        type: Function as PropType<TableAssistantSheetProps["onClose"]>,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          TableAssistantSheetProps["children"]
+        >,
+        default: undefined,
+      },
+    },
   }
 );

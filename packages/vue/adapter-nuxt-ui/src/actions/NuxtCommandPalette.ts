@@ -9,7 +9,7 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import UModal from "@nuxt/ui/components/Modal.vue";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { nuxtButton } from "../controls/button";
 import NuxtButton from "../controls/NuxtButton.vue";
@@ -79,7 +79,11 @@ export const NuxtCommandSurface = /*#__PURE__*/ defineComponent(
   },
   {
     name: "NuxtCommandSurface",
-    props: ["control", "dir", "container"],
+    props: {
+      control: { type: Object as PropType<ManagedCommandPaletteSurfaceProps> },
+      dir: { type: String as PropType<("ltr" | "rtl") | undefined> },
+      container: { type: Object as PropType<HTMLElement | undefined> },
+    },
   }
 );
 
@@ -156,6 +160,40 @@ export default /*#__PURE__*/ defineComponent(
   },
   {
     name: "NuxtCommandPalette",
-    props: ["model", "labels", "dir", "container", "classNames"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & { readonly model: CommandPaletteModel })["dir"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["container"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["classNames"]
+        >,
+      },
+    },
   }
 );

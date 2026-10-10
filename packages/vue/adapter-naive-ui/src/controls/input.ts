@@ -4,6 +4,7 @@ import { type InputInst, NInput } from "naive-ui";
 import {
   defineComponent,
   h,
+  type PropType,
   shallowRef,
   useAttrs,
   type VNode,
@@ -81,7 +82,13 @@ const NaiveInputControl = defineComponent(
       );
     };
   },
-  { name: "NaiveInputControl", inheritAttrs: false, props: ["control"] }
+  {
+    name: "NaiveInputControl",
+    inheritAttrs: false,
+    props: {
+      control: { type: Object as PropType<NaiveInputControl> },
+    },
+  }
 );
 
 /** Native attrs use inputProps; target refs use Naive's exported InputInst. */

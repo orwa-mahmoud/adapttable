@@ -6,6 +6,7 @@ import {
   onMounted,
   onScopeDispose,
   onUpdated,
+  type PropType,
   type VNode,
 } from "vue";
 
@@ -62,5 +63,10 @@ export const NativeColumnMenuPanel = defineComponent(
         [props.control.content]
       );
   },
-  { name: "NativeColumnMenuPanel", props: ["control"] }
+  {
+    name: "NativeColumnMenuPanel",
+    props: {
+      control: { type: Object as PropType<PanelControl> },
+    },
+  }
 );

@@ -8,7 +8,7 @@ import {
   ContextMenuRoot,
   ContextMenuTrigger,
 } from "reka-ui";
-import { defineComponent, h, Teleport } from "vue";
+import { defineComponent, h, type PropType, Teleport } from "vue";
 
 type Props = Parameters<ContextMenuSlots["Surface"]>[0] & {
   readonly dir: "ltr" | "rtl";
@@ -75,15 +75,20 @@ export const RekaContextSurface = defineComponent(
   },
   {
     name: "RekaContextSurface",
-    props: [
-      "at",
-      "anchorRef",
-      "label",
-      "onClose",
-      "container",
-      "children",
-      "className",
-      "dir",
-    ],
+    props: {
+      at: { type: Object as PropType<Props["at"]> },
+      anchorRef: { type: Object as PropType<Props["anchorRef"]> },
+      label: { type: String as PropType<Props["label"]> },
+      onClose: { type: Function as PropType<Props["onClose"]> },
+      container: { type: Object as PropType<Props["container"]> },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          Props["children"]
+        >,
+        default: undefined,
+      },
+      className: { type: String as PropType<Props["className"]> },
+      dir: { type: String as PropType<Props["dir"]> },
+    },
   }
 );

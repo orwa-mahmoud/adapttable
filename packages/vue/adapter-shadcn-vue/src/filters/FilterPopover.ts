@@ -1,5 +1,5 @@
 import type { FilterPanelSurfaceProps } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { Popover, PopoverAnchor, PopoverContent } from "../components/popover";
 
@@ -60,17 +60,27 @@ export const FilterPopover = defineComponent(
   },
   {
     name: "ShadcnFilterPopover",
-    props: [
-      "className",
-      "open",
-      "label",
-      "dir",
-      "anchor",
-      "container",
-      "children",
-      "onClose",
-      "onCloseAutoFocus",
-      "part",
-    ],
+    props: {
+      className: { type: String as PropType<PopoverProps["className"]> },
+      open: {
+        type: Boolean as PropType<PopoverProps["open"]>,
+        default: undefined,
+      },
+      label: { type: String as PropType<PopoverProps["label"]> },
+      dir: { type: String as PropType<PopoverProps["dir"]> },
+      anchor: { type: Object as PropType<PopoverProps["anchor"]> },
+      container: { type: Object as PropType<PopoverProps["container"]> },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          PopoverProps["children"]
+        >,
+        default: undefined,
+      },
+      onClose: { type: Function as PropType<PopoverProps["onClose"]> },
+      onCloseAutoFocus: {
+        type: Function as PropType<PopoverProps["onCloseAutoFocus"]>,
+      },
+      part: { type: String as PropType<PopoverProps["part"]> },
+    },
   }
 );

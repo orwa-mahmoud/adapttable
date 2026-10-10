@@ -8,7 +8,7 @@ import {
   slotRender,
 } from "@adapttable/vue/adapter";
 import { commandPalette as bindingCommandPalette } from "@adapttable/vue/features";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import {
   elementActionButton,
@@ -47,7 +47,41 @@ const ElementCommandPaletteControl = defineComponent(
   },
   {
     name: "ElementCommandPaletteControl",
-    props: ["model", "labels", "dir", "container", "classNames"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & { readonly model: CommandPaletteModel })["dir"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["container"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["classNames"]
+        >,
+      },
+    },
   }
 );
 export function commandPalette(

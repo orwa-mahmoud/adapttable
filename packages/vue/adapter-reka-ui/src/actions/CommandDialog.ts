@@ -7,7 +7,7 @@ import {
   DialogRoot,
   DialogTitle,
 } from "reka-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 type Props = ManagedCommandPaletteSurfaceProps & {
   readonly dir: "ltr" | "rtl";
@@ -74,16 +74,21 @@ export const RekaCommandDialog = defineComponent(
   },
   {
     name: "RekaCommandDialog",
-    props: [
-      "open",
-      "isCurrent",
-      "getOpener",
-      "onClose",
-      "label",
-      "children",
-      "className",
-      "dir",
-      "container",
-    ],
+    props: {
+      open: { type: Boolean as PropType<Props["open"]>, default: undefined },
+      isCurrent: { type: Function as PropType<Props["isCurrent"]> },
+      getOpener: { type: Function as PropType<Props["getOpener"]> },
+      onClose: { type: Function as PropType<Props["onClose"]> },
+      label: { type: String as PropType<Props["label"]> },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          Props["children"]
+        >,
+        default: undefined,
+      },
+      className: { type: String as PropType<Props["className"]> },
+      dir: { type: String as PropType<Props["dir"]> },
+      container: { type: Object as PropType<Props["container"]> },
+    },
   }
 );

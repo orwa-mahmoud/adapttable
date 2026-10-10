@@ -1,5 +1,5 @@
 import { FindBarChrome, type FindBarProps } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { useClassNames } from "../classNamesContext";
 import { vuetifyButton } from "../controls";
@@ -40,5 +40,11 @@ export const VuetifyFindBar = defineComponent(
         },
       });
   },
-  { props: ["find", "labels", "className"] }
+  {
+    props: {
+      find: { type: Object as PropType<FindBarProps["find"]> },
+      labels: { type: Object as PropType<FindBarProps["labels"]> },
+      className: { type: String as PropType<FindBarProps["className"]> },
+    },
+  }
 );

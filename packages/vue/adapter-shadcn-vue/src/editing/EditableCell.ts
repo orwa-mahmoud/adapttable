@@ -14,6 +14,7 @@ import {
   defineComponent,
   Fragment,
   h,
+  type PropType,
   type SetupContext,
   type VNodeChild,
 } from "vue";
@@ -27,19 +28,36 @@ import {
 } from "../controls";
 import { shadcnAction } from "../tableControls";
 
-const propNames = [
-  "editing",
-  "row",
-  "column",
-  "rowId",
-  "rowIndex",
-  "rows",
-  "columns",
-  "rowKey",
-  "editLabel",
-  "undoLabel",
-  "display",
-] satisfies (keyof VueEditableCellProps<unknown>)[];
+const propNames = {
+  editing: {
+    type: Object as PropType<VueEditableCellProps<unknown>["editing"]>,
+  },
+  row: { type: null },
+  column: { type: Object as PropType<VueEditableCellProps<unknown>["column"]> },
+  rowId: { type: String as PropType<VueEditableCellProps<unknown>["rowId"]> },
+  rowIndex: {
+    type: Number as PropType<VueEditableCellProps<unknown>["rowIndex"]>,
+  },
+  rows: { type: Array as PropType<VueEditableCellProps<unknown>["rows"]> },
+  columns: {
+    type: Array as PropType<VueEditableCellProps<unknown>["columns"]>,
+  },
+  rowKey: {
+    type: Function as PropType<VueEditableCellProps<unknown>["rowKey"]>,
+  },
+  editLabel: {
+    type: String as PropType<VueEditableCellProps<unknown>["editLabel"]>,
+  },
+  undoLabel: {
+    type: String as PropType<VueEditableCellProps<unknown>["undoLabel"]>,
+  },
+  display: {
+    type: [String, Number, Boolean, Array, Object] as PropType<
+      VueEditableCellProps<unknown>["display"]
+    >,
+    default: undefined,
+  },
+};
 
 const EditableCellPresentation = defineComponent(
   (props: VueEditableCellProps<unknown>) => {
@@ -140,4 +158,4 @@ export function EditableCell<TRow>(
 ) {
   return createVNode(EditableCellPresentation, { ...context.attrs, ...props });
 }
-EditableCell.props = propNames;
+EditableCell.props = Object.keys(propNames) as (keyof typeof propNames)[];

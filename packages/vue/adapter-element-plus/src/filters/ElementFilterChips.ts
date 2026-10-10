@@ -2,7 +2,7 @@ import {
   type ActiveFilterChipsSlotProps,
   FilterChipsChrome,
 } from "@adapttable/vue/adapter";
-import { defineComponent } from "vue";
+import { defineComponent, type PropType } from "vue";
 
 import { useClassNames } from "../classNamesContext";
 import { elementButton } from "../controls/button";
@@ -20,5 +20,16 @@ export const ElementFilterChips = defineComponent(
         },
       });
   },
-  { name: "ElementFilterChips", props: ["chips", "labels", "onClearAll"] }
+  {
+    name: "ElementFilterChips",
+    props: {
+      chips: { type: Array as PropType<ActiveFilterChipsSlotProps["chips"]> },
+      labels: {
+        type: Object as PropType<ActiveFilterChipsSlotProps["labels"]>,
+      },
+      onClearAll: {
+        type: Function as PropType<ActiveFilterChipsSlotProps["onClearAll"]>,
+      },
+    },
+  }
 );

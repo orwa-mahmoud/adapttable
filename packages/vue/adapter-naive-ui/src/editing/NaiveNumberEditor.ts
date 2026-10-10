@@ -5,6 +5,7 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
+  type PropType,
   shallowRef,
 } from "vue";
 
@@ -67,6 +68,11 @@ export const NaiveNumberEditor = defineComponent(
   {
     name: "NaiveNumberEditor",
     inheritAttrs: false,
-    props: ["attrs", "draft", "onChange", "onBlur"],
+    props: {
+      attrs: { type: Object as PropType<NumberEditorProps["attrs"]> },
+      draft: { type: String as PropType<NumberEditorProps["draft"]> },
+      onChange: { type: Function as PropType<NumberEditorProps["onChange"]> },
+      onBlur: { type: Function as PropType<NumberEditorProps["onBlur"]> },
+    },
   }
 );

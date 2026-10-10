@@ -6,6 +6,7 @@ import {
   defineComponent,
   h,
   mergeProps,
+  type PropType,
   shallowRef,
 } from "vue";
 
@@ -44,5 +45,12 @@ export const ElementCard = defineComponent(
       );
     };
   },
-  { name: "ElementCard", props: ["attrs", "bodyStyle"], inheritAttrs: false }
+  {
+    name: "ElementCard",
+    props: {
+      attrs: { type: Object as PropType<Attrs> },
+      bodyStyle: { type: Object as PropType<CSSProperties | undefined> },
+    },
+    inheritAttrs: false,
+  }
 );

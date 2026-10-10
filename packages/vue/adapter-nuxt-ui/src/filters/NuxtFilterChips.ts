@@ -3,7 +3,7 @@ import {
   FilterChipsChrome,
   useDataTableClassNames,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import NuxtButton from "../controls/NuxtButton.vue";
 export const NuxtFilterChips = defineComponent(
@@ -19,5 +19,16 @@ export const NuxtFilterChips = defineComponent(
         },
       });
   },
-  { name: "NuxtFilterChips", props: ["chips", "labels", "onClearAll"] }
+  {
+    name: "NuxtFilterChips",
+    props: {
+      chips: { type: Array as PropType<ActiveFilterChipsSlotProps["chips"]> },
+      labels: {
+        type: Object as PropType<ActiveFilterChipsSlotProps["labels"]>,
+      },
+      onClearAll: {
+        type: Function as PropType<ActiveFilterChipsSlotProps["onClearAll"]>,
+      },
+    },
+  }
 );

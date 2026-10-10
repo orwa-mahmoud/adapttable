@@ -10,7 +10,7 @@ import {
   toVueAttrs,
 } from "@adapttable/vue/adapter";
 import { sidePanel as bindingSidePanel } from "@adapttable/vue/features";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 import { VCard } from "vuetify/components/VCard";
 
 import { vuetifyButton } from "./controls";
@@ -67,7 +67,43 @@ const VuetifySidePanel = defineComponent(
   },
   {
     name: "VuetifySidePanel",
-    props: ["model", "labels", "dir", "classNames", "container"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["dir"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["classNames"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: SidePanelControlModel;
+          })["container"]
+        >,
+      },
+    },
   }
 );
 

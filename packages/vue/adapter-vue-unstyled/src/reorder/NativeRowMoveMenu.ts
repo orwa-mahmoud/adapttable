@@ -4,7 +4,15 @@ import {
   type RowMoveMenuSlotProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, nextTick, shallowRef, useId, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  nextTick,
+  type PropType,
+  shallowRef,
+  useId,
+  watch,
+} from "vue";
 
 /** Native dialog lifetime; the neutral session-bound callbacks own the decision. */
 const NativeRowMoveConfirmation = defineComponent(
@@ -111,7 +119,13 @@ const NativeRowMoveConfirmation = defineComponent(
       );
     };
   },
-  { name: "NativeRowMoveConfirmation", props: ["confirmation", "restoreFocus"] }
+  {
+    name: "NativeRowMoveConfirmation",
+    props: {
+      confirmation: { type: Object as PropType<RowMoveConfirmationProps> },
+      restoreFocus: { type: Function as PropType<() => void> },
+    },
+  }
 );
 export const NativeRowMoveMenu = defineComponent(
   (props: RowMoveMenuSlotProps) => {
@@ -179,5 +193,14 @@ export const NativeRowMoveMenu = defineComponent(
         ]),
       ]);
   },
-  { name: "NativeRowMoveMenu", props: ["label", "items", "confirmation"] }
+  {
+    name: "NativeRowMoveMenu",
+    props: {
+      label: { type: String as PropType<RowMoveMenuSlotProps["label"]> },
+      items: { type: Array as PropType<RowMoveMenuSlotProps["items"]> },
+      confirmation: {
+        type: Object as PropType<RowMoveMenuSlotProps["confirmation"]>,
+      },
+    },
+  }
 );

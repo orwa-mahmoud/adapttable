@@ -5,6 +5,7 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
+  type PropType,
   shallowRef,
 } from "vue";
 
@@ -63,5 +64,12 @@ export const NaivePaletteSurface = /*#__PURE__*/ defineComponent(
       );
     };
   },
-  { name: "NaivePaletteSurface", props: ["control", "container", "dir"] }
+  {
+    name: "NaivePaletteSurface",
+    props: {
+      control: { type: Object as PropType<ManagedCommandPaletteSurfaceProps> },
+      container: { type: Object as PropType<HTMLElement | undefined> },
+      dir: { type: String as PropType<Direction> },
+    },
+  }
 );

@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
   useDirection,
 } from "reka-ui";
-import { defineComponent, h, shallowRef, watch } from "vue";
+import { defineComponent, h, type PropType, shallowRef, watch } from "vue";
 
 import { shadcnPortal } from "../lib/portal";
 import { shadcnAction } from "../tableControls";
@@ -184,5 +184,14 @@ export const ShadcnMoveMenu = defineComponent(
       ]);
     };
   },
-  { name: "ShadcnMoveMenu", props: ["label", "items", "confirmation"] }
+  {
+    name: "ShadcnMoveMenu",
+    props: {
+      label: { type: String as PropType<RowMoveMenuSlotProps["label"]> },
+      items: { type: Array as PropType<RowMoveMenuSlotProps["items"]> },
+      confirmation: {
+        type: Object as PropType<RowMoveMenuSlotProps["confirmation"]>,
+      },
+    },
+  }
 );

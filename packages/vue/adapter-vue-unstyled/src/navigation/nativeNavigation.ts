@@ -9,7 +9,7 @@ import {
   StatusBarChrome,
   type StatusBarChromeProps,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, mergeProps } from "vue";
+import { defineComponent, h, mergeProps, type PropType } from "vue";
 
 import { useClassNames } from "../classNamesContext";
 export const NativeFindBar = defineComponent(
@@ -50,7 +50,13 @@ export const NativeFindBar = defineComponent(
         },
       });
   },
-  { props: ["find", "labels", "className"] }
+  {
+    props: {
+      find: { type: Object as PropType<FindBarProps["find"]> },
+      labels: { type: Object as PropType<FindBarProps["labels"]> },
+      className: { type: String as PropType<FindBarProps["className"]> },
+    },
+  }
 );
 export const NativeColumnSelect = defineComponent(
   (props: Omit<ColumnSelectCheckboxChromeProps, "slots">) => () =>
@@ -70,7 +76,31 @@ export const NativeColumnSelect = defineComponent(
           }),
       },
     }),
-  { props: ["label", "checked", "onToggle", "className"] }
+  {
+    props: {
+      label: {
+        type: String as PropType<
+          Omit<ColumnSelectCheckboxChromeProps, "slots">["label"]
+        >,
+      },
+      checked: {
+        type: Boolean as PropType<
+          Omit<ColumnSelectCheckboxChromeProps, "slots">["checked"]
+        >,
+        default: undefined,
+      },
+      onToggle: {
+        type: Function as PropType<
+          Omit<ColumnSelectCheckboxChromeProps, "slots">["onToggle"]
+        >,
+      },
+      className: {
+        type: String as PropType<
+          Omit<ColumnSelectCheckboxChromeProps, "slots">["className"]
+        >,
+      },
+    },
+  }
 );
 export const NativeFillHandle = defineComponent(
   (props: Omit<FillHandleChromeProps, "slots">) => () =>
@@ -108,7 +138,31 @@ export const NativeFillHandle = defineComponent(
           ),
       },
     }),
-  { props: ["focus", "windowIndex", "col", "firstRowIndex", "className"] }
+  {
+    props: {
+      focus: {
+        type: Object as PropType<Omit<FillHandleChromeProps, "slots">["focus"]>,
+      },
+      windowIndex: {
+        type: Number as PropType<
+          Omit<FillHandleChromeProps, "slots">["windowIndex"]
+        >,
+      },
+      col: {
+        type: Number as PropType<Omit<FillHandleChromeProps, "slots">["col"]>,
+      },
+      firstRowIndex: {
+        type: Number as PropType<
+          Omit<FillHandleChromeProps, "slots">["firstRowIndex"]
+        >,
+      },
+      className: {
+        type: String as PropType<
+          Omit<FillHandleChromeProps, "slots">["className"]
+        >,
+      },
+    },
+  }
 );
 export const NativeStatusBar = defineComponent(
   (props: Omit<StatusBarChromeProps, "slots">) => {
@@ -168,18 +222,47 @@ export const NativeStatusBar = defineComponent(
       });
   },
   {
-    props: [
-      "enabled",
-      "shown",
-      "page",
-      "limit",
-      "total",
-      "selected",
-      "stats",
-      "labels",
-      "locale",
-      "className",
-      "notices",
-    ],
+    props: {
+      enabled: {
+        type: Boolean as PropType<
+          Omit<StatusBarChromeProps, "slots">["enabled"]
+        >,
+        default: undefined,
+      },
+      shown: {
+        type: Number as PropType<Omit<StatusBarChromeProps, "slots">["shown"]>,
+      },
+      page: {
+        type: Number as PropType<Omit<StatusBarChromeProps, "slots">["page"]>,
+      },
+      limit: {
+        type: Number as PropType<Omit<StatusBarChromeProps, "slots">["limit"]>,
+      },
+      total: {
+        type: Number as PropType<Omit<StatusBarChromeProps, "slots">["total"]>,
+      },
+      selected: {
+        type: Number as PropType<
+          Omit<StatusBarChromeProps, "slots">["selected"]
+        >,
+      },
+      stats: {
+        type: Object as PropType<Omit<StatusBarChromeProps, "slots">["stats"]>,
+      },
+      labels: {
+        type: Object as PropType<Omit<StatusBarChromeProps, "slots">["labels"]>,
+      },
+      locale: {
+        type: String as PropType<Omit<StatusBarChromeProps, "slots">["locale"]>,
+      },
+      className: {
+        type: String as PropType<
+          Omit<StatusBarChromeProps, "slots">["className"]
+        >,
+      },
+      notices: {
+        type: Array as PropType<Omit<StatusBarChromeProps, "slots">["notices"]>,
+      },
+    },
   }
 );

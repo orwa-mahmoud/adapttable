@@ -2,7 +2,7 @@ import type {
   DataTableClassNames,
   FilterPanelSurfaceProps,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { Sheet, SheetContent, SheetTitle } from "../components/sheet";
 import { cn } from "../lib/utils";
@@ -64,18 +64,28 @@ export const FilterDrawer = defineComponent(
   },
   {
     name: "ShadcnFilterDrawer",
-    props: [
-      "className",
-      "classNames",
-      "closeLabel",
-      "open",
-      "label",
-      "dir",
-      "anchor",
-      "container",
-      "children",
-      "onClose",
-      "onCloseAutoFocus",
-    ],
+    props: {
+      className: { type: String as PropType<DrawerProps["className"]> },
+      classNames: { type: Object as PropType<DrawerProps["classNames"]> },
+      closeLabel: { type: String as PropType<DrawerProps["closeLabel"]> },
+      open: {
+        type: Boolean as PropType<DrawerProps["open"]>,
+        default: undefined,
+      },
+      label: { type: String as PropType<DrawerProps["label"]> },
+      dir: { type: String as PropType<DrawerProps["dir"]> },
+      anchor: { type: Object as PropType<DrawerProps["anchor"]> },
+      container: { type: Object as PropType<DrawerProps["container"]> },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          DrawerProps["children"]
+        >,
+        default: undefined,
+      },
+      onClose: { type: Function as PropType<DrawerProps["onClose"]> },
+      onCloseAutoFocus: {
+        type: Function as PropType<DrawerProps["onCloseAutoFocus"]>,
+      },
+    },
   }
 );

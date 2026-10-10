@@ -1,10 +1,12 @@
 /** Column-menu structure and keyboard wiring; kits supply every control. */
+/** Column-menu structure and keyboard wiring; kits supply every control. */
 import {
   defineComponent,
   Fragment,
   h,
   nextTick,
   onScopeDispose,
+  type PropType,
   shallowRef,
   useId,
   type VNodeChild,
@@ -206,15 +208,58 @@ export const ColumnHeaderRenameChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "ColumnHeaderRenameChrome",
-    props: [
-      "columnKey",
-      "name",
-      "onRenameColumn",
-      "labels",
-      "children",
-      "classNames",
-      "slots",
-    ],
+    props: {
+      columnKey: {
+        type: String as PropType<
+          (ColumnHeaderRenameSlotProps & {
+            readonly slots: ColumnRenameSlots;
+          })["columnKey"]
+        >,
+      },
+      name: {
+        type: String as PropType<
+          (ColumnHeaderRenameSlotProps & {
+            readonly slots: ColumnRenameSlots;
+          })["name"]
+        >,
+      },
+      onRenameColumn: {
+        type: Function as PropType<
+          (ColumnHeaderRenameSlotProps & {
+            readonly slots: ColumnRenameSlots;
+          })["onRenameColumn"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ColumnHeaderRenameSlotProps & {
+            readonly slots: ColumnRenameSlots;
+          })["labels"]
+        >,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          (ColumnHeaderRenameSlotProps & {
+            readonly slots: ColumnRenameSlots;
+          })["children"]
+        >,
+        default: undefined,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ColumnHeaderRenameSlotProps & {
+            readonly slots: ColumnRenameSlots;
+          })["classNames"]
+        >,
+      },
+      slots: {
+        type: Object as PropType<
+          (ColumnHeaderRenameSlotProps & {
+            readonly slots: ColumnRenameSlots;
+          })["slots"]
+        >,
+      },
+    },
   }
 );
 
@@ -396,7 +441,13 @@ const ColumnMenuRowChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "ColumnMenuRowChrome",
-    props: ["row", "labels", "slots", "classNames", "active"],
+    props: {
+      row: { type: Object as PropType<ColumnMenuDisplayRow> },
+      labels: { type: Object as PropType<ColumnMenuLabels> },
+      slots: { type: Object as PropType<ColumnMenuSlots> },
+      classNames: { type: Object as PropType<Names> },
+      active: { type: Boolean as PropType<boolean>, default: undefined },
+    },
   }
 );
 
@@ -653,5 +704,11 @@ export const ColumnMenuChrome = /*#__PURE__*/ defineComponent(
       );
     };
   },
-  { name: "ColumnMenuChrome", props: ["model", "slots"] }
+  {
+    name: "ColumnMenuChrome",
+    props: {
+      model: { type: Object as PropType<ColumnMenuModel> },
+      slots: { type: Object as PropType<ColumnMenuSlots> },
+    },
+  }
 );

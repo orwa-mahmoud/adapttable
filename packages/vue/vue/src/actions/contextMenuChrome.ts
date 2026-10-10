@@ -3,11 +3,13 @@ import type {
   ContextMenuSlots as NeutralSlots,
 } from "@adapttable/core/binding";
 import {
+  type ComponentObjectPropsOptions,
   defineComponent,
   Fragment,
   h,
   nextTick,
   onScopeDispose,
+  type PropType,
   type VNodeChild,
   watch,
 } from "vue";
@@ -201,15 +203,23 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "ContextMenuChrome",
-    props: [
-      "items",
-      "at",
-      "onClose",
-      "labels",
-      "className",
-      "container",
-      "slots",
-      "presentation",
-    ],
+    props: {
+      items: { type: Array as PropType<ContextMenuChromeProps["items"]> },
+      at: { type: Object as PropType<ContextMenuChromeProps["at"]> },
+      onClose: {
+        type: Function as PropType<ContextMenuChromeProps["onClose"]>,
+      },
+      labels: { type: Object as PropType<ContextMenuChromeProps["labels"]> },
+      className: {
+        type: String as PropType<ContextMenuChromeProps["className"]>,
+      },
+      container: {
+        type: Object as PropType<ContextMenuChromeProps["container"]>,
+      },
+      slots: { type: Object as PropType<ContextMenuChromeProps["slots"]> },
+      presentation: {
+        type: Function as PropType<ContextMenuChromeProps["presentation"]>,
+      },
+    } as ComponentObjectPropsOptions<ContextMenuChromeProps>,
   }
 );

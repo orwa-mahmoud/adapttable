@@ -9,6 +9,7 @@ import {
   h,
   nextTick,
   onMounted,
+  type PropType,
   shallowRef,
   Teleport,
   watch,
@@ -336,18 +337,109 @@ export const NativeFilterSurface = defineComponent(
   },
   {
     name: "NativeFilterSurface",
-    props: [
-      "open",
-      "label",
-      "dir",
-      "anchor",
-      "children",
-      "onClose",
-      "modal",
-      "part",
-      "backdropLabel",
-      "container",
-      "className",
-    ],
+    props: {
+      open: {
+        type: Boolean as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["open"]
+        >,
+        default: undefined,
+      },
+      label: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["label"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["dir"]
+        >,
+      },
+      anchor: {
+        type: Object as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["anchor"]
+        >,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["children"]
+        >,
+        default: undefined,
+      },
+      onClose: {
+        type: Function as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["onClose"]
+        >,
+      },
+      modal: {
+        type: Boolean as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["modal"]
+        >,
+        default: undefined,
+      },
+      part: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["part"]
+        >,
+      },
+      backdropLabel: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["backdropLabel"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["container"]
+        >,
+      },
+      className: {
+        type: String as PropType<
+          (FilterPanelSurfaceProps & {
+            readonly modal: boolean;
+            readonly part?: string;
+            readonly backdropLabel?: string;
+          })["className"]
+        >,
+      },
+    },
   }
 );

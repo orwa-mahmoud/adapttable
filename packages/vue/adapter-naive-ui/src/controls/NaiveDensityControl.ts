@@ -1,6 +1,6 @@
 import { type DensityChooserSlots, toVueAttrs } from "@adapttable/vue/adapter";
 import { NButton, NButtonGroup } from "naive-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 type Props = Parameters<DensityChooserSlots["Control"]>[0];
 
@@ -31,6 +31,11 @@ export const NaiveDensityControl = defineComponent(
   },
   {
     name: "NaiveDensityControl",
-    props: ["attrs", "value", "options", "onChange"],
+    props: {
+      attrs: { type: Object as PropType<Props["attrs"]> },
+      value: { type: String as PropType<Props["value"]> },
+      options: { type: Array as PropType<Props["options"]> },
+      onChange: { type: Function as PropType<Props["onChange"]> },
+    },
   }
 );

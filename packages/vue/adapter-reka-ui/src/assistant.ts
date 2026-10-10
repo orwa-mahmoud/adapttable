@@ -9,7 +9,7 @@ import {
   type TableAssistantProps,
 } from "@adapttable/vue/adapter";
 import { ConfigProvider } from "reka-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import {
   rekaApprovalControls,
@@ -28,26 +28,45 @@ export const TableAssistant = defineComponent(
     ),
   {
     name: "RekaTableAssistant",
-    props: [
-      "assistant",
-      "speech",
-      "open",
-      "onOpenChange",
-      "presentation",
-      "labels",
-      "accent",
-      "receipts",
-      "className",
-      "launcher",
-      "onSettings",
-      "boundary",
-      "note",
-      "greeting",
-      "avatars",
-      "messageAction",
-      "approval",
-      "dir",
-    ],
+    props: {
+      assistant: { type: Object as PropType<TableAssistantProps["assistant"]> },
+      speech: { type: Object as PropType<TableAssistantProps["speech"]> },
+      open: {
+        type: Boolean as PropType<TableAssistantProps["open"]>,
+        default: undefined,
+      },
+      onOpenChange: {
+        type: Function as PropType<TableAssistantProps["onOpenChange"]>,
+      },
+      presentation: {
+        type: String as PropType<TableAssistantProps["presentation"]>,
+      },
+      labels: { type: Object as PropType<TableAssistantProps["labels"]> },
+      accent: { type: String as PropType<TableAssistantProps["accent"]> },
+      receipts: {
+        type: Boolean as PropType<TableAssistantProps["receipts"]>,
+        default: undefined,
+      },
+      className: { type: String as PropType<TableAssistantProps["className"]> },
+      launcher: {
+        type: Boolean as PropType<TableAssistantProps["launcher"]>,
+        default: undefined,
+      },
+      onSettings: {
+        type: Function as PropType<TableAssistantProps["onSettings"]>,
+      },
+      boundary: {
+        type: [String, Object] as PropType<TableAssistantProps["boundary"]>,
+      },
+      note: { type: String as PropType<TableAssistantProps["note"]> },
+      greeting: { type: String as PropType<TableAssistantProps["greeting"]> },
+      avatars: { type: Object as PropType<TableAssistantProps["avatars"]> },
+      messageAction: {
+        type: Function as PropType<TableAssistantProps["messageAction"]>,
+      },
+      approval: { type: Object as PropType<TableAssistantProps["approval"]> },
+      dir: { type: String as PropType<TableAssistantProps["dir"]> },
+    },
   }
 );
 export const AgentApproval = defineComponent(
@@ -55,7 +74,14 @@ export const AgentApproval = defineComponent(
     h(AgentApprovalChrome, { ...props, slots: rekaApprovalControls }),
   {
     name: "RekaAgentApproval",
-    props: ["pending", "labels", "className", "buttonClassName"],
+    props: {
+      pending: { type: Object as PropType<AgentApprovalProps["pending"]> },
+      labels: { type: Object as PropType<AgentApprovalProps["labels"]> },
+      className: { type: String as PropType<AgentApprovalProps["className"]> },
+      buttonClassName: {
+        type: String as PropType<AgentApprovalProps["buttonClassName"]>,
+      },
+    },
   }
 );
 export function tableAssistant(): StaticTableFeature {

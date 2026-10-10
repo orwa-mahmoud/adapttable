@@ -3,7 +3,7 @@ import {
   FilterChipsChrome,
   useDataTableClassNames,
 } from "@adapttable/vue/adapter";
-import { defineComponent } from "vue";
+import { defineComponent, type PropType } from "vue";
 
 import { naiveButton } from "../controls/button";
 
@@ -20,5 +20,16 @@ export const NaiveFilterChips = defineComponent(
         },
       });
   },
-  { name: "NaiveFilterChips", props: ["chips", "labels", "onClearAll"] }
+  {
+    name: "NaiveFilterChips",
+    props: {
+      chips: { type: Array as PropType<ActiveFilterChipsSlotProps["chips"]> },
+      labels: {
+        type: Object as PropType<ActiveFilterChipsSlotProps["labels"]>,
+      },
+      onClearAll: {
+        type: Function as PropType<ActiveFilterChipsSlotProps["onClearAll"]>,
+      },
+    },
+  }
 );

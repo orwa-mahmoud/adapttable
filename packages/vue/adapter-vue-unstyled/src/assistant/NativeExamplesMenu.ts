@@ -2,7 +2,15 @@ import {
   type TableAssistantMenuProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, nextTick, shallowRef, useId, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  nextTick,
+  type PropType,
+  shallowRef,
+  useId,
+  watch,
+} from "vue";
 
 /** A native disclosure of commands. The browser retains ordinary Tab navigation. */
 export const NativeExamplesMenu = defineComponent(
@@ -161,15 +169,29 @@ export const NativeExamplesMenu = defineComponent(
   },
   {
     name: "NativeExamplesMenu",
-    props: [
-      "label",
-      "part",
-      "className",
-      "icon",
-      "disabled",
-      "items",
-      "onSelect",
-      "maxHeight",
-    ],
+    props: {
+      label: { type: String as PropType<TableAssistantMenuProps["label"]> },
+      part: { type: String as PropType<TableAssistantMenuProps["part"]> },
+      className: {
+        type: String as PropType<TableAssistantMenuProps["className"]>,
+      },
+      icon: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          TableAssistantMenuProps["icon"]
+        >,
+        default: undefined,
+      },
+      disabled: {
+        type: Boolean as PropType<TableAssistantMenuProps["disabled"]>,
+        default: undefined,
+      },
+      items: { type: Array as PropType<TableAssistantMenuProps["items"]> },
+      onSelect: {
+        type: Function as PropType<TableAssistantMenuProps["onSelect"]>,
+      },
+      maxHeight: {
+        type: String as PropType<TableAssistantMenuProps["maxHeight"]>,
+      },
+    },
   }
 );

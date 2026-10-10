@@ -3,7 +3,13 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { QCard, QCardSection, QDialog } from "quasar";
-import { defineComponent, h, onBeforeUnmount, shallowRef } from "vue";
+import {
+  defineComponent,
+  h,
+  onBeforeUnmount,
+  type PropType,
+  shallowRef,
+} from "vue";
 
 import { finishOverlayFocus } from "./focusHandoff";
 
@@ -63,5 +69,11 @@ export const QuasarCommandSurface = defineComponent(
       );
     };
   },
-  { name: "QuasarCommandSurface", props: ["control", "dir"] }
+  {
+    name: "QuasarCommandSurface",
+    props: {
+      control: { type: Object as PropType<ManagedCommandPaletteSurfaceProps> },
+      dir: { type: String as PropType<"ltr" | "rtl"> },
+    },
+  }
 );

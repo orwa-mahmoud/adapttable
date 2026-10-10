@@ -12,6 +12,7 @@ import {
   h,
   nextTick,
   onScopeDispose,
+  type PropType,
   shallowRef,
   type VNodeChild,
   watch,
@@ -140,15 +141,64 @@ export const ElementContextSurface = defineComponent(
   },
   {
     name: "ElementContextSurface",
-    props: [
-      "at",
-      "anchorRef",
-      "label",
-      "onClose",
-      "container",
-      "children",
-      "className",
-      "dir",
-    ],
+    props: {
+      at: {
+        type: Object as PropType<
+          (ContextMenuSurfaceProps<VNodeChild> & {
+            readonly dir?: "ltr" | "rtl";
+          })["at"]
+        >,
+      },
+      anchorRef: {
+        type: Object as PropType<
+          (ContextMenuSurfaceProps<VNodeChild> & {
+            readonly dir?: "ltr" | "rtl";
+          })["anchorRef"]
+        >,
+      },
+      label: {
+        type: String as PropType<
+          (ContextMenuSurfaceProps<VNodeChild> & {
+            readonly dir?: "ltr" | "rtl";
+          })["label"]
+        >,
+      },
+      onClose: {
+        type: Function as PropType<
+          (ContextMenuSurfaceProps<VNodeChild> & {
+            readonly dir?: "ltr" | "rtl";
+          })["onClose"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ContextMenuSurfaceProps<VNodeChild> & {
+            readonly dir?: "ltr" | "rtl";
+          })["container"]
+        >,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          (ContextMenuSurfaceProps<VNodeChild> & {
+            readonly dir?: "ltr" | "rtl";
+          })["children"]
+        >,
+        default: undefined,
+      },
+      className: {
+        type: String as PropType<
+          (ContextMenuSurfaceProps<VNodeChild> & {
+            readonly dir?: "ltr" | "rtl";
+          })["className"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ContextMenuSurfaceProps<VNodeChild> & {
+            readonly dir?: "ltr" | "rtl";
+          })["dir"]
+        >,
+      },
+    },
   }
 );

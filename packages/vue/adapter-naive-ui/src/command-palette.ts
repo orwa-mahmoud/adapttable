@@ -12,7 +12,7 @@ import {
 } from "@adapttable/vue/adapter";
 import { commandPalette as bindingCommandPalette } from "@adapttable/vue/features";
 import { NText } from "naive-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { NaivePaletteSurface } from "./actions/NaivePaletteSurface";
 import { naiveButton } from "./controls/button";
@@ -86,7 +86,41 @@ const NaiveCommandPalette = /*#__PURE__*/ defineComponent(
   },
   {
     name: "NaiveCommandPalette",
-    props: ["model", "labels", "dir", "classNames", "container"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & { readonly model: CommandPaletteModel })["dir"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["classNames"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["container"]
+        >,
+      },
+    },
   }
 );
 export function commandPalette(

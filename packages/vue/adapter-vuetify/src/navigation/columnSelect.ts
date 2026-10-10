@@ -2,7 +2,7 @@ import {
   ColumnSelectCheckboxChrome,
   type ColumnSelectCheckboxChromeProps,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import VuetifyCheckbox from "../controls/VuetifyCheckbox.vue";
 
@@ -19,5 +19,29 @@ export const VuetifyColumnSelect = defineComponent(
           }),
       },
     }),
-  { props: ["label", "checked", "onToggle", "className"] }
+  {
+    props: {
+      label: {
+        type: String as PropType<
+          Omit<ColumnSelectCheckboxChromeProps, "slots">["label"]
+        >,
+      },
+      checked: {
+        type: Boolean as PropType<
+          Omit<ColumnSelectCheckboxChromeProps, "slots">["checked"]
+        >,
+        default: undefined,
+      },
+      onToggle: {
+        type: Function as PropType<
+          Omit<ColumnSelectCheckboxChromeProps, "slots">["onToggle"]
+        >,
+      },
+      className: {
+        type: String as PropType<
+          Omit<ColumnSelectCheckboxChromeProps, "slots">["className"]
+        >,
+      },
+    },
+  }
 );

@@ -3,7 +3,7 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { ElDrawer } from "element-plus";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 /**
  * Chrome chooses initial and return focus; ElDrawer contains focus and owns
@@ -55,6 +55,26 @@ export const ElementAssistantSheet = defineComponent(
   },
   {
     name: "ElementAssistantSheet",
-    props: ["label", "part", "className", "dir", "open", "onClose", "children"],
+    props: {
+      label: { type: String as PropType<TableAssistantSheetProps["label"]> },
+      part: { type: String as PropType<TableAssistantSheetProps["part"]> },
+      className: {
+        type: String as PropType<TableAssistantSheetProps["className"]>,
+      },
+      dir: { type: String as PropType<TableAssistantSheetProps["dir"]> },
+      open: {
+        type: Boolean as PropType<TableAssistantSheetProps["open"]>,
+        default: undefined,
+      },
+      onClose: {
+        type: Function as PropType<TableAssistantSheetProps["onClose"]>,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          TableAssistantSheetProps["children"]
+        >,
+        default: undefined,
+      },
+    },
   }
 );

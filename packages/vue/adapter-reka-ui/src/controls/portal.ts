@@ -4,6 +4,7 @@ import {
   h,
   inject,
   type InjectionKey,
+  type PropType,
   provide,
   type VNodeChild,
 } from "vue";
@@ -31,7 +32,16 @@ const RekaPortal = defineComponent(
     return () =>
       h(props.component, { to: props.to ?? container() ?? "body" }, slots);
   },
-  { name: "RekaPortal", props: ["component", "to"], inheritAttrs: false }
+  {
+    name: "RekaPortal",
+    props: {
+      component: { type: [Object, Function] as PropType<Component> },
+      to: {
+        type: [String, Object] as PropType<(HTMLElement | string) | undefined>,
+      },
+    },
+    inheritAttrs: false,
+  }
 );
 
 export function rekaPortal(

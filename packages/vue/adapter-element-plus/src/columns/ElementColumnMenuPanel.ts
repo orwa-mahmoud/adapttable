@@ -10,6 +10,7 @@ import {
   mergeProps,
   nextTick,
   onScopeDispose,
+  type PropType,
   provide,
   shallowRef,
   watch,
@@ -194,5 +195,11 @@ export const ElementColumnMenuPanel = defineComponent(
       );
     };
   },
-  { name: "ElementColumnMenuPanel", props: ["control", "initialFocus"] }
+  {
+    name: "ElementColumnMenuPanel",
+    props: {
+      control: { type: Object as PropType<ManagedOverlayPanelProps> },
+      initialFocus: { type: String as PropType<string | undefined> },
+    },
+  }
 );

@@ -10,7 +10,7 @@ import {
   useFeatureState,
 } from "@adapttable/vue/adapter";
 import { filters as bindingFilters } from "@adapttable/vue/features";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { FilterChips } from "./filters/FilterChips";
 import { FilterPanel } from "./filters/FilterPanel";
@@ -31,7 +31,18 @@ const ChipsFeatureControl = defineComponent(
     const names = useDataTableClassNames();
     return () => h(FilterChips, { ...props, classNames: names.value });
   },
-  { name: "ShadcnFilterChipsFeature", props: ["chips", "labels", "onClearAll"] }
+  {
+    name: "ShadcnFilterChipsFeature",
+    props: {
+      chips: { type: Array as PropType<ActiveFilterChipsSlotProps["chips"]> },
+      labels: {
+        type: Object as PropType<ActiveFilterChipsSlotProps["labels"]>,
+      },
+      onClearAll: {
+        type: Function as PropType<ActiveFilterChipsSlotProps["onClearAll"]>,
+      },
+    },
+  }
 );
 
 export type FiltersOptions = NonNullable<Parameters<typeof bindingFilters>[1]>;

@@ -8,7 +8,7 @@ import {
   slotRender,
 } from "@adapttable/vue/adapter";
 import { sidePanel as bindingSidePanel } from "@adapttable/vue/features";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { nativeSidePanelSlots } from "./actions/nativeControls";
 const NativeSidePanel = /*#__PURE__*/ defineComponent(
@@ -22,7 +22,33 @@ const NativeSidePanel = /*#__PURE__*/ defineComponent(
   },
   {
     name: "NativeSidePanel",
-    props: ["model", "labels", "dir", "classNames", "container"],
+    props: {
+      model: {
+        type: Object as PropType<
+          Omit<SidePanelChromeProps, "slots" | "presentation">["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          Omit<SidePanelChromeProps, "slots" | "presentation">["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          Omit<SidePanelChromeProps, "slots" | "presentation">["dir"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          Omit<SidePanelChromeProps, "slots" | "presentation">["classNames"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          Omit<SidePanelChromeProps, "slots" | "presentation">["container"]
+        >,
+      },
+    },
   }
 );
 export function sidePanel(

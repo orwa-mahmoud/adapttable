@@ -3,7 +3,14 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { QBtnToggle } from "quasar";
-import { defineComponent, h, mergeProps, shallowRef, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  mergeProps,
+  type PropType,
+  shallowRef,
+  watch,
+} from "vue";
 
 import { quasarAttrs, useQuasarControlRef } from "./controlAttrs";
 
@@ -52,5 +59,11 @@ export const QuasarDensityToggle = defineComponent(
       );
     };
   },
-  { name: "QuasarDensityToggle", props: ["control"], inheritAttrs: false }
+  {
+    name: "QuasarDensityToggle",
+    props: {
+      control: { type: Object as PropType<DensityControl> },
+    },
+    inheritAttrs: false,
+  }
 );

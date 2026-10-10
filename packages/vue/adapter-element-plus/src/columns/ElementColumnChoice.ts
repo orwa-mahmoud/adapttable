@@ -1,5 +1,5 @@
 import type { ColumnMenuSlots } from "@adapttable/vue/adapter";
-import { defineComponent, h, inject } from "vue";
+import { defineComponent, h, inject, type PropType } from "vue";
 
 import ElementSelect from "../controls/ElementSelect.vue";
 import { columnMenuContainer } from "./panelContext";
@@ -38,5 +38,10 @@ export const ElementColumnChoice = defineComponent(
         onKeydownCapture: escape,
       });
   },
-  { name: "ElementColumnChoice", props: ["control"] }
+  {
+    name: "ElementColumnChoice",
+    props: {
+      control: { type: Object as PropType<ChoiceControl> },
+    },
+  }
 );

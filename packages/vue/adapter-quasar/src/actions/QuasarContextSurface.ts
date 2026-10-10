@@ -3,7 +3,14 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { QList, QMenu } from "quasar";
-import { defineComponent, h, onMounted, shallowRef, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  onMounted,
+  type PropType,
+  shallowRef,
+  watch,
+} from "vue";
 
 import { focusMenuItem, moveMenuFocus } from "./menuFocus";
 
@@ -60,5 +67,11 @@ export const QuasarContextSurface = defineComponent(
           )
         : null;
   },
-  { name: "QuasarContextSurface", props: ["control", "dir"] }
+  {
+    name: "QuasarContextSurface",
+    props: {
+      control: { type: Object as PropType<ContextMenuSurfaceProps> },
+      dir: { type: String as PropType<"ltr" | "rtl"> },
+    },
+  }
 );

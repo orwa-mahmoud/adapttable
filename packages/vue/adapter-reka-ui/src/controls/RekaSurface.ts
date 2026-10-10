@@ -16,7 +16,7 @@ import {
   PopoverRoot,
   Primitive,
 } from "reka-ui";
-import { defineComponent, h, mergeProps, watch } from "vue";
+import { defineComponent, h, mergeProps, type PropType, watch } from "vue";
 
 import { useTargetAttrs } from "./target";
 
@@ -185,21 +185,36 @@ export const RekaSurface = defineComponent(
   },
   {
     name: "RekaSurface",
-    props: [
-      "open",
-      "label",
-      "dir",
-      "anchor",
-      "container",
-      "children",
-      "onClose",
-      "modal",
-      "part",
-      "className",
-      "backdropClassName",
-      "drawerClassName",
-      "contentAttrs",
-      "isCurrent",
-    ],
+    props: {
+      open: {
+        type: Boolean as PropType<SurfaceProps["open"]>,
+        default: undefined,
+      },
+      label: { type: String as PropType<SurfaceProps["label"]> },
+      dir: { type: String as PropType<SurfaceProps["dir"]> },
+      anchor: { type: Object as PropType<SurfaceProps["anchor"]> },
+      container: { type: Object as PropType<SurfaceProps["container"]> },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          SurfaceProps["children"]
+        >,
+        default: undefined,
+      },
+      onClose: { type: Function as PropType<SurfaceProps["onClose"]> },
+      modal: {
+        type: Boolean as PropType<SurfaceProps["modal"]>,
+        default: undefined,
+      },
+      part: { type: String as PropType<SurfaceProps["part"]> },
+      className: { type: String as PropType<SurfaceProps["className"]> },
+      backdropClassName: {
+        type: String as PropType<SurfaceProps["backdropClassName"]>,
+      },
+      drawerClassName: {
+        type: String as PropType<SurfaceProps["drawerClassName"]>,
+      },
+      contentAttrs: { type: Object as PropType<SurfaceProps["contentAttrs"]> },
+      isCurrent: { type: Function as PropType<SurfaceProps["isCurrent"]> },
+    },
   }
 );

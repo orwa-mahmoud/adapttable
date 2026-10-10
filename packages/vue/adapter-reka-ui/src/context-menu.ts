@@ -13,7 +13,7 @@ import {
   type ContextMenuOptions,
 } from "@adapttable/vue/features";
 import { ContextMenuItem, ContextMenuSeparator } from "reka-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { RekaContextSurface } from "./actions/ContextSurface";
 
@@ -64,7 +64,37 @@ const RekaContextMenuControl = /*#__PURE__*/ defineComponent(
   },
   {
     name: "RekaContextMenuControl",
-    props: ["model", "labels", "dir", "container", "classNames"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["dir"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: ContextMenuModel;
+          })["container"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: ContextMenuModel;
+          })["classNames"]
+        >,
+      },
+    },
   }
 );
 export function contextMenu<TRow>(

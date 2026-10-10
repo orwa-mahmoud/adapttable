@@ -5,6 +5,7 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
+  type PropType,
   shallowRef,
 } from "vue";
 
@@ -35,5 +36,11 @@ export const VuetifySurface = defineComponent(
         slots
       );
   },
-  { props: ["component", "attrs"], inheritAttrs: false }
+  {
+    props: {
+      component: { type: [Object, Function] as PropType<Component> },
+      attrs: { type: Object as PropType<Attrs> },
+    },
+    inheritAttrs: false,
+  }
 );

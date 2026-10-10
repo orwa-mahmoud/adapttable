@@ -5,6 +5,7 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
+  type PropType,
   shallowRef,
   type VNodeChild,
 } from "vue";
@@ -35,7 +36,14 @@ const NativeElement = defineComponent(
       );
     };
   },
-  { name: "NaiveSemanticElement", props: ["component", "attrs", "content"] }
+  {
+    name: "NaiveSemanticElement",
+    props: {
+      component: { type: [Object, Function] as PropType<Component> },
+      attrs: { type: Object as PropType<Attrs> },
+      content: { type: Function as PropType<() => VNodeChild> },
+    },
+  }
 );
 
 /** Naive primitives have one semantic root; refs resolve through public $el. */

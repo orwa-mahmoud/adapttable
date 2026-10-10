@@ -12,7 +12,7 @@ import {
   contextMenu as bindingContextMenu,
   type ContextMenuOptions,
 } from "@adapttable/vue/features";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { nativeContextMenuSlots } from "./actions/nativeControls";
 const NativeContextMenuControl = /*#__PURE__*/ defineComponent(
@@ -36,7 +36,37 @@ const NativeContextMenuControl = /*#__PURE__*/ defineComponent(
   },
   {
     name: "NativeContextMenuControl",
-    props: ["model", "labels", "dir", "container", "classNames"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & { readonly model: ContextMenuModel })["dir"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: ContextMenuModel;
+          })["container"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: ContextMenuModel;
+          })["classNames"]
+        >,
+      },
+    },
   }
 );
 export function contextMenu<TRow>(

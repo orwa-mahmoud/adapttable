@@ -6,7 +6,15 @@ import {
   resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
-import { defineComponent, h, nextTick, shallowRef, useId, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  nextTick,
+  type PropType,
+  shallowRef,
+  useId,
+  watch,
+} from "vue";
 
 import { useScopeActivity } from "../store";
 import { approvalIdentity } from "./approvalIdentity";
@@ -296,16 +304,29 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "ApprovalReviewChrome",
-    props: [
-      "pending",
-      "labels",
-      "slots",
-      "expanded",
-      "onExpand",
-      "onBack",
-      "className",
-      "buttonClassName",
-    ],
+    props: {
+      pending: {
+        type: Object as PropType<ApprovalReviewChromeProps["pending"]>,
+      },
+      labels: { type: Object as PropType<ApprovalReviewChromeProps["labels"]> },
+      slots: { type: Object as PropType<ApprovalReviewChromeProps["slots"]> },
+      expanded: {
+        type: Boolean as PropType<ApprovalReviewChromeProps["expanded"]>,
+        default: undefined,
+      },
+      onExpand: {
+        type: Function as PropType<ApprovalReviewChromeProps["onExpand"]>,
+      },
+      onBack: {
+        type: Function as PropType<ApprovalReviewChromeProps["onBack"]>,
+      },
+      className: {
+        type: String as PropType<ApprovalReviewChromeProps["className"]>,
+      },
+      buttonClassName: {
+        type: String as PropType<ApprovalReviewChromeProps["buttonClassName"]>,
+      },
+    },
   }
 );
 
@@ -352,6 +373,18 @@ export const AgentApprovalChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "AgentApprovalChrome",
-    props: ["pending", "labels", "slots", "className", "buttonClassName"],
+    props: {
+      pending: {
+        type: Object as PropType<AgentApprovalChromeProps["pending"]>,
+      },
+      labels: { type: Object as PropType<AgentApprovalChromeProps["labels"]> },
+      slots: { type: Object as PropType<AgentApprovalChromeProps["slots"]> },
+      className: {
+        type: String as PropType<AgentApprovalChromeProps["className"]>,
+      },
+      buttonClassName: {
+        type: String as PropType<AgentApprovalChromeProps["buttonClassName"]>,
+      },
+    },
   }
 );

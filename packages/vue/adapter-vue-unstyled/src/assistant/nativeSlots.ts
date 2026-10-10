@@ -5,7 +5,7 @@ import {
   type TableAssistantSlots,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, shallowRef, watch } from "vue";
+import { defineComponent, h, type PropType, shallowRef, watch } from "vue";
 
 import { NativeExamplesMenu } from "./NativeExamplesMenu";
 
@@ -53,7 +53,27 @@ const NativeSheet = defineComponent(
   },
   {
     name: "NativeAssistantSheet",
-    props: ["label", "part", "className", "dir", "open", "onClose", "children"],
+    props: {
+      label: { type: String as PropType<TableAssistantSheetProps["label"]> },
+      part: { type: String as PropType<TableAssistantSheetProps["part"]> },
+      className: {
+        type: String as PropType<TableAssistantSheetProps["className"]>,
+      },
+      dir: { type: String as PropType<TableAssistantSheetProps["dir"]> },
+      open: {
+        type: Boolean as PropType<TableAssistantSheetProps["open"]>,
+        default: undefined,
+      },
+      onClose: {
+        type: Function as PropType<TableAssistantSheetProps["onClose"]>,
+      },
+      children: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          TableAssistantSheetProps["children"]
+        >,
+        default: undefined,
+      },
+    },
   }
 );
 

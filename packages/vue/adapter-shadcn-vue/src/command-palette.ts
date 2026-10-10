@@ -12,7 +12,7 @@ import {
 } from "@adapttable/vue/adapter";
 import { commandPalette as bindingCommandPalette } from "@adapttable/vue/features";
 import { Primitive } from "reka-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { ShadcnCommandDialog } from "./actions/CommandDialog";
 import { shadcnActionButton, shadcnInput } from "./actions/controls";
@@ -88,7 +88,41 @@ const CommandPaletteControl = defineComponent(
   },
   {
     name: "ShadcnCommandPaletteControl",
-    props: ["model", "labels", "dir", "classNames", "container"],
+    props: {
+      model: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["model"]
+        >,
+      },
+      labels: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["labels"]
+        >,
+      },
+      dir: {
+        type: String as PropType<
+          (ActionPresentation & { readonly model: CommandPaletteModel })["dir"]
+        >,
+      },
+      classNames: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["classNames"]
+        >,
+      },
+      container: {
+        type: Object as PropType<
+          (ActionPresentation & {
+            readonly model: CommandPaletteModel;
+          })["container"]
+        >,
+      },
+    },
   }
 );
 

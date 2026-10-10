@@ -21,6 +21,7 @@ import {
 import {
   defineComponent,
   h,
+  type PropType,
   type ShallowRef,
   shallowRef,
   useId,
@@ -226,7 +227,15 @@ export const AssistantReceipt = /*#__PURE__*/ defineComponent(
       );
     };
   },
-  { name: "AssistantReceipt", props: ["receipt", "labels", "slots", "onUndo"] }
+  {
+    name: "AssistantReceipt",
+    props: {
+      receipt: { type: Object as PropType<ReceiptProps["receipt"]> },
+      labels: { type: Object as PropType<ReceiptProps["labels"]> },
+      slots: { type: Object as PropType<ReceiptProps["slots"]> },
+      onUndo: { type: Function as PropType<ReceiptProps["onUndo"]> },
+    },
+  }
 );
 export interface AssistantMessageProps {
   readonly message: TableAssistantMessageView;
@@ -573,17 +582,24 @@ export const AssistantMessage = /*#__PURE__*/ defineComponent(
   },
   {
     name: "AssistantMessage",
-    props: [
-      "message",
-      "slots",
-      "labels",
-      "avatars",
-      "receipts",
-      "undo",
-      "onUndo",
-      "onUndoAction",
-      "onAnswer",
-      "action",
-    ],
+    props: {
+      message: { type: Object as PropType<AssistantMessageProps["message"]> },
+      slots: { type: Object as PropType<AssistantMessageProps["slots"]> },
+      labels: { type: Object as PropType<AssistantMessageProps["labels"]> },
+      avatars: { type: Object as PropType<AssistantMessageProps["avatars"]> },
+      receipts: {
+        type: Boolean as PropType<AssistantMessageProps["receipts"]>,
+        default: undefined,
+      },
+      undo: { type: Object as PropType<AssistantMessageProps["undo"]> },
+      onUndo: { type: Function as PropType<AssistantMessageProps["onUndo"]> },
+      onUndoAction: {
+        type: Function as PropType<AssistantMessageProps["onUndoAction"]>,
+      },
+      onAnswer: {
+        type: Function as PropType<AssistantMessageProps["onAnswer"]>,
+      },
+      action: { type: Object as PropType<AssistantMessageProps["action"]> },
+    },
   }
 );

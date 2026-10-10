@@ -6,10 +6,12 @@ import {
 } from "@adapttable/core";
 import type { SidePanelSlots as NeutralSlots } from "@adapttable/core/binding";
 import {
+  type ComponentObjectPropsOptions,
   defineComponent,
   h,
   nextTick,
   onScopeDispose,
+  type PropType,
   useId,
   type VNodeChild,
   watch,
@@ -296,15 +298,21 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
   },
   {
     name: "SidePanelChrome",
-    props: [
-      "model",
-      "slots",
-      "labels",
-      "dir",
-      "classNames",
-      "container",
-      "presentation",
-    ],
+    props: {
+      model: { type: Object as PropType<SidePanelChromeProps["model"]> },
+      slots: { type: Object as PropType<SidePanelChromeProps["slots"]> },
+      labels: { type: Object as PropType<SidePanelChromeProps["labels"]> },
+      dir: { type: String as PropType<SidePanelChromeProps["dir"]> },
+      classNames: {
+        type: Object as PropType<SidePanelChromeProps["classNames"]>,
+      },
+      container: {
+        type: Object as PropType<SidePanelChromeProps["container"]>,
+      },
+      presentation: {
+        type: Function as PropType<SidePanelChromeProps["presentation"]>,
+      },
+    } as ComponentObjectPropsOptions<SidePanelChromeProps>,
   }
 );
 export const SidePanelLayoutChrome = /*#__PURE__*/ defineComponent(
@@ -343,5 +351,16 @@ export const SidePanelLayoutChrome = /*#__PURE__*/ defineComponent(
             ]
           )
         : slots.default?.(),
-  { name: "SidePanelLayoutChrome", props: ["open", "side", "mobile", "panel"] }
+  {
+    name: "SidePanelLayoutChrome",
+    props: {
+      open: { type: Boolean as PropType<boolean>, default: undefined },
+      side: { type: String as PropType<("start" | "end") | undefined> },
+      mobile: {
+        type: Boolean as PropType<boolean | undefined>,
+        default: undefined,
+      },
+      panel: { type: Function as PropType<() => VNodeChild> },
+    },
+  }
 );

@@ -4,7 +4,7 @@ import {
   type OverlayCloseReason,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, nextTick } from "vue";
+import { defineComponent, h, nextTick, type PropType } from "vue";
 
 import { Popover, PopoverAnchor, PopoverContent } from "../components/popover";
 import { shadcnControlAttrs } from "../controls";
@@ -55,7 +55,15 @@ const ManagedPanel = defineComponent(
           () => props.control.content
         ),
       ]),
-  { name: "ShadcnManagedPanel", props: ["control", "requestClose"] }
+  {
+    name: "ShadcnManagedPanel",
+    props: {
+      control: { type: Object as PropType<ManagedOverlayPanelProps> },
+      requestClose: {
+        type: Function as PropType<(reason: OverlayCloseReason) => void>,
+      },
+    },
+  }
 );
 
 /** The persistent menu owner outlives the portaled panel during its close phase. */
