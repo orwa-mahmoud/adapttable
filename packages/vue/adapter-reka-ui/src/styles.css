@@ -162,7 +162,9 @@
   position: fixed;
   inset-block: 0;
   inset-inline-end: 0;
-  inline-size: min(28rem, 100vw);
+  /* 100% of the viewport the panel is fixed to, which excludes a classic
+     scrollbar or a reserved gutter; 100vw does not. */
+  inline-size: min(28rem, 100%);
   overflow: auto;
   padding: 22px;
   border-radius: 0;
