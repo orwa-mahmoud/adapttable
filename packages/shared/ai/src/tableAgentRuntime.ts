@@ -33,15 +33,15 @@ import {
   type ApprovalTransaction,
   settleDecisions,
 } from "./approvalTransaction";
-import type { ProposalResolver } from "./binding";
+import { contractFingerprint, type ProposalResolver } from "./binding";
 import { tableActionCapabilities } from "./capabilities/actions";
 import { capabilityDefinitionStamp } from "./capabilities/registry";
 import type { AgentContextInputs } from "./context";
+import { createLiveApplyCoordinator } from "./controlledApply";
 import { agentFiltersFromDefs } from "./filterCatalog";
 import type { CommitPolicy, RowAddressScope, WritePolicy } from "./keys";
 import {
   agentColumnsFromNeutral,
-  monotonicRevision,
   observationFromNeutral,
   readRowsFromNeutral,
   resolveRowFromNeutral,
@@ -50,7 +50,9 @@ import {
 } from "./liveTable";
 import { agentObservation } from "./observation";
 import { type AgentPagination, agentPagination } from "./pagination";
-import { createAgentSession } from "./session";
+import { viewRevisionStamp } from "./runtimeViewStamp";
+import { createAgentSessionInternal } from "./session";
+export { viewRevisionStamp } from "./runtimeViewStamp";
 import type {
   AgentApply,
   AgentCapabilityDefinition,
@@ -163,65 +165,6 @@ function cellRecord(
     cells[column.id] = record[column.id];
   }
   return cells;
-}
-
-/**
- * `JSON.stringify` that never throws on host rows: a BigInt is written as its
- * digits with an `n`, and a value that contains itself is written once, not
- * followed back in.
- */
-function stampJson(value: unknown): string {
-  // The chain of objects from the root to the one being written. A value
-  // already on it is a cycle; one seen elsewhere is only shared, and is written.
-  const ancestors: unknown[] = [];
-  return JSON.stringify(
-    value,
-    function replace(this: unknown, _key: string, next: unknown): unknown {
-      if (typeof next === "bigint") return `${next.toString()}n`;
-      if (typeof next !== "object" || next === null) return next;
-      while (ancestors.length > 0 && ancestors.at(-1) !== this) {
-        ancestors.pop();
-      }
-      if (ancestors.includes(next)) return undefined;
-      ancestors.push(next);
-      return next;
-    }
-  );
-}
-
-/**
- * A string that changes whenever the runtime view an agent reads changes.
- *
- * A view carrying a neutral table stamps that table's revisions. Any other
- * view stamps its row identities and row payloads together with the page,
- * search, sort, filters, grouping, aggregation overrides, pins, hidden columns
- * and column order — written without throwing on a BigInt or on a row that
- * contains itself.
- *
- * @public
- */
-export function viewRevisionStamp(view: TableRuntimeView | undefined): string {
-  const table = view?.neutralTable;
-  if (table) return monotonicRevision(table.revisions, undefined).token;
-  const rows = view?.rows ?? [];
-  const getRowId = view?.getRowId;
-  const query = view?.query;
-  return stampJson({
-    ids: rows.map((row) => (getRowId ? getRowId(row) : null)),
-    payloads: rows,
-    page: query?.page ?? 1,
-    limit: query?.limit ?? 10,
-    search: query?.search ?? "",
-    sortBy: query?.sortBy,
-    sortDir: query?.sortDir,
-    filters: query?.extra,
-    groupBy: view?.groupingState?.groupBy,
-    aggregateOverrides: view?.groupingState?.aggregateOverrides,
-    pinnedColumns: view?.pinning?.columns,
-    pinnedRows: view?.pinning?.rows,
-    hiddenColumns: view?.columnLayout?.hidden,
-    columnOrder: view?.columnLayout?.keys,
-  });
 }
 
 function liveReadRows(
@@ -1005,7 +948,11 @@ export interface LiveSessionInputs {
    * Commits a state change the binding still holds, before the session takes
    * its admission snapshot for a call.
    */
-  readonly flushAdmission: { readonly current: () => void };
+  readonly flushAdmission: { readonly current: () => void | Promise<void> };
+  /** Whether the controller still owns this table identity and registry. */
+  readonly isCurrent?: () => boolean;
+  /** Wake pending admission when this session is retired; never aborts a handler. */
+  readonly retirementSignal?: AbortSignal;
   /** Asks the table's own approval surface when the host set no `onApprove`. */
   readonly waitForChrome: {
     readonly current: (
@@ -1022,6 +969,56 @@ export interface LiveSessionInputs {
    * changes before returning.
    */
   readonly flush: (run: () => void) => void;
+  /**
+   * Optional delivery fence for controlled layout and explicit selection.
+   * Invoke `capture` once after model delivery, passing any synchronous binding
+   * reconciliation it needs. The capture checks cancellation before reconciling
+   * and validates authoritative state before the hook completes. A delayed host
+   * write is not confirmed merely because this hook resolved.
+   * Omit for a binding whose setters commit synchronously.
+   */
+  readonly settleApply?: (
+    capture: (reconcile?: () => void) => void
+  ) => void | Promise<void>;
+}
+
+/** Wait for a framework commit without retaining a cancelled call. */
+function waitForAdmission(
+  admission: Promise<void>,
+  signal?: AbortSignal,
+  retirementSignal?: AbortSignal
+): Promise<void> {
+  const signals = [signal, retirementSignal].filter(
+    (current): current is AbortSignal => current !== undefined
+  );
+  if (signals.length === 0) return admission;
+  return new Promise<void>((resolve, reject) => {
+    let settled = false;
+    const finish = (run: () => void): void => {
+      if (settled) return;
+      settled = true;
+      for (const current of signals)
+        current.removeEventListener("abort", abort);
+      run();
+    };
+    const abort = (): void => finish(resolve);
+    for (const current of signals)
+      current.addEventListener("abort", abort, { once: true });
+    // Keep the rejection handler even if cancellation wins, so a late failed
+    // commit cannot become an unhandled rejection.
+    void Promise.resolve(admission).then(
+      () => finish(resolve),
+      (error: unknown) =>
+        finish(() =>
+          reject(
+            error instanceof Error
+              ? error
+              : new Error("admission failed", { cause: error })
+          )
+        )
+    );
+    if (signals.some((current) => current.aborted)) abort();
+  });
 }
 
 /**
@@ -1082,18 +1079,36 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
   let observedTable: TableRuntimeView["neutralTable"];
   let sourceEpoch = 0;
   let hasObservedView = false;
-  const observe = () => {
-    const options = optionsRef.current;
-    if (options.observe) return options.observe();
-    const runtimeView = runtimeRef.current.view();
-    const table = runtimeView?.neutralTable;
-    // Revisions belong to one engine. A replacement can start at exactly
-    // the same tuple, but work admitted against the old source is stale.
-    // Remember absence too, so engine -> server -> engine is never a reset.
+  let observedRevision: number | undefined;
+  let observationEpoch = 0;
+  const trackedObservation = (
+    observation: AgentObservation
+  ): AgentObservation => {
+    if (
+      observedRevision !== undefined &&
+      observedRevision !== observation.viewRevision
+    )
+      observationEpoch += 1;
+    observedRevision = observation.viewRevision;
+    return observation;
+  };
+  const trackSource = (view: TableRuntimeView | undefined): void => {
+    const table = view?.neutralTable;
     if (table !== observedTable) {
       observedTable = table;
       sourceEpoch += 1;
     }
+  };
+  const observe = () => {
+    const options = optionsRef.current;
+    if (options.observe) {
+      // Controlled delivery still belongs to one runtime source, while the
+      // host keeps ownership of the observation object and revision numbering.
+      if (inputs.settleApply) trackSource(runtimeRef.current.view());
+      return trackedObservation(options.observe());
+    }
+    const runtimeView = runtimeRef.current.view();
+    trackSource(runtimeView);
     // Bindings can observe before their first view is published. That is
     // bootstrap, not a previous source: reserve revision 1 for the first
     // real view. Once published, absence is a transition like any other.
@@ -1103,11 +1118,8 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
           `${String(sourceEpoch)}:${viewRevisionStamp(runtimeView)}`
         )
       : revisionCounter.current();
-    return observationFromRuntime(
-      options,
-      runtimeRef.current,
-      viewRevision,
-      apply
+    return trackedObservation(
+      observationFromRuntime(options, runtimeRef.current, viewRevision, apply)
     );
   };
   const onApprove = (subject: ApprovalSubject, signal?: AbortSignal) => {
@@ -1152,41 +1164,66 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
       };
     }
   );
-  const inner = createAgentSession({
-    observe,
-    apply,
-    onApprove,
-    // Read at call time, like everything else here. The session is built once
-    // and a host may wire where progress goes after that, so what a capability
-    // reports is delivered through the reference rather than through whatever
-    // was configured when the session was made.
-    onProgress: (report) => {
-      reportProgress.current(report);
+  const settlement = inputs.settleApply;
+  const coordinator = settlement
+    ? createLiveApplyCoordinator({
+        view: () => runtimeRef.current.view(),
+        observe,
+        contract: () => contractFingerprint(inner.manifest(), inner.catalog()),
+        sourceEpoch: () => sourceEpoch,
+        revisionEpoch: () => observationEpoch,
+        isCurrent: () => inputs.isCurrent?.() !== false,
+        retirementSignal: inputs.retirementSignal,
+        bindingOwned: (method) =>
+          typeof optionsRef.current.apply?.[method] !== "function",
+        invoke: (method, args) => {
+          const latest = currentApply(optionsRef.current, runtimeRef.current);
+          const fn = asCallable(Reflect.get(latest, method));
+          if (!fn) throw new Error(`${method} is not wired`);
+          fn(...args);
+        },
+        flush,
+        settle: settlement,
+      })
+    : undefined;
+  const inner = createAgentSessionInternal(
+    {
+      observe,
+      apply,
+      onApprove,
+      // Read at call time, like everything else here. The session is built once
+      // and a host may wire where progress goes after that, so what a capability
+      // reports is delivered through the reference rather than through whatever
+      // was configured when the session was made.
+      onProgress: (report) => {
+        reportProgress.current(report);
+      },
+      // The host's own definitions, then one per row and bulk action the table
+      // composed. The action set is part of the registry key, so a table that
+      // gains or loses an action gets a session that offers exactly those.
+      capabilities: [
+        ...customCapabilities,
+        ...tableActionCapabilities(runtimeRef.current.view()?.actions, {
+          actions: () => runtimeRef.current.view()?.actions,
+          rowFor: (rowKey) => {
+            const view = runtimeRef.current.view();
+            return view?.rows.find((row) => view.getRowId(row) === rowKey);
+          },
+          selectedIds: () => {
+            const selection = runtimeRef.current.view()?.selection;
+            return selection ? [...selection.selectedIds] : undefined;
+          },
+        }),
+      ],
+      ...(optionsRef.current.capabilityApproval
+        ? { capabilityApproval: optionsRef.current.capabilityApproval }
+        : {}),
+      ...(optionsRef.current.excludeCapabilities
+        ? { excludeCapabilities: optionsRef.current.excludeCapabilities }
+        : {}),
     },
-    // The host's own definitions, then one per row and bulk action the table
-    // composed. The action set is part of the registry key, so a table that
-    // gains or loses an action gets a session that offers exactly those.
-    capabilities: [
-      ...customCapabilities,
-      ...tableActionCapabilities(runtimeRef.current.view()?.actions, {
-        actions: () => runtimeRef.current.view()?.actions,
-        rowFor: (rowKey) => {
-          const view = runtimeRef.current.view();
-          return view?.rows.find((row) => view.getRowId(row) === rowKey);
-        },
-        selectedIds: () => {
-          const selection = runtimeRef.current.view()?.selection;
-          return selection ? [...selection.selectedIds] : undefined;
-        },
-      }),
-    ],
-    ...(optionsRef.current.capabilityApproval
-      ? { capabilityApproval: optionsRef.current.capabilityApproval }
-      : {}),
-    ...(optionsRef.current.excludeCapabilities
-      ? { excludeCapabilities: optionsRef.current.excludeCapabilities }
-      : {}),
-  });
+    coordinator
+  );
   return {
     catalog: () => inner.catalog(),
     describe: (key: string) => inner.describe(key),
@@ -1202,7 +1239,55 @@ export function bindLiveSession(inputs: LiveSessionInputs): AgentSession {
       // change is refused as foreign, never swept into the revision of the
       // agent call below. The mapping's own mutation is committed in `apply`
       // above.
-      flushAdmission.current();
+      if (signal?.aborted) {
+        return {
+          ok: false,
+          revision: revisionCounter.current(),
+          idempotencyKey,
+          error: { code: "cancelled", message: "execute cancelled" },
+        };
+      }
+      if (inputs.retirementSignal?.aborted) {
+        return {
+          ok: false,
+          revision: revisionCounter.current(),
+          idempotencyKey,
+          error: {
+            code: "not-wired",
+            message: `capability "${key}" is not wired on this table`,
+          },
+        };
+      }
+      const admission = flushAdmission.current();
+      if (admission && typeof admission.then === "function") {
+        try {
+          await waitForAdmission(admission, signal, inputs.retirementSignal);
+        } catch (error) {
+          if (!signal?.aborted && !inputs.retirementSignal?.aborted)
+            throw error;
+        }
+      }
+      // A disconnect permanently aborts this call. Check it before a validity
+      // reader can touch the runtime, including after a rejected barrier.
+      if (signal?.aborted) {
+        return {
+          ok: false,
+          revision: revisionCounter.current(),
+          idempotencyKey,
+          error: { code: "cancelled", message: "execute cancelled" },
+        };
+      }
+      if (inputs.retirementSignal?.aborted || inputs.isCurrent?.() === false) {
+        return {
+          ok: false,
+          revision: revisionCounter.current(),
+          idempotencyKey,
+          error: {
+            code: "not-wired",
+            message: `capability "${key}" is not wired on this table`,
+          },
+        };
+      }
       const result = await inner.execute(
         key,
         args,

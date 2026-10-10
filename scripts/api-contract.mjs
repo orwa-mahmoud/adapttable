@@ -14,6 +14,7 @@
  * - every symbol in the manifest is still `@public` in the report — missing,
  *   renamed, or demoted, which is the direction a one-way guard misses
  * - a pure re-export entry forwards the surface its policy names
+ * - a mixed entry keeps an exact direct surface and its canonical forwarding
  *
  * And structurally, so the manifest cannot rot into decoration:
  *
@@ -87,7 +88,7 @@ export function readReport(text) {
   return {
     tagged,
     stars,
-    exported: new Set(exported.values()),
+    exported: new Set(exported.map(([, publicName]) => publicName)),
     forwarded,
   };
 }
@@ -109,19 +110,19 @@ function readLine(line, tag, declared, inline, stars) {
   return null;
 }
 
-/** `local name -> public name` for every `export { … }` specifier. */
+/** Every `[local name, public name]` pair, including aliases of one local. */
 function blockExports(text) {
-  const exported = new Map();
+  const exported = [];
   for (const block of text.matchAll(/export \{([^}]*)\}/g)) {
     for (const part of block[1].split(",")) {
       const spec = part.trim();
       if (!spec) continue;
       const renamed =
         /^(?:type )?([A-Za-z_$][\w$]*) as ([A-Za-z_$][\w$]*)$/.exec(spec);
-      if (renamed) exported.set(renamed[1], renamed[2]);
+      if (renamed) exported.push([renamed[1], renamed[2]]);
       else {
         const name = spec.replace(/^type /, "");
-        exported.set(name, name);
+        exported.push([name, name]);
       }
     }
   }
@@ -161,11 +162,20 @@ export function checkContract({ manifest, entrypoints, reports }) {
     }
     const report = readReport(text);
     const expected = surfaces[policy.surface ?? policy.reexport] ?? [];
-    errors.push(
-      ...(policy.reexport
-        ? reexportErrors(reportName, report, expected, policy.from)
-        : surfaceErrors(reportName, report, expected))
-    );
+    if (policy.surface && policy.reexport) {
+      errors.push(
+        ...mixedErrors(reportName, report, expected, {
+          ...policy,
+          canonical: surfaces[policy.reexport] ?? [],
+        })
+      );
+    } else {
+      errors.push(
+        ...(policy.reexport
+          ? reexportErrors(reportName, report, expected, policy.from)
+          : surfaceErrors(reportName, report, expected))
+      );
+    }
   }
   return errors;
 }
@@ -184,16 +194,9 @@ function shapeErrors(surfaces, policies) {
   }
   const used = new Set();
   for (const [report, policy] of Object.entries(policies)) {
-    const named = policy.surface ?? policy.reexport;
-    if (!named) {
-      errors.push(`"${report}" has a policy with neither surface nor reexport`);
-      continue;
-    }
-    used.add(named);
-    if (!(named in surfaces)) {
-      errors.push(`"${report}" names surface "${named}", which is not defined`);
-    }
+    errors.push(...policySurfaceErrors(report, policy, surfaces, used));
   }
+
   for (const name of Object.keys(surfaces)) {
     if (!used.has(name)) {
       errors.push(`surface "${name}" is defined but no entry point uses it`);
@@ -270,12 +273,13 @@ function entryFrameworkErrors(frameworks, policies, entrypoints) {
   const errors = [];
   for (const entry of entrypoints) {
     const policy = policies[entry.report];
-    const named = policy?.surface ?? policy?.reexport;
-    const framework = owner.get(named);
-    if (framework === undefined || framework === entry.framework) continue;
-    errors.push(
-      `"${entry.report}" is a ${entry.framework} entry point but names surface "${named}", which is filed under ${framework}`
-    );
+    for (const named of policySurfaces(policy ?? {})) {
+      const framework = owner.get(named);
+      if (framework === undefined || framework === entry.framework) continue;
+      errors.push(
+        `"${entry.report}" is a ${entry.framework} entry point but names surface "${named}", which is filed under ${framework}`
+      );
+    }
   }
   return errors;
 }
@@ -363,6 +367,106 @@ function surfaceErrors(reportName, report, expected) {
     errors.push(
       `"${reportName}" is a documented entry point whose whole surface is now internal`
     );
+  }
+  return errors;
+}
+
+/** Both references remain live, independently framework-owned surfaces. */
+function policySurfaces(policy) {
+  return [...new Set([policy.surface, policy.reexport].filter(Boolean))];
+}
+
+/** Policy typos must not silently turn a forwarding check off. */
+function policyErrors(reportName, policy) {
+  const errors = [];
+  const known = new Set(["surface", "reexport", "from", "additionalFrom"]);
+  for (const key of Object.keys(policy)) {
+    if (!known.has(key)) {
+      errors.push(`"${reportName}" has unknown policy field "${key}"`);
+    }
+  }
+  const mixed = policy.surface && policy.reexport;
+  if (mixed && (typeof policy.from !== "string" || !policy.from)) {
+    errors.push(
+      `"${reportName}" mixed policy requires a canonical from source`
+    );
+  }
+  if (policy.additionalFrom === undefined) return errors;
+  if (!mixed) {
+    errors.push(`"${reportName}" additionalFrom requires a mixed policy`);
+  }
+  const sources = policy.additionalFrom;
+  if (
+    !Array.isArray(sources) ||
+    sources.some((s) => typeof s !== "string" || !s)
+  ) {
+    errors.push(
+      `"${reportName}" additionalFrom must list nonempty source strings`
+    );
+  } else if (new Set([policy.from, ...sources]).size !== sources.length + 1) {
+    errors.push(`"${reportName}" lists a wildcard source twice`);
+  }
+  return errors;
+}
+
+/**
+ * Exact direct exports plus canonical forwarding. Report wildcards do not
+ * encode runtime/type-only provenance; source and built-consumer checks prove
+ * that separately. In particular, a native type star cannot excuse losing an
+ * explicit runtime writer export from its direct surface.
+ */
+function mixedErrors(reportName, report, expected, policy) {
+  const errors = surfaceErrors(reportName, report, expected);
+  const approved = new Set(expected);
+  const unexpected = [...report.forwarded].filter(
+    (name) => !approved.has(name)
+  );
+  if (unexpected.length > 0) {
+    errors.push(
+      `"${reportName}" forwards ${unexpected.length} uncontracted explicit name(s): ${unexpected.slice(0, 8).join(", ")}`
+    );
+  }
+  const canonical = new Set(policy.canonical);
+  const shadows = Object.keys(report.tagged).filter((name) =>
+    canonical.has(name)
+  );
+  if (shadows.length > 0) {
+    errors.push(
+      `"${reportName}" declares ${shadows.length} name(s) that shadow its canonical surface: ${shadows.slice(0, 8).join(", ")}`
+    );
+  }
+  const additional = Array.isArray(policy.additionalFrom)
+    ? policy.additionalFrom
+    : [];
+  const sources = new Set([policy.from, ...additional]);
+  for (const source of sources) {
+    if (typeof source === "string" && !report.stars.includes(source)) {
+      errors.push(
+        `"${reportName}" no longer forwards required wildcard source "${source}"`
+      );
+    }
+  }
+  const extraStars = report.stars.filter((source) => !sources.has(source));
+  if (extraStars.length > 0) {
+    errors.push(
+      `"${reportName}" forwards ${extraStars.length} unexpected wildcard source(s): ${extraStars.join(", ")}`
+    );
+  }
+  return errors;
+}
+
+/** Validate and record every direct or canonical surface a policy references. */
+function policySurfaceErrors(report, policy, surfaces, used) {
+  const errors = policyErrors(report, policy);
+  const names = policySurfaces(policy);
+  if (names.length === 0) {
+    errors.push(`"${report}" has a policy with neither surface nor reexport`);
+  }
+  for (const named of names) {
+    used.add(named);
+    if (!(named in surfaces)) {
+      errors.push(`"${report}" names surface "${named}", which is not defined`);
+    }
   }
   return errors;
 }

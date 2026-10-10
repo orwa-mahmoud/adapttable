@@ -1,8 +1,5 @@
-import {
-  type ColumnDef,
-  type PaginationMode,
-  type RowReorderState,
-} from "@adapttable/angular";
+import type { ColumnDef, PaginationMode } from "@adapttable/angular";
+import type { RowReorderState } from "@adapttable/angular/adapter";
 import { rowReorder } from "@adapttable/taiga-ui/row-reorder";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";

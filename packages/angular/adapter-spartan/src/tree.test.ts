@@ -3,12 +3,12 @@
  * indent by depth, children fetched as a node opens, and the same disclosure
  * at the head of each phone card.
  */
-import {
-  type AdaptTableFeature,
-  type ColumnDef,
-  type TableLabels,
-  tree as bindingTree,
+import type {
+  AdaptTableFeature,
+  ColumnDef,
+  TableLabels,
 } from "@adapttable/angular";
+import { tree as bindingTree } from "@adapttable/angular/features";
 import { tree } from "@adapttable/spartan/tree";
 import { virtualize } from "@adapttable/spartan/virtualize";
 import { Component, signal } from "@angular/core";

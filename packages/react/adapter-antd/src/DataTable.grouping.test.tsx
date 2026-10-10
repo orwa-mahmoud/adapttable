@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { rowReorder } from "./row-reorder";
 
 interface Row {
   id: string;
@@ -48,7 +49,58 @@ function renderHarness(
 const part = (name: string) =>
   document.querySelector(`[data-adapttable-part="${name}"]`);
 
+function columnOffset(row: Element, key: string): number {
+  let offset = 0;
+  for (const cell of row.querySelectorAll<HTMLTableCellElement>(
+    ":scope > td"
+  )) {
+    if (cell.dataset.columnKey === key) return offset;
+    offset += cell.colSpan;
+  }
+  throw new Error(`Missing ${key} cell`);
+}
+
 describe("<DataTable> row grouping (antd)", () => {
+  it.each([
+    [false, false],
+    [false, true],
+    [true, false],
+    [true, true],
+  ])(
+    "keeps grouped columns aligned with reordering (aggregates=%s, selection=%s)",
+    (aggregates, selection) => {
+      renderHarness({
+        override: {
+          features: [rowReorder(vi.fn())],
+          groupFooters: true,
+          groupAggregates: aggregates
+            ? (rows) => ({ name: rows.length })
+            : undefined,
+          bulkActions: selection
+            ? [{ key: "x", label: "Archive", onClick: vi.fn() }]
+            : undefined,
+        },
+      });
+      const dataRow = part("row")!;
+      for (const group of document.querySelectorAll(
+        '[data-adapttable-part="group-row"], [data-adapttable-part="group-footer-row"]'
+      )) {
+        expect(columnOffset(group, "team")).toBe(columnOffset(dataRow, "team"));
+        if (aggregates)
+          expect(columnOffset(group, "name")).toBe(
+            columnOffset(dataRow, "name")
+          );
+        else
+          expect(
+            group.querySelector('td[data-column-key="team"]')
+          ).toHaveAttribute("colspan", "2");
+        expect(
+          group.querySelector('[data-adapttable-part="row-reorder-handle"]')
+        ).toBeNull();
+      }
+    }
+  );
+
   it("renders desktop group headers and collapses on toggle", () => {
     renderHarness();
     expect(part("group-row")).toBeInTheDocument();

@@ -4,13 +4,12 @@
  * NG-ZORRO supplies the card, the row and the
  * controls are the binding's; this fills them with buttons and a text field.
  */
+import type { SavedView, TableLabels } from "@adapttable/angular";
 import {
   AdaptSavedViewGlyph,
   AdaptSavedViewsPanelChrome,
-  type SavedView,
   type SavedViewsPanelSlots,
-  type TableLabels,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,

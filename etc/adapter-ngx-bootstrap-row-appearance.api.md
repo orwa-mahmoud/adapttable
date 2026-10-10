@@ -4,8 +4,8 @@
 
 ```ts
 
-import { rowAppearance } from '@adapttable/angular';
-import { RowAppearanceOptions } from '@adapttable/angular';
+import { rowAppearance } from '@adapttable/angular/features';
+import { RowAppearanceOptions } from '@adapttable/angular/features';
 
 export { rowAppearance }
 

@@ -1,5 +1,67 @@
 /** Shared Angular signals and lifecycle above injectDataTable; kits own all rendered controls. */
 import {
+  AdaptCellTemplate,
+  type AdaptTableFeature,
+  type Attrs,
+  type BatchEditHandler,
+  type CellEditHandler,
+  type CellSaveStateInjectOptions,
+  type ColumnDef,
+  type ColumnInput,
+  createFeatureResources,
+  type DataTable,
+  type DataTableClassNames,
+  type DirtyEdits,
+  editableCellController,
+  type EditableCellEditing,
+  type EditConflictHandler,
+  type EditConflictPolicy,
+  type EditHistoryOptions,
+  type EditValidationInjectOptions,
+  featureOptionsOf,
+  type FeatureResources,
+  findMarkAttrs,
+  flattenColumns,
+  type GridFocus,
+  injectBatchEditing,
+  injectCellEditing,
+  injectCellSaveState,
+  injectDataTable,
+  injectDensity,
+  injectDirtyCells,
+  injectEditValidation,
+  injectExportCsv,
+  injectFindFocus,
+  injectFindInTable,
+  injectFindScroll,
+  injectFindShortcut,
+  injectFindWindowScroll,
+  injectFullscreen,
+  injectGridFocus,
+  injectIsMobile,
+  injectKeyedVirtualization,
+  injectLiveEditConflict,
+  injectRowEditing,
+  injectRowMutations,
+  injectRowSelection,
+  injectTableData,
+  injectTableEditHistory,
+  injectTableVirtualizer,
+  type LiveEditConflictInput,
+  type MobileCardRenderer,
+  mountTableFeatures,
+  readMaybe,
+  type RowActionsRenderer,
+  type RowEditHandler,
+  type RowSelection,
+  type SummaryRowFn,
+  type TableAssistantProps,
+  tableFeaturesOf,
+  type TableQueryHandler,
+  urlAdapterFor,
+} from "@adapttable/angular";
+import { type SidePanelOptions } from "@adapttable/angular/features";
+import {
   ACTIONS_COLUMN_KEY,
   type ActiveFilterChip,
   asBatchGesture,
@@ -10,6 +72,7 @@ import {
   type ColumnLayoutState,
   type ConfirmHandler,
   type ContextMenuTarget,
+  copyContextMenuSelection,
   defaultConfirm,
   devWarn,
   type Direction,
@@ -24,6 +87,7 @@ import {
   type FilterTypeSpec,
   type GetCellSpan,
   groupedViewSource,
+  type NestedTableParent,
   type PaginationMode,
   partitionPinnedRows,
   type PinnedRows,
@@ -41,12 +105,15 @@ import {
   type RowHeight,
   type RowStyle,
   type SavedViewsControllerOptions,
+  sourceCapabilities,
+  stableKey,
   type TableDensity,
   type TableLabels,
   type TableQueryParams,
   type TableSource,
   type TableVirtualization,
   type TreeEntry,
+  type TreeShape,
   windowGroupedEntries,
   withRowMutationActions,
   withRowPinActions,
@@ -99,6 +166,7 @@ import {
   resolveBodyVirtualization,
   resolveRowStyle,
   ROW_REORDER_ANNOUNCER,
+  type RowEditIcons,
   type RowMutationsState,
   SAVED_VIEWS,
   type SavedViewsSlotProps,
@@ -136,104 +204,28 @@ import {
 import { type CommandPaletteInjectOptions } from "../actions/commandPalette";
 import {
   ADAPTTABLE_CONTEXT_MENU,
-  copyContextMenuSelection,
   type TableContextMenuOptions,
-} from "../actions/contextMenu";
-import { type SummaryRowFn } from "../aggregate/aggregate";
-import { type TableAssistantProps } from "../assistant/assistantSlots";
-import { type Attrs } from "../attrs";
-import { AdaptCellTemplate } from "../cell";
-import { type ColumnDef, type ColumnInput, flattenColumns } from "../columnDef";
-import { type DataTable, injectDataTable } from "../dataTable";
-import { type DirtyEdits, injectDirtyCells } from "../editing/dirtyCells";
-import {
-  editableCellController,
-  type EditableCellEditing,
-  rowIsDirty,
-} from "../editing/editableCellController";
-import {
-  type EditConflictHandler,
-  type EditConflictPolicy,
-  injectLiveEditConflict,
-  type LiveEditConflictInput,
-} from "../editing/editConflict";
-import {
-  type EditHistoryOptions,
-  injectTableEditHistory,
-} from "../editing/editHistory";
-import {
-  type BatchEditHandler,
-  type CellEditHandler,
-  injectBatchEditing,
-  injectCellEditing,
-  injectRowEditing,
-  type RowEditHandler,
-} from "../editing/editing";
+} from "../actions/tableContextMenu";
 import {
   type BatchEditBarProps,
   type RowEditActionsProps,
-  type RowEditIcons,
 } from "../editing/rowEditGate";
-import {
-  type CellSaveStateInjectOptions,
-  injectCellSaveState,
-} from "../editing/saveState";
-import {
-  type EditValidationInjectOptions,
-  injectEditValidation,
-} from "../editing/validation";
-import { injectExportCsv } from "../export/exportHandler";
-import {
-  type AdaptTableFeature,
-  featureOptionsOf,
-  tableFeaturesOf,
-} from "../featureHost";
-import {
-  createFeatureResources,
-  type FeatureResources,
-  mountTableFeatures,
-} from "../featureLifecycle";
-import { type SidePanelOptions } from "../features/factories";
-import { injectGrouping, type TableGrouping } from "../features/grouping";
-import { injectRowDetail, type TableRowDetail } from "../features/rowDetail";
-import { injectTableRowPinning } from "../features/rowPinning";
-import { selectionStatsOf } from "../features/selectionStats";
-import { injectTree, type TableTree } from "../features/tree";
+import { rowIsDirty } from "../editing/rowEditingHelpers";
 import {
   type FiltersMode,
   type FiltersView,
   filtersViewFor,
 } from "../filters/tableFilters";
-import { injectFindInTable } from "../find/findInTable";
-import {
-  findMarkAttrs,
-  injectFindFocus,
-  injectFindScroll,
-  injectFindShortcut,
-  injectFindWindowScroll,
-} from "../find/findMarks";
-import { type GridFocus, injectGridFocus } from "../focus/gridFocus";
+import { selectionStatsOf } from "../focus/selectionStats";
 import { injectGroupingPanelState } from "../grouping/groupingPanelState";
-import { injectIsMobile } from "../hooks/isMobile";
-import { type MobileCardRenderer } from "../rows/mobileCard";
-import { type RowActionsRenderer } from "../rows/rowActions";
-import { injectRowMutations } from "../rows/rowMutations";
+import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
 import { injectRowReorder, type RowReorderState } from "../rows/rowReorder";
-import { injectRowSelection, type RowSelection } from "../selection/selection";
-import { type TableQueryHandler } from "../source/serverData";
-import { injectTableData } from "../source/tableData";
-import { readMaybe } from "../store";
-import { type NestedTableParent } from "../tree/nestedTable";
-import { urlAdapterFor } from "../url/tableUrlState";
+import { injectTableRowPinning } from "../rows/tableRowPinning";
+import { injectRowDetail, type TableRowDetail } from "../tree/tableRowDetail";
+import { injectTree, type TableTree } from "../tree/tableTree";
 import { injectColumnWindow } from "../virtual/columnWindow";
-import {
-  injectKeyedVirtualization,
-  injectTableVirtualizer,
-} from "../virtual/tableVirtualization";
 import { injectMeasuredWindowScrollMargin } from "../virtual/windowScrollMargin";
-import type { DataTableClassNames } from "./dataTableClassNames";
 import { tableRuntimeFor } from "./tableRuntime";
-import { injectDensity, injectFullscreen } from "./toolbar";
 
 /** A required kit-rendered surface exposes its native scroll element. @public */
 export interface DataTableSurface {
@@ -818,6 +810,7 @@ function commandPalettePropsFor(options: {
   readonly commandPalette: CommandPaletteInjectOptions["commandPalette"];
   readonly onPrint: CommandPaletteInjectOptions["onPrint"];
   readonly labels: Signal<TableLabels>;
+  readonly dir: Signal<Direction>;
   readonly clearFilters: () => void;
   readonly featureHost: CommandPaletteInjectOptions["featureHost"];
   readonly exportCsv:
@@ -836,6 +829,7 @@ function commandPalettePropsFor(options: {
     return {
       commandPalette: options.commandPalette,
       labels: options.labels(),
+      dir: options.dir(),
       onPrint: options.onPrint,
       onExport: exported?.onExportCsv,
       exportLabel: exported?.exportLabel,
@@ -1519,8 +1513,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           left.every((feature, index) => feature === right[index]),
       }
     );
+    const inScrollBox = computed(() => this.maxHeight() != null);
     const configuration = computed(() => ({
       features: features(),
+      inScrollBox: inScrollBox(),
       selectable: this.selectable(),
       cellNavigation: this.cellNavigation(),
       filtersMode: this.filtersMode(),
@@ -1639,7 +1635,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const selectable = this.selectable() || bulk !== undefined;
     const selectionController =
       selectable || selectionState.controller !== undefined
-        ? resources.use("selection", [], () =>
+        ? resources.use("selection", [], (injector) =>
             injectRowSelection<TRow>({
               rows: computed(() => source().rows),
               rowKey: (row) => this.rowKey()(row),
@@ -1648,6 +1644,19 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
                 this.selectionChange.emit(ids);
               },
               labels,
+              acrossPages: computed(
+                () => sourceCapabilities(source()).selectAcrossPages
+              ),
+              resetKey: computed(() => {
+                const current = source();
+                return stableKey([
+                  current.search,
+                  current.extra,
+                  current.filterTree,
+                  current.groupBy,
+                ]);
+              }),
+              injector,
             })
           )
         : undefined;
@@ -2019,6 +2028,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       GetCellSpan<TRow> | undefined;
     const exportOption = featureOptions.exportCsv as
       boolean | ExportCsvOptions<TRow> | undefined;
+    const treeShape = featureOptions as TreeShape<TRow>;
     const exporter = resources.use(
       "export",
       [
@@ -2037,18 +2047,33 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               exportCsv: exportOption,
               source: table.source,
               columns: table.columns,
-              context: computed(() => ({
-                selectedIds: selection?.selectedIds(),
-                getRowId: (row: TRow) => this.rowKey()(row),
-                allColumns: table.allColumns(),
-                range: grid?.range(),
-                firstRowIndex: table.windowStart(),
-                getCellSpan,
-                grouping: grouping?.(),
-                tree: tree?.(),
-                groupTotal: table.labels().groupTotal,
-                summaryRow: this.summaryRow(),
-              })),
+              context: computed(() => {
+                const currentTree = tree?.();
+                const getChildren = currentTree
+                  ? treeShape.getChildren
+                  : undefined;
+                const getParentId = currentTree
+                  ? treeShape.getParentId
+                  : undefined;
+                return {
+                  selectedIds: selection?.selectedIds(),
+                  getRowId: (row: TRow) => this.rowKey()(row),
+                  allColumns: table.allColumns(),
+                  range: grid?.range(),
+                  firstRowIndex: table.windowStart(),
+                  getCellSpan,
+                  grouping: grouping?.(),
+                  tree: currentTree
+                    ? {
+                        ...currentTree,
+                        ...(getChildren ? { getChildren } : {}),
+                        ...(getParentId ? { getParentId } : {}),
+                      }
+                    : undefined,
+                  groupTotal: table.labels().groupTotal,
+                  summaryRow: this.summaryRow(),
+                };
+              }),
               labels: table.labels,
               featureHost: table.featureHost,
               injector,
@@ -2213,6 +2238,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         featureOptions.rowHeight,
         featureOptions.virtualOverscan,
         featureOptions.virtualScrollMargin,
+        this.maxHeight() != null,
       ],
       (injector) =>
         bodyWindowFor({
@@ -2567,6 +2593,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         featureOptions.commandPalette as CommandPaletteInjectOptions["commandPalette"],
       onPrint: featureOptions.onPrint as (() => void) | undefined,
       labels: table.labels,
+      dir: table.dir,
       clearFilters: table.clearFilters,
       featureHost: table.featureHost,
       exportCsv: exporter,

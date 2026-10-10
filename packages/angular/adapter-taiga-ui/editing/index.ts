@@ -1,17 +1,21 @@
 import {
   type AdaptTableFeature,
   type CellEditHandler,
+  extendFeature,
+  type RowEditHandler,
+  slotRender,
+} from "@adapttable/angular";
+import {
   EDITABLE_CELL,
+  ROW_EDIT_ACTIONS,
+  TOOLBAR_EXTRAS,
+} from "@adapttable/angular/adapter";
+import {
   editing as coreAngularEditing,
   type EditingLifecycleExtras,
-  extendFeature,
-  ROW_EDIT_ACTIONS,
-  type RowEditHandler,
   rowEditing as coreAngularRowEditing,
-  slotRender,
-  TOOLBAR_EXTRAS,
   undoRedoButtons as bindingUndoRedoButtons,
-} from "@adapttable/angular";
+} from "@adapttable/angular/features";
 import { AdaptEditableCell, AdaptUndoRedoButtons } from "@adapttable/taiga-ui";
 
 import { AdaptRowEditActions } from "./rowEditActions";
@@ -69,9 +73,8 @@ export function undoRedoButtons(): AdaptTableFeature {
     }),
   ]);
 }
-export {
-  dirtyIndicators,
-  editHistory,
-  type EditHistoryHandle,
-  type EditHistoryOptions,
+export type {
+  EditHistoryHandle,
+  EditHistoryOptions,
 } from "@adapttable/angular";
+export { dirtyIndicators, editHistory } from "@adapttable/angular/features";

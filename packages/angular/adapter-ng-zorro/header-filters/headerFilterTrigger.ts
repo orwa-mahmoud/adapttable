@@ -1,14 +1,16 @@
 /** A column's NG-ZORRO filter popover, preserving the binding's session. */
 import {
+  injectHeaderFilterOverlay,
+  type TableSource,
+} from "@adapttable/angular";
+import {
   AdaptIcon,
   defaultFilterRegistry,
   type FilterHeaderControlProps,
   filterLabel,
   FILTERS_ICON,
   hasActiveHeaderFilter,
-  injectHeaderFilterOverlay,
-  type TableSource,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   AdaptAutoFilterForm,
   OVERLAY_Z,

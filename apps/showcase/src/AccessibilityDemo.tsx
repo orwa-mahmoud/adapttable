@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Keyboard } from "./sectionIcons";
@@ -24,7 +25,7 @@ function useAnnouncements(root: HTMLElement | null): string[] {
     if (!root) return undefined;
     const read = () => {
       const regions = root.querySelectorAll<HTMLElement>(
-        '[aria-live], [role="status"], [role="alert"]'
+        '[aria-live="polite"], [aria-live="assertive"], [role="status"]:not([aria-live="off"]), [role="alert"]:not([aria-live="off"])'
       );
       for (const region of regions) {
         const text = region.textContent?.trim() ?? "";
@@ -80,7 +81,7 @@ export function AccessibilityDemo({
             <DemoScenarioProvider value="accessibility">
               <Demo
                 mode="frontend"
-                locale="en"
+                locale={initialDemoLocale()}
                 dark={dark}
                 urlKey="a11y"
                 cellNavigation

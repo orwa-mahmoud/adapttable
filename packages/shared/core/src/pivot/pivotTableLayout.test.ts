@@ -114,6 +114,40 @@ describe("pivotTableLayout", () => {
 });
 
 describe("pivot panel model", () => {
+  it("changes optional measure captions while preserving zones, keys and canonical aggregations", () => {
+    const config: PivotConfig = {
+      rows: ["region"],
+      columns: [],
+      measures: [
+        { key: "amount", agg: "sum" },
+        { key: "amount", agg: "avg", label: "Authored average" },
+        { key: "amount", agg: "median" },
+        { key: "amount", agg: () => 1 },
+      ],
+    };
+    const fields = [
+      { key: "region", label: "المنطقة" },
+      { key: "amount", label: "القيمة" },
+    ];
+    const original = pivotPanelZones(fields, config, labels);
+    const localized = pivotPanelZones(fields, config, labels, {
+      sum: "المجموع",
+      avg: "المتوسط",
+    });
+    expect(localized.slice(0, 2)).toEqual(original.slice(0, 2));
+    expect(localized[2]?.entries.map((entry) => entry.label)).toEqual([
+      "المجموع القيمة",
+      "Authored average",
+      "median القيمة",
+      "القيمة",
+    ]);
+    expect(
+      localized[2]?.entries.map((entry) => ({ ...entry, label: undefined }))
+    ).toEqual(
+      original[2]?.entries.map((entry) => ({ ...entry, label: undefined }))
+    );
+    expect(config.measures[0]).toEqual({ key: "amount", agg: "sum" });
+  });
   it("captions each zone", () => {
     expect(pivotZoneLabel("rows", labels)).toBe(labels.pivotRows);
     expect(pivotZoneLabel("columns", labels)).toBe(labels.pivotColumns);

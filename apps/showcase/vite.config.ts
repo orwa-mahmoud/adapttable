@@ -3,8 +3,10 @@ import { dirname, join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import angular from "@analogjs/vite-plugin-angular";
-import tailwindcss from "@tailwindcss/vite";
+import ui from "@nuxt/ui/vite";
+import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 import react from "@vitejs/plugin-react";
+import vue from "@vitejs/plugin-vue";
 import { defineConfig, type Plugin } from "vite";
 
 import { appendScript, guarded } from "../../scripts/analytics-guard.mjs";
@@ -261,6 +263,21 @@ const ANGULAR_SOURCES = [
   `${packageDir("adapter-angular-aria")}${sep}`,
 ];
 
+/** Vue owns its SFCs and source modules, never React's transform. */
+const VUE_SOURCES = [
+  fileURLToPath(new URL("./src/vue/", import.meta.url)),
+  `${packageDir("vue")}${sep}`,
+  `${packageDir("adapter-vue-unstyled")}${sep}`,
+  `${packageDir("ai-vue")}${sep}`,
+  `${packageDir("adapter-element-plus")}${sep}`,
+  `${packageDir("adapter-vuetify")}${sep}`,
+  `${packageDir("adapter-naive-ui")}${sep}`,
+  `${packageDir("adapter-reka-ui")}${sep}`,
+  `${packageDir("adapter-shadcn-vue")}${sep}`,
+  `${packageDir("adapter-nuxt-ui")}${sep}`,
+  `${packageDir("adapter-quasar")}${sep}`,
+];
+
 /** Whether a module is Angular source the Angular compiler owns. */
 const isAngularSource = (id: string): boolean =>
   ANGULAR_SOURCES.some((dir) => id.startsWith(dir));
@@ -271,13 +288,25 @@ export default defineConfig({
     adapttableSubpaths(),
     // The Angular pages and the Angular packages compile with Angular's own
     // compiler, from source like every other package here; React's plugin
-    // keeps to everything else.
+    // and Vue compile their own source separately.
     angular({
       tsconfig: page("./src/angular/tsconfig.json"),
       transformFilter: (_code, id) => isAngularSource(id),
     }),
-    react({ exclude: ANGULAR_SOURCES.map((dir) => `${dir}**`) }),
-    tailwindcss(),
+    vue({ template: { transformAssetUrls } }),
+    ui({
+      router: false,
+      colorMode: false,
+      prose: true,
+      autoImport: false,
+      components: false,
+      dts: false,
+    }),
+    quasar(),
+    react({
+      exclude: [...ANGULAR_SOURCES, ...VUE_SOURCES].map((dir) => `${dir}**`),
+    }),
+    // Nuxt UI installs the shared Tailwind Vite integration once.
     taigaAssets(),
     siteNotices({
       extraPackages: [
@@ -325,10 +354,32 @@ export default defineConfig({
     // the file rather than listing 100-odd entries that go stale one import
     // at a time.
     alias: [
+      ...[
+        "element-plus",
+        "vuetify",
+        "naive-ui",
+        "reka-ui",
+        "shadcn-vue",
+        "nuxt-ui",
+        "quasar",
+      ].map((kit) => ({
+        find: new RegExp(`^@adapttable/${kit}$`),
+        replacement: pkg(`adapter-${kit}`),
+      })),
+      {
+        find: "@adapttable/shadcn-vue/styles.css",
+        replacement: `${packageDir("adapter-shadcn-vue")}/src/styles.css`,
+      },
       { find: /^@adapttable\/core$/, replacement: pkg("core") },
       { find: /^@adapttable\/react$/, replacement: pkg("react") },
+      { find: /^@adapttable\/vue$/, replacement: pkg("vue") },
+      {
+        find: /^@adapttable\/vue-unstyled$/,
+        replacement: pkg("adapter-vue-unstyled"),
+      },
       { find: /^@adapttable\/ai$/, replacement: pkg("ai") },
       { find: /^@adapttable\/ai-react$/, replacement: pkg("ai-react") },
+      { find: /^@adapttable\/ai-vue$/, replacement: pkg("ai-vue") },
       { find: /^@adapttable\/ai-angular$/, replacement: pkg("ai-angular") },
       { find: /^@adapttable\/i18n$/, replacement: pkg("i18n") },
       { find: /^@adapttable\/mantine$/, replacement: pkg("adapter-mantine") },
@@ -395,7 +446,11 @@ export default defineConfig({
         replacement: pkg("adapter-angular-unstyled"),
       },
     ],
+    // Nuxt UI’s Vue plugin rewrites components from its own physical runtime.
+    // Share that application instance across pnpm peer contexts.
     dedupe: [
+      "vue",
+      "@nuxt/ui",
       "react",
       "react-dom",
       "@mui/material",

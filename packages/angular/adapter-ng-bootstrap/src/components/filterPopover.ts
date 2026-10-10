@@ -2,12 +2,13 @@
 import {
   type FilterOverlaySlotProps,
   injectPopoverSpace,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  computed,
   type ElementRef,
   input,
   type TemplateRef,
@@ -30,7 +31,11 @@ import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
       triggers="manual"
       autoClose="outside"
       [animation]="false"
-      [placement]="p.dir === 'rtl' ? 'bottom-start' : 'bottom-end'"
+      [placement]="
+        p.dir === 'rtl'
+          ? ['bottom-start', 'top-start']
+          : ['bottom-end', 'top-end']
+      "
       popoverClass="adapttable-filter-popover"
       (hidden)="closed()"
       (shown)="shown()"
@@ -67,7 +72,7 @@ import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
         </header>
         <div
           data-ng-bootstrap-part="filters-body"
-          style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+          style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px"
         >
           <ng-container [ngTemplateOutlet]="p.filters" />
         </div>
@@ -93,11 +98,22 @@ export class AdaptFilterPopover {
   private readonly popover = viewChild.required(NgbPopover);
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
-  protected readonly availableHeight = injectPopoverSpace({
+  private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
     reserve: 48,
+    allowAbove: () => {
+      const origin = this.anchor()?.nativeElement;
+      const viewport = origin?.ownerDocument.defaultView;
+      return (
+        viewport != null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom - 48 < 160
+      );
+    },
   });
+  protected readonly availableHeight = computed(() =>
+    Math.min(560, this.viewportSpace())
+  );
   private restoreFocus = false;
 
   constructor() {

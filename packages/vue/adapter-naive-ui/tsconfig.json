@@ -1,0 +1,28 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node", "vitest/globals"],
+    "rootDirs": [".", "./.sfc-types"],
+    "paths": {
+      "@adapttable/naive-ui": ["./src/index.ts"],
+      "@adapttable/naive-ui/*": ["./src/*.ts"],
+      "@adapttable/naive-ui/column-selection": ["./src/column-selection.ts"]
+    }
+  },
+  "files": ["src/styles.d.ts"],
+  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "test/types/invalid",
+    ".sfc-types"
+  ],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "dataAttributes": ["data-*"]
+  }
+}

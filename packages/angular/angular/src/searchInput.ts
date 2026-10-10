@@ -1,7 +1,9 @@
 /**
  * A search box that types fast and commits slowly: the text follows every
- * keystroke, and the trimmed term reaches the view state once typing pauses.
+ * keystroke, and the trimmed term reaches the view state once typing pauses
+ * or the box loses focus.
  */
+import { commitSearchOnBlur } from "@adapttable/core/binding";
 import {
   DestroyRef,
   effect,
@@ -15,7 +17,7 @@ import {
 export interface SearchInput {
   /** What the box shows, committed or not. */
   readonly value: Signal<string>;
-  /** Type into the box; the trimmed term commits after the delay. */
+  /** Type into the box; the trimmed term commits after the delay or on blur. */
   readonly setValue: (next: string) => void;
   /** Commit a term now, skipping the delay. */
   readonly commit: (term: string) => void;
@@ -36,18 +38,24 @@ export function createSearchInput(
   const value = signal(untracked(committed));
   let last = untracked(committed);
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let disarm: (() => void) | undefined;
 
   const cancel = (): void => {
     clearTimeout(timer);
     timer = undefined;
+    disarm?.();
+    disarm = undefined;
   };
-  const commit = (term: string): void => {
+  const flush = (next: string): void => {
     cancel();
-    const trimmed = term.trim();
-    value.set(trimmed);
+    const trimmed = next.trim();
     if (trimmed === last) return;
     last = trimmed;
     setSearch(trimmed);
+  };
+  const commit = (term: string): void => {
+    value.set(term.trim());
+    flush(term);
   };
 
   effect(
@@ -68,12 +76,13 @@ export function createSearchInput(
       value.set(next);
       cancel();
       timer = setTimeout(() => {
-        timer = undefined;
-        const trimmed = next.trim();
-        if (trimmed === last) return;
-        last = trimmed;
-        setSearch(trimmed);
+        flush(next);
       }, delayMs);
+      // Leaving the box commits now, so the next control the user reaches
+      // acts on the term they typed rather than racing the delay.
+      disarm = commitSearchOnBlur(() => {
+        flush(next);
+      });
     },
     commit,
   };

@@ -163,7 +163,11 @@ for (const kit of ANGULAR_KITS) {
       await tree
         .locator('[data-adapttable-part="filter-tree-summary"]')
         .click();
-      await tree.getByRole("button", { name: "Add condition" }).click();
+      const addCondition = tree.getByRole("button", { name: "Add condition" });
+      // A kit can reveal the tree by animating its panel open; the button is
+      // clickable once the panel no longer clips it.
+      await expect(addCondition).toBeInViewport({ ratio: 1 });
+      await addCondition.click();
       const condition = tree.locator(
         '[data-adapttable-part="filter-tree-condition"]'
       );
@@ -179,7 +183,9 @@ for (const kit of ANGULAR_KITS) {
       page,
     }) => {
       await page.goto(PAGE);
-      await page.getByRole("button", { name: "Drawer", exact: true }).click();
+      await page
+        .getByRole("combobox", { name: "Filter layout", exact: true })
+        .selectOption("drawer");
       await part(page, "filters-button").click();
       const drawer = part(page, "filters-panel");
       await expect(drawer).toBeVisible();
@@ -208,7 +214,9 @@ for (const kit of ANGULAR_KITS) {
 
     test("filters one column from its header funnel", async ({ page }) => {
       await page.goto(PAGE);
-      await page.getByRole("button", { name: "Header", exact: true }).click();
+      await page
+        .getByRole("combobox", { name: "Filter layout", exact: true })
+        .selectOption("header");
       const funnels = part(page, "filter-header-trigger");
       // Person, Team, Status, Timeline, Budget, Load — every column with a filter.
       await expect(funnels).toHaveCount(6);
@@ -221,22 +229,24 @@ for (const kit of ANGULAR_KITS) {
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
     });
 
-    if (kit.key === "ngx-bootstrap") {
+    if (kit.key === "ngx-bootstrap" || kit.key === "spartan") {
       test("keeps multiple checkbox choices open in its native header menu", async ({
         page,
       }) => {
         await page.goto(PAGE);
-        await page.getByRole("button", { name: "Header", exact: true }).click();
+        await page
+          .getByRole("combobox", { name: "Filter layout", exact: true })
+          .selectOption("header");
         await part(page, "filter-header-trigger").nth(1).click();
         const core = page.getByRole("checkbox", { name: "Core", exact: true });
         const platform = page.getByRole("checkbox", {
           name: "Platform",
           exact: true,
         });
-        await core.check();
+        await checkAngularCheckbox(kit, core);
         await expect(core).toBeChecked();
         await expect(platform).toBeVisible();
-        await platform.check();
+        await checkAngularCheckbox(kit, platform);
         await expect(platform).toBeChecked();
         await expect(part(page, "row")).toHaveCount(12);
         expect(new Set(await teams(page))).toEqual(

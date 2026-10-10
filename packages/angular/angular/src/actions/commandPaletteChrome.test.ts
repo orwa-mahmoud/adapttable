@@ -8,10 +8,12 @@ import {
   Component,
   type ElementRef,
   input,
+  PLATFORM_ID,
   signal,
   viewChild,
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -309,5 +311,157 @@ describe("AdaptCommandPaletteChrome", () => {
     fixture.detectChanges();
     expect(part("command-palette")).toBeNull();
     fixture.destroy();
+  });
+  it("closes once from Escape on an actually focused command button", async () => {
+    const fixture = await mount();
+    const host = fixture.componentInstance;
+    const item = document.querySelector<HTMLButtonElement>(
+      '[data-adapttable-part="command-item"]:not([disabled])'
+    )!;
+    item.focus();
+    expect(document.activeElement).toBe(item);
+    const event = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    item.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(host.closed).toHaveBeenCalledOnce();
+    expect(host.open()).toBe(false);
+    fixture.destroy();
+  });
+
+  it("wraps Tab from the focused last command and Shift+Tab from the search input", async () => {
+    const fixture = await mount();
+    const input = part("command-input") as HTMLInputElement;
+    const item = document.querySelector<HTMLButtonElement>(
+      '[data-adapttable-part="command-item"]:not([disabled])'
+    )!;
+    item.focus();
+    const tab = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+      cancelable: true,
+    });
+    item.dispatchEvent(tab);
+    expect(tab.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(input);
+    const back = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+      cancelable: true,
+      shiftKey: true,
+    });
+    input.dispatchEvent(back);
+    expect(back.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(item);
+    fixture.destroy();
+  });
+
+  it("dispatches input navigation once and preserves a command button's native activation", async () => {
+    const fixture = await mount();
+    const host = fixture.componentInstance;
+    const first = vi.fn();
+    const second = vi.fn();
+    const third = vi.fn();
+    host.commands.set([
+      { key: "first", label: "First", onSelect: first },
+      { key: "second", label: "Second", onSelect: second },
+      { key: "third", label: "Third", onSelect: third },
+    ]);
+    fixture.detectChanges();
+    const input = part("command-input") as HTMLInputElement;
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "ArrowDown",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    fixture.detectChanges();
+    const items = [
+      ...document.querySelectorAll<HTMLButtonElement>(
+        '[data-adapttable-part="command-item"]'
+      ),
+    ];
+    expect(items.map((item) => item.getAttribute("aria-selected"))).toEqual([
+      "false",
+      "true",
+      "false",
+    ]);
+    items[2]!.focus();
+    const enter = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
+    items[2]!.dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(false);
+    expect(first).not.toHaveBeenCalled();
+    expect(second).not.toHaveBeenCalled();
+    expect(third).not.toHaveBeenCalled();
+    // Synthetic key events do not synthesize a browser's native click.
+    items[2]!.click();
+    expect(third).toHaveBeenCalledOnce();
+    expect(host.closed).toHaveBeenCalledOnce();
+    fixture.destroy();
+  });
+
+  it("ignores composing Enter and lets the next ordinary Enter run once", async () => {
+    const fixture = await mount();
+    const host = fixture.componentInstance;
+    host.commands.set([
+      { key: "greet", label: "Greet", onSelect: host.greeted },
+    ]);
+    fixture.detectChanges();
+    const input = part("command-input") as HTMLInputElement;
+    const composing = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+      isComposing: true,
+    });
+    input.dispatchEvent(composing);
+    expect(composing.defaultPrevented).toBe(false);
+    expect(host.greeted).not.toHaveBeenCalled();
+    expect(host.closed).not.toHaveBeenCalled();
+    expect(host.open()).toBe(true);
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    expect(host.greeted).toHaveBeenCalledOnce();
+    expect(host.closed).toHaveBeenCalledOnce();
+    fixture.destroy();
+  });
+
+  it("closes only once when Escape bubbles from the search input", async () => {
+    const fixture = await mount();
+    part("command-input")!.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+    expect(fixture.componentInstance.closed).toHaveBeenCalledOnce();
+    fixture.destroy();
+  });
+
+  it("does not bind pointer listeners or focus controls on the server with DOM globals present", async () => {
+    TestBed.overrideProvider(PLATFORM_ID, { useValue: "server" });
+    const listener = vi.spyOn(document, "addEventListener");
+    const fixture = await mount();
+    expect(
+      listener.mock.calls.filter(([event]) => event === "pointerdown")
+    ).toEqual([]);
+    const input = fixture.debugElement.query(By.directive(PaletteInput))
+      .componentInstance as PaletteInput;
+    const element = document.createElement("input");
+    const focused = vi.spyOn(element, "focus");
+    input.props().inputProps.ref(element);
+    expect(focused).not.toHaveBeenCalled();
+    fixture.destroy();
+    listener.mockRestore();
   });
 });

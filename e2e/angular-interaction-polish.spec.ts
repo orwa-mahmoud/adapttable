@@ -1,6 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import { ANGULAR_KITS, angularPart } from "./angular-kit";
+
+const columnKeys = (page: Page) =>
+  page
+    .locator("th[data-column-key]")
+    .evaluateAll((headers) =>
+      headers.map((header) => header.getAttribute("data-column-key"))
+    );
 
 for (const kit of ANGULAR_KITS) {
   test(`${kit.key}: the live demo exposes working column visibility, pinning and keyboard order`, async ({
@@ -38,12 +45,7 @@ for (const kit of ANGULAR_KITS) {
       name: "Move to start / Move to end: Status",
       exact: true,
     });
-    const order = () =>
-      page
-        .locator("th[data-column-key]")
-        .evaluateAll((headers) =>
-          headers.map((header) => header.getAttribute("data-column-key"))
-        );
+    const order = () => columnKeys(page);
     const before = await order();
     await grip.press("ArrowUp");
     await expect.poll(order).not.toEqual(before);
@@ -98,6 +100,23 @@ for (const kit of ANGULAR_KITS) {
     const triggers = page.locator(
       '[data-adapttable-part="filter-header-trigger"]'
     );
+    await expect
+      .poll(() => columnKeys(page))
+      .toEqual(["person", "status", "timeline", "budget", "load"]);
+    await expect(triggers).toHaveCount(5);
+    const columns = angularPart(kit, page, "column-menu-button");
+    await columns.click();
+    const menu = angularPart(kit, page, "column-menu-panel");
+    await expect(menu).toBeVisible();
+    await menu
+      .getByRole("button", { name: "Show column: Team", exact: true })
+      .click();
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    await expect(columns).toBeFocused();
+    await expect
+      .poll(() => columnKeys(page))
+      .toEqual(["person", "team", "status", "timeline", "budget", "load"]);
     await expect(triggers).toHaveCount(6);
     for (let index = 0; index < 6; index++) {
       const trigger = triggers.nth(index).locator("button, summary").first();

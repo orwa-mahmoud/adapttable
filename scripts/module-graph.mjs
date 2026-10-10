@@ -4,7 +4,7 @@
  * Shared by smoke-dist, framework-boundary checking, and isolation fixtures.
  */
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 
 import ts from "typescript";
 
@@ -27,22 +27,49 @@ export function buildPkgDirByName(root = REPO_ROOT) {
 
 /** Every specifier a built file imports, from TypeScript's scanner. */
 export function importsOf(file) {
-  return ts
-    .preProcessFile(readFileSync(file, "utf8"), true, true)
-    .importedFiles.map((found) => found.fileName);
+  const scanned = ts.preProcessFile(readFileSync(file, "utf8"), true, true);
+  return [
+    ...scanned.importedFiles.map((found) => found.fileName),
+    ...scanned.referencedFiles.map(({ fileName }) =>
+      fileName.startsWith(".") || isAbsolute(fileName)
+        ? fileName
+        : `./${fileName}`
+    ),
+    ...scanned.typeReferenceDirectives.map((found) => found.fileName),
+  ];
 }
 
-/** The first `exports` branch a given set of conditions allows (skips `types`). */
+/** The first `exports` branch a given set of conditions allows. */
 function pickCondition(node, conditions) {
   if (typeof node === "string") return node;
   if (!node || typeof node !== "object") return undefined;
   for (const [key, value] of Object.entries(node)) {
-    if (key === "types") continue;
     if (key !== "default" && !conditions.has(key)) continue;
     const hit = pickCondition(value, conditions);
     if (hit) return hit;
   }
   return undefined;
+}
+
+/** TypeScript resolves JavaScript-looking declaration imports to their types. */
+function declarationTarget(target) {
+  const extension = /\.(?:js|mjs|cjs)$/.exec(target)?.[0];
+  if (extension) {
+    const declarationExtension = {
+      ".js": ".d.ts",
+      ".mjs": ".d.mts",
+      ".cjs": ".d.cts",
+    }[extension];
+    const declaration =
+      target.slice(0, -extension.length) + declarationExtension;
+    if (existsSync(declaration)) return declaration;
+  }
+  if (existsSync(target)) return target;
+  return (
+    [".d.ts", ".d.mts", ".d.cts", "/index.d.ts"]
+      .map((suffix) => target + suffix)
+      .find(existsSync) ?? target
+  );
 }
 
 /**
@@ -51,7 +78,11 @@ function pickCondition(node, conditions) {
  * @returns `{ file }` | `{ external }` | `{ unresolved }`
  */
 export function resolveImport(spec, fromFile, pkgDirByName) {
-  if (spec.startsWith(".")) return { file: resolve(dirname(fromFile), spec) };
+  const declaration = /\.d\.(?:ts|mts|cts)$/.test(fromFile);
+  if (spec.startsWith(".") || isAbsolute(spec)) {
+    const target = resolve(dirname(fromFile), spec);
+    return { file: declaration ? declarationTarget(target) : target };
+  }
   const scoped = spec.startsWith("@");
   const name = spec
     .split("/")
@@ -61,8 +92,9 @@ export function resolveImport(spec, fromFile, pkgDirByName) {
   if (!pkgDir) return { external: name };
   const conditions = new Set([
     "node",
-    fromFile.endsWith(".cjs") ? "require" : "import",
+    /\.(?:cjs|cts)$/.test(fromFile) ? "require" : "import",
   ]);
+  if (declaration) conditions.add("types");
   const pkgJson = readPackageJson(pkgDir);
   const subpath = `.${spec.slice(name.length)}`;
   const target = pickCondition(pkgJson.exports?.[subpath], conditions);

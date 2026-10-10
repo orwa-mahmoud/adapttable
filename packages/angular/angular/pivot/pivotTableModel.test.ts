@@ -116,6 +116,35 @@ describe("pivotTableModel", () => {
     expect(grouped[0]?.group).toEqual(["EU", "Q1"]);
   });
 
+  it("names nested pivot axes and localized totals in phone cards", () => {
+    const model = pivotTableModel(
+      pivot(SALES, {
+        ...base,
+        columns: ["region", "quarter"],
+        measures: [{ key: "amount", agg: "sum", label: "المجموع" }],
+      }),
+      { labels: { pivotTotal: "الإجمالي" } }
+    );
+
+    expect(model.columns.slice(1).map((column) => column.mobileLabel)).toEqual([
+      "EU / Q1 / المجموع",
+      "EU / Q2 / المجموع",
+      "US / Q1 / المجموع",
+      "US / Q2 / المجموع",
+      "الإجمالي / المجموع",
+    ]);
+    expect(model.columns.slice(1).map((column) => column.header)).toEqual([
+      "المجموع",
+      "المجموع",
+      "المجموع",
+      "المجموع",
+      "المجموع",
+    ]);
+    expect(model.columns[1]?.group).toEqual(["EU", "Q1"]);
+    const flat = modelFor({ ...base, columns: [], grandTotals: false });
+    expect(flat.columns[1]?.mobileLabel).toBe("sum Amount");
+  });
+
   it("puts the grand total in the footer and not the body", () => {
     const model = modelFor(base);
     const footer = model.summaryRow!(model.rows);

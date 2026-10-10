@@ -6,9 +6,10 @@ import {
   AdaptExtraRowContent,
   AdaptFooter,
   AdaptHeader,
+  AdaptHeaderActions,
   AdaptRowDetail,
   AdaptSlot,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component } from "@angular/core";
 
@@ -40,6 +41,7 @@ import { AdaptRowActions } from "./rowActionButtons";
     AdaptExtraRowContent,
     AdaptFooter,
     AdaptHeader,
+    AdaptHeaderActions,
     AdaptRowActions,
     AdaptRowDetail,
     AdaptSlot,

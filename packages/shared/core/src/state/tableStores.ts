@@ -345,12 +345,14 @@ export function sanitizeStoredLayout(
 ): ColumnLayoutState | null {
   if (!isPlainRecord(parsed)) return null;
   const names = sanitizeNames(parsed.names);
+  const collapsedGroups = stringEntries(parsed.collapsedGroups);
   return {
     hidden: stringEntries(parsed.hidden),
     order: stringEntries(parsed.order),
     pinned: sanitizePinned(parsed.pinned),
     widths: sanitizeWidths(parsed.widths),
     ...(Object.keys(names).length > 0 ? { names } : {}),
+    ...(collapsedGroups.length > 0 ? { collapsedGroups } : {}),
   };
 }
 

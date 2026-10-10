@@ -1,11 +1,10 @@
 /** Compose a kit's optional approval strip without importing an AI runtime. */
-import { AGENT_APPROVAL, slotRender } from "@adapttable/core/binding";
-
 import {
   type AdaptTableFeature,
   extendFeature,
   type SlotComponent,
-} from "../featureHost";
+} from "@adapttable/angular";
+import { AGENT_APPROVAL, slotRender } from "@adapttable/core/binding";
 
 /**
  * Bind a kit component accepting `AgentApprovalProps` to the approval slot.

@@ -222,6 +222,28 @@ describe("inherited Angular header contracts", () => {
   it("follows an aliased binding base and verifies the native template", () => {
     assert.deepEqual(parity(inheritedHeaderRoot()).problems, []);
   });
+  it("follows an adapter-entry alias and still requires the inherited header attrs", () => {
+    const root = inheritedHeaderRoot({
+      wrapper: SHARED_HEADER_WRAPPER.replace(
+        '"@adapttable/angular"',
+        '"@adapttable/angular/adapter"'
+      ),
+    });
+    writePackage(root, "angular", "angular", ["adapter"], {
+      "ng-package.json": JSON.stringify({ lib: { entryFile: "src/index.ts" } }),
+      "adapter/ng-package.json": JSON.stringify({
+        lib: { entryFile: "../src/adapter.ts" },
+      }),
+      "src/adapter.ts":
+        'export { AdaptDesktopTableModel } from "./layout/desktopTableModel";',
+    });
+    assert.deepEqual(parity(root).problems, []);
+    writePackage(root, "angular", "angular", ["adapter"], {
+      "src/adapter.ts":
+        'export type { AdaptDesktopTableModel } from "./layout/desktopTableModel";',
+    });
+    assert.deepEqual(parity(root).problems, [MISSING_HEADER]);
+  });
   for (const [name, options] of [
     [
       "an unused model import",

@@ -6,9 +6,9 @@
 import {
   injectSavedViews,
   type SavedViewsControllerOptions,
-  type SavedViewsSlotProps,
   type SavedViewsState,
 } from "@adapttable/angular";
+import type { SavedViewsSlotProps } from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { Directionality } from "@angular/cdk/bidi";
 import { CdkConnectedOverlay, OverlayModule } from "@angular/cdk/overlay";

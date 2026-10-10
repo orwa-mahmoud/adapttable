@@ -2,6 +2,7 @@ import { xlsxWriter } from "@adapttable/core/xlsx";
 import { Suspense, useState } from "react";
 
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Monitor, Phone } from "./sectionIcons";
@@ -23,7 +24,7 @@ const EXPORT_GROUPED_AS_XLSX = {
 
 export function GroupingDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const [mobile, setMobile] = useState(false);
-  const [rtl, setRtl] = useState(false);
+  const [rtl, setRtl] = useState(() => initialDemoLocale() === "ar");
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;
   return (
     <div className="mx-demo">

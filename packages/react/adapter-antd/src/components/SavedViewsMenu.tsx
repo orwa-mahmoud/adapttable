@@ -27,6 +27,9 @@ export interface SavedViewsMenuProps {
   dir?: Direction;
 }
 
+/** The input's intrinsic size would set the panel wider than a phone. */
+const NAME_INPUT_STYLE = { flex: "1 1 10rem", width: "10rem", minWidth: 0 };
+
 /**
  * AntD saved-views popover on core's headless `useSavedViews`: a list of
  * captured views (click re-applies one to the table's URL state, a trailing
@@ -94,6 +97,7 @@ export function SavedViewsMenu({
       <Flex align="center" gap={4}>
         <Input
           size="small"
+          style={NAME_INPUT_STYLE}
           placeholder={labels.viewName}
           aria-label={labels.viewName}
           value={name}

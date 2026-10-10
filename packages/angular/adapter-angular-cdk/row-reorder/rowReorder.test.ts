@@ -2,11 +2,8 @@
  * Keyboard reorder stays on the loaded page — rowCount is on-screen rows,
  * not the source total — and the kit controls call through to the host.
  */
-import {
-  type ColumnDef,
-  type PaginationMode,
-  type RowReorderState,
-} from "@adapttable/angular";
+import type { ColumnDef, PaginationMode } from "@adapttable/angular";
+import type { RowReorderState } from "@adapttable/angular/adapter";
 import { rowReorder } from "@adapttable/angular-cdk/row-reorder";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";

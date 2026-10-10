@@ -88,9 +88,9 @@ for (const route of ["/angular-main/", "/angular-all-options/", "/ng-zorro/"]) {
     }
     await page.screenshot({ path: testInfo.outputPath("phone.png") });
     if (route === "/angular-main/") {
-      await page
-        .getByRole("combobox", { name: "Locale", exact: true })
-        .selectOption("ar");
+      const arabic = page.getByRole("radio", { name: "العربية", exact: true });
+      await arabic.check();
+      await expect(arabic).toBeChecked();
       await expect(
         page.locator('[data-adapttable-part="root"]')
       ).toHaveAttribute("dir", "rtl");
@@ -144,12 +144,26 @@ test("Angular live settings retain borders and stay inside their panel on narrow
 }) => {
   await page.goto("/angular-main/");
   await expect(
-    page.getByRole("combobox", { name: "Data", exact: true })
+    page.getByRole("group", { name: "Data", exact: true })
   ).toBeVisible();
+  for (const [group, selected] of [
+    ["Data", "Frontend"],
+    ["Locale", "English"],
+    ["Density", "Comfortable"],
+    ["Layout", "Responsive"],
+  ] as const) {
+    const choices = page.getByRole("group", { name: group, exact: true });
+    await expect(choices.getByRole("radio")).toHaveCount(2);
+    await expect(
+      choices.getByRole("radio", { name: selected, exact: true })
+    ).toBeChecked();
+  }
   for (const width of [1280, 390, 320]) {
     await page.setViewportSize({ width, height: 844 });
     const controls = await page
-      .locator(".angular-options select")
+      .locator(
+        ".controls.angular-options .angular-choice__options, .controls.angular-options select"
+      )
       .evaluateAll((selects) =>
         selects.map((select) => {
           const box = select.getBoundingClientRect();
@@ -165,7 +179,7 @@ test("Angular live settings retain borders and stay inside their panel on narrow
           };
         })
       );
-    expect(controls).toHaveLength(4);
+    expect(controls).toHaveLength(5);
     for (const control of controls) {
       expect(control.left).toBeGreaterThanOrEqual(control.panelLeft);
       expect(control.right).toBeLessThanOrEqual(control.panelRight);
@@ -183,12 +197,16 @@ for (const kit of ["material", "angular-cdk"]) {
     await expect(rows.first()).toBeVisible();
     const comfortable = (await rows.first().boundingBox())!.height;
     expect(comfortable).toBeLessThanOrEqual(56);
-    await page
-      .getByRole("combobox", { name: "Density", exact: true })
-      .selectOption("compact");
+    const compact = page.getByRole("radio", { name: "Compact", exact: true });
+    await compact.focus();
+    await expect(compact).toBeFocused();
+    await compact.press("Space");
+    await expect(compact).toBeChecked();
+    // The provider scope is recreated; restore the chosen radio, not its first sibling.
+    await expect(compact).toBeFocused();
     await expect(
-      page.getByRole("combobox", { name: "Density", exact: true })
-    ).toHaveValue("compact");
+      page.getByRole("radio", { name: "Comfortable", exact: true })
+    ).not.toBeChecked();
     await expect
       .poll(async () => (await rows.first().boundingBox())!.height)
       .toBeLessThan(comfortable);

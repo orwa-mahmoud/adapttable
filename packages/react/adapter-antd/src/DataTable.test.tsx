@@ -87,6 +87,23 @@ beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
 afterEach(() => vi.useRealTimers());
 
 describe("<DataTable> (Ant Design)", () => {
+  it("announces sorting without making every table cell a live message", async () => {
+    renderHarness();
+    expect(
+      screen
+        .getByRole("table")
+        .closest('[aria-live="polite"], [aria-live="assertive"]')
+    ).toBeNull();
+    fireEvent.click(screen.getByRole("columnheader", { name: /Name/ }));
+    await waitFor(() => {
+      expect(
+        document.querySelector(
+          '[data-adapttable-part="table-status-announcer"]'
+        )
+      ).toHaveTextContent("Sorted by Name, ascending");
+    });
+  });
+
   it("the pager names its arrows and announces the current page", () => {
     renderHarness({}, "limit=1");
     const current = document.querySelector('[aria-current="page"]');

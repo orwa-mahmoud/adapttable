@@ -5,7 +5,7 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { CellNavigationOptions } from '@adapttable/angular';
+import { CellNavigationOptions } from '@adapttable/angular/features';
 
 // @public
 export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;

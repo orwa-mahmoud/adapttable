@@ -112,6 +112,27 @@ describe("entrypoints", () => {
     }
   });
 
+  it("reports canonical Vue binding, native assistant and AI entries", () => {
+    for (const [dir, subpaths] of [
+      ["vue", [".", "./features", "./adapter"]],
+      ["adapter-vue-unstyled", ["./assistant"]],
+      ["ai-vue", ["."]],
+    ]) {
+      const entries = ENTRIES.filter((entry) => entry.dir === dir);
+      assert.ok(entries.length > 0, `${dir} exposes a public entry`);
+      assert.ok(
+        entries.every((entry) => entry.published),
+        dir
+      );
+      assert.equal(packageJson(dir).publishConfig?.access, "public", dir);
+      for (const subpath of subpaths)
+        assert.ok(
+          entries.some((entry) => entry.subpath === subpath),
+          `${dir} exposes ${subpath}`
+        );
+    }
+  });
+
   it("leaves the unimplemented PrimeNG placeholder without typed entries", () => {
     assert.equal(packageJson("adapter-primeng").private, true);
     assert.deepEqual(packageJson("adapter-primeng").exports, {});

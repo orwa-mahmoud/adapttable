@@ -22,6 +22,9 @@ export const ogCardMetadata = (pages = sidebarPages()) =>
     if (slug.startsWith("angular/")) {
       framework = "angular";
       footer = "Headless Angular data table · native kit controls";
+    } else if (slug.startsWith("vue/")) {
+      framework = "vue";
+      footer = "Experimental Vue workspace API · native controls";
     } else if (SHARED_DOCS.includes(slug)) {
       framework = "shared";
       footer = "Framework-neutral engine · React and Angular bindings";

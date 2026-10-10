@@ -14,6 +14,12 @@
  */
 import type { FeatureHostState } from "../features/currentHost";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
+import {
+  createEditCommitLifecycle,
+  type EditCommitSnapshot,
+  type EditCommitValidationOptions,
+  validateEditCommit,
+} from "./editCommitLifecycle";
 import type { BatchRowEdit, EditEventHandler } from "./editContracts";
 import { observeEdit } from "./editingController";
 import { parseColumnDraft, type RowEditDrafts } from "./rowEditing";
@@ -45,6 +51,8 @@ export interface BatchEditEntry {
  * @public
  */
 export interface BatchEditingState<TRow> {
+  /** Current validation or host-save state, absent while idle. */
+  readonly commit?: EditCommitSnapshot;
   /** How many rows are waiting — what a "3 unsaved rows" line reads. */
   count: number;
   /** Whether anything is waiting at all. */
@@ -62,7 +70,7 @@ export interface BatchEditingState<TRow> {
     columnKey: string,
     value: string
   ) => void;
-  /** Hand the host every pending row, as one list, then forget them. */
+  /** Request one atomic save; retain drafts until the host accepts it. */
   saveAll: () => void;
   /** Forget everything, restoring nothing — the drafts were never applied. */
   cancelAll: () => void;
@@ -95,7 +103,15 @@ export interface BatchEditingState<TRow> {
  *
  * @public
  */
-export interface BatchEditStoreOptions<TRow> {
+export interface BatchEditStoreOptions<
+  TRow,
+> extends EditCommitValidationOptions<TRow> {
+  /** Format a failed validation request or host save. */
+  readonly formatEditError?: (error: unknown) => string;
+  /** Observe a rejected host save. */
+  readonly onEditError?: EditEventHandler<TRow>;
+  /** Observe a validation verdict which refused a save. */
+  readonly onValidationFail?: EditEventHandler<TRow>;
   /**
    * Whether batch editing is armed. Off by default: it changes when a commit
    * happens, which is a decision about the data rather than a preference.
@@ -137,6 +153,8 @@ export type BatchPendingDrafts = Readonly<
  * @public
  */
 export interface BatchEditSnapshot {
+  /** Current validation or host-save state, absent while idle. */
+  readonly commit?: EditCommitSnapshot;
   /** Every pending row, by id. */
   readonly pending: BatchPendingDrafts;
   /** The same rows as a list, for the conflict reconciler. */
@@ -151,6 +169,8 @@ export interface BatchEditSnapshot {
  * @public
  */
 export interface BatchEditStore<TRow> {
+  /** Revoke pending continuations; cannot cancel a request already sent to the host. */
+  readonly dispose?: () => void;
   /** The batch now. */
   readonly getSnapshot: () => BatchEditSnapshot;
   /** Listen for changes. Returns the unsubscribe. */
@@ -164,7 +184,7 @@ export interface BatchEditStore<TRow> {
     columnKey: string,
     value: string
   ) => void;
-  /** Hand the host every pending row, then forget them. */
+  /** Hand the host every pending row, clearing drafts only after success. */
   readonly saveAll: () => void;
   /** Forget everything. */
   readonly cancelAll: () => void;
@@ -220,9 +240,22 @@ export function createBatchEditStore<TRow>(
   let current = options;
   let snapshot = batchSnapshot({});
   const { subscribe, notify } = listenerSet();
+  let disposed = false;
+  const commit = createEditCommitLifecycle((value) => {
+    if (disposed) return;
+    if (value === undefined) {
+      const next = { ...snapshot };
+      delete next.commit;
+      snapshot = next;
+    } else snapshot = { ...snapshot, commit: value };
+    notify();
+  });
 
   const write = (next: BatchPendingDrafts): void => {
-    snapshot = batchSnapshot(next);
+    snapshot = {
+      ...batchSnapshot(next),
+      ...(snapshot.commit ? { commit: snapshot.commit } : {}),
+    };
     notify();
   };
 
@@ -262,14 +295,31 @@ export function createBatchEditStore<TRow>(
     getSnapshot: () => snapshot,
     subscribe,
     configure(next) {
+      if (disposed) return;
+      if (
+        next.enabled !== current.enabled ||
+        next.columns !== current.columns ||
+        next.onBatchEdit !== current.onBatchEdit ||
+        next.validateRow !== current.validateRow ||
+        next.applyEdit !== current.applyEdit ||
+        next.featureHost !== current.featureHost
+      )
+        commit.invalidate();
       current = next;
     },
+    dispose() {
+      if (disposed) return;
+      commit.dispose();
+      disposed = true;
+    },
     setDraft(row, rowId, columnKey, value) {
-      if (current.enabled !== true) return;
+      if (disposed || current.enabled !== true) return;
       const column = columnOf(columnKey);
       if (!column) return;
       const stored = readEditableCellValue(row, column, current.featureHost);
       const entry = snapshot.pending[rowId];
+      if (commit.busy() && entry?.drafts[columnKey] === value) return;
+      commit.invalidate();
       const drafts = { ...entry?.drafts, [columnKey]: value };
       const seeds = { ...entry?.seeds, [columnKey]: stored };
       // A value typed back to what it was is not a change, and a row left with
@@ -296,6 +346,7 @@ export function createBatchEditStore<TRow>(
       }
     },
     saveAll() {
+      if (disposed || current.enabled !== true || commit.busy()) return;
       const edits: BatchRowEdit<TRow>[] = [];
       for (const [rowId, entry] of Object.entries(snapshot.pending)) {
         const row = entry.row as TRow;
@@ -312,38 +363,74 @@ export function createBatchEditStore<TRow>(
         }
         edits.push({ row, rowId, patch });
       }
-      if (edits.length > 0) {
-        current.onBatchEdit?.(edits);
-        for (const edit of edits) {
-          observeEdit(current.onEditCommit, {
-            row: edit.row,
-            rowId: edit.rowId,
-            columnKey: "",
-            value: edit.patch,
-            previousValue: edit.row,
-            unit: "batch",
-          });
-        }
+      if (edits.length === 0) {
+        write({});
+        return;
       }
-      write({});
+      const validate =
+        current.validateRow !== undefined ||
+        current.columns.some(
+          (column) =>
+            column.validate && edits.some((edit) => column.key in edit.patch)
+        );
+      const events = edits.map((edit) => ({
+        row: edit.row,
+        rowId: edit.rowId,
+        columnKey: "",
+        value: edit.patch,
+        previousValue: edit.row,
+        unit: "batch" as const,
+      }));
+      commit.run({
+        validate: validate
+          ? (active) => validateEditCommit(edits, current, active)
+          : undefined,
+        commit: () => current.onBatchEdit?.(edits),
+        committed: () => {
+          for (const event of events) observeEdit(current.onEditCommit, event);
+        },
+        success: () => write({}),
+        failure: (error) => {
+          for (const event of events)
+            observeEdit(current.onEditError, { ...event, error });
+        },
+        invalid: (failures) => {
+          for (const failure of failures) {
+            const event = events.find((item) => item.rowId === failure.rowId);
+            if (event)
+              observeEdit(current.onValidationFail, {
+                ...event,
+                columnKey: failure.columnKey ?? "",
+                error: failure.message,
+              });
+          }
+        },
+        formatError: current.formatEditError,
+      });
     },
     cancelAll() {
+      if (disposed) return;
+      commit.invalidate();
       for (const [rowId, entry] of Object.entries(snapshot.pending)) {
         cancelEvent(rowId, entry);
       }
       write({});
     },
     cancelRow(rowId) {
+      if (disposed) return;
       const entry = snapshot.pending[rowId];
       if (!entry) return;
+      commit.invalidate();
       cancelEvent(rowId, entry);
       const next = { ...snapshot.pending };
       delete next[rowId];
       write(next);
     },
     acceptSeeds(row, rowId, columnKeys) {
+      if (disposed) return;
       const entry = snapshot.pending[rowId];
       if (!entry) return;
+      commit.invalidate();
       write({
         ...snapshot.pending,
         [rowId]: {
@@ -354,8 +441,10 @@ export function createBatchEditStore<TRow>(
       });
     },
     takeSeeds(row, rowId, columnKeys) {
+      if (disposed) return;
       const entry = snapshot.pending[rowId];
       if (!entry) return;
+      commit.invalidate();
       // Taking what arrived leaves nothing changed in that cell, so the draft
       // goes: an untouched cell reads the row itself.
       const drafts = { ...entry.drafts };
@@ -391,6 +480,7 @@ export function batchEditingView<TRow>(
   const count = Object.keys(pending).length;
   return {
     count,
+    commit: snapshot.commit,
     pending: count > 0,
     isPending: (rowId) => rowId in pending,
     isChanged: (rowId, columnKey) =>

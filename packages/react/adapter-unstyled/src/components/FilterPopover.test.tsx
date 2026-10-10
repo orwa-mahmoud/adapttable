@@ -235,6 +235,19 @@ describe("FilterPopover", () => {
       expect(card.style.transform).toBe("");
     });
 
+    it("places the whole card above a trigger near the bottom edge", () => {
+      vi.spyOn(window, "innerHeight", "get").mockReturnValue(720);
+      renderPopover();
+      stubTrigger({ left: 500, right: 600, top: 680, bottom: 712 });
+      const card = stubCardRect({ left: 220, right: 600 });
+      fireEvent.resize(window);
+      expect(Number.parseFloat(card.style.top)).toBeGreaterThanOrEqual(8);
+      expect(Number.parseFloat(card.style.top) + 400).toBeLessThanOrEqual(680);
+      expect(Number.parseFloat(card.style.maxHeight)).toBeGreaterThanOrEqual(
+        400
+      );
+    });
+
     it("caps the card width so it can never exceed the viewport", () => {
       renderPopover();
       const card = document.querySelector<HTMLElement>(

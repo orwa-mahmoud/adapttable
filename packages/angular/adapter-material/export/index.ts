@@ -5,14 +5,15 @@
  */
 import {
   type AdaptTableFeature,
-  coreExportCsv,
   type ExportCsvOptions,
-  exportPdf as bindingExportPdf,
-  exportXlsx as bindingExportXlsx,
   extendFeature,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/angular";
+import { coreExportCsv, TOOLBAR_EXTRAS } from "@adapttable/angular/adapter";
+import {
+  exportPdf as bindingExportPdf,
+  exportXlsx as bindingExportXlsx,
+} from "@adapttable/angular/features";
 import { AdaptExportButton } from "@adapttable/angular-material";
 
 /**

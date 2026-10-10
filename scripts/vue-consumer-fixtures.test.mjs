@@ -1,0 +1,409 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import { FIXTURES, PLAIN_ADAPTER_CEILING_KB } from "./consumer-fixtures.mjs";
+import { KITS } from "./kits.mjs";
+import {
+  PDF_WRITER_MARKER,
+  VUE_CONSUMER_SPECS,
+  VUE_LAYOUT_GRAPH_SPECS,
+  VUE_NATIVE_BASE_SPECS,
+  VUE_OPTIONAL_BASE_MARKERS,
+  VUE_RUNTIME_EXTERNALS,
+  vueConsumerCoverageProblems,
+  vueConsumerExternals,
+  vueConsumerFixtures,
+  vueEmittedCss,
+  vueForeignImport,
+  vueGraphProblems,
+  XLSX_WRITER_MARKER,
+} from "./vue-consumer-fixtures.mjs";
+
+const vue = FIXTURES.filter((fixture) => fixture.framework === "vue");
+const fixture = (name) => {
+  const found = vue.find((entry) => entry.name === name);
+  assert.ok(found, name);
+  return found;
+};
+
+describe("packed Vue consumers", () => {
+  it("registers every distinct real entry and matches existing comparable ceilings", () => {
+    assert.equal(VUE_CONSUMER_SPECS.length, 18);
+    assert.deepEqual(
+      vue.map((entry) => entry.name),
+      VUE_CONSUMER_SPECS.map((entry) => entry.name)
+    );
+    assert.deepEqual(vueConsumerCoverageProblems(FIXTURES), []);
+    for (const entry of vue) {
+      assert.equal(entry.kind, "vue-consumer");
+      assert.ok(entry.functionality);
+      if (entry.hardBaseCeiling) {
+        assert.equal(entry.budgetKB, PLAIN_ADAPTER_CEILING_KB);
+        assert.equal("item1BaselineKB" in entry, false);
+      } else {
+        const comparable = FIXTURES.find(
+          (candidate) => candidate.name === entry.comparable
+        );
+        assert.ok(comparable);
+        assert.equal(entry.budgetKB, comparable.budgetKB);
+      }
+    }
+    assert.throws(
+      () => vueConsumerFixtures([], PLAIN_ADAPTER_CEILING_KB),
+      /Missing comparable/
+    );
+  });
+
+  it("measures all seven native kit roots with real adapter CSS and the 80 KiB ceiling", () => {
+    assert.deepEqual(
+      VUE_NATIVE_BASE_SPECS.map((entry) => entry.pkg).sort(),
+      KITS.filter((kit) => kit.framework === "vue" && kit.role === "shell")
+        .map((kit) => kit.name)
+        .sort()
+    );
+    assert.equal(VUE_NATIVE_BASE_SPECS.length, 7);
+    for (const spec of VUE_NATIVE_BASE_SPECS) {
+      const entry = fixture(spec.name);
+      assert.equal(entry.kit, spec.pkg.replace(/^adapter-/, ""));
+      assert.equal(entry.budgetKB, PLAIN_ADAPTER_CEILING_KB);
+      assert.equal(entry.styleEntryFile, "styles.css");
+      assert.equal(
+        entry.code,
+        'export { DataTable } from "PKG";\nimport "STYLE";'
+      );
+      assert.deepEqual(entry.absent, [
+        PDF_WRITER_MARKER,
+        XLSX_WRITER_MARKER,
+        "export-progress-surface",
+        ...VUE_OPTIONAL_BASE_MARKERS,
+      ]);
+      assert.ok(
+        vueGraphProblems(entry, {
+          code: "DataTable",
+          css: "",
+          imports: new Set(),
+        }).some((problem) => problem.includes("missing CSS"))
+      );
+      assert.deepEqual(
+        vueGraphProblems(entry, {
+          code: "DataTable",
+          css: `.${entry.presentCss[0]} { display: block; }`,
+          imports: new Set(),
+        }),
+        []
+      );
+      assert.ok(
+        vueConsumerCoverageProblems(
+          FIXTURES.filter((candidate) => candidate !== entry)
+        ).some((problem) =>
+          problem.includes(`Missing Vue kit base consumer: ${entry.pkg}`)
+        )
+      );
+    }
+  });
+
+  it("rejects optional native feature machinery while permitting lightweight shared channels", () => {
+    for (const spec of VUE_NATIVE_BASE_SPECS) {
+      const entry = fixture(spec.name);
+      const graph = {
+        code: `DataTable COMMAND_PALETTE_MODEL CONTEXT_MENU_MODEL SAVED_VIEWS_MODEL
+          groupingPanelModelKey rowReorderModelKey TABLE_ASSISTANT
+          vue-command-palette-model vue-context-menu-model table-assistant`,
+        css: entry.presentCss.join(" "),
+        imports: new Set(),
+      };
+      assert.deepEqual(vueGraphProblems(entry, graph), []);
+      for (const marker of VUE_OPTIONAL_BASE_MARKERS)
+        assert.ok(
+          vueGraphProblems(entry, {
+            ...graph,
+            code: `${graph.code} ${marker}`,
+          }).some((problem) => problem.includes(`leaked ${marker}`)),
+          `${entry.name} must reject ${marker}`
+        );
+      assert.ok(
+        vueGraphProblems(entry, {
+          ...graph,
+          imports: new Set(["@adapttable/ai-vue"]),
+        }).some((problem) => problem.includes("optional AI runtime"))
+      );
+    }
+  });
+
+  it("fails if a Vue entry disappears, duplicates or a registered kit lacks coverage", () => {
+    assert.ok(
+      vueConsumerCoverageProblems(
+        FIXTURES.filter((entry) => entry !== vue[0])
+      ).some((error) => error.includes("exactly one"))
+    );
+    assert.ok(
+      vueConsumerCoverageProblems([...FIXTURES, vue[0]]).some((error) =>
+        error.includes("exactly one")
+      )
+    );
+    assert.ok(
+      vueConsumerCoverageProblems(FIXTURES, [
+        ...KITS,
+        { name: "adapter-vue-new", framework: "vue", role: "native" },
+      ]).some((error) => error.includes("adapter-vue-new"))
+    );
+    assert.deepEqual(
+      vueConsumerCoverageProblems(FIXTURES, [
+        ...KITS,
+        { name: "adapter-vue-private", framework: "vue", role: "private" },
+      ]),
+      []
+    );
+  });
+
+  it("requires own writers and rejects planted sibling or base writer leaks", () => {
+    const base = fixture("vue-unstyled · table");
+    const pdf = fixture("vue-unstyled · + export-pdf");
+    const xlsx = fixture("vue-unstyled · + export-xlsx");
+    const graph = (code) => ({ code, imports: new Set() });
+    assert.ok(
+      vueGraphProblems(
+        base,
+        graph("const DataTable = {}; function pdfWriter() {}")
+      ).some((error) => error.includes(`leaked ${PDF_WRITER_MARKER}`))
+    );
+    assert.ok(
+      vueGraphProblems(pdf, graph("DataTable export-progress-surface")).some(
+        (error) => error.includes(`missing ${PDF_WRITER_MARKER}`)
+      )
+    );
+    assert.ok(
+      vueGraphProblems(
+        pdf,
+        graph(
+          "DataTable export-progress-surface function pdfWriter() {} function xlsxWriter() {}"
+        )
+      ).some((error) => error.includes(`leaked ${XLSX_WRITER_MARKER}`))
+    );
+    assert.deepEqual(
+      vueGraphProblems(
+        xlsx,
+        graph("DataTable export-progress-surface function xlsxWriter() {}")
+      ),
+      []
+    );
+    assert.ok(
+      fixture("vue-unstyled · features barrel").present.includes(
+        PDF_WRITER_MARKER
+      )
+    );
+    assert.ok(
+      fixture("vue-unstyled · features barrel").present.includes(
+        XLSX_WRITER_MARKER
+      )
+    );
+  });
+
+  it("covers both view controls and rejects optional writers and AI", () => {
+    for (const [entry, factory, marker] of [
+      ["density", "densityChooser", "density-toggle"],
+      ["fullscreen", "fullscreen", "fullscreen-toggle"],
+    ]) {
+      const consumer = fixture(`vue-unstyled · + ${entry}`);
+      const code = `DataTable ${factory} ${marker}`;
+      assert.deepEqual(
+        vueGraphProblems(consumer, { code, imports: new Set() }),
+        []
+      );
+      for (const leak of [PDF_WRITER_MARKER, XLSX_WRITER_MARKER, "tableAgent"])
+        assert.ok(
+          vueGraphProblems(consumer, {
+            code: `${code} ${leak}`,
+            imports: new Set(),
+          }).some((error) => error.includes("leaked"))
+        );
+      for (const imported of [
+        "@adapttable/ai",
+        "@adapttable/ai-vue",
+        "/cell/node_modules/@adapttable/ai-vue/dist/index.js",
+        "/repo/packages/shared/ai/dist/index.js",
+        "/repo/packages/vue/ai-vue/dist/index.js",
+      ])
+        assert.ok(
+          vueGraphProblems(consumer, {
+            code,
+            imports: new Set([imported]),
+          }).some((error) => error.includes("optional AI runtime"))
+        );
+    }
+  });
+
+  it("detects bare and resolved cross-kit/framework imports and counts AdaptTable code", () => {
+    const base = fixture("vue-unstyled · table");
+    for (const source of [
+      "react",
+      "react/jsx-runtime",
+      "@angular/core",
+      "@adapttable/react/adapter",
+      "/repo/packages/react/react/dist/index.js",
+      "@adapttable/ng-zorro",
+      "/repo/packages/react/adapter-unstyled/dist/index.js",
+    ])
+      assert.ok(vueForeignImport(source, base), source);
+    for (const source of [
+      "vue",
+      "@adapttable/core",
+      "@adapttable/vue/adapter",
+      "@adapttable/vue-unstyled/export",
+    ])
+      assert.equal(vueForeignImport(source, base), undefined, source);
+    const other = {
+      name: "adapter-vue-other",
+      framework: "vue",
+      role: "native",
+    };
+    assert.match(
+      vueForeignImport("@adapttable/vue-other", base, [...KITS, other]),
+      /another kit/
+    );
+    assert.ok(
+      vueGraphProblems(base, {
+        code: "DataTable",
+        imports: new Set(["react"]),
+      }).some((error) => error.includes("another framework"))
+    );
+    for (const source of [
+      "@adapttable/core",
+      "@adapttable/vue",
+      "@adapttable/vue-unstyled",
+      "@tanstack/virtual-core",
+      "react",
+    ])
+      assert.equal(
+        VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(source)),
+        false,
+        source
+      );
+    assert.equal(
+      VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test("vue")),
+      true
+    );
+    assert.equal(
+      VUE_RUNTIME_EXTERNALS.some((pattern) =>
+        pattern.test("vue/server-renderer")
+      ),
+      true
+    );
+  });
+
+  it("externalizes each kit's peer UI library and never AdaptTable's own code", () => {
+    const external = (pkg, id) =>
+      vueConsumerExternals(pkg).some((pattern) => pattern.test(id));
+    for (const [pkg, id] of [
+      ["adapter-vuetify", "vuetify"],
+      ["adapter-vuetify", "vuetify/components"],
+      ["adapter-nuxt-ui", "@nuxt/ui/components/Table.vue"],
+      ["adapter-quasar", "quasar/src/components/btn/QBtn.js"],
+      ["adapter-element-plus", "element-plus"],
+      ["adapter-naive-ui", "naive-ui"],
+      ["adapter-vue-unstyled", "vue"],
+    ])
+      assert.equal(external(pkg, id), true, `${pkg}: ${id}`);
+    for (const [pkg, id] of [
+      ["adapter-vuetify", "vuetify-extra"],
+      ["adapter-vuetify", "@adapttable/vue"],
+      ["adapter-vuetify", "@adapttable/core"],
+      ["adapter-vue-unstyled", "vuetify"],
+      ["adapter-shadcn-vue", "class-variance-authority"],
+    ])
+      assert.equal(external(pkg, id), false, `${pkg}: ${id}`);
+  });
+});
+
+it("includes emitted drawer CSS in the three drawer-capable unstyled consumers", () => {
+  const drawerConsumers = vue.filter(
+    (entry) => entry.pkg === "adapter-vue-unstyled" && entry.styleEntryFile
+  );
+  assert.deepEqual(
+    drawerConsumers.map((entry) => entry.name),
+    [
+      "vue-unstyled · preset",
+      "vue-unstyled · table + preset",
+      "vue-unstyled · features barrel",
+    ]
+  );
+  for (const entry of drawerConsumers) {
+    assert.equal(entry.styleEntryFile, "styles.css");
+    assert.match(entry.code, /import "STYLE"/);
+    const code = entry.present.join(" ");
+    assert.ok(
+      vueGraphProblems(entry, { code, imports: new Set() }).some((problem) =>
+        problem.includes("missing CSS filters-backdrop")
+      )
+    );
+    const css = vueEmittedCss([
+      { type: "chunk", fileName: "fake.js", code: "filters-backdrop" },
+      {
+        type: "asset",
+        fileName: "styles.css",
+        source: new TextEncoder().encode(
+          "[data-adapttable-filter-dialog]::backdrop{} [data-adapttable-part=filters-backdrop]{}"
+        ),
+      },
+    ]);
+    assert.deepEqual(
+      vueGraphProblems(entry, { code, imports: new Set(), css }),
+      []
+    );
+    assert.equal(
+      vueEmittedCss([{ type: "chunk", fileName: "fake.js", code: css }]),
+      ""
+    );
+  }
+});
+
+describe("optional Vue layout graphs", () => {
+  it("keeps headless and named shell consumers separate from optional rendering", () => {
+    const root = fixture("vue · simple table");
+    const shell = VUE_LAYOUT_GRAPH_SPECS.find(
+      (entry) => entry.name === "vue · headless adapter shell"
+    );
+    assert.ok(shell);
+    assert.equal(shell.entryFile, "adapter.js");
+    assert.equal(shell.code, 'export { useDataTableShell } from "PKG";');
+    for (const entry of [root, shell]) {
+      assert.ok(entry.absent.includes("DataTableSurfaceChrome"));
+      assert.ok(
+        vueGraphProblems(entry, {
+          code: `${entry.present.join(" ")} function DataTableSurfaceChrome() {}`,
+          imports: new Set(),
+        }).some((problem) => problem.includes("leaked DataTableSurfaceChrome"))
+      );
+    }
+    assert.deepEqual(
+      vueGraphProblems(shell, {
+        code: "useDataTableShell DesktopTableChrome MobileCardsChrome",
+        imports: new Set(),
+      }),
+      []
+    );
+  });
+
+  it("requires the real helper when explicitly selected without adding a size budget", () => {
+    const surface = VUE_LAYOUT_GRAPH_SPECS.find(
+      (entry) => entry.name === "vue · optional table surface"
+    );
+    assert.ok(surface);
+    assert.equal(surface.entryFile, "adapter.js");
+    assert.equal(surface.code, 'export { DataTableSurfaceChrome } from "PKG";');
+    assert.equal("budgetKB" in surface, false);
+    assert.deepEqual(
+      vueGraphProblems(surface, {
+        code: "function DataTableSurfaceChrome() {}",
+        imports: new Set(),
+      }),
+      []
+    );
+    assert.ok(
+      vueGraphProblems(surface, {
+        code: "function useDataTableShell() {}",
+        imports: new Set(),
+      }).some((problem) => problem.includes("missing DataTableSurfaceChrome"))
+    );
+  });
+});

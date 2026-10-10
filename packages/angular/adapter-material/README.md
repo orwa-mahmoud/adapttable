@@ -8,21 +8,21 @@ labels; this kit owns buttons, fields, checkboxes, chips, cards, menus and overl
 
 ## Availability and compatibility
 
-Prepared for its first public `0.1.0` release. Publication to npm is a separate
-owner-controlled step; package metadata does not imply registry availability.
+Available on npm. Install a compatible binding and kit release together; their
+versions are independent and the kit declares its binding/core dependencies.
 
 The initial integration targets Angular **22**, Angular Material **22.2.1**
 and CDK **22.2.1**. Material requires the same CDK version. Keep Material and
 CDK together; AdaptTable packages have independent versions.
 
-After publication, install the kit and its native peers in an Angular 22 app:
+Install the kit and its native peers in an Angular 22 app:
 
 ```sh
 pnpm add @adapttable/angular-material @adapttable/angular @angular/material@22.2.1 @angular/cdk@22.2.1
 ```
 
-Before publication, link `@adapttable/angular-material@workspace:*` and
-`@adapttable/angular@workspace:*` from this monorepo instead. AdaptTable package
+For local source development, link `@adapttable/angular-material@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo. AdaptTable package
 versions are independent; the adapter resolves its exact binding/core dependencies.
 
 The host must also provide compatible `@angular/common`, `@angular/core`,

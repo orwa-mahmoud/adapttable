@@ -106,6 +106,22 @@ export function composeDemos({ dist, site, pages = SHOWCASE_PAGES }) {
     for (const entry of entries) {
       cpSync(join(dist, entry), join(target, entry), { recursive: true });
     }
+    const pageDir = (path) => posix.dirname(path.replace(/^\.\//, ""));
+    // Longest first, so a nested page wins over the folder that contains it.
+    const moves = relocated
+      .map((page) => [
+        pageDir(page.html),
+        posix.dirname(`${page.route.slice(root.length)}index.html`),
+      ])
+      .sort(([a], [b]) => b.length - a.length);
+    // A link into a page that moved too must follow it to its new address.
+    const moved = (path) => {
+      for (const [from, to] of moves) {
+        if (path === from) return to;
+        if (path.startsWith(`${from}/`)) return to + path.slice(from.length);
+      }
+      return path;
+    };
     for (const page of relocated) {
       const source = page.html.replace(/^\.\//, "");
       const destination = `${page.route.slice(root.length)}index.html`;
@@ -113,12 +129,16 @@ export function composeDemos({ dist, site, pages = SHOWCASE_PAGES }) {
         /\b(src|href)="([^"#][^"]*)"/g,
         (attribute, name, value) => {
           if (/^(?:[a-z][a-z\d+.-]*:|\/)/i.test(value)) return attribute;
-          const resolved = posix.normalize(
-            posix.join(posix.dirname(source), value)
+          const cut = value.search(/[?#]/);
+          const path = cut === -1 ? value : value.slice(0, cut);
+          const suffix = cut === -1 ? "" : value.slice(cut);
+          const resolved = moved(
+            posix.normalize(posix.join(posix.dirname(source), path))
           );
           const rebased = posix.relative(posix.dirname(destination), resolved);
           const local = rebased.startsWith(".") ? rebased : `./${rebased}`;
-          return `${name}="${local}"`;
+          const slash = path.endsWith("/") && !local.endsWith("/") ? "/" : "";
+          return `${name}="${local}${slash}${suffix}"`;
         }
       );
       mkdirSync(dirname(join(target, destination)), { recursive: true });

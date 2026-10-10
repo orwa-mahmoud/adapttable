@@ -128,6 +128,10 @@ export interface TableRuntimeView<TRow = unknown> {
   /** Live selection, when a selection-owning feature is composed. */
   readonly selection?: {
     readonly selectedIds: ReadonlySet<string>;
+    /** Whether the selection covers every row matching the current query. */
+    readonly allMatching?: boolean;
+    /** Observed source reachability; this flag grants no row or operation access. */
+    readonly acrossPages?: boolean;
     readonly replace: (ids: readonly string[] | undefined) => void;
   };
   /**

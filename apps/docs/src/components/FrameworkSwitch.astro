@@ -1,13 +1,13 @@
 ---
-import { SITE_FRAMEWORKS, selectedFramework, frameworkDocsTarget } from "../../../../scripts/framework-navigation.mjs";
+import { DOCS_FRAMEWORKS, selectedFramework, frameworkDocsTarget } from "../../../../scripts/framework-navigation.mjs";
 const current = selectedFramework(Astro.url.pathname);
 ---
 
 <label class="framework-picker">
-  <span aria-hidden="true" data-framework-icon>{current === "angular" ? "Ⓐ" : "⚛"}</span>
+  <span aria-hidden="true" data-framework-icon>{DOCS_FRAMEWORKS.find(({ key }) => key === current)?.icon ?? "⚛"}</span>
   <span class="sr-only">Framework</span>
   <select aria-label="Framework" data-framework-select autocomplete="off">
-    {SITE_FRAMEWORKS.map(({key, label}) => <option value={key} selected={key === current} data-href={frameworkDocsTarget(Astro.url.pathname, key).href}>{label}</option>)}
+    {DOCS_FRAMEWORKS.map(({key, label}) => <option value={key} selected={key === current} data-href={frameworkDocsTarget(Astro.url.pathname, key).href}>{label}</option>)}
   </select>
 </label>
 

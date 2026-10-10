@@ -6,18 +6,23 @@
 import {
   type AdaptTableFeature,
   extendFeature,
-  GROUP_HEADER_CARD,
-  GROUP_HEADER_ROW,
-  grouping as coreAngularGrouping,
-  type GroupingExtras,
   slotRender,
 } from "@adapttable/angular";
+import {
+  GROUP_HEADER_CARD,
+  GROUP_HEADER_ROW,
+} from "@adapttable/angular/adapter";
+import {
+  grouping as coreAngularGrouping,
+  type GroupingExtras,
+} from "@adapttable/angular/features";
 import {
   AdaptGroupHeaderCard,
   AdaptGroupHeaderRow,
 } from "@adapttable/ng-bootstrap";
 
-export type { GroupingExtras, GroupSort } from "@adapttable/angular";
+export type { GroupSort } from "@adapttable/angular";
+export type { GroupingExtras } from "@adapttable/angular/features";
 
 /**
  * Group rows under collapsible headers drawn with native controls, as rows

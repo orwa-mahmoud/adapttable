@@ -6,7 +6,7 @@ import {
 import { ApplicationRef, Injector, type Signal, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { AdaptCellTemplate } from "./cell";
+import { AdaptCellTemplate } from "./cellTemplate";
 import { type ColumnDef, resolveColumns } from "./columnDef";
 import { injectDataTable } from "./dataTable";
 import { injectIsMobile } from "./hooks/isMobile";

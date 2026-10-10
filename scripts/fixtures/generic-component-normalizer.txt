@@ -1,0 +1,26 @@
+type Normalize<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
+export interface RowsProps<Row> {
+  readonly rows: readonly Row[];
+  readonly rowKey: (row: Row) => string;
+}
+export interface CellSlots<Row> {
+  cell: (context: { readonly row: Row }) => string;
+}
+export interface Exposed<Row> {
+  row(index: number): Row | undefined;
+  focus(): void;
+}
+declare const generic: <Row>(
+  props: NonNullable<Awaited<typeof setup>>["props"],
+  context?: Normalize<Pick<NonNullable<Awaited<typeof setup>>, "attrs" | "emit" | "slots">>,
+  expose?: NonNullable<Awaited<typeof setup>>["expose"],
+  setup?: Promise<{
+    props: Normalize<RowsProps<Row> & { "onUpdate:selection"?: (ids: string[]) => void }>;
+    attrs: Record<string, unknown>;
+    slots: CellSlots<Row>;
+    emit: (event: "update:selection", ids: string[]) => void;
+    expose: (handle: Exposed<Row>) => void;
+  }>
+) => { __ctx?: NonNullable<Awaited<typeof setup>> };
+declare const local: typeof generic;
+export { local as Table };

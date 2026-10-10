@@ -64,11 +64,11 @@ export const columnLayoutSlice: UrlSliceSpec<
   write(params, value, ns, { defaultColumnLayout }) {
     const fallback = columnLayoutFallback(defaultColumnLayout);
     const isDefault = stableKey(value) === stableKey(fallback);
-    const isEmpty = stableKey(value) === stableKey(EMPTY_COLUMN_LAYOUT);
     writeColumnLayout(params, isDefault ? EMPTY_COLUMN_LAYOUT : value, ns);
     // An all-empty layout writes no params, which reads back as "use the
     // default" — stamp a marker so an explicitly emptied layout sticks.
-    if (isEmpty && !isDefault) params.set(ns + PARAM_COL_HIDDEN, "");
+    if (!isDefault && readColumnLayout(params, ns) === undefined)
+      params.set(ns + PARAM_COL_HIDDEN, "");
   },
   writeDebounceMs: URL_SLICE_WRITE_DEBOUNCE_MS,
 };

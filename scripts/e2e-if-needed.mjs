@@ -21,11 +21,14 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Keep this matcher shared with CI so a docs-only push cannot silently skip
 // the guide and framework-switch contracts.
 const RELATED =
-  /^(packages\/(shared|react|angular)\/|apps\/(showcase|docs)\/|docs\/|e2e\/|playwright\.config\.ts$|scripts\/(serve-showcase|angular-docs|docs-files|site|build-llms-full)\.mjs$|pnpm-lock\.yaml$)/;
+  /^(packages\/(shared|react|angular|vue)\/|apps\/(showcase|docs)\/|docs\/|e2e\/|playwright\.config\.ts$|scripts\/(serve-showcase|angular-docs|vue-docs|framework-navigation|og-cards|docs-files|site|build-llms-full)\.mjs$|pnpm-lock\.yaml$)/;
 
 /** @param {string} file */
 export function isE2eRelated(file) {
-  return RELATED.test(file.replaceAll("\\", "/"));
+  const path = file.replaceAll("\\", "/");
+  return (
+    RELATED.test(path) || path === "scripts/build-vue-browser-consumer.mjs"
+  );
 }
 
 /** @param {string} file */

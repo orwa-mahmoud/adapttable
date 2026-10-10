@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-import { configure } from "@testing-library/react";
+import { configure } from "@testing-library/dom";
 
 // Testing Library waits one second for an element to appear or disappear.
 // That default assumes an idle machine; these suites run ten workers deep and

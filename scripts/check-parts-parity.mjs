@@ -84,6 +84,7 @@ import {
   frameworkFiles,
   FRAMEWORKS,
   frameworksIn,
+  kitDir,
   kitRegistryErrors,
   KITS,
   kitSourceDirs,
@@ -92,6 +93,13 @@ import {
   shellKits,
 } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
+import {
+  sfcScriptText,
+  vueBindingSources,
+  vueForwardsAttributeApi,
+  vueKitWithBindingSources,
+  vueRenderedParts,
+} from "./vue-binding-structure.mjs";
 
 /**
  * The kit each private kit is measured against while it is built: every part
@@ -109,6 +117,24 @@ const EXPECTED_GAPS = {
   "adapter-antd": {
     "header-group-row":
       "antd nests group columns as `children` on the column def; it exposes one `header.row` seam, not a separate group-row element.",
+  },
+  "adapter-element-plus": {
+    "filters-backdrop":
+      "ElDrawer renders its modal mask internally and exposes only `modalClass` (which carries `filtersBackdrop`), no attribute or ref hook.",
+    "row-move-menu-content":
+      "The move destinations are an ElSelect, whose option dropdown is rendered internally with only `popperClass`, no attribute or ref hook; each ElOption still carries `row-move-menu-item`.",
+  },
+  "adapter-naive-ui": {
+    "filters-backdrop":
+      "NDrawer keeps its mask internal with no attribute, class or ref hook, and its focus trap requires that mask.",
+  },
+  "adapter-nuxt-ui": {
+    "filters-backdrop":
+      "USlideover renders its overlay internally and exposes only `ui.overlay` (which carries `filtersBackdrop`), no attribute or ref hook.",
+  },
+  "adapter-quasar": {
+    "filters-backdrop":
+      "QDialog renders its backdrop internally with no attribute, class or ref hook.",
   },
 };
 
@@ -141,6 +167,8 @@ const CONTRACT = [
  * `row` has two such routes in React. A kit that lays out its own body spreads
  * `getRowProps` directly; a kit thinned onto the shared desktop assembly
  * receives the same props already merged, through `createDesktopRow`.
+ * Vue renders its imported Chrome with complete model attrs and calls the
+ * neutral `rowAttributes` API through its binding; both sides are checked.
  * Angular assembles each body entry from `table.rowAttrs` (or the grid's
  * preserving wrapper), then binds that record whole with `adaptAttrs` on its
  * `<tr>`. A framework with no entry has no such route, and its kits name every
@@ -149,109 +177,20 @@ const CONTRACT = [
 const CORE_GETTER_PARTS = {
   react: { row: ["getRowProps", "createDesktopRow"] },
   angular: { row: ["rowAttrs"] },
+  vue: { row: ["rowAttributes"] },
 };
 
 /**
- * Parts adapter-unstyled names because adapter-unstyled builds the thing.
- *
- * Native controls and native structure are that adapter's kit, so it assembles
- * a popover, a menu, a pager and a skeleton out of elements it owns. The themed
- * kits reach the same affordance through their kit's Popover, Menu, Pagination
- * and Skeleton, whose internals are the kit's — there is no element of theirs
- * that the same name would belong on. Grouped by the widget, with the reason
- * per group.
+ * Parts only the native kits name, because native controls are their kit: they
+ * build a widget from elements they own where every themed kit reaches the
+ * same affordance through its kit's component, whose internals are the kit's.
+ * Each entry is grouped by widget with its reason; the guard rejects an entry
+ * once any themed kit names the part.
  */
 const FALLBACK_ONLY = {
   // Its own shortcuts menu: a native disclosure wrapping a <menu> of buttons,
   // where a themed kit reaches the same affordance through its own Menu.
   "assistant shortcuts": ["assistant-examples-list"],
-  // Its own anchored card and drawer, built from divs and a backdrop.
-  filters: [
-    "filters-anchor",
-    "filters-backdrop",
-    "filters-body",
-    "filters-button",
-    "filters-clear",
-    "filters-close",
-    "filters-count",
-    "filters-done",
-    "filters-footer",
-    "filters-header",
-    "filters-icon",
-    "filters-panel",
-    "filters-popover",
-    "filters-title",
-    "filter-checkbox-group",
-    "filter-options-loading",
-  ],
-  // Its own column menu: a panel of native buttons and separators.
-  "column menu": [
-    "column-menu",
-    "column-menu-auto-size",
-    "column-menu-choice-label",
-    "column-menu-choice-select",
-    "column-menu-grip",
-    "column-menu-header",
-    "column-menu-label",
-    "column-menu-panel",
-    "column-menu-pin",
-    "column-menu-reset",
-    "column-menu-separator",
-    "column-menu-title",
-    "column-menu-visibility",
-  ],
-  // Its own saved-views menu, down to the save row and the divider.
-  "views menu": [
-    "views-button",
-    "views-delete",
-    "views-divider",
-    "views-input",
-    "views-item",
-    "views-menu",
-    "views-panel",
-    "views-row",
-    "views-save",
-    "views-save-row",
-  ],
-  // Its own pager: numbered buttons, an ellipsis, a rows-per-page select.
-  pager: [
-    "page-ellipsis",
-    "page-next",
-    "page-number",
-    "page-prev",
-    "pager",
-    "rows-per-page",
-    "load-more",
-    "load-more-button",
-  ],
-  // Its own loading skeleton, drawn as lines and blocks.
-  skeleton: [
-    "loading",
-    "loading-card",
-    "loading-cards",
-    "loading-cell",
-    "loading-header-cell",
-    "loading-header-row",
-    "loading-line",
-    "loading-row",
-    "loading-table",
-    "refresh-indicator",
-  ],
-  // Native controls: a select for sorting where a kit has a Select, a bare
-  // checkbox where a kit has a Checkbox, a button where a kit has a Button.
-  "native controls": [
-    "checkbox",
-    "empty-clear",
-    "expand-button",
-    "export-spinner",
-    "retry-button",
-    "sort-button",
-    "sort-index",
-    "sort-select",
-  ],
-  // Structure only the native shell has: the spacer that gives a virtualized
-  // column window its width.
-  virtualization: ["virtual-spacer"],
 };
 
 /**
@@ -261,6 +200,24 @@ const FALLBACK_ONLY = {
  * remain in the participating kits.
  */
 const UNNAMED_IN_KITS = {};
+
+/**
+ * Parts one native kit renders for UI the other frameworks' native kits do not
+ * have, each with the reason. A listed part must still be rendered by its kit
+ * and still be missing from another native kit; otherwise the entry is stale.
+ */
+const NATIVE_EXTRAS = {
+  "adapter-vue-unstyled": {
+    "row-edit-error":
+      "Vue's row-edit actions show the host's failed commit as a status; React and Angular surface edit errors on the cell editors only.",
+    "batch-edit-error":
+      "Vue's batch-edit bar shows the host's failed batch commit as a status; React and Angular have no batch-level error status.",
+    "assistant-voice-error":
+      "Vue's assistant composer names its voice-input error; React and Angular assistants show no voice-input error element.",
+    "sort-direction":
+      "Vue's mobile sort control toggles the direction with its own button; React and Angular mobile sorting uses the sort select alone.",
+  },
+};
 
 /** Every part named in one of the two accounted-for lists. */
 function accountedFor(groups) {
@@ -280,7 +237,9 @@ const DATASET_PART =
 const KIT_PART_PATTERNS = [
   // `data-adapttable-part="x"` as a JSX or template attribute, and
   // `{ "data-adapttable-part": "x" }` handed through a prop object.
-  /["']?data-adapttable-part["']?\s*[=:]\s*["'](?<part>[a-z0-9-]+)["']/g,
+  // A Vue `:data-adapttable-part="name"` (or `v-bind:`) binds an expression,
+  // not a literal, so a leading colon does not name a part.
+  /(?<!:)["']?data-adapttable-part["']?\s*[=:]\s*["'](?<part>[a-z0-9-]+)["']/g,
   // A template binding to a string literal: Vue's
   // `:data-adapttable-part="'x'"` (and `v-bind:`), Angular's
   // `[attr.data-adapttable-part]="'x'"`, and the same binding as a key of an
@@ -381,6 +340,311 @@ function factoryPartNames(file, text) {
     visit(statement.body);
   }
   return found;
+}
+
+/** A file's TypeScript: the whole of a `.ts`/`.tsx`, an SFC's script blocks. */
+function scriptText(file, text) {
+  if (/\.tsx?$/.test(file)) return text;
+  return file.endsWith(".vue") ? sfcScriptText(file, text) : undefined;
+}
+
+/**
+ * A sixth way to name a part: a helper whose returned record sets
+ * `data-adapttable-part` from one of its own parameters, as
+ * `part(name, names)` does. Each call to that helper in the same file with a
+ * string literal in that position names the part. Only a helper that really
+ * returns the parameter as the part counts; its name is irrelevant.
+ */
+function helperPartNames(file, text) {
+  const found = new Set();
+  const script = scriptText(file, text);
+  if (script === undefined) return found;
+  const source = ts.createSourceFile(
+    file,
+    script,
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  );
+  const helpers = declaredPartHelpers(source);
+  helpers.local = new Set(helpers.keys());
+  for (const [name, index] of importedPartHelpers(file, source))
+    if (!helpers.has(name)) helpers.set(name, index);
+  const thunks = localThunks(source);
+  function visit(node) {
+    const helper = ts.isCallExpression(node) && calledHelper(node, helpers);
+    if (helper !== undefined && helper !== false)
+      for (const name of literalBranches(node.arguments[helper], thunks))
+        found.add(name);
+    const value = partPropertyValue(node);
+    if (value && !ts.isIdentifier(value) && namesRenderedPart(node))
+      for (const name of literalBranches(value, thunks)) found.add(name);
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return found;
+}
+
+/**
+ * The part position of a call to a known helper: `helper(...)`, or
+ * `record.helper(...)` when the file itself declares a part helper of that
+ * name and hands it around in a record.
+ */
+function calledHelper(call, helpers) {
+  const callee = call.expression;
+  if (ts.isIdentifier(callee)) return helpers.get(callee.text);
+  if (
+    ts.isPropertyAccessExpression(callee) &&
+    helpers.local?.has(callee.name.text)
+  )
+    return helpers.get(callee.name.text);
+  return undefined;
+}
+
+/** Zero-parameter local arrow functions with an expression body. */
+function localThunks(source) {
+  const thunks = new Map();
+  function visit(node) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.initializer &&
+      ts.isArrowFunction(node.initializer) &&
+      node.initializer.parameters.length === 0 &&
+      !ts.isBlock(node.initializer.body)
+    )
+      thunks.set(node.name.text, node.initializer.body);
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return thunks;
+}
+
+/**
+ * A source file's part helpers, at any depth, by declared name. A helper that
+ * hands its parameter to another part helper is one too, so this repeats until
+ * no new helper appears.
+ */
+function declaredPartHelpers(source) {
+  const helpers = new Map();
+  const functions = [];
+  function visit(node) {
+    const fn = helperFunction(node);
+    if (fn) functions.push(fn);
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const fn of functions) {
+      if (helpers.has(fn.name)) continue;
+      const index = partParameterIndex(fn.node, helpers);
+      if (index >= 0) {
+        helpers.set(fn.name, index);
+        grew = true;
+      }
+    }
+  }
+  return helpers;
+}
+
+/** `part ?? fallback` sets the part from `part` first; that is its subject. */
+function fallbackSubject(expression) {
+  if (
+    expression &&
+    ts.isBinaryExpression(expression) &&
+    (expression.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken ||
+      expression.operatorToken.kind === ts.SyntaxKind.BarBarToken)
+  )
+    return expression.left;
+  return expression;
+}
+
+/** The argument a call hands to a known part helper's part position. */
+function forwardedPart(node, helpers) {
+  if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression))
+    return undefined;
+  const index = helpers.get(node.expression.text);
+  return index === undefined ? undefined : node.arguments[index];
+}
+
+/** A named function declaration, or a variable initialized with a function. */
+function helperFunction(node) {
+  if (ts.isFunctionDeclaration(node) && node.name)
+    return { name: node.name.text, node };
+  if (
+    ts.isVariableDeclaration(node) &&
+    ts.isIdentifier(node.name) &&
+    node.initializer &&
+    (ts.isArrowFunction(node.initializer) ||
+      ts.isFunctionExpression(node.initializer))
+  )
+    return { name: node.name.text, node: node.initializer };
+  return undefined;
+}
+
+/**
+ * Part helpers a file imports by relative path, resolved to the declaring file
+ * rather than matched by name, so a same-named function elsewhere never counts.
+ */
+function importedPartHelpers(file, source) {
+  const helpers = new Map();
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      !statement.moduleSpecifier.text.startsWith(".") ||
+      statement.importClause?.isTypeOnly
+    )
+      continue;
+    const bindings = statement.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings)) continue;
+    const base = join(dirname(file), statement.moduleSpecifier.text);
+    const target = [`${base}.ts`, join(base, "index.ts"), base].find(
+      (candidate) => /\.tsx?$/.test(candidate) && existsSync(candidate)
+    );
+    if (!target) continue;
+    const declared = localPartHelpers(target);
+    for (const element of bindings.elements) {
+      const original = (element.propertyName ?? element.name).text;
+      if (declared.has(original))
+        helpers.set(element.name.text, declared.get(original));
+    }
+  }
+  return helpers;
+}
+
+const localHelperCache = new Map();
+/** A file's own part helpers, by declared name. */
+function localPartHelpers(file) {
+  if (!localHelperCache.has(file)) {
+    const source = ts.createSourceFile(
+      file,
+      readFileSync(file, "utf8"),
+      ts.ScriptTarget.Latest,
+      true
+    );
+    localHelperCache.set(file, declaredPartHelpers(source));
+  }
+  return localHelperCache.get(file);
+}
+
+/** Which parameter a function returns as its record's `data-adapttable-part`. */
+function partParameterIndex(fn, helpers = new Map()) {
+  const parameters = fn.parameters.map((parameter) =>
+    ts.isIdentifier(parameter.name) ? parameter.name.text : undefined
+  );
+  let index = -1;
+  function visit(node) {
+    if (index >= 0 || (node !== fn && ts.isFunctionLike(node))) return;
+    const value = fallbackSubject(
+      partPropertyValue(node) ?? forwardedPart(node, helpers)
+    );
+    if (value && ts.isIdentifier(value) && isReturned(node)) {
+      index = parameters.indexOf(value.text);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(fn);
+  return index;
+}
+
+/** `part`, or a prop naming the part of one element a component renders. */
+const PART_PROP = /^(?:part|[a-z][A-Za-z]*Part)$/;
+
+/**
+ * The value an object property gives a part: `"data-adapttable-part": value`
+ * on an element, or `part: value` handed to a kit's slot, shorthand included.
+ * A component that renders several elements takes one prop per element —
+ * `menuPart`, `optionPart`, `overlayPart` — and forwards each as that
+ * element's `data-adapttable-part`.
+ */
+function partPropertyValue(node) {
+  if (ts.isShorthandPropertyAssignment(node) && node.name.text === "part")
+    return node.name;
+  if (!ts.isPropertyAssignment(node)) return undefined;
+  const named = ts.isStringLiteral(node.name) || ts.isIdentifier(node.name);
+  const key = named ? node.name.text : undefined;
+  return key === "data-adapttable-part" || PART_PROP.test(key ?? "")
+    ? node.initializer
+    : undefined;
+}
+
+/**
+ * An element's `data-adapttable-part` names a part wherever it is written; a
+ * part prop only does when its record is handed straight to a call — a kit's
+ * slot, a component or a part helper — rather than sitting in an unrelated
+ * object.
+ */
+function namesRenderedPart(property) {
+  const key = property.name.text;
+  if (key === "data-adapttable-part") return true;
+  const record = property.parent;
+  return (
+    ts.isObjectLiteralExpression(record) &&
+    ts.isCallExpression(record.parent) &&
+    record.parent.arguments.includes(record)
+  );
+}
+
+/** The string literals an expression can evaluate to, through ternaries. */
+function literalBranches(expression, thunks = new Map(), seen = new Set()) {
+  if (!expression || seen.has(expression)) return [];
+  const next = new Set([...seen, expression]);
+  if (ts.isParenthesizedExpression(expression))
+    return literalBranches(expression.expression, thunks, next);
+  if (ts.isStringLiteralLike(expression)) return [expression.text];
+  if (
+    ts.isCallExpression(expression) &&
+    ts.isIdentifier(expression.expression) &&
+    expression.arguments.length === 0 &&
+    thunks.has(expression.expression.text)
+  )
+    return literalBranches(
+      thunks.get(expression.expression.text),
+      thunks,
+      next
+    );
+  if (ts.isConditionalExpression(expression))
+    return [
+      ...literalBranches(expression.whenTrue, thunks, next),
+      ...literalBranches(expression.whenFalse, thunks, next),
+    ];
+  if (
+    ts.isBinaryExpression(expression) &&
+    (expression.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken ||
+      expression.operatorToken.kind === ts.SyntaxKind.BarBarToken)
+  )
+    return [
+      ...literalBranches(expression.left, thunks, next),
+      ...literalBranches(expression.right, thunks, next),
+    ];
+  return [];
+}
+
+/** Whether an object property belongs to a record the function returns. */
+function isReturned(property) {
+  let node = property.parent;
+  while (node && !ts.isFunctionLike(node)) {
+    if (ts.isReturnStatement(node)) return true;
+    if (ts.isArrowFunction(node.parent) && node.parent.body === node)
+      return true;
+    if (ts.isParenthesizedExpression(node)) {
+      node = node.parent;
+      continue;
+    }
+    if (ts.isObjectLiteralExpression(node) || ts.isCallExpression(node)) {
+      node = node.parent;
+      continue;
+    }
+    if (ts.isSpreadAssignment(node) || ts.isPropertyAssignment(node)) {
+      node = node.parent;
+      continue;
+    }
+    return false;
+  }
+  return false;
 }
 
 /** A value declaration that can introduce or shadow a JSX identifier. */
@@ -488,7 +752,8 @@ function bindingImports(source, declarations, importedName, modules) {
   for (const statement of source.statements) {
     if (
       !ts.isImportDeclaration(statement) ||
-      !ts.isStringLiteral(statement.moduleSpecifier)
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.importClause?.isTypeOnly
     ) {
       continue;
     }
@@ -497,6 +762,7 @@ function bindingImports(source, declarations, importedName, modules) {
     if (!bindings || !ts.isNamedImports(bindings)) continue;
     for (const imported of bindings.elements) {
       if (
+        !imported.isTypeOnly &&
         (imported.propertyName ?? imported.name).text === importedName &&
         declarations.get(imported.name.text)?.length === 1
       ) {
@@ -750,7 +1016,7 @@ function angularPartNames(sources) {
       source,
       declarations,
       "AdaptLiveRegion",
-      ["@adapttable/angular"]
+      ["@adapttable/angular", "@adapttable/angular/adapter"]
     );
     function visit(node) {
       const entry = componentTemplate(node, components, liveRegions);
@@ -798,7 +1064,16 @@ const kitFiles = (kit, root) =>
  * templates.
  */
 function partsOf(kit, root) {
-  return namesIn(kitFiles(kit, root), KIT_PART_PATTERNS);
+  const files = kitFiles(kit, root);
+  const found = namesIn(files, KIT_PART_PATTERNS);
+  for (const file of files)
+    for (const part of helperPartNames(file, readFileSync(file, "utf8")))
+      found.add(part);
+  if (kit.framework === "vue") {
+    for (const part of vueRenderedParts(vueBindingSources(files, root)))
+      found.add(part);
+  }
+  return found;
 }
 
 /**
@@ -817,6 +1092,7 @@ function chromeNamesIn(files) {
   for (const file of files) {
     const text = readFileSync(file, "utf8");
     for (const part of factoryPartNames(file, text)) found.add(part);
+    for (const part of helperPartNames(file, text)) found.add(part);
     for (const match of text.matchAll(PARTS_TABLE)) {
       for (const name of match[1].matchAll(/["']([a-z0-9-]+)["']/g)) {
         found.add(name[1]);
@@ -862,6 +1138,10 @@ function chromeByFramework(frameworks, root) {
 
 /** Whether a kit's files call one of its binding's prop-getters by name. */
 function callsCoreGetter(kit, getter, root) {
+  if (kit.framework === "vue") {
+    const sources = vueKitWithBindingSources(kitFiles(kit, root), root);
+    return vueForwardsAttributeApi(sources, "tr", getter);
+  }
   // Angular also uses `rowAttrs` for the assembled record and for reorder
   // state. Only the table/grid call carries the canonical row part.
   const call = new RegExp(
@@ -882,8 +1162,42 @@ function callsCoreGetter(kit, getter, root) {
  * How one kit accounts for one contract part: its own literal, a binding
  * prop-getter it spreads, an EXPECTED_GAPS entry — or nothing, which fails.
  */
+/**
+ * The structural parts a Vue kit's own server-rendered contract test asserts.
+ * A Vue kit can forward the binding's attrs through its kit's own wrapper
+ * components, where no static trace can follow them; the rendered table is the
+ * proof then, as each React kit's `RowParts.test.tsx` is. Only a test that lists
+ * the parts and asserts the rendered list equals them counts.
+ */
+const VUE_CONTRACT_TEST = "test/structural-parts.ssr.test.ts";
+function renderedContractParts(kit, root) {
+  const file = join(kitDir(kit, root), VUE_CONTRACT_TEST);
+  if (kit.framework !== "vue" || !existsSync(file)) return new Set();
+  const source = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.Latest,
+    true
+  );
+  const listed = source.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => statement.declarationList.declarations)
+    .filter((declaration) => declaration.name.getText() === "STRUCTURAL_PARTS")
+    .flatMap((declaration) => {
+      let value = declaration.initializer;
+      while (value && ts.isAsExpression(value)) value = value.expression;
+      return value && ts.isArrayLiteralExpression(value)
+        ? value.elements.filter(ts.isStringLiteral).map((item) => item.text)
+        : [];
+    });
+  return source.text.includes("toEqual([...STRUCTURAL_PARTS])")
+    ? new Set(listed)
+    : new Set();
+}
+
 function contractAccount(kit, part, parts, context) {
   if (parts.has(part)) return null;
+  if (renderedContractParts(kit, context.root).has(part)) return null;
   const routes = context.getterParts[kit.framework]?.[part];
   if (routes?.some((getter) => callsCoreGetter(kit, getter, context.root))) {
     return null;
@@ -983,8 +1297,38 @@ function nativeParityFailures(byKit, chrome, context) {
     const missing = native
       .filter((kit) => !rendered.get(kit.name).has(part))
       .map((kit) => kit.name);
-    return missing.length > 0 ? [{ part, missing }] : [];
+    if (missing.length === 0) return [];
+    const owners = native.filter((kit) => !missing.includes(kit.name));
+    const accounted = owners.every(
+      (kit) => context.nativeExtras[kit.name]?.[part] !== undefined
+    );
+    return accounted ? [] : [{ part, missing }];
   });
+}
+
+/**
+ * Every native extra still describes the kits as they are: the listed kit
+ * renders the part and at least one other native kit still does not.
+ */
+function staleNativeExtras(byKit, chrome, context) {
+  const rendered = (kit) =>
+    new Set([...byKit.get(kit.name), ...chrome.get(kit.framework)]);
+  return Object.entries(context.nativeExtras).flatMap(([name, parts]) =>
+    Object.keys(parts).flatMap((part) => {
+      const kit = context.nativeKits.find((item) => item.name === name);
+      // A run over a subset of the registry (a fixture) judges only its kits.
+      if (!kit)
+        return context.registered.has(name)
+          ? [`${part} — ${name} is not a native kit`]
+          : [];
+      if (!rendered(kit).has(part))
+        return [`${part} — ${name} no longer renders it`];
+      const others = context.nativeKits.filter((item) => item !== kit);
+      return others.every((item) => rendered(item).has(part))
+        ? [`${part} — every native kit renders it now`]
+        : [];
+    })
+  );
 }
 
 /**
@@ -1002,12 +1346,19 @@ function themedFailures(byKit, nativeParts, everyPart, chrome, context) {
     )
   );
   const failures = [];
+  const renders = (kit, part) =>
+    byKit.get(kit.name).has(part) || chrome.get(kit.framework).has(part);
   for (const part of [...everyPart].sort()) {
     if (getterNames.has(part)) continue;
+    // Themed kits are held to the parts their own framework's themed kits
+    // render; frameworks are held to each other through their native kits.
+    const frameworks = new Set(
+      shell.filter((kit) => renders(kit, part)).map((kit) => kit.framework)
+    );
     const missing = shell.filter(
       (kit) =>
-        !byKit.get(kit.name).has(part) &&
-        !chrome.get(kit.framework).has(part) &&
+        frameworks.has(kit.framework) &&
+        !renders(kit, part) &&
         context.expectedGaps[kit.name]?.[part] === undefined
     );
     if (missing.length === 0) continue;
@@ -1016,7 +1367,8 @@ function themedFailures(byKit, nativeParts, everyPart, chrome, context) {
     // simply never named. `cards` sat in exactly that state: antd and
     // unstyled emitted it, five kits rendered the list without naming it, and
     // treating "one kit" as "kit-specific" hid it.
-    if (!nativeParts.has(part) && missing.length === shell.length - 1) {
+    const peers = shell.filter((kit) => frameworks.has(kit.framework));
+    if (!nativeParts.has(part) && missing.length === peers.length - 1) {
       continue;
     }
     failures.push({ part, missing: missing.map((kit) => kit.name) });
@@ -1040,6 +1392,7 @@ function themedFailures(byKit, nativeParts, everyPart, chrome, context) {
  * @param {Record<string, Record<string, string[]>>} [options.getterParts]
  * @param {Record<string, string[]>} [options.fallbackOnly]
  * @param {Record<string, string[]>} [options.unnamedInKits]
+ * @param {Record<string, Record<string, string>>} [options.nativeExtras]
  * @returns {{ failures: { headline: string, lines: string[], advice: string }[], summary: string }}
  */
 export function checkPartsParity({
@@ -1050,6 +1403,7 @@ export function checkPartsParity({
   getterParts = CORE_GETTER_PARTS,
   fallbackOnly = FALLBACK_ONLY,
   unnamedInKits = UNNAMED_IN_KITS,
+  nativeExtras = NATIVE_EXTRAS,
 } = {}) {
   const registry = kitRegistryErrors(root, kits);
   if (registry.length > 0) {
@@ -1074,6 +1428,8 @@ export function checkPartsParity({
     getterParts,
     fallbackOnly,
     unnamedInKits,
+    nativeExtras,
+    registered: new Set(kits.map((kit) => kit.name)),
     // The adapters that render the shared shell's chrome with their own kit's
     // components. They should agree part-for-part.
     shellKits: shellKits(kits),
@@ -1105,6 +1461,7 @@ export function checkPartsParity({
 
   const contractMissing = contractFailures(byKit, chrome, context);
   const native = nativeParityFailures(byKit, chrome, context);
+  const staleExtras = staleNativeExtras(byKit, chrome, context);
   const themed = themedFailures(byKit, nativeParts, everyPart, chrome, context);
   const { unaccounted, stale, unnamed } = nativeOnlyFailures(
     byKit,
@@ -1135,6 +1492,14 @@ export function checkPartsParity({
         "own elements or its binding's Chrome. Restore each missing part " +
         "where that element renders; another native kit naming it does not " +
         "satisfy this kit's contract.",
+    },
+    {
+      headline: `${staleExtras.length} native extra(s) in NATIVE_EXTRAS are stale:`,
+      lines: staleExtras,
+      advice:
+        "Each NATIVE_EXTRAS entry names a part only its native kit renders. " +
+        "Remove an entry once every native kit renders the part, or when its " +
+        "kit stops rendering it.",
     },
     {
       headline: `${themed.length} part(s) are rendered by some adapters and not others:`,

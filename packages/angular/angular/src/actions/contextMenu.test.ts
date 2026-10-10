@@ -11,11 +11,11 @@ import { Component, inject, Injector, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
+import { injectContextMenu } from "./contextMenu";
 import {
-  injectContextMenu,
   injectTableContextMenu,
   type TableContextMenuOptions,
-} from "./contextMenu";
+} from "./tableContextMenu";
 
 interface Row {
   id: string;

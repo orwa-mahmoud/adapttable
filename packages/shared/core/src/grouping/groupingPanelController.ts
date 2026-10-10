@@ -469,6 +469,7 @@ export function createGroupingPanelController(
     snapshot.drag?.source === "chip" && hasGroupingColumnDrag(event);
   const removeDragEnter = (event: GroupingDragEventLike): void => {
     if (!chipDragged(event)) return;
+    event.preventDefault();
     setDrag((current) =>
       current ? { ...current, overIndex: undefined, overRemove: true } : current
     );

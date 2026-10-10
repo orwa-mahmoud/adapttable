@@ -1,14 +1,16 @@
 import {
-  ACTIVE_FILTER_CHIPS,
   type AdaptTableFeature,
-  coreFilters,
   extendFeature,
-  FILTER_DRAWER,
-  FILTER_POPOVER,
   type FilterDef,
-  FILTERS_FORM,
   slotRender,
 } from "@adapttable/angular";
+import {
+  ACTIVE_FILTER_CHIPS,
+  coreFilters,
+  FILTER_DRAWER,
+  FILTER_POPOVER,
+  FILTERS_FORM,
+} from "@adapttable/angular/adapter";
 import {
   AdaptFilterChips,
   AdaptFilterDrawer,
@@ -43,4 +45,4 @@ export function filters<TRow>(
   ]);
 }
 
-export { filterTypes } from "@adapttable/angular";
+export { filterTypes } from "@adapttable/angular/features";

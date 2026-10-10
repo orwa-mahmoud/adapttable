@@ -19,7 +19,9 @@ assert.deepEqual(parsed.errors, []);
 const dist = resolve(dir, "dist");
 const isDist = (file) => {
   const absolute = resolve(file);
-  return absolute === dist || absolute.startsWith(`${dist}${sep}`);
+  // Workspace consumers may reach this dist through a package-manager symlink.
+  const canonical = ts.sys.realpath?.(absolute) ?? absolute;
+  return canonical === dist || canonical.startsWith(`${dist}${sep}`);
 };
 const host = {
   ...ts.sys,
@@ -57,4 +59,59 @@ describe("Angular self-package resolution before a build", () => {
     const result = ts.resolveModuleName(manifest.name, importer, options, host);
     assert.equal(result.resolvedModule, undefined);
   });
+});
+
+// These kits intentionally exercise the binding source through Vite aliases.
+// TypeScript must resolve those same public entries before any dist exists.
+describe("Bootstrap kit binding source resolution", () => {
+  for (const kit of ["adapter-ng-bootstrap", "adapter-ngx-bootstrap"]) {
+    const kitRoot = packageDir(kit);
+    const config = ts.readConfigFile(
+      join(kitRoot, "tsconfig.spec.json"),
+      ts.sys.readFile
+    );
+    assert.equal(config.error, undefined);
+    const parsed = ts.parseJsonConfigFileContent(
+      config.config,
+      ts.sys,
+      kitRoot
+    );
+    assert.deepEqual(parsed.errors, []);
+    for (const subpath of Object.keys(manifest.exports).filter(
+      (key) => key !== "./package.json"
+    )) {
+      const specifier =
+        manifest.name + (subpath === "." ? "" : subpath.slice(1));
+      it(`${kit} resolves ${specifier} to the same source as its Vite alias`, () => {
+        const entryDir = subpath === "." ? dir : join(dir, subpath);
+        const entry = JSON.parse(
+          readFileSync(join(entryDir, "ng-package.json"), "utf8")
+        );
+        const result = ts.resolveModuleName(
+          specifier,
+          join(kitRoot, "src/dataTable.ts"),
+          parsed.options,
+          host
+        );
+        assert.equal(
+          result.resolvedModule?.resolvedFileName,
+          resolve(entryDir, entry.lib.entryFile)
+        );
+      });
+    }
+    for (const subpath of ["features", "adapter"]) {
+      it(`${kit} rejects its old wildcard fallback for ${subpath}`, () => {
+        const specifier = `${manifest.name}/${subpath}`;
+        const paths = { ...parsed.options.paths };
+        delete paths[specifier];
+        const result = ts.resolveModuleName(
+          specifier,
+          join(kitRoot, "src/dataTable.ts"),
+          { ...parsed.options, paths },
+          host
+        );
+        assert.equal(result.resolvedModule, undefined);
+      });
+    }
+  }
 });

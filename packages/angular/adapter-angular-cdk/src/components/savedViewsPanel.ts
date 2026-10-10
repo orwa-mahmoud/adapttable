@@ -4,13 +4,12 @@
  * Native markup carries no look of its own. The card, the row and the
  * controls are the binding's; this fills them with buttons and a text field.
  */
+import type { SavedView, TableLabels } from "@adapttable/angular";
 import {
   AdaptSavedViewGlyph,
   AdaptSavedViewsPanelChrome,
-  type SavedView,
   type SavedViewsPanelSlots,
-  type TableLabels,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {

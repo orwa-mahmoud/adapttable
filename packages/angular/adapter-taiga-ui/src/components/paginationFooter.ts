@@ -1,4 +1,4 @@
-import { AdaptIcon, expandChevronIcon } from "@adapttable/angular";
+import { AdaptIcon, expandChevronIcon } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

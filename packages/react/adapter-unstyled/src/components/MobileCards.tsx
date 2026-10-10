@@ -259,7 +259,11 @@ function MobileCardBase<TRow>({
   return (
     <li
       {...rowClickProps(row, onRowClick, index)}
-      style={{ ...treeCardStyle(treeEntry?.level ?? 0), ...style }}
+      style={{
+        minHeight: "max-content",
+        ...treeCardStyle(treeEntry?.level ?? 0),
+        ...style,
+      }}
       ref={measureElement}
       data-index={index}
       // A windowed list has only a slice of its items in the DOM, so each

@@ -9,7 +9,7 @@ import {
   type CommandPaletteSurfaceProps,
   injectCommandPalette,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ɵHlmButton as HlmButton,
   ɵHlmInput as HlmInput,
@@ -54,6 +54,7 @@ import {
           class="at-spartan-surface at-spartan-popover"
           data-adapttable-kit="spartan"
           [class]="props().className"
+          [attr.dir]="props().dir"
           data-adapttable-part="command-palette"
         >
           <ng-container [ngTemplateOutlet]="props().children ?? null" />
@@ -199,6 +200,7 @@ const SLOTS: CommandPaletteSlots = {
       [open]="palette().open"
       [onClose]="palette().close"
       [labels]="props().labels"
+      [dir]="props().dir"
       [slots]="slots"
     />
   `,

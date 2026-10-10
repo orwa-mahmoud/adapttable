@@ -9,7 +9,8 @@ import { TestBed } from "@angular/core/testing";
 
 import { featureSlotFillsOf } from "./featureHost";
 import { createFeatureState, injectFeatureState } from "./featureState";
-import { AdaptSlot, ADAPTTABLE_SLOT_TABLE, type SlotTable } from "./slots";
+import { ADAPTTABLE_SLOT_TABLE, type SlotTable } from "./slotContracts";
+import { AdaptSlot } from "./slots";
 
 const VALUE = featureStateKey<string>("slot-value");
 const SLOT = featureSlotKey<object>("state-slot");

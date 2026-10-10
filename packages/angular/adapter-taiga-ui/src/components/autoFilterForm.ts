@@ -6,7 +6,7 @@ import {
   AdaptRangeFilterFieldModel,
   AdaptSelectFilterFieldModel,
   AdaptTextFilterFieldModel,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed } from "@angular/core";
 

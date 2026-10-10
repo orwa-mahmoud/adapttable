@@ -4,6 +4,7 @@ import { aggregate } from "../aggregate/aggregate";
 import type { ColumnMetadata } from "../columnModel";
 import type { TableRuntime, TableRuntimeView } from "../features/tableRuntime";
 import type { GroupAggregateOverrides } from "./groupAggregateOverrides";
+import { deferGroupingDropToInner } from "./groupingPanelChromeModel";
 import {
   createGroupingPanelController,
   type GroupingDragEventLike,
@@ -400,6 +401,77 @@ describe("grouping panel controller: drag", () => {
       "Team removed from grouping"
     );
   });
+
+  it("consumes a bubbling chip dragenter before ancestor grouping boundaries", () => {
+    const { controller } = harness({ groupBy: "team,status" });
+    controller.startDrag("team", "chip", dragEvent());
+    controller.dragEnter(2, dragEvent("team"));
+    const boundary = document.createElement("div");
+    const removeTarget = document.createElement("div");
+    boundary.append(removeTarget);
+    const ancestorEnter = vi.fn((event: DragEvent) =>
+      controller.dragEnter(2, event)
+    );
+    const ancestor = deferGroupingDropToInner({
+      onDragEnter: ancestorEnter,
+    });
+    const observedAtAncestor = vi.fn();
+    removeTarget.addEventListener("dragenter", (event) => {
+      controller.removeDragEnter(event);
+    });
+    boundary.addEventListener("dragenter", (event) => {
+      observedAtAncestor(event.defaultPrevented);
+      ancestor.onDragEnter?.(event);
+    });
+    const event = new Event("dragenter", { bubbles: true, cancelable: true });
+    Object.defineProperty(event, "dataTransfer", { value: transfer("team") });
+
+    expect(removeTarget.dispatchEvent(event)).toBe(false);
+    expect(event.defaultPrevented).toBe(true);
+    expect(observedAtAncestor).toHaveBeenCalledWith(true);
+    expect(ancestorEnter).not.toHaveBeenCalled();
+    expect(controller.getSnapshot().drag).toEqual({
+      key: "team",
+      source: "chip",
+      overIndex: undefined,
+      overRemove: true,
+    });
+  });
+
+  it.each([
+    { name: "no active drag", source: undefined, payload: "team" },
+    { name: "a header drag", source: "header", payload: "team" },
+    { name: "a foreign payload", source: "chip", payload: undefined },
+    { name: "no data transfer", source: "chip", payload: null },
+  ] as const)(
+    "leaves $name unconsumed when entering remove",
+    ({ source, payload }) => {
+      const { controller } = harness({ groupBy: "team,status" });
+      if (source) controller.startDrag("team", source, dragEvent());
+      const boundary = document.createElement("div");
+      const removeTarget = document.createElement("div");
+      boundary.append(removeTarget);
+      const ancestorEnter = vi.fn((event: DragEvent) =>
+        controller.dragEnter(2, event)
+      );
+      const ancestor = deferGroupingDropToInner({ onDragEnter: ancestorEnter });
+      removeTarget.addEventListener("dragenter", (event) => {
+        controller.removeDragEnter(event);
+      });
+      boundary.addEventListener("dragenter", (event) => {
+        ancestor.onDragEnter?.(event);
+      });
+      const event = new Event("dragenter", { bubbles: true, cancelable: true });
+      Object.defineProperty(event, "dataTransfer", {
+        value: payload === null ? null : transfer(payload),
+      });
+
+      expect(removeTarget.dispatchEvent(event)).toBe(true);
+      expect(event.defaultPrevented).toBe(false);
+      expect(ancestorEnter).toHaveBeenCalledWith(event);
+      expect(controller.getSnapshot().drag?.overRemove).not.toBe(true);
+    }
+  );
 
   it("routes the prop getters to the same transitions", () => {
     const { controller, state } = harness({ groupBy: "team" });

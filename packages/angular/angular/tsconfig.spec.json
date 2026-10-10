@@ -8,6 +8,8 @@
   },
   "include": [
     "src",
+    "features",
+    "adapter",
     "router",
     "stream",
     "formula",

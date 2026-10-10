@@ -6,8 +6,10 @@ import { ANGULAR_KITS, angularPart } from "./angular-kit";
 /** Keep production browser views with the report for visual review. */
 async function attachView(page: Page, testInfo: TestInfo, name: string) {
   if (testInfo.project.name !== "chromium") return;
+  const path = testInfo.outputPath(`${name}.png`);
+  await page.screenshot({ path, fullPage: true, animations: "disabled" });
   await testInfo.attach(name, {
-    body: await page.screenshot({ fullPage: true, animations: "disabled" }),
+    path,
     contentType: "image/png",
   });
 }
@@ -302,9 +304,49 @@ for (const kit of ANGULAR_KITS) {
       await expect(
         cards.first().locator('[data-adapttable-part="card-value"]').first()
       ).toHaveText("Ada Lovelace");
+      const cardLabels = cards
+        .first()
+        .locator('[data-adapttable-part="card-label"]');
+      // The initial layout hides Email and Team, including in mobile cards.
+      await expect(cardLabels).toHaveText([
+        "Status",
+        "Timeline",
+        "Budget",
+        "Load",
+      ]);
+      const columns = angularPart(kit, page, "column-menu-button", surface);
+      // Column-layout editing belongs to the desktop table. The accepted
+      // layout still drives mobile cards when the host crosses the breakpoint.
+      await expect(columns).toHaveCount(0);
+      await page.setViewportSize({ width: 1280, height: 844 });
+      await expect(surface.locator('[data-adapttable-part="row"]')).toHaveCount(
+        10
+      );
+      await columns.click();
+      const menu = angularPart(kit, page, "column-menu-panel");
+      await expect(menu).toBeVisible();
+      const showTeam = menu.getByRole("button", {
+        name: "Show column: Team",
+        exact: true,
+      });
+      await expect(showTeam).toHaveAttribute("aria-pressed", "false");
+      await showTeam.click();
       await expect(
-        cards.first().locator('[data-adapttable-part="card-label"]')
-      ).toHaveText(["Team", "Status", "Timeline", "Budget", "Load"]);
+        menu.getByRole("button", { name: "Hide column: Team", exact: true })
+      ).toHaveAttribute("aria-pressed", "true");
+      await page.keyboard.press("Escape");
+      await expect(menu).toBeHidden();
+      await expect(columns).toBeFocused();
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect(columns).toHaveCount(0);
+      await expect(cards).toHaveCount(10);
+      await expect(cardLabels).toHaveText([
+        "Team",
+        "Status",
+        "Timeline",
+        "Budget",
+        "Load",
+      ]);
       // Table scrolling is allowed; the document itself must fit the phone.
       await expect
         .poll(() =>
@@ -345,6 +387,13 @@ for (const kit of ANGULAR_KITS) {
       await expect(
         cards.first().locator('[data-adapttable-part="card-value"]').first()
       ).toHaveText("Ada Lovelace");
+      await expect(cardLabels).toHaveText([
+        "Team",
+        "Status",
+        "Timeline",
+        "Budget",
+        "Load",
+      ]);
       await attachView(page, testInfo, `${kit.key}-${mode}-phone`);
       if (mode !== "angular-all-options") continue;
 
@@ -364,7 +413,7 @@ for (const kit of ANGULAR_KITS) {
         .toBeLessThanOrEqual(1);
       await attachView(page, testInfo, `${kit.key}-phone-lab-controls-top`);
       const finalControl = dialog.getByRole("checkbox", {
-        name: "Mobile cards",
+        name: "Virtualization",
         exact: true,
       });
       await expect(finalControl).toBeEnabled();

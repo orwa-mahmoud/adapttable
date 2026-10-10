@@ -7,6 +7,7 @@ import {
   assertPackedMatchesExpected,
   EXTRA_PROBE_ROUTES,
   kitLoadDependencies,
+  kitLoadOverrides,
   packagesForRuntime,
   probePrelude,
   probeRoutes,
@@ -34,6 +35,7 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/ai",
   "@adapttable/ai-angular",
   "@adapttable/ai-react",
+  "@adapttable/ai-vue",
   "@adapttable/angular",
   "@adapttable/angular-aria",
   "@adapttable/angular-cdk",
@@ -44,19 +46,40 @@ const PUBLISHED_SNAPSHOT = [
   "@adapttable/chakra",
   "@adapttable/cli",
   "@adapttable/core",
+  "@adapttable/element-plus",
   "@adapttable/i18n",
   "@adapttable/mantine",
   "@adapttable/mui",
+  "@adapttable/naive-ui",
   "@adapttable/ng-bootstrap",
   "@adapttable/ng-zorro",
   "@adapttable/ngx-bootstrap",
+  "@adapttable/nuxt-ui",
+  "@adapttable/quasar",
   "@adapttable/radix",
   "@adapttable/react",
+  "@adapttable/reka-ui",
   "@adapttable/server",
   "@adapttable/shadcn",
+  "@adapttable/shadcn-vue",
   "@adapttable/spartan",
   "@adapttable/taiga-ui",
   "@adapttable/unstyled",
+  "@adapttable/vue",
+  "@adapttable/vue-unstyled",
+  "@adapttable/vuetify",
+];
+const VUE_PUBLIC_PACKAGES = [
+  "@adapttable/ai-vue",
+  "@adapttable/element-plus",
+  "@adapttable/naive-ui",
+  "@adapttable/nuxt-ui",
+  "@adapttable/quasar",
+  "@adapttable/reka-ui",
+  "@adapttable/shadcn-vue",
+  "@adapttable/vue",
+  "@adapttable/vue-unstyled",
+  "@adapttable/vuetify",
 ];
 const TAIGA_NATIVE_PEER_NAMES = [
   "@maskito/angular",
@@ -87,7 +110,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares the baseline floor and every Angular 22 native kit floor", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 29);
+    assert.equal(manifests.length, 39);
     for (const manifest of manifests) {
       const pkg = json(manifest);
       const floor = ANGULAR_22_KITS.has(pkg.name) ? ANGULAR_22_FLOOR : FLOOR;
@@ -136,9 +159,10 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 26);
+    assert.equal(names.length, 36);
     assert.ok(!names.includes("@adapttable/bootstrap"));
     assert.ok(!names.includes("@adapttable/primeng"));
+    for (const name of VUE_PUBLIC_PACKAGES) assert.ok(names.includes(name));
   });
 
   it("fails a planted missing package with the name involved", () => {
@@ -159,9 +183,9 @@ describe("supported Node contract", () => {
     );
   });
 
-  it("rejects each missing Angular 22 kit and each private kit in the packed set", () => {
+  it("rejects each missing Angular 22 or Vue package and each private kit in the packed set", () => {
     const expected = publishedPackageNames();
-    for (const name of ANGULAR_22_KITS) {
+    for (const name of [...ANGULAR_22_KITS, ...VUE_PUBLIC_PACKAGES]) {
       assert.throws(
         () =>
           assertPackedMatchesExpected(
@@ -231,6 +255,73 @@ describe("supported Node contract", () => {
     assert.ok(deps.antd);
     assert.equal(deps.react, undefined);
     assert.equal(deps["@adapttable/core"], undefined);
+  });
+
+  it("keeps Nuxt's generated consumer compatible below Node 22.19", () => {
+    const published = publishedPackages();
+    for (const version of ["22.12.0", "v22.12.0", "22.18.9"]) {
+      const packages = packagesForRuntime(published, version);
+      const deps = kitLoadDependencies(packages, version);
+      assert.equal(deps["@nuxt/ui"], "^4.11.3");
+      assert.equal(deps.unifont, "0.7.4");
+      assert.equal(deps.undici, undefined);
+      assert.equal(kitLoadOverrides({}, deps).unifont, undefined);
+      assert.equal(kitLoadOverrides({}, deps).undici, undefined);
+      const withoutNuxt = packages.filter(
+        (entry) => entry.name !== "@adapttable/nuxt-ui"
+      );
+      assert.equal(
+        kitLoadDependencies(withoutNuxt, version).unifont,
+        undefined
+      );
+    }
+    for (const version of ["22.19.0", "22.22.3", "24.15.0", "26.0.0"]) {
+      const packages = packagesForRuntime(published, version);
+      assert.equal(kitLoadDependencies(packages, version).unifont, undefined);
+    }
+  });
+
+  it("preserves the generated direct Element Plus spec in its scoped override", () => {
+    const packages = publishedPackages();
+    const tarballs = Object.fromEntries(
+      packages.map(({ name, directory }) => [
+        name,
+        `file:/packs/${directory}.tgz`,
+      ])
+    );
+    for (const version of ["22.12.0", "22.22.3", "24.15.0"]) {
+      const deps = kitLoadDependencies(
+        packagesForRuntime(packages, version),
+        version
+      );
+      assert.equal(deps["element-plus"], "^2.14.7");
+      const overrides = kitLoadOverrides(tarballs, deps);
+      assert.deepEqual(overrides, {
+        ...tarballs,
+        "element-plus@2.14.7": {
+          ".": "$element-plus",
+          "@popperjs/core":
+            "https://registry.npmjs.org/@sxzz/popperjs-es/-/popperjs-es-2.11.8.tgz",
+        },
+      });
+      const reference = overrides["element-plus@2.14.7"]["."];
+      assert.equal(deps[reference.slice(1)], deps["element-plus"]);
+      assert.equal(deps["@popperjs/core"], "^2.11.8");
+    }
+    assert.deepEqual(kitLoadOverrides(tarballs, {}), tarballs);
+  });
+
+  it("installs Vue and probes every public Vue root on supported runtimes", () => {
+    for (const version of ["22.12.0", "22.22.3", "24.15.0", "26.0.0"]) {
+      const packages = packagesForRuntime(publishedPackages(), version);
+      const deps = kitLoadDependencies(packages, version);
+      assert.equal(deps.vue, "^3.5.0", version);
+      const routes = probeRoutes(packages.map((entry) => entry.name));
+      for (const name of VUE_PUBLIC_PACKAGES) {
+        assert.ok(routes.includes(name), `${version}: ${name}`);
+        assert.equal(deps[name], undefined, `${name} loads from its tarball`);
+      }
+    }
   });
 
   it("installs and preloads the Angular compiler for the Angular binding", () => {

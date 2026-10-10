@@ -98,6 +98,7 @@ export interface AgentApprovalPending {
     readonly approve: () => void;
     readonly decideAt?: (index: number, approved: boolean) => void;
     readonly decisions: readonly AgentApprovalDecision[];
+    readonly identity?: object;
     readonly operation?: AgentApprovalOperation;
     readonly presentation: ApprovalPresentation;
     readonly proposals: readonly AgentApprovalProposal[];
@@ -425,6 +426,7 @@ export interface BatchEditingState<TRow> {
     acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
     cancelAll: () => void;
     cancelRow: (rowId: string) => void;
+    readonly commit?: EditCommitSnapshot;
     count: number;
     draftFor: (row: TRow, rowId: string, columnKey: string) => string;
     entries: readonly BatchEditEntry[];
@@ -1296,6 +1298,19 @@ export interface ColumnResizeHandleProps {
 }
 
 // @public
+export function columnScrollTarget(input: {
+    readonly columns: readonly {
+        readonly key: string;
+    }[];
+    readonly columnKey: string;
+    readonly viewport: ColumnViewport;
+    readonly widths?: Readonly<Record<string, number>>;
+    readonly pinnedKeys?: ReadonlySet<string>;
+    readonly leadingWidth?: number;
+    readonly trailingWidth?: number;
+}): number | undefined;
+
+// @public
 export interface ColumnSelectCheckboxChromeProps {
     readonly checked: boolean;
     readonly className?: string;
@@ -1341,6 +1356,9 @@ export function columnWindowPlan<TColumn extends {
     readonly viewport: ColumnViewport;
     readonly widths?: Readonly<Record<string, number>>;
     readonly pinnedKeys?: ReadonlySet<string>;
+    readonly pinnedSides?: Readonly<Record<string, "start" | "end">>;
+    readonly leadingWidth?: number;
+    readonly trailingWidth?: number;
     readonly overscan?: number;
 }): ColumnWindowPlan<TColumn>;
 
@@ -1412,6 +1430,9 @@ export interface CommandPaletteSurfaceProps<TNode = unknown> {
     readonly label: string;
     readonly onClose: () => void;
 }
+
+// @public
+export function commitSearchOnBlur(commit: () => void): () => void;
 
 // @public
 export type ConfirmHandler = (request: ConfirmRequest) => void;
@@ -1699,6 +1720,9 @@ export function coreVirtualize(options?: VirtualizeInput): CoreFeature;
 
 // @public
 export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry>(features: readonly FeatureSetup<unknown, TPanel>[] | undefined): FeatureHostState;
+
+// @public
+export function createMenuNavigation(): MenuNavigationController;
 
 // @public
 export type CssProperties = Record<string, string | number | undefined>;
@@ -2378,6 +2402,57 @@ export interface EditableCellSlots<TNode = unknown> {
 }
 
 // @public
+export interface EditableColumnLike<TRow = unknown> {
+    editable?: boolean | {
+        bivarianceHack(row: TRow): boolean;
+    }["bivarianceHack"];
+    editor?: ColumnModelEditor;
+    editValue?: {
+        bivarianceHack(row: TRow): string;
+    }["bivarianceHack"];
+    key: string;
+    parseValue?: {
+        bivarianceHack(draft: string, row: TRow): unknown;
+    }["bivarianceHack"];
+    sortValue?: {
+        bivarianceHack(row: TRow): SortableValue;
+    }["bivarianceHack"];
+    validate?: {
+        bivarianceHack(value: unknown, row: TRow): string | undefined | Promise<string | undefined>;
+    }["bivarianceHack"];
+}
+
+// @public
+export interface EditCommitSnapshot {
+    // (undocumented)
+    readonly error?: string;
+    // (undocumented)
+    readonly phase: "validating" | "saving" | "invalid" | "failed";
+    // (undocumented)
+    readonly validation?: readonly EditCommitValidationFailure[];
+}
+
+// @public
+export interface EditCommitValidationFailure {
+    // (undocumented)
+    readonly columnKey?: string;
+    // (undocumented)
+    readonly message: string;
+    // (undocumented)
+    readonly rowId: string;
+}
+
+// @public
+export interface EditCommitValidationOptions<TRow> {
+    // (undocumented)
+    readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
+    // (undocumented)
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    // (undocumented)
+    readonly validateRow?: RowValidator<TRow>;
+}
+
+// @public
 export interface EditHistoryLiveSlotProps<TRow = never, THistory = unknown, TOptions = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
     children: (result: {
         history: THistory;
@@ -2486,6 +2561,8 @@ export interface ExportContext<TRow> {
     tree?: {
         entries: readonly TreeEntry<TRow>[];
         allEntries?: readonly TreeEntry<TRow>[];
+        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
     };
 }
 
@@ -4115,6 +4192,49 @@ export function measureRowDetailAsPair(isMobile: boolean, renderRowDetail: unkno
 export function measureWindowScrollMargin(root: Element | null): number;
 
 // @public
+export type MenuNavigationAction = {
+    readonly kind: "close";
+    readonly key: "Escape" | "Tab";
+} | {
+    readonly kind: "focus";
+    readonly index: number;
+};
+
+// @public
+export interface MenuNavigationController {
+    // (undocumented)
+    readonly key: (event: MenuNavigationKey, items: readonly MenuNavigationItem[], focused: number, now?: number) => MenuNavigationAction | undefined;
+    // (undocumented)
+    readonly reset: () => void;
+}
+
+// @public
+export interface MenuNavigationItem {
+    // (undocumented)
+    readonly disabled?: boolean;
+    // (undocumented)
+    readonly label: string;
+}
+
+// @public
+export interface MenuNavigationKey {
+    // (undocumented)
+    readonly altKey?: boolean;
+    // (undocumented)
+    readonly ctrlKey?: boolean;
+    // (undocumented)
+    readonly defaultPrevented?: boolean;
+    // (undocumented)
+    readonly isComposing?: boolean;
+    // (undocumented)
+    readonly key: string;
+    // (undocumented)
+    readonly metaKey?: boolean;
+    // (undocumented)
+    readonly shiftKey?: boolean;
+}
+
+// @public
 export interface MergedCellStyle {
     background?: string;
     textAlign: "center";
@@ -4544,6 +4664,12 @@ export interface ResolvableColumn<TRow> {
 export function resolveBodyVirtualization<TRow>(keyed: KeyedVirtualization, flat: TableVirtualization<TRow>): TableVirtualization<TRow>;
 
 // @public
+export function resolveCellSpan<TRow>(args: GetCellSpanArgs<TRow>, getCellSpan: GetCellSpan<TRow> | undefined, remainingCols: number, remainingRows: number): {
+    colSpan: number;
+    rowSpan: number;
+};
+
+// @public
 export function resolveColumnDefaults<TRow, TColumn extends ResolvableColumn<TRow>>(columns: readonly TColumn[], locale?: string, rendersItself?: (column: TColumn) => boolean): TColumn[];
 
 // @public
@@ -4687,6 +4813,7 @@ export interface RowEditingState<TRow> {
     activeRowId: string | null;
     begin: (row: TRow, rowId: string) => void;
     cancel: () => void;
+    readonly commit?: EditCommitSnapshot;
     draftFor: (columnKey: string) => string;
     drafts: RowEditDrafts;
     featureHost?: FeatureHostState;
@@ -4799,6 +4926,12 @@ export class RowPairMeasureController {
 
 // @public
 export interface RowPairMeasurer {
+    detail: (index: number) => (node: Element | null) => void;
+    row: (index: number) => (node: Element | null) => void;
+}
+
+// @public
+interface RowPairMeasurer_2 {
     detail: (index: number) => (node: Element | null) => void;
     row: (index: number) => (node: Element | null) => void;
 }
@@ -5045,6 +5178,9 @@ export interface RowTreeParentRef<TRow> {
 }
 
 // @public
+export type RowValidator<TRow> = (row: TRow) => string | Record<string, string> | undefined | Promise<string | Record<string, string> | undefined>;
+
+// @public
 export function rowWindow<TRow>(input: {
     readonly enabled: boolean;
     readonly rows: readonly VirtualTableRow<TRow>[];
@@ -5096,6 +5232,8 @@ export interface RuntimeChromeInput<TRow> {
     readonly table: {
         readonly selection?: {
             readonly selectedIds: ReadonlySet<string>;
+            readonly allMatching?: boolean;
+            readonly acrossPages?: boolean;
             readonly replace: (ids: readonly string[] | undefined) => void;
         } | null;
         readonly labels: object;
@@ -6487,6 +6625,8 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly rows: readonly TRow[];
     readonly selection?: {
         readonly selectedIds: ReadonlySet<string>;
+        readonly allMatching?: boolean;
+        readonly acrossPages?: boolean;
         readonly replace: (ids: readonly string[] | undefined) => void;
     };
     readonly sortBy?: string;
@@ -6670,6 +6810,13 @@ export interface TreeExpansionState {
     expandedIds: ReadonlySet<string>;
     isExpanded: (id: string) => boolean;
     toggle: (id: string) => void;
+}
+
+// @public
+export interface TreeShape<TRow> {
+    getChildren?: (row: TRow) => readonly TRow[] | undefined;
+    getParentId?: (row: TRow) => string | undefined;
+    hasChildren?: (row: TRow) => boolean;
 }
 
 // @public

@@ -606,6 +606,17 @@ export function createUrlSliceStore<T, TConfig extends object>(
     );
   };
 
+  const flush = (): void => {
+    if (timer === undefined) return;
+    const value = pending as T;
+    clearTimeout(timer);
+    timer = undefined;
+    // Release the old operation before calling the adapter. Its listeners
+    // may accept a newer value or call flush again during this write.
+    pending = NOTHING_PENDING;
+    persist(value);
+  };
+
   return {
     getSnapshot: () =>
       pending === NOTHING_PENDING
@@ -635,23 +646,15 @@ export function createUrlSliceStore<T, TConfig extends object>(
         return;
       }
       pending = value;
-      notify();
       if (timer !== undefined) clearTimeout(timer);
+      // Own the timer before notifying: a subscriber may accept a newer
+      // value, flush this one, or dispose its binding synchronously.
       timer = setTimeout(() => {
-        timer = undefined;
-        persist(value);
-        pending = NOTHING_PENDING;
+        flush();
         notify();
       }, delay);
+      notify();
     },
-    flush() {
-      if (timer === undefined) return;
-      clearTimeout(timer);
-      timer = undefined;
-      // A live timer implies a pending value — the timeout clears the timer
-      // before it clears the value.
-      persist(pending as T);
-      pending = NOTHING_PENDING;
-    },
+    flush,
   };
 }

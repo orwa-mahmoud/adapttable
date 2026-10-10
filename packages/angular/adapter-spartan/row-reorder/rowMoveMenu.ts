@@ -5,7 +5,7 @@
 import {
   restoreFocusSoon,
   type RowMoveMenuSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ɵHlmButton as HlmButton,
   ɵHlmPopoverLabel as HlmPopoverLabel,

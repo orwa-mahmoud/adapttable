@@ -17,6 +17,7 @@ import {
   siteUrl,
   switchDocsRoute,
 } from "./site.mjs";
+import { VUE_DOCS } from "./vue-docs.mjs";
 
 const DOCS = fileURLToPath(new URL("../docs/", import.meta.url));
 const PAGES = docsFiles(DOCS).map((file) => file.replace(/\.md$/, ""));
@@ -35,6 +36,48 @@ describe("site addresses", () => {
     assert.equal(docsRoute("filtering"), `/${FRAMEWORK}/filtering/`);
     assert.equal(docsSlug("concepts"), "concepts");
     assert.equal(docsRoute("concepts"), "/concepts/");
+  });
+
+  it("registers only implemented Vue guides with framework-aware fallback", () => {
+    assert.deepEqual(VUE_DOCS, [
+      "vue/getting-started.md",
+      "vue/element-plus.md",
+      "vue/naive-ui.md",
+      "vue/nuxt-ui.md",
+      "vue/quasar.md",
+      "vue/reka-ui.md",
+      "vue/shadcn-vue.md",
+      "vue/vuetify.md",
+      "vue/features.md",
+      "vue/api.md",
+      "vue/assistant.md",
+      "vue/summary-row.md",
+      "vue/column-menu.md",
+      "vue/navigation.md",
+      "vue/actions.md",
+      "vue/specialized.md",
+    ]);
+    for (const source of VUE_DOCS) {
+      assert.ok(PAGES.includes(source.replace(/\.md$/, "")), source);
+      assert.equal(docsRoute(source), `/${source.replace(/\.md$/, "")}/`);
+    }
+    assert.equal(docsReferenceRoute("api", "vue"), "/vue/api/");
+    assert.equal(
+      docsReferenceRoute("filtering", "vue"),
+      "/vue/getting-started/?unavailable=filtering"
+    );
+    assert.equal(docsReferenceRoute("concepts", "vue"), "/concepts/");
+    assert.equal(
+      switchDocsRoute("/vue/api/", "react", ["api.md", ...VUE_DOCS]),
+      "/react/api/"
+    );
+    assert.equal(
+      switchDocsRoute("/react/filtering/", "vue", [
+        "filtering.md",
+        ...VUE_DOCS,
+      ]),
+      "/vue/getting-started/"
+    );
   });
 
   it("names only shared pages that exist in docs/", () => {
@@ -58,7 +101,8 @@ describe("site addresses", () => {
     assert.equal(docsRoute("data-tiers"), "/data-tiers/");
     assert.equal(docsRoute("custom-table-source"), "/custom-table-source/");
     assert.equal(docsRoute("concepts", "angular"), "/concepts/");
-    assert.equal(ANGULAR_DOCS.length, 57);
+    assert.equal(ANGULAR_DOCS.length, 58);
+    assert.ok(ANGULAR_DOCS.includes("angular/migrating-to-0-5.md"));
     for (const kit of [
       "material",
       "ng-bootstrap",
@@ -165,10 +209,12 @@ describe("site addresses", () => {
       demoRoute("unstyled/filtering", "angular"),
       "/angular/demo/unstyled/filtering/"
     );
+    assert.equal(demoRoute("unstyled", "vue"), "/vue/demo/unstyled/");
     assert.equal(demoRoute("mantine", "react"), "/react/demo/mantine/");
     assert.deepEqual(DEMO_ROOTS, {
       react: "/react/demo/",
       angular: "/angular/demo/",
+      vue: "/vue/demo/",
     });
   });
 });

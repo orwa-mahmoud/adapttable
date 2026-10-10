@@ -1,7 +1,8 @@
 /**
  * The unstyled command palette: the toolbar button, the dialog, and a command.
  */
-import type { TableLabels, ToolbarExtrasSlotProps } from "@adapttable/angular";
+import type { TableLabels } from "@adapttable/angular";
+import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
 import { commandPalette } from "@adapttable/angular-cdk/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -27,11 +28,13 @@ const ROWS: Row[] = [{ id: "1", name: "Ada" }];
       [urlSync]="false"
       [forceMobile]="false"
       [features]="features"
+      [dir]="dir()"
     />
   `,
 })
 class Host {
   readonly rows = ROWS;
+  readonly dir = signal<"ltr" | "rtl">("ltr");
   readonly columns = [
     { key: "name", header: "Name", accessor: (row: Row) => row.name },
   ];
@@ -64,6 +67,7 @@ class Host {
       [forceMobile]="false"
       [features]="features"
       [labels]="labels()"
+      [dir]="dir()"
     />
   `,
 })
@@ -322,6 +326,125 @@ describe("command palette (unstyled Angular)", () => {
     const fixture = TestBed.createComponent(BareButton);
     fixture.detectChanges();
     expect(part("command-palette-button")).toBeNull();
+    fixture.destroy();
+  });
+  it("keeps the actual palette surface in the table's live direction while open", async () => {
+    const fixture = TestBed.createComponent(ControlledHost);
+    const host = fixture.componentInstance;
+    host.dir.set("rtl");
+    host.paletteOpen.set(true);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const surface = part("command-palette")!;
+    const input = part("command-input") as HTMLInputElement;
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("rtl");
+    input.value = "Greet";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await fixture.whenStable();
+    host.dir.set("ltr");
+    await fixture.whenStable();
+    expect(part("command-palette")).toBe(surface);
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("ltr");
+    expect(part("command-input")).toBe(input);
+    expect(input.value).toBe("Greet");
+    expect(host.paletteOpen()).toBe(true);
+    expect(host.onOpenChange).not.toHaveBeenCalled();
+    host.dir.set("rtl");
+    await fixture.whenStable();
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("rtl");
+    expect(part("command-input")).toBe(input);
+    fixture.destroy();
+  });
+  it("opens the default palette from its shortcut without adding a toolbar button", async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.features[0] = commandPalette();
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(part("command-palette-button")).toBeNull();
+    expect(part("command-palette")).toBeNull();
+
+    const shortcut = new KeyboardEvent("keydown", {
+      key: "k",
+      ctrlKey: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(shortcut);
+    await fixture.whenStable();
+    expect(shortcut.defaultPrevented).toBe(true);
+    expect(part("command-palette")).not.toBeNull();
+    expect(part("command-input")?.getAttribute("role")).toBe("combobox");
+    expect(part("command-palette-button")).toBeNull();
+    part("command-input")!.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await fixture.whenStable();
+    expect(part("command-palette")).toBeNull();
+    fixture.destroy();
+  });
+
+  it("lets the CDK surface close only an unhandled Escape and restores trigger focus", async () => {
+    const fixture = TestBed.createComponent(ControlledHost);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host = fixture.componentInstance;
+    const trigger = part("command-palette-button")!;
+    trigger.focus();
+    trigger.click();
+    await fixture.whenStable();
+    const surface = part("command-palette")!;
+    const ordinary = new KeyboardEvent("keydown", {
+      key: "a",
+      bubbles: true,
+      cancelable: true,
+    });
+    surface.dispatchEvent(ordinary);
+    const handledEscape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    handledEscape.preventDefault();
+    surface.dispatchEvent(handledEscape);
+    await fixture.whenStable();
+    expect(ordinary.defaultPrevented).toBe(false);
+    expect(part("command-palette")).toBe(surface);
+    expect(host.paletteOpen()).toBe(true);
+    expect(host.onOpenChange.mock.calls).toEqual([[true]]);
+
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    surface.dispatchEvent(escape);
+    await fixture.whenStable();
+    expect(escape.defaultPrevented).toBe(true);
+    expect(host.paletteOpen()).toBe(false);
+    expect(host.onOpenChange.mock.calls).toEqual([[true], [false]]);
+    expect(part("command-palette")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+
+    trigger.click();
+    await fixture.whenStable();
+    expect(part("command-palette")).not.toBeNull();
+    document.querySelector<HTMLElement>(".adapt-cdk-backdrop")!.click();
+    await fixture.whenStable();
+    expect(host.paletteOpen()).toBe(false);
+    expect(host.onOpenChange.mock.calls).toEqual([
+      [true],
+      [false],
+      [true],
+      [false],
+    ]);
+    expect(part("command-palette")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
     fixture.destroy();
   });
 });

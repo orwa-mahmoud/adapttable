@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../../../favicon.svg" />
+    <meta name="description" content="Try a local shadcn-vue Vue table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/vue/demo/shadcn-vue/ai/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AdaptTable" />
+    <meta property="og:title" content="shadcn-vue Vue AI table assistant demo — AdaptTable" />
+    <meta property="og:description" content="Try a local shadcn-vue Vue table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/vue/demo/shadcn-vue/ai/" />
+    <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="shadcn-vue Vue AI table assistant demo — AdaptTable" />
+    <meta name="twitter:description" content="Try a local shadcn-vue Vue table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required." />
+    <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try a local shadcn-vue Vue table assistant: sort salaries, answer a filtering question and approve or reject a proposed edit. No model or API key required.","url":"https://adapttable.orwamahmoud.com/vue/demo/shadcn-vue/ai/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <title>shadcn-vue Vue AI table assistant demo — AdaptTable</title>
+    <script>
+      try {
+        if (localStorage.getItem("adapttable-demo-theme") === "dark")
+          document.documentElement.dataset.theme = "dark";
+      } catch {}
+    </script>
+    <style>
+      /* The pre-mount fallback inside #root. React replaces it on mount, so
+         this paints only while the bundle is still downloading — or
+         permanently, when JavaScript is unavailable. Styled so that moment
+         reads as the page arriving rather than as broken markup. */
+      .at-fallback {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 4.5rem 1.5rem;
+        font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+        color: #52525b;
+        line-height: 1.65;
+      }
+      .at-fallback p {
+        text-wrap: pretty;
+      }
+      .at-fallback__kicker {
+        margin: 0 0 0.75rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #71717a;
+      }
+      .at-fallback h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #18181b;
+        margin: 0 0 1rem;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .at-fallback h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #18181b;
+        margin: 2rem 0 0.6rem;
+      }
+      .at-fallback pre {
+        overflow-x: auto;
+        padding: 1rem 1.1rem;
+        border: 1px solid #e4e4e7;
+        border-radius: 12px;
+        background: #fafafa;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: #3f3f46;
+      }
+      .at-fallback p code {
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: #f4f4f5;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.86em;
+        color: #27272a;
+      }
+      .at-fallback ul {
+        padding-inline-start: 1.2rem;
+        margin: 0;
+      }
+      .at-fallback li {
+        margin: 0.4rem 0;
+      }
+      .at-fallback a {
+        color: #4f46e5;
+      }
+      [data-theme="dark"] .at-fallback {
+        color: #a1a1aa;
+      }
+      [data-theme="dark"] .at-fallback :is(h1, h2) {
+        color: #fafafa;
+      }
+      [data-theme="dark"] .at-fallback pre {
+        border-color: #3f3f46;
+        background: #18181b;
+        color: #d4d4d8;
+      }
+      [data-theme="dark"] .at-fallback p code {
+        background: #27272a;
+        color: #e4e4e7;
+      }
+      [data-theme="dark"] .at-fallback a {
+        color: #a5b4fc;
+      }
+      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Replaced by Vue on mount — the served markup carries the page's
+         own words so a crawler, and anyone whose bundle has not arrived, reads
+         a real page. Written by scripts/build-showcase-html.mjs. -->
+    <div id="root" data-matrix-page="shadcn-vue/ai">
+      <main class="at-fallback">
+        <p class="at-fallback__kicker">AdaptTable for shadcn-vue</p>
+        <h1>AI table assistant in shadcn-vue Vue</h1>
+        <p>This deterministic local demo mounts a real shadcn-vue Vue table and its shadcn-vue assistant. Ask to sort salaries, choose a person, or propose Grace's salary as 150. No language model or API key is needed.</p>
+        <p>A question filters the table only after you answer. A proposed edit waits for your approval in the assistant, the table or a dialog; an approved write updates the host's data and its status line. Rejecting leaves the data unchanged, and the conversation records the execution result.</p>
+        <p><code>tableAgent</code> and <code>useTableAssistant</code> from <code>@adapttable/ai-vue</code> share the mounted table's session. The snippet below shows a minimal local sorting transport; the demo also includes questions and governed edits. JSON, OpenAI, HTTP, MCP, MCP Apps, WebMCP, AG-UI and AI SDK helpers can use the same session in your application.</p>
+        <h2>The code</h2>
+        <pre><code>&lt;script setup lang=&quot;ts&quot;&gt;
+import type { AgentSession, AssistantTransport } from &quot;@adapttable/ai&quot;;
+import { tableAgent, useTableAssistant } from &quot;@adapttable/ai-vue&quot;;
+import { shallowRef } from &quot;vue&quot;;
+import type { ColumnDef } from &quot;@adapttable/vue&quot;;
+import { DataTable } from &quot;@adapttable/shadcn-vue&quot;;
+import { TableAssistant } from &quot;@adapttable/shadcn-vue/assistant&quot;;
+
+interface AgentPerson { id: string; name: string; salary: number }
+
+// A minimal local transport: no model, endpoint or API key.
+const transport: AssistantTransport = {
+  send: async ({ session, text, signal }) =&gt; {
+    if (!text.toLowerCase().includes(&quot;sort&quot;)) {
+      return { text: &quot;Try: sort salaries highest first.&quot; };
+    }
+    const key = &quot;view.setSort&quot;;
+    const result = await session.execute(
+      key,
+      { key: &quot;salary&quot;, dir: &quot;desc&quot; },
+      session.manifest().viewRevision,
+      crypto.randomUUID(),
+      signal
+    );
+    return {
+      text: result.ok ? &quot;Highest salary first.&quot; : &quot;The sort was not applied.&quot;,
+      keys: [key],
+      results: [result],
+    };
+  },
+};
+
+const rows: readonly AgentPerson[] = [
+  { id: &quot;ada&quot;, name: &quot;Ada Lovelace&quot;, salary: 120 },
+  { id: &quot;grace&quot;, name: &quot;Grace Hopper&quot;, salary: 140 },
+];
+const columns: readonly ColumnDef&lt;AgentPerson&gt;[] = [
+  { key: &quot;name&quot;, header: &quot;Person&quot; },
+  { key: &quot;salary&quot;, header: &quot;Salary&quot;, sortable: true },
+];
+const rowKey = (row: AgentPerson) =&gt; row.id;
+const session = shallowRef&lt;AgentSession&gt;();
+const open = shallowRef(false);
+const assistant = useTableAssistant(() =&gt; ({
+  session: session.value,
+  transport,
+  open: open.value,
+  onOpenChange: (value) =&gt; {
+    open.value = value;
+  },
+}));
+const features = [tableAgent({
+  tableId: &quot;people&quot;, approval: &quot;never&quot;,
+  columns: { salary: { type: &quot;number&quot;, sortable: true } },
+  bridge: { attach: (value) =&gt; { session.value = value; } },
+})];
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;DataTable
+    :data=&quot;rows&quot; :columns=&quot;columns&quot; :row-key=&quot;rowKey&quot;
+    :features=&quot;features&quot; :url-sync=&quot;false&quot;
+  /&gt;
+  &lt;TableAssistant
+    :assistant=&quot;assistant.view.value&quot;
+    :open=&quot;assistant.open.value&quot;
+    :on-open-change=&quot;assistant.setOpen&quot;
+    presentation=&quot;floating&quot;
+  /&gt;
+&lt;/template&gt;</code></pre>
+        <h2>Install</h2>
+        <pre><code># Runs once the Vue packages are published to npm
+pnpm add @adapttable/shadcn-vue @adapttable/vue @adapttable/core reka-ui</code></pre>
+        <h2>The same feature in the other kits</h2>
+        <ul>
+          <li><a href="../../unstyled/ai/">AI table assistant in Vue Unstyled Vue</a> — Native elements — your own CSS</li>
+          <li><a href="../../element-plus/ai/">AI table assistant in Element Plus Vue</a> — Element blue, crisp form controls</li>
+          <li><a href="../../vuetify/ai/">AI table assistant in Vuetify Vue</a> — Material Design, Vuetify blue</li>
+          <li><a href="../../naive-ui/ai/">AI table assistant in Naive UI Vue</a> — Clean, compact, green accent</li>
+          <li><a href="../../reka-ui/ai/">AI table assistant in Reka UI Vue</a> — Accessible primitives, neutral theme</li>
+          <li><a href="../../nuxt-ui/ai/">AI table assistant in Nuxt UI Vue</a> — Tailwind-native, Nuxt green</li>
+          <li><a href="../../quasar/ai/">AI table assistant in Quasar Vue</a> — Material-flavoured, Quasar blue</li>
+        </ul>
+        <h2>More shadcn-vue features</h2>
+        <ul>
+          <li><a href="../filtering/">Filtering in shadcn-vue</a> — Ranges, selects, an AND/OR tree and chips — all in the URL.</li>
+          <li><a href="../columns/">Column management in shadcn-vue</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="../column-groups/">Column groups in shadcn-vue</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="../selection/">Row selection in shadcn-vue</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="../rows/">Rows in shadcn-vue</a> — Pin rows from a 3-dot menu, and merge a team that runs down the page.</li>
+          <li><a href="../row-reordering/">Row reordering in shadcn-vue</a> — Drag or keyboard moves, announced — the host writes.</li>
+          <li><a href="../editing/">Inline cell editing in shadcn-vue</a> — Native editors in the cell; every write goes through your handler.</li>
+          <li><a href="../grouping/">Row grouping in shadcn-vue</a> — Drag, select or keyboard grouping, with totals in the headers.</li>
+          <li><a href="../aggregation/">Aggregation in shadcn-vue</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="../nested-tables/">Nested tables in shadcn-vue</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="../export/">CSV export in shadcn-vue</a> — One toolbar button, a CSV of the table as it stands.</li>
+          <li><a href="../scale/">Row and column virtualization in shadcn-vue</a> — 40,000 rows in a scroll box, only the visible ones rendered.</li>
+          <li><a href="../tree/">Tree data in shadcn-vue</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
+          <li><a href="../mobile-cards/">Mobile cards in shadcn-vue</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="../pivot/">Pivot tables in shadcn-vue</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="../saved-views/">Saved views in shadcn-vue</a> — Name an arrangement and restore it from the menu.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in shadcn-vue</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="../rtl/">Right-to-left shadcn-vue data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="../realtime/">Live updates in shadcn-vue</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="../accessibility/">Accessible shadcn-vue data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+        </ul>
+        <p>
+          Reference: <a href="https://adapttable.orwamahmoud.com/ai-http/">ai-http</a>, <a href="https://adapttable.orwamahmoud.com/ai-integrations/">ai-integrations</a>, <a href="https://adapttable.orwamahmoud.com/ai/">ai</a>, <a href="https://adapttable.orwamahmoud.com/vue/getting-started/?unavailable=agent-capabilities">agent-capabilities</a>. More of this kit:
+          <a href="../">AdaptTable for shadcn-vue</a>, or
+          <a href="/vue/demo/shadcn-vue/">the live demo</a>.
+        </p>
+      </main>
+    </div>
+    <script type="module" src="/src/vue/matrix/entry-matrix.ts"></script>
+  </body>
+</html>

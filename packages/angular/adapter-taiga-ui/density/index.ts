@@ -1,10 +1,12 @@
 import {
   type AdaptTableFeature,
-  coreDensityChooser,
   extendFeature,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/angular";
+import {
+  coreDensityChooser,
+  TOOLBAR_EXTRAS,
+} from "@adapttable/angular/adapter";
 import { AdaptDensityButton } from "@adapttable/taiga-ui";
 
 /**

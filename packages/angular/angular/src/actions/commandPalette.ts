@@ -2,10 +2,13 @@
  * The command palette, armed: open state, the shortcut that opens it, and
  * the commands it lists.
  */
+import { fromStore, injectShortcuts, readMaybe } from "@adapttable/angular";
+import type { CommandPaletteOptions } from "@adapttable/angular/features";
 import {
   type Command,
   commandPaletteCommands,
   createCommandPaletteController,
+  type Direction,
   type FeatureHostState,
   isCommandPaletteArmed,
   OPEN_PALETTE_COMMAND,
@@ -21,10 +24,7 @@ import {
   type Signal,
 } from "@angular/core";
 
-import type { CommandPaletteOptions } from "../features/factories";
-import { fromStore, readMaybe } from "../store";
 import { ADAPTTABLE_PALETTE_OPEN } from "./paletteState";
-import { injectShortcuts } from "./shortcuts";
 
 export { OPEN_PALETTE_COMMAND };
 
@@ -38,6 +38,8 @@ export interface CommandPaletteInjectOptions extends TableCommandOptions {
   readonly commandPalette?: boolean | CommandPaletteOptions;
   /** Label overrides; gaps fall back to English. */
   readonly labels: TableLabels;
+  /** The table's current writing direction, including portaled surfaces. */
+  readonly dir?: Direction;
   /** The host of this table, for commands a feature registered. */
   readonly featureHost?: FeatureHostState;
 }

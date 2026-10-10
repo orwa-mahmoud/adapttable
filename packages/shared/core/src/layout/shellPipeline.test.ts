@@ -878,3 +878,51 @@ describe("finishShellBody", () => {
     expect(tableProps.tree).toBe(tree);
   });
 });
+
+describe("selection scope publication", () => {
+  it("preserves runtimes that omit optional scope metadata", () => {
+    const selectedIds = new Set(["a"]);
+    const replace = vi.fn();
+    const publisher = new TableRuntimePublisher<Row>();
+    const published = publisher.update(
+      makeChrome({
+        table: { labels: {}, selection: { selectedIds, replace } },
+      }),
+      {}
+    );
+    expect(published.selection).toEqual({ selectedIds, replace });
+    expect(published.selection).not.toHaveProperty("allMatching");
+    expect(published.selection).not.toHaveProperty("acrossPages");
+  });
+  it.each([false, true])(
+    "forwards all-matching and source reachability without changing host sets: %s",
+    (enabled) => {
+      const selectedIds = new Set(["b", "a"]);
+      const replace = vi.fn();
+      const publisher = new TableRuntimePublisher<Row>();
+      const published = publisher.update(
+        makeChrome({
+          table: {
+            labels: {},
+            selection: {
+              selectedIds,
+              replace,
+              allMatching: enabled,
+              acrossPages: enabled,
+            },
+          },
+        }),
+        {}
+      );
+      expect(published.selection).toEqual({
+        selectedIds,
+        replace,
+        allMatching: enabled,
+        acrossPages: enabled,
+      });
+      expect(published.selection?.selectedIds).toBe(selectedIds);
+      expect([...selectedIds]).toEqual(["b", "a"]);
+      expect(replace).not.toHaveBeenCalled();
+    }
+  );
+});

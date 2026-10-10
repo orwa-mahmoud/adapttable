@@ -10,7 +10,8 @@ import { TestBed } from "@angular/core/testing";
 import { AdaptControl } from "./control";
 import { extendFeature, featureSlotFillsOf } from "./featureHost";
 import { AdaptIcon } from "./icon";
-import { AdaptSlot, ADAPTTABLE_SLOT_TABLE, type SlotTable } from "./slots";
+import { ADAPTTABLE_SLOT_TABLE, type SlotTable } from "./slotContracts";
+import { AdaptSlot } from "./slots";
 
 interface Label {
   readonly text: string;

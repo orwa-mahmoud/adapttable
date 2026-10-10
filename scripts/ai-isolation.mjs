@@ -3,22 +3,22 @@
  *
  *   node scripts/ai-isolation.mjs
  *
- * `@adapttable/core`, `@adapttable/react`, every published adapter root and
+ * `@adapttable/core`, every implemented binding and adapter root, and
  * `@adapttable/server` must not mention the agent protocol. A table pays for
  * discovery only when it imports `@adapttable/ai`.
  */
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { CORE, FRAMEWORKS, KITS, participatingKits } from "./kits.mjs";
+import { buildPkgDirByName, walkGraph } from "./module-graph.mjs";
 import {
-  CORE,
-  FRAMEWORKS,
-  frameworksIn,
-  KITS,
-  participatingKits,
-} from "./kits.mjs";
-import { packageDir, packageRel, REPO_ROOT as ROOT } from "./packages.mjs";
+  listPackages,
+  packageDir,
+  packageRel,
+  REPO_ROOT as ROOT,
+} from "./packages.mjs";
 
 const MARKERS = [
   "createAgentSession",
@@ -37,8 +37,8 @@ const MARKERS = [
 
 /**
  * The package folders whose root graph must stay free of the agent protocol:
- * the engine, the binding of every framework a published kit is built on, the
- * server, and every published kit in `scripts/kits.mjs`.
+ * the engine, every existing framework binding, the server, and participating
+ * or implemented non-React kits in `scripts/kits.mjs`.
  */
 /** The JavaScript branch of an exports entry, without guessing the build format. */
 export function moduleEntry(entry) {
@@ -51,39 +51,58 @@ export function moduleEntry(entry) {
   return undefined;
 }
 
-function manifestOf(name) {
+/** Every advertised JavaScript condition, including require and browser builds. */
+export function moduleEntries(entry, into = new Set()) {
+  if (typeof entry === "string") {
+    if (/\.[cm]?js$/.test(entry)) into.add(entry);
+    return [...into];
+  }
+  if (!entry || typeof entry !== "object") return [...into];
+  for (const [condition, value] of Object.entries(entry)) {
+    if (!condition.startsWith("types")) moduleEntries(value, into);
+  }
+  return [...into];
+}
+
+function manifestOf(name, root = ROOT) {
   return JSON.parse(
-    readFileSync(join(packageDir(name), "package.json"), "utf8")
+    readFileSync(join(packageDir(name, root), "package.json"), "utf8")
   );
 }
 
-// Angular's implemented kits must prove isolation before the campaign promotes
-// them to native/shell. Placeholder manifests have no root entry yet.
-const angularKits = KITS.filter(
-  (kit) =>
-    kit.framework === "angular" &&
-    moduleEntry(manifestOf(kit.name).exports?.["."])
-);
-const guardedKits = [
-  ...new Map(
-    [...participatingKits(KITS), ...angularKits].map((kit) => [kit.name, kit])
-  ).values(),
-];
-const GRAPH_PACKAGES = [
-  CORE,
-  ...frameworksIn(guardedKits).map(
-    (framework) => FRAMEWORKS[framework].binding
-  ),
-  "server",
-  ...guardedKits.map((kit) => kit.name),
-];
+/**
+ * Discover every existing binding, even before its first kit participates.
+ * Implemented private non-React kits owe isolation proof as they grow; the
+ * private React reference remains outside kit contracts under its existing role.
+ * A placeholder with no root export does not claim an implemented graph.
+ */
+export function baseGraphPaths(root = ROOT, kits = KITS) {
+  const bindings = listPackages(root)
+    .filter((pkg) => FRAMEWORKS[pkg.group]?.binding === pkg.name)
+    .map((pkg) => pkg.name);
+  const implementedKits = kits.filter(
+    (kit) =>
+      kit.framework !== "react" &&
+      moduleEntries(manifestOf(kit.name, root).exports?.["."]).length > 0
+  );
+  const names = new Set([
+    CORE,
+    ...bindings,
+    "server",
+    ...[...participatingKits(kits), ...implementedKits].map((kit) => kit.name),
+  ]);
+  return [...names].flatMap((name) => {
+    const entries = moduleEntries(manifestOf(name, root).exports?.["."]);
+    if (entries.length === 0)
+      throw new Error(`No JavaScript root export declared by ${name}`);
+    return entries.map(
+      (entry) => `${packageRel(name, root)}/${entry.replace(/^\.\//u, "")}`
+    );
+  });
+}
 
-/** Each root graph, following the package's declared JavaScript entry. */
-const GRAPHS = GRAPH_PACKAGES.map((name) => {
-  const entry = moduleEntry(manifestOf(name).exports?.["."]);
-  if (!entry) throw new Error(`No JavaScript root export declared by ${name}`);
-  return `${packageRel(name)}/${entry.replace(/^\.\//u, "")}`;
-});
+/** Each root graph, following every declared JavaScript condition. */
+const GRAPHS = baseGraphPaths();
 
 /**
  * Every marker one graph's text carries.
@@ -97,16 +116,6 @@ export function leaksIn(file, text) {
   );
 }
 
-/** A graph's text, or nothing when that entry was never built. */
-function readGraph(file) {
-  try {
-    return readFileSync(join(ROOT, file), "utf8");
-  } catch (error) {
-    if (error.code === "ENOENT") return undefined;
-    throw error;
-  }
-}
-
 /**
  * Check every base graph.
  *
@@ -114,13 +123,25 @@ function readGraph(file) {
  * failure named in full rather than a graph quietly skipped — a pass over
  * eleven graphs must mean eleven graphs were read.
  */
-export function checkGraphs(graphs = GRAPHS) {
+export function checkGraphs(graphs = GRAPHS, root = ROOT) {
   const leaked = [];
   const missing = [];
+  const pkgDirByName = buildPkgDirByName(root);
   for (const file of graphs) {
-    const text = readGraph(file);
-    if (text === undefined) missing.push(file);
-    else leaked.push(...leaksIn(file, text));
+    const entry = join(root, file);
+    if (!existsSync(entry)) {
+      missing.push(file);
+      continue;
+    }
+    const graph = walkGraph([entry], pkgDirByName);
+    for (const unresolved of graph.unresolved) {
+      missing.push(`${file} has unresolved import ${unresolved}`);
+    }
+    for (const reached of graph.files) {
+      const path = relative(root, reached).replaceAll("\\", "/");
+      const label = reached === entry ? file : `${file} reaches ${path}`;
+      leaked.push(...leaksIn(label, readFileSync(reached, "utf8")));
+    }
   }
   return { leaked, missing };
 }

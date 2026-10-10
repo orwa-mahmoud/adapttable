@@ -17,6 +17,12 @@ import {
   readEditableCellValue,
   resolveCellEditor,
 } from "./cellEditing";
+import {
+  createEditCommitLifecycle,
+  type EditCommitSnapshot,
+  type EditCommitValidationOptions,
+  validateEditCommit,
+} from "./editCommitLifecycle";
 import type { EditEventHandler } from "./editContracts";
 import { observeEdit } from "./editingController";
 import { listenerSet } from "./storePlumbing";
@@ -34,6 +40,8 @@ export type RowEditDrafts = Readonly<Record<string, string>>;
  * @public
  */
 export interface RowEditingState<TRow> {
+  /** Current validation or host-save state, absent while idle. */
+  readonly commit?: EditCommitSnapshot;
   /** The row being edited, or `null` when none is. */
   activeRowId: string | null;
   /** Whether this row is the one being edited. */
@@ -47,7 +55,8 @@ export interface RowEditingState<TRow> {
   /** Replace one column's draft. */
   setDraft: (columnKey: string, value: string) => void;
   /**
-   * Hand the host everything the reader changed, as one patch, then close.
+   * Hand the host everything the reader changed as one patch. Close after a
+   * successful save; pending and rejected saves keep the drafts.
    * A no-op when nothing is open, and it reports nothing when nothing changed —
    * saving an untouched row is a write the host never asked for.
    */
@@ -86,7 +95,15 @@ export interface RowEditingState<TRow> {
  *
  * @public
  */
-export interface RowEditStoreOptions<TRow> {
+export interface RowEditStoreOptions<
+  TRow,
+> extends EditCommitValidationOptions<TRow> {
+  /** Format a failed validation request or host save. */
+  readonly formatEditError?: (error: unknown) => string;
+  /** Observe a rejected host save. */
+  readonly onEditError?: EditEventHandler<TRow>;
+  /** Observe a validation verdict which refused a save. */
+  readonly onValidationFail?: EditEventHandler<TRow>;
   /**
    * Whether row editing is armed. Off by default: it changes the commit unit,
    * which is a decision about the data, not a preference.
@@ -118,6 +135,8 @@ export interface RowEditStoreOptions<TRow> {
  * @public
  */
 export interface RowEditSnapshot {
+  /** Current validation or host-save state, absent while idle. */
+  readonly commit?: EditCommitSnapshot;
   /** The row being edited, or `null`. */
   readonly activeRowId: string | null;
   /** Every draft in the open row, by column key. */
@@ -136,6 +155,8 @@ export interface RowEditSnapshot {
  * @public
  */
 export interface RowEditStore<TRow> {
+  /** Revoke pending continuations; cannot cancel a request already sent to the host. */
+  readonly dispose?: () => void;
   /** The form now. */
   readonly getSnapshot: () => RowEditSnapshot;
   /** Listen for changes. Returns the unsubscribe. */
@@ -146,7 +167,7 @@ export interface RowEditStore<TRow> {
   readonly begin: (row: TRow, rowId: string) => void;
   /** Replace one column's draft. */
   readonly setDraft: (columnKey: string, value: string) => void;
-  /** Hand the host the patch, then close. */
+  /** Request a save; close on success and retain drafts after an async failure. */
   readonly save: () => void;
   /** Throw every draft away and close. */
   readonly cancel: () => void;
@@ -211,6 +232,16 @@ export function createRowEditStore<TRow>(
     isDirty: false,
   };
   const { subscribe, notify } = listenerSet();
+  let disposed = false;
+  const commit = createEditCommitLifecycle((value) => {
+    if (disposed) return;
+    if (value === undefined) {
+      const next = { ...snapshot };
+      delete next.commit;
+      snapshot = next;
+    } else snapshot = { ...snapshot, commit: value };
+    notify();
+  });
   // The row and its seeds as they were when the edit opened: what "changed"
   // is measured against, and what the patch is built from. Outside the
   // snapshot because a save reads them in the same tick a keystroke wrote a
@@ -223,7 +254,7 @@ export function createRowEditStore<TRow>(
       Object.entries(drafts).some(
         ([key, value]) => value !== opened?.seeds[key]
       );
-    snapshot = { activeRowId, drafts, isDirty };
+    snapshot = { ...snapshot, activeRowId, drafts, isDirty };
     notify();
   };
 
@@ -269,10 +300,26 @@ export function createRowEditStore<TRow>(
     getSnapshot: () => snapshot,
     subscribe,
     configure(next) {
+      if (disposed) return;
+      if (
+        next.enabled !== current.enabled ||
+        next.columns !== current.columns ||
+        next.onRowEdit !== current.onRowEdit ||
+        next.validateRow !== current.validateRow ||
+        next.applyEdit !== current.applyEdit ||
+        next.featureHost !== current.featureHost
+      )
+        commit.invalidate();
       current = next;
     },
+    dispose() {
+      if (disposed) return;
+      commit.dispose();
+      disposed = true;
+    },
     begin(row, rowId) {
-      if (current.enabled !== true) return;
+      if (disposed || current.enabled !== true) return;
+      commit.invalidate();
       const seeds: Record<string, string> = {};
       for (const column of editableColumns(current.columns, row)) {
         seeds[column.key] = readEditableCellValue(
@@ -293,8 +340,10 @@ export function createRowEditStore<TRow>(
       });
     },
     setDraft(columnKey, value) {
+      if (disposed) return;
       const previous = snapshot.drafts[columnKey];
       if (previous === value) return;
+      commit.invalidate();
       const open = opened;
       const seed = open?.seeds[columnKey];
       write(snapshot.activeRowId, { ...snapshot.drafts, [columnKey]: value });
@@ -313,6 +362,7 @@ export function createRowEditStore<TRow>(
       }
     },
     save() {
+      if (disposed || current.enabled !== true || commit.busy()) return;
       const open = opened;
       if (!open) return;
       const patch: Record<string, unknown> = {};
@@ -327,26 +377,52 @@ export function createRowEditStore<TRow>(
           current.featureHost
         );
       }
-      // Saving an untouched row is a write the host never asked for.
-      if (Object.keys(patch).length > 0) {
-        current.onRowEdit?.(open.row, patch);
-        observeEdit(current.onEditCommit, {
-          row: open.row,
-          rowId: open.rowId,
-          columnKey: "",
-          value: patch,
-          previousValue: open.row,
-          unit: "row",
-        });
+      if (Object.keys(patch).length === 0) {
+        close("silent");
+        return;
       }
-      close("silent");
+      const edits = [{ row: open.row, rowId: open.rowId, patch }];
+      const validate =
+        current.validateRow !== undefined ||
+        current.columns.some(
+          (column) => column.validate && column.key in patch
+        );
+      const event = {
+        row: open.row,
+        rowId: open.rowId,
+        columnKey: "",
+        value: patch,
+        previousValue: open.row,
+        unit: "row" as const,
+      };
+      commit.run({
+        validate: validate
+          ? (active) => validateEditCommit(edits, current, active)
+          : undefined,
+        commit: () => current.onRowEdit?.(open.row, patch),
+        committed: () => observeEdit(current.onEditCommit, event),
+        success: () => close("silent"),
+        failure: (error) =>
+          observeEdit(current.onEditError, { ...event, error }),
+        invalid: (failures) =>
+          observeEdit(current.onValidationFail, {
+            ...event,
+            columnKey: failures[0]?.columnKey ?? "",
+            error: failures[0]?.message,
+          }),
+        formatError: current.formatEditError,
+      });
     },
     cancel() {
+      if (disposed) return;
+      commit.invalidate();
       close("cancel");
     },
     openedRow: () => opened?.row,
     seeds: () => opened?.seeds,
     acceptSeeds(row, columnKeys) {
+      if (disposed) return;
+      commit.invalidate();
       const open = opened;
       if (!open) return;
       opened = {
@@ -356,6 +432,8 @@ export function createRowEditStore<TRow>(
       };
     },
     takeSeeds(row, columnKeys) {
+      if (disposed) return;
+      commit.invalidate();
       const open = opened;
       if (!open) return;
       const incoming = incomingOf(row, columnKeys);
@@ -407,6 +485,7 @@ export function rowEditingView<TRow>(
     save: store.save,
     cancel: store.cancel,
     isDirty: snapshot.isDirty,
+    commit: snapshot.commit,
     signature: rowEditSignature(snapshot),
     openedRow: store.openedRow,
     seeds: store.seeds,

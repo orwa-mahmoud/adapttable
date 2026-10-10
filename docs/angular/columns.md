@@ -63,15 +63,23 @@ single `context` object unless you arrange that yourself.
 
 ## Renderer fields and context
 
-| Column field | Renderer context                                   |
-| ------------ | -------------------------------------------------- |
-| `cell`       | `$implicit` / `row`, `rowIndex`, `column`, `value` |
-| `headerCell` | `$implicit` / `column`                             |
-| `footer`     | `$implicit` / `column`, and the summary `value`    |
+| Column field    | Renderer context                                   |
+| --------------- | -------------------------------------------------- |
+| `cell`          | `$implicit` / `row`, `rowIndex`, `column`, `value` |
+| `headerCell`    | `$implicit` / `column`                             |
+| `headerActions` | `$implicit` / `column`                             |
+| `footer`        | `$implicit` / `column`, and the summary `value`    |
 
 Each renderer is a `TemplateRef<TContext>` or Angular component type. The
-names are lowercase `cell`, `headerCell` and `footer`. `header` and
-`headerActions` are plain text. Put a custom header control in `headerCell`.
+names are lowercase `cell`, `headerCell`, `headerActions` and `footer`.
+`header` is plain text; `headerActions` also accepts plain text. Use
+`headerCell` for the caption and `headerActions` for your own controls. The
+kit renders `headerActions` after the caption, outside the sort button, so
+clicking an action does not also sort the column. Templates receive the column
+as both `$implicit` and `column`; components receive only the inputs they
+declare. Action controls and their callbacks belong to the host. Header
+actions are a desktop-header surface; mobile cards do not render them.
+
 A footer renderer needs a summary value supplied by the table's `summaryRow`;
 declaring a renderer alone does not create an aggregate.
 

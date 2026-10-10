@@ -6,4 +6,4 @@
  *
  * @packageDocumentation
  */
-export { cellSpan } from "@adapttable/angular";
+export { cellSpan } from "@adapttable/angular/features";

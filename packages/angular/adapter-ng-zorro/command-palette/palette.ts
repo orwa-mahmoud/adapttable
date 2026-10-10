@@ -9,7 +9,8 @@ import {
   type CommandPaletteSurfaceProps,
   injectCommandPalette,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
+import { Directionality } from "@angular/cdk/bidi";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
@@ -61,6 +62,7 @@ import { NzTypographyModule } from "ng-zorro-antd/typography";
 class AdaptCommandSurface {
   readonly props = input.required<CommandPaletteSurfaceProps>();
   private readonly modal = viewChild(NzModalComponent);
+  private readonly direction = inject(Directionality);
 
   constructor() {
     afterRenderEffect((onCleanup) => {
@@ -69,6 +71,11 @@ class AdaptCommandSurface {
       element.dataset.adapttablePart = "command-palette";
       element.setAttribute("aria-label", this.props().label);
       element.setAttribute("aria-modal", "true");
+      const dir = this.props().dir ?? this.direction.valueSignal();
+      element.setAttribute("dir", dir);
+      // NG-ZORRO 22 snapshots modal direction when opening. Keep its native
+      // RTL styling in sync on the public modal element without remounting it.
+      element.classList.toggle("ant-modal-wrap-rtl", dir === "rtl");
       const onKey = (event: KeyboardEvent): void => {
         if (event.key !== "Escape" || event.defaultPrevented) return;
         event.preventDefault();
@@ -223,6 +230,7 @@ const SLOTS: CommandPaletteSlots = {
       [open]="palette().open"
       [onClose]="palette().close"
       [labels]="props().labels"
+      [dir]="props().dir"
       [slots]="slots"
     />
   `,

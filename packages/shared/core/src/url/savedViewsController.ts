@@ -205,7 +205,8 @@ export interface SavedViewsController {
   /**
    * Load the list and keep loads live. Returns the teardown, after which a
    * store reply still in flight is ignored and `reload` does nothing. A
-   * binding reconnects when the storage key changes.
+   * binding reconnects when the storage key changes. Local list edits also
+   * retire replies from loads that started before those edits.
    */
   readonly connect: () => () => void;
   /**
@@ -213,7 +214,7 @@ export interface SavedViewsController {
    * Does nothing while disconnected.
    */
   readonly reload: () => void;
-  /** Capture the table's CURRENT state under a name (replaces same-name). */
+  /** Capture the current state under a name, unless that view is read-only. */
   readonly save: (name: string) => void;
   /** Apply a saved view to the table (other tables' params untouched). */
   readonly apply: (name: string) => void;
@@ -582,6 +583,9 @@ export function createSavedViewsController(
   /** Show an operation's list at once, then write it through. */
   const commit = (change: ListChange | undefined): void => {
     if (!change) return;
+    // An older list response (including a rejection) must not replace a
+    // newer local edit. A subsequent explicit reload is authoritative again.
+    ticket += 1;
     publish(change.next);
     try {
       const { store } = options;
@@ -619,6 +623,12 @@ export function createSavedViewsController(
       if (connected) load();
     },
     save(name) {
+      if (
+        snapshot.views.some(
+          (view) => view.name === name && view.readOnly === true
+        )
+      )
+        return;
       const visibility = options.visibility ?? "private";
       const view: SavedView = {
         name,

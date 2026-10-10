@@ -128,3 +128,69 @@ describe("resolveContextTarget", () => {
     );
   });
 });
+
+describe("mobile public part targeting", () => {
+  it.each(["card", "row"])(
+    "resolves a card value inside %s without changing desktop precedence",
+    (part) => {
+      build(
+        `<article data-adapttable-part="${part}" data-row-id="1"><dl><div data-adapttable-part="card-row"><dd data-adapttable-part="card-value" data-column-key="name"><span id="mobile-value">Ada</span></dd></div></dl><button id="mobile-gap">Actions</button></article>`
+      );
+      const found = resolveContextTarget<Row>(at("mobile-value"), rowFor);
+      expect(found?.target).toEqual({
+        kind: "cell",
+        row: ROWS["1"],
+        rowId: "1",
+        columnKey: "name",
+      });
+      expect(found?.element.tagName).toBe("DD");
+      expect(
+        resolveContextTarget<Row>(at("mobile-gap"), rowFor)?.target.kind
+      ).toBe("row");
+    }
+  );
+});
+
+describe("nested context ownership", () => {
+  const wrap = (inner: string) =>
+    `<div data-adapttable-part="root"><div data-adapttable-part="row" data-row-id="1"><div data-adapttable-part="cell" data-column-key="outer"><div data-adapttable-part="root">${inner}</div></div></div></div>`;
+  it("keeps an inner card's column and a gap's row together", () => {
+    build(
+      wrap(
+        '<article data-adapttable-part="card" data-row-id="1"><dd data-adapttable-part="card-value" data-column-key="inner"><span id="value">Ada</span></dd><button id="gap">Actions</button></article>'
+      )
+    );
+    expect(resolveContextTarget(at("value"), rowFor)?.target).toEqual({
+      kind: "cell",
+      row: ROWS["1"],
+      rowId: "1",
+      columnKey: "inner",
+    });
+    expect(resolveContextTarget(at("gap"), rowFor)?.target).toEqual({
+      kind: "row",
+      row: ROWS["1"],
+      rowId: "1",
+    });
+  });
+  it.each([
+    '<button id="empty">Empty</button>',
+    '<article data-adapttable-part="summary-card"><dd data-adapttable-part="card-value" data-column-key="summary"><span id="empty">Sum</span></dd></article>',
+  ])("does not borrow an outer data row for %s", (content) => {
+    build(wrap(content));
+    expect(resolveContextTarget(at("empty"), rowFor)).toBeNull();
+  });
+  it("rejects summaries contained in a data row without confusing a nested real row", () => {
+    build(
+      '<div data-adapttable-part="root"><div data-adapttable-part="row" data-row-id="1"><article data-adapttable-part="summary-card"><dd data-adapttable-part="card-value" data-column-key="sum"><span id="summary">Sum</span></dd></article></div></div>'
+    );
+    expect(resolveContextTarget(at("summary"), rowFor)).toBeNull();
+  });
+  it("never inherits an outer header from an inner table root", () => {
+    build(
+      '<div data-adapttable-part="root"><div data-adapttable-part="header-cell" data-column-key="outer"><div data-adapttable-part="root"><article data-adapttable-part="card" data-row-id="1"><span id="inner-row">Ada</span></article></div></div></div>'
+    );
+    expect(resolveContextTarget(at("inner-row"), rowFor)?.target.kind).toBe(
+      "row"
+    );
+  });
+});

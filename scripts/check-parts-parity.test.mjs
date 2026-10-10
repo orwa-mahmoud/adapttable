@@ -363,6 +363,97 @@ function themedOwnership(themedSource = SCROLL_BOX_REF) {
   });
 }
 
+describe("native extras and per-framework themed parity", () => {
+  const withExtras = (root, nativeExtras) =>
+    checkPartsParity({
+      root,
+      kits: NATIVE_KITS,
+      contract: ["table", "cell"],
+      expectedGaps: {},
+      getterParts: {},
+      fallbackOnly: { "native elements": ["table", "cell", "bulk-bar"] },
+      unnamedInKits: {},
+      nativeExtras,
+    }).failures.map(({ headline, lines }) => ({ headline, lines }));
+
+  it("accepts a part only one native kit renders when it is listed with a reason", () => {
+    assert.deepEqual(
+      withExtras(fixtureRoot(), {
+        "adapter-plain": {
+          "bulk-bar": "only the React native kit has a bulk bar",
+        },
+      }),
+      []
+    );
+  });
+
+  it("reports a listed extra that every native kit renders or its kit no longer renders", () => {
+    assert.deepEqual(
+      withExtras(contractRoot(), {
+        "adapter-plain": { table: "stale", ghost: "removed" },
+      }),
+      [
+        {
+          headline: "2 native extra(s) in NATIVE_EXTRAS are stale:",
+          lines: [
+            "table — every native kit renders it now",
+            "ghost — adapter-plain no longer renders it",
+          ],
+        },
+      ]
+    );
+  });
+
+  it("holds themed kits to their own framework's themed parts", () => {
+    const root = mkdtempSync(join(tmpdir(), "adapttable-parts-themed-"));
+    temps.push(root);
+    writePackage(root, "shared", "core", { "src/index.ts": "export {};\n" });
+    writePackage(root, "react", "react", { "src/index.ts": "export {};\n" });
+    writePackage(root, "angular", "angular", {
+      "src/index.ts": "export {};\n",
+    });
+    const table = (extra = "") =>
+      `export const T = () => <table data-adapttable-part="table"><td data-adapttable-part="cell" />${extra}</table>;\n`;
+    const kits = [
+      { name: "adapter-red", framework: "react", role: "shell" },
+      { name: "adapter-blue", framework: "react", role: "shell" },
+      { name: "adapter-gold", framework: "angular", role: "shell" },
+      { name: "adapter-jade", framework: "angular", role: "shell" },
+      { name: "adapter-onyx", framework: "angular", role: "shell" },
+    ];
+    for (const kit of kits) {
+      const gold =
+        kit.name === "adapter-onyx"
+          ? ""
+          : '<div data-adapttable-part="gold-only"></div>';
+      writePackage(
+        root,
+        kit.framework,
+        kit.name,
+        kit.framework === "react"
+          ? { "src/Table.tsx": table() }
+          : {
+              "src/table.component.html": `<table data-adapttable-part="table"><td data-adapttable-part="cell"></td>${gold}</table>\n`,
+            }
+      );
+    }
+    const failures = checkPartsParity({
+      root,
+      kits,
+      contract: ["table", "cell"],
+      expectedGaps: {},
+      getterParts: {},
+      fallbackOnly: {},
+      unnamedInKits: {},
+      nativeExtras: {},
+    }).failures;
+    assert.deepEqual(
+      failures.flatMap(({ lines }) => lines),
+      ["gold-only — missing from adapter-onyx"]
+    );
+  });
+});
+
 describe("native-only accounting uses effective themed parts", () => {
   it("accepts a name provided by themed Chrome and another framework's native kit", () => {
     assert.deepEqual(themedOwnership().failures, []);
@@ -428,6 +519,33 @@ describe("inherited Angular row contracts", () => {
   it("follows a kit's actual binding shell base to the canonical getter", () => {
     assert.deepEqual(rowParity(inheritedRowsRoot()).failures, []);
   });
+  it("follows a runtime alias through the adapter entry's shared src file", () => {
+    const root = inheritedRowsRoot();
+    writePackage(root, "angular", "angular", {
+      "package.json": JSON.stringify({
+        name: "@adapttable/angular",
+        exports: { ".": "./index.js", "./adapter": "./adapter.js" },
+      }),
+      "ng-package.json": JSON.stringify({ lib: { entryFile: "src/index.ts" } }),
+      "adapter/ng-package.json": JSON.stringify({
+        lib: { entryFile: "../src/adapter.ts" },
+      }),
+      "src/adapter.ts":
+        'export { AdaptDataTableShell as Shell } from "./layout/dataTableShell";',
+    });
+    writePackage(root, "angular", "adapter-verdant", {
+      "src/dataTable.ts":
+        'import { Shell as Base } from "@adapttable/angular/adapter"; export class AdaptDataTable extends Base {}',
+    });
+    assert.deepEqual(rowParity(root).failures, []);
+    writePackage(root, "angular", "angular", {
+      "src/adapter.ts":
+        'export type { AdaptDataTableShell as Shell } from "./layout/dataTableShell";',
+    });
+    assert.deepEqual(rowParity(root).failures[0].lines, [
+      "row — adapter-verdant: neither names it nor calls rowAttrs",
+    ]);
+  });
   for (const [name, root] of [
     ["an unused shell import", () => inheritedRowsRoot(false)],
     [
@@ -481,6 +599,110 @@ function expressionGap(source, layer = "kit", extension = "tsx") {
   });
   return report(root)[0].missing;
 }
+
+describe("part helpers and conditional part names", () => {
+  for (const [name, source, expected] of [
+    [
+      "a helper that returns its parameter as the part",
+      'function part(name, names) { return { "data-adapttable-part": name, class: names }; }\nexport const View = () => h("div", part("helper-part", {}));',
+      ["helper-part"],
+    ],
+    [
+      "a helper that hands its parameter to a kit slot",
+      'function button(props, label, part) { return props.slots.Button({ label, part }); }\nexport const View = (props) => button(props, "Close", "slot-part");',
+      ["slot-part"],
+    ],
+    [
+      "a helper that forwards its parameter to another part helper",
+      'const part = (name) => ({ "data-adapttable-part": name });\nfunction control(name) { return h("button", { ...part(name) }); }\nexport const View = () => control("forwarded-part");',
+      ["forwarded-part"],
+    ],
+    [
+      "both branches of a conditional part",
+      'export const View = (up) => h("button", { "data-adapttable-part": up ? "move-up" : "move-down" });',
+      ["move-down", "move-up"],
+    ],
+    [
+      "a helper that does not return its parameter as the part",
+      'function label(name) { return { title: name }; }\nexport const View = () => h("div", label("not-a-part"));',
+      [],
+    ],
+    [
+      "a component prop that names one of its elements",
+      'export const View = () => h(Select, { value: "", optionPart: "option-part" });',
+      ["option-part"],
+    ],
+    [
+      "a part-named key in an object no call receives",
+      'export const config = { menuPart: "unhanded-part" };',
+      [],
+    ],
+    [
+      "a same-named helper from another package",
+      'import { part } from "@elsewhere/parts";\nexport const View = () => h("div", part("foreign-part"));',
+      [],
+    ],
+  ]) {
+    it(`reads ${name}`, () => {
+      assert.deepEqual(
+        [...expressionGap(source, "kit", "ts")].sort(),
+        expected
+      );
+    });
+  }
+});
+
+describe("Vue single-file component scripts", () => {
+  /** The parts a Vue kit's files name, as a private Vue kit's gap against it. */
+  function vueGap(files) {
+    const root = mkdtempSync(join(tmpdir(), "adapttable-parts-sfc-"));
+    temps.push(root);
+    writePackage(root, "shared", "core", { "src/index.ts": "export {};\n" });
+    writePackage(root, "vue", "vue", { "src/index.ts": "export {};\n" });
+    writePackage(root, "vue", "adapter-plain", files);
+    writePackage(root, "vue", "adapter-draft", {
+      "src/index.ts": "export {};\n",
+    });
+    return partsGapReport({
+      root,
+      kits: [
+        { name: "adapter-plain", framework: "vue", role: "native" },
+        { name: "adapter-draft", framework: "vue", role: "private" },
+      ],
+      references: { "adapter-draft": "adapter-plain" },
+    })[0].missing;
+  }
+
+  it("reads part props and helpers in an SFC's script blocks", () => {
+    assert.deepEqual(
+      vueGap({
+        "src/Menu.vue": [
+          '<script setup lang="ts">',
+          'const part = (name: string) => ({ "data-adapttable-part": name });',
+          'const view = () => [h(Select, { menuPart: "sfc-menu" }), h("li", part("sfc-item"))];',
+          "</script>",
+          "<template><div /></template>",
+        ].join("\n"),
+      }),
+      ["sfc-item", "sfc-menu"]
+    );
+  });
+
+  it("ignores part-like text outside an SFC's script blocks", () => {
+    assert.deepEqual(
+      vueGap({
+        "src/Note.vue": [
+          '<script setup lang="ts">',
+          "const label = 1;",
+          "</script>",
+          '<template><p>{{ label }} h(Select, { menuPart: "template-text" })</p></template>',
+          '<docs>h(Select, { menuPart: "docs-text" })</docs>',
+        ].join("\n"),
+      }),
+      []
+    );
+  });
+});
 
 describe("rendered JSX part expressions", () => {
   it("reads every literal branch of a nullish conditional on a Chrome element", () => {
@@ -686,9 +908,13 @@ const ANGULAR_GROUP_ROW = `<tr
 ></tr>`;
 
 /** The directive is imported by the component that owns the template. */
-const angularComponent = (template, imports = "AdaptLiveRegion") => `
+const angularComponent = (
+  template,
+  imports = "AdaptLiveRegion",
+  module = "@adapttable/angular"
+) => `
 import { Component } from "@angular/core";
-import { AdaptLiveRegion } from "@adapttable/angular";
+import { AdaptLiveRegion } from "${module}";
 @Component({
   imports: [${imports}],
   template: \`${template}\`,
@@ -716,6 +942,63 @@ describe("rendered Angular part expressions and directives", () => {
       "column-rename-announcer",
     ]);
   });
+
+  for (const module of ["@adapttable/angular", "@adapttable/angular/adapter"]) {
+    it(`follows a registered runtime alias from ${module}`, () => {
+      const source = angularComponent(ANGULAR_REGION, "Region", module).replace(
+        "import { AdaptLiveRegion }",
+        "import { AdaptLiveRegion as Region }"
+      );
+      assert.deepEqual(angularExpressionGap(source), [
+        "column-rename-announcer",
+      ]);
+    });
+
+    for (const [name, source] of [
+      ["an unused directive", angularComponent(ANGULAR_REGION, "", module)],
+      [
+        "a type-only import declaration",
+        angularComponent(ANGULAR_REGION, "AdaptLiveRegion", module).replace(
+          "import { AdaptLiveRegion }",
+          "import type { AdaptLiveRegion }"
+        ),
+      ],
+      [
+        "a type-only import specifier",
+        angularComponent(ANGULAR_REGION, "AdaptLiveRegion", module).replace(
+          "import { AdaptLiveRegion }",
+          "import { type AdaptLiveRegion }"
+        ),
+      ],
+      [
+        "a shadowed local alias",
+        angularComponent(ANGULAR_REGION, "Region", module).replace(
+          "import { AdaptLiveRegion }",
+          "import { AdaptLiveRegion as Region }"
+        ) + "\nfunction unrelated(Region) {}",
+      ],
+    ]) {
+      it(`does not infer a directive part from ${name} in ${module}`, () => {
+        assert.deepEqual(angularExpressionGap(source), []);
+      });
+    }
+  }
+
+  for (const module of [
+    "@adapttable/angular/private",
+    "@adapttable/angular/src/adapter",
+    "@adapttable/angular/adapter/private",
+    "@adapttable/angular/features",
+  ]) {
+    it(`rejects a directive lookalike imported from ${module}`, () => {
+      assert.deepEqual(
+        angularExpressionGap(
+          angularComponent(ANGULAR_REGION, "AdaptLiveRegion", module)
+        ),
+        []
+      );
+    });
+  }
 
   it("follows a registered directive into its paired external template", () => {
     const source = angularComponent("").replace(

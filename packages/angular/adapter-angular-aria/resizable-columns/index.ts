@@ -1,1 +1,1 @@
-export { resizableColumns } from "@adapttable/angular";
+export { resizableColumns } from "@adapttable/angular/features";

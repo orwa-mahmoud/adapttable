@@ -22,6 +22,13 @@ import type { ApprovalPresentation } from "../types";
  */
 export interface AgentApprovalPending {
   /**
+   * Opaque identity of this approval transaction, stable across decision snapshots.
+   * A replacement transaction must use a fresh token, even when proposals are reused.
+   * Optional for existing hosts; without it, surfaces can only use proposal and
+   * operation reference identity to distinguish transactions.
+   */
+  readonly identity?: object;
+  /**
    * Proposed writes waiting for a human decision.
    *
    * Empty when the write names no rows — see {@link operation}.

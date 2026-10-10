@@ -96,11 +96,26 @@ export class LiveFeatureHost<
   registerContextMenuItems(items: ContextMenuItemsFactory<TRow>): void {
     this.contextMenuItems.push(items);
   }
-  /** Run every cleanup once. Later calls do nothing. */
+  /**
+   * Run every cleanup once, then rethrow the first failure, if any.
+   * Later calls do nothing.
+   */
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
-    for (const cleanup of this.disposers) cleanup();
+    let failed = false;
+    let firstError: unknown;
+    for (const cleanup of this.disposers) {
+      try {
+        cleanup();
+      } catch (error) {
+        if (!failed) {
+          failed = true;
+          firstError = error;
+        }
+      }
+    }
+    if (failed) throw firstError;
   }
 }
 
@@ -130,6 +145,7 @@ export interface FeatureSetup<TRow, TPanel extends SidePanelEntry> {
  *
  * A list with no `setup` shares {@link EMPTY_FEATURE_HOST}, so a table that
  * composes nothing registrable allocates nothing.
+ * If setup fails, run all registered cleanups and rethrow that setup failure.
  *
  * @param features - The composed features, in array order.
  * @returns The host the table reads registrations from.
@@ -145,9 +161,18 @@ export function createFeatureHost<
     return EMPTY_FEATURE_HOST;
   }
   const host = new LiveFeatureHost<unknown, TPanel>();
-  for (const feature of features) {
-    const cleanup = feature.setup?.(host);
-    if (cleanup) host.onDispose(cleanup);
+  try {
+    for (const feature of features) {
+      const cleanup = feature.setup?.(host);
+      if (cleanup) host.onDispose(cleanup);
+    }
+  } catch (error) {
+    try {
+      host.dispose();
+    } catch {
+      // Every cleanup ran; preserve the setup error that caused the rollback.
+    }
+    throw error;
   }
   return host;
 }

@@ -9,9 +9,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import { injectDataTable } from "../dataTable";
 import type { AdaptTableFeature } from "../featureHost";
+import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
 import { injectFrontendData } from "../source/frontendData";
 import { ADAPTTABLE_URL_ADAPTER } from "../url/tableUrlState";
-import { grouping, injectGrouping, type TableGrouping } from "./grouping";
+import { grouping } from "./grouping";
 import { groupingPanel } from "./groupingPanel";
 
 interface Task {

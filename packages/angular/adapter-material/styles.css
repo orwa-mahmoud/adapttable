@@ -14,6 +14,14 @@
   min-inline-size: 0;
   max-inline-size: 100%;
 }
+.adapt-material .adapt-material-chips-clear {
+  align-self: center;
+  flex: 0 0 auto;
+  margin-inline-start: 8px;
+}
+.adapt-material .adapt-material-chips-clear button {
+  white-space: nowrap;
+}
 .adapt-material [data-adapttable-part="root"] {
   min-inline-size: 0;
   border: 1px solid var(--adapt-material-line);
@@ -118,11 +126,18 @@
   inline-size: 56px;
   padding: 4px;
 }
+/* Keep Material's 48px touch target inside the header, including at the edge. */
+.adapt-material
+  [data-adapttable-part="header-cell"]:has(
+    [data-adapttable-part="resize-handle"]
+  ) {
+  padding-inline-end: 56px;
+}
 .adapt-material [data-adapttable-part="resize-handle"] {
   position: absolute;
   inset-inline-end: 0;
   inset-block: 0;
-  inline-size: 8px;
+  inline-size: 48px;
   min-inline-size: 0;
   block-size: 100%;
   padding: 0;
@@ -277,4 +292,10 @@
 }
 .adapt-material-filters-button {
   --mat-button-text-container-shape: 6px;
+}
+
+/* Flexible center bounds can reach the viewport edge. Reserve the horizontal
+   gutter on the actual pane, where its percentage uses those native bounds. */
+.cdk-overlay-pane:has(> mat-card.adapt-material-filter-card) {
+  max-width: calc(100% - 16px);
 }

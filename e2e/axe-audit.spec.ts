@@ -100,9 +100,20 @@ for (const kit of builtAdapters("angular")) {
       page,
     }) => {
       await openKitPage(page, `/${kit.key}/filtering/`);
-      await demo(page)
-        .getByRole("button", { name: layout, exact: true })
-        .click();
+      const filterLayout = demo(page).getByRole("combobox", {
+        name: "Filter layout",
+        exact: true,
+      });
+      await expect(filterLayout.locator("option")).toHaveText([
+        "Popover",
+        "Drawer",
+        "Header",
+      ]);
+      await filterLayout.focus();
+      await expect(filterLayout).toBeFocused();
+      await filterLayout.selectOption({ label: layout });
+      await expect(filterLayout).toHaveValue(layout.toLowerCase());
+      await expect(filterLayout.locator("option:checked")).toHaveText(layout);
       const trigger = angularPart(kit, page, "filters-button", demo(page));
       await trigger.click();
       const panelPart =

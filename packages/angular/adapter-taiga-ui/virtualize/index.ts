@@ -1,8 +1,8 @@
+import type { AdaptTableFeature } from "@adapttable/angular";
 import {
-  type AdaptTableFeature,
   virtualize as coreAngularVirtualize,
   type VirtualizeOptions,
-} from "@adapttable/angular";
+} from "@adapttable/angular/features";
 
 /**
  * Row windowing — `@adapttable/taiga-ui/virtualize`.

@@ -1,0 +1,313 @@
+# @adapttable/vuetify
+
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+Vuetify imports CSS: Node SSR uses Vite host compilation with `vuetify` and
+`@adapttable/vuetify` in `ssr.noExternal`, for both ESM and CommonJS entries.
+
+Vuetify controls for the headless AdaptTable Vue binding. AdaptTable owns query
+state and requests changes from the host; Vuetify supplies Material Design
+presentation. The adapter does not introduce a second table data engine.
+
+## Features
+
+- Feature composition with 41 canonical factories and focused, opt-in imports.
+- Sorting, multi-sort, pagination, global search, selection and selection
+  statistics, with host-controlled state.
+- Filtering, custom filter types, the AND/OR filter tree and header filters.
+- Cell editing, row and batch editing, dirty indicators, undo/redo and
+  host-owned save callbacks.
+- Column management, column groups, resizing and fit-to-width.
+- Grouping and aggregation, tree data, row expansion and nested tables.
+- Row reordering, row pinning, pinned summary rows, row and column spanning,
+  full-width separator rows, row styling and virtualization.
+- Keyboard navigation, cell ranges, Find, saved views, row actions, bulk actions,
+  a command palette, context menus and side-panel view controls.
+- Optional assistant and approval surfaces with host-owned transport and
+  decisions.
+- CSV export and host-owned print layout; PDF export and XLSX use optional
+  writers supplied to the export feature.
+- Pivot data, a spreadsheet formula engine and sparklines through the shared
+  Vue binding's opt-in entries.
+- Mobile card layouts, localized labels, RTL and server-side rendering (SSR)
+  with the host setup described below.
+
+Import `pdfWriter` from `@adapttable/vue/pdf` or `xlsxWriter` from
+`@adapttable/vue/xlsx` and pass it as the `writer` option to this adapter's
+`exportCsv` factory. The adapter retains its own export controls.
+
+For pivot data, import `pivot` and `pivotTableModel` from
+`@adapttable/vue/pivot` and render the prepared rows and columns with this
+adapter; the `pivot` entry's `PivotPanel` edits the axes and measures with
+Vuetify controls. Formula columns come from
+`buildFormulaColumns` in `@adapttable/vue/formula`, and SVG sparkline columns
+from `sparklineColumn` in `@adapttable/vue/sparkline`.
+
+## Vuetify setup
+
+This adapter targets Vuetify 4.2.4 or later in the 4.x line and Vue 3.5. Install
+and register the Vuetify plugin in the host application. Import Vuetify's base
+styles once.
+
+```ts
+import { createApp } from "vue";
+import { createVuetify } from "vuetify/framework";
+import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
+import "vuetify/styles";
+import "@adapttable/vuetify/styles.css";
+import App from "./App.vue";
+
+const vuetify = createVuetify({
+  icons: { defaultSet: "mdi", aliases, sets: { mdi } },
+});
+
+createApp(App).use(vuetify).mount("#app");
+```
+
+The host owns its theme, icon set and locale configuration. SVG icons above are
+included with Vuetify and do not require a font download. An existing Vuetify
+application can keep its current plugin and settings.
+
+For server rendering, create a fresh Vue app and Vuetify plugin for each request,
+set `ssr: true` on `createVuetify`, and hydrate with the same configuration. Do
+not share a Vuetify plugin instance between server requests.
+
+## DataTable
+
+```vue
+<script setup lang="ts">
+import { DataTable, type ColumnDef } from "@adapttable/vuetify";
+
+interface Person {
+  id: string;
+  name: string;
+  team: string;
+}
+
+const people: readonly Person[] = [
+  { id: "ada", name: "Ada", team: "Platform" },
+  { id: "bea", name: "Bea", team: "Design" },
+];
+const columns: readonly ColumnDef<Person>[] = [
+  { key: "name", header: "Name", sortable: true },
+  { key: "team", header: "Team", sortable: true },
+];
+const rowKey = (person: Person) => person.id;
+</script>
+
+<template>
+  <DataTable :data="people" :columns="columns" :row-key="rowKey" />
+</template>
+```
+
+The desktop renderer uses Vuetify's documented `VTable` wrapper slot so the
+native table retains its accessibility attributes, refs and class hooks.
+Mobile rows use `VCard`. Both consume the Vue binding's prepared rows and
+columns, including the resolved order and span/pinning attributes. They do not
+create another data pipeline.
+
+For custom layouts, the Vue binding's headless APIs and optional
+`DataTableSurfaceChrome` remain available. Its desktop and mobile renderers are
+required slots, so the host chooses its table presentation.
+
+## Density
+
+Add `densityChooser()` from `@adapttable/vuetify/density` to expose Comfortable
+and Compact together in a Vuetify button toggle. The named group uses native
+buttons with pressed states; Tab moves between choices and Enter or Space
+requests the focused choice. Labels, direction and density state come from the
+binding. With a controlled `density` prop, the selected choice changes only
+after the host accepts `onDensityChange` or `update:density`.
+
+## Navigation and status
+
+Optional navigation uses the same binding-owned ranges, find matches and host
+write callbacks as the headless table. Import each feature from its focused
+entry:
+
+```ts
+import { cellNavigation } from "@adapttable/vuetify/cell-navigation";
+import { columnSelectionCheckbox } from "@adapttable/vuetify/column-selection";
+import { findInTable } from "@adapttable/vuetify/find-in-table";
+import { selectionStats, statusBar } from "@adapttable/vuetify/status-bar";
+
+const features = [
+  cellNavigation(),
+  columnSelectionCheckbox(),
+  findInTable({ button: true }),
+  selectionStats(),
+  statusBar(),
+];
+```
+
+Pass `features` to `DataTable`. Find uses `VTextField` and `VBtn`; column
+selection uses `VCheckboxBtn`. Status and range statistics use `VSheet` and
+`VChip`. Typing keeps focus in the find input. With cell navigation, closing
+find returns focus to the matched grid cell; standalone find restores its
+opener. Mobile cards support find without enabling a desktop grid.
+
+## Rows, columns and hierarchy
+
+The `columns` entry supplies `collapsibleColumnGroups`, `fitColumns`,
+`multiSort` and `resizableColumns`. The `rows` entry supplies `cellSpan`,
+`extraRows`, `pinnedSummaryRows`, `rowAppearance`, `rowActions` and `rowPinning`.
+Each factory also has a focused entry with the corresponding kebab-case name.
+The binding resolves order, spans, pins and host callbacks; the Vuetify table
+renders the resulting native rows and cells. Mobile cards retain complete field
+values when desktop cells span multiple rows.
+
+Use `tree` for loaded or lazy children and `rowDetail` for host-rendered detail
+content. Their expand controls are `VBtn` components, with `VProgressCircular`
+for a pending tree load. For example, using the `Person` type above:
+
+```ts
+import { h } from "vue";
+import { rowDetail } from "@adapttable/vuetify/row-detail";
+
+const features = [
+  rowDetail<Person>((person) => h("p", `Team: ${person.team}`)),
+];
+```
+
+`nestedTable` accepts a host callback that renders a child `DataTable`. Child
+row types remain independent and inherit the supplied density and label
+defaults. Expansion and pinning accept the binding's controlled state options.
+
+## Column menu
+
+Add `columnMenu()` from `@adapttable/vuetify/column-menu` to enable the Columns
+manager and direct header rename controls. The binding owns search, order,
+visibility, pinning and rename validation. Buttons and icons use `VBtn` and
+`VIcon`, rename fields use `VTextField`, and choice actions use `VSelect`.
+The anchored `VMenu` positions against the binding's native trigger target;
+the trigger keeps its binding-owned accessibility attributes when the panel
+closes. `ColumnMenu` is also exported for custom toolbar layouts.
+
+## Editing
+
+Mark editable columns with `editable: true`, then add `editing(onCellEdit)` from
+`@adapttable/vuetify/editing`. The callback receives the row, column key and
+parsed value. `rowEditing(onRowEdit)` submits a row patch through Save and
+Cancel controls; `batchEditing(onBatchEdit)` stages changes across rows until
+the batch Save action. Return a promise for asynchronous saves and supply new
+rows after the host accepts a write.
+
+Text, number and date/time editors use `VTextField`; booleans use
+`VCheckboxBtn`; select and multi-select editors use `VSelect`, including its
+menu, keyboard handling and native focus target. Validation remains in the
+binding and its accessible error message is associated with the actual input.
+Custom editors receive the existing binding controller. `editHistory`,
+`undoRedoButtons` and `dirtyIndicators` compose through the same optional entry.
+
+## Filters
+
+Import `filters` from `@adapttable/vuetify/filters` and supply the binding's
+filter definitions. Text, numeric and date fields use `VTextField`; operators
+and single choices use `VSelect`; multiple choices use `VCheckboxBtn`. The
+searchable checklist uses binding-owned facets and windowing, with `VChip`
+counts. Set `{ tree: true }` to include the advanced AND/OR builder inside a
+Vuetify expansion panel.
+
+The default filter surface is a `VMenu` anchored to its trigger with no
+backdrop. Set `{ mode: "drawer" }` for a `VDialog` whose content contains the
+actual dimming `VSheet` backdrop and a `VCard` side panel. Vuetify owns the
+portal, scroll blocking, focus trap and overlay stack. The binding owns open
+state and filter writes. Nested select menus retain their keyboard and
+pointer behavior.
+
+`headerFilters()` from `@adapttable/vuetify/header-filters` adds anchored
+column filters. `FilterHeaderControl` and `FilterHeaderRow` support custom
+header layouts; compact multi-choice controls retain the genuine Vuetify
+select menu. `ChecklistFilter`, `FilterTreeBuilder` and `VuetifyFilterField`
+are also available from the filters entry for custom filter layouts.
+
+## Saved views
+
+Add `savedViews({ storageKey: "people-views" })` from
+`@adapttable/vuetify/saved-views` to the table's `features`. Options also accept
+a Vue ref or getter. The binding owns capture, URL namespaces, persistence and
+the model's lifetime. The menu uses a `VMenu` and `VCard`, with `VBtn` actions
+and a `VTextField` name input. It supports RTL and the table's overlay container,
+including fullscreen layouts; Escape restores focus to its native trigger.
+
+For a standalone manager, import `SavedViewsPanel` from the same entry. Pass
+the `views` array and `onApply`, `onRename`, `onMove`, `onSetDefault`, and
+`onRemove` callbacks, for example from the Vue binding's `useSavedViews` result.
+The host owns the list: callbacks request changes, and accepted changes arrive
+through `views`. Rename sends the entered draft to `onRename`; the binding's
+model supplies trimming and validation. Enter commits and Escape cancels;
+composing text does neither. `VChip` badges show default and read-only views,
+and unavailable row actions remain visible as disabled Vuetify buttons.
+
+`labels`, `className`, `classNames`, and a Vue `footer` node customize the panel.
+`SavedView`, `SavedViewsStore`, `UseSavedViewsOptions`, and
+`SavedViewsPanelProps` are exported from the saved-views entry. Menu and panel
+controls work in mobile layouts and render without browser-only ref calls on
+the server.
+
+## Actions and export
+
+Import `bulkActions` from `@adapttable/vuetify/bulk-actions` and `print` from
+`@adapttable/vuetify/print`. Both use native `VBtn` controls. Bulk actions keep
+the shared confirmation, pending, disabled and error behavior. Selection clears
+only after accepted successful work. `print(callback, true)` adds the optional
+print button; the callback remains host-owned.
+
+`exportCsv` is available from the canonical `@adapttable/vuetify/export` entry.
+The shared controller owns CSV generation, server export jobs, cancellation,
+retry and stale-completion handling. `VCard` displays server progress with
+`VProgressLinear`, and `VBtn` renders cancel, retry, dismiss and download actions.
+No export runs while the feature is inactive. Import `virtualize` from
+`@adapttable/vuetify/virtualize` to window the existing desktop rows or mobile
+cards; the binding keeps pinned summaries outside the scrolling row window.
+
+## Grouping, reordering and panels
+
+`groupingPanel` from `@adapttable/vuetify/grouping-panel` uses `VCard`, `VChip`,
+`VSelect`, `VCheckboxBtn` and `VBtn` over the shared grouping model. Group order,
+aggregation choices, drag/drop, RTL keyboard movement and change notifications
+stay in the binding. `rowReorder` from `@adapttable/vuetify/row-reorder` requests
+host changes through native grip and move buttons. Cross-group destination
+menus use `VMenu`/`VList`; requested approval uses a `VDialog`.
+
+`commandPalette` and `contextMenu` are available from their corresponding
+`command-palette` and `context-menu` entries. The command dialog uses `VDialog`,
+`VField` and `VListItem`; its actual input owns the combobox ID, active option
+and keyboard handlers. Context menus use `VMenu` and `VList` with native
+keyboard navigation. Both preserve binding-owned action admission and stale
+lifetime guards; overlays attach to the supplied fullscreen container.
+
+`sidePanel` from `@adapttable/vuetify/side-panel` uses a `VCard` aside and native
+`VBtn` tabs. Its `open` value and `onOpenChange` callback remain controlled by
+the host. Rejected selection or close requests leave the accepted panel visible.
+
+The `assistant` entry provides `TableAssistant`, `AgentApproval`,
+`tableAssistant()`, and `agentApproval()` using the binding's conversation and
+approval contracts. Its sheet is a `VDialog`, examples open in a `VMenu` with a
+`VList`, and speech language choices use `VSelect`. The composer is a native
+textarea inside `VField`; like the command palette input, the textarea carries
+the part, accessible name and keyboard handling. It does not import an AI
+transport or own approval decisions. The `pivot` entry provides a controlled
+`PivotPanel` with `VSelect` and `VBtn` controls.
+
+## Control ownership
+
+Buttons use `VBtn`. Checkboxes use `VCheckboxBtn` and its documented input slot,
+retaining Vuetify's icons and interaction handling. Text and choice controls
+use `VTextField`, `VTextarea` and `VSelect`. Their compound host owns the
+`data-adapttable-part` marker and class hook; the actual input owns its ID,
+accessible name, validation attributes and keyboard behavior. The documented
+`controlRef` exposes that native focus target to AdaptTable without DOM queries
+or mutations. This ownership is present in server-rendered HTML as well as the
+hydrated application.
+
+## Upstream references
+
+- [Vuetify installation and SSR](https://vuetifyjs.com/en/getting-started/installation/)
+- [VTextField API](https://vuetifyjs.com/en/api/v-text-field/)
+- [VMenu API](https://vuetifyjs.com/en/api/v-menu/)
+- [VDialog API](https://vuetifyjs.com/en/api/v-dialog/)
+- [Expansion panels](https://vuetifyjs.com/en/components/expansion-panels/)
+- [VSelect API](https://vuetifyjs.com/en/api/v-select/)
+- [VCheckboxBtn API and slots](https://vuetifyjs.com/en/api/v-checkbox-btn/)
+
+Vuetify and AdaptTable are MIT licensed.

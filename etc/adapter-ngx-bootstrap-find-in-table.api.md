@@ -5,14 +5,14 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { FindBarProps } from '@adapttable/angular';
-import { FindBarSlots } from '@adapttable/angular';
-import { FindButtonProps } from '@adapttable/angular';
+import { FindBarProps } from '@adapttable/angular/adapter';
+import { FindBarSlots } from '@adapttable/angular/adapter';
+import { FindButtonProps } from '@adapttable/angular/adapter';
 import { FindInTableState } from '@adapttable/angular';
-import { FindSearchProps } from '@adapttable/angular';
+import { FindSearchProps } from '@adapttable/angular/adapter';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
-import { ToolbarExtrasSlotProps } from '@adapttable/angular';
+import { ToolbarExtrasSlotProps } from '@adapttable/angular/adapter';
 import { WritableSignal } from '@angular/core';
 
 // @public

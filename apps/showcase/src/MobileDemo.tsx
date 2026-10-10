@@ -1,6 +1,7 @@
 import { Suspense, useState } from "react";
 
 import { DemoScenarioProvider, type PageMode } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, DemoFallback } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Monitor, Phone } from "./sectionIcons";
@@ -97,7 +98,7 @@ export function MobileDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               <DemoScenarioProvider value="mobile">
                 <Demo
                   mode="frontend"
-                  locale="en"
+                  locale={initialDemoLocale()}
                   dark={dark}
                   urlKey="mob"
                   forceMobile={phone}

@@ -4,7 +4,7 @@
 
 ```ts
 
-import { extraRows } from '@adapttable/angular';
+import { extraRows } from '@adapttable/angular/features';
 
 export { extraRows }
 

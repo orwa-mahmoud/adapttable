@@ -5,7 +5,7 @@ import {
   AdaptColumnMenuRowModel,
   AdaptIcon,
   AdaptLiveRegion,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -283,6 +283,7 @@ export class AdaptColumnMenuEdgeRow extends AdaptColumnMenuEdgeRowModel {}
     @let p = props();
     <div
       [tuiDropdown]="menuContent"
+      [tuiDropdownOffset]="8"
       tuiDropdownRole="dialog"
       [adaptTaigaDropdownLabel]="p.labels.columns"
       [tuiDropdownOpen]="popover.open()"

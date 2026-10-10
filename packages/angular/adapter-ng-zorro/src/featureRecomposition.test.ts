@@ -207,7 +207,6 @@ describe("mounted feature recomposition (NG-ZORRO)", () => {
     expect(one(root, part("pinned-summary-top")).textContent).toContain(
       "Original total"
     );
-    current.flush(() => current.runtime.view()!.selection!.replace(["2"]));
     current.flush(() =>
       current.runtime.view()!.columnLayout!.setOrder!(["team", "name"])
     );
@@ -216,6 +215,10 @@ describe("mounted feature recomposition (NG-ZORRO)", () => {
     );
     current.flush(() => current.runtime.view()!.query!.setSearch("Grace"));
     current.flush(() => current.runtime.view()!.query!.setSort("name", "desc"));
+    await mounted.settle();
+    // Search changes the selection scope; establish selection after it settles
+    // so this case isolates preservation across unrelated feature replacement.
+    current.flush(() => current.runtime.view()!.selection!.replace(["2"]));
     await mounted.settle();
     const selected = host.selected();
     const layout = host.layout();

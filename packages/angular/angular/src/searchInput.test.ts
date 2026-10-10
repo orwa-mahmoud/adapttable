@@ -87,4 +87,34 @@ describe("createSearchInput", () => {
     vi.advanceTimersByTime(300);
     expect(setSearch).not.toHaveBeenCalled();
   });
+
+  it("commits a pending term when the box loses focus, so a saved view can restore its own", () => {
+    const { input, committed, setSearch, flush } = setup("Priya");
+    const box = document.createElement("input");
+    document.body.append(box);
+    box.focus();
+    // Clear the box, then reach for a saved view before the delay ends.
+    input.setValue("");
+    box.blur();
+    expect(setSearch).toHaveBeenCalledExactlyOnceWith("");
+    // The view brings back the term the box held before.
+    committed.set("Priya");
+    flush();
+    expect(input.value()).toBe("Priya");
+    vi.advanceTimersByTime(300);
+    expect(setSearch).toHaveBeenCalledTimes(1);
+    box.remove();
+  });
+
+  it("does not commit on blur once the delay has committed the term", () => {
+    const { input, setSearch } = setup();
+    const box = document.createElement("input");
+    document.body.append(box);
+    box.focus();
+    input.setValue("ada");
+    vi.advanceTimersByTime(300);
+    box.blur();
+    expect(setSearch).toHaveBeenCalledExactlyOnceWith("ada");
+    box.remove();
+  });
 });

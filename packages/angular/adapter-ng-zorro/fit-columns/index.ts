@@ -1,1 +1,1 @@
-export { fitColumns } from "@adapttable/angular";
+export { fitColumns } from "@adapttable/angular/features";

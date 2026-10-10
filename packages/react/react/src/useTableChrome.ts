@@ -21,6 +21,7 @@ import {
   type TableLabels,
   type TableSource,
   type TreeEntry,
+  type TreeShape,
 } from "@adapttable/core";
 import {
   applyFeatureNoticesAttribute,
@@ -408,6 +409,10 @@ export interface TableChrome<TRow> {
     entries: readonly TreeEntry<TRow>[];
     /** Every loaded node, including descendants of collapsed parents. */
     allEntries?: readonly TreeEntry<TRow>[];
+    /** Loaded descendants to read within an export's source scope. */
+    getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+    /** Flat ancestry to reconstruct within an export's source scope. */
+    getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
     /** Which nodes are open. */
     expansion: TreeExpansionState;
     /** Which column carries the chevron and the indent. */

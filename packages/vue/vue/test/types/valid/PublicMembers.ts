@@ -1,0 +1,48 @@
+import type {
+  AggregateSpec,
+  CellEditor,
+  ColumnInput,
+  ComponentRenderer,
+  FeatureMountContext,
+  FeatureState,
+  FeatureStateKey,
+  FilterRuntime,
+  ResolvedTableOptions,
+  RowActionControlsProjector,
+  StaticFeatureHost,
+  TableFeatureHost,
+  TableRuntimeView,
+  TableSummaryCellModel,
+  TableSummaryModel,
+  UseDataTableShellOptions,
+} from "@adapttable/vue";
+import type {
+  HeaderFilterModel,
+  UseDataTableShellResult,
+  VueHeaderFilterControlProps,
+} from "@adapttable/vue/adapter";
+interface Row {
+  id: string;
+  value: number;
+}
+export type NamedMembers = [
+  AggregateSpec,
+  CellEditor,
+  ColumnInput<Row>,
+  ComponentRenderer<{ value: number }>,
+  FeatureMountContext<Row>,
+  FeatureState,
+  FeatureStateKey<number>,
+  FilterRuntime<Row>,
+  HeaderFilterModel<Row>,
+  ResolvedTableOptions<Row>,
+  RowActionControlsProjector<Row>,
+  StaticFeatureHost,
+  TableFeatureHost<Row>,
+  TableRuntimeView<Row>,
+  TableSummaryCellModel<Row>,
+  TableSummaryModel<Row>,
+  UseDataTableShellOptions<Row>,
+  UseDataTableShellResult<Row>,
+  VueHeaderFilterControlProps<Row>,
+];

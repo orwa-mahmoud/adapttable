@@ -29,17 +29,5 @@ export function createSourceSignal(): SourceSignal {
   };
 }
 
-/** Recompute only when an input changed identity, like a memo hook. */
-export function memoOne<TArgs extends readonly unknown[], TResult>(
-  compute: (...args: TArgs) => TResult
-): (...args: TArgs) => TResult {
-  let last: { args: TArgs; result: TResult } | undefined;
-  return (...args) => {
-    if (last?.args.every((arg, index) => Object.is(arg, args[index]))) {
-      return last.result;
-    }
-    const result = compute(...args);
-    last = { args, result };
-    return result;
-  };
-}
+/** Share the same identity and argument-count contract as the view-state stores. */
+export { memoLast as memoOne } from "../utils/memoLast";

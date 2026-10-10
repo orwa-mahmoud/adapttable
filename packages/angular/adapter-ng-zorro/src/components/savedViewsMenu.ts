@@ -6,9 +6,9 @@
 import {
   injectSavedViews,
   type SavedViewsControllerOptions,
-  type SavedViewsSlotProps,
   type SavedViewsState,
 } from "@adapttable/angular";
+import type { SavedViewsSlotProps } from "@adapttable/angular/adapter";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -58,7 +58,9 @@ import { OVERLAY_Z } from "./overlayPlacement";
         [nzPopoverBackdrop]="false"
         [nzPopoverContent]="content"
         [nzPopoverPlacement]="
-          direction() === 'rtl' ? 'bottomLeft' : 'bottomRight'
+          direction() === 'rtl'
+            ? ['bottomLeft', 'bottomRight', 'topLeft', 'topRight']
+            : ['bottomRight', 'bottomLeft', 'topRight', 'topLeft']
         "
         [nzPopoverOverlayStyle]="overlayStyle"
         type="button"
@@ -91,7 +93,9 @@ import { OVERLAY_Z } from "./overlayPlacement";
             <nz-divider />
             <div [style]="rowStyle">
               <input
+                #nameInput
                 nz-input
+                [style]="inputStyle"
                 [attr.aria-label]="l.viewName"
                 [attr.placeholder]="l.viewName"
                 [value]="name()"
@@ -125,12 +129,20 @@ export class AdaptSavedViewsMenu implements OnInit {
     "align-items": "center",
     gap: "6px",
   };
+  /** The input's intrinsic size would set the panel wider than a phone. */
+  protected readonly inputStyle = {
+    flex: "1 1 10rem",
+    "inline-size": "10rem",
+    "min-inline-size": "0",
+  };
   protected readonly name = signal("");
   protected readonly trimmed = computed(() => this.name().trim());
   /** The views, once the props say where they are kept. */
   protected readonly views = signal<SavedViewsState | undefined>(undefined);
 
   private readonly injector = inject(Injector);
+  private readonly nameInput =
+    viewChild<ElementRef<HTMLInputElement>>("nameInput");
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
   private readonly trigger = viewChild<
     ElementRef<HTMLElement>,
@@ -174,5 +186,6 @@ export class AdaptSavedViewsMenu implements OnInit {
   protected save(): void {
     this.views()?.save(this.trimmed());
     this.name.set("");
+    this.nameInput()?.nativeElement.focus();
   }
 }

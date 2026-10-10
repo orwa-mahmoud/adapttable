@@ -5,7 +5,7 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { GroupingExtras } from '@adapttable/angular';
+import { GroupingExtras } from '@adapttable/angular/features';
 import { GroupSort } from '@adapttable/angular';
 
 // @public

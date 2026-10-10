@@ -43,6 +43,41 @@ Use this route only when downloading every page and holding the resulting file
 in the tab is appropriate. The file goes through the normal writer, and
 `onBeforeExport`/`onAfterExport` run as they do for any browser-built export.
 
+## Tree scopes and summaries
+
+With an active tree, `scope: "page"` exports the visible hierarchy; collapsed
+children stay out. `"all"` walks the complete filtered source, including loaded
+children under collapsed or off-page roots. `"selected"` searches that same
+hierarchy and exports only checked rows, in tree order. It does not add
+unchecked ancestors or descendants. A range keeps its existing rectangle.
+
+Nested data follows the host's `getChildren` reader from the filtered roots.
+To exclude individual children, supply a pruned hierarchy, for example through
+`filterTreeRows`. Flat data with `getParentId` uses only rows in the filtered
+source. Export does not fetch lazy children, change expansion, or add off-page
+rows to the table's runtime inventory. `fetchAll` applies the same rules to its
+fetched rows; its cap still counts source records, which may be roots.
+
+For `all` and `selected`, local export hooks and `request(info).rows` receive
+the resolved tree data rows. Page metadata keeps the existing source contract:
+`onBeforeExport`, `onAfterExport`, and `request(info).rows` receive `source.rows`,
+even when the page file includes visible descendants from expanded tree rows.
+Collapsing a tree changes the page file, not that source-shaped metadata.
+
+`summaryRow` keeps a separate contract: it receives
+the original source rows for the scope, before descendants are expanded. A root
+may already contain a rollup, so summing roots and children would count the same
+values twice. A child-only selection can therefore export a child while the
+summary mapper receives an empty array when the raw source contains only roots.
+
+Built-in bindings supply the current shape readers automatically. Headless
+callers of `buildTableCsv`, `downloadTableCsv`, or `makeExportCsvHandler` should
+pass `context.getRowId` and `context.tree.getChildren` or
+`context.tree.getParentId`, alongside the current entries. With row identity but
+no shape readers, all/selected retain conservative source-ID filtering: an
+entries-only context cannot distinguish a nested descendant from a stale,
+filtered-out flat row.
+
 ## Server-built export with progress
 
 `onExportAll(query, controls)` is the path beyond the browser cap. The table

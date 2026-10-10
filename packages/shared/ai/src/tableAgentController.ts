@@ -122,7 +122,16 @@ export interface TableAgentControllerInputs {
    * Commits a state change the binding still holds, before the session takes
    * its admission snapshot for a call.
    */
-  readonly flushAdmission: () => void;
+  readonly flushAdmission: () => void | Promise<void>;
+  /**
+   * Optional controlled-model delivery fence. Invoke `capture` once after
+   * delivery, with synchronous binding reconciliation when needed. The hook
+   * completes after capture; delayed persistence is not model acceptance.
+   * Omit for a binding whose setters commit synchronously.
+   */
+  readonly settleApply?: (
+    capture: (reconcile?: () => void) => void
+  ) => void | Promise<void>;
   /**
    * Runs one view mutation and commits the state it changes before returning.
    */
@@ -245,6 +254,8 @@ export function createTableAgentController(
   let registryKey: string | undefined;
   let revisions: RevisionCounter = createRevisionCounter();
   let session: AgentSession | null = null;
+  let sessionGeneration = 0;
+  let sessionRetirement: AbortController | undefined;
   let connected = true;
   const activeCalls = new Set<AbortController>();
 
@@ -306,19 +317,35 @@ export function createTableAgentController(
     if (session && tableId === options.tableId && registryKey === key) {
       return session;
     }
+    const retired = sessionRetirement;
+    const retirement = new AbortController();
     tableId = options.tableId;
     registryKey = key;
     revisions = createRevisionCounter();
+    const boundGeneration = ++sessionGeneration;
+    const boundTableId = options.tableId;
+    const boundRegistryKey = key;
     const live = bindLiveSession({
       options: optionsRef,
       runtime: runtimeRef,
       revisions,
       flushAdmission: flushAdmissionRef,
+      settleApply: inputs.settleApply,
+      retirementSignal: retirement.signal,
+      isCurrent: () =>
+        connected &&
+        boundGeneration === sessionGeneration &&
+        boundTableId === optionsRef.current.tableId &&
+        boundRegistryKey === registryKeyOf(optionsRef.current),
       waitForChrome: waitForChromeRef,
       reportProgress: reportProgressRef,
       flush: inputs.flush,
     });
     session = bindLifecycle(live, revisions);
+    sessionRetirement = retirement;
+    // Retiring a registry wakes only its admission wait. Already-running
+    // handlers and approvals retain the session's existing revalidation rules.
+    retired?.abort();
     return session;
   };
 
@@ -477,7 +504,18 @@ export function createTableAgentController(
     setTransaction((current) => recordDecision(current, id, index, approved));
   };
 
+  // A presentation token reveals none of the mutable pending entry or resolver.
+  // Weak ownership lets it disappear with the transaction it identifies.
+  const approvalIdentities = new WeakMap<PendingApproval, object>();
+  const approvalIdentity = (entry: PendingApproval): object => {
+    const existing = approvalIdentities.get(entry);
+    if (existing) return existing;
+    const identity = Object.freeze({});
+    approvalIdentities.set(entry, identity);
+    return identity;
+  };
   const approvalFor = (open: ApprovalTransaction): AgentApprovalPending => ({
+    identity: approvalIdentity(open.pending),
     proposals: open.pending.proposals,
     ...(open.pending.operation ? { operation: open.pending.operation } : {}),
     decisions: open.decisions,
@@ -580,7 +618,7 @@ export function createTableAgentController(
 
   // The chrome path is the only one that parks: with `onApprove` the host
   // answers directly and nothing is ever left open here. Rebuilt only when the
-  // transaction moved, because a decision inside it is a new transaction.
+  // transaction snapshot moved; row decisions preserve its presentation identity.
   const approvalNow = (
     hostApproves: boolean,
     kept: AgentApprovalPending | null | undefined

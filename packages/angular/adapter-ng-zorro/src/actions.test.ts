@@ -298,9 +298,11 @@ describe("the NG-ZORRO Angular row actions", () => {
     expect(part("row-actions-menu", document)).toBeNull();
     trigger.click();
     await settle();
-    await vi.waitFor(() =>
-      expect(part("row-actions-menu", document)).not.toBeNull()
-    );
+    // The native overlay can attach before Angular paints its visibility signal.
+    await vi.waitFor(() => {
+      expect(part("row-actions-menu", document)).not.toBeNull();
+      expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    });
     const menu = part("row-actions-menu", document)!;
     expect(menu.classList.contains("ant-dropdown-menu")).toBe(true);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");

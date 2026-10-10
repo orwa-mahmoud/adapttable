@@ -19,11 +19,22 @@ peerDependencyRules:
 # only @adapttable/* deps plus react-compiler-runtime, @tanstack/react-virtual,
 # @tanstack/angular-virtual and tslib — so these are build/dev tooling only.
 overrides:
+  # React/Vite tooling retains the baseline Node 22.12 contract. Angular owns
+  # its separate Babel 8 dependency and higher Node floor. Reuse the root
+  # Babel 7 peer instead of allowing workspace peer resolution to select 8.
+  "@rolldown/plugin-babel>@babel/core": "$@babel/core"
   # Starters declare ^2.0.0 so StackBlitz installs from npm. The monorepo
   # must still typecheck them against workspace packages. Turbo `^build`
   # only follows a matching semver range, so each starter also names the
   # workspace `#build` it needs (see starters/*/turbo.json).
   "@adapttable/antd": "workspace:*"
+  "@adapttable/element-plus": "workspace:*"
+  "@adapttable/naive-ui": "workspace:*"
+  "@adapttable/nuxt-ui": "workspace:*"
+  "@adapttable/quasar": "workspace:*"
+  "@adapttable/reka-ui": "workspace:*"
+  "@adapttable/shadcn-vue": "workspace:*"
+  "@adapttable/vuetify": "workspace:*"
   "@adapttable/base-ui": "workspace:*"
   "@adapttable/chakra": "workspace:*"
   "@adapttable/core": "workspace:*"

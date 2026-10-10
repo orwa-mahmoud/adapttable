@@ -1,5 +1,5 @@
 /** Backdrop-free Material filter card, anchored and dismissed by CDK. */
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import type { FilterOverlaySlotProps } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
@@ -29,7 +29,7 @@ import { AdaptMaterialPopover } from "./materialPopover";
     <adapt-material-popover
       [origin]="anchor"
       [open]="p.open"
-      [belowOnly]="true"
+      [filterSurface]="true"
       [dir]="p.dir ?? 'ltr'"
       (dismiss)="p.onClose()"
     >
@@ -39,9 +39,9 @@ import { AdaptMaterialPopover } from "./materialPopover";
           class="adapt-material-filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
-          [style.width.px]="340"
+          [style.width]="'100%'"
           [style.max-width]="'calc(100vw - 48px)'"
-          style="display: flex; flex-direction: column; max-height: calc(var(--adapt-material-popover-height, 560px) - 32px)"
+          style="display: flex; flex-direction: column; min-height: 0; max-height: calc(var(--adapt-material-popover-height, 560px) - 32px)"
         >
           <header class="adapt-material-filters-header" style="flex: none">
             <h3 class="adapt-material-filters-title">
@@ -62,7 +62,7 @@ import { AdaptMaterialPopover } from "./materialPopover";
           </header>
           <div
             class="adapt-material-filters-body"
-            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px"
           >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>

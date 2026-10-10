@@ -2,12 +2,13 @@
 import {
   type FilterOverlaySlotProps,
   injectPopoverSpace,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  computed,
   type ElementRef,
   input,
   type TemplateRef,
@@ -16,6 +17,7 @@ import {
 import { PopoverDirective } from "ngx-bootstrap/popover";
 
 import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
+import { fitBootstrapPopoverHorizontally } from "./bootstrapPopoverGeometry";
 
 /** The kit owns placement, outside-click dismissal and Escape handling. */
 @Component({
@@ -31,6 +33,8 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
       [container]="overlayContainer()"
       triggers="manual"
       [outsideClick]="true"
+      [adaptivePosition]="true"
+      boundariesElement="viewport"
       [placement]="p.dir === 'rtl' ? 'bottom left' : 'bottom right'"
       containerClass="adapttable-filter-popover"
       (onHidden)="closed()"
@@ -43,9 +47,10 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
     </span>
     <ng-template #content>
       <div
+        #card
         data-ngx-bootstrap-part="filters-popover"
         [style.max-height.px]="availableHeight()"
-        style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
+        style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: 100%"
         (click)="keepRemovedContentInside($event)"
         [attr.dir]="p.dir ?? 'ltr'"
         [attr.data-dir]="p.dir ?? 'ltr'"
@@ -69,7 +74,7 @@ import { injectBootstrapOverlayContainer } from "./bootstrapOverlay";
         </header>
         <div
           data-ngx-bootstrap-part="filters-body"
-          style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+          style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px"
         >
           <ng-container [ngTemplateOutlet]="p.filters" />
         </div>
@@ -96,14 +101,55 @@ export class AdaptFilterPopover {
   private readonly popover = viewChild.required(PopoverDirective);
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
-  protected readonly availableHeight = injectPopoverSpace({
+  private readonly card = viewChild<ElementRef<HTMLElement>>("card");
+  private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
     reserve: 48,
+    allowAbove: () => {
+      const origin = this.anchor()?.nativeElement;
+      const viewport = origin?.ownerDocument.defaultView;
+      return (
+        viewport != null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom - 48 < 160
+      );
+    },
   });
+  protected readonly availableHeight = computed(() =>
+    Math.min(560, this.viewportSpace())
+  );
   private restoreFocus = false;
 
   constructor() {
+    afterRenderEffect((cleanup) => {
+      const pane =
+        this.card()?.nativeElement.closest<HTMLElement>("popover-container");
+      if (!this.props().open || !pane) return;
+      this.availableHeight();
+      const viewport = pane.ownerDocument.defaultView;
+      const fit = () => fitBootstrapPopoverHorizontally(pane);
+      fit();
+      const resize =
+        typeof ResizeObserver === "undefined" ? null : new ResizeObserver(fit);
+      resize?.observe(pane);
+      // ngx-bootstrap can write a new native transform without resizing.
+      let nativeTransform = pane.style.transform;
+      const placement = new MutationObserver(() => {
+        if (pane.style.transform === nativeTransform) return;
+        nativeTransform = pane.style.transform;
+        fit();
+      });
+      placement.observe(pane, { attributes: true, attributeFilter: ["style"] });
+      viewport?.addEventListener("resize", fit);
+      viewport?.addEventListener("scroll", fit, true);
+      cleanup(() => {
+        resize?.disconnect();
+        placement.disconnect();
+        viewport?.removeEventListener("resize", fit);
+        viewport?.removeEventListener("scroll", fit, true);
+        pane.style.translate = "";
+      });
+    });
     afterRenderEffect((cleanup) => {
       const { open } = this.props();
       const overlay = this.popover();

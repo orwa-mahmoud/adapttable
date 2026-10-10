@@ -8,7 +8,7 @@ import {
   type ContextMenuSlots,
   injectTableContextMenu,
   type TableContextMenuOptions,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { Menu, MenuItem } from "@angular/aria/menu";
 import {
   afterNextRender,

@@ -21,6 +21,7 @@ import {
   strings,
 } from "./data";
 import { DemoScenarioProvider } from "./Demo";
+import { initialDemoLocale } from "./demoPresentation";
 import { ADAPTERS, Control, DemoFallback, Segmented } from "./kitDemos";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { Check, Layers } from "./sectionIcons";
@@ -183,7 +184,7 @@ function exportOptions(
 }
 
 export function ExportPdfDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(initialDemoLocale);
   const [exportMode, setExportMode] = useState<"pdf" | "server">("pdf");
   const font = useArabicFont(locale === "ar");
   const Demo = ADAPTERS[adapter] ?? ADAPTERS.mantine;

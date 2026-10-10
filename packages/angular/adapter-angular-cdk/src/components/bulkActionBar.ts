@@ -2,14 +2,14 @@
  * The selection bar that acts on the selected rows, drawn with native
  * elements.
  */
+import type { SelectionState } from "@adapttable/angular";
 import {
   bulkActionErrorMessage,
   type BulkBarSlotProps,
   injectBulkBarRunner,
   offersAllMatching,
   resolveDisabledReason,
-  type SelectionState,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import {
   ChangeDetectionStrategy,

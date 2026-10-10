@@ -9,7 +9,7 @@ import {
   type CommandPaletteSurfaceProps,
   injectCommandPalette,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵbootstrapModal as bootstrapModal } from "@adapttable/ng-bootstrap";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -37,6 +37,7 @@ let nextPaletteId = 0;
       <div
         [attr.aria-label]="props().label"
         [class]="props().className"
+        [attr.dir]="props().dir"
         data-adapttable-part="command-palette"
       >
         <span class="visually-hidden" [id]="titleId">{{ props().label }}</span>
@@ -188,6 +189,7 @@ const SLOTS: CommandPaletteSlots = {
       [open]="palette().open"
       [onClose]="palette().close"
       [labels]="props().labels"
+      [dir]="props().dir"
       [slots]="slots"
     />
   `,

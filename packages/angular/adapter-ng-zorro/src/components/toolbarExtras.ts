@@ -9,7 +9,7 @@ import {
   type ExportProgressSlots,
   type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { NzButtonModule } from "ng-zorro-antd/button";
 import { NzCardModule } from "ng-zorro-antd/card";

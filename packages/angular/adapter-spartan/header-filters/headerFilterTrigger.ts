@@ -4,27 +4,31 @@
  * finishes, when the table asks for that.
  */
 import {
+  injectHeaderFilterOverlay,
+  type TableSource,
+} from "@adapttable/angular";
+import {
   AdaptIcon,
   defaultFilterRegistry,
   type FilterHeaderControlProps,
   filterLabel,
   FILTERS_ICON,
   hasActiveHeaderFilter,
-  injectHeaderFilterOverlay,
-  type TableSource,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   AdaptAutoFilterForm,
   ɵHlmButton as HlmButton,
   ɵHlmPopoverLabel as HlmPopoverLabel,
 } from "@adapttable/spartan";
 import {
+  afterEveryRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   ElementRef,
   inject,
   input,
+  signal,
 } from "@angular/core";
 import {
   BrnPopover,
@@ -78,6 +82,7 @@ import {
           class="at-spartan-surface at-spartan-popover"
           data-adapttable-kit="spartan"
           data-adapttable-part="filter-header-cell"
+          [attr.dir]="direction()"
         >
           <adapt-auto-filter-form
             [defs]="[p.def]"
@@ -92,11 +97,25 @@ import {
 })
 export class AdaptHeaderFilterTrigger {
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
-  protected readonly direction = computed(() =>
-    this.element.nativeElement.closest<HTMLElement>("[dir]")?.dir === "rtl"
-      ? "rtl"
-      : "ltr"
-  );
+  private readonly directionValue = signal<"ltr" | "rtl">("ltr");
+  protected readonly direction = this.directionValue.asReadonly();
+
+  constructor() {
+    // Native dir inheritance is DOM state, not a computed signal dependency.
+    // Observe inherited DOM changes after an Angular render, not through a
+    // global mutation observer. This read-phase render callback is
+    // browser-only and is retired with the component's injection context.
+    afterEveryRender({
+      read: () => {
+        const next =
+          this.element.nativeElement.closest<HTMLElement>("[dir]")?.dir ===
+          "rtl"
+            ? "rtl"
+            : "ltr";
+        if (next !== this.directionValue()) this.directionValue.set(next);
+      },
+    });
+  }
   /** The slot's props. */
   readonly props = input.required<FilterHeaderControlProps<never>>();
 
@@ -107,12 +126,16 @@ export class AdaptHeaderFilterTrigger {
     hasActiveHeaderFilter(this.props())
   );
   /** The overlay session for this column's funnel. */
-  protected readonly overlay = injectHeaderFilterOverlay({
-    def: computed(() => this.props().def),
-    source: computed(() => this.props().source),
-    closeOnSelect: computed(() => this.props().closeOnSelect === true),
-    registry: computed(() => this.props().registry ?? defaultFilterRegistry),
-  });
+  protected readonly overlay = injectHeaderFilterOverlay(
+    {
+      def: computed(() => this.props().def),
+      source: computed(() => this.props().source),
+      closeOnSelect: computed(() => this.props().closeOnSelect === true),
+      registry: computed(() => this.props().registry ?? defaultFilterRegistry),
+    },
+    // Brain recognises its portaled checklist and owns outside dismissal.
+    { pointerDismiss: false }
+  );
   /** The source the form writes, still a table source at runtime. */
   protected readonly formSource = computed(
     () => this.overlay.source() as TableSource<never>

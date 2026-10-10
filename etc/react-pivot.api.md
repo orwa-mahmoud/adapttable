@@ -77,6 +77,12 @@ export { CellEditorOption }
 export { CellProps }
 
 // @public
+interface CellProps_2<TRow> {
+    readonly row: TRow;
+    readonly rowIndex: number;
+}
+
+// @public
 export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     accessor?: (row: TRow) => ReactNode;
     Cell?: ComponentType<CellProps_2<TRow>>;
@@ -93,11 +99,33 @@ export { ColumnFilter }
 
 export { ColumnFooterContext }
 
+// @public
+interface ColumnFooterContext_2<TRow> {
+    column: ColumnDef<TRow>;
+    value: ReactNode;
+}
+
 export { ColumnGroupShow }
 
 export { ColumnHeaderContext }
 
+// @public
+interface ColumnHeaderContext_2<TRow> {
+    column: ColumnDef<TRow>;
+    controller: ColumnHeaderController_2;
+}
+
 export { ColumnHeaderController }
+
+// @public
+interface ColumnHeaderController_2 {
+    label: ReactNode;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
 
 export { CustomCellEditorCtrl }
 

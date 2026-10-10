@@ -5,7 +5,7 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { Overlay } from "@angular/cdk/overlay";
 import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {

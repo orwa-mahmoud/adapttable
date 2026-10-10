@@ -99,6 +99,33 @@ describe("source-relative markdown links", () => {
     );
   });
 
+  it("routes experimental Vue links without treating them as React sources", () => {
+    assert.equal(
+      rewriteDocLinks(
+        "[API](./api.md#data-sources) [Concepts](../concepts.md)",
+        "vue/getting-started.md"
+      ),
+      "[API](/vue/api/#data-sources) [Concepts](/concepts/)"
+    );
+    assert.equal(
+      rewriteDocLinks("[Vue](./vue/api.md)", "api.md"),
+      "[Vue](/vue/api/)"
+    );
+    assert.equal(
+      rewriteDocLinks("[Filters](../filtering.md)", "vue/api.md"),
+      "[Filters](/vue/getting-started/?unavailable=filtering)"
+    );
+    assert.deepEqual(
+      sidebarSlugs()
+        .filter((slug) => slug.startsWith("vue/"))
+        .sort(),
+      docsFiles(join(REPO_ROOT, "docs"))
+        .filter((file) => file.startsWith("vue/"))
+        .map((file) => file.replace(/\.md$/, ""))
+        .sort()
+    );
+  });
+
   it("normalizes repository links from either source depth and leaves external links alone", () => {
     const root = "https://github.com/orwa-mahmoud/adapttable/blob/main/";
     assert.equal(

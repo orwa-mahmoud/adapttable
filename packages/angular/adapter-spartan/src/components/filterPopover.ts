@@ -2,7 +2,7 @@
 import {
   type FilterOverlaySlotProps,
   injectPopoverSpace,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { OverlayPositionBuilder } from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -54,7 +54,7 @@ import { HlmPopoverLabel } from "../helm/popover";
         <section
           class="at-spartan-surface at-spartan-popover"
           [style.max-height.px]="availableHeight()"
-          style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
+          style="box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
           data-adapttable-kit="spartan"
           data-spartan-part="filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
@@ -80,7 +80,7 @@ import { HlmPopoverLabel } from "../helm/popover";
           </header>
           <div
             data-spartan-part="filters-body"
-            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px"
           >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
@@ -100,14 +100,25 @@ export class AdaptFilterPopover {
   private readonly positions = inject(OverlayPositionBuilder);
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
-  protected readonly availableHeight = injectPopoverSpace({
+  private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
     reserve: 16,
+    allowAbove: () => {
+      const origin = this.anchor()?.nativeElement;
+      const viewport = origin?.ownerDocument.defaultView;
+      return (
+        viewport != null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom - 16 < 160
+      );
+    },
   });
+  protected readonly availableHeight = computed(() =>
+    Math.min(560, this.viewportSpace())
+  );
   readonly props =
     input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
-  /** Brain retains its native portal and dismissal; the filter card stays below. */
+  /** Brain retains its native portal and flips a low filter above its trigger. */
   protected readonly position = computed(() => {
     const edge = this.props().dir === "rtl" ? "start" : "end";
     return this.positions
@@ -120,8 +131,30 @@ export class AdaptFilterPopover {
           overlayY: "top",
           offsetY: 4,
         },
+        {
+          originX: edge,
+          originY: "top",
+          overlayX: edge,
+          overlayY: "bottom",
+          offsetY: -4,
+        },
+        {
+          originX: edge === "start" ? "end" : "start",
+          originY: "bottom",
+          overlayX: edge === "start" ? "end" : "start",
+          overlayY: "top",
+          offsetY: 4,
+        },
+        {
+          originX: edge === "start" ? "end" : "start",
+          originY: "top",
+          overlayX: edge === "start" ? "end" : "start",
+          overlayY: "bottom",
+          offsetY: -4,
+        },
       ])
-      .withFlexibleDimensions(false)
-      .withPush(false);
+      .withViewportMargin(8)
+      .withFlexibleDimensions(true)
+      .withPush(true);
   });
 }

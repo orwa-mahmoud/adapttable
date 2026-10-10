@@ -1,0 +1,46 @@
+@layer components {
+  .adapttable-nuxt-context-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+  .adapttable-nuxt-context-menu {
+    max-width: 90vw;
+    max-height: 80dvh;
+    overflow: auto;
+  }
+  .adapttable-nuxt-context-menu [data-adapttable-part="context-menu-item"] {
+    justify-content: start;
+  }
+  .adapttable-nuxt-command-palette {
+    padding: 1rem;
+    max-height: 75vh;
+    overflow: auto;
+  }
+  .adapttable-nuxt-command-palette [data-adapttable-part="command-list"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-block-start: 0.5rem;
+  }
+  .adapttable-nuxt-context-menu [data-adapttable-part="context-menu-item"],
+  .adapttable-nuxt-command-palette [data-adapttable-part="command-item"],
+  .adapttable-nuxt [data-adapttable-part="side-panel-tab"],
+  .adapttable-nuxt [data-adapttable-part="side-panel-close"] {
+    min-height: 2.75rem;
+  }
+  .adapttable-nuxt-command-palette [data-adapttable-part="command-item"] {
+    justify-content: start;
+  }
+  .adapttable-nuxt [data-adapttable-part="side-panel-header"],
+  .adapttable-nuxt [data-adapttable-part="side-panel-tabs"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .adapttable-nuxt [data-adapttable-part="side-panel-body"] {
+    margin-block-start: 0.75rem;
+  }
+}

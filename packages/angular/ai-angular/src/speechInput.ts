@@ -8,12 +8,8 @@ import {
   type SpeechState,
   type VoiceOptions,
 } from "@adapttable/ai/voice";
-import {
-  fromStore,
-  type MaybeSignal,
-  readMaybe,
-  type SpeechInputHandle,
-} from "@adapttable/angular";
+import { fromStore, type MaybeSignal, readMaybe } from "@adapttable/angular";
+import type { SpeechInputHandle } from "@adapttable/angular/adapter";
 import {
   assertInInjectionContext,
   computed,

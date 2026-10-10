@@ -5,7 +5,7 @@
 import {
   restoreFocusSoon,
   type RowMoveMenuSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { AdaptCdkPopover } from "@adapttable/angular-cdk";
 import { A11yModule } from "@angular/cdk/a11y";
 import { Directionality } from "@angular/cdk/bidi";

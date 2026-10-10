@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { pivotRoster } from "./casts";
 import { PIVOT_FIELDS } from "./data";
+import { initialDemoDirection, initialDemoLocale } from "./demoPresentation";
 import { kitPivotPanel, KitProvider } from "./kitProviders";
 import type { FeatureBodyProps } from "./matrix/featureBodies";
 import { PivotTableView } from "./PivotTableView";
@@ -33,8 +34,8 @@ export function PivotDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
   const PivotPanel = kitPivotPanel(adapter);
 
   return (
-    <div className="mx-demo">
-      <KitProvider kit={adapter} dark={dark}>
+    <div className="mx-demo" dir={initialDemoDirection()}>
+      <KitProvider kit={adapter} dark={dark} dir={initialDemoDirection()}>
         <div
           className="mx-demo__body pivot-layout"
           data-adapter={adapter}
@@ -45,11 +46,12 @@ export function PivotDemo({ dark, adapter }: Readonly<FeatureBodyProps>) {
               fields={PIVOT_FIELDS}
               config={config}
               onChange={onConfigChange}
-              labels={getLabels("en")}
+              labels={getLabels(initialDemoLocale())}
             />
           </Suspense>
           <PivotTableView
             kit={adapter}
+            locale={initialDemoLocale()}
             rows={pivotRoster()}
             fields={PIVOT_FIELDS}
             config={config}

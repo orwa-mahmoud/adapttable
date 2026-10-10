@@ -3,19 +3,21 @@
  * State and callbacks stay in the binding; NG-ZORRO owns the visible controls.
  */
 import {
+  ADAPTTABLE_FIND_STATE,
+  type ContextMenuRegionHandlers,
+  type FindInTableState,
+} from "@adapttable/angular";
+import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
   ADAPTTABLE_CONTEXT_MENU,
-  ADAPTTABLE_FIND_STATE,
   ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
   type PaletteOpenState,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { BidiModule } from "@angular/cdk/bidi";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -48,7 +50,7 @@ export type {
   BodySlot,
   RowActionsCell,
   TableView,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 
 @Component({
   selector: "adapt-data-table",

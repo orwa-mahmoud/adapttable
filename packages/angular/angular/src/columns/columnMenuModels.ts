@@ -1,4 +1,10 @@
 import {
+  ADAPTTABLE_SLOT_TABLE,
+  type ColumnDrag,
+  type ColumnLayout,
+  injectColumnDrag,
+} from "@adapttable/angular";
+import {
   ACTIONS_COLUMN_KEY,
   type ColumnMenuChoice,
   type ColumnMenuItem,
@@ -21,13 +27,7 @@ import {
 } from "@adapttable/core/binding";
 import { computed, Directive, inject, input, signal } from "@angular/core";
 
-import { ADAPTTABLE_SLOT_TABLE } from "../slots";
-import { type ColumnLayout } from "./columnLayout";
-import {
-  type ColumnDrag,
-  injectColumnDrag,
-  injectColumnRenameEditor,
-} from "./columnMenu";
+import { injectColumnRenameEditor } from "./columnMenu";
 const NOOP_RENAME = (): void => undefined;
 function isChoice(item: ColumnMenuItem): item is ColumnMenuChoice {
   return "kind" in item && item.kind === "choice";

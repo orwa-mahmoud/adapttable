@@ -10,6 +10,8 @@ import { effect, type Injector, type Signal, signal } from "@angular/core";
 export const MENU_PANEL_STYLE: Readonly<Record<string, string>> = {
   margin: "0",
   "min-inline-size": "0",
+  "max-block-size": "100%",
+  "box-sizing": "border-box",
   "overflow-y": "auto",
 };
 

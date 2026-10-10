@@ -7,9 +7,9 @@ import {
   injectChangedCellFlash,
   type MobileCardField,
   type RowAction,
-  runRowAction,
   type TableLabels,
 } from "@adapttable/angular";
+import { runRowAction } from "@adapttable/angular/adapter";
 import { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";
 import { dirtyIndicators, editing } from "@adapttable/taiga-ui/editing";
 import { pinnedSummaryRows } from "@adapttable/taiga-ui/pinned-summary-rows";

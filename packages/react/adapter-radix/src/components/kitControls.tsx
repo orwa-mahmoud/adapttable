@@ -253,7 +253,12 @@ export function FilterHeaderTrigger<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ) {
   const active = hasActiveHeaderFilter(props);
-  const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(props);
+  const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(
+    props,
+    {
+      nestedSelector: "[role='listbox']",
+    }
+  );
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger>

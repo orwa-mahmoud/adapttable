@@ -43,7 +43,7 @@ export class InvoiceTotals {
       header: "Amount",
       sortValue: (row) => row.amount,
       formatAggregate: (value) =>
-        typeof value === "number" ? `$${value.toFixed(2)}` : value,
+        typeof value === "number" ? `${value.toFixed(2)}` : value,
     },
   ];
   readonly summary = aggregate<Invoice>(
@@ -51,7 +51,7 @@ export class InvoiceTotals {
     {
       columns: this.columns,
       format: (value) =>
-        typeof value === "number" ? `$${value.toFixed(2)}` : value,
+        typeof value === "number" ? `${value.toFixed(2)}` : value,
     }
   );
   readonly features = [

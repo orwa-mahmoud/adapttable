@@ -95,7 +95,7 @@ export function useFindInTable<TRow>(
   // query is waiting to be written.
   useEffect(() => {
     controller.syncFromUrl();
-  }, [controller, enabled, search, pending, query, open]);
+  }, [controller, enabled, adapter, urlKey, search, pending, query, open]);
 
   useEffect(() => controller.connect(), [controller]);
 

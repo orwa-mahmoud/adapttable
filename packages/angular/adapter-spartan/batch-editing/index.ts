@@ -5,14 +5,16 @@
  */
 import {
   type AdaptTableFeature,
-  BATCH_EDIT_BAR,
   type BatchEditHandler,
-  batchEditing as coreAngularBatchEditing,
-  EDITABLE_CELL,
   extendFeature,
-  ROW_EDIT_ACTIONS,
   slotRender,
 } from "@adapttable/angular";
+import {
+  BATCH_EDIT_BAR,
+  EDITABLE_CELL,
+  ROW_EDIT_ACTIONS,
+} from "@adapttable/angular/adapter";
+import { batchEditing as coreAngularBatchEditing } from "@adapttable/angular/features";
 import { AdaptEditableCell } from "@adapttable/spartan";
 import { AdaptRowEditActions } from "@adapttable/spartan/editing";
 

@@ -9,7 +9,7 @@ import {
   type ExportProgressSlots,
   type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 import { HlmButton } from "../helm/controls";

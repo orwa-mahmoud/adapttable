@@ -5,7 +5,7 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { TreeFeatureOptions } from '@adapttable/angular';
+import { TreeFeatureOptions } from '@adapttable/angular/features';
 
 // @public
 export function tree<TRow>(options?: TreeFeatureOptions<TRow>): AdaptTableFeature;

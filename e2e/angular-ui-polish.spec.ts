@@ -1,7 +1,48 @@
 /** Responsive loading, native control alignment and opaque pinned-cell regressions. */
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
 
 import { builtAdapters, featuresOf } from "../apps/showcase/matrix.mjs";
+
+async function expectMaterialClearAllFits(chips: Locator, locale: string) {
+  const clear = chips.getByRole("button", {
+    name: locale === "ar" ? "مسح الكل" : "Clear all",
+    exact: true,
+  });
+  await expect(clear).toHaveClass(/mat-mdc-button/);
+  await expect(clear).not.toHaveClass(/mat-mdc-chip-remove/);
+  await expect(clear).toHaveAttribute("data-adapttable-part", "chip-remove");
+  const bounds = await clear.evaluate((button) => {
+    const label = button.querySelector(".mdc-button__label")!;
+    const range = document.createRange();
+    range.selectNodeContents(label);
+    const lines = [...range.getClientRects()].filter(
+      (rect) => rect.width > 0 && rect.height > 0
+    );
+    const edges = (rect: DOMRect) => ({
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+    });
+    return {
+      button: edges(button.getBoundingClientRect()),
+      label: edges(range.getBoundingClientRect()),
+      lineCount: new Set(lines.map((rect) => Math.round(rect.top))).size,
+      viewportWidth: document.documentElement.clientWidth,
+      clientWidth: button.clientWidth,
+      scrollWidth: button.scrollWidth,
+    };
+  });
+  expect(bounds.lineCount).toBe(1);
+  expect(bounds.label.left).toBeGreaterThanOrEqual(bounds.button.left - 1);
+  expect(bounds.label.right).toBeLessThanOrEqual(bounds.button.right + 1);
+  expect(bounds.label.top).toBeGreaterThanOrEqual(bounds.button.top - 1);
+  expect(bounds.label.bottom).toBeLessThanOrEqual(bounds.button.bottom + 1);
+  expect(bounds.scrollWidth).toBeLessThanOrEqual(bounds.clientWidth + 1);
+  expect(bounds.button.left).toBeGreaterThanOrEqual(0);
+  expect(bounds.button.right).toBeLessThanOrEqual(bounds.viewportWidth);
+  return clear;
+}
 
 for (const kit of builtAdapters("angular")) {
   for (const suffix of [
@@ -101,15 +142,13 @@ for (const key of [
   "taiga-ui",
 ]) {
   for (const locale of ["en", "ar"]) {
-    test(`${key} ${locale}: filters stay beneath their trigger with reachable dismissal`, async ({
+    test(`${key} ${locale}: filters stay anchored with reachable dismissal`, async ({
       page,
     }, testInfo) => {
       await page.setViewportSize({ width: 1440, height: 856 });
       await page.goto(`/angular-main/?kit=${key}`);
       if (locale === "ar")
-        await page
-          .getByRole("combobox", { name: "Locale", exact: true })
-          .selectOption("ar");
+        await page.getByRole("radio", { name: "العربية", exact: true }).check();
       const trigger = page.getByRole("button", {
         name: locale === "ar" ? "عوامل التصفية" : "Filters",
         exact: true,
@@ -124,13 +163,25 @@ for (const key of [
           '[data-adapttable-part="filters-popover"], [data-spartan-part="filters-popover"], [data-taiga-part="filters-popover"], [data-ng-bootstrap-part="filters-popover"], [data-ngx-bootstrap-part="filters-popover"]'
       );
       await expect(panel).toBeVisible();
+      const surface =
+        key === "material"
+          ? page.locator(".cdk-overlay-pane .adapt-material-filter-card")
+          : panel;
       await expect
         .poll(async () => {
           const anchor = await trigger.boundingBox();
-          const card = await panel.boundingBox();
-          return card!.y - anchor!.y - anchor!.height;
+          const card = await surface.boundingBox();
+          if (!anchor || !card) return false;
+          return (
+            card.y >= anchor.y + anchor.height ||
+            card.y + card.height <= anchor.y
+          );
         })
-        .toBeGreaterThanOrEqual(0);
+        .toBe(true);
+      if (key === "material") {
+        await expect(surface).toBeInViewport({ ratio: 1 });
+        await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+      }
       const person = panel.getByRole("textbox", {
         name: locale === "ar" ? "الشخص" : "Person",
         exact: true,
@@ -152,6 +203,7 @@ for (const key of [
       expect(Math.abs(personBox!.y - operatorBox!.y)).toBeLessThanOrEqual(8);
       const done = panel.locator("footer button").last();
       await expect(done).toBeVisible();
+      if (key === "material") await expect(done).toBeInViewport({ ratio: 1 });
       expect(
         (await done.boundingBox())!.y + (await done.boundingBox())!.height
       ).toBeLessThanOrEqual(856);
@@ -170,12 +222,69 @@ for (const key of [
           exact: true,
         })
       ).toBeChecked();
-      await page.screenshot({
-        path: testInfo.outputPath("native-filter-under-button.png"),
-      });
+      const capture = testInfo.outputPath(
+        key === "material"
+          ? `material-filter-layout-polish-${locale}.png`
+          : "native-filter-anchored.png"
+      );
+      await page.screenshot({ path: capture });
+      if (key === "material") {
+        await testInfo.attach("Material anchored filters", {
+          path: capture,
+          contentType: "image/png",
+        });
+        await expectMaterialClearAllFits(
+          page.locator('[data-adapttable-part="chips"]'),
+          locale
+        );
+      }
       await done.click();
       await expect(panel).toBeHidden();
       await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(6);
+      if (key === "material") {
+        const chips = page.locator('[data-adapttable-part="chips"]');
+        const clear = await expectMaterialClearAllFits(chips, locale);
+        await clear.focus();
+        await page.keyboard.press("Shift+Tab");
+        await expect(clear).not.toBeFocused();
+        await page.keyboard.press("Tab");
+        await expect(clear).toBeFocused();
+        await page.keyboard.press("Enter");
+        await expect(chips).toHaveCount(0);
+        await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(
+          10
+        );
+
+        await trigger.click();
+        await core.check();
+        await done.click();
+        await expect(panel).toBeHidden();
+        await page.setViewportSize({ width: 320, height: 844 });
+        await expect(page.locator('[data-adapttable-part="card"]')).toHaveCount(
+          6
+        );
+        await chips.scrollIntoViewIfNeeded();
+        const mobileClear = await expectMaterialClearAllFits(chips, locale);
+        await expect(mobileClear).toBeInViewport({ ratio: 1 });
+        const mobileCapture = testInfo.outputPath(
+          `material-chip-clear-mobile-${locale}.png`
+        );
+        await page.screenshot({ path: mobileCapture });
+        await testInfo.attach("Material mobile chip actions", {
+          path: mobileCapture,
+          contentType: "image/png",
+        });
+        await mobileClear.focus();
+        await page.keyboard.press("Shift+Tab");
+        await expect(mobileClear).not.toBeFocused();
+        await page.keyboard.press("Tab");
+        await expect(mobileClear).toBeFocused();
+        await page.keyboard.press("Space");
+        await expect(chips).toHaveCount(0);
+        await expect(page.locator('[data-adapttable-part="card"]')).toHaveCount(
+          10
+        );
+      }
     });
   }
 }

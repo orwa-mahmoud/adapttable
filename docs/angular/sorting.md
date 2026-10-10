@@ -44,7 +44,7 @@ export class InvoiceTable {
     {
       key: "amount",
       sortable: true,
-      accessor: (row) => `$${row.amount.toFixed(2)}`,
+      accessor: (row) => `${row.amount.toFixed(2)}`,
       sortValue: (row) => row.amount,
       exportValue: (row) => row.amount,
     },

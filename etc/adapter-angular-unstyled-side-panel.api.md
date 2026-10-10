@@ -7,8 +7,8 @@
 import { AdaptTableFeature } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
-import { SidePanelOptions } from '@adapttable/angular';
-import { SidePanelSlots } from '@adapttable/angular';
+import { SidePanelOptions } from '@adapttable/angular/features';
+import { SidePanelSlots } from '@adapttable/angular/adapter';
 import { TableLabels } from '@adapttable/angular';
 import { TemplateRef } from '@angular/core';
 

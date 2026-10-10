@@ -2,7 +2,8 @@
  * A column's cell as plain text.
  *
  * The engine and accessibility paths read values through format/export/sort
- * extractors and the column data path — never through React renderers.
+ * extractors, primitive accessors and the column data path. Renderer objects
+ * are never stringified or rendered.
  */
 import type { ColumnMetadata } from "../columnModel";
 import { getPath } from "../utils/path";
@@ -29,11 +30,14 @@ export function columnText<TRow>(
 ): string {
   if (column.formatValue) return column.formatValue(row);
 
-  const candidates = [
-    column.exportValue?.(row),
-    column.sortValue?.(row),
-    getPath(row, column.key),
-  ];
+  const fromExport = column.exportValue?.(row);
+  // Retain the existing projection/data read order before examining text.
+  const candidates = [column.sortValue?.(row), getPath(row, column.key)];
+  const exported = asText(fromExport);
+  if (exported !== undefined) return exported;
+  // Accessors may return renderer objects; only existing plain-text values qualify.
+  const accessed = asText(column.accessor?.(row));
+  if (accessed !== undefined) return accessed;
   for (const candidate of candidates) {
     const text = asText(candidate);
     if (text !== undefined) return text;

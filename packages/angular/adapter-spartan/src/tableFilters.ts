@@ -4,4 +4,4 @@ export {
   type FiltersView,
   filtersViewFor,
   type FiltersViewInput,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";

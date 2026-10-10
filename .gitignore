@@ -54,3 +54,6 @@ pg-*.png
 
 # Redirect-only site for the previous address, written by scripts/build-redirects.mjs
 legacy-site/
+
+# Exact Vue SFC declarations generated before typed lint.
+**/.sfc-types/

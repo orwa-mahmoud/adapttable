@@ -146,6 +146,13 @@ const slots: GroupingPanelSlots = {
     "data-adapttable-part": part,
   }: GroupingPanelSelectProps) => {
     const addControl = part === "grouping-add";
+    const caption = addControl
+      ? label
+      : options.reduce(
+          (longest, option) =>
+            option.label.length > longest.length ? option.label : longest,
+          ""
+        );
     return (
       <Select
         aria-label={label}
@@ -156,9 +163,9 @@ const slots: GroupingPanelSlots = {
         variant={addControl ? undefined : "borderless"}
         options={options.map((option) => ({ ...option }))}
         style={{
-          width: addControl ? addControlWidth(label) : 76,
-          maxWidth: addControl ? "100%" : undefined,
-          flex: addControl ? "0 0 auto" : undefined,
+          width: addControlWidth(caption),
+          maxWidth: "100%",
+          flex: "0 0 auto",
         }}
         getPopupContainer={(trigger: HTMLElement) =>
           trigger.parentElement ?? document.body

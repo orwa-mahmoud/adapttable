@@ -1,0 +1,1532 @@
+/* Host styling for the native Vue kit. Every table control remains adapter-owned. */
+body.vue-workspace-page {
+  margin: 0;
+  --ws-bg: #f7f7f2;
+  --ws-surface: #fffefa;
+  --ws-raised: #f1f3ed;
+  --ws-ink: #1c302b;
+  --ws-muted: #65736a;
+  --ws-line: #d9e0d6;
+  --ws-soft: #e9ede4;
+  --ws-accent: #25674c;
+  --ws-on-accent: #ffffff;
+  --ws-wash: #e7f1e7;
+  --ws-warning: #946117;
+  --ws-warning-bg: #fff0d2;
+  --ws-shadow: 0 14px 40px #18372812;
+  color: var(--ws-ink);
+  background: var(--ws-bg);
+  font:
+    14px/1.55 ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body.vue-workspace-page[data-workspace-theme="dark"] {
+  --ws-bg: #111d19;
+  --ws-surface: #192923;
+  --ws-raised: #21352b;
+  --ws-ink: #edf1e7;
+  --ws-muted: #adbdaf;
+  --ws-line: #3a5142;
+  --ws-soft: #2b4033;
+  --ws-accent: #9cd9af;
+  --ws-on-accent: #153323;
+  --ws-wash: #264332;
+  --ws-warning: #f0cd87;
+  --ws-warning-bg: #483c23;
+  --ws-shadow: 0 14px 40px #0003;
+}
+.vue-workspace-page *,
+.vue-workspace-page *::before,
+.vue-workspace-page *::after {
+  box-sizing: border-box;
+}
+.vue-workspace-page :is(button, input, select, textarea) {
+  font: inherit;
+  color: inherit;
+}
+.vue-workspace-page button,
+.vue-workspace-page select,
+.vue-workspace-page input:not([type="checkbox"], [type="radio"]),
+.vue-workspace-page textarea {
+  border: 1px solid var(--ws-line);
+  border-radius: 7px;
+  background: var(--ws-surface);
+  min-block-size: 38px;
+  padding: 7px 11px;
+  max-inline-size: 100%;
+}
+.vue-workspace-page :is(button, select, summary) {
+  cursor: pointer;
+}
+.vue-workspace-page button {
+  font-weight: 560;
+}
+.vue-workspace-page button:hover:not(:disabled) {
+  background: var(--ws-raised);
+  border-color: var(--ws-accent);
+}
+.vue-workspace-page button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.vue-workspace-page input:is([type="checkbox"], [type="radio"]) {
+  accent-color: var(--ws-accent);
+  inline-size: 16px;
+  block-size: 16px;
+}
+.vue-workspace-page :focus-visible {
+  outline: 3px solid var(--ws-accent);
+  outline-offset: 3px;
+}
+.vue-workspace-page a {
+  color: var(--ws-accent);
+  text-underline-offset: 4px;
+}
+.vue-workspace-page :is(h1, h2, h3, p) {
+  margin-block-start: 0;
+}
+.vue-workspace-page [hidden] {
+  display: none;
+}
+.vue-workspace {
+  min-block-size: 100dvh;
+}
+.workspace-shell {
+  inline-size: min(1280px, 100% - 80px);
+  margin-inline: auto;
+}
+.workspace-skip {
+  position: fixed;
+  z-index: 3000;
+  inset-block-start: -100px;
+  inset-inline-start: 1rem;
+  padding: 1rem;
+  background: var(--ws-surface);
+}
+.workspace-skip:focus {
+  inset-block-start: 1rem;
+}
+.workspace-nav {
+  background: var(--ws-surface);
+  border-block-end: 1px solid var(--ws-line);
+}
+.workspace-nav__inner {
+  display: flex;
+  min-block-size: 82px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.workspace-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ws-ink) !important;
+  text-decoration: none;
+  font-size: 19px;
+  font-weight: 720;
+  letter-spacing: -0.6px;
+}
+.workspace-brand > span {
+  font-size: 11px;
+  padding: 2px 7px;
+  letter-spacing: 0;
+  background: var(--ws-wash);
+  border-radius: 5px;
+  color: var(--ws-accent);
+  font-weight: 650;
+}
+.workspace-preferences {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+.workspace-preference {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.workspace-preference > span {
+  font-size: 10px;
+  color: var(--ws-muted);
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.workspace-choice {
+  display: flex;
+  gap: 3px;
+}
+.workspace-choice button {
+  min-block-size: 32px;
+  padding: 4px 9px;
+  font-size: 12px;
+}
+.workspace-choice button[aria-pressed="true"],
+.workspace-choice button[aria-pressed="true"]:hover:not(:disabled) {
+  border-color: var(--ws-accent);
+  background: var(--ws-accent);
+  color: var(--ws-on-accent);
+}
+.workspace-theme {
+  display: grid;
+  place-items: center;
+  min-block-size: 32px !important;
+  padding: 5px !important;
+  inline-size: 34px;
+}
+.workspace-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.43fr);
+  gap: 72px;
+  padding-block: 56px 38px;
+  align-items: center;
+}
+.workspace-eyebrow {
+  color: var(--ws-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 10px;
+  line-height: 1.6;
+  font-weight: 720;
+  margin-block-end: 13px;
+}
+.workspace-hero h1 {
+  font-size: clamp(32px, 3.5vw, 52px);
+  line-height: 1.08;
+  letter-spacing: -0.047em;
+  max-inline-size: 700px;
+  font-weight: 580;
+  margin-block-end: 21px;
+  text-wrap: balance;
+}
+.workspace-hero__lead {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ws-muted);
+  max-inline-size: 580px;
+  margin-block-end: 16px;
+}
+.workspace-notice {
+  font-size: 11px;
+  color: var(--ws-muted);
+  margin: 0;
+}
+.workspace-metrics {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  overflow: hidden;
+  background: var(--ws-line);
+  border: 1px solid var(--ws-line);
+  border-radius: 14px;
+  box-shadow: var(--ws-shadow);
+}
+.workspace-metrics > div {
+  background: var(--ws-surface);
+  padding: 19px 21px;
+}
+.workspace-metrics > div:last-child {
+  grid-column: 1 / -1;
+}
+.workspace-metrics dt {
+  font-size: 11px;
+  color: var(--ws-muted);
+}
+.workspace-metrics dd {
+  margin: 7px 0 0;
+  font-size: 29px;
+  line-height: 1.2;
+  font-weight: 560;
+  letter-spacing: -1px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.workspace-metric-decoration {
+  color: var(--ws-accent);
+  font-size: 23px;
+}
+.workspace-metric-dot {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--ws-warning);
+}
+.workspace-tabs {
+  display: flex;
+  gap: 6px;
+  padding-block: 0 16px;
+  border-block-end: 1px solid var(--ws-line);
+}
+.workspace-tabs > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-color: transparent;
+  background: transparent;
+  padding: 9px 16px;
+}
+.workspace-tabs > button > span {
+  color: var(--ws-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.vue-workspace-page .workspace-tabs > button[aria-pressed="true"] {
+  background: var(--ws-ink);
+  color: var(--ws-surface);
+  border-color: var(--ws-ink);
+}
+.workspace-tabs > button[aria-pressed="true"] > span {
+  color: inherit;
+  opacity: 0.65;
+}
+.workspace-guide {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 25px;
+  padding-block: 19px;
+  color: var(--ws-muted);
+  font-size: 12px;
+}
+.workspace-guide strong {
+  color: var(--ws-ink);
+  font-size: 12px;
+  font-weight: 620;
+}
+.workspace-guide p {
+  margin: 3px 0 0;
+}
+.workspace-guide details {
+  max-inline-size: 330px;
+  flex: 0 0 210px;
+}
+.workspace-guide summary {
+  color: var(--ws-accent);
+  font-size: 12px;
+  text-align: end;
+}
+.workspace-guide details[open] summary {
+  text-align: start;
+}
+.workspace-stage {
+  min-block-size: 400px;
+}
+.workspace-view {
+  background: var(--ws-surface);
+  padding: 27px;
+  border: 1px solid var(--ws-line);
+  border-radius: 16px;
+  box-shadow: var(--ws-shadow);
+}
+.workspace-view__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 28px;
+  margin-block-end: 22px;
+}
+.workspace-view__head .workspace-eyebrow {
+  font-size: 9px;
+  margin-block-end: 6px;
+}
+.workspace-view h2 {
+  font-size: 25px;
+  line-height: 1.25;
+  letter-spacing: -0.7px;
+  font-weight: 580;
+  margin-block-end: 10px;
+}
+.workspace-view__head p:not(.workspace-eyebrow) {
+  color: var(--ws-muted);
+  max-inline-size: 690px;
+  font-size: 13px;
+  margin: 0;
+}
+.workspace-local {
+  max-inline-size: 155px;
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--ws-muted);
+  padding-block-start: 8px;
+}
+.workspace-local > span {
+  display: inline-block;
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background: var(--ws-accent);
+  margin-inline-end: 5px;
+}
+.workspace-controls {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block-end: 9px;
+}
+.workspace-controls > label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--ws-muted);
+}
+.workspace-controls > label > select {
+  color: var(--ws-ink);
+  font-size: 12px;
+  min-block-size: 34px;
+}
+.workspace-controls__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-inline-start: auto;
+}
+.workspace-controls__actions button {
+  font-size: 11px;
+  min-block-size: 34px;
+}
+.workspace-feedback {
+  min-block-size: 24px;
+  font-size: 11px;
+  color: var(--ws-accent);
+  margin-block: 9px 13px;
+}
+.workspace-subhead {
+  margin-block: 34px 17px;
+}
+.workspace-subhead h3 {
+  font-size: 20px;
+  font-weight: 590;
+  letter-spacing: -0.4px;
+  margin-block-end: 8px;
+}
+.workspace-subhead p {
+  font-size: 13px;
+  color: var(--ws-muted);
+  max-inline-size: 650px;
+  margin: 0;
+}
+.workspace-table-note {
+  color: var(--ws-muted);
+  font-size: 11px;
+  padding: 12px 15px;
+  margin: 0;
+}
+.workspace-empty,
+.workspace-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 42px 20px;
+  min-block-size: 200px;
+  text-align: center;
+  color: var(--ws-muted);
+}
+.workspace-empty strong {
+  font-size: 17px;
+  color: var(--ws-ink);
+}
+.workspace-empty p {
+  margin: 0;
+  max-inline-size: 400px;
+}
+.workspace-loading__mark {
+  inline-size: 26px;
+  block-size: 26px;
+  border: 2px solid var(--ws-line);
+  border-block-start-color: var(--ws-accent);
+  border-radius: 50%;
+  animation: workspace-spin 0.8s linear infinite;
+}
+.workspace-paused,
+.workspace-error {
+  border: 1px dashed var(--ws-line);
+  border-radius: 10px;
+  background: var(--ws-raised);
+}
+.workspace-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  color: var(--ws-muted);
+  padding-block: 36px 30px;
+  font-size: 11px;
+}
+.workspace-footer strong {
+  color: var(--ws-ink);
+  font-size: 15px;
+  letter-spacing: -0.4px;
+}
+.workspace-footer p {
+  margin: 5px 0 0;
+}
+.workspace-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  align-items: flex-start;
+}
+.workspace-footer details {
+  max-inline-size: 250px;
+}
+.workspace-footer summary {
+  color: var(--ws-accent);
+}
+/* Table structure and native controls share a restrained, comfortable rhythm. */
+.vue-workspace-page [data-adapttable-part="root"] {
+  min-inline-size: 0;
+  border: 1px solid var(--ws-line);
+  border-radius: 10px;
+  background: var(--ws-surface);
+}
+.vue-workspace-page [data-adapttable-part="toolbar"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  padding: 13px;
+  border-block-end: 1px solid var(--ws-line);
+}
+.vue-workspace-page [data-adapttable-part="toolbar"] :is(button, select) {
+  font-size: 11px;
+  min-block-size: 34px;
+  padding: 6px 9px;
+}
+.vue-workspace-page [data-adapttable-part="search-field"] {
+  display: flex;
+  flex: 1 1 185px;
+  max-inline-size: 400px;
+  margin-inline-end: auto;
+}
+.vue-workspace-page [data-adapttable-part="search"] {
+  inline-size: 100%;
+  font-size: 12px;
+  min-block-size: 34px !important;
+}
+.vue-workspace-page [data-adapttable-part="scroll-box"] {
+  overflow: auto;
+  max-inline-size: 100%;
+  scrollbar-color: var(--ws-line) transparent;
+}
+.vue-workspace-page [data-adapttable-part="table"] {
+  inline-size: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+.vue-workspace-page :is(th, td) {
+  padding: 13px 14px;
+  text-align: start;
+  border-block-end: 1px solid var(--ws-soft);
+  background: var(--ws-surface);
+}
+.vue-workspace-page th {
+  background: var(--ws-raised);
+  color: var(--ws-muted);
+  font-size: 10px;
+  font-weight: 620;
+  letter-spacing: 0.02em;
+}
+.vue-workspace-page
+  [data-adapttable-part="root"][data-density="compact"]
+  :is(th, td) {
+  padding-block: 8px;
+}
+.vue-workspace-page [data-adapttable-part="sort-button"] {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  min-block-size: 22px;
+  font-size: inherit;
+  text-align: inherit;
+}
+.vue-workspace-page [data-adapttable-part="tbody"] tr:hover > td {
+  background: var(--ws-raised);
+}
+.vue-workspace-page
+  [data-adapttable-part="tbody"]
+  tr[aria-selected="true"]
+  > td {
+  background: var(--ws-wash);
+}
+.vue-workspace-page [data-adapttable-part="footer"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  font-size: 11px;
+  color: var(--ws-muted);
+  border-block-start: 1px solid var(--ws-line);
+}
+.vue-workspace-page [data-adapttable-part="footer"] select,
+.vue-workspace-page [data-adapttable-part="pager"] button {
+  font-size: 11px;
+  min-block-size: 30px;
+  padding: 4px 8px;
+}
+.vue-workspace-page [data-adapttable-part="pager"] {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-inline-start: auto;
+}
+.vue-workspace-page [data-adapttable-part="page-number"][aria-current="page"] {
+  background: var(--ws-accent);
+  color: var(--ws-on-accent);
+  border-color: var(--ws-accent);
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="selection-cell"],
+    [data-adapttable-part="selection-header"]
+  ) {
+  inline-size: 42px;
+  padding-inline: 12px;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="summary-cell"],
+    [data-adapttable-part="summary-card"]
+  ) {
+  background: var(--ws-wash);
+  color: var(--ws-ink);
+  font-weight: 620;
+}
+.vue-workspace-page [data-adapttable-part="table-footer"] {
+  border-block-start: 1px solid var(--ws-soft);
+}
+.order-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.order-status::before {
+  content: "";
+  inline-size: 4px;
+  block-size: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.order-status--review {
+  color: var(--ws-warning);
+  background: var(--ws-warning-bg);
+}
+.order-status--ready {
+  color: var(--ws-accent);
+  background: var(--ws-wash);
+}
+.order-status--dispatched {
+  color: var(--ws-muted);
+  background: var(--ws-raised);
+}
+.vue-workspace-page [data-adapttable-part="edit-cell-activate"] {
+  border-color: transparent;
+  min-block-size: 28px;
+  padding: 4px 5px;
+  text-align: start;
+  font-size: inherit;
+  font-weight: 400;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="edit-cell-error"],
+    [data-adapttable-part="edit-cell-save-error"]
+  ) {
+  font-size: 11px;
+  color: var(--ws-warning);
+  margin-block-start: 5px;
+}
+.vue-workspace-page [data-adapttable-part="editable-cell"] {
+  min-inline-size: 110px;
+}
+.vue-workspace-page [data-adapttable-part="edit-cell-editor"] {
+  inline-size: 100%;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="expand-toggle"],
+    [data-adapttable-part="tree-toggle"],
+    [data-adapttable-part="group-toggle"]
+  ) {
+  min-block-size: 26px;
+  padding: 2px 7px;
+  border-color: transparent;
+  background: transparent;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="group-row"],
+    [data-adapttable-part="group-footer-row"]
+  )
+  > td {
+  background: var(--ws-raised);
+  font-size: 11px;
+}
+.vue-workspace-page [data-adapttable-part="group-cell"] {
+  padding-block: 10px;
+}
+.vue-workspace-page [data-adapttable-part="group-count"] {
+  color: var(--ws-muted);
+}
+.vue-workspace-page [data-adapttable-part="detail-cell"] {
+  padding: 0;
+  background: var(--ws-raised);
+}
+.order-lines {
+  padding: 17px;
+}
+.order-lines__title {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  margin-block-end: 12px;
+}
+.order-lines__title span {
+  color: var(--ws-muted);
+}
+.order-lines [data-adapttable-part="footer"] {
+  padding-block: 7px;
+}
+.vue-workspace-page [data-adapttable-part="row-reorder-buttons"] {
+  display: flex;
+  gap: 3px;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="row-reorder-up"],
+    [data-adapttable-part="row-reorder-down"]
+  ) {
+  min-block-size: 26px;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+/* Card reorder controls keep full labels and reserve a separate native menu row. */
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  [data-adapttable-part="row-reorder-buttons"] {
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 8px;
+}
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  :is(
+    [data-adapttable-part="row-reorder-up"],
+    [data-adapttable-part="row-reorder-down"]
+  ) {
+  flex: 1 1 auto;
+  min-block-size: 44px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  [data-adapttable-part="row-move-menu"] {
+  flex-basis: 100%;
+  min-inline-size: 0;
+}
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  :is(
+    [data-adapttable-part="row-move-menu-content"],
+    [data-adapttable-part="row-move-menu-trigger"]
+  ) {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+.vue-workspace-page
+  [data-workspace-table="dispatch"]
+  [data-adapttable-part="card"]
+  [data-adapttable-part="row-move-menu-trigger"] {
+  min-block-size: 44px;
+}
+.vue-workspace-page [data-adapttable-part="grouping-panel"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  border-block-end: 1px solid var(--ws-line);
+  background: var(--ws-raised);
+  font-size: 11px;
+}
+.vue-workspace-page [data-adapttable-part="grouping-drop-zone"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.vue-workspace-page [data-adapttable-part="grouping-item"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.vue-workspace-page [data-adapttable-part="grouping-chip"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--ws-wash);
+}
+.vue-workspace-page
+  [data-adapttable-part="grouping-panel"]
+  :is(select, button) {
+  min-block-size: 28px;
+  padding: 4px 7px;
+  font-size: 10px;
+}
+.vue-workspace-page [data-adapttable-part="grouping-aggregations"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.vue-workspace-page
+  :is([data-adapttable-part="status-bar"], [data-adapttable-part="find-bar"]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  padding: 9px 13px;
+  font-size: 11px;
+  background: var(--ws-raised);
+  border-block-start: 1px solid var(--ws-line);
+}
+.vue-workspace-page [data-adapttable-part="find-bar"] :is(input, button) {
+  min-block-size: 30px;
+  font-size: 11px;
+}
+.vue-workspace-page [data-adapttable-part="find-input"] {
+  flex: 1 1 140px;
+}
+.vue-workspace-page [data-cell-match-current] {
+  background: var(--ws-warning-bg);
+  color: var(--ws-ink);
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="bulk-bar"],
+    [data-adapttable-part="select-all-banner"]
+  ) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  background: var(--ws-wash);
+  font-size: 12px;
+}
+.vue-workspace-page [data-adapttable-part="bulk-button"] {
+  background: var(--ws-accent);
+  color: var(--ws-on-accent);
+  border-color: var(--ws-accent);
+}
+.vue-workspace-page [data-adapttable-part="table-region"] {
+  display: flex;
+  min-inline-size: 0;
+}
+.vue-workspace-page [data-adapttable-part="table-region-main"] {
+  min-inline-size: 0;
+  flex: 1;
+}
+.vue-workspace-page [data-adapttable-part="side-panel"] {
+  inline-size: 290px;
+  border-inline-start: 1px solid var(--ws-line);
+  padding: 15px;
+  background: var(--ws-raised);
+  font-size: 12px;
+}
+.vue-workspace-page [data-adapttable-part="side-panel-header"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin-block-end: 17px;
+}
+.vue-workspace-page [data-adapttable-part="side-panel-tabs"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+/* Top-layer native overlays inherit page tokens even when teleported to body. */
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="filters-popover"],
+    [data-adapttable-part="filters-panel"],
+    [data-adapttable-part="command-palette"],
+    [data-adapttable-part="context-menu"]
+  ) {
+  color: var(--ws-ink);
+  background: var(--ws-surface);
+  border: 1px solid var(--ws-line);
+  border-radius: 11px;
+  padding: 18px;
+  box-shadow: 0 18px 60px #0003;
+  font-size: 13px;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="filters-header"],
+    [data-adapttable-part="filters-footer"]
+  ) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.vue-workspace-page [data-adapttable-part="filters-header"] {
+  margin-block-end: 17px;
+}
+.vue-workspace-page [data-adapttable-part="filters-title"] {
+  font-size: 16px;
+  margin: 0;
+}
+.vue-workspace-page [data-adapttable-part="filter-field"] {
+  display: grid;
+  gap: 7px;
+  margin-block-end: 17px;
+}
+.vue-workspace-page [data-adapttable-part="filter-label"] {
+  font-size: 12px;
+  color: var(--ws-muted);
+}
+.vue-workspace-page [data-adapttable-part="filters-footer"] {
+  border-block-start: 1px solid var(--ws-line);
+  padding-block-start: 14px;
+}
+.vue-workspace-page [data-adapttable-part="views-panel"] {
+  color: var(--ws-ink);
+  background: var(--ws-surface);
+  border: 1px solid var(--ws-line);
+  border-radius: 11px;
+  padding: 14px;
+  box-shadow: 0 18px 60px #0003;
+}
+.vue-workspace-page [data-adapttable-part="views-row"] {
+  margin-block-end: 8px;
+}
+.vue-workspace-page [data-adapttable-part="views-item"] {
+  flex: 1;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.vue-workspace-page [data-adapttable-part="views-input"] {
+  min-inline-size: 0;
+  inline-size: 11rem;
+}
+.vue-workspace-page [data-adapttable-part="saved-view-row"] {
+  padding-block: 10px;
+  border-block-end: 1px solid var(--ws-line);
+}
+.vue-workspace-page [data-adapttable-part="saved-views-title"] {
+  font-size: 16px;
+}
+.vue-workspace-page [data-adapttable-part="saved-views-footer"] {
+  display: block;
+  margin-block-start: 16px;
+  line-height: 1.6;
+  color: var(--ws-muted);
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="filters-done"],
+    [data-adapttable-part="assistant-send"],
+    [data-adapttable-part="agent-approval-approve"]
+  ) {
+  background: var(--ws-accent);
+  color: var(--ws-on-accent);
+  border-color: var(--ws-accent);
+}
+.vue-workspace-page dialog:not([data-adapttable-filter-dialog])::backdrop,
+.vue-workspace-page [data-adapttable-part="filters-backdrop"] {
+  background: #102b2259;
+  backdrop-filter: blur(2px);
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="command-item"],
+    [data-adapttable-part="context-menu-item"]
+  ) {
+  display: block;
+  inline-size: 100%;
+  text-align: start;
+  margin-block: 5px;
+}
+.vue-workspace-page [data-adapttable-part="command-input"] {
+  inline-size: 100%;
+  margin-block-end: 12px;
+}
+/* The assistant is a contained panel: readable and useful without obscuring the grid. */
+.vue-workspace-page [data-adapttable-part="assistant-launcher-anchor"] {
+  display: block;
+  padding: 12px 14px;
+  border-block-start: 1px solid var(--ws-line);
+}
+.vue-workspace-page [data-adapttable-part="assistant-launcher"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ws-accent);
+  background: var(--ws-wash);
+  border-color: transparent;
+  font-size: 12px;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="assistant-launcher-mark"],
+    [data-adapttable-part="assistant-mark"],
+    [data-adapttable-part="assistant-user-mark"],
+    [data-adapttable-part="assistant-message-mark"],
+    [data-adapttable-part="assistant-receipt-icon"]
+  ) {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 22px;
+  block-size: 22px;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="assistant-launcher-mark"],
+    [data-adapttable-part="assistant-mark"],
+    [data-adapttable-part="assistant-user-mark"],
+    [data-adapttable-part="assistant-message-mark"],
+    [data-adapttable-part="assistant-receipt-icon"]
+  )
+  > :is(svg, img) {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+.vue-workspace-page [data-adapttable-part="assistant-panel"] {
+  border-block-start: 1px solid var(--ws-line);
+  padding: 18px;
+  max-inline-size: 100%;
+}
+.vue-workspace-page [data-adapttable-part="assistant-header"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-block-end: 15px;
+}
+.vue-workspace-page [data-adapttable-part="assistant-title"] {
+  font-weight: 650;
+}
+.vue-workspace-page [data-adapttable-part="assistant-close"] {
+  margin-inline-start: auto;
+  min-block-size: 30px;
+  font-size: 11px;
+}
+.vue-workspace-page [data-adapttable-part="assistant-connection"] {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--ws-wash);
+  border-radius: 4px;
+}
+.vue-workspace-page [data-adapttable-part="assistant-conversation"] {
+  max-block-size: 330px;
+  overflow: auto;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="assistant-message"],
+    [data-adapttable-part="assistant-greeting"]
+  ) {
+  margin-block: 12px;
+  max-inline-size: 760px;
+  font-size: 13px;
+}
+.vue-workspace-page [data-adapttable-part="assistant-examples-menu"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 13px;
+}
+.vue-workspace-page [data-adapttable-part="assistant-examples-item"] {
+  font-size: 12px;
+}
+.vue-workspace-page [data-adapttable-part="assistant-composer"] {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+  margin-block-start: 16px;
+}
+.vue-workspace-page [data-adapttable-part="assistant-input"] {
+  inline-size: 100%;
+  min-block-size: 62px;
+  resize: vertical;
+  flex: 1;
+}
+.vue-workspace-page [data-adapttable-part="assistant-empty-note"] {
+  font-size: 11px;
+  color: var(--ws-muted);
+  margin-block: 12px 0;
+  max-inline-size: 780px;
+}
+.vue-workspace-page
+  :is(
+    [data-adapttable-part="assistant-approval"],
+    [data-adapttable-part="approval-review"]
+  ) {
+  background: var(--ws-wash);
+  border: 1px solid var(--ws-line);
+  border-radius: 8px;
+  padding: 14px;
+  margin-block: 12px;
+}
+.vue-workspace-page [data-adapttable-part="pivot-panel"] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-block-end: 16px;
+}
+.vue-workspace-page [data-adapttable-part="pivot-zone"] {
+  min-inline-size: 0;
+  border: 1px solid var(--ws-line);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0;
+  background: var(--ws-raised);
+}
+.vue-workspace-page [data-adapttable-part="pivot-zone"] legend {
+  font-size: 11px;
+  color: var(--ws-muted);
+  padding-inline: 4px;
+}
+.vue-workspace-page [data-adapttable-part="pivot-field"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  font-size: 11px;
+  margin-block-end: 8px;
+}
+.vue-workspace-page [data-adapttable-part="pivot-field"] > span {
+  flex-basis: 100%;
+  margin-block-end: 3px;
+}
+.vue-workspace-page [data-adapttable-part="pivot-panel"] :is(button, select) {
+  min-block-size: 28px;
+  padding: 4px 6px;
+  font-size: 10px;
+}
+.vue-workspace-page [data-adapttable-part="sparkline"] {
+  color: var(--ws-accent);
+  max-inline-size: 100%;
+}
+/* Cards preserve field names, controls, summaries, and actual nested child tables. */
+.vue-workspace-page [data-adapttable-part="cards"] {
+  display: grid;
+  gap: 12px;
+  padding: 13px;
+}
+.vue-workspace-page [data-adapttable-part="card"] {
+  border: 1px solid var(--ws-line);
+  border-radius: 9px;
+  padding: 14px;
+  min-inline-size: 0;
+}
+.vue-workspace-page [data-adapttable-part="card"] > dl,
+.vue-workspace-page [data-adapttable-part="summary-card"] > dl {
+  margin: 0;
+}
+.vue-workspace-page [data-adapttable-part="card-row"] {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 6px;
+}
+.vue-workspace-page [data-adapttable-part="card-label"] {
+  color: var(--ws-muted);
+  font-size: 11px;
+  flex: 0 0 35%;
+}
+.vue-workspace-page [data-adapttable-part="card-value"] {
+  margin: 0;
+  font-size: 12px;
+  text-align: end;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.vue-workspace-page [data-adapttable-part="card-actions"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-block-start: 10px;
+}
+.vue-workspace-page [data-adapttable-part="summary-card"] {
+  padding: 13px;
+}
+.vue-workspace-page [data-adapttable-part="card-detail"] {
+  margin-block-start: 12px;
+}
+.vue-workspace-page [data-adapttable-part="card-detail"] .order-lines {
+  padding: 0;
+}
+@keyframes workspace-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 1000px) {
+  .workspace-shell {
+    inline-size: min(1280px, 100% - 40px);
+  }
+  .workspace-hero {
+    gap: 30px;
+    padding-block: 40px 30px;
+  }
+  .workspace-view {
+    padding: 20px;
+  }
+  .workspace-local {
+    display: none;
+  }
+  .workspace-controls__actions {
+    margin-inline-start: 0;
+  }
+}
+@media (max-width: 700px) {
+  .workspace-shell {
+    inline-size: calc(100% - 28px);
+  }
+  .workspace-nav__inner {
+    min-block-size: 110px;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-block: 15px;
+  }
+  .workspace-preferences {
+    gap: 7px;
+  }
+  .workspace-brand {
+    font-size: 17px;
+  }
+  .workspace-hero {
+    display: block;
+    padding-block: 30px 23px;
+  }
+  .workspace-hero h1 {
+    font-size: 37px;
+    max-inline-size: 460px;
+  }
+  .workspace-hero__lead {
+    font-size: 14px;
+  }
+  .workspace-metrics {
+    grid-template-columns: 1fr 1fr 1.25fr;
+    margin-block-start: 24px;
+  }
+  .workspace-metrics > div {
+    padding: 12px;
+  }
+  .workspace-metrics > div:last-child {
+    grid-column: auto;
+  }
+  .workspace-metrics dt {
+    font-size: 9px;
+  }
+  .workspace-metrics dd {
+    font-size: 22px;
+  }
+  .workspace-metric-decoration,
+  .workspace-metric-dot {
+    display: none;
+  }
+  .workspace-tabs {
+    gap: 3px;
+  }
+  .workspace-tabs > button {
+    font-size: 11px;
+    gap: 5px;
+    flex: 1;
+    padding: 9px 6px;
+    justify-content: center;
+  }
+  .workspace-tabs > button > span {
+    display: none;
+  }
+  .workspace-guide {
+    display: block;
+    padding-block: 15px;
+  }
+  .workspace-guide details {
+    margin-block-start: 8px;
+  }
+  .workspace-guide summary {
+    text-align: start;
+  }
+  .workspace-view {
+    padding: 17px 12px;
+    border-radius: 11px;
+  }
+  .workspace-view h2 {
+    font-size: 22px;
+  }
+  .workspace-view__head {
+    margin-block-end: 17px;
+  }
+  .workspace-controls {
+    gap: 9px;
+  }
+  .workspace-controls > label {
+    flex: 1 1 130px;
+  }
+  .workspace-controls__actions {
+    inline-size: 100%;
+  }
+  .workspace-controls__actions > button {
+    flex: 1;
+  }
+  .workspace-feedback {
+    font-size: 10px;
+  }
+  .workspace-footer {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .workspace-footer nav {
+    gap: 15px;
+  }
+  .vue-workspace-page [data-adapttable-part="toolbar"] {
+    padding: 10px;
+    gap: 6px;
+  }
+  .vue-workspace-page [data-adapttable-part="search-field"] {
+    flex-basis: 100%;
+    max-inline-size: none;
+  }
+  .vue-workspace-page [data-adapttable-part="toolbar"] :is(button, select) {
+    min-block-size: 40px;
+  }
+  .vue-workspace-page [data-adapttable-part="pager"] {
+    margin-inline-start: 0;
+    inline-size: 100%;
+    justify-content: center;
+  }
+  .vue-workspace-page [data-adapttable-part="pager"] button {
+    min-block-size: 38px;
+    min-inline-size: 34px;
+  }
+  .vue-workspace-page [data-adapttable-part="table-region"] {
+    flex-direction: column;
+  }
+  .vue-workspace-page [data-adapttable-part="side-panel"] {
+    inline-size: 100%;
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--ws-line);
+  }
+  .vue-workspace-page [data-adapttable-part="pivot-panel"] {
+    grid-template-columns: 1fr;
+  }
+  .vue-workspace-page [data-adapttable-part="assistant-composer"] {
+    flex-wrap: wrap;
+  }
+  .vue-workspace-page [data-adapttable-part="assistant-input"] {
+    flex-basis: 100%;
+  }
+  .vue-workspace-page [data-adapttable-part="find-input"] {
+    min-inline-size: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace-loading__mark {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .order-status,
+  .vue-workspace-page .workspace-tabs > button[aria-pressed="true"] {
+    border: 1px solid currentColor;
+  }
+  .workspace-metric-dot {
+    forced-color-adjust: none;
+  }
+}
+
+.vue-workspace[dir="rtl"] :is(h1, h2, h3, .workspace-eyebrow) {
+  letter-spacing: normal;
+}
+.vue-workspace-page [data-adapttable-part="assistant-messages"] {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.vue-workspace-page [data-adapttable-part="tbody"] [data-cell-selected] {
+  background: var(--ws-wash);
+  box-shadow: inset 0 0 0 1px var(--ws-line);
+}
+.vue-workspace-page [data-grid-cell]:focus {
+  outline: 2px solid var(--ws-accent);
+  outline-offset: -2px;
+}
+.vue-workspace-page [data-adapttable-part="tbody"] [data-cell-match] {
+  background: var(--ws-warning-bg);
+}
+.vue-workspace-page [data-adapttable-part="tbody"] [data-cell-match-current] {
+  box-shadow: inset 0 0 0 2px var(--ws-warning);
+}
+.vue-workspace-page [data-cell-span] {
+  vertical-align: middle;
+  background: var(--ws-raised);
+}
+.vue-workspace-page
+  [data-adapttable-part="command-item"][aria-selected="true"] {
+  background: var(--ws-wash);
+  border-color: var(--ws-accent);
+}
+
+.vue-workspace[lang="ar"] {
+  font-family: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+}
+
+.vue-workspace-page [data-adapttable-part="card"][data-selected] {
+  background: var(--ws-wash);
+  border-color: var(--ws-accent);
+}
+
+.workspace-export-hint {
+  margin-block: 8px 14px;
+  padding: 10px 13px;
+  border-inline-start: 3px solid var(--ws-warning);
+  background: var(--ws-warning-bg);
+  color: var(--ws-ink);
+  font-size: 12px;
+}
+.workspace-review-queue {
+  display: grid;
+  gap: 9px;
+}
+.workspace-review-queue button {
+  text-align: start;
+  font-size: 12px;
+}
+.workspace-discovery {
+  margin-block: 0 20px;
+  font-size: 11px;
+  color: var(--ws-muted);
+}
+.workspace-discovery__rail {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.workspace-discovery__rail > strong {
+  color: var(--ws-ink);
+  font-weight: 600;
+}
+.workspace-discovery nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+}
+.workspace-discovery nav a {
+  text-decoration-thickness: 1px;
+}
+.workspace-implementation {
+  margin-block-start: 10px;
+}
+.workspace-implementation > summary {
+  color: var(--ws-accent);
+}
+.workspace-implementation__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 24px;
+  padding: 20px;
+  margin-block-start: 10px;
+  border: 1px solid var(--ws-line);
+  border-radius: 10px;
+  background: var(--ws-surface);
+  font-size: 12px;
+}
+.workspace-implementation__body h3 {
+  font-size: 12px;
+  margin-block: 18px 8px;
+  color: var(--ws-ink);
+}
+.workspace-implementation__body pre {
+  overflow: auto;
+  margin-block: 10px;
+  padding: 13px;
+  border: 1px solid var(--ws-line);
+  border-radius: 7px;
+  background: var(--ws-raised);
+  color: var(--ws-ink);
+  font:
+    11px/1.6 ui-monospace,
+    monospace;
+  direction: ltr;
+  text-align: left;
+}
+.workspace-implementation__body label {
+  display: grid;
+  gap: 7px;
+  margin-block-end: 12px;
+}
+@media (max-width: 700px) {
+  .workspace-hero {
+    padding-block: 22px 18px;
+  }
+  .workspace-hero h1 {
+    font-size: 30px;
+    margin-block-end: 12px;
+  }
+  .workspace-hero__lead {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-block-end: 10px;
+  }
+  .workspace-metrics {
+    margin-block-start: 16px;
+  }
+  .workspace-metrics > div {
+    padding: 10px;
+  }
+  .workspace-metrics dd {
+    font-size: 20px;
+  }
+  .workspace-guide {
+    padding-block: 12px;
+  }
+  .workspace-discovery {
+    margin-block-end: 14px;
+  }
+  .workspace-implementation__body {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+  .workspace-view__head p:not(.workspace-eyebrow) {
+    font-size: 12px;
+  }
+}

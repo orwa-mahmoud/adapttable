@@ -14,6 +14,12 @@ import {
   createTableAssistant,
 } from "@adapttable/ai";
 import {
+  fromStore,
+  injectFeatureState,
+  type MaybeSignal,
+  readMaybe,
+} from "@adapttable/angular";
+import {
   AGENT_ALWAYS_ALLOW_STATE,
   AGENT_APPROVAL_STATE,
   AGENT_PROGRESS_STATE,
@@ -22,11 +28,7 @@ import {
   type AgentApprovalPending,
   type AgentProgress,
   type AgentViewState,
-  fromStore,
-  injectFeatureState,
-  type MaybeSignal,
-  readMaybe,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   assertInInjectionContext,
   computed,

@@ -6,8 +6,8 @@ export const VIEWPORT_GUTTER = 8;
 
 /**
  * Pin a `position: fixed` overlay under `trigger`, aligned to the inline-end
- * edge, never flipped above it. Caps height to the room actually below the
- * button so a tall panel scrolls inside instead of covering the page.
+ * edge. Prefer the room below, flip above when it fits better, and constrain
+ * a tall panel to the viewport so all its controls remain reachable.
  */
 export function placeOverlayBelowTrigger(
   overlay: HTMLElement,
@@ -17,12 +17,29 @@ export function placeOverlayBelowTrigger(
   overlay.style.transform = "";
   const triggerRect = trigger.getBoundingClientRect();
   const viewportWidth = document.documentElement.clientWidth;
-  const top = triggerRect.bottom + 4;
+  const viewportHeight = window.innerHeight;
+  overlay.style.boxSizing = "border-box";
+  overlay.style.maxWidth = `calc(100vw - ${VIEWPORT_GUTTER * 2}px)`;
+  const desiredHeight = Math.min(
+    560,
+    Math.max(overlay.scrollHeight, overlay.getBoundingClientRect().height || 0)
+  );
+  const below = Math.max(
+    0,
+    viewportHeight - triggerRect.bottom - 4 - VIEWPORT_GUTTER
+  );
+  const above = Math.max(0, triggerRect.top - 4 - VIEWPORT_GUTTER);
+  const placeBelow = below >= desiredHeight || below >= above;
+  overlay.style.maxHeight = `${Math.min(560, placeBelow ? below : above)}px`;
+  const height = overlay.getBoundingClientRect().height || 0;
+  const proposedTop = placeBelow
+    ? triggerRect.bottom + 4
+    : triggerRect.top - 4 - height;
+  const top = Math.max(
+    VIEWPORT_GUTTER,
+    Math.min(proposedTop, viewportHeight - VIEWPORT_GUTTER - height)
+  );
   overlay.style.top = `${Math.round(top)}px`;
-  overlay.style.maxHeight = `${Math.max(
-    120,
-    Math.min(560, window.innerHeight - top - VIEWPORT_GUTTER)
-  )}px`;
   const measured = overlay.offsetWidth;
   const styled = Number.parseFloat(overlay.style.width);
   let raw = 380;

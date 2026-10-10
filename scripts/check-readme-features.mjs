@@ -21,11 +21,12 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
+  listPackages,
   packageDir,
-  packageNames,
   packageRel,
   REPO_ROOT as root,
 } from "./packages.mjs";
+import { readmeFeatureMentioned } from "./readme-feature-rules.mjs";
 
 /**
  * Feature docs pages → the pattern that proves a README mentions them.
@@ -87,8 +88,9 @@ function isPrivatePackage(dir) {
 // need a Features section — a package page with none tells a reader nothing.
 // Unpublished (`private: true`) adapters are still in-progress and must not
 // need a marketing README.
-const adapters = packageNames(root).filter(
-  (d) => (d.startsWith("adapter-") || d === "core") && !isPrivatePackage(d)
+const adapters = listPackages(root).filter(
+  ({ name }) =>
+    (name.startsWith("adapter-") || name === "core") && !isPrivatePackage(name)
 );
 const needSectionOnly = ["cli", "i18n"];
 
@@ -145,11 +147,14 @@ for (const page of documented) {
 // with a docs page and none of them reached the feature table. It is held to
 // the same contract as the packages it advertises.
 const readmes = [
-  "README.md",
-  ...adapters.map((a) => `${packageRel(a, root)}/README.md`),
+  { relative: "README.md" },
+  ...adapters.map(({ rel, group }) => ({
+    relative: `${rel}/README.md`,
+    framework: group,
+  })),
 ];
 
-for (const relative of readmes) {
+for (const { relative, framework } of readmes) {
   const readme = readFileSync(join(root, relative), "utf8");
   const section = /^## Features\n([\s\S]*?)(?=^## )/m.exec(readme);
 
@@ -159,7 +164,10 @@ for (const relative of readmes) {
   }
 
   const missing = Object.entries(FEATURES)
-    .filter(([, pattern]) => !pattern.test(section[1]))
+    .filter(
+      ([name, pattern]) =>
+        !readmeFeatureMentioned(name, pattern, section[1], framework)
+    )
     .map(([name]) => name);
 
   if (missing.length > 0) {

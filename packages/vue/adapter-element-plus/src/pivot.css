@@ -1,0 +1,20 @@
+.adapttable-element-plus-pivot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.adapttable-element-plus-pivot fieldset {
+  display: grid;
+  gap: 0.5rem;
+  min-inline-size: 12rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.75rem;
+  border: 1px solid var(--el-border-color);
+  border-radius: var(--el-border-radius-base);
+}
+.adapttable-element-plus-pivot [data-adapttable-part="pivot-field"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}

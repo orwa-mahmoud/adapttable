@@ -86,6 +86,7 @@ import {
   defaultSystem,
   Progress,
   Text,
+  Theme,
 } from "@chakra-ui/react";
 
 import {
@@ -306,9 +307,7 @@ export function ChakraDemo({
   });
   return (
     <ChakraProvider value={defaultSystem}>
-      {/* Chakra v3 resolves `_dark` tokens under a `.dark` ancestor, so forcing
-          the class here tracks the page theme without next-themes/persistence. */}
-      <Box className={dark ? "dark" : "light"} bg="bg" color="fg">
+      <Theme appearance={dark ? "dark" : "light"}>
         <DemoBody
           rowActionsShown={rowActionsShown}
           mode={mode}
@@ -428,7 +427,7 @@ export function ChakraDemo({
             />
           )}
         />
-      </Box>
+      </Theme>
     </ChakraProvider>
   );
 }

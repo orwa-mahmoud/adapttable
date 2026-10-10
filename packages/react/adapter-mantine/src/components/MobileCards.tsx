@@ -306,7 +306,11 @@ function MobileCardBase<TRow>({
   return (
     <Card
       {...rowClickProps(row, onRowClick, index)}
-      style={{ ...treeCardStyle(treeEntry?.level ?? 0), ...style }}
+      style={{
+        minHeight: "max-content",
+        ...treeCardStyle(treeEntry?.level ?? 0),
+        ...style,
+      }}
       className={className}
       ref={measureElement}
       data-index={index}

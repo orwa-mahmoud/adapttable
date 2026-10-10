@@ -9,7 +9,7 @@ import {
   type CommandPaletteSurfaceProps,
   injectCommandPalette,
   type ToolbarExtrasSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { Overlay, OverlayModule } from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
@@ -52,6 +52,7 @@ import {
         aria-modal="true"
         [attr.aria-label]="props().label"
         [class]="props().className"
+        [attr.dir]="props().dir"
         data-adapttable-part="command-palette"
         style="min-inline-size: min(360px, 100%); max-inline-size: 520px; inline-size: 100%"
       >
@@ -201,6 +202,7 @@ const SLOTS: CommandPaletteSlots = {
       [open]="palette().open"
       [onClose]="palette().close"
       [labels]="props().labels"
+      [dir]="props().dir"
       [slots]="slots"
     />
   `,

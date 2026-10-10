@@ -9,5 +9,6 @@
     },
     "types": ["node"]
   },
-  "include": ["./**/*.ts"]
+  "include": ["./**/*.ts"],
+  "exclude": ["./consumers"]
 }

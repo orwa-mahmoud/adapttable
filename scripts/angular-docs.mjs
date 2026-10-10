@@ -13,6 +13,7 @@ export const ANGULAR_KIT_DOCS = Object.freeze([
 export const ANGULAR_DOCS = Object.freeze(
   [
     "getting-started",
+    "migrating-to-0-5",
     ...ANGULAR_KIT_DOCS,
     "features",
     "data-tiers",

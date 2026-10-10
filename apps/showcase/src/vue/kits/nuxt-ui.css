@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@source "../../../../../packages/vue/adapter-nuxt-ui/src";

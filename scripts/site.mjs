@@ -9,6 +9,13 @@
  * engine and the project itself stay at the root.
  */
 import { ANGULAR_DOCS } from "./angular-docs.mjs";
+import { VUE_DOCS } from "./vue-docs.mjs";
+
+/** @type {Readonly<Partial<Record<string, readonly string[]>>>} */
+const FRAMEWORK_GUIDES = Object.freeze({
+  angular: ANGULAR_DOCS,
+  vue: VUE_DOCS,
+});
 
 /** The published origin. Every absolute URL the site emits starts with it. */
 export const ORIGIN = "https://adapttable.orwamahmoud.com";
@@ -60,7 +67,7 @@ function trimRouteSlashes(page) {
 export const docsSlug = (page, framework = FRAMEWORK) => {
   const source = trimRouteSlashes(page).replace(/\.md$/, "");
   // A canonical framework folder wins over shared basename classification.
-  if (/^(react|angular)\//.test(source)) return source;
+  if (/^(react|angular|vue)\//.test(source)) return source;
   return SHARED.has(source) ? source : `${framework}/${source}`;
 };
 
@@ -75,19 +82,22 @@ export const docsRoute = (page, framework = FRAMEWORK) =>
   `/${docsSlug(page, framework)}/`;
 
 /**
- * A reference uses its framework's guide or a shared contract. Missing Angular
- * counterparts point to an explicitly explained Angular front door.
+ * A reference uses its framework's guide or a shared contract. Missing
+ * counterparts point to an explicitly explained framework front door.
  * @param {string} page - A source basename, with optional `.md`.
  * @param {string} [framework] - The framework requesting the reference.
  * @returns {string} The route of an available guide.
  */
 export const docsReferenceRoute = (page, framework = FRAMEWORK) => {
   const source = page.replace(/\.md$/, "");
-  if (framework === "angular") {
-    if (ANGULAR_DOCS.includes(`angular/${source}.md`))
-      return docsRoute(`angular/${source}`);
-    if (!SHARED.has(source))
-      return `${docsRoute("angular/getting-started")}?unavailable=${encodeURIComponent(source)}`;
+  const guides = FRAMEWORK_GUIDES[framework];
+  if (guides) {
+    if (guides.includes(`${framework}/${source}.md`))
+      return docsRoute(`${framework}/${source}`);
+    if (!SHARED.has(source)) {
+      const frontDoor = docsRoute(`${framework}/getting-started`);
+      return `${frontDoor}?unavailable=${encodeURIComponent(source)}`;
+    }
   }
   return docsRoute(source);
 };
@@ -106,7 +116,7 @@ export function switchDocsRoute(page, framework, sources) {
     sources.map((source) => source.replace(/\.md$/, ""))
   );
   const source = trimRouteSlashes(page).replace(/\.md$/, "");
-  const basename = source.replace(/^(react|angular)\//, "");
+  const basename = source.replace(/^(react|angular|vue)\//, "");
   const counterpart =
     framework === FRAMEWORK ? basename : `${framework}/${basename}`;
   if (registered.has(counterpart)) return docsRoute(counterpart);
@@ -132,13 +142,14 @@ export const demoRootOf = (framework) => `/${framework}/demo/`;
 
 /**
  * The demo sections the site serves, by framework: React's under
- * `/react/demo/`, Angular's under `/angular/demo/`.
+ * `/react/demo/`, Angular's under `/angular/demo/`, Vue's under `/vue/demo/`.
  *
  * @type {Readonly<Record<string, string>>}
  */
 export const DEMO_ROOTS = Object.freeze({
   react: demoRootOf("react"),
   angular: demoRootOf("angular"),
+  vue: demoRootOf("vue"),
 });
 
 /** The route the showcase is mounted at inside the composed site. */

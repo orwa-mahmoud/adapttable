@@ -1,8 +1,10 @@
+import type { ExportRequest, TreeShape } from "@adapttable/core";
 import { act, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import {
+  type DataTableShellProps,
   type DataTableShellResult,
   useDataTableShell,
 } from "../useDataTableShell";
@@ -17,6 +19,7 @@ import { FeatureProviders, FeatureSlot } from "./providers";
 import { selectionStats } from "./selection-stats";
 import { GRID_FOCUS_ANNOUNCER } from "./slotKeys";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
+import { tree } from "./tree";
 
 /**
  * The shell's live interaction hooks, mounted by the features that own them.
@@ -303,3 +306,117 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     expect(view.current.selectionStats?.average).toBe(20);
   });
 });
+
+interface TreeExportRow {
+  id: string;
+  name: string;
+  children?: readonly TreeExportRow[];
+  parent?: string;
+}
+
+it.each(["nested", "parent-id"] as const)(
+  "exports off-page %s rows with current readers and retires removed trees",
+  (kind) => {
+    const firstChild: TreeExportRow = {
+      id: "first-child",
+      name: "First child",
+      parent: "first",
+    };
+    const secondChild: TreeExportRow = {
+      id: "second-child",
+      name: "Second child",
+      parent: "second",
+    };
+    const roots: readonly TreeExportRow[] = [
+      { id: "first", name: "First", children: [firstChild] },
+      { id: "second", name: "Second", children: [secondChild] },
+    ];
+    const data =
+      kind === "nested" ? roots : [...roots, firstChild, secondChild];
+    const request = vi.fn<(info: ExportRequest<TreeExportRow>) => void>();
+    const exporter = exportCsv<TreeExportRow>({ scope: "all", request });
+    let current: DataTableShellResult<TreeExportRow> | undefined;
+    function Probe({ props }: { props: DataTableShellProps<TreeExportRow> }) {
+      const shell = useDataTableShell(props, noForm);
+      return (
+        <DataTableShellView<TreeExportRow> shell={shell}>
+          {(next) => {
+            current = next;
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    const table = (features: readonly TableFeature<TreeExportRow>[]) => {
+      const props = applyTableFeatures({
+        data,
+        columns: [{ key: "name", accessor: (row: TreeExportRow) => row.name }],
+        rowKey: (row: TreeExportRow) => row.id,
+        defaults: { limit: 1 },
+        features,
+        urlSync: false,
+      });
+      return (
+        <FeatureProviders props={props}>
+          <Probe props={props} />
+        </FeatureProviders>
+      );
+    };
+    const initialShape: TreeShape<TreeExportRow> =
+      kind === "nested"
+        ? { getChildren: (row) => row.children }
+        : { getParentId: (row) => row.parent };
+    const result = render(table([tree<TreeExportRow>(initialShape), exporter]));
+    const exportedIds = () =>
+      request.mock.lastCall?.[0].rows.map((row) => row.id);
+    const run = () => {
+      act(() => current?.toolbarProps.onExportCsv?.());
+    };
+    try {
+      expect(current?.chrome.source.rows.map((row) => row.id)).toEqual([
+        "first",
+      ]);
+      const initialTree = current?.chrome.tree;
+      expect(initialTree).toBeDefined();
+      expect(initialTree?.getChildren).toBe(initialShape.getChildren);
+      expect(initialTree?.getParentId).toBe(initialShape.getParentId);
+      expect(Object.hasOwn(initialTree ?? {}, "getChildren")).toBe(
+        kind === "nested"
+      );
+      expect(Object.hasOwn(initialTree ?? {}, "getParentId")).toBe(
+        kind === "parent-id"
+      );
+      const runtimeEntries = initialTree?.allEntries;
+      run();
+      expect(exportedIds()).toEqual([
+        "first",
+        "first-child",
+        "second",
+        "second-child",
+      ]);
+      expect(current?.chrome.tree?.allEntries).toBe(runtimeEntries);
+      const replacementShape: TreeShape<TreeExportRow> =
+        kind === "nested"
+          ? { getChildren: () => undefined }
+          : { getParentId: () => undefined };
+      result.rerender(table([tree<TreeExportRow>(replacementShape), exporter]));
+      expect(current?.chrome.tree?.getChildren).toBe(
+        replacementShape.getChildren
+      );
+      expect(current?.chrome.tree?.getParentId).toBe(
+        replacementShape.getParentId
+      );
+      expect(initialTree?.getChildren).toBe(initialShape.getChildren);
+      expect(initialTree?.getParentId).toBe(initialShape.getParentId);
+      run();
+      expect(exportedIds()).toEqual(data.map((row) => row.id));
+      result.rerender(table([exporter]));
+      expect(current?.chrome.tree).toBeUndefined();
+      run();
+      expect(exportedIds()).toEqual(data.map((row) => row.id));
+      expect(request).toHaveBeenCalledTimes(3);
+    } finally {
+      result.unmount();
+    }
+  }
+);

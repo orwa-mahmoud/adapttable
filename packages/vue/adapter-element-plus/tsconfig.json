@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node", "vitest/globals"],
+    "rootDirs": [".", "./.sfc-types"]
+  },
+  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist", "coverage", ".sfc-types"],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "dataAttributes": ["data-*"]
+  }
+}

@@ -9,10 +9,15 @@ import {
   frameworkOf,
   MATRIX_FEATURES,
   matrixPages,
+  VUE_KIT_LAB_PAGES,
+  VUE_KIT_PAGES,
+  VUE_NATIVE_BASELINE,
+  VUE_NATIVE_PAGES,
 } from "../apps/showcase/matrix.mjs";
 import {
   featurePage,
   landingPage,
+  nativeVuePage,
   readShowcaseHtml,
   showcaseHtmlFiles,
 } from "./build-showcase-html.mjs";
@@ -43,14 +48,142 @@ describe("the generated showcase pages", () => {
 
   it("writes one page per matrix entry and per replaced address", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
-    // features — across all eight kits; all nine Angular kits' landings
-    // plus all twenty-one feature destinations; and the eight replaced top-level
-    // addresses. Kit `/accessibility/` URLs are matrix pages again, not
-    // redirects to editing. Written out rather than recomputed from the
-    // matrix: the writer reads that same list, so a derived count would agree
-    // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + 9 * (1 + 21) + 8 + 2);
+    // features — across all eight kits; the same twenty-two for each of the
+    // nine Angular kits and the eight Vue kits; and the eight replaced
+    // top-level addresses, two Angular modes, sixteen native Vue previews,
+    // seven kit order desks and five real-control labs. Kit `/accessibility/`
+    // URLs are matrix pages again, not redirects to editing. Written out rather
+    // than recomputed from the matrix: the writer reads that same list, so a
+    // derived count would agree with itself no matter what it produced.
+    assert.equal(
+      files.length,
+      8 * 22 + 9 * (1 + 21) + 8 * (1 + 21) + 8 + 2 + 16 + 7 + 5
+    );
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
+  });
+
+  it("writes the Vue base preview without indexability or parity claims", () => {
+    const { dir, html } = nativeVuePage();
+    assert.equal(dir, "vue/unstyled/preview");
+    assert.match(html, /name="robots" content="noindex, follow"/);
+    assert.ok(
+      html.includes(`href="${siteUrl("/vue/demo/unstyled/preview/")}"`)
+    );
+    assert.ok(html.includes(VUE_NATIVE_BASELINE.notice));
+    assert.match(html, /href="\.\.\/\.\.\/\.\.\/third-party-notices\.txt"/);
+    assert.match(html, /src="\.\.\/\.\.\/\.\.\/src\/vue\/entry-native\.ts"/);
+    assert.doesNotMatch(html, /data-matrix-page|entry-matrix|npm install/);
+    // The Vue Unstyled kit's own landing owns the kit's address.
+    assert.ok(
+      matrixPages().some(
+        (page) =>
+          page.framework === "vue" &&
+          page.path === "unstyled" &&
+          page.feature === null
+      )
+    );
+  });
+
+  it("registers each implemented Vue feature preview exactly once", () => {
+    assert.deepEqual(
+      VUE_NATIVE_PAGES.map((page) => page.path),
+      [
+        "unstyled/preview",
+        "unstyled/workspace",
+        "unstyled/assistant",
+        "unstyled/table-surfaces",
+        "unstyled/table-footers",
+        "unstyled/filter-editing",
+        "unstyled/composition",
+        "unstyled/hierarchy",
+        "unstyled/row-controls",
+        "unstyled/selection-contract",
+        "unstyled/view-controls",
+        "unstyled/column-menu",
+        "unstyled/navigation",
+        "unstyled/actions",
+        "unstyled/specialized",
+        "unstyled/feature-union",
+      ]
+    );
+    for (const page of VUE_NATIVE_PAGES) {
+      const generated = files.filter((file) => file.dir === page.dir);
+      assert.equal(generated.length, 1, page.dir);
+      assert.match(
+        generated[0].html,
+        /name="robots" content="noindex, follow"/
+      );
+      assert.ok(generated[0].html.includes(page.entry.slice(1)), page.dir);
+      assert.ok(
+        generated[0].html.includes(siteUrl(demoRoute(page.path, "vue"))),
+        page.dir
+      );
+    }
+  });
+
+  it("generates seven genuine Vue kit order desks without a parity claim", () => {
+    assert.deepEqual(
+      VUE_KIT_PAGES.map((page) => page.path),
+      [
+        "element-plus/orders",
+        "vuetify/orders",
+        "naive-ui/orders",
+        "reka-ui/orders",
+        "shadcn-vue/orders",
+        "nuxt-ui/orders",
+        "quasar/orders",
+      ]
+    );
+    for (const page of VUE_KIT_PAGES)
+      assert.equal(page.path, `${page.kit}/orders`);
+    for (const page of VUE_KIT_PAGES) {
+      const generated = files.filter((file) => file.dir === page.dir);
+      assert.equal(generated.length, 1, page.dir);
+      assert.match(
+        generated[0].html,
+        /name="robots" content="noindex, follow"/
+      );
+      assert.ok(
+        generated[0].html.includes(siteUrl(demoRoute(page.path, "vue"))),
+        page.dir
+      );
+      assert.ok(generated[0].html.includes(page.entry.slice(1)), page.dir);
+      assert.match(
+        generated[0].html,
+        /Preview of table controls, selection, search, pagination and presentation settings/
+      );
+    }
+  });
+
+  it("generates each real-control Vue kit lab exactly once without indexing it", () => {
+    assert.deepEqual(
+      VUE_KIT_LAB_PAGES.map((page) => page.path),
+      [
+        "shadcn-vue/filter-panel",
+        "shadcn-vue/feature-parity",
+        "shadcn-vue/action-surfaces",
+        "nuxt-ui/workspace",
+        "naive-ui/filter-panel",
+      ]
+    );
+    for (const page of VUE_KIT_LAB_PAGES) {
+      const generated = files.filter((file) => file.dir === page.dir);
+      assert.equal(generated.length, 1, page.dir);
+      assert.match(
+        generated[0].html,
+        /name="robots" content="noindex, follow"/
+      );
+      assert.ok(
+        generated[0].html.includes(siteUrl(demoRoute(page.path, "vue"))),
+        page.dir
+      );
+      assert.ok(generated[0].html.includes(page.entry.slice(1)), page.dir);
+      assert.ok(generated[0].html.includes(page.notice), page.dir);
+      assert.equal(
+        VUE_KIT_PAGES.some((preview) => preview.path === page.path),
+        false
+      );
+    }
   });
 
   it("gives every Angular kit a destination for every matrix feature", () => {
@@ -80,6 +213,66 @@ describe("the generated showcase pages", () => {
           'name="robots" content="index, follow, max-image-preview:large"'
         ),
         page.dir
+      );
+    }
+  });
+
+  it("gives every Vue kit the pages every React kit has", () => {
+    const expected = MATRIX_FEATURES.map((feature) => feature.slug).sort();
+    const kits = builtAdapters("vue");
+    assert.equal(kits.length, 8);
+    for (const kit of kits)
+      assert.deepEqual(
+        featuresOf(kit)
+          .map((feature) => feature.slug)
+          .sort(),
+        expected,
+        `${kit.key} leaves a feature without a Vue destination`
+      );
+    const perKit = (framework) =>
+      matrixPages().filter((page) => page.framework === framework).length /
+      builtAdapters(framework).length;
+    assert.equal(perKit("vue"), perKit("react"));
+  });
+
+  it("indexes every Vue kit landing and feature page under the Vue demo root", () => {
+    const pages = matrixPages().filter((page) => page.framework === "vue");
+    assert.equal(pages.length, 176);
+    for (const page of pages) {
+      assert.equal(page.indexable, true, page.dir);
+      assert.equal(page.dir, `vue/${page.path}`);
+      const kit = adapterByKey(page.adapter);
+      const generated = page.feature
+        ? featurePage(kit, featureBySlug(page.feature))
+        : landingPage(kit);
+      assert.equal(generated.dir, page.dir);
+      assert.ok(
+        generated.html.includes(
+          `<link rel="canonical" href="${siteUrl(demoRoute(page.path, "vue"))}"`
+        ),
+        page.dir
+      );
+      assert.ok(
+        generated.html.includes(`data-matrix-page="${page.path}"`),
+        page.dir
+      );
+      assert.ok(
+        generated.html.includes(
+          'name="robots" content="index, follow, max-image-preview:large"'
+        ),
+        page.dir
+      );
+    }
+    // Vue Unstyled keeps the kit's npm homepage address.
+    assert.ok(pages.some((page) => page.dir === "vue/unstyled"));
+  });
+
+  it("states on every Vue install line that publication comes first", () => {
+    for (const kit of builtAdapters("vue")) {
+      const { html } = landingPage(kit);
+      assert.ok(
+        html.includes("# Runs once the Vue packages are published to npm"),
+        kit.key
       );
     }
   });
@@ -182,7 +375,22 @@ describe("the generated showcase pages", () => {
 
   it("names the v3 AI integration capabilities in static HTML", () => {
     const ai = files.filter((file) => file.dir.endsWith("/ai"));
-    assert.equal(ai.length, 17);
+    assert.equal(ai.length, 25);
+    const vueDirs = new Set(
+      matrixPages()
+        .filter((page) => page.framework === "vue")
+        .map((page) => page.dir)
+    );
+    const vue = ai.filter((file) => vueDirs.has(file.dir));
+    assert.equal(vue.length, 8);
+    for (const file of vue) {
+      assert.match(file.html, /useTableAssistant/);
+      assert.match(file.html, /tableAgent/);
+      assert.match(file.html, /@adapttable\/ai-vue/);
+      assert.match(file.html, /session\.execute/);
+      assert.match(file.html, /No language model or API key is needed/);
+      assert.doesNotMatch(file.html, /ai-angular|injectTableAssistant/);
+    }
     const angularDirs = new Set(
       matrixPages()
         .filter((page) => page.framework === "angular")
@@ -242,6 +450,17 @@ describe("the generated showcase pages", () => {
         1,
         `${file.dir} serves more than one h1`
       );
+      const vuePage = [
+        ...VUE_NATIVE_PAGES,
+        ...VUE_KIT_PAGES,
+        ...VUE_KIT_LAB_PAGES,
+      ].find((page) => page.dir === file.dir);
+      if (vuePage) {
+        assert.ok(main.includes(vuePage.description), file.dir);
+        assert.ok(main.includes(vuePage.notice), file.dir);
+        assert.doesNotMatch(main, /<pre><code>|npm install/);
+        continue;
+      }
       const mode = ANGULAR_MODES.get(file.dir);
       if (mode) {
         assert.match(
@@ -280,8 +499,9 @@ describe("the generated showcase pages", () => {
 /**
  * A kit's pages boot the entry of the framework it is built on and say that
  * framework's name — the React pages above do it through the same lookup a kit
- * from another framework would. The fixture is a Vue kit the showcase does not
- * ship: it is handed to the page writers directly, never added to the matrix.
+ * from another framework would. The fixture is a Svelte kit the showcase does
+ * not ship: it is handed to the page writers directly, never added to the
+ * matrix.
  */
 describe("the framework a kit is built on", () => {
   const files = new Map(showcaseHtmlFiles().map((file) => [file.dir, file]));
@@ -301,18 +521,18 @@ describe("the framework a kit is built on", () => {
     }
   });
 
-  const vue = {
-    key: "vue",
-    label: "Vue",
-    binding: "@adapttable/vue",
-    entry: "/src/vue/entry-matrix.ts",
+  const svelte = {
+    key: "svelte",
+    label: "Svelte",
+    binding: "@adapttable/svelte",
+    entry: "/src/svelte/entry-matrix.ts",
   };
   const mantine = adapterByKey("mantine");
   assert.ok(mantine);
   const verdant = {
     ...mantine,
     key: "verdant",
-    framework: "vue",
+    framework: "svelte",
     label: "Verdant",
     pkg: "@adapttable/verdant",
     peer: "verdant-ui",
@@ -325,41 +545,42 @@ describe("the framework a kit is built on", () => {
     const feature = {
       ...formulas,
       snippets: {
-        vue: '<script setup lang="ts">\nimport { DataTable } from "{pkg}";\n</script>',
+        svelte:
+          '<script lang="ts">\nimport { DataTable } from "{pkg}";\n</script>',
       },
     };
-    const { dir, html } = featurePage(verdant, feature, vue);
+    const { dir, html } = featurePage(verdant, feature, svelte);
     assert.equal(dir, "verdant/formulas");
     assert.match(
       html,
-      /<script type="module" src="\/src\/vue\/entry-matrix\.ts"><\/script>/
+      /<script type="module" src="\/src\/svelte\/entry-matrix\.ts"><\/script>/
     );
     assert.doesNotMatch(html, /entry-matrix\.tsx/);
-    assert.match(html, /Replaced by Vue on mount/);
-    assert.match(html, /Includes Vue integration code\./);
+    assert.match(html, /Replaced by Svelte on mount/);
+    assert.match(html, /Includes Svelte integration code\./);
     assert.match(
       html,
       /import \{ DataTable \} from &quot;@adapttable\/verdant&quot;/
     );
     assert.doesNotMatch(html, /@adapttable\/react/);
 
-    const landing = landingPage(verdant, vue);
-    assert.match(landing.html, /<title>Verdant Vue data table examples/);
-    assert.match(landing.html, /@adapttable\/vue connects it to Vue\./);
-    assert.match(landing.html, /src="\/src\/vue\/entry-matrix\.ts"/);
+    const landing = landingPage(verdant, svelte);
+    assert.match(landing.html, /<title>Verdant Svelte data table examples/);
+    assert.match(landing.html, /@adapttable\/svelte connects it to Svelte\./);
+    assert.match(landing.html, /src="\/src\/svelte\/entry-matrix\.ts"/);
   });
 
-  it("refuses to show a Vue kit the code written for React", () => {
+  it("refuses to show a Svelte kit the code written for React", () => {
     assert.throws(
-      () => featurePage(verdant, formulas, vue),
-      /"formulas" has no Vue code for Verdant/
+      () => featurePage(verdant, formulas, svelte),
+      /"formulas" has no Svelte code for Verdant/
     );
   });
 
   it("refuses a kit whose framework the showcase does not serve", () => {
     assert.throws(
       () => landingPage(verdant),
-      /Verdant is built on "vue", which SHOWCASE_FRAMEWORKS does not serve/
+      /Verdant is built on "svelte", which SHOWCASE_FRAMEWORKS does not serve/
     );
   });
 });

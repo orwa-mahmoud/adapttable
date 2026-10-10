@@ -1,7 +1,8 @@
 /**
  * The NG-ZORRO command palette: the toolbar button, the dialog, and a command.
  */
-import type { TableLabels, ToolbarExtrasSlotProps } from "@adapttable/angular";
+import type { TableLabels } from "@adapttable/angular";
+import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
 import { commandPalette } from "@adapttable/ng-zorro/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -67,6 +68,7 @@ class Host {
       [forceMobile]="false"
       [features]="features"
       [labels]="labels()"
+      [dir]="dir()"
     />
   `,
 })
@@ -410,5 +412,45 @@ describe("command palette (NG-ZORRO Angular)", () => {
     fixture.detectChanges();
     expect(part("command-palette-button")).toBeNull();
     fixture.destroy();
+  });
+  it("keeps the actual palette surface in the table's live direction while open", async () => {
+    const fixture = TestBed.createComponent(ControlledHost);
+    const host = fixture.componentInstance;
+    host.dir.set("rtl");
+    host.paletteOpen.set(true);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const surface = part("command-palette")!;
+    const input = part("command-input") as HTMLInputElement;
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("rtl");
+    expect(surface.classList.contains("ant-modal-wrap-rtl")).toBe(true);
+    input.value = "Greet";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await fixture.whenStable();
+    host.dir.set("ltr");
+    await fixture.whenStable();
+    expect(part("command-palette")).toBe(surface);
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("ltr");
+    expect(surface.classList.contains("ant-modal-wrap-rtl")).toBe(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(surface.classList.contains("ant-modal-wrap-rtl")).toBe(false);
+    expect(part("command-input")).toBe(input);
+    expect(input.value).toBe("Greet");
+    expect(host.paletteOpen()).toBe(true);
+    expect(host.onOpenChange).not.toHaveBeenCalled();
+    host.dir.set("rtl");
+    await fixture.whenStable();
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("rtl");
+    expect(surface.classList.contains("ant-modal-wrap-rtl")).toBe(true);
+    expect(part("command-input")).toBe(input);
+    fixture.destroy();
+    expect(part("command-palette")).toBeNull();
+    expect(surface.isConnected).toBe(false);
+    const retiredClassName = surface.className;
+    host.dir.set("ltr");
+    TestBed.tick();
+    expect(surface.className).toBe(retiredClassName);
   });
 });

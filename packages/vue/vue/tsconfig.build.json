@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "paths": {
+      "@adapttable/vue": ["./src/index.ts"],
+      "@adapttable/vue/adapter": ["./src/adapter.ts"]
+    },
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "test",
+    "node_modules",
+    "dist",
+    "coverage"
+  ]
+}

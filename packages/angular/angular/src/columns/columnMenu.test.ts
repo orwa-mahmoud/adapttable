@@ -1,7 +1,13 @@
-import { Injector, signal } from "@angular/core";
+import {
+  createEnvironmentInjector,
+  EnvironmentInjector,
+  Injector,
+  signal,
+} from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { injectColumnDrag, injectColumnRenameEditor } from "./columnMenu";
+import { injectColumnDrag } from "./columnDrag";
+import { injectColumnRenameEditor } from "./columnMenu";
 
 type Handler = (event: Event) => void;
 
@@ -67,7 +73,7 @@ describe("injectColumnDrag", () => {
 });
 
 describe("injectColumnRenameEditor", () => {
-  function editor() {
+  function editor(injector?: Injector) {
     const renames: [string, string][] = [];
     const column = signal({
       key: "name",
@@ -78,7 +84,7 @@ describe("injectColumnRenameEditor", () => {
         `Now ${name}`,
     });
     const state = TestBed.runInInjectionContext(() =>
-      injectColumnRenameEditor({ column })
+      injectColumnRenameEditor({ column, injector })
     );
     TestBed.tick();
     return { state, renames };
@@ -144,5 +150,141 @@ describe("injectColumnRenameEditor", () => {
     });
     expect(state.editing()).toBe(false);
     state.cancel();
+  });
+  function controlledFrames() {
+    let next = 0;
+    const pending = new Map<number, FrameRequestCallback>();
+    const request = vi
+      .spyOn(globalThis, "requestAnimationFrame")
+      .mockImplementation((callback) => {
+        const id = ++next;
+        pending.set(id, callback);
+        return id;
+      });
+    const cancel = vi
+      .spyOn(globalThis, "cancelAnimationFrame")
+      .mockImplementation((id) => {
+        pending.delete(id);
+      });
+    return {
+      flush: () => {
+        const callbacks = [...pending.values()];
+        pending.clear();
+        for (const callback of callbacks) callback(0);
+      },
+      restore: () => {
+        request.mockRestore();
+        cancel.mockRestore();
+      },
+    };
+  }
+
+  it.each(["cancel", "submit"] as const)(
+    "cancels deferred %s focus restoration when its injector is destroyed",
+    (close) => {
+      const injector = createEnvironmentInjector(
+        [],
+        TestBed.inject(EnvironmentInjector)
+      );
+      const { state } = editor(injector);
+      const trigger = document.createElement("button");
+      const nextControl = document.createElement("input");
+      document.body.append(trigger, nextControl);
+      trigger.focus();
+      state.begin();
+      nextControl.focus();
+      const frames = controlledFrames();
+      try {
+        state[close]();
+        injector.destroy();
+        frames.flush();
+        frames.flush();
+        expect(document.activeElement).toBe(nextControl);
+      } finally {
+        if (!injector.destroyed) injector.destroy();
+        frames.restore();
+        trigger.remove();
+        nextControl.remove();
+      }
+    }
+  );
+
+  it("cancels the second restore frame after destruction", () => {
+    const injector = createEnvironmentInjector(
+      [],
+      TestBed.inject(EnvironmentInjector)
+    );
+    const { state } = editor(injector);
+    const trigger = document.createElement("button");
+    document.body.append(trigger);
+    trigger.focus();
+    state.begin();
+    trigger.blur();
+    const frames = controlledFrames();
+    try {
+      state.cancel();
+      frames.flush();
+      expect(document.activeElement).toBe(trigger);
+      trigger.blur();
+      expect(document.activeElement).toBe(document.body);
+      injector.destroy();
+      frames.flush();
+      expect(document.activeElement).toBe(document.body);
+    } finally {
+      if (!injector.destroyed) injector.destroy();
+      frames.restore();
+      trigger.remove();
+    }
+  });
+
+  it("replaces a pending restore so repeated closes cannot survive destruction", () => {
+    const injector = createEnvironmentInjector(
+      [],
+      TestBed.inject(EnvironmentInjector)
+    );
+    const { state } = editor(injector);
+    const trigger = document.createElement("button");
+    const nextControl = document.createElement("input");
+    document.body.append(trigger, nextControl);
+    trigger.focus();
+    state.begin();
+    nextControl.focus();
+    const frames = controlledFrames();
+    try {
+      state.cancel();
+      state.cancel();
+      injector.destroy();
+      frames.flush();
+      frames.flush();
+      expect(document.activeElement).toBe(nextControl);
+    } finally {
+      if (!injector.destroyed) injector.destroy();
+      frames.restore();
+      trigger.remove();
+      nextControl.remove();
+    }
+  });
+
+  it("keeps focus in a reopened editor instead of restoring an earlier close", () => {
+    const { state } = editor();
+    const trigger = document.createElement("button");
+    const input = document.createElement("input");
+    document.body.append(trigger, input);
+    trigger.focus();
+    state.begin();
+    input.focus();
+    const frames = controlledFrames();
+    try {
+      state.cancel();
+      state.begin();
+      frames.flush();
+      frames.flush();
+      expect(document.activeElement).toBe(input);
+      expect(state.editing()).toBe(true);
+    } finally {
+      frames.restore();
+      trigger.remove();
+      input.remove();
+    }
   });
 });

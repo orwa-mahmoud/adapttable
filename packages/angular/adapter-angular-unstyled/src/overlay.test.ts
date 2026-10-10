@@ -34,6 +34,61 @@ function place(
 }
 
 describe("placeOverlayBelowTrigger", () => {
+  it("flips above a low trigger and caps a tall menu to the usable space", () => {
+    const overlay = document.createElement("div");
+    const trigger = document.createElement("button");
+    const originalHeight = window.innerHeight;
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 720,
+    });
+    Object.defineProperty(overlay, "scrollHeight", { value: 300 });
+    Object.defineProperty(overlay, "offsetWidth", { value: 200 });
+    overlay.getBoundingClientRect = () => ({
+      ...rect(200, 400),
+      height: Math.min(300, Number.parseFloat(overlay.style.maxHeight) || 300),
+    });
+    trigger.getBoundingClientRect = () => ({
+      ...rect(300, 400, 690),
+      top: 650,
+    });
+    placeOverlayBelowTrigger(overlay, trigger, "ltr");
+    expect(overlay.style.top).toBe("346px");
+    expect(overlay.style.maxHeight).toBe("560px");
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: originalHeight,
+    });
+  });
+
+  it("uses the larger side in a short viewport without a minimum-height overflow", () => {
+    const overlay = document.createElement("div");
+    const trigger = document.createElement("button");
+    const originalHeight = window.innerHeight;
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 160,
+    });
+    Object.defineProperty(overlay, "scrollHeight", { value: 300 });
+    Object.defineProperty(overlay, "offsetWidth", { value: 200 });
+    overlay.getBoundingClientRect = () => ({
+      ...rect(200, 400),
+      height: Math.min(300, Number.parseFloat(overlay.style.maxHeight) || 300),
+    });
+    trigger.getBoundingClientRect = () => ({ ...rect(300, 400, 90), top: 50 });
+    placeOverlayBelowTrigger(overlay, trigger, "rtl");
+    expect(overlay.style.maxHeight).toBe("58px");
+    expect(overlay.style.top).toBe("94px");
+    expect(
+      Number.parseFloat(overlay.style.top) +
+        Number.parseFloat(overlay.style.maxHeight)
+    ).toBe(152);
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: originalHeight,
+    });
+  });
+
   it("end-aligns under the trigger in LTR, start-aligns in RTL", () => {
     expect(place(rect(200, 400), "ltr").style.left).toBe("200px");
     expect(place(rect(300, 500), "rtl", 0).style.left).toBe("300px");

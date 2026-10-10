@@ -1,9 +1,9 @@
 import {
   injectSavedViews,
   type SavedViewsControllerOptions,
-  type SavedViewsSlotProps,
   type SavedViewsState,
 } from "@adapttable/angular";
+import type { SavedViewsSlotProps } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -39,6 +39,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
     @let l = props().labels;
     <div
       [tuiDropdown]="menuContent"
+      [tuiDropdownOffset]="8"
       tuiDropdownRole="dialog"
       [adaptTaigaDropdownLabel]="l.savedViews"
       [tuiDropdownOpen]="popover.open()"
@@ -92,8 +93,9 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
             }
             <hr data-taiga-part="views-divider" />
             <div data-taiga-part="views-save-row" [style]="rowStyle">
-              <tui-textfield
+              <tui-textfield style="flex: 1 1 0; min-inline-size: 0"
                 ><input
+                  #nameInput
                   tuiInput
                   data-taiga-part="views-input"
                   [attr.aria-label]="l.viewName"
@@ -124,7 +126,10 @@ export class AdaptSavedViewsMenu implements OnInit {
   readonly props =
     input.required<SavedViewsSlotProps<SavedViewsControllerOptions>>();
 
-  protected readonly panelStyle = MENU_PANEL_STYLE;
+  protected readonly panelStyle: Readonly<Record<string, string>> = {
+    ...MENU_PANEL_STYLE,
+    "inline-size": "min(380px, calc(100vw - 32px))",
+  };
   protected readonly rowStyle = {
     display: "flex",
     "align-items": "center",
@@ -136,6 +141,8 @@ export class AdaptSavedViewsMenu implements OnInit {
   protected readonly views = signal<SavedViewsState | undefined>(undefined);
 
   private readonly injector = inject(Injector);
+  private readonly nameInput =
+    viewChild<ElementRef<HTMLInputElement>>("nameInput");
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
   private readonly trigger = viewChild<ElementRef<HTMLElement>>("trigger");
   private readonly panel = viewChild<ElementRef<HTMLElement>>("panel");
@@ -165,5 +172,6 @@ export class AdaptSavedViewsMenu implements OnInit {
   protected save(): void {
     this.views()?.save(this.trimmed());
     this.name.set("");
+    this.nameInput()?.nativeElement.focus();
   }
 }

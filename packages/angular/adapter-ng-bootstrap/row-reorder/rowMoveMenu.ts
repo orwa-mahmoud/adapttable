@@ -5,7 +5,7 @@
 import {
   restoreFocusSoon,
   type RowMoveMenuSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵbootstrapPopperOptions as bootstrapPopperOptions } from "@adapttable/ng-bootstrap";
 import {
   ChangeDetectionStrategy,

@@ -1,0 +1,77 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@adapttable/vue-unstyled": ["./src/index.ts"],
+      "@adapttable/vue-unstyled/assistant": ["./src/assistant.ts"],
+      "@adapttable/vue-unstyled/features": ["./src/features.ts"],
+      "@adapttable/vue-unstyled/grouping": ["./src/grouping.ts"],
+      "@adapttable/vue-unstyled/tree": ["./src/tree.ts"],
+      "@adapttable/vue-unstyled/row-detail": ["./src/row-detail.ts"],
+      "@adapttable/vue-unstyled/filters": ["./src/filters.ts"],
+      "@adapttable/vue-unstyled/header-filters": ["./src/header-filters.ts"],
+      "@adapttable/vue-unstyled/editing": ["./src/editing.ts"],
+      "@adapttable/vue-unstyled/batch-editing": ["./src/batch-editing.ts"],
+      "@adapttable/vue-unstyled/density": ["./src/density.ts"],
+      "@adapttable/vue-unstyled/fullscreen": ["./src/fullscreen.ts"],
+      "@adapttable/vue-unstyled/saved-views": ["./src/saved-views.ts"],
+      "@adapttable/vue-unstyled/resizable-columns": [
+        "./src/resizable-columns.ts"
+      ],
+      "@adapttable/vue-unstyled/column-groups": ["./src/column-groups.ts"],
+      "@adapttable/vue-unstyled/multi-sort": ["./src/multi-sort.ts"],
+      "@adapttable/vue-unstyled/fit-columns": ["./src/fit-columns.ts"],
+      "@adapttable/vue-unstyled/row-pinning": ["./src/row-pinning.ts"],
+      "@adapttable/vue-unstyled/pinned-summary-rows": [
+        "./src/pinned-summary-rows.ts"
+      ],
+      "@adapttable/vue-unstyled/cell-span": ["./src/cell-span.ts"],
+      "@adapttable/vue-unstyled/extra-rows": ["./src/extra-rows.ts"],
+      "@adapttable/vue-unstyled/row-appearance": ["./src/row-appearance.ts"],
+      "@adapttable/vue-unstyled/row-actions": ["./src/row-actions.ts"],
+      "@adapttable/vue-unstyled/nested-table": ["./src/nested-table.ts"],
+      "@adapttable/vue-unstyled/cell-navigation": ["./src/cell-navigation.ts"],
+      "@adapttable/vue-unstyled/find-in-table": ["./src/find-in-table.ts"],
+      "@adapttable/vue-unstyled/status-bar": ["./src/status-bar.ts"],
+      "@adapttable/vue-unstyled/column-menu": ["./src/column-menu.ts"],
+      "@adapttable/vue-unstyled/column-selection": [
+        "./src/column-selection.ts"
+      ],
+      "@adapttable/vue-unstyled/selection-stats": ["./src/selection-stats.ts"],
+      "@adapttable/vue-unstyled/bulk-actions": ["./src/bulk-actions.ts"],
+      "@adapttable/vue-unstyled/command-palette": ["./src/command-palette.ts"],
+      "@adapttable/vue-unstyled/context-menu": ["./src/context-menu.ts"],
+      "@adapttable/vue-unstyled/side-panel": ["./src/side-panel.ts"],
+      "@adapttable/vue-unstyled/print": ["./src/print.ts"],
+      "@adapttable/vue-unstyled/export-csv": ["./src/export-csv.ts"],
+      "@adapttable/vue-unstyled/export-pdf": ["./src/export-pdf.ts"],
+      "@adapttable/vue-unstyled/export-xlsx": ["./src/export-xlsx.ts"],
+      "@adapttable/vue-unstyled/pivot": ["./src/pivot.ts"],
+      "@adapttable/vue-unstyled/row-reorder": ["./src/row-reorder.ts"],
+      "@adapttable/vue-unstyled/virtualize": ["./src/virtualize.ts"],
+      "@adapttable/vue-unstyled/grouping-panel": ["./src/grouping-panel.ts"],
+      "@adapttable/vue-unstyled/export": ["./src/export.ts"],
+      "@adapttable/vue-unstyled/preset": ["./src/preset.ts"],
+      "@adapttable/ai-vue": ["../ai-vue/src/index.ts"],
+      "@adapttable/ai": ["../../shared/ai/src/index.ts"],
+      "@adapttable/ai/voice": ["../../shared/ai/src/voice.ts"]
+    },
+    "rootDirs": [".", "./.sfc-types"]
+  },
+  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "test/types/invalid",
+    ".sfc-types"
+  ],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "dataAttributes": ["data-*"]
+  }
+}

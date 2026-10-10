@@ -1,9 +1,10 @@
 /** Follow actual named binding base classes for the structural contract guards. */
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join, relative, sep } from "node:path";
 
 import ts from "typescript";
 
+import { entrySource } from "./feature-entry-source.mjs";
 import { bindingDir, packageNameAt } from "./kits.mjs";
 
 function parse(file) {
@@ -16,6 +17,7 @@ function parse(file) {
 }
 
 function relativeSource(file, specifier) {
+  if (!specifier.startsWith(".")) return undefined;
   const path = join(dirname(file), specifier);
   return [path + ".ts", join(path, "index.ts")].find(existsSync);
 }
@@ -33,6 +35,7 @@ function exportedClass(node, name) {
 function resolveExport(node, file, name, visited) {
   if (
     !ts.isExportDeclaration(node) ||
+    node.isTypeOnly ||
     !node.moduleSpecifier ||
     !ts.isStringLiteral(node.moduleSpecifier)
   )
@@ -42,7 +45,7 @@ function resolveExport(node, file, name, visited) {
   if (!node.exportClause) return exportedSource(target, name, visited);
   if (!ts.isNamedExports(node.exportClause)) return undefined;
   const exported = node.exportClause.elements.find(
-    (element) => element.name.text === name
+    (element) => !element.isTypeOnly && element.name.text === name
   );
   return exported
     ? exportedSource(
@@ -53,7 +56,7 @@ function resolveExport(node, file, name, visited) {
     : undefined;
 }
 
-/** Resolve only a symbol that the binding actually exports from its main entry. */
+/** Resolve only a runtime symbol that the binding actually exports. */
 function exportedSource(file, name, visited = new Set()) {
   const key = file + ":" + name;
   if (!existsSync(file) || visited.has(key)) return undefined;
@@ -66,22 +69,56 @@ function exportedSource(file, name, visited = new Set()) {
   return undefined;
 }
 
-function bindingImports(source, packageName) {
+/** An Angular entry's configuration may share src, but cannot leave its package. */
+function withinPackage(binding, file) {
+  const path = relative(binding, file);
+  return path !== ".." && !path.startsWith(`..${sep}`) && !isAbsolute(path);
+}
+
+function bindingEntry(binding, framework, packageName, specifier, root) {
+  const primary = specifier === packageName;
+  if (
+    primary &&
+    (framework !== "angular" || !existsSync(join(binding, "ng-package.json")))
+  )
+    return join(binding, "src/index.ts");
+  if (
+    framework !== "angular" ||
+    (!primary && !specifier.startsWith(`${packageName}/`))
+  )
+    return undefined;
+  const file = entrySource(specifier, root);
+  return file?.endsWith(".ts") && withinPackage(binding, file)
+    ? file
+    : undefined;
+}
+
+function bindingImports(source, binding, framework, root) {
+  const packageName = packageNameAt(binding);
   const imports = new Map();
   for (const node of source.statements) {
     if (
       !ts.isImportDeclaration(node) ||
       !ts.isStringLiteral(node.moduleSpecifier) ||
-      node.moduleSpecifier.text !== packageName
+      node.importClause?.isTypeOnly
     )
       continue;
     const named = node.importClause?.namedBindings;
     if (!named || !ts.isNamedImports(named)) continue;
+    const entry = bindingEntry(
+      binding,
+      framework,
+      packageName,
+      node.moduleSpecifier.text,
+      root
+    );
+    if (!entry) continue;
     for (const element of named.elements) {
-      imports.set(
-        element.name.text,
-        element.propertyName?.text ?? element.name.text
-      );
+      if (!element.isTypeOnly)
+        imports.set(element.name.text, {
+          entry,
+          name: element.propertyName?.text ?? element.name.text,
+        });
     }
   }
   return imports;
@@ -103,7 +140,7 @@ export function inheritedBindingSources(file, framework, root) {
   if (!file.endsWith(".ts")) return [];
   const binding = bindingDir(framework, root);
   const source = parse(file);
-  const imports = bindingImports(source, packageNameAt(binding));
+  const imports = bindingImports(source, binding, framework, root);
   const names = source.statements
     .filter(ts.isClassDeclaration)
     .flatMap(baseNames);
@@ -111,7 +148,7 @@ export function inheritedBindingSources(file, framework, root) {
   for (const name of names) {
     const exported = imports.get(name);
     if (!exported) continue;
-    const base = exportedSource(join(binding, "src/index.ts"), exported);
+    const base = exportedSource(exported.entry, exported.name);
     if (base) files.add(base);
   }
   return [...files].map((base) => ({

@@ -1,13 +1,17 @@
 import {
   type AdaptTableFeature,
   extendFeature,
+  slotRender,
+} from "@adapttable/angular";
+import {
   GROUP_HEADER_CARD,
   GROUP_HEADER_ROW,
   GROUPING_PANEL,
+} from "@adapttable/angular/adapter";
+import {
   groupingPanel as coreAngularGroupingPanel,
   type GroupingPanelExtras,
-  slotRender,
-} from "@adapttable/angular";
+} from "@adapttable/angular/features";
 import {
   AdaptGroupHeaderCard,
   AdaptGroupHeaderRow,

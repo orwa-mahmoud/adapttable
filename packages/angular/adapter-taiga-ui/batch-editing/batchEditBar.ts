@@ -3,7 +3,7 @@ import {
   type BatchEditBarProps,
   type BatchEditBarSlots,
   type BatchEditButtonProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ɵTAIGA_CONTROLS as TAIGA_CONTROLS } from "@adapttable/taiga-ui";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 

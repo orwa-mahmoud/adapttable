@@ -1,6 +1,7 @@
 /**
  * The desktop table body: header, rows, reorder handles and cell editors.
  */
+import type { Attrs } from "@adapttable/angular";
 import {
   AdaptAttrs,
   AdaptCell,
@@ -9,10 +10,10 @@ import {
   AdaptExtraRowContent,
   AdaptFooter,
   AdaptHeader,
+  AdaptHeaderActions,
   AdaptRowDetail,
   AdaptSlot,
-  type Attrs,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
@@ -50,6 +51,7 @@ import { AdaptSelectionCheckbox } from "./selectionCheckbox";
     AdaptExtraRowContent,
     AdaptFooter,
     AdaptHeader,
+    AdaptHeaderActions,
     AdaptRowActions,
     AdaptRowDetail,
     AdaptSlot,

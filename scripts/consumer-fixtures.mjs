@@ -11,6 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { packageDir } from "./packages.mjs";
+import { vueConsumerFixtures } from "./vue-consumer-fixtures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const classification = JSON.parse(
@@ -349,7 +350,7 @@ function allFeatureFixture() {
   };
 }
 
-export const FIXTURES = [
+const existingFixtures = [
   ...CORE_FIXTURES,
   ...REACT_FIXTURES,
   ...adapterBaseFixtures(),
@@ -357,6 +358,11 @@ export const FIXTURES = [
   ...featureDeltaFixtures(),
   ...combinationFixtures(),
   allFeatureFixture(),
+];
+
+export const FIXTURES = [
+  ...existingFixtures,
+  ...vueConsumerFixtures(existingFixtures, PLAIN_ADAPTER_CEILING_KB),
 ];
 
 /**

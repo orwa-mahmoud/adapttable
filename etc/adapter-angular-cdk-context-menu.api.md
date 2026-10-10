@@ -6,13 +6,13 @@
 
 import { AdaptTableFeature } from '@adapttable/angular';
 import { ConnectedPosition } from '@angular/cdk/overlay';
-import { ContextMenuOptions } from '@adapttable/angular';
-import { ContextMenuSlots } from '@adapttable/angular';
+import { ContextMenuOptions } from '@adapttable/angular/features';
+import { ContextMenuSlots } from '@adapttable/angular/adapter';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { Signal } from '@angular/core';
-import { TableContextMenu } from '@adapttable/angular';
-import { TableContextMenuOptions } from '@adapttable/angular';
+import { TableContextMenu } from '@adapttable/angular/adapter';
+import { TableContextMenuOptions } from '@adapttable/angular/adapter';
 
 // @public
 export class AdaptContextMenuItem {

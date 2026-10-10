@@ -9,7 +9,7 @@ import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { SavedView } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
-import { SavedViewsPanelSlots } from '@adapttable/angular';
+import { SavedViewsPanelSlots } from '@adapttable/angular/adapter';
 import { TableLabels } from '@adapttable/angular';
 import { TemplateRef } from '@angular/core';
 

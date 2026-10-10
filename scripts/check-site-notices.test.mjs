@@ -13,7 +13,7 @@ import { it } from "node:test";
 import { checkSiteNotices } from "./check-site-notices.mjs";
 import { NOTICE_JSON, NOTICE_TEXT, renderNotices } from "./site-notices.mjs";
 
-it("requires complete notices in docs and both composed demo roots", () => {
+it("requires complete notices in docs and all three composed demo roots", () => {
   const root = mkdtempSync(join(tmpdir(), "adapttable-site-notices-"));
   const packages = [
     {
@@ -33,6 +33,7 @@ it("requires complete notices in docs and both composed demo roots", () => {
       root,
       join(root, "react/demo"),
       join(root, "angular/demo"),
+      join(root, "vue/demo"),
     ]) {
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "app.js"), "example");
@@ -42,8 +43,8 @@ it("requires complete notices in docs and both composed demo roots", () => {
       );
       writeFileSync(join(dir, NOTICE_TEXT), renderNotices(packages));
     }
-    assert.equal(checkSiteNotices(root).length, 3);
-    rmSync(join(root, "angular/demo", NOTICE_TEXT));
+    assert.equal(checkSiteNotices(root).length, 4);
+    rmSync(join(root, "vue/demo", NOTICE_TEXT));
     assert.throws(() => checkSiteNotices(root), /ENOENT/);
   } finally {
     rmSync(root, { recursive: true, force: true });

@@ -1,7 +1,11 @@
 /**
  * Row count and the windowed pager.
  */
-import { AdaptAttrs, AdaptIcon, expandChevronIcon } from "@adapttable/angular";
+import {
+  AdaptAttrs,
+  AdaptIcon,
+  expandChevronIcon,
+} from "@adapttable/angular/adapter";
 import { Toolbar, ToolbarWidget } from "@angular/aria/toolbar";
 import { Dir } from "@angular/cdk/bidi";
 import {

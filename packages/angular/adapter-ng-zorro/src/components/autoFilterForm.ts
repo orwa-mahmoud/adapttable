@@ -13,7 +13,7 @@ import {
   AdaptSelectFilterFieldModel,
   AdaptTextFilterFieldModel,
   createFilterFieldId as fieldId,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

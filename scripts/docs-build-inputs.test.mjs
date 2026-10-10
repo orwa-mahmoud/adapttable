@@ -37,6 +37,8 @@ describe("docs build cache inputs", () => {
     assert.ok(includesExternal("docs/angular/future-guide.md"));
     assert.ok(includesExternal("llms.txt"));
     assert.ok(includesExternal("scripts/site-notices.mjs"));
+    assert.ok(includesExternal("scripts/vue-docs.mjs"));
+    assert.ok(includesExternal("scripts/framework-navigation.mjs"));
     assert.ok(includesExternal("scripts/third-party-licenses/manifest.json"));
     assert.ok(includesExternal("scripts/third-party-licenses/future-LICENSE"));
     // sync-docs generates this from the canonical markdown before copying
@@ -56,6 +58,7 @@ describe("docs build cache inputs", () => {
       .map((file) => relative(ROOT, file).split(sep).join("/"))
       .filter((file) => !file.startsWith("apps/docs/"));
     assert.ok(externalFiles.includes("scripts/angular-docs.mjs"));
+    assert.ok(externalFiles.includes("scripts/vue-docs.mjs"));
     assert.ok(externalFiles.includes("apps/showcase/matrix.mjs"));
     for (const file of externalFiles) {
       assert.ok(includesExternal(file), `uncached docs dependency: ${file}`);

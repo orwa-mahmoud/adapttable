@@ -4,11 +4,12 @@
  * The row itself is {@link AdaptSidePanelLayout}. This keeps the selector
  * the table already uses.
  */
-import { AdaptSidePanelLayout } from "@adapttable/angular";
+import { AdaptSidePanelLayout } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,
   input,
+  type InputSignal,
   type TemplateRef,
 } from "@angular/core";
 
@@ -32,5 +33,5 @@ export class AdaptTableRegion {
   /** The panel beside the body. Absent, the body stands alone. */
   readonly panel = input<TemplateRef<unknown>>();
   /** Which edge the panel sits on. */
-  readonly side = input<"start" | "end">("end");
+  readonly side: InputSignal<"start" | "end"> = input<"start" | "end">("end");
 }

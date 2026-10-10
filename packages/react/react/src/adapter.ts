@@ -117,7 +117,7 @@ export {
   type StandardFeaturesFactory,
 } from "./adapterFeatures/standardPreset";
 export { createAdapterTableAssistantFeature } from "./adapterFeatures/tableAssistant";
-export type { ColumnDef } from "./columnDef";
+export type { ColumnDef, ReactColumnGroupDef } from "./columnDef";
 export {
   type ColumnGroupToggleButtonProps,
   ColumnGroupToggleChrome,
@@ -1117,6 +1117,7 @@ export {
   pinnedRowPart,
   pinnedRowSticky,
   pinnedRowStickyStyle,
+  renderedRowsOf,
   resetColumnLayout,
   resolveRowHeight,
   resolveRowStyle,

@@ -7,8 +7,8 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
 import { featureOptionsOf } from "../featureHost";
+import { exportPdf, exportXlsx } from "../features/export";
 import { AdaptExportAnnouncer } from "./exportAnnouncer";
-import { exportPdf, exportXlsx } from "./exportHandler";
 import {
   AdaptExportProgressChrome,
   type ExportProgressSlots,

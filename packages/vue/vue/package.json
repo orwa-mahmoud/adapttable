@@ -1,0 +1,141 @@
+{
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "vue": "^3.5.43"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "vue-tsc --noEmit && node ../../../scripts/check-vue-types.mjs",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf dist coverage .turbo"
+  },
+  "name": "@adapttable/vue",
+  "description": "Headless Vue composables and structural table contracts for AdaptTable.",
+  "dependencies": {
+    "@adapttable/core": "3.8.1",
+    "@tanstack/virtual-core": "^3.17.11"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./adapter": {
+      "import": {
+        "types": "./dist/adapter.d.ts",
+        "default": "./dist/adapter.js"
+      },
+      "require": {
+        "types": "./dist/adapter.d.cts",
+        "default": "./dist/adapter.cjs"
+      }
+    },
+    "./features": {
+      "import": {
+        "types": "./dist/features.d.ts",
+        "default": "./dist/features.js"
+      },
+      "require": {
+        "types": "./dist/features.d.cts",
+        "default": "./dist/features.cjs"
+      }
+    },
+    "./formula": {
+      "import": {
+        "types": "./dist/formula.d.ts",
+        "default": "./dist/formula.js"
+      },
+      "require": {
+        "types": "./dist/formula.d.cts",
+        "default": "./dist/formula.cjs"
+      }
+    },
+    "./pivot": {
+      "import": {
+        "types": "./dist/pivot.d.ts",
+        "default": "./dist/pivot.js"
+      },
+      "require": {
+        "types": "./dist/pivot.d.cts",
+        "default": "./dist/pivot.cjs"
+      }
+    },
+    "./stream": {
+      "import": {
+        "types": "./dist/stream.d.ts",
+        "default": "./dist/stream.js"
+      },
+      "require": {
+        "types": "./dist/stream.d.cts",
+        "default": "./dist/stream.cjs"
+      }
+    },
+    "./sparkline": {
+      "import": {
+        "types": "./dist/sparkline.d.ts",
+        "default": "./dist/sparkline.js"
+      },
+      "require": {
+        "types": "./dist/sparkline.d.cts",
+        "default": "./dist/sparkline.cjs"
+      }
+    },
+    "./pdf": {
+      "import": {
+        "types": "./dist/pdf.d.ts",
+        "default": "./dist/pdf.js"
+      },
+      "require": {
+        "types": "./dist/pdf.d.cts",
+        "default": "./dist/pdf.cjs"
+      }
+    },
+    "./xlsx": {
+      "import": {
+        "types": "./dist/xlsx.d.ts",
+        "default": "./dist/xlsx.js"
+      },
+      "require": {
+        "types": "./dist/xlsx.d.cts",
+        "default": "./dist/xlsx.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/vue/vue"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://adapttable.orwamahmoud.com/vue/demo/unstyled/"
+}

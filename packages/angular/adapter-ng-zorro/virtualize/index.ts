@@ -3,11 +3,11 @@
  *
  * @packageDocumentation
  */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import {
-  type AdaptTableFeature,
   virtualize as coreAngularVirtualize,
   type VirtualizeOptions,
-} from "@adapttable/angular";
+} from "@adapttable/angular/features";
 
 /**
  * Render only the rows in view. Compose with `paginationMode="infinite"`

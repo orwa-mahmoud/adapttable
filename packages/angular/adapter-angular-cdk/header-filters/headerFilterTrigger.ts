@@ -4,15 +4,17 @@
  * finishes, when the table asks for that.
  */
 import {
+  injectHeaderFilterOverlay,
+  type TableSource,
+} from "@adapttable/angular";
+import {
   AdaptIcon,
   defaultFilterRegistry,
   type FilterHeaderControlProps,
   filterLabel,
   FILTERS_ICON,
   hasActiveHeaderFilter,
-  injectHeaderFilterOverlay,
-  type TableSource,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { AdaptAutoFilterForm, AdaptCdkPopover } from "@adapttable/angular-cdk";
 import { A11yModule } from "@angular/cdk/a11y";
 import { Directionality } from "@angular/cdk/bidi";

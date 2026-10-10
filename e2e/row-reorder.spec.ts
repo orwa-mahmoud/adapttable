@@ -39,6 +39,77 @@ const part = (page: Page, name: string) =>
 const pagePart = (page: Page, name: string) =>
   page.locator(`[data-adapttable-part="${name}"]`);
 
+for (const locale of ["en", "ar"]) {
+  test(`antd: grouped and extra rows retain native column alignment (${locale})`, async ({
+    page,
+  }, testInfo) => {
+    await openDemo(page, "antd");
+    await configureFeatureLab(page, "row structure", "Grouped");
+    await enable(page, "reorder");
+    await enable(page, "Extra attached to a person");
+    if (locale === "ar") await configureFeatureLab(page, "locale", "العربية");
+    await expect(part(page, "group-row").first()).toBeVisible();
+    await expect(part(page, "full-width-row")).toHaveCount(1);
+    await expect
+      .poll(() =>
+        demo(page).evaluate((root) => {
+          const headers = [
+            ...root.querySelectorAll<HTMLTableCellElement>(
+              "th[data-column-key]"
+            ),
+          ];
+          const person = headers.find(
+            (header) => header.dataset.columnKey === "person"
+          );
+          const budget = headers.find(
+            (header) => header.dataset.columnKey === "budget"
+          );
+          if (!person || !budget)
+            throw new Error("Missing native data headers");
+          let mismatch = 0;
+          for (const group of root.querySelectorAll(
+            '[data-adapttable-part="group-row"]'
+          )) {
+            for (const header of [person, budget]) {
+              const cell = group.querySelector(
+                `td[data-column-key="${header.dataset.columnKey}"]`
+              );
+              if (!cell) throw new Error("Missing native aggregate cell");
+              const expected = header.getBoundingClientRect();
+              const actual = cell.getBoundingClientRect();
+              mismatch = Math.max(
+                mismatch,
+                Math.abs(actual.left - expected.left),
+                Math.abs(actual.width - expected.width)
+              );
+            }
+          }
+          const extra = root.querySelector(
+            '[data-adapttable-part="full-width-cell"]'
+          );
+          if (!extra) throw new Error("Missing native extra cell");
+          const tracks = headers.map((header) =>
+            header.getBoundingClientRect()
+          );
+          const bounds = extra.getBoundingClientRect();
+          return Math.max(
+            mismatch,
+            Math.abs(
+              bounds.left - Math.min(...tracks.map((track) => track.left))
+            ),
+            Math.abs(
+              bounds.right - Math.max(...tracks.map((track) => track.right))
+            )
+          );
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    await demo(page).screenshot({
+      path: testInfo.outputPath(`antd-synthetic-grid-${locale}.png`),
+    });
+  });
+}
+
 function nameIn(text: string): string {
   return NAMES.find((name) => text.includes(name)) ?? "";
 }
@@ -205,6 +276,9 @@ for (const adapter of ADAPTERS) {
       const groupedRows = demo(page).locator("[data-stagger][data-row-id]");
       await expect(groupedRows).toHaveCount(30);
       const groupedGrip = part(page, "row-reorder-handle").first();
+      const movedRowId = await groupedGrip.evaluate((node) =>
+        node.closest("[data-row-id]")?.getAttribute("data-row-id")
+      );
       await groupedGrip.evaluate((element) =>
         element.scrollIntoView({ block: "center" })
       );
@@ -223,6 +297,12 @@ for (const adapter of ADAPTERS) {
       await expect(
         page.locator('[data-adapttable-part="row-move-confirmation"]:visible')
       ).toHaveCount(0);
+      if (adapter === "antd")
+        await expect(
+          demo(page).locator(
+            `[data-row-id="${movedRowId}"] [data-adapttable-part="row-move-menu-trigger"]`
+          )
+        ).toBeFocused();
 
       const trigger = part(page, "row-move-menu-trigger").first();
       await expect(trigger).toBeVisible();
@@ -230,6 +310,14 @@ for (const adapter of ADAPTERS) {
         node.closest("[data-row-id]")?.getAttribute("data-row-id")
       );
       expect(triggerRowId).toBeTruthy();
+      // The previous focus restore can start the page's smooth scroll.
+      // Position this row immediately so the click reaches its trigger.
+      await trigger.evaluate((element) =>
+        window.scrollBy({
+          top: element.getBoundingClientRect().top - 300,
+          behavior: "instant",
+        })
+      );
       // Click, not Space: after the confirm dialog closes, Space is eaten by
       // a kit overlay that is no longer :visible but still intercepts keys.
       await trigger.click();

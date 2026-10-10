@@ -1,7 +1,7 @@
 /**
  * The chips for every active filter, each removable, and a clear-all.
  */
-import { type ActiveFilterChipsSlotProps } from "@adapttable/angular";
+import type { ActiveFilterChipsSlotProps } from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 /**

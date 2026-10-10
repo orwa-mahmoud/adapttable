@@ -2,12 +2,12 @@
  * The checklist's Brain/Helm controls: search box, button and checkbox. Native
  * is this kit's kit.
  */
-import {
-  type ChecklistButtonProps,
-  type ChecklistCheckboxProps,
-  type ChecklistSearchProps,
-  type ChecklistSlots,
-} from "@adapttable/angular";
+import type {
+  ChecklistButtonProps,
+  ChecklistCheckboxProps,
+  ChecklistSearchProps,
+  ChecklistSlots,
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { BrnCheckbox } from "@spartan-ng/brain/checkbox";
 

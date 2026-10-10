@@ -5,10 +5,9 @@
  * The headless hook stays {@link injectGridFocus}; this factory only turns
  * the capability on so a kit can list it with the other features.
  */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import type { CellRange } from "@adapttable/core";
 import { coreCellNavigation } from "@adapttable/core/binding";
-
-import type { AdaptTableFeature } from "../featureHost";
 
 /**
  * Options for {@link cellNavigation}.

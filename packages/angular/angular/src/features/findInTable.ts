@@ -6,9 +6,8 @@
  * feature. A kit extends the feature with the bar and, optionally, a
  * toolbar button.
  */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import { coreFindInTable } from "@adapttable/core/binding";
-
-import type { AdaptTableFeature } from "../featureHost";
 
 /**
  * Add the find bar, opened with Ctrl/Cmd+F with focus anywhere in the table,

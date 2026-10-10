@@ -5,7 +5,9 @@ import { selectedFramework } from "../../../../scripts/framework-navigation.mjs"
 const framework = selectedFramework(Astro.url.pathname);
 const links = (config.social || []).map((link) => ({
   ...link,
-  href: link.label === "Live demo" && framework === "angular" ? "/angular/demo/unstyled/" : link.href,
+  href: link.label === "Live demo"
+    ? framework === "vue" ? "/vue/demo/unstyled/" : framework === "angular" ? "/angular/demo/unstyled/" : link.href
+    : link.href,
 }));
 ---
 {links.map(({ label, href, icon }) => <a {href} rel="me" class="sl-flex"><span class="sr-only">{label}</span><Icon name={icon} /></a>)}

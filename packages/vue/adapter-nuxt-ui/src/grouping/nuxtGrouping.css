@@ -1,0 +1,25 @@
+@layer components {
+  .adapttable-nuxt-grouping-body,
+  .adapttable-nuxt [data-adapttable-part="grouping-aggregations"],
+  .adapttable-nuxt [data-adapttable-part="grouping-aggregation-add"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .adapttable-nuxt-grouping-drop {
+    display: inline-flex;
+    align-items: center;
+    min-inline-size: 0.75rem;
+    min-block-size: 2.75rem;
+    border: 1px dashed transparent;
+  }
+  .adapttable-nuxt-grouping-drop[data-empty] {
+    min-inline-size: 8rem;
+    padding: 0.5rem;
+  }
+  .adapttable-nuxt-grouping-drop[data-empty],
+  .adapttable-nuxt-grouping-drop[data-active] {
+    border-color: var(--ui-border-accented);
+  }
+}

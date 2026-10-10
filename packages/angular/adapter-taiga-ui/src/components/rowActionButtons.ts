@@ -1,15 +1,17 @@
+import type {
+  ConfirmHandler,
+  RowAction,
+  RowActionsContext,
+  RowActionsLayout,
+  RowActionsRenderer,
+  TableLabels,
+} from "@adapttable/angular";
 import {
-  type ConfirmHandler,
   resolveDisabledReason,
   resolveRenderer,
-  type RowAction,
-  type RowActionsContext,
-  type RowActionsLayout,
-  type RowActionsRenderer,
   runRowAction,
-  type TableLabels,
   visibleRowActions,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

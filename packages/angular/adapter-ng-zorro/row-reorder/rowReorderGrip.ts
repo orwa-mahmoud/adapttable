@@ -8,7 +8,7 @@ import {
   type RowReorderHandleProps,
   type RowReorderHandleSlotProps,
   type RowReorderHandleSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { NzButtonModule } from "ng-zorro-antd/button";
 

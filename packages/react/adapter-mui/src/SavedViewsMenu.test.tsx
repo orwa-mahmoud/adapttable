@@ -64,6 +64,17 @@ function saveAs(name: string) {
 }
 
 describe("SavedViewsMenu (MUI)", () => {
+  it("returns focus to the name input when saving disables the pressed button", () => {
+    mountMenu("t.q=ali");
+    fireEvent.change(nameInput(), { target: { value: "Mine" } });
+    saveButton().focus();
+    fireEvent.click(saveButton());
+    expect(saveButton()).toBeDisabled();
+    expect(nameInput()).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    expect(trigger()).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("saves the table's own params under the typed (trimmed) name; disabled while empty", () => {
     const { storage } = mountMenu("t.q=ali&other.q=keep");
     expect(trigger()).toHaveAttribute("aria-expanded", "true");

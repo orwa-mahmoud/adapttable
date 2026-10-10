@@ -434,7 +434,7 @@ export type {
   PivotPanelSurfaceProps,
   PivotZoneProps,
 } from "./pivot/pivotPanelContract";
-export { type BodyCell, cellSpanMark } from "./rows/cellSpan";
+export { type BodyCell, cellSpanMark, resolveCellSpan } from "./rows/cellSpan";
 export {
   type CellSpanRequest,
   type GetCellSpan,
@@ -827,6 +827,7 @@ export type {
   QueryFilterGroup,
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
+export { commitSearchOnBlur } from "./source/searchInputFlush";
 export type { TableSource } from "./source/TableSource";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";
@@ -880,7 +881,7 @@ export {
 } from "./style/icons";
 export { MOUNT_STAGGER, OVERLAY_MOTION } from "./style/motion";
 export type { TableStateMutators } from "./tableStateMutators";
-export type { TreeEntry } from "./tree/treeRows";
+export type { TreeEntry, TreeShape } from "./tree/treeRows";
 export type {
   ActionAiOptions,
   ActionApprovalPolicy,
@@ -907,6 +908,7 @@ export {
   type ChromeRenderModel,
   chromeRenderModel,
   type ChromeRenderModelInput,
+  columnScrollTarget,
   type ColumnViewport,
   type ColumnWindowPlan,
   columnWindowPlan,
@@ -994,6 +996,20 @@ export type {
   UseTableUrlStateResult,
 } from "./url/urlBindingState";
 // Types the shared state shapes above hand back.
+export {
+  createMenuNavigation,
+  type MenuNavigationAction,
+  type MenuNavigationController,
+  type MenuNavigationItem,
+  type MenuNavigationKey,
+} from "./actions/menuNavigation";
+export type { EditableColumnLike } from "./editing/cellEditing";
+export type {
+  EditCommitSnapshot,
+  EditCommitValidationFailure,
+  EditCommitValidationOptions,
+} from "./editing/editCommitLifecycle";
+export type { RowValidator } from "./editing/editContracts";
 export type { ChecklistWindow } from "./filters/checklistModel";
 export type { HighlightedCell } from "./rows/highlightStore";
 export type { RowPatchEvent } from "./rows/patch";

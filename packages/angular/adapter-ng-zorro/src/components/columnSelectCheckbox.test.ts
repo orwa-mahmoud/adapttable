@@ -1,5 +1,5 @@
 /** The NG-ZORRO column checkbox preserves the Chrome wrapper and inner label. */
-import type { ColumnSelectCheckboxChromeProps } from "@adapttable/angular";
+import type { ColumnSelectCheckboxChromeProps } from "@adapttable/angular/adapter";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 

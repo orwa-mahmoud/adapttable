@@ -42,7 +42,12 @@
  */
 
 import { demoRoute } from "../../scripts/site.mjs";
-import { matrixPages } from "./matrix.mjs";
+import {
+  matrixPages,
+  VUE_KIT_LAB_PAGES,
+  VUE_KIT_PAGES,
+  VUE_NATIVE_PAGES,
+} from "./matrix.mjs";
 
 /** The framework the showcase's own pages — landing, labs — are written in. */
 const SHOWCASE_FRAMEWORK = "react";
@@ -52,16 +57,18 @@ const SHOWCASE_FRAMEWORK = "react";
  * page except the landing page.
  *
  * @param {string} dir
- * @param {{ indexable?: boolean, framework?: string | null }} [options]
+ * @param {{ indexable?: boolean, framework?: string | null, path?: string }} [options]
+ *   `path` is the page's address under its framework's demo root, where it
+ *   differs from the folder its HTML sits in.
  * @returns {ShowcasePage}
  */
 const demo = (
   dir,
-  { indexable = true, framework = SHOWCASE_FRAMEWORK } = {}
+  { indexable = true, framework = SHOWCASE_FRAMEWORK, path = dir } = {}
 ) => ({
   key: dir.replaceAll("/", "-"),
   html: `./${dir}/index.html`,
-  route: demoRoute(dir, framework ?? SHOWCASE_FRAMEWORK),
+  route: demoRoute(path, framework ?? SHOWCASE_FRAMEWORK),
   indexable,
   framework,
 });
@@ -107,6 +114,15 @@ export const SHOWCASE_PAGES = [
     framework: SHOWCASE_FRAMEWORK,
   },
   demo("all-options"),
+  ...[...VUE_NATIVE_PAGES, ...VUE_KIT_PAGES, ...VUE_KIT_LAB_PAGES].map(
+    (page) => ({
+      key: page.key,
+      html: `./${page.dir}/index.html`,
+      route: demoRoute(page.path, "vue"),
+      indexable: false,
+      framework: "vue",
+    })
+  ),
   {
     key: "angular-main",
     html: "./angular-main/index.html",
@@ -129,7 +145,11 @@ export const SHOWCASE_PAGES = [
   // The adapter × feature matrix — a landing plus the matrix feature pages per
   // built adapter, expanded from `matrix.mjs`.
   ...matrixPages().map((page) =>
-    demo(page.dir, { framework: page.framework, indexable: page.indexable })
+    demo(page.dir, {
+      framework: page.framework,
+      indexable: page.indexable,
+      path: page.path,
+    })
   ),
   // The addresses those pages replaced — static redirects with no bundle.
   ...REPLACED_PAGES.map(([from]) =>

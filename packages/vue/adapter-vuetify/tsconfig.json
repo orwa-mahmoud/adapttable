@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node", "vitest/globals", "vite/client"],
+    "paths": {},
+    "rootDirs": [".", "./.sfc-types"]
+  },
+  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "browser"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "test/types/invalid",
+    ".sfc-types"
+  ],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "dataAttributes": ["data-*"]
+  }
+}

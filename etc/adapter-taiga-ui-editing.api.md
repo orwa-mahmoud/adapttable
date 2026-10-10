@@ -6,15 +6,15 @@
 
 import { AdaptTableFeature } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
-import { dirtyIndicators } from '@adapttable/angular';
-import { editHistory } from '@adapttable/angular';
+import { dirtyIndicators } from '@adapttable/angular/features';
+import { editHistory } from '@adapttable/angular/features';
 import { EditHistoryHandle } from '@adapttable/angular';
 import { EditHistoryOptions } from '@adapttable/angular';
-import { EditingLifecycleExtras } from '@adapttable/angular';
+import { EditingLifecycleExtras } from '@adapttable/angular/features';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
-import { RowEditActionsProps } from '@adapttable/angular';
-import { RowEditActionsSlots } from '@adapttable/angular';
+import { RowEditActionsProps } from '@adapttable/angular/adapter';
+import { RowEditActionsSlots } from '@adapttable/angular/adapter';
 import { RowEditHandler } from '@adapttable/angular';
 
 // @public

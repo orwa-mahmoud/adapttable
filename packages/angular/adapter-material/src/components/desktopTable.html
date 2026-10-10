@@ -89,9 +89,10 @@
               </span>
             </ng-template>
             @if (column.headerActions) {
-              <span data-adapttable-part="header-actions">{{
-                column.headerActions
-              }}</span>
+              <span
+                data-adapttable-part="header-actions"
+                [adaptHeaderActions]="column"
+              ></span>
             }
             @if (columnSelects().get(column.key); as select) {
               <ng-container

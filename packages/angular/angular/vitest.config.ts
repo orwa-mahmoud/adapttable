@@ -41,6 +41,10 @@ export default defineConfig({
         replacement: path.resolve(packageDir, "src/index.ts"),
       },
       {
+        find: /^@adapttable\/angular\/(features|adapter)$/,
+        replacement: path.resolve(packageDir, "src/$1.ts"),
+      },
+      {
         find: /^@adapttable\/angular\/(.+)$/,
         replacement: path.resolve(packageDir, "$1/index.ts"),
       },
@@ -60,6 +64,8 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: [
       "src/**/*.test.ts",
+      "features/**/*.test.ts",
+      "adapter/**/*.test.ts",
       "router/**/*.test.ts",
       "stream/**/*.test.ts",
       "formula/**/*.test.ts",
@@ -79,6 +85,8 @@ export default defineConfig({
       reporter: ["text", "lcov", "html"],
       include: [
         "src/**/*.ts",
+        "features/**/*.ts",
+        "adapter/**/*.ts",
         "router/**/*.ts",
         "stream/**/*.ts",
         "formula/**/*.ts",
@@ -88,6 +96,10 @@ export default defineConfig({
       exclude: [
         "src/**/*.test.ts",
         "src/**/index.ts",
+        "features/**/*.test.ts",
+        "features/index.ts",
+        "adapter/**/*.test.ts",
+        "adapter/index.ts",
         "router/**/*.test.ts",
         "router/index.ts",
         "stream/**/*.test.ts",

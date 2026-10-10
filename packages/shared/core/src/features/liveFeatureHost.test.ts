@@ -49,6 +49,37 @@ describe("LiveFeatureHost", () => {
     host.dispose();
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
+
+  it.each([new Error("first cleanup failed"), undefined])(
+    "runs independent cleanups once and preserves the first failure: %s",
+    (failure: unknown) => {
+      const host = new LiveFeatureHost();
+      const calls: string[] = [];
+      const reported: unknown[] = [];
+      host.onDispose(() => {
+        calls.push("first");
+        host.dispose();
+        throw failure;
+      });
+      host.onDispose(() => {
+        calls.push("second");
+        throw new Error("second cleanup failed");
+      });
+      host.onDispose(() => calls.push("last"));
+
+      try {
+        host.dispose();
+      } catch (error) {
+        reported.push(error);
+      }
+
+      expect(reported).toHaveLength(1);
+      expect(reported[0]).toBe(failure);
+      expect(calls).toEqual(["first", "second", "last"]);
+      expect(() => host.dispose()).not.toThrow();
+      expect(calls).toEqual(["first", "second", "last"]);
+    }
+  );
 });
 
 describe("createFeatureHost", () => {
@@ -74,6 +105,88 @@ describe("createFeatureHost", () => {
     disposeFeatureHost(host);
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
+
+  it("rolls back earlier and partial setups once and skips later setups", () => {
+    const failure = new Error("setup failed");
+    const registeredCleanup = vi.fn();
+    const returnedCleanup = vi.fn();
+    const partialCleanup = vi.fn();
+    const laterSetup = vi.fn();
+    const hosts: LiveFeatureHost[] = [];
+    const reported: unknown[] = [];
+
+    try {
+      createFeatureHost([
+        {
+          setup: (host) => {
+            hosts.push(host);
+            host.onDispose(registeredCleanup);
+            return returnedCleanup;
+          },
+        },
+        {
+          setup: (host) => {
+            host.onDispose(partialCleanup);
+            throw failure;
+          },
+        },
+        { setup: laterSetup },
+      ]);
+    } catch (error) {
+      reported.push(error);
+    }
+
+    expect(reported).toHaveLength(1);
+    expect(reported[0]).toBe(failure);
+    expect(registeredCleanup).toHaveBeenCalledTimes(1);
+    expect(returnedCleanup).toHaveBeenCalledTimes(1);
+    expect(partialCleanup).toHaveBeenCalledTimes(1);
+    expect(laterSetup).not.toHaveBeenCalled();
+    expect(() => hosts[0]?.dispose()).not.toThrow();
+    expect(registeredCleanup).toHaveBeenCalledTimes(1);
+    expect(returnedCleanup).toHaveBeenCalledTimes(1);
+    expect(partialCleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([new Error("setup failed"), undefined])(
+    "preserves the setup failure even when rollback fails: %s",
+    (failure: unknown) => {
+      const cleanupFailure = new Error("cleanup failed");
+      const failedCleanup = vi.fn(() => {
+        throw cleanupFailure;
+      });
+      const lastCleanup = vi.fn();
+      const hosts: LiveFeatureHost[] = [];
+      const reported: unknown[] = [];
+
+      try {
+        createFeatureHost([
+          {
+            setup: (host) => {
+              hosts.push(host);
+              return failedCleanup;
+            },
+          },
+          {
+            setup: (host) => {
+              host.onDispose(lastCleanup);
+              throw failure;
+            },
+          },
+        ]);
+      } catch (error) {
+        reported.push(error);
+      }
+
+      expect(reported).toHaveLength(1);
+      expect(reported[0]).toBe(failure);
+      expect(failedCleanup).toHaveBeenCalledTimes(1);
+      expect(lastCleanup).toHaveBeenCalledTimes(1);
+      expect(() => hosts[0]?.dispose()).not.toThrow();
+      expect(failedCleanup).toHaveBeenCalledTimes(1);
+      expect(lastCleanup).toHaveBeenCalledTimes(1);
+    }
+  );
 });
 
 describe("disposeFeatureHost", () => {

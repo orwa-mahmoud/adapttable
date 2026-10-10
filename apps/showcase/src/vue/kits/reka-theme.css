@@ -1,0 +1,13 @@
+.dark [data-vue-kit="reka-ui"],
+.dark :is(.at-reka, .at-reka-surface, .at-reka-select-content, .at-reka-menu) {
+  --at-reka-background: #1c202b;
+  --at-reka-subtle: #252b38;
+  --at-reka-border: #3a4253;
+  --at-reka-text: #eff1f7;
+  --at-reka-muted: #adb7ce;
+  --at-reka-accent: #c4a5fd;
+  --at-reka-accent-soft: #33274b;
+}
+.dark .at-reka tbody tr:hover td {
+  background: var(--at-reka-subtle);
+}

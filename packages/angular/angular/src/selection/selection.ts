@@ -9,6 +9,7 @@
 import {
   applyGroupLeafSelection,
   createAllMatchingScope,
+  createControllableStore,
   headerSelectionOf,
   resolveLabels,
   type TableLabels,
@@ -19,10 +20,24 @@ import type {
   HeaderSelectionState,
   SelectionState,
 } from "@adapttable/core/binding";
-import { computed, type Signal, signal } from "@angular/core";
+import {
+  assertInInjectionContext,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  Injector,
+  type Signal,
+  untracked,
+} from "@angular/core";
 
-import type { Attrs } from "../attrs";
-import { type MaybeSignalOptional, readMaybe } from "../store";
+import type { Attrs } from "../attrContracts";
+import {
+  fromStore,
+  type MaybeSignal,
+  type MaybeSignalOptional,
+  readMaybe,
+} from "../store";
 
 /**
  * Options for {@link injectRowSelection}.
@@ -44,7 +59,11 @@ export interface RowSelectionOptions<TRow> {
    * Whether the source can answer for rows beyond the ones on screen, so
    * "select all N matching" can be offered. Defaults to `true`.
    */
-  readonly acrossPages?: boolean;
+  readonly acrossPages?: MaybeSignal<boolean>;
+  /** Clear selection when the result set changes, but not on first mount. */
+  readonly resetKey?: MaybeSignal<unknown>;
+  /** The injector whose lifetime the selection follows. */
+  readonly injector?: Injector;
 }
 
 /**
@@ -98,7 +117,13 @@ export interface RowSelection {
 export function injectRowSelection<TRow>(
   options: RowSelectionOptions<TRow>
 ): RowSelection {
-  const own = signal<ReadonlySet<string>>(new Set());
+  if (!options.injector) assertInInjectionContext(injectRowSelection);
+  const injector = options.injector ?? inject(Injector);
+  const destroyRef = injector.get(DestroyRef);
+  const store = createControllableStore<ReadonlySet<string>>(new Set(), {
+    observeUncontrolled: true,
+  });
+  const own = fromStore(store, { injector });
   const controlled = computed(() => {
     const ids = options.selectedIds && readMaybe(options.selectedIds);
     return ids === undefined ? undefined : new Set(ids);
@@ -113,18 +138,47 @@ export function injectRowSelection<TRow>(
   );
 
   const scope = createAllMatchingScope();
-  const allMatching = signal(scope.getSnapshot());
-  scope.subscribe(() => {
-    allMatching.set(scope.getSnapshot());
-  });
-  const acrossPages = options.acrossPages ?? true;
-
-  const commit = (next: ReadonlySet<string>): void => {
-    // Any explicit change narrows the scope back to concrete ids.
-    scope.narrow();
-    if (controlled() === undefined) own.set(next);
+  const scopeSnapshot = fromStore(scope, { injector });
+  const acrossPages = computed(() =>
+    options.acrossPages === undefined ? true : readMaybe(options.acrossPages)
+  );
+  const resetKey = computed(() => readMaybe(options.resetKey));
+  let previousResetKey = untracked(resetKey);
+  const allMatching = computed(
+    () =>
+      acrossPages() &&
+      scopeSnapshot() &&
+      Object.is(previousResetKey, resetKey())
+  );
+  const onChange = (next: ReadonlySet<string>): void => {
     options.onSelectionChange?.([...next]);
   };
+  const control = (): void => {
+    store.control({ value: untracked(controlled), onChange });
+  };
+  const commit = (next: ReadonlySet<string>): void => {
+    if (destroyRef.destroyed) return;
+    // Any explicit change narrows the scope back to concrete ids.
+    scope.narrow();
+    control();
+    store.commit(next);
+  };
+  effect(
+    () => {
+      const key = resetKey();
+      const allowed = acrossPages();
+      untracked(() => {
+        if (!allowed) scope.narrow();
+        if (Object.is(previousResetKey, key)) return;
+        previousResetKey = key;
+        // Scope can be broad even with no explicit ids to clear.
+        scope.narrow();
+        control();
+        if (store.current().size > 0) store.commit(new Set());
+      });
+    },
+    { injector }
+  );
   const isSelected = (id: string): boolean => selectedIds().has(id);
   const toggle = (id: string): void => {
     commit(toggleId(selectedIds(), id));
@@ -142,7 +196,7 @@ export function injectRowSelection<TRow>(
     commit(applyGroupLeafSelection(ids, selectedIds()));
   };
   const selectAllMatching = (): void => {
-    scope.select(acrossPages);
+    if (!destroyRef.destroyed) scope.select(acrossPages());
   };
 
   return {
@@ -155,7 +209,7 @@ export function injectRowSelection<TRow>(
     clear,
     replace,
     toggleGroupLeaves,
-    allMatching: allMatching.asReadonly(),
+    allMatching,
     selectAllMatching,
     state: computed(() => ({
       selectedIds: selectedIds(),
@@ -170,7 +224,7 @@ export function injectRowSelection<TRow>(
       visibleIds: visibleIds(),
       allMatching: allMatching(),
       selectAllMatching,
-      acrossPages,
+      acrossPages: acrossPages(),
     })),
     rowCheckboxAttrs: (id) => ({
       type: "checkbox",

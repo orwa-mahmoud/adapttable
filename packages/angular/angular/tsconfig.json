@@ -8,7 +8,9 @@
     "types": ["node", "vitest/globals"],
     "paths": {
       "@adapttable/angular": ["./src/index.ts"],
-      "@adapttable/angular/*": ["./*/index.ts"]
+      "@adapttable/angular/*": ["./*/index.ts"],
+      "@adapttable/angular/features": ["./src/features.ts"],
+      "@adapttable/angular/adapter": ["./src/adapter.ts"]
     }
   },
   "angularCompilerOptions": {
@@ -18,6 +20,8 @@
   },
   "include": [
     "src",
+    "features",
+    "adapter",
     "formula",
     "pivot",
     "sparkline",

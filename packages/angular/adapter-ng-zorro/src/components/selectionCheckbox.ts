@@ -1,5 +1,6 @@
 /** NG-ZORRO selection control with the binding's native-input contract. */
-import { AdaptAttrs, type Attrs } from "@adapttable/angular";
+import type { Attrs } from "@adapttable/angular";
+import { AdaptAttrs } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

@@ -127,6 +127,11 @@ is `hideOnMobile`, so a collapsed Delivery does not become an empty card field.
 
 ## Helpers
 
+React adapter authors can import `flattenReactColumnTree` and the
+`ReactColumnGroupDef<TRow>` type from `@adapttable/react/adapter`.
+`ReactColumnGroupDef` is the same type exported by `@adapttable/react`;
+its children keep React column render callbacks when passed to the flattener.
+
 `flattenColumnTree` turns a mixed `ColumnInput[]` into leaves plus a
 `ColumnGroupRecord` map. `applyCollapsedColumnGroups` hides leaves under
 collapsed ids and inserts a stub (`COLUMN_GROUP_STUB_PREFIX`,

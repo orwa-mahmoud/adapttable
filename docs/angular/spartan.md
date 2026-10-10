@@ -1,9 +1,8 @@
 # Spartan Angular table
 
 `@adapttable/spartan` renders AdaptTable through Spartan Brain and an owned
-Helm layer. It is being prepared for its first public **0.1.0** release.
-Registry installation requires the owner-controlled npm publication to complete;
-release preparation does not confirm npm availability.
+Helm layer. The kit is available on npm.
+Keep the kit and binding releases compatible with their declared dependencies.
 
 ## Architecture and supported versions
 
@@ -17,10 +16,10 @@ and CDK compatibility with `>=21.0.0 <23.0.0`. This kit targets Angular 22. See
 
 ## Application setup
 
-After publication completes, install in an existing Angular 22 application:
+Install in an existing Angular 22 application:
 
 ```sh
-npm install @adapttable/spartan@0.1.0 @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1
+npm install @adapttable/spartan @adapttable/angular @spartan-ng/brain@1.5.0 @angular/cdk@^22 @angular/forms@^22 rxjs@^7.8.0 tailwindcss@^4 clsx@^2.1.1 tw-animate-css@^1
 ```
 
 Keep the host's Angular Common and Core packages on compatible Angular 22

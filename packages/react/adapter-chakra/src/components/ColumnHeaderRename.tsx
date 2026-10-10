@@ -4,8 +4,10 @@ import {
   LiveRegion,
   useColumnRenameEditor,
 } from "@adapttable/react/adapter";
-import { Button, Field, Input, Text } from "@chakra-ui/react";
+import { Button, Field, IconButton, Input, Text } from "@chakra-ui/react";
 import { type PropsWithChildren, useEffect, useRef } from "react";
+
+import { EditRowIcon } from "../icons";
 
 function HeaderRenameForm({
   rename,
@@ -109,7 +111,7 @@ export function ColumnHeaderRename({
       ) : (
         children
       )}
-      <Button
+      <IconButton
         type="button"
         size="xs"
         variant="ghost"
@@ -118,8 +120,8 @@ export function ColumnHeaderRename({
         disabled={rename.editing}
         onClick={rename.begin}
       >
-        {labels.renameColumn}
-      </Button>
+        <EditRowIcon />
+      </IconButton>
       <LiveRegion part="header-rename-announcer" statusRole={false}>
         {rename.announcement}
       </LiveRegion>

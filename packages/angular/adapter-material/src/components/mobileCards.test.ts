@@ -8,9 +8,9 @@ import {
   injectChangedCellFlash,
   type MobileCardField,
   type RowAction,
-  runRowAction,
   type TableLabels,
 } from "@adapttable/angular";
+import { runRowAction } from "@adapttable/angular/adapter";
 import { cellNavigation } from "@adapttable/angular-material/cell-navigation";
 import { dirtyIndicators, editing } from "@adapttable/angular-material/editing";
 import { pinnedSummaryRows } from "@adapttable/angular-material/pinned-summary-rows";

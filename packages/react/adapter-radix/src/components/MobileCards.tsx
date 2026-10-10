@@ -281,7 +281,11 @@ function MobileCardBase<TRow>({
       role="listitem"
       className={className}
       {...rowClickProps(row, onRowClick, index)}
-      style={{ ...treeCardStyle(treeEntry?.level ?? 0), ...style }}
+      style={{
+        minHeight: "max-content",
+        ...treeCardStyle(treeEntry?.level ?? 0),
+        ...style,
+      }}
     >
       {treeEntry && (
         <OptionalTreeToggle

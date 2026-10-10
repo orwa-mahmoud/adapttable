@@ -8,7 +8,7 @@ import {
   type ContextMenuSlots,
   injectTableContextMenu,
   type TableContextMenuOptions,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { Directionality } from "@angular/cdk/bidi";
 import {

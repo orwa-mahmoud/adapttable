@@ -13,12 +13,13 @@ import { fileURLToPath } from "node:url";
 import { ANGULAR_DOCS } from "./angular-docs.mjs";
 import { docsFiles } from "./docs-files.mjs";
 import { siteUrl } from "./site.mjs";
+import { VUE_DOCS } from "./vue-docs.mjs";
 
 const HEADER = `# AdaptTable — full documentation
 
-> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React and Angular bindings, and native table adapters. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Angular has unstyled and NG-ZORRO kits. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
+> AdaptTable v3 documentation: a framework-neutral data engine in @adapttable/core, headless React and Angular bindings, and native table adapters. React kits include Mantine, MUI, Chakra UI, Ant Design, Radix Themes, Base UI, shadcn/ui and unstyled Tailwind. Angular kits include native unstyled, NG-ZORRO, Material, ng-bootstrap, ngx-bootstrap, Spartan, Taiga UI, Aria and CDK. Individually imported features include filtering, grouping, pivot tables, formulas, editing, virtualization and export. Responsive mobile cards, URL state, i18n/RTL and optional provider-neutral AI sessions. MIT licensed; applications own data and persistence.
 
-Start with your framework's getting-started and the shared concepts for package ownership, then features for opt-in composition. Angular kits and @adapttable/ai-angular are prepared for their first public 0.1.0 release; npm publication is a separate owner-controlled step. Verify registry availability before installing, or use built local packages until publication. Vue is not supported. Use the v2-to-v3 migration guide when upgrading React; historical migration examples describe their named versions, not current import paths. This file is generated from the canonical guides; the linked index is at ${siteUrl("/llms.txt")}.
+Start with your framework's getting-started and the shared concepts for package ownership, then features for opt-in composition. The Angular binding, all nine native kits and @adapttable/ai-angular are available on npm. The upcoming Angular 0.5 binding changes canonical import paths; use its migration guide and compatible kit releases when upgrading. Vue has an experimental, unreleased 0.1.0 public binding and eight kits — native Unstyled, Element Plus, Naive UI, Nuxt UI, Quasar, Reka UI, shadcn-vue and Vuetify — each covering the full feature set with its own controls, plus optional agents, assistant UI and speech through @adapttable/ai-vue. The Vue packages are not published to npm. Use the v2-to-v3 migration guide when upgrading React; historical migration examples describe their named versions, not current import paths. This file is generated from the canonical guides; the linked index is at ${siteUrl("/llms.txt")}.
 
 `;
 
@@ -93,6 +94,7 @@ export const DOCS = [
   "migrate-from-v1.md",
   "versioning.md",
   ...ANGULAR_DOCS,
+  ...VUE_DOCS,
 ];
 
 /**

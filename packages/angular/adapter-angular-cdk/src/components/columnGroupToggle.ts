@@ -9,7 +9,7 @@ import {
   type ColumnGroupToggleProps,
   type ColumnGroupToggleSlots,
   expandChevronIcon,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import {
   ChangeDetectionStrategy,

@@ -1,9 +1,9 @@
+import type { TableLabels } from "@adapttable/angular";
 import {
   AdaptAttrs,
   AdaptLiveRegion,
   injectColumnRenameEditor,
-  type TableLabels,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { Component, computed, input } from "@angular/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";

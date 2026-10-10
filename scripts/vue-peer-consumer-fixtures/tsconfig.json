@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "Preserve",
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node"],
+    "paths": {
+      "vue": ["../../packages/vue/vue/node_modules/vue"],
+      "vue/*": ["../../packages/vue/vue/node_modules/vue/*"],
+      "@adapttable/core": ["../../packages/shared/core/src/index.ts"],
+      "@adapttable/core/*": ["../../packages/shared/core/src/*.ts"],
+      "@adapttable/i18n": ["../../packages/shared/i18n/src/index.ts"],
+      "@adapttable/ai": ["../../packages/shared/ai/src/index.ts"],
+      "@adapttable/ai/*": ["../../packages/shared/ai/src/*.ts"],
+      "@adapttable/vue": ["../../packages/vue/vue/src/index.ts"],
+      "@adapttable/vue/*": ["../../packages/vue/vue/src/*.ts"],
+      "@adapttable/vue-unstyled": [
+        "../../packages/vue/adapter-vue-unstyled/src/index.ts"
+      ],
+      "@adapttable/vue-unstyled/*": [
+        "../../packages/vue/adapter-vue-unstyled/src/*.ts"
+      ],
+      "@adapttable/ai-vue": ["../../packages/vue/ai-vue/src/index.ts"]
+    }
+  },
+  "include": ["*.vue", "*.cts"],
+  "vueCompilerOptions": { "strictTemplates": true }
+}

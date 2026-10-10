@@ -1,16 +1,27 @@
-import { injectPopoverSpace } from "@adapttable/angular";
+import { injectPopoverSpace } from "@adapttable/angular/adapter";
 import { BidiModule } from "@angular/cdk/bidi";
 /** Material card surface on the CDK overlay used by Material itself. */
-import { type ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import {
+  CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
+  CdkConnectedOverlay,
+  type ConnectedPosition,
+  OverlayContainer,
+  OverlayModule,
+} from "@angular/cdk/overlay";
+import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
   ElementRef,
+  inject,
   input,
   output,
+  viewChild,
 } from "@angular/core";
 import { MatCardModule } from "@angular/material/card";
+
+import { fitFilterOverlayHorizontally } from "./materialPopoverGeometry";
 
 /** Anchored, backdrop-free surface with scoped dismissal and focus restoration. @internal */
 @Component({
@@ -25,22 +36,35 @@ import { MatCardModule } from "@angular/material/card";
       [cdkConnectedOverlayHasBackdrop]="false"
       [cdkConnectedOverlayDisableClose]="true"
       [cdkConnectedOverlayPositions]="
-        belowOnly() ? belowPositions : positions()
+        belowOnly()
+          ? belowPositions
+          : filterSurface()
+            ? filterPositions
+            : positions()
       "
       [cdkConnectedOverlayPush]="!belowOnly()"
+      [cdkConnectedOverlayFlexibleDimensions]="
+        constrainedSurface() || (overlayDefaults?.flexibleDimensions ?? false)
+      "
+      [cdkConnectedOverlayWidth]="
+        constrainedSurface() ? 374 : (overlayDefaults?.width ?? '')
+      "
       [cdkConnectedOverlayViewportMargin]="8"
       [cdkConnectedOverlayPanelClass]="'adapt-material-overlay'"
+      (positionChange)="fitFilterOverlay()"
       (overlayOutsideClick)="outside($event)"
       (overlayKeydown)="keydown($event)"
     >
       <mat-card
         appearance="outlined"
+        [class.adapt-material-filter-card]="constrainedSurface()"
         [attr.dir]="direction()"
-        [style.max-height.px]="belowOnly() ? availableHeight() : null"
+        [style.width]="constrainedSurface() ? '100%' : null"
+        [style.max-height.px]="constrainedSurface() ? availableHeight() : null"
         [style.--adapt-material-popover-height]="
-          belowOnly() ? availableHeight() + 'px' : null
+          constrainedSurface() ? availableHeight() + 'px' : null
         "
-        [style.overflow-y]="belowOnly() ? 'hidden' : 'auto'"
+        [style.overflow-y]="constrainedSurface() ? 'hidden' : 'auto'"
         style="max-width: calc(100vw - 16px); max-height: min(560px, calc(100vh - 32px)); overflow: auto; padding: 16px"
       >
         <ng-content />
@@ -48,14 +72,95 @@ import { MatCardModule } from "@angular/material/card";
   ></span>`,
 })
 export class AdaptMaterialPopover {
+  private readonly overlayContainer = inject(OverlayContainer);
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+
+  constructor() {
+    afterRenderEffect((onCleanup) => {
+      const connected = this.connectedOverlay();
+      if (!this.open() || !this.constrainedSurface() || !connected) return;
+      this.availableHeight();
+      this.direction();
+      // Height is measured after the card mounts. Reapply the native strategy
+      // after that size changes so a pushed initial position cannot linger.
+      connected.overlayRef.updatePosition();
+      const pane = connected.overlayRef.overlayElement;
+      const viewport = pane.ownerDocument.defaultView;
+      const fit = () => this.fitFilterOverlay();
+      fit();
+      // Native positioning can stay on the same connection during a resize.
+      // Observe its actual pane as well as page movement and viewport changes.
+      let renderedSize = pane.getBoundingClientRect();
+      const observer =
+        typeof ResizeObserver === "undefined"
+          ? null
+          : new ResizeObserver(() => {
+              // A height signal can change before its binding reaches the DOM.
+              // ResizeObserver confirms the rendered size before CDK measures it.
+              const nextSize = pane.getBoundingClientRect();
+              if (
+                nextSize.width !== renderedSize.width ||
+                nextSize.height !== renderedSize.height
+              ) {
+                connected.overlayRef.updatePosition();
+                // Consume any size change caused by native placement itself.
+                renderedSize = pane.getBoundingClientRect();
+              }
+              fit();
+            });
+      observer?.observe(pane);
+      observer?.observe(this.overlayContainer.getContainerElement());
+      viewport?.addEventListener("resize", fit);
+      viewport?.addEventListener("scroll", fit, true);
+      onCleanup(() => {
+        observer?.disconnect();
+        viewport?.removeEventListener("resize", fit);
+        viewport?.removeEventListener("scroll", fit, true);
+        pane.style.translate = "";
+      });
+    });
+  }
+
+  protected fitFilterOverlay(): void {
+    if (!this.constrainedSurface()) return;
+    const pane = this.connectedOverlay()?.overlayRef?.overlayElement;
+    if (pane)
+      fitFilterOverlayHorizontally(
+        pane,
+        this.overlayContainer.getContainerElement()
+      );
+  }
+
+  protected readonly overlayDefaults = inject(
+    CDK_CONNECTED_OVERLAY_DEFAULT_CONFIG,
+    {
+      optional: true,
+    }
+  );
   readonly origin = input.required<HTMLElement>();
   readonly open = input(true);
   readonly belowOnly = input(false);
+  /** Constrain a filter card while allowing CDK to flip when space is short. */
+  readonly filterSurface = input(false);
   readonly align = input<"start" | "end">("end");
+  protected readonly constrainedSurface = computed(
+    () => this.belowOnly() || this.filterSurface()
+  );
   protected readonly availableHeight = injectPopoverSpace({
     origin: () => this.origin(),
-    open: () => this.open() && this.belowOnly(),
+    open: () => this.open() && this.constrainedSurface(),
     reserve: 16,
+    allowAbove: () => {
+      if (!this.filterSurface() || this.belowOnly()) return false;
+      const origin = this.origin();
+      const viewport = origin.ownerDocument.defaultView;
+      // Preserve the preferred below placement when a header, footer and
+      // useful portion of the filter body fit. CDK handles the short-space case.
+      return (
+        viewport !== null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom < 160
+      );
+    },
   });
   protected readonly belowPositions: ConnectedPosition[] = [
     {
@@ -65,6 +170,31 @@ export class AdaptMaterialPopover {
       overlayY: "top",
       offsetY: 4,
     },
+    // Search can be absent, placing the trigger at the other toolbar edge.
+    // Keep both logical alignments below the trigger, including in RTL.
+    {
+      originX: "start",
+      originY: "bottom",
+      overlayX: "start",
+      overlayY: "top",
+      offsetY: 4,
+    },
+    {
+      originX: "center",
+      originY: "bottom",
+      overlayX: "center",
+      overlayY: "top",
+      offsetY: 4,
+    },
+  ];
+  protected readonly filterPositions: ConnectedPosition[] = [
+    ...this.belowPositions,
+    ...this.belowPositions.map<ConnectedPosition>((position) => ({
+      ...position,
+      originY: "top",
+      overlayY: "bottom",
+      offsetY: -4,
+    })),
   ];
   readonly dir = input<"ltr" | "rtl">();
   protected readonly direction = computed(

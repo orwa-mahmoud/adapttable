@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "#build/ui": ["./node_modules/.nuxt-ui/ui/index.ts"],
+      "#build/ui/*": ["./node_modules/.nuxt-ui/ui/*"]
+    }
+  },
+  "include": ["src", "test", "browser", "vitest.config.ts", "tsdown.config.ts"],
+  "exclude": ["node_modules", "dist", "coverage"],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "dataAttributes": ["data-*"]
+  }
+}

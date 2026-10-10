@@ -81,6 +81,14 @@ and first-release status. A command is
 `separatorBefore`. `onSelect` is a function, not an Angular event output. Labels
 for custom commands are already-localized text supplied by the application.
 
+## Writing direction
+
+The palette follows the table's current `dir`, including kit-owned overlays
+rendered through portals. Switching between RTL and LTR while it is open keeps
+the mounted palette and search text intact. Custom adapters can forward `dir`
+through `CommandPaletteInjectOptions` and `AdaptCommandPaletteChrome`; omitting
+it preserves the kit's inherited or native direction.
+
 ## Shortcuts and focus
 
 The default shortcut list contains `{ chord: "mod+k", command:

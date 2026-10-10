@@ -38,7 +38,7 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
     cell?: Renderer<CellContext<TRow>>;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
-    headerActions?: string;
+    headerActions?: string | Renderer<HeaderContext<TRow>>;
     headerCell?: Renderer<HeaderContext<TRow>>;
 }
 

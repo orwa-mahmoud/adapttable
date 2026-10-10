@@ -2,7 +2,7 @@
 import type {
   AgentApprovalButtonProps,
   AgentApprovalListProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   Component,
   computed,

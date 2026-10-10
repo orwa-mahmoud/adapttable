@@ -177,6 +177,12 @@ export interface CellNavigationOptions {
 export { CellProps }
 
 // @public
+interface CellProps_2<TRow> {
+    readonly row: TRow;
+    readonly rowIndex: number;
+}
+
+// @public
 export function cellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppearance?: CellSpanAppearance): TableFeature<TRow>;
 
 export { CellSpanAppearance }
@@ -207,11 +213,33 @@ export { ColumnFilter }
 
 export { ColumnFooterContext }
 
+// @public
+interface ColumnFooterContext_2<TRow> {
+    column: ColumnDef<TRow>;
+    value: ReactNode;
+}
+
 export { ColumnGroupShow }
 
 export { ColumnHeaderContext }
 
+// @public
+interface ColumnHeaderContext_2<TRow> {
+    column: ColumnDef<TRow>;
+    controller: ColumnHeaderController_2;
+}
+
 export { ColumnHeaderController }
+
+// @public
+interface ColumnHeaderController_2 {
+    label: ReactNode;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
 
 export { ColumnLayoutState }
 

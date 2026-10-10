@@ -1,0 +1,88 @@
+import type { Attrs } from "@adapttable/vue";
+import { useElementRef } from "@adapttable/vue/adapter";
+import { type ButtonInstance, ElButton } from "element-plus";
+import {
+  defineComponent,
+  h,
+  mergeProps,
+  type PropType,
+  shallowRef,
+  type VNode,
+  type VNodeChild,
+} from "vue";
+
+import { isElementRef } from "./ref";
+
+const ElementButton = defineComponent(
+  (
+    props: {
+      readonly attrs: Attrs;
+      readonly content: VNodeChild;
+      readonly loading?: () => VNodeChild;
+    },
+    { attrs }
+  ) => {
+    const control = shallowRef<ButtonInstance>();
+    useElementRef(
+      () => {
+        const target: unknown = control.value?.$el;
+        if (target == null) return null;
+        return target instanceof HTMLButtonElement ? target : null;
+      },
+      () => (isElementRef(props.attrs.ref) ? props.attrs.ref : undefined)
+    );
+    return () => {
+      const incoming = mergeProps(props.attrs, attrs);
+      const nativeAttrs = Object.fromEntries(
+        Object.entries(incoming).filter(
+          ([name]) => name !== "ref" && name !== "type"
+        )
+      );
+      const type = incoming.type;
+      const nativeType =
+        type === "submit" || type === "reset" ? type : "button";
+      return h(
+        ElButton,
+        { ...nativeAttrs, nativeType, ref: control },
+        props.loading
+          ? { default: () => props.content, loading: props.loading }
+          : { default: () => props.content }
+      );
+    };
+  },
+  {
+    name: "ElementButton",
+    props: {
+      attrs: { type: Object as PropType<Attrs> },
+      content: {
+        type: [String, Number, Boolean, Array, Object] as PropType<VNodeChild>,
+        default: undefined,
+      },
+      loading: { type: Function as PropType<(() => VNodeChild) | undefined> },
+    },
+    inheritAttrs: false,
+  }
+);
+
+/**
+ * Element Plus retains its native button; one setup scope owns its DOM ref.
+ * `loading` replaces ElButton's busy icon while its `loading` prop is set.
+ */
+export function elementButton(
+  attrs: Attrs,
+  content: VNodeChild,
+  loading?: () => VNodeChild
+): VNode {
+  const key = attrs.key;
+  return h(ElementButton, {
+    key:
+      typeof key === "string" ||
+      typeof key === "number" ||
+      typeof key === "symbol"
+        ? key
+        : undefined,
+    attrs,
+    content,
+    loading,
+  });
+}

@@ -1,0 +1,262 @@
+# @adapttable/vue-unstyled
+
+Requires Node.js **22.12.0 or newer**; packed releases are tested on Node 22.12 and Node 24.
+
+Native HTML controls for the AdaptTable Vue binding. The table ships no theme;
+style semantic elements with `classNames` or `data-adapttable-part` selectors.
+This public package is experimental, prepared for `0.1.0`, and has not been
+published to npm. It requires Vue `^3.5.0`; use the built workspace packages
+until publication.
+
+## Native overlay stylesheet
+
+When using filter drawers, load the native stylesheet once from your client
+application entry:
+
+```ts
+import "@adapttable/vue-unstyled/styles.css";
+```
+
+It scopes the native dialog backdrop to this component and provides minimal
+Canvas panel colors plus a 20% black scrim on the real backdrop button.
+`filtersPanel`, `filtersDrawer` and `filtersBackdrop` class hooks style the
+foreground panel and backdrop separately. The package's JavaScript entries
+remain usable by bare ESM, CommonJS and server rendering without a CSS loader.
+Your application or framework owns loading the stylesheet; the library does
+not insert stylesheet elements at runtime.
+
+## Basic table
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from "vue";
+import { DataTable, type ColumnDef } from "@adapttable/vue-unstyled";
+
+interface Person {
+  id: string;
+  name: string;
+  score: number;
+}
+const rows = shallowRef<readonly Person[]>([
+  { id: "ada", name: "Ada", score: 10 },
+]);
+const selectedIds = shallowRef<string[]>([]);
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "score", sortable: true },
+];
+const rowKey = (person: Person) => person.id;
+</script>
+<template>
+  <DataTable
+    v-model:selected-ids="selectedIds"
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+    :url-sync="false"
+    table-label="People"
+  />
+</template>
+```
+
+The native surface supports search, sorting, pagination, row selection,
+responsive mobile cards, grouped column headings with optional native desktop
+collapse buttons, source replacement, loading/refreshing, empty results and
+error/retry rendering. Pass `source` to use a source
+created by `@adapttable/vue` instead of the built-in frontend data path.
+
+`selectedIds` and `columnLayout` are controlled when supplied. Their matching
+`update:selectedIds` and `update:columnLayout` events request changes; the host
+may accept or reject each request. Prop replacement never emits another request.
+Use `selectable` with `defaultSelectedIds` for local selection. The table does
+not modify the host's rows. Defaults seed initial state only.
+
+`summaryRow` maps the current source rows to column-aligned totals. Column
+`footer` renderers and the `footer` scoped slot also work without a mapper.
+Mobile cards show the same footer values with column labels. Use `tableFooter`
+for free content below the table and above pagination. Summary cells follow
+effective column order, visibility, width and pinning. See the
+[footer guide](https://adapttable.orwamahmoud.com/vue/summary-row/) for row scope
+and styling hooks.
+
+`cell` and `header` scoped slots receive typed row/column contexts. An explicit
+column renderer wins over the matching table slot. A `ColumnDef<Person, number>`
+provides a numeric value to its renderer; a heterogeneous table cell slot has an
+`unknown` value and a typed `Person` row. The `toolbar` slot appends content
+after the built-in toolbar controls. The `loading`, `empty` and `error` slots
+replace status content; an error slot receives the real error, retry action
+and retrying state. No retry is offered without a source
+retry callback.
+
+Set `collapsibleColumnGroups` to show native desktop group-header buttons.
+Cards honor the same collapsed layout but do not render desktop group controls.
+
+All `classNames` keys are exported in `DataTableClassNames`. Ordinary attributes,
+classes and listeners fall through to the root. Column, row and native-control
+semantics remain on their actual table or input elements. Labels come from the
+binding's localized label contract; pass `labels` and `dir="rtl"` together for
+an RTL locale. For SSR, provide equivalent server/client data and URL state;
+the initial responsive surface is desktop unless `forceMobile` is supplied.
+
+A template ref exposes `DataTableHandle<Person>` with `focus()`, `runtime` and
+`getView()`. `focus()` targets the actual scroll surface.
+
+## Features
+
+Feature composition adds the optional behaviors below to the native global
+search box, sorting, pagination, row selection and responsive mobile cards.
+Controlled column management exposes order, visibility, width and pin state.
+Import factories from their named entries, or collect them from
+`@adapttable/vue-unstyled/features`. The base entry does not import the feature
+barrel. Models, validation, data coordination and persistence stay in the Vue
+binding and shared core; these contributions provide native controls.
+
+- `/filters`: `filters(defs, { mode: "popover" | "drawer", tree: true })`,
+  `filterTypes`, native checklist fields and an optional AND/OR filter tree.
+  A custom filter type still needs a supported widget or adapter field renderer.
+  The popover has no backdrop; the drawer uses a native modal dialog.
+- `/header-filters`: `headerFilters()` supplies native header controls and
+  delegates their actions to the same filter model. `FilterHeaderControl` and
+  `FilterHeaderRow` provide compact standalone controls and a second header row,
+  exported from this entry and the root. Their class hooks target the actual
+  search/select, range wrapper and multi-choice summary. Header filters are a desktop
+  surface; mobile filtering remains available through `/filters`.
+- `/editing`: cell editing with `editing(onCellEdit)`, `rowEditing(onRowEdit)`, `editHistory()`,
+  `undoRedoButtons()` and `dirtyIndicators()`. Editors include native text,
+  number, boolean, date/time and select controls. Custom editors render through
+  the binding's typed custom-control contract.
+- `/batch-editing`: `batchEditing(onBatchEdit)` stages changes until the native
+  Save action. Validation, async save errors, retry and rollback remain binding
+  behavior. No editor writes host rows directly.
+- `/multi-sort`, `/fit-columns`, `/resizable-columns` and `/column-groups`:
+  `multiSort()`, `fitColumns()`, `resizableColumns()` and
+  `collapsibleColumnGroups()` for collapsible column groups; also collected in
+  the corresponding individual column entry. Native desktop resize handles preserve pointer,
+  keyboard and RTL semantics. Cards do not render desktop resize handles.
+- `/row-actions`, `/row-pinning`, `/pinned-summary-rows`, `/extra-rows`,
+  `/cell-span` and `/row-appearance`: row actions, row pinning, independent
+  summary rows, full-width/separator rows, cell spanning and row styling.
+  Add, duplicate and delete request host callbacks.
+  Confirmed actions use the native browser confirmation, or the `confirm` prop.
+  Independent summaries are outside selection. Cards render complete cell
+  values rather than attempting desktop row/column spans.
+- `/grouping`: `grouping(groupBy, extras?)` supplies aggregation and native
+  group collapse, selection and paging
+  controls. Use this native factory so the optional group renderer is loaded.
+- `/tree`, `/row-detail` and `/nested-table`: loaded/lazy tree data,
+  row expansion and nested tables use native controls on desktop and cards. The host supplies
+  children and child-table renderers; the table does not own that row data.
+- `/density`, `/fullscreen` and `/saved-views`: density, fullscreen and Saved Views
+  use `densityChooser()`, `fullscreen()` and `savedViews()` to mount their
+  native toolbar view controls. `SavedViewsPanel`
+  exposes the native management surface. Unsupported browsers show no fullscreen
+  button. Portalled filter surfaces use the active fullscreen container.
+- `/cell-navigation`, `/find-in-table` and `/status-bar`: keyboard cell navigation,
+  column selection checkboxes, host-owned clipboard/fill actions, find-in-table,
+  selected-cell statistics and a row-status strip. Find remains available on
+  mobile cards; desktop grid controls do not render there. See
+  [navigation and find](https://adapttable.orwamahmoud.com/vue/navigation/).
+- `/column-menu`: controlled column management with search, visibility, pinning,
+  reordering, sizing and optional rename controls. The same menu manages desktop
+  columns and mobile fields. See the
+  [column menu](https://adapttable.orwamahmoud.com/vue/column-menu/).
+- `/bulk-actions`, `/command-palette`, `/context-menu` and `/side-panel`: native
+  bulk actions with pending/error feedback, a keyboard command palette,
+  contextual cell/column actions and host-controlled side panels. Mutations and
+  panel state remain host-owned.
+- `/export` and `/print`: CSV export with loaded, selected, range or
+  host-provided all-row scopes, optional server progress/cancellation, and a host
+  print callback. `/export-csv` remains a deprecated compatibility path.
+  `/export-pdf` and `/export-xlsx` provide `exportPdf` and `exportXlsx` with
+  the same native controls and lifetime. Their `pdfWriter` and `xlsxWriter`
+  helpers remain available for `exportCsv({ writer })`. See
+  [actions and exports](https://adapttable.orwamahmoud.com/vue/actions/).
+- `/virtualize`: row and optional column virtualization with logical navigation
+  and measured expanded content. Pinned rows stay outside the row window; row
+  spans keep all rows mounted, and any cell span keeps all columns mounted.
+- `/row-reorder` and `/grouping-panel`: row reordering requests host writes;
+  native handles, mobile move buttons and controlled group/tree destinations
+  share one move policy. Grouping controls expose group order and permitted
+  aggregations.
+- `/pivot`, `/formula`, `/stream` and `/sparkline`: a controlled native pivot
+  panel and table model, spreadsheet formula columns with explicit errors,
+  lifecycle-scoped row streams, and accessible SVG sparkline columns. These are
+  separate data/rendering entries, not automatically loaded table features. See
+  [specialized data views](https://adapttable.orwamahmoud.com/vue/specialized/).
+- SSR and hydration with request-local state, no browser globals during server
+  rendering, and resources activated after mount.
+
+```ts
+import { filters } from "@adapttable/vue-unstyled/filters";
+import { densityChooser } from "@adapttable/vue-unstyled/density";
+import { savedViews } from "@adapttable/vue-unstyled/saved-views";
+
+const features = [
+  filters([{ key: "name", type: "text", label: "Name" }]),
+  densityChooser(),
+  savedViews({ storageKey: "people-views" }),
+];
+```
+
+## State and lifecycle
+
+`density` is controlled when supplied. `update:density` requests a change;
+`onDensityChange` is an optional observer called once for that request. A rejected
+request restores the displayed native select value. `defaultDensity` seeds
+local state. The root reflects effective state through `data-density`.
+
+Controlled selection, tree/detail expansion and pins likewise remain
+host-authoritative. The table never owns edited, added, duplicated or deleted
+rows: persistence goes through host callbacks. For history with row or batch
+editing, compose `editing(onCellEdit)` to provide the undo/redo replay callback.
+
+Saved Views capture the connected source query state, density and uncontrolled
+row pins. Group collapse requires `useGroupCollapseUrlState` wiring. Column
+layout requires binding `useColumnLayoutUrlState` to the column-layout prop and
+update event, with its `flush` passed as the Saved Views `flushViewState` option.
+`useColumnLayoutStorageState` is a separate browser-preference alternative.
+Selection, tree/detail expansion and edit drafts are not captured. Grouped/tree tables refuse data-row pinning;
+independent summaries remain supported. Selection follows visible hierarchy
+rows, while editing preserves drafts for loaded rows hidden by collapse.
+
+On the server, resource-backed action controls remain suspended. The first
+client render has the same shape, and controls activate after mount. Importing
+or server-rendering the native package does not require browser globals.
+Provide equivalent server/client rows, controlled state and URL input to hydrate.
+
+This experimental native slice does not yet provide the complete React/Angular
+feature catalog or styled Vue kits.
+
+Read [getting started](https://adapttable.orwamahmoud.com/vue/getting-started/),
+[feature composition](https://adapttable.orwamahmoud.com/vue/features/) and the
+[Vue API reference](https://adapttable.orwamahmoud.com/vue/api/) for exact
+signatures, controlled events, slots, examples and current state boundaries.
+
+## Optional assistant and approval controls
+
+Import `TableAssistant`, `AgentApproval`, `tableAssistant()` and `agentApproval()`
+from `@adapttable/vue-unstyled/assistant`. The components and features provide
+native HTML controls without loading an AI runtime. Pass conversation state through
+the `assistant` prop and include `tableAssistant()` when mounting it inside
+`DataTable`. `agentApproval()` adds the table approval strip; widget and modal
+reviews have one decision owner. Optional agents, conversations and speech are
+provided by `@adapttable/ai-vue`. See the
+[assistant guide](https://adapttable.orwamahmoud.com/vue/assistant/).
+
+## Standard features and exports
+
+Import `standardFeatures` from `@adapttable/vue-unstyled/preset` for native
+columns, density, CSV export, Find, fit columns, fullscreen, header filters,
+multi-sort, resize handles and status controls. Add typed `grouping`,
+`bulkActions`, `filters` or `savedViews` options only when you need them.
+
+CSV is available from `@adapttable/vue-unstyled/export`; `/export-csv` remains
+compatible. `exportPdf` and `exportXlsx` live in the separate `/export-pdf` and
+`/export-xlsx` entries alongside their writer helpers. All accept `false` to
+disable export. Append either factory after `standardFeatures()` to replace
+its CSV control with that format. Import individual entries to keep unused
+writers out of the application.
+
+See the [feature guide](https://adapttable.orwamahmoud.com/vue/features/) and
+[export guide](https://adapttable.orwamahmoud.com/vue/actions/) for composition,
+selection, range, server jobs and host callbacks.

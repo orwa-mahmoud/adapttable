@@ -5,7 +5,7 @@ name: PR
 #   Lint · Unit · Package · Playwright
 on:
   push:
-    branches: [main]
+    branches: [main, feat/vue-foundation-and-adapters]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -45,6 +45,8 @@ jobs:
       needBuild: ${{ steps.flags.outputs.needBuild }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Dedupe against PR-verified trees
         id: dedupe
@@ -110,6 +112,17 @@ jobs:
             fi
             exit 0
           fi
+          if [ "$EVENT" = "push" ] && [ "$GITHUB_REF" = "refs/heads/feat/vue-foundation-and-adapters" ]; then
+            # Check the entire branch: a new checkpoint can supersede a run
+            # whose earlier package and browser jobs have not finished yet.
+            if node scripts/integration-diff.mjs > "$tmp"; then
+              emit "$tmp"
+            else
+              echo "Could not compare the integration branch — running the full gate."
+              node scripts/ci-detect.mjs >> "$GITHUB_OUTPUT"
+            fi
+            exit 0
+          fi
           if [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "$zero" ]; then
             git fetch --no-tags --depth=1 origin "$BEFORE"
             git diff --name-only "$BEFORE" HEAD > "$tmp" || true
@@ -128,7 +141,20 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Build packages
+        id: build-packages
         run: pnpm build --concurrency=1
+      - name: Retain Vue declarations after a failed build
+        if: ${{ !cancelled() && steps.build-packages.outcome == 'failure' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vue-build-declaration-diagnostics
+          path: |
+            packages/vue/vue/package.json
+            packages/vue/vue/dist/
+            packages/shared/core/package.json
+            packages/shared/core/dist/
+          if-no-files-found: warn
+          retention-days: 7
       - name: Pack Node support fixtures
         if: needs.detect.outputs.runPackage == 'true'
         run: pnpm node:support:pack
@@ -198,11 +224,11 @@ jobs:
     needs: detect
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: ${{ matrix.name == 'vue' && 15 || 10 }}
     strategy:
       fail-fast: false
       matrix:
-        name: [core, react, antd, mui, kits, tools]
+        name: [core, react, vue, antd, mui, kits, tools]
     steps:
       # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -210,6 +236,7 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
       - name: Lint
+        id: package-lint
         env:
           LANE: ${{ matrix.name }}
           # Pull requests check only the packages the diff affects and their
@@ -220,6 +247,7 @@ jobs:
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
             react) f="--filter=@adapttable/react" ;;
+            vue) f="--filter=./packages/vue/*" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
@@ -228,6 +256,20 @@ jobs:
           esac
           # 2-core runner: two packages at once, each lint is one process.
           pnpm lint $f $AFFECTED --concurrency=1 --continue=dependencies-successful
+
+      - name: Capture proposed Vue lint fixes
+        id: vue-lint-fixes
+        if: ${{ !cancelled() && matrix.name == 'vue' && steps.package-lint.outcome == 'failure' }}
+        timeout-minutes: 5
+        run: node scripts/capture-vue-lint-fixes.mjs
+      - name: Retain proposed Vue lint fixes for review
+        if: ${{ !cancelled() && matrix.name == 'vue' && steps.package-lint.outcome == 'failure' && hashFiles('reports/vue-eslint-fix-dry-run.json') != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vue-eslint-fix-dry-run
+          path: reports/vue-eslint-fix-dry-run.json
+          if-no-files-found: error
+          retention-days: 7
 
   typescript:
     name: TypeScript
@@ -238,7 +280,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [core, react, antd, mui, kits, tools]
+        name: [core, react, vue, antd, mui, kits, tools]
     steps:
       # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -256,6 +298,7 @@ jobs:
           case "$LANE" in
             core) f="--filter=@adapttable/core" ;;
             react) f="--filter=@adapttable/react" ;;
+            vue) f="--filter=./packages/vue/*" ;;
             antd) f="--filter=@adapttable/antd" ;;
             mui) f="--filter=@adapttable/mui" ;;
             kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled --filter=@adapttable/bootstrap" ;;
@@ -263,6 +306,9 @@ jobs:
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
           pnpm typecheck $f $AFFECTED --concurrency=1
+      - name: Verify current and minimum Vue source contracts
+        if: matrix.name == 'vue'
+        run: pnpm check:vue-peer-types
 
   lint:
     name: Lint
@@ -303,6 +349,7 @@ jobs:
           - name: base-ui · ai
           - name: radix · server · cli · i18n
           - name: angular
+          - name: vue
     steps:
       # Full history so turbo can diff against the base branch.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -323,6 +370,7 @@ jobs:
             "core · unstyled") f="--filter=@adapttable/core --filter=@adapttable/unstyled" ;;
             "mui · shadcn") f="--filter=@adapttable/mui --filter=@adapttable/shadcn" ;;
             react) f="--filter=@adapttable/react" ;;
+            vue) f="--filter=./packages/vue/*" ;;
             "mantine · bootstrap") f="--filter=@adapttable/mantine --filter=@adapttable/bootstrap" ;;
             "base-ui · ai") f="--filter=@adapttable/base-ui --filter=@adapttable/ai" ;;
             "radix · server · cli · i18n") f="--filter=@adapttable/radix --filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
@@ -334,7 +382,8 @@ jobs:
           # 46s, radix 45s, unstyled 40s, core 33s, shadcn 18s, ai 8s,
           # bootstrap 5s, server/cli/i18n ~1s each. antd alone sets the floor.
           # angular runs alone: its suites compile with Angular's compiler,
-          # not the React plugin the other lanes share.
+          # not the React plugin the other lanes share. Vue has its own lane
+          # using the SFC compiler and its per-package coverage floors.
           pnpm test:coverage $f $AFFECTED --concurrency=1 --continue=dependencies-successful
 
   unit:
@@ -361,14 +410,19 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - name: Restore built packages
+        id: built-packages
         run: pnpm build --concurrency=1
+      - name: Verify current and minimum Vue built contracts and ownership
+        run: pnpm check:vue-built-peers
+      - name: Run every Vue kit on its minimum and current Vue
+        run: pnpm check:vue-kit-peers
       - name: Check the engine imports no framework
         run: pnpm check:boundary
       - name: Validate published package configs
         run: pnpm publint
       - name: Check the extracted API reports are current
         id: api-reports
-        if: needs.detect.outputs.runPackage == 'true'
+        if: ${{ !cancelled() && steps.built-packages.outcome == 'success' && needs.detect.outputs.runPackage == 'true' }}
         env:
           ADAPTTABLE_API_REPORTS_DIAGNOSTICS_DIR: ${{ runner.temp }}/adapttable-api-reports
         run: pnpm api:check
@@ -380,11 +434,25 @@ jobs:
           path: ${{ runner.temp }}/adapttable-api-reports/*.api.md
           if-no-files-found: warn
           retention-days: 7
+      - name: Diagnose canonical Vue report definitions
+        id: retained-vue-api-reports
+        if: ${{ !cancelled() && steps.built-packages.outcome == 'success' && steps.api-reports.outcome == 'failure' }}
+        env:
+          ADAPTTABLE_API_REPORTS_DIAGNOSTICS_DIR: ${{ runner.temp }}/adapttable-vue-retained-api-reports
+        run: node scripts/api-reports.mjs --package vue --include-forgotten-exports
+      - name: Retain complete Vue report diagnostics
+        if: ${{ !cancelled() && steps.retained-vue-api-reports.outcome == 'failure' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vue-retained-api-report-diagnostics
+          path: ${{ runner.temp }}/adapttable-vue-retained-api-reports/*.api.md
+          if-no-files-found: warn
+          retention-days: 7
       - name: Smoke-check built package artifacts
         if: needs.detect.outputs.runPackage == 'true'
         run: pnpm smoke:dist
       - name: Bundle-size budget
-        if: needs.detect.outputs.runPackage == 'true'
+        if: ${{ !cancelled() && steps.built-packages.outcome == 'success' && needs.detect.outputs.runPackage == 'true' }}
         run: pnpm budget
 
   consumer:
@@ -538,12 +606,20 @@ jobs:
       # compile the same site.
       - name: Build
         run: pnpm turbo run build --filter=@adapttable/showcase --concurrency=1
+      - name: Build the isolated packed Vue browser consumer
+        run: pnpm build:e2e:vue-consumer
       - name: Build Astro docs once for all browser shards
         run: pnpm --filter @adapttable/docs build
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: showcase-dist
           path: apps/showcase/dist/
+          retention-days: 1
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: packed-vue-consumer-dist
+          path: e2e/consumers/dist/vue-native-filters/
+          if-no-files-found: error
           retention-days: 1
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -567,25 +643,57 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
       - uses: ./.github/actions/playwright-chromium
+      - name: Install CI fullscreen input diagnostic dependency
+        # Use Ubuntu's configured official repositories; Xvfb comes from the
+        # Playwright dependency installation. Only the two opted-in probes use
+        # xdotool, and the remaining suite keeps its current browser settings.
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y xdotool
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: showcase-dist
           path: apps/showcase/dist/
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
+          name: packed-vue-consumer-dist
+          path: e2e/consumers/dist/vue-native-filters/
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
           name: docs-dist
           path: apps/docs/dist/
       - name: Run E2E smoke suite
-        run: pnpm exec playwright test --project=chromium --project=chromium-dev --shard=${{ matrix.shard }}/9
+        run: xvfb-run --auto-servernum pnpm exec playwright test --project=chromium --project=chromium-dev --shard=${{ matrix.shard }}/9
         env:
           SHOWCASE_SKIP_BUILD: "1"
           DOCS_SKIP_BUILD: "1"
+          FULLSCREEN_X11_DIAGNOSTIC: "1"
       - name: Upload browser report
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
+          retention-days: 7
+      - name: Upload Vue kit screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vue-kit-screenshots-${{ matrix.shard }}
+          path: |
+            test-results/**/vue-kit-*.png
+            test-results/**/naive-filter-*.png
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload Material filter diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: material-filter-diagnostics-${{ matrix.shard }}
+          path: |
+            test-results/**/material-filter-layout-*.png
+            test-results/**/material-filter-geometry-*.json
+          if-no-files-found: ignore
           retention-days: 7
 
   playwright:

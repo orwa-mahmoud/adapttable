@@ -548,20 +548,46 @@
     }
   },
   "frameworkBoundary": {
-    "rule": "Modules listed in `engineModules` are the framework-agnostic engine: model, state, operators and serialization. They import no React and no React-coupled package. A vendor namespace is not a framework boundary — a framework-neutral dependency such as `@tanstack/virtual-core` is ordinary engine code, while `@tanstack/react-virtual` is React-coupled and belongs to the binding side. React lives in the binding layer (hooks, Chrome, focus). Items that add engine code add the module here; `scripts/check-framework-boundary.mjs` fails the build when a listed module gains a React-coupled import. Shipped neutral entrypoints are walked transitively through dist.",
+    "rule": "Modules listed in `engineModules` are the framework-agnostic engine: model, state, operators and serialization. They import no React, Vue or Angular runtime and no framework-coupled package. A vendor namespace is not a framework boundary: framework-neutral dependencies such as `@tanstack/virtual-core` are ordinary engine code, while framework-specific integrations belong to bindings. Items that add engine code add the module here. The boundary check scans source and every advertised runtime and declaration condition of neutral entrypoints transitively.",
     "forbiddenImports": [
       "react",
       "react-dom",
       "react/*",
       "react-dom/*",
       "react-compiler-runtime",
-      "@tanstack/react-*"
+      "@tanstack/react-*",
+      "vue",
+      "vue/*",
+      "@vue/*",
+      "@tanstack/vue-*",
+      "@angular/*",
+      "@tanstack/angular-*",
+      "@adapttable/react",
+      "@adapttable/react/*",
+      "@adapttable/vue",
+      "@adapttable/vue/*",
+      "@adapttable/angular",
+      "@adapttable/angular/*"
     ],
     "forbiddenReach": [
       "react",
       "react-dom",
+      "react/*",
+      "react-dom/*",
       "react-compiler-runtime",
-      "@adapttable/react"
+      "@tanstack/react-*",
+      "vue",
+      "vue/*",
+      "@vue/*",
+      "@tanstack/vue-*",
+      "@angular/*",
+      "@tanstack/angular-*",
+      "@adapttable/react",
+      "@adapttable/react/*",
+      "@adapttable/vue",
+      "@adapttable/vue/*",
+      "@adapttable/angular",
+      "@adapttable/angular/*"
     ],
     "neutralEntrypoints": [
       {

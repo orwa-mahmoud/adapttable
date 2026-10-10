@@ -35,6 +35,12 @@ export interface ColumnResizeHandleProps {
   onDoubleClick: (event: MouseEvent & { currentTarget: HTMLElement }) => void;
 }
 
+/** Ownership for a resize handle and any drag it starts. @public */
+export interface ColumnResizeHandleOptions {
+  /** Cancels listeners and pending writes; an aborted handle stays inert. */
+  readonly signal?: AbortSignal;
+}
+
 /** Current rendered width of the resize handle's owning header cell. */
 function cellWidth(handle: HTMLElement): number {
   const cell = handle.closest("th,td");
@@ -66,13 +72,15 @@ function isRtl(handle: HTMLElement): boolean {
 export function columnResizeHandleProps(
   key: string,
   setWidth: (key: string, width: number) => void,
-  label: string
+  label: string,
+  options: ColumnResizeHandleOptions = {}
 ): ColumnResizeHandleProps {
   return {
     role: "button",
     tabIndex: 0,
     "aria-label": label,
     onDoubleClick: (event) => {
+      if (options.signal?.aborted) return;
       // Measure from the table the handle is in, so this needs no wiring: the
       // cells carry their column key and the browser has already laid them out.
       const width = measureColumnWidth(
@@ -83,6 +91,8 @@ export function columnResizeHandleProps(
       if (width !== null) setWidth(key, width);
     },
     onPointerDown: (event) => {
+      if (options.signal?.aborted) return;
+      const ownerDocument = event.currentTarget.ownerDocument ?? document;
       event.preventDefault();
       event.stopPropagation();
       const startX = event.clientX;
@@ -93,35 +103,51 @@ export function columnResizeHandleProps(
       // drag emits far more moves than frames.
       let frame = 0;
       let lastX = startX;
+      let ended = false;
       const commit = () => {
         frame = 0;
+        if (ended || options.signal?.aborted) return;
         const delta = rtl ? startX - lastX : lastX - startX;
         setWidth(key, Math.max(MIN_COLUMN_WIDTH, startWidth + delta));
       };
       const onMove = (e: globalThis.PointerEvent) => {
+        if (ended || options.signal?.aborted) return;
         lastX = e.clientX;
         frame ||= globalThis.requestAnimationFrame(commit);
       };
       // `pointercancel` fires instead of `pointerup` when the browser takes
       // over the gesture (touch scroll, alt-tab mid-drag) — clean up on both
       // or the column keeps resizing with every later pointer move.
+      const detach = () => {
+        ownerDocument.removeEventListener("pointermove", onMove);
+        ownerDocument.removeEventListener("pointerup", onUp);
+        ownerDocument.removeEventListener("pointercancel", onUp);
+        options.signal?.removeEventListener("abort", onAbort);
+      };
+      const onAbort = () => {
+        if (ended) return;
+        ended = true;
+        if (frame) globalThis.cancelAnimationFrame(frame);
+        frame = 0;
+        detach();
+      };
       const onUp = () => {
-        // Flush a pending frame so the release position always lands; a
-        // drag-less click leaves no pending frame and commits nothing.
+        if (ended) return;
         if (frame) {
           globalThis.cancelAnimationFrame(frame);
           frame = 0;
           commit();
         }
-        document.removeEventListener("pointermove", onMove);
-        document.removeEventListener("pointerup", onUp);
-        document.removeEventListener("pointercancel", onUp);
+        ended = true;
+        detach();
       };
-      document.addEventListener("pointermove", onMove);
-      document.addEventListener("pointerup", onUp);
-      document.addEventListener("pointercancel", onUp);
+      ownerDocument.addEventListener("pointermove", onMove);
+      ownerDocument.addEventListener("pointerup", onUp);
+      ownerDocument.addEventListener("pointercancel", onUp);
+      options.signal?.addEventListener("abort", onAbort, { once: true });
     },
     onKeyDown: (event) => {
+      if (options.signal?.aborted) return;
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
       event.preventDefault();
       const current = cellWidth(event.currentTarget);

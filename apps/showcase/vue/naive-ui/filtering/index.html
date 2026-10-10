@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../../../favicon.svg" />
+    <meta name="description" content="Try Naive UI Vue table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/vue/demo/naive-ui/filtering/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AdaptTable" />
+    <meta property="og:title" content="Naive UI table filtering — AdaptTable" />
+    <meta property="og:description" content="Try Naive UI Vue table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/vue/demo/naive-ui/filtering/" />
+    <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Naive UI table filtering — AdaptTable" />
+    <meta name="twitter:description" content="Try Naive UI Vue table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL." />
+    <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Naive UI Vue table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.","url":"https://adapttable.orwamahmoud.com/vue/demo/naive-ui/filtering/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
+         Injected only off localhost, so a dev server files no session. -->
+    <script>
+      (function () {
+  var isLocal = function(){
+  var h = location.hostname || "";
+  if (location.protocol === "file:") return true;
+  if (h === "" || h === "localhost" || h === "0.0.0.0" || h === "[::1]" || h === "::1") return true;
+  if (h.endsWith(".local") || h.endsWith(".localhost")) return true;
+  if (/^127\./.test(h)) return true;
+  if (/^10\./.test(h)) return true;
+  if (/^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
+  return false;
+};
+  if (isLocal()) return;
+  (function () {
+    var s = document.createElement('script');
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.defer = true;
+    s.setAttribute("data-cf-beacon", "{\"token\": \"dd71ff9f3b7b4064969d3f81e8c6ee9b\"}");
+    document.head.appendChild(s);
+  })();
+})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <title>Naive UI table filtering — AdaptTable</title>
+    <script>
+      try {
+        if (localStorage.getItem("adapttable-demo-theme") === "dark")
+          document.documentElement.dataset.theme = "dark";
+      } catch {}
+    </script>
+    <style>
+      /* The pre-mount fallback inside #root. React replaces it on mount, so
+         this paints only while the bundle is still downloading — or
+         permanently, when JavaScript is unavailable. Styled so that moment
+         reads as the page arriving rather than as broken markup. */
+      .at-fallback {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 4.5rem 1.5rem;
+        font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+        color: #52525b;
+        line-height: 1.65;
+      }
+      .at-fallback p {
+        text-wrap: pretty;
+      }
+      .at-fallback__kicker {
+        margin: 0 0 0.75rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #71717a;
+      }
+      .at-fallback h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #18181b;
+        margin: 0 0 1rem;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .at-fallback h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #18181b;
+        margin: 2rem 0 0.6rem;
+      }
+      .at-fallback pre {
+        overflow-x: auto;
+        padding: 1rem 1.1rem;
+        border: 1px solid #e4e4e7;
+        border-radius: 12px;
+        background: #fafafa;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: #3f3f46;
+      }
+      .at-fallback p code {
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: #f4f4f5;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.86em;
+        color: #27272a;
+      }
+      .at-fallback ul {
+        padding-inline-start: 1.2rem;
+        margin: 0;
+      }
+      .at-fallback li {
+        margin: 0.4rem 0;
+      }
+      .at-fallback a {
+        color: #4f46e5;
+      }
+      [data-theme="dark"] .at-fallback {
+        color: #a1a1aa;
+      }
+      [data-theme="dark"] .at-fallback :is(h1, h2) {
+        color: #fafafa;
+      }
+      [data-theme="dark"] .at-fallback pre {
+        border-color: #3f3f46;
+        background: #18181b;
+        color: #d4d4d8;
+      }
+      [data-theme="dark"] .at-fallback p code {
+        background: #27272a;
+        color: #e4e4e7;
+      }
+      [data-theme="dark"] .at-fallback a {
+        color: #a5b4fc;
+      }
+      .at-fallback {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .at-fallback pre {
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Replaced by Vue on mount — the served markup carries the page's
+         own words so a crawler, and anyone whose bundle has not arrived, reads
+         a real page. Written by scripts/build-showcase-html.mjs. -->
+    <div id="root" data-matrix-page="naive-ui/filtering">
+      <main class="at-fallback">
+        <p class="at-fallback__kicker">AdaptTable for Naive UI</p>
+        <h1>Filtering in Naive UI</h1>
+        <p>Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each using Naive UI controls.</p>
+        <p>Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.</p>
+        <p>Filter state lives in the versioned URL, so a filtered view is a link someone can send.</p>
+        <h2>The code</h2>
+        <pre><code>&lt;script setup lang=&quot;ts&quot;&gt;
+import type { ColumnDef } from &quot;@adapttable/vue&quot;;
+import { DataTable } from &quot;@adapttable/naive-ui&quot;;
+import { filters } from &quot;@adapttable/naive-ui/filters&quot;;
+import { headerFilters } from &quot;@adapttable/naive-ui/header-filters&quot;;
+
+defineProps&lt;{ rows: readonly Person[] }&gt;();
+
+const columns: ColumnDef&lt;Person&gt;[] = [
+  { key: &quot;name&quot;, filter: &quot;text&quot; },
+  { key: &quot;team&quot;, filter: { type: &quot;multiSelect&quot;, options: &quot;auto&quot; } },
+  { key: &quot;budget&quot;, filter: &quot;numberRange&quot; },
+  { key: &quot;hiredAt&quot;, filter: &quot;dateRange&quot; },
+];
+const rowKey = (row: Person) =&gt; row.id;
+const features = [filters&lt;Person&gt;([], { mode: &quot;popover&quot; }), headerFilters()];
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;DataTable
+    :data=&quot;rows&quot;
+    :columns=&quot;columns&quot;
+    :row-key=&quot;rowKey&quot;
+    url-key=&quot;f&quot;
+    :features=&quot;features&quot;
+  /&gt;
+&lt;/template&gt;</code></pre>
+        <h2>Install</h2>
+        <pre><code># Runs once the Vue packages are published to npm
+pnpm add @adapttable/naive-ui @adapttable/vue @adapttable/core naive-ui</code></pre>
+        <h2>The same feature in the other kits</h2>
+        <ul>
+          <li><a href="../../unstyled/filtering/">Filtering in Vue Unstyled</a> — Native elements — your own CSS</li>
+          <li><a href="../../element-plus/filtering/">Filtering in Element Plus</a> — Element blue, crisp form controls</li>
+          <li><a href="../../vuetify/filtering/">Filtering in Vuetify</a> — Material Design, Vuetify blue</li>
+          <li><a href="../../reka-ui/filtering/">Filtering in Reka UI</a> — Accessible primitives, neutral theme</li>
+          <li><a href="../../shadcn-vue/filtering/">Filtering in shadcn-vue</a> — Monochrome, ring focus</li>
+          <li><a href="../../nuxt-ui/filtering/">Filtering in Nuxt UI</a> — Tailwind-native, Nuxt green</li>
+          <li><a href="../../quasar/filtering/">Filtering in Quasar</a> — Material-flavoured, Quasar blue</li>
+        </ul>
+        <h2>More Naive UI features</h2>
+        <ul>
+          <li><a href="../columns/">Column management in Naive UI</a> — Show, hide, reorder, pin and resize — from a menu you did not write.</li>
+          <li><a href="../column-groups/">Column groups in Naive UI</a> — Spanning headers that collapse to a stub, a kept child, or a custom cell.</li>
+          <li><a href="../selection/">Row selection in Naive UI</a> — A set of ids that survives paging, with bulk actions over it.</li>
+          <li><a href="../rows/">Rows in Naive UI</a> — Pin rows from a 3-dot menu, and merge a team that runs down the page.</li>
+          <li><a href="../row-reordering/">Row reordering in Naive UI</a> — Drag or keyboard moves, announced — the host writes.</li>
+          <li><a href="../editing/">Inline cell editing in Naive UI</a> — Native editors in the cell; every write goes through your handler.</li>
+          <li><a href="../grouping/">Row grouping in Naive UI</a> — Drag, select or keyboard grouping, with totals in the headers.</li>
+          <li><a href="../aggregation/">Aggregation in Naive UI</a> — Footer totals, pinned summaries, group aggregates — not data rows.</li>
+          <li><a href="../nested-tables/">Nested tables in Naive UI</a> — A real table under a row — same engine, own columns, own keys.</li>
+          <li><a href="../export/">CSV export in Naive UI</a> — One toolbar button, a CSV of the table as it stands.</li>
+          <li><a href="../scale/">Row and column virtualization in Naive UI</a> — 40,000 rows in a scroll box, only the visible ones rendered.</li>
+          <li><a href="../tree/">Tree data in Naive UI</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
+          <li><a href="../mobile-cards/">Mobile cards in Naive UI</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
+          <li><a href="../pivot/">Pivot tables in Naive UI</a> — Rows down the side, dimensions across the top, subtotals at every level.</li>
+          <li><a href="../saved-views/">Saved views in Naive UI</a> — Name an arrangement and restore it from the menu.</li>
+          <li><a href="../formulas/">Spreadsheet formulas in Naive UI</a> — ROUND, POWER, SQRT, IF — computed columns, errors in the cell.</li>
+          <li><a href="../rtl/">Right-to-left Naive UI data table</a> — Arabic strings, a flipped axis, and a popover that opens from the right edge.</li>
+          <li><a href="../realtime/">Live updates in Naive UI</a> — Rows change while you read them. Sort and selection hold.</li>
+          <li><a href="../accessibility/">Accessible Naive UI data table</a> — Arrow-key focus, a visible ring, forced-colors, and live announcements.</li>
+          <li><a href="../ai/">AI table assistant in Naive UI Vue</a> — Local sort, questions and approved edits with real table outcomes.</li>
+        </ul>
+        <p>
+          Reference: <a href="https://adapttable.orwamahmoud.com/vue/getting-started/?unavailable=filtering">filtering</a>, <a href="https://adapttable.orwamahmoud.com/vue/getting-started/?unavailable=filter-tree">filter-tree</a>, <a href="https://adapttable.orwamahmoud.com/vue/getting-started/?unavailable=url-state">url-state</a>. More of this kit:
+          <a href="../">AdaptTable for Naive UI</a>, or
+          <a href="/vue/demo/naive-ui/">the live demo</a>.
+        </p>
+      </main>
+    </div>
+    <script type="module" src="/src/vue/matrix/entry-matrix.ts"></script>
+  </body>
+</html>

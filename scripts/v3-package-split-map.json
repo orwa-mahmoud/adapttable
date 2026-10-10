@@ -2723,6 +2723,14 @@
       "behavior": ""
     },
     {
+      "export": "AGENT_HTTP_SCHEMA",
+      "currentImport": "@adapttable/ai/http",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/ai/http",
+      "behavior": ""
+    },
+    {
       "export": "AGENT_SCHEMA_VERSION",
       "currentImport": "@adapttable/ai/http",
       "kind": "type",
@@ -13699,6 +13707,14 @@
       "behavior": ""
     },
     {
+      "export": "columnScrollTarget",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ColumnSelectCheckboxChromeProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -13815,6 +13831,14 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "commitSearchOnBlur",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -14299,6 +14323,14 @@
       "behavior": ""
     },
     {
+      "export": "createMenuNavigation",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "CssProperties",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -14748,6 +14780,38 @@
     },
     {
       "export": "EditableCellSlots",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "EditableColumnLike",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "EditCommitSnapshot",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "EditCommitValidationFailure",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "EditCommitValidationOptions",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16635,6 +16699,38 @@
       "behavior": ""
     },
     {
+      "export": "MenuNavigationAction",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "MenuNavigationController",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "MenuNavigationItem",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "MenuNavigationKey",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "mergedCellStyle",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -17092,6 +17188,14 @@
     },
     {
       "export": "resolveBodyVirtualization",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "resolveCellSpan",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -17612,6 +17716,14 @@
     },
     {
       "export": "RowTreeParentRef",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "RowValidator",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -18612,6 +18724,14 @@
     },
     {
       "export": "TreeExpansionState",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "TreeShape",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -23843,6 +23963,14 @@
       "behavior": ""
     },
     {
+      "export": "ColumnResizeHandleOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "columnResizeHandleProps",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -25332,6 +25460,30 @@
     },
     {
       "export": "EditableColumnLike",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditCommitSnapshot",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditCommitValidationFailure",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditCommitValidationOptions",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
@@ -31436,6 +31588,14 @@
     },
     {
       "export": "RowPinState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowReorderActions",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
@@ -40539,6 +40699,14 @@
       "behavior": ""
     },
     {
+      "export": "ReactColumnGroupDef",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "ReactColumnResizeHandleProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -40604,6 +40772,14 @@
     },
     {
       "export": "rememberFeatureHost",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "renderedRowsOf",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",

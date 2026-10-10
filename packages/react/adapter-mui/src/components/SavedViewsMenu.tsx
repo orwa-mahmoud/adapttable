@@ -9,7 +9,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 /**
  * The label strings the saved-views menu renders.
@@ -48,6 +48,7 @@ export function SavedViewsMenu({
   const { views, save, apply, remove } = useSavedViews(options);
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
   const [name, setName] = useState("");
+  const nameInput = useRef<HTMLInputElement>(null);
   const trimmed = name.trim();
   return (
     <>
@@ -116,6 +117,7 @@ export function SavedViewsMenu({
           <Divider sx={{ my: 0.5 }} />
           <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
             <TextField
+              inputRef={nameInput}
               size="small"
               value={name}
               placeholder={labels.viewName}
@@ -129,6 +131,9 @@ export function SavedViewsMenu({
               onClick={() => {
                 save(trimmed);
                 setName("");
+                // The save button becomes disabled. Keep keyboard focus in
+                // the native popover so Escape still reaches its handler.
+                nameInput.current?.focus();
               }}
             >
               {labels.saveView}

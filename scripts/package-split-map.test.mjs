@@ -32,6 +32,46 @@ describe("v3 package-split map", () => {
     assert.deepEqual(committed.symbols, generated.symbols);
   });
 
+  it("keeps edit settlement types on their neutral core entry points", () => {
+    const map = buildPackageSplitMap();
+    const manifest = JSON.parse(
+      readFileSync(join(ROOT, "etc", "api-contract.json"), "utf8")
+    );
+    const settlementTypes = [
+      "EditCommitSnapshot",
+      "EditCommitValidationFailure",
+      "EditCommitValidationOptions",
+    ];
+    for (const [surface, currentImport, names] of [
+      ["core", "@adapttable/core", settlementTypes],
+      [
+        "core-binding",
+        "@adapttable/core/binding",
+        [...settlementTypes, "EditableColumnLike", "RowValidator"],
+      ],
+    ]) {
+      assert.ok(manifest.frameworks.neutral.includes(surface), surface);
+      for (const name of names) {
+        assert.ok(manifest.surfaces[surface].includes(name), name);
+        assert.deepEqual(
+          map.symbols.filter(
+            (row) => row.currentImport === currentImport && row.export === name
+          ),
+          [
+            {
+              export: name,
+              currentImport,
+              kind: "type",
+              class: "neutral-model",
+              proposedImport: currentImport,
+              behavior: "",
+            },
+          ]
+        );
+      }
+    }
+  });
+
   it("is wired into the library check", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
     assert.ok(gateSteps(pkg.scripts, "check").has("check:package-split"));

@@ -1,4 +1,4 @@
-import { AdaptSidePanelLayout } from "@adapttable/angular";
+import { AdaptSidePanelLayout } from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

@@ -4,22 +4,22 @@ Requires Node.js **22.22.3+ on Node 22, 24.15.0+ on Node 24, or Node 26+**, matc
 
 Taiga UI controls for the headless Angular AdaptTable binding.
 
-Prepared for its first public `0.1.0` release. Publication to npm is a separate
-owner-controlled step; package metadata does not imply registry availability.
+Available on npm. Install a compatible binding and kit release together; their
+versions are independent and the kit declares its binding/core dependencies.
 
 The adapter uses Taiga UI 5.26.0 (Apache-2.0), with Angular 22 and RxJS 7.
 The adapter's own source remains MIT. No Taiga implementation code is vendored.
 
 ## Installation and host setup
 
-After publication, install the kit and its Taiga peers in an Angular 22 app:
+Install the kit and its Taiga peers in an Angular 22 app:
 
 ```sh
 pnpm add @adapttable/taiga-ui @adapttable/angular @taiga-ui/core@5.26.0 @taiga-ui/kit@5.26.0 @taiga-ui/cdk@5.26.0 @taiga-ui/i18n@5.26.0 @taiga-ui/styles@5.26.0 @taiga-ui/icons@5.26.0 @taiga-ui/design-tokens@~0.320.0 @taiga-ui/event-plugins@^5
 ```
 
-Before publication, link `@adapttable/taiga-ui@workspace:*` and
-`@adapttable/angular@workspace:*` from this monorepo instead. AdaptTable package
+For local source development, link `@adapttable/taiga-ui@workspace:*` and
+`@adapttable/angular@workspace:*` from this monorepo. AdaptTable package
 versions are independent; the adapter resolves its exact binding/core dependencies.
 
 Use matching 5.26.0 versions of `@taiga-ui/core`, `@taiga-ui/kit`,

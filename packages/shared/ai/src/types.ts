@@ -548,6 +548,8 @@ export type { AgentProgress } from "@adapttable/core";
 export interface AgentCapabilityContext {
   readonly observation: AgentObservation;
   readonly apply: AgentApply;
+  /** Wait for this call's earlier controlled view requests before reading or applying again. */
+  readonly whenApplied?: () => Promise<void>;
   readonly observe: () => AgentObservation;
   readonly onApprove?: (
     subject: ApprovalSubject,

@@ -174,3 +174,46 @@ describe("a dropped candidate leaves the committed state usable", () => {
     expect(ids(engine.rows("full"))).toBe("b,a");
   });
 });
+
+describe("engine row metadata survives every full rebuild", () => {
+  it("keeps full and paged snapshots linked through reset, discard and invalidation", () => {
+    const rows = ROWS.map((row) => ({ ...row }));
+    const engine = createTableEngine({
+      data: rows,
+      columns: COLUMNS,
+      rowKey: (row) => row.id,
+      defaults: { limit: 2 },
+    });
+    const initial = incrementalViewOf(engine.rows("full"));
+    expect(initial?.rows).toBe(rows);
+    expect(incrementalViewOf(engine.rows("page"))).toBe(initial);
+
+    engine.configure({ groupBy: "team", aggregateSpec: { amount: "sum" } });
+    engine.configure({ getRowId: (row) => `${row.team}:${row.id}` });
+    const reset = incrementalViewOf(engine.rows("full"));
+    expect(reset?.aggregates).toEqual({ amount: 40 });
+    expect(groupLabels(engine.rows("full"))).toEqual(["0:Core", "0:Web"]);
+    expect(incrementalViewOf(engine.rows("page"))).toBe(reset);
+
+    engine.stageCandidate({ search: "Web" });
+    expect(
+      incrementalViewOf(engine.candidate.rows("full"))?.aggregates
+    ).toEqual({
+      amount: 10,
+    });
+    engine.discardCandidate();
+    const restored = incrementalViewOf(engine.rows("full"));
+    expect(restored?.aggregates).toEqual({ amount: 40 });
+    expect(groupLabels(engine.rows("full"))).toEqual(["0:Core", "0:Web"]);
+    expect(incrementalViewOf(engine.rows("page"))).toBe(restored);
+
+    rows[0]!.amount = 30;
+    engine.invalidate(["data"]);
+    const updated = incrementalViewOf(engine.rows("full"));
+    expect(updated?.rows).toBe(rows);
+    expect(updated?.aggregates).toEqual({ amount: 50 });
+    expect(groupLabels(engine.rows("full"))).toEqual(["0:Core", "0:Web"]);
+    expect(incrementalViewOf(engine.rows("page"))).toBe(updated);
+    engine.dispose();
+  });
+});

@@ -450,6 +450,8 @@ export interface BuildColumnsOptions<TRow> {
   fitColumns?: boolean;
   /** Headless row-reorder; omit and no reorder column is injected. */
   rowReorder?: RowReorderState<TRow>;
+  /** Data-leaf indexes from the binding, excluding native synthetic rows. */
+  reorderIndices?: ReadonlyMap<string, number>;
   /** Dataset offset of the first rendered row (page / virtual window). */
   windowStart?: number;
   /** Per-row body cells so `onCell` can apply col/row spans. */
@@ -715,6 +717,7 @@ export function buildColumns<TRow>({
   fitColumns,
   tree,
   rowReorder,
+  reorderIndices,
   windowStart = 0,
   cellsByRow,
   pinnedSummaryTop = [],
@@ -972,12 +975,6 @@ export function buildColumns<TRow>({
       title: "",
       width: REORDER_COLUMN_WIDTH,
       fixed: reorderFixed ? "left" : undefined,
-      onCell: (record: GroupedDataRecord<TRow>) => {
-        if (isAdaptTableGroupRow(record) || isAdaptTableExtraRow(record)) {
-          return { colSpan: 0 };
-        }
-        return {};
-      },
       onHeaderCell: () => ({
         "data-adapttable-part": "reorder-header",
         "aria-label": labels.reorderRow,
@@ -992,16 +989,18 @@ export function buildColumns<TRow>({
         }
         const row = record;
         const id = getRowId(row);
+        const localIndex = reorderIndices ? reorderIndices.get(id) : index;
+        if (localIndex === undefined) return null;
         return (
           <span data-adapttable-part="reorder-cell">
             <OptionalRowReorderHandle
               reorder={rowReorder}
               labels={labels}
               rowId={id}
-              localIndex={index}
+              localIndex={localIndex}
               row={row}
               windowStart={windowStart}
-              rowCount={rows.length}
+              rowCount={reorderIndices?.size ?? rows.length}
             />
           </span>
         );

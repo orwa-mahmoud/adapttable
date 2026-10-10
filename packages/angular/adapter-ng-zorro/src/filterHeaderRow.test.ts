@@ -5,7 +5,7 @@
 import {
   defaultFilterRegistry,
   type FilterHeaderControlProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   defaultLabels,
   type ExtraFilters,

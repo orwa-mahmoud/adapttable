@@ -37,6 +37,23 @@ const target = join(here, "src/content/docs");
  * `docs/` to each other.
  */
 export const TITLES = {
+  "angular/migrating-to-0-5.md": "Migrate Angular table imports to 0.5",
+  "vue/actions.md": "Vue actions and exports",
+  "vue/column-menu.md": "Vue column menu",
+  "vue/navigation.md": "Vue navigation, find and status",
+  "vue/specialized.md": "Vue specialized data views",
+  "vue/summary-row.md": "Vue summaries and footers",
+  "vue/getting-started.md": "Get started with experimental Vue tables",
+  "vue/element-plus.md": "Element Plus Vue tables",
+  "vue/naive-ui.md": "Naive UI Vue tables",
+  "vue/nuxt-ui.md": "Nuxt UI Vue tables",
+  "vue/quasar.md": "Quasar Vue tables",
+  "vue/reka-ui.md": "Reka UI Vue tables",
+  "vue/shadcn-vue.md": "shadcn-vue tables",
+  "vue/vuetify.md": "Vuetify Vue tables",
+  "vue/api.md": "Experimental Vue table API reference",
+  "vue/assistant.md": "Vue assistant and approvals",
+  "vue/features.md": "Vue filters, editing and feature composition",
   "angular/angular-cdk.md": "Angular CDK tables",
   "angular/aria.md": "Angular Aria tables",
   "angular/material.md": "Angular Material tables",
@@ -172,6 +189,40 @@ export const TITLES = {
 // emits from `description`. Keyword-rich and unique per page so search and
 // answer engines have something better than a generic site default.
 export const DESCRIPTIONS = {
+  "angular/migrating-to-0-5.md":
+    "Move Angular table imports to their 0.5 root, features and adapter entries. Preserve native kit controls and upgrade independently versioned packages.",
+  "vue/actions.md":
+    "Compose Vue bulk actions, command palettes, context menus, panels, CSV exports, optional writers and print controls with host-owned actions.",
+  "vue/column-menu.md":
+    "Manage Vue table column visibility, order, pinning, sizing and names with controlled layouts, native controls and typed adapter slots.",
+  "vue/navigation.md":
+    "Add Vue cell navigation, clipboard and fill actions, find-in-table, column selection and status controls with scoped models and native slots.",
+  "vue/specialized.md":
+    "Compose Vue virtual windows, host-owned row reordering, grouping and pivot controls, formulas, row streams and accessible sparklines.",
+  "vue/summary-row.md":
+    "Render Vue page totals and custom footers with reactive summary values, aligned desktop cells, mobile cards and shared adapter models.",
+  "vue/assistant.md":
+    "Connect Vue agents and conversations with native controls, explicit approval and host-controlled state.",
+  "vue/getting-started.md":
+    "Build an experimental Vue table with native controls, reactive sources, optional features, controlled state and SSR lifecycle rules.",
+  "vue/element-plus.md":
+    "Build Vue tables with Element Plus controls and card surfaces, host-owned data and composable features.",
+  "vue/naive-ui.md":
+    "Build Vue tables with Naive UI controls and semantic table primitives, host-owned data and composable features.",
+  "vue/nuxt-ui.md":
+    "Build Vue tables with Nuxt UI components, Tailwind theming, host-owned data and composable features.",
+  "vue/quasar.md":
+    "Build Vue tables with Quasar controls, host-owned data and composable features.",
+  "vue/reka-ui.md":
+    "Build accessible Vue tables with Reka UI primitives, a neutral theme, host-owned data and composable features.",
+  "vue/shadcn-vue.md":
+    "Build Vue tables with shadcn-vue presentation over Reka UI, standard shadcn tokens and composable features.",
+  "vue/vuetify.md":
+    "Build Vue tables with Vuetify controls, the host Vuetify theme, host-owned data and composable features.",
+  "vue/features.md":
+    "Compose native Vue filters, cell and batch editing, grouped and tree rows, row presentation and view controls with host-owned data and scoped state.",
+  "vue/api.md":
+    "Reference for the implemented Vue 3.5 sources, renderers, native table, structural Chrome, scoped features and model channels. Experimental workspace API.",
   "angular/angular-cdk.md":
     "Use the Angular CDK table adapter with CDK overlays, focus handling, native controls and composable features.",
   "angular/aria.md":
@@ -500,9 +551,11 @@ export function rewriteDocLinks(markdown, file) {
     (_link, open, href, close) => {
       const doc = docLinkTarget(file, href);
       if (doc) {
+        const framework = /^(angular|vue)\//.exec(file)?.[1];
+        const explicitFramework = /^(react|angular|vue)\//.test(doc.file);
         const route =
-          file.startsWith("angular/") && !doc.file.startsWith("angular/")
-            ? docsReferenceRoute(doc.file, "angular")
+          framework && !explicitFramework
+            ? docsReferenceRoute(doc.file, framework)
             : docsRoute(doc.file);
         const suffix = route.includes("?unavailable=") ? "" : doc.suffix;
         return `${open}${route}${suffix}${close}`;

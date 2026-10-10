@@ -1,10 +1,10 @@
-import {
-  type AngularFilterTreeDisclosureProps,
-  type FilterTreeButtonProps,
-  type FilterTreeInputProps,
-  type FilterTreeSelectProps,
-  type FilterTreeSlots,
-} from "@adapttable/angular";
+import type {
+  AngularFilterTreeDisclosureProps,
+  FilterTreeButtonProps,
+  FilterTreeInputProps,
+  FilterTreeSelectProps,
+  FilterTreeSlots,
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 

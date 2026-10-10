@@ -32,6 +32,12 @@ import { createRequire } from "node:module";
 import { dirname, extname, isAbsolute, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  requireVueBrowserArtifact,
+  VUE_BROWSER_DIST,
+  VUE_BROWSER_ROUTE,
+} from "./build-vue-browser-consumer.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = process.argv.includes("--docs");
 const APP = DOCS ? "docs" : "showcase";
@@ -104,6 +110,14 @@ function build() {
     console.error(`${APP} build failed`);
     process.exit(result.status ?? 1);
   }
+  if (!DOCS) {
+    const consumer = spawnSync(
+      process.execPath,
+      [join(ROOT, "scripts/build-vue-browser-consumer.mjs")],
+      { cwd: ROOT, stdio: "inherit" }
+    );
+    if (consumer.status !== 0) process.exit(consumer.status ?? 1);
+  }
 }
 
 /** Resolve one URL path to a file inside `dist`, or null. */
@@ -114,14 +128,21 @@ function fileFor(urlPath) {
   } catch {
     return null;
   }
+  // This test-only route is a separate packed artifact. It is never copied
+  // into public showcase dist, and cannot fall through to source fixtures.
+  let directory = DIST;
+  if (!DOCS && decoded.startsWith(VUE_BROWSER_ROUTE)) {
+    directory = join(ROOT, VUE_BROWSER_DIST);
+    decoded = decoded.slice(VUE_BROWSER_ROUTE.length);
+  }
   const parts = [];
   for (const part of decoded.split("/")) {
     if (part === "" || part === ".") continue;
     if (part === ".." || part.includes("\0")) return null;
     parts.push(part);
   }
-  const target = parts.length === 0 ? DIST : join(DIST, ...parts);
-  const rel = relative(DIST, target);
+  const target = parts.length === 0 ? directory : join(directory, ...parts);
+  const rel = relative(directory, target);
   if (rel.startsWith("..") || isAbsolute(rel)) return null;
 
   if (existsSync(target) && statSync(target).isFile()) return target;
@@ -170,6 +191,7 @@ function patchStream(req, res) {
 }
 
 build();
+if (!DOCS) requireVueBrowserArtifact(ROOT);
 
 if (!existsSync(DIST)) {
   console.error(`no build at ${DIST}`);
@@ -182,7 +204,7 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-createServer((req, res) => {
+const server = createServer((req, res) => {
   const url = req.url ?? "/";
   if (!DOCS && url.split("?")[0] === PATCH_STREAM_PATH) {
     patchStream(req, res);
@@ -213,6 +235,10 @@ createServer((req, res) => {
   res.on("error", abort);
   res.on("close", () => stream.destroy());
   stream.pipe(res);
-}).listen(PORT, () => {
-  console.log(`${APP} served from ${DIST} on http://localhost:${PORT}`);
+});
+server.listen(PORT, () => {
+  const address = server.address();
+  const actualPort =
+    address && typeof address === "object" ? address.port : PORT;
+  console.log(`${APP} served from ${DIST} on http://localhost:${actualPort}`);
 });

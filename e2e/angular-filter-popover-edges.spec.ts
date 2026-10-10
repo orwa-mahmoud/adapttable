@@ -1,0 +1,530 @@
+/** Searchless toolbars must not strand native filter cards outside the viewport. */
+import { writeFile } from "node:fs/promises";
+
+import {
+  expect,
+  type Locator,
+  type Page,
+  test,
+  type TestInfo,
+} from "@playwright/test";
+
+import { angularPart } from "./angular-kit";
+
+const viewports = [
+  { width: 390, height: 844 },
+  { width: 1180, height: 757 },
+  { width: 1440, height: 856 },
+];
+
+async function expectHorizontalFit(surface: Locator, width: number) {
+  await expect
+    .poll(async () => {
+      const box = await surface.boundingBox();
+      return box !== null && box.x >= 7 && box.x + box.width <= width - 7;
+    })
+    .toBe(true);
+}
+
+async function clickOutsideFilter(
+  page: Page,
+  surface: Locator,
+  trigger: Locator
+) {
+  const card = await surface.elementHandle();
+  const origin = await trigger.elementHandle();
+  if (!card || !origin)
+    throw new Error("The open filter has no card or trigger.");
+  const point = await page.evaluate(
+    ({ card, origin }) => {
+      const bounds = [
+        card.getBoundingClientRect(),
+        origin.getBoundingClientRect(),
+      ];
+      const candidates = [
+        { x: 2, y: 2 },
+        { x: 2, y: innerHeight - 2 },
+        { x: innerWidth - 2, y: 2 },
+        { x: innerWidth - 2, y: innerHeight - 2 },
+      ];
+      return (
+        candidates.find(({ x, y }) => {
+          const outside = bounds.every(
+            (rect) =>
+              x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
+          );
+          const hit = document.elementFromPoint(x, y);
+          return (
+            outside &&
+            hit &&
+            !card.contains(hit) &&
+            !origin.contains(hit) &&
+            !hit.closest(
+              ".cdk-overlay-pane, button, a, input, select, textarea, [role=button]"
+            )
+          );
+        }) ?? null
+      );
+    },
+    { card, origin }
+  );
+  if (!point)
+    throw new Error(
+      "No unobstructed viewport point exists outside the filter."
+    );
+  await page.mouse.click(point.x, point.y);
+}
+
+async function expectReachableFields(panel: Locator, width: number) {
+  const fields = panel.locator('[data-adapttable-part="filter-field"]');
+  await expect(fields).toHaveCount(7);
+  const controls = fields.locator(
+    'input:not([type="hidden"]), select, [role="combobox"]'
+  );
+  expect(await controls.count()).toBeGreaterThanOrEqual(7);
+  for (const control of await controls.all()) {
+    await control.scrollIntoViewIfNeeded();
+    await control.click({ trial: true });
+    await expectHorizontalFit(control, width);
+  }
+  const done = panel.locator("footer button").last();
+  await expect(done).toBeInViewport({ ratio: 1 });
+  await done.click({ trial: true });
+  return done;
+}
+
+/** Read both sides of a screenshot to distinguish scroll settling from clipping. */
+async function captureMaterialLayout(
+  panel: Locator,
+  testInfo: TestInfo,
+  phase: string
+): Promise<void> {
+  const measure = () =>
+    panel.evaluate((inner) => {
+      const identify = (element: Element | null) =>
+        element
+          ? {
+              tag: element.tagName,
+              id: element.id,
+              className: element.getAttribute("class"),
+              part: element.getAttribute("data-adapttable-part"),
+            }
+          : null;
+      const describe = (element: Element | null) => {
+        if (!(element instanceof HTMLElement)) return null;
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        const x = rect.x + rect.width / 2;
+        const y = rect.y + rect.height / 2;
+        const hit = document.elementFromPoint(x, y);
+        return {
+          element: identify(element),
+          rect: {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+          },
+          scrollTop: element.scrollTop,
+          scrollLeft: element.scrollLeft,
+          scrollHeight: element.scrollHeight,
+          scrollWidth: element.scrollWidth,
+          clientHeight: element.clientHeight,
+          clientWidth: element.clientWidth,
+          style: {
+            display: style.display,
+            position: style.position,
+            boxSizing: style.boxSizing,
+            overflowX: style.overflowX,
+            overflowY: style.overflowY,
+            minHeight: style.minHeight,
+            maxHeight: style.maxHeight,
+            paddingTop: style.paddingTop,
+            paddingBottom: style.paddingBottom,
+            flex: style.flex,
+            transform: style.transform,
+          },
+          centerHit: identify(hit),
+          centerIsUnobscured: hit !== null && element.contains(hit),
+        };
+      };
+      const body = inner.querySelector(".adapt-material-filters-body");
+      const pane = inner.closest(".cdk-overlay-pane");
+      const anchor = document.querySelector(".adapt-material-filters-anchor");
+      const ancestors = [];
+      for (let current = body; current; current = current.parentElement) {
+        ancestors.push(describe(current));
+      }
+      return {
+        capturedAt: performance.now(),
+        viewport: {
+          innerWidth: window.innerWidth,
+          innerHeight: window.innerHeight,
+          clientWidth: document.documentElement.clientWidth,
+          clientHeight: document.documentElement.clientHeight,
+          scrollX: window.scrollX,
+          scrollY: window.scrollY,
+        },
+        trigger: describe(anchor?.querySelector("button") ?? null),
+        anchor: describe(anchor),
+        boundingBox: describe(pane?.parentElement ?? null),
+        pane: describe(pane),
+        card: describe(inner.closest("mat-card")),
+        panel: describe(inner),
+        header: describe(inner.querySelector("header")),
+        title: describe(inner.querySelector("header h3")),
+        clear: describe(inner.querySelector("header button")),
+        body: describe(body),
+        done: describe(inner.querySelector("footer button")),
+        ancestors,
+      };
+    });
+  const beforeScreenshot = await measure();
+  const suffix = phase.replaceAll(" ", "-");
+  const screenshotPath = testInfo.outputPath(
+    `material-filter-layout-${suffix}.png`
+  );
+  await panel.page().screenshot({ path: screenshotPath });
+  await testInfo.attach(`Material layout: ${phase}`, {
+    path: screenshotPath,
+    contentType: "image/png",
+  });
+  const afterScreenshot = await measure();
+  const geometryPath = testInfo.outputPath(
+    `material-filter-geometry-${suffix}.json`
+  );
+  await writeFile(
+    geometryPath,
+    JSON.stringify({ phase, beforeScreenshot, afterScreenshot }, null, 2)
+  );
+  await testInfo.attach(`Material geometry and scroll offsets: ${phase}`, {
+    path: geometryPath,
+    contentType: "application/json",
+  });
+  const summarize = (snapshot: typeof beforeScreenshot) =>
+    Object.fromEntries(
+      (["pane", "card", "panel", "header", "body", "done"] as const).map(
+        (key) => {
+          const element = snapshot[key];
+          return [
+            key,
+            element && {
+              top: element.rect.top,
+              height: element.rect.height,
+              scrollTop: element.scrollTop,
+              scrollHeight: element.scrollHeight,
+              clientHeight: element.clientHeight,
+            },
+          ];
+        }
+      )
+    );
+  console.log(
+    "Material filter layout:",
+    JSON.stringify({
+      test: testInfo.title,
+      phase,
+      before: summarize(beforeScreenshot),
+      after: summarize(afterScreenshot),
+    })
+  );
+}
+
+/** Run after the original scenario, so restoration cannot mask its assertions. */
+async function diagnoseMaterialHeader(
+  trigger: Locator,
+  panel: Locator,
+  width: number,
+  testInfo: TestInfo
+): Promise<void> {
+  await trigger.evaluate((button) =>
+    button.scrollIntoView({ block: "center", behavior: "instant" })
+  );
+  await trigger.click();
+  await expect(panel).toBeVisible();
+  await captureMaterialLayout(panel, testInfo, "replay before traversal");
+  const done = await expectReachableFields(panel, width);
+  await captureMaterialLayout(panel, testInfo, "replay after traversal");
+  const header = panel.locator("header");
+  // Preserve restoration evidence even when this exposes the suspected defect.
+  await expect
+    .soft(header, "Material filter header stays visible after full traversal")
+    .toBeInViewport({ ratio: 1 });
+  await captureMaterialLayout(panel, testInfo, "after header visibility check");
+  await header.scrollIntoViewIfNeeded();
+  await captureMaterialLayout(panel, testInfo, "after header restoration");
+  await expect(header).toBeInViewport({ ratio: 1 });
+  await expect(header.getByRole("heading")).toBeInViewport({ ratio: 1 });
+  await expect(header.getByRole("button")).toBeInViewport({ ratio: 1 });
+  await header.getByRole("heading").click({ trial: true });
+  await expect(done).toBeInViewport({ ratio: 1 });
+  await done.click();
+  await expect(panel).toBeHidden();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+}
+
+for (const key of ["angular-cdk", "material", "aria"]) {
+  for (const locale of ["en", "ar"]) {
+    for (const search of ["on", "off"]) {
+      for (const viewport of viewports) {
+        test(`${key} ${locale} search=${search} ${viewport.width}: filter card stays reachable at either toolbar edge`, async ({
+          page,
+        }, testInfo) => {
+          await page.setViewportSize(viewport);
+          await page.goto(
+            `/angular-main/?kit=${key}&locale=${locale}&search=${search}`
+          );
+          const kit = { key };
+          const trigger = angularPart(kit, page, "filters-button");
+          const panel = angularPart(kit, page, "filters-popover");
+          const surface =
+            key === "material"
+              ? page.locator(".cdk-overlay-pane mat-card")
+              : panel;
+          const searchable = page.getByRole("searchbox");
+          if (search === "off") await expect(searchable).toHaveCount(0);
+          else await expect(searchable).toBeVisible();
+          await expect(trigger).toHaveAttribute("aria-expanded", "false");
+          await trigger.evaluate((button) =>
+            button.scrollIntoView({ block: "center", behavior: "instant" })
+          );
+          await trigger.click();
+          await expect(panel).toBeVisible();
+          await expect(panel).toHaveAttribute(
+            "data-dir",
+            locale === "ar" ? "rtl" : "ltr"
+          );
+          await expect(trigger).toHaveAttribute("aria-expanded", "true");
+          await expect(page.locator(".cdk-overlay-backdrop")).toHaveCount(0);
+          try {
+            await expectHorizontalFit(surface, viewport.width);
+            await expect
+              .poll(async () => {
+                const anchor = (await trigger.boundingBox())!;
+                const card = (await surface.boundingBox())!;
+                const below = card.y >= anchor.y + anchor.height;
+                const above = card.y + card.height <= anchor.y;
+                return below || above;
+              })
+              .toBe(true);
+          } catch (error) {
+            if (key === "material")
+              await captureMaterialLayout(
+                panel,
+                testInfo,
+                "initial placement failure"
+              );
+            throw error;
+          }
+          if (key === "material") {
+            await expect(surface).toBeInViewport({ ratio: 1 });
+            await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+            await expect(panel.locator("footer button")).toBeInViewport({
+              ratio: 1,
+            });
+          }
+
+          const diagnoseHeader = key === "material";
+          if (diagnoseHeader)
+            await captureMaterialLayout(
+              panel,
+              testInfo,
+              "before original traversal"
+            );
+          const done = await expectReachableFields(panel, viewport.width);
+          if (diagnoseHeader)
+            await captureMaterialLayout(
+              panel,
+              testInfo,
+              "after original traversal"
+            );
+          await testInfo.attach("Filter popover at the toolbar edge", {
+            body: await page.screenshot(),
+            contentType: "image/png",
+          });
+          await done.click();
+          await expect(panel).toBeHidden();
+          await expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+          await trigger.click();
+          await expect(panel).toBeVisible();
+          await panel.getByRole("textbox").first().focus();
+          await page.keyboard.press("Escape");
+          await expect(panel).toBeHidden();
+          await expect(trigger).toHaveAttribute("aria-expanded", "false");
+          await expect(trigger).toBeFocused();
+
+          await trigger.click();
+          await expect(panel).toBeVisible();
+          if (key === "material")
+            await captureMaterialLayout(
+              panel,
+              testInfo,
+              "before outside click"
+            );
+          await clickOutsideFilter(page, surface, trigger);
+          await expect(panel).toBeHidden();
+          await expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+          if (viewport.width === 390) {
+            // Consumer toolbars can center the trigger, where neither edge
+            // alignment can contain a full-width card on a narrow screen.
+            // The synthetic floating trigger owns its stacking level so
+            // unrelated toolbar siblings cannot intercept its real pointer.
+            await angularPart(kit, page, "filters-anchor").evaluate(
+              (anchor) => {
+                anchor.style.cssText =
+                  "position: fixed; left: 50%; top: 120px; transform: translateX(-50%); display: inline-flex; z-index: 1";
+              }
+            );
+            await trigger.click();
+            await expect(panel).toBeVisible();
+            await expectHorizontalFit(surface, viewport.width);
+            const anchor = (await trigger.boundingBox())!;
+            const card = (await surface.boundingBox())!;
+            expect(card.y).toBeGreaterThanOrEqual(anchor.y + anchor.height);
+            const centeredDone = await expectReachableFields(
+              panel,
+              viewport.width
+            );
+            if (key === "material")
+              await captureMaterialLayout(
+                panel,
+                testInfo,
+                "centered narrow trigger"
+              );
+            await testInfo.attach(
+              "Filter popover at a centered narrow trigger",
+              {
+                body: await page.screenshot(),
+                contentType: "image/png",
+              }
+            );
+            await centeredDone.click();
+            await expect(panel).toBeHidden();
+          }
+          if (diagnoseHeader)
+            await diagnoseMaterialHeader(
+              trigger,
+              panel,
+              viewport.width,
+              testInfo
+            );
+        });
+      }
+    }
+  }
+}
+
+for (const locale of ["en", "ar"]) {
+  test(`material ${locale}: native fallback keeps a near-bottom filter usable through scroll and resize`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto(`/material/?locale=${locale}`);
+    const trigger = angularPart({ key: "material" }, page, "filters-button");
+    const panel = angularPart({ key: "material" }, page, "filters-popover");
+    const surface = page.locator(".cdk-overlay-pane mat-card");
+    await trigger.evaluate((button) =>
+      button.scrollIntoView({ block: "end", behavior: "instant" })
+    );
+    const initialAnchor = await trigger.boundingBox();
+    expect(initialAnchor).not.toBeNull();
+    expect(720 - initialAnchor!.y - initialAnchor!.height).toBeLessThan(80);
+    await trigger.click();
+    await expect(panel).toBeVisible();
+    await expect(panel).toHaveAttribute("dir", locale === "ar" ? "rtl" : "ltr");
+    await expect(page.locator(".cdk-overlay-backdrop")).toHaveCount(0);
+    await expect
+      .poll(async () => {
+        const card = await surface.boundingBox();
+        const anchor = await trigger.boundingBox();
+        return (
+          card !== null && anchor !== null && card.y + card.height <= anchor.y
+        );
+      })
+      .toBe(true);
+
+    const assertUsable = async (phase: string) => {
+      const width = page.viewportSize()!.width;
+      await expectHorizontalFit(surface, width);
+      await expect(surface).toBeInViewport({ ratio: 1 });
+      await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+      const done = panel.locator("footer button").last();
+      await expect(done).toBeInViewport({ ratio: 1 });
+      const controls = panel.locator(
+        'input:not([type="hidden"]), select, [role="combobox"]'
+      );
+      expect(await controls.count()).toBeGreaterThan(0);
+      for (const control of await controls.all()) {
+        await control.scrollIntoViewIfNeeded();
+        await control.click({ trial: true });
+      }
+      await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+      await expect(done).toBeInViewport({ ratio: 1 });
+      await captureMaterialLayout(panel, testInfo, phase);
+    };
+    await assertUsable("near bottom above fallback");
+    await page.evaluate(() => window.scrollBy(0, 220));
+    await assertUsable("after page scroll");
+    await page.setViewportSize({ width: 1024, height: 840 });
+    await assertUsable("after viewport resize");
+    await page.keyboard.press("Escape");
+    await expect(panel).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+  });
+}
+
+for (const locale of ["en", "ar"]) {
+  for (const gutter of ["auto", "stable"]) {
+    test(`material ${locale}: filter respects ${gutter} scrollbar gutters through narrow resizing`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(
+        `/angular-main/?kit=material&locale=${locale}&search=off`
+      );
+      await page.evaluate((value) => {
+        document.documentElement.style.scrollbarGutter = value;
+      }, gutter);
+      const trigger = angularPart({ key: "material" }, page, "filters-button");
+      const panel = angularPart({ key: "material" }, page, "filters-popover");
+      const surface = page.locator(".cdk-overlay-pane mat-card");
+      await trigger.evaluate((button) =>
+        button.scrollIntoView({ block: "center", behavior: "instant" })
+      );
+      await trigger.click();
+      await expect(panel).toBeVisible();
+      for (const width of [390, 320, 390]) {
+        await page.setViewportSize({ width, height: 844 });
+        await expectHorizontalFit(surface, width);
+        await expect
+          .poll(() =>
+            surface.evaluate((card) => {
+              const container = card.closest(".cdk-overlay-container")!;
+              const bounds = container.getBoundingClientRect();
+              const actual = card.getBoundingClientRect();
+              return (
+                actual.left >= Math.max(0, bounds.left) + 7 &&
+                actual.right <=
+                  Math.min(document.documentElement.clientWidth, bounds.right) -
+                    7
+              );
+            })
+          )
+          .toBe(true);
+        await expect(surface).toBeInViewport({ ratio: 1 });
+        await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+        await expectReachableFields(panel, width);
+        await expect(panel.locator("header")).toBeInViewport({ ratio: 1 });
+      }
+      await page.keyboard.press("Escape");
+      await expect(panel).toBeHidden();
+      await expect(trigger).toBeFocused();
+    });
+  }
+}

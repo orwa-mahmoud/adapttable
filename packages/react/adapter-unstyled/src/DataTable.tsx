@@ -393,8 +393,8 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                         data-adapttable-part="search-field"
                         className={classNames.searchField}
                         style={{
-                          flex: 1,
-                          minWidth: 0,
+                          flex: "1 1 200px",
+                          minWidth: "min(200px, 100%)",
                           display: "inline-flex",
                           alignItems: "center",
                         }}

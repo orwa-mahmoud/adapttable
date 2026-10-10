@@ -161,6 +161,8 @@ describe("Angular showcase snippets compile", () => {
           "@adapttable/ai/*": [join(ai, "src", "*.ts")],
           "@adapttable/ai-angular": [join(aiAngular, "src", "index.ts")],
           "@adapttable/angular": [join(angular, "src", "index.ts")],
+          "@adapttable/angular/features": [join(angular, "src", "features.ts")],
+          "@adapttable/angular/adapter": [join(angular, "src", "adapter.ts")],
           "@adapttable/angular/*": [join(angular, "*", "index.ts")],
           ...angularKitSourcePaths(),
           "@adapttable/i18n": [join(i18n, "src", "index.ts")],
@@ -205,6 +207,94 @@ describe("Angular showcase snippets compile", () => {
       result.status,
       0,
       `the Angular page code does not compile (${written.length} files):\n${result.stdout}${result.stderr}`
+    );
+  });
+});
+
+/**
+ * Every Vue kit's page code compiles against the Vue packages' source: each
+ * snippet is a single-file component, written to a scratch project that extends
+ * the showcase's Vue tsconfig and checked with vue-tsc, with the row type the
+ * page code leaves to the reader declared beside them.
+ */
+describe("Vue showcase snippets compile", () => {
+  const scratch = mkdtempSync(join(tmpdir(), "adapttable-vue-snippets-"));
+  after(() => rmSync(scratch, { recursive: true, force: true }));
+  const ROW =
+    "interface Person { id: string; name: string; team: string; status: string; budget: number; email: string; hiredAt: string }\n";
+
+  /** The scratch project's config: the showcase's Vue config, plus sources. */
+  const tsconfig = () => {
+    const ai = packageDir("ai");
+    const core = packageDir("core");
+    const i18n = packageDir("i18n");
+    const showcase = join(REPO_ROOT, "apps", "showcase");
+    return {
+      extends: join(showcase, "src", "vue", "tsconfig.json"),
+      compilerOptions: {
+        noEmit: true,
+        noUnusedLocals: false,
+        // Vite's client types declare the stylesheets the kits import.
+        types: ["vite/client"],
+        paths: {
+          ...JSON.parse(
+            readFileSync(join(showcase, "src", "vue", "tsconfig.json"), "utf8")
+          ).compilerOptions.paths,
+          "@adapttable/ai": [join(ai, "src", "index.ts")],
+          "@adapttable/ai/*": [join(ai, "src", "*.ts")],
+          "@adapttable/i18n": [join(i18n, "src", "index.ts")],
+          "@adapttable/core": [join(core, "src", "index.ts")],
+          "@adapttable/core/*": [join(core, "src", "*.ts")],
+        },
+      },
+      include: ["./*.vue", "./*.d.ts"],
+    };
+  };
+
+  it("type-checks the code on every Vue feature page", () => {
+    symlinkSync(
+      join(REPO_ROOT, "apps", "showcase", "node_modules"),
+      join(scratch, "node_modules"),
+      "junction"
+    );
+    const kits = builtAdapters("vue");
+    assert.ok(kits.length > 0, "no Vue kit has pages");
+    const written = [];
+    for (const kit of kits) {
+      for (const feature of featuresOf(kit)) {
+        const code = fillTemplate(snippetFor(feature, kit), kit);
+        const file = `${kit.key}-${feature.slug}.vue`;
+        writeFileSync(join(scratch, file), `${code}\n`);
+        written.push(file);
+      }
+    }
+    writeFileSync(join(scratch, "row.d.ts"), ROW);
+    const config = tsconfig();
+    // The extended config's paths are relative to its own folder; restate
+    // them from the scratch project's folder.
+    const vueConfigDir = join(REPO_ROOT, "apps", "showcase", "src", "vue");
+    config.compilerOptions.paths = Object.fromEntries(
+      Object.entries(config.compilerOptions.paths).map(([name, targets]) => [
+        name,
+        targets.map((target) =>
+          target.startsWith("/") ? target : join(vueConfigDir, target)
+        ),
+      ])
+    );
+    writeFileSync(
+      join(scratch, "tsconfig.json"),
+      JSON.stringify(config, null, 2)
+    );
+    const vueTsc = createRequire(
+      join(REPO_ROOT, "apps", "showcase", "package.json")
+    ).resolve("vue-tsc/bin/vue-tsc.js");
+    const result = spawnSync(process.execPath, [vueTsc, "-p", scratch], {
+      encoding: "utf8",
+    });
+    assert.equal(
+      result.status,
+      0,
+      `the Vue page code does not compile (${written.length} files):\n${result.stdout}${result.stderr}`
     );
   });
 });

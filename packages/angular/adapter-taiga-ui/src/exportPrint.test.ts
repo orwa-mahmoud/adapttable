@@ -1,9 +1,9 @@
-import {
-  type AdaptTableFeature,
-  type ColumnDef,
-  type ExportCsvOptions,
-  type ToolbarExtrasSlotProps,
+import type {
+  AdaptTableFeature,
+  ColumnDef,
+  ExportCsvOptions,
 } from "@adapttable/angular";
+import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
 import { type ExportProgressState, type ExportTable } from "@adapttable/core";
 import { bulkActions } from "@adapttable/taiga-ui/bulk-actions";
 import { cellNavigation } from "@adapttable/taiga-ui/cell-navigation";

@@ -4,6 +4,8 @@ import type { RowMutationsState } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
   computed,
+  DestroyRef,
+  inject,
   type Injector,
   type Signal,
 } from "@angular/core";
@@ -37,14 +39,15 @@ export function injectRowMutations<TRow>(
   injector?: Injector
 ): Signal<RowMutationsState<TRow>> {
   if (!injector) assertInInjectionContext(injectRowMutations);
+  const destroyRef = injector?.get(DestroyRef) ?? inject(DestroyRef);
   const addRow = (): void => {
-    readMaybe(options).onAddRow?.();
+    if (!destroyRef.destroyed) readMaybe(options).onAddRow?.();
   };
   const duplicate = (row: TRow): void => {
-    readMaybe(options).onDuplicateRow?.(row);
+    if (!destroyRef.destroyed) readMaybe(options).onDuplicateRow?.(row);
   };
   const remove = (row: TRow): void => {
-    readMaybe(options).onDeleteRow?.(row);
+    if (!destroyRef.destroyed) readMaybe(options).onDeleteRow?.(row);
   };
   return computed(() => {
     const current = readMaybe(options);

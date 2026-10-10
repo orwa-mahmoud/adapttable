@@ -42,13 +42,24 @@ export interface ResolvedContextTarget<TRow> {
 }
 
 /** Every part name a rendered data row carries. */
-const ROW_SELECTOR = ["row", "pinned-top", "pinned-bottom"]
+const ROW_SELECTOR = ["row", "pinned-top", "pinned-bottom", "card"]
   .map((part) => `[data-adapttable-part="${part}"]`)
   .join(",");
 
-/** The nearest ancestor carrying a part name, or null. */
-function partAncestor(from: Element, part: string): HTMLElement | null {
-  return from.closest<HTMLElement>(`[data-adapttable-part="${part}"]`);
+const ROOT_SELECTOR = '[data-adapttable-part="root"]';
+const CELL_SELECTOR =
+  '[data-adapttable-part="cell"],[data-adapttable-part="card-value"]';
+const SUMMARY_SELECTOR =
+  '[data-adapttable-part="summary-row"],[data-adapttable-part="summary-card"]';
+
+/** A nested table's target cannot escape its nearest owning root. */
+function closestInRoot(
+  from: Element,
+  selector: string,
+  root: Element | null
+): HTMLElement | null {
+  const candidate = from.closest<HTMLElement>(selector);
+  return candidate && (!root || root.contains(candidate)) ? candidate : null;
 }
 
 /**
@@ -67,24 +78,36 @@ export function resolveContextTarget<TRow>(
   from: Element,
   rowFor: (rowId: string) => TRow | undefined
 ): ResolvedContextTarget<TRow> | null {
-  const header = partAncestor(from, "header-cell");
+  const root = from.closest(ROOT_SELECTOR);
+  const row = closestInRoot(from, ROW_SELECTOR, root);
+  const summary = closestInRoot(from, SUMMARY_SELECTOR, root);
+  if (summary && (!row || row.contains(summary))) return null;
+  const header = closestInRoot(
+    from,
+    '[data-adapttable-part="header-cell"]',
+    root
+  );
   if (header) {
     const columnKey = header.dataset.columnKey;
     if (columnKey === undefined) return null;
     return { target: { kind: "header", columnKey }, element: header };
   }
   // A pinned row names its side instead of `row`; it is still a row.
-  const row = from.closest<HTMLElement>(ROW_SELECTOR);
   if (!row) return null;
   const rowId = row.getAttribute(ROW_ID_ATTRIBUTE);
   if (rowId === null) return null;
   const value = rowFor(rowId);
   if (value === undefined) return null;
-  const cell = partAncestor(from, "cell");
+  const cell = closestInRoot(from, CELL_SELECTOR, root);
   const columnKey = cell?.dataset.columnKey;
   // A click on the row but outside any cell — the gap between them, a
   // pinned spacer — is a row menu, not a cell menu with no column.
-  if (cell && columnKey !== undefined) {
+  if (
+    cell &&
+    row.contains(cell) &&
+    cell.closest(ROW_SELECTOR) === row &&
+    columnKey !== undefined
+  ) {
     return {
       target: { kind: "cell", row: value, rowId, columnKey },
       element: cell,

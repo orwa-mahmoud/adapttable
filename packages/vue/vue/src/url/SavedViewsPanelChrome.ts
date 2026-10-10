@@ -1,0 +1,238 @@
+/** The management panel owns rename state and structure; kits own controls. */
+import {
+  createSavedViewRenameController,
+  resolveLabels,
+  type SavedView,
+  type SavedViewGlyph,
+  savedViewRowControls,
+} from "@adapttable/core";
+import type {
+  SavedViewsPanelChromeProps as NeutralPanelProps,
+  SavedViewsPanelSlots as NeutralPanelSlots,
+} from "@adapttable/core/binding";
+import {
+  defineComponent,
+  h,
+  onScopeDispose,
+  type PropType,
+  type VNodeChild,
+  watch,
+} from "vue";
+
+import { useExternalStore, useScopeActivity } from "../store";
+export type SavedViewsPanelSlots = NeutralPanelSlots<VNodeChild>;
+export type SavedViewsPanelChromeProps = NeutralPanelProps<VNodeChild>;
+export type {
+  SavedViewControlKey,
+  SavedViewsPanelEmptyProps,
+  SavedViewsPanelInputProps,
+} from "@adapttable/core/binding";
+const layout = {
+  row: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "6px",
+    minWidth: 0,
+  },
+  caption: {
+    display: "flex",
+    flexWrap: "nowrap",
+    alignItems: "center",
+    gap: "6px",
+    flex: "1 1 9rem",
+    minWidth: 0,
+  },
+  controls: {
+    display: "flex",
+    alignItems: "center",
+    gap: "2px",
+    flex: "0 0 auto",
+    minWidth: 0,
+  },
+  control: { flex: "0 0 auto" },
+} as const;
+function glyph({ paths, filled }: SavedViewGlyph): VNodeChild {
+  return h(
+    "svg",
+    {
+      width: 14,
+      height: 14,
+      viewBox: "0 0 24 24",
+      fill: filled ? "currentColor" : "none",
+      stroke: "currentColor",
+      "stroke-width": 1.9,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      "aria-hidden": "true",
+      focusable: "false",
+    },
+    paths.map((d) => h("path", { key: d, d }))
+  );
+}
+export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
+  (props: SavedViewsPanelChromeProps) => {
+    const active = useScopeActivity();
+    const rename = createSavedViewRenameController();
+    const state = useExternalStore(rename);
+    watch(
+      () => props.views,
+      (views) => {
+        if (
+          state.value.editing !== null &&
+          !views.some(
+            (view) => view.name === state.value.editing && !view.readOnly
+          )
+        )
+          rename.cancel();
+      },
+      { flush: "sync" }
+    );
+    let generation = 0;
+    // Getter sources avoid forcing retirement when only a slot wrapper changes.
+    watch(
+      [
+        () => active.value,
+        () => props.views,
+        () => props.slots.Surface,
+        () => props.slots.Row,
+        () => props.slots.Input,
+        () => props.slots.Empty,
+        () => props.onApply,
+        () => props.onRename,
+        () => props.onMove,
+        () => props.onSetDefault,
+        () => props.onRemove,
+      ],
+      () => {
+        generation++;
+      },
+      { flush: "sync" }
+    );
+    watch(
+      () => state.value.editing,
+      () => {
+        generation++;
+      },
+      { flush: "sync" }
+    );
+    onScopeDispose(() => {
+      generation++;
+    });
+    const rowFor = (view: SavedView, index: number): VNodeChild => {
+      const labels = resolveLabels(props.labels);
+      const controls = props.slots;
+      const { Surface, Row, Input, Empty } = controls;
+      const isEditing = state.value.editing === view.name;
+      const ticket = generation;
+      const live = active.value;
+      const views = props.views;
+      const run = (callback: () => void): void => {
+        if (
+          live &&
+          active.value &&
+          ticket === generation &&
+          props.views === views &&
+          props.slots.Surface === Surface &&
+          props.slots.Row === Row &&
+          props.slots.Input === Input &&
+          props.slots.Empty === Empty &&
+          views.includes(view)
+        )
+          callback();
+      };
+      const focus = (element: HTMLInputElement | null): void => {
+        run(() => element?.focus());
+      };
+      return controls.Row({
+        "data-adapttable-part": "saved-view-row",
+        layout,
+        viewName: view.name,
+        isEditing,
+        isDefault: view.isDefault === true,
+        readOnly: view.readOnly === true,
+        defaultLabel: labels.defaultViewBadge,
+        readOnlyLabel: labels.readOnlyViewBadge,
+        name: isEditing
+          ? controls.Input({
+              label: labels.viewName,
+              ref: focus,
+              value: state.value.draft,
+              onChange: (next) => run(() => rename.setDraft(next)),
+              onCommit: () => run(() => rename.commit(props.onRename)),
+              onCancel: () => run(rename.cancel),
+            })
+          : view.name,
+        onApply: () => run(() => props.onApply(view.name)),
+        applyLabel: labels.applyView,
+        controls: savedViewRowControls({
+          view,
+          index,
+          count: props.views.length,
+          editing: isEditing,
+          labels,
+          onStartRename: () => run(() => rename.begin(view.name)),
+          onMove: (delta) => run(() => props.onMove(view.name, delta)),
+          onSetDefault: () => run(() => props.onSetDefault(view.name)),
+          onRemove: () => run(() => props.onRemove(view.name)),
+        }).map(({ glyph: shape, ...control }) => ({
+          ...control,
+          icon: glyph(shape),
+        })),
+      });
+    };
+    return () => {
+      const labels = resolveLabels(props.labels);
+      const controls = props.slots;
+      for (const key of ["Surface", "Row", "Input", "Empty"] as const)
+        if (!controls[key])
+          throw new Error(
+            `AdaptTable: required adapter control slot "SavedViewsPanel.${key}" is missing.`
+          );
+      const children: VNodeChild[] = props.views.length
+        ? props.views.map((view, index) => rowFor(view, index))
+        : [controls.Empty({ message: labels.savedViews })];
+      return controls.Surface({
+        "data-adapttable-part": "saved-views-panel",
+        className: props.className,
+        title: labels.savedViews,
+        footer: props.footer,
+        children,
+      });
+    };
+  },
+  {
+    name: "SavedViewsPanelChrome",
+    props: {
+      views: { type: Array as PropType<SavedViewsPanelChromeProps["views"]> },
+      onApply: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onApply"]>,
+      },
+      onRename: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onRename"]>,
+      },
+      onMove: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onMove"]>,
+      },
+      onSetDefault: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onSetDefault"]>,
+      },
+      onRemove: {
+        type: Function as PropType<SavedViewsPanelChromeProps["onRemove"]>,
+      },
+      labels: {
+        type: Object as PropType<SavedViewsPanelChromeProps["labels"]>,
+      },
+      footer: {
+        type: [String, Number, Boolean, Array, Object] as PropType<
+          SavedViewsPanelChromeProps["footer"]
+        >,
+        default: undefined,
+      },
+      slots: { type: Object as PropType<SavedViewsPanelChromeProps["slots"]> },
+      className: {
+        type: String as PropType<SavedViewsPanelChromeProps["className"]>,
+      },
+    },
+  }
+);

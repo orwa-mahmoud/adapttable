@@ -1,17 +1,10 @@
 /**
  * Row reorder feature factory for Angular.
  */
+import type { AdaptTableFeature } from "@adapttable/angular";
 import type { RowReorderHandler, RowReorderOptions } from "@adapttable/core";
 
-import type { AdaptTableFeature } from "../featureHost";
-
-/**
- * A row-reorder feature that also carries the host's write and options.
- */
-interface RowReorderFeature<TRow> extends AdaptTableFeature {
-  readonly onRowReorder: RowReorderHandler<TRow>;
-  readonly options?: RowReorderOptions<TRow>;
-}
+import type { RowReorderFeature } from "./rowReorderContracts";
 
 /**
  * Let rows be dragged, or moved with the keyboard, into a new order.
@@ -41,5 +34,3 @@ export function rowReorder<TRow>(
     options,
   } as RowReorderFeature<TRow>;
 }
-
-export type { RowReorderFeature };

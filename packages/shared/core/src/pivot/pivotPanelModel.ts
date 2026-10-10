@@ -118,6 +118,7 @@ export interface PivotZoneModel {
  * @param fields - Every field the user can pivot on.
  * @param config - The configuration being edited.
  * @param labels - Resolved labels.
+ * @param aggregationLabels - Optional presentation captions for aggregation names.
  * @returns The zones.
  *
  * @public
@@ -128,7 +129,8 @@ export function pivotPanelZones(
   labels: Pick<
     Required<TableLabels>,
     "pivotRows" | "pivotColumns" | "pivotMeasures"
-  >
+  >,
+  aggregationLabels?: Readonly<Record<string, string | undefined>>
 ): PivotZoneModel[] {
   const unused = availableFields(fields, config);
   const nameOf = (key: string) =>
@@ -138,7 +140,7 @@ export function pivotPanelZones(
       zone === "measures"
         ? config.measures.map((measure, index) => ({
             key: `${measure.key}-${String(index)}`,
-            label: measureLabel(measure, fields),
+            label: measureLabel(measure, fields, aggregationLabels),
           }))
         : config[zone].map((key) => ({ key, label: nameOf(key) }));
     const entries = raw.map((entry, index) => ({

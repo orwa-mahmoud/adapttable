@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import { featuresOf, SHOWCASE_ADAPTERS } from "../apps/showcase/matrix.mjs";
 import {
+  DOCS_FRAMEWORKS,
   frameworkDemoTarget,
   frameworkDocsTarget,
   normalizeFramework,
@@ -18,7 +19,6 @@ const adapters = [
 const features = () => [{ slug: "editing" }, { slug: "filtering" }];
 for (const value of [
   "",
-  "vue",
   "angular ",
   "/attacker.invalid",
   "\\attacker.invalid",
@@ -58,11 +58,48 @@ for (const value of [
   });
 }
 describe("framework navigation", () => {
+  it("offers a docs-only experimental Vue surface without full demo parity", () => {
+    assert.equal(normalizeFramework("vue"), "react");
+    assert.equal(selectedFramework("/concepts/", "vue"), "vue");
+    for (const path of [
+      "/angular/demo/",
+      "/angular/demo/all-options/",
+      "/angular/demo/ng-zorro/editing/",
+    ]) {
+      assert.deepEqual(
+        frameworkDemoTarget(path, "vue", adapters, features),
+        frameworkDemoTarget(path, "react", adapters, features)
+      );
+    }
+    assert.ok(
+      DOCS_FRAMEWORKS.some(
+        ({ key, label }) => key === "vue" && label.includes("experimental")
+      )
+    );
+    assert.equal(selectedFramework("/vue/api/", "react"), "vue");
+    assert.deepEqual(frameworkDocsTarget("/react/api/", "vue"), {
+      href: "/vue/api/",
+      equivalent: true,
+    });
+    assert.deepEqual(frameworkDocsTarget("/react/filtering/", "vue"), {
+      href: "/vue/getting-started/?unavailable=filtering",
+      equivalent: false,
+    });
+    assert.deepEqual(frameworkDocsTarget("/concepts/", "vue"), {
+      href: "/concepts/",
+      equivalent: true,
+    });
+    assert.deepEqual(frameworkDocsTarget("/vue/api/", "react"), {
+      href: "/react/api/",
+      equivalent: true,
+    });
+  });
+
   it("gives explicit routes precedence over remembered selection", () => {
     assert.equal(selectedFramework("/react/filtering/", "angular"), "react");
     assert.equal(selectedFramework("/angular/filtering/", "react"), "angular");
     assert.equal(selectedFramework("/concepts/", "angular"), "angular");
-    assert.equal(selectedFramework("/", "vue"), "react");
+    assert.equal(selectedFramework("/", "vue"), "vue");
   });
   it("retains matching guides and shared contracts", () => {
     assert.deepEqual(frameworkDocsTarget("/react/filtering/", "angular"), {
@@ -227,4 +264,36 @@ describe("local showcase framework switching", () => {
       "/angular/demo/?kit=ng-zorro&locale=ar"
     );
   });
+});
+
+it("keeps the Angular migration guide on registered framework destinations", () => {
+  assert.deepEqual(
+    frameworkDocsTarget("/angular/migrating-to-0-5/", "angular"),
+    {
+      href: "/angular/migrating-to-0-5/",
+      equivalent: true,
+    }
+  );
+  for (const framework of ["react", "vue"]) {
+    assert.deepEqual(
+      frameworkDocsTarget("/angular/migrating-to-0-5/", framework),
+      {
+        href: `/${framework}/getting-started/?unavailable=migrating-to-0-5`,
+        equivalent: false,
+      }
+    );
+  }
+});
+
+it("does not fabricate a React counterpart for an unregistered guide", () => {
+  assert.deepEqual(frameworkDocsTarget("/angular/not-a-guide/", "react"), {
+    href: "/react/getting-started/?unavailable=not-a-guide",
+    equivalent: false,
+  });
+  for (const page of ["features", "filtering", "api"]) {
+    assert.deepEqual(frameworkDocsTarget(`/angular/${page}/`, "react"), {
+      href: `/react/${page}/`,
+      equivalent: true,
+    });
+  }
 });

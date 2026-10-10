@@ -8,10 +8,8 @@ import {
 import { Injector, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import {
-  injectBulkActionRunner,
-  rowActionsFor,
-} from "../actions/bulkActionRunner";
+import { injectBulkActionRunner } from "../actions/bulkActionRunner";
+import { rowActionsFor } from "../actions/rowActions";
 import { injectFrontendData } from "../source/frontendData";
 import { injectSavedViews } from "../url/savedViews";
 import { injectDensity, injectExportCsv, injectFullscreen } from "./toolbar";

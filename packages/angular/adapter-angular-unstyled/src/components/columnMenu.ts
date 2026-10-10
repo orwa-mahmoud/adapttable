@@ -10,7 +10,7 @@ import {
   AdaptColumnMenuRowModel,
   AdaptIcon,
   AdaptLiveRegion,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

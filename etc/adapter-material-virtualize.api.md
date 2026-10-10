@@ -5,7 +5,7 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { VirtualizeOptions } from '@adapttable/angular';
+import { VirtualizeOptions } from '@adapttable/angular/features';
 
 // @public
 export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;

@@ -5,11 +5,11 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
-import { FeatureNotice } from '@adapttable/angular';
+import { FeatureNotice } from '@adapttable/angular/adapter';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { SelectionStats } from '@adapttable/angular';
-import { StatusBarSlots } from '@adapttable/angular';
+import { StatusBarSlots } from '@adapttable/angular/adapter';
 import { TableLabels } from '@adapttable/angular';
 import { TemplateRef } from '@angular/core';
 

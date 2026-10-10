@@ -12,6 +12,15 @@
   "angularCompilerOptions": {
     "compilationMode": "partial"
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.test.ts"]
+  "include": [
+    "src",
+    "features",
+    "adapter",
+    "formula",
+    "pivot",
+    "router",
+    "sparkline",
+    "stream"
+  ],
+  "exclude": ["**/*.test.ts"]
 }

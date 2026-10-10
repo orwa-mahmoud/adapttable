@@ -3,6 +3,7 @@ import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Drawer } from "@base-ui/react/drawer";
 import { type ReactNode } from "react";
 
+import { ensureBaseUiDrawerStyles } from "../injectStyles";
 import type { BaseUiAccentColor } from "../types";
 import { Button, Flex } from "../ui";
 
@@ -26,6 +27,7 @@ export function FilterDrawer({
   accentColor?: BaseUiAccentColor;
   dir?: Direction;
 }>) {
+  ensureBaseUiDrawerStyles();
   return (
     <Drawer.Root
       open={open}

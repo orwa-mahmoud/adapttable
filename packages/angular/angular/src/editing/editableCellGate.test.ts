@@ -12,11 +12,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
-import {
-  type EditableCellEditing,
-  rowEditingSignature,
-  rowIsDirty,
-} from "./editableCellController";
+import { type EditableCellEditing } from "./editableCellController";
 import {
   AdaptCellConflictNotice,
   AdaptEditableCellGate,
@@ -28,6 +24,7 @@ import {
   multiDraftFromSelect,
 } from "./editableCellGate";
 import { type CellEditHandler, injectCellEditing } from "./editing";
+import { rowEditingSignature, rowIsDirty } from "./rowEditingHelpers";
 import { injectCellSaveState } from "./saveState";
 import { injectEditValidation } from "./validation";
 

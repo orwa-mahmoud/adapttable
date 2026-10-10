@@ -13,7 +13,9 @@
  *
  * Sizes are minified + gzipped bytes of AdaptTable's own share of the graph.
  * React and the UI kits are external because an application already ships
- * them; counting them would drown the number the budget is about.
+ * them; counting them would drown the number the budget is about. Vue fixtures
+ * externalize the same way — the Vue runtime and each kit's peer UI library —
+ * and count all remaining emitted chunks and assets.
  *
  * The bundler is rolldown, re-exported by tsdown, which builds this repo
  * already — the measurement adds no dependency of its own.
@@ -39,6 +41,14 @@ import {
 } from "./consumer-fixtures.mjs";
 import { packageDir, packageRel } from "./packages.mjs";
 import { publishedFigures, staleReason } from "./published-figures.mjs";
+import {
+  vueConsumerCoverageProblems,
+  vueConsumerExternals,
+  vueEmittedCss,
+  vueMissingCss,
+} from "./vue-consumer-fixtures.mjs";
+import { buildVueCssConsumer } from "./vue-css-consumer.mjs";
+import { buildVueNativeConsumer } from "./vue-native-consumer.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
@@ -82,6 +92,8 @@ function entryCode(fixture) {
   if (extras[0]) {
     code = code.replaceAll("ALSO", join(dist, extras[0]));
   }
+  if (fixture.styleEntryFile)
+    code = code.replaceAll("STYLE", join(dist, fixture.styleEntryFile));
   return code;
 }
 
@@ -98,20 +110,60 @@ export async function measure(fixture, dir) {
   writeFileSync(entry, entryCode(fixture));
 
   const started = performance.now();
-  const bundle = await Rolldown.rolldown({
-    input: entry,
-    external: (id) => EXTERNAL.some((re) => re.test(id)),
-    logLevel: "silent",
-  });
-  const [min, readable] = await Promise.all([
-    bundle.generate({ format: "esm", minify: true }),
-    bundle.generate({ format: "esm" }),
-  ]);
-  await bundle.close();
+  let min;
+  let readable;
+  const externals =
+    fixture.framework === "vue" ? vueConsumerExternals(fixture.pkg) : EXTERNAL;
+  if (fixture.consumerHost) {
+    min = await buildVueNativeConsumer(
+      fixture,
+      entry,
+      dir,
+      true,
+      [],
+      externals
+    );
+    readable = await buildVueNativeConsumer(
+      fixture,
+      entry,
+      dir,
+      false,
+      [],
+      externals
+    );
+  } else if (fixture.styleEntryFile) {
+    // Independent builds keep the stateful CSS collection passes separate.
+    min = await buildVueCssConsumer(entry, dir, true, [], externals);
+    readable = await buildVueCssConsumer(entry, dir, false, [], externals);
+  } else {
+    const bundle = await Rolldown.rolldown({
+      input: entry,
+      external: (id) => externals.some((re) => re.test(id)),
+      logLevel: "silent",
+    });
+    [min, readable] = await Promise.all([
+      bundle.generate({ format: "esm", minify: true }),
+      bundle.generate({ format: "esm" }),
+    ]);
+    await bundle.close();
+  }
   const parseMs = Math.round(performance.now() - started);
 
-  const code = readable.output[0].code;
-  const sizeBytes = gzipSync(min.output[0].code).length;
+  const code =
+    fixture.framework === "vue"
+      ? readable.output
+          .filter((file) => file.type === "chunk")
+          .map((file) => file.code)
+          .join("\n")
+      : readable.output[0].code;
+  // Vue consumers include every emitted chunk/asset. No optional AdaptTable
+  // implementation may disappear from the measured transfer through splitting.
+  const files = fixture.framework === "vue" ? min.output : [min.output[0]];
+  const sizeBytes = files.reduce(
+    (total, file) =>
+      total + gzipSync(file.type === "chunk" ? file.code : file.source).length,
+    0
+  );
   return {
     sizeBytes,
     sizeKB: sizeBytes / 1024,
@@ -119,9 +171,14 @@ export async function measure(fixture, dir) {
     leaked: (fixture.absent ?? []).filter((name) =>
       new RegExp(`\\b${name}`).test(code)
     ),
-    missing: (fixture.present ?? []).filter(
-      (name) => !new RegExp(`\\b${name}`).test(code)
-    ),
+    missing: [
+      ...(fixture.present ?? []).filter(
+        (name) => !new RegExp(`\\b${name}`).test(code)
+      ),
+      ...vueMissingCss(fixture, vueEmittedCss(readable.output)).map(
+        (marker) => `CSS ${marker}`
+      ),
+    ],
   };
 }
 
@@ -290,6 +347,8 @@ function exitIfFailed(over, stale) {
 }
 
 async function main() {
+  const coverageProblems = vueConsumerCoverageProblems(FIXTURES);
+  if (coverageProblems.length) throw new Error(coverageProblems.join("\n"));
   const dir = mkdtempSync(join(tmpdir(), "adapttable-budget-"));
   const rows = [];
   let over = 0;

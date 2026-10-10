@@ -6,12 +6,13 @@
 import {
   type FilterOverlaySlotProps,
   injectPopoverSpace,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   type ElementRef,
   input,
@@ -48,7 +49,7 @@ import { OVERLAY_Z, placeOverlayBelowTrigger } from "./overlayPlacement";
         <div
           #card
           [style.max-height.px]="availableHeight()"
-          style="display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
+          style="box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; width: 340px; max-width: calc(100vw - 32px)"
           data-adapttable-part="filters-popover"
           [attr.dir]="p.dir ?? 'ltr'"
           [attr.data-dir]="p.dir ?? 'ltr'"
@@ -76,7 +77,7 @@ import { OVERLAY_Z, placeOverlayBelowTrigger } from "./overlayPlacement";
           </header>
           <div
             data-adapttable-part="filters-body"
-            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain"
+            style="min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block-end: 4px; scroll-padding-block: 4px"
           >
             <ng-container [ngTemplateOutlet]="p.filters" />
           </div>
@@ -100,11 +101,22 @@ export class AdaptFilterPopover {
   protected readonly zIndex = OVERLAY_Z;
   private readonly anchor =
     viewChild.required<ElementRef<HTMLElement>>("anchor");
-  protected readonly availableHeight = injectPopoverSpace({
+  private readonly viewportSpace = injectPopoverSpace({
     origin: () => this.anchor()?.nativeElement,
     open: () => this.props().open,
     reserve: 16,
+    allowAbove: () => {
+      const origin = this.anchor()?.nativeElement;
+      const viewport = origin?.ownerDocument.defaultView;
+      return (
+        viewport != null &&
+        viewport.innerHeight - origin.getBoundingClientRect().bottom - 16 < 160
+      );
+    },
   });
+  protected readonly availableHeight = computed(() =>
+    Math.min(560, this.viewportSpace())
+  );
   private readonly card = viewChild<ElementRef<HTMLElement>>("card");
 
   constructor() {
@@ -138,6 +150,7 @@ export class AdaptFilterPopover {
       const card = this.card()?.nativeElement;
       const { open, dir } = this.props();
       if (!open || !card) return;
+      this.availableHeight();
       const place = (): void => {
         placeOverlayBelowTrigger(
           card,

@@ -83,6 +83,39 @@ describe("pivotTableModel", () => {
     expect(model.columns[1]?.meta?.pivotLeaf).toBe(result.columnLeaves[0]);
   });
 
+  it("names each mobile measure with its column path and localized total", () => {
+    const model = pivotTableModel(
+      pivot(SALES, { ...base, columns: ["region", "quarter"] }),
+      { fields: FIELDS, labels: { pivotTotal: "الإجمالي" } }
+    );
+
+    expect(model.columns.slice(1).map((column) => column.mobileLabel)).toEqual([
+      "EU / Q1 / sum Amount",
+      "EU / Q2 / sum Amount",
+      "US / Q1 / sum Amount",
+      "US / Q2 / sum Amount",
+      "الإجمالي / sum Amount",
+    ]);
+    expect(model.columns[1]?.header).toBe("sum Amount");
+  });
+
+  it("keeps flat mobile measures distinct without inventing a column path", () => {
+    const model = modelFor({
+      ...base,
+      columns: [],
+      grandTotals: false,
+      measures: [
+        { key: "amount", agg: "sum" },
+        { key: "amount", agg: "count" },
+      ],
+    });
+
+    expect(model.columns.slice(1).map((column) => column.mobileLabel)).toEqual([
+      "sum Amount",
+      "count Amount",
+    ]);
+  });
+
   it("turns the column tree into header groups with the engine's spans", () => {
     const result = pivot(SALES, {
       ...base,

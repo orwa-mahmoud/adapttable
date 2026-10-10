@@ -1,17 +1,22 @@
+import { readFileSync } from "node:fs";
+
 import {
   type ColumnDef,
-  defaultFilterRegistry,
   type FilterDef,
   type FilterFormSource,
   filterRuntimeFor,
   type FilterTypeSpec,
-  type FilterWidgetRenderProps,
   injectDataTable,
   injectFrontendData,
   type TableLabels,
 } from "@adapttable/angular";
+import {
+  defaultFilterRegistry,
+  type FilterWidgetRenderProps,
+} from "@adapttable/angular/adapter";
 import { filters, filterTypes } from "@adapttable/angular-material/filters";
 import { headerFilters } from "@adapttable/angular-material/header-filters";
+import { CdkConnectedOverlay } from "@angular/cdk/overlay";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -24,6 +29,7 @@ import {
   viewChild,
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 
 import { kitSelector } from "../testUtils";
 import { AdaptAutoFilterForm } from "./components/autoFilterForm";
@@ -117,6 +123,8 @@ const DEFS: FilterDef<Person>[] = [
       [rowKey]="rowKey"
       [urlSync]="false"
       [forceMobile]="false"
+      [searchable]="searchable()"
+      [dir]="dir()"
       [features]="features()"
       [filtersMode]="mode()"
       [labels]="labels()"
@@ -124,6 +132,8 @@ const DEFS: FilterDef<Person>[] = [
   `,
 })
 class Host {
+  readonly searchable = input(true);
+  readonly dir = input<"ltr" | "rtl">("ltr");
   readonly features = input([filters(DEFS)]);
   readonly mode = input<FiltersMode>("popover");
   readonly labels = input<Partial<TableLabels> | undefined>(undefined);
@@ -214,6 +224,88 @@ describe("the Angular Material filters", () => {
     await settle();
     expect(part("filters-popover")).toBeNull();
   });
+
+  it.each(["ltr", "rtl"] as const)(
+    "prefers below alignments and offers native above fallbacks without search in %s",
+    async (dir) => {
+      const { fixture, part, openFilters, settle } = await mount();
+      fixture.componentRef.setInput("searchable", false);
+      fixture.componentRef.setInput("dir", dir);
+      await settle();
+      expect(part("search")).toBeNull();
+      await openFilters();
+      const panel = part("filters-popover")!;
+      const overlay = fixture.debugElement
+        .queryAllNodes(By.directive(CdkConnectedOverlay))
+        .map((node) => node.injector.get(CdkConnectedOverlay))
+        .find((candidate) =>
+          candidate.overlayRef?.overlayElement.contains(panel)
+        );
+      expect(overlay).toBeDefined();
+      expect(overlay!.positions).toEqual([
+        {
+          originX: "end",
+          originY: "bottom",
+          overlayX: "end",
+          overlayY: "top",
+          offsetY: 4,
+        },
+        {
+          originX: "start",
+          originY: "bottom",
+          overlayX: "start",
+          overlayY: "top",
+          offsetY: 4,
+        },
+        {
+          originX: "center",
+          originY: "bottom",
+          overlayX: "center",
+          overlayY: "top",
+          offsetY: 4,
+        },
+        {
+          originX: "end",
+          originY: "top",
+          overlayX: "end",
+          overlayY: "bottom",
+          offsetY: -4,
+        },
+        {
+          originX: "start",
+          originY: "top",
+          overlayX: "start",
+          overlayY: "bottom",
+          offsetY: -4,
+        },
+        {
+          originX: "center",
+          originY: "top",
+          overlayX: "center",
+          overlayY: "bottom",
+          offsetY: -4,
+        },
+      ]);
+      expect(overlay!.flexibleDimensions).toBe(true);
+      expect(overlay!.width).toBe(374);
+      expect(overlay!.push).toBe(true);
+      expect(overlay!.viewportMargin).toBe(8);
+      expect(overlay!.hasBackdrop).toBe(false);
+      const pane = overlay!.overlayRef.overlayElement;
+      expect(
+        pane.querySelector("mat-card.adapt-material-filter-card")
+      ).not.toBeNull();
+      const theme = document.createElement("style");
+      theme.textContent = readFileSync("styles.css", "utf8");
+      document.head.append(theme);
+      try {
+        expect(getComputedStyle(pane).maxWidth).toBe("calc(100% - 16px)");
+      } finally {
+        theme.remove();
+      }
+      expect(panel.getAttribute("data-dir")).toBe(dir);
+    }
+  );
 
   it("filters by text, and counts and chips what is set", async () => {
     const { part, parts, ids, field, type, openFilters } = await mount();

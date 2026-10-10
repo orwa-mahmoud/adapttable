@@ -5,10 +5,12 @@ import {
   type AdaptTableFeature,
   type CellEditHandler,
   type ColumnDef,
-  type EditableCellEditorCtrl,
-  type EditableCellSlotProps,
   injectCellEditing,
 } from "@adapttable/angular";
+import type {
+  EditableCellEditorCtrl,
+  EditableCellSlotProps,
+} from "@adapttable/angular/adapter";
 import { editing } from "@adapttable/ng-zorro/editing";
 import { Component, computed, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";

@@ -91,19 +91,14 @@ type FilterLayout = "popover" | "drawer" | "header";
         <span class="hint">Filters opens the popover or the drawer</span>
         <span class="hint">Advanced sits at the top of that panel</span>
         <span class="hint">Header funnels filter one column</span>
-        <div class="seg" role="group" aria-label="Filter layout">
-          @for (option of layouts; track option.value) {
-            <button
-              type="button"
-              class="seg__btn"
-              [class.is-on]="layout() === option.value"
-              [attr.aria-pressed]="layout() === option.value"
-              (click)="layout.set(option.value)"
-            >
-              {{ option.label }}
-            </button>
-          }
-        </div>
+        <label class="angular-select">
+          Filter layout
+          <select [value]="layout()" (change)="changeLayout($event)">
+            @for (option of layouts; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
       </div>
       <div class="mx-demo__body">
         @for (current of mounted(); track current) {
@@ -136,6 +131,13 @@ class FilteringBody {
     { value: "header", label: "Header" },
   ];
   readonly layout = signal<FilterLayout>("popover");
+  changeLayout(event: Event): void {
+    if (!(event.target instanceof HTMLSelectElement)) return;
+    const value = event.target.value;
+    const option = this.layouts.find((layout) => layout.value === value);
+    if (option) this.layout.set(option.value);
+  }
+
   /**
    * The layout the table is mounted for — one entry, replaced when the layout
    * changes, so switching remounts the table the way React's `key` does.
@@ -723,23 +725,25 @@ class SavedViewsBody {
   ];
 }
 
-/** The landing page's table: filters, sorting and paging, nothing to explain. */
+/** The landing page composes the kit's real controls into a useful workspace. */
 @Component({
   selector: "adapt-showcase-landing-table",
   imports: [AdaptShowcaseTable],
   template: `
-    <div class="mx-demo">
+    <div class="mx-demo mx-demo--overview">
       <div class="mx-demo__body">
         <adapt-showcase-table
           [dir]="presentation.dir"
           [labels]="presentation.labels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
-          [urlSync]="false"
-          [data]="rows"
+          urlKey="overview"
+          [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
+          [selectable]="true"
           [defaults]="{ limit: 10 }"
+          [summaryRow]="summary"
           [features]="features"
         />
       </div>
@@ -749,11 +753,43 @@ class SavedViewsBody {
 export class AdaptShowcaseLandingTable {
   private readonly kit = inject(SHOWCASE_KIT);
   readonly presentation = SHOWCASE_PRESENTATION;
-  readonly rows = PEOPLE;
-  readonly columns = COLUMNS;
+  readonly rows = signal<readonly Person[]>(peopleRows());
+  readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
+  readonly summary = aggregate<Person>(
+    { budget: "sum" },
+    {
+      columns: this.columns,
+      format: (value) =>
+        typeof value === "number" ? formatMoney(value) : value,
+    }
+  );
   readonly features: readonly AdaptTableFeature[] = [
     this.kit.filters(FILTER_DEFS),
+    this.kit.columnMenu(),
+    this.kit.resizableColumns(),
+    this.kit.savedViews({
+      storageKey: `adapttable-angular-${this.kit.key}-overview-views`,
+      urlKey: "overview",
+    }),
+    this.kit.groupingPanel<Person>([], {
+      groupAggregates: aggregate<Person>(
+        { budget: "sum" },
+        { columns: this.columns }
+      ),
+      groupFooters: true,
+    }),
+    this.kit.editing<Person>((row, key, value) => {
+      this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
+    }),
+    this.kit.editHistory(),
+    this.kit.undoRedoButtons(),
+    this.kit.cellNavigation(),
+    this.kit.bulkActions([]),
+    this.kit.exportCsv<Person>({ filename: "people-workspace.csv" }),
+    this.kit.densityChooser(),
+    this.kit.fullscreen(),
+    this.kit.statusBar(),
   ];
 }
 
@@ -1268,7 +1304,7 @@ class FormulasBody {
     <div class="mx-demo">
       <div class="mx-demo__body">
         <adapt-showcase-table
-          tableLabel="الأشخاص"
+          [tableLabel]="presentation.locale === 'ar' ? 'الأشخاص' : 'People'"
           urlKey="rtl"
           [dir]="presentation.dir"
           [labels]="presentation.labels"

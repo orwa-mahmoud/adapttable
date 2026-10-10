@@ -4,8 +4,8 @@
 
 ```ts
 
-import { rowPinning } from '@adapttable/angular';
-import { RowPinningFeatureOptions } from '@adapttable/angular';
+import { rowPinning } from '@adapttable/angular/features';
+import { RowPinningFeatureOptions } from '@adapttable/angular/features';
 
 export { rowPinning }
 

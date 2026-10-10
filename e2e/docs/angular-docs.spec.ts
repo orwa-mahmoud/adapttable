@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import { expect, type Page, test } from "@playwright/test";
 
+import { sidebarSlugs } from "../../apps/docs/sidebar.mjs";
 import { TITLES } from "../../apps/docs/sync-docs.mjs";
 import { ANGULAR_DOCS } from "../../scripts/angular-docs.mjs";
 import { ORIGIN } from "../../scripts/site.mjs";
@@ -11,6 +12,9 @@ import { ORIGIN } from "../../scripts/site.mjs";
 const DOCS_URL = "http://localhost:4323";
 const TITLES_BY_SOURCE: Readonly<Record<string, string>> = TITLES;
 const DOCS_ROOT = join(import.meta.dirname, "../../docs");
+const reactGuideSlugs = new Set(
+  sidebarSlugs().filter((slug) => !slug.includes("/"))
+);
 
 test.use({ baseURL: DOCS_URL });
 
@@ -96,15 +100,7 @@ for (const source of ANGULAR_DOCS) {
   const route = `/angular/${basename}/`;
   // These two Angular guides have framework-neutral counterparts at root.
   // Keep this expectation independent of the switch's routing function.
-  const angularOnly = [
-    "material",
-    "ng-bootstrap",
-    "spartan",
-    "taiga-ui",
-    "angular-cdk",
-    "ngx-bootstrap",
-    "aria",
-  ].includes(basename);
+  const angularOnly = !reactGuideSlugs.has(basename);
   const reactRoute = ["data-tiers", "custom-table-source"].includes(basename)
     ? `/${basename}/`
     : `/react/${basename}/`;

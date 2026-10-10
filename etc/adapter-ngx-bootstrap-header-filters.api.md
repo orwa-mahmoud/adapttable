@@ -7,8 +7,8 @@
 import { AdaptTableFeature } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
 import { FilterFormSource } from '@adapttable/angular';
-import { FilterHeaderClassNames } from '@adapttable/angular';
-import { FilterHeaderSlots } from '@adapttable/angular';
+import { FilterHeaderClassNames } from '@adapttable/angular/adapter';
+import { FilterHeaderSlots } from '@adapttable/angular/adapter';
 import { FilterTypeRegistry } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';

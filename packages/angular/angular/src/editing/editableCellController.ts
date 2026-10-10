@@ -1,13 +1,7 @@
-/**
- * Per-cell editing controller — core's pipeline bound to Angular's column
- * type and the editing bundle the table hands every cell.
- */
 import {
   type EditableCellController,
   editableCellController as coreEditableCellController,
   type EditingBundle,
-  rowEditingSignature as coreRowEditingSignature,
-  rowIsDirty as coreRowIsDirty,
 } from "@adapttable/core";
 import type { RowEditIcons } from "@adapttable/core/binding";
 
@@ -18,7 +12,6 @@ export type {
   EditableCellMode,
   EditingBundle,
 } from "@adapttable/core";
-export { focusEditorOnMount, stopCellEditKeyboard } from "@adapttable/core";
 
 /**
  * Opt-in editing bundle from the table's composed editing features.
@@ -28,36 +21,6 @@ export { focusEditorOnMount, stopCellEditKeyboard } from "@adapttable/core";
 export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
   /** Glyph overrides for the row-mode controls, when the host set any. */
   rowEditIcons?: RowEditIcons;
-}
-
-/**
- * Whether a row holds any dirty cell mark.
- *
- * @public
- */
-export function rowIsDirty<TRow>(
-  editing: EditableCellEditing<TRow> | undefined,
-  rowId: string
-): boolean {
-  return coreRowIsDirty(
-    editing as Parameters<typeof coreRowIsDirty<TRow>>[0],
-    rowId
-  );
-}
-
-/**
- * Signature of a row's editing state for memo comparators.
- *
- * @public
- */
-export function rowEditingSignature<TRow>(
-  editing: EditableCellEditing<TRow> | undefined,
-  rowId: string
-): string | null {
-  return coreRowEditingSignature(
-    editing as Parameters<typeof coreRowEditingSignature<TRow>>[0],
-    rowId
-  );
 }
 
 /**

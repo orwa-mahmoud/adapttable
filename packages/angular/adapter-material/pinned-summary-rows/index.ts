@@ -6,4 +6,4 @@
  *
  * @packageDocumentation
  */
-export { pinnedSummaryRows } from "@adapttable/angular";
+export { pinnedSummaryRows } from "@adapttable/angular/features";

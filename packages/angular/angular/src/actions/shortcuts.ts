@@ -17,6 +17,8 @@ import {
   type Signal,
 } from "@angular/core";
 
+import { onBrowser } from "../hooks/platform";
+
 export type { Shortcut };
 export { DEFAULT_SHORTCUTS };
 
@@ -58,7 +60,8 @@ export function injectShortcuts(
     (onCleanup) => {
       const current = options();
       const shortcuts = current.shortcuts ?? DEFAULT_SHORTCUTS;
-      if (!current.enabled || shortcuts.length === 0) return;
+      if (!onBrowser(resolved) || !current.enabled || shortcuts.length === 0)
+        return;
       const handle = createShortcutHandler(shortcuts, current.onCommand);
       const node = current.target?.() ?? document;
       const onKeyDown = (event: Event) => {

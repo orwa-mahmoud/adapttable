@@ -1,8 +1,8 @@
+import type { ColumnDef } from "@adapttable/angular";
 import {
   AdaptGroupingPanelChrome,
   type AngularGroupingPanelAggregationItemProps,
   type AngularGroupingPanelSurfaceProps,
-  type ColumnDef,
   type GroupingPanelAggregationRemoveProps,
   type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
@@ -12,11 +12,12 @@ import {
   type GroupingPanelSelectProps,
   type GroupingPanelSlotProps,
   type GroupingPanelSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   inject,
   input,
@@ -155,8 +156,11 @@ class AdaptGroupingChip {
       [tuiTextfieldCleaner]="false"
       [stringify]="p.options | taigaLabels"
       [style.inline-size]="
-        p['data-adapttable-part'] === 'grouping-add' ? width(p.label) : null
+        p['data-adapttable-part'] === 'grouping-add'
+          ? width(p.label)
+          : optionWidth()
       "
+      style="max-inline-size: 100%; flex-shrink: 0"
       ><input
         tuiSelect
         [attr.aria-label]="p.label"
@@ -187,6 +191,13 @@ class AdaptGroupingSelect {
   private readonly destroyRef = inject(DestroyRef);
   readonly props = input.required<GroupingPanelSelectProps>();
   protected readonly width = addControlWidth;
+  protected readonly optionWidth = computed(() => {
+    const length = this.props().options.reduce(
+      (longest, option) => Math.max(longest, option.label.length),
+      0
+    );
+    return `calc(${String(length)}ch + 4rem)`;
+  });
   private readonly model = viewChild.required(NgModel);
 
   protected change(value: string | null): void {

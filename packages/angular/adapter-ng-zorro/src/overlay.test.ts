@@ -1,4 +1,4 @@
-import { type FilterOverlaySlotProps } from "@adapttable/angular";
+import type { FilterOverlaySlotProps } from "@adapttable/angular/adapter";
 import { resolveLabels } from "@adapttable/core";
 import {
   Component,

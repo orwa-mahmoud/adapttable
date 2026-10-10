@@ -4,7 +4,7 @@
 
 ```ts
 
-import { cellSpan } from '@adapttable/angular';
+import { cellSpan } from '@adapttable/angular/features';
 
 export { cellSpan }
 

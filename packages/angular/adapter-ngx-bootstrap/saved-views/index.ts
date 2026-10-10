@@ -5,12 +5,11 @@
  */
 import {
   type AdaptTableFeature,
-  coreSavedViews,
   extendFeature,
-  SAVED_VIEWS,
   type SavedViewsControllerOptions,
   slotRender,
 } from "@adapttable/angular";
+import { coreSavedViews, SAVED_VIEWS } from "@adapttable/angular/adapter";
 import { AdaptSavedViewsMenu } from "@adapttable/ngx-bootstrap";
 
 export { AdaptSavedViewsPanel } from "@adapttable/ngx-bootstrap";

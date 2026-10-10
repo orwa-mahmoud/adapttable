@@ -1,14 +1,22 @@
 /**
  * The unstyled command palette: the toolbar button, the dialog, and a command.
  */
-import type { TableLabels, ToolbarExtrasSlotProps } from "@adapttable/angular";
+import type { TableLabels } from "@adapttable/angular";
+import type { ToolbarExtrasSlotProps } from "@adapttable/angular/adapter";
 import { commandPalette } from "@adapttable/ngx-bootstrap/command-palette";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
-import { AdaptCommandPaletteButton } from "../command-palette/palette";
-import { ngxBootstrapPart } from "../testUtils";
+import {
+  AdaptCommandPaletteButton,
+  AdaptCommandPaletteLive,
+} from "../command-palette/palette";
+import {
+  ngxBootstrapPart,
+  pressEscapeFrom,
+  settleBootstrap,
+} from "../testUtils";
 import { AdaptDataTable } from "./dataTable";
 
 interface Row {
@@ -28,11 +36,13 @@ const ROWS: Row[] = [{ id: "1", name: "Ada" }];
       [urlSync]="false"
       [forceMobile]="false"
       [features]="features"
+      [dir]="dir()"
     />
   `,
 })
 class Host {
   readonly rows = ROWS;
+  readonly dir = signal<"ltr" | "rtl">("ltr");
   readonly columns = [
     { key: "name", header: "Name", accessor: (row: Row) => row.name },
   ];
@@ -65,6 +75,7 @@ class Host {
       [forceMobile]="false"
       [features]="features"
       [labels]="labels()"
+      [dir]="dir()"
     />
   `,
 })
@@ -324,5 +335,111 @@ describe("command palette (unstyled Angular)", () => {
     fixture.detectChanges();
     expect(part("command-palette-button")).toBeNull();
     fixture.destroy();
+  });
+  it("keeps the actual palette surface in the table's live direction while open", async () => {
+    const fixture = TestBed.createComponent(ControlledHost);
+    const host = fixture.componentInstance;
+    host.dir.set("rtl");
+    host.paletteOpen.set(true);
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const surface = part("command-palette")!;
+    const input = part("command-input") as HTMLInputElement;
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("rtl");
+    expect(surface.closest<HTMLElement>('[role="dialog"]')?.dir).toBe("rtl");
+    input.value = "Greet";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await fixture.whenStable();
+    host.dir.set("ltr");
+    await fixture.whenStable();
+    expect(part("command-palette")).toBe(surface);
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("ltr");
+    expect(surface.closest<HTMLElement>('[role="dialog"]')?.dir).toBe("ltr");
+    expect(part("command-input")).toBe(input);
+    expect(input.value).toBe("Greet");
+    expect(host.paletteOpen()).toBe(true);
+    expect(host.onOpenChange).not.toHaveBeenCalled();
+    host.dir.set("rtl");
+    await fixture.whenStable();
+    expect(surface.closest<HTMLElement>("[dir]")?.dir).toBe("rtl");
+    expect(part("command-input")).toBe(input);
+    fixture.destroy();
+  });
+  it("opens the default palette from its shortcut without adding a toolbar button", async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.features[0] = commandPalette();
+    document.body.append(fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    expect(part("command-palette-button")).toBeNull();
+    expect(part("command-palette")).toBeNull();
+
+    const shortcut = new KeyboardEvent("keydown", {
+      key: "k",
+      ctrlKey: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(shortcut);
+    await fixture.whenStable();
+    expect(shortcut.defaultPrevented).toBe(true);
+    expect(part("command-palette")).not.toBeNull();
+    expect(part("command-input")?.getAttribute("role")).toBe("combobox");
+    expect(part("command-palette-button")).toBeNull();
+    part("command-input")!.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    await fixture.whenStable();
+    expect(part("command-palette")).toBeNull();
+    fixture.destroy();
+  });
+
+  it("defaults a standalone palette to LTR and reports native dismissals once", async () => {
+    const fixture = TestBed.createComponent(AdaptCommandPaletteLive);
+    const open = signal(false);
+    const onOpenChange = vi.fn((next: boolean) => open.set(next));
+    fixture.componentRef.setInput("props", {
+      commandPalette: { open, onOpenChange },
+      labels: {},
+    });
+    const trigger = document.createElement("button");
+    trigger.textContent = "Open standalone commands";
+    document.body.append(trigger, fixture.nativeElement);
+    fixture.autoDetectChanges();
+    await settleBootstrap(fixture);
+    trigger.focus();
+    open.set(true);
+    await settleBootstrap(fixture);
+    const surface = part("command-palette")!;
+    const modal = surface.closest<HTMLElement>('.modal[role="dialog"]')!;
+    expect(modal.dir).toBe("ltr");
+    expect(modal.getAttribute("data-dir")).toBe("ltr");
+    expect(modal.classList.contains("show")).toBe(true);
+    expect(modal.contains(document.activeElement)).toBe(true);
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    document.querySelector<HTMLElement>(".modal-backdrop")!.click();
+    await settleBootstrap(fixture);
+    expect(open()).toBe(false);
+    expect(onOpenChange.mock.calls).toEqual([[false]]);
+    expect(part("command-palette")).toBeNull();
+    expect(document.querySelector(".modal-backdrop")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+
+    open.set(true);
+    await settleBootstrap(fixture);
+    const reopened = part("command-palette")!.closest<HTMLElement>(".modal")!;
+    pressEscapeFrom(reopened);
+    await settleBootstrap(fixture);
+    expect(open()).toBe(false);
+    expect(onOpenChange.mock.calls).toEqual([[false], [false]]);
+    expect(part("command-palette")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+    fixture.destroy();
+    trigger.remove();
   });
 });

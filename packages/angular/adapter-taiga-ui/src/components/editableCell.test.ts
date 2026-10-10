@@ -2,11 +2,13 @@ import {
   type AdaptTableFeature,
   type CellEditHandler,
   type ColumnDef,
+  injectCellEditing,
+} from "@adapttable/angular";
+import {
   type EditableCellEditorCtrl,
   type EditableCellSlotProps,
   formatMultiDraft,
-  injectCellEditing,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { editing } from "@adapttable/taiga-ui/editing";
 import { Component, computed, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";

@@ -4,7 +4,7 @@
 
 ```ts
 
-import { resizableColumns } from '@adapttable/angular';
+import { resizableColumns } from '@adapttable/angular/features';
 
 export { resizableColumns }
 

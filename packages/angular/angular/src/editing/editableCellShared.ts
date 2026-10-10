@@ -5,6 +5,10 @@
  * not import each other at runtime.
  */
 import {
+  type editableCellController,
+  type EditableCellEditing,
+} from "@adapttable/angular";
+import {
   booleanDraft,
   type CellConflictAsk,
   formatMultiDraft,
@@ -21,10 +25,6 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
-import {
-  type editableCellController,
-  type EditableCellEditing,
-} from "./editableCellController";
 
 export type { CellConflictAsk } from "@adapttable/core";
 

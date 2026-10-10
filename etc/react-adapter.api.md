@@ -482,6 +482,7 @@ import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
 import { RELATIVE_PRESETS } from '@adapttable/core';
+import { renderedRowsOf } from '@adapttable/core/binding';
 import { renderRegisteredFilter } from '@adapttable/core';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
@@ -659,6 +660,7 @@ import { treeCardStyle } from '@adapttable/core';
 import { TreeCellProps as TreeCellProps_2 } from '@adapttable/core/binding';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
+import { TreeShape } from '@adapttable/core';
 import { TreeToggleButtonProps } from '@adapttable/core/binding';
 import { TreeToggleProps } from '@adapttable/core/binding';
 import { TreeToggleSlots as TreeToggleSlots_2 } from '@adapttable/core/binding';
@@ -1017,6 +1019,12 @@ export type CellNavLiveSlotProps<TRow = never> = CellNavLiveSlotProps_2<Omit<Use
 
 export { CellProps }
 
+// @public
+interface CellProps_2<TRow> {
+    readonly row: TRow;
+    readonly rowIndex: number;
+}
+
 export { CellRange }
 
 export { CellSaveState }
@@ -1163,6 +1171,12 @@ export { columnFlexShares }
 
 export { ColumnFooterContext }
 
+// @public
+interface ColumnFooterContext_2<TRow> {
+    column: ColumnDef<TRow>;
+    value: ReactNode;
+}
+
 export { ColumnGroupDef }
 
 export { columnGroupHeaderCaption }
@@ -1194,12 +1208,31 @@ export type ColumnGroupToggleSlots = ColumnGroupToggleSlots_2<ReactNode>;
 
 export { ColumnHeaderContext }
 
+// @public
+interface ColumnHeaderContext_2<TRow> {
+    column: ColumnDef<TRow>;
+    controller: ColumnHeaderController_2;
+}
+
 export { ColumnHeaderController }
+
+// @public
+interface ColumnHeaderController_2 {
+    label: ReactNode;
+    sortDir?: "asc" | "desc";
+    sortIndex?: number;
+    toggleSort: (event?: {
+        shiftKey?: boolean;
+    }) => void;
+}
 
 // @public
 export type ColumnHeaderRenameSlotProps = ColumnHeaderRenameSlotProps_2<ReactNode>;
 
 export { ColumnInput }
+
+// @public
+type ColumnInput_2<TRow> = ColumnDef<TRow> | ReactColumnGroupDef<TRow>;
 
 export { ColumnLayoutState }
 
@@ -2861,6 +2894,12 @@ export { QueryGroupRow }
 export { QuerySupport }
 
 // @public
+export interface ReactColumnGroupDef<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
+    // (undocumented)
+    readonly children: readonly ColumnInput_2<TRow>[];
+}
+
+// @public
 export type ReactColumnResizeHandleProps = Omit<ColumnResizeHandleProps, "onPointerDown" | "onKeyDown" | "onDoubleClick"> & Pick<HTMLAttributes<HTMLElement>, "onPointerDown" | "onKeyDown" | "onDoubleClick"> & {
     readonly "data-adapttable-part"?: "resize-handle";
 };
@@ -2898,6 +2937,8 @@ export { RELATIVE_PRESETS }
 
 // @public
 export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
+
+export { renderedRowsOf }
 
 export { renderRegisteredFilter }
 
@@ -3623,6 +3664,8 @@ export interface TableChrome<TRow> {
     tree?: {
         entries: readonly TreeEntry<TRow>[];
         allEntries?: readonly TreeEntry<TRow>[];
+        getChildren?: NonNullable<TreeShape<TRow>["getChildren"]>;
+        getParentId?: NonNullable<TreeShape<TRow>["getParentId"]>;
         expansion: TreeExpansionState;
         columnKey?: string;
     };

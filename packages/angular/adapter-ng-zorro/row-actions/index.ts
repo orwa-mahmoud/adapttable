@@ -3,12 +3,12 @@
  *
  * @packageDocumentation
  */
-import {
-  type AdaptTableFeature,
-  coreRowActions,
-  type RowAction,
-  type RowActionsLayout,
+import type {
+  AdaptTableFeature,
+  RowAction,
+  RowActionsLayout,
 } from "@adapttable/angular";
+import { coreRowActions } from "@adapttable/angular/adapter";
 
 /**
  * Options for {@link rowActions}.

@@ -3,6 +3,7 @@
  * passes the search, select, range and multi controls the reader uses. The
  * same definitions and extra bag the panel uses.
  */
+import { filterOptionsFor } from "@adapttable/angular";
 import {
   type BooleanChoice,
   booleanFilterWidget,
@@ -50,7 +51,6 @@ import {
 import { resolveRenderer } from "../cell";
 import { AdaptControl } from "../control";
 import { AdaptColumnSpacer } from "../virtual/columnSpacer";
-import { filterOptionsFor } from "./filters";
 
 /**
  * The kit's controls for one header-filter cell. Each is a standalone

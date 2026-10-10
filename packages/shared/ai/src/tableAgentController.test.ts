@@ -664,6 +664,11 @@ describe("approval through the table's own surface", () => {
     open.decideAt?.(0, true);
     const moved = h.pending();
     expect(moved).not.toBe(open);
+    expect(open.identity).toBeDefined();
+    expect(Object.isFrozen(open.identity)).toBe(true);
+    expect(Object.keys(open.identity ?? {})).toEqual([]);
+    expect(moved?.identity).toBe(open.identity);
+    expect(moved?.approve).not.toBe(open.approve);
     expect(moved?.decisions).toEqual(["approved", "pending", "pending"]);
     // A position outside the plan, or a repeat, changes nothing.
     moved?.decideAt?.(9, true);
@@ -701,6 +706,20 @@ describe("approval through the table's own surface", () => {
     h.pending()?.reject("only the first");
     await second;
     expect(onCellEdit.mock.calls.map((call) => idOf(call[0]))).toEqual(["1"]);
+  });
+
+  it("gives each transaction a private fresh presentation token even when the same request is repeated", async () => {
+    const h = harness({ approval: "writes" });
+    const first = h.run("edit.cells", editThree);
+    const original = await parked(h);
+    original.reject();
+    await first;
+    const second = h.run("edit.cells", editThree);
+    const replacement = await parked(h);
+    expect(replacement.proposals).toEqual(original.proposals);
+    expect(replacement.identity).not.toBe(original.identity);
+    replacement.reject();
+    await second;
   });
 
   it("waits for a whole decision on a write that names no rows", async () => {

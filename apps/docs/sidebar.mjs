@@ -131,10 +131,37 @@ const primarySidebar = [
 const angularSources = new Set(ANGULAR_DOCS);
 
 export const sidebar = [
+  {
+    label: "Vue (experimental)",
+    items: [
+      { label: "Get started with Vue", slug: "vue/getting-started" },
+      {
+        label: "UI kits",
+        items: [
+          { label: "Element Plus", slug: "vue/element-plus" },
+          { label: "Naive UI", slug: "vue/naive-ui" },
+          { label: "Nuxt UI", slug: "vue/nuxt-ui" },
+          { label: "Quasar", slug: "vue/quasar" },
+          { label: "Reka UI", slug: "vue/reka-ui" },
+          { label: "shadcn-vue", slug: "vue/shadcn-vue" },
+          { label: "Vuetify", slug: "vue/vuetify" },
+        ],
+      },
+      { label: "Vue feature composition", slug: "vue/features" },
+      { label: "Vue actions and exports", slug: "vue/actions" },
+      { label: "Vue column menu", slug: "vue/column-menu" },
+      { label: "Vue navigation, find and status", slug: "vue/navigation" },
+      { label: "Vue specialized data views", slug: "vue/specialized" },
+      { label: "Vue summaries and footers", slug: "vue/summary-row" },
+      { label: "Vue API reference", slug: "vue/api" },
+      { label: "Vue assistant and approvals", slug: "vue/assistant" },
+    ],
+  },
   ...primarySidebar,
   {
     label: "Angular",
     items: [
+      { label: "Migrate to Angular 0.5", slug: "angular/migrating-to-0-5" },
       {
         label: "UI kits",
         items: [
@@ -163,7 +190,16 @@ export const sidebar = [
   },
 ];
 
-/** Every leaf with its nearest group, at any nesting depth. */
+/** @typedef {{ label: string, slug: string }} SidebarPage */
+/** @typedef {{ label: string, items: readonly SidebarItem[] }} SidebarGroup */
+/** @typedef {SidebarPage | SidebarGroup} SidebarItem */
+
+/**
+ * Every leaf with its nearest group, at any nesting depth.
+ * @param {readonly SidebarItem[]} [items]
+ * @param {string} [group]
+ * @returns {(SidebarPage & { group: string })[]}
+ */
 export function sidebarPages(items = sidebar, group = "") {
   return items.flatMap((item) =>
     "items" in item
@@ -172,7 +208,11 @@ export function sidebarPages(items = sidebar, group = "") {
   );
 }
 
-/** Every canonical source slug the sidebar links, flattened recursively. */
+/**
+ * Every canonical source slug the sidebar links, flattened recursively.
+ * @param {readonly SidebarItem[]} [items]
+ * @returns {string[]}
+ */
 export function sidebarSlugs(items = sidebar) {
   return sidebarPages(items).map((item) => item.slug);
 }

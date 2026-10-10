@@ -72,6 +72,7 @@ import {
   pinnedSummaryRowId,
   printToolbar,
   rememberFeatureHost,
+  renderedRowsOf,
   REORDER_COLUMN_WIDTH,
   resolveFilterMode,
   resolveLabels,
@@ -172,6 +173,10 @@ import { MobileCards } from "./components/MobileCards";
 import { SkeletonTable } from "./components/SkeletonTable";
 import { Toolbar } from "./components/Toolbar";
 import type { DataTableProps } from "./types";
+
+// Table always nests its rows in Spin, even when loading is false. Its
+// default live region would repeat every cell beside our status announcer.
+const SILENT_TABLE_LOADING = { spinning: false, "aria-live": "off" };
 
 /**
  * antd renders virtual rows inside its own fixed-height scroll container, so
@@ -405,6 +410,7 @@ function antdSummaryRowAttrs(
 function antdOnRow<TRow>(options: {
   record: GroupedDataRecord<TRow>;
   rowIndex: number | undefined;
+  reorderIndices: ReadonlyMap<string, number> | undefined;
   getRowId: (row: TRow) => string;
   rowPinning: RowPinningState<TRow> | undefined;
   pinnedSummaryTop?: readonly TRow[];
@@ -427,6 +433,7 @@ function antdOnRow<TRow>(options: {
   const {
     record,
     rowIndex,
+    reorderIndices,
     getRowId,
     rowPinning,
     pinnedSummaryTop = [],
@@ -478,16 +485,17 @@ function antdOnRow<TRow>(options: {
     pinRowSticky
   );
   const visual = resolveRowStyle(rowStyle, rowHeight, row, rowIndex ?? 0);
+  const reorderIndex = reorderIndices?.get(id);
   const reorderStyle =
-    rowReorder && rowIndex !== undefined
-      ? rowReorderDropStyle(rowReorder.rowAttrs(id, rowIndex))
+    rowReorder && reorderIndex !== undefined
+      ? rowReorderDropStyle(rowReorder.rowAttrs(id, reorderIndex))
       : undefined;
   return {
     ...rowClickProps(row, onRowClick, rowIndex),
-    ...(rowReorder && rowIndex !== undefined
+    ...(rowReorder && reorderIndex !== undefined
       ? {
-          ...rowReorder.dropProps(rowIndex, row, windowStart),
-          ...rowReorder.rowAttrs(id, rowIndex),
+          ...rowReorder.dropProps(reorderIndex, row, windowStart),
+          ...rowReorder.rowAttrs(id, reorderIndex),
         }
       : {}),
     // antd builds its own <tr>, so the absolute aria-rowindex arrives
@@ -1290,6 +1298,7 @@ interface DataTableBodyRegionProps<TRow> {
   hasPinned: boolean;
   hasRowActions: boolean;
   rowReorder: RowReorderState<TRow> | undefined;
+  reorderIndices: ReadonlyMap<string, number> | undefined;
   windowStart: number;
   /** Rows in the whole dataset, for the cards' `aria-setsize`. */
   cardSetSize: number;
@@ -1332,6 +1341,7 @@ function DesktopTableBody<TRow>({
   minWidth,
   emptyNode,
   rowReorder,
+  reorderIndices,
   windowStart,
   rowPinning,
   pinnedSummaryTop = [],
@@ -1370,6 +1380,7 @@ function DesktopTableBody<TRow>({
   minWidth: number;
   emptyNode: ReactNode;
   rowReorder: RowReorderState<TRow> | undefined;
+  reorderIndices: ReadonlyMap<string, number> | undefined;
   windowStart: number;
   rowPinning: RowPinningState<TRow> | undefined;
   pinnedSummaryTop?: readonly TRow[];
@@ -1456,12 +1467,14 @@ function DesktopTableBody<TRow>({
       expandable={expandable}
       summary={summary}
       pagination={false}
+      loading={SILENT_TABLE_LOADING}
       rowClassName={rowClassName ? buildRowClassName(rowClassName) : undefined}
       onChange={handleChange as TableProps<GroupedDataRecord<TRow>>["onChange"]}
       onRow={(record, rowIndex) =>
         antdOnRow({
           record,
           rowIndex,
+          reorderIndices,
           getRowId,
           rowPinning,
           pinnedSummaryTop,
@@ -1610,6 +1623,7 @@ function DataTableBodyRegion<TRow>(
     hasPinned,
     hasRowActions,
     rowReorder,
+    reorderIndices,
     windowStart,
     cardSetSize,
     rowPinning,
@@ -1710,6 +1724,7 @@ function DataTableBodyRegion<TRow>(
         minWidth={minWidth}
         emptyNode={emptyNode}
         rowReorder={rowReorder}
+        reorderIndices={reorderIndices}
         windowStart={windowStart}
         rowPinning={rowPinning}
         pinnedSummaryTop={pinnedSummaryTop}
@@ -2252,6 +2267,11 @@ function AntdTableBody<TRow>({
           virtualBody && !c.isPaged && !source.error
         );
 
+        const reorderIndices = c.rowReorder
+          ? new Map(
+              renderedRowsOf(c).map((row, index) => [getRowId(row), index])
+            )
+          : undefined;
         const treeEntries = c.tree?.entries;
         const treeEntryByRow = new Map<TRow, TreeEntry<TRow>>(
           treeEntries?.map((entry) => [entry.row, entry])
@@ -2353,6 +2373,7 @@ function AntdTableBody<TRow>({
           columnGroups: c.columnGroups,
           onToggleColumnGroup: c.columnLayout.toggleColumnGroup,
           rowReorder: c.rowReorder,
+          reorderIndices,
           windowStart,
           cellsByRow,
           pinnedSummaryTop,
@@ -2486,6 +2507,7 @@ function AntdTableBody<TRow>({
                 hasPinned={hasPinned}
                 hasRowActions={hasRowActions}
                 rowReorder={c.rowReorder}
+                reorderIndices={reorderIndices}
                 windowStart={windowStart}
                 cardSetSize={cardSetSize}
                 rowPinning={c.rowPinning}

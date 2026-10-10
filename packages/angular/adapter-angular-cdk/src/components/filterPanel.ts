@@ -5,7 +5,7 @@ import {
   AdaptFilterTreeChrome,
   type FilterOverlaySlotProps,
   type FiltersFormSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import {
   type CdkConnectedOverlay,

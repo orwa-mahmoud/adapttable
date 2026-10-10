@@ -1,0 +1,26 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@adapttable/vue": ["./src/index.ts"],
+      "@adapttable/vue/adapter": ["./src/adapter.ts"],
+      "@adapttable/vue/features": ["./src/features.ts"],
+      "@adapttable/vue/formula": ["./src/formula.ts"],
+      "@adapttable/vue/pivot": ["./src/pivot.ts"],
+      "@adapttable/vue/stream": ["./src/stream.ts"],
+      "@adapttable/vue/sparkline": ["./src/sparkline.ts"],
+      "@adapttable/vue/pdf": ["./src/pdf.ts"],
+      "@adapttable/vue/xlsx": ["./src/xlsx.ts"]
+    }
+  },
+  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist", "coverage", "test/types/invalid"],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "dataAttributes": ["data-*"]
+  }
+}

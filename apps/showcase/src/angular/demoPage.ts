@@ -5,7 +5,9 @@ import {
   type CellContext,
   type ColumnDef,
   type ColumnInput,
+  type ColumnLayoutState,
   type FacetMap,
+  injectColumnLayoutUrlState,
   injectHighlight,
   injectPrefersReducedMotion,
   injectSavedViews,
@@ -52,6 +54,7 @@ import {
   personSkills,
   personStatus,
   SKILLS,
+  strings,
   summaryPerson,
 } from "../people";
 import {
@@ -199,6 +202,7 @@ export class AdaptShowcaseDemoPage {
     option("density", "comfortable") === "compact" ? "compact" : "comfortable"
   );
   readonly filterMode = option("filters", "popover");
+  readonly filterSet = this.large ? "kitchen" : option("filter-set", "live");
   readonly pagination: PaginationMode =
     this.large || option("pagination", "paged") === "infinite"
       ? "infinite"
@@ -214,6 +218,25 @@ export class AdaptShowcaseDemoPage {
   readonly editingMode = initialEditingMode(this.canWrite, this.lab);
   readonly editing = this.editingMode !== "off";
   readonly grouping = this.structure === "grouped";
+  readonly columnState = injectColumnLayoutUrlState({
+    urlKey: this.urlKey,
+    defaultColumnLayout: {
+      hidden:
+        this.grouping || enabled("cell-span") || enabled("column-groups")
+          ? ["email"]
+          : ["email", "team"],
+    },
+  });
+  /** A new pin reveals the wide arrangement so its stickiness is visible. */
+  setColumnLayout(next: ColumnLayoutState): void {
+    const previous = this.columnState.layout();
+    const pinAdded = Object.keys(next.pinned).some(
+      (key) => !(key in previous.pinned)
+    );
+    this.columnState.onLayoutChange(
+      pinAdded && next.hidden.length ? { ...next, hidden: [] } : next
+    );
+  }
   readonly reducedMotion = injectPrefersReducedMotion();
   readonly motion = enabled("motion", true);
   readonly highlight = injectHighlight(
@@ -233,11 +256,20 @@ export class AdaptShowcaseDemoPage {
   readonly flashCell = viewChild<TemplateRef<CellContext<Person>>>("flashCell");
   readonly leafColumns = computed<readonly ColumnDef<Person>[]>(() => {
     const flash = this.flashCell();
+    const columns = peopleColumns({ editable: this.editing }).map((column) => ({
+      ...column,
+      minWidth: typeof column.width === "number" ? column.width : undefined,
+      ...(enabled("cell-flash") && flash ? { cell: flash } : {}),
+    }));
+    columns.splice(1, 0, {
+      key: "email",
+      header: strings(this.presentation.locale === "ar" ? "ar" : "en").email,
+      accessor: (row: Person) => row.email,
+      width: 280,
+      minWidth: 280,
+    });
     return [
-      ...peopleColumns({ editable: this.editing }).map((column) => ({
-        ...column,
-        ...(enabled("cell-flash") && flash ? { cell: flash } : {}),
-      })),
+      ...columns,
       ...(enabled("formula")
         ? buildFormulaColumns<Person>([
             {
@@ -302,7 +334,7 @@ export class AdaptShowcaseDemoPage {
       result = [
         ...groupedPeopleColumns().map(replace),
         ...columns.filter((column) =>
-          ["tag", "trend", "remote", "skills"].includes(column.key)
+          ["email", "tag", "trend", "remote", "skills"].includes(column.key)
         ),
       ];
     }
@@ -396,7 +428,7 @@ export class AdaptShowcaseDemoPage {
     : "en";
   readonly baseFeatures: readonly AdaptTableFeature[] = [
     this.kit.filters(
-      option("filter-set", "live") === "kitchen" || this.large
+      this.filterSet === "kitchen"
         ? kitchenFilterDefs(this.dataLocale).map((def) =>
             def.type === "personText" ? { ...def, type: "text" } : def
           )
@@ -780,7 +812,6 @@ export class AdaptShowcaseDemoPage {
     ["extra-rows", "Attached extra row"],
     ["row-style", "Row style"],
     ["virtualize", "Virtualization"],
-    ["mobile", "Mobile cards"],
   ];
   readonly optionsDialog =
     viewChild<ElementRef<HTMLDialogElement>>("optionsDialog");
@@ -941,7 +972,21 @@ export class AdaptShowcaseDemoPage {
     // in the demo session, and the binding restores its URL-backed state.
     navigateDemo(url);
   }
+  private normalizePresentationChange(
+    url: URL,
+    key: string,
+    value: string
+  ): void {
+    if (key === "locale") url.searchParams.delete("dir");
+    if (key === "grouping") {
+      url.searchParams.set("structure", value === "on" ? "grouped" : "flat");
+      if (value === "on") url.searchParams.set("row-pinning", "off");
+    }
+    if (key === "editing")
+      url.searchParams.set("editing-mode", value === "on" ? "cell" : "off");
+  }
   private normalizeOptionChange(url: URL, key: string, value: string): void {
+    this.normalizePresentationChange(url, key, value);
     if (key === "structure" && ["grouped", "tree"].includes(value))
       url.searchParams.set("row-pinning", "off");
     if (key === "dataset" && value === "large") {
@@ -987,10 +1032,11 @@ export class AdaptShowcaseDemoPage {
       mode: this.server ? "server" : "frontend",
       locale: this.presentation.locale,
       density: this.density(),
+      mobile: this.mobile ? "on" : "off",
       filters: this.filterMode,
       dataset: this.dataset,
       pagination: this.pagination,
-      "filter-set": this.mountedOptions.get("filter-set") ?? "live",
+      "filter-set": this.filterSet,
       structure: this.structure,
       "editing-mode": this.editingMode,
       failure: this.failure(),
@@ -1002,7 +1048,7 @@ export class AdaptShowcaseDemoPage {
       if (element instanceof HTMLInputElement) {
         element.checked =
           element.type === "radio"
-            ? element.value === this.kit.key
+            ? element.value === (values[key] ?? this.mountedOptions.get(key))
             : this.checkedControl(key);
       } else if (element instanceof HTMLSelectElement) {
         element.value = values[key] ?? this.mountedOptions.get(key) ?? "";

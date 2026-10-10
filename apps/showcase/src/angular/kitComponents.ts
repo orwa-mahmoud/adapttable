@@ -12,14 +12,16 @@ import type {
   ExtraFilters,
   PaginationMode,
   SummaryRowFn,
-  TableAssistantButtonProps,
-  TableAssistantLanguageChipProps,
   TableAssistantProps,
   TableDensity,
   TableLabels,
   TableQueryParams,
   TableSource,
 } from "@adapttable/angular";
+import type {
+  TableAssistantButtonProps,
+  TableAssistantLanguageChipProps,
+} from "@adapttable/angular/adapter";
 import type { PivotConfig, PivotField } from "@adapttable/angular/pivot";
 import { NgComponentOutlet } from "@angular/common";
 import {

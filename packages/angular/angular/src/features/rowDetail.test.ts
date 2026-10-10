@@ -6,7 +6,8 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 
 import { featureOptionsOf } from "../featureHost";
-import { injectRowDetail, nestedTable, rowDetail } from "./rowDetail";
+import { injectRowDetail } from "../tree/tableRowDetail";
+import { nestedTable, rowDetail } from "./rowDetail";
 
 /** A stand-in renderer; the features only carry it. */
 class Panel {}

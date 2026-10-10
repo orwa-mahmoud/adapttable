@@ -9,7 +9,8 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { AdaptAttrs, type Attrs } from "./attrs";
+import { type Attrs } from "./attrContracts";
+import { AdaptAttrs } from "./attrs";
 
 @Component({
   imports: [AdaptAttrs],

@@ -9,7 +9,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import type { AdaptTableFeature } from "../featureHost";
 import { injectFrontendData } from "../source/frontendData";
-import { injectTree, tree, type TreeFeatureOptions } from "./tree";
+import { injectTree } from "../tree/tableTree";
+import { tree, type TreeFeatureOptions } from "./tree";
 
 interface Person {
   id: string;

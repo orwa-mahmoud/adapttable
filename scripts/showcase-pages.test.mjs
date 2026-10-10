@@ -15,19 +15,76 @@ import {
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES, SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
 import { demoRootOf, demoRoute, FRAMEWORK } from "./site.mjs";
-import { isRedirectPage } from "./sitemap-routes.mjs";
+import { indexableRoutes, isRedirectPage } from "./sitemap-routes.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
 
 const INDEX = "index.html";
+
+const VUE_PREVIEW_ENTRIES = new Map([
+  ["preview", "src/vue/entry-native.ts"],
+  ["workspace", "src/vue/workspace/entry-workspace.ts"],
+  ["assistant", "src/vue/entry-assistant.ts"],
+  ["table-surfaces", "src/vue/entry-table-surfaces.ts"],
+  ["table-footers", "src/vue/entry-table-footers.ts"],
+  ["filter-editing", "src/vue/entry-filter-editing.ts"],
+  ["composition", "src/vue/entry-composition.ts"],
+  ["hierarchy", "src/vue/entry-hierarchy.ts"],
+  ["row-controls", "src/vue/entry-rows.ts"],
+  ["selection-contract", "src/vue/entry-selection-contract.ts"],
+  ["view-controls", "src/vue/entry-view-controls.ts"],
+  ["column-menu", "src/vue/column-menu/entry-column-menu.ts"],
+  ["navigation", "src/vue/navigation/entry-navigation.ts"],
+  ["actions", "src/vue/actions/entry-actions.ts"],
+  ["specialized", "src/vue/specialized/entry-specialized.ts"],
+  ["feature-union", "src/vue/feature-union/entry-feature-union.ts"],
+]);
+
+const VUE_KIT_PREVIEW_ENTRIES = new Map([
+  ["element-plus", "src/vue/kits/entry-element-plus.ts"],
+  ["vuetify", "src/vue/kits/entry-vuetify.ts"],
+  ["naive-ui", "src/vue/kits/entry-naive-ui.ts"],
+  ["reka-ui", "src/vue/kits/entry-reka-ui.ts"],
+  ["shadcn-vue", "src/vue/kits/entry-shadcn-vue.ts"],
+  ["nuxt-ui", "src/vue/kits/entry-nuxt-ui.ts"],
+  ["quasar", "src/vue/kits/entry-quasar.ts"],
+]);
+
+const VUE_KIT_LAB_ENTRIES = new Map([
+  ["shadcn-vue/filter-panel", "src/vue/kits/entry-shadcn-filter-panel.ts"],
+  ["shadcn-vue/feature-parity", "src/vue/kits/entry-shadcn-feature-parity.ts"],
+  [
+    "shadcn-vue/action-surfaces",
+    "src/vue/kits/entry-shadcn-action-surfaces.ts",
+  ],
+  ["nuxt-ui/workspace", "src/vue/kits/entry-nuxt-workspace.ts"],
+  ["naive-ui/filter-panel", "src/vue/kits/entry-naive-filter-panel.ts"],
+]);
+
+const VUE_KIT_LAB_WRAPPERS = new Map([
+  ["nuxt-ui/workspace", "NuxtWorkspaceShowcase.vue"],
+  ["naive-ui/filter-panel", "NaiveFilterPanelShowcase.vue"],
+]);
 
 const STANDALONE_ENTRIES = new Map([
   ["main", "src/main.tsx"],
   ["all-options", "src/entry-all-options.tsx"],
   ["agent-approval", "src/entry-agent-approval.tsx"],
   ["mcp-app", "src/entry-mcp-app.tsx"],
+  ...[...VUE_KIT_PREVIEW_ENTRIES].map(([kit, entry]) => [
+    `vue-${kit}-orders`,
+    entry,
+  ]),
+  ...[...VUE_KIT_LAB_ENTRIES].map(([path, entry]) => [
+    `vue-${path.replaceAll("/", "-")}`,
+    entry,
+  ]),
   ["angular-main", "src/angular/entry-demo.ts"],
   ["angular-all-options", "src/angular/entry-demo.ts"],
+  ...[...VUE_PREVIEW_ENTRIES].map(([slug, entry]) => [
+    `vue-unstyled-${slug}`,
+    entry,
+  ]),
 ]);
 
 /** Not page directories: build output, dependencies, static assets, source. */
@@ -122,6 +179,33 @@ function assertStandaloneEntry(page, source, entry) {
     assert.equal(page.indexable, true, page.html);
     assert.ok(source.includes(`data-angular-mode="${lab ? "lab" : "live"}"`));
     assert.doesNotMatch(source, /data-matrix-page/);
+  } else if (page.framework === "vue") {
+    const lab = [...VUE_KIT_LAB_ENTRIES.keys()].find(
+      (path) => page.key === `vue-${path.replaceAll("/", "-")}`
+    );
+    if (lab) {
+      assert.equal(page.route, `/vue/demo/${lab}/`);
+      assert.equal(page.indexable, false);
+      assert.doesNotMatch(source, /data-matrix-page/);
+      return;
+    }
+    const kit = [...VUE_KIT_PREVIEW_ENTRIES.keys()].find(
+      (key) => page.key === `vue-${key}-orders`
+    );
+    if (kit) {
+      assert.equal(page.route, `/vue/demo/${kit}/orders/`);
+      assert.equal(page.indexable, false);
+      assert.doesNotMatch(source, /data-matrix-page/);
+      return;
+    }
+    const preview = [...VUE_PREVIEW_ENTRIES].find(
+      ([slug]) => page.key === `vue-unstyled-${slug}`
+    );
+    assert.ok(preview, page.html);
+    const [slug] = preview;
+    assert.equal(page.route, `/vue/demo/unstyled/${slug}/`);
+    assert.equal(page.indexable, false);
+    assert.doesNotMatch(source, /data-matrix-page/);
   } else {
     assert.equal(page.framework, "react", page.html);
   }
@@ -133,6 +217,125 @@ describe("the showcase page manifest", () => {
       sorted(SHOWCASE_PAGES.map((page) => page.html)),
       entriesOnDisk()
     );
+  });
+
+  it("keeps every implemented Vue preview distinct from the other unstyled families", () => {
+    const previewKeys = new Set(
+      [...VUE_PREVIEW_ENTRIES.keys()].map((slug) => `vue-unstyled-${slug}`)
+    );
+    const vue = SHOWCASE_PAGES.filter((page) => previewKeys.has(page.key));
+    assert.deepEqual(
+      vue,
+      [...VUE_PREVIEW_ENTRIES.keys()].map((slug) => ({
+        key: `vue-unstyled-${slug}`,
+        html: `./vue/unstyled/${slug}/index.html`,
+        route: `/vue/demo/unstyled/${slug}/`,
+        indexable: false,
+        framework: "vue",
+      }))
+    );
+    assert.ok(
+      SHOWCASE_PAGES.some((page) => page.route === "/angular/demo/unstyled/")
+    );
+    const indexed = indexableRoutes(SHOWCASE_PAGES);
+    for (const page of vue) {
+      assert.equal(indexed.includes(page.route), false, page.route);
+    }
+    // The previews sit beside the Vue Unstyled kit's indexed matrix pages,
+    // which own the kit's own address and the feature addresses.
+    const matrix = matrixPages().filter(
+      (page) => page.framework === "vue" && page.adapter === "vue-unstyled"
+    );
+    assert.equal(matrix.length, MATRIX_FEATURES.length + 1);
+    for (const page of matrix) {
+      assert.ok(indexed.includes(demoRoute(page.path, "vue")), page.path);
+      assert.equal(previewKeys.has(page.dir.replaceAll("/", "-")), false);
+    }
+    const component = readFileSync(
+      join(SHOWCASE, "src/vue/NativeDemo.vue"),
+      "utf8"
+    );
+    assert.match(component, /from "@adapttable\/vue-unstyled"/);
+    assert.doesNotMatch(
+      component,
+      /@adapttable\/(?:core|react|angular|unstyled)["/]/
+    );
+  });
+
+  it("registers each actual Vue kit entry separately from complete feature parity", () => {
+    for (const [kit, entry] of VUE_KIT_PREVIEW_ENTRIES) {
+      const pages = SHOWCASE_PAGES.filter(
+        (page) => page.key === `vue-${kit}-orders`
+      );
+      assert.deepEqual(pages, [
+        {
+          key: `vue-${kit}-orders`,
+          html: `./vue/${kit}/orders/index.html`,
+          route: `/vue/demo/${kit}/orders/`,
+          indexable: false,
+          framework: "vue",
+        },
+      ]);
+      const source = readFileSync(join(SHOWCASE, entry), "utf8");
+      assert.match(source, /createApp/);
+      assert.doesNotMatch(
+        source,
+        /@adapttable\/(?:core|react|angular|unstyled)["/]/
+      );
+    }
+  });
+
+  it("boots real-control Vue labs separately from the seven basic kit previews", () => {
+    const indexed = indexableRoutes(SHOWCASE_PAGES);
+    for (const [path, entry] of VUE_KIT_LAB_ENTRIES) {
+      const key = `vue-${path.replaceAll("/", "-")}`;
+      assert.deepEqual(
+        SHOWCASE_PAGES.filter((page) => page.key === key),
+        [
+          {
+            key,
+            html: `./vue/${path}/index.html`,
+            route: `/vue/demo/${path}/`,
+            indexable: false,
+            framework: "vue",
+          },
+        ]
+      );
+      assert.equal(indexed.includes(`/vue/demo/${path}/`), false);
+      const source = readFileSync(join(SHOWCASE, entry), "utf8");
+      assert.match(source, /createApp\(Fixture\)/);
+      // Each lab mounts its own kit's fixture, directly or through a showcase
+      // wrapper component.
+      const wrapper = VUE_KIT_LAB_WRAPPERS.get(path);
+      if (wrapper) assert.ok(source.includes(`from "./${wrapper}"`), path);
+      const mounted = wrapper
+        ? readFileSync(join(SHOWCASE, "src/vue/kits", wrapper), "utf8")
+        : source;
+      assert.ok(
+        mounted.includes(`packages/vue/adapter-${path.split("/")[0]}/`),
+        path
+      );
+      assert.doesNotMatch(
+        source,
+        /@adapttable\/(?:core|react|angular|unstyled)["/]/
+      );
+    }
+    const nuxt = readFileSync(
+      join(SHOWCASE, VUE_KIT_LAB_ENTRIES.get("nuxt-ui/workspace")),
+      "utf8"
+    );
+    assert.match(nuxt, /import "\.\/nuxt-ui\.css"/);
+    assert.match(nuxt, /from "@nuxt\/ui\/vue-plugin"/);
+    assert.match(nuxt, /\.use\(ui\)\.mount\("#root"\)/);
+    const fixture = readFileSync(
+      join(SHOWCASE, "src/vue/kits/NuxtWorkspaceShowcase.vue"),
+      "utf8"
+    );
+    assert.match(
+      fixture,
+      /packages\/vue\/adapter-nuxt-ui\/browser\/workspace\/NuxtWorkspaceFixture\.vue/
+    );
+    assert.match(fixture, /<Fixture \/>/);
   });
 
   it("registers row-reordering and aggregation for every published adapter", () => {

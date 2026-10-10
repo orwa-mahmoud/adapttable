@@ -4,7 +4,7 @@
 
 ```ts
 
-import { fitColumns } from '@adapttable/angular';
+import { fitColumns } from '@adapttable/angular/features';
 
 export { fitColumns }
 

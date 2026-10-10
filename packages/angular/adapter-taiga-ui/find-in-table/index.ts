@@ -1,11 +1,10 @@
 import {
   type AdaptTableFeature,
   extendFeature,
-  FIND_BAR,
-  findInTable as bindingFindInTable,
   slotRender,
-  TOOLBAR_EXTRAS,
 } from "@adapttable/angular";
+import { FIND_BAR, TOOLBAR_EXTRAS } from "@adapttable/angular/adapter";
+import { findInTable as bindingFindInTable } from "@adapttable/angular/features";
 
 import { AdaptFindBar, AdaptFindToolbarButton } from "./findBar";
 

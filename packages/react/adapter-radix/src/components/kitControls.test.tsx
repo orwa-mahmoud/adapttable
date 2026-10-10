@@ -1,5 +1,5 @@
 import type { QueryFilterGroup } from "@adapttable/core";
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -252,6 +252,30 @@ describe("kit header filter trigger (radix)", () => {
     expect(
       document.querySelector('[data-adapttable-part="filter-header-cell"]')
     ).not.toBeNull();
+  });
+
+  it("keeps a native operator press inside the session and dismisses a true outside press", async () => {
+    renderRadix(<TriggerHarness />);
+    fireEvent.click(trigger());
+    await screen.findByRole("textbox", { name: "Name" });
+    fireEvent.click(
+      screen.getByRole("combobox", { name: defaultLabels.operator })
+    );
+    const option = await screen.findByRole("option", {
+      name: defaultLabels.opNotContains,
+    });
+    fireEvent.mouseDown(option);
+    fireEvent.click(option);
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: "Name" })).toBeVisible()
+    );
+    expect(
+      screen.getByRole("combobox", { name: defaultLabels.operator })
+    ).toHaveTextContent(defaultLabels.opNotContains);
+    fireEvent.mouseDown(document.body);
+    await waitFor(() =>
+      expect(screen.queryByRole("textbox", { name: "Name" })).toBeNull()
+    );
   });
 });
 

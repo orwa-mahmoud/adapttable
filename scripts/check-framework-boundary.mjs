@@ -2,7 +2,7 @@
 /**
  * The engine/binding line — source modules and shipped neutral graphs.
  *
- * Source-listed engine modules must not import React directly. Shipped neutral
+ * Source-listed engine modules must not import a framework directly. Shipped neutral
  * entrypoints are walked transitively through dist so a coupling through a local
  * re-export cannot hide behind `../types`.
  *
@@ -12,10 +12,14 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import ts from "typescript";
+
 import {
   buildPkgDirByName,
+  conditionTargets,
   hasClientDirective,
-  resolvePublishedEntry,
+  importsOf,
+  readPackageJson,
   walkGraph,
 } from "./module-graph.mjs";
 import {
@@ -31,12 +35,7 @@ const {
   engineModules,
   forbiddenImports,
   neutralEntrypoints = [],
-  forbiddenReach = [
-    "react",
-    "react-dom",
-    "react-compiler-runtime",
-    "@adapttable/react",
-  ],
+  forbiddenReach = [],
 } = frameworkBoundary;
 
 /** A trailing `*` is a prefix; the rest are exact. */
@@ -49,36 +48,59 @@ function buildMatchers(patterns) {
 }
 
 const forbiddenMatchers = buildMatchers(forbiddenImports);
-const reachMatchers = buildMatchers([
-  ...forbiddenReach,
-  "react/*",
-  "react-dom/*",
-  "@tanstack/react-*",
-]);
+const reachMatchers = buildMatchers([...forbiddenImports, ...forbiddenReach]);
 
 function isForbidden(spec, matchers) {
   return matchers.some((matches) => matches(spec));
 }
 
-/** Every `from "…"` and `import("…")` specifier in one file. */
-function specifiersOf(source) {
-  const out = [];
-  const re = /(?:from|import)[\s(]*["']([^"']+)["']/g;
-  for (const match of source.matchAll(re)) out.push(match[1]);
-  return out;
+/** Inspect type syntax, not framework names in documentation or literal data. */
+function declarationViolations(file) {
+  const source = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.Latest,
+    true
+  );
+  const hits = new Set();
+  function visit(node) {
+    if (
+      ts.isIdentifier(node) &&
+      /^React(?:Node|Element|Component)/.test(node.text)
+    ) {
+      hits.add("React.* type name");
+    }
+    if (
+      ts.isImportTypeNode(node) &&
+      ts.isLiteralTypeNode(node.argument) &&
+      ts.isStringLiteral(node.argument.literal)
+    ) {
+      const spec = node.argument.literal.text;
+      if (isForbidden(spec, reachMatchers)) hits.add(`import("${spec}")`);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return [...hits];
 }
 
-/** React type references inside a neutral declaration file. */
-function declarationViolations(file) {
-  const text = readFileSync(file, "utf8");
-  const hits = [];
-  if (/from\s+["']react["']/.test(text)) hits.push('imports "react"');
-  if (/from\s+["']react-dom["']/.test(text)) hits.push('imports "react-dom"');
-  if (/import\s*\(\s*["']react["']\s*\)/.test(text))
-    hits.push('import("react")');
-  if (/React(?:Node|Element|Component)/.test(text))
-    hits.push("React.* type name");
-  return hits;
+function fileViolations(file, label) {
+  const violations = importsOf(file)
+    .filter((spec) => isForbidden(spec, reachMatchers))
+    .map(
+      (spec) => `${label}: ${relative(ROOT, file)} imports forbidden ${spec}`
+    );
+  if (hasClientDirective(file)) {
+    violations.push(`${label} reaches client module ${relative(ROOT, file)}`);
+  }
+  if (/\.d\.(?:ts|mts|cts)$/.test(file)) {
+    violations.push(
+      ...declarationViolations(file).map(
+        (hit) => `${label}: ${relative(ROOT, file)} ${hit}`
+      )
+    );
+  }
+  return violations;
 }
 
 /**
@@ -102,28 +124,24 @@ export function checkTransitiveGraph({ entryFiles, pkgDirByName, label }) {
     violations.push(`${label} has unresolved import ${spec}`);
   }
   for (const file of files) {
-    if (hasClientDirective(file)) {
-      violations.push(`${label} reaches client module ${relative(ROOT, file)}`);
-    }
-    if (file.endsWith(".d.ts")) {
-      for (const hit of declarationViolations(file)) {
-        violations.push(`${label}: ${relative(ROOT, file)} ${hit}`);
-      }
-    }
+    violations.push(...fileViolations(file, label));
   }
   return violations;
 }
 
-function checkSourceEngineModules() {
+export function checkSourceEngineModules({
+  modules = engineModules,
+  root = ROOT,
+} = {}) {
   const missing = [];
   const violations = [];
-  for (const relativePath of engineModules) {
-    const file = resolvePackagePath(relativePath);
+  for (const relativePath of modules) {
+    const file = resolvePackagePath(relativePath, root);
     if (!existsSync(file)) {
       missing.push(relativePath);
       continue;
     }
-    const banned = specifiersOf(readFileSync(file, "utf8")).filter((spec) =>
+    const banned = importsOf(file).filter((spec) =>
       isForbidden(spec, forbiddenMatchers)
     );
     if (banned.length > 0) {
@@ -133,36 +151,25 @@ function checkSourceEngineModules() {
   return { missing, violations };
 }
 
-/** The runtime file beside a resolved declaration entry. */
-function runtimeFileFor(file) {
-  if (file.endsWith(".d.ts")) return file.replace(/\.d\.ts$/, ".js");
-  if (file.endsWith(".d.cts")) return file.replace(/\.d\.cts$/, ".cjs");
-  return file;
-}
-
-/** One published neutral entry: the graph it pulls in and the types it ships. */
-function checkNeutralEntry(pkgName, subpath, pkgDirByName) {
-  const resolved = resolvePublishedEntry(pkgName, subpath, pkgDirByName);
+/** Every declared runtime and type condition of a published neutral entry. */
+export function checkNeutralEntry(pkgName, subpath, pkgDirByName) {
   const label = `${pkgName}${subpath === "." ? "" : subpath.replace(/^\.\//, "/")}`;
-  if (resolved.missing) return [`missing neutral entry ${label}`];
-
-  const runtime = runtimeFileFor(resolved.file);
-  if (!existsSync(runtime)) return [`missing neutral runtime for ${label}`];
-
-  const violations = checkTransitiveGraph({
-    entryFiles: [runtime],
-    pkgDirByName,
-    label,
-  });
-  const types = resolved.file.endsWith(".d.ts")
-    ? resolved.file
-    : runtime.replace(/\.(js|cjs|mjs)$/, ".d.ts");
-  if (existsSync(types)) {
-    for (const hit of declarationViolations(types)) {
-      violations.push(`${label}: ${relative(ROOT, types)} ${hit}`);
-    }
+  const dir = pkgDirByName.get(pkgName);
+  if (!dir) return [`missing neutral entry ${label}`];
+  const key = subpath === "." ? "." : `./${subpath.replace(/^\.\//, "")}`;
+  const targets = [...conditionTargets(readPackageJson(dir).exports?.[key])];
+  if (targets.length === 0) return [`missing neutral entry ${label}`];
+  const violations = [];
+  const entryFiles = [];
+  for (const target of targets) {
+    const file = join(dir, target);
+    if (existsSync(file)) entryFiles.push(file);
+    else violations.push(`missing neutral target ${label}: ${target}`);
   }
-  return violations;
+  return [
+    ...violations,
+    ...checkTransitiveGraph({ entryFiles, pkgDirByName, label }),
+  ];
 }
 
 function checkNeutralEntrypoints() {
@@ -210,8 +217,8 @@ function main() {
   for (const { relative: rel, banned } of sourceViolations) {
     console.error(
       `✗ ${rel} is engine but imports ${banned.join(", ")}\n` +
-        `  Move the React use into a binding module, or drop this module from ` +
-        `frameworkBoundary.engineModules with the reason in the commit.`
+        `  Move the framework use into a binding module; keep engine code in ` +
+        `frameworkBoundary.engineModules framework-neutral.`
     );
   }
   for (const rel of missing) {

@@ -9,6 +9,7 @@
     "pnpm-workspace.yaml",
     "scripts/bootstrap-styles.mjs",
     "scripts/build-library.mjs",
+    "scripts/check-vue-types.mjs",
     "scripts/vitest-workers.mjs",
     "tsconfig.base.json",
     "vitest.shared.ts"
@@ -29,6 +30,14 @@
     },
     "test:coverage": {
       "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "@adapttable/vue#test": {
+      "dependsOn": ["^build", "build"],
+      "outputs": []
+    },
+    "@adapttable/vue#test:coverage": {
+      "dependsOn": ["^build", "build"],
       "outputs": ["coverage/**"]
     },
     "lint": {

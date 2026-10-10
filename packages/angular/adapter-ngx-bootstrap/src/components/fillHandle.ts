@@ -5,7 +5,7 @@ import {
   type FillHandleChromeProps,
   type FillHandleSlotProps,
   type FillHandleSlots,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 /** The ngx-bootstrap kit's visible drag handle. @public */

@@ -7,7 +7,7 @@ import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
 import { virtualize } from "@adapttable/angular-unstyled/virtualize";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
 
@@ -165,6 +165,60 @@ describe("virtualize (unstyled Angular)", () => {
     expect(renderedRowIds()).toEqual(
       Array.from({ length: 10 }, (_, index) => String(index))
     );
+  });
+
+  it("switches between bounded and page windows without remounting the table", async () => {
+    layout.listTop = 400;
+    const disposed = vi.fn();
+    const mounted = vi.fn<NonNullable<AdaptTableFeature["mount"]>>(
+      () => disposed
+    );
+    const fixture = await mount({
+      features: [
+        virtualize({ estimateRowSize: 40, virtualOverscan: 0 }),
+        { id: "window-observer", mount: mounted },
+      ],
+      maxHeight: 200,
+    });
+    const table = document.querySelector("table");
+    const search = document.querySelector<HTMLInputElement>(
+      '[data-adapttable-part="search-field"] input'
+    )!;
+    expect(search).not.toBeNull();
+    search.focus();
+    expect(document.activeElement).toBe(search);
+    expect(mounted).toHaveBeenCalledOnce();
+    const runtime = mounted.mock.calls[0]![0].runtime;
+    expect(runtime.rowAt(0)).toBe(ITEMS[0]);
+    // Core's materializeWindowRows/rowWindow intentionally renders no rows
+    // before a new virtualizer's first slice. Rows may remount during the
+    // transition; the table, feature runtime and focused toolbar stay live.
+    expect(renderedRowIds()).toEqual(["0", "1", "2", "3", "4"]);
+    fixture.componentRef.setInput("maxHeight", undefined);
+    await fixture.whenStable();
+    await fixture.whenStable();
+    expect(renderedRowIds()).toEqual(
+      Array.from({ length: 10 }, (_, index) => String(index))
+    );
+    expect(document.querySelector("table")).toBe(table);
+    expect(mounted).toHaveBeenCalledOnce();
+    expect(disposed).not.toHaveBeenCalled();
+    expect(mounted.mock.calls[0]![0].runtime).toBe(runtime);
+    expect(runtime.rowAt(0)).toBe(ITEMS[0]);
+    expect(document.activeElement).toBe(search);
+    fixture.componentRef.setInput("maxHeight", 200);
+    await fixture.whenStable();
+    await fixture.whenStable();
+    expect(renderedRowIds()).toEqual(["0", "1", "2", "3", "4"]);
+    expect(document.querySelector("table")).toBe(table);
+    expect(mounted).toHaveBeenCalledOnce();
+    expect(disposed).not.toHaveBeenCalled();
+    expect(mounted.mock.calls[0]![0].runtime).toBe(runtime);
+    expect(runtime.rowAt(0)).toBe(ITEMS[0]);
+    expect(document.activeElement).toBe(search);
+    expect(fixture.componentInstance.data).toBe(ITEMS);
+    fixture.destroy();
+    expect(disposed).toHaveBeenCalledOnce();
   });
 
   it("keeps the true height below the window when rows measure taller", async () => {

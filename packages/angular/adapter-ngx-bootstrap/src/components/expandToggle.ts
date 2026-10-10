@@ -5,7 +5,7 @@ import {
   AdaptIcon,
   expandChevronIcon,
   type ExpandToggleSlotProps,
-} from "@adapttable/angular";
+} from "@adapttable/angular/adapter";
 import {
   ChangeDetectionStrategy,
   Component,

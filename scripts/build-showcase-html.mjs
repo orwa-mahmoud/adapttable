@@ -38,7 +38,14 @@ import {
   landingIntro,
   matrixPages,
   otherKitsOf,
+  pageDirOf,
+  pagePathOf,
+  pathOf,
   snippetFor,
+  VUE_KIT_LAB_PAGES,
+  VUE_KIT_PAGES,
+  VUE_NATIVE_BASELINE,
+  VUE_NATIVE_PAGES,
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES } from "../apps/showcase/pages.mjs";
 import { appendScript, guarded } from "./analytics-guard.mjs";
@@ -235,7 +242,7 @@ const head = ({
         color: #a5b4fc;
       }
 ${
-  route.startsWith("/angular/")
+  route.startsWith("/angular/") || route.startsWith("/vue/")
     ? `      .at-fallback {
         box-sizing: border-box;
         width: 100%;
@@ -295,6 +302,15 @@ const linkList = (items) =>
     "        </ul>",
   ].join("\n");
 
+/**
+ * Where "the live demo" points from a kit's page: React's shared live demo,
+ * or the kit's own landing for a framework whose kits each have one.
+ */
+const liveDemoRoute = (adapter) =>
+  adapter.framework === "react"
+    ? demoRoute()
+    : demoRoute(pathOf(adapter), adapter.framework);
+
 /** The other kits on this kit's framework with a page for this feature. */
 const kitsWithFeature = (adapter, feature) =>
   otherKitsOf(adapter).filter((other) =>
@@ -327,18 +343,19 @@ export const featurePage = (
   framework = frameworkOf(adapter)
 ) => {
   const fill = (text) => fillTemplate(text, adapter, framework);
-  const dir = `${adapter.key}/${feature.slug}`;
-  const route = demoRoute(dir, framework.key);
-  const own = headFor(feature, adapter);
+  const dir = pageDirOf(adapter, feature.slug, framework);
+  const path = pagePathOf(adapter, feature.slug);
+  const route = demoRoute(path, framework.key);
+  const own = headFor(feature, adapter, framework);
   const note = feature.notes[adapter.key];
   const body = `    <!-- Replaced by ${framework.label} on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
          a real page. Written by scripts/build-showcase-html.mjs. -->
-    <div id="root" data-matrix-page="${dir}">
+    <div id="root" data-matrix-page="${path}">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for ${escapeHtml(adapter.label)}</p>
         <h1>${escapeHtml(fill(own.h1))}</h1>
-${introFor(feature, adapter)
+${introFor(feature, adapter, framework)
   .map((line) => `        <p>${paragraph(fill(line))}</p>`)
   .join("\n")}
 ${note ? `        <p>${paragraph(note)}</p>\n` : ""}        <h2>The code</h2>
@@ -348,7 +365,7 @@ ${note ? `        <p>${paragraph(note)}</p>\n` : ""}        <h2>The code</h2>
 ${linkSection(
   "The same feature in the other kits",
   kitsWithFeature(adapter, feature).map((other) => ({
-    href: `../../${other.key}/${feature.slug}/`,
+    href: `../../${pathOf(other)}/${feature.slug}/`,
     text: fillTemplate(headFor(feature, other).h1, other),
     note: other.blurb,
   }))
@@ -356,13 +373,13 @@ ${linkSection(
     `More ${adapter.label} features`,
     siblingFeatures(adapter, feature).map((sibling) => ({
       href: `../${sibling.slug}/`,
-      text: fill(headFor(sibling, adapter).h1),
-      note: fill(headFor(sibling, adapter).card),
+      text: fill(headFor(sibling, adapter, framework).h1),
+      note: fill(headFor(sibling, adapter, framework).card),
     }))
   )}        <p>
           Reference: ${docsList(feature.docs, adapter.framework)}. More of this kit:
           <a href="../">AdaptTable for ${escapeHtml(adapter.label)}</a>, or
-          <a href="${adapter.framework === "angular" ? demoRoute(adapter.key, adapter.framework) : demoRoute()}">the live demo</a>.
+          <a href="${liveDemoRoute(adapter)}">the live demo</a>.
         </p>
       </main>
     </div>
@@ -390,7 +407,7 @@ const otherKitsSection = (adapter, fill) => {
         <p>${paragraph(fill(LANDING.kitsLead))}</p>
 ${linkList(
   others.map((other) => ({
-    href: `../${other.key}/`,
+    href: `../${pathOf(other)}/`,
     text: fillTemplate(LANDING.h1, other),
     note: other.blurb,
   }))
@@ -408,13 +425,14 @@ ${linkList(
  */
 export const landingPage = (adapter, framework = frameworkOf(adapter)) => {
   const fill = (text) => fillTemplate(text, adapter, framework);
-  const dir = adapter.key;
-  const route = demoRoute(dir, framework.key);
+  const dir = pageDirOf(adapter, null, framework);
+  const path = pagePathOf(adapter);
+  const route = demoRoute(path, framework.key);
   const head_ = landingHead(adapter);
   const body = `    <!-- Replaced by ${framework.label} on mount — see the note on a feature page for why the
          served markup carries content. Written by
          scripts/build-showcase-html.mjs. -->
-    <div id="root" data-matrix-page="${dir}">
+    <div id="root" data-matrix-page="${path}">
       <main class="at-fallback">
         <p class="at-fallback__kicker">${escapeHtml(adapter.pkg)}</p>
         <h1>${escapeHtml(fill(LANDING.h1))}</h1>
@@ -427,13 +445,13 @@ ${landingIntro(adapter)
 ${linkList(
   featuresOf(adapter).map((feature) => ({
     href: `./${feature.slug}/`,
-    text: fill(headFor(feature, adapter).h1),
-    note: fill(headFor(feature, adapter).card),
+    text: fill(headFor(feature, adapter, framework).h1),
+    note: fill(headFor(feature, adapter, framework).card),
   }))
 )}
 ${otherKitsSection(adapter, fill)}        <p>
           Reference: <a href="${siteUrl(docsReferenceRoute("getting-started", adapter.framework))}">getting started</a>. Or
-          open <a href="${adapter.framework === "angular" ? demoRoute(adapter.key, adapter.framework) : demoRoute()}">the live demo</a> and switch kits on
+          open <a href="${liveDemoRoute(adapter)}">the live demo</a> and switch kits on
           the same table.
         </p>
       </main>
@@ -564,8 +582,31 @@ export const angularModePage = (lab = false) => {
   };
 };
 
+/** A native Vue showcase surface. */
+export const nativeVuePage = (definition = VUE_NATIVE_BASELINE) => {
+  const { dir, title, description, path, entry, notice } = definition;
+  return {
+    dir,
+    html: htmlDocument(
+      head({
+        dir,
+        title,
+        description,
+        route: demoRoute(path, "vue"),
+        indexable: false,
+      }),
+      `<div id="root"><main class="at-fallback"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p><p>${escapeHtml(notice)}</p></main></div>
+    <footer class="vue-baseline"><a href="${upTo(dir)}third-party-notices.txt">Third-party notices</a></footer>
+    <script type="module" src="${upTo(dir)}${entry.slice(1)}"></script>`
+    ),
+  };
+};
+
 /** Every HTML file this writes, as `{ dir, html }`. */
 export const showcaseHtmlFiles = () => [
+  ...[...VUE_NATIVE_PAGES, ...VUE_KIT_PAGES, ...VUE_KIT_LAB_PAGES].map(
+    nativeVuePage
+  ),
   angularModePage(),
   angularModePage(true),
   ...matrixPages().map((page) => {

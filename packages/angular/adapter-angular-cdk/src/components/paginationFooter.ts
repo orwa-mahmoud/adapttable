@@ -1,7 +1,11 @@
 /**
  * Row count and the windowed pager.
  */
-import { AdaptAttrs, AdaptIcon, expandChevronIcon } from "@adapttable/angular";
+import {
+  AdaptAttrs,
+  AdaptIcon,
+  expandChevronIcon,
+} from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import {
   ChangeDetectionStrategy,

@@ -1,54 +1,23 @@
-/**
- * Cell and header content: a column's template or component when it has
- * one, its text otherwise. Structure only — the element the content lands in
- * is the host's own `<td>` or `<th>`.
- */
+import {
+  type CellContext,
+  type ColumnDef,
+  type FooterContext,
+  type HeaderContext,
+  type Renderer,
+} from "@adapttable/angular";
 import { cellValue } from "@adapttable/core";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  Directive,
-  inject,
   input,
   reflectComponentType,
   TemplateRef,
   type Type,
 } from "@angular/core";
 
-import {
-  type CellContext,
-  type ColumnDef,
-  type FooterContext,
-  type HeaderContext,
-  primitiveText,
-  type Renderer,
-} from "./columnDef";
-
-/**
- * A cell template declared in a component's own template:
- * `<ng-template adaptCellTemplate="status" let-row>…</ng-template>`. Collect
- * them with `viewChildren(AdaptCellTemplate)` and pass them to
- * `injectDataTable` as `cellTemplates`.
- *
- * @public
- */
-@Directive({ selector: "ng-template[adaptCellTemplate]" })
-export class AdaptCellTemplate {
-  /** The key of the column this template renders. */
-  readonly key = input.required<string>({ alias: "adaptCellTemplate" });
-  /** The template. */
-  readonly template = inject<TemplateRef<CellContext<unknown>>>(TemplateRef);
-
-  /** Type the template's `let-` variables. */
-  static ngTemplateContextGuard(
-    _directive: AdaptCellTemplate,
-    _context: unknown
-  ): _context is CellContext<unknown> {
-    return true;
-  }
-}
+import { primitiveText } from "./primitiveText";
 
 /**
  * A column renderer split by kind: the template to stamp, or the component
@@ -193,6 +162,60 @@ export class AdaptHeader<TRow> {
   protected readonly renderer = computed(() =>
     resolveRenderer(this.column().headerCell, this.context())
   );
+}
+
+/**
+ * Renders a column's extra header content into its host element:
+ * `<span [adaptHeaderActions]="column">`. Kits place this after the header
+ * caption, outside the sort button, so host-provided controls stay independent.
+ *
+ * @public
+ */
+@Component({
+  selector: "[adaptHeaderActions]",
+  imports: [NgTemplateOutlet, NgComponentOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `@let content = renderer();
+    @if (content?.template; as template) {
+      <ng-container
+        [ngTemplateOutlet]="template"
+        [ngTemplateOutletContext]="context()"
+      />
+    } @else if (content?.component; as component) {
+      <ng-container
+        [ngComponentOutlet]="component"
+        [ngComponentOutletInputs]="content?.inputs"
+      />
+    } @else {
+      {{ text() }}
+    }`,
+})
+export class AdaptHeaderActions<TRow> {
+  /** The column. */
+  readonly column = input.required<ColumnDef<TRow>>({
+    alias: "adaptHeaderActions",
+  });
+
+  /** What the renderer receives. */
+  protected readonly context = computed<HeaderContext<TRow>>(() => ({
+    $implicit: this.column(),
+    column: this.column(),
+  }));
+
+  /** The column's extra header renderer, resolved. */
+  protected readonly renderer = computed(() => {
+    const actions = this.column().headerActions;
+    return resolveRenderer(
+      typeof actions === "string" ? undefined : actions,
+      this.context()
+    );
+  });
+
+  /** Plain text remains supported without being interpreted as markup. */
+  protected readonly text = computed(() => {
+    const actions = this.column().headerActions;
+    return typeof actions === "string" ? actions : "";
+  });
 }
 
 /**

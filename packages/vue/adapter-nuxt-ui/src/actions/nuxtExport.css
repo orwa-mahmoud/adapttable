@@ -1,0 +1,54 @@
+@layer components {
+  .adapttable-nuxt-export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .adapttable-nuxt-export-spinner {
+    width: 1rem;
+    height: 1rem;
+    animation: adapttable-nuxt-export-spin 1s linear infinite;
+  }
+  .adapttable-nuxt-export-progress {
+    display: block;
+    width: 100%;
+    height: 0.5rem;
+    overflow: hidden;
+    border: 0;
+    border-radius: 999px;
+    appearance: none;
+    background: var(--ui-bg-accented);
+    color: var(--ui-primary);
+    accent-color: var(--ui-primary);
+  }
+  .adapttable-nuxt-export-progress::-webkit-progress-bar {
+    border-radius: inherit;
+    background: var(--ui-bg-accented);
+  }
+  .adapttable-nuxt-export-progress::-webkit-progress-value {
+    border-radius: inherit;
+    background: var(--ui-primary);
+  }
+  .adapttable-nuxt-export-progress::-moz-progress-bar {
+    border-radius: inherit;
+    background: var(--ui-primary);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adapttable-nuxt-export-spinner {
+      animation: none;
+    }
+  }
+  @media (forced-colors: active) {
+    .adapttable-nuxt-export-progress {
+      appearance: auto;
+      accent-color: auto;
+      background: Canvas;
+      color: Highlight;
+    }
+  }
+  @keyframes adapttable-nuxt-export-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
