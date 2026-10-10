@@ -74,7 +74,17 @@ export function RowEditActions<TRow>(
 ) {
   return createVNode(RowActionsPresentation, { ...context.attrs, ...props });
 }
-RowEditActions.props = Object.keys(rowProps) as (keyof typeof rowProps)[];
+RowEditActions.props = Object.keys(rowProps) as [
+  "rowEditing",
+  "row",
+  "rowId",
+  "labels",
+  "className",
+  "buttonClassName",
+  "icons",
+  "conflict",
+  "showBegin",
+];
 
 const batchProps = {
   batch: { type: Object as PropType<BatchEditBarProps<unknown>["batch"]> },

@@ -158,4 +158,16 @@ export function EditableCell<TRow>(
 ) {
   return createVNode(EditableCellPresentation, { ...context.attrs, ...props });
 }
-EditableCell.props = Object.keys(propNames) as (keyof typeof propNames)[];
+EditableCell.props = Object.keys(propNames) as [
+  "editing",
+  "row",
+  "column",
+  "rowId",
+  "rowIndex",
+  "rows",
+  "columns",
+  "rowKey",
+  "editLabel",
+  "undoLabel",
+  "display",
+];
