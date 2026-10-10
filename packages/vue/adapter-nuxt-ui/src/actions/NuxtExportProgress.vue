@@ -36,7 +36,6 @@ const actions = ["cancel", "retry", "dismiss"] as const;
       :value="control.progress"
       :max="100"
       :aria-label="control.progressLabel"
-      role="progressbar"
       data-adapttable-part="export-progress-bar"
       :class="['adapttable-nuxt-export-progress', names.exportProgressBar]"
     />

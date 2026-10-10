@@ -230,7 +230,10 @@ describe("genuine Nuxt action controls", () => {
     );
     await tick();
     await click(host, "export-csv-button");
-    const progress = find<HTMLProgressElement>(host, '[role="progressbar"]');
+    const progress = find<HTMLProgressElement>(
+      host,
+      part("export-progress-bar")
+    );
     expect(progress).toBeInstanceOf(HTMLProgressElement);
     expect(progress.getAttribute("data-adapttable-part")).toBe(
       "export-progress-bar"
@@ -243,7 +246,7 @@ describe("genuine Nuxt action controls", () => {
     expect(progress.getAttribute("aria-label")).toBe("Preparing report");
     at(controls, 0).setProgress?.(0);
     await tick();
-    expect(find(host, '[role="progressbar"]')).toBe(progress);
+    expect(find(host, part("export-progress-bar"))).toBe(progress);
     expect(progress.hasAttribute("value")).toBe(true);
     expect(progress.value).toBe(0);
     expect(progress.position).toBe(0);
