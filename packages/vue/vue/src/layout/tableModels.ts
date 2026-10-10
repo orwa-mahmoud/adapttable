@@ -15,13 +15,7 @@ import {
 import { computed, type ComputedRef, type VNodeChild } from "vue";
 
 import { type Attrs, toVueAttrs } from "../attrs";
-import {
-  type CellContext,
-  type ColumnDef,
-  type HeaderContext,
-  renderCell,
-  renderHeader,
-} from "../columnDef";
+import type { CellContext, ColumnDef, HeaderContext } from "../columnDef";
 import type {
   GroupRowModel,
   RowDetailModel,
@@ -248,4 +242,4 @@ export function useMobileCardsModel<TRow>(
     }),
   }));
 }
-export { renderCell, renderHeader };
+export { renderCell, renderHeader } from "../columnDef";

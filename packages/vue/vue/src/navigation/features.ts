@@ -2,7 +2,6 @@
 import {
   beginCellEdit,
   cellNavigationChannels,
-  type CellRange,
   selectionStats as computeSelectionStats,
 } from "@adapttable/core";
 import {
@@ -178,4 +177,5 @@ export function selectionStats(): StaticTableFeature {
 export function statusBar(): StaticTableFeature {
   return { ...coreStatusBar(), requiredSlots: [STATUS_BAR] };
 }
-export type { CellNavigationOptions, CellRange };
+export type { CellNavigationOptions };
+export type { CellRange } from "@adapttable/core";

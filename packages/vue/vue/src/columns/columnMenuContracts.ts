@@ -1,8 +1,5 @@
 /** Typed, inert positions shared by the shell and every Vue kit. */
-import type {
-  ColumnMenuLabels,
-  ColumnMenuSlotProps as NeutralColumnMenuSlotProps,
-} from "@adapttable/core";
+import type { ColumnMenuSlotProps as NeutralColumnMenuSlotProps } from "@adapttable/core";
 import {
   type ColumnHeaderRenameSlotProps as NeutralColumnHeaderRenameSlotProps,
   type FeatureHostState,
@@ -36,4 +33,4 @@ export const COLUMN_HEADER_RENAME = featureSlotKey<ColumnHeaderRenameSlotProps>(
   "column-header-rename",
   { single: true }
 );
-export type { ColumnMenuLabels };
+export type { ColumnMenuLabels } from "@adapttable/core";
