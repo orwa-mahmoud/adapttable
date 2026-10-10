@@ -103,7 +103,7 @@
   border: 1px solid #acb8c9;
   border-radius: 5px;
   background: var(--at-reka-background, #fff);
-  color: white;
+  color: var(--at-reka-text, #182234);
   cursor: pointer;
 }
 
@@ -111,6 +111,7 @@
 .at-reka-checkbox[data-state="indeterminate"] {
   border-color: var(--at-reka-accent, #6d28d9);
   background: var(--at-reka-accent, #6d28d9);
+  color: white;
 }
 
 .at-reka-checkbox-indicator {
