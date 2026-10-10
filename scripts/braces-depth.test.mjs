@@ -15,7 +15,10 @@ describe("the installed braces patch", () => {
 
   it("rejects nesting past the depth guard before the call stack overflows", () => {
     const pattern = `${"{".repeat(101)}a${"}".repeat(101)}`;
-    assert.throws(() => braces(pattern), /brace depth \(101\) exceeds max depth \(100\)/);
+    assert.throws(
+      () => braces(pattern),
+      /brace depth \(101\) exceeds max depth \(100\)/
+    );
     assert.throws(
       () => braces(pattern, { expand: true }),
       /brace depth \(101\) exceeds max depth \(100\)/
