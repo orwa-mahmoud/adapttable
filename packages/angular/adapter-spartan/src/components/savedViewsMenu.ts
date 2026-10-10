@@ -13,11 +13,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  type ElementRef,
   inject,
   Injector,
   input,
   type OnInit,
   signal,
+  viewChild,
 } from "@angular/core";
 import {
   BrnPopover,
@@ -28,6 +30,15 @@ import {
 import { HlmButton, HlmInput } from "../helm/controls";
 import { HlmPopoverLabel } from "../helm/popover";
 import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
+
+/** The CDK overlay lands this far left of the trigger under a reserved gutter. */
+function rtlScrollbarGutter(dir: string | null | undefined): string {
+  const root = globalThis.document?.documentElement;
+  const view = root?.ownerDocument.defaultView;
+  if (dir !== "rtl" || !view || !root) return "0px";
+  const gutter = view.innerWidth - root.getBoundingClientRect().width;
+  return `${gutter > 0 ? gutter : 0}px`;
+}
 
 /**
  * The saved-views toolbar control.
@@ -76,7 +87,7 @@ import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
           class="at-spartan-surface at-spartan-popover"
           data-adapttable-kit="spartan"
           data-spartan-part="views-panel"
-          [style]="panelStyle"
+          [style]="panelStyle()"
         >
           @for (view of views()?.views() ?? []; track view.name) {
             <div data-spartan-part="views-row" [style]="rowStyle">
@@ -129,11 +140,20 @@ export class AdaptSavedViewsMenu implements OnInit {
   readonly props =
     input.required<SavedViewsSlotProps<SavedViewsControllerOptions>>();
 
-  protected readonly panelStyle = {
-    ...MENU_PANEL_STYLE,
-    "inline-size": "min(320px, calc(100vw - 16px))",
-    "box-sizing": "border-box",
-  };
+  private readonly root = viewChild<ElementRef<HTMLElement>>("root");
+  protected readonly panelStyle = computed(() => {
+    this.popover.open();
+    const host = this.root()?.nativeElement;
+    return {
+      ...MENU_PANEL_STYLE,
+      "inline-size": "min(320px, calc(100vw - 16px))",
+      "box-sizing": "border-box",
+      // The CDK overlay lands one scrollbar-gutter left of the trigger.
+      translate: rtlScrollbarGutter(
+        host?.closest("[dir]")?.getAttribute("dir")
+      ),
+    };
+  });
   protected readonly rowStyle = {
     display: "flex",
     "align-items": "center",
