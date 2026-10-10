@@ -1,5 +1,68 @@
 # @adapttable/angular
 
+## 0.5.0
+
+### Minor Changes
+
+- 7e33aa2: Organize the Angular 0.5 binding around canonical public entries: application
+  hooks, column/rendering contracts, composition and `AdaptCellTemplate` at the
+  root; headless factories/options under `/features`; structural Chrome, kit models,
+  directives and controllers under `/adapter`. Specialized formula, pivot, router,
+  sparkline and stream entries retain their declaration and DI-token identities.
+  
+  All nine native kits and Angular AI consume those entries; kit feature imports
+  remain unchanged. Custom renderers/adapters must update binding imports using
+  the migration guide. Each entry re-exports the public types its signatures return.
+- f7f62c6: Allow Angular column `headerActions` to render host templates or components,
+  alongside plain text. All nine native kits pass the current header context and
+  place the action outside the sortable caption. Export `AdaptHeaderActions` for
+  custom adapter structure. Header actions appear in desktop headers; mobile cards
+  keep their existing presentation.
+- f81d849: Let Angular row selection follow live source capabilities and reset keys while
+  preserving host-controlled IDs and selection across paging/sorting. Current
+  cell-range callbacks receive changes; attaching a callback observes the current
+  range without replaying unchanged ranges to replacements.
+  
+  Virtualized bodies react when `maxHeight` changes between element and page
+  scrolling without replacing the table or feature runtime. Live direction updates
+  reach command palettes and compact headers. Browser-only controls and overlays
+  respect the Angular server platform, including window-like server globals.
+  Retired row/bulk controls and delayed confirmations cannot start host writes or
+  clear a replacement selection. Side-panel declarations retain logical start/end.
+- 32e1255: Keep Angular native filter cards and toolbar menus within the viewport on phones
+  and in RTL layouts. Material filters can flip above a low trigger, retain native
+  placement on rendered-size changes and scrollbar gutters, and scroll their body
+  while headers/actions remain visible. The optional `injectPopoverSpace`
+  `allowAbove` getter preserves existing below-only defaults.
+  
+  Material Clear all labels fit a text button; resize handles keep their 48px
+  native targets inside the header. Aria, CDK and Unstyled menus cap/flip within the
+  viewport, and Taiga UI menus preserve readable name fields and a viewport gutter.
+  NG-ZORRO, ngx-bootstrap and Taiga UI restore name-field focus after saving.
+  Palettes handle Escape and Tab from command buttons; rename focus work retires
+  with its owner. Spartan header filters follow live inherited writing direction.
+
+### Patch Changes
+
+- aebbd39: Add optional tree-shape readers to export contexts. React, Angular and Vue all
+  and selected exports include loaded descendants across filtered roots/pages;
+  page files follow visible expansion. File, hook and request data agree, while
+  summary callbacks and page request metadata retain original source-shaped rows.
+  
+  Headless contexts without shape readers retain conservative membership filtering.
+  Runtime tree inventories and server export routes keep their existing behavior.
+- Updated dependencies [0120bd4]
+- Updated dependencies [f3240c8]
+- Updated dependencies [19da962]
+- Updated dependencies [d32983f]
+- Updated dependencies [da5d11b]
+- Updated dependencies [1946b61]
+- Updated dependencies [05b436c]
+- Updated dependencies [88840eb]
+- Updated dependencies [d32983f]
+- Updated dependencies [aebbd39]
+  - @adapttable/core@3.9.0
+
 ## 0.4.0
 
 ### Minor Changes

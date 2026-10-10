@@ -1,7 +1,7 @@
 # Experimental Vue API reference
 
 This reference describes the experimental `0.1.0` public packages.
-They require Vue `^3.5.0` and have not been published to npm. See
+They require Vue `^3.5.0` and are published on npm. See
 [getting started](./getting-started.md) for scope, workspace setup and a first
 native table. Identically named APIs in the React and Angular references do
 not define Vue signatures.
@@ -95,7 +95,7 @@ importing the binding root never installs controls, optional features or AI.
 `@adapttable/element-plus`, `@adapttable/vuetify`, `@adapttable/naive-ui`,
 `@adapttable/reka-ui`, `@adapttable/shadcn-vue`, `@adapttable/nuxt-ui` and
 `@adapttable/quasar` export their own `DataTable` and 41 canonical feature
-factories through focused entries. All remain unreleased `0.1.0` packages.
+factories through focused entries. All are experimental `0.1.0` packages on npm.
 Their controls consume the shared Vue model and Chrome contracts; they do not
 import another framework binding or replace the table engine.
 
@@ -884,7 +884,7 @@ may have been replaced or deactivated. Render these controls through the kit's
 
 ## Optional Vue assistant contracts
 
-`@adapttable/ai-vue` is the optional public, unreleased Vue 3.5 binding to neutral
+`@adapttable/ai-vue` is the optional experimental Vue 3.5 binding to neutral
 AI stores. `tableAgent(options: MaybeRefOrGetter<TableAgentOptions>)` returns a
 `StaticTableFeature`; `TableAgentBridge` and `TableAgentColumnPatch` describe
 host notifications and column patches. `TABLE_AGENT_STATE` is the typed feature

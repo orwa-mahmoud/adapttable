@@ -125,7 +125,7 @@ examples, required slots and state-persistence boundaries.
 AI runtime. The separately opt-in `@adapttable/ai-vue` package connects agents,
 conversations and speech to Vue scopes. See the
 [assistant guide](https://adapttable.orwamahmoud.com/vue/assistant/) for approvals,
-controlled updates and lifecycle behavior. These public packages are unreleased.
+controlled updates and lifecycle behavior. These public packages are experimental.
 
 ## Popup control slot ownership
 

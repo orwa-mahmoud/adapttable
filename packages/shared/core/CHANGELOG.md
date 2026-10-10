@@ -1,5 +1,78 @@
 # @adapttable/core
 
+## 3.9.0
+
+### Minor Changes
+
+- 0120bd4: Add optional `settleApply` delivery hooks and
+  `AgentCapabilityContext.whenApplied()` for custom handlers. Binding-owned column
+  visibility/order/pinning and explicit selection confirm the delivered model
+  before reporting success; result revisions reflect real updates and no-ops.
+  Synchronous bindings and void-compatible setters remain supported.
+  
+  Bindings can await pending state publication before call admission. Retired table
+  identities/capability registries reject queued work, and cancellation/replay
+  preserve callback ownership and custom revision numbering. Neutral engine view
+  revisions include layout, pinning and selection; optional all-matching/cross-page
+  selection scope does not grant additional access.
+  
+  Pending approvals can carry a stable frozen transaction token across snapshots,
+  with a fresh token for each transaction, so presentations distinguish reused
+  proposals. Hosts may continue to omit it.
+- f3240c8: Expose a flat-menu keyboard controller for native presentations with disabled-item
+  navigation, incremental typeahead and close requests that preserve native Tab.
+  Context menus keep targets inside their owning table, including nested mobile
+  cards, and exclude summary rows. Grouping controls keep focus within enabled,
+  visible semantic controls and accept remove-target dragenter events.
+  
+  Disconnected or reentrant export runs cannot deliver retired results or cancel
+  a newly started run. Feature cleanup releases each resource once even when a
+  cleanup fails, and setup failures roll back completed/partial resources while
+  preserving the original error. Source memoization preserves argument-count and
+  identity semantics; incremental metadata avoids redundant engine publications.
+- d32983f: Add `FindController.flush()` so captured views include queries waiting for the
+  URL debounce. Pending writes stay with the adapter/namespace that accepted them;
+  React synchronizes source changes after render.
+  
+  Find and grid announcements use supported primitive/Date accessor values before
+  sort/backing fields, preserving explicit format/export projections and avoiding
+  object stringification. Retire clipboard results when row/column context changes
+  and deferred focus when another cell receives focus, while preserving newly
+  issued requests.
+- 1946b61: Allow `measureLabel` and `pivotPanelZones` to receive aggregation captions so hosts
+  can localize pivot measure labels without changing field/aggregation keys or
+  configuration. Default captions and authored labels remain unchanged. Vue pivot
+  chips and remove controls use the same localized captions as their selector.
+- 05b436c: Allow column resize handles to accept an abort signal so adapters can release
+  active drags and retained controls with their owning scope. Expose the resize
+  options type and existing cell-span resolver through the binding contracts.
+- 88840eb: Add optional validation and asynchronous save state to row and batch editing.
+  Drafts remain available while a host save is pending or rejected, and batches
+  validate before submission. Ignore stale continuations after cancellation,
+  reconfiguration or disposal. Synchronous saves retain their callback order.
+- d32983f: Add session-bound row-reorder callbacks and authoritative host row indices so
+  pending drag, menu and confirmation actions cannot target replacement rows.
+  
+  Column windowing accepts `columnScrollTarget` and pinned-side/control-width
+  inputs, revealing columns within the usable space beside sticky columns.
+- aebbd39: Add optional tree-shape readers to export contexts. React, Angular and Vue all
+  and selected exports include loaded descendants across filtered roots/pages;
+  page files follow visible expansion. File, hook and request data agree, while
+  summary callbacks and page request metadata retain original source-shaped rows.
+  
+  Headless contexts without shape readers retain conservative membership filtering.
+  Runtime tree inventories and server export routes keep their existing behavior.
+
+### Patch Changes
+
+- 19da962: Remove unused React development dependencies from the framework-neutral core
+  and use DOM Testing Library for its test helpers. Runtime dependencies and
+  public APIs remain unchanged.
+- da5d11b: Restore collapsed column groups and explicitly empty layouts from saved state.
+  Preserve the newest URL slice when host callbacks synchronously write, flush or
+  dispose the binding. Earlier Saved Views loads cannot overwrite newer list edits;
+  read-only views cannot be overwritten, and explicit reloads remain authoritative.
+
 ## 3.8.1
 
 ### Patch Changes

@@ -3,7 +3,7 @@
 Add `columnMenu()` from the chosen Vue kit's `/column-menu` entry to the table's
 `features` list. It is available in Unstyled, Element Plus, Vuetify, Naive UI,
 Reka UI, shadcn-vue, Nuxt UI and Quasar; use the same kit for the table and feature.
-These packages remain experimental and unreleased. The menu provides column search, visibility, pinning,
+These packages are experimental. The menu provides column search, visibility, pinning,
 reordering, sorting, sizing, and reset. Rename controls appear for columns
 that declare `renameable: true` when the table provides its rename channel.
 
