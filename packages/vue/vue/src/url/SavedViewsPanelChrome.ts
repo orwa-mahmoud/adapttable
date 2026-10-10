@@ -190,7 +190,7 @@ export const SavedViewsPanelChrome = /*#__PURE__*/ defineComponent(
             `AdaptTable: required adapter control slot "SavedViewsPanel.${key}" is missing.`
           );
       const children: VNodeChild[] = props.views.length
-        ? props.views.map(rowFor)
+        ? props.views.map((view, index) => rowFor(view, index))
         : [controls.Empty({ message: labels.savedViews })];
       return controls.Surface({
         "data-adapttable-part": "saved-views-panel",
