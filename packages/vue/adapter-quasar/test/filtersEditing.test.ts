@@ -46,6 +46,7 @@ import {
   FilterTreeBuilder,
   QuasarFilterField,
 } from "../src/filters";
+import QuasarFilterSurface from "../src/filters/QuasarFilterSurface.vue";
 import {
   FilterHeaderControl,
   FilterHeaderRow,
@@ -153,6 +154,61 @@ async function activate(wrapper: ReturnType<typeof host>) {
 }
 
 describe("Quasar filters and editors", () => {
+  it("shifts an Arabic filter surface by the reserved scrollbar gutter", async () => {
+    const width = vi
+      .spyOn(document.documentElement, "getBoundingClientRect")
+      .mockReturnValue({ width: 375 } as DOMRect);
+    const inner = vi.spyOn(window, "innerWidth", "get").mockReturnValue(390);
+    const onClose = vi.fn();
+    const props = {
+      open: true,
+      label: "Filters",
+      dir: "rtl" as const,
+      anchor: document.body,
+      children: "Fields",
+      onClose,
+    };
+    try {
+      const popover = host(() =>
+        h(QuasarFilterSurface, { ...props, modal: false })
+      );
+      await settle();
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--adapttable-rtl-gutter"
+        )
+      ).toBe("15px");
+      popover.getComponent(QMenu).vm.$emit("update:model-value", false);
+      expect(onClose).toHaveBeenCalledOnce();
+
+      inner.mockReturnValue(375);
+      const drawer = host(() =>
+        h(QuasarFilterSurface, { ...props, modal: true, onClose: vi.fn() })
+      );
+      await settle();
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--adapttable-rtl-gutter"
+        )
+      ).toBe("0px");
+      const close = vi.fn();
+      const closing = host(() =>
+        h(QuasarFilterSurface, {
+          ...props,
+          modal: true,
+          onClose: close,
+        })
+      );
+      await settle();
+      closing.getComponent(QDialog).vm.$emit("update:model-value", false);
+      expect(close).toHaveBeenCalledOnce();
+      drawer.unmount();
+    } finally {
+      document.documentElement.style.removeProperty("--adapttable-rtl-gutter");
+      width.mockRestore();
+      inner.mockRestore();
+    }
+  });
   it("uses the real field primitives and rejects controlled text/select/checkbox writes once", async () => {
     const text = field({ key: "name", type: "text" }, false);
     await text.wrapper.getComponent(QInput).get("input").setValue("Rejected");

@@ -268,4 +268,39 @@ describe("the Spartan Angular toolbar controls", () => {
     await settle();
     expect(parts("views-item")).toEqual([]);
   });
+
+  it("shifts the Arabic views panel by the reserved scrollbar gutter", async () => {
+    document.documentElement.setAttribute("dir", "rtl");
+    const width = vi
+      .spyOn(document.documentElement, "getBoundingClientRect")
+      .mockReturnValue({ width: 375 } as DOMRect);
+    const inner = vi.spyOn(window, "innerWidth", "get").mockReturnValue(390);
+    try {
+      const { element, part, settle } = await mount([
+        savedViews({ storageKey: "gutter-views", storage: null }),
+      ]);
+      element.setAttribute("dir", "rtl");
+      for (const node of element.querySelectorAll<HTMLElement>("[dir]")) {
+        node.setAttribute("dir", "rtl");
+      }
+      const open = async () => {
+        focusAndClick(part<HTMLButtonElement>("views-button")!);
+        await settle();
+      };
+      await open();
+      expect(part("views-panel")?.style.translate).toBe("15px");
+      document.body.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", keyCode: 27 })
+      );
+      await settle();
+      inner.mockReturnValue(375);
+      width.mockReturnValue({ width: 375 } as DOMRect);
+      await open();
+      expect(part("views-panel")?.style.translate).toBe("0px");
+    } finally {
+      document.documentElement.removeAttribute("dir");
+      width.mockRestore();
+      inner.mockRestore();
+    }
+  });
 });
