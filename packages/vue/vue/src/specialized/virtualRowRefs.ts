@@ -78,7 +78,7 @@ export class VirtualRowRefs {
     this.#disposed = true;
     // Retire complete rows first: a departing detail is not a shorter live row.
     for (const half of ["row", "detail"] as const)
-      for (const parts of [...this.#positions.values()]) {
+      for (const parts of this.#positions.values()) {
         const attached = parts[half];
         if (attached) this.#release(attached);
       }
