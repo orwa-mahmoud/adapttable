@@ -28,7 +28,7 @@ export function useElementConfirm(
     const dialog: OwnedDialog = {};
     dialogs ??= new Set();
     dialogs.add(dialog);
-    void ElMessageBox.confirm(
+    ElMessageBox.confirm(
       ({ close }: MessageBoxActionHandlers) => {
         dialog.close = close;
         return h("span", request.message);
