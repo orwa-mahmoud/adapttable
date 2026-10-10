@@ -235,7 +235,7 @@ export function EditableCell<TRow>(props: VueEditableCellProps<TRow>, context: P
 // @public (undocumented)
 export namespace EditableCell {
     var // (undocumented)
-    props: ("rows" | "columns" | "rowKey" | "row" | "display" | "editing" | "column" | "rowId" | "rowIndex" | "editLabel" | "undoLabel")[];
+    props: ("rows" | "columns" | "rowKey" | "rowId" | "row" | "undoLabel" | "display" | "editing" | "column" | "rowIndex" | "editLabel")[];
 }
 
 export { editHistory }
@@ -458,7 +458,7 @@ export function RowEditActions<TRow>(props: RowEditActionsProps<TRow>, context: 
 // @public (undocumented)
 export namespace RowEditActions {
     var // (undocumented)
-    props: ("labels" | "className" | "buttonClassName" | "row" | "rowId" | "rowEditing" | "icons" | "conflict" | "showBegin")[];
+    props: ("labels" | "className" | "buttonClassName" | "rowEditing" | "rowId" | "icons" | "conflict" | "showBegin" | "row")[];
 }
 
 export { RowEditIcons }

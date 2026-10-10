@@ -19,7 +19,7 @@ export function ColumnMenu<TRow>(props: ColumnMenuSlotProps<TRow>, context: Pick
 // @public (undocumented)
 export namespace ColumnMenu {
     var // (undocumented)
-    props: ("dir" | "labels" | "classNames" | "allColumns" | "layout" | "hasRowActions" | "hasRowReorder" | "onAutoSize" | "onAutoSizeColumn" | "onSortColumn" | "onFilterColumn" | "onRenameColumn" | "sortBy" | "sortDir" | "groupingPanel" | "featureHost" | "container")[];
+    props: ("labels" | "classNames" | "dir" | "allColumns" | "layout" | "hasRowActions" | "hasRowReorder" | "onAutoSize" | "onAutoSizeColumn" | "onSortColumn" | "onFilterColumn" | "onRenameColumn" | "sortBy" | "sortDir" | "groupingPanel" | "featureHost" | "container")[];
 }
 
 // @public (undocumented)
