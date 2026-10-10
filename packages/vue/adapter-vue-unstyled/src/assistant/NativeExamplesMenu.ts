@@ -73,9 +73,8 @@ export const NativeExamplesMenu = defineComponent(
           return;
         const items = buttons();
         if (!items.length) return;
-        const current = items.findIndex(
-          (item) => item === document.activeElement
-        );
+        const focusTargets: readonly (EventTarget | null | undefined)[] = items;
+        const current = focusTargets.indexOf(document.activeElement);
         let index = (current + 1) % items.length;
         if (event.key === "Home") index = 0;
         else if (event.key === "End") index = items.length - 1;

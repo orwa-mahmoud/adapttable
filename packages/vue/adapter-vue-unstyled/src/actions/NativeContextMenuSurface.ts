@@ -88,9 +88,8 @@ export const NativeContextMenuSurface = defineComponent(
         return;
       }
       const entries = items();
-      const at = entries.findIndex(
-        (item) => item === root.value?.ownerDocument.activeElement
-      );
+      const focusTargets: readonly (EventTarget | null | undefined)[] = entries;
+      const at = focusTargets.indexOf(root.value?.ownerDocument.activeElement);
       let to: number | undefined;
       if (event.key === "ArrowDown") to = (at + 1) % entries.length;
       else if (event.key === "ArrowUp")

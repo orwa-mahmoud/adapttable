@@ -53,13 +53,14 @@ export const NuxtContextMenuSurface = /*#__PURE__*/ defineComponent(
       )
         return;
       const items = entries();
+      const focusTargets: readonly (EventTarget | null | undefined)[] = items;
       const action = navigation.key(
         event,
         items.map((item) => ({
           label: item.textContent ?? "",
           disabled: item.disabled,
         })),
-        items.findIndex((item) => item === surface?.ownerDocument.activeElement)
+        focusTargets.indexOf(surface?.ownerDocument.activeElement)
       );
       if (!action) return;
       if (action.kind !== "close" || action.key !== "Tab")

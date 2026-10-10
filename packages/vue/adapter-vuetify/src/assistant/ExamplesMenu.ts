@@ -94,10 +94,11 @@ export const VuetifyExamplesMenu = defineComponent(
       const items = [
         ...panel.querySelectorAll<HTMLElement>('[role="menuitem"]'),
       ];
+      const focusTargets: readonly (EventTarget | null | undefined)[] = items;
       const action = navigation.key(
         event,
         items.map((item) => ({ label: item.textContent ?? "" })),
-        items.findIndex((item) => item === panel.ownerDocument.activeElement)
+        focusTargets.indexOf(panel.ownerDocument.activeElement)
       );
       if (!action) return;
       if (action.kind !== "close" || action.key !== "Tab")

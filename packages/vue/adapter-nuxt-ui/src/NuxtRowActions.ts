@@ -73,7 +73,8 @@ const NuxtRowActionsPresentation = /*#__PURE__*/ defineComponent(
           'button[role="menuitem"]'
         ),
       ];
-      const focused = buttons.findIndex((button) => button === event.target);
+      const focusTargets: readonly (EventTarget | null | undefined)[] = buttons;
+      const focused = focusTargets.indexOf(event.target);
       const action = navigation.key(
         event,
         buttons.map((button) => ({
