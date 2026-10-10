@@ -14,7 +14,8 @@
  * Sizes are minified + gzipped bytes of AdaptTable's own share of the graph.
  * React and the UI kits are external because an application already ships
  * them; counting them would drown the number the budget is about. Vue fixtures
- * externalize only the Vue runtime and count all emitted chunks and assets.
+ * externalize the same way — the Vue runtime and each kit's peer UI library —
+ * and count all remaining emitted chunks and assets.
  *
  * The bundler is rolldown, re-exported by tsdown, which builds this repo
  * already — the measurement adds no dependency of its own.
@@ -41,8 +42,8 @@ import {
 import { packageDir, packageRel } from "./packages.mjs";
 import { publishedFigures, staleReason } from "./published-figures.mjs";
 import {
-  VUE_RUNTIME_EXTERNALS,
   vueConsumerCoverageProblems,
+  vueConsumerExternals,
   vueEmittedCss,
   vueMissingCss,
 } from "./vue-consumer-fixtures.mjs";
@@ -111,20 +112,33 @@ export async function measure(fixture, dir) {
   const started = performance.now();
   let min;
   let readable;
+  const externals =
+    fixture.framework === "vue" ? vueConsumerExternals(fixture.pkg) : EXTERNAL;
   if (fixture.consumerHost) {
-    min = await buildVueNativeConsumer(fixture, entry, dir, true);
-    readable = await buildVueNativeConsumer(fixture, entry, dir, false);
+    min = await buildVueNativeConsumer(
+      fixture,
+      entry,
+      dir,
+      true,
+      [],
+      externals
+    );
+    readable = await buildVueNativeConsumer(
+      fixture,
+      entry,
+      dir,
+      false,
+      [],
+      externals
+    );
   } else if (fixture.styleEntryFile) {
     // Independent builds keep the stateful CSS collection passes separate.
-    min = await buildVueCssConsumer(entry, dir, true);
-    readable = await buildVueCssConsumer(entry, dir, false);
+    min = await buildVueCssConsumer(entry, dir, true, [], externals);
+    readable = await buildVueCssConsumer(entry, dir, false, [], externals);
   } else {
     const bundle = await Rolldown.rolldown({
       input: entry,
-      external: (id) =>
-        (fixture.framework === "vue" ? VUE_RUNTIME_EXTERNALS : EXTERNAL).some(
-          (re) => re.test(id)
-        ),
+      external: (id) => externals.some((re) => re.test(id)),
       logLevel: "silent",
     });
     [min, readable] = await Promise.all([

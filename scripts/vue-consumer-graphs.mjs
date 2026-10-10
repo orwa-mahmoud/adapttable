@@ -9,7 +9,7 @@ import {
   PDF_WRITER_MARKER,
   VUE_LAYOUT_GRAPH_SPECS,
   VUE_OPTIONAL_BASE_MARKERS,
-  VUE_RUNTIME_EXTERNALS,
+  vueConsumerExternals,
   vueEmittedCss,
   vueGraphProblems,
   XLSX_WRITER_MARKER,
@@ -45,13 +45,13 @@ export async function vueConsumerGraph(fixture, dir) {
       },
     },
   ];
+  const externals = vueConsumerExternals(fixture.pkg);
   const bundle =
     fixture.styleEntryFile || fixture.consumerHost
       ? undefined
       : await Rolldown.rolldown({
           input,
-          external: (id) =>
-            VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(id)),
+          external: (id) => externals.some((pattern) => pattern.test(id)),
           logLevel: "silent",
           plugins,
         });
@@ -63,10 +63,12 @@ export async function vueConsumerGraph(fixture, dir) {
         input,
         dir,
         false,
-        plugins
+        plugins,
+        externals
       );
     else if (bundle) output = await bundle.generate({ format: "esm" });
-    else output = await buildVueCssConsumer(input, dir, false, plugins);
+    else
+      output = await buildVueCssConsumer(input, dir, false, plugins, externals);
     const chunks = output.output.filter((chunk) => chunk.type === "chunk");
     return {
       code: chunks.map((chunk) => chunk.code).join("\n"),

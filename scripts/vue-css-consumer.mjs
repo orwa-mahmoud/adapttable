@@ -7,10 +7,10 @@ export async function buildVueCssConsumer(
   input,
   directory,
   minify,
-  plugins = []
+  plugins = [],
+  externals = VUE_RUNTIME_EXTERNALS
 ) {
-  const isVueRuntime = (id) =>
-    VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(id));
+  const isExternal = (id) => externals.some((pattern) => pattern.test(id));
   const bundles = await build({
     config: false,
     cwd: directory,
@@ -28,11 +28,11 @@ export async function buildVueCssConsumer(
     minify,
     css: { splitting: false, fileName: "styles.css", inject: false, minify },
     deps: {
-      neverBundle: VUE_RUNTIME_EXTERNALS,
-      alwaysBundle: (id) => !isVueRuntime(id),
-      onlyImport: VUE_RUNTIME_EXTERNALS,
+      neverBundle: externals,
+      alwaysBundle: (id) => !isExternal(id),
+      onlyImport: externals,
     },
-    inputOptions: { external: isVueRuntime },
+    inputOptions: { external: isExternal },
     plugins,
   });
   try {

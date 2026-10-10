@@ -29,7 +29,13 @@ function packageImport(entry, name, subpath) {
 }
 
 /** Match a production browser consumer while keeping every emitted asset measurable. */
-export function vueNativeConsumerConfig(input, directory, minify, plugins) {
+export function vueNativeConsumerConfig(
+  input,
+  directory,
+  minify,
+  plugins,
+  externals = VUE_RUNTIME_EXTERNALS
+) {
   return {
     configFile: false,
     root: directory,
@@ -47,8 +53,7 @@ export function vueNativeConsumerConfig(input, directory, minify, plugins) {
       sourcemap: false,
       lib: { entry: input, formats: ["es"] },
       rolldownOptions: {
-        external: (id) =>
-          VUE_RUNTIME_EXTERNALS.some((pattern) => pattern.test(id)),
+        external: (id) => externals.some((pattern) => pattern.test(id)),
       },
     },
   };
@@ -59,7 +64,8 @@ export async function buildVueNativeConsumer(
   input,
   directory,
   minify,
-  plugins = []
+  plugins = [],
+  externals = VUE_RUNTIME_EXTERNALS
 ) {
   if (!["nuxt-vite", "quasar-vite"].includes(fixture.consumerHost))
     throw new Error(
@@ -99,10 +105,13 @@ export async function buildVueNativeConsumer(
     hostPlugins = [vue({ template: { transformAssetUrls } }), quasar()];
   }
   const result = await build(
-    vueNativeConsumerConfig(input, directory, minify, [
-      ...hostPlugins,
-      ...plugins,
-    ])
+    vueNativeConsumerConfig(
+      input,
+      directory,
+      minify,
+      [...hostPlugins, ...plugins],
+      externals
+    )
   );
   return {
     output: (Array.isArray(result) ? result : [result]).flatMap(

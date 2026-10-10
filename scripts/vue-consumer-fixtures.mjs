@@ -1,7 +1,26 @@
 /** Packed Vue consumers use existing comparable ceilings, never an invented baseline. */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { KITS } from "./kits.mjs";
+import { packageDir } from "./packages.mjs";
 
 export const VUE_RUNTIME_EXTERNALS = [/^vue($|\/)/];
+
+/**
+ * What the application already ships: the Vue runtime and the package's peer
+ * UI library. As with React's kits, the measured share is AdaptTable's own.
+ */
+export function vueConsumerExternals(pkg) {
+  const manifest = JSON.parse(
+    readFileSync(join(packageDir(pkg), "package.json"), "utf8")
+  );
+  const peers = Object.keys(manifest.peerDependencies ?? {}).map(
+    (name) =>
+      new RegExp(`^${name.replaceAll(/[.*+?^${}()|[\]\\/]/g, "\\$&")}($|/)`)
+  );
+  return [...VUE_RUNTIME_EXTERNALS, ...peers];
+}
 export const PDF_WRITER_MARKER = "function pdfWriter";
 export const XLSX_WRITER_MARKER = "function xlsxWriter";
 const writers = [PDF_WRITER_MARKER, XLSX_WRITER_MARKER];

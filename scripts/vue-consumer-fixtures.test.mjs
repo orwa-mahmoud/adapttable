@@ -11,6 +11,7 @@ import {
   VUE_OPTIONAL_BASE_MARKERS,
   VUE_RUNTIME_EXTERNALS,
   vueConsumerCoverageProblems,
+  vueConsumerExternals,
   vueConsumerFixtures,
   vueEmittedCss,
   vueForeignImport,
@@ -288,6 +289,29 @@ describe("packed Vue consumers", () => {
       ),
       true
     );
+  });
+
+  it("externalizes each kit's peer UI library and never AdaptTable's own code", () => {
+    const external = (pkg, id) =>
+      vueConsumerExternals(pkg).some((pattern) => pattern.test(id));
+    for (const [pkg, id] of [
+      ["adapter-vuetify", "vuetify"],
+      ["adapter-vuetify", "vuetify/components"],
+      ["adapter-nuxt-ui", "@nuxt/ui/components/Table.vue"],
+      ["adapter-quasar", "quasar/src/components/btn/QBtn.js"],
+      ["adapter-element-plus", "element-plus"],
+      ["adapter-naive-ui", "naive-ui"],
+      ["adapter-vue-unstyled", "vue"],
+    ])
+      assert.equal(external(pkg, id), true, `${pkg}: ${id}`);
+    for (const [pkg, id] of [
+      ["adapter-vuetify", "vuetify-extra"],
+      ["adapter-vuetify", "@adapttable/vue"],
+      ["adapter-vuetify", "@adapttable/core"],
+      ["adapter-vue-unstyled", "vuetify"],
+      ["adapter-shadcn-vue", "class-variance-authority"],
+    ])
+      assert.equal(external(pkg, id), false, `${pkg}: ${id}`);
   });
 });
 
