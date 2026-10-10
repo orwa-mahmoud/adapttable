@@ -241,6 +241,7 @@ describe("Vue showcase snippets compile", () => {
             readFileSync(join(showcase, "src", "vue", "tsconfig.json"), "utf8")
           ).compilerOptions.paths,
           "@adapttable/ai": [join(ai, "src", "index.ts")],
+          "@adapttable/ai/*": [join(ai, "src", "*.ts")],
           "@adapttable/i18n": [join(i18n, "src", "index.ts")],
           "@adapttable/core": [join(core, "src", "index.ts")],
           "@adapttable/core/*": [join(core, "src", "*.ts")],
