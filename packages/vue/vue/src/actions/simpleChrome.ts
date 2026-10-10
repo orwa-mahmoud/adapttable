@@ -28,19 +28,18 @@ export function BulkActionsChrome(props: BulkActionsChromeProps): VNodeChild {
     onClick: () => void,
     disabled = false,
     title?: string,
-    color?: string,
-    icon?: VNodeChild
+    appearance?: { readonly color?: string; readonly icon?: VNodeChild }
   ) =>
     slots.Button({
       label,
-      icon,
+      icon: appearance?.icon,
       attrs: {
         type: "button",
         "data-adapttable-part": part,
         class: className,
         disabled,
         title,
-        "data-color": color,
+        "data-color": appearance?.color,
         onClick,
       },
     });
@@ -97,8 +96,7 @@ export function BulkActionsChrome(props: BulkActionsChromeProps): VNodeChild {
             () => model.run(action),
             model.pending !== null || Boolean(model.disabledReason(action)),
             model.disabledReason(action),
-            action.color,
-            action.icon as VNodeChild
+            { color: action.color, icon: action.icon as VNodeChild }
           ),
         ])
       ),
