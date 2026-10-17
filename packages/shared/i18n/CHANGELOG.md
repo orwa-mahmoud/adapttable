@@ -1,5 +1,11 @@
 # @adapttable/i18n
 
+## 3.3.6
+
+### Patch Changes
+
+- 9175bd3: Add an Indonesian (`id`) locale preset for table labels via `getLabels("id")`.
+
 ## 3.3.5
 
 ### Patch Changes
