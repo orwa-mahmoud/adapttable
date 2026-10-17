@@ -9,6 +9,7 @@ import { fa } from "./locales/fa";
 import { fr } from "./locales/fr";
 import { he } from "./locales/he";
 import { hi } from "./locales/hi";
+import { id } from "./locales/id";
 import { it } from "./locales/it";
 import { ja } from "./locales/ja";
 import { ko } from "./locales/ko";
@@ -35,6 +36,7 @@ export const locales = {
   fr,
   he,
   hi,
+  id,
   it,
   ja,
   ko,

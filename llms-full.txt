@@ -16525,7 +16525,7 @@ the press is cancelled. Mouse and pen presses never open the menu by holding.
 
 ---
 
-# React table i18n & RTL — Arabic, Hebrew, 19 locales
+# React table i18n & RTL — Arabic, Hebrew, 20 locales
 
 ▶ **See it working:** [flip the whole table to Arabic RTL in the live demo](https://adapttable.orwamahmoud.com/react/demo/mantine/rtl/) — a real table you can interact with, not a recording.
 
@@ -16595,6 +16595,7 @@ unknown locales; `hasLocale(locale)` tells you whether a preset exists.
 | `fr`    | French                | ltr       |
 | `he`    | Hebrew                | rtl       |
 | `hi`    | Hindi                 | ltr       |
+| `id`    | Indonesian            | ltr       |
 | `it`    | Italian               | ltr       |
 | `ja`    | Japanese              | ltr       |
 | `ko`    | Korean                | ltr       |
@@ -21548,8 +21549,8 @@ const source = useQuerySource({ usePaginatedQuery });
 
 Yes, RTL is first-class. Column alignment uses **logical CSS** (`start`/`end`),
 so it flips automatically under `dir="rtl"`. The optional `@adapttable/i18n`
-package ships **19 locales** — English, Arabic, Czech, German, Spanish, Persian,
-French, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Russian,
+package ships **20 locales** — English, Arabic, Czech, German, Spanish, Persian,
+French, Hebrew, Hindi, Indonesian, Italian, Japanese, Korean, Polish, Portuguese, Russian,
 Turkish, Urdu, Simplified Chinese, and Traditional Chinese — plus `getDirection` /
 `isRtlLocale` helpers. Arabic, Hebrew, Persian, and Urdu are right-to-left.
 

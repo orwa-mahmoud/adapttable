@@ -33707,6 +33707,14 @@
       "behavior": ""
     },
     {
+      "export": "id",
+      "currentImport": "@adapttable/i18n",
+      "kind": "value",
+      "class": "application-hook",
+      "proposedImport": "@adapttable/i18n",
+      "behavior": ""
+    },
+    {
       "export": "isRtlLocale",
       "currentImport": "@adapttable/i18n",
       "kind": "value",

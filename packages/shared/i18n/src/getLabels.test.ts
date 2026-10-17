@@ -82,8 +82,8 @@ describe("presets", () => {
   const cmp = (a: string, b: string) => a.localeCompare(b);
   const enKeys = Object.keys(en).sort(cmp);
 
-  it("bundles 19 locales", () => {
-    expect(Object.keys(locales)).toHaveLength(19);
+  it("bundles 20 locales", () => {
+    expect(Object.keys(locales)).toHaveLength(20);
   });
 
   it("exposes the new presets", () => {
