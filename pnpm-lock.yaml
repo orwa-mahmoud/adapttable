@@ -401,7 +401,7 @@ importers:
         version: 5.26.0(a34c38c4d0ba62ba8085483b11b1cdb8)
       '@taiga-ui/core':
         specifier: 5.26.0
-        version: 5.26.0(e3ef40c6dc844e37cb3ae8eb878d4915)
+        version: 5.26.0(9a455fa7bbe5b46c5a5ed7854bf5743f)
       '@taiga-ui/event-plugins':
         specifier: ^5.0.0
         version: 5.1.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -413,7 +413,7 @@ importers:
         version: 5.26.0
       '@taiga-ui/kit':
         specifier: 5.26.0
-        version: 5.26.0(7144628aaac232bb355bc4d6a635dfa0)
+        version: 5.26.0(63ab9c939868c970b92324ed627b06aa)
       '@taiga-ui/styles':
         specifier: 5.26.0
         version: 5.26.0(@taiga-ui/design-tokens@0.320.0)
@@ -440,7 +440,7 @@ importers:
         version: 2.45.3(vue@3.5.43(typescript@6.0.3))
       ng-zorro-antd:
         specifier: ^22.1.1
-        version: 22.1.1(c4b0d13742452919fe3c6407db2123d2)
+        version: 22.1.1(4c2095d29922388af50abec6cd6c2ce8)
       ngx-bootstrap:
         specifier: 22.0.0
         version: 22.0.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(rxjs@7.8.2)
@@ -468,10 +468,10 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(5f906f8a2f22f61129a57331a6b1c356))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(5f906f8a2f22f61129a57331a6b1c356)
       '@angular/cdk':
         specifier: 22.2.1
         version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -497,8 +497,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/router':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@babel/core':
         specifier: ^7.29.7
         version: 7.29.7
@@ -659,16 +659,16 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/aria':
         specifier: 22.2.1
         version: 22.2.1(@angular/cdk@22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/cdk':
         specifier: 22.2.1
         version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -688,8 +688,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -714,13 +714,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/cdk':
         specifier: 22.2.1
         version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -743,8 +743,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -769,13 +769,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/common':
         specifier: ^22.2.0
         version: 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -792,8 +792,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -818,13 +818,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/cdk':
         specifier: ^22.2.1
         version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -850,8 +850,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -876,13 +876,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/common':
         specifier: ^22.2.0
         version: 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -905,8 +905,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@ng-bootstrap/ng-bootstrap':
         specifier: ^21.0.0
         version: 21.0.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/localize@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0))(@popperjs/core@2.11.8)(rxjs@7.8.2)
@@ -949,13 +949,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/cdk':
         specifier: ^22.0.0
         version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -978,11 +978,11 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@angular/router':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -991,7 +991,7 @@ importers:
         version: 22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@volar/typescript@2.4.28)(@vue/language-core@3.3.12)(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vue-tsc@3.3.12(typescript@6.0.3))
       ng-zorro-antd:
         specifier: ^22.1.1
-        version: 22.1.1(c4b0d13742452919fe3c6407db2123d2)
+        version: 22.1.1(4c2095d29922388af50abec6cd6c2ce8)
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -1010,13 +1010,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/common':
         specifier: ^22.2.0
         version: 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -1036,8 +1036,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -1077,13 +1077,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/cdk':
         specifier: ^22.0.0
         version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -1106,8 +1106,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@spartan-ng/brain':
         specifier: 1.5.0
         version: 1.5.0(047650e4970c8ac2e1be9cfebbefb553)
@@ -1144,13 +1144,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/cdk':
         specifier: ^22.2.0
         version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -1173,17 +1173,17 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/platform-server':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@angular/router':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@taiga-ui/cdk':
         specifier: 5.26.0
         version: 5.26.0(a34c38c4d0ba62ba8085483b11b1cdb8)
       '@taiga-ui/core':
         specifier: 5.26.0
-        version: 5.26.0(e3ef40c6dc844e37cb3ae8eb878d4915)
+        version: 5.26.0(9a455fa7bbe5b46c5a5ed7854bf5743f)
       '@taiga-ui/event-plugins':
         specifier: ^5.0.0
         version: 5.1.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
@@ -1195,7 +1195,7 @@ importers:
         version: 5.26.0
       '@taiga-ui/kit':
         specifier: 5.26.0
-        version: 5.26.0(7144628aaac232bb355bc4d6a635dfa0)
+        version: 5.26.0(63ab9c939868c970b92324ed627b06aa)
       '@taiga-ui/styles':
         specifier: 5.26.0
         version: 5.26.0(@taiga-ui/design-tokens@0.320.0)
@@ -1229,13 +1229,13 @@ importers:
         version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/common':
         specifier: ^22.2.0
         version: 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -1272,13 +1272,13 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+        version: 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)
+        version: 2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@angular/build':
         specifier: ^22.2.0
-        version: 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+        version: 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       '@angular/common':
         specifier: ^22.2.0
         version: 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -1295,8 +1295,8 @@ importers:
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       '@angular/router':
-        specifier: ^22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+        specifier: ^22.2.1
+        version: 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@tanstack/angular-query-experimental':
         specifier: ^5.104.0
         version: 5.104.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(csstype@3.2.3)
@@ -1324,10 +1324,10 @@ importers:
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       antd:
         specifier: ^6.6.1
         version: 6.6.1(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1342,7 +1342,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       vitest-axe:
         specifier: ^0.1.0
-        version: 0.1.0(vitest@4.1.11)
+        version: 0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
 
   packages/react/adapter-base-ui:
     dependencies:
@@ -1358,16 +1358,16 @@ importers:
     devDependencies:
       '@base-ui/react':
         specifier: ^1.7.0
-        version: 1.7.0(@types/react@19.2.18)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 1.7.0(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@testing-library/user-event':
         specifier: ^14.6.6
         version: 14.6.6(@testing-library/dom@10.4.1)
@@ -1382,7 +1382,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       vitest-axe:
         specifier: ^0.1.0
-        version: 0.1.0(vitest@4.1.11)
+        version: 0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
 
   packages/react/adapter-chakra:
     dependencies:
@@ -1398,22 +1398,22 @@ importers:
     devDependencies:
       '@chakra-ui/react':
         specifier: ^3.36.1
-        version: 3.36.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 3.36.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@emotion/react':
         specifier: ^11.14.0
-        version: 11.14.0(@types/react@19.2.18)(react@19.2.8)
+        version: 11.14.0(@types/react@19.3.0)(react@19.2.8)
       '@emotion/styled':
         specifier: ^11.14.1
-        version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
+        version: 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       axe-core:
         specifier: ^4.13.0
         version: 4.13.0
@@ -1428,7 +1428,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       vitest-axe:
         specifier: ^0.1.0
-        version: 0.1.0(vitest@4.1.11)
+        version: 0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
 
   packages/react/adapter-mantine:
     dependencies:
@@ -1453,7 +1453,7 @@ importers:
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1477,7 +1477,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       vitest-axe:
         specifier: ^0.1.0
-        version: 0.1.0(vitest@4.1.11)
+        version: 0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
 
   packages/react/adapter-mui:
     dependencies:
@@ -1493,22 +1493,22 @@ importers:
     devDependencies:
       '@emotion/react':
         specifier: ^11.14.0
-        version: 11.14.0(@types/react@19.2.18)(react@19.2.8)
+        version: 11.14.0(@types/react@19.3.0)(react@19.2.8)
       '@emotion/styled':
         specifier: ^11.14.1
-        version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
+        version: 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8)
       '@mui/material':
         specifier: ^9.3.1
-        version: 9.3.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 9.3.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       axe-core:
         specifier: ^4.13.0
         version: 4.13.0
@@ -1520,7 +1520,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       vitest-axe:
         specifier: ^0.1.0
-        version: 0.1.0(vitest@4.1.11)
+        version: 0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
 
   packages/react/adapter-radix:
     dependencies:
@@ -1536,16 +1536,16 @@ importers:
     devDependencies:
       '@radix-ui/themes':
         specifier: ^3.3.0
-        version: 3.3.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 3.3.0(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       axe-core:
         specifier: ^4.13.0
         version: 4.13.0
@@ -1557,7 +1557,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       vitest-axe:
         specifier: ^0.1.0
-        version: 0.1.0(vitest@4.1.11)
+        version: 0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
 
   packages/react/adapter-shadcn:
     dependencies:
@@ -1579,10 +1579,10 @@ importers:
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       axe-core:
         specifier: ^4.13.0
         version: 4.13.0
@@ -1594,7 +1594,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       vitest-axe:
         specifier: ^0.1.0
-        version: 0.1.0(vitest@4.1.11)
+        version: 0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
 
   packages/react/adapter-unstyled:
     dependencies:
@@ -1613,10 +1613,10 @@ importers:
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       axe-core:
         specifier: ^4.13.0
         version: 4.13.0
@@ -1628,7 +1628,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       vitest-axe:
         specifier: ^0.1.0
-        version: 0.1.0(vitest@4.1.11)
+        version: 0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
 
   packages/react/ai-react:
     dependencies:
@@ -1647,7 +1647,7 @@ importers:
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -1672,10 +1672,10 @@ importers:
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -1698,13 +1698,13 @@ importers:
         version: 9.6.1(@types/node@26.4.0)
       '@stryker-mutator/vitest-runner':
         specifier: ^9.6.1
-        version: 9.6.1(@stryker-mutator/core@9.6.1(@types/node@26.4.0))(vitest@4.1.11)
+        version: 9.6.1(@stryker-mutator/core@9.6.1(@types/node@26.4.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))
       fast-check:
         specifier: ^4.9.0
         version: 4.9.0
@@ -2515,23 +2515,23 @@ packages:
       '@angular/animations':
         optional: true
 
-  '@angular/platform-server@22.2.0':
-    resolution: {integrity: sha512-Ppb0Zqr0lLubAW2UvjsNYDuoh+WX8ZeKdrmEMa8qhpVIxD1UL6CAQnKSlQQabWfuCQOphzBi7u7QeotGsTajKQ==}
+  '@angular/platform-server@22.2.1':
+    resolution: {integrity: sha512-nnk4wuwI0u6AmMZpmpQXvJic+aFwG7+tkoWMtAr9kY2V9yl/WZIOhk8r4QtYHOzmxT3k7YRIpQ4BOlIg+jUXNw==}
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
     peerDependencies:
-      '@angular/common': 22.2.0
-      '@angular/compiler': 22.2.0
-      '@angular/core': 22.2.0
-      '@angular/platform-browser': 22.2.0
+      '@angular/common': 22.2.1
+      '@angular/compiler': 22.2.1
+      '@angular/core': 22.2.1
+      '@angular/platform-browser': 22.2.1
       rxjs: ^6.5.3 || ^7.4.0
 
-  '@angular/router@22.2.0':
-    resolution: {integrity: sha512-+pxHMwWWKg+ejS1vKa+tS91CDusCIK1MOSy6fVLc89McMOY/C8tsLrh1uJaMjklejsz+3XUhJgrLOvl3ISNz6w==}
+  '@angular/router@22.2.1':
+    resolution: {integrity: sha512-HJfJ4yA1znKd9YFtbDOJfKmD12x0PhS7LkmYdWlJRu2WkQZRBVrdGKdmbvV5UvrqCRllVWKpzw1TIZJM69rlcw==}
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
     peerDependencies:
-      '@angular/common': 22.2.0
-      '@angular/core': 22.2.0
-      '@angular/platform-browser': 22.2.0
+      '@angular/common': 22.2.1
+      '@angular/core': 22.2.1
+      '@angular/platform-browser': 22.2.1
       rxjs: ^6.5.3 || ^7.4.0
 
   '@ant-design/colors@7.2.1':
@@ -7453,6 +7453,9 @@ packages:
   '@types/react@19.2.18':
     resolution: {integrity: sha512-AnzbBERsrLKtk2XSfTbYRLjQPdy116Sty4q+T+Bp3IC4l6jNBvreVPAHmpq9qhXQM7CXZPjLVmGMw9sy+hxQ3w==}
 
+  '@types/react@19.3.0':
+    resolution: {integrity: sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==}
+
   '@types/sax@1.2.7':
     resolution: {integrity: sha512-rO73L89PJxeYM3s3pPPjiPgVVcymqU490g0YO5n5By0k2Erzj6tay/4lr1CHAAU4JyOWd1rpQ8bCf6cZfHU96A==}
 
@@ -7747,8 +7750,22 @@ packages:
   '@vitest/expect@4.1.11':
     resolution: {integrity: sha512-VX2x5vNJXET47KAFzwERI+KRMtTTCSWTfSMKsW7JsUsXV4psq++e3DvZpuTDOpHcxytiDs6p2nhVb2tVDiiUYw==}
 
+  '@vitest/expect@4.1.12':
+    resolution: {integrity: sha512-vFlTt+YEu9WBpNjdGayNmlMVzrWPi1+sv853/7t2FU7hpO5gAFBKHzQmkCq5Xjpr+evegF2994LQT3hF3mRlqQ==}
+
   '@vitest/mocker@4.1.11':
     resolution: {integrity: sha512-2XJVD55d1o5AZous5CCGKS74g/riOj9odEt2bQpCVZeblHyHdnMeFl4jl0XjU21stf4mbjUkew2eXQZt65g5CQ==}
+    peerDependencies:
+      msw: ^2.4.9
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
+    peerDependenciesMeta:
+      msw:
+        optional: true
+      vite:
+        optional: true
+
+  '@vitest/mocker@4.1.12':
+    resolution: {integrity: sha512-fKShNpKZzupWZuY0z7egydvL0sqW4INEZBEExMBMAa6izlENEVHwoXgdaTCaBZ5fwlr4xf2o1wXC83n9RpO+NA==}
     peerDependencies:
       msw: ^2.4.9
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -7761,17 +7778,32 @@ packages:
   '@vitest/pretty-format@4.1.11':
     resolution: {integrity: sha512-yiZzPbGTS9Sr/JpFl8zHrcIkAofNbFV6k21vIgQN/cY/oxZeXhJv5sc/MBJ5jFKWmWs+oJHw0UXLZjmf931+Vw==}
 
+  '@vitest/pretty-format@4.1.12':
+    resolution: {integrity: sha512-XW9O8+Mxx4VpCtkYdMJLZQQwsVryP9wk7cPKDxtXFfwSak6yRh5+2fep/Y0XF/ElBvJHq8bcYdi6aeuai0opZA==}
+
   '@vitest/runner@4.1.11':
     resolution: {integrity: sha512-LztvUgdwMNJMIkj3hQnnxiC2Xy1zNxq928W/xhjCLaNCzqTZOudjwbQf6v9IntZGPw132i2Lq2rgTRZHD3JHNw==}
+
+  '@vitest/runner@4.1.12':
+    resolution: {integrity: sha512-NKlVKCr5QnCe8jijdMnmkpHHU+WTqiLFR6G0pHji9uRjXK9xJl1k1nTw6F3pOOj2PDcsDt2GKQMI7wIsaT491w==}
 
   '@vitest/snapshot@4.1.11':
     resolution: {integrity: sha512-pN7ikn1ON7h8ee4gIAp4AzyK+zBtJPzVbqOgu5LCEh4VaJVbPQcgYQYJIMGQPXVeJJq1fnfazis7a5pFNPahog==}
 
+  '@vitest/snapshot@4.1.12':
+    resolution: {integrity: sha512-ko1y1Qgb/slzQ9mr+b89Cuqud8WG1TKtsPD8r7ZUBdvVOGt85Af2HwCqHujrhwJq95hs/9RM7fcAPg57o1vlzw==}
+
   '@vitest/spy@4.1.11':
     resolution: {integrity: sha512-apNa/prQy2qCeywhnixOHPRCgGNhvg7T4Dapfl1GahLp/R+uhBm5cPyFoNVyqsNd2h1nJxL6BqqdIjiABL60YA==}
 
+  '@vitest/spy@4.1.12':
+    resolution: {integrity: sha512-RGq9x4JNGNTZHEJxvN0oSiJjeSCExm0n2gZKKJZHY9cX5AVA6M7VJILBT3ZJ/tJ/0J9uWT7fETV9/btoi//vSg==}
+
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
+
+  '@vitest/utils@4.1.12':
+    resolution: {integrity: sha512-Q3awXrwOfEV+qc3WmO5ONyE0yO7Q1gQ9/oyHxGLZ/pl7N3NO/ZztqQwKLuwMkV+CA1JYSIeO3gkHnRDIo4AVaA==}
 
   '@volar/language-core@2.4.28':
     resolution: {integrity: sha512-w4qhIJ8ZSitgLAkVay6AbcnC7gP3glYM3fYwKV3srj8m494E3xtrCv6E+bWviiK/8hs6e6t1ij1s2Endql7vzQ==}
@@ -8800,6 +8832,10 @@ packages:
 
   chai@6.2.2:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
+    engines: {node: '>=18'}
+
+  chai@6.3.0:
+    resolution: {integrity: sha512-XWAtwJ6OHO+tj0EKCs0Y2UamnyOxseZWltU4x2U2wh8g4AigdjwvtUjvLP2tqkA/avxHEtzxNaqGq/YGNwckKg==}
     engines: {node: '>=18'}
 
   chalk@4.1.2:
@@ -11087,6 +11123,10 @@ packages:
     resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
     engines: {node: '>=12.20.0'}
 
+  obug@2.2.1:
+    resolution: {integrity: sha512-XrsrhT5sybtKI6wakr2SPOlGZWWYbUXZ7a0jT8/QOeAPau+1X/bSegNe5YR75oJmEZQbKningirmGOEJCIk61Q==}
+    engines: {node: '>=12.20.0'}
+
   obug@3.0.0:
     resolution: {integrity: sha512-5vvB5+W7ePv+p3uqxi+RcW1XAzLW0/hxt3/4X4Lc4qHudzOhmBiBwOY6DRob4WnanAEGvNcLjF+KNOufrUoEQw==}
     engines: {node: '>=12.20.0'}
@@ -12464,6 +12504,10 @@ packages:
     resolution: {integrity: sha512-yau8yJdTt989Mm0Bd/236QnzEiPf2xLLTqUZRUJOo/3CB078LSwzei343DgtJVmfJKJE3TMINY1u42SQsP6mXw==}
     engines: {node: '>=14.0.0'}
 
+  tinyrainbow@3.2.0:
+    resolution: {integrity: sha512-LgO3D9yZJjApUiuUfl9iFAwrtaX4+lok3wJIqttGoKCHlWUqHqbQpnxCf82L8FjgKsh4iGo78hqJwgL8F6To2A==}
+    engines: {node: '>=14.0.0'}
+
   tldts-core@7.4.11:
     resolution: {integrity: sha512-CW3WN2rIIE/Of21mulhgnGOwoDyEFNygyIBOONSdyAuSATgMMUCpLeUlB+E8sAwA5xRV9hYPl+kyZ9citHCaKg==}
 
@@ -13088,6 +13132,47 @@ packages:
       jsdom:
         optional: true
 
+  vitest@4.1.12:
+    resolution: {integrity: sha512-5eWdz2yb3ajxWF3C8C4TjkXl7FGm3n2E/VlazALrQHzK7nYMSGFnCZto0bbPNl77AwkOZVLk0YnBAejUu0NiWA==}
+    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@opentelemetry/api': ^1.9.0
+      '@types/node': ^20.0.0 || ^22.0.0 || >=24.0.0
+      '@vitest/browser-playwright': 4.1.12
+      '@vitest/browser-preview': 4.1.12
+      '@vitest/browser-webdriverio': ^4.1.11
+      '@vitest/coverage-istanbul': 4.1.12
+      '@vitest/coverage-v8': 4.1.12
+      '@vitest/ui': 4.1.12
+      happy-dom: '*'
+      jsdom: '*'
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser-playwright':
+        optional: true
+      '@vitest/browser-preview':
+        optional: true
+      '@vitest/browser-webdriverio':
+        optional: true
+      '@vitest/coverage-istanbul':
+        optional: true
+      '@vitest/coverage-v8':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
   vooks@0.2.12:
     resolution: {integrity: sha512-iox0I3RZzxtKlcgYaStQYKEzWWGAduMmq+jS7OrNdQo1FgGfPMubGL3uGHOU9n97NIvfFDBGnpSvkWyb/NSn/Q==}
     peerDependencies:
@@ -13351,38 +13436,38 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
 
-  '@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))':
+  '@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(5f906f8a2f22f61129a57331a6b1c356))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))':
     dependencies:
       magic-string: 0.30.21
       obug: 2.1.4
       oxc-parser: 0.121.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@angular/build': 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+      '@angular/build': 22.2.0(5f906f8a2f22f61129a57331a6b1c356)
       vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
 
-  '@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))':
+  '@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))':
     dependencies:
       magic-string: 0.30.21
       obug: 2.1.4
       oxc-parser: 0.121.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@angular/build': 22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)
+      '@angular/build': 22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)
       vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
 
-  '@analogjs/vitest-angular@2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.11)':
+  '@analogjs/vitest-angular@2.7.5(@analogjs/vite-plugin-angular@2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))(@angular-devkit/architect@0.2202.0(chokidar@5.0.0))(@angular-devkit/schematics@22.2.1(chokidar@5.0.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))':
     dependencies:
-      '@analogjs/vite-plugin-angular': 2.7.5(@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+      '@analogjs/vite-plugin-angular': 2.7.5(@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
       '@angular-devkit/architect': 0.2202.0(chokidar@5.0.0)
       '@angular-devkit/schematics': 22.2.1(chokidar@5.0.0)
-      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+      vitest: 4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
 
   '@angular-devkit/architect@0.2202.0(chokidar@5.0.0)':
     dependencies:
@@ -13440,7 +13525,7 @@ snapshots:
       '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
       tslib: 2.8.1
 
-  '@angular/build@22.2.0(4cf6f328742c66d66ca4a4cb9d5cf5e1)':
+  '@angular/build@22.2.0(5f906f8a2f22f61129a57331a6b1c356)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@angular-devkit/architect': 0.2202.0(chokidar@5.0.0)
@@ -13477,7 +13562,7 @@ snapshots:
       '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
       '@angular/localize': 22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)
       '@angular/platform-browser': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
-      '@angular/platform-server': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@angular/platform-server': 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       istanbul-lib-instrument: 6.0.3
       less: 4.9.1
       lmdb: 3.5.6
@@ -13485,7 +13570,65 @@ snapshots:
       postcss: 8.5.26
       rollup: 4.62.0
       tailwindcss: 4.3.3
-      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))
+      vitest: 4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))
+    transitivePeerDependencies:
+      - '@types/node'
+      - '@vitejs/devtools'
+      - jiti
+      - kerberos
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
+
+  '@angular/build@22.2.0(a8e914f7f47a3bc63f10b61e6f7d6cf3)':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@angular-devkit/architect': 0.2202.0(chokidar@5.0.0)
+      '@angular/compiler': 22.2.0
+      '@angular/compiler-cli': 22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3)
+      '@babel/core': 8.0.5
+      '@inquirer/confirm': 6.3.2(@types/node@26.4.0)
+      '@parcel/watcher': 2.6.0
+      '@vitejs/plugin-basic-ssl': 2.3.0(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+      beasties: 0.5.4
+      browserslist: 4.28.9
+      chokidar: 5.0.0
+      esbuild: 0.28.2
+      https-proxy-agent: 9.1.0
+      jsonc-parser: 3.3.1
+      listr2: 11.1.0
+      magic-string: 1.4.1
+      mrmime: 2.0.1
+      oxc-parser: 0.150.0
+      parse5-html-rewriting-stream: 8.0.1
+      picomatch: 4.0.7
+      piscina: 5.3.2
+      rolldown: 1.2.8
+      sass: 1.104.1
+      sass-embedded: 1.104.1
+      semver: 7.8.5
+      source-map-support: 0.5.21
+      tinyglobby: 0.2.17
+      tslib: 2.8.1
+      typescript: 6.0.3
+      vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(yaml@2.9.1)
+      xxhash-wasm: 1.1.0
+    optionalDependencies:
+      '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
+      '@angular/localize': 22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)
+      '@angular/platform-browser': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
+      '@angular/platform-server': 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      istanbul-lib-instrument: 6.0.3
+      less: 4.9.1
+      lmdb: 3.5.6
+      ng-packagr: 22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@volar/typescript@2.4.28)(@vue/language-core@3.3.12)(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vue-tsc@3.3.12(typescript@6.0.3))
+      postcss: 8.5.26
+      rollup: 4.62.0
+      tailwindcss: 4.3.3
+      vitest: 4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - '@types/node'
       - '@vitejs/devtools'
@@ -13573,7 +13716,7 @@ snapshots:
       '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
       tslib: 2.8.1
 
-  '@angular/platform-server@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)':
+  '@angular/platform-server@22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)':
     dependencies:
       '@angular/common': 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/compiler': 22.2.0
@@ -13583,7 +13726,7 @@ snapshots:
       tslib: 2.8.1
       xhr2: 0.2.1
 
-  '@angular/router@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)':
+  '@angular/router@22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)':
     dependencies:
       '@angular/common': 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
@@ -14283,6 +14426,19 @@ snapshots:
       '@types/react': 19.2.18
       date-fns: 4.4.0
 
+  '@base-ui/react@1.7.0(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@base-ui/utils': 0.3.2(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@floating-ui/react-dom': 2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@floating-ui/utils': 0.2.12
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      use-sync-external-store: 1.6.0(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      date-fns: 4.4.0
+
   '@base-ui/utils@0.3.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -14304,6 +14460,17 @@ snapshots:
       use-sync-external-store: 1.6.0(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@base-ui/utils@0.3.2(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@floating-ui/utils': 0.2.12
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      reselect: 5.2.0
+      use-sync-external-store: 1.6.0(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@bcoe/v8-coverage@1.0.2': {}
 
@@ -14384,6 +14551,19 @@ snapshots:
       '@ark-ui/react': 5.37.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@emotion/is-prop-valid': 1.4.0
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@19.2.8)
+      '@emotion/serialize': 1.3.3
+      '@emotion/use-insertion-effect-with-fallbacks': 1.2.0(react@19.2.8)
+      '@emotion/utils': 1.4.2
+      '@pandacss/is-valid-prop': 1.12.0
+      csstype: 3.2.3
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+
+  '@chakra-ui/react@3.36.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@ark-ui/react': 5.37.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@emotion/is-prop-valid': 1.4.0
+      '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.2.8)
       '@emotion/serialize': 1.3.3
       '@emotion/use-insertion-effect-with-fallbacks': 1.2.0(react@19.2.8)
       '@emotion/utils': 1.4.2
@@ -14654,6 +14834,22 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@emotion/babel-plugin': 11.13.5
+      '@emotion/cache': 11.14.0
+      '@emotion/serialize': 1.3.3
+      '@emotion/use-insertion-effect-with-fallbacks': 1.2.0(react@19.2.8)
+      '@emotion/utils': 1.4.2
+      '@emotion/weak-memoize': 0.4.0
+      hoist-non-react-statics: 3.3.2
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@emotion/serialize@1.3.3':
     dependencies:
       '@emotion/hash': 0.9.2
@@ -14676,6 +14872,21 @@ snapshots:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+    transitivePeerDependencies:
+      - supports-color
+
+  '@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@emotion/babel-plugin': 11.13.5
+      '@emotion/is-prop-valid': 1.4.0
+      '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.2.8)
+      '@emotion/serialize': 1.3.3
+      '@emotion/use-insertion-effect-with-fallbacks': 1.2.0(react@19.2.8)
+      '@emotion/utils': 1.4.2
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
     transitivePeerDependencies:
       - supports-color
 
@@ -15427,6 +15638,27 @@ snapshots:
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
       '@types/react': 19.2.18
 
+  '@mui/material@9.3.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/core-downloads-tracker': 9.3.1
+      '@mui/system': 9.3.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8)
+      '@mui/types': 9.3.0(@types/react@19.3.0)
+      '@mui/utils': 9.3.0(@types/react@19.3.0)(react@19.2.8)
+      '@popperjs/core': 2.11.8
+      '@types/react-transition-group': 4.4.12(@types/react@19.3.0)
+      clsx: 2.1.1
+      csstype: 3.2.3
+      prop-types: 15.8.1
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-is: 19.2.8
+      react-transition-group: 4.4.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+    optionalDependencies:
+      '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.2.8)
+      '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8)
+      '@types/react': 19.3.0
+
   '@mui/private-theming@9.3.0(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -15435,6 +15667,15 @@ snapshots:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@mui/private-theming@9.3.0(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/utils': 9.3.0(@types/react@19.3.0)(react@19.2.8)
+      prop-types: 15.8.1
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@mui/styled-engine@9.3.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -15448,6 +15689,19 @@ snapshots:
     optionalDependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@19.2.8)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
+
+  '@mui/styled-engine@9.3.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@emotion/cache': 11.14.0
+      '@emotion/serialize': 1.3.3
+      '@emotion/sheet': 1.4.0
+      csstype: 3.2.3
+      prop-types: 15.8.1
+      react: 19.2.8
+    optionalDependencies:
+      '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.2.8)
+      '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8)
 
   '@mui/system@9.3.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -15465,11 +15719,33 @@ snapshots:
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
       '@types/react': 19.2.18
 
+  '@mui/system@9.3.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/private-theming': 9.3.0(@types/react@19.3.0)(react@19.2.8)
+      '@mui/styled-engine': 9.3.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8))(react@19.2.8)
+      '@mui/types': 9.3.0(@types/react@19.3.0)
+      '@mui/utils': 9.3.0(@types/react@19.3.0)(react@19.2.8)
+      clsx: 2.1.1
+      csstype: 3.2.3
+      prop-types: 15.8.1
+      react: 19.2.8
+    optionalDependencies:
+      '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.2.8)
+      '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.2.8))(@types/react@19.3.0)(react@19.2.8)
+      '@types/react': 19.3.0
+
   '@mui/types@9.3.0(@types/react@19.2.18)':
     dependencies:
       '@babel/runtime': 7.29.7
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@mui/types@9.3.0(@types/react@19.3.0)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@mui/utils@9.3.0(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -15482,6 +15758,18 @@ snapshots:
       react-is: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@mui/utils@9.3.0(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@mui/types': 9.3.0(@types/react@19.3.0)
+      '@types/prop-types': 15.7.15
+      clsx: 2.1.1
+      prop-types: 15.8.1
+      react: 19.2.8
+      react-is: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@napi-rs/nice-android-arm-eabi@1.1.1':
     optional: true
@@ -16638,6 +16926,15 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-accessible-icon@1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-visually-hidden': 1.2.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-accordion@1.2.14(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -16655,6 +16952,23 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-accordion@1.2.14(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collapsible': 1.1.14(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-alert-dialog@1.1.17(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -16668,6 +16982,19 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-alert-dialog@1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dialog': 1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-arrow@1.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -16677,6 +17004,15 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-arrow@1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-aspect-ratio@1.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -16685,6 +17021,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-aspect-ratio@1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-avatar@1.2.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16698,6 +17043,19 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-avatar@1.2.0(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-is-hydrated': 0.1.1(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-checkbox@1.3.5(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16715,6 +17073,22 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-checkbox@1.3.5(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-previous': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-size': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-collapsible@1.1.14(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -16731,6 +17105,22 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-collapsible@1.1.14(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-collection@1.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.18)(react@19.2.8)
@@ -16743,11 +17133,29 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-collection@1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-compose-refs@1.1.3(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-compose-refs@1.1.3(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-context-menu@2.3.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16762,11 +17170,30 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-context-menu@2.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-menu': 2.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-context@1.1.4(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-context@1.1.4(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-dialog@1.1.17(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16790,11 +17217,39 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-dialog@1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-focus-guards': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-focus-scope': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      aria-hidden: 1.2.6
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-remove-scroll: 2.7.2(@types/react@19.3.0)(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-direction@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-direction@1.1.2(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-dismissable-layer@1.1.13(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16808,6 +17263,19 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-dismissable-layer@1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-escape-keydown': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-dropdown-menu@2.1.18(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16824,11 +17292,32 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-dropdown-menu@2.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-menu': 2.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-focus-guards@1.1.4(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-focus-guards@1.1.4(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-focus-scope@1.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16840,6 +17329,17 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-focus-scope@1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-form@0.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16854,6 +17354,20 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-form@0.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-label': 2.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-hover-card@1.1.17(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16872,12 +17386,36 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-hover-card@1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-id@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-id@1.1.2(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-label@2.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16887,6 +17425,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-label@2.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-menu@2.1.18(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16914,6 +17461,32 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-menu@2.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-focus-guards': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-focus-scope': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      aria-hidden: 1.2.6
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-remove-scroll: 2.7.2(@types/react@19.3.0)(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-menubar@1.1.18(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -16931,6 +17504,24 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-menubar@1.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-menu': 2.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-navigation-menu@1.2.16(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -16954,6 +17545,28 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-navigation-menu@1.2.16(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-previous': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-visually-hidden': 1.2.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-one-time-password-field@0.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/number': 1.1.2
@@ -16974,6 +17587,26 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-one-time-password-field@0.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/number': 1.1.2
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-effect-event': 0.0.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-is-hydrated': 0.1.1(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-password-toggle-field@0.1.5(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -16989,6 +17622,22 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-password-toggle-field@0.1.5(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-effect-event': 0.0.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-is-hydrated': 0.1.1(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-popover@1.1.17(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17013,6 +17662,29 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-popover@1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-focus-guards': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-focus-scope': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      aria-hidden: 1.2.6
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-remove-scroll: 2.7.2(@types/react@19.3.0)(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-popper@1.3.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@floating-ui/react-dom': 2.1.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -17031,6 +17703,24 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-popper@1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@floating-ui/react-dom': 2.1.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-arrow': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-rect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-size': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/rect': 1.1.2
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-portal@1.1.12(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -17041,6 +17731,16 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-portal@1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-presence@1.1.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.18)(react@19.2.8)
@@ -17049,6 +17749,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-presence@1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-primitive@2.1.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17059,6 +17768,15 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-primitive@2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-progress@1.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-context': 1.1.4(@types/react@19.2.18)(react@19.2.8)
@@ -17068,6 +17786,16 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-progress@1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-radio-group@1.4.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17087,6 +17815,24 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-radio-group@1.4.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-previous': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-size': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-roving-focus@1.1.13(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -17104,6 +17850,23 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-roving-focus@1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-scroll-area@1.2.12(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/number': 1.1.2
@@ -17120,6 +17883,23 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-scroll-area@1.2.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/number': 1.1.2
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-select@2.3.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17151,6 +17931,36 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-select@2.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/number': 1.1.2
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-focus-guards': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-focus-scope': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-previous': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-visually-hidden': 1.2.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      aria-hidden: 1.2.6
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-remove-scroll: 2.7.2(@types/react@19.3.0)(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-separator@1.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -17159,6 +17969,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-separator@1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-slider@1.4.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17179,12 +17998,38 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-slider@1.4.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/number': 1.1.2
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-previous': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-size': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-slot@1.3.0(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-slot@1.3.0(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-switch@1.3.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17201,6 +18046,21 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-switch@1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-previous': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-size': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-tabs@1.1.15(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -17216,6 +18076,22 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-tabs@1.1.15(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-toast@1.2.17(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17237,6 +18113,26 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-toast@1.2.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-visually-hidden': 1.2.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-toggle-group@1.1.13(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -17252,6 +18148,21 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-toggle-group@1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-toggle': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-toggle@1.1.12(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.4
@@ -17262,6 +18173,17 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-toggle@1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-toolbar@1.1.13(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17277,6 +18199,21 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-toolbar@1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-separator': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-toggle-group': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/react-tooltip@1.2.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17298,11 +18235,37 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  '@radix-ui/react-tooltip@1.2.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-id': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-visually-hidden': 1.2.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   '@radix-ui/react-use-callback-ref@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-use-callback-ref@1.1.2(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-use-controllable-state@1.2.3(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -17312,12 +18275,27 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
+  '@radix-ui/react-use-controllable-state@1.2.3(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-use-effect-event': 0.0.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   '@radix-ui/react-use-effect-event@0.0.3(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-use-effect-event@0.0.3(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-use-escape-keydown@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -17326,11 +18304,24 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
+  '@radix-ui/react-use-escape-keydown@1.1.2(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   '@radix-ui/react-use-is-hydrated@0.1.1(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-use-is-hydrated@0.1.1(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-use-layout-effect@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -17338,11 +18329,23 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
+  '@radix-ui/react-use-layout-effect@1.1.2(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   '@radix-ui/react-use-previous@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-use-previous@1.1.2(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-use-rect@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -17351,12 +18354,26 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
+  '@radix-ui/react-use-rect@1.1.2(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@radix-ui/rect': 1.1.2
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   '@radix-ui/react-use-size@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
+
+  '@radix-ui/react-use-size@1.1.2(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   '@radix-ui/react-visually-hidden@1.2.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -17366,6 +18383,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/react-visually-hidden@1.2.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@radix-ui/rect@1.1.2': {}
 
@@ -17380,6 +18406,18 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@radix-ui/themes@3.3.0(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@radix-ui/colors': 3.0.0
+      classnames: 2.5.1
+      radix-ui: 1.6.0(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-remove-scroll-bar: 2.3.8(@types/react@19.3.0)(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@rc-component/async-validator@6.0.0':
     dependencies:
@@ -18193,14 +19231,14 @@ snapshots:
 
   '@stryker-mutator/util@9.6.1': {}
 
-  '@stryker-mutator/vitest-runner@9.6.1(@stryker-mutator/core@9.6.1(@types/node@26.4.0))(vitest@4.1.11)':
+  '@stryker-mutator/vitest-runner@9.6.1(@stryker-mutator/core@9.6.1(@types/node@26.4.0))(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))':
     dependencies:
       '@stryker-mutator/api': 9.6.1
       '@stryker-mutator/core': 9.6.1(@types/node@26.4.0)
       '@stryker-mutator/util': 9.6.1
       semver: 7.8.5
       tslib: 2.8.1
-      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+      vitest: 4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
 
   '@swc/helpers@0.5.23':
     dependencies:
@@ -18234,13 +19272,13 @@ snapshots:
       - '@types/semver'
       - chokidar
 
-  '@taiga-ui/core@5.26.0(e3ef40c6dc844e37cb3ae8eb878d4915)':
+  '@taiga-ui/core@5.26.0(9a455fa7bbe5b46c5a5ed7854bf5743f)':
     dependencies:
       '@angular/common': 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
       '@angular/forms': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@angular/platform-browser': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
-      '@angular/router': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@angular/router': 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@ng-web-apis/common': 5.4.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@types/dom-speech-recognition@0.0.12)(rxjs@7.8.2)
       '@ng-web-apis/intersection-observer': 5.4.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@ng-web-apis/common@5.4.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@types/dom-speech-recognition@0.0.12)(rxjs@7.8.2))
       '@ng-web-apis/mutation-observer': 5.4.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@ng-web-apis/common@5.4.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@types/dom-speech-recognition@0.0.12)(rxjs@7.8.2))
@@ -18277,12 +19315,12 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@taiga-ui/kit@5.26.0(7144628aaac232bb355bc4d6a635dfa0)':
+  '@taiga-ui/kit@5.26.0(63ab9c939868c970b92324ed627b06aa)':
     dependencies:
       '@angular/common': 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
       '@angular/forms': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
-      '@angular/router': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@angular/router': 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@maskito/angular': 5.6.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@maskito/core@5.6.0)
       '@maskito/core': 5.6.0
       '@maskito/kit': 5.6.0(@maskito/core@5.6.0)
@@ -18293,7 +19331,7 @@ snapshots:
       '@ng-web-apis/platform': 5.4.0
       '@ng-web-apis/resize-observer': 5.4.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@ng-web-apis/common@5.4.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@types/dom-speech-recognition@0.0.12)(rxjs@7.8.2))
       '@taiga-ui/cdk': 5.26.0(a34c38c4d0ba62ba8085483b11b1cdb8)
-      '@taiga-ui/core': 5.26.0(e3ef40c6dc844e37cb3ae8eb878d4915)
+      '@taiga-ui/core': 5.26.0(9a455fa7bbe5b46c5a5ed7854bf5743f)
       '@taiga-ui/i18n': 5.26.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@ng-web-apis/common@5.4.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@types/dom-speech-recognition@0.0.12)(rxjs@7.8.2))(rxjs@7.8.2)
       '@taiga-ui/polymorpheus': 5.0.1(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))
       '@taiga-ui/styles': 5.26.0(@taiga-ui/design-tokens@0.320.0)
@@ -18498,7 +19536,7 @@ snapshots:
       picocolors: 1.1.1
       pretty-format: 27.5.1
 
-  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11)':
+  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)))':
     dependencies:
       '@adobe/css-tools': 4.5.0
       '@testing-library/dom': 10.4.1
@@ -18508,7 +19546,7 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
     optionalDependencies:
-      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+      vitest: 4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
 
   '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -18519,6 +19557,16 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
+
+  '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@testing-library/dom': 10.4.1
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
 
   '@testing-library/user-event@14.6.6(@testing-library/dom@10.4.1)':
     dependencies:
@@ -18912,11 +19960,24 @@ snapshots:
     dependencies:
       '@types/react': 19.2.18
 
+  '@types/react-dom@19.2.5(@types/react@19.3.0)':
+    dependencies:
+      '@types/react': 19.3.0
+    optional: true
+
   '@types/react-transition-group@4.4.12(@types/react@19.2.18)':
     dependencies:
       '@types/react': 19.2.18
 
+  '@types/react-transition-group@4.4.12(@types/react@19.3.0)':
+    dependencies:
+      '@types/react': 19.3.0
+
   '@types/react@19.2.18':
+    dependencies:
+      csstype: 3.2.3
+
+  '@types/react@19.3.0':
     dependencies:
       csstype: 3.2.3
 
@@ -19196,6 +20257,10 @@ snapshots:
     dependencies:
       vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(yaml@2.9.1)
 
+  '@vitejs/plugin-basic-ssl@2.3.0(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))':
+    dependencies:
+      vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)
+
   '@vitejs/plugin-react@6.1.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.7)(@babel/runtime@8.0.0)(rolldown@1.2.8)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1)))(babel-plugin-react-compiler@1.0.0)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
@@ -19244,7 +20309,7 @@ snapshots:
       magicast: 0.5.4
       obug: 2.1.4
       tinyrainbow: 3.1.1
-      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))
+      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -19260,7 +20325,7 @@ snapshots:
       obug: 2.1.4
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))
+      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
 
   '@vitest/expect@4.1.11':
     dependencies:
@@ -19271,13 +20336,14 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.1
 
-  '@vitest/mocker@4.1.11(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))':
+  '@vitest/expect@4.1.12':
     dependencies:
-      '@vitest/spy': 4.1.11
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1)
+      '@standard-schema/spec': 1.1.0
+      '@types/chai': 5.2.3
+      '@vitest/spy': 4.1.12
+      '@vitest/utils': 4.1.12
+      chai: 6.3.0
+      tinyrainbow: 3.2.0
 
   '@vitest/mocker@4.1.11(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))':
     dependencies:
@@ -19287,13 +20353,39 @@ snapshots:
     optionalDependencies:
       vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)
 
+  '@vitest/mocker@4.1.12(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))':
+    dependencies:
+      '@vitest/spy': 4.1.12
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1)
+    optional: true
+
+  '@vitest/mocker@4.1.12(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))':
+    dependencies:
+      '@vitest/spy': 4.1.12
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)
+
   '@vitest/pretty-format@4.1.11':
     dependencies:
       tinyrainbow: 3.1.1
 
+  '@vitest/pretty-format@4.1.12':
+    dependencies:
+      tinyrainbow: 3.2.0
+
   '@vitest/runner@4.1.11':
     dependencies:
       '@vitest/utils': 4.1.11
+      pathe: 2.0.3
+
+  '@vitest/runner@4.1.12':
+    dependencies:
+      '@vitest/utils': 4.1.12
       pathe: 2.0.3
 
   '@vitest/snapshot@4.1.11':
@@ -19303,13 +20395,28 @@ snapshots:
       magic-string: 0.30.21
       pathe: 2.0.3
 
+  '@vitest/snapshot@4.1.12':
+    dependencies:
+      '@vitest/pretty-format': 4.1.12
+      '@vitest/utils': 4.1.12
+      magic-string: 0.30.21
+      pathe: 2.0.3
+
   '@vitest/spy@4.1.11': {}
+
+  '@vitest/spy@4.1.12': {}
 
   '@vitest/utils@4.1.11':
     dependencies:
       '@vitest/pretty-format': 4.1.11
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
+
+  '@vitest/utils@4.1.12':
+    dependencies:
+      '@vitest/pretty-format': 4.1.12
+      convert-source-map: 2.0.0
+      tinyrainbow: 3.2.0
 
   '@volar/language-core@2.4.28':
     dependencies:
@@ -20627,6 +21734,8 @@ snapshots:
   ccount@2.0.1: {}
 
   chai@6.2.2: {}
+
+  chai@6.3.0: {}
 
   chalk@4.1.2:
     dependencies:
@@ -23435,14 +24544,14 @@ snapshots:
       - supports-color
       - vue-tsc
 
-  ng-zorro-antd@22.1.1(c4b0d13742452919fe3c6407db2123d2):
+  ng-zorro-antd@22.1.1(4c2095d29922388af50abec6cd6c2ce8):
     dependencies:
       '@angular/cdk': 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@angular/common': 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
       '@angular/forms': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@angular/platform-browser': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
-      '@angular/router': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@angular/router': 22.2.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@ant-design/icons-angular': 22.1.1(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@ctrl/tinycolor': 3.6.1
       date-fns: 4.4.0
@@ -23549,6 +24658,8 @@ snapshots:
       es-object-atoms: 1.1.2
 
   obug@2.1.4: {}
+
+  obug@2.2.1: {}
 
   obug@3.0.0: {}
 
@@ -24113,6 +25224,69 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
+  radix-ui@1.6.0(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+    dependencies:
+      '@radix-ui/primitive': 1.1.4
+      '@radix-ui/react-accessible-icon': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-accordion': 1.2.14(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-alert-dialog': 1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-arrow': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-aspect-ratio': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-avatar': 1.2.0(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-checkbox': 1.3.5(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-collapsible': 1.1.14(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-context-menu': 2.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-dialog': 1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-direction': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-dropdown-menu': 2.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-focus-guards': 1.1.4(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-focus-scope': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-form': 0.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-hover-card': 1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-label': 2.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-menu': 2.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-menubar': 1.1.18(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-navigation-menu': 1.2.16(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-one-time-password-field': 0.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-password-toggle-field': 0.1.5(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-popover': 1.1.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-progress': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-radio-group': 1.4.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-scroll-area': 1.2.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-select': 2.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-separator': 1.1.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-slider': 1.4.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-switch': 1.3.1(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-tabs': 1.1.15(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-toast': 1.2.17(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-toggle': 1.1.12(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-toggle-group': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-toolbar': 1.1.13(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-tooltip': 1.2.10(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-effect-event': 0.0.3(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-escape-keydown': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-is-hydrated': 0.1.1(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-use-size': 1.1.2(@types/react@19.3.0)(react@19.2.8)
+      '@radix-ui/react-visually-hidden': 1.2.6(@types/react-dom@19.2.5(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.5(@types/react@19.3.0)
+
   radix3@1.1.2: {}
 
   rc9@3.1.0:
@@ -24148,6 +25322,14 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
+  react-remove-scroll-bar@2.3.8(@types/react@19.3.0)(react@19.2.8):
+    dependencies:
+      react: 19.2.8
+      react-style-singleton: 2.2.3(@types/react@19.3.0)(react@19.2.8)
+      tslib: 2.8.1
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   react-remove-scroll@2.7.2(@types/react@19.2.18)(react@19.2.8):
     dependencies:
       react: 19.2.8
@@ -24159,6 +25341,17 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
+  react-remove-scroll@2.7.2(@types/react@19.3.0)(react@19.2.8):
+    dependencies:
+      react: 19.2.8
+      react-remove-scroll-bar: 2.3.8(@types/react@19.3.0)(react@19.2.8)
+      react-style-singleton: 2.2.3(@types/react@19.3.0)(react@19.2.8)
+      tslib: 2.8.1
+      use-callback-ref: 1.3.3(@types/react@19.3.0)(react@19.2.8)
+      use-sidecar: 1.1.3(@types/react@19.3.0)(react@19.2.8)
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   react-style-singleton@2.2.3(@types/react@19.2.18)(react@19.2.8):
     dependencies:
       get-nonce: 1.0.1
@@ -24166,6 +25359,14 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.18
+
+  react-style-singleton@2.2.3(@types/react@19.3.0)(react@19.2.8):
+    dependencies:
+      get-nonce: 1.0.1
+      react: 19.2.8
+      tslib: 2.8.1
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   react-transition-group@4.4.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
@@ -25272,6 +26473,8 @@ snapshots:
 
   tinyrainbow@3.1.1: {}
 
+  tinyrainbow@3.2.0: {}
+
   tldts-core@7.4.11: {}
 
   tldts@7.4.11:
@@ -25853,6 +27056,13 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
+  use-callback-ref@1.3.3(@types/react@19.3.0)(react@19.2.8):
+    dependencies:
+      react: 19.2.8
+      tslib: 2.8.1
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   use-sidecar@1.1.3(@types/react@19.2.18)(react@19.2.8):
     dependencies:
       detect-node-es: 1.1.0
@@ -25860,6 +27070,14 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.18
+
+  use-sidecar@1.1.3(@types/react@19.3.0)(react@19.2.8):
+    dependencies:
+      detect-node-es: 1.1.0
+      react: 19.2.8
+      tslib: 2.8.1
+    optionalDependencies:
+      '@types/react': 19.3.0
 
   use-sync-external-store@1.6.0(react@19.2.8):
     dependencies:
@@ -25973,7 +27191,7 @@ snapshots:
     optionalDependencies:
       vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)
 
-  vitest-axe@0.1.0(vitest@4.1.11):
+  vitest-axe@0.1.0(vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))):
     dependencies:
       aria-query: 5.3.2
       axe-core: 4.13.0
@@ -25981,37 +27199,7 @@ snapshots:
       dom-accessibility-api: 0.5.16
       lodash-es: 4.18.1
       redent: 3.0.0
-      vitest: 4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
-
-  vitest@4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1)):
-    dependencies:
-      '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))
-      '@vitest/pretty-format': 4.1.11
-      '@vitest/runner': 4.1.11
-      '@vitest/snapshot': 4.1.11
-      '@vitest/spy': 4.1.11
-      '@vitest/utils': 4.1.11
-      es-module-lexer: 2.3.2
-      expect-type: 1.4.0
-      magic-string: 0.30.21
-      obug: 2.1.4
-      pathe: 2.0.3
-      picomatch: 4.0.7
-      std-env: 4.2.0
-      tinybench: 2.9.0
-      tinyexec: 1.3.0
-      tinyglobby: 0.2.17
-      tinyrainbow: 3.1.1
-      vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@types/node': 26.4.0
-      '@vitest/coverage-istanbul': 4.1.11(vitest@4.1.11)
-      '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
-      jsdom: 30.0.1
-    transitivePeerDependencies:
-      - msw
+      vitest: 4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
 
   vitest@4.1.11(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)):
     dependencies:
@@ -26033,6 +27221,67 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.1
+      vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 26.4.0
+      '@vitest/coverage-istanbul': 4.1.11(vitest@4.1.11)
+      '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
+      jsdom: 30.0.1
+    transitivePeerDependencies:
+      - msw
+
+  vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1)):
+    dependencies:
+      '@vitest/expect': 4.1.12
+      '@vitest/mocker': 4.1.12(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1))
+      '@vitest/pretty-format': 4.1.12
+      '@vitest/runner': 4.1.12
+      '@vitest/snapshot': 4.1.12
+      '@vitest/spy': 4.1.12
+      '@vitest/utils': 4.1.12
+      es-module-lexer: 2.3.2
+      expect-type: 1.4.0
+      magic-string: 0.30.21
+      obug: 2.2.1
+      pathe: 2.0.3
+      picomatch: 4.0.7
+      std-env: 4.3.0
+      tinybench: 2.9.0
+      tinyexec: 1.3.1
+      tinyglobby: 0.2.17
+      tinyrainbow: 3.2.0
+      vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.105.0)(yaml@2.9.1)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 26.4.0
+      '@vitest/coverage-istanbul': 4.1.11(vitest@4.1.11)
+      '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
+      jsdom: 30.0.1
+    transitivePeerDependencies:
+      - msw
+    optional: true
+
+  vitest@4.1.12(@types/node@26.4.0)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)):
+    dependencies:
+      '@vitest/expect': 4.1.12
+      '@vitest/mocker': 4.1.12(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1))
+      '@vitest/pretty-format': 4.1.12
+      '@vitest/runner': 4.1.12
+      '@vitest/snapshot': 4.1.12
+      '@vitest/spy': 4.1.12
+      '@vitest/utils': 4.1.12
+      es-module-lexer: 2.3.2
+      expect-type: 1.4.0
+      magic-string: 0.30.21
+      obug: 2.2.1
+      pathe: 2.0.3
+      picomatch: 4.0.7
+      std-env: 4.3.0
+      tinybench: 2.9.0
+      tinyexec: 1.3.1
+      tinyglobby: 0.2.17
+      tinyrainbow: 3.2.0
       vite: 8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
