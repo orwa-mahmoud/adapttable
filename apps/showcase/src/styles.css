@@ -1954,6 +1954,14 @@ a {
   opacity: 0.7;
 }
 
+/* ---------- editable cells ---------- */
+/* A demo cell that opens an editor reads as a control: one click selects
+   it, and a double-click or Enter opens the editor the banner names. The kits
+   draw it as text, so the demo overrides their inline cursor. */
+[data-adapttable-part="edit-cell-activate"] {
+  cursor: pointer !important;
+}
+
 /* ---------- a host's own mobile card ---------- */
 /* What `renderCard` replaces the built-in stack with: the identity as a
    headline, the rest as a compact grid. */

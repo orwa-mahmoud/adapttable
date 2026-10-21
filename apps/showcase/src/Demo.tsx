@@ -1177,7 +1177,10 @@ function Frontend({
     <>
       {editingArmed ? (
         <div className="demo-live-update">
-          <span>Open an editor, then test an incoming server change.</span>
+          <span>
+            Double-click a cell or press Enter to edit it, then test an incoming
+            server change.
+          </span>
           <button
             type="button"
             data-adapttable-part="demo-live-update"
