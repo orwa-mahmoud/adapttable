@@ -98,6 +98,9 @@ overrides:
   # shared-cache cookie disclosure, RetryHandler DoS, retry response
   # splitting, dump-interceptor truncation, unsafe-method cache replay
   undici: "^7.29.1"
+  # launch-editor command injection and Windows path checks in the dev
+  # server; @angular/build pins vite 8.3.0 exactly
+  vite: "^8.3.3"
 
 # Local security remedy until a patched upstream release exists; see patches/README.md.
 patchedDependencies:

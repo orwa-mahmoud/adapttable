@@ -27,7 +27,7 @@
     "@adapttable/react": "workspace:*",
     "@adapttable/shadcn": "workspace:*",
     "@adapttable/unstyled": "workspace:*",
-    "@angular/core": "^22.2.0"
+    "@angular/core": "^22.2.3"
   },
   "devDependencies": {
     "@base-ui/react": "^1.7.0",
