@@ -54,6 +54,8 @@ export interface EditingLifecycleExtras<TRow = unknown> {
   readonly editConflictPolicy?: EditConflictPolicy;
   /** Host resolution, taking precedence over the default policy. */
   readonly onEditConflict?: EditConflictHandler<TRow>;
+  /** The pointer gesture that opens a cell's editor; `"doubleClick"` by default. */
+  readonly editActivation?: "doubleClick" | "click";
   /** Extra patch fields merged into the feature. */
   readonly [key: string]: unknown;
 }

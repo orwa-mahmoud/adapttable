@@ -252,7 +252,11 @@ export function useEditableCellModel<TRow>(
           activate = node;
           void nextTick(restoreFocus);
         },
-        onClick: (event) => event.stopPropagation(),
+        onClick: (event) => {
+          event.stopPropagation();
+          if (allowed() && props.editing?.activation === "click")
+            controller.begin();
+        },
         onDoubleClick: (event) => {
           if (!allowed()) return;
           event.preventDefault();
@@ -309,7 +313,7 @@ const EDITING_HOLD =
   "display: grid; grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none";
 // The editor fills the space the idle cell holds and adds no width of its own,
 // so opening it never reflows the column. An object, so re-renders patch these
-// keys and keep the margins `bleedIntoCellPadding` sets.
+// keys and keep the margins `mountLayer` sets.
 const EDITING_LAYER = {
   gridRow: "1",
   gridColumn: "1",
@@ -318,19 +322,44 @@ const EDITING_LAYER = {
   contain: "inline-size",
 } as const;
 
+/** How long a second press still belongs to the gesture that opened the editor. */
+const OPENING_GESTURE_MS = 500;
+
+const openedAt = new WeakMap<Element, number>();
+
 /**
- * Let the editor's layer reach into its table cell's block padding, so an
- * editor taller than one line of text still fits the row it opened in. The
- * row grows only when the editor is taller than the whole cell.
+ * Mount the editor's layer: note when it opened, and let it reach into its
+ * table cell's block padding, so an editor taller than one line of text still
+ * fits the row it opened in. The row grows only when the editor is taller than
+ * the whole cell.
  */
-function bleedIntoCellPadding(vnode: VNode): void {
+function mountLayer(vnode: VNode): void {
   const layer = vnode.el;
   if (!(layer instanceof HTMLElement)) return;
+  openedAt.set(layer, performance.now());
   const cell = layer.closest("td, th");
   if (!cell) return;
   const padding = getComputedStyle(cell);
   layer.style.marginTop = `-${padding.paddingTop}`;
   layer.style.marginBottom = `-${padding.paddingBottom}`;
+}
+
+/**
+ * The rest of a double-click whose first press opened the editor does not
+ * reach it: a second press would tick the checkbox or toggle the list the
+ * reader only meant to open.
+ */
+function holdOpeningPress(event: MouseEvent): void {
+  const layer = event.currentTarget;
+  const opened = layer instanceof Element ? openedAt.get(layer) : undefined;
+  if (
+    opened !== undefined &&
+    performance.now() - opened < OPENING_GESTURE_MS &&
+    event.detail > 1
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
 }
 
 /** Receives a gesture or a ref and does nothing with it. */
@@ -362,7 +391,12 @@ function editingFrame(display: VNodeChild, editor: VNodeChild[]): VNodeChild {
     h("span", { "aria-hidden": "true", style: EDITING_HOLD }, [display]),
     h(
       "span",
-      { style: EDITING_LAYER, onVnodeMounted: bleedIntoCellPadding },
+      {
+        style: EDITING_LAYER,
+        onVnodeMounted: mountLayer,
+        onMousedownCapture: holdOpeningPress,
+        onClickCapture: holdOpeningPress,
+      },
       editor
     ),
   ]);

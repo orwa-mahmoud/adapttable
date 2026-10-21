@@ -287,6 +287,7 @@ export class AdaptEditableCellGate<TRow> {
       },
       onClick: (event: { stopPropagation: () => void }) => {
         event.stopPropagation();
+        if (this.editing()?.activation === "click") ctrl.begin();
       },
       onKeyDown: (event: {
         key: string;

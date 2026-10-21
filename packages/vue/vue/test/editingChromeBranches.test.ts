@@ -161,6 +161,43 @@ describe("editable cell control contracts", () => {
     expect(value.cell.value.controller.draft).toBe("latest");
     value.scope.stop();
   });
+  it("keeps a single click for selection unless activation is click", () => {
+    const stopPropagation = vi.fn();
+    const idle = fixture();
+    idle.cell.value.activate.onClick({ stopPropagation });
+    expect(idle.cell.value.controller.mode).toBe("activatable");
+    idle.scope.stop();
+    const live = fixture({ editActivation: "click" });
+    live.cell.value.activate.onClick({ stopPropagation });
+    expect(live.cell.value.controller.mode).toBe("editing");
+    expect(stopPropagation).toHaveBeenCalledTimes(2);
+    live.scope.stop();
+  });
+  it("keeps the rest of the opening double-click out of the editor", async () => {
+    const now = vi.spyOn(performance, "now").mockReturnValue(1000);
+    const value = fixture({ editActivation: "click" });
+    value.cell.value.activate.onClick({ stopPropagation: vi.fn() });
+    const element = document.createElement("div");
+    const app = createApp({
+      render: () => EditableCellChrome({ model: value.cell.value, controls }),
+    });
+    app.mount(element);
+    await tick();
+    const editor = element.querySelector("b")!;
+    const press = (type: string, detail: number) =>
+      editor.dispatchEvent(
+        new MouseEvent(type, { detail, bubbles: true, cancelable: true })
+      );
+    // dispatchEvent returns false when the event was cancelled.
+    expect(press("mousedown", 2)).toBe(false);
+    expect(press("click", 2)).toBe(false);
+    expect(press("mousedown", 1)).toBe(true);
+    now.mockReturnValue(1600);
+    expect(press("mousedown", 2)).toBe(true);
+    now.mockRestore();
+    app.unmount();
+    value.scope.stop();
+  });
   it("holds the idle cell's geometry while the editor is open", async () => {
     const value = fixture();
     value.cell.value.controller.begin();

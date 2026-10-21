@@ -284,6 +284,7 @@ function scopedEditCallback<TArgs extends unknown[], TResult>(
 function editingBundleFor<TRow>(options: {
   readonly live: Signal<LiveEditConflictInput<TRow>>;
   readonly featureOptions: Readonly<Record<string, unknown>>;
+  readonly activation: Signal<"doubleClick" | "click" | undefined>;
   readonly columns: Signal<readonly ColumnDef<TRow>[]>;
   readonly featureHost: DataTable<TRow>["featureHost"];
   readonly labels: DataTable<TRow>["labels"];
@@ -420,6 +421,7 @@ function editingBundleFor<TRow>(options: {
         theirsValue: labels.theirsValue,
       },
       featureHost: options.featureHost,
+      activation: options.activation(),
     };
   });
 }
@@ -1289,6 +1291,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   readonly editConflictPolicy = input<EditConflictPolicy>();
   /** Host conflict decision; takes precedence over the policy. */
   readonly onEditConflict = input<EditConflictHandler<TRow>>();
+  /**
+   * The pointer gesture that opens a cell's editor. `"doubleClick"` (default)
+   * keeps a single click for selecting the cell; `"click"` opens the editor on
+   * the first click. Enter and F2 open it either way.
+   */
+  readonly editActivation = input<"doubleClick" | "click">();
   /** The column layout, to control it. */
   readonly columnLayout = input<ColumnLayoutState>();
   /** The layout an uncontrolled table starts from. Read once. */
@@ -2190,6 +2198,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         featureOptions.rowVersion,
         featureOptions.editConflictPolicy,
         featureOptions.onEditConflict,
+        featureOptions.editActivation,
         history,
         grouping,
       ],
@@ -2215,6 +2224,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
                 EditConflictHandler<TRow> | undefined),
           })),
           featureOptions: editingOptionsFor(featureOptions, history),
+          activation: computed(
+            () =>
+              this.editActivation() ??
+              (featureOptions.editActivation as
+                "doubleClick" | "click" | undefined)
+          ),
           columns: computed(() => table.allColumns()),
           get featureHost() {
             return table.featureHost;

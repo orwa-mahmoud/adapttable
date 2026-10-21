@@ -536,6 +536,7 @@ export function EditableCellGate<TRow>(
         }}
         onClick={(event) => {
           event.stopPropagation();
+          if (props.editing?.activation === "click") ctrl.begin();
         }}
         onKeyDown={(event) => {
           if (isEditActivateKey(event.key)) {

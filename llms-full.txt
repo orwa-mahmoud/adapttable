@@ -5836,6 +5836,10 @@ export function People() {
 - **Keyboard.** Double-click / Enter / F2 begins; Enter commits; Escape
   cancels and restores focus; Tab / Shift+Tab commits and advances to the
   next editable cell.
+- **One click.** `editing(handler, { editActivation: "click" })` opens a
+  cell's editor on the first click, the way a form field does — right for a
+  table people mostly edit. The default, `"doubleClick"`, keeps a single click
+  for selecting the cell. Enter and F2 open the editor either way.
 - **One-way data flow.** The commit payload is
   `(row, key, nextValue)` on the handler you pass to `editing()` — adapters
   render kit-native inputs; core owns the state machine so every kit behaves
@@ -5850,17 +5854,18 @@ export function People() {
 
 ## Options
 
-| Prop / field  | Type                                                    | Default  | Description                                                                                              |
-| ------------- | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `editing(fn)` | `(row: TRow, key: string, nextValue: unknown) => void`  | —        | First argument to `editing()`; its presence enables editing.                                             |
-| `editable`    | `boolean \| ((row: TRow) => boolean)`                   | —        | Whether this column can open an editor (still requires `editing()`).                                     |
-| `editor`      | `CellEditor` — see [the editor set](#the-editor-set)    | `"text"` | Widget for the active cell: text, number, boolean, date, datetime, time, select, multi-select or custom. |
-| `editValue`   | `(row: TRow) => string`                                 | —        | Draft seed when the displayed cell is formatted but editing needs the raw.                               |
-| `parseValue`  | `(draft: string, row: TRow) => unknown`                 | —        | Turns the edited text into the value committed to your edit handler.                                     |
-| `labels`      | `TableLabels`                                           | English  | Override `editCell` for the activate control's accessible name.                                          |
-| `validate`    | `(value, row) => string \| undefined \| Promise<…>`     | —        | Column rule: return a message to reject the commit (see below).                                          |
-| `validateRow` | `(row) => string \| Record<string,string> \| undefined` | —        | Table rule over the row the edit would produce (cross-field).                                            |
-| `applyEdit`   | `(row, columnKey, value) => TRow`                       | spread   | How an edit lands on a row for `validateRow` to judge.                                                   |
+| Prop / field     | Type                                                    | Default         | Description                                                                                              |
+| ---------------- | ------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------- |
+| `editing(fn)`    | `(row: TRow, key: string, nextValue: unknown) => void`  | —               | First argument to `editing()`; its presence enables editing.                                             |
+| `editable`       | `boolean \| ((row: TRow) => boolean)`                   | —               | Whether this column can open an editor (still requires `editing()`).                                     |
+| `editor`         | `CellEditor` — see [the editor set](#the-editor-set)    | `"text"`        | Widget for the active cell: text, number, boolean, date, datetime, time, select, multi-select or custom. |
+| `editValue`      | `(row: TRow) => string`                                 | —               | Draft seed when the displayed cell is formatted but editing needs the raw.                               |
+| `parseValue`     | `(draft: string, row: TRow) => unknown`                 | —               | Turns the edited text into the value committed to your edit handler.                                     |
+| `labels`         | `TableLabels`                                           | English         | Override `editCell` for the activate control's accessible name.                                          |
+| `editActivation` | `"doubleClick" \| "click"`                              | `"doubleClick"` | The pointer gesture that opens a cell's editor; Enter and F2 open it either way.                         |
+| `validate`       | `(value, row) => string \| undefined \| Promise<…>`     | —               | Column rule: return a message to reject the commit (see below).                                          |
+| `validateRow`    | `(row) => string \| Record<string,string> \| undefined` | —               | Table rule over the row the edit would produce (cross-field).                                            |
+| `applyEdit`      | `(row, columnKey, value) => TRow`                       | spread          | How an edit lands on a row for `validateRow` to judge.                                                   |
 
 ### Lifecycle events
 
@@ -17115,6 +17120,7 @@ per-column aggregation choices.
 | `onEditError`               | `EditEventHandler<TRow>`                                        | —               | Observe a save promise rejecting.                                                                                                                                                                                                 |
 | `onEditConflict`            | `EditConflictHandler<TRow>`                                     | —               | A row changed under an open editor. Return `"keep"` or `"take"`; omit and `editConflictPolicy` decides.                                                                                                                           |
 | `editConflictPolicy`        | `"keep" \| "take" \| "ask"`                                     | `"ask"`         | What to do when the host does not choose. `"ask"` surfaces Keep mine / Take theirs.                                                                                                                                               |
+| `editActivation`            | `"doubleClick" \| "click"`                                      | `"doubleClick"` | The pointer gesture that opens a cell's editor. `"click"` opens it on the first click; Enter and F2 open it either way.                                                                                                           |
 | `rowVersion`                | `(row: TRow) => string \| number`                               | —               | Host version of a row. Any change under an open editor is a conflict, not only the edited column.                                                                                                                                 |
 | `validateRow`               | `RowValidator<TRow>`                                            | —               | Gate a commit on a row-level rule. Receives the row the edit would produce; return a message, a column key → message map, or nothing. May be async.                                                                               |
 | `applyEdit`                 | `(row: TRow, columnKey: string, value: unknown) => TRow`        | shallow spread  | How an edit is applied to a row for `validateRow` to judge; pass it when a column reads a nested path.                                                                                                                            |
@@ -28150,7 +28156,9 @@ or the [NG-ZORRO editing demo](https://adapttable.orwamahmoud.com/angular/demo/n
 
 ## Keyboard, mobile and incoming updates
 
-Double-click a cell to open its editor. Keyboard grid navigation supplies an
+Double-click a cell to open its editor, or a single click with
+`editing(handler, { editActivation: "click" })` or the table's
+`[editActivation]="'click'"` input. Keyboard grid navigation supplies an
 accessible route to editable cells; Enter commits, Escape cancels, and Tab
 commits and advances through the editing flow. Validation failures keep the
 draft available for correction. Editors are also rendered inside mobile fields,
@@ -34047,9 +34055,14 @@ sends `readonly BatchRowEdit<TRow>[]`, each carrying `row`, `rowId` and
 promise so the binding can show pending state and failures. Replace the host
 rows when saving succeeds; no factory mutates them for you.
 
+A double-click, Enter or F2 opens a cell's editor. Pass
+`editing(onCellEdit, { editActivation: "click" })` to open it on the first
+click instead, the way a form field does; Enter and F2 still work.
+
 `EditingLifecycleExtras<TRow>` includes validation/application hooks, edit
 lifecycle/error callbacks, rollback, dirty tracking, history, row versions,
-conflict policy/handler and optional `rowEditIcons`. It omits rows, columns,
+conflict policy/handler, the `editActivation` gesture and optional
+`rowEditIcons`. It omits rows, columns,
 row key and the three primary write callbacks, which the shell/factory supplies.
 `TableEditingOptions<TRow>` is the complete headless input, requiring rows,
 editable columns and a row key. Native editors cover text, number, boolean,

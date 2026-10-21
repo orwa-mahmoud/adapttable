@@ -34,14 +34,16 @@ const COLS: ColumnDef<Person>[] = [{ key: "name", editable: true }];
 
 function Harness({
   onCellEdit,
+  activation,
 }: Readonly<{
   onCellEdit?: (row: Person, key: string, next: unknown) => void;
+  activation?: "doubleClick" | "click";
 }>) {
   const state = useCellEditing();
   return (
     <EditableCellGate
       slots={editableCellTestSlots}
-      editing={onCellEdit ? { onCellEdit, state } : undefined}
+      editing={onCellEdit ? { onCellEdit, state, activation } : undefined}
       row={ROW}
       column={COLS[0]!}
       rowId="1"
@@ -116,6 +118,32 @@ describe("EditableCellGate", () => {
     expect(
       screen.getByRole("textbox", { name: "Edit cell" })
     ).toBeInTheDocument();
+  });
+
+  it("keeps a single click for selection unless activation is click", () => {
+    const { unmount } = render(<Harness onCellEdit={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }));
+    expect(screen.queryByRole("textbox", { name: "Edit cell" })).toBeNull();
+    unmount();
+    render(<Harness onCellEdit={vi.fn()} activation="click" />);
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }));
+    expect(
+      screen.getByRole("textbox", { name: "Edit cell" })
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the rest of the opening double-click out of the editor", () => {
+    const now = vi.spyOn(performance, "now").mockReturnValue(1000);
+    render(<Harness onCellEdit={vi.fn()} activation="click" />);
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }), { detail: 1 });
+    const editor = screen.getByRole("textbox", { name: "Edit cell" });
+    // fireEvent returns false when the event was cancelled.
+    expect(fireEvent.mouseDown(editor, { detail: 2 })).toBe(false);
+    expect(fireEvent.click(editor, { detail: 2 })).toBe(false);
+    expect(fireEvent.mouseDown(editor, { detail: 1 })).toBe(true);
+    now.mockReturnValue(1600);
+    expect(fireEvent.mouseDown(editor, { detail: 2 })).toBe(true);
+    now.mockRestore();
   });
 
   it("holds the idle cell's geometry while the editor is open", () => {

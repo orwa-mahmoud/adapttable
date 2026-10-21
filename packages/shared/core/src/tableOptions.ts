@@ -259,6 +259,13 @@ export interface TableOptions<TRow, TNode = unknown> {
    */
   editConflictPolicy?: EditConflictPolicy;
   /**
+   * The pointer gesture that opens a cell's editor. `"doubleClick"` (default)
+   * keeps a single click for selecting the cell; `"click"` opens the editor on
+   * the first click, the way a form field does. Enter and F2 open it either
+   * way.
+   */
+  editActivation?: "doubleClick" | "click";
+  /**
    * Host version of a row. When set, any version change under an open editor
    * is a conflict, not only a change to the edited column.
    */

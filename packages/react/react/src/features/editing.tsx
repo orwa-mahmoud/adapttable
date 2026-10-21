@@ -140,6 +140,7 @@ function LiveEditing({
               theirsValue: chrome.table.labels.theirsValue,
             },
             featureHost: featureHostOf(props),
+            activation: props.editActivation,
           }
         : undefined,
     [

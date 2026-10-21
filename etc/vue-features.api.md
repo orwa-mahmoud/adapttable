@@ -849,6 +849,7 @@ export interface TableEditingOptions<TRow> extends EditLifecycle<TRow>, EditVali
     readonly conflictLabels?: NonNullable<EditingBundle<TRow>["conflictLabels"]>;
     // (undocumented)
     readonly dirtyIndicators?: boolean;
+    readonly editActivation?: "doubleClick" | "click";
     // (undocumented)
     readonly editConflictPolicy?: EditConflictPolicy;
     // (undocumented)

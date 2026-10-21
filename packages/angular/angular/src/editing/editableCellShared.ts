@@ -20,7 +20,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   type ElementRef,
+  inject,
   input,
   TemplateRef,
   type Type,
@@ -231,6 +233,9 @@ export class AdaptEditableCellDisplay {
   });
 }
 
+/** How long a second press still belongs to the gesture that opened the editor. */
+const OPENING_GESTURE_MS = 500;
+
 /**
  * The cell's geometry while an editor replaces its display. What the idle cell
  * showed — the kit's activate control, or plain display for a row editor — is
@@ -276,16 +281,35 @@ export class AdaptEditingCellFrame implements AfterViewInit {
   /** Inert props for {@link AdaptEditingCellFrame.idle}. */
   readonly idleProps = input<unknown>();
   private readonly layer = viewChild<ElementRef<HTMLElement>>("layer");
+  private readonly destroyRef = inject(DestroyRef);
 
   /**
-   * Let the editor's layer reach into its table cell's block padding, so an
-   * editor taller than one line of text still fits the row it opened in. The
-   * row grows only when the editor is taller than the whole cell.
+   * Note when the editor opened, and let its layer reach into its table
+   * cell's block padding, so an editor taller than one line of text still fits
+   * the row it opened in. The row grows only when the editor is taller than
+   * the whole cell.
    */
   ngAfterViewInit(): void {
     const layer = this.layer()?.nativeElement;
-    const cell = layer?.closest("td, th");
-    if (!layer || !cell) return;
+    if (!layer) return;
+    const opened = performance.now();
+    // The rest of a double-click whose first press opened the editor does not
+    // reach it: a second press would tick the checkbox or toggle the list the
+    // reader only meant to open.
+    const holdOpeningPress = (event: MouseEvent) => {
+      if (event.detail > 1 && performance.now() - opened < OPENING_GESTURE_MS) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    layer.addEventListener("mousedown", holdOpeningPress, true);
+    layer.addEventListener("click", holdOpeningPress, true);
+    this.destroyRef.onDestroy(() => {
+      layer.removeEventListener("mousedown", holdOpeningPress, true);
+      layer.removeEventListener("click", holdOpeningPress, true);
+    });
+    const cell = layer.closest("td, th");
+    if (!cell) return;
     const padding = getComputedStyle(cell);
     layer.style.marginTop = `-${padding.paddingTop}`;
     layer.style.marginBottom = `-${padding.paddingBottom}`;

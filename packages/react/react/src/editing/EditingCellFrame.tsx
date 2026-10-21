@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactElement, ReactNode } from "react";
+import type { CSSProperties, MouseEvent, ReactElement, ReactNode } from "react";
 
 const FRAME: CSSProperties = { display: "grid", minWidth: 0 };
 
@@ -25,17 +25,42 @@ const LAYER: CSSProperties = {
   contain: "inline-size",
 };
 
+/** How long a second press still belongs to the gesture that opened the editor. */
+const OPENING_GESTURE_MS = 500;
+
+const openedAt = new WeakMap<Element, number>();
+
 /**
- * Let the editor's layer reach into its table cell's block padding, so an
- * editor taller than one line of text still fits the row it opened in. The
- * row grows only when the editor is taller than the whole cell.
+ * Mount the editor's layer: note when it opened, and let it reach into its
+ * table cell's block padding, so an editor taller than one line of text still
+ * fits the row it opened in. The row grows only when the editor is taller than
+ * the whole cell.
  */
-function bleedIntoCellPadding(layer: HTMLElement | null): void {
-  const cell = layer?.closest("td, th");
-  if (!layer || !cell) return;
+function mountLayer(layer: HTMLElement | null): void {
+  if (!layer) return;
+  openedAt.set(layer, performance.now());
+  const cell = layer.closest("td, th");
+  if (!cell) return;
   const padding = getComputedStyle(cell);
   layer.style.marginTop = `-${padding.paddingTop}`;
   layer.style.marginBottom = `-${padding.paddingBottom}`;
+}
+
+/**
+ * The rest of a double-click whose first press opened the editor does not
+ * reach it: a second press would tick the checkbox or toggle the list the
+ * reader only meant to open.
+ */
+function holdOpeningPress(event: MouseEvent<HTMLElement>): void {
+  const opened = openedAt.get(event.currentTarget);
+  if (
+    opened !== undefined &&
+    performance.now() - opened < OPENING_GESTURE_MS &&
+    event.detail > 1
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
 }
 
 /**
@@ -52,7 +77,12 @@ export function EditingCellFrame(
       <span aria-hidden="true" style={HOLD}>
         {props.display}
       </span>
-      <span ref={bleedIntoCellPadding} style={LAYER}>
+      <span
+        ref={mountLayer}
+        style={LAYER}
+        onMouseDownCapture={holdOpeningPress}
+        onClickCapture={holdOpeningPress}
+      >
         {props.children}
       </span>
     </span>
