@@ -1,5 +1,17 @@
 # @adapttable/react
 
+## 1.8.0
+
+### Minor Changes
+
+- e3e40e7: Add `editActivation: "click"` to open a cell's editor on the first click, the way a form field does; set it on the table or in `editing(handler, { editActivation: "click" })`. The default stays a double-click, and Enter and F2 open the editor either way. The rest of a double-click that opened an editor no longer acts inside it, so it never ticks a checkbox or toggles a list.
+
+### Patch Changes
+
+- ffc8540: Opening a cell editor no longer changes the table's layout: the column keeps its width, the row keeps its height, and the editor fits inside its cell in every kit and density.
+- Updated dependencies [e3e40e7]
+  - @adapttable/core@3.12.0
+
 ## 1.7.4
 
 ### Patch Changes

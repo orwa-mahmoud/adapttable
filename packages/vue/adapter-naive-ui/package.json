@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
@@ -39,7 +39,7 @@
   "name": "@adapttable/naive-ui",
   "description": "Naive UI data table controls for the AdaptTable Vue binding.",
   "dependencies": {
-    "@adapttable/vue": "0.2.0"
+    "@adapttable/vue": "0.3.0"
   },
   "exports": {
     ".": {

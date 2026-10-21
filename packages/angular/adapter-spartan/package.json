@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/spartan",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "AdaptTable's Angular DataTable rendered with Spartan Brain and package-owned Helm components.",
   "keywords": [
     "angular",
@@ -221,8 +221,8 @@
     "tw-animate-css": "^1.0.0"
   },
   "dependencies": {
-    "@adapttable/core": "3.11.0",
-    "@adapttable/angular": "0.6.2",
+    "@adapttable/core": "3.12.0",
+    "@adapttable/angular": "0.7.0",
     "tslib": "^2.8.1"
   },
   "engines": {

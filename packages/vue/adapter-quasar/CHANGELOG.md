@@ -1,5 +1,13 @@
 # @adapttable/quasar
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [e3e40e7]
+- Updated dependencies [ffc8540]
+  - @adapttable/vue@0.3.0
+
 ## 0.3.0
 
 ### Minor Changes

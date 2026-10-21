@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/ai-angular",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Angular bindings for AdaptTable AI — tableAgent, injectTableAssistant and injectSpeechInput.",
   "keywords": [
     "angular",
@@ -50,8 +50,8 @@
     "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0"
   },
   "dependencies": {
-    "@adapttable/ai": "0.6.3",
-    "@adapttable/angular": "0.6.2",
+    "@adapttable/ai": "0.6.4",
+    "@adapttable/angular": "0.7.0",
     "tslib": "^2.8.1"
   },
   "publishConfig": {
@@ -72,6 +72,6 @@
     "ng-packagr": "^22.2.1",
     "rxjs": "^7.8.2",
     "@adapttable/angular-unstyled": "workspace:*",
-    "@adapttable/core": "3.11.0"
+    "@adapttable/core": "3.12.0"
   }
 }
