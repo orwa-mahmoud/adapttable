@@ -4,10 +4,10 @@ const FRAME: CSSProperties = { display: "grid", minWidth: 0 };
 
 // The idle cell keeps its size while the editor is open: it is still laid out,
 // so the column and the row measure the same content they did a moment ago,
-// and it is neither seen, heard nor reachable. A grid, so the idle control is
-// laid out as a block, as it is in the cell, with no line box around it.
+// and it is neither seen, heard nor reachable. A block container, as the table
+// cell is, so the idle control sits in the same line box it does in the cell.
 const HOLD: CSSProperties = {
-  display: "grid",
+  display: "flow-root",
   gridRow: "1",
   gridColumn: "1",
   visibility: "hidden",

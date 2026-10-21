@@ -254,7 +254,7 @@ const OPENING_GESTURE_MS = 500;
   template: `
     <span
       aria-hidden="true"
-      style="display: grid; grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none"
+      style="display: flow-root; grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none"
     >
       @if (idle(); as control) {
         <ng-container
