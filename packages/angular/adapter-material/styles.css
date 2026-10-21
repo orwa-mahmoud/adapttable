@@ -78,6 +78,14 @@
   --mat-form-field-container-vertical-padding: 8px;
   --mat-form-field-container-text-size: 14px;
 }
+/* A cell editor fits the row it opens in, compact rows included: Material's
+   densest form-field size. */
+.adapt-material
+  .mat-mdc-form-field:has([data-adapttable-part="edit-cell-editor"]) {
+  --mat-form-field-container-height: 36px;
+  --mat-form-field-container-vertical-padding: 6px;
+  --mat-form-field-container-text-size: 14px;
+}
 .adapt-material [data-adapttable-part="scroll-box"] {
   overflow: auto;
   max-inline-size: 100%;

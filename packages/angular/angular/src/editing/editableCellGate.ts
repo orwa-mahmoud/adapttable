@@ -72,6 +72,11 @@ export type { EditableCellButtonProps } from "@adapttable/core/binding";
 export type EditableCellActivateProps =
   NeutralEditableCellActivateProps<unknown>;
 
+/** Receives a gesture or a ref and does nothing with it. */
+function ignore(): void {
+  // The held idle control answers nothing; the editor above it does.
+}
+
 /**
  * Opt-in cell wrapper: plain display when editing is off; double-click /
  * Enter / F2 to activate; kit supplies the editor via `editor`.
@@ -127,7 +132,10 @@ export type EditableCellActivateProps =
       } @else if (p === "display") {
         <adapt-editable-cell-display [props]="display()" />
       } @else if (p === "editor" || p === "custom-editor") {
-        <adapt-editing-cell-frame [display]="display()">
+        <adapt-editing-cell-frame
+          [idle]="slots().Activate"
+          [idleProps]="idleActivateProps()"
+        >
           <ng-container
             [adaptControl]="editor()"
             [adaptControlProps]="editorCtrl()"
@@ -293,6 +301,20 @@ export class AdaptEditableCellGate<TRow> {
       },
     };
   });
+
+  /**
+   * The idle cell as the kit draws it, held under the editor for its size
+   * alone: no ref, and no gesture reaches it.
+   */
+  protected readonly idleActivateProps = computed(
+    (): EditableCellActivateProps => ({
+      ...this.activateProps(),
+      activateRef: ignore,
+      onDoubleClick: ignore,
+      onClick: ignore,
+      onKeyDown: ignore,
+    })
+  );
 
   protected readonly editorCtrl = computed((): EditableCellEditorCtrl => {
     const ctrl = this.ctrl();

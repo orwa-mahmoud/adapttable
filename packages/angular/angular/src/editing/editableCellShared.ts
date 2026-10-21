@@ -16,12 +16,15 @@ import {
 import type { EditableCellButtonProps } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
+  type AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
+  type ElementRef,
   input,
   TemplateRef,
   type Type,
+  viewChild,
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
@@ -229,35 +232,62 @@ export class AdaptEditableCellDisplay {
 }
 
 /**
- * The cell's geometry while an editor replaces its display. The display is
- * still laid out — neither seen, heard nor reachable — so the column and the
- * row measure the same content they did a moment ago. The projected editor
- * fills that space and adds no width of its own, so opening it never reflows
- * the column; it can still grow the row when it is taller than the display,
- * rather than spill over the row below.
+ * The cell's geometry while an editor replaces its display. What the idle cell
+ * showed — the kit's activate control, or plain display for a row editor — is
+ * still laid out, neither seen, heard nor reachable, so the column and the row
+ * measure the same content they did a moment ago. The projected editor fills
+ * that space and adds no width of its own, so opening it never reflows the
+ * column.
  *
  * @internal
  */
 @Component({
   selector: "adapt-editing-cell-frame",
-  imports: [AdaptEditableCellDisplay],
+  imports: [AdaptControl, AdaptEditableCellDisplay],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: grid; min-width: 0" },
   template: `
     <span
       aria-hidden="true"
-      style="grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none"
+      style="display: grid; grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none"
     >
-      <adapt-editable-cell-display [props]="display()" />
+      @if (idle(); as control) {
+        <ng-container
+          [adaptControl]="control"
+          [adaptControlProps]="idleProps()"
+        />
+      } @else {
+        <adapt-editable-cell-display [props]="display()" />
+      }
     </span>
     <span
+      #layer
       style="grid-row: 1; grid-column: 1; align-self: center; min-width: 0; contain: inline-size"
     >
       <ng-content />
     </span>
   `,
 })
-export class AdaptEditingCellFrame {
-  /** What the cell shows when it is not being edited. */
-  readonly display = input.required<unknown>();
+export class AdaptEditingCellFrame implements AfterViewInit {
+  /** What the cell shows when it is not being edited, without a control. */
+  readonly display = input<unknown>();
+  /** The kit's idle control, held in place of `display`. */
+  readonly idle = input<Type<unknown>>();
+  /** Inert props for {@link AdaptEditingCellFrame.idle}. */
+  readonly idleProps = input<unknown>();
+  private readonly layer = viewChild<ElementRef<HTMLElement>>("layer");
+
+  /**
+   * Let the editor's layer reach into its table cell's block padding, so an
+   * editor taller than one line of text still fits the row it opened in. The
+   * row grows only when the editor is taller than the whole cell.
+   */
+  ngAfterViewInit(): void {
+    const layer = this.layer()?.nativeElement;
+    const cell = layer?.closest("td, th");
+    if (!layer || !cell) return;
+    const padding = getComputedStyle(cell);
+    layer.style.marginTop = `-${padding.paddingTop}`;
+    layer.style.marginBottom = `-${padding.paddingBottom}`;
+  }
 }

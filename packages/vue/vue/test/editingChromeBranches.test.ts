@@ -161,7 +161,7 @@ describe("editable cell control contracts", () => {
     expect(value.cell.value.controller.draft).toBe("latest");
     value.scope.stop();
   });
-  it("holds the display's geometry while the editor is open", async () => {
+  it("holds the idle cell's geometry while the editor is open", async () => {
     const value = fixture();
     value.cell.value.controller.begin();
     const element = document.createElement("div");
@@ -173,12 +173,12 @@ describe("editable cell control contracts", () => {
     const editor = element.querySelector("b")!;
     const layer = editor.parentElement!;
     const hold = layer.previousElementSibling as HTMLElement;
-    // The display stays laid out under the editor, out of sight and out of
-    // the accessibility tree; the editor's layer adds no width of its own.
+    // The kit's idle control stays laid out under the editor, out of sight
+    // and out of the accessibility tree; the editor's layer adds no width.
     expect(layer.parentElement!.style.display).toBe("grid");
     expect(hold.getAttribute("aria-hidden")).toBe("true");
     expect(hold.style.visibility).toBe("hidden");
-    expect(hold.textContent).toBe("Ada");
+    expect(hold.querySelector("i")!.textContent).toBe("Edit name");
     expect(layer.style.contain).toBe("inline-size");
     app.unmount();
     value.scope.stop();

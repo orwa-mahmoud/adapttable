@@ -249,6 +249,11 @@ export function CellConflictNotice({
   );
 }
 
+/** Receives a gesture or a ref and does nothing with it. */
+function ignore(): void {
+  // The held idle control answers nothing; the editor above it does.
+}
+
 function ConflictNotice(
   props: Readonly<{
     ctrl: ReturnType<typeof editableCellController>;
@@ -399,6 +404,23 @@ export function EditableCellGate<TRow>(
     ctrl.onEditorKeyDown(event);
   };
 
+  // The idle cell as the kit draws it, held under the editor for its size
+  // alone: no ref, and no gesture reaches it.
+  const IdleActivate = props.slots.Activate;
+  const idle = (
+    <IdleActivate
+      title={props.editLabel}
+      className={props.activateClassName}
+      saveStatus={ctrl.saveStatus}
+      dirty={ctrl.isDirty}
+      activateRef={ignore}
+      display={props.display}
+      onDoubleClick={ignore}
+      onClick={ignore}
+      onKeyDown={ignore}
+    />
+  );
+
   // A column that brought its own component renders it here rather than in each
   // kit: activation, focus, the keyboard flow, validation and the commit are
   // all the table's either way, so nine copies of this branch would differ only
@@ -425,7 +447,7 @@ export function EditableCellGate<TRow>(
       conflict: controllerConflictAsk(ctrl),
     });
     return (
-      <EditingCellFrame display={props.display}>
+      <EditingCellFrame display={idle}>
         <>{custom}</>
         <ConflictNotice
           ctrl={ctrl}
@@ -452,7 +474,7 @@ export function EditableCellGate<TRow>(
 
   if (presentation === "editor" && ctrl.editor) {
     return (
-      <EditingCellFrame display={props.display}>
+      <EditingCellFrame display={idle}>
         {props.renderEditor({
           draft: ctrl.draft,
           setDraft: ctrl.setDraft,

@@ -180,7 +180,9 @@ class AdaptEditCellButton {
         }
       </fieldset>
     } @else if (isSelectEditor(p.editor)) {
-      <tui-textfield [stringify]="p.selectOptions | taigaLabels"
+      <tui-textfield
+        tuiTextfieldSize="s"
+        [stringify]="p.selectOptions | taigaLabels"
         ><input
           tuiSelect
           [adaptTaigaEditorValidation]="p.error"
@@ -206,7 +208,7 @@ class AdaptEditCellButton {
         </tui-data-list></tui-textfield
       >
     } @else {
-      <tui-textfield
+      <tui-textfield tuiTextfieldSize="s"
         ><input
           tuiInput
           [adaptTaigaEditorValidation]="p.error"

@@ -2,10 +2,12 @@ import type { CSSProperties, ReactElement, ReactNode } from "react";
 
 const FRAME: CSSProperties = { display: "grid", minWidth: 0 };
 
-// The display keeps the cell's size while the editor is open: it is still laid
-// out, so the column and the row measure the same content they did a moment
-// ago, and it is neither seen, heard nor reachable.
+// The idle cell keeps its size while the editor is open: it is still laid out,
+// so the column and the row measure the same content they did a moment ago,
+// and it is neither seen, heard nor reachable. A grid, so the idle control is
+// laid out as a block, as it is in the cell, with no line box around it.
 const HOLD: CSSProperties = {
+  display: "grid",
   gridRow: "1",
   gridColumn: "1",
   visibility: "hidden",
@@ -14,8 +16,7 @@ const HOLD: CSSProperties = {
 };
 
 // The editor fills the space the display holds and adds no width of its own,
-// so opening it never reflows the column. It can still grow the row when it is
-// taller than the display, rather than spill over the row below.
+// so opening it never reflows the column.
 const LAYER: CSSProperties = {
   gridRow: "1",
   gridColumn: "1",
@@ -23,6 +24,19 @@ const LAYER: CSSProperties = {
   minWidth: 0,
   contain: "inline-size",
 };
+
+/**
+ * Let the editor's layer reach into its table cell's block padding, so an
+ * editor taller than one line of text still fits the row it opened in. The
+ * row grows only when the editor is taller than the whole cell.
+ */
+function bleedIntoCellPadding(layer: HTMLElement | null): void {
+  const cell = layer?.closest("td, th");
+  if (!layer || !cell) return;
+  const padding = getComputedStyle(cell);
+  layer.style.marginTop = `-${padding.paddingTop}`;
+  layer.style.marginBottom = `-${padding.paddingBottom}`;
+}
 
 /**
  * The cell's geometry while an editor replaces its display.
@@ -38,7 +52,9 @@ export function EditingCellFrame(
       <span aria-hidden="true" style={HOLD}>
         {props.display}
       </span>
-      <span style={LAYER}>{props.children}</span>
+      <span ref={bleedIntoCellPadding} style={LAYER}>
+        {props.children}
+      </span>
     </span>
   );
 }

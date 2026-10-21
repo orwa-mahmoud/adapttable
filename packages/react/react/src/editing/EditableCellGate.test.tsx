@@ -118,16 +118,23 @@ describe("EditableCellGate", () => {
     ).toBeInTheDocument();
   });
 
-  it("holds the display's geometry while the editor is open", () => {
-    render(<Harness onCellEdit={vi.fn()} />);
+  it("holds the idle cell's geometry while the editor is open", () => {
+    const onCellEdit = vi.fn();
+    render(<Harness onCellEdit={onCellEdit} />);
     fireEvent.doubleClick(screen.getByRole("button", { name: "Ada" }));
     const editor = screen.getByRole("textbox", { name: "Edit cell" });
-    // The display stays laid out under the editor, out of sight and out of
-    // the accessibility tree, so the column and row keep measuring it.
-    const hold = screen.getByText("Ada").parentElement!;
-    expect(hold).toHaveAttribute("aria-hidden", "true");
+    // The kit's idle control stays laid out under the editor, out of sight
+    // and out of the accessibility tree, so the column and row keep its size.
+    const idle = document.querySelector<HTMLElement>(
+      '[data-adapttable-part="edit-cell-activate"]'
+    )!;
+    expect(idle).toHaveTextContent("Ada");
+    const hold = idle.closest<HTMLElement>('[aria-hidden="true"]')!;
     expect(hold).toHaveStyle({ visibility: "hidden" });
     expect(screen.queryByRole("button", { name: "Ada" })).toBeNull();
+    // No gesture reaches the held control.
+    fireEvent.doubleClick(idle);
+    expect(screen.getByRole("textbox", { name: "Edit cell" })).toBe(editor);
     // The editor's layer shares the display's grid cell and adds no width.
     const layer = editor.parentElement!;
     expect(layer).toHaveStyle({ gridRow: "1", gridColumn: "1" });
