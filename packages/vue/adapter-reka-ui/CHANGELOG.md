@@ -1,5 +1,14 @@
 # @adapttable/reka-ui
 
+## 0.2.1
+
+### Patch Changes
+
+- ffc8540: Opening a cell editor no longer changes the table's layout: the column keeps its width, the row keeps its height, and the editor fits inside its cell in every kit and density.
+- Updated dependencies [e3e40e7]
+- Updated dependencies [ffc8540]
+  - @adapttable/vue@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

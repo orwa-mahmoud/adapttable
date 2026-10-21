@@ -1,5 +1,14 @@
 # @adapttable/unstyled
 
+## 3.4.2
+
+### Patch Changes
+
+- Updated dependencies [e3e40e7]
+- Updated dependencies [ffc8540]
+  - @adapttable/core@3.12.0
+  - @adapttable/react@1.8.0
+
 ## 3.4.1
 
 ### Patch Changes

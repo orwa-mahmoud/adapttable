@@ -1,5 +1,14 @@
 # @adapttable/element-plus
 
+## 0.3.1
+
+### Patch Changes
+
+- 39b2e49: Select cell editors take keyboard focus when they open, so typing, arrow keys and Escape work at once and Escape returns focus to the cell.
+- Updated dependencies [e3e40e7]
+- Updated dependencies [ffc8540]
+  - @adapttable/vue@0.3.0
+
 ## 0.3.0
 
 ### Minor Changes
