@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { formatMultiDraft, readMultiDraft } from "@adapttable/vue/adapter";
-import { computed, shallowRef, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, shallowRef, watch } from "vue";
 import { VSelect } from "vuetify/components/VSelect";
 
-import { useControlRef, valueControlAttrs } from "../controls/controlRef";
+import { valueControlAttrs } from "../controls/controlRef";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{
@@ -28,10 +28,31 @@ const invalid = computed(
     props.attrs["aria-invalid"] === "true"
 );
 let menuEscape: KeyboardEvent | undefined;
-useControlRef(
-  () => select.value?.controlRef,
-  () => props.attrs
+// VSelect forwards its text field's input, so `focus` reaches the field in
+// every build; its internal control ref is not part of what it forwards. The
+// owner can ask before this template ref resolves, so that request waits a
+// tick for it.
+const focusHandle = {
+  focus: () => {
+    if (select.value) select.value.focus();
+    else void nextTick(() => select.value?.focus());
+  },
+};
+const owner = (ref: unknown) =>
+  typeof ref === "function"
+    ? (ref as (target: { focus(): void } | null) => void)
+    : undefined;
+watch(
+  () => owner(props.attrs.ref),
+  (next, previous) => {
+    previous?.(null);
+    next?.(focusHandle);
+  },
+  { immediate: true, flush: "post" }
 );
+onBeforeUnmount(() => {
+  owner(props.attrs.ref)?.(null);
+});
 // VSelect's public focus state includes its portaled list, unlike input blur.
 watch(
   () => select.value?.isFocused,

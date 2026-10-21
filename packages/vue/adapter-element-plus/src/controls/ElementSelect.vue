@@ -19,8 +19,14 @@ function change(value: unknown): void {
   if (typeof value === "string") emit("change", value);
   void nextTick(() => control.value?.$forceUpdate());
 }
+// A parent ref resolves before this template ref does, so a focus requested
+// while the select mounts waits a tick for it.
+function focus(): void {
+  if (control.value) control.value.focus();
+  else void nextTick(() => control.value?.focus());
+}
 defineExpose({
-  focus: () => control.value?.focus(),
+  focus,
   blur: () => control.value?.blur(),
 });
 </script>
