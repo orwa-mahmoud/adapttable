@@ -141,12 +141,16 @@ for (const kit of builtAdapters("angular")) {
       feature: "columns",
       trigger: "column-menu-button",
       panel: "column-menu-panel",
+      // The column menu lives in the header row; phone widths render cards,
+      // which have no header.
+      viewport: { width: 1280, height: 900 },
     },
     { feature: "saved-views", trigger: "views-button", panel: "views-panel" },
   ]) {
     test(`${kit.key}/${overlay.feature}: the open menu passes axe`, async ({
       page,
     }) => {
+      if (overlay.viewport) await page.setViewportSize(overlay.viewport);
       await openKitPage(page, `/${kit.key}/${overlay.feature}/`);
       await angularPart(kit, page, overlay.trigger, demo(page)).click();
       await expect(angularPart(kit, page, overlay.panel)).toBeVisible();
