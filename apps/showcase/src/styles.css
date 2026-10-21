@@ -1955,9 +1955,8 @@ a {
 }
 
 /* ---------- editable cells ---------- */
-/* A demo cell that opens an editor reads as a control: one click selects
-   it, and a double-click or Enter opens the editor the banner names. The kits
-   draw it as text, so the demo overrides their inline cursor. */
+/* A demo cell that opens an editor reads as a control. The kits draw it as
+   text, so the demo overrides their inline cursor. */
 [data-adapttable-part="edit-cell-activate"] {
   cursor: pointer !important;
 }
