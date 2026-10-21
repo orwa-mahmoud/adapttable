@@ -15,8 +15,11 @@ import {
   addressMap,
   finalRoute,
   forwardedQuery,
+  kitShortcuts,
+  LICENSE_URL,
   redirectPage,
   redirectsTable,
+  ruleCounts,
   writeLegacySite,
 } from "./build-redirects.mjs";
 import { LEGACY_SITE } from "./legacy-routes.mjs";
@@ -128,12 +131,75 @@ describe("redirectsTable", () => {
     assert.equal(new Set(sources).size, sources.length);
   });
 
-  it("ends on the one splat rule", () => {
+  it("puts every splat rule after the static ones, ending on the showcase", () => {
     const rules = redirectsTable(composed())
       .split("\n")
       .filter((line) => line !== "" && !line.startsWith("#"));
     assert.equal(rules.at(-1), `/demo/* ${DEMO_ROOT}:splat 301`);
-    assert.equal(rules.filter((line) => line.includes("*")).length, 1);
+    const firstSplat = rules.findIndex((line) => line.includes("*"));
+    assert.ok(rules.slice(firstSplat).every((line) => line.includes("*")));
+  });
+
+  it("sends the registry license links to the repository's license", () => {
+    const lines = redirectsTable(composed()).split("\n");
+    assert.ok(lines.includes(`/LICENSE ${LICENSE_URL} 301`));
+    assert.ok(lines.includes(`/blob/master/LICENSE ${LICENSE_URL} 301`));
+  });
+
+  it("answers a kit's demo at its address without /demo/", () => {
+    const root = composed();
+    write(root, `${demoRoute("mantine").slice(1)}index.html`, PAGE);
+    const lines = redirectsTable(root).split("\n");
+    const kit = demoRoute("mantine");
+    assert.ok(lines.includes(`/react/mantine ${kit} 301`));
+    assert.ok(lines.includes(`/react/mantine/ ${kit} 301`));
+    assert.ok(lines.includes(`/react/mantine/* ${kit}:splat 301`));
+  });
+});
+
+describe("kitShortcuts", () => {
+  it("gives a kit with no page of its own one splat rule", () => {
+    const { statics, splats } = kitShortcuts([
+      "/react/demo/mui/",
+      "/react/demo/mui/columns/",
+    ]);
+    assert.deepEqual(statics, [
+      "/react/mui /react/demo/mui/ 301",
+      "/react/mui/ /react/demo/mui/ 301",
+    ]);
+    assert.deepEqual(splats, ["/react/mui/* /react/demo/mui/:splat 301"]);
+  });
+
+  it("keeps a kit's guide page and answers each demo page beneath it", () => {
+    const { statics, splats } = kitShortcuts([
+      "/vue/vuetify/",
+      "/vue/vuetify/theming/",
+      "/vue/demo/vuetify/",
+      "/vue/demo/vuetify/columns/",
+      "/vue/demo/vuetify/theming/",
+    ]);
+    assert.deepEqual(splats, []);
+    assert.deepEqual(statics, [
+      "/vue/vuetify/columns/ /vue/demo/vuetify/columns/ 301",
+      "/vue/vuetify/columns /vue/demo/vuetify/columns/ 301",
+    ]);
+  });
+});
+
+describe("ruleCounts", () => {
+  it("counts placeholder and splat sources as dynamic", () => {
+    assert.deepEqual(
+      ruleCounts(
+        [
+          "# note",
+          "/a /b/ 301",
+          "/c/* /d/:splat 301",
+          "/e/:id /f/ 301",
+          "",
+        ].join("\n")
+      ),
+      { static: 1, dynamic: 2 }
+    );
   });
 });
 
