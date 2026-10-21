@@ -43,6 +43,7 @@ import { AdaptControl } from "../control";
 import {
   AdaptCellConflictNotice,
   AdaptEditableCellDisplay,
+  AdaptEditingCellFrame,
   type EditableCellEditorCtrl,
   type EditableCellSlots,
 } from "./editableCellShared";
@@ -314,28 +315,35 @@ export class AdaptBatchEditBarChrome<TRow> {
  */
 @Component({
   selector: "adapt-row-edit-cell",
-  imports: [AdaptControl, AdaptCellConflictNotice, AdaptEditableCellDisplay],
+  imports: [
+    AdaptControl,
+    AdaptCellConflictNotice,
+    AdaptEditableCellDisplay,
+    AdaptEditingCellFrame,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
     @if (hasEditor()) {
-      <ng-container
-        [adaptControl]="editor()"
-        [adaptControlProps]="editorCtrl()"
-      />
-      @if (ask(); as currentAsk) {
-        @if (conflictLabels(); as labels) {
-          @if (slots(); as cellSlots) {
-            <adapt-cell-conflict-notice
-              [ask]="currentAsk"
-              [labels]="labels"
-              [errorId]="errorId()"
-              [errorClassName]="errorClassName()"
-              [slots]="cellSlots"
-            />
+      <adapt-editing-cell-frame [display]="display()">
+        <ng-container
+          [adaptControl]="editor()"
+          [adaptControlProps]="editorCtrl()"
+        />
+        @if (ask(); as currentAsk) {
+          @if (conflictLabels(); as labels) {
+            @if (slots(); as cellSlots) {
+              <adapt-cell-conflict-notice
+                [ask]="currentAsk"
+                [labels]="labels"
+                [errorId]="errorId()"
+                [errorClassName]="errorClassName()"
+                [slots]="cellSlots"
+              />
+            }
           }
         }
-      }
+      </adapt-editing-cell-frame>
     } @else {
       <adapt-editable-cell-display [props]="display()" />
     }

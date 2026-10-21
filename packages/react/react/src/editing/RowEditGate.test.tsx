@@ -130,6 +130,26 @@ describe("RowEditCell", () => {
     expect(screen.getByLabelText("field")).toHaveValue("Ship");
   });
 
+  it("keeps the display laid out under the field, hidden from every reader", () => {
+    const result = openRow();
+    render(
+      <RowEditCell
+        rowEditing={result.current}
+        column={COLUMNS[0]!}
+        display="Ship"
+        editLabel="Edit cell"
+        takesFocus
+        renderEditor={editorFor}
+      />
+    );
+    const hold = screen.getByText("Ship");
+    expect(hold).toHaveAttribute("aria-hidden", "true");
+    expect(hold).toHaveStyle({ visibility: "hidden" });
+    expect(screen.getByLabelText("field").parentElement!.style.contain).toBe(
+      "inline-size"
+    );
+  });
+
   it("passes a column nobody may edit straight through", () => {
     const result = openRow();
     render(

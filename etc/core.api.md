@@ -2876,6 +2876,7 @@ export interface EditingArmingProps {
 
 // @public
 export interface EditingBundle<TRow> {
+    activation?: "doubleClick" | "click";
     batch?: BatchEditingState<TRow>;
     conflict?: EditConflictState<TRow>;
     conflictLabels?: EditConflictLabels;
@@ -8454,6 +8455,7 @@ export interface TableOptions<TRow, TNode = unknown> {
     };
     density?: "comfortable" | "compact";
     dir?: Direction;
+    editActivation?: "doubleClick" | "click";
     editConflictPolicy?: EditConflictPolicy;
     estimateCardSize?: number;
     estimateRowSize?: number;

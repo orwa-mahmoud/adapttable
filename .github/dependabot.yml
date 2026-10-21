@@ -10,3 +10,18 @@ updates:
       actions:
         patterns:
           - "*"
+
+  # npm security updates only: open-pull-requests-limit 0 keeps version
+  # updates off. Every open security fix lands in one pull request, whose
+  # pnpm-lock.yaml the Dependabot lockfile workflow rewrites with the pinned
+  # pnpm.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"

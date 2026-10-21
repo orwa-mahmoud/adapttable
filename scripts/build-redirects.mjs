@@ -119,9 +119,52 @@ export const addressMap = (root) =>
     .sort((a, b) => a.from.localeCompare(b.from));
 
 /**
+ * The license, for the links registries build from a package's homepage —
+ * `/LICENSE` on the site, or `/blob/master/LICENSE` as on a repository.
+ */
+export const LICENSE_URL =
+  "https://github.com/orwa-mahmoud/adapttable/blob/main/LICENSE";
+
+/** Cloudflare's per-file limits for `_redirects`. */
+export const REDIRECT_LIMITS = Object.freeze({ static: 2000, dynamic: 100 });
+
+/**
+ * The address a kit's demo answers without `/demo/`: `/react/mui/columns`
+ * reaches `/react/demo/mui/columns/`. A kit with no page of its own under that
+ * address takes it whole, as one splat rule; a kit whose guide lives there
+ * keeps the guide, and each demo page beneath it answers by a rule of its own.
+ *
+ * @param {readonly string[]} routes - Every route the site serves.
+ * @returns {{ statics: string[], splats: string[] }}
+ */
+export const kitShortcuts = (routes) => {
+  const served = new Set(routes);
+  const statics = [];
+  const splats = [];
+  for (const demo of routes) {
+    const kit = /^\/([^/]+)\/demo\/([^/]+)\/$/.exec(demo);
+    if (!kit) continue;
+    const short = `/${kit[1]}/${kit[2]}/`;
+    if (!routes.some((route) => route.startsWith(short))) {
+      statics.push(`${short.slice(0, -1)} ${demo} 301`, `${short} ${demo} 301`);
+      splats.push(`${short}* ${demo}:splat 301`);
+      continue;
+    }
+    for (const page of routes) {
+      if (page === demo || !page.startsWith(demo)) continue;
+      const from = `${short}${page.slice(demo.length)}`;
+      if (served.has(from)) continue;
+      statics.push(`${from} ${page} 301`, `${from.slice(0, -1)} ${page} 301`);
+    }
+  }
+  return { statics, splats };
+};
+
+/**
  * The `_redirects` table: each changed page's previous path, with and without
  * its trailing slash; one rule for the showcase and one for the framework
- * section's root; and every page's own slashless address.
+ * section's root; every page's own slashless address; and each kit's demo at
+ * its address without `/demo/`.
  *
  * @param {string} root
  * @returns {string}
@@ -134,6 +177,8 @@ export const redirectsTable = (root) => {
     `/${FRAMEWORK}/ ${docsRoute("getting-started")} 302`,
     `/angular ${docsRoute("angular/getting-started")} 302`,
     `/angular/ ${docsRoute("angular/getting-started")} 302`,
+    `/LICENSE ${LICENSE_URL} 301`,
+    `/blob/master/LICENSE ${LICENSE_URL} 301`,
   ];
   for (const { from, to } of addressMap(root)) {
     if (from === to || from.startsWith("/demo/")) continue;
@@ -147,12 +192,39 @@ export const redirectsTable = (root) => {
   const listed = new Set(lines.map((line) => line.split(" ")[0]));
   for (const { route } of sitePages(root)) {
     const bare = route.slice(0, -1);
-    if (bare !== "" && !listed.has(bare)) lines.push(`${bare} ${route} 301`);
+    if (bare !== "" && !listed.has(bare)) {
+      lines.push(`${bare} ${route} 301`);
+      listed.add(bare);
+    }
   }
-  // The one splat rule goes last: every rule after a dynamic one counts
-  // against the host's much smaller dynamic-rule limit.
-  lines.push(`/demo/* ${DEMO_ROOT}:splat 301`);
+  const { statics, splats } = kitShortcuts(
+    sitePages(root).map(({ route }) => route)
+  );
+  for (const rule of statics) {
+    const from = rule.split(" ")[0];
+    if (listed.has(from)) continue;
+    lines.push(rule);
+    listed.add(from);
+  }
+  // Splat rules go last: every rule after a dynamic one counts against the
+  // host's much smaller dynamic-rule limit.
+  lines.push(...splats, `/demo/* ${DEMO_ROOT}:splat 301`);
   return `${lines.join("\n")}\n`;
+};
+
+/**
+ * How many static and dynamic rules a `_redirects` table holds.
+ *
+ * @param {string} table
+ * @returns {{ static: number, dynamic: number }}
+ */
+export const ruleCounts = (table) => {
+  const rules = table
+    .split("\n")
+    .filter((line) => /^\/\S* \S+ \d{3}$/.test(line))
+    .map((line) => line.split(" ")[0]);
+  const dynamic = rules.filter((from) => /[*:]/.test(from)).length;
+  return { static: rules.length - dynamic, dynamic };
 };
 
 /**
@@ -292,12 +364,22 @@ const main = () => {
     process.exit(1);
   }
   const table = redirectsTable(root);
+  const counts = ruleCounts(table);
+  if (
+    counts.static > REDIRECT_LIMITS.static ||
+    counts.dynamic > REDIRECT_LIMITS.dynamic
+  ) {
+    console.error(
+      `build-redirects: ${counts.static} static and ${counts.dynamic} dynamic ` +
+        `rules exceed the host's ${REDIRECT_LIMITS.static} / ` +
+        `${REDIRECT_LIMITS.dynamic} limit; rules past it are ignored.`
+    );
+    process.exit(1);
+  }
   writeFileSync(join(root, "_redirects"), table);
-  const rules = table
-    .split("\n")
-    .filter((line) => /^\/\S* \S+ \d{3}$/.test(line));
   console.log(
-    `build-redirects: ${rules.length} rules in ${join(root, "_redirects")}`
+    `build-redirects: ${counts.static} static and ${counts.dynamic} dynamic ` +
+      `rules in ${join(root, "_redirects")}`
   );
   const legacy = option("legacy");
   if (legacy) {

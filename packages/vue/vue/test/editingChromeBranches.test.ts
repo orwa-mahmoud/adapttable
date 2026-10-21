@@ -3,7 +3,14 @@ import {
   slotRender,
 } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
-import { effectScope, h, nextTick, shallowRef, type VNodeChild } from "vue";
+import {
+  createApp,
+  effectScope,
+  h,
+  nextTick,
+  shallowRef,
+  type VNodeChild,
+} from "vue";
 
 import {
   dirtyIndicators,
@@ -152,6 +159,65 @@ describe("editable cell control contracts", () => {
     EditableCellChrome({ model: value.cell.value, controls: slots });
     buttons[1]!.onClick({ stopPropagation });
     expect(value.cell.value.controller.draft).toBe("latest");
+    value.scope.stop();
+  });
+  it("keeps a single click for selection unless activation is click", () => {
+    const stopPropagation = vi.fn();
+    const idle = fixture();
+    idle.cell.value.activate.onClick({ stopPropagation });
+    expect(idle.cell.value.controller.mode).toBe("activatable");
+    idle.scope.stop();
+    const live = fixture({ editActivation: "click" });
+    live.cell.value.activate.onClick({ stopPropagation });
+    expect(live.cell.value.controller.mode).toBe("editing");
+    expect(stopPropagation).toHaveBeenCalledTimes(2);
+    live.scope.stop();
+  });
+  it("keeps the rest of the opening double-click out of the editor", async () => {
+    const now = vi.spyOn(performance, "now").mockReturnValue(1000);
+    const value = fixture({ editActivation: "click" });
+    value.cell.value.activate.onClick({ stopPropagation: vi.fn() });
+    const element = document.createElement("div");
+    const app = createApp({
+      render: () => EditableCellChrome({ model: value.cell.value, controls }),
+    });
+    app.mount(element);
+    await tick();
+    const editor = element.querySelector("b")!;
+    const press = (type: string, detail: number) =>
+      editor.dispatchEvent(
+        new MouseEvent(type, { detail, bubbles: true, cancelable: true })
+      );
+    // dispatchEvent returns false when the event was cancelled.
+    expect(press("mousedown", 2)).toBe(false);
+    expect(press("click", 2)).toBe(false);
+    expect(press("mousedown", 1)).toBe(true);
+    now.mockReturnValue(1600);
+    expect(press("mousedown", 2)).toBe(true);
+    now.mockRestore();
+    app.unmount();
+    value.scope.stop();
+  });
+  it("holds the idle cell's geometry while the editor is open", async () => {
+    const value = fixture();
+    value.cell.value.controller.begin();
+    const element = document.createElement("div");
+    const app = createApp({
+      render: () => EditableCellChrome({ model: value.cell.value, controls }),
+    });
+    app.mount(element);
+    await tick();
+    const editor = element.querySelector("b")!;
+    const layer = editor.parentElement!;
+    const hold = layer.previousElementSibling as HTMLElement;
+    // The kit's idle control stays laid out under the editor, out of sight
+    // and out of the accessibility tree; the editor's layer adds no width.
+    expect(layer.parentElement!.style.display).toBe("grid");
+    expect(hold.getAttribute("aria-hidden")).toBe("true");
+    expect(hold.style.visibility).toBe("hidden");
+    expect(hold.querySelector("i")!.textContent).toBe("Edit name");
+    expect(layer.style.contain).toBe("inline-size");
+    app.unmount();
     value.scope.stop();
   });
   it("renders host failure with a host-owned rollback button and localized status", async () => {

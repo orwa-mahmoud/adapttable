@@ -417,6 +417,9 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
                     <div
                       data-adapttable-part="card-value"
                       data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
+                      // The item's content box is a flex row; the value spans
+                      // it, as a card field does in every other kit.
+                      style={{ flex: "1 1 auto", minWidth: 0 }}
                     >
                       {value}
                     </div>

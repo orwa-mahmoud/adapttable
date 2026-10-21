@@ -27,6 +27,7 @@ import {
   shallowRef,
   toValue,
   useId,
+  type VNode,
   type VNodeChild,
   watch,
 } from "vue";
@@ -251,7 +252,11 @@ export function useEditableCellModel<TRow>(
           activate = node;
           void nextTick(restoreFocus);
         },
-        onClick: (event) => event.stopPropagation(),
+        onClick: (event) => {
+          event.stopPropagation();
+          if (allowed() && props.editing?.activation === "click")
+            controller.begin();
+        },
         onDoubleClick: (event) => {
           if (!allowed()) return;
           event.preventDefault();
@@ -299,6 +304,133 @@ export function useEditableCellModel<TRow>(
       },
     };
   });
+}
+// The idle cell keeps its size while the editor is open: it is still laid out,
+// so the column and the row measure the same content they did a moment ago,
+// and it is neither seen, heard nor reachable. A block container, as the table
+// cell is, holding a copy of the cell's root, so the idle control sits in the
+// same boxes it does in the cell.
+const EDITING_HOLD =
+  "display: flow-root; grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none";
+// The editor fills the space the idle cell holds and adds no width of its own,
+// so opening it never reflows the column. An object, so re-renders patch these
+// keys and keep the margins `mountLayer` sets.
+const EDITING_LAYER = {
+  gridRow: "1",
+  gridColumn: "1",
+  alignSelf: "center",
+  minWidth: 0,
+  contain: "inline-size",
+} as const;
+
+/** How long a second press still belongs to the gesture that opened the editor. */
+const OPENING_GESTURE_MS = 500;
+
+const openedAt = new WeakMap<Element, number>();
+
+/**
+ * Mount the editor's layer: note when it opened, listen for the rest of the
+ * opening double-click, and let it reach into its table cell's block padding,
+ * so an editor taller than one line of text still fits the row it opened in.
+ * The row grows only when the editor is taller than the whole cell.
+ *
+ * The listeners are the DOM's own, not Vue's: a Vue listener that saw the click
+ * first would stamp it, and Vue then skips the click on a control rendered in
+ * the same millisecond, such as a conflict notice's button.
+ */
+function mountLayer(vnode: VNode): void {
+  const layer = vnode.el;
+  if (!(layer instanceof HTMLElement)) return;
+  openedAt.set(layer, performance.now());
+  layer.addEventListener("mousedown", holdOpeningPress, true);
+  layer.addEventListener("click", holdOpeningPress, true);
+  const cell = layer.closest("td, th");
+  if (!cell) return;
+  const padding = getComputedStyle(cell);
+  layer.style.marginTop = `-${padding.paddingTop}`;
+  layer.style.marginBottom = `-${padding.paddingBottom}`;
+}
+
+function unmountLayer(vnode: VNode): void {
+  const layer = vnode.el;
+  if (!(layer instanceof HTMLElement)) return;
+  layer.removeEventListener("mousedown", holdOpeningPress, true);
+  layer.removeEventListener("click", holdOpeningPress, true);
+}
+
+/**
+ * The rest of a double-click whose first press opened the editor does not
+ * reach it: a second press would tick the checkbox or toggle the list the
+ * reader only meant to open.
+ */
+function holdOpeningPress(event: MouseEvent): void {
+  const layer = event.currentTarget;
+  const opened = layer instanceof Element ? openedAt.get(layer) : undefined;
+  if (
+    opened !== undefined &&
+    performance.now() - opened < OPENING_GESTURE_MS &&
+    event.detail > 1
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+}
+
+/** Receives a gesture or a ref and does nothing with it. */
+function ignore(): void {
+  // The held idle control answers nothing; the editor above it does.
+}
+
+/** The root's styling attributes: its class and the kit-facing state. */
+function rootStyling<TRow>(
+  model: EditableCellModel<TRow>,
+  classNames: EditableCellClassNames | undefined
+): Readonly<Record<string, unknown>> {
+  const ctrl = model.controller;
+  return {
+    class: classNames?.editableCell,
+    "data-save-status": ctrl.saveStatus,
+    "data-edit-unit": model.unit,
+    "data-dirty": ctrl.isDirty ? "" : undefined,
+  };
+}
+
+/**
+ * The idle cell as the kit draws it, inside a copy of the cell's root with the
+ * root's class and kit attributes, held under the editor for its size alone:
+ * no ref, and no gesture reaches it. A row editor opens over plain display, so
+ * that is what it holds.
+ */
+function idleCell<TRow>(
+  model: EditableCellModel<TRow>,
+  controls: EditableCellChromeSlots<TRow>,
+  classNames: EditableCellClassNames | undefined
+): VNodeChild {
+  return h("span", rootStyling(model, classNames), [
+    model.unit === "row"
+      ? model.display
+      : controls.Activate({
+          ...model.activate,
+          activateRef: ignore,
+          onClick: ignore,
+          onDoubleClick: ignore,
+          onKeyDown: ignore,
+        }),
+  ]);
+}
+function editingFrame(display: VNodeChild, editor: VNodeChild[]): VNodeChild {
+  return h("span", { style: "display: grid; min-width: 0" }, [
+    h("span", { "aria-hidden": "true", style: EDITING_HOLD }, [display]),
+    h(
+      "span",
+      {
+        style: EDITING_LAYER,
+        onVnodeMounted: mountLayer,
+        onVnodeBeforeUnmount: unmountLayer,
+      },
+      editor
+    ),
+  ]);
 }
 /** Structure only: every editor, activation target and button is mandatory kit UI. */
 export interface EditableCellClassNames {
@@ -383,6 +515,15 @@ export function EditableCellChrome<TRow>(props: {
       )
     );
   }
+  // A batch keeps every cell a field, so only a cell or row editor that
+  // replaces its display holds that display's geometry.
+  if (ctrl.mode === "editing" && model.unit !== "batch")
+    children.push(
+      editingFrame(
+        idleCell(model, controls, props.classNames),
+        children.splice(0)
+      )
+    );
   const saveFailure = (): VNodeChild => {
     if (!ctrl.saveFailure) return null;
     return h(
@@ -414,10 +555,7 @@ export function EditableCellChrome<TRow>(props: {
       "data-adapttable-part":
         model.unit === "batch" ? "batch-edit-cell" : undefined,
       "data-changed": model.unit === "batch" && model.changed ? "" : undefined,
-      class: props.classNames?.editableCell,
-      "data-save-status": ctrl.saveStatus,
-      "data-edit-unit": model.unit,
-      "data-dirty": ctrl.isDirty ? "" : undefined,
+      ...rootStyling(model, props.classNames),
     },
     children
   );

@@ -324,6 +324,8 @@ export interface TableEditingOptions<TRow>
   readonly rowVersion?: (row: TRow) => string | number;
   readonly editConflictPolicy?: EditConflictPolicy;
   readonly onEditConflict?: EditConflictHandler<TRow>;
+  /** The pointer gesture that opens a cell's editor; `"doubleClick"` by default. */
+  readonly editActivation?: "doubleClick" | "click";
   readonly featureHost?: FeatureHostState;
   readonly conflictLabels?: NonNullable<EditingBundle<TRow>["conflictLabels"]>;
 }
@@ -633,6 +635,7 @@ export function useTableEditing<TRow>(
       conflict: conflict.value,
       conflictLabels: options.value.conflictLabels,
       featureHost: options.value.featureHost,
+      activation: options.value.editActivation,
     };
   });
   return { bundle, history };

@@ -1888,6 +1888,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly dir: InputSignal<Direction>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<"start" | "end">;
+    readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
@@ -2205,6 +2206,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "editActivation": {
+            "alias": "editActivation";
+            "required": false;
+            "isSignal": true;
+        };
         "columnLayout": {
             "alias": "columnLayout";
             "required": false;
@@ -2390,6 +2396,7 @@ export class AdaptEditableCellGate<TRow> {
     readonly errorClassName: InputSignal<string | undefined>;
     // (undocumented)
     protected readonly errorId: Signal<string>;
+    protected readonly idleActivateProps: Signal<EditableCellActivateProps>;
     readonly kitRendersError: InputSignal<boolean | undefined>;
     // (undocumented)
     protected readonly presentation: Signal<EditableCellPresentation>;

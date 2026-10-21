@@ -682,6 +682,11 @@ function applyRowModelFlags(
   if (flags.editing) {
     Object.assign(next, { onCellEdit: flags.onCellEdit });
   }
+  // On the live demo a visitor's first click on a value opens it, as a form
+  // field would; the feature pages and the lab keep the default double-click.
+  if (flags.editing && flags.urlKey === "live") {
+    Object.assign(next, { editActivation: "click" });
+  }
   // The lifecycle belongs to every editing mode, not just the cell: the
   // simulated incoming update aims at whatever the reader has open, and a row
   // or a batch is as open as a cell.
@@ -1177,7 +1182,12 @@ function Frontend({
     <>
       {editingArmed ? (
         <div className="demo-live-update">
-          <span>Open an editor, then test an incoming server change.</span>
+          <span>
+            {urlKey === "live"
+              ? "Click a cell to edit it"
+              : "Double-click a cell or press Enter to edit it"}
+            , then test an incoming server change.
+          </span>
           <button
             type="button"
             data-adapttable-part="demo-live-update"

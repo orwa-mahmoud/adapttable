@@ -1954,6 +1954,13 @@ a {
   opacity: 0.7;
 }
 
+/* ---------- editable cells ---------- */
+/* A demo cell that opens an editor reads as a control. The kits draw it as
+   text, so the demo overrides their inline cursor. */
+[data-adapttable-part="edit-cell-activate"] {
+  cursor: pointer !important;
+}
+
 /* ---------- a host's own mobile card ---------- */
 /* What `renderCard` replaces the built-in stack with: the identity as a
    headline, the rest as a compact grid. */
@@ -1969,8 +1976,11 @@ a {
   font-weight: 600;
   font-size: 1rem;
 }
+/* Full card width, so the avatar stays beside the name until the name runs
+   out of room — an inline-flex wrap container sizes to its widest item. */
 [data-adapttable-part="card"] .demo-person-identity {
   flex-wrap: wrap;
+  width: 100%;
   min-width: 0;
 }
 [data-adapttable-part="card"] .demo-person-identity__details {

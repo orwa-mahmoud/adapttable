@@ -462,8 +462,10 @@ export class AdaptShowcaseDemoPage {
       : []),
     ...(this.editingMode === "cell"
       ? [
-          this.kit.editing<Person>((row, key, value) =>
-            this.write(row, { [key]: value })
+          // A visitor's first click on a value opens it, as a form field would.
+          this.kit.editing<Person>(
+            (row, key, value) => this.write(row, { [key]: value }),
+            { editActivation: "click" }
           ),
         ]
       : []),

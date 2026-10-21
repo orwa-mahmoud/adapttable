@@ -16,12 +16,17 @@ import {
 import type { EditableCellButtonProps } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
+  type AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  type ElementRef,
+  inject,
   input,
   TemplateRef,
   type Type,
+  viewChild,
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
@@ -226,4 +231,87 @@ export class AdaptEditableCellDisplay {
     const content = this.props();
     return content instanceof TemplateRef ? content : null;
   });
+}
+
+/** How long a second press still belongs to the gesture that opened the editor. */
+const OPENING_GESTURE_MS = 500;
+
+/**
+ * The cell's geometry while an editor replaces its display. What the idle cell
+ * showed — the kit's activate control, or plain display for a row editor — is
+ * still laid out, neither seen, heard nor reachable, so the column and the row
+ * measure the same content they did a moment ago. The projected editor fills
+ * that space and adds no width of its own, so opening it never reflows the
+ * column.
+ *
+ * @internal
+ */
+@Component({
+  selector: "adapt-editing-cell-frame",
+  imports: [AdaptControl, AdaptEditableCellDisplay],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: grid; min-width: 0" },
+  template: `
+    <span
+      aria-hidden="true"
+      style="display: flow-root; grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none"
+    >
+      @if (idle(); as control) {
+        <ng-container
+          [adaptControl]="control"
+          [adaptControlProps]="idleProps()"
+        />
+      } @else {
+        <adapt-editable-cell-display [props]="display()" />
+      }
+    </span>
+    <span
+      #layer
+      style="grid-row: 1; grid-column: 1; align-self: center; min-width: 0; contain: inline-size"
+    >
+      <ng-content />
+    </span>
+  `,
+})
+export class AdaptEditingCellFrame implements AfterViewInit {
+  /** What the cell shows when it is not being edited, without a control. */
+  readonly display = input<unknown>();
+  /** The kit's idle control, held in place of `display`. */
+  readonly idle = input<Type<unknown>>();
+  /** Inert props for {@link AdaptEditingCellFrame.idle}. */
+  readonly idleProps = input<unknown>();
+  private readonly layer = viewChild<ElementRef<HTMLElement>>("layer");
+  private readonly destroyRef = inject(DestroyRef);
+
+  /**
+   * Note when the editor opened, and let its layer reach into its table
+   * cell's block padding, so an editor taller than one line of text still fits
+   * the row it opened in. The row grows only when the editor is taller than
+   * the whole cell.
+   */
+  ngAfterViewInit(): void {
+    const layer = this.layer()?.nativeElement;
+    if (!layer) return;
+    const opened = performance.now();
+    // The rest of a double-click whose first press opened the editor does not
+    // reach it: a second press would tick the checkbox or toggle the list the
+    // reader only meant to open.
+    const holdOpeningPress = (event: MouseEvent) => {
+      if (event.detail > 1 && performance.now() - opened < OPENING_GESTURE_MS) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    layer.addEventListener("mousedown", holdOpeningPress, true);
+    layer.addEventListener("click", holdOpeningPress, true);
+    this.destroyRef.onDestroy(() => {
+      layer.removeEventListener("mousedown", holdOpeningPress, true);
+      layer.removeEventListener("click", holdOpeningPress, true);
+    });
+    const cell = layer.closest("td, th");
+    if (!cell) return;
+    const padding = getComputedStyle(cell);
+    layer.style.marginTop = `-${padding.paddingTop}`;
+    layer.style.marginBottom = `-${padding.paddingBottom}`;
+  }
 }

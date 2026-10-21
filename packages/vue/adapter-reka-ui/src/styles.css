@@ -72,6 +72,12 @@
   padding: 6px 10px;
 }
 
+/* A cell editor spans the cell it replaces, at the width the column had. */
+.at-reka-input[data-adapttable-part="edit-cell-editor"] {
+  box-sizing: border-box;
+  inline-size: 100%;
+}
+
 .at-reka-input::placeholder {
   color: var(--at-reka-muted, #66758c);
 }

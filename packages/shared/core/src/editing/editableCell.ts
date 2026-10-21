@@ -379,6 +379,11 @@ export interface EditingBundle<TRow> {
   conflictLabels?: EditConflictLabels;
   /** The host of THIS table — plugin editors resolve from here. */
   featureHost?: FeatureHostState;
+  /**
+   * The pointer gesture that opens a cell's editor —
+   * `TableOptions.editActivation`. Absent means `"doubleClick"`.
+   */
+  activation?: "doubleClick" | "click";
 }
 
 /* ── One cell ──────────────────────────────────────────────────────── */

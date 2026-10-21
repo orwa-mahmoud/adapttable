@@ -42,6 +42,7 @@ import { AdaptControl } from "../control";
 import {
   AdaptCellConflictNotice,
   AdaptEditableCellDisplay,
+  AdaptEditingCellFrame,
   type EditableCellEditorCtrl,
   type EditableCellSlots,
 } from "./editableCellShared";
@@ -71,6 +72,11 @@ export type { EditableCellButtonProps } from "@adapttable/core/binding";
 export type EditableCellActivateProps =
   NeutralEditableCellActivateProps<unknown>;
 
+/** Receives a gesture or a ref and does nothing with it. */
+function ignore(): void {
+  // The held idle control answers nothing; the editor above it does.
+}
+
 /**
  * Opt-in cell wrapper: plain display when editing is off; double-click /
  * Enter / F2 to activate; kit supplies the editor via `editor`.
@@ -86,6 +92,7 @@ export type EditableCellActivateProps =
     AdaptControl,
     AdaptCellConflictNotice,
     AdaptEditableCellDisplay,
+    AdaptEditingCellFrame,
     AdaptBatchEditCell,
     AdaptRowEditCell,
   ],
@@ -125,35 +132,40 @@ export type EditableCellActivateProps =
       } @else if (p === "display") {
         <adapt-editable-cell-display [props]="display()" />
       } @else if (p === "editor" || p === "custom-editor") {
-        <ng-container
-          [adaptControl]="editor()"
-          [adaptControlProps]="editorCtrl()"
-        />
-        @if (conflictAsk(); as ask) {
-          @if (editing()?.conflictLabels; as conflictLabels) {
-            <adapt-cell-conflict-notice
-              [ask]="ask"
-              [labels]="conflictLabels"
-              [errorId]="errorId()"
-              [errorClassName]="errorClassName()"
-              [slots]="slots()"
-            />
+        <adapt-editing-cell-frame
+          [idle]="slots().Activate"
+          [idleProps]="idleActivateProps()"
+        >
+          <ng-container
+            [adaptControl]="editor()"
+            [adaptControlProps]="editorCtrl()"
+          />
+          @if (conflictAsk(); as ask) {
+            @if (editing()?.conflictLabels; as conflictLabels) {
+              <adapt-cell-conflict-notice
+                [ask]="ask"
+                [labels]="conflictLabels"
+                [errorId]="errorId()"
+                [errorClassName]="errorClassName()"
+                [slots]="slots()"
+              />
+            }
           }
-        }
-        @if (
-          conflictAsk() === undefined &&
-          ctrl().error !== undefined &&
-          kitRendersError() !== true
-        ) {
-          <span
-            [attr.id]="errorId()"
-            role="alert"
-            data-adapttable-part="edit-cell-error"
-            [class]="errorClassName()"
-          >
-            {{ ctrl().error }}
-          </span>
-        }
+          @if (
+            conflictAsk() === undefined &&
+            ctrl().error !== undefined &&
+            kitRendersError() !== true
+          ) {
+            <span
+              [attr.id]="errorId()"
+              role="alert"
+              data-adapttable-part="edit-cell-error"
+              [class]="errorClassName()"
+            >
+              {{ ctrl().error }}
+            </span>
+          }
+        </adapt-editing-cell-frame>
       } @else {
         <ng-container
           [adaptControl]="slots().Activate"
@@ -275,6 +287,7 @@ export class AdaptEditableCellGate<TRow> {
       },
       onClick: (event: { stopPropagation: () => void }) => {
         event.stopPropagation();
+        if (this.editing()?.activation === "click") ctrl.begin();
       },
       onKeyDown: (event: {
         key: string;
@@ -289,6 +302,20 @@ export class AdaptEditableCellGate<TRow> {
       },
     };
   });
+
+  /**
+   * The idle cell as the kit draws it, held under the editor for its size
+   * alone: no ref, and no gesture reaches it.
+   */
+  protected readonly idleActivateProps = computed(
+    (): EditableCellActivateProps => ({
+      ...this.activateProps(),
+      activateRef: ignore,
+      onDoubleClick: ignore,
+      onClick: ignore,
+      onKeyDown: ignore,
+    })
+  );
 
   protected readonly editorCtrl = computed((): EditableCellEditorCtrl => {
     const ctrl = this.ctrl();

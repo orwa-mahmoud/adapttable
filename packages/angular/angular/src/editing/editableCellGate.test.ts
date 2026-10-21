@@ -163,6 +163,7 @@ class GateHost {
   readonly onEditCommit = input<(event: unknown) => void>();
   readonly onEditCancel = input<(event: unknown) => void>();
   readonly onRollback = input<(previous: Person, columnKey: string) => void>();
+  readonly activation = input<"doubleClick" | "click">();
 
   readonly state = injectCellEditing<Person>({
     onEditStart: (event) => this.onEditStart()?.(event),
@@ -188,6 +189,7 @@ class GateHost {
     state: this.state(),
     validation: this.validate() ? this.validation() : undefined,
     saving: this.saving(),
+    activation: this.activation(),
     lifecycle: {
       onEditStart: (event) => this.onEditStart()?.(event),
       onEditCommit: (event) => this.onEditCommit()?.(event),
@@ -209,8 +211,11 @@ async function mountGate(options: {
   onEditCommit?: (event: unknown) => void;
   onEditCancel?: (event: unknown) => void;
   onRollback?: (previous: Person, columnKey: string) => void;
+  activation?: "doubleClick" | "click";
 }) {
   const fixture = TestBed.createComponent(GateHost);
+  if (options.activation)
+    fixture.componentRef.setInput("activation", options.activation);
   fixture.componentRef.setInput("onCellEdit", options.onCellEdit);
   if (options.parseValue)
     fixture.componentRef.setInput("parseValue", options.parseValue);
@@ -465,6 +470,85 @@ describe("AdaptEditableCellGate commits", () => {
     expect(
       element.querySelector('[data-adapttable-part="edit-cell-editor"]')
     ).not.toBeNull();
+  });
+
+  it("holds the display's geometry while the editor is open", async () => {
+    const { element, settle } = await mountGate({ onCellEdit: vi.fn() });
+    element
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="edit-cell-activate"]'
+      )!
+      .dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    await settle();
+    const editor = element.querySelector<HTMLElement>(
+      '[data-adapttable-part="edit-cell-editor"]'
+    )!;
+    const frame = element.querySelector<HTMLElement>(
+      "adapt-editing-cell-frame"
+    )!;
+    expect(frame.style.display).toBe("grid");
+    const [hold, layer] = Array.from(frame.children) as HTMLElement[];
+    // The display stays laid out under the editor, out of sight and out of
+    // the accessibility tree; the editor's layer adds no width of its own.
+    expect(hold!.getAttribute("aria-hidden")).toBe("true");
+    expect(hold!.style.visibility).toBe("hidden");
+    expect(hold!.textContent).toContain("Ada");
+    expect(layer!.style.contain).toBe("inline-size");
+    expect(layer!.contains(editor)).toBe(true);
+  });
+
+  it("keeps a single click for selection unless activation is click", async () => {
+    const idle = await mountGate({ onCellEdit: vi.fn() });
+    idle.element
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="edit-cell-activate"]'
+      )!
+      .click();
+    await idle.settle();
+    expect(
+      idle.element.querySelector('[data-adapttable-part="edit-cell-editor"]')
+    ).toBeNull();
+    idle.fixture.destroy();
+    const live = await mountGate({ onCellEdit: vi.fn(), activation: "click" });
+    live.element
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="edit-cell-activate"]'
+      )!
+      .click();
+    await live.settle();
+    expect(
+      live.element.querySelector('[data-adapttable-part="edit-cell-editor"]')
+    ).not.toBeNull();
+  });
+
+  it("keeps the rest of the opening double-click out of the editor", async () => {
+    const now = vi.spyOn(performance, "now").mockReturnValue(1000);
+    const { element, settle } = await mountGate({
+      onCellEdit: vi.fn(),
+      activation: "click",
+    });
+    element
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="edit-cell-activate"]'
+      )!
+      .click();
+    await settle();
+    const editor = element.querySelector<HTMLElement>(
+      '[data-adapttable-part="edit-cell-editor"]'
+    )!;
+    const press = (type: string, detail: number) =>
+      editor.dispatchEvent(
+        new MouseEvent(type, { detail, bubbles: true, cancelable: true })
+      );
+    // dispatchEvent returns false when the event was cancelled.
+    expect(press("mousedown", 2)).toBe(false);
+    expect(press("click", 2)).toBe(false);
+    expect(press("mousedown", 1)).toBe(true);
+    now.mockReturnValue(1600);
+    expect(press("mousedown", 2)).toBe(true);
+    now.mockRestore();
   });
 
   it("hands the host the value from a custom parseValue", async () => {

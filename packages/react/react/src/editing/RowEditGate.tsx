@@ -42,6 +42,7 @@ import {
   type EditableCellEditorCtrl,
   type EditableCellSlots,
 } from "./EditableCellGate";
+import { EditingCellFrame } from "./EditingCellFrame";
 import type { RowEditingState } from "./rowEditing";
 
 export type { BatchEditingState } from "./batchEditing";
@@ -198,7 +199,7 @@ export function RowEditCell<TRow>({
 
   if (isCustomEditor(editor)) {
     return (
-      <>
+      <EditingCellFrame display={display}>
         {
           editor.render({
             draft: ctrl.draft,
@@ -226,11 +227,11 @@ export function RowEditCell<TRow>({
             slots={slots}
           />
         ) : null}
-      </>
+      </EditingCellFrame>
     );
   }
   return (
-    <>
+    <EditingCellFrame display={display}>
       {renderEditor(ctrl)}
       {slots ? (
         <CellConflictNotice
@@ -241,7 +242,7 @@ export function RowEditCell<TRow>({
           slots={slots}
         />
       ) : null}
-    </>
+    </EditingCellFrame>
   );
 }
 

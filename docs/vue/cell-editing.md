@@ -50,9 +50,14 @@ sends `readonly BatchRowEdit<TRow>[]`, each carrying `row`, `rowId` and
 promise so the binding can show pending state and failures. Replace the host
 rows when saving succeeds; no factory mutates them for you.
 
+A double-click, Enter or F2 opens a cell's editor. Pass
+`editing(onCellEdit, { editActivation: "click" })` to open it on the first
+click instead, the way a form field does; Enter and F2 still work.
+
 `EditingLifecycleExtras<TRow>` includes validation/application hooks, edit
 lifecycle/error callbacks, rollback, dirty tracking, history, row versions,
-conflict policy/handler and optional `rowEditIcons`. It omits rows, columns,
+conflict policy/handler, the `editActivation` gesture and optional
+`rowEditIcons`. It omits rows, columns,
 row key and the three primary write callbacks, which the shell/factory supplies.
 `TableEditingOptions<TRow>` is the complete headless input, requiring rows,
 editable columns and a row key. Native editors cover text, number, boolean,

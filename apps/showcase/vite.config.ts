@@ -118,6 +118,61 @@ const microsoftClarity = (): Plugin => ({
 });
 
 /**
+ * Reload a page whose lazy chunk a deploy removed.
+ *
+ * A deploy replaces the hashed assets, so a page opened before it can ask for a
+ * chunk the site no longer serves. Vite reports that as `vite:preloadError`.
+ * The error always surfaces, so a page with its own recovery still shows it;
+ * the page reloads only when the published HTML no longer names the build it
+ * runs, and at most once a minute, so a broken deploy never reload-loops.
+ */
+const stalePreloadRecovery = (): Plugin => ({
+  name: "adapttable-stale-preload-recovery",
+  apply: "build",
+  transformIndexHtml: () => [
+    {
+      tag: "script",
+      children: [
+        "(function () {",
+        "  var key = 'adapttable-preload-reload';",
+        "  var checking = false;",
+        "  window.addEventListener('vite:preloadError', function () {",
+        "    var entry = document.querySelector('script[type=\"module\"][src]');",
+        "    if (checking || !entry) return;",
+        "    var build = entry.getAttribute('src');",
+        "    checking = true;",
+        "    fetch(location.href, { cache: 'no-store' })",
+        "      .then(function (response) {",
+        "        return response.ok ? response.text() : null;",
+        "      })",
+        "      .then(",
+        "        function (html) {",
+        "          checking = false;",
+        "          if (html === null || html.indexOf(build) !== -1) return;",
+        "          try {",
+        "            var last = Number(sessionStorage.getItem(key)) || 0;",
+        "            if (Date.now() - last < 60000) return;",
+        "            sessionStorage.setItem(key, String(Date.now()));",
+        "          } catch (error) {",
+        // Without storage there is no loop guard: the error stands.
+        "            return;",
+        "          }",
+        "          location.reload();",
+        "        },",
+        "        function (error) {",
+        "          checking = false;",
+        "          console.warn('AdaptTable: could not check for a newer build', error);",
+        "        }",
+        "      );",
+        "  });",
+        "})();",
+      ].join("\n"),
+      injectTo: "head-prepend",
+    },
+  ],
+});
+
+/**
  * A real EventSource of patch ticks for the realtime page.
  *
  * The frames are just a clock — the demo's `parse` turns each tick into a
@@ -344,6 +399,7 @@ export default defineConfig({
         { name: "bootstrap" },
       ],
     }),
+    stalePreloadRecovery(),
     googleAnalytics(),
     microsoftClarity(),
     patchStream(),

@@ -22,6 +22,18 @@
   }
 }
 
+/* A cell editor fits the row it opens in, the compact rows included; phone
+   cards keep the touch-sized field above. */
+@media (min-width: 601px) {
+  .adapttable-vuetify-field[data-adapttable-part="edit-cell-editor"] {
+    --v-input-control-height: 32px;
+    --v-input-padding-top: 4px;
+  }
+  .adapttable-vuetify-field[data-adapttable-part="edit-cell-editor"] .v-field {
+    --v-field-padding-bottom: 4px;
+  }
+}
+
 .adapttable-vuetify {
   color: rgb(var(--v-theme-on-surface));
   background: rgb(var(--v-theme-surface));

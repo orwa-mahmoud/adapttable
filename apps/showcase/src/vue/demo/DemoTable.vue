@@ -93,9 +93,13 @@ const features = [
     : []),
   ...(editing
     ? [
-        kit.editing<Person>((row, key, value) => {
-          rows.value = applyPersonEdit(rows.value, row, key, value);
-        }),
+        // A visitor's first click on a value opens it, as a form field would.
+        kit.editing<Person>(
+          (row, key, value) => {
+            rows.value = applyPersonEdit(rows.value, row, key, value);
+          },
+          { editActivation: "click" }
+        ),
         kit.editHistory(),
         kit.undoRedoButtons(),
         kit.cellNavigation(),

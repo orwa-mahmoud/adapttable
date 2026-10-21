@@ -136,6 +136,7 @@ export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Editin
 export interface EditingLifecycleExtras<TRow = unknown> {
     readonly [key: string]: unknown;
     readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
+    readonly editActivation?: "doubleClick" | "click";
     readonly editConflictPolicy?: EditConflictPolicy;
     readonly formatEditError?: (error: unknown) => string;
     readonly onDirtyChange?: (dirty: DirtyEdits) => void;
