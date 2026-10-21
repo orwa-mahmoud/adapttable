@@ -118,6 +118,27 @@ describe("EditableCellGate", () => {
     ).toBeInTheDocument();
   });
 
+  it("holds the display's geometry while the editor is open", () => {
+    render(<Harness onCellEdit={vi.fn()} />);
+    fireEvent.doubleClick(screen.getByRole("button", { name: "Ada" }));
+    const editor = screen.getByRole("textbox", { name: "Edit cell" });
+    // The display stays laid out under the editor, out of sight and out of
+    // the accessibility tree, so the column and row keep measuring it.
+    const hold = screen.getByText("Ada").parentElement!;
+    expect(hold).toHaveAttribute("aria-hidden", "true");
+    expect(hold).toHaveStyle({ visibility: "hidden" });
+    expect(screen.queryByRole("button", { name: "Ada" })).toBeNull();
+    // The editor's layer shares the display's grid cell and adds no width.
+    const layer = editor.parentElement!;
+    expect(layer).toHaveStyle({ gridRow: "1", gridColumn: "1" });
+    expect(layer.style.contain).toBe("inline-size");
+    expect(hold.parentElement).toBe(layer.parentElement);
+    expect(layer.parentElement).toHaveStyle({ display: "grid" });
+    fireEvent.keyDown(editor, { key: "Escape" });
+    expect(screen.getByRole("button", { name: "Ada" })).toBeInTheDocument();
+    expect(document.querySelector('[aria-hidden="true"]')).toBeNull();
+  });
+
   it("stops click propagation on the activate control", () => {
     const onCellEdit = vi.fn();
     const parentClick = vi.fn();

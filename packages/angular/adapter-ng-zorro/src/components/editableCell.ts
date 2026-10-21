@@ -65,7 +65,7 @@ import { AdaptOverlayOrigin } from "./overlayPlacement";
       [attr.data-save]="p.saveStatus ?? null"
       [attr.aria-busy]="p.saveStatus === 'saving' ? true : null"
       [class]="p.className"
-      style="display: block; width: 100%; height: auto; min-height: 1.25em; padding: 0; cursor: text; text-align: inherit; white-space: normal"
+      style="display: block; width: 100%; height: auto; min-height: 1.25em; padding: 0; border: 0; cursor: text; text-align: inherit; white-space: normal"
       (dblclick)="p.onDoubleClick($event)"
       (click)="p.onClick($event)"
       (keydown)="p.onKeyDown($event)"

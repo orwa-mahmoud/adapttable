@@ -227,3 +227,37 @@ export class AdaptEditableCellDisplay {
     return content instanceof TemplateRef ? content : null;
   });
 }
+
+/**
+ * The cell's geometry while an editor replaces its display. The display is
+ * still laid out — neither seen, heard nor reachable — so the column and the
+ * row measure the same content they did a moment ago. The projected editor
+ * fills that space and adds no width of its own, so opening it never reflows
+ * the column; it can still grow the row when it is taller than the display,
+ * rather than spill over the row below.
+ *
+ * @internal
+ */
+@Component({
+  selector: "adapt-editing-cell-frame",
+  imports: [AdaptEditableCellDisplay],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: grid; min-width: 0" },
+  template: `
+    <span
+      aria-hidden="true"
+      style="grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none"
+    >
+      <adapt-editable-cell-display [props]="display()" />
+    </span>
+    <span
+      style="grid-row: 1; grid-column: 1; align-self: center; min-width: 0; contain: inline-size"
+    >
+      <ng-content />
+    </span>
+  `,
+})
+export class AdaptEditingCellFrame {
+  /** What the cell shows when it is not being edited. */
+  readonly display = input.required<unknown>();
+}

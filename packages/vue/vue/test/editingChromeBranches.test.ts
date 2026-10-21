@@ -3,7 +3,14 @@ import {
   slotRender,
 } from "@adapttable/core/binding";
 import { describe, expect, it, vi } from "vitest";
-import { effectScope, h, nextTick, shallowRef, type VNodeChild } from "vue";
+import {
+  createApp,
+  effectScope,
+  h,
+  nextTick,
+  shallowRef,
+  type VNodeChild,
+} from "vue";
 
 import {
   dirtyIndicators,
@@ -152,6 +159,28 @@ describe("editable cell control contracts", () => {
     EditableCellChrome({ model: value.cell.value, controls: slots });
     buttons[1]!.onClick({ stopPropagation });
     expect(value.cell.value.controller.draft).toBe("latest");
+    value.scope.stop();
+  });
+  it("holds the display's geometry while the editor is open", async () => {
+    const value = fixture();
+    value.cell.value.controller.begin();
+    const element = document.createElement("div");
+    const app = createApp({
+      render: () => EditableCellChrome({ model: value.cell.value, controls }),
+    });
+    app.mount(element);
+    await tick();
+    const editor = element.querySelector("b")!;
+    const layer = editor.parentElement!;
+    const hold = layer.previousElementSibling as HTMLElement;
+    // The display stays laid out under the editor, out of sight and out of
+    // the accessibility tree; the editor's layer adds no width of its own.
+    expect(layer.parentElement!.style.display).toBe("grid");
+    expect(hold.getAttribute("aria-hidden")).toBe("true");
+    expect(hold.style.visibility).toBe("hidden");
+    expect(hold.textContent).toBe("Ada");
+    expect(layer.style.contain).toBe("inline-size");
+    app.unmount();
     value.scope.stop();
   });
   it("renders host failure with a host-owned rollback button and localized status", async () => {

@@ -29,6 +29,7 @@ import {
   focusEditorOnMount,
   stopCellEditKeyboard,
 } from "./editableCellController";
+import { EditingCellFrame } from "./EditingCellFrame";
 import { BatchEditCell, RowEditCell } from "./RowEditGate";
 
 export type { EditableCellButtonProps } from "@adapttable/core/binding";
@@ -424,8 +425,8 @@ export function EditableCellGate<TRow>(
       conflict: controllerConflictAsk(ctrl),
     });
     return (
-      <>
-        {custom}
+      <EditingCellFrame display={props.display}>
+        <>{custom}</>
         <ConflictNotice
           ctrl={ctrl}
           errorId={errorId}
@@ -445,13 +446,13 @@ export function EditableCellGate<TRow>(
             {ctrl.error}
           </span>
         )}
-      </>
+      </EditingCellFrame>
     );
   }
 
   if (presentation === "editor" && ctrl.editor) {
     return (
-      <>
+      <EditingCellFrame display={props.display}>
         {props.renderEditor({
           draft: ctrl.draft,
           setDraft: ctrl.setDraft,
@@ -489,7 +490,7 @@ export function EditableCellGate<TRow>(
               {ctrl.error}
             </span>
           )}
-      </>
+      </EditingCellFrame>
     );
   }
 

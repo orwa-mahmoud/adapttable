@@ -42,6 +42,7 @@ import { AdaptControl } from "../control";
 import {
   AdaptCellConflictNotice,
   AdaptEditableCellDisplay,
+  AdaptEditingCellFrame,
   type EditableCellEditorCtrl,
   type EditableCellSlots,
 } from "./editableCellShared";
@@ -86,6 +87,7 @@ export type EditableCellActivateProps =
     AdaptControl,
     AdaptCellConflictNotice,
     AdaptEditableCellDisplay,
+    AdaptEditingCellFrame,
     AdaptBatchEditCell,
     AdaptRowEditCell,
   ],
@@ -125,35 +127,37 @@ export type EditableCellActivateProps =
       } @else if (p === "display") {
         <adapt-editable-cell-display [props]="display()" />
       } @else if (p === "editor" || p === "custom-editor") {
-        <ng-container
-          [adaptControl]="editor()"
-          [adaptControlProps]="editorCtrl()"
-        />
-        @if (conflictAsk(); as ask) {
-          @if (editing()?.conflictLabels; as conflictLabels) {
-            <adapt-cell-conflict-notice
-              [ask]="ask"
-              [labels]="conflictLabels"
-              [errorId]="errorId()"
-              [errorClassName]="errorClassName()"
-              [slots]="slots()"
-            />
+        <adapt-editing-cell-frame [display]="display()">
+          <ng-container
+            [adaptControl]="editor()"
+            [adaptControlProps]="editorCtrl()"
+          />
+          @if (conflictAsk(); as ask) {
+            @if (editing()?.conflictLabels; as conflictLabels) {
+              <adapt-cell-conflict-notice
+                [ask]="ask"
+                [labels]="conflictLabels"
+                [errorId]="errorId()"
+                [errorClassName]="errorClassName()"
+                [slots]="slots()"
+              />
+            }
           }
-        }
-        @if (
-          conflictAsk() === undefined &&
-          ctrl().error !== undefined &&
-          kitRendersError() !== true
-        ) {
-          <span
-            [attr.id]="errorId()"
-            role="alert"
-            data-adapttable-part="edit-cell-error"
-            [class]="errorClassName()"
-          >
-            {{ ctrl().error }}
-          </span>
-        }
+          @if (
+            conflictAsk() === undefined &&
+            ctrl().error !== undefined &&
+            kitRendersError() !== true
+          ) {
+            <span
+              [attr.id]="errorId()"
+              role="alert"
+              data-adapttable-part="edit-cell-error"
+              [class]="errorClassName()"
+            >
+              {{ ctrl().error }}
+            </span>
+          }
+        </adapt-editing-cell-frame>
       } @else {
         <ng-container
           [adaptControl]="slots().Activate"

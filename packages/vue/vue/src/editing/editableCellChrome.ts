@@ -300,6 +300,23 @@ export function useEditableCellModel<TRow>(
     };
   });
 }
+// The display keeps the cell's size while the editor is open: it is still laid
+// out, so the column and the row measure the same content they did a moment
+// ago, and it is neither seen, heard nor reachable.
+const EDITING_HOLD =
+  "grid-row: 1; grid-column: 1; visibility: hidden; opacity: 0; pointer-events: none";
+// The editor fills the space the display holds and adds no width of its own,
+// so opening it never reflows the column. It can still grow the row when it is
+// taller than the display, rather than spill over the row below.
+const EDITING_LAYER =
+  "grid-row: 1; grid-column: 1; align-self: center; min-width: 0; contain: inline-size";
+
+function editingFrame(display: VNodeChild, editor: VNodeChild[]): VNodeChild {
+  return h("span", { style: "display: grid; min-width: 0" }, [
+    h("span", { "aria-hidden": "true", style: EDITING_HOLD }, [display]),
+    h("span", { style: EDITING_LAYER }, editor),
+  ]);
+}
 /** Structure only: every editor, activation target and button is mandatory kit UI. */
 export interface EditableCellClassNames {
   readonly editableCell?: string;
@@ -383,6 +400,10 @@ export function EditableCellChrome<TRow>(props: {
       )
     );
   }
+  // A batch keeps every cell a field, so only a cell or row editor that
+  // replaces its display holds that display's geometry.
+  if (ctrl.mode === "editing" && model.unit !== "batch")
+    children.push(editingFrame(model.display, children.splice(0)));
   const saveFailure = (): VNodeChild => {
     if (!ctrl.saveFailure) return null;
     return h(

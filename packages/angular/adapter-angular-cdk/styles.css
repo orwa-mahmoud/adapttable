@@ -146,6 +146,15 @@ textarea[data-adapttable-cdk-control] {
   background: var(--adapt-cdk-background, Canvas);
   padding: 0.375rem 0.625rem;
 }
+/* A cell editor spans the cell it replaces, at the width the column had. */
+input[data-adapttable-cdk-control][data-adapttable-part="edit-cell-editor"]:not(
+    [type="checkbox"]
+  ),
+select[data-adapttable-cdk-control][data-adapttable-part="edit-cell-editor"] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
 [data-adapttable-cdk-control].cdk-keyboard-focused,
 [data-adapttable-cdk-control]:focus-visible {
   outline: 2px solid var(--adapt-cdk-accent, #3158b6);

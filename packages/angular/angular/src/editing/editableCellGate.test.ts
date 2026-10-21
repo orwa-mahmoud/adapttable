@@ -467,6 +467,33 @@ describe("AdaptEditableCellGate commits", () => {
     ).not.toBeNull();
   });
 
+  it("holds the display's geometry while the editor is open", async () => {
+    const { element, settle } = await mountGate({ onCellEdit: vi.fn() });
+    element
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="edit-cell-activate"]'
+      )!
+      .dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    await settle();
+    const editor = element.querySelector<HTMLElement>(
+      '[data-adapttable-part="edit-cell-editor"]'
+    )!;
+    const frame = element.querySelector<HTMLElement>(
+      "adapt-editing-cell-frame"
+    )!;
+    expect(frame.style.display).toBe("grid");
+    const [hold, layer] = Array.from(frame.children) as HTMLElement[];
+    // The display stays laid out under the editor, out of sight and out of
+    // the accessibility tree; the editor's layer adds no width of its own.
+    expect(hold!.getAttribute("aria-hidden")).toBe("true");
+    expect(hold!.style.visibility).toBe("hidden");
+    expect(hold!.textContent).toContain("Ada");
+    expect(layer!.style.contain).toBe("inline-size");
+    expect(layer!.contains(editor)).toBe(true);
+  });
+
   it("hands the host the value from a custom parseValue", async () => {
     const onCellEdit = vi.fn();
     const { element, settle } = await mountGate({
