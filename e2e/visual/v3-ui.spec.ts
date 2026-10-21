@@ -43,15 +43,25 @@ async function setTheme(page: Page, theme: "light" | "dark"): Promise<void> {
  * header, a table toolbar) is painted at the scroll offset — in the middle of
  * the image. With the whole page on screen nothing scrolls.
  */
-async function fitViewportToPage(page: Page): Promise<void> {
+async function fitViewportToPage(page: Page, minHeight = 0): Promise<void> {
   const viewport = page.viewportSize()!;
-  const height = await page.evaluate(() =>
-    Math.ceil(document.documentElement.scrollHeight)
+  const height = await page.evaluate(
+    (floor) =>
+      Math.max(Math.ceil(document.documentElement.scrollHeight), floor),
+    minHeight
   );
   if (height > viewport.height) {
     await page.setViewportSize({ width: viewport.width, height });
   }
 }
+
+/**
+ * Overlays cap their height by the viewport — the space left below the
+ * trigger, or a share of `vh`. A viewport this tall leaves every cap slack, so
+ * an overlay capture shows its natural size whatever the page around it
+ * holds.
+ */
+const OVERLAY_VIEWPORT_HEIGHT = 2400;
 
 async function snapshotDemo(page: Page, name: string): Promise<void> {
   await waitForDemo(page);
@@ -109,7 +119,7 @@ test.describe("overlays", () => {
       await page.goto(`/${kit}/filtering/`);
       await setTheme(page, "light");
       await waitForDemo(page);
-      await fitViewportToPage(page);
+      await fitViewportToPage(page, OVERLAY_VIEWPORT_HEIGHT);
       await demo(page)
         .getByRole("button", { name: "Filters", exact: true })
         .click();
@@ -142,6 +152,7 @@ test.describe("overlays", () => {
       await page.goto(`/${kit}/columns/`);
       await setTheme(page, "light");
       await waitForDemo(page);
+      await fitViewportToPage(page, OVERLAY_VIEWPORT_HEIGHT);
       await page
         .locator('[data-adapttable-part="column-menu-button"]')
         .first()
