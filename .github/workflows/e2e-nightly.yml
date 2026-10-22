@@ -58,7 +58,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [firefox, webkit, mobile-chrome]
+        # Firefox and WebKit run the full cross-browser set, past one runner's
+        # budget; each splits across two runners.
+        include:
+          - { project: firefox, shard: 1/2 }
+          - { project: firefox, shard: 2/2 }
+          - { project: webkit, shard: 1/2 }
+          - { project: webkit, shard: 2/2 }
+          - { project: mobile-chrome, shard: 1/1 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
@@ -78,7 +85,7 @@ jobs:
           name: docs-dist
           path: apps/docs/dist/
       - name: Run the nightly project
-        run: pnpm exec playwright test --project=${{ matrix.project }}
+        run: pnpm exec playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}
         env:
           SHOWCASE_SKIP_BUILD: "1"
           DOCS_SKIP_BUILD: "1"
@@ -86,7 +93,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: playwright-nightly-${{ matrix.project }}
+          name: playwright-nightly-${{ matrix.project }}-${{ strategy.job-index }}
           path: playwright-report/
           retention-days: 7
 
