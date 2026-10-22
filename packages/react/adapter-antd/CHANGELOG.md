@@ -1,5 +1,15 @@
 # @adapttable/antd
 
+## 3.3.9
+
+### Patch Changes
+
+- ffc8540: Mobile card values span their field, so an unlabeled identity field uses the full card width and long values wrap at the field edge.
+- Updated dependencies [e3e40e7]
+- Updated dependencies [ffc8540]
+  - @adapttable/core@3.12.0
+  - @adapttable/react@1.8.0
+
 ## 3.3.8
 
 ### Patch Changes

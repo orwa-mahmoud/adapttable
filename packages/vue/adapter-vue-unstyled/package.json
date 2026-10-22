@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
@@ -36,8 +36,8 @@
   "name": "@adapttable/vue-unstyled",
   "description": "Native HTML data table controls for the AdaptTable Vue binding.",
   "dependencies": {
-    "@adapttable/core": "3.11.0",
-    "@adapttable/vue": "0.2.0"
+    "@adapttable/core": "3.12.0",
+    "@adapttable/vue": "0.3.0"
   },
   "exports": {
     ".": {

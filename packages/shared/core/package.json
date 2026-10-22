@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/core",
-  "version": "3.11.0",
+  "version": "3.12.0",
   "description": "Framework-neutral AdaptTable engine \u2014 models, state, URL sync, and a unified client/server TableSource. Zero UI-kit or React imports.",
   "keywords": [
     "data-table",
