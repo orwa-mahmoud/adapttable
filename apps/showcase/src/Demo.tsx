@@ -23,6 +23,7 @@ import {
   useColumnLayoutUrlState,
   useFrontendData,
   useHighlight,
+  useIsMobile,
   useQuerySource,
 } from "@adapttable/react";
 import {
@@ -671,6 +672,18 @@ function rowFormArmed(flags: {
   return flags.editing === true && flags.rowActionsShown === true;
 }
 
+/**
+ * How the incoming-change hint tells a reader to open an editor. Only cell
+ * editing on the table names the gesture; cards, row forms and batches open
+ * theirs from a button.
+ */
+function editHint(cellGesture: boolean, urlKey: string | undefined): string {
+  if (!cellGesture) return "Open an editor";
+  return urlKey === "live"
+    ? "Click a cell to edit it"
+    : "Double-click a cell or press Enter to edit it";
+}
+
 function applyRowModelFlags(
   next: DemoColumnProps,
   flags: Parameters<typeof frontendColumnProps>[1],
@@ -981,6 +994,8 @@ function Frontend({
   formulaColumns,
 }: Readonly<DataProps>) {
   const scenario = useDemoScenario();
+  const mobile = useIsMobile();
+  const cellGesture = editing === true && !mobile;
   // Cloned, so cell edits never mutate the shared PEOPLE seed. Span starts
   // from a team-sorted copy so Core sits together; the seed file itself
   // stays interleaved (tree leads and Alan-as-row-2 e2e depend on that).
@@ -1183,10 +1198,8 @@ function Frontend({
       {editingArmed ? (
         <div className="demo-live-update">
           <span>
-            {urlKey === "live"
-              ? "Click a cell to edit it"
-              : "Double-click a cell or press Enter to edit it"}
-            , then test an incoming server change.
+            {editHint(cellGesture, urlKey)}, then test an incoming server
+            change.
           </span>
           <button
             type="button"
