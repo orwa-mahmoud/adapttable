@@ -98,6 +98,12 @@ overrides:
   # shared-cache cookie disclosure, RetryHandler DoS, retry response
   # splitting, dump-interceptor truncation, unsafe-method cache replay
   undici: "^7.29.1"
+  # Command injection through editor CLI flags, unescaped % in Windows
+  # arguments, and a bypassable existence check on Windows
+  launch-editor: "^2.14.2"
+  # One Sass compiler across the graph, so vite resolves to one instance
+  # per project; @angular/build pins sass-embedded 1.104.1 exactly
+  sass-embedded: "^1.105.0"
   # launch-editor command injection and Windows path checks in the dev
   # server; @angular/build pins vite 8.3.0 exactly
   vite: "^8.3.3"
