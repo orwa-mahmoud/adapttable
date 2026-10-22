@@ -482,6 +482,19 @@ ${appendScript("https://www.clarity.ms/tag/xxq9dbsjnj", { async: true })}`)}
         <div class="hero__badge">
           <span class="badge__bolt" aria-hidden="true">
             <svg
+              class="badge__bolt-glow"
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"></path>
+            </svg>
+            <svg
               width="13"
               height="13"
               viewBox="0 0 24 24"
@@ -1535,8 +1548,18 @@ const features = [filters([])];
     animation: wave 5s ease-out infinite;
   }
   .badge__bolt {
-    display: inline-flex;
+    display: inline-grid;
     animation: bolt 5s ease-in-out infinite;
+  }
+  .badge__bolt > svg {
+    grid-area: 1 / 1;
+  }
+  /* The glow is a lit copy under the bolt that fades in and out: an opacity
+     animation stays on the compositor, where an animated filter repaints. */
+  .badge__bolt-glow {
+    filter: drop-shadow(0 0 6px color-mix(in oklch, var(--brand) 60%, transparent));
+    opacity: 0;
+    animation: bolt-glow 5s ease-in-out infinite;
   }
   @keyframes shimmer {
     0%, 55%, 100% { background-position: 215% 0, 0 0; }
@@ -1548,8 +1571,12 @@ const features = [filters([])];
     100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--brand) 0%, transparent); }
   }
   @keyframes bolt {
-    0%, 14%, 30%, 100% { transform: none; filter: none; }
-    20% { transform: scale(1.25) rotate(-6deg); filter: drop-shadow(0 0 6px color-mix(in oklch, var(--brand) 60%, transparent)); }
+    0%, 14%, 30%, 100% { transform: none; }
+    20% { transform: scale(1.25) rotate(-6deg); }
+  }
+  @keyframes bolt-glow {
+    0%, 14%, 30%, 100% { opacity: 0; }
+    20% { opacity: 1; }
   }
   .hero__h1 {
     margin: 0;
@@ -2488,6 +2515,7 @@ const features = [filters([])];
     .hero__badge,
     .hero__badge::after,
     .badge__bolt,
+    .badge__bolt-glow,
     .btn-demo,
     .card {
       animation: none;
