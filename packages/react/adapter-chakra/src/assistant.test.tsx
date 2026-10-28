@@ -235,6 +235,22 @@ describe("TableAssistant", () => {
     expect(part("assistant-back")).toBeTruthy();
   });
 
+  it("opens the sheet on the composer, not the first header button", async () => {
+    mount(
+      <TableAssistant
+        assistant={view()}
+        labels={defaultLabels}
+        presentation="sheet"
+        open
+        onOpenChange={() => undefined}
+      />
+    );
+
+    await waitFor(() => {
+      expect(document.activeElement).toBe(part("assistant-input"));
+    });
+  });
+
   it("reads correctly right-to-left", () => {
     const { container } = mount(
       <div dir="rtl">

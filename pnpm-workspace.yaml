@@ -41,6 +41,10 @@ overrides:
   "@adapttable/shadcn-vue": "workspace:*"
   "@adapttable/unstyled": "workspace:*"
   "@adapttable/vuetify": "workspace:*"
+  # Chakra pins one Ark release; 5.39.3 brings @zag-js/presence 1.45, which
+  # unmounts a closing popover whose exit animation ended before presence
+  # started listening, instead of leaving it mounted and invisible.
+  "@chakra-ui/react>@ark-ui/react": "5.39.3"
   # React/Vite tooling retains the baseline Node 22.12 contract. Angular owns
   # its separate Babel 8 dependency and higher Node floor. Reuse the root
   # Babel 7 peer instead of allowing workspace peer resolution to select 8.
@@ -57,9 +61,11 @@ overrides:
   # development-server file read on Windows; 0.28.2 is already in the tree
   esbuild: "^0.28.1"
   "eslint-plugin-sonarjs>minimatch": "^10.2.3"
-  # host confusion via backslash authority introducer, and via an unclosed
-  # bracket in the authority
-  fast-uri: "^3.1.8"
+  # host confusion via backslash authority introducer, an unclosed bracket
+  # in the authority and unchecked WHATWG host canonicalization; scheme
+  # spoofing via percent-encoded schemes; scheme injection via a
+  # first-segment colon; path equivalence in relative reference normalization
+  fast-uri: "^3.1.9"
   # Retain current cache APIs and the Vary/prototype fixes; the stale-reuse
   # remedy remains a source patch until upstream includes the complete guard.
   http-cache-semantics: "^4.3.0"
@@ -75,9 +81,10 @@ overrides:
   # quadratic flat-selector parsing. postcss-nested 6.2.0 asks for ^6.1.1;
   # 7.1.6 keeps the processSync API that plugin calls.
   postcss-selector-parser: "^7.1.6"
-  # array-limit / prototype pollution advisories; 6.15.1 is the last
-  # vulnerable line Dependabot could not raise past a parent range
-  qs: "^6.16.0"
+  # array-limit / prototype pollution advisories, and an uncaught TypeError
+  # in stringify with arrayFormat 'comma'; 6.15.1 is the last vulnerable
+  # line Dependabot could not raise past a parent range
+  qs: "~6.16.1"
   seroval: "1.6.8"
   seroval-plugins: "1.6.8"
   # inherited libvips CVEs (2026-33327/33328/35590/35591)
@@ -96,8 +103,10 @@ overrides:
   # CRLF injection, cache-control disclosure, cookie injection, response
   # desync, private-cache crash, TLS validation bypass in BalancedPool,
   # shared-cache cookie disclosure, RetryHandler DoS, retry response
-  # splitting, dump-interceptor truncation, unsafe-method cache replay
-  undici: "^7.29.1"
+  # splitting, dump-interceptor truncation, unsafe-method cache replay,
+  # content-encoding and WebSocket PONG DoS, TLS 1.2 renegotiation DoS,
+  # dropped Agent TLS options, cross-origin redirect cache poisoning
+  undici: "^7.30.1"
   # Command injection through editor CLI flags, unescaped % in Windows
   # arguments, and a bypassable existence check on Windows
   launch-editor: "^2.14.2"
