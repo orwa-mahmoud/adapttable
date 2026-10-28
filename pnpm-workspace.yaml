@@ -41,6 +41,10 @@ overrides:
   "@adapttable/shadcn-vue": "workspace:*"
   "@adapttable/unstyled": "workspace:*"
   "@adapttable/vuetify": "workspace:*"
+  # Chakra pins one Ark release; 5.39.3 brings @zag-js/presence 1.45, which
+  # unmounts a closing popover whose exit animation ended before presence
+  # started listening, instead of leaving it mounted and invisible.
+  "@chakra-ui/react>@ark-ui/react": "5.39.3"
   # React/Vite tooling retains the baseline Node 22.12 contract. Angular owns
   # its separate Babel 8 dependency and higher Node floor. Reuse the root
   # Babel 7 peer instead of allowing workspace peer resolution to select 8.
