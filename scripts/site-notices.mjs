@@ -5,6 +5,7 @@ import {
   readFileSync,
   realpathSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
 import { dirname, isAbsolute, join, parse, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -56,12 +57,10 @@ import { fileURLToPath } from "node:url";
  * @typedef {{type: "chunk", moduleIds?: readonly string[],
  *   modules?: Record<string, unknown>} | {type: "asset"}} NoticeOutput
  * @typedef {Record<string, NoticeOutput>} NoticeBundle
- * @typedef {{type: "asset", fileName: string, source: string}} NoticeAsset
  *
  * @typedef {object} NoticePluginContext
  * @property {{config: {consumer?: "client" | "server",
  *   build: {ssr?: boolean | string}}}} [environment]
- * @property {(asset: NoticeAsset) => string} emitFile
  *
  * @typedef {object} NoticePlugin
  * @property {string} name
@@ -70,6 +69,8 @@ import { fileURLToPath } from "node:url";
  * @property {(config: {root: string}) => void} configResolved
  * @property {(this: NoticePluginContext, output: unknown,
  *   bundle: NoticeBundle) => void} generateBundle
+ * @property {(this: NoticePluginContext, output: {dir?: string},
+ *   bundle: NoticeBundle) => void} writeBundle
  */
 
 export const NOTICE_TEXT = "third-party-notices.txt";
@@ -281,7 +282,23 @@ export function collectNotices(
 }
 
 /**
- * Vite and Astro use the same hook; SSR-only code is not sent to browsers.
+ * Whether a build hook runs for the browser bundle. Vite's Environment API is
+ * authoritative: Astro's client environment can inherit build.ssr=true from
+ * the shared prerender configuration.
+ * @param {NoticePluginContext} context
+ * @returns {boolean}
+ */
+function isBrowserBuild(context) {
+  const config = context.environment?.config;
+  if (config?.consumer === "server") return false;
+  return config?.consumer === "client" || !config?.build.ssr;
+}
+
+/**
+ * Vite and Astro use the same hooks; SSR-only code is not sent to browsers.
+ * Packages are read from every generated chunk, including scripts a later
+ * plugin inlines into HTML; assets are read once the bundle is final, so the
+ * inventory lists only files that are written.
  * @param {SiteNoticeOptions} [options]
  * @returns {NoticePlugin}
  */
@@ -289,6 +306,8 @@ export function siteNotices(options = {}) {
   // Vite resolves this before invoking its build hooks.
   /** @type {string} */
   let root;
+  /** @type {PackageNotice[] | undefined} */
+  let packages;
   return {
     name: "adapttable-site-notices",
     apply: "build",
@@ -297,11 +316,7 @@ export function siteNotices(options = {}) {
       root = config.root;
     },
     generateBundle(_output, bundle) {
-      // Vite's Environment API is authoritative: Astro's client environment
-      // can inherit build.ssr=true from the shared prerender configuration.
-      const config = this.environment?.config;
-      if (config?.consumer === "server") return;
-      if (config?.consumer !== "client" && config?.build.ssr) return;
+      if (!isBrowserBuild(this)) return;
       const extraModules = [...(options.extraModules ?? [])];
       for (const extra of options.extraPackages ?? []) {
         const from = extra.via
@@ -309,24 +324,22 @@ export function siteNotices(options = {}) {
           : root;
         extraModules.push(installedPackage(extra.name, from));
       }
-      const packages = collectNotices(bundle, { ...options, extraModules });
+      packages = collectNotices(bundle, { ...options, extraModules });
       if (packages.length === 0)
         throw new Error("site-notices: browser build has no package inventory");
+    },
+    writeBundle(output, bundle) {
+      if (!isBrowserBuild(this) || !packages) return;
+      if (!output.dir)
+        throw new Error("site-notices: browser build has no output directory");
       const assets = Object.keys(bundle)
         .filter((name) => /\.(?:m?js|css)$/.test(name))
         .sort();
-      this.emitFile({
-        type: "asset",
-        fileName: NOTICE_JSON,
-        source:
-          JSON.stringify({ schemaVersion: 1, assets, packages }, null, 2) +
-          "\n",
-      });
-      this.emitFile({
-        type: "asset",
-        fileName: NOTICE_TEXT,
-        source: renderNotices(packages),
-      });
+      writeFileSync(
+        join(output.dir, NOTICE_JSON),
+        JSON.stringify({ schemaVersion: 1, assets, packages }, null, 2) + "\n"
+      );
+      writeFileSync(join(output.dir, NOTICE_TEXT), renderNotices(packages));
     },
   };
 }

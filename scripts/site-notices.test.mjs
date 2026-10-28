@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -47,6 +48,8 @@ function pkg(root, name = "example", version = "1.0.0") {
   write(directory, "LICENSE", MIT);
   return { directory, data: { name, version, license: "MIT" } };
 }
+const readJson = (out) =>
+  JSON.parse(readFileSync(join(out, NOTICE_JSON), "utf8"));
 const bundleFor = (...ids) => ({
   "assets/app.js": { type: "chunk", moduleIds: ids },
 });
@@ -230,53 +233,74 @@ describe("website license notices", () => {
       )[0].files.some((f) => f.name === "NOTICE")
     );
   });
-  it("emits text and a machine-readable inventory and skips SSR", () => {
+  it("writes text and a machine-readable inventory and skips SSR", () => {
     const item = pkg(fixture()),
-      assets = [],
-      plugin = siteNotices();
-    plugin.generateBundle.call(
-      { environment: { config: { build: { ssr: true } } } },
-      {},
-      {}
-    );
-    plugin.generateBundle.call(
-      { emitFile: (file) => assets.push(file) },
-      {},
-      bundleFor(join(item.directory, "index.js"))
-    );
-    assert.deepEqual(
-      assets.map((a) => a.fileName),
-      [NOTICE_JSON, NOTICE_TEXT]
-    );
-    assert.ok(assets[1].source.includes(MIT));
+      out = fixture(),
+      plugin = siteNotices(),
+      ssr = { environment: { config: { build: { ssr: true } } } },
+      bundle = bundleFor(join(item.directory, "index.js"));
+    plugin.generateBundle.call(ssr, {}, {});
+    plugin.writeBundle.call(ssr, { dir: out }, {});
+    assert.equal(existsSync(join(out, NOTICE_JSON)), false);
+    plugin.generateBundle.call({}, {}, bundle);
+    plugin.writeBundle.call({}, { dir: out }, bundle);
+    assert.deepEqual(readJson(out).assets, ["assets/app.js"]);
+    assert.ok(readFileSync(join(out, NOTICE_TEXT), "utf8").includes(MIT));
   });
-  it("emits notices for Astro client consumers with inherited SSR build flags", () => {
-    const item = pkg(fixture());
-    const assets = [];
-    const plugin = siteNotices();
-    plugin.generateBundle.call(
-      {
+  it("writes notices for Astro client consumers with inherited SSR build flags", () => {
+    const item = pkg(fixture()),
+      out = fixture(),
+      plugin = siteNotices(),
+      client = {
         environment: { config: { consumer: "client", build: { ssr: true } } },
-        emitFile: (file) => assets.push(file),
       },
-      {},
-      bundleFor(join(item.directory, "index.js"))
-    );
-    assert.deepEqual(
-      assets.map((asset) => asset.fileName),
-      [NOTICE_JSON, NOTICE_TEXT]
-    );
-    assert.ok(assets[1].source.includes(MIT));
-    assert.doesNotThrow(() =>
-      plugin.generateBundle.call(
-        {
-          environment: {
-            config: { consumer: "server", build: { ssr: false } },
-          },
+      server = {
+        environment: { config: { consumer: "server", build: { ssr: false } } },
+      },
+      bundle = bundleFor(join(item.directory, "index.js"));
+    plugin.generateBundle.call(client, {}, bundle);
+    assert.doesNotThrow(() => plugin.generateBundle.call(server, {}, {}));
+    plugin.writeBundle.call(server, { dir: out }, {});
+    assert.equal(existsSync(join(out, NOTICE_JSON)), false);
+    plugin.writeBundle.call(client, { dir: out }, bundle);
+    assert.deepEqual(readJson(out).assets, ["assets/app.js"]);
+    assert.ok(readFileSync(join(out, NOTICE_TEXT), "utf8").includes(MIT));
+  });
+  it("keeps the packages of a chunk inlined into HTML but lists only written files", () => {
+    const root = fixture(),
+      kept = pkg(root, "kept"),
+      inlined = pkg(root, "inlined"),
+      out = fixture(),
+      plugin = siteNotices(),
+      bundle = {
+        "assets/app.js": {
+          type: "chunk",
+          moduleIds: [join(kept.directory, "index.js")],
         },
-        {},
-        {}
-      )
+        "assets/inline.js": {
+          type: "chunk",
+          moduleIds: [join(inlined.directory, "index.js")],
+        },
+      };
+    plugin.generateBundle.call({}, {}, bundle);
+    // A later generateBundle hook moves the chunk's code into the HTML.
+    delete bundle["assets/inline.js"];
+    plugin.writeBundle.call({}, { dir: out }, bundle);
+    const inventory = readJson(out);
+    assert.deepEqual(inventory.assets, ["assets/app.js"]);
+    assert.deepEqual(
+      inventory.packages.map((p) => p.name),
+      ["inlined", "kept"]
+    );
+  });
+  it("refuses to write notices without an output directory", () => {
+    const item = pkg(fixture()),
+      plugin = siteNotices(),
+      bundle = bundleFor(join(item.directory, "index.js"));
+    plugin.generateBundle.call({}, {}, bundle);
+    assert.throws(
+      () => plugin.writeBundle.call({}, {}, bundle),
+      /no output directory/
     );
   });
   it("checks matching terms and all listed emitted assets", () => {
