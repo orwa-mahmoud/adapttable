@@ -91,6 +91,8 @@ jobs:
         env:
           SHOWCASE_SKIP_BUILD: "1"
           DOCS_SKIP_BUILD: "1"
+          # Firefox refuses to run as root with a HOME another user owns.
+          HOME: /root
       - name: Upload report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
