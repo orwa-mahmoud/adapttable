@@ -25,7 +25,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { KitPortal } from "./components/kitPortal";
 import { NativeSelect } from "./components/primitives";
@@ -179,12 +179,20 @@ function AssistantSheet({
   dir,
   children,
 }: Readonly<TableAssistantSheetProps>) {
+  const content = useRef<HTMLDivElement>(null);
   return (
     <Drawer.Root
       open={open}
       onOpenChange={(event) => {
         if (!event.open) onClose();
       }}
+      // The composer is what a reader opens the sheet for; without this the
+      // drawer's own focus moves to the first button in the header.
+      initialFocusEl={() =>
+        content.current?.querySelector<HTMLElement>(
+          '[data-adapttable-part="assistant-input"]'
+        ) ?? null
+      }
       placement="bottom"
       size="full"
     >
@@ -192,6 +200,7 @@ function AssistantSheet({
         <Drawer.Backdrop />
         <Drawer.Positioner>
           <Drawer.Content
+            ref={content}
             aria-label={label}
             dir={dir}
             data-adapttable-part={part}
