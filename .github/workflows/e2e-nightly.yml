@@ -54,6 +54,11 @@ jobs:
     name: Firefox / WebKit / Pixel 5
     needs: showcase-build
     runs-on: ubuntu-latest
+    # Playwright's image carries every browser build with the system libraries
+    # it links against, whatever Ubuntu the runner itself is on. Keep the tag
+    # on the installed @playwright/test version.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -69,9 +74,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
-      - uses: ./.github/actions/playwright-chromium
-        with:
-          browsers: ${{ matrix.project == 'mobile-chrome' && 'chromium' || matrix.project }}
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: showcase-dist
