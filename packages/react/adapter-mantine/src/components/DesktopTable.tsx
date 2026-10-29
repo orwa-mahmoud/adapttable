@@ -38,7 +38,13 @@ import {
 
 import { type Density, DENSITY_SPACING } from "../density";
 import { ChevronDownIcon, ChevronUpIcon, SelectorIcon } from "../icons";
-import { HAIRLINE, SURFACE } from "../surface";
+import {
+  HAIRLINE,
+  PIN_HOVER_CLASS,
+  PIN_HOVER_CSS,
+  PINNED_BODY_PAINT,
+  SURFACE,
+} from "../surface";
 import {
   OptionalColumnGroupToggle,
   OptionalColumnHeaderRename,
@@ -333,7 +339,9 @@ function DesktopRowBase<TRow>(
     };
   };
   const paintPin = (style: CSSProperties | undefined) =>
-    withRowSeparator(style ? { ...style, background: SURFACE } : undefined);
+    withRowSeparator(
+      style ? { ...style, background: PINNED_BODY_PAINT } : undefined
+    );
   const expansionLead = expandable ? MANTINE_WIDTHS.expansion : 0;
   const selectionLead =
     expansionLead + (showReorder ? REORDER_COLUMN_WIDTH : 0);
@@ -715,11 +723,14 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
         ref={scroll.bindScrollBox}
         style={{ width: "100%", ...scroll.boxStyle }}
       >
+        <style>{PIN_HOVER_CSS}</style>
         <Table
           data-adapttable-part="table"
           {...tableProps}
           {...gridProps}
-          className={className}
+          className={
+            className ? `${PIN_HOVER_CLASS} ${className}` : PIN_HOVER_CLASS
+          }
           highlightOnHover
           verticalSpacing={verticalSpacing}
           horizontalSpacing={horizontalSpacing}

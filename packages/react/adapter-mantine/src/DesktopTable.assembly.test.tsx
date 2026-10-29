@@ -25,7 +25,13 @@ import { ColumnHeaderRename } from "./components/ColumnHeaderRename";
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
 import { rowReorder } from "./row-reorder";
-import { HAIRLINE, SURFACE } from "./surface";
+import {
+  HAIRLINE,
+  PIN_HOVER_CLASS,
+  PIN_HOVER_CSS,
+  PINNED_BODY_PAINT,
+  SURFACE,
+} from "./surface";
 
 interface Person {
   id: string;
@@ -177,6 +183,23 @@ describe("DesktopTable assembly paint (Mantine)", () => {
     expect(table.style.minWidth).toBe("480px");
   });
 
+  it("hands the row's hover tint to its pinned cells", () => {
+    const { container } = mount(fullChrome);
+    const table = container.querySelector<HTMLElement>(
+      '[data-adapttable-part="table"]'
+    )!;
+
+    expect(table).toHaveClass(PIN_HOVER_CLASS);
+    expect(
+      [...container.querySelectorAll("style")].map((s) => s.textContent)
+    ).toContain(PIN_HOVER_CSS);
+    // An end-pinned cell wears the tinted paint too, not a bare surface.
+    const notePinned = container.querySelector<HTMLElement>(
+      'td[data-column-key="note"]'
+    )!;
+    expect(notePinned.style.background).toBe(PINNED_BODY_PAINT);
+  });
+
   it("uses SURFACE/HAIRLINE and separate collapse when the header sticks", () => {
     const { container } = mount(fullChrome);
     const table = container.querySelector<HTMLElement>(
@@ -223,7 +246,9 @@ describe("DesktopTable assembly paint (Mantine)", () => {
     const nameCell = container.querySelector<HTMLElement>(
       'td[data-column-key="name"]'
     )!;
-    expect(nameCell.style.background).toBe(SURFACE);
+    // The opaque surface, with the row's hover tint layered on top.
+    expect(nameCell.style.background).toBe(PINNED_BODY_PAINT);
+    expect(PINNED_BODY_PAINT.endsWith(SURFACE)).toBe(true);
 
     expect(screen.getByTestId("name-actions")).toBeInTheDocument();
     expect(container.querySelector("em")?.textContent).toBe("lead");
