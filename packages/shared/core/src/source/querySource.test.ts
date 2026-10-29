@@ -284,7 +284,10 @@ describe("createQuerySource", () => {
       store.set({ page: 2 });
 
       store.set({
-        filterTree: { combinator: "and", conditions: [] },
+        filterTree: {
+          combinator: "and",
+          conditions: [{ key: "id", op: "eq", value: "a" }],
+        },
       });
       source.params(CURSOR, store.view);
       source.update({ query: queryOf(undefined) });

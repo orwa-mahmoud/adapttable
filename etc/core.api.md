@@ -5202,6 +5202,9 @@ export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is 
 export function isFilterOpKey(key: string): boolean;
 
 // @public
+export function isFilterTreeConditionSet(condition: QueryCondition): boolean;
+
+// @public
 export function isFindShortcut(event: ChordKeyEvent): boolean;
 
 // @public
@@ -7645,6 +7648,9 @@ export function setFilterTreeCombinator(tree: QueryFilterGroup, path: readonly n
 
 // @public
 export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
+
+// @public
+export function settledFilterTree(tree: QueryFilterGroup | undefined): QueryFilterGroup | undefined;
 
 // @public
 export interface Shortcut {

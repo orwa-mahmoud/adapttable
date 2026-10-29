@@ -56,6 +56,22 @@ function harness(initial: QueryFilterGroup) {
 }
 
 describe("filter chip tree snapshots", () => {
+  it("shows no chip for a condition still waiting for its value", () => {
+    const state = harness({
+      combinator: "or",
+      conditions: [
+        { key: "name", op: "contains", value: "Ada" },
+        { key: "name", op: "contains" },
+      ],
+    });
+    try {
+      expect(state.chip(0).label).toContain("Ada");
+      expect(() => state.chip(1)).toThrow("Missing tree chip");
+    } finally {
+      state.stop();
+    }
+  });
+
   it.each(["key", "operator", "value", "condition"] as const)(
     "retires an opaque leaf after in-place %s replacement",
     async (change) => {

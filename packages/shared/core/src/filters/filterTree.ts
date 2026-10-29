@@ -13,15 +13,17 @@ import type { ExtraFilters } from "../types";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import { type FilterDef, filterPredicate } from "./filterDefs";
 import type { FilterTypeRegistry } from "./filterRegistry";
-import { isActiveFilterTree } from "./filterTreeCodec";
+import { settledFilterTree } from "./filterTreeCodec";
 import { filterOpKey } from "./operators";
 
 export {
   FILTER_TREE_PARAM,
   FILTER_TREE_VERSION,
   isActiveFilterTree,
+  isFilterTreeConditionSet,
   parseFilterTree,
   serializeFilterTree,
+  settledFilterTree,
 } from "./filterTreeCodec";
 
 function asScalar(value: unknown): string | undefined {
@@ -69,6 +71,8 @@ function matchCondition<TRow>(
 /**
  * Evaluate a tree against one row. An empty / missing tree matches
  * every row. Unknown condition keys match (stale links do not hide data).
+ * Conditions still waiting for a value — and groups holding only those — are
+ * left out, as if they were not there.
  *
  * @public
  */
@@ -78,13 +82,14 @@ export function evaluateFilterTree<TRow>(
   defs: readonly FilterDef<TRow>[],
   registry: FilterTypeRegistry = defaultFilterRegistry
 ): boolean {
-  if (!isActiveFilterTree(tree)) return true;
-  const results = tree.conditions.map((node) =>
+  const settled = settledFilterTree(tree);
+  if (!settled) return true;
+  const results = settled.conditions.map((node) =>
     isFilterGroup(node)
       ? evaluateFilterTree(node, row, defs, registry)
       : matchCondition(row, node, defs, registry)
   );
-  return tree.combinator === "and"
+  return settled.combinator === "and"
     ? results.every(Boolean)
     : results.some(Boolean);
 }

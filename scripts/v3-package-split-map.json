@@ -21027,6 +21027,14 @@
       "behavior": ""
     },
     {
+      "export": "isFilterTreeConditionSet",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "NUMBER_OPS",
       "currentImport": "@adapttable/core/query",
       "kind": "value",
@@ -21196,6 +21204,14 @@
     },
     {
       "export": "serializePivotState",
+      "currentImport": "@adapttable/core/query",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "settledFilterTree",
       "currentImport": "@adapttable/core/query",
       "kind": "value",
       "class": "neutral-operation",
@@ -28611,6 +28627,14 @@
       "behavior": ""
     },
     {
+      "export": "isFilterTreeConditionSet",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "isFindShortcut",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -32212,6 +32236,14 @@
     },
     {
       "export": "setMeasureAgg",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "settledFilterTree",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",

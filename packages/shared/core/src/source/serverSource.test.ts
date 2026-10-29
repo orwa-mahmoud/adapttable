@@ -102,6 +102,39 @@ describe("createServerSource", () => {
     expect(listener.mock.calls[1]?.[1].signal.aborted).toBe(false);
   });
 
+  it("sends only the tree conditions that filter, so an empty one costs no request", () => {
+    const listener = vi.fn<TableQueryListener>();
+    const source = createServerSource<Row>();
+    const done = { key: "amount", op: "gte", value: 1 };
+    const cfg = config({
+      onQueryChange: listener,
+      supports: { filterTree: true },
+    });
+    const store = viewStore({
+      filterTree: { combinator: "and", conditions: [done] },
+    });
+    const frame = render(source, cfg, store);
+    expect(frame.query.filterTree).toEqual({
+      combinator: "and",
+      conditions: [done],
+    });
+
+    // A condition the reader has just added, with no value yet, filters
+    // nothing: the server is asked the same question, so not asked again.
+    store.set({
+      filterTree: {
+        combinator: "and",
+        conditions: [done, { key: "id", op: "eq" }],
+      },
+    });
+    const next = render(source, cfg, store);
+    expect(next.query.filterTree).toEqual({
+      combinator: "and",
+      conditions: [done],
+    });
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
   it("does nothing before the first update", () => {
     const source = createServerSource<Row>();
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);

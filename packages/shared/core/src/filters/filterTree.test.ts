@@ -7,8 +7,10 @@ import {
   conditionToExtra,
   evaluateFilterTree,
   isActiveFilterTree,
+  isFilterTreeConditionSet,
   parseFilterTree,
   serializeFilterTree,
+  settledFilterTree,
 } from "./filterTree";
 
 interface Row {
@@ -116,6 +118,89 @@ describe("evaluateFilterTree", () => {
         DEFS
       )
     ).toBe(false);
+  });
+
+  it("leaves out conditions still waiting for a value, so an OR stays narrow", () => {
+    const tree: QueryFilterGroup = {
+      combinator: "or",
+      conditions: [
+        { key: "team", op: "eq", value: "Core" },
+        { key: "name", op: "contains" },
+        { combinator: "and", conditions: [{ key: "budget", op: "gte" }] },
+      ],
+    };
+    expect(evaluateFilterTree(tree, ADA, DEFS)).toBe(true);
+    // Without the rule the empty condition matched Ali and widened the OR.
+    expect(evaluateFilterTree(tree, ALI, DEFS)).toBe(false);
+    expect(
+      evaluateFilterTree(
+        { combinator: "and", conditions: [{ key: "name", op: "eq" }] },
+        ALI,
+        DEFS
+      )
+    ).toBe(true);
+  });
+});
+
+describe("isFilterTreeConditionSet", () => {
+  it("needs a value unless the operator takes none", () => {
+    expect(isFilterTreeConditionSet({ key: "name", op: "contains" })).toBe(
+      false
+    );
+    expect(
+      isFilterTreeConditionSet({ key: "name", op: "contains", value: "" })
+    ).toBe(false);
+    expect(
+      isFilterTreeConditionSet({
+        key: "budget",
+        op: "between",
+        value: ["", ""],
+      })
+    ).toBe(false);
+    expect(isFilterTreeConditionSet({ key: "name", op: "empty" })).toBe(true);
+    expect(
+      isFilterTreeConditionSet({ key: "budget", op: "gte", value: 0 })
+    ).toBe(true);
+    expect(
+      isFilterTreeConditionSet({ key: "flag", op: "eq", value: false })
+    ).toBe(true);
+    expect(
+      isFilterTreeConditionSet({ key: "budget", op: "between", value: ["", 9] })
+    ).toBe(true);
+    // A custom type's own value object is a value, whatever its shape.
+    expect(
+      isFilterTreeConditionSet({ key: "sku", op: "custom", value: { min: 1 } })
+    ).toBe(true);
+  });
+});
+
+describe("settledFilterTree", () => {
+  it("drops unfinished conditions and emptied groups, keeping a finished tree as is", () => {
+    const finished: QueryFilterGroup = {
+      combinator: "and",
+      conditions: [{ key: "team", op: "eq", value: "Core" }],
+    };
+    expect(settledFilterTree(finished)).toBe(finished);
+    expect(
+      settledFilterTree({
+        combinator: "or",
+        conditions: [
+          { key: "team", op: "eq", value: "Core" },
+          { key: "name", op: "contains", value: "" },
+          { combinator: "and", conditions: [{ key: "budget", op: "gte" }] },
+        ],
+      })
+    ).toEqual({
+      combinator: "or",
+      conditions: [{ key: "team", op: "eq", value: "Core" }],
+    });
+    expect(
+      settledFilterTree({
+        combinator: "and",
+        conditions: [{ key: "name", op: "contains" }],
+      })
+    ).toBeUndefined();
+    expect(settledFilterTree(undefined)).toBeUndefined();
   });
 });
 

@@ -6,6 +6,7 @@ import {
   type FilterDef,
   filterTreeChipLabel,
   type FilterTypeRegistry,
+  isFilterTreeConditionSet,
   type QueryFilterGroup,
   removeFilterTreeNode,
   type TableLabels,
@@ -32,11 +33,14 @@ export function filterTreeChips<TRow>(
   registry: FilterTypeRegistry | undefined
 ): readonly ActiveFilterChip[] {
   if (!tree || !setTree) return [];
-  return walkFilterTreeConditions(tree).map(({ condition, path }) => ({
-    key: `ft:${path.join(".")}:${condition.key}:${condition.op}`,
-    label: filterTreeChipLabel(condition, defs, labels, registry),
-    onRemove: () => {
-      setTree(removeFilterTreeNode(tree, path));
-    },
-  }));
+  // A condition still waiting for a value filters nothing, so it is no chip.
+  return walkFilterTreeConditions(tree)
+    .filter(({ condition }) => isFilterTreeConditionSet(condition))
+    .map(({ condition, path }) => ({
+      key: `ft:${path.join(".")}:${condition.key}:${condition.op}`,
+      label: filterTreeChipLabel(condition, defs, labels, registry),
+      onRemove: () => {
+        setTree(removeFilterTreeNode(tree, path));
+      },
+    }));
 }
