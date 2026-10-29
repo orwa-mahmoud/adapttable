@@ -20,6 +20,8 @@ import {
   logicalAlign,
   mergedCellStyle,
   PIN_Z,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
   REORDER_COLUMN_WIDTH,
   resolveRowEditTrigger,
@@ -243,6 +245,7 @@ function DesktopRowBase<TRow>(
     rowDomProps,
     bodyPinStyle,
     dir,
+    pinPart,
   } = props;
   const expandable = expanded !== undefined;
   const expansionLead = expandable ? EXPAND_WIDTH : 0;
@@ -250,6 +253,11 @@ function DesktopRowBase<TRow>(
     expansionLead + (showReorder ? REORDER_COLUMN_WIDTH : 0);
   const palette = useMuiPalette();
   const pinBg = pinnedBodyPaint(palette.background.paper);
+  // A pinned total is the host's figure, not a person: it reads semibold, as
+  // the column footer's summary does.
+  const summaryRow =
+    pinPart === PINNED_SUMMARY_TOP_PART ||
+    pinPart === PINNED_SUMMARY_BOTTOM_PART;
   const edge = (active: boolean, lead = 0) =>
     pinnedEdgeCellStyle("start", active, PIN_Z.body, pinBg, lead);
   const rowEdit = resolveRowEditTrigger(
@@ -345,6 +353,7 @@ function DesktopRowBase<TRow>(
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
               sx={{
                 textAlign: muiAlign(column.align),
+                ...(summaryRow ? { fontWeight: 600 } : {}),
                 ...(pin ? PAPER_SX : {}),
               }}
               style={cellHighlightStyle(
