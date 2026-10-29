@@ -22,6 +22,8 @@ import {
   logicalAlign,
   mergedCellStyle,
   PIN_Z,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
   type PinSide,
   REORDER_COLUMN_WIDTH,
@@ -202,7 +204,12 @@ function DesktopRowBase<TRow>(
     accentColor,
     dir,
     rowPinSide,
+    pinPart,
   } = props;
+  // A pinned total is the host's figure, not a person: it reads semibold.
+  const summaryRow =
+    pinPart === PINNED_SUMMARY_TOP_PART ||
+    pinPart === PINNED_SUMMARY_BOTTOM_PART;
   const expandable = expanded !== undefined;
   // A pinned row sticks, so its leading and trailing cells need the surface
   // too: the rows scrolling beneath must not show through them.
@@ -318,6 +325,7 @@ function DesktopRowBase<TRow>(
                   ? "center"
                   : logicalAlign(column.align)
               }
+              fontWeight={summaryRow ? "semibold" : undefined}
               style={cellHighlightStyle(
                 focusProps,
                 {
