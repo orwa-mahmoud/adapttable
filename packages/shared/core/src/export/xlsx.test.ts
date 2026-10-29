@@ -159,6 +159,26 @@ describe("xlsxWriter", () => {
     expect(built.parts[0]).toBeInstanceOf(Uint8Array);
   });
 
+  it("sizes a column without a stated width to its longest value", () => {
+    const built = xlsxWriter().build({
+      table: {
+        headers: ["Name", "Note", "Hired", "Paid"],
+        keys: ["name", "note", "hired", "paid"],
+        rows: [
+          ["Amara Okafor-Lee", "x".repeat(90), new Date(2019, 1, 17), 66000],
+          ["Ada", "", new Date(2020, 0, 1), 5],
+        ],
+      },
+    } as never);
+    const widths = [
+      ...textOf(built.parts[0] as Uint8Array).matchAll(
+        /<col [^>]*width="(\d+)"/g
+      ),
+    ].map((match) => Number(match[1]));
+    // "Amara Okafor-Lee" + 2; capped at 40; a date's 10 + 2; the 8 floor.
+    expect(widths).toEqual([18, 40, 12, 8]);
+  });
+
   it("carries a declared column width into the sheet", () => {
     const built = xlsxWriter({ sheetName: "Report" }).build({ table } as never);
     const sheet = textOf(built.parts[0] as Uint8Array);
