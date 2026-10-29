@@ -159,6 +159,26 @@ describe("DesktopTable assembly paint (Chakra)", () => {
     expect(table.querySelector("[data-grid-cell]")).toBeNull();
   });
 
+  it("sets a heading over its values, in the column's alignment", () => {
+    mount({
+      columns: [
+        { key: "name", header: "Name", accessor: (row) => row.name },
+        {
+          key: "city",
+          header: "City",
+          accessor: (row) => row.city,
+          align: "end",
+        },
+      ],
+    });
+    const caption = (key: string) =>
+      document.querySelector(
+        `th[data-column-key="${key}"] [data-adapttable-part="header-caption"]`
+      )!.parentElement!;
+    expect(getComputedStyle(caption("city")).justifyContent).toBe("flex-end");
+    expect(getComputedStyle(caption("name")).justifyContent).toBe("flex-start");
+  });
+
   it("forwards size tokens onto the table root", () => {
     const sm = mount({ size: "sm" });
     expect(

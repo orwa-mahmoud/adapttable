@@ -441,6 +441,19 @@ function NormalHeaderCaption<TRow>({
   );
 }
 
+/**
+ * The caption row is a flex box, which ignores the cell's `textAlign`; it is
+ * justified the same way so an end-aligned column's heading sits over its
+ * values. `flex-end` follows the writing direction, so RTL needs nothing more.
+ */
+function headerJustify(
+  align: ColumnDef<unknown>["align"]
+): "flex-start" | "center" | "flex-end" {
+  if (align === "end") return "flex-end";
+  if (align === "center") return "center";
+  return "flex-start";
+}
+
 function LeafHeader<TRow>({
   leaf,
   stickyTh,
@@ -484,7 +497,12 @@ function LeafHeader<TRow>({
       {...stickyTh}
       style={leafStyle}
     >
-      <Flex align="center" gap={1} flexWrap="wrap">
+      <Flex
+        align="center"
+        gap={1}
+        flexWrap="wrap"
+        justify={headerJustify(column.align)}
+      >
         {column.renameable === true && onRenameColumn ? (
           <OptionalColumnHeaderRename
             columnKey={column.key}
