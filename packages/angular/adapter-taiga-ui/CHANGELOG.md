@@ -1,5 +1,11 @@
 # @adapttable/taiga-ui
 
+## 0.2.8
+
+### Patch Changes
+
+- c07f3a3: Taiga dropdowns, selects and the filters popover close reliably in Safari. `provideAdaptTaiga()` keeps component styles in the document while Taiga's closing animation runs, so a closed overlay no longer stays on screen.
+
 ## 0.2.7
 
 ### Patch Changes
