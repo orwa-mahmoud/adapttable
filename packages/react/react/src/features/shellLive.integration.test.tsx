@@ -190,6 +190,54 @@ describe("each live feature replaces its stand-in with the real hook", () => {
     expect(view.current.fullscreen.active).toBe(false);
   });
 
+  it("fullscreen promotes the table's root on the first press, with no re-render first", () => {
+    Object.defineProperty(document, "fullscreenEnabled", {
+      value: true,
+      configurable: true,
+    });
+    const request = vi.fn(() => Promise.resolve());
+    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
+      value: request,
+      configurable: true,
+    });
+    try {
+      const props = applyTableFeatures({
+        features: [fullscreen()],
+        data: ROWS,
+        columns,
+        rowKey: (r: Row) => r.id,
+        urlSync: false,
+      });
+      let view: DataTableShellResult<Row> | undefined;
+      function Probe() {
+        const shell = useDataTableShell(props, noForm);
+        return (
+          <div ref={shell.chrome.rootRef} data-testid="root">
+            <DataTableShellView<Row> shell={shell}>
+              {(next) => {
+                view = next;
+                return null;
+              }}
+            </DataTableShellView>
+          </div>
+        );
+      }
+      render(
+        <FeatureProviders props={props}>
+          <Probe />
+        </FeatureProviders>
+      );
+      act(() => {
+        view!.fullscreen.toggle();
+      });
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(request.mock.contexts[0]).toBe(screen.getByTestId("root"));
+    } finally {
+      Reflect.deleteProperty(HTMLElement.prototype, "requestFullscreen");
+      Reflect.deleteProperty(document, "fullscreenEnabled");
+    }
+  });
+
   it("editHistory records an edit and can take it back", () => {
     const onCellEdit = vi.fn();
     const view = mount([

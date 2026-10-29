@@ -22,7 +22,7 @@ import {
  * Features fill the live slots. Empty slots pass inert stubs, so the lean
  * table never imports those hooks.
  */
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { asBatchGesture } from "../editing/editHistory";
 import { beginCellEdit } from "../editing/useCellEditing";
@@ -256,8 +256,18 @@ function FullscreenStage<TRow>({
   children,
 }: StageProps<TRow>): ReactNode {
   const filled = useFeatureSlotFilled(FULLSCREEN_LIVE);
+  // The root exists only once the table has committed. Read from the ref
+  // during render it is still null, and the button would do nothing until
+  // something else happened to re-render the table. A passive effect runs
+  // after every ref in the commit is attached, wherever the root sits; it
+  // follows each shell render, since one can swap the root (loading to table).
+  const rootRef = shell.chrome.rootRef;
+  const [element, setElement] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (filled) setElement(rootRef.current);
+  }, [filled, rootRef, shell]);
   const fullscreenProps = {
-    element: shell.chrome.rootRef.current,
+    element,
     children: (fullscreen: typeof DISABLED_FULLSCREEN) =>
       children({ ...live, fullscreen }),
   } as unknown as FullscreenLiveSlotProps;
