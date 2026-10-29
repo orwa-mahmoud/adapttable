@@ -322,6 +322,7 @@ function DesktopRowBase<TRow>(
     rowDomProps,
     bodyPinStyle,
     stickyHeader,
+    rowPinSide,
   } = props;
   const expandable = expanded !== undefined;
   const rowSeparator: CSSProperties | undefined = stickyHeader
@@ -339,9 +340,14 @@ function DesktopRowBase<TRow>(
         : rowSeparator.boxShadow,
     };
   };
+  // A pinned row sticks as well, so every one of its cells takes the opaque
+  // paint: the rows scrolling beneath it must not show through.
+  const rowPinned = rowPinSide !== undefined;
   const paintPin = (style: CSSProperties | undefined) =>
     withRowSeparator(
-      style ? { ...style, background: PINNED_BODY_PAINT } : undefined
+      style || rowPinned
+        ? { ...style, background: PINNED_BODY_PAINT }
+        : undefined
     );
   const expansionLead = expandable ? MANTINE_WIDTHS.expansion : 0;
   const selectionLead =

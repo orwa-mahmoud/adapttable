@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { PINNED_BODY_PAINT } from "./surface";
 
 interface Task {
   id: string;
@@ -79,6 +80,26 @@ describe("row pinning (mantine)", () => {
     expect(part("tbody")?.textContent).toContain("Test");
     expect(part("pinned-top")).toHaveAttribute("data-row-pin", "top");
     expect(part("pinned-bottom")).toHaveAttribute("data-row-pin", "bottom");
+  });
+
+  it("paints every cell of a pinned row so scrolled rows cannot show through", () => {
+    render(
+      table({
+        pinnedRowIds: { top: ["1"], bottom: ["3"] },
+        onPinnedRowIdsChange: vi.fn(),
+      })
+    );
+    for (const name of ["pinned-top", "pinned-bottom"]) {
+      const cells = part(name)!.querySelectorAll<HTMLElement>("td");
+      expect(cells.length).toBeGreaterThan(0);
+      for (const cell of cells) {
+        expect(cell.style.background).toBe(PINNED_BODY_PAINT);
+      }
+    }
+    const unpinned = part("tbody")!.querySelector<HTMLElement>(
+      "tr:not([data-row-pin]) td"
+    )!;
+    expect(unpinned.style.background).toBe("");
   });
 
   it("offers pin actions on cards with no sticky chrome", () => {
