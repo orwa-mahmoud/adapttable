@@ -71,7 +71,9 @@ const COLUMNS: ColumnDef<Person>[] = [
 
 const EXPANSION_WIDTH = 48;
 const REORDER_WIDTH = 64;
-const PIN_BG = "var(--mui-palette-background-paper)";
+// A plain createTheme declares no CSS variables, so pins must carry the
+// theme's own paper colour: an undefined var() would leave them transparent.
+const PIN_BG = "rgb(255, 255, 255)";
 const theme = createTheme();
 
 function mount(
@@ -159,7 +161,10 @@ describe("DesktopTable assembly paint (MUI)", () => {
     const nameCell = container.querySelector<HTMLElement>(
       'td[data-column-key="name"]'
     )!;
-    expect(nameCell.style.background).toBe(PIN_BG);
+    // The row's hover or selected tint rides over the paper.
+    expect(nameCell.style.background).toContain("var(--adapttable-pin-tint");
+    // createTheme's paper, as written inside the gradient.
+    expect(nameCell.style.background).toMatch(/\), #fff$/);
     expect(nameCell.style.position).toBe("sticky");
 
     const sortLabel = screen.getByRole("button", { name: /Name/ });
