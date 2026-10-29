@@ -44,6 +44,13 @@ export interface AssistantComposerProps {
     "label" | "items" | "onSelect"
   >;
   readonly placeholder?: string;
+  /**
+   * Hold the composer at the bottom while the conversation scrolls. Right for
+   * a window or sheet, which scroll inside themselves; an inline panel scrolls
+   * with the page, where a sticky composer would float over the messages.
+   * Defaults to `true`.
+   */
+  readonly sticky?: boolean;
 }
 /** Draws composer structure while delegating every visible control to its kit. @public */
 @Component({

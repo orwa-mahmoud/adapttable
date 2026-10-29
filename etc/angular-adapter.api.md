@@ -4762,6 +4762,7 @@ export interface AssistantComposerProps {
     readonly speech?: SpeechInputHandle;
     // (undocumented)
     readonly status: string;
+    readonly sticky?: boolean;
 }
 
 export { assistantIsBusy }

@@ -1229,6 +1229,18 @@ describe("the composer", () => {
   });
 });
 
+describe("where the composer sits", () => {
+  it("stays in the inline panel's flow, so it never floats over the messages", () => {
+    mount({ presentation: "panel" });
+    expect(part("assistant-composer")!.style.position).toBe("");
+  });
+
+  it("holds the bottom of a window that scrolls inside itself", () => {
+    mount({ presentation: "floating" });
+    expect(part("assistant-composer")!.style.position).toBe("sticky");
+  });
+});
+
 describe("the narrow-viewport sheet", () => {
   it("is modal and offers a way back to the table", () => {
     mount({ presentation: "sheet" });

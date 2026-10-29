@@ -1032,6 +1032,7 @@ export function TableAssistantChrome({
         setDraft={assistant.setDraft}
         onSend={composer.send}
         onStop={assistant.stop}
+        sticky={resolved !== "panel"}
         {...(composer.answering
           ? {
               placeholder:
