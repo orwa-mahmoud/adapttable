@@ -73,6 +73,27 @@ describe("antd SavedViewsMenu", () => {
     expect(stored[0]!.search).not.toContain("other.q");
   });
 
+  it("draws the divider only once a view is listed above it", async () => {
+    render(
+      <SavedViewsMenu
+        options={{
+          storageKey: "views",
+          storage: fakeStorage(),
+          urlAdapter: createMemoryAdapter("t.q=ali"),
+          urlKey: "t",
+        }}
+        labels={labels}
+      />
+    );
+    await openMenu();
+    expect(document.querySelector(".ant-divider")).toBeNull();
+    fireEvent.change(screen.getByPlaceholderText("View name"), {
+      target: { value: "Mine" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save view" }));
+    expect(document.querySelector(".ant-divider")).not.toBeNull();
+  });
+
   it("clicking a view re-applies its params and closes the popover", async () => {
     const adapter = createMemoryAdapter("t.q=ali&other.q=keep");
     render(

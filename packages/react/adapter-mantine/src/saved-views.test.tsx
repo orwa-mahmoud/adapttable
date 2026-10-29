@@ -92,6 +92,13 @@ describe("SavedViewsMenu", () => {
     expect(buttonByText(defaultLabels.saveView)).toBeDisabled();
   });
 
+  it("draws the divider only once a view is listed above it", async () => {
+    await openMenu();
+    expect(document.querySelector(".mantine-Divider-root")).toBeNull();
+    saveView("Mine");
+    expect(document.querySelector(".mantine-Divider-root")).not.toBeNull();
+  });
+
   it("applies a view: the adapter URL regains the captured table params", async () => {
     const adapter = await openMenu("q=alice&unrelated=keep");
     saveView("Mine");

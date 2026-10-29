@@ -117,10 +117,12 @@ export function SavedViewsMenu({
                 </button>
               </div>
             ))}
-            <hr
-              data-adapttable-part="views-divider"
-              className={classNames.viewsDivider}
-            />
+            {views.length > 0 && (
+              <hr
+                data-adapttable-part="views-divider"
+                className={classNames.viewsDivider}
+              />
+            )}
             <div
               data-adapttable-part="views-save-row"
               className={classNames.viewsSaveRow}

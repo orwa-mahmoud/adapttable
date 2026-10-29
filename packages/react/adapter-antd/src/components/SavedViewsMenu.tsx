@@ -93,7 +93,7 @@ export function SavedViewsMenu({
           </Button>
         </Flex>
       ))}
-      <Divider style={{ margin: "8px 0" }} />
+      {views.length > 0 && <Divider style={{ margin: "8px 0" }} />}
       <Flex align="center" gap={4}>
         <Input
           size="small"
