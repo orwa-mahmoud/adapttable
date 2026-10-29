@@ -85,8 +85,10 @@ overrides:
   # in stringify with arrayFormat 'comma'; 6.15.1 is the last vulnerable
   # line Dependabot could not raise past a parent range
   qs: "~6.16.1"
-  seroval: "1.6.8"
-  seroval-plugins: "1.6.8"
+  # code injection through a typed array's own constructor property, and
+  # script injection through RegExp sources in serialized output
+  seroval: "1.6.11"
+  seroval-plugins: "1.6.11"
   # inherited libvips CVEs (2026-33327/33328/35590/35591)
   sharp: "^0.35.0"
   # command injection via a line terminator in a token after a comment token
