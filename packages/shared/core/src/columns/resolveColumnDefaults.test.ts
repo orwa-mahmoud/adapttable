@@ -67,6 +67,20 @@ describe("resolveColumnDefaults", () => {
     const [column] = resolveColumnDefaults<Row, Col>([{ key: "tags" }]);
     expect(column!.accessor!(ROW)).toBeNull();
   });
+
+  it("shows a column's formatValue text, as the engine and export read it", () => {
+    // A collapsed group's summary column is keyed by no row field; its text
+    // is its formatValue, so a data-path reader would leave every cell blank.
+    const [summary, formatted] = resolveColumnDefaults<Row, Col>([
+      {
+        key: "__groupRender:g:0",
+        formatValue: (r) => `${r.name} · ${r.tags.length}`,
+      },
+      { key: "name", formatValue: (r) => r.name.toUpperCase() },
+    ]);
+    expect(summary!.accessor!(ROW)).toBe("Ada · 1");
+    expect(formatted!.accessor!(ROW)).toBe("ADA");
+  });
 });
 
 describe("resolveColumnHeaders", () => {

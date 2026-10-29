@@ -4658,6 +4658,7 @@ export function resetColumnLayout<TRow>(row: ColumnMenuRow<TRow>, layout: UseCol
 // @public
 export interface ResolvableColumn<TRow> {
     readonly accessor?: (row: TRow) => unknown;
+    readonly formatValue?: (row: TRow) => string;
     readonly header?: object | string | number | bigint | boolean | symbol | null;
     readonly i18n?: NonNullable<ColumnModel<TRow>["i18n"]>;
     readonly key: string;
