@@ -18,6 +18,8 @@ import {
   type HtmlGroupedHeaderCell,
   mergedCellStyle,
   PIN_Z,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
   pinnedCellStyle,
   REORDER_COLUMN_WIDTH,
   resolveRowEditTrigger,
@@ -323,6 +325,7 @@ function DesktopRowBase<TRow>(
     bodyPinStyle,
     stickyHeader,
     rowPinSide,
+    pinPart,
   } = props;
   const expandable = expanded !== undefined;
   const rowSeparator: CSSProperties | undefined = stickyHeader
@@ -343,6 +346,11 @@ function DesktopRowBase<TRow>(
   // A pinned row sticks as well, so every one of its cells takes the opaque
   // paint: the rows scrolling beneath it must not show through.
   const rowPinned = rowPinSide !== undefined;
+  // A pinned total is the host's figure, not a person: it reads semibold, as
+  // the column footer's summary does.
+  const summaryRow =
+    pinPart === PINNED_SUMMARY_TOP_PART ||
+    pinPart === PINNED_SUMMARY_BOTTOM_PART;
   const paintPin = (style: CSSProperties | undefined) =>
     withRowSeparator(
       style || rowPinned
@@ -444,6 +452,7 @@ function DesktopRowBase<TRow>(
               rowSpan={rowSpan > 1 ? rowSpan : undefined}
               data-column-key={column.key}
               data-adapttable-part="cell"
+              fw={summaryRow ? 600 : undefined}
               data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
               {...cellProps}
