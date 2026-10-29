@@ -13,9 +13,11 @@ and their published peers. Configure Taiga icon assets at
 Your build must support Less.
 
 Register `provideAdaptTaiga()` from `@adapttable/taiga-ui` in your application's
-bootstrap providers. It enables Taiga's event plugins and stable options without
-writing theme attributes to `document.body`, disabling scrollbars globally, or
-adding document metadata. Use `AdaptTaigaRoot` for the scoped theme instead.
+bootstrap providers. It enables Taiga's event plugins and stable options, and
+keeps component styles in the document while Taiga's dropdowns animate closed,
+without writing theme attributes to `document.body`, disabling scrollbars
+globally, or adding document metadata. Use `AdaptTaigaRoot` for the scoped theme
+instead.
 
 Install in an existing Angular 22 application:
 

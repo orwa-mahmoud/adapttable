@@ -2,7 +2,7 @@ import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { AdaptTaigaRoot } from "./taigaRoot";
+import { AdaptTaigaRoot, provideAdaptTaiga } from "./taigaRoot";
 
 @Component({
   imports: [AdaptTaigaRoot],
@@ -20,6 +20,23 @@ import { AdaptTaigaRoot } from "./taigaRoot";
 class Host {
   readonly theme = signal<"light" | "dark" | null>(null);
   readonly direction = signal<"ltr" | "rtl" | null>(null);
+}
+
+@Component({
+  selector: "adapt-leaving-panel",
+  template: "",
+  styles: ":host { --adapt-leaving-panel: 1; }",
+})
+class LeavingPanel {}
+
+@Component({
+  imports: [LeavingPanel],
+  template: `@if (open()) {
+    <adapt-leaving-panel />
+  }`,
+})
+class LeavingHost {
+  readonly open = signal(true);
 }
 
 afterEach(() => {
@@ -70,5 +87,26 @@ describe("Taiga root theme and direction scope", () => {
       [null, null],
     ]);
     expect(scope(override)).toEqual(["light", "ltr"]);
+  });
+});
+
+describe("Taiga providers", () => {
+  it("keep a destroyed component's styles for Taiga's leave animation", async () => {
+    TestBed.configureTestingModule({ providers: provideAdaptTaiga() });
+    const fixture = TestBed.createComponent(LeavingHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const styled = () =>
+      [...document.querySelectorAll("style")].some((style) =>
+        style.textContent?.includes("--adapt-leaving-panel")
+      );
+    expect(styled()).toBe(true);
+
+    fixture.componentInstance.open.set(false);
+    await fixture.whenStable();
+    expect(
+      fixture.nativeElement.querySelector("adapt-leaving-panel")
+    ).toBeNull();
+    expect(styled()).toBe(true);
   });
 });
