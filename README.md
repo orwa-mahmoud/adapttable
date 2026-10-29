@@ -7,9 +7,8 @@
 **React · Angular · Vue · 25 native adapters · 20 locales · MIT licensed**
 
 Filtering, grouping, pivot tables, editing and saved views — rendered with your
-UI kit's own components. On phones, rows become cards automatically. Add an
-agent that operates through the same table capabilities, or go fully headless
-and render everything yourself.
+UI kit's own components. Add an agent that operates through the same table
+capabilities, or go fully headless and render everything yourself.
 
 [![npm version](https://img.shields.io/npm/v/@adapttable/core.svg)](https://www.npmjs.com/package/@adapttable/core)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
@@ -18,6 +17,19 @@ and render everything yourself.
 **[React demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[Angular demo](https://adapttable.orwamahmoud.com/angular/demo/)** · **[Vue demo](https://adapttable.orwamahmoud.com/vue/demo/)** · **[Documentation](https://adapttable.orwamahmoud.com/)**
 
 </div>
+
+- **Mobile cards, automatically.** Below the breakpoint, rows become readable
+  cards with the same filters, search and selection — no second layout to
+  build. Prefer the table on phones? Set `forceMobile` to `false` and it keeps
+  horizontal scrolling.
+  [See it flip live →](https://adapttable.orwamahmoud.com/react/demo/mantine/mobile-cards/)
+- **The whole view in the URL.** Search, filters, sorting, paging and grouping —
+  and column layout when you opt in — live in the query string, so any view is
+  a shareable link that survives reload and the back button. Several tables can
+  share one URL. [URL state →](https://adapttable.orwamahmoud.com/react/url-state/)
+- **Spreadsheet power, no paid tier.** Pivot tables, formulas, cell-range
+  selection with clipboard and fill handle, undo/redo, and Excel and PDF
+  export — all MIT. [Pivot tables →](https://adapttable.orwamahmoud.com/react/pivot/)
 
 ## Your table already knows what it can do
 
