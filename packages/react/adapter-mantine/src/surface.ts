@@ -35,3 +35,13 @@ export const PIN_HOVER_CSS = `@media (hover: hover){.${PIN_HOVER_CLASS}>tbody>tr
 /** Hairline for row separators, the header underline and group headers. */
 export const HAIRLINE =
   "var(--adapttable-header-border, var(--mantine-color-default-border))";
+
+/**
+ * A cell inside the selected range: Mantine's light primary fill under a 1px
+ * primary outline, so the range is drawn by an outline as well as a colour.
+ */
+export const SELECTED_CELL_STYLE = {
+  background: "var(--mantine-primary-color-light)",
+  outline: "1px solid var(--mantine-primary-color-filled)",
+  outlineOffset: "-1px",
+} as const;

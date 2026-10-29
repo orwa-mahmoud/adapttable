@@ -43,6 +43,7 @@ import {
   PIN_HOVER_CLASS,
   PIN_HOVER_CSS,
   PINNED_BODY_PAINT,
+  SELECTED_CELL_STYLE,
   SURFACE,
 } from "../surface";
 import {
@@ -448,9 +449,7 @@ function DesktopRowBase<TRow>(
                   ...pinStyle,
                   ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
                 },
-                {
-                  background: "var(--mantine-primary-color-light)",
-                }
+                SELECTED_CELL_STYLE
               )}
             >
               <OptionalTreeCell
