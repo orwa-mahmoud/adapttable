@@ -1,0 +1,13 @@
+# Coverage is uploaded from main by .github/workflows/coverage.yml, one flag
+# per unit lane. Pull requests upload nothing, so Codecov posts no comments
+# or status checks on them.
+comment: false
+
+coverage:
+  status:
+    project: off
+    patch: off
+
+flag_management:
+  default_rules:
+    carryforward: true
