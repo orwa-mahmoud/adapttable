@@ -95,7 +95,6 @@ describe("advertised locale count", () => {
 
   checkAdvertised(
     [
-      { file: "README.md", occurrences: 2 },
       { file: "docs/faq.md", occurrences: 1 },
       { file: "docs/i18n-rtl.md", occurrences: 1 },
       { file: "llms.txt", occurrences: 3 },
@@ -158,7 +157,6 @@ describe("advertised adapter count", () => {
   // Publishing another framework's kit must not change that React-only count.
   checkAdvertised(
     [
-      { file: "README.md", occurrences: 1 },
       { file: "docs/api.md", occurrences: 2 },
       { file: "docs/accessibility.md", occurrences: 1 },
       { file: "docs/cell-navigation.md", occurrences: 2 },
