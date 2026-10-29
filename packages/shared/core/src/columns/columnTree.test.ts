@@ -156,6 +156,8 @@ describe("applyCollapsedColumnGroups", () => {
     expect(next).toHaveLength(1);
     expect(next[0]!.key.startsWith(COLUMN_GROUP_RENDER_PREFIX)).toBe(true);
     expect(next[0]!.formatValue?.({ id: "1", email: "a@b.c" })).toBe("a@b.c");
+    // The cell itself reads the accessor: without it the summary is blank.
+    expect(next[0]!.accessor?.({ id: "1", email: "a@b.c" })).toBe("a@b.c");
   });
 
   it("honours groupShow always and closed", () => {

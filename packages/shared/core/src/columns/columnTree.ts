@@ -362,19 +362,22 @@ function renderColumn<TRow>(
   render: (row: TRow) => DisplayValue | undefined,
   headerTooltip: string | undefined
 ): ColumnMetadata<TRow> {
+  const text = (row: TRow): string => {
+    const value = render(row);
+    if (typeof value === "string") return value;
+    if (typeof value === "number" || typeof value === "boolean") {
+      return String(value);
+    }
+    return "";
+  };
   return {
     key: `${COLUMN_GROUP_RENDER_PREFIX}${id}:${String(index)}`,
     header: "",
     headerTooltip,
     width: 180,
-    formatValue: (row) => {
-      const value = render(row);
-      if (typeof value === "string") return value;
-      if (typeof value === "number" || typeof value === "boolean") {
-        return String(value);
-      }
-      return "";
-    },
+    // A cell reads the accessor; export, sorting and the AI read formatValue.
+    accessor: text,
+    formatValue: text,
     group: path.length === 1 ? path[0] : path,
     sortable: false,
   };
