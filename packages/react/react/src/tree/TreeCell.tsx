@@ -35,9 +35,13 @@ export interface TreeCellChromeProps<TRow> extends TreeCellProps<TRow> {
   readonly slots: TreeToggleSlots;
 }
 
+// A leaf's first item is an empty spacer, which would set the box's baseline
+// and drop the cell's text below the rest of the row; centring keeps every
+// tree row the height of a plain one.
 const WRAPPER = {
   display: "inline-flex",
   alignItems: "center",
+  verticalAlign: "middle",
   gap: 4,
 } as const;
 

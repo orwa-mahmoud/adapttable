@@ -86,9 +86,12 @@ export function hierarchyCell<TRow>(input: {
     entry,
     attrs: {
       "data-adapttable-part": "tree-cell",
+      // A leaf's empty spacer would set the baseline and drop the text below
+      // the row; centring keeps every tree row the height of a plain one.
       style: {
         display: "inline-flex",
         alignItems: "center",
+        verticalAlign: "middle",
         gap: "4px",
         ...(!card ? treeIndentStyle(entry.level) : {}),
       },

@@ -365,7 +365,10 @@ describe("tree and detail", () => {
     )!;
     const row = required(shell.desktop.value.bodySlots![0]);
     if (row.kind !== "row") throw new Error("expected row");
-    const attrs = required(row.wiring.cells[0]).tree!.toggleAttrs!;
+    const cell = required(row.wiring.cells[0]).tree!;
+    // Centred, so a leaf's empty spacer cannot lower the text below the row.
+    expect(cell.attrs.style).toMatchObject({ verticalAlign: "middle" });
+    const attrs = cell.toggleAttrs!;
     const key = attrs.onKeydown as (event: KeyboardEvent) => void;
     key(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
     expect(shell.tree.value!.expansion.isExpanded("a")).toBe(true);
