@@ -1,0 +1,115 @@
+name: Coverage
+
+# Full coverage of every package on main, uploaded to Codecov. Pull requests
+# test only the packages their diff affects, so this workflow measures the
+# whole library: the same lanes as the PR unit shards, without --affected.
+# It never gates a PR.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "vitest.shared.ts"
+      - "codecov.yml"
+      - ".github/workflows/coverage.yml"
+      - ".github/actions/setup-pnpm/**"
+  workflow_dispatch:
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  ADAPTTABLE_CHECK_CONCURRENCY: "1"
+  ADAPTTABLE_TEST_WORKERS: "1"
+  NG_BUILD_MAX_WORKERS: "1"
+  RAYON_NUM_THREADS: "1"
+  UV_THREADPOOL_SIZE: "1"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Build packages
+        run: pnpm build --concurrency=1
+
+  coverage:
+    name: Coverage
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.name == 'angular' && 45 || matrix.name == 'vue' && 20 || 15 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: antd
+            flag: antd
+          - name: chakra
+            flag: chakra
+          - name: core · unstyled
+            flag: core-unstyled
+          - name: mui · shadcn
+            flag: mui-shadcn
+          - name: react
+            flag: react
+          - name: mantine
+            flag: mantine
+          - name: base-ui · ai
+            flag: base-ui-ai
+          - name: radix · server · cli · i18n
+            flag: radix-server-cli-i18n
+          - name: angular
+            flag: angular
+          - name: vue
+            flag: vue
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-pnpm
+      - name: Test with coverage
+        env:
+          LANE: ${{ matrix.name }}
+        run: |
+          case "$LANE" in
+            antd) f="--filter=@adapttable/antd" ;;
+            chakra) f="--filter=@adapttable/chakra" ;;
+            "core · unstyled") f="--filter=@adapttable/core --filter=@adapttable/unstyled" ;;
+            "mui · shadcn") f="--filter=@adapttable/mui --filter=@adapttable/shadcn" ;;
+            react) f="--filter=@adapttable/react" ;;
+            vue) f="--filter=./packages/vue/*" ;;
+            mantine) f="--filter=@adapttable/mantine" ;;
+            "base-ui · ai") f="--filter=@adapttable/base-ui --filter=@adapttable/ai" ;;
+            "radix · server · cli · i18n") f="--filter=@adapttable/radix --filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
+            angular) f="--filter=./packages/angular/*" ;;
+            *) echo "unknown lane: $LANE"; exit 1 ;;
+          esac
+          pnpm test:coverage $f --concurrency=1
+      # Vitest writes package-relative paths; every adapter has a
+      # src/DataTable.tsx, so Codecov needs repo-relative ones.
+      - name: Make coverage paths repo-relative
+        run: node scripts/fix-lcov-paths.mjs
+      - name: List coverage reports
+        id: reports
+        run: |
+          files="$(find packages -path '*/node_modules' -prune -o -path '*/coverage/lcov.info' -print | sort | paste -sd, -)"
+          [ -n "$files" ] || { echo "No coverage reports found"; exit 1; }
+          echo "Reports: $files"
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ steps.reports.outputs.files }}
+          flags: ${{ matrix.flag }}
+          name: ${{ matrix.flag }}
+          disable_search: true
+          fail_ci_if_error: true
