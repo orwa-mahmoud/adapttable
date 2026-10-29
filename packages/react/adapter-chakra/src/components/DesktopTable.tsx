@@ -201,8 +201,15 @@ function DesktopRowBase<TRow>(
     bodyPinStyle,
     accentColor,
     dir,
+    rowPinSide,
   } = props;
   const expandable = expanded !== undefined;
+  // A pinned row sticks, so its leading and trailing cells need the surface
+  // too: the rows scrolling beneath must not show through them.
+  const edgeRowPaint =
+    rowPinSide === undefined
+      ? edgeRowPin
+      : { ...edgeRowPin, background: PIN_BG };
   const dataPinStyle = (key: string) => {
     const pin = bodyPinStyle(key);
     if (!pin) return undefined;
@@ -231,7 +238,7 @@ function DesktopRowBase<TRow>(
             px={1}
             style={{
               ...edgeCellStyle("start", hasStartPin, PIN_Z.body),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <OptionalExpandToggle
@@ -255,7 +262,7 @@ function DesktopRowBase<TRow>(
                 PIN_Z.body,
                 expandable ? EXPANSION_WIDTH : 0
               ),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <OptionalRowReorderHandle
@@ -280,7 +287,7 @@ function DesktopRowBase<TRow>(
                 (expandable ? EXPANSION_WIDTH : 0) +
                   (showReorder ? REORDER_COLUMN_WIDTH : 0)
               ),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <Checkbox
@@ -357,7 +364,7 @@ function DesktopRowBase<TRow>(
             textAlign="end"
             style={{
               ...edgeCellStyle("end", hasEndPin || actionsPinned, PIN_Z.body),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             {editing?.rowEditing && (
