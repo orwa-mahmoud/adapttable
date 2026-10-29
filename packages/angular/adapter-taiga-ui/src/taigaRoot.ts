@@ -9,6 +9,7 @@ import {
   type TemplateRef,
   ViewEncapsulation,
 } from "@angular/core";
+import { REMOVE_STYLES_ON_COMPONENT_DESTROY } from "@angular/platform-browser";
 import { TUI_OPTIONS, type TuiOptions, TuiRoot } from "@taiga-ui/core";
 import { provideEventPlugins } from "@taiga-ui/event-plugins";
 
@@ -21,6 +22,10 @@ const TAIGA_OPTIONS: TuiOptions = {
 /** Taiga event handling without document-wide theme or scrollbar side effects. */
 export function provideAdaptTaiga(): (Provider | EnvironmentProviders)[] {
   return [
+    // Taiga's leave animations run after the component is destroyed; its
+    // styles have to outlive it, or a closing dropdown waits on a cancel
+    // event that WebKit does not always deliver and stays on screen.
+    { provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false },
     { provide: TUI_OPTIONS, useValue: TAIGA_OPTIONS },
     provideEventPlugins(),
   ];
