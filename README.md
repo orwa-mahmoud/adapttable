@@ -4,15 +4,17 @@
 
 ### Build your table. Connect your agent. Keep your UI kit.
 
-**React · Angular · Vue · 25 native adapters · 20 locales · MIT licensed**
+**React · Angular · Vue · 25 native adapters · MIT licensed**
 
 Filtering, grouping, pivot tables, editing and saved views — rendered with your
 UI kit's own components. Add an agent that operates through the same table
 capabilities, or go fully headless and render everything yourself.
 
 [![npm version](https://img.shields.io/npm/v/@adapttable/core.svg)](https://www.npmjs.com/package/@adapttable/core)
+[![downloads](https://img.shields.io/npm/dm/@adapttable/core.svg)](https://www.npmjs.com/package/@adapttable/core)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6.svg)](./tsconfig.base.json)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 
 **[React demo](https://adapttable.orwamahmoud.com/react/demo/)** · **[Angular demo](https://adapttable.orwamahmoud.com/angular/demo/)** · **[Vue demo](https://adapttable.orwamahmoud.com/vue/demo/)** · **[Documentation](https://adapttable.orwamahmoud.com/)**
 
