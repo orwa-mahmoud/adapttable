@@ -67,14 +67,16 @@ nz-table adapt-header-filter-trigger {
   flex: 0 0 auto;
 }
 
-/* Keep the resize target at the inline edge of its own column header. */
+/* Keep the resize target at the inline edge of its own column header. The
+ * handle is an empty nz-button: naming .ant-btn keeps its size ahead of
+ * NG-ZORRO's collapsed .ant-btn:empty. */
 nz-table
   [data-adapttable-part="header-cell"]:has(
     [data-adapttable-part="resize-handle"]
   ) {
   position: relative;
 }
-nz-table [data-adapttable-part="resize-handle"] {
+nz-table .ant-btn[data-adapttable-part="resize-handle"] {
   position: absolute;
   display: block;
   visibility: visible;
@@ -92,7 +94,7 @@ nz-table [data-adapttable-part="resize-handle"] {
   touch-action: none;
   user-select: none;
 }
-nz-table [data-adapttable-part="resize-handle"]::after {
+nz-table .ant-btn[data-adapttable-part="resize-handle"]::after {
   content: "";
   position: absolute;
   inset-inline-end: 3px;
@@ -101,10 +103,13 @@ nz-table [data-adapttable-part="resize-handle"]::after {
   background: var(--ant-color-border, #d9d9d9);
 }
 nz-table
-  [data-adapttable-part="resize-handle"]:is(:hover, :focus-visible)::after {
+  .ant-btn[data-adapttable-part="resize-handle"]:is(
+    :hover,
+    :focus-visible
+  )::after {
   background: var(--ant-color-primary, #1677ff);
 }
-nz-table [data-adapttable-part="resize-handle"]:focus-visible {
+nz-table .ant-btn[data-adapttable-part="resize-handle"]:focus-visible {
   outline: 2px solid var(--ant-color-primary, #1677ff);
   outline-offset: -2px;
 }
