@@ -8,6 +8,8 @@ import {
 } from "@adapttable/react/adapter";
 import { Dialog, Text, TextField } from "@radix-ui/themes";
 
+import { usePortalContainer } from "./portalContainer";
+
 /**
  * The kit's own dialog, holding core's combobox.
  *
@@ -23,6 +25,7 @@ function Surface({
   children,
   className,
 }: Readonly<CommandPaletteSurfaceProps>) {
+  const portalContainer = usePortalContainer();
   return (
     <Dialog.Root
       open
@@ -31,6 +34,7 @@ function Surface({
       }}
     >
       <Dialog.Content
+        container={portalContainer}
         aria-label={label}
         className={className}
         data-adapttable-part="command-palette"

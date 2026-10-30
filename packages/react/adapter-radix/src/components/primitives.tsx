@@ -9,6 +9,7 @@ import {
 import { type KeyboardEvent, type ReactNode } from "react";
 
 import type { RadixAccentColor } from "../types";
+import { usePortalContainer } from "./portalContainer";
 
 /**
  * Tooltip wrapper presenting the `label` + single-trigger-child contract the
@@ -25,8 +26,13 @@ export function Tooltip({
   disabled?: boolean;
   children: ReactNode;
 }>) {
+  const portalContainer = usePortalContainer();
   if (disabled || label === "" || label == null) return <>{children}</>;
-  return <RadixTooltip content={label}>{children}</RadixTooltip>;
+  return (
+    <RadixTooltip content={label} container={portalContainer}>
+      {children}
+    </RadixTooltip>
+  );
 }
 
 /**
@@ -179,6 +185,7 @@ export function NativeSelect({
   "aria-busy"?: true;
   "data-conflict"?: "";
 }>) {
+  const portalContainer = usePortalContainer();
   // Radix reads `""` as "nothing selected" and paints the placeholder, which
   // is what a cleared select should show. The sentinel is only for a list that
   // offers an empty CHOICE ("Any"), because `Select.Item` forbids an empty
@@ -202,7 +209,10 @@ export function NativeSelect({
         style={width || minHeight ? { width, minHeight } : undefined}
         {...rest}
       />
-      <Select.Content position="popper" container={container}>
+      <Select.Content
+        position="popper"
+        container={container ?? portalContainer}
+      >
         {options.map((option) => (
           <Select.Item
             key={option.value === "" ? EMPTY_VALUE : option.value}

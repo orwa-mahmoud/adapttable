@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 
 import type { RadixAccentColor } from "../types";
+import { usePortalContainer } from "./portalContainer";
 
 /** Small × glyph for the per-view delete button. */
 function CrossIcon() {
@@ -68,6 +69,7 @@ export function SavedViewsMenu({
   labels,
   accentColor,
 }: Readonly<SavedViewsMenuProps>) {
+  const portalContainer = usePortalContainer();
   const { views, save, apply, remove } = useSavedViews(options);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -84,6 +86,7 @@ export function SavedViewsMenu({
         </Button>
       </Popover.Trigger>
       <Popover.Content
+        container={portalContainer}
         align="end"
         side="bottom"
         // Collision handling stays on: a panel wider than the space

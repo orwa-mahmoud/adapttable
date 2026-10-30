@@ -68,6 +68,7 @@ import { useEffect, useRef, useState } from "react";
 import { FiltersIcon, iconForRowEditPart } from "../icons";
 import { AutoFilterForm } from "./AutoFilterForm";
 import { useMobileTarget } from "./mobileTarget";
+import { usePortalContainer } from "./portalContainer";
 import { Checkbox, NativeSelect } from "./primitives";
 
 export type {
@@ -166,6 +167,7 @@ function HeaderMulti({
   menuClassName,
   onToggle,
 }: Readonly<FilterHeaderMultiProps>) {
+  const portalContainer = usePortalContainer();
   return (
     <Popover.Root>
       <Popover.Trigger>
@@ -191,6 +193,7 @@ function HeaderMulti({
         </Button>
       </Popover.Trigger>
       <Popover.Content
+        container={portalContainer}
         align="start"
         sideOffset={4}
         className={menuClassName}
@@ -253,6 +256,7 @@ export function FilterHeaderControl<TRow>(
 export function FilterHeaderTrigger<TRow>(
   props: Readonly<FilterHeaderControlProps<TRow>>
 ) {
+  const portalContainer = usePortalContainer();
   const active = hasActiveHeaderFilter(props);
   const { open, setOpen, source, sessionProps } = useHeaderFilterOverlay(
     props,
@@ -276,6 +280,7 @@ export function FilterHeaderTrigger<TRow>(
         </IconButton>
       </Popover.Trigger>
       <Popover.Content
+        container={portalContainer}
         {...sessionProps}
         align="start"
         sideOffset={4}
@@ -649,6 +654,7 @@ function RowMoveMenu({
   items,
   confirmation,
 }: Readonly<RowMoveMenuSlotProps>) {
+  const portalContainer = usePortalContainer();
   const [open, setOpen] = useState(false);
   const [direction, setDirection] = useState<"ltr" | "rtl">("ltr");
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -698,6 +704,7 @@ function RowMoveMenu({
           </IconButton>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
+          container={portalContainer}
           aria-label={label}
           align="start"
           sideOffset={4}

@@ -28,6 +28,7 @@ import {
   TextArea,
 } from "@radix-ui/themes";
 
+import { usePortalContainer } from "./components/portalContainer";
 import { NativeSelect } from "./components/primitives";
 
 const BADGE_COLOR = {
@@ -183,6 +184,7 @@ function AssistantSheet({
   dir,
   children,
 }: Readonly<TableAssistantSheetProps>) {
+  const portalContainer = usePortalContainer();
   return (
     <Dialog.Root
       open={open}
@@ -191,6 +193,7 @@ function AssistantSheet({
       }}
     >
       <Dialog.Content
+        container={portalContainer}
         aria-label={label}
         dir={dir}
         data-adapttable-part={part}
@@ -294,6 +297,7 @@ function AssistantMenu({
   onSelect,
   maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
+  const portalContainer = usePortalContainer();
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger disabled={disabled}>
@@ -312,6 +316,7 @@ function AssistantMenu({
         </IconButton>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content
+        container={portalContainer}
         side="top"
         align="start"
         style={{ maxHeight, overflowY: "auto" }}

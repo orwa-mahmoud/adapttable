@@ -4,6 +4,7 @@ import { Button, Dialog, Flex } from "@radix-ui/themes";
 import { type ReactNode } from "react";
 
 import type { RadixAccentColor } from "../types";
+import { usePortalContainer } from "./portalContainer";
 
 /** Filters dialog (Radix has no Drawer — a real modal with backdrop + focus trap). */
 export function FilterDrawer({
@@ -25,6 +26,7 @@ export function FilterDrawer({
   accentColor?: RadixAccentColor;
   dir?: Direction;
 }>) {
+  const portalContainer = usePortalContainer();
   // Radix Themes ships no Drawer primitive, so the drawer is a Dialog restyled
   // into a full-height panel pinned to the inline-end edge (RTL-correct via
   // logical insets) that slides in from that edge — instead of the centered
@@ -70,7 +72,11 @@ export function FilterDrawer({
         if (!next) onClose();
       }}
     >
-      <Dialog.Content dir={dir} className={drawerClass}>
+      <Dialog.Content
+        container={portalContainer}
+        dir={dir}
+        className={drawerClass}
+      >
         <style>{drawerCss}</style>
         <Dialog.Title>{labels.filters}</Dialog.Title>
         <Flex
