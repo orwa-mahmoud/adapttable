@@ -282,6 +282,7 @@ export function FilterHeaderTrigger<TRow>(
       <Popover.Content
         container={portalContainer}
         {...sessionProps}
+        aria-label={filterLabel(props.def)}
         align="start"
         sideOffset={4}
         data-adapttable-part="filter-header-cell"

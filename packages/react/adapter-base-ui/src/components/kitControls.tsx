@@ -350,6 +350,7 @@ export function FilterHeaderTrigger<TRow>(
         <Popover.Positioner side="bottom" align="start" sideOffset={4}>
           <Popover.Popup
             {...sessionProps}
+            aria-label={filterLabel(props.def)}
             data-adapttable-part="filter-header-cell"
             style={{ minWidth: "20rem", padding: 8 }}
           >

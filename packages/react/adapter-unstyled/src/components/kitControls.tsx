@@ -325,6 +325,8 @@ export function FilterHeaderTrigger<TRow>(
         <FiltersIcon size={14} />
       </summary>
       <div
+        role="dialog"
+        aria-label={filterLabel(props.def)}
         data-adapttable-part="filter-header-cell"
         className={props.classNames?.filterHeaderCell}
         style={{
