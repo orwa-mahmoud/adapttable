@@ -354,6 +354,10 @@ export interface DataTableProps<TRow> {
   readonly onDensityChange?: (density: TableDensity) => void;
   readonly confirm?: ConfirmHandler;
   /** Omit or use buttons for the inline strip; menu uses the kit menu control. */
+  /** Activate a row, or a phone card, by clicking it or pressing Enter or Space. */
+  readonly onRowClick?: (row: TRow) => void;
+  /** Mark cells a patch just changed; pair with `useChangedCellFlash` from `/stream`. */
+  readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   readonly rowActionsLayout?: RowActionsLayout;
   readonly classNames?: DataTableClassNames;
 }

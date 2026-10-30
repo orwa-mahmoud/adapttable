@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ChangedCellFlashState } from '@adapttable/core/binding';
 import { InsertPatch } from '@adapttable/core/stream';
 import { isStreamLive } from '@adapttable/core/stream';
 import { isStreamSettled } from '@adapttable/core/stream';
@@ -26,6 +27,8 @@ import { StreamSocket as StreamSocket_2 } from '@adapttable/core';
 import { StreamSocketEvent } from '@adapttable/core/stream';
 import { UpdatePatch } from '@adapttable/core/stream';
 import { UpsertPatch } from '@adapttable/core/stream';
+
+export { ChangedCellFlashState }
 
 export { InsertPatch }
 
@@ -61,6 +64,15 @@ export { StreamSocketEvent }
 export { UpdatePatch }
 
 export { UpsertPatch }
+
+// @public
+export function useChangedCellFlash(input?: MaybeRefOrGetter<UseChangedCellFlashOptions>): ChangedCellFlashState;
+
+// @public
+export interface UseChangedCellFlashOptions {
+    readonly durationMs?: number;
+    readonly enabled?: boolean;
+}
 
 // @public (undocumented)
 export function useRowPatchStream<TRow>(input: MaybeRefOrGetter<UseRowPatchStreamOptions<TRow>>): {

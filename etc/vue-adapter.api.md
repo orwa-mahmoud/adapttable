@@ -1485,6 +1485,7 @@ export interface DataTableProps<TRow> {
     readonly forceMobile?: boolean;
     // (undocumented)
     readonly getSearchText?: (row: TRow) => string;
+    readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     // (undocumented)
     readonly isFetching?: boolean;
     // (undocumented)
@@ -1508,10 +1509,12 @@ export interface DataTableProps<TRow> {
     readonly onColumnRename?: (key: string, name: string) => void;
     // (undocumented)
     readonly onDensityChange?: (density: TableDensity_2) => void;
+    readonly onRowClick?: (row: TRow) => void;
     // (undocumented)
     readonly paginationMode?: PaginationMode;
     // (undocumented)
     readonly refetch?: () => void | Promise<unknown>;
+    // (undocumented)
     readonly rowActionsLayout?: RowActionsLayout;
     // (undocumented)
     readonly rowKey: (row: TRow) => string;
@@ -4201,6 +4204,7 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    isCellFlashing: (row: TRow, columnKey: string) => boolean;
     cellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
     searchInputAttrs: () => Record<string, unknown>;
@@ -4233,6 +4237,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly fitColumns?: MaybeRefOrGetter<boolean>;
     // (undocumented)
     readonly forceMobile?: MaybeRefOrGetter<boolean>;
+    readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     // (undocumented)
     readonly labels?: MaybeRefOrGetterOptional<TableLabels>;
     // (undocumented)
@@ -4243,6 +4248,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly multiSort?: MaybeRefOrGetter<boolean>;
     // (undocumented)
     readonly onClearFilters?: () => void;
+    readonly onRowClick?: (row: TRow) => void;
     // (undocumented)
     readonly rowKey: (row: TRow) => string;
     // (undocumented)
@@ -4309,6 +4315,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
         headerCellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
         sortButtonAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
         rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+        isCellFlashing: (row: TRow, columnKey: string) => boolean;
         cellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
         cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
         searchInputAttrs: () => Record<string, unknown>;

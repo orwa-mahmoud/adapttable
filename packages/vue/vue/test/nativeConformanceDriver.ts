@@ -49,10 +49,14 @@ type ScenarioProps = Pick<
   | "defaults"
   | "features"
   | "paginationMode"
+  | "onRowClick"
+  | "isCellFlashing"
 >;
 
 interface NativeScenario extends ConformanceScenario {
   onRangeChange?: (range: CellRange | null) => void;
+  onRowClick?: (row: ConformanceRow) => void;
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
 }
 interface NativeDriver extends ConformanceDriver {
   mount: (scenario: NativeScenario) => ConformanceMount;
@@ -108,6 +112,8 @@ export function nativeConformanceDriver(kit: NativeKit): NativeDriver {
           ...(scenario.virtualize ? [kit.virtualize({ maxHeight: 200 })] : []),
         ],
         ...(scenario.virtualize ? { paginationMode: "infinite" } : {}),
+        onRowClick: scenario.onRowClick,
+        isCellFlashing: scenario.isCellFlashing,
       };
       const container = document.createElement("div");
       document.body.append(container);
@@ -238,4 +244,103 @@ export function nativeRangeConformanceTests(
       }
     },
   }));
+}
+
+/** Row activation and changed-cell marks, on desktop rows and phone cards. */
+export function nativeRowConformanceTests(
+  driver: NativeDriver
+): readonly ConformanceTest[] {
+  const layout = (mobile: boolean) => (mobile ? "phone cards" : "desktop rows");
+  const rowOf = (root: ParentNode, mobile: boolean, id: string) => {
+    const row = root.querySelector<HTMLElement>(
+      mobile
+        ? `[data-adapttable-part="card"][data-row-id="${id}"]`
+        : `tr[data-row-id="${id}"]`
+    );
+    if (!row) throw new Error(`Missing row ${id}`);
+    return row;
+  };
+  return [false, true].flatMap((mobile) => [
+    {
+      name: `activates a row by click, Enter and Space (${layout(mobile)})`,
+      async run() {
+        const activate = vi.fn<(row: ConformanceRow) => void>();
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          mobile,
+          onRowClick: activate,
+        });
+        try {
+          await view.ready;
+          const row = rowOf(view.container, mobile, "r2");
+          expect(row.hasAttribute("data-clickable")).toBe(true);
+          expect(rowOf(view.container, mobile, "r1").tabIndex).toBe(0);
+          expect(row.tabIndex).toBe(-1);
+          const text = [...row.querySelectorAll<HTMLElement>("*")].find(
+            (element) => element.textContent.trim() === "Grace"
+          );
+          nativeConformanceHarness.fireEvent.click(text ?? row);
+          nativeConformanceHarness.fireEvent.keyDown(row, { key: "Enter" });
+          nativeConformanceHarness.fireEvent.keyDown(row, { key: " " });
+          expect(activate.mock.calls.map(([target]) => target.id)).toEqual([
+            "r2",
+            "r2",
+            "r2",
+          ]);
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+    {
+      name: `leaves rows inert without onRowClick (${layout(mobile)})`,
+      async run() {
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          mobile,
+        });
+        try {
+          await view.ready;
+          const row = rowOf(view.container, mobile, "r2");
+          expect(row.hasAttribute("data-clickable")).toBe(false);
+          expect(row.hasAttribute("data-adapttable-row")).toBe(false);
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+    {
+      name: `marks only the cells isCellFlashing names (${layout(mobile)})`,
+      async run() {
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          mobile,
+          isCellFlashing: (rowId, columnKey) =>
+            rowId === "r2" && columnKey === "age",
+        });
+        try {
+          await view.ready;
+          const marked = [
+            ...view.container.querySelectorAll<HTMLElement>("[data-flash]"),
+          ];
+          expect(marked).toHaveLength(1);
+          expect(marked[0]?.getAttribute("data-adapttable-part")).toBe(
+            mobile ? "card-value" : "cell"
+          );
+          expect(marked[0]?.textContent.trim()).toBe("28");
+          expect(rowOf(view.container, mobile, "r2").contains(marked[0]!)).toBe(
+            true
+          );
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+  ]);
 }

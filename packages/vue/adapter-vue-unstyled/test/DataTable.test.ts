@@ -19,6 +19,7 @@ import {
 import { renderToString } from "vue/server-renderer";
 
 import { DataTable, type DataTableProps } from "../src";
+import { useChangedCellFlash } from "../src/stream";
 interface Row {
   id: string;
   name: string;
@@ -269,6 +270,34 @@ describe("native DataTable", () => {
       fixture.element.querySelector('[data-adapttable-part="empty"]')
     ).toBeNull();
   });
+  it("repaints a cell a live patch changed, then lets it fade", async () => {
+    vi.useFakeTimers();
+    const scope = effectScope();
+    cleanup.push(() => {
+      scope.stop();
+    });
+    const flash = scope.run(() => useChangedCellFlash({ enabled: true }))!;
+    const { element } = mount({ isCellFlashing: flash.isFlashing });
+    await nextTick();
+    expect(element.querySelector("[data-flash]")).toBeNull();
+    flash.mark([
+      {
+        type: "update",
+        id: "g",
+        prev: rows[1]!,
+        next: { ...rows[1]!, score: 4 },
+        index: 1,
+      },
+    ]);
+    await nextTick();
+    const marked = element.querySelectorAll<HTMLElement>("[data-flash]");
+    expect(marked).toHaveLength(1);
+    expect(marked[0]!.closest("tr")?.getAttribute("data-row-id")).toBe("g");
+    vi.advanceTimersByTime(1200);
+    await nextTick();
+    expect(element.querySelector("[data-flash]")).toBeNull();
+  });
+
   it("keeps two tables isolated and host row objects untouched", async () => {
     const one = mount();
     const two = mount();

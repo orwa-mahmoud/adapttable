@@ -111,6 +111,27 @@ produces labeled, semantic controls and guards delayed confirmation against
 feature removal. Use it when implementing a kit; the native table already
 uses this projection.
 
+## Row clicks
+
+`onRowClick(row)` activates a desktop row or a phone card from a click on its
+body, Enter or Space; clicks on its own buttons, links and inputs stay theirs.
+The first row is the Tab stop and Arrow Up/Down move between rows. Bind it as
+a prop or a listener:
+
+```vue
+<DataTable
+  :data="people"
+  :columns="columns"
+  :row-key="(row) => row.id"
+  @row-click="(row) => openPerson(row.id)"
+/>
+```
+
+Activatable rows and cards carry `data-clickable`. Omit the callback and rows
+stay inert. `isCellFlashing(rowId, columnKey)` marks cells with `data-flash`,
+on desktop cells and on card values; see
+[changed cells](./specialized.md#formulas-streams-and-sparklines).
+
 ## Explore the implementation
 
 Use the [Vue live demo](https://adapttable.orwamahmoud.com/vue/demo/) to switch

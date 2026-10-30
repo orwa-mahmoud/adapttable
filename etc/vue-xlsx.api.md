@@ -794,6 +794,7 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    isCellFlashing: (row: TRow, columnKey: string) => boolean;
     cellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
     searchInputAttrs: () => Record<string, unknown>;
@@ -823,6 +824,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly fitColumns?: MaybeRefOrGetter<boolean>;
     // (undocumented)
     readonly forceMobile?: MaybeRefOrGetter<boolean>;
+    readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     // (undocumented)
     readonly labels?: MaybeRefOrGetterOptional<TableLabels>;
     // (undocumented)
@@ -833,6 +835,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly multiSort?: MaybeRefOrGetter<boolean>;
     // (undocumented)
     readonly onClearFilters?: () => void;
+    readonly onRowClick?: (row: TRow) => void;
     // (undocumented)
     readonly rowKey: (row: TRow) => string;
     // (undocumented)

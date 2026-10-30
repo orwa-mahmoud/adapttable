@@ -16,6 +16,7 @@ import {
   pinnedCellStyle,
   resolveLabels,
   resolveTableStatus,
+  rowClickProps,
   SEARCH_DEBOUNCE_MS,
   tableErrorState,
   type TableLabels,
@@ -94,6 +95,10 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
   readonly selection?: RowSelection;
   readonly activeFilterCount?: MaybeRefOrGetter<number>;
   readonly onClearFilters?: () => void;
+  /** Activate a row by clicking its body, Enter or Space. */
+  readonly onRowClick?: (row: TRow) => void;
+  /** Live changed-cell reader, such as `useChangedCellFlash().isFlashing`. */
+  readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
 }
 export function useDataTable<TRow>(
   input: MaybeRefOrGetter<UseDataTableOptions<TRow>>
@@ -442,8 +447,9 @@ export function useDataTable<TRow>(
           toggleSortLevel: (key) => source.value.toggleSortLevel(key),
         })
       ),
-    rowAttrs: (row: TRow, index: number) =>
-      toVueAttrs({
+    rowAttrs: (row: TRow, index: number) => {
+      const click = rowClickProps(row, options.value.onRowClick, index);
+      return toVueAttrs({
         ...rowAttributes(
           rowKey(row),
           index,
@@ -453,7 +459,13 @@ export function useDataTable<TRow>(
           { enabled: false, windowed: windowed.value },
           windowStart.value + index
         ),
-      }),
+        ...click,
+        "data-clickable": click ? "" : undefined,
+      });
+    },
+    /** Whether a live update to this cell is fresh enough to flash. */
+    isCellFlashing: (row: TRow, columnKey: string) =>
+      options.value.isCellFlashing?.(rowKey(row), columnKey) === true,
     cellAttrs: (column: ColumnDef<TRow>) => {
       const attrs = cellAttributes(column, sizing.value);
       return toVueAttrs({
@@ -464,7 +476,10 @@ export function useDataTable<TRow>(
     },
     cardAttrs: (row: TRow, index: number) => {
       const size = cardSetSize(source.value, windowStart.value);
+      const click = rowClickProps(row, options.value.onRowClick, index);
       return toVueAttrs({
+        ...click,
+        "data-clickable": click ? "" : undefined,
         "data-adapttable-part": "card",
         "data-row-id": rowKey(row),
         "data-index": index,
