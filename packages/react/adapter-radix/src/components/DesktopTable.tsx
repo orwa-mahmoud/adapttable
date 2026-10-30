@@ -261,7 +261,14 @@ function DesktopRowBase<TRow>(
     accentColor,
     dir,
     pinPart,
+    rowPinSide,
   } = props;
+  // A pinned row sticks, so its leading and trailing cells need the surface
+  // too: the rows scrolling beneath must not show through them.
+  const edgeRowPaint =
+    rowPinSide === undefined
+      ? edgeRowPin
+      : { ...edgeRowPin, background: PIN_BG };
   // A pinned total is the host's figure, not a person: it reads bold.
   const summaryRow =
     pinPart === PINNED_SUMMARY_TOP_PART ||
@@ -296,7 +303,7 @@ function DesktopRowBase<TRow>(
             data-adapttable-part="expand-cell"
             style={{
               ...edgeCellStyle("start", hasStartPin, PIN_Z.body),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <OptionalExpandToggle
@@ -319,7 +326,7 @@ function DesktopRowBase<TRow>(
                 PIN_Z.body,
                 expandable ? EXPANSION_WIDTH : 0
               ),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <OptionalRowReorderHandle
@@ -344,7 +351,7 @@ function DesktopRowBase<TRow>(
                 (expandable ? EXPANSION_WIDTH : 0) +
                   (showReorder ? REORDER_COLUMN_WIDTH : 0)
               ),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <Checkbox
@@ -422,7 +429,7 @@ function DesktopRowBase<TRow>(
             justify="end"
             style={{
               ...edgeCellStyle("end", hasEndPin || actionsPinned, PIN_Z.body),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             {editing?.rowEditing && (
