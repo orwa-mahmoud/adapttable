@@ -310,6 +310,8 @@ export interface DesktopRowWiring<TRow> {
   rowDomProps: Record<string, unknown>;
   /** Sticky offsets for one body cell, absent when unpinned. */
   bodyPinStyle: (key: string) => CSSProperties | undefined;
+  /** The edge a body cell's column is pinned to, for its `data-pinned`. */
+  bodyPinSide: (key: string) => PinOffset["side"] | undefined;
 }
 
 /**

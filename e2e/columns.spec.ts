@@ -235,3 +235,30 @@ for (const kit of KITS) {
     expect(overflow, `${kit} table does not overflow sideways`).toBe(true);
   });
 }
+
+for (const kit of KITS) {
+  test(`${kit}: a pinned column's header and body cells name the edge they hold`, async ({
+    page,
+  }) => {
+    await page.goto(`/${kit}/columns/`);
+    const root = page.locator(`[data-adapter="${kit}"]`).first();
+    const pinnedHeader = root
+      .locator('[data-adapttable-part="header-cell"]')
+      .filter({ hasText: "Person" })
+      .first();
+    await expect(pinnedHeader).toHaveAttribute("data-pinned", "start");
+    const key = await pinnedHeader.getAttribute("data-column-key");
+    const firstRow = root.locator('[data-adapttable-part="row"]').first();
+    await expect(
+      firstRow.locator(
+        `[data-adapttable-part="cell"][data-column-key="${key}"]`
+      )
+    ).toHaveAttribute("data-pinned", "start");
+    // A floating column says nothing.
+    const floating = root
+      .locator('[data-adapttable-part="header-cell"]')
+      .filter({ hasText: "Status" })
+      .first();
+    await expect(floating).not.toHaveAttribute("data-pinned", /./);
+  });
+}

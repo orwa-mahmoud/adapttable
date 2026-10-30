@@ -363,6 +363,8 @@ describe("desktopRowWiring", () => {
       zIndex: PIN_Z.body,
     });
     expect(wiring.bodyPinStyle("team")).toBeUndefined();
+    expect(wiring.bodyPinSide("name")).toBe("start");
+    expect(wiring.bodyPinSide("team")).toBeUndefined();
   });
 
   it("reads selection, expansion, tree, style, flash, editing and reorder", () => {
@@ -1094,8 +1096,10 @@ describe("desktopHeaderLeaf", () => {
     const column = { key: "name", header: "Name", sortable: true };
     const leaf = desktopHeaderLeaf(ctx, column, 0, 2, new Map([["name", 7]]));
 
+    // A pinned header names the edge it holds, as its body cells do.
     expect(leaf.headerProps).toEqual({
       "data-key": "name",
+      "data-pinned": "start",
       style: { color: "red" },
       draggable: "name",
     });

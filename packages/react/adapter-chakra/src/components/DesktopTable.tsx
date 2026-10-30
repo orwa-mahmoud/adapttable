@@ -201,6 +201,7 @@ function DesktopRowBase<TRow>(
     detailMeasureRef,
     rowDomProps,
     bodyPinStyle,
+    bodyPinSide,
     accentColor,
     dir,
     rowPinSide,
@@ -316,6 +317,7 @@ function DesktopRowBase<TRow>(
               colSpan={colSpan > 1 ? colSpan : undefined}
               rowSpan={rowSpan > 1 ? rowSpan : undefined}
               data-column-key={column.key}
+              data-pinned={bodyPinSide(column.key)}
               data-adapttable-part="cell"
               data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}

@@ -892,6 +892,7 @@ export function buildColumns<TRow>({
             rowSpan: cell.rowSpan,
             "data-adapttable-part": "cell",
             "data-column-key": column.key,
+            "data-pinned": pinned?.[column.key],
             "data-flash": cellFlashAttr(isCellFlashing, rowId, column.key),
             ...(mark ? { "data-cell-span": mark } : {}),
             style: cellHighlightStyle(
@@ -928,6 +929,7 @@ export function buildColumns<TRow>({
             ...groupingDrag,
             "data-adapttable-part": "header-cell",
             "data-column-key": column.key,
+            "data-pinned": pinned?.[column.key],
             ...gridFocus?.getColumnHeaderProps(columnIndex, {
               sortable: column.sortable,
             }),

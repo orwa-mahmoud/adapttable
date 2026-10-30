@@ -2149,6 +2149,7 @@ export interface DesktopRowWiringModel<TRow, C extends DesktopRowWiringContext<T
     actionsPinned: boolean;
     // (undocumented)
     bodyCells: readonly BodyCell<TRow>[];
+    bodyPinSide: (key: string) => PinOffset["side"] | undefined;
     // (undocumented)
     bodyPinStyle: (key: string) => ReturnType<typeof desktopBodyPinStyle>;
     // (undocumented)
