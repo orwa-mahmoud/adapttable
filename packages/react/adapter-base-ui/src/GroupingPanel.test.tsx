@@ -143,6 +143,17 @@ describe("GroupingPanel (base-ui)", () => {
     expect(state.remove).toHaveBeenCalledWith("team");
   });
 
+  it("numbers each chip by its grouping level", () => {
+    renderPanel(panelState({ groupBy: ["team", "amount"] }));
+
+    const handles = [
+      ...document.querySelectorAll(
+        '[data-adapttable-part="grouping-chip-handle"]'
+      ),
+    ].map((handle) => handle.textContent);
+    expect(handles).toEqual(["1. Team", "2. Amount"]);
+  });
+
   it("shows insertion feedback and the remove target during chip dragging", () => {
     // Three fields, dragging the last: the boundaries either side of it would
     // leave it where it is, so the ones that CAN take it are the two ahead.

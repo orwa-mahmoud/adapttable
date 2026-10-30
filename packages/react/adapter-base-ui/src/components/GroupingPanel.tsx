@@ -80,7 +80,9 @@ const slots: GroupingPanelSlots = {
         {...keyboardProps}
       >
         <GripIcon />
-        <span>{label}</span>
+        <span>
+          {level}. {label}
+        </span>
       </Button>
       <IconButton
         type="button"

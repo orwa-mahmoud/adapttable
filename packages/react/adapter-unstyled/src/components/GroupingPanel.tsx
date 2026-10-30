@@ -130,7 +130,7 @@ function Chip({
         {...dragProps}
         {...keyboardProps}
       >
-        <span aria-hidden="true">⋮⋮</span> {label}
+        <span aria-hidden="true">⋮⋮</span> {level}. {label}
       </button>
       <button
         type="button"
