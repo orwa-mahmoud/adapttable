@@ -606,6 +606,13 @@ export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>) {
   return <GroupMoreButtonChrome {...props} slots={{ Button: MoreButton }} />;
 }
 
+// Radix's `.rt-reset` unsets every property on a button, Chrome's own
+// `-webkit-user-drag: element` for [draggable] included, which leaves the
+// handle impossible to drag with a mouse.
+const NATIVE_DRAG: { readonly WebkitUserDrag: string } = {
+  WebkitUserDrag: "element",
+};
+
 function ReorderHandle({
   label,
   pressed,
@@ -628,7 +635,7 @@ function ReorderHandle({
       aria-label={label}
       aria-pressed={pressed}
       disabled={disabled}
-      style={{ cursor: pressed ? "grabbing" : "grab" }}
+      style={{ cursor: pressed ? "grabbing" : "grab", ...NATIVE_DRAG }}
       {...dragProps}
       onKeyDown={onKeyDown}
     >

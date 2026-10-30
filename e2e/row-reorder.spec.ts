@@ -139,10 +139,9 @@ async function enable(page: Page, group: string): Promise<void> {
 }
 
 /**
- * HTML5 pointer-drag path. Playwright's `dragTo` mouse sequence does not
- * start a drag on every kit's handle (MUI / Radix IconButton swallow the
- * native gesture); dispatching the same DragEvents a completed pointer
- * drag fires still goes through the live `dropProps` the digest exists for.
+ * HTML5 pointer-drag path. Dispatches the DragEvents a completed pointer drag
+ * fires, through the live `dropProps` the digest exists for. That the mouse
+ * gesture itself starts the drag is its own test below.
  */
 async function pointerDragRow(grip: Locator, target: Locator): Promise<void> {
   const toHandle = await target.elementHandle();
@@ -236,6 +235,43 @@ for (const adapter of ADAPTERS) {
       await pointerDragRow(grip, rows.nth(1));
       await expect(rows.nth(0)).toContainText(secondName);
       await expect(rows.nth(0)).not.toContainText(firstName);
+    });
+
+    test("starts a native drag when the grip is pressed and moved", async ({
+      page,
+    }) => {
+      await openDemo(page, adapter);
+      await enable(page, "reorder");
+      const grip = part(page, "row-reorder-handle").first();
+      await expect(grip).toBeVisible();
+      // The row re-renders once the drag lifts, so the record lives on the
+      // document rather than on the grip node.
+      await page.evaluate(() => {
+        document.addEventListener(
+          "dragstart",
+          (event) => {
+            const from =
+              event.target instanceof Element
+                ? event.target.closest("[data-adapttable-part]")
+                : null;
+            document.documentElement.dataset.dragFrom =
+              from?.getAttribute("data-adapttable-part") ?? "";
+          },
+          { capture: true }
+        );
+      });
+      const box = await grip.boundingBox();
+      expect(box).not.toBeNull();
+      await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box!.x + box!.width / 2, box!.y + 80, {
+        steps: 10,
+      });
+      await page.mouse.up();
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-drag-from",
+        "row-reorder-handle"
+      );
     });
 
     test("mirrors the horizontal grab under RTL", async ({ page }) => {
