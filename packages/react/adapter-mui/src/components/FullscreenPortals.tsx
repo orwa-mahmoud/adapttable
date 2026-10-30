@@ -1,4 +1,4 @@
-import { createTheme, type Theme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, type Theme, ThemeProvider } from "@mui/material";
 import { type ReactNode, useCallback } from "react";
 
 /**
