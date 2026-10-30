@@ -4,6 +4,7 @@ import { isValidElement, type ReactElement, type ReactNode } from "react";
 
 import type { BaseUiAccentColor } from "../types";
 import { Button, Flex, Text } from "../ui";
+import { usePortalContainer } from "./portalContainer";
 
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
@@ -44,6 +45,7 @@ export function FilterPopover({
   dir = "ltr",
   children,
 }: Readonly<FilterPopoverProps>) {
+  const portalContainer = usePortalContainer();
   const trigger = isValidElement(children) ? (
     <Popover.Trigger render={children as ReactElement} />
   ) : (
@@ -57,7 +59,7 @@ export function FilterPopover({
       }}
     >
       {trigger}
-      <Popover.Portal>
+      <Popover.Portal container={portalContainer}>
         <Popover.Positioner
           className="adapttable-popup-positioner"
           side="bottom"

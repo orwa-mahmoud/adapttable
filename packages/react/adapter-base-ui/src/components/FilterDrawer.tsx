@@ -6,6 +6,7 @@ import { type ReactNode } from "react";
 import { ensureBaseUiDrawerStyles } from "../injectStyles";
 import type { BaseUiAccentColor } from "../types";
 import { Button, Flex } from "../ui";
+import { usePortalContainer } from "./portalContainer";
 
 /** Filters drawer — Base UI Drawer pinned to the inline-end edge. */
 export function FilterDrawer({
@@ -27,6 +28,7 @@ export function FilterDrawer({
   accentColor?: BaseUiAccentColor;
   dir?: Direction;
 }>) {
+  const portalContainer = usePortalContainer();
   ensureBaseUiDrawerStyles();
   return (
     <Drawer.Root
@@ -36,7 +38,7 @@ export function FilterDrawer({
         if (!next) onClose();
       }}
     >
-      <Drawer.Portal>
+      <Drawer.Portal container={portalContainer}>
         <Drawer.Backdrop
           className="adapttable-drawer-backdrop"
           data-testid="adapttable-filter-drawer-backdrop"

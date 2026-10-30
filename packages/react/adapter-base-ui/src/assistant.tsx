@@ -18,6 +18,7 @@ import { Drawer } from "@base-ui/react/drawer";
 import { Menu } from "@base-ui/react/menu";
 import { useRef } from "react";
 
+import { usePortalContainer } from "./components/portalContainer";
 import { NativeSelect } from "./components/primitives";
 import { ensureBaseUiDrawerStyles } from "./injectStyles";
 import { Badge, Button, Card, cx, IconButton } from "./ui";
@@ -170,6 +171,7 @@ function AssistantSheet({
   dir,
   children,
 }: Readonly<TableAssistantSheetProps>) {
+  const portalContainer = usePortalContainer();
   ensureBaseUiDrawerStyles();
   const popup = useRef<HTMLDivElement>(null);
   return (
@@ -180,7 +182,7 @@ function AssistantSheet({
         if (!next) onClose();
       }}
     >
-      <Drawer.Portal>
+      <Drawer.Portal container={portalContainer}>
         <Drawer.Backdrop className="adapttable-drawer-backdrop" />
         <Drawer.Viewport>
           <Drawer.Popup
@@ -305,6 +307,7 @@ function AssistantMenu({
   onSelect,
   maxHeight,
 }: Readonly<TableAssistantMenuProps>) {
+  const portalContainer = usePortalContainer();
   return (
     <Menu.Root>
       <Menu.Trigger
@@ -323,7 +326,7 @@ function AssistantMenu({
           </IconButton>
         }
       />
-      <Menu.Portal>
+      <Menu.Portal container={portalContainer}>
         {/* The positioner carries the overlay layer, as every other portaled
             surface in this kit does: Base UI puts a transform on it, and a
             transform is a stacking context — a z-index on the popup inside
