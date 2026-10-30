@@ -99,6 +99,52 @@ describe("a table that composed none of the live features", () => {
   });
 });
 
+describe("a paged table without cell navigation", () => {
+  it("keeps its windowed ARIA getters across re-renders", () => {
+    const props = applyTableFeatures({
+      features: [],
+      data: ROWS,
+      columns,
+      rowKey: (r: Row) => r.id,
+      urlSync: false,
+      defaults: { limit: 1 },
+    });
+    const seen: DataTableShellResult<Row>[] = [];
+    function Probe() {
+      const shell = useDataTableShell(props, noForm);
+      return (
+        <DataTableShellView<Row> shell={shell}>
+          {(next) => {
+            seen.push(next);
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    const { rerender } = render(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
+    );
+    const first = seen.at(-1)!;
+    // Two rows, one per page: the table names its real size.
+    expect(first.gridFocus.getGridProps()).toMatchObject({
+      "aria-rowcount": 2,
+    });
+    rerender(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
+    );
+    expect(seen.length).toBeGreaterThan(1);
+    // A kit that keys its table components on this getter (antd) would
+    // remount the whole table if it changed with every render.
+    expect(seen.at(-1)!.gridFocus.getGridProps).toBe(
+      first.gridFocus.getGridProps
+    );
+  });
+});
+
 describe("each live feature replaces its stand-in with the real hook", () => {
   it("retires row selection when a compound filter changes the query", () => {
     const view = mount([bulkActions([])]);

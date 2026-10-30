@@ -22,7 +22,7 @@ import {
  * Features fill the live slots. Empty slots pass inert stubs, so the lean
  * table never imports those hooks.
  */
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { asBatchGesture } from "../editing/editHistory";
 import { beginCellEdit } from "../editing/useCellEditing";
@@ -177,6 +177,23 @@ function CellNavStage<TRow>({
     onCut: props.onCellCut,
   };
   const windowStart = options.firstRowIndex;
+  // One object per table shape, not per render: a kit that keys its table
+  // components on these getters (antd) would remount the table on every
+  // render if they were rebuilt.
+  const { rowCount, columnsWindowed, firstRowIndex } = options;
+  const rowsLength = options.rows.length;
+  const columnsLength = options.columns.length;
+  const windowedAria = useMemo(
+    () =>
+      windowedTableAria({
+        rowCount,
+        rowsLength,
+        columnsLength,
+        columnsWindowed,
+        firstRowIndex,
+      }),
+    [rowCount, rowsLength, columnsLength, columnsWindowed, firstRowIndex]
+  );
   const navProps = {
     options,
     hostProps: props,
@@ -198,17 +215,7 @@ function CellNavStage<TRow>({
       // Without the feature the table still names its real size: assistive
       // tech can only count the slice in the DOM — and find still marks its
       // matches.
-      gridFocus: withFindMarks(
-        windowedTableAria({
-          rowCount: options.rowCount,
-          rowsLength: options.rows.length,
-          columnsLength: options.columns.length,
-          columnsWindowed: options.columnsWindowed,
-          firstRowIndex: options.firstRowIndex,
-        }),
-        live.find,
-        windowStart
-      ),
+      gridFocus: withFindMarks(windowedAria, live.find, windowStart),
     })
   );
 }
