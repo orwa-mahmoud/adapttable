@@ -122,6 +122,7 @@ import { extraHostFillStyle } from '@adapttable/core/binding';
 import { ExtraRow as ExtraRow_2 } from '@adapttable/core';
 import { extraRowsForSection } from '@adapttable/core/binding';
 import { extraUncoveredColSpans } from '@adapttable/core/binding';
+import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
@@ -220,8 +221,10 @@ import { PivotAggProps } from '@adapttable/core/binding';
 import { PivotPanelChromeProps as PivotPanelChromeProps_2 } from '@adapttable/core/binding';
 import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
 import { PublicProps } from 'vue';
+import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
+import { QuerySupport } from '@adapttable/core';
 import { readMultiDraft } from '@adapttable/core';
 import { Ref } from 'vue';
 import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
@@ -300,6 +303,7 @@ import { TableDensity } from '@adapttable/core';
 import { TableDensity as TableDensity_2 } from '@adapttable/core/binding';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { TableQuery } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core/binding';
 import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
@@ -1447,6 +1451,7 @@ export interface DataTableHandle<TRow> {
 
 // @public
 export interface DataTableProps<TRow> {
+    readonly aggregates?: readonly QueryAggregate[];
     // (undocumented)
     readonly assistant?: TableAssistantProps;
     // (undocumented)
@@ -1477,6 +1482,8 @@ export interface DataTableProps<TRow> {
     readonly dir?: Direction;
     // (undocumented)
     readonly error?: Error | null;
+    readonly facetKeys?: readonly string[];
+    readonly facets?: FacetMap;
     // (undocumented)
     readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];
     // (undocumented)
@@ -1497,6 +1504,7 @@ export interface DataTableProps<TRow> {
     readonly maxHeight?: number | string;
     // (undocumented)
     readonly mobileBreakpoint?: number;
+    readonly mode?: "frontend" | "server";
     // (undocumented)
     readonly multiSort?: boolean;
     // (undocumented)
@@ -1509,11 +1517,13 @@ export interface DataTableProps<TRow> {
     readonly onColumnRename?: (key: string, name: string) => void;
     // (undocumented)
     readonly onDensityChange?: (density: TableDensity_2) => void;
+    readonly onQueryChange?: TableQueryHandler;
     readonly onRowClick?: (row: TRow) => void;
     // (undocumented)
     readonly paginationMode?: PaginationMode;
     // (undocumented)
     readonly refetch?: () => void | Promise<unknown>;
+    readonly responseKey?: string;
     // (undocumented)
     readonly rowActionsLayout?: RowActionsLayout;
     // (undocumented)
@@ -1531,8 +1541,10 @@ export interface DataTableProps<TRow> {
     // (undocumented)
     readonly source?: TableSource<TRow>;
     readonly summaryRow?: SummaryRowFn<TRow>;
+    readonly supports?: QuerySupport;
     // (undocumented)
     readonly tableLabel?: string;
+    readonly total?: number;
     // (undocumented)
     readonly urlAdapter?: UrlStateAdapter;
     // (undocumented)
@@ -3928,6 +3940,17 @@ export interface TableHeaderModel<TRow> {
     readonly sortAttrs?: Attrs;
 }
 
+// @public
+type TableQueryHandler = (query: TableQuery, info: TableQueryInfo) => void | Promise<void>;
+
+// @public
+interface TableQueryInfo {
+    // (undocumented)
+    readonly key: string;
+    // (undocumented)
+    readonly signal: AbortSignal;
+}
+
 // @public (undocumented)
 export interface TableRowDetail<TRow> {
     // (undocumented)
@@ -4446,6 +4469,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
 
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
+    readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps_2<VNodeChild>>;
     // (undocumented)
@@ -4458,10 +4482,13 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
+    readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
     readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
+    readonly mode?: "frontend" | "server";
     // (undocumented)
     readonly onCellCut?: (range: CellRange) => void;
     // (undocumented)
@@ -4470,8 +4497,10 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
+    readonly onQueryChange?: TableQueryHandler;
     // (undocumented)
     readonly onSelectionChange?: (ids: string[]) => void;
+    readonly responseKey?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
     // (undocumented)
@@ -4481,6 +4510,8 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;
+    readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
+    readonly total?: MaybeRefOrGetterOptional<number>;
 }
 
 // @public (undocumented)

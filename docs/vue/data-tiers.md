@@ -46,6 +46,54 @@ publishes `rows`/`total`, or `useQuerySource` when an existing query composable
 owns fetching and cancellation. See [source contracts](./api.md#data-sources)
 for request cancellation and query-library lifecycle rules.
 
+## Server rows through table props
+
+The table takes the server tier directly: pass the current page as `data`, the
+row count as `total`, and fetch in `onQueryChange`. It is called after mount
+and once per real change with the consolidated query; the previous request's
+`signal` is aborted. `is-loading` and `error` describe the request.
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from "vue";
+import type { TableQueryHandler } from "@adapttable/vue";
+import { DataTable } from "@adapttable/vue-unstyled";
+
+const rows = shallowRef<readonly Person[]>([]);
+const total = shallowRef(0);
+const loading = shallowRef(false);
+const fetchPage: TableQueryHandler = async (query, { signal }) => {
+  loading.value = true;
+  try {
+    const reply = await api.people(query, { signal });
+    if (signal.aborted) return;
+    rows.value = reply.rows;
+    total.value = reply.total;
+  } finally {
+    if (!signal.aborted) loading.value = false;
+  }
+};
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :total="total"
+    :is-loading="loading"
+    :columns="columns"
+    :row-key="(row) => row.id"
+    @query-change="fetchPage"
+  />
+</template>
+```
+
+`mode` is inferred: `data` with `onQueryChange` is server, `data` alone is
+frontend. `mode="frontend"` keeps the table's own search, sort and paging and
+makes `onQueryChange` a notification of what the reader changed; the mount is
+not a change. `supports`, `aggregates`, `responseKey`, `facetKeys` and `facets`
+carry the same server capabilities as `useServerData`; `facetKeys` defaults to
+every checklist filter. A supplied `source` wins over all of them.
+
 ## Server query ownership
 
 `useServerData` accepts reactive `rows`, `total`, `loading` and `error`, and an `onQueryChange` callback. The host fetches or computes a response and publishes it through those refs. Use the callback context’s abort signal to avoid applying replies after a newer query or disposal. Declare only the server capabilities your endpoint actually implements.

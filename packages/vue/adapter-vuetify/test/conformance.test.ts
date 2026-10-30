@@ -13,6 +13,7 @@ import {
   nativeRangeConformanceTests,
   nativeRowConformanceTests,
   nativeSearchConformanceTests,
+  nativeServerConformanceTests,
 } from "../../vue/test/nativeConformanceDriver";
 import { DataTable } from "../src";
 import { cellNavigation } from "../src/cell-navigation";
@@ -59,5 +60,10 @@ describe(`row activation and changed cells — ${driver.name}`, () => {
 
 describe(`search placeholder — ${driver.name}`, () => {
   for (const test of nativeSearchConformanceTests(driver))
+    it(test.name, test.run);
+});
+
+describe(`server tier and query notices — ${driver.name}`, () => {
+  for (const test of nativeServerConformanceTests(driver))
     it(test.name, test.run);
 });

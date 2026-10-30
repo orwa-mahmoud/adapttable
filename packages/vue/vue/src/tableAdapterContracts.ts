@@ -3,7 +3,10 @@ import type {
   ColumnLayoutState,
   ConfirmHandler,
   Direction,
+  FacetMap,
   PaginationMode,
+  QueryAggregate,
+  QuerySupport,
   RowActionsLayout,
   TableErrorState,
   TableLabels,
@@ -25,6 +28,7 @@ import type {
 } from "./columnDef";
 import type { ComposedFeature } from "./features/tableFeature";
 import type { CellRange } from "./navigation/contracts";
+import type { TableQueryHandler } from "./source/useServerData";
 
 /** CSS hooks for the corresponding table or control presentation target. */
 export interface DataTableClassNames {
@@ -312,6 +316,26 @@ export interface DataTableProps<TRow> {
   readonly onCellCut?: (range: CellRange) => void;
   readonly data?: readonly TRow[];
   readonly source?: TableSource<TRow>;
+  /**
+   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
+   * table's own processing and makes `onQueryChange` a notification. Absent:
+   * `data` with `onQueryChange` is server, `data` alone is frontend.
+   */
+  readonly mode?: "frontend" | "server";
+  /** One consolidated query per change: the server page to fetch, or a notice. */
+  readonly onQueryChange?: TableQueryHandler;
+  /** Server tier: the row count across every page. */
+  readonly total?: number;
+  /** Server tier: what the endpoint can answer, such as facet counts. */
+  readonly supports?: QuerySupport;
+  /** Server tier: aggregates the endpoint computes for the query. */
+  readonly aggregates?: readonly QueryAggregate[];
+  /** Server tier: names the response the aggregates belong to. */
+  readonly responseKey?: string;
+  /** Server tier: keys sent as `query.facets`; defaults to every checklist filter. */
+  readonly facetKeys?: readonly string[];
+  /** Server tier: distinct-value counts from the last fetch. */
+  readonly facets?: FacetMap;
   readonly columns: readonly ColumnInput<TRow>[];
   readonly rowKey: (row: TRow) => string;
   readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];

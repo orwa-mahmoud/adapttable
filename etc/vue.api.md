@@ -1681,6 +1681,7 @@ export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
+    readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
@@ -1693,10 +1694,13 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity_2>;
+    readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
     readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
+    readonly mode?: "frontend" | "server";
     // (undocumented)
     readonly onCellCut?: (range: CellRange) => void;
     // (undocumented)
@@ -1705,8 +1709,10 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity_2) => void;
+    readonly onQueryChange?: TableQueryHandler;
     // (undocumented)
     readonly onSelectionChange?: (ids: string[]) => void;
+    readonly responseKey?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
     // (undocumented)
@@ -1716,6 +1722,8 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;
+    readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
+    readonly total?: MaybeRefOrGetterOptional<number>;
 }
 
 // @public (undocumented)
