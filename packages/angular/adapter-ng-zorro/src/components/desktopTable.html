@@ -5,6 +5,7 @@
     [nzTemplateMode]="true"
     [nzFrontPagination]="false"
     [nzShowPagination]="false"
+    [nzSize]="v.density() === 'compact' ? 'small' : 'default'"
     [attr.data-adapttable-part]="
       tableAttrs()['role'] === 'grid' ? 'grid' : null
     "

@@ -90,6 +90,25 @@ class TwentyFivePerPage {
   readonly rowKey = (row: City) => row.id;
 }
 
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="data"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+      [density]="density()"
+    />
+  `,
+})
+class DensityHost {
+  readonly data = CITIES;
+  readonly columns = COLUMNS;
+  readonly rowKey = (row: City) => row.id;
+  readonly density = signal<"compact" | "comfortable">("comfortable");
+}
+
 async function mount() {
   const fixture = TestBed.createComponent(Host);
   fixture.autoDetectChanges();
@@ -149,6 +168,17 @@ describe("the NG-ZORRO Angular table", () => {
       stage.remove();
       Reflect.deleteProperty(document, "fullscreenEnabled");
     }
+  });
+
+  it("draws compact density with NG-ZORRO's small table", async () => {
+    const fixture = TestBed.createComponent(DensityHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector(".ant-table-small")).toBeNull();
+    fixture.componentInstance.density.set("compact");
+    await fixture.whenStable();
+    expect(element.querySelector(".ant-table-small")).not.toBeNull();
   });
 
   it("fills a column from the host's cell template", async () => {
