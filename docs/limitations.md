@@ -83,7 +83,7 @@ Sizes are minified + gzipped AdaptTable bytes. React and the UI kit are
 external — an application already ships them. The method is packed
 consumer fixtures in `scripts/bundle-budget.mjs`.
 
-- A published adapter's base `DataTable` is held to **≤ 80 KB**
+- A published adapter's base `DataTable` is held to **≤ 81 KB**
   (`PLAIN_ADAPTER_CEILING_KB`) and at least 35% under that kit's recorded
   pre-v3 size (`scripts/consumer-fixtures.mjs`). Omitted feature markers must be absent from the base graph.
 - Optional features arrive with their import. Called with no argument,
@@ -172,7 +172,7 @@ a fix was attempted and failed. None is listed.
 | Virtualize DOM count                     | [virtualization](./virtualization.md)                                                                    |
 | Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                  |
 | URL-state 8,192 cap, `limit` 1–500       | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`             |
-| Adapter ≤ 80 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                             |
+| Adapter ≤ 81 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                             |
 | AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                               |
 | Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                          |
 | Chromium e2e                             | `playwright.config.ts`                                                                                   |

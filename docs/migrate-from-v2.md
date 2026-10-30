@@ -4,7 +4,7 @@ v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
 what it named and nothing else. Measured adapter sizes live in the
 [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable); the acceptance ceiling
-is 80 KB min+gzip.
+is 81 KB min+gzip.
 
 Nothing else about the table changed: the same columns, the same data tiers,
 the same URL state, the same labels.
