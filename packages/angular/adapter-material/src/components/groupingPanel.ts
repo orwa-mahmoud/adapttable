@@ -157,7 +157,7 @@ class AdaptGroupingDropZone {
         (dragend)="p.dragProps.onDragEnd?.($event)"
         (keydown)="p.keyboardProps.onKeyDown($event)"
       >
-        <span aria-hidden="true">⋮⋮</span> {{ p.label }}
+        <span aria-hidden="true">⋮⋮</span> {{ p.level }}. {{ p.label }}
       </button>
       <button
         mat-button

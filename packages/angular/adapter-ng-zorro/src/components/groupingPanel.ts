@@ -172,7 +172,8 @@ class AdaptGroupingDropZone {
         (dragend)="p.dragProps.onDragEnd?.($event)"
         (keydown)="p.keyboardProps.onKeyDown($event)"
       >
-        <span aria-hidden="true">⋮⋮</span> <span>{{ p.label }} </span>
+        <span aria-hidden="true">⋮⋮</span>
+        <span>{{ p.level }}. {{ p.label }} </span>
       </button>
       <button
         nz-button
