@@ -22,6 +22,8 @@ import {
   logicalAlign,
   mergedCellStyle,
   PIN_Z,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
   type PinSide,
   REORDER_COLUMN_WIDTH,
@@ -157,6 +159,8 @@ function rowExtrasEqual<TRow>(
   );
 }
 
+const SUMMARY_CELL_STYLE = { fontWeight: 600 } as const;
+
 function DesktopRowBase<TRow>(
   props: Readonly<DesktopRowProps<TRow>>
 ): ReactElement {
@@ -207,8 +211,13 @@ function DesktopRowBase<TRow>(
     bodyPinStyle,
     accentColor,
     dir,
+    pinPart,
     rowPinSide,
   } = props;
+  // A pinned total is the host's figure, not a person: it reads semibold.
+  const summaryRow =
+    pinPart === PINNED_SUMMARY_TOP_PART ||
+    pinPart === PINNED_SUMMARY_BOTTOM_PART;
   // A pinned row sticks, so its leading and trailing cells need the surface
   // too: the rows scrolling beneath must not show through them.
   const edgeRowPaint =
@@ -329,6 +338,7 @@ function DesktopRowBase<TRow>(
                 {
                   ...dataPinStyle(column.key),
                   ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
+                  ...(summaryRow ? SUMMARY_CELL_STYLE : undefined),
                 },
                 {
                   background:
