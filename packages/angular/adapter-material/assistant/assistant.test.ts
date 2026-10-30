@@ -124,6 +124,11 @@ describe("native assistant", () => {
     ).toBe(true);
     const input = part<HTMLTextAreaElement>("assistant-input");
     expect(input?.tagName).toBe("TEXTAREA");
+    // The field grows into the composer row instead of keeping Material's
+    // intrinsic width.
+    expect(input?.closest<HTMLElement>("mat-form-field")?.style.flex).toBe(
+      "1 1 auto"
+    );
     expect(input?.value).toBe("Hello");
     if (input) {
       input.value = "Updated";

@@ -78,7 +78,13 @@ export class AdaptAssistantButton {
   selector: "adapt-assistant-input",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
-  template: `<mat-form-field appearance="outline" subscriptSizing="dynamic">
+  // The form field takes the composer's free width; Material's own field is
+  // sized to its 180px infix otherwise.
+  template: `<mat-form-field
+    appearance="outline"
+    subscriptSizing="dynamic"
+    style="flex: 1 1 auto; min-width: 0"
+  >
     <textarea
       autofocus
       cdkFocusInitial
