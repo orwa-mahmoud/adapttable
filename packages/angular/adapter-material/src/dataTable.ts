@@ -19,6 +19,10 @@ import {
   AdaptTableStatusAnnouncer,
   type PaletteOpenState,
 } from "@adapttable/angular/adapter";
+import {
+  FullscreenOverlayContainer,
+  OverlayContainer,
+} from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
@@ -63,6 +67,10 @@ export type {
   templateUrl: "./dataTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    // The Fullscreen API hides everything outside the promoted element, so
+    // the table's selects, menus and popovers render into a CDK overlay
+    // container that follows the page into fullscreen.
+    { provide: OverlayContainer, useClass: FullscreenOverlayContainer },
     {
       provide: ADAPTTABLE_FIND_STATE,
       useFactory: () => signal<FindInTableState | null>(null),
