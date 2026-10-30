@@ -1,28 +1,32 @@
+/* Unencapsulated so the table surface can reach NG-ZORRO's own wrappers; every
+ * rule stays inside nz-table, so no other kit's table is touched. */
+
 /* Structural alignment stays in the kit; interactive controls remain NG-ZORRO. */
-:is(
-  [data-adapttable-part="selection-header"],
-  [data-adapttable-part="selection-cell"],
-  [data-adapttable-part="expand-header"],
-  [data-adapttable-part="expand-cell"],
-  [data-adapttable-part="reorder-header"],
-  [data-adapttable-part="reorder-cell"]
-) {
+nz-table
+  :is(
+    [data-adapttable-part="selection-header"],
+    [data-adapttable-part="selection-cell"],
+    [data-adapttable-part="expand-header"],
+    [data-adapttable-part="expand-cell"],
+    [data-adapttable-part="reorder-header"],
+    [data-adapttable-part="reorder-cell"]
+  ) {
   padding-inline: 8px;
   text-align: center;
 }
-.adapt-header-controls {
+nz-table .adapt-header-controls {
   display: flex;
   align-items: center;
   gap: 0.375rem;
   min-inline-size: 0;
 }
-[data-adapttable-part="header-caption-control"] {
+nz-table [data-adapttable-part="header-caption-control"] {
   display: inline-flex;
   align-items: center;
   min-inline-size: 0;
   flex: 1 1 auto;
 }
-[data-adapttable-part="header-caption-control"] > button {
+nz-table [data-adapttable-part="header-caption-control"] > button {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -30,36 +34,47 @@
   padding-inline: 0;
   font-weight: 600;
 }
-/* Sticky cells must paint an opaque surface over horizontally scrolling cells. */
-[data-adapttable-part="cell"][data-pinned] {
-  background: var(--adapttable-ng-zorro-surface, #fff);
+/* Sticky cells must paint an opaque surface over the cells scrolling beneath
+ * them: a pinned column's cells and every cell of a pinned row. Unless the
+ * host names a surface, they take the table's own, which NG-ZORRO's light or
+ * dark theme sets on .ant-table and the wrappers below pass down. A hovered
+ * row's pinned cells take NG-ZORRO's own row hover. */
+nz-table
+  .ant-table
+  :is(.ant-table-container, .ant-table-content, table, tbody, tr) {
+  background-color: inherit;
 }
-tr:hover > [data-adapttable-part="cell"][data-pinned] {
-  background: var(--adapttable-ng-zorro-hover, #fafafa);
+nz-table [data-adapttable-part="cell"][data-pinned],
+nz-table tr[data-row-pin] > td {
+  background-color: var(--adapttable-ng-zorro-surface, inherit);
 }
-tr[data-selected] > [data-adapttable-part="cell"][data-pinned] {
+nz-table tr[data-selected] > [data-adapttable-part="cell"][data-pinned] {
   background: var(--adapttable-ng-zorro-selected, #e6f7ff);
 }
-[data-adapttable-part="cell"][data-pinned][data-cell-selected] {
+nz-table [data-adapttable-part="cell"][data-pinned][data-cell-selected] {
   background: var(--adapttable-ng-zorro-selected, #e6f7ff);
 }
-[data-adapttable-part="header-caption-control"] > button > span:first-child {
+nz-table
+  [data-adapttable-part="header-caption-control"]
+  > button
+  > span:first-child {
   min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-adapt-header-filter-trigger {
+nz-table adapt-header-filter-trigger {
   display: inline-flex;
   flex: 0 0 auto;
 }
 
 /* Keep the resize target at the inline edge of its own column header. */
-[data-adapttable-part="header-cell"]:has(
-  [data-adapttable-part="resize-handle"]
-) {
+nz-table
+  [data-adapttable-part="header-cell"]:has(
+    [data-adapttable-part="resize-handle"]
+  ) {
   position: relative;
 }
-[data-adapttable-part="resize-handle"] {
+nz-table [data-adapttable-part="resize-handle"] {
   position: absolute;
   display: block;
   visibility: visible;
@@ -77,7 +92,7 @@ adapt-header-filter-trigger {
   touch-action: none;
   user-select: none;
 }
-[data-adapttable-part="resize-handle"]::after {
+nz-table [data-adapttable-part="resize-handle"]::after {
   content: "";
   position: absolute;
   inset-inline-end: 3px;
@@ -85,10 +100,11 @@ adapt-header-filter-trigger {
   inline-size: 2px;
   background: var(--ant-color-border, #d9d9d9);
 }
-[data-adapttable-part="resize-handle"]:is(:hover, :focus-visible)::after {
+nz-table
+  [data-adapttable-part="resize-handle"]:is(:hover, :focus-visible)::after {
   background: var(--ant-color-primary, #1677ff);
 }
-[data-adapttable-part="resize-handle"]:focus-visible {
+nz-table [data-adapttable-part="resize-handle"]:focus-visible {
   outline: 2px solid var(--ant-color-primary, #1677ff);
   outline-offset: -2px;
 }

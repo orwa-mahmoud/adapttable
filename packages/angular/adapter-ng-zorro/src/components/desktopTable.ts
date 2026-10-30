@@ -21,6 +21,7 @@ import {
   computed,
   ElementRef,
   viewChild,
+  ViewEncapsulation,
 } from "@angular/core";
 import { NzButtonModule } from "ng-zorro-antd/button";
 import { NzTableModule } from "ng-zorro-antd/table";
@@ -59,6 +60,7 @@ import { AdaptSelectionCheckbox } from "./selectionCheckbox";
   ],
   templateUrl: "./desktopTable.html",
   styleUrl: "./desktopTable.css",
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
 })
