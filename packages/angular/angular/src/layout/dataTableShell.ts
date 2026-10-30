@@ -2435,6 +2435,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           : {
               ...(typeof style === "object" && style !== null ? style : {}),
               ...pinnedRowSticky(side, pinSticky, 0),
+              // A pinned total is the host's figure, not a record: semibold.
+              ...(summary ? { fontWeight: 600 } : {}),
             },
       };
     };
