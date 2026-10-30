@@ -11527,11 +11527,13 @@
       "StreamSocketEvent",
       "UpdatePatch",
       "UpsertPatch",
+      "UseChangedCellFlashOptions",
       "UseRowPatchStreamOptions",
       "isStreamLive",
       "isStreamSettled",
       "openRowPatchStream",
       "parseRowPatchFrame",
+      "useChangedCellFlash",
       "useRowPatchStream"
     ],
     "vue-sparkline": [
