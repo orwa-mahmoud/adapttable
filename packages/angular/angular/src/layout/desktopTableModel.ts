@@ -26,9 +26,11 @@ import {
   type TreeCellProps,
 } from "@adapttable/core/binding";
 import {
+  afterRenderEffect,
   computed,
   Directive,
-  type ElementRef,
+  ElementRef,
+  inject,
   input,
   type TemplateRef,
   viewChild,
@@ -66,6 +68,37 @@ export abstract class AdaptDesktopTableModel<TRow> {
   protected readonly groupLabelAttrs: Attrs = {
     style: groupedHeaderLabelStyle(),
   };
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  constructor() {
+    // A sticky header's height is where pinned rows stick below it.
+    afterRenderEffect((onCleanup) => {
+      const view = this.view();
+      if (!view.stickyHead()) return;
+      const head = this.host.nativeElement.querySelector("thead");
+      if (!head || typeof ResizeObserver === "undefined") return;
+      const report = () => {
+        view.reportHeaderHeight(head.getBoundingClientRect().height);
+      };
+      report();
+      const observer = new ResizeObserver(report);
+      observer.observe(head);
+      onCleanup(() => {
+        observer.disconnect();
+      });
+    });
+  }
+
+  /** The `<thead>` style: sticky while `stickyHeader` is on. */
+  protected theadStyle(): Record<string, string> | null {
+    const sticky = this.view().stickyHead();
+    if (!sticky) return null;
+    return {
+      position: "sticky",
+      top: `${String(sticky.top)}px`,
+      zIndex: String(sticky.zIndex),
+    };
+  }
   protected sortIndex(column: { key: string }): number | undefined {
     const index = this.view().table.sortButtonAttrs(column)["data-sort-index"];
     return typeof index === "number" ? index : undefined;

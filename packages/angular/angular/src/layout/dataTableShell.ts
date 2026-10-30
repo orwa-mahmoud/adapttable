@@ -73,6 +73,7 @@ import {
   type ConfirmHandler,
   type ContextMenuTarget,
   copyContextMenuSelection,
+  type CssProperties,
   defaultConfirm,
   devWarn,
   type Direction,
@@ -140,6 +141,7 @@ import {
   desktopDetailMeasureRef,
   desktopRowMeasureRef,
   type DesktopRowWiringArgs,
+  desktopStickyPlan,
   type EditableCellSlotProps,
   estimateBodyItemSize,
   type ExpandToggleSlotProps,
@@ -1085,6 +1087,10 @@ export interface TableView<TRow> {
   readonly confirm: ConfirmHandler;
   /** The row density the root states. */
   readonly density: Signal<TableDensity>;
+  /** The header's sticky style, absent unless `stickyHeader` is on. */
+  readonly stickyHead: Signal<CssProperties | undefined>;
+  /** A desktop table reports its header's height, so pinned rows sit below it. */
+  readonly reportHeaderHeight: (px: number) => void;
   /** The toolbar extras' props: density, fullscreen and export. */
   readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
   /** The saved-views menu's props, when it is composed. */
@@ -1212,6 +1218,13 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   readonly dir = input<Direction>("ltr");
   /** Show the phone layout whatever the viewport. */
   readonly forceMobile = input<boolean>();
+  /** Keep the desktop header in view while the table or the page scrolls. */
+  readonly stickyHeader = input(false);
+  /**
+   * Top inset in px for a header that sticks to the page, such as the height
+   * of an app bar it must clear. Inside a scroll box the header sticks at 0.
+   */
+  readonly stickyTop = input(0);
   /**
    * Viewport width, in pixels, at or below which the table shows cards.
    * Read when the table is created.
@@ -2428,7 +2441,25 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     // A pinned row keeps its place above or below the scrolling rows, stuck
     // there inside a scroll box; a host summary row is marked and named, with
     // none of a data row's interactions. A pinned card is an ordinary card.
-    const pinSticky = this.maxHeight() != null;
+    // The header sticks to the page, or at 0 inside a scroll box: a maxHeight
+    // box, or one that scrolls sized columns sideways.
+    const headerHeight = signal(0);
+    const stickyPlan = computed(() => {
+      const tableStyle = table.tableAttrs().style;
+      return desktopStickyPlan({
+        maxHeight: this.maxHeight() == null ? undefined : 0,
+        hasPinned: false,
+        overflowing:
+          typeof tableStyle === "object" &&
+          tableStyle !== null &&
+          "minWidth" in tableStyle &&
+          Boolean(tableStyle.minWidth),
+        stickyHeader: this.stickyHeader(),
+        stickyTop: this.stickyTop(),
+        headerHeight: headerHeight(),
+      });
+    });
+    const pinSticky = this.maxHeight() != null || this.stickyHeader();
     const pinnedAttrs = (
       attrs: Attrs,
       args: DesktopRowWiringArgs<TRow>,
@@ -2453,7 +2484,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           ? style
           : {
               ...(typeof style === "object" && style !== null ? style : {}),
-              ...pinnedRowSticky(side, pinSticky, 0),
+              ...pinnedRowSticky(side, pinSticky, stickyPlan().rowPinOffset),
               // A pinned total is the host's figure, not a record: semibold.
               ...(summary ? { fontWeight: 600 } : {}),
             },
@@ -2720,6 +2751,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       bulkBar,
       rowActions: rowActionList,
       density,
+      stickyHead: computed(() => stickyPlan().stickyStyle),
+      reportHeaderHeight: (px) => {
+        headerHeight.set(px);
+      },
       toolbarExtras,
       rowMutations,
       savedViews,

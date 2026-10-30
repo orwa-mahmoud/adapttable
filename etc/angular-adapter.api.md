@@ -1984,6 +1984,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     } | undefined>;
     // @internal
     protected readonly statusBarSlot: FeatureSlotKey<Omit<StatusBarChromeProps<unknown>, "slots">>;
+    readonly stickyHeader: InputSignal<boolean>;
+    readonly stickyTop: InputSignal<number>;
     readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
     readonly supports: InputSignal<QuerySupport | undefined>;
     // (undocumented)
@@ -2081,6 +2083,16 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
         "forceMobile": {
             "alias": "forceMobile";
+            "required": false;
+            "isSignal": true;
+        };
+        "stickyHeader": {
+            "alias": "stickyHeader";
+            "required": false;
+            "isSignal": true;
+        };
+        "stickyTop": {
+            "alias": "stickyTop";
             "required": false;
             "isSignal": true;
         };
@@ -2280,6 +2292,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
 
 // @public
 export abstract class AdaptDesktopTableModel<TRow> {
+    constructor();
     // (undocumented)
     protected readonly columnGroupToggleSlot: FeatureSlotKey<ColumnGroupToggleProps>;
     // (undocumented)
@@ -2363,6 +2376,7 @@ export abstract class AdaptDesktopTableModel<TRow> {
     }): number | undefined;
     // (undocumented)
     protected spanned(attrs: Attrs, cell: BodyCellView<TRow>): Attrs;
+    protected theadStyle(): Record<string, string> | null;
     // (undocumented)
     protected treeCellProps(entry: BodyRow<TRow>, columnKey: string, children: TemplateRef<unknown>): TreeCellProps<never> | undefined;
     // (undocumented)
@@ -6301,6 +6315,7 @@ export interface TableView<TRow> {
     readonly renderCard: Signal<MobileCardRenderer<TRow> | undefined>;
     readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
     readonly reorder: Signal<RowReorderState<TRow>> | undefined;
+    readonly reportHeaderHeight: (px: number) => void;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
     readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
@@ -6309,6 +6324,7 @@ export interface TableView<TRow> {
     readonly selection: RowSelection | undefined;
     readonly showActions: Signal<boolean>;
     readonly showSummary: Signal<boolean>;
+    readonly stickyHead: Signal<CssProperties | undefined>;
     readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
     readonly table: DataTable<TRow>;
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
