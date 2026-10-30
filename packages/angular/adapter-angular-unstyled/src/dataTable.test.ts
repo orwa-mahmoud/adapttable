@@ -104,7 +104,39 @@ async function mount() {
   };
 }
 
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="data"
+      [columns]="columns()"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+    />
+  `,
+})
+class SizedColumns {
+  readonly data = CITIES;
+  readonly columns = signal<ColumnDef<City>[]>([
+    { key: "name", width: 900, accessor: (row) => row.name },
+    { key: "country", width: 600, accessor: (row) => row.country },
+  ]);
+  readonly rowKey = (row: City) => row.id;
+}
+
 describe("the unstyled Angular table", () => {
+  it("scrolls sized columns sideways inside the table, not the page", async () => {
+    const fixture = TestBed.createComponent(SizedColumns);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { part } = queryParts(fixture.nativeElement as HTMLElement);
+    expect(part("table")?.style.minWidth).toBe("1500px");
+    expect(part("scroll-box")?.style.overflowX).toBe("auto");
+    fixture.componentInstance.columns.set(COLUMNS);
+    await fixture.whenStable();
+    expect(part("scroll-box")?.style.overflowX).toBe("");
+  });
+
   it("follows the viewport when the host does not force a layout", async () => {
     const { part, ids } = await mount();
     // No `matchMedia` in the test environment: the desktop table.

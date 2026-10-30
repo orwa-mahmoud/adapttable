@@ -287,11 +287,21 @@ export abstract class AdaptDesktopTableModel<TRow> {
   }
   protected scrollBoxStyle(): Record<string, string> | null {
     const maxHeight = this.maxHeight();
-    if (maxHeight == null) return null;
-    return {
-      maxHeight:
-        typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight,
-      overflow: "auto",
-    };
+    if (maxHeight != null) {
+      return {
+        maxHeight:
+          typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight,
+        overflow: "auto",
+      };
+    }
+    // Sized columns give the table a minimum width that can outgrow the box;
+    // the box then scrolls sideways instead of the page.
+    const style = this.view().table.tableAttrs().style;
+    const sized =
+      typeof style === "object" &&
+      style !== null &&
+      "minWidth" in style &&
+      Boolean(style.minWidth);
+    return sized ? { overflowX: "auto" } : null;
   }
 }
