@@ -39,7 +39,7 @@ const rowKey = (row: Person) => row.id;
 </template>
 ```
 
-Use `searchable="false"` to omit the search field, and `getSearchText` to choose the text searched for each row. `searchDebounceMs` controls the draft delay. With a supplied server source, query changes request data from the host; the table does not download the complete dataset to sort it.
+Use `searchable="false"` to omit the search field, and `getSearchText` to choose the text searched for each row. `searchDebounceMs` controls the draft delay, and `searchPlaceholder` sets the search box placeholder ahead of the `searchPlaceholder` label. With a supplied server source, query changes request data from the host; the table does not download the complete dataset to sort it.
 
 A custom header owns its sort control. Invoke the provided `toggleSort` callback instead of changing the row array. For headless surfaces, use the sorting state and requests exposed by `useDataTable`; see the [API](./api.md).
 

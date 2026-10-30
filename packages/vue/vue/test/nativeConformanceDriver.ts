@@ -1,5 +1,5 @@
 /** A Vue mount adapter for the unchanged framework-neutral behavioral suite. */
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels, type TableLabels } from "@adapttable/core";
 import {
   CONFORMANCE_COLUMNS,
   CONFORMANCE_ROWS,
@@ -51,12 +51,16 @@ type ScenarioProps = Pick<
   | "paginationMode"
   | "onRowClick"
   | "isCellFlashing"
+  | "searchPlaceholder"
 >;
 
 interface NativeScenario extends ConformanceScenario {
   onRangeChange?: (range: CellRange | null) => void;
   onRowClick?: (row: ConformanceRow) => void;
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
+  searchPlaceholder?: string;
+  /** Table labels beyond the neutral suite's; they replace `labels`. */
+  tableLabels?: TableLabels;
 }
 interface NativeDriver extends ConformanceDriver {
   mount: (scenario: NativeScenario) => ConformanceMount;
@@ -85,7 +89,7 @@ export function nativeConformanceDriver(kit: NativeKit): NativeDriver {
         forceMobile: scenario.mobile,
         urlSync: false,
         selectable: scenario.selectable,
-        labels: scenario.labels,
+        labels: scenario.tableLabels ?? scenario.labels,
         defaults:
           scenario.pageSize === undefined
             ? undefined
@@ -114,6 +118,7 @@ export function nativeConformanceDriver(kit: NativeKit): NativeDriver {
         ...(scenario.virtualize ? { paginationMode: "infinite" } : {}),
         onRowClick: scenario.onRowClick,
         isCellFlashing: scenario.isCellFlashing,
+        searchPlaceholder: scenario.searchPlaceholder,
       };
       const container = document.createElement("div");
       document.body.append(container);
@@ -343,4 +348,52 @@ export function nativeRowConformanceTests(
       },
     },
   ]);
+}
+
+/** The search box's placeholder: the prop, ahead of the `searchPlaceholder` label. */
+export function nativeSearchConformanceTests(
+  driver: NativeDriver
+): readonly ConformanceTest[] {
+  const placeholders = (root: ParentNode) =>
+    [...root.querySelectorAll<HTMLInputElement>("input[placeholder]")].map(
+      (input) => input.placeholder
+    );
+  return [
+    {
+      name: "shows searchPlaceholder in the search box, ahead of the label",
+      async run() {
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          tableLabels: { searchPlaceholder: "From labels" },
+          searchPlaceholder: "Search names",
+        });
+        try {
+          await view.ready;
+          expect(placeholders(view.container)).toContain("Search names");
+          expect(placeholders(view.container)).not.toContain("From labels");
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+    {
+      name: "falls back to the searchPlaceholder label",
+      async run() {
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          tableLabels: { searchPlaceholder: "From labels" },
+        });
+        try {
+          await view.ready;
+          expect(placeholders(view.container)).toContain("From labels");
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+  ];
 }

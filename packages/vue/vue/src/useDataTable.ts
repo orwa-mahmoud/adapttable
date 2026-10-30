@@ -86,6 +86,8 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
   readonly mobileBreakpoint?: MaybeRefOrGetterOptional<number>;
   readonly locale?: MaybeRefOrGetterOptional<string>;
   readonly searchDebounceMs?: number;
+  /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
+  readonly searchPlaceholder?: MaybeRefOrGetterOptional<string>;
   readonly multiSort?: MaybeRefOrGetter<boolean>;
   readonly fitColumns?: MaybeRefOrGetter<boolean>;
   readonly columnWidths?: MaybeRefOrGetterOptional<
@@ -108,9 +110,15 @@ export function useDataTable<TRow>(
   const active = useScopeActivity();
   const source = computed(() => toValue(options.value.source));
   const rows = computed(() => source.value.rows);
-  const labels = computed(() =>
-    resolveLabels(toValue<TableLabels | undefined>(options.value.labels))
-  );
+  const labels = computed(() => {
+    const host = toValue<TableLabels | undefined>(options.value.labels);
+    const placeholder = toValue(options.value.searchPlaceholder);
+    return resolveLabels(
+      placeholder === undefined
+        ? host
+        : { ...host, searchPlaceholder: placeholder }
+    );
+  });
   const dir = computed(() => toValue(options.value.dir) ?? "ltr");
   const isMobile = useViewportMobile(options);
   const columnInputs = computed(() => toValue(options.value.columns));

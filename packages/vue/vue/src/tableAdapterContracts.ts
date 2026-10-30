@@ -323,6 +323,8 @@ export interface DataTableProps<TRow> {
   readonly locale?: string;
   readonly searchable?: boolean;
   readonly searchDebounceMs?: number;
+  /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
+  readonly searchPlaceholder?: string;
   readonly forceMobile?: boolean;
   readonly mobileBreakpoint?: number;
   /** Bound the scroll body while keeping the toolbar and pagination outside it. */

@@ -869,6 +869,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly rowKey: (row: TRow) => string;
     // (undocumented)
     readonly searchDebounceMs?: number;
+    readonly searchPlaceholder?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly selection?: RowSelection;
     // (undocumented)
