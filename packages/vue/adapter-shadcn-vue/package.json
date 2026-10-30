@@ -1,7 +1,19 @@
 {
   "name": "@adapttable/shadcn-vue",
   "version": "0.2.1",
-  "description": "shadcn-vue data table presentation for the headless AdaptTable Vue binding.",
+  "description": "shadcn-vue data table presentation for the headless AdaptTable Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "data-table",
+    "table",
+    "datagrid",
+    "typescript",
+    "adapttable",
+    "shadcn-vue",
+    "shadcn",
+    "tailwind"
+  ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",

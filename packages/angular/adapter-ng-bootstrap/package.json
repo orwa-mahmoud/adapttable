@@ -1,13 +1,17 @@
 {
   "name": "@adapttable/ng-bootstrap",
   "version": "0.2.7",
-  "description": "AdaptTable Angular tables with ng-bootstrap overlays and isolated Bootstrap controls.",
+  "description": "AdaptTable Angular tables with ng-bootstrap overlays and isolated Bootstrap controls — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
     "ng-bootstrap",
     "bootstrap",
-    "adapttable"
+    "adapttable",
+    "table",
+    "angular-table",
+    "datagrid",
+    "typescript"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",

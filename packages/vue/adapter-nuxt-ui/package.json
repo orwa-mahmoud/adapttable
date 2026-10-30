@@ -1,7 +1,19 @@
 {
   "name": "@adapttable/nuxt-ui",
   "version": "0.3.2",
-  "description": "Nuxt UI components for the AdaptTable headless Vue binding.",
+  "description": "Nuxt UI components for the AdaptTable headless Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "data-table",
+    "table",
+    "datagrid",
+    "typescript",
+    "adapttable",
+    "nuxt",
+    "nuxt-ui",
+    "tailwind"
+  ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",

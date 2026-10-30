@@ -1,14 +1,18 @@
 {
   "name": "@adapttable/ng-zorro",
   "version": "0.2.7",
-  "description": "AdaptTable's Angular DataTable rendered with NG-ZORRO components.",
+  "description": "AdaptTable's Angular DataTable rendered with NG-ZORRO components — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
     "table",
     "ng-zorro",
     "headless",
-    "adapttable"
+    "adapttable",
+    "ant-design",
+    "angular-table",
+    "datagrid",
+    "typescript"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",

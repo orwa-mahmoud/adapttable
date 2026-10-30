@@ -1,7 +1,17 @@
 {
   "name": "@adapttable/vuetify",
   "version": "0.3.1",
-  "description": "Vuetify controls for the AdaptTable Vue binding.",
+  "description": "Vuetify controls for the AdaptTable Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "data-table",
+    "table",
+    "datagrid",
+    "typescript",
+    "adapttable",
+    "vuetify"
+  ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",

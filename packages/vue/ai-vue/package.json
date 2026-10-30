@@ -1,7 +1,17 @@
 {
   "name": "@adapttable/ai-vue",
   "version": "0.1.6",
-  "description": "Optional Vue bindings for AdaptTable AI agents, assistants and speech input.",
+  "description": "Optional Vue bindings for AdaptTable AI agents, assistants and speech input — the agent acts through the table's own capabilities, with approval before writes.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "data-table",
+    "ai",
+    "agent",
+    "assistant",
+    "typescript",
+    "adapttable"
+  ],
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

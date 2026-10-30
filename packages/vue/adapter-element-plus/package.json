@@ -1,7 +1,17 @@
 {
   "name": "@adapttable/element-plus",
   "version": "0.3.1",
-  "description": "Element Plus data table controls for the AdaptTable Vue binding.",
+  "description": "Element Plus data table controls for the AdaptTable Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "data-table",
+    "table",
+    "datagrid",
+    "typescript",
+    "adapttable",
+    "element-plus"
+  ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",

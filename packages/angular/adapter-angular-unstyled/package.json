@@ -1,14 +1,17 @@
 {
   "name": "@adapttable/angular-unstyled",
   "version": "0.2.7",
-  "description": "AdaptTable's Angular DataTable with native HTML controls, responsive cards, opt-in features and no theme of its own.",
+  "description": "AdaptTable's Angular DataTable with native HTML controls, responsive cards, opt-in features and no theme of its own — sorting, filters, editing, grouping, column pinning, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
     "table",
     "unstyled",
     "headless",
-    "adapttable"
+    "adapttable",
+    "angular-table",
+    "datagrid",
+    "typescript"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",

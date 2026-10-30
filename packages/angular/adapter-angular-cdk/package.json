@@ -1,12 +1,17 @@
 {
   "name": "@adapttable/angular-cdk",
   "version": "0.2.7",
-  "description": "AdaptTable Angular table with CDK accessibility and overlay primitives and adapter-owned neutral controls.",
+  "description": "AdaptTable Angular table with CDK accessibility and overlay primitives and adapter-owned neutral controls — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
     "cdk",
-    "adapttable"
+    "adapttable",
+    "table",
+    "headless",
+    "angular-table",
+    "datagrid",
+    "typescript"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",

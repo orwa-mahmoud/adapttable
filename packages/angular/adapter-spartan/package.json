@@ -1,14 +1,18 @@
 {
   "name": "@adapttable/spartan",
   "version": "0.2.7",
-  "description": "AdaptTable's Angular DataTable rendered with Spartan Brain and package-owned Helm components.",
+  "description": "AdaptTable's Angular DataTable rendered with Spartan Brain and package-owned Helm components — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
     "table",
     "unstyled",
     "headless",
-    "adapttable"
+    "adapttable",
+    "spartan",
+    "angular-table",
+    "datagrid",
+    "typescript"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
