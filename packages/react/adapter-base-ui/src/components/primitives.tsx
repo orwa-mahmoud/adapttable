@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { ChevronDownIcon } from "../icons";
+import { ChevronDownIcon } from "../svg";
 import type { BaseUiAccentColor } from "../types";
 import { Flex, Text } from "../ui";
 import { usePortalContainer } from "./portalContainer";

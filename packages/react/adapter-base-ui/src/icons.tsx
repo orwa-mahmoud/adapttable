@@ -7,40 +7,9 @@ import {
 } from "@adapttable/react";
 import type { ReactNode } from "react";
 
-interface IconProps {
-  size?: number;
-}
+import { type IconProps, Svg } from "./svg";
 
-function Svg({
-  size = 16,
-  children,
-}: Readonly<IconProps & { children: ReactNode }>) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      {children}
-    </svg>
-  );
-}
-
-/** Downward chevron: the open affordance on selects and disclosures. */
-export function ChevronDownIcon({ size = 16 }: Readonly<IconProps>) {
-  return (
-    <Svg size={size}>
-      <path d="m6 9 6 6 6-6" />
-    </Svg>
-  );
-}
+export { ChevronDownIcon } from "./svg";
 
 /** Hopper funnel with a neck — Base UI's Filters glyph. */
 export function FiltersIcon({ size = 16 }: Readonly<IconProps>) {
