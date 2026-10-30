@@ -33,6 +33,15 @@ function Svg({
   );
 }
 
+/** Downward chevron: the open affordance on selects and disclosures. */
+export function ChevronDownIcon({ size = 16 }: Readonly<IconProps>) {
+  return (
+    <Svg size={size}>
+      <path d="m6 9 6 6 6-6" />
+    </Svg>
+  );
+}
+
 /** Hopper funnel with a neck — Base UI's Filters glyph. */
 export function FiltersIcon({ size = 16 }: Readonly<IconProps>) {
   return (

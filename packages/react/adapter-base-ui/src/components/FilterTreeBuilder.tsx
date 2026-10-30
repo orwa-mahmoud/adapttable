@@ -8,6 +8,7 @@ import {
   type FilterTreeSlots,
 } from "@adapttable/react/adapter";
 
+import { ChevronDownIcon } from "../icons";
 import { Button, Flex, TextField } from "../ui";
 import { NativeSelect } from "./primitives";
 
@@ -109,7 +110,13 @@ function TreeDisclosure({
         style={{ justifyContent: "space-between" }}
       >
         {label}
-        <span aria-hidden>{expanded ? "▴" : "▾"}</span>
+        <span
+          aria-hidden
+          className="adapttable-select-icon"
+          data-expanded={expanded ? "" : undefined}
+        >
+          <ChevronDownIcon size={14} />
+        </span>
       </Button>
       {expanded ? children : null}
     </Flex>

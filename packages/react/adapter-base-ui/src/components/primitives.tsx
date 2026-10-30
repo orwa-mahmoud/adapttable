@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { ChevronDownIcon } from "../icons";
 import type { BaseUiAccentColor } from "../types";
 import { Flex, Text } from "../ui";
 import { usePortalContainer } from "./portalContainer";
@@ -220,6 +221,9 @@ export function NativeSelect({
         {...rest}
       >
         <Select.Value data-slot="select-value" placeholder={placeholder} />
+        <Select.Icon className="adapttable-select-icon">
+          <ChevronDownIcon size={14} />
+        </Select.Icon>
       </Select.Trigger>
       <Select.Portal container={portalContainer}>
         <Select.Positioner
