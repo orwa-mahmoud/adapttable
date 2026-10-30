@@ -111,40 +111,8 @@ formula grammar. Parser errors and dependency cycles remain explicit result
 fields. Formula text is serialized as data; importing or restoring a formula does
 not execute JavaScript. Sorting and export use the neutral numeric/text result.
 
-`useRowPatchStream` from `/stream` passes an updater to the host's `onPatch` callback.
-It accepts WebSocket or EventSource transport, custom frame parsing and an optional
-reconnect policy. Callback replacement does not reconnect a healthy socket.
-Endpoint or transport replacement closes the previous stream. Component mounting
-opens it, KeepAlive suspension closes it, activation reconnects it, and explicit
-`close()` keeps it closed for the remainder of that composable's lifetime.
-
-`useChangedCellFlash(options?)` from `/stream` marks the cells a patch changed.
-It is off until `enabled: true`, lights nothing for a reader who prefers reduced
-motion, and holds each mark for `durationMs` (1200 ms by default). Feed `mark`
-the events from core's `rowPatchLog`, and pass `isFlashing` to the table's
-`isCellFlashing`; the changed cells and card values carry `data-flash`, which
-your stylesheet animates. The result also offers `isRowFlashing(rowId)`,
-`flashProps(rowId, columnKey)` for custom cells, and `clear()`.
-
-```ts
-import { rowPatchLog } from "@adapttable/core";
-import { useChangedCellFlash, useRowPatchStream } from "@adapttable/vue/stream";
-import { shallowRef } from "vue";
-
-const rows = shallowRef<readonly Quote[]>(initial);
-const flash = useChangedCellFlash({ enabled: true });
-useRowPatchStream({
-  websocket: "wss://api.example.com/quotes",
-  getRowId: (row) => row.id,
-  onPatch: (update) => {
-    const next = update(rows.value);
-    rows.value = next;
-    const log = rowPatchLog(next);
-    if (log) flash.mark(log.events);
-  },
-});
-// <DataTable :data="rows" :is-cell-flashing="flash.isFlashing" … />
-```
+`useRowPatchStream` and `useChangedCellFlash` from `/stream` keep host-owned
+rows live and mark the cells a patch changed; see [realtime rows](./realtime.md).
 
 `Sparkline` and `sparklineColumn` from `/sparkline` render line, bar or area SVGs
 using neutral geometry. Each chart has an accessible name and title. Non-finite

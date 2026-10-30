@@ -242,6 +242,8 @@ const {
 - [Vue navigation, find and status](https://adapttable.orwamahmoud.com/vue/navigation/): optional keyboard grid, column selection, host-owned clipboard and fill, find URL state, localized statistics and native slots
 - [Vue actions and export](https://adapttable.orwamahmoud.com/vue/actions/): native bulk actions, palette, context menu, side panel, history and host-controlled export
 - [Vue specialized data views](https://adapttable.orwamahmoud.com/vue/specialized/): windowed rows and columns, host-owned row moves, grouping configuration, pivot, formulas, streams and sparklines
+- [Vue realtime rows](https://adapttable.orwamahmoud.com/vue/realtime/): host-owned ref updates over WebSockets or SSE, connection lifecycle and changed-cell flash
+- [Vue localization and RTL](https://adapttable.orwamahmoud.com/vue/i18n-rtl/): locale bundles, per-locale i18n column paths, translated labels and direction props
 
 ## Demo
 

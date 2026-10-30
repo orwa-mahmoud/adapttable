@@ -178,6 +178,8 @@ export const sidebar = [
       { label: "Vue column menu", slug: "vue/column-menu" },
       { label: "Vue navigation, find and status", slug: "vue/navigation" },
       { label: "Vue specialized data views", slug: "vue/specialized" },
+      { label: "Vue realtime rows", slug: "vue/realtime" },
+      { label: "Vue localization and RTL", slug: "vue/i18n-rtl" },
       { label: "Vue summaries and footers", slug: "vue/summary-row" },
       { label: "Vue API reference", slug: "vue/api" },
       { label: "Vue assistant and approvals", slug: "vue/assistant" },

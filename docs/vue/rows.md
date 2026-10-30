@@ -119,18 +119,37 @@ The first row is the Tab stop and Arrow Up/Down move between rows. Bind it as
 a prop or a listener:
 
 ```vue
-<DataTable
-  :data="people"
-  :columns="columns"
-  :row-key="(row) => row.id"
-  @row-click="(row) => openPerson(row.id)"
-/>
+<script setup lang="ts">
+import { shallowRef } from "vue";
+import type { ColumnDef } from "@adapttable/vue";
+import { DataTable } from "@adapttable/vue-unstyled";
+
+interface Person {
+  id: string;
+  name: string;
+}
+const people: readonly Person[] = [{ id: "ada", name: "Ada" }];
+const columns: readonly ColumnDef<Person>[] = [{ key: "name" }];
+const opened = shallowRef<string>();
+const openPerson = (row: Person) => {
+  opened.value = row.id;
+};
+</script>
+
+<template>
+  <DataTable
+    :data="people"
+    :columns="columns"
+    :row-key="(row: Person) => row.id"
+    @row-click="openPerson"
+  />
+</template>
 ```
 
 Activatable rows and cards carry `data-clickable`. Omit the callback and rows
 stay inert. `isCellFlashing(rowId, columnKey)` marks cells with `data-flash`,
 on desktop cells and on card values; see
-[changed cells](./specialized.md#formulas-streams-and-sparklines).
+[realtime rows](./realtime.md#flash-the-cells-that-moved).
 
 ## Explore the implementation
 

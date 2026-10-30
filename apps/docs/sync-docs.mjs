@@ -53,6 +53,8 @@ export const TITLES = {
   "vue/column-menu.md": "Vue column menu",
   "vue/navigation.md": "Vue navigation, find and status",
   "vue/specialized.md": "Vue specialized data views",
+  "vue/realtime.md": "Vue realtime table updates",
+  "vue/i18n-rtl.md": "Vue table localization and RTL",
   "vue/summary-row.md": "Vue summaries and footers",
   "vue/getting-started.md": "Get started with Vue tables",
   "vue/element-plus.md": "Element Plus Vue tables",
@@ -232,6 +234,10 @@ export const DESCRIPTIONS = {
     "Add Vue cell navigation, clipboard and fill actions, find-in-table, column selection and status controls with scoped models and native slots.",
   "vue/specialized.md":
     "Compose Vue virtual windows, host-owned row reordering, grouping and pivot controls, formulas, row streams and accessible sparklines.",
+  "vue/realtime.md":
+    "Apply realtime row patches to host-owned Vue refs over WebSockets or server-sent events, and flash the cells each patch changed.",
+  "vue/i18n-rtl.md":
+    "Localize Vue tables with shared locale bundles, per-locale i18n column paths and direction props across native kit controls.",
   "vue/summary-row.md":
     "Render Vue page totals and custom footers with reactive summary values, aligned desktop cells, mobile cards and shared adapter models.",
   "vue/assistant.md":

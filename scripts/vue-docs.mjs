@@ -27,4 +27,6 @@ export const VUE_DOCS = Object.freeze([
   "vue/navigation.md",
   "vue/actions.md",
   "vue/specialized.md",
+  "vue/realtime.md",
+  "vue/i18n-rtl.md",
 ]);

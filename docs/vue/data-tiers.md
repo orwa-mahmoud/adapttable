@@ -56,16 +56,31 @@ and once per real change with the consolidated query; the previous request's
 ```vue
 <script setup lang="ts">
 import { shallowRef } from "vue";
-import type { TableQueryHandler } from "@adapttable/vue";
+import type { ColumnDef, TableQuery, TableQueryHandler } from "@adapttable/vue";
 import { DataTable } from "@adapttable/vue-unstyled";
 
+interface Person {
+  id: string;
+  name: string;
+}
+interface PeoplePage {
+  rows: readonly Person[];
+  total: number;
+}
+// Your application's request; it sends the query and honors the signal.
+declare function fetchPeople(
+  query: TableQuery,
+  init: { signal: AbortSignal }
+): Promise<PeoplePage>;
+
+const columns: readonly ColumnDef<Person>[] = [{ key: "name", sortable: true }];
 const rows = shallowRef<readonly Person[]>([]);
 const total = shallowRef(0);
 const loading = shallowRef(false);
 const fetchPage: TableQueryHandler = async (query, { signal }) => {
   loading.value = true;
   try {
-    const reply = await api.people(query, { signal });
+    const reply = await fetchPeople(query, { signal });
     if (signal.aborted) return;
     rows.value = reply.rows;
     total.value = reply.total;
@@ -81,7 +96,7 @@ const fetchPage: TableQueryHandler = async (query, { signal }) => {
     :total="total"
     :is-loading="loading"
     :columns="columns"
-    :row-key="(row) => row.id"
+    :row-key="(row: Person) => row.id"
     @query-change="fetchPage"
   />
 </template>

@@ -67,6 +67,8 @@ describe("site addresses", () => {
       "vue/navigation.md",
       "vue/actions.md",
       "vue/specialized.md",
+      "vue/realtime.md",
+      "vue/i18n-rtl.md",
     ]);
     for (const source of VUE_DOCS) {
       assert.ok(PAGES.includes(source.replace(/\.md$/, "")), source);
