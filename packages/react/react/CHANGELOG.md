@@ -1,5 +1,27 @@
 # @adapttable/react
 
+## 1.9.0
+
+### Minor Changes
+
+- e50c6c8: Pinned columns carry `data-pinned="start"` or `"end"` on their header and body cells in every React kit, so the pinned edge shows in Windows high-contrast mode. The desktop row wiring adds `bodyPinSide` for kits that render their own cells.
+
+### Patch Changes
+
+- 7cd8e5c: A paged antd table no longer remounts on every render: a batch-edit field keeps focus and its typing, and scroll position holds. The windowed row and column counts a paged table reports are now built once per table shape in every kit.
+- 91ea216: In the inline assistant panel the composer stays at the end of the panel instead of sticking to the bottom of the screen over the conversation and the approval review. The floating window and the sheet still hold it at their bottom edge.
+- aa06136: A page that renders the table assistant closed keeps its focus and scroll position on load. The launcher takes focus only when an open panel closes.
+- b4f2c66: An AND/OR filter-tree condition still waiting for its value no longer acts as a filter: it gets no chip, is not counted on the Filters badge, cannot widen an OR group to every row, and is not sent to a server. `isFilterTreeConditionSet` and `settledFilterTree`, from `@adapttable/core` and `@adapttable/core/query`, give a backend the same rule.
+- 4b3a395: The fullscreen button works on its first press after the table mounts, without waiting for something else to re-render the table.
+- 2e930c2: A leaf row in a tree is the same height as a parent row, with its text on the row's centre line instead of a few pixels low.
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [858ef5b]
+  - @adapttable/core@3.13.0
+
 ## 1.8.0
 
 ### Minor Changes

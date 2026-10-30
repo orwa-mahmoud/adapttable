@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/vuetify",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Vuetify controls for the AdaptTable Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
   "keywords": [
     "vue",
@@ -40,7 +40,7 @@
     "@vue/test-utils": "2.4.6"
   },
   "dependencies": {
-    "@adapttable/vue": "0.3.0"
+    "@adapttable/vue": "0.4.0"
   },
   "engines": {
     "node": ">=22.12.0"

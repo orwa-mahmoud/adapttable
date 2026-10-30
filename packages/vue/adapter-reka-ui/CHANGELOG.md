@@ -1,5 +1,16 @@
 # @adapttable/reka-ui
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [b4f2c66]
+- Updated dependencies [2e930c2]
+- Updated dependencies [5ff3cee]
+- Updated dependencies [20122b2]
+- Updated dependencies [e21f5a5]
+  - @adapttable/vue@0.4.0
+
 ## 0.2.1
 
 ### Patch Changes

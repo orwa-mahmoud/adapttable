@@ -1,5 +1,20 @@
 # @adapttable/ai-angular
 
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [46f6212]
+- Updated dependencies [5b8adbd]
+- Updated dependencies [f009a47]
+- Updated dependencies [d9bca8c]
+- Updated dependencies [a3f3c45]
+- Updated dependencies [91ea216]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [2e930c2]
+  - @adapttable/angular@0.8.0
+  - @adapttable/ai@0.6.5
+
 ## 0.1.8
 
 ### Patch Changes

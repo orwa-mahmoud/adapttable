@@ -1,5 +1,28 @@
 # @adapttable/angular
 
+## 0.8.0
+
+### Minor Changes
+
+- 5b8adbd: The table takes `stickyHeader` and `stickyTop` inputs. A sticky header stays in view inside a `maxHeight` box, in a table that scrolls sideways, or on the page below an app bar of `stickyTop` pixels, and pinned rows sit below it.
+- d9bca8c: The table takes `locale`, `mobileBreakpoint` and `searchDebounceMs` inputs. With `locale`, columns that read by `i18n` path show, filter, search and sort that locale's field.
+
+### Patch Changes
+
+- 46f6212: A table whose sized columns outgrow its box scrolls sideways inside the table instead of widening the page.
+- f009a47: Pinned summary rows read semibold, so a total stands apart from the rows of data around it.
+- a3f3c45: A table whose columns set a width keeps those widths and scrolls sideways when they do not fit, instead of squeezing them; resizing a column widens it.
+- 91ea216: In the inline assistant panel the composer stays at the end of the panel instead of sticking to the bottom of the screen over the conversation and the approval review. The floating window and the sheet still hold it at their bottom edge.
+- b4f2c66: An AND/OR filter-tree condition still waiting for its value no longer acts as a filter: it gets no chip, is not counted on the Filters badge, cannot widen an OR group to every row, and is not sent to a server. `isFilterTreeConditionSet` and `settledFilterTree`, from `@adapttable/core` and `@adapttable/core/query`, give a backend the same rule.
+- 2e930c2: A leaf row in a tree is the same height as a parent row, with its text on the row's centre line instead of a few pixels low.
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [858ef5b]
+  - @adapttable/core@3.13.0
+
 ## 0.7.0
 
 ### Minor Changes

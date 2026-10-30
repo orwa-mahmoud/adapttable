@@ -1,5 +1,5 @@
 {
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",
@@ -47,8 +47,8 @@
     "headless"
   ],
   "dependencies": {
-    "@adapttable/core": "3.12.0",
-    "@adapttable/vue": "0.3.0"
+    "@adapttable/core": "3.13.0",
+    "@adapttable/vue": "0.4.0"
   },
   "exports": {
     ".": {

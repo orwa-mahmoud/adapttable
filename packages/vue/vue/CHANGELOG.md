@@ -1,5 +1,25 @@
 # @adapttable/vue
 
+## 0.4.0
+
+### Minor Changes
+
+- 5ff3cee: The table takes `onRowClick`, which activates a row or phone card by click, Enter or Space, and `isCellFlashing`, which marks changed cells and card values with `data-flash`. `useChangedCellFlash` from `/stream` tracks the cells a live patch changed, and stays dark for readers who prefer reduced motion.
+- 20122b2: The table takes a `searchPlaceholder` prop for the search box, ahead of the `searchPlaceholder` label.
+- e21f5a5: The table takes the server tier as props: `data` as the current page with `onQueryChange` fetches each query, described by `total`, `supports`, `aggregates`, `responseKey`, `facetKeys` and `facets`. `mode="frontend"` keeps the table's own processing and makes `onQueryChange` a notice of each change.
+
+### Patch Changes
+
+- b4f2c66: An AND/OR filter-tree condition still waiting for its value no longer acts as a filter: it gets no chip, is not counted on the Filters badge, cannot widen an OR group to every row, and is not sent to a server. `isFilterTreeConditionSet` and `settledFilterTree`, from `@adapttable/core` and `@adapttable/core/query`, give a backend the same rule.
+- 2e930c2: A leaf row in a tree is the same height as a parent row, with its text on the row's centre line instead of a few pixels low.
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [858ef5b]
+  - @adapttable/core@3.13.0
+
 ## 0.3.0
 
 ### Minor Changes

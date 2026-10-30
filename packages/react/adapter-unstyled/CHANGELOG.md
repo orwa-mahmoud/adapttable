@@ -1,5 +1,28 @@
 # @adapttable/unstyled
 
+## 3.4.3
+
+### Patch Changes
+
+- 2172d8d: Each grouping chip shows its level, as in "1. Team · 2. Status".
+- 1faedc0: A column's header filter opens as a dialog named for that column, so screen readers announce which filter is open.
+- edc52fa: The Saved views menu draws its divider only once a saved view is listed above it; an empty menu opens straight onto the name field.
+- ba8095f: The filter popover and drawer, saved views and the column menu open inside the table while it is fullscreen, so they stay visible.
+- 8a972a0: A header filter closes on Escape, returning focus to its funnel, and on a press outside it, so opening one column's filter closes the last.
+- Updated dependencies [7cd8e5c]
+- Updated dependencies [91ea216]
+- Updated dependencies [aa06136]
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [4b3a395]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [2e930c2]
+- Updated dependencies [858ef5b]
+  - @adapttable/react@1.9.0
+  - @adapttable/core@3.13.0
+
 ## 3.4.2
 
 ### Patch Changes
