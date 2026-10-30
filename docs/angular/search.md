@@ -60,7 +60,8 @@ unless the host provides another way to inspect and clear it.
 ## Typing and committed search
 
 The search input updates its displayed text immediately and commits a trimmed
-term after 300 ms without another keystroke. URL changes, clear-all and other
+term after 300 ms without another keystroke; `[searchDebounceMs]` on the table
+changes that wait. URL changes, clear-all and other
 external committed changes update the displayed text. Timers are cleared when
 the table is destroyed.
 

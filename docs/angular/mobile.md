@@ -7,7 +7,7 @@ column definitions, host callbacks and optional features drive both layouts.
 ## Automatic cards or a scrolling table
 
 Omit `forceMobile` for automatic cards below the default 768px viewport
-breakpoint. Set `[forceMobile]="true"` to preview cards at any width, or
+breakpoint; `[mobileBreakpoint]` sets another width. Set `[forceMobile]="true"` to preview cards at any width, or
 `[forceMobile]="false"` to keep the desktop table with horizontal scrolling on
 phones. No second table instance is needed, so sorting, filtering and selection
 remain with the same table.

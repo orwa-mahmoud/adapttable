@@ -1914,7 +1914,9 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly isCellFlashing: InputSignal<((rowId: string, columnKey: string) => boolean) | undefined>;
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly loading: InputSignal<boolean | undefined>;
+    readonly locale: InputSignal<string | undefined>;
     readonly maxHeight: InputSignal<string | number | undefined>;
+    readonly mobileBreakpoint: InputSignal<number | undefined>;
     // @internal
     protected readonly mobileCards: Signal<DataTableSurface | undefined>;
     readonly mode: InputSignal<"frontend" | "server" | undefined>;
@@ -1946,6 +1948,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
     readonly searchable: InputSignal<boolean>;
+    readonly searchDebounceMs: InputSignal<number | undefined>;
     // @internal
     protected readonly searchIcon: IconDescriptor;
     readonly searchPlaceholder: InputSignal<string | undefined>;
@@ -2081,6 +2084,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "mobileBreakpoint": {
+            "alias": "mobileBreakpoint";
+            "required": false;
+            "isSignal": true;
+        };
         "classNames": {
             "alias": "classNames";
             "required": false;
@@ -2111,6 +2119,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "locale": {
+            "alias": "locale";
+            "required": false;
+            "isSignal": true;
+        };
         "searchPlaceholder": {
             "alias": "searchPlaceholder";
             "required": false;
@@ -2118,6 +2131,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
         "searchable": {
             "alias": "searchable";
+            "required": false;
+            "isSignal": true;
+        };
+        "searchDebounceMs": {
+            "alias": "searchDebounceMs";
             "required": false;
             "isSignal": true;
         };
@@ -4556,6 +4574,7 @@ export class AdaptTreeCellChrome {
     paddingInlineStart?: string;
     display: string;
     alignItems: string;
+    verticalAlign: string;
     gap: string;
     }>;
     // (undocumented)

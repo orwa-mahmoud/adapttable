@@ -1212,6 +1212,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   readonly dir = input<Direction>("ltr");
   /** Show the phone layout whatever the viewport. */
   readonly forceMobile = input<boolean>();
+  /**
+   * Viewport width, in pixels, at or below which the table shows cards.
+   * Read when the table is created.
+   */
+  readonly mobileBreakpoint = input<number>();
   /** Classes for mobile-card and row-action parts. */
   readonly classNames = input<DataTableClassNames>({});
   /** Replace a card's fields while preserving its interactive shell. */
@@ -1225,6 +1230,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     input<(rowId: string, columnKey: string) => boolean>();
   /** Translated labels, merged over the English defaults. */
   readonly labels = input<TableLabels>();
+  /**
+   * Active locale for columns that read by `i18n` path: the cells, filter
+   * choices, search and sort all read that locale's field.
+   */
+  readonly locale = input<string>();
   /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
   readonly searchPlaceholder = input<string>();
   /**
@@ -1232,6 +1242,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    * second search box inside a row reads as chrome rather than as a feature.
    */
   readonly searchable = input(true);
+  /**
+   * How long the search box waits after the last keystroke before it
+   * searches, in milliseconds. Read when the table is created.
+   */
+  readonly searchDebounceMs = input<number>();
   /**
    * One value per column for a summary row under the body — `aggregate`
    * builds one. A column's `footer` renders its value; without either, no
@@ -1601,7 +1616,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     );
     const urlAdapter = activeUrlAdapter();
     const viewportMobile = resources.use("mobile", [], (injector) =>
-      injectIsMobile({ injector })
+      injectIsMobile({ injector, breakpoint: this.mobileBreakpoint() })
     );
     const isMobile = computed(() => this.forceMobile() ?? viewportMobile());
     const data = resources.use("data", [], (injector) =>
@@ -1639,6 +1654,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         urlKey: this.urlKey,
         defaults: this.defaults,
         paginationMode: computed(() => this.paginationMode() ?? "auto"),
+        locale: this.locale,
+        mobileBreakpoint: this.mobileBreakpoint(),
         injector,
       })
     );
@@ -1703,6 +1720,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         tableLabel: this.tableLabel,
         labels,
         dir: this.dir,
+        locale: this.locale,
+        searchDebounceMs: this.searchDebounceMs(),
         forceMobile: isMobile,
         cellTemplates: this.cellTemplates,
         get selection() {

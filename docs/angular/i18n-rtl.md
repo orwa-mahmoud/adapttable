@@ -1,15 +1,15 @@
 # Angular table localization and RTL
 
 Table labels, row values and text direction are separate inputs. Pass translated
-`labels`, set `dir`, and resolve locale-dependent column paths with the Angular
-binding. Set the HTML language on the surrounding page or host for assistive
-technology.
+`labels`, set `dir`, and set `locale` so columns that read by `i18n` path use
+that locale's field. Set the HTML language on the surrounding page or host for
+assistive technology.
 
 ## Switch between English and Arabic
 
 ```ts
 import { Component, computed, signal } from "@angular/core";
-import { resolveColumns, type ColumnDef } from "@adapttable/angular";
+import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ng-zorro";
 import { getDirection, getLabels } from "@adapttable/i18n";
 
@@ -29,6 +29,7 @@ interface Person {
       [data]="people"
       [columns]="columns()"
       [rowKey]="rowKey"
+      [locale]="locale()"
       [labels]="labels()"
       [dir]="direction()"
       [attr.lang]="locale()"
@@ -44,31 +45,26 @@ export class LocalizedPeopleTable {
   readonly rowKey = (row: Person) => row.id;
   readonly labels = computed(() => getLabels(this.locale()));
   readonly direction = computed(() => getDirection(this.locale()));
-  readonly columns = computed(() => {
-    const locale = this.locale();
-    const definitions: ColumnDef<Person>[] = [
-      {
-        key: "name",
-        header: locale === "ar" ? "الاسم" : "Name",
-        i18n: { en: "names.en", ar: "names.ar" },
-        sortable: true,
-        sortValue: (row) => row.names[locale],
-        exportValue: (row) => row.names[locale],
-      },
-    ];
-    return resolveColumns(definitions, locale);
-  });
+  readonly columns = computed((): ColumnDef<Person>[] => [
+    {
+      key: "name",
+      header: this.locale() === "ar" ? "الاسم" : "Name",
+      i18n: { en: "names.en", ar: "names.ar" },
+      sortable: true,
+    },
+  ]);
 }
 ```
 
-The kit shell has `labels` and `dir` inputs, **not a `locale` input**.
-`resolveColumns` fills the accessor for each locale-dependent data path.
-An explicit accessor remains your responsibility; the binding does not
-replace it. Keep the column key stable when translating the caption.
+The table's `locale` picks each column's `i18n` path: the cells, the choices of
+a `"auto"` select filter, search and sort all read the active locale's field.
+An explicit accessor, `sortValue` or filter `getValue` still wins where a column
+sets one. Keep the column key stable when translating the caption.
 
 With a custom source or headless table, `injectFrontendData` and
 `injectDataTable` also accept a locale value or signal. Pass the same locale
-to the source and renderer when their value resolution depends on it.
+to the source and renderer when their value resolution depends on it;
+`resolveColumns(columns, locale)` resolves the paths for a renderer of your own.
 
 ## Labels and formatting
 
