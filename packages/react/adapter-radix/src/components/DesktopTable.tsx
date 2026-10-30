@@ -22,6 +22,8 @@ import {
   logicalAlign,
   mergedCellStyle,
   PIN_Z,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
   type PinSide,
   REORDER_COLUMN_WIDTH,
@@ -206,6 +208,8 @@ function rowExtrasEqual<TRow>(
   );
 }
 
+const SUMMARY_CELL_STYLE = { fontWeight: "var(--font-weight-bold)" } as const;
+
 function DesktopRowBase<TRow>(
   props: Readonly<DesktopRowProps<TRow>>
 ): ReactElement {
@@ -256,7 +260,12 @@ function DesktopRowBase<TRow>(
     bodyPinStyle,
     accentColor,
     dir,
+    pinPart,
   } = props;
+  // A pinned total is the host's figure, not a person: it reads bold.
+  const summaryRow =
+    pinPart === PINNED_SUMMARY_TOP_PART ||
+    pinPart === PINNED_SUMMARY_BOTTOM_PART;
   const expandable = expanded !== undefined;
   const dataPinStyle = (key: string) => {
     const pin = bodyPinStyle(key);
@@ -371,6 +380,7 @@ function DesktopRowBase<TRow>(
                 {
                   ...dataPinStyle(column.key),
                   ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
+                  ...(summaryRow ? SUMMARY_CELL_STYLE : undefined),
                 },
                 {
                   background: "var(--accent-a3)",
