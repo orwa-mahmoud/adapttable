@@ -300,10 +300,28 @@ export function FilterHeaderTrigger<TRow>(
 ) {
   const active = hasActiveHeaderFilter(props);
   const { open, setOpen, source, sessionProps, resetKey } =
-    useHeaderFilterOverlay(props, { pointerDismiss: false });
+    useHeaderFilterOverlay(props);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  // Escape is bound to the document, like the row-move confirm below, so it
+  // works wherever focus sits. It runs in the capture phase, ahead of the
+  // shared dismiss that remounts the panel, and closes in place so focus can
+  // return to the funnel.
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setOpen(false);
+      detailsRef.current?.querySelector("summary")?.focus();
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [open, setOpen]);
   return (
     <details
       key={resetKey}
+      ref={detailsRef}
       {...sessionProps}
       open={open}
       onToggle={(event) => setOpen(event.currentTarget.open)}
