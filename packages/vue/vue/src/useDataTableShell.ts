@@ -21,6 +21,7 @@ import {
   type RowAction,
   stableKey,
   type TableDensity,
+  type TableQueryListener,
   type TableSource,
   withRowPinActions,
 } from "@adapttable/core";
@@ -144,7 +145,7 @@ import {
   useFrontendData,
   type UseFrontendDataOptions,
 } from "./source/useFrontendData";
-import { type TableQueryHandler, useServerData } from "./source/useServerData";
+import { useServerData } from "./source/useServerData";
 import {
   bodyWindowModelKey,
   groupingPanelControlKey,
@@ -192,7 +193,7 @@ export interface UseDataTableShellOptions<TRow>
    * the host fetches that page and the superseded request's `signal` is
    * aborted; on the frontend tier it is told what the reader did.
    */
-  readonly onQueryChange?: TableQueryHandler;
+  readonly onQueryChange?: TableQueryListener;
   /** Server tier: the row count across every page. */
   readonly total?: MaybeRefOrGetterOptional<number>;
   /** Server tier: what the endpoint can answer, such as facet counts. */

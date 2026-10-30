@@ -95,7 +95,7 @@ import { TableAssistantProps } from '@adapttable/core/binding';
 import { TableDensity } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
-import { TableQuery } from '@adapttable/core';
+import { TableQueryListener } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
 import { TableViewStateConfig } from '@adapttable/core';
@@ -956,17 +956,6 @@ export interface TableHeaderModel<TRow> {
     readonly sortAttrs?: Attrs;
 }
 
-// @public
-type TableQueryHandler = (query: TableQuery, info: TableQueryInfo) => void | Promise<void>;
-
-// @public
-interface TableQueryInfo {
-    // (undocumented)
-    readonly key: string;
-    // (undocumented)
-    readonly signal: AbortSignal;
-}
-
 // @public (undocumented)
 export interface TableRowDetail<TRow> {
     // (undocumented)
@@ -1225,7 +1214,7 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
-    readonly onQueryChange?: TableQueryHandler;
+    readonly onQueryChange?: TableQueryListener;
     // (undocumented)
     readonly onSelectionChange?: (ids: string[]) => void;
     readonly responseKey?: MaybeRefOrGetterOptional<string>;

@@ -10,6 +10,7 @@ import type {
   RowActionsLayout,
   TableErrorState,
   TableLabels,
+  TableQueryListener,
   TableSource,
   TableViewStateConfig,
   UrlStateAdapter,
@@ -28,7 +29,6 @@ import type {
 } from "./columnDef";
 import type { ComposedFeature } from "./features/tableFeature";
 import type { CellRange } from "./navigation/contracts";
-import type { TableQueryHandler } from "./source/useServerData";
 
 /** CSS hooks for the corresponding table or control presentation target. */
 export interface DataTableClassNames {
@@ -323,7 +323,7 @@ export interface DataTableProps<TRow> {
    */
   readonly mode?: "frontend" | "server";
   /** One consolidated query per change: the server page to fetch, or a notice. */
-  readonly onQueryChange?: TableQueryHandler;
+  readonly onQueryChange?: TableQueryListener;
   /** Server tier: the row count across every page. */
   readonly total?: number;
   /** Server tier: what the endpoint can answer, such as facet counts. */
