@@ -1,8 +1,11 @@
 /* Unencapsulated so the table surface can reach NG-ZORRO's own wrappers; every
  * rule stays inside nz-table, so no other kit's table is touched. */
 
-/* Structural alignment stays in the kit; interactive controls remain NG-ZORRO. */
+/* Structural alignment stays in the kit; interactive controls remain NG-ZORRO.
+ * Naming .ant-table keeps the compact inset ahead of NG-ZORRO's own cell
+ * padding. */
 nz-table
+  .ant-table
   :is(
     [data-adapttable-part="selection-header"],
     [data-adapttable-part="selection-cell"],
