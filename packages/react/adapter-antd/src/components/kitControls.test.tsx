@@ -234,6 +234,39 @@ describe("kit header filter trigger (antd)", () => {
     ).not.toBeNull();
   });
 
+  it("opens a named dialog it says it controls", () => {
+    renderAntd(<TriggerHarness />);
+    expect(trigger()).toHaveAttribute("aria-haspopup", "dialog");
+    expect(trigger()).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(trigger());
+
+    const panel = screen.getByRole("dialog", {
+      name: trigger().getAttribute("aria-label")!,
+    });
+    expect(panel).toHaveAttribute("data-adapttable-part", "filter-header-cell");
+    expect(trigger()).toHaveAttribute("aria-expanded", "true");
+    expect(trigger()).toHaveAttribute("aria-controls", panel.id);
+  });
+
+  it("opens inside the fullscreen element while the table is fullscreen", () => {
+    const stage = document.createElement("div");
+    document.body.append(stage);
+    Object.defineProperty(document, "fullscreenElement", {
+      value: stage,
+      configurable: true,
+    });
+    try {
+      renderAntd(<TriggerHarness />);
+      fireEvent.click(trigger());
+      expect(
+        stage.querySelector('[data-adapttable-part="filter-header-cell"]')
+      ).not.toBeNull();
+    } finally {
+      Reflect.deleteProperty(document, "fullscreenElement");
+      stage.remove();
+    }
+  });
+
   it("does not let the opening click reach a parent sort handler", () => {
     const onSort = vi.fn();
     renderAntd(
