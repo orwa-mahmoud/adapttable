@@ -1,5 +1,29 @@
 # @adapttable/mui
 
+## 3.3.10
+
+### Patch Changes
+
+- b364843: While the table is fullscreen, its menus, popovers, selects, dialogs and tooltips open inside it instead of behind the fullscreen view.
+- a8576df: A column header's filter opens as a named dialog that its funnel button reports as expanded and controls, instead of a popup announced as a tooltip.
+- 64a6efa: Pinned columns paint the theme's paper colour under any MUI theme, so columns scrolled sideways no longer show through them when the theme declares no CSS variables, and a pinned cell takes its row's hover and selected tint. The selected-range fill and group-header dividers use the theme's colours too, so they show in dark mode.
+- f009a47: Pinned summary rows read semibold, so a total stands apart from the rows of data around it.
+- e50c6c8: Pinned columns carry `data-pinned="start"` or `"end"` on their header and body cells in every React kit, so the pinned edge shows in Windows high-contrast mode. The desktop row wiring adds `bodyPinSide` for kits that render their own cells.
+- edc52fa: The Saved views menu draws its divider only once a saved view is listed above it; an empty menu opens straight onto the name field.
+- Updated dependencies [7cd8e5c]
+- Updated dependencies [91ea216]
+- Updated dependencies [aa06136]
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [4b3a395]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [2e930c2]
+- Updated dependencies [858ef5b]
+  - @adapttable/react@1.9.0
+  - @adapttable/core@3.13.0
+
 ## 3.3.9
 
 ### Patch Changes

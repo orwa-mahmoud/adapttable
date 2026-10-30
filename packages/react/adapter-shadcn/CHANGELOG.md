@@ -1,5 +1,26 @@
 # @adapttable/shadcn
 
+## 3.4.3
+
+### Patch Changes
+
+- f3615cc: Pinned rows are opaque, so rows scrolling beneath no longer show through them, and pinned cells follow the row's hover and selection.
+- f009a47: Pinned summary rows read semibold, so a total stands apart from the rows of data around it.
+- Updated dependencies [7cd8e5c]
+- Updated dependencies [91ea216]
+- Updated dependencies [aa06136]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [4b3a395]
+- Updated dependencies [2172d8d]
+- Updated dependencies [1faedc0]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [edc52fa]
+- Updated dependencies [2e930c2]
+- Updated dependencies [ba8095f]
+- Updated dependencies [8a972a0]
+  - @adapttable/react@1.9.0
+  - @adapttable/unstyled@3.4.3
+
 ## 3.4.2
 
 ### Patch Changes

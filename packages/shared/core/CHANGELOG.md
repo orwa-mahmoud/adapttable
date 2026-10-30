@@ -1,5 +1,19 @@
 # @adapttable/core
 
+## 3.13.0
+
+### Minor Changes
+
+- b4f2c66: An AND/OR filter-tree condition still waiting for its value no longer acts as a filter: it gets no chip, is not counted on the Filters badge, cannot widen an OR group to every row, and is not sent to a server. `isFilterTreeConditionSet` and `settledFilterTree`, from `@adapttable/core` and `@adapttable/core/query`, give a backend the same rule.
+- e50c6c8: Pinned columns carry `data-pinned="start"` or `"end"` on their header and body cells in every React kit, so the pinned edge shows in Windows high-contrast mode. The desktop row wiring adds `bodyPinSide` for kits that render their own cells.
+
+### Patch Changes
+
+- 549ee08: A cell changed during batch editing now shows the dotted mark of an unsaved edit, drawn just outside its field, in every kit.
+- 702a702: A column with `formatValue` and no `accessor` shows that text in its cells, the same text sorting, export and the AI read. A collapsed column group's `collapsedRender` summary now appears instead of an empty cell.
+- 7ee7489: Filter-tree chips for select, multi-select, checklist and boolean fields name their operator ("Team Equal Design", "Tags Is any of …") instead of showing its code.
+- 858ef5b: An XLSX export sizes each column without a stated width to its longest value or heading (8 to 40 characters), so names and notes no longer open clipped.
+
 ## 3.12.0
 
 ### Minor Changes

@@ -1,5 +1,30 @@
 # @adapttable/mantine
 
+## 3.3.10
+
+### Patch Changes
+
+- 6f928dc: While the table is fullscreen, every overlay it opens — the Filters popover, column and saved-view menus, selects, the command palette — appears inside it instead of behind the fullscreen view.
+- 9047912: Pinned cells take the row's hover colour, so a hovered row lights up across its pinned columns too.
+- 7af1098: A row pinned to the top or bottom paints every cell with the table surface, so the rows scrolling beneath it no longer show through.
+- dfb4443: A selected cell range is drawn in Mantine's primary colour: the light primary fill under a 1px primary outline, in place of a 2px text-colour box around every cell.
+- e925b60: Pinned summary rows read semibold, as the column-footer summary does, so a total stands apart from the rows of data around it.
+- e50c6c8: Pinned columns carry `data-pinned="start"` or `"end"` on their header and body cells in every React kit, so the pinned edge shows in Windows high-contrast mode. The desktop row wiring adds `bodyPinSide` for kits that render their own cells.
+- edc52fa: The Saved views menu draws its divider only once a saved view is listed above it; an empty menu opens straight onto the name field.
+- Updated dependencies [7cd8e5c]
+- Updated dependencies [91ea216]
+- Updated dependencies [aa06136]
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [4b3a395]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [2e930c2]
+- Updated dependencies [858ef5b]
+  - @adapttable/react@1.9.0
+  - @adapttable/core@3.13.0
+
 ## 3.3.9
 
 ### Patch Changes

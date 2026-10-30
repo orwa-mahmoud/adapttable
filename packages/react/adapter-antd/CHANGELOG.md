@@ -1,5 +1,32 @@
 # @adapttable/antd
 
+## 3.3.10
+
+### Patch Changes
+
+- 00f50d8: A row action's tooltip no longer catches the pointer, so the bubble shown over the row above cannot swallow a click meant for that row's buttons.
+- c6db174: A filter's select list opens inside the table while it is fullscreen, so a value can be picked from the Filters panel there.
+- 7d20d1c: The fullscreen button works on its first press, and while the table is fullscreen its popovers, selects, menus, tooltips and dialogs open inside it instead of behind it.
+- 161ec12: A column header's filter opens as a named dialog that its funnel button reports as expanded and controls, and while the table is fullscreen it opens inside it instead of behind it.
+- 7cd8e5c: A paged antd table no longer remounts on every render: a batch-edit field keeps focus and its typing, and scroll position holds. The windowed row and column counts a paged table reports are now built once per table shape in every kit.
+- 1f70183: A row pinned to the top or bottom paints its cells with the table surface, so the rows scrolling beneath it no longer show through.
+- f009a47: Pinned summary rows read semibold, so a total stands apart from the rows of data around it.
+- e50c6c8: Pinned columns carry `data-pinned="start"` or `"end"` on their header and body cells in every React kit, so the pinned edge shows in Windows high-contrast mode. The desktop row wiring adds `bodyPinSide` for kits that render their own cells.
+- edc52fa: The Saved views menu draws its divider only once a saved view is listed above it; an empty menu opens straight onto the name field.
+- Updated dependencies [7cd8e5c]
+- Updated dependencies [91ea216]
+- Updated dependencies [aa06136]
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [4b3a395]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [2e930c2]
+- Updated dependencies [858ef5b]
+  - @adapttable/react@1.9.0
+  - @adapttable/core@3.13.0
+
 ## 3.3.9
 
 ### Patch Changes

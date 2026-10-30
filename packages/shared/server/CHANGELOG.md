@@ -1,5 +1,17 @@
 # @adapttable/server
 
+## 0.4.15
+
+### Patch Changes
+
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [858ef5b]
+  - @adapttable/core@3.13.0
+
 ## 0.4.14
 
 ### Patch Changes

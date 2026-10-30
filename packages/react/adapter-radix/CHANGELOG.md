@@ -1,5 +1,29 @@
 # @adapttable/radix
 
+## 3.3.10
+
+### Patch Changes
+
+- 1faedc0: A column's header filter opens as a dialog named for that column, so screen readers announce which filter is open.
+- e50c6c8: Pinned columns carry `data-pinned="start"` or `"end"` on their header and body cells in every React kit, so the pinned edge shows in Windows high-contrast mode. The desktop row wiring adds `bodyPinSide` for kits that render their own cells.
+- 5943ac4: Filters, header filters, selects, menus, tooltips, saved views, the context menu and the command palette open inside the table while it is fullscreen, so they stay visible.
+- 7831ef9: A pinned row's grip, selection, expand and actions cells take the table surface, so rows scrolling beneath no longer show through them.
+- 53ce512: The row reorder grip starts a drag under the mouse. Radix Themes' button reset no longer stops the browser from treating it as a drag source.
+- b6c7d11: Pinned summary rows read bold, so a total stands apart from the rows of data around it.
+- Updated dependencies [7cd8e5c]
+- Updated dependencies [91ea216]
+- Updated dependencies [aa06136]
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [4b3a395]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [2e930c2]
+- Updated dependencies [858ef5b]
+  - @adapttable/react@1.9.0
+  - @adapttable/core@3.13.0
+
 ## 3.3.9
 
 ### Patch Changes

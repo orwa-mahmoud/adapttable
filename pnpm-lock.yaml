@@ -1735,7 +1735,7 @@ importers:
   packages/vue/adapter-element-plus:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1754,7 +1754,7 @@ importers:
   packages/vue/adapter-naive-ui:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1776,7 +1776,7 @@ importers:
   packages/vue/adapter-nuxt-ui:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1795,7 +1795,7 @@ importers:
   packages/vue/adapter-quasar:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1820,7 +1820,7 @@ importers:
   packages/vue/adapter-reka-ui:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1842,7 +1842,7 @@ importers:
   packages/vue/adapter-shadcn-vue:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
       '@lucide/vue':
         specifier: ^1.28.0
@@ -1885,7 +1885,7 @@ importers:
         specifier: workspace:*
         version: link:../../shared/core
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
     devDependencies:
       '@adapttable/i18n':
@@ -1901,7 +1901,7 @@ importers:
   packages/vue/adapter-vuetify:
     dependencies:
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
@@ -1932,14 +1932,14 @@ importers:
         specifier: workspace:*
         version: link:../../shared/ai
       '@adapttable/vue':
-        specifier: 0.3.0
+        specifier: 0.4.0
         version: link:../vue
     devDependencies:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
       '@adapttable/vue-unstyled':
-        specifier: 0.2.1
+        specifier: 0.2.2
         version: link:../adapter-vue-unstyled
       vue:
         specifier: ^3.5.43

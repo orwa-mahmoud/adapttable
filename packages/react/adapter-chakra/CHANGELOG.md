@@ -1,5 +1,28 @@
 # @adapttable/chakra
 
+## 3.3.11
+
+### Patch Changes
+
+- d9ee6c8: A column heading follows its column's alignment, so an end-aligned column's heading sits over its values instead of at the start of the cell.
+- 0044e0c: A row pinned to the top or bottom paints its reorder, selection, expand and action cells too, so rows scrolling beneath it no longer show through at its edges.
+- f009a47: Pinned summary rows read semibold, so a total stands apart from the rows of data around it.
+- 1faedc0: A column's header filter opens as a dialog named for that column, so screen readers announce which filter is open.
+- e50c6c8: Pinned columns carry `data-pinned="start"` or `"end"` on their header and body cells in every React kit, so the pinned edge shows in Windows high-contrast mode. The desktop row wiring adds `bodyPinSide` for kits that render their own cells.
+- Updated dependencies [7cd8e5c]
+- Updated dependencies [91ea216]
+- Updated dependencies [aa06136]
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [4b3a395]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [2e930c2]
+- Updated dependencies [858ef5b]
+  - @adapttable/react@1.9.0
+  - @adapttable/core@3.13.0
+
 ## 3.3.10
 
 ### Patch Changes

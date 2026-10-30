@@ -1,5 +1,33 @@
 # @adapttable/ng-zorro
 
+## 0.3.0
+
+### Minor Changes
+
+- 5b8adbd: The table takes `stickyHeader` and `stickyTop` inputs. A sticky header stays in view inside a `maxHeight` box, in a table that scrolls sideways, or on the page below an app bar of `stickyTop` pixels, and pinned rows sit below it.
+
+### Patch Changes
+
+- a353b2d: Each grouping chip shows its level, as in "1. Team · 2. Status".
+- 3eb3845: Compact density draws NG-ZORRO's small table.
+- 546758c: Selects, menus and popovers open inside the table while it is fullscreen, so they stay visible.
+- b0fbee2: Pinned columns and pinned rows take the table's own surface in both NG-ZORRO themes, so scrolled rows no longer show through them and the dark theme no longer draws them white.
+- Updated dependencies [46f6212]
+- Updated dependencies [5b8adbd]
+- Updated dependencies [f009a47]
+- Updated dependencies [d9bca8c]
+- Updated dependencies [a3f3c45]
+- Updated dependencies [91ea216]
+- Updated dependencies [549ee08]
+- Updated dependencies [702a702]
+- Updated dependencies [7ee7489]
+- Updated dependencies [b4f2c66]
+- Updated dependencies [e50c6c8]
+- Updated dependencies [2e930c2]
+- Updated dependencies [858ef5b]
+  - @adapttable/angular@0.8.0
+  - @adapttable/core@3.13.0
+
 ## 0.2.7
 
 ### Patch Changes

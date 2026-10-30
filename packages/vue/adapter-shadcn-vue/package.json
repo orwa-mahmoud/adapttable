@@ -1,6 +1,6 @@
 {
   "name": "@adapttable/shadcn-vue",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "shadcn-vue data table presentation for the headless AdaptTable Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
   "keywords": [
     "vue",
@@ -45,7 +45,7 @@
     "reka-ui": "^2.11.0"
   },
   "dependencies": {
-    "@adapttable/vue": "0.3.0",
+    "@adapttable/vue": "0.4.0",
     "@vueuse/core": "^14.4.0",
     "@lucide/vue": "^1.28.0",
     "class-variance-authority": "^0.7.1",
