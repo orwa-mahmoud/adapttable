@@ -44,7 +44,7 @@ function Surface({ label, children, className }: CommandPaletteSurfaceProps) {
         aria-label={label}
         className={className}
         data-adapttable-part="command-palette"
-        style={{ minWidth: 360, maxWidth: 520, width: "100%%" }}
+        style={{ minWidth: 360, maxWidth: 520, width: "100%" }}
       >
         {children}
       </div>
@@ -58,7 +58,7 @@ function Input_({ inputProps }: CommandPaletteInputProps) {
     <input
       {...rest}
       ref={ref}
-      style={{ width: "100%%", padding: 8 }}
+      style={{ width: "100%", padding: 8 }}
       onChange={(event) => {
         onChange(event.target.value);
       }}
