@@ -11514,6 +11514,7 @@
       "UrlSliceOptions"
     ],
     "vue-stream": [
+      "ChangedCellFlashState",
       "InsertPatch",
       "OpenRowPatchStreamOptions",
       "RemovePatch",
