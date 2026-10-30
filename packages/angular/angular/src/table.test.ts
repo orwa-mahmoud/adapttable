@@ -89,6 +89,24 @@ class PeopleTable {
   });
 }
 
+const SIZED: ColumnDef<Person>[] = [
+  { key: "name", width: 200 },
+  { key: "city", width: 150 },
+];
+
+@Component({
+  imports: [AdaptAttrs],
+  template: `<table [adaptAttrs]="table.tableAttrs()"></table>`,
+})
+class SizedTable {
+  readonly source = injectFrontendData({ data: PEOPLE, columns: SIZED });
+  readonly table = injectDataTable({
+    source: this.source,
+    columns: SIZED,
+    rowKey: (row) => row.id,
+  });
+}
+
 async function mount(search = "") {
   const adapter: UrlStateAdapter = createMemoryAdapter(search);
   TestBed.configureTestingModule({
@@ -108,6 +126,23 @@ async function mount(search = "") {
 }
 
 describe("a headless Angular table", () => {
+  it("holds sized columns at their widths with a table minimum width", async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ADAPTTABLE_URL_ADAPTER, useValue: createMemoryAdapter("") },
+      ],
+    });
+    const fixture = TestBed.createComponent(SizedTable);
+    await fixture.whenStable();
+    const table = (fixture.nativeElement as HTMLElement).querySelector("table");
+    expect(table?.style.minWidth).toBe("350px");
+  });
+
+  it("leaves a table of unsized columns free to fit its box", async () => {
+    const { element } = await mount();
+    expect(element.querySelector("table")?.style.minWidth).toBe("");
+  });
+
   it("renders the first page with its accessible structure", async () => {
     const { element, names } = await mount();
     const table = element.querySelector("table");

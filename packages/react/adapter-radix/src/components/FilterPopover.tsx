@@ -3,6 +3,7 @@ import { Button, Flex, Popover, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 
 import type { RadixAccentColor } from "../types";
+import { usePortalContainer } from "./portalContainer";
 
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
@@ -43,6 +44,7 @@ export function FilterPopover({
   dir = "ltr",
   children,
 }: Readonly<FilterPopoverProps>) {
+  const portalContainer = usePortalContainer();
   return (
     <Popover.Root
       open={open}
@@ -52,6 +54,7 @@ export function FilterPopover({
     >
       <Popover.Trigger>{children}</Popover.Trigger>
       <Popover.Content
+        container={portalContainer}
         data-testid="adapttable-filter-popover"
         aria-label={labels.filters}
         align={dir === "rtl" ? "start" : "end"}

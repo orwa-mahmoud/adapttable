@@ -31,7 +31,18 @@
     "clean": "rimraf dist coverage .turbo"
   },
   "name": "@adapttable/vue",
-  "description": "Headless Vue composables and structural table contracts for AdaptTable.",
+  "description": "Headless Vue composables and structural table contracts for AdaptTable — sorting, filtering, editing, grouping, URL state and server data over the framework-neutral engine.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "data-table",
+    "table",
+    "datagrid",
+    "headless",
+    "composables",
+    "typescript",
+    "adapttable"
+  ],
   "dependencies": {
     "@adapttable/core": "3.12.0",
     "@tanstack/virtual-core": "^3.17.11"

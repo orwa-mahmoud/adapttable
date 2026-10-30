@@ -50,9 +50,15 @@ export interface AssistantComposerProps {
    * panel has — not in a second box drawn beside it.
    */
   readonly placeholder?: string;
+  /**
+   * Hold the composer at the bottom while the conversation scrolls. Right for
+   * a window or sheet, which scroll inside themselves; an inline panel scrolls
+   * with the page, where a sticky composer would float over the messages.
+   */
+  readonly sticky?: boolean;
 }
 
-/** The sticky bottom composer. @internal */
+/** The bottom composer, sticky where its surface scrolls. @internal */
 export function AssistantComposer({
   slots,
   labels,
@@ -65,6 +71,7 @@ export function AssistantComposer({
   speech,
   examples,
   placeholder,
+  sticky = true,
 }: AssistantComposerProps): ReactElement {
   // A parked approval is still a turn: the host says so with `busy`, and
   // without it the status is the only signal there is.
@@ -106,8 +113,7 @@ export function AssistantComposer({
         border: "1px solid currentColor",
         borderColor: "color-mix(in srgb, currentColor 22%, transparent)",
         background: "color-mix(in srgb, currentColor 3%, transparent)",
-        position: "sticky",
-        insetBlockEnd: 0,
+        ...(sticky ? { position: "sticky", insetBlockEnd: 0 } : {}),
         flexShrink: 0,
       }}
     >

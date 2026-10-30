@@ -7,8 +7,10 @@ import {
 import { editing } from "@adapttable/angular-material/editing";
 import { rowReorder } from "@adapttable/angular-material/row-reorder";
 import { virtualize } from "@adapttable/angular-material/virtualize";
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { kitSelector } from "../testUtils";
@@ -111,6 +113,38 @@ describe("the Angular Material table", () => {
     // No `matchMedia` in the test environment: the desktop table.
     expect(part("table")).not.toBeNull();
     expect(ids()).toEqual(["1", "2", "3", "4", "5"]);
+  });
+
+  it("moves its overlays into the element the browser makes fullscreen", async () => {
+    // jsdom has no Fullscreen API; CDK listens only where the browser has one.
+    Object.defineProperty(document, "fullscreenEnabled", {
+      value: true,
+      configurable: true,
+    });
+    const { fixture } = await mount();
+    const overlays = fixture.debugElement
+      .query(By.directive(AdaptDataTable))
+      .injector.get(OverlayContainer);
+    const container = overlays.getContainerElement();
+    expect(container.parentElement).toBe(document.body);
+    const stage = document.createElement("div");
+    document.body.append(stage);
+    Object.defineProperty(document, "fullscreenElement", {
+      get: () => stage,
+      configurable: true,
+    });
+    try {
+      document.dispatchEvent(new Event("fullscreenchange"));
+      expect(container.parentElement).toBe(stage);
+    } finally {
+      Object.defineProperty(document, "fullscreenElement", {
+        value: null,
+        configurable: true,
+      });
+      document.dispatchEvent(new Event("fullscreenchange"));
+      stage.remove();
+      Reflect.deleteProperty(document, "fullscreenEnabled");
+    }
   });
 
   it("fills a column from the host's cell template", async () => {

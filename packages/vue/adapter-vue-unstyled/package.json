@@ -34,7 +34,18 @@
     "clean": "rimraf dist coverage .turbo .sfc-types"
   },
   "name": "@adapttable/vue-unstyled",
-  "description": "Native HTML data table controls for the AdaptTable Vue binding.",
+  "description": "Native HTML data table controls for the AdaptTable Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL, with no theme of its own.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "data-table",
+    "table",
+    "datagrid",
+    "typescript",
+    "adapttable",
+    "unstyled",
+    "headless"
+  ],
   "dependencies": {
     "@adapttable/core": "3.12.0",
     "@adapttable/vue": "0.3.0"

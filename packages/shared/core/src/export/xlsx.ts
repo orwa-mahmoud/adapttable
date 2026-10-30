@@ -159,10 +159,26 @@ function cellXml(
   )}</t></is></c>`;
 }
 
+/** How many characters a written value takes, so its column can show it. */
+function cellChars(value: unknown): number {
+  if (value instanceof Date) return isDateOnly(value) ? 10 : 19;
+  if (typeof value === "string") return value.length;
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value).length;
+  }
+  return 0;
+}
+
 function colsXml(table: ExportTable): string {
   const cols = table.headers.map((header, index) => {
     const stated = table.widths?.[index];
-    const width = stated ?? Math.min(40, Math.max(8, header.length + 2));
+    // Without a stated width the column fits its longest value or heading,
+    // so nothing opens clipped; 40 keeps one long note from taking the sheet.
+    const longest = table.rows.reduce(
+      (most, row) => Math.max(most, cellChars(row[index])),
+      header.length
+    );
+    const width = stated ?? Math.min(40, Math.max(8, longest + 2));
     return `<col min="${String(index + 1)}" max="${String(index + 1)}" width="${String(width)}" customWidth="1"/>`;
   });
   return cols.length > 0 ? `<cols>${cols.join("")}</cols>` : "";

@@ -70,6 +70,24 @@ describe("batch editing (antd)", () => {
     expect(part("batch-edit-bar")).toBeNull();
   });
 
+  it("keeps the field a reader is typing in across the first change of a paged table", () => {
+    // More rows than a page: the table names its real size, the case whose
+    // rebuilt ARIA getters used to remount antd's table on every render.
+    const many = Array.from({ length: 12 }, (_, i) => ({
+      id: String(i + 1),
+      title: `Task ${String(i + 1)}`,
+      points: i,
+    }));
+    table({ data: many, defaults: { limit: 5 } });
+    const field = editors()[0]!;
+    field.focus();
+    fireEvent.change(field, { target: { value: "Task 1 done" } });
+
+    expect(field.isConnected).toBe(true);
+    expect(document.activeElement).toBe(field);
+    expect(editors()[0]).toBe(field);
+  });
+
   it("counts unsaved rows, and marks the cells that changed", () => {
     table();
     fireEvent.change(editors()[0]!, { target: { value: "Ship it" } });

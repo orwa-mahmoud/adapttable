@@ -44,7 +44,7 @@ import {
   windowedTableAria,
   withFindMarks,
 } from "@adapttable/react/adapter";
-import type { ReactNode, RefObject } from "react";
+import { type ReactNode, type RefObject, useMemo } from "react";
 
 import type { DataTableProps } from "./types";
 
@@ -337,6 +337,21 @@ function NavStage<TRow>({
   readonly children: (gridFocus: GridFocusState) => ReactNode;
 }): ReactNode {
   const filled = useFeatureSlotFilled(CELL_NAV_LIVE);
+  // One object per table shape, not per render: the table's `components`
+  // are keyed on these getters, and rebuilding them remounts antd's table.
+  const rowsLength = rows.length;
+  const columnsLength = columns.length;
+  const windowedAria = useMemo(
+    () =>
+      windowedTableAria({
+        rowCount,
+        rowsLength,
+        columnsLength,
+        columnsWindowed,
+        firstRowIndex,
+      }),
+    [rowCount, rowsLength, columnsLength, columnsWindowed, firstRowIndex]
+  );
   const options: Omit<
     UseGridFocusOptions<TRow>,
     "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind"
@@ -382,19 +397,7 @@ function NavStage<TRow>({
   return filled ? (
     <FeatureSlot slot={CELL_NAV_LIVE} props={navProps} />
   ) : (
-    children(
-      withFindMarks(
-        windowedTableAria({
-          rowCount,
-          rowsLength: rows.length,
-          columnsLength: columns.length,
-          columnsWindowed,
-          firstRowIndex,
-        }),
-        find,
-        firstRowIndex
-      )
-    )
+    children(withFindMarks(windowedAria, find, firstRowIndex))
   );
 }
 

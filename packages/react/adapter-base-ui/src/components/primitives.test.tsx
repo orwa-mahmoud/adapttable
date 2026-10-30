@@ -108,6 +108,21 @@ describe("NativeSelect primitive (Base UI)", () => {
     expect(within(trigger).getByText("All")).toBeInTheDocument();
   });
 
+  it("shows a chevron that marks the trigger as a select", () => {
+    renderNode(
+      <NativeSelect
+        aria-label="Status"
+        value="active"
+        options={[{ value: "active", label: "Active" }]}
+        onValueChange={vi.fn()}
+      />
+    );
+    const trigger = screen.getByRole("combobox", { name: "Status" });
+    const icon = trigger.querySelector(".adapttable-select-icon");
+    expect(icon).toHaveAttribute("aria-hidden", "true");
+    expect(icon?.querySelector("svg")).not.toBeNull();
+  });
+
   it("maps the sentinel back to the empty value when the empty option is picked", () => {
     const onValueChange = vi.fn();
     renderNode(

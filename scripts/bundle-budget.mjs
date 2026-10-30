@@ -21,7 +21,7 @@
  * already — the measurement adds no dependency of its own.
  *
  * Consumer paths live in `consumer-fixtures.mjs`: core-simple, every adapter
- * base (≤ 80 KB and ≥ 35% below the item-1 baseline), every feature delta on
+ * base (≤ 81 KB and ≥ 35% below the item-1 baseline), every feature delta on
  * MUI, `standardFeatures()` for every kit, representative combinations, and
  * the all-feature ceiling. Negative markers travel with each fixture.
  */
@@ -282,7 +282,7 @@ function logRow(fixture, row) {
     const cut = ((1 - row.sizeKB / fixture.item1BaselineKB) * 100).toFixed(0);
     const vs80 =
       row.sizeKB <= PLAIN_ADAPTER_CEILING_KB
-        ? "≤ 80 KB"
+        ? `≤ ${PLAIN_ADAPTER_CEILING_KB} KB`
         : `OVER ${PLAIN_ADAPTER_CEILING_KB} KB`;
     console.log(
       `  └ item-1 ${fixture.item1BaselineKB} KB → ${cut}% smaller · ${vs80}`

@@ -4,7 +4,7 @@
     data-adapttable-part="table"
     [adaptAttrs]="v.grid ? v.grid.tableAttrs() : v.table.tableAttrs()"
   >
-    <thead data-adapttable-part="thead">
+    <thead data-adapttable-part="thead" [style]="theadStyle()">
       <ng-template #leadingHeaders let-band>
         @if (v.rowDetail) {
           <th

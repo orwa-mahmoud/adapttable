@@ -3885,6 +3885,7 @@
       "isExtraEntry",
       "isFilterGroup",
       "isFilterOpKey",
+      "isFilterTreeConditionSet",
       "isFindShortcut",
       "isFirstEditableColumn",
       "isFormulaError",
@@ -4336,6 +4337,7 @@
       "ServerSourceViewState",
       "setFilterTreeCombinator",
       "setMeasureAgg",
+      "settledFilterTree",
       "Shortcut",
       "ShortcutKeyEvent",
       "shouldEscapeClose",
@@ -4766,6 +4768,7 @@
       "IncrementalViewConfig",
       "isActiveFilterTree",
       "isFilterGroup",
+      "isFilterTreeConditionSet",
       "NUMBER_OPS",
       "parseFilterTree",
       "parseRelativeToken",
@@ -4788,6 +4791,7 @@
       "serializeFormulaColumns",
       "serializePivot",
       "serializePivotState",
+      "settledFilterTree",
       "SidePanelEntry",
       "SortableValue",
       "SortDirection",
@@ -11510,6 +11514,7 @@
       "UrlSliceOptions"
     ],
     "vue-stream": [
+      "ChangedCellFlashState",
       "InsertPatch",
       "OpenRowPatchStreamOptions",
       "RemovePatch",
@@ -11523,11 +11528,13 @@
       "StreamSocketEvent",
       "UpdatePatch",
       "UpsertPatch",
+      "UseChangedCellFlashOptions",
       "UseRowPatchStreamOptions",
       "isStreamLive",
       "isStreamSettled",
       "openRowPatchStream",
       "parseRowPatchFrame",
+      "useChangedCellFlash",
       "useRowPatchStream"
     ],
     "vue-sparkline": [

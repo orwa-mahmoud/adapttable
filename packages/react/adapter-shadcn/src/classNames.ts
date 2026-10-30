@@ -1,6 +1,14 @@
 import type { DataTableClassNames } from "@adapttable/unstyled";
 
 /**
+ * The surface of a body cell that sticks: a pinned column's cell, or any cell
+ * of a pinned row. It is opaque so scrolled content never shows through, and
+ * follows the row's hover and selection in their opaque form.
+ */
+const STICKY_CELL =
+  "[&[data-pinned]]:bg-card [tr[data-row-pin]>&]:bg-card [tr:hover>&[data-pinned]]:bg-[color-mix(in_oklab,var(--color-muted)_50%,var(--color-card))] [tr[data-row-pin]:hover>&]:bg-[color-mix(in_oklab,var(--color-muted)_50%,var(--color-card))] [tr[data-selected]>&[data-pinned]]:bg-accent [tr[data-selected][data-row-pin]>&]:bg-accent";
+
+/**
  * shadcn/ui class preset for AdaptTable. Maps every AdaptTable part to shadcn's
  * design-token utility classes (`bg-card`, `text-muted-foreground`,
  * `border-border`, `bg-primary`, `ring-ring`, …) — deliberately **monochrome
@@ -150,8 +158,7 @@ export const shadcnClassNames = {
   sortButton:
     "inline-flex items-center gap-1 font-medium hover:text-foreground",
   row: "border-b border-border last:border-0 hover:bg-muted/50 data-[selected]:bg-accent data-[dragging]:opacity-60 data-[drop=before]:shadow-[inset_0_2px_0_0_hsl(var(--primary))] data-[drop=after]:shadow-[inset_0_-2px_0_0_hsl(var(--primary))]",
-  // Pinned cells must be opaque so scrolled content never shows through.
-  cell: "px-3 py-2.5 [&[data-pinned]]:bg-card [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
+  cell: `px-3 py-2.5 ${STICKY_CELL} [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5 [[data-adapttable-part=pinned-summary-top]_&]:font-semibold [[data-adapttable-part=pinned-summary-bottom]_&]:font-semibold`,
   cellSpan: "bg-muted/40 text-center",
   actionButton:
     "h-8 w-8 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-50",
@@ -313,15 +320,13 @@ export const shadcnClassNames = {
   selectAllButton:
     "rounded-md px-1.5 py-0.5 text-xs font-medium text-primary hover:bg-accent",
   selectionHeader: "w-11 border-b border-border bg-card px-3 py-2.5",
-  selectionCell:
-    "w-11 px-3 py-2.5 [&[data-pinned]]:bg-card [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
+  selectionCell: `w-11 px-3 py-2.5 ${STICKY_CELL} [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5`,
   checkbox: "h-4 w-4 accent-primary",
   actionsHeader:
     "w-[120px] border-b border-border bg-card px-3 py-2.5 text-end font-medium text-muted-foreground",
-  actionsCell:
-    "px-3 py-2.5 text-end [&[data-pinned]]:bg-card [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5",
+  actionsCell: `px-3 py-2.5 text-end ${STICKY_CELL} [[data-density=compact]_&]:px-2 [[data-density=compact]_&]:py-1.5`,
   reorderHeader: "w-10 border-b border-border bg-card",
-  reorderCell: "w-10 px-1 py-2.5",
+  reorderCell: `w-10 px-1 py-2.5 ${STICKY_CELL}`,
   rowReorderHandle:
     "inline-grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-accent data-[dragging]:cursor-grabbing",
   rowReorderButtons: "mt-2 flex items-center gap-1",
@@ -331,7 +336,7 @@ export const shadcnClassNames = {
     "inline-grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-accent disabled:opacity-50",
   // ── Row expansion & detail ──────────────────────────────────────
   expandHeader: "w-8 border-b border-border bg-card",
-  expandCell: "w-8 px-2 py-2.5",
+  expandCell: `w-8 px-2 py-2.5 ${STICKY_CELL}`,
   expandButton:
     "inline-grid h-6 w-6 place-items-center rounded-md text-muted-foreground transition-transform hover:bg-accent data-[expanded]:rotate-90",
   detailRow: "border-b border-border bg-muted/30",

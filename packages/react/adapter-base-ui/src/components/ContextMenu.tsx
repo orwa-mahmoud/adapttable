@@ -8,6 +8,7 @@ import {
 import { Popover } from "@base-ui/react/popover";
 
 import { Button } from "../ui";
+import { usePortalContainer } from "./portalContainer";
 
 /**
  * The kit's own overlay, opened at the point the pointer was.
@@ -38,6 +39,7 @@ function Surface({
   children,
   className,
 }: Readonly<ContextMenuSurfaceProps>) {
+  const portalContainer = usePortalContainer();
   return (
     <Popover.Root
       open
@@ -48,7 +50,7 @@ function Surface({
       <Popover.Trigger
         render={<span aria-hidden="true" style={anchorStyle(at)} />}
       />
-      <Popover.Portal>
+      <Popover.Portal container={portalContainer}>
         <Popover.Positioner side="bottom" align="start">
           <Popover.Popup
             role="menu"

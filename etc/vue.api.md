@@ -218,6 +218,7 @@ import { TableEngine } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
+import { TableQueryListener } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core/binding';
 import { TableRuntimeView } from '@adapttable/core/binding';
@@ -1621,6 +1622,7 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    isCellFlashing: (row: TRow, columnKey: string) => boolean;
     cellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
     searchInputAttrs: () => Record<string, unknown>;
@@ -1650,6 +1652,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly fitColumns?: MaybeRefOrGetter<boolean>;
     // (undocumented)
     readonly forceMobile?: MaybeRefOrGetter<boolean>;
+    readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     // (undocumented)
     readonly labels?: MaybeRefOrGetterOptional<TableLabels>;
     // (undocumented)
@@ -1660,10 +1663,12 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly multiSort?: MaybeRefOrGetter<boolean>;
     // (undocumented)
     readonly onClearFilters?: () => void;
+    readonly onRowClick?: (row: TRow) => void;
     // (undocumented)
     readonly rowKey: (row: TRow) => string;
     // (undocumented)
     readonly searchDebounceMs?: number;
+    readonly searchPlaceholder?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly selection?: RowSelection;
     // (undocumented)
@@ -1677,6 +1682,7 @@ export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
+    readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
@@ -1689,10 +1695,13 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity_2>;
+    readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
     readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
+    readonly mode?: "frontend" | "server";
     // (undocumented)
     readonly onCellCut?: (range: CellRange) => void;
     // (undocumented)
@@ -1701,8 +1710,10 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity_2) => void;
+    readonly onQueryChange?: TableQueryListener;
     // (undocumented)
     readonly onSelectionChange?: (ids: string[]) => void;
+    readonly responseKey?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
     // (undocumented)
@@ -1712,6 +1723,8 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;
+    readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
+    readonly total?: MaybeRefOrGetterOptional<number>;
 }
 
 // @public (undocumented)

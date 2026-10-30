@@ -8,8 +8,10 @@ import {
   type ReactNode,
 } from "react";
 
+import { ChevronDownIcon } from "../svg";
 import type { BaseUiAccentColor } from "../types";
 import { Flex, Text } from "../ui";
+import { usePortalContainer } from "./portalContainer";
 
 /**
  * Tooltip wrapper presenting the `label` + single-trigger-child contract the
@@ -25,13 +27,14 @@ export function Tooltip({
   disabled?: boolean;
   children: ReactNode;
 }>) {
+  const portalContainer = usePortalContainer();
   if (disabled || label === "" || label == null) return <>{children}</>;
   if (!isValidElement(children)) return <>{children}</>;
   return (
     <BaseTooltip.Provider>
       <BaseTooltip.Root>
         <BaseTooltip.Trigger render={children as ReactElement} />
-        <BaseTooltip.Portal>
+        <BaseTooltip.Portal container={portalContainer}>
           <BaseTooltip.Positioner sideOffset={6}>
             <BaseTooltip.Popup className="adapttable-tooltip">
               {label}
@@ -185,6 +188,7 @@ export function NativeSelect({
   "aria-busy"?: true;
   "data-conflict"?: "";
 }>) {
+  const portalContainer = usePortalContainer();
   const items = Object.fromEntries(
     options.map((option) => [
       option.value === "" ? EMPTY_VALUE : option.value,
@@ -217,8 +221,11 @@ export function NativeSelect({
         {...rest}
       >
         <Select.Value data-slot="select-value" placeholder={placeholder} />
+        <Select.Icon className="adapttable-select-icon">
+          <ChevronDownIcon size={14} />
+        </Select.Icon>
       </Select.Trigger>
-      <Select.Portal>
+      <Select.Portal container={portalContainer}>
         <Select.Positioner
           className="adapttable-select-positioner"
           sideOffset={4}

@@ -95,7 +95,7 @@ describe("unstyled GroupingPanel", () => {
       { target: { value: "team" } }
     );
 
-    expect(groupingKeys()).toEqual(["Team"]);
+    expect(groupingKeys()).toEqual(["1. Team"]);
   });
 
   it("reorders grouping chips with arrow keys", () => {
@@ -106,7 +106,7 @@ describe("unstyled GroupingPanel", () => {
       { key: "ArrowRight" }
     );
 
-    expect(groupingKeys()).toEqual(["Status", "Team"]);
+    expect(groupingKeys()).toEqual(["1. Status", "2. Team"]);
   });
 
   it("removes a grouping chip", () => {

@@ -661,6 +661,30 @@ describe("the launcher", () => {
     // Without this the next Tab starts from the top of the page.
     expect(document.activeElement).toBe(part("assistant-launcher"));
   });
+
+  it("leaves focus where the page put it when it first renders closed", () => {
+    const frames: FrameRequestCallback[] = [];
+    const scheduled = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((callback) => {
+        frames.push(callback);
+        return frames.length;
+      });
+    const field = document.createElement("input");
+    document.body.append(field);
+    field.focus();
+    try {
+      mount({ open: false });
+      for (const frame of frames) frame(0);
+
+      // A closed assistant on page load is not a panel that just closed:
+      // taking focus here would also scroll the page to the launcher.
+      expect(document.activeElement).toBe(field);
+    } finally {
+      scheduled.mockRestore();
+      field.remove();
+    }
+  });
 });
 
 describe("the header", () => {
@@ -1202,6 +1226,18 @@ describe("the composer", () => {
     const live = part("assistant-status")!;
     expect(live).toHaveTextContent("Working");
     expect(live).not.toHaveTextContent("a long question");
+  });
+});
+
+describe("where the composer sits", () => {
+  it("stays in the inline panel's flow, so it never floats over the messages", () => {
+    mount({ presentation: "panel" });
+    expect(part("assistant-composer")!.style.position).toBe("");
+  });
+
+  it("holds the bottom of a window that scrolls inside itself", () => {
+    mount({ presentation: "floating" });
+    expect(part("assistant-composer")!.style.position).toBe("sticky");
   });
 });
 

@@ -2,6 +2,10 @@
  * Column tools on the NG-ZORRO table: a multi-sort badge, a resize handle,
  * a header's own text, a phone sort select, and renaming from the header.
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import type {
   AdaptTableFeature,
   ColumnDef,
@@ -151,6 +155,19 @@ describe("the NG-ZORRO table's column tools", () => {
     expect(handle.getAttribute("role")).toBe("button");
     expect(handle.getAttribute("aria-label")).toBe("Resize column: Name");
     expect(parts("header-actions")[0]!.textContent.trim()).toBe("info");
+    // The handle is an empty nz-button; NG-ZORRO collapses .ant-btn:empty, so
+    // the kit's size rule names the class to stay ahead of it.
+    expect(handle.matches(".ant-btn:empty")).toBe(true);
+    const css = readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        "components/desktopTable.css"
+      ),
+      "utf8"
+    );
+    expect(css).toMatch(
+      /nz-table \.ant-btn\[data-adapttable-part="resize-handle"\] \{[^}]*inline-size: 8px;/
+    );
   });
 
   it.each([

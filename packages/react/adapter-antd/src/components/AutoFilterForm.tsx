@@ -53,7 +53,10 @@ function filterSelectPopupContainer(trigger: HTMLElement): HTMLElement {
   const overlay = trigger.closest(
     '[data-adapttable-part="filter-header-cell"]'
   );
-  return overlay instanceof HTMLElement ? overlay : document.body;
+  if (overlay instanceof HTMLElement) return overlay;
+  // Fullscreen hides everything outside the promoted element, the body
+  // included: the list opens inside it while it is up.
+  return (document.fullscreenElement as HTMLElement | null) ?? document.body;
 }
 
 /** A scalar state value as input text (`""` when unset). */

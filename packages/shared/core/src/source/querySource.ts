@@ -14,6 +14,7 @@
  */
 import type { ColumnMetadata } from "../columnModel";
 import type { FacetMap } from "../filters/facets";
+import { settledFilterTree } from "../filters/filterTreeCodec";
 import { queryAggregateOps } from "../grouping/groupAggregateOverrides";
 import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import type {
@@ -303,7 +304,7 @@ export function createQuerySource<
           groupBy,
           aggregates,
           expandedIds: nextConfig.expandedIds,
-          filterTree: nextView.filterTree,
+          filterTree: settledFilterTree(nextView.filterTree),
           facets: nextConfig.facetKeys,
         },
         supports
@@ -331,7 +332,7 @@ export function createQuerySource<
         groupBy: nextView.groupBy,
         groupAggregateOverrides: nextView.groupAggregateOverrides,
         filters: nextView.extra,
-        filterTree: nextView.filterTree,
+        filterTree: settledFilterTree(nextView.filterTree),
       }),
     };
     trailBase ??= request.trailKey;

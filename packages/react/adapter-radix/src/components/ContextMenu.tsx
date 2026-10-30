@@ -7,6 +7,8 @@ import {
 } from "@adapttable/react/adapter";
 import { DropdownMenu } from "@radix-ui/themes";
 
+import { usePortalContainer } from "./portalContainer";
+
 /**
  * The kit's own menu, opened at the point the pointer was.
  *
@@ -32,6 +34,7 @@ function Surface({
   children,
   className,
 }: Readonly<ContextMenuSurfaceProps>) {
+  const portalContainer = usePortalContainer();
   return (
     <DropdownMenu.Root
       open
@@ -43,6 +46,7 @@ function Surface({
         <span aria-hidden="true" style={anchorStyle(at)} />
       </DropdownMenu.Trigger>
       <DropdownMenu.Content
+        container={portalContainer}
         aria-label={label}
         className={className}
         data-adapttable-part="context-menu"

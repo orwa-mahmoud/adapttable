@@ -18597,7 +18597,10 @@ Relative dates: `RELATIVE_NAMED` / `RELATIVE_PRESETS` /
 `relativeTokenLabel` / `resolveRelativeRange`.
 AND/OR trees: `FILTER_TREE_PARAM` / `FILTER_TREE_VERSION` /
 `parseFilterTree` / `serializeFilterTree` / `isActiveFilterTree` /
-`evaluateFilterTree` / `conditionToExtra`. Mutations:
+`evaluateFilterTree` / `conditionToExtra` /
+`isFilterTreeConditionSet` / `settledFilterTree` — a condition still waiting
+for a value filters nothing: it gets no chip, is not counted, is left out of
+evaluation and is not sent to a server. Mutations:
 `emptyFilterTree` / `addFilterTreeCondition` / `addFilterTreeGroup` /
 `removeFilterTreeNode` / `replaceFilterTreeNode` /
 `setFilterTreeCombinator` / `walkFilterTreeConditions` /
@@ -19087,7 +19090,8 @@ multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
 **The query model without React.** `@adapttable/core/query` is the half of the
 model a backend needs and no more: the `ft=1.{…}` codec (`parseFilterTree`,
 `serializeFilterTree`, `isActiveFilterTree`, `FILTER_TREE_PARAM`,
-`FILTER_TREE_VERSION`), the `pivot=rows:…` codec (`serializePivot`,
+`FILTER_TREE_VERSION`, and `isFilterTreeConditionSet` / `settledFilterTree` for
+the tree that actually filters), the `pivot=rows:…` codec (`serializePivot`,
 `deserializePivot`, plus `serializePivotState` / `deserializePivotState` for the
 whole `PivotUrlState` — the `config` and the folded `collapsed` keys), the
 `formula=key:text` codec (`serializeFormulaColumns`,
@@ -26808,7 +26812,8 @@ unless the host provides another way to inspect and clear it.
 ## Typing and committed search
 
 The search input updates its displayed text immediately and commits a trimmed
-term after 300 ms without another keystroke. URL changes, clear-all and other
+term after 300 ms without another keystroke; `[searchDebounceMs]` on the table
+changes that wait. URL changes, clear-all and other
 external committed changes update the displayed text. Timers are cleared when
 the table is destroyed.
 
@@ -26944,7 +26949,8 @@ server page locally. See [data tiers](./data-tiers.md) and the shared
 closes it and restores trigger focus; an outside click closes it too.
 `filtersMode="drawer"` uses a backdrop. The toolbar remains available with
 mobile cards. Supply `[labels]` and `dir="rtl"` for translated controls and
-direction-aware placement; the kit shell has no `locale` input.
+direction-aware placement, and `[locale]` so the choices of an `"auto"`
+select filter read the locale's field.
 
 Filters, operators and the nested tree participate in [URL state](./url-state.md)
 and [saved views](./saved-views.md). Removing a chip removes its own value;
@@ -30233,7 +30239,7 @@ column definitions, host callbacks and optional features drive both layouts.
 ## Automatic cards or a scrolling table
 
 Omit `forceMobile` for automatic cards below the default 768px viewport
-breakpoint. Set `[forceMobile]="true"` to preview cards at any width, or
+breakpoint; `[mobileBreakpoint]` sets another width. Set `[forceMobile]="true"` to preview cards at any width, or
 `[forceMobile]="false"` to keep the desktop table with horizontal scrolling on
 phones. No second table instance is needed, so sorting, filtering and selection
 remain with the same table.
@@ -31450,8 +31456,13 @@ not React's headless feature aggregate.
   with your host's storage and permission model
 - The views popover closes on Escape and returns focus to its trigger. Keep
   visible controls reachable on narrow screens instead of relying on a shortcut
-- `[labels]` supplies localized captions and `[dir]` supplies direction. The
-  kit shell does not have a `locale` input
+- `[labels]` supplies localized captions, `[dir]` supplies direction and
+  `[locale]` picks the field that columns with `i18n` paths read; see
+  [localization and RTL](./i18n-rtl.md)
+- `[stickyHeader]="true"` keeps the desktop header in view. Inside a
+  `maxHeight` box or a table that scrolls sideways it sticks at the top of the
+  box; on a page-scrolling table it sticks at `[stickyTop]`, the height of any
+  app bar it must clear. Pinned rows sit below a sticky header
 
 `sidePanel()` from `/side-panel` accepts named panels and a controlled `open`
 key or `null`, plus `onOpenChange`. Panel content can be a template or plain
@@ -31617,15 +31628,15 @@ define the options and rendered surface.
 # Angular table localization and RTL
 
 Table labels, row values and text direction are separate inputs. Pass translated
-`labels`, set `dir`, and resolve locale-dependent column paths with the Angular
-binding. Set the HTML language on the surrounding page or host for assistive
-technology.
+`labels`, set `dir`, and set `locale` so columns that read by `i18n` path use
+that locale's field. Set the HTML language on the surrounding page or host for
+assistive technology.
 
 ## Switch between English and Arabic
 
 ```ts
 import { Component, computed, signal } from "@angular/core";
-import { resolveColumns, type ColumnDef } from "@adapttable/angular";
+import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/ng-zorro";
 import { getDirection, getLabels } from "@adapttable/i18n";
 
@@ -31645,6 +31656,7 @@ interface Person {
       [data]="people"
       [columns]="columns()"
       [rowKey]="rowKey"
+      [locale]="locale()"
       [labels]="labels()"
       [dir]="direction()"
       [attr.lang]="locale()"
@@ -31660,31 +31672,26 @@ export class LocalizedPeopleTable {
   readonly rowKey = (row: Person) => row.id;
   readonly labels = computed(() => getLabels(this.locale()));
   readonly direction = computed(() => getDirection(this.locale()));
-  readonly columns = computed(() => {
-    const locale = this.locale();
-    const definitions: ColumnDef<Person>[] = [
-      {
-        key: "name",
-        header: locale === "ar" ? "الاسم" : "Name",
-        i18n: { en: "names.en", ar: "names.ar" },
-        sortable: true,
-        sortValue: (row) => row.names[locale],
-        exportValue: (row) => row.names[locale],
-      },
-    ];
-    return resolveColumns(definitions, locale);
-  });
+  readonly columns = computed((): ColumnDef<Person>[] => [
+    {
+      key: "name",
+      header: this.locale() === "ar" ? "الاسم" : "Name",
+      i18n: { en: "names.en", ar: "names.ar" },
+      sortable: true,
+    },
+  ]);
 }
 ```
 
-The kit shell has `labels` and `dir` inputs, **not a `locale` input**.
-`resolveColumns` fills the accessor for each locale-dependent data path.
-An explicit accessor remains your responsibility; the binding does not
-replace it. Keep the column key stable when translating the caption.
+The table's `locale` picks each column's `i18n` path: the cells, the choices of
+a `"auto"` select filter, search and sort all read the active locale's field.
+An explicit accessor, `sortValue` or filter `getValue` still wins where a column
+sets one. Keep the column key stable when translating the caption.
 
 With a custom source or headless table, `injectFrontendData` and
 `injectDataTable` also accept a locale value or signal. Pass the same locale
-to the source and renderer when their value resolution depends on it.
+to the source and renderer when their value resolution depends on it;
+`resolveColumns(columns, locale)` resolves the paths for a renderer of your own.
 
 ## Labels and formatting
 
@@ -33493,7 +33500,7 @@ const rowKey = (row: Person) => row.id;
 </template>
 ```
 
-Use `searchable="false"` to omit the search field, and `getSearchText` to choose the text searched for each row. `searchDebounceMs` controls the draft delay. With a supplied server source, query changes request data from the host; the table does not download the complete dataset to sort it.
+Use `searchable="false"` to omit the search field, and `getSearchText` to choose the text searched for each row. `searchDebounceMs` controls the draft delay, and `searchPlaceholder` sets the search box placeholder ahead of the `searchPlaceholder` label. With a supplied server source, query changes request data from the host; the table does not download the complete dataset to sort it.
 
 A custom header owns its sort control. Invoke the provided `toggleSort` callback instead of changing the row array. For headless surfaces, use the sorting state and requests exposed by `useDataTable`; see the [API](./api.md).
 
@@ -33793,6 +33800,69 @@ For remote rows, choose `useServerData` when the host performs requests and
 publishes `rows`/`total`, or `useQuerySource` when an existing query composable
 owns fetching and cancellation. See [source contracts](./api.md#data-sources)
 for request cancellation and query-library lifecycle rules.
+
+## Server rows through table props
+
+The table takes the server tier directly: pass the current page as `data`, the
+row count as `total`, and fetch in `onQueryChange`. It is called after mount
+and once per real change with the consolidated query; the previous request's
+`signal` is aborted. `is-loading` and `error` describe the request.
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from "vue";
+import type { ColumnDef, TableQuery, TableQueryHandler } from "@adapttable/vue";
+import { DataTable } from "@adapttable/vue-unstyled";
+
+interface Person {
+  id: string;
+  name: string;
+}
+interface PeoplePage {
+  rows: readonly Person[];
+  total: number;
+}
+// Your application's request; it sends the query and honors the signal.
+declare function fetchPeople(
+  query: TableQuery,
+  init: { signal: AbortSignal }
+): Promise<PeoplePage>;
+
+const columns: readonly ColumnDef<Person>[] = [{ key: "name", sortable: true }];
+const rows = shallowRef<readonly Person[]>([]);
+const total = shallowRef(0);
+const loading = shallowRef(false);
+const fetchPage: TableQueryHandler = async (query, { signal }) => {
+  loading.value = true;
+  try {
+    const reply = await fetchPeople(query, { signal });
+    if (signal.aborted) return;
+    rows.value = reply.rows;
+    total.value = reply.total;
+  } finally {
+    if (!signal.aborted) loading.value = false;
+  }
+};
+</script>
+
+<template>
+  <DataTable
+    :data="rows"
+    :total="total"
+    :is-loading="loading"
+    :columns="columns"
+    :row-key="(row: Person) => row.id"
+    @query-change="fetchPage"
+  />
+</template>
+```
+
+`mode` is inferred: `data` with `onQueryChange` is server, `data` alone is
+frontend. `mode="frontend"` keeps the table's own search, sort and paging and
+makes `onQueryChange` a notification of what the reader changed; the mount is
+not a change. `supports`, `aggregates`, `responseKey`, `facetKeys` and `facets`
+carry the same server capabilities as `useServerData`; `facetKeys` defaults to
+every checklist filter. A supplied `source` wins over all of them.
 
 ## Server query ownership
 
@@ -34391,6 +34461,46 @@ persistence promise. `rowActionControls(input: RowActionControlsInput<TRow>)`
 produces labeled, semantic controls and guards delayed confirmation against
 feature removal. Use it when implementing a kit; the native table already
 uses this projection.
+
+## Row clicks
+
+`onRowClick(row)` activates a desktop row or a phone card from a click on its
+body, Enter or Space; clicks on its own buttons, links and inputs stay theirs.
+The first row is the Tab stop and Arrow Up/Down move between rows. Bind it as
+a prop or a listener:
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from "vue";
+import type { ColumnDef } from "@adapttable/vue";
+import { DataTable } from "@adapttable/vue-unstyled";
+
+interface Person {
+  id: string;
+  name: string;
+}
+const people: readonly Person[] = [{ id: "ada", name: "Ada" }];
+const columns: readonly ColumnDef<Person>[] = [{ key: "name" }];
+const opened = shallowRef<string>();
+const openPerson = (row: Person) => {
+  opened.value = row.id;
+};
+</script>
+
+<template>
+  <DataTable
+    :data="people"
+    :columns="columns"
+    :row-key="(row: Person) => row.id"
+    @row-click="openPerson"
+  />
+</template>
+```
+
+Activatable rows and cards carry `data-clickable`. Omit the callback and rows
+stay inert. `isCellFlashing(rowId, columnKey)` marks cells with `data-flash`,
+on desktop cells and on card values; see
+[realtime rows](./realtime.md#flash-the-cells-that-moved).
 
 ## Explore the implementation
 
@@ -35077,17 +35187,19 @@ changes them.
 
 `DataTable<TRow>` from `@adapttable/vue-unstyled` uses `DataTableProps<TRow>`:
 
-| Prop group          | Props and behavior                                                                                                                                                                                                                                    |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Required            | `columns: readonly ColumnInput<TRow>[]`, `rowKey: (row: TRow) => string`.                                                                                                                                                                             |
-| Data                | `data?: readonly TRow[]` or `source?: TableSource<TRow>`; source takes precedence. `getSearchText` customizes local search.                                                                                                                           |
-| Query               | `defaults`, `paginationMode`, `urlSync`, `urlKey`, `urlAdapter`; these configure the fallback frontend source, not a separately supplied source.                                                                                                      |
-| Search and sorting  | `searchable` defaults to true; `searchDebounceMs` defaults to the engine's 300ms interval. `multiSort` enables shift-key sort levels.                                                                                                                 |
-| Layout              | `forceMobile`, `mobileBreakpoint`, `columnLayout`, `defaultColumnLayout`, `onColumnRename`, `fitColumns`, `columnWidths`, `collapsibleColumnGroups`. Group headings and native desktop collapse buttons render; cards honor the resulting visibility. |
-| Selection           | `selectable`, controlled `selectedIds`, initial `defaultSelectedIds`.                                                                                                                                                                                 |
-| Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                |
-| Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                     |
-| Extensions          | `features?: readonly ComposedFeature<NoInfer<TRow>>[]`. Compose factories from the native feature entries; the row type is inferred from the data/columns contract.                                                                                   |
+| Prop group          | Props and behavior                                                                                                                                                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required            | `columns: readonly ColumnInput<TRow>[]`, `rowKey: (row: TRow) => string`.                                                                                                                                                                                                                   |
+| Data                | `data?: readonly TRow[]` or `source?: TableSource<TRow>`; source takes precedence. `getSearchText` customizes local search.                                                                                                                                                                 |
+| Server tier         | `onQueryChange` with `data` as the current page fetches each query; `total`, `supports`, `aggregates`, `responseKey`, `facetKeys`, `facets` describe the reply. `mode="frontend"` makes `onQueryChange` a change notice. See [data tiers](./data-tiers.md#server-rows-through-table-props). |
+| Query               | `defaults`, `paginationMode`, `urlSync`, `urlKey`, `urlAdapter`; these configure the fallback frontend source, not a separately supplied source.                                                                                                                                            |
+| Search and sorting  | `searchable` defaults to true; `searchDebounceMs` defaults to the engine's 300ms interval; `searchPlaceholder` overrides the placeholder label. `multiSort` enables shift-key sort levels.                                                                                                  |
+| Layout              | `forceMobile`, `mobileBreakpoint`, `columnLayout`, `defaultColumnLayout`, `onColumnRename`, `fitColumns`, `columnWidths`, `collapsibleColumnGroups`. Group headings and native desktop collapse buttons render; cards honor the resulting visibility.                                       |
+| Selection           | `selectable`, controlled `selectedIds`, initial `defaultSelectedIds`.                                                                                                                                                                                                                       |
+| Rows                | `onRowClick` activates a row or card; `isCellFlashing` marks changed cells with `data-flash`.                                                                                                                                                                                               |
+| Labels and styling  | `tableLabel`, `labels`, `dir`, `locale`, `classNames`.                                                                                                                                                                                                                                      |
+| Local source status | `isLoading`, `isFetching`, `error`, `refetch`; a supplied source owns its status.                                                                                                                                                                                                           |
+| Extensions          | `features?: readonly ComposedFeature<NoInfer<TRow>>[]`. Compose factories from the native feature entries; the row type is inferred from the data/columns contract.                                                                                                                         |
 
 `summaryRow?: SummaryRowFn<TRow>` builds a column-aligned footer from the current
 source row scope. A visible column `footer` or the table `footer` slot also
@@ -36721,12 +36833,8 @@ formula grammar. Parser errors and dependency cycles remain explicit result
 fields. Formula text is serialized as data; importing or restoring a formula does
 not execute JavaScript. Sorting and export use the neutral numeric/text result.
 
-`useRowPatchStream` from `/stream` passes an updater to the host's `onPatch` callback.
-It accepts WebSocket or EventSource transport, custom frame parsing and an optional
-reconnect policy. Callback replacement does not reconnect a healthy socket.
-Endpoint or transport replacement closes the previous stream. Component mounting
-opens it, KeepAlive suspension closes it, activation reconnects it, and explicit
-`close()` keeps it closed for the remainder of that composable's lifetime.
+`useRowPatchStream` and `useChangedCellFlash` from `/stream` keep host-owned
+rows live and mark the cells a patch changed; see [realtime rows](./realtime.md).
 
 `Sparkline` and `sparklineColumn` from `/sparkline` render line, bar or area SVGs
 using neutral geometry. Each chart has an accessible name and title. Non-finite
@@ -36889,3 +36997,249 @@ by column key) and `cycles` (keys involved in dependency cycles), but its `colum
 error and cycle fields before combining those columns with the table's ordinary
 columns. The [formula grammar](../formulas.md) describes expressions and
 failure reporting; the Vue result type determines what can be rendered here.
+
+---
+
+# Vue realtime rows
+
+Keep live rows in a Vue ref and update that ref when a feed delivers patches.
+`useRowPatchStream()` from `@adapttable/vue/stream` connects a WebSocket or
+server-sent-events endpoint to the host-owned array. It does not make the table
+a database or a write transport.
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from "vue";
+import type { ColumnDef } from "@adapttable/vue";
+import { useRowPatchStream } from "@adapttable/vue/stream";
+import { DataTable } from "@adapttable/vue-unstyled";
+
+interface Stock {
+  id: string;
+  product: string;
+  available: number;
+}
+
+const rows = shallowRef<readonly Stock[]>([
+  { id: "s1", product: "Notebook", available: 10 },
+]);
+const enabled = shallowRef(true);
+const rowKey = (row: Stock) => row.id;
+const columns: readonly ColumnDef<Stock>[] = [
+  { key: "product", header: "Product" },
+  { key: "available", header: "Available" },
+];
+const stream = useRowPatchStream<Stock>(() => ({
+  eventSource: "/api/stock/events",
+  enabled: enabled.value,
+  getRowId: rowKey,
+  onPatch: (update) => {
+    rows.value = update(rows.value);
+  },
+}));
+const { status, error } = stream;
+</script>
+
+<template>
+  <button type="button" @click="enabled = !enabled">
+    {{ enabled ? "Pause live updates" : "Resume live updates" }}
+  </button>
+  <p role="status">Feed: {{ status }}</p>
+  <p v-if="error" role="alert">{{ error.message }}</p>
+  <DataTable
+    table-label="Live stock"
+    :data="rows"
+    :columns="columns"
+    :row-key="rowKey"
+  />
+</template>
+```
+
+Use a real application endpoint in place of `/api/stock/events`. The default
+frame format is a JSON patch array, for example
+`[{"type":"update","id":"s1","changes":{"available":9}}]`. A custom `parse`
+function can adapt another protocol. Use your kit's `DataTable`; the stream
+entry remains on the binding.
+
+## Connection lifecycle
+
+Choose `websocket` or `eventSource`; SSE also accepts an event name and
+WebSockets can supply subprotocols. Pass a getter for the whole options object
+so the URL and `enabled` stay reactive. Changing the endpoint or transport
+closes the prior connection; replacing only a callback does not reconnect a
+healthy socket. Mounting opens the feed, KeepAlive suspension closes it,
+activation reconnects it, and unmounting closes it. The returned `status` and
+`error` are readonly refs. `close()` keeps the feed closed for the rest of that
+composable's lifetime; use `enabled: false` as the paused state you can resume.
+
+`reconnect` configures reconnection. Reopening a transport is not proof that
+missed data was replayed: the host protocol must decide how to resume, refetch
+or reconcile after a gap. Invalid default-format frames with no valid patches
+leave the row array unchanged. Validate incoming business values and permissions
+at your service boundary; do not let a feed grant new editing rights.
+
+The feed opens after mount, so server rendering never connects. Keep the
+initial rows identical on server and client for hydration.
+
+## Flash the cells that moved
+
+`useChangedCellFlash(options?)` from `/stream` marks the cells a patch changed.
+It is off until `enabled: true`, lights nothing for a reader who prefers reduced
+motion, and holds each mark for `durationMs` (1200 ms by default). Feed `mark`
+the events from core's `rowPatchLog`, and pass `isFlashing` to the table's
+`isCellFlashing`; the changed desktop cells and card values carry `data-flash`,
+which your stylesheet animates. The unstyled kit needs your CSS for a visible
+tint. The result also offers `isRowFlashing(rowId)`,
+`flashProps(rowId, columnKey)` for custom cells, and `clear()`; its timers stop
+with the component.
+
+```ts
+import { rowPatchLog } from "@adapttable/core";
+import { useChangedCellFlash, useRowPatchStream } from "@adapttable/vue/stream";
+import { shallowRef } from "vue";
+
+interface Stock {
+  id: string;
+  product: string;
+  available: number;
+}
+const rowKey = (row: Stock) => row.id;
+const rows = shallowRef<readonly Stock[]>([]);
+const flash = useChangedCellFlash({ enabled: true });
+useRowPatchStream<Stock>({
+  eventSource: "/api/stock/events",
+  getRowId: rowKey,
+  onPatch: (update) => {
+    const next = update(rows.value);
+    rows.value = next;
+    const log = rowPatchLog(next);
+    if (log) flash.mark(log.events);
+  },
+});
+// <DataTable :data="rows" :is-cell-flashing="flash.isFlashing" … />
+```
+
+## Apply a patch without a stream
+
+`applyRowPatches`, `updateRow`, `insertRow`, `upsertRow` and `removeRow` are
+neutral helpers from `@adapttable/core`. Apply them to the ref's value for a
+save response, timer or an existing host socket. Updates preserve untouched row
+objects and no-op patches preserve the array reference. Stable keys retain
+selection and expansion identity; an update to a missing ID is a no-op, while an
+upsert can append a missing record. `applyRowPatchesWithLog` returns
+`{ rows, events }` for the flash.
+
+Keep connection status and failures available as text, not only animation.
+Pause/Resume should be reachable by touch and keyboard. For live updates that
+arrive under an active edit, configure the
+[editing conflict policy](./cell-editing.md) rather than silently overwriting a
+draft.
+
+See [Data tiers](./data-tiers.md), [Specialized data views](./specialized.md)
+and the [stream implementation](../../packages/vue/vue/src/stream.ts).
+
+---
+
+# Vue table localization and RTL
+
+Table labels, row values and text direction are separate props. Pass translated
+`labels`, set `dir`, and set `locale` so columns that read by `i18n` path use
+that locale's field. Set the HTML language on the surrounding page or host for
+assistive technology.
+
+## Switch between English and Arabic
+
+```vue
+<script setup lang="ts">
+import { computed, shallowRef } from "vue";
+import type { ColumnDef } from "@adapttable/vue";
+import { DataTable } from "@adapttable/vue-unstyled";
+import { getDirection, getLabels } from "@adapttable/i18n";
+
+interface Person {
+  id: string;
+  names: { en: string; ar: string };
+}
+
+const locale = shallowRef<"en" | "ar">("en");
+const people: readonly Person[] = [
+  { id: "ada", names: { en: "Ada Lovelace", ar: "آدا لوفليس" } },
+];
+const labels = computed(() => getLabels(locale.value));
+const direction = computed(() => getDirection(locale.value));
+const columns = computed((): ColumnDef<Person>[] => [
+  {
+    key: "name",
+    header: locale.value === "ar" ? "الاسم" : "Name",
+    i18n: { en: "names.en", ar: "names.ar" },
+    sortable: true,
+  },
+]);
+</script>
+
+<template>
+  <div :lang="locale">
+    <button type="button" @click="locale = 'en'">English</button>
+    <button type="button" @click="locale = 'ar'">العربية</button>
+    <DataTable
+      :data="people"
+      :columns="columns"
+      :row-key="(row: Person) => row.id"
+      :locale="locale"
+      :labels="labels"
+      :dir="direction"
+      :table-label="locale === 'ar' ? 'الأشخاص' : 'People'"
+    />
+  </div>
+</template>
+```
+
+The table's `locale` picks each column's `i18n` path: the cells, the choices of
+an `"auto"` select filter, search and sort all read the active locale's field.
+An explicit accessor, `sortValue` or filter `getValue` still wins where a column
+sets one. Keep the column key stable when translating the caption.
+
+With a custom source or headless table, `useFrontendData` and `useDataTable`
+also accept a locale value, ref or getter. Pass the same locale to the source
+and renderer when their value resolution depends on it;
+`resolveColumns(columns, locale)` resolves the paths for a renderer of your own.
+
+## Labels and formatting
+
+`@adapttable/i18n` is optional and framework-neutral. It exports ready locale
+bundles such as `ar` and `en`, `getLabels`, `getDirection` and RTL helpers.
+You may instead pass your application's own `TableLabels`. Missing labels
+fall back to English, so provide all relevant labels for a fully localized
+experience, including labels contributed by editing, filters and assistants.
+
+Column headers, custom actions, validation messages, arbitrary card text and
+domain-specific sparkline summaries are host content. Translate them in your
+application. Format dates and numbers with your locale-aware formatter and
+keep explicit raw `sortValue` / `exportValue` functions when formatted strings
+would be ambiguous for operations.
+
+Search text is also a host choice. A frontend source's `getSearchText` can
+select the active-language fields; default row-value search may include
+multiple translations. On the server tier, pass the locale through your
+application's request contract and let the server implement localized search.
+
+## Direction across the complete table
+
+`dir="rtl"` reaches table and card structure and the kit's overlays, such as
+the filters popover. Logical pin sides `"start"` and `"end"` follow direction.
+Grid Left/Right keys follow the screen's visual direction. Use logical CSS
+properties such as `margin-inline-start` and `padding-inline-end` in custom
+renderers.
+
+Each kit keeps direction local to its table and the controls it opens. Element
+Plus, Naive UI and Quasar widgets elsewhere in your application take their own
+locale and RTL configuration; AdaptTable labels do not translate unrelated
+widgets. See [Vue installation and providers](./getting-started.md).
+
+Test translated labels, long captions, nested selects, drawers, pinned columns,
+card actions and keyboard movement together. Direction alone does not translate
+the words, and translated words alone do not mirror the layout.
+
+See [Mobile cards](./mobile-cards.md), [Filtering](./filtering.md),
+[Navigation](./navigation.md) and the shared
+[localization reference](../i18n-rtl.md).

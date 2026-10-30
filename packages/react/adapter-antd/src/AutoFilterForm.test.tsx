@@ -138,6 +138,29 @@ describe("<AutoFilterForm> (Ant Design)", () => {
     expect(write).toHaveBeenCalledWith("core", undefined);
   });
 
+  it("opens its list inside the fullscreen element while one is up", () => {
+    const stage = document.createElement("div");
+    document.body.append(stage);
+    Object.defineProperty(document, "fullscreenElement", {
+      value: stage,
+      configurable: true,
+    });
+    try {
+      render(
+        <AutoFilterForm
+          defs={[{ key: "core", type: "boolean", label: "Core team" }]}
+          source={staticSource({})}
+          labels={defaultLabels}
+        />
+      );
+      fireEvent.mouseDown(screen.getByRole("combobox", { name: "Core team" }));
+      expect(stage.querySelector(".ant-select-dropdown")).not.toBeNull();
+    } finally {
+      Reflect.deleteProperty(document, "fullscreenElement");
+      stage.remove();
+    }
+  });
+
   it("tolerates a scalar multiSelect value (treats it as one selection)", () => {
     render(
       <AutoFilterForm

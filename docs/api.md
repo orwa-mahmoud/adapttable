@@ -1590,7 +1590,10 @@ Relative dates: `RELATIVE_NAMED` / `RELATIVE_PRESETS` /
 `relativeTokenLabel` / `resolveRelativeRange`.
 AND/OR trees: `FILTER_TREE_PARAM` / `FILTER_TREE_VERSION` /
 `parseFilterTree` / `serializeFilterTree` / `isActiveFilterTree` /
-`evaluateFilterTree` / `conditionToExtra`. Mutations:
+`evaluateFilterTree` / `conditionToExtra` /
+`isFilterTreeConditionSet` / `settledFilterTree` — a condition still waiting
+for a value filters nothing: it gets no chip, is not counted, is left out of
+evaluation and is not sent to a server. Mutations:
 `emptyFilterTree` / `addFilterTreeCondition` / `addFilterTreeGroup` /
 `removeFilterTreeNode` / `replaceFilterTreeNode` /
 `setFilterTreeCombinator` / `walkFilterTreeConditions` /
@@ -2080,7 +2083,8 @@ multi-value encoding. `QueryInput` is a `Request`, `URL`, query string or
 **The query model without React.** `@adapttable/core/query` is the half of the
 model a backend needs and no more: the `ft=1.{…}` codec (`parseFilterTree`,
 `serializeFilterTree`, `isActiveFilterTree`, `FILTER_TREE_PARAM`,
-`FILTER_TREE_VERSION`), the `pivot=rows:…` codec (`serializePivot`,
+`FILTER_TREE_VERSION`, and `isFilterTreeConditionSet` / `settledFilterTree` for
+the tree that actually filters), the `pivot=rows:…` codec (`serializePivot`,
 `deserializePivot`, plus `serializePivotState` / `deserializePivotState` for the
 whole `PivotUrlState` — the `config` and the folded `collapsed` keys), the
 `formula=key:text` codec (`serializeFormulaColumns`,

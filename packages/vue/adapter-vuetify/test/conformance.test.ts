@@ -11,6 +11,9 @@ import {
   nativeConformanceDriver,
   nativeConformanceHarness,
   nativeRangeConformanceTests,
+  nativeRowConformanceTests,
+  nativeSearchConformanceTests,
+  nativeServerConformanceTests,
 } from "../../vue/test/nativeConformanceDriver";
 import { DataTable } from "../src";
 import { cellNavigation } from "../src/cell-navigation";
@@ -48,5 +51,19 @@ describe(`table conformance — ${driver.name}`, () => {
 
 describe(`native cell ranges — ${driver.name}`, () => {
   for (const test of nativeRangeConformanceTests(driver))
+    it(test.name, test.run);
+});
+
+describe(`row activation and changed cells — ${driver.name}`, () => {
+  for (const test of nativeRowConformanceTests(driver)) it(test.name, test.run);
+});
+
+describe(`search placeholder — ${driver.name}`, () => {
+  for (const test of nativeSearchConformanceTests(driver))
+    it(test.name, test.run);
+});
+
+describe(`server tier and query notices — ${driver.name}`, () => {
+  for (const test of nativeServerConformanceTests(driver))
     it(test.name, test.run);
 });

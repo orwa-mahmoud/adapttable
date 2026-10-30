@@ -115,7 +115,7 @@ export function SavedViewsMenu({
               </ActionIcon>
             </Group>
           ))}
-          <Divider my={4} />
+          {views.views.length > 0 && <Divider my={4} />}
           <Group gap={6} p={4} wrap="nowrap">
             <TextInput
               size="xs"

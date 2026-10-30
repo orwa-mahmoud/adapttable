@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 
 import type { DataTableClassNames } from "../types";
 import { MENU_PANEL_STYLE, useMenuPopover } from "./menuPopover";
+import { usePortalContainer } from "./portalContainer";
 
 /**
  * Layout for a panel row: the name/input takes the space, the trailing
@@ -55,6 +56,7 @@ export function SavedViewsMenu({
   labels,
   classNames,
 }: Readonly<SavedViewsMenuProps>) {
+  const portalContainer = usePortalContainer();
   const { views, save, apply, remove } = useSavedViews(options);
   const { open, setOpen, rootRef, triggerRef, panelRef } = useMenuPopover();
   const [name, setName] = useState("");
@@ -117,10 +119,12 @@ export function SavedViewsMenu({
                 </button>
               </div>
             ))}
-            <hr
-              data-adapttable-part="views-divider"
-              className={classNames.viewsDivider}
-            />
+            {views.length > 0 && (
+              <hr
+                data-adapttable-part="views-divider"
+                className={classNames.viewsDivider}
+              />
+            )}
             <div
               data-adapttable-part="views-save-row"
               className={classNames.viewsSaveRow}
@@ -148,7 +152,7 @@ export function SavedViewsMenu({
               </button>
             </div>
           </div>,
-          document.body
+          portalContainer ?? document.body
         )}
     </div>
   );

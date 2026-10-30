@@ -53,6 +53,21 @@ for (const adapter of ADAPTERS) {
       await expect(table.getByText("Alan Turing")).toHaveCount(0);
     });
 
+    test("header filter opens as a dialog named for its column", async ({
+      page,
+    }) => {
+      await openDemo(page, adapter);
+      const table = demo(page).locator(`[data-adapter="${adapter}"]`);
+      const trigger = table
+        .getByRole("columnheader", { name: /Person/ })
+        .locator('[data-adapttable-part="filter-header-trigger"]');
+      await trigger.click();
+      const panel = headerFilterPanel(page, "Person");
+      await expect(panel).toBeVisible();
+      await expect(panel).toHaveRole("dialog");
+      await expect(panel).toHaveAccessibleName(/Person/);
+    });
+
     test("picking an operator leaves the header filter open", async ({
       page,
     }) => {

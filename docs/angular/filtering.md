@@ -100,7 +100,8 @@ server page locally. See [data tiers](./data-tiers.md) and the shared
 closes it and restores trigger focus; an outside click closes it too.
 `filtersMode="drawer"` uses a backdrop. The toolbar remains available with
 mobile cards. Supply `[labels]` and `dir="rtl"` for translated controls and
-direction-aware placement; the kit shell has no `locale` input.
+direction-aware placement, and `[locale]` so the choices of an `"auto"`
+select filter read the locale's field.
 
 Filters, operators and the nested tree participate in [URL state](./url-state.md)
 and [saved views](./saved-views.md). Removing a chip removes its own value;

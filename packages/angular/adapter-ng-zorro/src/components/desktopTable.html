@@ -5,13 +5,18 @@
     [nzTemplateMode]="true"
     [nzFrontPagination]="false"
     [nzShowPagination]="false"
+    [nzSize]="v.density() === 'compact' ? 'small' : 'default'"
     [attr.data-adapttable-part]="
       tableAttrs()['role'] === 'grid' ? 'grid' : null
     "
     [adaptAttrs]="tableAttrs()"
     [adaptAttrsTarget]="tableElement"
   >
-    <thead class="ant-table-thead" data-adapttable-part="thead">
+    <thead
+      class="ant-table-thead"
+      data-adapttable-part="thead"
+      [style]="theadStyle()"
+    >
       <ng-template #leadingHeaders let-band>
         @if (v.rowDetail) {
           <th

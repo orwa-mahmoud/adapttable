@@ -43,6 +43,7 @@ import {
   chromeShowFooter,
   clearChromeFilters,
   type CssProperties,
+  desktopTableStyle,
   type FeatureHostState,
   fetchNextBodyPage,
   headerCellAttributes,
@@ -402,13 +403,25 @@ export function injectDataTable<TRow>(
     ...layout().state.widths,
     ...columnWidths(),
   }));
+  const fitColumns = computed(
+    () =>
+      readMaybe(options.fitColumns ?? false) ||
+      featureOptions().fitColumns === true
+  );
   const flexShares = computed(() =>
     columnFlexShares({
       columns: columns(),
-      fitColumns:
-        readMaybe(options.fitColumns ?? false) ||
-        featureOptions().fitColumns === true,
+      fitColumns: fitColumns(),
       widths: widths(),
+    })
+  );
+  // A minimum width that holds every sized column, so the widths hold and the
+  // table scrolls sideways instead of squeezing them; fitted when asked.
+  const tableStyle = computed(() =>
+    desktopTableStyle(columns(), {
+      columnWidths: widths(),
+      extraMinWidth: 0,
+      fitColumns: fitColumns(),
     })
   );
   const sizing = computed(() => ({
@@ -581,6 +594,7 @@ export function injectDataTable<TRow>(
         rowCount: source().total,
         colCount: columns().length,
       }),
+      style: tableStyle(),
     }),
     headerRowAttrs: () => headerRowAttributes(),
     headerCellAttrs: (column) => {

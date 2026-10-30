@@ -72,6 +72,25 @@ describe("row pinning (shadcn)", () => {
     expect(part("pinned-bottom")).toHaveAttribute("data-row-pin", "bottom");
   });
 
+  it("gives a pinned row's cells an opaque surface", () => {
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        pinnedRowIds={{ top: ["1"], bottom: [] }}
+        onPinnedRowIdsChange={vi.fn()}
+      />
+    );
+    // The preset's variant targets the cells of a row that carries the pin.
+    const cell = part("pinned-top")?.querySelector<HTMLElement>(
+      "td[data-column-key=title]"
+    );
+    expect(cell?.className).toContain("[tr[data-row-pin]>&]:bg-card");
+    expect(cell?.parentElement).toHaveAttribute("data-row-pin", "top");
+  });
+
   it("offers pin actions on cards with no sticky chrome", () => {
     const onPinnedRowIdsChange = vi.fn();
     render(

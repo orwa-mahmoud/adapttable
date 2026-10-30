@@ -67,6 +67,8 @@ import {
         dropdownToggle
         style="list-style: none; cursor: pointer; display: inline-flex; align-items: center; padding: 2px"
         [attr.aria-label]="caption()"
+        aria-haspopup="dialog"
+        [attr.aria-expanded]="overlay.open()"
         [attr.data-active]="active() ? '' : null"
       >
         <svg [adaptIcon]="icon"></svg>
@@ -83,6 +85,8 @@ import {
       >
         @if (overlay.open()) {
           <div
+            role="dialog"
+            [attr.aria-label]="caption()"
             data-adapttable-part="filter-header-cell"
             style="inline-size: min(20rem, calc(100vw - 2rem)); padding: 0.5rem"
           >

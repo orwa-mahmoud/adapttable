@@ -229,6 +229,21 @@ for (const kit of ANGULAR_KITS) {
       expect(new Set(await teams(page))).toEqual(new Set(["Core"]));
     });
 
+    test("opens a header funnel as a dialog named for its column", async ({
+      page,
+    }) => {
+      await page.goto(PAGE);
+      await page
+        .getByRole("combobox", { name: "Filter layout", exact: true })
+        .selectOption("header");
+      await part(page, "filter-header-trigger").nth(1).click();
+      const dialog = page.getByRole("dialog", { name: /Team/ });
+      await expect(dialog).toBeVisible();
+      await expect(
+        dialog.getByRole("checkbox", { name: "Core", exact: true })
+      ).toBeVisible();
+    });
+
     if (kit.key === "ngx-bootstrap" || kit.key === "spartan") {
       test("keeps multiple checkbox choices open in its native header menu", async ({
         page,

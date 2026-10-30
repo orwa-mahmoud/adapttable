@@ -114,7 +114,7 @@ export function SavedViewsMenu({
               </IconButton>
             </Stack>
           ))}
-          <Divider sx={{ my: 0.5 }} />
+          {views.length > 0 && <Divider sx={{ my: 0.5 }} />}
           <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
             <TextField
               inputRef={nameInput}

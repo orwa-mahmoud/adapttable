@@ -1,5 +1,5 @@
 /** A Vue mount adapter for the unchanged framework-neutral behavioral suite. */
-import { defaultLabels } from "@adapttable/core";
+import { defaultLabels, type TableLabels } from "@adapttable/core";
 import {
   CONFORMANCE_COLUMNS,
   CONFORMANCE_ROWS,
@@ -20,7 +20,7 @@ import type {
   rowReorder,
   virtualize,
 } from "../src/features";
-import type { ColumnDef } from "../src/index";
+import type { ColumnDef, TableQueryHandler } from "../src/index";
 
 interface NativeKit {
   name: string;
@@ -49,10 +49,24 @@ type ScenarioProps = Pick<
   | "defaults"
   | "features"
   | "paginationMode"
+  | "onRowClick"
+  | "isCellFlashing"
+  | "searchPlaceholder"
+  | "mode"
+  | "onQueryChange"
+  | "total"
 >;
 
 interface NativeScenario extends ConformanceScenario {
   onRangeChange?: (range: CellRange | null) => void;
+  onRowClick?: (row: ConformanceRow) => void;
+  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
+  searchPlaceholder?: string;
+  mode?: "frontend" | "server";
+  onQueryChange?: TableQueryHandler;
+  total?: number;
+  /** Table labels beyond the neutral suite's; they replace `labels`. */
+  tableLabels?: TableLabels;
 }
 interface NativeDriver extends ConformanceDriver {
   mount: (scenario: NativeScenario) => ConformanceMount;
@@ -81,7 +95,7 @@ export function nativeConformanceDriver(kit: NativeKit): NativeDriver {
         forceMobile: scenario.mobile,
         urlSync: false,
         selectable: scenario.selectable,
-        labels: scenario.labels,
+        labels: scenario.tableLabels ?? scenario.labels,
         defaults:
           scenario.pageSize === undefined
             ? undefined
@@ -108,6 +122,12 @@ export function nativeConformanceDriver(kit: NativeKit): NativeDriver {
           ...(scenario.virtualize ? [kit.virtualize({ maxHeight: 200 })] : []),
         ],
         ...(scenario.virtualize ? { paginationMode: "infinite" } : {}),
+        onRowClick: scenario.onRowClick,
+        isCellFlashing: scenario.isCellFlashing,
+        searchPlaceholder: scenario.searchPlaceholder,
+        mode: scenario.mode,
+        onQueryChange: scenario.onQueryChange,
+        total: scenario.total,
       };
       const container = document.createElement("div");
       document.body.append(container);
@@ -238,4 +258,241 @@ export function nativeRangeConformanceTests(
       }
     },
   }));
+}
+
+/** Row activation and changed-cell marks, on desktop rows and phone cards. */
+export function nativeRowConformanceTests(
+  driver: NativeDriver
+): readonly ConformanceTest[] {
+  const layout = (mobile: boolean) => (mobile ? "phone cards" : "desktop rows");
+  const rowOf = (root: ParentNode, mobile: boolean, id: string) => {
+    const row = root.querySelector<HTMLElement>(
+      mobile
+        ? `[data-adapttable-part="card"][data-row-id="${id}"]`
+        : `tr[data-row-id="${id}"]`
+    );
+    if (!row) throw new Error(`Missing row ${id}`);
+    return row;
+  };
+  return [false, true].flatMap((mobile) => [
+    {
+      name: `activates a row by click, Enter and Space (${layout(mobile)})`,
+      async run() {
+        const activate = vi.fn<(row: ConformanceRow) => void>();
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          mobile,
+          onRowClick: activate,
+        });
+        try {
+          await view.ready;
+          const row = rowOf(view.container, mobile, "r2");
+          expect(row.hasAttribute("data-clickable")).toBe(true);
+          expect(rowOf(view.container, mobile, "r1").tabIndex).toBe(0);
+          expect(row.tabIndex).toBe(-1);
+          const text = [...row.querySelectorAll<HTMLElement>("*")].find(
+            (element) => element.textContent.trim() === "Grace"
+          );
+          nativeConformanceHarness.fireEvent.click(text ?? row);
+          nativeConformanceHarness.fireEvent.keyDown(row, { key: "Enter" });
+          nativeConformanceHarness.fireEvent.keyDown(row, { key: " " });
+          expect(activate.mock.calls.map(([target]) => target.id)).toEqual([
+            "r2",
+            "r2",
+            "r2",
+          ]);
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+    {
+      name: `leaves rows inert without onRowClick (${layout(mobile)})`,
+      async run() {
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          mobile,
+        });
+        try {
+          await view.ready;
+          const row = rowOf(view.container, mobile, "r2");
+          expect(row.hasAttribute("data-clickable")).toBe(false);
+          expect(row.hasAttribute("data-adapttable-row")).toBe(false);
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+    {
+      name: `marks only the cells isCellFlashing names (${layout(mobile)})`,
+      async run() {
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          mobile,
+          isCellFlashing: (rowId, columnKey) =>
+            rowId === "r2" && columnKey === "age",
+        });
+        try {
+          await view.ready;
+          const marked = [
+            ...view.container.querySelectorAll<HTMLElement>("[data-flash]"),
+          ];
+          expect(marked).toHaveLength(1);
+          expect(marked[0]?.getAttribute("data-adapttable-part")).toBe(
+            mobile ? "card-value" : "cell"
+          );
+          expect(marked[0]?.textContent.trim()).toBe("28");
+          expect(rowOf(view.container, mobile, "r2").contains(marked[0]!)).toBe(
+            true
+          );
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+  ]);
+}
+
+/** The search box's placeholder: the prop, ahead of the `searchPlaceholder` label. */
+export function nativeSearchConformanceTests(
+  driver: NativeDriver
+): readonly ConformanceTest[] {
+  const placeholders = (root: ParentNode) =>
+    [...root.querySelectorAll<HTMLInputElement>("input[placeholder]")].map(
+      (input) => input.placeholder
+    );
+  return [
+    {
+      name: "shows searchPlaceholder in the search box, ahead of the label",
+      async run() {
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          tableLabels: { searchPlaceholder: "From labels" },
+          searchPlaceholder: "Search names",
+        });
+        try {
+          await view.ready;
+          expect(placeholders(view.container)).toContain("Search names");
+          expect(placeholders(view.container)).not.toContain("From labels");
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+    {
+      name: "falls back to the searchPlaceholder label",
+      async run() {
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          tableLabels: { searchPlaceholder: "From labels" },
+        });
+        try {
+          await view.ready;
+          expect(placeholders(view.container)).toContain("From labels");
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+  ];
+}
+
+/** The server tier from `data` + `onQueryChange`, and a frontend notice. */
+export function nativeServerConformanceTests(
+  driver: NativeDriver
+): readonly ConformanceTest[] {
+  const rowIds = (root: ParentNode) =>
+    [...root.querySelectorAll<HTMLElement>('[data-adapttable-part="row"]')].map(
+      (row) => row.dataset.rowId
+    );
+  const sortAge = (root: ParentNode) => {
+    const header = [
+      ...root.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="header-cell"]'
+      ),
+    ].find((cell) => cell.dataset.columnKey === "age");
+    if (!header) throw new Error("Missing age header");
+    nativeConformanceHarness.fireEvent.click(
+      header.querySelector('button, [role="button"]') ?? header
+    );
+  };
+  return [
+    {
+      name: "fetches the page from onQueryChange and shows the host's rows",
+      async run() {
+        const fetch = vi.fn<TableQueryHandler>();
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS.slice(0, 2),
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          pageSize: 1,
+          total: 3,
+          onQueryChange: fetch,
+        });
+        try {
+          await view.ready;
+          await vi.waitFor(() => {
+            expect(fetch).toHaveBeenCalledTimes(1);
+          });
+          expect(fetch.mock.calls[0]?.[0]).toMatchObject({ page: 1, limit: 1 });
+          // The host's page is shown as sent: the table neither pages nor
+          // sorts it.
+          expect(rowIds(view.container)).toEqual(["r1", "r2"]);
+          sortAge(view.container);
+          await vi.waitFor(() => {
+            expect(fetch.mock.lastCall?.[0]).toMatchObject({
+              sortBy: "age",
+              sortDir: "asc",
+            });
+          });
+          expect(fetch.mock.lastCall?.[1].signal).toBeInstanceOf(AbortSignal);
+          expect(fetch.mock.calls[0]?.[1].signal.aborted).toBe(true);
+          expect(rowIds(view.container)).toEqual(["r1", "r2"]);
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+    {
+      name: 'tells a mode="frontend" table\'s onQueryChange what changed',
+      async run() {
+        const notice = vi.fn<TableQueryHandler>();
+        const view = driver.mount({
+          rows: CONFORMANCE_ROWS,
+          columns: CONFORMANCE_COLUMNS,
+          tableLabel: "People",
+          mode: "frontend",
+          onQueryChange: notice,
+        });
+        try {
+          await view.ready;
+          await nextTick();
+          // The mount is not a change.
+          expect(notice).not.toHaveBeenCalled();
+          sortAge(view.container);
+          await vi.waitFor(() => {
+            expect(notice).toHaveBeenCalledTimes(1);
+          });
+          expect(notice.mock.calls[0]?.[0]).toMatchObject({
+            sortBy: "age",
+            sortDir: "asc",
+          });
+          // The table still sorts its own rows.
+          expect(rowIds(view.container)).toEqual(["r2", "r1", "r3"]);
+        } finally {
+          view.unmount();
+        }
+      },
+    },
+  ];
 }

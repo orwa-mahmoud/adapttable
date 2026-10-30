@@ -10,10 +10,10 @@
     border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
     background: color-mix(in srgb, currentColor 3%, transparent);
     min-width: 0;
-    position: sticky;
-    inset-block-end: 0;
     flex-shrink: 0;
   "
+  [style.position]="props().sticky === false ? null : 'sticky'"
+  [style.inset-block-end]="props().sticky === false ? null : '0'"
 >
   <div
     data-adapttable-part="assistant-composer-controls"

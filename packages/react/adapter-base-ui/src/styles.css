@@ -701,6 +701,23 @@ button.adapttable-btn:has([data-slot="select-value"]) {
   z-index: var(--adapttable-overlay-z);
 }
 
+/* The list is at least as wide as the field that opened it. */
+.adapttable-select-popup {
+  min-width: var(--anchor-width);
+}
+
+.adapttable-select-icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--adapttable-muted);
+  transition: transform 140ms ease;
+}
+
+.adapttable-select-icon[data-expanded],
+.adapttable-select-icon[data-popup-open] {
+  transform: rotate(180deg);
+}
+
 /* Interactive grouping strip. Insertion targets stay visible instead of
  * becoming zero-width gaps, and every part wraps when the table narrows. */
 .adapttable-grouping-panel {

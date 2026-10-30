@@ -367,6 +367,8 @@ export interface DesktopRowWiringModel<
   detailMeasureRef: ((element: Element | null) => void) | undefined;
   rowDomProps: Record<string, unknown>;
   bodyPinStyle: (key: string) => ReturnType<typeof desktopBodyPinStyle>;
+  /** The edge a body cell's column is pinned to, for its `data-pinned`. */
+  bodyPinSide: (key: string) => PinOffset["side"] | undefined;
 }
 
 /**
@@ -625,6 +627,7 @@ export function desktopRowWiring<TRow, C extends DesktopRowWiringContext<TRow>>(
     }),
     bodyPinStyle: (key: string) =>
       desktopBodyPinStyle(key, pinOffset, leads, rowPinSide, rowPinOffset),
+    bodyPinSide: (key: string) => pinOffset?.(key)?.side,
   };
 }
 
@@ -1168,8 +1171,11 @@ export function desktopHeaderLeaf<
 } {
   const { table, gridFocus, setWidth } = ctx;
   const localStyle = ctx.headStyle(column);
+  const pinSide = ctx.pinOffset?.(column.key)?.side;
   const headerProps = {
     ...table.getHeaderCellProps(column, localStyle && { style: localStyle }),
+    // Pinned header cells say which edge they hold, as body cells do.
+    ...(pinSide ? { "data-pinned": pinSide } : {}),
     // A column the host closed to grouping offers no drag: the reader is
     // never handed a gesture the panel would refuse.
     ...(column.groupable === false
@@ -1207,7 +1213,7 @@ export function desktopHeaderLeaf<
       ctx.headerFilters === true
         ? filterDefForColumn(ctx.filterDefs ?? [], column.key)
         : undefined,
-    pinSide: ctx.pinOffset?.(column.key)?.side,
+    pinSide,
     resizeHandleProps: setWidth
       ? ctx.columnResizeHandleProps(
           column.key,

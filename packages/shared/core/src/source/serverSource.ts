@@ -12,6 +12,7 @@
  * adds only its own reactivity and the moment it commits.
  */
 import type { ColumnMetadata } from "../columnModel";
+import { settledFilterTree } from "../filters/filterTreeCodec";
 import {
   type GroupAggregateOverrides,
   queryAggregateOps,
@@ -253,7 +254,7 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
       aggregates,
       cursor: cursorMode ? cursors[page - 1] : undefined,
       expandedIds: config.expandedIds,
-      filterTree: view.filterTree,
+      filterTree: settledFilterTree(view.filterTree),
       facets: config.facetKeys,
       supports,
     });

@@ -66,6 +66,7 @@ import {
 import {
   type ReactNode,
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -299,6 +300,8 @@ export function FilterHeaderTrigger<TRow>(
 ) {
   const active = hasActiveHeaderFilter(props);
   const triggerRef = useRef<HTMLSpanElement>(null);
+  const panelId = useId();
+  const label = filterLabel(props.def);
   const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(
     null
   );
@@ -337,7 +340,10 @@ export function FilterHeaderTrigger<TRow>(
         <Button
           type={active ? "primary" : "text"}
           size="small"
-          aria-label={filterLabel(props.def)}
+          aria-label={label}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
           data-adapttable-part="filter-header-trigger"
           data-active={active ? "" : undefined}
           onMouseDown={(event) => event.stopPropagation()}
@@ -354,6 +360,9 @@ export function FilterHeaderTrigger<TRow>(
         createPortal(
           <div
             {...sessionProps}
+            id={panelId}
+            role="dialog"
+            aria-label={label}
             data-adapttable-part="filter-header-cell"
             style={{
               position: "fixed",
@@ -375,7 +384,9 @@ export function FilterHeaderTrigger<TRow>(
               registry={props.registry}
             />
           </div>,
-          document.body
+          // Fullscreen hides everything outside the promoted element, the body
+          // included; the field opens inside it while it is up.
+          (document.fullscreenElement as HTMLElement | null) ?? document.body
         )}
     </>
   );

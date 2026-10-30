@@ -1,6 +1,8 @@
 /** Host-owned row updates, with resource ownership tied to the Vue scope. */
 import {
   applyRowPatches,
+  CHANGED_CELL_FLASH_MS,
+  createChangedCellFlashStore,
   openRowPatchStream,
   parseRowPatchFrame,
   type RowPatch,
@@ -9,6 +11,7 @@ import {
   type RowPatchStreamStatus,
   type StreamSocket,
 } from "@adapttable/core";
+import type { ChangedCellFlashState } from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -20,7 +23,8 @@ import {
   watch,
 } from "vue";
 
-import { requireScope, useScopeActivity } from "./store";
+import { requireScope, useExternalStore, useScopeActivity } from "./store";
+export type { ChangedCellFlashState } from "@adapttable/core/binding";
 export type {
   InsertPatch,
   OpenRowPatchStreamOptions,
@@ -138,3 +142,79 @@ export function useRowPatchStream<TRow>(
   };
 }
 export type RowPatchStreamState = ReturnType<typeof useRowPatchStream>;
+
+/** Options for {@link useChangedCellFlash}. @public */
+export interface UseChangedCellFlashOptions {
+  /** Whether changed cells are marked. Defaults to `false`. */
+  readonly enabled?: boolean;
+  /** How long a mark lasts, in milliseconds. Defaults to 1200. */
+  readonly durationMs?: number;
+}
+
+/** What an unmarked cell carries. */
+const NO_FLASH: Record<string, never> = {};
+/** What a marked cell carries. */
+const FLASH: { "data-flash": "" } = { "data-flash": "" };
+
+/**
+ * Mark the cells a live patch changed, briefly — and not at all when the
+ * reader prefers reduced motion. Pass `isFlashing` to the table's
+ * `isCellFlashing` and feed `mark` the events a patch produced.
+ * @public
+ */
+export function useChangedCellFlash(
+  input: MaybeRefOrGetter<UseChangedCellFlashOptions> = {}
+): ChangedCellFlashState {
+  requireScope("useChangedCellFlash");
+  const options = computed(() => toValue(input));
+  const reduced = usePrefersReducedMotion();
+  const config = computed(() => ({
+    live: (options.value.enabled ?? false) && !reduced.value,
+    durationMs: options.value.durationMs ?? CHANGED_CELL_FLASH_MS,
+  }));
+  const store = createChangedCellFlashStore(config.value);
+  // A new generation per mark and per fade, so whatever read a cell's state
+  // reads it again.
+  const generation = useExternalStore(store);
+  // Turning it off, or a reduced-motion preference arriving, drops what is
+  // already on screen rather than leaving it lit.
+  watch(
+    config,
+    (next) => {
+      store.configure(next);
+      if (!next.live) store.clear();
+    },
+    { flush: "sync" }
+  );
+  // Timers must not outlive the table.
+  onScopeDispose(store.clear);
+  // Reading the generation is what makes a render track the store.
+  const live = (): boolean => generation.value >= 0 && config.value.live;
+  const isFlashing = (rowId: string, columnKey: string): boolean =>
+    live() && store.isFlashing(rowId, columnKey);
+  return {
+    isFlashing,
+    isRowFlashing: (rowId) => live() && store.isRowFlashing(rowId),
+    flashProps: (rowId, columnKey) =>
+      isFlashing(rowId, columnKey) ? FLASH : NO_FLASH,
+    mark: store.mark,
+    clear: store.clear,
+  };
+}
+
+/** `prefers-reduced-motion: reduce`, followed live; false without a window. */
+function usePrefersReducedMotion(): Readonly<ShallowRef<boolean>> {
+  const reduced = shallowRef(false);
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function")
+    return shallowReadonly(reduced);
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const read = (): void => {
+    reduced.value = media.matches;
+  };
+  read();
+  media.addEventListener("change", read);
+  onScopeDispose(() => {
+    media.removeEventListener("change", read);
+  });
+  return shallowReadonly(reduced);
+}

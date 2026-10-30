@@ -139,6 +139,7 @@ import {
   type UIEventHandler,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -1562,6 +1563,16 @@ function theadComponent(
   };
 }
 
+/**
+ * A pinned row sticks while the rest scroll beneath it, and antd paints its
+ * cells transparent over the table's surface, so the scrolled rows would show
+ * through. antd owns the `<td>`s; this paints a pinned row's cells with the
+ * container colour, and antd's own hover and selection rules, which are more
+ * specific, still tint them. A pinned summary row is the host's total, not a
+ * record, and reads semibold.
+ */
+const PINNED_ROW_CSS = `[data-adapttable-part="root"] tr[data-row-pin] > td{background:var(--ant-color-bg-container,#fff)}[data-adapttable-part="root"] tr[data-adapttable-part^="pinned-summary"] > td{font-weight:600}`;
+
 function TheadRow(props: Readonly<HTMLAttributes<HTMLTableRowElement>>) {
   return <tr data-adapttable-part="header-row" {...props} />;
 }
@@ -2177,7 +2188,19 @@ function AntdTableBody<TRow>({
   const rootRef = c.rootRef;
   // Fullscreen also decides where every overlay portals: promoted, the rest
   // of the document is hidden, so a menu on `document.body` is invisible.
-  const fullscreen = useFullscreen(rootRef.current);
+  // The root exists only once the table has committed; read from the ref
+  // during render it is still null, and the button would do nothing.
+  const [rootElement, setRootElement] = useState<HTMLElement | null>(null);
+  const wantsFullscreen = chromeProps.fullscreen === true;
+  useEffect(() => {
+    if (wantsFullscreen) setRootElement(rootRef.current);
+  }, [wantsFullscreen, rootRef, c]);
+  const fullscreen = useFullscreen(rootElement);
+  const fullscreenContainer = fullscreen.container;
+  const popupContainer = useCallback(
+    () => fullscreenContainer ?? document.body,
+    [fullscreenContainer]
+  );
   const viewControls = viewControlsToolbar(
     { density, onDensityChange, fullscreen: chromeProps.fullscreen },
     fullscreen
@@ -2577,243 +2600,252 @@ function AntdTableBody<TRow>({
                   }
                   aria-busy={c.isRefreshing || undefined}
                 >
-                  <FeatureSlot
-                    slot={GRID_FOCUS_ANNOUNCER}
-                    props={{ focus: gridFocus }}
-                  />
-                  <TableStatusAnnouncer announcement={statusAnnouncement} />
-                  <AntdRowReorderAnnouncer rowReorder={c.rowReorder} />
-                  <FeatureSlot
-                    slot={FIND_BAR}
-                    props={{ find, labels: c.table.labels }}
-                  />
-                  <Space
-                    orientation="vertical"
-                    size="small"
-                    style={{ width: "100%" }}
+                  <style>{PINNED_ROW_CSS}</style>
+                  {/* Every antd popup under the table opens in the fullscreen
+                      element while it is up; the rest of the page is hidden. */}
+                  <ConfigProvider
+                    getPopupContainer={
+                      fullscreenContainer ? popupContainer : undefined
+                    }
                   >
-                    <div
-                      data-adapttable-part="toolbar"
-                      ref={stickyBar.toolbarRef}
-                      className={classNames?.toolbar}
-                      style={stickyBar.toolbarStyle}
-                    >
-                      <Toolbar
-                        table={table}
-                        searchable={props.searchable !== false}
-                        searchPlaceholder={props.searchPlaceholder}
-                        sortByOptions={props.sortByOptions}
-                        toolbar={props.toolbar}
-                        toolbarSlots={props.toolbarSlots}
-                        {...undoRedoToolbar(
-                          props.undoRedoButtons,
-                          history,
-                          labels
-                        )}
-                        {...printToolbar(
-                          props.printButton,
-                          props.onPrint,
-                          labels
-                        )}
-                        {...viewControls}
-                        hasFilters={toolbarShowsFilters(
-                          filtersMode,
-                          Boolean(filtersNode),
-                          Boolean(resolvedSource.setFilterTree)
-                        )}
-                        activeFilterCount={c.activeFilterCount}
-                        filters={filtersNode}
-                        filtersMode={filtersMode}
-                        filtersOpen={filtersOpen}
-                        onToggleFilters={filtersTrigger.onClick}
-                        onFiltersTriggerPointerDown={
-                          filtersTrigger.onPointerDown
-                        }
-                        onCloseFilters={() => setFiltersOpen(false)}
-                        onClearFilters={c.clearFilters}
-                        onAddRow={
-                          c.rowMutations.canAdd
-                            ? c.rowMutations.addRow
-                            : undefined
-                        }
-                        addRowLabel={labels.addRow}
-                        isRefreshing={c.isRefreshing}
-                        dir={props.dir}
-                        columnMenu={
-                          <ColumnMenuSlot
-                            onAutoSize={onAutoSize}
-                            onAutoSizeColumn={onAutoSizeColumn}
-                            onSortColumn={(key, dir) =>
-                              source.setSort(key, dir)
-                            }
-                            onFilterColumn={() => setFiltersOpen(true)}
-                            onRenameColumn={
-                              props.onColumnRename
-                                ? c.columnLayout.setName
-                                : undefined
-                            }
-                            sortBy={source.sortBy}
-                            sortDir={source.sortDir}
-                            enabled={
-                              Boolean(props.enableColumnMenu) && !c.isMobile
-                            }
-                            allColumns={c.allColumns}
-                            layout={c.columnLayout}
-                            labels={labels}
-                            dir={props.dir}
-                            hasRowActions={c.hasRowActions}
-                            hasRowReorder={c.hasRowReorder}
-                            groupingPanel={c.groupingPanel}
-                          />
-                        }
-                        {...exportHandler}
-                        savedViewsMenu={
-                          <SavedViewsSlot
-                            options={props.savedViews}
-                            urlAdapter={resolvedUrlAdapter}
-                            urlKey={props.urlKey}
-                            labels={labels}
-                          />
-                        }
-                        showRowsPerPage={!c.isPaged}
-                      />
-                    </div>
                     <FeatureSlot
-                      slot={ACTIVE_FILTER_CHIPS}
-                      props={{
-                        chips: c.mergedChips,
-                        onClearAll: c.clearFilters,
-                        labels,
-                      }}
+                      slot={GRID_FOCUS_ANNOUNCER}
+                      props={{ focus: gridFocus }}
                     />
-                    {c.editing?.batch && (
-                      <FeatureSlot
-                        slot={BATCH_EDIT_BAR}
-                        props={{
-                          batch: c.editing.batch,
-                          contested: c.editing.conflict?.anyContested,
-                          labels,
-                        }}
-                      />
-                    )}
+                    <TableStatusAnnouncer announcement={statusAnnouncement} />
+                    <AntdRowReorderAnnouncer rowReorder={c.rowReorder} />
                     <FeatureSlot
-                      slot={AGENT_APPROVAL}
-                      props={{ pending: approval, labels }}
+                      slot={FIND_BAR}
+                      props={{ find, labels: c.table.labels }}
                     />
-
-                    {selection && props.bulkActions && (
-                      <FeatureSlot
-                        slot={BULK_BAR}
-                        props={{
-                          selection,
-                          total: source.total,
-                          bulkActions: props.bulkActions,
-                          confirm,
-                          labels,
-                        }}
-                      />
-                    )}
-                    <AntdGroupingPanel
-                      state={c.groupingPanel}
-                      columns={c.allColumns}
-                      labels={labels}
-                      mobile={c.isMobile}
-                      dir={props.dir}
-                    />
-                    <div
-                      className={
-                        c.body === "desktop" ? classNames?.table : undefined
-                      }
+                    <Space
+                      orientation="vertical"
+                      size="small"
+                      style={{ width: "100%" }}
                     >
-                      <OptionalSidePanel
-                        side={props.sidePanel?.side}
-                        body={bodyRegion}
-                        panel={
-                          props.sidePanel?.open != null && (
-                            <FeatureSlot
-                              slot={SIDE_PANEL}
-                              props={{
-                                panels: props.sidePanel.panels,
-                                openPanel: props.sidePanel.open,
-                                onOpenPanel: props.sidePanel.onOpenChange,
-                                onClose: () => {
-                                  props.sidePanel?.onOpenChange(null);
-                                },
-                                side: props.sidePanel?.side,
-                                labels,
-                              }}
-                            />
-                          )
-                        }
-                      />
-                    </div>
-                    <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
-                    {c.isPaged && !source.error && c.body === "desktop" && (
                       <div
-                        data-adapttable-part="footer"
-                        className={classNames?.footer}
+                        data-adapttable-part="toolbar"
+                        ref={stickyBar.toolbarRef}
+                        className={classNames?.toolbar}
+                        style={stickyBar.toolbarStyle}
                       >
-                        <PagedFooter
+                        <Toolbar
                           table={table}
-                          source={source}
-                          labels={labels}
-                          showRowsPerPage={!c.grouping}
+                          searchable={props.searchable !== false}
+                          searchPlaceholder={props.searchPlaceholder}
+                          sortByOptions={props.sortByOptions}
+                          toolbar={props.toolbar}
+                          toolbarSlots={props.toolbarSlots}
+                          {...undoRedoToolbar(
+                            props.undoRedoButtons,
+                            history,
+                            labels
+                          )}
+                          {...printToolbar(
+                            props.printButton,
+                            props.onPrint,
+                            labels
+                          )}
+                          {...viewControls}
+                          hasFilters={toolbarShowsFilters(
+                            filtersMode,
+                            Boolean(filtersNode),
+                            Boolean(resolvedSource.setFilterTree)
+                          )}
+                          activeFilterCount={c.activeFilterCount}
+                          filters={filtersNode}
+                          filtersMode={filtersMode}
+                          filtersOpen={filtersOpen}
+                          onToggleFilters={filtersTrigger.onClick}
+                          onFiltersTriggerPointerDown={
+                            filtersTrigger.onPointerDown
+                          }
+                          onCloseFilters={() => setFiltersOpen(false)}
+                          onClearFilters={c.clearFilters}
+                          onAddRow={
+                            c.rowMutations.canAdd
+                              ? c.rowMutations.addRow
+                              : undefined
+                          }
+                          addRowLabel={labels.addRow}
+                          isRefreshing={c.isRefreshing}
+                          dir={props.dir}
+                          columnMenu={
+                            <ColumnMenuSlot
+                              onAutoSize={onAutoSize}
+                              onAutoSizeColumn={onAutoSizeColumn}
+                              onSortColumn={(key, dir) =>
+                                source.setSort(key, dir)
+                              }
+                              onFilterColumn={() => setFiltersOpen(true)}
+                              onRenameColumn={
+                                props.onColumnRename
+                                  ? c.columnLayout.setName
+                                  : undefined
+                              }
+                              sortBy={source.sortBy}
+                              sortDir={source.sortDir}
+                              enabled={
+                                Boolean(props.enableColumnMenu) && !c.isMobile
+                              }
+                              allColumns={c.allColumns}
+                              layout={c.columnLayout}
+                              labels={labels}
+                              dir={props.dir}
+                              hasRowActions={c.hasRowActions}
+                              hasRowReorder={c.hasRowReorder}
+                              groupingPanel={c.groupingPanel}
+                            />
+                          }
+                          {...exportHandler}
+                          savedViewsMenu={
+                            <SavedViewsSlot
+                              options={props.savedViews}
+                              urlAdapter={resolvedUrlAdapter}
+                              urlKey={props.urlKey}
+                              labels={labels}
+                            />
+                          }
+                          showRowsPerPage={!c.isPaged}
                         />
                       </div>
-                    )}
-                    {!c.isPaged && !source.error && source.hasNextPage && (
-                      <Flex ref={loadMoreRef} justify="center">
-                        <Button
-                          loading={source.isFetchingNextPage}
-                          onClick={() => source.fetchNextPage()}
+                      <FeatureSlot
+                        slot={ACTIVE_FILTER_CHIPS}
+                        props={{
+                          chips: c.mergedChips,
+                          onClearAll: c.clearFilters,
+                          labels,
+                        }}
+                      />
+                      {c.editing?.batch && (
+                        <FeatureSlot
+                          slot={BATCH_EDIT_BAR}
+                          props={{
+                            batch: c.editing.batch,
+                            contested: c.editing.conflict?.anyContested,
+                            labels,
+                          }}
+                        />
+                      )}
+                      <FeatureSlot
+                        slot={AGENT_APPROVAL}
+                        props={{ pending: approval, labels }}
+                      />
+
+                      {selection && props.bulkActions && (
+                        <FeatureSlot
+                          slot={BULK_BAR}
+                          props={{
+                            selection,
+                            total: source.total,
+                            bulkActions: props.bulkActions,
+                            confirm,
+                            labels,
+                          }}
+                        />
+                      )}
+                      <AntdGroupingPanel
+                        state={c.groupingPanel}
+                        columns={c.allColumns}
+                        labels={labels}
+                        mobile={c.isMobile}
+                        dir={props.dir}
+                      />
+                      <div
+                        className={
+                          c.body === "desktop" ? classNames?.table : undefined
+                        }
+                      >
+                        <OptionalSidePanel
+                          side={props.sidePanel?.side}
+                          body={bodyRegion}
+                          panel={
+                            props.sidePanel?.open != null && (
+                              <FeatureSlot
+                                slot={SIDE_PANEL}
+                                props={{
+                                  panels: props.sidePanel.panels,
+                                  openPanel: props.sidePanel.open,
+                                  onOpenPanel: props.sidePanel.onOpenChange,
+                                  onClose: () => {
+                                    props.sidePanel?.onOpenChange(null);
+                                  },
+                                  side: props.sidePanel?.side,
+                                  labels,
+                                }}
+                              />
+                            )
+                          }
+                        />
+                      </div>
+                      <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
+                      {c.isPaged && !source.error && c.body === "desktop" && (
+                        <div
+                          data-adapttable-part="footer"
+                          className={classNames?.footer}
                         >
-                          {labels.loadMore}
-                        </Button>
-                      </Flex>
+                          <PagedFooter
+                            table={table}
+                            source={source}
+                            labels={labels}
+                            showRowsPerPage={!c.grouping}
+                          />
+                        </div>
+                      )}
+                      {!c.isPaged && !source.error && source.hasNextPage && (
+                        <Flex ref={loadMoreRef} justify="center">
+                          <Button
+                            loading={source.isFetchingNextPage}
+                            onClick={() => source.fetchNextPage()}
+                          >
+                            {labels.loadMore}
+                          </Button>
+                        </Flex>
+                      )}
+                    </Space>
+                    {filtersNode && filtersMode === "drawer" && (
+                      <FeatureSlot
+                        slot={FILTER_DRAWER}
+                        props={{
+                          open: filtersOpen,
+                          onClose: () => setFiltersOpen(false),
+                          filters: filtersNode,
+                          activeFilterCount: c.activeFilterCount,
+                          onClearFilters: c.clearFilters,
+                          labels,
+                          dir: props.dir,
+                        }}
+                      />
                     )}
-                  </Space>
-                  {filtersNode && filtersMode === "drawer" && (
                     <FeatureSlot
-                      slot={FILTER_DRAWER}
+                      slot={COMMAND_PALETTE_LIVE}
                       props={{
-                        open: filtersOpen,
-                        onClose: () => setFiltersOpen(false),
-                        filters: filtersNode,
-                        activeFilterCount: c.activeFilterCount,
-                        onClearFilters: c.clearFilters,
+                        commandPalette: props.commandPalette,
                         labels,
-                        dir: props.dir,
+                        onPrint: props.onPrint,
+                        onExport: exportHandler.onExportCsv,
+                        exportLabel: exportHandler.exportLabel,
+                        onClearFilters: c.clearFilters,
+                        hasFilters: c.activeFilterCount > 0,
+                        featureHost,
                       }}
                     />
-                  )}
-                  <FeatureSlot
-                    slot={COMMAND_PALETTE_LIVE}
-                    props={{
-                      commandPalette: props.commandPalette,
-                      labels,
-                      onPrint: props.onPrint,
-                      onExport: exportHandler.onExportCsv,
-                      exportLabel: exportHandler.exportLabel,
-                      onClearFilters: c.clearFilters,
-                      hasFilters: c.activeFilterCount > 0,
-                      featureHost,
-                    }}
-                  />
-                  <FeatureSlot
-                    slot={STATUS_BAR}
-                    props={{
-                      enabled: props.statusBar === true,
-                      notices: c.featureNotices,
-                      shown: source.rows.length,
-                      page: source.page,
-                      limit: source.limit,
-                      total: source.total,
-                      selected: table.selection?.selectedCount ?? 0,
-                      stats,
-                      labels,
-                      locale: props.locale,
-                    }}
-                  />
+                    <FeatureSlot
+                      slot={STATUS_BAR}
+                      props={{
+                        enabled: props.statusBar === true,
+                        notices: c.featureNotices,
+                        shown: source.rows.length,
+                        page: source.page,
+                        limit: source.limit,
+                        total: source.total,
+                        selected: table.selection?.selectedCount ?? 0,
+                        stats,
+                        labels,
+                        locale: props.locale,
+                      }}
+                    />
+                  </ConfigProvider>
                 </div>
               )}
             </ContextMenuLiveGate>

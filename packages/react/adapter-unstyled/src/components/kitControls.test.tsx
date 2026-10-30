@@ -223,6 +223,40 @@ describe("kit header filter trigger (unstyled)", () => {
       document.querySelector('[data-adapttable-part="filter-header-trigger"]')
     ).not.toHaveAttribute("open");
   });
+  const headerTrigger = () =>
+    document.querySelector('[data-adapttable-part="filter-header-trigger"]')!;
+  // A <details> reports its own toggle a task later; the panel's open state
+  // follows that event, so a test lets it land before acting on the panel.
+  const openHeaderFilter = async () => {
+    fireEvent.click(headerTrigger().querySelector("summary")!);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(headerTrigger()).toHaveAttribute("open");
+  };
+
+  it("closes on Escape and returns focus to its funnel", async () => {
+    render(<TriggerHarness def={DEFS[1]!} />);
+    await openHeaderFilter();
+    fireEvent.keyDown(
+      document.querySelector('[data-adapttable-part="filter-select"]')!,
+      { key: "Escape" }
+    );
+    expect(headerTrigger()).not.toHaveAttribute("open");
+    expect(headerTrigger().querySelector("summary")).toHaveFocus();
+  });
+
+  it("closes when the pointer goes down outside it", async () => {
+    render(
+      <>
+        <button type="button">elsewhere</button>
+        <TriggerHarness def={DEFS[1]!} />
+      </>
+    );
+    await openHeaderFilter();
+    fireEvent.mouseDown(screen.getByRole("button", { name: "elsewhere" }));
+    expect(headerTrigger()).not.toHaveAttribute("open");
+  });
 });
 
 describe("kit filter tree (unstyled)", () => {

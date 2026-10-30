@@ -3,10 +3,14 @@ import type {
   ColumnLayoutState,
   ConfirmHandler,
   Direction,
+  FacetMap,
   PaginationMode,
+  QueryAggregate,
+  QuerySupport,
   RowActionsLayout,
   TableErrorState,
   TableLabels,
+  TableQueryListener,
   TableSource,
   TableViewStateConfig,
   UrlStateAdapter,
@@ -312,6 +316,26 @@ export interface DataTableProps<TRow> {
   readonly onCellCut?: (range: CellRange) => void;
   readonly data?: readonly TRow[];
   readonly source?: TableSource<TRow>;
+  /**
+   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
+   * table's own processing and makes `onQueryChange` a notification. Absent:
+   * `data` with `onQueryChange` is server, `data` alone is frontend.
+   */
+  readonly mode?: "frontend" | "server";
+  /** One consolidated query per change: the server page to fetch, or a notice. */
+  readonly onQueryChange?: TableQueryListener;
+  /** Server tier: the row count across every page. */
+  readonly total?: number;
+  /** Server tier: what the endpoint can answer, such as facet counts. */
+  readonly supports?: QuerySupport;
+  /** Server tier: aggregates the endpoint computes for the query. */
+  readonly aggregates?: readonly QueryAggregate[];
+  /** Server tier: names the response the aggregates belong to. */
+  readonly responseKey?: string;
+  /** Server tier: keys sent as `query.facets`; defaults to every checklist filter. */
+  readonly facetKeys?: readonly string[];
+  /** Server tier: distinct-value counts from the last fetch. */
+  readonly facets?: FacetMap;
   readonly columns: readonly ColumnInput<TRow>[];
   readonly rowKey: (row: TRow) => string;
   readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];
@@ -323,6 +347,8 @@ export interface DataTableProps<TRow> {
   readonly locale?: string;
   readonly searchable?: boolean;
   readonly searchDebounceMs?: number;
+  /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
+  readonly searchPlaceholder?: string;
   readonly forceMobile?: boolean;
   readonly mobileBreakpoint?: number;
   /** Bound the scroll body while keeping the toolbar and pagination outside it. */
@@ -354,6 +380,10 @@ export interface DataTableProps<TRow> {
   readonly onDensityChange?: (density: TableDensity) => void;
   readonly confirm?: ConfirmHandler;
   /** Omit or use buttons for the inline strip; menu uses the kit menu control. */
+  /** Activate a row, or a phone card, by clicking it or pressing Enter or Space. */
+  readonly onRowClick?: (row: TRow) => void;
+  /** Mark cells a patch just changed; pair with `useChangedCellFlash` from `/stream`. */
+  readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   readonly rowActionsLayout?: RowActionsLayout;
   readonly classNames?: DataTableClassNames;
 }

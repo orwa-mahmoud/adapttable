@@ -172,6 +172,13 @@ describe("AdaptGroupingPanel", () => {
     expect(host.removed).toEqual(["team"]);
   });
 
+  it("numbers each chip by its grouping level", async () => {
+    const { element } = await mountPanel();
+    expect(one(element, "grouping-chip-handle").textContent).toContain(
+      "1. Team"
+    );
+  });
+
   it("hands chip keys to the keyboard mover", async () => {
     const { element, host } = await mountPanel();
     const handle = one(element, "grouping-chip-handle");

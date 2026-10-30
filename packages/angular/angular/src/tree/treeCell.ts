@@ -95,9 +95,13 @@ export class AdaptTreeCellChrome {
   });
 
   /** The wrapper's layout and its depth's indent. @internal */
+  // A leaf's first item is an empty spacer, which would set the box's
+  // baseline and drop the text below the row; centring keeps every tree row
+  // the height of a plain one.
   protected readonly wrapperStyle = computed(() => ({
     display: "inline-flex",
     alignItems: "center",
+    verticalAlign: "middle",
     gap: "4px",
     ...treeIndentStyle(this.treeEntry()?.level ?? 0),
   }));

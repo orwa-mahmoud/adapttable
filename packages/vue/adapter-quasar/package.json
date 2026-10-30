@@ -1,7 +1,17 @@
 {
   "name": "@adapttable/quasar",
   "version": "0.3.1",
-  "description": "Quasar primitives and controls for the AdaptTable Vue binding.",
+  "description": "Quasar primitives and controls for the AdaptTable Vue binding — sorting, filters, editing, grouping, responsive cards, URL state and RTL.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "data-table",
+    "table",
+    "datagrid",
+    "typescript",
+    "adapttable",
+    "quasar"
+  ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
   "type": "module",

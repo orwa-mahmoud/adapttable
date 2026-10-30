@@ -15,6 +15,7 @@ import type { ReactNode } from "react";
 import { iconForRowAction, MoreVerticalIcon } from "../icons";
 import type { BaseUiAccentColor } from "../types";
 import { Button, Flex, IconButton } from "../ui";
+import { usePortalContainer } from "./portalContainer";
 import { Tooltip } from "./primitives";
 
 interface RowActionButtonsProps<TRow> {
@@ -104,6 +105,7 @@ function ActionMenu<TRow>({
   confirm: ConfirmHandler;
   labels: Required<TableLabels>;
 }>): ReactNode {
+  const portalContainer = usePortalContainer();
   return (
     <Menu.Root>
       <Menu.Trigger
@@ -121,7 +123,7 @@ function ActionMenu<TRow>({
           </IconButton>
         }
       />
-      <Menu.Portal>
+      <Menu.Portal container={portalContainer}>
         <Menu.Positioner side="bottom" align="end">
           <Menu.Popup
             data-adapttable-part="row-actions-menu"

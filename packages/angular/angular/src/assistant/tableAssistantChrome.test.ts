@@ -478,6 +478,16 @@ describe("AdaptTableAssistantChrome", () => {
     fixture.componentInstance.extras.set({ presentation: "panel" });
     await settle(fixture);
     expect(part("assistant-panel")).not.toBeNull();
+    // The inline panel scrolls with the page, so its composer stays in flow.
+    expect(part("assistant-composer")?.style.position).toBe("");
+  });
+
+  it("holds the composer at the bottom of a window that scrolls inside itself", async () => {
+    vi.stubGlobal("innerWidth", 1000);
+    vi.stubGlobal("matchMedia", undefined);
+    await mounted({ presentation: "floating" });
+    expect(part("assistant-composer")?.style.position).toBe("sticky");
+    expect(part("assistant-composer")?.style.insetBlockEnd).toBe("0px");
   });
   it("subscribes to and cleans up usable media-query listeners", async () => {
     const add = vi.fn();

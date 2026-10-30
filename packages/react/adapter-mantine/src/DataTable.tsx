@@ -44,6 +44,7 @@ import { useMountStagger } from "./animation/useMountStagger";
 import { DesktopTable } from "./components/DesktopTable";
 import { EmptyState } from "./components/EmptyState";
 import { ErrorState } from "./components/ErrorState";
+import { FullscreenPortals } from "./components/FullscreenPortals";
 import { MobileCards } from "./components/MobileCards";
 import { PaginationFooter } from "./components/PaginationFooter";
 import { TableSkeleton } from "./components/TableSkeleton";
@@ -266,278 +267,281 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
               }}
             >
               {(regionProps) => (
-                <Paper
-                  {...regionProps}
-                  ref={rootRef}
-                  p="xs"
-                  radius="md"
-                  withBorder
-                  dir={dir}
-                  aria-busy={chrome.isRefreshing || undefined}
-                  className={classNames?.root}
-                >
-                  <FeatureSlot
-                    slot={GRID_FOCUS_ANNOUNCER}
-                    props={{ focus: view.gridFocus }}
-                  />
-                  <TableStatusAnnouncer
-                    announcement={shell.statusAnnouncement}
-                  />
-                  {view.tableProps.rowReorder ? (
+                <FullscreenPortals container={view.fullscreen.container}>
+                  <Paper
+                    {...regionProps}
+                    ref={rootRef}
+                    p="xs"
+                    radius="md"
+                    withBorder
+                    dir={dir}
+                    aria-busy={chrome.isRefreshing || undefined}
+                    className={classNames?.root}
+                  >
                     <FeatureSlot
-                      slot={ROW_REORDER_ANNOUNCER}
-                      props={{
-                        announcement: view.tableProps.rowReorder.announcement,
-                      }}
+                      slot={GRID_FOCUS_ANNOUNCER}
+                      props={{ focus: view.gridFocus }}
                     />
-                  ) : null}
-                  <FeatureSlot
-                    slot={FIND_BAR}
-                    props={{ find: view.find, labels: table.labels }}
-                  />
-                  <Stack gap="xs">
-                    <Box
-                      data-adapttable-part="toolbar"
-                      ref={stickyBar.toolbarRef}
-                      style={{
-                        ...stickyBar.toolbarStyle,
-                        ...(stickyBar.toolbarStyle
-                          ? {
-                              background: SURFACE,
-                              paddingBottom: "var(--mantine-spacing-xs)",
-                            }
-                          : {}),
-                      }}
-                      className={classNames?.toolbar}
-                    >
-                      <Stack gap="xs">
-                        <Toolbar
-                          {...toolbarProps}
-                          filtersMode={filtersMode}
-                          filtersOpen={drawerOpened}
-                          onToggleFilters={filtersTrigger.onClick}
-                          onFiltersTriggerPointerDown={
-                            filtersTrigger.onPointerDown
-                          }
-                          onCloseFilters={() => setDrawerOpened(false)}
-                          savedViewsMenu={
-                            savedViews && (
-                              <SavedViewsSlot
-                                // The table's own URL backend/namespace are the
-                                // defaults — an explicit option still wins.
-                                options={{
-                                  urlAdapter: shell.urlAdapter,
-                                  urlKey: props.urlKey,
-                                  ...savedViews,
-                                }}
-                                labels={table.labels}
-                              />
-                            )
-                          }
-                          columnMenu={
-                            <ColumnMenuSlot
-                              enabled={enableColumnMenu && !isMobile}
-                              onAutoSize={view.autoSizeColumns}
-                              onAutoSizeColumn={view.autoSizeColumn}
-                              onSortColumn={(key, dir) =>
-                                viewSource.setSort(key, dir)
-                              }
-                              onFilterColumn={() => setDrawerOpened(true)}
-                              onRenameColumn={
-                                props.onColumnRename
-                                  ? chrome.columnLayout.setName
-                                  : undefined
-                              }
-                              sortBy={viewSource.sortBy}
-                              sortDir={viewSource.sortDir}
-                              allColumns={chrome.allColumns}
-                              layout={chrome.columnLayout}
-                              labels={table.labels}
-                              hasRowActions={hasRowActions}
-                              hasRowReorder={hasRowReorder}
-                              groupingPanel={chrome.groupingPanel}
-                              dir={dir}
-                            />
-                          }
-                        />
-                        <FeatureSlot
-                          slot={ACTIVE_FILTER_CHIPS}
-                          props={{
-                            chips: chrome.mergedChips,
-                            onClearAll: chrome.clearFilters,
-                            labels,
-                          }}
-                        />
-                        {chrome.editing?.batch && (
-                          <FeatureSlot
-                            slot={BATCH_EDIT_BAR}
-                            props={{
-                              batch: chrome.editing.batch,
-                              contested: chrome.editing.conflict?.anyContested,
-                              labels,
-                            }}
-                          />
-                        )}
-                        <FeatureSlot
-                          slot={AGENT_APPROVAL}
-                          props={{ pending: approval, labels }}
-                        />
-
-                        {table.selection && bulkActions && (
-                          <FeatureSlot
-                            slot={BULK_BAR}
-                            props={{
-                              selection: table.selection,
-                              total: shell.source.total,
-                              bulkActions,
-                              confirm: chrome.confirm,
-                              labels,
-                            }}
-                          />
-                        )}
-                      </Stack>
-                    </Box>
-
-                    {chrome.isRefreshing && (
-                      <Progress
-                        size="xs"
-                        animated
-                        value={100}
-                        aria-label={table.labels.loading}
-                      />
-                    )}
-
-                    <FeatureSlot
-                      slot={COMMAND_PALETTE_LIVE}
-                      props={{
-                        commandPalette: props.commandPalette,
-                        labels,
-                        onPrint: props.onPrint,
-                        onExport: view.toolbarProps.onExportCsv,
-                        exportLabel: view.toolbarProps.exportLabel,
-                        onClearFilters: chrome.clearFilters,
-                        hasFilters: chrome.activeFilterCount > 0,
-                        featureHost: shell.featureHost,
-                      }}
+                    <TableStatusAnnouncer
+                      announcement={shell.statusAnnouncement}
                     />
-
-                    {view.groupingPanelProps ? (
+                    {view.tableProps.rowReorder ? (
                       <FeatureSlot
-                        slot={GROUPING_PANEL}
-                        props={
-                          view.groupingPanelProps as GroupingPanelSlotProps<never>
+                        slot={ROW_REORDER_ANNOUNCER}
+                        props={{
+                          announcement: view.tableProps.rowReorder.announcement,
+                        }}
+                      />
+                    ) : null}
+                    <FeatureSlot
+                      slot={FIND_BAR}
+                      props={{ find: view.find, labels: table.labels }}
+                    />
+                    <Stack gap="xs">
+                      <Box
+                        data-adapttable-part="toolbar"
+                        ref={stickyBar.toolbarRef}
+                        style={{
+                          ...stickyBar.toolbarStyle,
+                          ...(stickyBar.toolbarStyle
+                            ? {
+                                background: SURFACE,
+                                paddingBottom: "var(--mantine-spacing-xs)",
+                              }
+                            : {}),
+                        }}
+                        className={classNames?.toolbar}
+                      >
+                        <Stack gap="xs">
+                          <Toolbar
+                            {...toolbarProps}
+                            filtersMode={filtersMode}
+                            filtersOpen={drawerOpened}
+                            onToggleFilters={filtersTrigger.onClick}
+                            onFiltersTriggerPointerDown={
+                              filtersTrigger.onPointerDown
+                            }
+                            onCloseFilters={() => setDrawerOpened(false)}
+                            savedViewsMenu={
+                              savedViews && (
+                                <SavedViewsSlot
+                                  // The table's own URL backend/namespace are the
+                                  // defaults — an explicit option still wins.
+                                  options={{
+                                    urlAdapter: shell.urlAdapter,
+                                    urlKey: props.urlKey,
+                                    ...savedViews,
+                                  }}
+                                  labels={table.labels}
+                                />
+                              )
+                            }
+                            columnMenu={
+                              <ColumnMenuSlot
+                                enabled={enableColumnMenu && !isMobile}
+                                onAutoSize={view.autoSizeColumns}
+                                onAutoSizeColumn={view.autoSizeColumn}
+                                onSortColumn={(key, dir) =>
+                                  viewSource.setSort(key, dir)
+                                }
+                                onFilterColumn={() => setDrawerOpened(true)}
+                                onRenameColumn={
+                                  props.onColumnRename
+                                    ? chrome.columnLayout.setName
+                                    : undefined
+                                }
+                                sortBy={viewSource.sortBy}
+                                sortDir={viewSource.sortDir}
+                                allColumns={chrome.allColumns}
+                                layout={chrome.columnLayout}
+                                labels={table.labels}
+                                hasRowActions={hasRowActions}
+                                hasRowReorder={hasRowReorder}
+                                groupingPanel={chrome.groupingPanel}
+                                dir={dir}
+                              />
+                            }
+                          />
+                          <FeatureSlot
+                            slot={ACTIVE_FILTER_CHIPS}
+                            props={{
+                              chips: chrome.mergedChips,
+                              onClearAll: chrome.clearFilters,
+                              labels,
+                            }}
+                          />
+                          {chrome.editing?.batch && (
+                            <FeatureSlot
+                              slot={BATCH_EDIT_BAR}
+                              props={{
+                                batch: chrome.editing.batch,
+                                contested:
+                                  chrome.editing.conflict?.anyContested,
+                                labels,
+                              }}
+                            />
+                          )}
+                          <FeatureSlot
+                            slot={AGENT_APPROVAL}
+                            props={{ pending: approval, labels }}
+                          />
+
+                          {table.selection && bulkActions && (
+                            <FeatureSlot
+                              slot={BULK_BAR}
+                              props={{
+                                selection: table.selection,
+                                total: shell.source.total,
+                                bulkActions,
+                                confirm: chrome.confirm,
+                                labels,
+                              }}
+                            />
+                          )}
+                        </Stack>
+                      </Box>
+
+                      {chrome.isRefreshing && (
+                        <Progress
+                          size="xs"
+                          animated
+                          value={100}
+                          aria-label={table.labels.loading}
+                        />
+                      )}
+
+                      <FeatureSlot
+                        slot={COMMAND_PALETTE_LIVE}
+                        props={{
+                          commandPalette: props.commandPalette,
+                          labels,
+                          onPrint: props.onPrint,
+                          onExport: view.toolbarProps.onExportCsv,
+                          exportLabel: view.toolbarProps.exportLabel,
+                          onClearFilters: chrome.clearFilters,
+                          hasFilters: chrome.activeFilterCount > 0,
+                          featureHost: shell.featureHost,
+                        }}
+                      />
+
+                      {view.groupingPanelProps ? (
+                        <FeatureSlot
+                          slot={GROUPING_PANEL}
+                          props={
+                            view.groupingPanelProps as GroupingPanelSlotProps<never>
+                          }
+                        />
+                      ) : null}
+
+                      <OptionalSidePanel
+                        side={props.sidePanel?.side}
+                        body={
+                          <>
+                            {chrome.errorState
+                              ? (fillSlot(slots?.error, chrome.errorState) ?? (
+                                  <ErrorState
+                                    error={chrome.errorState.error}
+                                    title={table.labels.errorTitle}
+                                    message={table.labels.errorMessage}
+                                    retryLabel={table.labels.retry}
+                                    onRetry={chrome.errorState.retry}
+                                    isRetrying={chrome.errorState.retrying}
+                                  />
+                                ))
+                              : body}
+                          </>
+                        }
+                        panel={
+                          props.sidePanel?.open != null && (
+                            <FeatureSlot
+                              slot={SIDE_PANEL}
+                              props={{
+                                panels: props.sidePanel.panels,
+                                openPanel: props.sidePanel.open,
+                                onOpenPanel: props.sidePanel.onOpenChange,
+                                onClose: () => {
+                                  props.sidePanel?.onOpenChange(null);
+                                },
+                                side: props.sidePanel?.side,
+                                labels,
+                              }}
+                            />
+                          )
                         }
                       />
-                    ) : null}
 
-                    <OptionalSidePanel
-                      side={props.sidePanel?.side}
-                      body={
-                        <>
-                          {chrome.errorState
-                            ? (fillSlot(slots?.error, chrome.errorState) ?? (
-                                <ErrorState
-                                  error={chrome.errorState.error}
-                                  title={table.labels.errorTitle}
-                                  message={table.labels.errorMessage}
-                                  retryLabel={table.labels.retry}
-                                  onRetry={chrome.errorState.retry}
-                                  isRetrying={chrome.errorState.retrying}
-                                />
-                              ))
-                            : body}
-                        </>
-                      }
-                      panel={
-                        props.sidePanel?.open != null && (
-                          <FeatureSlot
-                            slot={SIDE_PANEL}
-                            props={{
-                              panels: props.sidePanel.panels,
-                              openPanel: props.sidePanel.open,
-                              onOpenPanel: props.sidePanel.onOpenChange,
-                              onClose: () => {
-                                props.sidePanel?.onOpenChange(null);
-                              },
-                              side: props.sidePanel?.side,
-                              labels,
-                            }}
-                          />
-                        )
-                      }
-                    />
+                      {canLoadMore && viewSource.hasNextPage && (
+                        <Group ref={loadMoreRef} justify="center" py="xs">
+                          <Button
+                            variant="default"
+                            size="sm"
+                            loading={viewSource.isFetchingNextPage}
+                            onClick={() => viewSource.fetchNextPage()}
+                          >
+                            {table.labels.loadMore}
+                          </Button>
+                        </Group>
+                      )}
 
-                    {canLoadMore && viewSource.hasNextPage && (
-                      <Group ref={loadMoreRef} justify="center" py="xs">
-                        <Button
-                          variant="default"
-                          size="sm"
-                          loading={viewSource.isFetchingNextPage}
-                          onClick={() => viewSource.fetchNextPage()}
+                      {props.tableFooter ? (
+                        <Box data-adapttable-part="table-footer">
+                          {props.tableFooter}
+                        </Box>
+                      ) : null}
+
+                      {chrome.showFooter && (
+                        <Box
+                          data-adapttable-part="footer"
+                          className={classNames?.footer}
                         >
-                          {table.labels.loadMore}
-                        </Button>
-                      </Group>
+                          <PaginationFooter
+                            page={table.pagination.safePage}
+                            totalPages={table.pagination.totalPages}
+                            limit={viewSource.limit}
+                            defaultLimit={viewSource.defaultLimit}
+                            total={viewSource.total}
+                            fromIndex={table.pagination.fromIndex}
+                            toIndex={table.pagination.toIndex}
+                            onPageChange={viewSource.setPage}
+                            onLimitChange={viewSource.setLimit}
+                            labels={table.labels}
+                            showRowsPerPage={!chrome.grouping}
+                          />
+                        </Box>
+                      )}
+                    </Stack>
+
+                    {filters && filtersMode === "drawer" && (
+                      <FeatureSlot
+                        slot={FILTER_DRAWER}
+                        props={{
+                          open: drawerOpened,
+                          onClose: () => setDrawerOpened(false),
+                          filters,
+                          activeFilterCount: chrome.activeFilterCount,
+                          onClearFilters: chrome.clearFilters,
+                          labels,
+                          dir: props.dir,
+                        }}
+                      />
                     )}
-
-                    {props.tableFooter ? (
-                      <Box data-adapttable-part="table-footer">
-                        {props.tableFooter}
-                      </Box>
-                    ) : null}
-
-                    {chrome.showFooter && (
-                      <Box
-                        data-adapttable-part="footer"
-                        className={classNames?.footer}
-                      >
-                        <PaginationFooter
-                          page={table.pagination.safePage}
-                          totalPages={table.pagination.totalPages}
-                          limit={viewSource.limit}
-                          defaultLimit={viewSource.defaultLimit}
-                          total={viewSource.total}
-                          fromIndex={table.pagination.fromIndex}
-                          toIndex={table.pagination.toIndex}
-                          onPageChange={viewSource.setPage}
-                          onLimitChange={viewSource.setLimit}
-                          labels={table.labels}
-                          showRowsPerPage={!chrome.grouping}
-                        />
-                      </Box>
-                    )}
-                  </Stack>
-
-                  {filters && filtersMode === "drawer" && (
                     <FeatureSlot
-                      slot={FILTER_DRAWER}
+                      slot={STATUS_BAR}
                       props={{
-                        open: drawerOpened,
-                        onClose: () => setDrawerOpened(false),
-                        filters,
-                        activeFilterCount: chrome.activeFilterCount,
-                        onClearFilters: chrome.clearFilters,
+                        enabled: props.statusBar === true,
+                        notices: chrome.featureNotices,
+                        shown: shell.source.rows.length,
+                        page: shell.source.page,
+                        limit: shell.source.limit,
+                        total: shell.source.total,
+                        selected: table.selection?.selectedCount ?? 0,
+                        stats: view.selectionStats,
                         labels,
-                        dir: props.dir,
+                        locale: props.locale,
                       }}
                     />
-                  )}
-                  <FeatureSlot
-                    slot={STATUS_BAR}
-                    props={{
-                      enabled: props.statusBar === true,
-                      notices: chrome.featureNotices,
-                      shown: shell.source.rows.length,
-                      page: shell.source.page,
-                      limit: shell.source.limit,
-                      total: shell.source.total,
-                      selected: table.selection?.selectedCount ?? 0,
-                      stats: view.selectionStats,
-                      labels,
-                      locale: props.locale,
-                    }}
-                  />
-                </Paper>
+                  </Paper>
+                </FullscreenPortals>
               )}
             </ContextMenuLiveGate>
           </FeatureHostProvider>

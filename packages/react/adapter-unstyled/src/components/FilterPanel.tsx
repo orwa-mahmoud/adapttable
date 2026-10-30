@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
+import { usePortalContainer } from "./portalContainer";
 
 /**
  * Props for {@link FilterPanel}.
@@ -49,6 +50,7 @@ export function FilterPanel({
   dir = "ltr",
   classNames,
 }: Readonly<FilterPanelProps>) {
+  const portalContainer = usePortalContainer();
   // The drawer outlives `open` by one exit so it has something to animate on
   // the way out. `state` is which end of the SLIDE to render and lags a frame
   // by design; every semantic — modal, inert, focus — follows `open` itself,
@@ -242,6 +244,6 @@ export function FilterPanel({
         </footer>
       </dialog>
     </>,
-    document.body
+    portalContainer ?? document.body
   );
 }

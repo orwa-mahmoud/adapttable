@@ -1,8 +1,9 @@
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
+import { savedViews } from "./saved-views";
 
 interface Row {
   id: string;
@@ -85,6 +86,45 @@ describe("density and fullscreen (antd)", () => {
     table({ fullscreen: true });
 
     expect(part("fullscreen-toggle")).not.toBeNull();
+  });
+
+  it("goes fullscreen on the first press and opens its overlays inside", async () => {
+    // jsdom has no Fullscreen API: promote the element the way a browser does.
+    const promoted: Element[] = [];
+    Object.defineProperty(document, "fullscreenElement", {
+      get: () => promoted.at(-1) ?? null,
+      configurable: true,
+    });
+    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
+      value(this: HTMLElement) {
+        promoted.push(this);
+        document.dispatchEvent(new Event("fullscreenchange"));
+        return Promise.resolve();
+      },
+      configurable: true,
+    });
+    try {
+      table({
+        fullscreen: true,
+        features: [savedViews({ storageKey: "fullscreen-views" })],
+      });
+      fireEvent.click(part("fullscreen-toggle")!);
+      expect(document.fullscreenElement).toBe(part("root"));
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Saved views" }));
+        await Promise.resolve();
+      });
+      const nameField = await screen.findByPlaceholderText("View name");
+      // Outside the promoted element the popover would be hidden with the
+      // rest of the page.
+      expect(part("root")!.contains(nameField)).toBe(true);
+    } finally {
+      Reflect.deleteProperty(HTMLElement.prototype, "requestFullscreen");
+      Object.defineProperty(document, "fullscreenElement", {
+        value: null,
+        configurable: true,
+      });
+    }
   });
 
   it("hides the toggle where fullscreen is not allowed at all", () => {

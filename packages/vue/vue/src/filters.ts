@@ -4,6 +4,7 @@ import {
   type FilterDef,
   filterTreeChipLabel,
   type FilterTypeSpec,
+  isFilterTreeConditionSet,
   removeFilterTreeNode,
   walkFilterTreeConditions,
 } from "@adapttable/core";
@@ -106,26 +107,29 @@ function mountFilters<TRow>(context: FeatureMountContext<TRow>): void {
         },
       })),
       ...(tree && source.setFilterTree
-        ? walkFilterTreeConditions(tree).map(({ condition, path }) => ({
-            key: `ft:${path.join(".")}:${condition.key}:${condition.op}`,
-            label: filterTreeChipLabel(
-              condition,
-              runtime.defs,
-              labels,
-              runtime.registry
-            ),
-            onRemove: () => {
-              const current = context.table.source.value;
-              if (
-                owns() &&
-                current.filterTree &&
-                sameFilterTree(current.filterTree, treeKey)
-              )
-                current.setFilterTree?.(
-                  removeFilterTreeNode(current.filterTree, path)
-                );
-            },
-          }))
+        ? walkFilterTreeConditions(tree)
+            // A condition still waiting for a value filters nothing.
+            .filter(({ condition }) => isFilterTreeConditionSet(condition))
+            .map(({ condition, path }) => ({
+              key: `ft:${path.join(".")}:${condition.key}:${condition.op}`,
+              label: filterTreeChipLabel(
+                condition,
+                runtime.defs,
+                labels,
+                runtime.registry
+              ),
+              onRemove: () => {
+                const current = context.table.source.value;
+                if (
+                  owns() &&
+                  current.filterTree &&
+                  sameFilterTree(current.filterTree, treeKey)
+                )
+                  current.setFilterTree?.(
+                    removeFilterTreeNode(current.filterTree, path)
+                  );
+              },
+            }))
         : []),
     ];
     const count = chips.length;

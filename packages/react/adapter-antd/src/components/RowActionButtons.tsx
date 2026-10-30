@@ -46,7 +46,14 @@ function ActionStrip<TRow>({
           reason !== undefined || (action.isDisabled?.(row) ?? false);
         const icon = iconForRowAction(action);
         return (
-          <Tooltip key={action.key} title={reason ?? action.label}>
+          <Tooltip
+            key={action.key}
+            title={reason ?? action.label}
+            // A label, not a control: it must not hold the pointer, or the
+            // bubble over the next row's buttons swallows the click meant
+            // for them.
+            styles={{ root: { pointerEvents: "none" } }}
+          >
             <Button
               size="small"
               type="text"

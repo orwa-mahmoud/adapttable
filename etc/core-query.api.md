@@ -659,6 +659,9 @@ export function isActiveFilterTree(tree: QueryFilterGroup | undefined): tree is 
 export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is QueryFilterGroup;
 
 // @public
+export function isFilterTreeConditionSet(condition: QueryCondition): boolean;
+
+// @public
 export const NUMBER_OPS: readonly ["eq", "neq", "gt", "gte", "lt", "lte", "between", "in", "notIn"];
 
 // @public
@@ -770,6 +773,9 @@ export function serializePivot(config: PivotConfig): string;
 
 // @public
 export function serializePivotState(state: PivotUrlState): string;
+
+// @public
+export function settledFilterTree(tree: QueryFilterGroup | undefined): QueryFilterGroup | undefined;
 
 // @public
 export interface SidePanelEntry {

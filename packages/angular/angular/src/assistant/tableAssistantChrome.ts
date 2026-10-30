@@ -382,6 +382,7 @@ export class AdaptTableAssistantChrome {
       setDraft: assistant.setDraft,
       onSend: state.send,
       onStop: assistant.stop,
+      sticky: this.resolved() !== "panel",
       ...(state.answering
         ? {
             placeholder: this.copy().assistantAnswerPlaceholder,

@@ -234,6 +234,8 @@ describe("the unstyled table's row pinning", () => {
       '[data-adapttable-part="pinned-summary-top"]'
     )!;
     expect(summary.getAttribute("aria-label")).toBe("Summary row");
+    // A total reads apart from the records around it.
+    expect(summary.style.fontWeight).toBe("600");
     expect(summary.textContent).toContain("Total");
     expect(summary.querySelector(".adapt-material-checkbox")).toBeNull();
     expect(bodyOrder()[0]).toBe("pinned-summary-top:total");

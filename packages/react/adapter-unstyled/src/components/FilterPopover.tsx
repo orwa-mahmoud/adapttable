@@ -9,6 +9,7 @@ import {
   placeOverlayBelowTrigger,
   VIEWPORT_GUTTER,
 } from "./overlayPlacement";
+import { usePortalContainer } from "./portalContainer";
 
 /**
  * Props for {@link FilterPopover}.
@@ -42,7 +43,8 @@ export interface FilterPopoverProps {
  * Anchored filter card (the default filter container). Opens beneath the
  * Filters button with NO backdrop — the background stays visible and
  * interactive; clicking outside the popover/anchor or pressing Escape closes
- * it. Portalled to `document.body` so sticky headers cannot paint over it.
+ * it. Portalled to `document.body` (the table itself while fullscreen) so
+ * sticky headers cannot paint over it.
  * Pair with `filtersMode="drawer"` for the slide-in panel (`FilterPanel`).
  *
  * @public
@@ -58,6 +60,7 @@ export function FilterPopover({
   classNames,
   children,
 }: Readonly<FilterPopoverProps>) {
+  const portalContainer = usePortalContainer();
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const rootRef = useRef<HTMLSpanElement>(null);
@@ -155,7 +158,7 @@ export function FilterPopover({
       style={{ position: "relative", display: "inline-flex" }}
     >
       {children}
-      {card && createPortal(card, document.body)}
+      {card && createPortal(card, portalContainer ?? document.body)}
     </span>
   );
 }

@@ -133,6 +133,9 @@ describe("AdaptTreeCellChrome", () => {
     expect(spacer.getAttribute("aria-hidden")).toBe("true");
     expect(spacer.style.width).toBe("1.5em");
     expect(spacer.className).toBe("tree-spacer");
+    // Centred, so the empty spacer cannot set the baseline and push the text
+    // below the rest of the row.
+    expect(part("tree-cell")!.style.verticalAlign).toBe("middle");
   });
 
   it("flags a node whose children are being fetched", async () => {

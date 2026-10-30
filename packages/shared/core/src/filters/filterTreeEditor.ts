@@ -90,8 +90,34 @@ export function filterTreeOpLabel(
       DATE_OP_LABEL_KEYS[op as keyof typeof DATE_OP_LABEL_KEYS]
     );
   }
+  if (
+    widget !== undefined &&
+    CHOICE_WIDGETS.has(widget) &&
+    op in CHOICE_OP_LABEL_KEYS
+  ) {
+    return filterOpLabel(
+      labels,
+      CHOICE_OP_LABEL_KEYS[op as keyof typeof CHOICE_OP_LABEL_KEYS]
+    );
+  }
   return op;
 }
+
+/** Widgets whose value is picked from a set rather than typed. */
+const CHOICE_WIDGETS: ReadonlySet<string> = new Set([
+  "select",
+  "multiSelect",
+  "checklist",
+  "boolean",
+]);
+
+/** `TableLabels` key for each operator a choice widget offers. */
+const CHOICE_OP_LABEL_KEYS = {
+  eq: "opEqual",
+  neq: "opNotEqual",
+  in: "opIn",
+  notIn: "opNotIn",
+} as const satisfies Record<string, keyof TableLabels>;
 
 /**
  * A fresh condition for a def: its key and the type's default operator.

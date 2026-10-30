@@ -266,6 +266,21 @@ describe("kit header filter trigger (mui)", () => {
       document.querySelector('[data-adapttable-part="filter-header-cell"]')
     ).not.toBeNull();
   });
+
+  it("opens a named dialog it says it controls, never a tooltip", () => {
+    renderMui(<TriggerHarness />);
+    expect(trigger()).toHaveAttribute("aria-haspopup", "dialog");
+    expect(trigger()).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(trigger());
+
+    const panel = screen.getByRole("dialog", {
+      name: trigger().getAttribute("aria-label")!,
+    });
+    expect(panel).toHaveAttribute("data-adapttable-part", "filter-header-cell");
+    expect(trigger()).toHaveAttribute("aria-expanded", "true");
+    expect(trigger()).toHaveAttribute("aria-controls", panel.id);
+    expect(document.querySelector('[role="tooltip"]')).toBeNull();
+  });
 });
 
 describe("kit multi-select header widget (mui)", () => {

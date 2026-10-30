@@ -4,6 +4,10 @@
  * scrolling ones, host summary rows without a row's controls, and a summary
  * row under the body — on desktop and on phone cards.
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import {
   type AdaptTableFeature,
   aggregate,
@@ -125,6 +129,30 @@ afterEach(() => {
 });
 
 describe("the NG-ZORRO table's row pinning", () => {
+  it("paints a pinned row's cells with the table's own surface", async () => {
+    const { settle } = await mount();
+    press(rowById("3"), "Pin to top");
+    await settle();
+    // The kit's sheet is global, scoped by nz-table: its pinned-row rule must
+    // reach this row's cells, which take the table's surface unless the host
+    // names one.
+    const css = readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        "components/desktopTable.css"
+      ),
+      "utf8"
+    );
+    expect(css).toMatch(
+      /nz-table tr\[data-row-pin\] > td \{\s*background-color: var\(--adapttable-ng-zorro-surface, inherit\);/
+    );
+    expect(
+      rowById("3")
+        .querySelector("td")
+        ?.matches("nz-table tr[data-row-pin] > td")
+    ).toBe(true);
+  });
+
   it("pins a row to either edge from its actions, and unpins it", async () => {
     const { settle } = await mount();
     expect(bodyOrder()).toEqual(["row:1", "row:2", "row:3"]);
@@ -234,6 +262,8 @@ describe("the NG-ZORRO table's row pinning", () => {
       '[data-adapttable-part="pinned-summary-top"]'
     )!;
     expect(summary.getAttribute("aria-label")).toBe("Summary row");
+    // A total reads apart from the records around it.
+    expect(summary.style.fontWeight).toBe("600");
     expect(summary.textContent).toContain("Total");
     expect(
       summary.querySelector('[data-adapttable-part="checkbox"]')

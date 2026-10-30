@@ -28,6 +28,7 @@ import { Popover } from "@base-ui/react/popover";
 import { useState } from "react";
 
 import { Button, Flex, IconButton, Separator, Text, TextField } from "../ui";
+import { usePortalContainer } from "./portalContainer";
 import { NativeSelect } from "./primitives";
 
 const NOOP_RENAME = () => undefined;
@@ -376,6 +377,7 @@ export function ColumnMenu<TRow>({
   dir,
   groupingPanel,
 }: Readonly<ColumnMenuProps<TRow>>) {
+  const portalContainer = usePortalContainer();
   const drag = useColumnDragState();
   const [query, setQuery] = useState("");
   const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
@@ -393,7 +395,7 @@ export function ColumnMenu<TRow>({
       >
         {labels.columns}
       </Popover.Trigger>
-      <Popover.Portal>
+      <Popover.Portal container={portalContainer}>
         <Popover.Positioner
           className="adapttable-popup-positioner"
           side="bottom"

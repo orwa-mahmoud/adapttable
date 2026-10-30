@@ -6,17 +6,22 @@ import {
   type CellRange,
   type ConfirmHandler,
   createMemoryAdapter,
+  createTableData,
   type ExtraFilters,
+  type FacetMap,
   type FilterDef,
   type FilterTypeSpec,
   groupedViewSource,
   isCellEditable,
+  type QueryAggregate,
   type QueryFilterGroup,
+  type QuerySupport,
   REORDER_COLUMN_KEY,
   resolveUrlAdapter,
   type RowAction,
   stableKey,
   type TableDensity,
+  type TableQueryListener,
   type TableSource,
   withRowPinActions,
 } from "@adapttable/core";
@@ -140,6 +145,7 @@ import {
   useFrontendData,
   type UseFrontendDataOptions,
 } from "./source/useFrontendData";
+import { useServerData } from "./source/useServerData";
 import {
   bodyWindowModelKey,
   groupingPanelControlKey,
@@ -176,6 +182,30 @@ export interface UseDataTableShellOptions<TRow>
   /** Bound the rendered scroll body; CSS lengths are measured after mount. */
   readonly maxHeight?: number | string;
   readonly data?: MaybeRefOrGetter<readonly TRow[]>;
+  /**
+   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
+   * table's own processing and makes `onQueryChange` a notification. Absent:
+   * `data` with `onQueryChange` is server, `data` alone is frontend.
+   */
+  readonly mode?: "frontend" | "server";
+  /**
+   * Called with one consolidated query per real change: on the server tier
+   * the host fetches that page and the superseded request's `signal` is
+   * aborted; on the frontend tier it is told what the reader did.
+   */
+  readonly onQueryChange?: TableQueryListener;
+  /** Server tier: the row count across every page. */
+  readonly total?: MaybeRefOrGetterOptional<number>;
+  /** Server tier: what the endpoint can answer, such as facet counts. */
+  readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
+  /** Server tier: aggregates the endpoint computes for the query. */
+  readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+  /** Server tier: names the response the aggregates belong to. */
+  readonly responseKey?: MaybeRefOrGetterOptional<string>;
+  /** Server tier: keys sent as `query.facets`; defaults to every checklist filter. */
+  readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
+  /** Server tier: distinct-value counts from the last fetch. */
+  readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
   readonly features?: MaybeRefOrGetterOptional<
     readonly ComposedFeature<NoInfer<TRow>>[]
   >;
@@ -310,15 +340,32 @@ export function useDataTableShell<TRow>(
       : true;
     return keep && (resolved.value.filterTreeFn?.(row, tree) ?? true);
   };
-  // A supplied source owns its state; the fallback never joins its URL namespace.
+  // The data tier: a supplied source, then the host's server page when
+  // onQueryChange is wired (or mode says so), then the table's own rows.
+  // The active tier owns the URL; an inactive one keeps private state.
+  const dataController = createTableData<TRow>();
+  onScopeDispose(dataController.dispose);
+  const tier = computed(
+    () =>
+      dataController.plan({
+        engine: undefined,
+        source: supplied.value,
+        data: toValue(resolved.value.data),
+        mode: resolved.value.mode,
+        onQueryChange: resolved.value.onQueryChange,
+        columns: [],
+      }).tier
+  );
+  const onFrontend = computed(() => tier.value === "frontend");
+  const onServer = computed(() => tier.value === "server");
   const frontend = useFrontendData(() => ({
     ...resolved.value,
     forceMobile: isMobile,
-    data: supplied.value ? [] : (toValue(resolved.value.data) ?? []),
+    data: onFrontend.value ? (toValue(resolved.value.data) ?? []) : [],
     columns: flattenColumns(toValue(resolved.value.columns)).leaves,
     getRowId: resolved.value.rowKey,
-    urlAdapter: supplied.value ? undefined : urlAdapter,
-    urlSync: !supplied.value,
+    urlAdapter: onFrontend.value ? urlAdapter : undefined,
+    urlSync: onFrontend.value,
     filterFn: filterRuntime.value ? filterRows : resolved.value.filterFn,
     filterTreeFn: filterRuntime.value
       ? filterTree
@@ -335,8 +382,56 @@ export function useDataTableShell<TRow>(
       ...(filterRuntime.value?.numberExtraKeys ?? []),
     ],
   }));
+  const server = useServerData<TRow>(() => {
+    const value = resolved.value;
+    const live = onServer.value;
+    const filters = filterRuntime.value;
+    return {
+      rows: live ? (toValue(value.data) ?? []) : [],
+      total: () => toValue(value.total) ?? 0,
+      loading: value.isLoading,
+      error: value.error,
+      onQueryChange: live ? value.onQueryChange : undefined,
+      // A column's default aggregate is a request to the server, so only the
+      // server tier reads the columns.
+      columns: live ? flattenColumns(toValue(value.columns)).leaves : [],
+      supports: live ? value.supports : undefined,
+      aggregates: live ? value.aggregates : undefined,
+      responseKey: live ? value.responseKey : undefined,
+      facets: live ? value.facets : undefined,
+      // A server query counts every checklist filter unless told which.
+      facetKeys: live
+        ? (toValue(value.facetKeys) ??
+          filters?.defs
+            .filter(
+              (def) =>
+                (filters.registry.get(def.type)?.widget ?? def.type) ===
+                "checklist"
+            )
+            .map((def) => def.key))
+        : undefined,
+      urlAdapter: live ? urlAdapter : undefined,
+      urlSync: live,
+      urlKey: value.urlKey,
+      defaults: value.defaults,
+      arrayExtraKeys: filters?.arrayExtraKeys,
+      numberExtraKeys: filters?.numberExtraKeys,
+      paginationMode: value.paginationMode,
+      forceMobile: isMobile,
+    };
+  });
+  // Once the frame is on screen, a frontend table's onQueryChange hears
+  // about a change; the mount is not one.
+  const tierSource = computed(() =>
+    dataController.finish({
+      resolved:
+        supplied.value ?? (onServer.value ? server.value : frontend.value),
+      frontend: frontend.value,
+    })
+  );
+  watch(tierSource, dataController.commit, { flush: "post" });
   const source = computed(() => {
-    const raw = supplied.value ?? frontend.value;
+    const raw = tierSource.value;
     const filters = filterRuntime.value;
     const engine = resolved.value.filterEngine;
     if (!filters || !engine || supplied.value || !raw.allSearchedRows)

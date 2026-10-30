@@ -122,6 +122,7 @@ import { extraHostFillStyle } from '@adapttable/core/binding';
 import { ExtraRow as ExtraRow_2 } from '@adapttable/core';
 import { extraRowsForSection } from '@adapttable/core/binding';
 import { extraUncoveredColSpans } from '@adapttable/core/binding';
+import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
@@ -220,8 +221,10 @@ import { PivotAggProps } from '@adapttable/core/binding';
 import { PivotPanelChromeProps as PivotPanelChromeProps_2 } from '@adapttable/core/binding';
 import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
 import { PublicProps } from 'vue';
+import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
+import { QuerySupport } from '@adapttable/core';
 import { readMultiDraft } from '@adapttable/core';
 import { Ref } from 'vue';
 import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
@@ -300,6 +303,7 @@ import { TableDensity } from '@adapttable/core';
 import { TableDensity as TableDensity_2 } from '@adapttable/core/binding';
 import { TableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { TableQueryListener } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core/binding';
 import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
@@ -1447,6 +1451,7 @@ export interface DataTableHandle<TRow> {
 
 // @public
 export interface DataTableProps<TRow> {
+    readonly aggregates?: readonly QueryAggregate[];
     // (undocumented)
     readonly assistant?: TableAssistantProps;
     // (undocumented)
@@ -1477,6 +1482,8 @@ export interface DataTableProps<TRow> {
     readonly dir?: Direction;
     // (undocumented)
     readonly error?: Error | null;
+    readonly facetKeys?: readonly string[];
+    readonly facets?: FacetMap;
     // (undocumented)
     readonly features?: readonly ComposedFeature<NoInfer<TRow>>[];
     // (undocumented)
@@ -1485,6 +1492,7 @@ export interface DataTableProps<TRow> {
     readonly forceMobile?: boolean;
     // (undocumented)
     readonly getSearchText?: (row: TRow) => string;
+    readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     // (undocumented)
     readonly isFetching?: boolean;
     // (undocumented)
@@ -1496,6 +1504,7 @@ export interface DataTableProps<TRow> {
     readonly maxHeight?: number | string;
     // (undocumented)
     readonly mobileBreakpoint?: number;
+    readonly mode?: "frontend" | "server";
     // (undocumented)
     readonly multiSort?: boolean;
     // (undocumented)
@@ -1508,10 +1517,14 @@ export interface DataTableProps<TRow> {
     readonly onColumnRename?: (key: string, name: string) => void;
     // (undocumented)
     readonly onDensityChange?: (density: TableDensity_2) => void;
+    readonly onQueryChange?: TableQueryListener;
+    readonly onRowClick?: (row: TRow) => void;
     // (undocumented)
     readonly paginationMode?: PaginationMode;
     // (undocumented)
     readonly refetch?: () => void | Promise<unknown>;
+    readonly responseKey?: string;
+    // (undocumented)
     readonly rowActionsLayout?: RowActionsLayout;
     // (undocumented)
     readonly rowKey: (row: TRow) => string;
@@ -1519,6 +1532,7 @@ export interface DataTableProps<TRow> {
     readonly searchable?: boolean;
     // (undocumented)
     readonly searchDebounceMs?: number;
+    readonly searchPlaceholder?: string;
     // (undocumented)
     readonly selectable?: boolean;
     // (undocumented)
@@ -1527,8 +1541,10 @@ export interface DataTableProps<TRow> {
     // (undocumented)
     readonly source?: TableSource<TRow>;
     readonly summaryRow?: SummaryRowFn<TRow>;
+    readonly supports?: QuerySupport;
     // (undocumented)
     readonly tableLabel?: string;
+    readonly total?: number;
     // (undocumented)
     readonly urlAdapter?: UrlStateAdapter;
     // (undocumented)
@@ -4201,6 +4217,7 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    isCellFlashing: (row: TRow, columnKey: string) => boolean;
     cellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
     searchInputAttrs: () => Record<string, unknown>;
@@ -4233,6 +4250,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly fitColumns?: MaybeRefOrGetter<boolean>;
     // (undocumented)
     readonly forceMobile?: MaybeRefOrGetter<boolean>;
+    readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     // (undocumented)
     readonly labels?: MaybeRefOrGetterOptional<TableLabels>;
     // (undocumented)
@@ -4243,10 +4261,12 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly multiSort?: MaybeRefOrGetter<boolean>;
     // (undocumented)
     readonly onClearFilters?: () => void;
+    readonly onRowClick?: (row: TRow) => void;
     // (undocumented)
     readonly rowKey: (row: TRow) => string;
     // (undocumented)
     readonly searchDebounceMs?: number;
+    readonly searchPlaceholder?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly selection?: RowSelection;
     // (undocumented)
@@ -4309,6 +4329,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
         headerCellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
         sortButtonAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
         rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+        isCellFlashing: (row: TRow, columnKey: string) => boolean;
         cellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
         cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
         searchInputAttrs: () => Record<string, unknown>;
@@ -4437,6 +4458,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
 
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
+    readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps_2<VNodeChild>>;
     // (undocumented)
@@ -4449,10 +4471,13 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly defaultSelectedIds?: readonly string[];
     // (undocumented)
     readonly density?: MaybeRefOrGetterOptional<TableDensity>;
+    readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
     // (undocumented)
     readonly features?: MaybeRefOrGetterOptional<readonly ComposedFeature<NoInfer<TRow>>[]>;
     readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
     readonly maxHeight?: number | string;
+    readonly mode?: "frontend" | "server";
     // (undocumented)
     readonly onCellCut?: (range: CellRange) => void;
     // (undocumented)
@@ -4461,8 +4486,10 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
     // (undocumented)
     readonly onDensityChange?: (next: TableDensity) => void;
+    readonly onQueryChange?: TableQueryListener;
     // (undocumented)
     readonly onSelectionChange?: (ids: string[]) => void;
+    readonly responseKey?: MaybeRefOrGetterOptional<string>;
     // (undocumented)
     readonly runtimeChannels?: MaybeRefOrGetter<Pick<RuntimeChromeInput<TRow>, "filterDefs" | "filterRegistry" | "grouping" | "tree" | "editing" | "rowPinning">>;
     // (undocumented)
@@ -4472,6 +4499,8 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
     // (undocumented)
     readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
     readonly summaryRow?: SummaryRowFn<TRow>;
+    readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
+    readonly total?: MaybeRefOrGetterOptional<number>;
 }
 
 // @public (undocumented)

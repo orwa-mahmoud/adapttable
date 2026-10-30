@@ -42,6 +42,16 @@ describe("filterTreeOpLabel", () => {
     expect(filterTreeOpLabel("text", "gte", labels)).toBe("gte");
     expect(filterTreeOpLabel(undefined, "eq", labels)).toBe("eq");
   });
+
+  it("names the operators of the choice widgets instead of showing them raw", () => {
+    expect(filterTreeOpLabel("select", "eq", labels)).toBe(labels.opEqual);
+    expect(filterTreeOpLabel("boolean", "eq", labels)).toBe(labels.opEqual);
+    expect(filterTreeOpLabel("multiSelect", "in", labels)).toBe(labels.opIn);
+    expect(filterTreeOpLabel("checklist", "notIn", labels)).toBe(
+      labels.opNotIn
+    );
+    expect(filterTreeOpLabel("select", "between", labels)).toBe("between");
+  });
 });
 
 describe("filterTreeValueEditor", () => {

@@ -1677,6 +1677,7 @@ export type DesktopRowSlot<TRow> = ChromeRowSlot<DesktopRowWiring<TRow>>;
 export interface DesktopRowWiring<TRow> {
     actionsPinned: boolean;
     bodyCells: readonly BodyCell_2<TRow>[];
+    bodyPinSide: (key: string) => PinOffset["side"] | undefined;
     bodyPinStyle: (key: string) => CSSProperties | undefined;
     cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
     clickable: boolean;

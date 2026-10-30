@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/angular",
   "version": "0.7.0",
-  "description": "Headless Angular binding for AdaptTable. Signals over the framework-neutral engine in @adapttable/core.",
+  "description": "Headless Angular binding for AdaptTable. Signals over the framework-neutral engine in @adapttable/core — tables with sorting, filtering, editing, grouping, URL state and server data.",
   "keywords": [
     "angular",
     "signals",
@@ -10,7 +10,9 @@
     "headless",
     "headless-ui",
     "datagrid",
-    "adapttable"
+    "adapttable",
+    "typescript",
+    "angular-table"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",

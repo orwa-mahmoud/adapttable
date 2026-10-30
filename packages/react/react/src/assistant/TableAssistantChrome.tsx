@@ -905,9 +905,14 @@ export function TableAssistantChrome({
   }, [open, mountedSurface, assistant.status]);
 
   // Closing returns the reader where they were. Without this, focus falls to
-  // the document and the next Tab starts from the top of the page.
+  // the document and the next Tab starts from the top of the page. Only a
+  // panel that was open closes: a first render that starts closed leaves
+  // focus, and the page's scroll position, where the page put them.
+  const launcherWasOpen = useRef(open);
   useEffect(() => {
-    if (open) return;
+    const closed = launcherWasOpen.current && !open;
+    launcherWasOpen.current = open;
+    if (!closed) return;
     const trigger = launcherRef.current?.querySelector<HTMLElement>(
       '[data-adapttable-part="assistant-launcher"]'
     );
@@ -1027,6 +1032,7 @@ export function TableAssistantChrome({
         setDraft={assistant.setDraft}
         onSend={composer.send}
         onStop={assistant.stop}
+        sticky={resolved !== "panel"}
         {...(composer.answering
           ? {
               placeholder:

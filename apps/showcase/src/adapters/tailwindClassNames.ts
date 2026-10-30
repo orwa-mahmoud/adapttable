@@ -1,6 +1,14 @@
 import type { DataTableClassNames } from "@adapttable/unstyled";
 
 /**
+ * The surface of a body cell that sticks: a pinned column's cell, or any cell
+ * of a pinned row. It is opaque so scrolled rows never show through, and takes
+ * the opaque form of the row's hover and selection colours.
+ */
+const STICKY_CELL =
+  "[&[data-pinned]]:bg-white [tr[data-row-pin]>&]:bg-white [tr:hover>&[data-pinned]]:bg-gray-50 [tr[data-row-pin]:hover>&]:bg-gray-50 [tr[data-selected]>&[data-pinned]]:bg-indigo-50 [tr[data-selected][data-row-pin]>&]:bg-indigo-50 dark:[&[data-pinned]]:bg-zinc-900 dark:[tr[data-row-pin]>&]:bg-zinc-900 dark:[tr:hover>&[data-pinned]]:bg-[color-mix(in_oklab,var(--color-zinc-800)_60%,var(--color-zinc-900))] dark:[tr[data-row-pin]:hover>&]:bg-[color-mix(in_oklab,var(--color-zinc-800)_60%,var(--color-zinc-900))] dark:[tr[data-selected]>&[data-pinned]]:bg-[color-mix(in_oklab,var(--color-indigo-500)_15%,var(--color-zinc-900))] dark:[tr[data-selected][data-row-pin]>&]:bg-[color-mix(in_oklab,var(--color-indigo-500)_15%,var(--color-zinc-900))]";
+
+/**
  * The Tailwind kit's class map — the "bring your own classes" look.
  *
  * Its own module because two call sites need it: the Tailwind adapter demo,
@@ -64,7 +72,7 @@ export const tailwindClassNames: DataTableClassNames = {
   sortButton:
     "inline-flex items-center gap-1 font-semibold text-gray-600 hover:text-indigo-600 dark:text-zinc-300 dark:hover:text-indigo-400",
   row: "border-b border-gray-100 last:border-0 hover:bg-gray-50 data-[selected]:bg-indigo-50 data-[dragging]:opacity-60 data-[drop=before]:shadow-[inset_0_2px_0_0_theme(colors.indigo.500)] data-[drop=after]:shadow-[inset_0_-2px_0_0_theme(colors.indigo.500)] dark:border-zinc-800 dark:hover:bg-zinc-800/60 dark:data-[selected]:bg-indigo-500/15",
-  cell: "px-3 py-2.5 [&[data-pinned]]:bg-white dark:[&[data-pinned]]:bg-zinc-900",
+  cell: `px-3 py-2.5 ${STICKY_CELL} [[data-adapttable-part=pinned-summary-top]_&]:font-semibold [[data-adapttable-part=pinned-summary-bottom]_&]:font-semibold`,
   actionButton:
     "h-8 w-8 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 disabled:opacity-50 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200",
   footer:
@@ -167,19 +175,18 @@ export const tailwindClassNames: DataTableClassNames = {
   checkbox: "h-4 w-4 accent-indigo-600",
   selectionHeader:
     "w-11 border-b border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-800",
-  selectionCell:
-    "w-11 px-3 py-2.5 [&[data-pinned]]:bg-white dark:[&[data-pinned]]:bg-zinc-900",
+  selectionCell: `w-11 px-3 py-2.5 ${STICKY_CELL}`,
   actionsHeader:
     "w-[120px] border-b border-gray-200 bg-gray-50 px-3 py-2.5 text-end font-semibold text-gray-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400",
-  actionsCell:
-    "px-3 py-2.5 text-end [&[data-pinned]]:bg-white dark:[&[data-pinned]]:bg-zinc-900",
+  actionsCell: `px-3 py-2.5 text-end ${STICKY_CELL}`,
   rowActionsTrigger:
     "inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 [&::-webkit-details-marker]:hidden dark:hover:bg-zinc-800",
   rowActionsMenu:
     "relative inline-block [&>button]:block [&>button]:w-full [&>button]:px-2 [&>button]:text-start",
   expandHeader:
     "w-8 border-b border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-800",
-  expandCell: "w-8 px-2 py-2.5",
+  expandCell: `w-8 px-2 py-2.5 ${STICKY_CELL}`,
+  reorderCell: `w-10 px-1 py-2.5 ${STICKY_CELL}`,
   expandButton:
     "inline-grid h-6 w-6 place-items-center rounded-md text-gray-400 transition-transform hover:bg-gray-100 data-[expanded]:rotate-90 dark:hover:bg-zinc-800",
   detailRow:

@@ -287,6 +287,7 @@ export function FilterHeaderTrigger<TRow>(
         <Popover.Positioner>
           <Popover.Content
             {...sessionProps}
+            aria-label={filterLabel(props.def)}
             width="max-content"
             minWidth="20rem"
             p={2}

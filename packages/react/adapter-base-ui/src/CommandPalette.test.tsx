@@ -58,6 +58,13 @@ describe("command palette (base-ui)", () => {
     expect(screen.getByText("Print")).toBeInTheDocument();
   });
 
+  it("spans the width its bounds allow", () => {
+    table();
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+
+    expect((palette() as HTMLElement).style.width).toBe("100%");
+  });
+
   it("takes focus into its search box", () => {
     table();
     fireEvent.keyDown(document, { key: "k", ctrlKey: true });

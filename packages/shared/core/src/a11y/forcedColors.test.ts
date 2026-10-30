@@ -14,6 +14,8 @@ const REQUIRED = [
   "[data-cell-match]",
   "[data-cell-match-current]",
   "[data-dirty]",
+  "[data-changed]",
+  '[data-adapttable-part="batch-edit-cell"]',
   '[aria-invalid="true"]',
   '[data-pinned="start"]',
   '[data-pinned="end"]',

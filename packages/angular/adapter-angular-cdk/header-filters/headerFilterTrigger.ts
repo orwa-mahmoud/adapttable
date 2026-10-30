@@ -59,6 +59,7 @@ import {
           (click)="toggle()"
           style="list-style: none; cursor: pointer; display: inline-flex; align-items: center; padding: 2px"
           [attr.aria-label]="caption()"
+          aria-haspopup="dialog"
           [attr.data-active]="active() ? '' : null"
         >
           <svg [adaptIcon]="icon"></svg>
@@ -66,6 +67,8 @@ import {
       </ng-template>
       <ng-template #content>
         <div
+          role="dialog"
+          [attr.aria-label]="caption()"
           data-adapttable-part="filter-header-cell"
           [attr.data-adapttable-header-filter]="overlay.sessionId"
           style="min-inline-size: min(20rem, calc(100vw - 48px))"

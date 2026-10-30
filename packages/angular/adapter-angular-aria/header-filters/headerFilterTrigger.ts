@@ -51,6 +51,7 @@ import {
         #trigger
         style="list-style: none; cursor: pointer; display: inline-flex; align-items: center; padding: 2px"
         [attr.aria-label]="caption()"
+        aria-haspopup="dialog"
         [attr.data-active]="active() ? '' : null"
       >
         <svg [adaptIcon]="icon"></svg>
@@ -58,6 +59,8 @@ import {
       @if (overlay.open()) {
         <div
           #panel
+          role="dialog"
+          [attr.aria-label]="caption()"
           data-adapttable-part="filter-header-cell"
           style="position: fixed; z-index: 10050; width: 20rem; max-width: calc(100vw - 16px); box-sizing: border-box; overflow-y: auto; padding: 0.5rem; background: Canvas; color: CanvasText; border: 1px solid currentColor"
         >

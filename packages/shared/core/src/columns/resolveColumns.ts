@@ -49,14 +49,18 @@ export interface ResolvableColumn<TRow> {
   readonly header?: object | string | number | bigint | boolean | symbol | null;
   /** Reads the cell value; missing gets a data-path reader. */
   readonly accessor?: (row: TRow) => unknown;
+  /** Display text the column already produces; read before the data path. */
+  readonly formatValue?: (row: TRow) => string;
   /** Data path per locale tag. */
   readonly i18n?: NonNullable<ColumnModel<TRow>["i18n"]>;
 }
 
 /**
  * Fill a column's declarative defaults: a missing `header` is the key,
- * humanized, and a column without an `accessor` reads the row by its
- * locale-resolved data path. Complete columns are returned unchanged.
+ * humanized, and a column without an `accessor` shows its `formatValue` text
+ * when it has one — the same text the engine and export read — and otherwise
+ * reads the row by its locale-resolved data path. Complete columns are
+ * returned unchanged.
  *
  * @param columns - The declared columns, in any binding's column type.
  * @param locale - The active locale.
@@ -79,12 +83,12 @@ export function resolveColumnDefaults<
     const needsAccessor = !column.accessor && !rendersItself(column);
     if (!needsHeader && !needsAccessor) return column;
     const path = localizedColumnPath(column, locale);
+    const generated =
+      column.formatValue ?? ((row: TRow) => columnPathText(getPath(row, path)));
     return {
       ...column,
       header: needsHeader ? humanizeKey(column.key) : column.header,
-      accessor: needsAccessor
-        ? (row: TRow) => columnPathText(getPath(row, path))
-        : column.accessor,
+      accessor: needsAccessor ? generated : column.accessor,
     };
   });
 }

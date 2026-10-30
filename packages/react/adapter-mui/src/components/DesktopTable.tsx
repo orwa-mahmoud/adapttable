@@ -20,6 +20,8 @@ import {
   logicalAlign,
   mergedCellStyle,
   PIN_Z,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
   REORDER_COLUMN_WIDTH,
   resolveRowEditTrigger,
@@ -40,6 +42,7 @@ import {
   TableRow,
   TableSortLabel,
   type Theme,
+  useTheme,
 } from "@mui/material";
 import {
   type CSSProperties,
@@ -128,7 +131,25 @@ const MUI_WIDTHS = {
   selection: SELECTION_WIDTH,
   actions: ACTIONS_WIDTH,
 } as const;
-const PIN_BG = "var(--mui-palette-background-paper)";
+/**
+ * The palette as values a style can use: CSS variables when the theme declares
+ * them, the theme's own colours when it does not. A bare `var(--mui-palette-…)`
+ * is undefined under a plain `createTheme`, and an undefined variable in an
+ * inline background leaves a pinned cell transparent.
+ */
+function useMuiPalette() {
+  const theme = useTheme();
+  return (theme.vars ?? theme).palette;
+}
+
+/**
+ * A pinned body cell: the paper surface, with the row's hover or selected tint
+ * laid over it through `--adapttable-pin-tint`, so the cell lights up with the
+ * rest of its row.
+ */
+function pinnedBodyPaint(paper: string): string {
+  return `linear-gradient(var(--adapttable-pin-tint, transparent), var(--adapttable-pin-tint, transparent)), ${paper}`;
+}
 const PAPER_SX = { bgcolor: "background.paper" } as const;
 const RESIZE_HANDLE_SX = {
   position: "absolute",
@@ -223,14 +244,23 @@ function DesktopRowBase<TRow>(
     detailMeasureRef,
     rowDomProps,
     bodyPinStyle,
+    bodyPinSide,
     dir,
+    pinPart,
   } = props;
   const expandable = expanded !== undefined;
   const expansionLead = expandable ? EXPAND_WIDTH : 0;
   const selectionLead =
     expansionLead + (showReorder ? REORDER_COLUMN_WIDTH : 0);
+  const palette = useMuiPalette();
+  const pinBg = pinnedBodyPaint(palette.background.paper);
+  // A pinned total is the host's figure, not a person: it reads semibold, as
+  // the column footer's summary does.
+  const summaryRow =
+    pinPart === PINNED_SUMMARY_TOP_PART ||
+    pinPart === PINNED_SUMMARY_BOTTOM_PART;
   const edge = (active: boolean, lead = 0) =>
-    pinnedEdgeCellStyle("start", active, PIN_Z.body, PIN_BG, lead);
+    pinnedEdgeCellStyle("start", active, PIN_Z.body, pinBg, lead);
   const rowEdit = resolveRowEditTrigger(
     rowActions,
     editing?.rowEditing,
@@ -246,6 +276,12 @@ function DesktopRowBase<TRow>(
         className={rowClass}
         hover
         selected={Boolean(selected)}
+        sx={{
+          "&.Mui-selected > td": {
+            "--adapttable-pin-tint": palette.action.selected,
+          },
+          "&:hover > td": { "--adapttable-pin-tint": palette.action.hover },
+        }}
         onMouseEnter={hasPrefetch ? () => onPrefetch(row) : undefined}
       >
         {expandable && (
@@ -313,23 +349,22 @@ function DesktopRowBase<TRow>(
               colSpan={colSpan > 1 ? colSpan : undefined}
               rowSpan={rowSpan > 1 ? rowSpan : undefined}
               data-column-key={column.key}
+              data-pinned={bodyPinSide(column.key)}
               data-adapttable-part="cell"
               data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
               sx={{
                 textAlign: muiAlign(column.align),
+                ...(summaryRow ? { fontWeight: 600 } : {}),
                 ...(pin ? PAPER_SX : {}),
               }}
               style={cellHighlightStyle(
                 focusProps,
                 {
-                  ...(pin ? { ...pin, background: PIN_BG } : {}),
+                  ...(pin ? { ...pin, background: pinBg } : {}),
                   ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
                 },
-                {
-                  backgroundColor:
-                    "var(--mui-palette-action-selected, rgba(0, 0, 0, 0.08))",
-                }
+                { backgroundColor: palette.action.selected }
               )}
               {...focusProps}
             >
@@ -374,7 +409,7 @@ function DesktopRowBase<TRow>(
                 "end",
                 hasEndPin || actionsPinned,
                 PIN_Z.body,
-                PIN_BG
+                pinBg
               ),
               ...edgeRowPin,
             }}
@@ -577,6 +612,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     fitColumns,
     widths: columnWidths,
   });
+  const palette = useMuiPalette();
   const headPaint: SxProps<Theme> | undefined = stickyHeader
     ? {
         position: "sticky",
@@ -590,7 +626,13 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     ...(active ? { ...PAPER_SX } : {}),
   });
   const edgeHeadStyle = (active: boolean, lead = 0) =>
-    pinnedEdgeCellStyle("start", active, PIN_Z.headerPinned, PIN_BG, lead);
+    pinnedEdgeCellStyle(
+      "start",
+      active,
+      PIN_Z.headerPinned,
+      palette.background.paper,
+      lead
+    );
 
   const leafProps = {
     flexShares,
@@ -628,10 +670,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
         data-adapttable-part="header-group-cell"
         sx={{
           fontWeight: 600,
-          ...groupedHeaderCellStyle(
-            cell,
-            "var(--mui-palette-divider, rgba(0, 0, 0, 0.12))"
-          ),
+          ...groupedHeaderCellStyle(cell, palette.divider),
         }}
       >
         <span style={groupedHeaderLabelStyle()}>
@@ -711,7 +750,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
             "end",
             pin.hasEndPin || pin.stickActions,
             PIN_Z.headerPinned,
-            PIN_BG
+            palette.background.paper
           )}
         >
           {labels.actions}

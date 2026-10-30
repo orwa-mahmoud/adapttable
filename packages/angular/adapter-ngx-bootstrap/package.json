@@ -1,13 +1,17 @@
 {
   "name": "@adapttable/ngx-bootstrap",
   "version": "0.2.7",
-  "description": "AdaptTable Angular tables with ngx-bootstrap controls and isolated Bootstrap styles.",
+  "description": "AdaptTable Angular tables with ngx-bootstrap controls and isolated Bootstrap styles — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
     "ngx-bootstrap",
     "bootstrap",
-    "adapttable"
+    "adapttable",
+    "table",
+    "angular-table",
+    "datagrid",
+    "typescript"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",

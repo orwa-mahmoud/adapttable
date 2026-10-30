@@ -14,6 +14,7 @@ import type { ReactNode } from "react";
 
 import { iconForRowAction, MoreVerticalIcon } from "../icons";
 import type { RadixAccentColor } from "../types";
+import { usePortalContainer } from "./portalContainer";
 import { Tooltip } from "./primitives";
 
 interface RowActionButtonsProps<TRow> {
@@ -105,6 +106,7 @@ function ActionMenu<TRow>({
   labels: Required<TableLabels>;
   accentColor?: RadixAccentColor;
 }>): ReactNode {
+  const portalContainer = usePortalContainer();
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
@@ -121,6 +123,7 @@ function ActionMenu<TRow>({
         </IconButton>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content
+        container={portalContainer}
         data-adapttable-part="row-actions-menu"
         onClick={(event) => event.stopPropagation()}
       >

@@ -50,6 +50,21 @@ describe("TreeCell", () => {
     expect(part("tree-toggle")).not.toBeNull();
   });
 
+  it("centres a leaf, so its empty spacer cannot lower the text", () => {
+    render(
+      <TreeCellChrome
+        slots={treeToggleTestSlots}
+        entry={entry({ hasChildren: false })}
+        columnKey="name"
+        treeColumnKey="name"
+      >
+        <span>lib</span>
+      </TreeCellChrome>
+    );
+    expect(part("tree-spacer")).not.toBeNull();
+    expect(part("tree-cell")!.style.verticalAlign).toBe("middle");
+  });
+
   it("passes a column that is not the tree column straight through", () => {
     render(
       <TreeCellChrome

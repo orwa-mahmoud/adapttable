@@ -22,6 +22,8 @@ import {
   logicalAlign,
   mergedCellStyle,
   PIN_Z,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
   pinnedEdgeCellStyle,
   type PinSide,
   REORDER_COLUMN_WIDTH,
@@ -206,6 +208,8 @@ function rowExtrasEqual<TRow>(
   );
 }
 
+const SUMMARY_CELL_STYLE = { fontWeight: "var(--font-weight-bold)" } as const;
+
 function DesktopRowBase<TRow>(
   props: Readonly<DesktopRowProps<TRow>>
 ): ReactElement {
@@ -254,9 +258,22 @@ function DesktopRowBase<TRow>(
     detailMeasureRef,
     rowDomProps,
     bodyPinStyle,
+    bodyPinSide,
     accentColor,
     dir,
+    pinPart,
+    rowPinSide,
   } = props;
+  // A pinned row sticks, so its leading and trailing cells need the surface
+  // too: the rows scrolling beneath must not show through them.
+  const edgeRowPaint =
+    rowPinSide === undefined
+      ? edgeRowPin
+      : { ...edgeRowPin, background: PIN_BG };
+  // A pinned total is the host's figure, not a person: it reads bold.
+  const summaryRow =
+    pinPart === PINNED_SUMMARY_TOP_PART ||
+    pinPart === PINNED_SUMMARY_BOTTOM_PART;
   const expandable = expanded !== undefined;
   const dataPinStyle = (key: string) => {
     const pin = bodyPinStyle(key);
@@ -287,7 +304,7 @@ function DesktopRowBase<TRow>(
             data-adapttable-part="expand-cell"
             style={{
               ...edgeCellStyle("start", hasStartPin, PIN_Z.body),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <OptionalExpandToggle
@@ -310,7 +327,7 @@ function DesktopRowBase<TRow>(
                 PIN_Z.body,
                 expandable ? EXPANSION_WIDTH : 0
               ),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <OptionalRowReorderHandle
@@ -335,7 +352,7 @@ function DesktopRowBase<TRow>(
                 (expandable ? EXPANSION_WIDTH : 0) +
                   (showReorder ? REORDER_COLUMN_WIDTH : 0)
               ),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             <Checkbox
@@ -357,6 +374,7 @@ function DesktopRowBase<TRow>(
               colSpan={colSpan > 1 ? colSpan : undefined}
               rowSpan={rowSpan > 1 ? rowSpan : undefined}
               data-column-key={column.key}
+              data-pinned={bodyPinSide(column.key)}
               data-adapttable-part="cell"
               data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
@@ -371,6 +389,7 @@ function DesktopRowBase<TRow>(
                 {
                   ...dataPinStyle(column.key),
                   ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
+                  ...(summaryRow ? SUMMARY_CELL_STYLE : undefined),
                 },
                 {
                   background: "var(--accent-a3)",
@@ -412,7 +431,7 @@ function DesktopRowBase<TRow>(
             justify="end"
             style={{
               ...edgeCellStyle("end", hasEndPin || actionsPinned, PIN_Z.body),
-              ...edgeRowPin,
+              ...edgeRowPaint,
             }}
           >
             {editing?.rowEditing && (

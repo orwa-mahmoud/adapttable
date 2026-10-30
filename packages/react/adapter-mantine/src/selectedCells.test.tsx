@@ -48,4 +48,27 @@ describe("selected cells are visible (mantine)", () => {
       "0"
     );
   });
+
+  it("draws the range in Mantine's primary colour", () => {
+    const { container } = renderMantine(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        cellNavigation
+      />
+    );
+    const first = container.querySelector<HTMLElement>("[data-grid-cell]")!;
+    act(() => first.focus());
+    fireEvent.keyDown(first, { key: "ArrowRight", shiftKey: true });
+    for (const cell of container.querySelectorAll<HTMLElement>(
+      "[data-cell-selected]"
+    )) {
+      expect(cell.style.outline).toBe(
+        "1px solid var(--mantine-primary-color-filled)"
+      );
+      expect(cell.style.background).toBe("var(--mantine-primary-color-light)");
+    }
+  });
 });

@@ -123,7 +123,10 @@ function desktopCells<TRow>(
 ): readonly TableCellModel<TRow>[] {
   return table.columns.value.map((column) => ({
     key: column.key,
-    attrs: table.cellAttrs(column),
+    attrs: {
+      ...table.cellAttrs(column),
+      "data-flash": table.isCellFlashing(row, column.key) ? "" : undefined,
+    },
     context: {
       row,
       rowIndex: index,
@@ -139,7 +142,10 @@ function cardCells<TRow>(
 ): readonly TableCellModel<TRow>[] {
   return row.cells.map((cell) => ({
     ...cell,
-    attrs: { "data-column-key": cell.key },
+    attrs: {
+      "data-column-key": cell.key,
+      "data-flash": cell.attrs["data-flash"],
+    },
   }));
 }
 export function useDesktopTableModel<TRow>(

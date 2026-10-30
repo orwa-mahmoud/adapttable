@@ -85,8 +85,13 @@ not React's headless feature aggregate.
   with your host's storage and permission model
 - The views popover closes on Escape and returns focus to its trigger. Keep
   visible controls reachable on narrow screens instead of relying on a shortcut
-- `[labels]` supplies localized captions and `[dir]` supplies direction. The
-  kit shell does not have a `locale` input
+- `[labels]` supplies localized captions, `[dir]` supplies direction and
+  `[locale]` picks the field that columns with `i18n` paths read; see
+  [localization and RTL](./i18n-rtl.md)
+- `[stickyHeader]="true"` keeps the desktop header in view. Inside a
+  `maxHeight` box or a table that scrolls sideways it sticks at the top of the
+  box; on a page-scrolling table it sticks at `[stickyTop]`, the height of any
+  app bar it must clear. Pinned rows sit below a sticky header
 
 `sidePanel()` from `/side-panel` accepts named panels and a controlled `open`
 key or `null`, plus `onOpenChange`. Panel content can be a template or plain

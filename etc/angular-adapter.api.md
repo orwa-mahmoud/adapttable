@@ -1914,7 +1914,9 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly isCellFlashing: InputSignal<((rowId: string, columnKey: string) => boolean) | undefined>;
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly loading: InputSignal<boolean | undefined>;
+    readonly locale: InputSignal<string | undefined>;
     readonly maxHeight: InputSignal<string | number | undefined>;
+    readonly mobileBreakpoint: InputSignal<number | undefined>;
     // @internal
     protected readonly mobileCards: Signal<DataTableSurface | undefined>;
     readonly mode: InputSignal<"frontend" | "server" | undefined>;
@@ -1946,6 +1948,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
     readonly searchable: InputSignal<boolean>;
+    readonly searchDebounceMs: InputSignal<number | undefined>;
     // @internal
     protected readonly searchIcon: IconDescriptor;
     readonly searchPlaceholder: InputSignal<string | undefined>;
@@ -1981,6 +1984,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     } | undefined>;
     // @internal
     protected readonly statusBarSlot: FeatureSlotKey<Omit<StatusBarChromeProps<unknown>, "slots">>;
+    readonly stickyHeader: InputSignal<boolean>;
+    readonly stickyTop: InputSignal<number>;
     readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
     readonly supports: InputSignal<QuerySupport | undefined>;
     // (undocumented)
@@ -2081,6 +2086,21 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "stickyHeader": {
+            "alias": "stickyHeader";
+            "required": false;
+            "isSignal": true;
+        };
+        "stickyTop": {
+            "alias": "stickyTop";
+            "required": false;
+            "isSignal": true;
+        };
+        "mobileBreakpoint": {
+            "alias": "mobileBreakpoint";
+            "required": false;
+            "isSignal": true;
+        };
         "classNames": {
             "alias": "classNames";
             "required": false;
@@ -2111,6 +2131,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "locale": {
+            "alias": "locale";
+            "required": false;
+            "isSignal": true;
+        };
         "searchPlaceholder": {
             "alias": "searchPlaceholder";
             "required": false;
@@ -2118,6 +2143,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         };
         "searchable": {
             "alias": "searchable";
+            "required": false;
+            "isSignal": true;
+        };
+        "searchDebounceMs": {
+            "alias": "searchDebounceMs";
             "required": false;
             "isSignal": true;
         };
@@ -2262,6 +2292,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
 
 // @public
 export abstract class AdaptDesktopTableModel<TRow> {
+    constructor();
     // (undocumented)
     protected readonly columnGroupToggleSlot: FeatureSlotKey<ColumnGroupToggleProps>;
     // (undocumented)
@@ -2345,6 +2376,7 @@ export abstract class AdaptDesktopTableModel<TRow> {
     }): number | undefined;
     // (undocumented)
     protected spanned(attrs: Attrs, cell: BodyCellView<TRow>): Attrs;
+    protected theadStyle(): Record<string, string> | null;
     // (undocumented)
     protected treeCellProps(entry: BodyRow<TRow>, columnKey: string, children: TemplateRef<unknown>): TreeCellProps<never> | undefined;
     // (undocumented)
@@ -4556,6 +4588,7 @@ export class AdaptTreeCellChrome {
     paddingInlineStart?: string;
     display: string;
     alignItems: string;
+    verticalAlign: string;
     gap: string;
     }>;
     // (undocumented)
@@ -4762,6 +4795,7 @@ export interface AssistantComposerProps {
     readonly speech?: SpeechInputHandle;
     // (undocumented)
     readonly status: string;
+    readonly sticky?: boolean;
 }
 
 export { assistantIsBusy }
@@ -6281,6 +6315,7 @@ export interface TableView<TRow> {
     readonly renderCard: Signal<MobileCardRenderer<TRow> | undefined>;
     readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
     readonly reorder: Signal<RowReorderState<TRow>> | undefined;
+    readonly reportHeaderHeight: (px: number) => void;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
     readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
@@ -6289,6 +6324,7 @@ export interface TableView<TRow> {
     readonly selection: RowSelection | undefined;
     readonly showActions: Signal<boolean>;
     readonly showSummary: Signal<boolean>;
+    readonly stickyHead: Signal<CssProperties | undefined>;
     readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
     readonly table: DataTable<TRow>;
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;

@@ -60,6 +60,26 @@ describe("pinned summary rows (base-ui)", () => {
     expect(screen.getByText("Ship")).toBeInTheDocument();
   });
 
+  it("sets totals apart from the people rows", () => {
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        features={[pinnedSummaryRows({ top: [TOP], bottom: [BOTTOM] })]}
+      />
+    );
+    const weight = (cell: Element | null | undefined) =>
+      cell ? getComputedStyle(cell).fontWeight : undefined;
+    for (const name of ["pinned-summary-top", "pinned-summary-bottom"]) {
+      expect(
+        weight(part(name)?.querySelector("td[data-column-key=title]"))
+      ).toBe("600");
+    }
+    expect(weight(screen.getByText("Ship").closest("td"))).not.toBe("600");
+  });
+
   it("stays on a grouped table where lift-a-data-row pinning is refused", () => {
     render(
       <DataTable

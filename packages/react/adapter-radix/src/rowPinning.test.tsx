@@ -81,6 +81,23 @@ describe("row pinning (radix)", () => {
     expect(part("pinned-bottom")).toHaveAttribute("data-row-pin", "bottom");
   });
 
+  it("paints a pinned row's edge cells so scrolled rows cannot show through", () => {
+    render(
+      table({
+        pinnedRowIds: { top: ["1"], bottom: [] },
+        onPinnedRowIdsChange: vi.fn(),
+      })
+    );
+    const pinnedActions = part("pinned-top")!.querySelector<HTMLElement>(
+      '[data-adapttable-part="actions-cell"]'
+    )!;
+    expect(pinnedActions.style.background).toBe("var(--color-background)");
+    const scrollingActions = part("tbody")!.querySelector<HTMLElement>(
+      'tr:not([data-row-pin]) [data-adapttable-part="actions-cell"]'
+    )!;
+    expect(scrollingActions.style.background).toBe("");
+  });
+
   it("offers pin actions on cards with no sticky chrome", () => {
     const onPinnedRowIdsChange = vi.fn();
     render(table({ forceMobile: true, onPinnedRowIdsChange }));

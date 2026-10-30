@@ -4,8 +4,10 @@
  * Core stays headless: this is a `<style>` tag, not a painted control. Windows
  * High Contrast (`forced-colors: active`) drops authored fills and box-shadows,
  * so focus, selection, dirty cells, validation and find hits each keep a
- * system-color *outline*. `prefers-contrast: more` thickens the same focus
- * outline for kits that expose no contrast hook of their own.
+ * system-color *outline*. A cell changed in a batch edit takes the dotted mark
+ * of a dirty cell, drawn just outside its field, which would cover it.
+ * `prefers-contrast: more` thickens the same focus outline for kits that expose
+ * no contrast hook of their own.
  */
 
 /** Id of the singleton stylesheet, so a second table does not inject again. */
@@ -23,6 +25,13 @@ export const FORCED_COLORS_CSS = `
 [data-dirty]:not([data-cell-match]):not([data-cell-match-current]) {
   outline: 2px dotted currentColor;
   outline-offset: -2px;
+}
+[data-adapttable-part="batch-edit-cell"] {
+  display: block;
+}
+[data-changed]:not([data-cell-match]):not([data-cell-match-current]) {
+  outline: 2px dotted currentColor;
+  outline-offset: 2px;
 }
 [aria-invalid="true"]:not([data-cell-match]):not([data-cell-match-current]) {
   outline: 2px double currentColor;
@@ -67,7 +76,8 @@ export const FORCED_COLORS_CSS = `
     outline: 2px solid CanvasText;
     outline-offset: -2px;
   }
-  [data-dirty] {
+  [data-dirty],
+  [data-changed] {
     outline: 2px dotted CanvasText;
     outline-offset: -2px;
     box-shadow: none !important;

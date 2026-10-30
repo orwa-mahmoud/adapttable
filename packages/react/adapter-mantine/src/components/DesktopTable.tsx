@@ -18,6 +18,8 @@ import {
   type HtmlGroupedHeaderCell,
   mergedCellStyle,
   PIN_Z,
+  PINNED_SUMMARY_BOTTOM_PART,
+  PINNED_SUMMARY_TOP_PART,
   pinnedCellStyle,
   REORDER_COLUMN_WIDTH,
   resolveRowEditTrigger,
@@ -38,7 +40,14 @@ import {
 
 import { type Density, DENSITY_SPACING } from "../density";
 import { ChevronDownIcon, ChevronUpIcon, SelectorIcon } from "../icons";
-import { HAIRLINE, SURFACE } from "../surface";
+import {
+  HAIRLINE,
+  PIN_HOVER_CLASS,
+  PIN_HOVER_CSS,
+  PINNED_BODY_PAINT,
+  SELECTED_CELL_STYLE,
+  SURFACE,
+} from "../surface";
 import {
   OptionalColumnGroupToggle,
   OptionalColumnHeaderRename,
@@ -314,7 +323,10 @@ function DesktopRowBase<TRow>(
     detailMeasureRef,
     rowDomProps,
     bodyPinStyle,
+    bodyPinSide,
     stickyHeader,
+    rowPinSide,
+    pinPart,
   } = props;
   const expandable = expanded !== undefined;
   const rowSeparator: CSSProperties | undefined = stickyHeader
@@ -332,8 +344,20 @@ function DesktopRowBase<TRow>(
         : rowSeparator.boxShadow,
     };
   };
+  // A pinned row sticks as well, so every one of its cells takes the opaque
+  // paint: the rows scrolling beneath it must not show through.
+  const rowPinned = rowPinSide !== undefined;
+  // A pinned total is the host's figure, not a person: it reads semibold, as
+  // the column footer's summary does.
+  const summaryRow =
+    pinPart === PINNED_SUMMARY_TOP_PART ||
+    pinPart === PINNED_SUMMARY_BOTTOM_PART;
   const paintPin = (style: CSSProperties | undefined) =>
-    withRowSeparator(style ? { ...style, background: SURFACE } : undefined);
+    withRowSeparator(
+      style || rowPinned
+        ? { ...style, background: PINNED_BODY_PAINT }
+        : undefined
+    );
   const expansionLead = expandable ? MANTINE_WIDTHS.expansion : 0;
   const selectionLead =
     expansionLead + (showReorder ? REORDER_COLUMN_WIDTH : 0);
@@ -428,7 +452,9 @@ function DesktopRowBase<TRow>(
               colSpan={colSpan > 1 ? colSpan : undefined}
               rowSpan={rowSpan > 1 ? rowSpan : undefined}
               data-column-key={column.key}
+              data-pinned={bodyPinSide(column.key)}
               data-adapttable-part="cell"
+              fw={summaryRow ? 600 : undefined}
               data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
               data-cell-span={cellSpanMark(colSpan, rowSpan)}
               {...cellProps}
@@ -440,9 +466,7 @@ function DesktopRowBase<TRow>(
                   ...pinStyle,
                   ...mergedCellStyle(colSpan, rowSpan, cellSpanAppearance),
                 },
-                {
-                  background: "var(--mantine-primary-color-light)",
-                }
+                SELECTED_CELL_STYLE
               )}
             >
               <OptionalTreeCell
@@ -715,11 +739,14 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
         ref={scroll.bindScrollBox}
         style={{ width: "100%", ...scroll.boxStyle }}
       >
+        <style>{PIN_HOVER_CSS}</style>
         <Table
           data-adapttable-part="table"
           {...tableProps}
           {...gridProps}
-          className={className}
+          className={
+            className ? `${PIN_HOVER_CLASS} ${className}` : PIN_HOVER_CLASS
+          }
           highlightOnHover
           verticalSpacing={verticalSpacing}
           horizontalSpacing={horizontalSpacing}

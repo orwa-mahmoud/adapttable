@@ -138,6 +138,15 @@ describe("unstyled SavedViewsMenu", () => {
     expect(panel()).toBeNull();
   });
 
+  it("draws no divider while there is no view above it", () => {
+    renderMenu();
+    fireEvent.click(trigger());
+    expect(panel()).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-adapttable-part="views-divider"]')
+    ).toBeNull();
+  });
+
   it("exposes every part's className hook", () => {
     renderMenu({
       views: [{ name: "Alpha", search: "q=a" }],

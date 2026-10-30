@@ -1,14 +1,18 @@
 {
   "name": "@adapttable/angular-aria",
   "version": "0.2.7",
-  "description": "Angular Aria accessible composite controls and adapter-owned styling for AdaptTable",
+  "description": "Angular Aria accessible composite controls and adapter-owned styling for AdaptTable — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "angular-aria",
     "data-table",
     "accessible",
     "headless",
-    "adapttable"
+    "adapttable",
+    "table",
+    "angular-table",
+    "datagrid",
+    "typescript"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",

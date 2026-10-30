@@ -100,6 +100,13 @@ describe("SavedViewsMenu (MUI)", () => {
     expect(trigger()).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("draws the divider only once a view is listed above it", () => {
+    mountMenu("t.q=ali");
+    expect(document.querySelector(".MuiDivider-root")).toBeNull();
+    saveAs("Mine");
+    expect(document.querySelector(".MuiDivider-root")).not.toBeNull();
+  });
+
   it("applies a saved view back onto the adapter and closes the popover", () => {
     const { adapter } = mountMenu("t.q=ali&other.q=keep");
     saveAs("Mine");

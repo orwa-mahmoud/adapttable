@@ -90,4 +90,27 @@ describe("useFilterTreeChips", () => {
     result.current[0]?.onRemove();
     expect(setFilterTree).toHaveBeenCalledWith(undefined);
   });
+
+  it("shows no chip for a condition still waiting for its value", () => {
+    const { result } = renderHook(() =>
+      useFilterTreeChips({
+        tree: {
+          combinator: "or",
+          conditions: [
+            { key: "name", op: "eq", value: "Ada" },
+            { key: "name", op: "contains" },
+            { key: "name", op: "empty" },
+          ],
+        },
+        defs: DEFS,
+        labels: defaultLabels,
+        setFilterTree: vi.fn(),
+      })
+    );
+    // The finished condition and the valueless "is empty" keep their chips.
+    expect(result.current.map((chip) => chip.label)).toEqual([
+      "Person Equal Ada",
+      expect.stringContaining("Person"),
+    ]);
+  });
 });

@@ -31,6 +31,7 @@ import { createPortal } from "react-dom";
 import { cx } from "../cx";
 import type { DataTableClassNames } from "../types";
 import { MENU_PANEL_STYLE, useMenuPopover } from "./menuPopover";
+import { usePortalContainer } from "./portalContainer";
 
 const NOOP_RENAME = () => undefined;
 
@@ -493,6 +494,7 @@ export function ColumnMenu<TRow>({
   sortDir,
   dir,
 }: Readonly<ColumnMenuProps<TRow>>) {
+  const portalContainer = usePortalContainer();
   const drag = useColumnDragState();
   const { open, setOpen, rootRef, triggerRef, panelRef } = useMenuPopover();
   const [query, setQuery] = useState("");
@@ -631,7 +633,7 @@ export function ColumnMenu<TRow>({
               {labels.resetColumns}
             </button>
           </fieldset>,
-          document.body
+          portalContainer ?? document.body
         )}
     </div>
   );

@@ -48,6 +48,7 @@ import type { ReactNode } from "react";
 
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
+import { FullscreenPortals } from "./components/FullscreenPortals";
 import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
@@ -274,227 +275,230 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
           <FeatureHostProvider host={shell.featureHost}>
             <ContextMenuLiveGate props={contextMenuLive}>
               {(regionProps) => (
-                <Paper
-                  ref={rootRef}
-                  {...regionProps}
-                  variant="outlined"
-                  dir={props.dir}
-                  className={
-                    [className, classNames?.root].filter(Boolean).join(" ") ||
-                    undefined
-                  }
-                  aria-busy={c.isRefreshing || undefined}
-                  sx={{ p: 1.5 }}
-                >
-                  <FeatureSlot
-                    slot={GRID_FOCUS_ANNOUNCER}
-                    props={{ focus: view.gridFocus }}
-                  />
-                  <TableStatusAnnouncer
-                    announcement={shell.statusAnnouncement}
-                  />
-                  {view.tableProps.rowReorder ? (
+                <FullscreenPortals container={view.fullscreen.container}>
+                  <Paper
+                    ref={rootRef}
+                    {...regionProps}
+                    variant="outlined"
+                    dir={props.dir}
+                    className={
+                      [className, classNames?.root].filter(Boolean).join(" ") ||
+                      undefined
+                    }
+                    aria-busy={c.isRefreshing || undefined}
+                    sx={{ p: 1.5 }}
+                  >
                     <FeatureSlot
-                      slot={ROW_REORDER_ANNOUNCER}
-                      props={{
-                        announcement: view.tableProps.rowReorder.announcement,
-                      }}
+                      slot={GRID_FOCUS_ANNOUNCER}
+                      props={{ focus: view.gridFocus }}
                     />
-                  ) : null}
-                  <FeatureSlot
-                    slot={FIND_BAR}
-                    props={{ find: view.find, labels }}
-                  />
-                  <Stack spacing={1.5}>
-                    <Box
-                      data-adapttable-part="toolbar"
-                      ref={stickyBar.toolbarRef}
-                      className={classNames?.toolbar}
-                      sx={
-                        stickyBar.toolbarStyle
-                          ? {
-                              position: "sticky",
-                              top: stickyBar.toolbarStyle.top,
-                              zIndex: 3,
-                              bgcolor: "background.paper",
-                              pb: 1.5,
-                            }
-                          : undefined
-                      }
-                    >
-                      <Toolbar
-                        {...toolbarProps}
-                        savedViewsMenu={savedViewsMenu}
-                        filtersMode={filtersMode}
-                        filtersOpen={filtersOpen}
-                        onToggleFilters={filtersTrigger.onClick}
-                        onFiltersTriggerPointerDown={
-                          filtersTrigger.onPointerDown
-                        }
-                        onCloseFilters={() => setFiltersOpen(false)}
-                        columnMenu={columnMenu}
-                      />
-                    </Box>
-                    {c.isRefreshing && (
-                      <LinearProgress aria-label={labels.loading} />
-                    )}
-                    <FeatureSlot
-                      slot={ACTIVE_FILTER_CHIPS}
-                      props={{
-                        chips: view.chrome.mergedChips,
-                        onClearAll: c.clearFilters,
-                        labels,
-                      }}
+                    <TableStatusAnnouncer
+                      announcement={shell.statusAnnouncement}
                     />
-                    {view.chrome.editing?.batch && (
+                    {view.tableProps.rowReorder ? (
                       <FeatureSlot
-                        slot={BATCH_EDIT_BAR}
+                        slot={ROW_REORDER_ANNOUNCER}
                         props={{
-                          batch: view.chrome.editing.batch,
-                          contested: view.chrome.editing.conflict?.anyContested,
-                          labels,
-                        }}
-                      />
-                    )}
-                    <FeatureSlot
-                      slot={AGENT_APPROVAL}
-                      props={{ pending: approval, labels }}
-                    />
-
-                    {table.selection && props.bulkActions ? (
-                      <FeatureSlot
-                        slot={BULK_BAR}
-                        props={{
-                          selection: table.selection,
-                          total: viewSource.total,
-                          bulkActions: props.bulkActions,
-                          confirm,
-                          labels,
+                          announcement: view.tableProps.rowReorder.announcement,
                         }}
                       />
                     ) : null}
                     <FeatureSlot
-                      slot={COMMAND_PALETTE_LIVE}
-                      props={{
-                        commandPalette: props.commandPalette,
-                        labels,
-                        onPrint: props.onPrint,
-                        onExport: view.toolbarProps.onExportCsv,
-                        exportLabel: view.toolbarProps.exportLabel,
-                        onClearFilters: c.clearFilters,
-                        hasFilters: c.activeFilterCount > 0,
-                        featureHost: shell.featureHost,
-                      }}
+                      slot={FIND_BAR}
+                      props={{ find: view.find, labels }}
                     />
-                    {view.groupingPanelProps ? (
-                      <FeatureSlot
-                        slot={GROUPING_PANEL}
-                        props={
-                          view.groupingPanelProps as GroupingPanelSlotProps<never>
+                    <Stack spacing={1.5}>
+                      <Box
+                        data-adapttable-part="toolbar"
+                        ref={stickyBar.toolbarRef}
+                        className={classNames?.toolbar}
+                        sx={
+                          stickyBar.toolbarStyle
+                            ? {
+                                position: "sticky",
+                                top: stickyBar.toolbarStyle.top,
+                                zIndex: 3,
+                                bgcolor: "background.paper",
+                                pb: 1.5,
+                              }
+                            : undefined
                         }
-                      />
-                    ) : null}
-                    <OptionalSidePanel
-                      side={props.sidePanel?.side}
-                      body={
-                        <>
-                          {c.errorState
-                            ? (fillSlot(slots?.error, c.errorState) ?? (
-                                <ErrorState
-                                  error={c.errorState.error}
-                                  labels={labels}
-                                  onRetry={c.errorState.retry}
-                                />
-                              ))
-                            : body}
-                        </>
-                      }
-                      panel={
-                        props.sidePanel?.open != null && (
-                          <FeatureSlot
-                            slot={SIDE_PANEL}
-                            props={{
-                              panels: props.sidePanel.panels,
-                              openPanel: props.sidePanel.open,
-                              onOpenPanel: props.sidePanel.onOpenChange,
-                              onClose: () => {
-                                props.sidePanel?.onOpenChange(null);
-                              },
-                              side: props.sidePanel.side,
-                              labels,
-                            }}
-                          />
-                        )
-                      }
-                    />
-                    {canLoadMore && viewSource.hasNextPage && (
-                      <Box
-                        ref={loadMoreRef}
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          py: 1,
-                        }}
                       >
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          disabled={viewSource.isFetchingNextPage}
-                          onClick={() => viewSource.fetchNextPage()}
-                        >
-                          {labels.loadMore}
-                        </Button>
-                      </Box>
-                    )}
-                    <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
-                    {c.showFooter && (
-                      <Box
-                        data-adapttable-part="footer"
-                        className={classNames?.footer}
-                      >
-                        <Footer
-                          pagination={table.pagination}
-                          total={viewSource.total}
-                          limit={viewSource.limit}
-                          defaultLimit={viewSource.defaultLimit}
-                          setPage={viewSource.setPage}
-                          setLimit={viewSource.setLimit}
-                          labels={labels}
-                          showRowsPerPage={!view.chrome.grouping}
+                        <Toolbar
+                          {...toolbarProps}
+                          savedViewsMenu={savedViewsMenu}
+                          filtersMode={filtersMode}
+                          filtersOpen={filtersOpen}
+                          onToggleFilters={filtersTrigger.onClick}
+                          onFiltersTriggerPointerDown={
+                            filtersTrigger.onPointerDown
+                          }
+                          onCloseFilters={() => setFiltersOpen(false)}
+                          columnMenu={columnMenu}
                         />
                       </Box>
+                      {c.isRefreshing && (
+                        <LinearProgress aria-label={labels.loading} />
+                      )}
+                      <FeatureSlot
+                        slot={ACTIVE_FILTER_CHIPS}
+                        props={{
+                          chips: view.chrome.mergedChips,
+                          onClearAll: c.clearFilters,
+                          labels,
+                        }}
+                      />
+                      {view.chrome.editing?.batch && (
+                        <FeatureSlot
+                          slot={BATCH_EDIT_BAR}
+                          props={{
+                            batch: view.chrome.editing.batch,
+                            contested:
+                              view.chrome.editing.conflict?.anyContested,
+                            labels,
+                          }}
+                        />
+                      )}
+                      <FeatureSlot
+                        slot={AGENT_APPROVAL}
+                        props={{ pending: approval, labels }}
+                      />
+
+                      {table.selection && props.bulkActions ? (
+                        <FeatureSlot
+                          slot={BULK_BAR}
+                          props={{
+                            selection: table.selection,
+                            total: viewSource.total,
+                            bulkActions: props.bulkActions,
+                            confirm,
+                            labels,
+                          }}
+                        />
+                      ) : null}
+                      <FeatureSlot
+                        slot={COMMAND_PALETTE_LIVE}
+                        props={{
+                          commandPalette: props.commandPalette,
+                          labels,
+                          onPrint: props.onPrint,
+                          onExport: view.toolbarProps.onExportCsv,
+                          exportLabel: view.toolbarProps.exportLabel,
+                          onClearFilters: c.clearFilters,
+                          hasFilters: c.activeFilterCount > 0,
+                          featureHost: shell.featureHost,
+                        }}
+                      />
+                      {view.groupingPanelProps ? (
+                        <FeatureSlot
+                          slot={GROUPING_PANEL}
+                          props={
+                            view.groupingPanelProps as GroupingPanelSlotProps<never>
+                          }
+                        />
+                      ) : null}
+                      <OptionalSidePanel
+                        side={props.sidePanel?.side}
+                        body={
+                          <>
+                            {c.errorState
+                              ? (fillSlot(slots?.error, c.errorState) ?? (
+                                  <ErrorState
+                                    error={c.errorState.error}
+                                    labels={labels}
+                                    onRetry={c.errorState.retry}
+                                  />
+                                ))
+                              : body}
+                          </>
+                        }
+                        panel={
+                          props.sidePanel?.open != null && (
+                            <FeatureSlot
+                              slot={SIDE_PANEL}
+                              props={{
+                                panels: props.sidePanel.panels,
+                                openPanel: props.sidePanel.open,
+                                onOpenPanel: props.sidePanel.onOpenChange,
+                                onClose: () => {
+                                  props.sidePanel?.onOpenChange(null);
+                                },
+                                side: props.sidePanel.side,
+                                labels,
+                              }}
+                            />
+                          )
+                        }
+                      />
+                      {canLoadMore && viewSource.hasNextPage && (
+                        <Box
+                          ref={loadMoreRef}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            py: 1,
+                          }}
+                        >
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            disabled={viewSource.isFetchingNextPage}
+                            onClick={() => viewSource.fetchNextPage()}
+                          >
+                            {labels.loadMore}
+                          </Button>
+                        </Box>
+                      )}
+                      <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
+                      {c.showFooter && (
+                        <Box
+                          data-adapttable-part="footer"
+                          className={classNames?.footer}
+                        >
+                          <Footer
+                            pagination={table.pagination}
+                            total={viewSource.total}
+                            limit={viewSource.limit}
+                            defaultLimit={viewSource.defaultLimit}
+                            setPage={viewSource.setPage}
+                            setLimit={viewSource.setLimit}
+                            labels={labels}
+                            showRowsPerPage={!view.chrome.grouping}
+                          />
+                        </Box>
+                      )}
+                    </Stack>
+                    {filtersNode && filtersMode === "drawer" && (
+                      <FeatureSlot
+                        slot={FILTER_DRAWER}
+                        props={{
+                          open: filtersOpen,
+                          onClose: () => setFiltersOpen(false),
+                          filters: filtersNode,
+                          activeFilterCount: c.activeFilterCount,
+                          onClearFilters: c.clearFilters,
+                          labels,
+                          dir: props.dir,
+                        }}
+                      />
                     )}
-                  </Stack>
-                  {filtersNode && filtersMode === "drawer" && (
                     <FeatureSlot
-                      slot={FILTER_DRAWER}
+                      slot={STATUS_BAR}
                       props={{
-                        open: filtersOpen,
-                        onClose: () => setFiltersOpen(false),
-                        filters: filtersNode,
-                        activeFilterCount: c.activeFilterCount,
-                        onClearFilters: c.clearFilters,
+                        enabled: props.statusBar === true,
+                        notices: c.featureNotices,
+                        shown: shell.source.rows.length,
+                        page: shell.source.page,
+                        limit: shell.source.limit,
+                        total: shell.source.total,
+                        selected: table.selection?.selectedCount ?? 0,
+                        stats: view.selectionStats,
                         labels,
-                        dir: props.dir,
+                        locale: props.locale,
                       }}
                     />
-                  )}
-                  <FeatureSlot
-                    slot={STATUS_BAR}
-                    props={{
-                      enabled: props.statusBar === true,
-                      notices: c.featureNotices,
-                      shown: shell.source.rows.length,
-                      page: shell.source.page,
-                      limit: shell.source.limit,
-                      total: shell.source.total,
-                      selected: table.selection?.selectedCount ?? 0,
-                      stats: view.selectionStats,
-                      labels,
-                      locale: props.locale,
-                    }}
-                  />
-                </Paper>
+                  </Paper>
+                </FullscreenPortals>
               )}
             </ContextMenuLiveGate>
           </FeatureHostProvider>

@@ -1,14 +1,18 @@
 {
   "name": "@adapttable/angular-material",
   "version": "0.2.7",
-  "description": "AdaptTable's Angular DataTable rendered with Angular Material components.",
+  "description": "AdaptTable's Angular DataTable rendered with Angular Material components — sorting, filters, editing, grouping, column pinning, responsive cards, URL state and RTL.",
   "keywords": [
     "angular",
     "data-table",
     "table",
     "angular-material",
     "headless",
-    "adapttable"
+    "adapttable",
+    "material",
+    "angular-table",
+    "datagrid",
+    "typescript"
   ],
   "license": "MIT",
   "author": "Orwa Mahmoud",
