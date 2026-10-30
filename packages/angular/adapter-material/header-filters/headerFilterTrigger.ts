@@ -60,6 +60,7 @@ import { MatButtonModule } from "@angular/material/button";
         (click)="overlay.setOpen(!overlay.open())"
         style="list-style: none; cursor: pointer; display: inline-flex; align-items: center; padding: 2px"
         [attr.aria-label]="caption()"
+        aria-haspopup="dialog"
         [attr.data-active]="active() ? '' : null"
       >
         <svg [adaptIcon]="icon"></svg>
@@ -71,6 +72,8 @@ import { MatButtonModule } from "@angular/material/button";
           (dismiss)="overlay.setOpen(false)"
         >
           <div
+            role="dialog"
+            [attr.aria-label]="caption()"
             data-adapttable-part="filter-header-cell"
             [attr.data-adapttable-header-filter]="overlay.sessionId"
             style="min-width: min(20rem, calc(100vw - 48px))"
