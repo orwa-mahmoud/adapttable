@@ -1562,6 +1562,15 @@ function theadComponent(
   };
 }
 
+/**
+ * A pinned row sticks while the rest scroll beneath it, and antd paints its
+ * cells transparent over the table's surface, so the scrolled rows would show
+ * through. antd owns the `<td>`s; this paints a pinned row's cells with the
+ * container colour, and antd's own hover and selection rules, which are more
+ * specific, still tint them.
+ */
+const PINNED_ROW_CSS = `[data-adapttable-part="root"] tr[data-row-pin] > td{background:var(--ant-color-bg-container,#fff)}`;
+
 function TheadRow(props: Readonly<HTMLAttributes<HTMLTableRowElement>>) {
   return <tr data-adapttable-part="header-row" {...props} />;
 }
@@ -2577,6 +2586,7 @@ function AntdTableBody<TRow>({
                   }
                   aria-busy={c.isRefreshing || undefined}
                 >
+                  <style>{PINNED_ROW_CSS}</style>
                   <FeatureSlot
                     slot={GRID_FOCUS_ANNOUNCER}
                     props={{ focus: gridFocus }}

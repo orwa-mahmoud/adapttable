@@ -72,6 +72,34 @@ describe("row pinning (antd)", () => {
     expect(part("pinned-bottom")).toHaveAttribute("data-row-pin", "bottom");
   });
 
+  it("paints every cell of a pinned row so scrolled rows cannot show through", () => {
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        pinnedRowIds={{ top: ["1"], bottom: ["3"] }}
+        onPinnedRowIdsChange={vi.fn()}
+      />
+    );
+    // jsdom resolves no var() colours, so this checks the rule and its reach.
+    const rule = [...part("root")!.querySelectorAll("style")]
+      .map((style) => style.textContent ?? "")
+      .find((text) => text.includes("tr[data-row-pin] > td"));
+    expect(rule).toContain("background:var(--ant-color-bg-container");
+    const selector = rule!.slice(0, rule!.indexOf("{"));
+    for (const name of ["pinned-top", "pinned-bottom"]) {
+      const cells = [...part(name)!.querySelectorAll("td")];
+      expect(cells.length).toBeGreaterThan(0);
+      for (const cell of cells) expect(cell.matches(selector)).toBe(true);
+    }
+    const scrolling = part("tbody")!.querySelector(
+      "tr.ant-table-row:not([data-row-pin]) td"
+    )!;
+    expect(scrolling.matches(selector)).toBe(false);
+  });
+
   it("offers pin actions on cards with no sticky chrome", () => {
     const onPinnedRowIdsChange = vi.fn();
     render(
