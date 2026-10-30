@@ -41,6 +41,26 @@ describe("pinned summary rows (shadcn)", () => {
     expect(part("pinned-summary-bottom")).toBeNull();
   });
 
+  it("sets totals apart from the people rows", () => {
+    render(
+      <DataTable
+        data={ROWS}
+        columns={COLS}
+        rowKey={(r) => r.id}
+        urlSync={false}
+        features={[pinnedSummaryRows({ top: [TOP], bottom: [BOTTOM] })]}
+      />
+    );
+    // The preset's variant targets cells inside each pinned summary section.
+    for (const name of ["pinned-summary-top", "pinned-summary-bottom"]) {
+      const cell = part(name)?.querySelector("td[data-column-key=title]");
+      expect(cell?.className).toContain(
+        `[[data-adapttable-part=${name}]_&]:font-semibold`
+      );
+      expect(cell?.closest(`[data-adapttable-part="${name}"]`)).not.toBeNull();
+    }
+  });
+
   it("sticks host objects above and below the scroll body", () => {
     render(
       <DataTable
