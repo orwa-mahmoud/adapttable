@@ -831,3 +831,76 @@ describe("createIncrementalView — localized sort", () => {
     expect(arabic.sorted.map(idOf)).toEqual(["2", "1"]);
   });
 });
+
+describe("group cells from aggregateSpec", () => {
+  interface Score {
+    id: string;
+    team: string;
+    v: number;
+  }
+  const scores: Score[] = [
+    { id: "a", team: "x", v: 1 },
+    { id: "b", team: "x", v: 2 },
+    { id: "c", team: "y", v: 5 },
+  ];
+  const config: IncrementalViewConfig<Score> = {
+    getRowId: (row) => row.id,
+    columns: [{ key: "v" }, { key: "team" }],
+    groupBy: "team",
+    aggregateSpec: { v: "sum" },
+  };
+  const totals = (view: IncrementalView<Score>) =>
+    Object.fromEntries(
+      (view.groups ?? []).flatMap((entry) =>
+        entry.kind === "group" ? [[entry.key, entry.aggregateCells]] : []
+      )
+    );
+
+  it("draws each group's totals on the first build, after a patch and after a rebuild", () => {
+    const initial = createIncrementalView(scores, config);
+    expect(totals(initial)).toEqual({
+      "group:team:s:x": { v: 3 },
+      "group:team:s:y": { v: 5 },
+    });
+
+    const patched = applyRowPatchesToView(initial, [
+      updateRow<Score>("a", { v: 10 }),
+    ]);
+    expect(totals(patched)).toEqual({
+      "group:team:s:x": { v: 12 },
+      "group:team:s:y": { v: 5 },
+    });
+
+    expect(totals(createIncrementalView(patched.rows, config))).toEqual(
+      totals(patched)
+    );
+  });
+
+  it("recomputes the totals when the aggregate changes", () => {
+    const view = configureIncrementalView(
+      createIncrementalView(scores, config),
+      {
+        aggregateSpec: { v: "min" },
+      }
+    );
+    expect(totals(view)).toEqual({
+      "group:team:s:x": { v: 1 },
+      "group:team:s:y": { v: 5 },
+    });
+  });
+
+  it("keeps the host's groupAggregates ahead of aggregateSpec", () => {
+    const initial = createIncrementalView(scores, {
+      ...config,
+      groupAggregates: (rows) => ({ v: `${String(rows.length)} rows` }),
+    });
+    expect(totals(initial)).toEqual({
+      "group:team:s:x": { v: "2 rows" },
+      "group:team:s:y": { v: "1 rows" },
+    });
+    const patched = applyRowPatchesToView(initial, [
+      updateRow<Score>("a", { v: 10 }),
+    ]);
+    expect(totals(patched)).toEqual(totals(initial));
+  });
+});
