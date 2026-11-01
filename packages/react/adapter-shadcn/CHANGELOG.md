@@ -1,5 +1,12 @@
 # @adapttable/shadcn
 
+## 3.4.4
+
+### Patch Changes
+
+- @adapttable/unstyled@3.4.4
+  - @adapttable/react@1.9.1
+
 ## 3.4.3
 
 ### Patch Changes

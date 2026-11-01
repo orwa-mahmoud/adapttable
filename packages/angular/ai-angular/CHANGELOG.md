@@ -1,5 +1,12 @@
 # @adapttable/ai-angular
 
+## 0.1.10
+
+### Patch Changes
+
+- @adapttable/angular@0.8.1
+  - @adapttable/ai@0.6.6
+
 ## 0.1.9
 
 ### Patch Changes

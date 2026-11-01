@@ -1,5 +1,11 @@
 # @adapttable/core
 
+## 3.13.1
+
+### Patch Changes
+
+- 7dee39f: Grouped rows show their `aggregateSpec` totals from the first render, matching the totals a row update produces. A custom `groupAggregates` still takes precedence.
+
 ## 3.13.0
 
 ### Minor Changes

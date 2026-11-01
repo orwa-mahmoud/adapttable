@@ -1,5 +1,11 @@
 # @adapttable/nuxt-ui
 
+## 0.3.4
+
+### Patch Changes
+
+- @adapttable/vue@0.4.1
+
 ## 0.3.3
 
 ### Patch Changes

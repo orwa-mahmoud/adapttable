@@ -1,5 +1,12 @@
 # @adapttable/ai-vue
 
+## 0.1.8
+
+### Patch Changes
+
+- @adapttable/ai@0.6.6
+  - @adapttable/vue@0.4.1
+
 ## 0.1.7
 
 ### Patch Changes
