@@ -117,3 +117,54 @@ for (const kit of builtAdapters("angular")) {
     });
   }
 }
+
+for (const kit of builtAdapters("angular")) {
+  test(`${kit.key}: a column's grip starts a drag under the mouse`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(`/${pathOf(kit)}/columns/`);
+    await page
+      .getByRole("button", { name: getLabels("en").columns, exact: true })
+      .click();
+    const grips = page.locator(
+      '[data-adapttable-part="column-menu-item"]:visible [data-adapttable-grip]'
+    );
+    await expect(grips.nth(1)).toBeVisible();
+    // The row re-renders once the drag lifts, so the record lives on the
+    // document rather than on the row.
+    await page.evaluate(() => {
+      document.addEventListener(
+        "dragstart",
+        (event) => {
+          const from =
+            event.target instanceof Element
+              ? event.target.closest("[data-adapttable-part]")
+              : null;
+          document.documentElement.dataset.dragFrom =
+            from?.getAttribute("data-adapttable-part") ?? "";
+        },
+        { capture: true }
+      );
+    });
+    // A kit may slide its menu into place; aim where the grip settles.
+    let box = await grips.nth(1).boundingBox();
+    await expect
+      .poll(async () => {
+        const next = await grips.nth(1).boundingBox();
+        const settled = JSON.stringify(next) === JSON.stringify(box);
+        box = next;
+        return settled;
+      })
+      .toBe(true);
+    expect(box).not.toBeNull();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y - 40, { steps: 10 });
+    await page.mouse.up();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-drag-from",
+      "column-menu-item"
+    );
+  });
+}
