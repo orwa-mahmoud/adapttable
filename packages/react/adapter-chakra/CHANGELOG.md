@@ -1,5 +1,13 @@
 # @adapttable/chakra
 
+## 3.3.12
+
+### Patch Changes
+
+- Updated dependencies [7dee39f]
+  - @adapttable/core@3.13.1
+  - @adapttable/react@1.9.1
+
 ## 3.3.11
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @adapttable/react
 
+## 1.9.1
+
+### Patch Changes
+
+- Updated dependencies [7dee39f]
+  - @adapttable/core@3.13.1
+
 ## 1.9.0
 
 ### Minor Changes

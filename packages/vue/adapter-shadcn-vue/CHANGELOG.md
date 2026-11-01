@@ -1,5 +1,11 @@
 # @adapttable/shadcn-vue
 
+## 0.2.3
+
+### Patch Changes
+
+- @adapttable/vue@0.4.1
+
 ## 0.2.2
 
 ### Patch Changes
