@@ -1029,7 +1029,7 @@ function groupFlattenOptions<TRow>(
     columns: config.columns ?? [],
     getRowId: config.getRowId,
     collapsedGroupIds: config.collapsedGroupIds ?? new Set(),
-    aggregates: skipAggregates ? undefined : config.groupAggregates,
+    aggregates: skipAggregates ? undefined : groupAggregator(config),
     aggregateOps: config.groupAggregateOps,
     blankLabel: config.blankLabel,
     footers: config.groupFooters === true,
@@ -1081,9 +1081,22 @@ function groupCellsFrom<TRow>(
   config: IncrementalViewConfig<TRow>,
   rows: readonly TRow[]
 ): Partial<Record<string, DisplayValue>> | undefined {
-  if (config.groupAggregates) return config.groupAggregates(rows);
+  return groupAggregator(config)?.(rows);
+}
+
+/**
+ * What a group's cells are computed with: the host's `groupAggregates`, else
+ * the built-in `aggregateSpec`. The first build and every patch read the same
+ * one, so a group's totals never depend on how the view was reached.
+ */
+function groupAggregator<TRow>(
+  config: IncrementalViewConfig<TRow>
+):
+  | ((rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>)
+  | undefined {
+  if (config.groupAggregates) return config.groupAggregates;
   if (config.aggregateSpec) {
-    return aggregate(config.aggregateSpec, config.aggregateOptions)(rows);
+    return aggregate(config.aggregateSpec, config.aggregateOptions);
   }
   return undefined;
 }
