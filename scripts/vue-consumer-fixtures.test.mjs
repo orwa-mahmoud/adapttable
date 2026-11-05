@@ -37,15 +37,16 @@ describe("packed Vue consumers", () => {
     for (const entry of vue) {
       assert.equal(entry.kind, "vue-consumer");
       assert.ok(entry.functionality);
+      assert.equal(entry.initialKB, entry.totalKB);
       if (entry.hardBaseCeiling) {
-        assert.equal(entry.budgetKB, PLAIN_ADAPTER_CEILING_KB);
+        assert.equal(entry.totalKB, PLAIN_ADAPTER_CEILING_KB);
         assert.equal("item1BaselineKB" in entry, false);
       } else {
         const comparable = FIXTURES.find(
           (candidate) => candidate.name === entry.comparable
         );
         assert.ok(comparable);
-        assert.equal(entry.budgetKB, comparable.budgetKB);
+        assert.equal(entry.totalKB, comparable.initialKB);
       }
     }
     assert.throws(
@@ -65,7 +66,7 @@ describe("packed Vue consumers", () => {
     for (const spec of VUE_NATIVE_BASE_SPECS) {
       const entry = fixture(spec.name);
       assert.equal(entry.kit, spec.pkg.replace(/^adapter-/, ""));
-      assert.equal(entry.budgetKB, PLAIN_ADAPTER_CEILING_KB);
+      assert.equal(entry.totalKB, PLAIN_ADAPTER_CEILING_KB);
       assert.equal(entry.styleEntryFile, "styles.css");
       assert.equal(
         entry.code,
@@ -414,7 +415,8 @@ describe("optional Vue layout graphs", () => {
     assert.ok(surface);
     assert.equal(surface.entryFile, "adapter.js");
     assert.equal(surface.code, 'export { DataTableSurfaceChrome } from "PKG";');
-    assert.equal("budgetKB" in surface, false);
+    assert.equal("initialKB" in surface, false);
+    assert.equal("totalKB" in surface, false);
     assert.deepEqual(
       vueGraphProblems(surface, {
         code: "function DataTableSurfaceChrome() {}",

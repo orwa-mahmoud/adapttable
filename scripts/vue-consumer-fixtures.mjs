@@ -221,12 +221,18 @@ export function vueConsumerFixtures(comparables, hardBaseCeiling) {
     );
     if (!spec.hardBaseCeiling && !comparable)
       throw new Error(`Missing comparable Vue budget: ${spec.comparable}`);
+    // These ceilings have always held every emitted file, so they are total
+    // ceilings; the initial share is a subset held to the same number.
+    const ceilingKB = spec.hardBaseCeiling
+      ? hardBaseCeiling
+      : comparable.initialKB;
     return {
       ...spec,
       framework: "vue",
       kind: "vue-consumer",
       kit: spec.pkg === "vue" ? undefined : spec.pkg.replace(/^adapter-/, ""),
-      budgetKB: spec.hardBaseCeiling ? hardBaseCeiling : comparable.budgetKB,
+      initialKB: ceilingKB,
+      totalKB: ceilingKB,
     };
   });
 }

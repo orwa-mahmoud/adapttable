@@ -112,12 +112,20 @@ function adapterOf(kit) {
   return ADAPTERS.find((adapter) => adapter.kit === kit);
 }
 
+/**
+ * Ceilings, in KiB of gzip. `initialKB` holds what loading the entries costs:
+ * these React and core fixtures held exactly that scope before every emitted
+ * file was counted. `totalKB` adds everything behind a dynamic import. On
+ * 2026-11-05 every one of them except the lazy PDF case emitted a single file,
+ * so its total ceiling is its initial ceiling.
+ */
 const CORE_FIXTURES = [
   {
     name: "core · simple table",
     kind: "core",
     pkg: "core",
-    budgetKB: 20,
+    initialKB: 20,
+    totalKB: 20,
     code: `export { createTableEngine } from "PKG";`,
     present: ["createTableEngine"],
     absent: [
@@ -128,6 +136,18 @@ const CORE_FIXTURES = [
       "useRowPatchStream",
       "grouping-drop-zone",
     ],
+  },
+  {
+    name: "core · engine + lazy pdf",
+    kind: "core",
+    pkg: "core",
+    alsoEntryFile: "pdf.js",
+    // The engine's own initial ceiling. The writer arrives through a dynamic
+    // import: 20.8 KiB total on 2026-11-05, held with ~15% headroom.
+    initialKB: 20,
+    totalKB: 24,
+    code: `export { createTableEngine } from "PKG";\nexport const loadPdf = () => import("ALSO");`,
+    present: ["createTableEngine", "pdfWriter"],
   },
   {
     name: "core · every export",
@@ -142,7 +162,8 @@ const CORE_FIXTURES = [
     // filter trees, batch change marks, content-sized XLSX columns and pinned
     // edge marks bring it to 101.2 KB (2026-10-30). The simple core table and
     // the hard plain-adapter ceiling stay as they are.
-    budgetKB: 102,
+    initialKB: 102,
+    totalKB: 102,
     code: `export * from "PKG";`,
     absent: ["useRowPatchStream", "grouping-drop-zone"],
   },
@@ -151,7 +172,8 @@ const CORE_FIXTURES = [
     kind: "core",
     pkg: "core",
     entryFile: "pivot.js",
-    budgetKB: 5,
+    initialKB: 5,
+    totalKB: 5,
     code: `export { pivot } from "PKG";`,
   },
   {
@@ -159,7 +181,8 @@ const CORE_FIXTURES = [
     kind: "core",
     pkg: "core",
     entryFile: "formula.js",
-    budgetKB: 6,
+    initialKB: 6,
+    totalKB: 6,
     code: `export { buildFormulaColumns } from "PKG";`,
   },
   {
@@ -167,7 +190,8 @@ const CORE_FIXTURES = [
     kind: "core",
     pkg: "core",
     entryFile: "stream.js",
-    budgetKB: 5,
+    initialKB: 5,
+    totalKB: 5,
     code: `export { openRowPatchStream, parseRowPatchFrame } from "PKG";`,
     absent: ["useState", "useRowPatchStream"],
   },
@@ -176,7 +200,8 @@ const CORE_FIXTURES = [
     kind: "core",
     pkg: "core",
     entryFile: "query.js",
-    budgetKB: 1,
+    initialKB: 1,
+    totalKB: 1,
     code: `export { parseFilterTree, deserializePivot, deserializeFormulaColumns } from "PKG";`,
     absent: [
       "useState",
@@ -193,7 +218,8 @@ const CORE_FIXTURES = [
     // Declared filters, filter-type checks, the typed filter tree and
     // grouping keys all run inside parseTableQuery, so a column-list caller
     // carries them too.
-    budgetKB: 5,
+    initialKB: 5,
+    totalKB: 5,
     code: `export { parseTableQuery } from "PKG";`,
     absent: ["useState", "PIVOT_BLANK", "toCsv"],
   },
@@ -204,7 +230,8 @@ const REACT_FIXTURES = [
     name: "react · simple table",
     kind: "react",
     pkg: "react",
-    budgetKB: 35,
+    initialKB: 35,
+    totalKB: 35,
     code: `export { useFrontendData, useDataTable } from "PKG";`,
     present: ["useDataTable", "useFrontendData"],
     absent: ["grouping-drop-zone"],
@@ -214,7 +241,8 @@ const REACT_FIXTURES = [
     kind: "react",
     pkg: "react",
     entryFile: "features.js",
-    budgetKB: 16,
+    initialKB: 16,
+    totalKB: 16,
     code: `export { groupingPanel } from "PKG";`,
     present: ["groupingPanel"],
   },
@@ -223,7 +251,8 @@ const REACT_FIXTURES = [
     kind: "react",
     pkg: "react",
     entryFile: "pivot.js",
-    budgetKB: 8,
+    initialKB: 8,
+    totalKB: 8,
     code: `export { pivotTableModel } from "PKG";`,
   },
   {
@@ -231,7 +260,8 @@ const REACT_FIXTURES = [
     kind: "react",
     pkg: "react",
     entryFile: "stream.js",
-    budgetKB: 6,
+    initialKB: 6,
+    totalKB: 6,
     code: `export { useRowPatchStream } from "PKG";`,
     present: ["useRowPatchStream"],
   },
@@ -243,7 +273,8 @@ function adapterBaseFixtures() {
     kind: "adapter-base",
     kit,
     pkg,
-    budgetKB: PLAIN_ADAPTER_CEILING_KB,
+    initialKB: adapterAcceptanceKB(kit),
+    totalKB: adapterAcceptanceKB(kit),
     item1BaselineKB: ITEM1_ADAPTER_BASELINE_KB[kit],
     code: `export { DataTable } from "PKG";`,
     absent: ADAPTER_ABSENT,
@@ -258,7 +289,8 @@ function presetFixtures() {
       kit,
       pkg,
       entryFile: "preset.js",
-      budgetKB: 150,
+      initialKB: 150,
+      totalKB: 150,
       code: `export { standardFeatures } from "PKG";`,
     },
     {
@@ -267,7 +299,8 @@ function presetFixtures() {
       kit,
       pkg,
       alsoEntryFile: "preset.js",
-      budgetKB: 160,
+      initialKB: 160,
+      totalKB: 160,
       code: `export { DataTable } from "PKG";\nexport { standardFeatures } from "ALSO";`,
     },
   ]);
@@ -285,7 +318,8 @@ function featureDeltaFixtures() {
       kit: DELTA_KIT,
       pkg,
       alsoEntryFile: `${subpath}.js`,
-      budgetKB: 160,
+      initialKB: 160,
+      totalKB: 160,
       code: namedImport
         ? `export { DataTable } from "PKG";\nexport { editing } from "ALSO";`
         : `export { DataTable } from "PKG";\nexport * from "ALSO";`,
@@ -304,7 +338,8 @@ function combinationFixtures() {
       kit: DELTA_KIT,
       pkg,
       alsoFiles: ["cell-navigation.js", "find-in-table.js", "editing.js"],
-      budgetKB: 180,
+      initialKB: 180,
+      totalKB: 180,
       code: `export { DataTable } from "PKG";\nexport * from "ALSO0";\nexport * from "ALSO1";\nexport * from "ALSO2";`,
       present: ["GRID_CELL_ATTR", "matchKeySet", "useTableEditHistory"],
       absent: absentExcept([
@@ -319,7 +354,8 @@ function combinationFixtures() {
       kit: DELTA_KIT,
       pkg,
       alsoFiles: ["filters.js", "grouping.js", "column-menu.js"],
-      budgetKB: 180,
+      initialKB: 180,
+      totalKB: 180,
       code: `export { DataTable } from "PKG";\nexport * from "ALSO0";\nexport * from "ALSO1";\nexport * from "ALSO2";`,
       present: [
         "useFilterTreeChips",
@@ -334,7 +370,8 @@ function combinationFixtures() {
       kit: DELTA_KIT,
       pkg,
       alsoFiles: ["export.js", "print.js"],
-      budgetKB: 180,
+      initialKB: 180,
+      totalKB: 180,
       code: `export { DataTable } from "PKG";\nexport * from "ALSO0";\nexport * from "ALSO1";`,
       present: ["buildExportTable"],
       absent: absentExcept(["buildExportTable"]),
@@ -350,7 +387,8 @@ function allFeatureFixture() {
     kit: DELTA_KIT,
     pkg,
     alsoEntryFile: "features.js",
-    budgetKB: 220,
+    initialKB: 220,
+    totalKB: 220,
     code: `export { DataTable } from "PKG";\nexport * from "ALSO";`,
   };
 }
@@ -365,10 +403,36 @@ const existingFixtures = [
   allFeatureFixture(),
 ];
 
-export const FIXTURES = [
+/**
+ * The stable `--case` ID of a fixture name: `mui · + export` → `mui-plus-export`.
+ * Names are already the keys published figures and comparables use.
+ */
+export function caseId(name) {
+  return name
+    .toLowerCase()
+    .replaceAll("+", " plus ")
+    .replaceAll(/[^a-z0-9]+/g, "-")
+    .replaceAll(/^-|-$/g, "");
+}
+
+function withCaseIds(fixtures) {
+  const seen = new Map();
+  return fixtures.map((fixture) => {
+    const id = caseId(fixture.name);
+    if (seen.has(id)) {
+      throw new Error(
+        `"${fixture.name}" and "${seen.get(id)}" share the case ID ${id}`
+      );
+    }
+    seen.set(id, fixture.name);
+    return { id, ...fixture };
+  });
+}
+
+export const FIXTURES = withCaseIds([
   ...existingFixtures,
   ...vueConsumerFixtures(existingFixtures, PLAIN_ADAPTER_CEILING_KB),
-];
+]);
 
 /**
  * A consumer that deliberately imports a live hook into an adapter root.

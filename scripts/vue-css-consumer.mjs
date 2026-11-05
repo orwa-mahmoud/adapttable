@@ -24,6 +24,7 @@ export async function buildVueCssConsumer(
     clean: false,
     write: false,
     report: false,
+    logLevel: "silent",
     sourcemap: false,
     minify,
     css: { splitting: false, fileName: "styles.css", inject: false, minify },

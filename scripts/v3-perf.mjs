@@ -1,5 +1,5 @@
 /**
- * v3 base-table performance — parse/build, first render, sort/page/search
+ * v3 base-table performance — bundler build, first render, sort/page/search
  * updates, and optional panel first-open.
  *
  * Smaller bytes must not buy a slower table, a layout shift, a hydration
@@ -65,8 +65,8 @@ async function measureParseBuild() {
       const fixture = FIXTURES.find((entry) => entry.name === name);
       const samples = [];
       for (let i = 0; i < 3; i++) {
-        const { parseMs } = await measure(fixture, dir);
-        samples.push(parseMs);
+        const { buildMs } = await measure(fixture, dir);
+        samples.push(buildMs);
       }
       parseBuildMs[name] = median(samples);
     }
@@ -279,7 +279,7 @@ function regressions(current, baseline) {
   );
   for (const name of PARSE_FIXTURES) {
     compare(
-      `parse ${name}`,
+      `bundler build ${name}`,
       current.parseBuildMs[name],
       baseline.parseBuildMs?.[name]
     );
@@ -304,7 +304,7 @@ try {
   const current = {
     measuredAt: new Date().toISOString().slice(0, 10),
     method:
-      "rolldown parse of packed adapter-root fixtures; Playwright against /tailwind/ for first render, sort, page, search and column-menu first-open. React and the kit stay external in the parse fixtures.",
+      "rolldown build time of packed adapter-root fixtures (bundler, not browser parse); Playwright against /tailwind/ for first render, sort, page, search and column-menu first-open. React and the kit stay external in the build fixtures.",
     parseBuildMs,
     ...interaction,
   };
@@ -313,7 +313,7 @@ try {
     console.log(JSON.stringify(current, null, 2));
   } else {
     console.log(
-      `parse/build  unstyled ${parseBuildMs["unstyled · table"]}ms  mui ${parseBuildMs["mui · table"]}ms  antd ${parseBuildMs["antd · table"]}ms`
+      `bundler build  unstyled ${parseBuildMs["unstyled · table"]}ms  mui ${parseBuildMs["mui · table"]}ms  antd ${parseBuildMs["antd · table"]}ms`
     );
     console.log(
       `first render ${current.firstRenderMs}ms  sort ${current.sortMs}ms  page ${current.pageMs}ms  search ${current.searchMs}ms  panel ${current.panelFirstOpenMs}ms  CLS ${current.cls}`

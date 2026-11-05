@@ -432,7 +432,10 @@ contracts (`TableSource`, `TableQueryParams`, capabilities) live in core.
 The promise is that features are opt-in, so the cost of a table is measured
 rather than asserted. `scripts/bundle-budget.mjs` bundles real consumer fixtures
 against the built packages — what npm ships, not the source — with React and the
-UI kits external, and holds each fixture to a written ceiling.
+UI kits external. Every emitted chunk and stylesheet is counted once, and each
+fixture is held to a written initial ceiling (the entries' static graph and
+styles) and total ceiling (everything behind a dynamic import as well).
+`--case <id>` measures only the named fixtures.
 
 A green total is not sufficient on its own: each fixture also names markers that
 must be **absent** from its graph, which is what distinguishes a feature that is
