@@ -430,12 +430,17 @@ contracts (`TableSource`, `TableQueryParams`, capabilities) live in core.
 ## Bundle cost
 
 The promise is that features are opt-in, so the cost of a table is measured
-rather than asserted. `scripts/bundle-budget.mjs` bundles real consumer fixtures
-against the built packages — what npm ships, not the source — with React and the
-UI kits external. Every emitted chunk and stylesheet is counted once, and each
-fixture is held to a written initial ceiling (the entries' static graph and
-styles) and total ceiling (everything behind a dynamic import as well).
-`--case <id>` measures only the named fixtures.
+rather than asserted. `scripts/bundle-budget.mjs` packs each package a run
+needs with `pnpm pack`, unpacks the tarballs into a scratch consumer that has no
+workspace to fall back on, and bundles real consumer fixtures through their
+public specifiers and `exports` maps — what npm ships, not the source — with
+React, Vue and the UI kits external. Every module the graph resolved is
+recorded and must come from a tarball. Every emitted chunk and stylesheet is
+counted once, and each fixture is held to a written initial ceiling (the
+entries' static graph and styles) and total ceiling (everything behind a
+dynamic import as well). Every fixture also type-checks against the packed
+declarations, and the query, stream and server entries run in Node with no
+framework installed. `--case <id>` measures only the named fixtures.
 
 A green total is not sufficient on its own: each fixture also names markers that
 must be **absent** from its graph, which is what distinguishes a feature that is

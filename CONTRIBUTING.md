@@ -137,10 +137,13 @@ Keep every package `"sideEffects": false`. A single module with a side effect
 defeats tree-shaking for everything that imports it, and the budget below is
 usually how you find out.
 
-`pnpm budget` (in `pnpm check` and in CI) bundles ten real consumer imports
-against the built packages and fails on two things: a fixture crossing its
-size ceiling, and a name reaching the base import that should have been shaken
-out. It runs against `dist/`, so run `pnpm build` first.
+`pnpm budget` (in `pnpm check` and in CI) packs the packages it needs, installs
+the tarballs into a scratch consumer and bundles real consumer imports through
+their published names. It fails on a fixture crossing its size ceiling, a name
+reaching the base import that should have been shaken out, an import the
+tarballs do not resolve, an entry that does not type-check against the packed
+declarations, and a query or server entry that cannot run in Node without a
+framework. It packs `dist/`, so run `pnpm build` first.
 
 Both failures mean the same thing — a feature is being paid for by people who
 did not ask for it. Move the weight behind a subpath entry. Raising a ceiling

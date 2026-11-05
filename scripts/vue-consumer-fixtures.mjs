@@ -158,6 +158,17 @@ export const VUE_CONSUMER_SPECS = [
     absent,
   })),
   {
+    name: "vue-unstyled · grouping + aggregation",
+    pkg: "adapter-vue-unstyled",
+    alsoEntryFile: "grouping.js",
+    comparable: "mui · grouping + aggregation",
+    code: 'export { DataTable } from "PKG";\nexport { grouping } from "ALSO";\nexport { aggregate } from "@adapttable/vue";',
+    functionality: "Native table, row grouping and the aggregate factory",
+    present: ["DataTable", "groupedEntriesForStrategy", "aggregate"],
+    absent: [...writers, "tableAgent", "createTableAssistant"],
+    rejectOptionalAi: true,
+  },
+  {
     name: "vue-unstyled · features barrel",
     pkg: "adapter-vue-unstyled",
     alsoEntryFile: "features.js",

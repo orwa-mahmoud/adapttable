@@ -3,9 +3,12 @@
  *
  * AdaptTable's promise is that features are opt-in: a plain table pays for the
  * plain table and nothing else. A promise like that is worth exactly what it is
- * measured at, so this bundles real consumer fixtures against the built
- * packages — what npm ships, not the source — and holds each one to a written
- * ceiling.
+ * measured at, so this packs the packages a run needs, installs the tarballs
+ * into a scratch consumer, bundles real consumer fixtures through their public
+ * package names and `exports` maps — what npm ships, not the source — and
+ * holds each one to a written ceiling. Every case is also type-checked against
+ * the packed declarations, and the query and server cases run in Node with no
+ * framework installed.
  *
  *   pnpm build && node scripts/bundle-budget.mjs      # measure and check
  *   node scripts/bundle-budget.mjs --update           # print current sizes
@@ -31,20 +34,29 @@
  * MUI, `standardFeatures()` for every kit, representative combinations, and
  * the all-feature ceiling. Negative markers travel with each fixture.
  */
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join, relative } from "node:path";
+import { writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 
 import { Rolldown } from "tsdown";
 
+import { requestedCases, selectCases } from "./case-selection.mjs";
 import {
+  fixtureFolders,
   FIXTURES,
   PLAIN_ADAPTER_CEILING_KB,
   plantedLeakFixture,
 } from "./consumer-fixtures.mjs";
-import { packageDir, packageRel } from "./packages.mjs";
+import { packageRel } from "./packages.mjs";
+import {
+  declarationProblems,
+  nodeConsumerProblems,
+  packageClosure,
+  packedConsumer,
+  packedModules,
+  workspacePackages,
+} from "./packed-consumers.mjs";
 import { publishedFigures, staleReason } from "./published-figures.mjs";
 import {
   vueConsumerCoverageProblems,
@@ -92,25 +104,33 @@ function extraFiles(fixture) {
   return extras;
 }
 
-/** The consumer module, and the package files it imports. */
-function entryModule(fixture) {
-  const dist = join(packageDir(fixture.pkg), "dist");
-  const target = join(dist, fixture.entryFile ?? "index.js");
+const SCOPED_SPECIFIER = /["'](@adapttable\/[^"']+)["']/g;
+
+/**
+ * The consumer module, and the public specifiers it imports. `PKG`, `ALSO*`
+ * and `STYLE` name files of the fixture's package; `install` turns each one
+ * into the specifier its packed `exports` map publishes for that file.
+ */
+export function entryModule(fixture, install) {
   const extras = extraFiles(fixture);
-  const imports = [];
   let code = fixture.code;
   const use = (token, file) => {
     if (!code.includes(token)) return;
-    code = code.replaceAll(token, file);
-    imports.push(file);
+    if (!install) {
+      throw new Error(
+        `${fixture.name} imports ${token}: measure it from a packed install`
+      );
+    }
+    code = code.replaceAll(token, install.specifier(fixture.pkg, file));
   };
-  use("PKG", target);
+  use("PKG", fixture.entryFile ?? "index.js");
   for (let index = extras.length - 1; index >= 0; index--) {
-    use(`ALSO${index}`, join(dist, extras[index]));
+    use(`ALSO${index}`, extras[index]);
   }
-  if (extras[0]) use("ALSO", join(dist, extras[0]));
-  if (fixture.styleEntryFile) use("STYLE", join(dist, fixture.styleEntryFile));
-  return { code, imports: imports.map((file) => relative(ROOT, file)).sort() };
+  if (extras[0]) use("ALSO", extras[0]);
+  if (fixture.styleEntryFile) use("STYLE", fixture.styleEntryFile);
+  const imports = [...code.matchAll(SCOPED_SPECIFIER)].map((match) => match[1]);
+  return { code, imports: [...new Set(imports)].sort() };
 }
 
 const SOURCE_MAP = /\.map$/;
@@ -257,22 +277,39 @@ export function inspectOutputs(fixture, readableOutput) {
   };
 }
 
-async function bundleFixture(fixture, entry, dir, externals) {
+/**
+ * A plugin that collects every module id the bundler loaded, tree-shaken
+ * barrels included — the graph resolution reached, not only what rendered.
+ */
+function moduleRecorder() {
+  const ids = new Set();
+  return {
+    ids,
+    plugin: {
+      name: "adapttable-module-recorder",
+      buildEnd() {
+        for (const id of this.getModuleIds()) ids.add(id);
+      },
+    },
+  };
+}
+
+async function bundleFixture(fixture, entry, dir, externals, plugins) {
   if (fixture.consumerHost) {
     return Promise.all(
       [true, false].map((minify) =>
-        buildVueNativeConsumer(fixture, entry, dir, minify, [], externals)
+        buildVueNativeConsumer(fixture, entry, dir, minify, plugins, externals)
       )
     );
   }
   if (fixture.styleEntryFile) {
     // Independent builds keep the stateful CSS collection passes separate.
-    const min = await buildVueCssConsumer(entry, dir, true, [], externals);
+    const min = await buildVueCssConsumer(entry, dir, true, plugins, externals);
     const readable = await buildVueCssConsumer(
       entry,
       dir,
       false,
-      [],
+      plugins,
       externals
     );
     return [min, readable];
@@ -280,6 +317,7 @@ async function bundleFixture(fixture, entry, dir, externals) {
   const bundle = await Rolldown.rolldown({
     input: entry,
     external: (id) => externals.some((re) => re.test(id)),
+    plugins,
     logLevel: "silent",
   });
   try {
@@ -300,23 +338,34 @@ async function bundleFixture(fixture, entry, dir, externals) {
  * checks read the unminified build of the same graph, where identifiers still
  * carry their real names. `buildMs` is the bundler's wall-clock time for both
  * builds, not a browser parse measurement.
+ *
+ * With `install`, the entry is written into that packed consumer and every
+ * module the graph reached is recorded: `resolvedFiles` from the tarballs,
+ * `unpackedFiles` from anywhere under the workspace's `packages/`.
  */
-export async function measure(fixture, dir) {
-  const { code, imports } = entryModule(fixture);
-  const entry = join(dir, "entry.js");
+export async function measure(fixture, dir, install) {
+  const { code, imports } = entryModule(fixture, install);
+  const entry = join(dir, fixture.typeOnly ? "entry.ts" : "entry.js");
   writeFileSync(entry, code);
   const framework = fixture.framework === "vue" ? "vue" : "react";
   const externals =
     framework === "vue" ? vueConsumerExternals(fixture.pkg) : EXTERNAL;
 
+  const recorder = moduleRecorder();
   const started = performance.now();
-  const [min, readable] = await bundleFixture(fixture, entry, dir, externals);
+  const [min, readable] = await bundleFixture(fixture, entry, dir, externals, [
+    recorder.plugin,
+  ]);
   const buildMs = Math.round(performance.now() - started);
 
   const accounted = accountOutputs(min.output, readable.output);
+  const modules = packedModules(recorder.ids, dir);
   return {
     ...accounted,
+    entryCode: code,
     entryImports: imports,
+    resolvedFiles: modules.files,
+    unpackedFiles: modules.unpacked,
     peerPolicy: PEER_POLICY[framework],
     externalImports: [
       ...new Set(
@@ -339,46 +388,17 @@ export function fixtureCeilings(fixture) {
   return { initialKB, totalKB };
 }
 
-/**
- * The `--case` IDs a run asked for, in order. A flag without a value is an
- * error, so a typo cannot quietly select everything.
- */
-export function requestedCases(argv) {
-  const ids = [];
-  for (let index = 0; index < argv.length; index++) {
-    const arg = argv[index];
-    let value;
-    if (arg === "--case") value = argv[++index];
-    else if (arg.startsWith("--case=")) value = arg.slice("--case=".length);
-    else continue;
-    if (!value || value.startsWith("--")) {
-      throw new Error("--case needs a case ID");
-    }
-    ids.push(...value.split(","));
-  }
-  return ids;
-}
+export { requestedCases };
 
 /** Every fixture when no IDs were requested; otherwise exactly the named ones. */
-export function selectFixtures(fixtures, ids) {
-  if (!ids.length) return fixtures;
-  const known = new Set(fixtures.map((fixture) => fixture.id));
-  const unknown = ids.filter((id) => !known.has(id));
-  if (unknown.length) {
-    throw new Error(
-      `Unknown --case ${unknown.join(", ")}. Known cases:\n  ${[...known].join("\n  ")}`
-    );
-  }
-  return fixtures.filter((fixture) => ids.includes(fixture.id));
-}
+export const selectFixtures = selectCases;
 
 /**
  * A planted import of a live hook must trip the negative assertion. If this
  * stays green, the detector is what failed — not the table.
  */
-export async function provePlantedLeak(dir) {
-  const fixture = plantedLeakFixture(ROOT);
-  const { leaked } = await measure(fixture, dir);
+export async function provePlantedLeak(install) {
+  const { leaked } = await measure(plantedLeakFixture(), install.dir, install);
   if (!leaked.includes("useTableEditHistory")) {
     throw new Error(
       "planted leak did not fail the negative assertion — the detector is blind"
@@ -475,7 +495,7 @@ function logRow(fixture, row) {
       lazy +
       `   build ${String(row.buildMs).padStart(4)}ms`
   );
-  if (fixture.kind === "adapter-base") {
+  if (fixture.kind === "adapter-base" && fixture.item1BaselineKB) {
     const cut = ((1 - initialKB / fixture.item1BaselineKB) * 100).toFixed(0);
     const vs80 =
       initialKB <= PLAIN_ADAPTER_CEILING_KB
@@ -495,6 +515,38 @@ function logRow(fixture, row) {
       `  └ feature marker missing from the composed graph: ${row.missing.join(", ")}`
     );
   }
+  for (const problem of row.resolutionProblems) console.log(`  └ ${problem}`);
+}
+
+function logChecks(rows) {
+  for (const row of rows) {
+    for (const problem of row.declarationProblems) {
+      console.log(`✗ ${row.name}: declarations · ${problem}`);
+    }
+    for (const problem of row.nodeProblems ?? []) {
+      console.log(`✗ ${row.name}: Node consumer · ${problem}`);
+    }
+  }
+  const nodeRuns = rows.filter((row) => row.nodeProblems).length;
+  console.log(
+    `\n${rows.length} entries type-checked against the packed declarations` +
+      (nodeRuns ? `; ${nodeRuns} ran in Node with no framework installed` : "")
+  );
+}
+
+function printJson(rows, packages) {
+  console.log(
+    JSON.stringify(
+      {
+        unit: "bytes; KiB = 1024 bytes",
+        resolution: "packed tarballs installed into a scratch consumer",
+        packages,
+        fixtures: rows.map(jsonRow),
+      },
+      null,
+      2
+    )
+  );
 }
 
 /**
@@ -534,9 +586,11 @@ function exitIfFailed(over, stale) {
   if (!over && !stale) return;
   if (over) {
     console.error(
-      `\n${over} fixture(s) over budget.\n` +
-        `Either the weight belongs behind an optional entry point, or the budget ` +
-        `needs raising — in the pull request, with a reason, never silently.`
+      `\n${over} fixture(s) failed.\n` +
+        `Over budget: either the weight belongs behind an optional entry point, ` +
+        `or the budget needs raising — in the pull request, with a reason, never ` +
+        `silently. A leak, an unpacked module, a declaration or a Node failure ` +
+        `is a defect in what ships.`
     );
   }
   if (stale) {
@@ -555,7 +609,16 @@ function jsonRow(row) {
     kind: row.kind,
     peerPolicy: row.peerPolicy,
     entryImports: row.entryImports,
+    resolvedFiles: row.resolvedFiles,
     externalImports: row.externalImports,
+    declarations: row.declarationProblems.length
+      ? { ok: false, problems: row.declarationProblems }
+      : { ok: true },
+    ...(row.nodeProblems && {
+      node: row.nodeProblems.length
+        ? { ok: false, problems: row.nodeProblems }
+        : { ok: true, frameworkRuntimes: "not installed" },
+    }),
     initial: row.initial,
     lazy: row.lazy,
     total: row.total,
@@ -577,14 +640,39 @@ function selectedFixtures() {
   }
 }
 
-async function measuredRow(fixture, dir) {
-  const measured = await measure(fixture, dir);
+/**
+ * Why a measured graph does not prove the packed path: a module that came
+ * from the workspace instead of a tarball, an `@adapttable/*` import the
+ * install could not resolve (the bundler leaves it external rather than
+ * failing), or a type-only import that still reached runtime code.
+ */
+export function resolutionProblems(fixture, measured) {
+  const problems = [
+    ...measured.unpackedFiles.map(
+      (file) => `resolved outside the tarballs: ${file}`
+    ),
+    ...measured.externalImports
+      .filter((specifier) => specifier.startsWith("@adapttable/"))
+      .map((specifier) => `did not resolve from the tarballs: ${specifier}`),
+  ];
+  if (fixture.typeOnly && measured.resolvedFiles.length) {
+    problems.push(
+      `a type-only import reached runtime modules: ${measured.resolvedFiles.join(", ")}`
+    );
+  }
+  return problems;
+}
+
+async function measuredRow(fixture, install) {
+  const measured = await measure(fixture, install.dir, install);
   const ceilings = fixtureCeilings(fixture);
+  const problems = resolutionProblems(fixture, measured);
   const ok =
     kib(measured.initial.gzipBytes) <= ceilings.initialKB &&
     kib(measured.total.gzipBytes) <= ceilings.totalKB &&
     measured.leaked.length === 0 &&
-    measured.missing.length === 0;
+    measured.missing.length === 0 &&
+    problems.length === 0;
   return {
     id: fixture.id,
     name: fixture.name,
@@ -592,38 +680,83 @@ async function measuredRow(fixture, dir) {
     kit: fixture.kit,
     ...measured,
     ...ceilings,
+    resolutionProblems: problems,
     ok,
   };
+}
+
+/**
+ * The entry as the compiler checks it. `export *` becomes a namespace
+ * re-export: two barrels sharing a name are ambiguous to TypeScript but not
+ * to a bundler, and the namespace form still needs each module's types.
+ */
+export function declarationSource(code) {
+  let star = 0;
+  return code.replaceAll(
+    /export \* from (["'][^"']+["'])/g,
+    (_, specifier) => `export * as star${star++} from ${specifier}`
+  );
+}
+
+/** Each row's compiler errors against the packed declarations. */
+function checkDeclarations(rows, install) {
+  const problems = declarationProblems(
+    install.dir,
+    rows.map((row) => ({ id: row.id, code: declarationSource(row.entryCode) }))
+  );
+  for (const row of rows) {
+    row.declarationProblems = problems.get(row.id);
+    if (row.declarationProblems.length) row.ok = false;
+  }
+}
+
+/**
+ * Run each Node-side fixture's program from an install of only its own
+ * package closure, with no framework or peer installed.
+ */
+function checkNodeConsumers(rows, selected, install, packages) {
+  for (const fixture of selected.filter((entry) => entry.node)) {
+    const row = rows.find((entry) => entry.id === fixture.id);
+    const closure = new Set(packageClosure([fixture.pkg], packages));
+    const program = fixture.node.replaceAll(
+      "PKG",
+      install.specifier(fixture.pkg, fixture.entryFile ?? "index.js")
+    );
+    row.nodeProblems = nodeConsumerProblems(
+      install.packs.filter((pack) => closure.has(pack.folder)),
+      program
+    );
+    if (row.nodeProblems.length) row.ok = false;
+  }
 }
 
 async function main() {
   const coverageProblems = vueConsumerCoverageProblems(FIXTURES);
   if (coverageProblems.length) throw new Error(coverageProblems.join("\n"));
   const selected = selectedFixtures();
-  const dir = mkdtempSync(join(tmpdir(), "adapttable-budget-"));
+  const packages = workspacePackages();
+  const install = packedConsumer(
+    fixtureFolders([...selected, plantedLeakFixture()], packages),
+    { packages, peers: true }
+  );
   const rows = [];
 
   try {
     for (const fixture of selected) {
-      const row = await measuredRow(fixture, dir);
+      const row = await measuredRow(fixture, install);
       rows.push(row);
       if (!JSON_OUT) logRow(fixture, row);
     }
-    await provePlantedLeak(dir);
+    checkDeclarations(rows, install);
+    checkNodeConsumers(rows, selected, install, packages);
+    await provePlantedLeak(install);
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    install.dispose();
   }
   const over = rows.filter((row) => !row.ok).length;
 
-  if (JSON_OUT) {
-    console.log(
-      JSON.stringify(
-        { unit: "bytes; KiB = 1024 bytes", fixtures: rows.map(jsonRow) },
-        null,
-        2
-      )
-    );
-  }
+  if (JSON_OUT) printJson(rows, install.packages);
+  else logChecks(rows);
 
   if (UPDATE) {
     console.log("\nCurrent sizes with ~15% headroom — for the FIXTURES table:");

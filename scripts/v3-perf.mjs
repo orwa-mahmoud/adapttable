@@ -18,21 +18,15 @@
  *   node scripts/v3-perf.mjs --baseline scripts/v3-perf-baseline.linux.json
  */
 import { spawn } from "node:child_process";
-import {
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { chromium } from "@playwright/test";
 
 import { measure } from "./bundle-budget.mjs";
-import { FIXTURES } from "./consumer-fixtures.mjs";
+import { fixtureFolders, FIXTURES } from "./consumer-fixtures.mjs";
+import { packedConsumer } from "./packed-consumers.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -58,20 +52,22 @@ function median(values) {
 }
 
 async function measureParseBuild() {
-  const dir = mkdtempSync(join(tmpdir(), "adapttable-v3-perf-"));
+  const fixtures = PARSE_FIXTURES.map((name) =>
+    FIXTURES.find((entry) => entry.name === name)
+  );
+  const install = packedConsumer(fixtureFolders(fixtures), { peers: true });
   const parseBuildMs = {};
   try {
-    for (const name of PARSE_FIXTURES) {
-      const fixture = FIXTURES.find((entry) => entry.name === name);
+    for (const fixture of fixtures) {
       const samples = [];
       for (let i = 0; i < 3; i++) {
-        const { buildMs } = await measure(fixture, dir);
+        const { buildMs } = await measure(fixture, install.dir, install);
         samples.push(buildMs);
       }
-      parseBuildMs[name] = median(samples);
+      parseBuildMs[fixture.name] = median(samples);
     }
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    install.dispose();
   }
   return parseBuildMs;
 }

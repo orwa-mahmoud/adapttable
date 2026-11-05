@@ -10,7 +10,9 @@ import { Rolldown } from "tsdown";
 
 import {
   accountOutputs,
+  declarationSource,
   emittedLedger,
+  entryModule,
   fixtureCeilings,
   inspectOutputs,
   measure,
@@ -225,6 +227,57 @@ describe("emitted-file accounting", () => {
       code: "",
     };
     assert.throws(() => emittedLedger([chunk, chunk]), /emitted twice/);
+  });
+});
+
+describe("packed entry modules", () => {
+  const install = {
+    specifier: (folder, file) =>
+      file === "index.js"
+        ? `@adapttable/${folder}`
+        : `@adapttable/${folder}/${file.replace(/\.js$/, "")}`,
+  };
+
+  it("names each fixture file by its public specifier", () => {
+    const { code, imports } = entryModule(
+      {
+        name: "kit + feature",
+        pkg: "mui",
+        alsoEntryFile: "grouping.js",
+        code: 'export { DataTable } from "PKG";\nexport * from "ALSO";\nexport { aggregate } from "@adapttable/react";',
+      },
+      install
+    );
+    assert.equal(
+      code,
+      'export { DataTable } from "@adapttable/mui";\nexport * from "@adapttable/mui/grouping";\nexport { aggregate } from "@adapttable/react";'
+    );
+    assert.deepEqual(imports, [
+      "@adapttable/mui",
+      "@adapttable/mui/grouping",
+      "@adapttable/react",
+    ]);
+  });
+
+  it("refuses a package token without a packed install", () => {
+    assert.throws(
+      () =>
+        entryModule({
+          name: "loose",
+          pkg: "core",
+          code: 'export * from "PKG";',
+        }),
+      /measure it from a packed install/
+    );
+  });
+
+  it("type-checks barrels as namespaces so shared names stay unambiguous", () => {
+    assert.equal(
+      declarationSource(
+        'export { DataTable } from "@adapttable/mui";\nexport * from "@adapttable/mui/a";\nexport * from "@adapttable/mui/b";'
+      ),
+      'export { DataTable } from "@adapttable/mui";\nexport * as star0 from "@adapttable/mui/a";\nexport * as star1 from "@adapttable/mui/b";'
+    );
   });
 });
 
