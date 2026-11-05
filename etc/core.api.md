@@ -47,6 +47,9 @@ export interface ActiveFilterChipsOptions {
 }
 
 // @public
+export function activeTierValue<T>(active: boolean, value: T, idle: T): T;
+
+// @public
 export function addAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, operationId: string): Readonly<Partial<Record<string, string>>>;
 
 // @public
@@ -5085,6 +5088,9 @@ export function idSetReader(): (ids: readonly string[] | undefined) => ReadonlyS
 export function impliedOperations<TRow>(column: ColumnMetadata<TRow>): readonly AggregateName[];
 
 // @public
+export const INACTIVE_TIER_ROWS: readonly never[];
+
+// @public
 export function incrementalSearchText<TRow>(row: TRow): string;
 
 // @public
@@ -9016,6 +9022,9 @@ export function textFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<Filter
 
 // @public
 export type TextOp = (typeof TEXT_OPS)[number];
+
+// @public
+export function tierRows<TRow>(active: boolean, data: readonly TRow[] | undefined): readonly TRow[];
 
 // @public
 export function toAggregateInstant(value: AggregateOrderedValue): number | undefined;

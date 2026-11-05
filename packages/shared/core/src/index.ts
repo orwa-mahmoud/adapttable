@@ -780,10 +780,13 @@ export {
   type ServerSourceViewState,
 } from "./source/serverSource";
 export {
+  activeTierValue,
   createTableData,
+  INACTIVE_TIER_ROWS,
   type TableData,
   type TableDataConfig,
   type TableDataPlan,
+  tierRows,
 } from "./source/tableData";
 export type { TableSource } from "./source/TableSource";
 export type {

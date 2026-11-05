@@ -109,6 +109,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "activeTierValue",
+      "kind": "runtime",
+      "module": "source/tableData.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/tableData.ts#activeTierValue",
+      "subpaths": ["."]
+    },
+    {
       "name": "addAggregation",
       "kind": "runtime",
       "module": "aggregate/aggregationModel.ts",
@@ -4597,6 +4608,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "INACTIVE_TIER_ROWS",
+      "kind": "runtime",
+      "module": "source/tableData.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/tableData.ts#INACTIVE_TIER_ROWS",
+      "subpaths": ["."]
+    },
+    {
       "name": "incrementalSearchText",
       "kind": "runtime",
       "module": "rows/incremental.ts",
@@ -8268,6 +8290,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/filterWidgets.ts#textFilterWidget",
+      "subpaths": ["."]
+    },
+    {
+      "name": "tierRows",
+      "kind": "runtime",
+      "module": "source/tableData.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/tableData.ts#tierRows",
       "subpaths": ["."]
     },
     {

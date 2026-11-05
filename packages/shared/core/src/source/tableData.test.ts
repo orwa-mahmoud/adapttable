@@ -1,12 +1,23 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { createBasicTableEngine } from "../engine/basicTableEngine";
 import { LiveFeatureHost } from "../features/liveFeatureHost";
 import type { FilterDef, FilterRuntime } from "../filters/filterDefs";
 import { FILTER_ENGINE_IMPL, type FilterEngine } from "../filters/filterEngine";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import { resetDevWarnings } from "../utils/devWarn";
 import type { TableQueryListener } from "./dataTier";
-import { createTableData, type TableDataConfig } from "./tableData";
+import {
+  createFrontendSourceWith,
+  type FrontendSourceViewState,
+} from "./frontendSource";
+import {
+  activeTierValue,
+  createTableData,
+  INACTIVE_TIER_ROWS,
+  type TableDataConfig,
+  tierRows,
+} from "./tableData";
 import type { TableSource } from "./TableSource";
 
 interface Row {
@@ -422,6 +433,40 @@ describe("createTableData", () => {
       table.dispose();
     });
 
+    it("keeps a retained facade and does not abort a notice when the tier switches", () => {
+      const listener = vi.fn<TableQueryListener>();
+      const table = createTableData<Row>();
+      const frontend = sourceOf({ page: 1 });
+      const changed = sourceOf({ page: 2 });
+      const server = sourceOf({ page: 4 });
+      const frontendMode = config({
+        mode: "frontend",
+        onQueryChange: listener,
+      });
+
+      table.plan(frontendMode);
+      table.finish({ resolved: frontend, frontend });
+      table.commit();
+      table.plan(frontendMode);
+      table.finish({ resolved: changed, frontend: changed });
+      table.commit();
+      expect(listener).toHaveBeenCalledTimes(1);
+      const signal = listener.mock.calls[0]?.[1].signal;
+      expect(signal?.aborted).toBe(false);
+
+      table.plan(config({ mode: "server", onQueryChange: listener }));
+      expect(table.finish({ resolved: server, frontend: changed })).toBe(
+        server
+      );
+      table.commit();
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(signal?.aborted).toBe(false);
+      expect(changed.page).toBe(2);
+
+      table.dispose();
+      expect(signal?.aborted).toBe(true);
+    });
+
     it("stays quiet unless the mode is explicitly frontend", () => {
       const listener = vi.fn<TableQueryListener>();
       const table = createTableData<Row>();
@@ -434,5 +479,79 @@ describe("createTableData", () => {
       table.commit();
       expect(listener).not.toHaveBeenCalled();
     });
+  });
+
+  it("does not dispose a host-owned source", () => {
+    const table = createTableData<Row>();
+    const host = sourceOf();
+    const dispose = vi.fn();
+    Object.assign(host, { dispose });
+    expect(
+      table.plan(config({ source: host, data: undefined })).tier
+    ).toBe("source");
+    expect(table.finish({ resolved: host, frontend: sourceOf() })).toBe(host);
+    table.dispose();
+    expect(dispose).not.toHaveBeenCalled();
+  });
+});
+
+describe("tier activation", () => {
+  const view: FrontendSourceViewState = {
+    page: 1,
+    limit: 10,
+    search: "n",
+    sortBy: undefined,
+    sortDir: undefined,
+    sortLevels: [],
+    groupBy: undefined,
+    extra: {},
+    filterTree: undefined,
+  };
+
+  it("gives every inactive tier one empty array", () => {
+    const rows = [{ id: "1", team: "x" }];
+    expect(tierRows(false, rows)).toBe(INACTIVE_TIER_ROWS);
+    expect(tierRows(true, undefined)).toBe(INACTIVE_TIER_ROWS);
+    expect(tierRows(true, rows)).toBe(rows);
+    expect(activeTierValue(false, rows, undefined)).toBeUndefined();
+    expect(tierRows(false, rows)).toBe(tierRows(false, undefined));
+  });
+
+  it("does not search when the inactive rows repeat", () => {
+    let factories = 0;
+    const source = createFrontendSourceWith<{ id: string }>((options) => {
+      factories += 1;
+      return createBasicTableEngine(options);
+    });
+    const loaded = Array.from({ length: 40 }, (_, index) => ({
+      id: String(index),
+    }));
+    let calls = 0;
+    const getSearchText = (row: { id: string }): string => {
+      calls += 1;
+      return row.id;
+    };
+    source.update(
+      { data: loaded, getSearchText, paginationMode: "paged" },
+      view
+    );
+    const afterLoad = calls;
+    expect(afterLoad).toBe(loaded.length);
+
+    source.update(
+      { data: INACTIVE_TIER_ROWS, getSearchText, paginationMode: "paged" },
+      view
+    );
+    expect(calls).toBe(afterLoad);
+    source.update(
+      { data: tierRows(false, loaded), getSearchText, paginationMode: "paged" },
+      view
+    );
+    expect(calls).toBe(afterLoad);
+    expect(factories).toBe(1);
+    expect(source.update(
+      { data: INACTIVE_TIER_ROWS, getSearchText, paginationMode: "paged" },
+      view
+    ).allSearchedRows).toHaveLength(0);
   });
 });

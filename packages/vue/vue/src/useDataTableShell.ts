@@ -1,6 +1,7 @@
 /** One source, feature lifecycle and model composition shared by every Vue kit. */
 import {
   ACTIONS_COLUMN_KEY,
+  activeTierValue,
   type BulkAction,
   type CellEdit,
   type CellRange,
@@ -12,6 +13,7 @@ import {
   type FilterDef,
   type FilterTypeSpec,
   type FrontendEngineFactory,
+  INACTIVE_TIER_ROWS,
   isCellEditable,
   projectedGroupingSource,
   type QueryAggregate,
@@ -24,6 +26,7 @@ import {
   type TableDensity,
   type TableQueryListener,
   type TableSource,
+  tierRows,
   withRowPinActions,
 } from "@adapttable/core";
 import {
@@ -363,7 +366,7 @@ export function useDataTableShell<TRow>(
   const frontend = useFrontendData(() => ({
     ...resolved.value,
     forceMobile: isMobile,
-    data: onFrontend.value ? (toValue(resolved.value.data) ?? []) : [],
+    data: tierRows(onFrontend.value, toValue(resolved.value.data)),
     columns: flattenColumns(toValue(resolved.value.columns)).leaves,
     getRowId: resolved.value.rowKey,
     urlAdapter: onFrontend.value ? urlAdapter : undefined,
@@ -391,18 +394,20 @@ export function useDataTableShell<TRow>(
     const live = onServer.value;
     const filters = filterRuntime.value;
     return {
-      rows: live ? (toValue(value.data) ?? []) : [],
+      rows: tierRows(live, toValue(value.data)),
       total: () => toValue(value.total) ?? 0,
       loading: value.isLoading,
       error: value.error,
-      onQueryChange: live ? value.onQueryChange : undefined,
+      onQueryChange: activeTierValue(live, value.onQueryChange, undefined),
       // A column's default aggregate is a request to the server, so only the
       // server tier reads the columns.
-      columns: live ? flattenColumns(toValue(value.columns)).leaves : [],
-      supports: live ? value.supports : undefined,
-      aggregates: live ? value.aggregates : undefined,
-      responseKey: live ? value.responseKey : undefined,
-      facets: live ? value.facets : undefined,
+      columns: live
+        ? flattenColumns(toValue(value.columns)).leaves
+        : INACTIVE_TIER_ROWS,
+      supports: activeTierValue(live, value.supports, undefined),
+      aggregates: activeTierValue(live, value.aggregates, undefined),
+      responseKey: activeTierValue(live, value.responseKey, undefined),
+      facets: activeTierValue(live, value.facets, undefined),
       // A server query counts every checklist filter unless told which.
       facetKeys: live
         ? (toValue(value.facetKeys) ??

@@ -2,14 +2,27 @@
  * The table data controller: which tier serves a table's rows, and the
  * declarative filters every tier shares.
  *
- * A binding holds one {@link TableData} per table. Each update it hands over
- * the table's data props and gets a {@link TableDataPlan} back — the tier, the
+ * A binding holds one {@link TableData} per table and creates the frontend
+ * and server facades once for that mount. Each update it hands over the
+ * table's data props and gets a {@link TableDataPlan} back — the tier, the
  * merged filter runtime, the predicate the frontend tier filters with and the
  * facet keys the server tier asks for — builds the tier's source from it, then
  * hands that source back to have facet counts computed where no server
  * answered them. The controller also loads each filter's own option list once,
  * and, when a frontend table has an `onQueryChange`, tells it about each
  * change. A binding adds only its own reactivity and the moment it commits.
+ *
+ * Selection and lifetime are different. `plan` names the active tier. The
+ * other built-in facade stays constructed and retained: a switch does not
+ * dispose it, and an external `source` is never disposed here. The host owns
+ * that object.
+ *
+ * | State | What it is | Commit boundary |
+ * | --- | --- | --- |
+ * | active | The tier `plan` returns. `finish` reads this source. | `commit` notifies only when `mode` is `"frontend"`. |
+ * | inactive | The other built-in facade. It is given {@link INACTIVE_TIER_ROWS} and no query callback, so it does not search. | Readers do not see it. |
+ * | retained | That facade's view, URL and request state. | A tier switch does not abort a notice already sent. |
+ * | disposed | `dispose` has run. The notice in flight is aborted. | The external source is left alone. |
  */
 
 import type { ColumnMetadata, ExtraFilters } from "../contracts/columns";
@@ -36,6 +49,41 @@ import {
   type TableQueryListener,
   warnDataTierMisuse,
 } from "./dataTier";
+
+/**
+ * Rows, or columns, an inactive built-in tier receives.
+ *
+ * One array for every table. A repeat update of an inactive tier is the same
+ * dataset, so the facade does not search again. Do not mutate it.
+ *
+ * @public
+ */
+export const INACTIVE_TIER_ROWS: readonly never[] = [];
+
+/**
+ * The value a tier receives while it is, or is not, the one serving.
+ *
+ * @public
+ */
+export function activeTierValue<T>(active: boolean, value: T, idle: T): T {
+  return active ? value : idle;
+}
+
+/**
+ * Rows a built-in tier is given.
+ *
+ * Inactive, or active with no host array, this is {@link INACTIVE_TIER_ROWS}.
+ * The host's own array is returned as given.
+ *
+ * @public
+ */
+export function tierRows<TRow>(
+  active: boolean,
+  data: readonly TRow[] | undefined
+): readonly TRow[] {
+  if (!active || data === undefined) return INACTIVE_TIER_ROWS;
+  return data;
+}
 import { createSourceSignal, memoOne } from "./sourceState";
 import type { TableSource } from "./TableSource";
 
@@ -129,10 +177,15 @@ export interface TableData<TRow> {
   }) => TableSource<TRow>;
   /**
    * Once the frame is on screen: tell a frontend table's `onQueryChange`
-   * about a change. The mount is not a change.
+   * about a change. The mount is not a change. A server or source tier
+   * records the key and does not notify, and it does not abort a notice a
+   * previous frontend commit already sent. `dispose` is what aborts that.
    */
   readonly commit: () => void;
-  /** Abort the notification in flight, for when the table goes away. */
+  /**
+   * Abort the notification in flight, for when the table goes away.
+   * An external `source` is host-owned and is not disposed.
+   */
   readonly dispose: () => void;
   /**
    * Start every option list the current filters load on their own, once each.
