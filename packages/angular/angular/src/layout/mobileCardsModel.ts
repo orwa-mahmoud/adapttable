@@ -34,12 +34,12 @@ import { resolveRenderer } from "../cell";
 import { type RowReorderState } from "../rows/rowReorder";
 import { type RowReorderButtonsProps } from "../rows/rowReorderHandle";
 import { type TreeToggleProps } from "../tree/treeToggle";
-import { type TableView } from "./dataTableShell";
+import { type TableSurfaceView } from "./tableSurfaceHost";
 
 /** Shared AdaptMobileCards signals; adapters supply native templates and controls. @public */
 @Directive({})
 export abstract class AdaptMobileCardsModel<TRow> {
-  readonly view = input.required<TableView<TRow>>();
+  readonly view = input.required<TableSurfaceView<TRow>>();
   readonly rowKey = input.required<(row: TRow) => string>();
   protected readonly reorderButtonsSlot = ROW_REORDER_BUTTONS;
   protected readonly editableCellSlot = EDITABLE_CELL;

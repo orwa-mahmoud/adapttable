@@ -1095,7 +1095,7 @@ export class AdaptBatchEditCell<TRow> {
     readonly batch: InputSignal<BatchEditingState<TRow>>;
     // (undocumented)
     protected readonly changed: Signal<boolean>;
-    readonly column: InputSignal<ColumnDef<TRow>>;
+    readonly column: InputSignal<ColumnDef$2<TRow>>;
     readonly conflictLabels: InputSignal<EditConflictLabels | undefined>;
     readonly display: InputSignal<unknown>;
     readonly editLabel: InputSignal<string>;
@@ -2382,7 +2382,7 @@ export abstract class AdaptDesktopTableModel<TRow> {
     // (undocumented)
     protected readonly treeCellSlot: FeatureSlotKey<TreeCellProps<never, unknown>>;
     // (undocumented)
-    readonly view: InputSignal<TableView<TRow>>;
+    readonly view: InputSignal<TableSurfaceView<TRow>>;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptDesktopTableModel<any>, never, never, {
         "view": {
@@ -3392,7 +3392,7 @@ export abstract class AdaptMobileCardsModel<TRow> {
     // (undocumented)
     protected readonly treeToggleSlot: FeatureSlotKey<TreeToggleProps<never>>;
     // (undocumented)
-    readonly view: InputSignal<TableView<TRow>>;
+    readonly view: InputSignal<TableSurfaceView<TRow>>;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptMobileCardsModel<any>, never, never, {
         "view": {
@@ -3668,7 +3668,7 @@ export class AdaptRowEditActionsChrome<TRow> {
 // @public
 export class AdaptRowEditCell<TRow> {
     readonly ask: InputSignal<CellConflictAsk | undefined>;
-    readonly column: InputSignal<ColumnDef<TRow>>;
+    readonly column: InputSignal<ColumnDef$2<TRow>>;
     readonly conflictLabels: InputSignal<EditConflictLabels | undefined>;
     readonly display: InputSignal<unknown>;
     readonly editLabel: InputSignal<string>;
@@ -4508,6 +4508,14 @@ export class AdaptTableAssistantChrome {
 }
 
 // @public
+interface AdaptTableFeature$2 extends FeatureSetup<unknown, SidePanelEntry> {
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly id?: string;
+    mount?(context: FeatureMountContext$1): void | (() => void);
+    readonly renders?: readonly FeatureRender<never, SlotComponent$2>[];
+}
+
+// @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
@@ -4803,6 +4811,9 @@ export { assistantIsBusy }
 export { assistantIsUsable }
 
 // @public
+type Attrs$2 = Readonly<Record<string, unknown>>;
+
+// @public
 export type Attrs = Readonly<Record<string, unknown>>;
 
 export { BATCH_EDIT_BAR }
@@ -4821,7 +4832,7 @@ export { bindHeaderFilterDismiss }
 // @public
 export interface BodyCellView<TRow> {
     readonly colSpan: number;
-    readonly column: ColumnDef<TRow>;
+    readonly column: ColumnDef$2<TRow>;
     readonly columnIndex: number;
     readonly mark: string | undefined;
     readonly rowSpan: number;
@@ -4829,9 +4840,9 @@ export interface BodyCellView<TRow> {
 
 // @public
 export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
-    readonly cardAttrs: Attrs;
-    readonly detailAttrs: Attrs;
-    readonly rowAttrs: Attrs;
+    readonly cardAttrs: Attrs$2;
+    readonly detailAttrs: Attrs$2;
+    readonly rowAttrs: Attrs$2;
 }
 
 // @public
@@ -4861,8 +4872,17 @@ export interface CellConflictNoticeProps {
     readonly ask?: CellConflictAsk;
     readonly errorClassName?: string;
     readonly errorId: string;
-    readonly labels?: NonNullable<EditableCellEditing<never>["conflictLabels"]>;
+    readonly labels?: NonNullable<EditableCellEditing$2<never>["conflictLabels"]>;
     readonly slots: EditableCellSlots;
+}
+
+// @public
+interface CellContext$2<TRow> {
+    readonly $implicit: TRow;
+    readonly column: ColumnDef$2<TRow>;
+    readonly row: TRow;
+    readonly rowIndex: number;
+    readonly value: unknown;
 }
 
 // @public
@@ -4909,6 +4929,15 @@ export { COLUMN_MENU }
 export { COLUMN_SELECT }
 
 // @public
+interface ColumnDef$2<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+    cell?: Renderer$2<CellContext$2<TRow>>;
+    footer?: Renderer$2<FooterContext$2<TRow>>;
+    header?: string;
+    headerActions?: string | Renderer$2<HeaderContext$2<TRow>>;
+    headerCell?: Renderer$2<HeaderContext$2<TRow>>;
+}
+
+// @public
 export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
     cell?: Renderer<CellContext<TRow>>;
     footer?: Renderer<FooterContext<TRow>>;
@@ -4941,6 +4970,9 @@ export interface ColumnGroupToggleSlots {
 
 // @public
 export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
+
+// @public
+type ColumnLayout$2<TRow> = UseColumnLayoutResult<TRow>;
 
 // @public
 export type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
@@ -5006,7 +5038,7 @@ export interface ColumnSelectSlots {
 
 // @public
 export interface ColumnWindow<TRow> {
-    readonly columns: readonly ColumnDef<TRow>[];
+    readonly columns: readonly ColumnDef$2<TRow>[];
     readonly enabled: boolean;
     readonly paddingEnd: number;
     readonly paddingStart: number;
@@ -5014,8 +5046,8 @@ export interface ColumnWindow<TRow> {
 
 // @public
 export interface ColumnWindowOptions<TRow> {
-    readonly columns: Signal<readonly ColumnDef<TRow>[]>;
-    readonly enabled: MaybeSignal<boolean>;
+    readonly columns: Signal<readonly ColumnDef$2<TRow>[]>;
+    readonly enabled: MaybeSignal$1<boolean>;
     readonly getScrollElement: () => HTMLElement | null;
     readonly injector?: Injector;
     readonly overscan?: number;
@@ -5124,6 +5156,70 @@ export function createAdapterTableAssistantFeature(component: Type<unknown>): Ad
 export function createFilterFieldId(): string;
 
 // @public
+interface DataTable$2<TRow> {
+    readonly allColumns: Signal<readonly ColumnDef$2<TRow>[]>;
+    readonly autoSizeColumn: (root: Element | null, key: string) => void;
+    readonly autoSizeColumns: (root: Element | null) => void;
+    readonly bodyRegion: Signal<ChromeBodyRegion>;
+    readonly canLoadMore: Signal<boolean>;
+    readonly canRenameColumns: boolean;
+    readonly cardAttrs: (row: TRow, index: number) => Attrs$2;
+    readonly cellAttrs: (column: ColumnDef$2<TRow>) => Attrs$2;
+    readonly cellValue: (column: ColumnDef$2<TRow>, row: TRow) => unknown;
+    readonly clearFilters: () => void;
+    readonly columnGroups: Signal<ReadonlyMap<string, ColumnGroupRecord<TRow>>>;
+    readonly columns: Signal<readonly ColumnDef$2<TRow>[]>;
+    readonly dir: Signal<Direction>;
+    readonly emptyVariant: Signal<"noData" | "noResults">;
+    readonly errorState: Signal<{
+        readonly error: Error;
+        readonly retry?: () => void;
+        readonly retrying: boolean;
+    } | undefined>;
+    readonly featureHost: FeatureHostState_2;
+    readonly featureOptions: Readonly<Record<string, unknown>>;
+    readonly featureState: FeatureState$1;
+    readonly hasSlot: (slot: {
+        readonly id: string;
+    }) => boolean;
+    readonly headerCellAttrs: (column: ColumnDef$2<TRow>) => Attrs$2;
+    readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
+    readonly headerRowAttrs: () => Attrs$2;
+    readonly isEmpty: Signal<boolean>;
+    readonly isMobile: Signal<boolean>;
+    readonly isRefreshing: Signal<boolean>;
+    readonly labels: Signal<Required<TableLabels>>;
+    readonly layout: Signal<ColumnLayout$2<TRow>>;
+    readonly loadMore: () => void;
+    readonly loadMoreAttrs: () => Attrs$2;
+    readonly loadMoreButtonAttrs: () => Attrs$2;
+    readonly pagerSlots: Signal<PaginationSlot[]>;
+    readonly pageSizeOptions: Signal<readonly number[]>;
+    readonly pagination: Signal<PaginationInfo>;
+    readonly rowAttrs: (row: TRow, index: number) => Attrs$2;
+    readonly rowKey: (row: TRow) => string;
+    readonly rows: Signal<readonly TRow[]>;
+    readonly search: Signal<string>;
+    readonly searchInputAttrs: () => Attrs$2;
+    readonly searchValue: Signal<string>;
+    readonly setLimit: (limit: number) => void;
+    readonly setPage: (page: number) => void;
+    readonly setSearch: (term: string) => void;
+    readonly setSearchValue: (text: string) => void;
+    readonly showFooter: Signal<boolean>;
+    readonly slotFills: SlotFills$1;
+    readonly sortButtonAttrs: (column: ColumnDef$2<TRow>) => Attrs$2;
+    readonly sortBy: Signal<string | undefined>;
+    readonly sortByOptions: Signal<SortByOption[]>;
+    readonly sortDir: Signal<SortDirection | undefined>;
+    readonly source: Signal<TableSource<TRow>>;
+    readonly statusAnnouncement: Signal<string>;
+    readonly tableAttrs: () => Attrs$2;
+    readonly toggleSort: (key: string) => void;
+    readonly windowStart: Signal<number>;
+}
+
+// @public
 export interface DataTable<TRow> {
     readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
     readonly autoSizeColumn: (root: Element | null, key: string) => void;
@@ -5188,6 +5284,32 @@ export interface DataTable<TRow> {
 }
 
 // @public
+interface DataTableClassNames$2 {
+    readonly actionButton?: string;
+    readonly card?: string;
+    readonly cardActions?: string;
+    readonly cardDetail?: string;
+    readonly cardLabel?: string;
+    readonly cardRow?: string;
+    readonly cards?: string;
+    readonly cardValue?: string;
+    readonly checkbox?: string;
+    readonly fullWidthCell?: string;
+    readonly fullWidthRow?: string;
+    readonly rowActionsMenu?: string;
+    readonly rowActionsTrigger?: string;
+    readonly rowReorderButtons?: string;
+    readonly rowReorderDown?: string;
+    readonly rowReorderUp?: string;
+    readonly separatorCell?: string;
+    readonly separatorRow?: string;
+    readonly summaryCard?: string;
+    readonly treeSpacer?: string;
+    readonly treeToggle?: string;
+    readonly virtualSpacer?: string;
+}
+
+// @public
 export interface DataTableClassNames {
     readonly actionButton?: string;
     readonly card?: string;
@@ -5243,6 +5365,17 @@ export type EditableCellActivateProps = EditableCellActivateProps_2<unknown>;
 export { EditableCellButtonProps }
 
 // @public
+function editableCellController$1<TRow>(options: {
+    editing: EditableCellEditing$2<TRow> | undefined;
+    row: TRow;
+    column: ColumnDef$2<TRow>;
+    rowId: string;
+    rows: readonly TRow[];
+    columns: readonly ColumnDef$2<TRow>[];
+    rowKey: (row: TRow) => string;
+}): EditableCellController;
+
+// @public
 export function editableCellController<TRow>(options: {
     editing: EditableCellEditing<TRow> | undefined;
     row: TRow;
@@ -5254,6 +5387,11 @@ export function editableCellController<TRow>(options: {
 }): EditableCellController;
 
 // @public
+interface EditableCellEditing$2<TRow> extends EditingBundle<TRow> {
+    rowEditIcons?: RowEditIcons;
+}
+
+// @public
 export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
     rowEditIcons?: RowEditIcons;
 }
@@ -5263,7 +5401,7 @@ export interface EditableCellEditorCtrl {
     commitOnBlur: () => void;
     conflict?: boolean;
     draft: string;
-    editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
+    editor: NonNullable<ReturnType<typeof editableCellController$1>["editor"]>;
     error?: string;
     errorId: string;
     focusRef: (node: {
@@ -5275,7 +5413,7 @@ export interface EditableCellEditorCtrl {
         preventDefault: () => void;
         shiftKey?: boolean;
     }) => void;
-    selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
+    selectOptions: ReturnType<typeof editableCellController$1>["selectOptions"];
     setDraft: (value: string) => void;
     validating: boolean;
 }
@@ -5320,6 +5458,15 @@ export { extraHostFillStyle }
 export { eyeIcon }
 
 // @public
+interface FeatureMountContext$1 {
+    flush<T>(run: () => T): T;
+    flushAdmission(): void;
+    readonly injector: Injector;
+    readonly runtime: TableRuntime;
+    readonly state: FeatureState$1;
+}
+
+// @public
 export interface FeatureMountContext {
     flush<T>(run: () => T): T;
     flushAdmission(): void;
@@ -5329,6 +5476,12 @@ export interface FeatureMountContext {
 }
 
 export { FeatureNotice }
+
+// @public
+interface FeatureState$1 {
+    get<T>(key: FeatureStateKey<T>): Signal<T | undefined>;
+    set<T>(key: FeatureStateKey<T>, value: T | undefined): void;
+}
 
 // @public
 export interface FeatureState {
@@ -5505,11 +5658,38 @@ export function floatingStyle(boundary: TableAssistantBoundary): TableAssistantP
 export { focusEditorOnMount }
 
 // @public
+interface FooterContext$2<TRow> extends HeaderContext$2<TRow> {
+    readonly value: unknown;
+}
+
+// @public
 export interface FooterContext<TRow> extends HeaderContext<TRow> {
     readonly value: unknown;
 }
 
 export { formatMultiDraft }
+
+// @public
+interface GridFocus$2<TRow> {
+    readonly active: Signal<GridCell | null>;
+    readonly announcement: Signal<string>;
+    readonly cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
+    readonly cellAttrs: (column: ColumnDef$2<TRow>, index: number, col: number) => Attrs$2;
+    readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
+    readonly enabled: Signal<boolean>;
+    readonly fillHandleCell: Signal<GridCell | null>;
+    readonly fillHandleLabel: Signal<string>;
+    readonly fillPreview: Signal<CellRange | null>;
+    readonly focusCell: (cell: GridCell) => void;
+    readonly getFillHandleProps: () => Attrs$2;
+    readonly headerCellAttrs: (column: ColumnDef$2<TRow>, col: number) => Attrs$2;
+    readonly isColumnSelected: (col: number) => boolean;
+    readonly range: Signal<CellRange | null>;
+    readonly rowAttrs: (row: TRow, index: number) => Attrs$2;
+    readonly selectRange: (range: CellRange | null) => void;
+    readonly tableAttrs: () => Attrs$2;
+    readonly toggleColumn: (col: number) => void;
+}
 
 // @public
 export interface GridFocus<TRow> {
@@ -5565,11 +5745,11 @@ export { GROUPING_PANEL }
 
 // @public
 export interface GroupingOptions<TRow> {
-    readonly features: readonly AdaptTableFeature[];
+    readonly features: readonly AdaptTableFeature$2[];
     readonly injector?: Injector;
-    readonly locale?: MaybeSignalOptional<string>;
+    readonly locale?: MaybeSignalOptional$2<string>;
     readonly source: Signal<TableSource<TRow>>;
-    readonly table: Pick<DataTable<TRow>, "allColumns" | "rowKey">;
+    readonly table: Pick<DataTable$2<TRow>, "allColumns" | "rowKey">;
 }
 
 export { GroupingPanelAggregationRemoveProps }
@@ -5630,6 +5810,12 @@ export { groupRowParts }
 export { groupSelectionState }
 
 export { hasActiveHeaderFilter }
+
+// @public
+interface HeaderContext$2<TRow> {
+    readonly $implicit: ColumnDef$2<TRow>;
+    readonly column: ColumnDef$2<TRow>;
+}
 
 // @public
 export interface HeaderContext<TRow> {
@@ -5732,7 +5918,13 @@ export function launcherStyle(boundary: TableAssistantBoundary): TableAssistantP
 export { listFilterValues }
 
 // @public
+type MaybeSignal$1<T> = T | Signal<T>;
+
+// @public
 export type MaybeSignal<T> = T | Signal<T>;
+
+// @public
+type MaybeSignalOptional$2<T> = T | Signal<T | undefined>;
 
 // @public
 export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
@@ -5740,7 +5932,7 @@ export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
 // @public
 export interface MeasuredWindowScrollMarginOptions {
     readonly element: () => Element | null;
-    readonly enabled: MaybeSignal<boolean>;
+    readonly enabled: MaybeSignal$1<boolean>;
     readonly injector?: Injector;
 }
 
@@ -5749,10 +5941,25 @@ export { MergedCellStyle }
 export { mergedCellStyle }
 
 // @public
+interface MobileCardContext$2<TRow> extends Readonly<Omit<MobileCardModel<TRow>, "fields">> {
+    readonly $implicit: TRow;
+    readonly fields: readonly MobileCardField$2<TRow>[];
+    readonly row: TRow;
+}
+
+// @public
 export interface MobileCardContext<TRow> extends Readonly<Omit<MobileCardModel<TRow>, "fields">> {
     readonly $implicit: TRow;
     readonly fields: readonly MobileCardField<TRow>[];
     readonly row: TRow;
+}
+
+// @public
+interface MobileCardField$2<TRow> extends Omit<MobileCardField_2<TRow>, "column" | "label" | "value"> {
+    readonly column: ColumnDef$2<TRow>;
+    readonly context: CellContext$2<TRow>;
+    readonly label: string | undefined;
+    readonly value: TemplateRef<CellContext$2<TRow>>;
 }
 
 // @public
@@ -5764,6 +5971,9 @@ export interface MobileCardField<TRow> extends Omit<MobileCardField_2<TRow>, "co
 }
 
 export { mobileCardListStyle }
+
+// @public
+type MobileCardRenderer$2<TRow> = Renderer$2<MobileCardContext$2<TRow>>;
 
 // @public
 export type MobileCardRenderer<TRow> = Renderer<MobileCardContext<TRow>>;
@@ -5780,9 +5990,22 @@ export interface MultiSelectEditorSlots {
 }
 
 // @public
+interface NestedTable$1<TRow = unknown> {
+    readonly label?: string;
+    readonly table: Renderer$2<NestedTableContext$2<TRow>>;
+}
+
+// @public
 export interface NestedTable<TRow = unknown> {
     readonly label?: string;
     readonly table: Renderer<NestedTableContext<TRow>>;
+}
+
+// @public
+interface NestedTableContext$2<TRow = unknown> {
+    readonly $implicit: NestedTableDefaults;
+    readonly defaults: NestedTableDefaults;
+    readonly row: TRow;
 }
 
 // @public
@@ -5791,6 +6014,9 @@ export interface NestedTableContext<TRow = unknown> {
     readonly defaults: NestedTableDefaults;
     readonly row: TRow;
 }
+
+// @public
+type NestedTableFor$2<TRow> = (row: TRow) => NestedTable$1<TRow> | undefined;
 
 // @public
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
@@ -5839,6 +6065,9 @@ export { RELATIVE_PRESET_LABEL_KEYS }
 export { RELATIVE_PRESETS }
 
 export { renderedRowsOf }
+
+// @public
+type Renderer$2<TContext> = TemplateRef<TContext> | Type<unknown>;
 
 // @public
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
@@ -5922,6 +6151,12 @@ export { RowClickProps }
 export { rowClickProps }
 
 // @public
+interface RowDetailContext$2<TRow> {
+    readonly $implicit: TRow;
+    readonly row: TRow;
+}
+
+// @public
 export interface RowDetailContext<TRow> {
     readonly $implicit: TRow;
     readonly row: TRow;
@@ -5929,7 +6164,7 @@ export interface RowDetailContext<TRow> {
 
 // @public
 export interface RowDetailOptions {
-    readonly features: readonly AdaptTableFeature[];
+    readonly features: readonly AdaptTableFeature$2[];
     readonly injector?: Injector;
 }
 
@@ -5953,10 +6188,10 @@ export { rowEditControls }
 export { RowEditControlsOptions }
 
 // @public
-export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
+export function rowEditingSignature<TRow>(editing: EditableCellEditing$2<TRow> | undefined, rowId: string): string | null;
 
 // @public
-export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): boolean;
+export function rowIsDirty<TRow>(editing: EditableCellEditing$2<TRow> | undefined, rowId: string): boolean;
 
 export { RowMoveMenuSlotProps }
 
@@ -5990,11 +6225,29 @@ export type RowReorderState<TRow> = RowReorderState_2<TRow, DragEvent, KeyboardE
 
 // @public
 export interface RowReorderStateOptions<TRow> {
-    readonly features: readonly AdaptTableFeature[];
+    readonly features: readonly AdaptTableFeature$2[];
     readonly grouping?: Signal<RuntimeGrouping<TRow> | undefined>;
     readonly injector?: Injector;
     readonly source: Signal<TableSource<TRow>>;
-    readonly table: DataTable<TRow>;
+    readonly table: DataTable$2<TRow>;
+}
+
+// @public
+interface RowSelection$1 {
+    readonly allMatching: Signal<boolean>;
+    readonly clear: () => void;
+    readonly headerCheckboxAttrs: () => Attrs$2;
+    readonly headerState: Signal<HeaderSelectionState_2>;
+    readonly isSelected: (id: string) => boolean;
+    readonly replace: (ids: readonly string[] | undefined) => void;
+    readonly rowCheckboxAttrs: (id: string) => Attrs$2;
+    readonly selectAllMatching: () => void;
+    readonly selectedCount: Signal<number>;
+    readonly selectedIds: Signal<ReadonlySet<string>>;
+    readonly state: Signal<SelectionState>;
+    readonly toggle: (id: string) => void;
+    readonly toggleAll: () => void;
+    readonly toggleGroupLeaves: (ids: readonly string[]) => void;
 }
 
 // @public
@@ -6071,7 +6324,13 @@ export interface SidePanelSlots {
 }
 
 // @public
+type SlotComponent$2 = Type<unknown>;
+
+// @public
 export type SlotComponent = Type<unknown>;
+
+// @public
+type SlotFills$1 = ReadonlyMap<string, readonly SlotFill<SlotComponent$2>[]>;
 
 // @public
 export type SlotFills = ReadonlyMap<string, readonly SlotFill<SlotComponent>[]>;
@@ -6243,8 +6502,8 @@ export type TableQueryHandler = (query: TableQuery, info: {
 // @public
 export interface TableRowDetail<TRow> {
     readonly expansion: RowExpansionState;
-    readonly nested: NestedTableFor<TRow> | undefined;
-    readonly render: Renderer<RowDetailContext<TRow>> | undefined;
+    readonly nested: NestedTableFor$2<TRow> | undefined;
+    readonly render: Renderer$2<RowDetailContext$2<TRow>> | undefined;
 }
 
 // @public
@@ -6260,7 +6519,49 @@ export interface TableRowPinningOptions<TRow> {
 }
 
 // @public
-export function tableRuntimeFor<TRow>(table: DataTable<TRow>, source: Signal<TableSource<TRow>>, features: MaybeSignal<readonly AdaptTableFeature[]>, grouping?: Signal<RuntimeGrouping<TRow> | undefined>, options?: Signal<RuntimeTableOptions<TRow>>): TableRuntime<TRow>;
+export function tableRuntimeFor<TRow>(table: DataTable$2<TRow>, source: Signal<TableSource<TRow>>, features: MaybeSignal$1<readonly AdaptTableFeature$2[]>, grouping?: Signal<RuntimeGrouping<TRow> | undefined>, options?: Signal<RuntimeTableOptions<TRow>>): TableRuntime<TRow>;
+
+// @public
+export interface TableSurfaceView<TRow> {
+    readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
+    readonly body: Signal<readonly BodySlot<TRow>[]>;
+    readonly bodyCells: Signal<ReadonlyMap<string, readonly BodyCellView<TRow>[]>>;
+    readonly bodyColSpan: Signal<number>;
+    readonly cellSpanAppearance: CellSpanAppearance | undefined;
+    readonly classNames: Signal<DataTableClassNames$2>;
+    readonly columnIndex: Signal<ReadonlyMap<string, number>>;
+    readonly columns: Signal<readonly ColumnDef$2<TRow>[]>;
+    readonly columnSelect: boolean;
+    readonly columnSpacers: Signal<{
+        start: number;
+        end: number;
+    } | undefined>;
+    readonly density: Signal<TableDensity>;
+    readonly detailParent: Signal<NestedTableParent>;
+    readonly editableCells: Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
+    readonly editing: Signal<EditableCellEditing$2<TRow>> | undefined;
+    readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
+    readonly grid: GridFocus$2<TRow> | undefined;
+    readonly groupHeaders: Signal<{
+        readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
+        readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
+    }>;
+    readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
+    readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef$2<TRow>>> | undefined;
+    readonly renderCard: Signal<MobileCardRenderer$2<TRow> | undefined>;
+    readonly reorder: Signal<RowReorderState<TRow>> | undefined;
+    readonly reportHeaderHeight: (px: number) => void;
+    readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
+    readonly selection: RowSelection$1 | undefined;
+    readonly showActions: Signal<boolean>;
+    readonly showSummary: Signal<boolean>;
+    readonly stickyHead: Signal<CssProperties | undefined>;
+    readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
+    readonly table: DataTable$2<TRow>;
+    readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
+    readonly treeCellFilled: boolean;
+    readonly virtualization: Signal<TableVirtualization<TRow>>;
+}
 
 // @public
 export interface TableTree<TRow> {
@@ -6273,64 +6574,26 @@ export interface TableTree<TRow> {
 }
 
 // @public
-export interface TableView<TRow> {
-    readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
+export interface TableView<TRow> extends TableSurfaceView<TRow> {
     readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
-    readonly body: Signal<readonly BodySlot<TRow>[]>;
-    readonly bodyCells: Signal<ReadonlyMap<string, readonly BodyCellView<TRow>[]>>;
-    readonly bodyColSpan: Signal<number>;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
-    readonly cellSpanAppearance: CellSpanAppearance | undefined;
-    readonly classNames: Signal<DataTableClassNames>;
-    readonly columnIndex: Signal<ReadonlyMap<string, number>>;
     readonly columnMenu: boolean;
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
-    readonly columns: Signal<readonly ColumnDef<TRow>[]>;
-    readonly columnSelect: boolean;
-    readonly columnSpacers: Signal<{
-        start: number;
-        end: number;
-    } | undefined>;
     readonly commandPalette: Signal<CommandPaletteInjectOptions>;
     readonly confirm: ConfirmHandler;
     readonly contextMenu: Signal<TableContextMenuOptions<TRow> & {
         readonly children: (regionProps: Record<string, unknown>) => undefined;
     }>;
-    readonly density: Signal<TableDensity>;
-    readonly detailParent: Signal<NestedTableParent>;
-    readonly editableCells: Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
-    readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
-    readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
     readonly filters: FiltersView | undefined;
     readonly findBar: Signal<FindBarProps> | undefined;
-    readonly grid: GridFocus<TRow> | undefined;
-    readonly groupHeaders: Signal<{
-        readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
-        readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
-    }>;
-    readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
-    readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
     readonly isCellFlashing: (rowId: string, columnKey: string) => boolean;
     readonly markedCellAttrs: (column: ColumnDef<TRow>, index: number, col: number, rowId?: string) => Attrs;
-    readonly renderCard: Signal<MobileCardRenderer<TRow> | undefined>;
     readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
-    readonly reorder: Signal<RowReorderState<TRow>> | undefined;
-    readonly reportHeaderHeight: (px: number) => void;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
-    readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
     readonly rowMutations: Signal<RowMutationsState<TRow>>;
     readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
-    readonly selection: RowSelection | undefined;
-    readonly showActions: Signal<boolean>;
-    readonly showSummary: Signal<boolean>;
-    readonly stickyHead: Signal<CssProperties | undefined>;
-    readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
-    readonly table: DataTable<TRow>;
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
-    readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
-    readonly treeCellFilled: boolean;
-    readonly virtualization: Signal<TableVirtualization<TRow>>;
 }
 
 export { TOOLBAR_EXTRAS }
@@ -6347,10 +6610,10 @@ export { TreeCellProps }
 
 // @public
 export interface TreeOptions<TRow> {
-    readonly features: readonly AdaptTableFeature[];
+    readonly features: readonly AdaptTableFeature$2[];
     readonly injector?: Injector;
     readonly source: Signal<TableSource<TRow>>;
-    readonly table: Pick<DataTable<TRow>, "columns" | "rowKey">;
+    readonly table: Pick<DataTable$2<TRow>, "columns" | "rowKey">;
 }
 
 export { TreeToggleButtonProps }

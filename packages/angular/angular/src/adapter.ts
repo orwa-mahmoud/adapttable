@@ -263,6 +263,7 @@ export {
   type RuntimeTableOptions,
   tableRuntimeFor,
 } from "./layout/tableRuntime";
+export { type TableSurfaceView } from "./layout/tableSurfaceHost";
 export { AdaptExtraRowContent } from "./rows/extraRowContent";
 export {
   injectRowReorder,

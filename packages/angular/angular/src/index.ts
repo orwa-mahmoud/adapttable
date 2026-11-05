@@ -93,6 +93,7 @@ export {
   type RowEditHandler,
   type RowEditingInjectOptions,
 } from "./editing/editing";
+export { editingBundleFor } from "./editing/editingBundle";
 export {
   type CellSaveStateInjectOptions,
   injectCellSaveState,
@@ -166,10 +167,33 @@ export {
   type GroupPagingState,
   injectGroupPaging,
 } from "./grouping/groupPaging";
+export {
+  type GroupingOptions,
+  injectGrouping,
+  type TableGrouping,
+} from "./grouping/tableGrouping";
 export { injectIsMobile, type IsMobileOptions } from "./hooks/isMobile";
 export { injectMediaQuery } from "./hooks/mediaQuery";
 export { injectPrefersReducedMotion } from "./hooks/prefersReducedMotion";
 export { type DataTableClassNames } from "./layout/dataTableClassNames";
+export {
+  SURFACE_EDITING,
+  SURFACE_GRID,
+  SURFACE_GROUPING,
+  SURFACE_HANDLES,
+  SURFACE_OCCUPIED,
+  type SurfaceHandles,
+  type SurfaceOccupation,
+} from "./layout/surfaceChannels";
+export {
+  type BodyCellView,
+  type BodyRow,
+  type BodySlot,
+  injectTableSurfaceHost,
+  type RowActionsCell,
+  type TableSurfaceHostOptions,
+  type TableSurfaceView,
+} from "./layout/tableSurfaceHost";
 export {
   type DensityOptions,
   type DensityState,
@@ -208,6 +232,7 @@ export {
   type RowPinningState,
   type RowPinSide,
 } from "./rows/rowPinning";
+export { type RowReorderState } from "./rows/rowReorder";
 export {
   injectRowSelection,
   type RowSelection,
@@ -256,6 +281,8 @@ export {
   type NestedTableFor,
   type RowDetailContext,
 } from "./tree/nestedTableContracts";
+export { type TableRowDetail } from "./tree/tableRowDetail";
+export { type TableTree } from "./tree/tableTree";
 export {
   injectTreeExpansion,
   type TreeExpansionOptions,

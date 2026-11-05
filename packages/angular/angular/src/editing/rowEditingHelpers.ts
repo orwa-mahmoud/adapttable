@@ -1,8 +1,9 @@
-import type { EditableCellEditing } from "@adapttable/angular";
 import {
   rowEditingSignature as coreRowEditingSignature,
   rowIsDirty as coreRowIsDirty,
 } from "@adapttable/core";
+
+import type { EditableCellEditing } from "./editableCellController";
 
 /**
  * Whether a row holds any dirty cell mark.

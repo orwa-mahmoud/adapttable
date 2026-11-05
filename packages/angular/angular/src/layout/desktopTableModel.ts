@@ -45,13 +45,13 @@ import { type TableTree } from "../tree/tableTree";
 import {
   type BodyCellView,
   type BodyRow,
-  type TableView,
-} from "./dataTableShell";
+  type TableSurfaceView,
+} from "./tableSurfaceHost";
 
 /** Shared AdaptDesktopTable signals; adapters supply native templates and controls. @public */
 @Directive({})
 export abstract class AdaptDesktopTableModel<TRow> {
-  readonly view = input.required<TableView<TRow>>();
+  readonly view = input.required<TableSurfaceView<TRow>>();
   readonly rowKey = input.required<(row: TRow) => string>();
   readonly maxHeight = input<number | string>();
   protected readonly filterSlots = { header: FILTER_HEADER };

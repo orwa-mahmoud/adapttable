@@ -7,12 +7,6 @@
  * and when it reaches the host differ.
  */
 import {
-  type BatchEditingState,
-  type ColumnDef,
-  type EditableCellEditing,
-  type RowEditingState,
-} from "@adapttable/angular";
-import {
   batchEditBarModel,
   batchEditErrorId,
   type CellConflictAsk,
@@ -39,7 +33,9 @@ import {
   type Type,
 } from "@angular/core";
 
+import type { ColumnDef } from "../columnDef";
 import { AdaptControl } from "../control";
+import type { EditableCellEditing } from "./editableCellController";
 import {
   AdaptCellConflictNotice,
   AdaptEditableCellDisplay,
@@ -47,9 +43,10 @@ import {
   type EditableCellEditorCtrl,
   type EditableCellSlots,
 } from "./editableCellShared";
+import type { BatchEditingState, RowEditingState } from "./editing";
 
 export type { EditableCellEditorCtrl } from "./editableCellShared";
-export type { BatchEditingState, RowEditingState } from "@adapttable/angular";
+export type { BatchEditingState, RowEditingState } from "./editing";
 export type { EditableColumnLike, TableLabels } from "@adapttable/core";
 export {
   type RowEditConflict,

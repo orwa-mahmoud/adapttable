@@ -6,11 +6,6 @@
  * logical (leading / trailing), so a wide RTL table scrolls correctly.
  */
 import {
-  type ColumnDef,
-  type MaybeSignal,
-  readMaybe,
-} from "@adapttable/angular";
-import {
   type ColumnViewport,
   columnWindowPlan,
   readColumnViewport,
@@ -24,6 +19,9 @@ import {
   type Signal,
   signal,
 } from "@angular/core";
+
+import { type ColumnDef } from "../columnDef";
+import { type MaybeSignal, readMaybe } from "../store";
 
 /**
  * Options for {@link injectColumnWindow}.

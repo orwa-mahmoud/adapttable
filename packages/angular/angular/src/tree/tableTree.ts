@@ -1,12 +1,4 @@
 import {
-  type AdaptTableFeature,
-  type DataTable,
-  featureOptionsOf,
-  injectLazyChildren,
-  injectTreeExpansion,
-} from "@adapttable/angular";
-import type { TreeFeatureOptions } from "@adapttable/angular/features";
-import {
   buildTreeEntries,
   closeFailedTreeNode,
   type TableSource,
@@ -28,6 +20,12 @@ import {
   untracked,
 } from "@angular/core";
 
+import type { DataTable } from "../dataTable";
+import { type AdaptTableFeature, featureOptionsOf } from "../featureHost";
+import type { MaybeSignal } from "../store";
+import { injectLazyChildren } from "./lazyChildren";
+import { injectTreeExpansion } from "./treeExpansion";
+
 /**
  * The live tree while `tree()` is composed.
  *
@@ -46,6 +44,17 @@ export interface TableTree<TRow> {
   readonly failedIds: ReadonlySet<string>;
   /** The column that carries the chevron. */
   readonly columnKey: string | undefined;
+}
+
+/** The `tree` feature's options, read from the composed feature list. */
+interface DeclaredTree<TRow> {
+  readonly getChildren?: (row: TRow) => readonly TRow[] | undefined;
+  readonly getParentId?: (row: TRow) => string | undefined;
+  readonly hasChildren?: (row: TRow) => boolean;
+  readonly treeColumn?: string;
+  readonly onLoadChildren?: (row: TRow) => void | Promise<void>;
+  readonly expandedIds?: MaybeSignal<readonly string[]>;
+  readonly onExpandedIdsChange?: (ids: string[]) => void;
 }
 
 /**
@@ -81,7 +90,7 @@ export function injectTree<TRow>(
   if (!features.some((feature) => feature.id === "tree")) return undefined;
   if (!options.injector) assertInInjectionContext(injectTree);
   const injector = options.injector ?? inject(Injector);
-  const declared = featureOptionsOf(features) as TreeFeatureOptions<TRow>;
+  const declared = featureOptionsOf(features) as DeclaredTree<TRow>;
   const { getChildren, getParentId, hasChildren } = declared;
   const rowKey = (row: TRow): string => table.rowKey(row);
 

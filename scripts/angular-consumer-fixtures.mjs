@@ -56,7 +56,9 @@ export function angularBaseImports(folder) {
   }
   const code = readFileSync(join(packageDir(folder), target), "utf8");
   return [
-    ...new Set([...code.matchAll(/from "(@adapttable\/[^"]+)"/g)].map((m) => m[1])),
+    ...new Set(
+      [...code.matchAll(/from "(@adapttable\/[^"]+)"/g)].map((m) => m[1])
+    ),
   ].sort();
 }
 
@@ -195,6 +197,58 @@ const BASE_ABSENT = [
   "xlsxWriter",
 ];
 
+const LEAN = `import { Component, input } from "@angular/core";
+import { injectTableSurfaceHost } from "@adapttable/angular";
+
+type Person = ${PERSON};
+
+const columns = [
+  { key: "name", header: "Name" },
+  { key: "team", header: "Team" },
+];
+
+@Component({
+  selector: "consumer-app",
+  standalone: true,
+  template: \`@for (slot of view().body(); track $index) { <span></span> }\`,
+})
+export class ConsumerApp {
+  readonly data = input.required<Person[]>();
+  readonly view = injectTableSurfaceHost({
+    data: this.data,
+    columns,
+    rowKey: (row: Person) => row.id,
+  });
+}
+`;
+
+const LEAN_COMPOSED = `import { Component, input } from "@angular/core";
+import { injectTableSurfaceHost } from "@adapttable/angular";
+import { cellNavigation, editing, grouping } from "@adapttable/angular/features";
+
+type Person = ${PERSON};
+
+const columns = [
+  { key: "name", header: "Name" },
+  { key: "team", header: "Team" },
+];
+
+@Component({
+  selector: "consumer-app",
+  standalone: true,
+  template: \`@for (slot of view().body(); track $index) { <span></span> }\`,
+})
+export class ConsumerApp {
+  readonly data = input.required<Person[]>();
+  readonly view = injectTableSurfaceHost({
+    data: this.data,
+    columns,
+    rowKey: (row: Person) => row.id,
+    features: [grouping("team"), cellNavigation(), editing(() => {})],
+  });
+}
+`;
+
 const HEADLESS = `import { Component, input } from "@angular/core";
 import type { ColumnDef } from "@adapttable/angular";
 import { injectDataTable, injectFrontendData } from "@adapttable/angular";
@@ -269,6 +323,8 @@ const CEILINGS = {
   "angular · unstyled + exportCsv": { own: 142, app: 252 },
   "angular · unstyled combination": { own: 156, app: 268 },
   "angular · unstyled + preset": { own: 173, app: 286 },
+  "angular · lean table": { own: 56, app: 96 },
+  "angular · lean grouping navigation editing": { own: 82, app: 121 },
 };
 
 /** The measured own share and complete app, in KiB, for one fixture. */
@@ -288,16 +344,23 @@ export function angularConsumerFixtures(kits = angularKits()) {
     throw new Error("The Angular matrix needs the unstyled kit");
   }
   const bases = kits.map((kit) =>
-    rendered(`angular · ${kit.name.replace("@adapttable/", "")} table`, kit, [], {
-      functionality: `${kit.name} base table, no optional feature`,
-      absent: BASE_ABSENT,
-      ...ceilings(`angular · ${kit.name.replace("@adapttable/", "")} table`),
-    })
+    rendered(
+      `angular · ${kit.name.replace("@adapttable/", "")} table`,
+      kit,
+      [],
+      {
+        functionality: `${kit.name} base table, no optional feature`,
+        absent: BASE_ABSENT,
+        ...ceilings(`angular · ${kit.name.replace("@adapttable/", "")} table`),
+      }
+    )
   );
   const feature = (key, functionality, absent = BASE_ABSENT) =>
     rendered(`angular · unstyled + ${key}`, native, [FEATURES[key]], {
       functionality,
-      absent: absent.filter((marker) => !FEATURES[key].present.includes(marker)),
+      absent: absent.filter(
+        (marker) => !FEATURES[key].present.includes(marker)
+      ),
       ...ceilings(`angular · unstyled + ${key}`),
     });
   return [
@@ -314,14 +377,58 @@ export function angularConsumerFixtures(kits = angularKits()) {
       ...ceilings("angular · headless table"),
       code: HEADLESS,
     },
+    {
+      name: "angular · lean table",
+      kind: "angular-consumer",
+      framework: "angular",
+      pkg: "angular",
+      rendered: true,
+      peerPolicy: "own-share",
+      functionality: "Lean structural host with no optional feature",
+      present: ["injectTableSurfaceHost"],
+      absent: [
+        "AdaptDataTable",
+        "coreGrouping",
+        "createGridFocusController",
+        "injectCellEditing",
+        "pdfWriter",
+        "xlsxWriter",
+      ],
+      ...ceilings("angular · lean table"),
+      code: LEAN,
+    },
+    {
+      name: "angular · lean grouping navigation editing",
+      kind: "angular-consumer",
+      framework: "angular",
+      pkg: "angular",
+      rendered: true,
+      peerPolicy: "own-share",
+      functionality:
+        "Lean structural host with grouping, cell navigation and editing",
+      present: [
+        "injectTableSurfaceHost",
+        "coreGrouping",
+        "createGridFocusController",
+        "injectCellEditing",
+      ],
+      absent: ["AdaptDataTable", "pdfWriter", "xlsxWriter"],
+      ...ceilings("angular · lean grouping navigation editing"),
+      code: LEAN_COMPOSED,
+    },
     ...bases,
     feature("grouping", "Native table with row grouping"),
-    rendered("angular · unstyled grouping + aggregation", native, [FEATURES.grouping], {
-      functionality: "Native table, row grouping and a summary aggregate",
-      summary: 'aggregate({ points: "sum" })',
-      absent: BASE_ABSENT.filter((marker) => marker !== "coreGrouping"),
-      ...ceilings("angular · unstyled grouping + aggregation"),
-    }),
+    rendered(
+      "angular · unstyled grouping + aggregation",
+      native,
+      [FEATURES.grouping],
+      {
+        functionality: "Native table, row grouping and a summary aggregate",
+        summary: 'aggregate({ points: "sum" })',
+        absent: BASE_ABSENT.filter((marker) => marker !== "coreGrouping"),
+        ...ceilings("angular · unstyled grouping + aggregation"),
+      }
+    ),
     feature("editing", "Native table with cell editing"),
     feature("filters", "Native table with the filter drawer"),
     feature("virtualize", "Native table with row virtualization"),
