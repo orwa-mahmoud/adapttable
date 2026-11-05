@@ -440,8 +440,9 @@ names the path. Public entry files directly under `src/` may re-export.
 `utils/` sits at the domain rank, so a helper may type CSS.
 
 The incremental cache is `rows/incremental.ts`. Runtime owners are every
-module under `rows/` and `engine/createTableEngine.ts`. A runtime import from
-any other module is a reach. Type-only edges are reported on their own line
+module under `rows/` and `engine/fullRowModel.ts`. A runtime import from
+any other module is a reach. The table session calls that model; it does
+not import the cache itself. Type-only edges are reported on their own line
 and are not counted as JavaScript.
 
 The current violation set is an exact edge list. A new edge fails, and a

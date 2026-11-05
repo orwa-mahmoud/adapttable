@@ -25,7 +25,7 @@
   "lowMaxRank": 20,
   "presentationMinRank": 40,
   "incrementalModule": "rows/incremental.ts",
-  "incrementalOwners": ["engine/createTableEngine.ts"],
+  "incrementalOwners": ["engine/fullRowModel.ts"],
   "knownViolations": [
     {
       "id": "grouping-reaches-incremental-cache",
@@ -1866,6 +1866,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "selection/allMatchingScope.ts#createAllMatchingScope",
+      "subpaths": ["."]
+    },
+    {
+      "name": "createBasicTableEngine",
+      "kind": "runtime",
+      "module": "engine/basicTableEngine.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "engine/basicTableEngine.ts#createBasicTableEngine",
       "subpaths": ["."]
     },
     {

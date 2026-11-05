@@ -2110,6 +2110,9 @@ export function coveredAddressSet<TRow>(options: {
 export function createAllMatchingScope(): AllMatchingScope;
 
 // @public
+export function createBasicTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
+
+// @public
 export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>): BatchEditStore<TRow>;
 
 // @public

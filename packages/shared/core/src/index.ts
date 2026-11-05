@@ -9,6 +9,7 @@
  */
 
 /* ── Types ─────────────────────────────────────────────────────────── */
+export { createBasicTableEngine } from "./engine/basicTableEngine";
 export {
   cellSortValue,
   cellValue,
