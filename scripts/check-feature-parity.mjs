@@ -21,7 +21,9 @@ import { readFileSync } from "node:fs";
 import { basename, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { checkBindingCapabilities } from "./binding-capabilities.mjs";
 import { inheritedBindingSources } from "./binding-inheritance.mjs";
+import { checkConformanceRegistry } from "./check-conformance-registry.mjs";
 import { REPORT_REFERENCES } from "./check-parts-parity.mjs";
 import {
   bindingDir,
@@ -426,14 +428,29 @@ function printReport() {
 
 function main() {
   const { problems, kits, subpaths } = checkFeatureParity();
-  if (problems.length > 0) {
-    console.error(`feature parity: ${problems.length} problem(s)\n`);
-    for (const problem of problems) console.error(`  ${problem}`);
+  const capabilities = checkBindingCapabilities();
+  const registry = checkConformanceRegistry();
+  const all = [
+    ...problems,
+    ...capabilities.problems,
+    ...registry.problems,
+  ];
+  if (all.length > 0) {
+    console.error(`feature parity: ${all.length} problem(s)\n`);
+    for (const problem of all) console.error(`  ${problem}`);
     process.exit(1);
   }
   console.log(
     `feature parity: ${kits} kits share ${subpaths} subpaths ` +
       `and pass core's header props through whole`
+  );
+  console.log(
+    `binding capabilities: ${Object.values(capabilities.found)
+      .map((rows) => rows.length)
+      .join("/")}`
+  );
+  console.log(
+    `conformance registry: ${registry.kits} kits register the shared suite`
   );
 }
 

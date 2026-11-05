@@ -6,5 +6,10 @@ const theme = createTheme();
 
 /** Render a component tree wrapped in a default MUI `ThemeProvider`. */
 export function renderMui(ui: ReactElement): RenderResult {
-  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+  const view = render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+  return {
+    ...view,
+    rerender: (next) =>
+      view.rerender(<ThemeProvider theme={theme}>{next}</ThemeProvider>),
+  };
 }

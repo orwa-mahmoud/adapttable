@@ -10,7 +10,7 @@ import {
   type ConformanceTest,
 } from "@adapttable/core/conformance";
 import { expect, vi } from "vitest";
-import { type App, createApp, nextTick, type VNode } from "vue";
+import { type App, createApp, nextTick, ref, type VNode } from "vue";
 
 import type { CellRange, DataTableProps } from "../src/adapter";
 import type {
@@ -20,7 +20,7 @@ import type {
   rowReorder,
   virtualize,
 } from "../src/features";
-import type { ColumnDef, TableQueryHandler } from "../src/index";
+import type { ColumnDef } from "../src/index";
 
 interface NativeKit {
   name: string;
@@ -63,7 +63,6 @@ interface NativeScenario extends ConformanceScenario {
   isCellFlashing?: (rowId: string, columnKey: string) => boolean;
   searchPlaceholder?: string;
   mode?: "frontend" | "server";
-  onQueryChange?: TableQueryHandler;
   total?: number;
   /** Table labels beyond the neutral suite's; they replace `labels`. */
   tableLabels?: TableLabels;
@@ -126,17 +125,39 @@ export function nativeConformanceDriver(kit: NativeKit): NativeDriver {
         isCellFlashing: scenario.isCellFlashing,
         searchPlaceholder: scenario.searchPlaceholder,
         mode: scenario.mode,
-        onQueryChange: scenario.onQueryChange,
+        onQueryChange:
+          scenario.onQueryChange === undefined
+            ? undefined
+            : (query, info) => {
+                scenario.onQueryChange?.(query, info);
+              },
         total: scenario.total,
       };
       const container = document.createElement("div");
       document.body.append(container);
-      const app = createApp({ render: () => kit.render(props) });
+      const tick = ref(0);
+      const app = createApp({
+        setup: () => () => {
+          const generation = tick.value;
+          const flash = scenario.isCellFlashing;
+          return kit.render({
+            ...props,
+            isCellFlashing: flash
+              ? (rowId, columnKey) =>
+                  generation >= 0 && flash(rowId, columnKey) === true
+              : undefined,
+          });
+        },
+      });
       kit.install?.(app);
       app.mount(container);
       return {
         container,
         ready: nextTick(),
+        refresh: () => {
+          tick.value += 1;
+          return nextTick();
+        },
         unmount: () => {
           app.unmount();
           container.remove();
@@ -430,14 +451,16 @@ export function nativeServerConformanceTests(
     {
       name: "fetches the page from onQueryChange and shows the host's rows",
       async run() {
-        const fetch = vi.fn<TableQueryHandler>();
+        const fetch = vi.fn<NonNullable<ConformanceScenario["onQueryChange"]>>();
         const view = driver.mount({
           rows: CONFORMANCE_ROWS.slice(0, 2),
           columns: CONFORMANCE_COLUMNS,
           tableLabel: "People",
           pageSize: 1,
           total: 3,
-          onQueryChange: fetch,
+          onQueryChange: (query, info) => {
+            fetch(query, info);
+          },
         });
         try {
           await view.ready;
@@ -466,13 +489,16 @@ export function nativeServerConformanceTests(
     {
       name: 'tells a mode="frontend" table\'s onQueryChange what changed',
       async run() {
-        const notice = vi.fn<TableQueryHandler>();
+        const notice =
+          vi.fn<NonNullable<ConformanceScenario["onQueryChange"]>>();
         const view = driver.mount({
           rows: CONFORMANCE_ROWS,
           columns: CONFORMANCE_COLUMNS,
           tableLabel: "People",
           mode: "frontend",
-          onQueryChange: notice,
+          onQueryChange: (query, info) => {
+            notice(query, info);
+          },
         });
         try {
           await view.ready;

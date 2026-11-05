@@ -54,6 +54,8 @@ import {
   entryExports,
   summarize,
 } from "./api-warnings.mjs";
+import { checkBindingCapabilities } from "./binding-capabilities.mjs";
+import { checkConformanceRegistry } from "./check-conformance-registry.mjs";
 import { packageDir } from "./packages.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -431,5 +433,20 @@ if (!LOCAL) {
     reports: generatedReports,
     success: ok,
   });
+}
+if (!scoped) {
+  const capabilities = checkBindingCapabilities();
+  const registry = checkConformanceRegistry();
+  const extra = [...capabilities.problems, ...registry.problems];
+  if (extra.length > 0) {
+    console.error(
+      `\napi-reports: ${extra.length} binding capability or conformance registration problem(s)\n  ${extra.join("\n  ")}`
+    );
+    ok = false;
+  } else {
+    console.log(
+      "api-reports: binding capabilities and conformance registration match"
+    );
+  }
 }
 if (!ok) process.exit(1);

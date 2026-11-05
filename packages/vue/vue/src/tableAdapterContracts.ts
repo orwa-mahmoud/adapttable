@@ -347,6 +347,10 @@ export interface DataTableProps<TRow> {
   readonly locale?: string;
   readonly searchable?: boolean;
   readonly searchDebounceMs?: number;
+  /** Stick the header while the body scrolls. Inside `maxHeight`, it sticks at 0. */
+  readonly stickyHeader?: boolean;
+  /** Page offset for a sticky header, in pixels. Ignored inside a scroll box. */
+  readonly stickyTop?: number;
   /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
   readonly searchPlaceholder?: string;
   readonly forceMobile?: boolean;

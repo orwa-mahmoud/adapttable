@@ -31,6 +31,7 @@ export interface ConformanceExpectation {
     toBe(expected: unknown): void;
     toBeNull(): void;
     toEqual(expected: unknown): void;
+    toHaveLength(expected: number): void;
 }
 
 // @public
@@ -49,6 +50,7 @@ export interface ConformanceHarness {
 export interface ConformanceLabels {
     readonly nextPage?: string;
     readonly noData?: string;
+    readonly searchPlaceholder?: string;
     readonly sortedBy?: (info: {
         readonly column: string;
         readonly ascending: boolean;
@@ -59,6 +61,7 @@ export interface ConformanceLabels {
 export interface ConformanceMount {
     readonly container: HTMLElement;
     readonly ready?: Promise<void>;
+    readonly refresh?: () => void | Promise<void>;
     readonly unmount: () => void;
 }
 
@@ -74,15 +77,28 @@ export interface ConformanceScenario {
     readonly columns: readonly ConformanceColumn[];
     readonly dir?: "ltr" | "rtl";
     readonly groupBy?: "name" | "age";
+    readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
     readonly labels?: ConformanceLabels;
     readonly mobile?: boolean;
+    readonly mode?: "frontend" | "server";
     readonly navigable?: boolean;
     readonly onCellEdit?: (rowId: string, columnKey: string, value: unknown) => void;
+    readonly onQueryChange?: (query: {
+        readonly page?: number;
+        readonly limit?: number;
+        readonly sortBy?: string;
+        readonly sortDir?: string;
+    }, info: {
+        readonly signal: AbortSignal;
+    }) => void;
+    readonly onRowClick?: (row: ConformanceRow) => void;
     readonly onRowReorder?: (from: number, to: number, rowId: string) => void;
     readonly pageSize?: number;
     readonly rows: readonly ConformanceRow[];
+    readonly searchPlaceholder?: string;
     readonly selectable?: boolean;
     readonly tableLabel: string;
+    readonly total?: number;
     readonly virtualize?: boolean;
 }
 

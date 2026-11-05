@@ -490,6 +490,8 @@ export function useDataTableShell<TRow>(
     forceMobile: isMobile,
     source: viewSource,
     selection: selection.value,
+    stickyTop:
+      resolved.value.maxHeight != null ? 0 : resolved.value.stickyTop,
   }));
   watch(
     () => {

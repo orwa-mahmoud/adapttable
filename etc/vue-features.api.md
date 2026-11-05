@@ -1177,6 +1177,8 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly selection?: RowSelection;
     // (undocumented)
     readonly source: MaybeRefOrGetter<TableSource<TRow>>;
+    readonly stickyHeader?: MaybeRefOrGetterOptional<boolean>;
+    readonly stickyTop?: MaybeRefOrGetterOptional<number>;
     // (undocumented)
     readonly tableLabel?: MaybeRefOrGetterOptional<string>;
 }

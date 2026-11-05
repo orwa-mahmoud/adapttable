@@ -8,5 +8,9 @@ import type { ReactElement } from "react";
  * its tokens, accent, and radius. Mirrors Chakra's `renderChakra` helper.
  */
 export function renderRadix(ui: ReactElement): RenderResult {
-  return render(<Theme>{ui}</Theme>);
+  const view = render(<Theme>{ui}</Theme>);
+  return {
+    ...view,
+    rerender: (next) => view.rerender(<Theme>{next}</Theme>),
+  };
 }

@@ -1540,6 +1540,8 @@ export interface DataTableProps<TRow> {
     readonly skeletonRows?: number;
     // (undocumented)
     readonly source?: TableSource<TRow>;
+    readonly stickyHeader?: boolean;
+    readonly stickyTop?: number;
     readonly summaryRow?: SummaryRowFn<TRow>;
     readonly supports?: QuerySupport;
     // (undocumented)
@@ -4271,6 +4273,8 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly selection?: RowSelection;
     // (undocumented)
     readonly source: MaybeRefOrGetter<TableSource<TRow>>;
+    readonly stickyHeader?: MaybeRefOrGetterOptional<boolean>;
+    readonly stickyTop?: MaybeRefOrGetterOptional<number>;
     // (undocumented)
     readonly tableLabel?: MaybeRefOrGetterOptional<string>;
 }
