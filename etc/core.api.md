@@ -3605,6 +3605,12 @@ export function filterExportView<TRow>(view: readonly ExportViewEntry<TRow>[], s
 export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
 
 // @public
+export interface FilteringContribution<TRow> {
+    readonly defs?: readonly FilterDef<TRow>[];
+    readonly registry?: FilterTypeRegistry;
+}
+
+// @public
 export function filterLabel(def: Pick<FilterDef, "key" | "label">): string;
 
 // @public
@@ -8789,6 +8795,7 @@ export interface TableRuntimeView<TRow = unknown> {
     };
     readonly editing?: EditingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
+    readonly filtering?: FilteringContribution<TRow>;
     readonly filterRegistry?: FilterTypeRegistry;
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: GroupingContribution<TRow>;

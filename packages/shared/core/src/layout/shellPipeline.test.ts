@@ -272,6 +272,35 @@ describe("tableRuntimeView", () => {
     expect(view.columnLayout).toBeUndefined();
     expect(view.editing).toBeUndefined();
     expect(view.pinning?.setRowPin).toBeUndefined();
+    expect(view.filtering).toBeUndefined();
+    expect(view.filterDefs).toBeUndefined();
+    expect(view.filterRegistry).toBeUndefined();
+  });
+
+  it("projects the host filter catalog and leaves applied extras on the query", () => {
+    const defs = [{ key: "name", type: "text" as const }];
+    const registry = { types: {} };
+    const extra = { name: "Ada" };
+    const view = tableRuntimeView(
+      makeChrome({
+        filterDefs: defs,
+        filterRegistry: registry as never,
+        source: makeSource({ extra }),
+      }),
+      {}
+    );
+    expect(view.filtering?.defs).toBe(defs);
+    expect(view.filtering?.registry).toBe(registry);
+    expect(view.filterDefs).toBe(defs);
+    expect(view.filterRegistry).toBe(registry);
+    expect(view.query?.extra).toBe(extra);
+    const registryOnly = tableRuntimeView(
+      makeChrome({ filterRegistry: registry as never }),
+      {}
+    );
+    expect(registryOnly.filtering?.defs).toBeUndefined();
+    expect(registryOnly.filtering?.registry).toBe(registry);
+    expect(registryOnly.filterDefs).toBeUndefined();
   });
 
   it("labels grouping columns by string header, mobile label, then key", () => {

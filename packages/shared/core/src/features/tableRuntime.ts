@@ -14,6 +14,7 @@ import type { QueryAggregate } from "../contracts/query";
 import type { TableSourceCapabilities } from "../contracts/source";
 import type { NeutralTable } from "../engine/neutralTable";
 import type { FilterDef } from "../filters/filterDefs";
+import type { FilteringContribution } from "../filters/filterFormModel";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { RowPinSide } from "../rows/rowPinModel";
@@ -118,11 +119,25 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly clearExtras?: () => void;
   };
   /**
+   * The filter catalog the host published.
+   *
+   * {@link filterDefs} and {@link filterRegistry} are this contribution's
+   * fields, projected so existing readers keep those names. Applied values
+   * stay on {@link TableRuntimeView.query}.
+   */
+  readonly filtering?: FilteringContribution<TRow>;
+  /**
    * Declarative filter definitions the live chrome resolved. Absent when
    * the host never published defs (a custom form with no catalog).
+   *
+   * The same array as {@link FilteringContribution.defs}.
    */
   readonly filterDefs?: readonly FilterDef<TRow>[];
-  /** Type registry those defs were built against. */
+  /**
+   * Type registry those defs were built against.
+   *
+   * The same registry as {@link FilteringContribution.registry}.
+   */
   readonly filterRegistry?: FilterTypeRegistry;
   /**
    * Declared source capabilities from the live `TableSource`, when the

@@ -660,6 +660,7 @@ export {
 export type { ChipLabelResolver } from "./filters/filterDefs";
 export {
   type FilterFormSource,
+  type FilteringContribution,
   listFilterValues,
 } from "./filters/filterFormModel";
 export { formulaSlice } from "./formula/formulaUrlSlice";

@@ -27,6 +27,7 @@ import {
 import { deriveRuntimeOperations } from "../features/runtimeOperations";
 import type { TableRuntimeView } from "../features/tableRuntime";
 import type { FilterDef } from "../filters/filterDefs";
+import { filteringContributionOf } from "../filters/filterFormModel";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { RowPinSide } from "../rows/rowPinModel";
 import type { TableSource } from "../source/TableSource";
@@ -279,6 +280,10 @@ export function tableRuntimeView<TRow>(
     host: chrome.grouping,
     feature: chrome.featureGrouping,
   });
+  const filtering = filteringContributionOf({
+    defs: chrome.filterDefs,
+    registry: chrome.filterRegistry,
+  });
   return {
     rows: source.rows,
     visibleRows: renderedRowsOf({
@@ -305,8 +310,9 @@ export function tableRuntimeView<TRow>(
       setExtras: source.setExtras,
       clearExtras: source.clearExtras,
     },
-    filterDefs: chrome.filterDefs,
-    filterRegistry: chrome.filterRegistry,
+    filtering,
+    filterDefs: filtering?.defs,
+    filterRegistry: filtering?.registry,
     grouping,
     groupingState: {
       groupBy: source.groupBy,

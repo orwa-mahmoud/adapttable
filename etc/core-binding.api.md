@@ -3106,6 +3106,12 @@ export interface FilterHeaderSlots<TNode = unknown> {
 }
 
 // @public
+export interface FilteringContribution<TRow> {
+    readonly defs?: readonly FilterDef<TRow>[];
+    readonly registry?: FilterTypeRegistry;
+}
+
+// @public
 export interface FilterOption {
     label: string;
     value: string;
@@ -6660,6 +6666,7 @@ export interface TableRuntimeView<TRow = unknown> {
     };
     readonly editing?: EditingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
+    readonly filtering?: FilteringContribution<TRow>;
     readonly filterRegistry?: FilterTypeRegistry;
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: GroupingContribution<TRow>;

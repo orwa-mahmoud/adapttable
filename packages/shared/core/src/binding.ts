@@ -715,6 +715,7 @@ export {
 export type { FilterEngine } from "./filters/filterEngine";
 export type {
   FilterFormSource,
+  FilteringContribution,
   FiltersFormSlotProps,
 } from "./filters/filterFormModel";
 export type {

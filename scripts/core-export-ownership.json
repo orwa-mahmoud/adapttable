@@ -11240,6 +11240,17 @@
       "subpaths": [".", "./binding"]
     },
     {
+      "name": "FilteringContribution",
+      "kind": "type",
+      "module": "filters/filterFormModel.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterFormModel.ts#FilteringContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "FilterOp",
       "kind": "type",
       "module": "filters/operators.ts",
