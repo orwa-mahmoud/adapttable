@@ -80,6 +80,7 @@ import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FindInTableState } from '@adapttable/core/binding';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
@@ -788,6 +789,7 @@ export interface FromStoreOptions {
 // @public
 export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "injector"> {
     readonly columns?: MaybeSignal<readonly ColumnMetadata<TRow>[]>;
+    readonly createEngine?: MaybeSignalOptional<FrontendEngineFactory<TRow>>;
     readonly data: MaybeSignal<readonly TRow[]>;
     readonly error?: MaybeSignalOptional<Error | null>;
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
@@ -1502,6 +1504,7 @@ export type TableAssistantProps = TableAssistantProps_2<TableAssistantNode>;
 export interface TableDataOptions<TRow> extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
     readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
     readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
+    readonly createEngine?: MaybeSignalOptional<FrontendEngineFactory<TRow>>;
     readonly data?: MaybeSignalOptional<readonly TRow[]>;
     readonly engine?: FilterEngine;
     readonly error?: MaybeSignalOptional<Error | null>;

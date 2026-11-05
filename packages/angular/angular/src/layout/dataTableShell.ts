@@ -86,6 +86,7 @@ import {
   FILTER_ENGINE_IMPL,
   type FilterDef,
   type FilterTypeSpec,
+  type FrontendEngineFactory,
   type GetCellSpan,
   type NestedTableParent,
   type PaginationMode,
@@ -223,6 +224,7 @@ import { injectGroupingPanelState } from "../grouping/groupingPanelState";
 import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
 import { injectRowReorder, type RowReorderState } from "../rows/rowReorder";
 import { injectTableRowPinning } from "../rows/tableRowPinning";
+import { frontendRowModelOf } from "../source/rowModel";
 import { injectRowDetail, type TableRowDetail } from "../tree/tableRowDetail";
 import { injectTree, type TableTree } from "../tree/tableTree";
 import { injectColumnWindow } from "../virtual/columnWindow";
@@ -1669,6 +1671,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         paginationMode: computed(() => this.paginationMode() ?? "auto"),
         locale: this.locale,
         mobileBreakpoint: this.mobileBreakpoint(),
+        createEngine: computed(
+          () =>
+            frontendRowModelOf(
+              tableFeaturesOf(this.injector, this.features())
+            ) as FrontendEngineFactory<TRow> | undefined
+        ),
         injector,
       })
     );

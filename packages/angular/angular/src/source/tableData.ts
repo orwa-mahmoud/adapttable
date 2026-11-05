@@ -13,6 +13,7 @@ import {
   type FilterEngine,
   type FilterRuntime,
   type FilterTypeSpec,
+  type FrontendEngineFactory,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
@@ -114,6 +115,11 @@ export interface TableDataOptions<TRow> extends Pick<
   readonly featureHost?: Signal<FeatureHostState | undefined>;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
+  /**
+   * Evaluator for the frontend tier. Defaults to the basic one. The shell
+   * passes the full one while grouping is composed.
+   */
+  readonly createEngine?: MaybeSignalOptional<FrontendEngineFactory<TRow>>;
 }
 
 /**
@@ -205,6 +211,7 @@ export function injectTableData<TRow>(
     filterKey: computed(() => plan().filterKey),
     locale,
     paginationMode: mode,
+    createEngine: options.createEngine,
     forceMobile: options.forceMobile,
     mobileBreakpoint: options.mobileBreakpoint,
     isLoading: computed(() =>

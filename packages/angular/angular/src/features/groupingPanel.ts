@@ -2,8 +2,10 @@
  * The interactive grouping panel feature for Angular.
  */
 import type { AdaptTableFeature } from "@adapttable/angular";
+import { createTableEngine } from "@adapttable/core";
 import { coreGroupingPanel } from "@adapttable/core/binding";
 
+import { withFrontendRowModel } from "../source/rowModel";
 import type { GroupingExtras } from "./grouping";
 
 /**
@@ -40,11 +42,14 @@ export function groupingPanel<TRow = unknown>(
   groupBy?: string | readonly string[],
   extras: GroupingPanelExtras<TRow> = {}
 ): AdaptTableFeature {
-  return {
-    ...coreGroupingPanel<TRow>(groupBy, extras),
-    initialGroupBy: groupBy,
-    extras,
-  } as GroupingPanelFeature<TRow>;
+  return withFrontendRowModel(
+    {
+      ...coreGroupingPanel<TRow>(groupBy, extras),
+      initialGroupBy: groupBy,
+      extras,
+    } as GroupingPanelFeature<TRow>,
+    createTableEngine
+  );
 }
 
 export type { GroupingPanelFeature };

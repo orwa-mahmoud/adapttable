@@ -6,6 +6,7 @@ import {
   createGroupingPanelController,
   createMemoryAdapter,
   createRowReorderController,
+  createTableEngine,
   resolveLabels,
   rowReorderRuntimeOptions,
   type TableSource,
@@ -167,6 +168,7 @@ describe("tableRuntimeFor", () => {
       readonly source = injectFrontendData({
         data: this.data,
         columns: COLUMNS,
+        createEngine: createTableEngine<Person>,
       });
       readonly table = injectDataTable({
         source: this.source,

@@ -1,6 +1,12 @@
 import { type AdaptTableFeature } from "@adapttable/angular";
-import { type GroupNode, type GroupSort } from "@adapttable/core";
+import {
+  createTableEngine,
+  type GroupNode,
+  type GroupSort,
+} from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
+
+import { withFrontendRowModel } from "../source/rowModel";
 
 /**
  * Everything grouping can be told.
@@ -49,5 +55,8 @@ export function grouping<TRow = unknown>(
   groupBy: string | readonly string[],
   extras: GroupingExtras<TRow> = {}
 ): AdaptTableFeature {
-  return coreGrouping<TRow>(groupBy, extras) as AdaptTableFeature;
+  return withFrontendRowModel(
+    coreGrouping<TRow>(groupBy, extras) as AdaptTableFeature,
+    createTableEngine
+  );
 }
