@@ -1,6 +1,8 @@
 import {
-  createFrontendSource,
+  createBasicTableEngine,
+  createFrontendSourceWith,
   type ExtraFilters,
+  type FrontendEngineFactory,
   type FrontendSource,
   type PaginationMode,
   type QueryFilterGroup,
@@ -11,6 +13,8 @@ import {
 import { useCallback, useLayoutEffect, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";
+import { useFeatureState } from "../features/featureState";
+import { FRONTEND_ROW_MODEL } from "../features/rowModelKey";
 import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
@@ -91,6 +95,11 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
    * so the mode follows the same rule as the card layout.
    */
   mobileBreakpoint?: number;
+  /**
+   * Evaluator for this table's engine. Defaults to the basic one. Grouping
+   * passes the full evaluator; a headless caller can pass it the same way.
+   */
+  createEngine?: FrontendEngineFactory<TRow>;
 }
 
 /**
@@ -98,9 +107,9 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
  * and slices a caller-supplied array. The mirror of `useQuerySource` —
  * the table cannot tell which produced it.
  *
- * A {@link rowPatchLog} on `data` continues the live {@link IncrementalView}
- * so only touched rows re-run search, filters and sort. Spreading the
- * patched array drops the log and falls back to a full rebuild.
+ * The basic evaluator filters, sorts, and searches. A grouping feature
+ * supplies the full evaluator, which keeps the patch log's one-row path.
+ * Spreading a patched array drops the log and rebuilds either way.
  *
  * @typeParam TRow - The row item type.
  * @param options - See {@link UseFrontendDataOptions}.
@@ -132,8 +141,13 @@ export function useFrontendData<TRow>(
     forceMobile,
     mobileBreakpoint,
     locale,
+    createEngine: requestedEngine,
     ...urlOptions
   } = options;
+  const publishedEngine = useFeatureState(FRONTEND_ROW_MODEL) as
+    FrontendEngineFactory<TRow> | undefined;
+  const createEngine =
+    requestedEngine ?? publishedEngine ?? createBasicTableEngine;
 
   const mediaMobile = useIsMobile(mobileBreakpoint);
   const isMobile = forceMobile ?? mediaMobile;
@@ -142,7 +156,10 @@ export function useFrontendData<TRow>(
   const state = useTableUrlState(urlOptions);
   const { limit, search, sortBy, sortDir, groupBy } = state;
 
-  const [source] = useState<FrontendSource<TRow>>(createFrontendSource);
+  const [source] = useState<FrontendSource<TRow>>(() =>
+    createFrontendSourceWith(createEngine)
+  );
+  const [, setModelEpoch] = useState(0);
   // The frame is read from the engine's candidate; the committed engine — the
   // one an agent or a second component holds — stays on the table that is on
   // screen until React accepts this render, which is where it is published.
@@ -162,7 +179,12 @@ export function useFrontendData<TRow>(
     state
   );
   useLayoutEffect(() => {
-    source.commit();
+    if (source.engineFactory === createEngine) return;
+    source.replaceEngine(createEngine);
+    setModelEpoch((epoch) => epoch + 1);
+  }, [source, createEngine]);
+  useLayoutEffect(() => {
+    if (source.engineFactory === createEngine) source.commit();
   });
 
   const { page: safePage, total, hasNextPage } = frame;

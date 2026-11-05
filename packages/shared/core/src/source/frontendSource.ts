@@ -21,6 +21,7 @@ import type { QueryFilterGroup, SortLevel } from "../contracts/query";
 import type { RowPatchLog } from "../contracts/rows";
 import {
   createTableEngine,
+  type CreateTableEngineOptions,
   type TableEngine,
   type TableEngineReader,
 } from "../engine/createTableEngine";
@@ -150,6 +151,18 @@ export interface FrontendSourceFrame<TRow> {
 }
 
 /**
+ * Builds the engine a frontend source drives.
+ *
+ * {@link createFrontendSource} passes the full evaluator. A plain table
+ * passes {@link createBasicTableEngine} so grouping stays out of that graph.
+ *
+ * @public
+ */
+export type FrontendEngineFactory<TRow> = (
+  options: CreateTableEngineOptions<TRow>
+) => TableEngine<TRow>;
+
+/**
  * One table's frontend tier.
  *
  * @public
@@ -157,6 +170,8 @@ export interface FrontendSourceFrame<TRow> {
 export interface FrontendSource<TRow> {
   /** The engine the source drives, for agents and a second reader. */
   readonly engine: TableEngine<TRow>;
+  /** The evaluator the next update will keep, or install if it changed. */
+  readonly engineFactory: FrontendEngineFactory<TRow>;
   /**
    * Stage the host's data and view on the engine's candidate and read what
    * the table shows from it. Nothing outside the caller sees the change until
@@ -168,6 +183,11 @@ export interface FrontendSource<TRow> {
   ) => FrontendSourceFrame<TRow>;
   /** Publish the staged candidate to the engine's subscribers. */
   readonly commit: () => void;
+  /**
+   * Drop the current engine without publishing its candidate and use
+   * `createEngine` on the next update. The same factory is a no-op.
+   */
+  readonly replaceEngine: (createEngine: FrontendEngineFactory<TRow>) => void;
 }
 
 /** Value-only inputs. Callback and array identity are ignored. */
@@ -244,17 +264,22 @@ function warnUnresolvableSort<TRow>(
 }
 
 /**
- * Create one table's frontend tier.
+ * Create one table's frontend tier on an explicit evaluator.
  *
  * The first update seeds the engine; every later one restages it only when
  * the data array or a value-level input moved, so a host that rebuilds its
  * columns or filter callbacks on every render keeps the same page slice.
+ * {@link createFrontendSource} is the convenience form that supplies the
+ * full evaluator.
  *
  * @returns The source; call {@link FrontendSource.update} before reading.
  *
  * @public
  */
-export function createFrontendSource<TRow>(): FrontendSource<TRow> {
+export function createFrontendSourceWith<TRow>(
+  initialEngine: FrontendEngineFactory<TRow>
+): FrontendSource<TRow> {
+  let createEngine = initialEngine;
   let engine: TableEngine<TRow> | undefined;
   let data: readonly TRow[] | undefined;
   let fingerprint: string | undefined;
@@ -285,7 +310,7 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
   ): TableEngine<TRow> {
     if (engine) return engine;
     data = config.data;
-    engine = createTableEngine({
+    engine = createEngine({
       data: config.data,
       columns: config.columns ?? [],
       locale: config.locale,
@@ -433,6 +458,23 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
     };
   }
 
+  function replaceEngine(next: FrontendEngineFactory<TRow>): void {
+    if (next === createEngine) return;
+    if (engine) {
+      engine.discardCandidate();
+      engine.dispose();
+    }
+    engine = undefined;
+    data = undefined;
+    fingerprint = undefined;
+    filterKey = undefined;
+    stages = 0;
+    searched = undefined;
+    page = undefined;
+    searchCache.clear();
+    createEngine = next;
+  }
+
   return {
     get engine() {
       if (!engine) {
@@ -440,7 +482,26 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
       }
       return engine;
     },
+    get engineFactory() {
+      return createEngine;
+    },
     update,
     commit: () => engine?.commitCandidate(),
+    replaceEngine,
   };
+}
+
+/**
+ * Create one table's frontend tier with the full evaluator.
+ *
+ * Filter, sort, search, grouping, and aggregates all run in the engine.
+ * A table that only filters, sorts, and searches uses
+ * {@link createFrontendSourceWith} with {@link createBasicTableEngine}.
+ *
+ * @returns The source; call {@link FrontendSource.update} before reading.
+ *
+ * @public
+ */
+export function createFrontendSource<TRow>(): FrontendSource<TRow> {
+  return createFrontendSourceWith(createTableEngine);
 }

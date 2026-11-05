@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ColumnMetadata } from "../contracts/columns";
+import { createBasicTableEngine } from "../engine/basicTableEngine";
+import { createTableEngine } from "../engine/createTableEngine";
+import { incrementalViewOf } from "../rows/incrementalView";
 import { applyRowPatches, insertRow, updateRow } from "../rows/patch";
 import { resetDevWarnings } from "../utils/devWarn";
 import {
   createFrontendSource,
+  createFrontendSourceWith,
   defaultFrontendRowId,
   defaultSearchText,
   type FrontendSourceConfig,
@@ -495,5 +499,42 @@ describe("createFrontendSource", () => {
       sortDir: "asc",
     });
     expect(warn).not.toHaveBeenCalled();
+  });
+});
+
+describe("createFrontendSourceWith", () => {
+  function groupsOf(rows: readonly Row[]) {
+    return incrementalViewOf<{ groups?: readonly unknown[] }>(rows)?.groups;
+  }
+
+  it("keeps grouping out of the basic evaluator", () => {
+    const source = createFrontendSourceWith<Row>(createBasicTableEngine);
+    source.update(config(), { ...VIEW, groupBy: "name" });
+    source.commit();
+    expect(groupsOf(source.engine.rows("full"))).toBeUndefined();
+  });
+
+  it("uses the full evaluator when that factory is supplied", () => {
+    const source = createFrontendSourceWith<Row>(createTableEngine);
+    source.update(config(), { ...VIEW, groupBy: "name" });
+    source.commit();
+    expect(groupsOf(source.engine.rows("full"))).toBeDefined();
+  });
+
+  it("drops a pending candidate when the evaluator is replaced", () => {
+    const source = createFrontendSourceWith<Row>(createBasicTableEngine);
+    source.update(config(), VIEW);
+    source.commit();
+    const first = source.engine;
+    const heard = vi.fn();
+    first.subscribe("all", heard);
+    source.update(config(), { ...VIEW, search: "bob" });
+    source.replaceEngine(createTableEngine);
+    expect(heard).not.toHaveBeenCalled();
+    expect(() => source.engine).toThrow(/update\(\)/);
+    source.update(config(), { ...VIEW, groupBy: "name" });
+    source.commit();
+    expect(groupsOf(source.engine.rows("full"))).toBeDefined();
+    expect(source.engine).not.toBe(first);
   });
 });

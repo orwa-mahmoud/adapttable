@@ -2144,6 +2144,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "createFrontendSourceWith",
+      "kind": "runtime",
+      "module": "source/frontendSource.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/frontendSource.ts#createFrontendSourceWith",
+      "subpaths": ["."]
+    },
+    {
       "name": "createGridFocusController",
       "kind": "runtime",
       "module": "focus/gridFocusController.ts",
@@ -11415,6 +11426,17 @@
       "deprecated": false,
       "identity": "columns/columnTree.ts#FlattenedColumns",
       "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "FrontendEngineFactory",
+      "kind": "type",
+      "module": "source/frontendSource.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/frontendSource.ts#FrontendEngineFactory",
+      "subpaths": ["."]
     },
     {
       "name": "FrontendSource",

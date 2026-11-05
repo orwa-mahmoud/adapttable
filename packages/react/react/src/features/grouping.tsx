@@ -7,6 +7,7 @@
  */
 import {
   computePagination,
+  createTableEngine,
   devWarn,
   formatGroupBy,
   type GroupByInput,
@@ -25,9 +26,24 @@ import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";
 import { useGroupPaging } from "../grouping/useGroupPaging";
-import { slotRender } from "./providers";
+import {
+  type FeatureProviderProps,
+  FeatureStateScope,
+  slotRender,
+} from "./providers";
+import { FRONTEND_ROW_MODEL } from "./rowModelKey";
 import { type ChromeExtraSlotProps, GROUPING_LIVE } from "./slotKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
+
+function GroupingModelProvider({
+  children,
+}: Readonly<FeatureProviderProps>): ReactNode {
+  return (
+    <FeatureStateScope stateKey={FRONTEND_ROW_MODEL} value={createTableEngine}>
+      {children}
+    </FeatureStateScope>
+  );
+}
 
 function LiveGrouping({
   chrome,
@@ -293,6 +309,7 @@ export function grouping<TRow>(
 ): TableFeature<TRow> {
   return {
     ...coreGrouping<TRow>(groupBy, extras),
+    provider: { Provider: GroupingModelProvider },
     renders: [
       slotRender(GROUPING_LIVE, (props) => <LiveGrouping {...props} />),
     ],

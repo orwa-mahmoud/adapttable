@@ -6,6 +6,7 @@
  */
 import {
   createGroupingPanelController,
+  createTableEngine,
   declaredAggregates,
 } from "@adapttable/core";
 import { coreGroupingPanel } from "@adapttable/core/binding";
@@ -23,6 +24,7 @@ import {
   FeatureStateScope,
   useTableRuntime,
 } from "./providers";
+import { FRONTEND_ROW_MODEL } from "./rowModelKey";
 import type { TableFeature } from "./tableFeature";
 
 interface GroupingPanelFeature<TRow> extends TableFeature<TRow> {
@@ -71,8 +73,10 @@ function GroupingPanelProvider({
   );
 
   return (
-    <FeatureStateScope stateKey={GROUPING_PANEL_STATE} value={value}>
-      {children}
+    <FeatureStateScope stateKey={FRONTEND_ROW_MODEL} value={createTableEngine}>
+      <FeatureStateScope stateKey={GROUPING_PANEL_STATE} value={value}>
+        {children}
+      </FeatureStateScope>
     </FeatureStateScope>
   );
 }

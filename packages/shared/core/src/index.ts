@@ -750,8 +750,10 @@ export {
 } from "./source/dataTier";
 export {
   createFrontendSource,
+  createFrontendSourceWith,
   defaultFrontendRowId,
   defaultSearchText,
+  type FrontendEngineFactory,
   type FrontendSource,
   type FrontendSourceConfig,
   type FrontendSourceFrame,

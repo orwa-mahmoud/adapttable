@@ -2185,6 +2185,9 @@ export function createFirstLoadLatch(): FirstLoadLatch;
 export function createFrontendSource<TRow>(): FrontendSource<TRow>;
 
 // @public
+export function createFrontendSourceWith<TRow>(initialEngine: FrontendEngineFactory<TRow>): FrontendSource<TRow>;
+
+// @public
 export function createGridFocusController<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
 
 // @public
@@ -4010,9 +4013,14 @@ export type FormulaValue = {
 };
 
 // @public
+export type FrontendEngineFactory<TRow> = (options: CreateTableEngineOptions<TRow>) => TableEngine<TRow>;
+
+// @public
 export interface FrontendSource<TRow> {
     readonly commit: () => void;
     readonly engine: TableEngine<TRow>;
+    readonly engineFactory: FrontendEngineFactory<TRow>;
+    readonly replaceEngine: (createEngine: FrontendEngineFactory<TRow>) => void;
     readonly update: (config: FrontendSourceConfig<TRow>, view: FrontendSourceViewState) => FrontendSourceFrame<TRow>;
 }
 
