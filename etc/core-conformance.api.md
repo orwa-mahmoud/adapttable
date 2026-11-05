@@ -109,6 +109,49 @@ export interface ConformanceTest {
 }
 
 // @public
+export function featureLifecycleConformanceTests(driver: FeatureLifecycleDriver, harness: LifecycleHarness): {
+    readonly name: string;
+    readonly run: () => Promise<void>;
+}[];
+
+// @public
+export interface FeatureLifecycleDriver {
+    readonly name: string;
+    open(): Promise<LifecycleObservation>;
+    openNested(): Promise<{
+        readonly outer: LifecycleObservation;
+        readonly inner: LifecycleObservation;
+    }>;
+}
+
+// @public
+export interface LifecycleDeclaration {
+    readonly command?: string;
+    readonly fail?: boolean;
+    readonly id: string;
+}
+
+// @public
+export interface LifecycleHarness {
+    // (undocumented)
+    readonly expect: (value: unknown) => {
+        toEqual(expected: unknown): void;
+        toBe(expected: unknown): void;
+    };
+}
+
+// @public
+export interface LifecycleObservation {
+    cleanups(id: string): number;
+    commands(): readonly string[];
+    dispose(): Promise<void>;
+    hostPublications(): number;
+    reconcile(features: readonly LifecycleDeclaration[]): Promise<void>;
+    revisionNotifications(): number;
+    setups(id: string): number;
+}
+
+// @public
 export function tableConformanceTests(driver: ConformanceDriver, harness: ConformanceHarness): readonly ConformanceTest[];
 
 // (No @packageDocumentation comment for this package)

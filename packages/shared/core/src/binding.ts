@@ -185,6 +185,15 @@ export {
   slotRender,
 } from "./features/featureKeys";
 export {
+  type FeatureRegistration,
+  type FeatureRegistrationPlan,
+  invokeCleanups,
+  planFeatureRegistration,
+  preferLastById,
+  projectFeatureHosts,
+  type RegisteredFeature,
+} from "./features/featureRegistration";
+export {
   createFeatureHost,
   disposeFeatureHost,
   EMPTY_FEATURE_HOST,
@@ -685,7 +694,6 @@ export {
   rememberAppliedFeatures,
   resolveFeatureGrouping,
 } from "./features/featurePatch";
-export type { FeatureRegistration } from "./features/featureRegistration";
 export {
   type CoreStandardFeatureFactories,
   type CoreStandardFeatureOptions,

@@ -1,6 +1,10 @@
 /** A table's generic feature lifecycle, independent of optional features. */
 import type { TableRuntime } from "@adapttable/core";
-import { orderedContributions } from "@adapttable/core/binding";
+import {
+  invokeCleanups,
+  orderedContributions,
+  planFeatureRegistration,
+} from "@adapttable/core/binding";
 import {
   ApplicationRef,
   ChangeDetectorRef,
@@ -91,15 +95,7 @@ function mountFeaturesOnce<TRow>(
   const dispose = (): void => {
     if (disposed) return;
     disposed = true;
-    const failures: unknown[] = [];
-    cleanups.reverse();
-    for (const cleanup of cleanups) {
-      try {
-        cleanup();
-      } catch (error) {
-        failures.push(error);
-      }
-    }
+    const failures = [...invokeCleanups([...cleanups].reverse())];
     try {
       injector.destroy();
     } catch (error) {
@@ -273,16 +269,13 @@ export function mountTableFeatures<TRow>(
   >();
   let disposed = false;
   const release = (ids: readonly string[]): void => {
-    const failures: unknown[] = [];
+    const cleanups: (() => void)[] = [];
     for (const id of ids) {
       const current = mounted.get(id);
       mounted.delete(id);
-      try {
-        current?.dispose();
-      } catch (error) {
-        failures.push(error);
-      }
+      if (current) cleanups.push(current.dispose);
     }
+    const failures = invokeCleanups(cleanups);
     if (failures.length > 0)
       throw new AggregateError(failures, "Table feature cleanup failed");
   };
@@ -304,20 +297,22 @@ export function mountTableFeatures<TRow>(
       (entry) => entry.mount?.bind(entry),
       "mount"
     );
-    const next = new Map(
-      contributions.map(({ id, feature }) => [id, feature.entry])
-    );
+    const next = contributions.map(({ id, feature }) => ({
+      id,
+      feature: feature.entry,
+    }));
+    const retained = [...mounted.keys()].reverse().map((id) => {
+      const current = mounted.get(id);
+      if (!current) throw new Error("Missing mounted feature");
+      return { id, feature: current.feature };
+    });
+    const plan = planFeatureRegistration(retained, next, Object.is);
     // Retract old publications before a new owner publishes the same state key.
-    release(
-      [...mounted.keys()]
-        .filter((id) => mounted.get(id)?.feature !== next.get(id))
-        .reverse()
-    );
-    for (const { id, feature } of contributions) {
-      if (mounted.has(id)) continue;
-      mounted.set(id, {
-        feature: feature.entry,
-        dispose: mountFeaturesOnce([feature.entry], options),
+    release(plan.release);
+    for (const entry of plan.mount) {
+      mounted.set(entry.id, {
+        feature: entry.feature,
+        dispose: mountFeaturesOnce([entry.feature], options),
       });
     }
   };
@@ -338,7 +333,26 @@ export function mountTableFeatures<TRow>(
     () => {
       const list = features();
       untracked(() => {
-        update(list);
+        const before = new Set(mounted.keys());
+        try {
+          update(list);
+        } catch (error) {
+          const added = [...mounted.keys()]
+            .filter((id) => !before.has(id))
+            .reverse();
+          const failures = [error];
+          try {
+            release(added);
+          } catch (cleanupError) {
+            failures.push(cleanupError);
+          }
+          if (failures.length > 1)
+            throw new AggregateError(
+              failures,
+              "Table feature mounting and cleanup failed"
+            );
+          throw error;
+        }
       });
     },
     { injector: options.injector }

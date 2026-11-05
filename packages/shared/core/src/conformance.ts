@@ -8,6 +8,13 @@
  * @packageDocumentation
  */
 export {
+  featureLifecycleConformanceTests,
+  type FeatureLifecycleDriver,
+  type LifecycleDeclaration,
+  type LifecycleHarness,
+  type LifecycleObservation,
+} from "./conformance/featureLifecycleConformance";
+export {
   CONFORMANCE_COLUMNS,
   CONFORMANCE_ROWS,
   type ConformanceColumn,

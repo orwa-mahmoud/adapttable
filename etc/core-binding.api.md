@@ -2862,6 +2862,12 @@ export interface FeatureRegistration<TRow = unknown> {
 }
 
 // @public
+export interface FeatureRegistrationPlan<TFeature> {
+    readonly mount: readonly RegisteredFeature<TFeature>[];
+    readonly release: readonly string[];
+}
+
+// @public
 export interface FeatureRender<TProps, TNode = unknown> {
     readonly orderAs?: string;
     readonly render: (props: TProps) => TNode;
@@ -4065,6 +4071,9 @@ export function insertExtrasBeforeRows<TRow>(rows: readonly TRow[], extraRows: r
 } | ExtraEntry)[];
 
 // @public
+export function invokeCleanups(cleanups: readonly (() => void)[]): readonly unknown[];
+
+// @public
 export function isBodyEligible<TRow>(chrome: Pick<BodyChrome<TRow>, "grouping" | "tree" | "isPaged" | "source" | "body">): boolean;
 
 // @public
@@ -4602,6 +4611,14 @@ export interface PivotZoneProps<TNode = unknown> {
 }
 
 // @public
+export function planFeatureRegistration<TFeature>(retained: readonly RegisteredFeature<TFeature>[], next: readonly RegisteredFeature<TFeature>[], same: (current: TFeature, next: TFeature) => boolean): FeatureRegistrationPlan<TFeature>;
+
+// @public
+export function preferLastById<TFeature extends {
+    readonly id: string;
+}>(features: readonly TFeature[]): readonly TFeature[];
+
+// @public
 export function preserveEditorFocusOnLayoutChange(): void;
 
 // @public
@@ -4609,6 +4626,9 @@ export function printToolbarProps(wanted: boolean | undefined, onPrint: (() => v
     onPrint?: () => void;
     printLabel?: string;
 };
+
+// @public
+export function projectFeatureHosts<TRow>(hosts: readonly FeatureHostState<TRow>[]): LiveFeatureHost<TRow>;
 
 // @public
 export function projectGroupingContribution<TRow>(input: {
@@ -4652,6 +4672,12 @@ export function readColumnViewport(element: {
     readonly scrollLeft: number;
     readonly clientWidth: number;
 }): ColumnViewport;
+
+// @public
+export interface RegisteredFeature<TFeature> {
+    readonly feature: TFeature;
+    readonly id: string;
+}
 
 // @public
 export const REMAINING_FEATURE_OWNERSHIP: {

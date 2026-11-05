@@ -1,7 +1,11 @@
 /** One retained effect scope and registry per feature resource. */
 import {
   type FeatureHostState,
+  invokeCleanups,
   LiveFeatureHost,
+  planFeatureRegistration,
+  preferLastById,
+  projectFeatureHosts,
   type TableRuntime,
 } from "@adapttable/core/binding";
 import type { ComposedFeature, FeatureMountContext } from "@adapttable/vue";
@@ -77,19 +81,14 @@ export function useFeatureLifecycle<TRow>(options: {
   let disposed = false;
   let order: readonly string[] = [];
   const release = (resource: MountedFeature<TRow>): void => {
-    const failures: unknown[] = [];
-    for (const cleanup of [
-      resource.state.dispose,
-      resource.cleanup,
-      () => resource.host.dispose(),
-      () => resource.scope.stop(),
-    ]) {
-      try {
-        cleanup?.();
-      } catch (error) {
-        failures.push(error);
-      }
-    }
+    const failures = invokeCleanups(
+      [
+        resource.state.dispose,
+        resource.cleanup,
+        () => resource.host.dispose(),
+        () => resource.scope.stop(),
+      ].filter((cleanup): cleanup is () => void => cleanup !== undefined)
+    );
     if (failures.length)
       throw new AggregateError(
         failures,
@@ -97,33 +96,27 @@ export function useFeatureLifecycle<TRow>(options: {
       );
   };
   const project = (features: readonly ComposedFeature<TRow>[]): void => {
-    const combined = new LiveFeatureHost<TRow>();
-    for (const declaration of features) {
-      const part = retained.get(declaration.id)?.host;
-      if (!part) continue;
-      combined.filterTypes.push(...part.filterTypes);
-      combined.filterExtends.push(...part.filterExtends);
-      for (const [key, value] of part.editors) combined.editors.set(key, value);
-      for (const [key, value] of part.aggregators)
-        combined.aggregators.set(key, value);
-      combined.writers.push(...part.writers);
-      combined.columnMenuActions.push(...part.columnMenuActions);
-      combined.panels.push(...part.panels);
-      combined.commands.push(...part.commands);
-      combined.contextMenuItems.push(...part.contextMenuItems);
-    }
-    host.value = combined;
+    host.value = projectFeatureHosts(
+      features.flatMap((declaration) => {
+        const part = retained.get(declaration.id)?.host;
+        return part ? [part] : [];
+      })
+    );
   };
   const removeChanged = (features: readonly ComposedFeature<TRow>[]): void => {
-    const failures: unknown[] = [];
-    const next = new Map(
-      features.map((declaration) => [declaration.id, declaration])
+    const plan = planFeatureRegistration(
+      [...retained].map(([id, resource]) => ({
+        id,
+        feature: resource.declaration,
+      })),
+      features.map((feature) => ({ id: feature.id, feature })),
+      sameResource
     );
-    for (const [id, resource] of retained) {
-      const declaration = next.get(id);
-      if (declaration && sameResource(resource.declaration, declaration))
-        continue;
+    const failures: unknown[] = [];
+    for (const id of plan.release) {
+      const resource = retained.get(id);
       retained.delete(id);
+      if (!resource) continue;
       try {
         release(resource);
       } catch (error) {
@@ -195,9 +188,10 @@ export function useFeatureLifecycle<TRow>(options: {
   };
   const reconcile = (features: readonly ComposedFeature<TRow>[]): void => {
     if (disposed) return;
+    const resolved = preferLastById(features);
     const unchanged =
-      order.length === features.length &&
-      features.every((declaration, index) => {
+      order.length === resolved.length &&
+      resolved.every((declaration, index) => {
         const prior = retained.get(declaration.id);
         return (
           order[index] === declaration.id &&
@@ -206,11 +200,11 @@ export function useFeatureLifecycle<TRow>(options: {
         );
       });
     if (unchanged) return;
-    order = features.map((declaration) => declaration.id);
-    removeChanged(features);
+    order = resolved.map((declaration) => declaration.id);
+    removeChanged(resolved);
     const added: MountedFeature<TRow>[] = [];
     try {
-      for (const declaration of features) {
+      for (const declaration of resolved) {
         if (retained.has(declaration.id)) continue;
         const resource = mount(declaration);
         retained.set(declaration.id, resource);
@@ -227,7 +221,7 @@ export function useFeatureLifecycle<TRow>(options: {
           errors.push(cleanupError);
         }
       }
-      project(features);
+      project(resolved);
       if (errors.length > 1)
         throw new AggregateError(
           errors,
@@ -235,7 +229,7 @@ export function useFeatureLifecycle<TRow>(options: {
         );
       throw error;
     }
-    project(features);
+    project(resolved);
   };
   const dispose = (): void => {
     if (disposed) return;

@@ -26,7 +26,12 @@ describe("@adapttable/core/conformance", () => {
     expect(conformance.CONFORMANCE_ROWS.length).toBeGreaterThan(0);
     expect(conformance.CONFORMANCE_COLUMNS.length).toBeGreaterThan(0);
     expect(Object.keys(conformance).sort((a, b) => a.localeCompare(b))).toEqual(
-      ["CONFORMANCE_COLUMNS", "CONFORMANCE_ROWS", "tableConformanceTests"]
+      [
+        "CONFORMANCE_COLUMNS",
+        "CONFORMANCE_ROWS",
+        "featureLifecycleConformanceTests",
+        "tableConformanceTests",
+      ]
     );
   });
 });
