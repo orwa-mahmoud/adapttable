@@ -38,28 +38,6 @@
           "kind": "runtime"
         }
       ]
-    },
-    {
-      "id": "row-modules-import-css-types",
-      "cause": "Row modules name CSS property types from the style layer. The edges are type-only, so they add no JavaScript, and they still point the row layer at presentation.",
-      "destinationItem": "ie7y",
-      "edges": [
-        {
-          "from": "rows/extraRows.ts",
-          "to": "style/cssProperties.ts",
-          "kind": "type"
-        },
-        {
-          "from": "rows/rowPresentation.ts",
-          "to": "style/cssProperties.ts",
-          "kind": "type"
-        },
-        {
-          "from": "rows/rowStyle.ts",
-          "to": "style/cssProperties.ts",
-          "kind": "type"
-        }
-      ]
     }
   ],
   "exports": [
@@ -10362,12 +10340,12 @@
     {
       "name": "CssProperties",
       "kind": "type",
-      "module": "style/cssProperties.ts",
+      "module": "contracts/cssProperties.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "style/cssProperties.ts#CssProperties",
+      "identity": "contracts/cssProperties.ts#CssProperties",
       "subpaths": [".", "./binding"]
     },
     {
@@ -14179,12 +14157,12 @@
     {
       "name": "absoluteColumnIndex",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopHeader.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#absoluteColumnIndex",
+      "identity": "layout/desktopHeader.ts#absoluteColumnIndex",
       "subpaths": ["./binding"]
     },
     {
@@ -14696,12 +14674,12 @@
     {
       "name": "asSizeEstimator",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#asSizeEstimator",
+      "identity": "virtual/viewportState.ts#asSizeEstimator",
       "subpaths": ["./binding"]
     },
     {
@@ -14718,12 +14696,12 @@
     {
       "name": "bodyCanLoadMore",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#bodyCanLoadMore",
+      "identity": "virtual/viewportState.ts#bodyCanLoadMore",
       "subpaths": ["./binding"]
     },
     {
@@ -14740,23 +14718,23 @@
     {
       "name": "bodySentinelCount",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#bodySentinelCount",
+      "identity": "virtual/viewportState.ts#bodySentinelCount",
       "subpaths": ["./binding"]
     },
     {
       "name": "bodyWindowKind",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#bodyWindowKind",
+      "identity": "virtual/viewportState.ts#bodyWindowKind",
       "subpaths": ["./binding"]
     },
     {
@@ -15125,12 +15103,12 @@
     {
       "name": "columnHeaderControllerFor",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopHeader.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#columnHeaderControllerFor",
+      "identity": "layout/desktopHeader.ts#columnHeaderControllerFor",
       "subpaths": ["./binding"]
     },
     {
@@ -15158,12 +15136,12 @@
     {
       "name": "columnScrollTarget",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#columnScrollTarget",
+      "identity": "virtual/viewportState.ts#columnScrollTarget",
       "subpaths": ["./binding"]
     },
     {
@@ -15180,12 +15158,12 @@
     {
       "name": "columnWindowPlan",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#columnWindowPlan",
+      "identity": "virtual/viewportState.ts#columnWindowPlan",
       "subpaths": ["./binding"]
     },
     {
@@ -15785,12 +15763,12 @@
     {
       "name": "DESKTOP_ROW_WIRING_KEYS",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#DESKTOP_ROW_WIRING_KEYS",
+      "identity": "layout/desktopRowModel.ts#DESKTOP_ROW_WIRING_KEYS",
       "subpaths": ["./binding"]
     },
     {
@@ -15818,12 +15796,12 @@
     {
       "name": "desktopBodySlots",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopBodySlots",
+      "identity": "layout/desktopRowModel.ts#desktopBodySlots",
       "subpaths": ["./binding"]
     },
     {
@@ -15851,12 +15829,12 @@
     {
       "name": "desktopEdgeBodyStyle",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopSticky.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopEdgeBodyStyle",
+      "identity": "layout/desktopSticky.ts#desktopEdgeBodyStyle",
       "subpaths": ["./binding"]
     },
     {
@@ -15873,12 +15851,12 @@
     {
       "name": "desktopEdgeHeadStyle",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopSticky.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopEdgeHeadStyle",
+      "identity": "layout/desktopSticky.ts#desktopEdgeHeadStyle",
       "subpaths": ["./binding"]
     },
     {
@@ -15906,34 +15884,34 @@
     {
       "name": "desktopHeadCellStyle",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopSticky.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopHeadCellStyle",
+      "identity": "layout/desktopSticky.ts#desktopHeadCellStyle",
       "subpaths": ["./binding"]
     },
     {
       "name": "desktopHeaderLeaf",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopHeader.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopHeaderLeaf",
+      "identity": "layout/desktopHeader.ts#desktopHeaderLeaf",
       "subpaths": ["./binding"]
     },
     {
       "name": "desktopPinEdges",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopSticky.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopPinEdges",
+      "identity": "layout/desktopSticky.ts#desktopPinEdges",
       "subpaths": ["./binding"]
     },
     {
@@ -15950,12 +15928,12 @@
     {
       "name": "desktopRowDomProps",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopRowDomProps",
+      "identity": "layout/desktopRowModel.ts#desktopRowDomProps",
       "subpaths": ["./binding"]
     },
     {
@@ -15972,23 +15950,23 @@
     {
       "name": "desktopRowWiring",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopRowWiring",
+      "identity": "layout/desktopRowModel.ts#desktopRowWiring",
       "subpaths": ["./binding"]
     },
     {
       "name": "desktopRowWiringEqual",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopRowWiringEqual",
+      "identity": "layout/desktopRowModel.ts#desktopRowWiringEqual",
       "subpaths": ["./binding"]
     },
     {
@@ -16005,23 +15983,23 @@
     {
       "name": "desktopStickyPlan",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopSticky.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopStickyPlan",
+      "identity": "layout/desktopSticky.ts#desktopStickyPlan",
       "subpaths": ["./binding"]
     },
     {
       "name": "desktopTableStyle",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopSticky.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#desktopTableStyle",
+      "identity": "layout/desktopSticky.ts#desktopTableStyle",
       "subpaths": ["./binding"]
     },
     {
@@ -16104,12 +16082,12 @@
     {
       "name": "EndReachedLatch",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#EndReachedLatch",
+      "identity": "virtual/viewportState.ts#EndReachedLatch",
       "subpaths": ["./binding"]
     },
     {
@@ -16137,12 +16115,12 @@
     {
       "name": "estimateBodyItemSize",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#estimateBodyItemSize",
+      "identity": "virtual/viewportState.ts#estimateBodyItemSize",
       "subpaths": ["./binding"]
     },
     {
@@ -16346,12 +16324,12 @@
     {
       "name": "fetchNextBodyPage",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#fetchNextBodyPage",
+      "identity": "virtual/viewportState.ts#fetchNextBodyPage",
       "subpaths": ["./binding"]
     },
     {
@@ -16709,12 +16687,12 @@
     {
       "name": "hasLoadedChildren",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#hasLoadedChildren",
+      "identity": "virtual/viewportState.ts#hasLoadedChildren",
       "subpaths": ["./binding"]
     },
     {
@@ -16764,12 +16742,12 @@
     {
       "name": "headerSortDir",
       "kind": "runtime",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopHeader.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#headerSortDir",
+      "identity": "layout/desktopHeader.ts#headerSortDir",
       "subpaths": ["./binding"]
     },
     {
@@ -16841,12 +16819,12 @@
     {
       "name": "isBodyEligible",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#isBodyEligible",
+      "identity": "virtual/viewportState.ts#isBodyEligible",
       "subpaths": ["./binding"]
     },
     {
@@ -16940,12 +16918,12 @@
     {
       "name": "keyedWindow",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#keyedWindow",
+      "identity": "virtual/viewportState.ts#keyedWindow",
       "subpaths": ["./binding"]
     },
     {
@@ -17006,12 +16984,12 @@
     {
       "name": "materializeWindowRows",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#materializeWindowRows",
+      "identity": "virtual/viewportState.ts#materializeWindowRows",
       "subpaths": ["./binding"]
     },
     {
@@ -17116,12 +17094,12 @@
     {
       "name": "pendingListSize",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#pendingListSize",
+      "identity": "virtual/viewportState.ts#pendingListSize",
       "subpaths": ["./binding"]
     },
     {
@@ -17248,12 +17226,12 @@
     {
       "name": "pinnedScrollRows",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#pinnedScrollRows",
+      "identity": "virtual/viewportState.ts#pinnedScrollRows",
       "subpaths": ["./binding"]
     },
     {
@@ -17336,12 +17314,12 @@
     {
       "name": "readColumnViewport",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/rowMeasurement.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#readColumnViewport",
+      "identity": "virtual/rowMeasurement.ts#readColumnViewport",
       "subpaths": ["./binding"]
     },
     {
@@ -17391,12 +17369,12 @@
     {
       "name": "resolveBodyVirtualization",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#resolveBodyVirtualization",
+      "identity": "virtual/viewportState.ts#resolveBodyVirtualization",
       "subpaths": ["./binding"]
     },
     {
@@ -17567,12 +17545,12 @@
     {
       "name": "RowPairMeasureController",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/rowMeasurement.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#RowPairMeasureController",
+      "identity": "virtual/rowMeasurement.ts#RowPairMeasureController",
       "subpaths": ["./binding"]
     },
     {
@@ -17622,12 +17600,12 @@
     {
       "name": "rowScrollTarget",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#rowScrollTarget",
+      "identity": "virtual/viewportState.ts#rowScrollTarget",
       "subpaths": ["./binding"]
     },
     {
@@ -17666,12 +17644,12 @@
     {
       "name": "rowWindow",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#rowWindow",
+      "identity": "virtual/viewportState.ts#rowWindow",
       "subpaths": ["./binding"]
     },
     {
@@ -17941,12 +17919,12 @@
     {
       "name": "SummaryCellsCache",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/summaryCells.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#SummaryCellsCache",
+      "identity": "virtual/summaryCells.ts#SummaryCellsCache",
       "subpaths": ["./binding"]
     },
     {
@@ -18084,12 +18062,12 @@
     {
       "name": "virtualizeIgnoredOnPage",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#virtualizeIgnoredOnPage",
+      "identity": "virtual/viewportState.ts#virtualizeIgnoredOnPage",
       "subpaths": ["./binding"]
     },
     {
@@ -18106,12 +18084,12 @@
     {
       "name": "withSourceIndices",
       "kind": "runtime",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#withSourceIndices",
+      "identity": "virtual/viewportState.ts#withSourceIndices",
       "subpaths": ["./binding"]
     },
     {
@@ -18238,23 +18216,23 @@
     {
       "name": "BodyChrome",
       "kind": "type",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#BodyChrome",
+      "identity": "virtual/viewportState.ts#BodyChrome",
       "subpaths": ["./binding"]
     },
     {
       "name": "BodyWindowKind",
       "kind": "type",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#BodyWindowKind",
+      "identity": "virtual/viewportState.ts#BodyWindowKind",
       "subpaths": ["./binding"]
     },
     {
@@ -18634,23 +18612,23 @@
     {
       "name": "ColumnViewport",
       "kind": "type",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#ColumnViewport",
+      "identity": "virtual/viewportState.ts#ColumnViewport",
       "subpaths": ["./binding"]
     },
     {
       "name": "ColumnWindowPlan",
       "kind": "type",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#ColumnWindowPlan",
+      "identity": "virtual/viewportState.ts#ColumnWindowPlan",
       "subpaths": ["./binding"]
     },
     {
@@ -18843,12 +18821,12 @@
     {
       "name": "DesktopBodySlotsInput",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#DesktopBodySlotsInput",
+      "identity": "layout/desktopRowModel.ts#DesktopBodySlotsInput",
       "subpaths": ["./binding"]
     },
     {
@@ -18876,56 +18854,56 @@
     {
       "name": "DesktopHeaderLeafContext",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopHeader.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#DesktopHeaderLeafContext",
+      "identity": "layout/desktopHeader.ts#DesktopHeaderLeafContext",
       "subpaths": ["./binding"]
     },
     {
       "name": "DesktopRowPinPart",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#DesktopRowPinPart",
+      "identity": "layout/desktopRowModel.ts#DesktopRowPinPart",
       "subpaths": ["./binding"]
     },
     {
       "name": "DesktopRowWiringArgs",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#DesktopRowWiringArgs",
+      "identity": "layout/desktopRowModel.ts#DesktopRowWiringArgs",
       "subpaths": ["./binding"]
     },
     {
       "name": "DesktopRowWiringContext",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#DesktopRowWiringContext",
+      "identity": "layout/desktopRowModel.ts#DesktopRowWiringContext",
       "subpaths": ["./binding"]
     },
     {
       "name": "DesktopRowWiringModel",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#DesktopRowWiringModel",
+      "identity": "layout/desktopRowModel.ts#DesktopRowWiringModel",
       "subpaths": ["./binding"]
     },
     {
@@ -18942,12 +18920,12 @@
     {
       "name": "DesktopStickyPlan",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopSticky.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#DesktopStickyPlan",
+      "identity": "layout/desktopSticky.ts#DesktopStickyPlan",
       "subpaths": ["./binding"]
     },
     {
@@ -19811,23 +19789,23 @@
     {
       "name": "LeafColumn",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopHeader.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#LeafColumn",
+      "identity": "layout/desktopHeader.ts#LeafColumn",
       "subpaths": ["./binding"]
     },
     {
       "name": "LeafSortProps",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopHeader.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#LeafSortProps",
+      "identity": "layout/desktopHeader.ts#LeafSortProps",
       "subpaths": ["./binding"]
     },
     {
@@ -21098,23 +21076,23 @@
     {
       "name": "WindowVirtualizer",
       "kind": "type",
-      "module": "virtual/bodyWindow.ts",
+      "module": "virtual/viewportState.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "virtual/bodyWindow.ts#WindowVirtualizer",
+      "identity": "virtual/viewportState.ts#WindowVirtualizer",
       "subpaths": ["./binding"]
     },
     {
       "name": "WiringReorder",
       "kind": "type",
-      "module": "layout/desktopAssembly.ts",
+      "module": "layout/desktopRowModel.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "layout/desktopAssembly.ts#WiringReorder",
+      "identity": "layout/desktopRowModel.ts#WiringReorder",
       "subpaths": ["./binding"]
     },
     {

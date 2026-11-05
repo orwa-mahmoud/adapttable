@@ -1,5 +1,5 @@
 import { PIN_Z } from "../columns/columnLayoutModel";
-import type { CssProperties } from "../style/cssProperties";
+import type { CssProperties } from "../contracts/cssProperties";
 import type { BodyCell } from "./cellSpan";
 import type { ExtraRow } from "./extraRows";
 import type { EditableCellEditing } from "./rowEditingDigest";

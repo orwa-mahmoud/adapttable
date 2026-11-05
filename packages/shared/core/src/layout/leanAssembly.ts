@@ -3,7 +3,10 @@
  *
  * Small functions live here in full. Heavy implementations (cell-span math,
  * extra-row splicing, column-resize drag) are injected through
- * {@link resolveAssembly} when the owning feature is composed.
+ * {@link resolveAssembly} when the owning feature is composed. Summary
+ * aggregates and browser measurement stay out of this bag: the row, header
+ * and sticky builders call these seams, and they do not import the
+ * incremental engine or the viewport measurer.
  */
 
 import type { PinOffset } from "../columns/columnLayoutModel";
