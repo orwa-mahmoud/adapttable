@@ -34,6 +34,8 @@ import {
   applyRowPatchesWithLog,
   insertRow,
   removeRow,
+  type RowPatch,
+  type RowPatchEvent,
   rowPatchLog,
   updateRow,
   upsertRow,
@@ -903,4 +905,363 @@ describe("group cells from aggregateSpec", () => {
     ]);
     expect(totals(patched)).toEqual(totals(initial));
   });
+});
+
+/** Fixed-seed stream, so a failing batch replays exactly. */
+function seeded(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0;
+    return state / 2 ** 32;
+  };
+}
+
+const TEAMS = ["Core", "Web", "Net", "Labs"];
+
+function people(count: number, budget: (index: number) => number): Person[] {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `r${String(index)}`,
+    name: `Name ${String(index)}`,
+    team: TEAMS[index % TEAMS.length]!,
+    budget: budget(index),
+    status: index % 3 === 0 ? "blocked" : "active",
+  }));
+}
+
+function randomPatches(
+  rows: readonly Person[],
+  rand: () => number,
+  label: string
+): RowPatch<Person>[] {
+  const patches: RowPatch<Person>[] = [];
+  const count = 1 + Math.floor(rand() * 8);
+  for (let j = 0; j < count; j++) {
+    const row = rows[Math.floor(rand() * rows.length)];
+    const op = Math.floor(rand() * 7);
+    const budget = Math.floor(rand() * 20);
+    if (op === 0 || !row) {
+      const id = `${label}-${String(j)}`;
+      const at = Math.floor(rand() * (rows.length + 1));
+      const team = TEAMS[j % TEAMS.length]!;
+      patches.push(
+        insertRow({ id, name: id, team, budget, status: "active" }, at)
+      );
+    } else if (op === 1) {
+      patches.push(removeRow(row.id));
+    } else if (op === 2) {
+      patches.push(updateRow<Person>(row.id, { budget: row.budget }));
+    } else if (op === 3) {
+      patches.push(
+        updateRow<Person>(row.id, { team: TEAMS[j % TEAMS.length]! })
+      );
+    } else if (op === 4) {
+      const status = rand() < 0.5 ? "active" : "blocked";
+      patches.push(updateRow<Person>(row.id, { status }));
+    } else if (op === 5) {
+      patches.push(upsertRow({ ...row, budget }));
+    } else {
+      patches.push(updateRow<Person>(row.id, { budget }));
+    }
+  }
+  return patches;
+}
+
+type TracedProfile = (trace: string[]) => IncrementalViewConfig<Person>;
+
+function tracedFilter(trace: string[]) {
+  return (row: Person) => {
+    trace.push(`filter:${row.id}:${String(row.budget)}`);
+    return row.budget % 3 !== 0;
+  };
+}
+
+function tracedSortValue(trace: string[]) {
+  return (row: Person, key: string) => {
+    trace.push(`sort:${row.id}:${key}`);
+    return row[key as keyof Person];
+  };
+}
+
+const sumBudget = (rows: readonly Person[]) => ({
+  budget: rows.reduce((sum, row) => sum + row.budget, 0),
+});
+
+const TRACED_PROFILES: [string, TracedProfile][] = [
+  [
+    "built-in totals",
+    () => ({
+      getRowId: byId,
+      columns: COLS,
+      aggregateSpec: { budget: "sum" },
+      aggregateOptions: { columns: COLS },
+    }),
+  ],
+  ["custom summary row", () => ({ getRowId: byId, summaryRow: sumBudget })],
+  ["search", () => ({ getRowId: byId, search: "1" })],
+  [
+    "filter",
+    (trace) => ({ getRowId: byId, filterFn: tracedFilter(trace), extra: {} }),
+  ],
+  [
+    "sort with ties",
+    (trace) => ({
+      getRowId: byId,
+      columns: COLS,
+      getSortValue: tracedSortValue(trace),
+      sortBy: "budget",
+      sortDir: "asc",
+    }),
+  ],
+  [
+    "filter + multi-sort",
+    (trace) => ({
+      getRowId: byId,
+      columns: COLS,
+      filterFn: tracedFilter(trace),
+      extra: {},
+      getSortValue: tracedSortValue(trace),
+      sortLevels: [
+        { key: "team", dir: "asc" },
+        { key: "budget", dir: "desc" },
+      ],
+    }),
+  ],
+  [
+    "grouping with custom aggregates",
+    () => ({
+      getRowId: byId,
+      columns: COLS,
+      groupBy: "team",
+      groupFooters: true,
+      groupAggregates: sumBudget,
+    }),
+  ],
+  [
+    "nested grouping, filtered, sorted, min total",
+    (trace) => ({
+      getRowId: byId,
+      columns: COLS,
+      filterFn: tracedFilter(trace),
+      extra: {},
+      getSortValue: tracedSortValue(trace),
+      sortBy: "budget",
+      sortDir: "desc",
+      groupBy: ["team", "status"],
+      groupAggregates: (rows) => ({ budget: rows.length }),
+      aggregateSpec: { budget: "min" },
+      aggregateOptions: { columns: COLS },
+    }),
+  ],
+];
+
+/** One predicate call per row an event brought in — nothing else re-tested. */
+function expectedFilterCalls(
+  events: readonly RowPatchEvent<Person>[],
+  config: IncrementalViewConfig<Person>
+): string[] {
+  if (!config.filterFn) return [];
+  return events.flatMap((event) => {
+    if (event.type === "remove") return [];
+    const row = event.type === "insert" ? event.row : event.next;
+    return [`filter:${row.id}:${String(row.budget)}`];
+  });
+}
+
+describe("applyRowPatchesToView — seeded batches", () => {
+  it.each(TRACED_PROFILES)(
+    "%s: a batch, the same patches one by one and a full rebuild agree",
+    (_, profile) => {
+      for (let seed = 1; seed <= 6; seed++) {
+        const rand = seeded(seed);
+        const batchTrace: string[] = [];
+        const sparseTrace: string[] = [];
+        const config = profile(batchTrace);
+        const start = people(60, (index) => (index * 7) % 20);
+        let batch = createIncrementalView(start, config);
+        let sparse = createIncrementalView(start, profile(sparseTrace));
+        for (let step = 0; step < 10; step++) {
+          const label = `s${String(seed)}-${String(step)}`;
+          const patches = randomPatches(batch.rows, rand, label);
+          const events = applyRowPatchesWithLog(
+            batch.rows,
+            patches,
+            byId
+          ).events;
+          batchTrace.length = 0;
+          sparseTrace.length = 0;
+          batch = applyRowPatchesToView(batch, patches);
+          for (const patch of patches) {
+            sparse = applyRowPatchesToView(sparse, [patch]);
+          }
+          expect(ids(sparse.rows)).toEqual(ids(batch.rows));
+          expect(ids(sparse.sorted)).toEqual(ids(batch.sorted));
+          expect(groupShape(sparse.groups)).toEqual(groupShape(batch.groups));
+          expect(sparse.aggregates).toEqual(batch.aggregates);
+          expect(sparseTrace).toEqual(batchTrace);
+          expect(
+            batchTrace.filter((call) => call.startsWith("filter:"))
+          ).toEqual(expectedFilterCalls(events, config));
+          expectMatch(batch, batch.rows, config);
+        }
+      }
+    }
+  );
+});
+
+interface PatchWork {
+  rowIds: number;
+  mappedSlots: number;
+  filterCalls: number;
+  sortCalls: number;
+}
+
+type WorkProfile = (work: PatchWork) => IncrementalViewConfig<Person>;
+
+const WORK_PROFILES: [string, WorkProfile][] = [
+  [
+    "built-in totals",
+    (work) => ({
+      getRowId: (row) => (work.rowIds++, row.id),
+      columns: COLS,
+      aggregateSpec: { budget: "sum" },
+      aggregateOptions: { columns: COLS },
+    }),
+  ],
+  [
+    "filter",
+    (work) => ({
+      getRowId: (row) => (work.rowIds++, row.id),
+      filterFn: (row) => (work.filterCalls++, row.budget % 2 === 0),
+      extra: {},
+    }),
+  ],
+  [
+    "sort",
+    (work) => ({
+      getRowId: (row) => (work.rowIds++, row.id),
+      getSortValue: (row) => (work.sortCalls++, row.budget),
+      sortBy: "budget",
+      sortDir: "asc",
+    }),
+  ],
+  [
+    "filter + sort",
+    (work) => ({
+      getRowId: (row) => (work.rowIds++, row.id),
+      filterFn: (row) => (work.filterCalls++, row.budget % 2 === 0),
+      extra: {},
+      getSortValue: (row) => (work.sortCalls++, row.budget),
+      sortBy: "budget",
+      sortDir: "asc",
+    }),
+  ],
+];
+
+const WORK_ROWS = 4000;
+
+/** Array slots `Array.prototype.map` walks while `run` is on the stack. */
+function mappedSlots(run: () => void): number {
+  const map = Array.prototype.map;
+  let slots = 0;
+  const spy = vi.spyOn(Array.prototype, "map").mockImplementation(function (
+    this: unknown[],
+    ...args
+  ) {
+    slots += this.length;
+    return map.apply(this, args);
+  } as typeof map);
+  try {
+    run();
+  } finally {
+    spy.mockRestore();
+  }
+  return slots;
+}
+
+/**
+ * Process `batch` updates on even-budget rows that lead both the source and
+ * the sort order. They pass every profile's filter, so locating a row stays
+ * short and any remaining cost that grows with the row count is index work.
+ * `perEventBatches` is the planted regression: the same patches, one batch
+ * per event.
+ */
+function patchWork(
+  profile: WorkProfile,
+  batch: number,
+  perEventBatches = false
+): PatchWork {
+  const work: PatchWork = {
+    rowIds: 0,
+    mappedSlots: 0,
+    filterCalls: 0,
+    sortCalls: 0,
+  };
+  const rows = people(WORK_ROWS, (index) => index);
+  const view = createIncrementalView(rows, profile(work));
+  const patches = rows
+    .filter((row) => row.budget % 2 === 0)
+    .slice(0, batch)
+    .map((row) =>
+      updateRow<Person>(row.id, { budget: row.budget + WORK_ROWS })
+    );
+  let base: readonly Person[] = rows;
+  const logs = perEventBatches
+    ? patches.map((patch) => {
+        const log = applyRowPatchesWithLog(base, [patch], byId);
+        base = log.rows;
+        return log;
+      })
+    : [applyRowPatchesWithLog(rows, patches, byId)];
+  Object.assign(work, { rowIds: 0, filterCalls: 0, sortCalls: 0 });
+  work.mappedSlots = mappedSlots(() => {
+    let next = view;
+    for (const log of logs) next = applyRowPatchLogToView(next, log);
+  });
+  return work;
+}
+
+/**
+ * Work is row-id reads plus array slots mapped, and one pass over the rows
+ * costs `WORK_ROWS` of it. Each event past the first may cost under an eighth
+ * of a pass: locating and moving one row, never re-indexing the set. Grouping
+ * is left out — its tree reads a fresh sorted-position map after every event.
+ */
+function expectNoPerEventIndexPass(
+  profile: WorkProfile,
+  perEventBatches = false
+): void {
+  const one = patchWork(profile, 1, perEventBatches);
+  const many = patchWork(profile, 32, perEventBatches);
+  const total = (work: PatchWork) => work.rowIds + work.mappedSlots;
+  const perExtraEvent = (total(many) - total(one)) / 31;
+  expect(perExtraEvent).toBeLessThan(WORK_ROWS / 8);
+}
+
+describe("applyRowPatchLogToView — index work per event", () => {
+  it.each(WORK_PROFILES)(
+    "%s: an extra event in the batch costs no pass over the rows",
+    (_, profile) => {
+      expectNoPerEventIndexPass(profile);
+    }
+  );
+
+  it.each(WORK_PROFILES)(
+    "%s: the guard fails when every event rebuilds the indexes",
+    (_, profile) => {
+      expect(() => {
+        expectNoPerEventIndexPass(profile, true);
+      }).toThrow();
+    }
+  );
+
+  it.each(WORK_PROFILES)(
+    "%s: predicates and sort values run once per touched row",
+    (_, profile) => {
+      const one = patchWork(profile, 1);
+      const many = patchWork(profile, 32);
+      const filtered = profile(many).filterFn !== undefined;
+      expect(many.filterCalls).toBe(filtered ? 32 : 0);
+      expect(many.sortCalls).toBe(32 * one.sortCalls);
+    }
+  );
 });

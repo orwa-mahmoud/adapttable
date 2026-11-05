@@ -440,7 +440,9 @@ export function applyRowPatchLogToView<TRow>(
   }
 
   state.filtered = state.filtered.slice();
-  state.filteredSourceIndex = state.filteredSourceIndex.slice();
+  if (hasFilter(config)) {
+    state.filteredSourceIndex = state.filteredSourceIndex.slice();
+  }
   state.sorted = state.sorted.slice();
 
   const source = [...view.rows];
@@ -457,7 +459,11 @@ export function applyRowPatchLogToView<TRow>(
   state.filtered = filtered as TRow[];
   state.sorted = sorted as TRow[];
   state.filteredPos = indexMap(filtered, config.getRowId);
-  state.sortedPos = indexMap(sorted, config.getRowId);
+  state.sortedPos =
+    sorted === filtered ? state.filteredPos : indexMap(sorted, config.getRowId);
+  if (!hasFilter(config)) {
+    state.filteredSourceIndex = source.map((_, index) => index);
+  }
 
   const groups = state.tree
     ? paintGroups(
@@ -739,7 +745,6 @@ function applyFilterEvent<TRow>(
 ): FilterDelta<TRow> {
   if (!hasFilter(config)) {
     state.filtered = source as TRow[];
-    state.filteredSourceIndex = source.map((_, index) => index);
     return sourceDelta(event);
   }
   if (event.type === "insert") return filterInsert(state, event, config);
@@ -839,11 +844,16 @@ function applySortEvent<TRow>(
 ): void {
   if (!hasSort(config)) {
     state.sorted = state.filtered;
-    state.sortedPos = indexMap(state.filtered, config.getRowId);
+    // Mid-batch, only the group tree reads sorted positions; the batch
+    // end rebuilds them for everyone else.
+    if (state.tree) state.sortedPos = indexMap(state.filtered, config.getRowId);
     return;
   }
   if (delta.kind === "none") return;
-  state.filteredPos = indexMap(state.filtered, config.getRowId);
+  // A replace keeps every filtered position, so the map is still current.
+  if (delta.kind !== "replace") {
+    state.filteredPos = indexMap(state.filtered, config.getRowId);
+  }
   if (delta.kind === "enter") {
     insertSorted(state, delta.row, config);
   } else if (delta.kind === "leave") {
@@ -851,7 +861,7 @@ function applySortEvent<TRow>(
   } else {
     replaceSorted(state, delta.prev, delta.next, config);
   }
-  state.sortedPos = indexMap(state.sorted, config.getRowId);
+  if (state.tree) state.sortedPos = indexMap(state.sorted, config.getRowId);
 }
 
 function insertSorted<TRow>(
