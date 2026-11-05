@@ -11,6 +11,7 @@
 import {
   createRowReorderController,
   isRowMovePending,
+  isRtlElement,
   type RowDropPosition,
   type RowReorderControllerOptions,
   rowReorderRowAttributes,
@@ -106,8 +107,14 @@ export function useRowReorder<TRow>(
   options: RowReorderControllerOptions<TRow>
 ): RowReorderState<TRow> {
   const { enabled, getRowId } = options;
-  const [controller] = useState(() => createRowReorderController(options));
-  controller.configure(options);
+  const withDirection = (next: RowReorderControllerOptions<TRow>) => ({
+    ...next,
+    isRtl: next.isRtl ?? isRtlElement,
+  });
+  const [controller] = useState(() =>
+    createRowReorderController(withDirection(options))
+  );
+  controller.configure(withDirection(options));
   const {
     lifted,
     overIndex,

@@ -4,6 +4,7 @@ export { rowReorderControlKey, rowReorderModelKey } from "./contracts";
 import {
   createRowReorderController,
   isRowMovePending,
+  isRtlElement,
   type RowDragEvent,
   type RowKeyEvent,
   type RowReorderActions,
@@ -117,6 +118,7 @@ export function useRowReorder<TRow>(
   const configuration = computed(() => ({
     ...options.value,
     enabled: active.value && options.value.enabled,
+    isRtl: options.value.isRtl ?? isRtlElement,
   }));
   const controller = createRowReorderController(configuration.value);
   const snapshot = useExternalStore(controller, { active });

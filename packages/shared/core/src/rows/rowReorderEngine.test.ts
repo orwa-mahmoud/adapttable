@@ -736,7 +736,9 @@ describe("keyboard grab", () => {
   });
 
   it("flips the horizontal arrows right to left", () => {
-    const { reorder } = setup();
+    const { reorder } = setup({
+      isRtl: (element) => element?.dir === "rtl",
+    });
     const grip = document.createElement("button");
     grip.dir = "rtl";
     document.body.append(grip);

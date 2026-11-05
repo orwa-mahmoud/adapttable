@@ -40,18 +40,6 @@
       ]
     },
     {
-      "id": "reorder-engine-imports-writing-direction",
-      "cause": "The reorder engine asks the layout layer which way the pointer moves, so a row algorithm depends on presentation.",
-      "destinationItem": "glv4",
-      "edges": [
-        {
-          "from": "rows/rowReorderEngine.ts",
-          "to": "layout/writingDirection.ts",
-          "kind": "runtime"
-        }
-      ]
-    },
-    {
       "id": "row-modules-import-css-types",
       "cause": "Row modules name CSS property types from the style layer. The edges are type-only, so they add no JavaScript, and they still point the row layer at presentation.",
       "destinationItem": "ie7y",
@@ -408,12 +396,12 @@
     {
       "name": "applyRowReorder",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#applyRowReorder",
+      "identity": "rows/rowReorderPolicy.ts#applyRowReorder",
       "subpaths": ["."]
     },
     {
@@ -2333,12 +2321,12 @@
     {
       "name": "createRowReorderController",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#createRowReorderController",
+      "identity": "rows/rowReorderController.ts#createRowReorderController",
       "subpaths": ["."]
     },
     {
@@ -2498,12 +2486,12 @@
     {
       "name": "datasetIndex",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#datasetIndex",
+      "identity": "rows/rowReorderPolicy.ts#datasetIndex",
       "subpaths": ["."]
     },
     {
@@ -2707,12 +2695,12 @@
     {
       "name": "defaultRowReorderAnnouncements",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#defaultRowReorderAnnouncements",
+      "identity": "rows/rowReorderPolicy.ts#defaultRowReorderAnnouncements",
       "subpaths": ["."]
     },
     {
@@ -5127,12 +5115,12 @@
     {
       "name": "isRowMovePending",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#isRowMovePending",
+      "identity": "rows/rowReorderController.ts#isRowMovePending",
       "subpaths": ["."]
     },
     {
@@ -7085,12 +7073,12 @@
     {
       "name": "resolveRowMove",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#resolveRowMove",
+      "identity": "rows/rowReorderPolicy.ts#resolveRowMove",
       "subpaths": ["."]
     },
     {
@@ -7371,12 +7359,12 @@
     {
       "name": "rowMoveMenu",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#rowMoveMenu",
+      "identity": "rows/rowReorderPolicy.ts#rowMoveMenu",
       "subpaths": ["."]
     },
     {
@@ -7503,12 +7491,12 @@
     {
       "name": "rowReorderAnnouncements",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#rowReorderAnnouncements",
+      "identity": "rows/rowReorderPolicy.ts#rowReorderAnnouncements",
       "subpaths": ["."]
     },
     {
@@ -7525,12 +7513,12 @@
     {
       "name": "rowReorderRowAttributes",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderProps.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#rowReorderRowAttributes",
+      "identity": "rows/rowReorderProps.ts#rowReorderRowAttributes",
       "subpaths": ["."]
     },
     {
@@ -12860,12 +12848,12 @@
     {
       "name": "RowDragEvent",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowDragEvent",
+      "identity": "rows/rowReorderController.ts#RowDragEvent",
       "subpaths": ["."]
     },
     {
@@ -13036,12 +13024,12 @@
     {
       "name": "RowKeyEvent",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowKeyEvent",
+      "identity": "rows/rowReorderController.ts#RowKeyEvent",
       "subpaths": ["."]
     },
     {
@@ -13058,12 +13046,12 @@
     {
       "name": "RowMoveDrop",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowMoveDrop",
+      "identity": "rows/rowReorderPolicy.ts#RowMoveDrop",
       "subpaths": ["."]
     },
     {
@@ -13113,12 +13101,12 @@
     {
       "name": "RowMoveView",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowMoveView",
+      "identity": "rows/rowReorderPolicy.ts#RowMoveView",
       "subpaths": ["."]
     },
     {
@@ -13190,56 +13178,56 @@
     {
       "name": "RowReorderActions",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderActions",
+      "identity": "rows/rowReorderController.ts#RowReorderActions",
       "subpaths": ["."]
     },
     {
       "name": "RowReorderAnnouncements",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderAnnouncements",
+      "identity": "rows/rowReorderPolicy.ts#RowReorderAnnouncements",
       "subpaths": ["."]
     },
     {
       "name": "RowReorderController",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderController",
+      "identity": "rows/rowReorderController.ts#RowReorderController",
       "subpaths": ["."]
     },
     {
       "name": "RowReorderControllerOptions",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderControllerOptions",
+      "identity": "rows/rowReorderController.ts#RowReorderControllerOptions",
       "subpaths": ["."]
     },
     {
       "name": "RowReorderDecision",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderDecision",
+      "identity": "rows/rowReorderPolicy.ts#RowReorderDecision",
       "subpaths": ["."]
     },
     {
@@ -13256,23 +13244,23 @@
     {
       "name": "RowReorderHandler",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderHandler",
+      "identity": "rows/rowReorderPolicy.ts#RowReorderHandler",
       "subpaths": ["."]
     },
     {
       "name": "RowReorderLabels",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderPolicy.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderLabels",
+      "identity": "rows/rowReorderPolicy.ts#RowReorderLabels",
       "subpaths": [".", "./binding"]
     },
     {
@@ -13289,23 +13277,23 @@
     {
       "name": "RowReorderSlot",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderSlot",
+      "identity": "rows/rowReorderController.ts#RowReorderSlot",
       "subpaths": ["."]
     },
     {
       "name": "RowReorderSnapshot",
       "kind": "type",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#RowReorderSnapshot",
+      "identity": "rows/rowReorderController.ts#RowReorderSnapshot",
       "subpaths": ["."]
     },
     {
@@ -17502,12 +17490,12 @@
     {
       "name": "ROW_DND_MIME",
       "kind": "runtime",
-      "module": "rows/rowReorderEngine.ts",
+      "module": "rows/rowReorderController.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "rows/rowReorderEngine.ts#ROW_DND_MIME",
+      "identity": "rows/rowReorderController.ts#ROW_DND_MIME",
       "subpaths": ["./binding"]
     },
     {

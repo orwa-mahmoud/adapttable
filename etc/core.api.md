@@ -7344,6 +7344,7 @@ export interface RowReorderControllerOptions<TRow> {
     getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
     getRowId?: (row: TRow) => string;
     readonly getRowIndex?: (row: TRow) => number | undefined;
+    isRtl?: (element: HTMLElement | null) => boolean;
     labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled"> & Partial<Pick<RowReorderLabels, "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever">>;
     movePolicy?: RowMovePolicy;
     onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
