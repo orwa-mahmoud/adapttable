@@ -1,5 +1,6 @@
 /** Grouping uses core's capability, aggregation and flattened-entry pipelines. */
 import {
+  createTableEngine,
   devWarn,
   type ExtraRow,
   formatGroupBy,
@@ -33,6 +34,7 @@ import {
 import { useGroupPaging } from "../grouping/groupPaging";
 import { groupingModelKey, type TableGrouping } from "../hierarchy/models";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
+import { withFrontendRowModel } from "../source/rowModel";
 export interface GroupingExtras<TRow = unknown> extends Omit<
   GroupCollapseOptions,
   "enabled"
@@ -129,15 +131,18 @@ export function grouping<TRow>(
   extras: GroupingExtras<TRow> = {}
 ): TableFeature<TRow> {
   const base = coreGrouping<TRow>([], extras);
-  return {
-    id: base.id,
-    apply: (input) => ({
-      ...base.apply?.(input),
-      groupBy,
-      bodyModel: projectHeadlessRows,
-    }),
-    mount: mountGrouping,
-  };
+  return withFrontendRowModel(
+    {
+      id: base.id,
+      apply: (input) => ({
+        ...base.apply?.(input),
+        groupBy,
+        bodyModel: projectHeadlessRows,
+      }),
+      mount: mountGrouping,
+    },
+    createTableEngine
+  );
 }
 export type { GroupCollapseOptions } from "../grouping/groupCollapse";
 export { useGroupCollapse } from "../grouping/groupCollapse";

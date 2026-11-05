@@ -1,3 +1,4 @@
+import { createTableEngine } from "@adapttable/core";
 import { slotRender } from "@adapttable/core/binding";
 import { afterEach, expect, it, vi } from "vitest";
 import { effectScope, nextTick, shallowRef } from "vue";
@@ -42,7 +43,12 @@ function fixture(ordinary = false) {
       : panel(notify),
   ]);
   const source = scope.run(() =>
-    useFrontendData<Row>({ data: rows, columns, urlSync: false })
+    useFrontendData<Row>({
+      data: rows,
+      columns,
+      urlSync: false,
+      createEngine: createTableEngine<Row>,
+    })
   );
   if (!source) throw new Error("Missing source");
   let afterWrite: (() => void) | undefined;

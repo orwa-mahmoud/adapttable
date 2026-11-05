@@ -131,6 +131,7 @@ import { FilterType } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FindInTableState } from '@adapttable/core/binding';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { FunctionalComponent } from 'vue';
 import { GetCellSpan } from '@adapttable/core';
 import { GetCellSpanArgs } from '@adapttable/core';
@@ -1857,6 +1858,7 @@ export function useFrontendData<TRow>(input: MaybeRefOrGetter<UseFrontendDataOpt
 export interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, SourceViewportOptions {
     // (undocumented)
     readonly columns?: MaybeRefOrGetterOptional<readonly ColumnMetadata<TRow>[]>;
+    readonly createEngine?: FrontendEngineFactory<TRow>;
     // (undocumented)
     readonly data: MaybeRefOrGetter<readonly TRow[]>;
     // (undocumented)

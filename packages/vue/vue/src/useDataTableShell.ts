@@ -11,6 +11,7 @@ import {
   type FacetMap,
   type FilterDef,
   type FilterTypeSpec,
+  type FrontendEngineFactory,
   isCellEditable,
   projectedGroupingSource,
   type QueryAggregate,
@@ -140,6 +141,7 @@ import {
   SELECTION_STATS_MODEL,
 } from "./navigation/contracts";
 import { useRowSelection } from "./selection/selection";
+import { frontendRowModelOf } from "./source/rowModel";
 import { useViewportMobile } from "./source/sourceLifecycle";
 import {
   useFrontendData,
@@ -381,6 +383,8 @@ export function useDataTableShell<TRow>(
       ...(toValue(resolved.value.numberExtraKeys) ?? []),
       ...(filterRuntime.value?.numberExtraKeys ?? []),
     ],
+    createEngine: frontendRowModelOf(declarations.value) as
+      FrontendEngineFactory<TRow> | undefined,
   }));
   const server = useServerData<TRow>(() => {
     const value = resolved.value;
@@ -490,8 +494,7 @@ export function useDataTableShell<TRow>(
     forceMobile: isMobile,
     source: viewSource,
     selection: selection.value,
-    stickyTop:
-      resolved.value.maxHeight != null ? 0 : resolved.value.stickyTop,
+    stickyTop: resolved.value.maxHeight != null ? 0 : resolved.value.stickyTop,
   }));
   watch(
     () => {

@@ -1,3 +1,4 @@
+import { createTableEngine } from "@adapttable/core";
 import { type ColumnDef, useFrontendData } from "@adapttable/vue";
 import ui from "@nuxt/ui/vue-plugin";
 import { afterEach, expect, it, vi } from "vitest";
@@ -69,6 +70,7 @@ function fixture(
       columns,
       defaults: initial.length ? { groupBy: initial.join(",") } : undefined,
       urlSync: false,
+      createEngine: createTableEngine<Row>,
     })
   );
   if (!source) throw new Error("Missing source");

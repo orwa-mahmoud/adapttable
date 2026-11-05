@@ -1,6 +1,7 @@
 /** One grouping controller with required Vue adapter slots. */
 import {
   createGroupingPanelController,
+  createTableEngine,
   declaredAggregates,
   deferGroupingDropToInner,
   focusAfterAggregationRemoval,
@@ -45,6 +46,7 @@ import {
 } from "../features/tableFeature";
 import { groupingModelKey } from "../hierarchy/models";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
+import { withFrontendRowModel } from "../source/rowModel";
 import { useExternalStore } from "../store";
 import { groupingPanelControlKey, groupingPanelModelKey } from "./contracts";
 export { groupingPanelControlKey, groupingPanelModelKey } from "./contracts";
@@ -332,92 +334,97 @@ export function groupingPanel<TRow>(
   extras: GroupingExtras<TRow> = {}
 ): TableFeature<TRow> {
   const base = coreGroupingPanel<TRow>(initialGroupBy, extras);
-  return {
-    id: base.id,
-    requiredSlots: [groupingPanelControlKey<never>()],
-    apply: (input) => ({
-      ...base.apply?.(input),
-      bodyModel: projectHeadlessRows,
-    }),
-    mount: (context) => {
-      mountGrouping(context);
-      let disposed = false;
-      onScopeDispose(() => {
-        disposed = true;
-      });
-      const neutralRuntime = eraseTableRuntime(context.runtime);
-      const setGroupBy: typeof context.source.value.setGroupBy = (value) => {
-        if (disposed || !context.active.value) return;
-        const state = neutralRuntime.view()?.groupingState;
-        if (!state) return;
-        state.setGroupBy(value);
-        if (disposed || !context.active.value) return;
-        (context.options.value as GroupingExtras<TRow>).onGroupByChange?.(
-          parseGroupBy(value)
-        );
-      };
-      const runtime = {
-        ...neutralRuntime,
-        view: () => {
-          if (disposed || !context.active.value) return undefined;
-          const view = neutralRuntime.view();
-          return view?.groupingState
-            ? {
-                ...view,
-                groupingState: { ...view.groupingState, setGroupBy },
-              }
-            : view;
-        },
-      };
-      const controller = createGroupingPanelController({
-        runtime,
-        groupAggregates: extras.groupAggregates,
-      });
-      const snapshot = useExternalStore(controller, { active: context.active });
-      const grouped = context.state.get(groupingModelKey<TRow>());
-      watch(
-        context.active,
-        (active) => {
-          if (active) controller.initialize(initialGroupBy);
-        },
-        { immediate: true, flush: "sync" }
-      );
-      watch(
-        () => controller.reconcileKey(),
-        () => {
-          if (context.active.value) controller.reconcile();
-        },
-        { immediate: true, flush: "sync" }
-      );
-      const model = computed(() => {
-        const declared = declaredAggregates(extras.groupAggregates);
-        const state = groupingPanelState({
-          interactions: controller.interactions(snapshot.value, declared),
-          groupBy: parseGroupBy(context.source.value.groupBy),
-          columns: context.table.allColumns.value,
-          source: context.source.value,
+  return withFrontendRowModel(
+    {
+      id: base.id,
+      requiredSlots: [groupingPanelControlKey<never>()],
+      apply: (input) => ({
+        ...base.apply?.(input),
+        bodyModel: projectHeadlessRows,
+      }),
+      mount: (context) => {
+        mountGrouping(context);
+        let disposed = false;
+        onScopeDispose(() => {
+          disposed = true;
         });
-        if (!state) return undefined;
-        return {
-          state: {
-            ...state,
-            aggregations: groupingPanelAggregations({
-              source: context.source.value,
-              columns: context.table.allColumns.value,
-              declared,
-              entries: grouped.value?.entries,
-            }),
-          },
-          columns: context.table.allColumns.value,
-          labels: context.table.labels.value,
-          mobile: context.table.isMobile.value,
-          dir: context.table.dir.value,
+        const neutralRuntime = eraseTableRuntime(context.runtime);
+        const setGroupBy: typeof context.source.value.setGroupBy = (value) => {
+          if (disposed || !context.active.value) return;
+          const state = neutralRuntime.view()?.groupingState;
+          if (!state) return;
+          state.setGroupBy(value);
+          if (disposed || !context.active.value) return;
+          (context.options.value as GroupingExtras<TRow>).onGroupByChange?.(
+            parseGroupBy(value)
+          );
         };
-      });
-      watchEffect(
-        () => context.state.set(groupingPanelModelKey<TRow>(), model.value),
-        { flush: "sync" }
-      );
+        const runtime = {
+          ...neutralRuntime,
+          view: () => {
+            if (disposed || !context.active.value) return undefined;
+            const view = neutralRuntime.view();
+            return view?.groupingState
+              ? {
+                  ...view,
+                  groupingState: { ...view.groupingState, setGroupBy },
+                }
+              : view;
+          },
+        };
+        const controller = createGroupingPanelController({
+          runtime,
+          groupAggregates: extras.groupAggregates,
+        });
+        const snapshot = useExternalStore(controller, {
+          active: context.active,
+        });
+        const grouped = context.state.get(groupingModelKey<TRow>());
+        watch(
+          context.active,
+          (active) => {
+            if (active) controller.initialize(initialGroupBy);
+          },
+          { immediate: true, flush: "sync" }
+        );
+        watch(
+          () => controller.reconcileKey(),
+          () => {
+            if (context.active.value) controller.reconcile();
+          },
+          { immediate: true, flush: "sync" }
+        );
+        const model = computed(() => {
+          const declared = declaredAggregates(extras.groupAggregates);
+          const state = groupingPanelState({
+            interactions: controller.interactions(snapshot.value, declared),
+            groupBy: parseGroupBy(context.source.value.groupBy),
+            columns: context.table.allColumns.value,
+            source: context.source.value,
+          });
+          if (!state) return undefined;
+          return {
+            state: {
+              ...state,
+              aggregations: groupingPanelAggregations({
+                source: context.source.value,
+                columns: context.table.allColumns.value,
+                declared,
+                entries: grouped.value?.entries,
+              }),
+            },
+            columns: context.table.allColumns.value,
+            labels: context.table.labels.value,
+            mobile: context.table.isMobile.value,
+            dir: context.table.dir.value,
+          };
+        });
+        watchEffect(
+          () => context.state.set(groupingPanelModelKey<TRow>(), model.value),
+          { flush: "sync" }
+        );
+      },
     },
-  };
+    createTableEngine
+  );
 }
