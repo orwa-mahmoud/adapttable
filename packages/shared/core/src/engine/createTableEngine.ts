@@ -20,6 +20,7 @@ import {
   applyRowPatchLogToView,
   attachIncrementalView,
   createIncrementalView,
+  forkIncrementalView,
   type IncrementalView,
   type IncrementalViewConfig,
   reconfigureIncrementalView,
@@ -141,6 +142,36 @@ export interface TableEngineConfigPatch<TRow> extends Partial<
 }
 
 /**
+ * Callbacks a source may refresh without handing the engine a new query.
+ *
+ * Each key that is present is written. `undefined` clears that callback
+ * where the model allows it; a key that is absent is left as it is.
+ * Column arrays are adopted onto the model the derivation reads. The
+ * column list `getColumn` walks changes only when a stage or configure
+ * replaces it, so an in-place edit of a column object stays visible.
+ *
+ * @public
+ */
+export interface TableCallbackRefresh<TRow> {
+  /** Stable row identity. */
+  readonly getRowId?: (row: TRow) => string;
+  /** Searchable text for one row. */
+  readonly getSearchText?: (row: TRow) => string;
+  /** Client filter over the extra bag. */
+  readonly filterFn?: NonNullable<IncrementalViewConfig<TRow>["filterFn"]>;
+  /** Predicate for a filter tree. */
+  readonly filterTreeFn?: NonNullable<
+    IncrementalViewConfig<TRow>["filterTreeFn"]
+  >;
+  /** Columns the derivation reads. */
+  readonly columns?: NonNullable<IncrementalViewConfig<TRow>["columns"]>;
+  /** Sort value for one cell. */
+  readonly getSortValue?: NonNullable<
+    IncrementalViewConfig<TRow>["getSortValue"]
+  >;
+}
+
+/**
  * Everything that can be read off a table without changing it.
  *
  * The engine itself is one of these, and so is the candidate a binding stages
@@ -231,6 +262,15 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
   readonly commitCandidate: () => void;
   /** Drop the candidate; the committed state is already what it was. */
   readonly discardCandidate: () => void;
+  /**
+   * Adopt callback identities onto the model that is being written.
+   *
+   * While a candidate is pending, the committed model is left untouched.
+   * A new closure with the same presence does not re-derive or notify.
+   * Clearing a callback, or adding one that was absent, re-derives the
+   * affected rows and notifies when that write is the committed model.
+   */
+  readonly refreshCallbacks: (patch: TableCallbackRefresh<TRow>) => void;
   /** Stop every subscription and release the engine. */
   readonly dispose: () => void;
 }
@@ -346,6 +386,31 @@ interface EngineView<TRow> {
     IncrementalViewConfig<TRow>["groupAggregateOps"]
   >;
 }
+
+/**
+ * One session slice, committed or candidate.
+ *
+ * `model` is the derivation readers walk. `modelHandle` is the cache owner
+ * a discard restores. A candidate writes a fork, so abandoning it leaves
+ * this handle and its rows intact.
+ */
+interface SessionRecord<TRow> {
+  view: EngineView<TRow>;
+  viewConfig: IncrementalViewConfig<TRow>;
+  model: IncrementalView<TRow>;
+  modelHandle: IncrementalView<TRow>;
+  revisions: TableRevisions;
+}
+
+/** Callbacks {@link TableEngine.refreshCallbacks} may adopt or clear. */
+const CALLBACK_KEYS = [
+  "getRowId",
+  "getSearchText",
+  "filterFn",
+  "filterTreeFn",
+  "columns",
+  "getSortValue",
+] as const satisfies readonly (keyof TableCallbackRefresh<never>)[];
 
 const EMPTY_EXTRA: ExtraFilters = {};
 let tableSeq = 0;
@@ -474,11 +539,11 @@ export function createTableEngine<TRow>(
   };
   let revisions: TableRevisions = { data: 1, view: 1, schema: 1, policy: 1 };
   /**
-   * The committed state, held apart while a candidate is pending. Everything
-   * public reads through here; `view`, `derived` and `revisions` are the
-   * candidate the stager is building.
+   * The committed session, held apart while a candidate is pending.
+   * `view`, `derived` and `revisions` are the candidate being built.
+   * Discard restores `modelHandle`; it does not rebuild the derivation.
    */
-  let committed: CommittedState<TRow> | undefined;
+  let committed: SessionRecord<TRow> | undefined;
   /** Axes the pending candidate moved, published together at commit. */
   let pendingAxes: TableRevisionAxis[] = [];
   let disposed = false;
@@ -489,13 +554,30 @@ export function createTableEngine<TRow>(
 
   /** The state a public read answers from: committed, never a candidate. */
   function readable(): CommittedState<TRow> {
-    return committed ?? { view, derived, revisions };
+    if (!committed) return { view, derived, revisions };
+    return {
+      view: committed.view,
+      derived: committed.model,
+      revisions: committed.revisions,
+    };
   }
 
-  function columnMap(
-    state: CommittedState<TRow>
-  ): Map<string, ColumnMetadata<TRow>> {
-    return new Map(state.view.columns.map((column) => [column.key, column]));
+  /**
+   * The column for `key`, last duplicate wins.
+   *
+   * A reverse scan allocates nothing and reads the object the host still
+   * holds, so an in-place key or header edit is visible. A map cached by
+   * the column-array identity would keep the previous object.
+   */
+  function columnByKey(
+    columns: readonly ColumnMetadata<TRow>[],
+    key: string
+  ): ColumnMetadata<TRow> | undefined {
+    for (let index = columns.length - 1; index >= 0; index -= 1) {
+      const column = columns[index];
+      if (column?.key === key) return column;
+    }
+    return undefined;
   }
 
   function viewConfig(): IncrementalViewConfig<TRow> {
@@ -597,12 +679,12 @@ export function createTableEngine<TRow>(
       },
       getColumn(key) {
         assertLive();
-        return columnMap(state()).get(key);
+        return columnByKey(state().view.columns, key);
       },
       cellValue(row, columnKey) {
         assertLive();
         const current = state();
-        const column = columnMap(current).get(columnKey);
+        const column = columnByKey(current.view.columns, columnKey);
         if (!column) return undefined;
         return cellValue(row, column, current.view.locale);
       },
@@ -650,7 +732,16 @@ export function createTableEngine<TRow>(
    * candidate instead. Called once per pending candidate.
    */
   function beginCandidate(): void {
-    committed ??= { view, derived, revisions };
+    if (committed) return;
+    committed = {
+      view,
+      viewConfig: viewConfig(),
+      model: derived,
+      modelHandle: derived,
+      revisions,
+    };
+    // The candidate writes this copy. The committed handle stays put.
+    derived = forkIncrementalView(derived);
   }
 
   /**
@@ -660,19 +751,11 @@ export function createTableEngine<TRow>(
    */
   function dropCandidate(): void {
     if (!committed) return;
-    const staged = derived;
     view = committed.view;
-    derived = committed.derived;
+    derived = committed.modelHandle;
     revisions = committed.revisions;
     committed = undefined;
     pendingAxes = [];
-    // A candidate that re-derived wrote into the incremental state it shares
-    // with the committed view, so that state no longer describes the rows it
-    // holds. Rebuild it from the committed configuration before anything
-    // configures or patches it again.
-    if (staged !== derived) {
-      derived = createIncrementalView(view.data, viewConfig());
-    }
   }
 
   function publish(
@@ -761,6 +844,41 @@ export function createTableEngine<TRow>(
     if (disposed) {
       throw new Error("TableEngine is disposed");
     }
+  }
+
+  function callbackConfig(patch: TableCallbackRefresh<TRow>): {
+    configPatch: Partial<IncrementalViewConfig<TRow>>;
+    cleared: (keyof IncrementalViewConfig<TRow>)[];
+  } {
+    const configPatch: Partial<IncrementalViewConfig<TRow>> = {};
+    const cleared: (keyof IncrementalViewConfig<TRow>)[] = [];
+    for (const key of CALLBACK_KEYS) {
+      if (!(key in patch)) continue;
+      const value = patch[key];
+      if (value === undefined) cleared.push(key);
+      else Object.assign(configPatch, { [key]: value });
+    }
+    return { configPatch, cleared };
+  }
+
+  function adoptCallbackView(patch: TableCallbackRefresh<TRow>): void {
+    let nextView = view;
+    const adopt = <K extends keyof EngineView<TRow>>(
+      key: K,
+      value: EngineView<TRow>[K]
+    ): void => {
+      if (Object.is(view[key], value)) return;
+      if (nextView === view) nextView = { ...view };
+      nextView[key] = value;
+    };
+    if ("getRowId" in patch && patch.getRowId !== undefined) {
+      adopt("getRowId", patch.getRowId);
+    }
+    if ("getSearchText" in patch) adopt("getSearchText", patch.getSearchText);
+    if ("filterFn" in patch) adopt("filterFn", patch.filterFn);
+    if ("filterTreeFn" in patch) adopt("filterTreeFn", patch.filterTreeFn);
+    if ("getSortValue" in patch) adopt("getSortValue", patch.getSortValue);
+    if (nextView !== view) view = nextView;
   }
 
   const committedReader = readerOf(readable);
@@ -861,7 +979,13 @@ export function createTableEngine<TRow>(
       applyConfigurePatch(patch);
       // The tokens follow what the candidate actually reads differently, so a
       // render sees a coherent snapshot and an unchanged table stays still.
-      const base = committed ?? { view, derived, revisions };
+      const base: CommittedState<TRow> = committed
+        ? {
+            view: committed.view,
+            derived: committed.model,
+            revisions: committed.revisions,
+          }
+        : { view, derived, revisions };
       pendingAxes = observableAxes(base, { view, derived, revisions });
       revisions = bump(base.revisions, pendingAxes);
     },
@@ -879,6 +1003,20 @@ export function createTableEngine<TRow>(
     discardCandidate() {
       assertLive();
       dropCandidate();
+    },
+    refreshCallbacks(patch) {
+      assertLive();
+      adoptCallbackView(patch);
+      const { configPatch, cleared } = callbackConfig(patch);
+      if (cleared.length === 0 && Object.keys(configPatch).length === 0) {
+        return;
+      }
+      const beforeSorted = derived.sorted;
+      derived = reconfigureIncrementalView(derived, configPatch, cleared);
+      attachIncrementalView(derived.sorted, derived);
+      if (!committed && !sameList(beforeSorted, derived.sorted)) {
+        publish(["view"]);
+      }
     },
     invalidate(axes, next, options) {
       assertLive();

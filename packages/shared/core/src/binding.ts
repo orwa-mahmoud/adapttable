@@ -579,6 +579,7 @@ export type {
   CustomCellEditorRender,
 } from "./editing/cellEditing";
 export type {
+  TableCallbackRefresh,
   TableEngine,
   TableEngineConfigPatch,
   TableEngineReader,

@@ -61,6 +61,7 @@ import {
   type IncrementalGroupTree,
   incrementalGroupTree,
   moveGroupedRow,
+  type MutablePartition,
   removeGroupedRow,
   rowGroupPath,
   snapshotPartitions,
@@ -242,6 +243,107 @@ export function incrementalViewConfig<TRow>(
   view: IncrementalView<TRow>
 ): IncrementalViewConfig<TRow> | undefined {
   return getState(view)?.config;
+}
+
+/**
+ * A second snapshot over the same row objects.
+ *
+ * The copy owns its derived arrays, indexes, grouping tree and aggregate
+ * accumulators. It keeps the source row array, so a patch log that starts
+ * at that array still continues, and it does not retarget that array's
+ * snapshot — the committed view stays reachable from it. Row objects are
+ * not cloned.
+ *
+ * @typeParam TRow - The row type.
+ * @param view - The snapshot to copy.
+ * @returns The copy, or `view` when it has no snapshot.
+ */
+export function forkIncrementalView<TRow>(
+  view: IncrementalView<TRow>
+): IncrementalView<TRow> {
+  const state = getState(view);
+  if (!state) return view;
+  const filtered = state.filtered.slice();
+  const sorted =
+    state.sorted === state.filtered ? filtered : state.sorted.slice();
+  const filteredPos = new Map(state.filteredPos);
+  const forkedState: ViewState<TRow> = {
+    config: { ...state.config },
+    searchText: new Map(state.searchText),
+    sortValues: new Map(state.sortValues),
+    filtered,
+    filteredSourceIndex: state.filteredSourceIndex.slice(),
+    filteredPos,
+    sorted,
+    sortedPos:
+      state.sortedPos === state.filteredPos
+        ? filteredPos
+        : new Map(state.sortedPos),
+    tree: state.tree ? cloneGroupTree(state.tree) : undefined,
+    summary: state.summary ? cloneSummary(state.summary) : undefined,
+    summaryDirty: state.summaryDirty,
+    groupCells: cloneGroupCells(state.groupCells),
+    dirtyGroups: new Set(state.dirtyGroups),
+  };
+  const forked: IncrementalView<TRow> = {
+    rows: view.rows,
+    filtered,
+    sorted,
+    groups: view.groups?.slice(),
+    aggregates: view.aggregates ? { ...view.aggregates } : undefined,
+  };
+  STATES.set(forked, forkedState as ViewState<unknown>);
+  attachView(filtered, forked);
+  attachView(sorted, forked);
+  return forked;
+}
+
+function clonePartition<TRow>(
+  node: MutablePartition<TRow>
+): MutablePartition<TRow> {
+  const children = node.children?.map(clonePartition);
+  return {
+    value: node.value,
+    valueKey: node.valueKey,
+    rows: node.rows.slice(),
+    children,
+    childMap: new Map(children?.map((child) => [child.valueKey, child])),
+  };
+}
+
+function cloneGroupTree<TRow>(
+  tree: IncrementalGroupTree<TRow>
+): IncrementalGroupTree<TRow> {
+  const roots = tree.roots.map(clonePartition);
+  return {
+    keys: tree.keys,
+    columns: tree.columns,
+    locale: tree.locale,
+    roots,
+    rootMap: new Map(roots.map((root) => [root.valueKey, root])),
+  };
+}
+
+function cloneSummary<TRow>(
+  summary: IncrementalAggregate<TRow>
+): IncrementalAggregate<TRow> {
+  return {
+    spec: summary.spec,
+    options: summary.options,
+    columns: new Map(summary.columns),
+    bindings: summary.bindings.map((binding) => ({
+      key: binding.key,
+      acc: { ...binding.acc },
+    })),
+  };
+}
+
+function cloneGroupCells(
+  cells: ReadonlyMap<string, Partial<Record<string, DisplayValue>>>
+): Map<string, Partial<Record<string, DisplayValue>>> {
+  const copy = new Map<string, Partial<Record<string, DisplayValue>>>();
+  for (const [key, value] of cells) copy.set(key, { ...value });
+  return copy;
 }
 
 /**

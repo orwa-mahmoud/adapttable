@@ -17,6 +17,7 @@ export {
 export {
   createTableEngine,
   type CreateTableEngineOptions,
+  type TableCallbackRefresh,
   type TableEngine,
   type TableEngineConfigPatch,
   type TableEngineReader,

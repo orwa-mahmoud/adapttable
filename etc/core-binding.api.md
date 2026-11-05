@@ -6089,6 +6089,16 @@ export function tableAttributes(dir: Direction | undefined, label: string): {
 };
 
 // @public
+export interface TableCallbackRefresh<TRow> {
+    readonly columns?: NonNullable<IncrementalViewConfig<TRow>["columns"]>;
+    readonly filterFn?: NonNullable<IncrementalViewConfig<TRow>["filterFn"]>;
+    readonly filterTreeFn?: NonNullable<IncrementalViewConfig<TRow>["filterTreeFn"]>;
+    readonly getRowId?: (row: TRow) => string;
+    readonly getSearchText?: (row: TRow) => string;
+    readonly getSortValue?: NonNullable<IncrementalViewConfig<TRow>["getSortValue"]>;
+}
+
+// @public
 export type TableDensity = "comfortable" | "compact";
 
 // @public
@@ -6107,6 +6117,7 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
     }, options?: {
         silent?: boolean;
     }) => void;
+    readonly refreshCallbacks: (patch: TableCallbackRefresh<TRow>) => void;
     readonly rowKey: (row: TRow) => string;
     readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
         readonly data?: readonly TRow[];

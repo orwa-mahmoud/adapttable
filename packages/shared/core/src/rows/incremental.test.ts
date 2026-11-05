@@ -24,6 +24,7 @@ import {
   attachIncrementalView,
   configureIncrementalView,
   createIncrementalView,
+  forkIncrementalView,
   incrementalSearchText,
   type IncrementalView,
   type IncrementalViewConfig,
@@ -1263,4 +1264,28 @@ describe("applyRowPatchLogToView — index work per event", () => {
       expect(many.sortCalls).toBe(32 * one.sortCalls);
     }
   );
+});
+
+describe("forkIncrementalView", () => {
+  it("patches the fork and leaves the committed snapshot's rows and totals", () => {
+    const view = createIncrementalView(ROWS, {
+      getRowId: (row) => row.id,
+      columns: COLS,
+      groupBy: "team",
+      aggregateSpec: { budget: "sum" },
+      aggregateOptions: { columns: COLS },
+    });
+    const before = view.aggregates?.budget;
+    const fork = forkIncrementalView(view);
+    const removed = ROWS[0]!;
+    const patched = applyRowPatchesToView(fork, [
+      { type: "remove", id: removed.id },
+    ]);
+
+    expect(incrementalViewOf(view.sorted)).toBe(view);
+    expect(view.sorted).toContain(removed);
+    expect(patched.sorted).not.toContain(removed);
+    expect(view.aggregates?.budget).toBe(before);
+    expect(patched.aggregates?.budget).not.toBe(before);
+  });
 });

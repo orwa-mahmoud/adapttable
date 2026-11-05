@@ -24,13 +24,7 @@ import {
   type TableEngine,
   type TableEngineReader,
 } from "../engine/createTableEngine";
-import {
-  incrementalSearchText,
-  type IncrementalView,
-  type IncrementalViewConfig,
-  incrementalViewConfig,
-  incrementalViewOf,
-} from "../rows/incremental";
+import { engineSearchText } from "../engine/searchText";
 import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
 import type { PaginationMode, ResolvedPaginationMode } from "../types";
 import { devWarn } from "../utils/devWarn";
@@ -60,7 +54,7 @@ export function resolvePaginationMode(
  * @public
  */
 export function defaultSearchText<TRow>(row: TRow): string {
-  return incrementalSearchText(row);
+  return engineSearchText(row);
 }
 
 /**
@@ -201,21 +195,6 @@ function viewFingerprint<TRow>(
     page: view.page,
     limit: view.limit,
   });
-}
-
-/** Point the live view at this update's callbacks without restaging it. */
-function adoptCallbacks<TRow>(
-  view: IncrementalView<TRow>,
-  config: IncrementalViewConfig<TRow>
-): void {
-  const current = incrementalViewConfig(view);
-  if (!current) return;
-  current.getRowId = config.getRowId;
-  current.getSearchText = config.getSearchText;
-  current.filterFn = config.filterFn;
-  current.filterTreeFn = config.filterTreeFn;
-  current.columns = config.columns;
-  current.getSortValue = config.getSortValue;
 }
 
 function forgetPatchedSearch<TRow>(
@@ -362,7 +341,7 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
       stages += 1;
     }
 
-    const viewConfig: IncrementalViewConfig<TRow> = {
+    const viewConfig = {
       getRowId,
       getSearchText: projectSearchText,
       filterFn: config.filterFn,
@@ -406,18 +385,22 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
     // Everything this frame reads comes from the candidate; the committed
     // engine stays on the table on screen until the binding commits.
     const reader = table.candidate;
-    const incremental = incrementalViewOf(reader.rows("full"));
-    if (!incremental) {
-      throw new Error("TableEngine is missing its incremental snapshot");
-    }
-    adoptCallbacks(incremental, viewConfig);
+    table.refreshCallbacks({
+      getRowId: viewConfig.getRowId,
+      getSearchText: viewConfig.getSearchText,
+      filterFn: viewConfig.filterFn,
+      filterTreeFn: viewConfig.filterTreeFn,
+      columns: viewConfig.columns,
+      getSortValue: viewConfig.getSortValue,
+    });
 
     const { sortBy, sortDir, sortLevels } = view;
+    const sorted = reader.rows("full");
     if (sortLevels.length === 0 && sortBy && sortDir) {
       warnUnresolvableSort(
         sortBy,
         config.columns?.find((column) => column.key === sortBy),
-        incremental.filtered,
+        sorted,
         config.getSortValue
       );
     }
@@ -438,7 +421,7 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
 
     return {
       rows: page.rows,
-      allFilteredRows: incremental.sorted,
+      allFilteredRows: sorted,
       // Facets count after search, BEFORE extra filters: `filtered` already
       // applied filterFn, so a selected checklist would hide every other value.
       allSearchedRows: searchedRows(config.data, view.search),

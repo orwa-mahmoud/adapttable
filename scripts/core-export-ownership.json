@@ -28,18 +28,6 @@
   "incrementalOwners": ["engine/createTableEngine.ts"],
   "knownViolations": [
     {
-      "id": "source-reaches-incremental-cache",
-      "cause": "FrontendSource imports the full incremental module, so the source graph keeps the row-model cache.",
-      "destinationItem": "f5i6",
-      "edges": [
-        {
-          "from": "source/frontendSource.ts",
-          "to": "rows/incremental.ts",
-          "kind": "runtime"
-        }
-      ]
-    },
-    {
       "id": "grouping-reaches-incremental-cache",
       "cause": "The grouping strategy configures the incremental view through the full incremental module.",
       "destinationItem": "ohuz",
@@ -23302,6 +23290,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "contracts/query.ts#SortLevel",
+      "subpaths": [".", "./binding", "./query"]
+    },
+    {
+      "name": "TableCallbackRefresh",
+      "kind": "type",
+      "module": "engine/createTableEngine.ts",
+      "audience": "app",
+      "path": "./query",
+      "forward": true,
+      "deprecated": false,
+      "identity": "engine/createTableEngine.ts#TableCallbackRefresh",
       "subpaths": [".", "./binding", "./query"]
     },
     {
