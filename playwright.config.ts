@@ -75,8 +75,19 @@ export default defineConfig({
         "**/dev-server/**",
         "**/visual/**",
         "**/nightly-smoke.spec.ts",
+        // The packed Angular consumer builds and serves itself. It runs under
+        // its own project, so a CI shard that never built it does not fail.
+        "**/angular-packed-consumer.spec.ts",
       ],
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      // Builds and serves its own packed page, so it needs none of the
+      // showcase, dev or docs servers the other projects share.
+      name: "angular-consumer",
+      testMatch: "**/angular-packed-consumer.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+      webServer: [],
     },
     {
       // Behaviour that exists only while Vite is serving — today, the real

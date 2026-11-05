@@ -41,6 +41,11 @@ import { gzipSync } from "node:zlib";
 
 import { Rolldown } from "tsdown";
 
+import {
+  angularTransformer,
+  bundleAngularConsumer,
+  compileAngularConsumers,
+} from "./angular-consumer-build.mjs";
 import { requestedCases, selectCases } from "./case-selection.mjs";
 import {
   fixtureFolders,
@@ -94,6 +99,7 @@ const EXTERNAL = [
 const PEER_POLICY = {
   react: "React runtime and UI-kit libraries external",
   vue: "Vue runtime and the package's peerDependencies external",
+  angular: "Angular framework and UI-kit libraries external; own share",
 };
 
 function extraFiles(fixture) {
@@ -294,6 +300,32 @@ function moduleRecorder() {
   };
 }
 
+/** Angular, RxJS and every kit UI library: what an Angular app already ships. */
+const ANGULAR_EXTERNAL = [
+  /^@angular\//,
+  /^rxjs($|\/)/,
+  /^zone\.js($|\/)/,
+  /^tslib($|\/)/,
+  /^@taiga-ui\//,
+  /^ng-zorro-antd($|\/)/,
+  /^@ng-bootstrap\//,
+  /^ngx-bootstrap($|\/)/,
+  /^@spartan-ng\//,
+  /^@ng-icons\//,
+];
+
+/**
+ * The compiled bootstrap entries for the Angular fixtures, keyed by case id.
+ * One `ngc` run compiles them all; an empty selection compiles nothing.
+ */
+function angularEntries(fixtures, dir) {
+  if (!fixtures.length) return new Map();
+  return compileAngularConsumers(
+    dir,
+    fixtures.map((fixture) => ({ id: fixture.id, code: fixture.code }))
+  );
+}
+
 async function bundleFixture(fixture, entry, dir, externals, plugins) {
   if (fixture.consumerHost) {
     return Promise.all(
@@ -343,25 +375,40 @@ async function bundleFixture(fixture, entry, dir, externals, plugins) {
  * module the graph reached is recorded: `resolvedFiles` from the tarballs,
  * `unpackedFiles` from anywhere under the workspace's `packages/`.
  */
-export async function measure(fixture, dir, install) {
+export async function measure(fixture, dir, install, angular) {
   const { code, imports } = entryModule(fixture, install);
   const entry = join(dir, fixture.typeOnly ? "entry.ts" : "entry.js");
   writeFileSync(entry, code);
-  const framework = fixture.framework === "vue" ? "vue" : "react";
-  const externals =
-    framework === "vue" ? vueConsumerExternals(fixture.pkg) : EXTERNAL;
+  const framework = fixture.framework ?? "react";
+  const externals = {
+    vue: vueConsumerExternals(fixture.pkg),
+    angular: ANGULAR_EXTERNAL,
+  }[framework] ?? EXTERNAL;
 
   const recorder = moduleRecorder();
   const started = performance.now();
-  const [min, readable] = await bundleFixture(fixture, entry, dir, externals, [
-    recorder.plugin,
-  ]);
+  const compiled = angular?.get(fixture.id);
+  const bundled = (external) =>
+    bundleAngularConsumer(compiled.entry, {
+      dir,
+      externals: external,
+      transformer: angular.transformer,
+      plugins: [recorder.plugin],
+    });
+  const [min, readable] = compiled
+    ? await bundled(externals)
+    : await bundleFixture(fixture, entry, dir, externals, [recorder.plugin]);
+  // The complete application bundles the framework too, so its bytes are
+  // reported beside AdaptTable's own share and never checked against it.
+  const application = compiled && (await bundled([]));
   const buildMs = Math.round(performance.now() - started);
 
   const accounted = accountOutputs(min.output, readable.output);
   const modules = packedModules(recorder.ids, dir);
+  const app = application && accountOutputs(application[0].output, application[1].output);
   return {
     ...accounted,
+    ...(app && { application: app.total }),
     entryCode: code,
     entryImports: imports,
     resolvedFiles: modules.files,
@@ -385,7 +432,7 @@ export function fixtureCeilings(fixture) {
       `${fixture.name} needs an initial ceiling and a total ceiling no lower than it`
     );
   }
-  return { initialKB, totalKB };
+  return { initialKB, totalKB, ...(fixture.appKB && { appKB: fixture.appKB }) };
 }
 
 export { requestedCases };
@@ -486,6 +533,9 @@ function logRow(fixture, row) {
   const lazy = row.lazy.files
     ? `   lazy ${kib(row.lazy.gzipBytes).toFixed(1)} KiB in ${row.lazy.files}`
     : "";
+  const application = row.application
+    ? `   app ${kib(row.application.gzipBytes).toFixed(1)} / ${row.appKB} KiB`
+    : "";
   console.log(
     `${row.ok ? "✓" : "✗"} ${fixture.name.padEnd(34)}` +
       `initial ${initialKB.toFixed(1).padStart(6)} / ${String(Math.ceil(row.initialKB)).padStart(3)} KiB` +
@@ -493,6 +543,7 @@ function logRow(fixture, row) {
       `   total ${totalKB.toFixed(1).padStart(6)} / ${String(Math.ceil(row.totalKB)).padStart(3)} KiB` +
       ` (${headroomText(totalKB, row.totalKB)})` +
       lazy +
+      application +
       `   build ${String(row.buildMs).padStart(4)}ms`
   );
   if (fixture.kind === "adapter-base" && fixture.item1BaselineKB) {
@@ -516,6 +567,11 @@ function logRow(fixture, row) {
     );
   }
   for (const problem of row.resolutionProblems) console.log(`  └ ${problem}`);
+  if (row.appOver) {
+    console.log(
+      `  └ complete app ${kib(row.application.gzipBytes).toFixed(1)} KiB exceeds ${row.appKB} KiB`
+    );
+  }
 }
 
 function logChecks(rows) {
@@ -622,6 +678,10 @@ function jsonRow(row) {
     initial: row.initial,
     lazy: row.lazy,
     total: row.total,
+    ...(row.application && {
+      application: row.application,
+      applicationCeilingKiB: row.appKB,
+    }),
     ceilingsKiB: { initial: row.initialKB, total: row.totalKB },
     ok: row.ok,
     leaked: row.leaked,
@@ -663,13 +723,16 @@ export function resolutionProblems(fixture, measured) {
   return problems;
 }
 
-async function measuredRow(fixture, install) {
-  const measured = await measure(fixture, install.dir, install);
+async function measuredRow(fixture, install, angular) {
+  const measured = await measure(fixture, install.dir, install, angular);
   const ceilings = fixtureCeilings(fixture);
   const problems = resolutionProblems(fixture, measured);
+  const appOver =
+    measured.application && kib(measured.application.gzipBytes) > fixture.appKB;
   const ok =
     kib(measured.initial.gzipBytes) <= ceilings.initialKB &&
     kib(measured.total.gzipBytes) <= ceilings.totalKB &&
+    !appOver &&
     measured.leaked.length === 0 &&
     measured.missing.length === 0 &&
     problems.length === 0;
@@ -681,6 +744,7 @@ async function measuredRow(fixture, install) {
     ...measured,
     ...ceilings,
     resolutionProblems: problems,
+    ...(appOver && { appOver: true }),
     ok,
   };
 }
@@ -730,6 +794,54 @@ function checkNodeConsumers(rows, selected, install, packages) {
   }
 }
 
+/**
+ * Compile the Angular fixtures once and record any that fail to compile.
+ * Returns the linker and the compiled entries the measurement bundles, or
+ * undefined when the run selected no Angular fixture.
+ */
+async function compiledAngular(selected, dir, rows) {
+  const fixtures = selected.filter((fixture) => fixture.framework === "angular");
+  if (!fixtures.length) return undefined;
+  const compiled = angularEntries(fixtures, dir);
+  for (const [id, result] of compiled) {
+    if (!result.problems.length) continue;
+    const fixture = fixtures.find((entry) => entry.id === id);
+    const row = failedRow(fixture, result.problems);
+    rows.push(row);
+    if (!JSON_OUT) logRow(fixture, row);
+  }
+  return {
+    transformer: angularTransformer(),
+    get: (id) => compiled.get(id),
+  };
+}
+
+/** A fixture whose consumer did not compile, reported as a failed row. */
+function failedRow(fixture, problems) {
+  const empty = { files: 0, rawBytes: 0, minBytes: 0, gzipBytes: 0 };
+  return {
+    id: fixture.id,
+    name: fixture.name,
+    kind: fixture.kind,
+    initial: empty,
+    lazy: empty,
+    total: empty,
+    ledger: [],
+    entryCode: "",
+    entryImports: [],
+    resolvedFiles: [],
+    unpackedFiles: [],
+    peerPolicy: PEER_POLICY.angular,
+    externalImports: [],
+    buildMs: 0,
+    leaked: [],
+    missing: [],
+    ...fixtureCeilings(fixture),
+    resolutionProblems: problems.map((problem) => `did not compile: ${problem}`),
+    ok: false,
+  };
+}
+
 async function main() {
   const coverageProblems = vueConsumerCoverageProblems(FIXTURES);
   if (coverageProblems.length) throw new Error(coverageProblems.join("\n"));
@@ -742,10 +854,16 @@ async function main() {
   const rows = [];
 
   try {
-    for (const fixture of selected) {
-      const row = await measuredRow(fixture, install);
-      rows.push(row);
-      if (!JSON_OUT) logRow(fixture, row);
+    const angular = await compiledAngular(selected, install.dir, rows);
+    try {
+      for (const fixture of selected) {
+        if (rows.some((row) => row.id === fixture.id)) continue;
+        const row = await measuredRow(fixture, install, angular);
+        rows.push(row);
+        if (!JSON_OUT) logRow(fixture, row);
+      }
+    } finally {
+      await angular?.transformer.close();
     }
     checkDeclarations(rows, install);
     checkNodeConsumers(rows, selected, install, packages);

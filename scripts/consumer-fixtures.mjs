@@ -10,6 +10,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { angularConsumerFixtures } from "./angular-consumer-fixtures.mjs";
 import { kitDir, KITS, packageNameAt } from "./kits.mjs";
 import { folderOf, workspacePackages } from "./packed-consumers.mjs";
 import { vueConsumerFixtures } from "./vue-consumer-fixtures.mjs";
@@ -532,6 +533,7 @@ function withCaseIds(fixtures) {
 export const FIXTURES = withCaseIds([
   ...existingFixtures,
   ...vueConsumerFixtures(existingFixtures, PLAIN_ADAPTER_CEILING_KB),
+  ...angularConsumerFixtures(),
 ]);
 
 /**
