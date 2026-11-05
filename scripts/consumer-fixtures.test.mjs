@@ -163,6 +163,12 @@ describe("consumer fixtures", () => {
     assert.ok(
       FIXTURES.some((fixture) => fixture.name === "core · simple table")
     );
+    const basic = FIXTURES.find(
+      (fixture) => fixture.name === "core · basic table"
+    );
+    assert.equal(basic?.code.includes("createBasicTableEngine"), true);
+    assert.ok(basic?.absent.includes("groupedEntriesForStrategy"));
+    assert.ok(basic && basic.initialKB < 20);
     assert.ok(
       FIXTURES.some((fixture) => fixture.name === "react · simple table")
     );
