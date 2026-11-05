@@ -15,10 +15,10 @@
  * Resolving once puts that beyond doubt, and it makes a writer non-generic:
  * `xlsxWriter()` drops into a table of any row type without a type argument.
  *
- * The other reason formats stay separate is weight. CSV is built in, so it
- * lives here. XLSX is a separate entry (`@adapttable/core/xlsx`) that only an
- * app importing it ever downloads — a table that exports CSV must not ship a
- * ZIP encoder.
+ * The other reason formats stay separate is weight. CSV encoding lives in
+ * `csvWriter.ts` and is re-exported here. XLSX and PDF stay separate entries
+ * (`@adapttable/core/xlsx`, `@adapttable/core/pdf`) that only an app importing
+ * them ever downloads — a table that exports CSV must not ship those writers.
  */
 
 import type { ColumnMetadata } from "../contracts/columns";
@@ -29,7 +29,6 @@ import {
 } from "../rows/cellSpan";
 import { isBrowser } from "../utils/env";
 import { exportCellValue } from "./cellValue";
-import { matrixToCsv } from "./csv";
 
 /**
  * What a structured export row is: a data leaf, a group header, or a
@@ -262,23 +261,7 @@ export function buildExportTable<TRow>(
   };
 }
 
-/** The UTF-8 byte-order mark, which is what makes Excel read the file as UTF-8. */
-const BOM = "\uFEFF";
-
-/**
- * The built-in writer: comma-separated text, UTF-8 with a BOM so Excel opens
- * unicode correctly. This is what the export button uses when no writer is
- * given.
- *
- * @public
- */
-export const csvWriter: ExportWriter = {
-  extension: "csv",
-  build: ({ table, escapeFormulas }) => {
-    const text = matrixToCsv(table, { escapeFormulas });
-    return { parts: [BOM, text], mimeType: "text/csv;charset=utf-8", text };
-  },
-};
+export { csvWriter } from "./csvWriter";
 
 /** `"export.xlsx"` — the name when the caller did not choose one. */
 export function defaultExportFilename(writer: ExportWriter): string {
