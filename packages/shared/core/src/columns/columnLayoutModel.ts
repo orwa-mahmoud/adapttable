@@ -4,7 +4,8 @@
  * The hook that *changes* hide/order/pin/resize lives in
  * {@link useColumnLayout}. This module is safe on the three-prop path.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 
 /**
  * Edge a column can be pinned to — logical, so it follows the writing

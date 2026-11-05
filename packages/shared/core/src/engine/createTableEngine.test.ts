@@ -1,7 +1,7 @@
 /** @vitest-environment node */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
 import { createTableEngine } from "./createTableEngine";
 import { createNeutralTable } from "./neutralTable";
 

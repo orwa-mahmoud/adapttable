@@ -8,7 +8,8 @@
  * single-control write dismisses it. A dismissal also bumps a reset key, so a
  * kit remounts the overlay's form fresh the next time it opens.
  */
-import type { ExtraFilters } from "../columnModel";
+
+import type { ExtraFilters } from "../contracts/columns";
 import type { TableSource } from "../source/TableSource";
 import { defaultFilterRegistry } from "./filterBuiltins";
 import { type FilterDef, RANGE_SUFFIXES } from "./filterDefs";

@@ -12,12 +12,12 @@
  * stages are the same everywhere, so they live here.
  */
 import { computedAggregateKeys } from "../aggregate/aggregationModel";
-import type { ColumnMetadata } from "../columnModel";
 import { applyColumnOrder, type PinSide } from "../columns/columnLayoutModel";
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { TableEngine } from "../engine/createTableEngine";
 import { createNeutralTable, type NeutralTable } from "../engine/neutralTable";
 import { deriveRuntimeOperations } from "../features/runtimeOperations";

@@ -3,11 +3,12 @@
  * binding adapts core's stores to its reactivity and hands back these
  * shapes, so a kit reads the same fields in every framework.
  */
-import type { ExtraFilters, SortDirection } from "../columnModel";
+
 import type { ColumnLayoutState } from "../columns/columnLayoutModel";
+import type { ExtraFilters, SortDirection } from "../contracts/columns";
+import type { QueryFilterGroup } from "../contracts/query";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { RowPinState } from "../rows/rowPinModel";
-import type { QueryFilterGroup } from "../source/queryContract";
 import type { TableStateMutators } from "../tableStateMutators";
 import type { SavedView } from "./savedViewsController";
 import type { TableDensity } from "./viewStateSlices";

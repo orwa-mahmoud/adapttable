@@ -1,4 +1,4 @@
-import type { ExtraFilters, FilterValue } from "../types";
+import type { ExtraFilters, FilterValue } from "../contracts/columns";
 
 /**
  * Numeric comparison operators for count/usage filters.

@@ -3,9 +3,10 @@
  * predicate, chips and tree serialization. Built-ins are the first consumers —
  * every former `switch (def.type)` looks up a spec instead.
  */
+import type { ExtraFilters } from "../contracts/columns";
+import type { QueryCondition } from "../contracts/query";
 import type { DisplayValue } from "../display";
-import type { QueryCondition } from "../source/queryContract";
-import type { ExtraFilters, TableLabels } from "../types";
+import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import {
   type ChipLabelResolver,

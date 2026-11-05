@@ -10,8 +10,9 @@
  * Mobile cards ignore geometry — a card is a list of fields, not a grid.
  * Spans are derived from data, so there is nothing to put in the URL.
  */
-import type { ColumnMetadata } from "../columnModel";
+
 import type { PinOffset } from "../columns/columnLayoutModel";
+import type { ColumnMetadata } from "../contracts/columns";
 
 export {
   bodyCellsHaveRowSpan,

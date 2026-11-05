@@ -7,7 +7,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import { aggregate } from "../aggregate/aggregate";
 import { serializeAggregationDerivedKey } from "../aggregate/aggregationModel";
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
+import type { QueryFilterGroup } from "../contracts/query";
+import type { RowPatch, RowPatchEvent } from "../contracts/rows";
 import type { FilterDef } from "../filters/filterDefs";
 import { evaluateFilterTree } from "../filters/filterTree";
 import { withGroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
@@ -16,7 +18,6 @@ import {
   type GroupedFlatEntry,
 } from "../grouping/groupRows";
 import { sortRows, sortRowsMulti } from "../sort/compare";
-import type { QueryFilterGroup } from "../source/queryContract";
 import {
   applyRowPatchesToView,
   applyRowPatchLogToView,
@@ -34,8 +35,6 @@ import {
   applyRowPatchesWithLog,
   insertRow,
   removeRow,
-  type RowPatch,
-  type RowPatchEvent,
   rowPatchLog,
   updateRow,
   upsertRow,

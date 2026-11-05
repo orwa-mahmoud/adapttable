@@ -1,4 +1,5 @@
-import type { ColumnMetadata, ColumnModel } from "../columnModel";
+import type { ColumnMetadata, ColumnModel } from "../contracts/columns";
+
 /**
  * A column identity for width resolution — just its key and declared width.
  *

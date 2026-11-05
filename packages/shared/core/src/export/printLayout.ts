@@ -11,7 +11,8 @@
  * {@link ExportTable} — so three formats of the same table cannot disagree
  * about what a cell contains.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import { isBrowser } from "../utils/env";
 import {
   buildExportTable,

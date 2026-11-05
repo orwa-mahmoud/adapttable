@@ -1,7 +1,8 @@
 /**
  * Resolve a cell value from a neutral column. Never reads React renderers.
  */
-import type { ColumnMetadata, SortableValue } from "../columnModel";
+
+import type { ColumnMetadata, SortableValue } from "../contracts/columns";
 import { resolveLocaleTag } from "../utils/localeTag";
 import { getPath } from "../utils/path";
 

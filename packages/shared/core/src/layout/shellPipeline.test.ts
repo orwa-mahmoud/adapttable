@@ -6,11 +6,11 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnMetadata } from "../columnModel";
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import { createTableEngine } from "../engine/createTableEngine";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { TableSource } from "../source/TableSource";

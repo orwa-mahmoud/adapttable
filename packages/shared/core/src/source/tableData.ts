@@ -11,16 +11,20 @@
  * and, when a frontend table has an `onQueryChange`, tells it about each
  * change. A binding adds only its own reactivity and the moment it commits.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata, ExtraFilters } from "../contracts/columns";
+import type {
+  FacetMap,
+  QueryFilterGroup,
+  TableQuery,
+} from "../contracts/query";
 import type { FeatureHostState } from "../features/currentHost";
-import type { FacetMap } from "../filters/facets";
 import type { FilterDef, FilterRuntime } from "../filters/filterDefs";
 import type { FilterEngine } from "../filters/filterEngine";
 import type {
   FilterTypeRegistry,
   FilterTypeSpec,
 } from "../filters/filterRegistry";
-import type { ExtraFilters } from "../types";
 import { stableKey } from "../utils/stableKey";
 import {
   createFilterOptionsLoader,
@@ -32,9 +36,7 @@ import {
   type TableQueryListener,
   warnDataTierMisuse,
 } from "./dataTier";
-import type { QueryFilterGroup } from "./queryContract";
 import { createSourceSignal, memoOne } from "./sourceState";
-import type { TableQuery } from "./tableQuery";
 import type { TableSource } from "./TableSource";
 
 const EMPTY_REGISTRY: FilterTypeRegistry = {

@@ -17,8 +17,9 @@
  * is measured the answer is one per row, which over-renders slightly and is
  * never wrong.
  */
+import type { ChecklistValue } from "../contracts/query";
 import type { TableSource } from "../source/TableSource";
-import { type ChecklistValue, collectChecklistValues } from "./checklistValues";
+import { collectChecklistValues } from "./checklistValues";
 import type { FilterDef } from "./filterDefs";
 import { listFilterValues } from "./filterFormModel";
 

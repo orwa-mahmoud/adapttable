@@ -36,8 +36,8 @@
  * neither is a dependency — these are plain arrays that happen to be exactly
  * what both expect.
  */
+import type { TableQuery } from "../contracts/query";
 import { stableKey } from "../utils/stableKey";
-import type { TableQuery } from "./tableQuery";
 
 /**
  * Options for {@link tableQueryKey} and {@link tableQueryBaseKey}.

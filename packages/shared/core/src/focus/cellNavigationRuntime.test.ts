@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import { createEditHistory } from "../editing/editHistory";
 import type { CellEdit } from "./cellEdits";
 import {

@@ -10,9 +10,10 @@
  * itself is the binding's (TanStack's React or core package); every number
  * that comes out of it is computed here.
  */
-import type { ColumnMetadata } from "../columnModel";
+
 import type { PinOffset } from "../columns/columnLayoutModel";
 import { DEFAULT_CARD_SIZE_PX, DEFAULT_ROW_SIZE_PX } from "../constants";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import {
   chromeColumnPlan,
@@ -26,7 +27,7 @@ import {
 } from "../layout/leanAssembly";
 import type { BodyCell, GetCellSpan } from "../rows/cellSpan";
 import type { ExtraRow } from "../rows/extraRows";
-import { incrementalViewOf } from "../rows/incremental";
+import { incrementalViewOf } from "../rows/incrementalView";
 import { pinnedSummaryEntries } from "../rows/pinnedSummaryRows";
 import type { RowPinState } from "../rows/rowPinModel";
 import {
@@ -310,7 +311,9 @@ export class SummaryCellsCache<TCells> {
     summaryRow: ((rows: readonly TRow[]) => TCells) | undefined,
     rows: readonly TRow[]
   ): TCells | undefined {
-    const fromView = incrementalViewOf(rows)?.aggregates as TCells | undefined;
+    const fromView = incrementalViewOf<{
+      readonly aggregates?: TCells;
+    }>(rows)?.aggregates;
     const enabled = summaryRow !== undefined && fromView === undefined;
     if (
       rows === this.#rows &&

@@ -1,4 +1,4 @@
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { DisplayValue } from "../display";
 import { resolveColumnPath } from "../engine/cellValue";
 import type { ExtraEntry } from "../rows/extraRows";

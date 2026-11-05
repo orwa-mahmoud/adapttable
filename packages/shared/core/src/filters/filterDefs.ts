@@ -5,11 +5,16 @@
  * predicate. Definitions come from two places — a column's `filter` shorthand
  * and the table-level `filters` array — merged by {@link resolveFilterDefs}.
  */
-import type { ColumnMetadata } from "../columnModel";
+
 import { localizedColumnPath } from "../columns/resolveColumns";
+import type {
+  ColumnMetadata,
+  ExtraFilters,
+  FilterValue,
+} from "../contracts/columns";
+import type { QueryCondition } from "../contracts/query";
 import { defaultLabels } from "../labels";
-import type { QueryCondition } from "../source/queryContract";
-import type { ExtraFilters, FilterValue, TableLabels } from "../types";
+import type { TableLabels } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { humanizeKey } from "../utils/humanizeKey";
 import { getPath } from "../utils/path";

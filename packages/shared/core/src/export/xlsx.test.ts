@@ -8,7 +8,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { ExportTable } from "./exportWriter";
 import {
   buildTableXlsx,

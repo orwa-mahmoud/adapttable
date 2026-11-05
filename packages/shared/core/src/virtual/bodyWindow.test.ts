@@ -9,8 +9,8 @@
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { ColumnMetadata } from "../columnModel";
 import { DEFAULT_CARD_SIZE_PX, DEFAULT_ROW_SIZE_PX } from "../constants";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { BodyCell } from "../rows/cellSpan";
 import type { ExtraRow } from "../rows/extraRows";

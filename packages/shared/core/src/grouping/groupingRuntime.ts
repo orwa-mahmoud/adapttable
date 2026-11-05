@@ -20,7 +20,7 @@ import {
   effectiveAggregateOps,
   serializeAggregationDerivedKey,
 } from "../aggregate/aggregationModel";
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import {
   type ExtraEntry,
   type ExtraRow,

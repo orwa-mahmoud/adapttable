@@ -4,15 +4,15 @@
  * Lives on `@adapttable/<kit>/filters`. The DataTable root never imports
  * this module — only the filters feature's provider does.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata, ExtraFilters } from "../contracts/columns";
+import type { FacetMap, QueryFilterGroup } from "../contracts/query";
 import {
   applyFilterExtends,
   type FeatureHostState,
 } from "../features/currentHost";
-import type { QueryFilterGroup } from "../source/queryContract";
-import type { ExtraFilters } from "../types";
 import { stableKey } from "../utils/stableKey";
-import { computeFilterFacets, type FacetMap } from "./facets";
+import { computeFilterFacets } from "./facets";
 import { resolveFilterRegistry } from "./filterBuiltins";
 import {
   buildFilterRuntime,

@@ -24,8 +24,9 @@
  * `data-grid-cell` attribute inside the attached container, so nothing holds a
  * reference per cell.
  */
-import type { ColumnMetadata } from "../columnModel";
+
 import { columnText } from "../columns/columnText";
+import type { ColumnMetadata } from "../contracts/columns";
 import { isThenable } from "../editing/storePlumbing";
 import { defaultLabels } from "../labels";
 import type { Direction, TableLabels } from "../types";

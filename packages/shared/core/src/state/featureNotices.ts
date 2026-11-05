@@ -7,15 +7,12 @@
  * label, missing pin/reorder, unvirtualized page). Nothing here flips an
  * opt-in or draws a new control.
  */
+import type { TableSourceCapabilities } from "../contracts/source";
 import {
   exportAllFallsBackToPage,
   type ExportCsvOptions,
 } from "../export/tableCsv";
-import {
-  capabilityReason,
-  sourceCapabilities,
-  type TableSourceCapabilities,
-} from "../source/capabilities";
+import { capabilityReason, sourceCapabilities } from "../source/capabilities";
 import type { TableSource } from "../source/TableSource";
 import type { TableLabels } from "../types";
 

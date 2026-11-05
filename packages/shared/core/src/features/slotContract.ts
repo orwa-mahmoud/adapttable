@@ -14,13 +14,13 @@ import type { ConfirmHandler } from "../actions/confirm";
 import type { ContextMenuChromeProps } from "../actions/contextMenuContract";
 import type { AgentApprovalProps } from "../approval/agentApprovalContract";
 import type { TableAssistantProps } from "../assistant/assistantSlots";
-import type { ColumnModel } from "../columnModel";
 import type { ColumnGroupToggleProps } from "../columns/columnGroupToggleContract";
 import type { PinOffset } from "../columns/columnLayoutModel";
 import type {
   ColumnMenuLabels,
   ColumnMenuSlotProps,
 } from "../columns/columnMenuModel";
+import type { ColumnModel } from "../contracts/columns";
 import type {
   BatchEditBarProps,
   RowEditActionsProps,

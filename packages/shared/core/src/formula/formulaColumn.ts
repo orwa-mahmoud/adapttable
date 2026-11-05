@@ -14,7 +14,8 @@
  * the cycle is found in the dependency graph before anything is evaluated,
  * and every column in it renders `#CYCLE!` — a report rather than a hang.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import {
   evaluateFormula,
   FORMULA_BLANK,

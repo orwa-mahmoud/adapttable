@@ -1,8 +1,8 @@
 /**
  * Computed columns — a column whose value is derived rather than stored.
  */
-import type { ColumnModel } from "../columnModel";
-import type { SortableValue } from "../types";
+
+import type { ColumnModel, SortableValue } from "../contracts/columns";
 
 /**
  * How a computed column is declared.

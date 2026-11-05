@@ -1,4 +1,4 @@
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
 import { humanizeKey } from "../utils/humanizeKey";
 import { resolveLocaleTag } from "../utils/localeTag";
 import { getPath } from "../utils/path";

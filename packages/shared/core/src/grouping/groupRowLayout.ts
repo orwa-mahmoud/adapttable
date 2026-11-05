@@ -15,8 +15,11 @@
  * before the first aggregate, which keeps the label's roomy look without
  * displacing a single number.
  */
-import type { AggregateOperationId } from "../aggregate/aggregate";
-import type { ColumnMetadata } from "../columnModel";
+
+import type {
+  AggregateOperationId,
+  ColumnMetadata,
+} from "../contracts/columns";
 import type { DisplayValue } from "../display";
 
 /**

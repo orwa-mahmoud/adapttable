@@ -1,20 +1,21 @@
-import type { ColumnMetadata } from "../columnModel";
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
+import type {
+  ColumnMetadata,
+  ExtraFilters,
+  SortDirection,
+} from "../contracts/columns";
+import type { QueryFilterGroup, SortLevel } from "../contracts/query";
+import type { CapabilitySource } from "../contracts/source";
 import type { DisplayValue } from "../display";
 import type { FeatureHostState } from "../features/currentHost";
 import { type CellRange, cellRangeIndices } from "../focus/cellRange";
 import { parseGroupBy } from "../grouping/groupKeys";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { GetCellSpan } from "../rows/cellSpan";
-import type { SortLevel } from "../sort/compare";
-import {
-  type CapabilitySource,
-  sourceCapabilities,
-} from "../source/capabilities";
-import type { QueryFilterGroup } from "../source/queryContract";
+import { sourceCapabilities } from "../source/capabilities";
 import type { TableSource } from "../source/TableSource";
 import {
   buildTreeEntries,
@@ -22,7 +23,6 @@ import {
   type TreeShape,
 } from "../tree/treeRows";
 import { treeExportExpandedIds } from "../tree/treeRuntime";
-import type { ExtraFilters, SortDirection } from "../types";
 import { devWarn } from "../utils/devWarn";
 import {
   exportViewFromChrome,

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { QueryFilterGroup } from "../contracts/query";
 import { resolveLabels } from "../labels";
-import type { QueryFilterGroup } from "../source/queryContract";
 import {
   builtInFilterSpecs,
   defaultFilterRegistry,

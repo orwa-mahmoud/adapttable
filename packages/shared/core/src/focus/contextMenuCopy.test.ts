@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ContextMenuTarget } from "../actions/contextMenuModel";
-import type { ColumnModel } from "../types";
+import type { ColumnModel } from "../contracts/columns";
 import type { CellRange } from "./cellRange";
 import {
   contextMenuCopyTarget,

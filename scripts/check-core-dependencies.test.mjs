@@ -1,10 +1,21 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
+import { fileURLToPath } from "node:url";
 
-import { checkCoreDependencies } from "./check-core-dependencies.mjs";
+import {
+  checkCoreDependencies,
+  readCoreEdges,
+} from "./check-core-dependencies.mjs";
 
 const OWNERSHIP = {
   layers: [
@@ -43,7 +54,8 @@ describe("core dependency checker", () => {
   it("rejects a direct low-layer import of presentation, with the path", () => {
     const checked = check({
       "layout/pin.ts": "export const pin = 1;\n",
-      "source/direct.ts": 'import { pin } from "../layout/pin";\nexport const used = pin;\n',
+      "source/direct.ts":
+        'import { pin } from "../layout/pin";\nexport const used = pin;\n',
     });
     assert.ok(
       checked.problems.some((problem) =>
@@ -143,8 +155,10 @@ describe("core dependency checker", () => {
     const checked = check(
       {
         "layout/pin.ts": "export const pin = 1;\n",
-        "sort/kept.ts": 'import { pin } from "../layout/pin";\nexport const used = pin;\n',
-        "sort/extra.ts": 'import { pin } from "../layout/pin";\nexport const more = pin;\n',
+        "sort/kept.ts":
+          'import { pin } from "../layout/pin";\nexport const used = pin;\n',
+        "sort/extra.ts":
+          'import { pin } from "../layout/pin";\nexport const more = pin;\n',
       },
       ownership
     );
@@ -158,9 +172,36 @@ describe("core dependency checker", () => {
     );
     assert.ok(
       checked.problems.some((problem) =>
-        problem.includes("stale violation: runtime sort/gone.ts -> layout/pin.ts")
+        problem.includes(
+          "stale violation: runtime sort/gone.ts -> layout/pin.ts"
+        )
       ),
       checked.problems.join("\n")
     );
+  });
+
+  it("keeps neutral contracts free of implementation imports", () => {
+    const src = join(
+      dirname(fileURLToPath(import.meta.url)),
+      "../packages/shared/core/src"
+    );
+    const names = readdirSync(join(src, "contracts")).filter((name) =>
+      name.endsWith(".ts")
+    );
+    assert.ok(names.length >= 5);
+    const edges = readCoreEdges(src).filter((edge) =>
+      edge.from.startsWith("contracts/")
+    );
+    assert.deepEqual(
+      edges.filter((edge) => edge.kind === "runtime").map((edge) => edge.from),
+      []
+    );
+    const valueLine =
+      /^(export )?(async )?(function |class |const |let |enum )/;
+    for (const edge of edges) {
+      const text = readFileSync(join(src, edge.to), "utf8");
+      const hit = text.split("\n").find((line) => valueLine.test(line));
+      assert.equal(hit, undefined, `${edge.from} -> ${edge.to}`);
+    }
   });
 });

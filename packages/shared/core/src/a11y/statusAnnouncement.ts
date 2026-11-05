@@ -21,8 +21,9 @@
  * string included, so silence clears the region and a repeated message is
  * heard again.
  */
+import type { SortDirection } from "../contracts/columns";
 import { computePagination } from "../pagination/paginationMath";
-import type { SortDirection, TableLabels } from "../types";
+import type { TableLabels } from "../types";
 
 /**
  * What the table's status announcement is resolved from.

@@ -1,7 +1,7 @@
 /** @vitest-environment node */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
 import { applyRowPatches, updateRow } from "../rows/patch";
 import { createTableEngine } from "./createTableEngine";
 

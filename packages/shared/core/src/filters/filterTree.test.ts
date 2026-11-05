@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { QueryFilterGroup } from "../source/queryContract";
+import type { QueryFilterGroup } from "../contracts/query";
 import type { FilterDef } from "./filterDefs";
 import { emptyFilterRegistry } from "./filterRegistry";
 import {

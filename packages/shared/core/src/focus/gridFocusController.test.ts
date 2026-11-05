@@ -12,7 +12,7 @@ import {
   vi,
 } from "vitest";
 
-import type { ColumnModel } from "../types";
+import type { ColumnModel } from "../contracts/columns";
 import type { CellEdit } from "./cellEdits";
 import {
   createGridFocusController,

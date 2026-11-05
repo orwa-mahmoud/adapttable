@@ -8,7 +8,8 @@
  * here. The builder and the chips read operators through the same registry
  * widget, so a custom filter type labels its operators the same way in both.
  */
-import type { QueryCondition, QueryFilterGroup } from "../source/queryContract";
+
+import type { QueryCondition, QueryFilterGroup } from "../contracts/query";
 import type { TableLabels } from "../types";
 import { type FilterDef, filterLabel } from "./filterDefs";
 import {

@@ -16,7 +16,8 @@
  * the host does; that rule does not stop being true because the request
  * arrived from a menu.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import type { RowAction, TableLabels } from "../types";
 
 /**

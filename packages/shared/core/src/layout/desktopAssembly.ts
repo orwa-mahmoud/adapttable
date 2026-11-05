@@ -10,7 +10,7 @@
  * minimum width. A binding supplies its refs and render nodes; the rules
  * are the same in every binding.
  */
-import type { ColumnMetadata } from "../columnModel";
+
 import { columnHeaderLabel } from "../columns/columnHeader";
 import {
   edgePinStyle,
@@ -21,6 +21,7 @@ import {
 } from "../columns/columnLayoutModel";
 import { fittedTableStyle } from "../columns/columnSizing";
 import { tableMinWidth } from "../columns/columnWidths";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { FilterDef } from "../filters/filterDefs";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { BodyCell } from "../rows/cellSpan";

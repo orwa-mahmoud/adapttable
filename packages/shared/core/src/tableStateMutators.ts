@@ -1,7 +1,10 @@
+import type {
+  ExtraFilters,
+  FilterValue,
+  SortDirection,
+} from "./contracts/columns";
+import type { QueryFilterGroup, SortLevel } from "./contracts/query";
 import type { GroupAggregateOverrides } from "./grouping/groupAggregateOverrides";
-import type { SortLevel } from "./sort/compare";
-import type { QueryFilterGroup } from "./source/queryContract";
-import type { ExtraFilters, FilterValue, SortDirection } from "./types";
 
 /**
  * The state-mutator half shared by {@link TableSource} and

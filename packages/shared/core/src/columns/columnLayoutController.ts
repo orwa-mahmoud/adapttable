@@ -10,7 +10,8 @@
  * baselines between renders; {@link ColumnLayoutController.configure} hands
  * it the current columns each time.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import {
   type ControllableStore,
   type ControllableStoreOptions,

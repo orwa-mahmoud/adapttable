@@ -8,7 +8,8 @@
  * and only the model lives here. A binding keeps one piece of state per
  * widget, the operator a reader picked before typing a value, and hands it in.
  */
-import type { FilterValue, TableLabels } from "../types";
+import type { FilterValue } from "../contracts/columns";
+import type { TableLabels } from "../types";
 import { type FilterDef, filterLabel, RANGE_SUFFIXES } from "./filterDefs";
 import type { FilterFormSource } from "./filterFormModel";
 import {

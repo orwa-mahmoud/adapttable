@@ -8,7 +8,7 @@
  * list changes. Every binding does exactly this, so the host is core's.
  */
 import type { Command } from "../actions/commandRegistry";
-import type { Aggregator } from "../aggregate/aggregate";
+import type { Aggregator } from "../contracts/columns";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
 import type { ExportWriter } from "../export/exportWriter";
 import type { FilterTypeSpec } from "../filters/filterRegistry";

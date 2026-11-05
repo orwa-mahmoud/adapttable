@@ -13,20 +13,19 @@
  * its identity across renders.
  */
 import { DEFAULT_LIMIT } from "../constants";
+import type {
+  ExtraFilters,
+  FilterValue,
+  SortDirection,
+} from "../contracts/columns";
+import type { QueryFilterGroup, SortLevel } from "../contracts/query";
 import {
   type GroupAggregateOverrides,
   parseGroupAggregateOverrides,
   serializeGroupAggregateOverrides,
 } from "../grouping/groupAggregateOverrides";
-import type { SortLevel } from "../sort/compare";
-import type { QueryFilterGroup } from "../source/queryContract";
 import type { TableStateMutators } from "../tableStateMutators";
-import type {
-  ExtraFilters,
-  FilterValue,
-  SortDirection,
-  TableQueryParams,
-} from "../types";
+import type { TableQueryParams } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { memoLast } from "../utils/memoLast";
 import {

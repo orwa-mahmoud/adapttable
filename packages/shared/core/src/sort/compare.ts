@@ -1,5 +1,8 @@
 /** `null` / `undefined` / `NaN` are unorderable and always sort last. */
-import type { SortableValue, SortDirection } from "../columnModel";
+import type { SortableValue, SortDirection } from "../contracts/columns";
+import type { SortLevel } from "../contracts/query";
+export type { SortLevel } from "../contracts/query";
+
 function sortsLast(value: SortableValue): boolean {
   return (
     value === null ||
@@ -138,18 +141,6 @@ export function sortRows<TRow>(
     .map((row, index) => ({ row, index, value: getValue(row) }))
     .sort((x, y) => compareSortEntries(x, y, direction))
     .map((entry) => entry.row);
-}
-
-/**
- * One level of a multi-column sort.
- *
- * @public
- */
-export interface SortLevel {
-  /** Stable key for the entry. */
-  key: string;
-  /** Sort direction for this level. */
-  dir: SortDirection;
 }
 
 /**

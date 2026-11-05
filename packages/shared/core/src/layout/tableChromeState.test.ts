@@ -6,8 +6,8 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnMetadata } from "../columnModel";
 import { REORDER_COLUMN_KEY } from "../columns/columnMenuModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { GroupingPanelInteractions } from "../grouping/groupingPanelModel";
 import { defaultLabels } from "../labels";
 import {

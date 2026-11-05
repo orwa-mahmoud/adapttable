@@ -5,7 +5,6 @@ import {
 import {
   aggregate,
   AGGREGATE_NAMES,
-  type AggregateOperationId,
   type AggregateSpec,
   CUSTOM_AGGREGATE,
   declaredAggregates,
@@ -15,9 +14,12 @@ import {
   AGGREGATE_SUPPRESSED,
   resolveEffectiveAggregation,
 } from "../aggregate/aggregationModel";
-import type { ColumnMetadata } from "../columnModel";
+import type {
+  AggregateOperationId,
+  ColumnMetadata,
+} from "../contracts/columns";
+import type { QueryAggregate } from "../contracts/query";
 import type { DisplayValue } from "../display";
-import type { QueryAggregate } from "../source/queryContract";
 import type { GroupAggregateOps } from "./groupRowLayout";
 import type { GroupAggregatesFn } from "./groupRows";
 

@@ -21,7 +21,9 @@ import type {
   ExtraFilters,
   SortableValue,
   SortDirection,
-} from "../columnModel";
+} from "../contracts/columns";
+import type { QueryFilterGroup, SortLevel } from "../contracts/query";
+import type { RowPatch, RowPatchEvent, RowPatchLog } from "../contracts/rows";
 import type { DisplayValue } from "../display";
 import { cellSortValue } from "../engine/cellValue";
 import { engineSearchText } from "../engine/searchText";
@@ -42,11 +44,9 @@ import {
   compareSortEntries,
   compareSortLevel,
   sortedInsertIndex,
-  type SortLevel,
   sortRows,
   sortRowsMulti,
 } from "../sort/compare";
-import type { QueryFilterGroup } from "../source/queryContract";
 import { stableKey } from "../utils/stableKey";
 import {
   addAggregateRow,
@@ -69,12 +69,7 @@ import {
   attachIncrementalView as attachView,
   incrementalViewOf as viewOf,
 } from "./incrementalView";
-import {
-  applyRowPatchesWithLog,
-  type RowPatch,
-  type RowPatchEvent,
-  type RowPatchLog,
-} from "./patch";
+import { applyRowPatchesWithLog } from "./patch";
 
 export { rowPatchLog } from "./patch";
 

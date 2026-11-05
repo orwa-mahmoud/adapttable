@@ -11,7 +11,8 @@
  * equivalent to retyping the source cell into each target cell — never a
  * separate notion of what a cell contains.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import { isCellEditable, readEditableCellValue } from "../editing/cellEditing";
 import type { CellEdit } from "./cellEdits";
 import { type CellRange, cellRangeBounds } from "./cellRange";

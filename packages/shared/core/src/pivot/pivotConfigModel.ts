@@ -17,7 +17,8 @@
  * can be summed and counted in the same pivot, so measures are keyed by
  * their position rather than by their column.
  */
-import type { AggregateName } from "../aggregate/aggregate";
+
+import type { AggregateName } from "../contracts/columns";
 import type { PivotConfig, PivotMeasure } from "./pivotModel";
 
 /**

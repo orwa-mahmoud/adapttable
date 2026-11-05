@@ -12,8 +12,13 @@
  * which aggregate operations the rows on screen were computed with — so a
  * binding adds only its own reactivity and the moment it commits.
  */
-import type { ColumnMetadata } from "../columnModel";
-import type { FacetMap } from "../filters/facets";
+
+import type { ColumnMetadata } from "../contracts/columns";
+import type {
+  FacetMap,
+  QueryAggregate,
+  QuerySupport,
+} from "../contracts/query";
 import { settledFilterTree } from "../filters/filterTreeCodec";
 import { queryAggregateOps } from "../grouping/groupAggregateOverrides";
 import type { GroupAggregateOps } from "../grouping/groupRowLayout";
@@ -34,11 +39,7 @@ import {
   queryGroupBy,
   recordCursor,
 } from "./dataTier";
-import {
-  applyQuerySupport,
-  type QueryAggregate,
-  type QuerySupport,
-} from "./queryContract";
+import { applyQuerySupport } from "./queryContract";
 import { createResponseAggregateOps } from "./responseAggregateOps";
 import type { ServerSourceViewState } from "./serverSource";
 import { createSourceSignal } from "./sourceState";

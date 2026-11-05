@@ -6,8 +6,8 @@
  */
 import { describe, expect, it } from "vitest";
 
+import type { TableQuery } from "../contracts/query";
 import { tableQueryBaseKey, tableQueryKey } from "./queryKey";
-import type { TableQuery } from "./tableQuery";
 
 const QUERY: TableQuery = {
   page: 2,

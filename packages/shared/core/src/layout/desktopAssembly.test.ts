@@ -6,8 +6,8 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnMetadata } from "../columnModel";
 import { PIN_Z, type PinOffset } from "../columns/columnLayoutModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { BodyCell } from "../rows/cellSpan";
 import {

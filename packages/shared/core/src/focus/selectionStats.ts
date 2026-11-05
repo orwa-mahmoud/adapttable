@@ -12,7 +12,8 @@
  * meaningful sum, and refusing to give one because a string is in the way is
  * the behaviour nobody wants.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import { exportCellValue } from "../export/cellValue";
 import type { CellRange } from "./cellRange";
 import { loadedRangeBounds } from "./loadedRange";

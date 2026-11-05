@@ -4,7 +4,8 @@
  * Views / query-contract id. Omitting the param keeps the historical
  * default so existing links keep matching.
  */
-import type { ExtraFilters, FilterValue, TableLabels } from "../types";
+import type { ExtraFilters, FilterValue } from "../contracts/columns";
+import type { TableLabels } from "../types";
 
 /**
  * Suffix on the filter key that stores the operator token (`name` → `nameOp`).

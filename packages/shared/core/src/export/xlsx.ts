@@ -15,7 +15,8 @@
  * Numbers stay numbers so a spreadsheet can sum them, which is the entire point
  * of exporting to a spreadsheet rather than a CSV.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import {
   buildExportTable,
   type ExportTable,

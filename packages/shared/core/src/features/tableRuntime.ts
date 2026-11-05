@@ -7,15 +7,16 @@
  * announcement is always an event rather than a render. These are the shapes
  * of that read; each binding publishes them its own way.
  */
-import type { ColumnMetadata, ExtraFilters } from "../columnModel";
+
 import type { PinSide } from "../columns/columnLayoutModel";
+import type { ColumnMetadata, ExtraFilters } from "../contracts/columns";
+import type { QueryAggregate } from "../contracts/query";
+import type { TableSourceCapabilities } from "../contracts/source";
 import type { NeutralTable } from "../engine/neutralTable";
 import type { FilterDef } from "../filters/filterDefs";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { RowPinSide } from "../rows/rowPinModel";
-import type { TableSourceCapabilities } from "../source/capabilities";
-import type { QueryAggregate } from "../source/queryContract";
 import type { BulkAction, RowAction } from "../types";
 
 /**

@@ -23,7 +23,8 @@
  * honoured here because a PDF that ignores them is a screenshot of the
  * wrong table.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import {
   buildExportTable,
   type ExportTable,

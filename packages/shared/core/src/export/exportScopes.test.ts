@@ -7,7 +7,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
 import type { TableSource } from "../source/TableSource";
 import { resetDevWarnings } from "../utils/devWarn";
 import { buildTableCsv, resolveExportColumns } from "./tableCsv";

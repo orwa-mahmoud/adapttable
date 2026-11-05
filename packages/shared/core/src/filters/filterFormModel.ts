@@ -2,7 +2,8 @@
  * Filter-form contracts used by the engine. Widget hooks live on
  * `@adapttable/react`.
  */
-import type { FilterValue } from "../columnModel";
+
+import type { FilterValue } from "../contracts/columns";
 import type { TableSource } from "../source/TableSource";
 import type { TableLabels } from "../types";
 import type { FilterDef } from "./filterDefs";

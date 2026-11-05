@@ -3,8 +3,8 @@
  * binding adapts core's stores to its reactivity and hands back these
  * shapes, so a kit reads the same fields in every framework.
  */
+import type { ChecklistValue } from "../contracts/query";
 import type { ChecklistWindow } from "./checklistModel";
-import type { ChecklistValue } from "./checklistValues";
 
 /**
  * Kit-agnostic state behind {@link useChecklistFilter}.

@@ -2,12 +2,19 @@
  * Framework-neutral table engine. Filter, sort and page run here; React
  * hooks subscribe. Host callbacks remain the persistence boundary.
  */
-import {
-  type ColumnMetadata,
-  type ExtraFilters,
-  type SortDirection,
-} from "../columnModel";
 import { DEFAULT_LIMIT } from "../constants";
+import type {
+  ColumnMetadata,
+  ExtraFilters,
+  SortDirection,
+} from "../contracts/columns";
+import type {
+  TableOperation,
+  TableRevisionAxis,
+  TableRevisions,
+  TableRowScope,
+} from "../contracts/lifecycle";
+import type { TableSourceCapabilities } from "../contracts/source";
 import { formatGroupBy } from "../grouping/groupKeys";
 import {
   applyRowPatchLogToView,
@@ -18,65 +25,15 @@ import {
   reconfigureIncrementalView,
 } from "../rows/incremental";
 import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
-import {
-  sourceCapabilities,
-  type TableSourceCapabilities,
-} from "../source/capabilities";
+import { sourceCapabilities } from "../source/capabilities";
 import { cellValue } from "./cellValue";
 import { engineSearchText } from "./searchText";
-
-/**
- * Revision axes AI and bindings subscribe to. Unrelated React renders
- * must not increment these.
- *
- * @public
- */
-export interface TableRevisions {
-  /** Row identities or cell values changed. */
-  readonly data: number;
-  /** Sort, filter, page, group, expand, pin, search. */
-  readonly view: number;
-  /** Column set, types, or operation metadata. */
-  readonly schema: number;
-  /**
-   * Permissions, source capabilities, or wired operations. The engine never
-   * infers these; a host that changes them bumps this with
-   * `invalidate(["policy"])`.
-   */
-  readonly policy: number;
-}
-
-/**
- * One revision axis.
- *
- * @public
- */
-export type TableRevisionAxis = keyof TableRevisions;
-
-/**
- * View and policy operations. Row writes stay on host callbacks.
- *
- * @public
- */
-export type TableOperation =
-  | {
-      readonly type: "setSort";
-      readonly key?: string;
-      readonly dir?: SortDirection;
-    }
-  | { readonly type: "setSearch"; readonly search: string }
-  | { readonly type: "setPage"; readonly page: number }
-  | { readonly type: "setLimit"; readonly limit: number }
-  | { readonly type: "setFilters"; readonly filters: ExtraFilters }
-  | { readonly type: "setGroupBy"; readonly key?: string }
-  | { readonly type: "setSelection"; readonly ids?: readonly string[] };
-
-/**
- * Named row window.
- *
- * @public
- */
-export type TableRowScope = "visible" | "page" | "full";
+export type {
+  TableOperation,
+  TableRevisionAxis,
+  TableRevisions,
+  TableRowScope,
+} from "../contracts/lifecycle";
 
 /**
  * Readable snapshot of engine state.

@@ -3,9 +3,9 @@
  * binding adapts core's stores to its reactivity and hands back these
  * shapes, so a kit reads the same fields in every framework.
  */
+import type { RowPatchEvent } from "../contracts/rows";
 import type { RowAction } from "../types";
 import type { HighlightedCell } from "./highlightStore";
-import type { RowPatchEvent } from "./patch";
 import type { RowPinSide, RowPinState } from "./rowPinModel";
 
 /**

@@ -18,7 +18,8 @@
  * cell renderers included. So a custom card is a layout decision, not a
  * re-implementation: reuse the values, arrange them differently.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import type { DisplayValue } from "../display";
 
 /**

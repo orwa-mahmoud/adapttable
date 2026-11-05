@@ -1,14 +1,15 @@
 /**
  * Live handle AI and future bindings read. No React.
  */
-import type { ColumnMetadata } from "../columnModel";
-import type { TableSourceCapabilities } from "../source/capabilities";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import type {
-  TableEngine,
   TableRevisionAxis,
   TableRevisions,
   TableRowScope,
-} from "./createTableEngine";
+} from "../contracts/lifecycle";
+import type { TableSourceCapabilities } from "../contracts/source";
+import type { TableEngine } from "./createTableEngine";
 
 /**
  * Binding-supplied row windows and operation wiring for {@link createNeutralTable}.

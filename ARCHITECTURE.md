@@ -427,13 +427,13 @@ line is drawn and enforced so a second binding never requires one.
 `scripts/check-core-dependencies.mjs` classifies `packages/shared/core/src`
 from `scripts/core-export-ownership.json`.
 
-| Layer | Rank | Owners |
-| --- | --- | --- |
-| Leaf | 0 | `sort/` |
-| Engine | 10 | `engine/`, `rows/` |
-| Source | 20 | `source/` |
-| Domain | 30 | every other folder, including `utils/` |
-| Presentation | 40 | `layout/`, `style/`, `a11y/`, `overlays/`, `conformance/` |
+| Layer        | Rank | Owners                                                    |
+| ------------ | ---- | --------------------------------------------------------- |
+| Leaf         | 0    | `contracts/`, `sort/`                                     |
+| Engine       | 10   | `engine/`, `rows/`                                        |
+| Source       | 20   | `source/`                                                 |
+| Domain       | 30   | every other folder, including `utils/`                    |
+| Presentation | 40   | `layout/`, `style/`, `a11y/`, `overlays/`, `conformance/` |
 
 A module at rank 20 or below importing presentation fails, and the message
 names the path. Public entry files directly under `src/` may re-export.
@@ -445,11 +445,12 @@ any other module is a reach. Type-only edges are reported on their own line
 and are not counted as JavaScript.
 
 The current violation set is an exact edge list. A new edge fails, and a
-listed edge that the source no longer has fails as stale. The recorded edges
-are the autosize/resize cycle, the virtual body window's incremental reach,
-frontend source's incremental reach, grouping's incremental reach, the
-reorder engine's writing-direction import, and the type-only CSS imports in
-the row modules. Each entry names its cause and the change that removes it.
+listed edge that the source no longer has fails as stale. The recorded edges are frontend source's incremental reach, grouping's
+incremental reach, the reorder engine's writing-direction import, and the
+type-only CSS imports in the row modules. Each entry names its cause and the
+change that removes it. Column width bounds live in one module, and the
+virtual body window reads the lightweight incremental snapshot, so those two
+edges are no longer recorded.
 
 The same checker inventories every public export of the core entries through
 TypeScript symbol resolution: name, type or runtime, defining module,

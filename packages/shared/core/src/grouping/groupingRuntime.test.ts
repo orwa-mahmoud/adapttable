@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { aggregate } from "../aggregate/aggregate";
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { QueryGroupRow } from "../source/queryGroups";
 import { createControllableStore } from "../state/controllableStore";
 import { groupCollapseActions } from "./groupCollapse";

@@ -1,4 +1,4 @@
-import type { ExtraFilters, FilterValue } from "../types";
+import type { ExtraFilters, FilterValue } from "../contracts/columns";
 import {
   DATE_OP_LABEL_KEYS,
   type DateOp,

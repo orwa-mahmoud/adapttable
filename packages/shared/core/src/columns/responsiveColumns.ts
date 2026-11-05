@@ -25,7 +25,8 @@
  * pass, gives the same answer every time, and is the same number the table's
  * own `min-width` is built from.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import { resolveColumnWidth } from "./columnWidths";
 
 /**

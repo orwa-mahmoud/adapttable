@@ -7,94 +7,25 @@
  * menu, the URL, a saved view, a server request — resolves through here, so
  * one column cannot offer Sum in one place and refuse it in another.
  */
-import type { ColumnMetadata } from "../columnModel";
-import type { GroupingCapability } from "../source/capabilities";
+import type {
+  AggregatableConfig,
+  AggregateName,
+  AggregateOperation,
+  Aggregator,
+  ColumnMetadata,
+} from "../contracts/columns";
+import type { GroupingCapability } from "../contracts/source";
 import { devWarn } from "../utils/devWarn";
-import {
-  AGGREGATE_NAMES,
-  type AggregateName,
-  type AggregateOrderedValue,
-  type Aggregator,
-} from "./aggregate";
+import { AGGREGATE_NAMES } from "./aggregate";
+export type {
+  Aggregatable,
+  AggregatableConfig,
+  AggregateOperation,
+  CustomAggregateOperation,
+} from "../contracts/columns";
 
 /** Ids that mean removal or "the host calculates this itself", never an offer. */
 const RESERVED_OPERATION_IDS = new Set(["none", "custom"]);
-
-/**
- * An operation the host defines itself.
- *
- * `id` is what state stores and a server is asked for, so it has to be
- * stable; `label` is what a reader sees. `calculate` runs locally — leave it
- * out for an operation only a backend can answer.
- *
- * @typeParam TValue - The resolved column value the calculation receives.
- *
- * @public
- */
-export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
-  /** Stable identifier, unique within the column. Never a display string. */
-  readonly id: string;
-  /** What the reader sees in the operation list. */
-  readonly label: string;
-  /**
-   * What this operation does, for anything reading the table rather than
-   * looking at it.
-   *
-   * A built-in needs none: "avg" means the same thing on every table. Your own
-   * does not — an agent meets the id and the label and has no way to know
-   * whether "band" is a range, a percentile or something only this business
-   * says. Write the sentence you would say to a colleague; it is handed over
-   * when the capability is described.
-   */
-  readonly description?: string;
-  /**
-   * The local calculation. Omit it when only the server can answer this
-   * operation; the table then offers it solely where the source declares it.
-   */
-  readonly calculate?: Aggregator<TValue>;
-}
-
-/**
- * One entry in a column's operation list: a built-in name or the host's own.
- *
- * @typeParam TValue - The resolved column value a custom calculation sees.
- *
- * @public
- */
-export type AggregateOperation<TValue = AggregateOrderedValue> =
-  AggregateName | CustomAggregateOperation<TValue>;
-
-/**
- * A column's aggregation offer.
- *
- * @typeParam TValue - The resolved column value a custom calculation sees.
- *
- * @public
- */
-export interface AggregatableConfig<TValue = AggregateOrderedValue> {
-  /**
-   * The operation this column starts with. It must name one of
-   * `operations`; leave it out and the column is available but inactive
-   * until a reader adds it.
-   */
-  readonly default?: string;
-  /** Every operation a reader may choose. An empty list offers nothing. */
-  readonly operations: readonly AggregateOperation<TValue>[];
-}
-
-/**
- * Whether — and how — a reader may aggregate this column.
- *
- * `false` or omitted refuses reader-controlled aggregation; `true` offers the
- * operations that suit the column's declared value type; an object says
- * exactly what to offer and what to start with.
- *
- * @typeParam TValue - The resolved column value a custom calculation sees.
- *
- * @public
- */
-export type Aggregatable<TValue = AggregateOrderedValue> =
-  boolean | AggregatableConfig<TValue>;
 
 /**
  * One operation, resolved against a column.

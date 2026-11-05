@@ -15,12 +15,12 @@ import type {
   ContextMenuItem,
   ContextMenuTarget,
 } from "../actions/contextMenuModel";
-import type { Aggregator } from "../aggregate/aggregate";
 import type {
   ColumnMenuActionContext,
   ColumnMenuItem,
   ColumnMenuRow,
 } from "../columns/columnMenuModel";
+import type { Aggregator } from "../contracts/columns";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
 import type { ExportWriter } from "../export/exportWriter";
 import {

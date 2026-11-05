@@ -5,7 +5,7 @@
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { ExtraFilters } from "../columnModel";
+import type { ExtraFilters } from "../contracts/columns";
 import {
   bindHeaderFilterDismiss,
   createHeaderFilterOverlay,

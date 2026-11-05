@@ -11,25 +11,29 @@
  * rather than replaced. This module is those rules; a binding drives them
  * from the view-state store and keeps its own reactivity.
  */
-import type { ColumnMetadata } from "../columnModel";
-import type { FacetMap } from "../filters/facets";
+
+import type {
+  ColumnMetadata,
+  ExtraFilters,
+  SortDirection,
+} from "../contracts/columns";
+import type {
+  FacetMap,
+  QueryAggregate,
+  QueryFilterGroup,
+  QuerySupport,
+  SortLevel,
+  TableQuery,
+} from "../contracts/query";
 import type { FilterDef } from "../filters/filterDefs";
 import {
   type GroupAggregateOverrides,
   withQueryAggregateOverrides,
 } from "../grouping/groupAggregateOverrides";
 import { parseGroupBy } from "../grouping/groupKeys";
-import type { SortLevel } from "../sort/compare";
-import type { ExtraFilters, SortDirection } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { stableKey } from "../utils/stableKey";
-import {
-  applyQuerySupport,
-  type QueryAggregate,
-  type QueryFilterGroup,
-  type QuerySupport,
-} from "./queryContract";
-import type { TableQuery } from "./tableQuery";
+import { applyQuerySupport } from "./queryContract";
 
 /* ── Tier resolution ───────────────────────────────────────────────── */
 

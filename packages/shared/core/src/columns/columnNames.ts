@@ -1,4 +1,4 @@
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 
 /** The declared prose name used when a user rename is reset. */
 export function declaredColumnName<TRow>(column: ColumnMetadata<TRow>): string {

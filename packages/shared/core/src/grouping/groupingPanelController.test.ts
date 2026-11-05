@@ -1,7 +1,7 @@
 import { describe, expect, it, type Mock, vi } from "vitest";
 
 import { aggregate } from "../aggregate/aggregate";
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { TableRuntime, TableRuntimeView } from "../features/tableRuntime";
 import type { GroupAggregateOverrides } from "./groupAggregateOverrides";
 import { deferGroupingDropToInner } from "./groupingPanelChromeModel";

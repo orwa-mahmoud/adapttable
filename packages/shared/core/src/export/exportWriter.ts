@@ -20,7 +20,8 @@
  * app importing it ever downloads — a table that exports CSV must not ship a
  * ZIP encoder.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import {
   coveredAddressSet,
   type GetCellSpan,

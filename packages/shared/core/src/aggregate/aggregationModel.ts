@@ -8,8 +8,9 @@
  * the transitions below, so a column offers the same operations wherever it
  * is touched and nothing stays active while invisible.
  */
-import type { ColumnMetadata } from "../columnModel";
-import type { QueryAggregate } from "../source/queryContract";
+
+import type { ColumnMetadata } from "../contracts/columns";
+import type { QueryAggregate } from "../contracts/query";
 import {
   type AggregationSourceSupport,
   allowsReaderOperation,

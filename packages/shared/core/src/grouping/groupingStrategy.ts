@@ -5,15 +5,14 @@
  * engine. Nothing here hard-wires grouping to the browser in a way a
  * source-provided strategy cannot replace.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
+import type { TableSourceCapabilities } from "../contracts/source";
 import {
   configureIncrementalView,
   incrementalViewOf,
 } from "../rows/incremental";
-import {
-  sourceCapabilities,
-  type TableSourceCapabilities,
-} from "../source/capabilities";
+import { sourceCapabilities } from "../source/capabilities";
 import { type QueryGroupRow, serverGroupEntries } from "../source/queryGroups";
 import type { GroupAggregateOps } from "./groupRowLayout";
 import {

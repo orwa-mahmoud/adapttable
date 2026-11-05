@@ -10,7 +10,8 @@
  * Values come from the same resolution the exports use, so what lands in a
  * spreadsheet from a copy and from a downloaded file cannot disagree.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import { exportCellValue } from "../export/cellValue";
 import type { CellRange } from "./cellRange";
 import { loadedRangeBounds } from "./loadedRange";

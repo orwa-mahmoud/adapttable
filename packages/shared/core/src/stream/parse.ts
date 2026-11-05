@@ -11,7 +11,8 @@
  * each is dropped rather than applied, because a malformed frame must not
  * be able to empty a table.
  */
-import type { RowPatch } from "../rows/patch";
+
+import type { RowPatch } from "../contracts/rows";
 
 export type { RowPatch };
 

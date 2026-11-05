@@ -11,19 +11,26 @@
  * aggregate operations the rows on screen were computed with — so a binding
  * adds only its own reactivity and the moment it commits.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type {
+  ColumnMetadata,
+  ExtraFilters,
+  SortDirection,
+} from "../contracts/columns";
+import type {
+  QueryAggregate,
+  QueryFilterGroup,
+  QuerySupport,
+  SortLevel,
+  TableQuery,
+} from "../contracts/query";
 import { settledFilterTree } from "../filters/filterTreeCodec";
 import {
   type GroupAggregateOverrides,
   queryAggregateOps,
 } from "../grouping/groupAggregateOverrides";
 import type { GroupAggregateOps } from "../grouping/groupRowLayout";
-import type { SortLevel } from "../sort/compare";
-import type {
-  ExtraFilters,
-  ResolvedPaginationMode,
-  SortDirection,
-} from "../types";
+import type { ResolvedPaginationMode } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { stableKey } from "../utils/stableKey";
 import {
@@ -45,14 +52,8 @@ import {
   staleAppendStash,
   type TableQueryListener,
 } from "./dataTier";
-import type {
-  QueryAggregate,
-  QueryFilterGroup,
-  QuerySupport,
-} from "./queryContract";
 import { createResponseAggregateOps } from "./responseAggregateOps";
 import { createSourceSignal } from "./sourceState";
-import type { TableQuery } from "./tableQuery";
 
 /**
  * The host's last answer and its request settings, as of one update.

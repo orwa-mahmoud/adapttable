@@ -5,7 +5,8 @@
  * Hide / reorder / pin / resize live on {@link useColumnLayout} and mount
  * only when a layout-owning feature is composed.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import {
   EMPTY_COLUMN_LAYOUT,
   type PinOffset,

@@ -10,7 +10,15 @@
  * revision, and whether an infinite list has more — so a binding adds only its
  * own reactivity and the moment it commits.
  */
-import type { ColumnMetadata, SortableValue } from "../columnModel";
+
+import type {
+  ColumnMetadata,
+  ExtraFilters,
+  SortableValue,
+  SortDirection,
+} from "../contracts/columns";
+import type { QueryFilterGroup, SortLevel } from "../contracts/query";
+import type { RowPatchLog } from "../contracts/rows";
 import {
   createTableEngine,
   type TableEngine,
@@ -23,21 +31,10 @@ import {
   incrementalViewConfig,
   incrementalViewOf,
 } from "../rows/incremental";
-import {
-  type RowPatchLog,
-  rowPatchLog,
-  rowPatchLogStartsAt,
-} from "../rows/patch";
-import type { SortLevel } from "../sort/compare";
-import type {
-  ExtraFilters,
-  PaginationMode,
-  ResolvedPaginationMode,
-  SortDirection,
-} from "../types";
+import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
+import type { PaginationMode, ResolvedPaginationMode } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { stableKey } from "../utils/stableKey";
-import type { QueryFilterGroup } from "./queryContract";
 
 /**
  * Resolve `"auto"` to a concrete pagination mode (mobile → infinite,

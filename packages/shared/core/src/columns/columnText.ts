@@ -5,7 +5,8 @@
  * extractors, primitive accessors and the column data path. Renderer objects
  * are never stringified or rendered.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import { getPath } from "../utils/path";
 
 /** Primitives read as themselves; a date reads as its ISO day. */
