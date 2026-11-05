@@ -4072,6 +4072,7 @@ export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, 
 
 // @public
 export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+    active?: boolean;
     aggregates?: readonly QueryAggregate[];
     columns?: readonly ColumnMetadata<TRow>[];
     error?: Error | null;

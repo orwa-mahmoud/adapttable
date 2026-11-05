@@ -10,7 +10,7 @@ import {
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
-import { useCallback, useLayoutEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";
 import { useFeatureState } from "../features/featureState";
@@ -20,6 +20,12 @@ import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
+import {
+  type FrameHold,
+  markFrameCommitted,
+  sourceViewKey,
+  takeRetainedFrame,
+} from "./retainedFrame";
 
 export { defaultFrontendRowId, defaultSearchText } from "@adapttable/core";
 
@@ -100,6 +106,13 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
    * passes the full evaluator; a headless caller can pass it the same way.
    */
   createEngine?: FrontendEngineFactory<TRow>;
+  /**
+   * When `false`, the source stays mounted but a repeat of the same inputs
+   * does not refresh it. The first inactive render still applies what it is
+   * given, so the shell can hand it an empty row list and release the
+   * previous cache. Defaults to active.
+   */
+  active?: boolean;
 }
 
 /**
@@ -120,9 +133,10 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
 export function useFrontendData<TRow>(
   options: UseFrontendDataOptions<TRow>
 ): TableSource<TRow> {
-  // The source is mutable and must see every render's inputs, and the base
-  // bundle carries this hook: the compiler's cache would skip updates and add
-  // weight without adding hits.
+  // The source is created once. An active render, and the first inactive
+  // render, apply this render's inputs; a later render of those same inputs
+  // does not. The compiler's cache would skip a real refresh and add weight,
+  // so this hook stays opted out.
   "use no memo";
   const {
     data,
@@ -142,6 +156,7 @@ export function useFrontendData<TRow>(
     mobileBreakpoint,
     locale,
     createEngine: requestedEngine,
+    active: activeOption = true,
     ...urlOptions
   } = options;
   const publishedEngine = useFeatureState(FRONTEND_ROW_MODEL) as
@@ -160,31 +175,57 @@ export function useFrontendData<TRow>(
     createFrontendSourceWith(createEngine)
   );
   const [, setModelEpoch] = useState(0);
+  const held = useRef<FrameHold<ReturnType<FrontendSource<TRow>["update"]>> | null>(
+    null
+  );
   // The frame is read from the engine's candidate; the committed engine — the
   // one an agent or a second component holds — stays on the table that is on
   // screen until React accepts this render, which is where it is published.
-  const frame = source.update(
-    {
+  // A repeat of inputs already committed skips that work. Deactivation still
+  // runs once, so the empty row list replaces the previous cache.
+  const { frame, skipped } = takeRetainedFrame(
+    held,
+    [
+      activeOption,
       data,
+      columns,
+      filterKey,
       getRowId,
       getSearchText,
       getSortValue,
-      columns,
       filterFn,
       filterTreeFn,
-      filterKey,
       locale,
-      paginationMode: resolvedMode,
-    },
-    state
+      resolvedMode,
+    ],
+    sourceViewKey(state),
+    () =>
+      source.update(
+        {
+          data,
+          getRowId,
+          getSearchText,
+          getSortValue,
+          columns,
+          filterFn,
+          filterTreeFn,
+          filterKey,
+          locale,
+          paginationMode: resolvedMode,
+        },
+        state
+      )
   );
   useLayoutEffect(() => {
     if (source.engineFactory === createEngine) return;
     source.replaceEngine(createEngine);
+    held.current = null;
     setModelEpoch((epoch) => epoch + 1);
   }, [source, createEngine]);
   useLayoutEffect(() => {
-    if (source.engineFactory === createEngine) source.commit();
+    if (source.engineFactory !== createEngine || skipped) return;
+    source.commit();
+    markFrameCommitted(held);
   });
 
   const { page: safePage, total, hasNextPage } = frame;

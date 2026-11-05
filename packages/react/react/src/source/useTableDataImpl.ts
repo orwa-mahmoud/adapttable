@@ -12,6 +12,7 @@ import {
   isDeclarativeFilters,
   type PaginationMode,
   type QueryAggregate,
+  type QueryFilterGroup,
   type QuerySupport,
   type SortableValue,
   type TableData,
@@ -22,8 +23,10 @@ import {
 import type { UseTableDataResult } from "@adapttable/core/binding";
 import {
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -190,6 +193,7 @@ function frontendTierInput<TRow>(input: {
 }) {
   const { runtime } = input;
   return {
+    active: input.active,
     urlSync: activeTierValue(input.active, input.urlSync, false),
     data: tierRows(input.active, input.data),
     filterTreeFn: input.filterTreeFn,
@@ -214,6 +218,7 @@ function serverTierInput<TRow>(input: {
 }) {
   const { active, runtime } = input;
   return {
+    active,
     urlSync: activeTierValue(active, input.urlSync, false),
     rows: tierRows(active, input.data),
     onQueryChange: activeTierValue(active, input.onQueryChange, undefined),
@@ -290,6 +295,14 @@ export function useTableDataWithEngine<TRow>(
     () => resolveColumns(columns, locale),
     [columns, locale]
   );
+  // `plan()` builds a new tree predicate every render. The predicate's
+  // meaning is `filterKey`; a fresh closure would keep an idle tier refreshing.
+  const filterTreeRef = useRef(plan.filterTreeFn);
+  filterTreeRef.current = plan.filterTreeFn;
+  const applyFilterTree = useCallback((row: TRow, tree: QueryFilterGroup) => {
+    const apply = filterTreeRef.current;
+    return apply ? apply(row, tree) : false;
+  }, []);
   const frontend = useFrontendData<TRow>({
     ...urlOptions,
     ...frontendTierInput<TRow>({
@@ -297,7 +310,7 @@ export function useTableDataWithEngine<TRow>(
       urlSync: urlOptions.urlSync,
       data,
       runtime,
-      filterTreeFn: plan.filterTreeFn,
+      filterTreeFn: plan.filterTreeFn ? applyFilterTree : undefined,
       isFrontendMode: mode === "frontend",
       loading,
     }),

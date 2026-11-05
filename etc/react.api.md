@@ -116,6 +116,7 @@ import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { FindInTableState } from '@adapttable/core/binding';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { GetCellSpan } from '@adapttable/core';
 import { getHistoryAdapter } from '@adapttable/core';
 import { GRID_CELL_ATTR } from '@adapttable/core';
@@ -1400,7 +1401,9 @@ export function useFrontendData<TRow>(options: UseFrontendDataOptions<TRow>): Ta
 
 // @public
 export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+    active?: boolean;
     columns?: readonly ColumnDef<TRow>[];
+    createEngine?: FrontendEngineFactory<TRow>;
     data: readonly TRow[];
     error?: Error | null;
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
@@ -1627,6 +1630,7 @@ export function useServerData<TRow>(options: UseServerDataOptions<TRow>): TableS
 
 // @public
 export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+    active?: boolean;
     aggregates?: readonly QueryAggregate[];
     columns?: readonly ColumnMetadata<TRow>[];
     error?: Error | null;
