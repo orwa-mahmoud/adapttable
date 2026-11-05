@@ -12,6 +12,7 @@ import {
 } from "../columns/columnMenuModel";
 import type { ColumnMetadata } from "../contracts/columns";
 import { createTableEngine } from "../engine/createTableEngine";
+import type { GroupingContribution } from "../features/featureContribution";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { TableSource } from "../source/TableSource";
 import {
@@ -299,6 +300,26 @@ describe("tableRuntimeView", () => {
     expect(view.visibleRows).toEqual([ROWS[0]]);
     expect(view.groupingState?.computedAggregateKeys).toEqual(["score"]);
     expect(view.groupingState?.aggregateOverrides).toEqual({ score: "sum" });
+  });
+
+  it("projects a feature grouping contribution unless the host published one", () => {
+    const feature: GroupingContribution<Row> = {
+      entries: [],
+      groupBy: ["team"],
+    };
+    const host: GroupingContribution<Row> = {
+      entries: [],
+      groupBy: ["name"],
+    };
+    expect(
+      tableRuntimeView(makeChrome({ featureGrouping: feature }), {}).grouping
+    ).toBe(feature);
+    expect(
+      tableRuntimeView(
+        makeChrome({ grouping: host, featureGrouping: feature }),
+        {}
+      ).grouping
+    ).toBe(host);
   });
 
   it("publishes the host's own actions when either list is non-empty", () => {
@@ -761,7 +782,10 @@ describe("overlayChromeExtras", () => {
 });
 
 describe("finishShellBody", () => {
-  function makeShell(chrome: { grouping?: object; tree?: object }) {
+  function makeShell(chrome: {
+    grouping?: { readonly entries: readonly unknown[] };
+    tree?: object;
+  }) {
     return {
       tableProps: {
         virtualScrollRef: "shellRef" as string,

@@ -292,8 +292,7 @@ export function createGroupingPanelController(
 
   const activeKeys = (): string[] => {
     const current = view();
-    const live = current?.grouping as
-      { groupBy?: readonly string[] } | undefined;
+    const live = current?.grouping;
     return live?.groupBy
       ? [...live.groupBy]
       : parseGroupBy(current?.groupingState?.groupBy);

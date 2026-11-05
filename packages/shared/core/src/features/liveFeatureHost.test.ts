@@ -189,6 +189,69 @@ describe("createFeatureHost", () => {
   );
 });
 
+describe("grouping contributions", () => {
+  const earlier = { entries: [] as const };
+  const later = { entries: [] as const, groupBy: ["team"] };
+
+  it("lets the later feature win, then restores the earlier one when it is released", () => {
+    const host = new LiveFeatureHost<{ id: string }>();
+    const releaseEarlier = vi.fn();
+    const releaseLater = vi.fn();
+    host.contributeGrouping("earlier", earlier);
+    host.onFeatureDispose("earlier", releaseEarlier);
+    host.contributeGrouping("later", later);
+    host.onFeatureDispose("later", releaseLater);
+    host.registerCommand({
+      key: "audit",
+      label: "Audit",
+      onSelect: vi.fn(),
+    });
+
+    expect(host.groupingContribution()).toBe(later);
+    host.releaseFeature("later");
+    expect(releaseLater).toHaveBeenCalledTimes(1);
+    expect(releaseEarlier).not.toHaveBeenCalled();
+    expect(host.groupingContribution()).toBe(earlier);
+    expect(host.commands).toHaveLength(1);
+
+    host.contributeGrouping("later", later);
+    expect(host.groupingContribution()).toBe(later);
+    expect(releaseLater).toHaveBeenCalledTimes(1);
+    expect(host.commands).toHaveLength(1);
+  });
+
+  it("clears owned grouping when setup fails and leaves another host alone", () => {
+    const kept = new LiveFeatureHost<{ id: string }>();
+    const keptCleanup = vi.fn();
+    kept.contributeGrouping("grouping", earlier);
+    kept.onFeatureDispose("grouping", keptCleanup);
+    kept.registerCommand({ key: "kept", label: "Kept", onSelect: vi.fn() });
+
+    const failure = new Error("setup failed");
+    const ownedCleanup = vi.fn();
+    expect(() =>
+      createFeatureHost([
+        {
+          setup: (host) => {
+            host.contributeGrouping("grouping", later);
+            return ownedCleanup;
+          },
+        },
+        {
+          setup: () => {
+            throw failure;
+          },
+        },
+      ])
+    ).toThrow(failure);
+
+    expect(ownedCleanup).toHaveBeenCalledTimes(1);
+    expect(kept.groupingContribution()).toBe(earlier);
+    expect(keptCleanup).not.toHaveBeenCalled();
+    expect(kept.commands.map((command) => command.key)).toEqual(["kept"]);
+  });
+});
+
 describe("disposeFeatureHost", () => {
   it("leaves the shared empty host and foreign hosts alone", () => {
     const dispose = vi.spyOn(LiveFeatureHost.prototype, "dispose");

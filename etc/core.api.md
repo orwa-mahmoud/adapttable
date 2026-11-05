@@ -4521,6 +4521,12 @@ export function groupingComputationKind(input: {
 }): GroupingComputationKind;
 
 // @public
+export interface GroupingContribution<TRow> {
+    readonly entries: readonly GroupedFlatEntry<TRow>[];
+    readonly groupBy?: readonly string[];
+}
+
+// @public
 export interface GroupingDragEventLike {
     readonly currentTarget: EventTarget | null;
     readonly dataTransfer: DataTransfer | null;
@@ -5387,6 +5393,9 @@ export interface MergedRowActions<TRow> {
 // @public
 export function mergeFilterChips(filterChips: readonly ActiveFilterChip[], extraChips: readonly ActiveFilterChip[] | undefined): readonly ActiveFilterChip[];
 
+// @public
+export function mergeGroupingContributions<TRow>(contributions: readonly (GroupingContribution<TRow> | undefined)[]): GroupingContribution<TRow> | undefined;
+
 // @internal
 export function mergeProps<T extends Props>(base: T, overrides?: Props): T;
 
@@ -6059,6 +6068,12 @@ export interface PointerReleaseTarget {
 }
 
 // @public
+export function projectGroupingContribution<TRow>(input: {
+    readonly host: GroupingContribution<TRow> | undefined;
+    readonly feature: GroupingContribution<TRow> | undefined;
+}): GroupingContribution<TRow> | undefined;
+
+// @public
 export type Props = Record<string, unknown>;
 
 // @public
@@ -6428,6 +6443,21 @@ export function relativeTokenLabel(raw: string, labels: {
     relLastN: string;
     relNextN: string;
 }): string;
+
+// @public
+export const REMAINING_FEATURE_OWNERSHIP: {
+    readonly tree: "tableRuntime.tree";
+    readonly selection: "tableRuntime.selection";
+    readonly pinning: "tableRuntime.pinning";
+    readonly editing: "tableRuntime.editing";
+    readonly columnLayout: "tableRuntime.columnLayout";
+    readonly detail: "tableRuntime.detail";
+    readonly rowPinning: "tableRuntime.rowPinning";
+    readonly query: "tableRuntime.query";
+};
+
+// @public
+export type RemainingFeatureDomain = keyof typeof REMAINING_FEATURE_OWNERSHIP;
 
 // @public
 export function removeAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, declaredByDeveloper: boolean): Readonly<Partial<Record<string, string>>>;
@@ -8652,7 +8682,7 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filterRegistry?: FilterTypeRegistry;
     readonly getRowId: (row: TRow) => string;
-    readonly grouping?: unknown;
+    readonly grouping?: GroupingContribution<TRow>;
     readonly groupingState?: {
         readonly groupBy: string | undefined;
         readonly aggregateOverrides: GroupAggregateOverrides;

@@ -3353,7 +3353,9 @@ export function finishShellBody<TRef, TShell extends PipelineShell & {
         readonly columnWindow: unknown;
     };
     readonly chrome: {
-        readonly grouping?: object;
+        readonly grouping?: {
+            readonly entries: readonly unknown[];
+        };
         readonly tree?: object;
     };
 }>(shell: TShell, body: ShellBodyInput<TRef>, composeRefs: (first: TRef, second: TRef) => TRef): TShell;
@@ -3630,6 +3632,12 @@ export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     onKeyDown: (event: TKeyboardEvent) => void;
     role: "button";
     tabIndex: 0;
+}
+
+// @public
+export interface GroupingContribution<TRow> {
+    readonly entries: readonly GroupedFlatEntry<TRow>[];
+    readonly groupBy?: readonly string[];
 }
 
 // @public
@@ -4152,12 +4160,15 @@ export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = Sid
     readonly columnMenuActions: ColumnMenuActionFactory<TRow>[];
     readonly commands: Command[];
     readonly contextMenuItems: ContextMenuItemsFactory<TRow>[];
+    contributeGrouping(id: string, contribution: GroupingContribution<TRow>): void;
     dispose(): void;
     readonly editors: Map<string, CustomCellEditorRender>;
     extendFilterType(type: string, patch: Partial<FilterTypeSpec>): void;
     readonly filterExtends: FilterTypeExtend[];
     readonly filterTypes: FilterTypeSpec[];
+    groupingContribution(): GroupingContribution<TRow> | undefined;
     onDispose(cleanup: () => void): void;
+    onFeatureDispose(id: string, cleanup: () => void): void;
     readonly panels: TPanel[];
     registerAggregator(name: string, aggregator: Aggregator): void;
     registerColumnMenuAction(factory: ColumnMenuActionFactory<TRow>): void;
@@ -4167,6 +4178,7 @@ export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = Sid
     registerFilterType(spec: FilterTypeSpec): void;
     registerPanel(panel: TPanel): void;
     registerWriter(writer: ExportWriter): void;
+    releaseFeature(id: string): void;
     readonly writers: ExportWriter[];
 }
 
@@ -4247,6 +4259,9 @@ export function mergedCellStyle(colSpan: number, rowSpan: number, appearance?: C
 
 // @public
 export function mergeFeaturePatches(list: readonly PatchFeature[]): Record<string, unknown>;
+
+// @public
+export function mergeGroupingContributions<TRow>(contributions: readonly (GroupingContribution<TRow> | undefined)[]): GroupingContribution<TRow> | undefined;
 
 // @public
 export const MOUNT_STAGGER: {
@@ -4366,7 +4381,7 @@ export interface OverlayChrome {
     // (undocumented)
     readonly editingRows: unknown;
     // (undocumented)
-    readonly grouping?: unknown;
+    readonly grouping?: GroupingContribution<unknown>;
     // (undocumented)
     readonly hasRowActions: boolean;
     // (undocumented)
@@ -4596,6 +4611,12 @@ export function printToolbarProps(wanted: boolean | undefined, onPrint: (() => v
 };
 
 // @public
+export function projectGroupingContribution<TRow>(input: {
+    readonly host: GroupingContribution<TRow> | undefined;
+    readonly feature: GroupingContribution<TRow> | undefined;
+}): GroupingContribution<TRow> | undefined;
+
+// @public
 export interface QueryAggregate {
     fn: AggregateFn | (string & {});
     key: string;
@@ -4633,6 +4654,21 @@ export function readColumnViewport(element: {
 }): ColumnViewport;
 
 // @public
+export const REMAINING_FEATURE_OWNERSHIP: {
+    readonly tree: "tableRuntime.tree";
+    readonly selection: "tableRuntime.selection";
+    readonly pinning: "tableRuntime.pinning";
+    readonly editing: "tableRuntime.editing";
+    readonly columnLayout: "tableRuntime.columnLayout";
+    readonly detail: "tableRuntime.detail";
+    readonly rowPinning: "tableRuntime.rowPinning";
+    readonly query: "tableRuntime.query";
+};
+
+// @public
+export type RemainingFeatureDomain = keyof typeof REMAINING_FEATURE_OWNERSHIP;
+
+// @public
 export function rememberAppliedFeatures(options: object, list: readonly PatchFeature[]): void;
 
 // @public
@@ -4640,9 +4676,7 @@ export function renderedRowsOf<TRow>(chrome: {
     readonly source: {
         readonly rows: readonly TRow[];
     };
-    readonly grouping?: {
-        readonly entries: readonly GroupedFlatEntry<TRow>[];
-    };
+    readonly grouping?: GroupingContribution<TRow>;
     readonly tree?: {
         readonly entries: readonly {
             readonly row: TRow;
@@ -4700,6 +4734,9 @@ export interface ResolvedDensity {
 
 // @public
 export type ResolvedPaginationMode = "infinite" | "paged";
+
+// @public
+export function resolveFeatureGrouping<TRow>(host: GroupingContribution<TRow> | undefined, features: readonly (GroupingContribution<TRow> | undefined)[]): GroupingContribution<TRow> | undefined;
 
 // @public
 export function resolveMobileLabel(column: {
@@ -5219,12 +5256,11 @@ export interface RuntimeChromeInput<TRow> {
             readonly setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
         };
     };
+    readonly featureGrouping?: GroupingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filterRegistry?: FilterTypeRegistry;
     readonly getRowId: (row: TRow) => string;
-    readonly grouping?: {
-        readonly entries: readonly GroupedFlatEntry<TRow>[];
-    };
+    readonly grouping?: GroupingContribution<TRow>;
     readonly rowPinning?: {
         readonly state: {
             readonly top: readonly string[];
@@ -6598,7 +6634,7 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filterRegistry?: FilterTypeRegistry;
     readonly getRowId: (row: TRow) => string;
-    readonly grouping?: unknown;
+    readonly grouping?: GroupingContribution<TRow>;
     readonly groupingState?: {
         readonly groupBy: string | undefined;
         readonly aggregateOverrides: GroupAggregateOverrides;

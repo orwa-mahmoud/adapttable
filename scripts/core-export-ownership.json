@@ -5268,6 +5268,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "mergeGroupingContributions",
+      "kind": "runtime",
+      "module": "features/featureContribution.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureContribution.ts#mergeGroupingContributions",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "mergeProps",
       "kind": "runtime",
       "module": "utils/mergeProps.ts",
@@ -6115,6 +6126,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "projectGroupingContribution",
+      "kind": "runtime",
+      "module": "features/featureContribution.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureContribution.ts#projectGroupingContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "queryAggregateOps",
       "kind": "runtime",
       "module": "grouping/groupAggregateOverrides.ts",
@@ -6443,6 +6465,17 @@
       "deprecated": false,
       "identity": "filters/relativeDates.ts#relativeTokenLabel",
       "subpaths": ["."]
+    },
+    {
+      "name": "REMAINING_FEATURE_OWNERSHIP",
+      "kind": "runtime",
+      "module": "features/featureContribution.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureContribution.ts#REMAINING_FEATURE_OWNERSHIP",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "removeAggregation",
@@ -11626,6 +11659,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "GroupingContribution",
+      "kind": "type",
+      "module": "features/featureContribution.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureContribution.ts#GroupingContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "GroupingDragEventLike",
       "kind": "type",
       "module": "grouping/groupingPanelController.ts",
@@ -12493,6 +12537,17 @@
       "deprecated": false,
       "identity": "filters/relativeDates.ts#RelativePreset",
       "subpaths": ["."]
+    },
+    {
+      "name": "RemainingFeatureDomain",
+      "kind": "type",
+      "module": "features/featureContribution.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureContribution.ts#RemainingFeatureDomain",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ResolvedAggregatable",
@@ -16853,12 +16908,12 @@
     {
       "name": "orderedContributions",
       "kind": "runtime",
-      "module": "features/featureKeys.ts",
+      "module": "features/featureContribution.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "features/featureKeys.ts#orderedContributions",
+      "identity": "features/featureContribution.ts#orderedContributions",
       "subpaths": ["./binding"]
     },
     {
@@ -17167,6 +17222,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "columns/resolveColumns.ts#resolveColumnHeaders",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "resolveFeatureGrouping",
+      "kind": "runtime",
+      "module": "features/featurePatch.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featurePatch.ts#resolveFeatureGrouping",
       "subpaths": ["./binding"]
     },
     {
@@ -19625,12 +19691,12 @@
     {
       "name": "OrderedContribution",
       "kind": "type",
-      "module": "features/featureKeys.ts",
+      "module": "features/featureContribution.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "features/featureKeys.ts#OrderedContribution",
+      "identity": "features/featureContribution.ts#OrderedContribution",
       "subpaths": ["./binding"]
     },
     {

@@ -18,6 +18,7 @@ import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { RowPinSide } from "../rows/rowPinModel";
 import type { BulkAction, RowAction } from "../types";
+import type { GroupingContribution } from "./featureContribution";
 
 /**
  * The latest fully composed view of a table, as a feature above it reads it.
@@ -40,8 +41,13 @@ export interface TableRuntimeView<TRow = unknown> {
   readonly rowLabel: (row: TRow) => string;
   /** Active sort key, when visual order is source-controlled. */
   readonly sortBy?: string;
-  /** Live grouping bundle; feature providers narrow this structurally. */
-  readonly grouping?: unknown;
+  /**
+   * Grouping's owned entries, projected for compatibility.
+   *
+   * The runtime stores the contribution a binding or feature already owns.
+   * It does not keep a second grouping controller.
+   */
+  readonly grouping?: GroupingContribution<TRow>;
   /** URL/source-backed grouping state used by optional interaction chrome. */
   readonly groupingState?: {
     readonly groupBy: string | undefined;
@@ -70,7 +76,10 @@ export interface TableRuntimeView<TRow = unknown> {
       overrides: GroupAggregateOverrides
     ) => void;
   };
-  /** Live tree bundle; feature providers narrow this structurally. */
+  /**
+   * Live tree bundle. Still published on this view until the tree domain
+   * owns a contribution. Named in `REMAINING_FEATURE_OWNERSHIP`.
+   */
   readonly tree?: unknown;
   /**
    * Page, search and sort the source currently owns.

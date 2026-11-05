@@ -4,6 +4,13 @@
  * Kept as a dedicated barrel so the main entry stays grouped by concern.
  */
 
+export {
+  type GroupingContribution,
+  mergeGroupingContributions,
+  projectGroupingContribution,
+  REMAINING_FEATURE_OWNERSHIP,
+  type RemainingFeatureDomain,
+} from "./features/featureContribution";
 export type { TableRuntime, TableRuntimeView } from "./features/tableRuntime";
 export type { CellNavigationChannelsOptions } from "./focus/cellNavigationRuntime";
 export {

@@ -20,11 +20,14 @@ import {
 import type { ColumnMetadata } from "../contracts/columns";
 import type { TableEngine } from "../engine/createTableEngine";
 import { createNeutralTable, type NeutralTable } from "../engine/neutralTable";
+import {
+  type GroupingContribution,
+  projectGroupingContribution,
+} from "../features/featureContribution";
 import { deriveRuntimeOperations } from "../features/runtimeOperations";
 import type { TableRuntimeView } from "../features/tableRuntime";
 import type { FilterDef } from "../filters/filterDefs";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
-import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { RowPinSide } from "../rows/rowPinModel";
 import type { TableSource } from "../source/TableSource";
 import type { BulkAction, RowAction, TableLabels } from "../types";
@@ -109,7 +112,12 @@ export interface RuntimeChromeInput<TRow> {
     readonly setPinned: (key: string, side: PinSide | undefined) => void;
   };
   /** Grouped entries, when grouping renders. */
-  readonly grouping?: { readonly entries: readonly GroupedFlatEntry<TRow>[] };
+  readonly grouping?: GroupingContribution<TRow>;
+  /**
+   * Grouping a feature contributed when the host published none.
+   * A defined {@link grouping} wins.
+   */
+  readonly featureGrouping?: GroupingContribution<TRow>;
   /** Tree entries, when a tree renders. */
   readonly tree?: { readonly entries: readonly { readonly row: TRow }[] };
   /** Selection, when composed. */
@@ -157,7 +165,7 @@ export interface RuntimeChromeInput<TRow> {
  */
 export function renderedRowsOf<TRow>(chrome: {
   readonly source: { readonly rows: readonly TRow[] };
-  readonly grouping?: { readonly entries: readonly GroupedFlatEntry<TRow>[] };
+  readonly grouping?: GroupingContribution<TRow>;
   readonly tree?: { readonly entries: readonly { readonly row: TRow }[] };
 }): readonly TRow[] {
   if (chrome.grouping) {
@@ -267,9 +275,17 @@ export function tableRuntimeView<TRow>(
   }
 ): TableRuntimeView<TRow> {
   const source = chrome.source;
+  const grouping = projectGroupingContribution({
+    host: chrome.grouping,
+    feature: chrome.featureGrouping,
+  });
   return {
     rows: source.rows,
-    visibleRows: renderedRowsOf(chrome),
+    visibleRows: renderedRowsOf({
+      source: chrome.source,
+      grouping,
+      tree: chrome.tree,
+    }),
     getRowId: chrome.getRowId,
     rowLabel: (row: TRow) => readableRowLabel(chrome, row),
     sortBy: source.sortBy,
@@ -291,13 +307,13 @@ export function tableRuntimeView<TRow>(
     },
     filterDefs: chrome.filterDefs,
     filterRegistry: chrome.filterRegistry,
-    grouping: chrome.grouping,
+    grouping,
     groupingState: {
       groupBy: source.groupBy,
       aggregateOverrides: source.groupAggregateOverrides ?? {},
       columns: chrome.allColumns,
-      computedAggregateKeys: chrome.grouping
-        ? computedAggregateKeys(chrome.grouping.entries)
+      computedAggregateKeys: grouping
+        ? computedAggregateKeys(grouping.entries)
         : undefined,
       queryAggregates: source.queryAggregates,
       aggregateOperations: source.aggregateOperations,
@@ -642,7 +658,7 @@ export interface OverlayChrome {
   readonly rowMutations: { readonly canAdd: boolean; readonly addRow: unknown };
   readonly editingRows: unknown;
   readonly tree?: unknown;
-  readonly grouping?: unknown;
+  readonly grouping?: GroupingContribution<unknown>;
   readonly editing?: unknown;
   readonly detail?: { readonly render: unknown; readonly expansion: unknown };
   readonly rowPinning?: unknown;
@@ -772,7 +788,7 @@ export function finishShellBody<
       readonly columnWindow: unknown;
     };
     readonly chrome: {
-      readonly grouping?: object;
+      readonly grouping?: { readonly entries: readonly unknown[] };
       readonly tree?: object;
     };
   },

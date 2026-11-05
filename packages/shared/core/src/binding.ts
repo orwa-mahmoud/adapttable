@@ -669,6 +669,13 @@ export type {
   SidePanelEntry,
 } from "./features/currentHost";
 export {
+  type GroupingContribution,
+  mergeGroupingContributions,
+  projectGroupingContribution,
+  REMAINING_FEATURE_OWNERSHIP,
+  type RemainingFeatureDomain,
+} from "./features/featureContribution";
+export {
   applyTableFeatures,
   type FeatureApplyInput,
   type FeaturePatch,
@@ -676,6 +683,7 @@ export {
   mergeFeaturePatches,
   type PatchFeature,
   rememberAppliedFeatures,
+  resolveFeatureGrouping,
 } from "./features/featurePatch";
 export type { FeatureRegistration } from "./features/featureRegistration";
 export {
