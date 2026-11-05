@@ -678,6 +678,7 @@ export type {
   SidePanelEntry,
 } from "./features/currentHost";
 export {
+  type EditingContribution,
   type GroupingContribution,
   mergeGroupingContributions,
   projectGroupingContribution,

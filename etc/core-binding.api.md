@@ -2468,6 +2468,12 @@ export interface EditHistoryLiveSlotProps<TRow = never, THistory = unknown, TOpt
 export const EDITING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
 
 // @public
+export interface EditingContribution<TRow> {
+    readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+}
+
+// @public
 export const EMPTY_FEATURE_HOST: FeatureHostState;
 
 // @public
@@ -4684,7 +4690,6 @@ export const REMAINING_FEATURE_OWNERSHIP: {
     readonly tree: "tableRuntime.tree";
     readonly selection: "tableRuntime.selection";
     readonly pinning: "tableRuntime.pinning";
-    readonly editing: "tableRuntime.editing";
     readonly columnLayout: "tableRuntime.columnLayout";
     readonly detail: "tableRuntime.detail";
     readonly rowPinning: "tableRuntime.rowPinning";
@@ -6653,10 +6658,7 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly move?: (key: string, toIndex: number) => void;
         readonly setOrder?: (order: readonly string[]) => void;
     };
-    readonly editing?: {
-        readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-        readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
-    };
+    readonly editing?: EditingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filterRegistry?: FilterTypeRegistry;
     readonly getRowId: (row: TRow) => string;

@@ -271,6 +271,37 @@ describe("createCellSaveStore", () => {
     expect(cellSaveStatus(store.getSnapshot(), "1", "name")).toBeUndefined();
   });
 
+  it("a superseded successful save does not clear the current failure", async () => {
+    const store = createCellSaveStore<Row>();
+    const base = {
+      rowId: "1",
+      columnKey: "name",
+      previous: ada,
+      attempted: "A",
+    };
+    let resolveFirst!: () => void;
+    const first = store.track({
+      ...base,
+      result: new Promise((resolve) => {
+        resolveFirst = () => resolve(undefined);
+      }),
+    });
+    await store.track({
+      ...base,
+      attempted: "B",
+      result: Promise.reject(new Error("current")),
+    });
+    expect(cellSaveFailure(store.getSnapshot(), "1", "name")?.attempted).toBe(
+      "B"
+    );
+    resolveFirst();
+    await expect(first).resolves.toBe(false);
+    expect(cellSaveFailure(store.getSnapshot(), "1", "name")?.attempted).toBe(
+      "B"
+    );
+    expect(cellSaveStatus(store.getSnapshot(), "1", "name")).toBe("failed");
+  });
+
   it("reads a rejection as the sentence a cell shows", () => {
     expect(defaultSaveErrorMessage(new Error("boom"))).toBe("boom");
     expect(defaultSaveErrorMessage("quota")).toBe("quota");

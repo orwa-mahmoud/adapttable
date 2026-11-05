@@ -11,7 +11,7 @@
 
 import type { PinOffset } from "../columns/columnLayoutModel";
 import type { ColumnMetadata } from "../contracts/columns";
-import { asGesture } from "../editing/editingController";
+import { asGesture } from "../editing/editHistory";
 import { coveredAddressSet, type GetCellSpan } from "../rows/cellSpan";
 import type { CellEdit } from "./cellEdits";
 import { type CellRange, isSingleCell } from "./cellRange";

@@ -5,6 +5,7 @@
  */
 
 export {
+  type EditingContribution,
   type GroupingContribution,
   mergeGroupingContributions,
   projectGroupingContribution,

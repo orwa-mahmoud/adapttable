@@ -18,7 +18,10 @@ import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { RowPinSide } from "../rows/rowPinModel";
 import type { BulkAction, RowAction } from "../types";
-import type { GroupingContribution } from "./featureContribution";
+import type {
+  EditingContribution,
+  GroupingContribution,
+} from "./featureContribution";
 
 /**
  * The latest fully composed view of a table, as a feature above it reads it.
@@ -187,19 +190,7 @@ export interface TableRuntimeView<TRow = unknown> {
    * Live editing channels. `onCellEdit` is the host callback; `stageCell`
    * is the batch/dirty path when batch editing is composed.
    */
-  readonly editing?: {
-    readonly onCellEdit?: (
-      row: TRow,
-      key: string,
-      nextValue: unknown
-    ) => unknown;
-    readonly stageCell?: (
-      row: TRow,
-      rowId: string,
-      columnKey: string,
-      value: string
-    ) => void;
-  };
+  readonly editing?: EditingContribution<TRow>;
 }
 
 /**

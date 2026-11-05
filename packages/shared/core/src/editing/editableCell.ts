@@ -42,17 +42,19 @@ import {
   type CellSaveStatus,
   cellSaveStatus,
   type CellSaveStore,
-  type EditValidationSnapshot,
-  type EditValidationStore,
   type FailedCellSave,
   isCellEditActive,
   observeEdit,
+} from "./editSession";
+import {
+  type EditValidationSnapshot,
+  type EditValidationStore,
   rowHasValidationError,
   type ValidationCheckResult,
   validationErrorFor,
   validationKey,
   validationSignature,
-} from "./editingController";
+} from "./editValidation";
 import type { RowEditingState } from "./rowEditing";
 
 /* ── The state each store hands a cell ─────────────────────────────── */

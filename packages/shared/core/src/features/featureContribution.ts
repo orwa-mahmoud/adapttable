@@ -1,10 +1,10 @@
 /**
  * Typed domain contributions.
  *
- * Grouping is the first domain with a complete contract. Other domains stay
- * named in {@link REMAINING_FEATURE_OWNERSHIP} until their own items replace
- * the compatibility fields on the runtime view. Nothing here is constructed
- * from a registry, and grouping's entry type is imported as a type only.
+ * Grouping and editing have their own contracts. Other domains stay named in
+ * {@link REMAINING_FEATURE_OWNERSHIP} until their own items replace the
+ * compatibility fields on the runtime view. Nothing here is constructed from
+ * a registry, and grouping's entry type is imported as a type only.
  */
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import { devWarn } from "../utils/devWarn";
@@ -30,6 +30,35 @@ export interface GroupingContribution<TRow> {
 }
 
 /**
+ * Editing's owned channels.
+ *
+ * `onCellEdit` is the host write. `stageCell` is the batch path when batch
+ * editing is composed. The table does not write the row itself.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export interface EditingContribution<TRow> {
+  /** The host callback. A write goes through the host, not the table. */
+  readonly onCellEdit?: (
+    row: TRow,
+    key: string,
+    nextValue: unknown
+  ) => unknown;
+  /**
+   * Stage one cell while a batch is open. Absent when batch editing is not
+   * composed.
+   */
+  readonly stageCell?: (
+    row: TRow,
+    rowId: string,
+    columnKey: string,
+    value: string
+  ) => void;
+}
+
+/**
  * Domains whose runtime fields are still compatibility projections.
  *
  * The value is the field that still owns the data. Nothing is imported or
@@ -41,7 +70,6 @@ export const REMAINING_FEATURE_OWNERSHIP = {
   tree: "tableRuntime.tree",
   selection: "tableRuntime.selection",
   pinning: "tableRuntime.pinning",
-  editing: "tableRuntime.editing",
   columnLayout: "tableRuntime.columnLayout",
   detail: "tableRuntime.detail",
   rowPinning: "tableRuntime.rowPinning",

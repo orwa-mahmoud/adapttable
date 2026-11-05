@@ -452,23 +452,23 @@
     {
       "name": "asBatchGesture",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#asBatchGesture",
+      "identity": "editing/editHistory.ts#asBatchGesture",
       "subpaths": ["."]
     },
     {
       "name": "asGesture",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#asGesture",
+      "identity": "editing/editHistory.ts#asGesture",
       "subpaths": ["."]
     },
     {
@@ -914,45 +914,45 @@
     {
       "name": "cellSaveFailure",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#cellSaveFailure",
+      "identity": "editing/editSession.ts#cellSaveFailure",
       "subpaths": ["."]
     },
     {
       "name": "cellSaveKey",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#cellSaveKey",
+      "identity": "editing/editSession.ts#cellSaveKey",
       "subpaths": ["."]
     },
     {
       "name": "cellSaveSignature",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#cellSaveSignature",
+      "identity": "editing/editSession.ts#cellSaveSignature",
       "subpaths": ["."]
     },
     {
       "name": "cellSaveStatus",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#cellSaveStatus",
+      "identity": "editing/editSession.ts#cellSaveStatus",
       "subpaths": ["."]
     },
     {
@@ -980,12 +980,12 @@
     {
       "name": "cellsOfBatch",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#cellsOfBatch",
+      "identity": "editing/editHistory.ts#cellsOfBatch",
       "subpaths": ["."]
     },
     {
@@ -1915,23 +1915,23 @@
     {
       "name": "createCellEditSession",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#createCellEditSession",
+      "identity": "editing/editSession.ts#createCellEditSession",
       "subpaths": ["."]
     },
     {
       "name": "createCellSaveStore",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#createCellSaveStore",
+      "identity": "editing/editSession.ts#createCellSaveStore",
       "subpaths": ["."]
     },
     {
@@ -2058,23 +2058,23 @@
     {
       "name": "createEditHistoryStack",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#createEditHistoryStack",
+      "identity": "editing/editHistory.ts#createEditHistoryStack",
       "subpaths": ["."]
     },
     {
       "name": "createEditValidationStore",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#createEditValidationStore",
+      "identity": "editing/editValidation.ts#createEditValidationStore",
       "subpaths": ["."]
     },
     {
@@ -2575,12 +2575,12 @@
     {
       "name": "DEFAULT_EDIT_HISTORY_DEPTH",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#DEFAULT_EDIT_HISTORY_DEPTH",
+      "identity": "editing/editHistory.ts#DEFAULT_EDIT_HISTORY_DEPTH",
       "subpaths": ["."]
     },
     {
@@ -2707,12 +2707,12 @@
     {
       "name": "defaultSaveErrorMessage",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#defaultSaveErrorMessage",
+      "identity": "editing/editSession.ts#defaultSaveErrorMessage",
       "subpaths": ["."]
     },
     {
@@ -2938,12 +2938,12 @@
     {
       "name": "editHistoryEntry",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#editHistoryEntry",
+      "identity": "editing/editHistory.ts#editHistoryEntry",
       "subpaths": ["."]
     },
     {
@@ -4797,12 +4797,12 @@
     {
       "name": "isCellEditActive",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#isCellEditActive",
+      "identity": "editing/editSession.ts#isCellEditActive",
       "subpaths": ["."]
     },
     {
@@ -5556,12 +5556,12 @@
     {
       "name": "observeEdit",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#observeEdit",
+      "identity": "editing/editSession.ts#observeEdit",
       "subpaths": ["."]
     },
     {
@@ -6304,12 +6304,12 @@
     {
       "name": "readCellValue",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#readCellValue",
+      "identity": "editing/editHistory.ts#readCellValue",
       "subpaths": ["."]
     },
     {
@@ -7338,12 +7338,12 @@
     {
       "name": "rowHasValidationError",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#rowHasValidationError",
+      "identity": "editing/editValidation.ts#rowHasValidationError",
       "subpaths": ["."]
     },
     {
@@ -8515,34 +8515,34 @@
     {
       "name": "validationErrorFor",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#validationErrorFor",
+      "identity": "editing/editValidation.ts#validationErrorFor",
       "subpaths": ["."]
     },
     {
       "name": "validationKey",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#validationKey",
+      "identity": "editing/editValidation.ts#validationKey",
       "subpaths": ["."]
     },
     {
       "name": "validationSignature",
       "kind": "runtime",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#validationSignature",
+      "identity": "editing/editValidation.ts#validationSignature",
       "subpaths": ["."]
     },
     {
@@ -9428,67 +9428,67 @@
     {
       "name": "CellEditKeyAction",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellEditKeyAction",
+      "identity": "editing/editSession.ts#CellEditKeyAction",
       "subpaths": ["."]
     },
     {
       "name": "CellEditKeyOutcome",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellEditKeyOutcome",
+      "identity": "editing/editSession.ts#CellEditKeyOutcome",
       "subpaths": ["."]
     },
     {
       "name": "CellEditNavigation",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellEditNavigation",
+      "identity": "editing/editSession.ts#CellEditNavigation",
       "subpaths": ["."]
     },
     {
       "name": "CellEditSession",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellEditSession",
+      "identity": "editing/editSession.ts#CellEditSession",
       "subpaths": ["."]
     },
     {
       "name": "CellEditSessionOptions",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellEditSessionOptions",
+      "identity": "editing/editSession.ts#CellEditSessionOptions",
       "subpaths": ["."]
     },
     {
       "name": "CellEditSnapshot",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellEditSnapshot",
+      "identity": "editing/editSession.ts#CellEditSnapshot",
       "subpaths": ["."]
     },
     {
@@ -9560,12 +9560,12 @@
     {
       "name": "CellSaveSnapshot",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellSaveSnapshot",
+      "identity": "editing/editSession.ts#CellSaveSnapshot",
       "subpaths": ["."]
     },
     {
@@ -9582,34 +9582,34 @@
     {
       "name": "CellSaveStatus",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellSaveStatus",
+      "identity": "editing/editSession.ts#CellSaveStatus",
       "subpaths": ["."]
     },
     {
       "name": "CellSaveStore",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellSaveStore",
+      "identity": "editing/editSession.ts#CellSaveStore",
       "subpaths": ["."]
     },
     {
       "name": "CellSaveStoreOptions",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#CellSaveStoreOptions",
+      "identity": "editing/editSession.ts#CellSaveStoreOptions",
       "subpaths": ["."]
     },
     {
@@ -10693,34 +10693,34 @@
     {
       "name": "EditHistoryEntry",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#EditHistoryEntry",
+      "identity": "editing/editHistory.ts#EditHistoryEntry",
       "subpaths": ["."]
     },
     {
       "name": "EditHistorySnapshot",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#EditHistorySnapshot",
+      "identity": "editing/editHistory.ts#EditHistorySnapshot",
       "subpaths": ["."]
     },
     {
       "name": "EditHistoryStack",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editHistory.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#EditHistoryStack",
+      "identity": "editing/editHistory.ts#EditHistoryStack",
       "subpaths": ["."]
     },
     {
@@ -10768,6 +10768,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "EditingContribution",
+      "kind": "type",
+      "module": "features/featureContribution.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureContribution.ts#EditingContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "EditLifecycle",
       "kind": "type",
       "module": "editing/editContracts.ts",
@@ -10803,12 +10814,12 @@
     {
       "name": "EditValidationSnapshot",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#EditValidationSnapshot",
+      "identity": "editing/editValidation.ts#EditValidationSnapshot",
       "subpaths": ["."]
     },
     {
@@ -10825,23 +10836,23 @@
     {
       "name": "EditValidationStore",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#EditValidationStore",
+      "identity": "editing/editValidation.ts#EditValidationStore",
       "subpaths": ["."]
     },
     {
       "name": "EditValidationStoreOptions",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#EditValidationStoreOptions",
+      "identity": "editing/editValidation.ts#EditValidationStoreOptions",
       "subpaths": ["."]
     },
     {
@@ -11144,12 +11155,12 @@
     {
       "name": "FailedCellSave",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editSession.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#FailedCellSave",
+      "identity": "editing/editSession.ts#FailedCellSave",
       "subpaths": ["."]
     },
     {
@@ -14092,12 +14103,12 @@
     {
       "name": "ValidationCheckResult",
       "kind": "type",
-      "module": "editing/editingController.ts",
+      "module": "editing/editValidation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "editing/editingController.ts#ValidationCheckResult",
+      "identity": "editing/editValidation.ts#ValidationCheckResult",
       "subpaths": ["."]
     },
     {
@@ -16818,6 +16829,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "invokeCleanups",
+      "kind": "runtime",
+      "module": "features/featureRegistration.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureRegistration.ts#invokeCleanups",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "isBodyEligible",
       "kind": "runtime",
       "module": "virtual/bodyWindow.ts",
@@ -17247,6 +17269,28 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "planFeatureRegistration",
+      "kind": "runtime",
+      "module": "features/featureRegistration.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureRegistration.ts#planFeatureRegistration",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "preferLastById",
+      "kind": "runtime",
+      "module": "features/featureRegistration.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureRegistration.ts#preferLastById",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "preserveEditorFocusOnLayoutChange",
       "kind": "runtime",
       "module": "editing/layoutFocus.ts",
@@ -17266,6 +17310,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/shellPipeline.ts#printToolbarProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "projectFeatureHosts",
+      "kind": "runtime",
+      "module": "features/featureRegistration.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureRegistration.ts#projectFeatureHosts",
       "subpaths": ["./binding"]
     },
     {
@@ -19040,6 +19095,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "FeatureRegistrationPlan",
+      "kind": "type",
+      "module": "features/featureRegistration.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureRegistration.ts#FeatureRegistrationPlan",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FeatureRender",
       "kind": "type",
       "module": "features/featureKeys.ts",
@@ -19961,6 +20027,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotPanelContract.ts#PivotZoneProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "RegisteredFeature",
+      "kind": "type",
+      "module": "features/featureRegistration.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureRegistration.ts#RegisteredFeature",
       "subpaths": ["./binding"]
     },
     {
@@ -21064,6 +21141,17 @@
       "subpaths": ["./conformance"]
     },
     {
+      "name": "featureLifecycleConformanceTests",
+      "kind": "runtime",
+      "module": "conformance/featureLifecycleConformance.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/featureLifecycleConformance.ts#featureLifecycleConformanceTests",
+      "subpaths": ["./conformance"]
+    },
+    {
       "name": "tableConformanceTests",
       "kind": "runtime",
       "module": "conformance/tableConformance.ts",
@@ -21171,6 +21259,50 @@
       "forward": true,
       "deprecated": false,
       "identity": "conformance/tableConformance.ts#ConformanceTest",
+      "subpaths": ["./conformance"]
+    },
+    {
+      "name": "FeatureLifecycleDriver",
+      "kind": "type",
+      "module": "conformance/featureLifecycleConformance.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/featureLifecycleConformance.ts#FeatureLifecycleDriver",
+      "subpaths": ["./conformance"]
+    },
+    {
+      "name": "LifecycleDeclaration",
+      "kind": "type",
+      "module": "conformance/featureLifecycleConformance.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/featureLifecycleConformance.ts#LifecycleDeclaration",
+      "subpaths": ["./conformance"]
+    },
+    {
+      "name": "LifecycleHarness",
+      "kind": "type",
+      "module": "conformance/featureLifecycleConformance.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/featureLifecycleConformance.ts#LifecycleHarness",
+      "subpaths": ["./conformance"]
+    },
+    {
+      "name": "LifecycleObservation",
+      "kind": "type",
+      "module": "conformance/featureLifecycleConformance.ts",
+      "audience": "app",
+      "path": "./conformance",
+      "forward": true,
+      "deprecated": false,
+      "identity": "conformance/featureLifecycleConformance.ts#LifecycleObservation",
       "subpaths": ["./conformance"]
     },
     {

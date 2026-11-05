@@ -133,7 +133,6 @@ export interface LifecycleDeclaration {
 
 // @public
 export interface LifecycleHarness {
-    // (undocumented)
     readonly expect: (value: unknown) => {
         toEqual(expected: unknown): void;
         toBe(expected: unknown): void;

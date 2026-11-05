@@ -164,6 +164,9 @@ const CORE_FIXTURES = [
       "virtual",
       "useRowPatchStream",
       "grouping-drop-zone",
+      "createCellEditSession",
+      "createEditValidationStore",
+      "createEditHistory",
     ],
   },
   {
@@ -185,6 +188,9 @@ const CORE_FIXTURES = [
       "virtual",
       "useRowPatchStream",
       "grouping-drop-zone",
+      "createCellEditSession",
+      "createEditValidationStore",
+      "createEditHistory",
     ],
   },
   {
@@ -344,7 +350,12 @@ const REACT_FIXTURES = [
     totalKB: 35,
     code: `export { useFrontendData, useDataTable } from "PKG";`,
     present: ["useDataTable", "useFrontendData"],
-    absent: ["grouping-drop-zone"],
+    absent: [
+      "grouping-drop-zone",
+      "createCellEditSession",
+      "createEditValidationStore",
+      "createEditHistory",
+    ],
   },
   {
     name: "react · grouping panel",
@@ -421,6 +432,13 @@ function featureDeltaFixtures() {
   return uniqueFeatureSubpaths().map((subpath) => {
     const marker = FEATURE_MARKERS[subpath];
     const present = marker ? [marker] : [];
+    if (subpath === "editing") {
+      present.push(
+        "createCellEditSession",
+        "createEditValidationStore",
+        "createEditHistory"
+      );
+    }
     const namedImport = subpath === "editing";
     return {
       name: `${DELTA_KIT} · + ${subpath}`,
