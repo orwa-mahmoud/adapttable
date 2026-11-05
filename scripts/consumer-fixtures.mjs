@@ -283,7 +283,7 @@ const CORE_FIXTURES = [
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.
-    present: UNRELATED_CORE_ENGINES,
+    present: [...UNRELATED_CORE_ENGINES, "defaultLabels", "resolveLabels"],
     absent: ["useRowPatchStream", "grouping-drop-zone"],
   },
   {
@@ -368,7 +368,12 @@ const REACT_FIXTURES = [
     initialKB: 35,
     totalKB: 35,
     code: `export { useFrontendData, useDataTable } from "PKG";`,
-    present: ["useDataTable", "useFrontendData"],
+    present: [
+      "useDataTable",
+      "useFrontendData",
+      "defaultLabels",
+      "resolveLabels",
+    ],
     absent: [
       "grouping-drop-zone",
       "createCellEditSession",
@@ -418,6 +423,11 @@ function adapterBaseFixtures() {
     item1BaselineKB: ITEM1_ADAPTER_BASELINE_KB[kit],
     code: `export { DataTable } from "PKG";`,
     absent: ADAPTER_ABSENT,
+    // The full resolver stays in the MUI base table. A narrow labels split
+    // saved a standalone focus entry and grew this graph; that is not a saving.
+    ...(kit === "mui"
+      ? { present: ["defaultLabels", "resolveLabels"] }
+      : {}),
   }));
 }
 

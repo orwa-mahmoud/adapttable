@@ -122,6 +122,33 @@ describe("consumer fixtures", () => {
     ]);
   });
 
+  it("requires the full label resolver on the consumers a narrow split grows", () => {
+    const markers = ["defaultLabels", "resolveLabels"];
+    for (const name of [
+      "core · every export",
+      "react · simple table",
+      "mui · table",
+      "angular · headless table",
+      "vue · simple table",
+    ]) {
+      const fixture = FIXTURES.find((entry) => entry.name === name);
+      assert.ok(fixture, name);
+      for (const marker of markers) {
+        assert.ok(
+          fixture.present.includes(marker),
+          `${name} must keep ${marker}`
+        );
+      }
+    }
+    const others = FIXTURES.filter(
+      (entry) => entry.kind === "adapter-base" && entry.kit !== "mui"
+    );
+    assert.ok(others.length > 0);
+    for (const fixture of others) {
+      assert.equal(fixture.present, undefined, fixture.name);
+    }
+  });
+
   it("measures named primitives against engines the full graph really holds", () => {
     const every = FIXTURES.find((f) => f.name === "core · every export");
     for (const name of ["core · one primitive", "core · binding helper"]) {

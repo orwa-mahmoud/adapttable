@@ -372,7 +372,12 @@ export function angularConsumerFixtures(kits = angularKits()) {
       rendered: true,
       peerPolicy: "own-share",
       functionality: "Headless table: signals, attributes and cell projection",
-      present: ["injectDataTable", "injectFrontendData"],
+      present: [
+        "injectDataTable",
+        "injectFrontendData",
+        "defaultLabels",
+        "resolveLabels",
+      ],
       absent: ["AdaptDataTable", "coreGrouping", "xlsxWriter"],
       ...ceilings("angular · headless table"),
       code: HEADLESS,
