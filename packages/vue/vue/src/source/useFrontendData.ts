@@ -24,6 +24,11 @@ import {
   useSourceMode,
   useSourceSnapshot,
 } from "./sourceLifecycle";
+import {
+  type CachedSnapshot,
+  cachedSnapshot,
+  sourceViewKey,
+} from "./sourceRefresh";
 
 /** Inputs for the frontend source. Callback functions are never getters. @public */
 export interface UseFrontendDataOptions<TRow>
@@ -83,47 +88,87 @@ export function useFrontendData<TRow>(
   const refetch = (): Promise<unknown> | void => {
     if (active.value) return options.value.refetch?.();
   };
+  const held = { current: null as CachedSnapshot<TableSource<TRow>> | null };
   const snapshot = useSourceSnapshot(
     (): TableSource<TRow> => {
       const value = options.value;
       const view = state.value;
-      const next = factoryOf();
-      // Synchronous so grouping, which reads this snapshot, sees the evaluator
-      // it asked for. The snapshot publishes only from the live scope.
-      if (source.engineFactory !== next) source.replaceEngine(next);
-      const frame = source.update(
-        {
-          data: toValue(value.data),
-          columns: toValue(value.columns),
-          getRowId: value.getRowId,
-          getSearchText: value.getSearchText,
-          getSortValue: value.getSortValue,
-          filterFn: value.filterFn,
-          filterTreeFn: value.filterTreeFn,
-          filterKey: toValue(value.filterKey),
-          locale: toValue(value.locale),
-          paginationMode: mode.value,
-        },
-        view
+      const data = toValue(value.data);
+      const columns = toValue(value.columns);
+      const filterKey = toValue(value.filterKey);
+      const locale = toValue(value.locale);
+      const factory = factoryOf();
+      const isLoading = toValue(value.isLoading) ?? false;
+      const isFetching = toValue(value.isFetching) ?? false;
+      const error = toValue(value.error) ?? null;
+      const nextRefetch = value.refetch ? refetch : undefined;
+      const frame = cachedSnapshot(
+        held,
+        [
+          data,
+          columns,
+          value.getRowId,
+          value.getSearchText,
+          value.getSortValue,
+          value.filterFn,
+          value.filterTreeFn,
+          filterKey,
+          locale,
+          mode.value,
+          factory,
+        ],
+        sourceViewKey(view),
+        () => {
+          // Synchronous so grouping, which reads this snapshot, sees the
+          // evaluator it asked for. The snapshot publishes only from the
+          // live scope.
+          if (source.engineFactory !== factory) source.replaceEngine(factory);
+          const frame = source.update(
+            {
+              data,
+              columns,
+              getRowId: value.getRowId,
+              getSearchText: value.getSearchText,
+              getSortValue: value.getSortValue,
+              filterFn: value.filterFn,
+              filterTreeFn: value.filterTreeFn,
+              filterKey,
+              locale,
+              paginationMode: mode.value,
+            },
+            view
+          );
+          return {
+            ...view,
+            ...actions,
+            rows: frame.rows,
+            allFilteredRows: frame.allFilteredRows,
+            allSearchedRows: frame.allSearchedRows,
+            total: frame.total,
+            page: frame.page,
+            hasNextPage: frame.hasNextPage,
+            fetchNextPage,
+            isLoading,
+            isFetching,
+            isFetchingNextPage: false,
+            error,
+            refetch: nextRefetch,
+            paginationMode: mode.value,
+            tableEngine: source.engine,
+          };
+        }
       );
-      return {
-        ...view,
-        ...actions,
-        rows: frame.rows,
-        allFilteredRows: frame.allFilteredRows,
-        allSearchedRows: frame.allSearchedRows,
-        total: frame.total,
-        page: frame.page,
-        hasNextPage: frame.hasNextPage,
-        fetchNextPage,
-        isLoading: toValue(value.isLoading) ?? false,
-        isFetching: toValue(value.isFetching) ?? false,
-        isFetchingNextPage: false,
-        error: toValue(value.error) ?? null,
-        refetch: value.refetch ? refetch : undefined,
-        paginationMode: mode.value,
-        tableEngine: source.engine,
-      };
+      if (
+        frame.isLoading === isLoading &&
+        frame.isFetching === isFetching &&
+        frame.error === error &&
+        frame.refetch === nextRefetch
+      ) {
+        return frame;
+      }
+      const published = { ...frame, isLoading, isFetching, error, refetch: nextRefetch };
+      if (held.current) held.current = { ...held.current, snapshot: published };
+      return published;
     },
     () => {
       if (active.value && source.engineFactory === factoryOf()) source.commit();

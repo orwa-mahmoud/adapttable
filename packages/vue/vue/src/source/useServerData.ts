@@ -24,6 +24,11 @@ import {
   useSourceMode,
   useSourceSnapshot,
 } from "./sourceLifecycle";
+import {
+  type CachedSnapshot,
+  sameIdentity,
+  sourceViewKey,
+} from "./sourceRefresh";
 
 /** Request metadata supplied by the neutral server source. @public */
 export interface TableQueryInfo {
@@ -83,9 +88,12 @@ export function useServerData<TRow>(
   const refetch = (): Promise<unknown> | void => {
     if (active.value) return source.refetch();
   };
+  const held = {
+    current: null as (CachedSnapshot<TableSource<TRow>> & { revision: number }) | null,
+  };
   return useSourceSnapshot(
     (): TableSource<TRow> => {
-      toValue(revision);
+      const revisionValue = toValue(revision);
       const value = options.value;
       const view = state.value;
       const supports = toValue(value.supports);
@@ -93,9 +101,40 @@ export function useServerData<TRow>(
       const loading = toValue(value.loading) ?? false;
       const error = toValue(value.error) ?? null;
       const total = toValue(value.total);
+      const rows = toValue(value.rows);
+      const facets = toValue(value.facets);
+      const previous = held.current;
+      const identity = [
+        rows,
+        total,
+        toValue(value.nextCursor) ?? null,
+        loading,
+        error,
+        mode.value,
+        supports,
+        aggregates,
+        toValue(value.columns),
+        toValue(value.responseKey),
+        toValue(value.expandedIds),
+        toValue(value.facetKeys),
+        value.onQueryChange,
+        facets,
+      ];
+      const viewKey = sourceViewKey(view);
+      if (
+        previous?.viewKey === viewKey &&
+        sameIdentity(previous.identity, identity)
+      ) {
+        if (previous.revision === revisionValue) return previous.snapshot;
+        // A refetch bumps the revision without changing inputs. A new
+        // snapshot identity is what asks the post-flush watch to commit.
+        const republished = { ...previous.snapshot };
+        held.current = { ...previous, snapshot: republished, revision: revisionValue };
+        return republished;
+      }
       const frame = source.update(
         {
-          rows: toValue(value.rows),
+          rows,
           total,
           nextCursor: toValue(value.nextCursor),
           loading,
@@ -111,7 +150,7 @@ export function useServerData<TRow>(
         },
         { ...view, setPage: actions.setPage }
       );
-      return {
+      const snapshot: TableSource<TRow> = {
         ...view,
         ...actions,
         rows: frame.rows,
@@ -122,7 +161,7 @@ export function useServerData<TRow>(
         honorsAggregates:
           Boolean(supports?.aggregates) ||
           Boolean(supports?.aggregateOperations),
-        facets: toValue(value.facets),
+        facets,
         isLoading: frame.isLoading,
         isFetching: loading,
         isFetchingNextPage: frame.isFetchingNextPage,
@@ -133,6 +172,8 @@ export function useServerData<TRow>(
         fetchNextPage,
         refetch,
       };
+      held.current = { identity, viewKey, snapshot, revision: revisionValue };
+      return snapshot;
     },
     source.commit,
     source.dispose

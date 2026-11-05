@@ -58,6 +58,48 @@ describe("useServerData", () => {
     expect(second).toHaveBeenCalledTimes(2);
   });
 
+  it("does not re-read rows when an equivalent options object replaces the previous one", async () => {
+    const scope = effectScope();
+    let reads = 0;
+    const hostRows = new Proxy([{ id: "a" }] as Row[], {
+      get(target, property, receiver) {
+        if (property === "length") reads += 1;
+        return Reflect.get(target, property, receiver);
+      },
+    });
+    const requests: TableQueryInfo[] = [];
+    const onQueryChange = vi.fn((_query, info: TableQueryInfo) => {
+      requests.push(info);
+    });
+    const tick = shallowRef(0);
+    const source = scope.run(() =>
+      useServerData(() => {
+        const stamp = tick.value;
+        return {
+          rows: stamp < 0 ? [] : hostRows,
+          total: 1,
+          urlSync: false,
+          onQueryChange,
+        };
+      })
+    );
+    const afterMount = reads;
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
+    expect(afterMount).toBeGreaterThan(0);
+    tick.value += 1;
+    await nextTick();
+    expect(reads).toBe(afterMount);
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
+    expect(requests[0]?.signal.aborted).toBe(false);
+    source?.value.refetch?.();
+    await nextTick();
+    expect(onQueryChange).toHaveBeenCalledTimes(2);
+    expect(requests[0]?.signal.aborted).toBe(true);
+    expect(requests[1]?.signal.aborted).toBe(false);
+    scope.stop();
+    expect(requests[1]?.signal.aborted).toBe(true);
+  });
+
   it("the host's request-local abort guard rejects late replies", async () => {
     const scope = effectScope();
     const rows = shallowRef<readonly Row[]>([]);

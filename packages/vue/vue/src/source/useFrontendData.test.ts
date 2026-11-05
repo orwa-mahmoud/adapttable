@@ -1,3 +1,9 @@
+import {
+  createBasicTableEngine,
+  type FrontendEngineFactory,
+  INACTIVE_TIER_ROWS,
+  type TableCallbackRefresh,
+} from "@adapttable/core";
 import { describe, expect, it, vi } from "vitest";
 import {
   createApp,
@@ -155,5 +161,55 @@ describe("useFrontendData", () => {
     await nextTick();
     expect(root.textContent).toBe("Zoe");
     app.unmount();
+  });
+
+  it("skips an equivalent options object and still refreshes a real change", () => {
+    const scope = effectScope();
+    let refreshes = 0;
+    const columns = [{ key: "name" }];
+    const tick = shallowRef(0);
+    const filterKey = shallowRef("one");
+    const data = shallowRef<readonly Row[]>(rows);
+    const search = shallowRef<(row: Row) => string>((row) => row.name);
+    const createEngine: FrontendEngineFactory<Row> = (options) => {
+      const engine = createBasicTableEngine<Row>(options);
+      const target = engine as unknown as {
+        refreshCallbacks: (patch: TableCallbackRefresh<Row>) => void;
+      };
+      const refresh = target.refreshCallbacks.bind(engine);
+      target.refreshCallbacks = (patch) => {
+        refreshes += 1;
+        refresh(patch);
+      };
+      return engine;
+    };
+    const source = scope.run(() =>
+      useFrontendData(() => {
+        const stamp = tick.value;
+        return {
+          data: stamp < 0 ? [] : data.value,
+          columns,
+          urlSync: false,
+          getSearchText: search.value,
+          filterKey: filterKey.value,
+          createEngine,
+        };
+      })
+    );
+    const initial = refreshes;
+    expect(initial).toBeGreaterThan(0);
+    expect(source?.value.total).toBe(3);
+    tick.value += 1;
+    expect(refreshes).toBe(initial);
+    search.value = (row) => row.id;
+    expect(refreshes).toBe(initial + 1);
+    filterKey.value = "two";
+    expect(refreshes).toBe(initial + 2);
+    data.value = INACTIVE_TIER_ROWS;
+    expect(refreshes).toBe(initial + 3);
+    expect(source?.value.total).toBe(0);
+    tick.value += 1;
+    expect(refreshes).toBe(initial + 3);
+    scope.stop();
   });
 });

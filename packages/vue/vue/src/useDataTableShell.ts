@@ -363,11 +363,22 @@ export function useDataTableShell<TRow>(
   );
   const onFrontend = computed(() => tier.value === "frontend");
   const onServer = computed(() => tier.value === "server");
+  let columnSource: unknown;
+  let columnLeaves: ReturnType<typeof flattenColumns<TRow>>["leaves"] = [];
+  const tierColumns = (live: boolean) => {
+    if (!live) return INACTIVE_TIER_ROWS;
+    const input = toValue(resolved.value.columns);
+    if (input === columnSource) return columnLeaves;
+    columnSource = input;
+    columnLeaves = input ? flattenColumns(input).leaves : [];
+    return columnLeaves;
+  };
+  let facetKeyList: readonly string[] | undefined;
   const frontend = useFrontendData(() => ({
     ...resolved.value,
     forceMobile: isMobile,
     data: tierRows(onFrontend.value, toValue(resolved.value.data)),
-    columns: flattenColumns(toValue(resolved.value.columns)).leaves,
+    columns: tierColumns(onFrontend.value),
     getRowId: resolved.value.rowKey,
     urlAdapter: onFrontend.value ? urlAdapter : undefined,
     urlSync: onFrontend.value,
@@ -393,6 +404,19 @@ export function useDataTableShell<TRow>(
     const value = resolved.value;
     const live = onServer.value;
     const filters = filterRuntime.value;
+    if (live) {
+      const checklistKeys = filters?.defs
+        .filter(
+          (def) =>
+            (filters.registry.get(def.type)?.widget ?? def.type) ===
+            "checklist"
+        )
+        .map((def) => def.key);
+      facetKeyList = retainStrings(
+        facetKeyList,
+        toValue(value.facetKeys) ?? checklistKeys
+      );
+    }
     return {
       rows: tierRows(live, toValue(value.data)),
       total: () => toValue(value.total) ?? 0,
@@ -401,24 +425,13 @@ export function useDataTableShell<TRow>(
       onQueryChange: activeTierValue(live, value.onQueryChange, undefined),
       // A column's default aggregate is a request to the server, so only the
       // server tier reads the columns.
-      columns: live
-        ? flattenColumns(toValue(value.columns)).leaves
-        : INACTIVE_TIER_ROWS,
+      columns: tierColumns(live),
       supports: activeTierValue(live, value.supports, undefined),
       aggregates: activeTierValue(live, value.aggregates, undefined),
       responseKey: activeTierValue(live, value.responseKey, undefined),
       facets: activeTierValue(live, value.facets, undefined),
       // A server query counts every checklist filter unless told which.
-      facetKeys: live
-        ? (toValue(value.facetKeys) ??
-          filters?.defs
-            .filter(
-              (def) =>
-                (filters.registry.get(def.type)?.widget ?? def.type) ===
-                "checklist"
-            )
-            .map((def) => def.key))
-        : undefined,
+      facetKeys: live ? facetKeyList : undefined,
       urlAdapter: live ? urlAdapter : undefined,
       urlSync: live,
       urlKey: value.urlKey,
@@ -1373,6 +1386,20 @@ export function useDataTableShell<TRow>(
     },
   };
 }
+function retainStrings(
+  previous: readonly string[] | undefined,
+  next: readonly string[] | undefined
+): readonly string[] | undefined {
+  if (previous === next) return previous;
+  if (
+    previous?.length === next?.length &&
+    next?.every((item, index) => item === previous?.[index])
+  ) {
+    return previous;
+  }
+  return next;
+}
+
 export type UseDataTableShellResult<TRow> = ReturnType<
   typeof useDataTableShell<TRow>
 >;

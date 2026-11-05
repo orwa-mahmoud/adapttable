@@ -87,11 +87,23 @@ export function useTableUrlState(
     }
     return store;
   });
-  const config = computed((): TableViewStateConfig => ({
-    defaults: toValue(options.value.defaults),
-    numberExtraKeys: toValue(options.value.numberExtraKeys),
-    arrayExtraKeys: toValue(options.value.arrayExtraKeys),
-  }));
+  let numberExtraKeys: readonly string[] | undefined;
+  let arrayExtraKeys: readonly string[] | undefined;
+  const config = computed((): TableViewStateConfig => {
+    numberExtraKeys = retainStrings(
+      numberExtraKeys,
+      toValue(options.value.numberExtraKeys)
+    );
+    arrayExtraKeys = retainStrings(
+      arrayExtraKeys,
+      toValue(options.value.arrayExtraKeys)
+    );
+    return {
+      defaults: toValue(options.value.defaults),
+      numberExtraKeys,
+      arrayExtraKeys,
+    };
+  });
   // Configure before projecting the store, including when only config changes.
   watch(
     [current, config],
@@ -149,4 +161,18 @@ export function useTableUrlState(
     clearExtras: (...args) => mutate(() => current.value.clearExtras(...args)),
     clearAll: (...args) => mutate(() => current.value.clearAll(...args)),
   };
+}
+
+function retainStrings(
+  previous: readonly string[] | undefined,
+  next: readonly string[] | undefined
+): readonly string[] | undefined {
+  if (previous === next) return previous;
+  if (
+    previous?.length === next?.length &&
+    next?.every((item, index) => item === previous?.[index])
+  ) {
+    return previous;
+  }
+  return next;
 }
