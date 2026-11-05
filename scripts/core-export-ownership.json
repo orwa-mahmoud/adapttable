@@ -2177,6 +2177,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "createGridNavigation",
+      "kind": "runtime",
+      "module": "focus/gridNavigation.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "focus/gridNavigation.ts#createGridNavigation",
+      "subpaths": ["."]
+    },
+    {
       "name": "createGroupingPanelController",
       "kind": "runtime",
       "module": "grouping/groupingPanelController.ts",
@@ -3862,67 +3873,67 @@
     {
       "name": "GRID_CELL_ATTR",
       "kind": "runtime",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridNavigation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#GRID_CELL_ATTR",
+      "identity": "focus/gridNavigation.ts#GRID_CELL_ATTR",
       "subpaths": ["."]
     },
     {
       "name": "gridCellAttr",
       "kind": "runtime",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridNavigation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#gridCellAttr",
+      "identity": "focus/gridNavigation.ts#gridCellAttr",
       "subpaths": ["."]
     },
     {
       "name": "gridCellAttributes",
       "kind": "runtime",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridAria.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#gridCellAttributes",
+      "identity": "focus/gridAria.ts#gridCellAttributes",
       "subpaths": ["."]
     },
     {
       "name": "gridColumnHeaderAttributes",
       "kind": "runtime",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridAria.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#gridColumnHeaderAttributes",
+      "identity": "focus/gridAria.ts#gridColumnHeaderAttributes",
       "subpaths": ["."]
     },
     {
       "name": "gridContainerAttributes",
       "kind": "runtime",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridAria.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#gridContainerAttributes",
+      "identity": "focus/gridAria.ts#gridContainerAttributes",
       "subpaths": ["."]
     },
     {
       "name": "gridFillHandleCell",
       "kind": "runtime",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridFill.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#gridFillHandleCell",
+      "identity": "focus/gridFill.ts#gridFillHandleCell",
       "subpaths": ["."]
     },
     {
@@ -3939,12 +3950,12 @@
     {
       "name": "gridRowAttributes",
       "kind": "runtime",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridAria.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#gridRowAttributes",
+      "identity": "focus/gridAria.ts#gridRowAttributes",
       "subpaths": ["."]
     },
     {
@@ -5028,12 +5039,12 @@
     {
       "name": "isGridColumnSelected",
       "kind": "runtime",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridRange.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#isGridColumnSelected",
+      "identity": "focus/gridRange.ts#isGridColumnSelected",
       "subpaths": ["."]
     },
     {
@@ -11573,56 +11584,56 @@
     {
       "name": "GridCellAttributes",
       "kind": "type",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridAria.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#GridCellAttributes",
+      "identity": "focus/gridAria.ts#GridCellAttributes",
       "subpaths": ["."]
     },
     {
       "name": "GridCellAttributesInput",
       "kind": "type",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridAria.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#GridCellAttributesInput",
+      "identity": "focus/gridAria.ts#GridCellAttributesInput",
       "subpaths": ["."]
     },
     {
       "name": "GridContainerAttributes",
       "kind": "type",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridAria.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#GridContainerAttributes",
+      "identity": "focus/gridAria.ts#GridContainerAttributes",
       "subpaths": ["."]
     },
     {
       "name": "GridFocusController",
       "kind": "type",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridNavigation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#GridFocusController",
+      "identity": "focus/gridNavigation.ts#GridFocusController",
       "subpaths": ["."]
     },
     {
       "name": "GridFocusControllerOptions",
       "kind": "type",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridNavigation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#GridFocusControllerOptions",
+      "identity": "focus/gridNavigation.ts#GridFocusControllerOptions",
       "subpaths": ["."]
     },
     {
@@ -11639,23 +11650,23 @@
     {
       "name": "GridFocusSnapshot",
       "kind": "type",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridNavigation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#GridFocusSnapshot",
+      "identity": "focus/gridNavigation.ts#GridFocusSnapshot",
       "subpaths": ["."]
     },
     {
       "name": "GridKeyEvent",
       "kind": "type",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridNavigation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#GridKeyEvent",
+      "identity": "focus/gridNavigation.ts#GridKeyEvent",
       "subpaths": ["."]
     },
     {
@@ -12486,12 +12497,12 @@
     {
       "name": "PointerReleaseTarget",
       "kind": "type",
-      "module": "focus/gridFocusController.ts",
+      "module": "focus/gridNavigation.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "focus/gridFocusController.ts#PointerReleaseTarget",
+      "identity": "focus/gridNavigation.ts#PointerReleaseTarget",
       "subpaths": ["."]
     },
     {

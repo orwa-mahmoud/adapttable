@@ -2194,6 +2194,9 @@ export function createFrontendSourceWith<TRow>(initialEngine: FrontendEngineFact
 export function createGridFocusController<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
 
 // @public
+export function createGridNavigation<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
+
+// @public
 export function createGroupingPanelController(initial: GroupingPanelControllerOptions): GroupingPanelController;
 
 // @public

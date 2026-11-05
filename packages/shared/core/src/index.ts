@@ -574,6 +574,7 @@ export {
   isGridColumnSelected,
   type PointerReleaseTarget,
 } from "./focus/gridFocusController";
+export { createGridNavigation } from "./focus/gridNavigation";
 export {
   cellFillHandler,
   type CellFillHandlerOptions,

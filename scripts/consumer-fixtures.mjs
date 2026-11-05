@@ -194,6 +194,25 @@ const CORE_FIXTURES = [
     ],
   },
   {
+    name: "core · base navigation",
+    kind: "core",
+    pkg: "core",
+    // 7.40 KiB gzip on 2026-11-06. Held at 9 KiB. Range, clipboard, fill
+    // and history stay out of this graph.
+    initialKB: 9,
+    totalKB: 9,
+    code: `export { createGridNavigation } from "PKG";`,
+    present: ["createGridNavigation"],
+    absent: [
+      "extendCellRange",
+      "writeClipboardText",
+      "fillRangeEdits",
+      "pasteRangeEdits",
+      "asGesture",
+      "createEditHistory",
+    ],
+  },
+  {
     name: "core · engine + lazy pdf",
     kind: "core",
     pkg: "core",
@@ -437,6 +456,15 @@ function featureDeltaFixtures() {
         "createCellEditSession",
         "createEditValidationStore",
         "createEditHistory"
+      );
+    }
+    if (subpath === "cell-navigation") {
+      present.push(
+        "extendCellRange",
+        "writeClipboardText",
+        "fillRangeEdits",
+        "pasteRangeEdits",
+        "asGesture"
       );
     }
     const namedImport = subpath === "editing";
