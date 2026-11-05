@@ -87,12 +87,12 @@ import {
   type FilterDef,
   type FilterTypeSpec,
   type GetCellSpan,
-  groupedViewSource,
   type NestedTableParent,
   type PaginationMode,
   partitionPinnedRows,
   type PinnedRows,
   pinnedSummaryPart,
+  projectedGroupingSource,
   type QueryAggregate,
   type QuerySupport,
   requestDensityChange,
@@ -1721,7 +1721,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     );
     const viewSource = resources.use("view-source", [], () =>
       computed(() =>
-        groupingRef()?.() === undefined ? source() : groupedViewSource(source())
+        projectedGroupingSource(source(), { model: groupingRef()?.() })
       )
     );
     const readRename = this.onColumnRename;

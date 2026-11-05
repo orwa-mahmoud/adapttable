@@ -3,13 +3,13 @@ import {
   devWarn,
   type ExtraRow,
   formatGroupBy,
-  groupedRowModel,
-  groupingAggregates,
   groupingIgnoredWarning,
+  groupingProjectionBundle,
+  groupingSourceOf,
   type GroupNode,
-  groupShowMoreRequest,
   type GroupSort,
   parseGroupBy,
+  projectGrouping,
 } from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
 import type {
@@ -64,13 +64,25 @@ export function mountGrouping<TRow>(context: FeatureMountContext<TRow>): void {
     enabled: context.active,
   }));
   const paging = useGroupPaging(context.active);
-  const aggregates = computed(() =>
-    groupingAggregates({
-      source: context.source.value,
+  const projected = computed(() => {
+    const value = options.value;
+    return projectGrouping({
+      groupByKeys: keys.value,
+      source: groupingSourceOf(context.source.value),
       columns: context.table.allColumns.value,
-      groupAggregates: options.value.groupAggregates,
-    })
-  );
+      locale: toValue(context.options.value.locale),
+      getRowId: context.table.rowKey,
+      collapsedGroupIds: collapse.value.collapsedGroupIds,
+      groupAggregates: value.groupAggregates,
+      groupFooters: value.groupFooters,
+      groupSort: value.groupSort,
+      groupFilter: value.groupFilter,
+      groupPageSize: value.groupPageSize,
+      groupRowPageSize: value.groupRowPageSize,
+      paging: paging.value.paging,
+      extraRows: value.extraRows,
+    });
+  });
   watch(
     () => groupingIgnoredWarning(keys.value, context.source.value),
     (warning) => {
@@ -78,43 +90,22 @@ export function mountGrouping<TRow>(context: FeatureMountContext<TRow>): void {
     },
     { immediate: true }
   );
-  const model = computed((): TableGrouping<TRow> | undefined => {
-    const value = options.value;
-    const rows = groupedRowModel({
-      ...value,
-      groupByKeys: keys.value,
-      source: context.source.value,
-      columns: context.table.allColumns.value,
-      locale: toValue(context.options.value.locale),
-      getRowId: context.table.rowKey,
-      collapsedGroupIds: collapse.value.collapsedGroupIds,
-      aggregates: aggregates.value,
-      paging: paging.value.paging,
-    });
-    if (!rows) return undefined;
-    return {
+  const model = computed((): TableGrouping<TRow> | undefined =>
+    groupingProjectionBundle({
       groupBy: keys.value,
+      projection: projected.value,
       collapsed: collapse.value,
-      aggregates: aggregates.value.aggregates,
-      entries: rows.entries,
       setGroupBy: (key) => {
-        if (disposed || !context.active.value) return;
         context.source.value.setGroupBy(formatGroupBy(key));
         options.value.onGroupByChange?.(parseGroupBy(key));
       },
-      expandAll: collapse.value.expandAll,
-      collapseAll: () => collapse.value.collapseToDepth(0, rows.openGroups),
-      collapseToDepth: (depth) =>
-        collapse.value.collapseToDepth(depth, rows.openGroups),
-      showMore: (entry) => {
-        if (disposed || !context.active.value) return;
-        const request = groupShowMoreRequest(entry, options.value);
-        paging.value.showMore(request.pageSize, request.groupKey);
-        if (request.loadMoreKey !== undefined)
-          options.value.onGroupLoadMore?.(request.loadMoreKey);
-      },
-    };
-  });
+      paging: paging.value,
+      groupPageSize: options.value.groupPageSize,
+      groupRowPageSize: options.value.groupRowPageSize,
+      onGroupLoadMore: options.value.onGroupLoadMore,
+      whenActive: () => !disposed && context.active.value,
+    })
+  );
   watchEffect(() => context.state.set(groupingModelKey<TRow>(), model.value), {
     flush: "sync",
   });

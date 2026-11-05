@@ -4503,6 +4503,16 @@ export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
 }
 
 // @public
+export function groupingCollapseCommands(openGroups: readonly {
+    readonly key: string;
+    readonly level: number;
+}[], collapse: Pick<GroupCollapseActions, "expandAll" | "collapseToDepth">): {
+    readonly expandAll: () => void;
+    readonly collapseAll: () => void;
+    readonly collapseToDepth: (depth: number) => void;
+};
+
+// @public
 export function groupingColumnName(column: {
     readonly key: string;
     readonly header?: unknown;
@@ -4677,7 +4687,76 @@ export interface GroupingPanelState extends GroupingPanelInteractions {
 }
 
 // @public
+export interface GroupingProjection<TRow> {
+    readonly aggregates: GroupingAggregates<TRow>;
+    readonly ignoredWarning: string | undefined;
+    readonly model: GroupedRowModel<TRow> | undefined;
+}
+
+// @public
+export function groupingProjectionBundle<TRow, TCollapsed extends Pick<GroupCollapseActions, "expandAll" | "collapseToDepth">>(input: {
+    readonly groupBy: readonly string[];
+    readonly projection: GroupingProjection<TRow>;
+    readonly collapsed: TCollapsed;
+    readonly setGroupBy: (key: GroupByInput) => void;
+    readonly paging: GroupingShowMoreTarget;
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+    readonly onGroupLoadMore?: (groupKey: string) => void;
+    readonly whenActive?: () => boolean;
+}): {
+    readonly groupBy: readonly string[];
+    readonly collapsed: TCollapsed;
+    readonly aggregates: GroupingAggregates<TRow>["aggregates"];
+    readonly entries: GroupedRowModel<TRow>["entries"];
+    readonly setGroupBy: (key: GroupByInput) => void;
+    readonly showMore: (entry: {
+        readonly scope: "groups" | "rows";
+        readonly groupKey?: string;
+    }) => void;
+    readonly expandAll: () => void;
+    readonly collapseAll: () => void;
+    readonly collapseToDepth: (depth: number) => void;
+} | undefined;
+
+// @public
+export interface GroupingProjectionInput<TRow> {
+    readonly collapsedGroupIds: ReadonlySet<string>;
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly extraRows?: readonly ExtraRow[];
+    readonly getRowId: (row: TRow) => string;
+    readonly groupAggregates?: (rows: readonly TRow[]) => unknown;
+    readonly groupByKeys: readonly string[];
+    readonly groupFilter?: (group: GroupNode<TRow>) => boolean;
+    readonly groupFooters?: boolean;
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+    readonly groupSort?: GroupSort<TRow>;
+    readonly locale?: string;
+    readonly paging?: GroupPaging;
+    readonly panelDeclared?: DeclaredAggregates;
+    readonly source: GroupingRuntimeSource<TRow>;
+}
+
+// @public
 export type GroupingRuntimeSource<TRow> = Pick<TableSource<TRow>, "allFilteredRows" | "groups" | "capabilities" | "honorsAggregates" | "aggregateOperations" | "groupAggregateOverrides" | "queryAggregates" | "groupAggregations">;
+
+// @public
+export function groupingShowMoreAction(entry: {
+    readonly scope: "groups" | "rows";
+    readonly groupKey?: string;
+}, sizes: {
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+}, paging: GroupingShowMoreTarget, onGroupLoadMore?: (groupKey: string) => void): void;
+
+// @public
+export interface GroupingShowMoreTarget {
+    showMore(pageSize: number, groupKey?: string): void;
+}
+
+// @public
+export function groupingSourceOf<TRow>(source: GroupingRuntimeSource<TRow>): GroupingRuntimeSource<TRow>;
 
 // @public
 export function groupLeafCount(entry: {
@@ -6066,6 +6145,16 @@ export interface PointerReleaseTarget {
     addEventListener: (type: "mouseup", listener: () => void) => void;
     removeEventListener: (type: "mouseup", listener: () => void) => void;
 }
+
+// @public
+export function projectedGroupingSource<TSource extends {
+    readonly allFilteredRows?: readonly unknown[];
+}>(source: TSource, projection: {
+    readonly model: unknown;
+}): TSource;
+
+// @public
+export function projectGrouping<TRow>(input: GroupingProjectionInput<TRow>): GroupingProjection<TRow>;
 
 // @public
 export function projectGroupingContribution<TRow>(input: {

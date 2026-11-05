@@ -4102,6 +4102,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "groupingCollapseCommands",
+      "kind": "runtime",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#groupingCollapseCommands",
+      "subpaths": ["."]
+    },
+    {
       "name": "groupingColumnName",
       "kind": "runtime",
       "module": "grouping/groupingPanelChromeModel.ts",
@@ -4176,6 +4187,39 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupingRuntime.ts#groupingPanelAggregations",
+      "subpaths": ["."]
+    },
+    {
+      "name": "groupingProjectionBundle",
+      "kind": "runtime",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#groupingProjectionBundle",
+      "subpaths": ["."]
+    },
+    {
+      "name": "groupingShowMoreAction",
+      "kind": "runtime",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#groupingShowMoreAction",
+      "subpaths": ["."]
+    },
+    {
+      "name": "groupingSourceOf",
+      "kind": "runtime",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#groupingSourceOf",
       "subpaths": ["."]
     },
     {
@@ -6123,6 +6167,28 @@
       "forward": true,
       "deprecated": false,
       "identity": "pivot/pivotUrlSlice.ts#pivotSlice",
+      "subpaths": ["."]
+    },
+    {
+      "name": "projectedGroupingSource",
+      "kind": "runtime",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#projectedGroupingSource",
+      "subpaths": ["."]
+    },
+    {
+      "name": "projectGrouping",
+      "kind": "runtime",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#projectGrouping",
       "subpaths": ["."]
     },
     {
@@ -11747,6 +11813,28 @@
       "subpaths": ["."]
     },
     {
+      "name": "GroupingProjection",
+      "kind": "type",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#GroupingProjection",
+      "subpaths": ["."]
+    },
+    {
+      "name": "GroupingProjectionInput",
+      "kind": "type",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#GroupingProjectionInput",
+      "subpaths": ["."]
+    },
+    {
       "name": "GroupingRuntimeSource",
       "kind": "type",
       "module": "grouping/groupingRuntime.ts",
@@ -11755,6 +11843,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupingRuntime.ts#GroupingRuntimeSource",
+      "subpaths": ["."]
+    },
+    {
+      "name": "GroupingShowMoreTarget",
+      "kind": "type",
+      "module": "grouping/groupingProjection.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingProjection.ts#GroupingShowMoreTarget",
       "subpaths": ["."]
     },
     {

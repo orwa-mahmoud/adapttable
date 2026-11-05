@@ -54,6 +54,19 @@ export type {
 } from "./grouping/groupingPanelController";
 export { createGroupingPanelController } from "./grouping/groupingPanelController";
 export type {
+  GroupingProjection,
+  GroupingProjectionInput,
+  GroupingShowMoreTarget,
+} from "./grouping/groupingProjection";
+export {
+  groupingCollapseCommands,
+  groupingProjectionBundle,
+  groupingShowMoreAction,
+  groupingSourceOf,
+  projectedGroupingSource,
+  projectGrouping,
+} from "./grouping/groupingProjection";
+export type {
   GroupedRowModel,
   GroupedRowModelOptions,
   GroupingAggregates,

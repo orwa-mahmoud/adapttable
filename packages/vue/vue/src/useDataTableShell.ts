@@ -11,8 +11,8 @@ import {
   type FacetMap,
   type FilterDef,
   type FilterTypeSpec,
-  groupedViewSource,
   isCellEditable,
+  projectedGroupingSource,
   type QueryAggregate,
   type QueryFilterGroup,
   type QuerySupport,
@@ -452,7 +452,7 @@ export function useDataTableShell<TRow>(
   const tree = state.get(treeModelKey<TRow>());
   const detail = state.get(rowDetailModelKey<TRow>());
   const viewSource = computed(() =>
-    grouping.value ? groupedViewSource(source.value) : source.value
+    projectedGroupingSource(source.value, { model: grouping.value })
   );
   const pinning = state.get(rowPinningModelKey<TRow>());
   const rowInventory = computed(() =>

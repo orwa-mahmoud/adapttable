@@ -16,12 +16,12 @@ import {
   type GroupAggregatesFn,
   type GroupByInput,
   type GroupedFlatEntry,
-  groupedRowModel,
-  groupingAggregates,
   groupingIgnoredWarning,
+  groupingProjectionBundle,
   type GroupingRuntimeSource,
-  groupShowMoreRequest,
+  groupingSourceOf,
   parseGroupBy,
+  projectGrouping,
   type TableSource,
 } from "@adapttable/core";
 import { type GroupCollapseState } from "@adapttable/core/binding";
@@ -132,19 +132,7 @@ export function injectGrouping<TRow>(
   // Only the fields grouping reads, so a page or a search does not rebuild
   // the grouped model.
   const groupingSource = computed(
-    (): GroupingRuntimeSource<TRow> => {
-      const source = options.source();
-      return {
-        allFilteredRows: source.allFilteredRows,
-        groups: source.groups,
-        capabilities: source.capabilities,
-        honorsAggregates: source.honorsAggregates,
-        aggregateOperations: source.aggregateOperations,
-        groupAggregateOverrides: source.groupAggregateOverrides,
-        queryAggregates: source.queryAggregates,
-        groupAggregations: source.groupAggregations,
-      };
-    },
+    (): GroupingRuntimeSource<TRow> => groupingSourceOf(options.source()),
     { equal: sameFields }
   );
 
@@ -160,26 +148,18 @@ export function injectGrouping<TRow>(
     options.source().setGroupBy(formatGroupBy(key));
     extras.onGroupByChange?.(parseGroupBy(key));
   };
-  const aggregates = computed(() =>
-    groupingAggregates({
-      source: groupingSource(),
-      columns: table.allColumns(),
-      groupAggregates: extras.groupAggregates,
-      panelDeclared,
-    })
-  );
-
-  return computed((): TableGrouping<TRow> | undefined => {
+  const projected = computed(() => {
     const collapsed = collapse();
     const pagingState = paging();
-    const model = groupedRowModel({
+    return projectGrouping({
       groupByKeys: groupByKeys(),
       source: groupingSource(),
       columns: table.allColumns(),
       locale: options.locale && readMaybe(options.locale),
       getRowId: (row) => table.rowKey(row),
       collapsedGroupIds: collapsed.collapsedGroupIds,
-      aggregates: aggregates(),
+      groupAggregates: extras.groupAggregates,
+      panelDeclared,
       groupFooters: extras.groupFooters,
       groupSort: extras.groupSort,
       groupFilter: extras.groupFilter,
@@ -188,32 +168,21 @@ export function injectGrouping<TRow>(
       paging: pagingState.paging,
       extraRows: extras.extraRows,
     });
-    if (!model) return undefined;
-    const { openGroups } = model;
-    return {
+  });
+
+  return computed((): TableGrouping<TRow> | undefined => {
+    const collapsed = collapse();
+    const pagingState = paging();
+    return groupingProjectionBundle({
       groupBy: groupByKeys(),
+      projection: projected(),
       collapsed,
-      aggregates: aggregates().aggregates,
-      entries: model.entries,
       setGroupBy,
-      showMore: (entry) => {
-        const request = groupShowMoreRequest(entry, {
-          groupPageSize: extras.groupPageSize,
-          groupRowPageSize: extras.groupRowPageSize,
-        });
-        pagingState.showMore(request.pageSize, request.groupKey);
-        if (request.loadMoreKey !== undefined) {
-          extras.onGroupLoadMore?.(request.loadMoreKey);
-        }
-      },
-      expandAll: collapsed.expandAll,
-      collapseAll: () => {
-        collapsed.collapseToDepth(0, openGroups);
-      },
-      collapseToDepth: (depth) => {
-        collapsed.collapseToDepth(depth, openGroups);
-      },
-    };
+      paging: pagingState,
+      groupPageSize: extras.groupPageSize,
+      groupRowPageSize: extras.groupRowPageSize,
+      onGroupLoadMore: extras.onGroupLoadMore,
+    });
   });
 }
 
