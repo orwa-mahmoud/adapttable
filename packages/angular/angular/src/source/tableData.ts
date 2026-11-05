@@ -199,15 +199,19 @@ export function injectTableData<TRow>(
     data: computed(() =>
       onFrontend() ? tierRows(true, data()) : INACTIVE_TIER_ROWS
     ),
-    columns,
+    columns: computed(() =>
+      onFrontend() ? columns() : INACTIVE_TIER_ROWS
+    ),
     getRowId: options.getRowId,
     getSearchText: options.getSearchText,
     getSortValue: options.getSortValue,
+    // Read the shared plan only while this tier is active. An idle frame
+    // that called plan() would refresh on every live row change.
     get filterFn() {
-      return plan().filterFn;
+      return onFrontend() ? plan().filterFn : undefined;
     },
     get filterTreeFn() {
-      return plan().filterTreeFn;
+      return onFrontend() ? plan().filterTreeFn : undefined;
     },
     filterKey: computed(() => plan().filterKey),
     locale,

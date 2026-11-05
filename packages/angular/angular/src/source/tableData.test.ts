@@ -3,9 +3,11 @@
  * filters every tier shares, and what the host is told.
  */
 import {
+  createBasicTableEngine,
   createMemoryAdapter,
   FILTER_ENGINE_IMPL,
   type FilterDef,
+  type TableCallbackRefresh,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
@@ -34,12 +36,30 @@ const COLUMNS: ColumnDef<Row>[] = [
   { key: "team", accessor: (row) => row.team },
 ];
 
+let refreshes = 0;
+
+function countingEngine(
+  options: Parameters<typeof createBasicTableEngine<Row>>[0]
+) {
+  const engine = createBasicTableEngine<Row>(options);
+  const refresh = engine.refreshCallbacks.bind(engine);
+  const mutable = engine as unknown as {
+    refreshCallbacks: (patch: TableCallbackRefresh<Row>) => void;
+  };
+  mutable.refreshCallbacks = (patch) => {
+    refreshes += 1;
+    refresh(patch);
+  };
+  return engine;
+}
+
 let config: {
   mode?: "frontend" | "server";
   onQueryChange?: (query: TableQuery, info: { signal: AbortSignal }) => void;
   prebuilt?: boolean;
   filters?: FilterDef<Row>[];
   engine?: boolean;
+  createEngine?: typeof countingEngine;
 } = {};
 
 @Component({ template: "" })
@@ -65,6 +85,7 @@ class Host {
     source: config.prebuilt ? this.prebuilt : undefined,
     filters: config.filters,
     engine: config.engine ? FILTER_ENGINE_IMPL : undefined,
+    createEngine: config.createEngine,
     defaults: { limit: 2 },
   });
 }
@@ -86,6 +107,7 @@ const ids = (source: TableSource<Row>) => source.rows.map((row) => row.id);
 
 beforeEach(() => {
   config = {};
+  refreshes = 0;
   TestBed.configureTestingModule({
     providers: [
       { provide: ADAPTTABLE_URL_ADAPTER, useValue: createMemoryAdapter() },
@@ -224,5 +246,33 @@ describe("injectTableData", () => {
     host.loading.set(true);
     await settle();
     expect(source().isLoading).toBe(false);
+  });
+
+  it("does not refresh an idle frontend when its rows are read or replaced", async () => {
+    config = {
+      mode: "server",
+      onQueryChange: vi.fn(),
+      createEngine: countingEngine,
+    };
+    const { host, source, settle } = await mount();
+    const applied = refreshes;
+    expect(applied).toBeGreaterThan(0);
+    for (let read = 0; read < 20; read += 1) source();
+    expect(refreshes).toBe(applied);
+    for (let next = 0; next < 20; next += 1) {
+      host.rows.set(ROWS.map((row) => ({ ...row, id: `${row.id}-${next}` })));
+      await settle();
+    }
+    expect(refreshes).toBe(applied);
+  });
+
+  it("refreshes the frontend tier when its own rows change", async () => {
+    config = { mode: "frontend", createEngine: countingEngine };
+    const { host, source, settle } = await mount();
+    const applied = refreshes;
+    host.rows.set([{ id: "9", team: "Data" }]);
+    await settle();
+    expect(refreshes).toBeGreaterThan(applied);
+    expect(ids(source())).toEqual(["9"]);
   });
 });
