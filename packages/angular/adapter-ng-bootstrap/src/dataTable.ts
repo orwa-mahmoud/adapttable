@@ -5,7 +5,6 @@
  */
 import {
   ADAPTTABLE_FIND_STATE,
-  ADAPTTABLE_KIT_MOTION_OFF,
   type ContextMenuRegionHandlers,
   type FindInTableState,
 } from "@adapttable/angular";
@@ -16,6 +15,7 @@ import {
   AdaptIcon,
   AdaptSlot,
   ADAPTTABLE_CONTEXT_MENU,
+  ADAPTTABLE_KIT_MOTION_OFF,
   ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
   type PaletteOpenState,
