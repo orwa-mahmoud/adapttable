@@ -7,6 +7,7 @@ import { after, before, describe, it } from "node:test";
 import { compileAngularConsumers } from "./angular-consumer-build.mjs";
 import {
   angularBaseImports,
+  angularConsumerCoverageProblems,
   angularConsumerFixtures,
   angularKits,
 } from "./angular-consumer-fixtures.mjs";
@@ -16,7 +17,7 @@ import {
   baseImportProblems,
   plantedControllerFixture,
 } from "./angular-consumer-graphs.mjs";
-import { caseId, fixtureFolders } from "./consumer-fixtures.mjs";
+import { caseId, fixtureFolders,FIXTURES } from "./consumer-fixtures.mjs";
 import { packedConsumer } from "./packed-consumers.mjs";
 
 describe("angular consumer fixtures", () => {
@@ -37,6 +38,18 @@ describe("angular consumer fixtures", () => {
     assert.ok(fixtures.some((fixture) => fixture.name.includes("aggregation")));
     assert.ok(fixtures.some((fixture) => fixture.name.includes("combination")));
     assert.ok(fixtures.some((fixture) => fixture.pkg === "angular"));
+    assert.deepEqual(angularConsumerCoverageProblems(FIXTURES), []);
+  });
+
+  it("fails when an Angular kit base disappears from the budget", () => {
+    const kept = FIXTURES.filter(
+      (fixture) => fixture.pkg !== "adapter-angular-unstyled"
+    );
+    const problems = angularConsumerCoverageProblems(kept);
+    assert.ok(
+      problems.some((problem) => problem.includes("angular-unstyled")),
+      problems.join("\n")
+    );
   });
 
   it("gives every fixture its own case id and a ceiling above zero", () => {

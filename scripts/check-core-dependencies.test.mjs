@@ -204,4 +204,18 @@ describe("core dependency checker", () => {
       assert.equal(hit, undefined, `${edge.from} -> ${edge.to}`);
     }
   });
+
+  it("records no temporary core dependency violation", () => {
+    const ownership = JSON.parse(
+      readFileSync(
+        join(dirname(fileURLToPath(import.meta.url)), "core-export-ownership.json"),
+        "utf8"
+      )
+    );
+    assert.deepEqual(ownership.knownViolations, []);
+    const checked = checkCoreDependencies();
+    assert.deepEqual(checked.problems, []);
+    assert.equal(checked.javascript.length, 0);
+    assert.equal(checked.typeOnly.length, 0);
+  });
 });

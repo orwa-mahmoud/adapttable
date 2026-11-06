@@ -21,7 +21,8 @@ const classification = JSON.parse(
 );
 
 /** Hard acceptance for a plain adapter `DataTable`. */
-export const PLAIN_ADAPTER_CEILING_KB = 81;
+/** Plain adapter `DataTable`, gzip. Ratcheted from 81 KiB on 2026-11-06. */
+export const PLAIN_ADAPTER_CEILING_KB = 80;
 
 /**
  * Item-1 packed adapter roots, the baseline the 35% reduction is judged

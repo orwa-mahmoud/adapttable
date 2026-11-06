@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { DisplayValue } from "../display";
+import { createIncrementalView } from "../rows/incremental";
 import {
   groupedEntriesForStrategy,
   groupingComputationKind,
@@ -83,6 +84,27 @@ describe("groupedEntriesForStrategy", () => {
     });
     expect(entries.some((entry) => entry.kind === "group")).toBe(true);
     expect(entries.filter((entry) => entry.kind === "row")).toHaveLength(2);
+  });
+
+  it("reads groups from the snapshot attached to the filtered rows", () => {
+    const rows = [
+      { id: "1", team: "eng" },
+      { id: "2", team: "eng" },
+    ];
+    const view = createIncrementalView(rows, {
+      getRowId,
+      groupBy: ["team"],
+      columns,
+    });
+    const entries = groupedEntriesForStrategy({
+      kind: "client",
+      groupByKeys: ["team"],
+      allFilteredRows: rows,
+      columns,
+      getRowId,
+      collapsedGroupIds: new Set(),
+    });
+    expect(entries).toEqual(view.groups);
   });
 
   it("does not label a server group with a later Average override", () => {

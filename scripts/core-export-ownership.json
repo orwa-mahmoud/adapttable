@@ -26,20 +26,7 @@
   "presentationMinRank": 40,
   "incrementalModule": "rows/incremental.ts",
   "incrementalOwners": ["engine/fullRowModel.ts"],
-  "knownViolations": [
-    {
-      "id": "grouping-reaches-incremental-cache",
-      "cause": "The grouping strategy configures the incremental view through the full incremental module.",
-      "destinationItem": "ohuz",
-      "edges": [
-        {
-          "from": "grouping/groupingStrategy.ts",
-          "to": "rows/incremental.ts",
-          "kind": "runtime"
-        }
-      ]
-    }
-  ],
+  "knownViolations": [],
   "exports": [
     {
       "name": "acceptColumnDrag",

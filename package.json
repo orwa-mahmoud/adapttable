@@ -58,7 +58,7 @@
     "release:gated": "pnpm run build && pnpm run publint && changeset publish",
     "check:parts": "node scripts/check-parts-parity.mjs",
     "check:features": "node scripts/check-feature-classification.mjs && node scripts/check-feature-parity.mjs && node scripts/check-feature-typing.mjs",
-    "check:boundary": "node scripts/check-framework-boundary.mjs && node scripts/check-boundary-consumers.mjs && node scripts/check-package-split-destinations.mjs && node scripts/check-core-dependencies.mjs",
+    "check:boundary": "node scripts/check-framework-boundary.mjs && node scripts/check-boundary-consumers.mjs && node scripts/check-package-split-destinations.mjs && node scripts/check-core-dependencies.mjs && node scripts/check-binding-core-imports.mjs",
     "check:api-contract": "node scripts/check-api-contract.mjs",
     "check:package-split": "node scripts/check-package-split-map.mjs",
     "check:static": "node scripts/run-parallel.mjs check:contracts check:packages:static",

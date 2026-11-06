@@ -457,3 +457,42 @@ export function angularConsumerFixtures(kits = angularKits()) {
     ),
   ];
 }
+
+/** Names a packed Angular consumer must keep. A missing one fails the budget. */
+const ANGULAR_COVERAGE = [
+  "headless",
+  "grouping",
+  "aggregation",
+  "editing",
+  "filters",
+  "virtualize",
+  "combination",
+  "preset",
+];
+
+/**
+ * Registry membership must not silently drop an Angular kit or feature.
+ * The budget calls this, so CI fails on the same entry that measures bytes.
+ */
+export function angularConsumerCoverageProblems(
+  fixtures,
+  kits = angularKits()
+) {
+  const angular = fixtures.filter((fixture) => fixture.framework === "angular");
+  const problems = [];
+  for (const kit of kits) {
+    const bases = angular.filter((fixture) => fixture.pkg === kit.folder);
+    if (bases.length < 1) {
+      problems.push(`Missing Angular kit base consumer: ${kit.name}`);
+    }
+  }
+  if (!angular.some((fixture) => fixture.pkg === "angular")) {
+    problems.push("Missing Angular headless consumer");
+  }
+  for (const feature of ANGULAR_COVERAGE) {
+    if (!angular.some((fixture) => fixture.name.includes(feature))) {
+      problems.push(`Missing Angular consumer that turns on ${feature}`);
+    }
+  }
+  return problems;
+}

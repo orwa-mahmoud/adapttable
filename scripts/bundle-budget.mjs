@@ -30,7 +30,7 @@
  * already — the measurement adds no dependency of its own.
  *
  * Consumer paths live in `consumer-fixtures.mjs`: core-simple, every adapter
- * base (≤ 81 KB and ≥ 35% below the item-1 baseline), every feature delta on
+ * base (≤ 80 KB and ≥ 35% below the item-1 baseline), every feature delta on
  * MUI, `standardFeatures()` for every kit, representative combinations, and
  * the all-feature ceiling. Negative markers travel with each fixture.
  */
@@ -46,6 +46,7 @@ import {
   bundleAngularConsumer,
   compileAngularConsumers,
 } from "./angular-consumer-build.mjs";
+import { angularConsumerCoverageProblems } from "./angular-consumer-fixtures.mjs";
 import { requestedCases, selectCases } from "./case-selection.mjs";
 import {
   fixtureFolders,
@@ -843,7 +844,10 @@ function failedRow(fixture, problems) {
 }
 
 async function main() {
-  const coverageProblems = vueConsumerCoverageProblems(FIXTURES);
+  const coverageProblems = [
+    ...vueConsumerCoverageProblems(FIXTURES),
+    ...angularConsumerCoverageProblems(FIXTURES),
+  ];
   if (coverageProblems.length) throw new Error(coverageProblems.join("\n"));
   const selected = selectedFixtures();
   const packages = workspacePackages();
