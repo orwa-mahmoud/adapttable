@@ -1343,7 +1343,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "setExtra" | "setExtras" | "extra" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "allFilteredRows" | "setExtra" | "setExtras" | "facets">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -1888,7 +1888,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly dir: InputSignal<Direction>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<"start" | "end">;
-    readonly editActivation: InputSignal<"doubleClick" | "click" | undefined>;
+    readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
@@ -2382,7 +2382,7 @@ export abstract class AdaptDesktopTableModel<TRow> {
     // (undocumented)
     protected readonly treeCellSlot: FeatureSlotKey<TreeCellProps<never, unknown>>;
     // (undocumented)
-    readonly view: InputSignal<TableSurfaceView<TRow>>;
+    readonly view: InputSignal<TableView<TRow>>;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptDesktopTableModel<any>, never, never, {
         "view": {
@@ -3216,7 +3216,7 @@ export class AdaptGroupMoreButtonChrome {
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"groups" | "rows">;
+    readonly scope: InputSignal<"rows" | "groups">;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {
@@ -3392,7 +3392,7 @@ export abstract class AdaptMobileCardsModel<TRow> {
     // (undocumented)
     protected readonly treeToggleSlot: FeatureSlotKey<TreeToggleProps<never>>;
     // (undocumented)
-    readonly view: InputSignal<TableSurfaceView<TRow>>;
+    readonly view: InputSignal<TableView<TRow>>;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptMobileCardsModel<any>, never, never, {
         "view": {

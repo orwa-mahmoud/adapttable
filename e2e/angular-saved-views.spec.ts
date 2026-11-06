@@ -66,7 +66,11 @@ for (const kit of ANGULAR_KITS) {
       ) {
         await part(page, "views-button").click();
       }
-      await savedItems.filter({ hasText: "Z to A" }).click();
+      const saved = savedItems.filter({ hasText: "Z to A" });
+      // Taiga's dropdown leaves the previous dialog mounted for its close
+      // animation. Wait until that one is gone so the click has one target.
+      await expect(saved).toHaveCount(1);
+      await saved.click();
       await expect(firstPerson(page)).toHaveText("Yann LeCun");
     });
   });

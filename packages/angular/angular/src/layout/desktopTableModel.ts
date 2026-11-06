@@ -42,16 +42,16 @@ import { columnSelectLabel } from "../focus/columnSelectCheckbox";
 import { type RowReorderState } from "../rows/rowReorder";
 import { type RowReorderHandleProps } from "../rows/rowReorderHandle";
 import { type TableTree } from "../tree/tableTree";
+import { type TableView } from "./dataTableShell";
 import {
   type BodyCellView,
   type BodyRow,
-  type TableSurfaceView,
 } from "./tableSurfaceHost";
 
 /** Shared AdaptDesktopTable signals; adapters supply native templates and controls. @public */
 @Directive({})
 export abstract class AdaptDesktopTableModel<TRow> {
-  readonly view = input.required<TableSurfaceView<TRow>>();
+  readonly view = input.required<TableView<TRow>>();
   readonly rowKey = input.required<(row: TRow) => string>();
   readonly maxHeight = input<number | string>();
   protected readonly filterSlots = { header: FILTER_HEADER };
