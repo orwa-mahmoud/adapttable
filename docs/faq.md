@@ -185,8 +185,9 @@ React and the UI kit external because your app already ships those):
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. The every-export
 row is the whole public surface imported at once, measured 2026-11-06 at
-103.4 KiB. Its ceiling in `scripts/consumer-fixtures.mjs` is 102 KiB, so that
-fixture is over budget. It is not the download of a table. All eight React adapters
+103.45 KiB (105,932 bytes). Its ceiling is that measurement: the composed
+session, the grouping projection, and the shell operations, plus the snapshot
+guard and the grouped-snapshot cache. It is not the download of a table. All eight React adapters
 land within ~12 kB of each other, so switching kits does not change what you
 pay. Tree-shaking drops unused exports from an application bundle. Installing
 a package still installs that package.

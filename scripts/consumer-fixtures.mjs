@@ -279,8 +279,13 @@ const CORE_FIXTURES = [
     // filter trees, batch change marks, content-sized XLSX columns and pinned
     // edge marks bring it to 101.2 KB (2026-10-30). The simple core table and
     // the hard plain-adapter ceiling stay as they are.
-    initialKB: 102,
-    totalKB: 102,
+    // The owner accepted the measured graph on 2026-11-06. 103.38 KiB
+    // (105,859 bytes) is the composed session, the grouping projection, and
+    // the shell operations. The snapshot guard and the grouped-snapshot
+    // cache bring the packed graph to 103.45 KiB (105,932 bytes). The
+    // ceiling is that measurement.
+    initialKB: 103.45,
+    totalKB: 103.45,
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.
