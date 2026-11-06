@@ -35,6 +35,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
+  withKitEnvironment,
 } from "@adapttable/react/adapter";
 import {
   Box,
@@ -53,6 +54,7 @@ import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
+import { useMuiLibrary } from "./libraryEnvironment";
 import type { DataTableProps } from "./types";
 
 function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
@@ -521,7 +523,10 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
  * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
+  const kit = useMuiLibrary();
+  const props = useTableFeatures(
+    withKitEnvironment(incoming, { dir: kit.dir })
+  );
   return (
     <FeatureProviders props={props}>
       <DataTableContent<TRow> {...props} />
