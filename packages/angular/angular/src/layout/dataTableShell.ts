@@ -153,6 +153,7 @@ import {
   viewChild,
 } from "@angular/core";
 
+import { mountForcedColorsStyles } from "../a11y/forcedColors";
 import { type CommandPaletteInjectOptions } from "../actions/commandPalette";
 import {
   ADAPTTABLE_CONTEXT_MENU,
@@ -905,6 +906,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     table
       .source()
       .setSort(table.sortBy(), table.sortDir() === "desc" ? "asc" : "desc");
+  }
+
+  constructor() {
+    mountForcedColorsStyles();
   }
 
   ngOnInit(): void {

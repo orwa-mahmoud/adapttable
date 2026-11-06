@@ -138,7 +138,8 @@ and unstyled.
 ## Accessibility
 
 Keyboard, names, RTL and forced-colors are on by default across the eight
-published React kits ([accessibility](./accessibility.md)).
+published React kits, the eight published Vue kits, and the nine published
+Angular kits ([accessibility](./accessibility.md)).
 
 antd keeps a sticky header. `role="grid"` sits on the wrapper around
 both of antd's tables so a cell and its `columnheader` share one grid.

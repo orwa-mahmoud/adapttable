@@ -1,4 +1,9 @@
 /** Structural Chrome, kit slots, models and live controllers. @packageDocumentation */
+export {
+  ensureForcedColorsStyles,
+  FORCED_COLORS_CSS,
+  mountForcedColorsStyles,
+} from "./a11y/forcedColors";
 export { AdaptLiveRegion } from "./a11y/liveRegion";
 export { AdaptTableStatusAnnouncer } from "./a11y/tableStatusAnnouncer";
 export { injectBulkBarRunner } from "./actions/bulkBarRunner";

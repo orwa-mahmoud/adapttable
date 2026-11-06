@@ -96,6 +96,7 @@ finds that cell's `columnheader` in the same grid.
 
 ## Notes
 
-- Works in all eight React adapters. The demo is the same walk on each kit.
+- Works in the eight React adapters, the eight Vue adapters, and the nine
+  Angular adapters. The demo is the same walk on each kit.
 - Labels you pass through `labels` are the accessible names, including in
   Arabic and the other [bundled locales](./i18n-rtl.md).

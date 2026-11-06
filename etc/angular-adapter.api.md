@@ -128,6 +128,7 @@ import { editorBusyProps } from '@adapttable/core/editing';
 import { editorInputType } from '@adapttable/core/editing';
 import { editorValidationProps } from '@adapttable/core/editing';
 import { ElementRef } from '@angular/core';
+import { ensureForcedColorsStyles } from '@adapttable/core/binding';
 import { estimateBodyItemSize } from '@adapttable/core/binding';
 import { EXPAND_TOGGLE } from '@adapttable/core/binding';
 import { expandChevronIcon } from '@adapttable/core/binding';
@@ -193,6 +194,7 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core/editing';
+import { FORCED_COLORS_CSS } from '@adapttable/core/binding';
 import { formatMultiDraft } from '@adapttable/core/editing';
 import { GridCell } from '@adapttable/core';
 import { GRIP_ICON } from '@adapttable/core/binding';
@@ -1343,7 +1345,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "allFilteredRows" | "setExtra" | "setExtras" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "setExtras" | "facets">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -1849,6 +1851,7 @@ export class AdaptControl<TProps> {
 
 // @public
 export abstract class AdaptDataTableShell<TRow> implements OnInit {
+    constructor();
     // (undocumented)
     protected readonly agentApprovalProps: Signal<AgentApprovalProps>;
     protected readonly agentApprovalSlot: FeatureSlotKey<AgentApprovalProps>;
@@ -1888,7 +1891,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly dir: InputSignal<Direction>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<"start" | "end">;
-    readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
+    readonly editActivation: InputSignal<"doubleClick" | "click" | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
@@ -3216,7 +3219,7 @@ export class AdaptGroupMoreButtonChrome {
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"rows" | "groups">;
+    readonly scope: InputSignal<"groups" | "rows">;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {
@@ -5432,6 +5435,8 @@ export { editorInputType }
 
 export { editorValidationProps }
 
+export { ensureForcedColorsStyles }
+
 export { estimateBodyItemSize }
 
 export { EXPAND_TOGGLE }
@@ -5666,6 +5671,8 @@ interface FooterContext$2<TRow> extends HeaderContext$2<TRow> {
 export interface FooterContext<TRow> extends HeaderContext<TRow> {
     readonly value: unknown;
 }
+
+export { FORCED_COLORS_CSS }
 
 export { formatMultiDraft }
 
@@ -5977,6 +5984,9 @@ type MobileCardRenderer$2<TRow> = Renderer$2<MobileCardContext$2<TRow>>;
 
 // @public
 export type MobileCardRenderer<TRow> = Renderer<MobileCardContext<TRow>>;
+
+// @public
+export function mountForcedColorsStyles(): void;
 
 // @public
 export function multiDraftFromSelect(select: HTMLSelectElement): string;

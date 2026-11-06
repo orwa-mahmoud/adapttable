@@ -101,6 +101,7 @@ describe("the unstyled Angular table on the server", () => {
     expect(typeof globalThis.document).toBe("undefined");
     const html = await renderOnServer("/cities");
     expect(html).toContain('data-adapttable-part="table"');
+    expect(html).not.toContain("adapttable-forced-colors");
     expect(html).toContain('data-adapttable-part="toolbar"');
     expect(html).toContain("Amman");
     expect(html).toContain("Dubai");

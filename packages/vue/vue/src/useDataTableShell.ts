@@ -63,6 +63,7 @@ import {
   watch,
 } from "vue";
 
+import { mountForcedColorsStyles } from "./a11y/forcedColors";
 import {
   BULK_ACTIONS_CONTROL,
   BULK_ACTIONS_MODEL,
@@ -276,6 +277,7 @@ export interface ResolvedTableOptions<TRow>
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
 ) {
+  mountForcedColorsStyles();
   const options = computed(() => toValue(input));
   const declarations = computed(() =>
     normalizeFeatures(toValue(options.value.features) ?? [])

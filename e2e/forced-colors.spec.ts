@@ -1,8 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { builtAdapters } from "../apps/showcase/matrix.mjs";
+import { builtAdapters, pageDirOf } from "../apps/showcase/matrix.mjs";
 
-const KITS = builtAdapters().map((adapter) => adapter.key);
+const KITS = [
+  ...builtAdapters("react"),
+  ...builtAdapters("vue"),
+  ...builtAdapters("angular"),
+];
 
 /**
  * Windows High Contrast drops authored fills and box-shadows. Focus, find
@@ -23,23 +27,23 @@ test.describe("forced-colors", () => {
   test("every kit keeps a visible outline on the focused cell", async ({
     page,
   }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(420_000);
     for (const kit of KITS) {
-      await page.goto(`/${kit}/accessibility/`);
+      await page.goto(`/${pageDirOf(kit, "accessibility")}/`);
       await page.emulateMedia({ forcedColors: "active" });
       const cell = page.locator("[data-grid-cell]").first();
-      await expect(cell, `${kit} has no navigable cell`).toBeVisible();
+      await expect(cell, `${kit.key} has no navigable cell`).toBeVisible();
       await cell.focus();
       await expect(cell).toBeFocused();
 
       const outline = await outlineOf(page, "[data-grid-cell]:focus");
       expect(
         outline.startsWith("none") || outline.includes(" 0px "),
-        `${kit} focused cell has no outline under forced-colors (${outline})`
+        `${kit.key} focused cell has no outline under forced-colors (${outline})`
       ).toBe(false);
       expect(
         outline.includes("none") && !outline.includes("solid"),
-        `${kit} focused cell relies on box-shadow instead of outline (${outline})`
+        `${kit.key} focused cell relies on box-shadow instead of outline (${outline})`
       ).toBe(false);
 
       await page.keyboard.press("ArrowRight");
@@ -48,7 +52,7 @@ test.describe("forced-colors", () => {
       const next = await outlineOf(page, "[data-grid-cell]:focus");
       expect(
         next.startsWith("none") || next.includes(" 0px "),
-        `${kit} arrow-moved focus lost its outline (${next})`
+        `${kit.key} arrow-moved focus lost its outline (${next})`
       ).toBe(false);
     }
   });

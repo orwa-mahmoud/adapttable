@@ -1,4 +1,9 @@
 /** Structural Chrome, required slots, and adapter construction. */
+export {
+  ensureForcedColorsStyles,
+  FORCED_COLORS_CSS,
+  mountForcedColorsStyles,
+} from "./a11y/forcedColors";
 export type {
   CommandPaletteChromeProps,
   CommandPaletteSlots,
