@@ -14,7 +14,6 @@ import {
   createGroupingPanelController,
   declaredAggregates,
   groupingPanelAggregations,
-  parseGroupBy,
   type TableRuntime,
   type TableSource,
 } from "@adapttable/core";
@@ -22,6 +21,7 @@ import {
   type GroupingPanelSlotProps,
   groupingPanelState,
 } from "@adapttable/core/binding";
+import { parseGroupBy } from "@adapttable/core/grouping";
 import {
   computed,
   effect,

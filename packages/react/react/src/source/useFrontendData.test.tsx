@@ -1,10 +1,10 @@
 import {
   applyRowPatches,
-  createTableEngine,
   resetDevWarnings,
   rowPatchLog,
   updateRow,
 } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { act, renderHook } from "@testing-library/react";
 import { useEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";

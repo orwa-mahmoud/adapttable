@@ -4,12 +4,12 @@
  * The compatibility shell and a feature mount both call this, so a table
  * gets one bundle. The structural host does not import it.
  */
+import { type EditEventHandler } from "@adapttable/core";
+import type { RowEditIcons } from "@adapttable/core/binding";
 import {
   dirtyMarkerView,
-  type EditEventHandler,
   resolveEditingArming,
-} from "@adapttable/core";
-import type { RowEditIcons } from "@adapttable/core/binding";
+} from "@adapttable/core/editing";
 import {
   computed,
   DestroyRef,

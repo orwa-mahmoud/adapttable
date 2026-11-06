@@ -5,8 +5,9 @@ import {
   SURFACE_HANDLES,
   SURFACE_OCCUPIED,
 } from "@adapttable/angular";
-import { createTableEngine, projectedGroupingSource } from "@adapttable/core";
+import { projectedGroupingSource } from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
 
 import { withFrontendRowModel } from "../source/rowModel";
 import { type GroupingExtras } from "./groupingExtras";

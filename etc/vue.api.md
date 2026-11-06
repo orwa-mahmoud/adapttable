@@ -80,7 +80,7 @@ import { DirtyCellStoreOptions } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DUPLICATE_ROW_ACTION_KEY } from '@adapttable/core';
 import { EditableCellController } from '@adapttable/core';
-import { editableCellController } from '@adapttable/core';
+import { editableCellController } from '@adapttable/core/editing';
 import { EditableCellMode } from '@adapttable/core';
 import { EditableColumnLike } from '@adapttable/core';
 import { EditCommitSnapshot } from '@adapttable/core';

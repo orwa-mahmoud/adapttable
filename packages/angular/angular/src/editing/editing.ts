@@ -4,19 +4,21 @@
  */
 import {
   type BatchEditingState,
-  batchEditingView,
   type BatchRowEdit,
   type CellEditingState,
-  cellEditingView,
-  createBatchEditStore,
-  createCellEditSession,
-  createRowEditStore,
   type EditableColumnLike,
   type EditEventHandler,
   type FeatureHostState,
   type RowEditingState,
-  rowEditingView,
 } from "@adapttable/core";
+import {
+  batchEditingView,
+  cellEditingView,
+  createBatchEditStore,
+  createCellEditSession,
+  createRowEditStore,
+  rowEditingView,
+} from "@adapttable/core/editing";
 import {
   assertInInjectionContext,
   computed,

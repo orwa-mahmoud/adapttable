@@ -7,11 +7,8 @@
  * request that has not answered — and where the tier cannot tell, it says
  * nothing rather than the wrong thing.
  */
-import {
-  type QueryAggregate,
-  queryAggregateOps,
-  type TableQueryParams,
-} from "@adapttable/core";
+import { type QueryAggregate, type TableQueryParams } from "@adapttable/core";
+import { queryAggregateOps } from "@adapttable/core/grouping";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

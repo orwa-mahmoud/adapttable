@@ -1,4 +1,4 @@
-import { formatMultiDraft } from "@adapttable/core";
+import { formatMultiDraft } from "@adapttable/core/editing";
 import {
   act,
   fireEvent,

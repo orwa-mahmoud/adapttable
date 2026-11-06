@@ -1,4 +1,4 @@
-import { editorInputType as coreEditorInputType } from "@adapttable/core";
+import { editorInputType as coreEditorInputType } from "@adapttable/core/editing";
 import { describe, expect, it } from "vitest";
 
 import { editorInputType } from "../src/adapter";

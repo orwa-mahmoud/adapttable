@@ -4,12 +4,11 @@
  * (`createRowEditStore`); this hook subscribes to the store.
  */
 import {
-  createRowEditStore,
   type EditableColumnLike,
   type FeatureHostState,
   type RowEditingState,
-  rowEditingView,
 } from "@adapttable/core";
+import { createRowEditStore, rowEditingView } from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import type { EditEventHandler } from "./editingEvents";

@@ -2,7 +2,8 @@
  * The plain-table source uses the basic evaluator until grouping publishes
  * the full one. A render that never commits cannot swap that evaluator.
  */
-import { createTableEngine, incrementalViewOf } from "@adapttable/core";
+import { incrementalViewOf } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { act, render } from "@testing-library/react";
 import { Suspense, use } from "react";
 import { describe, expect, it, vi } from "vitest";

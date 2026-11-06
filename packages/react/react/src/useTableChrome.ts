@@ -10,7 +10,6 @@ import {
   type GroupByInput,
   type GroupedFlatEntry,
   type GroupingPanelState,
-  parseGroupBy,
   type PinnedRows,
   resolvePinnedRows,
   responsiveColumns,
@@ -40,6 +39,7 @@ import {
   undoRedoToolbarProps,
   viewControlsToolbarProps,
 } from "@adapttable/core/binding";
+import { parseGroupBy } from "@adapttable/core/grouping";
 import {
   type ReactNode,
   type RefObject,

@@ -1,11 +1,8 @@
 /**
  * Unsaved cell marks as Angular signals over core's dirty-cell store.
  */
-import {
-  createDirtyCellStore,
-  type DirtyCellState,
-  dirtyCellView,
-} from "@adapttable/core";
+import { type DirtyCellState } from "@adapttable/core";
+import { createDirtyCellStore, dirtyCellView } from "@adapttable/core/editing";
 import {
   assertInInjectionContext,
   computed,

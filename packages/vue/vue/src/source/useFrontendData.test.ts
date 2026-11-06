@@ -1,9 +1,9 @@
 import {
-  createBasicTableEngine,
   type FrontendEngineFactory,
   INACTIVE_TIER_ROWS,
   type TableCallbackRefresh,
 } from "@adapttable/core";
+import { createBasicTableEngine } from "@adapttable/core/engine";
 import { describe, expect, it, vi } from "vitest";
 import {
   createApp,

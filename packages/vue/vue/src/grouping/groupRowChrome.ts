@@ -1,17 +1,17 @@
 /** Group structure and aggregate alignment; kits supply every control. */
-import {
-  type DisplayValue,
-  groupAggregateEntries,
-  groupLeafCount,
-  groupRowLayout,
-  groupSelectionState,
-} from "@adapttable/core";
+import { type DisplayValue } from "@adapttable/core";
 import {
   type ChromeGroupSlot,
   groupIndentStyle,
   groupRowParts,
   resolveMobileLabel,
 } from "@adapttable/core/binding";
+import {
+  groupAggregateEntries,
+  groupLeafCount,
+  groupRowLayout,
+  groupSelectionState,
+} from "@adapttable/core/grouping";
 import { h, isVNode, type VNodeChild } from "vue";
 
 import { type Attrs, mergeVueAttrs } from "../attrs";

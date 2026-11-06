@@ -3,7 +3,6 @@
  * filters every tier shares, and what the host is told.
  */
 import {
-  createBasicTableEngine,
   createMemoryAdapter,
   FILTER_ENGINE_IMPL,
   type FilterDef,
@@ -11,6 +10,7 @@ import {
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
+import { createBasicTableEngine } from "@adapttable/core/engine";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";

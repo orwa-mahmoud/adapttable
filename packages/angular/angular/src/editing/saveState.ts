@@ -1,12 +1,8 @@
 /**
  * Cell save state — pending, failed, rollback — over core's save store.
  */
-import {
-  type CellSaveState,
-  cellSaveView,
-  createCellSaveStore,
-  type EditEventHandler,
-} from "@adapttable/core";
+import { type CellSaveState, type EditEventHandler } from "@adapttable/core";
+import { cellSaveView, createCellSaveStore } from "@adapttable/core/editing";
 import {
   assertInInjectionContext,
   computed,

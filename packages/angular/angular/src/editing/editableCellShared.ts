@@ -4,12 +4,9 @@
  * Kept separate so {@link AdaptEditableCellGate} and the row/batch cells do
  * not import each other at runtime.
  */
-import {
-  booleanDraft,
-  type CellConflictAsk,
-  formatMultiDraft,
-} from "@adapttable/core";
+import { type CellConflictAsk } from "@adapttable/core";
 import type { EditableCellButtonProps } from "@adapttable/core/binding";
+import { booleanDraft, formatMultiDraft } from "@adapttable/core/editing";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   type AfterViewInit,

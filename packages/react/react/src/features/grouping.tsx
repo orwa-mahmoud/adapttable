@@ -7,9 +7,7 @@
  */
 import {
   computePagination,
-  createTableEngine,
   devWarn,
-  formatGroupBy,
   type GroupByInput,
   groupingIgnoredWarning,
   groupingPanelAggregations,
@@ -17,11 +15,12 @@ import {
   groupingSourceOf,
   type GroupNode,
   type GroupSort,
-  parseGroupBy,
   projectedGroupingSource,
   projectGrouping,
 } from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
+import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";

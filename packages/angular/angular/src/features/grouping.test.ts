@@ -1,11 +1,8 @@
 /**
  * The live grouped model — what a grouped table renders from.
  */
-import {
-  createMemoryAdapter,
-  createTableEngine,
-  type TableSource,
-} from "@adapttable/core";
+import { createMemoryAdapter, type TableSource } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";

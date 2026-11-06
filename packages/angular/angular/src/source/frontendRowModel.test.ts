@@ -1,11 +1,8 @@
 /**
  * The plain source uses the basic evaluator until grouping supplies the full one.
  */
-import {
-  createMemoryAdapter,
-  createTableEngine,
-  incrementalViewOf,
-} from "@adapttable/core";
+import { createMemoryAdapter, incrementalViewOf } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";

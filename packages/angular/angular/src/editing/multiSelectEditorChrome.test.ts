@@ -1,5 +1,5 @@
 /** Multi-select Chrome: kit controls, draft ordering and group focus. */
-import { formatMultiDraft } from "@adapttable/core";
+import { formatMultiDraft } from "@adapttable/core/editing";
 import {
   type AfterViewInit,
   Component,

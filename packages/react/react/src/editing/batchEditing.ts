@@ -6,12 +6,14 @@
  */
 import {
   type BatchEditingState,
-  batchEditingView,
   type BatchRowEdit,
-  createBatchEditStore,
   type EditableColumnLike,
   type FeatureHostState,
 } from "@adapttable/core";
+import {
+  batchEditingView,
+  createBatchEditStore,
+} from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import type { EditEventHandler } from "./editingEvents";

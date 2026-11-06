@@ -4,7 +4,6 @@
  */
 import {
   findMatchCountText,
-  focusEditorOnMount,
   handleFindBarKey,
   resolveLabels,
   type TableLabels,
@@ -14,6 +13,7 @@ import type {
   FindInTableState,
   FindSearchProps,
 } from "@adapttable/core/binding";
+import { focusEditorOnMount } from "@adapttable/core/editing";
 import {
   ChangeDetectionStrategy,
   Component,

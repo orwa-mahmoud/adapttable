@@ -13,22 +13,18 @@
  * "undo that paste" — and it is why the batch routes come through here rather
  * than each cell recording itself.
  */
+import { type EditHistoryState } from "@adapttable/core";
 import {
   createEditHistory,
-  type EditHistoryState,
   editHistoryView,
   readCellValue as readNeutralCellValue,
   recordingCellEdit,
   resolveEditHistory,
-} from "@adapttable/core";
+} from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
-export {
-  asBatchGesture,
-  asGesture,
-  type EditHistoryEntry,
-  type EditHistoryState,
-} from "@adapttable/core";
+export { type EditHistoryEntry, type EditHistoryState } from "@adapttable/core";
+export { asBatchGesture, asGesture } from "@adapttable/core/editing";
 
 import type { ColumnDef } from "../columnDef";
 import type { EditHistoryOptions } from "../props";

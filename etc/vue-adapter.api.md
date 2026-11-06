@@ -105,7 +105,7 @@ import { EditConflictPolicy } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
-import { editorInputType } from '@adapttable/core';
+import { editorInputType } from '@adapttable/core/editing';
 import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
 import { ExportHandlerState } from '@adapttable/core/binding';
@@ -168,7 +168,8 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { flattenColumnTree } from '@adapttable/core/binding';
-import { formatMultiDraft } from '@adapttable/core';
+import { formatMultiDraft } from '@adapttable/core/editing';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GridFocusAnnouncerSlotProps } from '@adapttable/core/binding';
@@ -225,7 +226,7 @@ import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
-import { readMultiDraft } from '@adapttable/core';
+import { readMultiDraft } from '@adapttable/core/editing';
 import { Ref } from 'vue';
 import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
 import { resetColumnLayout } from '@adapttable/core/binding';
@@ -4580,6 +4581,7 @@ defaultExpanded?: boolean;
 export interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, SourceViewportOptions {
     // (undocumented)
     readonly columns?: MaybeRefOrGetterOptional<readonly ColumnMetadata<TRow>[]>;
+    readonly createEngine?: FrontendEngineFactory<TRow>;
     // (undocumented)
     readonly data: MaybeRefOrGetter<readonly TRow[]>;
     // (undocumented)

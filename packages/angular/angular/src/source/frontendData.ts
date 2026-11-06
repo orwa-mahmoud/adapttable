@@ -5,7 +5,6 @@
  */
 import {
   type ColumnMetadata,
-  createBasicTableEngine,
   createFrontendSourceWith,
   type ExtraFilters,
   type FrontendEngineFactory,
@@ -15,6 +14,7 @@ import {
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
+import { createBasicTableEngine } from "@adapttable/core/engine";
 import {
   assertInInjectionContext,
   computed,

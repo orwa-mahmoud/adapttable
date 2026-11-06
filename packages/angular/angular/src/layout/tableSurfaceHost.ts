@@ -16,10 +16,8 @@ import {
   type PinnedRows,
   pinnedSummaryPart,
   resolveDensity,
-  resolveRowEditTrigger,
   type RowAction,
   rowClickProps,
-  rowEditConflict,
   type RowHeight,
   type RowStyle,
   type TableDensity,
@@ -56,6 +54,10 @@ import {
   resolveRowStyle,
   virtualizeIgnoredOnPage,
 } from "@adapttable/core/binding";
+import {
+  resolveRowEditTrigger,
+  rowEditConflict,
+} from "@adapttable/core/editing";
 import {
   computed,
   DestroyRef,

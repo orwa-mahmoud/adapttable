@@ -1,6 +1,10 @@
+import { type CellConflictAsk } from "@adapttable/core";
+import type {
+  EditableCellActivateProps as NeutralEditableCellActivateProps,
+  EditableCellSlots as NeutralEditableCellSlots,
+} from "@adapttable/core/binding";
 import {
   booleanDraft,
-  type CellConflictAsk,
   cellConflictAsk,
   controllerConflictAsk,
   editableCellErrorId,
@@ -10,11 +14,7 @@ import {
   isCustomEditor,
   isEditActivateKey,
   isFirstEditableColumn,
-} from "@adapttable/core";
-import type {
-  EditableCellActivateProps as NeutralEditableCellActivateProps,
-  EditableCellSlots as NeutralEditableCellSlots,
-} from "@adapttable/core/binding";
+} from "@adapttable/core/editing";
 import {
   type ReactElement,
   type ReactNode,
@@ -159,12 +159,12 @@ export interface EditableCellGateProps<TRow> {
   readonly slots: EditableCellSlots;
 }
 
+export { type CellConflictAsk } from "@adapttable/core";
 export {
-  type CellConflictAsk,
   editorBusyProps,
   editorValidationProps,
   stopEditKeys,
-} from "@adapttable/core";
+} from "@adapttable/core/editing";
 
 /**
  * Props for {@link CellConflictNotice}.

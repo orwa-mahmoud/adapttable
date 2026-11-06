@@ -1,6 +1,5 @@
 /** Optional factories adapt shared controllers; the shell projects their models. */
 import {
-  beginCellEdit,
   cellNavigationChannels,
   selectionStats as computeSelectionStats,
 } from "@adapttable/core";
@@ -15,6 +14,7 @@ import {
   slotRender,
   STATUS_BAR,
 } from "@adapttable/core/binding";
+import { beginCellEdit } from "@adapttable/core/editing";
 import type { FeatureMountContext, StaticTableFeature } from "@adapttable/vue";
 import { computed, toValue, watch } from "vue";
 

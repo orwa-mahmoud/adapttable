@@ -2,7 +2,6 @@ import {
   declaredAggregates,
   devWarn,
   type ExtraRow,
-  formatGroupBy,
   type GroupAggregatesFn,
   type GroupByInput,
   type GroupedFlatEntry,
@@ -10,11 +9,11 @@ import {
   groupingProjectionBundle,
   type GroupingRuntimeSource,
   groupingSourceOf,
-  parseGroupBy,
   projectGrouping,
   type TableSource,
 } from "@adapttable/core";
 import { type GroupCollapseState } from "@adapttable/core/binding";
+import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
 import {
   assertInInjectionContext,
   computed,

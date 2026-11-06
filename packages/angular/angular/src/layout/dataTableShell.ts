@@ -52,7 +52,6 @@ import { type SidePanelOptions } from "@adapttable/angular/features";
 import {
   ACTIONS_COLUMN_KEY,
   type ActiveFilterChip,
-  asBatchGesture,
   type BulkAction,
   type CellNavigationChannelsOptions,
   type CellRange,
@@ -134,6 +133,7 @@ import {
   TREE_CELL,
   undoRedoToolbarProps,
 } from "@adapttable/core/binding";
+import { asBatchGesture } from "@adapttable/core/editing";
 import {
   computed,
   contentChild,

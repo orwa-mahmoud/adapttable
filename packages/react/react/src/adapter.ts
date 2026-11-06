@@ -1068,7 +1068,6 @@ export {
 export { editableCellController } from "./editing/editableCellController";
 export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";
-export { normalizeEditorOptions } from "@adapttable/core";
 export {
   applyCollapsedColumnGroups,
   bodyCellsHaveRowSpan,
@@ -1128,6 +1127,7 @@ export {
   toggleCollapsedColumnGroup,
   unpinAllColumns,
 } from "@adapttable/core/binding";
+export { normalizeEditorOptions } from "@adapttable/core/editing";
 
 // Core names the kits use, so a kit imports only this binding and never
 // reaches into @adapttable/core itself.
@@ -1143,30 +1143,18 @@ export {
   defaultFilterRegistry,
   defaultLabels,
   edgePinStyle,
-  editorInputType,
   FILTER_TYPES,
   filterLabel,
   filterStateKeys,
   filterWidgetKind,
-  formatMultiDraft,
-  groupAggregateEntries,
-  groupAggregateNode,
   type GroupAggregateOps,
-  groupLeafCount,
-  groupRowLayout,
-  groupSelectionState,
-  isBooleanEditor,
   isDeclarativeFilters,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
   joinRelativeToken,
   pageSizeOptions,
   type PaginatedResponse,
   partitionPinnedRows,
   PIN_Z,
   pinnedCellStyle,
-  readMultiDraft,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
@@ -1182,6 +1170,22 @@ export {
   treeCardStyle,
   visibleRowActions,
 } from "@adapttable/core";
+export {
+  editorInputType,
+  formatMultiDraft,
+  isBooleanEditor,
+  isDraftChecked,
+  isMultiSelectEditor,
+  isSelectEditor,
+  readMultiDraft,
+} from "@adapttable/core/editing";
+export {
+  groupAggregateEntries,
+  groupAggregateNode,
+  groupLeafCount,
+  groupRowLayout,
+  groupSelectionState,
+} from "@adapttable/core/grouping";
 
 // What a live runtime offers, for a binding projecting it into the neutral
 // AI contracts. Nothing here decides what an operation means — that is

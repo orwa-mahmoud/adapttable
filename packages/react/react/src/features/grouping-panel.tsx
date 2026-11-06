@@ -6,10 +6,10 @@
  */
 import {
   createGroupingPanelController,
-  createTableEngine,
   declaredAggregates,
 } from "@adapttable/core";
 import { coreGroupingPanel } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
 import {
   type ReactNode,
   useEffect,

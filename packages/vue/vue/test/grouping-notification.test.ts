@@ -1,5 +1,5 @@
-import { createTableEngine } from "@adapttable/core";
 import { slotRender } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
 import { afterEach, expect, it, vi } from "vitest";
 import { effectScope, nextTick, shallowRef } from "vue";
 

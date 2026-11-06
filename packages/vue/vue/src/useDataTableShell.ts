@@ -14,7 +14,6 @@ import {
   type FilterTypeSpec,
   type FrontendEngineFactory,
   INACTIVE_TIER_ROWS,
-  isCellEditable,
   projectedGroupingSource,
   type QueryAggregate,
   type QueryFilterGroup,
@@ -50,6 +49,7 @@ import {
   type ToolbarExtrasSlotProps,
   undoRedoToolbarProps,
 } from "@adapttable/core/binding";
+import { isCellEditable } from "@adapttable/core/editing";
 import {
   computed,
   getCurrentInstance,
@@ -408,8 +408,7 @@ export function useDataTableShell<TRow>(
       const checklistKeys = filters?.defs
         .filter(
           (def) =>
-            (filters.registry.get(def.type)?.widget ?? def.type) ===
-            "checklist"
+            (filters.registry.get(def.type)?.widget ?? def.type) === "checklist"
         )
         .map((def) => def.key);
       facetKeyList = retainStrings(

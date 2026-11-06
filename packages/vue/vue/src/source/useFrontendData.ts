@@ -1,6 +1,5 @@
 import {
   type ColumnMetadata,
-  createBasicTableEngine,
   createFrontendSourceWith,
   type ExtraFilters,
   type FrontendEngineFactory,
@@ -8,6 +7,7 @@ import {
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
+import { createBasicTableEngine } from "@adapttable/core/engine";
 import { computed, type MaybeRefOrGetter, type ShallowRef, toValue } from "vue";
 
 import {
@@ -166,7 +166,13 @@ export function useFrontendData<TRow>(
       ) {
         return frame;
       }
-      const published = { ...frame, isLoading, isFetching, error, refetch: nextRefetch };
+      const published = {
+        ...frame,
+        isLoading,
+        isFetching,
+        error,
+        refetch: nextRefetch,
+      };
       if (held.current) held.current = { ...held.current, snapshot: published };
       return published;
     },

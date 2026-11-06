@@ -1,4 +1,3 @@
-import { resolveRowEditTrigger, rowEditConflict } from "@adapttable/core";
 import {
   BATCH_EDIT_BAR,
   coreBatchEditing,
@@ -11,6 +10,10 @@ import {
   ROW_EDIT_ACTIONS,
   type RowEditIcons,
 } from "@adapttable/core/binding";
+import {
+  resolveRowEditTrigger,
+  rowEditConflict,
+} from "@adapttable/core/editing";
 import type {
   FeatureMountContext,
   StaticTableFeature,
@@ -213,8 +216,8 @@ export type {
   CustomCellEditorConflict,
   CustomCellEditorCtrl,
 } from "@adapttable/core";
-export { formatMultiDraft, readMultiDraft } from "@adapttable/core";
 export type { RowEditIcons } from "@adapttable/core/binding";
+export { formatMultiDraft, readMultiDraft } from "@adapttable/core/editing";
 
 /** Public feature signatures share the binding's nameable member types. */
 export { UNDO_REDO_CONTROL } from "./actions/contracts";

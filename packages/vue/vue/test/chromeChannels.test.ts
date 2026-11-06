@@ -1,7 +1,5 @@
 import {
-  cellEditingView,
   type ConfirmHandler,
-  createCellEditSession,
   resolveLabels,
   type RowAction,
   type TableDensity,
@@ -12,6 +10,10 @@ import {
   slotRender,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
+import {
+  cellEditingView,
+  createCellEditSession,
+} from "@adapttable/core/editing";
 import { expect, it, vi } from "vitest";
 import {
   createApp,

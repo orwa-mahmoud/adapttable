@@ -431,11 +431,8 @@ export type {
 export {
   defaultConfirm,
   defaultFilterRegistry,
-  editorInputType,
   filterLabel,
   filterWidgetKind,
-  formatMultiDraft,
-  readMultiDraft,
   resolveLabels,
 } from "@adapttable/core";
 export type {
@@ -571,6 +568,11 @@ export {
   type MenuNavigationItem,
   type MenuNavigationKey,
 } from "@adapttable/core/binding";
+export {
+  editorInputType,
+  formatMultiDraft,
+  readMultiDraft,
+} from "@adapttable/core/editing";
 
 // Types this entry's own signatures hand back.
 export type { SidePanelOptions, SidePanelPanel } from "./actions/contracts";

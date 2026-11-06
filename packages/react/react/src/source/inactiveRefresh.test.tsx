@@ -1,8 +1,8 @@
 import {
-  createBasicTableEngine,
   INACTIVE_TIER_ROWS,
   type TableCallbackRefresh,
 } from "@adapttable/core";
+import { createBasicTableEngine } from "@adapttable/core/engine";
 import { act, renderHook } from "@testing-library/react";
 import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";

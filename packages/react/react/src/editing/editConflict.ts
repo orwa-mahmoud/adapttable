@@ -5,11 +5,11 @@
  * reader typed, take the incoming value, or ask. The reconciler lives in
  * `@adapttable/core` (`createEditConflictStore`); this hook subscribes to it.
  */
+import { type EditConflictState } from "@adapttable/core";
 import {
   createEditConflictStore,
-  type EditConflictState,
   editConflictView,
-} from "@adapttable/core";
+} from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 export type {
@@ -23,7 +23,10 @@ export type {
   ReconcileLiveEdit,
   ReconcileLiveRowEdit,
 } from "@adapttable/core";
-export { liveRowChanged, resolveConflictChoice } from "@adapttable/core";
+export {
+  liveRowChanged,
+  resolveConflictChoice,
+} from "@adapttable/core/editing";
 
 /**
  * Headless conflict state. Inert until {@link EditConflictState.reconcile}

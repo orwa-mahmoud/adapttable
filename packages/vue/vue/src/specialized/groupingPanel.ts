@@ -1,7 +1,6 @@
 /** One grouping controller with required Vue adapter slots. */
 import {
   createGroupingPanelController,
-  createTableEngine,
   declaredAggregates,
   deferGroupingDropToInner,
   focusAfterAggregationRemoval,
@@ -11,7 +10,6 @@ import {
   groupingDropPlan,
   groupingPanelAggregations,
   INERT_GROUPING_DROP_HANDLERS,
-  parseGroupBy,
 } from "@adapttable/core";
 import {
   coreGroupingPanel,
@@ -19,6 +17,8 @@ import {
   type GroupingPanelSlots as NeutralGroupingPanelSlots,
   groupingPanelState,
 } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
+import { parseGroupBy } from "@adapttable/core/grouping";
 import {
   computed,
   defineComponent,

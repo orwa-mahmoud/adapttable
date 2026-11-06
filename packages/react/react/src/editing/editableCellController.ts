@@ -7,11 +7,11 @@
  */
 import {
   type EditableCellController,
-  editableCellController as coreEditableCellController,
   type EditingBundle,
   rowEditingSignature as coreRowEditingSignature,
   rowIsDirty as coreRowIsDirty,
 } from "@adapttable/core";
+import { editableCellController as coreEditableCellController } from "@adapttable/core/editing";
 
 import type { ColumnDef } from "../columnDef";
 import type { RowEditIcons } from "./RowEditGate";
@@ -20,7 +20,10 @@ export type {
   EditableCellController,
   EditableCellMode,
 } from "@adapttable/core";
-export { focusEditorOnMount, stopCellEditKeyboard } from "@adapttable/core";
+export {
+  focusEditorOnMount,
+  stopCellEditKeyboard,
+} from "@adapttable/core/editing";
 
 /**
  * Opt-in editing bundle from {@link TableChrome.editing}.

@@ -1,5 +1,4 @@
 import {
-  createBasicTableEngine,
   createFrontendSourceWith,
   type ExtraFilters,
   type FrontendEngineFactory,
@@ -10,6 +9,7 @@ import {
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
+import { createBasicTableEngine } from "@adapttable/core/engine";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";
@@ -175,9 +175,9 @@ export function useFrontendData<TRow>(
     createFrontendSourceWith(createEngine)
   );
   const [, setModelEpoch] = useState(0);
-  const held = useRef<FrameHold<ReturnType<FrontendSource<TRow>["update"]>> | null>(
-    null
-  );
+  const held = useRef<FrameHold<
+    ReturnType<FrontendSource<TRow>["update"]>
+  > | null>(null);
   // The frame is read from the engine's candidate; the committed engine — the
   // one an agent or a second component holds — stays on the table that is on
   // screen until React accepts this render, which is where it is published.

@@ -1647,7 +1647,9 @@ export interface TableEditHistoryProps<TRow> {
 }
 
 // @public
-export function tableFeaturesOf(injector: Injector, own: readonly AdaptTableFeature[] | undefined): readonly AdaptTableFeature[];
+export function tableFeaturesOf(injector: Injector, own: readonly AdaptTableFeature[] | undefined): readonly (AdaptTableFeature & {
+    readonly id: string;
+})[];
 
 // @public
 export interface TableFilters<TRow> {

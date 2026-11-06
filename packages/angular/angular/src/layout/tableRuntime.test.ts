@@ -6,11 +6,11 @@ import {
   createGroupingPanelController,
   createMemoryAdapter,
   createRowReorderController,
-  createTableEngine,
   resolveLabels,
   rowReorderRuntimeOptions,
   type TableSource,
 } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { Component, computed, type Signal, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";

@@ -19,12 +19,11 @@
  * busy rather than blocking the keystroke, and a newer draft supersedes an older
  * check — a stale answer must never mark a value the reader has already changed.
  */
+import { type EditValidationState, type RowValidator } from "@adapttable/core";
 import {
   createEditValidationStore,
-  type EditValidationState,
   editValidationView,
-  type RowValidator,
-} from "@adapttable/core";
+} from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 export type {

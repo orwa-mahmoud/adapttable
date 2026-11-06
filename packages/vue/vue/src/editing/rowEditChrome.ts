@@ -1,14 +1,13 @@
-import {
-  batchEditBarModel,
-  type DisplayValue,
-  resolveLabels,
-  rowEditActionsLayout,
-  rowEditControls,
-} from "@adapttable/core";
+import { type DisplayValue, resolveLabels } from "@adapttable/core";
 import type {
   BatchEditBarProps as CoreBatchEditBarProps,
   RowEditActionsProps as CoreRowEditActionsProps,
 } from "@adapttable/core/binding";
+import {
+  batchEditBarModel,
+  rowEditActionsLayout,
+  rowEditControls,
+} from "@adapttable/core/editing";
 import { h, type VNodeChild } from "vue";
 
 // Named aliases remain visible to Vue's SFC prop resolver after declaration bundling.

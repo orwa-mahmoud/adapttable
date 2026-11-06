@@ -2,11 +2,8 @@
  * Row reorder state: what each gesture hands the host, and what the table
  * announces and marks while a row is moving.
  */
-import {
-  createMemoryAdapter,
-  createTableEngine,
-  type RowReorderOptions,
-} from "@adapttable/core";
+import { createMemoryAdapter, type RowReorderOptions } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";

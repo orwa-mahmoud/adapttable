@@ -3,13 +3,13 @@
  * The engine owns state; this hook re-renders on revision bumps.
  */
 import {
-  createTableEngine,
   type CreateTableEngineOptions,
   devWarn,
   type TableEngine,
   type TableEngineReader,
 } from "@adapttable/core";
 import { sameRows } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
 import {
   useDebugValue,
   useEffect,

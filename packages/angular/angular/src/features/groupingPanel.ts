@@ -2,8 +2,8 @@
  * The interactive grouping panel feature for Angular.
  */
 import type { AdaptTableFeature } from "@adapttable/angular";
-import { createTableEngine } from "@adapttable/core";
 import { coreGroupingPanel } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
 
 import { withFrontendRowModel } from "../source/rowModel";
 import type { GroupingExtras } from "./grouping";

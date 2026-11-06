@@ -1,18 +1,17 @@
 /** Grouping uses core's capability, aggregation and flattened-entry pipelines. */
 import {
-  createTableEngine,
   devWarn,
   type ExtraRow,
-  formatGroupBy,
   groupingIgnoredWarning,
   groupingProjectionBundle,
   groupingSourceOf,
   type GroupNode,
   type GroupSort,
-  parseGroupBy,
   projectGrouping,
 } from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
+import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
 import type {
   FeatureMountContext,
   StaticTableFeature,
