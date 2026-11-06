@@ -97,4 +97,43 @@ describe("server rendering", () => {
     }
     expect(renderToString(<Harness />)).toBe(renderToString(<Harness />));
   });
+
+  it("keeps two request locales and their row ids apart", () => {
+    interface Named extends Row {
+      nameEn: string;
+      nameAr: string;
+    }
+    const rows: Named[] = [
+      { id: "en-first", name: "Ada", nameEn: "Ada", nameAr: "زيد" },
+      { id: "ar-first", name: "Zed", nameEn: "Zed", nameAr: "آدا" },
+    ];
+    const columns = [
+      {
+        key: "nameEn",
+        accessor: (row: Named) => row.nameEn,
+        i18n: { ar: "nameAr" },
+      },
+    ];
+    function Harness({ locale }: { locale: string }) {
+      const source = useFrontendData({
+        data: rows,
+        columns,
+        locale,
+        getRowId: (row) => row.id,
+        urlAdapter: createMemoryAdapter(""),
+        defaults: { sortBy: "nameEn", sortDir: "asc" },
+        forceMobile: false,
+      });
+      return <output>{source.rows.map((row) => row.id).join(",")}</output>;
+    }
+    const english = () => renderToString(<Harness locale="en" />);
+    const arabic = () => renderToString(<Harness locale="ar" />);
+    const enFirst = english();
+    const arFirst = arabic();
+    expect(english()).toBe(enFirst);
+    expect(arabic()).toBe(arFirst);
+    expect(enFirst).toContain("en-first,ar-first");
+    expect(arFirst).toContain("ar-first,en-first");
+    expect(enFirst).not.toContain("ar-first,en-first");
+  });
 });

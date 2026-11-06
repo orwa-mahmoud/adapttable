@@ -67,4 +67,46 @@ describe("conformance registry", () => {
       rmSync(root, { recursive: true, force: true });
     }
   });
+
+  it("rejects a kit that filters the shared cases", () => {
+    const root = kitRoot(
+      "packages/react/adapter-fixture/src/conformance.test.tsx",
+      "const tests = tableConformanceTests(driver, harness).filter(() => false);\n"
+    );
+    try {
+      const checked = checkConformanceRegistry({ root, kits: [kit] });
+      assert.deepEqual(checked.problems, [
+        "react/adapter-fixture: conformance suite does not run every case",
+      ]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a shared suite that drops a common case", () => {
+    const root = kitRoot(
+      "packages/react/adapter-fixture/src/conformance.test.tsx",
+      "for (const test of tableConformanceTests(driver, harness)) {\n  it(test.name, test.run);\n}\n"
+    );
+    const suite = join(root, "suite.ts");
+    writeFileSync(
+      suite,
+      'it("activates a row from its body and not from an interactive control", () => {});\n'
+    );
+    try {
+      const checked = checkConformanceRegistry({
+        root,
+        kits: [kit],
+        suiteFile: suite,
+      });
+      assert.equal(checked.cases, 1);
+      assert.ok(
+        checked.problems.some((problem) =>
+          problem.includes("marks a flashing cell")
+        )
+      );
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 });
