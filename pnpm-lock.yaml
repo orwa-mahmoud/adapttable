@@ -1800,6 +1800,9 @@ importers:
 
   packages/vue/adapter-quasar:
     dependencies:
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
       '@adapttable/vue':
         specifier: 0.4.1
         version: link:../vue

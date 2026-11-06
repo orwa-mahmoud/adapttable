@@ -15,6 +15,7 @@ import {
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
+  withKitEnvironment,
 } from "@adapttable/vue/adapter";
 import {
   computed,
@@ -24,6 +25,7 @@ import {
   watch,
 } from "vue";
 
+import { useQuasarLibrary } from "./libraryEnvironment";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { quasarTableControls } from "./table/controls";
 import { quasarSurfaceControls } from "./table/surface";
@@ -50,22 +52,29 @@ const footer = shallowRef(slots.footer);
 onBeforeUpdate(() => {
   footer.value = slots.footer;
 });
-const shell = useDataTableShell<TRow>(() => ({
-  ...props,
-  footer: footer.value,
-  confirm: props.confirm ?? defaultConfirm,
-  onDensityChange: (density) => {
-    props.onDensityChange?.(density);
-    emit("update:density", density);
-  },
-  onSelectionChange:
-    props.selectable ||
-    props.selectedIds !== undefined ||
-    props.defaultSelectedIds !== undefined
-      ? (ids) => emit("update:selectedIds", ids)
-      : undefined,
-  onColumnLayoutChange: (layout) => emit("update:columnLayout", layout),
-}));
+const kit = useQuasarLibrary();
+const shell = useDataTableShell<TRow>(() =>
+  withKitEnvironment(
+    {
+      ...props,
+      footer: footer.value,
+      confirm: props.confirm ?? defaultConfirm,
+      onDensityChange: (density: TableDensity) => {
+        props.onDensityChange?.(density);
+        emit("update:density", density);
+      },
+      onSelectionChange:
+        props.selectable ||
+        props.selectedIds !== undefined ||
+        props.defaultSelectedIds !== undefined
+          ? (ids: string[]) => emit("update:selectedIds", ids)
+          : undefined,
+      onColumnLayoutChange: (layout: ColumnLayoutState) =>
+        emit("update:columnLayout", layout),
+    },
+    kit.value
+  )
+);
 const names = computed(() => props.classNames ?? {});
 provideDataTableClassNames(() => names.value);
 function controls(): TableChromeSlots<TRow> {
