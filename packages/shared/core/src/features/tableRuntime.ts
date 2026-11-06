@@ -12,7 +12,7 @@ import type {
   ColumnLayoutContribution,
   PinningContribution,
 } from "../columns/columnLayoutModel";
-import type { ColumnMetadata, ExtraFilters } from "../contracts/columns";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { QueryAggregate } from "../contracts/query";
 import type { TableSourceCapabilities } from "../contracts/source";
 import type { NeutralTable } from "../engine/neutralTable";
@@ -21,6 +21,7 @@ import type { FilteringContribution } from "../filters/filterFormModel";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { SelectionContribution } from "../selection/selectionBindingState";
+import type { QueryContribution } from "../source/queryContract";
 import type { TreeContribution } from "../tree/treeBindingState";
 import type { BulkAction, RowAction } from "../types";
 import type {
@@ -90,38 +91,13 @@ export interface TableRuntimeView<TRow = unknown> {
    */
   readonly tree?: TreeContribution<TRow>;
   /**
-   * Page, search and sort the source currently owns.
+   * Page, search, and sort the source currently owns.
    *
    * Optional so a test-published view can omit it. Live chrome fills it
    * so a feature above the table can apply ordinary view operations.
+   * Applied values stay here. The catalog is {@link FilteringContribution}.
    */
-  readonly query?: {
-    readonly page: number;
-    readonly limit: number;
-    /**
-     * Rows matching the current query, when the source counted them.
-     *
-     * The filtered total, not the dataset and not the rows on screen. Absent
-     * where the source cannot say, which a consumer must carry as unknown
-     * rather than substituting what happens to be loaded.
-     */
-    readonly total?: number;
-    /**
-     * The table's default page size, so a rows-per-page list can keep it
-     * after the reader picks another size.
-     */
-    readonly defaultLimit?: number;
-    readonly search: string;
-    readonly sortBy?: string;
-    readonly sortDir?: "asc" | "desc";
-    readonly setPage: (page: number) => void;
-    readonly setLimit: (limit: number) => void;
-    readonly setSearch: (search: string) => void;
-    readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
-    readonly extra?: ExtraFilters;
-    readonly setExtras?: (extra: ExtraFilters) => void;
-    readonly clearExtras?: () => void;
-  };
+  readonly query?: QueryContribution;
   /**
    * The filter catalog the host published.
    *

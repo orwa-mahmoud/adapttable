@@ -849,6 +849,7 @@ export type {
   AggregateFn,
   QueryAggregate,
   QueryCondition,
+  QueryContribution,
   QueryFilterGroup,
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";

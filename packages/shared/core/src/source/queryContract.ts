@@ -13,6 +13,7 @@
  * something the source did not sign up for — silence there would look like a
  * bug in the table rather than a gap in the integration.
  */
+import type { ExtraFilters, SortDirection } from "../contracts/columns";
 import type {
   QueryCondition,
   QueryExtensions,
@@ -95,4 +96,53 @@ export function applyQuerySupport(
     }
   }
   return allowed;
+}
+
+/**
+ * Page, search, and sort the source currently owns.
+ *
+ * Applied filter values stay here. The filter catalog is a separate
+ * contribution. This is not a copy of the rows and it does not build an
+ * engine: a server table publishes the same setters from its URL store.
+ *
+ * @public
+ */
+export interface QueryContribution {
+  /** The 1-based page. */
+  readonly page: number;
+  /** The page size. */
+  readonly limit: number;
+  /**
+   * Rows matching the current query, when the source counted them.
+   *
+   * The filtered total, not the dataset and not the rows on screen. Absent
+   * where the source cannot say, which a consumer must carry as unknown
+   * rather than substituting what happens to be loaded.
+   */
+  readonly total?: number;
+  /**
+   * The table's default page size, so a rows-per-page list can keep it
+   * after the reader picks another size.
+   */
+  readonly defaultLimit?: number;
+  /** The committed search text. */
+  readonly search: string;
+  /** Active sort key, when one is set. */
+  readonly sortBy?: string;
+  /** Active sort direction. */
+  readonly sortDir?: SortDirection;
+  /** Set the 1-based page. */
+  readonly setPage: (page: number) => void;
+  /** Set the page size. */
+  readonly setLimit: (limit: number) => void;
+  /** Set or clear the committed search text. */
+  readonly setSearch: (search: string) => void;
+  /** Set or clear the single-column sort. */
+  readonly setSort: (key?: string, dir?: SortDirection) => void;
+  /** Applied extra filters. */
+  readonly extra?: ExtraFilters;
+  /** Replace the applied extra filters. */
+  readonly setExtras?: (extra: ExtraFilters) => void;
+  /** Clear the applied extra filters. */
+  readonly clearExtras?: () => void;
 }

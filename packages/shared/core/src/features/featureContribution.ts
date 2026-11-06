@@ -1,10 +1,10 @@
 /**
  * Typed domain contributions.
  *
- * Grouping, editing, tree, pinning, column layout, detail, and row pinning
- * have their own contracts. Query stays named in
- * {@link REMAINING_FEATURE_OWNERSHIP}. Nothing here is constructed from a
- * registry, and grouping's entry type is imported as a type only.
+ * Grouping, editing, tree, pinning, column layout, detail, row pinning, and
+ * query have their own contracts. {@link REMAINING_FEATURE_OWNERSHIP} is
+ * empty. Nothing here is constructed from a registry, and grouping's entry
+ * type is imported as a type only.
  */
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import { devWarn } from "../utils/devWarn";
@@ -57,14 +57,13 @@ export interface EditingContribution<TRow> {
 /**
  * Domains whose runtime fields are still compatibility projections.
  *
- * The value is the field that still owns the data. Nothing is imported or
- * constructed from this map.
+ * The value would be the field that still owns the data. Nothing is
+ * imported or constructed from this map. It is empty: query and the
+ * earlier domains have their own contributions.
  *
  * @public
  */
-export const REMAINING_FEATURE_OWNERSHIP = {
-  query: "tableRuntime.query",
-} as const;
+export const REMAINING_FEATURE_OWNERSHIP = {} as const;
 
 /**
  * A domain that has not moved onto a typed contribution yet.

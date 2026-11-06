@@ -599,6 +599,7 @@ export {
   isFilterGroup,
   type QueryAggregate,
   type QueryCondition,
+  type QueryContribution,
   type QueryExtensions,
   type QueryFilterGroup,
   type QuerySupport,

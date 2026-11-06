@@ -4687,6 +4687,24 @@ export interface QueryCondition {
 }
 
 // @public
+export interface QueryContribution {
+    readonly clearExtras?: () => void;
+    readonly defaultLimit?: number;
+    readonly extra?: ExtraFilters;
+    readonly limit: number;
+    readonly page: number;
+    readonly search: string;
+    readonly setExtras?: (extra: ExtraFilters) => void;
+    readonly setLimit: (limit: number) => void;
+    readonly setPage: (page: number) => void;
+    readonly setSearch: (search: string) => void;
+    readonly setSort: (key?: string, dir?: SortDirection) => void;
+    readonly sortBy?: string;
+    readonly sortDir?: SortDirection;
+    readonly total?: number;
+}
+
+// @public
 export interface QueryFilterGroup {
     combinator: "and" | "or";
     conditions: readonly (QueryCondition | QueryFilterGroup)[];
@@ -4717,9 +4735,7 @@ export interface RegisteredFeature<TFeature> {
 }
 
 // @public
-export const REMAINING_FEATURE_OWNERSHIP: {
-    readonly query: "tableRuntime.query";
-};
+export const REMAINING_FEATURE_OWNERSHIP: {};
 
 // @public
 export type RemainingFeatureDomain = keyof typeof REMAINING_FEATURE_OWNERSHIP;
@@ -6693,22 +6709,7 @@ export interface TableRuntimeView<TRow = unknown> {
     };
     readonly neutralTable?: NeutralTable<TRow>;
     readonly pinning?: PinningContribution;
-    readonly query?: {
-        readonly page: number;
-        readonly limit: number;
-        readonly total?: number;
-        readonly defaultLimit?: number;
-        readonly search: string;
-        readonly sortBy?: string;
-        readonly sortDir?: "asc" | "desc";
-        readonly setPage: (page: number) => void;
-        readonly setLimit: (limit: number) => void;
-        readonly setSearch: (search: string) => void;
-        readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
-        readonly extra?: ExtraFilters;
-        readonly setExtras?: (extra: ExtraFilters) => void;
-        readonly clearExtras?: () => void;
-    };
+    readonly query?: QueryContribution;
     readonly rowLabel: (row: TRow) => string;
     readonly rows: readonly TRow[];
     readonly selection?: SelectionContribution;

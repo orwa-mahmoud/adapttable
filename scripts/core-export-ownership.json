@@ -12516,6 +12516,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "QueryContribution",
+      "kind": "type",
+      "module": "source/queryContract.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/queryContract.ts#QueryContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "QueryEmitter",
       "kind": "type",
       "module": "source/dataTier.ts",
