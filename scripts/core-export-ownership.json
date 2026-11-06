@@ -9843,6 +9843,17 @@
       "subpaths": [".", "./binding"]
     },
     {
+      "name": "ColumnLayoutContribution",
+      "kind": "type",
+      "module": "columns/columnLayoutModel.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "columns/columnLayoutModel.ts#ColumnLayoutContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "ColumnLayoutController",
       "kind": "type",
       "module": "columns/columnLayoutController.ts",
@@ -12472,6 +12483,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "PinningContribution",
+      "kind": "type",
+      "module": "columns/columnLayoutModel.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "columns/columnLayoutModel.ts#PinningContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "PointerReleaseTarget",
       "kind": "type",
       "module": "focus/gridNavigation.ts",
@@ -14032,6 +14054,17 @@
       "deprecated": false,
       "identity": "filters/operators.ts#TextOp",
       "subpaths": ["."]
+    },
+    {
+      "name": "TreeContribution",
+      "kind": "type",
+      "module": "tree/treeBindingState.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "tree/treeBindingState.ts#TreeContribution",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "TreeEntry",
@@ -18951,6 +18984,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "DetailContribution",
+      "kind": "type",
+      "module": "rows/rowsBindingState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "rows/rowsBindingState.ts#DetailContribution",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "EditableCellActivateProps",
       "kind": "type",
       "module": "editing/editableCellContract.ts",
@@ -20180,6 +20224,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "stream/streamBindingState.ts#RowPatchStreamState",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "RowPinningContribution",
+      "kind": "type",
+      "module": "rows/rowPinModel.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "rows/rowPinModel.ts#RowPinningContribution",
       "subpaths": ["./binding"]
     },
     {

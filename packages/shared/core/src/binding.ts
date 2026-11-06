@@ -554,9 +554,11 @@ export type {
   SortDirection,
 } from "./columnModel";
 export type {
+  ColumnLayoutContribution,
   ColumnLayoutState,
   PinLeads,
   PinnedCellStyle,
+  PinningContribution,
   PinOffset,
   PinSide,
   UseColumnLayoutResult,
@@ -826,7 +828,11 @@ export type { PivotMeasure } from "./pivot/pivotModel";
 export type { CellSpanAppearance } from "./rows/cellSpan";
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "./rows/extraRows";
 export type { IncrementalViewConfig } from "./rows/incremental";
-export type { RowPinLookup, RowPinSide } from "./rows/rowPinModel";
+export type {
+  RowPinLookup,
+  RowPinningContribution,
+  RowPinSide,
+} from "./rows/rowPinModel";
 export type { RowPinState } from "./rows/rowPinModel";
 export type { RowReorderLabels } from "./rows/rowReorderEngine";
 export { ROW_DND_MIME } from "./rows/rowReorderEngine";
@@ -990,6 +996,7 @@ export type { UsePivotUrlStateResult } from "./pivot/pivotBindingState";
 export { ROW_REORDER, type RowReorderState } from "./rows/rowReorderContract";
 export type {
   ChangedCellFlashState,
+  DetailContribution,
   HighlightState,
   RowExpansionState,
   RowMutationsState,
@@ -1007,6 +1014,7 @@ export type {
 export type { RowPatchStreamState } from "./stream/streamBindingState";
 export type {
   LazyChildrenState,
+  TreeContribution,
   TreeExpansionState,
 } from "./tree/treeBindingState";
 export type {

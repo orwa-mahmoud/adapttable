@@ -1080,6 +1080,18 @@ export interface ColumnHeaderRenameSlotProps<TNode = unknown> {
 export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
 
 // @public
+export interface ColumnLayoutContribution {
+    readonly hidden: readonly string[];
+    readonly keys: readonly string[];
+    // (undocumented)
+    readonly move?: (key: string, toIndex: number) => void;
+    // (undocumented)
+    readonly setHidden?: (key: string, hidden: boolean) => void;
+    // (undocumented)
+    readonly setOrder?: (order: readonly string[]) => void;
+}
+
+// @public
 export interface ColumnLayoutState {
     collapsedGroups?: readonly string[];
     hidden: readonly string[];
@@ -2324,6 +2336,12 @@ export function desktopTableStyle(columns: readonly ColumnMetadata<never>[], opt
 }): CssProperties | undefined;
 
 // @public
+export interface DetailContribution<TRender = unknown> {
+    readonly expansion: RowExpansionState;
+    readonly render: TRender;
+}
+
+// @public
 export type Direction = "ltr" | "rtl";
 
 // @public
@@ -3374,7 +3392,9 @@ export function finishShellBody<TRef, TShell extends PipelineShell & {
         readonly grouping?: {
             readonly entries: readonly unknown[];
         };
-        readonly tree?: object;
+        readonly tree?: {
+            readonly entries: readonly unknown[];
+        };
     };
 }>(shell: TShell, body: ShellBodyInput<TRef>, composeRefs: (first: TRef, second: TRef) => TRef): TShell;
 
@@ -4173,7 +4193,7 @@ export interface LeafSortProps {
 }
 
 // @public
-export function liveColumnLayout<TRow>(chrome: Pick<RuntimeChromeInput<TRow>, "columnLayoutLive" | "allColumns" | "columnLayout">): TableRuntimeView<TRow>["columnLayout"] | undefined;
+export function liveColumnLayout<TRow>(chrome: Pick<RuntimeChromeInput<TRow>, "columnLayoutLive" | "allColumns" | "columnLayout">): ColumnLayoutContribution | undefined;
 
 // @public
 export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = SidePanelEntry> implements FeatureHostState<TRow> {
@@ -4204,7 +4224,7 @@ export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = Sid
 }
 
 // @public
-export function livePinning<TRow>(chrome: Pick<RuntimeChromeInput<TRow>, "columnLayout" | "rowPinning">): NonNullable<TableRuntimeView<TRow>["pinning"]>;
+export function livePinning<TRow>(chrome: Pick<RuntimeChromeInput<TRow>, "columnLayout" | "rowPinning">): PinningContribution;
 
 // @public
 export function logicalAlign(align: ColumnModel["align"]): "start" | "center" | "end";
@@ -4391,10 +4411,7 @@ export interface OverlayChrome {
         readonly setName: unknown;
     };
     // (undocumented)
-    readonly detail?: {
-        readonly render: unknown;
-        readonly expansion: unknown;
-    };
+    readonly detail?: DetailContribution;
     // (undocumented)
     readonly droppedColumns: readonly string[];
     // (undocumented)
@@ -4413,13 +4430,13 @@ export interface OverlayChrome {
         readonly addRow: unknown;
     };
     // (undocumented)
-    readonly rowPinning?: unknown;
+    readonly rowPinning?: RowPinningContribution;
     // (undocumented)
     readonly source: unknown;
     // (undocumented)
     readonly table: object;
     // (undocumented)
-    readonly tree?: unknown;
+    readonly tree?: TreeContribution<unknown>;
 }
 
 // @public
@@ -4517,6 +4534,14 @@ export type PinnedSide = PinSide | undefined;
 
 // @public
 export const PINNING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
+export interface PinningContribution {
+    readonly columns: Readonly<Record<string, PinSide>>;
+    readonly rows?: RowPinState;
+    readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
+    readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
+}
 
 // @public
 export interface PinOffset {
@@ -4693,11 +4718,6 @@ export interface RegisteredFeature<TFeature> {
 
 // @public
 export const REMAINING_FEATURE_OWNERSHIP: {
-    readonly tree: "tableRuntime.tree";
-    readonly pinning: "tableRuntime.pinning";
-    readonly columnLayout: "tableRuntime.columnLayout";
-    readonly detail: "tableRuntime.detail";
-    readonly rowPinning: "tableRuntime.rowPinning";
     readonly query: "tableRuntime.query";
 };
 
@@ -4713,11 +4733,7 @@ export function renderedRowsOf<TRow>(chrome: {
         readonly rows: readonly TRow[];
     };
     readonly grouping?: GroupingContribution<TRow>;
-    readonly tree?: {
-        readonly entries: readonly {
-            readonly row: TRow;
-        }[];
-    };
+    readonly tree?: TreeContribution<TRow>;
 }): readonly TRow[];
 
 // @public
@@ -5061,6 +5077,13 @@ export interface RowPinLookup {
 }
 
 // @public
+export interface RowPinningContribution {
+    readonly pin: (rowKey: string, side: RowPinSide) => void;
+    readonly state: RowPinState;
+    readonly unpin: (rowKey: string) => void;
+}
+
+// @public
 export interface RowPinningState<TRow> {
     actions: readonly RowAction<TRow>[];
     pin: (rowId: string, side: RowPinSide) => void;
@@ -5297,24 +5320,13 @@ export interface RuntimeChromeInput<TRow> {
     readonly filterRegistry?: FilterTypeRegistry;
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: GroupingContribution<TRow>;
-    readonly rowPinning?: {
-        readonly state: {
-            readonly top: readonly string[];
-            readonly bottom: readonly string[];
-        };
-        readonly pin: (rowKey: string, side: RowPinSide) => void;
-        readonly unpin: (rowKey: string) => void;
-    };
+    readonly rowPinning?: RowPinningContribution;
     readonly source: TableSource<TRow>;
     readonly table: {
         readonly selection?: SelectionContribution | null;
         readonly labels: object;
     };
-    readonly tree?: {
-        readonly entries: readonly {
-            readonly row: TRow;
-        }[];
-    };
+    readonly tree?: TreeContribution<TRow>;
 }
 
 // @public
@@ -6659,13 +6671,7 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly row: readonly RowAction<TRow>[];
         readonly bulk: readonly BulkAction[];
     };
-    readonly columnLayout?: {
-        readonly keys: readonly string[];
-        readonly hidden: readonly string[];
-        readonly setHidden?: (key: string, hidden: boolean) => void;
-        readonly move?: (key: string, toIndex: number) => void;
-        readonly setOrder?: (order: readonly string[]) => void;
-    };
+    readonly columnLayout?: ColumnLayoutContribution;
     readonly editing?: EditingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filtering?: FilteringContribution<TRow>;
@@ -6686,15 +6692,7 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
     };
     readonly neutralTable?: NeutralTable<TRow>;
-    readonly pinning?: {
-        readonly columns: Readonly<Record<string, PinSide>>;
-        readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
-        readonly rows?: {
-            readonly top: readonly string[];
-            readonly bottom: readonly string[];
-        };
-        readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
-    };
+    readonly pinning?: PinningContribution;
     readonly query?: {
         readonly page: number;
         readonly limit: number;
@@ -6716,7 +6714,7 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly selection?: SelectionContribution;
     readonly sortBy?: string;
     readonly sourceCapabilities?: TableSourceCapabilities;
-    readonly tree?: unknown;
+    readonly tree?: TreeContribution<TRow>;
     readonly visibleRows?: readonly TRow[];
 }
 
@@ -6871,6 +6869,12 @@ export interface TreeCellProps<TRow, TNode = unknown> {
     spacerClassName?: string;
     toggleClassName?: string;
     treeColumnKey: string | undefined;
+}
+
+// @public
+export interface TreeContribution<TRow> {
+    readonly allEntries?: readonly TreeEntry<TRow>[];
+    readonly entries: readonly TreeEntry<TRow>[];
 }
 
 // @public

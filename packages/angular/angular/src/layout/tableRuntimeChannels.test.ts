@@ -3,6 +3,7 @@ import {
   type BulkAction,
   type RowAction,
   type TableSource,
+  type TreeEntry,
 } from "@adapttable/core";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -189,7 +190,19 @@ describe("runtime projection channels", () => {
     expect(host.runtime.rowAt(9)).toBeUndefined();
     expect(host.runtime.view()!.columnLayout).toBeUndefined();
     host.options.set({
-      tree: { entries: [{ row: ROWS[1]! }] },
+      tree: {
+        entries: [
+          {
+            row: ROWS[1]!,
+            key: ROWS[1]!.id,
+            level: 0,
+            hasChildren: false,
+            expanded: false,
+            path: [],
+            descendantIds: [],
+          } satisfies TreeEntry<Row>,
+        ],
+      },
       columnLayoutLive: true,
       rowActions: actions,
       bulkActions: bulk,

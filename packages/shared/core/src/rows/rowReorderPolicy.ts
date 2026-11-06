@@ -6,6 +6,7 @@
  * helper consume these results; they do not reimplement them.
  */
 import type { GroupedFlatEntry } from "../grouping/groupRows";
+import type { TreeContribution } from "../tree/treeBindingState";
 import type { TreeEntry } from "../tree/treeRows";
 import {
   type RowDropPosition,
@@ -243,10 +244,7 @@ export interface RowMoveView<TRow> {
   /** The grouped rows, when the table is grouped. */
   readonly grouping?: { readonly entries: readonly GroupedFlatEntry<TRow>[] };
   /** The tree rows, when the table is a tree. */
-  readonly tree?: {
-    readonly entries: readonly TreeEntry<TRow>[];
-    readonly allEntries?: readonly TreeEntry<TRow>[];
-  };
+  readonly tree?: TreeContribution<TRow>;
 }
 
 /**

@@ -1384,6 +1384,18 @@ export function columnHeaderLabel<TRow>(column: ColumnMetadata<TRow>): string;
 export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
 
 // @public
+export interface ColumnLayoutContribution {
+    readonly hidden: readonly string[];
+    readonly keys: readonly string[];
+    // (undocumented)
+    readonly move?: (key: string, toIndex: number) => void;
+    // (undocumented)
+    readonly setHidden?: (key: string, hidden: boolean) => void;
+    // (undocumented)
+    readonly setOrder?: (order: readonly string[]) => void;
+}
+
+// @public
 export interface ColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
     readonly configure: (options: ColumnLayoutControllerOptions<TRow, TColumn>) => void;
     readonly move: (key: string, toIndex: number) => void;
@@ -5993,6 +6005,14 @@ export function pinnedSummaryRowId(side: RowPinSide, index: number): string;
 export function pinnedSummarySideFromId(id: string): RowPinSide | undefined;
 
 // @public
+export interface PinningContribution {
+    readonly columns: Readonly<Record<string, PinSide>>;
+    readonly rows?: RowPinState;
+    readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
+    readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
+}
+
+// @public
 export interface PinOffset {
     inset: number;
     side: PinSide;
@@ -6564,11 +6584,6 @@ export function relativeTokenLabel(raw: string, labels: {
 
 // @public
 export const REMAINING_FEATURE_OWNERSHIP: {
-    readonly tree: "tableRuntime.tree";
-    readonly pinning: "tableRuntime.pinning";
-    readonly columnLayout: "tableRuntime.columnLayout";
-    readonly detail: "tableRuntime.detail";
-    readonly rowPinning: "tableRuntime.rowPinning";
     readonly query: "tableRuntime.query";
 };
 
@@ -7162,10 +7177,7 @@ export interface RowMoveView<TRow> {
     };
     readonly rowLabel: (row: TRow) => string;
     readonly sortBy?: string;
-    readonly tree?: {
-        readonly entries: readonly TreeEntry<TRow>[];
-        readonly allEntries?: readonly TreeEntry<TRow>[];
-    };
+    readonly tree?: TreeContribution<TRow>;
 }
 
 // @public
@@ -8793,13 +8805,7 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly row: readonly RowAction<TRow>[];
         readonly bulk: readonly BulkAction[];
     };
-    readonly columnLayout?: {
-        readonly keys: readonly string[];
-        readonly hidden: readonly string[];
-        readonly setHidden?: (key: string, hidden: boolean) => void;
-        readonly move?: (key: string, toIndex: number) => void;
-        readonly setOrder?: (order: readonly string[]) => void;
-    };
+    readonly columnLayout?: ColumnLayoutContribution;
     readonly editing?: EditingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filtering?: FilteringContribution<TRow>;
@@ -8820,15 +8826,7 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
     };
     readonly neutralTable?: NeutralTable<TRow>;
-    readonly pinning?: {
-        readonly columns: Readonly<Record<string, PinSide>>;
-        readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
-        readonly rows?: {
-            readonly top: readonly string[];
-            readonly bottom: readonly string[];
-        };
-        readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
-    };
+    readonly pinning?: PinningContribution;
     readonly query?: {
         readonly page: number;
         readonly limit: number;
@@ -8850,7 +8848,7 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly selection?: SelectionContribution;
     readonly sortBy?: string;
     readonly sourceCapabilities?: TableSourceCapabilities;
-    readonly tree?: unknown;
+    readonly tree?: TreeContribution<TRow>;
     readonly visibleRows?: readonly TRow[];
 }
 
@@ -9084,6 +9082,12 @@ export function treeCardStyle(level: number): {
 
 // @public
 export function treeColumnKey<TRow>(columns: readonly ColumnMetadata<TRow>[], declared?: string): string | undefined;
+
+// @public
+export interface TreeContribution<TRow> {
+    readonly allEntries?: readonly TreeEntry<TRow>[];
+    readonly entries: readonly TreeEntry<TRow>[];
+}
 
 // @public
 export interface TreeEntry<TRow> {

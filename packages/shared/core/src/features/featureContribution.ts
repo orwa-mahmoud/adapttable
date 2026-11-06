@@ -1,10 +1,10 @@
 /**
  * Typed domain contributions.
  *
- * Grouping and editing have their own contracts. Other domains stay named in
- * {@link REMAINING_FEATURE_OWNERSHIP} until their own items replace the
- * compatibility fields on the runtime view. Nothing here is constructed from
- * a registry, and grouping's entry type is imported as a type only.
+ * Grouping, editing, tree, pinning, column layout, detail, and row pinning
+ * have their own contracts. Query stays named in
+ * {@link REMAINING_FEATURE_OWNERSHIP}. Nothing here is constructed from a
+ * registry, and grouping's entry type is imported as a type only.
  */
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import { devWarn } from "../utils/devWarn";
@@ -63,11 +63,6 @@ export interface EditingContribution<TRow> {
  * @public
  */
 export const REMAINING_FEATURE_OWNERSHIP = {
-  tree: "tableRuntime.tree",
-  pinning: "tableRuntime.pinning",
-  columnLayout: "tableRuntime.columnLayout",
-  detail: "tableRuntime.detail",
-  rowPinning: "tableRuntime.rowPinning",
   query: "tableRuntime.query",
 } as const;
 

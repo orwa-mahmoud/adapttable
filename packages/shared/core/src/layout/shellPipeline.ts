@@ -12,7 +12,12 @@
  * stages are the same everywhere, so they live here.
  */
 import { computedAggregateKeys } from "../aggregate/aggregationModel";
-import { applyColumnOrder, type PinSide } from "../columns/columnLayoutModel";
+import {
+  applyColumnOrder,
+  type ColumnLayoutContribution,
+  type PinningContribution,
+  type PinSide,
+} from "../columns/columnLayoutModel";
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
@@ -29,12 +34,14 @@ import type { TableRuntimeView } from "../features/tableRuntime";
 import type { FilterDef } from "../filters/filterDefs";
 import { filteringContributionOf } from "../filters/filterFormModel";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
-import type { RowPinSide } from "../rows/rowPinModel";
+import type { RowPinningContribution, RowPinSide } from "../rows/rowPinModel";
+import type { DetailContribution } from "../rows/rowsBindingState";
 import {
   type SelectionContribution,
   selectionContributionOf,
 } from "../selection/selectionBindingState";
 import type { TableSource } from "../source/TableSource";
+import type { TreeContribution } from "../tree/treeBindingState";
 import type { BulkAction, RowAction, TableLabels } from "../types";
 import { sourceWindowStart } from "./chromeModel";
 
@@ -123,22 +130,15 @@ export interface RuntimeChromeInput<TRow> {
    * A defined {@link grouping} wins.
    */
   readonly featureGrouping?: GroupingContribution<TRow>;
-  /** Tree entries, when a tree renders. */
-  readonly tree?: { readonly entries: readonly { readonly row: TRow }[] };
+  /** The host's tree bundle, when a tree renders. */
+  readonly tree?: TreeContribution<TRow>;
   /** Selection, when composed. */
   readonly table: {
     readonly selection?: SelectionContribution | null;
     readonly labels: object;
   };
-  /** Row pinning, when composed. */
-  readonly rowPinning?: {
-    readonly state: {
-      readonly top: readonly string[];
-      readonly bottom: readonly string[];
-    };
-    readonly pin: (rowKey: string, side: RowPinSide) => void;
-    readonly unpin: (rowKey: string) => void;
-  };
+  /** Row pinning, when composed. Column pinning stays on the layout. */
+  readonly rowPinning?: RowPinningContribution;
   /** Editing, when composed. */
   readonly editing?: {
     readonly onCellEdit?: (
@@ -166,7 +166,7 @@ export interface RuntimeChromeInput<TRow> {
 export function renderedRowsOf<TRow>(chrome: {
   readonly source: { readonly rows: readonly TRow[] };
   readonly grouping?: GroupingContribution<TRow>;
-  readonly tree?: { readonly entries: readonly { readonly row: TRow }[] };
+  readonly tree?: TreeContribution<TRow>;
 }): readonly TRow[] {
   if (chrome.grouping) {
     return chrome.grouping.entries.flatMap((entry) =>
@@ -213,7 +213,7 @@ export function liveColumnLayout<TRow>(
     RuntimeChromeInput<TRow>,
     "columnLayoutLive" | "allColumns" | "columnLayout"
   >
-): TableRuntimeView<TRow>["columnLayout"] | undefined {
+): ColumnLayoutContribution | undefined {
   if (!chrome.columnLayoutLive) return undefined;
   const reserved = new Set([ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY]);
   const declared = chrome.allColumns.filter(
@@ -241,7 +241,7 @@ export function liveColumnLayout<TRow>(
  */
 export function livePinning<TRow>(
   chrome: Pick<RuntimeChromeInput<TRow>, "columnLayout" | "rowPinning">
-): NonNullable<TableRuntimeView<TRow>["pinning"]> {
+): PinningContribution {
   const rowPinning = chrome.rowPinning;
   return {
     columns: chrome.columnLayout.state.pinned,
@@ -651,11 +651,11 @@ export interface OverlayChrome {
   readonly activeFilterCount: number;
   readonly rowMutations: { readonly canAdd: boolean; readonly addRow: unknown };
   readonly editingRows: unknown;
-  readonly tree?: unknown;
+  readonly tree?: TreeContribution<unknown>;
   readonly grouping?: GroupingContribution<unknown>;
   readonly editing?: unknown;
-  readonly detail?: { readonly render: unknown; readonly expansion: unknown };
-  readonly rowPinning?: unknown;
+  readonly detail?: DetailContribution;
+  readonly rowPinning?: RowPinningContribution;
   readonly rowActions?: unknown;
   readonly columnGroups: unknown;
   readonly hasRowActions: boolean;
@@ -783,7 +783,7 @@ export function finishShellBody<
     };
     readonly chrome: {
       readonly grouping?: { readonly entries: readonly unknown[] };
-      readonly tree?: object;
+      readonly tree?: { readonly entries: readonly unknown[] };
     };
   },
 >(

@@ -8,7 +8,10 @@
  * of that read; each binding publishes them its own way.
  */
 
-import type { PinSide } from "../columns/columnLayoutModel";
+import type {
+  ColumnLayoutContribution,
+  PinningContribution,
+} from "../columns/columnLayoutModel";
 import type { ColumnMetadata, ExtraFilters } from "../contracts/columns";
 import type { QueryAggregate } from "../contracts/query";
 import type { TableSourceCapabilities } from "../contracts/source";
@@ -17,8 +20,8 @@ import type { FilterDef } from "../filters/filterDefs";
 import type { FilteringContribution } from "../filters/filterFormModel";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
-import type { RowPinSide } from "../rows/rowPinModel";
 import type { SelectionContribution } from "../selection/selectionBindingState";
+import type { TreeContribution } from "../tree/treeBindingState";
 import type { BulkAction, RowAction } from "../types";
 import type {
   EditingContribution,
@@ -82,10 +85,10 @@ export interface TableRuntimeView<TRow = unknown> {
     ) => void;
   };
   /**
-   * Live tree bundle. Still published on this view until the tree domain
-   * owns a contribution. Named in `REMAINING_FEATURE_OWNERSHIP`.
+   * The host's walked tree. Grouping is a separate contribution. Expansion
+   * stays on the tree controller; this view aliases the host's entries.
    */
-  readonly tree?: unknown;
+  readonly tree?: TreeContribution<TRow>;
   /**
    * Page, search and sort the source currently owns.
    *
@@ -168,22 +171,11 @@ export interface TableRuntimeView<TRow = unknown> {
    * under RTL. Row sides are physical (`top`/`bottom`) because a pinned row
    * is above or below the scrolled body in every writing direction.
    *
-   * `columns` and `rows` are the CURRENT state, so unpinning is an inverse
+   * `columns` and `rows` are the current state, so unpinning is an inverse
    * of what is actually pinned rather than a reset of the whole layout.
+   * Row pinning and column pinning stay separate controllers.
    */
-  readonly pinning?: {
-    /** Column key to the edge it is pinned to. */
-    readonly columns: Readonly<Record<string, PinSide>>;
-    /** Pin a column to an edge, or unpin it with `undefined`. */
-    readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
-    /** Row keys pinned above and below the scrolled body. */
-    readonly rows?: {
-      readonly top: readonly string[];
-      readonly bottom: readonly string[];
-    };
-    /** Pin a row to an edge, or unpin it with `undefined`. */
-    readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
-  };
+  readonly pinning?: PinningContribution;
   /**
    * Live hide and order, when a layout-owning feature is composed.
    *
@@ -191,15 +183,7 @@ export interface TableRuntimeView<TRow = unknown> {
    * when the reader can hide and reorder too. Advertising a no-op would
    * tell the agent it moved a column the table left alone.
    */
-  readonly columnLayout?: {
-    /** Full order, hidden columns included. */
-    readonly keys: readonly string[];
-    /** Column ids the reader has hidden. */
-    readonly hidden: readonly string[];
-    readonly setHidden?: (key: string, hidden: boolean) => void;
-    readonly move?: (key: string, toIndex: number) => void;
-    readonly setOrder?: (order: readonly string[]) => void;
-  };
+  readonly columnLayout?: ColumnLayoutContribution;
   /**
    * Live editing channels. `onCellEdit` is the host callback; `stageCell`
    * is the batch/dirty path when batch editing is composed.

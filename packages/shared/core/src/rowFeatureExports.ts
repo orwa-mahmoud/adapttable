@@ -4,6 +4,10 @@
  * Kept as a dedicated barrel so the main entry stays grouped by concern.
  */
 
+export type {
+  ColumnLayoutContribution,
+  PinningContribution,
+} from "./columns/columnLayoutModel";
 export {
   type EditingContribution,
   type GroupingContribution,
@@ -118,6 +122,7 @@ export type {
   LazyChildrenSnapshot,
 } from "./tree/lazyChildren";
 export { createLazyChildrenController } from "./tree/lazyChildren";
+export type { TreeContribution } from "./tree/treeBindingState";
 export type { TreeExpansionActions } from "./tree/treeRuntime";
 export {
   closeFailedTreeNode,

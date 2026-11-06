@@ -15,6 +15,7 @@ import { createTableEngine } from "../engine/createTableEngine";
 import type { GroupingContribution } from "../features/featureContribution";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { TableSource } from "../source/TableSource";
+import type { TreeEntry } from "../tree/treeRows";
 import {
   cellNavigationInput,
   CHROME_EXTRA_SLOT_ORDER,
@@ -47,6 +48,18 @@ const ROWS: Row[] = [
 ];
 
 const getRowId = (row: Row) => row.id;
+
+function treeEntry(row: Row): TreeEntry<Row> {
+  return {
+    row,
+    key: row.id,
+    level: 0,
+    hasChildren: false,
+    expanded: false,
+    path: [],
+    descendantIds: [],
+  };
+}
 
 const COLUMNS: ColumnMetadata<Row>[] = [
   { key: "name", header: "Name", accessor: (row) => row.name },
@@ -134,7 +147,7 @@ describe("renderedRowsOf", () => {
         { kind: "row", key: "b", row: ROWS[1], index: 0 },
       ] as unknown as GroupedFlatEntry<Row>[],
     };
-    const tree = { entries: [{ row: ROWS[0]! }] };
+    const tree = { entries: [treeEntry(ROWS[0]!)] };
     const source = { rows: ROWS };
     expect(renderedRowsOf({ source, grouping, tree })).toEqual([ROWS[1]]);
     expect(renderedRowsOf({ source, tree })).toEqual([ROWS[0]]);
@@ -429,13 +442,15 @@ describe("TableRuntimePublisher", () => {
     expect(neutral?.rows("visible")).toEqual(ROWS);
 
     // The host turns selection off and a tree reorders the rendered rows.
+    const tree = { entries: [treeEntry(ROWS[1]!)] };
     const second = publisher.update(
       makeChrome({
         source: makeSource({ tableEngine: engine }),
-        tree: { entries: [{ row: ROWS[1]! }] },
+        tree,
       }),
       {}
     );
+    expect(second.tree).toBe(tree);
     expect(second.neutralTable).toBe(neutral);
     expect(neutral?.operations.setSelection).toBe(false);
     expect(neutral?.rows("visible")).toEqual([ROWS[1]]);
@@ -687,8 +702,19 @@ describe("overlayChromeExtras", () => {
       tree: { entries: [] },
       grouping: { entries: [] },
       editing: { active: null },
-      detail: { render: vi.fn(), expansion: { expandedIds: new Set() } },
-      rowPinning: { state: {} },
+      detail: {
+        render: vi.fn(),
+        expansion: {
+          expandedIds: new Set<string>(),
+          isExpanded: () => false,
+          toggle: vi.fn(),
+        },
+      },
+      rowPinning: {
+        state: { top: [], bottom: [] },
+        pin: vi.fn(),
+        unpin: vi.fn(),
+      },
       rowActions: { open: vi.fn() },
       columnGroups: [{ key: "g" }],
       hasRowActions: true,
@@ -813,7 +839,7 @@ describe("overlayChromeExtras", () => {
 describe("finishShellBody", () => {
   function makeShell(chrome: {
     grouping?: { readonly entries: readonly unknown[] };
-    tree?: object;
+    tree?: { readonly entries: readonly unknown[] };
   }) {
     return {
       tableProps: {

@@ -70,6 +70,21 @@ export interface RowExpansionState {
 }
 
 /**
+ * A row-detail panel. Expansion here is {@link RowExpansionState}, not the
+ * tree's open set and not a group's collapsed buckets.
+ *
+ * @typeParam TRender - The host's render function.
+ *
+ * @public
+ */
+export interface DetailContribution<TRender = unknown> {
+  /** The host's detail renderer. */
+  readonly render: TRender;
+  /** Which detail panels are open. */
+  readonly expansion: RowExpansionState;
+}
+
+/**
  * Row-mutation state: the toolbar's control and the per-row actions.
  *
  * @public
