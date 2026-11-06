@@ -17,6 +17,7 @@ import {
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
+  withKitEnvironment,
 } from "@adapttable/vue/adapter";
 import UApp from "@nuxt/ui/components/App.vue";
 import {
@@ -32,6 +33,7 @@ import NuxtButton from "./controls/NuxtButton.vue";
 import { provideNuxtPortalContainer } from "./controls/portalContext";
 import { nuxtSelection } from "./controls/selection";
 import { provideNuxtDensity } from "./densityContext";
+import { useNuxtLibrary } from "./libraryEnvironment";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { nuxtSurface } from "./surface";
 
@@ -59,22 +61,29 @@ onBeforeUpdate(() => {
   footerSlot.value = slots.footer;
   cardSlot.value = slots.card;
 });
-const shell = useDataTableShell<TRow>(() => ({
-  ...props,
-  footer: footerSlot.value,
-  confirm: props.confirm ?? defaultConfirm,
-  onDensityChange: (density) => {
-    props.onDensityChange?.(density);
-    emit("update:density", density);
-  },
-  onSelectionChange:
-    props.selectable ||
-    props.selectedIds !== undefined ||
-    props.defaultSelectedIds !== undefined
-      ? (ids) => emit("update:selectedIds", ids)
-      : undefined,
-  onColumnLayoutChange: (layout) => emit("update:columnLayout", layout),
-}));
+const kit = useNuxtLibrary();
+const shell = useDataTableShell<TRow>(() =>
+  withKitEnvironment(
+    {
+      ...props,
+      footer: footerSlot.value,
+      confirm: props.confirm ?? defaultConfirm,
+      onDensityChange: (density: TableDensity) => {
+        props.onDensityChange?.(density);
+        emit("update:density", density);
+      },
+      onSelectionChange:
+        props.selectable ||
+        props.selectedIds !== undefined ||
+        props.defaultSelectedIds !== undefined
+          ? (ids: string[]) => emit("update:selectedIds", ids)
+          : undefined,
+      onColumnLayoutChange: (layout: ColumnLayoutState) =>
+        emit("update:columnLayout", layout),
+    },
+    kit.value
+  )
+);
 const names = computed(() => props.classNames ?? {});
 const fullscreen = shell.state.get(FULLSCREEN_MODEL);
 const portalContainer = provideNuxtPortalContainer(
