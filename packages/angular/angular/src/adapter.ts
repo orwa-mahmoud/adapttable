@@ -245,6 +245,7 @@ export {
   injectGrouping,
   type TableGrouping,
 } from "./grouping/tableGrouping";
+export { ADAPTTABLE_KIT_MOTION_OFF } from "./hooks/prefersReducedMotion";
 export { AdaptIcon } from "./icon";
 export {
   AdaptDataTableShell,
