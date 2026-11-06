@@ -582,6 +582,11 @@ Framework-free — see [concepts](./concepts.md#the-framework-neutral-engine).
 - `createTableEngine(options: CreateTableEngineOptions): TableEngine` — build
   an engine over in-memory rows. Filter, sort, page and group run here, with no
   React in the import graph.
+- `createBasicTableEngine(options: CreateTableEngineOptions): TableEngine`
+  (`@adapttable/core` and `@adapttable/core/engine`) — the same session with
+  the basic evaluator: filter, sort, search and page. Grouping and aggregate
+  code stay out of that graph. An existing root import of `createTableEngine`
+  keeps working.
 - `TableEngine` — the handle: `snapshot()`, `rows(scope)`, `dispatch(op)`,
   `configure(patch)`, `invalidate(axes, next)`, `subscribe(axes, listener)`,
   `cellValue`, `rowByKey`, `rowKey`, `getColumn`, `dispose()`.
@@ -611,6 +616,76 @@ Framework-free — see [concepts](./concepts.md#the-framework-neutral-engine).
   `operations` map of what is wired right now. `NeutralTableBinding` is how a
   host supplies the visible rows and that map.
 - `devWarn(message)` — development-only warning, printed once per message.
+
+### Composed ownership
+
+These names are the composed session, the typed feature contributions, and
+the registration helpers. [Architecture](../ARCHITECTURE.md#composed-session)
+explains which import a program changes. This list is the reference.
+
+- `createFrontendSourceWith(engineFactory)` — a frontend source on an explicit
+  evaluator. `FrontendEngineFactory` builds that engine.
+  `createFrontendSource` is the convenience form that supplies the full one.
+- `TableCallbackRefresh` — callback identities `refreshCallbacks` adopts:
+  row id, search text, filters, columns and sort value.
+- `createGridNavigation(options): GridFocusController` — arrow keys, Home,
+  End, PageUp, PageDown, Enter and F2, without selection, clipboard, fill or
+  history.
+- `INACTIVE_TIER_ROWS` — the one empty array an inactive built-in tier
+  receives. `activeTierValue` picks the live value or the idle one.
+  `tierRows` returns the host array while that tier is serving, and
+  `INACTIVE_TIER_ROWS` otherwise.
+- `GroupingContribution` — grouping's `entries`, and `groupBy` when the
+  binding published the keys on that bundle. `projectGroupingContribution`
+  returns the host contribution when it is defined, otherwise the feature
+  contribution, as the same object. `mergeGroupingContributions` keeps the
+  last defined contribution. `resolveFeatureGrouping` does that for the host
+  plus each feature, skipping undefined entries.
+  `REMAINING_FEATURE_OWNERSHIP` is the empty map of domains that have not
+  moved onto a typed contribution. `RemainingFeatureDomain` is its key type,
+  which is `never`.
+- `EditingContribution` — `onCellEdit` and, when batch editing is composed,
+  `stageCell`. The table does not write the row. `QueryContribution` is the
+  page, search and sort the source owns. `FilteringContribution` is the
+  filter catalog (`defs` and `registry`); applied values stay on the query.
+  `TreeContribution` aliases the host's tree entries. `DetailContribution`
+  is a row-detail renderer plus `RowExpansionState`.
+  `RowPinningContribution` is the row-pin controller. `PinningContribution`
+  is column pins and, when row pinning is composed, the row-pin lists.
+  `ColumnLayoutContribution` is hide and order when a layout feature
+  publishes setters. `SelectionContribution` is the host's `selectedIds` set
+  on the runtime view. It does not copy that set.
+- `projectGrouping(input): GroupingProjection` — one grouping snapshot.
+  `GroupingProjectionInput` is what it reads besides the binding's collapse
+  and paging snapshots. `GroupingProjection` is the warning, the aggregates
+  and the model. `groupingSourceOf` copies the source fields that snapshot
+  reads. `projectedGroupingSource` is the source the table renders: the
+  grouped view when the projection has a model, otherwise the source itself.
+  `groupingShowMoreAction` advances a `GroupingShowMoreTarget`.
+  `groupingCollapseCommands` closes over the open groups and the binding's
+  collapse owner. `groupingProjectionBundle` is the grouped view a binding
+  publishes, or `undefined` when the projection has no model.
+- `SHELL_OPERATION_OWNERS` names the module that owns each shell operation.
+  `ShellOperation` is one of those keys. `ShellOperationInput` holds the
+  optional contributions: `FindContribution`, `DensityContribution`,
+  `FullscreenContribution`, `ContextMenuContribution`,
+  `CommandPaletteContribution` and `PrintContribution`. An absent field is
+  an operation that is not armed. `publishShellOverlay` remembers that input
+  on the chrome object. `projectShellOperations` keeps each armed
+  contribution as the owner's object. `withShellOperations` lays those onto
+  a runtime view and clears the ones that are no longer armed.
+- `planFeatureRegistration` — which retained features stay and which
+  declarations still mount. `preferLastById` keeps the last declaration of
+  each id. `FeatureRegistrationPlan` is the release list and the mount list.
+  `RegisteredFeature` is one id plus its declaration. `projectFeatureHosts`
+  reads the per-feature hosts as one host. `invokeCleanups` runs every
+  cleanup and returns the failures; one failure does not skip the rest.
+  These functions are on `@adapttable/core/binding`.
+- `featureLifecycleConformanceTests(driver, harness)` — the registration
+  cases a binding runs against its own lifecycle. `FeatureLifecycleDriver`
+  opens an independent table and a nested one. `LifecycleHarness` is the
+  runner's `expect`. `LifecycleDeclaration` is one feature the driver mounts.
+  `LifecycleObservation` is what the driver can see after a reconcile.
 
 ### Table options and runtime contracts
 
@@ -3169,6 +3244,17 @@ virtualization. `AdaptDesktopTableModel` and `AdaptMobileCardsModel` build live
 header, row, field and custom-renderer plans while each kit renders its native
 table or cards. `AdaptGroupHeaderRowModel` and `AdaptGroupHeaderCardModel`
 provide group captions, aggregates and expansion props.
+
+`injectTableSurfaceHost(options)` returns a `TableSurfaceView`: the
+structural view the compatibility shell and the lean host share.
+`TableSurfaceHostOptions` is the rows, columns and features that host
+composes. `editingBundleFor` builds the one editing bundle both the shell
+and a feature mount use. A lean feature mount reads `SurfaceHandles` from
+the `SURFACE_HANDLES` token. `SURFACE_OCCUPIED` (`SurfaceOccupation`) records
+which of grid, grouping and editing the shell already created.
+`SURFACE_GRID`, `SURFACE_GROUPING` and `SURFACE_EDITING` are the feature-state
+keys a lean mount publishes. `TableSurfaceView` is also exported from
+`@adapttable/angular/adapter`.
 
 `AdaptAutoFilterFormModel` builds field plans. `AdaptTextFilterFieldModel`,
 `AdaptRangeFilterFieldModel`, `AdaptSelectFilterFieldModel`,

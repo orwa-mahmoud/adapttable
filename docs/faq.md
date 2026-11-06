@@ -179,13 +179,17 @@ React and the UI kit external because your app already ships those):
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
 | `useFrontendData` + `useDataTable` (react) | ~21 kB    |
-| every core export                          | ~101 kB   |
+| every core export                          | ~103 kB   |
 | `DataTable` from an adapter                | ~72–78 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
-full core, because the parts you never import never arrive. All eight React adapters
+full core, because the parts you never import never arrive. The every-export
+row is the whole public surface imported at once, measured 2026-11-06 at
+103.4 KiB. Its ceiling in `scripts/consumer-fixtures.mjs` is 102 KiB, so that
+fixture is over budget. It is not the download of a table. All eight React adapters
 land within ~12 kB of each other, so switching kits does not change what you
-pay.
+pay. Tree-shaking drops unused exports from an application bundle. Installing
+a package still installs that package.
 
 The third row is what composition buys. Every optional feature lives on its own
 entry point, so a plain `DataTable` carries none of them: no drag machine, no

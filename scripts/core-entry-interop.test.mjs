@@ -134,6 +134,50 @@ describe("focused core entries from a tarball", () => {
     }
   });
 
+  it("runs the documented constructors and a feature plan from the tarball", () => {
+    const source = [
+      `import { createTableEngine } from "@adapttable/core";`,
+      `import { planFeatureRegistration } from "@adapttable/core/binding";`,
+      `import { createBasicTableEngine } from "@adapttable/core/engine";`,
+      `import assert from "node:assert/strict";`,
+      ``,
+      `const rows = [`,
+      `  { id: "1", name: "Grace" },`,
+      `  { id: "2", name: "Ada" },`,
+      `];`,
+      `const columns = [{ key: "name", header: "Name", sortable: true }];`,
+      `const rowKey = (row) => row.id;`,
+      `const basic = createBasicTableEngine({ data: rows, columns, rowKey });`,
+      `basic.dispatch({ type: "setSort", key: "name", dir: "asc" });`,
+      `assert.deepEqual(basic.rows("full").map(rowKey), ["2", "1"]);`,
+      `basic.subscribe("all", () => {`,
+      `  throw new Error("subscriber");`,
+      `});`,
+      `assert.throws(() => basic.dispatch({ type: "setSearch", search: "Ada" }));`,
+      `assert.equal(basic.snapshot().search, "Ada");`,
+      `assert.deepEqual(basic.rows("full").map(rowKey), ["2"]);`,
+      `basic.dispose();`,
+      `const full = createTableEngine({ data: rows, columns, rowKey });`,
+      `full.dispatch({ type: "setSort", key: "name", dir: "asc" });`,
+      `assert.deepEqual(full.rows("full").map(rowKey), ["2", "1"]);`,
+      `full.dispose();`,
+      `const plan = planFeatureRegistration(`,
+      `  [],`,
+      `  [{ id: "notes", feature: { id: "notes" } }],`,
+      `  (current, next) => current === next`,
+      `);`,
+      `assert.deepEqual(plan.release, []);`,
+      `assert.deepEqual(plan.mount.map((entry) => entry.id), ["notes"]);`,
+      ``,
+    ].join("\n");
+    writeFileSync(join(consumer.dir, "composition.mjs"), source);
+    execFileSync(process.execPath, [join(consumer.dir, "composition.mjs")], {
+      cwd: consumer.dir,
+      stdio: "pipe",
+    });
+    assert.equal(existsSync(join(consumer.dir, "composition.mjs")), true);
+  });
+
   it("typechecks a type-only import of each new entry", () => {
     const source = [
       `import type { TableEngine } from "@adapttable/core/engine";`,

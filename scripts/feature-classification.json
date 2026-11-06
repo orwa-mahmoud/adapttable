@@ -601,7 +601,11 @@
           "./formula",
           "./xlsx",
           "./pdf",
-          "./conformance"
+          "./conformance",
+          "./engine",
+          "./grouping",
+          "./editing",
+          "./selection"
         ]
       },
       {

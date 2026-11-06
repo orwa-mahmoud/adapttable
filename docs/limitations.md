@@ -92,6 +92,9 @@ consumer fixtures in `scripts/bundle-budget.mjs`.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
+- Importing every core export measured 103.4 KiB gzip on 2026-11-06. The
+  fixture ceiling is 102 KiB, and that case does not pass. The figure is the
+  whole public surface, not a table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 
 Published FAQ figures are the measurements the budget script checks, not
 a second estimate. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable) ·
@@ -173,6 +176,7 @@ a fix was attempted and failed. None is listed.
 | Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                  |
 | URL-state 8,192 cap, `limit` 1–500       | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`             |
 | Adapter ≤ 80 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                             |
+| Every core export over its 102 KiB ceiling | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
 | AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                               |
 | Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                          |
 | Chromium e2e                             | `playwright.config.ts`                                                                                   |
