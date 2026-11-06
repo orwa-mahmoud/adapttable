@@ -17,14 +17,21 @@ import {
   ADAPTTABLE_CONTEXT_MENU,
   ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
+  type KitEnvironment,
   type PaletteOpenState,
 } from "@adapttable/angular/adapter";
+import { Directionality } from "@angular/cdk/bidi";
 import {
   FullscreenOverlayContainer,
   OverlayContainer,
 } from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
@@ -85,4 +92,17 @@ export type {
     },
   ],
 })
-export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {}
+export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {
+  private readonly inheritedDirection = inject(Directionality, {
+    optional: true,
+  });
+
+  /**
+   * Material takes direction from CDK `Directionality`. It has no runtime
+   * locale, density, or motion setting for the table's chrome.
+   */
+  protected override kitEnvironment(): KitEnvironment {
+    const dir = this.inheritedDirection?.valueSignal();
+    return dir === undefined ? {} : { dir };
+  }
+}
