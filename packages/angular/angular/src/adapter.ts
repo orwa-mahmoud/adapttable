@@ -256,6 +256,7 @@ export {
   type TableView,
 } from "./layout/dataTableShell";
 export { AdaptDesktopTableModel } from "./layout/desktopTableModel";
+export type { KitEnvironment } from "./layout/kitEnvironment";
 export { AdaptMobileCardsModel } from "./layout/mobileCardsModel";
 export { injectPopoverSpace } from "./layout/popoverSpace";
 export {

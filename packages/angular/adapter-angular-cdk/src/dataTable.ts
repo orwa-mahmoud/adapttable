@@ -17,12 +17,18 @@ import {
   ADAPTTABLE_CONTEXT_MENU,
   ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
+  type KitEnvironment,
   type PaletteOpenState,
 } from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
-import { Dir } from "@angular/cdk/bidi";
+import { Dir, Directionality } from "@angular/cdk/bidi";
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from "@angular/core";
 
 import { AdaptDesktopTable } from "./components/desktopTable";
 import { AdaptErrorState } from "./components/errorState";
@@ -74,4 +80,14 @@ export type {
     },
   ],
 })
-export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {}
+export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {
+  private readonly inheritedDirection = inject(Directionality, {
+    optional: true,
+  });
+
+  /** CDK's `Directionality`: the closest `dir`, or the document. */
+  protected override kitEnvironment(): KitEnvironment {
+    const dir = this.inheritedDirection?.valueSignal();
+    return dir === undefined ? {} : { dir };
+  }
+}

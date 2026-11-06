@@ -169,6 +169,7 @@ import {
 import { selectionStatsOf } from "../focus/selectionStats";
 import { injectPrefersReducedMotion } from "../hooks/prefersReducedMotion";
 import { staggerMounted } from "../motion/mountStagger";
+import type { KitEnvironment } from "./kitEnvironment";
 import { SURFACE_OCCUPIED } from "./surfaceChannels";
 import {
   bodyWindowFor,
@@ -576,8 +577,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   readonly rowKey = input.required<(row: TRow) => string>();
   /** The table's accessible name. Defaults to the `table` label. */
   readonly tableLabel = input<string>();
-  /** Text direction. */
-  readonly dir = input<Direction>("ltr");
+  /**
+   * Text direction. An explicit value wins. Otherwise a kit may supply its
+   * library's direction. With neither, the table stays left to right.
+   */
+  readonly dir = input<Direction>();
   /** Show the phone layout whatever the viewport. */
   readonly forceMobile = input<boolean>();
   /** Keep the desktop header in view while the table or the page scrolls. */
@@ -984,6 +988,15 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     );
   }
 
+  /**
+   * The kit's library settings. The binding calls this while resolving
+   * direction, labels, locale and density, so overrides must read signals
+   * here rather than inject.
+   */
+  protected kitEnvironment(): KitEnvironment {
+    return {};
+  }
+
   /** Compose current chrome while retaining each unchanged controller scope. */
   private assembleTable(
     features: readonly AdaptTableFeature[],
@@ -991,9 +1004,13 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   ): void {
     const labels = computed((): TableLabels | undefined => {
       const placeholder = this.searchPlaceholder();
+      const kit = this.kitEnvironment().labels;
+      const own = this.labels();
+      const merged =
+        own === undefined && kit === undefined ? undefined : { ...kit, ...own };
       return placeholder === undefined
-        ? this.labels()
-        : { ...this.labels(), searchPlaceholder: placeholder };
+        ? merged
+        : { ...merged, searchPlaceholder: placeholder };
     });
     const liveOptions = resources.use("options", [], () =>
       computed(() =>
@@ -1130,8 +1147,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         rowKey: (row) => this.rowKey()(row),
         tableLabel: this.tableLabel,
         labels,
-        dir: this.dir,
-        locale: this.locale,
+        dir: computed(() => this.dir() ?? this.kitEnvironment().dir ?? "ltr"),
+        locale: computed(() => this.locale() ?? this.kitEnvironment().locale),
         searchDebounceMs: this.searchDebounceMs(),
         forceMobile: isMobile,
         cellTemplates: this.cellTemplates,
@@ -1325,7 +1342,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           : undefined
     );
     const density = computed(() =>
-      resolveDensity(this.density(), densityState?.density())
+      resolveDensity(
+        this.density() ?? this.kitEnvironment().density,
+        densityState?.density()
+      )
     );
     const fullscreen = resources.use(
       "fullscreen",
