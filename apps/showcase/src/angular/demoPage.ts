@@ -228,6 +228,7 @@ export class AdaptShowcaseDemoPage {
       ? "infinite"
       : "paged";
   readonly mobile = this.availableEnabled("mobile");
+  readonly animate = enabled("animate");
   readonly selectable = this.availableEnabled("selection", this.lab);
   readonly searchable = this.availableEnabled("search", true);
   readonly requestedStructure = initialStructure(this.server, this.urlKey);

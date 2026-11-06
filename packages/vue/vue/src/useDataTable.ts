@@ -455,7 +455,11 @@ export function useDataTable<TRow>(
         ...attrs,
         "data-pinned": layout.value.pinOffset(column.key)?.side,
         "data-sticky": sticky ? "" : undefined,
-        style: { ...attrs.style, ...pinStyle(column.key, true), ...stickyStyle },
+        style: {
+          ...attrs.style,
+          ...pinStyle(column.key, true),
+          ...stickyStyle,
+        },
       });
     },
     sortButtonAttrs: (column: ColumnDef<TRow>) =>
@@ -482,6 +486,7 @@ export function useDataTable<TRow>(
         ),
         ...click,
         "data-clickable": click ? "" : undefined,
+        "data-stagger": "",
       });
     },
     /** Whether a live update to this cell is fresh enough to flash. */
@@ -507,6 +512,7 @@ export function useDataTable<TRow>(
         "data-selected": options.value.selection?.isSelected(rowKey(row))
           ? ""
           : undefined,
+        "data-stagger": "",
         "aria-posinset":
           size > rows.value.length ? windowStart.value + index + 1 : undefined,
         "aria-setsize": size > rows.value.length ? size : undefined,

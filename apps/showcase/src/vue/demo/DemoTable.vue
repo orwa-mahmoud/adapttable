@@ -178,6 +178,7 @@ const density = query.get("density") === "compact" ? "compact" : "comfortable";
         :mobile-breakpoint="enabled('mobile') ? Number.MAX_SAFE_INTEGER : 768"
         :defaults="{ limit: 10 }"
         :density="density"
+        :animate="enabled('animate')"
         :summary-row="summary"
         :features="features"
       />

@@ -152,6 +152,10 @@ describe("a headless Angular table", () => {
     const rows = element.querySelectorAll("tbody tr");
     expect(rows[0]?.getAttribute("data-adapttable-part")).toBe("row");
     expect(rows[0]?.getAttribute("data-row-id")).toBe("1");
+    expect(rows[0]?.hasAttribute("data-stagger")).toBe(true);
+    expect(element.querySelectorAll("tbody [data-stagger]")).toHaveLength(
+      rows.length
+    );
     const headers = [...element.querySelectorAll("th")].map((th) =>
       th.textContent?.trim()
     );

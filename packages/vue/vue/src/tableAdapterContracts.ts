@@ -380,6 +380,11 @@ export interface DataTableProps<TRow> {
   readonly error?: Error | null;
   readonly refetch?: () => void | Promise<unknown>;
   readonly density?: TableDensity;
+  /**
+   * Animate rows and cards as they mount. Off by default. Skipped when the
+   * reader prefers reduced motion.
+   */
+  readonly animate?: boolean;
   readonly defaultDensity?: TableDensity;
   readonly onDensityChange?: (density: TableDensity) => void;
   readonly confirm?: ConfirmHandler;

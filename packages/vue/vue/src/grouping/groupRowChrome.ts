@@ -162,6 +162,7 @@ export function GroupRowChrome<TRow>(
     "data-adapttable-part": mobile ? parts.card : parts.row,
     "data-group-key": entry.key,
     "data-collapsed": collapsedGroupAttr(entry),
+    "data-stagger": "",
     class: mobile
       ? [names.groupRow, names.groupCard]
       : [names.groupRow, rowClass],

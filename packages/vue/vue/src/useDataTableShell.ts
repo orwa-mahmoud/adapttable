@@ -136,6 +136,7 @@ import {
   useSummaryCells,
   useTableSummaryModel,
 } from "./layout/tableSummaryModel";
+import { useMountStagger } from "./motion/useMountStagger";
 import {
   FILL_HANDLE_CONTROL,
   FIND_BUTTON,
@@ -224,6 +225,11 @@ export interface UseDataTableShellOptions<TRow>
   readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
   readonly confirm?: ConfirmHandler;
   readonly density?: MaybeRefOrGetterOptional<TableDensity>;
+  /**
+   * Animate rows and cards as they mount. Off by default. Skipped when the
+   * reader prefers reduced motion.
+   */
+  readonly animate?: MaybeRefOrGetterOptional<boolean>;
   readonly defaultDensity?: TableDensity;
   readonly onDensityChange?: (next: TableDensity) => void;
   readonly selectable?: MaybeRefOrGetter<boolean>;
@@ -1344,6 +1350,11 @@ export function useDataTableShell<TRow>(
     currentView = undefined;
     surface.value = null;
   });
+  useMountStagger(
+    root,
+    () => [table.source.value.rows.length, isMobile.value],
+    () => ({ enabled: toValue(options.value.animate) === true })
+  );
   return {
     table,
     rowInventory,

@@ -135,6 +135,7 @@ import {
 } from "@adapttable/core/binding";
 import { asBatchGesture } from "@adapttable/core/editing";
 import {
+  afterRenderEffect,
   computed,
   contentChild,
   contentChildren,
@@ -166,6 +167,8 @@ import {
   filtersViewFor,
 } from "../filters/tableFilters";
 import { selectionStatsOf } from "../focus/selectionStats";
+import { injectPrefersReducedMotion } from "../hooks/prefersReducedMotion";
+import { staggerMounted } from "../motion/mountStagger";
 import { SURFACE_OCCUPIED } from "./surfaceChannels";
 import {
   bodyWindowFor,
@@ -702,6 +705,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   readonly closeHeaderFilterOnSelect = input(false);
   /** The host's own chips, shown after the table's filter chips. */
   readonly extraChips = input<readonly ActiveFilterChip[]>([]);
+  /**
+   * Animate rows and cards as they mount. Off by default. Skipped when the
+   * reader prefers reduced motion.
+   */
+  readonly animate = input(false);
   /** Controlled row density. Omit to use the composed chooser's state. */
   readonly density = input<TableDensity>();
   /** Every density request; a controlled table waits for its density input. */
@@ -846,7 +854,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     viewChild<TemplateRef<unknown>>("filtersTrigger");
   private scrollToGridRow: ((rowIndex: number) => void) | undefined;
   private readonly injector = inject(Injector);
+  private readonly reducedMotion = injectPrefersReducedMotion();
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
+  /** Skips a repeat entrance when the row count and layout have not changed. */
+  private staggerGeneration = "";
 
   /** Ctrl/Cmd+X and the menu's Cut, after the clipboard write succeeds. */
   private cutSelection(range: CellRange): void {
@@ -910,6 +921,24 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
 
   constructor() {
     mountForcedColorsStyles();
+    afterRenderEffect(() => {
+      const current = this.view();
+      const rows = current?.table.source().rows.length ?? 0;
+      const mobile = current?.table.isMobile() ?? false;
+      const enabled = this.animate();
+      const reduced = this.reducedMotion();
+      const root = this.root()?.nativeElement;
+      const marked = root?.querySelectorAll("[data-stagger]").length ?? 0;
+      const generation = `${enabled}:${reduced}:${rows}:${mobile ? 1 : 0}:${marked}`;
+      if (!enabled || reduced) {
+        this.staggerGeneration = generation;
+        return;
+      }
+      if (!root || marked === 0 || generation === this.staggerGeneration)
+        return;
+      this.staggerGeneration = generation;
+      staggerMounted({ root, enabled, reduced, rows, mobile });
+    });
   }
 
   ngOnInit(): void {
