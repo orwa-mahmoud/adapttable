@@ -34,9 +34,7 @@ const FRAMEWORK = [
 
 /** @param {string} spec */
 function isFramework(spec) {
-  return FRAMEWORK.some(
-    (name) => spec === name || spec.startsWith(`${name}/`)
-  );
+  return FRAMEWORK.some((name) => spec === name || spec.startsWith(`${name}/`));
 }
 
 /**
@@ -63,7 +61,12 @@ function resolveRelative(fromFile, spec) {
   const base = resolve(dirname(fromFile), spec);
   const candidates = spec.endsWith(".ts")
     ? [base]
-    : [`${base}.ts`, `${base}.tsx`, join(base, "index.ts"), join(base, "index.tsx")];
+    : [
+        `${base}.ts`,
+        `${base}.tsx`,
+        join(base, "index.ts"),
+        join(base, "index.tsx"),
+      ];
   return candidates.find((candidate) => existsSync(candidate));
 }
 
@@ -89,7 +92,10 @@ function edgesOf(source) {
         ts.isNamedImports(node.importClause.namedBindings)
       ) {
         const named = node.importClause.namedBindings.elements;
-        if (named.some((element) => !element.isTypeOnly) || node.importClause.name) {
+        if (
+          named.some((element) => !element.isTypeOnly) ||
+          node.importClause.name
+        ) {
           edges.push({ spec, kind: "runtime" });
         }
         if (named.some((element) => element.isTypeOnly)) {
@@ -228,7 +234,9 @@ function incrementalReaches(runtime, ownership) {
       const ownedByEngine =
         edge.from.startsWith("engine/") && owners.has(edge.from);
       const publicEntry = !edge.from.includes("/");
-      return !ownedByRows && !ownedByEngine && !publicEntry && !owners.has(edge.from);
+      return (
+        !ownedByRows && !ownedByEngine && !publicEntry && !owners.has(edge.from)
+      );
     })
     .map((edge) => ({ ...edge, reason: "reaches the incremental cache" }));
 }
@@ -296,7 +304,9 @@ export function classifyCoreEdges(edges, ownership) {
 export function checkCoreDependencies({
   root = ROOT,
   srcDir = join(root, "packages/shared/core/src"),
-  ownership = JSON.parse(readFileSync(join(root, "scripts/core-export-ownership.json"), "utf8")),
+  ownership = JSON.parse(
+    readFileSync(join(root, "scripts/core-export-ownership.json"), "utf8")
+  ),
 } = {}) {
   const edges = readCoreEdges(srcDir);
   const classified = classifyCoreEdges(edges, ownership);
@@ -327,8 +337,7 @@ function exportsOf(checker, source, subpath, srcDir) {
       symbol.flags & ts.SymbolFlags.Alias
         ? checker.getAliasedSymbol(symbol)
         : symbol;
-    const declaration =
-      aliased.valueDeclaration ?? aliased.declarations?.[0];
+    const declaration = aliased.valueDeclaration ?? aliased.declarations?.[0];
     const modulePath =
       declaration === undefined
         ? undefined
@@ -359,6 +368,10 @@ const ENTRY_SOURCES = {
   "./query": "query.ts",
   "./stream": "stream.ts",
   "./conformance": "conformance.ts",
+  "./engine": "engine.ts",
+  "./grouping": "grouping.ts",
+  "./editing": "editing.ts",
+  "./selection": "selection.ts",
 };
 
 /**
@@ -460,9 +473,7 @@ function main() {
   const write = process.argv.includes("--write-inventory");
   const checked = checkCoreDependencies();
   if (checked.problems.length > 0) {
-    console.error(
-      `core dependencies: ${checked.problems.length} problem(s)\n`
-    );
+    console.error(`core dependencies: ${checked.problems.length} problem(s)\n`);
     for (const problem of checked.problems) console.error(`  ${problem}`);
     process.exit(1);
   }

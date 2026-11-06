@@ -342,6 +342,81 @@ const CORE_FIXTURES = [
     ].join("\n"),
   },
   {
+    name: "core · engine entry",
+    kind: "core",
+    pkg: "core",
+    entryFile: "engine.js",
+    // 10.46 KiB gzip on 2026-11-06 for both constructors. The full engine's
+    // row model still contains the incremental cache; this door does not
+    // export it. Editing, writers and the formula parser stay out.
+    initialKB: 12,
+    totalKB: 12,
+    code: `export { createTableEngine, createBasicTableEngine } from "PKG";`,
+    present: ["createTableEngine", "createBasicTableEngine"],
+    absent: [
+      "createCellEditSession",
+      "createEditHistory",
+      "xlsxWriter",
+      "pdfWriter",
+      "parseFormula",
+      "openRowPatchStream",
+    ],
+  },
+  {
+    name: "core · grouping entry",
+    kind: "core",
+    pkg: "core",
+    entryFile: "grouping.js",
+    // 1.71 KiB gzip on 2026-11-06. The incremental cache stays out.
+    initialKB: 2,
+    totalKB: 2,
+    code: `export { buildGroupedFlatModel } from "PKG";`,
+    present: ["buildGroupedFlatModel"],
+    absent: [
+      "createTableEngine",
+      "createCellEditSession",
+      "xlsxWriter",
+      "parseFormula",
+      "createIncrementalView",
+    ],
+  },
+  {
+    name: "core · editing entry",
+    kind: "core",
+    pkg: "core",
+    entryFile: "editing.js",
+    // 1.72 KiB gzip on 2026-11-06.
+    initialKB: 2,
+    totalKB: 2,
+    code: `export { createCellEditSession, createEditHistory } from "PKG";`,
+    present: ["createCellEditSession", "createEditHistory"],
+    absent: [
+      "createTableEngine",
+      "xlsxWriter",
+      "pdfWriter",
+      "parseFormula",
+      "createIncrementalView",
+    ],
+  },
+  {
+    name: "core · selection entry",
+    kind: "core",
+    pkg: "core",
+    entryFile: "selection.js",
+    // 187 bytes gzip on 2026-11-06.
+    initialKB: 1,
+    totalKB: 1,
+    code: `export { createAllMatchingScope } from "PKG";`,
+    present: ["createAllMatchingScope"],
+    absent: [
+      "createTableEngine",
+      "createCellEditSession",
+      "xlsxWriter",
+      "parseFormula",
+      "createIncrementalView",
+    ],
+  },
+  {
     name: "server · parse a query",
     kind: "core",
     pkg: "server",
@@ -425,9 +500,7 @@ function adapterBaseFixtures() {
     absent: ADAPTER_ABSENT,
     // The full resolver stays in the MUI base table. A narrow labels split
     // saved a standalone focus entry and grew this graph; that is not a saving.
-    ...(kit === "mui"
-      ? { present: ["defaultLabels", "resolveLabels"] }
-      : {}),
+    ...(kit === "mui" ? { present: ["defaultLabels", "resolveLabels"] } : {}),
   }));
 }
 

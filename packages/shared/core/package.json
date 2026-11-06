@@ -117,6 +117,46 @@
         "default": "./dist/stream.cjs"
       }
     },
+    "./engine": {
+      "import": {
+        "types": "./dist/engine.d.ts",
+        "default": "./dist/engine.js"
+      },
+      "require": {
+        "types": "./dist/engine.d.cts",
+        "default": "./dist/engine.cjs"
+      }
+    },
+    "./grouping": {
+      "import": {
+        "types": "./dist/grouping.d.ts",
+        "default": "./dist/grouping.js"
+      },
+      "require": {
+        "types": "./dist/grouping.d.cts",
+        "default": "./dist/grouping.cjs"
+      }
+    },
+    "./editing": {
+      "import": {
+        "types": "./dist/editing.d.ts",
+        "default": "./dist/editing.js"
+      },
+      "require": {
+        "types": "./dist/editing.d.cts",
+        "default": "./dist/editing.cjs"
+      }
+    },
+    "./selection": {
+      "import": {
+        "types": "./dist/selection.d.ts",
+        "default": "./dist/selection.js"
+      },
+      "require": {
+        "types": "./dist/selection.d.cts",
+        "default": "./dist/selection.cjs"
+      }
+    },
     "./conformance": {
       "import": {
         "types": "./dist/conformance.d.ts",
