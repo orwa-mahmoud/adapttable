@@ -250,6 +250,10 @@ export {
   type UseSelectionOptions,
 } from "./selection/useSelection";
 /* ── Hooks ─────────────────────────────────────────────────────────── */
+export {
+  type KitEnvironment,
+  withKitEnvironment,
+} from "./hooks/kitEnvironment";
 export { useColorScheme } from "./hooks/useColorScheme";
 export { useDebounce } from "./hooks/useDebounce";
 export {
@@ -258,7 +262,10 @@ export {
 } from "./hooks/useInfiniteScroll";
 export { useIsMobile } from "./hooks/useIsMobile";
 export { useMediaQuery } from "./hooks/useMediaQuery";
-export { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
+export {
+  ReducedMotionScope,
+  usePrefersReducedMotion,
+} from "./hooks/usePrefersReducedMotion";
 export {
   useScrollToTableTop,
   type UseScrollToTableTopOptions,

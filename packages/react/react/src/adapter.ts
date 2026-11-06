@@ -487,6 +487,10 @@ export {
 export { GroupToggleSpacer } from "./grouping/GroupToggleSpacer";
 export type { GroupCollapseState } from "./grouping/useGroupCollapse";
 export {
+  type KitEnvironment,
+  withKitEnvironment,
+} from "./hooks/kitEnvironment";
+export {
   type MountStaggerOptions,
   useMountStagger,
 } from "./hooks/useMountStagger";
@@ -495,6 +499,7 @@ export {
   type OverlayTransition,
   useOverlayTransition,
 } from "./hooks/useOverlayTransition";
+export { ReducedMotionScope } from "./hooks/usePrefersReducedMotion";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
 export {
   createDesktopRow,

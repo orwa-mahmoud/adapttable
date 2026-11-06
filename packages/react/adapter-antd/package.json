@@ -458,6 +458,7 @@
   },
   "dependencies": {
     "@adapttable/core": "3.13.1",
+    "@adapttable/i18n": "workspace:*",
     "react-compiler-runtime": "^1.0.0",
     "@adapttable/react": "1.9.1"
   },

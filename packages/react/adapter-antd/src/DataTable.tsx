@@ -70,6 +70,7 @@ import {
   pinnedSummaryPart,
   pinnedSummaryRowId,
   printToolbar,
+  ReducedMotionScope,
   rememberFeatureHost,
   renderedRowsOf,
   REORDER_COLUMN_WIDTH,
@@ -111,6 +112,7 @@ import {
   viewControlsToolbar,
   type VirtualTableRow,
   windowGroupedEntries,
+  withKitEnvironment,
 } from "@adapttable/react/adapter";
 import {
   Button,
@@ -172,6 +174,7 @@ import {
 import { MobileCards } from "./components/MobileCards";
 import { SkeletonTable } from "./components/SkeletonTable";
 import { Toolbar } from "./components/Toolbar";
+import { useAntdLibrary } from "./libraryEnvironment";
 import type { DataTableProps } from "./types";
 
 // Table always nests its rows in Spin, even when loading is false. Its
@@ -2872,13 +2875,28 @@ function AntdTableBody<TRow>({
  * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
+  const kit = useAntdLibrary();
+  const sized = {
+    ...incoming,
+    size:
+      incoming.size ?? (incoming.density === undefined ? kit.size : undefined),
+  } as typeof incoming;
+  const props = useTableFeatures(
+    withKitEnvironment(sized, {
+      dir: kit.dir,
+      locale: kit.locale,
+      labels: kit.labels,
+      density: incoming.size === undefined ? kit.density : undefined,
+    })
+  );
   return (
-    <FeatureProviders props={props}>
-      <HeaderFilterOpenProvider>
-        <ForcedColorsStyle />
-        <DataTableContent<TRow> {...props} />
-      </HeaderFilterOpenProvider>
-    </FeatureProviders>
+    <ReducedMotionScope off={kit.motionOff}>
+      <FeatureProviders props={props}>
+        <HeaderFilterOpenProvider>
+          <ForcedColorsStyle />
+          <DataTableContent<TRow> {...props} />
+        </HeaderFilterOpenProvider>
+      </FeatureProviders>
+    </ReducedMotionScope>
   );
 }
