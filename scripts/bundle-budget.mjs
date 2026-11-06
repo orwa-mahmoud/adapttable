@@ -447,14 +447,17 @@ export const selectFixtures = selectCases;
  */
 export async function provePlantedLeak(install) {
   const { leaked } = await measure(plantedLeakFixture(), install.dir, install);
-  if (!leaked.includes("useTableEditHistory")) {
+  if (
+    !leaked.includes("useTableEditHistory") ||
+    !leaked.includes("asBatchGesture")
+  ) {
     throw new Error(
-      "planted leak did not fail the negative assertion — the detector is blind"
+      `planted leak did not fail the negative assertion — the detector is blind (saw ${leaked.join(", ") || "nothing"})`
     );
   }
   if (!JSON_OUT) {
     console.log(
-      "✓ planted leak failed the negative assertion (useTableEditHistory)"
+      "✓ planted leak failed the negative assertion (useTableEditHistory, asBatchGesture)"
     );
   }
 }

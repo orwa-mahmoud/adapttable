@@ -9,7 +9,6 @@ import {
   cellFlashAttr,
   type ConfirmHandler,
   EXTRA_ROW_PARTS,
-  insertExtraRows,
   isExtraEntry,
   mobileCardListStyle,
   mobileCardRegionProps,
@@ -466,6 +465,7 @@ export function MobileCards<TRow>({
   pinnedSummaryTop = [],
   pinnedSummaryBottom = [],
   extraRows,
+  assembly,
   renderCard,
   maxHeight,
   virtualScrollRef,
@@ -480,6 +480,13 @@ export function MobileCards<TRow>({
     pinnedSummaryTop,
     pinnedSummaryBottom
   );
+  const flatCardSlots = assembly?.insertExtraRows
+    ? assembly.insertExtraRows(
+        bodyRowEntries(entries, tree),
+        extraRows,
+        (entry) => entry.key
+      )
+    : bodyRowEntries(entries, tree);
   const compact = size === "1";
   const summary = useSummaryCells(summaryRow, rows);
 
@@ -612,11 +619,7 @@ export function MobileCards<TRow>({
               }
               return cardFor(entry.row, entry.index, entry.key);
             })
-          : insertExtraRows(
-              bodyRowEntries(entries, tree),
-              extraRows,
-              (e) => e.key
-            ).map((slot) =>
+          : flatCardSlots.map((slot) =>
               "kind" in slot ? (
                 <Card
                   key={slot.key}

@@ -55,7 +55,6 @@ import {
   type GroupedFlatEntry,
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
-  insertExtraRows,
   isDeclarativeFilters,
   isExtraEntry,
   KEYED_WINDOW,
@@ -575,10 +574,11 @@ function resolveAntdDataSource<TRow>(
   grouping: unknown,
   rows: readonly GroupedDataRecord<TRow>[],
   extraRows: ComposedProps<TRow>["extraRows"],
-  getRowId: (row: TRow) => string
+  getRowId: (row: TRow) => string,
+  insertRows: NonNullable<RenderModelAssembly<TRow>>["insertExtraRows"]
 ): readonly GroupedDataRecord<TRow>[] {
-  if (grouping) return rows;
-  return insertExtraRows(
+  if (grouping || insertRows === undefined) return rows;
+  return insertRows(
     (rows as readonly TRow[]).map((row) => ({
       kind: "row" as const,
       key: getRowId(row),
@@ -2317,11 +2317,15 @@ function AntdTableBody<TRow>({
           dataSourceBase,
           c.pinnedRows
         );
+        const featureAssembly = (
+          props as Partial<{ assembly: RenderModelAssembly<TRow> }>
+        ).assembly;
         const dataSource = resolveAntdDataSource(
           grouping,
           partitionedSource,
           props.extraRows,
-          getRowId
+          getRowId,
+          featureAssembly?.insertExtraRows
         );
         const { cellsByRow } = tableRenderModel({
           table,
@@ -2342,8 +2346,7 @@ function AntdTableBody<TRow>({
           // Features that replace an assembly heavy — cell spanning, extra rows —
           // write it onto the props the feature pass returns. antd assembles its own
           // table, so it reads that here the way the shared shell does.
-          assembly: (props as Partial<{ assembly: RenderModelAssembly<TRow> }>)
-            .assembly,
+          assembly: featureAssembly,
         });
         const pinRowSticky = !bodyCellsHaveRowSpan(cellsByRow);
 

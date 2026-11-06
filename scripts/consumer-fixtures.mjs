@@ -61,6 +61,8 @@ export const ADAPTER_ABSENT = [
   "matchKeySet",
   "useRowPinningUrlState",
   "useTableEditHistory",
+  "beginCellEdit",
+  "asBatchGesture",
   "FilterTreeBuilder",
   "SavedViewsMenu",
   "DensityButton",
@@ -702,8 +704,8 @@ export function plantedLeakFixture() {
     name: "planted leak · antd + useTableEditHistory",
     kind: "planted-leak",
     pkg: "adapter-antd",
-    code: `export { DataTable } from "PKG";\nexport { useTableEditHistory } from "@adapttable/react";`,
-    absent: ["useTableEditHistory"],
+    code: `export { DataTable } from "PKG";\nexport { useTableEditHistory, asBatchGesture } from "@adapttable/react";`,
+    absent: ["useTableEditHistory", "asBatchGesture"],
   };
 }
 

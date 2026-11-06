@@ -6,6 +6,7 @@ import {
   type UseDataTableResult,
 } from "@adapttable/react";
 import {
+  type AssemblyFns,
   bodyRowEntries,
   cellFlashAttr,
   type ConfirmHandler,
@@ -13,7 +14,6 @@ import {
   type ExtraRow,
   groupAggregateEntries,
   type GroupedFlatEntry,
-  insertExtraRows,
   isExtraEntry,
   mobileCardRegionProps,
   orderedCardEntries,
@@ -525,6 +525,7 @@ export function MobileCards<TRow>({
   pinnedSummaryTop = [],
   pinnedSummaryBottom = [],
   extraRows,
+  assembly,
   renderCard,
   listRef,
   listStyle,
@@ -600,6 +601,8 @@ export function MobileCards<TRow>({
   pinnedSummaryTop?: readonly TRow[];
   pinnedSummaryBottom?: readonly TRow[];
   extraRows?: readonly ExtraRow[];
+  /** Present when `extraRows()` composed the splice. Absent on a plain table. */
+  assembly?: Partial<AssemblyFns<TRow>>;
   /** Attach the virtualizer to the card scroll region. */
   listRef?: (node: HTMLElement | null) => void;
   /** Clip style when the host passed `maxHeight`. */
@@ -618,6 +621,13 @@ export function MobileCards<TRow>({
     pinnedSummaryTop,
     pinnedSummaryBottom
   );
+  const flatCardSlots = assembly?.insertExtraRows
+    ? assembly.insertExtraRows(
+        bodyRowEntries(entries, tree),
+        extraRows,
+        (entry) => entry.key
+      )
+    : bodyRowEntries(entries, tree);
 
   // `memo` erases generics at module level, so the memoized card is
   // instantiated here (once — the identity is stable for the list's life).
@@ -814,11 +824,7 @@ export function MobileCards<TRow>({
               }
               return renderLeafCard(entry.row, entry.index, entry.key);
             })
-          : insertExtraRows(
-              bodyRowEntries(entries, tree),
-              extraRows,
-              (e) => e.key
-            ).map((slot) =>
+          : flatCardSlots.map((slot) =>
               "kind" in slot ? (
                 <li
                   key={slot.key}

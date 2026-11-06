@@ -1,4 +1,3 @@
-import type { EditableColumnLike } from "@adapttable/core";
 import {
   CELL_NAV_LIVE,
   cellNavigationInput,
@@ -23,12 +22,12 @@ import {
  * Mount shell interaction hooks in-tree: history, find, grid, export, fullscreen.
  *
  * Features fill the live slots. Empty slots pass inert stubs, so the lean
- * table never imports those hooks.
+ * table never imports those hooks. Enter-to-edit and batch recording live in
+ * the cell-navigation and editing entries; this file only forwards the host
+ * callbacks when those slots are empty.
  */
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { asBatchGesture } from "../editing/editHistory";
-import { beginCellEdit } from "../editing/useCellEditing";
 import { withFindMarks } from "../find/findMarks";
 import type { DataTableShellResult } from "../useDataTableShell";
 import { rememberFeatureHost } from "./featureHost";
@@ -51,6 +50,14 @@ import { type FindLiveSlotProps } from "./slotKeys";
 interface HistoryResult<TRow> {
   history: DataTableShellResult<TRow>["editHistory"];
   onCellEdit: DataTableShellResult<TRow>["chromeProps"]["onCellEdit"];
+  /**
+   * Set by the editing entry. Absent when the slot is empty, so the host's
+   * own batch callback is left untouched and this file does not import the
+   * gesture wrapper.
+   */
+  onBatchEdit?: NonNullable<
+    DataTableShellResult<TRow>["chromeProps"]["onBatchEdit"]
+  >;
 }
 
 /**
@@ -71,10 +78,7 @@ export function HistoryLiveGate<TRow>({
     const chromeProps = {
       ...shell.chromeProps,
       onCellEdit: result.onCellEdit,
-      onBatchEdit: asBatchGesture(
-        shell.chromeProps.onBatchEdit,
-        result.history.record
-      ),
+      onBatchEdit: result.onBatchEdit ?? shell.chromeProps.onBatchEdit,
     };
     rememberFeatureHost(chromeProps, shell.featureHost);
     return children({
@@ -87,6 +91,7 @@ export function HistoryLiveGate<TRow>({
     editHistory: shell.chromeProps.editHistory,
     columns: shell.chrome.allColumns,
     onCellEdit: shell.chromeProps.onCellEdit,
+    onBatchEdit: shell.chromeProps.onBatchEdit,
     children: apply,
   } as unknown as EditHistoryLiveSlotProps;
   return filled ? (
@@ -168,16 +173,6 @@ function CellNavStage<TRow>({
       columns: chrome.columnLayout.visibleColumns,
       columnsWindowed: shell.tableProps.columnWindow.enabled,
       headerCheckbox: props.columnSelectionCheckbox === true,
-      activate: (row, column) => {
-        const editing = chrome.editing;
-        if (!editing) return;
-        beginCellEdit(
-          editing.state,
-          row,
-          column as EditableColumnLike<TRow>,
-          props.rowKey
-        );
-      },
     }),
     getRowId: props.rowKey,
     dir: props.dir,
@@ -212,6 +207,7 @@ function CellNavStage<TRow>({
     onFind: live.find.openBar,
     matchKeys: live.find.matchKeys,
     currentMatch: live.find.current,
+    editing: chrome.editing,
     children: (gridFocus: ReturnType<typeof disabledGridFocus>) =>
       children({ ...live, gridFocus }),
   } as unknown as CellNavLiveSlotProps;

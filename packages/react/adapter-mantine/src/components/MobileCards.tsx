@@ -8,7 +8,6 @@ import {
   cellFlashAttr,
   type ConfirmHandler,
   EXTRA_ROW_PARTS,
-  insertExtraRows,
   isExtraEntry,
   mobileCardListStyle,
   mobileCardRegionProps,
@@ -112,6 +111,7 @@ export interface MobileCardsProps<TRow> extends Pick<
   | "pinnedSummaryTop"
   | "pinnedSummaryBottom"
   | "extraRows"
+  | "assembly"
   | "maxHeight"
   | "virtualScrollRef"
 > {
@@ -524,6 +524,7 @@ export function MobileCards<TRow>({
   pinnedSummaryTop = [],
   pinnedSummaryBottom = [],
   extraRows,
+  assembly,
   renderCard,
   maxHeight,
   virtualScrollRef,
@@ -541,6 +542,13 @@ export function MobileCards<TRow>({
     pinnedSummaryTop,
     pinnedSummaryBottom
   );
+  const flatCardSlots = assembly?.insertExtraRows
+    ? assembly.insertExtraRows(
+        bodyRowEntries(entries, tree),
+        extraRows,
+        (entry) => entry.key
+      )
+    : bodyRowEntries(entries, tree);
   // Header groups and multi-sort are desktop-only: cards have no column axis
   // to span a group label across or to chain a sort on, so neither renders
   // here. The footer summary still applies — it closes the list as one card.
@@ -680,11 +688,7 @@ export function MobileCards<TRow>({
               }
               return cardFor(entry.row, entry.index, entry.key);
             })
-          : insertExtraRows(
-              bodyRowEntries(entries, tree),
-              extraRows,
-              (e) => e.key
-            ).map((slot) =>
+          : flatCardSlots.map((slot) =>
               "kind" in slot ? (
                 <Card
                   key={slot.key}
