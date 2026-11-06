@@ -1759,6 +1759,9 @@ importers:
 
   packages/vue/adapter-naive-ui:
     dependencies:
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
       '@adapttable/vue':
         specifier: 0.4.1
         version: link:../vue
@@ -1766,9 +1769,6 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
-      '@adapttable/i18n':
-        specifier: workspace:*
-        version: link:../../shared/i18n
       '@css-render/vue3-ssr':
         specifier: 0.15.14
         version: 0.15.14(vue@3.5.43(typescript@6.0.3))

@@ -21,7 +21,6 @@
   "devDependencies": {
     "@adapttable/core": "workspace:*",
     "vue": "^3.5.43",
-    "@adapttable/i18n": "workspace:*",
     "naive-ui": "2.45.3",
     "@css-render/vue3-ssr": "0.15.14"
   },
@@ -49,6 +48,7 @@
     "naive-ui"
   ],
   "dependencies": {
+    "@adapttable/i18n": "workspace:*",
     "@adapttable/vue": "0.4.1"
   },
   "exports": {
