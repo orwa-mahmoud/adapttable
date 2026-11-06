@@ -30,6 +30,17 @@ import {
   projectGroupingContribution,
 } from "../features/featureContribution";
 import { deriveRuntimeOperations } from "../features/runtimeOperations";
+import {
+  type CommandPaletteContribution,
+  type ContextMenuContribution,
+  type DensityContribution,
+  type FindContribution,
+  type FullscreenContribution,
+  type PrintContribution,
+  projectShellOperations,
+  readShellOverlay,
+  withShellOperations,
+} from "../features/shellOperations";
 import type { TableRuntimeView } from "../features/tableRuntime";
 import type { FilterDef } from "../filters/filterDefs";
 import { filteringContributionOf } from "../filters/filterFormModel";
@@ -155,6 +166,18 @@ export interface RuntimeChromeInput<TRow> {
       ) => void;
     };
   };
+  /** The find bar, when find can open. */
+  readonly find?: FindContribution;
+  /** The density chooser, when that feature is composed. */
+  readonly density?: DensityContribution;
+  /** Fullscreen, when the browser supports it. */
+  readonly fullscreen?: FullscreenContribution;
+  /** The context menu, when that feature is composed. */
+  readonly contextMenu?: ContextMenuContribution<TRow>;
+  /** The command palette, when it is armed. */
+  readonly commandPalette?: CommandPaletteContribution;
+  /** Print, when the host asked for the control. */
+  readonly print?: PrintContribution;
 }
 
 /**
@@ -355,6 +378,7 @@ export function tableRuntimeView<TRow>(
             : undefined,
         }
       : undefined,
+    ...projectShellOperations(chrome),
   };
 }
 
@@ -371,12 +395,21 @@ export function tableRuntimeView<TRow>(
  */
 export class TableRuntimePublisher<TRow> {
   #view: TableRuntimeView<TRow> | undefined;
+  #chrome: object | undefined;
   #visibleRows: readonly TRow[] = [];
   #neutral: NeutralTable<TRow> | undefined;
   readonly #binding = {
     visibleRows: (): readonly TRow[] => this.#visibleRows,
-    operations: (): Readonly<Record<string, boolean>> =>
-      this.#view ? deriveRuntimeOperations(this.#view) : {},
+    operations: (): Readonly<Record<string, boolean>> => {
+      const view = this.#view;
+      if (!view) return {};
+      const overlay = this.#chrome
+        ? readShellOverlay<TRow>(this.#chrome)
+        : undefined;
+      return deriveRuntimeOperations(
+        overlay ? withShellOperations(view, overlay) : view
+      );
+    },
   };
 
   /**
@@ -396,6 +429,7 @@ export class TableRuntimePublisher<TRow> {
     }
   ): TableRuntimeView<TRow> {
     const view = tableRuntimeView(chrome, options);
+    this.#chrome = chrome;
     this.#view = view;
     this.#visibleRows = view.visibleRows ?? view.rows;
     const engine = chrome.source.tableEngine;
@@ -583,14 +617,10 @@ export interface PipelineShell {
 export function finishShellLive<
   TShell extends PipelineShell,
   TLive extends {
-    readonly find: unknown;
+    readonly find: FindContribution;
     readonly gridFocus: unknown;
     readonly exportHandler: object;
-    readonly fullscreen: {
-      readonly supported: boolean;
-      readonly active: boolean;
-      readonly toggle: () => void;
-    };
+    readonly fullscreen: FullscreenContribution;
     readonly stats: unknown;
   },
   TDensity,

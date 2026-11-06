@@ -28,6 +28,14 @@ import type {
   EditingContribution,
   GroupingContribution,
 } from "./featureContribution";
+import type {
+  CommandPaletteContribution,
+  ContextMenuContribution,
+  DensityContribution,
+  FindContribution,
+  FullscreenContribution,
+  PrintContribution,
+} from "./shellOperations";
 
 /**
  * The latest fully composed view of a table, as a feature above it reads it.
@@ -165,6 +173,39 @@ export interface TableRuntimeView<TRow = unknown> {
    * is the batch/dirty path when batch editing is composed.
    */
   readonly editing?: EditingContribution<TRow>;
+  /**
+   * The find bar, when find is composed and can open.
+   *
+   * The find controller's own state. Absent when find is off, so the view
+   * does not advertise a bar the table does not have.
+   */
+  readonly find?: FindContribution;
+  /**
+   * The density chooser, when that feature is composed.
+   *
+   * A table that only renders a default density does not publish this.
+   */
+  readonly density?: DensityContribution;
+  /**
+   * Fullscreen, when the feature is composed and the browser supports it.
+   */
+  readonly fullscreen?: FullscreenContribution;
+  /**
+   * The context menu, when that feature is composed.
+   *
+   * The host's factories or the menu model the binding already resolved.
+   */
+  readonly contextMenu?: ContextMenuContribution<TRow>;
+  /**
+   * The command palette, when that feature is armed.
+   *
+   * `commands` is the host's list.
+   */
+  readonly commandPalette?: CommandPaletteContribution;
+  /**
+   * Print, when the host wired a print handler and asked for the control.
+   */
+  readonly print?: PrintContribution;
 }
 
 /**

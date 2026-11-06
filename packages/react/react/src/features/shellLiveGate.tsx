@@ -12,9 +12,12 @@ import {
   finishShellLive,
   FULLSCREEN_LIVE,
   type FullscreenLiveSlotProps,
+  publishShellOverlay,
   SELECTION_STATS_LIVE,
   type SelectionStatsLiveSlotProps,
+  type ShellOperationInput,
   sourceWindowStart,
+  withShellOperations,
 } from "@adapttable/core/binding";
 /**
  * Mount shell interaction hooks in-tree: history, find, grid, export, fullscreen.
@@ -29,7 +32,12 @@ import { beginCellEdit } from "../editing/useCellEditing";
 import { withFindMarks } from "../find/findMarks";
 import type { DataTableShellResult } from "../useDataTableShell";
 import { rememberFeatureHost } from "./featureHost";
-import { FeatureSlot, useFeatureSlotFilled } from "./providers";
+import {
+  FeatureSlot,
+  useFeatureSlotFilled,
+  usePublishTableRuntime,
+  useTableRuntime,
+} from "./providers";
 import {
   DISABLED_EXPORT,
   DISABLED_FIND,
@@ -364,7 +372,67 @@ export function ShellLiveGate<TRow>({
   };
   return (
     <LiveChain index={0} shell={shell} live={idle}>
-      {(live) => children(finishShellLive(shell, live))}
+      {(live) => (
+        <PublishLiveOperations shell={shell} live={live}>
+          {children}
+        </PublishLiveOperations>
+      )}
     </LiveChain>
   );
+}
+
+/**
+ * Project the live controllers onto the runtime after the stages that own
+ * them have run. The chrome publisher has already built the view.
+ */
+function PublishLiveOperations<TRow>({
+  shell,
+  live,
+  children,
+}: {
+  readonly shell: DataTableShellResult<TRow>;
+  readonly live: ShellLive<TRow>;
+  readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
+}): ReactNode {
+  const input = liveShellOperations(shell, live);
+  publishShellOverlay(shell.chrome, input);
+  const runtime = useTableRuntime<TRow>();
+  const current = runtime.view();
+  const projected = current ? withShellOperations(current, input) : undefined;
+  usePublishTableRuntime(
+    projected?.visibleRows ?? projected?.rows ?? [],
+    projected ? runtime.labels() : undefined,
+    projected
+  );
+  return children(finishShellLive(shell, live));
+}
+
+/** Armed shell operations from the controllers this gate just ran. */
+function liveShellOperations<TRow>(
+  shell: DataTableShellResult<TRow>,
+  live: ShellLive<TRow>
+): ShellOperationInput<TRow> {
+  const props = shell.chromeProps;
+  const host = shell.featureHost;
+  const commands = host?.commands ?? [];
+  const palette = props.commandPalette;
+  const paletteArmed =
+    palette !== false && (palette !== undefined || commands.length > 0);
+  const onPrint = props.onPrint;
+  return {
+    find: live.find,
+    fullscreen: live.fullscreen,
+    density:
+      props.densityChooser === true
+        ? { density: props.density, onDensityChange: props.onDensityChange }
+        : undefined,
+    contextMenu: props.contextMenu
+      ? { items: host?.contextMenuItems ?? [] }
+      : undefined,
+    commandPalette: paletteArmed ? { commands } : undefined,
+    print:
+      props.printButton === true && onPrint
+        ? { onPrint }
+        : undefined,
+  };
 }

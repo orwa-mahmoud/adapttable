@@ -1394,6 +1394,13 @@ export interface CommandPaletteChromeProps<TNode = unknown, TKeyboardEvent = Key
 }
 
 // @public
+export interface CommandPaletteContribution {
+    readonly close?: () => void;
+    readonly commands: readonly Command[];
+    readonly open?: () => void;
+}
+
+// @public
 export interface CommandPaletteInputProps<TKeyboardEvent = KeyboardEvent> {
     readonly inputProps: {
         readonly value: string;
@@ -1477,6 +1484,13 @@ export interface ContextMenuChromeProps<TNode = unknown> {
     labels?: TableLabels;
     onClose: () => void;
     slots: ContextMenuSlots<TNode>;
+}
+
+// @public
+export interface ContextMenuContribution<TRow = unknown> {
+    readonly close?: () => void;
+    readonly entries?: readonly ContextMenuItem[];
+    readonly items?: readonly ContextMenuItemsFactory<TRow>[];
 }
 
 // @public
@@ -1791,6 +1805,12 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 
 // @public
 export const DENSITY_STATE: FeatureStateKey<DensityFeatureState>;
+
+// @public
+export interface DensityContribution {
+    readonly density: TableDensity;
+    readonly onDensityChange: (next: TableDensity) => void;
+}
 
 // @public
 export interface DensityFeatureState {
@@ -3348,6 +3368,15 @@ export interface FindButtonProps {
 }
 
 // @public
+export interface FindContribution {
+    readonly open: boolean;
+    readonly openBar?: () => void;
+    readonly query: string;
+    readonly setOpen: (open: boolean) => void;
+    readonly setQuery: (query: string) => void;
+}
+
+// @public
 export interface FindInTableState {
     current: GridCell | null;
     index: number;
@@ -3400,14 +3429,10 @@ export function finishShellBody<TRef, TShell extends PipelineShell & {
 
 // @public
 export function finishShellLive<TShell extends PipelineShell, TLive extends {
-    readonly find: unknown;
+    readonly find: FindContribution;
     readonly gridFocus: unknown;
     readonly exportHandler: object;
-    readonly fullscreen: {
-        readonly supported: boolean;
-        readonly active: boolean;
-        readonly toggle: () => void;
-    };
+    readonly fullscreen: FullscreenContribution;
     readonly stats: unknown;
 }, TDensity>(shell: TShell & {
     readonly editHistory: Parameters<typeof undoRedoToolbarProps>[1];
@@ -3434,6 +3459,13 @@ export const FORCED_COLORS_CSS: string;
 
 // @public
 export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps<unknown, unknown>>;
+
+// @public
+export interface FullscreenContribution {
+    readonly active: boolean;
+    readonly supported: boolean;
+    readonly toggle: () => void;
+}
 
 // @public
 export interface FullscreenLiveSlotProps<TFullscreen = unknown, TNode = unknown> {
@@ -4659,6 +4691,11 @@ export function preferLastById<TFeature extends {
 export function preserveEditorFocusOnLayoutChange(): void;
 
 // @public
+export interface PrintContribution {
+    readonly onPrint: () => void;
+}
+
+// @public
 export function printToolbarProps(wanted: boolean | undefined, onPrint: (() => void) | undefined, labels: Pick<TableLabels, "print">): {
     onPrint?: () => void;
     printLabel?: string;
@@ -4672,6 +4709,12 @@ export function projectGroupingContribution<TRow>(input: {
     readonly host: GroupingContribution<TRow> | undefined;
     readonly feature: GroupingContribution<TRow> | undefined;
 }): GroupingContribution<TRow> | undefined;
+
+// @public
+export function projectShellOperations<TRow>(input: ShellOperationInput<TRow>): ShellOperationInput<TRow>;
+
+// @public
+export function publishShellOverlay<TRow>(owner: object, input: ShellOperationInput<TRow>): void;
 
 // @public
 export interface QueryAggregate {
@@ -5325,6 +5368,9 @@ export interface RuntimeChromeInput<TRow> {
         readonly setPinned: (key: string, side: PinSide | undefined) => void;
     };
     readonly columnLayoutLive?: boolean;
+    readonly commandPalette?: CommandPaletteContribution;
+    readonly contextMenu?: ContextMenuContribution<TRow>;
+    readonly density?: DensityContribution;
     readonly editing?: {
         readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
         readonly batch?: {
@@ -5334,8 +5380,11 @@ export interface RuntimeChromeInput<TRow> {
     readonly featureGrouping?: GroupingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filterRegistry?: FilterTypeRegistry;
+    readonly find?: FindContribution;
+    readonly fullscreen?: FullscreenContribution;
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: GroupingContribution<TRow>;
+    readonly print?: PrintContribution;
     readonly rowPinning?: RowPinningContribution;
     readonly source: TableSource<TRow>;
     readonly table: {
@@ -5577,6 +5626,16 @@ export const SHARED_DESKTOP_ROW_KEYS: readonly ["row", "id", "index", "selected"
 export const SHELL_LIVE_STAGE_ORDER: readonly ["find-live", "cell-nav-live", "export-live", "fullscreen-live", "selection-stats-live"];
 
 // @public
+export const SHELL_OPERATION_OWNERS: {
+    readonly find: "find/findController.ts";
+    readonly density: "layout/densityContract.ts";
+    readonly fullscreen: "layout/layoutBindingState.ts";
+    readonly contextMenu: "actions/contextMenuModel.ts";
+    readonly commandPalette: "actions/commandPaletteController.ts";
+    readonly print: "layout/shellPipeline.ts";
+};
+
+// @public
 export interface ShellBodyInput<TRef> {
     // (undocumented)
     readonly canLoadMore: boolean;
@@ -5611,6 +5670,25 @@ export interface ShellBodyInput<TRef> {
 
 // @public
 export type ShellLiveStageId = (typeof SHELL_LIVE_STAGE_ORDER)[number];
+
+// @public
+export type ShellOperation = keyof typeof SHELL_OPERATION_OWNERS;
+
+// @public
+export interface ShellOperationInput<TRow = unknown> {
+    // (undocumented)
+    readonly commandPalette?: CommandPaletteContribution;
+    // (undocumented)
+    readonly contextMenu?: ContextMenuContribution<TRow>;
+    // (undocumented)
+    readonly density?: DensityContribution;
+    // (undocumented)
+    readonly find?: FindContribution;
+    // (undocumented)
+    readonly fullscreen?: FullscreenContribution;
+    // (undocumented)
+    readonly print?: PrintContribution;
+}
 
 // @public
 export function showAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
@@ -6688,10 +6766,15 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly bulk: readonly BulkAction[];
     };
     readonly columnLayout?: ColumnLayoutContribution;
+    readonly commandPalette?: CommandPaletteContribution;
+    readonly contextMenu?: ContextMenuContribution<TRow>;
+    readonly density?: DensityContribution;
     readonly editing?: EditingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filtering?: FilteringContribution<TRow>;
     readonly filterRegistry?: FilterTypeRegistry;
+    readonly find?: FindContribution;
+    readonly fullscreen?: FullscreenContribution;
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: GroupingContribution<TRow>;
     readonly groupingState?: {
@@ -6709,6 +6792,7 @@ export interface TableRuntimeView<TRow = unknown> {
     };
     readonly neutralTable?: NeutralTable<TRow>;
     readonly pinning?: PinningContribution;
+    readonly print?: PrintContribution;
     readonly query?: QueryContribution;
     readonly rowLabel: (row: TRow) => string;
     readonly rows: readonly TRow[];
@@ -7109,6 +7193,9 @@ export interface WiringReorder<TRow> extends RowReorderDigest {
         "data-drop"?: "before" | "inside" | "after";
     } | undefined;
 }
+
+// @public
+export function withShellOperations<TRow>(view: TableRuntimeView<TRow>, input: ShellOperationInput<TRow>): TableRuntimeView<TRow>;
 
 // @public
 export function withSourceIndices<TRow>(virtualization: TableVirtualization<TRow>, sourceRows: readonly TRow[], rowKey: (row: TRow) => string): TableVirtualization<TRow>;

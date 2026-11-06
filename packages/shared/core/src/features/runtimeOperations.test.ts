@@ -34,7 +34,7 @@ describe("deriveRuntimeOperations", () => {
     const ops = deriveRuntimeOperations(undefined);
 
     expect(Object.values(ops).every((wired) => !wired)).toBe(true);
-    expect(Object.keys(ops)).toHaveLength(13);
+    expect(Object.keys(ops)).toHaveLength(19);
   });
 
   it("reports every operation unwired on a bare view", () => {
@@ -63,6 +63,18 @@ describe("deriveRuntimeOperations", () => {
           move: noop,
           setOrder: noop,
         },
+        find: {
+          open: true,
+          query: "a",
+          setOpen: noop,
+          setQuery: noop,
+          openBar: noop,
+        },
+        density: { density: "compact", onDensityChange: noop },
+        fullscreen: { supported: true, active: false, toggle: noop },
+        contextMenu: { items: [] },
+        commandPalette: { commands: [] },
+        print: { onPrint: noop },
       })
     );
 
@@ -106,5 +118,31 @@ describe("deriveRuntimeOperations", () => {
     expect(ops.hideColumn).toBe(false);
     expect(ops.moveColumn).toBe(false);
     expect(ops.setColumnOrder).toBe(false);
+  });
+
+  it("claims find only when the bar can open, and fullscreen only when supported", () => {
+    const closed = deriveRuntimeOperations(
+      view({
+        find: { open: false, query: "", setOpen: noop, setQuery: noop },
+        fullscreen: { supported: false, active: false, toggle: noop },
+      })
+    );
+    expect(closed.find).toBe(false);
+    expect(closed.toggleFullscreen).toBe(false);
+
+    const armed = deriveRuntimeOperations(
+      view({
+        find: {
+          open: false,
+          query: "",
+          setOpen: noop,
+          setQuery: noop,
+          openBar: noop,
+        },
+        fullscreen: { supported: true, active: false, toggle: noop },
+      })
+    );
+    expect(armed.find).toBe(true);
+    expect(armed.toggleFullscreen).toBe(true);
   });
 });

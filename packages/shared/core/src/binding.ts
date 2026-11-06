@@ -698,6 +698,20 @@ export {
   resolveFeatureGrouping,
 } from "./features/featurePatch";
 export {
+  type CommandPaletteContribution,
+  type ContextMenuContribution,
+  type DensityContribution,
+  type FindContribution,
+  type FullscreenContribution,
+  type PrintContribution,
+  projectShellOperations,
+  publishShellOverlay,
+  SHELL_OPERATION_OWNERS,
+  type ShellOperation,
+  type ShellOperationInput,
+  withShellOperations,
+} from "./features/shellOperations";
+export {
   type CoreStandardFeatureFactories,
   type CoreStandardFeatureOptions,
   standardFeatureList,

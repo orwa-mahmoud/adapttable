@@ -13,6 +13,7 @@ import {
 import type { ColumnMetadata } from "../contracts/columns";
 import { createTableEngine } from "../engine/createTableEngine";
 import type { GroupingContribution } from "../features/featureContribution";
+import { publishShellOverlay } from "../features/shellOperations";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { TableSource } from "../source/TableSource";
 import type { TreeEntry } from "../tree/treeRows";
@@ -465,6 +466,33 @@ describe("TableRuntimePublisher", () => {
     expect(withEngine.neutralTable).toBeDefined();
     expect(publisher.update(makeChrome(), {}).neutralTable).toBeUndefined();
   });
+
+  it("reads a shell overlay published after the view, per chrome", () => {
+    const engine = makeEngine();
+    const publisher = new TableRuntimePublisher<Row>();
+    const chrome = makeChrome({
+      source: makeSource({ tableEngine: engine }),
+    });
+    const view = publisher.update(chrome, {});
+    expect(view.neutralTable?.operations.find).toBe(false);
+    const find = {
+      open: true,
+      query: "ada",
+      setOpen: vi.fn(),
+      setQuery: vi.fn(),
+      openBar: vi.fn(),
+    };
+    publishShellOverlay(chrome, { find });
+    expect(view.neutralTable?.operations.find).toBe(true);
+    expect(view.find).toBeUndefined();
+    const nested = new TableRuntimePublisher<Row>();
+    const nestedView = nested.update(
+      makeChrome({ source: makeSource({ tableEngine: makeEngine() }) }),
+      {}
+    );
+    expect(nestedView.neutralTable?.operations.find).toBe(false);
+    expect(view.neutralTable?.operations.find).toBe(true);
+  });
 });
 
 describe("cellNavigationInput", () => {
@@ -638,7 +666,12 @@ describe("finishShellLive", () => {
       },
     };
     const live = {
-      find: { query: "" },
+      find: {
+        open: false,
+        query: "",
+        setOpen: vi.fn(),
+        setQuery: vi.fn(),
+      },
       gridFocus: { enabled: true },
       exportHandler: { onExport: vi.fn() },
       fullscreen: { supported: true, active: false, toggle: vi.fn() },

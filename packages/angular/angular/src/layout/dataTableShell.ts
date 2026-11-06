@@ -1918,6 +1918,24 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             tree: current?.tree?.(),
             rowPinning: livePinning(),
             editing: current?.editing?.(),
+            find: find?.(),
+            density: densityState
+              ? {
+                  density: densityState.density(),
+                  onDensityChange: densityState.setDensity,
+                }
+              : undefined,
+            fullscreen: fullscreen?.(),
+            contextMenu: liveFeatures().some(
+              (feature) => feature.id === "context-menu"
+            )
+              ? { items: table.featureHost.contextMenuItems }
+              : undefined,
+            commandPalette: paletteContribution(
+              featureOptions.commandPalette,
+              table.featureHost.commands
+            ),
+            print: printContribution(featureOptions),
             rowActions: options.rowActions as
               readonly RowAction<TRow>[] | undefined,
             bulkActions: options.bulkActions as
@@ -1939,6 +1957,27 @@ function groupByKeys(value: unknown): readonly string[] {
   if (typeof value === "string") return [value];
   if (!Array.isArray(value)) return [];
   return value as readonly string[];
+}
+
+/** The host's commands, when the palette is armed. The array is the host's. */
+function paletteContribution<TCommand extends { readonly key: string }>(
+  commandPalette: unknown,
+  commands: readonly TCommand[]
+): { readonly commands: readonly TCommand[] } | undefined {
+  if (commandPalette === false) return undefined;
+  if (commandPalette === undefined && commands.length === 0) return undefined;
+  return { commands };
+}
+
+/** The host's print handler, when the toolbar button was asked for. */
+function printContribution(
+  options: Readonly<Record<string, unknown>>
+): { onPrint: () => void } | undefined {
+  const onPrint = options.onPrint;
+  if (options.printButton !== true || typeof onPrint !== "function") {
+    return undefined;
+  }
+  return { onPrint: onPrint as () => void };
 }
 
 /** What the status strip shows for one table. */

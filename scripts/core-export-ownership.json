@@ -6213,6 +6213,17 @@
       "subpaths": [".", "./binding"]
     },
     {
+      "name": "projectShellOperations",
+      "kind": "runtime",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#projectShellOperations",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "queryAggregateOps",
       "kind": "runtime",
       "module": "grouping/groupAggregateOverrides.ts",
@@ -7828,6 +7839,17 @@
       "deprecated": false,
       "identity": "filters/filterTreeMutations.ts#setFilterTreeCombinator",
       "subpaths": ["."]
+    },
+    {
+      "name": "SHELL_OPERATION_OWNERS",
+      "kind": "runtime",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#SHELL_OPERATION_OWNERS",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "shouldEscapeClose",
@@ -10041,6 +10063,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "CommandPaletteContribution",
+      "kind": "type",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#CommandPaletteContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "CommandPaletteController",
       "kind": "type",
       "module": "actions/commandPaletteController.ts",
@@ -10127,6 +10160,17 @@
       "deprecated": false,
       "identity": "actions/contextMenuModel.ts#ContextMenuActions",
       "subpaths": ["."]
+    },
+    {
+      "name": "ContextMenuContribution",
+      "kind": "type",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#ContextMenuContribution",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ContextMenuCopyFocus",
@@ -10391,6 +10435,17 @@
       "deprecated": false,
       "identity": "filters/operators.ts#DateOp",
       "subpaths": ["."]
+    },
+    {
+      "name": "DensityContribution",
+      "kind": "type",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#DensityContribution",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "Direction",
@@ -11383,6 +11438,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "FindContribution",
+      "kind": "type",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#FindContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "FindController",
       "kind": "type",
       "module": "find/findController.ts",
@@ -11524,6 +11590,17 @@
       "deprecated": false,
       "identity": "source/frontendSource.ts#FrontendSourceViewState",
       "subpaths": ["."]
+    },
+    {
+      "name": "FullscreenContribution",
+      "kind": "type",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#FullscreenContribution",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "GetCellSpan",
@@ -12503,6 +12580,17 @@
       "deprecated": false,
       "identity": "focus/gridNavigation.ts#PointerReleaseTarget",
       "subpaths": ["."]
+    },
+    {
+      "name": "PrintContribution",
+      "kind": "type",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#PrintContribution",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "Props",
@@ -13614,6 +13702,28 @@
       "deprecated": false,
       "identity": "source/serverSource.ts#ServerSourceViewState",
       "subpaths": ["."]
+    },
+    {
+      "name": "ShellOperation",
+      "kind": "type",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#ShellOperation",
+      "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "ShellOperationInput",
+      "kind": "type",
+      "module": "features/shellOperations.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#ShellOperationInput",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "Shortcut",
@@ -17367,6 +17477,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "publishShellOverlay",
+      "kind": "runtime",
+      "module": "features/shellOperations.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#publishShellOverlay",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "readableRowLabel",
       "kind": "runtime",
       "module": "layout/shellPipeline.ts",
@@ -18145,6 +18266,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/chromeModel.ts#virtualListElement",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "withShellOperations",
+      "kind": "runtime",
+      "module": "features/shellOperations.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/shellOperations.ts#withShellOperations",
       "subpaths": ["./binding"]
     },
     {

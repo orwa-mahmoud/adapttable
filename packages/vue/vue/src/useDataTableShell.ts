@@ -1216,6 +1216,25 @@ export function useDataTableShell<TRow>(
         : undefined,
     },
     ...toValue(resolved.value.runtimeChannels),
+    find: find.value,
+    density: featureDensity.value
+      ? {
+          density: featureDensity.value.density,
+          onDensityChange: featureDensity.value.setDensity,
+        }
+      : undefined,
+    fullscreen: fullscreen.value,
+    contextMenu: contextMenu.value
+      ? { entries: contextMenu.value.items, close: contextMenu.value.close }
+      : undefined,
+    commandPalette: commandPalette.value
+      ? {
+          commands: commandPalette.value.commands,
+          open: commandPalette.value.show,
+          close: commandPalette.value.close,
+        }
+      : undefined,
+    print: printing.value ? { onPrint: printing.value } : undefined,
   }));
   const publish = (): TableRuntimeView<TRow> | undefined => {
     if (disposed) return undefined;

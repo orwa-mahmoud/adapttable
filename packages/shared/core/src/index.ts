@@ -1148,6 +1148,18 @@ export type {
   ContextMenuItemsFactory,
   FilterTypeExtend,
 } from "./features/currentHost";
+export {
+  type CommandPaletteContribution,
+  type ContextMenuContribution,
+  type DensityContribution,
+  type FindContribution,
+  type FullscreenContribution,
+  type PrintContribution,
+  projectShellOperations,
+  SHELL_OPERATION_OWNERS,
+  type ShellOperation,
+  type ShellOperationInput,
+} from "./features/shellOperations";
 export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
 export * from "./rowFeatureExports";
 export type {

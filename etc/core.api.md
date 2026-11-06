@@ -1784,6 +1784,13 @@ export interface CommandPaletteCommandsOptions extends TableCommandOptions {
 }
 
 // @public
+export interface CommandPaletteContribution {
+    readonly close?: () => void;
+    readonly commands: readonly Command[];
+    readonly open?: () => void;
+}
+
+// @public
 export interface CommandPaletteController {
     readonly configure: (options: CommandPaletteControllerOptions) => void;
     readonly getSnapshot: () => CommandPaletteSnapshot;
@@ -1881,6 +1888,13 @@ export interface ContextMenuActions<TRow> {
     onHide?: (columnKey: string) => void;
     onSort?: (columnKey: string, direction: "asc" | "desc") => void;
     onTogglePin?: (columnKey: string) => void;
+}
+
+// @public
+export interface ContextMenuContribution<TRow = unknown> {
+    readonly close?: () => void;
+    readonly entries?: readonly ContextMenuItem[];
+    readonly items?: readonly ContextMenuItemsFactory<TRow>[];
 }
 
 // @public
@@ -2468,6 +2482,12 @@ export function deferGroupingDropToInner<TEvent extends {
 
 // @public
 export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
+
+// @public
+export interface DensityContribution {
+    readonly density: TableDensity;
+    readonly onDensityChange: (next: TableDensity) => void;
+}
 
 // @public
 export const densitySlice: UrlSliceSpec<TableDensity, {
@@ -3828,6 +3848,15 @@ export interface FindBarKeyTarget {
 }
 
 // @public
+export interface FindContribution {
+    readonly open: boolean;
+    readonly openBar?: () => void;
+    readonly query: string;
+    readonly setOpen: (open: boolean) => void;
+    readonly setQuery: (query: string) => void;
+}
+
+// @public
 export interface FindController {
     readonly configure: (options: FindControllerOptions) => void;
     readonly connect: () => () => void;
@@ -4089,6 +4118,13 @@ export interface FrontendSourceViewState {
     readonly sortBy: string | undefined;
     readonly sortDir: SortDirection | undefined;
     readonly sortLevels: readonly SortLevel[];
+}
+
+// @public
+export interface FullscreenContribution {
+    readonly active: boolean;
+    readonly supported: boolean;
+    readonly toggle: () => void;
 }
 
 // @public
@@ -6196,6 +6232,11 @@ export interface PointerReleaseTarget {
 }
 
 // @public
+export interface PrintContribution {
+    readonly onPrint: () => void;
+}
+
+// @public
 export function projectedGroupingSource<TSource extends {
     readonly allFilteredRows?: readonly unknown[];
 }>(source: TSource, projection: {
@@ -6210,6 +6251,9 @@ export function projectGroupingContribution<TRow>(input: {
     readonly host: GroupingContribution<TRow> | undefined;
     readonly feature: GroupingContribution<TRow> | undefined;
 }): GroupingContribution<TRow> | undefined;
+
+// @public
+export function projectShellOperations<TRow>(input: ShellOperationInput<TRow>): ShellOperationInput<TRow>;
 
 // @public
 export type Props = Record<string, unknown>;
@@ -7839,6 +7883,35 @@ export function setMeasureAgg(config: PivotConfig, index: number, agg: Aggregate
 export function settledFilterTree(tree: QueryFilterGroup | undefined): QueryFilterGroup | undefined;
 
 // @public
+export const SHELL_OPERATION_OWNERS: {
+    readonly find: "find/findController.ts";
+    readonly density: "layout/densityContract.ts";
+    readonly fullscreen: "layout/layoutBindingState.ts";
+    readonly contextMenu: "actions/contextMenuModel.ts";
+    readonly commandPalette: "actions/commandPaletteController.ts";
+    readonly print: "layout/shellPipeline.ts";
+};
+
+// @public
+export type ShellOperation = keyof typeof SHELL_OPERATION_OWNERS;
+
+// @public
+export interface ShellOperationInput<TRow = unknown> {
+    // (undocumented)
+    readonly commandPalette?: CommandPaletteContribution;
+    // (undocumented)
+    readonly contextMenu?: ContextMenuContribution<TRow>;
+    // (undocumented)
+    readonly density?: DensityContribution;
+    // (undocumented)
+    readonly find?: FindContribution;
+    // (undocumented)
+    readonly fullscreen?: FullscreenContribution;
+    // (undocumented)
+    readonly print?: PrintContribution;
+}
+
+// @public
 export interface Shortcut {
     chord: string;
     command: string;
@@ -8822,10 +8895,15 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly bulk: readonly BulkAction[];
     };
     readonly columnLayout?: ColumnLayoutContribution;
+    readonly commandPalette?: CommandPaletteContribution;
+    readonly contextMenu?: ContextMenuContribution<TRow>;
+    readonly density?: DensityContribution;
     readonly editing?: EditingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
     readonly filtering?: FilteringContribution<TRow>;
     readonly filterRegistry?: FilterTypeRegistry;
+    readonly find?: FindContribution;
+    readonly fullscreen?: FullscreenContribution;
     readonly getRowId: (row: TRow) => string;
     readonly grouping?: GroupingContribution<TRow>;
     readonly groupingState?: {
@@ -8843,6 +8921,7 @@ export interface TableRuntimeView<TRow = unknown> {
     };
     readonly neutralTable?: NeutralTable<TRow>;
     readonly pinning?: PinningContribution;
+    readonly print?: PrintContribution;
     readonly query?: QueryContribution;
     readonly rowLabel: (row: TRow) => string;
     readonly rows: readonly TRow[];
