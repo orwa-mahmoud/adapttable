@@ -105,7 +105,10 @@ export interface AgentContextView {
   /** Filter state, with excluded keys already removed. */
   readonly filters?: Readonly<Record<string, unknown>>;
   readonly pinnedColumns?: Readonly<Record<string, unknown>>;
-  readonly pinnedRows?: Readonly<Record<string, unknown>>;
+  readonly pinnedRows?: {
+    readonly top: readonly string[];
+    readonly bottom: readonly string[];
+  };
   readonly hiddenColumns?: readonly string[];
   readonly columnOrder?: readonly string[];
   /**
@@ -311,7 +314,10 @@ export function buildView(
     readonly groupBy?: string;
     readonly filters?: Readonly<Record<string, unknown>>;
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
-    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    readonly pinnedRows?: {
+      readonly top: readonly string[];
+      readonly bottom: readonly string[];
+    };
     readonly hiddenColumns?: readonly string[];
     readonly columnOrder?: readonly string[];
     readonly pagination?: AgentPagination;
