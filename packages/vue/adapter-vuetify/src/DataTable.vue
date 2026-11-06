@@ -15,6 +15,7 @@ import {
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
+  withKitEnvironment,
 } from "@adapttable/vue/adapter";
 import {
   computed,
@@ -32,6 +33,7 @@ import { vuetifyButton } from "./controls";
 import VuetifyInput from "./controls/VuetifyInput.vue";
 import VuetifySelect from "./controls/VuetifySelect.vue";
 import { VUETIFY_GROUP_ROW, vuetifyGroupRowSlotKey } from "./groupRowSlot";
+import { useVuetifyLibrary } from "./libraryEnvironment";
 import LoadingState from "./LoadingState.vue";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { VuetifyDesktop } from "./table/Desktop";
@@ -60,22 +62,29 @@ const footer = shallowRef(slots.footer);
 onBeforeUpdate(() => {
   footer.value = slots.footer;
 });
-const shell = useDataTableShell<TRow>(() => ({
-  ...props,
-  footer: footer.value,
-  confirm: props.confirm ?? defaultConfirm,
-  onDensityChange: (density) => {
-    props.onDensityChange?.(density);
-    emit("update:density", density);
-  },
-  onSelectionChange:
-    props.selectable ||
-    props.selectedIds !== undefined ||
-    props.defaultSelectedIds !== undefined
-      ? (ids) => emit("update:selectedIds", ids)
-      : undefined,
-  onColumnLayoutChange: (layout) => emit("update:columnLayout", layout),
-}));
+const kit = useVuetifyLibrary();
+const shell = useDataTableShell<TRow>(() =>
+  withKitEnvironment(
+    {
+      ...props,
+      footer: footer.value,
+      confirm: props.confirm ?? defaultConfirm,
+      onDensityChange: (density: TableDensity) => {
+        props.onDensityChange?.(density);
+        emit("update:density", density);
+      },
+      onSelectionChange:
+        props.selectable ||
+        props.selectedIds !== undefined ||
+        props.defaultSelectedIds !== undefined
+          ? (ids: string[]) => emit("update:selectedIds", ids)
+          : undefined,
+      onColumnLayoutChange: (layout: ColumnLayoutState) =>
+        emit("update:columnLayout", layout),
+    },
+    kit.value
+  )
+);
 const { table } = shell;
 const names = computed(() => props.classNames ?? {});
 provideClassNames(() => names.value);

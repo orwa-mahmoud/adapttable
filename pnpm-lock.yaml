@@ -1906,6 +1906,9 @@ importers:
 
   packages/vue/adapter-vuetify:
     dependencies:
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
       '@adapttable/vue':
         specifier: 0.4.1
         version: link:../vue
@@ -1913,9 +1916,6 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
-      '@adapttable/i18n':
-        specifier: workspace:*
-        version: link:../../shared/i18n
       '@vue/server-renderer':
         specifier: ^3.5.43
         version: 3.5.43

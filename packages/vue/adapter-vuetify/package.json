@@ -34,12 +34,12 @@
     "@adapttable/core": "workspace:*",
     "vue": "^3.5.43",
     "vuetify": "^4.2.4",
-    "@adapttable/i18n": "workspace:*",
     "vite": "^8.3.0",
     "@vue/server-renderer": "^3.5.43",
     "@vue/test-utils": "2.4.6"
   },
   "dependencies": {
+    "@adapttable/i18n": "workspace:*",
     "@adapttable/vue": "0.4.1"
   },
   "engines": {
