@@ -947,6 +947,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
