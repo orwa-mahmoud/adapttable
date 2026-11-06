@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { DisplayValue } from "../display";
 import { createBasicTableEngine } from "../engine/basicTableEngine";
@@ -146,6 +146,34 @@ describe("groupedEntriesForStrategy", () => {
       data: [ada, { ...grace, team: "eng" }],
     });
     expect(grouped()).toEqual(patched.groups);
+  });
+
+  it("keeps group aggregates when the engine reattaches its own snapshot", () => {
+    const data = [
+      { id: "1", team: "eng", budget: 1 },
+      { id: "2", team: "web", budget: 4 },
+    ];
+    const engine = createTableEngine({ data, columns, rowKey: getRowId });
+    const aggregates = vi.fn((rows: readonly { budget: number }[]) => ({
+      budget: rows.reduce((sum, row) => sum + row.budget, 0),
+    }));
+    const read = () =>
+      groupedEntriesForStrategy({
+        kind: "client",
+        groupByKeys: ["team"],
+        allFilteredRows: engine.rows("full"),
+        columns,
+        getRowId,
+        collapsedGroupIds: new Set(),
+        aggregates,
+      });
+    read();
+    const calls = aggregates.mock.calls.length;
+    expect(calls).toBe(2);
+    read();
+    engine.refreshCallbacks({ columns, getRowId });
+    read();
+    expect(aggregates).toHaveBeenCalledTimes(calls);
   });
 
   it("reads groups from the snapshot attached to the filtered rows", () => {
