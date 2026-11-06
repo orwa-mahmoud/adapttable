@@ -4,8 +4,8 @@
  * The table is the unstyled kit with grouping and a summary aggregate — the
  * combination fixture — compiled and linked exactly as the budget compiles it,
  * from the packed tarballs. The page bundles the Angular framework in, because
- * a browser has nothing else to load it from. Nothing here is wired into CI:
- * the smoke runs against this server on its own.
+ * a browser has nothing else to load it from. PR CI runs the smoke as the
+ * `angular-consumer` Playwright project after these packages are built.
  *
  *   node scripts/build-angular-browser-consumer.mjs          # build, then serve
  *   node scripts/build-angular-browser-consumer.mjs --build  # build only

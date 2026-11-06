@@ -9,7 +9,8 @@ import {
  * A packed Angular table, rendered in a real browser.
  *
  * The page is built from the packed tarballs and served on its own port, so
- * it never depends on the showcase build or on CI having produced an artifact.
+ * it never depends on the showcase. PR CI selects it with
+ * `--project=angular-consumer` after the packages it packs are built.
  * It drives the table the way a user would: the rows render, a column sorts
  * when its header is activated, and a group collapses when its header is.
  */

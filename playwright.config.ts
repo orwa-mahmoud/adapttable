@@ -10,7 +10,8 @@ import { defineConfig, devices } from "@playwright/test";
  * browser. Depth stays in the unit suites; this is a smoke net.
  *
  * Tiers:
- * - Per-PR / `pnpm test:e2e`: Chromium (+ the Vite-only `chromium-dev` file).
+ * - Per-PR / `pnpm test:e2e`: Chromium, the Vite-only `chromium-dev` file,
+ *   and the packed Angular consumer.
  * - Nightly / pre-release (`.github/workflows/e2e-nightly.yml`): Firefox,
  *   WebKit, Pixel 5, and Chromium visual baselines. Those projects are always
  *   defined here so a local `playwright test --project=firefox` works; the
@@ -75,8 +76,9 @@ export default defineConfig({
         "**/dev-server/**",
         "**/visual/**",
         "**/nightly-smoke.spec.ts",
-        // The packed Angular consumer builds and serves itself. It runs under
-        // its own project, so a CI shard that never built it does not fail.
+        // The packed Angular consumer builds and serves itself. The
+        // `angular-consumer` project runs it after its packages are built,
+        // so a showcase shard does not pack it and does not fail on it.
         "**/angular-packed-consumer.spec.ts",
       ],
       use: { ...devices["Desktop Chrome"] },
