@@ -35,6 +35,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
+  withKitEnvironment,
 } from "@adapttable/react/adapter";
 import { Box, Button, Flex, Progress, Stack, Text } from "@chakra-ui/react";
 import type { ReactNode } from "react";
@@ -45,6 +46,7 @@ import { MobileCards } from "./components/MobileCards";
 import { Footer } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
+import { useChakraLibrary } from "./libraryEnvironment";
 import { subtleText } from "./styles";
 import type { DataTableProps } from "./types";
 
@@ -520,7 +522,14 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
  * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
+  const kit = useChakraLibrary();
+  const props = useTableFeatures(
+    withKitEnvironment(incoming, {
+      dir: kit.dir,
+      locale: kit.locale,
+      labels: kit.labels,
+    })
+  );
   return (
     <FeatureProviders props={props}>
       <DataTableContent<TRow> {...props} />

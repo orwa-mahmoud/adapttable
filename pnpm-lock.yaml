@@ -1396,6 +1396,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
       '@adapttable/react':
         specifier: workspace:*
         version: link:../react
