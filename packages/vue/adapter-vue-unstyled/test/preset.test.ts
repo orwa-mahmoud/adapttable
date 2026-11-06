@@ -79,7 +79,14 @@ describe("standard native features", () => {
       expect(find(host, part("column-menu-button")).tagName).toBe("BUTTON");
       expect(find(host, part("density-toggle")).tagName).toBe("SELECT");
       expect(find(host, part("export-csv-button")).tagName).toBe("BUTTON");
-      expect(host.querySelectorAll(part("status-bar"))).toHaveLength(1);
+      if (forceMobile)
+        expect(host.querySelectorAll(part("status-bar"))).toHaveLength(1);
+      else {
+        expect(host.querySelector(part("status-bar"))).toBeNull();
+        expect(host.querySelector(part("footer"))?.textContent).toContain(
+          "of"
+        );
+      }
       expect(host.querySelector(part("find-button"))).toBeNull();
       const select = find<HTMLSelectElement>(host, part("density-toggle"));
       await write(select, "compact", "change");

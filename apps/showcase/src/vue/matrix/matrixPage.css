@@ -33,6 +33,17 @@ html[data-framework="vue"] {
 .mx-vue.mx-ng--unstyled [data-adapttable-part="root"] {
   overflow: visible;
 }
+.mx-vue.mx-ng--unstyled
+  [data-adapttable-part="root"][data-density="compact"]
+  :is([data-adapttable-part="cell"], [data-adapttable-part="header-cell"], th) {
+  padding-block: 4px;
+}
+.mx-vue.mx-ng--unstyled [data-adapttable-part="status-bar"]:not(:empty) {
+  padding: var(--sp-3);
+  border-top: 1px solid var(--ng-line);
+  color: var(--ink-2);
+  background: var(--ng-surface);
+}
 .mx-vue.mx-ng--unstyled [data-adapttable-part="column-menu-submenu"] {
   grid-column: 1 / -1;
   display: flex;

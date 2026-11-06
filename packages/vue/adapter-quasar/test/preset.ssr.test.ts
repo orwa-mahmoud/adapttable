@@ -26,7 +26,7 @@ describe("standard features on the server", () => {
       "column-menu-button",
       "density-toggle",
       "export-csv-button",
-      "status-bar",
+      "footer",
     ])
       expect(html).toContain(`data-adapttable-part="${part}"`);
   });

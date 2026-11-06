@@ -51,8 +51,13 @@ it.each([false, true])(
     expect(html).toContain('type="search"');
     expect(html).toContain('value="Ada"');
     expect(html).toContain("data-cell-match-current");
-    expect(html).toContain('data-adapttable-part="status-item"');
-    expect(html.match(/data-adapttable-part="status-bar"/g)).toHaveLength(1);
+    if (mobile) {
+      expect(html).toContain('data-adapttable-part="status-item"');
+      expect(html.match(/data-adapttable-part="status-bar"/g)).toHaveLength(1);
+    } else {
+      expect(html).not.toContain('data-status="rows"');
+      expect(html).toContain('data-adapttable-part="footer"');
+    }
     // Navigation attaches browser focus handlers after hydration.
     expect(html).not.toContain('role="grid"');
     expect(html).not.toContain('role="checkbox"');

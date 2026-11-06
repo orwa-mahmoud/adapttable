@@ -383,8 +383,9 @@ function setScrollElement(element: HTMLElement | null): void {
   min-inline-size: 0;
 }
 
-.adapttable-element-plus[data-density="compact"] :is(th, td) {
-  padding-block: 0.4rem;
+.adapttable-element-plus[data-density="compact"] :is(th, td),
+.adapttable-element-plus[data-density="compact"] :is(th, td).el-table__cell {
+  padding-block: 4px;
 }
 
 .adapttable-element-plus [data-adapttable-part="resize-handle"] {

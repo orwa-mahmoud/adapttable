@@ -264,10 +264,11 @@ export function SelectionStatsChrome(
 export type StatusBarChromeProps = NeutralStatusBarChromeProps<VNodeChild>;
 export function StatusBarChrome(props: StatusBarChromeProps): VNodeChild {
   const stats = SelectionStatsChrome({ ...props, slots: props.slots.stats });
-  const items = statusBarItems(props);
-  return props.enabled || items.length
-    ? props.slots.Bar({ items, stats, className: props.className })
-    : stats;
+  // An empty figure is one the footer already prints, so the strip leaves it out.
+  const items = statusBarItems(props).filter((item) => item.text !== "");
+  if (items.length === 0 && !stats) return null;
+  if (!props.enabled && items.length === 0) return stats;
+  return props.slots.Bar({ items, stats, className: props.className });
 }
 const LIVE_STYLE = {
   position: "absolute",

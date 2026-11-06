@@ -16,9 +16,20 @@
 .vue-demo .adtab {
   min-inline-size: 8rem;
 }
-.vue-demo .adtab.is-on {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 1px var(--brand);
+/* One border on the selected card. The shared kit-card rule also draws a
+   1px ring and an offset outline on click; this wins and keeps the keyboard
+   outline for :focus-visible only. */
+.vue-demo .demo-kit-cards .adtab.is-on {
+  border-color: var(--c);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--c) 15%, transparent);
+  outline: none;
+}
+.vue-demo .demo-kit-cards .adtab.is-on:focus-within {
+  outline: none;
+}
+.vue-demo .demo-kit-cards .adtab.is-on:focus-visible {
+  outline: 2px solid var(--c);
+  outline-offset: 2px;
 }
 .vue-demo__install,
 .vue-demo__options {

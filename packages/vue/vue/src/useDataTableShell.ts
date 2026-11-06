@@ -912,7 +912,10 @@ export function useDataTableShell<TRow>(
       total: source.value.total,
       selected: selection.value?.selectedIds.value.size ?? 0,
       stats: selectionStats.value ?? null,
-      labels: table.labels.value,
+      // The footer already prints this range. Blanking it keeps the two from repeating.
+      labels: table.showFooter.value
+        ? { ...table.labels.value, showing: () => "" }
+        : table.labels.value,
       locale: toValue(resolved.value.locale),
       className: classNames?.statusBar,
     }),

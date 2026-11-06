@@ -177,6 +177,13 @@ export const NativeStatusBar = defineComponent(
               {
                 "data-adapttable-part": "status-bar",
                 class: control.className,
+                style: {
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "4px 16px",
+                  fontVariantNumeric: "tabular-nums",
+                },
               },
               [
                 ...control.items.map((item) =>

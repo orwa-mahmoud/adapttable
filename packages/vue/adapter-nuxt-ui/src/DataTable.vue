@@ -282,6 +282,12 @@ function scrollRef(element: HTMLElement | null): void {
     border-collapse: collapse;
     font-size: 0.875rem;
   }
+  .adapttable-nuxt-table :is(th, td) {
+    padding-block: 0.625rem;
+  }
+  .adapttable-nuxt[data-density="compact"] .adapttable-nuxt-table :is(th, td) {
+    padding-block: 0.25rem;
+  }
   .adapttable-nuxt-table th {
     text-align: start;
   }

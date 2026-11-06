@@ -17,7 +17,7 @@ it("renders native action and status controls in genuine Node SSR", async () => 
     "print-button",
     "bulk-button",
     "find-button",
-    "status-bar",
+    "footer",
   ])
     expect(html).toContain(`data-adapttable-part="${part}"`);
   expect(html).not.toContain('data-adapttable-part="find-bar"');

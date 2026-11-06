@@ -414,6 +414,36 @@ it("keeps structural Chrome empty when capabilities or selections are absent", (
       },
     })
   ).toBe("Page only");
+  const quiet = { ...labels, showing: () => "" };
+  expect(
+    StatusBarChrome({
+      enabled: true,
+      shown: 10,
+      page: 1,
+      limit: 10,
+      total: 30,
+      selected: 0,
+      stats: null,
+      labels: quiet,
+      slots: { Bar: () => "bar", stats: { Stats: () => "unexpected" } },
+    })
+  ).toBeNull();
+  expect(
+    StatusBarChrome({
+      enabled: true,
+      shown: 10,
+      page: 1,
+      limit: 10,
+      total: 30,
+      selected: 2,
+      stats: null,
+      labels: quiet,
+      slots: {
+        Bar: (props) => props.items.map((item) => item.text).join("|"),
+        stats: { Stats: () => "unexpected" },
+      },
+    })
+  ).toBe(labels.selectedCount(2));
 });
 it("reveals column checkboxes for hover, focus and selection and disposes its media listener", async () => {
   let hovering = true;

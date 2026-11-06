@@ -104,6 +104,9 @@ it("uses shared keyboard ranges and genuine Reka column checkboxes with one stat
     head: { row: 1, col: 1 },
   });
   expect(host.querySelectorAll(part("status-bar"))).toHaveLength(1);
+  expect(
+    element(host, part("status-bar")).classList.contains("consumer-status")
+  ).toBe(true);
   const handle = element(host, part("fill-handle"));
   expect(handle.classList.contains("at-reka-fill-handle")).toBe(true);
   expect(handle.parentElement?.dataset.adapttablePart).toBe(
@@ -129,9 +132,7 @@ it("uses shared keyboard ranges and genuine Reka column checkboxes with one stat
   checkbox.click();
   await flush();
   expect(checkbox.getAttribute("aria-checked")).toBe("false");
-  expect(
-    element(host, part("status-bar")).classList.contains("consumer-status")
-  ).toBe(true);
+  expect(host.querySelector('[data-status="rows"]')).toBeNull();
 });
 it("opens and dismisses the binding find controller through styled native Reka inputs", async () => {
   const host = mount();
