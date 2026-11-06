@@ -5,6 +5,7 @@
  */
 import {
   ADAPTTABLE_FIND_STATE,
+  ADAPTTABLE_KIT_MOTION_OFF,
   type ContextMenuRegionHandlers,
   type FindInTableState,
 } from "@adapttable/angular";
@@ -23,9 +24,11 @@ import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   input,
   signal,
 } from "@angular/core";
+import { NgbConfig } from "@ng-bootstrap/ng-bootstrap";
 
 import { AdaptDesktopTable } from "./components/desktopTable";
 import { AdaptErrorState } from "./components/errorState";
@@ -33,6 +36,7 @@ import { AdaptMobileCards } from "./components/mobileCards";
 import { AdaptPaginationFooter } from "./components/paginationFooter";
 import { AdaptTableRegion } from "./components/tableRegion";
 import { AdaptTableSkeleton } from "./components/tableSkeleton";
+import { ngBootstrapMotionOff } from "./libraryEnvironment";
 
 export type {
   BodyCellView,
@@ -62,6 +66,10 @@ export type {
   templateUrl: "./dataTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    {
+      provide: ADAPTTABLE_KIT_MOTION_OFF,
+      useFactory: () => ngBootstrapMotionOff(inject(NgbConfig)),
+    },
     {
       provide: ADAPTTABLE_FIND_STATE,
       useFactory: () => signal<FindInTableState | null>(null),

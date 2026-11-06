@@ -174,7 +174,10 @@ export {
 } from "./grouping/tableGrouping";
 export { injectIsMobile, type IsMobileOptions } from "./hooks/isMobile";
 export { injectMediaQuery } from "./hooks/mediaQuery";
-export { injectPrefersReducedMotion } from "./hooks/prefersReducedMotion";
+export {
+  ADAPTTABLE_KIT_MOTION_OFF,
+  injectPrefersReducedMotion,
+} from "./hooks/prefersReducedMotion";
 export { type DataTableClassNames } from "./layout/dataTableClassNames";
 export {
   SURFACE_EDITING,
