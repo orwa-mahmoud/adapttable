@@ -17,6 +17,7 @@ import {
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
+  withKitEnvironment,
 } from "@adapttable/vue/adapter";
 import { ConfigProvider } from "reka-ui";
 import {
@@ -32,6 +33,7 @@ import { provideRekaClasses } from "./context";
 import { rekaButton } from "./controls/basic";
 import { rekaSelectionCheckbox } from "./controls/checkbox";
 import { provideRekaPortalContainer } from "./controls/portal";
+import { useRekaLibrary } from "./libraryEnvironment";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { rekaSurfaceControls } from "./surfaceControls";
 import {
@@ -63,22 +65,29 @@ const footer = shallowRef(content.footer);
 onBeforeUpdate(() => {
   footer.value = content.footer;
 });
-const shell = useDataTableShell<TRow>(() => ({
-  ...props,
-  footer: footer.value,
-  confirm: props.confirm ?? defaultConfirm,
-  onDensityChange: (density) => {
-    props.onDensityChange?.(density);
-    emit("update:density", density);
-  },
-  onSelectionChange:
-    props.selectable ||
-    props.selectedIds !== undefined ||
-    props.defaultSelectedIds !== undefined
-      ? (ids) => emit("update:selectedIds", ids)
-      : undefined,
-  onColumnLayoutChange: (layout) => emit("update:columnLayout", layout),
-}));
+const kit = useRekaLibrary();
+const shell = useDataTableShell<TRow>(() =>
+  withKitEnvironment(
+    {
+      ...props,
+      footer: footer.value,
+      confirm: props.confirm ?? defaultConfirm,
+      onDensityChange: (density: TableDensity) => {
+        props.onDensityChange?.(density);
+        emit("update:density", density);
+      },
+      onSelectionChange:
+        props.selectable ||
+        props.selectedIds !== undefined ||
+        props.defaultSelectedIds !== undefined
+          ? (ids: string[]) => emit("update:selectedIds", ids)
+          : undefined,
+      onColumnLayoutChange: (layout: ColumnLayoutState) =>
+        emit("update:columnLayout", layout),
+    },
+    kit.value
+  )
+);
 const names = computed(() => ({
   ...props.classNames,
   root: ["at-reka", props.classNames?.root].filter(Boolean).join(" "),

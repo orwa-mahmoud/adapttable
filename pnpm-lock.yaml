@@ -1828,6 +1828,9 @@ importers:
 
   packages/vue/adapter-reka-ui:
     dependencies:
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
       '@adapttable/vue':
         specifier: 0.4.1
         version: link:../vue
@@ -1835,9 +1838,6 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
-      '@adapttable/i18n':
-        specifier: workspace:*
-        version: link:../../shared/i18n
       '@vue/test-utils':
         specifier: 2.4.6
         version: 2.4.6
