@@ -1056,6 +1056,7 @@ export {
   type RowGroupRef,
 } from "./grouping/groupRows";
 export { groupSelectionState } from "./grouping/groupSelection";
+export type { SelectionContribution } from "./selection/selectionBindingState";
 export {
   type QueryGroupRow,
   type QueryGroupsPage,

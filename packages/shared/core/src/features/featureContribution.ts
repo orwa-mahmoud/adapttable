@@ -41,11 +41,7 @@ export interface GroupingContribution<TRow> {
  */
 export interface EditingContribution<TRow> {
   /** The host callback. A write goes through the host, not the table. */
-  readonly onCellEdit?: (
-    row: TRow,
-    key: string,
-    nextValue: unknown
-  ) => unknown;
+  readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
   /**
    * Stage one cell while a batch is open. Absent when batch editing is not
    * composed.
@@ -68,7 +64,6 @@ export interface EditingContribution<TRow> {
  */
 export const REMAINING_FEATURE_OWNERSHIP = {
   tree: "tableRuntime.tree",
-  selection: "tableRuntime.selection",
   pinning: "tableRuntime.pinning",
   columnLayout: "tableRuntime.columnLayout",
   detail: "tableRuntime.detail",

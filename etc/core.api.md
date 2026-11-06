@@ -6565,7 +6565,6 @@ export function relativeTokenLabel(raw: string, labels: {
 // @public
 export const REMAINING_FEATURE_OWNERSHIP: {
     readonly tree: "tableRuntime.tree";
-    readonly selection: "tableRuntime.selection";
     readonly pinning: "tableRuntime.pinning";
     readonly columnLayout: "tableRuntime.columnLayout";
     readonly detail: "tableRuntime.detail";
@@ -7666,6 +7665,14 @@ export const SEARCH_DEBOUNCE_MS = 300;
 
 // @public
 export function searchChecklistItems(items: readonly ChecklistValue[], query: string): readonly ChecklistValue[];
+
+// @public
+export interface SelectionContribution {
+    readonly acrossPages?: boolean;
+    readonly allMatching?: boolean;
+    readonly replace: (ids: readonly string[] | undefined) => void;
+    readonly selectedIds: ReadonlySet<string>;
+}
 
 // @public
 export interface SelectionStatPart {
@@ -8840,12 +8847,7 @@ export interface TableRuntimeView<TRow = unknown> {
     };
     readonly rowLabel: (row: TRow) => string;
     readonly rows: readonly TRow[];
-    readonly selection?: {
-        readonly selectedIds: ReadonlySet<string>;
-        readonly allMatching?: boolean;
-        readonly acrossPages?: boolean;
-        readonly replace: (ids: readonly string[] | undefined) => void;
-    };
+    readonly selection?: SelectionContribution;
     readonly sortBy?: string;
     readonly sourceCapabilities?: TableSourceCapabilities;
     readonly tree?: unknown;

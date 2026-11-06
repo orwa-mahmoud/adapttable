@@ -30,6 +30,10 @@ import type { FilterDef } from "../filters/filterDefs";
 import { filteringContributionOf } from "../filters/filterFormModel";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { RowPinSide } from "../rows/rowPinModel";
+import {
+  type SelectionContribution,
+  selectionContributionOf,
+} from "../selection/selectionBindingState";
 import type { TableSource } from "../source/TableSource";
 import type { BulkAction, RowAction, TableLabels } from "../types";
 import { sourceWindowStart } from "./chromeModel";
@@ -123,12 +127,7 @@ export interface RuntimeChromeInput<TRow> {
   readonly tree?: { readonly entries: readonly { readonly row: TRow }[] };
   /** Selection, when composed. */
   readonly table: {
-    readonly selection?: {
-      readonly selectedIds: ReadonlySet<string>;
-      readonly allMatching?: boolean;
-      readonly acrossPages?: boolean;
-      readonly replace: (ids: readonly string[] | undefined) => void;
-    } | null;
+    readonly selection?: SelectionContribution | null;
     readonly labels: object;
   };
   /** Row pinning, when composed. */
@@ -343,18 +342,7 @@ export function tableRuntimeView<TRow>(
       (options.rowActions?.length ?? 0) + (options.bulkActions?.length ?? 0) > 0
         ? { row: options.rowActions ?? [], bulk: options.bulkActions ?? [] }
         : undefined,
-    selection: chrome.table.selection
-      ? {
-          selectedIds: chrome.table.selection.selectedIds,
-          ...(chrome.table.selection.allMatching === undefined
-            ? {}
-            : { allMatching: chrome.table.selection.allMatching }),
-          ...(chrome.table.selection.acrossPages === undefined
-            ? {}
-            : { acrossPages: chrome.table.selection.acrossPages }),
-          replace: chrome.table.selection.replace,
-        }
-      : undefined,
+    selection: selectionContributionOf(chrome.table.selection),
     pinning: livePinning(chrome),
     columnLayout: liveColumnLayout(chrome),
     editing: chrome.editing

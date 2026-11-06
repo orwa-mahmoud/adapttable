@@ -995,7 +995,10 @@ export type {
   RowMutationsState,
   RowPinningState,
 } from "./rows/rowsBindingState";
-export type { SelectionState } from "./selection/selectionBindingState";
+export type {
+  SelectionContribution,
+  SelectionState,
+} from "./selection/selectionBindingState";
 export type { HeaderSelectionState } from "./selection/selectionState";
 export type {
   SearchInputState,

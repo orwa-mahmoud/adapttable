@@ -4694,7 +4694,6 @@ export interface RegisteredFeature<TFeature> {
 // @public
 export const REMAINING_FEATURE_OWNERSHIP: {
     readonly tree: "tableRuntime.tree";
-    readonly selection: "tableRuntime.selection";
     readonly pinning: "tableRuntime.pinning";
     readonly columnLayout: "tableRuntime.columnLayout";
     readonly detail: "tableRuntime.detail";
@@ -5308,12 +5307,7 @@ export interface RuntimeChromeInput<TRow> {
     };
     readonly source: TableSource<TRow>;
     readonly table: {
-        readonly selection?: {
-            readonly selectedIds: ReadonlySet<string>;
-            readonly allMatching?: boolean;
-            readonly acrossPages?: boolean;
-            readonly replace: (ids: readonly string[] | undefined) => void;
-        } | null;
+        readonly selection?: SelectionContribution | null;
         readonly labels: object;
     };
     readonly tree?: {
@@ -5471,6 +5465,14 @@ export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknow
 
 // @public
 export const SELECTION_STATS_LIVE: FeatureSlotKey<SelectionStatsLiveSlotProps<never, ColumnModel<never>, unknown>>;
+
+// @public
+export interface SelectionContribution {
+    readonly acrossPages?: boolean;
+    readonly allMatching?: boolean;
+    readonly replace: (ids: readonly string[] | undefined) => void;
+    readonly selectedIds: ReadonlySet<string>;
+}
 
 // @public
 export function selectionObserverIds(controlled: boolean, selectedIds: ReadonlySet<string> | undefined): string[] | undefined;
@@ -6711,12 +6713,7 @@ export interface TableRuntimeView<TRow = unknown> {
     };
     readonly rowLabel: (row: TRow) => string;
     readonly rows: readonly TRow[];
-    readonly selection?: {
-        readonly selectedIds: ReadonlySet<string>;
-        readonly allMatching?: boolean;
-        readonly acrossPages?: boolean;
-        readonly replace: (ids: readonly string[] | undefined) => void;
-    };
+    readonly selection?: SelectionContribution;
     readonly sortBy?: string;
     readonly sourceCapabilities?: TableSourceCapabilities;
     readonly tree?: unknown;

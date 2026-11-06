@@ -18,6 +18,7 @@ import type { FilteringContribution } from "../filters/filterFormModel";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { RowPinSide } from "../rows/rowPinModel";
+import type { SelectionContribution } from "../selection/selectionBindingState";
 import type { BulkAction, RowAction } from "../types";
 import type {
   EditingContribution,
@@ -153,15 +154,13 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly row: readonly RowAction<TRow>[];
     readonly bulk: readonly BulkAction[];
   };
-  /** Live selection, when a selection-owning feature is composed. */
-  readonly selection?: {
-    readonly selectedIds: ReadonlySet<string>;
-    /** Whether the selection covers every row matching the current query. */
-    readonly allMatching?: boolean;
-    /** Observed source reachability; this flag grants no row or operation access. */
-    readonly acrossPages?: boolean;
-    readonly replace: (ids: readonly string[] | undefined) => void;
-  };
+  /**
+   * Live selection, when a selection-owning feature is composed.
+   *
+   * The host's set and replace function. Grouping reads those ids through
+   * `groupSelectionState` and does not keep another copy.
+   */
+  readonly selection?: SelectionContribution;
   /**
    * Live pinning, when a pin-owning feature is composed.
    *

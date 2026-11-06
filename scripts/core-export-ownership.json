@@ -13484,6 +13484,17 @@
       "subpaths": [".", "./binding"]
     },
     {
+      "name": "SelectionContribution",
+      "kind": "type",
+      "module": "selection/selectionBindingState.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "selection/selectionBindingState.ts#SelectionContribution",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "SelectionStatPart",
       "kind": "type",
       "module": "focus/statusBar.ts",
