@@ -256,6 +256,8 @@ export {
   rowDetailModelKey,
   treeModelKey,
 } from "./hierarchy/models";
+export type { KitEnvironment } from "./kitEnvironment";
+export { withKitEnvironment } from "./kitEnvironment";
 export type {
   DataTableSurfaceChromeProps,
   DataTableSurfaceSlots,

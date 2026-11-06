@@ -1740,6 +1740,9 @@ importers:
 
   packages/vue/adapter-element-plus:
     dependencies:
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
       '@adapttable/vue':
         specifier: 0.4.1
         version: link:../vue
@@ -1747,9 +1750,6 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
-      '@adapttable/i18n':
-        specifier: workspace:*
-        version: link:../../shared/i18n
       element-plus:
         specifier: 2.14.7
         version: 2.14.7(vue@3.5.43(typescript@6.0.3))
