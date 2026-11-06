@@ -1850,6 +1850,9 @@ importers:
 
   packages/vue/adapter-shadcn-vue:
     dependencies:
+      '@adapttable/i18n':
+        specifier: workspace:*
+        version: link:../../shared/i18n
       '@adapttable/vue':
         specifier: 0.4.1
         version: link:../vue
