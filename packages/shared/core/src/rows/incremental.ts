@@ -583,6 +583,16 @@ function getState<TRow>(
   return STATES.get(view) as ViewState<TRow> | undefined;
 }
 
+/**
+ * Whether `view` was built by {@link createIncrementalView}. A basic-engine
+ * row array can carry a lookalike, and grouping must not reconfigure that.
+ */
+export function hasIncrementalSnapshot<TRow>(
+  view: IncrementalView<TRow>
+): boolean {
+  return STATES.has(view);
+}
+
 function publish<TRow>(
   rows: readonly TRow[],
   filtered: readonly TRow[],

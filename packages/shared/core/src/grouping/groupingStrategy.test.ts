@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import type { DisplayValue } from "../display";
-import { createIncrementalView } from "../rows/incremental";
+import { createBasicTableEngine } from "../engine/basicTableEngine";
+import { createTableEngine } from "../engine/createTableEngine";
+import {
+  applyRowPatchesToView,
+  createIncrementalView,
+} from "../rows/incremental";
+import { updateRow } from "../rows/patch";
 import {
   groupedEntriesForStrategy,
   groupingComputationKind,
@@ -84,6 +90,62 @@ describe("groupedEntriesForStrategy", () => {
     });
     expect(entries.some((entry) => entry.kind === "group")).toBe(true);
     expect(entries.filter((entry) => entry.kind === "row")).toHaveLength(2);
+  });
+
+  it("groups rows from a basic engine instead of reconfiguring its view", () => {
+    const data = [
+      { id: "1", team: "eng" },
+      { id: "2", team: "eng" },
+    ];
+    const engine = createBasicTableEngine({
+      data,
+      columns,
+      rowKey: getRowId,
+    });
+    engine.refreshCallbacks({ getRowId });
+    const entries = groupedEntriesForStrategy({
+      kind: "client",
+      groupByKeys: ["team"],
+      allFilteredRows: engine.rows("full"),
+      columns,
+      getRowId,
+      collapsedGroupIds: new Set(),
+    });
+    const plain = groupedEntriesForStrategy({
+      kind: "client",
+      groupByKeys: ["team"],
+      allFilteredRows: data,
+      columns,
+      getRowId,
+      collapsedGroupIds: new Set(),
+    });
+    expect(entries).toEqual(plain);
+    expect(entries.some((entry) => entry.kind === "group")).toBe(true);
+  });
+
+  it("reconfigures and patches a full-engine snapshot", () => {
+    const ada = { id: "1", team: "eng", name: "Ada" };
+    const grace = { id: "2", team: "web", name: "Grace" };
+    const data = [ada, grace];
+    const engine = createTableEngine({ data, columns, rowKey: getRowId });
+    const grouped = () =>
+      groupedEntriesForStrategy({
+        kind: "client",
+        groupByKeys: ["team"],
+        allFilteredRows: engine.rows("full"),
+        columns,
+        getRowId,
+        collapsedGroupIds: new Set(),
+      });
+    expect(grouped().some((entry) => entry.kind === "group")).toBe(true);
+    const patched = applyRowPatchesToView(
+      createIncrementalView(data, { getRowId, groupBy: ["team"], columns }),
+      [updateRow("2", { team: "eng" })]
+    );
+    engine.invalidate(["data"], {
+      data: [ada, { ...grace, team: "eng" }],
+    });
+    expect(grouped()).toEqual(patched.groups);
   });
 
   it("reads groups from the snapshot attached to the filtered rows", () => {
