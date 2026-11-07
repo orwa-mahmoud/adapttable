@@ -34,7 +34,7 @@ const groups = [
     value: current("mode", "frontend"),
     options: [
       { value: "frontend", label: "Frontend" },
-      { value: "server", label: "Server" },
+      { value: "backend", label: "Backend" },
     ],
   },
   {
@@ -68,7 +68,8 @@ const groups = [
 const toggles = [
   { key: "grouping", label: "Grouping", initial: false },
   { key: "editing", label: "Editing", initial: true },
-  { key: "selection", label: "Row selection", initial: props.lab },
+  { key: "selection", label: "Row selection", initial: true },
+  { key: "motion", label: "Motion", initial: true },
   ...(props.lab
     ? [
         { key: "row-reorder", label: "Row reordering", initial: false },
@@ -305,7 +306,7 @@ function reset(): void {
       >
       <div class="angular-options-switches">
         <label
-          v-for="toggle in toggles.slice(0, 3)"
+          v-for="toggle in toggles.slice(0, 4)"
           :key="toggle.key"
           class="vue-demo__toggle"
           ><input
@@ -316,8 +317,8 @@ function reset(): void {
               current(toggle.key, toggle.initial ? 'on' : 'off') === 'on'
             "
             :disabled="
-              current('mode', 'frontend') === 'server' &&
-              ['grouping', 'editing'].includes(toggle.key)
+              ['server', 'backend'].includes(current('mode', 'frontend')) &&
+              ['grouping', 'editing', 'selection'].includes(toggle.key)
             "
             @change="change"
           />{{ toggle.label }}</label
