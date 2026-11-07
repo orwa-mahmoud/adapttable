@@ -8,6 +8,7 @@
   "allowedNonPeerDependencies": [
     "@adapttable/core",
     "@adapttable/angular",
+    "@adapttable/i18n",
     "tslib"
   ]
 }

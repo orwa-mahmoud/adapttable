@@ -36,7 +36,7 @@ import {
 } from "@adapttable/antd/status-bar";
 import { tree as tree_ } from "@adapttable/antd/tree";
 import type { ColumnLayoutState } from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
 import type {
   ColumnDef,
   FeatureProps,
@@ -86,6 +86,7 @@ import {
   theme as antdTheme,
   Typography,
 } from "antd";
+import arEG from "antd/locale/ar_EG";
 
 import {
   type AvatarCellProps,
@@ -120,6 +121,7 @@ import {
   showsRowActions,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
+import { pageTablePresentation } from "../demoPresentation";
 import {
   nestedInnerFeatures,
   nestedOuterFeatures,
@@ -320,6 +322,7 @@ export function AntdDemo({
   return (
     <ConfigProvider
       direction={getDirection(locale)}
+      locale={locale === "ar" ? arEG : undefined}
       theme={{
         algorithm: dark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
       }}
@@ -432,10 +435,7 @@ export function AntdDemo({
             maxHeight={maxHeight}
             density={density}
             filtersMode={filtersUi}
-            labels={getLabels(locale)}
-            locale={locale}
-            dir={getDirection(locale)}
-            searchPlaceholder={s.search}
+            {...pageTablePresentation(locale, s.search)}
             rowActionsLayout={rowMutations ? "menu" : undefined}
             confirm={demoConfirm}
             animate={animate}

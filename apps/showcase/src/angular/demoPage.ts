@@ -149,8 +149,8 @@ function controlValue(target: HTMLInputElement | HTMLSelectElement): string {
     [tableLabel]="defaults().tableLabel"
     [searchable]="defaults().searchable"
     [density]="defaults().density"
-    [dir]="presentation.dir"
-    [labels]="presentation.labels"
+    [dir]="presentation.tableDir"
+    [labels]="presentation.tableLabels"
   />`,
 })
 class LabOrders {

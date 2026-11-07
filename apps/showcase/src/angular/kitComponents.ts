@@ -78,7 +78,7 @@ export class AdaptShowcaseTable<TRow> implements OnInit {
     return decorate(this.columns());
   });
   readonly tableLabel = input<string>();
-  readonly dir = input<Direction>("ltr");
+  readonly dir = input<Direction>();
   readonly labels = input<TableLabels>();
   readonly urlSync = input(true);
   readonly urlKey = input<string>();

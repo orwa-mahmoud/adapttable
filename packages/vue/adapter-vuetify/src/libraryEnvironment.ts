@@ -1,7 +1,7 @@
 import { getLabels, hasLocale } from "@adapttable/i18n";
 import type { KitEnvironment } from "@adapttable/vue/adapter";
 import { computed, type ComputedRef, inject, type Ref } from "vue";
-import { useLocale } from "vuetify";
+import { useLocale } from "vuetify/framework";
 
 /** Vuetify's script-style locale keys, written as BCP-47 for AdaptTable. */
 const LOCALE_TAGS: Record<string, string> = {

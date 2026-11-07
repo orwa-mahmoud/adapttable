@@ -453,7 +453,7 @@
         [fields]="pivotFields"
         [config]="pivotState.config()"
         [onChange]="pivotState.onConfigChange"
-        [labels]="presentation.labels"
+        [labels]="presentation.tableLabels"
       />
     </ng-template>
     <ng-template #viewsPanel
@@ -511,8 +511,8 @@
             [features]="panelFeatures()"
             [urlSync]="false"
             [searchable]="false"
-            [labels]="presentation.labels"
-            [dir]="presentation.dir"
+            [labels]="presentation.tableLabels"
+            [dir]="presentation.tableDir"
             [density]="density()"
             [animate]="animate"
             [forceMobile]="mobile ? true : undefined"
@@ -532,8 +532,8 @@
             [columnLayout]="columnState.layout()"
             (columnLayoutChange)="setColumnLayout($event)"
             [rowKey]="rowKey"
-            [labels]="presentation.labels"
-            [dir]="presentation.dir"
+            [labels]="presentation.tableLabels"
+            [dir]="presentation.tableDir"
             [features]="features()"
             [density]="density()"
             [animate]="animate"

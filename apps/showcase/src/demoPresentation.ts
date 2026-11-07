@@ -1,6 +1,35 @@
+import { getDirection, getLabels } from "@adapttable/i18n";
 import { useState } from "react";
 
 import type { Locale } from "./people";
+
+/** The page asked the kit provider, not the table props, to own direction and labels. */
+export function librarySettingOnly(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("library") === "1";
+}
+
+/**
+ * Props the page writes onto the table. `?library=1` leaves them unset so
+ * the only direction and labels on screen come from that kit's provider.
+ */
+export function pageTablePresentation(
+  locale: string,
+  searchPlaceholder: string
+): {
+  labels?: ReturnType<typeof getLabels>;
+  locale?: string;
+  dir?: "ltr" | "rtl";
+  searchPlaceholder?: string;
+} {
+  if (librarySettingOnly()) return {};
+  return {
+    labels: getLabels(locale),
+    locale,
+    dir: getDirection(locale),
+    searchPlaceholder,
+  };
+}
 
 /** Keep a shared feature URL's requested language on the actual native table. */
 export function initialDemoLocale(): Locale {

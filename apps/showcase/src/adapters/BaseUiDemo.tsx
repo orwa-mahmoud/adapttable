@@ -36,13 +36,15 @@ import {
 } from "@adapttable/base-ui/status-bar";
 import { tree as tree_ } from "@adapttable/base-ui/tree";
 import type { ColumnLayoutState } from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
 import type {
   ColumnDef,
   FeatureProps,
   NestedTableDefaults,
 } from "@adapttable/react";
+import { DirectionProvider } from "@base-ui/react/direction-provider";
 
+import { pageTablePresentation } from "../demoPresentation";
 import { kitChromeFeatures } from "./chromeFeatures";
 
 /** This kit's factories, handed to the shared builder. */
@@ -331,125 +333,124 @@ export function BaseUiDemo({
     columnGroups,
   });
   return (
-    <DemoBody
-      rowActionsShown={rowActionsShown}
-      mode={mode}
-      pageMode={pageMode}
-      urlKey={urlKey}
-      defaultColumnLayout={
-        // The wide showcase pins BOTH edges by default: person at the
-        // start, the actions column at the end (it pins like any column).
-        wide
-          ? {
-              pinned: focused
-                ? { person: "start" }
-                : { person: "start", actions: "end" },
+    <DirectionProvider direction={getDirection(locale)}>
+      <DemoBody
+        rowActionsShown={rowActionsShown}
+        mode={mode}
+        pageMode={pageMode}
+        urlKey={urlKey}
+        defaultColumnLayout={
+          // The wide showcase pins BOTH edges by default: person at the
+          // start, the actions column at the end (it pins like any column).
+          wide
+            ? {
+                pinned: focused
+                  ? { person: "start" }
+                  : { person: "start", actions: "end" },
+              }
+            : (defaultColumnLayout ?? LIVE_DEFAULT_LAYOUT)
+        }
+        grouping={grouping}
+        tree={tree}
+        rowMode={rowMode}
+        batch={batch}
+        rowMutations={rowMutations}
+        rowReorder={rowReorder}
+        rowPinning={rowPinning}
+        pinnedSummaryRows={pinnedSummaryRows}
+        summaryRow={summaryRow}
+        cellSpan={cellSpan}
+        extraRows={extraRows}
+        rowStyle={rowStyle}
+        highlight={highlight}
+        failure={failure}
+        onRecover={onRecover}
+        customCard={customCard}
+        realtime={realtime}
+        editing={editing}
+        derivedFields={derivedFields}
+        formulaColumns={formulaColumns}
+        render={(
+          source,
+          { features: demoFeatures, demoRowHandlers, ...columns }
+        ) => (
+          <DataTable
+            source={source}
+            columns={
+              wide
+                ? makeWideColumns(locale, BASE_UI_CELLS, {
+                    editable: Boolean(
+                      editing === true ||
+                      rowMode === true ||
+                      batch === true ||
+                      editorShowcase === true
+                    ),
+                  })
+                : makeColumns(locale, BASE_UI_CELLS, {
+                    groups: columnGroups,
+                    sparkline,
+                    editors: editorShowcase,
+                    formulas: formulaColumns,
+                    editable: Boolean(
+                      editing === true ||
+                      rowMode === true ||
+                      batch === true ||
+                      editorShowcase === true
+                    ),
+                  })
             }
-          : (defaultColumnLayout ?? LIVE_DEFAULT_LAYOUT)
-      }
-      grouping={grouping}
-      tree={tree}
-      rowMode={rowMode}
-      batch={batch}
-      rowMutations={rowMutations}
-      rowReorder={rowReorder}
-      rowPinning={rowPinning}
-      pinnedSummaryRows={pinnedSummaryRows}
-      summaryRow={summaryRow}
-      cellSpan={cellSpan}
-      extraRows={extraRows}
-      rowStyle={rowStyle}
-      highlight={highlight}
-      failure={failure}
-      onRecover={onRecover}
-      customCard={customCard}
-      realtime={realtime}
-      editing={editing}
-      derivedFields={derivedFields}
-      formulaColumns={formulaColumns}
-      render={(
-        source,
-        { features: demoFeatures, demoRowHandlers, ...columns }
-      ) => (
-        <DataTable
-          source={source}
-          columns={
-            wide
-              ? makeWideColumns(locale, BASE_UI_CELLS, {
-                  editable: Boolean(
-                    editing === true ||
-                    rowMode === true ||
-                    batch === true ||
-                    editorShowcase === true
-                  ),
-                })
-              : makeColumns(locale, BASE_UI_CELLS, {
-                  groups: columnGroups,
-                  sparkline,
-                  editors: editorShowcase,
-                  formulas: formulaColumns,
-                  editable: Boolean(
-                    editing === true ||
-                    rowMode === true ||
-                    batch === true ||
-                    editorShowcase === true
-                  ),
-                })
-          }
-          rowKey={(r) => r.id}
-          features={[
-            ...(nested ? nestedOuterFeatures<Person>() : []),
-            ...kitChromeFeatures(KIT_CHROME, {
-              cellNavigation,
-              columnSelectionCheckbox,
-              densityChooser,
-              editing,
-              exportCsv,
-              focused,
-              fullscreen,
-              headerFilters,
-              nested: nested ? nestedOrders : undefined,
-              nestedOpenIds: nestedOpenIds(nested, source.rows),
-              onPrint,
-              printButton,
-              undoRedoButtons,
-              urlKey,
-              bulkActions,
-              bulkActionList: makeBulkActions(locale),
-              collapsibleColumnGroups: columns.collapsibleColumnGroups,
-              columnMenu,
-              rowActions: rowActionsShown
-                ? makeActions(locale, demoRowHandlers)
-                : undefined,
-              commandPalette,
-              contextMenu,
-              filterControls,
-              filterDefs: filters,
-              filterTypeSpecs: demoFilterTypes(),
-              sidePanel,
-              statusBar,
-              kitFeatures: columns.kitFeatures,
-            }),
-            ...(demoFeatures ?? []),
-          ]}
-          onDensityChange={onDensityChange}
-          {...columns}
-          forceMobile={forceMobile}
-          maxHeight={maxHeight}
-          density={density}
-          filtersMode={filtersUi}
-          labels={getLabels(locale)}
-          locale={locale}
-          dir={getDirection(locale)}
-          searchPlaceholder={s.search}
-          rowActionsLayout={rowMutations ? "menu" : undefined}
-          confirm={demoConfirm}
-          animate={animate}
-          stickyHeader
-          filterFields={filterFields}
-          accentColor="blue"
-        />
-      )}
-    />
+            rowKey={(r) => r.id}
+            features={[
+              ...(nested ? nestedOuterFeatures<Person>() : []),
+              ...kitChromeFeatures(KIT_CHROME, {
+                cellNavigation,
+                columnSelectionCheckbox,
+                densityChooser,
+                editing,
+                exportCsv,
+                focused,
+                fullscreen,
+                headerFilters,
+                nested: nested ? nestedOrders : undefined,
+                nestedOpenIds: nestedOpenIds(nested, source.rows),
+                onPrint,
+                printButton,
+                undoRedoButtons,
+                urlKey,
+                bulkActions,
+                bulkActionList: makeBulkActions(locale),
+                collapsibleColumnGroups: columns.collapsibleColumnGroups,
+                columnMenu,
+                rowActions: rowActionsShown
+                  ? makeActions(locale, demoRowHandlers)
+                  : undefined,
+                commandPalette,
+                contextMenu,
+                filterControls,
+                filterDefs: filters,
+                filterTypeSpecs: demoFilterTypes(),
+                sidePanel,
+                statusBar,
+                kitFeatures: columns.kitFeatures,
+              }),
+              ...(demoFeatures ?? []),
+            ]}
+            onDensityChange={onDensityChange}
+            {...columns}
+            forceMobile={forceMobile}
+            maxHeight={maxHeight}
+            density={density}
+            filtersMode={filtersUi}
+            {...pageTablePresentation(locale, s.search)}
+            rowActionsLayout={rowMutations ? "menu" : undefined}
+            confirm={demoConfirm}
+            animate={animate}
+            stickyHeader
+            filterFields={filterFields}
+            accentColor="blue"
+          />
+        )}
+      />
+    </DirectionProvider>
   );
 }

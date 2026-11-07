@@ -54,6 +54,7 @@ function readShowcasePresentation(): {
   readonly locale: string;
   readonly dir: Direction;
   readonly labels: ReturnType<typeof getLabels>;
+  readonly libraryOnly: boolean;
 } {
   const url =
     typeof window === "undefined" ? undefined : new URL(window.location.href);
@@ -68,6 +69,8 @@ function readShowcasePresentation(): {
         ? requestedDirection
         : getDirection(locale),
     labels: getLabels(locale),
+    /** The table props stay unset; the kit provider is the only source. */
+    libraryOnly: url?.searchParams.get("library") === "1",
   };
 }
 
@@ -362,21 +365,32 @@ export function groupedPeopleColumns(
 }
 
 /** The direction, labels and language every table on the page shares. */
-export const TABLE_PRESENTATION = {
-  dir: SHOWCASE_PRESENTATION.dir,
-  labels: SHOWCASE_PRESENTATION.labels,
-  lang: SHOWCASE_PRESENTATION.locale,
-} as const;
+export const TABLE_PRESENTATION: {
+  dir?: Direction;
+  labels?: ReturnType<typeof getLabels>;
+  lang?: string;
+} = {};
+
+/** `?library=1` leaves the table props unset so the kit provider is the source. */
+function syncTablePresentation(): void {
+  if (SHOWCASE_PRESENTATION.libraryOnly) {
+    delete TABLE_PRESENTATION.dir;
+    delete TABLE_PRESENTATION.labels;
+    delete TABLE_PRESENTATION.lang;
+    return;
+  }
+  TABLE_PRESENTATION.dir = SHOWCASE_PRESENTATION.dir;
+  TABLE_PRESENTATION.labels = SHOWCASE_PRESENTATION.labels;
+  TABLE_PRESENTATION.lang = SHOWCASE_PRESENTATION.locale;
+}
+
+syncTablePresentation();
 
 /** Keep shared locale objects current before a same-document demo remount. */
 export function refreshShowcasePresentation(): void {
   Object.assign(SHOWCASE_PRESENTATION, readShowcasePresentation());
   FILTER_DEFS.splice(0, FILTER_DEFS.length, ...localizedFilterDefs());
-  Object.assign(TABLE_PRESENTATION, {
-    dir: SHOWCASE_PRESENTATION.dir,
-    labels: SHOWCASE_PRESENTATION.labels,
-    lang: SHOWCASE_PRESENTATION.locale,
-  });
+  syncTablePresentation();
 }
 
 /** How many rows the scale page windows. */

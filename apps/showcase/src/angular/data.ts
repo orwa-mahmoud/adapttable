@@ -52,6 +52,9 @@ function readShowcasePresentation(): {
   readonly locale: string;
   readonly dir: Direction;
   readonly labels: ReturnType<typeof getLabels>;
+  readonly libraryOnly: boolean;
+  readonly tableDir: Direction | undefined;
+  readonly tableLabels: ReturnType<typeof getLabels> | undefined;
 } {
   const url =
     typeof window === "undefined" ? undefined : new URL(window.location.href);
@@ -59,13 +62,20 @@ function readShowcasePresentation(): {
     url?.searchParams.get("locale") ??
     (url?.pathname.includes("/rtl/") ? "ar" : "en");
   const requestedDirection = url?.searchParams.get("dir");
+  const dir =
+    requestedDirection === "rtl" || requestedDirection === "ltr"
+      ? requestedDirection
+      : getDirection(locale);
+  const labels = getLabels(locale);
+  const libraryOnly = url?.searchParams.get("library") === "1";
   return {
     locale,
-    dir:
-      requestedDirection === "rtl" || requestedDirection === "ltr"
-        ? requestedDirection
-        : getDirection(locale),
-    labels: getLabels(locale),
+    dir,
+    labels,
+    libraryOnly,
+    /** Unset when the kit provider is the only source of direction and labels. */
+    tableDir: libraryOnly ? undefined : dir,
+    tableLabels: libraryOnly ? undefined : labels,
   };
 }
 

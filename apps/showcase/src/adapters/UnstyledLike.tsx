@@ -1,5 +1,4 @@
 import type { ColumnLayoutState } from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
 import type {
   ColumnDef,
   FeatureProps,
@@ -42,6 +41,7 @@ import {
 } from "@adapttable/unstyled/status-bar";
 import { tree as tree_ } from "@adapttable/unstyled/tree";
 
+import { pageTablePresentation } from "../demoPresentation";
 import { type KitChromeFactories, kitChromeFeatures } from "./chromeFeatures";
 
 /** This kit's factories, handed to the shared builder. */
@@ -459,10 +459,7 @@ export function UnstyledLike({
             maxHeight={maxHeight}
             density={density}
             filtersMode={filtersUi}
-            labels={getLabels(locale)}
-            locale={locale}
-            dir={getDirection(locale)}
-            searchPlaceholder={s.search}
+            {...pageTablePresentation(locale, s.search)}
             rowActionsLayout={rowMutations ? "menu" : undefined}
             confirm={demoConfirm}
             animate={animate}

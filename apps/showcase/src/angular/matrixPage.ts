@@ -7,6 +7,7 @@
  * Angular kit's page reads exactly as its React neighbours do. The chrome is
  * the page's own; everything under the seam is the kit.
  */
+import { Dir } from "@angular/cdk/bidi";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   Component,
@@ -85,6 +86,7 @@ export const MATRIX_PAGE = new InjectionToken<MatrixPageContext>(
   imports: [
     AdaptShowcaseNav,
     AdaptShowcaseWordmark,
+    Dir,
     NgComponentOutlet,
     NgTemplateOutlet,
   ],

@@ -155,6 +155,7 @@
         class="mx-kit-host"
         [attr.data-adapttable-kit]="adapter().key"
         [attr.data-bs-theme]="dark() ? 'dark' : 'light'"
+        [dir]="presentation.dir"
         [class.adapttable-ng-bootstrap]="adapter().key === 'ng-bootstrap'"
         [class.adapttable-ngx-bootstrap]="adapter().key === 'ngx-bootstrap'"
       >
