@@ -256,9 +256,17 @@ export {
   type RowActionsCell,
   type TableView,
 } from "./layout/dataTableShell";
+export {
+  type AdaptDesktopSlots,
+  AdaptDesktopStructure,
+} from "./layout/desktopStructure";
 export { AdaptDesktopTableModel } from "./layout/desktopTableModel";
 export type { KitEnvironment } from "./layout/kitEnvironment";
 export { AdaptMobileCardsModel } from "./layout/mobileCardsModel";
+export {
+  type AdaptMobileSlots,
+  AdaptMobileStructure,
+} from "./layout/mobileStructure";
 export { injectPopoverSpace } from "./layout/popoverSpace";
 export {
   AdaptSidePanelChrome,

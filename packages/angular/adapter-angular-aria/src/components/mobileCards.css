@@ -1,12 +1,12 @@
 /* The kit keeps its card and controls; the field body responds to its own width. */
-.adapt-card-fields {
+.adapt-aria-mobile .adapt-card-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
   gap: 0.75rem;
   margin-block: 0.75rem;
   min-inline-size: 0;
 }
-.adapt-card-fields > [data-adapttable-part="card-row"] {
+.adapt-aria-mobile .adapt-card-fields > [data-adapttable-part="card-row"] {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -21,19 +21,19 @@
   );
   overflow-wrap: anywhere;
 }
-.adapt-card-fields > [data-card-identity] {
+.adapt-aria-mobile .adapt-card-fields > [data-card-identity] {
   padding: 0;
   background: transparent;
   font-size: 1rem;
   font-weight: 600;
 }
-.adapt-card-fields [data-adapttable-part="card-label"] {
+.adapt-aria-mobile .adapt-card-fields [data-adapttable-part="card-label"] {
   flex: none;
   font-size: 0.75rem;
   line-height: 1.5;
   font-weight: 500;
 }
-.adapt-card-fields [data-adapttable-part="card-value"] {
+.adapt-aria-mobile .adapt-card-fields [data-adapttable-part="card-value"] {
   display: block;
   flex: none;
   min-inline-size: 0;
@@ -42,7 +42,7 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
-[data-adapttable-part="card-actions"] {
+.adapt-aria-mobile [data-adapttable-part="card-actions"] {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -51,7 +51,7 @@
   border-block-start: 1px solid
     color-mix(in srgb, currentColor 15%, transparent);
 }
-[data-adapttable-part="card"][data-selected] {
+.adapt-aria-mobile [data-adapttable-part="card"][data-selected] {
   outline: 2px solid var(--adapt-aria-accent, currentColor);
   outline-offset: -2px;
 }

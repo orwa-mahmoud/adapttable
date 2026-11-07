@@ -22,6 +22,7 @@ import { AgentApprovalPending as AgentApprovalPending_2 } from '@adapttable/core
 import { AgentApprovalProps } from '@adapttable/core/binding';
 import { AgentProgress } from '@adapttable/core/binding';
 import { AgentViewState } from '@adapttable/core/binding';
+import { ApprovalArgumentPair } from '@adapttable/core';
 import { ApprovalReview } from '@adapttable/core';
 import { approvalReview } from '@adapttable/core';
 import { ApprovalReviewItem } from '@adapttable/core';
@@ -80,6 +81,7 @@ import { ColumnModel } from '@adapttable/core';
 import { ColumnResizeHandleProps } from '@adapttable/core';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
+import { columnSelectLabel } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { COMMAND_PALETTE_LIVE } from '@adapttable/core/binding';
 import { CommandPaletteSurfaceProps as CommandPaletteSurfaceProps_2 } from '@adapttable/core/binding';
@@ -315,6 +317,7 @@ import { RowActionsLayout } from '@adapttable/core';
 import { RowActionsRenderContext } from '@adapttable/core';
 import { RowClickProps } from '@adapttable/core';
 import { rowClickProps } from '@adapttable/core';
+import { RowDropPosition } from '@adapttable/core';
 import { RowEditActionsLayout } from '@adapttable/core';
 import { RowEditActionsProps } from '@adapttable/core/binding';
 import { RowEditButtonProps } from '@adapttable/core/binding';
@@ -514,10 +517,7 @@ export class AdaptApprovalReviewChrome {
     readonly onExpand: InputSignal<(() => void) | undefined>;
     readonly onReject: InputSignal<() => void>;
     // (undocumented)
-    protected readonly pairs: Signal<readonly {
-    name: string;
-    value: string;
-    }[]>;
+    protected readonly pairs: Signal<readonly ApprovalArgumentPair[]>;
     // (undocumented)
     protected readonly perItem: Signal<boolean>;
     // (undocumented)
@@ -1856,6 +1856,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     protected readonly agentApprovalProps: Signal<AgentApprovalProps>;
     protected readonly agentApprovalSlot: FeatureSlotKey<AgentApprovalProps>;
     readonly aggregates: InputSignal<readonly QueryAggregate[] | undefined>;
+    readonly animate: InputSignal<boolean>;
     readonly assistant: InputSignal<TableAssistantProps | undefined>;
     // @internal
     protected readonly batchEditBarSlot: FeatureSlotKey<BatchEditBarProps<never>>;
@@ -1888,10 +1889,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly densityChange: OutputEmitterRef<TableDensity>;
     // @internal
     protected readonly desktopTable: Signal<DataTableSurface | undefined>;
-    readonly dir: InputSignal<Direction>;
+    readonly dir: InputSignal<Direction | undefined>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<"start" | "end">;
-    readonly editActivation: InputSignal<"doubleClick" | "click" | undefined>;
+    readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
@@ -1915,6 +1916,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     // @internal
     protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
     readonly isCellFlashing: InputSignal<((rowId: string, columnKey: string) => boolean) | undefined>;
+    protected kitEnvironment(): KitEnvironment;
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly loading: InputSignal<boolean | undefined>;
     readonly locale: InputSignal<string | undefined>;
@@ -2274,6 +2276,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "animate": {
+            "alias": "animate";
+            "required": false;
+            "isSignal": true;
+        };
         "density": {
             "alias": "density";
             "required": false;
@@ -2291,6 +2298,93 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     }, ["cellTemplates", "tableFooter", "sidePanel"], never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDataTableShell<any>, never>;
+}
+
+// @public
+export interface AdaptDesktopSlots {
+    readonly body: TemplateRef<unknown>;
+    readonly cell: TemplateRef<unknown>;
+    readonly checkbox: TemplateRef<unknown>;
+    readonly frame?: TemplateRef<unknown>;
+    readonly head: TemplateRef<unknown>;
+    readonly headerCaption: TemplateRef<unknown>;
+    readonly headerCell: TemplateRef<unknown>;
+    readonly headerRename: TemplateRef<unknown>;
+    readonly resizeHandle: TemplateRef<unknown>;
+    readonly row: TemplateRef<unknown>;
+    readonly rowActions: TemplateRef<unknown>;
+    readonly sortButton: TemplateRef<unknown>;
+    readonly table?: TemplateRef<unknown>;
+}
+
+// @public
+export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
+    bodyTemplate(): TemplateRef<unknown> | undefined;
+    protected dragHandlers(entry: BodyRow<TRow>, summary: boolean): {
+        dragging: null;
+        drop: null;
+        onDragOver: null;
+        onDrop: null;
+    } | {
+        dragging: "" | null;
+        drop: RowDropPosition | null;
+        onDragOver: (event: DragEvent) => void;
+        onDrop: (event: DragEvent) => void;
+    };
+    readonly embedded: InputSignal<boolean>;
+    readonly railMin: InputSignal<number>;
+    protected railOffset(part: "expand" | "reorder" | "selection"): string;
+    protected railStyle(selection: boolean, offset: string, header: boolean): string;
+    protected rowBox(content: TemplateRef<unknown>, part: string | null, attrs: Attrs, wiring?: {
+        readonly inert?: boolean;
+        readonly dragging?: string | null;
+        readonly drop?: string | null;
+        readonly onDragOver?: ((event: DragEvent) => void) | null;
+        readonly onDrop?: ((event: DragEvent) => void) | null;
+    }): {
+        content: TemplateRef<unknown>;
+        part: string | null;
+        attrs: Readonly<Record<string, unknown>>;
+        inert: boolean;
+        dragging: string | null;
+        drop: string | null;
+        onDragOver: ((event: DragEvent) => void) | null;
+        onDrop: ((event: DragEvent) => void) | null;
+    };
+    readonly selectionRail: InputSignal<string | null>;
+    protected shiftedPin(attrs: Attrs): Attrs;
+    readonly slotInjector: InputSignal<Injector | "outlet" | undefined>;
+    readonly slots: InputSignal<AdaptDesktopSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDesktopStructure<any>, "adapt-desktop-structure", never, {
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "embedded": {
+            "alias": "embedded";
+            "required": false;
+            "isSignal": true;
+        };
+        "slotInjector": {
+            "alias": "slotInjector";
+            "required": false;
+            "isSignal": true;
+        };
+        "railMin": {
+            "alias": "railMin";
+            "required": false;
+            "isSignal": true;
+        };
+        "selectionRail": {
+            "alias": "selectionRail";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDesktopStructure<any>, never>;
 }
 
 // @public
@@ -3219,7 +3313,7 @@ export class AdaptGroupMoreButtonChrome {
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"groups" | "rows">;
+    readonly scope: InputSignal<"rows" | "groups">;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {
@@ -3416,6 +3510,35 @@ export abstract class AdaptMobileCardsModel<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMobileCardsModel<any>, never>;
+}
+
+// @public
+export interface AdaptMobileSlots {
+    // (undocumented)
+    readonly card?: TemplateRef<unknown>;
+    // (undocumented)
+    readonly checkbox: TemplateRef<unknown>;
+    // (undocumented)
+    readonly field?: TemplateRef<unknown>;
+    // (undocumented)
+    readonly rowActions: TemplateRef<unknown>;
+    // (undocumented)
+    readonly spacer: TemplateRef<unknown>;
+}
+
+// @public
+export class AdaptMobileStructure<TRow> extends AdaptMobileCardsModel<TRow> {
+    readonly slots: InputSignal<AdaptMobileSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMobileStructure<any>, "adapt-mobile-structure", never, {
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMobileStructure<any>, never>;
 }
 
 // @public
@@ -4377,6 +4500,9 @@ export class AdaptStatusBarChrome {
 export const ADAPTTABLE_CONTEXT_MENU: InjectionToken<WritableSignal<ContextMenuRegionHandlers | null>>;
 
 // @public
+export const ADAPTTABLE_KIT_MOTION_OFF: InjectionToken<Signal<boolean>>;
+
+// @public
 export const ADAPTTABLE_PALETTE_OPEN: InjectionToken<WritableSignal<PaletteOpenState | null>>;
 
 // @public
@@ -5028,11 +5154,7 @@ export { ColumnSelectCheckboxChromeProps }
 
 export { ColumnSelectCheckboxProps }
 
-// @public
-export function columnSelectLabel(label: string | undefined, column: {
-    readonly header?: string;
-    readonly key: string;
-}): string;
+export { columnSelectLabel }
 
 // @public
 export interface ColumnSelectSlots {
@@ -5918,6 +6040,18 @@ export { isSelectedCell }
 export { isSelectEditor }
 
 export { joinRelativeToken }
+
+// @public
+export interface KitEnvironment {
+    // (undocumented)
+    readonly density?: TableDensity;
+    // (undocumented)
+    readonly dir?: Direction;
+    // (undocumented)
+    readonly labels?: Partial<TableLabels>;
+    // (undocumented)
+    readonly locale?: string;
+}
 
 // @public
 export function launcherStyle(boundary: TableAssistantBoundary): TableAssistantPlacement;

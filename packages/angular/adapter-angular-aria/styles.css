@@ -135,6 +135,16 @@
   overflow-wrap: anywhere;
   box-sizing: border-box;
 }
+/* Comfortable cell padding plus the bordered icon button is 74px.
+   React's expand column is about 65px, and the check stays at 72. */
+.adapt-aria
+  [data-density="comfortable"]
+  :is(
+    [data-adapttable-part="expand-header"],
+    [data-adapttable-part="expand-cell"]
+  ) {
+  padding-inline: 0.8rem;
+}
 .adapt-aria th {
   font-weight: 600;
   white-space: nowrap;

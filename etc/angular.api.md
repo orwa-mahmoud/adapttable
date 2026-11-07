@@ -229,6 +229,9 @@ export const ADAPTTABLE_FEATURES: InjectionToken<readonly AdaptTableFeature[]>;
 export const ADAPTTABLE_FIND_STATE: InjectionToken<WritableSignal<FindInTableState | null>>;
 
 // @public
+export const ADAPTTABLE_KIT_MOTION_OFF: InjectionToken<Signal<boolean>>;
+
+// @public
 export const ADAPTTABLE_SLOT_TABLE: InjectionToken<SlotTable>;
 
 // @public
