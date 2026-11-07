@@ -8,6 +8,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
+  DesktopTableChrome,
   edgePinStyle,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
@@ -30,6 +31,7 @@ import {
 } from "@adapttable/react/adapter";
 import { Badge, Checkbox, Group, Table, VisuallyHidden } from "@mantine/core";
 import {
+  type ComponentProps,
   type CSSProperties,
   Fragment,
   type ReactElement,
@@ -546,6 +548,26 @@ function DesktopRowBase<TRow>(
   );
 }
 
+/**
+ * Stable element types. An inline host is a new component every render,
+ * which remounts the table and retriggers scroll measurement.
+ */
+function MantineTableHost(props: ComponentProps<typeof Table>) {
+  return <Table {...props} />;
+}
+
+function MantineHeadHost(props: ComponentProps<typeof Table.Thead>) {
+  return <Table.Thead {...props} />;
+}
+
+function MantineBodyHost(props: ComponentProps<typeof Table.Tbody>) {
+  return <Table.Tbody {...props} />;
+}
+
+function MantineRowHost(props: ComponentProps<typeof Table.Tr>) {
+  return <Table.Tr {...props} />;
+}
+
 /** Desktop table rendering driven by core prop-getters. */
 export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
   const {
@@ -572,16 +594,12 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
     model,
     summary,
     showColumnFooter,
-    headerPlan,
-    headerBand,
     header,
     pin,
     scroll,
     tableStyle,
-    tableProps,
     gridProps,
     callbacks,
-    bodySlots,
     resizeHandleStyle,
     widths,
   } = assembly;
@@ -731,155 +749,116 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
     typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
 
   return (
-    <div
-      data-adapttable-part={gridProps?.role === "grid" ? "grid" : undefined}
-      style={{ display: "contents" }}
-    >
-      <div
-        ref={scroll.bindScrollBox}
-        style={{ width: "100%", ...scroll.boxStyle }}
-      >
-        <style>{PIN_HOVER_CSS}</style>
-        <Table
-          data-adapttable-part="table"
-          {...tableProps}
-          {...gridProps}
-          className={
-            className ? `${PIN_HOVER_CLASS} ${className}` : PIN_HOVER_CLASS
-          }
-          highlightOnHover
-          verticalSpacing={verticalSpacing}
-          horizontalSpacing={horizontalSpacing}
-          style={{
-            minWidth: Math.max(480, minWidth),
-            ...(stickyHeader
-              ? { borderCollapse: "separate" as const, borderSpacing: 0 }
-              : {}),
-            ...(tableStyle?.tableLayout
-              ? { tableLayout: tableStyle.tableLayout }
-              : {}),
-            ...(tableStyle?.width ? { width: tableStyle.width } : {}),
-          }}
+    <DesktopTableChrome
+      assembly={assembly}
+      hosts={{
+        Table: MantineTableHost,
+        Head: MantineHeadHost,
+        Body: MantineBodyHost,
+        Row: MantineRowHost,
+      }}
+      frame={(scrollBox) => (
+        <div
+          data-adapttable-part={gridProps?.role === "grid" ? "grid" : undefined}
+          style={{ display: "contents" }}
         >
-          <Table.Thead
-            data-adapttable-part="thead"
-            ref={header.theadRef}
-            style={{ background: SURFACE }}
-          >
-            {headerPlan ? (
-              headerPlan.map((row, rowIndex) => {
-                const last = rowIndex === headerPlan.length - 1;
-                return (
-                  <Table.Tr
-                    key={row.map((cell) => cell.key).join("|")}
-                    {...(last ? header.headerRowProps : {})}
-                    ref={last ? header.headerRowRef : undefined}
-                    data-adapttable-part={
-                      last ? "header-row" : "header-group-row"
-                    }
-                  >
-                    {rowIndex === 0 ? leadingHeaders(headerBand) : null}
-                    {row.map(renderPlanCell)}
-                    {rowIndex === 0 ? trailingHeaders(headerBand) : null}
-                  </Table.Tr>
-                );
-              })
-            ) : (
-              <Table.Tr
-                {...header.headerRowProps}
-                ref={header.headerRowRef}
-                data-adapttable-part="header-row"
-              >
-                {leadingHeaders(1)}
-                {columns.map((column, headerIndex) => (
-                  <LeafHeader
-                    key={column.key}
-                    leaf={header.leaf(column, headerIndex)}
-                    {...leafProps}
-                  />
-                ))}
-                {trailingHeaders(1)}
-              </Table.Tr>
-            )}
-          </Table.Thead>
-          <Table.Tbody ref={bodyRef} data-adapttable-part="tbody">
-            {bodySlots.map((slot) => {
-              if (slot.kind === "extra") {
-                return (
-                  <ExtraSlotRow
-                    key={slot.key}
-                    kind={slot.extraKind}
-                    colSpan={slot.colSpan}
-                    render={slot.render}
-                    labels={labels}
-                    fillStyle={slot.fillStyle}
-                  />
-                );
-              }
-              if (slot.kind === "virtualPad") {
-                return (
-                  <Table.Tr key={slot.key} aria-hidden>
-                    <Table.Td
-                      colSpan={slot.colSpan}
-                      style={{ height: slot.height, padding: 0 }}
-                    />
-                  </Table.Tr>
-                );
-              }
-              if (slot.kind === "group") {
-                return (
-                  <OptionalGroupHeaderRow
-                    key={slot.key}
-                    entry={slot.entry}
-                    columns={columns}
-                    leadingCells={leadingCells}
-                    showActions={showActions}
-                    getCellProps={props.table.getCellProps}
-                    selection={selection}
-                    labels={labels}
-                    onToggleCollapse={callbacks.onToggleGroup}
-                    onShowMore={props.grouping?.showMore ?? (() => undefined)}
-                  />
-                );
-              }
-              return (
-                <Row
-                  key={slot.key}
-                  {...slot.wiring}
-                  stickyHeader={stickyHeader}
-                />
-              );
-            })}
-          </Table.Tbody>
-          {showColumnFooter && (
-            <Table.Tfoot data-adapttable-part="summary">
-              <Table.Tr data-adapttable-part="summary-row">
-                {header.leading.expand && (
-                  <Table.Td data-adapttable-part="summary-cell" />
-                )}
-                <When show={showReorder}>
-                  <Table.Td data-adapttable-part="summary-cell" />
-                </When>
-                {selection && <Table.Td data-adapttable-part="summary-cell" />}
-                {columns.map((column) => (
-                  <Table.Td
-                    key={column.key}
-                    {...props.table.getCellProps(column)}
-                    data-adapttable-part="summary-cell"
-                    fw={600}
-                    c="dimmed"
-                  >
-                    {resolveColumnFooter(column, summary?.[column.key])}
-                  </Table.Td>
-                ))}
-                {showActions && (
-                  <Table.Td data-adapttable-part="summary-cell" />
-                )}
-              </Table.Tr>
-            </Table.Tfoot>
-          )}
-        </Table>
-      </div>
-    </div>
+          {scrollBox}
+        </div>
+      )}
+      scrollBoxProps={{
+        style: { width: "100%", ...scroll.boxStyle },
+      }}
+      beforeTable={<style>{PIN_HOVER_CSS}</style>}
+      headProps={{ style: { background: SURFACE } }}
+      bodyProps={{ ref: bodyRef }}
+      tableProps={{
+        className: className
+          ? `${PIN_HOVER_CLASS} ${className}`
+          : PIN_HOVER_CLASS,
+        highlightOnHover: true,
+        verticalSpacing,
+        horizontalSpacing,
+        style: {
+          minWidth: Math.max(480, minWidth),
+          ...(stickyHeader
+            ? { borderCollapse: "separate" as const, borderSpacing: 0 }
+            : {}),
+          ...(tableStyle?.tableLayout
+            ? { tableLayout: tableStyle.tableLayout }
+            : {}),
+          ...(tableStyle?.width ? { width: tableStyle.width } : {}),
+        },
+      }}
+      renderLeading={leadingHeaders}
+      renderTrailing={trailingHeaders}
+      renderPlanCell={renderPlanCell}
+      renderLeaf={(leaf, column) => (
+        <LeafHeader key={column.key} leaf={leaf} {...leafProps} />
+      )}
+      renderRow={(slot) => (
+        <Row key={slot.key} {...slot.wiring} stickyHeader={stickyHeader} />
+      )}
+      renderGroup={(slot) => (
+        <OptionalGroupHeaderRow
+          key={slot.key}
+          entry={slot.entry}
+          columns={columns}
+          leadingCells={leadingCells}
+          showActions={showActions}
+          getCellProps={props.table.getCellProps}
+          selection={selection}
+          labels={labels}
+          onToggleCollapse={callbacks.onToggleGroup}
+          onShowMore={props.grouping?.showMore ?? (() => undefined)}
+        />
+      )}
+      renderExtra={(slot) => (
+        <ExtraSlotRow
+          key={slot.key}
+          kind={slot.extraKind}
+          colSpan={slot.colSpan}
+          render={slot.render}
+          labels={labels}
+          fillStyle={slot.fillStyle}
+        />
+      )}
+      renderVirtualPad={(slot) => (
+        <Table.Tr key={slot.key} aria-hidden>
+          <Table.Td
+            colSpan={slot.colSpan}
+            style={{ height: slot.height, padding: 0 }}
+          />
+        </Table.Tr>
+      )}
+      renderSummary={() =>
+        showColumnFooter ? (
+          <Table.Tfoot data-adapttable-part="summary">
+            <Table.Tr data-adapttable-part="summary-row">
+              {header.leading.expand && (
+                <Table.Td data-adapttable-part="summary-cell" />
+              )}
+              <When show={showReorder}>
+                <Table.Td data-adapttable-part="summary-cell" />
+              </When>
+              {selection && <Table.Td data-adapttable-part="summary-cell" />}
+              {columns.map((column) => (
+                <Table.Td
+                  key={column.key}
+                  {...props.table.getCellProps(column)}
+                  data-adapttable-part="summary-cell"
+                  fw={600}
+                  c="dimmed"
+                >
+                  {resolveColumnFooter(column, summary?.[column.key])}
+                </Table.Td>
+              ))}
+              {showActions && (
+                <Table.Td data-adapttable-part="summary-cell" />
+              )}
+            </Table.Tr>
+          </Table.Tfoot>
+        ) : null
+      }
+    />
   );
 }
