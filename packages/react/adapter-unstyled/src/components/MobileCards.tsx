@@ -12,6 +12,8 @@ import {
   isExtraEntry,
   mobileCardListStyle,
   mobileCardRegionProps,
+  MobileCardsChrome,
+  type MobileCardSlot,
   orderedCardEntries,
   pinnedSummaryPart,
   pinnedSummaryRowId,
@@ -37,7 +39,6 @@ import {
 import {
   type CSSProperties,
   memo,
-  type ReactElement,
   type ReactNode,
   useMemo,
 } from "react";
@@ -201,17 +202,12 @@ function MobileCardBase<TRow>({
   rowActionsLayout,
   renderRowActions,
   classNames,
-  className,
-  style,
   isCellFlashing,
   selected,
   expanded,
   onToggleSelect,
   onToggleExpand,
   renderDetail,
-  onRowClick,
-  measureElement,
-  clickable,
   editing,
   rows,
   getRowId,
@@ -220,10 +216,7 @@ function MobileCardBase<TRow>({
   rowReorder,
   windowStart,
   rowCount,
-  setSize,
   renderCard,
-  part,
-  ariaLabel,
 }: Readonly<MobileCardProps<TRow>>) {
   // Built once and used by both paths, so a custom card shows the very same
   // value node the built-in would have — cell renderers and editors included.
@@ -258,29 +251,6 @@ function MobileCardBase<TRow>({
   const rowConflict = rowEditConflict(editing, id);
   return (
     <MobileTarget.Provider value={true}>
-      <li
-        {...rowClickProps(row, onRowClick, index)}
-        style={{
-          display: "block",
-          minHeight: "max-content",
-          ...treeCardStyle(treeEntry?.level ?? 0),
-          ...style,
-        }}
-        ref={measureElement}
-        data-index={index}
-        // A windowed list has only a slice of its items in the DOM, so each
-        // one states where it sits and how many there are; a complete list
-        // needs neither, because assistive tech can simply count.
-        aria-posinset={setSize > rowCount ? windowStart + index + 1 : undefined}
-        aria-setsize={setSize > rowCount ? setSize : undefined}
-        data-adapttable-part={part ?? "card"}
-        data-stagger=""
-        data-selected={selected ? "" : undefined}
-        aria-label={ariaLabel}
-        data-dirty={rowIsDirty(editing, id) ? "" : undefined}
-        data-clickable={clickable ? "" : undefined}
-        className={cx(classNames.card, className)}
-      >
         {treeEntry && (
           <OptionalTreeToggle
             toggleClassName={classNames.treeToggle}
@@ -411,9 +381,56 @@ function MobileCardBase<TRow>({
             {renderDetail(row)}
           </div>
         )}
-      </li>
     </MobileTarget.Provider>
   );
+}
+
+/** The list item's attributes. The shared chrome owns the item element. */
+function cardElementProps<TRow>(
+  props: Readonly<MobileCardProps<TRow>>
+): Record<string, unknown> {
+  const {
+    row,
+    index,
+    id,
+    classNames,
+    className,
+    style,
+    selected,
+    onRowClick,
+    measureElement,
+    clickable,
+    editing,
+    treeEntry,
+    windowStart,
+    rowCount,
+    setSize,
+    part,
+    ariaLabel,
+  } = props;
+  return {
+    ...rowClickProps(row, onRowClick, index),
+    style: {
+      display: "block",
+      minHeight: "max-content",
+      ...treeCardStyle(treeEntry?.level ?? 0),
+      ...style,
+    },
+    ref: measureElement,
+    "data-index": index,
+    // A windowed list has only a slice of its items in the DOM, so each
+    // one states where it sits and how many there are; a complete list
+    // needs neither, because assistive tech can simply count.
+    "aria-posinset": setSize > rowCount ? windowStart + index + 1 : undefined,
+    "aria-setsize": setSize > rowCount ? setSize : undefined,
+    "data-adapttable-part": part ?? "card",
+    "data-stagger": "",
+    "data-selected": selected ? "" : undefined,
+    "aria-label": ariaLabel,
+    "data-dirty": rowIsDirty(editing, id) ? "" : undefined,
+    "data-clickable": clickable ? "" : undefined,
+    className: cx(classNames.card, className),
+  };
 }
 
 /** Mobile card-list rendering. */
@@ -486,189 +503,161 @@ export function MobileCards<TRow>({
     index: number,
     key: string,
     treeEntry?: TreeEntry<TRow>
-  ): ReactElement => {
+  ): MobileCardSlot => {
     const side = pinnedSummarySideFromId(key);
     const id = side ? key : getRowId(row);
-    return (
-      <CardItem
-        key={key}
-        row={row}
-        index={index}
-        id={id}
-        columns={columns}
-        labels={labels}
-        confirm={confirm}
-        rowActions={unlessPinned(side, rowActions)}
-        rowActionsLayout={rowActionsLayout}
-        renderRowActions={unlessPinned(side, renderRowActions)}
-        classNames={classNames}
-        className={rowClassName?.(row, index)}
-        style={resolveRowStyle(rowStyle, rowHeight, row, index)}
-        styleSignature={rowStyleSignature(
-          resolveRowStyle(rowStyle, rowHeight, row, index)
-        )}
-        flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
-        isCellFlashing={isCellFlashing}
-        selected={unlessPinnedMatch(side, selection?.isSelected, id)}
-        expanded={unlessPinnedMatch(side, expansionState?.isExpanded, id)}
-        onToggleSelect={unlessPinned(side, selection?.toggle)}
-        onToggleExpand={unlessPinned(side, expansionState?.toggle)}
-        renderDetail={unlessPinned(side, renderRowDetail)}
-        onRowClick={unlessPinned(side, onRowClick)}
-        measureElement={measureElement}
-        editing={editing}
-        rows={rows}
-        getRowId={getRowId}
-        editingSignature={rowEditingSignature(editing, id)}
-        treeEntry={unlessPinned(side, treeEntry)}
-        onToggleTree={unlessPinned(side, tree?.expansion.toggle)}
-        rowReorder={unlessPinned(side, rowReorder)}
-        windowStart={windowStart}
-        rowCount={rows.length}
-        setSize={cardSetSize}
-        reorderSignature={rowReorderSignature(rowReorder, id, index)}
-        clickable={Boolean(unlessPinned(side, onRowClick))}
-        renderCard={unlessPinned(side, renderCard)}
-        part={side ? pinnedSummaryPart(side) : undefined}
-        ariaLabel={side ? labels.pinnedSummaryRow : undefined}
-      />
-    );
+    const cardProps: MobileCardProps<TRow> = {
+      row,
+      index,
+      id,
+      columns,
+      labels,
+      confirm,
+      rowActions: unlessPinned(side, rowActions),
+      rowActionsLayout,
+      renderRowActions: unlessPinned(side, renderRowActions),
+      classNames,
+      className: rowClassName?.(row, index),
+      style: resolveRowStyle(rowStyle, rowHeight, row, index),
+      styleSignature: rowStyleSignature(
+        resolveRowStyle(rowStyle, rowHeight, row, index)
+      ),
+      flashSignature: rowFlashSignature(isCellFlashing, id, columns),
+      isCellFlashing,
+      selected: unlessPinnedMatch(side, selection?.isSelected, id),
+      expanded: unlessPinnedMatch(side, expansionState?.isExpanded, id),
+      onToggleSelect: unlessPinned(side, selection?.toggle),
+      onToggleExpand: unlessPinned(side, expansionState?.toggle),
+      renderDetail: unlessPinned(side, renderRowDetail),
+      onRowClick: unlessPinned(side, onRowClick),
+      measureElement,
+      clickable: Boolean(unlessPinned(side, onRowClick)),
+      editing,
+      rows,
+      getRowId,
+      editingSignature: rowEditingSignature(editing, id),
+      treeEntry: unlessPinned(side, treeEntry),
+      onToggleTree: unlessPinned(side, tree?.expansion.toggle),
+      rowReorder: unlessPinned(side, rowReorder),
+      windowStart,
+      rowCount: rows.length,
+      setSize: cardSetSize,
+      reorderSignature: rowReorderSignature(rowReorder, id, index),
+      renderCard: unlessPinned(side, renderCard),
+      part: side ? pinnedSummaryPart(side) : undefined,
+      ariaLabel: side ? labels.pinnedSummaryRow : undefined,
+    };
+    return {
+      key,
+      part: cardProps.part ?? "card",
+      props: cardElementProps(cardProps),
+      content: <CardItem {...cardProps} />,
+    };
   };
 
+  const extraSlot = (entry: {
+    readonly key: string;
+    readonly kind: "separator" | "fullWidth";
+    readonly render?: () => unknown;
+  }): MobileCardSlot => ({
+    key: entry.key,
+    part: EXTRA_ROW_PARTS[entry.kind].row,
+    props: {
+      role: entry.kind === "separator" ? "separator" : undefined,
+      "aria-label":
+        entry.kind === "separator" ? labels.rowSeparator : undefined,
+      className:
+        entry.kind === "separator"
+          ? classNames.separatorRow
+          : classNames.fullWidthRow,
+      style: { display: "block" },
+    },
+    content: (
+      <div
+        data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}
+        className={
+          entry.kind === "separator"
+            ? classNames.separatorCell
+            : classNames.fullWidthCell
+        }
+      >
+        {entry.kind === "fullWidth" ? (entry.render?.() as ReactNode) : null}
+      </div>
+    ),
+  });
+
+  function groupedSlots(): MobileCardSlot[] {
+    if (!grouping) return [];
+    const cards: MobileCardSlot[] = [];
+    for (const [index, row] of pinnedSummaryTop.entries()) {
+      cards.push(cardFor(row, index, pinnedSummaryRowId("top", index)));
+    }
+    for (const entry of grouping.entries) {
+      if (isExtraEntry(entry)) {
+        cards.push(extraSlot(entry));
+        continue;
+      }
+      if (
+        entry.kind === "group" ||
+        entry.kind === "groupFooter" ||
+        entry.kind === "groupMore"
+      ) {
+        cards.push({
+          key: entry.key,
+          props: {
+            "data-adapttable-part": undefined,
+            className: undefined,
+            style: { display: "block" },
+          },
+          content: (
+            <OptionalGroupHeaderCard
+              entry={entry}
+              columns={columns}
+              selection={selection}
+              labels={labels}
+              compact={false}
+              onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
+              onShowMore={grouping.showMore}
+            />
+          ),
+        });
+        continue;
+      }
+      cards.push(cardFor(entry.row, entry.index, entry.key));
+    }
+    for (const [index, row] of pinnedSummaryBottom.entries()) {
+      cards.push(cardFor(row, index, pinnedSummaryRowId("bottom", index)));
+    }
+    return cards;
+  }
+
+  function flatSlots(): MobileCardSlot[] {
+    return flatCardSlots.map((slot) =>
+      isExtraEntry(slot)
+        ? extraSlot(slot)
+        : cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
+    );
+  }
+
+  const cards = grouping ? groupedSlots() : flatSlots();
+
   return (
-    <section
-      {...mobileCardRegionProps(
+    <MobileCardsChrome
+      regionProps={mobileCardRegionProps(
         table.getTableProps()["aria-label"],
         labels.table,
         maxHeight
       )}
       dir={table.getTableProps().dir}
-      ref={virtualScrollRef}
-      className={classNames.scrollBox}
+      scrollRef={virtualScrollRef}
+      classNames={classNames}
       style={mobileCardListStyle(maxHeight)}
-    >
-      <ul
-        {...table.getTableProps({ role: undefined })}
-        data-adapttable-part="cards"
-        className={classNames.cards}
-        // No `list-style: none` here: Safari/VoiceOver strips list semantics
-        // from such lists. Markers are suppressed per-item with display:block.
-        style={{ margin: 0, padding: 0 }}
-      >
-        {paddingTop > 0 && (
-          <li
-            data-adapttable-part="virtual-spacer"
-            className={classNames.virtualSpacer}
-            style={{ display: "block", height: paddingTop }}
-          />
-        )}
-        {grouping
-          ? pinnedSummaryTop.map((row, index) =>
-              cardFor(row, index, pinnedSummaryRowId("top", index))
-            )
-          : null}
-        {grouping
-          ? grouping.entries.map((entry) => {
-              if (isExtraEntry(entry)) {
-                return (
-                  <li
-                    key={entry.key}
-                    data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].row}
-                    role={entry.kind === "separator" ? "separator" : undefined}
-                    aria-label={
-                      entry.kind === "separator"
-                        ? labels.rowSeparator
-                        : undefined
-                    }
-                    className={
-                      entry.kind === "separator"
-                        ? classNames.separatorRow
-                        : classNames.fullWidthRow
-                    }
-                    style={{ display: "block" }}
-                  >
-                    <div
-                      data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}
-                      className={
-                        entry.kind === "separator"
-                          ? classNames.separatorCell
-                          : classNames.fullWidthCell
-                      }
-                    >
-                      {entry.kind === "fullWidth"
-                        ? (entry.render?.() as ReactNode)
-                        : null}
-                    </div>
-                  </li>
-                );
-              }
-              if (
-                entry.kind === "group" ||
-                entry.kind === "groupFooter" ||
-                entry.kind === "groupMore"
-              ) {
-                return (
-                  <li key={entry.key} style={{ display: "block" }}>
-                    <OptionalGroupHeaderCard
-                      entry={entry}
-                      columns={columns}
-                      selection={selection}
-                      labels={labels}
-                      compact={false}
-                      onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
-                      onShowMore={grouping.showMore}
-                    />
-                  </li>
-                );
-              }
-              return cardFor(entry.row, entry.index, entry.key);
-            })
-          : flatCardSlots.map((slot) =>
-              isExtraEntry(slot) ? (
-                <li
-                  key={slot.key}
-                  data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].row}
-                  role={slot.kind === "separator" ? "separator" : undefined}
-                  aria-label={
-                    slot.kind === "separator" ? labels.rowSeparator : undefined
-                  }
-                  className={
-                    slot.kind === "separator"
-                      ? classNames.separatorRow
-                      : classNames.fullWidthRow
-                  }
-                  style={{ display: "block" }}
-                >
-                  <div
-                    data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}
-                    className={
-                      slot.kind === "separator"
-                        ? classNames.separatorCell
-                        : classNames.fullWidthCell
-                    }
-                  >
-                    {slot.kind === "fullWidth"
-                      ? (slot.render?.() as ReactNode)
-                      : null}
-                  </div>
-                </li>
-              ) : (
-                cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
-              )
-            )}
-        {grouping
-          ? pinnedSummaryBottom.map((row, index) =>
-              cardFor(row, index, pinnedSummaryRowId("bottom", index))
-            )
-          : null}
-        {paddingBottom > 0 && (
-          <li
-            data-adapttable-part="virtual-spacer"
-            className={classNames.virtualSpacer}
-            style={{ display: "block", height: paddingBottom }}
-          />
-        )}
-        {summary && (
+      listProps={table.getTableProps({ role: undefined })}
+      paddingTop={paddingTop}
+      paddingBottom={paddingBottom}
+      cards={cards}
+      summary={
+        summary ? (
           <li
             data-adapttable-part="summary-card"
             className={cx(classNames.card, classNames.summaryCard)}
@@ -699,8 +688,8 @@ export function MobileCards<TRow>({
               )
             )}
           </li>
-        )}
-      </ul>
-    </section>
+        ) : undefined
+      }
+    />
   );
 }
