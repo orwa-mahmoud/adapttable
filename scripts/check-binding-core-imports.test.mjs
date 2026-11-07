@@ -4,7 +4,9 @@ import { describe, it } from "node:test";
 import {
   bindingCoreImportViolations,
   checkBindingCoreImports,
+  checkSharedBehaviours,
   focusedValueDoors,
+  reimplementedBehaviourViolations,
 } from "./check-binding-core-imports.mjs";
 
 describe("binding core imports", () => {
@@ -30,5 +32,33 @@ describe("binding core imports", () => {
   it("accepts the three bindings", () => {
     const violations = checkBindingCoreImports();
     assert.deepEqual(violations, []);
+  });
+
+  it("fails a planted binding duplicate and accepts the real bindings", () => {
+    const behaviours = [
+      {
+        name: "sourceViewKey",
+        owner: "packages/shared/core/src/source/sourceRefresh.ts",
+      },
+    ];
+    assert.deepEqual(
+      reimplementedBehaviourViolations(
+        "export function sourceViewKey(state) { return state; }",
+        behaviours,
+        "planted"
+      ),
+      [
+        "planted: sourceViewKey is owned by packages/shared/core/src/source/sourceRefresh.ts and cannot be reimplemented in a binding",
+      ]
+    );
+    assert.deepEqual(
+      reimplementedBehaviourViolations(
+        'export { sourceViewKey } from "@adapttable/core/binding";',
+        behaviours,
+        "planted"
+      ),
+      []
+    );
+    assert.deepEqual(checkSharedBehaviours(), []);
   });
 });

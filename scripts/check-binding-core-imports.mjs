@@ -47,11 +47,15 @@ function valueExportElements(statement) {
   ) {
     return undefined;
   }
-  return statement.exportClause.elements.filter((element) => !element.isTypeOnly);
+  return statement.exportClause.elements.filter(
+    (element) => !element.isTypeOnly
+  );
 }
 
 /** @param {string} file */
-export function focusedValueDoors(file = join(ROOT, "packages/shared/core/src")) {
+export function focusedValueDoors(
+  file = join(ROOT, "packages/shared/core/src")
+) {
   /** @type {Map<string, string>} */
   const owner = new Map();
   /** @type {Set<string>} */
@@ -161,12 +165,7 @@ function violationsIn(statement, doors, label) {
  * @param {string} [label]
  */
 export function bindingCoreImportViolations(text, doors, label = "source") {
-  const source = ts.createSourceFile(
-    label,
-    text,
-    ts.ScriptTarget.Latest,
-    true
-  );
+  const source = ts.createSourceFile(label, text, ts.ScriptTarget.Latest, true);
   return source.statements.flatMap((statement) =>
     violationsIn(statement, doors, label)
   );
@@ -175,14 +174,155 @@ export function bindingCoreImportViolations(text, doors, label = "source") {
 /** @param {string} dir @param {string[]} out */
 function walk(dir, out) {
   for (const name of readdirSync(dir)) {
-    if (name === "node_modules" || name === "dist" || name === "coverage") {
+    if (
+      name === "node_modules" ||
+      name === "dist" ||
+      name === "coverage" ||
+      name === ".sfc-types"
+    ) {
       continue;
     }
     const path = join(dir, name);
     if (statSync(path).isDirectory()) walk(path, out);
-    else if (/\.(ts|tsx)$/.test(name)) out.push(path);
+    else if (/\.(ts|tsx)$/.test(name) && !name.endsWith(".d.ts"))
+      out.push(path);
   }
   return out;
+}
+
+/**
+ * Names a binding must import instead of declaring again.
+ *
+ * @param {string} file
+ */
+export function sharedCoreBehaviours(
+  file = join(ROOT, "scripts/shared-core-behaviours.json")
+) {
+  const registry = JSON.parse(readFileSync(file, "utf8"));
+  return registry.behaviours;
+}
+
+/**
+ * @param {string} text
+ * @param {string} name
+ */
+/**
+ * @param {string} text
+ * @param {string} name
+ */
+function exportsName(text, name) {
+  const source = ts.createSourceFile(
+    "owner",
+    text,
+    ts.ScriptTarget.Latest,
+    true
+  );
+  for (const statement of source.statements) {
+    if (
+      !ts.isExportDeclaration(statement) ||
+      statement.exportClause === undefined ||
+      !ts.isNamedExports(statement.exportClause)
+    ) {
+      continue;
+    }
+    for (const element of statement.exportClause.elements) {
+      if (element.name.text === name) return true;
+    }
+  }
+  return false;
+}
+
+function declaresFunction(text, name) {
+  const source = ts.createSourceFile(name, text, ts.ScriptTarget.Latest, true);
+  let found = false;
+  /** @param {import("typescript").Node} node */
+  function visit(node) {
+    if (found) return;
+    if (
+      (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) &&
+      node.name?.text === name
+    ) {
+      found = true;
+      return;
+    }
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text === name &&
+      node.initializer !== undefined &&
+      (ts.isArrowFunction(node.initializer) ||
+        ts.isFunctionExpression(node.initializer))
+    ) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return found;
+}
+
+/**
+ * @param {string} text
+ * @param {{ name: string, owner: string }[]} behaviours
+ * @param {string} [label]
+ */
+export function reimplementedBehaviourViolations(
+  text,
+  behaviours,
+  label = "source"
+) {
+  return behaviours.flatMap((behaviour) =>
+    declaresFunction(text, behaviour.name)
+      ? [
+          `${label}: ${behaviour.name} is owned by ${behaviour.owner} and cannot be reimplemented in a binding`,
+        ]
+      : []
+  );
+}
+
+/**
+ * @param {string} root
+ * @param {{ name: string, owner: string }[]} behaviours
+ */
+function ownerViolations(root, behaviours) {
+  return behaviours.flatMap((behaviour) => {
+    const file = join(root, behaviour.owner);
+    let text = "";
+    try {
+      text = readFileSync(file, "utf8");
+    } catch {
+      return [
+        `registry: ${behaviour.name} has no implementation at ${behaviour.owner}`,
+      ];
+    }
+    return declaresFunction(text, behaviour.name) ||
+      exportsName(text, behaviour.name)
+      ? []
+      : [
+          `registry: ${behaviour.name} is not implemented in ${behaviour.owner}`,
+        ];
+  });
+}
+
+export function checkSharedBehaviours({
+  root = ROOT,
+  behaviours = sharedCoreBehaviours(),
+} = {}) {
+  /** @type {string[]} */
+  const violations = ownerViolations(root, behaviours);
+  for (const binding of BINDINGS) {
+    for (const file of walk(join(root, binding), [])) {
+      violations.push(
+        ...reimplementedBehaviourViolations(
+          readFileSync(file, "utf8"),
+          behaviours,
+          file.slice(root.length + 1)
+        )
+      );
+    }
+  }
+  return violations;
 }
 
 export function checkBindingCoreImports({
@@ -206,15 +346,27 @@ export function checkBindingCoreImports({
 }
 
 function main() {
-  const violations = checkBindingCoreImports();
-  if (violations.length > 0) {
-    console.error(
-      `binding core imports: ${violations.length} focused value(s) still on the root\n`
-    );
-    for (const violation of violations) console.error(`  ${violation}`);
+  const importViolations = checkBindingCoreImports();
+  const behaviourViolations = checkSharedBehaviours();
+  if (importViolations.length > 0 || behaviourViolations.length > 0) {
+    if (importViolations.length > 0) {
+      console.error(
+        `binding core imports: ${importViolations.length} focused value(s) still on the root`
+      );
+      for (const violation of importViolations) console.error(`  ${violation}`);
+    }
+    if (behaviourViolations.length > 0) {
+      console.error(
+        `binding core imports: ${behaviourViolations.length} reimplemented shared behaviour(s)`
+      );
+      for (const violation of behaviourViolations)
+        console.error(`  ${violation}`);
+    }
     process.exit(1);
   }
-  console.log("binding core imports: focused values use their doors");
+  console.log(
+    "binding core imports: focused values use their doors and shared behaviours stay in core"
+  );
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();

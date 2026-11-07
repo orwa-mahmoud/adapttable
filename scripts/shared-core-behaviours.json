@@ -1,0 +1,48 @@
+{
+  "behaviours": [
+    {
+      "name": "approvalArgumentPairs",
+      "owner": "packages/shared/core/src/approval/approvalReview.ts"
+    },
+    {
+      "name": "approvalValueText",
+      "owner": "packages/shared/core/src/approval/approvalReview.ts"
+    },
+    {
+      "name": "cachedSnapshot",
+      "owner": "packages/shared/core/src/source/sourceRefresh.ts"
+    },
+    {
+      "name": "columnSelectLabel",
+      "owner": "packages/shared/core/src/layout/leanAssembly.ts"
+    },
+    {
+      "name": "frontendRowModelOf",
+      "owner": "packages/shared/core/src/source/frontendRowModel.ts"
+    },
+    {
+      "name": "primitiveText",
+      "owner": "packages/shared/core/src/columns/resolveColumns.ts"
+    },
+    {
+      "name": "revisionToken",
+      "owner": "packages/shared/core/src/engine/neutralTable.ts"
+    },
+    {
+      "name": "sameIdentity",
+      "owner": "packages/shared/core/src/source/sourceRefresh.ts"
+    },
+    {
+      "name": "sourceViewKey",
+      "owner": "packages/shared/core/src/source/sourceRefresh.ts"
+    },
+    {
+      "name": "virtualItemMeta",
+      "owner": "packages/shared/core/src/virtual/virtualTableModel.ts"
+    },
+    {
+      "name": "withFrontendRowModel",
+      "owner": "packages/shared/core/src/source/frontendRowModel.ts"
+    }
+  ]
+}
