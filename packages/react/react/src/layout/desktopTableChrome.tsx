@@ -100,6 +100,12 @@ export interface DesktopTableChromeProps<TRow> {
   readonly tableProps?: Record<string, unknown>;
   /** Extra props for the head. */
   readonly headProps?: Record<string, unknown>;
+  /**
+   * Spread the assembly's header-row props onto the last header row.
+   * Absent, they are spread. A kit whose header row does not carry them
+   * passes false.
+   */
+  readonly applyHeaderRowProps?: boolean;
   /** Extra props for the body, including a kit ref. */
   readonly bodyProps?: Record<string, unknown>;
   /** Drawn inside the scroll box, before the table. */
@@ -186,6 +192,8 @@ export function DesktopTableChrome<TRow>(
   const Foot = hostOf(hosts, "Foot");
   const Row = hostOf(hosts, "Row");
   const Cell = hostOf(hosts, "Cell");
+  const headerRowProps =
+    props.applyHeaderRowProps === false ? {} : header.headerRowProps;
 
   const headerRows = headerPlan
     ? headerPlan.map((row, rowIndex) => {
@@ -193,7 +201,7 @@ export function DesktopTableChrome<TRow>(
         return (
           <Row
             key={row.map((cell) => cell.key).join("|")}
-            {...(last ? header.headerRowProps : {})}
+            {...(last ? headerRowProps : {})}
             ref={last ? header.headerRowRef : undefined}
             data-adapttable-part={last ? "header-row" : "header-group-row"}
             className={last ? classNames.headerRow : classNames.headerGroupRow}
@@ -206,7 +214,7 @@ export function DesktopTableChrome<TRow>(
       })
     : (
         <Row
-          {...header.headerRowProps}
+          {...headerRowProps}
           ref={header.headerRowRef}
           data-adapttable-part="header-row"
           className={classNames.headerRow}

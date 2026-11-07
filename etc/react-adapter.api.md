@@ -1813,6 +1813,7 @@ export interface DesktopTableChromeClassNames {
 
 // @public
 export interface DesktopTableChromeProps<TRow> {
+    readonly applyHeaderRowProps?: boolean;
     readonly assembly: DesktopTableAssembly<TRow>;
     readonly beforeTable?: ReactNode;
     readonly bodyProps?: Record<string, unknown>;
