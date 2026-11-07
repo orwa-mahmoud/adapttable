@@ -392,6 +392,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "approvalArgumentPairs",
+      "kind": "runtime",
+      "module": "approval/approvalReview.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "approval/approvalReview.ts#approvalArgumentPairs",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "approvalReview",
       "kind": "runtime",
       "module": "approval/approvalReview.ts",
@@ -401,6 +412,17 @@
       "deprecated": false,
       "identity": "approval/approvalReview.ts#approvalReview",
       "subpaths": ["."]
+    },
+    {
+      "name": "approvalValueText",
+      "kind": "runtime",
+      "module": "approval/approvalReview.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "approval/approvalReview.ts#approvalValueText",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "attachIncrementalView",
@@ -1313,7 +1335,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/leanAssembly.ts#columnSelectLabel",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "columnSizeStyle",
@@ -7355,6 +7377,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "virtualItemMeta",
+      "kind": "runtime",
+      "module": "virtual/virtualTableModel.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "virtual/virtualTableModel.ts#virtualItemMeta",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "visibleColumns",
       "kind": "runtime",
       "module": "columns/visibleColumns.ts",
@@ -7749,6 +7782,17 @@
       "deprecated": false,
       "identity": "source/dataTier.ts#AppendStash",
       "subpaths": ["."]
+    },
+    {
+      "name": "ApprovalArgumentPair",
+      "kind": "type",
+      "module": "approval/approvalReview.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "approval/approvalReview.ts#ApprovalArgumentPair",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ApprovalReview",
@@ -9442,7 +9486,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/frontendSource.ts#FrontendEngineFactory",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "FrontendSource",
@@ -12514,6 +12558,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "cachedSnapshot",
+      "kind": "runtime",
+      "module": "source/sourceRefresh.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/sourceRefresh.ts#cachedSnapshot",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "cardSetSize",
       "kind": "runtime",
       "module": "layout/tableChromeState.ts",
@@ -14274,6 +14329,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "frontendRowModelOf",
+      "kind": "runtime",
+      "module": "source/frontendRowModel.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/frontendRowModel.ts#frontendRowModelOf",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FULLSCREEN_LIVE",
       "kind": "runtime",
       "module": "features/slotContract.ts",
@@ -15044,6 +15110,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "primitiveText",
+      "kind": "runtime",
+      "module": "columns/resolveColumns.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "columns/resolveColumns.ts#columnPathText",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "printToolbarProps",
       "kind": "runtime",
       "module": "layout/shellPipeline.ts",
@@ -15429,6 +15506,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "sameIdentity",
+      "kind": "runtime",
+      "module": "source/sourceRefresh.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/sourceRefresh.ts#sameIdentity",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "sameRows",
       "kind": "runtime",
       "module": "engine/sameRows.ts",
@@ -15660,6 +15748,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "sourceViewKey",
+      "kind": "runtime",
+      "module": "source/sourceRefresh.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/sourceRefresh.ts#sourceViewKey",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "sourceWindowStart",
       "kind": "runtime",
       "module": "layout/chromeModel.ts",
@@ -15858,6 +15957,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "withFrontendRowModel",
+      "kind": "runtime",
+      "module": "source/frontendRowModel.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/frontendRowModel.ts#withFrontendRowModel",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "withShellOperations",
       "kind": "runtime",
       "module": "features/shellOperations.ts",
@@ -16042,6 +16152,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "actions/actionsBindingState.ts#BulkBarState",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "CachedSnapshot",
+      "kind": "type",
+      "module": "source/sourceRefresh.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/sourceRefresh.ts#CachedSnapshot",
       "subpaths": ["./binding"]
     },
     {
@@ -18319,6 +18440,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/featureKeys.ts#SlotFill",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "SourceViewKeyInput",
+      "kind": "type",
+      "module": "source/sourceRefresh.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "source/sourceRefresh.ts#SourceViewKeyInput",
       "subpaths": ["./binding"]
     },
     {
@@ -22811,7 +22943,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "engine/createTableEngine.ts#CreateTableEngineOptions",
-      "subpaths": [".", "./engine"]
+      "subpaths": [".", "./binding", "./engine"]
     },
     {
       "name": "NeutralTable",

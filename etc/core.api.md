@@ -300,6 +300,15 @@ export function applyTableUrlState(search: string, savedSearch: string, namespac
 export const APPROVAL_PREVIEW_LIMIT = 3;
 
 // @public
+export interface ApprovalArgumentPair {
+    readonly name: string;
+    readonly value: string;
+}
+
+// @public
+export function approvalArgumentPairs(args: unknown): readonly ApprovalArgumentPair[];
+
+// @public
 export type ApprovalPresentation = "widget" | "table" | "modal";
 
 // @public
@@ -332,6 +341,9 @@ export interface ApprovalReviewItem {
     readonly index: number;
     readonly proposal: AgentApprovalProposal;
 }
+
+// @public
+export function approvalValueText(value: unknown): string | undefined;
 
 // @public
 export function asBatchGesture<TRow>(apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
@@ -9343,6 +9355,9 @@ export interface VirtualItemMeta {
     size: number;
     start: number;
 }
+
+// @public
+export function virtualItemMeta(item: VirtualItemMeta): VirtualItemMeta;
 
 // @public
 export interface VirtualTableRow<TRow> {

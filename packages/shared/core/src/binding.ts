@@ -596,6 +596,7 @@ export type {
   CustomCellEditorRender,
 } from "./editing/cellEditing";
 export type {
+  CreateTableEngineOptions,
   TableCallbackRefresh,
   TableEngine,
   TableEngineConfigPatch,
@@ -869,6 +870,7 @@ export {
   frontendRowModelOf,
   withFrontendRowModel,
 } from "./source/frontendRowModel";
+export type { FrontendEngineFactory } from "./source/frontendSource";
 export type {
   AggregateFn,
   QueryAggregate,

@@ -152,6 +152,9 @@ describe("renderedRowsOf", () => {
     const source = { rows: ROWS };
     expect(renderedRowsOf({ source, grouping, tree })).toEqual([ROWS[1]]);
     expect(renderedRowsOf({ source, tree })).toEqual([ROWS[0]]);
+    expect(
+      renderedRowsOf({ source, tree: { entries: [{ row: ROWS[0]! }] } })
+    ).toEqual([ROWS[0]]);
     expect(renderedRowsOf({ source })).toBe(ROWS);
   });
 });

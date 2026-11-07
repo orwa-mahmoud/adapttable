@@ -228,6 +228,15 @@ export function applyFeatureNoticesAttribute(root: HTMLElement | null, notices: 
 export function applyTableFeatures<P extends object>(options: P): P;
 
 // @public
+export interface ApprovalArgumentPair {
+    readonly name: string;
+    readonly value: string;
+}
+
+// @public
+export function approvalArgumentPairs(args: unknown): readonly ApprovalArgumentPair[];
+
+// @public
 export type ApprovalPresentation = "widget" | "table" | "modal";
 
 // @public
@@ -237,6 +246,9 @@ export interface ApprovalReviewSlots<TNode = unknown> {
     readonly List: (props: AgentApprovalListProps<TNode>) => TNode;
     readonly Reject: (props: AgentApprovalButtonProps) => TNode;
 }
+
+// @public
+export function approvalValueText(value: unknown): string | undefined;
 
 // @public
 export interface AssemblyFns<TRow = unknown> {
@@ -539,6 +551,21 @@ export interface BulkBarState {
     scope: BulkActionContext | undefined;
     selectedCount: number;
 }
+
+// @public (undocumented)
+export interface CachedSnapshot<T> {
+    // (undocumented)
+    identity: readonly unknown[];
+    // (undocumented)
+    snapshot: T;
+    // (undocumented)
+    viewKey: string;
+}
+
+// @public
+export function cachedSnapshot<T>(held: {
+    current: CachedSnapshot<T> | null;
+}, identity: readonly unknown[], viewKey: string, refresh: () => T): T;
 
 // @public
 export function cardSetSize(source: Pick<TableSource<unknown>, "total" | "rows">, windowStart: number): number;
@@ -1291,7 +1318,9 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
-export function columnPathText(value: unknown): string | null;
+function columnPathText(value: unknown): string | null;
+export { columnPathText }
+export { columnPathText as primitiveText }
 
 // @public
 export interface ColumnResizeHandleProps {
@@ -1336,6 +1365,12 @@ export interface ColumnSelectCheckboxProps {
     readonly label: string;
     readonly onToggle: () => void;
 }
+
+// @public
+export function columnSelectLabel(label: string | undefined, column: {
+    header?: DisplayValue;
+    key: string;
+}): string;
 
 // @public
 export interface ColumnSelectSlots<TNode = unknown> {
@@ -1749,6 +1784,27 @@ export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry
 
 // @public
 export function createMenuNavigation(): MenuNavigationController;
+
+// @public
+export interface CreateTableEngineOptions<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly data: readonly TRow[];
+    readonly defaults?: {
+        readonly page?: number;
+        readonly limit?: number;
+        readonly search?: string;
+        readonly sortBy?: string;
+        readonly sortDir?: SortDirection;
+        readonly extra?: ExtraFilters;
+        readonly groupBy?: string;
+    };
+    readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly getSearchText?: (row: TRow) => string;
+    readonly locale?: string;
+    readonly paginationMode?: "paged" | "infinite";
+    readonly rowKey: (row: TRow) => string;
+    readonly tableId?: string;
+}
 
 // @public
 export type CssProperties = Record<string, string | number | undefined>;
@@ -3458,6 +3514,12 @@ export interface FlattenedColumns<TRow> {
 export const FORCED_COLORS_CSS: string;
 
 // @public
+export type FrontendEngineFactory<TRow> = (options: CreateTableEngineOptions<TRow>) => TableEngine<TRow>;
+
+// @public
+export function frontendRowModelOf(features: readonly object[]): FrontendEngineFactory<unknown> | undefined;
+
+// @public
 export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps<unknown, unknown>>;
 
 // @public
@@ -4792,7 +4854,11 @@ export function renderedRowsOf<TRow>(chrome: {
         readonly rows: readonly TRow[];
     };
     readonly grouping?: GroupingContribution<TRow>;
-    readonly tree?: TreeContribution<TRow>;
+    readonly tree?: {
+        readonly entries: readonly {
+            readonly row: TRow;
+        }[];
+    };
 }): readonly TRow[];
 
 // @public
@@ -5398,6 +5464,9 @@ export interface RuntimeChromeInput<TRow> {
 export type RuntimeColumn<TRow> = ColumnMetadata<TRow>;
 
 // @public
+export function sameIdentity(left: readonly unknown[], right: readonly unknown[]): boolean;
+
+// @public
 export function sameRows<TRow>(a: readonly TRow[], b: readonly TRow[]): boolean;
 
 // @public
@@ -5827,6 +5896,33 @@ export function sortLevelOf(levels: readonly {
     key: string;
     dir: SortDirection;
 } | undefined;
+
+// @public
+export function sourceViewKey(state: SourceViewKeyInput): string;
+
+// @public
+export interface SourceViewKeyInput {
+    // (undocumented)
+    readonly extra: ExtraFilters;
+    // (undocumented)
+    readonly filterTree: QueryFilterGroup | undefined;
+    // (undocumented)
+    readonly groupAggregateOverrides: GroupAggregateOverrides | undefined;
+    // (undocumented)
+    readonly groupBy: string | undefined;
+    // (undocumented)
+    readonly limit: number;
+    // (undocumented)
+    readonly page: number;
+    // (undocumented)
+    readonly search: string;
+    // (undocumented)
+    readonly sortBy: string | undefined;
+    // (undocumented)
+    readonly sortDir: string | undefined;
+    // (undocumented)
+    readonly sortLevels: readonly SortLevel[];
+}
 
 // @public
 export function sourceWindowStart(source: {
@@ -7151,6 +7247,9 @@ export interface VirtualItemMeta {
 }
 
 // @public
+export function virtualItemMeta(item: VirtualItemMeta): VirtualItemMeta;
+
+// @public
 export function virtualizeIgnoredOnPage<TRow>(virtualize: boolean, chrome: Pick<BodyChrome<TRow>, "grouping" | "tree" | "source">): boolean;
 
 // @public
@@ -7193,6 +7292,9 @@ export interface WiringReorder<TRow> extends RowReorderDigest {
         "data-drop"?: "before" | "inside" | "after";
     } | undefined;
 }
+
+// @public
+export function withFrontendRowModel<T extends object>(feature: T, createEngine: FrontendEngineFactory<unknown>): T;
 
 // @public
 export function withShellOperations<TRow>(view: TableRuntimeView<TRow>, input: ShellOperationInput<TRow>): TableRuntimeView<TRow>;

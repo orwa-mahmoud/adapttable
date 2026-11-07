@@ -189,7 +189,12 @@ export interface RuntimeChromeInput<TRow> {
 export function renderedRowsOf<TRow>(chrome: {
   readonly source: { readonly rows: readonly TRow[] };
   readonly grouping?: GroupingContribution<TRow>;
-  readonly tree?: TreeContribution<TRow>;
+  /**
+   * Visible tree nodes. Only `row` is read. A full {@link TreeContribution}
+   * still assigns, and so does the row-only entry this function published
+   * before that type existed.
+   */
+  readonly tree?: { readonly entries: readonly { readonly row: TRow }[] };
 }): readonly TRow[] {
   if (chrome.grouping) {
     return chrome.grouping.entries.flatMap((entry) =>
