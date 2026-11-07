@@ -139,6 +139,7 @@ import { ColumnResizeHandleProps } from '@adapttable/core';
 import { columnResizeHandleProps } from '@adapttable/core';
 import { ColumnSelectCheckboxChromeProps as ColumnSelectCheckboxChromeProps_2 } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
+import { columnSelectLabel } from '@adapttable/core/binding';
 import { ColumnSelectSlots as ColumnSelectSlots_2 } from '@adapttable/core/binding';
 import { columnSizeStyle } from '@adapttable/core';
 import { ColumnSizingOptions } from '@adapttable/core';
@@ -208,6 +209,7 @@ import { editorInputType } from '@adapttable/core/editing';
 import { editorValidationProps } from '@adapttable/core/editing';
 import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
+import { ElementType } from 'react';
 import { ensureForcedColorsStyles } from '@adapttable/core/binding';
 import { EXPAND_TOGGLE } from '@adapttable/core/binding';
 import { ExpandToggleSlotProps } from '@adapttable/core/binding';
@@ -478,6 +480,7 @@ import { readMultiDraft } from '@adapttable/core/editing';
 import { ReconcileLiveBatchEdit } from '@adapttable/core';
 import { ReconcileLiveEdit } from '@adapttable/core';
 import { ReconcileLiveRowEdit } from '@adapttable/core';
+import { Ref } from 'react';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
@@ -1305,11 +1308,7 @@ export interface ColumnSelectCheckboxChromeProps extends ColumnSelectCheckboxChr
 
 export { ColumnSelectCheckboxProps }
 
-// @public
-export function columnSelectLabel(label: string | undefined, column: {
-    header?: ReactNode;
-    key: string;
-}): string;
+export { columnSelectLabel }
 
 // @public
 export type ColumnSelectSlots = ColumnSelectSlots_2<ReactNode>;
@@ -1793,6 +1792,57 @@ export interface DesktopTableAssembly<TRow> {
         reorder: number;
         includeExpansionInLeads: boolean;
     };
+}
+
+// @public
+export function DesktopTableChrome<TRow>(props: Readonly<DesktopTableChromeProps<TRow>>): ReactElement;
+
+// @public
+export interface DesktopTableChromeClassNames {
+    readonly headerGroupRow?: string;
+    readonly headerRow?: string;
+    readonly scrollBox?: string;
+    readonly summary?: string;
+    readonly summaryCell?: string;
+    readonly summaryRow?: string;
+    readonly table?: string;
+    readonly tbody?: string;
+    readonly thead?: string;
+    readonly virtualSpacer?: string;
+}
+
+// @public
+export interface DesktopTableChromeProps<TRow> {
+    readonly assembly: DesktopTableAssembly<TRow>;
+    readonly beforeTable?: ReactNode;
+    readonly bodyProps?: Record<string, unknown>;
+    readonly classNames?: DesktopTableChromeClassNames;
+    readonly frame?: (scrollBox: ReactNode) => ReactNode;
+    readonly headProps?: Record<string, unknown>;
+    readonly hosts?: Partial<DesktopTableHosts>;
+    readonly renderExtra: (slot: DesktopExtraSlot) => ReactNode;
+    readonly renderGroup: (slot: DesktopGroupSlot<TRow>) => ReactNode;
+    readonly renderLeading: (rowSpan: number) => ReactNode;
+    readonly renderLeaf: (leaf: DesktopHeaderLeaf<TRow>, column: ColumnDef<TRow>, index: number) => ReactNode;
+    readonly renderPlanCell: (cell: HtmlGroupedHeaderCell) => ReactNode;
+    readonly renderRow: (slot: DesktopRowSlot<TRow>) => ReactNode;
+    readonly renderSummary?: () => ReactNode;
+    readonly renderTrailing: (rowSpan: number) => ReactNode;
+    readonly renderVirtualPad?: (slot: DesktopVirtualPadSlot) => ReactNode;
+    readonly scrollBoxProps?: Record<string, unknown>;
+    readonly tableProps?: Record<string, unknown>;
+}
+
+// @public
+export interface DesktopTableHosts {
+    readonly Body: ElementType;
+    readonly Cell: ElementType;
+    readonly Foot: ElementType;
+    readonly Head: ElementType;
+    readonly HeaderCell: ElementType;
+    readonly Row: ElementType;
+    readonly ScrollBox: ElementType;
+    readonly Table: ElementType;
 }
 
 // @public
@@ -2683,6 +2733,14 @@ export interface KeyedWindow extends KeyedVirtualization {
 // @public
 export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode>;
 
+// @public
+export interface KitEnvironment {
+    density?: Density;
+    dir?: Direction;
+    labels?: Partial<TableLabels>;
+    locale?: string;
+}
+
 export { LayoutStorage }
 
 // @public
@@ -2710,6 +2768,52 @@ export { MobileCardModel }
 export function mobileCardRegionProps(requestedLabel: string | undefined, fallbackLabel: string, maxHeight: CSSProperties["maxHeight"]): Pick<HTMLAttributes<HTMLElement>, "aria-label" | "tabIndex">;
 
 export { MobileCardRenderer }
+
+// @public
+export function MobileCardsChrome(props: Readonly<MobileCardsChromeProps>): ReactElement;
+
+// @public
+export interface MobileCardsChromeClassNames {
+    readonly card?: string;
+    readonly cardLabel?: string;
+    readonly cardRow?: string;
+    readonly cards?: string;
+    readonly cardValue?: string;
+    readonly scrollBox?: string;
+    readonly summaryCard?: string;
+    readonly virtualSpacer?: string;
+}
+
+// @public
+export interface MobileCardsChromeProps {
+    readonly cards: readonly MobileCardSlot[];
+    readonly classNames?: MobileCardsChromeClassNames;
+    readonly dir?: string;
+    readonly hosts?: Partial<MobileCardsHosts>;
+    readonly listProps?: Record<string, unknown>;
+    readonly listStyle?: CSSProperties;
+    readonly paddingBottom?: number;
+    readonly paddingTop?: number;
+    readonly regionProps: Record<string, unknown>;
+    readonly scrollRef?: Ref<HTMLElement>;
+    readonly style?: CSSProperties;
+    readonly summary?: ReactNode;
+}
+
+// @public
+export interface MobileCardsHosts {
+    readonly Card: ElementType;
+    readonly List: ElementType;
+    readonly Section: ElementType;
+}
+
+// @public
+export interface MobileCardSlot {
+    readonly content: ReactNode;
+    readonly key: string;
+    readonly part?: string;
+    readonly props?: Record<string, unknown>;
+}
 
 // @public
 export interface MountStaggerOptions {
@@ -2931,6 +3035,12 @@ export { ReconcileLiveBatchEdit }
 export { ReconcileLiveEdit }
 
 export { ReconcileLiveRowEdit }
+
+// @public
+export function ReducedMotionScope(input: {
+    off: boolean;
+    children: ReactNode;
+}): ReactNode;
 
 export { RELATIVE_PRESET_LABEL_KEYS }
 
@@ -4190,6 +4300,14 @@ export { windowGroupedEntries }
 
 // @public
 export function withFindMarks(base: GridFocusState, find: Pick<FindInTableState, "matchKeys" | "current">, firstRowIndex: number): GridFocusState;
+
+// @public
+export function withKitEnvironment<P extends {
+    dir?: Direction;
+    locale?: string;
+    labels?: Partial<TableLabels>;
+    density?: Density;
+}>(props: Readonly<P>, kit: KitEnvironment): P;
 
 // (No @packageDocumentation comment for this package)
 

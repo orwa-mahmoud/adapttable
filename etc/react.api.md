@@ -770,6 +770,14 @@ export { InfiniteQueryLike }
 
 export { isDeclarativeFilters }
 
+// @public
+export interface KitEnvironment {
+    density?: Density;
+    dir?: Direction;
+    labels?: Partial<TableLabels>;
+    locale?: string;
+}
+
 export { LayoutStorage }
 
 export { LazyChildrenState }
@@ -878,6 +886,12 @@ export { ReconcileLiveBatchEdit }
 export { ReconcileLiveEdit }
 
 export { ReconcileLiveRowEdit }
+
+// @public
+export function ReducedMotionScope(input: {
+    off: boolean;
+    children: ReactNode;
+}): ReactNode;
 
 // @public
 export function resolveColumnFooter<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
@@ -1755,6 +1769,14 @@ export function useVirtualChromeBodyData<TRow>(chrome: TableChrome<TRow>, props:
 export { ValidationCheckResult }
 
 export { ValidationTarget }
+
+// @public
+export function withKitEnvironment<P extends {
+    dir?: Direction;
+    locale?: string;
+    labels?: Partial<TableLabels>;
+    density?: Density;
+}>(props: Readonly<P>, kit: KitEnvironment): P;
 
 // (No @packageDocumentation comment for this package)
 

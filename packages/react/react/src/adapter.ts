@@ -521,6 +521,19 @@ export {
   type DesktopVirtualPadSlot,
   useDesktopTableAssembly,
 } from "./layout/desktopTableAssembly";
+export {
+  DesktopTableChrome,
+  type DesktopTableChromeClassNames,
+  type DesktopTableChromeProps,
+  type DesktopTableHosts,
+} from "./layout/desktopTableChrome";
+export {
+  MobileCardsChrome,
+  type MobileCardsChromeClassNames,
+  type MobileCardsChromeProps,
+  type MobileCardsHosts,
+  type MobileCardSlot,
+} from "./layout/mobileCardsChrome";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export {
   SidePanelChrome,
