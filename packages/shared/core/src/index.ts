@@ -193,9 +193,12 @@ export {
 } from "./aggregate/aggregationModel";
 export {
   APPROVAL_PREVIEW_LIMIT,
+  type ApprovalArgumentPair,
+  approvalArgumentPairs,
   type ApprovalReview,
   approvalReview,
   type ApprovalReviewItem,
+  approvalValueText,
 } from "./approval/approvalReview";
 export { columnText } from "./columns/columnText";
 export { computed, type ComputedColumnSpec } from "./columns/computed";

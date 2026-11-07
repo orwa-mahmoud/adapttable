@@ -9,7 +9,6 @@ import {
   type KeyedVirtualization,
   type TableVirtualization,
   VIRTUAL_OVERSCAN,
-  type VirtualItemMeta,
   type VirtualTableRow,
 } from "@adapttable/core";
 import {
@@ -18,12 +17,9 @@ import {
   keyedWindow,
   materializeWindowRows,
   rowWindow,
+  virtualItemMeta,
 } from "@adapttable/core/binding";
-import {
-  useVirtualizer,
-  useWindowVirtualizer,
-  type VirtualItem,
-} from "@tanstack/react-virtual";
+import { useVirtualizer, useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useRowPairMeasurer } from "./measureRowPair";
@@ -40,17 +36,6 @@ export {
   windowGroupedEntries,
 } from "@adapttable/core";
 export { rowSourceIndex } from "@adapttable/core/binding";
-
-function asItemMeta(item: VirtualItem): VirtualItemMeta {
-  return {
-    index: item.index,
-    start: item.start,
-    end: item.end,
-    size: item.size,
-    key: item.key,
-    lane: item.lane,
-  };
-}
 
 /**
  * Options for `useTableVirtualization`.
@@ -159,7 +144,7 @@ export function useTableVirtualizer<TRow>({
   const virtualItems = virtualizer.getVirtualItems();
   const active = enabled && virtualItems.length > 0;
   const measureRowPair = useRowPairMeasurer(virtualizer, enabled && expandable);
-  const items = useMemo(() => virtualItems.map(asItemMeta), [virtualItems]);
+  const items = useMemo(() => virtualItems.map(virtualItemMeta), [virtualItems]);
   const materializedRows = useMemo<readonly VirtualTableRow<TRow>[]>(
     () => materializeWindowRows(rows, rowKey, enabled, active ? items : []),
     [active, enabled, items, rowKey, rows]
@@ -285,7 +270,7 @@ export function useKeyedVirtualizer(
       enabled,
       count: keys.length,
       virtualizer,
-      items: active ? virtualItems.map(asItemMeta) : [],
+      items: active ? virtualItems.map(virtualItemMeta) : [],
       estimateSize,
     }),
     scrollToIndex,

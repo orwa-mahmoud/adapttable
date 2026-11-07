@@ -9,12 +9,17 @@
  *
  * Structure and part names live here; every visible control is a kit slot.
  */
-import type {
-  ApprovalReview,
-  ApprovalReviewItem,
-  TableLabels,
+import {
+  type ApprovalReview,
+  type ApprovalReviewItem,
+  resolveLabels,
+  type TableLabels,
 } from "@adapttable/core";
-import type { ApprovalReviewSlots as NeutralApprovalReviewSlots } from "@adapttable/core/binding";
+import {
+  approvalArgumentPairs,
+  type ApprovalReviewSlots as NeutralApprovalReviewSlots,
+  approvalValueText,
+} from "@adapttable/core/binding";
 import { Fragment, type ReactElement, type ReactNode, useId } from "react";
 
 import type {
@@ -73,14 +78,8 @@ function describeItem(
   proposal: AgentApprovalProposal,
   labels: TableLabels | undefined
 ): string {
-  const describe =
-    labels?.proposalChange ??
-    (({ row, column, before, after }) => {
-      const field = column ? `${row} · ${column}` : row;
-      if (before === undefined && after === undefined) return field;
-      return `${field}: ${before ?? "—"} → ${after ?? "—"}`;
-    });
-  return describe({
+  const copy = resolveLabels(labels);
+  return copy.proposalChange({
     row: proposal.rowLabel ?? proposal.rowKey,
     ...(proposal.column === undefined
       ? {}
@@ -88,47 +87,10 @@ function describeItem(
     // The column's own wording wins where it has one: the card a reader
     // agrees on should read in the same units as the table behind it.
     before: proposal.beforeUnavailable
-      ? (labels?.proposalValueUnavailable ?? "Unavailable")
-      : (proposal.beforeText ?? display(proposal.before)),
-    after: proposal.afterText ?? display(proposal.after),
+      ? copy.proposalValueUnavailable
+      : (proposal.beforeText ?? approvalValueText(proposal.before)),
+    after: proposal.afterText ?? approvalValueText(proposal.after),
   });
-}
-
-function display(value: unknown): string | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return "—";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  return JSON.stringify(value);
-}
-
-/**
- * One operation's arguments, as pairs a reader can read.
- *
- * Names are the host's own keys, spaced out of camelCase rather than
- * translated: the host chose the word, and inventing another would describe
- * something different from what it will receive. A value too deep to show
- * plainly is left to {@link display}, which is honest about being JSON.
- */
-function argumentPairs(
-  args: unknown
-): readonly { name: string; value: string }[] {
-  // Whatever a host's capability takes: only an object has pairs to show, and
-  // anything else falls back to the one line `display` can honestly give it.
-  if (!args || typeof args !== "object" || Array.isArray(args)) {
-    const single = display(args);
-    return single === undefined ? [] : [{ name: "", value: single }];
-  }
-  return Object.entries(args as Record<string, unknown>).map(
-    ([name, value]) => ({
-      name: name
-        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-        .replace(/^./, (first) => first.toUpperCase()),
-      value: display(value) ?? "—",
-    })
-  );
 }
 
 /**
@@ -164,6 +126,7 @@ export function ApprovalReviewChrome({
   const buttonClass: { className?: string } = buttonClassName
     ? { className: buttonClassName }
     : {};
+  const copy = resolveLabels(labels);
 
   return (
     <div
@@ -206,7 +169,7 @@ export function ApprovalReviewChrome({
               margin: 0,
             }}
           >
-            {argumentPairs(review.operation.arguments).map((pair) => (
+            {approvalArgumentPairs(review.operation.arguments).map((pair) => (
               <Fragment key={pair.name}>
                 <dt style={{ opacity: 0.7 }}>{pair.name}</dt>
                 <dd style={{ margin: 0, fontWeight: 550 }}>{pair.value}</dd>
@@ -256,7 +219,7 @@ export function ApprovalReviewChrome({
       ) : null}
       {expanded && onBack ? (
         <Action
-          label={labels?.backToConversation ?? "Back to conversation"}
+          label={copy.backToConversation}
           part="approval-review-back"
           {...buttonClass}
           onClick={onBack}
@@ -279,7 +242,7 @@ export function ApprovalReviewChrome({
             should take deliberately, not the one the thumb lands on. */}
         {onAlwaysAllow ? (
           <Action
-            label={labels?.alwaysAllowProposal ?? "Always allow"}
+            label={copy.alwaysAllowProposal}
             part="agent-approval-always-allow"
             {...buttonClass}
             onClick={onAlwaysAllow}
@@ -321,6 +284,7 @@ function ReviewRow({
   readonly buttonClassName?: string;
 }): ReactElement {
   const text = describeItem(item.proposal, labels);
+  const copy = resolveLabels(labels);
   const buttonClass: { className?: string } = buttonClassName
     ? { className: buttonClassName }
     : {};
@@ -368,13 +332,13 @@ function ReviewRow({
           }}
         >
           <Reject
-            label={labels?.rejectProposal ?? "Reject"}
+            label={copy.rejectProposal}
             part="approval-review-row-reject"
             {...buttonClass}
             onClick={() => onDecide(item.index, false)}
           />
           <Approve
-            label={labels?.approveProposal ?? "Approve"}
+            label={copy.approveProposal}
             part="approval-review-row-approve"
             {...buttonClass}
             onClick={() => onDecide(item.index, true)}

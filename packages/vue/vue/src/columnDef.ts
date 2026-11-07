@@ -7,8 +7,8 @@ import type {
   SortDirection,
 } from "@adapttable/core";
 import {
-  columnPathText,
   flattenColumnTree,
+  primitiveText,
   resolveColumnDefaults,
 } from "@adapttable/core/binding";
 import {
@@ -86,9 +86,7 @@ export interface ColumnGroup<TRow> extends Omit<
   readonly children: readonly ColumnInput<TRow>[];
 }
 export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
-export function primitiveText(value: unknown): string | null {
-  return columnPathText(value);
-}
+export { primitiveText };
 export function renderContent<TContext>(
   renderer: Renderer<TContext>,
   context: TContext

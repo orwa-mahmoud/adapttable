@@ -15,6 +15,7 @@
 import {
   type ApprovalReview,
   approvalReview,
+  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
 import {
@@ -177,7 +178,7 @@ function Header({
           textOverflow: "ellipsis",
         }}
       >
-        {labels?.assistantTitle ?? "Table assistant"}
+        {resolveLabels(labels).assistantTitle}
       </span>
       <Badge
         label={connection}
@@ -197,8 +198,8 @@ function Header({
       >
         {onSettings ? (
           <Button
-            label={labels?.assistantSettings ?? "Assistant settings"}
-            tooltip={labels?.assistantSettings ?? "Assistant settings"}
+            label={resolveLabels(labels).assistantSettings}
+            tooltip={resolveLabels(labels).assistantSettings}
             part="assistant-settings"
             variant="subtle"
             icon={<SettingsIcon />}
@@ -207,8 +208,8 @@ function Header({
           />
         ) : null}
         <Button
-          label={labels?.assistantClose ?? "Close"}
-          tooltip={labels?.assistantClose ?? "Close"}
+          label={resolveLabels(labels).assistantClose}
+          tooltip={resolveLabels(labels).assistantClose}
           part="assistant-close"
           variant="subtle"
           icon={<CloseIcon />}
@@ -278,7 +279,7 @@ function Launcher({
       // reader a white robot here and a coloured one everywhere else.
       variant="subtle"
       iconOnly
-      tooltip={labels?.assistantOpen ?? "Ask AI"}
+      tooltip={resolveLabels(labels).assistantOpen}
       icon={
         <span
           data-adapttable-part="assistant-launcher-mark"
@@ -541,10 +542,9 @@ function PanelNotice({
   if (rejoin) {
     return (
       <p data-adapttable-part="assistant-detached">
-        {labels?.assistantDetached ??
-          "The connection went. The work may still be running."}{" "}
+        {resolveLabels(labels).assistantDetached}{" "}
         <Button
-          label={labels?.assistantRejoin ?? "Rejoin"}
+          label={resolveLabels(labels).assistantRejoin}
           part="assistant-rejoin"
           variant="secondary"
           onClick={() => void assistant.resume?.()}
@@ -555,7 +555,7 @@ function PanelNotice({
   if (assistant.status === "disconnected") {
     return (
       <p data-adapttable-part="assistant-unavailable">
-        {labels?.assistantUnavailable ?? "The assistant is not connected."}
+        {resolveLabels(labels).assistantUnavailable}
       </p>
     );
   }
@@ -711,8 +711,7 @@ function Body({
           data-adapttable-part="assistant-approval-elsewhere"
           style={{ margin: 0 }}
         >
-          {labels?.approvalWaitingElsewhere ??
-            "A change is waiting for your decision."}
+          {resolveLabels(labels).approvalWaitingElsewhere}
         </p>
       ) : null}
       {scroll.hasUnseen ? (
@@ -724,7 +723,7 @@ function Body({
           }}
         >
           <Button
-            label={labels?.assistantNewMessages ?? "New messages"}
+            label={resolveLabels(labels).assistantNewMessages}
             part="assistant-jump-latest"
             variant="secondary"
             onClick={scroll.jumpToLatest}
@@ -947,7 +946,7 @@ export function TableAssistantChrome({
   // place itself is worse than a narrow one.
   const resolved =
     presentation === "floating" && !wide ? "sheet" : presentation;
-  const title = labels?.assistantTitle ?? "Table assistant";
+  const title = resolveLabels(labels).assistantTitle;
   // Everything eligible, primary and overflow alike: a menu has room for the
   // lot, which is the whole reason it replaced a list that had to be split.
   const examples = {
@@ -1036,7 +1035,7 @@ export function TableAssistantChrome({
         {...(composer.answering
           ? {
               placeholder:
-                labels?.assistantAnswerPlaceholder ?? "Type an answer",
+                resolveLabels(labels).assistantAnswerPlaceholder,
             }
           : {})}
         {...(speech ? { speech } : {})}
@@ -1044,7 +1043,7 @@ export function TableAssistantChrome({
       />
       {resolved === "sheet" ? (
         <Button
-          label={labels?.assistantBackToTable ?? "Back to table"}
+          label={resolveLabels(labels).assistantBackToTable}
           part="assistant-back"
           variant="subtle"
           onClick={close}

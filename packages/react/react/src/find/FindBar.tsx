@@ -2,7 +2,11 @@
  * Find-bar layout. Structure only — adapters pass the search field and
  * the previous / next / close buttons the end user clicks.
  */
-import { findMatchCountText, handleFindBarKey } from "@adapttable/core";
+import {
+  findMatchCountText,
+  handleFindBarKey,
+  resolveLabels,
+} from "@adapttable/core";
 import type {
   FindBarProps,
   FindBarSlots as NeutralFindBarSlots,
@@ -73,6 +77,7 @@ export function FindBarChrome({
 
   const Search = slots.Search;
   const Button = slots.Button;
+  const copy = resolveLabels(labels);
   return (
     <div
       data-adapttable-part="find-bar"
@@ -85,8 +90,8 @@ export function FindBarChrome({
       }}
     >
       <Search
-        label={labels?.findInTable ?? "Find in table"}
-        placeholder={labels?.findPlaceholder ?? "Find in table"}
+        label={copy.findInTable}
+        placeholder={copy.findPlaceholder}
         value={find.query}
         focusRef={focusEditorOnMount}
         onChange={find.setQuery}
@@ -94,21 +99,21 @@ export function FindBarChrome({
       />
       <output data-adapttable-part="find-count">{count}</output>
       <Button
-        label={labels?.findPrevious ?? "Previous match"}
+        label={copy.findPrevious}
         part="find-previous"
         kind="previous"
         disabled={find.matches.length === 0}
         onClick={find.previous}
       />
       <Button
-        label={labels?.findNext ?? "Next match"}
+        label={copy.findNext}
         part="find-next"
         kind="next"
         disabled={find.matches.length === 0}
         onClick={find.next}
       />
       <Button
-        label={labels?.findClose ?? "Close find"}
+        label={copy.findClose}
         part="find-close"
         kind="close"
         onClick={() => {

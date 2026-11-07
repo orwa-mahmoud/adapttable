@@ -7,7 +7,7 @@
  * word. `isComposing` is the only reliable signal for that, so it is checked
  * before anything else.
  */
-import type { TableLabels } from "@adapttable/core";
+import { resolveLabels, type TableLabels } from "@adapttable/core";
 import type { KeyboardEvent, ReactElement } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
@@ -82,9 +82,10 @@ export function AssistantComposer({
   const LanguageChip = slots.LanguageChip;
   const Menu = slots.Menu;
   const listening = speech?.state.status === "listening";
+  const copy = resolveLabels(labels);
   const micLabel = listening
-    ? (labels?.assistantVoiceStop ?? "Stop dictation")
-    : (labels?.assistantVoiceStart ?? "Dictate");
+    ? copy.assistantVoiceStop
+    : copy.assistantVoiceStart;
   // A chip for one language is a question with one answer.
   const showChip =
     speech?.available === true &&
@@ -129,7 +130,7 @@ export function AssistantComposer({
         {/* Announced once when it starts, not on every interim result: a screen
           reader repeating every word heard is unusable. */}
         <LiveRegion part="assistant-voice-status">
-          {listening ? (labels?.assistantVoiceListening ?? "Listening") : ""}
+          {listening ? copy.assistantVoiceListening : ""}
         </LiveRegion>
         {/* Where a reader looks when they do not know what to type. It leads the
           row rather than trailing it: the actions on the other end are what
@@ -153,12 +154,8 @@ export function AssistantComposer({
           style={{ flex: "1 1 auto", minWidth: 0, display: "flex" }}
         >
           <Composer
-            label={labels?.assistantPlaceholder ?? "Ask about this table…"}
-            placeholder={
-              placeholder ??
-              labels?.assistantPlaceholder ??
-              "Ask about this table…"
-            }
+            label={copy.assistantPlaceholder}
+            placeholder={placeholder ?? copy.assistantPlaceholder}
             part="assistant-input"
             value={draft}
             disabled={!usable}
@@ -168,7 +165,7 @@ export function AssistantComposer({
         </span>
         {showChip && LanguageChip ? (
           <LanguageChip
-            label={labels?.assistantVoiceLanguage ?? "Dictation language"}
+            label={copy.assistantVoiceLanguage}
             value={speech.state.language}
             options={speech.languages.map((value) => ({ value, label: value }))}
             part="assistant-voice-language"
@@ -190,8 +187,8 @@ export function AssistantComposer({
         ) : null}
         {busy ? (
           <Button
-            label={labels?.assistantStop ?? "Stop"}
-            tooltip={labels?.assistantStop ?? "Stop"}
+            label={copy.assistantStop}
+            tooltip={copy.assistantStop}
             part="assistant-stop"
             variant="secondary"
             icon={<StopIcon />}
@@ -200,8 +197,8 @@ export function AssistantComposer({
           />
         ) : (
           <Button
-            label={labels?.assistantSend ?? "Send"}
-            tooltip={labels?.assistantSend ?? "Send"}
+            label={copy.assistantSend}
+            tooltip={copy.assistantSend}
             part="assistant-send"
             variant="primary"
             icon={<SendIcon />}

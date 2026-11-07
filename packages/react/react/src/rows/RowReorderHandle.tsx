@@ -2,6 +2,7 @@
  * Row-reorder layout. The live region stays here. Adapters pass the grip
  * and the mobile up/down buttons the end user clicks.
  */
+import { resolveLabels } from "@adapttable/core";
 import type {
   RowMoveMenuSlotProps,
   RowReorderButtonsProps as NeutralRowReorderButtonsProps,
@@ -106,6 +107,7 @@ function RowMoveMenu<TRow>({
       : pending?.fromParent.label;
   const to =
     pending?.kind === "group" ? pending.toGroup.label : pending?.toParent.label;
+  const copy = resolveLabels(labels);
   return (
     <Menu
       label={menu.label}
@@ -119,15 +121,14 @@ function RowMoveMenu<TRow>({
       confirmation={
         pending && from && to
           ? {
-              title: labels.confirmRowMoveTitle ?? "Confirm row move",
-              description:
-                labels.confirmRowMoveDescription?.(
-                  pending.rowLabel,
-                  from,
-                  to
-                ) ?? `Move ${pending.rowLabel} from ${from} to ${to}?`,
-              confirmLabel: labels.confirmRowMove ?? "Move",
-              cancelLabel: labels.cancel ?? "Cancel",
+              title: copy.confirmRowMoveTitle,
+              description: copy.confirmRowMoveDescription(
+                pending.rowLabel,
+                from,
+                to
+              ),
+              confirmLabel: copy.confirmRowMove,
+              cancelLabel: copy.cancel,
               onConfirm: reorder.confirmMove,
               onCancel: reorder.cancelMove,
             }

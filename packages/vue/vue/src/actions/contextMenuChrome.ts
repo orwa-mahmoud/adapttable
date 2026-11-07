@@ -1,3 +1,4 @@
+import { resolveLabels } from "@adapttable/core";
 import type {
   ContextMenuChromeProps as NeutralProps,
   ContextMenuSlots as NeutralSlots,
@@ -151,7 +152,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
         surface = props.presentation({
           at: props.at,
           anchorRef,
-          label: props.labels?.contextMenu ?? "Table actions",
+          label: resolveLabels(props.labels).contextMenu,
           onClose: close,
           container: props.container,
           className: props.className,
@@ -166,7 +167,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
         surface = slots.Surface({
           at: props.at,
           anchorRef,
-          label: props.labels?.contextMenu ?? "Table actions",
+          label: resolveLabels(props.labels).contextMenu,
           onClose: close,
           container: props.container,
           className: props.className,

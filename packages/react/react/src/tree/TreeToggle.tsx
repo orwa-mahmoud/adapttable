@@ -2,6 +2,7 @@
  * Tree-toggle layout. The leaf spacer stays here (display only). Adapters
  * pass the chevron button the end user clicks.
  */
+import { resolveLabels } from "@adapttable/core";
 import type {
   TreeToggleProps,
   TreeToggleSlots as NeutralTreeToggleSlots,
@@ -56,13 +57,10 @@ export function TreeToggleChrome<TRow>({
     );
   }
   const Button = slots.Button;
+  const copy = resolveLabels(labels);
   return (
     <Button
-      label={
-        entry.expanded
-          ? (labels?.collapseRow ?? "Collapse row")
-          : (labels?.expandRow ?? "Expand row")
-      }
+      label={entry.expanded ? copy.collapseRow : copy.expandRow}
       expanded={entry.expanded}
       loading={entry.loading === true}
       className={toggleClassName}

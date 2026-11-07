@@ -4,7 +4,6 @@
  * reader. Kits pass the checkbox.
  */
 import { injectMediaQuery } from "@adapttable/angular";
-import { defaultLabels } from "@adapttable/core";
 import type { ColumnSelectCheckboxProps } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
@@ -18,6 +17,7 @@ import {
 import { AdaptControl } from "../control";
 
 export type { ColumnSelectCheckboxProps } from "@adapttable/core/binding";
+export { columnSelectLabel } from "@adapttable/core/binding";
 
 /**
  * A pointer that can hover — where the checkbox waits to be wanted; without
@@ -33,22 +33,6 @@ const HOVER_QUERY = "(hover: hover) and (pointer: fine)";
 export interface ColumnSelectSlots {
   /** Renders the checkbox; receives `ColumnSelectCheckboxProps`. */
   readonly Checkbox: Type<unknown>;
-}
-
-/**
- * The checkbox's accessible name: what it does, and which column.
- *
- * @param label - The localized action, e.g. "Select column".
- * @param column - The column's key and header.
- * @returns The name, e.g. "Select column: Budget".
- *
- * @public
- */
-export function columnSelectLabel(
-  label: string | undefined,
-  column: { readonly header?: string; readonly key: string }
-): string {
-  return `${label ?? defaultLabels.selectColumn}: ${column.header ?? column.key}`;
 }
 
 /**

@@ -1,4 +1,5 @@
 import { stableKey } from "@adapttable/core";
+import { sameIdentity, sourceViewKey } from "@adapttable/core/binding";
 
 /**
  * The last refresh a source hook applied, and whether React committed it.
@@ -47,43 +48,4 @@ export function markFrameCommitted<Frame>(held: {
   if (held.current) held.current.committed = true;
 }
 
-/**
- * The view fields a source refresh reads. Setters stay out: they are stable,
- * and the object that carries them is new every render.
- */
-export function sourceViewKey(state: {
-  page: number;
-  limit: number;
-  search: string;
-  sortBy: string | undefined;
-  sortDir: string | undefined;
-  groupBy: string | undefined;
-  extra: object;
-  filterTree: unknown;
-  sortLevels: readonly object[];
-  groupAggregateOverrides: unknown;
-}): string {
-  return stableKey({
-    page: state.page,
-    limit: state.limit,
-    search: state.search,
-    sortBy: state.sortBy ?? null,
-    sortDir: state.sortDir ?? null,
-    groupBy: state.groupBy ?? null,
-    extra: state.extra,
-    filterTree: state.filterTree ?? null,
-    sortLevels: state.sortLevels,
-    groupAggregateOverrides: state.groupAggregateOverrides ?? null,
-  });
-}
-
-function sameIdentity(
-  left: readonly unknown[],
-  right: readonly unknown[]
-): boolean {
-  if (left.length !== right.length) return false;
-  for (let index = 0; index < left.length; index += 1) {
-    if (!Object.is(left[index], right[index])) return false;
-  }
-  return true;
-}
+export { sourceViewKey };

@@ -12,6 +12,7 @@ import {
   resolveVirtualRows,
   rowSourceIndex,
   virtualColumnSpan,
+  virtualItemMeta,
   windowGroupedEntries,
 } from "./virtualTableModel";
 
@@ -26,6 +27,28 @@ describe("rowSourceIndex", () => {
   it("is the window index until pinning pulls rows out of it", () => {
     expect(rowSourceIndex({ index: 3 })).toBe(3);
     expect(rowSourceIndex({ index: 0, sourceIndex: 7 })).toBe(7);
+  });
+});
+
+describe("virtualItemMeta", () => {
+  it("keeps the fields a row reads and drops the rest", () => {
+    expect(
+      virtualItemMeta({
+        index: 2,
+        start: 40,
+        end: 80,
+        size: 40,
+        key: "r2",
+        lane: 0,
+      })
+    ).toEqual({
+      index: 2,
+      start: 40,
+      end: 80,
+      size: 40,
+      key: "r2",
+      lane: 0,
+    });
   });
 });
 

@@ -33,6 +33,7 @@ import {
   AGENT_APPROVAL,
   AGENT_APPROVAL_STATE,
   COLUMN_SELECT,
+  columnSelectLabel,
   DENSITY_STATE,
   EMPTY_FEATURE_HOST,
   type FeatureHostState,
@@ -1135,7 +1136,10 @@ export function useDataTableShell<TRow>(
         selection: gridFocus.value?.columnCheckbox
           ? (className?: string) =>
               renderFeatureSlot(COLUMN_SELECT, slotFills.value, {
-                label: `${table.labels.value.selectColumn}: ${header.context.label}`,
+                label: columnSelectLabel(table.labels.value.selectColumn, {
+                  key: header.key,
+                  header: header.context.label,
+                }),
                 checked: gridFocus.value?.isColumnSelected(col) ?? false,
                 onToggle: columnToggle(col),
                 className,

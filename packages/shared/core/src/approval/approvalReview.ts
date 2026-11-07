@@ -176,3 +176,67 @@ export function approvalReview(
         : undefined,
   };
 }
+
+/**
+ * A value a reader can see on an approval line.
+ *
+ * Absent stays absent. Null is an empty cell (`—`), not a missing lookup.
+ * A string, number, boolean or bigint is itself. Anything else is JSON. A
+ * bigint is written as a decimal because `JSON.stringify` throws on one,
+ * and a review line has to stay a line.
+ *
+ * @param value - The stored before or after, or one operation argument.
+ * @returns The text, or `undefined` when there is nothing to show.
+ *
+ * @public
+ */
+export function approvalValueText(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return "—";
+  if (typeof value === "string") return value;
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint"
+  ) {
+    return String(value);
+  }
+  return JSON.stringify(value);
+}
+
+/** One argument a host will receive, already readable. @public */
+export interface ApprovalArgumentPair {
+  /** The host's key, spaced out of camelCase. Empty when there is one line. */
+  readonly name: string;
+  /** {@link approvalValueText}, or `—` when the argument is absent. */
+  readonly value: string;
+}
+
+/**
+ * One operation's arguments, as pairs a reader can read.
+ *
+ * Names are the host's own keys, spaced out of camelCase rather than
+ * translated. Only an object has pairs. Anything else is one line, and
+ * nothing at all is an empty list.
+ *
+ * @param args - Whatever the capability was called with.
+ * @returns The pairs, in the host's key order.
+ *
+ * @public
+ */
+export function approvalArgumentPairs(
+  args: unknown
+): readonly ApprovalArgumentPair[] {
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    const single = approvalValueText(args);
+    return single === undefined ? [] : [{ name: "", value: single }];
+  }
+  return Object.entries(args as Record<string, unknown>).map(
+    ([name, value]) => ({
+      name: name
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .replace(/^./, (first) => first.toUpperCase()),
+      value: approvalValueText(value) ?? "—",
+    })
+  );
+}

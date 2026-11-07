@@ -6,10 +6,9 @@ import {
   type CreateTableEngineOptions,
   devWarn,
   type TableEngine,
-  type TableEngineReader,
 } from "@adapttable/core";
 import { sameRows } from "@adapttable/core/binding";
-import { createTableEngine } from "@adapttable/core/engine";
+import { createTableEngine, revisionToken } from "@adapttable/core/engine";
 import {
   useDebugValue,
   useEffect,
@@ -17,11 +16,6 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
-
-function revisionToken<TRow>(reader: TableEngineReader<TRow>): string {
-  const revisions = reader.snapshot().revisions;
-  return `${revisions.data}:${revisions.view}:${revisions.schema}:${revisions.policy}`;
-}
 
 /**
  * The options this hook keeps replaying onto the committed engine. Anything
@@ -173,8 +167,8 @@ export function useTableEngine<TRow>(
         if (publishingRef.current) return;
         onStoreChange();
       }),
-    () => revisionToken(engine.candidate),
-    () => revisionToken(engine.candidate)
+    () => revisionToken(engine.candidate.snapshot().revisions),
+    () => revisionToken(engine.candidate.snapshot().revisions)
   );
 
   // The render was accepted: publish what it staged, before paint, so an

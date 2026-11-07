@@ -1,35 +1,9 @@
 /**
  * The evaluator a composed grouping feature carries for the plain-table source.
  *
- * The shell reads it off the feature object. The feature module is the one
- * that imports the full evaluator, so a table that never composes grouping
- * does not.
+ * Owned by core. This file forwards it so existing binding imports stay put.
  */
-import type { FrontendEngineFactory } from "@adapttable/core";
-
-const FRONTEND_ROW_MODEL = "frontendRowModel";
-
-/** Attach the evaluator `feature` needs. Spread by {@link extendFeature}. */
-export function withFrontendRowModel<T extends object>(
-  feature: T,
-  createEngine: FrontendEngineFactory<unknown>
-): T {
-  return { ...feature, [FRONTEND_ROW_MODEL]: createEngine };
-}
-
-/**
- * The evaluator the composed features require, later features winning.
- * Absent when none of them groups.
- */
-export function frontendRowModelOf(
-  features: readonly object[]
-): FrontendEngineFactory<unknown> | undefined {
-  let factory: FrontendEngineFactory<unknown> | undefined;
-  for (const feature of features) {
-    const candidate = (feature as Record<string, unknown>)[FRONTEND_ROW_MODEL];
-    if (typeof candidate === "function") {
-      factory = candidate as FrontendEngineFactory<unknown>;
-    }
-  }
-  return factory;
-}
+export {
+  frontendRowModelOf,
+  withFrontendRowModel,
+} from "@adapttable/core/binding";

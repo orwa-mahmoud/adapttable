@@ -29,6 +29,7 @@ import {
   commandListKeyAction,
   commandListView,
   createCommandList,
+  resolveLabels,
   runCommand,
   tabTrapTarget,
 } from "@adapttable/core";
@@ -186,10 +187,10 @@ export function CommandPaletteChrome(
   };
 
   if (!open) return null;
-  const labels = props.labels;
+  const labels = resolveLabels(props.labels);
   return (
     <slots.Surface
-      label={labels?.commandPalette ?? "Command palette"}
+      label={labels.commandPalette}
       onClose={onClose}
       className={props.className}
     >
@@ -224,15 +225,15 @@ export function CommandPaletteChrome(
             "aria-expanded": true,
             "aria-controls": listId,
             "aria-activedescendant": activeId,
-            "aria-label": labels?.commandSearch ?? "Search commands",
-            placeholder: labels?.commandSearch ?? "Search commands",
+            "aria-label": labels.commandSearch,
+            placeholder: labels.commandSearch,
             "data-adapttable-part": "command-input",
           }}
         />
         <div
           id={listId}
           role="listbox"
-          aria-label={labels?.commandPalette ?? "Command palette"}
+          aria-label={labels.commandPalette}
           data-adapttable-part="command-list"
         >
           {matches.map((command, index) => (
@@ -258,7 +259,7 @@ export function CommandPaletteChrome(
         </div>
         {matches.length === 0 && (
           <slots.Empty
-            message={labels?.commandEmpty ?? "No matching command"}
+            message={labels.commandEmpty}
           />
         )}
       </div>

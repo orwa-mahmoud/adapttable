@@ -306,6 +306,7 @@ export {
   resolveVirtualRows,
   rowSourceIndex,
   virtualColumnSpan,
+  virtualItemMeta,
 } from "./virtual/virtualTableModel";
 export { buildTableXlsx, xlsxWriter } from "./xlsx";
 

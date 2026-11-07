@@ -37,6 +37,9 @@ export function columnPathText(value: unknown): string | null {
   }
 }
 
+/** The same text, under the name the bindings already publish. */
+export { columnPathText as primitiveText };
+
 /**
  * What {@link resolveColumnDefaults} reads from a binding's column type.
  *

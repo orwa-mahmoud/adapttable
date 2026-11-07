@@ -2,7 +2,9 @@
 import {
   type AgentApprovalPending,
   type AgentApprovalProposal,
+  approvalArgumentPairs,
   approvalReview,
+  approvalValueText,
   resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
@@ -33,29 +35,6 @@ export interface ApprovalReviewChromeProps {
   readonly className?: string;
   readonly buttonClassName?: string;
 }
-function display(value: unknown): string | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return "—";
-  if (typeof value === "string") return value;
-  if (
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    typeof value === "bigint"
-  )
-    return String(value);
-  return JSON.stringify(value);
-}
-function argumentPairs(args: unknown): readonly (readonly [string, unknown])[] {
-  if (args === undefined) return [];
-  if (args !== null && typeof args === "object" && !Array.isArray(args))
-    return Object.entries(args).map(([name, value]) => [
-      name
-        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-        .replace(/^./, (first) => first.toUpperCase()),
-      value,
-    ]);
-  return [["", args]];
-}
 function describe(
   proposal: AgentApprovalProposal,
   labels: TableLabels | undefined
@@ -68,8 +47,8 @@ function describe(
       : { column: proposal.columnLabel ?? proposal.column }),
     before: proposal.beforeUnavailable
       ? copy.proposalValueUnavailable
-      : (proposal.beforeText ?? display(proposal.before)),
-    after: proposal.afterText ?? display(proposal.after),
+      : (proposal.beforeText ?? approvalValueText(proposal.before)),
+    after: proposal.afterText ?? approvalValueText(proposal.after),
   });
 }
 /** @public */
@@ -178,7 +157,7 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
         }
       );
       const operation = review.operation;
-      const pairs = argumentPairs(operation?.arguments);
+      const pairs = approvalArgumentPairs(operation?.arguments);
       return h(
         "div",
         {
@@ -217,9 +196,9 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
                       "data-adapttable-part":
                         "approval-review-operation-arguments",
                     },
-                    pairs.flatMap(([name, value]) => [
-                      h("dt", name),
-                      h("dd", display(value) ?? "—"),
+                    pairs.flatMap((pair) => [
+                      h("dt", pair.name),
+                      h("dd", pair.value),
                     ])
                   ),
                 ]

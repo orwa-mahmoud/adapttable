@@ -35,6 +35,11 @@ export {
   type ApprovalReviewSlots,
 } from "./approval/agentApprovalContract";
 export {
+  type ApprovalArgumentPair,
+  approvalArgumentPairs,
+  approvalValueText,
+} from "./approval/approvalReview";
+export {
   assistantActionsName,
   assistantBadgeTone,
   assistantComposerState,
@@ -414,6 +419,7 @@ export {
   type AssemblyFns,
   bodyCellsHaveRowSpan,
   cellsForRow,
+  columnSelectLabel,
   extraHostFillStyle,
   isExtraEntry,
   pinnedRowCellStyle,
@@ -495,7 +501,7 @@ export type {
   SavedViewsPanelSlots,
   SavedViewsPanelSurfaceProps,
 } from "./url/savedViewsPanelContract";
-export { rowSourceIndex } from "./virtual/virtualTableModel";
+export { rowSourceIndex, virtualItemMeta } from "./virtual/virtualTableModel";
 
 /**
  * The member types the signatures above hand back, so a consumer of this
@@ -859,6 +865,10 @@ export type {
   TableSourceCapabilities,
   TotalCountCapability,
 } from "./source/capabilities";
+export {
+  frontendRowModelOf,
+  withFrontendRowModel,
+} from "./source/frontendRowModel";
 export type {
   AggregateFn,
   QueryAggregate,
@@ -868,6 +878,13 @@ export type {
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
 export { commitSearchOnBlur } from "./source/searchInputFlush";
+export {
+  type CachedSnapshot,
+  cachedSnapshot,
+  sameIdentity,
+  sourceViewKey,
+  type SourceViewKeyInput,
+} from "./source/sourceRefresh";
 export type { TableSource } from "./source/TableSource";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";
@@ -982,6 +999,7 @@ export type {
 // test its table engine runs on each render.
 export {
   columnPathText,
+  primitiveText,
   type ResolvableColumn,
   resolveColumnDefaults,
   resolveColumnHeaders,

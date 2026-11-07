@@ -4,8 +4,10 @@
  */
 import {
   type AgentApprovalProposal,
+  approvalArgumentPairs,
   type ApprovalReview,
   type ApprovalReviewItem,
+  approvalValueText,
   resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
@@ -82,17 +84,6 @@ export interface ApprovalReviewChromeProps {
   readonly buttonClassName?: string;
 }
 
-/** A readable value, preserving the difference between absent and empty. */
-function display(value: unknown): string | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return "—";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  return JSON.stringify(value);
-}
-
 /** Prefer the column's own display units and the reader's vocabulary. */
 function describeItem(
   proposal: AgentApprovalProposal,
@@ -107,27 +98,9 @@ function describeItem(
       : { column: proposal.columnLabel ?? proposal.column }),
     before: proposal.beforeUnavailable
       ? copy.proposalValueUnavailable
-      : (proposal.beforeText ?? display(proposal.before)),
-    after: proposal.afterText ?? display(proposal.after),
+      : (proposal.beforeText ?? approvalValueText(proposal.before)),
+    after: proposal.afterText ?? approvalValueText(proposal.after),
   });
-}
-
-/** The arguments a host receives, read as pairs without inventing row data. */
-function argumentPairs(
-  args: unknown
-): readonly { name: string; value: string }[] {
-  if (!args || typeof args !== "object" || Array.isArray(args)) {
-    const single = display(args);
-    return single === undefined ? [] : [{ name: "", value: single }];
-  }
-  return Object.entries(args as Record<string, unknown>).map(
-    ([name, value]) => ({
-      name: name
-        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-        .replace(/^./, (first) => first.toUpperCase()),
-      value: display(value) ?? "—",
-    })
-  );
 }
 
 /**
@@ -176,7 +149,7 @@ export class AdaptApprovalReviewChrome {
     viewChild<TemplateRef<unknown>>("rowsTemplate");
 
   protected readonly pairs = computed(() =>
-    argumentPairs(this.review().operation?.arguments)
+    approvalArgumentPairs(this.review().operation?.arguments)
   );
 
   private readonly shown = computed(() =>
