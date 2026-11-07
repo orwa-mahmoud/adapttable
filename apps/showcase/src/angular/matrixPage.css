@@ -253,6 +253,10 @@ adapt-showcase-matrix-page *::after {
   border-bottom: 1px solid var(--ng-soft);
 }
 
+.mx-ng--unstyled [data-density="compact"] [data-adapttable-part="cell"] {
+  padding-block: var(--sp-1);
+}
+
 .mx-ng--unstyled [data-adapttable-part="cell"][data-pinned] {
   background: var(--ng-row-surface, var(--ng-surface));
 }

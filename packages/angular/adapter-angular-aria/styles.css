@@ -22,10 +22,12 @@
   --adapt-aria-line: #494b60;
   --adapt-aria-accent: #bca4ff;
 }
-.adapt-aria [data-density="compact"] {
+.adapt-aria [data-density="compact"],
+.adapt-aria [data-density="compact"] .adapt-aria {
   --adapt-aria-space: 0.3rem 0.55rem;
 }
-.adapt-aria [data-density="comfortable"] {
+.adapt-aria [data-density="comfortable"],
+.adapt-aria [data-density="comfortable"] .adapt-aria {
   --adapt-aria-space: 1rem 1.1rem;
 }
 .adapt-aria :is(button, input, select, textarea, .adapt-aria-select) {
