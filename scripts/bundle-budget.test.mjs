@@ -18,6 +18,7 @@ import {
   measure,
   requestedCases,
   selectFixtures,
+  withoutComments,
 } from "./bundle-budget.mjs";
 import {
   caseId,
@@ -157,6 +158,14 @@ describe("emitted-file accounting", () => {
     assert.ok(sheet.gzipBytes > 0);
     assert.equal(accounted.total.gzipBytes, sum(accounted.ledger, "gzipBytes"));
     assert.ok(accounted.lazy.gzipBytes >= sheet.gzipBytes);
+  });
+
+  it("matches markers against code, not the doc comments that name them", () => {
+    const code = withoutComments(
+      "/**\n * Composes {@link createGridFocusController}.\n */\n// createTableEngine\nconst kept = createGridFocus();\n"
+    );
+    assert.doesNotMatch(code, /createGridFocusController|createTableEngine/);
+    assert.match(code, /createGridFocus\(\)/);
   });
 
   it("counts lazy locale presets as their largest one, not their sum", () => {

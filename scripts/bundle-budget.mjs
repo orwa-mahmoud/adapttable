@@ -286,6 +286,18 @@ export function accountOutputs(minOutput, readableOutput) {
 }
 
 /**
+ * Bundled code without its block and whole-line comments. A doc comment that
+ * names a function is not that function, so a marker must match code.
+ */
+export function withoutComments(code) {
+  return code
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split("\n")
+    .filter((line) => !line.trimStart().startsWith("//"))
+    .join("\n");
+}
+
+/**
  * Markers that leaked into, or are missing from, every emitted chunk and
  * stylesheet of the readable build.
  *
@@ -295,10 +307,12 @@ export function accountOutputs(minOutput, readableOutput) {
  * selectors for parts the runtime graph omits.
  */
 export function inspectOutputs(fixture, readableOutput) {
-  const code = readableOutput
-    .filter((file) => file.type === "chunk")
-    .map((file) => file.code)
-    .join("\n");
+  const code = withoutComments(
+    readableOutput
+      .filter((file) => file.type === "chunk")
+      .map((file) => file.code)
+      .join("\n")
+  );
   const css = vueEmittedCss(readableOutput);
   const inCode = (name) => new RegExp(`\\b${name}`).test(code);
   return {
