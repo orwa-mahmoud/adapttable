@@ -15968,6 +15968,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "withKitEnvironment",
+      "kind": "runtime",
+      "module": "layout/kitEnvironment.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/kitEnvironment.ts#withKitEnvironment",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "withShellOperations",
       "kind": "runtime",
       "module": "features/shellOperations.ts",
@@ -17692,6 +17703,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/slotContract.ts#KeyedWindowSlotProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "KitEnvironment",
+      "kind": "type",
+      "module": "layout/kitEnvironment.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/kitEnvironment.ts#KitEnvironment",
       "subpaths": ["./binding"]
     },
     {
