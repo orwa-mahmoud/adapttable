@@ -576,27 +576,34 @@ function LeafHeader<TRow>({
  * which remounts the table and retriggers scroll measurement.
  */
 function ChakraScrollHost(props: ComponentProps<typeof Box>) {
+  "use no memo";
   return <Box {...props} />;
 }
 
 function ChakraTableHost(props: ComponentProps<typeof Table.Root>) {
+  "use no memo";
   return <Table.Root {...props} />;
 }
 
 function ChakraHeadHost(props: ComponentProps<typeof Table.Header>) {
+  "use no memo";
   return <Table.Header {...props} />;
 }
 
 function ChakraBodyHost(props: ComponentProps<typeof Table.Body>) {
+  "use no memo";
   return <Table.Body {...props} />;
 }
 
 function ChakraRowHost(props: ComponentProps<typeof Table.Row>) {
+  "use no memo";
   return <Table.Row {...props} />;
 }
 
 /** Desktop Chakra table. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const {
     size,
     accentColor,

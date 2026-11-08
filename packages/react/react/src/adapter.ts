@@ -522,10 +522,13 @@ export {
   useDesktopTableAssembly,
 } from "./layout/desktopTableAssembly";
 export {
+  type DesktopStructureHosts,
   DesktopTableChrome,
   type DesktopTableChromeClassNames,
   type DesktopTableChromeProps,
   type DesktopTableHosts,
+  DesktopTableStructure,
+  type DesktopTableStructureProps,
 } from "./layout/desktopTableChrome";
 export {
   MobileCardsChrome,
@@ -533,6 +536,9 @@ export {
   type MobileCardsChromeProps,
   type MobileCardsHosts,
   type MobileCardSlot,
+  MobileCardsStructure,
+  type MobileCardsStructureProps,
+  type MobileStructureHosts,
 } from "./layout/mobileCardsChrome";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export {

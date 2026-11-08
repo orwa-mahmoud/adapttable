@@ -398,6 +398,7 @@ function ChakraMobileCardHost(props: {
   readonly "data-passthrough"?: string;
   readonly "data-adapttable-part"?: string;
 }) {
+  "use no memo";
   if (props["data-adapttable-part"] === "virtual-spacer") {
     const height = props.style?.height;
     return (
@@ -449,6 +450,8 @@ export function MobileCards<TRow>({
   maxHeight,
   virtualScrollRef,
 }: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const { columns, selection, labels } = table;
   const entries = orderedCardEntries(
     rows,

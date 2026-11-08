@@ -1747,6 +1747,9 @@ export interface DesktopRowWiring<TRow> {
 }
 
 // @public
+export type DesktopStructureHosts = readonly [ElementType | undefined, ElementType | undefined, ElementType | undefined, ElementType | undefined, ElementType | undefined];
+
+// @public
 export interface DesktopTableAssembly<TRow> {
     bodySlots: readonly DesktopBodySlot<TRow>[];
     callbacks: {
@@ -1870,6 +1873,32 @@ export interface DesktopTablePin {
     stickActions: boolean;
     stickyAttr: true | undefined;
     stickyStyle: CSSProperties | undefined;
+}
+
+// @public
+export function DesktopTableStructure<TRow>(input: Readonly<DesktopTableStructureProps<TRow>>): ReactElement;
+
+// @public
+export interface DesktopTableStructureProps<TRow> {
+    readonly a: DesktopTableAssembly<TRow>;
+    readonly b?: ReactNode;
+    readonly bp?: Record<string, unknown>;
+    readonly c?: DesktopTableChromeClassNames;
+    readonly f?: (scrollBox: ReactNode) => ReactNode;
+    readonly h?: DesktopStructureHosts;
+    readonly hp?: Record<string, unknown>;
+    readonly p?: boolean;
+    readonly rc: (cell: HtmlGroupedHeaderCell) => ReactNode;
+    readonly rf: (leaf: DesktopHeaderLeaf<TRow>, column: ColumnDef<TRow>, index: number) => ReactNode;
+    readonly rg: (slot: DesktopGroupSlot<TRow>) => ReactNode;
+    readonly rl: (rowSpan: number) => ReactNode;
+    readonly rr: (slot: DesktopRowSlot<TRow>) => ReactNode;
+    readonly rs?: () => ReactNode;
+    readonly rt: (rowSpan: number) => ReactNode;
+    readonly rv?: (slot: DesktopVirtualPadSlot) => ReactNode;
+    readonly rx: (slot: DesktopExtraSlot) => ReactNode;
+    readonly s?: Record<string, unknown>;
+    readonly t?: Record<string, unknown>;
 }
 
 // @public
@@ -2815,6 +2844,28 @@ export interface MobileCardSlot {
     readonly part?: string;
     readonly props?: Record<string, unknown>;
 }
+
+// @public
+export function MobileCardsStructure(input: Readonly<MobileCardsStructureProps>): ReactElement;
+
+// @public
+export interface MobileCardsStructureProps {
+    readonly c?: MobileCardsChromeClassNames;
+    readonly d?: string;
+    readonly h?: MobileStructureHosts;
+    readonly k: readonly MobileCardSlot[];
+    readonly lp?: Record<string, unknown>;
+    readonly ls?: CSSProperties;
+    readonly pb?: number;
+    readonly pt?: number;
+    readonly rp: Record<string, unknown>;
+    readonly sr?: Ref<HTMLElement>;
+    readonly st?: CSSProperties;
+    readonly su?: ReactNode;
+}
+
+// @public
+export type MobileStructureHosts = readonly [ElementType | undefined, ElementType | undefined, ElementType | undefined];
 
 // @public
 export interface MountStaggerOptions {

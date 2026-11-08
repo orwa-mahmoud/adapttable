@@ -1,5 +1,5 @@
 /** The desktop table: header, pinned columns, rows and summary. */
-import { type ColumnDef } from "@adapttable/react";
+import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
   cellSpanMark,
@@ -493,6 +493,8 @@ function LeafHeader<TRow>({
 
 /** Desktop semantic table rendering. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const { classNames, filterRegistry, closeHeaderFilterOnSelect } = props;
   const assembly = useDesktopTableAssembly(props, { widths: UNSTYLED_WIDTHS });
   const Row = useMemo(
@@ -503,8 +505,10 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       ),
     []
   );
-  const { model, header, pin, callbacks, resizeHandleStyle } = assembly;
-  const { columns, selection, labels, showActions, leadingCells } = model;
+  const { model, summary, showColumnFooter, header, pin, callbacks, resizeHandleStyle } =
+    assembly;
+  const { columns, selection, labels, showActions, showReorder, leadingCells } =
+    model;
 
   const leafProps = {
     classNames,
@@ -672,6 +676,59 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           fillStyle={slot.fillStyle}
         />
       )}
+      renderVirtualPad={(slot) => (
+        <tr
+          key={slot.key}
+          data-adapttable-part="virtual-spacer"
+          className={classNames.virtualSpacer}
+        >
+          <td colSpan={slot.colSpan} style={{ height: slot.height, padding: 0 }} />
+        </tr>
+      )}
+      renderSummary={() =>
+        showColumnFooter ? (
+          <tfoot data-adapttable-part="summary" className={classNames.summary}>
+            <tr
+              data-adapttable-part="summary-row"
+              className={classNames.summaryRow}
+            >
+              {header.leading.expand && (
+                <td
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                />
+              )}
+              {showReorder && (
+                <td
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                />
+              )}
+              {selection && (
+                <td
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                />
+              )}
+              {columns.map((column) => (
+                <td
+                  key={column.key}
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                >
+                  {resolveColumnFooter(column, summary?.[column.key])}
+                </td>
+              ))}
+              {showActions && (
+                <td
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                />
+              )}
+            </tr>
+          </tfoot>
+        ) : null
+      }
     />
   );
 }

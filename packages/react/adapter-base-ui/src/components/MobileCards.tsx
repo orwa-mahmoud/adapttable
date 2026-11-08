@@ -12,8 +12,8 @@ import {
   isExtraEntry,
   mobileCardListStyle,
   mobileCardRegionProps,
-  MobileCardsChrome,
   type MobileCardSlot,
+  MobileCardsStructure,
   orderedCardEntries,
   pinnedSummaryPart,
   pinnedSummaryRowId,
@@ -87,6 +87,7 @@ function BaseUiMobileCardHost(
     readonly "data-adapttable-part"?: string;
   }
 ) {
+  "use no memo";
   if (props["data-adapttable-part"] === "virtual-spacer") {
     return <Box aria-hidden style={{ height: props.style?.height }} />;
   }
@@ -459,6 +460,8 @@ export function MobileCards<TRow>({
   maxHeight,
   virtualScrollRef,
 }: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const { columns, selection, labels } = table;
   const entries = orderedCardEntries(
     rows,
@@ -642,26 +645,29 @@ export function MobileCards<TRow>({
   const cards = grouping ? groupedSlots() : flatSlots();
 
   return (
-    <MobileCardsChrome
-      regionProps={mobileCardRegionProps(
+    <MobileCardsStructure
+      rp={mobileCardRegionProps(
         table.getTableProps()["aria-label"],
         labels.table,
         maxHeight
       )}
-      scrollRef={virtualScrollRef}
-      style={mobileCardListStyle(maxHeight)}
-      hosts={{ List: Flex, Card: BaseUiMobileCardHost }}
-      listProps={{
+      sr={virtualScrollRef}
+      st={mobileCardListStyle(maxHeight)}
+      h={
+        // eslint-disable-next-line no-sparse-arrays -- the empty section slot stays a native section
+        [, Flex, BaseUiMobileCardHost]
+      }
+      lp={{
         direction: "column",
         gap: compact ? "2" : "3",
         role: "list",
         "aria-label": table.getTableProps()["aria-label"],
       }}
-      listStyle={{ margin: undefined, padding: undefined }}
-      paddingTop={paddingTop}
-      paddingBottom={paddingBottom}
-      cards={cards}
-      summary={
+      ls={{ margin: undefined, padding: undefined }}
+      pt={paddingTop}
+      pb={paddingBottom}
+      k={cards}
+      su={
         summary ? (
           <Card
             data-adapttable-part="summary-card"

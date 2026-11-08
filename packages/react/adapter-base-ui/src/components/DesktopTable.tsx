@@ -11,7 +11,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
-  DesktopTableChrome,
+  DesktopTableStructure,
   type Direction,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
@@ -36,7 +36,6 @@ import {
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
 import {
-  type ComponentProps,
   type CSSProperties,
   type ReactElement,
   type ReactNode,
@@ -122,18 +121,6 @@ const PIN_BG = "var(--adapttable-surface, #ffffff)";
 const STICKY_FIX_CLASS = "adapttable-base-ui-scroll";
 
 const STICKY_FIX_CSS = `.${STICKY_FIX_CLASS} table{overflow:visible;min-width:var(--adapttable-min-width,0)}`;
-
-/**
- * Stable element types. An inline host is a new component every render,
- * which remounts the table and retriggers scroll measurement.
- */
-function BaseUiTableHost(props: ComponentProps<typeof Table.Root>) {
-  return <Table.Root {...props} />;
-}
-
-function BaseUiRowHost(props: ComponentProps<typeof Table.Row>) {
-  return <Table.Row {...props} />;
-}
 
 export interface SharedProps<TRow> extends SharedTableRenderProps<TRow> {
   /** Class hook for the table (desktop) / each card (mobile). */
@@ -568,6 +555,8 @@ function LeafHeader<TRow>({
 
 /** Desktop Base UI table. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const {
     size,
     accentColor,
@@ -765,11 +754,14 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
 
   return (
-    <DesktopTableChrome
-      assembly={assembly}
-      hosts={{ Table: BaseUiTableHost, Row: BaseUiRowHost }}
-      applyHeaderRowProps={false}
-      scrollBoxProps={{
+    <DesktopTableStructure
+      a={assembly}
+      h={
+        // eslint-disable-next-line no-sparse-arrays, @typescript-eslint/unbound-method -- empty slots stay native; Root and Row only read their props
+        [, Table.Root, , , Table.Row]
+      }
+      p={false}
+      s={{
         ref: (node: HTMLDivElement | null) => {
           scroll.bindScrollBox(node);
           node?.style.setProperty(
@@ -788,8 +780,8 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           overflowY: maxHeight == null ? undefined : "auto",
         },
       }}
-      beforeTable={<style>{STICKY_FIX_CSS}</style>}
-      tableProps={{
+      b={<style>{STICKY_FIX_CSS}</style>}
+      t={{
         size,
         variant: "surface",
         "data-size": size,
@@ -802,13 +794,13 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           ? { tableLayout: tableStyle.tableLayout, width: tableStyle.width }
           : undefined,
       }}
-      renderLeading={leadingHeaders}
-      renderTrailing={trailingHeaders}
-      renderPlanCell={renderPlanCell}
-      renderLeaf={(leaf) => (
+      rl={leadingHeaders}
+      rt={trailingHeaders}
+      rc={renderPlanCell}
+      rf={(leaf) => (
         <LeafHeader key={leaf.column.key} leaf={leaf} {...leafProps} />
       )}
-      renderRow={(slot) => (
+      rr={(slot) => (
         <Row
           key={slot.key}
           {...slot.wiring}
@@ -817,7 +809,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           dir={dir}
         />
       )}
-      renderGroup={(slot) => (
+      rg={(slot) => (
         <OptionalGroupHeaderRow
           key={slot.key}
           entry={slot.entry}
@@ -831,7 +823,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           onShowMore={props.grouping?.showMore ?? (() => undefined)}
         />
       )}
-      renderExtra={(slot) => (
+      rx={(slot) => (
         <ExtraSlotRow
           key={slot.key}
           kind={slot.extraKind}
@@ -841,7 +833,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           fillStyle={slot.fillStyle}
         />
       )}
-      renderVirtualPad={(slot) => (
+      rv={(slot) => (
         <Table.Row key={slot.key} aria-hidden>
           <Table.Cell
             colSpan={slot.colSpan}
@@ -849,7 +841,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           />
         </Table.Row>
       )}
-      renderSummary={() =>
+      rs={() =>
         showColumnFooter ? (
           <tfoot
             data-adapttable-part="summary"

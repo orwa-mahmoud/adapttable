@@ -607,27 +607,34 @@ function LeafHeader<TRow>({
  * which remounts the table and retriggers scroll measurement.
  */
 function RadixScrollHost(props: ComponentProps<typeof Box>) {
+  "use no memo";
   return <Box {...props} />;
 }
 
 function RadixTableHost(props: ComponentProps<typeof Table.Root>) {
+  "use no memo";
   return <Table.Root {...props} />;
 }
 
 function RadixHeadHost(props: ComponentProps<typeof Table.Header>) {
+  "use no memo";
   return <Table.Header {...props} />;
 }
 
 function RadixBodyHost(props: ComponentProps<typeof Table.Body>) {
+  "use no memo";
   return <Table.Body {...props} />;
 }
 
 function RadixRowHost(props: ComponentProps<typeof Table.Row>) {
+  "use no memo";
   return <Table.Row {...props} />;
 }
 
 /** Desktop Radix Themes table. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const {
     size,
     accentColor,

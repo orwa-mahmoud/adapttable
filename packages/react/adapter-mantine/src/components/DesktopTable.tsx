@@ -553,23 +553,29 @@ function DesktopRowBase<TRow>(
  * which remounts the table and retriggers scroll measurement.
  */
 function MantineTableHost(props: ComponentProps<typeof Table>) {
+  "use no memo";
   return <Table {...props} />;
 }
 
 function MantineHeadHost(props: ComponentProps<typeof Table.Thead>) {
+  "use no memo";
   return <Table.Thead {...props} />;
 }
 
 function MantineBodyHost(props: ComponentProps<typeof Table.Tbody>) {
+  "use no memo";
   return <Table.Tbody {...props} />;
 }
 
 function MantineRowHost(props: ComponentProps<typeof Table.Tr>) {
+  "use no memo";
   return <Table.Tr {...props} />;
 }
 
 /** Desktop table rendering driven by core prop-getters. */
 export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const {
     className,
     bodyRef,

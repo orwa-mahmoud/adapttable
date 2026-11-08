@@ -10,6 +10,7 @@ import { type ElementType, type ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
+import { resolveColumnFooter } from "../columns/columnHeader";
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableChrome } from "../useTableChrome";
@@ -71,6 +72,19 @@ function Desktop({
       }
       renderGroup={() => null}
       renderExtra={() => null}
+      renderSummary={() =>
+        assembly.showColumnFooter ? (
+          <tfoot data-adapttable-part="summary">
+            <tr>
+              {assembly.model.columns.map((column) => (
+                <td key={column.key}>
+                  {resolveColumnFooter(column, assembly.summary?.[column.key])}
+                </td>
+              ))}
+            </tr>
+          </tfoot>
+        ) : null
+      }
     />
   );
 }

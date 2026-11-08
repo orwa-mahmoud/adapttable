@@ -83,6 +83,7 @@ function AntdMobileCardHost(props: {
   readonly "data-passthrough"?: string;
   readonly "data-adapttable-part"?: string;
 }) {
+  "use no memo";
   if (props["data-passthrough"] != null) return <>{props.children}</>;
   if (props["data-adapttable-part"] === "virtual-spacer") {
     return <li aria-hidden style={{ height: props.style?.height }} />;
@@ -628,6 +629,8 @@ export function MobileCards<TRow>({
   /** Clip style when the host passed `maxHeight`. */
   listStyle?: CSSProperties;
 }>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const { labels, selection, columns } = table;
   // Either the virtual slice or every source row, resolved to render entries
   // with their ORIGINAL index (so cells and classes see the true row index).

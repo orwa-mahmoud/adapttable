@@ -15,7 +15,6 @@ import {
 } from "react";
 
 import type { ColumnDef } from "../columnDef";
-import { resolveColumnFooter } from "../columns/columnHeader";
 import type {
   DesktopExtraSlot,
   DesktopGroupSlot,
@@ -130,36 +129,173 @@ export interface DesktopTableChromeProps<TRow> {
   readonly renderGroup: (slot: DesktopGroupSlot<TRow>) => ReactNode;
   /** One host-injected extra row. */
   readonly renderExtra: (slot: DesktopExtraSlot) => ReactNode;
-  /**
-   * One virtual spacer. Absent, a row and a cell of the kit's elements,
-   * with the spacer part name.
-   */
+  /** One virtual spacer. Absent, the window has no spacer row. */
   readonly renderVirtualPad?: (slot: DesktopVirtualPadSlot) => ReactNode;
-  /**
-   * The summary row's contents. Absent, one summary cell per column plus
-   * a pad for each leading and trailing rail.
-   */
+  /** The summary row's contents. Absent, the table has no summary row. */
   readonly renderSummary?: () => ReactNode;
 }
 
-type HostName = keyof DesktopTableHosts;
+/**
+ * Host elements in slot order: scroll box, table, head, body, row.
+ * An empty slot uses the native element.
+ *
+ * @public
+ */
+export type DesktopStructureHosts = readonly [
+  ElementType | undefined,
+  ElementType | undefined,
+  ElementType | undefined,
+  ElementType | undefined,
+  ElementType | undefined,
+];
 
-const NATIVE: DesktopTableHosts = {
-  ScrollBox: "div",
-  Table: "table",
-  Head: "thead",
-  Body: "tbody",
-  Foot: "tfoot",
-  Row: "tr",
-  HeaderCell: "th",
-  Cell: "td",
-};
+/**
+ * Fields for {@link DesktopTableStructure}.
+ *
+ * The short names are the point: a kit calls this instead of
+ * {@link DesktopTableChrome} so the plain-table bundle does not carry
+ * the readable prop names. The nesting is the same structure.
+ *
+ * @public
+ */
+export interface DesktopTableStructureProps<TRow> {
+  /** Assembled rows, header plan and pin geometry. */
+  readonly a: DesktopTableAssembly<TRow>;
+  /** Classes for the header rows. */
+  readonly c?: DesktopTableChromeClassNames;
+  /** Kit elements in {@link DesktopStructureHosts} order. */
+  readonly h?: DesktopStructureHosts;
+  /** False skips the assembly's header-row props. Absent, they are spread. */
+  readonly p?: boolean;
+  /** Extra props for the scroll box, after the structure's own. */
+  readonly s?: Record<string, unknown>;
+  /** Drawn inside the scroll box, before the table. */
+  readonly b?: ReactNode;
+  /** Extra props for the table, after the assembly's table and grid props. */
+  readonly t?: Record<string, unknown>;
+  /** Extra props for the head. */
+  readonly hp?: Record<string, unknown>;
+  /** Extra props for the body. */
+  readonly bp?: Record<string, unknown>;
+  /** Leading rail header cells for one header band. */
+  readonly rl: (rowSpan: number) => ReactNode;
+  /** Trailing rail header cells for one header band. */
+  readonly rt: (rowSpan: number) => ReactNode;
+  /** One cell of a grouped header plan. */
+  readonly rc: (cell: HtmlGroupedHeaderCell) => ReactNode;
+  /** One leaf header when there is no grouped plan. */
+  readonly rf: (
+    leaf: DesktopHeaderLeaf<TRow>,
+    column: ColumnDef<TRow>,
+    index: number
+  ) => ReactNode;
+  /** One data row. */
+  readonly rr: (slot: DesktopRowSlot<TRow>) => ReactNode;
+  /** One group header, footer or more row. */
+  readonly rg: (slot: DesktopGroupSlot<TRow>) => ReactNode;
+  /** One host-injected extra row. */
+  readonly rx: (slot: DesktopExtraSlot) => ReactNode;
+  /** One virtual spacer. Absent, the window has no spacer row. */
+  readonly rv?: (slot: DesktopVirtualPadSlot) => ReactNode;
+  /** The summary row. Absent, the table has no summary row. */
+  readonly rs?: () => ReactNode;
+  /** Wraps the scroll box. Absent, the scroll box is the root. */
+  readonly f?: (scrollBox: ReactNode) => ReactNode;
+}
 
-function hostOf(
-  hosts: Partial<DesktopTableHosts> | undefined,
-  name: HostName
-): ElementType {
-  return hosts?.[name] ?? NATIVE[name];
+/**
+ * Desktop table layout shared by every React kit.
+ *
+ * Scroll, table, head and body classes travel on those elements' own
+ * props. Header-row classes stay here, because the structure creates
+ * those rows.
+ *
+ * @public
+ */
+export function DesktopTableStructure<TRow>(
+  input: Readonly<DesktopTableStructureProps<TRow>>
+): ReactElement {
+  const assembly = input.a;
+  const names = input.c ?? {};
+  const hosts = input.h;
+  const ScrollBox = hosts?.[0] ?? "div";
+  const Table = hosts?.[1] ?? "table";
+  const Head = hosts?.[2] ?? "thead";
+  const Body = hosts?.[3] ?? "tbody";
+  const Row = hosts?.[4] ?? "tr";
+  const header = assembly.header;
+  const plan = assembly.headerPlan;
+  const rowProps = input.p === false ? undefined : header.headerRowProps;
+  const bands = plan ?? [null];
+  const headerRows = bands.map((row, index) => {
+    const last = row == null || index === bands.length - 1;
+    const span = row ? assembly.headerBand : 1;
+    return (
+      <Row
+        key={row ? row.map((cell) => cell.key).join("|") : "leaf"}
+        {...(last ? rowProps : undefined)}
+        ref={last ? header.headerRowRef : undefined}
+        data-adapttable-part={last ? "header-row" : "header-group-row"}
+        className={last ? names.headerRow : names.headerGroupRow}
+      >
+        {index ? null : input.rl(span)}
+        {row
+          ? row.map(input.rc)
+          : assembly.model.columns.map((column, headerIndex) =>
+              input.rf(header.leaf(column, headerIndex), column, headerIndex)
+            )}
+        {index ? null : input.rt(span)}
+      </Row>
+    );
+  });
+  const scroll = assembly.scroll;
+  const scrollBox = (
+    <ScrollBox
+      ref={scroll.bindScrollBox}
+      data-adapttable-part="scroll-box"
+      style={scroll.boxStyle}
+      {...input.s}
+    >
+      {input.b}
+      <Table
+        {...assembly.tableProps}
+        {...assembly.gridProps}
+        data-adapttable-part="table"
+        style={assembly.tableStyle}
+        {...input.t}
+      >
+        <Head
+          ref={header.theadRef}
+          data-adapttable-part="thead"
+          {...input.hp}
+        >
+          {headerRows}
+        </Head>
+        <Body data-adapttable-part="tbody" {...input.bp}>
+          {assembly.bodySlots.map((slot) => {
+            /* eslint-disable sonarjs/no-nested-conditional -- one expression for the four slot kinds */
+            return slot.kind === "extra"
+              ? input.rx(slot)
+              : slot.kind === "virtualPad"
+                ? (input.rv?.(slot) ?? null)
+                : slot.kind === "group"
+                  ? input.rg(slot)
+                  : input.rr(slot);
+            /* eslint-enable sonarjs/no-nested-conditional */
+          })}
+        </Body>
+        {input.rs?.() ?? null}
+      </Table>
+    </ScrollBox>
+  );
+  return (input.f ? input.f(scrollBox) : scrollBox) as ReactElement;
+}
+
+function withClass(
+  className: string | undefined,
+  props: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined {
+  return className ? { className, ...props } : props;
 }
 
 /**
@@ -170,150 +306,29 @@ function hostOf(
 export function DesktopTableChrome<TRow>(
   props: Readonly<DesktopTableChromeProps<TRow>>
 ): ReactElement {
-  const { assembly, classNames = {}, hosts } = props;
-  const {
-    model,
-    summary,
-    showColumnFooter,
-    headerPlan,
-    headerBand,
-    header,
-    scroll,
-    tableStyle,
-    tableProps,
-    gridProps,
-    bodySlots,
-  } = assembly;
-  const { columns, selection, showActions, showReorder } = model;
-  const ScrollBox = hostOf(hosts, "ScrollBox");
-  const Table = hostOf(hosts, "Table");
-  const Head = hostOf(hosts, "Head");
-  const Body = hostOf(hosts, "Body");
-  const Foot = hostOf(hosts, "Foot");
-  const Row = hostOf(hosts, "Row");
-  const Cell = hostOf(hosts, "Cell");
-  const headerRowProps =
-    props.applyHeaderRowProps === false ? {} : header.headerRowProps;
-
-  const headerRows = headerPlan
-    ? headerPlan.map((row, rowIndex) => {
-        const last = rowIndex === headerPlan.length - 1;
-        return (
-          <Row
-            key={row.map((cell) => cell.key).join("|")}
-            {...(last ? headerRowProps : {})}
-            ref={last ? header.headerRowRef : undefined}
-            data-adapttable-part={last ? "header-row" : "header-group-row"}
-            className={last ? classNames.headerRow : classNames.headerGroupRow}
-          >
-            {rowIndex === 0 ? props.renderLeading(headerBand) : null}
-            {row.map((cell) => props.renderPlanCell(cell))}
-            {rowIndex === 0 ? props.renderTrailing(headerBand) : null}
-          </Row>
-        );
-      })
-    : (
-        <Row
-          {...headerRowProps}
-          ref={header.headerRowRef}
-          data-adapttable-part="header-row"
-          className={classNames.headerRow}
-        >
-          {props.renderLeading(1)}
-          {columns.map((column, headerIndex) =>
-            props.renderLeaf(header.leaf(column, headerIndex), column, headerIndex)
-          )}
-          {props.renderTrailing(1)}
-        </Row>
-      );
-
-  const summaryPad = (
-    <Cell
-      data-adapttable-part="summary-cell"
-      className={classNames.summaryCell}
-    />
-  );
-
-  let summaryRow: ReactNode = null;
-  if (props.renderSummary) summaryRow = props.renderSummary();
-  else if (showColumnFooter) {
-    summaryRow = (
-      <Foot data-adapttable-part="summary" className={classNames.summary}>
-        <Row
-          data-adapttable-part="summary-row"
-          className={classNames.summaryRow}
-        >
-          {header.leading.expand && summaryPad}
-          {showReorder && summaryPad}
-          {selection && summaryPad}
-          {columns.map((column) => (
-            <Cell
-              key={column.key}
-              data-adapttable-part="summary-cell"
-              className={classNames.summaryCell}
-            >
-              {resolveColumnFooter(column, summary?.[column.key])}
-            </Cell>
-          ))}
-          {showActions && summaryPad}
-        </Row>
-      </Foot>
-    );
-  }
-
-  const scrollBox = (
-    <ScrollBox
-      ref={scroll.bindScrollBox}
-      data-adapttable-part="scroll-box"
-      className={classNames.scrollBox}
-      style={scroll.boxStyle}
-      {...props.scrollBoxProps}
-    >
-      {props.beforeTable}
-      <Table
-        {...tableProps}
-        {...gridProps}
-        data-adapttable-part="table"
-        className={classNames.table}
-        style={tableStyle}
-        {...props.tableProps}
-      >
-        <Head
-          ref={header.theadRef}
-          data-adapttable-part="thead"
-          className={classNames.thead}
-          {...props.headProps}
-        >
-          {headerRows}
-        </Head>
-        <Body data-adapttable-part="tbody" className={classNames.tbody} {...props.bodyProps}>
-          {bodySlots.map((slot) => {
-            let node: ReactNode;
-            if (slot.kind === "extra") node = props.renderExtra(slot);
-            else if (slot.kind === "virtualPad") {
-              node = props.renderVirtualPad ? (
-                props.renderVirtualPad(slot)
-              ) : (
-                <Row
-                  key={slot.key}
-                  data-adapttable-part="virtual-spacer"
-                  className={classNames.virtualSpacer}
-                >
-                  <Cell
-                    colSpan={slot.colSpan}
-                    style={{ height: slot.height, padding: 0 }}
-                  />
-                </Row>
-              );
-            } else if (slot.kind === "group") node = props.renderGroup(slot);
-            else node = props.renderRow(slot);
-            return node;
-          })}
-        </Body>
-        {summaryRow}
-      </Table>
-    </ScrollBox>
-  );
-
-  return <>{props.frame ? props.frame(scrollBox) : scrollBox}</>;
+  const names = props.classNames;
+  const hosts = props.hosts;
+  return DesktopTableStructure({
+    a: props.assembly,
+    c: names,
+    h: hosts
+      ? [hosts.ScrollBox, hosts.Table, hosts.Head, hosts.Body, hosts.Row]
+      : undefined,
+    p: props.applyHeaderRowProps,
+    s: withClass(names?.scrollBox, props.scrollBoxProps),
+    b: props.beforeTable,
+    t: withClass(names?.table, props.tableProps),
+    hp: withClass(names?.thead, props.headProps),
+    bp: withClass(names?.tbody, props.bodyProps),
+    rl: props.renderLeading,
+    rt: props.renderTrailing,
+    rc: props.renderPlanCell,
+    rf: props.renderLeaf,
+    rr: props.renderRow,
+    rg: props.renderGroup,
+    rx: props.renderExtra,
+    rv: props.renderVirtualPad,
+    rs: props.renderSummary,
+    f: props.frame,
+  });
 }

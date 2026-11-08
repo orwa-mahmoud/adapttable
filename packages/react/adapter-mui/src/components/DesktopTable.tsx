@@ -569,27 +569,34 @@ function LeafHeader<TRow>({
  * which remounts the table and retriggers scroll measurement.
  */
 function MuiScrollHost(props: ComponentProps<typeof Box>) {
+  "use no memo";
   return <Box {...props} />;
 }
 
 function MuiTableHost(props: ComponentProps<typeof Table>) {
+  "use no memo";
   return <Table {...props} />;
 }
 
 function MuiHeadHost(props: ComponentProps<typeof TableHead>) {
+  "use no memo";
   return <TableHead {...props} />;
 }
 
 function MuiBodyHost(props: ComponentProps<typeof TableBody>) {
+  "use no memo";
   return <TableBody {...props} />;
 }
 
 function MuiRowHost(props: ComponentProps<typeof TableRow>) {
+  "use no memo";
   return <TableRow {...props} />;
 }
 
 /** Desktop MUI table. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const {
     size,
     dir,
