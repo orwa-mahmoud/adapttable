@@ -73,7 +73,7 @@ describe("consumer fixtures", () => {
     assert.ok(planted.absent.includes("useTableEditHistory"));
     assert.match(
       planted.code,
-      /export \{ useTableEditHistory \} from "@adapttable\/react";/
+      /export \{ useTableEditHistory, asBatchGesture \} from "@adapttable\/react";/
     );
     assert.doesNotMatch(planted.code, /dist|packages\//);
   });
