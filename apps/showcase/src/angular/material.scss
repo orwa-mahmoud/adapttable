@@ -65,3 +65,9 @@ html[data-theme="dark"] .adapt-material-overlay {
     )
   );
 }
+
+/* Row actions match the table's other in-cell buttons, so a row keeps the
+   compact height of a Material data table. */
+[data-angular-kit="material"] [data-adapttable-part="actions-cell"] {
+  @include mat.button-density(-3);
+}
