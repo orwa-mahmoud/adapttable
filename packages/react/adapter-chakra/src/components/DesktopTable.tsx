@@ -600,6 +600,17 @@ function ChakraRowHost(props: ComponentProps<typeof Table.Row>) {
   return <Table.Row {...props} />;
 }
 
+function chakraGridFrame(scrollBox: ReactNode, role: unknown): ReactElement {
+  return (
+    <Box
+      data-adapttable-part={role === "grid" ? "grid" : undefined}
+      style={{ display: "contents" }}
+    >
+      {scrollBox}
+    </Box>
+  );
+}
+
 /** Desktop Chakra table. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
   // The compiler's cache around these slots is larger than the slots.
@@ -807,14 +818,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
         Row: ChakraRowHost,
       }}
       applyHeaderRowProps={false}
-      frame={(scrollBox) => (
-        <Box
-          data-adapttable-part={gridProps?.role === "grid" ? "grid" : undefined}
-          style={{ display: "contents" }}
-        >
-          {scrollBox}
-        </Box>
-      )}
+      frame={(scrollBox) => chakraGridFrame(scrollBox, gridProps?.role)}
       scrollBoxProps={{
         maxH: maxHeight == null ? undefined : `${maxHeight}px`,
         overflowX:

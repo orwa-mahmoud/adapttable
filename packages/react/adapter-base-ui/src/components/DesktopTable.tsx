@@ -752,6 +752,103 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
 
   const minWidth =
     typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
+  const renderLeaf = (leaf: DesktopHeaderLeaf<TRow>): ReactElement => {
+    return <LeafHeader key={leaf.column.key} leaf={leaf} {...leafProps} />;
+  };
+  const renderRow = (slot: {
+    key: string;
+    wiring: DesktopRowWiring<TRow>;
+  }): ReactElement => {
+    return (
+      <Row
+        key={slot.key}
+        {...slot.wiring}
+        size={size}
+        accentColor={accentColor}
+        dir={dir}
+      />
+    );
+  };
+  const renderGroup = (slot: {
+    key: string;
+    entry: Parameters<typeof OptionalGroupHeaderRow<TRow>>[0]["entry"];
+  }): ReactElement => {
+    return (
+      <OptionalGroupHeaderRow
+        key={slot.key}
+        entry={slot.entry}
+        columns={columns}
+        leadingCells={leadingCells}
+        showActions={showActions}
+        getCellProps={props.table.getCellProps}
+        selection={selection}
+        labels={labels}
+        onToggleCollapse={callbacks.onToggleGroup}
+        onShowMore={props.grouping?.showMore ?? (() => undefined)}
+      />
+    );
+  };
+  const renderExtra = (slot: {
+    key: string;
+    extraKind: "separator" | "fullWidth";
+    colSpan: number;
+    render?: () => ReactNode;
+    fillStyle?: CSSProperties;
+  }): ReactElement => {
+    return (
+      <ExtraSlotRow
+        key={slot.key}
+        kind={slot.extraKind}
+        colSpan={slot.colSpan}
+        render={slot.render}
+        labels={labels}
+        fillStyle={slot.fillStyle}
+      />
+    );
+  };
+  const renderPad = (slot: {
+    key: string;
+    colSpan: number;
+    height: number;
+  }): ReactElement => {
+    return (
+      <Table.Row key={slot.key} aria-hidden>
+        <Table.Cell
+          colSpan={slot.colSpan}
+          style={{ height: slot.height, padding: 0 }}
+        />
+      </Table.Row>
+    );
+  };
+  const renderSummary = (): ReactNode => {
+    if (!showColumnFooter) return null;
+    return (
+      <tfoot
+        data-adapttable-part="summary"
+        style={{ verticalAlign: "inherit" }}
+      >
+        <Table.Row data-summary="" data-adapttable-part="summary-row">
+          {header.leading.expand && (
+            <Table.Cell data-adapttable-part="summary-cell" />
+          )}
+          <When show={showReorder}>
+            <Table.Cell data-adapttable-part="summary-cell" />
+          </When>
+          {selection && <Table.Cell data-adapttable-part="summary-cell" />}
+          {columns.map((column) => (
+            <Table.Cell
+              key={column.key}
+              data-adapttable-part="summary-cell"
+              justify={justifyFor(column.align)}
+            >
+              {resolveColumnFooter(column, summary?.[column.key])}
+            </Table.Cell>
+          ))}
+          {showActions && <Table.Cell data-adapttable-part="summary-cell" />}
+        </Table.Row>
+      </tfoot>
+    );
+  };
 
   return (
     <DesktopTableStructure
@@ -796,80 +893,12 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       rl={leadingHeaders}
       rt={trailingHeaders}
       rc={renderPlanCell}
-      rf={(leaf) => (
-        <LeafHeader key={leaf.column.key} leaf={leaf} {...leafProps} />
-      )}
-      rr={(slot) => (
-        <Row
-          key={slot.key}
-          {...slot.wiring}
-          size={size}
-          accentColor={accentColor}
-          dir={dir}
-        />
-      )}
-      rg={(slot) => (
-        <OptionalGroupHeaderRow
-          key={slot.key}
-          entry={slot.entry}
-          columns={columns}
-          leadingCells={leadingCells}
-          showActions={showActions}
-          getCellProps={props.table.getCellProps}
-          selection={selection}
-          labels={labels}
-          onToggleCollapse={callbacks.onToggleGroup}
-          onShowMore={props.grouping?.showMore ?? (() => undefined)}
-        />
-      )}
-      rx={(slot) => (
-        <ExtraSlotRow
-          key={slot.key}
-          kind={slot.extraKind}
-          colSpan={slot.colSpan}
-          render={slot.render}
-          labels={labels}
-          fillStyle={slot.fillStyle}
-        />
-      )}
-      rv={(slot) => (
-        <Table.Row key={slot.key} aria-hidden>
-          <Table.Cell
-            colSpan={slot.colSpan}
-            style={{ height: slot.height, padding: 0 }}
-          />
-        </Table.Row>
-      )}
-      rs={() =>
-        showColumnFooter ? (
-          <tfoot
-            data-adapttable-part="summary"
-            style={{ verticalAlign: "inherit" }}
-          >
-            <Table.Row data-summary="" data-adapttable-part="summary-row">
-              {header.leading.expand && (
-                <Table.Cell data-adapttable-part="summary-cell" />
-              )}
-              <When show={showReorder}>
-                <Table.Cell data-adapttable-part="summary-cell" />
-              </When>
-              {selection && <Table.Cell data-adapttable-part="summary-cell" />}
-              {columns.map((column) => (
-                <Table.Cell
-                  key={column.key}
-                  data-adapttable-part="summary-cell"
-                  justify={justifyFor(column.align)}
-                >
-                  {resolveColumnFooter(column, summary?.[column.key])}
-                </Table.Cell>
-              ))}
-              {showActions && (
-                <Table.Cell data-adapttable-part="summary-cell" />
-              )}
-            </Table.Row>
-          </tfoot>
-        ) : null
-      }
+      rf={renderLeaf}
+      rr={renderRow}
+      rg={renderGroup}
+      rx={renderExtra}
+      rv={renderPad}
+      rs={renderSummary}
     />
   );
 }

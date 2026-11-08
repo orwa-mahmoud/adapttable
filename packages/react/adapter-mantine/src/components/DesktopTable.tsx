@@ -572,6 +572,17 @@ function MantineRowHost(props: ComponentProps<typeof Table.Tr>) {
   return <Table.Tr {...props} />;
 }
 
+function mantineGridFrame(scrollBox: ReactNode, role: unknown): ReactElement {
+  return (
+    <div
+      data-adapttable-part={role === "grid" ? "grid" : undefined}
+      style={{ display: "contents" }}
+    >
+      {scrollBox}
+    </div>
+  );
+}
+
 /** Desktop table rendering driven by core prop-getters. */
 export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
   // The compiler's cache around these slots is larger than the slots.
@@ -763,14 +774,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
         Body: MantineBodyHost,
         Row: MantineRowHost,
       }}
-      frame={(scrollBox) => (
-        <div
-          data-adapttable-part={gridProps?.role === "grid" ? "grid" : undefined}
-          style={{ display: "contents" }}
-        >
-          {scrollBox}
-        </div>
-      )}
+      frame={(scrollBox) => mantineGridFrame(scrollBox, gridProps?.role)}
       scrollBoxProps={{
         style: { width: "100%", ...scroll.boxStyle },
       }}
