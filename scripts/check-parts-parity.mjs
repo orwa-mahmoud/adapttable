@@ -1158,16 +1158,22 @@ function callsCoreGetter(kit, getter, root) {
  * prop-getter it spreads, an EXPECTED_GAPS entry — or nothing, which fails.
  */
 /**
- * The structural parts a Vue kit's own server-rendered contract test asserts.
- * A Vue kit can forward the binding's attrs through its kit's own wrapper
- * components, where no static trace can follow them; the rendered table is the
- * proof then, as each React kit's `RowParts.test.tsx` is. Only a test that lists
- * the parts and asserts the rendered list equals them counts.
+ * The structural parts a kit's own rendered contract test asserts. A Vue kit
+ * can forward the binding's attrs through its kit's own wrapper components, and
+ * an Angular kit renders through the binding's `AdaptDesktopStructure`
+ * component; no static trace follows either. The rendered table is the proof
+ * then, as each React kit's `RowParts.test.tsx` is. Only a test that lists the
+ * parts and asserts the rendered list equals them counts.
  */
-const VUE_CONTRACT_TEST = "test/structural-parts.ssr.test.ts";
+const RENDERED_CONTRACT_TESTS = {
+  vue: "test/structural-parts.ssr.test.ts",
+  angular: "src/structural-parts.test.ts",
+};
 function renderedContractParts(kit, root) {
-  const file = join(kitDir(kit, root), VUE_CONTRACT_TEST);
-  if (kit.framework !== "vue" || !existsSync(file)) return new Set();
+  const test = RENDERED_CONTRACT_TESTS[kit.framework];
+  if (test === undefined) return new Set();
+  const file = join(kitDir(kit, root), test);
+  if (!existsSync(file)) return new Set();
   const source = ts.createSourceFile(
     file,
     readFileSync(file, "utf8"),
