@@ -13,9 +13,7 @@ import ElementFilterField from "./ElementFilterField.vue";
 import { ElementFilterSurface } from "./ElementFilterSurface";
 import { ElementFilterTree } from "./ElementFilterTree";
 
-export const ElementFiltersPanel = defineComponent({
-  name: "ElementFiltersPanel",
-  setup() {
+function useElementFiltersPanel() {
     const names = useClassNames();
     const model = useFeatureState(filterViewKey<unknown>());
     const controls: FilterPanelSlots<unknown> = {
@@ -97,5 +95,9 @@ export const ElementFiltersPanel = defineComponent({
             classNames: names.value,
           })
         : null;
-  },
+}
+
+export const ElementFiltersPanel = defineComponent({
+  name: "ElementFiltersPanel",
+  setup: useElementFiltersPanel,
 });

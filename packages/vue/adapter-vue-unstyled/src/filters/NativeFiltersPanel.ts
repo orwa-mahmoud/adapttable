@@ -12,9 +12,7 @@ import { NativeFilterField } from "./NativeFilterField";
 import { NativeFilterSurface } from "./NativeFilterSurface";
 import { NativeFilterTree } from "./NativeFilterTree";
 
-export const NativeFiltersPanel = defineComponent({
-  name: "NativeFiltersPanel",
-  setup() {
+function useNativeFiltersPanel() {
     const names = useClassNames();
     const model = useFeatureState(filterViewKey<unknown>());
     const buttonClassName = (part: string): string | undefined => {
@@ -98,5 +96,9 @@ export const NativeFiltersPanel = defineComponent({
             classNames: names.value,
           })
         : null;
-  },
+}
+
+export const NativeFiltersPanel = defineComponent({
+  name: "NativeFiltersPanel",
+  setup: useNativeFiltersPanel,
 });

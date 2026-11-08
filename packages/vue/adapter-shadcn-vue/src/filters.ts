@@ -15,16 +15,18 @@ import { defineComponent, h, type PropType } from "vue";
 import { FilterChips } from "./filters/FilterChips";
 import { FilterPanel } from "./filters/FilterPanel";
 
+function useShadcnFilterPanel() {
+  const model = useFeatureState(filterViewKey());
+  const names = useDataTableClassNames();
+  return () =>
+    model.value
+      ? h(FilterPanel, { model: model.value, classNames: names.value })
+      : null;
+}
+
 const PanelFeatureControl = defineComponent({
   name: "ShadcnFilterPanelFeature",
-  setup() {
-    const model = useFeatureState(filterViewKey());
-    const names = useDataTableClassNames();
-    return () =>
-      model.value
-        ? h(FilterPanel, { model: model.value, classNames: names.value })
-        : null;
-  },
+  setup: useShadcnFilterPanel,
 });
 const ChipsFeatureControl = defineComponent(
   (props: ActiveFilterChipsSlotProps) => {
