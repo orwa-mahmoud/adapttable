@@ -800,7 +800,7 @@ export function tableConformanceTests(
           ...container.querySelectorAll<HTMLElement>("[data-flash]"),
         ];
         expect(marked).toHaveLength(1);
-        expect(marked[0]?.getAttribute("data-adapttable-part")).toBe("cell");
+        expect(marked[0]?.dataset.adapttablePart).toBe("cell");
         expect(marked[0]?.textContent?.trim()).toBe("28");
         clock.advance(1000);
         await mounted.refresh?.();
@@ -818,11 +818,15 @@ export function tableConformanceTests(
         searchPlaceholder: "Search names",
       },
       (container) => {
-        const placeholders = [
-          ...container.querySelectorAll<HTMLInputElement>("input[placeholder]"),
-        ].map((input) => input.placeholder);
-        expect(placeholders.includes("Search names")).toBe(true);
-        expect(placeholders.includes("From labels")).toBe(false);
+        const placeholders = new Set(
+          [
+            ...container.querySelectorAll<HTMLInputElement>(
+              "input[placeholder]"
+            ),
+          ].map((input) => input.placeholder)
+        );
+        expect(placeholders.has("Search names")).toBe(true);
+        expect(placeholders.has("From labels")).toBe(false);
       }
     ));
 
