@@ -212,7 +212,7 @@
           [ngTemplateOutletContext]="
             rowBox(
               headerBand,
-              last ? 'header-row' : 'header-group-row',
+              last ? rowParts.header : rowParts.headerGroup,
               last ? v.table.headerRowAttrs() : noAttrs
             )
           "
@@ -245,7 +245,7 @@
         [ngTemplateOutletInjector]="slotInjector()"
         [ngTemplateOutlet]="kit.row"
         [ngTemplateOutletContext]="
-          rowBox(plainHead, 'header-row', v.table.headerRowAttrs())
+          rowBox(plainHead, rowParts.header, v.table.headerRowAttrs())
         "
       />
     }
@@ -494,7 +494,7 @@
                 [ngTemplateOutletInjector]="slotInjector()"
                 [ngTemplateOutlet]="kit.row"
                 [ngTemplateOutletContext]="
-                  rowBox(detailRow, 'detail-row', entry.detailAttrs)
+                  rowBox(detailRow, rowParts.detail, entry.detailAttrs)
                 "
               />
             }

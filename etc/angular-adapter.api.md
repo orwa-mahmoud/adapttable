@@ -2334,7 +2334,7 @@ export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
     };
     readonly embedded: InputSignal<boolean>;
     readonly railMin: InputSignal<number>;
-    protected railOffset(part: "expand" | "reorder" | "selection"): string;
+    protected railOffset(rail: RailPart): string;
     protected railStyle(selection: boolean, offset: string, header: boolean): string;
     protected rowBox(content: TemplateRef<unknown>, part: string | null, attrs: Attrs, wiring?: {
         readonly inert?: boolean;
@@ -2351,6 +2351,11 @@ export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
         drop: string | null;
         onDragOver: ((event: DragEvent) => void) | null;
         onDrop: ((event: DragEvent) => void) | null;
+    };
+    protected readonly rowParts: {
+        readonly header: "header-row";
+        readonly headerGroup: "header-group-row";
+        readonly detail: "detail-row";
     };
     readonly selectionRail: InputSignal<string | null>;
     protected shiftedPin(attrs: Attrs): Attrs;
@@ -6192,6 +6197,9 @@ export { pinnedRowSticky }
 export { pinnedSummaryPart }
 
 export { printToolbarProps }
+
+// @public (undocumented)
+type RailPart = "expand" | "reorder" | "selection";
 
 export { readMultiDraft }
 

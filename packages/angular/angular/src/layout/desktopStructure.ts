@@ -40,6 +40,13 @@ import { type BodyRow } from "./tableSurfaceHost";
 
 type RailPart = "expand" | "reorder" | "selection";
 
+/** The row parts this structure writes, named once for its template. */
+const STRUCTURE_ROW_PARTS = {
+  header: "header-row",
+  headerGroup: "header-group-row",
+  detail: "detail-row",
+} as const;
+
 /** Writes the measured rail widths onto the table, without another render. */
 function publishRailLead(element: HTMLElement): void {
   const row = element.closest("tr");
@@ -168,6 +175,8 @@ export interface AdaptDesktopSlots {
   host: { style: "display: contents" },
 })
 export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
+  /** The row parts the template writes. */
+  protected readonly rowParts = STRUCTURE_ROW_PARTS;
   /** The kit's table elements and controls. */
   readonly slots = input.required<AdaptDesktopSlots>();
   /**
@@ -290,8 +299,8 @@ export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
   }
 
   /** Where a leading rail sticks once a data column is pinned to the start. */
-  protected railOffset(part: "expand" | "reorder" | "selection"): string {
-    return `var(--at-offset-${part}, 0px)`;
+  protected railOffset(rail: RailPart): string {
+    return `var(--at-offset-${rail}, 0px)`;
   }
 
   /** The style of a leading rail cell. Selection adds the kit's padding. */
