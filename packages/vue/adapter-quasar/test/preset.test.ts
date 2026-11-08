@@ -51,15 +51,15 @@ describe("standard features", () => {
       { global: { plugins: [Quasar] }, attachTo: document.body }
     );
     await nextTick();
-    for (const part of [
+    const missing = [
       "column-menu-button",
       "density-toggle",
       "export-csv-button",
-      "status-bar",
-    ])
-      expect(wrapper.find(`[data-adapttable-part="${part}"]`).exists()).toBe(
-        true
-      );
+      "footer",
+    ].filter(
+      (part) => !wrapper.find(`[data-adapttable-part="${part}"]`).exists()
+    );
+    expect(missing).toEqual([]);
     wrapper.unmount();
   });
 });
