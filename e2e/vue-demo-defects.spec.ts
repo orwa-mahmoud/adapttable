@@ -6,11 +6,12 @@ import { builtAdapters } from "../apps/showcase/matrix.mjs";
 async function openKit(
   page: Page,
   kit: string,
-  query: Record<string, string>
+  query: Record<string, string>,
+  route = "vue-main"
 ): Promise<void> {
   const search = new URLSearchParams({ kit, editing: "off", ...query });
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto(`/vue-main/?${search.toString()}`);
+  await page.goto(`/${route}/?${search.toString()}`);
 }
 
 async function rowHeight(
@@ -36,7 +37,8 @@ for (const kit of builtAdapters("vue")) {
   test(`${kit.key}: the status bar stays in the card and skips the footer count`, async ({
     page,
   }) => {
-    await openKit(page, kit.key, { selection: "on" });
+    // The live demo mounts no status bar, like React's; the lab page does.
+    await openKit(page, kit.key, { selection: "on" }, "vue-all-options");
     const root = page.locator('.mx-demo [data-adapttable-part="root"]');
     const footer = root.locator('[data-adapttable-part="footer"]');
     await expect(footer).toContainText("Showing");
