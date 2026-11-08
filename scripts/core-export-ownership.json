@@ -14736,6 +14736,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "isRecord",
+      "kind": "runtime",
+      "module": "utils/isRecord.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "utils/isRecord.ts#isRecord",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "isSelectedCell",
       "kind": "runtime",
       "module": "style/cellDisplay.ts",

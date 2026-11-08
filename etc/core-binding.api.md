@@ -4224,6 +4224,9 @@ export function isExtraEntry(entry: object): entry is ExtraEntry;
 export function isMatchedCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
 
 // @public
+export function isRecord(value: unknown): value is Record<string, unknown>;
+
+// @public
 export function isSelectedCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
 
 // @public

@@ -7810,7 +7810,8 @@
       "retainItems",
       "rowMoveMenuProps",
       "RowMoveMenuSource",
-      "sameItems"
+      "sameItems",
+      "isRecord"
     ],
     "core-conformance": [
       "CONFORMANCE_COLUMNS",

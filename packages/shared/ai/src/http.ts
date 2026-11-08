@@ -5,6 +5,8 @@
  * capability manifest to a developer-owned endpoint and executes the
  * returned actions through the existing session. No model SDK.
  */
+import { isRecord } from "@adapttable/core/binding";
+
 import type { AssistantTransport } from "./assistantContracts";
 import type { AssistantReceiptSubject } from "./assistantReceipts";
 import { subjectFor } from "./assistantSubjects";
@@ -559,10 +561,6 @@ function jsonBytes(value: unknown): number {
 
 function requestBytes(body: AgentHttpRequest): number {
   return jsonBytes(body);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function asString(value: unknown): string | undefined {

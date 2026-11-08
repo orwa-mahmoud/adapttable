@@ -1007,6 +1007,7 @@ export {
   resolveColumnHeaders,
 } from "./columns/resolveColumns";
 export { sameRows } from "./engine/sameRows";
+export { isRecord } from "./utils/isRecord";
 export { retainItems, sameItems } from "./utils/sameItems";
 
 // Shared state shapes the bindings return from their hooks.

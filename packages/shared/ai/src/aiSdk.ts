@@ -54,6 +54,7 @@
  * @packageDocumentation
  */
 import type { ApprovalPresentation } from "@adapttable/core";
+import { isRecord } from "@adapttable/core/binding";
 
 import type {
   AssistantTransport,
@@ -318,10 +319,6 @@ function callKey(
   toolCallId: string
 ): string {
   return `ai-sdk:${JSON.stringify({ tableId, step, streamStep, toolCallId })}`;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /** The rows an approval request enumerated, kept only where addressable. */

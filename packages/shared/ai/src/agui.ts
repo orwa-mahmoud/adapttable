@@ -58,6 +58,7 @@
  * @packageDocumentation
  */
 import type { ApprovalPresentation } from "@adapttable/core";
+import { isRecord } from "@adapttable/core/binding";
 
 import type {
   AssistantAnswer,
@@ -269,10 +270,6 @@ function pointerSegment(key: string): string {
   return key.replaceAll("~", "~0").replaceAll("/", "~1");
 }
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 /**
  * An RFC 6902 patch between two state documents.
  *
@@ -285,7 +282,7 @@ export function statePatch(
   next: unknown,
   base = ""
 ): readonly JsonPatchOperation[] {
-  if (!isPlainObject(previous) || !isPlainObject(next)) {
+  if (!isRecord(previous) || !isRecord(next)) {
     if (sameValue(previous, next)) return [];
     return [{ op: "replace", path: base, value: next }];
   }
@@ -423,11 +420,11 @@ function parseArgs(text: string): unknown {
  * settles nothing.
  */
 function proposalsOf(payload: unknown): readonly WriteProposal[] | undefined {
-  if (!isPlainObject(payload)) return undefined;
+  if (!isRecord(payload)) return undefined;
   const proposals = payload.proposals;
   if (!Array.isArray(proposals)) return undefined;
   const rows = proposals.flatMap((entry): WriteProposal[] => {
-    if (!isPlainObject(entry) || typeof entry.rowKey !== "string") return [];
+    if (!isRecord(entry) || typeof entry.rowKey !== "string") return [];
     return [
       {
         rowKey: entry.rowKey,
@@ -452,7 +449,7 @@ function approvalSubject(
   interrupt: AgUiInterrupt,
   presentation: ApprovalPresentation
 ): ApprovalSubject {
-  const payload = isPlainObject(interrupt.payload) ? interrupt.payload : {};
+  const payload = isRecord(interrupt.payload) ? interrupt.payload : {};
   const proposals = proposalsOf(payload);
   if (proposals) {
     return {
@@ -481,7 +478,7 @@ function approvalSubject(
 
 /** The question an `input_required` interrupt is asking. */
 function questionOf(interrupt: AgUiInterrupt): AssistantQuestion {
-  const payload = isPlainObject(interrupt.payload) ? interrupt.payload : {};
+  const payload = isRecord(interrupt.payload) ? interrupt.payload : {};
   const question =
     typeof payload.question === "string" ? payload.question : undefined;
   if (!question) {
@@ -491,7 +488,7 @@ function questionOf(interrupt: AgUiInterrupt): AssistantQuestion {
     );
   }
   const options = Array.isArray(payload.options)
-    ? payload.options.filter(isPlainObject).flatMap((option) => {
+    ? payload.options.filter(isRecord).flatMap((option) => {
         const id = option.id;
         const label = option.label;
         if (typeof id !== "string" || typeof label !== "string") return [];
@@ -551,7 +548,7 @@ function unresolvedTurn(
  * list beside a message about work nobody can identify.
  */
 function interruptCapability(interrupt: AgUiInterrupt): readonly string[] {
-  if (!isPlainObject(interrupt.payload)) return [];
+  if (!isRecord(interrupt.payload)) return [];
   const capability = interrupt.payload.capability;
   return typeof capability === "string" && capability !== ""
     ? [capability]

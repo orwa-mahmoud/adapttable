@@ -25,6 +25,10 @@
       "owner": "packages/shared/core/src/source/frontendRowModel.ts"
     },
     {
+      "name": "isRecord",
+      "owner": "packages/shared/core/src/utils/isRecord.ts"
+    },
+    {
       "name": "primitiveText",
       "owner": "packages/shared/core/src/columns/resolveColumns.ts"
     },

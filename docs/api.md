@@ -1135,7 +1135,8 @@ defaults, `columnPathText` for a data-path value as cell text, and
 `sameItems` — whether two lists hold the same items by identity, so a table
 engine does not rebuild for an inline array (`sameRows` is its deprecated
 row-named form) — with `retainItems`, which keeps the previous list while its
-items are unchanged. Source refresh shares `sourceViewKey` /
+items are unchanged — and `isRecord`, whether a value is a plain record.
+Source refresh shares `sourceViewKey` /
 `SourceViewKeyInput` and `cachedSnapshot` / `CachedSnapshot`; a composed grouping feature carries its evaluator through
 `withFrontendRowModel` / `frontendRowModelOf`; `virtualItemMeta` copies the
 virtualizer fields a row keeps; and `approvalValueText` /

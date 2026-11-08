@@ -126,6 +126,8 @@ const PORTABLE_TRIO: readonly {
   },
 ];
 
+import { isRecord } from "@adapttable/core/binding";
+
 import { openAiToolNameMap } from "./capabilities/registry";
 
 /**
@@ -345,10 +347,6 @@ function ok(
     idempotencyKey,
     result,
   };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function readKey(args: unknown): string | undefined {

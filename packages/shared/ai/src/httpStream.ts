@@ -20,6 +20,8 @@
  * what providers already emit and what a proxy already understands, not
  * because the protocol needs a format of its own.
  */
+import { isRecord } from "@adapttable/core/binding";
+
 import type {
   AgentHttpQuestion,
   AgentHttpResponse,
@@ -47,10 +49,6 @@ export class AgentStreamError extends Error {
     this.name = "AgentStreamError";
     this.code = code;
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function asKind(value: string): AgentStreamEventKind | undefined {
