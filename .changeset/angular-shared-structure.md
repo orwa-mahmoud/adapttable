@@ -13,4 +13,4 @@
 
 Angular kits draw the desktop table and the phone cards through one structure, `AdaptDesktopStructure` and `AdaptMobileStructure`. Each kit still supplies its own table, rows, cells, cards and controls, and `AdaptDesktopTable` and `AdaptMobileCards` keep the same inputs.
 
-`injectTableSurfaceHost` composes a lean structural table from the features it is given, with `TableSurfaceView` and `editingBundleFor` published; kit tables keep typing their view as `TableView`.
+`injectTableSurfaceHost` composes a lean structural table from the features it is given, with `TableSurfaceView` and `editingBundleFor` published; kit tables keep typing their view as `TableView`. `AdaptHeaderTemplate` and `AdaptHeaderTemplateSlot` let a kit declare its header cell inside its table template.

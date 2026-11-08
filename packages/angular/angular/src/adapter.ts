@@ -261,6 +261,10 @@ export {
   AdaptDesktopStructure,
 } from "./layout/desktopStructure";
 export { AdaptDesktopTableModel } from "./layout/desktopTableModel";
+export {
+  AdaptHeaderTemplate,
+  AdaptHeaderTemplateSlot,
+} from "./layout/headerTemplate";
 export type { KitEnvironment } from "./layout/kitEnvironment";
 export { AdaptMobileCardsModel } from "./layout/mobileCardsModel";
 export {

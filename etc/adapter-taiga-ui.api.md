@@ -10,6 +10,7 @@ import { AdaptColumnMenuModel } from '@adapttable/angular/adapter';
 import { AdaptDataTableShell } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderCardModel } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderRowModel } from '@adapttable/angular/adapter';
+import { AdaptHeaderTemplateSlot } from '@adapttable/angular/adapter';
 import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
 import { AfterViewInit } from '@angular/core';
 import { BodyCellView } from '@adapttable/angular/adapter';
@@ -322,9 +323,7 @@ export class AdaptDensityButton {
 
 // @internal
 export class AdaptDesktopTable<TRow> {
-    // (undocumented)
-    protected headerTemplate: TemplateRef<unknown> | null;
-    holdHeader(template: TemplateRef<unknown>): void;
+    protected readonly header: AdaptHeaderTemplateSlot;
     // (undocumented)
     readonly maxHeight: InputSignal<string | number | undefined>;
     // (undocumented)

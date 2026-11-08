@@ -3402,6 +3402,24 @@ export class AdaptHeaderActions<TRow> {
 }
 
 // @public
+export class AdaptHeaderTemplate {
+    constructor();
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptHeaderTemplate, "ng-template[adaptHeaderTemplate]", never, {}, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptHeaderTemplate, never>;
+}
+
+// @public
+export class AdaptHeaderTemplateSlot {
+    template: TemplateRef<unknown> | null;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptHeaderTemplateSlot, never>;
+    // (undocumented)
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
+}
+
+// @public
 export class AdaptIcon {
     readonly adaptIcon: InputSignal<IconDescriptor>;
     // (undocumented)

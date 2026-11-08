@@ -3262,7 +3262,9 @@ header, row, field and custom-renderer plans while each kit renders its native
 table or cards. `AdaptGroupHeaderRowModel` and `AdaptGroupHeaderCardModel`
 provide group captions, aggregates and expansion props. `AdaptDesktopStructure`
 and `AdaptMobileStructure` draw the shared desktop table and card list from a
-kit's `AdaptDesktopSlots` / `AdaptMobileSlots` templates.
+kit's `AdaptDesktopSlots` / `AdaptMobileSlots` templates. A kit that declares its header-cell template inside
+its table template marks it with `AdaptHeaderTemplate` and reads it from an
+`AdaptHeaderTemplateSlot` it provides.
 `ADAPTTABLE_KIT_MOTION_OFF` is the token a kit provides when its UI library
 turns motion off, and `mountForcedColorsStyles` installs the shared
 high-contrast stylesheet.

@@ -2,16 +2,16 @@ import {
   AdaptAttrs,
   AdaptDesktopStructure,
   AdaptHeader,
+  AdaptHeaderTemplate,
+  AdaptHeaderTemplateSlot,
   type TableView,
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
-  Directive,
   inject,
   input,
-  TemplateRef,
   viewChild,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
@@ -19,14 +19,6 @@ import { MatButtonModule } from "@angular/material/button";
 import { AdaptColumnHeaderRename } from "./columnHeaderRename";
 import { AdaptRowActions } from "./rowActionButtons";
 import { AdaptSelectionCheckbox } from "./selectionCheckbox";
-
-/** The header cell lives inside the table so the cell and the table are one tree. */
-@Directive({ selector: "ng-template[adaptHeaderTemplate]" })
-class AdaptHeaderTemplate {
-  constructor() {
-    inject(AdaptDesktopTable).holdHeader(inject(TemplateRef));
-  }
-}
 
 /**
  * The desktop table body. Layout, rows and part names come from
@@ -36,6 +28,7 @@ class AdaptHeaderTemplate {
  */
 @Component({
   selector: "adapt-desktop-table",
+  providers: [AdaptHeaderTemplateSlot],
   imports: [
     AdaptAttrs,
     AdaptColumnHeaderRename,
@@ -56,12 +49,8 @@ export class AdaptDesktopTable<TRow> {
   readonly rowKey = input.required<(row: TRow) => string>();
   readonly maxHeight = input<number | string>();
   private readonly structure = viewChild(AdaptDesktopStructure);
-  protected headerTemplate: TemplateRef<unknown> | null = null;
-
-  /** The table view registers the header cell before the structure draws it. */
-  holdHeader(template: TemplateRef<unknown>): void {
-    this.headerTemplate = template;
-  }
+  /** The header-cell template the table view registers. */
+  protected readonly header = inject(AdaptHeaderTemplateSlot);
 
   /** The scroll box the shell virtualizes against. */
   scrollElement(): HTMLElement | null {

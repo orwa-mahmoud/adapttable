@@ -12814,7 +12814,9 @@
       "TableAssistantAvatars",
       "TableAssistantNode",
       "TableAssistantProps",
-      "TableQueryHandler"
+      "TableQueryHandler",
+      "AdaptHeaderTemplate",
+      "AdaptHeaderTemplateSlot"
     ],
     "adapter-element-plus-batch-editing": [
       "batchEditing",
