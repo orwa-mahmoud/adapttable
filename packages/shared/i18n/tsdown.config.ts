@@ -1,7 +1,7 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/load.ts"],
   format: ["esm", "cjs"],
   // The published declarations come from `src` alone. The package's own
   // tsconfig also covers its vitest and tsdown configs so typecheck sees

@@ -1,5 +1,5 @@
 import { ConfigProvider } from "reka-ui";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, createSSRApp, h, nextTick, type VNode } from "vue";
 import { renderToString } from "vue/server-renderer";
 
@@ -52,16 +52,18 @@ function mount(vnode: VNode): HTMLElement {
 }
 
 describe("Reka UI library environment", () => {
-  it("follows an Arabic right-to-left provider on the server and in the browser", async () => {
+  it("follows an Arabic right-to-left provider: direction on the server, labels once loaded", async () => {
     const rendered = await html(provider({ dir: "rtl", locale: "ar" }));
     expect(rendered).toContain('dir="rtl"');
-    expect(rendered).toContain("صفوف لكل صفحة");
+    expect(rendered).toContain("Rows per page");
     const host = mount(provider({ dir: "rtl", locale: "ar" }));
     await nextTick();
     expect(
       host.querySelector('[data-adapttable-part="root"]')?.getAttribute("dir")
     ).toBe("rtl");
-    expect(host.textContent).toContain("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(host.textContent).toContain("صفوف لكل صفحة");
+    });
   });
 
   it("lets an explicit dir and labels win", async () => {

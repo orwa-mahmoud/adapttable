@@ -1,5 +1,4 @@
-import { getLabels, hasLocale } from "@adapttable/i18n";
-import type { KitEnvironment } from "@adapttable/vue/adapter";
+import { type KitEnvironment, useLocaleLabels } from "@adapttable/vue/adapter";
 import { injectConfigProviderContext } from "reka-ui";
 import { computed, type ComputedRef } from "vue";
 
@@ -9,13 +8,6 @@ import { computed, type ComputedRef } from "vue";
  * injection itself can: no provider returns this object.
  */
 const ABSENT = {};
-
-function labelsForLocale(
-  locale: string
-): ReturnType<typeof getLabels> | undefined {
-  if (!hasLocale(locale)) return undefined;
-  return getLabels(locale);
-}
 
 /**
  * Reka UI config provider.
@@ -28,15 +20,16 @@ function labelsForLocale(
  */
 export function useRekaLibrary(): ComputedRef<KitEnvironment> {
   const context = injectConfigProviderContext(ABSENT);
-  return computed(() => {
-    if (context === ABSENT) return {};
-    const locale = context.locale?.value;
-    const tag =
-      typeof locale === "string" && locale !== "" ? locale : undefined;
-    return {
-      dir: context.dir?.value,
-      locale: tag,
-      labels: tag === undefined ? undefined : labelsForLocale(tag),
-    };
-  });
+  return useLocaleLabels(
+    computed(() => {
+      if (context === ABSENT) return {};
+      const locale = context.locale?.value;
+      const tag =
+        typeof locale === "string" && locale !== "" ? locale : undefined;
+      return {
+        dir: context.dir?.value,
+        locale: tag,
+      };
+    })
+  );
 }

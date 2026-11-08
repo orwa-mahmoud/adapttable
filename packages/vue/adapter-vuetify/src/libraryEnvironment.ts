@@ -1,5 +1,4 @@
-import { getLabels, hasLocale } from "@adapttable/i18n";
-import type { KitEnvironment } from "@adapttable/vue/adapter";
+import { type KitEnvironment, useLocaleLabels } from "@adapttable/vue/adapter";
 import { computed, type ComputedRef, inject, type Ref } from "vue";
 import { useLocale } from "vuetify/framework";
 
@@ -13,13 +12,6 @@ const DEFAULTS = Symbol.for("vuetify:defaults");
 
 interface VuetifyDefaults {
   readonly global?: { readonly density?: string };
-}
-
-function labelsForLocale(
-  locale: string
-): ReturnType<typeof getLabels> | undefined {
-  if (!hasLocale(locale)) return undefined;
-  return getLabels(locale);
 }
 
 function densityFor(value: string | undefined): KitEnvironment["density"] {
@@ -42,20 +34,21 @@ export function useVuetifyLibrary(): ComputedRef<KitEnvironment> {
     DEFAULTS,
     undefined
   );
-  return computed(() => {
-    const current = locale.current.value;
-    const rtl = locale.isRtl.value === true;
-    const tag =
-      typeof current === "string" && current !== ""
-        ? (LOCALE_TAGS[current] ?? current)
-        : undefined;
-    const density = densityFor(defaults?.value?.global?.density);
-    if (tag === undefined || (tag === "en" && !rtl)) return { density };
-    return {
-      dir: rtl ? "rtl" : "ltr",
-      locale: tag,
-      labels: labelsForLocale(tag),
-      density,
-    };
-  });
+  return useLocaleLabels(
+    computed(() => {
+      const current = locale.current.value;
+      const rtl = locale.isRtl.value === true;
+      const tag =
+        typeof current === "string" && current !== ""
+          ? (LOCALE_TAGS[current] ?? current)
+          : undefined;
+      const density = densityFor(defaults?.value?.global?.density);
+      if (tag === undefined || (tag === "en" && !rtl)) return { density };
+      return {
+        dir: rtl ? "rtl" : "ltr",
+        locale: tag,
+        density,
+      };
+    })
+  );
 }

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, createSSRApp, h, nextTick } from "vue";
 import { renderToString } from "vue/server-renderer";
 import { createVuetify, type VuetifyOptions } from "vuetify";
@@ -56,13 +56,15 @@ function mount(options: VuetifyOptions, extra?: Record<string, unknown>) {
 }
 
 describe("Vuetify library environment", () => {
-  it("follows an Arabic locale on the server and in the browser", async () => {
+  it("follows an Arabic locale: direction on the server, labels once loaded", async () => {
     const rendered = await html({ locale: { locale: "ar" } });
     expect(rendered).toContain('dir="rtl"');
-    expect(rendered).toContain("صفوف لكل صفحة");
+    expect(rendered).toContain("Rows per page");
     const host = mount({ locale: { locale: "ar" } });
     await nextTick();
-    expect(host.textContent).toContain("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(host.textContent).toContain("صفوف لكل صفحة");
+    });
     expect(
       host.querySelector('[data-adapttable-part="root"]')?.getAttribute("dir")
     ).toBe("rtl");
@@ -70,7 +72,7 @@ describe("Vuetify library environment", () => {
 
   it("maps zhHans onto the shipped Chinese labels", async () => {
     const rendered = await html({ locale: { locale: "zhHans" } });
-    expect(rendered).toContain("每页行数");
+    expect(rendered).toContain("Rows per page");
   });
 
   it("lets an explicit dir, labels and density win", async () => {

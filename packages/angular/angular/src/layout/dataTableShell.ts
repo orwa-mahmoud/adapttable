@@ -134,6 +134,7 @@ import {
   undoRedoToolbarProps,
 } from "@adapttable/core/binding";
 import { asBatchGesture } from "@adapttable/core/editing";
+import { loadLabels } from "@adapttable/i18n/load";
 import {
   afterRenderEffect,
   computed,
@@ -862,6 +863,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
   /** Skips a repeat entrance when the row count and layout have not changed. */
   private staggerGeneration = "";
+  /** Labels for the kit library's locale, once loaded. */
+  private readonly libraryLabels = signal<
+    | { readonly locale: string; readonly labels: TableLabels | undefined }
+    | undefined
+  >(undefined);
 
   /** Ctrl/Cmd+X and the menu's Cut, after the clipboard write succeeds. */
   private cutSelection(range: CellRange): void {
@@ -925,6 +931,21 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
 
   constructor() {
     mountForcedColorsStyles();
+    // Only the library locale's language is fetched, and only when neither
+    // the kit nor the host supplies labels.
+    effect((onCleanup) => {
+      const kit = this.kitEnvironment();
+      if (kit.labels !== undefined || this.labels() !== undefined) return;
+      const locale = kit.locale;
+      if (locale === undefined) return;
+      let current = true;
+      onCleanup(() => {
+        current = false;
+      });
+      void loadLabels(locale).then((labels) => {
+        if (current) this.libraryLabels.set({ locale, labels });
+      });
+    });
     afterRenderEffect(() => {
       const current = this.view();
       const rows = current?.table.source().rows.length ?? 0;
@@ -1004,7 +1025,13 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   ): void {
     const labels = computed((): TableLabels | undefined => {
       const placeholder = this.searchPlaceholder();
-      const kit = this.kitEnvironment().labels;
+      const environment = this.kitEnvironment();
+      const loaded = this.libraryLabels();
+      const kit =
+        environment.labels ??
+        (loaded !== undefined && loaded.locale === environment.locale
+          ? loaded.labels
+          : undefined);
       const own = this.labels();
       const merged =
         own === undefined && kit === undefined ? undefined : { ...kit, ...own };

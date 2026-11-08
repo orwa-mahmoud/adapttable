@@ -80,13 +80,15 @@ describe("Ant Design library settings", () => {
     expect(rootDir(container)).toBe("ltr");
   });
 
-  it("uses Arabic labels when the ConfigProvider locale is Arabic", () => {
+  it("uses Arabic labels when the ConfigProvider locale is Arabic", async () => {
     const { container } = render(
       <ConfigProvider locale={arEG}>
         <Harness />
       </ConfigProvider>
     );
-    expect(container).toHaveTextContent("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(container).toHaveTextContent("صفوف لكل صفحة");
+    });
   });
 
   it("keeps the current labels when i18n has no preset for the locale", () => {

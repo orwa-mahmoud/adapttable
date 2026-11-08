@@ -1,5 +1,4 @@
-import { getLabels, hasLocale } from "@adapttable/i18n";
-import type { KitEnvironment } from "@adapttable/vue/adapter";
+import { type KitEnvironment, useLocaleLabels } from "@adapttable/vue/adapter";
 import { useQuasar } from "quasar";
 import { computed, type ComputedRef } from "vue";
 
@@ -12,13 +11,6 @@ declare module "quasar" {
 
 const DEFAULT_ISO = "en-US";
 
-function labelsForLocale(
-  locale: string
-): ReturnType<typeof getLabels> | undefined {
-  if (!hasLocale(locale)) return undefined;
-  return getLabels(locale);
-}
-
 /**
  * Quasar language pack.
  *
@@ -29,14 +21,15 @@ function labelsForLocale(
  */
 export function useQuasarLibrary(): ComputedRef<KitEnvironment> {
   const quasar = useQuasar();
-  return computed(() => {
-    const iso = quasar.lang.isoName;
-    const rtl = quasar.lang.rtl === true;
-    if (iso === DEFAULT_ISO && !rtl) return {};
-    return {
-      dir: rtl ? "rtl" : "ltr",
-      locale: iso,
-      labels: labelsForLocale(iso),
-    };
-  });
+  return useLocaleLabels(
+    computed(() => {
+      const iso = quasar.lang.isoName;
+      const rtl = quasar.lang.rtl === true;
+      if (iso === DEFAULT_ISO && !rtl) return {};
+      return {
+        dir: rtl ? "rtl" : "ltr",
+        locale: iso,
+      };
+    })
+  );
 }

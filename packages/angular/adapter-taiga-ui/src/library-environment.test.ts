@@ -93,13 +93,17 @@ describe("Taiga UI library environment", () => {
     expect(text).not.toContain("Zeilen pro Seite");
   });
 
-  it("follows a German language and an Arabic one", () => {
+  it("follows a German language and an Arabic one", async () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: TUI_LANGUAGE, useValue: signal(TUI_GERMAN_LANGUAGE) },
       ],
     });
-    expect(textOf(TableHost)).toContain("Zeilen pro Seite");
+    const german = TestBed.createComponent(TableHost);
+    german.autoDetectChanges();
+    await vi.waitFor(() => {
+      expect(german.nativeElement.textContent).toContain("Zeilen pro Seite");
+    });
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -108,7 +112,9 @@ describe("Taiga UI library environment", () => {
     });
     const arabic = TestBed.createComponent(TableHost);
     arabic.autoDetectChanges();
-    expect(arabic.nativeElement.textContent).toContain("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(arabic.nativeElement.textContent).toContain("صفوف لكل صفحة");
+    });
     expect(
       arabic.nativeElement
         .querySelector('[data-adapttable-part="root"]')

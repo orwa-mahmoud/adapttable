@@ -32,6 +32,7 @@ import {
   TableStatusAnnouncer,
   useDataTableShell,
   useFeatureState,
+  useLocaleLabels,
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
@@ -523,11 +524,14 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const kit = useChakraLibrary();
+  const libraryLabels = useLocaleLabels(
+    incoming.labels === undefined ? kit.locale : undefined
+  );
   const props = useTableFeatures(
     withKitEnvironment(incoming, {
       dir: kit.dir,
       locale: kit.locale,
-      labels: kit.labels,
+      labels: libraryLabels,
     })
   );
   return (

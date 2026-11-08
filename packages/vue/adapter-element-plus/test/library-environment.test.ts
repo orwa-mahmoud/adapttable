@@ -5,7 +5,7 @@ import {
 } from "element-plus";
 import ar from "element-plus/es/locale/lang/ar";
 import sv from "element-plus/es/locale/lang/sv";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, h, nextTick, type VNode } from "vue";
 import { renderToString } from "vue/server-renderer";
 
@@ -47,12 +47,14 @@ async function html(vnode: VNode): Promise<string> {
 }
 
 describe("Element Plus library environment", () => {
-  it("follows an Arabic locale on the server and in the browser", async () => {
+  it("follows an Arabic locale: direction on the server, labels once loaded", async () => {
     const rendered = await html(provider({ locale: ar }));
-    expect(rendered).toContain("صفوف لكل صفحة");
+    expect(rendered).toContain("Rows per page");
     const view = mount(() => provider({ locale: ar }));
     await nextTick();
-    expect(view.root.textContent).toContain("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(view.root.textContent).toContain("صفوف لكل صفحة");
+    });
   });
 
   it("lets an explicit dir and labels win", async () => {

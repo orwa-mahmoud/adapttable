@@ -1,5 +1,4 @@
-import { getLabels, hasLocale } from "@adapttable/i18n";
-import type { KitEnvironment } from "@adapttable/vue/adapter";
+import { type KitEnvironment, useLocaleLabels } from "@adapttable/vue/adapter";
 import { computed, type ComputedRef, inject, type Ref } from "vue";
 
 /**
@@ -14,13 +13,6 @@ interface NaiveConfig {
   readonly mergedComponentPropsRef: Ref<
     { readonly DataTable?: { readonly size?: string } } | undefined
   >;
-}
-
-function labelsForLocale(
-  locale: string
-): ReturnType<typeof getLabels> | undefined {
-  if (!hasLocale(locale)) return undefined;
-  return getLabels(locale);
 }
 
 function densityFor(size: string | undefined): KitEnvironment["density"] {
@@ -41,16 +33,18 @@ function densityFor(size: string | undefined): KitEnvironment["density"] {
  */
 export function useNaiveLibrary(): ComputedRef<KitEnvironment> {
   const config = inject<NaiveConfig | null>(NAIVE_CONFIG, null);
-  return computed(() => {
-    const rtl = config?.mergedRtlRef.value;
-    const name = config?.mergedLocaleRef.value?.name;
-    const locale = typeof name === "string" && name !== "" ? name : undefined;
-    const size = config?.mergedComponentPropsRef.value?.DataTable?.size;
-    return {
-      dir: rtl !== undefined && Object.keys(rtl).length > 0 ? "rtl" : undefined,
-      locale,
-      labels: locale === undefined ? undefined : labelsForLocale(locale),
-      density: densityFor(size),
-    };
-  });
+  return useLocaleLabels(
+    computed(() => {
+      const rtl = config?.mergedRtlRef.value;
+      const name = config?.mergedLocaleRef.value?.name;
+      const locale = typeof name === "string" && name !== "" ? name : undefined;
+      const size = config?.mergedComponentPropsRef.value?.DataTable?.size;
+      return {
+        dir:
+          rtl !== undefined && Object.keys(rtl).length > 0 ? "rtl" : undefined,
+        locale,
+        density: densityFor(size),
+      };
+    })
+  );
 }

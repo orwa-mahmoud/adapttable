@@ -1,13 +1,5 @@
 import type { KitEnvironment } from "@adapttable/angular/adapter";
-import { getLabels, hasLocale } from "@adapttable/i18n";
 import type { Direction } from "@angular/cdk/bidi";
-
-function labelsForLocale(
-  locale: string
-): ReturnType<typeof getLabels> | undefined {
-  if (!hasLocale(locale)) return undefined;
-  return getLabels(locale);
-}
 
 function densityFor(size: string | undefined): KitEnvironment["density"] {
   if (size === "small") return "compact";
@@ -35,7 +27,6 @@ export function ngZorroLibrary(input: {
   return {
     dir: input.dir,
     locale: tag,
-    labels: tag === undefined ? undefined : labelsForLocale(tag),
     density: densityFor(input.size),
   };
 }

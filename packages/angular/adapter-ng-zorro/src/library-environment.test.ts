@@ -4,7 +4,7 @@ import { Component } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { NZ_CONFIG } from "ng-zorro-antd/core/config";
 import { ar_EG, NZ_I18N, sv_SE, zh_CN } from "ng-zorro-antd/i18n";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
 
@@ -112,7 +112,9 @@ describe("NG-ZORRO library environment", () => {
     const fixture = TestBed.createComponent(TableHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    expect(fixture.nativeElement.textContent).toContain("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(fixture.nativeElement.textContent).toContain("صفوف لكل صفحة");
+    });
   });
 
   it("lets an explicit dir and labels win", async () => {
@@ -134,7 +136,9 @@ describe("NG-ZORRO library environment", () => {
     const chinese = TestBed.createComponent(TableHost);
     chinese.autoDetectChanges();
     await chinese.whenStable();
-    expect(chinese.nativeElement.textContent).toContain("每页行数");
+    await vi.waitFor(() => {
+      expect(chinese.nativeElement.textContent).toContain("每页行数");
+    });
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [{ provide: NZ_I18N, useValue: sv_SE }],

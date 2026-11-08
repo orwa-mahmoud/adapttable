@@ -27,7 +27,6 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@adapttable/i18n": "workspace:*",
     "@adapttable/vue": "0.4.1"
   },
   "peerDependencies": {
@@ -37,7 +36,8 @@
   "devDependencies": {
     "@adapttable/core": "workspace:*",
     "element-plus": "2.14.7",
-    "vue": "^3.5.43"
+    "vue": "^3.5.43",
+    "@adapttable/i18n": "workspace:*"
   },
   "engines": {
     "node": ">=22.12.0"

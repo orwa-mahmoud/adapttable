@@ -488,6 +488,7 @@ export { GroupToggleSpacer } from "./grouping/GroupToggleSpacer";
 export type { GroupCollapseState } from "./grouping/useGroupCollapse";
 export {
   type KitEnvironment,
+  useLocaleLabels,
   withKitEnvironment,
 } from "./hooks/kitEnvironment";
 export {

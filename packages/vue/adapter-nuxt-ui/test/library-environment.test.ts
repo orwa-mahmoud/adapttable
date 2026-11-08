@@ -1,7 +1,7 @@
 import UApp from "@nuxt/ui/components/App.vue";
 import { ar, sv } from "@nuxt/ui/locale";
 import ui from "@nuxt/ui/vue-plugin";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, createSSRApp, h, nextTick, type VNode } from "vue";
 import { renderToString } from "vue/server-renderer";
 
@@ -57,16 +57,18 @@ function mount(vnode: VNode): HTMLElement {
 }
 
 describe("Nuxt UI library environment", () => {
-  it("follows an Arabic locale on the server and in the browser", async () => {
+  it("follows an Arabic locale: direction on the server, labels once loaded", async () => {
     const rendered = await html(provider({ locale: ar }));
     expect(rendered).toContain('dir="rtl"');
-    expect(rendered).toContain("صفوف لكل صفحة");
+    expect(rendered).toContain("Rows per page");
     const host = mount(provider({ locale: ar }));
     await nextTick();
     expect(
       host.querySelector('[data-adapttable-part="root"]')?.getAttribute("dir")
     ).toBe("rtl");
-    expect(host.textContent).toContain("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(host.textContent).toContain("صفوف لكل صفحة");
+    });
   });
 
   it("follows an explicit direction without a locale pack", async () => {

@@ -220,7 +220,6 @@
   "dependencies": {
     "@adapttable/core": "3.13.1",
     "@adapttable/angular": "0.8.1",
-    "@adapttable/i18n": "workspace:*",
     "tslib": "^2.8.1"
   },
   "engines": {

@@ -29,6 +29,7 @@
       "core-stream",
       "core-xlsx",
       "i18n",
+      "i18n-load",
       "server"
     ],
     "angular": [
@@ -4558,7 +4559,6 @@
       "writeSortLevels",
       "writeStoredColumnLayout",
       "xlsxWriter"
-
     ],
     "core-editing": [
       "ActionAiOptions",
@@ -5340,7 +5340,6 @@
       "TEXT_OPS",
       "TotalCountCapability",
       "UseColumnLayoutResult"
-
     ],
     "core-selection": [
       "AllMatchingScope",
@@ -5550,6 +5549,9 @@
       "ur",
       "zh",
       "zhTW"
+    ],
+    "i18n-load": [
+      "loadLabels"
     ],
     "kit/batch-editing": [
       "batchEditing"
@@ -6737,7 +6739,8 @@
       "ViewControlsToolbar",
       "windowedTableAria",
       "withFindMarks",
-      "withKitEnvironment"
+      "withKitEnvironment",
+      "useLocaleLabels"
     ],
     "react-features": [
       "applyTableFeatures",
@@ -7799,7 +7802,6 @@
       "MenuNavigationItem",
       "MenuNavigationKey",
       "TreeShape"
-
     ],
     "core-conformance": [
       "CONFORMANCE_COLUMNS",
@@ -7819,7 +7821,6 @@
       "LifecycleHarness",
       "LifecycleObservation",
       "tableConformanceTests"
-
     ],
     "angular": [
       "BodyCellView",
@@ -8083,7 +8084,6 @@
       "DirtyCellsOptions",
       "DirtyEdits",
       "injectDirtyCells"
-
     ],
     "angular-formula": [
       "AngularFormulaColumnsResult",
@@ -11612,7 +11612,10 @@
       "UseSavedViewsResult",
       "UseTableUrlStateOptions",
       "VuePivotAggProps",
-      "VueRowReorderModel"
+      "VueRowReorderModel",
+      "KitEnvironment",
+      "useLocaleLabels",
+      "withKitEnvironment"
     ],
     "adapter-vue-unstyled": [
       "CellContext",
@@ -12816,7 +12819,6 @@
       "TableAssistantNode",
       "TableAssistantProps",
       "TableQueryHandler"
-
     ],
     "adapter-element-plus-batch-editing": [
       "batchEditing",
@@ -15974,6 +15976,9 @@
     },
     "i18n.api.md": {
       "surface": "i18n"
+    },
+    "i18n-load.api.md": {
+      "surface": "i18n-load"
     },
     "react-adapter.api.md": {
       "surface": "react-adapter"

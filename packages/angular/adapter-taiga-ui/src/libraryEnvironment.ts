@@ -1,5 +1,4 @@
 import type { KitEnvironment } from "@adapttable/angular/adapter";
-import { getLabels, hasLocale } from "@adapttable/i18n";
 import type { TuiLanguageName } from "@taiga-ui/i18n";
 
 /**
@@ -41,10 +40,7 @@ export function taigaLibrary(name: TuiLanguageName): KitEnvironment {
   if (name === "english" || name === "") return {};
   const locale = LOCALE_TAG[name];
   if (locale === undefined) return {};
-  return {
-    locale,
-    labels: hasLocale(locale) ? getLabels(locale) : undefined,
-  };
+  return { locale };
 }
 
 /**

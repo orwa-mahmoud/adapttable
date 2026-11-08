@@ -45,6 +45,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./load": {
+      "import": {
+        "types": "./dist/load.d.ts",
+        "default": "./dist/load.js"
+      },
+      "require": {
+        "types": "./dist/load.d.cts",
+        "default": "./dist/load.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

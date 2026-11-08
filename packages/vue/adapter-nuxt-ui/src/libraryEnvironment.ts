@@ -1,5 +1,4 @@
-import { getLabels, hasLocale } from "@adapttable/i18n";
-import type { KitEnvironment } from "@adapttable/vue/adapter";
+import { type KitEnvironment, useLocaleLabels } from "@adapttable/vue/adapter";
 import { localeContextInjectionKey } from "@nuxt/ui/composables";
 import { computed, type ComputedRef, inject, type Ref, shallowRef } from "vue";
 
@@ -10,13 +9,6 @@ interface NuxtLocale {
 
 /** Keeps a missing `UApp` from warning. An empty app also leaves this unset. */
 const ABSENT = shallowRef<NuxtLocale | undefined>(undefined);
-
-function labelsForLocale(
-  locale: string
-): ReturnType<typeof getLabels> | undefined {
-  if (!hasLocale(locale)) return undefined;
-  return getLabels(locale);
-}
 
 /**
  * Nuxt UI `UApp` locale.
@@ -31,18 +23,19 @@ export function useNuxtLibrary(): ComputedRef<KitEnvironment> {
     localeContextInjectionKey,
     ABSENT as Ref<NuxtLocale | undefined>
   );
-  return computed(() => {
-    const locale = provided.value;
-    if (!locale) return {};
-    const tag =
-      typeof locale.code === "string" && locale.code !== ""
-        ? locale.code
-        : undefined;
-    return {
-      dir:
-        locale.dir === "rtl" || locale.dir === "ltr" ? locale.dir : undefined,
-      locale: tag,
-      labels: tag === undefined ? undefined : labelsForLocale(tag),
-    };
-  });
+  return useLocaleLabels(
+    computed(() => {
+      const locale = provided.value;
+      if (!locale) return {};
+      const tag =
+        typeof locale.code === "string" && locale.code !== ""
+          ? locale.code
+          : undefined;
+      return {
+        dir:
+          locale.dir === "rtl" || locale.dir === "ltr" ? locale.dir : undefined,
+        locale: tag,
+      };
+    })
+  );
 }

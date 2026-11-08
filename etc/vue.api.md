@@ -170,6 +170,7 @@ import { PinnedRows } from '@adapttable/core';
 import { PinnedSummaryEntry } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
+import { primitiveText } from '@adapttable/core/binding';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
@@ -859,8 +860,7 @@ export { PinOffset }
 
 export { PinSide }
 
-// @public (undocumented)
-export function primitiveText(value: unknown): string | null;
+export { primitiveText }
 
 export { QueryCondition }
 
@@ -1686,6 +1686,7 @@ export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+    readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)

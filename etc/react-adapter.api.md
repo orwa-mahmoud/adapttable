@@ -4201,6 +4201,9 @@ export function useKeyedVirtualization(options: {
 }): KeyedVirtualization;
 
 // @public
+export function useLocaleLabels(locale: string | undefined): Required<TableLabels> | undefined;
+
+// @public
 export function useMountStagger(ref: RefObject<HTMLElement | null>, deps: DependencyList, options: MountStaggerOptions): void;
 
 // @public

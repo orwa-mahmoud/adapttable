@@ -7,7 +7,7 @@ import {
 import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
@@ -63,14 +63,16 @@ function rootDir(container: ParentNode): string | null {
 }
 
 describe("Chakra library settings", () => {
-  it("follows an Arabic LocaleProvider on the server and in the browser", () => {
+  it("follows an Arabic LocaleProvider: direction on the server, labels once loaded", async () => {
     const html = renderToString(shell(<Harness />, "ar-EG"));
     expect(html).toContain('dir="rtl"');
-    expect(html).toContain("صفوف لكل صفحة");
+    expect(html).toContain("Rows per page");
 
     const { container } = render(shell(<Harness />, "ar-EG"));
     expect(rootDir(container)).toBe("rtl");
-    expect(container).toHaveTextContent("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(container).toHaveTextContent("صفوف لكل صفحة");
+    });
   });
 
   it("lets an explicit dir and labels win over the provider", () => {

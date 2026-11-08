@@ -1,7 +1,7 @@
 import { Quasar } from "quasar";
 import langAr from "quasar/lang/ar";
 import langSv from "quasar/lang/sv";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp, createSSRApp, h, nextTick } from "vue";
 import { renderToString } from "vue/server-renderer";
 
@@ -60,13 +60,15 @@ function rootDir(host: ParentNode): string | null {
 }
 
 describe("Quasar library environment", () => {
-  it("follows an Arabic language pack on the server and in the browser", async () => {
+  it("follows an Arabic language pack: direction on the server, labels once loaded", async () => {
     const rendered = await html(langAr);
     expect(rendered).toContain('dir="rtl"');
-    expect(rendered).toContain("صفوف لكل صفحة");
+    expect(rendered).toContain("Rows per page");
     const host = mount(langAr);
     await nextTick();
-    expect(host.textContent).toContain("صفوف لكل صفحة");
+    await vi.waitFor(() => {
+      expect(host.textContent).toContain("صفوف لكل صفحة");
+    });
     expect(rootDir(host)).toBe("rtl");
   });
 

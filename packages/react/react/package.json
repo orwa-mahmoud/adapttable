@@ -119,6 +119,7 @@
   },
   "dependencies": {
     "@adapttable/core": "3.13.1",
+    "@adapttable/i18n": "3.3.9",
     "@tanstack/react-virtual": "^3.14.10",
     "react-compiler-runtime": "^1.0.0"
   },

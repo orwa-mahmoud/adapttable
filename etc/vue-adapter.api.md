@@ -1455,6 +1455,7 @@ export interface DataTableHandle<TRow> {
 // @public
 export interface DataTableProps<TRow> {
     readonly aggregates?: readonly QueryAggregate[];
+    readonly animate?: boolean;
     // (undocumented)
     readonly assistant?: TableAssistantProps;
     // (undocumented)
@@ -2778,6 +2779,18 @@ export { isColumnGroupStubKey }
 export { isColumnGroupSummaryKey }
 
 export { isExtraEntry }
+
+// @public
+export interface KitEnvironment {
+    // (undocumented)
+    readonly density?: TableDensity;
+    // (undocumented)
+    readonly dir?: Direction;
+    // (undocumented)
+    readonly labels?: Partial<TableLabels>;
+    // (undocumented)
+    readonly locale?: string;
+}
 
 // @public
 export function managedCommandPaletteSurface(render: (props: ManagedCommandPaletteSurfaceProps) => VNodeChild): CommandPaletteSurfaceSlot;
@@ -4473,6 +4486,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+    readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps_2<VNodeChild>>;
     // (undocumented)
@@ -4631,6 +4645,9 @@ dir: "ltr" | "rtl";
 resetKey: number;
 }>;
 
+// @public
+export function useLocaleLabels(environment: Readonly<Ref<KitEnvironment>>): ComputedRef<KitEnvironment>;
+
 // @public (undocumented)
 export function useMobileCardsModel<TRow>(table: UseDataTableResult<TRow>, desktop: ComputedRef<DesktopTableModel<TRow>>): ComputedRef<MobileCardsModel<TRow>>;
 
@@ -4730,6 +4747,9 @@ export interface VueRowReorderModel<TRow> {
     // (undocumented)
     readonly snapshot: RowReorderSnapshot<TRow>;
 }
+
+// @public
+export function withKitEnvironment<P extends KitEnvironment>(props: Readonly<P>, kit: KitEnvironment): P;
 
 // (No @packageDocumentation comment for this package)
 

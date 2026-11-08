@@ -102,6 +102,7 @@ import {
   useFeatureSlotFilled,
   useFeatureState,
   useFullscreen,
+  useLocaleLabels,
   useMountStagger,
   useOffsetHeight,
   useResolvedAdapter,
@@ -2876,6 +2877,9 @@ function AntdTableBody<TRow>({
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   const kit = useAntdLibrary();
+  const libraryLabels = useLocaleLabels(
+    incoming.labels === undefined ? kit.locale : undefined
+  );
   const sized = {
     ...incoming,
     size:
@@ -2885,7 +2889,7 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     withKitEnvironment(sized, {
       dir: kit.dir,
       locale: kit.locale,
-      labels: kit.labels,
+      labels: libraryLabels,
       density: incoming.size === undefined ? kit.density : undefined,
     })
   );

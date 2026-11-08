@@ -1,4 +1,3 @@
-import { getLabels, hasLocale } from "@adapttable/i18n";
 import type { Density } from "@adapttable/react";
 import { ConfigProvider, theme } from "antd";
 import { useContext } from "react";
@@ -6,18 +5,6 @@ import { useContext } from "react";
 import type { DataTableProps } from "./types";
 
 type AntdSize = NonNullable<DataTableProps<unknown>["size"]>;
-
-/**
- * Chrome labels for a ConfigProvider locale `@adapttable/i18n` knows.
- * An unknown language leaves labels unset so the table keeps its current
- * copy instead of silently switching to English.
- */
-function labelsForLocale(
-  locale: string | undefined
-): ReturnType<typeof getLabels> | undefined {
-  if (locale === undefined || !hasLocale(locale)) return undefined;
-  return getLabels(locale);
-}
 
 function sizeFromConfig(size: string | undefined): {
   size?: AntdSize;
@@ -41,7 +28,6 @@ function sizeFromConfig(size: string | undefined): {
 export function useAntdLibrary(): {
   dir?: "ltr" | "rtl";
   locale?: string;
-  labels?: ReturnType<typeof getLabels>;
   density?: Density;
   size?: AntdSize;
   motionOff: boolean;
@@ -56,7 +42,6 @@ export function useAntdLibrary(): {
   return {
     dir,
     locale: tag,
-    labels: labelsForLocale(tag),
     density: sized.density,
     size: sized.size,
     motionOff: token.motion === false,

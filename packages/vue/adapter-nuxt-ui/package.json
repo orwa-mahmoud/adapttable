@@ -463,7 +463,6 @@
     }
   },
   "dependencies": {
-    "@adapttable/i18n": "workspace:*",
     "@adapttable/vue": "0.4.1"
   },
   "peerDependencies": {

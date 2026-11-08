@@ -862,6 +862,7 @@ export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+    readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
