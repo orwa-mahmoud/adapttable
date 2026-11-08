@@ -788,7 +788,6 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
         className,
         "aria-label": tableProps["aria-label"],
         dir: undefined,
-        "data-adapttable-part": undefined,
         style: undefined,
         tableStyle: tableStyle
           ? { tableLayout: tableStyle.tableLayout, width: tableStyle.width }

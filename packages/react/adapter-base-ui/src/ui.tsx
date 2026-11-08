@@ -454,9 +454,9 @@ export const Table = {
     return (
       <div
         className={cx("adapttable-table-root", className)}
-        data-adapttable-part={role === "grid" ? "grid" : undefined}
         data-size={size}
         {...rest}
+        data-adapttable-part={role === "grid" ? "grid" : undefined}
       >
         <table
           data-adapttable-part="table"
