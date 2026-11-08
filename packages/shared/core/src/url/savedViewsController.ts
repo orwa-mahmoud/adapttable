@@ -21,6 +21,7 @@
  */
 import type { LayoutStorage } from "../state/tableStores";
 import { safeLocalStorage } from "../utils/env";
+import { sameItems } from "../utils/sameItems";
 import { createMemoryAdapter, resolveUrlAdapter } from "./historyAdapter";
 import type { UrlStateAdapter } from "./urlStateAdapter";
 import { applyTableUrlState, captureTableUrlState } from "./urlStateCodec";
@@ -416,11 +417,6 @@ async function writeToStore(
   await accepted(() => store.reorder(order));
 }
 
-/** Whether two lists hold the very same views in the same order. */
-function sameViews(a: readonly SavedView[], b: readonly SavedView[]): boolean {
-  return a.length === b.length && a.every((view, index) => view === b[index]);
-}
-
 /** Whether a view exists and this reader may change it. */
 function isChangeable(view: SavedView | undefined): view is SavedView {
   return view !== undefined && view.readOnly !== true;
@@ -562,7 +558,7 @@ export function createSavedViewsController(
 
   /** Show a loaded list, unless it is the list already shown. */
   const show = (views: readonly SavedView[]): void => {
-    if (sameViews(views, snapshot.views)) return;
+    if (sameItems(views, snapshot.views)) return;
     publish(views);
     notify();
   };

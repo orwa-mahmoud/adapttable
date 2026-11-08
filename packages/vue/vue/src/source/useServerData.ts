@@ -7,6 +7,11 @@ import {
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
+import {
+  type CachedSnapshot,
+  sameItems,
+  sourceViewKey,
+} from "@adapttable/core/binding";
 import { computed, type MaybeRefOrGetter, type ShallowRef, toValue } from "vue";
 
 import {
@@ -24,11 +29,6 @@ import {
   useSourceMode,
   useSourceSnapshot,
 } from "./sourceLifecycle";
-import {
-  type CachedSnapshot,
-  sameIdentity,
-  sourceViewKey,
-} from "./sourceRefresh";
 
 /** Request metadata supplied by the neutral server source. @public */
 export interface TableQueryInfo {
@@ -89,7 +89,8 @@ export function useServerData<TRow>(
     if (active.value) return source.refetch();
   };
   const held = {
-    current: null as (CachedSnapshot<TableSource<TRow>> & { revision: number }) | null,
+    current: null as
+      (CachedSnapshot<TableSource<TRow>> & { revision: number }) | null,
   };
   return useSourceSnapshot(
     (): TableSource<TRow> => {
@@ -123,13 +124,17 @@ export function useServerData<TRow>(
       const viewKey = sourceViewKey(view);
       if (
         previous?.viewKey === viewKey &&
-        sameIdentity(previous.identity, identity)
+        sameItems(previous.identity, identity)
       ) {
         if (previous.revision === revisionValue) return previous.snapshot;
         // A refetch bumps the revision without changing inputs. A new
         // snapshot identity is what asks the post-flush watch to commit.
         const republished = { ...previous.snapshot };
-        held.current = { ...previous, snapshot: republished, revision: revisionValue };
+        held.current = {
+          ...previous,
+          snapshot: republished,
+          revision: revisionValue,
+        };
         return republished;
       }
       const frame = source.update(

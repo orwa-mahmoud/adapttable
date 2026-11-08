@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   type CachedSnapshot,
   cachedSnapshot,
-  sameIdentity,
   sourceViewKey,
   type SourceViewKeyInput,
 } from "./sourceRefresh";
@@ -22,13 +21,6 @@ const view: SourceViewKeyInput = {
 };
 
 describe("source refresh identity", () => {
-  it("compares row arrays by reference and length", () => {
-    const row = { id: "1" };
-    expect(sameIdentity([row], [row])).toBe(true);
-    expect(sameIdentity([row], [{ id: "1" }])).toBe(false);
-    expect(sameIdentity([row], [row, row])).toBe(false);
-  });
-
   it("keeps a missing aggregate override in the key", () => {
     const key = sourceViewKey(view);
     expect(key).toContain('"groupAggregateOverrides":null');

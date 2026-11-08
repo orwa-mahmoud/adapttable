@@ -13,6 +13,7 @@ import type { RowPinSide, RowPinState } from "../rows/rowPinModel";
 import type { HeaderSelectionState } from "../selection/selectionState";
 import { devWarn } from "../utils/devWarn";
 import { memoLast } from "../utils/memoLast";
+import { sameItems } from "../utils/sameItems";
 import { stableKey } from "../utils/stableKey";
 
 /* ── Id sets: selection, expansion, collapsed groups ───────────────── */
@@ -145,20 +146,13 @@ export function applyRowPin(
   return { top, bottom };
 }
 
-function sameIds(left: readonly string[], right: readonly string[]): boolean {
-  return (
-    left.length === right.length &&
-    left.every((id, index) => id === right[index])
-  );
-}
-
 /**
  * Whether two pin states hold the same rows in the same order.
  *
  * @public
  */
 export function sameRowPins(left: RowPinState, right: RowPinState): boolean {
-  return sameIds(left.top, right.top) && sameIds(left.bottom, right.bottom);
+  return sameItems(left.top, right.top) && sameItems(left.bottom, right.bottom);
 }
 
 /**

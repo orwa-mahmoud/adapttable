@@ -39,6 +39,7 @@ import {
   type FeatureHostState,
   type FilterEngine,
   FIND_BAR,
+  retainItems,
   type RuntimeChromeInput,
   STATUS_BAR,
   TABLE_ASSISTANT,
@@ -420,7 +421,7 @@ export function useDataTableShell<TRow>(
             (filters.registry.get(def.type)?.widget ?? def.type) === "checklist"
         )
         .map((def) => def.key);
-      facetKeyList = retainStrings(
+      facetKeyList = retainItems(
         facetKeyList,
         toValue(value.facetKeys) ?? checklistKeys
       );
@@ -1424,19 +1425,6 @@ export function useDataTableShell<TRow>(
       root.value = next?.rootElement?.() ?? null;
     },
   };
-}
-function retainStrings(
-  previous: readonly string[] | undefined,
-  next: readonly string[] | undefined
-): readonly string[] | undefined {
-  if (previous === next) return previous;
-  if (
-    previous?.length === next?.length &&
-    next?.every((item, index) => item === previous?.[index])
-  ) {
-    return previous;
-  }
-  return next;
 }
 
 export type UseDataTableShellResult<TRow> = ReturnType<

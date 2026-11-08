@@ -7,7 +7,7 @@ import {
   devWarn,
   type TableEngine,
 } from "@adapttable/core";
-import { sameRows } from "@adapttable/core/binding";
+import { sameItems } from "@adapttable/core/binding";
 import { createTableEngine, revisionToken } from "@adapttable/core/engine";
 import {
   useDebugValue,
@@ -76,7 +76,7 @@ function syncEngine<TRow>(
   // A fresh array holding the same rows is the same data: adopting it without
   // staging is what keeps an inline `data={[…]}` from re-deriving the whole
   // view — and, now that a commit publishes, from re-rendering forever.
-  const dataChanged = !sameRows(previous.data, options.data);
+  const dataChanged = !sameItems(previous.data, options.data);
   const columnsChanged = !Object.is(previous.columns, options.columns);
 
   const patch: {

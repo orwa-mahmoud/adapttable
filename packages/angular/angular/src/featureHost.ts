@@ -15,6 +15,7 @@ import {
   planFeatureRegistration,
   preferLastById,
   projectFeatureHosts,
+  sameItems,
   type SidePanelEntry,
   type SlotFill,
   slotFillsOf,
@@ -207,9 +208,7 @@ export function featureHostFor(
   own: MaybeSignalOptional<readonly AdaptTableFeature[]> | undefined
 ): Signal<FeatureHostState> {
   const features = computed(() => tableFeaturesOf(injector, readMaybe(own)), {
-    equal: (left, right) =>
-      left.length === right.length &&
-      left.every((feature, index) => feature === right[index]),
+    equal: sameItems,
   });
   interface OwnedSetup {
     readonly feature: AdaptTableFeature & { readonly id: string };

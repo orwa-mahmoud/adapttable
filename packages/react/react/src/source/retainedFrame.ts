@@ -1,5 +1,5 @@
 import { stableKey } from "@adapttable/core";
-import { sameIdentity } from "@adapttable/core/binding";
+import { sameItems } from "@adapttable/core/binding";
 export { sourceViewKey } from "@adapttable/core/binding";
 
 /**
@@ -33,7 +33,7 @@ export function takeRetainedFrame<Frame>(
   if (
     previous?.committed === true &&
     previous.viewKey === viewKey &&
-    sameIdentity(previous.identity, identity)
+    sameItems(previous.identity, identity)
   ) {
     return { frame: previous.frame, skipped: true };
   }

@@ -7,6 +7,7 @@ import {
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
+import { retainItems } from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -90,11 +91,11 @@ export function useTableUrlState(
   let numberExtraKeys: readonly string[] | undefined;
   let arrayExtraKeys: readonly string[] | undefined;
   const config = computed((): TableViewStateConfig => {
-    numberExtraKeys = retainStrings(
+    numberExtraKeys = retainItems(
       numberExtraKeys,
       toValue(options.value.numberExtraKeys)
     );
-    arrayExtraKeys = retainStrings(
+    arrayExtraKeys = retainItems(
       arrayExtraKeys,
       toValue(options.value.arrayExtraKeys)
     );
@@ -161,18 +162,4 @@ export function useTableUrlState(
     clearExtras: (...args) => mutate(() => current.value.clearExtras(...args)),
     clearAll: (...args) => mutate(() => current.value.clearAll(...args)),
   };
-}
-
-function retainStrings(
-  previous: readonly string[] | undefined,
-  next: readonly string[] | undefined
-): readonly string[] | undefined {
-  if (previous === next) return previous;
-  if (
-    previous?.length === next?.length &&
-    next?.every((item, index) => item === previous?.[index])
-  ) {
-    return previous;
-  }
-  return next;
 }

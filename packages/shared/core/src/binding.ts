@@ -883,7 +883,6 @@ export { commitSearchOnBlur } from "./source/searchInputFlush";
 export {
   type CachedSnapshot,
   cachedSnapshot,
-  sameIdentity,
   sourceViewKey,
   type SourceViewKeyInput,
 } from "./source/sourceRefresh";
@@ -1007,6 +1006,7 @@ export {
   resolveColumnHeaders,
 } from "./columns/resolveColumns";
 export { sameRows } from "./engine/sameRows";
+export { retainItems, sameItems } from "./utils/sameItems";
 
 // Shared state shapes the bindings return from their hooks.
 export type { BulkBarState } from "./actions/actionsBindingState";

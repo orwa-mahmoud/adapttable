@@ -12,7 +12,7 @@ import {
   projectGrouping,
   type TableSource,
 } from "@adapttable/core";
-import { type GroupCollapseState } from "@adapttable/core/binding";
+import { type GroupCollapseState, sameItems } from "@adapttable/core/binding";
 import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
 import {
   assertInInjectionContext,
@@ -123,7 +123,7 @@ export function injectGrouping<TRow>(
 
   const groupByKeys = computed(
     () => parseGroupBy(extras.groupBy ?? options.source().groupBy),
-    { equal: sameKeys }
+    { equal: sameItems }
   );
   // Only the fields grouping reads, so a page or a search does not rebuild
   // the grouped model.
@@ -180,14 +180,6 @@ export function injectGrouping<TRow>(
       onGroupLoadMore: extras.onGroupLoadMore,
     });
   });
-}
-
-/** Whether two key lists name the same keys in the same order. */
-function sameKeys(left: readonly string[], right: readonly string[]): boolean {
-  return (
-    left.length === right.length &&
-    left.every((key, index) => key === right[index])
-  );
 }
 
 /** Whether two records hold the same value under every key. */

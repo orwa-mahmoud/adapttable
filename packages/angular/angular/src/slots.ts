@@ -5,7 +5,11 @@ import {
   type SlotComponent,
   type SlotTable,
 } from "@adapttable/angular";
-import { drawnSlotFills, type FeatureSlotKey } from "@adapttable/core/binding";
+import {
+  drawnSlotFills,
+  type FeatureSlotKey,
+  sameItems,
+} from "@adapttable/core/binding";
 import {
   type ComponentRef,
   type DestroyableInjector,
@@ -18,17 +22,6 @@ import {
   untracked,
   ViewContainerRef,
 } from "@angular/core";
-
-/** Whether two draws name the same components in the same order. */
-function sameDraw(
-  left: readonly SlotComponent[],
-  right: readonly SlotComponent[]
-): boolean {
-  return (
-    left.length === right.length &&
-    left.every((component, index) => component === right[index])
-  );
-}
 
 /**
  * Draws what the table's features contribute to one slot, handing each
@@ -76,7 +69,7 @@ export class AdaptSlot<TProps> {
         table.slotFills.get(slot.id) ?? []
       ).map((fill) => (fill.render as (value: TProps) => SlotComponent)(props));
       untracked(() => {
-        if (table !== this.drawnTable || !sameDraw(components, this.drawn)) {
+        if (table !== this.drawnTable || !sameItems(components, this.drawn)) {
           this.container.clear();
           this.slotInjector?.destroy();
           const injector = Injector.create({

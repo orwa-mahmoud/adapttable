@@ -26,6 +26,7 @@
  * panel looks like, whether it is open, and where focus sits are the binding's.
  */
 import type { AgentProgress } from "@adapttable/core";
+import { sameItems } from "@adapttable/core/binding";
 
 import {
   type AssistantAnswer,
@@ -663,10 +664,6 @@ export function createTableAssistant(
     return value;
   };
 
-  /** Whether two remembered sets say the same thing. */
-  const sameKeys = (a: readonly string[], b: readonly string[]): boolean =>
-    a === b || (a.length === b.length && a.every((key, i) => key === b[i]));
-
   /** Whether two undo offers say the same thing. */
   const sameOffer = (
     a: AssistantUndoOffer | null,
@@ -758,7 +755,7 @@ export function createTableAssistant(
     // Built once per list, so an unchanged table hands back the same array
     // rather than an equal one — a snapshot never equal to the last is a
     // render loop in a binding that subscribes.
-    if (namesCache && sameKeys(namesCache.keys, list)) return namesCache.value;
+    if (namesCache && sameItems(namesCache.keys, list)) return namesCache.value;
     const value = list.map((capability) => {
       const name = capabilityName(capability);
       return name === undefined ? { capability } : { capability, name };

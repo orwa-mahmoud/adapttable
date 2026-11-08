@@ -7,6 +7,11 @@ import {
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
+import {
+  type CachedSnapshot,
+  cachedSnapshot,
+  sourceViewKey,
+} from "@adapttable/core/binding";
 import { createBasicTableEngine } from "@adapttable/core/engine";
 import { computed, type MaybeRefOrGetter, type ShallowRef, toValue } from "vue";
 
@@ -24,11 +29,6 @@ import {
   useSourceMode,
   useSourceSnapshot,
 } from "./sourceLifecycle";
-import {
-  type CachedSnapshot,
-  cachedSnapshot,
-  sourceViewKey,
-} from "./sourceRefresh";
 
 /** Inputs for the frontend source. Callback functions are never getters. @public */
 export interface UseFrontendDataOptions<TRow>

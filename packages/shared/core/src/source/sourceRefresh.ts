@@ -9,6 +9,7 @@
 import type { ExtraFilters } from "../contracts/columns";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { SortLevel } from "../sort/compare";
+import { sameItems } from "../utils/sameItems";
 import { stableKey } from "../utils/stableKey";
 import type { QueryFilterGroup } from "./queryContract";
 
@@ -24,18 +25,6 @@ export interface SourceViewKeyInput {
   readonly filterTree: QueryFilterGroup | undefined;
   readonly sortLevels: readonly SortLevel[];
   readonly groupAggregateOverrides: GroupAggregateOverrides | undefined;
-}
-
-/** Reference equality for a source refresh. Row arrays are compared, not scanned. */
-export function sameIdentity(
-  left: readonly unknown[],
-  right: readonly unknown[]
-): boolean {
-  if (left.length !== right.length) return false;
-  for (let index = 0; index < left.length; index += 1) {
-    if (!Object.is(left[index], right[index])) return false;
-  }
-  return true;
 }
 
 /** URL fields a source refresh reads. The state object itself is left out. */
@@ -73,10 +62,7 @@ export function cachedSnapshot<T>(
   refresh: () => T
 ): T {
   const previous = held.current;
-  if (
-    previous?.viewKey === viewKey &&
-    sameIdentity(previous.identity, identity)
-  ) {
+  if (previous?.viewKey === viewKey && sameItems(previous.identity, identity)) {
     return previous.snapshot;
   }
   const snapshot = refresh();

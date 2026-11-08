@@ -17,6 +17,7 @@ import type {
 import { attachIncrementalView } from "../rows/incrementalView";
 import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
 import { sourceCapabilities } from "../source/capabilities";
+import { sameItems } from "../utils/sameItems";
 import { cellValue } from "./cellValue";
 import type {
   CreateTableEngineOptions,
@@ -29,16 +30,6 @@ import type {
 import type { RowModel } from "./rowModelContract";
 import { engineSearchText } from "./searchText";
 
-/** Two lists holding the same items, by item identity. */
-function sameList<T>(a: readonly T[], b: readonly T[]): boolean {
-  if (Object.is(a, b)) return true;
-  if (a.length !== b.length) return false;
-  for (let index = 0; index < a.length; index++) {
-    if (!Object.is(a[index], b[index])) return false;
-  }
-  return true;
-}
-
 /** Two filter bags holding the same values. */
 function sameExtra(a: ExtraFilters, b: ExtraFilters): boolean {
   if (Object.is(a, b)) return true;
@@ -48,7 +39,7 @@ function sameExtra(a: ExtraFilters, b: ExtraFilters): boolean {
     const left = a[key];
     const right = b[key];
     if (Array.isArray(left) && Array.isArray(right)) {
-      return sameList(left, right);
+      return sameItems(left, right);
     }
     return Object.is(left, right);
   });
@@ -68,14 +59,14 @@ function observableAxes<TRow>(
   after: CommittedState<TRow>
 ): TableRevisionAxis[] {
   const axes: TableRevisionAxis[] = [];
-  if (!sameList(before.view.columns, after.view.columns)) axes.push("schema");
+  if (!sameItems(before.view.columns, after.view.columns)) axes.push("schema");
   // `data` is the dataset. What the query makes of it is a view change, so a
   // search or a filter moves `view` and leaves a data-only subscriber alone.
-  if (!sameList(before.view.data, after.view.data)) axes.push("data");
+  if (!sameItems(before.view.data, after.view.data)) axes.push("data");
   const a = before.view;
   const b = after.view;
   if (
-    !sameList(before.derived.sorted, after.derived.sorted) ||
+    !sameItems(before.derived.sorted, after.derived.sorted) ||
     a.page !== b.page ||
     a.limit !== b.limit ||
     a.search !== b.search ||
@@ -84,7 +75,7 @@ function observableAxes<TRow>(
     a.groupBy !== b.groupBy ||
     a.paginationMode !== b.paginationMode ||
     a.locale !== b.locale ||
-    !sameList(a.selectedIds, b.selectedIds) ||
+    !sameItems(a.selectedIds, b.selectedIds) ||
     !sameExtra(a.extra, b.extra)
   ) {
     axes.push("view");
@@ -766,7 +757,7 @@ export function createTableSession<TRow>(
       const beforeSorted = derived.sorted;
       derived = model.reconfigure(derived, configPatch, cleared);
       attachIncrementalView(derived.sorted, derived);
-      if (!committed && !sameList(beforeSorted, derived.sorted)) {
+      if (!committed && !sameItems(beforeSorted, derived.sorted)) {
         publish(["view"]);
       }
     },

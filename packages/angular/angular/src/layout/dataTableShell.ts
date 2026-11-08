@@ -121,6 +121,7 @@ import {
   renderedRowsOf,
   ROW_REORDER_ANNOUNCER,
   type RowMutationsState,
+  sameItems,
   SAVED_VIEWS,
   type SavedViewsSlotProps,
   SEARCH_ICON,
@@ -971,9 +972,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const features = computed(
       () => tableFeaturesOf(this.injector, this.features()),
       {
-        equal: (left, right) =>
-          left.length === right.length &&
-          left.every((feature, index) => feature === right[index]),
+        equal: sameItems,
       }
     );
     const inScrollBox = computed(() => this.maxHeight() != null);
