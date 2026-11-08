@@ -341,6 +341,9 @@ export class AdaptDensityButton {
 // @internal
 export class AdaptDesktopTable<TRow> {
     // (undocumented)
+    protected headerTemplate: TemplateRef<unknown> | null;
+    holdHeader(template: TemplateRef<unknown>): void;
+    // (undocumented)
     readonly maxHeight: InputSignal<string | number | undefined>;
     // (undocumented)
     readonly rowKey: InputSignal<(row: TRow) => string>;

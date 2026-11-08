@@ -19,12 +19,6 @@ import { HlmButton, SpartanSelection } from "../helm/controls";
 import { AdaptColumnHeaderRename } from "./columnHeaderRename";
 import { AdaptRowActions } from "./rowActionButtons";
 
-/**
- * The desktop table body. Layout, rows and part names come from
- * {@link AdaptDesktopStructure}; this kit fills the slots with its own elements.
- *
- * @internal
- */
 /** The header cell lives inside the table so the cell and the table are one tree. */
 @Directive({ selector: "ng-template[adaptHeaderTemplate]" })
 class AdaptHeaderTemplate {
@@ -33,6 +27,12 @@ class AdaptHeaderTemplate {
   }
 }
 
+/**
+ * The desktop table body. Layout, rows and part names come from
+ * {@link AdaptDesktopStructure}; this kit fills the slots with its own elements.
+ *
+ * @internal
+ */
 @Component({
   selector: "adapt-desktop-table",
   imports: [

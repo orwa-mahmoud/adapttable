@@ -20,12 +20,6 @@ import {
 import { AdaptColumnHeaderRename } from "./columnHeaderRename";
 import { AdaptRowActions } from "./rowActionButtons";
 
-/**
- * The desktop table drawn with native elements. Layout, rows and part names
- * come from {@link AdaptDesktopStructure}; this kit fills the slots.
- *
- * @internal
- */
 /** The header cell lives inside the table so the cell and the table are one tree. */
 @Directive({ selector: "ng-template[adaptHeaderTemplate]" })
 class AdaptHeaderTemplate {
@@ -34,6 +28,12 @@ class AdaptHeaderTemplate {
   }
 }
 
+/**
+ * The desktop table drawn with native elements. Layout, rows and part names
+ * come from {@link AdaptDesktopStructure}; this kit fills the slots.
+ *
+ * @internal
+ */
 @Component({
   selector: "adapt-desktop-table",
   imports: [
