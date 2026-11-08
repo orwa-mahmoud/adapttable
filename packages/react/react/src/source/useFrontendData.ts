@@ -174,7 +174,7 @@ export function useFrontendData<TRow>(
   const [source] = useState<FrontendSource<TRow>>(() =>
     createFrontendSourceWith(createEngine)
   );
-  const [, setModelEpoch] = useState(0);
+  const [modelEpoch, setModelEpoch] = useState(0);
   const held = useRef<FrameHold<
     ReturnType<FrontendSource<TRow>["update"]>
   > | null>(null);
@@ -187,6 +187,7 @@ export function useFrontendData<TRow>(
     held,
     [
       activeOption,
+      modelEpoch,
       data,
       columns,
       filterKey,
