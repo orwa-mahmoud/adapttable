@@ -1,49 +1,18 @@
 /** The card list rendered in place of the table on narrow screens. */
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type ReactMobileCardRenderer,
-} from "@adapttable/react";
-import {
-  bodyRowEntries,
   cellFlashAttr,
-  type ConfirmHandler,
-  EXTRA_ROW_PARTS,
-  isExtraEntry,
+  type MobileCardBodyProps,
   mobileCardListStyle,
+  mobileCardPropsEqual,
   mobileCardRegionProps,
   MobileCardsChrome,
-  type MobileCardSlot,
-  orderedCardEntries,
-  pinnedSummaryPart,
-  pinnedSummaryRowId,
-  pinnedSummarySideFromId,
+  mobileCardSlots,
   resolveMobileLabel,
   resolveRowEditTrigger,
-  resolveRowStyle,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  rowClickProps,
   rowEditConflict,
-  rowEditingSignature,
-  rowFlashSignature,
-  rowIsDirty,
-  rowReorderSignature,
-  rowStyleSignature,
-  type TableLabels,
-  treeCardStyle,
-  type TreeEntry,
   useSummaryCells,
 } from "@adapttable/react/adapter";
-import {
-  type ComponentProps,
-  type CSSProperties,
-  memo,
-  type ReactNode,
-  useId,
-  useMemo,
-} from "react";
+import { type ComponentProps, memo, useId, useMemo } from "react";
 
 import type { BaseUiAccentColor } from "../types";
 import { Box, Card, Flex, Text } from "../ui";
@@ -59,22 +28,6 @@ import {
 import { MobileTarget } from "./mobileTarget";
 import { Checkbox } from "./primitives";
 import { RowActionButtons } from "./RowActionButtons";
-
-/** Drop row-interaction props on pinned summary cards. */
-function unlessPinned<T>(
-  side: ReturnType<typeof pinnedSummarySideFromId>,
-  value: T | undefined
-): T | undefined {
-  return side ? undefined : value;
-}
-
-function unlessPinnedMatch(
-  side: ReturnType<typeof pinnedSummarySideFromId>,
-  match: ((id: string) => boolean) | undefined,
-  id: string
-): boolean {
-  return Boolean(unlessPinned(side, match)?.(id));
-}
 
 /**
  * Stable list elements. An inline host is a new component every render,
@@ -104,122 +57,11 @@ function joinClasses(
   return base ?? extra;
 }
 
-/** Per-card inputs for the memoized {@link MobileCardBase}. */
-interface MobileCardProps<TRow> {
-  /** Replace the card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: ReactMobileCardRenderer<TRow>;
-  /** This card's place in the tree, when the table is one. */
-  treeEntry?: TreeEntry<TRow>;
-  /** Open or close this node. */
-  onToggleTree?: (id: string) => void;
-  row: TRow;
-  index: number;
-  /** Stable row id (selection / expansion key). */
-  id: string;
-  columns: readonly ColumnDef<TRow>[];
-  labels: Required<TableLabels>;
-  confirm: ConfirmHandler;
-  rowActions?: RowAction<TRow>[];
-  rowActionsLayout?: RowActionsLayout;
-  renderRowActions?: RowActionsRenderer<TRow>;
-  /** Static list class merged with resolved `rowClassName` output. */
-  className?: string;
-  /** Resolved `rowStyle` + `rowHeight`. Compared via `styleSignature`. */
-  style?: CSSProperties;
-  styleSignature: string;
-  /**
-   * Flashing column keys for this card, joined. Compared instead of
-   * `isCellFlashing`, which stays referentially stable while the marks move.
-   */
-  flashSignature: string;
-  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
-  selected: boolean;
-  expanded: boolean;
-  /** Selection toggle — present only when selection is enabled. */
-  onToggleSelect?: (id: string) => void;
-  /** Expansion toggle — present only when expansion is enabled. */
-  onToggleExpand?: (id: string) => void;
-  renderDetail?: (row: TRow) => ReactNode;
-  onRowClick?: (row: TRow) => void;
-  measureElement?: (node: Element | null) => void;
+/** A Base UI card body: the list's inputs, plus its size, direction and accent. */
+interface MobileCardProps<TRow> extends MobileCardBodyProps<TRow> {
   compact: boolean;
   dir?: "ltr" | "rtl";
   accentColor?: BaseUiAccentColor;
-  /**
-   * Opt-in editing bundle — uncompared. Its identity changes on every
-   * keystroke anywhere in the table; the per-row visual churn is
-   * fingerprinted by `editingSignature` instead. A held card keeps an
-   * older bundle safely: its handlers read live state through refs.
-   */
-  editing?: EditableCellEditing<TRow>;
-  /** Page rows for Tab advance — uncompared (see `editing`). */
-  rows: readonly TRow[];
-  getRowId: (row: TRow) => string;
-  /** Memo digest from {@link rowEditingSignature}. */
-  editingSignature: string | null;
-  /** Headless reorder; uncompared — visual churn is `reorderSignature`. */
-  rowReorder: SharedProps<TRow>["rowReorder"];
-  windowStart: number;
-  rowCount: number;
-  /** Rows in the whole dataset, for `aria-setsize`. */
-  setSize: number;
-  reorderSignature: string | null;
-  part?: string;
-  ariaLabel?: string;
-}
-
-/** The card props the memo comparator deliberately skips (see `editing`). */
-type UncomparedCardProp =
-  "editing" | "rows" | "getRowId" | "rowReorder" | "style" | "isCellFlashing";
-
-/** Every card prop the memo comparator checks with `Object.is`. */
-const COMPARED_CARD_PROPS: readonly Exclude<
-  keyof MobileCardProps<unknown>,
-  UncomparedCardProp
->[] = [
-  "row",
-  "index",
-  "id",
-  "columns",
-  "labels",
-  "confirm",
-  "rowActions",
-  "rowActionsLayout",
-  "renderRowActions",
-  "className",
-  "styleSignature",
-  "flashSignature",
-  "selected",
-  "expanded",
-  "onToggleSelect",
-  "onToggleExpand",
-  "renderDetail",
-  "onRowClick",
-  "measureElement",
-  "compact",
-  "dir",
-  "accentColor",
-  "editingSignature",
-  "reorderSignature",
-  "windowStart",
-  "rowCount",
-  "setSize",
-  // Or a folder opens and its own chevron never turns.
-  "treeEntry",
-  "part",
-  "ariaLabel",
-];
-
-/**
- * `React.memo` comparator: re-render a card only when one of its VISUAL
- * inputs changes — a search keystroke or another card's checkbox re-renders
- * the list shell, but every unchanged card bails out here.
- */
-function mobileCardPropsEqual<TRow>(
-  prev: Readonly<MobileCardProps<TRow>>,
-  next: Readonly<MobileCardProps<TRow>>
-): boolean {
-  return COMPARED_CARD_PROPS.every((key) => Object.is(prev[key], next[key]));
 }
 
 /** One card. Memoized by {@link mobileCardPropsEqual} at the call site. */
@@ -420,229 +262,77 @@ function MobileCardBase<TRow>({
 }
 
 /** Mobile Base UI card list. */
-export function MobileCards<TRow>({
-  table,
-  rows,
-  rowActions,
-  rowActionsLayout,
-  renderRowActions,
-  confirm,
-  getRowId,
-  size,
-  accentColor,
-  dir,
-  onRowClick,
-  rowClassName,
-  isCellFlashing,
-  rowStyle,
-  rowHeight,
-  renderRowDetail,
-  summaryRow,
-  expansion,
-  editing,
-  grouping,
-  tree,
-  className,
-  rowEntries,
-  paddingTop = 0,
-  paddingBottom = 0,
-  measureElement,
-  rowReorder,
-  windowStart = 0,
-  cardSetSize = 0,
-  pinnedTopRows = [],
-  pinnedBottomRows = [],
-  pinnedSummaryTop = [],
-  pinnedSummaryBottom = [],
-  extraRows,
-  assembly,
-  renderCard,
-  maxHeight,
-  virtualScrollRef,
-}: Readonly<SharedProps<TRow>>) {
+export function MobileCards<TRow>(props: Readonly<SharedProps<TRow>>) {
   // The compiler's cache around these slots is larger than the slots.
   "use no memo";
-  const { columns, selection, labels } = table;
-  const entries = orderedCardEntries(
+  const {
+    table,
     rows,
-    getRowId,
-    rowEntries,
-    pinnedTopRows,
-    pinnedBottomRows,
-    pinnedSummaryTop,
-    pinnedSummaryBottom
-  );
-  const flatCardSlots = assembly?.insertExtraRows
-    ? assembly.insertExtraRows(
-        bodyRowEntries(entries, tree),
-        extraRows,
-        (entry) => entry.key
-      )
-    : bodyRowEntries(entries, tree);
+    size,
+    accentColor,
+    dir,
+    summaryRow,
+    className,
+    paddingTop = 0,
+    paddingBottom = 0,
+    maxHeight,
+    virtualScrollRef,
+  } = props;
+  const { columns, selection, labels } = table;
   const compact = size === "1";
   const summary = useSummaryCells(summaryRow, rows);
 
   // `memo` erases generics at module level, so the memoized card is
   // instantiated here (once — the identity is stable for the list's life).
   const CardItem = useMemo(
-    () => memo(MobileCardBase<TRow>, mobileCardPropsEqual),
+    () =>
+      memo(
+        MobileCardBase<TRow>,
+        mobileCardPropsEqual<TRow, MobileCardProps<TRow>>([
+          "compact",
+          "dir",
+          "accentColor",
+        ])
+      ),
     []
   );
 
-  const cardFor = (
-    row: TRow,
-    index: number,
-    key: string,
-    treeEntry?: TreeEntry<TRow>
-  ): MobileCardSlot => {
-    const side = pinnedSummarySideFromId(key);
-    const id = side ? key : getRowId(row);
-    const part = side ? pinnedSummaryPart(side) : undefined;
-    const rowStyleValue = resolveRowStyle(rowStyle, rowHeight, row, index);
-    return {
-      key,
-      props: {
-        ref: measureElement,
-        "data-index": index,
-        // A windowed list has only a slice of its items in the DOM, so each
-        // one states where it sits and how many there are; a complete list
-        // needs neither, because assistive tech can simply count.
-        "aria-posinset":
-          cardSetSize > rows.length ? windowStart + index + 1 : undefined,
-        "aria-setsize": cardSetSize > rows.length ? cardSetSize : undefined,
-        "data-adapttable-part": part ?? "card",
-        "data-stagger": "",
-        "data-selected": unlessPinnedMatch(side, selection?.isSelected, id)
-          ? ""
-          : undefined,
-        "aria-label": side ? labels.pinnedSummaryRow : undefined,
-        "data-dirty": rowIsDirty(editing, id) ? "" : undefined,
-        size: compact ? "1" : "2",
-        role: "listitem",
-        className: joinClasses(className, rowClassName?.(row, index)),
-        ...rowClickProps(row, unlessPinned(side, onRowClick), index),
-        style: {
-          minHeight: "max-content",
-          ...treeCardStyle(treeEntry?.level ?? 0),
-          ...rowStyleValue,
+  const cards = mobileCardSlots(props, {
+    card: (entry) => {
+      const cardClass = joinClasses(className, entry.rowClass);
+      return {
+        key: entry.key,
+        props: {
+          ...entry.itemProps,
+          size: compact ? "1" : "2",
+          className: cardClass,
         },
-      },
-      content: (
-        <CardItem
-          row={row}
-          index={index}
-          id={id}
-          columns={columns}
-          labels={labels}
-          confirm={confirm}
-          rowActions={unlessPinned(side, rowActions)}
-          rowActionsLayout={rowActionsLayout}
-          renderRowActions={unlessPinned(side, renderRowActions)}
-          className={joinClasses(className, rowClassName?.(row, index))}
-          style={rowStyleValue}
-          styleSignature={rowStyleSignature(rowStyleValue)}
-          flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
-          isCellFlashing={isCellFlashing}
-          selected={unlessPinnedMatch(side, selection?.isSelected, id)}
-          expanded={unlessPinnedMatch(side, expansion?.isExpanded, id)}
-          onToggleSelect={unlessPinned(side, selection?.toggle)}
-          onToggleExpand={unlessPinned(side, expansion?.toggle)}
-          renderDetail={unlessPinned(side, renderRowDetail)}
-          onRowClick={unlessPinned(side, onRowClick)}
-          measureElement={measureElement}
-          compact={compact}
-          dir={dir}
-          accentColor={accentColor}
-          editing={editing}
-          rows={rows}
-          getRowId={getRowId}
-          editingSignature={rowEditingSignature(editing, id)}
-          treeEntry={unlessPinned(side, treeEntry)}
-          onToggleTree={unlessPinned(side, tree?.expansion.toggle)}
-          rowReorder={unlessPinned(side, rowReorder)}
-          windowStart={windowStart}
-          rowCount={rows.length}
-          setSize={cardSetSize}
-          reorderSignature={rowReorderSignature(rowReorder, id, index)}
-          renderCard={unlessPinned(side, renderCard)}
-          part={part}
-          ariaLabel={side ? labels.pinnedSummaryRow : undefined}
-        />
-      ),
-    };
-  };
-
-  const extraSlot = (entry: {
-    key: string;
-    kind: "separator" | "fullWidth";
-    render?: () => unknown;
-  }): MobileCardSlot => ({
-    key: entry.key,
-    part: EXTRA_ROW_PARTS[entry.kind].row,
-    props: {
-      role: entry.kind === "separator" ? "separator" : "listitem",
-      "aria-label":
-        entry.kind === "separator" ? labels.rowSeparator : undefined,
+        content: (
+          <CardItem
+            {...entry.body}
+            className={cardClass}
+            compact={compact}
+            dir={dir}
+            accentColor={accentColor}
+          />
+        ),
+      };
     },
-    content: (
-      <Box data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}>
-        {entry.kind === "fullWidth" ? (entry.render?.() as ReactNode) : null}
-      </Box>
+    extraCell: (part, content) => (
+      <Box data-adapttable-part={part}>{content}</Box>
+    ),
+    groupCard: (entry, grouping) => (
+      <OptionalGroupHeaderCard
+        entry={entry}
+        columns={columns}
+        selection={selection}
+        labels={labels}
+        compact={compact}
+        onToggleCollapse={(groupKey) => grouping.collapsed.toggle(groupKey)}
+        onShowMore={grouping.showMore}
+      />
     ),
   });
-
-  function groupedSlots(): MobileCardSlot[] {
-    if (!grouping) return [];
-    const slots: MobileCardSlot[] = [];
-    for (const [index, row] of pinnedSummaryTop.entries()) {
-      slots.push(cardFor(row, index, pinnedSummaryRowId("top", index)));
-    }
-    for (const entry of grouping.entries) {
-      if (isExtraEntry(entry)) {
-        slots.push(extraSlot(entry));
-        continue;
-      }
-      if (
-        entry.kind === "group" ||
-        entry.kind === "groupFooter" ||
-        entry.kind === "groupMore"
-      ) {
-        slots.push({
-          key: entry.key,
-          props: { "data-passthrough": "" },
-          content: (
-            <OptionalGroupHeaderCard
-              entry={entry}
-              columns={columns}
-              selection={selection}
-              labels={labels}
-              compact={compact}
-              onToggleCollapse={(groupKey) =>
-                grouping.collapsed.toggle(groupKey)
-              }
-              onShowMore={grouping.showMore}
-            />
-          ),
-        });
-        continue;
-      }
-      slots.push(cardFor(entry.row, entry.index, entry.key));
-    }
-    for (const [index, row] of pinnedSummaryBottom.entries()) {
-      slots.push(cardFor(row, index, pinnedSummaryRowId("bottom", index)));
-    }
-    return slots;
-  }
-
-  function flatSlots(): MobileCardSlot[] {
-    return flatCardSlots.map((slot) =>
-      isExtraEntry(slot)
-        ? extraSlot(slot)
-        : cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
-    );
-  }
-
-  const cards = grouping ? groupedSlots() : flatSlots();
 
   return (
     <MobileCardsChrome

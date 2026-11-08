@@ -535,6 +535,15 @@ export {
   type MobileCardsHosts,
   type MobileCardSlot,
 } from "./layout/mobileCardsChrome";
+export {
+  type MobileCardBodyProps,
+  type MobileCardEntry,
+  type MobileCardGrouping,
+  type MobileCardListProps,
+  mobileCardPropsEqual,
+  type MobileCardSlotKit,
+  mobileCardSlots,
+} from "./layout/mobileCardSlots";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export {
   SidePanelChrome,

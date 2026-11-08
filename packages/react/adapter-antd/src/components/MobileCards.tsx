@@ -7,37 +7,26 @@ import {
 } from "@adapttable/react";
 import {
   type AssemblyFns,
-  bodyRowEntries,
   cellFlashAttr,
   type ConfirmHandler,
-  EXTRA_ROW_PARTS,
   type ExtraRow,
   groupAggregateEntries,
   type GroupedFlatEntry,
-  isExtraEntry,
+  type MobileCardBodyProps,
+  mobileCardPropsEqual,
   mobileCardRegionProps,
   MobileCardsChrome,
-  type MobileCardSlot,
-  orderedCardEntries,
-  pinnedSummaryPart,
-  pinnedSummaryRowId,
-  pinnedSummarySideFromId,
+  mobileCardSlots,
   resolveMobileLabel,
   resolveRowEditTrigger,
-  resolveRowStyle,
   type RowAction,
   type RowActionsLayout,
   type RowActionsRenderer,
   rowClickProps,
   rowEditConflict,
-  rowEditingSignature,
-  rowFlashSignature,
   rowIsDirty,
-  rowReorderSignature,
   type RowReorderState,
   type RowStyle,
-  rowStyleSignature,
-  type TableLabels,
   treeCardStyle,
   type TreeEntry,
   useSummaryCells,
@@ -165,114 +154,16 @@ function SummaryCard<TRow>({
 }
 
 /** Per-card inputs for the memoized {@link CardItemBase}. */
-interface CardItemProps<TRow> {
-  /** Replace the card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: ReactMobileCardRenderer<TRow>;
-  /** This card's place in the tree, when the table is one. */
-  treeEntry?: TreeEntry<TRow>;
-  /** Open or close this node. */
-  onToggleTree?: (id: string) => void;
-  row: TRow;
-  rowIndex: number;
-  /** Stable row id (selection / expansion key). */
-  id: string;
-  columns: readonly ColumnDef<TRow>[];
-  labels: Required<TableLabels>;
-  confirm: ConfirmHandler;
-  rowActions?: readonly RowAction<TRow>[];
-  rowActionsLayout?: RowActionsLayout;
-  renderRowActions?: RowActionsRenderer<TRow>;
-  /** Resolved `rowClassName(row, index)`, compared as a plain string. */
-  className?: string;
-  /** Resolved `rowStyle` + `rowHeight`. Compared via `styleSignature`. */
-  style?: CSSProperties;
-  styleSignature: string;
-  /**
-   * Flashing column keys for this card, joined. Compared instead of
-   * `isCellFlashing`, which stays referentially stable while the marks move.
-   */
-  flashSignature: string;
-  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
-  selected: boolean;
-  expanded: boolean;
-  /** Selection toggle — present only when selection is enabled. */
-  onToggleSelect?: (id: string) => void;
-  /** Expansion toggle — present only when `renderRowDetail` is set. */
-  onToggleExpand?: (id: string) => void;
-  /** Detail-panel renderer — see `BaseDataTableProps.renderRowDetail`. */
-  renderDetail?: (row: TRow) => ReactNode;
-  /** Row activation handler — see `BaseDataTableProps.onRowClick`. */
-  onRowClick?: (row: TRow) => void;
+/** An antd card body: the list's inputs, plus the row prefetch. */
+interface CardItemProps<TRow> extends MobileCardBodyProps<TRow> {
   prefetch?: (row: TRow) => void;
-  /**
-   * Opt-in editing bundle — uncompared. Its identity changes on every
-   * keystroke anywhere in the table (it wraps the shared editing state), so
-   * comparing it would re-render every card on each character typed. The
-   * per-row visual churn is fingerprinted by `editingSignature` instead. A
-   * held card keeps an older bundle, which is safe: the state's handlers read
-   * their values through refs, so they always act on the current draft.
-   */
-  editing?: EditableCellEditing<TRow>;
-  /** Page rows for Tab advance — uncompared (see `editing`). */
-  rows: readonly TRow[];
-  getRowId: (row: TRow) => string;
-  /** Memo digest from {@link rowEditingSignature}. */
-  editingSignature: string | null;
-  /** Headless reorder; uncompared — visual churn is `reorderSignature`. */
-  rowReorder: RowReorderState<TRow> | undefined;
-  windowStart: number;
-  rowCount: number;
-  reorderSignature: string | null;
-}
-
-/**
- * `React.memo` comparator: re-render a card only when one of its VISUAL
- * inputs changes. A search keystroke, another card's checkbox, or an edit in
- * a different row re-renders the list shell, but every unchanged card bails
- * out here (column accessors are not re-invoked). The callbacks compared
- * below must stay referentially stable across unrelated renders;
- * `selection.toggle` (whose identity tracks the selection by design) is
- * compared, so a selection change still reaches every card un-stale.
- */
-function cardItemPropsEqual<TRow>(
-  prev: Readonly<CardItemProps<TRow>>,
-  next: Readonly<CardItemProps<TRow>>
-): boolean {
-  return (
-    prev.row === next.row &&
-    prev.rowIndex === next.rowIndex &&
-    prev.id === next.id &&
-    prev.columns === next.columns &&
-    prev.labels === next.labels &&
-    prev.confirm === next.confirm &&
-    prev.rowActions === next.rowActions &&
-    prev.rowActionsLayout === next.rowActionsLayout &&
-    prev.renderRowActions === next.renderRowActions &&
-    prev.className === next.className &&
-    prev.styleSignature === next.styleSignature &&
-    prev.flashSignature === next.flashSignature &&
-    prev.selected === next.selected &&
-    prev.expanded === next.expanded &&
-    prev.onToggleSelect === next.onToggleSelect &&
-    prev.onToggleExpand === next.onToggleExpand &&
-    prev.renderDetail === next.renderDetail &&
-    prev.onRowClick === next.onRowClick &&
-    prev.prefetch === next.prefetch &&
-    prev.editingSignature === next.editingSignature &&
-    prev.reorderSignature === next.reorderSignature &&
-    prev.windowStart === next.windowStart &&
-    prev.rowCount === next.rowCount &&
-    prev.renderCard === next.renderCard &&
-    // Or a folder opens and its own chevron never turns.
-    prev.treeEntry === next.treeEntry
-  );
 }
 
 /** One card. Memoized by {@link cardItemPropsEqual} at the call site. */
 function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
   const {
     row,
-    rowIndex,
+    index: rowIndex,
     id,
     columns,
     labels,
@@ -477,256 +368,119 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
  * viewports so columns never get cramped. Each card is memoized on its own
  * inputs, so a toolbar re-render (e.g. a search keystroke) re-renders no
  * unchanged card.
- */
-function summaryCardInteractive(
-  side: ReturnType<typeof pinnedSummarySideFromId>,
-  selection:
-    | { isSelected: (id: string) => boolean; toggle: (id: string) => void }
-    | null
-    | undefined,
-  expansion: RowExpansionState | undefined,
-  id: string
-): {
-  selected: boolean;
-  expanded: boolean;
-  onToggleSelect: ((id: string) => void) | undefined;
-  onToggleExpand: ((id: string) => void) | undefined;
-} {
-  if (side) {
-    return {
-      selected: false,
-      expanded: false,
-      onToggleSelect: undefined,
-      onToggleExpand: undefined,
-    };
-  }
-  return {
-    selected: Boolean(selection?.isSelected(id)),
-    expanded: Boolean(expansion?.isExpanded(id)),
-    onToggleSelect: selection?.toggle,
-    onToggleExpand: expansion?.toggle,
-  };
-}
-
-/**
+ *
  * @typeParam TRow - The row type.
  */
-export function MobileCards<TRow>({
-  table,
-  cardClassName,
-  rows,
-  rowActions,
-  rowActionsLayout,
-  renderRowActions,
-  confirm,
-  getRowId,
-  prefetch,
-  onRowClick,
-  rowClassName,
-  isCellFlashing,
-  rowStyle,
-  rowHeight,
-  tableLabel,
-  compact = false,
-  expansion,
-  renderRowDetail,
-  summaryRow,
-  editing,
-  grouping,
-  tree,
-  rowEntries,
-  paddingTop = 0,
-  paddingBottom = 0,
-  measureElement,
-  rowReorder,
-  windowStart = 0,
-  cardSetSize = 0,
-  pinnedTopRows = [],
-  pinnedBottomRows = [],
-  pinnedSummaryTop = [],
-  pinnedSummaryBottom = [],
-  extraRows,
-  assembly,
-  renderCard,
-  listRef,
-  listStyle,
-}: Readonly<{
-  table: UseDataTableResult<TRow>;
-  /** Class applied to every card (merged before `rowClassName`). */
-  cardClassName?: string;
-  rows: readonly TRow[];
-  rowActions?: readonly RowAction<TRow>[];
-  rowActionsLayout?: RowActionsLayout;
-  renderRowActions?: RowActionsRenderer<TRow>;
-  confirm: ConfirmHandler;
-  getRowId: (row: TRow) => string;
-  prefetch?: (row: TRow) => void;
-  /** Row activation handler — see `BaseDataTableProps.onRowClick`. */
-  onRowClick?: (row: TRow) => void;
-  /** Conditional per-row class — see `BaseDataTableProps.rowClassName`. */
-  rowClassName?: (row: TRow, index: number) => string | undefined;
-  /**
-   * Mark cells a patch just changed — `data-flash` on the card value. Omit
-   * and nothing is marked.
-   */
-  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
-  /** Conditional per-row style — see `BaseDataTableProps.rowStyle`. */
-  rowStyle?: RowStyle<TRow>;
-  /** Per-row height — see `BaseDataTableProps.rowHeight`. */
-  rowHeight?: number | ((row: TRow, index: number) => number);
-  tableLabel?: string;
-  /** Tighter card rhythm for the `"compact"` density. */
-  compact?: boolean;
-  /** Row-expansion state — present only when `renderRowDetail` is set. */
-  expansion?: RowExpansionState;
-  /** Detail-panel renderer — see `BaseDataTableProps.renderRowDetail`. */
-  renderRowDetail?: (row: TRow) => ReactNode;
-  /** Replace each card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: ReactMobileCardRenderer<TRow>;
-  /** Footer summary builder — see `BaseDataTableProps.summaryRow`. */
-  summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
-  /** Opt-in editing bundle — omit and cells stay display-only. */
-  editing?: EditableCellEditing<TRow>;
-  /**
-   * Opt-in grouping bundle — when set, cards iterate flat group/leaf entries
-   * instead of the leaf-only virtual window.
-   */
-  /** Hierarchy, when the host declared one. */
-  tree?: {
-    entries: readonly TreeEntry<TRow>[];
-    expansion: { toggle: (id: string) => void };
-  };
-  grouping?: {
-    collapsed: { toggle: (key: string) => void };
-    entries: readonly GroupedFlatEntry<TRow>[];
-    /** Reveal the next page of groups, or of one group's rows. */
-    showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
-  };
-  /**
-   * Windowed entries to render — the virtual slice when virtualization is on,
-   * `undefined` to render every source row (the non-windowed default).
-   */
-  rowEntries?: readonly VirtualTableRow<TRow>[];
-  /** Spacer height (px) reserving the rows scrolled off the top. */
-  paddingTop?: number;
-  /** Spacer height (px) reserving the rows still below the window. */
-  paddingBottom?: number;
-  /** Card measurement callback for the virtual window. */
-  measureElement?: (node: Element | null) => void;
-  rowReorder?: RowReorderState<TRow>;
-  windowStart?: number;
-  /** Rows in the whole dataset, for the cards' `aria-setsize`. */
-  cardSetSize?: number;
-  pinnedTopRows?: readonly TRow[];
-  pinnedBottomRows?: readonly TRow[];
-  pinnedSummaryTop?: readonly TRow[];
-  pinnedSummaryBottom?: readonly TRow[];
-  extraRows?: readonly ExtraRow[];
-  /** Present when `extraRows()` composed the splice. Absent on a plain table. */
-  assembly?: Partial<AssemblyFns<TRow>>;
-  /** Attach the virtualizer to the card scroll region. */
-  listRef?: (node: HTMLElement | null) => void;
-  /** Clip style when the host passed `maxHeight`. */
-  listStyle?: CSSProperties;
-}>) {
+export function MobileCards<TRow>(
+  props: Readonly<{
+    table: UseDataTableResult<TRow>;
+    /** Class applied to every card (merged before `rowClassName`). */
+    cardClassName?: string;
+    rows: readonly TRow[];
+    rowActions?: readonly RowAction<TRow>[];
+    rowActionsLayout?: RowActionsLayout;
+    renderRowActions?: RowActionsRenderer<TRow>;
+    confirm: ConfirmHandler;
+    getRowId: (row: TRow) => string;
+    prefetch?: (row: TRow) => void;
+    /** Row activation handler — see `BaseDataTableProps.onRowClick`. */
+    onRowClick?: (row: TRow) => void;
+    /** Conditional per-row class — see `BaseDataTableProps.rowClassName`. */
+    rowClassName?: (row: TRow, index: number) => string | undefined;
+    /**
+     * Mark cells a patch just changed — `data-flash` on the card value. Omit
+     * and nothing is marked.
+     */
+    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
+    /** Conditional per-row style — see `BaseDataTableProps.rowStyle`. */
+    rowStyle?: RowStyle<TRow>;
+    /** Per-row height — see `BaseDataTableProps.rowHeight`. */
+    rowHeight?: number | ((row: TRow, index: number) => number);
+    tableLabel?: string;
+    /** Tighter card rhythm for the `"compact"` density. */
+    compact?: boolean;
+    /** Row-expansion state — present only when `renderRowDetail` is set. */
+    expansion?: RowExpansionState;
+    /** Detail-panel renderer — see `BaseDataTableProps.renderRowDetail`. */
+    renderRowDetail?: (row: TRow) => ReactNode;
+    /** Replace each card's body — see `BaseDataTableProps.renderCard`. */
+    renderCard?: ReactMobileCardRenderer<TRow>;
+    /** Footer summary builder — see `BaseDataTableProps.summaryRow`. */
+    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, ReactNode>>;
+    /** Opt-in editing bundle — omit and cells stay display-only. */
+    editing?: EditableCellEditing<TRow>;
+    /**
+     * Opt-in grouping bundle — when set, cards iterate flat group/leaf entries
+     * instead of the leaf-only virtual window.
+     */
+    /** Hierarchy, when the host declared one. */
+    tree?: {
+      entries: readonly TreeEntry<TRow>[];
+      expansion: { toggle: (id: string) => void };
+    };
+    grouping?: {
+      collapsed: { toggle: (key: string) => void };
+      entries: readonly GroupedFlatEntry<TRow>[];
+      /** Reveal the next page of groups, or of one group's rows. */
+      showMore: (entry: {
+        scope: "groups" | "rows";
+        groupKey?: string;
+      }) => void;
+    };
+    /**
+     * Windowed entries to render — the virtual slice when virtualization is on,
+     * `undefined` to render every source row (the non-windowed default).
+     */
+    rowEntries?: readonly VirtualTableRow<TRow>[];
+    /** Spacer height (px) reserving the rows scrolled off the top. */
+    paddingTop?: number;
+    /** Spacer height (px) reserving the rows still below the window. */
+    paddingBottom?: number;
+    /** Card measurement callback for the virtual window. */
+    measureElement?: (node: Element | null) => void;
+    rowReorder?: RowReorderState<TRow>;
+    windowStart?: number;
+    /** Rows in the whole dataset, for the cards' `aria-setsize`. */
+    cardSetSize?: number;
+    pinnedTopRows?: readonly TRow[];
+    pinnedBottomRows?: readonly TRow[];
+    pinnedSummaryTop?: readonly TRow[];
+    pinnedSummaryBottom?: readonly TRow[];
+    extraRows?: readonly ExtraRow[];
+    /** Present when `extraRows()` composed the splice. Absent on a plain table. */
+    assembly?: Partial<AssemblyFns<TRow>>;
+    /** Attach the virtualizer to the card scroll region. */
+    listRef?: (node: HTMLElement | null) => void;
+    /** Clip style when the host passed `maxHeight`. */
+    listStyle?: CSSProperties;
+  }>
+) {
   // The compiler's cache around these slots is larger than the slots.
   "use no memo";
-  const { labels, selection, columns } = table;
-  // Either the virtual slice or every source row, resolved to render entries
-  // with their ORIGINAL index (so cells and classes see the true row index).
-  // Pinned rows lead / trail the list; cards have no sticky chrome.
-  const entries = orderedCardEntries(
+  const {
+    table,
+    cardClassName,
     rows,
-    getRowId,
-    rowEntries,
-    pinnedTopRows,
-    pinnedBottomRows,
-    pinnedSummaryTop,
-    pinnedSummaryBottom
-  );
-  const flatCardSlots = assembly?.insertExtraRows
-    ? assembly.insertExtraRows(
-        bodyRowEntries(entries, tree),
-        extraRows,
-        (entry) => entry.key
-      )
-    : bodyRowEntries(entries, tree);
+    prefetch,
+    tableLabel,
+    compact = false,
+    summaryRow,
+    paddingTop = 0,
+    paddingBottom = 0,
+    measureElement,
+    listRef,
+    listStyle,
+  } = props;
+  const { labels, selection, columns } = table;
 
-  // `memo` erases generics at module level, so the memoized card is
-  // instantiated here (once — the identity is stable for the list's life).
   const CardItem = useMemo(
-    () => memo(CardItemBase<TRow>, cardItemPropsEqual),
+    () =>
+      memo(
+        CardItemBase<TRow>,
+        mobileCardPropsEqual<TRow, CardItemProps<TRow>>(["prefetch"])
+      ),
     []
   );
-
-  const renderLeafCard = (
-    row: TRow,
-    index: number,
-    key: string,
-    treeEntry?: TreeEntry<TRow>
-  ): MobileCardSlot => {
-    const side = pinnedSummarySideFromId(key);
-    const id = side ? key : getRowId(row);
-    const interactive = summaryCardInteractive(side, selection, expansion, id);
-    const pinnedTree = side ? undefined : treeEntry;
-    const rowStyleValue = resolveRowStyle(rowStyle, rowHeight, row, index);
-    return {
-      key,
-      props: {
-        ref: measureElement,
-        "data-index": index,
-        // A windowed list has only a slice of its items in the DOM, so each
-        // one states where it sits and how many there are; a complete list
-        // needs neither, because assistive tech can simply count.
-        "aria-posinset":
-          cardSetSize > rows.length ? windowStart + index + 1 : undefined,
-        "aria-setsize": cardSetSize > rows.length ? cardSetSize : undefined,
-        "data-adapttable-part": side ? pinnedSummaryPart(side) : "card",
-        "aria-label": side ? labels.pinnedSummaryRow : undefined,
-        style: treeCardStyle(pinnedTree?.level ?? 0),
-      },
-      content: (
-        <CardItem
-          row={row}
-          rowIndex={index}
-          id={id}
-          columns={columns}
-          labels={labels}
-          confirm={confirm}
-          rowActions={side ? undefined : rowActions}
-          rowActionsLayout={rowActionsLayout}
-          renderRowActions={side ? undefined : renderRowActions}
-          className={
-            [cardClassName, rowClassName?.(row, index)]
-              .filter(Boolean)
-              .join(" ") || undefined
-          }
-          style={rowStyleValue}
-          styleSignature={rowStyleSignature(rowStyleValue)}
-          flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
-          isCellFlashing={isCellFlashing}
-          selected={interactive.selected}
-          expanded={interactive.expanded}
-          onToggleSelect={interactive.onToggleSelect}
-          onToggleExpand={interactive.onToggleExpand}
-          renderDetail={side ? undefined : renderRowDetail}
-          onRowClick={side ? undefined : onRowClick}
-          prefetch={prefetch}
-          editing={editing}
-          rows={rows}
-          getRowId={getRowId}
-          editingSignature={rowEditingSignature(editing, id)}
-          treeEntry={pinnedTree}
-          onToggleTree={side ? undefined : tree?.expansion.toggle}
-          rowReorder={side ? undefined : rowReorder}
-          windowStart={windowStart}
-          rowCount={rows.length}
-          reorderSignature={rowReorderSignature(rowReorder, id, index)}
-          renderCard={side ? undefined : renderCard}
-        />
-      ),
-    };
-  };
 
   const toGroupRow = (
     entry: Extract<
@@ -759,99 +513,70 @@ export function MobileCards<TRow>({
     collapsed: entry.kind === "group" && entry.collapsed,
   });
 
-  const extraSlot = (entry: {
-    key: string;
-    kind: "separator" | "fullWidth";
-    render?: () => unknown;
-  }): MobileCardSlot => ({
-    key: entry.key,
-    part: EXTRA_ROW_PARTS[entry.kind].row,
-    props: {
-      role: entry.kind === "separator" ? "separator" : undefined,
-      "aria-label":
-        entry.kind === "separator" ? labels.rowSeparator : undefined,
+  const cards = mobileCardSlots(props, {
+    card: (entry) => {
+      const { body, itemProps } = entry;
+      return {
+        key: entry.key,
+        props: {
+          ref: measureElement,
+          "data-index": entry.index,
+          "aria-posinset": itemProps["aria-posinset"],
+          "aria-setsize": itemProps["aria-setsize"],
+          "data-adapttable-part": itemProps["data-adapttable-part"],
+          "aria-label": itemProps["aria-label"],
+          style: treeCardStyle(body.treeEntry?.level ?? 0),
+        },
+        content: (
+          <CardItem
+            {...body}
+            className={
+              [cardClassName, entry.rowClass].filter(Boolean).join(" ") ||
+              undefined
+            }
+            prefetch={prefetch}
+          />
+        ),
+      };
     },
-    content: (
-      <div data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}>
-        {entry.kind === "fullWidth" ? (entry.render?.() as ReactNode) : null}
-      </div>
+    extraProps: (kind) => ({
+      role: kind === "separator" ? "separator" : undefined,
+    }),
+    extraCell: (part, content) => (
+      <div data-adapttable-part={part}>{content}</div>
+    ),
+    groupProps: { ref: measureElement, "data-adapttable-part": undefined },
+    groupCard: (entry, grouping) => (
+      <OptionalGroupHeaderCard
+        group={toGroupRow(entry)}
+        labels={labels}
+        onToggle={() => grouping.collapsed.toggle(entry.key)}
+        selection={selection ?? undefined}
+        onShowMore={grouping.showMore}
+        aggregateNodes={
+          entry.kind !== "groupMore" && entry.aggregateCells
+            ? groupAggregateEntries<TRow, ColumnDef<TRow>>(
+                columns,
+                entry.aggregateCells,
+                entry.aggregateOps
+              ).map(({ column, node }) => (
+                <Space key={column.key} size="small">
+                  <Typography.Text type="secondary">
+                    {resolveMobileLabel(column)}
+                  </Typography.Text>
+                  <Typography.Text
+                    data-column={column.key}
+                    data-adapttable-part="group-aggregate"
+                  >
+                    {node as ReactNode}
+                  </Typography.Text>
+                </Space>
+              ))
+            : undefined
+        }
+      />
     ),
   });
-
-  function groupedSlots(): MobileCardSlot[] {
-    if (!grouping) return [];
-    const slots: MobileCardSlot[] = [];
-    for (const [index, row] of pinnedSummaryTop.entries()) {
-      slots.push(renderLeafCard(row, index, pinnedSummaryRowId("top", index)));
-    }
-    for (const entry of grouping.entries) {
-      if (isExtraEntry(entry)) {
-        slots.push(extraSlot(entry));
-        continue;
-      }
-      if (
-        entry.kind === "group" ||
-        entry.kind === "groupFooter" ||
-        entry.kind === "groupMore"
-      ) {
-        slots.push({
-          key: entry.key,
-          props: {
-            ref: measureElement,
-            "data-adapttable-part": undefined,
-          },
-          content: (
-            <OptionalGroupHeaderCard
-              group={toGroupRow(entry)}
-              labels={labels}
-              onToggle={() => grouping.collapsed.toggle(entry.key)}
-              selection={selection ?? undefined}
-              onShowMore={grouping.showMore}
-              aggregateNodes={
-                entry.kind !== "groupMore" && entry.aggregateCells
-                  ? groupAggregateEntries<TRow, ColumnDef<TRow>>(
-                      columns,
-                      entry.aggregateCells,
-                      entry.aggregateOps
-                    ).map(({ column, node }) => (
-                      <Space key={column.key} size="small">
-                        <Typography.Text type="secondary">
-                          {resolveMobileLabel(column)}
-                        </Typography.Text>
-                        <Typography.Text
-                          data-column={column.key}
-                          data-adapttable-part="group-aggregate"
-                        >
-                          {node as ReactNode}
-                        </Typography.Text>
-                      </Space>
-                    ))
-                  : undefined
-              }
-            />
-          ),
-        });
-        continue;
-      }
-      slots.push(renderLeafCard(entry.row, entry.index, entry.key));
-    }
-    for (const [index, row] of pinnedSummaryBottom.entries()) {
-      slots.push(
-        renderLeafCard(row, index, pinnedSummaryRowId("bottom", index))
-      );
-    }
-    return slots;
-  }
-
-  function flatSlots(): MobileCardSlot[] {
-    return flatCardSlots.map((slot) =>
-      isExtraEntry(slot)
-        ? extraSlot(slot)
-        : renderLeafCard(slot.row, slot.index, slot.key, slot.treeEntry)
-    );
-  }
-
-  const cards = grouping ? groupedSlots() : flatSlots();
   if (summaryRow) {
     cards.push({
       key: "summary",
