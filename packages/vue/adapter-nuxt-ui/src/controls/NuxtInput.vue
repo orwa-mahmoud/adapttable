@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { toVueAttrs } from "@adapttable/vue/adapter";
+import { scheduleTick, toVueAttrs } from "@adapttable/vue/adapter";
 import UInput from "@nuxt/ui/components/Input.vue";
 import { onScopeDispose, shallowRef, watch } from "vue";
 
 import { useNuxtControlSize } from "../densityContext";
-import { scheduleTick } from "../scheduleTick";
 import { controlRef, withoutAttrs } from "./attrs";
 import type { NuxtInputControl } from "./types";
 import { useControlElementRef } from "./useControlElementRef";

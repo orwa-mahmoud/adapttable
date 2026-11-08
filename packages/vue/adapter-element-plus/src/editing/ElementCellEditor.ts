@@ -3,16 +3,25 @@ import {
   editorInputType,
   formatMultiDraft,
   readMultiDraft,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { computed, createVNode, defineComponent, h, onMounted, type PropType, shallowRef, watch } from "vue";
+import {
+  computed,
+  createVNode,
+  defineComponent,
+  h,
+  onMounted,
+  type PropType,
+  shallowRef,
+  watch,
+} from "vue";
 
 import ElementCheckbox from "../controls/ElementCheckbox.vue";
 import ElementInput from "../controls/ElementInput.vue";
 import ElementMultiSelect from "../controls/ElementMultiSelect.vue";
 import ElementSelect from "../controls/ElementSelect.vue";
 import { focusControlRef } from "../controls/focusRef";
-import { scheduleTick } from "../scheduleTick";
 
 /** The kit owns its nested popup; draft and commit transitions stay in Chrome. */
 const editorRuntimeProps = {

@@ -1,13 +1,22 @@
 import {
   type FilterPanelSurfaceProps,
   resolveLabels,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { type CSSProperties, defineComponent, h, onMounted, type PropType, shallowRef, Teleport, watch } from "vue";
+import {
+  type CSSProperties,
+  defineComponent,
+  h,
+  onMounted,
+  type PropType,
+  shallowRef,
+  Teleport,
+  watch,
+} from "vue";
 
 import { useClassNames } from "../classNamesContext";
 import { placeNativeOverlay } from "../overlayPlacement";
-import { scheduleTick } from "../scheduleTick";
 import NativeFilterDialog from "./NativeFilterDialog.vue";
 
 function focusInitialControl(root: HTMLElement): void {

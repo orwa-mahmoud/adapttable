@@ -1894,7 +1894,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly dir: InputSignal<Direction | undefined>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<"start" | "end">;
-    readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
+    readonly editActivation: InputSignal<"doubleClick" | "click" | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
@@ -3305,7 +3305,7 @@ export class AdaptGroupMoreButtonChrome {
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"rows" | "groups">;
+    readonly scope: InputSignal<"groups" | "rows">;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {

@@ -1,5 +1,6 @@
 import {
   createMenuNavigation,
+  scheduleTick,
   type TableAssistantMenuProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -13,7 +14,6 @@ import {
 import { VMenu } from "vuetify/components/VMenu";
 
 import { vuetifyButton } from "../controls";
-import { scheduleTick } from "../scheduleTick";
 
 /** One shortcut as a menu item: its icon, title and optional description. */
 function shortcut(

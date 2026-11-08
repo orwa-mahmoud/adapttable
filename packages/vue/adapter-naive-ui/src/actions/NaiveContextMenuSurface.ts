@@ -1,13 +1,21 @@
 import {
   type ContextMenuSurfaceProps,
   createMenuNavigation,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NCard, NPopover } from "naive-ui";
-import { type ComponentPublicInstance, defineComponent, h, type PropType, shallowRef, type VNodeChild, watch } from "vue";
+import {
+  type ComponentPublicInstance,
+  defineComponent,
+  h,
+  type PropType,
+  shallowRef,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import { htmlRoot } from "../controls/elementTarget";
-import { scheduleTick } from "../scheduleTick";
 /** Native surfaces apply the shared core's menu-navigation decisions. */
 export const NaiveContextMenuSurface = /*#__PURE__*/ defineComponent(
   (props: ContextMenuSurfaceProps<VNodeChild>) => {

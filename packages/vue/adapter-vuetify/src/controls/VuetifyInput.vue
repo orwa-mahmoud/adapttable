@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { scheduleTick } from "@adapttable/vue/adapter";
 import { computed, onBeforeUnmount, shallowRef } from "vue";
 import { VTextarea } from "vuetify/components/VTextarea";
 import { VTextField } from "vuetify/components/VTextField";
 
-import { scheduleTick } from "../scheduleTick";
 import { useControlRef, valueControlAttrs } from "./controlRef";
 
 /** Vuetify owns its compound host; controlRef remains the native focus target. */

@@ -3277,6 +3277,9 @@ export { SavedViewsPanelInputProps }
 // @public (undocumented)
 export type SavedViewsPanelSlots = SavedViewsPanelSlots_2<VNodeChild>;
 
+// @public
+export function scheduleTick(work: () => void | Promise<void>): void;
+
 // @public (undocumented)
 export const SELECTION_STATS_MODEL: FeatureStateKey<SelectionStats | null>;
 

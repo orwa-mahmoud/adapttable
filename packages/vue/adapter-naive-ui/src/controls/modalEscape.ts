@@ -1,6 +1,6 @@
+import { scheduleTick } from "@adapttable/vue/adapter";
 import { onScopeDispose } from "vue";
 
-import { scheduleTick } from "../scheduleTick";
 /** Naive emits close after its topmost trap check but omits the originating event. */
 export function useNaiveModalEscape(root: () => HTMLElement | null) {
   let pending: KeyboardEvent | undefined;

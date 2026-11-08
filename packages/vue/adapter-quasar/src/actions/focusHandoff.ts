@@ -1,5 +1,4 @@
-import { scheduleTick } from "../scheduleTick";
-
+import { scheduleTick } from "@adapttable/vue/adapter";
 
 /** Complete a native overlay's unmount without stealing a newer focus owner. */
 export function finishOverlayFocus(

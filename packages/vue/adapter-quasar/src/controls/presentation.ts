@@ -1,6 +1,5 @@
+import { scheduleTick } from "@adapttable/vue/adapter";
 import { onScopeDispose, shallowRef, watch } from "vue";
-
-import { scheduleTick } from "../scheduleTick";
 
 /** Repaint rejected controlled requests through the kit's public modelValue. */
 export function useQuasarPresentation(

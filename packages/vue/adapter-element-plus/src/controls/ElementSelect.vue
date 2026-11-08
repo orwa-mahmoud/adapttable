@@ -1,8 +1,7 @@
 <script setup lang="ts">
+import { scheduleTick } from "@adapttable/vue/adapter";
 import { ElOption, ElSelect, type SelectInstance } from "element-plus";
 import { shallowRef } from "vue";
-
-import { scheduleTick } from "../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(

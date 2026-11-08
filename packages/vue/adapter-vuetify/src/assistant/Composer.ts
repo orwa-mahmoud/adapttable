@@ -1,8 +1,12 @@
-import type { TableAssistantComposerProps } from "@adapttable/vue/adapter";
-import { defineComponent, h, onScopeDispose, type PropType, shallowRef } from "vue";
+import { scheduleTick,type TableAssistantComposerProps  } from "@adapttable/vue/adapter";
+import {
+  defineComponent,
+  h,
+  onScopeDispose,
+  type PropType,
+  shallowRef,
+} from "vue";
 import { VField } from "vuetify/components/VField";
-
-import { scheduleTick } from "../scheduleTick";
 
 /**
  * The assistant composer: a native textarea inside Vuetify's VField, the

@@ -1,14 +1,22 @@
 import {
   type FilterPanelSurfaceProps,
   type OverlayCloseReason,
+  scheduleTick,
   useDataTableClassNames,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NDrawer, NDrawerContent, NPopover } from "naive-ui";
-import { defineComponent, h, type HTMLAttributes, onMounted, type PropType, shallowRef, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  type HTMLAttributes,
+  onMounted,
+  type PropType,
+  shallowRef,
+  watch,
+} from "vue";
 
 import { naiveClassNames } from "../classNames";
-import { scheduleTick } from "../scheduleTick";
 
 /** Public vendor surfaces own their mask, trap, scroll lock and portal. */
 export const NaiveFilterSurface = defineComponent(

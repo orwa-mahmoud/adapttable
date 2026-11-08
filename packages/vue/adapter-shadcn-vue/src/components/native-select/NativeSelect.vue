@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { scheduleTick } from "@adapttable/vue/adapter";
 import { ChevronDownIcon } from "@lucide/vue";
 import { computed, type HTMLAttributes, onScopeDispose } from "vue";
 
 import { useControlTarget } from "../../lib/useControlTarget";
 import { cn } from "../../lib/utils";
-import { scheduleTick } from "../../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{

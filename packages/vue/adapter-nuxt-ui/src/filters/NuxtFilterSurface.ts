@@ -2,13 +2,12 @@ import "./nuxtFilterSurface.css";
 
 import {
   type FilterPanelSurfaceProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import UPopover from "@nuxt/ui/components/Popover.vue";
 import USlideover from "@nuxt/ui/components/Slideover.vue";
 import { defineComponent, h, type PropType, watch } from "vue";
-
-import { scheduleTick } from "../scheduleTick";
 
 type Props = FilterPanelSurfaceProps & {
   readonly modal: boolean;

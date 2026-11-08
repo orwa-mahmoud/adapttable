@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { formatMultiDraft, readMultiDraft } from "@adapttable/vue/adapter";
+import {
+  formatMultiDraft,
+  readMultiDraft,
+  scheduleTick,
+} from "@adapttable/vue/adapter";
 import { computed, onBeforeUnmount, shallowRef, watch } from "vue";
 import { VSelect } from "vuetify/components/VSelect";
 
 import { valueControlAttrs } from "../controls/controlRef";
-import { scheduleTick } from "../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{

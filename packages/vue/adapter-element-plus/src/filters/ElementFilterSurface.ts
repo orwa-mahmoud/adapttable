@@ -1,6 +1,7 @@
 import {
   type FilterPanelSurfaceProps,
   FULLSCREEN_MODEL,
+  scheduleTick,
   useFeatureState,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -11,9 +12,16 @@ import {
   ElDrawer,
   ElPopover,
 } from "element-plus";
-import { defineComponent, h, onMounted, type PropType, shallowRef, watch, withDirectives } from "vue";
+import {
+  defineComponent,
+  h,
+  onMounted,
+  type PropType,
+  shallowRef,
+  watch,
+  withDirectives,
+} from "vue";
 
-import { scheduleTick } from "../scheduleTick";
 import { rtlScrollbarGutter } from "../scrollbarGutter";
 
 /** Kit overlays retain their own positioning, focus trap and modal backdrop. */

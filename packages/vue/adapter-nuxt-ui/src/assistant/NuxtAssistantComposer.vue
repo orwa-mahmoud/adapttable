@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { type TableAssistantSlots, toVueAttrs } from "@adapttable/vue/adapter";
+import {
+  scheduleTick,
+  type TableAssistantSlots,
+  toVueAttrs,
+} from "@adapttable/vue/adapter";
 import UTextarea from "@nuxt/ui/components/Textarea.vue";
 import { onScopeDispose, shallowRef, watch } from "vue";
 
 import { useNuxtControlSize } from "../densityContext";
-import { scheduleTick } from "../scheduleTick";
 
 // The host owns the draft: a change it rejects repaints through the model
 // value of the textarea.

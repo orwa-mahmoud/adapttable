@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { useElementRef, useScopeActivity } from "@adapttable/vue/adapter";
+import {
+  scheduleTick,
+  useElementRef,
+  useScopeActivity,
+} from "@adapttable/vue/adapter";
 import { type CheckboxInstance, ElCheckbox } from "element-plus";
 import { computed, shallowRef, watch } from "vue";
-
-import { scheduleTick } from "../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(

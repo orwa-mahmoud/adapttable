@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { cloneVNode, type HTMLAttributes, mergeProps, onBeforeUnmount, shallowRef, type VNode } from "vue";
+import { scheduleTick } from "@adapttable/vue/adapter";
+import {
+  cloneVNode,
+  type HTMLAttributes,
+  mergeProps,
+  onBeforeUnmount,
+  shallowRef,
+  type VNode,
+} from "vue";
 import { VCheckboxBtn } from "vuetify/components/VCheckbox";
 import { VIcon } from "vuetify/components/VIcon";
 
-import { scheduleTick } from "../scheduleTick";
 import { controlAttrs, useControlRef } from "./controlRef";
 
 defineOptions({ inheritAttrs: false });

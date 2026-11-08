@@ -1,12 +1,21 @@
 import {
   type ManagedOverlayPanelProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { QCard, QCardSection, QMenu } from "quasar";
-import { defineComponent, h, mergeProps, onBeforeUnmount, onScopeDispose, type PropType, shallowRef, watchEffect } from "vue";
+import {
+  defineComponent,
+  h,
+  mergeProps,
+  onBeforeUnmount,
+  onScopeDispose,
+  type PropType,
+  shallowRef,
+  watchEffect,
+} from "vue";
 
 import { quasarAttrs, useQuasarControlRef } from "../controls/controlAttrs";
-import { scheduleTick } from "../scheduleTick";
 
 function visible(element: HTMLElement): boolean {
   if (

@@ -1,16 +1,24 @@
 import {
   createMenuNavigation,
   type RowMoveMenuSlotProps,
+  scheduleTick,
   toVueAttrs,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import UCard from "@nuxt/ui/components/Card.vue";
 import UModal from "@nuxt/ui/components/Modal.vue";
-import { defineComponent, h, onMounted, type PropType, shallowRef, useId, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  onMounted,
+  type PropType,
+  shallowRef,
+  useId,
+  watch,
+} from "vue";
 
 import NuxtButton from "../controls/NuxtButton.vue";
 import NuxtManagedPopover from "../controls/NuxtManagedPopover";
-import { scheduleTick } from "../scheduleTick";
 
 /** Destination selection and confirmation belong to the shared controller. */
 export const NuxtRowMoveMenu = /*#__PURE__*/ defineComponent(

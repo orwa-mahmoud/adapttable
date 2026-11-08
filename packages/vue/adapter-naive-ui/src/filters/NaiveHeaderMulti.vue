@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {
   type FilterHeaderMultiProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NPopover } from "naive-ui";
 import { computed, h, type HTMLAttributes, shallowRef, watch } from "vue";
 
 import { naiveButton } from "../controls/button";
-import { scheduleTick } from "../scheduleTick";
 import { naiveFilterCheckbox } from "./controls";
 
 defineOptions({ name: "NaiveHeaderMulti" });

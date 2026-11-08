@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import {
   type FilterPanelSurfaceProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { computed } from "vue";
 import { VCard } from "vuetify/components/VCard";
 import { VLocaleProvider } from "vuetify/components/VLocaleProvider";
 import { VMenu } from "vuetify/components/VMenu";
-
-import { scheduleTick } from "../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<

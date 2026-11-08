@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {
   type DensityChooserSlots,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { ElRadioButton, ElRadioGroup } from "element-plus";
 import { type ComponentPublicInstance, watch } from "vue";
-
-import { scheduleTick } from "../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{

@@ -1,14 +1,22 @@
 import {
   createMenuNavigation,
+  scheduleTick,
   type TableAssistantMenuProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NCard, NPopover } from "naive-ui";
-import { type ComponentPublicInstance, defineComponent, h, type PropType, type ShallowRef, shallowRef, watch } from "vue";
+import {
+  type ComponentPublicInstance,
+  defineComponent,
+  h,
+  type PropType,
+  type ShallowRef,
+  shallowRef,
+  watch,
+} from "vue";
 
 import { naiveButton } from "../controls/button";
 import { htmlRoot } from "../controls/elementTarget";
-import { scheduleTick } from "../scheduleTick";
 
 /** One shortcut as a menu item: its icon, title and optional description. */
 function shortcut(

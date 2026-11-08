@@ -2,15 +2,24 @@ import type { RowActionControl } from "@adapttable/vue";
 import {
   createMenuNavigation,
   mergeVueAttrs,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import UCard from "@nuxt/ui/components/Card.vue";
-import { createVNode, defineComponent, Fragment, h, shallowRef, useId, type VNode, watch } from "vue";
+import {
+  createVNode,
+  defineComponent,
+  Fragment,
+  h,
+  shallowRef,
+  useId,
+  type VNode,
+  watch,
+} from "vue";
 
 import NuxtButton from "./controls/NuxtButton.vue";
 import NuxtManagedPopover from "./controls/NuxtManagedPopover";
 import type { RowActionsControlProps } from "./rowActionsSlot";
-import { scheduleTick } from "./scheduleTick";
 
 const actionProps = {
   controls: null,

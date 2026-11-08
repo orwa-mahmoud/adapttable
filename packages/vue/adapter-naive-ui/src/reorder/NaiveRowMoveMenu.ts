@@ -1,16 +1,24 @@
 import {
   elementRef,
   type RowMoveMenuSlotProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NCard, NModal } from "naive-ui";
-import { type ComponentPublicInstance, defineComponent, h, type PropType, shallowRef, useId, watch } from "vue";
+import {
+  type ComponentPublicInstance,
+  defineComponent,
+  h,
+  type PropType,
+  shallowRef,
+  useId,
+  watch,
+} from "vue";
 
 import { naiveButton } from "../controls/button";
 import { htmlRoot } from "../controls/elementTarget";
 import { useNaiveModalEscape } from "../controls/modalEscape";
 import { naiveSelect } from "../controls/select";
-import { scheduleTick } from "../scheduleTick";
 
 export const NaiveRowMoveMenu = /*#__PURE__*/ defineComponent(
   (props: RowMoveMenuSlotProps) => {

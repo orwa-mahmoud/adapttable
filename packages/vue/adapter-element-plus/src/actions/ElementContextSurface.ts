@@ -1,5 +1,6 @@
 import {
   type ContextMenuSurfaceProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
@@ -7,9 +8,16 @@ import {
   ElDropdown,
   ElDropdownMenu,
 } from "element-plus";
-import { defineComponent, h, onScopeDispose, type PropType, shallowRef, type VNodeChild, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  onScopeDispose,
+  type PropType,
+  shallowRef,
+  type VNodeChild,
+  watch,
+} from "vue";
 
-import { scheduleTick } from "../scheduleTick";
 /** The public dropdown API synchronizes the primitive with the binding's open session. */
 export const ElementContextSurface = defineComponent(
   (

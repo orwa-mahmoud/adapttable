@@ -2,14 +2,24 @@ import type { ElementRef } from "@adapttable/vue";
 import {
   type ManagedOverlayPanelProps,
   type OverlayCloseReason,
+  scheduleTick,
   useElementRef,
 } from "@adapttable/vue/adapter";
 import { NCard, NPopover } from "naive-ui";
-import { type ComponentPublicInstance, defineComponent, h, mergeProps, onBeforeUnmount, onMounted, type PropType, shallowRef, watch } from "vue";
+import {
+  type ComponentPublicInstance,
+  defineComponent,
+  h,
+  mergeProps,
+  onBeforeUnmount,
+  onMounted,
+  type PropType,
+  shallowRef,
+  watch,
+} from "vue";
 
 import { withoutAttributes } from "../controls/attributes";
 import { htmlRoot } from "../controls/elementTarget";
-import { scheduleTick } from "../scheduleTick";
 
 /** Public Naive positioning and card surfaces own the managed panel boundary. */
 export const NaiveManagedPopover = defineComponent(

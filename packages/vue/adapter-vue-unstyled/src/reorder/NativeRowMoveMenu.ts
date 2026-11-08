@@ -2,11 +2,17 @@ import {
   elementRef,
   type RowMoveConfirmationProps,
   type RowMoveMenuSlotProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, type PropType, shallowRef, useId, watch } from "vue";
-
-import { scheduleTick } from "../scheduleTick";
+import {
+  defineComponent,
+  h,
+  type PropType,
+  shallowRef,
+  useId,
+  watch,
+} from "vue";
 
 /** Native dialog lifetime; the neutral session-bound callbacks own the decision. */
 const NativeRowMoveConfirmation = defineComponent(

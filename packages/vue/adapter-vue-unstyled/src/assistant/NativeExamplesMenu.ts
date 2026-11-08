@@ -1,4 +1,5 @@
 import {
+  scheduleTick,
   type TableAssistantMenuProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -11,8 +12,6 @@ import {
   useId,
   watch,
 } from "vue";
-
-import { scheduleTick } from "../scheduleTick";
 
 /** A native disclosure of commands. The browser retains ordinary Tab navigation. */
 export const NativeExamplesMenu = defineComponent(

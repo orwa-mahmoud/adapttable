@@ -2,6 +2,7 @@ import {
   managedOverlayPanel,
   type ManagedOverlayPanelProps,
   type OverlayCloseReason,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { defineComponent, h, type PropType } from "vue";
@@ -9,7 +10,6 @@ import { defineComponent, h, type PropType } from "vue";
 import { Popover, PopoverAnchor, PopoverContent } from "../components/popover";
 import { shadcnControlAttrs } from "../controls";
 import { cn } from "../lib/utils";
-import { scheduleTick } from "../scheduleTick";
 
 const ManagedPanel = defineComponent(
   (props: {

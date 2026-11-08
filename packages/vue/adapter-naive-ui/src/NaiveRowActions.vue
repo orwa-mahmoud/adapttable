@@ -1,11 +1,17 @@
 <script setup lang="ts" generic="TRow">
 import type { Direction, RowActionControl } from "@adapttable/vue";
-import type { RowActionsLayout } from "@adapttable/vue/adapter";
+import { type RowActionsLayout, scheduleTick  } from "@adapttable/vue/adapter";
 import { NPopover } from "naive-ui";
-import { computed, Fragment, h, type HTMLAttributes, mergeProps, shallowRef } from "vue";
+import {
+  computed,
+  Fragment,
+  h,
+  type HTMLAttributes,
+  mergeProps,
+  shallowRef,
+} from "vue";
 
 import { naiveButton } from "./controls/button";
-import { scheduleTick } from "./scheduleTick";
 
 defineOptions({ name: "NaiveRowActions" });
 const props = defineProps<{

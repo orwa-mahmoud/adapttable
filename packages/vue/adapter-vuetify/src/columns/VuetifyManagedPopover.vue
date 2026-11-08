@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type {
-  ManagedOverlayPanelProps,
-  OverlayCloseReason,
+import {
+  type ManagedOverlayPanelProps,
+  type OverlayCloseReason, scheduleTick 
 } from "@adapttable/vue/adapter";
 import { computed, onBeforeUnmount, shallowRef } from "vue";
 import { VCard } from "vuetify/components/VCard";
@@ -10,7 +10,6 @@ import { VMenu } from "vuetify/components/VMenu";
 import { useRtl } from "vuetify/framework";
 
 import { useControlRef } from "../controls/controlRef";
-import { scheduleTick } from "../scheduleTick";
 import { VuetifySurface } from "../table/VuetifySurface";
 
 defineOptions({ inheritAttrs: false });

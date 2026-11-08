@@ -1,14 +1,24 @@
 import {
   type ManagedOverlayPanelProps,
+  scheduleTick,
   useElementRef,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { ClickOutside, ElPopover } from "element-plus";
-import { defineComponent, h, mergeProps, onScopeDispose, type PropType, provide, shallowRef, watch, withDirectives } from "vue";
+import {
+  defineComponent,
+  h,
+  mergeProps,
+  onScopeDispose,
+  type PropType,
+  provide,
+  shallowRef,
+  watch,
+  withDirectives,
+} from "vue";
 
 import { isElementRef } from "../controls/ref";
 import { ElementCard } from "../presentation/ElementCard";
-import { scheduleTick } from "../scheduleTick";
 import { rtlScrollbarGutter } from "../scrollbarGutter";
 import { columnMenuContainer } from "./panelContext";
 

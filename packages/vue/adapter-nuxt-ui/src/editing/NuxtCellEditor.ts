@@ -1,15 +1,24 @@
 import {
   type EditableCellEditorProps,
   editorInputType,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { computed, createVNode, defineComponent, h, onMounted, type PropType, shallowRef, watch } from "vue";
+import {
+  computed,
+  createVNode,
+  defineComponent,
+  h,
+  onMounted,
+  type PropType,
+  shallowRef,
+  watch,
+} from "vue";
 
 import NuxtCheckbox from "../controls/NuxtCheckbox.vue";
 import NuxtInput from "../controls/NuxtInput.vue";
 import NuxtMultiSelect from "../controls/NuxtMultiSelect";
 import NuxtSelect from "../controls/NuxtSelect.vue";
-import { scheduleTick } from "../scheduleTick";
 
 const editorRuntimeProps = {
   controller: {

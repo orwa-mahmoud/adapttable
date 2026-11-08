@@ -11624,7 +11624,8 @@
       "VueRowReorderModel",
       "KitEnvironment",
       "useLocaleLabels",
-      "withKitEnvironment"
+      "withKitEnvironment",
+      "scheduleTick"
     ],
     "adapter-vue-unstyled": [
       "CellContext",

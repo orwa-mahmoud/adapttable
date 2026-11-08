@@ -16,6 +16,7 @@ import {
   AGENT_PROGRESS_STATE,
   AGENT_VIEW_STATE,
   eraseTableRuntime,
+  scheduleTick,
 } from "@adapttable/vue/adapter";
 import {
   computed,
@@ -26,7 +27,6 @@ import {
   watch,
 } from "vue";
 
-import { scheduleTick } from "./scheduleTick";
 export { TABLE_AGENT_STATE };
 export type { SharedApproval, TableAgentColumnPatch } from "@adapttable/ai";
 /** Neutral governance and callback options, unchanged. @public */

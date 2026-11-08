@@ -1,10 +1,9 @@
 import {
   type FilterPanelModel,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { onScopeDispose } from "vue";
-
-import { scheduleTick } from "../scheduleTick";
 
 function visible(element: HTMLElement): boolean {
   return (

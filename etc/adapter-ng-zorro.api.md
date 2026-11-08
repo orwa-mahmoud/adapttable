@@ -738,7 +738,7 @@ export class AdaptSavedViewsMenu implements OnInit {
     // (undocumented)
     protected apply(name: string): void;
     // (undocumented)
-    protected readonly direction: WritableSignal<"ltr" | "rtl">;
+    protected readonly direction: WritableSignal<"rtl" | "ltr">;
     protected readonly inputStyle: {
         flex: string;
         "inline-size": string;

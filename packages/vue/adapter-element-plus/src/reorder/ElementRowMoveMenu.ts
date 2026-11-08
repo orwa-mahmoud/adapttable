@@ -1,5 +1,6 @@
 import {
   type RowMoveMenuSlotProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
@@ -8,10 +9,16 @@ import {
   ElSelect,
   type SelectInstance,
 } from "element-plus";
-import { defineComponent, h, type PropType, shallowRef, useId, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  type PropType,
+  shallowRef,
+  useId,
+  watch,
+} from "vue";
 
 import { elementButton } from "../controls/button";
-import { scheduleTick } from "../scheduleTick";
 /** The shared controller owns target selection and pending confirmation. */
 export const ElementRowMoveMenu = defineComponent(
   (props: RowMoveMenuSlotProps) => {

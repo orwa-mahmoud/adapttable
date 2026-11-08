@@ -1,11 +1,18 @@
 import {
   type ContextMenuSurfaceProps,
   elementRef,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, type PropType, shallowRef, type VNodeChild, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  type PropType,
+  shallowRef,
+  type VNodeChild,
+  watch,
+} from "vue";
 
-import { scheduleTick } from "../scheduleTick";
 /** Native HTML is this kit's menu primitive, including its keyboard behavior. */
 export const NativeContextMenuSurface = defineComponent(
   (props: ContextMenuSurfaceProps<VNodeChild>) => {
