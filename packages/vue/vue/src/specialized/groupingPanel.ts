@@ -30,6 +30,7 @@ import {
 } from "../features/grouping";
 import {
   eraseTableRuntime,
+  type FeatureMountContext,
   type StaticTableFeature,
   type TableFeature,
 } from "../features/tableFeature";
@@ -324,15 +325,7 @@ export function groupingPanel<TRow>(
   extras: GroupingExtras<TRow> = {}
 ): TableFeature<TRow> {
   const base = coreGroupingPanel<TRow>(initialGroupBy, extras);
-  return withFrontendRowModel(
-    {
-      id: base.id,
-      requiredSlots: [groupingPanelControlKey<never>()],
-      apply: (input) => ({
-        ...base.apply?.(input),
-        bodyModel: projectHeadlessRows,
-      }),
-      mount: (context) => {
+  function useGroupingPanel(context: FeatureMountContext<TRow>): void {
         mountGrouping(context);
         let disposed = false;
         onScopeDispose(() => {
@@ -413,7 +406,16 @@ export function groupingPanel<TRow>(
           () => context.state.set(groupingPanelModelKey<TRow>(), model.value),
           { flush: "sync" }
         );
-      },
+  }
+  return withFrontendRowModel(
+    {
+      id: base.id,
+      requiredSlots: [groupingPanelControlKey<never>()],
+      apply: (input) => ({
+        ...base.apply?.(input),
+        bodyModel: projectHeadlessRows,
+      }),
+      mount: useGroupingPanel,
     },
     createTableEngine
   );

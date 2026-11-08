@@ -51,7 +51,7 @@ interface GroupingPatch<TRow> extends GroupingExtras<TRow> {
   readonly groupBy?: MaybeRefOrGetter<string | readonly string[]>;
   readonly extraRows?: readonly ExtraRow[];
 }
-export function mountGrouping<TRow>(context: FeatureMountContext<TRow>): void {
+function useGrouping<TRow>(context: FeatureMountContext<TRow>): void {
   let disposed = false;
   onScopeDispose(() => {
     disposed = true;
@@ -111,6 +111,8 @@ export function mountGrouping<TRow>(context: FeatureMountContext<TRow>): void {
     flush: "sync",
   });
 }
+/** @public */
+export { useGrouping as mountGrouping };
 /** Row-free options compose into tables without an explicit row annotation. @public */
 export type StaticGroupingExtras = Omit<
   GroupingExtras<unknown>,
@@ -138,7 +140,7 @@ export function grouping<TRow>(
         groupBy,
         bodyModel: projectHeadlessRows,
       }),
-      mount: mountGrouping,
+      mount: useGrouping,
     },
     createTableEngine
   );

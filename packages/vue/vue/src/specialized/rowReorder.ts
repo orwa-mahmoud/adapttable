@@ -24,7 +24,7 @@ import {
   type RowReorderHandleSlotProps,
   type RowReorderMoveButtonProps,
 } from "@adapttable/core/binding";
-import type { TableFeature } from "@adapttable/vue";
+import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
 import {
   computed,
   h,
@@ -302,11 +302,7 @@ export function rowReorder<TRow>(
   onRowReorder: RowReorderHandler<TRow>,
   options?: RowReorderOptions<TRow>
 ): TableFeature<TRow> {
-  return {
-    id: "row-reorder",
-    requiredSlots: [rowReorderControlKey<never>()],
-    apply: () => ({ bodyModel: projectHeadlessRows }),
-    mount: (context) => {
+  function useRowReorderMount(context: FeatureMountContext<TRow>): void {
       let previousOrder: ReadonlyMap<string, number> | undefined;
       const hostOrder = computed(() => {
         const previous = previousOrder;
@@ -381,6 +377,11 @@ export function rowReorder<TRow>(
         (value) => context.state.set(rowReorderModelKey<TRow>(), value),
         { immediate: true, flush: "sync" }
       );
-    },
+  }
+  return {
+    id: "row-reorder",
+    requiredSlots: [rowReorderControlKey<never>()],
+    apply: () => ({ bodyModel: projectHeadlessRows }),
+    mount: useRowReorderMount,
   };
 }
