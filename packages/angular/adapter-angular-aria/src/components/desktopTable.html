@@ -3,6 +3,25 @@
 </ng-template>
 <ng-template #table let-content="content" let-attrs="attrs">
   <table data-adapttable-part="table" [adaptAttrs]="attrs">
+    <ng-template
+      adaptHeaderTemplate
+      let-content="content"
+      let-attrs="attrs"
+      let-rowSpan="rowSpan"
+      let-colSpan="colSpan"
+      let-part="part"
+      let-scope="scope"
+    >
+      <th
+        [attr.data-adapttable-part]="part"
+        [attr.scope]="scope"
+        [adaptAttrs]="attrs"
+        [attr.rowspan]="rowSpan > 1 ? rowSpan : null"
+        [attr.colspan]="colSpan"
+      >
+        <ng-container *ngTemplateOutlet="content" />
+      </th>
+    </ng-template>
     <ng-container *ngTemplateOutlet="content" />
   </table>
 </ng-template>
@@ -61,15 +80,19 @@
   let-part="part"
   let-scope="scope"
 >
-  <th
-    [attr.data-adapttable-part]="part"
-    [attr.scope]="scope"
-    [adaptAttrs]="attrs"
-    [attr.rowspan]="rowSpan > 1 ? rowSpan : null"
-    [attr.colspan]="colSpan"
-  >
-    <ng-container *ngTemplateOutlet="content" />
-  </th>
+  <ng-container
+    *ngTemplateOutlet="
+      headerTemplate;
+      context: {
+        content: content,
+        attrs: attrs,
+        rowSpan: rowSpan,
+        colSpan: colSpan,
+        part: part,
+        scope: scope,
+      }
+    "
+  />
 </ng-template>
 <ng-template #cell let-content="content" let-attrs="attrs">
   <td data-adapttable-part="cell" [adaptAttrs]="attrs">
