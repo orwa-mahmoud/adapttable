@@ -342,8 +342,8 @@ export function FilterHeaderTrigger<TRow>(
       >
         <FiltersIcon size={14} />
       </summary>
-      <div
-        role="dialog"
+      <dialog
+        open
         aria-label={filterLabel(props.def)}
         data-adapttable-part="filter-header-cell"
         className={props.classNames?.filterHeaderCell}
@@ -351,7 +351,10 @@ export function FilterHeaderTrigger<TRow>(
           position: "absolute",
           zIndex: 3,
           insetInlineStart: 0,
+          insetInlineEnd: "auto",
           top: "100%",
+          bottom: "auto",
+          margin: 0,
           minWidth: "20rem",
           padding: "0.5rem",
           background: "Canvas",
@@ -366,7 +369,7 @@ export function FilterHeaderTrigger<TRow>(
           registry={props.registry}
           classNames={props.classNames}
         />
-      </div>
+      </dialog>
     </details>
   );
 }
