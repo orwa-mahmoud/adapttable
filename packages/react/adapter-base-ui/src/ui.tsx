@@ -424,71 +424,75 @@ export const Callout = {
 
 type Justify = "start" | "center" | "end";
 
+function TableRoot({
+  size = "2",
+  variant: _variant,
+  className,
+  children,
+  tableStyle,
+  // The grid semantics belong to the <table>, not to the scroll wrapper this
+  // component owns: a role-less div carrying `aria-rowcount` states the
+  // dataset size to nothing, and the same div carrying `aria-label` names
+  // nothing. Both are pulled out of the rest spread and applied below.
+  role,
+  "aria-rowcount": ariaRowCount,
+  "aria-colcount": ariaColCount,
+  "aria-label": ariaLabel,
+  ...rest
+}: Readonly<
+  {
+    size?: Size;
+    variant?: string;
+    className?: string;
+    children?: ReactNode;
+    /** Style for the inner `<table>` — the element a fitted layout needs. */
+    tableStyle?: CSSProperties;
+  } & HTMLAttributes<HTMLDivElement>
+>) {
+  return (
+    <div
+      className={cx("adapttable-table-root", className)}
+      data-size={size}
+      {...rest}
+      data-adapttable-part={role === "grid" ? "grid" : undefined}
+    >
+      <table
+        data-adapttable-part="table"
+        style={tableStyle}
+        role={role}
+        aria-rowcount={ariaRowCount}
+        aria-colcount={ariaColCount}
+        aria-label={ariaLabel}
+      >
+        {children}
+      </table>
+    </div>
+  );
+}
+
+function TableRow(
+  props: Readonly<
+    {
+      children?: ReactNode;
+      className?: string;
+      style?: CSSProperties;
+      ref?: Ref<HTMLTableRowElement>;
+    } & HTMLAttributes<HTMLTableRowElement>
+  >
+) {
+  return <tr {...props} />;
+}
+
 /** Semantic HTML table namespace matching other adapters' Table usage. */
 export const Table = {
-  Root({
-    size = "2",
-    variant: _variant,
-    className,
-    children,
-    tableStyle,
-    // The grid semantics belong to the <table>, not to the scroll wrapper this
-    // component owns: a role-less div carrying `aria-rowcount` states the
-    // dataset size to nothing, and the same div carrying `aria-label` names
-    // nothing. Both are pulled out of the rest spread and applied below.
-    role,
-    "aria-rowcount": ariaRowCount,
-    "aria-colcount": ariaColCount,
-    "aria-label": ariaLabel,
-    ...rest
-  }: Readonly<
-    {
-      size?: Size;
-      variant?: string;
-      className?: string;
-      children?: ReactNode;
-      /** Style for the inner `<table>` — the element a fitted layout needs. */
-      tableStyle?: CSSProperties;
-    } & HTMLAttributes<HTMLDivElement>
-  >) {
-    return (
-      <div
-        className={cx("adapttable-table-root", className)}
-        data-size={size}
-        {...rest}
-        data-adapttable-part={role === "grid" ? "grid" : undefined}
-      >
-        <table
-          data-adapttable-part="table"
-          style={tableStyle}
-          role={role}
-          aria-rowcount={ariaRowCount}
-          aria-colcount={ariaColCount}
-          aria-label={ariaLabel}
-        >
-          {children}
-        </table>
-      </div>
-    );
-  },
+  Root: TableRoot,
   Header({ children }: Readonly<{ children?: ReactNode }>) {
     return <thead>{children}</thead>;
   },
   Body({ children }: Readonly<{ children?: ReactNode }>) {
     return <tbody>{children}</tbody>;
   },
-  Row(
-    props: Readonly<
-      {
-        children?: ReactNode;
-        className?: string;
-        style?: CSSProperties;
-        ref?: Ref<HTMLTableRowElement>;
-      } & HTMLAttributes<HTMLTableRowElement>
-    >
-  ) {
-    return <tr {...props} />;
-  },
+  Row: TableRow,
   Cell({
     justify,
     ...rest

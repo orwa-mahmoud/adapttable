@@ -11,7 +11,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
-  DesktopTableStructure,
+  DesktopTableChrome,
   type Direction,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
@@ -851,14 +851,11 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
   };
 
   return (
-    <DesktopTableStructure
-      a={assembly}
-      h={
-        // eslint-disable-next-line no-sparse-arrays, @typescript-eslint/unbound-method -- empty slots stay native; Root and Row only read their props
-        [, Table.Root, , , Table.Row]
-      }
-      p={false}
-      s={{
+    <DesktopTableChrome
+      assembly={assembly}
+      hosts={{ Table: Table.Root, Row: Table.Row }}
+      applyHeaderRowProps={false}
+      scrollBoxProps={{
         ref: (node: HTMLDivElement | null) => {
           scroll.bindScrollBox(node);
           node?.style.setProperty(
@@ -877,8 +874,8 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           overflowY: maxHeight == null ? undefined : "auto",
         },
       }}
-      b={<style>{STICKY_FIX_CSS}</style>}
-      t={{
+      beforeTable={<style>{STICKY_FIX_CSS}</style>}
+      tableProps={{
         size,
         variant: "surface",
         "data-size": size,
@@ -890,15 +887,15 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           ? { tableLayout: tableStyle.tableLayout, width: tableStyle.width }
           : undefined,
       }}
-      rl={leadingHeaders}
-      rt={trailingHeaders}
-      rc={renderPlanCell}
-      rf={renderLeaf}
-      rr={renderRow}
-      rg={renderGroup}
-      rx={renderExtra}
-      rv={renderPad}
-      rs={renderSummary}
+      renderLeading={leadingHeaders}
+      renderTrailing={trailingHeaders}
+      renderPlanCell={renderPlanCell}
+      renderLeaf={renderLeaf}
+      renderRow={renderRow}
+      renderGroup={renderGroup}
+      renderExtra={renderExtra}
+      renderVirtualPad={renderPad}
+      renderSummary={renderSummary}
     />
   );
 }
