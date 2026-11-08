@@ -312,6 +312,9 @@ export function approvalArgumentPairs(args: unknown): readonly ApprovalArgumentP
 export type ApprovalPresentation = "widget" | "table" | "modal";
 
 // @public
+export function approvalProposalText(proposal: AgentApprovalProposal, labels: TableLabels | undefined): string;
+
+// @public
 export interface ApprovalReview {
     readonly approved: number;
     readonly approveLabel: string;

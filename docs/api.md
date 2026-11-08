@@ -1132,14 +1132,17 @@ results and the rest), the feature-state keys `DENSITY_STATE`
 (`DensityFeatureState`) and `ROW_REORDER`, `resolveColumnDefaults`
 (`ResolvableColumn`) and `resolveColumnHeaders` for a column's declarative
 defaults, `columnPathText` for a data-path value as cell text, and
-`sameRows` — whether a new `data` array holds the same rows, so a table
-engine does not rebuild for an inline array. Source refresh shares
-`sourceViewKey` / `SourceViewKeyInput`, `sameIdentity` and `cachedSnapshot` /
-`CachedSnapshot`; a composed grouping feature carries its evaluator through
+`sameItems` — whether two lists hold the same items by identity, so a table
+engine does not rebuild for an inline array (`sameRows` is its deprecated
+row-named form) — with `retainItems`, which keeps the previous list while its
+items are unchanged. Source refresh shares `sourceViewKey` /
+`SourceViewKeyInput` and `cachedSnapshot` / `CachedSnapshot`; a composed grouping feature carries its evaluator through
 `withFrontendRowModel` / `frontendRowModelOf`; `virtualItemMeta` copies the
 virtualizer fields a row keeps; and `approvalValueText` /
 `approvalArgumentPairs` / `ApprovalArgumentPair` turn an approval review's
-values and arguments into readable text. `KitEnvironment` / `withKitEnvironment` merge what a
+values and arguments into readable text, with `approvalProposalText` writing
+one proposed change as its review line. `rowMoveMenuProps` (reading a `RowMoveMenuSource`) builds a row's
+move menu and the confirmation its pending move waits for. `KitEnvironment` / `withKitEnvironment` merge what a
 kit read from its UI library — direction, locale, labels, density — under the
 table's own props; every binding re-exports them.
 
@@ -2748,7 +2751,12 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `DesktopTableChromeClassNames` / `DesktopTableHosts` and `MobileCardsChrome` /
 `MobileCardsChromeProps` / `MobileCardsChromeClassNames` / `MobileCardsHosts` /
 `MobileCardSlot` (the one desktop table and mobile card list every kit fills
-with its own elements and controls), `KitEnvironment` / `withKitEnvironment`
+with its own elements and controls), `mobileCardSlots` / `MobileCardSlotKit` /
+`MobileCardEntry` / `MobileCardListProps` / `MobileCardGrouping` /
+`MobileCardGroupEntry` (the card
+list's order, pinned totals, groups, extra rows and each card's list-item
+attributes, drawn with the kit's card host and body), `MobileCardBodyProps` /
+`mobileCardPropsEqual` (a card body's inputs and its memo comparator), `KitEnvironment` / `withKitEnvironment`
 (the direction, locale, labels and density a kit read from its UI library,
 with the table's own props winning), `useLocaleLabels` (that library
 locale's labels, loaded on demand), `ReducedMotionScope` (marks a table whose
@@ -3264,7 +3272,12 @@ provide group captions, aggregates and expansion props. `AdaptDesktopStructure`
 and `AdaptMobileStructure` draw the shared desktop table and card list from a
 kit's `AdaptDesktopSlots` / `AdaptMobileSlots` templates. A kit that declares its header-cell template inside
 its table template marks it with `AdaptHeaderTemplate` and reads it from an
-`AdaptHeaderTemplateSlot` it provides.
+`AdaptHeaderTemplateSlot` it provides. `AdaptTableSurface` holds the inputs
+and scroll box both structures and every kit body share;
+`AdaptDesktopTableHost` and `AdaptMobileCardsHost` give a kit's table and card
+components their structure's scroll box; `provideAdaptTableState()` provides
+the find, palette and context-menu state a kit's data table needs; and
+`scrollBoxStyle` is the scroll box's style rule.
 `ADAPTTABLE_KIT_MOTION_OFF` is the token a kit provides when its UI library
 turns motion off, and `mountForcedColorsStyles` installs the shared
 high-contrast stylesheet.

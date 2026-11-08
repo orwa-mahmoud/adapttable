@@ -5,6 +5,10 @@
       "owner": "packages/shared/core/src/approval/approvalReview.ts"
     },
     {
+      "name": "approvalProposalText",
+      "owner": "packages/shared/core/src/approval/approvalReview.ts"
+    },
+    {
       "name": "approvalValueText",
       "owner": "packages/shared/core/src/approval/approvalReview.ts"
     },
@@ -25,12 +29,20 @@
       "owner": "packages/shared/core/src/columns/resolveColumns.ts"
     },
     {
+      "name": "retainItems",
+      "owner": "packages/shared/core/src/utils/sameItems.ts"
+    },
+    {
       "name": "revisionToken",
       "owner": "packages/shared/core/src/engine/neutralTable.ts"
     },
     {
-      "name": "sameIdentity",
-      "owner": "packages/shared/core/src/source/sourceRefresh.ts"
+      "name": "rowMoveMenuProps",
+      "owner": "packages/shared/core/src/rows/rowMoveMenu.ts"
+    },
+    {
+      "name": "sameItems",
+      "owner": "packages/shared/core/src/utils/sameItems.ts"
     },
     {
       "name": "sourceViewKey",

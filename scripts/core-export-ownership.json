@@ -403,6 +403,17 @@
       "subpaths": [".", "./binding"]
     },
     {
+      "name": "approvalProposalText",
+      "kind": "runtime",
+      "module": "approval/approvalReview.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "approval/approvalReview.ts#approvalProposalText",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "approvalReview",
       "kind": "runtime",
       "module": "approval/approvalReview.ts",
@@ -15308,6 +15319,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "retainItems",
+      "kind": "runtime",
+      "module": "utils/sameItems.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "utils/sameItems.ts#retainItems",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ROW_ACTIONS_LIVE",
       "kind": "runtime",
       "module": "features/slotContract.ts",
@@ -15393,6 +15415,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/chromeModel.ts#rowAttributes",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "rowMoveMenuProps",
+      "kind": "runtime",
+      "module": "rows/rowMoveMenu.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "rows/rowMoveMenu.ts#rowMoveMenuProps",
       "subpaths": ["./binding"]
     },
     {
@@ -15506,14 +15539,14 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "sameIdentity",
+      "name": "sameItems",
       "kind": "runtime",
-      "module": "source/sourceRefresh.ts",
+      "module": "utils/sameItems.ts",
       "audience": "binding-spi",
       "path": "./binding",
       "forward": true,
       "deprecated": false,
-      "identity": "source/sourceRefresh.ts#sameIdentity",
+      "identity": "utils/sameItems.ts#sameItems",
       "subpaths": ["./binding"]
     },
     {
@@ -18066,6 +18099,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "rows/rowReorderContract.ts#RowMoveMenuSlotProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "RowMoveMenuSource",
+      "kind": "type",
+      "module": "rows/rowMoveMenu.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "rows/rowMoveMenu.ts#RowMoveMenuSource",
       "subpaths": ["./binding"]
     },
     {

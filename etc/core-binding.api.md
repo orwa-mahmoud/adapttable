@@ -240,6 +240,9 @@ export function approvalArgumentPairs(args: unknown): readonly ApprovalArgumentP
 export type ApprovalPresentation = "widget" | "table" | "modal";
 
 // @public
+export function approvalProposalText(proposal: AgentApprovalProposal, labels: TableLabels | undefined): string;
+
+// @public
 export interface ApprovalReviewSlots<TNode = unknown> {
     readonly Action: (props: AgentApprovalButtonProps) => TNode;
     readonly Approve: (props: AgentApprovalButtonProps) => TNode;
@@ -4937,6 +4940,9 @@ export function resolveRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefined, r
 export function resolveRowStyle<TRow>(rowStyle: RowStyle<TRow> | undefined, rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): CssProperties | undefined;
 
 // @public
+export function retainItems<T>(previous: readonly T[] | undefined, next: readonly T[] | undefined): readonly T[] | undefined;
+
+// @public
 export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
 
 // @public
@@ -5105,11 +5111,17 @@ export interface RowMoveMenuModel<TRow> {
 }
 
 // @public
+export function rowMoveMenuProps<TRow>(reorder: RowMoveMenuSource<TRow>, labels: RowReorderLabels | undefined, row: TRow, moveLocked: boolean): RowMoveMenuSlotProps | undefined;
+
+// @public
 export interface RowMoveMenuSlotProps {
     readonly confirmation?: RowMoveConfirmationProps;
     readonly items: readonly RowMoveMenuItemProps[];
     readonly label: string;
 }
+
+// @public
+export type RowMoveMenuSource<TRow> = Pick<RowReorderState<TRow>, "pendingMove" | "selectMoveTarget" | "confirmMove" | "cancelMove"> & Partial<Pick<RowReorderState<TRow>, "moveMenu" | "isMovePending">>;
 
 // @public
 export type RowMoveRequest<TRow> = {
@@ -5472,9 +5484,9 @@ export interface RuntimeChromeInput<TRow> {
 export type RuntimeColumn<TRow> = ColumnMetadata<TRow>;
 
 // @public
-export function sameIdentity(left: readonly unknown[], right: readonly unknown[]): boolean;
+export function sameItems<T>(a: readonly T[], b: readonly T[]): boolean;
 
-// @public
+// @public @deprecated
 export function sameRows<TRow>(a: readonly TRow[], b: readonly TRow[]): boolean;
 
 // @public

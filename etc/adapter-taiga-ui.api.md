@@ -8,9 +8,10 @@ import { ActiveFilterChipsSlotProps } from '@adapttable/angular/adapter';
 import { AdaptAutoFilterFormModel } from '@adapttable/angular/adapter';
 import { AdaptColumnMenuModel } from '@adapttable/angular/adapter';
 import { AdaptDataTableShell } from '@adapttable/angular/adapter';
+import { AdaptDesktopTableHost } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderCardModel } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderRowModel } from '@adapttable/angular/adapter';
-import { AdaptHeaderTemplateSlot } from '@adapttable/angular/adapter';
+import { AdaptMobileCardsHost } from '@adapttable/angular/adapter';
 import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
 import { AfterViewInit } from '@angular/core';
 import { BodyCellView } from '@adapttable/angular/adapter';
@@ -322,33 +323,9 @@ export class AdaptDensityButton {
 }
 
 // @internal
-export class AdaptDesktopTable<TRow> {
-    protected readonly header: AdaptHeaderTemplateSlot;
+export class AdaptDesktopTable<TRow> extends AdaptDesktopTableHost<TRow> {
     // (undocumented)
-    readonly maxHeight: InputSignal<string | number | undefined>;
-    // (undocumented)
-    readonly rowKey: InputSignal<(row: TRow) => string>;
-    scrollElement(): HTMLElement | null;
-    // (undocumented)
-    readonly view: InputSignal<TableView<TRow>>;
-    // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDesktopTable<any>, "adapt-desktop-table", never, {
-        "view": {
-            "alias": "view";
-            "required": true;
-            "isSignal": true;
-        };
-        "rowKey": {
-            "alias": "rowKey";
-            "required": true;
-            "isSignal": true;
-        };
-        "maxHeight": {
-            "alias": "maxHeight";
-            "required": false;
-            "isSignal": true;
-        };
-    }, {}, never, never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDesktopTable<any>, "adapt-desktop-table", never, {}, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDesktopTable<any>, never>;
 }
@@ -619,32 +596,9 @@ export class AdaptGroupMore {
 }
 
 // @internal
-export class AdaptMobileCards<TRow> {
+export class AdaptMobileCards<TRow> extends AdaptMobileCardsHost<TRow> {
     // (undocumented)
-    readonly maxHeight: InputSignal<string | number | undefined>;
-    // (undocumented)
-    readonly rowKey: InputSignal<(row: TRow) => string>;
-    scrollElement(): HTMLElement | null;
-    // (undocumented)
-    readonly view: InputSignal<TableView<TRow>>;
-    // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMobileCards<any>, "adapt-mobile-cards", never, {
-        "view": {
-            "alias": "view";
-            "required": true;
-            "isSignal": true;
-        };
-        "rowKey": {
-            "alias": "rowKey";
-            "required": true;
-            "isSignal": true;
-        };
-        "maxHeight": {
-            "alias": "maxHeight";
-            "required": false;
-            "isSignal": true;
-        };
-    }, {}, never, never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMobileCards<any>, "adapt-mobile-cards", never, {}, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMobileCards<any>, never>;
 }

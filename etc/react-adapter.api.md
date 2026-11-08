@@ -338,6 +338,7 @@ import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
 import { GroupedFlatEntry } from '@adapttable/core';
+import { GroupedFlatEntry as GroupedFlatEntry_2 } from '@adapttable/core/binding';
 import { GroupedHeaderAlign } from '@adapttable/core';
 import { groupedHeaderAlign } from '@adapttable/core/binding';
 import { groupedHeaderCellStyle } from '@adapttable/core/binding';
@@ -2755,11 +2756,118 @@ export { logicalAlign }
 // @public
 export const mergedCellStyle: (colSpan: number, rowSpan: number, appearance?: CellSpanAppearance_2, fill?: "on" | "off") => CSSProperties | undefined;
 
+// @public
+export interface MobileCardBodyProps<TRow> {
+    // (undocumented)
+    readonly ariaLabel?: string;
+    readonly className?: string;
+    // (undocumented)
+    readonly columns: readonly ColumnDef<TRow>[];
+    // (undocumented)
+    readonly confirm: ConfirmHandler;
+    readonly editing?: EditableCellEditing<TRow>;
+    // (undocumented)
+    readonly editingSignature: string | null;
+    // (undocumented)
+    readonly expanded: boolean;
+    readonly flashSignature: string;
+    // (undocumented)
+    readonly getRowId: (row: TRow) => string;
+    readonly id: string;
+    // (undocumented)
+    readonly index: number;
+    // (undocumented)
+    readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
+    // (undocumented)
+    readonly labels: Required<TableLabels>;
+    // (undocumented)
+    readonly measureElement?: (node: Element | null) => void;
+    // (undocumented)
+    readonly onRowClick?: (row: TRow) => void;
+    readonly onToggleExpand?: (id: string) => void;
+    readonly onToggleSelect?: (id: string) => void;
+    // (undocumented)
+    readonly onToggleTree?: (id: string) => void;
+    // (undocumented)
+    readonly part?: string;
+    readonly renderCard?: ReactMobileCardRenderer<TRow>;
+    // (undocumented)
+    readonly renderDetail?: (row: TRow) => ReactNode;
+    // (undocumented)
+    readonly renderRowActions?: RowActionsRenderer<TRow>;
+    // (undocumented)
+    readonly reorderSignature: string | null;
+    // (undocumented)
+    readonly row: TRow;
+    // (undocumented)
+    readonly rowActions?: readonly RowAction<TRow>[];
+    // (undocumented)
+    readonly rowActionsLayout?: RowActionsLayout;
+    // (undocumented)
+    readonly rowCount: number;
+    readonly rowReorder?: RowReorderState<TRow>;
+    readonly rows: readonly TRow[];
+    // (undocumented)
+    readonly selected: boolean;
+    readonly setSize: number;
+    readonly style?: CSSProperties;
+    // (undocumented)
+    readonly styleSignature: string;
+    readonly treeEntry?: TreeEntry<TRow>;
+    // (undocumented)
+    readonly windowStart: number;
+}
+
+// @public
+export interface MobileCardEntry<TRow> {
+    readonly body: MobileCardBodyProps<TRow>;
+    // (undocumented)
+    readonly index: number;
+    readonly itemProps: Record<string, unknown> & {
+        style: CSSProperties;
+    };
+    // (undocumented)
+    readonly key: string;
+    readonly pinned: boolean;
+    // (undocumented)
+    readonly row: TRow;
+    readonly rowClass: string | undefined;
+    // (undocumented)
+    readonly selected: boolean;
+}
+
 export { MobileCardField }
+
+// @public
+export type MobileCardGroupEntry<TRow> = Extract<GroupedFlatEntry_2<TRow>, {
+    kind: "group" | "groupFooter" | "groupMore";
+}>;
+
+// @public
+export type MobileCardGrouping<TRow> = Pick<NonNullable<SharedTableRenderProps<TRow>["grouping"]>, "entries" | "showMore"> & {
+    readonly collapsed: {
+        readonly toggle: (key: string) => void;
+    };
+};
+
+// @public
+export type MobileCardListProps<TRow> = Pick<SharedTableRenderProps<TRow>, "table" | "rows" | "getRowId" | "rowEntries" | "pinnedTopRows" | "pinnedBottomRows" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "extraRows" | "assembly" | "expansion" | "editing" | "rowReorder" | "windowStart" | "cardSetSize" | "measureElement" | "onRowClick" | "rowClassName" | "rowStyle" | "rowHeight" | "isCellFlashing" | "renderRowDetail" | "renderCard" | "rowActionsLayout" | "renderRowActions" | "confirm"> & {
+    readonly rowActions?: readonly RowAction<TRow>[];
+    readonly grouping?: MobileCardGrouping<TRow>;
+    readonly tree?: {
+        readonly entries: readonly TreeEntry<TRow>[];
+        readonly expansion: {
+            readonly toggle: (id: string) => void;
+        };
+    };
+};
 
 export { mobileCardListStyle }
 
 export { MobileCardModel }
+
+// @public
+export function mobileCardPropsEqual<TRow, TProps extends MobileCardBodyProps<TRow>>(kitProps: readonly Exclude<keyof TProps, keyof MobileCardBodyProps<TRow>>[]): (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean;
 
 // @public
 export function mobileCardRegionProps(requestedLabel: string | undefined, fallbackLabel: string, maxHeight: CSSProperties["maxHeight"]): Pick<HTMLAttributes<HTMLElement>, "aria-label" | "tabIndex">;
@@ -2811,6 +2919,18 @@ export interface MobileCardSlot {
     readonly part?: string;
     readonly props?: Record<string, unknown>;
 }
+
+// @public
+export interface MobileCardSlotKit<TRow> {
+    readonly card: (entry: MobileCardEntry<TRow>) => MobileCardSlot;
+    readonly extraCell: (part: string, content: ReactNode, kind: ExtraRowKind) => ReactNode;
+    readonly extraProps?: (kind: ExtraRowKind) => Record<string, unknown>;
+    readonly groupCard: (entry: MobileCardGroupEntry<TRow>, grouping: MobileCardGrouping<TRow>) => ReactNode;
+    readonly groupProps?: Record<string, unknown>;
+}
+
+// @public
+export function mobileCardSlots<TRow>(props: Readonly<MobileCardListProps<TRow>>, kit: MobileCardSlotKit<TRow>): MobileCardSlot[];
 
 // @public
 export interface MountStaggerOptions {

@@ -4558,7 +4558,8 @@
       "writeRowPins",
       "writeSortLevels",
       "writeStoredColumnLayout",
-      "xlsxWriter"
+      "xlsxWriter",
+      "approvalProposalText"
     ],
     "core-editing": [
       "ActionAiOptions",
@@ -6734,7 +6735,15 @@
       "windowedTableAria",
       "withFindMarks",
       "withKitEnvironment",
-      "useLocaleLabels"
+      "useLocaleLabels",
+      "MobileCardBodyProps",
+      "MobileCardEntry",
+      "MobileCardGroupEntry",
+      "MobileCardGrouping",
+      "MobileCardListProps",
+      "mobileCardPropsEqual",
+      "MobileCardSlotKit",
+      "mobileCardSlots"
     ],
     "react-features": [
       "applyTableFeatures",
@@ -7632,7 +7641,6 @@
       "rowWindow",
       "RuntimeChromeInput",
       "RuntimeColumn",
-      "sameIdentity",
       "sameRows",
       "SAVED_VIEWS",
       "SavedView",
@@ -7797,7 +7805,12 @@
       "MenuNavigationKey",
       "TreeShape",
       "KitEnvironment",
-      "withKitEnvironment"
+      "withKitEnvironment",
+      "approvalProposalText",
+      "retainItems",
+      "rowMoveMenuProps",
+      "RowMoveMenuSource",
+      "sameItems"
     ],
     "core-conformance": [
       "CONFORMANCE_COLUMNS",
@@ -12816,7 +12829,12 @@
       "TableAssistantProps",
       "TableQueryHandler",
       "AdaptHeaderTemplate",
-      "AdaptHeaderTemplateSlot"
+      "AdaptHeaderTemplateSlot",
+      "AdaptDesktopTableHost",
+      "AdaptMobileCardsHost",
+      "AdaptTableSurface",
+      "provideAdaptTableState",
+      "scrollBoxStyle"
     ],
     "adapter-element-plus-batch-editing": [
       "batchEditing",

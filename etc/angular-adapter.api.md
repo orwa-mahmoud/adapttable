@@ -287,6 +287,7 @@ import { pinnedRowPart } from '@adapttable/core/binding';
 import { pinnedRowSticky } from '@adapttable/core/binding';
 import { pinnedSummaryPart } from '@adapttable/core';
 import { printToolbarProps } from '@adapttable/core/binding';
+import { Provider } from '@angular/core';
 import { QueryAggregate } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
@@ -2394,8 +2395,21 @@ export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
 }
 
 // @public
-export abstract class AdaptDesktopTableModel<TRow> {
+export abstract class AdaptDesktopTableHost<TRow> extends AdaptTableSurface<TRow> {
+    protected readonly header: AdaptHeaderTemplateSlot;
+    // (undocumented)
+    scrollElement(): HTMLElement | null;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptDesktopTableHost<any>, never, never, {}, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDesktopTableHost<any>, never>;
+}
+
+// @public
+export abstract class AdaptDesktopTableModel<TRow> extends AdaptTableSurface<TRow> {
     constructor();
+    // (undocumented)
+    protected boxStyle(): Record<string, string> | null;
     // (undocumented)
     protected readonly columnGroupToggleSlot: FeatureSlotKey<ColumnGroupToggleProps>;
     // (undocumented)
@@ -2447,8 +2461,6 @@ export abstract class AdaptDesktopTableModel<TRow> {
     // (undocumented)
     protected readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
     // (undocumented)
-    readonly maxHeight: InputSignal<string | number | undefined>;
-    // (undocumented)
     protected readonly noAttrs: Attrs;
     // (undocumented)
     protected readonly renameColumn: (key: string, name: string) => void;
@@ -2466,14 +2478,6 @@ export abstract class AdaptDesktopTableModel<TRow> {
     // (undocumented)
     protected rowId(row: TRow): string;
     // (undocumented)
-    readonly rowKey: InputSignal<(row: TRow) => string>;
-    // (undocumented)
-    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
-    // (undocumented)
-    protected scrollBoxStyle(): Record<string, string> | null;
-    // (undocumented)
-    scrollElement(): HTMLElement | null;
-    // (undocumented)
     protected sortIndex(column: {
         key: string;
     }): number | undefined;
@@ -2485,25 +2489,7 @@ export abstract class AdaptDesktopTableModel<TRow> {
     // (undocumented)
     protected readonly treeCellSlot: FeatureSlotKey<TreeCellProps<never, unknown>>;
     // (undocumented)
-    readonly view: InputSignal<TableView<TRow>>;
-    // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptDesktopTableModel<any>, never, never, {
-        "view": {
-            "alias": "view";
-            "required": true;
-            "isSignal": true;
-        };
-        "rowKey": {
-            "alias": "rowKey";
-            "required": true;
-            "isSignal": true;
-        };
-        "maxHeight": {
-            "alias": "maxHeight";
-            "required": false;
-            "isSignal": true;
-        };
-    }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptDesktopTableModel<any>, never, never, {}, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDesktopTableModel<any>, never>;
 }
@@ -3456,7 +3442,17 @@ export class AdaptLiveRegion {
 }
 
 // @public
-export abstract class AdaptMobileCardsModel<TRow> {
+export abstract class AdaptMobileCardsHost<TRow> extends AdaptTableSurface<TRow> {
+    // (undocumented)
+    scrollElement(): HTMLElement | null;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptMobileCardsHost<any>, never, never, {}, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMobileCardsHost<any>, never>;
+}
+
+// @public
+export abstract class AdaptMobileCardsModel<TRow> extends AdaptTableSurface<TRow> {
     // (undocumented)
     protected caption(column: ColumnDef<TRow>): string | undefined;
     // (undocumented)
@@ -3490,8 +3486,6 @@ export abstract class AdaptMobileCardsModel<TRow> {
     overflowY: string;
     } | null>;
     // (undocumented)
-    readonly maxHeight: InputSignal<string | number | undefined>;
-    // (undocumented)
     protected reorderButtonsProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderButtonsProps<never>;
     // (undocumented)
     protected readonly reorderButtonsSlot: FeatureSlotKey<RowReorderButtonsProps_2<never, unknown>>;
@@ -3500,12 +3494,6 @@ export abstract class AdaptMobileCardsModel<TRow> {
     // (undocumented)
     protected rowId(row: TRow): string;
     // (undocumented)
-    readonly rowKey: InputSignal<(row: TRow) => string>;
-    // (undocumented)
-    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
-    // (undocumented)
-    scrollElement(): HTMLElement | null;
-    // (undocumented)
     protected readonly treeCards: Signal<Map<string, {
     readonly toggle: TreeToggleProps<never>;
     readonly indent: string | null;
@@ -3513,25 +3501,7 @@ export abstract class AdaptMobileCardsModel<TRow> {
     // (undocumented)
     protected readonly treeToggleSlot: FeatureSlotKey<TreeToggleProps<never>>;
     // (undocumented)
-    readonly view: InputSignal<TableView<TRow>>;
-    // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptMobileCardsModel<any>, never, never, {
-        "view": {
-            "alias": "view";
-            "required": true;
-            "isSignal": true;
-        };
-        "rowKey": {
-            "alias": "rowKey";
-            "required": true;
-            "isSignal": true;
-        };
-        "maxHeight": {
-            "alias": "maxHeight";
-            "required": false;
-            "isSignal": true;
-        };
-    }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptMobileCardsModel<any>, never, never, {}, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMobileCardsModel<any>, never>;
 }
@@ -4689,6 +4659,39 @@ export class AdaptTableStatusAnnouncer {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTableStatusAnnouncer, never>;
+}
+
+// @public
+export abstract class AdaptTableSurface<TRow> {
+    // (undocumented)
+    readonly maxHeight: InputSignal<string | number | undefined>;
+    // (undocumented)
+    readonly rowKey: InputSignal<(row: TRow) => string>;
+    // (undocumented)
+    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
+    scrollElement(): HTMLElement | null;
+    // (undocumented)
+    readonly view: InputSignal<TableView<TRow>>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptTableSurface<any>, never, never, {
+        "view": {
+            "alias": "view";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowKey": {
+            "alias": "rowKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "maxHeight": {
+            "alias": "maxHeight";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTableSurface<any>, never>;
 }
 
 // @public
@@ -6216,6 +6219,9 @@ export { pinnedSummaryPart }
 
 export { printToolbarProps }
 
+// @public
+export function provideAdaptTableState(): Provider[];
+
 export { readMultiDraft }
 
 export { RELATIVE_PRESET_LABEL_KEYS }
@@ -6451,6 +6457,9 @@ export interface SavedViewsPanelSlots {
 }
 
 export { SavedViewsSlotProps }
+
+// @public
+export function scrollBoxStyle(maxHeight: number | string | undefined, tableStyle: unknown): Record<string, string> | null;
 
 export { SEARCH_ICON }
 
