@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@adapttable/angular";
-import { Dir } from "@angular/cdk/bidi";
+import { Dir, Directionality } from "@angular/cdk/bidi";
 import { Component } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
@@ -54,8 +54,31 @@ class ExplicitDirection {
   readonly rowKey = (row: City) => row.id;
 }
 
+@Component({
+  imports: [AdaptDataTable],
+  providers: [
+    {
+      provide: Directionality,
+      useValue: { valueSignal: () => undefined },
+    },
+  ],
+  template: `
+    <adapt-data-table
+      [data]="cities"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+    />
+  `,
+})
+class UnsetDirection {
+  readonly cities = CITIES;
+  readonly columns = COLUMNS;
+  readonly rowKey = (row: City) => row.id;
+}
+
 async function rootDir(
-  host: typeof ParentDirection | typeof ExplicitDirection
+  host: typeof ParentDirection | typeof ExplicitDirection | typeof UnsetDirection
 ) {
   const fixture = TestBed.createComponent(host);
   fixture.autoDetectChanges();
@@ -73,6 +96,11 @@ describe("Angular CDK library environment", () => {
 
   it("lets an explicit dir win", async () => {
     const root = await rootDir(ExplicitDirection);
+    expect(root?.getAttribute("dir")).toBe("ltr");
+  });
+
+  it("stays left to right when the kit reports no direction", async () => {
+    const root = await rootDir(UnsetDirection);
     expect(root?.getAttribute("dir")).toBe("ltr");
   });
 });
