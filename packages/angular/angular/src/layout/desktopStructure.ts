@@ -299,7 +299,7 @@ export class AdaptDesktopStructure<TRow> extends AdaptDesktopTableModel<TRow> {
   }
 
   /** Where a leading rail sticks once a data column is pinned to the start. */
-  protected railOffset(rail: RailPart): string {
+  protected railOffset(rail: "expand" | "reorder" | "selection"): string {
     return `var(--at-offset-${rail}, 0px)`;
   }
 
