@@ -1029,7 +1029,7 @@ export {
 } from "./layout/densityContract";
 export type { FullscreenState } from "./layout/layoutBindingState";
 export type { UsePivotUrlStateResult } from "./pivot/pivotBindingState";
-export { rowMoveMenuProps } from "./rows/rowMoveMenu";
+export { rowMoveMenuProps, type RowMoveMenuSource } from "./rows/rowMoveMenu";
 export { ROW_REORDER, type RowReorderState } from "./rows/rowReorderContract";
 export type {
   ChangedCellFlashState,

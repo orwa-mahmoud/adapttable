@@ -538,6 +538,7 @@ export {
 export {
   type MobileCardBodyProps,
   type MobileCardEntry,
+  type MobileCardGroupEntry,
   type MobileCardGrouping,
   type MobileCardListProps,
   mobileCardPropsEqual,

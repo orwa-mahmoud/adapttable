@@ -7,6 +7,7 @@
 import {
   bodyRowEntries,
   type ConfirmHandler,
+  type ExtraRowKind,
   pinnedSummaryPart,
   pinnedSummaryRowId,
   pinnedSummarySideFromId,
@@ -184,11 +185,12 @@ export type MobileCardGrouping<TRow> = Pick<
   "entries" | "showMore"
 > & { readonly collapsed: { readonly toggle: (key: string) => void } };
 
-/** An extra row's kind. */
-type ExtraRowKind = "separator" | "fullWidth";
-
-/** A group header, footer or show-more entry. */
-type GroupCardEntry<TRow> = Extract<
+/**
+ * A group header, footer or show-more entry in the card list.
+ *
+ * @public
+ */
+export type MobileCardGroupEntry<TRow> = Extract<
   GroupedFlatEntry<TRow>,
   { kind: "group" | "groupFooter" | "groupMore" }
 >;
@@ -213,7 +215,7 @@ export interface MobileCardSlotKit<TRow> {
   readonly groupProps?: Record<string, unknown>;
   /** A group header, footer or show-more card, with the table's grouping. */
   readonly groupCard: (
-    entry: GroupCardEntry<TRow>,
+    entry: MobileCardGroupEntry<TRow>,
     grouping: MobileCardGrouping<TRow>
   ) => ReactNode;
 }

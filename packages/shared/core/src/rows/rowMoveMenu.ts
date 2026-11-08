@@ -5,8 +5,12 @@ import type {
 } from "./rowReorderContract";
 import type { RowReorderLabels } from "./rowReorderEngine";
 
-/** The part of a reorder state the destination menu reads. */
-type RowMoveMenuSource<TRow> = Pick<
+/**
+ * The part of a reorder state the destination menu reads.
+ *
+ * @public
+ */
+export type RowMoveMenuSource<TRow> = Pick<
   RowReorderState<TRow>,
   "pendingMove" | "selectMoveTarget" | "confirmMove" | "cancelMove"
 > &
