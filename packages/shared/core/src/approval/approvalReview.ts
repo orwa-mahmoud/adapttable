@@ -11,7 +11,7 @@
  *
  * Nothing here renders. It is the model the surfaces read.
  */
-import { defaultLabels } from "../labels";
+import { defaultLabels, resolveLabels } from "../labels";
 import type { TableLabels } from "../types";
 import type {
   AgentApprovalDecision,
@@ -202,6 +202,31 @@ export function approvalValueText(value: unknown): string | undefined {
     return String(value);
   }
   return JSON.stringify(value);
+}
+
+/**
+ * One proposed change as the line a reader approves or declines. The
+ * column's own wording wins where it has one, so the review reads in the
+ * table's units, and a value nobody could look up reads as unavailable,
+ * not as an empty cell.
+ *
+ * @public
+ */
+export function approvalProposalText(
+  proposal: AgentApprovalProposal,
+  labels: TableLabels | undefined
+): string {
+  const copy = resolveLabels(labels);
+  return copy.proposalChange({
+    row: proposal.rowLabel ?? proposal.rowKey,
+    ...(proposal.column === undefined
+      ? {}
+      : { column: proposal.columnLabel ?? proposal.column }),
+    before: proposal.beforeUnavailable
+      ? copy.proposalValueUnavailable
+      : (proposal.beforeText ?? approvalValueText(proposal.before)),
+    after: proposal.afterText ?? approvalValueText(proposal.after),
+  });
 }
 
 /** One argument a host will receive, already readable. @public */

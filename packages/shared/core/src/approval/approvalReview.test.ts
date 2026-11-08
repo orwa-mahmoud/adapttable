@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   approvalArgumentPairs,
+  approvalProposalText,
   approvalReview,
   approvalValueText,
 } from "./approvalReview";
@@ -223,5 +224,25 @@ describe("reading a value onto a review line", () => {
     expect(approvalArgumentPairs({ note: undefined })).toEqual([
       { name: "Note", value: "—" },
     ]);
+  });
+});
+
+describe("approvalProposalText", () => {
+  it("prefers the column's own wording and marks an unknown value", () => {
+    const text = approvalProposalText(
+      {
+        rowKey: "r1",
+        rowLabel: "Acme",
+        column: "price",
+        columnLabel: "Price",
+        beforeUnavailable: true,
+        after: 12,
+        afterText: "$12.00",
+      },
+      undefined
+    );
+    expect(text).toContain("Acme");
+    expect(text).toContain("Price");
+    expect(text).toContain("$12.00");
   });
 });

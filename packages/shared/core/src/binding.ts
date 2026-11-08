@@ -37,6 +37,7 @@ export {
 export {
   type ApprovalArgumentPair,
   approvalArgumentPairs,
+  approvalProposalText,
   approvalValueText,
 } from "./approval/approvalReview";
 export {
@@ -1028,6 +1029,7 @@ export {
 } from "./layout/densityContract";
 export type { FullscreenState } from "./layout/layoutBindingState";
 export type { UsePivotUrlStateResult } from "./pivot/pivotBindingState";
+export { rowMoveMenuProps } from "./rows/rowMoveMenu";
 export { ROW_REORDER, type RowReorderState } from "./rows/rowReorderContract";
 export type {
   ChangedCellFlashState,

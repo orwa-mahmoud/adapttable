@@ -1,10 +1,9 @@
 /** Shared approval structure. All decisions and list surfaces are kit slots. */
 import {
   type AgentApprovalPending,
-  type AgentApprovalProposal,
   approvalArgumentPairs,
+  approvalProposalText,
   approvalReview,
-  approvalValueText,
   resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
@@ -34,22 +33,6 @@ export interface ApprovalReviewChromeProps {
   readonly onBack?: () => void;
   readonly className?: string;
   readonly buttonClassName?: string;
-}
-function describe(
-  proposal: AgentApprovalProposal,
-  labels: TableLabels | undefined
-): string {
-  const copy = resolveLabels(labels);
-  return copy.proposalChange({
-    row: proposal.rowLabel ?? proposal.rowKey,
-    ...(proposal.column === undefined
-      ? {}
-      : { column: proposal.columnLabel ?? proposal.column }),
-    before: proposal.beforeUnavailable
-      ? copy.proposalValueUnavailable
-      : (proposal.beforeText ?? approvalValueText(proposal.before)),
-    after: proposal.afterText ?? approvalValueText(proposal.after),
-  });
 }
 /** @public */
 export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
@@ -115,7 +98,7 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
       });
       const rows = (full ? review.items : review.preview).map(
         ({ id, index, proposal, decision }) => {
-          const text = describe(proposal, props.labels);
+          const text = approvalProposalText(proposal, props.labels);
           return h(
             "li",
             {

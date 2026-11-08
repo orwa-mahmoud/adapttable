@@ -2,14 +2,14 @@
  * Row-reorder layout. The live region stays here. Adapters pass the grip
  * and the mobile up/down buttons the end user clicks.
  */
-import { resolveLabels } from "@adapttable/core";
-import type {
-  RowMoveMenuSlotProps,
-  RowReorderButtonsProps as NeutralRowReorderButtonsProps,
-  RowReorderButtonsSlots as NeutralRowReorderButtonsSlots,
-  RowReorderHandleProps as NeutralRowReorderHandleProps,
-  RowReorderHandleSlotProps as NeutralRowReorderHandleSlotProps,
-  RowReorderHandleSlots as NeutralRowReorderHandleSlots,
+import {
+  rowMoveMenuProps,
+  type RowMoveMenuSlotProps,
+  type RowReorderButtonsProps as NeutralRowReorderButtonsProps,
+  type RowReorderButtonsSlots as NeutralRowReorderButtonsSlots,
+  type RowReorderHandleProps as NeutralRowReorderHandleProps,
+  type RowReorderHandleSlotProps as NeutralRowReorderHandleSlotProps,
+  type RowReorderHandleSlots as NeutralRowReorderHandleSlots,
 } from "@adapttable/core/binding";
 import type { DragEvent, KeyboardEvent, ReactElement, ReactNode } from "react";
 
@@ -96,46 +96,8 @@ function RowMoveMenu<TRow>({
   moveLocked: boolean;
   Menu: (props: RowMoveMenuSlotProps) => ReactNode;
 }>): ReactNode {
-  const menu = reorder.moveMenu?.(row);
-  if (!menu) return null;
-  const ownsPending =
-    reorder.isMovePending?.(row) ?? reorder.pendingMove?.row === row;
-  const pending = ownsPending ? reorder.pendingMove : undefined;
-  const from =
-    pending?.kind === "group"
-      ? pending.fromGroup.label
-      : pending?.fromParent.label;
-  const to =
-    pending?.kind === "group" ? pending.toGroup.label : pending?.toParent.label;
-  const copy = resolveLabels(labels);
-  return (
-    <Menu
-      label={menu.label}
-      items={menu.targets.map((target) => ({
-        id: target.id,
-        label: target.label,
-        disabled: moveLocked || target.disabledReason !== undefined,
-        disabledReason: target.disabledReason,
-        onSelect: () => reorder.selectMoveTarget(target),
-      }))}
-      confirmation={
-        pending && from && to
-          ? {
-              title: copy.confirmRowMoveTitle,
-              description: copy.confirmRowMoveDescription(
-                pending.rowLabel,
-                from,
-                to
-              ),
-              confirmLabel: copy.confirmRowMove,
-              cancelLabel: copy.cancel,
-              onConfirm: reorder.confirmMove,
-              onCancel: reorder.cancelMove,
-            }
-          : undefined
-      }
-    />
-  );
+  const props = rowMoveMenuProps(reorder, labels, row, moveLocked);
+  return props ? <Menu {...props} /> : null;
 }
 
 export function RowReorderHandleChrome<TRow>({

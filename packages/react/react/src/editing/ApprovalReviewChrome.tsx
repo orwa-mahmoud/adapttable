@@ -17,15 +17,12 @@ import {
 } from "@adapttable/core";
 import {
   approvalArgumentPairs,
+  approvalProposalText,
   type ApprovalReviewSlots as NeutralApprovalReviewSlots,
-  approvalValueText,
 } from "@adapttable/core/binding";
 import { Fragment, type ReactElement, type ReactNode, useId } from "react";
 
-import type {
-  AgentApprovalButtonProps,
-  AgentApprovalProposal,
-} from "./AgentApprovalChrome";
+import type { AgentApprovalButtonProps } from "./AgentApprovalChrome";
 
 /**
  * Controls a kit supplies to the shared review body — `@adapttable/core`'s
@@ -66,31 +63,6 @@ export interface ApprovalReviewChromeProps {
   readonly className?: string;
   /** Class for each button. */
   readonly buttonClassName?: string;
-}
-
-/**
- * Read one change as a line the reader can act on.
- *
- * `Unavailable` and `—` are kept apart deliberately: a value nobody could
- * look up is not an empty cell.
- */
-function describeItem(
-  proposal: AgentApprovalProposal,
-  labels: TableLabels | undefined
-): string {
-  const copy = resolveLabels(labels);
-  return copy.proposalChange({
-    row: proposal.rowLabel ?? proposal.rowKey,
-    ...(proposal.column === undefined
-      ? {}
-      : { column: proposal.columnLabel ?? proposal.column }),
-    // The column's own wording wins where it has one: the card a reader
-    // agrees on should read in the same units as the table behind it.
-    before: proposal.beforeUnavailable
-      ? copy.proposalValueUnavailable
-      : (proposal.beforeText ?? approvalValueText(proposal.before)),
-    after: proposal.afterText ?? approvalValueText(proposal.after),
-  });
 }
 
 /**
@@ -283,7 +255,7 @@ function ReviewRow({
   readonly onDecide?: (index: number, approved: boolean) => void;
   readonly buttonClassName?: string;
 }): ReactElement {
-  const text = describeItem(item.proposal, labels);
+  const text = approvalProposalText(item.proposal, labels);
   const copy = resolveLabels(labels);
   const buttonClass: { className?: string } = buttonClassName
     ? { className: buttonClassName }

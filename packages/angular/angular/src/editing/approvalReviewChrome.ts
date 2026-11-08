@@ -3,11 +3,10 @@
  * owns its structure and every control is supplied by the kit.
  */
 import {
-  type AgentApprovalProposal,
   approvalArgumentPairs,
+  approvalProposalText,
   type ApprovalReview,
   type ApprovalReviewItem,
-  approvalValueText,
   resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
@@ -84,25 +83,6 @@ export interface ApprovalReviewChromeProps {
   readonly buttonClassName?: string;
 }
 
-/** Prefer the column's own display units and the reader's vocabulary. */
-function describeItem(
-  proposal: AgentApprovalProposal,
-  labels: TableLabels | undefined
-): string {
-  const copy = resolveLabels(labels);
-  const describe = copy.proposalChange;
-  return describe({
-    row: proposal.rowLabel ?? proposal.rowKey,
-    ...(proposal.column === undefined
-      ? {}
-      : { column: proposal.columnLabel ?? proposal.column }),
-    before: proposal.beforeUnavailable
-      ? copy.proposalValueUnavailable
-      : (proposal.beforeText ?? approvalValueText(proposal.before)),
-    after: proposal.afterText ?? approvalValueText(proposal.after),
-  });
-}
-
 /**
  * The same review body in the table strip, assistant and modal. No visible
  * controls are drawn here: even the list is a required kit slot.
@@ -174,7 +154,7 @@ export class AdaptApprovalReviewChrome {
       const decide = this.onDecide();
       return this.shown().map((item) => ({
         item,
-        text: describeItem(item.proposal, labels),
+        text: approvalProposalText(item.proposal, labels),
         approve: this.button(
           labels.approveProposal,
           APPROVAL_REVIEW_PARTS.rowApprove,

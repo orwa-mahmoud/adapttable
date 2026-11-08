@@ -195,6 +195,7 @@ export {
   APPROVAL_PREVIEW_LIMIT,
   type ApprovalArgumentPair,
   approvalArgumentPairs,
+  approvalProposalText,
   type ApprovalReview,
   approvalReview,
   type ApprovalReviewItem,
