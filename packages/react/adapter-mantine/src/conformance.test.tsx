@@ -80,7 +80,7 @@ const driver: ConformanceDriver = {
         searchPlaceholder={scenario.searchPlaceholder}
         onQueryChange={scenario.onQueryChange}
         total={scenario.total}
-        mode={scenario.mode}
+        mode={scenario.mode === "frontend" ? "frontend" : undefined}
         features={featuresFor(scenario)}
         {...(scenario.virtualize
           ? { paginationMode: "infinite" as const, maxHeight: 200 }
