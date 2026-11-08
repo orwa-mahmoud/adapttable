@@ -299,10 +299,12 @@ export class ConsumerApp {
 `;
 
 /**
- * Own-share ceilings in KiB, taken from the first linked measurement on
- * 2026-11-05 (Angular 22.2.3) and rounded up by about 15%. `app` is the
- * complete application with the framework bundled, recorded beside the own
- * share and not enforced against it: the framework's bytes are Angular's.
+ * Ceilings in KiB, taken from the first linked measurement on 2026-11-05
+ * (Angular 22.2.3) and rounded up by about 15%. `own` is AdaptTable's share;
+ * `app` is the complete application with Angular and the kit's UI library
+ * bundled, held to its own ceiling so a change that pulls more of either in
+ * shows up. NG-ZORRO's complete app was first measured on 2026-11-08 at
+ * 348.8 KiB; the library itself is most of it.
  */
 const CEILINGS = {
   "angular · headless table": { own: 37, app: 120 },
@@ -314,7 +316,7 @@ const CEILINGS = {
   "angular · angular-aria table": { own: 140, app: 250 },
   "angular · ngx-bootstrap table": { own: 141, app: 252 },
   "angular · angular-cdk table": { own: 140, app: 250 },
-  "angular · ng-zorro table": { own: 145, app: 256 },
+  "angular · ng-zorro table": { own: 145, app: 401 },
   "angular · unstyled + grouping": { own: 143, app: 254 },
   "angular · unstyled grouping + aggregation": { own: 143, app: 254 },
   "angular · unstyled + editing": { own: 148, app: 260 },
