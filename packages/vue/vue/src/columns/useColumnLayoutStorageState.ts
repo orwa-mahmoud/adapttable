@@ -49,7 +49,8 @@ export function useColumnLayoutStorageState(
   activity?: MaybeRefOrGetter<boolean>
 ): UseColumnLayoutStorageStateResult {
   requireScope("useColumnLayoutStorageState");
-  const active = activity ?? useScopeActivity();
+  const scopeActive = useScopeActivity();
+  const active = activity ?? scopeActive;
   const options = computed(() => toValue(input));
   const fallback = computed(() =>
     initialColumnLayout(toValue(options.value.defaultColumnLayout))

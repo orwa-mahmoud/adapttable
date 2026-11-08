@@ -11,14 +11,13 @@ import {
 } from "@adapttable/core";
 import {
   computed,
-  getCurrentInstance,
   h,
   type MaybeRefOrGetter,
   toValue,
-  useId,
   type VNodeChild,
 } from "vue";
 
+import { useInstanceId } from "../componentId";
 import { useFilterActionOwner } from "./filterActionOwner";
 import {
   useBooleanFilter,
@@ -86,7 +85,7 @@ export interface FilterFieldOptions<TRow> {
 export function useFilterField<TRow>(
   input: MaybeRefOrGetter<FilterFieldOptions<TRow>>
 ) {
-  const generated = getCurrentInstance() ? useId() : undefined;
+  const generated = useInstanceId(() => "");
   if (!generated && !toValue(input).id)
     throw new Error(
       "AdaptTable: a headless filter field needs an explicit id."

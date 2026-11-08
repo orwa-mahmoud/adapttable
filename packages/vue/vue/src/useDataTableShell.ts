@@ -1285,9 +1285,7 @@ export function useDataTableShell<TRow>(
       lifecycle.reconcile(declarations.value);
       const model = resolved.value.editingModel;
       if (model) {
-        editingLifecycle ??= lifecycleOwner?.run(() =>
-          useFeatureLifecycle(lifecycleInput)
-        );
+        editingLifecycle ??= lifecycleOwner?.run(useEditingLifecycle);
         editingLifecycle?.reconcile([{ id: "editing-model", mount: model }]);
       } else editingLifecycle?.reconcile([]);
       publish();
@@ -1332,6 +1330,9 @@ export function useDataTableShell<TRow>(
       if (active.value) reconcile();
     },
   };
+  function useEditingLifecycle(): FeatureLifecycle<TRow> {
+    return useFeatureLifecycle(lifecycleInput);
+  }
   const lifecycle = useFeatureLifecycle(lifecycleInput);
   watch(
     lifecycle.host,

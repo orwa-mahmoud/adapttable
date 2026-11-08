@@ -18,9 +18,10 @@ import {
   isEditActivateKey,
   stopEditKeys,
 } from "@adapttable/core/editing";
-import { computed, Fragment, getCurrentInstance, h, type MaybeRefOrGetter, onScopeDispose, shallowRef, toValue, useId, type VNode, type VNodeChild, watch } from "vue";
+import { computed, Fragment, h, type MaybeRefOrGetter, onScopeDispose, shallowRef, toValue, type VNode, type VNodeChild, watch } from "vue";
 
 import type { ColumnDef } from "../columnDef";
+import { useInstanceId } from "../componentId";
 import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 import { editableUnitModel } from "./editableUnitModel";
@@ -107,7 +108,7 @@ export function useEditableCellModel<TRow>(
     },
     { flush: "sync" }
   );
-  const prefix = getCurrentInstance() ? useId() : "";
+  const prefix = useInstanceId(() => "");
   let activate: HTMLButtonElement | null = null;
   let restore = false;
   let disposed = false;

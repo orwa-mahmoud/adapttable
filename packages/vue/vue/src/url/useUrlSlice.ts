@@ -44,7 +44,8 @@ export function useUrlSlice<T, TConfig extends object>(
   readonly flush: () => void;
 } {
   requireScope("useUrlSlice");
-  const active = activity ?? useScopeActivity();
+  const scopeActive = useScopeActivity();
+  const active = activity ?? scopeActive;
   const options = computed(() => toValue(input));
   const memory = createMemoryAdapter();
   const stores = new Map<

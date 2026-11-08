@@ -3,9 +3,10 @@ import {
   type ColumnRenameEditorOptions,
   createColumnRenameEditor,
 } from "@adapttable/core";
-import { computed, getCurrentInstance, type MaybeRefOrGetter, onScopeDispose, toValue, useId, watch, watchEffect } from "vue";
+import { computed, type MaybeRefOrGetter, onScopeDispose, toValue, watch, watchEffect } from "vue";
 
 import { elementRef } from "../attrs";
+import { useInstanceId } from "../componentId";
 import { scheduleTick } from "../scheduleTick";
 import { useExternalStore, useScopeActivity } from "../store";
 
@@ -16,9 +17,7 @@ export function useColumnRenameEditor(
   const active = useScopeActivity();
   const editor = createColumnRenameEditor(toValue(options));
   const snapshot = useExternalStore(editor);
-  const editorId = getCurrentInstance()
-    ? useId()
-    : "scope-" + String(++nextEditor);
+  const editorId = useInstanceId(() => "scope-" + String(++nextEditor));
   const inputId = `adapttable-rename-${editorId}`;
   let returnFocus: HTMLElement | null = null;
   let input: HTMLElement | null = null;
