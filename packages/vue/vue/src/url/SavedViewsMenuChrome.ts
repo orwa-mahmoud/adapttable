@@ -1,19 +1,10 @@
 /** Saved-view disclosure and keyboard wiring, shared by every Vue kit. */
 /** Saved-view disclosure and keyboard wiring, shared by every Vue kit. */
-import {
-  defineComponent,
-  h,
-  nextTick,
-  onScopeDispose,
-  type PropType,
-  shallowRef,
-  useId,
-  type VNodeChild,
-  watch,
-} from "vue";
+import { defineComponent, h, onScopeDispose, type PropType, shallowRef, useId, type VNodeChild, watch } from "vue";
 
 import { type Attrs, elementRef } from "../attrs";
 import { isManagedOverlayPanel, type OverlayPanelSlot } from "../overlayPanel";
+import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 import type { SavedViewsControlProps } from "../viewControls/contracts";
 import type { ViewControlButtonProps } from "../viewControls/viewControlsChrome";
@@ -90,7 +81,7 @@ export const SavedViewsMenuChrome = /*#__PURE__*/ defineComponent(
       if (!open.value) surfaceLifetime += 1;
       focusPanel = !isManagedOverlayPanel(props.slots.Panel);
       open.value = true;
-      void nextTick(focusFirst);
+      scheduleTick(focusFirst);
     };
     const keyboard = (event: KeyboardEvent): void => {
       if (event.key === "Escape" && open.value) {

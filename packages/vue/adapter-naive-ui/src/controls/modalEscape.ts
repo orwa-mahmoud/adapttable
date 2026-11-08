@@ -1,4 +1,6 @@
-import { nextTick, onScopeDispose } from "vue";
+import { onScopeDispose } from "vue";
+
+import { scheduleTick } from "../scheduleTick";
 /** Naive emits close after its topmost trap check but omits the originating event. */
 export function useNaiveModalEscape(root: () => HTMLElement | null) {
   let pending: KeyboardEvent | undefined;
@@ -9,7 +11,7 @@ export function useNaiveModalEscape(root: () => HTMLElement | null) {
     capture: (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       pending = event;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (pending === event) pending = undefined;
       });
     },

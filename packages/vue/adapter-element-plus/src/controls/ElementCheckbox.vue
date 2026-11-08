@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useElementRef, useScopeActivity } from "@adapttable/vue/adapter";
 import { type CheckboxInstance, ElCheckbox } from "element-plus";
-import { computed, nextTick, shallowRef, watch } from "vue";
+import { computed, shallowRef, watch } from "vue";
+
+import { scheduleTick } from "../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(
@@ -50,7 +52,7 @@ function reconcile(
   generation = ownerGeneration
 ): void {
   // A replacement control or activity session owns its own reconciliation.
-  void nextTick(() => {
+  scheduleTick(() => {
     if (
       !field ||
       !active.value ||

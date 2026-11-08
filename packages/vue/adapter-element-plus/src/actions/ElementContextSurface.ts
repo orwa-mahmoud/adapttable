@@ -7,16 +7,9 @@ import {
   ElDropdown,
   ElDropdownMenu,
 } from "element-plus";
-import {
-  defineComponent,
-  h,
-  nextTick,
-  onScopeDispose,
-  type PropType,
-  shallowRef,
-  type VNodeChild,
-  watch,
-} from "vue";
+import { defineComponent, h, onScopeDispose, type PropType, shallowRef, type VNodeChild, watch } from "vue";
+
+import { scheduleTick } from "../scheduleTick";
 /** The public dropdown API synchronizes the primitive with the binding's open session. */
 export const ElementContextSurface = defineComponent(
   (
@@ -49,7 +42,7 @@ export const ElementContextSurface = defineComponent(
       [active, control, () => props.at],
       () => {
         const ticket = generation;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (live && active.value && ticket === generation)
             control.value?.handleOpen();
           else if (!active.value) control.value?.handleClose();
@@ -90,7 +83,7 @@ export const ElementContextSurface = defineComponent(
             if (visible || !isCurrent()) return;
             onClose();
             // A rejected controlled close keeps the same native session open.
-            void nextTick(() => {
+            scheduleTick(() => {
               if (isCurrent()) control.value?.handleOpen();
             });
           },

@@ -12,6 +12,8 @@ import {
   watch,
 } from "vue";
 
+import { scheduleTick } from "../scheduleTick";
+
 /** A native disclosure of commands. The browser retains ordinary Tab navigation. */
 export const NativeExamplesMenu = defineComponent(
   (props: TableAssistantMenuProps) => {
@@ -68,7 +70,7 @@ export const NativeExamplesMenu = defineComponent(
       event.preventDefault();
       open.value = true;
       const owner = generation.value;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (!active.value || props.disabled || owner !== generation.value)
           return;
         const items = buttons();

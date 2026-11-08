@@ -2,17 +2,11 @@ import {
   type ManagedCommandPaletteSurfaceProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import {
-  defineComponent,
-  h,
-  nextTick,
-  onBeforeUnmount,
-  type PropType,
-  shallowRef,
-} from "vue";
+import { defineComponent, h, onBeforeUnmount, type PropType, shallowRef } from "vue";
 import { VCard, VCardText } from "vuetify/components/VCard";
 import { VDialog } from "vuetify/components/VDialog";
 
+import { scheduleTick } from "../scheduleTick";
 import { finishOverlayFocus } from "./focusHandoff";
 
 /** Vuetify owns modal trapping and dismissal; Chrome owns command admission. */
@@ -31,7 +25,7 @@ export const VuetifyCommandSurface = defineComponent(
         : null;
     const focus = () => {
       const control = props.control;
-      void nextTick(() => {
+      scheduleTick(() => {
         const root: unknown = card.value?.$el;
         if (
           !active.value ||

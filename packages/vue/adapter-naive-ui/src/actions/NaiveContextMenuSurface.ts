@@ -4,18 +4,10 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NCard, NPopover } from "naive-ui";
-import {
-  type ComponentPublicInstance,
-  defineComponent,
-  h,
-  nextTick,
-  type PropType,
-  shallowRef,
-  type VNodeChild,
-  watch,
-} from "vue";
+import { type ComponentPublicInstance, defineComponent, h, type PropType, shallowRef, type VNodeChild, watch } from "vue";
 
 import { htmlRoot } from "../controls/elementTarget";
+import { scheduleTick } from "../scheduleTick";
 /** Native surfaces apply the shared core's menu-navigation decisions. */
 export const NaiveContextMenuSurface = /*#__PURE__*/ defineComponent(
   (props: ContextMenuSurfaceProps<VNodeChild>) => {
@@ -35,7 +27,7 @@ export const NaiveContextMenuSurface = /*#__PURE__*/ defineComponent(
         navigation.reset();
         if (!live) return;
         let current = true;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (current && active.value)
             entries()
               .find((item) => item.getAttribute("aria-disabled") !== "true")

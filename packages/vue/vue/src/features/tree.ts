@@ -7,10 +7,11 @@ import {
 } from "@adapttable/core";
 import { coreTree, hasLoadedChildren } from "@adapttable/core/binding";
 import type { FeatureMountContext, TableFeature } from "@adapttable/vue";
-import { computed, nextTick, onScopeDispose, watchEffect } from "vue";
+import { computed, onScopeDispose, watchEffect } from "vue";
 
 import { type TableTree, treeModelKey } from "../hierarchy/models";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
+import { scheduleTick } from "../scheduleTick";
 import { useLazyChildren } from "../tree/lazyChildren";
 import {
   type TreeExpansionOptions,
@@ -48,7 +49,7 @@ function mount<TRow>(context: FeatureMountContext<TRow>): void {
       }),
     getRowId: context.table.rowKey,
     onLoadFailed: (_row, id) => {
-      void nextTick(() => {
+      scheduleTick(() => {
         if (!disposed && context.active.value)
           closeFailedTreeNode(expansion.value, id);
       });

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { formatMultiDraft, readMultiDraft } from "@adapttable/vue/adapter";
-import { computed, nextTick, onBeforeUnmount, shallowRef, watch } from "vue";
+import { computed, onBeforeUnmount, shallowRef, watch } from "vue";
 import { VSelect } from "vuetify/components/VSelect";
 
 import { valueControlAttrs } from "../controls/controlRef";
+import { scheduleTick } from "../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{
@@ -35,7 +36,7 @@ let menuEscape: KeyboardEvent | undefined;
 const focusHandle = {
   focus: () => {
     if (select.value) select.value.focus();
-    else void nextTick(() => select.value?.focus());
+    else scheduleTick(() => select.value?.focus());
   },
 };
 const owner = (ref: unknown) =>

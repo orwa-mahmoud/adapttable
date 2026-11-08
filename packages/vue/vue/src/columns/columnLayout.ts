@@ -7,17 +7,10 @@ import {
   createColumnLayoutController,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
-import {
-  computed,
-  type ComputedRef,
-  type MaybeRefOrGetter,
-  nextTick,
-  onScopeDispose,
-  toValue,
-  watchEffect,
-} from "vue";
+import { computed, type ComputedRef, type MaybeRefOrGetter, onScopeDispose, toValue, watchEffect } from "vue";
 
 import type { ColumnDef } from "../columnDef";
+import { scheduleTick } from "../scheduleTick";
 import { type MaybeRefOrGetterOptional, useExternalStore } from "../store";
 export interface ColumnLayoutOptions {
   readonly columnLayout?: MaybeRefOrGetterOptional<ColumnLayoutState>;
@@ -51,7 +44,7 @@ export function useColumnLayout<TRow>(
       value: controlled.value,
       onChange: (next) => {
         current.onColumnLayoutChange?.(next);
-        void nextTick(() => {
+        scheduleTick(() => {
           if (!disposed) reconcile();
         });
       },

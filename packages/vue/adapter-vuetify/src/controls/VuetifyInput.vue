@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, shallowRef } from "vue";
+import { computed, onBeforeUnmount, shallowRef } from "vue";
 import { VTextarea } from "vuetify/components/VTextarea";
 import { VTextField } from "vuetify/components/VTextField";
 
+import { scheduleTick } from "../scheduleTick";
 import { useControlRef, valueControlAttrs } from "./controlRef";
 
 /** Vuetify owns its compound host; controlRef remains the native focus target. */
@@ -46,7 +47,7 @@ function change(value: unknown): void {
   const owner = props.multiline ? textarea.value : input.value;
   props.onChange(typeof value === "string" ? value : "");
   // Repaint a rejected native edit through Vue's public component API.
-  void nextTick(() => {
+  scheduleTick(() => {
     if (!active || owner !== (props.multiline ? textarea.value : input.value))
       return;
     const control = owner?.controlRef;

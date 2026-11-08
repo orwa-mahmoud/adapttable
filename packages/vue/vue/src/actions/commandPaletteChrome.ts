@@ -11,20 +11,10 @@ import type {
   CommandPaletteChromeProps as NeutralProps,
   CommandPaletteSlots as NeutralSlots,
 } from "@adapttable/core/binding";
-import {
-  computed,
-  defineComponent,
-  h,
-  nextTick,
-  onScopeDispose,
-  type PropType,
-  shallowRef,
-  useId,
-  type VNodeChild,
-  watch,
-} from "vue";
+import { computed, defineComponent, h, onScopeDispose, type PropType, shallowRef, useId, type VNodeChild, watch } from "vue";
 
 import { elementRef } from "../attrs";
+import { scheduleTick } from "../scheduleTick";
 import { useExternalStore, useScopeActivity } from "../store";
 export type CommandPaletteSurfaceSlotProps = Parameters<
   NeutralSlots<VNodeChild, KeyboardEvent>["Surface"]
@@ -165,7 +155,7 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
       if (opener === null && current instanceof HTMLElement) opener = current;
       if (managed.value) return;
       const currentLifetime = lifetime();
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           currentLifetime() &&
           props.open &&
@@ -202,7 +192,7 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
           ? {
               ...command,
               onSelect: () => {
-                void nextTick(() => {
+                scheduleTick(() => {
                   if (active.value && (!owned || current())) command.onSelect();
                 });
               },

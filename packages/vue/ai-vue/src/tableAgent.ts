@@ -25,6 +25,8 @@ import {
   toValue,
   watch,
 } from "vue";
+
+import { scheduleTick } from "./scheduleTick";
 export { TABLE_AGENT_STATE };
 export type { SharedApproval, TableAgentColumnPatch } from "@adapttable/ai";
 /** Neutral governance and callback options, unchanged. @public */
@@ -91,7 +93,7 @@ function mountAgent<TRow>(
     if (disposed || !context.active.value || scheduled) return;
     scheduled = true;
     const currentGeneration = generation;
-    void nextTick(() => {
+    scheduleTick(() => {
       if (currentGeneration !== generation) return;
       scheduled = false;
       if (disposed || !context.active.value) return;

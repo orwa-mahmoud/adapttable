@@ -19,18 +19,7 @@ import {
 } from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 import { parseGroupBy } from "@adapttable/core/grouping";
-import {
-  computed,
-  defineComponent,
-  h,
-  nextTick,
-  onScopeDispose,
-  type PropType,
-  shallowRef,
-  type VNodeChild,
-  watch,
-  watchEffect,
-} from "vue";
+import { computed, defineComponent, h, onScopeDispose, type PropType, shallowRef, type VNodeChild, watch, watchEffect } from "vue";
 
 import { toVueAttrs } from "../attrs";
 import type { ColumnDef } from "../columnDef";
@@ -46,6 +35,7 @@ import {
 } from "../features/tableFeature";
 import { groupingModelKey } from "../hierarchy/models";
 import { projectHeadlessRows } from "../rows/headlessRowsModel";
+import { scheduleTick } from "../scheduleTick";
 import { withFrontendRowModel } from "../source/rowModel";
 import { useExternalStore } from "../store";
 import { groupingPanelControlKey, groupingPanelModelKey } from "./contracts";
@@ -93,7 +83,7 @@ const GroupingPanelSurface = /*#__PURE__*/ defineComponent({
         const index = pendingRemoval;
         pendingRemoval = undefined;
         if (index === undefined) return;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (live)
             focusAfterAggregationRemoval(
               fieldset.value,

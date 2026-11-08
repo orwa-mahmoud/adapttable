@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { toVueAttrs } from "@adapttable/vue/adapter";
 import UInput from "@nuxt/ui/components/Input.vue";
-import { nextTick, onScopeDispose, shallowRef, watch } from "vue";
+import { onScopeDispose, shallowRef, watch } from "vue";
 
 import { useNuxtControlSize } from "../densityContext";
+import { scheduleTick } from "../scheduleTick";
 import { controlRef, withoutAttrs } from "./attrs";
 import type { NuxtInputControl } from "./types";
 import { useControlElementRef } from "./useControlElementRef";
@@ -42,7 +43,7 @@ function update(value: unknown): void {
   props.control.onChange(presentation.value);
   // A rejected controlled request must repaint through the vendor's public
   // modelValue prop, without replacing the focused input or mutating its DOM.
-  void nextTick(() => {
+  scheduleTick(() => {
     if (current === revision) presentation.value = props.control.value;
   });
 }

@@ -3,19 +3,10 @@ import {
   type ColumnRenameEditorOptions,
   createColumnRenameEditor,
 } from "@adapttable/core";
-import {
-  computed,
-  getCurrentInstance,
-  type MaybeRefOrGetter,
-  nextTick,
-  onScopeDispose,
-  toValue,
-  useId,
-  watch,
-  watchEffect,
-} from "vue";
+import { computed, getCurrentInstance, type MaybeRefOrGetter, onScopeDispose, toValue, useId, watch, watchEffect } from "vue";
 
 import { elementRef } from "../attrs";
+import { scheduleTick } from "../scheduleTick";
 import { useExternalStore, useScopeActivity } from "../store";
 
 let nextEditor = 0;
@@ -34,7 +25,7 @@ export function useColumnRenameEditor(
   let generation = 0;
   const restore = (): void => {
     const ticket = ++generation;
-    void nextTick(() => {
+    scheduleTick(() => {
       if (ticket === generation && active.value && returnFocus?.isConnected)
         returnFocus.focus();
     });
@@ -89,7 +80,7 @@ export function useColumnRenameEditor(
           : null;
       editor.begin();
       const ticket = generation;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (ticket === generation && active.value) input?.focus();
       });
     },

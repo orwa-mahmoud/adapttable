@@ -8,17 +8,10 @@ import {
   ElSelect,
   type SelectInstance,
 } from "element-plus";
-import {
-  defineComponent,
-  h,
-  nextTick,
-  type PropType,
-  shallowRef,
-  useId,
-  watch,
-} from "vue";
+import { defineComponent, h, type PropType, shallowRef, useId, watch } from "vue";
 
 import { elementButton } from "../controls/button";
+import { scheduleTick } from "../scheduleTick";
 /** The shared controller owns target selection and pending confirmation. */
 export const ElementRowMoveMenu = defineComponent(
   (props: RowMoveMenuSlotProps) => {
@@ -57,7 +50,7 @@ export const ElementRowMoveMenu = defineComponent(
               if (!isCurrent()) return;
               const item = items.find((item) => item.id === value);
               if (item && !item.disabled) item.onSelect();
-              void nextTick(() => {
+              scheduleTick(() => {
                 if (isCurrent()) trigger.value?.$forceUpdate();
               });
             },

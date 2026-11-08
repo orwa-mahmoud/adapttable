@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import {
-  cloneVNode,
-  type HTMLAttributes,
-  mergeProps,
-  nextTick,
-  onBeforeUnmount,
-  shallowRef,
-  type VNode,
-} from "vue";
+import { cloneVNode, type HTMLAttributes, mergeProps, onBeforeUnmount, shallowRef, type VNode } from "vue";
 import { VCheckboxBtn } from "vuetify/components/VCheckbox";
 import { VIcon } from "vuetify/components/VIcon";
 
+import { scheduleTick } from "../scheduleTick";
 import { controlAttrs, useControlRef } from "./controlRef";
 
 defineOptions({ inheritAttrs: false });
@@ -36,7 +29,7 @@ function captureInput(value: unknown): void {
 function restoreControlledState(event: Event): void {
   const target = event.currentTarget;
   if (!(target instanceof HTMLInputElement)) return;
-  void nextTick(() => {
+  scheduleTick(() => {
     if (!active || input.value !== target || !target.isConnected) return;
     target.checked = props.checked;
     target.indeterminate = props.indeterminate === true;

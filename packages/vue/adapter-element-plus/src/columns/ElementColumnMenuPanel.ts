@@ -4,21 +4,11 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { ClickOutside, ElPopover } from "element-plus";
-import {
-  defineComponent,
-  h,
-  mergeProps,
-  nextTick,
-  onScopeDispose,
-  type PropType,
-  provide,
-  shallowRef,
-  watch,
-  withDirectives,
-} from "vue";
+import { defineComponent, h, mergeProps, onScopeDispose, type PropType, provide, shallowRef, watch, withDirectives } from "vue";
 
 import { isElementRef } from "../controls/ref";
 import { ElementCard } from "../presentation/ElementCard";
+import { scheduleTick } from "../scheduleTick";
 import { rtlScrollbarGutter } from "../scrollbarGutter";
 import { columnMenuContainer } from "./panelContext";
 
@@ -70,7 +60,7 @@ export const ElementColumnMenuPanel = defineComponent(
       if (!active.value || !control.open || !control.isCurrent()) return;
       control.onClose(reason);
       if (reason === "escape")
-        void nextTick(() => {
+        scheduleTick(() => {
           if (
             (!live || !props.control.open) &&
             control.isCurrent() &&

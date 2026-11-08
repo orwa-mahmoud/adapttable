@@ -1,4 +1,6 @@
-import { nextTick, onScopeDispose, shallowRef, watch } from "vue";
+import { onScopeDispose, shallowRef, watch } from "vue";
+
+import { scheduleTick } from "../scheduleTick";
 
 /** Repaint rejected controlled requests through the kit's public modelValue. */
 export function useQuasarPresentation(
@@ -20,7 +22,7 @@ export function useQuasarPresentation(
     try {
       onChange(presentation.value);
     } finally {
-      void nextTick(() => {
+      scheduleTick(() => {
         if (current === revision) presentation.value = value();
       });
     }

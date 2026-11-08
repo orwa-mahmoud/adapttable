@@ -24,17 +24,10 @@ import {
   showAllColumns,
   unpinAllColumns,
 } from "@adapttable/core/binding";
-import {
-  computed,
-  type MaybeRefOrGetter,
-  nextTick,
-  type ShallowRef,
-  shallowRef,
-  toValue,
-  watch,
-} from "vue";
+import { computed, type MaybeRefOrGetter, type ShallowRef, shallowRef, toValue, watch } from "vue";
 
 import type { Attrs } from "../attrs";
+import { scheduleTick } from "../scheduleTick";
 import { useExternalStore, useScopeActivity } from "../store";
 import type { ColumnMenuSlotProps } from "./columnMenuContracts";
 
@@ -188,7 +181,7 @@ export function useColumnMenu<TRow>(
         if (!event.defaultPrevented) return;
         event.stopPropagation();
         if (ownedFocus)
-          void nextTick(() => {
+          scheduleTick(() => {
             if (
               active.value &&
               currentRow(row.key)?.canMove &&

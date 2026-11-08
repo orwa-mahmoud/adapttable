@@ -18,23 +18,10 @@ import {
   isEditActivateKey,
   stopEditKeys,
 } from "@adapttable/core/editing";
-import {
-  computed,
-  Fragment,
-  getCurrentInstance,
-  h,
-  type MaybeRefOrGetter,
-  nextTick,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  useId,
-  type VNode,
-  type VNodeChild,
-  watch,
-} from "vue";
+import { computed, Fragment, getCurrentInstance, h, type MaybeRefOrGetter, onScopeDispose, shallowRef, toValue, useId, type VNode, type VNodeChild, watch } from "vue";
 
 import type { ColumnDef } from "../columnDef";
+import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 import { editableUnitModel } from "./editableUnitModel";
 import { useEditableCell } from "./editingModels";
@@ -152,7 +139,7 @@ export function useEditableCellModel<TRow>(
     editorNode = node;
     updateFocusRequest();
     focusEditor();
-    if (focusPending) void nextTick(focusEditor);
+    if (focusPending) scheduleTick(focusEditor);
   };
   const restoreFocus = () => {
     if (
@@ -171,7 +158,7 @@ export function useEditableCellModel<TRow>(
     () => {
       updateFocusRequest();
       focusEditor();
-      void nextTick(restoreFocus);
+      scheduleTick(restoreFocus);
     },
     { flush: "post" }
   );
@@ -252,7 +239,7 @@ export function useEditableCellModel<TRow>(
         activateRef: (node) => {
           if (disposed) return;
           activate = node;
-          void nextTick(restoreFocus);
+          scheduleTick(restoreFocus);
         },
         onClick: (event) => {
           event.stopPropagation();
@@ -301,7 +288,7 @@ export function useEditableCellModel<TRow>(
           if (unit.value.unit === "cell" && editorKeyRestoresFocus(event.key))
             restore = true;
           controller.onEditorKeyDown(event);
-          void nextTick(restoreFocus);
+          scheduleTick(restoreFocus);
         },
       },
     };

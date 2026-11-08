@@ -4,11 +4,12 @@ import {
   type OverlayCloseReason,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { defineComponent, h, nextTick, type PropType } from "vue";
+import { defineComponent, h, type PropType } from "vue";
 
 import { Popover, PopoverAnchor, PopoverContent } from "../components/popover";
 import { shadcnControlAttrs } from "../controls";
 import { cn } from "../lib/utils";
+import { scheduleTick } from "../scheduleTick";
 
 const ManagedPanel = defineComponent(
   (props: {
@@ -77,7 +78,7 @@ export function useManagedPanel() {
         const anchor = control.anchor;
         control.onClose(reason);
         if (reason === "outside") return;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (
             active.value &&
             control.isCurrent() &&

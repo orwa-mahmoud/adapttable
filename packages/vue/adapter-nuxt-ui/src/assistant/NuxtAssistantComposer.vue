@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { type TableAssistantSlots, toVueAttrs } from "@adapttable/vue/adapter";
 import UTextarea from "@nuxt/ui/components/Textarea.vue";
-import { nextTick, onScopeDispose, shallowRef, watch } from "vue";
+import { onScopeDispose, shallowRef, watch } from "vue";
 
 import { useNuxtControlSize } from "../densityContext";
+import { scheduleTick } from "../scheduleTick";
 
 // The host owns the draft: a change it rejects repaints through the model
 // value of the textarea.
@@ -28,7 +29,7 @@ function update(value: unknown): void {
   const current = ++revision;
   presentation.value = typeof value === "string" ? value : "";
   props.control.onChange(presentation.value);
-  void nextTick(() => {
+  scheduleTick(() => {
     if (current === revision) presentation.value = props.control.value;
   });
 }

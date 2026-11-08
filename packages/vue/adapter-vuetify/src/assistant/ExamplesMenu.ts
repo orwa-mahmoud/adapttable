@@ -3,14 +3,7 @@ import {
   type TableAssistantMenuProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import {
-  defineComponent,
-  h,
-  nextTick,
-  type PropType,
-  shallowRef,
-  watch,
-} from "vue";
+import { defineComponent, h, type PropType, shallowRef, watch } from "vue";
 import {
   VList,
   VListItem,
@@ -20,6 +13,7 @@ import {
 import { VMenu } from "vuetify/components/VMenu";
 
 import { vuetifyButton } from "../controls";
+import { scheduleTick } from "../scheduleTick";
 
 /** One shortcut as a menu item: its icon, title and optional description. */
 function shortcut(
@@ -73,7 +67,7 @@ export const VuetifyExamplesMenu = defineComponent(
     watch(open, (expanded) => {
       navigation.reset();
       if (!expanded) return;
-      void nextTick(() => {
+      scheduleTick(() => {
         const root: unknown = list.value?.$el;
         if (active.value && open.value && root instanceof HTMLElement)
           root

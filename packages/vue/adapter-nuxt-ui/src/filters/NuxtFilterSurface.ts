@@ -6,7 +6,9 @@ import {
 } from "@adapttable/vue/adapter";
 import UPopover from "@nuxt/ui/components/Popover.vue";
 import USlideover from "@nuxt/ui/components/Slideover.vue";
-import { defineComponent, h, nextTick, type PropType, watch } from "vue";
+import { defineComponent, h, type PropType, watch } from "vue";
+
+import { scheduleTick } from "../scheduleTick";
 
 type Props = FilterPanelSurfaceProps & {
   readonly modal: boolean;
@@ -65,7 +67,7 @@ export default defineComponent(
           // The trigger is external to UPopover/USlideover, so their native
           // teardown cannot restore it after releasing a modal focus trap.
           event.preventDefault();
-          void nextTick(() => {
+          scheduleTick(() => {
             if (
               ticket === lifetime &&
               active.value &&

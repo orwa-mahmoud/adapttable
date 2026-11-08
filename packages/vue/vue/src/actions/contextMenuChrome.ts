@@ -16,6 +16,7 @@ import {
 } from "vue";
 
 import { elementRef } from "../attrs";
+import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 export type ContextMenuSlots = NeutralSlots<VNodeChild>;
 /** A complete native menu presentation with binding-owned selection lifetimes. */
@@ -124,7 +125,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
           pendingSelection = undefined;
           throw error;
         }
-        void nextTick(async () => {
+        scheduleTick(async () => {
           // The close may be rejected without scheduling a render. Allow any
           // synchronous parent replacement to flush before reading its props.
           await nextTick();

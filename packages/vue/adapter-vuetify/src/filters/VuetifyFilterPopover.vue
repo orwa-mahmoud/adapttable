@@ -3,10 +3,12 @@ import {
   type FilterPanelSurfaceProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { computed, nextTick } from "vue";
+import { computed } from "vue";
 import { VCard } from "vuetify/components/VCard";
 import { VLocaleProvider } from "vuetify/components/VLocaleProvider";
 import { VMenu } from "vuetify/components/VMenu";
+
+import { scheduleTick } from "../scheduleTick";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<
@@ -40,7 +42,7 @@ function update(open: boolean): void {
   const anchor = props.anchor;
   // VMenu also emits false from its own deactivation hook. Let the shared
   // activity guard settle before treating that library update as a request.
-  void nextTick(() => {
+  scheduleTick(() => {
     if (
       active.value &&
       props.open &&

@@ -5,21 +5,11 @@ import {
   useElementRef,
 } from "@adapttable/vue/adapter";
 import { NCard, NPopover } from "naive-ui";
-import {
-  type ComponentPublicInstance,
-  defineComponent,
-  h,
-  mergeProps,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  type PropType,
-  shallowRef,
-  watch,
-} from "vue";
+import { type ComponentPublicInstance, defineComponent, h, mergeProps, onBeforeUnmount, onMounted, type PropType, shallowRef, watch } from "vue";
 
 import { withoutAttributes } from "../controls/attributes";
 import { htmlRoot } from "../controls/elementTarget";
+import { scheduleTick } from "../scheduleTick";
 
 /** Public Naive positioning and card surfaces own the managed panel boundary. */
 export const NaiveManagedPopover = defineComponent(
@@ -39,7 +29,7 @@ export const NaiveManagedPopover = defineComponent(
       if (!owner.open || !owner.isCurrent()) return;
       escapeOwner = reason === "escape" ? owner : undefined;
       owner.onClose(reason);
-      void nextTick(() => {
+      scheduleTick(() => {
         escapeOwner = undefined;
       });
     };
@@ -149,7 +139,7 @@ export const NaiveManagedPopover = defineComponent(
         return;
       const anchor = owner.anchor;
       const document = element.ownerDocument;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           owner.isCurrent() &&
           anchor?.isConnected &&

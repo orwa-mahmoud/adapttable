@@ -20,17 +20,9 @@ import type {
   StatusBarSlotProps as NeutralStatusBarSlotProps,
   StatusBarSlots as NeutralStatusBarSlots,
 } from "@adapttable/core/binding";
-import {
-  defineComponent,
-  h,
-  nextTick,
-  onScopeDispose,
-  type PropType,
-  shallowRef,
-  type VNodeChild,
-  watch,
-} from "vue";
+import { defineComponent, h, onScopeDispose, type PropType, shallowRef, type VNodeChild, watch } from "vue";
 
+import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 
 export type FindBarSlots = NeutralFindBarSlots<VNodeChild>;
@@ -97,14 +89,14 @@ const FindBarStructure = /*#__PURE__*/ defineComponent(
         document.activeElement instanceof HTMLElement
           ? document.activeElement
           : null;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (live && props.find.open) node.focus();
       });
     };
     onScopeDispose(() => {
       live = false;
       const target = previous;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           target?.isConnected &&
           target.ownerDocument.activeElement === target.ownerDocument.body

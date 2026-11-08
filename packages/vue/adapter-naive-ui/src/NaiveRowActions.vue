@@ -2,17 +2,10 @@
 import type { Direction, RowActionControl } from "@adapttable/vue";
 import type { RowActionsLayout } from "@adapttable/vue/adapter";
 import { NPopover } from "naive-ui";
-import {
-  computed,
-  Fragment,
-  h,
-  type HTMLAttributes,
-  mergeProps,
-  nextTick,
-  shallowRef,
-} from "vue";
+import { computed, Fragment, h, type HTMLAttributes, mergeProps, shallowRef } from "vue";
 
 import { naiveButton } from "./controls/button";
+import { scheduleTick } from "./scheduleTick";
 
 defineOptions({ name: "NaiveRowActions" });
 const props = defineProps<{
@@ -34,7 +27,7 @@ function dismiss(event: KeyboardEvent): void {
   event.preventDefault();
   event.stopPropagation();
   open.value = false;
-  void nextTick(() => trigger.value?.focus());
+  scheduleTick(() => trigger.value?.focus());
 }
 // Naive forwards these public Vue fallthrough attrs to its popover body.
 const surfaceAttrs = computed<HTMLAttributes>(() => ({

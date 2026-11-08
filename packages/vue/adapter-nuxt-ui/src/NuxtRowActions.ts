@@ -5,21 +5,12 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import UCard from "@nuxt/ui/components/Card.vue";
-import {
-  createVNode,
-  defineComponent,
-  Fragment,
-  h,
-  nextTick,
-  shallowRef,
-  useId,
-  type VNode,
-  watch,
-} from "vue";
+import { createVNode, defineComponent, Fragment, h, shallowRef, useId, type VNode, watch } from "vue";
 
 import NuxtButton from "./controls/NuxtButton.vue";
 import NuxtManagedPopover from "./controls/NuxtManagedPopover";
 import type { RowActionsControlProps } from "./rowActionsSlot";
+import { scheduleTick } from "./scheduleTick";
 
 const actionProps = {
   controls: null,
@@ -171,7 +162,7 @@ const NuxtRowActionsPresentation = /*#__PURE__*/ defineComponent(
                 onOpenAutoFocus: (event: Event) => {
                   event.preventDefault();
                   const root = event.target;
-                  void nextTick(() => {
+                  scheduleTick(() => {
                     if (
                       !active.value ||
                       !open.value ||

@@ -3,22 +3,13 @@ import {
   editorInputType,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import {
-  computed,
-  createVNode,
-  defineComponent,
-  h,
-  nextTick,
-  onMounted,
-  type PropType,
-  shallowRef,
-  watch,
-} from "vue";
+import { computed, createVNode, defineComponent, h, onMounted, type PropType, shallowRef, watch } from "vue";
 
 import NuxtCheckbox from "../controls/NuxtCheckbox.vue";
 import NuxtInput from "../controls/NuxtInput.vue";
 import NuxtMultiSelect from "../controls/NuxtMultiSelect";
 import NuxtSelect from "../controls/NuxtSelect.vue";
+import { scheduleTick } from "../scheduleTick";
 
 const editorRuntimeProps = {
   controller: {
@@ -104,7 +95,7 @@ const NuxtCellEditorPresentation = defineComponent(
       const commit = props.onBlur;
       // A Select closes by moving focus back to its trigger. Commit only after
       // focus has left the complete public control, using the captured owner.
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           active.value &&
           !popup.value &&

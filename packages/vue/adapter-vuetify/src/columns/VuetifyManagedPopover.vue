@@ -3,13 +3,14 @@ import type {
   ManagedOverlayPanelProps,
   OverlayCloseReason,
 } from "@adapttable/vue/adapter";
-import { computed, nextTick, onBeforeUnmount, shallowRef } from "vue";
+import { computed, onBeforeUnmount, shallowRef } from "vue";
 import { VCard } from "vuetify/components/VCard";
 import { VLocaleProvider } from "vuetify/components/VLocaleProvider";
 import { VMenu } from "vuetify/components/VMenu";
 import { useRtl } from "vuetify/framework";
 
 import { useControlRef } from "../controls/controlRef";
+import { scheduleTick } from "../scheduleTick";
 import { VuetifySurface } from "../table/VuetifySurface";
 
 defineOptions({ inheritAttrs: false });
@@ -42,7 +43,7 @@ function close(reason: OverlayCloseReason): void {
   if (!live || !owner.open || !owner.isCurrent()) return;
   escapeOwner = reason === "escape" ? owner : undefined;
   owner.onClose(reason);
-  void nextTick(() => {
+  scheduleTick(() => {
     if (live) escapeOwner = undefined;
   });
 }
@@ -83,7 +84,7 @@ onBeforeUnmount(() => {
     return;
   const anchor = owner.anchor;
   const document = target.ownerDocument;
-  void nextTick(() => {
+  scheduleTick(() => {
     if (!owner.isCurrent() || !anchor?.isConnected) return;
     if (
       document.activeElement === document.body ||

@@ -11,17 +11,9 @@ import {
   ElDrawer,
   ElPopover,
 } from "element-plus";
-import {
-  defineComponent,
-  h,
-  nextTick,
-  onMounted,
-  type PropType,
-  shallowRef,
-  watch,
-  withDirectives,
-} from "vue";
+import { defineComponent, h, onMounted, type PropType, shallowRef, watch, withDirectives } from "vue";
 
+import { scheduleTick } from "../scheduleTick";
 import { rtlScrollbarGutter } from "../scrollbarGutter";
 
 /** Kit overlays retain their own positioning, focus trap and modal backdrop. */
@@ -46,7 +38,7 @@ export const ElementFilterSurface = defineComponent(
       props.onClose(reason);
       if (reason === "escape") {
         const anchor = props.anchor;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (
             active.value &&
             !props.open &&

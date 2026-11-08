@@ -4,21 +4,13 @@ import {
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NCard, NModal } from "naive-ui";
-import {
-  type ComponentPublicInstance,
-  defineComponent,
-  h,
-  nextTick,
-  type PropType,
-  shallowRef,
-  useId,
-  watch,
-} from "vue";
+import { type ComponentPublicInstance, defineComponent, h, type PropType, shallowRef, useId, watch } from "vue";
 
 import { naiveButton } from "../controls/button";
 import { htmlRoot } from "../controls/elementTarget";
 import { useNaiveModalEscape } from "../controls/modalEscape";
 import { naiveSelect } from "../controls/select";
+import { scheduleTick } from "../scheduleTick";
 
 export const NaiveRowMoveMenu = /*#__PURE__*/ defineComponent(
   (props: RowMoveMenuSlotProps) => {
@@ -39,7 +31,7 @@ export const NaiveRowMoveMenu = /*#__PURE__*/ defineComponent(
       { flush: "sync" }
     );
     const restore = () => {
-      void nextTick(() => {
+      scheduleTick(() => {
         if (active.value && !props.confirmation && trigger.value?.isConnected)
           trigger.value.focus();
       });

@@ -1,13 +1,8 @@
 import type { TableAssistantComposerProps } from "@adapttable/vue/adapter";
-import {
-  defineComponent,
-  h,
-  nextTick,
-  onScopeDispose,
-  type PropType,
-  shallowRef,
-} from "vue";
+import { defineComponent, h, onScopeDispose, type PropType, shallowRef } from "vue";
 import { VField } from "vuetify/components/VField";
+
+import { scheduleTick } from "../scheduleTick";
 
 /**
  * The assistant composer: a native textarea inside Vuetify's VField, the
@@ -26,7 +21,7 @@ export const VuetifyAssistantComposer = defineComponent(
       const target = event.target;
       if (!(target instanceof HTMLTextAreaElement)) return;
       props.onChange(target.value);
-      void nextTick(() => {
+      scheduleTick(() => {
         const element = textarea.value;
         if (live && element && element.value !== props.value)
           element.value = props.value;
