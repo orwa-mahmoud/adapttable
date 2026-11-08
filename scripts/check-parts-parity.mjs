@@ -171,11 +171,17 @@ const CONTRACT = [
  * neutral `rowAttributes` API through its binding; both sides are checked.
  * Angular assembles each body entry from `table.rowAttrs` (or the grid's
  * preserving wrapper), then binds that record whole with `adaptAttrs` on its
- * `<tr>`. A framework with no entry has no such route, and its kits name every
- * contract part themselves.
+ * `<tr>`. React kits drawn by `DesktopTableChrome` receive `table`, `thead` and
+ * `tbody` on the elements it creates. A framework with no entry has no such
+ * route, and its kits name every contract part themselves.
  */
-const CORE_GETTER_PARTS = {
-  react: { row: ["getRowProps", "createDesktopRow"] },
+export const CORE_GETTER_PARTS = {
+  react: {
+    row: ["getRowProps", "createDesktopRow"],
+    table: ["DesktopTableChrome"],
+    thead: ["DesktopTableChrome"],
+    tbody: ["DesktopTableChrome"],
+  },
   angular: { row: ["rowAttrs"] },
   vue: { row: ["rowAttributes"] },
 };
