@@ -361,11 +361,6 @@
   color: var(--at-reka-muted);
   font-size: 12px;
 }
-.at-reka [data-adapttable-part="card-actions"] {
-  display: flex;
-  gap: 8px;
-  padding-block-start: 10px;
-}
 .at-reka [data-adapttable-part="empty"],
 .at-reka [data-adapttable-part="error"] {
   display: block;
