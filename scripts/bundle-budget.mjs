@@ -142,6 +142,22 @@ export function entryModule(fixture, install) {
 
 const SOURCE_MAP = /\.map$/;
 
+/**
+ * One language's label preset from `@adapttable/i18n`. Presets load on demand
+ * and an application loads at most one, so a group of them counts as its
+ * largest member, not their sum.
+ */
+const LOCALE_PRESET =
+  /[\\/]@adapttable[\\/]i18n[\\/]dist[\\/](?!index|load|rolldown-runtime)[\w-]+\.js$/;
+
+/** The group a lazy chunk is one alternative of, when it is one. */
+function alternativeOf(file) {
+  const ids = file.moduleIds ?? [];
+  return ids.length > 0 && ids.every((id) => LOCALE_PRESET.test(id))
+    ? "locale preset"
+    : undefined;
+}
+
 function emittedBytes(file) {
   if (file.type === "chunk") return Buffer.from(file.code);
   return Buffer.from(file.source);
@@ -213,6 +229,9 @@ export function emittedLedger(output) {
             (name) => !emitted(name)
           ),
         }),
+        ...(file.type === "chunk" &&
+          !initial.has(file.fileName) &&
+          alternativeOf(file) && { alternative: alternativeOf(file) }),
         bytes: bytes.length,
         gzipBytes: gzipSync(bytes).length,
       };
@@ -224,7 +243,19 @@ function phaseTotals(ledger) {
   for (const phase of ["initial", "lazy", "total"]) {
     totals[phase] = { files: 0, bytes: 0, gzipBytes: 0 };
   }
+  const largest = new Map();
   for (const file of ledger) {
+    if (file.alternative === undefined) continue;
+    const held = largest.get(file.alternative);
+    if (!held || file.gzipBytes > held.gzipBytes) {
+      largest.set(file.alternative, file);
+    }
+  }
+  const counted = ledger.filter(
+    (file) =>
+      file.alternative === undefined || largest.get(file.alternative) === file
+  );
+  for (const file of counted) {
     for (const phase of [file.phase, "total"]) {
       totals[phase].files++;
       totals[phase].bytes += file.bytes;
@@ -381,10 +412,11 @@ export async function measure(fixture, dir, install, angular) {
   const entry = join(dir, fixture.typeOnly ? "entry.ts" : "entry.js");
   writeFileSync(entry, code);
   const framework = fixture.framework ?? "react";
-  const externals = {
-    vue: vueConsumerExternals(fixture.pkg),
-    angular: ANGULAR_EXTERNAL,
-  }[framework] ?? EXTERNAL;
+  const externals =
+    {
+      vue: vueConsumerExternals(fixture.pkg),
+      angular: ANGULAR_EXTERNAL,
+    }[framework] ?? EXTERNAL;
 
   const recorder = moduleRecorder();
   const started = performance.now();
@@ -406,7 +438,8 @@ export async function measure(fixture, dir, install, angular) {
 
   const accounted = accountOutputs(min.output, readable.output);
   const modules = packedModules(recorder.ids, dir);
-  const app = application && accountOutputs(application[0].output, application[1].output);
+  const app =
+    application && accountOutputs(application[0].output, application[1].output);
   return {
     ...accounted,
     ...(app && { application: app.total }),
@@ -804,7 +837,9 @@ function checkNodeConsumers(rows, selected, install, packages) {
  * undefined when the run selected no Angular fixture.
  */
 async function compiledAngular(selected, dir, rows) {
-  const fixtures = selected.filter((fixture) => fixture.framework === "angular");
+  const fixtures = selected.filter(
+    (fixture) => fixture.framework === "angular"
+  );
   if (!fixtures.length) return undefined;
   const compiled = angularEntries(fixtures, dir);
   for (const [id, result] of compiled) {
@@ -841,7 +876,9 @@ function failedRow(fixture, problems) {
     leaked: [],
     missing: [],
     ...fixtureCeilings(fixture),
-    resolutionProblems: problems.map((problem) => `did not compile: ${problem}`),
+    resolutionProblems: problems.map(
+      (problem) => `did not compile: ${problem}`
+    ),
     ok: false,
   };
 }

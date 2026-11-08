@@ -25,6 +25,13 @@ const classification = JSON.parse(
 export const PLAIN_ADAPTER_CEILING_KB = 80;
 
 /**
+ * One language's labels, which a kit that follows its UI library's locale
+ * loads on demand. The largest preset and its loader gzip to 6.8 KiB, so a
+ * plain table's total may exceed its initial ceiling by this much.
+ */
+export const LAZY_LOCALE_PRESET_KB = 8;
+
+/**
  * Item-1 packed adapter roots, the baseline the 35% reduction is judged
  * against. These are the committed per-kit figures from the classification
  * seam measurement, which is the item-1 / pre-split graph.
@@ -505,7 +512,7 @@ function adapterBaseFixtures() {
     kit,
     pkg,
     initialKB: adapterAcceptanceKB(kit),
-    totalKB: adapterAcceptanceKB(kit),
+    totalKB: adapterAcceptanceKB(kit) + LAZY_LOCALE_PRESET_KB,
     item1BaselineKB: ITEM1_ADAPTER_BASELINE_KB[kit],
     code: `export { DataTable } from "PKG";`,
     absent: ADAPTER_ABSENT,
@@ -693,7 +700,11 @@ function withCaseIds(fixtures) {
 
 export const FIXTURES = withCaseIds([
   ...existingFixtures,
-  ...vueConsumerFixtures(existingFixtures, PLAIN_ADAPTER_CEILING_KB),
+  ...vueConsumerFixtures(
+    existingFixtures,
+    PLAIN_ADAPTER_CEILING_KB,
+    LAZY_LOCALE_PRESET_KB
+  ),
   ...angularConsumerFixtures(),
 ]);
 

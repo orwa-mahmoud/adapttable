@@ -69,6 +69,7 @@ export const VUE_NATIVE_BASE_SPECS = [
   pkg: `adapter-${kit}`,
   consumerHost: nativeConsumerHosts[kit],
   hardBaseCeiling: true,
+  followsLibraryLocale: true,
   code: 'export { DataTable } from "PKG";\nimport "STYLE";',
   styleEntryFile: "styles.css",
   presentCss: [css],
@@ -230,7 +231,11 @@ export const VUE_LAYOUT_GRAPH_SPECS = [
   },
 ];
 
-export function vueConsumerFixtures(comparables, hardBaseCeiling) {
+export function vueConsumerFixtures(
+  comparables,
+  hardBaseCeiling,
+  lazyLocaleKB = 0
+) {
   return VUE_CONSUMER_SPECS.map((spec) => {
     const comparable = comparables.find(
       (fixture) => fixture.name === spec.comparable
@@ -238,17 +243,20 @@ export function vueConsumerFixtures(comparables, hardBaseCeiling) {
     if (!spec.hardBaseCeiling && !comparable)
       throw new Error(`Missing comparable Vue budget: ${spec.comparable}`);
     // These ceilings have always held every emitted file, so they are total
-    // ceilings; the initial share is a subset held to the same number.
+    // ceilings; the initial share is a subset held to the same number. A kit
+    // that follows its library's locale may also load one language preset.
     const ceilingKB = spec.hardBaseCeiling
       ? hardBaseCeiling
       : comparable.initialKB;
+    const totalCeilingKB =
+      ceilingKB + (spec.followsLibraryLocale ? lazyLocaleKB : 0);
     return {
       ...spec,
       framework: "vue",
       kind: "vue-consumer",
       kit: spec.pkg === "vue" ? undefined : spec.pkg.replace(/^adapter-/, ""),
       initialKB: ceilingKB,
-      totalKB: ceilingKB,
+      totalKB: totalCeilingKB,
     };
   });
 }

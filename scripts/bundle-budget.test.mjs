@@ -19,7 +19,11 @@ import {
   requestedCases,
   selectFixtures,
 } from "./bundle-budget.mjs";
-import { caseId, FIXTURES } from "./consumer-fixtures.mjs";
+import {
+  caseId,
+  FIXTURES,
+  LAZY_LOCALE_PRESET_KB,
+} from "./consumer-fixtures.mjs";
 import { vueNativeConsumerConfig } from "./vue-native-consumer.mjs";
 
 let dir;
@@ -153,6 +157,47 @@ describe("emitted-file accounting", () => {
     assert.ok(sheet.gzipBytes > 0);
     assert.equal(accounted.total.gzipBytes, sum(accounted.ledger, "gzipBytes"));
     assert.ok(accounted.lazy.gzipBytes >= sheet.gzipBytes);
+  });
+
+  it("counts lazy locale presets as their largest one, not their sum", () => {
+    const preset = (fileName, code) => ({
+      type: "chunk",
+      fileName,
+      isEntry: false,
+      imports: [],
+      dynamicImports: [],
+      moduleIds: [`/app/node_modules/@adapttable/i18n/dist/${fileName}`],
+      code,
+    });
+    const output = [
+      {
+        type: "chunk",
+        fileName: "entry.js",
+        isEntry: true,
+        imports: [],
+        dynamicImports: ["ar-1.js", "de-1.js"],
+        moduleIds: ["/app/entry.js"],
+        code: "export const a = 1;",
+      },
+      preset(
+        "ar-1.js",
+        `export const ar = ${JSON.stringify("ar ".repeat(400))};`
+      ),
+      preset("de-1.js", `export const de = "de";`),
+    ];
+    const ledger = emittedLedger(output);
+    assert.deepEqual(
+      ledger.map(({ fileName, alternative }) => [fileName, alternative]),
+      [
+        ["ar-1.js", "locale preset"],
+        ["de-1.js", "locale preset"],
+        ["entry.js", undefined],
+      ]
+    );
+    const accounted = accountOutputs(output, output);
+    const arabic = ledger.find((file) => file.fileName === "ar-1.js");
+    assert.equal(accounted.lazy.files, 1);
+    assert.equal(accounted.lazy.gzipBytes, arabic.gzipBytes);
   });
 
   it("counts an unclaimed stylesheet as initial and never counts sourcemaps", () => {
@@ -341,7 +386,12 @@ describe("ceilings", () => {
 
   it("keeps Vue ceilings, which always counted every output, as totals", () => {
     for (const fixture of FIXTURES.filter((f) => f.framework === "vue")) {
-      assert.equal(fixture.totalKB, fixture.initialKB, fixture.name);
+      assert.equal(
+        fixture.totalKB,
+        fixture.initialKB +
+          (fixture.followsLibraryLocale ? LAZY_LOCALE_PRESET_KB : 0),
+        fixture.name
+      );
     }
   });
 
