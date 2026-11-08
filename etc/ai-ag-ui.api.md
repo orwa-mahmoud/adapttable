@@ -6,6 +6,7 @@
 
 import { ActionAiOptions } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
+import { RowPinState } from '@adapttable/core/binding';
 import { TableSourceCapabilities } from '@adapttable/core';
 
 // @public
@@ -148,10 +149,7 @@ export interface AgentContextInputs {
         readonly groupBy?: string;
         readonly filters?: Readonly<Record<string, unknown>>;
         readonly pinnedColumns?: Readonly<Record<string, unknown>>;
-        readonly pinnedRows?: {
-            readonly top: readonly string[];
-            readonly bottom: readonly string[];
-        };
+        readonly pinnedRows?: RowPinState | Readonly<Record<string, unknown>>;
         readonly hiddenColumns?: readonly string[];
         readonly columnOrder?: readonly string[];
         readonly pagination?: AgentPagination;
@@ -188,10 +186,7 @@ export interface AgentContextView {
     // (undocumented)
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
     // (undocumented)
-    readonly pinnedRows?: {
-        readonly top: readonly string[];
-        readonly bottom: readonly string[];
-    };
+    readonly pinnedRows?: RowPinState | Readonly<Record<string, unknown>>;
     // (undocumented)
     readonly revision: number;
     // (undocumented)

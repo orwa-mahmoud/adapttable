@@ -1,5 +1,5 @@
 ---
-"@adapttable/ai": minor
+"@adapttable/ai": patch
 ---
 
-Agent context `pinnedRows` is `{ top, bottom }` lists of row ids. A generic record is no longer accepted for that field.
+Agent context `pinnedRows` accepts the table's row pin state, `{ top, bottom }` lists of row ids, as well as any record.
