@@ -330,13 +330,12 @@ export function RowEditActionsChrome<TRow>({
         }}
       />
       {options.rowEditing.commit?.error ? (
-        <span
-          role="status"
+        <output
           data-adapttable-part="row-edit-error"
           style={{ flexBasis: "100%", minWidth: 0, overflowWrap: "anywhere" }}
         >
           {options.rowEditing.commit.error}
-        </span>
+        </output>
       ) : null}
     </span>
   );
@@ -546,13 +545,12 @@ export function BatchEditBarChrome<TRow>({
         onClick={batch.cancelAll}
       />
       {batch.commit?.error ? (
-        <span
-          role="status"
+        <output
           data-adapttable-part="batch-edit-error"
           style={{ flexBasis: "100%", minWidth: 0, overflowWrap: "anywhere" }}
         >
           {batch.commit.error}
-        </span>
+        </output>
       ) : null}
     </div>
   );
