@@ -479,8 +479,10 @@ const REACT_FIXTURES = [
     kind: "react",
     pkg: "react",
     entryFile: "features.js",
-    initialKB: 16,
-    totalKB: 16,
+    // The grouping feature carries the full evaluator (createTableEngine) a
+    // plain table no longer ships: 15.0 KB before that move, 20.2 KiB after.
+    initialKB: 21,
+    totalKB: 21,
     code: `export { groupingPanel } from "PKG";`,
     present: ["groupingPanel"],
   },
