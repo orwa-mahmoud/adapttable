@@ -7795,7 +7795,9 @@
       "MenuNavigationController",
       "MenuNavigationItem",
       "MenuNavigationKey",
-      "TreeShape"
+      "TreeShape",
+      "KitEnvironment",
+      "withKitEnvironment"
     ],
     "core-conformance": [
       "CONFORMANCE_COLUMNS",

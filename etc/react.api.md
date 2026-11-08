@@ -138,6 +138,7 @@ import { HighlightState } from '@adapttable/core/binding';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { isDeclarativeFilters } from '@adapttable/core';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
+import { KitEnvironment } from '@adapttable/core/binding';
 import { LayoutStorage } from '@adapttable/core';
 import { LazyChildrenState } from '@adapttable/core/binding';
 import { listFilterValues } from '@adapttable/core';
@@ -241,6 +242,7 @@ import { UseTableDataResult } from '@adapttable/core/binding';
 import { UseTableUrlStateResult } from '@adapttable/core/binding';
 import { ValidationCheckResult } from '@adapttable/core';
 import { ValidationTarget } from '@adapttable/core';
+import { withKitEnvironment } from '@adapttable/core/binding';
 
 export { ActiveFilterChip }
 
@@ -770,13 +772,7 @@ export { InfiniteQueryLike }
 
 export { isDeclarativeFilters }
 
-// @public
-export interface KitEnvironment {
-    density?: Density;
-    dir?: Direction;
-    labels?: Partial<TableLabels>;
-    locale?: string;
-}
+export { KitEnvironment }
 
 export { LayoutStorage }
 
@@ -1770,13 +1766,7 @@ export { ValidationCheckResult }
 
 export { ValidationTarget }
 
-// @public
-export function withKitEnvironment<P extends {
-    dir?: Direction;
-    locale?: string;
-    labels?: Partial<TableLabels>;
-    density?: Density;
-}>(props: Readonly<P>, kit: KitEnvironment): P;
+export { withKitEnvironment }
 
 // (No @packageDocumentation comment for this package)
 

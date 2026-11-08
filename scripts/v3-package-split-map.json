@@ -16779,6 +16779,14 @@
       "behavior": ""
     },
     {
+      "export": "KitEnvironment",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "LazyChildrenState",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -19308,6 +19316,14 @@
     },
     {
       "export": "withFrontendRowModel",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "withKitEnvironment",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",

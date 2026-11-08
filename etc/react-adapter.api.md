@@ -406,6 +406,7 @@ import { JSX } from 'react';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
 import { KeyedVirtualization } from '@adapttable/core';
 import { KeyedWindowSlotProps as KeyedWindowSlotProps_2 } from '@adapttable/core/binding';
+import { KitEnvironment } from '@adapttable/core/binding';
 import { LayoutStorage } from '@adapttable/core';
 import { logicalAlign } from '@adapttable/core/binding';
 import { MemoExoticComponent } from 'react';
@@ -678,6 +679,7 @@ import { VirtualTableRow } from '@adapttable/core';
 import { visibleRowActions } from '@adapttable/core';
 import { WidthColumn } from '@adapttable/core';
 import { windowGroupedEntries } from '@adapttable/core';
+import { withKitEnvironment } from '@adapttable/core/binding';
 
 export { ActionConfirm }
 
@@ -2734,13 +2736,7 @@ export interface KeyedWindow extends KeyedVirtualization {
 // @public
 export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode>;
 
-// @public
-export interface KitEnvironment {
-    density?: Density;
-    dir?: Direction;
-    labels?: Partial<TableLabels>;
-    locale?: string;
-}
+export { KitEnvironment }
 
 export { LayoutStorage }
 
@@ -4305,13 +4301,7 @@ export { windowGroupedEntries }
 // @public
 export function withFindMarks(base: GridFocusState, find: Pick<FindInTableState, "matchKeys" | "current">, firstRowIndex: number): GridFocusState;
 
-// @public
-export function withKitEnvironment<P extends {
-    dir?: Direction;
-    locale?: string;
-    labels?: Partial<TableLabels>;
-    density?: Density;
-}>(props: Readonly<P>, kit: KitEnvironment): P;
+export { withKitEnvironment }
 
 // (No @packageDocumentation comment for this package)
 

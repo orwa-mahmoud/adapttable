@@ -1077,6 +1077,10 @@ export type {
 export type { RowValidator } from "./editing/editContracts";
 export { preserveEditorFocusOnLayoutChange } from "./editing/layoutFocus";
 export type { ChecklistWindow } from "./filters/checklistModel";
+export {
+  type KitEnvironment,
+  withKitEnvironment,
+} from "./layout/kitEnvironment";
 export type { HighlightedCell } from "./rows/highlightStore";
 export type { RowPatchEvent } from "./rows/patch";
 export type {

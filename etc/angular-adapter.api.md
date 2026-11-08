@@ -261,6 +261,7 @@ import { isMultiSelectEditor } from '@adapttable/core/editing';
 import { isSelectedCell } from '@adapttable/core/binding';
 import { isSelectEditor } from '@adapttable/core/editing';
 import { joinRelativeToken } from '@adapttable/core';
+import { KitEnvironment } from '@adapttable/core/binding';
 import { listFilterValues } from '@adapttable/core';
 import { MergedCellStyle } from '@adapttable/core/binding';
 import { mergedCellStyle } from '@adapttable/core/binding';
@@ -6041,17 +6042,7 @@ export { isSelectEditor }
 
 export { joinRelativeToken }
 
-// @public
-export interface KitEnvironment {
-    // (undocumented)
-    readonly density?: TableDensity;
-    // (undocumented)
-    readonly dir?: Direction;
-    // (undocumented)
-    readonly labels?: Partial<TableLabels>;
-    // (undocumented)
-    readonly locale?: string;
-}
+export { KitEnvironment }
 
 // @public
 export function launcherStyle(boundary: TableAssistantBoundary): TableAssistantPlacement;

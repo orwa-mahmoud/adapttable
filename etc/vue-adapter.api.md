@@ -200,6 +200,7 @@ import { isColumnGroupRenderKey } from '@adapttable/core/binding';
 import { isColumnGroupStubKey } from '@adapttable/core/binding';
 import { isColumnGroupSummaryKey } from '@adapttable/core/binding';
 import { isExtraEntry } from '@adapttable/core/binding';
+import { KitEnvironment } from '@adapttable/core/binding';
 import { LiveFeatureHost } from '@adapttable/core/binding';
 import { MaybeRefOrGetter } from 'vue';
 import { MenuNavigationAction } from '@adapttable/core/binding';
@@ -323,6 +324,7 @@ import { VNode } from 'vue';
 import { VNodeChild } from 'vue';
 import { VNodeProps } from 'vue';
 import { VNodeRef } from 'vue';
+import { withKitEnvironment } from '@adapttable/core/binding';
 
 // @public (undocumented)
 export interface ActionButton {
@@ -2780,17 +2782,7 @@ export { isColumnGroupSummaryKey }
 
 export { isExtraEntry }
 
-// @public
-export interface KitEnvironment {
-    // (undocumented)
-    readonly density?: TableDensity;
-    // (undocumented)
-    readonly dir?: Direction;
-    // (undocumented)
-    readonly labels?: Partial<TableLabels>;
-    // (undocumented)
-    readonly locale?: string;
-}
+export { KitEnvironment }
 
 // @public
 export function managedCommandPaletteSurface(render: (props: ManagedCommandPaletteSurfaceProps) => VNodeChild): CommandPaletteSurfaceSlot;
@@ -4748,8 +4740,7 @@ export interface VueRowReorderModel<TRow> {
     readonly snapshot: RowReorderSnapshot<TRow>;
 }
 
-// @public
-export function withKitEnvironment<P extends KitEnvironment>(props: Readonly<P>, kit: KitEnvironment): P;
+export { withKitEnvironment }
 
 // (No @packageDocumentation comment for this package)
 

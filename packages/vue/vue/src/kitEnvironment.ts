@@ -1,31 +1,7 @@
-import type { Direction, TableDensity, TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/core";
+import type { KitEnvironment } from "@adapttable/core/binding";
 import { loadLabels } from "@adapttable/i18n/load";
 import { computed, type ComputedRef, type Ref, shallowRef, watch } from "vue";
-
-/** What a kit read from its own library. Unset fields stay with the table. */
-export interface KitEnvironment {
-  readonly dir?: Direction;
-  readonly locale?: string;
-  readonly labels?: Partial<TableLabels>;
-  readonly density?: TableDensity;
-}
-
-/**
- * Explicit table props win. A field the kit did not read stays untouched,
- * so a library default cannot override the page.
- */
-export function withKitEnvironment<P extends KitEnvironment>(
-  props: Readonly<P>,
-  kit: KitEnvironment
-): P {
-  return {
-    ...props,
-    dir: props.dir ?? kit.dir,
-    locale: props.locale ?? kit.locale,
-    labels: props.labels ?? kit.labels,
-    density: props.density ?? kit.density,
-  };
-}
 
 /**
  * Fills a kit environment's labels from its locale, loaded on demand.
@@ -70,3 +46,8 @@ export function useLocaleLabels(
       : kit;
   });
 }
+
+export {
+  type KitEnvironment,
+  withKitEnvironment,
+} from "@adapttable/core/binding";

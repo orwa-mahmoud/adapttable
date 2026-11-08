@@ -4256,6 +4256,14 @@ export interface KeyedWindowSlotProps<TWindow = unknown, TNode = unknown> {
 }
 
 // @public
+export interface KitEnvironment {
+    readonly density?: TableDensity;
+    readonly dir?: Direction;
+    readonly labels?: Partial<TableLabels>;
+    readonly locale?: string;
+}
+
+// @public
 export interface LazyChildrenState<TRow> {
     failedIds: ReadonlySet<string>;
     loadIfNeeded: (row: TRow) => void;
@@ -7295,6 +7303,9 @@ export interface WiringReorder<TRow> extends RowReorderDigest {
 
 // @public
 export function withFrontendRowModel<T extends object>(feature: T, createEngine: FrontendEngineFactory<unknown>): T;
+
+// @public
+export function withKitEnvironment<P extends KitEnvironment>(props: Readonly<P>, kit: KitEnvironment): P;
 
 // @public
 export function withShellOperations<TRow>(view: TableRuntimeView<TRow>, input: ShellOperationInput<TRow>): TableRuntimeView<TRow>;

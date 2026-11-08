@@ -1139,7 +1139,9 @@ engine does not rebuild for an inline array. Source refresh shares
 `withFrontendRowModel` / `frontendRowModelOf`; `virtualItemMeta` copies the
 virtualizer fields a row keeps; and `approvalValueText` /
 `approvalArgumentPairs` / `ApprovalArgumentPair` turn an approval review's
-values and arguments into readable text.
+values and arguments into readable text. `KitEnvironment` / `withKitEnvironment` merge what a
+kit read from its UI library — direction, locale, labels, density — under the
+table's own props; every binding re-exports them.
 
 - `chromeColumnPlan` (`ChromeColumnPlan`) — the columns a desktop table draws,
   with selection, expansion and action lanes.
