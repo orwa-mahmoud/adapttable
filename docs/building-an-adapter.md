@@ -549,6 +549,18 @@ Each themed kit (`packages/react/adapter-mantine`, `adapter-mui`, `adapter-chakr
 its kit's components in place of native elements. Ant Design renders the
 desktop table through antd's own `<Table>` instead of the shared assembly.
 
+## Neutral helpers the bindings share
+
+`@adapttable/core/binding` holds the framework-neutral decisions every
+binding makes the same way: `sourceViewKey` / `SourceViewKeyInput` and
+`sameIdentity` (whether a source refresh changed anything, without walking
+the rows), `cachedSnapshot` / `CachedSnapshot` (reuse the last snapshot when
+those inputs match), `withFrontendRowModel` / `frontendRowModelOf` (the
+evaluator a composed grouping feature carries for the plain-table source),
+`virtualItemMeta` (the virtualizer fields a row keeps), and
+`approvalValueText` / `approvalArgumentPairs` / `ApprovalArgumentPair` (an
+approval review's values and arguments as readable text).
+
 ## Package exports and peer dependencies
 
 The built-in adapters declare their kit (where there is one) and React as

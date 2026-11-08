@@ -118,6 +118,10 @@ Helpers from `@adapttable/i18n`:
 - `primarySubtag(locale)` — `"ar-EG"` → `"ar"`
 - `locales` — every preset keyed by tag (`LocaleKey`); each preset is also a
   named export (`ar`, `cs`, `de`, …, `zhTW` for `zh-TW`)
+- `loadLabels(locale)` from `@adapttable/i18n/load` — fetches one preset on
+  demand and resolves to `undefined` for a language without one. Kits that
+  follow their UI library's locale use it, so a plain table carries no label
+  data until a language is needed
 
 ## Custom labels
 

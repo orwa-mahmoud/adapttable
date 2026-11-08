@@ -1133,7 +1133,13 @@ results and the rest), the feature-state keys `DENSITY_STATE`
 (`ResolvableColumn`) and `resolveColumnHeaders` for a column's declarative
 defaults, `columnPathText` for a data-path value as cell text, and
 `sameRows` — whether a new `data` array holds the same rows, so a table
-engine does not rebuild for an inline array.
+engine does not rebuild for an inline array. Source refresh shares
+`sourceViewKey` / `SourceViewKeyInput`, `sameIdentity` and `cachedSnapshot` /
+`CachedSnapshot`; a composed grouping feature carries its evaluator through
+`withFrontendRowModel` / `frontendRowModelOf`; `virtualItemMeta` copies the
+virtualizer fields a row keeps; and `approvalValueText` /
+`approvalArgumentPairs` / `ApprovalArgumentPair` turn an approval review's
+values and arguments into readable text.
 
 - `chromeColumnPlan` (`ChromeColumnPlan`) — the columns a desktop table draws,
   with selection, expansion and action lanes.
@@ -2736,6 +2742,15 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `DEFAULT_CARD_SIZE_PX`, `useKeyedVirtualization` / `KeyedVirtualization`
 (virtualize an opaque keyed list, e.g. grouped entries),
 `useMountStagger` (the `animate` stagger),
+`DesktopTableChrome` / `DesktopTableChromeProps` /
+`DesktopTableChromeClassNames` / `DesktopTableHosts` and `MobileCardsChrome` /
+`MobileCardsChromeProps` / `MobileCardsChromeClassNames` / `MobileCardsHosts` /
+`MobileCardSlot` (the one desktop table and mobile card list every kit fills
+with its own elements and controls), `KitEnvironment` / `withKitEnvironment`
+(the direction, locale, labels and density a kit read from its UI library,
+with the table's own props winning), `useLocaleLabels` (that library
+locale's labels, loaded on demand), `ReducedMotionScope` (marks a table whose
+UI library turned motion off),
 `useOverlayTransition` / `OverlayTransition` (turns an `open` boolean into
 `{ rendered, state }` — `rendered` outlives `open` by one exit so an overlay
 has something to animate on the way out, and reduced motion skips both edges),
@@ -3243,7 +3258,12 @@ references implement `DataTableSurface`, which exposes the scroll element to
 virtualization. `AdaptDesktopTableModel` and `AdaptMobileCardsModel` build live
 header, row, field and custom-renderer plans while each kit renders its native
 table or cards. `AdaptGroupHeaderRowModel` and `AdaptGroupHeaderCardModel`
-provide group captions, aggregates and expansion props.
+provide group captions, aggregates and expansion props. `AdaptDesktopStructure`
+and `AdaptMobileStructure` draw the shared desktop table and card list from a
+kit's `AdaptDesktopSlots` / `AdaptMobileSlots` templates.
+`ADAPTTABLE_KIT_MOTION_OFF` is the token a kit provides when its UI library
+turns motion off, and `mountForcedColorsStyles` installs the shared
+high-contrast stylesheet.
 
 `injectTableSurfaceHost(options)` returns a `TableSurfaceView`: the
 structural view the compatibility shell and the lean host share.
@@ -4124,7 +4144,8 @@ Applications should use the documented table, feature and provider APIs instead.
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
   `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the bundled
   presets (`en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
-  … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
+  … including `zhTW`), and `loadLabels(locale)` from `@adapttable/i18n/load`,
+  which fetches one preset on demand — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--kit <kit>] [--force]`; programmatic
   `detectFramework`, `detectKit`, `choosePackageManager`, `installCommand`,
   `scaffoldFiles`, `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
