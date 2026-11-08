@@ -27,7 +27,7 @@ export interface TreeFeatureOptions<TRow> extends Omit<
   readonly treeColumn?: string;
   readonly onLoadChildren?: (row: TRow) => void | Promise<void>;
 }
-function mount<TRow>(context: FeatureMountContext<TRow>): void {
+function useTree<TRow>(context: FeatureMountContext<TRow>): void {
   let disposed = false;
   onScopeDispose(() => {
     disposed = true;
@@ -111,7 +111,7 @@ export function tree<TRow>(
       ...base.apply?.(input),
       bodyModel: projectHeadlessRows,
     }),
-    mount,
+    mount: useTree,
   };
 }
 export type { TableTree } from "../hierarchy/models";

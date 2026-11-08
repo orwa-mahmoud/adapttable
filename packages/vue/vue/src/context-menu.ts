@@ -36,7 +36,7 @@ export interface ContextMenuOptions<TRow> {
 const GRID_FOCUS_MODEL = featureStateKey<GridFocusState>(
   "vue-grid-focus-model"
 );
-function mountContextMenu<TRow>(context: FeatureMountContext<TRow>): void {
+function useContextMenuMount<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
   const enabled = () => active() && context.options.value.contextMenu !== false;
   const controller = createContextMenuOpenController<TRow>({
@@ -188,7 +188,7 @@ export function contextMenu<TRow>(
     id: core.id,
     apply: (input) => core.apply?.(input) ?? {},
     setup: (host) => core.setup?.(host),
-    mount: mountContextMenu,
+    mount: useContextMenuMount,
     requiredSlots: [CONTEXT_MENU_CONTROL],
   };
 }

@@ -38,7 +38,7 @@ export interface RowPinningFeatureOptions {
   readonly pinnedRowIds?: MaybeRefOrGetterOptional<RowPinState>;
   readonly onPinnedRowIdsChange?: (next: RowPinState) => void;
 }
-function mount<TRow>(context: FeatureMountContext<TRow>): void {
+function usePinnedRows<TRow>(context: FeatureMountContext<TRow>): void {
   const options = computed(
     () =>
       context.options.value as RowPinningFeatureOptions &
@@ -105,7 +105,7 @@ export function rowPinning(
       bodyModel: projectHeadlessRows,
       rowActionControls,
     }),
-    mount,
+    mount: usePinnedRows,
   };
 }
 export type {

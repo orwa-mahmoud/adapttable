@@ -16,7 +16,7 @@ import {
 } from "./actions/contracts";
 import { featureActivity } from "./actions/lifecycle";
 import { useExternalStore } from "./store";
-function mountBulkActions<TRow>(context: FeatureMountContext<TRow>): void {
+function useBulkActionsMount<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
   const configuration = () => ({
     cancelLabel: context.table.labels.value.cancel,
@@ -111,7 +111,7 @@ export function bulkActions(
 ): StaticTableFeature {
   return {
     ...coreBulkActions(actions),
-    mount: mountBulkActions,
+    mount: useBulkActionsMount,
     requiredSlots: [BULK_ACTIONS_CONTROL],
   };
 }

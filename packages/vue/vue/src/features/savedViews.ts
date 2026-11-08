@@ -8,7 +8,7 @@ import {
   SAVED_VIEWS_MODEL,
 } from "../viewControls/contracts";
 
-function mountSavedViews<TRow>(context: FeatureMountContext<TRow>): void {
+function useSavedViewsMount<TRow>(context: FeatureMountContext<TRow>): void {
   let live = true;
   onScopeDispose(() => {
     live = false;
@@ -36,7 +36,7 @@ export function savedViews(
 ): StaticTableFeature {
   return {
     ...coreSavedViews(options),
-    mount: mountSavedViews,
+    mount: useSavedViewsMount,
     requiredSlots: [SAVED_VIEWS_CONTROL],
   };
 }

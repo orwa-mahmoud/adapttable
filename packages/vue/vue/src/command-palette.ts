@@ -18,7 +18,7 @@ import {
 } from "./actions/contracts";
 import { featureActivity, ownsTableEvent } from "./actions/lifecycle";
 import { useExternalStore } from "./store";
-function mountPalette<TRow>(context: FeatureMountContext<TRow>): void {
+function usePaletteMount<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
   const controller = createCommandPaletteController({});
   const snapshot = useExternalStore(controller, { active: context.active });
@@ -114,7 +114,7 @@ export function commandPalette(
 ): StaticTableFeature {
   return {
     ...coreCommandPalette(options),
-    mount: mountPalette,
+    mount: usePaletteMount,
     requiredSlots: [COMMAND_PALETTE_CONTROL],
   };
 }

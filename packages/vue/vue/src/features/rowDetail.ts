@@ -13,7 +13,7 @@ interface DetailPatch<TRow> extends Omit<RowExpansionOptions, "enabled"> {
   readonly renderRowDetail?: (row: TRow) => VNodeChild;
   readonly nestedTable?: NestedTableFor<TRow>;
 }
-function mount<TRow>(context: FeatureMountContext<TRow>): void {
+function useRowDetail<TRow>(context: FeatureMountContext<TRow>): void {
   const options = computed(() => context.options.value as DetailPatch<TRow>);
   const expansion = useRowExpansion(() => ({
     ...options.value,
@@ -51,7 +51,7 @@ export function rowDetail<TRow>(
       ...options,
       bodyModel: projectHeadlessRows,
     }),
-    mount,
+    mount: useRowDetail,
   };
 }
 /** The child table stays in the host's kit and retains its own row type. @public */
@@ -68,7 +68,7 @@ export function nestedTable<TRow>(
       ...options,
       bodyModel: projectHeadlessRows,
     }),
-    mount,
+    mount: useRowDetail,
   };
 }
 export type { TableRowDetail } from "../hierarchy/models";

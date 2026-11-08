@@ -30,7 +30,7 @@ import {
 import { GridFocusAnnouncer } from "./navigationChrome";
 import { useFindInTable } from "./useFindInTable";
 import { useGridFocus } from "./useGridFocus";
-function mountNavigation<TRow>(context: FeatureMountContext<TRow>): void {
+function useNavigationMount<TRow>(context: FeatureMountContext<TRow>): void {
   const history = context.state.get(editHistoryModelKey<TRow>());
   const editing = context.state.get(editingModelKey<TRow>());
   const find = context.state.get(FIND_MODEL);
@@ -116,7 +116,7 @@ export function cellNavigation(
 ): StaticTableFeature {
   return {
     ...coreCellNavigation(options),
-    mount: mountNavigation,
+    mount: useNavigationMount,
     requiredSlots: [FILL_HANDLE_CONTROL],
     renders: [slotRender(GRID_ANNOUNCER, GridFocusAnnouncer)],
   };
@@ -124,7 +124,7 @@ export function cellNavigation(
 export function columnSelectionCheckbox(): StaticTableFeature {
   return { ...coreColumnSelectionCheckbox(), requiredSlots: [COLUMN_SELECT] };
 }
-function mountFind<TRow>(context: FeatureMountContext<TRow>): void {
+function useFindMount<TRow>(context: FeatureMountContext<TRow>): void {
   const grid = context.state.get(GRID_FOCUS_MODEL);
   const gridEnabled = computed(() => grid.value?.enabled === true);
   const find = useFindInTable(
@@ -150,7 +150,7 @@ function mountFind<TRow>(context: FeatureMountContext<TRow>): void {
   });
 }
 export function findInTable(): StaticTableFeature {
-  return { ...coreFindInTable(), mount: mountFind, requiredSlots: [FIND_BAR] };
+  return { ...coreFindInTable(), mount: useFindMount, requiredSlots: [FIND_BAR] };
 }
 function mountStats<TRow>(context: FeatureMountContext<TRow>): void {
   const grid = context.state.get(GRID_FOCUS_MODEL);

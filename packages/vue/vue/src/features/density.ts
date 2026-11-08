@@ -5,7 +5,7 @@ import { toValue, watch } from "vue";
 import { useDensityUrlState } from "../url/useDensityUrlState";
 import { DENSITY_CONTROL } from "../viewControls/contracts";
 
-function mountDensity<TRow>(context: FeatureMountContext<TRow>): void {
+function useDensityMount<TRow>(context: FeatureMountContext<TRow>): void {
   const density = useDensityUrlState(
     () => ({
       urlAdapter: context.urlAdapter,
@@ -34,7 +34,7 @@ function mountDensity<TRow>(context: FeatureMountContext<TRow>): void {
 export function densityChooser(): StaticTableFeature {
   return {
     ...coreDensityChooser(),
-    mount: mountDensity,
+    mount: useDensityMount,
     requiredSlots: [DENSITY_CONTROL],
   };
 }

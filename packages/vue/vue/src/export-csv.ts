@@ -32,7 +32,7 @@ import { useExternalStore } from "./store";
 const GRID_FOCUS_MODEL = featureStateKey<GridFocusState>(
   "vue-grid-focus-model"
 );
-function mountExport<TRow>(context: FeatureMountContext<TRow>): void {
+function useExportMount<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
   const grid = context.state.get(GRID_FOCUS_MODEL);
   const grouping = context.state.get(groupingModelKey<TRow>());
@@ -247,7 +247,7 @@ export function exportCsv<TRow>(
     id: core.id,
     apply: (input) => core.apply?.(input) ?? {},
     setup: (host) => core.setup?.(host),
-    mount: mountExport,
+    mount: useExportMount,
     requiredSlots: [EXPORT_CONTROL],
   };
 }
