@@ -1,14 +1,12 @@
 import {
   AdaptAttrs,
+  AdaptMobileCardsHost,
   AdaptMobileStructure,
-  type TableView,
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
-  input,
-  viewChild,
   ViewEncapsulation,
 } from "@angular/core";
 import { NzCardModule } from "ng-zorro-antd/card";
@@ -40,14 +38,4 @@ import { AdaptSelectionCheckbox } from "./selectionCheckbox";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents", class: "adapt-ng-zorro-mobile" },
 })
-export class AdaptMobileCards<TRow> {
-  readonly view = input.required<TableView<TRow>>();
-  readonly rowKey = input.required<(row: TRow) => string>();
-  readonly maxHeight = input<number | string>();
-  private readonly structure = viewChild(AdaptMobileStructure);
-
-  /** The scroll box the shell virtualizes against. */
-  scrollElement(): HTMLElement | null {
-    return this.structure()?.scrollElement() ?? null;
-  }
-}
+export class AdaptMobileCards<TRow> extends AdaptMobileCardsHost<TRow> {}

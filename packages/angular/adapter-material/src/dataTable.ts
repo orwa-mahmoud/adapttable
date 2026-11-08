@@ -4,21 +4,14 @@
  * the structure; Material supplies the visible controls and overlays.
  */
 import {
-  ADAPTTABLE_FIND_STATE,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
-} from "@adapttable/angular";
-import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
-  ADAPTTABLE_CONTEXT_MENU,
-  ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
   type KitEnvironment,
-  type PaletteOpenState,
+  provideAdaptTableState,
 } from "@adapttable/angular/adapter";
 import { Directionality } from "@angular/cdk/bidi";
 import {
@@ -26,12 +19,7 @@ import {
   OverlayContainer,
 } from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
@@ -78,18 +66,7 @@ export type {
     // the table's selects, menus and popovers render into a CDK overlay
     // container that follows the page into fullscreen.
     { provide: OverlayContainer, useClass: FullscreenOverlayContainer },
-    {
-      provide: ADAPTTABLE_FIND_STATE,
-      useFactory: () => signal<FindInTableState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_PALETTE_OPEN,
-      useFactory: () => signal<PaletteOpenState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_CONTEXT_MENU,
-      useFactory: () => signal<ContextMenuRegionHandlers | null>(null),
-    },
+    provideAdaptTableState(),
   ],
 })
 export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {

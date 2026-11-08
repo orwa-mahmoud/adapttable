@@ -4,21 +4,14 @@
  * this kit's kit, so every control a reader uses is the browser's own.
  */
 import {
-  ADAPTTABLE_FIND_STATE,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
-} from "@adapttable/angular";
-import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
-  ADAPTTABLE_CONTEXT_MENU,
   ADAPTTABLE_KIT_MOTION_OFF,
-  ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
-  type PaletteOpenState,
+  provideAdaptTableState,
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -26,7 +19,6 @@ import {
   Component,
   inject,
   input,
-  signal,
 } from "@angular/core";
 import { NgbConfig } from "@ng-bootstrap/ng-bootstrap";
 
@@ -70,18 +62,7 @@ export type {
       provide: ADAPTTABLE_KIT_MOTION_OFF,
       useFactory: () => ngBootstrapMotionOff(inject(NgbConfig)),
     },
-    {
-      provide: ADAPTTABLE_FIND_STATE,
-      useFactory: () => signal<FindInTableState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_PALETTE_OPEN,
-      useFactory: () => signal<PaletteOpenState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_CONTEXT_MENU,
-      useFactory: () => signal<ContextMenuRegionHandlers | null>(null),
-    },
+    provideAdaptTableState(),
   ],
 })
 export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {

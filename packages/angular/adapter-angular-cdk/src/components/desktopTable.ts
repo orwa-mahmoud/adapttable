@@ -1,19 +1,13 @@
 import {
   AdaptAttrs,
   AdaptDesktopStructure,
+  AdaptDesktopTableHost,
   AdaptHeaderTemplate,
   AdaptHeaderTemplateSlot,
-  type TableView,
 } from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  input,
-  viewChild,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component } from "@angular/core";
 
 import { AdaptColumnHeaderRename } from "./columnHeaderRename";
 import { AdaptRowActions } from "./rowActionButtons";
@@ -40,16 +34,4 @@ import { AdaptRowActions } from "./rowActionButtons";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
 })
-export class AdaptDesktopTable<TRow> {
-  readonly view = input.required<TableView<TRow>>();
-  readonly rowKey = input.required<(row: TRow) => string>();
-  readonly maxHeight = input<number | string>();
-  private readonly structure = viewChild(AdaptDesktopStructure);
-  /** The header-cell template the table view registers. */
-  protected readonly header = inject(AdaptHeaderTemplateSlot);
-
-  /** The scroll box the shell virtualizes against. */
-  scrollElement(): HTMLElement | null {
-    return this.structure()?.scrollElement() ?? null;
-  }
-}
+export class AdaptDesktopTable<TRow> extends AdaptDesktopTableHost<TRow> {}

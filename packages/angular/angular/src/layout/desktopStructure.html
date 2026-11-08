@@ -546,7 +546,7 @@
   }
 </ng-template>
 @if (!embedded()) {
-  <div #scrollBox data-adapttable-part="scroll-box" [style]="scrollBoxStyle()">
+  <div #scrollBox data-adapttable-part="scroll-box" [style]="boxStyle()">
     <ng-container *ngTemplateOutlet="tableHost" />
   </div>
 }

@@ -266,6 +266,11 @@ export {
   AdaptHeaderTemplateSlot,
 } from "./layout/headerTemplate";
 export type { KitEnvironment } from "./layout/kitEnvironment";
+export {
+  AdaptDesktopTableHost,
+  AdaptMobileCardsHost,
+  provideAdaptTableState,
+} from "./layout/kitHosts";
 export { AdaptMobileCardsModel } from "./layout/mobileCardsModel";
 export {
   type AdaptMobileSlots,
@@ -282,6 +287,7 @@ export {
   type RuntimeTableOptions,
   tableRuntimeFor,
 } from "./layout/tableRuntime";
+export { AdaptTableSurface, scrollBoxStyle } from "./layout/tableSurface";
 export { type TableSurfaceView } from "./layout/tableSurfaceHost";
 export { AdaptExtraRowContent } from "./rows/extraRowContent";
 export {

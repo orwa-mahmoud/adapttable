@@ -3,21 +3,14 @@
  * State and callbacks stay in the binding; NG-ZORRO owns the visible controls.
  */
 import {
-  ADAPTTABLE_FIND_STATE,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
-} from "@adapttable/angular";
-import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
-  ADAPTTABLE_CONTEXT_MENU,
-  ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
   type KitEnvironment,
-  type PaletteOpenState,
+  provideAdaptTableState,
 } from "@adapttable/angular/adapter";
 import { BidiModule, Directionality } from "@angular/cdk/bidi";
 import {
@@ -30,7 +23,6 @@ import {
   Component,
   ElementRef,
   inject,
-  signal,
   viewChild,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -94,18 +86,7 @@ export type {
     // the table's selects, menus and popovers render into a CDK overlay
     // container that follows the page into fullscreen.
     { provide: OverlayContainer, useClass: FullscreenOverlayContainer },
-    {
-      provide: ADAPTTABLE_FIND_STATE,
-      useFactory: () => signal<FindInTableState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_PALETTE_OPEN,
-      useFactory: () => signal<PaletteOpenState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_CONTEXT_MENU,
-      useFactory: () => signal<ContextMenuRegionHandlers | null>(null),
-    },
+    provideAdaptTableState(),
   ],
 })
 export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {

@@ -3,7 +3,8 @@ import {
   AdaptAttrs,
   AdaptDesktopStructure,
   AdaptHeader,
-  type TableView,
+  AdaptTableSurface,
+  scrollBoxStyle,
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -13,8 +14,6 @@ import {
   Directive,
   ElementRef,
   inject,
-  input,
-  viewChild,
   ViewEncapsulation,
 } from "@angular/core";
 import { NzButtonModule } from "ng-zorro-antd/button";
@@ -60,12 +59,7 @@ class AdaptZorroTableHost {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
 })
-export class AdaptDesktopTable<TRow> {
-  readonly view = input.required<TableView<TRow>>();
-  readonly rowKey = input.required<(row: TRow) => string>();
-  readonly maxHeight = input<number | string>();
-  private readonly scrollBox = viewChild<ElementRef<HTMLElement>>("scrollBox");
-
+export class AdaptDesktopTable<TRow> extends AdaptTableSurface<TRow> {
   private kitHost: HTMLElement | null = null;
 
   /** NG-ZORRO's host is stamped inside the shared structure, so the kit hears about it from the element itself. */
@@ -91,21 +85,10 @@ export class AdaptDesktopTable<TRow> {
    * this kit draws the box itself so NG-ZORRO can contain the rows.
    */
   protected scrollStyle(): Record<string, string> | null {
-    const maxHeight = this.maxHeight();
-    if (maxHeight != null) {
-      return {
-        maxHeight:
-          typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight,
-        overflow: "auto",
-      };
-    }
-    const style = this.view().table.tableAttrs().style;
-    const sized =
-      typeof style === "object" &&
-      style !== null &&
-      "minWidth" in style &&
-      Boolean(style.minWidth);
-    return sized ? { overflowX: "auto" } : null;
+    return scrollBoxStyle(
+      this.maxHeight(),
+      this.view().table.tableAttrs().style
+    );
   }
 
   /** NG-ZORRO's row class, kept when the row also carries its own class. */
@@ -116,10 +99,5 @@ export class AdaptDesktopTable<TRow> {
       ...(typeof own === "string" ? own.split(/\s+/).filter(Boolean) : []),
     ]);
     return { ...attrs, class: [...names].join(" ") };
-  }
-
-  /** The scroll box the shell virtualizes against. */
-  scrollElement(): HTMLElement | null {
-    return this.scrollBox()?.nativeElement ?? null;
   }
 }
