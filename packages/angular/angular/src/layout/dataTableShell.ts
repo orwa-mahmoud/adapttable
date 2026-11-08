@@ -149,6 +149,7 @@ import {
   input,
   type OnInit,
   output,
+  PendingTasks,
   type Signal,
   signal,
   type TemplateRef,
@@ -860,6 +861,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     viewChild<TemplateRef<unknown>>("filtersTrigger");
   private scrollToGridRow: ((rowIndex: number) => void) | undefined;
   private readonly injector = inject(Injector);
+  private readonly pendingTasks = inject(PendingTasks);
   private readonly reducedMotion = injectPrefersReducedMotion();
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
   /** Skips a repeat entrance when the row count and layout have not changed. */
@@ -943,7 +945,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       onCleanup(() => {
         current = false;
       });
-      void loadLabels(locale).then((labels) => {
+      // A pending task holds server rendering until the language arrives, so
+      // the page is serialized in it rather than in English.
+      this.pendingTasks.run(async () => {
+        const labels = await loadLabels(locale);
         if (current) this.libraryLabels.set({ locale, labels });
       });
     });
