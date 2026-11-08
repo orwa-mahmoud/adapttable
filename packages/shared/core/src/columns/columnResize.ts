@@ -1,8 +1,9 @@
 import { isRtlElement } from "../layout/writingDirection";
 import { measureColumnWidth } from "./autoSizeColumns";
-import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "./widthBounds";
+import { MIN_COLUMN_WIDTH } from "./widthBounds";
 
-export { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH };
+export { MAX_COLUMN_WIDTH } from "./widthBounds";
+export { MIN_COLUMN_WIDTH };
 /** Keyboard resize step (px) per arrow press. */
 export const COLUMN_RESIZE_STEP = 16;
 

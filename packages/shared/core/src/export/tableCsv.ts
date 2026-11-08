@@ -12,14 +12,12 @@ import type { TableSource } from "../source/TableSource";
 import { devWarn } from "../utils/devWarn";
 import { csvWriter } from "./csvWriter";
 import {
-  exportableColumns,
   exportAllFallsBackToPage,
   exportAllQueryOf,
   exportQueryOf,
   exportTableOptions,
   fetchAllExportRows,
   resolveExport,
-  resolveExportColumns,
   resolveExportCsv,
   sourceProvidesAllExportRows,
 } from "./exportRows";
@@ -219,6 +217,7 @@ export function makeExportCsvHandler<TRow>(
     });
 }
 
+export { exportableColumns, resolveExportColumns } from "./exportRows";
 export type {
   ExportAllControls,
   ExportAllQuery,
@@ -235,9 +234,7 @@ export type {
 } from "./tableExportContract";
 export { EXPORT_FETCH_ALL_MAX_ROWS } from "./tableExportContract";
 export {
-  exportableColumns,
   exportAllFallsBackToPage,
   fetchAllExportRows,
-  resolveExportColumns,
   resolveExportCsv,
 };

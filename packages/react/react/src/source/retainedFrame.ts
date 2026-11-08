@@ -1,5 +1,6 @@
 import { stableKey } from "@adapttable/core";
-import { sameIdentity, sourceViewKey } from "@adapttable/core/binding";
+import { sameIdentity } from "@adapttable/core/binding";
+export { sourceViewKey } from "@adapttable/core/binding";
 
 /**
  * The last refresh a source hook applied, and whether React committed it.
@@ -47,5 +48,3 @@ export function markFrameCommitted<Frame>(held: {
 }): void {
   if (held.current) held.current.committed = true;
 }
-
-export { sourceViewKey };
