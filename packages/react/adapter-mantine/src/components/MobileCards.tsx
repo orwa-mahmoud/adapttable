@@ -5,15 +5,18 @@ import {
   mobileCardPropsEqual,
   mobileCardRegionProps,
   MobileCardsChrome,
+  type MobileCardSlotKit,
   mobileCardSlots,
   resolveMobileLabel,
   resolveRowEditTrigger,
   rowEditConflict,
   type SharedTableRenderProps,
+  type UseDataTableResult,
   useSummaryCells,
 } from "@adapttable/react/adapter";
 import { Box, Card, Checkbox, Group, Stack, Text } from "@mantine/core";
 import {
+  type ComponentType,
   type CSSProperties,
   memo,
   type ReactNode,
@@ -321,46 +324,25 @@ function MantineMobileCardHost(props: {
   return <Card {...props} />;
 }
 
-/** Mobile rendering: one Mantine Card per row with labelled key/value rows. */
-export function MobileCards<TRow>(props: Readonly<MobileCardsProps<TRow>>) {
-  // The compiler's cache around these slots is larger than the slots.
-  "use no memo";
-  const {
-    table,
-    rows,
-    bodyRef,
-    className,
-    paddingTop = 0,
-    paddingBottom = 0,
-    density = "comfortable",
-    summaryRow,
-    maxHeight,
-    virtualScrollRef,
-  } = props;
+/** What the card list's callbacks read beside each card's entry. */
+interface CardSlotInputs<TRow> {
+  readonly table: UseDataTableResult<TRow>;
+  readonly CardItem: ComponentType<MobileCardProps<TRow>>;
+  readonly compact: boolean;
+  readonly cardPadding: MobileCardProps<TRow>["cardPadding"];
+  readonly cardGap: MobileCardProps<TRow>["cardGap"];
+}
+
+/** This kit's card host, body, extra-row cell and group card. */
+function cardSlotKit<TRow>({
+  table,
+  CardItem,
+  compact,
+  cardPadding,
+  cardGap,
+}: CardSlotInputs<TRow>): MobileCardSlotKit<TRow> {
   const { columns, selection, labels } = table;
-  const compact = density === "compact";
-  const cardPadding = compact ? "sm" : "md";
-  const cardGap = compact ? 4 : "xs";
-  // Header groups and multi-sort are desktop-only: cards have no column axis
-  // to span a group label across or to chain a sort on, so neither renders
-  // here. The footer summary still applies — it closes the list as one card.
-  const summaryCells = useSummaryCells(summaryRow, rows);
-
-  // `memo` erases generics at module level, so the memoized card is
-  // instantiated here (once — the identity is stable for the list's life).
-  const CardItem = useMemo(
-    () =>
-      memo(
-        MobileCardBase<TRow>,
-        mobileCardPropsEqual<TRow, MobileCardProps<TRow>>([
-          "cardPadding",
-          "cardGap",
-        ])
-      ),
-    []
-  );
-
-  const cards = mobileCardSlots(props, {
+  return {
     card: (entry) => ({
       key: entry.key,
       props: {
@@ -394,7 +376,52 @@ export function MobileCards<TRow>(props: Readonly<MobileCardsProps<TRow>>) {
         onShowMore={grouping.showMore}
       />
     ),
-  });
+  };
+}
+
+/** Mobile rendering: one Mantine Card per row with labelled key/value rows. */
+export function MobileCards<TRow>(props: Readonly<MobileCardsProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
+  const {
+    table,
+    rows,
+    bodyRef,
+    className,
+    paddingTop = 0,
+    paddingBottom = 0,
+    density = "comfortable",
+    summaryRow,
+    maxHeight,
+    virtualScrollRef,
+  } = props;
+  const { columns, labels } = table;
+  const compact = density === "compact";
+  const cardPadding = compact ? "sm" : "md";
+  const cardGap = compact ? 4 : "xs";
+  // Header groups and multi-sort are desktop-only: cards have no column axis
+  // to span a group label across or to chain a sort on, so neither renders
+  // here. The footer summary still applies — it closes the list as one card.
+  const summaryCells = useSummaryCells(summaryRow, rows);
+
+  // `memo` erases generics at module level, so the memoized card is
+  // instantiated here (once — the identity is stable for the list's life).
+  const CardItem = useMemo(
+    () =>
+      memo(
+        MobileCardBase<TRow>,
+        mobileCardPropsEqual<TRow, MobileCardProps<TRow>>([
+          "cardPadding",
+          "cardGap",
+        ])
+      ),
+    []
+  );
+
+  const cards = mobileCardSlots(
+    props,
+    cardSlotKit({ table, CardItem, compact, cardPadding, cardGap })
+  );
 
   const summary = summaryCells ? (
     <Card

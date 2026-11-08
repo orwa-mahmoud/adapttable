@@ -6,14 +6,17 @@ import {
   mobileCardPropsEqual,
   mobileCardRegionProps,
   MobileCardsChrome,
+  type MobileCardSlotKit,
   mobileCardSlots,
   resolveMobileLabel,
   resolveRowEditTrigger,
   rowEditConflict,
+  type UseDataTableResult,
   useSummaryCells,
 } from "@adapttable/react/adapter";
 import { Box, Card, Flex, Text } from "@radix-ui/themes";
 import {
+  type ComponentType,
   type CSSProperties,
   memo,
   type ReactNode,
@@ -266,43 +269,27 @@ function RadixMobileCardHost(props: {
   return <Card {...props} />;
 }
 
-/** Mobile Radix Themes card list. */
-export function MobileCards<TRow>(props: Readonly<SharedProps<TRow>>) {
-  // The compiler's cache around these slots is larger than the slots.
-  "use no memo";
-  const {
-    table,
-    rows,
-    size,
-    accentColor,
-    dir,
-    summaryRow,
-    className,
-    paddingTop = 0,
-    paddingBottom = 0,
-    maxHeight,
-    virtualScrollRef,
-  } = props;
+/** What the card list's callbacks read beside each card's entry. */
+interface CardSlotInputs<TRow> extends Pick<
+  SharedProps<TRow>,
+  "className" | "dir" | "accentColor"
+> {
+  readonly table: UseDataTableResult<TRow>;
+  readonly CardItem: ComponentType<MobileCardProps<TRow>>;
+  readonly compact: boolean;
+}
+
+/** This kit's card host, body, extra-row cell and group card. */
+function cardSlotKit<TRow>({
+  table,
+  CardItem,
+  className,
+  dir,
+  accentColor,
+  compact,
+}: CardSlotInputs<TRow>): MobileCardSlotKit<TRow> {
   const { columns, selection, labels } = table;
-  const compact = size === "1";
-  const summary = useSummaryCells(summaryRow, rows);
-
-  // `memo` erases generics at module level, so the memoized card is
-  // instantiated here (once — the identity is stable for the list's life).
-  const CardItem = useMemo(
-    () =>
-      memo(
-        MobileCardBase<TRow>,
-        mobileCardPropsEqual<TRow, MobileCardProps<TRow>>([
-          "compact",
-          "dir",
-          "accentColor",
-        ])
-      ),
-    []
-  );
-
-  const cards = mobileCardSlots(props, {
+  return {
     card: (entry) => {
       const cardClass = joinClasses(className, entry.rowClass);
       return {
@@ -337,7 +324,49 @@ export function MobileCards<TRow>(props: Readonly<SharedProps<TRow>>) {
         onShowMore={grouping.showMore}
       />
     ),
-  });
+  };
+}
+
+/** Mobile Radix Themes card list. */
+export function MobileCards<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
+  const {
+    table,
+    rows,
+    size,
+    accentColor,
+    dir,
+    summaryRow,
+    className,
+    paddingTop = 0,
+    paddingBottom = 0,
+    maxHeight,
+    virtualScrollRef,
+  } = props;
+  const { columns, labels } = table;
+  const compact = size === "1";
+  const summary = useSummaryCells(summaryRow, rows);
+
+  // `memo` erases generics at module level, so the memoized card is
+  // instantiated here (once — the identity is stable for the list's life).
+  const CardItem = useMemo(
+    () =>
+      memo(
+        MobileCardBase<TRow>,
+        mobileCardPropsEqual<TRow, MobileCardProps<TRow>>([
+          "compact",
+          "dir",
+          "accentColor",
+        ])
+      ),
+    []
+  );
+
+  const cards = mobileCardSlots(
+    props,
+    cardSlotKit({ table, CardItem, className, dir, accentColor, compact })
+  );
 
   return (
     <MobileCardsChrome

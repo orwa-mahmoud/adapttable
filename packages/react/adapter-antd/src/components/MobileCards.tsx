@@ -16,6 +16,7 @@ import {
   mobileCardPropsEqual,
   mobileCardRegionProps,
   MobileCardsChrome,
+  type MobileCardSlotKit,
   mobileCardSlots,
   resolveMobileLabel,
   resolveRowEditTrigger,
@@ -42,6 +43,7 @@ import {
   Typography,
 } from "antd";
 import {
+  type ComponentType,
   type CSSProperties,
   memo,
   type ReactNode,
@@ -361,6 +363,124 @@ function CardItemBase<TRow>(props: Readonly<CardItemProps<TRow>>) {
   );
 }
 
+/** A grouped-list entry as antd's group card reads it. */
+function toGroupRow<TRow>(
+  entry: Extract<
+    GroupedFlatEntry<TRow>,
+    { kind: "group" | "groupFooter" | "groupMore" }
+  >
+): AdaptTableGroupRow {
+  return {
+    [ADAPTTABLE_GROUP]: true,
+    key: entry.key,
+    label: entry.label,
+    level: entry.level,
+    footer: entry.kind === "groupFooter",
+    more:
+      entry.kind === "groupMore"
+        ? {
+            scope: entry.scope,
+            groupKey: entry.groupKey,
+            remaining: entry.remaining,
+          }
+        : undefined,
+    count:
+      (entry.kind === "group" ? entry.serverCount : undefined) ??
+      entry.leafIds.length,
+    leafIds: entry.leafIds,
+    aggregateCells:
+      entry.kind === "groupMore"
+        ? undefined
+        : (entry.aggregateCells as Partial<Record<string, ReactNode>>),
+    aggregateOps: entry.kind === "groupMore" ? undefined : entry.aggregateOps,
+    collapsed: entry.kind === "group" && entry.collapsed,
+  };
+}
+
+/** What the card list's callbacks read beside each card's entry. */
+interface CardSlotInputs<TRow> {
+  readonly table: UseDataTableResult<TRow>;
+  readonly CardItem: ComponentType<CardItemProps<TRow>>;
+  readonly cardClassName?: string;
+  readonly measureElement?: (node: Element | null) => void;
+  readonly prefetch?: (row: TRow) => void;
+}
+
+/** This kit's card host, body, extra-row cell and group card. */
+function cardSlotKit<TRow>({
+  table,
+  CardItem,
+  cardClassName,
+  measureElement,
+  prefetch,
+}: CardSlotInputs<TRow>): MobileCardSlotKit<TRow> {
+  const { columns, selection, labels } = table;
+  return {
+    card: (entry) => {
+      const { body, itemProps } = entry;
+      return {
+        key: entry.key,
+        props: {
+          ref: measureElement,
+          "data-index": entry.index,
+          "aria-posinset": itemProps["aria-posinset"],
+          "aria-setsize": itemProps["aria-setsize"],
+          "data-adapttable-part": itemProps["data-adapttable-part"],
+          "aria-label": itemProps["aria-label"],
+          style: treeCardStyle(body.treeEntry?.level ?? 0),
+        },
+        content: (
+          <CardItem
+            {...body}
+            className={
+              [cardClassName, entry.rowClass].filter(Boolean).join(" ") ||
+              undefined
+            }
+            prefetch={prefetch}
+          />
+        ),
+      };
+    },
+    extraProps: (kind) => ({
+      role: kind === "separator" ? "separator" : undefined,
+    }),
+    extraCell: (part, content) => (
+      <div data-adapttable-part={part}>{content}</div>
+    ),
+    groupProps: { ref: measureElement, "data-adapttable-part": undefined },
+    groupCard: (entry, grouping) => (
+      <OptionalGroupHeaderCard
+        group={toGroupRow(entry)}
+        labels={labels}
+        onToggle={() => grouping.collapsed.toggle(entry.key)}
+        selection={selection ?? undefined}
+        onShowMore={grouping.showMore}
+        aggregateNodes={
+          entry.kind !== "groupMore" && entry.aggregateCells
+            ? groupAggregateEntries<TRow, ColumnDef<TRow>>(
+                columns,
+                entry.aggregateCells,
+                entry.aggregateOps
+              ).map(({ column, node }) => (
+                <Space key={column.key} size="small">
+                  <Typography.Text type="secondary">
+                    {resolveMobileLabel(column)}
+                  </Typography.Text>
+                  <Typography.Text
+                    data-column={column.key}
+                    data-adapttable-part="group-aggregate"
+                  >
+                    {node as ReactNode}
+                  </Typography.Text>
+                </Space>
+              ))
+            : undefined
+        }
+      />
+    ),
+  };
+}
+
 /**
  * Mobile layout: one antd `Card` per row with an antd `Descriptions`
  * label/value list, an optional selection checkbox, an optional expandable
@@ -471,7 +591,7 @@ export function MobileCards<TRow>(
     listRef,
     listStyle,
   } = props;
-  const { labels, selection, columns } = table;
+  const { labels, columns } = table;
 
   const CardItem = useMemo(
     () =>
@@ -482,101 +602,10 @@ export function MobileCards<TRow>(
     []
   );
 
-  const toGroupRow = (
-    entry: Extract<
-      GroupedFlatEntry<TRow>,
-      { kind: "group" | "groupFooter" | "groupMore" }
-    >
-  ): AdaptTableGroupRow => ({
-    [ADAPTTABLE_GROUP]: true,
-    key: entry.key,
-    label: entry.label,
-    level: entry.level,
-    footer: entry.kind === "groupFooter",
-    more:
-      entry.kind === "groupMore"
-        ? {
-            scope: entry.scope,
-            groupKey: entry.groupKey,
-            remaining: entry.remaining,
-          }
-        : undefined,
-    count:
-      (entry.kind === "group" ? entry.serverCount : undefined) ??
-      entry.leafIds.length,
-    leafIds: entry.leafIds,
-    aggregateCells:
-      entry.kind === "groupMore"
-        ? undefined
-        : (entry.aggregateCells as Partial<Record<string, ReactNode>>),
-    aggregateOps: entry.kind === "groupMore" ? undefined : entry.aggregateOps,
-    collapsed: entry.kind === "group" && entry.collapsed,
-  });
-
-  const cards = mobileCardSlots(props, {
-    card: (entry) => {
-      const { body, itemProps } = entry;
-      return {
-        key: entry.key,
-        props: {
-          ref: measureElement,
-          "data-index": entry.index,
-          "aria-posinset": itemProps["aria-posinset"],
-          "aria-setsize": itemProps["aria-setsize"],
-          "data-adapttable-part": itemProps["data-adapttable-part"],
-          "aria-label": itemProps["aria-label"],
-          style: treeCardStyle(body.treeEntry?.level ?? 0),
-        },
-        content: (
-          <CardItem
-            {...body}
-            className={
-              [cardClassName, entry.rowClass].filter(Boolean).join(" ") ||
-              undefined
-            }
-            prefetch={prefetch}
-          />
-        ),
-      };
-    },
-    extraProps: (kind) => ({
-      role: kind === "separator" ? "separator" : undefined,
-    }),
-    extraCell: (part, content) => (
-      <div data-adapttable-part={part}>{content}</div>
-    ),
-    groupProps: { ref: measureElement, "data-adapttable-part": undefined },
-    groupCard: (entry, grouping) => (
-      <OptionalGroupHeaderCard
-        group={toGroupRow(entry)}
-        labels={labels}
-        onToggle={() => grouping.collapsed.toggle(entry.key)}
-        selection={selection ?? undefined}
-        onShowMore={grouping.showMore}
-        aggregateNodes={
-          entry.kind !== "groupMore" && entry.aggregateCells
-            ? groupAggregateEntries<TRow, ColumnDef<TRow>>(
-                columns,
-                entry.aggregateCells,
-                entry.aggregateOps
-              ).map(({ column, node }) => (
-                <Space key={column.key} size="small">
-                  <Typography.Text type="secondary">
-                    {resolveMobileLabel(column)}
-                  </Typography.Text>
-                  <Typography.Text
-                    data-column={column.key}
-                    data-adapttable-part="group-aggregate"
-                  >
-                    {node as ReactNode}
-                  </Typography.Text>
-                </Space>
-              ))
-            : undefined
-        }
-      />
-    ),
-  });
+  const cards = mobileCardSlots(
+    props,
+    cardSlotKit({ table, CardItem, cardClassName, measureElement, prefetch })
+  );
   if (summaryRow) {
     cards.push({
       key: "summary",
