@@ -248,7 +248,7 @@ test("Angular live settings expose binary choices and preserve URL history", asy
     "/angular-main/?kit=material&locale=en&density=comfortable&mobile=off&presentation-proof=keep"
   );
   for (const [group, options] of [
-    ["Data", ["Frontend", "Server"]],
+    ["Data", ["Frontend", "Backend"]],
     ["Locale", ["English", "العربية"]],
     ["Density", ["Comfortable", "Compact"]],
     ["Layout", ["Responsive", "Cards"]],

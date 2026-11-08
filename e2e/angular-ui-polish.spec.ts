@@ -218,7 +218,7 @@ for (const key of [
       await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(5);
       await expect(
         page.locator('[data-adapttable-part="footer"]')
-      ).toContainText("of 6");
+      ).toContainText(locale === "ar" ? "من 6" : "of 6");
       await expect(
         panel.getByRole("checkbox", {
           name: locale === "ar" ? "الأساسية" : "Core",
@@ -246,7 +246,7 @@ for (const key of [
       await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(5);
       await expect(
         page.locator('[data-adapttable-part="footer"]')
-      ).toContainText("of 6");
+      ).toContainText(locale === "ar" ? "من 6" : "of 6");
       if (key === "material") {
         const chips = page.locator('[data-adapttable-part="chips"]');
         const clear = await expectMaterialClearAllFits(chips, locale);
