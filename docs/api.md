@@ -892,7 +892,9 @@ GridFocusController` — the active cell, the selected range, a fill drag, the
 - `gridContainerAttributes` (`GridContainerAttributes`), `gridCellAttributes`
   (`GridCellAttributesInput`, `GridCellAttributes`), `gridRowAttributes`,
   `gridColumnHeaderAttributes` — the roles, absolute ARIA indices and selection
-  and find marks every binding puts on the grid.
+  and find marks every binding puts on the grid. `gridRowFocusSignature`
+  digests what those marks draw on one row, so a row repaints only when the
+  focus, range or find matches change on it.
 - `isGridColumnSelected`, `gridFillHandleCell` — whether a column is selected
   over every loaded row, and which cell carries the fill handle.
 

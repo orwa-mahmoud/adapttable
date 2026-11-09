@@ -39,6 +39,11 @@ export interface GridFocusState {
   getCellPropsAt: (windowIndex: number, col: number) => Record<string, unknown>;
   /** Props for a row addressed by its position in the rendered window. */
   getRowPropsAt: (windowIndex: number) => Record<string, unknown>;
+  /**
+   * What the focus, range, fill handle and find matches draw on the row at
+   * this rendered position, as a digest: a row repaints only when it changes.
+   */
+  rowFocusSignature?: (windowIndex: number) => string;
   /** Live-region text naming where focus is. Empty until focus moves. */
   announcement: string;
   /** The selected rectangle, or `null` when nothing is selected. */

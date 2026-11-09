@@ -31867,6 +31867,14 @@
       "behavior": ""
     },
     {
+      "export": "gridRowFocusSignature",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "groupAggregateEntries",
       "currentImport": "@adapttable/core",
       "kind": "value",

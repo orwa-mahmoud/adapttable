@@ -56,6 +56,7 @@ export {
   type GridContainerAttributes,
   gridContainerAttributes,
   gridRowAttributes,
+  gridRowFocusSignature,
 } from "./gridAria";
 export { gridFillHandleCell } from "./gridFill";
 export {

@@ -95,7 +95,7 @@ export const DESKTOP_ROW_WIRING_KEYS = [
   "clickable",
   "hasPrefetch",
   "editingSignature",
-  "gridFocus",
+  "focusSignature",
   "treeColumnKey",
 ] as const;
 
@@ -161,7 +161,17 @@ export interface DesktopRowWiringContext<TRow> {
   /** The table's row prop-getter. */
   readonly table: { getRowProps(row: TRow, index: number): object };
   /** Grid focus, when composed. */
-  readonly gridFocus: { getRowPropsAt(index: number): object } | undefined;
+  readonly gridFocus:
+    | {
+        getRowPropsAt(index: number): object;
+        /**
+         * What the focus and range draw on the row at this rendered position,
+         * so a row repaints only when they change there. Absent, every row
+         * repaints whenever the focus state changes.
+         */
+        rowFocusSignature?: (index: number) => string;
+      }
+    | undefined;
   /** The host's row click, if any. */
   readonly onRowClick: ((row: TRow) => void) | undefined;
   /** Stable click forwarder. */
@@ -278,6 +288,8 @@ export interface DesktopRowWiringModel<
   C extends DesktopRowWiringContext<TRow>,
 > {
   gridFocus: C["gridFocus"];
+  /** What the focus draws on this row; the row repaints when it changes. */
+  focusSignature: unknown;
   row: TRow;
   index: number;
   id: string;
@@ -506,6 +518,9 @@ export function desktopRowWiring<TRow, C extends DesktopRowWiringContext<TRow>>(
   const { pinOffset, leads, rowPinOffset } = ctx;
   return {
     gridFocus: ctx.gridFocus,
+    focusSignature: ctx.gridFocus?.rowFocusSignature
+      ? ctx.gridFocus.rowFocusSignature(focusIndex)
+      : ctx.gridFocus,
     row,
     index,
     id,

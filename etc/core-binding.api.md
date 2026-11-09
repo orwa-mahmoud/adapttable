@@ -1899,7 +1899,7 @@ export const DESKTOP_RESIZE_HANDLE_STYLE: {
 };
 
 // @public
-export const DESKTOP_ROW_WIRING_KEYS: readonly ["row", "index", "id", "selected", "expanded", "treeEntry", "columns", "spanSignature", "labels", "showActions", "showReorder", "reorderSignature", "rowPinSignature", "rowPinSide", "pinRowSticky", "rowPinOffset", "sourceIndex", "reorderPinned", "rowActions", "rowActionsLayout", "cellSpanAppearance", "renderRowActions", "columnSpan", "columnWidths", "pinSignature", "hasStartPin", "hasEndPin", "actionsPinned", "rowClass", "rowStyleSignature", "flashSignature", "clickable", "hasPrefetch", "editingSignature", "gridFocus", "treeColumnKey"];
+export const DESKTOP_ROW_WIRING_KEYS: readonly ["row", "index", "id", "selected", "expanded", "treeEntry", "columns", "spanSignature", "labels", "showActions", "showReorder", "reorderSignature", "rowPinSignature", "rowPinSide", "pinRowSticky", "rowPinOffset", "sourceIndex", "reorderPinned", "rowActions", "rowActionsLayout", "cellSpanAppearance", "renderRowActions", "columnSpan", "columnWidths", "pinSignature", "hasStartPin", "hasEndPin", "actionsPinned", "rowClass", "rowStyleSignature", "flashSignature", "clickable", "hasPrefetch", "editingSignature", "focusSignature", "treeColumnKey"];
 
 // @public
 export const DESKTOP_SELECTION_WIDTH = 48;
@@ -2181,6 +2181,7 @@ export interface DesktopRowWiringContext<TRow> {
     readonly getRowId: (row: TRow) => string;
     readonly gridFocus: {
         getRowPropsAt(index: number): object;
+        rowFocusSignature?: (index: number) => string;
     } | undefined;
     readonly handlePrefetch: (row: TRow) => void;
     readonly handleRowClick: (row: TRow) => void;
@@ -2271,6 +2272,7 @@ export interface DesktopRowWiringModel<TRow, C extends DesktopRowWiringContext<T
     flashSignature: string;
     // (undocumented)
     focusIndex: number;
+    focusSignature: unknown;
     // (undocumented)
     getRowId: (row: TRow) => string;
     // (undocumented)
@@ -3600,6 +3602,7 @@ export interface GridFocusState {
     getRowPropsAt: (windowIndex: number) => Record<string, unknown>;
     isColumnSelected: (col: number) => boolean;
     range: CellRange | null;
+    rowFocusSignature?: (windowIndex: number) => string;
     selectColumn: (col: number, extend?: boolean) => void;
     selectRange: (range: CellRange | null) => void;
     toggleColumn: (col: number) => void;

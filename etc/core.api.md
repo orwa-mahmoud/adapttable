@@ -4334,6 +4334,9 @@ export function gridRowAttributes(input: {
 };
 
 // @public
+export function gridRowFocusSignature(input: GridCellAttributesInput, rowIndex: number, colCount: number): string;
+
+// @public
 export function groupAggregateEntries<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined, aggregation?: GroupAggregateOps): GroupRowCell<TRow, TCol>[];
 
 // @public
