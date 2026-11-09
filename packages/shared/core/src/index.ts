@@ -575,6 +575,7 @@ export {
   type GridFocusSnapshot,
   type GridKeyEvent,
   gridRowAttributes,
+  gridRowFocusSignature,
   isGridColumnSelected,
   type PointerReleaseTarget,
 } from "./focus/gridFocusController";

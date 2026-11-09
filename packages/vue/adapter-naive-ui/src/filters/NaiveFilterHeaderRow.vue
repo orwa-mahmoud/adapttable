@@ -9,18 +9,29 @@ import { h } from "vue";
 import NaiveFilterHeaderControl from "./NaiveFilterHeaderControl.vue";
 
 defineOptions({ name: "NaiveFilterHeaderRow" });
-const props = withDefaults(defineProps<FilterHeaderRowProps<TRow>>(), {
-  enabled: undefined,
-  expandable: undefined,
-  showReorder: undefined,
-  selection: undefined,
-  showActions: undefined,
-  stickyAttr: undefined,
-});
+const {
+  enabled = undefined,
+  expandable = undefined,
+  showReorder = undefined,
+  selection = undefined,
+  showActions = undefined,
+  stickyAttr = undefined,
+  ...props
+} = defineProps<FilterHeaderRowProps<TRow>>();
 const controls: FilterHeaderRowSlots<TRow> = {
   Control: (control) => h(NaiveFilterHeaderControl<TRow>, { ...control }),
 };
-const Render = () => FilterHeaderChrome({ ...props, controls });
+const Render = () =>
+  FilterHeaderChrome({
+    ...props,
+    enabled,
+    expandable,
+    showReorder,
+    selection,
+    showActions,
+    stickyAttr,
+    controls,
+  });
 Render.props = [] as string[];
 </script>
 

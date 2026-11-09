@@ -37,7 +37,7 @@ Prefer zero install first? Open a live starter in
 [StackBlitz (Mantine)](https://stackblitz.com/github/orwa-mahmoud/adapttable/tree/main/starters/mantine)
 — or [any other kit](#try-it-in-stackblitz).
 
-A plain adapter `DataTable` is 74–80 kB min+gzip (measured 2026-10-15 from
+A plain adapter `DataTable` is 71–78 kB min+gzip (measured 2026-11-09 from
 packed fixtures; React and the kit stay external). The [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable)
 has the method and the rest of the grid.
 
@@ -760,8 +760,8 @@ it, and a duplicate id warns in development.
 bundle contains the configurable members whether or not you pass their options.
 That is the trade: one import instead of ten.
 
-Measured on MUI, the table alone is 74 kB gzipped and the same table with
-`standardFeatures()` composed is 130 kB.
+Measured on MUI, the table alone is 71 kB gzipped and the same table with
+`standardFeatures()` composed is 133 kB.
 A table counting every byte imports the individual features it uses instead,
 and pays for those alone — `pnpm budget` measures both paths on every run.
 
@@ -3049,6 +3049,18 @@ Each themed kit (`packages/react/adapter-mantine`, `adapter-mui`, `adapter-chakr
 `adapter-antd`, `adapter-radix`, `adapter-base-ui`) has the same shape with
 its kit's components in place of native elements. Ant Design renders the
 desktop table through antd's own `<Table>` instead of the shared assembly.
+
+## Neutral helpers the bindings share
+
+`@adapttable/core/binding` holds the framework-neutral decisions every
+binding makes the same way: `sourceViewKey` / `SourceViewKeyInput` and
+`sameItems` / `retainItems` (whether a source refresh changed anything,
+without walking the rows, and keeping the previous list when it did not), `cachedSnapshot` / `CachedSnapshot` (reuse the last snapshot when
+those inputs match), `withFrontendRowModel` / `frontendRowModelOf` (the
+evaluator a composed grouping feature carries for the plain-table source),
+`virtualItemMeta` (the virtualizer fields a row keeps), and
+`approvalValueText` / `approvalArgumentPairs` / `ApprovalArgumentPair` (an
+approval review's values and arguments as readable text).
 
 ## Package exports and peer dependencies
 
@@ -16650,6 +16662,10 @@ Helpers from `@adapttable/i18n`:
 - `primarySubtag(locale)` — `"ar-EG"` → `"ar"`
 - `locales` — every preset keyed by tag (`LocaleKey`); each preset is also a
   named export (`ar`, `cs`, `de`, …, `zhTW` for `zh-TW`)
+- `loadLabels(locale)` from `@adapttable/i18n/load` — fetches one preset on
+  demand and resolves to `undefined` for a language without one. Kits that
+  follow their UI library's locale use it, so a plain table carries no label
+  data until a language is needed
 
 ## Custom labels
 
@@ -16780,7 +16796,8 @@ finds that cell's `columnheader` in the same grid.
 
 ## Notes
 
-- Works in all eight React adapters. The demo is the same walk on each kit.
+- Works in the eight React adapters, the eight Vue adapters, and the nine
+  Angular adapters. The demo is the same walk on each kit.
 - Labels you pass through `labels` are the accessible names, including in
   Arabic and the other [bundled locales](./i18n-rtl.md).
 
@@ -17589,6 +17606,11 @@ Framework-free — see [concepts](./concepts.md#the-framework-neutral-engine).
 - `createTableEngine(options: CreateTableEngineOptions): TableEngine` — build
   an engine over in-memory rows. Filter, sort, page and group run here, with no
   React in the import graph.
+- `createBasicTableEngine(options: CreateTableEngineOptions): TableEngine`
+  (`@adapttable/core` and `@adapttable/core/engine`) — the same session with
+  the basic evaluator: filter, sort, search and page. Grouping and aggregate
+  code stay out of that graph. An existing root import of `createTableEngine`
+  keeps working.
 - `TableEngine` — the handle: `snapshot()`, `rows(scope)`, `dispatch(op)`,
   `configure(patch)`, `invalidate(axes, next)`, `subscribe(axes, listener)`,
   `cellValue`, `rowByKey`, `rowKey`, `getColumn`, `dispose()`.
@@ -17618,6 +17640,76 @@ Framework-free — see [concepts](./concepts.md#the-framework-neutral-engine).
   `operations` map of what is wired right now. `NeutralTableBinding` is how a
   host supplies the visible rows and that map.
 - `devWarn(message)` — development-only warning, printed once per message.
+
+### Composed ownership
+
+These names are the composed session, the typed feature contributions, and
+the registration helpers. [Architecture](../ARCHITECTURE.md#composed-session)
+explains which import a program changes. This list is the reference.
+
+- `createFrontendSourceWith(engineFactory)` — a frontend source on an explicit
+  evaluator. `FrontendEngineFactory` builds that engine.
+  `createFrontendSource` is the convenience form that supplies the full one.
+- `TableCallbackRefresh` — callback identities `refreshCallbacks` adopts:
+  row id, search text, filters, columns and sort value.
+- `createGridNavigation(options): GridFocusController` — arrow keys, Home,
+  End, PageUp, PageDown, Enter and F2, without selection, clipboard, fill or
+  history.
+- `INACTIVE_TIER_ROWS` — the one empty array an inactive built-in tier
+  receives. `activeTierValue` picks the live value or the idle one.
+  `tierRows` returns the host array while that tier is serving, and
+  `INACTIVE_TIER_ROWS` otherwise.
+- `GroupingContribution` — grouping's `entries`, and `groupBy` when the
+  binding published the keys on that bundle. `projectGroupingContribution`
+  returns the host contribution when it is defined, otherwise the feature
+  contribution, as the same object. `mergeGroupingContributions` keeps the
+  last defined contribution. `resolveFeatureGrouping` does that for the host
+  plus each feature, skipping undefined entries.
+  `REMAINING_FEATURE_OWNERSHIP` is the empty map of domains that have not
+  moved onto a typed contribution. `RemainingFeatureDomain` is its key type,
+  which is `never`.
+- `EditingContribution` — `onCellEdit` and, when batch editing is composed,
+  `stageCell`. The table does not write the row. `QueryContribution` is the
+  page, search and sort the source owns. `FilteringContribution` is the
+  filter catalog (`defs` and `registry`); applied values stay on the query.
+  `TreeContribution` aliases the host's tree entries. `DetailContribution`
+  is a row-detail renderer plus `RowExpansionState`.
+  `RowPinningContribution` is the row-pin controller. `PinningContribution`
+  is column pins and, when row pinning is composed, the row-pin lists.
+  `ColumnLayoutContribution` is hide and order when a layout feature
+  publishes setters. `SelectionContribution` is the host's `selectedIds` set
+  on the runtime view. It does not copy that set.
+- `projectGrouping(input): GroupingProjection` — one grouping snapshot.
+  `GroupingProjectionInput` is what it reads besides the binding's collapse
+  and paging snapshots. `GroupingProjection` is the warning, the aggregates
+  and the model. `groupingSourceOf` copies the source fields that snapshot
+  reads. `projectedGroupingSource` is the source the table renders: the
+  grouped view when the projection has a model, otherwise the source itself.
+  `groupingShowMoreAction` advances a `GroupingShowMoreTarget`.
+  `groupingCollapseCommands` closes over the open groups and the binding's
+  collapse owner. `groupingProjectionBundle` is the grouped view a binding
+  publishes, or `undefined` when the projection has no model.
+- `SHELL_OPERATION_OWNERS` names the module that owns each shell operation.
+  `ShellOperation` is one of those keys. `ShellOperationInput` holds the
+  optional contributions: `FindContribution`, `DensityContribution`,
+  `FullscreenContribution`, `ContextMenuContribution`,
+  `CommandPaletteContribution` and `PrintContribution`. An absent field is
+  an operation that is not armed. `publishShellOverlay` remembers that input
+  on the chrome object. `projectShellOperations` keeps each armed
+  contribution as the owner's object. `withShellOperations` lays those onto
+  a runtime view and clears the ones that are no longer armed.
+- `planFeatureRegistration` — which retained features stay and which
+  declarations still mount. `preferLastById` keeps the last declaration of
+  each id. `FeatureRegistrationPlan` is the release list and the mount list.
+  `RegisteredFeature` is one id plus its declaration. `projectFeatureHosts`
+  reads the per-feature hosts as one host. `invokeCleanups` runs every
+  cleanup and returns the failures; one failure does not skip the rest.
+  These functions are on `@adapttable/core/binding`.
+- `featureLifecycleConformanceTests(driver, harness)` — the registration
+  cases a binding runs against its own lifecycle. `FeatureLifecycleDriver`
+  opens an independent table and a nested one. `LifecycleHarness` is the
+  runner's `expect`. `LifecycleDeclaration` is one feature the driver mounts.
+  `LifecycleObservation` is what the driver can see after a reconcile.
 
 ### Table options and runtime contracts
 
@@ -17824,7 +17916,9 @@ GridFocusController` — the active cell, the selected range, a fill drag, the
 - `gridContainerAttributes` (`GridContainerAttributes`), `gridCellAttributes`
   (`GridCellAttributesInput`, `GridCellAttributes`), `gridRowAttributes`,
   `gridColumnHeaderAttributes` — the roles, absolute ARIA indices and selection
-  and find marks every binding puts on the grid.
+  and find marks every binding puts on the grid. `gridRowFocusSignature`
+  digests what those marks draw on one row, so a row repaints only when the
+  focus, range or find matches change on it.
 - `isGridColumnSelected`, `gridFillHandleCell` — whether a column is selected
   over every loaded row, and which cell carries the fill handle.
 
@@ -18064,8 +18158,20 @@ results and the rest), the feature-state keys `DENSITY_STATE`
 (`DensityFeatureState`) and `ROW_REORDER`, `resolveColumnDefaults`
 (`ResolvableColumn`) and `resolveColumnHeaders` for a column's declarative
 defaults, `columnPathText` for a data-path value as cell text, and
-`sameRows` — whether a new `data` array holds the same rows, so a table
-engine does not rebuild for an inline array.
+`sameItems` — whether two lists hold the same items by identity, so a table
+engine does not rebuild for an inline array (`sameRows` is its deprecated
+row-named form) — with `retainItems`, which keeps the previous list while its
+items are unchanged — and `isRecord`, whether a value is a plain record.
+Source refresh shares `sourceViewKey` /
+`SourceViewKeyInput` and `cachedSnapshot` / `CachedSnapshot`; a composed grouping feature carries its evaluator through
+`withFrontendRowModel` / `frontendRowModelOf`; `virtualItemMeta` copies the
+virtualizer fields a row keeps; and `approvalValueText` /
+`approvalArgumentPairs` / `ApprovalArgumentPair` turn an approval review's
+values and arguments into readable text, with `approvalProposalText` writing
+one proposed change as its review line. `rowMoveMenuProps` (reading a `RowMoveMenuSource`) builds a row's
+move menu and the confirmation its pending move waits for. `KitEnvironment` / `withKitEnvironment` merge what a
+kit read from its UI library — direction, locale, labels, density — under the
+table's own props; every binding re-exports them.
 
 - `chromeColumnPlan` (`ChromeColumnPlan`) — the columns a desktop table draws,
   with selection, expansion and action lanes.
@@ -18540,6 +18646,9 @@ flag while a host-owned `confirmMove` is outstanding.
 `applyRowReorder`, `datasetIndex`, `useRowReorder`,
 `rowReorderSignature`, `rowReorderDropStyle`, `REORDER_COLUMN_KEY`,
 `REORDER_COLUMN_WIDTH`, and `ROW_DND_MIME` are the headless primitives.
+`RowReorderState.hover` carries the drop edge under a drag as it moves: a row
+reads `hover.dropAt(rowId, index)` and applies it with `withRowDropTarget`, so
+a drag redraws the rows it crosses rather than the table.
 Nested move menus use `RowMoveMenuModel` / `RowMoveTarget`; the adapter seam is
 `RowMoveMenuSlotProps`, `RowMoveMenuItemProps`, and
 `RowMoveConfirmationProps`. Each adapter mounts
@@ -19668,6 +19777,20 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `DEFAULT_CARD_SIZE_PX`, `useKeyedVirtualization` / `KeyedVirtualization`
 (virtualize an opaque keyed list, e.g. grouped entries),
 `useMountStagger` (the `animate` stagger),
+`DesktopTableChrome` / `DesktopTableChromeProps` /
+`DesktopTableChromeClassNames` / `DesktopTableHosts` and `MobileCardsChrome` /
+`MobileCardsChromeProps` / `MobileCardsChromeClassNames` / `MobileCardsHosts` /
+`MobileCardSlot` (the one desktop table and mobile card list every kit fills
+with its own elements and controls), `mobileCardSlots` / `MobileCardSlotKit` /
+`MobileCardEntry` / `MobileCardListProps` / `MobileCardGrouping` /
+`MobileCardGroupEntry` (the card
+list's order, pinned totals, groups, extra rows and each card's list-item
+attributes, drawn with the kit's card host and body), `MobileCardBodyProps` /
+`mobileCardPropsEqual` (a card body's inputs and its memo comparator), `KitEnvironment` / `withKitEnvironment`
+(the direction, locale, labels and density a kit read from its UI library,
+with the table's own props winning), `useLocaleLabels` (that library
+locale's labels, loaded on demand), `ReducedMotionScope` (marks a table whose
+UI library turned motion off),
 `useOverlayTransition` / `OverlayTransition` (turns an `open` boolean into
 `{ rendered, state }` — `rendered` outlives `open` by one exit so an overlay
 has something to animate on the way out, and reduced motion skips both edges),
@@ -20175,7 +20298,31 @@ references implement `DataTableSurface`, which exposes the scroll element to
 virtualization. `AdaptDesktopTableModel` and `AdaptMobileCardsModel` build live
 header, row, field and custom-renderer plans while each kit renders its native
 table or cards. `AdaptGroupHeaderRowModel` and `AdaptGroupHeaderCardModel`
-provide group captions, aggregates and expansion props.
+provide group captions, aggregates and expansion props. `AdaptDesktopStructure`
+and `AdaptMobileStructure` draw the shared desktop table and card list from a
+kit's `AdaptDesktopSlots` / `AdaptMobileSlots` templates. A kit that declares its header-cell template inside
+its table template marks it with `AdaptHeaderTemplate` and reads it from an
+`AdaptHeaderTemplateSlot` it provides. `AdaptTableSurface` holds the inputs
+and scroll box both structures and every kit body share;
+`AdaptDesktopTableHost` and `AdaptMobileCardsHost` give a kit's table and card
+components their structure's scroll box; `provideAdaptTableState()` provides
+the find, palette and context-menu state a kit's data table needs; and
+`scrollBoxStyle` is the scroll box's style rule.
+`ADAPTTABLE_KIT_MOTION_OFF`, from `@adapttable/angular`, is the token a kit
+provides when its UI library turns motion off.
+
+`injectTableSurfaceHost(options)` returns a `TableSurfaceView`: the
+structural view the compatibility shell and the lean host share.
+`TableSurfaceHostOptions` is the rows, columns and features that host
+composes. `editingBundleFor` builds the one editing bundle both the shell
+and a feature mount use. A lean feature mount reads `SurfaceHandles` from
+the `SURFACE_HANDLES` token. `SURFACE_OCCUPIED` (`SurfaceOccupation`) records
+which of grid, grouping and editing the shell already created.
+`SURFACE_GRID`, `SURFACE_GROUPING` and `SURFACE_EDITING` are the feature-state
+keys a lean mount publishes. `injectTableSurfaceHost`,
+`TableSurfaceHostOptions` and `TableSurfaceView` come from
+`@adapttable/angular/adapter`; `editingBundleFor` and the surface tokens come
+from `@adapttable/angular`.
 
 `AdaptAutoFilterFormModel` builds field plans. `AdaptTextFilterFieldModel`,
 `AdaptRangeFilterFieldModel`, `AdaptSelectFilterFieldModel`,
@@ -20206,6 +20353,23 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   release their scopes. `tableFeaturesOf` combines injector-provided features
   with the table's own list; a later duplicate id wins for setup, options,
   rendering and mounting alike.
+- A feature brings its own code to the table. `withFeatureImplementation`
+  files an implementation on a feature under a `FeatureStateKey`, and
+  `featureImplementation(features, key)` returns the one
+  the composed features bring, a later feature winning. The table reads every
+  optional feature's code this way, so a table bundles only the code of the
+  features it composes. `FEATURE_IMPLEMENTATIONS` holds the keys:
+  `editing` (`editingBundleFor`), `editableCell` (`editableCellController`),
+  `editHistory` (`EditHistoryImplementation`, filed as
+  `EDIT_HISTORY_IMPLEMENTATION`), `findInTable` (`FindInTableImplementation`,
+  filed as `FIND_IN_TABLE_IMPLEMENTATION`), `exportCsv` (`injectExportCsv`),
+  `rowReorder` (`RowReorderImplementation`), `grouping`
+  (`GroupingImplementation`), `groupingPanel` (`GroupingPanelImplementation`),
+  `rowPinning` (`RowPinningImplementation`) and `tree` (`TreeImplementation`).
+  The filter engine travels under core's `FILTER_ENGINE` key. The adapter
+  entry's `coreExportCsv`, `coreFilters`, `coreHeaderFilters` and
+  `coreFindInTable` are the core factories with their implementations filed,
+  for a kit to extend.
 - All supported Angular kits accept live `selectable`, `cellNavigation`, `filtersMode`
   and `closeHeaderFilterOnSelect` inputs. Their controlled `density` input
   overrides the chooser's state; `densityChange` reports requests and waits
@@ -21045,7 +21209,8 @@ Applications should use the documented table, feature and provider APIs instead.
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
   `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the bundled
   presets (`en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
-  … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
+  … including `zhTW`), and `loadLabels(locale)` from `@adapttable/i18n/load`,
+  which fetches one preset on demand — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--kit <kit>] [--force]`; programmatic
   `detectFramework`, `detectKit`, `choosePackageManager`, `installCommand`,
   `scaffoldFiles`, `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
@@ -21145,6 +21310,8 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                                                                     | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                                                                     |
 | `elementRef`, `composeElementRefs`, `useElementRef`                                                             | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
 | `useScopeActivity()`                                                                                            | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                                                                               |
+| `scheduleTick(work)`                                                                                            | Runs work after Vue commits the DOM and rethrows its failure instead of discarding it.                                                                                                                        |
+| `mountForcedColorsStyles()`                                                                                     | Installs the shared high-contrast stylesheet once the table mounts; a server render never touches `document`.                                                                                                 |
 | `useExternalStore(store)`                                                                                       | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                                                                            |
 | `FeatureLifecycle`, `useFeatureLifecycle`                                                                       | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                                                                    |
 | `TableFeatureState`, `OwnedFeatureState`, `provideFeatureState`                                                 | Table-local state, ownership-safe publication cleanup and descendant injection. `createFeatureState` constructs the registry; `useFeatureState` reads it.                                                     |
@@ -21636,19 +21803,25 @@ Every package declares its side effects — none, or only its stylesheet in
 `@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-10-15 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-11-09 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
-| `useFrontendData` + `useDataTable` (react) | ~25 kB    |
-| every core export                          | ~101 kB   |
-| `DataTable` from an adapter                | ~74–80 kB |
+| `useFrontendData` + `useDataTable` (react) | ~22 kB    |
+| every core export                          | ~104 kB   |
+| `DataTable` from an adapter                | ~71–78 kB |
 
-The first row is the one to read: a headless table costs about a quarter of the
-full core, because the parts you never import never arrive. All eight React adapters
+The first row is the one to read: a headless table costs about a fifth of the
+full core, because the parts you never import never arrive. The every-export
+row is the whole public surface imported at once, measured 2026-11-09 at
+104.28 KiB (106,778 bytes). Its ceiling is that measurement: the composed
+session with one committed state and a staged row-model evaluator, the
+grouping projection, and the shell operations, plus the snapshot guard, the
+grouped-snapshot cache, and the shared behaviours the bindings used to copy. It is not the download of a table. All eight React adapters
 land within ~12 kB of each other, so switching kits does not change what you
-pay.
+pay. Tree-shaking drops unused exports from an application bundle. Installing
+a package still installs that package.
 
 The third row is what composition buys. Every optional feature lives on its own
 entry point, so a plain `DataTable` carries none of them: no drag machine, no
@@ -21791,7 +21964,7 @@ Sizes are minified + gzipped AdaptTable bytes. React and the UI kit are
 external — an application already ships them. The method is packed
 consumer fixtures in `scripts/bundle-budget.mjs`.
 
-- A published adapter's base `DataTable` is held to **≤ 81 KB**
+- A published adapter's base `DataTable` is held to **≤ 80 KB**
   (`PLAIN_ADAPTER_CEILING_KB`) and at least 35% under that kit's recorded
   pre-v3 size (`scripts/consumer-fixtures.mjs`). Omitted feature markers must be absent from the base graph.
 - Optional features arrive with their import. Called with no argument,
@@ -21800,6 +21973,9 @@ consumer fixtures in `scripts/bundle-budget.mjs`.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
+- Importing every core export measured 104.28 KiB gzip on 2026-11-09
+  (106,778 bytes). The fixture ceiling is that measurement. The figure is the
+  whole public surface, not a table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 
 Published FAQ figures are the measurements the budget script checks, not
 a second estimate. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable) ·
@@ -21843,7 +22019,8 @@ and unstyled.
 ## Accessibility
 
 Keyboard, names, RTL and forced-colors are on by default across the eight
-published React kits ([accessibility](./accessibility.md)).
+published React kits, the eight published Vue kits, and the nine published
+Angular kits ([accessibility](./accessibility.md)).
 
 antd keeps a sticky header. `role="grid"` sits on the wrapper around
 both of antd's tables so a cell and its `columnheader` share one grid.
@@ -21870,26 +22047,27 @@ a fix was attempted and failed. None is listed.
 
 ## Sources
 
-| Claim                                    | Source                                                                                                   |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Host callbacks own writes                | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                 |
-| Formula grammar and refused tokens       | [formulas](./formulas.md), `parseFormula`                                                                |
-| Move policy, cycle guard, sort block     | [row-reordering](./row-reordering.md)                                                                    |
-| `fullDataset` / export-all / `rows.read` | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts` |
-| `readMax` default 50                     | `packages/shared/ai/src/session.ts` `readMaxOf`                                                          |
-| Virtualize DOM count                     | [virtualization](./virtualization.md)                                                                    |
-| Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                  |
-| URL-state 8,192 cap, `limit` 1–500       | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`             |
-| Adapter ≤ 81 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                             |
-| AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                               |
-| Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                          |
-| Chromium e2e                             | `playwright.config.ts`                                                                                   |
-| Nightly Firefox / WebKit / Pixel 5       | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                         |
-| Showcase axe audit                       | `e2e/axe-audit.spec.ts`                                                                                  |
-| Visual baselines                         | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                       |
-| SSR seams                                | [ssr-rsc](./ssr-rsc.md)                                                                                  |
-| antd sticky header association           | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                           |
-| React / Node / kit floors                | [getting-started](./getting-started.md)                                                                  |
+| Claim                                       | Source                                                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Host callbacks own writes                   | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                      |
+| Formula grammar and refused tokens          | [formulas](./formulas.md), `parseFormula`                                                                     |
+| Move policy, cycle guard, sort block        | [row-reordering](./row-reordering.md)                                                                         |
+| `fullDataset` / export-all / `rows.read`    | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts`      |
+| `readMax` default 50                        | `packages/shared/ai/src/session.ts` `readMaxOf`                                                               |
+| Virtualize DOM count                        | [virtualization](./virtualization.md)                                                                         |
+| Export 50,000 cap                           | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
+| URL-state 8,192 cap, `limit` 1–500          | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |
+| Adapter ≤ 80 KB, omitted-feature markers    | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                                  |
+| Every core export at its 104.28 KiB ceiling | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
+| AI absent from base graphs                  | `scripts/ai-isolation.mjs`                                                                                    |
+| Perf baseline                               | `scripts/v3-perf-baseline.json`                                                                               |
+| Chromium e2e                                | `playwright.config.ts`                                                                                        |
+| Nightly Firefox / WebKit / Pixel 5          | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                              |
+| Showcase axe audit                          | `e2e/axe-audit.spec.ts`                                                                                       |
+| Visual baselines                            | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                            |
+| SSR seams                                   | [ssr-rsc](./ssr-rsc.md)                                                                                       |
+| antd sticky header association              | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                                |
+| React / Node / kit floors                   | [getting-started](./getting-started.md)                                                                       |
 
 ---
 
@@ -21923,8 +22101,8 @@ libraries.
 
 <sub>Comparison as of August 2026, based on each project's public documentation; capabilities evolve, so verify against the latest docs. "Open-core" means a free, MIT/community edition plus paid Enterprise/Pro tiers (AG Grid Enterprise; MUI X DataGrid Pro/Premium); the advanced server-side data and infinite-loading features sit in those paid tiers. Verified against their own docs in August 2026: AG Grid puts pivoting, cell-range selection, the fill handle, tree data, clipboard operations and Excel export in Enterprise; MUI X puts pivoting, cell selection, the fill handle, clipboard paste and Excel export in Premium. AdaptTable ships all of them under MIT, with the prerequisites stated: cell-range selection, the fill handle and range copy all need `cellNavigation()`, and paste and fill write through editable columns and the composed `editing()` handler — the channel inline editing uses — unless `onCellPaste` / `onCellFill` take the batch whole; cut reports its range to `onCellCut`. Pivoting is a separate engine plus its own panel rather than a one-line toggle. AG Grid and MUI X remain the more integrated spreadsheet-style products. Spotted something outdated or wrong? Please open an issue — we will correct it promptly.</sub>
 
-A plain AdaptTable adapter `DataTable` is 74–80 kB min+gzip (measured
-2026-10-15 from packed fixtures; React and the kit stay external). Competitor
+A plain AdaptTable adapter `DataTable` is 71–78 kB min+gzip (measured
+2026-11-09 from packed fixtures; React and the kit stay external). Competitor
 bundle sizes are not listed here — they depend on which paid modules you
 licence and are not produced by this repo's fixtures. Method and the rest of
 the grid: [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
@@ -23311,7 +23489,7 @@ v3 removes the enabling props. A feature is an import and an entry in
 `features`, and that is the only way in — which is what lets a table download
 what it named and nothing else. Measured adapter sizes live in the
 [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable); the acceptance ceiling
-is 81 KB min+gzip.
+is 80 KB min+gzip.
 
 Nothing else about the table changed: the same columns, the same data tiers,
 the same URL state, the same labels.
@@ -24040,15 +24218,19 @@ undocumented escape. There is no private channel behind it.
 
 Each is a published, supported entry — not an implementation detail:
 
-| Entry                      | What it is                                                                                            |
-| -------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `@adapttable/core/binding` | The framework-neutral adapter machinery `@adapttable/react/adapter` re-exports — import it from there |
-| `@adapttable/core/formula` | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                                            |
-| `@adapttable/core/pdf`     | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …)                            |
-| `@adapttable/core/pivot`   | Pivot engine (`pivot`, `serverPivotResult`, field helpers, pivot URL codecs)                          |
-| `@adapttable/core/query`   | The query model without React — codecs a backend can load                                             |
-| `@adapttable/core/stream`  | Live row patches (`RowPatch`, `RowPatchEvent`, …)                                                     |
-| `@adapttable/core/xlsx`    | Spreadsheet export writer                                                                             |
+| Entry                        | What it is                                                                                            |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `@adapttable/core/binding`   | The framework-neutral adapter machinery `@adapttable/react/adapter` re-exports — import it from there |
+| `@adapttable/core/editing`   | Cell and row editing (`createCellEditSession`, `createEditHistory`, …)                                |
+| `@adapttable/core/engine`    | Table constructors (`createTableEngine`, `createBasicTableEngine`, …)                                 |
+| `@adapttable/core/formula`   | Formula columns (`buildFormulaColumns`, `FormulaValue`, …)                                            |
+| `@adapttable/core/grouping`  | Row grouping (`buildGroupedFlatModel`, `groupSelectionState`, …)                                      |
+| `@adapttable/core/pdf`       | Print / PDF writers and page layout (`PrintPageSize`, `PrintPageBreak`, …)                            |
+| `@adapttable/core/pivot`     | Pivot engine (`pivot`, `serverPivotResult`, field helpers, pivot URL codecs)                          |
+| `@adapttable/core/query`     | The query model without React — codecs a backend can load                                             |
+| `@adapttable/core/selection` | Selection (`SelectionContribution`, `createAllMatchingScope`, …)                                      |
+| `@adapttable/core/stream`    | Live row patches (`RowPatch`, `RowPatchEvent`, …)                                                     |
+| `@adapttable/core/xlsx`      | Spreadsheet export writer                                                                             |
 
 `@adapttable/react` publishes the React-facing counterparts of the ones that
 need elements — `/formula`, `/pivot`, `/stream` — plus `/sparkline`, the
@@ -26253,6 +26435,16 @@ inputs and outputs remain the kit's public table contract. Render through
 `DataTableSurface` on each native surface so virtualization reads its actual
 scroll element. The models supply plans and renderer contexts; the adapter
 still supplies its own native table, cards and every required control.
+
+`AdaptDesktopStructure` and `AdaptMobileStructure` draw the one desktop table
+and phone card list every Angular kit shares; the kit passes its own
+elements and controls as `AdaptDesktopSlots` and `AdaptMobileSlots`
+templates. A kit that declares its header-cell template inside its table template, so the cell and the table are one view tree, marks it with `AdaptHeaderTemplate` and provides an `AdaptHeaderTemplateSlot` to read it from. Override the shell's `kitEnvironment()` to return the
+`KitEnvironment` the kit read from its UI library — direction, locale and
+density — and the shell loads that locale's labels on demand. Provide
+`ADAPTTABLE_KIT_MOTION_OFF` with a signal that is `true` when the library has
+turned animation off. The shell installs the shared high-contrast
+stylesheet.
 
 For a shell assembled directly, keep persistent state separate from feature composition:
 
@@ -34905,6 +35097,12 @@ releases inactive subscriptions and ignores notifications from replaced or
 disposed subscriptions. Snapshots and their row/engine objects are not deep-proxied.
 `ExternalStoreOptions.active` optionally adds an activity ref/getter to the
 owning scope's lifecycle. These helpers come from `@adapttable/vue/adapter`.
+
+A kit reads its UI library's direction, locale and density into a
+`KitEnvironment` and merges it under the table's props with
+`withKitEnvironment`; `useLocaleLabels` fills that environment's labels for
+the library locale, loading one language on demand. `mountForcedColorsStyles`
+installs the shared high-contrast stylesheet from setup.
 
 ## Data sources
 

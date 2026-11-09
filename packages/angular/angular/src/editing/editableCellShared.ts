@@ -13,7 +13,7 @@ import type { EditableCellButtonProps } from "@adapttable/core/binding";
 import { booleanDraft, formatMultiDraft } from "@adapttable/core/editing";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-  type AfterViewInit,
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -270,7 +270,7 @@ const OPENING_GESTURE_MS = 500;
     </span>
   `,
 })
-export class AdaptEditingCellFrame implements AfterViewInit {
+export class AdaptEditingCellFrame {
   /** What the cell shows when it is not being edited, without a control. */
   readonly display = input<unknown>();
   /** The kit's idle control, held in place of `display`. */
@@ -286,13 +286,36 @@ export class AdaptEditingCellFrame implements AfterViewInit {
    * the row it opened in. The row grows only when the editor is taller than
    * the whole cell.
    */
-  ngAfterViewInit(): void {
-    const layer = this.layer()?.nativeElement;
-    if (!layer) return;
+  constructor() {
+    // DOM work after the editor renders: read its cell's padding, then hold
+    // the rest of the opening double-click and let the layer reach the
+    // cell's block padding.
+    afterNextRender({
+      earlyRead: () => {
+        const layer = this.layer()?.nativeElement;
+        const cell = layer?.closest("td, th");
+        return {
+          layer,
+          padding: cell ? getComputedStyle(cell) : undefined,
+        };
+      },
+      write: ({ layer, padding }) => {
+        if (!layer) return;
+        this.holdOpeningGesture(layer);
+        if (!padding) return;
+        layer.style.marginTop = `-${padding.paddingTop}`;
+        layer.style.marginBottom = `-${padding.paddingBottom}`;
+      },
+    });
+  }
+
+  /**
+   * The rest of a double-click whose first press opened the editor does not
+   * reach it: a second press would tick the checkbox or toggle the list the
+   * reader only meant to open.
+   */
+  private holdOpeningGesture(layer: HTMLElement): void {
     const opened = performance.now();
-    // The rest of a double-click whose first press opened the editor does not
-    // reach it: a second press would tick the checkbox or toggle the list the
-    // reader only meant to open.
     const holdOpeningPress = (event: MouseEvent) => {
       if (event.detail > 1 && performance.now() - opened < OPENING_GESTURE_MS) {
         event.preventDefault();
@@ -305,10 +328,5 @@ export class AdaptEditingCellFrame implements AfterViewInit {
       layer.removeEventListener("mousedown", holdOpeningPress, true);
       layer.removeEventListener("click", holdOpeningPress, true);
     });
-    const cell = layer.closest("td, th");
-    if (!cell) return;
-    const padding = getComputedStyle(cell);
-    layer.style.marginTop = `-${padding.paddingTop}`;
-    layer.style.marginBottom = `-${padding.paddingBottom}`;
   }
 }

@@ -90,10 +90,12 @@ import {
 import {
   computed,
   DestroyRef,
+  effect,
   inject,
   Injector,
   type Signal,
   signal,
+  untracked,
 } from "@angular/core";
 
 import type { RowEditActionsProps } from "../editing/rowEditGate";
@@ -990,6 +992,165 @@ export interface TableSurfaceHostOptions<TRow> {
   readonly injector?: Injector;
 }
 
+/** The feature state a lean host's structure is built over. */
+interface LiveSurfaceState<TRow> {
+  readonly features: readonly AdaptTableFeature[];
+  readonly grid: GridFocus<TRow> | undefined;
+  readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
+  readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
+}
+
+function sameLiveSurfaceState<TRow>(
+  left: LiveSurfaceState<TRow>,
+  right: LiveSurfaceState<TRow>
+): boolean {
+  return (
+    left.features === right.features &&
+    left.grid === right.grid &&
+    left.grouping === right.grouping &&
+    left.editing === right.editing
+  );
+}
+
+/** The structure built over one live feature state. */
+function surfaceViewFor<TRow>(
+  table: DataTable<TRow>,
+  options: TableSurfaceHostOptions<TRow>,
+  live: LiveSurfaceState<TRow>,
+  injector: Injector
+): TableSurfaceView<TRow> {
+  const { grid, grouping, editing, features } = live;
+  const featureOptions = featureOptionsOf(features);
+  const bodyWindow = bodyWindowFor<TRow>({
+    table,
+    grouping,
+    tree: undefined,
+    expandable: false,
+    scrollRows: computed(() => table.source().rows),
+    featureOptions,
+    rowKey: options.rowKey,
+    maxHeight: readMaybe(options.maxHeight),
+    scrollBox: () => null,
+    root: () => null,
+    injector,
+  });
+  const columnWindow = injectColumnWindow<TRow>({
+    columns: table.columns,
+    enabled: featureOptions.virtualizeColumns === true,
+    widths: computed(() => table.layout().state.widths),
+    pinnedKeys: computed(() => {
+      const { pinned } = table.layout().state;
+      return new Set(
+        Object.keys(pinned).filter((key) => pinned[key] !== undefined)
+      );
+    }),
+    getScrollElement: () => null,
+    injector,
+  });
+  const rowKey = computed(() => options.rowKey);
+  const surface = buildSurfaceBody<TRow>({
+    table,
+    bodyWindow,
+    columnWindow,
+    selection: undefined,
+    grid,
+    editing,
+    reorder: undefined,
+    grouping,
+    rowDetail: undefined,
+    pinnedRows: computed(() => undefined),
+    summaryRows: featureOptions.pinnedRows as PinnedRows<TRow> | undefined,
+    extraRows: featureOptions.extraRows as readonly ExtraRow[] | undefined,
+    getCellSpan: featureOptions.getCellSpan as GetCellSpan<TRow> | undefined,
+    rowActionList: computed(
+      () => featureOptions.rowActions as RowAction<TRow>[] | undefined
+    ),
+    rowKey,
+    assembly: featureOptions.assembly as Partial<AssemblyFns<TRow>> | undefined,
+    rowClassName: featureOptions.rowClassName as
+      ((row: TRow, index: number) => string | undefined) | undefined,
+    rowStyle: featureOptions.rowStyle as RowStyle<TRow> | undefined,
+    rowHeight: featureOptions.rowHeight as RowHeight<TRow> | undefined,
+    density: computed(() => resolveDensity(undefined, undefined)),
+    labels: computed(() => table.labels()),
+    featureOptions,
+    maxHeight: () => readMaybe(options.maxHeight),
+    stickyHeader: () => readMaybe(options.stickyHeader) ?? false,
+    stickyTop: () => readMaybe(options.stickyTop) ?? 0,
+    onRowClick: () => readMaybe(options.onRowClick),
+    summaryRow: () => readMaybe(options.summaryRow),
+  });
+  const classNames = computed((): DataTableClassNames => ({}));
+  const renderCard = signal<MobileCardRenderer<TRow> | undefined>(undefined);
+  return {
+    table,
+    classNames,
+    renderCard,
+    selection: undefined,
+    grid,
+    density: computed(() => resolveDensity(undefined, undefined)),
+    groupingPanel: undefined,
+    reorder: undefined,
+    tree: undefined,
+    treeCellFilled: false,
+    columnSelect: false,
+    rowDetail: undefined,
+    cellSpanAppearance: featureOptions.cellSpanAppearance as
+      CellSpanAppearance | undefined,
+    editing,
+    grouping,
+    stickyHead: surface.stickyHead,
+    reportHeaderHeight: surface.reportHeaderHeight,
+    expandToggles: surface.expandToggles,
+    bodyCells: surface.bodyCells,
+    detailParent: surface.detailParent,
+    summary: surface.summary,
+    showSummary: surface.showSummary,
+    editableCells: surface.editableCells,
+    showActions: surface.showActions,
+    actionsCells: surface.actionsCells,
+    virtualization: surface.virtualization,
+    body: surface.body,
+    groupHeaders: surface.groupHeaders,
+    bodyColSpan: surface.bodyColSpan,
+    columns: surface.renderedColumns,
+    columnSpacers: surface.columnSpacers,
+    columnIndex: surface.columnIndex,
+  };
+}
+
+/**
+ * The structural view over the live feature state, rebuilt in its own scope
+ * whenever that state changes; the previous scope is disposed.
+ */
+function followSurfaceState<TRow>(
+  table: DataTable<TRow>,
+  options: TableSurfaceHostOptions<TRow>,
+  liveState: Signal<LiveSurfaceState<TRow>>,
+  injector: Injector
+): Signal<TableSurfaceView<TRow>> {
+  const structure = createFeatureResources(injector);
+  const build = (live: LiveSurfaceState<TRow>): TableSurfaceView<TRow> =>
+    structure.reconcile(() =>
+      structure.use(
+        "structure",
+        [live.features, live.grid, live.grouping, live.editing],
+        (scope) => surfaceViewFor(table, options, live, scope)
+      )
+    );
+  const view = signal(untracked(() => build(liveState())));
+  effect(
+    () => {
+      const live = liveState();
+      untracked(() => {
+        view.set(build(live));
+      });
+    },
+    { injector }
+  );
+  return view.asReadonly();
+}
+
 /**
  * A source-driven structural table. It mounts only the features it is given
  * and renders through the same body as the compatibility shell.
@@ -1003,7 +1164,6 @@ export function injectTableSurfaceHost<TRow>(
   const resources = createFeatureResources(parent);
   return resources.use("surface", [], (child) => {
     const featureList = computed(() => readMaybe(options.features) ?? []);
-    const featureOptions = featureOptionsOf(featureList());
     const columns = computed(
       () => flattenColumns(readMaybe(options.columns)).leaves
     );
@@ -1081,109 +1241,21 @@ export function injectTableSurfaceHost<TRow>(
       state: table.featureState,
       injector: scope,
     });
-    const grid = table.featureState.get(SURFACE_GRID)() as
-      GridFocus<TRow> | undefined;
-    const grouping = table.featureState.get(SURFACE_GROUPING)() as
-      Signal<TableGrouping<TRow> | undefined> | undefined;
-    const editing = table.featureState.get(SURFACE_EDITING)() as
-      Signal<EditableCellEditing<TRow>> | undefined;
-    const bodyWindow = bodyWindowFor<TRow>({
-      table,
-      grouping,
-      tree: undefined,
-      expandable: false,
-      scrollRows: computed(() => table.source().rows),
-      featureOptions,
-      rowKey: options.rowKey,
-      maxHeight: readMaybe(options.maxHeight),
-      scrollBox: () => null,
-      root: () => null,
-      injector: child,
-    });
-    const columnWindow = injectColumnWindow<TRow>({
-      columns: table.columns,
-      enabled: featureOptions.virtualizeColumns === true,
-      widths: computed(() => table.layout().state.widths),
-      pinnedKeys: computed(() => {
-        const { pinned } = table.layout().state;
-        return new Set(
-          Object.keys(pinned).filter((key) => pinned[key] !== undefined)
-        );
+    // The structure follows the features mounted now: a feature added,
+    // removed or added again after mount publishes its state, and the
+    // structure built over it is rebuilt.
+    const liveState = computed(
+      (): LiveSurfaceState<TRow> => ({
+        features: featureList(),
+        grid: table.featureState.get(SURFACE_GRID)() as
+          GridFocus<TRow> | undefined,
+        grouping: table.featureState.get(SURFACE_GROUPING)() as
+          Signal<TableGrouping<TRow> | undefined> | undefined,
+        editing: table.featureState.get(SURFACE_EDITING)() as
+          Signal<EditableCellEditing<TRow>> | undefined,
       }),
-      getScrollElement: () => null,
-      injector: child,
-    });
-    const rowKey = computed(() => options.rowKey);
-    const surface = buildSurfaceBody<TRow>({
-      table,
-      bodyWindow,
-      columnWindow,
-      selection: undefined,
-      grid,
-      editing,
-      reorder: undefined,
-      grouping,
-      rowDetail: undefined,
-      pinnedRows: computed(() => undefined),
-      summaryRows: featureOptions.pinnedRows as PinnedRows<TRow> | undefined,
-      extraRows: featureOptions.extraRows as readonly ExtraRow[] | undefined,
-      getCellSpan: featureOptions.getCellSpan as GetCellSpan<TRow> | undefined,
-      rowActionList: computed(
-        () => featureOptions.rowActions as RowAction<TRow>[] | undefined
-      ),
-      rowKey,
-      assembly: featureOptions.assembly as
-        Partial<AssemblyFns<TRow>> | undefined,
-      rowClassName: featureOptions.rowClassName as
-        ((row: TRow, index: number) => string | undefined) | undefined,
-      rowStyle: featureOptions.rowStyle as RowStyle<TRow> | undefined,
-      rowHeight: featureOptions.rowHeight as RowHeight<TRow> | undefined,
-      density: computed(() => resolveDensity(undefined, undefined)),
-      labels: computed(() => table.labels()),
-      featureOptions,
-      maxHeight: () => readMaybe(options.maxHeight),
-      stickyHeader: () => readMaybe(options.stickyHeader) ?? false,
-      stickyTop: () => readMaybe(options.stickyTop) ?? 0,
-      onRowClick: () => readMaybe(options.onRowClick),
-      summaryRow: () => readMaybe(options.summaryRow),
-    });
-    const classNames = computed((): DataTableClassNames => ({}));
-    const renderCard = signal<MobileCardRenderer<TRow> | undefined>(undefined);
-    const view: TableSurfaceView<TRow> = {
-      table,
-      classNames,
-      renderCard,
-      selection: undefined,
-      grid,
-      density: computed(() => resolveDensity(undefined, undefined)),
-      groupingPanel: undefined,
-      reorder: undefined,
-      tree: undefined,
-      treeCellFilled: false,
-      columnSelect: false,
-      rowDetail: undefined,
-      cellSpanAppearance: featureOptions.cellSpanAppearance as
-        CellSpanAppearance | undefined,
-      editing,
-      grouping,
-      stickyHead: surface.stickyHead,
-      reportHeaderHeight: surface.reportHeaderHeight,
-      expandToggles: surface.expandToggles,
-      bodyCells: surface.bodyCells,
-      detailParent: surface.detailParent,
-      summary: surface.summary,
-      showSummary: surface.showSummary,
-      editableCells: surface.editableCells,
-      showActions: surface.showActions,
-      actionsCells: surface.actionsCells,
-      virtualization: surface.virtualization,
-      body: surface.body,
-      groupHeaders: surface.groupHeaders,
-      bodyColSpan: surface.bodyColSpan,
-      columns: surface.renderedColumns,
-      columnSpacers: surface.columnSpacers,
-      columnIndex: surface.columnIndex,
-    };
-    return signal(view);
+      { equal: sameLiveSurfaceState }
+    );
+    return followSurfaceState(table, options, liveState, child);
   });
 }

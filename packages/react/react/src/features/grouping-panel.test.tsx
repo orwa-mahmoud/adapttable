@@ -15,7 +15,11 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
-import type { ButtonHTMLAttributes, HTMLAttributes } from "react";
+import {
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  useSyncExternalStore,
+} from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { UseColumnLayoutResult } from "../columns/useColumnLayout";
@@ -234,6 +238,21 @@ function dragTransfer(_key?: string) {
   };
 }
 
+/** The announcement as the strip reads it: live, not from the table. */
+function LiveAnnouncement({
+  panel,
+}: {
+  readonly panel: GroupingPanelInteractions;
+}) {
+  const live = panel.live;
+  if (!live) throw new Error("the grouping panel publishes no live state");
+  const { announcement } = useSyncExternalStore(
+    live.subscribe,
+    live.getSnapshot
+  );
+  return <span data-testid="announcement">{announcement}</span>;
+}
+
 function Chrome({
   labels,
   onState,
@@ -250,7 +269,7 @@ function Chrome({
   return (
     <div>
       <span data-testid="state">present</span>
-      <span data-testid="announcement">{panel.announcement}</span>
+      <LiveAnnouncement panel={panel} />
       <button
         type="button"
         data-testid="header-team"
@@ -556,6 +575,73 @@ describe("groupingPanel provider", () => {
       "Team moved to grouping position 2"
     );
     expect(groupingState.setGroupBy).toHaveBeenCalledTimes(1);
+  });
+
+  it("redraws the table when a header drag starts or ends, never while a drag hovers", () => {
+    const groupingState = mockGroupingState("team,budget");
+    let panel: GroupingPanelInteractions | undefined;
+    let renders = 0;
+    mountProvider(
+      groupingPanel(),
+      defaultLabels,
+      (next) => {
+        panel = next;
+        renders += 1;
+      },
+      runtimeView(groupingState)
+    );
+    const transfer = dragTransfer("team");
+    const hover = () => ({
+      dataTransfer: transfer,
+      preventDefault: () => undefined,
+    });
+    const hoverEveryBoundary = () => {
+      for (const index of [0, 1, 2, 1, 0]) {
+        act(() => {
+          panel!.dropProps(index).onDragEnter?.(hover() as never);
+          panel!.dropProps(index).onDragOver?.(hover() as never);
+        });
+      }
+    };
+
+    const atRest = renders;
+    act(() => {
+      panel!.chipDragProps("team").onDragStart?.({
+        target: screen.getByTestId("chip-team"),
+        currentTarget: screen.getByTestId("chip-team"),
+        dataTransfer: transfer,
+        preventDefault: () => undefined,
+      } as never);
+    });
+    hoverEveryBoundary();
+    expect(panel!.live?.getSnapshot().drag).toMatchObject({
+      key: "team",
+      source: "chip",
+      overIndex: 0,
+    });
+    act(() => {
+      panel!.chipDragProps("team").onDragEnd?.({} as never);
+    });
+    expect(renders).toBe(atRest);
+
+    act(() => {
+      panel!.headerDragProps("team").onDragStart?.({
+        target: screen.getByTestId("header-team"),
+        currentTarget: screen.getByTestId("header-team"),
+        dataTransfer: transfer,
+        preventDefault: () => undefined,
+      } as never);
+    });
+    const afterStart = renders;
+    expect(afterStart).toBeGreaterThan(atRest);
+    expect(panel!.drag).toMatchObject({ key: "team", source: "header" });
+    hoverEveryBoundary();
+    expect(renders).toBe(afterStart);
+    act(() => {
+      panel!.headerDragProps("team").onDragEnd?.({} as never);
+    });
+    expect(renders).toBeGreaterThan(afterStart);
+    expect(panel!.drag).toBeUndefined();
   });
 
   it("supports vertical and rtl keyboard moves and no-op edge moves", () => {

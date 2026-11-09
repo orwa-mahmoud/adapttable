@@ -124,11 +124,24 @@ export function useRowReorder<TRow>(
     announcement,
   } = useSyncExternalStore(
     controller.subscribe,
-    controller.getSnapshot,
-    controller.getSnapshot
+    controller.getTableSnapshot,
+    controller.getTableSnapshot
   );
 
   useEffect(() => controller.connect(), [controller]);
+
+  // The table redraws when a row is lifted, dropped or confirmed. Where the
+  // drag hovers reaches only the rows it touches, through `hover`.
+  const hover = useMemo<NonNullable<RowReorderState<TRow>["hover"]>>(
+    () => ({
+      subscribe: controller.subscribe,
+      dropAt: (rowId, localIndex) =>
+        rowReorderRowAttributes(controller.getSnapshot(), rowId, localIndex)[
+          "data-drop"
+        ],
+    }),
+    [controller]
+  );
 
   const dragProps = useCallback<RowReorderState<TRow>["dragProps"]>(
     (rowId, localIndex) => ({
@@ -204,6 +217,7 @@ export function useRowReorder<TRow>(
       confirmMove: controller.confirmMove,
       cancelMove: controller.cancelMove,
       rowAttrs,
+      hover,
     }),
     [
       controller,
@@ -220,6 +234,27 @@ export function useRowReorder<TRow>(
       dropProps,
       handleKeyDown,
       rowAttrs,
+      hover,
     ]
   );
+}
+
+/**
+ * A row's DOM props with the drop edge a drag hovers on it: the `data-drop`
+ * attribute and the insertion line.
+ *
+ * @public
+ */
+export function withRowDropTarget(
+  domProps: Record<string, unknown>,
+  drop: RowDropPosition
+): Record<string, unknown> {
+  return {
+    ...domProps,
+    "data-drop": drop,
+    style: {
+      ...(domProps.style as CSSProperties | undefined),
+      ...rowReorderDropStyle({ "data-drop": drop }),
+    },
+  };
 }

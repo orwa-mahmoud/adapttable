@@ -11,10 +11,9 @@ import { h, onScopeDispose, shallowRef, watch } from "vue";
 import { nativeFilterSlots } from "./nativeFilterSlots";
 
 defineOptions({ name: "NativeFilterHeaderControl" });
-const props = withDefaults(defineProps<FilterHeaderControlOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
-const model = useFilterHeaderControl(() => props);
+const { closeOnSelect = undefined, ...props } =
+  defineProps<FilterHeaderControlOptions<TRow>>();
+const model = useFilterHeaderControl(() => ({ ...props, closeOnSelect }));
 const active = useScopeActivity();
 const disclosure = shallowRef<HTMLDetailsElement | null>(null);
 const close = (restore: boolean) => {

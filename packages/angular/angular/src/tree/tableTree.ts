@@ -1,19 +1,15 @@
 import {
   type AdaptTableFeature,
   type DataTable,
+  FEATURE_IMPLEMENTATIONS,
+  featureImplementation,
   featureOptionsOf,
-  injectLazyChildren,
-  injectTreeExpansion,
   type MaybeSignal,
 } from "@adapttable/angular";
 import {
-  buildTreeEntries,
-  closeFailedTreeNode,
   type TableSource,
-  toggleTreeNode,
   treeColumnKey,
   type TreeEntry,
-  treeExportExpandedIds,
 } from "@adapttable/core";
 import {
   hasLoadedChildren,
@@ -89,19 +85,22 @@ export function injectTree<TRow>(
   options: TreeOptions<TRow>
 ): Signal<TableTree<TRow> | undefined> | undefined {
   const { features, table, source } = options;
-  if (!features.some((feature) => feature.id === "tree")) return undefined;
+  const code = featureImplementation(features, FEATURE_IMPLEMENTATIONS.tree);
+  if (!code || !features.some((feature) => feature.id === "tree")) {
+    return undefined;
+  }
   if (!options.injector) assertInInjectionContext(injectTree);
   const injector = options.injector ?? inject(Injector);
   const declared = featureOptionsOf(features) as DeclaredTree<TRow>;
   const { getChildren, getParentId, hasChildren } = declared;
   const rowKey = (row: TRow): string => table.rowKey(row);
 
-  const expansion = injectTreeExpansion({
+  const expansion = code.expansion({
     expandedIds: declared.expandedIds,
     onExpandedIdsChange: declared.onExpandedIdsChange,
     injector,
   });
-  const lazy = injectLazyChildren<TRow>({
+  const lazy = code.lazyChildren<TRow>({
     onLoadChildren: declared.onLoadChildren,
     hasLoadedChildren: (row) =>
       hasLoadedChildren(row, untracked(source).rows, {
@@ -113,7 +112,7 @@ export function injectTree<TRow>(
     // A node whose children failed to arrive closes, so the next click is a
     // retry rather than a close followed by an open.
     onLoadFailed: (_row, id) => {
-      closeFailedTreeNode(untracked(expansion), id);
+      code.closeFailed(untracked(expansion), id);
     },
     injector,
   });
@@ -123,7 +122,7 @@ export function injectTree<TRow>(
 
   const rows = computed(() => source().rows);
   const entries = computed(() =>
-    buildTreeEntries({
+    code.entries({
       rows: rows(),
       getRowId: rowKey,
       expandedIds: expansion().expandedIds,
@@ -134,10 +133,10 @@ export function injectTree<TRow>(
     })
   );
   const allEntries = computed(() =>
-    buildTreeEntries({
+    code.entries({
       rows: rows(),
       getRowId: rowKey,
-      expandedIds: treeExportExpandedIds(entries()),
+      expandedIds: code.exportExpandedIds(entries()),
       getChildren,
       getParentId,
       hasChildren,
@@ -155,7 +154,7 @@ export function injectTree<TRow>(
       expansion: {
         ...open,
         toggle: (id) => {
-          toggleTreeNode(untracked(entries), id, {
+          code.toggle(untracked(entries), id, {
             loadIfNeeded,
             toggle: open.toggle,
           });

@@ -96,13 +96,10 @@ import { copyContextMenuSelection } from '@adapttable/core';
 import { coreBulkActions } from '@adapttable/core/binding';
 import { coreColumnMenu } from '@adapttable/core/binding';
 import { coreDensityChooser } from '@adapttable/core/binding';
-import { coreExportCsv } from '@adapttable/core/binding';
-import { coreFilters } from '@adapttable/core/binding';
-import { coreFindInTable } from '@adapttable/core/binding';
+import { CoreFeature } from '@adapttable/core/binding';
 import { coreFullscreen } from '@adapttable/core/binding';
 import { coreGrouping } from '@adapttable/core/binding';
 import { coreGroupingPanel } from '@adapttable/core/binding';
-import { coreHeaderFilters } from '@adapttable/core/binding';
 import { coreRowActions } from '@adapttable/core/binding';
 import { coreSavedViews } from '@adapttable/core/binding';
 import { CssProperties } from '@adapttable/core';
@@ -137,6 +134,7 @@ import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { ExportProgressState } from '@adapttable/core';
 import { ExportProgressSurfaceSlotProps } from '@adapttable/core/binding';
 import { ExportProgressView } from '@adapttable/core';
+import { ExportWriter } from '@adapttable/core';
 import { EXTRA_OVER_SPAN_ROW_STYLE } from '@adapttable/core/binding';
 import { EXTRA_OVER_SPAN_STYLE } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
@@ -4629,6 +4627,7 @@ export class AdaptTableAssistantChrome {
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
+    readonly implementations?: Readonly<Record<string, unknown>>;
     mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
@@ -5243,11 +5242,16 @@ export { coreColumnMenu }
 
 export { coreDensityChooser }
 
-export { coreExportCsv }
+// @public
+export function coreExportCsv<TRow>(options?: boolean | {
+    readonly writer?: ExportWriter;
+}): CoreFeature<TRow>;
 
-export { coreFilters }
+// @public
+export function coreFilters<TRow>(defs: unknown): CoreFeature<TRow>;
 
-export { coreFindInTable }
+// @public
+export function coreFindInTable(): CoreFeature;
 
 export { coreFullscreen }
 
@@ -5255,7 +5259,8 @@ export { coreGrouping }
 
 export { coreGroupingPanel }
 
-export { coreHeaderFilters }
+// @public
+export function coreHeaderFilters(): CoreFeature;
 
 export { coreRowActions }
 

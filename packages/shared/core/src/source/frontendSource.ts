@@ -26,6 +26,10 @@ import {
   type TableEngineReader,
 } from "../engine/createTableEngine";
 import { engineSearchText } from "../engine/searchText";
+import {
+  sessionEvaluator,
+  stageSessionEvaluator,
+} from "../engine/tableSession";
 import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
 import type { PaginationMode, ResolvedPaginationMode } from "../types";
 import { devWarn } from "../utils/devWarn";
@@ -184,8 +188,12 @@ export interface FrontendSource<TRow> {
   /** Publish the staged candidate to the engine's subscribers. */
   readonly commit: () => void;
   /**
-   * Drop the current engine without publishing its candidate and use
-   * `createEngine` on the next update. The same factory is a no-op.
+   * Evaluate with `createEngine`'s evaluator from the next update on. The
+   * engine keeps its id, selection, subscribers and revisions: the next
+   * update stages the new evaluator on its candidate, and
+   * {@link FrontendSource.commit} publishes it. An engine built outside
+   * `createTableEngine` and `createBasicTableEngine` cannot take another
+   * evaluator, so the next update replaces it. The same factory is a no-op.
    */
   readonly replaceEngine: (createEngine: FrontendEngineFactory<TRow>) => void;
 }
@@ -281,6 +289,8 @@ export function createFrontendSourceWith<TRow>(
 ): FrontendSource<TRow> {
   let createEngine = initialEngine;
   let engine: TableEngine<TRow> | undefined;
+  /** The factory that built {@link engine}, the evaluator it began with. */
+  let builtWith = initialEngine;
   let data: readonly TRow[] | undefined;
   let fingerprint: string | undefined;
   let filterKey: string | number | undefined;
@@ -308,8 +318,9 @@ export function createFrontendSourceWith<TRow>(
     config: FrontendSourceConfig<TRow>,
     view: FrontendSourceViewState
   ): TableEngine<TRow> {
-    if (engine) return engine;
+    if (engine) return adoptEvaluator(engine, config, view);
     data = config.data;
+    builtWith = createEngine;
     engine = createEngine({
       data: config.data,
       columns: config.columns ?? [],
@@ -329,6 +340,44 @@ export function createFrontendSourceWith<TRow>(
       getSearchText: projectSearchText,
     });
     return engine;
+  }
+
+  /**
+   * Stage the requested evaluator on the live engine when it runs another.
+   * A candidate dropped before its commit takes its evaluator with it, so
+   * this asks the engine rather than remembering what it staged.
+   */
+  function adoptEvaluator(
+    table: TableEngine<TRow>,
+    config: FrontendSourceConfig<TRow>,
+    view: FrontendSourceViewState
+  ): TableEngine<TRow> {
+    const live = sessionEvaluator(table) ?? builtWith;
+    if (live === createEngine) return table;
+    const carrier = createEngine({
+      data: [],
+      columns: config.columns ?? [],
+      rowKey: getRowId,
+    });
+    const staged = stageSessionEvaluator(table, carrier, createEngine);
+    carrier.dispose();
+    if (staged) return table;
+    // An engine of the host's own making cannot take another evaluator.
+    table.discardCandidate();
+    table.dispose();
+    engine = undefined;
+    forgetEngineState();
+    return engineOf(config, view);
+  }
+
+  function forgetEngineState(): void {
+    data = undefined;
+    fingerprint = undefined;
+    filterKey = undefined;
+    stages = 0;
+    searched = undefined;
+    page = undefined;
+    searchCache.clear();
   }
 
   function searchedRows(
@@ -459,19 +508,6 @@ export function createFrontendSourceWith<TRow>(
   }
 
   function replaceEngine(next: FrontendEngineFactory<TRow>): void {
-    if (next === createEngine) return;
-    if (engine) {
-      engine.discardCandidate();
-      engine.dispose();
-    }
-    engine = undefined;
-    data = undefined;
-    fingerprint = undefined;
-    filterKey = undefined;
-    stages = 0;
-    searched = undefined;
-    page = undefined;
-    searchCache.clear();
     createEngine = next;
   }
 

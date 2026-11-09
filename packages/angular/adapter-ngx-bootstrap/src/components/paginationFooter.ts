@@ -7,18 +7,19 @@ import {
   expandChevronIcon,
 } from "@adapttable/angular/adapter";
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
   Directive,
+  effect,
   ElementRef,
   inject,
   input,
-  type OnChanges,
-  type OnInit,
   output,
   Renderer2,
+  untracked,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { PaginationComponent } from "ngx-bootstrap/pagination";
@@ -30,7 +31,7 @@ import type { TableView } from "../dataTable";
  * @internal
  */
 @Directive({ selector: "[adaptPaginationLink]" })
-export class AdaptPaginationLink implements OnChanges, OnInit {
+export class AdaptPaginationLink {
   readonly state = input.required<{
     readonly part: string;
     readonly label: string;
@@ -44,10 +45,41 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
   private readonly renderer = inject(Renderer2);
   private readonly destroy = inject(DestroyRef);
 
-  ngOnChanges(): void {
+  constructor() {
+    // The link's state is written onto ngx-bootstrap's own anchor, on the
+    // server too, so assistive tech reads it from the first paint.
+    effect(() => {
+      const state = this.state();
+      untracked(() => {
+        this.describe(state);
+      });
+    });
+    // Activation listeners are browser work: the server has no pointer.
+    afterNextRender(() => {
+      const link = this.element.nativeElement.parentElement;
+      if (!link) return;
+      // Native pageChanged also fires for model writes. Only activation writes
+      // back to the host; rendering or clamping the native pager must not.
+      this.destroy.onDestroy(
+        this.renderer.listen(link, "click", () => {
+          const state = this.state();
+          if (!state.disabled) this.selected.emit(state.page);
+        })
+      );
+      // Enter already activates an anchor. A button role also promises Space.
+      this.destroy.onDestroy(
+        this.renderer.listen(link, "keydown", (event: KeyboardEvent) => {
+          if (event.key !== " ") return;
+          event.preventDefault();
+          if (!this.state().disabled) link.click();
+        })
+      );
+    });
+  }
+
+  private describe(state: ReturnType<typeof this.state>): void {
     const link = this.element.nativeElement.parentElement;
     if (!link) return;
-    const state = this.state();
     this.renderer.setAttribute(link, "role", "button");
     this.renderer.setAttribute(link, "data-ngx-bootstrap-part", state.part);
     this.renderer.setAttribute(link, "aria-label", state.label);
@@ -55,27 +87,6 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
     this.renderer.setAttribute(link, "tabindex", state.disabled ? "-1" : "0");
     if (state.current) this.renderer.setAttribute(link, "aria-current", "page");
     else this.renderer.removeAttribute(link, "aria-current");
-  }
-
-  ngOnInit(): void {
-    const link = this.element.nativeElement.parentElement;
-    if (!link) return;
-    // Native pageChanged also fires for model writes. Only activation writes
-    // back to the host; rendering or clamping the native pager must not.
-    this.destroy.onDestroy(
-      this.renderer.listen(link, "click", () => {
-        const state = this.state();
-        if (!state.disabled) this.selected.emit(state.page);
-      })
-    );
-    // Enter already activates an anchor. A button role also promises Space.
-    this.destroy.onDestroy(
-      this.renderer.listen(link, "keydown", (event: KeyboardEvent) => {
-        if (event.key !== " ") return;
-        event.preventDefault();
-        if (!this.state().disabled) link.click();
-      })
-    );
   }
 }
 

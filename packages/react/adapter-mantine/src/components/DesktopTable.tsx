@@ -652,10 +652,20 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
       PIN_Z.headerPinned
     ),
   };
+  const headerHairline: CSSProperties = stickyHeader
+    ? { boxShadow: `0 1px 0 ${HAIRLINE}` }
+    : {};
   const leafPaint: CSSProperties = {
     background: SURFACE,
-    ...(stickyHeader ? { boxShadow: `0 1px 0 ${HAIRLINE}` } : {}),
+    ...headerHairline,
   };
+  // A group cell keeps its child rule (a background image), so it takes only
+  // the colour. A collapsed group spans to the bottom of the header, where
+  // the header's own hairline belongs.
+  const groupPaint = (rowSpan: number): CSSProperties => ({
+    backgroundColor: SURFACE,
+    ...(rowSpan > 1 ? headerHairline : {}),
+  });
 
   const leafProps = {
     paintStyle: leafPaint,
@@ -687,7 +697,10 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
         ta={groupedHeaderAlign(cell.cell.align)}
         fw={600}
         data-adapttable-part="header-group-cell"
-        style={groupedHeaderCellStyle(cell, HAIRLINE)}
+        style={{
+          ...groupedHeaderCellStyle(cell, HAIRLINE),
+          ...groupPaint(cell.rowSpan),
+        }}
       >
         <span style={groupedHeaderLabelStyle()}>
           {props.onToggleColumnGroup ? (

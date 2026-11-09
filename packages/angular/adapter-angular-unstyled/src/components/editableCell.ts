@@ -27,7 +27,7 @@ import {
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-  type AfterViewInit,
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -75,15 +75,17 @@ import {
     </button>
   `,
 })
-class AdaptEditCellActivate implements AfterViewInit {
+class AdaptEditCellActivate {
   readonly props = input.required<EditableCellActivateProps>();
   protected readonly displayTemplate = computed(() => {
     const content = this.props().display;
     return content instanceof TemplateRef ? content : null;
   });
   private readonly btn = viewChild<ElementRef<HTMLButtonElement>>("btn");
-  ngAfterViewInit(): void {
-    this.props().activateRef(this.btn()?.nativeElement ?? null);
+  constructor() {
+    afterRenderEffect(() => {
+      this.props().activateRef(this.btn()?.nativeElement ?? null);
+    });
   }
 }
 
@@ -196,7 +198,7 @@ class AdaptEditCellButton {
     }
   `,
 })
-export class AdaptNativeCellEditor implements AfterViewInit {
+export class AdaptNativeCellEditor {
   readonly props = input.required<EditableCellEditorCtrl>();
   private readonly el = viewChild<ElementRef<HTMLElement>>("el");
 
@@ -209,8 +211,10 @@ export class AdaptNativeCellEditor implements AfterViewInit {
   protected readonly readMultiDraft = readMultiDraft;
   protected readonly multiDraftFromSelect = multiDraftFromSelect;
 
-  ngAfterViewInit(): void {
-    this.props().focusRef(this.el()?.nativeElement ?? null);
+  constructor() {
+    afterRenderEffect(() => {
+      this.props().focusRef(this.el()?.nativeElement ?? null);
+    });
   }
 
   protected commitBoolean(checked: boolean): void {
@@ -245,12 +249,14 @@ export class AdaptNativeCellEditor implements AfterViewInit {
     </label>
   `,
 })
-class AdaptEditCellOption implements AfterViewInit {
+class AdaptEditCellOption {
   readonly props = input.required<MultiSelectEditorCheckboxProps>();
   private readonly el = viewChild.required<ElementRef<HTMLInputElement>>("el");
 
-  ngAfterViewInit(): void {
-    this.props().focusRef?.(this.el().nativeElement);
+  constructor() {
+    afterRenderEffect(() => {
+      this.props().focusRef?.(this.el().nativeElement);
+    });
   }
 }
 

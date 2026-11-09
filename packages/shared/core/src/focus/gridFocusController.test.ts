@@ -25,6 +25,7 @@ import {
   type GridFocusControllerOptions,
   type GridKeyEvent,
   gridRowAttributes,
+  gridRowFocusSignature,
   isGridColumnSelected,
 } from "./gridFocusController";
 
@@ -1034,5 +1035,57 @@ describe("attributes", () => {
     expect(
       gridFillHandleCell({ enabled: false, range, canFill: true })
     ).toBeNull();
+  });
+});
+
+describe("gridRowFocusSignature", () => {
+  const at = (row: number, col: number) => ({ row, col });
+  const input = (
+    active: { row: number; col: number } | null,
+    range: {
+      anchor: { row: number; col: number };
+      head: { row: number; col: number };
+    } | null = null
+  ) => ({
+    enabled: true,
+    columnsWindowed: false,
+    active,
+    firstRowIndex: 0,
+    range,
+    fillPreview: null,
+    matchKeys: new Set<string>(),
+    currentMatch: null,
+  });
+
+  it("keeps a row's digest while the focus moves between other rows", () => {
+    const before = gridRowFocusSignature(input(at(1, 0)), 5, 4);
+    const after = gridRowFocusSignature(input(at(2, 3)), 5, 4);
+    expect(after).toBe(before);
+  });
+
+  it("changes a row's digest when the focus or the range enters or leaves it", () => {
+    const idle = gridRowFocusSignature(input(at(1, 0)), 2, 4);
+    expect(gridRowFocusSignature(input(at(2, 1)), 2, 4)).not.toBe(idle);
+    const ranged = input(at(1, 0), { anchor: at(1, 0), head: at(3, 2) });
+    expect(gridRowFocusSignature(ranged, 2, 4)).not.toBe(idle);
+    const elsewhere = input(at(1, 0), { anchor: at(4, 0), head: at(6, 2) });
+    expect(gridRowFocusSignature(elsewhere, 2, 4)).not.toBe(
+      gridRowFocusSignature(ranged, 2, 4)
+    );
+  });
+
+  it("names the matched columns and the current match on its row", () => {
+    const base = input(at(0, 0));
+    const matched = {
+      ...base,
+      matchKeys: new Set(["3:1", "3:2", "4:0"]),
+      currentMatch: at(3, 2),
+    };
+    expect(gridRowFocusSignature(matched, 3, 4)).not.toBe(
+      gridRowFocusSignature(base, 3, 4)
+    );
+    expect(gridRowFocusSignature(matched, 5, 4)).toBe(
+      gridRowFocusSignature(base, 5, 4)
+    );
   });
 });

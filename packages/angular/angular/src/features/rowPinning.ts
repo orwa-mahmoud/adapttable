@@ -1,5 +1,25 @@
-import { type AdaptTableFeature, type MaybeSignal } from "@adapttable/angular";
-import { type RowPinState } from "@adapttable/core";
+import {
+  type AdaptTableFeature,
+  FEATURE_IMPLEMENTATIONS,
+  injectRowPinning,
+  injectRowPinningUrlState,
+  type MaybeSignal,
+  type RowPinningImplementation,
+  withFeatureImplementation,
+} from "@adapttable/angular";
+import {
+  partitionPinnedRows,
+  rowPinningControl,
+  type RowPinState,
+} from "@adapttable/core";
+
+/** Pinning's code, filed by {@link rowPinning}. */
+const ROW_PINNING_IMPLEMENTATION: RowPinningImplementation = {
+  url: injectRowPinningUrlState,
+  control: rowPinningControl,
+  state: injectRowPinning,
+  partition: partitionPinnedRows,
+};
 import { coreRowPinning } from "@adapttable/core/binding";
 
 /**
@@ -31,5 +51,9 @@ export interface RowPinningFeatureOptions {
 export function rowPinning(
   options: RowPinningFeatureOptions = {}
 ): AdaptTableFeature {
-  return coreRowPinning({ ...options });
+  return withFeatureImplementation(
+    coreRowPinning({ ...options }),
+    FEATURE_IMPLEMENTATIONS.rowPinning,
+    ROW_PINNING_IMPLEMENTATION
+  );
 }

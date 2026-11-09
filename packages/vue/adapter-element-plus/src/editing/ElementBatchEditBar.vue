@@ -7,13 +7,13 @@ import {
 import { useClassNames } from "../classNamesContext";
 import { elementEditingButton } from "./elementEditingButton";
 defineOptions({ name: "ElementBatchEditBar" });
-const props = withDefaults(defineProps<BatchEditBarProps<TRow>>(), {
-  contested: undefined,
-});
+const { contested = undefined, ...props } =
+  defineProps<BatchEditBarProps<TRow>>();
 const names = useClassNames();
 const Render = () =>
   BatchEditBarChrome({
     ...props,
+    contested,
     className: [props.className, names.value.batchEditBar]
       .filter(Boolean)
       .join(" "),

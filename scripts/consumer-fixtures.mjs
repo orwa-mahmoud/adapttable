@@ -294,10 +294,11 @@ const CORE_FIXTURES = [
     // cache bring the packed graph to 103.45 KiB (105,932 bytes).
     // Shared behaviours the bindings used to copy — approval text, the
     // virtualizer field slice, source refresh, and the grouping carrier —
-    // now live on this surface. Measured 2026-11-07 at 103.63 KiB
-    // (106,115 bytes). The ceiling is that measurement.
-    initialKB: 103.63,
-    totalKB: 103.63,
+    // now live on this surface. One committed state per session and the
+    // staged row-model evaluator bring it to 104.28 KiB (106,778 bytes),
+    // measured 2026-11-09. The ceiling is that measurement.
+    initialKB: 104.28,
+    totalKB: 104.28,
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.

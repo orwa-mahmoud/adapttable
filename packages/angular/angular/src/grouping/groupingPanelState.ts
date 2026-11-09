@@ -7,20 +7,17 @@ import {
   type AdaptTableFeature,
   type ColumnDef,
   type DataTable,
+  FEATURE_IMPLEMENTATIONS,
+  featureImplementation,
   fromStore,
 } from "@adapttable/angular";
 import type { GroupingPanelExtras } from "@adapttable/angular/features";
 import {
-  createGroupingPanelController,
   declaredAggregates,
-  groupingPanelAggregations,
   type TableRuntime,
   type TableSource,
 } from "@adapttable/core";
-import {
-  type GroupingPanelSlotProps,
-  groupingPanelState,
-} from "@adapttable/core/binding";
+import { type GroupingPanelSlotProps } from "@adapttable/core/binding";
 import { parseGroupBy } from "@adapttable/core/grouping";
 import {
   computed,
@@ -85,7 +82,11 @@ export function injectGroupingPanelState<TRow>(
   options: GroupingPanelStateOptions<TRow>
 ): Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined {
   const feature = groupingPanelFeatureOf(options.features);
-  if (!feature) return undefined;
+  const code = featureImplementation(
+    options.features,
+    FEATURE_IMPLEMENTATIONS.groupingPanel
+  );
+  if (!feature || !code) return undefined;
 
   const injector = options.injector ?? inject(Injector);
   const runtime = tableRuntimeFor(
@@ -95,7 +96,7 @@ export function injectGroupingPanelState<TRow>(
     options.grouping
   );
   const extras = feature.extras ?? {};
-  const controller = createGroupingPanelController({
+  const controller = code.controller({
     runtime: runtime as TableRuntime,
     groupAggregates: extras.groupAggregates,
   });
@@ -137,7 +138,7 @@ export function injectGroupingPanelState<TRow>(
   return computed((): GroupingPanelSlotProps<ColumnDef<TRow>> => {
     const current = options.source();
     const interactions = controller.interactions(snapshot(), declared);
-    const state = groupingPanelState({
+    const state = code.state({
       interactions,
       groupBy: parseGroupBy(current.groupBy),
       columns: options.table.allColumns(),
@@ -162,7 +163,7 @@ export function injectGroupingPanelState<TRow>(
           ? state
           : {
               ...state,
-              aggregations: groupingPanelAggregations({
+              aggregations: code.aggregations({
                 source: current,
                 columns: options.table.allColumns(),
                 declared,

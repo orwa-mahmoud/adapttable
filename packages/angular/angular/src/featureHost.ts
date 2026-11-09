@@ -11,6 +11,7 @@ import {
   type FeaturePatch,
   type FeatureRender,
   type FeatureSetup,
+  type FeatureStateKey,
   mergeFeaturePatches,
   planFeatureRegistration,
   preferLastById,
@@ -69,6 +70,56 @@ export interface AdaptTableFeature extends FeatureSetup<
   readonly renders?: readonly FeatureRender<never, SlotComponent>[];
   /** Start live behavior once the table runtime exists; dispose with the table. */
   mount?(context: FeatureMountContext): void | (() => void);
+  /**
+   * The code this feature brings to the table, by key. The table reaches a
+   * feature's code only through a composed feature, so a table never bundles
+   * the code of a feature it was not given.
+   */
+  readonly implementations?: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * A feature that brings `implementation` for `key`.
+ *
+ * @param feature - The feature to extend.
+ * @param key - The implementation's key.
+ * @param implementation - The code the table runs for this feature.
+ * @returns The feature with the implementation filed under the key.
+ *
+ * @public
+ */
+export function withFeatureImplementation<
+  TFeature extends {
+    readonly id?: string;
+    readonly implementations?: Readonly<Record<string, unknown>>;
+  },
+  T,
+>(feature: TFeature, key: FeatureStateKey<T>, implementation: T): TFeature {
+  return {
+    ...feature,
+    implementations: { ...feature.implementations, [key.id]: implementation },
+  };
+}
+
+/**
+ * The implementation the composed features bring for `key`; a later feature
+ * wins.
+ *
+ * @param features - The composed features.
+ * @param key - The implementation's key.
+ * @returns The implementation, or `undefined` when no feature brings one.
+ *
+ * @public
+ */
+export function featureImplementation<T>(
+  features: readonly AdaptTableFeature[],
+  key: FeatureStateKey<T>
+): T | undefined {
+  for (let index = features.length - 1; index >= 0; index -= 1) {
+    const implementation = features[index]?.implementations?.[key.id];
+    if (implementation !== undefined) return implementation as T;
+  }
+  return undefined;
 }
 
 /**

@@ -31867,6 +31867,14 @@
       "behavior": ""
     },
     {
+      "export": "gridRowFocusSignature",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "groupAggregateEntries",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -47548,6 +47556,14 @@
     },
     {
       "export": "withKitEnvironment",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "withRowDropTarget",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",

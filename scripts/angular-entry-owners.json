@@ -320,7 +320,19 @@
     "SURFACE_HANDLES",
     "SURFACE_OCCUPIED",
     "SurfaceHandles",
-    "SurfaceOccupation"
+    "SurfaceOccupation",
+    "featureImplementation",
+    "withFeatureImplementation",
+    "FEATURE_IMPLEMENTATIONS",
+    "EditHistoryImplementation",
+    "FindInTableImplementation",
+    "GroupingImplementation",
+    "GroupingPanelImplementation",
+    "RowPinningImplementation",
+    "RowReorderImplementation",
+    "TreeImplementation",
+    "EDIT_HISTORY_IMPLEMENTATION",
+    "FIND_IN_TABLE_IMPLEMENTATION"
   ],
   "features": [
     "CellNavigationOptions",

@@ -7,13 +7,13 @@ import {
 
 import { naiveEditingButton } from "./naiveEditingButton";
 defineOptions({ name: "NaiveRowEditActions" });
-const props = withDefaults(defineProps<RowEditActionsProps<TRow>>(), {
-  showBegin: undefined,
-});
+const { showBegin = undefined, ...props } =
+  defineProps<RowEditActionsProps<TRow>>();
 const names = useDataTableClassNames();
 const Render = () =>
   RowEditActionsChrome({
     ...props,
+    showBegin,
     className: [props.className, names.value.rowEditActions]
       .filter(Boolean)
       .join(" "),

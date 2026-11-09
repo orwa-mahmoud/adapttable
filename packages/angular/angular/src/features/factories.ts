@@ -5,20 +5,24 @@
  * components that fill its slots; a host plugin is the same type through
  * {@link feature}.
  */
-import type { AdaptTableFeature } from "@adapttable/angular";
-import type {
-  BulkAction,
-  CellSpanAppearance,
-  Command,
-  ContextMenuItem,
-  ContextMenuTarget,
-  ExtraRow,
-  GetCellSpan,
-  PinnedRows,
-  RowHeight,
-  RowStyle,
-  SavedViewsControllerOptions,
-  Shortcut,
+import {
+  type AdaptTableFeature,
+  withFeatureImplementation,
+} from "@adapttable/angular";
+import {
+  type BulkAction,
+  type CellSpanAppearance,
+  type Command,
+  type ContextMenuItem,
+  type ContextMenuTarget,
+  type ExtraRow,
+  FILTER_ENGINE_IMPL,
+  type GetCellSpan,
+  type PinnedRows,
+  type RowHeight,
+  type RowStyle,
+  type SavedViewsControllerOptions,
+  type Shortcut,
 } from "@adapttable/core";
 import {
   coreBulkActions,
@@ -42,6 +46,7 @@ import {
   coreStatusBar,
   coreUndoRedoButtons,
   type FeaturePatch,
+  FILTER_ENGINE,
   type SidePanelEntry,
 } from "@adapttable/core/binding";
 import type { Signal, TemplateRef } from "@angular/core";
@@ -310,7 +315,11 @@ export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature {
  * @public
  */
 export function headerFilters(): AdaptTableFeature {
-  return coreHeaderFilters();
+  return withFeatureImplementation(
+    coreHeaderFilters(),
+    FILTER_ENGINE,
+    FILTER_ENGINE_IMPL
+  );
 }
 
 /**

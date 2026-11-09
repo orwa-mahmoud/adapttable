@@ -173,7 +173,9 @@ describe("plain-table row model", () => {
     await act(async () => {
       await promise;
     });
+    // The committed render publishes the grouped rows on the same table.
+    expect(source?.tableEngine).toBe(engine);
     expect(groupsOf(source)).toBeDefined();
-    expect(woken).not.toHaveBeenCalled();
+    expect(woken).toHaveBeenCalledTimes(1);
   });
 });

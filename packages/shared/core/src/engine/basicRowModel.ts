@@ -1,9 +1,11 @@
 /**
  * Filter, sort, and search only.
  *
- * Grouping and aggregates are not evaluated. A patch re-filters the logged
- * rows; this model has no group tree or running totals to update in place.
+ * Grouping and aggregates are not evaluated. A patch evaluates only the rows
+ * it inserted or changed: every other row is the same object it was, so it
+ * keeps its result. This model has no group tree or running totals to update.
  */
+import type { RowPatchLog } from "../contracts/rows";
 import type {
   IncrementalView,
   IncrementalViewConfig,
@@ -34,6 +36,18 @@ function configOf<TRow>(
   return CONFIGS.get(view) as IncrementalViewConfig<TRow> | undefined;
 }
 
+function viewOf<TRow>(
+  rows: readonly TRow[],
+  filtered: readonly TRow[],
+  config: IncrementalViewConfig<TRow>
+): IncrementalView<TRow> {
+  const sorted = hasSort(config) ? sortMatchedRows(filtered, config) : filtered;
+  return remember(
+    { rows, filtered, sorted, groups: undefined, aggregates: undefined },
+    config
+  );
+}
+
 function createBasicView<TRow>(
   rows: readonly TRow[],
   config: IncrementalViewConfig<TRow>
@@ -41,11 +55,17 @@ function createBasicView<TRow>(
   const filtered = hasFilter(config)
     ? rows.filter((row) => rowMatches(row, config))
     : [...rows];
-  const sorted = hasSort(config) ? sortMatchedRows(filtered, config) : filtered;
-  return remember(
-    { rows, filtered, sorted, groups: undefined, aggregates: undefined },
-    config
-  );
+  return viewOf(rows, filtered, config);
+}
+
+/** The row objects a patch inserted or replaced: the only ones to evaluate. */
+function patchedRows<TRow>(log: RowPatchLog<TRow>): ReadonlySet<TRow> {
+  const touched = new Set<TRow>();
+  for (const event of log.events) {
+    if (event.type === "insert") touched.add(event.row);
+    else if (event.type === "update") touched.add(event.next);
+  }
+  return touched;
 }
 
 /** Filter, sort, and search. No grouping and no aggregates. */
@@ -70,7 +90,13 @@ export function createBasicRowModel<TRow>(): RowModel<TRow> {
       if (log.events.length === 0) return view;
       const config = configOf(view);
       if (!config) return view;
-      return createBasicView(log.rows, config);
+      if (!hasFilter(config)) return viewOf(log.rows, [...log.rows], config);
+      const touched = patchedRows(log);
+      const matched = new Set(view.filtered);
+      const filtered = log.rows.filter((row) =>
+        touched.has(row) ? rowMatches(row, config) : matched.has(row)
+      );
+      return viewOf(log.rows, filtered, config);
     },
     fork(view) {
       const config = configOf(view);

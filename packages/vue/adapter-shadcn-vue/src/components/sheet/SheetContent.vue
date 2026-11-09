@@ -28,36 +28,26 @@ defineOptions({
   inheritAttrs: false,
 });
 
-const props = withDefaults(defineProps<SheetContentProps>(), {
-  side: "right",
-  class: undefined,
-  portalTo: undefined,
-  overlayClass: undefined,
-  showClose: true,
-  overlayPart: undefined,
-});
+const {
+  side = "right",
+  class: classProp = undefined,
+  portalTo = undefined,
+  overlayClass = undefined,
+  showClose = true,
+  overlayPart = undefined,
+  ...props
+} = defineProps<SheetContentProps>();
 const emits = defineEmits<DialogContentEmits>();
 
-const delegatedProps = reactiveOmit(
-  props,
-  "class",
-  "side",
-  "portalTo",
-  "closeLabel",
-  "overlayClass",
-  "showClose",
-  "overlayPart"
-);
+// reka-ui's content takes every prop but the ones this wrapper renders itself.
+const delegatedProps = reactiveOmit(props, "closeLabel");
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
 </script>
 
 <template>
-  <DialogPortal :to="props.portalTo">
-    <SheetOverlay
-      :class="props.overlayClass"
-      :data-adapttable-part="props.overlayPart"
-    />
+  <DialogPortal :to="portalTo">
+    <SheetOverlay :class="overlayClass" :data-adapttable-part="overlayPart" />
     <DialogContent
       data-slot="sheet-content"
       :class="
@@ -71,7 +61,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
             'data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b',
           side === 'bottom' &&
             'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t',
-          props.class
+          classProp
         )
       "
       v-bind="{ ...$attrs, ...forwarded }"
@@ -79,7 +69,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
       <slot />
 
       <DialogClose
-        v-if="props.showClose"
+        v-if="showClose"
         class="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 end-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"
       >
         <X class="size-4" />

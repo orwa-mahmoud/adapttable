@@ -892,7 +892,9 @@ GridFocusController` — the active cell, the selected range, a fill drag, the
 - `gridContainerAttributes` (`GridContainerAttributes`), `gridCellAttributes`
   (`GridCellAttributesInput`, `GridCellAttributes`), `gridRowAttributes`,
   `gridColumnHeaderAttributes` — the roles, absolute ARIA indices and selection
-  and find marks every binding puts on the grid.
+  and find marks every binding puts on the grid. `gridRowFocusSignature`
+  digests what those marks draw on one row, so a row repaints only when the
+  focus, range or find matches change on it.
 - `isGridColumnSelected`, `gridFillHandleCell` — whether a column is selected
   over every loaded row, and which cell carries the fill handle.
 
@@ -1620,6 +1622,9 @@ flag while a host-owned `confirmMove` is outstanding.
 `applyRowReorder`, `datasetIndex`, `useRowReorder`,
 `rowReorderSignature`, `rowReorderDropStyle`, `REORDER_COLUMN_KEY`,
 `REORDER_COLUMN_WIDTH`, and `ROW_DND_MIME` are the headless primitives.
+`RowReorderState.hover` carries the drop edge under a drag as it moves: a row
+reads `hover.dropAt(rowId, index)` and applies it with `withRowDropTarget`, so
+a drag redraws the rows it crosses rather than the table.
 Nested move menus use `RowMoveMenuModel` / `RowMoveTarget`; the adapter seam is
 `RowMoveMenuSlotProps`, `RowMoveMenuItemProps`, and
 `RowMoveConfirmationProps`. Each adapter mounts
@@ -3324,6 +3329,23 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   release their scopes. `tableFeaturesOf` combines injector-provided features
   with the table's own list; a later duplicate id wins for setup, options,
   rendering and mounting alike.
+- A feature brings its own code to the table. `withFeatureImplementation`
+  files an implementation on a feature under a `FeatureStateKey`, and
+  `featureImplementation(features, key)` returns the one
+  the composed features bring, a later feature winning. The table reads every
+  optional feature's code this way, so a table bundles only the code of the
+  features it composes. `FEATURE_IMPLEMENTATIONS` holds the keys:
+  `editing` (`editingBundleFor`), `editableCell` (`editableCellController`),
+  `editHistory` (`EditHistoryImplementation`, filed as
+  `EDIT_HISTORY_IMPLEMENTATION`), `findInTable` (`FindInTableImplementation`,
+  filed as `FIND_IN_TABLE_IMPLEMENTATION`), `exportCsv` (`injectExportCsv`),
+  `rowReorder` (`RowReorderImplementation`), `grouping`
+  (`GroupingImplementation`), `groupingPanel` (`GroupingPanelImplementation`),
+  `rowPinning` (`RowPinningImplementation`) and `tree` (`TreeImplementation`).
+  The filter engine travels under core's `FILTER_ENGINE` key. The adapter
+  entry's `coreExportCsv`, `coreFilters`, `coreHeaderFilters` and
+  `coreFindInTable` are the core factories with their implementations filed,
+  for a kit to extend.
 - All supported Angular kits accept live `selectable`, `cellNavigation`, `filtersMode`
   and `closeHeaderFilterOnSelect` inputs. Their controlled `density` input
   overrides the chooser's state; `densityChange` reports requests and waits

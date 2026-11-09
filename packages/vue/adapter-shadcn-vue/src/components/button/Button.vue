@@ -13,15 +13,15 @@ interface Props extends PrimitiveProps {
   class?: NonNullable<HTMLAttributes["class"]>;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  as: "button",
-  elementRef: undefined,
-  variant: undefined,
-  size: undefined,
-  class: undefined,
-});
+const {
+  as = "button",
+  elementRef = undefined,
+  variant = undefined,
+  size = undefined,
+  class: classProp = undefined,
+} = defineProps<Props>();
 defineOptions({ name: "ShadcnButton" });
-const targetRef = useControlTarget(() => props.elementRef);
+const targetRef = useControlTarget(() => elementRef);
 </script>
 
 <template>
@@ -32,7 +32,7 @@ const targetRef = useControlTarget(() => props.elementRef);
     :data-size="size"
     :as="as"
     :as-child="asChild"
-    :class="cn(buttonVariants({ variant, size }), props.class)"
+    :class="cn(buttonVariants({ variant, size }), classProp)"
   >
     <slot />
   </Primitive>

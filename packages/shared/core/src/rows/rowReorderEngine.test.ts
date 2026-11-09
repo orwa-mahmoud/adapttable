@@ -813,6 +813,27 @@ describe("keyboard grab", () => {
 });
 
 describe("drag and drop", () => {
+  it("keeps the table snapshot while a drag hovers from row to row", () => {
+    const { reorder } = setup();
+    const atRest = reorder.getTableSnapshot();
+    const transfer = dataTransfer();
+    reorder.dragStart(dragEvent(transfer), "a", 0);
+    const lifted = reorder.getTableSnapshot();
+    expect(lifted).not.toBe(atRest);
+    expect(lifted.lifted).toEqual({ rowId: "a", from: 0 });
+
+    for (const index of [1, 2, 3, 2]) {
+      reorder.dragOver(dragEvent(transfer), index);
+    }
+    expect(reorder.getSnapshot().overIndex).toBe(2);
+    expect(reorder.getTableSnapshot()).toBe(lifted);
+    expect(reorder.getTableSnapshot().overIndex).toBeNull();
+
+    reorder.dragEnd();
+    expect(reorder.getTableSnapshot()).not.toBe(lifted);
+    expect(reorder.getTableSnapshot().lifted).toBeNull();
+  });
+
   it("drags, tracks the edge, and drops", () => {
     const { reorder, onRowReorder } = setup();
     const transfer = dataTransfer();

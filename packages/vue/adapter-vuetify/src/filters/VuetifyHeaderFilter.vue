@@ -12,10 +12,9 @@ import VuetifyButton from "../controls/VuetifyButton.vue";
 import VuetifyFilterField from "./VuetifyFilterField.vue";
 import VuetifyFilterPopover from "./VuetifyFilterPopover.vue";
 
-const props = withDefaults(defineProps<HeaderFilterOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
-const model = useHeaderFilter(() => props);
+const { closeOnSelect = undefined, ...props } =
+  defineProps<HeaderFilterOptions<TRow>>();
+const model = useHeaderFilter(() => ({ ...props, closeOnSelect }));
 const controls: HeaderFilterChromeSlots<TRow> = {
   Trigger: (trigger) =>
     h(VuetifyButton, {

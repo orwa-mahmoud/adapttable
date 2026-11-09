@@ -13,11 +13,10 @@ import NuxtButton from "../controls/NuxtButton.vue";
 import NuxtFilterField from "./NuxtFilterField.vue";
 import NuxtFilterSurface from "./NuxtFilterSurface";
 
-const props = withDefaults(defineProps<HeaderFilterOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
+const { closeOnSelect = undefined, ...props } =
+  defineProps<HeaderFilterOptions<TRow>>();
 const names = useDataTableClassNames();
-const model = useHeaderFilter(() => props);
+const model = useHeaderFilter(() => ({ ...props, closeOnSelect }));
 const controls: HeaderFilterChromeSlots<TRow> = {
   Trigger: (control) =>
     h(

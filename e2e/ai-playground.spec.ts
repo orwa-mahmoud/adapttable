@@ -26,11 +26,16 @@ async function mountedTable(page: Page) {
  * The demo's own table controls, now a button above the table rather than a
  * disclosure below it.
  */
-/** The demo's settings, which open in a drawer over the page. */
+/**
+ * The demo's settings, which open in a drawer over the page. The floating
+ * assistant can sit over the trigger, so it is opened from the keyboard,
+ * which reaches it wherever the window floats.
+ */
 async function openDemoOptions(page: Page): Promise<void> {
   const drawer = page.getByTestId("ai-demo-options-drawer");
   if (await drawer.isVisible()) return;
-  await page.getByTestId("ai-demo-options").click();
+  await page.getByTestId("ai-demo-options").focus();
+  await page.keyboard.press("Enter");
   await expect(drawer).toBeVisible();
 }
 

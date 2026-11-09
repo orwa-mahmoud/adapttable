@@ -16,23 +16,27 @@ import { h, type VNodeChild } from "vue";
 import { rekaButton, rekaInput } from "../controls/basic";
 import { rekaSelect } from "../controls/select";
 
-const props = withDefaults(
-  defineProps<{
-    defs: FilterTreeBuilderProps<TRow>["defs"];
-    source: FilterTreeBuilderProps<TRow>["source"];
-    labels?: NonNullable<FilterTreeBuilderProps<TRow>["labels"]>;
-    classNames?: NonNullable<FilterTreeBuilderProps<TRow>["classNames"]>;
-    registry?: NonNullable<FilterTreeBuilderProps<TRow>["registry"]>;
-    defaultExpanded?: boolean;
-  }>(),
-  {
-    defaultExpanded: undefined,
-    labels: undefined,
-    classNames: undefined,
-    registry: undefined,
-  }
-);
-const model = useFilterTreeModel(() => props);
+const {
+  defaultExpanded = undefined,
+  labels = undefined,
+  classNames = undefined,
+  registry = undefined,
+  ...props
+} = defineProps<{
+  defs: FilterTreeBuilderProps<TRow>["defs"];
+  source: FilterTreeBuilderProps<TRow>["source"];
+  labels?: NonNullable<FilterTreeBuilderProps<TRow>["labels"]>;
+  classNames?: NonNullable<FilterTreeBuilderProps<TRow>["classNames"]>;
+  registry?: NonNullable<FilterTreeBuilderProps<TRow>["registry"]>;
+  defaultExpanded?: boolean;
+}>();
+const model = useFilterTreeModel(() => ({
+  ...props,
+  defaultExpanded,
+  labels,
+  classNames,
+  registry,
+}));
 const controls: FilterTreeSlots<VNodeChild> = {
   Select: (control) =>
     h(

@@ -44,17 +44,18 @@ import {
 
 // The binding owns the table state. This component only chooses Reka paint.
 defineOptions({ inheritAttrs: false });
-const props = withDefaults(defineProps<DataTableProps<TRow>>(), {
-  searchable: true,
-  forceMobile: undefined,
-  urlSync: undefined,
-  selectable: undefined,
-  multiSort: undefined,
-  fitColumns: undefined,
-  collapsibleColumnGroups: undefined,
-  isLoading: undefined,
-  isFetching: undefined,
-});
+const {
+  searchable = true,
+  forceMobile = undefined,
+  urlSync = undefined,
+  selectable = undefined,
+  multiSort = undefined,
+  fitColumns = undefined,
+  collapsibleColumnGroups = undefined,
+  isLoading = undefined,
+  isFetching = undefined,
+  ...props
+} = defineProps<DataTableProps<TRow>>();
 const emit = defineEmits<{
   "update:selectedIds": [ids: string[]];
   "update:columnLayout": [layout: ColumnLayoutState];
@@ -70,6 +71,15 @@ const shell = useDataTableShell<TRow>(() =>
   withKitEnvironment(
     {
       ...props,
+      searchable,
+      forceMobile,
+      urlSync,
+      selectable,
+      multiSort,
+      fitColumns,
+      collapsibleColumnGroups,
+      isLoading,
+      isFetching,
       footer: footer.value,
       confirm: props.confirm ?? defaultConfirm,
       onDensityChange: (density: TableDensity) => {
@@ -77,7 +87,7 @@ const shell = useDataTableShell<TRow>(() =>
         emit("update:density", density);
       },
       onSelectionChange:
-        props.selectable ||
+        selectable ||
         props.selectedIds !== undefined ||
         props.defaultSelectedIds !== undefined
           ? (ids: string[]) => emit("update:selectedIds", ids)
@@ -95,7 +105,19 @@ const names = computed(() => ({
 provideRekaClasses(() => names.value);
 const fullscreen = shell.state.get(FULLSCREEN_MODEL);
 provideRekaPortalContainer(() => fullscreen.value?.container);
-const options = computed(() => ({ ...props, classNames: names.value }));
+const options = computed(() => ({
+  ...props,
+  searchable,
+  forceMobile,
+  urlSync,
+  selectable,
+  multiSort,
+  fitColumns,
+  collapsibleColumnGroups,
+  isLoading,
+  isFetching,
+  classNames: names.value,
+}));
 function controls(): TableChromeSlots<TRow> {
   return {
     SortButton: ({ attrs, content }) => rekaButton(attrs, content),

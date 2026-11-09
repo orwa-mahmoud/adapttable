@@ -114,6 +114,13 @@ export interface GroupingPanelSnapshot {
 export interface GroupingPanelController {
   /** The current state. A new object whenever anything in it changes. */
   readonly getSnapshot: () => GroupingPanelSnapshot;
+  /**
+   * The state the table itself draws from: a new object only when a column
+   * header's drag starts or ends, never while a drag hovers and never for a
+   * chip's drag, which only the strip draws. Its drag names the dragged
+   * header; its announcement stays empty. Pair it with `subscribe`.
+   */
+  readonly getTableSnapshot: () => GroupingPanelSnapshot;
   /** Listen for state changes. Returns the unsubscribe. */
   readonly subscribe: (listener: () => void) => () => void;
   /** Replace the configuration — a binding calls this on every render. */
@@ -253,6 +260,7 @@ export function createGroupingPanelController(
     drag: undefined,
     announcement: "",
   };
+  let tableSnapshot: GroupingPanelSnapshot = snapshot;
   let initialized = false;
   let built:
     | {
@@ -272,6 +280,15 @@ export function createGroupingPanelController(
       return;
     }
     snapshot = merged;
+    // Only a column header is drawn by the table; a chip lives in the strip.
+    const tableDrag =
+      merged.drag?.source === "header" ? merged.drag : undefined;
+    if (
+      tableDrag?.key !== tableSnapshot.drag?.key ||
+      tableDrag?.source !== tableSnapshot.drag?.source
+    ) {
+      tableSnapshot = { drag: tableDrag, announcement: "" };
+    }
     // Subscription changes during a publication apply to the next publication.
     const pendingListeners = [...listeners];
     for (const listener of pendingListeners) listener();
@@ -677,14 +694,22 @@ export function createGroupingPanelController(
     },
   });
 
+  const subscribe = (listener: () => void): (() => void) => {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  };
+  const getSnapshot = (): GroupingPanelSnapshot => snapshot;
+  const live: NonNullable<GroupingPanelInteractions["live"]> = {
+    subscribe,
+    getSnapshot,
+  };
+
   return {
-    getSnapshot: () => snapshot,
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    getSnapshot,
+    getTableSnapshot: () => tableSnapshot,
+    subscribe,
     configure: (next) => {
       options = next;
     },
@@ -716,6 +741,7 @@ export function createGroupingPanelController(
       const value: GroupingPanelInteractions = {
         drag: rendered.drag,
         announcement: rendered.announcement,
+        live,
         headerDragProps: (key) => dragProps(key, "header"),
         chipDragProps: (key) => dragProps(key, "chip"),
         chipKeyboardProps,

@@ -6,28 +6,27 @@ import {
 } from "@adapttable/vue/adapter";
 
 import { nuxtEditingButton } from "./nuxtEditingButton";
-const props = withDefaults(
-  defineProps<{
-    batch: BatchEditBarProps<TRow>["batch"];
-    contested?: Exclude<BatchEditBarProps<TRow>["contested"], undefined>;
-    labels?: Exclude<BatchEditBarProps<TRow>["labels"], undefined>;
-    className?: string;
-    buttonClassName?: string;
-  }>(),
-  {
-    contested: undefined,
-    labels: undefined,
-    className: undefined,
-    buttonClassName: undefined,
-  }
-);
+const {
+  contested = undefined,
+  labels = undefined,
+  className = undefined,
+  buttonClassName = undefined,
+  ...props
+} = defineProps<{
+  batch: BatchEditBarProps<TRow>["batch"];
+  contested?: Exclude<BatchEditBarProps<TRow>["contested"], undefined>;
+  labels?: Exclude<BatchEditBarProps<TRow>["labels"], undefined>;
+  className?: string;
+  buttonClassName?: string;
+}>();
 const names = useDataTableClassNames();
 const Render = () =>
   BatchEditBarChrome({
     ...props,
-    className: [props.className, names.value.batchEditBar]
-      .filter(Boolean)
-      .join(" "),
+    contested,
+    labels,
+    buttonClassName,
+    className: [className, names.value.batchEditBar].filter(Boolean).join(" "),
     controls: {
       Button: (control) =>
         nuxtEditingButton(control, names.value.batchEditButton),

@@ -193,6 +193,12 @@ export interface RowReorderController<TRow> {
   readonly forSession: () => RowReorderActions<TRow>;
   /** The current state. A new object whenever anything in it changes. */
   readonly getSnapshot: () => RowReorderSnapshot<TRow>;
+  /**
+   * The state the table itself draws from: the full state without the
+   * hovered index and edge, a new object only when anything else changes.
+   * Rows follow the hover through `getSnapshot`. Pair it with `subscribe`.
+   */
+  readonly getTableSnapshot: () => RowReorderSnapshot<TRow>;
   /** Listen for state changes. Returns the unsubscribe. */
   readonly subscribe: (listener: () => void) => () => void;
   /** Replace the configuration — a binding calls this on every render. */
@@ -276,6 +282,7 @@ export function createRowReorderController<TRow>(
 ): RowReorderController<TRow> {
   let options = initial;
   let snapshot: RowReorderSnapshot<TRow> = IDLE;
+  let tableSnapshot: RowReorderSnapshot<TRow> = IDLE;
   let mounted = true;
   let nextConfirmToken = 0;
   let activeConfirmToken = 0;
@@ -284,6 +291,19 @@ export function createRowReorderController<TRow>(
   let batchDepth = 0;
   let changed = false;
   const listeners = new Set<() => void>();
+
+  /** The table's view: everything but the hover, replaced only when it moves. */
+  const syncTable = (force: boolean): void => {
+    if (
+      force ||
+      snapshot.lifted !== tableSnapshot.lifted ||
+      snapshot.pendingMove !== tableSnapshot.pendingMove ||
+      snapshot.hostConfirmPending !== tableSnapshot.hostConfirmPending ||
+      snapshot.announcement !== tableSnapshot.announcement
+    ) {
+      tableSnapshot = { ...snapshot, overIndex: null, overPosition: null };
+    }
+  };
 
   const flush = (): void => {
     if (batchDepth > 0 || !changed) return;
@@ -296,6 +316,7 @@ export function createRowReorderController<TRow>(
     const keys = Object.keys(next) as (keyof RowReorderSnapshot<TRow>)[];
     if (keys.every((key) => next[key] === snapshot[key])) return;
     snapshot = next;
+    syncTable(false);
     changed = true;
     flush();
   };
@@ -330,6 +351,7 @@ export function createRowReorderController<TRow>(
       write({ pendingMove: null, hostConfirmPending: false, announcement: "" });
       reset();
       snapshot = { ...snapshot };
+      syncTable(true);
       changed = true;
     });
   };
@@ -618,6 +640,7 @@ export function createRowReorderController<TRow>(
       };
     },
     getSnapshot: () => snapshot,
+    getTableSnapshot: () => tableSnapshot,
     subscribe(listener) {
       listeners.add(listener);
       return () => {

@@ -318,6 +318,13 @@ export interface GroupingPanelInteractions {
     drag?: GroupingDragState;
     dropProps: (index: number) => GroupingDropProps;
     headerDragProps: (key: string) => GroupingDragProps;
+    live?: {
+        readonly subscribe: (listener: () => void) => () => void;
+        readonly getSnapshot: () => {
+            readonly drag: GroupingDragState | undefined;
+            readonly announcement: string;
+        };
+    };
     moveBy: (key: string, delta: -1 | 1) => void;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;

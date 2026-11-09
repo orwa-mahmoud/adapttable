@@ -602,6 +602,7 @@ export {
   rowReorderDropStyle,
   rowReorderSignature,
   type RowReorderState,
+  withRowDropTarget,
 } from "./rows/rowReorder";
 export {
   type RowMoveConfirmationProps,
@@ -1134,6 +1135,7 @@ export {
   inflateBodyCellRowSpans,
   insertExtraRows,
   insertExtrasBeforeRows,
+  isBodyEligible,
   isColumnGroupRenderKey,
   isColumnGroupStubKey,
   isColumnGroupSummaryKey,

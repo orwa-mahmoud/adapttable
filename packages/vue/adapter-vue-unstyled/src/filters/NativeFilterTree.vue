@@ -9,10 +9,9 @@ import { h, type VNodeChild } from "vue";
 
 /** The binding owns recursive layout and tree writes; this kit supplies native controls. */
 defineOptions({ name: "NativeFilterTree" });
-const props = withDefaults(defineProps<FilterTreeBuilderProps<TRow>>(), {
-  defaultExpanded: undefined,
-});
-const model = useFilterTreeModel(() => props);
+const { defaultExpanded = undefined, ...props } =
+  defineProps<FilterTreeBuilderProps<TRow>>();
+const model = useFilterTreeModel(() => ({ ...props, defaultExpanded }));
 const controls: FilterTreeSlots<VNodeChild> = {
   Select: (control) =>
     h(

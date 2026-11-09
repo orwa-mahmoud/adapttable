@@ -21,6 +21,7 @@ import {
   gridFillHandleCell,
   type GridFocusControllerOptions,
   gridRowAttributes,
+  gridRowFocusSignature,
   isGridColumnSelected,
 } from "@adapttable/core";
 import type { GridFocusState } from "@adapttable/core/binding";
@@ -229,6 +230,41 @@ export function useGridFocus<TRow>(
     [getRowProps, firstRowIndex]
   );
 
+  const rowFocusSignature = useCallback(
+    (windowIndex: number): string => {
+      const row = firstRowIndex + windowIndex;
+      const cells = gridRowFocusSignature(
+        {
+          enabled,
+          columnsWindowed,
+          active,
+          firstRowIndex,
+          range,
+          fillPreview,
+          matchKeys,
+          currentMatch,
+        },
+        row,
+        columns.length
+      );
+      const fill =
+        fillHandleCell?.row === row ? String(fillHandleCell.col) : "";
+      return `${cells}|${fill}`;
+    },
+    [
+      enabled,
+      columnsWindowed,
+      active,
+      firstRowIndex,
+      range,
+      fillPreview,
+      matchKeys,
+      currentMatch,
+      columns.length,
+      fillHandleCell,
+    ]
+  );
+
   // Memoized as a whole. A fresh object each render is not a cosmetic problem:
   // an adapter that memoizes on this state — antd derives its `components.table`
   // from it — would rebuild that derivation every render, remount the table, and
@@ -242,6 +278,7 @@ export function useGridFocus<TRow>(
       getRowProps,
       getCellPropsAt,
       getRowPropsAt,
+      rowFocusSignature,
       announcement: enabled ? announcement : "",
       range: enabled ? range : null,
       selectRange: controller.selectRange,
@@ -267,6 +304,7 @@ export function useGridFocus<TRow>(
       getRowProps,
       getCellPropsAt,
       getRowPropsAt,
+      rowFocusSignature,
       announcement,
       range,
       headerCheckbox,

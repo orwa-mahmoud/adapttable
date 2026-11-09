@@ -45,7 +45,7 @@
     "test:ssr": "ADAPTTABLE_QUASAR_SSR=1 vitest run --config vitest.config.ts",
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "test:coverage": "vitest run --coverage --config vitest.config.ts",
+    "test:coverage": "pnpm run test:ssr && vitest run --coverage --config vitest.config.ts",
     "clean": "rimraf dist coverage .turbo .sfc-types"
   },
   "exports": {

@@ -153,19 +153,20 @@ export class AdaptSavedViewsMenu implements OnInit {
     this.injector
   );
 
-  /** Open the views where the props say they are kept. */
+  constructor() {
+    // An open overlay follows the writing direction.
+    afterRenderEffect(() => {
+      this.direction.valueSignal();
+      if (!this.popover.open()) return;
+      const overlay = this.connectedOverlay()?.overlayRef;
+      if (!overlay) return;
+      overlay.setDirection(this.direction);
+      overlay.updatePosition();
+    });
+  }
+
+  /** Open the views where the props say they are kept, once they are bound. */
   ngOnInit(): void {
-    afterRenderEffect(
-      () => {
-        this.direction.valueSignal();
-        if (!this.popover.open()) return;
-        const overlay = this.connectedOverlay()?.overlayRef;
-        if (!overlay) return;
-        overlay.setDirection(this.direction);
-        overlay.updatePosition();
-      },
-      { injector: this.injector }
-    );
     this.views.set(
       injectSavedViews(
         computed(() => ({ ...this.props().options, injector: this.injector }))

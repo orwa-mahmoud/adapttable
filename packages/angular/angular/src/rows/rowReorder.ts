@@ -5,16 +5,14 @@
 import {
   type AdaptTableFeature,
   type DataTable,
+  FEATURE_IMPLEMENTATIONS,
+  featureImplementation,
   fromStore,
 } from "@adapttable/angular";
 import {
-  createRowReorderController,
-  isRowMovePending,
   isRtlElement,
   type RowDragEvent,
   type RowKeyEvent,
-  rowReorderRowAttributes,
-  rowReorderRuntimeOptions,
   type TableSource,
 } from "@adapttable/core";
 import { type RowReorderState as NeutralRowReorderState } from "@adapttable/core/binding";
@@ -112,7 +110,11 @@ export function injectRowReorder<TRow>(
   options: RowReorderStateOptions<TRow>
 ): Signal<RowReorderState<TRow>> | undefined {
   const feature = rowReorderFeatureOf<TRow>(options.features);
-  if (!feature) return undefined;
+  const code = featureImplementation(
+    options.features,
+    FEATURE_IMPLEMENTATIONS.rowReorder
+  );
+  if (!feature || !code) return undefined;
   if (!options.injector) assertInInjectionContext(injectRowReorder);
   const injector = options.injector ?? inject(Injector);
   const destroyRef = injector.get(DestroyRef);
@@ -123,10 +125,10 @@ export function injectRowReorder<TRow>(
     options.grouping
   );
   const controllerOptions = () => ({
-    ...rowReorderRuntimeOptions(runtime, feature.onRowReorder, feature.options),
+    ...code.runtimeOptions(runtime, feature.onRowReorder, feature.options),
     isRtl: isRtlElement,
   });
-  const controller = createRowReorderController<TRow>(controllerOptions());
+  const controller = code.controller<TRow>(controllerOptions());
   effect(
     () => {
       controller.configure(controllerOptions());
@@ -154,7 +156,7 @@ export function injectRowReorder<TRow>(
       announcement,
       isLifted: (rowId) => lifted?.rowId === rowId,
       isMovePending: (row) =>
-        isRowMovePending(
+        code.isMovePending(
           pendingMove,
           row,
           (entry) => runtime.view()?.getRowId(entry) ?? ""
@@ -200,7 +202,7 @@ export function injectRowReorder<TRow>(
       confirmMove: controller.confirmMove,
       cancelMove: controller.cancelMove,
       rowAttrs: (rowId, localIndex) =>
-        rowReorderRowAttributes(
+        code.rowAttributes(
           { lifted, overIndex, overPosition },
           rowId,
           localIndex

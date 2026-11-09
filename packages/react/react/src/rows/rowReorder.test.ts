@@ -128,6 +128,16 @@ describe("rowReorderDropStyle", () => {
   });
 });
 
+/** The index whose row shows a drop edge, read the way a row reads it. */
+function hoveredIndex(state: {
+  hover?: { dropAt: (id: string, index: number) => unknown };
+}) {
+  const index = ROWS.findIndex(
+    (row, at) => state.hover?.dropAt(row.id, at) !== undefined
+  );
+  return index === -1 ? null : index;
+}
+
 describe("useRowReorder", () => {
   const arm = (onRowReorder?: (from: number, to: number, row: Task) => void) =>
     renderHook(() =>
@@ -175,13 +185,17 @@ describe("useRowReorder", () => {
     });
     expect(result.current.lifted).toEqual({ rowId: "a", from: 0 });
     expect(result.current.announcement).toBe("Row 6 lifted");
-    expect(rowReorderSignature(result.current, "a", 0)).toBe("Ldtbefore");
+    // The lifted row's table signature carries the lift; the hover reaches
+    // rows through \`hover\`, and the lifted row itself shows no drop edge.
+    expect(rowReorderSignature(result.current, "a", 0)).toBe("Ld");
+    expect(result.current.hover?.dropAt("a", 0)).toBeUndefined();
     expect(rowReorderSignature(result.current, "b", 1)).toBe("L");
     act(() => {
       result.current.handleKeyDown(press("ArrowDown"), "a", 0, ROWS[0]!, 5, 3);
     });
-    expect(result.current.overIndex).toBe(1);
-    expect(rowReorderSignature(result.current, "b", 1)).toBe("Ltafter");
+    expect(hoveredIndex(result.current)).toBe(1);
+    expect(rowReorderSignature(result.current, "b", 1)).toBe("L");
+    expect(result.current.hover?.dropAt("b", 1)).toBe("after");
     act(() => {
       result.current.handleKeyDown(press(" "), "a", 0, ROWS[0]!, 5, 3);
     });
@@ -536,7 +550,7 @@ describe("useRowReorder", () => {
     act(() => {
       result.current.handleKeyDown(press("ArrowDown"), "a", 0, ROWS[0]!, 0, 3);
     });
-    expect(result.current.rowAttrs("b", 1)["data-drop"]).toBe("after");
+    expect(result.current.hover?.dropAt("b", 1)).toBe("after");
     expect(result.current.rowAttrs("a", 0)["data-dragging"]).toBe("");
   });
 
@@ -557,7 +571,7 @@ describe("useRowReorder", () => {
         dataTransfer: dt,
       } as never);
     });
-    expect(result.current.overIndex).toBe(2);
+    expect(hoveredIndex(result.current)).toBe(2);
     act(() => {
       result.current.dropProps(2, ROWS[2]!, 0).onDrop({
         preventDefault: vi.fn(),
@@ -608,11 +622,11 @@ describe("useRowReorder", () => {
         3
       );
     });
-    expect(result.current.overIndex).toBe(1);
+    expect(hoveredIndex(result.current)).toBe(1);
     act(() => {
       result.current.handleKeyDown(press("Tab"), "a", 0, ROWS[0]!, 0, 3);
     });
-    expect(result.current.overIndex).toBe(1);
+    expect(hoveredIndex(result.current)).toBe(1);
     act(() => {
       result.current.handleKeyDown(press(" "), "a", 0, ROWS[0]!, 0, 3);
     });
@@ -643,7 +657,7 @@ describe("useRowReorder", () => {
         3
       );
     });
-    expect(result.current.overIndex).toBe(1);
+    expect(hoveredIndex(result.current)).toBe(1);
     table.remove();
   });
 
@@ -789,7 +803,7 @@ describe("useRowReorder", () => {
         3
       );
     });
-    expect(result.current.overIndex).toBe(0);
+    expect(hoveredIndex(result.current)).toBe(0);
     root.remove();
   });
 

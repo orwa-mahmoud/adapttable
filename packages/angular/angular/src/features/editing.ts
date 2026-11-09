@@ -8,12 +8,15 @@ import {
   type CellEditHandler,
   type ColumnDef,
   type DirtyEdits,
+  editableCellController,
   editingBundleFor,
+  FEATURE_IMPLEMENTATIONS,
   featureOptionsOf,
   type RowEditHandler,
   SURFACE_EDITING,
   SURFACE_HANDLES,
   SURFACE_OCCUPIED,
+  withFeatureImplementation,
 } from "@adapttable/angular";
 import type {
   EditConflictHandler,
@@ -74,6 +77,21 @@ interface EditingFeature<TRow> extends AdaptTableFeature {
   readonly onCellEdit: CellEditHandler<TRow>;
 }
 
+/** A feature that brings the code the table builds editing from. */
+function withEditingImplementation(
+  feature: AdaptTableFeature
+): AdaptTableFeature {
+  return withFeatureImplementation(
+    withFeatureImplementation(
+      feature,
+      FEATURE_IMPLEMENTATIONS.editing,
+      editingBundleFor
+    ),
+    FEATURE_IMPLEMENTATIONS.editableCell,
+    editableCellController
+  );
+}
+
 /**
  * Edit a single cell in place.
  *
@@ -89,7 +107,7 @@ export function editing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
   extras: EditingLifecycleExtras<TRow> = {}
 ): AdaptTableFeature {
-  return {
+  return withEditingImplementation({
     ...coreEditing(onCellEdit, extras),
     onCellEdit,
     mount(context) {
@@ -123,7 +141,7 @@ export function editing<TRow>(
         context.state.set(SURFACE_EDITING, undefined);
       };
     },
-  } as EditingFeature<TRow>;
+  } as EditingFeature<TRow>);
 }
 
 /**
@@ -139,7 +157,7 @@ export function rowEditing<TRow>(
   onRowEdit: RowEditHandler<TRow>,
   extras: Record<string, unknown> = {}
 ): AdaptTableFeature {
-  return coreRowEditing(onRowEdit, extras);
+  return withEditingImplementation(coreRowEditing(onRowEdit, extras));
 }
 
 /**
@@ -155,7 +173,7 @@ export function batchEditing<TRow>(
   onBatchEdit: BatchEditHandler<TRow>,
   extras: Record<string, unknown> = {}
 ): AdaptTableFeature {
-  return coreBatchEditing(onBatchEdit, extras);
+  return withEditingImplementation(coreBatchEditing(onBatchEdit, extras));
 }
 
 /**
@@ -166,7 +184,7 @@ export function batchEditing<TRow>(
  * @public
  */
 export function dirtyIndicators(): AdaptTableFeature {
-  return coreDirtyIndicators();
+  return withEditingImplementation(coreDirtyIndicators());
 }
 
 export type {

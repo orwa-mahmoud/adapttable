@@ -12,11 +12,10 @@ import { useClassNames } from "../classNamesContext";
 import { NativeFilterField } from "./NativeFilterField";
 import { NativeFilterSurface } from "./NativeFilterSurface";
 defineOptions({ name: "NativeHeaderFilter" });
-const props = withDefaults(defineProps<HeaderFilterOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
+const { closeOnSelect = undefined, ...props } =
+  defineProps<HeaderFilterOptions<TRow>>();
 const names = useClassNames();
-const model = useHeaderFilter(() => props);
+const model = useHeaderFilter(() => ({ ...props, closeOnSelect }));
 const controls: HeaderFilterChromeSlots<TRow> = {
   Trigger: (control) =>
     h(

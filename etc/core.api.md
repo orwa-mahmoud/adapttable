@@ -4334,6 +4334,9 @@ export function gridRowAttributes(input: {
 };
 
 // @public
+export function gridRowFocusSignature(input: GridCellAttributesInput, rowIndex: number, colCount: number): string;
+
+// @public
 export function groupAggregateEntries<TRow, TCol extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(columns: readonly TCol[], aggregateCells: Readonly<Partial<Record<string, DisplayValue>>> | undefined, aggregation?: GroupAggregateOps): GroupRowCell<TRow, TCol>[];
 
 // @public
@@ -4718,6 +4721,7 @@ export interface GroupingPanelController {
     readonly drop: (index: number, event: GroupingDragEventLike) => void;
     readonly finishDrag: () => void;
     readonly getSnapshot: () => GroupingPanelSnapshot;
+    readonly getTableSnapshot: () => GroupingPanelSnapshot;
     readonly initialize: (initialGroupBy?: string | readonly string[]) => void;
     readonly interactions: (snapshot: GroupingPanelSnapshot, declared: DeclaredAggregates | undefined) => GroupingPanelInteractions;
     readonly moveBy: (key: string, delta: -1 | 1) => void;
@@ -4752,6 +4756,13 @@ export interface GroupingPanelInteractions {
     drag?: GroupingDragState;
     dropProps: (index: number) => GroupingDropProps;
     headerDragProps: (key: string) => GroupingDragProps;
+    live?: {
+        readonly subscribe: (listener: () => void) => () => void;
+        readonly getSnapshot: () => {
+            readonly drag: GroupingDragState | undefined;
+            readonly announcement: string;
+        };
+    };
     moveBy: (key: string, delta: -1 | 1) => void;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;
@@ -7422,6 +7433,7 @@ export interface RowReorderController<TRow> {
     readonly drop: (event: RowDragEvent, localIndex: number, row: TRow, windowStart: number) => void;
     readonly forSession: () => RowReorderActions<TRow>;
     readonly getSnapshot: () => RowReorderSnapshot<TRow>;
+    readonly getTableSnapshot: () => RowReorderSnapshot<TRow>;
     readonly keyDown: (event: RowKeyEvent, slot: RowReorderSlot<TRow>) => void;
     readonly moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
     readonly moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;

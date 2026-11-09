@@ -30,7 +30,7 @@ function groupsOf(
 }
 
 describe("frontend row model", () => {
-  it("keeps search across a grouping mount and removal, and does not publish the discarded engine", async () => {
+  it("keeps one engine, its search and its subscribers across a grouping mount and removal", async () => {
     const scope = effectScope();
     const full = shallowRef(false);
     const source = scope.run(() =>
@@ -53,13 +53,16 @@ describe("frontend row model", () => {
 
     full.value = true;
     await nextTick();
+    expect(source.value.tableEngine).toBe(engine);
     expect(groupsOf(source.value.tableEngine)).toBeDefined();
     expect(source.value.search).toBe("core");
     expect(source.value.groupBy).toBe("team");
-    expect(woken).not.toHaveBeenCalled();
+    // The grouped rows are news to the table's own subscribers.
+    expect(woken).toHaveBeenCalledTimes(1);
 
     full.value = false;
     await nextTick();
+    expect(source.value.tableEngine).toBe(engine);
     expect(groupsOf(source.value.tableEngine)).toBeUndefined();
     expect(source.value.search).toBe("core");
     expect(source.value.groupBy).toBe("team");

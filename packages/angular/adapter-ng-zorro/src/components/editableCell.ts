@@ -28,7 +28,7 @@ import {
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-  type AfterViewInit,
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -78,7 +78,7 @@ import { AdaptOverlayOrigin } from "./overlayPlacement";
     </button>
   `,
 })
-class AdaptEditCellActivate implements AfterViewInit {
+class AdaptEditCellActivate {
   readonly props = input.required<EditableCellActivateProps>();
   protected readonly displayTemplate = computed(() => {
     const content = this.props().display;
@@ -88,8 +88,10 @@ class AdaptEditCellActivate implements AfterViewInit {
     ElementRef<HTMLButtonElement>,
     ElementRef<HTMLButtonElement>
   >("btn", { read: ElementRef });
-  ngAfterViewInit(): void {
-    this.props().activateRef(this.btn()?.nativeElement ?? null);
+  constructor() {
+    afterRenderEffect(() => {
+      this.props().activateRef(this.btn()?.nativeElement ?? null);
+    });
   }
 }
 

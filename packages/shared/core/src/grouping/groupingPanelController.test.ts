@@ -329,6 +329,42 @@ describe("grouping panel controller: drag", () => {
     expect(payloadOnly.preventDefault).not.toHaveBeenCalled();
   });
 
+  it("changes the table snapshot when a header drag starts or ends, not while it hovers or for a chip", () => {
+    const { controller } = harness({ groupBy: "team" });
+    const atRest = controller.getTableSnapshot();
+
+    controller.startDrag("status", "header", dragEvent());
+    const dragging = controller.getTableSnapshot();
+    expect(dragging).not.toBe(atRest);
+    expect(dragging.drag).toMatchObject({ key: "status", source: "header" });
+
+    controller.dragEnter(1, dragEvent("status"));
+    controller.dragOver(0, dragEvent("status"));
+    controller.dragOver(1, dragEvent("status"));
+    expect(controller.getTableSnapshot()).toBe(dragging);
+    expect(controller.getSnapshot().drag?.overIndex).toBe(1);
+
+    const ui = controller.interactions(
+      controller.getTableSnapshot(),
+      undefined
+    );
+    expect(ui.live?.getSnapshot()).toBe(controller.getSnapshot());
+    expect(ui.dropProps(1)["data-drop-active"]).toBe(true);
+
+    controller.finishDrag();
+    const ended = controller.getTableSnapshot();
+    expect(ended).not.toBe(dragging);
+    expect(ended.drag).toBeUndefined();
+
+    controller.startDrag("team", "chip", dragEvent());
+    controller.dragOver(1, dragEvent("team"));
+    expect(controller.getSnapshot().drag).toMatchObject({
+      key: "team",
+      source: "chip",
+    });
+    expect(controller.getTableSnapshot()).toBe(ended);
+  });
+
   it("drops a new field at a boundary and moves an existing one", () => {
     const { controller, state } = harness({ groupBy: "team,status" });
     controller.startDrag("budget", "header", dragEvent());

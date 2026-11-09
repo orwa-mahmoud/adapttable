@@ -12,10 +12,9 @@ import { naiveSelect } from "../controls/select";
 import NaiveHeaderMulti from "./NaiveHeaderMulti.vue";
 
 defineOptions({ name: "NaiveFilterHeaderControl" });
-const props = withDefaults(defineProps<FilterHeaderControlOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
-const model = useFilterHeaderControl(() => props);
+const { closeOnSelect = undefined, ...props } =
+  defineProps<FilterHeaderControlOptions<TRow>>();
+const model = useFilterHeaderControl(() => ({ ...props, closeOnSelect }));
 const controls: FilterHeaderSlots = {
   Search: (control) =>
     naiveInput({

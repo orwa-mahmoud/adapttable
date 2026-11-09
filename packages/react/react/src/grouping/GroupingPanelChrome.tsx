@@ -26,6 +26,7 @@ import type {
   GroupingPanelRemoveZoneProps as NeutralGroupingPanelRemoveZoneProps,
   GroupingPanelSlotProps as NeutralGroupingPanelSlotProps,
   GroupingPanelSlots as NeutralGroupingPanelSlots,
+  GroupingPanelState,
   GroupingPanelSurfaceProps as NeutralGroupingPanelSurfaceProps,
 } from "@adapttable/core/binding";
 import {
@@ -34,6 +35,7 @@ import {
   type ReactNode,
   useEffect,
   useRef,
+  useSyncExternalStore,
 } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
@@ -166,6 +168,26 @@ export type GroupingPanelSlots = NeutralGroupingPanelSlots<
 export type GroupingPanelSlotProps<TRow = unknown> =
   NeutralGroupingPanelSlotProps<ColumnDef<TRow>>;
 
+/** A subscription for a state with no live part: its owner redraws it. */
+const STATIC_STATE = (): (() => void) => () => undefined;
+
+/**
+ * The drag and announcement as they change while a drag hovers. The table
+ * redraws the strip when a drag starts or ends; the strip follows the hover
+ * itself, so a drag never redraws the rows.
+ */
+function useLiveGroupingState(
+  state: GroupingPanelState
+): Pick<GroupingPanelState, "drag" | "announcement"> {
+  const live = state.live;
+  const current = () => (live ? live.getSnapshot() : state);
+  return useSyncExternalStore(
+    live?.subscribe ?? STATIC_STATE,
+    current,
+    current
+  );
+}
+
 /** Full props for {@link GroupingPanelChrome}. @public */
 export interface GroupingPanelChromeProps<
   TRow = unknown,
@@ -229,7 +251,8 @@ export function GroupingPanelChrome<TRow>({
   // onto a chip takes that chip's place. The strip is mostly free space, and a
   // drop there lands at the end — unless a caret or a chip inside it already
   // answered something more precise.
-  const plan = groupingDropPlan(state.groupBy, state.drag);
+  const { drag, announcement } = useLiveGroupingState(state);
+  const plan = groupingDropPlan(state.groupBy, drag);
   const inert = plan.inert;
   const ontoChip = (index: number): CoreGroupingDropProps => {
     const target = plan.chipTarget(index);
@@ -251,8 +274,8 @@ export function GroupingPanelChrome<TRow>({
           dropProps: INERT_DROP_PROPS,
         }
       : {
-          dragging: state.drag !== undefined,
-          active: state.drag?.overIndex === index,
+          dragging: drag !== undefined,
+          active: drag?.overIndex === index,
           dropProps: reactGroupingDropProps(state.dropProps(index)),
         };
 
@@ -313,8 +336,8 @@ export function GroupingPanelChrome<TRow>({
         <DropZone
           label={labels.groupingDropColumns}
           empty
-          dragging={state.drag !== undefined}
-          active={state.drag?.overIndex === 0}
+          dragging={drag !== undefined}
+          active={drag?.overIndex === 0}
           dropProps={reactGroupingDropProps(state.dropProps(0))}
           data-adapttable-part="grouping-drop-zone"
         />
@@ -421,18 +444,18 @@ export function GroupingPanelChrome<TRow>({
         </fieldset>
       ) : null}
       <LiveRegion part="grouping-announcer" statusRole={false}>
-        {state.announcement}
+        {announcement}
       </LiveRegion>
       {/* The way out of a grouping, on a line of its own: a target squeezed in
           beside the chips is one a reader never finds. It exists only while a
           chip is in the air, so it takes the line BELOW them — a line that
           appears above the chips moves the one under the pointer, and a drag
           whose source is pulled away the instant it starts never begins. */}
-      {state.drag?.source === "chip" ? (
+      {drag?.source === "chip" ? (
         <span style={{ display: "flex", flex: "1 0 100%", width: "100%" }}>
           <RemoveZone
             label={labels.groupingDropToRemove}
-            active={state.drag.overRemove === true}
+            active={drag.overRemove === true}
             dropProps={reactGroupingDropProps(state.removeDropProps())}
             data-adapttable-part="grouping-remove-zone"
           />

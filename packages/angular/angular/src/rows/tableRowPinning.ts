@@ -1,15 +1,14 @@
 import {
   type AdaptTableFeature,
+  FEATURE_IMPLEMENTATIONS,
+  featureImplementation,
   featureOptionsOf,
-  injectRowPinning,
-  injectRowPinningUrlState,
   readMaybe,
 } from "@adapttable/angular";
 import type { RowPinningFeatureOptions } from "@adapttable/angular/features";
 import {
   devWarn,
   rowPinningBlockedWarning,
-  rowPinningControl,
   rowPinningRequested,
   rowPinningUrlSync,
   type TableLabels,
@@ -74,10 +73,14 @@ export function injectTableRowPinning<TRow>(
     ...declared,
     pinnedRowIds: untracked(pinnedRowIds),
   });
-  if (!requested) return undefined;
+  const code = featureImplementation(
+    options.features,
+    FEATURE_IMPLEMENTATIONS.rowPinning
+  );
+  if (!requested || !code) return undefined;
   if (!options.injector) assertInInjectionContext(injectTableRowPinning);
   const injector = options.injector ?? inject(Injector);
-  const url = injectRowPinningUrlState({
+  const url = code.url({
     urlAdapter: options.urlAdapter,
     urlSync: rowPinningUrlSync({
       urlSync: options.urlSync,
@@ -88,7 +91,7 @@ export function injectTableRowPinning<TRow>(
     injector,
   });
   const control = computed(() =>
-    rowPinningControl({
+    code.control({
       requested,
       pinnedRowIds: pinnedRowIds(),
       onPinnedRowIdsChange: declared.onPinnedRowIdsChange,
@@ -104,7 +107,7 @@ export function injectTableRowPinning<TRow>(
     },
     { injector }
   );
-  const pinning = injectRowPinning<TRow>({
+  const pinning = code.state<TRow>({
     enabled,
     pinnedRowIds: computed(() => control().pinnedRowIds),
     onPinnedRowIdsChange: (next) => {

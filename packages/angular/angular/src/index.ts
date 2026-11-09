@@ -82,6 +82,7 @@ export {
   injectTableEditHistory,
   type TableEditHistoryProps,
 } from "./editing/editHistory";
+export { EDIT_HISTORY_IMPLEMENTATION } from "./editing/editHistoryImplementation";
 export {
   type BatchEditHandler,
   type BatchEditingInjectOptions,
@@ -112,11 +113,23 @@ export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
   extendFeature,
+  featureImplementation,
   featureOptionsOf,
   provideAdaptTableFeatures,
   type SlotComponent,
   tableFeaturesOf,
+  withFeatureImplementation,
 } from "./featureHost";
+export {
+  type EditHistoryImplementation,
+  FEATURE_IMPLEMENTATIONS,
+  type FindInTableImplementation,
+  type GroupingImplementation,
+  type GroupingPanelImplementation,
+  type RowPinningImplementation,
+  type RowReorderImplementation,
+  type TreeImplementation,
+} from "./featureImplementations";
 export {
   createFeatureResources,
   type FeatureMountContext,
@@ -144,6 +157,7 @@ export {
 export { filterTreeChips } from "./filters/filterTreeChips";
 export { injectHeaderFilterOverlay } from "./filters/headerFilterOverlay";
 export { type FindInTableOptions, injectFindInTable } from "./find/findInTable";
+export { FIND_IN_TABLE_IMPLEMENTATION } from "./find/findInTableImplementation";
 export {
   findMarkAttrs,
   injectFindFocus,

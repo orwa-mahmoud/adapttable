@@ -37,17 +37,18 @@ import { naiveDirection, useNaiveTableStyle } from "./theme";
 import type { DataTableProps, DataTableSlots } from "./types";
 
 defineOptions({ inheritAttrs: false });
-const props = withDefaults(defineProps<DataTableProps<TRow>>(), {
-  searchable: true,
-  forceMobile: undefined,
-  urlSync: undefined,
-  selectable: undefined,
-  multiSort: undefined,
-  fitColumns: undefined,
-  collapsibleColumnGroups: undefined,
-  isLoading: undefined,
-  isFetching: undefined,
-});
+const {
+  searchable = true,
+  forceMobile = undefined,
+  urlSync = undefined,
+  selectable = undefined,
+  multiSort = undefined,
+  fitColumns = undefined,
+  collapsibleColumnGroups = undefined,
+  isLoading = undefined,
+  isFetching = undefined,
+  ...props
+} = defineProps<DataTableProps<TRow>>();
 const emit = defineEmits<{
   "update:selectedIds": [ids: string[]];
   "update:columnLayout": [layout: ColumnLayoutState];
@@ -66,6 +67,15 @@ const shell = useDataTableShell<TRow>(() =>
   withKitEnvironment(
     {
       ...props,
+      searchable,
+      forceMobile,
+      urlSync,
+      selectable,
+      multiSort,
+      fitColumns,
+      collapsibleColumnGroups,
+      isLoading,
+      isFetching,
       footer: footer.value,
       confirm: props.confirm ?? defaultConfirm,
       onDensityChange: (density: TableDensity) => {
@@ -73,7 +83,7 @@ const shell = useDataTableShell<TRow>(() =>
         emit("update:density", density);
       },
       onSelectionChange:
-        props.selectable ||
+        selectable ||
         props.selectedIds !== undefined ||
         props.defaultSelectedIds !== undefined
           ? (ids: string[]) => emit("update:selectedIds", ids)
@@ -141,7 +151,19 @@ const Render = () =>
     h(DataTableSurfaceChrome<TRow>, {
       ...mergeProps(attrs, { class: "adapttable-naive", style: style.value }),
       model: shell,
-      options: { ...props, classNames: names.value },
+      options: {
+        ...props,
+        searchable,
+        forceMobile,
+        urlSync,
+        selectable,
+        multiSort,
+        fitColumns,
+        collapsibleColumnGroups,
+        isLoading,
+        isFetching,
+        classNames: names.value,
+      },
       slots: naiveSurfaceControls(controls(), shell.density.value),
       content: slots,
       rootRef: (element: HTMLElement | null) => {

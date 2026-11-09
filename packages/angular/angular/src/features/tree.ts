@@ -1,5 +1,29 @@
-import { type AdaptTableFeature, type MaybeSignal } from "@adapttable/angular";
+import {
+  type AdaptTableFeature,
+  FEATURE_IMPLEMENTATIONS,
+  injectLazyChildren,
+  injectTreeExpansion,
+  type MaybeSignal,
+  type TreeImplementation,
+  withFeatureImplementation,
+} from "@adapttable/angular";
+import {
+  buildTreeEntries,
+  closeFailedTreeNode,
+  toggleTreeNode,
+  treeExportExpandedIds,
+} from "@adapttable/core";
 import { coreTree } from "@adapttable/core/binding";
+
+/** The tree's code, filed by {@link tree}. */
+const TREE_IMPLEMENTATION: TreeImplementation = {
+  expansion: injectTreeExpansion,
+  lazyChildren: injectLazyChildren,
+  entries: buildTreeEntries,
+  exportExpandedIds: treeExportExpandedIds,
+  toggle: toggleTreeNode,
+  closeFailed: closeFailedTreeNode,
+};
 
 /**
  * Options for {@link tree}.
@@ -39,5 +63,9 @@ export interface TreeFeatureOptions<TRow> {
 export function tree<TRow>(
   options: TreeFeatureOptions<TRow> = {}
 ): AdaptTableFeature {
-  return coreTree<unknown>({ ...options });
+  return withFeatureImplementation(
+    coreTree<unknown>({ ...options }),
+    FEATURE_IMPLEMENTATIONS.tree,
+    TREE_IMPLEMENTATION
+  );
 }

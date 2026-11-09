@@ -63,7 +63,7 @@
     [attr.scope]="scope"
     [adaptAttrs]="attrs"
     [attr.rowspan]="rowSpan > 1 ? rowSpan : null"
-    [attr.colspan]="colSpan"
+    [attr.colspan]="colSpan > 1 ? colSpan : null"
   >
     @if (part === "header-cell") {
       <div class="adapt-header-controls">

@@ -11,35 +11,36 @@ import { h, type VNodeChild } from "vue";
 import QuasarButton from "../controls/QuasarButton.vue";
 import QuasarInput from "../controls/QuasarInput.vue";
 import QuasarSelect from "../controls/QuasarSelect.vue";
-const props = withDefaults(
-  defineProps<{
-    readonly defs: FilterTreeBuilderProps<TRow>["defs"];
-    readonly source: FilterTreeBuilderProps<TRow>["source"];
-    readonly labels?: Exclude<
-      FilterTreeBuilderProps<TRow>["labels"],
-      undefined
-    >;
-    readonly classNames?: Exclude<
-      FilterTreeBuilderProps<TRow>["classNames"],
-      undefined
-    >;
-    readonly registry?: Exclude<
-      FilterTreeBuilderProps<TRow>["registry"],
-      undefined
-    >;
-    readonly defaultExpanded?: Exclude<
-      FilterTreeBuilderProps<TRow>["defaultExpanded"],
-      undefined
-    >;
-  }>(),
-  {
-    defaultExpanded: undefined,
-    labels: undefined,
-    classNames: undefined,
-    registry: undefined,
-  }
-);
-const model = useFilterTreeModel(() => props);
+const {
+  defaultExpanded = undefined,
+  labels = undefined,
+  classNames = undefined,
+  registry = undefined,
+  ...props
+} = defineProps<{
+  readonly defs: FilterTreeBuilderProps<TRow>["defs"];
+  readonly source: FilterTreeBuilderProps<TRow>["source"];
+  readonly labels?: Exclude<FilterTreeBuilderProps<TRow>["labels"], undefined>;
+  readonly classNames?: Exclude<
+    FilterTreeBuilderProps<TRow>["classNames"],
+    undefined
+  >;
+  readonly registry?: Exclude<
+    FilterTreeBuilderProps<TRow>["registry"],
+    undefined
+  >;
+  readonly defaultExpanded?: Exclude<
+    FilterTreeBuilderProps<TRow>["defaultExpanded"],
+    undefined
+  >;
+}>();
+const model = useFilterTreeModel(() => ({
+  ...props,
+  defaultExpanded,
+  labels,
+  classNames,
+  registry,
+}));
 const controls: FilterTreeSlots<VNodeChild> = {
   Select: (control) =>
     h(

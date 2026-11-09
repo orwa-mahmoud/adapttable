@@ -4,7 +4,12 @@
  * The indices count in the dataset, not in the rendered window. A virtualized
  * table mounting 24 of 100,000 rows still reports row 40,000 as row 40,000.
  */
-import { type CellRange, isInCellRange, isSingleCell } from "./cellRange";
+import {
+  type CellRange,
+  cellRangeBounds,
+  isInCellRange,
+  isSingleCell,
+} from "./cellRange";
 import { type GridCell, sameGridCell } from "./gridFocus";
 import { GRID_CELL_ATTR, gridCellAttr } from "./gridNavigation";
 
@@ -141,6 +146,62 @@ export function gridCellAttributes(
     "data-cell-match-current":
       matched && sameGridCell(cell, currentMatch ?? null) ? "" : undefined,
   };
+}
+
+/**
+ * A digest of every attribute {@link gridCellAttributes} gives the cells of one
+ * row. Rows with equal digests render equal cells, so a row whose digest holds
+ * can skip a repaint while the focus or the range moves elsewhere.
+ *
+ * @param input - The same inputs the cell attributes read.
+ * @param rowIndex - The row's absolute index in the dataset.
+ * @param colCount - How many columns the row renders.
+ * @returns The digest.
+ *
+ * @public
+ */
+export function gridRowFocusSignature(
+  input: GridCellAttributesInput,
+  rowIndex: number,
+  colCount: number
+): string {
+  const windowed = input.columnsWindowed ? "w" : "";
+  if (!input.enabled) return windowed;
+  const { active, range, fillPreview, matchKeys, currentMatch } = input;
+  const activeCol = active?.row === rowIndex ? String(active.col) : "";
+  const firstEver =
+    active === null && rowIndex === input.firstRowIndex ? "f" : "";
+  const multiple = range && !isSingleCell(range) ? "m" : "";
+  const span = rowRangeSpan(fillPreview ?? range, rowIndex);
+  const matches = rowMatchColumns(matchKeys, rowIndex, colCount);
+  const current =
+    currentMatch?.row === rowIndex ? String(currentMatch.col) : "";
+  return `${windowed}|${activeCol}|${firstEver}|${multiple}|${span}|${matches}|${current}`;
+}
+
+/** The columns a range covers on one row, as `from-to`, or empty. */
+function rowRangeSpan(range: CellRange | null, rowIndex: number): string {
+  if (!range) return "";
+  const bounds = cellRangeBounds(range);
+  return rowIndex >= bounds.fromRow && rowIndex <= bounds.toRow
+    ? `${String(bounds.fromCol)}-${String(bounds.toCol)}`
+    : "";
+}
+
+/** The columns of one row the find bar matched, comma-separated. */
+function rowMatchColumns(
+  matchKeys: ReadonlySet<string> | undefined,
+  rowIndex: number,
+  colCount: number
+): string {
+  if (!matchKeys || matchKeys.size === 0) return "";
+  let matches = "";
+  for (let col = 0; col < colCount; col += 1) {
+    if (matchKeys.has(gridCellAttr({ row: rowIndex, col }))) {
+      matches += `${String(col)},`;
+    }
+  }
+  return matches;
 }
 
 /**

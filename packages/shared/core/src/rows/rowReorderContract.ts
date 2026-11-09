@@ -297,6 +297,20 @@ export interface RowReorderState<
     "data-dragging"?: "";
     "data-drop"?: RowDropPosition;
   };
+  /**
+   * The drop target under a drag, current on every hover. When present,
+   * `rowAttrs` and the hovered index above describe the table between
+   * hovers, and each row follows its own drop edge here.
+   */
+  hover?: {
+    /** Listen for a change. Returns the unsubscribe. */
+    readonly subscribe: (listener: () => void) => () => void;
+    /** The edge a drop on this row lands on, or `undefined`. */
+    readonly dropAt: (
+      rowId: string,
+      localIndex: number
+    ) => RowDropPosition | undefined;
+  };
 }
 
 /**
