@@ -7833,9 +7833,6 @@
       "tableConformanceTests"
     ],
     "angular": [
-      "BodyCellView",
-      "BodyRow",
-      "BodySlot",
       "DataTableClassNames",
       "ADAPTTABLE_FEATURES",
       "ADAPTTABLE_FEATURE_STATE",
@@ -7928,7 +7925,6 @@
       "Highlight",
       "InfiniteQuerySignals",
       "injectGrouping",
-      "injectTableSurfaceHost",
       "IsMobileOptions",
       "KeyedVirtualization",
       "KeyedVirtualizationOptions",
@@ -7947,7 +7943,6 @@
       "ReconcileLiveRowEdit",
       "Renderer",
       "ResizableVirtualizer",
-      "RowActionsCell",
       "RowMutationHandlers",
       "RowMutationsOptions",
       "RowMutationsState",
@@ -7963,7 +7958,6 @@
       "RowPinningUrlState",
       "RowReorderHandler",
       "RowReorderOptions",
-      "RowReorderState",
       "RowSelection",
       "RowSelectionOptions",
       "SavedViewsOptions",
@@ -7992,12 +7986,8 @@
       "TableFilters",
       "TableGrouping",
       "TableQueryHandler",
-      "TableRowDetail",
       "TableRuntime",
       "TableRuntimeView",
-      "TableSurfaceHostOptions",
-      "TableSurfaceView",
-      "TableTree",
       "TableUrlState",
       "TableUrlStateOptions",
       "TableVirtualization",
@@ -12501,7 +12491,6 @@
     ],
     "angular-adapter": [
       "ADAPTTABLE_CONTEXT_MENU",
-      "ADAPTTABLE_KIT_MOTION_OFF",
       "AdaptAutoFilterFormModel",
       "AdaptBooleanFilterFieldModel",
       "AdaptColumnMenuEdgeRowModel",
@@ -12531,7 +12520,6 @@
       "FiltersViewInput",
       "filtersViewFor",
       "KitEnvironment",
-      "mountForcedColorsStyles",
       "RowActionsCell",
       "TableSurfaceView",
       "TableView",
@@ -12836,7 +12824,9 @@
       "AdaptMobileCardsHost",
       "AdaptTableSurface",
       "provideAdaptTableState",
-      "scrollBoxStyle"
+      "scrollBoxStyle",
+      "injectTableSurfaceHost",
+      "TableSurfaceHostOptions"
     ],
     "adapter-element-plus-batch-editing": [
       "batchEditing",

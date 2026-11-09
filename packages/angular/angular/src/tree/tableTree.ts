@@ -1,4 +1,12 @@
 import {
+  type AdaptTableFeature,
+  type DataTable,
+  featureOptionsOf,
+  injectLazyChildren,
+  injectTreeExpansion,
+  type MaybeSignal,
+} from "@adapttable/angular";
+import {
   buildTreeEntries,
   closeFailedTreeNode,
   type TableSource,
@@ -19,12 +27,6 @@ import {
   type Signal,
   untracked,
 } from "@angular/core";
-
-import type { DataTable } from "../dataTable";
-import { type AdaptTableFeature, featureOptionsOf } from "../featureHost";
-import type { MaybeSignal } from "../store";
-import { injectLazyChildren } from "./lazyChildren";
-import { injectTreeExpansion } from "./treeExpansion";
 
 /**
  * The live tree while `tree()` is composed.

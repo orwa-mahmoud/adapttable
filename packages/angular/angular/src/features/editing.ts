@@ -6,6 +6,7 @@ import {
   type AdaptTableFeature,
   type BatchEditHandler,
   type CellEditHandler,
+  type ColumnDef,
   type DirtyEdits,
   editingBundleFor,
   featureOptionsOf,
@@ -27,8 +28,6 @@ import {
   coreRowEditing,
 } from "@adapttable/core/binding";
 import { computed } from "@angular/core";
-
-import type { ColumnDef } from "../columnDef";
 
 /**
  * Lifecycle observers a host may pass to {@link editing}.

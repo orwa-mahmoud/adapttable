@@ -3279,9 +3279,8 @@ and scroll box both structures and every kit body share;
 components their structure's scroll box; `provideAdaptTableState()` provides
 the find, palette and context-menu state a kit's data table needs; and
 `scrollBoxStyle` is the scroll box's style rule.
-`ADAPTTABLE_KIT_MOTION_OFF` is the token a kit provides when its UI library
-turns motion off, and `mountForcedColorsStyles` installs the shared
-high-contrast stylesheet.
+`ADAPTTABLE_KIT_MOTION_OFF`, from `@adapttable/angular`, is the token a kit
+provides when its UI library turns motion off.
 
 `injectTableSurfaceHost(options)` returns a `TableSurfaceView`: the
 structural view the compatibility shell and the lean host share.
@@ -3291,8 +3290,10 @@ and a feature mount use. A lean feature mount reads `SurfaceHandles` from
 the `SURFACE_HANDLES` token. `SURFACE_OCCUPIED` (`SurfaceOccupation`) records
 which of grid, grouping and editing the shell already created.
 `SURFACE_GRID`, `SURFACE_GROUPING` and `SURFACE_EDITING` are the feature-state
-keys a lean mount publishes. `TableSurfaceView` is also exported from
-`@adapttable/angular/adapter`.
+keys a lean mount publishes. `injectTableSurfaceHost`,
+`TableSurfaceHostOptions` and `TableSurfaceView` come from
+`@adapttable/angular/adapter`; `editingBundleFor` and the surface tokens come
+from `@adapttable/angular`.
 
 `AdaptAutoFilterFormModel` builds field plans. `AdaptTextFilterFieldModel`,
 `AdaptRangeFilterFieldModel`, `AdaptSelectFilterFieldModel`,
@@ -4264,6 +4265,7 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | `elementRef`, `composeElementRefs`, `useElementRef`                                                             | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
 | `useScopeActivity()`                                                                                            | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                                                                               |
 | `scheduleTick(work)`                                                                                            | Runs work after Vue commits the DOM and rethrows its failure instead of discarding it.                                                                                                                        |
+| `mountForcedColorsStyles()`                                                                                     | Installs the shared high-contrast stylesheet once the table mounts; a server render never touches `document`.                                                                                                 |
 | `useExternalStore(store)`                                                                                       | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                                                                            |
 | `FeatureLifecycle`, `useFeatureLifecycle`                                                                       | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                                                                    |
 | `TableFeatureState`, `OwnedFeatureState`, `provideFeatureState`                                                 | Table-local state, ownership-safe publication cleanup and descendant injection. `createFeatureState` constructs the registry; `useFeatureState` reads it.                                                     |

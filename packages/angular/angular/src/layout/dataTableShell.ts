@@ -32,6 +32,7 @@ import {
   injectGridFocus,
   injectGrouping,
   injectIsMobile,
+  injectPrefersReducedMotion,
   injectRowMutations,
   injectRowSelection,
   injectTableData,
@@ -43,6 +44,7 @@ import {
   type RowActionsRenderer,
   type RowSelection,
   type SummaryRowFn,
+  SURFACE_OCCUPIED,
   type TableAssistantProps,
   tableFeaturesOf,
   type TableQueryHandler,
@@ -170,10 +172,8 @@ import {
   filtersViewFor,
 } from "../filters/tableFilters";
 import { selectionStatsOf } from "../focus/selectionStats";
-import { injectPrefersReducedMotion } from "../hooks/prefersReducedMotion";
 import { staggerMounted } from "../motion/mountStagger";
 import type { KitEnvironment } from "./kitEnvironment";
-import { SURFACE_OCCUPIED } from "./surfaceChannels";
 import {
   bodyWindowFor,
   buildSurfaceBody,

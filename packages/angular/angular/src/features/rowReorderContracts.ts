@@ -1,6 +1,5 @@
+import type { AdaptTableFeature } from "@adapttable/angular";
 import type { RowReorderHandler, RowReorderOptions } from "@adapttable/core";
-
-import type { AdaptTableFeature } from "../featureHost";
 
 /**
  * A row-reorder feature that also carries the host's write and options.

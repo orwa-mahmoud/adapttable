@@ -311,7 +311,16 @@
     "slotRender",
     "tableFeaturesOf",
     "textFilterFor",
-    "urlAdapterFor"
+    "urlAdapterFor",
+    "editingBundleFor",
+    "ADAPTTABLE_KIT_MOTION_OFF",
+    "SURFACE_EDITING",
+    "SURFACE_GRID",
+    "SURFACE_GROUPING",
+    "SURFACE_HANDLES",
+    "SURFACE_OCCUPIED",
+    "SurfaceHandles",
+    "SurfaceOccupation"
   ],
   "features": [
     "CellNavigationOptions",
@@ -829,6 +838,21 @@
     "watchOverlayDismiss",
     "windowGroupedEntries",
     "withRowMutationActions",
-    "withRowPinActions"
+    "withRowPinActions",
+    "AdaptDesktopSlots",
+    "AdaptDesktopStructure",
+    "AdaptHeaderTemplate",
+    "AdaptHeaderTemplateSlot",
+    "KitEnvironment",
+    "AdaptDesktopTableHost",
+    "AdaptMobileCardsHost",
+    "provideAdaptTableState",
+    "AdaptMobileSlots",
+    "AdaptMobileStructure",
+    "AdaptTableSurface",
+    "scrollBoxStyle",
+    "TableSurfaceView",
+    "injectTableSurfaceHost",
+    "TableSurfaceHostOptions"
   ]
 }

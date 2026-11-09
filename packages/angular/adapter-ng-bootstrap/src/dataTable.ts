@@ -9,10 +9,10 @@ import {
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
-  ADAPTTABLE_KIT_MOTION_OFF,
   AdaptTableStatusAnnouncer,
   provideAdaptTableState,
 } from "@adapttable/angular/adapter";
+import { ADAPTTABLE_KIT_MOTION_OFF } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

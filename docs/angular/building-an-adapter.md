@@ -110,8 +110,8 @@ templates. A kit that declares its header-cell template inside its table templat
 `KitEnvironment` the kit read from its UI library — direction, locale and
 density — and the shell loads that locale's labels on demand. Provide
 `ADAPTTABLE_KIT_MOTION_OFF` with a signal that is `true` when the library has
-turned animation off. The shell calls `mountForcedColorsStyles` to install
-the shared high-contrast stylesheet.
+turned animation off. The shell installs the shared high-contrast
+stylesheet.
 
 For a shell assembled directly, keep persistent state separate from feature composition:
 

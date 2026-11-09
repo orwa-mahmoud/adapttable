@@ -6,6 +6,35 @@
  * the features the caller lists. This module does not import the shell.
  */
 import {
+  type AdaptTableFeature,
+  type Attrs,
+  type ColumnDef,
+  type ColumnInput,
+  createFeatureResources,
+  type DataTable,
+  type DataTableClassNames,
+  type EditableCellEditing,
+  featureOptionsOf,
+  flattenColumns,
+  type GridFocus,
+  injectDataTable,
+  injectKeyedVirtualization,
+  injectTableData,
+  injectTableVirtualizer,
+  type MaybeSignal,
+  type MaybeSignalOptional,
+  type MobileCardRenderer,
+  mountTableFeatures,
+  readMaybe,
+  type RowSelection,
+  type SummaryRowFn,
+  SURFACE_EDITING,
+  SURFACE_GRID,
+  SURFACE_GROUPING,
+  SURFACE_HANDLES,
+  type SurfaceHandles,
+} from "@adapttable/angular";
+import {
   type CellSpanAppearance,
   type CssProperties,
   devWarn,
@@ -67,46 +96,15 @@ import {
   signal,
 } from "@angular/core";
 
-import { type SummaryRowFn } from "../aggregate/aggregate";
-import type { Attrs } from "../attrContracts";
-import { type ColumnDef, type ColumnInput, flattenColumns } from "../columnDef";
-import { type DataTable, injectDataTable } from "../dataTable";
-import type { EditableCellEditing } from "../editing/editableCellController";
 import type { RowEditActionsProps } from "../editing/rowEditGate";
 import { rowIsDirty } from "../editing/rowEditingHelpers";
-import { type AdaptTableFeature, featureOptionsOf } from "../featureHost";
-import {
-  createFeatureResources,
-  mountTableFeatures,
-} from "../featureLifecycle";
-import type { GridFocus } from "../focus/gridFocus";
 import type { TableGrouping } from "../grouping/tableGrouping";
-import type { MobileCardRenderer } from "../rows/mobileCard";
 import type { RowReorderState } from "../rows/rowReorder";
-import type { RowSelection } from "../selection/selection";
 import { frontendRowModelOf } from "../source/rowModel";
-import { injectTableData } from "../source/tableData";
-import {
-  type MaybeSignal,
-  type MaybeSignalOptional,
-  readMaybe,
-} from "../store";
 import type { TableRowDetail } from "../tree/tableRowDetail";
 import type { TableTree } from "../tree/tableTree";
 import { type ColumnWindow, injectColumnWindow } from "../virtual/columnWindow";
-import {
-  injectKeyedVirtualization,
-  injectTableVirtualizer,
-} from "../virtual/tableVirtualization";
 import { injectMeasuredWindowScrollMargin } from "../virtual/windowScrollMargin";
-import type { DataTableClassNames } from "./dataTableClassNames";
-import {
-  SURFACE_EDITING,
-  SURFACE_GRID,
-  SURFACE_GROUPING,
-  SURFACE_HANDLES,
-  type SurfaceHandles,
-} from "./surfaceChannels";
 import { tableRuntimeFor } from "./tableRuntime";
 
 /**

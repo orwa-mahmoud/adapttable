@@ -2,6 +2,7 @@
  * Keep a window virtualizer's scroll margin equal to where the list starts on
  * the page, so a table offset down the page windows the rows actually in view.
  */
+import { type MaybeSignal, readMaybe } from "@adapttable/angular";
 import { measureWindowScrollMargin } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
@@ -14,7 +15,6 @@ import {
 } from "@angular/core";
 
 import { onBrowser } from "../hooks/platform";
-import { type MaybeSignal, readMaybe } from "../store";
 
 export {
   documentOffsetTop,

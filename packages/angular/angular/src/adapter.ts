@@ -1,9 +1,4 @@
 /** Structural Chrome, kit slots, models and live controllers. @packageDocumentation */
-export {
-  ensureForcedColorsStyles,
-  FORCED_COLORS_CSS,
-  mountForcedColorsStyles,
-} from "./a11y/forcedColors";
 export { AdaptLiveRegion } from "./a11y/liveRegion";
 export { AdaptTableStatusAnnouncer } from "./a11y/tableStatusAnnouncer";
 export { injectBulkBarRunner } from "./actions/bulkBarRunner";
@@ -245,7 +240,6 @@ export {
   injectGrouping,
   type TableGrouping,
 } from "./grouping/tableGrouping";
-export { ADAPTTABLE_KIT_MOTION_OFF } from "./hooks/prefersReducedMotion";
 export { AdaptIcon } from "./icon";
 export {
   AdaptDataTableShell,
@@ -288,7 +282,11 @@ export {
   tableRuntimeFor,
 } from "./layout/tableRuntime";
 export { AdaptTableSurface, scrollBoxStyle } from "./layout/tableSurface";
-export { type TableSurfaceView } from "./layout/tableSurfaceHost";
+export {
+  injectTableSurfaceHost,
+  type TableSurfaceHostOptions,
+  type TableSurfaceView,
+} from "./layout/tableSurfaceHost";
 export { AdaptExtraRowContent } from "./rows/extraRowContent";
 export {
   injectRowReorder,

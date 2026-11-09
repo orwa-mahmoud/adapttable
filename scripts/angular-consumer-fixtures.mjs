@@ -198,7 +198,7 @@ const BASE_ABSENT = [
 ];
 
 const LEAN = `import { Component, input } from "@angular/core";
-import { injectTableSurfaceHost } from "@adapttable/angular";
+import { injectTableSurfaceHost } from "@adapttable/angular/adapter";
 
 type Person = ${PERSON};
 
@@ -223,7 +223,7 @@ export class ConsumerApp {
 `;
 
 const LEAN_COMPOSED = `import { Component, input } from "@angular/core";
-import { injectTableSurfaceHost } from "@adapttable/angular";
+import { injectTableSurfaceHost } from "@adapttable/angular/adapter";
 import { cellNavigation, editing, grouping } from "@adapttable/angular/features";
 
 type Person = ${PERSON};

@@ -1,3 +1,11 @@
+import {
+  type AdaptTableFeature,
+  featureOptionsOf,
+  injectRowExpansion,
+  type NestedTableFor,
+  type Renderer,
+  type RowDetailContext,
+} from "@adapttable/angular";
 import { type RowExpansionState } from "@adapttable/core/binding";
 import {
   assertInInjectionContext,
@@ -6,11 +14,6 @@ import {
   Injector,
   type Signal,
 } from "@angular/core";
-
-import type { Renderer } from "../columnDef";
-import { type AdaptTableFeature, featureOptionsOf } from "../featureHost";
-import { injectRowExpansion } from "../rows/rowExpansion";
-import type { NestedTableFor, RowDetailContext } from "./nestedTableContracts";
 
 /**
  * The live row detail while `rowDetail()` or `nestedTable()` is composed.

@@ -25,7 +25,6 @@ import { CellRange } from '@adapttable/core';
 import { CellSaveState } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
-import { ChromeBodySlot } from '@adapttable/core/binding';
 import { ColumnGroupDef } from '@adapttable/core';
 import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnLayoutState } from '@adapttable/core';
@@ -37,14 +36,11 @@ import { ContextMenuRegionHandlers } from '@adapttable/core';
 import { ContextMenuState } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
 import { ContextMenuTriggerHandlers } from '@adapttable/core';
-import { CssProperties } from '@adapttable/core';
 import { DEFAULT_SHORTCUTS } from '@adapttable/core';
-import { DesktopRowWiringArgs } from '@adapttable/core/binding';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
 import { EditableCellController } from '@adapttable/core';
 import { EditableCellMode } from '@adapttable/core';
-import { EditableCellSlotProps } from '@adapttable/core/binding';
 import { EditableColumnLike } from '@adapttable/core';
 import { EditConflict } from '@adapttable/core';
 import { EditConflictChange } from '@adapttable/core';
@@ -60,7 +56,6 @@ import { EditLifecycle } from '@adapttable/core';
 import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
-import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { ExportContext as ExportContext_2 } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
@@ -93,9 +88,6 @@ import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
 import { GroupedFlatEntry } from '@adapttable/core';
-import { GroupHeaderCardSlotProps } from '@adapttable/core/binding';
-import { GroupHeaderRowSlotProps } from '@adapttable/core/binding';
-import { GroupingPanelSlotProps } from '@adapttable/core/binding';
 import { GroupPagingState } from '@adapttable/core/binding';
 import { GroupSort } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
@@ -134,7 +126,6 @@ import { RelativePreset } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
 import { RowActionsRenderContext } from '@adapttable/core';
-import { RowEditActionsProps } from '@adapttable/core/binding';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowExpansionState } from '@adapttable/core/binding';
@@ -149,7 +140,6 @@ import { RowPinState } from '@adapttable/core/binding';
 import { RowPinState as RowPinState_2 } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
 import { RowReorderOptions } from '@adapttable/core';
-import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
 import { SavedView } from '@adapttable/core';
@@ -283,25 +273,6 @@ export interface BatchEditingInjectOptions<TRow> {
 export { BatchEditingState }
 
 export { BatchRowEdit }
-
-// @public
-export interface BodyCellView<TRow> {
-    readonly colSpan: number;
-    readonly column: ColumnDef<TRow>;
-    readonly columnIndex: number;
-    readonly mark: string | undefined;
-    readonly rowSpan: number;
-}
-
-// @public
-export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
-    readonly cardAttrs: Attrs;
-    readonly detailAttrs: Attrs;
-    readonly rowAttrs: Attrs;
-}
-
-// @public
-export type BodySlot<TRow> = ChromeBodySlot<TRow, BodyRow<TRow>>;
 
 // @public
 export function booleanFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<BooleanFieldWidget>;
@@ -1168,9 +1139,6 @@ export function injectTableEditHistory<TRow>(options: MaybeSignal<TableEditHisto
 }>;
 
 // @public
-export function injectTableSurfaceHost<TRow>(options: TableSurfaceHostOptions<TRow>): Signal<TableSurfaceView<TRow>>;
-
-// @public
 export function injectTableUrlState(options?: TableUrlStateOptions): TableUrlState;
 
 // @public
@@ -1354,12 +1322,6 @@ export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale
 export { RowAction }
 
 // @public
-export interface RowActionsCell<TRow> {
-    readonly actions: readonly RowAction<TRow>[];
-    readonly rowEdit: RowEditActionsProps<never> | undefined;
-}
-
-// @public
 export interface RowActionsContext<TRow> extends Readonly<RowActionsRenderContext<TRow>> {
     readonly $implicit: TRow;
 }
@@ -1455,9 +1417,6 @@ export { RowPinState }
 export { RowReorderHandler }
 
 export { RowReorderOptions }
-
-// @public
-export type RowReorderState<TRow> = RowReorderState_2<TRow, DragEvent, KeyboardEvent>;
 
 // @public
 export interface RowSelection {
@@ -1691,85 +1650,11 @@ export type TableQueryHandler = (query: TableQuery, info: {
 
 export { TableQueryParams }
 
-// @public
-export interface TableRowDetail<TRow> {
-    readonly expansion: RowExpansionState;
-    readonly nested: NestedTableFor<TRow> | undefined;
-    readonly render: Renderer<RowDetailContext<TRow>> | undefined;
-}
-
 export { TableRuntime }
 
 export { TableRuntimeView }
 
 export { TableSource }
-
-// @public
-export interface TableSurfaceHostOptions<TRow> {
-    readonly columns: MaybeSignal<readonly ColumnInput<TRow>[]>;
-    readonly data?: MaybeSignalOptional<readonly TRow[]>;
-    readonly features?: MaybeSignalOptional<readonly AdaptTableFeature[]>;
-    readonly injector?: Injector;
-    readonly maxHeight?: MaybeSignalOptional<number | string>;
-    readonly onRowClick?: MaybeSignalOptional<(row: TRow) => void>;
-    readonly rowKey: (row: TRow) => string;
-    readonly source?: MaybeSignalOptional<TableSource<TRow>>;
-    readonly stickyHeader?: MaybeSignalOptional<boolean>;
-    readonly stickyTop?: MaybeSignalOptional<number>;
-    readonly summaryRow?: MaybeSignalOptional<SummaryRowFn<TRow>>;
-}
-
-// @public
-export interface TableSurfaceView<TRow> {
-    readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
-    readonly body: Signal<readonly BodySlot<TRow>[]>;
-    readonly bodyCells: Signal<ReadonlyMap<string, readonly BodyCellView<TRow>[]>>;
-    readonly bodyColSpan: Signal<number>;
-    readonly cellSpanAppearance: CellSpanAppearance | undefined;
-    readonly classNames: Signal<DataTableClassNames>;
-    readonly columnIndex: Signal<ReadonlyMap<string, number>>;
-    readonly columns: Signal<readonly ColumnDef<TRow>[]>;
-    readonly columnSelect: boolean;
-    readonly columnSpacers: Signal<{
-        start: number;
-        end: number;
-    } | undefined>;
-    readonly density: Signal<TableDensity>;
-    readonly detailParent: Signal<NestedTableParent>;
-    readonly editableCells: Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
-    readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
-    readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
-    readonly grid: GridFocus<TRow> | undefined;
-    readonly groupHeaders: Signal<{
-        readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
-        readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
-    }>;
-    readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
-    readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
-    readonly renderCard: Signal<MobileCardRenderer<TRow> | undefined>;
-    readonly reorder: Signal<RowReorderState<TRow>> | undefined;
-    readonly reportHeaderHeight: (px: number) => void;
-    readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
-    readonly selection: RowSelection | undefined;
-    readonly showActions: Signal<boolean>;
-    readonly showSummary: Signal<boolean>;
-    readonly stickyHead: Signal<CssProperties | undefined>;
-    readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
-    readonly table: DataTable<TRow>;
-    readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
-    readonly treeCellFilled: boolean;
-    readonly virtualization: Signal<TableVirtualization<TRow>>;
-}
-
-// @public
-export interface TableTree<TRow> {
-    readonly allEntries: readonly TreeEntry<TRow>[];
-    readonly columnKey: string | undefined;
-    readonly entries: readonly TreeEntry<TRow>[];
-    readonly expansion: TreeExpansionState;
-    readonly failedIds: ReadonlySet<string>;
-    readonly loadingIds: ReadonlySet<string>;
-}
 
 // @public
 export interface TableUrlState extends Pick<TableViewStore, "setPage" | "setLimit" | "setSort" | "setGroupBy" | "initializeGroupBy" | "setGroupAggregateOverrides" | "toggleSortLevel" | "setSearch" | "setExtra" | "setExtras" | "setFilterTree" | "clearExtras" | "clearAll"> {

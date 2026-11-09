@@ -189,15 +189,6 @@ export {
   type SurfaceOccupation,
 } from "./layout/surfaceChannels";
 export {
-  type BodyCellView,
-  type BodyRow,
-  type BodySlot,
-  injectTableSurfaceHost,
-  type RowActionsCell,
-  type TableSurfaceHostOptions,
-  type TableSurfaceView,
-} from "./layout/tableSurfaceHost";
-export {
   type DensityOptions,
   type DensityState,
   injectDensity,
@@ -235,7 +226,6 @@ export {
   type RowPinningState,
   type RowPinSide,
 } from "./rows/rowPinning";
-export { type RowReorderState } from "./rows/rowReorder";
 export {
   injectRowSelection,
   type RowSelection,
@@ -284,8 +274,6 @@ export {
   type NestedTableFor,
   type RowDetailContext,
 } from "./tree/nestedTableContracts";
-export { type TableRowDetail } from "./tree/tableRowDetail";
-export { type TableTree } from "./tree/tableTree";
 export {
   injectTreeExpansion,
   type TreeExpansionOptions,
