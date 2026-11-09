@@ -181,8 +181,10 @@ export async function assertLiveDemo(
   if (framework !== "react") {
     await expect(root(page)).toHaveAttribute("data-density", "compact");
   }
-  const compact = await cellHeight(page);
-  expect(comfortable > 0 && compact > 0 && compact < comfortable).toBe(true);
+  // The new spacing lands with the next render, not inside the click.
+  expect(comfortable).toBeGreaterThan(0);
+  await expect.poll(() => cellHeight(page)).toBeLessThan(comfortable);
+  expect(await cellHeight(page)).toBeGreaterThan(0);
 
   await choose(page, framework, "locale", "ar", "locale", "العربية");
   await expect(root(page)).toHaveCSS("direction", "rtl");
