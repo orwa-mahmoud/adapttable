@@ -201,6 +201,12 @@ export function GroupToggle({
   );
 }
 
+/**
+ * A group's count and totals stay on one line. Only the label wraps when the
+ * first column is narrower than the header's content.
+ */
+const GROUP_FIGURE_STYLE: CSSProperties = { whiteSpace: "nowrap" };
+
 const GROUP_HEADER_STYLE: CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
@@ -260,13 +266,18 @@ export function GroupHeaderCell({
         </Typography.Text>
       )}
       {group.footer !== true && group.more === undefined && (
-        <Typography.Text type="secondary" data-adapttable-part="group-count">
+        <Typography.Text
+          type="secondary"
+          style={GROUP_FIGURE_STYLE}
+          data-adapttable-part="group-count"
+        >
           {labels.groupCount(group.count)}
         </Typography.Text>
       )}
       {aggregate != null && aggregate !== false ? (
         <Typography.Text
           type="secondary"
+          style={GROUP_FIGURE_STYLE}
           data-adapttable-part="group-aggregate"
         >
           {aggregate}
@@ -359,7 +370,11 @@ export function GroupHeaderCard({
           {group.label}
         </Typography.Text>
       )}
-      <Typography.Text type="secondary" data-adapttable-part="group-count">
+      <Typography.Text
+        type="secondary"
+        style={GROUP_FIGURE_STYLE}
+        data-adapttable-part="group-count"
+      >
         {labels.groupCount(group.count)}
       </Typography.Text>
       {aggregateNodes}
