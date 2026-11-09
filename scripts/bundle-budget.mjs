@@ -15,6 +15,8 @@
  *   node scripts/bundle-budget.mjs --json             # machine-readable sizes
  *   node scripts/bundle-budget.mjs --case mui-table --case core-formula
  *                                                     # only the named cases
+ *   node scripts/bundle-budget.mjs --case mui-table --modules
+ *                                                     # and every module in them
  *
  * Sizes are minified + gzipped bytes of AdaptTable's own share of the graph.
  * React and the UI kits are external because an application already ships
@@ -76,6 +78,7 @@ import { buildVueNativeConsumer } from "./vue-native-consumer.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const UPDATE = process.argv.includes("--update");
 const JSON_OUT = process.argv.includes("--json");
+const MODULES = process.argv.includes("--modules");
 const KIB = 1024;
 
 /** Anything an application already has. AdaptTable's share is what remains. */
@@ -163,6 +166,27 @@ function emittedBytes(file) {
   return Buffer.from(file.source);
 }
 
+/** A module id as the consumer names it: the path below `node_modules/`. */
+function moduleName(id) {
+  const at = id.lastIndexOf("node_modules/");
+  return at === -1 ? id : id.slice(at + "node_modules/".length);
+}
+
+/**
+ * What each module adds to a chunk: its minified length, and the gzip size of
+ * its rendered code on its own (an upper bound — gzip shares context across a
+ * chunk, so the module sum exceeds the chunk's gzip size).
+ */
+function chunkModules(chunk) {
+  return Object.entries(chunk.modules)
+    .filter(([, module]) => module.renderedLength > 0)
+    .map(([id, module]) => ({
+      id: moduleName(id),
+      bytes: module.renderedLength,
+      gzipBytes: module.code ? gzipSync(module.code).length : 0,
+    }));
+}
+
 function linkedFiles(chunk) {
   return [
     ...chunk.imports,
@@ -179,9 +203,10 @@ function linkedFiles(chunk) {
  * each entry chunk, its complete static import closure, and the stylesheets
  * and assets those chunks link. An asset no lazy chunk claims is initial, so
  * an unsplit stylesheet the entry imports is never hidden as optional.
- * Sourcemaps are not shipped to the browser and are not counted.
+ * Sourcemaps are not shipped to the browser and are not counted. With
+ * `modules`, each chunk also lists the modules rendered into it.
  */
-export function emittedLedger(output) {
+export function emittedLedger(output, { modules = MODULES } = {}) {
   const files = new Map();
   for (const file of output) {
     if (SOURCE_MAP.test(file.fileName)) continue;
@@ -232,6 +257,8 @@ export function emittedLedger(output) {
         ...(file.type === "chunk" &&
           !initial.has(file.fileName) &&
           alternativeOf(file) && { alternative: alternativeOf(file) }),
+        ...(file.type === "chunk" &&
+          modules && { modules: chunkModules(file) }),
         bytes: bytes.length,
         gzipBytes: gzipSync(bytes).length,
       };
@@ -624,9 +651,32 @@ function logRow(fixture, row) {
     );
   }
   for (const problem of row.resolutionProblems) console.log(`  └ ${problem}`);
+  if (MODULES) logModules(row);
   if (row.appOver) {
     console.log(
       `  └ complete app ${kib(row.application.gzipBytes).toFixed(1)} KiB exceeds ${row.appKB} KiB`
+    );
+  }
+}
+
+const PHASE_ORDER = ["initial", "lazy"];
+
+/** Every module of the fixture, initial first, largest first within a phase. */
+function logModules(row) {
+  const modules = row.ledger
+    .filter((file) => file.modules)
+    .flatMap((file) =>
+      file.modules.map((module) => ({ ...module, phase: file.phase }))
+    )
+    .sort(
+      (a, b) =>
+        PHASE_ORDER.indexOf(a.phase) - PHASE_ORDER.indexOf(b.phase) ||
+        b.bytes - a.bytes
+    );
+  for (const module of modules) {
+    console.log(
+      `    ${module.phase.padEnd(7)} ${String(module.bytes).padStart(7)} min` +
+        `  ${String(module.gzipBytes).padStart(6)} gz  ${module.id}`
     );
   }
 }

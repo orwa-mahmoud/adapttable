@@ -232,6 +232,38 @@ describe("emitted-file accounting", () => {
     assert.deepEqual(ledger[0].externalImports, ["vue"]);
   });
 
+  it("lists each chunk's rendered modules by package path when asked", () => {
+    const chunk = {
+      type: "chunk",
+      fileName: "entry.js",
+      isEntry: true,
+      imports: [],
+      dynamicImports: [],
+      code: "const a=1;const b=2;",
+      modules: {
+        "/work/consumer/node_modules/@adapttable/core/dist/index.js": {
+          code: "const a=1;",
+          renderedLength: 10,
+        },
+        "/work/consumer/node_modules/@adapttable/core/dist/unused.js": {
+          code: null,
+          renderedLength: 0,
+        },
+        "/work/consumer/entry.js": { code: "const b=2;", renderedLength: 10 },
+      },
+    };
+    assert.equal(emittedLedger([chunk])[0].modules, undefined);
+    const [entry] = emittedLedger([chunk], { modules: true });
+    assert.deepEqual(
+      entry.modules.map(({ id, bytes }) => [id, bytes]),
+      [
+        ["@adapttable/core/dist/index.js", 10],
+        ["/work/consumer/entry.js", 10],
+      ]
+    );
+    assert.ok(entry.modules.every((module) => module.gzipBytes > 0));
+  });
+
   it("gives the same totals and ledger whatever order files are emitted in", async () => {
     write(LAZY_ENTRY);
     const { min, readable } = await rolldownBuild(join(dir, "lazy-entry.js"));
