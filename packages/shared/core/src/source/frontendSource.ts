@@ -18,7 +18,6 @@ import type {
   SortDirection,
 } from "../contracts/columns";
 import type { QueryFilterGroup, SortLevel } from "../contracts/query";
-import type { RowPatchLog } from "../contracts/rows";
 import {
   createTableEngine,
   type CreateTableEngineOptions,
@@ -27,6 +26,7 @@ import {
 } from "../engine/createTableEngine";
 import { engineSearchText } from "../engine/searchText";
 import {
+  sessionBase,
   sessionEvaluator,
   stageSessionEvaluator,
 } from "../engine/tableSession";
@@ -225,13 +225,16 @@ function viewFingerprint<TRow>(
   });
 }
 
-function forgetPatchedSearch<TRow>(
-  cache: Map<string, string>,
-  log: RowPatchLog<TRow>
-): void {
-  for (const event of log.events) {
-    if (event.type !== "insert") cache.delete(event.id);
-  }
+/** What the engine holds of a source's inputs, as far as the source can tell. */
+interface HeldFrame<TRow> {
+  readonly data: readonly TRow[] | undefined;
+  readonly fingerprint: string | undefined;
+  readonly filterKey: string | number | undefined;
+}
+
+/** What one complete update staged, and the engine view it left behind. */
+interface StagedFrame<TRow> extends HeldFrame<TRow> {
+  readonly view: object | undefined;
 }
 
 /** Narrows an accessor's value to a sortable primitive, else `null`. */
@@ -277,6 +280,9 @@ function warnUnresolvableSort<TRow>(
  * The first update seeds the engine; every later one restages it only when
  * the data array or a value-level input moved, so a host that rebuilds its
  * columns or filter callbacks on every render keeps the same page slice.
+ * What the source last staged is compared only while the engine still holds
+ * it: an update that threw, or a candidate that was dropped before its
+ * commit, is staged again whole.
  * {@link createFrontendSource} is the convenience form that supplies the
  * full evaluator.
  *
@@ -291,20 +297,43 @@ export function createFrontendSourceWith<TRow>(
   let engine: TableEngine<TRow> | undefined;
   /** The factory that built {@link engine}, the evaluator it began with. */
   let builtWith = initialEngine;
-  let data: readonly TRow[] | undefined;
-  let fingerprint: string | undefined;
-  let filterKey: string | number | undefined;
+  /**
+   * What the last complete update staged, and the engine view it left. It
+   * describes the engine only while the engine's base is still that view.
+   */
+  let staged: StagedFrame<TRow> | undefined;
   let getRowId: (row: TRow) => string = defaultFrontendRowId;
   let getSearchText: (row: TRow) => string = defaultSearchText;
-  const searchCache = new Map<string, string>();
+  /**
+   * Search text by row id, for the rows of {@link searchCacheData}. An entry
+   * answers only for the row object it was read from, so text read from
+   * rows another dataset held — a patch, an update that threw, a candidate
+   * that was dropped — is read again rather than reused.
+   */
+  const searchCache = new Map<string, { row: TRow; text: string }>();
+  let searchCacheData: readonly TRow[] | undefined;
   const projectSearchText = (row: TRow): string => {
     const id = getRowId(row);
     const cached = searchCache.get(id);
-    if (cached !== undefined) return cached;
+    if (cached?.row === row) return cached.text;
     const text = getSearchText(row);
-    searchCache.set(id, text);
+    searchCache.set(id, { row, text });
     return text;
   };
+
+  /**
+   * Point the search cache at `rows`. A row patch replaces the rows it
+   * changes, so the other entries stay; any other new array may carry rows
+   * the host changed in place, so the cache starts again.
+   */
+  function useSearchCacheFor(rows: readonly TRow[]): void {
+    if (rows === searchCacheData) return;
+    const log = rowPatchLog(rows);
+    const patched =
+      log && searchCacheData && rowPatchLogStartsAt(log, searchCacheData);
+    if (!patched) searchCache.clear();
+    searchCacheData = rows;
+  }
   /** Stages since creation: revisions move once per candidate, not per stage. */
   let stages = 0;
   let searched:
@@ -319,7 +348,6 @@ export function createFrontendSourceWith<TRow>(
     view: FrontendSourceViewState
   ): TableEngine<TRow> {
     if (engine) return adoptEvaluator(engine, config, view);
-    data = config.data;
     builtWith = createEngine;
     engine = createEngine({
       data: config.data,
@@ -371,13 +399,28 @@ export function createFrontendSourceWith<TRow>(
   }
 
   function forgetEngineState(): void {
-    data = undefined;
-    fingerprint = undefined;
-    filterKey = undefined;
+    staged = undefined;
     stages = 0;
     searched = undefined;
     page = undefined;
     searchCache.clear();
+    searchCacheData = undefined;
+  }
+
+  /**
+   * The source's record of the engine, when the engine still holds what it
+   * describes. An engine of the host's own making reports no base, and its
+   * record is trusted as it was left.
+   */
+  function heldFrame(table: TableEngine<TRow>): HeldFrame<TRow> | undefined {
+    const base = sessionBase(table);
+    if (!base) return staged;
+    const current = staged?.view === base.view ? staged : undefined;
+    return {
+      data: base.data as readonly TRow[],
+      fingerprint: current?.fingerprint,
+      filterKey: current?.filterKey,
+    };
   }
 
   function searchedRows(
@@ -403,15 +446,12 @@ export function createFrontendSourceWith<TRow>(
   ): FrontendSourceFrame<TRow> {
     getRowId = config.getRowId ?? defaultFrontendRowId;
     getSearchText = config.getSearchText ?? defaultSearchText;
+    useSearchCacheFor(config.data);
     const table = engineOf(config, view);
+    const held = heldFrame(table);
 
-    if (config.data !== data) {
-      const log = rowPatchLog(config.data);
-      if (log && data && rowPatchLogStartsAt(log, data)) {
-        forgetPatchedSearch(searchCache, log);
-      } else searchCache.clear();
+    if (config.data !== held?.data) {
       table.stageCandidate({}, { data: config.data });
-      data = config.data;
       stages += 1;
     }
 
@@ -437,8 +477,9 @@ export function createFrontendSourceWith<TRow>(
     // different window than the rows this frame returns.
     const nextFingerprint = viewFingerprint(config, view);
     const filtersChanged =
-      fingerprint !== undefined && !Object.is(filterKey, config.filterKey);
-    if (fingerprint !== nextFingerprint || filtersChanged) {
+      held?.fingerprint !== undefined &&
+      !Object.is(held.filterKey, config.filterKey);
+    if (held?.fingerprint !== nextFingerprint || filtersChanged) {
       table.stageCandidate({
         ...viewConfig,
         paginationMode: config.paginationMode,
@@ -451,8 +492,6 @@ export function createFrontendSourceWith<TRow>(
         // publishes it only at commit; the host's data identity stays intact.
         table.stageCandidate({}, { data: config.data });
       }
-      fingerprint = nextFingerprint;
-      filterKey = config.filterKey;
       stages += 1;
     }
 
@@ -492,6 +531,14 @@ export function createFrontendSourceWith<TRow>(
     if (page?.reader !== reader || page.key !== pageKey) {
       page = { reader, key: pageKey, rows: reader.rows("page") };
     }
+    // Recorded last: an update that throws above leaves the previous record,
+    // and the engine has already dropped the candidate it was building.
+    staged = {
+      view: sessionBase(table)?.view,
+      data: config.data,
+      fingerprint: nextFingerprint,
+      filterKey: config.filterKey,
+    };
 
     return {
       rows: page.rows,

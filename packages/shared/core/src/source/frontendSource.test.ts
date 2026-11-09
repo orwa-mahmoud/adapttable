@@ -562,3 +562,70 @@ describe("createFrontendSourceWith", () => {
     expect(groupsOf(source.engine.rows("full"))).toBeDefined();
   });
 });
+
+describe.each([
+  ["basic", createBasicTableEngine],
+  ["full", createTableEngine],
+] as const)("a source over the %s engine", (_name, factory) => {
+  it("stages the dataset again after an update that threw", () => {
+    let failing = false;
+    const filterFn = (_row: Row, extra: FrontendSourceViewState["extra"]) => {
+      if (failing && extra.strict === "on") throw new Error("filter failed");
+      return true;
+    };
+    const next: Row[] = [...ROWS, { id: "d", name: "Dana", count: 2 }];
+    const strict = { ...VIEW, extra: { strict: "on" } };
+    const source = createFrontendSourceWith<Row>(factory);
+    source.update(config({ filterFn }), VIEW);
+    source.commit();
+
+    failing = true;
+    expect(() =>
+      source.update(config({ data: next, filterFn }), strict)
+    ).toThrow("filter failed");
+    failing = false;
+    const frame = source.update(config({ data: next, filterFn }), strict);
+    source.commit();
+
+    expect(ids(frame.rows)).toEqual(["a", "b", "c", "d"]);
+    expect(ids(frame.allSearchedRows)).toEqual(["a", "b", "c", "d"]);
+    expect(ids(source.engine.rows("full"))).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("reads search text again for rows a dropped candidate patched", () => {
+    const source = createFrontendSourceWith<Row>(factory);
+    source.update(config(), VIEW);
+    source.commit();
+    const renamed = applyRowPatches<Row>(
+      ROWS,
+      [updateRow("a", { name: "Zed" })],
+      (row) => row.id
+    );
+
+    source.update(config({ data: renamed }), VIEW);
+    // A direct write owns the table: it drops the render's candidate and
+    // searches the committed rows, where "a" is still Alice.
+    source.engine.dispatch({ type: "setSearch", search: "alice" });
+    const frame = source.update(config({ data: renamed }), {
+      ...VIEW,
+      search: "zed",
+    });
+
+    expect(ids(frame.rows)).toEqual(["a"]);
+  });
+
+  it("stages the view again after its candidate was discarded", () => {
+    const source = createFrontendSourceWith<Row>(factory);
+    source.update(config(), VIEW);
+    source.commit();
+    const searched = { ...VIEW, search: "bob" };
+
+    source.update(config(), searched);
+    source.engine.discardCandidate();
+    const frame = source.update(config(), searched);
+    source.commit();
+
+    expect(ids(frame.rows)).toEqual(["b"]);
+    expect(ids(source.engine.rows("full"))).toEqual(["b"]);
+  });
+});

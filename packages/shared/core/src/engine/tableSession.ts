@@ -263,6 +263,21 @@ interface SessionControls {
   evaluator(): unknown;
   /** Stage `model` as the evaluator, published with the next commit. */
   stageModel(model: unknown, evaluator: unknown): void;
+  /** The state the next stage builds on: the candidate, else the committed table. */
+  base(): SessionBase;
+}
+
+/**
+ * The state a stage builds on, as a source compares it. `view` is replaced
+ * by every write that changes the view or the data and survives a commit
+ * unchanged, so a source can tell whether the engine still holds what it
+ * staged.
+ *
+ * @internal
+ */
+export interface SessionBase {
+  readonly view: object;
+  readonly data: readonly unknown[];
 }
 
 const SESSIONS = new WeakMap<object, SessionControls>();
@@ -276,6 +291,16 @@ const SESSIONS = new WeakMap<object, SessionControls>();
  */
 export function sessionEvaluator(engine: object): unknown {
   return SESSIONS.get(engine)?.evaluator();
+}
+
+/**
+ * The state `engine`'s next stage builds on, or `undefined` for an engine
+ * this module did not build.
+ *
+ * @internal
+ */
+export function sessionBase(engine: object): SessionBase | undefined {
+  return SESSIONS.get(engine)?.base();
 }
 
 /**
@@ -936,6 +961,10 @@ export function createTableSession<TRow>(
         draft.evaluator = evaluator;
         rebuild(draft);
       });
+    },
+    base() {
+      const state = candidate ?? committed;
+      return { view: state.view, data: state.view.data };
     },
   });
   return engine;
