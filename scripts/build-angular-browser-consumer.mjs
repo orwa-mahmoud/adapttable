@@ -62,14 +62,17 @@ export async function buildAngularBrowserConsumer(
       externals: [],
       transformer,
     });
-    const script = min.output
-      .filter((file) => file.type === "chunk")
-      .map((file) => file.code)
-      .join("\n");
+    // Lazily loaded locale labels arrive as their own chunks, which import
+    // each other by file name, so every chunk is written as emitted.
+    const chunks = min.output.filter((file) => file.type === "chunk");
+    const entry = chunks.find((file) => file.isEntry);
+    if (!entry) throw new Error(`${FIXTURE}: the bundle has no entry chunk`);
     rmSync(destination, { recursive: true, force: true });
     mkdirSync(destination, { recursive: true });
-    writeFileSync(join(destination, "main.js"), script);
-    writeFileSync(join(destination, "index.html"), page());
+    for (const chunk of chunks) {
+      writeFileSync(join(destination, chunk.fileName), chunk.code);
+    }
+    writeFileSync(join(destination, "index.html"), page(entry.fileName));
     return destination;
   } finally {
     await transformer.close();
@@ -77,8 +80,8 @@ export async function buildAngularBrowserConsumer(
   }
 }
 
-/** The page: the consumer bootstraps into the body. */
-function page() {
+/** The page: the consumer bootstraps into the body from `entry`. */
+function page(entry) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -87,7 +90,7 @@ function page() {
   </head>
   <body>
     <consumer-app></consumer-app>
-    <script type="module" src="./main.js"></script>
+    <script type="module" src="./${entry}"></script>
   </body>
 </html>
 `;
