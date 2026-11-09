@@ -185,7 +185,7 @@ export type {
   RowActionsCell,
 } from "./tableSurfaceHost";
 import { injectGroupingPanelState } from "../grouping/groupingPanelState";
-import { injectGrouping,type TableGrouping  } from "../grouping/tableGrouping";
+import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
 import { injectRowReorder } from "../rows/rowReorder";
 import { injectTableRowPinning } from "../rows/tableRowPinning";
 import { frontendRowModelOf } from "../source/rowModel";
