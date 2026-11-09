@@ -1,7 +1,7 @@
 /** Request-local state with scoped ownership and explicit publication. */
 import type { FeatureStateKey } from "@adapttable/core/binding";
 import {
-  getCurrentInstance,
+  hasInjectionContext,
   inject,
   type InjectionKey,
   provide,
@@ -87,7 +87,7 @@ export function provideFeatureState(state: FeatureState): void {
 export function useFeatureState<T>(
   key: FeatureStateKey<T>
 ): Readonly<ShallowRef<T | undefined>> {
-  const state = getCurrentInstance()
+  const state = hasInjectionContext()
     ? inject(FEATURE_STATE, undefined)
     : undefined;
   return state?.get(key) ?? shallowReadonly(shallowRef<T>());
