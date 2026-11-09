@@ -25,7 +25,8 @@ export interface RowModel<TRow> {
   ) => IncrementalView<TRow>;
   /**
    * Merge `patch` into the view. `undefined` entries are ignored. `cleared`
-   * names fields to remove. A callback-only change returns the same view.
+   * names fields to remove. `view` is never written: a change that derives
+   * the same rows returns a new record over the same arrays.
    */
   readonly reconfigure: (
     view: IncrementalView<TRow>,
