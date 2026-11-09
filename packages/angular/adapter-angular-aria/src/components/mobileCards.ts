@@ -3,7 +3,6 @@ import {
   AdaptMobileCardsHost,
   AdaptMobileStructure,
 } from "@adapttable/angular/adapter";
-import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,12 +19,7 @@ import { AdaptRowActions } from "./rowActionButtons";
  */
 @Component({
   selector: "adapt-mobile-cards",
-  imports: [
-    AdaptAttrs,
-    AdaptMobileStructure,
-    AdaptRowActions,
-    NgTemplateOutlet,
-  ],
+  imports: [AdaptAttrs, AdaptMobileStructure, AdaptRowActions],
   templateUrl: "./mobileCards.html",
   styleUrl: "./mobileCards.css",
   encapsulation: ViewEncapsulation.None,

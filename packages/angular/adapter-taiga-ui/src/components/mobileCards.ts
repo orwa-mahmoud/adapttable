@@ -3,7 +3,6 @@ import {
   AdaptMobileCardsHost,
   AdaptMobileStructure,
 } from "@adapttable/angular/adapter";
-import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,7 +24,6 @@ import { AdaptRowActions } from "./rowActionButtons";
     AdaptAttrs,
     AdaptMobileStructure,
     AdaptRowActions,
-    NgTemplateOutlet,
     ...TAIGA_CONTROLS,
   ],
   templateUrl: "./mobileCards.html",

@@ -4,7 +4,6 @@ import {
   AdaptMobileStructure,
 } from "@adapttable/angular/adapter";
 import { A11yModule } from "@angular/cdk/a11y";
-import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,13 +20,7 @@ import { AdaptRowActions } from "./rowActionButtons";
  */
 @Component({
   selector: "adapt-mobile-cards",
-  imports: [
-    A11yModule,
-    AdaptAttrs,
-    AdaptMobileStructure,
-    AdaptRowActions,
-    NgTemplateOutlet,
-  ],
+  imports: [A11yModule, AdaptAttrs, AdaptMobileStructure, AdaptRowActions],
   templateUrl: "./mobileCards.html",
   styleUrl: "./mobileCards.css",
   encapsulation: ViewEncapsulation.None,

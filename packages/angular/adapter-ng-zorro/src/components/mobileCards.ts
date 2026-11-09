@@ -1,5 +1,4 @@
 import {
-  AdaptAttrs,
   AdaptMobileCardsHost,
   AdaptMobileStructure,
 } from "@adapttable/angular/adapter";
@@ -24,7 +23,6 @@ import { AdaptSelectionCheckbox } from "./selectionCheckbox";
 @Component({
   selector: "adapt-mobile-cards",
   imports: [
-    AdaptAttrs,
     AdaptMobileStructure,
     AdaptRowActions,
     AdaptSelectionCheckbox,
