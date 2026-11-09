@@ -373,7 +373,7 @@ describe("useFrontendData — incremental patches", () => {
   // Typed readonly so a patched (readonly) result can be rerendered in.
   const INITIAL_ROWS: { data: readonly Row[] } = { data: ROWS };
 
-  it("re-filters logged rows on the basic evaluator and keeps untouched objects", () => {
+  it("re-filters only the patched row on the basic evaluator and keeps untouched objects", () => {
     const filterFn = vi.fn((row: Row) => row.count > 0);
     const adapter = createMemoryAdapter("");
     const { result, rerender } = renderHook(
@@ -394,7 +394,7 @@ describe("useFrontendData — incremental patches", () => {
     expect(rowPatchLog(patched)).toBeDefined();
     rerender({ data: patched });
 
-    expect(filterFn).toHaveBeenCalledTimes(ROWS.length);
+    expect(filterFn).toHaveBeenCalledTimes(1);
     expect(filtered().find((row) => row.id === "a")?.count).toBe(9);
     expect(filtered().find((row) => row.id === "b")).toBe(ROWS[1]);
   });
