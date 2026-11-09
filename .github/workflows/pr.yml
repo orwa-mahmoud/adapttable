@@ -186,9 +186,19 @@ jobs:
         with:
           turbo-cache: "false"
 
+      # Prettier skips a file whose content and options match the cache.
+      - name: Restore Prettier cache
+        if: needs.detect.outputs.skipAll != 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules/.cache/prettier
+          key: prettier-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            prettier-${{ runner.os }}-
+
       - name: Format check
         if: needs.detect.outputs.skipAll != 'true'
-        run: pnpm format:check
+        run: pnpm format:check --cache --cache-strategy content
 
       - name: Check adapter READMEs advertise every feature
         if: needs.detect.outputs.skipAll != 'true'
@@ -205,6 +215,9 @@ jobs:
       - name: Test root tooling
         if: needs.detect.outputs.skipAll != 'true'
         run: pnpm test:scripts
+        env:
+          # Each script test writes only inside its own temp folder.
+          ADAPTTABLE_CHECK_CONCURRENCY: "3"
 
       - name: Check every structural part is named in every kit
         if: needs.detect.outputs.runUnit == 'true'
