@@ -83,10 +83,28 @@ export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
 
 /** Interaction engine published by the optional feature provider. @public */
 export interface GroupingPanelInteractions {
-  /** Active native drag, when one is in progress. */
+  /**
+   * Active native drag, when one is in progress. From a table snapshot it
+   * names the dragged field only; {@link GroupingPanelInteractions.live}
+   * carries where the drag hovers.
+   */
   drag?: GroupingDragState;
   /** Latest localized screen-reader announcement. */
   announcement: string;
+  /**
+   * The drag and announcement as they change while a drag hovers, for the
+   * strip that draws the drop targets. `getSnapshot` returns a new object
+   * whenever either changes.
+   */
+  live?: {
+    /** Listen for a change. Returns the unsubscribe. */
+    readonly subscribe: (listener: () => void) => () => void;
+    /** The current drag and announcement. */
+    readonly getSnapshot: () => {
+      readonly drag: GroupingDragState | undefined;
+      readonly announcement: string;
+    };
+  };
   /** Props for a draggable desktop column header. */
   headerDragProps: (key: string) => GroupingDragProps;
   /** Props for a draggable grouping chip. */

@@ -49,10 +49,12 @@ function GroupingPanelProvider({
   const options = { runtime, groupAggregates: extras.groupAggregates };
   const [controller] = useState(() => createGroupingPanelController(options));
   controller.configure(options);
+  // The table re-renders when a drag starts or ends. Where it hovers reaches
+  // only the strip, through the interactions' live state.
   const snapshot = useSyncExternalStore(
     controller.subscribe,
-    controller.getSnapshot,
-    controller.getSnapshot
+    controller.getTableSnapshot,
+    controller.getTableSnapshot
   );
   useEffect(() => {
     controller.initialize(initialGroupBy);
