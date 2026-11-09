@@ -5,6 +5,10 @@ import { getCurrentInstance, useId } from "vue";
  * the id, and `useId` still runs so every setup takes the same hook path.
  */
 export function useInstanceId(fallback: () => string): string {
-  const generated = useId();
-  return getCurrentInstance() ? generated : fallback();
+  // The oldest supported Vue types `useId` as possibly undefined.
+  const supportedUseId: () => string | undefined = useId;
+  const generated = supportedUseId();
+  return getCurrentInstance() && generated !== undefined
+    ? generated
+    : fallback();
 }
