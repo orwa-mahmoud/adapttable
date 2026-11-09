@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
+import { coreDir } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
 
 const ROOT = REPO_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -324,9 +325,14 @@ export function checkCapabilitySurface({
 }
 
 /**
+ * The program a binding or kit tsconfig describes, with `@adapttable/core`
+ * resolved to its source, so the check reads current types before any build
+ * and never a stale `dist`.
+ *
  * @param {string} configPath
+ * @param {string} root
  */
-function programFrom(configPath) {
+function programFrom(configPath, root) {
   const read = ts.readConfigFile(configPath, ts.sys.readFile);
   if (read.error !== undefined) {
     throw new Error(`cannot read ${configPath}`);
@@ -336,9 +342,17 @@ function programFrom(configPath) {
     ts.sys,
     dirname(configPath)
   );
+  const core = join(coreDir(root), "src");
   return ts.createProgram({
     rootNames: parsed.fileNames,
-    options: parsed.options,
+    options: {
+      ...parsed.options,
+      paths: {
+        ...parsed.options.paths,
+        "@adapttable/core": [join(core, "index.ts")],
+        "@adapttable/core/*": [join(core, "*.ts")],
+      },
+    },
   });
 }
 
@@ -433,7 +447,7 @@ export function checkBindingCapabilities({
   const found = {};
   for (const surface of SURFACES) {
     const directory = join(root, surface.directory);
-    const program = programFrom(join(directory, "tsconfig.json"));
+    const program = programFrom(join(directory, "tsconfig.json"), root);
     const checker = program.getTypeChecker();
     const props = program.getSourceFile(join(directory, surface.props));
     if (props === undefined) {
@@ -451,7 +465,7 @@ export function checkBindingCapabilities({
     found[surface.framework] = checked.found;
     if (!factories) continue;
     const kitDir = join(root, surface.kit);
-    const kitProgram = programFrom(join(kitDir, "tsconfig.json"));
+    const kitProgram = programFrom(join(kitDir, "tsconfig.json"), root);
     const kitChecker = kitProgram.getTypeChecker();
     const sources = [
       program.getSourceFile(join(directory, surface.features)),
