@@ -81,8 +81,10 @@ export function createBasicRowModel<TRow>(): RowModel<TRow> {
         ...definedConfigPatch(patch),
       };
       for (const key of cleared) delete merged[key];
+      // Same rows, own record: the view passed in may be the committed
+      // table's, and a staged callback must not reach it.
       if (queryConfigFingerprint(current) === queryConfigFingerprint(merged)) {
-        return remember(view, merged);
+        return remember({ ...view }, merged);
       }
       return createBasicView(view.rows, merged);
     },

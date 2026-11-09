@@ -501,7 +501,6 @@ export function createTableSession<TRow>(
     draft: Draft<TRow>,
     revisions: TableRevisions
   ): SessionState<TRow> {
-    attachIncrementalView(draft.derived.sorted, draft.derived);
     return {
       view: draft.view,
       derived: draft.derived,
@@ -639,6 +638,7 @@ export function createTableSession<TRow>(
       ...stateOf(draft, bump(committed.revisions, changed)),
       owned: false,
     };
+    attachIncrementalView(committed.derived.sorted, committed.derived);
     if (!silent && changed.length > 0) notifyListeners(changed);
   }
 
@@ -657,6 +657,11 @@ export function createTableSession<TRow>(
       throw error;
     }
     const next = stateOf(draft, committed.revisions);
+    // Rows the committed table still shows keep pointing at its snapshot;
+    // the candidate's snapshot reaches them when it commits.
+    if (next.derived.sorted !== committed.derived.sorted) {
+      attachIncrementalView(next.derived.sorted, next.derived);
+    }
     // The tokens follow what the candidate actually reads differently, so a
     // render sees a coherent snapshot and an unchanged table stays still.
     pendingAxes = observableAxes(committed, next);
@@ -898,6 +903,7 @@ export function createTableSession<TRow>(
       if (!candidate) return;
       const changed = pendingAxes;
       committed = { ...candidate, owned: false };
+      attachIncrementalView(committed.derived.sorted, committed.derived);
       dropCandidate();
       if (changed.length === 0) return;
       // The revisions already moved with the candidate; publishing is what

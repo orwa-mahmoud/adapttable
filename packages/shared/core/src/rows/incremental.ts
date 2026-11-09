@@ -374,13 +374,18 @@ export function configureIncrementalView<TRow>(
   view: IncrementalView<TRow>,
   patch: Partial<IncrementalViewConfig<TRow>>
 ): IncrementalView<TRow> {
-  return reconfigureIncrementalView(view, patch, []);
+  return reconfigured(view, patch, [], "in place");
 }
 
 /**
- * {@link configureIncrementalView}, plus fields to clear. `configure` ignores
- * an `undefined` entry, so a caller that owns a field — the table engine
- * clearing its sort or grouping — names it here to take it off the view.
+ * {@link configureIncrementalView} for a table engine, plus fields to clear.
+ * `configure` ignores an `undefined` entry, so a caller that owns a field —
+ * the engine clearing its sort or grouping — names it here to take it off
+ * the view.
+ *
+ * It never writes `view`: the engine's committed table may still read it
+ * while a candidate is staged. A configuration that derives the same rows
+ * gets its own snapshot record over the same arrays.
  *
  * @param view - The latest snapshot.
  * @param patch - Fields to merge. `undefined` entries are ignored.
@@ -390,6 +395,21 @@ export function reconfigureIncrementalView<TRow>(
   view: IncrementalView<TRow>,
   patch: Partial<IncrementalViewConfig<TRow>>,
   cleared: readonly (keyof IncrementalViewConfig<TRow>)[]
+): IncrementalView<TRow> {
+  return reconfigured(view, patch, cleared, "new record");
+}
+
+/**
+ * Where a configuration that derives the same rows goes: onto `view` itself,
+ * which keeps its identity for a host's page slice, or onto a new record.
+ */
+type UnchangedRowsConfig = "in place" | "new record";
+
+function reconfigured<TRow>(
+  view: IncrementalView<TRow>,
+  patch: Partial<IncrementalViewConfig<TRow>>,
+  cleared: readonly (keyof IncrementalViewConfig<TRow>)[],
+  unchanged: UnchangedRowsConfig
 ): IncrementalView<TRow> {
   const state = getState(view);
   if (!state) {
@@ -407,8 +427,11 @@ export function reconfigureIncrementalView<TRow>(
   const derivedChanged =
     derivedConfigFingerprint(state.config) !== derivedConfigFingerprint(merged);
   if (!queryChanged && !derivedChanged) {
-    state.config = merged;
-    return view;
+    if (unchanged === "in place") {
+      state.config = merged;
+      return view;
+    }
+    return withConfig(view, { ...state, config: merged });
   }
   if (queryChanged) return createIncrementalView(view.rows, merged);
   // A table's grouping projection shares the source rows, but must keep
@@ -591,6 +614,27 @@ function getState<TRow>(
 }
 
 /**
+ * Whether two snapshots derive the same rows, groups and totals: the same
+ * record, or a record that carries another configuration over the same
+ * results.
+ *
+ * @internal
+ */
+export function sameIncrementalResults(
+  a: IncrementalView<unknown>,
+  b: IncrementalView<unknown>
+): boolean {
+  return (
+    a === b ||
+    (a.rows === b.rows &&
+      a.filtered === b.filtered &&
+      a.sorted === b.sorted &&
+      a.groups === b.groups &&
+      a.aggregates === b.aggregates)
+  );
+}
+
+/**
  * Whether `view` was built by {@link createIncrementalView}. A basic-engine
  * row array can carry a lookalike, and grouping must not reconfigure that.
  */
@@ -620,6 +664,20 @@ function publish<TRow>(
   attachView(filtered, view);
   attachView(sorted, view);
   return view;
+}
+
+/**
+ * A snapshot record over `view`'s arrays and results with its own state. The
+ * arrays stay attached to `view`, whose rows, groups and totals this record
+ * shares.
+ */
+function withConfig<TRow>(
+  view: IncrementalView<TRow>,
+  state: ViewState<TRow>
+): IncrementalView<TRow> {
+  const record: IncrementalView<TRow> = { ...view };
+  STATES.set(record, state as ViewState<unknown>);
+  return record;
 }
 
 function republishDerived<TRow>(
