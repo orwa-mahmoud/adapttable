@@ -10,11 +10,6 @@
 import { ensureForcedColorsStyles } from "@adapttable/core/binding";
 import { getCurrentInstance, onMounted } from "vue";
 
-export {
-  ensureForcedColorsStyles,
-  FORCED_COLORS_CSS,
-} from "@adapttable/core/binding";
-
 /**
  * Install the high-contrast stylesheet once this table is mounted.
  *

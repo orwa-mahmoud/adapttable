@@ -108,7 +108,6 @@ import { EditLifecycle } from '@adapttable/core';
 import { editorInputType } from '@adapttable/core/editing';
 import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
-import { ensureForcedColorsStyles } from '@adapttable/core/binding';
 import { ExportHandlerState } from '@adapttable/core/binding';
 import { ExportProgressChromeProps as ExportProgressChromeProps_2 } from '@adapttable/core/binding';
 import { ExportProgressSlots as ExportProgressSlots_2 } from '@adapttable/core/binding';
@@ -169,7 +168,6 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { flattenColumnTree } from '@adapttable/core/binding';
-import { FORCED_COLORS_CSS } from '@adapttable/core/binding';
 import { formatMultiDraft } from '@adapttable/core/editing';
 import { FrontendEngineFactory } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
@@ -1890,8 +1888,6 @@ export type ElementRef<TElement extends Element = HTMLElement> = (element: TElem
 // @public
 export function elementRef<TElement extends Element>(set: ElementRef<TElement>, target?: (component: ComponentPublicInstance) => TElement | null): VNodeProps["ref"];
 
-export { ensureForcedColorsStyles }
-
 // @public
 export function eraseTableRuntime<TRow>(runtime: TableRuntime<TRow>): TableRuntime<unknown>;
 
@@ -2521,8 +2517,6 @@ export interface FooterContext<TRow, TValue = unknown> {
     // (undocumented)
     readonly value: TValue | undefined;
 }
-
-export { FORCED_COLORS_CSS }
 
 export { formatMultiDraft }
 
