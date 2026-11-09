@@ -11,26 +11,30 @@ import { h, type VNodeChild } from "vue";
 import NuxtButton from "../controls/NuxtButton.vue";
 import NuxtInput from "../controls/NuxtInput.vue";
 import NuxtSelect from "../controls/NuxtSelect.vue";
-const props = withDefaults(
-  defineProps<{
-    defs: FilterTreeBuilderProps<TRow>["defs"];
-    source: FilterTreeBuilderProps<TRow>["source"];
-    labels?: Exclude<FilterTreeBuilderProps<TRow>["labels"], undefined>;
-    classNames?: Exclude<FilterTreeBuilderProps<TRow>["classNames"], undefined>;
-    registry?: Exclude<FilterTreeBuilderProps<TRow>["registry"], undefined>;
-    defaultExpanded?: Exclude<
-      FilterTreeBuilderProps<TRow>["defaultExpanded"],
-      undefined
-    >;
-  }>(),
-  {
-    defaultExpanded: undefined,
-    labels: undefined,
-    classNames: undefined,
-    registry: undefined,
-  }
-);
-const model = useFilterTreeModel(() => props);
+const {
+  defaultExpanded = undefined,
+  labels = undefined,
+  classNames = undefined,
+  registry = undefined,
+  ...props
+} = defineProps<{
+  defs: FilterTreeBuilderProps<TRow>["defs"];
+  source: FilterTreeBuilderProps<TRow>["source"];
+  labels?: Exclude<FilterTreeBuilderProps<TRow>["labels"], undefined>;
+  classNames?: Exclude<FilterTreeBuilderProps<TRow>["classNames"], undefined>;
+  registry?: Exclude<FilterTreeBuilderProps<TRow>["registry"], undefined>;
+  defaultExpanded?: Exclude<
+    FilterTreeBuilderProps<TRow>["defaultExpanded"],
+    undefined
+  >;
+}>();
+const model = useFilterTreeModel(() => ({
+  ...props,
+  defaultExpanded,
+  labels,
+  classNames,
+  registry,
+}));
 const controls: FilterTreeSlots<VNodeChild> = {
   Select: (control) =>
     h(

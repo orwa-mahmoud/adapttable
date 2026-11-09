@@ -17,10 +17,9 @@ import ElementInput from "../controls/ElementInput.vue";
 import ElementSelect from "../controls/ElementSelect.vue";
 
 defineOptions({ name: "ElementFilterHeaderControl" });
-const props = withDefaults(defineProps<FilterHeaderControlOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
-const model = useFilterHeaderControl(() => props);
+const { closeOnSelect = undefined, ...props } =
+  defineProps<FilterHeaderControlOptions<TRow>>();
+const model = useFilterHeaderControl(() => ({ ...props, closeOnSelect }));
 const active = useScopeActivity();
 const fullscreen = useFeatureState(FULLSCREEN_MODEL);
 const popover = shallowRef<PopoverInstance>();

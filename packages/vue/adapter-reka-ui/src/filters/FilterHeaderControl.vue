@@ -19,10 +19,9 @@ import { h } from "vue";
 import { rekaInput } from "../controls/basic";
 import { rekaSelect } from "../controls/select";
 
-const props = withDefaults(defineProps<FilterHeaderControlOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
-const model = useFilterHeaderControl(() => props);
+const { closeOnSelect = undefined, ...props } =
+  defineProps<FilterHeaderControlOptions<TRow>>();
+const model = useFilterHeaderControl(() => ({ ...props, closeOnSelect }));
 const active = useScopeActivity();
 const controls: FilterHeaderSlots = {
   Search: (control) =>
@@ -63,7 +62,7 @@ const controls: FilterHeaderSlots = {
           "onUpdate:modelValue": (checked: boolean) =>
             control.onToggle(option.value, checked),
           onSelect: (event: Event) => {
-            if (!props.closeOnSelect) event.preventDefault();
+            if (!closeOnSelect) event.preventDefault();
           },
           class: "at-reka-menu-item",
         },

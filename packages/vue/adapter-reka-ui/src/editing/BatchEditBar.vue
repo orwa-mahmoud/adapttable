@@ -7,13 +7,13 @@ import {
 import { useRekaClasses } from "../context";
 import { rekaEditingButton } from "./button";
 
-const props = withDefaults(defineProps<BatchEditBarProps<TRow>>(), {
-  contested: undefined,
-});
+const { contested = undefined, ...props } =
+  defineProps<BatchEditBarProps<TRow>>();
 const names = useRekaClasses();
 const Render = () =>
   BatchEditBarChrome({
     ...props,
+    contested,
     className: [props.className, names.value.batchEditBar]
       .filter(Boolean)
       .join(" "),

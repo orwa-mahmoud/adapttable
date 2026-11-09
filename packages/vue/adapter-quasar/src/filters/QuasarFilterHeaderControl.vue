@@ -10,10 +10,9 @@ import { h } from "vue";
 import QuasarInput from "../controls/QuasarInput.vue";
 import QuasarSelect from "../controls/QuasarSelect.vue";
 import QuasarHeaderMulti from "./QuasarHeaderMulti.vue";
-const props = withDefaults(defineProps<FilterHeaderControlOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
-const model = useFilterHeaderControl(() => props);
+const { closeOnSelect = undefined, ...props } =
+  defineProps<FilterHeaderControlOptions<TRow>>();
+const model = useFilterHeaderControl(() => ({ ...props, closeOnSelect }));
 const controls: FilterHeaderSlots = {
   Search: (control) =>
     h(QuasarInput, {

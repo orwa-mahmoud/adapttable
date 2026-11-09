@@ -4,16 +4,18 @@ import { ElOption, ElSelect, type SelectInstance } from "element-plus";
 import { shallowRef } from "vue";
 
 defineOptions({ inheritAttrs: false });
-const props = withDefaults(
-  defineProps<{
-    value: string;
-    options: readonly { value: string; label: string }[];
-    disabled?: boolean;
-    teleported?: boolean;
-    appendTo?: HTMLElement | string;
-  }>(),
-  { disabled: false, teleported: false, appendTo: undefined }
-);
+const {
+  disabled = false,
+  teleported = false,
+  appendTo = undefined,
+  ...props
+} = defineProps<{
+  value: string;
+  options: readonly { value: string; label: string }[];
+  disabled?: boolean;
+  teleported?: boolean;
+  appendTo?: HTMLElement | string;
+}>();
 const emit = defineEmits<{ change: [value: string] }>();
 const control = shallowRef<SelectInstance>();
 function change(value: unknown): void {
@@ -37,9 +39,9 @@ defineExpose({
     ref="control"
     v-bind="$attrs"
     :model-value="props.value"
-    :disabled="props.disabled"
-    :teleported="props.teleported"
-    :append-to="props.appendTo"
+    :disabled="disabled"
+    :teleported="teleported"
+    :append-to="appendTo"
     :validate-event="false"
     @update:model-value="change"
   >

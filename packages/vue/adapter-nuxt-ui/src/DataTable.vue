@@ -38,17 +38,18 @@ import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { nuxtSurface } from "./surface";
 
 defineOptions({ inheritAttrs: false });
-const props = withDefaults(defineProps<DataTableProps<TRow>>(), {
-  searchable: true,
-  forceMobile: undefined,
-  urlSync: undefined,
-  selectable: undefined,
-  multiSort: undefined,
-  fitColumns: undefined,
-  collapsibleColumnGroups: undefined,
-  isLoading: undefined,
-  isFetching: undefined,
-});
+const {
+  searchable = true,
+  forceMobile = undefined,
+  urlSync = undefined,
+  selectable = undefined,
+  multiSort = undefined,
+  fitColumns = undefined,
+  collapsibleColumnGroups = undefined,
+  isLoading = undefined,
+  isFetching = undefined,
+  ...props
+} = defineProps<DataTableProps<TRow>>();
 const emit = defineEmits<{
   "update:selectedIds": [ids: string[]];
   "update:columnLayout": [layout: ColumnLayoutState];
@@ -66,6 +67,15 @@ const shell = useDataTableShell<TRow>(() =>
   withKitEnvironment(
     {
       ...props,
+      searchable,
+      forceMobile,
+      urlSync,
+      selectable,
+      multiSort,
+      fitColumns,
+      collapsibleColumnGroups,
+      isLoading,
+      isFetching,
       footer: footerSlot.value,
       confirm: props.confirm ?? defaultConfirm,
       onDensityChange: (density: TableDensity) => {
@@ -73,7 +83,7 @@ const shell = useDataTableShell<TRow>(() =>
         emit("update:density", density);
       },
       onSelectionChange:
-        props.selectable ||
+        selectable ||
         props.selectedIds !== undefined ||
         props.defaultSelectedIds !== undefined
           ? (ids: string[]) => emit("update:selectedIds", ids)
@@ -207,7 +217,10 @@ function scrollRef(element: HTMLElement | null): void {
       v-bind="$attrs"
       class="adapttable-nuxt"
       :model="shell"
-      :options="props"
+      :options="{
+        ...props,
+        searchable,
+      }"
       :slots="nuxtSurface(controls())"
       :content="slots"
       :root-ref="rootRef"

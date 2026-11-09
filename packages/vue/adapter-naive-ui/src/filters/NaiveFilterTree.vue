@@ -14,25 +14,27 @@ import { naiveSelect } from "../controls/select";
 import NaiveFilterDisclosure from "./NaiveFilterDisclosure.vue";
 
 defineOptions({ name: "NaiveFilterTree" });
-const props = withDefaults(
-  defineProps<{
-    readonly defs: FilterTreeBuilderProps<TRow>["defs"];
-    readonly source: FilterTreeBuilderProps<TRow>["source"];
-    readonly labels?: NonNullable<FilterTreeBuilderProps<TRow>["labels"]>;
-    readonly classNames?: NonNullable<
-      FilterTreeBuilderProps<TRow>["classNames"]
-    >;
-    readonly registry?: NonNullable<FilterTreeBuilderProps<TRow>["registry"]>;
-    readonly defaultExpanded?: boolean;
-  }>(),
-  {
-    defaultExpanded: undefined,
-    labels: undefined,
-    classNames: undefined,
-    registry: undefined,
-  }
-);
-const model = useFilterTreeModel(() => props);
+const {
+  defaultExpanded = undefined,
+  labels = undefined,
+  classNames = undefined,
+  registry = undefined,
+  ...props
+} = defineProps<{
+  readonly defs: FilterTreeBuilderProps<TRow>["defs"];
+  readonly source: FilterTreeBuilderProps<TRow>["source"];
+  readonly labels?: NonNullable<FilterTreeBuilderProps<TRow>["labels"]>;
+  readonly classNames?: NonNullable<FilterTreeBuilderProps<TRow>["classNames"]>;
+  readonly registry?: NonNullable<FilterTreeBuilderProps<TRow>["registry"]>;
+  readonly defaultExpanded?: boolean;
+}>();
+const model = useFilterTreeModel(() => ({
+  ...props,
+  defaultExpanded,
+  labels,
+  classNames,
+  registry,
+}));
 function field(
   control: { label: string; fieldClassName?: string; labelClassName?: string },
   content: () => VNodeChild

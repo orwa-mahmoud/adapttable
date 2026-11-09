@@ -9,18 +9,29 @@ import { h } from "vue";
 import VuetifyFilterHeaderControl from "./VuetifyFilterHeaderControl.vue";
 
 defineOptions({ name: "VuetifyFilterHeaderRow" });
-const props = withDefaults(defineProps<FilterHeaderRowProps<TRow>>(), {
-  enabled: undefined,
-  expandable: undefined,
-  showReorder: undefined,
-  selection: undefined,
-  showActions: undefined,
-  stickyAttr: undefined,
-});
+const {
+  enabled = undefined,
+  expandable = undefined,
+  showReorder = undefined,
+  selection = undefined,
+  showActions = undefined,
+  stickyAttr = undefined,
+  ...props
+} = defineProps<FilterHeaderRowProps<TRow>>();
 const controls: FilterHeaderRowSlots<TRow> = {
   Control: (control) => h(VuetifyFilterHeaderControl<TRow>, { ...control }),
 };
-const Render = () => FilterHeaderChrome({ ...props, controls });
+const Render = () =>
+  FilterHeaderChrome({
+    ...props,
+    enabled,
+    expandable,
+    showReorder,
+    selection,
+    showActions,
+    stickyAttr,
+    controls,
+  });
 const renderProps: string[] = [];
 Render.props = renderProps;
 </script>

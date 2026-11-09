@@ -14,10 +14,9 @@ import NuxtInput from "../controls/NuxtInput.vue";
 import NuxtMultiSelect from "../controls/NuxtMultiSelect";
 import NuxtSelect from "../controls/NuxtSelect.vue";
 
-const props = withDefaults(defineProps<FilterHeaderControlOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
-const model = useFilterHeaderControl(() => props);
+const { closeOnSelect = undefined, ...props } =
+  defineProps<FilterHeaderControlOptions<TRow>>();
+const model = useFilterHeaderControl(() => ({ ...props, closeOnSelect }));
 const active = useScopeActivity();
 const mounted = shallowRef(false);
 onMounted(() => {

@@ -7,13 +7,13 @@ import {
 
 import { naiveEditingButton } from "./naiveEditingButton";
 defineOptions({ name: "NaiveBatchEditBar" });
-const props = withDefaults(defineProps<BatchEditBarProps<TRow>>(), {
-  contested: undefined,
-});
+const { contested = undefined, ...props } =
+  defineProps<BatchEditBarProps<TRow>>();
 const names = useDataTableClassNames();
 const Render = () =>
   BatchEditBarChrome({
     ...props,
+    contested,
     className: [props.className, names.value.batchEditBar]
       .filter(Boolean)
       .join(" "),

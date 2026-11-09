@@ -14,11 +14,10 @@ import VuetifySelect from "../controls/VuetifySelect.vue";
 import VuetifyHeaderMulti from "./VuetifyHeaderMulti.vue";
 
 defineOptions({ name: "VuetifyFilterHeaderControl" });
-const props = withDefaults(defineProps<FilterHeaderControlOptions<TRow>>(), {
-  closeOnSelect: undefined,
-});
+const { closeOnSelect = undefined, ...props } =
+  defineProps<FilterHeaderControlOptions<TRow>>();
 const { isRtl } = useRtl();
-const model = useFilterHeaderControl(() => props);
+const model = useFilterHeaderControl(() => ({ ...props, closeOnSelect }));
 const controls: FilterHeaderSlots = {
   Search: (control) =>
     h(VuetifyInput, {
