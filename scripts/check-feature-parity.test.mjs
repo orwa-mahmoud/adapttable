@@ -286,6 +286,138 @@ describe("inherited Angular header contracts", () => {
   }
 });
 
+const STRUCTURE_KIT_SOURCE = `import { AdaptDesktopStructure } from "@adapttable/angular";
+@Component({ imports: [AdaptDesktopStructure], templateUrl: "./desktopTable.html" })
+export class AdaptDesktopTable {}`;
+const STRUCTURE_KIT_TEMPLATE = `<ng-template #headerCell let-content="content" let-attrs="attrs">
+  <th [adaptAttrs]="attrs"><ng-container *ngTemplateOutlet="content" /></th>
+</ng-template>
+<adapt-desktop-structure [view]="view()" [kit]="{ headerCell: headerCell }" />`;
+const STRUCTURE_FORWARDING_TEMPLATE = `<ng-template #table let-content="content">
+  <table>
+    <ng-template adaptHeaderTemplate let-content="content" let-attrs="attrs">
+      <th [adaptAttrs]="attrs"><ng-container *ngTemplateOutlet="content" /></th>
+    </ng-template>
+  </table>
+</ng-template>
+<ng-template #headerCell let-content="content" let-attrs="attrs">
+  <ng-container
+    *ngTemplateOutlet="header.template; context: { content: content, attrs: attrs, part: part }"
+  />
+</ng-template>
+<adapt-desktop-structure [view]="view()" [kit]="{ headerCell: headerCell }" />`;
+const STRUCTURE_SOURCE = `import { AdaptDesktopTableModel } from "./desktopTableModel";
+@Component({ selector: "adapt-desktop-structure", templateUrl: "./desktopStructure.html" })
+export class AdaptDesktopStructure extends AdaptDesktopTableModel {}`;
+const STRUCTURE_TEMPLATE = `<ng-container
+  [ngTemplateOutlet]="kit.headerCell"
+  [ngTemplateOutletContext]="{
+    content: leafBody,
+    attrs: shiftedPin(headerCells().get(column.key)!),
+    part: 'header-cell',
+  }"
+/>`;
+
+/** An Angular kit drawn through the binding's shared desktop structure. */
+function structureRoot({
+  kitSource = STRUCTURE_KIT_SOURCE,
+  kitTemplate = STRUCTURE_KIT_TEMPLATE,
+  model = ANGULAR_HEADER_SOURCE,
+  template = STRUCTURE_TEMPLATE,
+} = {}) {
+  const root = contractRoot({
+    files: {
+      [ANGULAR_SOURCE_PATH]: kitSource,
+      [ANGULAR_TEMPLATE_PATH]: kitTemplate,
+    },
+  });
+  writePackage(root, "angular", "angular", [], {
+    "src/index.ts":
+      'export { AdaptDesktopStructure } from "./layout/desktopStructure";',
+    "src/layout/desktopStructure.ts": STRUCTURE_SOURCE,
+    "src/layout/desktopStructure.html": template,
+    "src/layout/desktopTableModel.ts": model.replace(
+      "class AdaptDesktopTable",
+      "class AdaptDesktopTableModel"
+    ),
+  });
+  return root;
+}
+
+describe("Angular kits drawn through the shared desktop structure", () => {
+  it("accepts a header cell that binds the attrs it receives whole", () => {
+    assert.deepEqual(parity(structureRoot()).problems, []);
+  });
+
+  it("accepts a header cell forwarding the attrs whole to its header template", () => {
+    const root = structureRoot({ kitTemplate: STRUCTURE_FORWARDING_TEMPLATE });
+    assert.deepEqual(parity(root).problems, []);
+  });
+
+  for (const [name, options] of [
+    [
+      "a header cell copying attrs by name",
+      {
+        kitTemplate: STRUCTURE_KIT_TEMPLATE.replace(
+          '[adaptAttrs]="attrs"',
+          '[attr.role]="attrs.role"'
+        ),
+      },
+    ],
+    [
+      "a kit that never hands its header cell to the structure",
+      {
+        kitTemplate: STRUCTURE_KIT_TEMPLATE.replace(
+          "{ headerCell: headerCell }",
+          "{}"
+        ),
+      },
+    ],
+    [
+      "a forwarded header template copying attrs by name",
+      {
+        kitTemplate: STRUCTURE_FORWARDING_TEMPLATE.replace(
+          '<th [adaptAttrs]="attrs">',
+          '<th [attr.scope]="attrs.scope">'
+        ),
+      },
+    ],
+    [
+      "a structure passing named fields to the header cell",
+      {
+        template: STRUCTURE_TEMPLATE.replace(
+          "shiftedPin(headerCells().get(column.key)!)",
+          "{ role: headerCells().get(column.key)!['role'] }"
+        ),
+      },
+    ],
+    [
+      "a structure whose model copies table attrs by name",
+      {
+        model: ANGULAR_HEADER_SOURCE.replace(
+          "view.table.headerCellAttrs(column)",
+          '{ scope: view.table.headerCellAttrs(column)["scope"] }'
+        ),
+      },
+    ],
+    [
+      "a kit that does not import the structure",
+      {
+        kitSource: STRUCTURE_KIT_SOURCE.replace(
+          'import { AdaptDesktopStructure } from "@adapttable/angular";\n',
+          ""
+        ),
+      },
+    ],
+  ]) {
+    it(`rejects ${name}`, () => {
+      assert.deepEqual(parity(structureRoot(options)).problems, [
+        MISSING_HEADER,
+      ]);
+    });
+  }
+});
+
 describe("Angular feature contracts before publication", () => {
   it("accepts a private native kit preserving grid and table attrs through its paired template", () => {
     assert.deepEqual(parity(contractRoot()), {
