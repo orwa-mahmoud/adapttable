@@ -1,5 +1,5 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material";
 import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { renderToString } from "react-dom/server";
