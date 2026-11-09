@@ -55,8 +55,17 @@ export interface DerivedStage<TRow> {
     sorted: readonly TRow[],
     config: IncrementalViewConfig<TRow>
   ) => Derivation<TRow> | undefined;
-  /** A value that changes exactly when `derive` would answer differently. */
-  readonly fingerprint: (config: IncrementalViewConfig<TRow>) => string;
+  /**
+   * `view` with its groups and totals derived again under `config`, when the
+   * stage reads `config` differently from the one `view` was built with;
+   * `undefined` when the groups and totals stand.
+   */
+  readonly rederive: (
+    view: IncrementalView<TRow>,
+    evaluation: Evaluation<TRow>,
+    config: IncrementalViewConfig<TRow>,
+    mode: ReconfigureMode
+  ) => IncrementalView<TRow> | undefined;
 }
 
 /** How a record was evaluated. */
@@ -117,7 +126,7 @@ function record<TRow>(
  * A record over fresh row arrays, with what the stage derived from them. The
  * arrays point back at it.
  */
-function derivedRecord<TRow>(
+export function derivedRecord<TRow>(
   rows: readonly TRow[],
   filtered: readonly TRow[],
   sorted: readonly TRow[],
@@ -487,18 +496,8 @@ export function reconfigureView<TRow>(
   if (queryConfigFingerprint(before) !== queryConfigFingerprint(merged)) {
     return evaluateRows(view.rows, merged, stage);
   }
-  if (stage && stage.fingerprint(before) !== stage.fingerprint(merged)) {
-    let { filtered, sorted } = view;
-    if (mode === "new record") {
-      filtered = [...view.filtered];
-      sorted = view.sorted === view.filtered ? filtered : [...view.sorted];
-    }
-    return derivedRecord(view.rows, filtered, sorted, {
-      ...evaluation,
-      config: merged,
-      derivation: stage.derive(sorted, merged),
-    });
-  }
+  const rederived = stage?.rederive(view, evaluation, merged, mode);
+  if (rederived) return rederived;
   if (mode === "new record") {
     return record(view, { ...evaluation, config: merged });
   }

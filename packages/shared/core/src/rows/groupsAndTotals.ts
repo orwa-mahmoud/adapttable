@@ -21,7 +21,7 @@ import {
   partitionGroupedRows,
 } from "../grouping/groupRows";
 import { stableKey } from "../utils/stableKey";
-import type { Derivation, DerivedStage } from "./evaluator";
+import { type Derivation, derivedRecord, type DerivedStage } from "./evaluator";
 import type { IncrementalViewConfig } from "./incremental";
 import {
   createIncrementalAggregate,
@@ -266,13 +266,33 @@ function derivation<TRow>(
 
 /** The full evaluator's stage: groups, group cells and grand totals. */
 export function groupsAndTotals<TRow>(): DerivedStage<TRow> {
+  const derive = (
+    sorted: readonly TRow[],
+    config: IncrementalViewConfig<TRow>
+  ) =>
+    groupingKeys(config.groupBy ?? []).length > 0 ||
+    config.summaryRow !== undefined ||
+    config.aggregateSpec !== undefined
+      ? derivation(sorted, config, undefined, undefined)
+      : undefined;
   return {
-    derive: (sorted, config) =>
-      groupingKeys(config.groupBy ?? []).length > 0 ||
-      config.summaryRow !== undefined ||
-      config.aggregateSpec !== undefined
-        ? derivation(sorted, config, undefined, undefined)
-        : undefined,
-    fingerprint: stageFingerprint,
+    derive,
+    rederive: (view, evaluation, config, mode) => {
+      if (stageFingerprint(evaluation.config) === stageFingerprint(config)) {
+        return undefined;
+      }
+      // A new record gets its own row arrays, so the snapshot attached to
+      // the arrays `view` shows keeps describing `view`.
+      let { filtered, sorted } = view;
+      if (mode === "new record") {
+        filtered = [...view.filtered];
+        sorted = view.sorted === view.filtered ? filtered : [...view.sorted];
+      }
+      return derivedRecord(view.rows, filtered, sorted, {
+        ...evaluation,
+        config,
+        derivation: derive(sorted, config),
+      });
+    },
   };
 }
