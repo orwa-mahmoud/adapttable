@@ -1,11 +1,26 @@
 import { type KitEnvironment, useLocaleLabels } from "@adapttable/vue/adapter";
-import { localeContextInjectionKey } from "@nuxt/ui/composables";
-import { computed, type ComputedRef, inject, type Ref, shallowRef } from "vue";
+import {
+  computed,
+  type ComputedRef,
+  inject,
+  type InjectionKey,
+  type Ref,
+  shallowRef,
+} from "vue";
 
 interface NuxtLocale {
   readonly code?: string;
   readonly dir?: "ltr" | "rtl";
 }
+
+/**
+ * The key `UApp` provides its locale under: Nuxt UI registers it as a global
+ * symbol, so it resolves the same under every module condition, `require`
+ * included, without loading Nuxt UI's composables.
+ */
+const NUXT_LOCALE = Symbol.for("nuxt-ui.locale-context") as InjectionKey<
+  Ref<NuxtLocale | undefined>
+>;
 
 /** Keeps a missing `UApp` from warning. An empty app also leaves this unset. */
 const ABSENT = shallowRef<NuxtLocale | undefined>(undefined);
@@ -19,10 +34,7 @@ const ABSENT = shallowRef<NuxtLocale | undefined>(undefined);
  * keeps the current copy.
  */
 export function useNuxtLibrary(): ComputedRef<KitEnvironment> {
-  const provided = inject(
-    localeContextInjectionKey,
-    ABSENT as Ref<NuxtLocale | undefined>
-  );
+  const provided = inject(NUXT_LOCALE, ABSENT);
   return useLocaleLabels(
     computed(() => {
       const locale = provided.value;
