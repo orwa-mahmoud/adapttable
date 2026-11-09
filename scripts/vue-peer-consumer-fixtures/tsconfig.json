@@ -12,6 +12,7 @@
       "@adapttable/core": ["../../packages/shared/core/src/index.ts"],
       "@adapttable/core/*": ["../../packages/shared/core/src/*.ts"],
       "@adapttable/i18n": ["../../packages/shared/i18n/src/index.ts"],
+      "@adapttable/i18n/*": ["../../packages/shared/i18n/src/*.ts"],
       "@adapttable/ai": ["../../packages/shared/ai/src/index.ts"],
       "@adapttable/ai/*": ["../../packages/shared/ai/src/*.ts"],
       "@adapttable/vue": ["../../packages/vue/vue/src/index.ts"],
