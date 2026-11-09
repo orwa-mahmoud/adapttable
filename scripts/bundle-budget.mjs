@@ -421,16 +421,22 @@ async function bundleFixture(fixture, entry, dir, externals, plugins) {
  * module the graph reached is recorded: `resolvedFiles` from the tarballs,
  * `unpackedFiles` from anywhere under the workspace's `packages/`.
  */
+/**
+ * What a framework's application already ships. Only a Vue fixture reads its
+ * package's peers, so other fixtures never need a workspace manifest.
+ */
+function consumerExternals(framework, pkg) {
+  if (framework === "vue") return vueConsumerExternals(pkg);
+  if (framework === "angular") return ANGULAR_EXTERNAL;
+  return EXTERNAL;
+}
+
 export async function measure(fixture, dir, install, angular) {
   const { code, imports } = entryModule(fixture, install);
   const entry = join(dir, fixture.typeOnly ? "entry.ts" : "entry.js");
   writeFileSync(entry, code);
   const framework = fixture.framework ?? "react";
-  const externals =
-    {
-      vue: vueConsumerExternals(fixture.pkg),
-      angular: ANGULAR_EXTERNAL,
-    }[framework] ?? EXTERNAL;
+  const externals = consumerExternals(framework, fixture.pkg);
 
   const recorder = moduleRecorder();
   const started = performance.now();
