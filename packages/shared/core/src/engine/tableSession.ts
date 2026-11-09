@@ -67,6 +67,8 @@ function observableAxes<TRow>(
   const b = after.view;
   if (
     !sameItems(before.derived.sorted, after.derived.sorted) ||
+    before.derived.groups !== after.derived.groups ||
+    before.derived.aggregates !== after.derived.aggregates ||
     a.page !== b.page ||
     a.limit !== b.limit ||
     a.search !== b.search ||

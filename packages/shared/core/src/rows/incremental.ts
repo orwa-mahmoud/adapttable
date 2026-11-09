@@ -434,6 +434,16 @@ function reconfigured<TRow>(
     return withConfig(view, { ...state, config: merged });
   }
   if (queryChanged) return createIncrementalView(view.rows, merged);
+  if (unchanged === "new record") {
+    // New groups or totals over the same rows: the record gets its own row
+    // arrays, so metadata attached to the arrays the caller still shows
+    // keeps describing the caller's snapshot.
+    return republishDerived(
+      view,
+      { ...ownRowArrays(state), config: merged },
+      merged
+    );
+  }
   // A table's grouping projection shares the source rows, but must keep
   // its derived configuration separate from the source snapshot. Otherwise
   // a later call can mistake that source's uncomputed groups for current totals.
@@ -666,6 +676,14 @@ function publish<TRow>(
   return view;
 }
 
+/** `state` with its own copies of the filtered and sorted arrays. */
+function ownRowArrays<TRow>(state: ViewState<TRow>): ViewState<TRow> {
+  const filtered = state.filtered.slice();
+  const sorted =
+    state.sorted === state.filtered ? filtered : state.sorted.slice();
+  return { ...state, filtered, sorted };
+}
+
 /**
  * A snapshot record over `view`'s arrays and results with its own state. The
  * arrays stay attached to `view`, whose rows, groups and totals this record
@@ -712,8 +730,8 @@ function republishDerived<TRow>(
   state.summaryDirty = false;
   return publish(
     view.rows,
-    view.filtered,
-    view.sorted,
+    state.filtered,
+    state.sorted,
     groups,
     readSummary(state.sorted, config, state.summary),
     state

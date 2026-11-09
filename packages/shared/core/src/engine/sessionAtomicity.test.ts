@@ -7,6 +7,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
+import { incrementalViewOf } from "../rows/incremental";
 import { applyRowPatches, updateRow } from "../rows/patch";
 import { createBasicTableEngine } from "./basicTableEngine";
 import {
@@ -214,5 +215,41 @@ describe.each(ENGINES)("the %s engine", (_name, create) => {
     expect(engine.candidate.rows("full")).toBe(committed);
     expect(engine.candidate.snapshot().page).toBe(3);
     expect(engine.snapshot().page).toBe(1);
+  });
+});
+
+describe("the full engine's aggregates", () => {
+  const scores = () => rows(3);
+  const totalOf = (reader: Pick<TableEngine<Row>, "rows">) =>
+    incrementalViewOf<Row>(reader.rows("full"))?.aggregates?.score;
+
+  it("keeps staged totals off the committed rows until commit", () => {
+    const engine = createTableEngine(optionsFor(scores()));
+    engine.configure({ aggregateSpec: { score: "sum" } });
+    expect(totalOf(engine)).toBe(3);
+    const woken = vi.fn();
+    engine.subscribe(["view"], woken);
+    const before = engine.snapshot().revisions;
+
+    engine.stageCandidate({ aggregateSpec: { score: "max" } });
+
+    expect(totalOf(engine)).toBe(3);
+    expect(totalOf(engine.candidate)).toBe(2);
+
+    engine.commitCandidate();
+
+    expect(totalOf(engine)).toBe(2);
+    expect(engine.snapshot().revisions.view).toBeGreaterThan(before.view);
+    expect(woken).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves the committed totals in place when the candidate is discarded", () => {
+    const engine = createTableEngine(optionsFor(scores()));
+    engine.configure({ aggregateSpec: { score: "sum" } });
+
+    engine.stageCandidate({ aggregateSpec: { score: "max" } });
+    engine.discardCandidate();
+
+    expect(totalOf(engine)).toBe(3);
   });
 });
