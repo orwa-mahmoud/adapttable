@@ -1135,6 +1135,7 @@ export {
   inflateBodyCellRowSpans,
   insertExtraRows,
   insertExtrasBeforeRows,
+  isBodyEligible,
   isColumnGroupRenderKey,
   isColumnGroupStubKey,
   isColumnGroupSummaryKey,

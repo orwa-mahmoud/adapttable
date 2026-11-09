@@ -389,6 +389,7 @@ import { htmlGroupedHeaderPlan } from '@adapttable/core/binding';
 import { inflateBodyCellRowSpans } from '@adapttable/core/binding';
 import { insertExtraRows } from '@adapttable/core/binding';
 import { insertExtrasBeforeRows } from '@adapttable/core/binding';
+import { isBodyEligible } from '@adapttable/core/binding';
 import { isBooleanEditor } from '@adapttable/core/editing';
 import { isColumnGroupRenderKey } from '@adapttable/core/binding';
 import { isColumnGroupStubKey } from '@adapttable/core/binding';
@@ -2694,6 +2695,8 @@ export { inflateBodyCellRowSpans }
 export { insertExtraRows }
 
 export { insertExtrasBeforeRows }
+
+export { isBodyEligible }
 
 export { isBooleanEditor }
 

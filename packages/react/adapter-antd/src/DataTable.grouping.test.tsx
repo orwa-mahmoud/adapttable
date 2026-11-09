@@ -2,8 +2,15 @@
  * Row grouping smoke: arms grouping via `groupBy` and exercises
  * antd's grouped dataSource / group header cells.
  */
+import { createMemoryAdapter } from "@adapttable/react";
+import {
+  KEYED_WINDOW,
+  type KeyedWindowSlotProps,
+  slotRender,
+  type TableFeature,
+} from "@adapttable/react/adapter";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
@@ -129,5 +136,69 @@ describe("<DataTable> row grouping (antd)", () => {
       },
     });
     expect(screen.getAllByLabelText(/^Select all: /).length).toBeGreaterThan(0);
+  });
+
+  /** Thirty people over three pages of ten. */
+  const MANY: Row[] = Array.from({ length: 30 }, (_, i) => ({
+    id: String(i + 1),
+    team: i % 2 === 0 ? "Core" : "Platform",
+    name: `P${String(i + 1).padStart(2, "0")}`,
+  }));
+
+  it("describes the full grouped set in a paged table's footer", () => {
+    render(
+      <DataTable<Row>
+        data={MANY}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlAdapter={createMemoryAdapter("limit=10")}
+        groupBy="team"
+      />
+    );
+    expect(
+      document.querySelectorAll("tbody tr[data-adapttable-part='row']")
+    ).toHaveLength(30);
+    expect(screen.getByText("Showing 1–30 of 30")).toBeInTheDocument();
+    expect(
+      document.querySelectorAll(
+        ".ant-pagination-item:not(.ant-pagination-prev, .ant-pagination-next)"
+      )
+    ).toHaveLength(1);
+  });
+
+  it("windows a paged grouped table's lines when virtualize is composed", () => {
+    // jsdom has no layout: a feature that fills KEYED_WINDOW with a fixed
+    // slice stands in for the virtualizer.
+    const windowed: TableFeature<Row> = {
+      id: "virtualize",
+      apply: () => ({ virtualize: true }),
+      renders: [
+        slotRender(
+          KEYED_WINDOW,
+          ({ children, enabled, keys }: KeyedWindowSlotProps) =>
+            children({
+              enabled,
+              indices: enabled ? [0, 1, 2, 3] : keys.map((_, index) => index),
+              paddingTop: 0,
+              paddingBottom: enabled ? 1200 : 0,
+              measureElement: vi.fn(),
+            })
+        ),
+      ],
+    };
+    render(
+      <DataTable<Row>
+        data={MANY}
+        columns={columns}
+        rowKey={(r) => r.id}
+        urlAdapter={createMemoryAdapter("limit=10")}
+        groupBy="team"
+        features={[windowed]}
+      />
+    );
+    const drawn = document.querySelectorAll(
+      "tbody tr[data-adapttable-part='row'], tbody tr[data-adapttable-part='group-row']"
+    );
+    expect(drawn).toHaveLength(4);
   });
 });

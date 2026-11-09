@@ -55,6 +55,7 @@ import {
   type GroupedFlatEntry,
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
+  isBodyEligible,
   isDeclarativeFilters,
   isExtraEntry,
   KEYED_WINDOW,
@@ -1199,29 +1200,22 @@ function AntdGroupingWindow<TRow>({
   grouping,
   scrollTarget,
   props,
-  isPaged,
-  error,
-  body,
-  isMobile,
+  chrome,
   children,
 }: Readonly<{
   grouping: GroupingBundle<TRow> | undefined;
   /** Where the window keeps find's scroll while it windows. */
   scrollTarget: AntdRowScroll["groups"];
   props: Readonly<ComposedProps<TRow>>;
-  isPaged: boolean;
-  error: Error | null;
-  body: string;
-  isMobile: boolean;
+  /** The table's chrome, for whether its body can take a window. */
+  chrome: ReturnType<typeof useTableChrome<TRow>>;
   children: (grouping: GroupingBundle<TRow> | undefined) => ReactNode;
 }>): ReactNode {
   const filled = useFeatureSlotFilled(KEYED_WINDOW);
   const keys = grouping?.entries.map((entry) => entry.key) ?? [];
-  const eligible =
-    grouping !== undefined &&
-    !isPaged &&
-    !error &&
-    (body === "desktop" || body === "mobile");
+  // A grouped page is eligible like any long list: its headers and footers
+  // outgrow the page size.
+  const eligible = grouping !== undefined && isBodyEligible(chrome);
   const windowed = (indices: readonly number[]) => {
     if (!grouping) return children(undefined);
     return children({
@@ -1242,7 +1236,7 @@ function AntdGroupingWindow<TRow>({
   const slotProps: KeyedWindowSlotProps = {
     keys,
     enabled: Boolean(props.virtualize) && eligible,
-    estimateSize: isMobile
+    estimateSize: chrome.isMobile
       ? (props.estimateCardSize ?? DEFAULT_CARD_SIZE_PX)
       : 56,
     overscan: props.virtualOverscan,
@@ -2120,10 +2114,7 @@ function AntdChromeSession<TRow>({
           grouping={chrome.grouping}
           scrollTarget={rowScroll.groups}
           props={props}
-          isPaged={chrome.isPaged}
-          error={chrome.source.error}
-          body={chrome.body}
-          isMobile={chrome.isMobile}
+          chrome={chrome}
         >
           {(grouping) => (
             <AntdTableBody<TRow>
@@ -2277,7 +2268,9 @@ function AntdTableBody<TRow>({
           : visible.filter((column) => !dropped.has(column.key)),
     };
   }, [c.table, c.columnLayout.visibleColumns, c.droppedColumns]);
-  const { labels, source, selection } = table;
+  const { labels, selection } = table;
+  // The rows the reader sees: a grouped table pages its full filtered set.
+  const source = c.source;
   const approval = useFeatureState(AGENT_APPROVAL_STATE);
   // The injected actions column is first-class in column management: it lives
   // in the layout state under its reserved key, so hiding it strips the
