@@ -4626,14 +4626,6 @@ export class AdaptTableAssistantChrome {
 }
 
 // @public
-interface AdaptTableFeature$2 extends FeatureSetup<unknown, SidePanelEntry> {
-    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
-    readonly id?: string;
-    mount?(context: FeatureMountContext$1): void | (() => void);
-    readonly renders?: readonly FeatureRender<never, SlotComponent$2>[];
-}
-
-// @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
@@ -4962,9 +4954,6 @@ export { assistantIsBusy }
 export { assistantIsUsable }
 
 // @public
-type Attrs$2 = Readonly<Record<string, unknown>>;
-
-// @public
 export type Attrs = Readonly<Record<string, unknown>>;
 
 export { BATCH_EDIT_BAR }
@@ -5028,15 +5017,6 @@ export interface CellConflictNoticeProps {
 }
 
 // @public
-interface CellContext$2<TRow> {
-    readonly $implicit: TRow;
-    readonly column: ColumnDef$2<TRow>;
-    readonly row: TRow;
-    readonly rowIndex: number;
-    readonly value: unknown;
-}
-
-// @public
 export interface CellContext<TRow> {
     readonly $implicit: TRow;
     readonly column: ColumnDef<TRow>;
@@ -5080,15 +5060,6 @@ export { COLUMN_MENU }
 export { COLUMN_SELECT }
 
 // @public
-interface ColumnDef$2<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
-    cell?: Renderer$2<CellContext$2<TRow>>;
-    footer?: Renderer$2<FooterContext$2<TRow>>;
-    header?: string;
-    headerActions?: string | Renderer$2<HeaderContext$2<TRow>>;
-    headerCell?: Renderer$2<HeaderContext$2<TRow>>;
-}
-
-// @public
 export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
     cell?: Renderer<CellContext<TRow>>;
     footer?: Renderer<FooterContext<TRow>>;
@@ -5121,9 +5092,6 @@ export interface ColumnGroupToggleSlots {
 
 // @public
 export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
-
-// @public
-type ColumnLayout$2<TRow> = UseColumnLayoutResult<TRow>;
 
 // @public
 export type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
@@ -5301,70 +5269,6 @@ export function createAdapterTableAssistantFeature(component: Type<unknown>): Ad
 
 // @public
 export function createFilterFieldId(): string;
-
-// @public
-interface DataTable$2<TRow> {
-    readonly allColumns: Signal<readonly ColumnDef$2<TRow>[]>;
-    readonly autoSizeColumn: (root: Element | null, key: string) => void;
-    readonly autoSizeColumns: (root: Element | null) => void;
-    readonly bodyRegion: Signal<ChromeBodyRegion>;
-    readonly canLoadMore: Signal<boolean>;
-    readonly canRenameColumns: boolean;
-    readonly cardAttrs: (row: TRow, index: number) => Attrs$2;
-    readonly cellAttrs: (column: ColumnDef$2<TRow>) => Attrs$2;
-    readonly cellValue: (column: ColumnDef$2<TRow>, row: TRow) => unknown;
-    readonly clearFilters: () => void;
-    readonly columnGroups: Signal<ReadonlyMap<string, ColumnGroupRecord<TRow>>>;
-    readonly columns: Signal<readonly ColumnDef$2<TRow>[]>;
-    readonly dir: Signal<Direction>;
-    readonly emptyVariant: Signal<"noData" | "noResults">;
-    readonly errorState: Signal<{
-        readonly error: Error;
-        readonly retry?: () => void;
-        readonly retrying: boolean;
-    } | undefined>;
-    readonly featureHost: FeatureHostState_2;
-    readonly featureOptions: Readonly<Record<string, unknown>>;
-    readonly featureState: FeatureState$1;
-    readonly hasSlot: (slot: {
-        readonly id: string;
-    }) => boolean;
-    readonly headerCellAttrs: (column: ColumnDef$2<TRow>) => Attrs$2;
-    readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
-    readonly headerRowAttrs: () => Attrs$2;
-    readonly isEmpty: Signal<boolean>;
-    readonly isMobile: Signal<boolean>;
-    readonly isRefreshing: Signal<boolean>;
-    readonly labels: Signal<Required<TableLabels>>;
-    readonly layout: Signal<ColumnLayout$2<TRow>>;
-    readonly loadMore: () => void;
-    readonly loadMoreAttrs: () => Attrs$2;
-    readonly loadMoreButtonAttrs: () => Attrs$2;
-    readonly pagerSlots: Signal<PaginationSlot[]>;
-    readonly pageSizeOptions: Signal<readonly number[]>;
-    readonly pagination: Signal<PaginationInfo>;
-    readonly rowAttrs: (row: TRow, index: number) => Attrs$2;
-    readonly rowKey: (row: TRow) => string;
-    readonly rows: Signal<readonly TRow[]>;
-    readonly search: Signal<string>;
-    readonly searchInputAttrs: () => Attrs$2;
-    readonly searchValue: Signal<string>;
-    readonly setLimit: (limit: number) => void;
-    readonly setPage: (page: number) => void;
-    readonly setSearch: (term: string) => void;
-    readonly setSearchValue: (text: string) => void;
-    readonly showFooter: Signal<boolean>;
-    readonly slotFills: SlotFills$1;
-    readonly sortButtonAttrs: (column: ColumnDef$2<TRow>) => Attrs$2;
-    readonly sortBy: Signal<string | undefined>;
-    readonly sortByOptions: Signal<SortByOption[]>;
-    readonly sortDir: Signal<SortDirection | undefined>;
-    readonly source: Signal<TableSource<TRow>>;
-    readonly statusAnnouncement: Signal<string>;
-    readonly tableAttrs: () => Attrs$2;
-    readonly toggleSort: (key: string) => void;
-    readonly windowStart: Signal<number>;
-}
 
 // @public
 export interface DataTable<TRow> {
@@ -5563,15 +5467,6 @@ export { extraHostFillStyle }
 export { eyeIcon }
 
 // @public
-interface FeatureMountContext$1 {
-    flush<T>(run: () => T): T;
-    flushAdmission(): void;
-    readonly injector: Injector;
-    readonly runtime: TableRuntime;
-    readonly state: FeatureState$1;
-}
-
-// @public
 export interface FeatureMountContext {
     flush<T>(run: () => T): T;
     flushAdmission(): void;
@@ -5581,12 +5476,6 @@ export interface FeatureMountContext {
 }
 
 export { FeatureNotice }
-
-// @public
-interface FeatureState$1 {
-    get<T>(key: FeatureStateKey<T>): Signal<T | undefined>;
-    set<T>(key: FeatureStateKey<T>, value: T | undefined): void;
-}
 
 // @public
 export interface FeatureState {
@@ -5763,11 +5652,6 @@ export function floatingStyle(boundary: TableAssistantBoundary): TableAssistantP
 export { focusEditorOnMount }
 
 // @public
-interface FooterContext$2<TRow> extends HeaderContext$2<TRow> {
-    readonly value: unknown;
-}
-
-// @public
 export interface FooterContext<TRow> extends HeaderContext<TRow> {
     readonly value: unknown;
 }
@@ -5828,11 +5712,11 @@ export { GROUPING_PANEL }
 
 // @public
 export interface GroupingOptions<TRow> {
-    readonly features: readonly AdaptTableFeature$2[];
+    readonly features: readonly AdaptTableFeature[];
     readonly injector?: Injector;
-    readonly locale?: MaybeSignalOptional$2<string>;
+    readonly locale?: MaybeSignalOptional<string>;
     readonly source: Signal<TableSource<TRow>>;
-    readonly table: Pick<DataTable$2<TRow>, "allColumns" | "rowKey">;
+    readonly table: Pick<DataTable<TRow>, "allColumns" | "rowKey">;
 }
 
 export { GroupingPanelAggregationRemoveProps }
@@ -5893,12 +5777,6 @@ export { groupRowParts }
 export { groupSelectionState }
 
 export { hasActiveHeaderFilter }
-
-// @public
-interface HeaderContext$2<TRow> {
-    readonly $implicit: ColumnDef$2<TRow>;
-    readonly column: ColumnDef$2<TRow>;
-}
 
 // @public
 export interface HeaderContext<TRow> {
@@ -6009,9 +5887,6 @@ export { listFilterValues }
 export type MaybeSignal<T> = T | Signal<T>;
 
 // @public
-type MaybeSignalOptional$2<T> = T | Signal<T | undefined>;
-
-// @public
 export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
 
 // @public
@@ -6119,9 +5994,6 @@ export { RELATIVE_PRESET_LABEL_KEYS }
 export { RELATIVE_PRESETS }
 
 export { renderedRowsOf }
-
-// @public
-type Renderer$2<TContext> = TemplateRef<TContext> | Type<unknown>;
 
 // @public
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
@@ -6357,13 +6229,7 @@ export interface SidePanelSlots {
 }
 
 // @public
-type SlotComponent$2 = Type<unknown>;
-
-// @public
 export type SlotComponent = Type<unknown>;
-
-// @public
-type SlotFills$1 = ReadonlyMap<string, readonly SlotFill<SlotComponent$2>[]>;
 
 // @public
 export type SlotFills = ReadonlyMap<string, readonly SlotFill<SlotComponent>[]>;

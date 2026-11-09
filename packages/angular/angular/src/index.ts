@@ -167,11 +167,6 @@ export {
   type GroupPagingState,
   injectGroupPaging,
 } from "./grouping/groupPaging";
-export {
-  type GroupingOptions,
-  injectGrouping,
-  type TableGrouping,
-} from "./grouping/tableGrouping";
 export { injectIsMobile, type IsMobileOptions } from "./hooks/isMobile";
 export { injectMediaQuery } from "./hooks/mediaQuery";
 export {

@@ -1,4 +1,13 @@
 import {
+  type AdaptTableFeature,
+  type DataTable,
+  featureOptionsOf,
+  injectGroupCollapse,
+  injectGroupPaging,
+  type MaybeSignalOptional,
+  readMaybe,
+} from "@adapttable/angular";
+import {
   declaredAggregates,
   devWarn,
   type ExtraRow,
@@ -23,12 +32,7 @@ import {
   type Signal,
 } from "@angular/core";
 
-import type { DataTable } from "../dataTable";
-import { type AdaptTableFeature, featureOptionsOf } from "../featureHost";
 import type { GroupingExtras } from "../features/groupingExtras";
-import { type MaybeSignalOptional, readMaybe } from "../store";
-import { injectGroupCollapse } from "./groupCollapse";
-import { injectGroupPaging } from "./groupPaging";
 
 /**
  * The grouped table a kit renders: its keys, collapse state and flat

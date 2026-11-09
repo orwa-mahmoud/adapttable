@@ -7,7 +7,7 @@
  */
 import type { TableSource } from "@adapttable/core";
 import { featureStateKey } from "@adapttable/core/binding";
-import { InjectionToken, type Signal } from "@angular/core";
+import { InjectionToken, type Injector, type Signal } from "@angular/core";
 
 import type { DataTable } from "../dataTable";
 import type { AdaptTableFeature } from "../featureHost";
@@ -66,6 +66,12 @@ export interface SurfaceHandles<TRow> {
   ): void;
   /** Publish the grouping signal the widen and the body both read. */
   publishGrouping(grouping: Signal<unknown> | undefined): void;
+  /**
+   * Create this table's grouping state in `injector`, or `undefined` when its
+   * features compose no grouping. The host owns the grouping implementation,
+   * so a feature never imports it.
+   */
+  createGrouping(injector: Injector): Signal<unknown> | undefined;
 }
 
 /** Provided by {@link injectTableSurfaceHost} for the mounts it runs. @public */

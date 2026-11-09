@@ -1,6 +1,5 @@
 import {
   type AdaptTableFeature,
-  injectGrouping,
   SURFACE_GROUPING,
   SURFACE_HANDLES,
   SURFACE_OCCUPIED,
@@ -46,12 +45,7 @@ export function grouping<TRow = unknown>(
       handles.installProjector((source, model) =>
         projectedGroupingSource(source, { model })
       );
-      const grouping = injectGrouping({
-        table: handles.table,
-        source: handles.source,
-        features: handles.features,
-        injector: context.injector,
-      });
+      const grouping = handles.createGrouping(context.injector);
       if (grouping === undefined) return;
       handles.publishGrouping(grouping);
       context.state.set(SURFACE_GROUPING, grouping);

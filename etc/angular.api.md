@@ -84,10 +84,7 @@ import { FrontendEngineFactory } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
-import { GroupAggregatesFn } from '@adapttable/core';
-import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
-import { GroupedFlatEntry } from '@adapttable/core';
 import { GroupPagingState } from '@adapttable/core/binding';
 import { GroupSort } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
@@ -890,15 +887,6 @@ export interface GroupCollapseUrlStateOptions extends UrlSliceOptions {
 }
 
 // @public
-export interface GroupingOptions<TRow> {
-    readonly features: readonly AdaptTableFeature[];
-    readonly injector?: Injector;
-    readonly locale?: MaybeSignalOptional<string>;
-    readonly source: Signal<TableSource<TRow>>;
-    readonly table: Pick<DataTable<TRow>, "allColumns" | "rowKey">;
-}
-
-// @public
 export interface GroupPagingOptions {
     readonly injector?: Injector;
 }
@@ -1043,9 +1031,6 @@ export function injectGroupCollapse(options?: GroupCollapseOptions): Signal<Grou
 
 // @public
 export function injectGroupCollapseUrlState(options?: GroupCollapseUrlStateOptions): GroupCollapseUrlState;
-
-// @public
-export function injectGrouping<TRow>(options: GroupingOptions<TRow>): Signal<TableGrouping<TRow> | undefined> | undefined;
 
 // @public
 export function injectGroupPaging(options?: GroupPagingOptions): Signal<GroupPagingState>;
@@ -1530,6 +1515,7 @@ export const SURFACE_OCCUPIED: FeatureStateKey<SurfaceOccupation>;
 
 // @public
 export interface SurfaceHandles<TRow> {
+    createGrouping(injector: Injector): Signal<unknown> | undefined;
     readonly features: readonly AdaptTableFeature[];
     groupingModel(): unknown;
     installProjector(project: (source: TableSource<TRow>, model: unknown) => TableSource<TRow>): void;
@@ -1620,22 +1606,6 @@ export interface TableFilters<TRow> {
     readonly filterTreeFn: (row: TRow, tree: QueryFilterGroup) => boolean;
     readonly numberExtraKeys: readonly string[];
     readonly runtime: Signal<FilterRuntime<TRow>>;
-}
-
-// @public
-export interface TableGrouping<TRow> {
-    readonly aggregates: GroupAggregatesFn<TRow> | undefined;
-    readonly collapseAll: () => void;
-    readonly collapsed: GroupCollapseState;
-    readonly collapseToDepth: (depth: number) => void;
-    readonly entries: readonly GroupedFlatEntry<TRow>[];
-    readonly expandAll: () => void;
-    readonly groupBy: readonly string[];
-    readonly setGroupBy: (key: GroupByInput) => void;
-    readonly showMore: (entry: {
-        scope: "groups" | "rows";
-        groupKey?: string;
-    }) => void;
 }
 
 export { TableLabels }

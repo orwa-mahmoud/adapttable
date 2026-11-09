@@ -98,7 +98,7 @@ import {
 
 import type { RowEditActionsProps } from "../editing/rowEditGate";
 import { rowIsDirty } from "../editing/rowEditingHelpers";
-import type { TableGrouping } from "../grouping/tableGrouping";
+import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
 import type { RowReorderState } from "../rows/rowReorder";
 import { frontendRowModelOf } from "../source/rowModel";
 import type { TableRowDetail } from "../tree/tableRowDetail";
@@ -1052,6 +1052,13 @@ export function injectTableSurfaceHost<TRow>(
           grouping as Signal<TableGrouping<TRow> | undefined> | undefined
         );
       },
+      createGrouping: (injector) =>
+        injectGrouping({
+          table,
+          source: data.source,
+          features: featureList(),
+          injector,
+        }),
     };
     const scope = Injector.create({
       providers: [{ provide: SURFACE_HANDLES, useValue: handles }],
