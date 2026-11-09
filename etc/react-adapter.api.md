@@ -410,7 +410,6 @@ import { KeyedWindowSlotProps as KeyedWindowSlotProps_2 } from '@adapttable/core
 import { KitEnvironment } from '@adapttable/core/binding';
 import { LayoutStorage } from '@adapttable/core';
 import { logicalAlign } from '@adapttable/core/binding';
-import { MemoExoticComponent } from 'react';
 import { MobileCardField } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
@@ -1467,7 +1466,7 @@ export function createAdapterStandardFeatures(factories: AdapterStandardFeatureF
 export function createAdapterTableAssistantFeature(TableAssistant: AdapterFeatureComponent<TableAssistantProps>): StaticTableFeature;
 
 // @public
-export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): MemoExoticComponent<(props: Readonly<TProps>) => ReactElement>;
+export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): (props: TProps) => ReactElement;
 
 export { createFilterRegistry }
 
@@ -4422,6 +4421,9 @@ export { windowGroupedEntries }
 export function withFindMarks(base: GridFocusState, find: Pick<FindInTableState, "matchKeys" | "current">, firstRowIndex: number): GridFocusState;
 
 export { withKitEnvironment }
+
+// @public
+export function withRowDropTarget(domProps: Record<string, unknown>, drop: RowDropPosition): Record<string, unknown>;
 
 // (No @packageDocumentation comment for this package)
 

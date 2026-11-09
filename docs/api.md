@@ -1620,6 +1620,9 @@ flag while a host-owned `confirmMove` is outstanding.
 `applyRowReorder`, `datasetIndex`, `useRowReorder`,
 `rowReorderSignature`, `rowReorderDropStyle`, `REORDER_COLUMN_KEY`,
 `REORDER_COLUMN_WIDTH`, and `ROW_DND_MIME` are the headless primitives.
+`RowReorderState.hover` carries the drop edge under a drag as it moves: a row
+reads `hover.dropAt(rowId, index)` and applies it with `withRowDropTarget`, so
+a drag redraws the rows it crosses rather than the table.
 Nested move menus use `RowMoveMenuModel` / `RowMoveTarget`; the adapter seam is
 `RowMoveMenuSlotProps`, `RowMoveMenuItemProps`, and
 `RowMoveConfirmationProps`. Each adapter mounts

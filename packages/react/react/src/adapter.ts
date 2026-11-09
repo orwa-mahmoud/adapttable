@@ -602,6 +602,7 @@ export {
   rowReorderDropStyle,
   rowReorderSignature,
   type RowReorderState,
+  withRowDropTarget,
 } from "./rows/rowReorder";
 export {
   type RowMoveConfirmationProps,

@@ -114,6 +114,7 @@ import {
   type VirtualTableRow,
   windowGroupedEntries,
   withKitEnvironment,
+  withRowDropTarget,
 } from "@adapttable/react/adapter";
 import {
   Button,
@@ -130,6 +131,7 @@ import {
 } from "antd";
 import {
   cloneElement,
+  createContext,
   type CSSProperties,
   type HTMLAttributes,
   isValidElement,
@@ -145,6 +147,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 import { AntdHistoryGate, AntdInteractionGate } from "./antdLiveGates";
@@ -490,16 +493,19 @@ function antdOnRow<TRow>(options: {
   );
   const visual = resolveRowStyle(rowStyle, rowHeight, row, rowIndex ?? 0);
   const reorderIndex = reorderIndices?.get(id);
-  const reorderStyle =
+  const reorderAttrs =
     rowReorder && reorderIndex !== undefined
-      ? rowReorderDropStyle(rowReorder.rowAttrs(id, reorderIndex))
+      ? liveReorderAttrs(rowReorder, id, reorderIndex)
       : undefined;
+  const reorderStyle = reorderAttrs
+    ? rowReorderDropStyle(reorderAttrs)
+    : undefined;
   return {
     ...rowClickProps(row, onRowClick, rowIndex),
     ...(rowReorder && reorderIndex !== undefined
       ? {
           ...rowReorder.dropProps(reorderIndex, row, windowStart),
-          ...rowReorder.rowAttrs(id, reorderIndex),
+          ...reorderAttrs,
         }
       : {}),
     // antd builds its own <tr>, so the absolute aria-rowindex arrives
@@ -1420,6 +1426,19 @@ function DesktopTableBody<TRow>({
   // in a sibling table.
   const gridProps = getGridProps?.();
   const isAccessibleGrid = gridProps?.role === "grid";
+  const hover = rowReorder?.hover;
+  const followsDrop = hover !== undefined && !virtualBody;
+  const rowDropFollow = useMemo<RowDropFollow | undefined>(
+    () =>
+      followsDrop && hover && reorderIndices
+        ? {
+            hover,
+            indices: reorderIndices,
+          }
+        : undefined,
+    [followsDrop, hover, reorderIndices]
+  );
+  useVirtualDropRedraw(virtualBody ? hover : undefined);
   const components = useMemo(() => {
     const props = getGridProps?.();
     const asGrid = props?.role === "grid";
@@ -1440,6 +1459,9 @@ function DesktopTableBody<TRow>({
       },
       body: {
         wrapper: virtualBody ? VirtualTbodyWrapper : TbodyWrapper,
+        // A body row follows a reorder drag's drop edge on its own; antd's
+        // virtual body draws its own rows, so there the table redraws.
+        ...(followsDrop ? { row: DropTargetRow } : {}),
         // A <table role="rowgroup"> is no longer a table, so a bare <td>
         // maps to `cell` instead of `gridcell`. Every body cell — including
         // antd-owned selection cells that never go through getCellProps —
@@ -1447,7 +1469,7 @@ function DesktopTableBody<TRow>({
         ...(asGrid ? { cell: GridBodyCell } : {}),
       },
     };
-  }, [getGridProps, pinArmed, theadRef, virtualBody]);
+  }, [followsDrop, getGridProps, pinArmed, theadRef, virtualBody]);
 
   const table = (
     <Table<GroupedDataRecord<TRow>>
@@ -1507,11 +1529,19 @@ function DesktopTableBody<TRow>({
       locale={{ emptyText: emptyNode }}
     />
   );
-  if (!isAccessibleGrid) return table;
-  return (
+  const body = isAccessibleGrid ? (
     <div {...gridProps} aria-label={tableLabel} data-adapttable-part="grid">
       {table}
     </div>
+  ) : (
+    table
+  );
+  return rowDropFollow ? (
+    <RowDropContext.Provider value={rowDropFollow}>
+      {body}
+    </RowDropContext.Provider>
+  ) : (
+    body
   );
 }
 
@@ -1539,6 +1569,82 @@ function TbodyWrapper(
   props: Readonly<HTMLAttributes<HTMLTableSectionElement>>
 ) {
   return <tbody data-adapttable-part="tbody" {...props} />;
+}
+
+/** A row's reorder attributes with the drop edge as the drag hovers now. */
+function liveReorderAttrs<TRow>(
+  rowReorder: RowReorderState<TRow>,
+  id: string,
+  index: number
+): ReturnType<RowReorderState<TRow>["rowAttrs"]> {
+  const attrs = rowReorder.rowAttrs(id, index);
+  const drop = rowReorder.hover?.dropAt(id, index) ?? attrs["data-drop"];
+  return drop === undefined ? attrs : { ...attrs, "data-drop": drop };
+}
+
+/** What a body row reads to follow a drag's drop edge on its own. */
+interface RowDropFollow {
+  readonly hover: NonNullable<RowReorderState<unknown>["hover"]>;
+  readonly indices: ReadonlyMap<string, number>;
+}
+
+const RowDropContext = createContext<RowDropFollow | undefined>(undefined);
+
+/** A row with no reorder hover has nothing to follow. */
+const NO_HOVER = (): (() => void) => () => undefined;
+
+/**
+ * Redraws the table on every reorder hover. antd's virtual body draws its own
+ * rows, so a row cannot follow the drop edge itself there.
+ */
+function useVirtualDropRedraw(
+  hover: RowReorderState<unknown>["hover"] | undefined
+): void {
+  const version = useRef(0);
+  const subscribe = useCallback(
+    (listener: () => void) =>
+      hover
+        ? hover.subscribe(() => {
+            version.current += 1;
+            listener();
+          })
+        : () => undefined,
+    [hover]
+  );
+  useSyncExternalStore(
+    subscribe,
+    () => version.current,
+    () => version.current
+  );
+}
+
+/**
+ * antd's body row, following the drop edge a drag hovers on it, so a drag
+ * redraws the rows it crosses instead of the whole table.
+ */
+function DropTargetRow(
+  props: Readonly<
+    HTMLAttributes<HTMLTableRowElement> & { "data-row-id"?: string }
+  >
+) {
+  const follow = useContext(RowDropContext);
+  const id = props["data-row-id"];
+  const index = id === undefined ? undefined : follow?.indices.get(id);
+  const dropAt = () =>
+    id === undefined || index === undefined
+      ? undefined
+      : follow?.hover.dropAt(id, index);
+  const drop = useSyncExternalStore(
+    index === undefined ? NO_HOVER : (follow?.hover.subscribe ?? NO_HOVER),
+    dropAt,
+    dropAt
+  );
+  const rowProps =
+    drop === undefined ||
+    drop === (props as Record<string, unknown>)["data-drop"]
+      ? props
+      : withRowDropTarget(props, drop);
+  return <tr {...rowProps} />;
 }
 
 function GridBodyCell(props: Readonly<TdHTMLAttributes<HTMLTableCellElement>>) {

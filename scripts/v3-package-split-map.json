@@ -47555,6 +47555,14 @@
       "behavior": ""
     },
     {
+      "export": "withRowDropTarget",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "applyTableFeatures",
       "currentImport": "@adapttable/react/features",
       "kind": "value",

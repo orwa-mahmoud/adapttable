@@ -3,7 +3,7 @@ import {
   insertExtraRows,
   insertExtrasBeforeRows,
 } from "@adapttable/core/binding";
-import { renderHook } from "@testing-library/react";
+import { act, render, renderHook } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -423,79 +423,131 @@ describe("desktopBodyPinStyle / desktopHeadCellStyle / desktopEdgeHeadStyle", ()
   });
 });
 
+/** One body row's wiring, every input at rest. */
+const ROW_WIRING = {
+  row: ROWS[0],
+  index: 0,
+  id: "a",
+  selected: false,
+  expanded: undefined,
+  columns: cols,
+  spanSignature: "",
+  labels: { cancel: "Cancel" },
+  showActions: false,
+  showReorder: false,
+  reorderSignature: null,
+  rowPinSignature: null,
+  rowPinSide: undefined,
+  pinRowSticky: true,
+  rowPinOffset: 0,
+  sourceIndex: 0,
+  reorderPinned: false,
+  rowActions: undefined,
+  rowActionsLayout: undefined,
+  cellSpanAppearance: undefined,
+  renderRowActions: undefined,
+  columnSpan: 1,
+  columnWidths: undefined,
+  pinSignature: "",
+  hasStartPin: false,
+  hasEndPin: false,
+  actionsPinned: false,
+  rowClass: undefined,
+  rowStyleSignature: "",
+  flashSignature: "",
+  clickable: false,
+  hasPrefetch: false,
+  editingSignature: null,
+  gridFocus: undefined,
+  treeColumnKey: undefined,
+  treeEntry: undefined,
+};
+
 describe("createDesktopRow", () => {
   it("skips a re-render when wiring and extras match", () => {
-    const RowBase = (props: DesktopRowWiring<Row> & { size: string }) =>
-      createElement("span", null, props.size);
+    let paints = 0;
+    const RowBase = (props: DesktopRowWiring<Row> & { size: string }) => {
+      paints += 1;
+      return createElement("span", null, props.size);
+    };
     const Row = createDesktopRow<Row, DesktopRowWiring<Row> & { size: string }>(
       RowBase,
       (prev, next) => prev.size === next.size
     );
     const wiring = {
-      row: ROWS[0],
-      index: 0,
-      id: "a",
-      selected: false,
-      expanded: undefined,
-      columns: cols,
-      spanSignature: "",
-      labels: { cancel: "Cancel" },
-      showActions: false,
-      showReorder: false,
-      reorderSignature: null,
-      rowPinSignature: null,
-      rowPinSide: undefined,
-      pinRowSticky: true,
-      rowPinOffset: 0,
-      sourceIndex: 0,
-      reorderPinned: false,
-      rowActions: undefined,
-      rowActionsLayout: undefined,
-      cellSpanAppearance: undefined,
-      renderRowActions: undefined,
-      columnSpan: 1,
-      columnWidths: undefined,
-      pinSignature: "",
-      hasStartPin: false,
-      hasEndPin: false,
-      actionsPinned: false,
-      rowClass: undefined,
-      rowStyleSignature: "",
-      flashSignature: "",
-      clickable: false,
-      hasPrefetch: false,
-      editingSignature: null,
-      gridFocus: undefined,
-      treeColumnKey: undefined,
-      treeEntry: undefined,
+      ...ROW_WIRING,
       size: "md",
     } as unknown as DesktopRowWiring<Row> & { size: string };
-    const compare = (
-      Row as unknown as {
-        compare: (
-          a: DesktopRowWiring<Row> & { size: string },
-          b: DesktopRowWiring<Row> & { size: string }
-        ) => boolean;
-      }
-    ).compare;
-    expect(compare).toBeTypeOf("function");
-    expect(compare(wiring, { ...wiring })).toBe(true);
-    expect(compare(wiring, { ...wiring, size: "lg" })).toBe(false);
-    expect(compare(wiring, { ...wiring, selected: true })).toBe(false);
-    const Bare = createDesktopRow<Row, DesktopRowWiring<Row>>(() =>
-      createElement("span")
+    const view = render(createElement(Row, wiring));
+    expect(paints).toBe(1);
+    view.rerender(createElement(Row, { ...wiring }));
+    expect(paints).toBe(1);
+    view.rerender(createElement(Row, { ...wiring, size: "lg" }));
+    expect(paints).toBe(2);
+    view.rerender(
+      createElement(Row, { ...wiring, size: "lg", selected: true })
     );
-    const bareCompare = (
-      Bare as unknown as {
-        compare: (
-          a: DesktopRowWiring<Row>,
-          b: DesktopRowWiring<Row>
-        ) => boolean;
-      }
-    ).compare;
-    expect(bareCompare(wiring, { ...wiring, size: "other" } as never)).toBe(
-      true
+    expect(paints).toBe(3);
+    view.unmount();
+
+    let barePaints = 0;
+    const Bare = createDesktopRow<Row, DesktopRowWiring<Row>>(() => {
+      barePaints += 1;
+      return createElement("span");
+    });
+    const bare = render(createElement(Bare, wiring));
+    bare.rerender(createElement(Bare, { ...wiring, size: "other" } as never));
+    expect(barePaints).toBe(1);
+    bare.unmount();
+  });
+
+  it("repaints only the row a reorder drag hovers", () => {
+    let paints = 0;
+    const listeners = new Set<() => void>();
+    let hovered: string | undefined;
+    const hover = {
+      subscribe: (listener: () => void) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      },
+      dropAt: (rowId: string) =>
+        rowId === hovered ? ("after" as const) : undefined,
+    };
+    const RowBase = (props: DesktopRowWiring<Row>) => {
+      paints += 1;
+      return createElement("span", {
+        "data-testid": props.id,
+        "data-drop": props.rowDomProps["data-drop"],
+      });
+    };
+    const Row = createDesktopRow<Row, DesktopRowWiring<Row>>(RowBase);
+    const rowOf = (id: string, index: number) =>
+      ({
+        ...ROW_WIRING,
+        id,
+        index,
+        row: ROWS[index],
+        showReorder: true,
+        rowReorder: { hover },
+        reorderSignature: "L",
+        rowDomProps: {},
+      }) as unknown as DesktopRowWiring<Row>;
+    const view = render(
+      createElement(
+        "div",
+        null,
+        createElement(Row, { key: "a", ...rowOf("a", 0) }),
+        createElement(Row, { key: "b", ...rowOf("b", 1) })
+      )
     );
+    expect(paints).toBe(2);
+    act(() => {
+      hovered = "b";
+      for (const listener of listeners) listener();
+    });
+    expect(paints).toBe(3);
+    expect(view.getByTestId("b").getAttribute("data-drop")).toBe("after");
+    expect(view.getByTestId("a").getAttribute("data-drop")).toBeNull();
   });
 });
 

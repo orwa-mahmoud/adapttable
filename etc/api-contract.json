@@ -6743,7 +6743,8 @@
       "MobileCardListProps",
       "mobileCardPropsEqual",
       "MobileCardSlotKit",
-      "mobileCardSlots"
+      "mobileCardSlots",
+      "withRowDropTarget"
     ],
     "react-features": [
       "applyTableFeatures",

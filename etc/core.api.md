@@ -7430,6 +7430,7 @@ export interface RowReorderController<TRow> {
     readonly drop: (event: RowDragEvent, localIndex: number, row: TRow, windowStart: number) => void;
     readonly forSession: () => RowReorderActions<TRow>;
     readonly getSnapshot: () => RowReorderSnapshot<TRow>;
+    readonly getTableSnapshot: () => RowReorderSnapshot<TRow>;
     readonly keyDown: (event: RowKeyEvent, slot: RowReorderSlot<TRow>) => void;
     readonly moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
     readonly moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;

@@ -5384,6 +5384,10 @@ export interface RowReorderState<TRow, TDragEvent = unknown, TKeyEvent = unknown
     };
     handleKeyDown: (event: TKeyEvent, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
     hostConfirmPending: boolean;
+    hover?: {
+        readonly subscribe: (listener: () => void) => () => void;
+        readonly dropAt: (rowId: string, localIndex: number) => RowDropPosition | undefined;
+    };
     isLifted: (rowId: string) => boolean;
     isMovePending?: (row: TRow) => boolean;
     lifted: {

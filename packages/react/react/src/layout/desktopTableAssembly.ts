@@ -44,6 +44,7 @@ import {
   REORDER_COLUMN_WIDTH,
 } from "@adapttable/core/binding";
 import {
+  createElement,
   type CSSProperties,
   memo,
   type ReactElement,
@@ -51,6 +52,7 @@ import {
   type RefCallback,
   useCallback,
   useRef,
+  useSyncExternalStore,
 } from "react";
 
 import type { ColumnDef } from "../columnDef";
@@ -66,6 +68,7 @@ import {
 import { type EditableCellEditing } from "../editing/editableCellController";
 import type { GridFocusState } from "../focus/useGridFocus";
 import type { RowPinSide } from "../rows/rowPinning";
+import { withRowDropTarget } from "../rows/rowReorder";
 import {
   type SharedTableRenderProps,
   type TableRenderModel,
@@ -598,12 +601,32 @@ export function desktopRowWiringEqual<TRow>(
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(
   RowBase: (props: Readonly<TProps>) => ReactElement,
   extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean
-) {
-  return memo(RowBase, (prev, next) => {
+): (props: TProps) => ReactElement {
+  const Row = memo(RowBase, (prev, next) => {
     if (!desktopRowWiringEqual(prev, next)) return false;
     return extraEqual?.(prev, next) ?? true;
   });
+  // Each row follows the drop edge a drag hovers on it, so a drag redraws the
+  // rows it crosses instead of the table.
+  return function DesktopRow(props: TProps): ReactElement {
+    const hover = props.showReorder ? props.rowReorder?.hover : undefined;
+    const dropAt = () => hover?.dropAt(props.id, props.index);
+    const drop = useSyncExternalStore(
+      hover?.subscribe ?? NO_HOVER,
+      dropAt,
+      dropAt
+    );
+    if (drop === undefined) return createElement(Row, props);
+    return createElement(Row, {
+      ...props,
+      reorderSignature: `${props.reorderSignature ?? ""}${drop}`,
+      rowDomProps: withRowDropTarget(props.rowDomProps, drop),
+    });
+  };
 }
+
+/** A row with no reorder hover has nothing to follow. */
+const NO_HOVER = (): (() => void) => () => undefined;
 
 /** What every desktop row of one table shares, in this binding's types. */
 type DesktopRowWiringContext<TRow> = DesktopRowWiringContextModel<TRow> & {
