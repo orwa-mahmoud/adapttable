@@ -21,6 +21,7 @@ import { NeutralTable } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
 import { revisionToken } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
+import { RowPinState } from '@adapttable/core/binding';
 import { TableRevisions } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core/binding';
 import { TableRuntimeView } from '@adapttable/core/binding';
@@ -202,7 +203,7 @@ export interface AgentContextInputs {
         readonly groupBy?: string;
         readonly filters?: Readonly<Record<string, unknown>>;
         readonly pinnedColumns?: Readonly<Record<string, unknown>>;
-        readonly pinnedRows?: Readonly<Record<string, unknown>>;
+        readonly pinnedRows?: RowPinState | Readonly<Record<string, unknown>>;
         readonly hiddenColumns?: readonly string[];
         readonly columnOrder?: readonly string[];
         readonly pagination?: AgentPagination;
@@ -258,7 +259,7 @@ export interface AgentContextView {
     // (undocumented)
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
     // (undocumented)
-    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    readonly pinnedRows?: RowPinState | Readonly<Record<string, unknown>>;
     // (undocumented)
     readonly revision: number;
     // (undocumented)

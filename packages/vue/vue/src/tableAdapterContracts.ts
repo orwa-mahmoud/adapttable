@@ -347,6 +347,10 @@ export interface DataTableProps<TRow> {
   readonly locale?: string;
   readonly searchable?: boolean;
   readonly searchDebounceMs?: number;
+  /** Stick the header while the body scrolls. Inside `maxHeight`, it sticks at 0. */
+  readonly stickyHeader?: boolean;
+  /** Page offset for a sticky header, in pixels. Ignored inside a scroll box. */
+  readonly stickyTop?: number;
   /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
   readonly searchPlaceholder?: string;
   readonly forceMobile?: boolean;
@@ -376,6 +380,11 @@ export interface DataTableProps<TRow> {
   readonly error?: Error | null;
   readonly refetch?: () => void | Promise<unknown>;
   readonly density?: TableDensity;
+  /**
+   * Animate rows and cards as they mount. Off by default. Skipped when the
+   * reader prefers reduced motion.
+   */
+  readonly animate?: boolean;
   readonly defaultDensity?: TableDensity;
   readonly onDensityChange?: (density: TableDensity) => void;
   readonly confirm?: ConfirmHandler;

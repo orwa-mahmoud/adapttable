@@ -7,7 +7,7 @@ import {
   FULLSCREEN_CONTROL,
   FULLSCREEN_MODEL,
 } from "../viewControls/contracts";
-function mountFullscreen<TRow>(context: FeatureMountContext<TRow>): void {
+function useFullscreenMount<TRow>(context: FeatureMountContext<TRow>): void {
   const state = useFullscreen(context.root, context.active);
   watch(state, (value) => context.state.set(FULLSCREEN_MODEL, value), {
     immediate: true,
@@ -18,7 +18,7 @@ function mountFullscreen<TRow>(context: FeatureMountContext<TRow>): void {
 export function fullscreen(): StaticTableFeature {
   return {
     ...coreFullscreen(),
-    mount: mountFullscreen,
+    mount: useFullscreenMount,
     requiredSlots: [FULLSCREEN_CONTROL],
   };
 }

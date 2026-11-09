@@ -14,6 +14,8 @@
  *   structurally and the surface joins them with a word in the reader's
  *   language, because "is" and "set to" are not this package's to write.
  */
+import { isRecord } from "@adapttable/core/binding";
+
 import type {
   AssistantReceiptSubject,
   AssistantReceiptTerm,
@@ -56,10 +58,6 @@ function termsFromBag(
       ? { column: labelOf(columns, id) }
       : { column: labelOf(columns, id), value: readableValue };
   });
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function filterSubject(

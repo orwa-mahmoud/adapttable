@@ -56,7 +56,8 @@ export function useSavedViews(
   activity?: MaybeRefOrGetter<boolean>
 ): UseSavedViewsResult {
   requireScope("useSavedViews");
-  const active = activity ?? useScopeActivity();
+  const scopeActive = useScopeActivity();
+  const active = activity ?? scopeActive;
   const options = computed(() => toValue(input));
   // Do not touch localStorage during SSR or the first hydration render.
   const browserStorage =

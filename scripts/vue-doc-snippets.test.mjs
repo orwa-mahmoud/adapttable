@@ -183,6 +183,9 @@ function compileExamples(examples) {
             "@adapttable/i18n": [
               join(REPO_ROOT, "packages/shared/i18n/src/index.ts"),
             ],
+            "@adapttable/i18n/*": [
+              join(REPO_ROOT, "packages/shared/i18n/src/*.ts"),
+            ],
           },
         },
         vueCompilerOptions: {

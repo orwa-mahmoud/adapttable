@@ -104,8 +104,8 @@ type FilterLayout = "popover" | "drawer" | "header";
       <div class="mx-demo__body">
         @for (current of mounted(); track current) {
           <adapt-showcase-table
-            [dir]="presentation.dir"
-            [labels]="presentation.labels"
+            [dir]="presentation.tableDir"
+            [labels]="presentation.tableLabels"
             [attr.lang]="presentation.locale"
             tableLabel="People"
             urlKey="flt"
@@ -166,8 +166,8 @@ class FilteringBody {
     <div class="mx-demo">
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
@@ -219,8 +219,8 @@ class SelectionBody {
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
@@ -289,8 +289,8 @@ class RowReorderingBody {
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           editConflictPolicy="ask"
@@ -371,8 +371,8 @@ class EditingBody {
     <div class="mx-demo">
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="grp"
@@ -404,8 +404,8 @@ class GroupingBody {
     <div class="mx-demo">
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
@@ -456,8 +456,8 @@ function scaleTier(): ScaleTier {
   imports: [AdaptShowcaseTable],
   template: `
     <adapt-showcase-table
-      [dir]="presentation.dir"
-      [labels]="presentation.labels"
+      [dir]="presentation.tableDir"
+      [labels]="presentation.tableLabels"
       [attr.lang]="presentation.locale"
       tableLabel="People"
       [urlSync]="false"
@@ -491,8 +491,8 @@ class ScaleFrontendTable {
   imports: [AdaptShowcaseTable],
   template: `
     <adapt-showcase-table
-      [dir]="presentation.dir"
-      [labels]="presentation.labels"
+      [dir]="presentation.tableDir"
+      [labels]="presentation.tableLabels"
       [attr.lang]="presentation.locale"
       tableLabel="People"
       [urlSync]="false"
@@ -566,8 +566,8 @@ function injectPeopleQuery(params: Signal<Partial<PeopleParams>>) {
       Use alternate data
     </button>
     <adapt-showcase-table
-      [dir]="presentation.dir"
-      [labels]="presentation.labels"
+      [dir]="presentation.tableDir"
+      [labels]="presentation.tableLabels"
       [attr.lang]="presentation.locale"
       tableLabel="People"
       [urlSync]="false"
@@ -732,8 +732,8 @@ class ScaleBody {
       </ng-template>
       <div class="mx-demo__body" [class.mx-phone]="mobile() === true">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           mode="frontend"
@@ -816,8 +816,8 @@ class MobileCardsBody {
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="views"
@@ -854,8 +854,8 @@ class SavedViewsBody {
     <div class="mx-demo mx-demo--overview">
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="overview"
@@ -928,8 +928,8 @@ export class AdaptShowcaseLandingTable {
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
@@ -973,8 +973,8 @@ const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
   template: `
     @let d = defaults();
     <adapt-showcase-table
-      [dir]="presentation.dir"
-      [labels]="presentation.labels"
+      [dir]="presentation.tableDir"
+      [labels]="presentation.tableLabels"
       [attr.lang]="presentation.locale"
       [data]="orders()"
       [columns]="columns"
@@ -1007,8 +1007,8 @@ class OrdersTable {
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
@@ -1081,8 +1081,8 @@ function teamSpan({
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           urlKey="rows"
@@ -1146,8 +1146,8 @@ class RowsBody {
       </div>
       <div class="mx-demo__body">
         <adapt-showcase-table
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           tableLabel="People"
           [urlSync]="false"
@@ -1186,8 +1186,8 @@ class ColumnGroupsBody {
         <adapt-showcase-table
           tableLabel="People"
           urlKey="cols"
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           [data]="rows"
           [columns]="columns"
@@ -1250,8 +1250,8 @@ class ColumnsBody {
           tableLabel="People budgets"
           urlKey="agg"
           [maxHeight]="420"
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           [data]="rows"
           [columns]="columns"
@@ -1431,8 +1431,8 @@ class FormulasBody {
         <adapt-showcase-table
           [tableLabel]="presentation.locale === 'ar' ? 'الأشخاص' : 'People'"
           urlKey="rtl"
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           [data]="rows"
           [columns]="columns"
@@ -1482,8 +1482,8 @@ class RtlBody {
         <adapt-showcase-table
           tableLabel="Live people"
           [urlSync]="false"
-          [dir]="presentation.dir"
-          [labels]="presentation.labels"
+          [dir]="presentation.tableDir"
+          [labels]="presentation.tableLabels"
           [attr.lang]="presentation.locale"
           [data]="rows()"
           [columns]="columns"

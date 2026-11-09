@@ -1,6 +1,7 @@
 /**
- * Extra public names the React binding imports. Kept as a dedicated
- * barrel so the main entry stays grouped by concern.
+ * Extra public names the framework bindings import. Kept as a dedicated
+ * barrel so the main entry stays grouped by concern. The names are
+ * framework-neutral; each binding re-exports what its adapters need.
  */
 
 export { resolveDisabledReason } from "./actions/confirm";
@@ -305,6 +306,7 @@ export {
   resolveVirtualRows,
   rowSourceIndex,
   virtualColumnSpan,
+  virtualItemMeta,
 } from "./virtual/virtualTableModel";
 export { buildTableXlsx, xlsxWriter } from "./xlsx";
 

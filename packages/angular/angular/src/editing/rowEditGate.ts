@@ -12,10 +12,15 @@ import {
   type EditableCellEditing,
   type RowEditingState,
 } from "@adapttable/angular";
+import { type CellConflictAsk, type TableLabels } from "@adapttable/core";
+import type {
+  BatchEditButtonProps,
+  RowEditButtonProps,
+  RowEditIcons,
+} from "@adapttable/core/binding";
 import {
   batchEditBarModel,
   batchEditErrorId,
-  type CellConflictAsk,
   editorSelectOptions,
   focusEditorOnMount,
   handleRowEditorKey,
@@ -24,13 +29,7 @@ import {
   rowEditControls,
   rowEditErrorId,
   rowEditSaveBlocked,
-  type TableLabels,
-} from "@adapttable/core";
-import type {
-  BatchEditButtonProps,
-  RowEditButtonProps,
-  RowEditIcons,
-} from "@adapttable/core/binding";
+} from "@adapttable/core/editing";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -54,7 +53,6 @@ export type { EditableColumnLike, TableLabels } from "@adapttable/core";
 export {
   type RowEditConflict,
   type RowEditControls,
-  rowEditControls,
   type RowEditControlsOptions,
 } from "@adapttable/core";
 export type {
@@ -64,6 +62,7 @@ export type {
   RowEditButtonProps,
   RowEditIcons,
 } from "@adapttable/core/binding";
+export { rowEditControls } from "@adapttable/core/editing";
 
 /**
  * Kit-supplied controls for {@link AdaptRowEditActionsChrome}.

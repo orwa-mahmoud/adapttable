@@ -34,8 +34,8 @@ export function rowMoveView<TRow>(
     getRowId: view.getRowId,
     rowLabel: view.rowLabel,
     sortBy: view.sortBy,
-    grouping: view.grouping as RowMoveView<TRow>["grouping"],
-    tree: view.tree as RowMoveView<TRow>["tree"],
+    grouping: view.grouping,
+    tree: view.tree,
   };
 }
 

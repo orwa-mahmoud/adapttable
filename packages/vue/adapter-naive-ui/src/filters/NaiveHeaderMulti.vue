@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import {
   type FilterHeaderMultiProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NPopover } from "naive-ui";
-import {
-  computed,
-  h,
-  type HTMLAttributes,
-  nextTick,
-  shallowRef,
-  watch,
-} from "vue";
+import { computed, h, type HTMLAttributes, shallowRef, watch } from "vue";
 
 import { naiveButton } from "../controls/button";
 import { naiveFilterCheckbox } from "./controls";
@@ -37,7 +31,7 @@ function keydown(event: KeyboardEvent) {
   event.stopPropagation();
   open.value = false;
   const anchor = trigger.value;
-  void nextTick(() => {
+  scheduleTick(() => {
     if (active.value && !open.value && trigger.value === anchor)
       anchor?.focus();
   });

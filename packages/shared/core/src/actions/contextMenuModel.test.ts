@@ -8,7 +8,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
 import { defaultLabels } from "../labels";
 import { contextMenuItems, type ContextMenuTarget } from "./contextMenuModel";
 

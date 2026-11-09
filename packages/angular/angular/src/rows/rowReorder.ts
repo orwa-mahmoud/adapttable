@@ -10,6 +10,7 @@ import {
 import {
   createRowReorderController,
   isRowMovePending,
+  isRtlElement,
   type RowDragEvent,
   type RowKeyEvent,
   rowReorderRowAttributes,
@@ -121,8 +122,10 @@ export function injectRowReorder<TRow>(
     options.features,
     options.grouping
   );
-  const controllerOptions = () =>
-    rowReorderRuntimeOptions(runtime, feature.onRowReorder, feature.options);
+  const controllerOptions = () => ({
+    ...rowReorderRuntimeOptions(runtime, feature.onRowReorder, feature.options),
+    isRtl: isRtlElement,
+  });
   const controller = createRowReorderController<TRow>(controllerOptions());
   effect(
     () => {

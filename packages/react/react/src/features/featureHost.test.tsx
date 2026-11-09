@@ -10,12 +10,12 @@ import {
   filterTypeDefaultOp,
   type FilterTypeSpec,
   pivot,
-  resolveCellEditor,
   resolveExportCsv,
   resolveFilterRegistry,
   runWithFeatureHost,
 } from "@adapttable/core";
 import { columnMenuActions } from "@adapttable/core/binding";
+import { resolveCellEditor } from "@adapttable/core/editing";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";

@@ -1,6 +1,5 @@
 import {
   applyGroupLeafSelection,
-  createAllMatchingScope,
   headerSelectionOf,
   idSetReader,
   offersAllMatching as neutralOffersAllMatching,
@@ -8,6 +7,7 @@ import {
   toggleIds,
 } from "@adapttable/core";
 import type { SelectionState } from "@adapttable/core/binding";
+import { createAllMatchingScope } from "@adapttable/core/selection";
 import {
   useCallback,
   useEffect,

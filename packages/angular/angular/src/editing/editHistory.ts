@@ -1,11 +1,11 @@
 /** Edit history adapts core's gesture stack to Angular signals and host callbacks. */
+import { type EditHistoryState } from "@adapttable/core";
 import {
   createEditHistory,
-  type EditHistoryState,
   editHistoryView,
   recordingCellEdit,
   resolveEditHistory,
-} from "@adapttable/core";
+} from "@adapttable/core/editing";
 import {
   assertInInjectionContext,
   computed,

@@ -7,13 +7,10 @@
  */
 import { describe, expect, it } from "vitest";
 
+import type { TableSourceCapabilities } from "../contracts/source";
 import { exportAllFallsBackToPage } from "../export/tableCsv";
 import { groupingComputationKind } from "../grouping/groupingStrategy";
-import {
-  capabilityReason,
-  sourceCapabilities,
-  type TableSourceCapabilities,
-} from "./capabilities";
+import { capabilityReason, sourceCapabilities } from "./capabilities";
 
 const ROWS = [{ id: "1", team: "eng" }];
 

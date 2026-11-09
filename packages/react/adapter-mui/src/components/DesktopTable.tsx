@@ -11,6 +11,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
+  DesktopTableChrome,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -45,6 +46,7 @@ import {
   useTheme,
 } from "@mui/material";
 import {
+  type ComponentProps,
   type CSSProperties,
   type ReactElement,
   type ReactNode,
@@ -562,8 +564,39 @@ function LeafHeader<TRow>({
   );
 }
 
+/**
+ * Stable element types. An inline host is a new component every render,
+ * which remounts the table and retriggers scroll measurement.
+ */
+function MuiScrollHost(props: ComponentProps<typeof Box>) {
+  "use no memo";
+  return <Box {...props} />;
+}
+
+function MuiTableHost(props: ComponentProps<typeof Table>) {
+  "use no memo";
+  return <Table {...props} />;
+}
+
+function MuiHeadHost(props: ComponentProps<typeof TableHead>) {
+  "use no memo";
+  return <TableHead {...props} />;
+}
+
+function MuiBodyHost(props: ComponentProps<typeof TableBody>) {
+  "use no memo";
+  return <TableBody {...props} />;
+}
+
+function MuiRowHost(props: ComponentProps<typeof TableRow>) {
+  "use no memo";
+  return <TableRow {...props} />;
+}
+
 /** Desktop MUI table. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const {
     size,
     dir,
@@ -586,16 +619,12 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     model,
     summary,
     showColumnFooter,
-    headerPlan,
-    headerBand,
     header,
     pin,
-    scroll,
     tableStyle,
     tableProps,
     gridProps,
     callbacks,
-    bodySlots,
   } = assembly;
   const {
     columns,
@@ -763,111 +792,81 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
 
   return (
-    <Box ref={scroll.bindScrollBox} style={scroll.boxStyle}>
-      <Table
-        data-adapttable-part="table"
-        size={size}
-        aria-label={tableProps["aria-label"]}
-        {...gridProps}
-        sx={minWidth > 0 ? { minWidth } : undefined}
-        style={
-          tableStyle
-            ? {
-                tableLayout: tableStyle.tableLayout,
-                width: tableStyle.width,
-              }
-            : undefined
-        }
-      >
-        <TableHead data-adapttable-part="thead" ref={header.theadRef}>
-          {headerPlan ? (
-            headerPlan.map((row, rowIndex) => {
-              const last = rowIndex === headerPlan.length - 1;
-              return (
-                <TableRow
-                  key={row.map((cell) => cell.key).join("|")}
-                  ref={last ? header.headerRowRef : undefined}
-                  data-adapttable-part={
-                    last ? "header-row" : "header-group-row"
-                  }
-                >
-                  {rowIndex === 0 ? leadingHeaders(headerBand) : null}
-                  {row.map(renderPlanCell)}
-                  {rowIndex === 0 ? trailingHeaders(headerBand) : null}
-                </TableRow>
-              );
-            })
-          ) : (
-            <TableRow
-              ref={header.headerRowRef}
-              data-adapttable-part="header-row"
-            >
-              {leadingHeaders(1)}
-              {columns.map((column, headerIndex) => {
-                const leaf = header.leaf(column, headerIndex);
-                return (
-                  <LeafHeader
-                    key={column.key}
-                    leaf={leaf}
-                    headSx={{
-                      ...headPaint,
-                      ...(leaf.pinSide ? PAPER_SX : {}),
-                      textAlign: muiAlign(column.align),
-                    }}
-                    {...leafProps}
-                  />
-                );
-              })}
-              {trailingHeaders(1)}
-            </TableRow>
-          )}
-        </TableHead>
-        <TableBody data-adapttable-part="tbody">
-          {bodySlots.map((slot) => {
-            if (slot.kind === "extra") {
-              return (
-                <ExtraSlotRow
-                  key={slot.key}
-                  kind={slot.extraKind}
-                  colSpan={slot.colSpan}
-                  render={slot.render}
-                  labels={labels}
-                  fillStyle={slot.fillStyle}
-                />
-              );
+    <DesktopTableChrome
+      assembly={assembly}
+      hosts={{
+        ScrollBox: MuiScrollHost,
+        Table: MuiTableHost,
+        Head: MuiHeadHost,
+        Body: MuiBodyHost,
+        Row: MuiRowHost,
+      }}
+      applyHeaderRowProps={false}
+      tableProps={{
+        size,
+        "aria-label": tableProps["aria-label"],
+        role: gridProps?.role,
+        dir: undefined,
+        sx: minWidth > 0 ? { minWidth } : undefined,
+        style: tableStyle
+          ? {
+              tableLayout: tableStyle.tableLayout,
+              width: tableStyle.width,
             }
-            if (slot.kind === "virtualPad") {
-              return (
-                <TableRow key={slot.key} aria-hidden>
-                  <TableCell
-                    colSpan={slot.colSpan}
-                    sx={{ height: slot.height, p: 0 }}
-                  />
-                </TableRow>
-              );
-            }
-            if (slot.kind === "group") {
-              return (
-                <OptionalGroupHeaderRow
-                  key={slot.key}
-                  entry={slot.entry}
-                  columns={columns}
-                  leadingCells={leadingCells}
-                  showActions={showActions}
-                  getCellProps={props.table.getCellProps}
-                  selection={selection}
-                  labels={labels}
-                  onToggleCollapse={callbacks.onToggleGroup}
-                  onShowMore={props.grouping?.showMore ?? (() => undefined)}
-                />
-              );
-            }
-            return (
-              <Row key={slot.key} {...slot.wiring} size={size} dir={dir} />
-            );
-          })}
-        </TableBody>
-        {showColumnFooter && (
+          : undefined,
+      }}
+      renderLeading={leadingHeaders}
+      renderTrailing={trailingHeaders}
+      renderPlanCell={renderPlanCell}
+      renderLeaf={(leaf, column) => (
+        <LeafHeader
+          key={column.key}
+          leaf={leaf}
+          headSx={{
+            ...headPaint,
+            ...(leaf.pinSide ? PAPER_SX : {}),
+            textAlign: muiAlign(column.align),
+          }}
+          {...leafProps}
+        />
+      )}
+      renderRow={(slot) => (
+        <Row key={slot.key} {...slot.wiring} size={size} dir={dir} />
+      )}
+      renderGroup={(slot) => (
+        <OptionalGroupHeaderRow
+          key={slot.key}
+          entry={slot.entry}
+          columns={columns}
+          leadingCells={leadingCells}
+          showActions={showActions}
+          getCellProps={props.table.getCellProps}
+          selection={selection}
+          labels={labels}
+          onToggleCollapse={callbacks.onToggleGroup}
+          onShowMore={props.grouping?.showMore ?? (() => undefined)}
+        />
+      )}
+      renderExtra={(slot) => (
+        <ExtraSlotRow
+          key={slot.key}
+          kind={slot.extraKind}
+          colSpan={slot.colSpan}
+          render={slot.render}
+          labels={labels}
+          fillStyle={slot.fillStyle}
+        />
+      )}
+      renderVirtualPad={(slot) => (
+        <TableRow key={slot.key} aria-hidden>
+          <TableCell
+            colSpan={slot.colSpan}
+            sx={{ height: slot.height, p: 0 }}
+          />
+        </TableRow>
+      )}
+      renderSummary={() =>
+        showColumnFooter ? (
           <TableFooter data-adapttable-part="summary">
             <TableRow data-adapttable-part="summary-row">
               {header.leading.expand && (
@@ -900,8 +899,8 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
               {showActions && <TableCell data-adapttable-part="summary-cell" />}
             </TableRow>
           </TableFooter>
-        )}
-      </Table>
-    </Box>
+        ) : null
+      }
+    />
   );
 }

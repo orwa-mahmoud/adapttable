@@ -10,13 +10,19 @@ import {
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
+import {
+  type FrameHold,
+  markFrameCommitted,
+  sourceViewKey,
+  takeRetainedFrame,
+} from "./retainedFrame";
 
 /**
  * One consolidated snapshot of everything a server query needs.
@@ -136,6 +142,13 @@ export interface UseServerDataOptions<TRow> extends Pick<
     query: TableQuery,
     info: { signal: AbortSignal; key: string }
   ) => void | Promise<void>;
+  /**
+   * When `false`, the source stays mounted but a repeat of the same inputs
+   * does not refresh it. The first inactive render still applies what it is
+   * given, so a tier switch can release the previous page without cancelling
+   * a request the active tier still owns. Defaults to active.
+   */
+  active?: boolean;
 }
 
 /**
@@ -158,9 +171,11 @@ export interface UseServerDataOptions<TRow> extends Pick<
 export function useServerData<TRow>(
   options: UseServerDataOptions<TRow>
 ): TableSource<TRow> {
-  // The source is mutable and must see every render's inputs, and every
-  // table's base bundle carries this hook: the compiler's cache would skip
-  // updates and add weight without adding hits.
+  // The source is created once. An active render, and the first inactive
+  // render, apply this render's inputs; a later render of those same inputs
+  // does not. A refetch still commits: it changes the source revision, not
+  // the inputs. The compiler's cache would skip a real refresh and add
+  // weight, so this hook stays opted out.
   "use no memo";
   const {
     rows,
@@ -179,6 +194,7 @@ export function useServerData<TRow>(
     facetKeys,
     facets,
     onQueryChange,
+    active: activeOption = true,
     ...urlOptions
   } = options;
   const mediaMobile = useIsMobile(mobileBreakpoint);
@@ -189,30 +205,66 @@ export function useServerData<TRow>(
   const [source] = useState<ServerSource<TRow>>(createServerSource);
   // The source's own state — an append, the cursor trail, a refetch, the
   // aggregate operations — re-renders through its subscription.
-  useSyncExternalStore(source.subscribe, source.revision, source.revision);
-
-  const frame = source.update(
-    {
+  const revision = useSyncExternalStore(
+    source.subscribe,
+    source.revision,
+    source.revision
+  );
+  const held = useRef<FrameHold<
+    ReturnType<ServerSource<TRow>["update"]>
+  > | null>(null);
+  const seenRevision = useRef<number | null>(null);
+  // A repeat of inputs already committed skips the refresh. The first
+  // inactive render still applies, so empty rows replace the previous page.
+  // A revision move (refetch, append, cursor) commits even when the inputs
+  // did not change, which is what re-sends or settles that request.
+  const { frame, skipped } = takeRetainedFrame(
+    held,
+    [
+      activeOption,
       rows,
       total,
       nextCursor,
       loading,
       error,
-      paginationMode: resolvedMode,
+      resolvedMode,
       supports,
       aggregates,
       columns,
       responseKey,
       expandedIds,
       facetKeys,
+      facets,
       onQueryChange,
-    },
-    state
+    ],
+    sourceViewKey(state),
+    () =>
+      source.update(
+        {
+          rows,
+          total,
+          nextCursor,
+          loading,
+          error,
+          paginationMode: resolvedMode,
+          supports,
+          aggregates,
+          columns,
+          responseKey,
+          expandedIds,
+          facetKeys,
+          onQueryChange,
+        },
+        state
+      )
   );
   // Once React accepts the render: send a changed query, latch the first
   // load, clamp, record the cursor, and settle the aggregate operations.
   useEffect(() => {
+    if (skipped && seenRevision.current === revision) return;
     source.commit();
+    seenRevision.current = revision;
+    markFrameCommitted(held);
   });
   // The request in flight is aborted when the table unmounts; a remount
   // sends it again.

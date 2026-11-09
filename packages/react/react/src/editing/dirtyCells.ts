@@ -3,11 +3,8 @@
  * server. The rules live in `@adapttable/core` (`createDirtyCellStore`); this
  * hook subscribes to the store.
  */
-import {
-  createDirtyCellStore,
-  type DirtyCellState,
-  dirtyCellView,
-} from "@adapttable/core";
+import { type DirtyCellState } from "@adapttable/core";
+import { createDirtyCellStore, dirtyCellView } from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 export type { DirtyCellState } from "@adapttable/core";

@@ -1,10 +1,9 @@
-import type { ColumnModelEditor } from "../columnModel";
+import type { ColumnModelEditor, SortableValue } from "../contracts/columns";
 import type { DisplayValue } from "../display";
 import {
   currentFeatureHost,
   type FeatureHostState,
 } from "../features/currentHost";
-import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
 
 /**

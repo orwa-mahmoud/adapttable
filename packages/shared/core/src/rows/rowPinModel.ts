@@ -22,6 +22,23 @@ export interface RowPinState {
 }
 
 /**
+ * The row-pin controller a binding publishes.
+ *
+ * Separate from column pinning and from tree or detail expansion. The
+ * runtime view reads {@link RowPinState} through the pinning projection.
+ *
+ * @public
+ */
+export interface RowPinningContribution {
+  /** Current lists. */
+  readonly state: RowPinState;
+  /** Pin a row to an edge. */
+  readonly pin: (rowKey: string, side: RowPinSide) => void;
+  /** Take a row off whichever edge holds it. */
+  readonly unpin: (rowKey: string) => void;
+}
+
+/**
  * Empty pin lists — omit `pinnedRowIds` and this is what the table holds.
  *
  * @public

@@ -87,6 +87,7 @@ function projectConfig(files) {
         "@adapttable/core": [join(core, "src", "index.ts")],
         "@adapttable/core/*": [join(core, "src", "*.ts")],
         "@adapttable/i18n": [join(i18n, "src", "index.ts")],
+        "@adapttable/i18n/*": [join(i18n, "src", "*.ts")],
       },
     },
     angularCompilerOptions: {

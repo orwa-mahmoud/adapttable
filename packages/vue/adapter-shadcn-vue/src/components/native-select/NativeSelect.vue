@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { scheduleTick } from "@adapttable/vue/adapter";
 import { ChevronDownIcon } from "@lucide/vue";
-import { computed, type HTMLAttributes, nextTick, onScopeDispose } from "vue";
+import { computed, type HTMLAttributes, onScopeDispose } from "vue";
 
 import { useControlTarget } from "../../lib/useControlTarget";
 import { cn } from "../../lib/utils";
@@ -29,7 +30,7 @@ function onChange(event: Event): void {
   const select = event.currentTarget;
   if (!(select instanceof HTMLSelectElement)) return;
   // Let Vue apply accepted controlled props before reconciling a rejected request.
-  void nextTick(() => {
+  scheduleTick(() => {
     if (!active || !select.isConnected) return;
     if (props.multiple) {
       const accepted = new Set(
@@ -62,11 +63,11 @@ const targetRef = useControlTarget(() => props.elementRef);
     <select
       :ref="targetRef"
       v-bind="$attrs"
+      v-model="selectedValue"
       :aria-label="$attrs['aria-label'] as HTMLAttributes['aria-label']"
       :aria-labelledby="
         $attrs['aria-labelledby'] as HTMLAttributes['aria-labelledby']
       "
-      v-model="selectedValue"
       :multiple="props.multiple"
       data-slot="native-select"
       :dir="props.dir"

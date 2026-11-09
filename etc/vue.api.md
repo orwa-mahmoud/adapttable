@@ -80,7 +80,7 @@ import { DirtyCellStoreOptions } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DUPLICATE_ROW_ACTION_KEY } from '@adapttable/core';
 import { EditableCellController } from '@adapttable/core';
-import { editableCellController } from '@adapttable/core';
+import { editableCellController } from '@adapttable/core/editing';
 import { EditableCellMode } from '@adapttable/core';
 import { EditableColumnLike } from '@adapttable/core';
 import { EditCommitSnapshot } from '@adapttable/core';
@@ -131,6 +131,7 @@ import { FilterType } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FindInTableState } from '@adapttable/core/binding';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { FunctionalComponent } from 'vue';
 import { GetCellSpan } from '@adapttable/core';
 import { GetCellSpanArgs } from '@adapttable/core';
@@ -169,6 +170,7 @@ import { PinnedRows } from '@adapttable/core';
 import { PinnedSummaryEntry } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
+import { primitiveText } from '@adapttable/core/binding';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
@@ -858,8 +860,7 @@ export { PinOffset }
 
 export { PinSide }
 
-// @public (undocumented)
-export function primitiveText(value: unknown): string | null;
+export { primitiveText }
 
 export { QueryCondition }
 
@@ -1673,6 +1674,8 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly selection?: RowSelection;
     // (undocumented)
     readonly source: MaybeRefOrGetter<TableSource<TRow>>;
+    readonly stickyHeader?: MaybeRefOrGetterOptional<boolean>;
+    readonly stickyTop?: MaybeRefOrGetterOptional<number>;
     // (undocumented)
     readonly tableLabel?: MaybeRefOrGetterOptional<string>;
 }
@@ -1683,6 +1686,7 @@ export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+    readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
@@ -1855,6 +1859,7 @@ export function useFrontendData<TRow>(input: MaybeRefOrGetter<UseFrontendDataOpt
 export interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, SourceViewportOptions {
     // (undocumented)
     readonly columns?: MaybeRefOrGetterOptional<readonly ColumnMetadata<TRow>[]>;
+    readonly createEngine?: FrontendEngineFactory<TRow>;
     // (undocumented)
     readonly data: MaybeRefOrGetter<readonly TRow[]>;
     // (undocumented)

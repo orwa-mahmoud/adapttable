@@ -93,6 +93,7 @@ export {
   type RowEditHandler,
   type RowEditingInjectOptions,
 } from "./editing/editing";
+export { editingBundleFor } from "./editing/editingBundle";
 export {
   type CellSaveStateInjectOptions,
   injectCellSaveState,
@@ -168,8 +169,20 @@ export {
 } from "./grouping/groupPaging";
 export { injectIsMobile, type IsMobileOptions } from "./hooks/isMobile";
 export { injectMediaQuery } from "./hooks/mediaQuery";
-export { injectPrefersReducedMotion } from "./hooks/prefersReducedMotion";
+export {
+  ADAPTTABLE_KIT_MOTION_OFF,
+  injectPrefersReducedMotion,
+} from "./hooks/prefersReducedMotion";
 export { type DataTableClassNames } from "./layout/dataTableClassNames";
+export {
+  SURFACE_EDITING,
+  SURFACE_GRID,
+  SURFACE_GROUPING,
+  SURFACE_HANDLES,
+  SURFACE_OCCUPIED,
+  type SurfaceHandles,
+  type SurfaceOccupation,
+} from "./layout/surfaceChannels";
 export {
   type DensityOptions,
   type DensityState,

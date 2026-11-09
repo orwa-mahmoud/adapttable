@@ -12,11 +12,15 @@ import { describe, expect, it } from "vitest";
 import * as binding from "./binding";
 import * as bindingExports from "./bindingExports";
 import * as conformance from "./conformance";
+import * as editing from "./editing";
+import * as engine from "./engine";
 import * as formula from "./formula";
+import * as grouping from "./grouping";
 import * as main from "./index";
 import * as pdf from "./pdf";
 import * as pivot from "./pivot";
 import * as query from "./query";
+import * as selection from "./selection";
 import * as stream from "./stream";
 import * as xlsx from "./xlsx";
 
@@ -26,7 +30,12 @@ describe("@adapttable/core/conformance", () => {
     expect(conformance.CONFORMANCE_ROWS.length).toBeGreaterThan(0);
     expect(conformance.CONFORMANCE_COLUMNS.length).toBeGreaterThan(0);
     expect(Object.keys(conformance).sort((a, b) => a.localeCompare(b))).toEqual(
-      ["CONFORMANCE_COLUMNS", "CONFORMANCE_ROWS", "tableConformanceTests"]
+      [
+        "CONFORMANCE_COLUMNS",
+        "CONFORMANCE_ROWS",
+        "featureLifecycleConformanceTests",
+        "tableConformanceTests",
+      ]
     );
   });
 });
@@ -103,5 +112,32 @@ describe("@adapttable/core/binding", () => {
       expect(Reflect.get(main, name)).toBe(Reflect.get(binding, name));
     }
     expect(Reflect.get(main, "xlsxWriter")).toBe(xlsx.xlsxWriter);
+  });
+});
+
+describe("the focused domain entries", () => {
+  it("serves the same engine the root serves", () => {
+    expect(engine.createTableEngine).toBe(main.createTableEngine);
+    expect(engine.createBasicTableEngine).toBe(main.createBasicTableEngine);
+    expect(engine.createNeutralTable).toBe(main.createNeutralTable);
+  });
+
+  it("serves the same grouping projection the root serves", () => {
+    expect(grouping.buildGroupedFlatModel).toBe(main.buildGroupedFlatModel);
+    expect(grouping.groupSelectionState).toBe(main.groupSelectionState);
+  });
+
+  it("serves the same editing session the root serves", () => {
+    expect(editing.createCellEditSession).toBe(main.createCellEditSession);
+    expect(editing.createEditHistory).toBe(main.createEditHistory);
+  });
+
+  it("serves the same selection scope the root serves", () => {
+    expect(selection.createAllMatchingScope).toBe(main.createAllMatchingScope);
+  });
+
+  it("leaves the incremental cache off the engine door", () => {
+    expect("createIncrementalView" in engine).toBe(false);
+    expect("attachIncrementalView" in engine).toBe(false);
   });
 });

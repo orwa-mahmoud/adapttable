@@ -1,4 +1,3 @@
-import type { EditableColumnLike } from "@adapttable/core";
 import {
   CELL_NAV_LIVE,
   cellNavigationInput,
@@ -12,24 +11,32 @@ import {
   finishShellLive,
   FULLSCREEN_LIVE,
   type FullscreenLiveSlotProps,
+  publishShellOverlay,
   SELECTION_STATS_LIVE,
   type SelectionStatsLiveSlotProps,
+  type ShellOperationInput,
   sourceWindowStart,
+  withShellOperations,
 } from "@adapttable/core/binding";
 /**
  * Mount shell interaction hooks in-tree: history, find, grid, export, fullscreen.
  *
  * Features fill the live slots. Empty slots pass inert stubs, so the lean
- * table never imports those hooks.
+ * table never imports those hooks. Enter-to-edit and batch recording live in
+ * the cell-navigation and editing entries; this file only forwards the host
+ * callbacks when those slots are empty.
  */
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { asBatchGesture } from "../editing/editHistory";
-import { beginCellEdit } from "../editing/useCellEditing";
 import { withFindMarks } from "../find/findMarks";
 import type { DataTableShellResult } from "../useDataTableShell";
 import { rememberFeatureHost } from "./featureHost";
-import { FeatureSlot, useFeatureSlotFilled } from "./providers";
+import {
+  FeatureSlot,
+  useFeatureSlotFilled,
+  usePublishTableRuntime,
+  useTableRuntime,
+} from "./providers";
 import {
   DISABLED_EXPORT,
   DISABLED_FIND,
@@ -43,6 +50,14 @@ import { type FindLiveSlotProps } from "./slotKeys";
 interface HistoryResult<TRow> {
   history: DataTableShellResult<TRow>["editHistory"];
   onCellEdit: DataTableShellResult<TRow>["chromeProps"]["onCellEdit"];
+  /**
+   * Set by the editing entry. Absent when the slot is empty, so the host's
+   * own batch callback is left untouched and this file does not import the
+   * gesture wrapper.
+   */
+  onBatchEdit?: NonNullable<
+    DataTableShellResult<TRow>["chromeProps"]["onBatchEdit"]
+  >;
 }
 
 /**
@@ -63,10 +78,7 @@ export function HistoryLiveGate<TRow>({
     const chromeProps = {
       ...shell.chromeProps,
       onCellEdit: result.onCellEdit,
-      onBatchEdit: asBatchGesture(
-        shell.chromeProps.onBatchEdit,
-        result.history.record
-      ),
+      onBatchEdit: result.onBatchEdit ?? shell.chromeProps.onBatchEdit,
     };
     rememberFeatureHost(chromeProps, shell.featureHost);
     return children({
@@ -79,6 +91,7 @@ export function HistoryLiveGate<TRow>({
     editHistory: shell.chromeProps.editHistory,
     columns: shell.chrome.allColumns,
     onCellEdit: shell.chromeProps.onCellEdit,
+    onBatchEdit: shell.chromeProps.onBatchEdit,
     children: apply,
   } as unknown as EditHistoryLiveSlotProps;
   return filled ? (
@@ -160,16 +173,6 @@ function CellNavStage<TRow>({
       columns: chrome.columnLayout.visibleColumns,
       columnsWindowed: shell.tableProps.columnWindow.enabled,
       headerCheckbox: props.columnSelectionCheckbox === true,
-      activate: (row, column) => {
-        const editing = chrome.editing;
-        if (!editing) return;
-        beginCellEdit(
-          editing.state,
-          row,
-          column as EditableColumnLike<TRow>,
-          props.rowKey
-        );
-      },
     }),
     getRowId: props.rowKey,
     dir: props.dir,
@@ -204,6 +207,7 @@ function CellNavStage<TRow>({
     onFind: live.find.openBar,
     matchKeys: live.find.matchKeys,
     currentMatch: live.find.current,
+    editing: chrome.editing,
     children: (gridFocus: ReturnType<typeof disabledGridFocus>) =>
       children({ ...live, gridFocus }),
   } as unknown as CellNavLiveSlotProps;
@@ -364,7 +368,64 @@ export function ShellLiveGate<TRow>({
   };
   return (
     <LiveChain index={0} shell={shell} live={idle}>
-      {(live) => children(finishShellLive(shell, live))}
+      {(live) => (
+        <PublishLiveOperations shell={shell} live={live}>
+          {children}
+        </PublishLiveOperations>
+      )}
     </LiveChain>
   );
+}
+
+/**
+ * Project the live controllers onto the runtime after the stages that own
+ * them have run. The chrome publisher has already built the view.
+ */
+function PublishLiveOperations<TRow>({
+  shell,
+  live,
+  children,
+}: {
+  readonly shell: DataTableShellResult<TRow>;
+  readonly live: ShellLive<TRow>;
+  readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
+}): ReactNode {
+  const input = liveShellOperations(shell, live);
+  publishShellOverlay(shell.chrome, input);
+  const runtime = useTableRuntime<TRow>();
+  const current = runtime.view();
+  const projected = current ? withShellOperations(current, input) : undefined;
+  usePublishTableRuntime(
+    projected?.visibleRows ?? projected?.rows ?? [],
+    projected ? runtime.labels() : undefined,
+    projected
+  );
+  return children(finishShellLive(shell, live));
+}
+
+/** Armed shell operations from the controllers this gate just ran. */
+function liveShellOperations<TRow>(
+  shell: DataTableShellResult<TRow>,
+  live: ShellLive<TRow>
+): ShellOperationInput<TRow> {
+  const props = shell.chromeProps;
+  const host = shell.featureHost;
+  const commands = host?.commands ?? [];
+  const palette = props.commandPalette;
+  const paletteArmed =
+    palette !== false && (palette !== undefined || commands.length > 0);
+  const onPrint = props.onPrint;
+  return {
+    find: live.find,
+    fullscreen: live.fullscreen,
+    density:
+      props.densityChooser === true
+        ? { density: props.density, onDensityChange: props.onDensityChange }
+        : undefined,
+    contextMenu: props.contextMenu
+      ? { items: host?.contextMenuItems ?? [] }
+      : undefined,
+    commandPalette: paletteArmed ? { commands } : undefined,
+    print: props.printButton === true && onPrint ? { onPrint } : undefined,
+  };
 }

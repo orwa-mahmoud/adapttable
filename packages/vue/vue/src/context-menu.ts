@@ -36,7 +36,7 @@ export interface ContextMenuOptions<TRow> {
 const GRID_FOCUS_MODEL = featureStateKey<GridFocusState>(
   "vue-grid-focus-model"
 );
-function mountContextMenu<TRow>(context: FeatureMountContext<TRow>): void {
+function useContextMenuMount<TRow>(context: FeatureMountContext<TRow>): void {
   const active = featureActivity(context);
   const enabled = () => active() && context.options.value.contextMenu !== false;
   const controller = createContextMenuOpenController<TRow>({
@@ -63,11 +63,12 @@ function mountContextMenu<TRow>(context: FeatureMountContext<TRow>): void {
       ? (context.options.value.contextMenu as ContextMenuOptions<TRow>)
       : undefined;
   const rowFor = (id: string) => {
-    const view = context.runtime.view();
-    const rows =
-      context.rowInventory?.value.visibleRows ??
-      view?.visibleRows ??
-      view?.rows;
+    // The shell frame reads this model. Asking the runtime for its view
+    // publishes that frame, so an open menu would re-enter this computed.
+    // The inventory is the same visible rows, without that publish.
+    const listed = context.rowInventory?.value.visibleRows;
+    const view = listed ? undefined : context.runtime.view();
+    const rows = listed ?? view?.visibleRows ?? view?.rows;
     return rows?.find((row) => context.table.rowKey(row) === id);
   };
   const model = computed<ContextMenuModel>(() => {
@@ -187,7 +188,7 @@ export function contextMenu<TRow>(
     id: core.id,
     apply: (input) => core.apply?.(input) ?? {},
     setup: (host) => core.setup?.(host),
-    mount: mountContextMenu,
+    mount: useContextMenuMount,
     requiredSlots: [CONTEXT_MENU_CONTROL],
   };
 }

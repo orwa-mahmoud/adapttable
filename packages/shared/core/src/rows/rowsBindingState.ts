@@ -3,9 +3,9 @@
  * binding adapts core's stores to its reactivity and hands back these
  * shapes, so a kit reads the same fields in every framework.
  */
+import type { RowPatchEvent } from "../contracts/rows";
 import type { RowAction } from "../types";
 import type { HighlightedCell } from "./highlightStore";
-import type { RowPatchEvent } from "./patch";
 import type { RowPinSide, RowPinState } from "./rowPinModel";
 
 /**
@@ -67,6 +67,21 @@ export interface RowExpansionState {
   isExpanded: (id: string) => boolean;
   /** Toggle a row's detail panel. */
   toggle: (id: string) => void;
+}
+
+/**
+ * A row-detail panel. Expansion here is {@link RowExpansionState}, not the
+ * tree's open set and not a group's collapsed buckets.
+ *
+ * @typeParam TRender - The host's render function.
+ *
+ * @public
+ */
+export interface DetailContribution<TRender = unknown> {
+  /** The host's detail renderer. */
+  readonly render: TRender;
+  /** Which detail panels are open. */
+  readonly expansion: RowExpansionState;
 }
 
 /**

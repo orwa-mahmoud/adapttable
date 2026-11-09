@@ -8,7 +8,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnModel } from "../types";
+import type { ColumnModel } from "../contracts/columns";
 import { clipboardRangeText, writeClipboardText } from "./clipboardRange";
 
 interface Row {

@@ -29,6 +29,7 @@ import {
   watch,
 } from "vue";
 
+import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 import { approvalIdentity } from "./approvalIdentity";
 import { ApprovalReviewChrome } from "./approvalReviewChrome";
@@ -125,7 +126,7 @@ const ApprovalModalContent = defineComponent(
         document.activeElement instanceof HTMLElement
           ? document.activeElement
           : null;
-      void nextTick(() => {
+      scheduleTick(() => {
         const target = root.value?.querySelector<HTMLElement>(
           'button:not(:disabled), [tabindex="0"]'
         );

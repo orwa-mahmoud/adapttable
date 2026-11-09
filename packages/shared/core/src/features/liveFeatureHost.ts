@@ -8,7 +8,7 @@
  * list changes. Every binding does exactly this, so the host is core's.
  */
 import type { Command } from "../actions/commandRegistry";
-import type { Aggregator } from "../aggregate/aggregate";
+import type { Aggregator } from "../contracts/columns";
 import type { CustomCellEditorRender } from "../editing/cellEditing";
 import type { ExportWriter } from "../export/exportWriter";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
@@ -19,6 +19,7 @@ import type {
   FilterTypeExtend,
   SidePanelEntry,
 } from "./currentHost";
+import type { GroupingContribution } from "./featureContribution";
 
 /**
  * The registrations a feature's `setup(host)` makes, collected for one table.
@@ -54,7 +55,80 @@ export class LiveFeatureHost<
   /** Factories that add entries to the right-click menus. */
   readonly contextMenuItems: ContextMenuItemsFactory<TRow>[] = [];
   private readonly disposers: (() => void)[] = [];
+  private readonly groupingById = new Map<string, GroupingContribution<TRow>>();
+  private readonly groupingOrder: string[] = [];
+  private readonly featureDisposers = new Map<string, (() => void)[]>();
   private disposed = false;
+
+  /**
+   * Publish one feature's grouping contribution.
+   *
+   * A later call wins, including a re-add of the same id. Unrelated
+   * registrations on this host are left alone.
+   */
+  contributeGrouping(
+    id: string,
+    contribution: GroupingContribution<TRow>
+  ): void {
+    if (this.disposed) return;
+    const index = this.groupingOrder.indexOf(id);
+    if (index >= 0) this.groupingOrder.splice(index, 1);
+    this.groupingOrder.push(id);
+    this.groupingById.set(id, contribution);
+  }
+
+  /**
+   * The grouping contribution the runtime projects: the last feature that
+   * still owns one.
+   */
+  groupingContribution(): GroupingContribution<TRow> | undefined {
+    for (let index = this.groupingOrder.length - 1; index >= 0; index--) {
+      const id = this.groupingOrder[index];
+      if (id === undefined) continue;
+      const contribution = this.groupingById.get(id);
+      if (contribution) return contribution;
+    }
+    return undefined;
+  }
+
+  /** Run `cleanup` when this feature is released or the host is disposed. */
+  onFeatureDispose(id: string, cleanup: () => void): void {
+    if (this.disposed) return;
+    const owned = this.featureDisposers.get(id) ?? [];
+    owned.push(cleanup);
+    this.featureDisposers.set(id, owned);
+    this.disposers.push(cleanup);
+  }
+
+  /**
+   * Drop one feature's grouping and run only its cleanups.
+   *
+   * Registrations and contributions from other features stay.
+   */
+  releaseFeature(id: string): void {
+    if (this.disposed) return;
+    this.groupingById.delete(id);
+    const index = this.groupingOrder.indexOf(id);
+    if (index >= 0) this.groupingOrder.splice(index, 1);
+    const cleanups = this.featureDisposers.get(id);
+    this.featureDisposers.delete(id);
+    if (!cleanups) return;
+    let failed = false;
+    let firstError: unknown;
+    for (const cleanup of cleanups) {
+      const at = this.disposers.indexOf(cleanup);
+      if (at >= 0) this.disposers.splice(at, 1);
+      try {
+        cleanup();
+      } catch (error) {
+        if (!failed) {
+          failed = true;
+          firstError = error;
+        }
+      }
+    }
+    if (failed) throw firstError;
+  }
 
   /** Run `cleanup` when the host is disposed. */
   onDispose(cleanup: () => void): void {
@@ -115,6 +189,9 @@ export class LiveFeatureHost<
         }
       }
     }
+    this.groupingById.clear();
+    this.groupingOrder.length = 0;
+    this.featureDisposers.clear();
     if (failed) throw firstError;
   }
 }

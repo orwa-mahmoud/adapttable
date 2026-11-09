@@ -11,8 +11,8 @@ import { AggregateSpec } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyRowPin } from '@adapttable/core';
 import { applyRowReorder } from '@adapttable/core';
-import { asBatchGesture } from '@adapttable/core';
-import { asGesture } from '@adapttable/core';
+import { asBatchGesture } from '@adapttable/core/editing';
+import { asGesture } from '@adapttable/core/editing';
 import { BatchEditingState } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
 import { BooleanChoice } from '@adapttable/core';
@@ -116,6 +116,7 @@ import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { FindInTableState } from '@adapttable/core/binding';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { GetCellSpan } from '@adapttable/core';
 import { getHistoryAdapter } from '@adapttable/core';
 import { GRID_CELL_ATTR } from '@adapttable/core';
@@ -137,10 +138,11 @@ import { HighlightState } from '@adapttable/core/binding';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { isDeclarativeFilters } from '@adapttable/core';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
+import { KitEnvironment } from '@adapttable/core/binding';
 import { LayoutStorage } from '@adapttable/core';
 import { LazyChildrenState } from '@adapttable/core/binding';
 import { listFilterValues } from '@adapttable/core';
-import { liveRowChanged } from '@adapttable/core';
+import { liveRowChanged } from '@adapttable/core/editing';
 import { MobileCardField } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
 import { MultiSelectEditorCheckboxProps as MultiSelectEditorCheckboxProps_2 } from '@adapttable/core/binding';
@@ -240,6 +242,7 @@ import { UseTableDataResult } from '@adapttable/core/binding';
 import { UseTableUrlStateResult } from '@adapttable/core/binding';
 import { ValidationCheckResult } from '@adapttable/core';
 import { ValidationTarget } from '@adapttable/core';
+import { withKitEnvironment } from '@adapttable/core/binding';
 
 export { ActiveFilterChip }
 
@@ -769,6 +772,8 @@ export { InfiniteQueryLike }
 
 export { isDeclarativeFilters }
 
+export { KitEnvironment }
+
 export { LayoutStorage }
 
 export { LazyChildrenState }
@@ -877,6 +882,12 @@ export { ReconcileLiveBatchEdit }
 export { ReconcileLiveEdit }
 
 export { ReconcileLiveRowEdit }
+
+// @public
+export function ReducedMotionScope(input: {
+    off: boolean;
+    children: ReactNode;
+}): ReactNode;
 
 // @public
 export function resolveColumnFooter<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
@@ -1400,7 +1411,9 @@ export function useFrontendData<TRow>(options: UseFrontendDataOptions<TRow>): Ta
 
 // @public
 export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+    active?: boolean;
     columns?: readonly ColumnDef<TRow>[];
+    createEngine?: FrontendEngineFactory<TRow>;
     data: readonly TRow[];
     error?: Error | null;
     filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
@@ -1627,6 +1640,7 @@ export function useServerData<TRow>(options: UseServerDataOptions<TRow>): TableS
 
 // @public
 export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+    active?: boolean;
     aggregates?: readonly QueryAggregate[];
     columns?: readonly ColumnMetadata<TRow>[];
     error?: Error | null;
@@ -1751,6 +1765,8 @@ export function useVirtualChromeBodyData<TRow>(chrome: TableChrome<TRow>, props:
 export { ValidationCheckResult }
 
 export { ValidationTarget }
+
+export { withKitEnvironment }
 
 // (No @packageDocumentation comment for this package)
 

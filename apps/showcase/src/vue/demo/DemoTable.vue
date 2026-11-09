@@ -26,7 +26,8 @@ const kit = useShowcaseKit();
 const query = new URLSearchParams(window.location.search);
 const enabled = (key: string, initial = false): boolean =>
   query.has(key) ? query.get(key) === "on" : initial;
-const server = query.get("mode") === "server";
+const server =
+  query.get("mode") === "server" || query.get("mode") === "backend";
 const editing = enabled("editing", true) && !server;
 const grouped = enabled("grouping") && !server;
 const rows = shallowRef<readonly Person[]>(
@@ -81,8 +82,8 @@ const features = [
     urlKey,
   }),
   kit.exportCsv<Person>({ filename: "people.csv" }),
-  kit.fullscreen(),
-  kit.statusBar(),
+  // The React live demo does not mount fullscreen, a status bar, or undo.
+  ...(props.lab ? [kit.fullscreen(), kit.statusBar()] : []),
   ...(grouped
     ? [
         kit.groupingPanel<Person>(["team"], {
@@ -100,14 +101,30 @@ const features = [
           },
           { editActivation: "click" }
         ),
+        ...(!props.lab
+          ? [
+              kit.rowEditing<Person>((row, patch) => {
+                rows.value = rows.value.map((item) =>
+                  item.id === row.id ? { ...item, ...patch } : item
+                );
+              }),
+            ]
+          : []),
         kit.editHistory(),
-        kit.undoRedoButtons(),
+        ...(props.lab ? [kit.undoRedoButtons()] : []),
         kit.cellNavigation(),
       ]
     : []),
-  ...(enabled("selection", props.lab) && !server
+  ...(enabled("selection", true) && !server
     ? [
         kit.bulkActions([
+          {
+            key: "export",
+            label: "Export",
+            onClick: (ids) => {
+              log.value = `Export: ${ids.length}`;
+            },
+          },
           {
             key: "archive",
             label: "Archive",
@@ -127,6 +144,21 @@ const features = [
         kit.rowReorder<Person>((from, to) => {
           rows.value = applyRowReorder(rows.value, from, to);
         }),
+      ]
+    : []),
+  ...(!server && !props.lab
+    ? [
+        kit.rowActions<Person>([
+          { key: "edit", label: "Edit", editsRow: true },
+          {
+            key: "delete",
+            label: "Delete",
+            color: "red",
+            onClick: (row) => {
+              rows.value = rows.value.filter((item) => item.id !== row.id);
+            },
+          },
+        ]),
       ]
     : []),
   ...(enabled("row-actions") && !server
@@ -174,10 +206,14 @@ const density = query.get("density") === "compact" ? "compact" : "comfortable";
         table-label="People directory"
         :url-key="urlKey"
         :url-adapter="demoUrlAdapter"
-        :selectable="enabled('selection', lab)"
+        :selectable="enabled('selection', true)"
         :mobile-breakpoint="enabled('mobile') ? Number.MAX_SAFE_INTEGER : 768"
-        :defaults="{ limit: 10 }"
+        :default-column-layout="
+          props.lab ? undefined : { hidden: ['email', 'team'] }
+        "
+        :defaults="{ limit: props.lab ? 10 : 5 }"
         :density="density"
+        :animate="enabled('motion', true)"
         :summary-row="summary"
         :features="features"
       />

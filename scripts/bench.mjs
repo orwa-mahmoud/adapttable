@@ -13,6 +13,7 @@
  *   node scripts/bench.mjs --only patch --port 4321
  *   node scripts/bench.mjs --port 4321 --json     # machine-readable
  *   node scripts/bench.mjs --record               # + probes, saved to bench-runs/
+ *   node scripts/bench.mjs --pilot                # composed-engine controller cases
  *
  * When nothing is already on the port it builds the showcase and serves the
  * production build (`vite preview`), the code users download, and stops that
@@ -61,6 +62,26 @@ const JSON_OUT = args.includes("--json");
 const RECORD = args.includes("--record");
 const onlyFlag = flag("only", "");
 const ONLY = typeof onlyFlag === "string" ? onlyFlag.toLowerCase() : "";
+
+if (args.includes("--pilot")) {
+  const out = join(ROOT, "scripts/bench-runs/2026-11-05-pilot.json");
+  const child = spawnSync(
+    join(ROOT, "node_modules/.bin/vitest"),
+    ["run", "src/engine/pilotBench.test.ts"],
+    {
+      cwd: join(ROOT, "packages/shared/core"),
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        PILOT_OUT: out,
+        NODE_OPTIONS: [process.env.NODE_OPTIONS, "--expose-gc"]
+          .filter(Boolean)
+          .join(" "),
+      },
+    }
+  );
+  process.exit(child.status ?? 1);
+}
 
 /**
  * Every scenario is a URL against the scale demo plus the shape we expect.

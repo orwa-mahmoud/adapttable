@@ -1,4 +1,5 @@
 /** Structural Chrome, required slots, and adapter construction. */
+export { mountForcedColorsStyles } from "./a11y/forcedColors";
 export type {
   CommandPaletteChromeProps,
   CommandPaletteSlots,
@@ -251,6 +252,8 @@ export {
   rowDetailModelKey,
   treeModelKey,
 } from "./hierarchy/models";
+export type { KitEnvironment } from "./kitEnvironment";
+export { useLocaleLabels, withKitEnvironment } from "./kitEnvironment";
 export type {
   DataTableSurfaceChromeProps,
   DataTableSurfaceSlots,
@@ -353,6 +356,7 @@ export type {
   HeadlessRowsOptions,
 } from "./rows/headlessRowsModel";
 export { rowActionControls } from "./rows/rowActionControls";
+export { scheduleTick } from "./scheduleTick";
 export type { SelectionCheckboxControl } from "./selection/checkboxControl";
 export {
   selectionCheckboxControl,
@@ -431,11 +435,8 @@ export type {
 export {
   defaultConfirm,
   defaultFilterRegistry,
-  editorInputType,
   filterLabel,
   filterWidgetKind,
-  formatMultiDraft,
-  readMultiDraft,
   resolveLabels,
 } from "@adapttable/core";
 export type {
@@ -571,6 +572,11 @@ export {
   type MenuNavigationItem,
   type MenuNavigationKey,
 } from "@adapttable/core/binding";
+export {
+  editorInputType,
+  formatMultiDraft,
+  readMultiDraft,
+} from "@adapttable/core/editing";
 
 // Types this entry's own signatures hand back.
 export type { SidePanelOptions, SidePanelPanel } from "./actions/contracts";

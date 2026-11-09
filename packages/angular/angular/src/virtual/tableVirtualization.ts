@@ -9,7 +9,6 @@ import {
   type KeyedVirtualization,
   type TableVirtualization,
   VIRTUAL_OVERSCAN,
-  type VirtualItemMeta,
 } from "@adapttable/core";
 import {
   asSizeEstimator,
@@ -17,6 +16,7 @@ import {
   keyedWindow,
   materializeWindowRows,
   rowWindow,
+  virtualItemMeta,
 } from "@adapttable/core/binding";
 import {
   afterNextRender,
@@ -34,21 +34,9 @@ import {
   type AngularVirtualizer,
   injectVirtualizer,
   injectWindowVirtualizer,
-  type VirtualItem,
 } from "@tanstack/angular-virtual";
 
 import { injectRowPairMeasurer } from "./measureRowPair";
-
-function asItemMeta(item: VirtualItem): VirtualItemMeta {
-  return {
-    index: item.index,
-    start: item.start,
-    end: item.end,
-    size: item.size,
-    key: item.key,
-    lane: item.lane,
-  };
-}
 
 /** Measure after child cells and styles have rendered, once per attached row. */
 function measureAfterRender(
@@ -252,7 +240,7 @@ export function injectTableVirtualizer<TRow>(
 
     const virtualization = computed((): TableVirtualization<TRow> => {
       const on = enabled();
-      const items = activeVirtualizer().getVirtualItems().map(asItemMeta);
+      const items = activeVirtualizer().getVirtualItems().map(virtualItemMeta);
       const active = on && items.length > 0;
       const rows = options.rows();
       const materialized = materializeWindowRows(
@@ -388,7 +376,7 @@ export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
 
     const virtualization = computed((): KeyedVirtualization => {
       const on = enabled();
-      const items = activeVirtualizer().getVirtualItems().map(asItemMeta);
+      const items = activeVirtualizer().getVirtualItems().map(virtualItemMeta);
       const vz = activeVirtualizer();
       return keyedWindow({
         enabled: on,

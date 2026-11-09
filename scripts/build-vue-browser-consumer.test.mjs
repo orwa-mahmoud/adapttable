@@ -350,8 +350,10 @@ test("a missing CI packed artifact fails server startup without a source fallbac
 });
 
 test("both browser workflows build and restore the isolated artifact, and the fixture is typechecked separately", () => {
+  // pr.yml: the upload, the Playwright shards and the packed Angular consumer,
+  // whose shared web servers serve the restored page.
   for (const [workflow, copies] of [
-    ["pr.yml", 2],
+    ["pr.yml", 3],
     ["e2e-nightly.yml", 3],
   ]) {
     const source = readFileSync(

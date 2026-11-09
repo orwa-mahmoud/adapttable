@@ -24,6 +24,7 @@ describe("e2ePlan", () => {
       "apps/docs/src/components/FrameworkSwitch.astro",
       "scripts/angular-docs.mjs",
       "scripts/build-vue-browser-consumer.mjs",
+      "scripts/build-angular-browser-consumer.mjs",
       "scripts/vue-docs.mjs",
       "scripts/framework-navigation.mjs",
       "scripts/og-cards.mjs",
@@ -99,6 +100,7 @@ describe("projectsFor", () => {
     assert.deepEqual(projectsFor(["e2e/rtl.spec.ts"]), DEFAULT_E2E_PROJECTS);
     assert.ok(DEFAULT_E2E_PROJECTS.includes("--project=chromium"));
     assert.ok(DEFAULT_E2E_PROJECTS.includes("--project=chromium-dev"));
+    assert.ok(DEFAULT_E2E_PROJECTS.includes("--project=angular-consumer"));
   });
 
   it("routes visual specs to the Chromium visual project", () => {

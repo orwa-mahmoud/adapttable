@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import {
   type DensityChooserSlots,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { ElRadioButton, ElRadioGroup } from "element-plus";
-import { type ComponentPublicInstance, nextTick, watch } from "vue";
+import { type ComponentPublicInstance, watch } from "vue";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps<{
@@ -17,7 +18,7 @@ let generation = 0;
 function reconcile(): void {
   const ticket = generation;
   const owned = [...fields];
-  void nextTick(() => {
+  scheduleTick(() => {
     if (!active.value || ticket !== generation) return;
     for (const [value, field] of owned)
       if (fields.get(value) === field && field.isConnected)

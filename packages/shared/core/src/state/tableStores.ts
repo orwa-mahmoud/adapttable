@@ -12,7 +12,9 @@ import {
 import type { RowPinSide, RowPinState } from "../rows/rowPinModel";
 import type { HeaderSelectionState } from "../selection/selectionState";
 import { devWarn } from "../utils/devWarn";
+import { isRecord } from "../utils/isRecord";
 import { memoLast } from "../utils/memoLast";
+import { sameItems } from "../utils/sameItems";
 import { stableKey } from "../utils/stableKey";
 
 /* ── Id sets: selection, expansion, collapsed groups ───────────────── */
@@ -145,20 +147,13 @@ export function applyRowPin(
   return { top, bottom };
 }
 
-function sameIds(left: readonly string[], right: readonly string[]): boolean {
-  return (
-    left.length === right.length &&
-    left.every((id, index) => id === right[index])
-  );
-}
-
 /**
  * Whether two pin states hold the same rows in the same order.
  *
  * @public
  */
 export function sameRowPins(left: RowPinState, right: RowPinState): boolean {
-  return sameIds(left.top, right.top) && sameIds(left.bottom, right.bottom);
+  return sameItems(left.top, right.top) && sameItems(left.bottom, right.bottom);
 }
 
 /**
@@ -295,15 +290,10 @@ function stringEntries(value: unknown): string[] {
   return value.filter((entry): entry is string => typeof entry === "string");
 }
 
-/** A non-null, non-array object — the only shape worth field-scanning. */
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 /** Keep only valid pin sides of a (possibly hostile) stored record. */
 function sanitizePinned(value: unknown): Record<string, PinSide> {
   const pinned: Record<string, PinSide> = {};
-  if (!isPlainRecord(value)) return pinned;
+  if (!isRecord(value)) return pinned;
   for (const [key, side] of Object.entries(value)) {
     if (side === "start" || side === "end") pinned[key] = side;
   }
@@ -313,7 +303,7 @@ function sanitizePinned(value: unknown): Record<string, PinSide> {
 /** Keep only finite positive widths of a (possibly hostile) stored record. */
 function sanitizeWidths(value: unknown): Record<string, number> {
   const widths: Record<string, number> = {};
-  if (!isPlainRecord(value)) return widths;
+  if (!isRecord(value)) return widths;
   for (const [key, px] of Object.entries(value)) {
     if (typeof px === "number" && Number.isFinite(px) && px > 0) {
       widths[key] = px;
@@ -325,7 +315,7 @@ function sanitizeWidths(value: unknown): Record<string, number> {
 /** Keep only non-empty string names from a (possibly hostile) stored record. */
 function sanitizeNames(value: unknown): Record<string, string> {
   const names: Record<string, string> = {};
-  if (!isPlainRecord(value)) return names;
+  if (!isRecord(value)) return names;
   for (const [key, name] of Object.entries(value)) {
     if (typeof name === "string" && name.trim() !== "") {
       names[key] = name.trim();
@@ -343,7 +333,7 @@ function sanitizeNames(value: unknown): Record<string, string> {
 export function sanitizeStoredLayout(
   parsed: unknown
 ): ColumnLayoutState | null {
-  if (!isPlainRecord(parsed)) return null;
+  if (!isRecord(parsed)) return null;
   const names = sanitizeNames(parsed.names);
   const collapsedGroups = stringEntries(parsed.collapsedGroups);
   return {

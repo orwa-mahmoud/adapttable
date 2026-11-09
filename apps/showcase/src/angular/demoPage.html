@@ -129,12 +129,12 @@
             <input
               type="radio"
               name="mode"
-              value="server"
+              value="backend"
               [checked]="server"
               (change)="change('mode', $event)"
               data-demo-control="mode"
             />
-            <span>Server</span>
+            <span>Backend</span>
           </label>
         </div>
       </fieldset>
@@ -263,7 +263,7 @@
     </section>
     @if (server) {
       <p class="hint">
-        Server mode uses the shared simulated API with latency, filtering,
+        Backend mode uses the shared simulated API with latency, filtering,
         sorting and pagination. Editing and grouping need the frontend row set.
       </p>
     }
@@ -453,7 +453,7 @@
         [fields]="pivotFields"
         [config]="pivotState.config()"
         [onChange]="pivotState.onConfigChange"
-        [labels]="presentation.labels"
+        [labels]="presentation.tableLabels"
       />
     </ng-template>
     <ng-template #viewsPanel
@@ -511,10 +511,12 @@
             [features]="panelFeatures()"
             [urlSync]="false"
             [searchable]="false"
-            [labels]="presentation.labels"
-            [dir]="presentation.dir"
+            [labels]="presentation.tableLabels"
+            [dir]="presentation.tableDir"
             [density]="density()"
+            [animate]="animate"
             [forceMobile]="mobile ? true : undefined"
+            [mobileBreakpoint]="768"
             [defaults]="{ limit: 100 }"
             [maxHeight]="560"
           />
@@ -526,19 +528,21 @@
             [source]="source"
             [error]="error()"
             [loading]="loading()"
-            [defaults]="{ limit: large ? 100 : 10 }"
+            [defaults]="{ limit: large ? 100 : 5 }"
             [columns]="columns()"
             [columnLayout]="columnState.layout()"
             (columnLayoutChange)="setColumnLayout($event)"
             [rowKey]="rowKey"
-            [labels]="presentation.labels"
-            [dir]="presentation.dir"
+            [labels]="presentation.tableLabels"
+            [dir]="presentation.tableDir"
             [features]="features()"
             [density]="density()"
+            [animate]="animate"
             (densityChange)="setDensity($event)"
             [filtersMode]="filterMode === 'drawer' ? 'drawer' : 'popover'"
             [paginationMode]="pagination"
             [forceMobile]="mobile ? true : undefined"
+            [mobileBreakpoint]="768"
             [selectable]="selectable"
             [searchable]="searchable"
             [summaryRow]="summary"

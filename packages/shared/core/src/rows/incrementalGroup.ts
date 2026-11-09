@@ -5,7 +5,8 @@
  * Flattening still goes through {@link flattenGroupPartitions} so collapse,
  * paging, group sort and group filter stay one implementation.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import {
   groupingKeys,
   type GroupPartition,

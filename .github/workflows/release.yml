@@ -71,7 +71,7 @@ jobs:
           github-token: ${{ secrets.RELEASE_TOKEN }}
         env:
           # The version-bump commit must not run the husky gate on this
-          # 2-core runner: CI enforces the same gate on every PR (including
+          # runner: CI enforces the same gate on every PR (including
           # the Version Packages PR), and the full suite inside a commit
           # hook starves past the 30s antd test budget.
           HUSKY: "0"

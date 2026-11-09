@@ -254,9 +254,7 @@ it("keeps host fill writes as requests and exposes all status markers and classe
   expect(
     element(root, part("status-bar")).classList.contains("status-paint")
   ).toBe(true);
-  expect(
-    element(root, part("status-item")).classList.contains("item-paint")
-  ).toBe(true);
+  expect(root.querySelector('[data-status="rows"]')).toBeNull();
   const stats = element(root, part("selection-stats"));
   expect(stats.classList.contains("stats-paint")).toBe(true);
   expect(stats.getAttribute("aria-live")).toBe("polite");

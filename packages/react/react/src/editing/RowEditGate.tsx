@@ -8,11 +8,18 @@
  * rather than in nine adapters, because a second copy of "which editor does this
  * column want" is a second place for the answer to drift.
  */
+import { type EditableColumnLike } from "@adapttable/core";
+import {
+  type BatchEditBarProps,
+  type BatchEditBarSlots as NeutralBatchEditBarSlots,
+  preserveEditorFocusOnLayoutChange,
+  type RowEditActionsProps,
+  type RowEditActionsSlots as NeutralRowEditActionsSlots,
+} from "@adapttable/core/binding";
 import {
   batchEditBarModel,
   batchEditErrorId,
   customEditorConflict,
-  type EditableColumnLike,
   editorSelectOptions,
   handleRowEditorKey,
   isCustomEditor,
@@ -21,14 +28,7 @@ import {
   rowEditControls,
   rowEditErrorId,
   rowEditSaveBlocked,
-} from "@adapttable/core";
-import {
-  type BatchEditBarProps,
-  type BatchEditBarSlots as NeutralBatchEditBarSlots,
-  preserveEditorFocusOnLayoutChange,
-  type RowEditActionsProps,
-  type RowEditActionsSlots as NeutralRowEditActionsSlots,
-} from "@adapttable/core/binding";
+} from "@adapttable/core/editing";
 import { type ReactElement, type ReactNode, useCallback, useRef } from "react";
 
 import type { BatchEditingState } from "./batchEditing";
@@ -52,7 +52,6 @@ export type { EditableColumnLike, TableLabels } from "@adapttable/core";
 export {
   type RowEditConflict,
   type RowEditControls,
-  rowEditControls,
   type RowEditControlsOptions,
 } from "@adapttable/core";
 export type {
@@ -62,6 +61,7 @@ export type {
   RowEditButtonProps,
   RowEditIcons,
 } from "@adapttable/core/binding";
+export { rowEditControls } from "@adapttable/core/editing";
 
 /**
  * Adapter-supplied controls for {@link RowEditActionsChrome} —
@@ -330,13 +330,12 @@ export function RowEditActionsChrome<TRow>({
         }}
       />
       {options.rowEditing.commit?.error ? (
-        <span
-          role="status"
+        <output
           data-adapttable-part="row-edit-error"
           style={{ flexBasis: "100%", minWidth: 0, overflowWrap: "anywhere" }}
         >
           {options.rowEditing.commit.error}
-        </span>
+        </output>
       ) : null}
     </span>
   );
@@ -546,13 +545,12 @@ export function BatchEditBarChrome<TRow>({
         onClick={batch.cancelAll}
       />
       {batch.commit?.error ? (
-        <span
-          role="status"
+        <output
           data-adapttable-part="batch-edit-error"
           style={{ flexBasis: "100%", minWidth: 0, overflowWrap: "anywhere" }}
         >
           {batch.commit.error}
-        </span>
+        </output>
       ) : null}
     </div>
   );

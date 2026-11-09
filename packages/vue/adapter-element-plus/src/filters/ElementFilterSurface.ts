@@ -1,6 +1,7 @@
 import {
   type FilterPanelSurfaceProps,
   FULLSCREEN_MODEL,
+  scheduleTick,
   useFeatureState,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -14,7 +15,6 @@ import {
 import {
   defineComponent,
   h,
-  nextTick,
   onMounted,
   type PropType,
   shallowRef,
@@ -46,7 +46,7 @@ export const ElementFilterSurface = defineComponent(
       props.onClose(reason);
       if (reason === "escape") {
         const anchor = props.anchor;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (
             active.value &&
             !props.open &&

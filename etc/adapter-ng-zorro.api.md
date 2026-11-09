@@ -8,11 +8,12 @@ import { ActiveFilterChipsSlotProps } from '@adapttable/angular/adapter';
 import { AdaptAutoFilterFormModel } from '@adapttable/angular/adapter';
 import { AdaptColumnMenuModel } from '@adapttable/angular/adapter';
 import { AdaptDataTableShell } from '@adapttable/angular/adapter';
-import { AdaptDesktopTableModel } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderCardModel } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderRowModel } from '@adapttable/angular/adapter';
-import { AdaptMobileCardsModel } from '@adapttable/angular/adapter';
+import { AdaptMobileCardsHost } from '@adapttable/angular/adapter';
 import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
+import { AdaptTableSurface } from '@adapttable/angular/adapter';
+import { Attrs } from '@adapttable/angular';
 import { BodyCellView } from '@adapttable/angular/adapter';
 import { BodyRow } from '@adapttable/angular/adapter';
 import { BodySlot } from '@adapttable/angular/adapter';
@@ -56,6 +57,7 @@ import { isBooleanEditor } from '@adapttable/angular/adapter';
 import { isDraftChecked } from '@adapttable/angular/adapter';
 import { isMultiSelectEditor } from '@adapttable/angular/adapter';
 import { isSelectEditor } from '@adapttable/angular/adapter';
+import { KitEnvironment } from '@adapttable/angular/adapter';
 import { MultiSelectEditorSlots } from '@adapttable/angular/adapter';
 import { OnInit } from '@angular/core';
 import { PivotConfig } from '@adapttable/angular/pivot';
@@ -262,6 +264,8 @@ export class AdaptColumnSelectCheckbox {
 
 // @public (undocumented)
 export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {
+    // (undocumented)
+    protected kitEnvironment(): KitEnvironment;
     protected readonly sortInput: () => HTMLElement | null;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDataTable<any>, "adapt-data-table", never, {}, {}, never, never, true, never>;
@@ -285,10 +289,13 @@ export class AdaptDensityButton {
 }
 
 // @internal
-export class AdaptDesktopTable<TRow> extends AdaptDesktopTableModel<TRow> {
+export class AdaptDesktopTable<TRow> extends AdaptTableSurface<TRow> {
+    attachTableHost(element: HTMLElement): void;
+    protected scrollStyle(): Record<string, string> | null;
     // (undocumented)
     protected readonly tableAttrs: Signal<Readonly<Record<string, unknown>>>;
     protected readonly tableElement: () => HTMLTableElement | null;
+    protected withRowClass(attrs: Attrs): Attrs;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDesktopTable<any>, "adapt-desktop-table", never, {}, {}, never, never, true, never>;
     // (undocumented)
@@ -581,7 +588,7 @@ export class AdaptGroupMore {
 }
 
 // @internal
-export class AdaptMobileCards<TRow> extends AdaptMobileCardsModel<TRow> {
+export class AdaptMobileCards<TRow> extends AdaptMobileCardsHost<TRow> {
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMobileCards<any>, "adapt-mobile-cards", never, {}, {}, never, never, true, never>;
     // (undocumented)

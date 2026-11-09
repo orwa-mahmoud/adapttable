@@ -6,13 +6,9 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { QueryExtensions, QueryFilterGroup } from "../contracts/query";
 import { resetDevWarnings } from "../utils/devWarn";
-import {
-  applyQuerySupport,
-  isFilterGroup,
-  type QueryExtensions,
-  type QueryFilterGroup,
-} from "./queryContract";
+import { applyQuerySupport, isFilterGroup } from "./queryContract";
 
 const ALL: QueryExtensions = {
   groupBy: ["team"],

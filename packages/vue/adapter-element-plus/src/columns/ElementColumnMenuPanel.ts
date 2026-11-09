@@ -1,5 +1,6 @@
 import {
   type ManagedOverlayPanelProps,
+  scheduleTick,
   useElementRef,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -8,7 +9,6 @@ import {
   defineComponent,
   h,
   mergeProps,
-  nextTick,
   onScopeDispose,
   type PropType,
   provide,
@@ -70,7 +70,7 @@ export const ElementColumnMenuPanel = defineComponent(
       if (!active.value || !control.open || !control.isCurrent()) return;
       control.onClose(reason);
       if (reason === "escape")
-        void nextTick(() => {
+        scheduleTick(() => {
           if (
             (!live || !props.control.open) &&
             control.isCurrent() &&

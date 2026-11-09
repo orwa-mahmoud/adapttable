@@ -9,8 +9,8 @@
  * serves every framework.
  */
 import type { ConfirmHandler } from "./actions/confirm";
-import type { ExtraFilters } from "./columnModel";
 import type { ColumnLayoutState } from "./columns/columnLayoutModel";
+import type { ExtraFilters } from "./contracts/columns";
 import type {
   EditConflictHandler,
   EditConflictPolicy,

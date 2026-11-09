@@ -13,11 +13,14 @@ import {
   type FilterEngine,
   type FilterRuntime,
   type FilterTypeSpec,
+  type FrontendEngineFactory,
+  INACTIVE_TIER_ROWS,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
   type SortableValue,
   type TableSource,
+  tierRows,
 } from "@adapttable/core";
 import type { FeatureHostState } from "@adapttable/core/binding";
 import {
@@ -41,9 +44,6 @@ import {
 import type { TableUrlStateOptions } from "../url/tableUrlState";
 import { injectFrontendData } from "./frontendData";
 import { injectServerData, type TableQueryHandler } from "./serverData";
-
-/** The server tier's columns while the table is not on it: none. */
-const NO_COLUMNS: readonly never[] = [];
 
 /**
  * Options for {@link injectTableData}.
@@ -114,6 +114,11 @@ export interface TableDataOptions<TRow> extends Pick<
   readonly featureHost?: Signal<FeatureHostState | undefined>;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
+  /**
+   * Evaluator for the frontend tier. Defaults to the basic one. The shell
+   * passes the full one while grouping is composed.
+   */
+  readonly createEngine?: MaybeSignalOptional<FrontendEngineFactory<TRow>>;
 }
 
 /**
@@ -191,20 +196,25 @@ export function injectTableData<TRow>(
     urlSync: computed(() =>
       onFrontend() ? readMaybe(options.urlSync) : false
     ),
-    data: computed(() => (onFrontend() ? (data() ?? []) : [])),
-    columns,
+    data: computed(() =>
+      onFrontend() ? tierRows(true, data()) : INACTIVE_TIER_ROWS
+    ),
+    columns: computed(() => (onFrontend() ? columns() : INACTIVE_TIER_ROWS)),
     getRowId: options.getRowId,
     getSearchText: options.getSearchText,
     getSortValue: options.getSortValue,
+    // Read the shared plan only while this tier is active. An idle frame
+    // that called plan() would refresh on every live row change.
     get filterFn() {
-      return plan().filterFn;
+      return onFrontend() ? plan().filterFn : undefined;
     },
     get filterTreeFn() {
-      return plan().filterTreeFn;
+      return onFrontend() ? plan().filterTreeFn : undefined;
     },
     filterKey: computed(() => plan().filterKey),
     locale,
     paginationMode: mode,
+    createEngine: options.createEngine,
     forceMobile: options.forceMobile,
     mobileBreakpoint: options.mobileBreakpoint,
     isLoading: computed(() =>
@@ -218,7 +228,9 @@ export function injectTableData<TRow>(
   const server = injectServerData<TRow>({
     ...urlOptions,
     urlSync: computed(() => (onServer() ? readMaybe(options.urlSync) : false)),
-    rows: computed(() => (onServer() ? (data() ?? []) : [])),
+    rows: computed(() =>
+      onServer() ? tierRows(true, data()) : INACTIVE_TIER_ROWS
+    ),
     total: computed(() => readMaybe(options.total) ?? 0),
     loading: options.loading,
     error: options.error,
@@ -227,7 +239,7 @@ export function injectTableData<TRow>(
     mobileBreakpoint: options.mobileBreakpoint,
     // A column's default aggregate is a request to the server, so only the
     // server tier reads the columns.
-    columns: computed(() => (onServer() ? columns() : NO_COLUMNS)),
+    columns: computed(() => (onServer() ? columns() : INACTIVE_TIER_ROWS)),
     onQueryChange: computed(() =>
       onServer() ? readMaybe(options.onQueryChange) : undefined
     ),

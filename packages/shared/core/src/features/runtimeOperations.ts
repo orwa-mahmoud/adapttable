@@ -34,5 +34,11 @@ export function deriveRuntimeOperations<TRow>(
     hideColumn: Boolean(view?.columnLayout?.setHidden),
     moveColumn: Boolean(view?.columnLayout?.move),
     setColumnOrder: Boolean(view?.columnLayout?.setOrder),
+    find: Boolean(view?.find?.openBar),
+    setDensity: Boolean(view?.density),
+    toggleFullscreen: Boolean(view?.fullscreen?.supported),
+    contextMenu: Boolean(view?.contextMenu),
+    commandPalette: Boolean(view?.commandPalette),
+    print: Boolean(view?.print),
   };
 }

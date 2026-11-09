@@ -169,6 +169,7 @@ export function projectHeadlessRows<TRow>(
       rowAttrs = {
         "data-adapttable-part": part,
         "data-row-id": id,
+        "data-stagger": "",
         ...(card ? { role: "listitem" } : {}),
       };
     const cellModel = (cell: BodyCell<TRow>): TableCellModel<TRow> => {

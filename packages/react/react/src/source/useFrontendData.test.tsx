@@ -4,6 +4,7 @@ import {
   rowPatchLog,
   updateRow,
 } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { act, renderHook } from "@testing-library/react";
 import { useEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -372,7 +373,7 @@ describe("useFrontendData — incremental patches", () => {
   // Typed readonly so a patched (readonly) result can be rerendered in.
   const INITIAL_ROWS: { data: readonly Row[] } = { data: ROWS };
 
-  it("does not re-run filterFn on untouched rows when the patch log is kept", () => {
+  it("re-filters logged rows on the basic evaluator and keeps untouched objects", () => {
     const filterFn = vi.fn((row: Row) => row.count > 0);
     const adapter = createMemoryAdapter("");
     const { result, rerender } = renderHook(
@@ -393,10 +394,35 @@ describe("useFrontendData — incremental patches", () => {
     expect(rowPatchLog(patched)).toBeDefined();
     rerender({ data: patched });
 
+    expect(filterFn).toHaveBeenCalledTimes(ROWS.length);
+    expect(filtered().find((row) => row.id === "a")?.count).toBe(9);
+    expect(filtered().find((row) => row.id === "b")).toBe(ROWS[1]);
+  });
+
+  it("re-runs filterFn only for the patched row when the full evaluator is supplied", () => {
+    const filterFn = vi.fn((row: Row) => row.count > 0);
+    const adapter = createMemoryAdapter("");
+    const { result, rerender } = renderHook(
+      ({ data }: { data: readonly Row[] }) =>
+        useFrontendData<Row>({
+          data,
+          filterFn,
+          createEngine: createTableEngine,
+          urlAdapter: adapter,
+          paginationMode: "paged",
+        }),
+      { initialProps: INITIAL_ROWS }
+    );
+    const filtered = () => result.current.allFilteredRows ?? [];
+    expect(filtered().map((row) => row.id)).toEqual(["a", "b", "c"]);
+    filterFn.mockClear();
+
+    const patched = applyRowPatches(ROWS, [updateRow("a", { count: 9 })], byId);
+    rerender({ data: patched });
+
     expect(filterFn).toHaveBeenCalledTimes(1);
     expect(filterFn.mock.calls[0]?.[0]?.id).toBe("a");
     expect(filtered().find((row) => row.id === "a")?.count).toBe(9);
-    expect(filtered().find((row) => row.id === "b")).toBe(ROWS[1]);
   });
 
   it("falls back to a full rebuild when the host spreads the patched array", () => {

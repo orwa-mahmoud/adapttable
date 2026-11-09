@@ -4,6 +4,18 @@
  * Kept as a dedicated barrel so the main entry stays grouped by concern.
  */
 
+export type {
+  ColumnLayoutContribution,
+  PinningContribution,
+} from "./columns/columnLayoutModel";
+export {
+  type EditingContribution,
+  type GroupingContribution,
+  mergeGroupingContributions,
+  projectGroupingContribution,
+  REMAINING_FEATURE_OWNERSHIP,
+  type RemainingFeatureDomain,
+} from "./features/featureContribution";
 export type { TableRuntime, TableRuntimeView } from "./features/tableRuntime";
 export type { CellNavigationChannelsOptions } from "./focus/cellNavigationRuntime";
 export {
@@ -46,6 +58,19 @@ export type {
   GroupingPanelSnapshot,
 } from "./grouping/groupingPanelController";
 export { createGroupingPanelController } from "./grouping/groupingPanelController";
+export type {
+  GroupingProjection,
+  GroupingProjectionInput,
+  GroupingShowMoreTarget,
+} from "./grouping/groupingProjection";
+export {
+  groupingCollapseCommands,
+  groupingProjectionBundle,
+  groupingShowMoreAction,
+  groupingSourceOf,
+  projectedGroupingSource,
+  projectGrouping,
+} from "./grouping/groupingProjection";
 export type {
   GroupedRowModel,
   GroupedRowModelOptions,
@@ -97,6 +122,7 @@ export type {
   LazyChildrenSnapshot,
 } from "./tree/lazyChildren";
 export { createLazyChildrenController } from "./tree/lazyChildren";
+export type { TreeContribution } from "./tree/treeBindingState";
 export type { TreeExpansionActions } from "./tree/treeRuntime";
 export {
   closeFailedTreeNode,

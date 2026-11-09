@@ -1,7 +1,7 @@
 /** Shared admission and settlement of a row/batch save; it never owns drafts or rows. */
 import type { EditableColumnLike } from "./cellEditing";
 import type { BatchRowEdit, RowValidator } from "./editContracts";
-import { defaultSaveErrorMessage } from "./editingController";
+import { defaultSaveErrorMessage } from "./editSession";
 import { isThenable } from "./storePlumbing";
 
 /** A validation failure addressed to a row or one of its fields. @public */

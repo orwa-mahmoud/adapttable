@@ -11,13 +11,17 @@
  */
 import type { ColumnLayoutState } from "../columns/columnLayoutModel";
 import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "../columns/columnResize";
+import type {
+  ExtraFilters,
+  FilterValue,
+  SortDirection,
+} from "../contracts/columns";
+import type { QueryFilterGroup } from "../contracts/query";
 import {
   parseFilterTree,
   serializeFilterTree,
 } from "../filters/filterTreeCodec";
 import { type RowPinSide, type RowPinState } from "../rows/rowPinModel";
-import type { QueryFilterGroup } from "../source/queryContract";
-import type { ExtraFilters, FilterValue, SortDirection } from "../types";
 
 /** Decode a URI component, tolerating malformed input from hand-edited URLs. */
 function safeDecode(value: string): string {

@@ -1,15 +1,15 @@
+import type { ExtraFilters, SortDirection } from "../contracts/columns";
+import type {
+  FacetMap,
+  QueryAggregate,
+  QueryFilterGroup,
+} from "../contracts/query";
+import type { TableSourceCapabilities } from "../contracts/source";
 import type { TableEngine } from "../engine/createTableEngine";
-import type { FacetMap } from "../filters/facets";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import type { TableStateMutators } from "../tableStateMutators";
-import type {
-  ExtraFilters,
-  ResolvedPaginationMode,
-  SortDirection,
-} from "../types";
-import type { TableSourceCapabilities } from "./capabilities";
-import type { QueryAggregate, QueryFilterGroup } from "./queryContract";
+import type { ResolvedPaginationMode } from "../types";
 import type { QueryGroupRow } from "./queryGroups";
 
 /**

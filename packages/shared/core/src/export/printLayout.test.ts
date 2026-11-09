@@ -8,7 +8,7 @@
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
 import * as env from "../utils/env";
 import { buildExportTable } from "./exportWriter";
 import {

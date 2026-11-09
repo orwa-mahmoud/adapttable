@@ -69,6 +69,7 @@ export const VUE_NATIVE_BASE_SPECS = [
   pkg: `adapter-${kit}`,
   consumerHost: nativeConsumerHosts[kit],
   hardBaseCeiling: true,
+  followsLibraryLocale: true,
   code: 'export { DataTable } from "PKG";\nimport "STYLE";',
   styleEntryFile: "styles.css",
   presentCss: [css],
@@ -86,7 +87,12 @@ export const VUE_CONSUMER_SPECS = [
     comparable: "react · simple table",
     code: 'export { useFrontendData, useDataTable } from "PKG";',
     functionality: "Source composable and headless table model",
-    present: ["useFrontendData", "useDataTable"],
+    present: [
+      "useFrontendData",
+      "useDataTable",
+      "defaultLabels",
+      "resolveLabels",
+    ],
     absent: [...writers, "DataTableSurfaceChrome"],
   },
   {
@@ -158,6 +164,17 @@ export const VUE_CONSUMER_SPECS = [
     absent,
   })),
   {
+    name: "vue-unstyled · grouping + aggregation",
+    pkg: "adapter-vue-unstyled",
+    alsoEntryFile: "grouping.js",
+    comparable: "mui · grouping + aggregation",
+    code: 'export { DataTable } from "PKG";\nexport { grouping } from "ALSO";\nexport { aggregate } from "@adapttable/vue";',
+    functionality: "Native table, row grouping and the aggregate factory",
+    present: ["DataTable", "groupedEntriesForStrategy", "aggregate"],
+    absent: [...writers, "tableAgent", "createTableAssistant"],
+    rejectOptionalAi: true,
+  },
+  {
     name: "vue-unstyled · features barrel",
     pkg: "adapter-vue-unstyled",
     alsoEntryFile: "features.js",
@@ -214,19 +231,32 @@ export const VUE_LAYOUT_GRAPH_SPECS = [
   },
 ];
 
-export function vueConsumerFixtures(comparables, hardBaseCeiling) {
+export function vueConsumerFixtures(
+  comparables,
+  hardBaseCeiling,
+  lazyLocaleKB = 0
+) {
   return VUE_CONSUMER_SPECS.map((spec) => {
     const comparable = comparables.find(
       (fixture) => fixture.name === spec.comparable
     );
     if (!spec.hardBaseCeiling && !comparable)
       throw new Error(`Missing comparable Vue budget: ${spec.comparable}`);
+    // These ceilings have always held every emitted file, so they are total
+    // ceilings; the initial share is a subset held to the same number. A kit
+    // that follows its library's locale may also load one language preset.
+    const ceilingKB = spec.hardBaseCeiling
+      ? hardBaseCeiling
+      : comparable.initialKB;
+    const totalCeilingKB =
+      ceilingKB + (spec.followsLibraryLocale ? lazyLocaleKB : 0);
     return {
       ...spec,
       framework: "vue",
       kind: "vue-consumer",
       kit: spec.pkg === "vue" ? undefined : spec.pkg.replace(/^adapter-/, ""),
-      budgetKB: spec.hardBaseCeiling ? hardBaseCeiling : comparable.budgetKB,
+      initialKB: ceilingKB,
+      totalKB: totalCeilingKB,
     };
   });
 }

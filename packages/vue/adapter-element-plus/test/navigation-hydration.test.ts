@@ -41,7 +41,7 @@ it("hydrates the same semantic cell and kit status node before activating native
   const cleanup = installSsrTeleports(context);
   document.body.append(root);
   const cell = node<HTMLElement>(root, "tbody td");
-  const item = node<HTMLElement>(root, '[data-adapttable-part="status-item"]');
+  const item = node<HTMLElement>(root, '[data-adapttable-part="footer"]');
   const client = app();
   const warnings: string[] = [];
   client.config.warnHandler = (message) => warnings.push(message);
@@ -51,7 +51,7 @@ it("hydrates the same semantic cell and kit status node before activating native
     await nextTick();
     await nextTick();
     expect(node(root, "tbody td")).toBe(cell);
-    expect(node(root, '[data-adapttable-part="status-item"]')).toBe(item);
+    expect(node(root, '[data-adapttable-part="footer"]')).toBe(item);
     expect(cell.getAttribute("role")).toBe("gridcell");
     const checkbox = node<HTMLInputElement>(
       root,

@@ -18,6 +18,7 @@ import {
 } from "vue";
 
 import { toVueAttrs } from "../attrs";
+import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 import type {
   ActionPresentation,
@@ -217,7 +218,7 @@ export const SidePanelChrome = /*#__PURE__*/ defineComponent(
         );
         const target = model.tabs.find((tab) => tab.key === chosen);
         if (target)
-          void nextTick(async () => {
+          scheduleTick(async () => {
             await nextTick();
             if (
               !disposed &&

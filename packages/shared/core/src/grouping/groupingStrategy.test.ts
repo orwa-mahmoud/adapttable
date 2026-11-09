@@ -1,6 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { DisplayValue } from "../display";
+import { createBasicTableEngine } from "../engine/basicTableEngine";
+import { createTableEngine } from "../engine/createTableEngine";
+import {
+  applyRowPatchesToView,
+  createIncrementalView,
+} from "../rows/incremental";
+import { updateRow } from "../rows/patch";
 import {
   groupedEntriesForStrategy,
   groupingComputationKind,
@@ -83,6 +90,111 @@ describe("groupedEntriesForStrategy", () => {
     });
     expect(entries.some((entry) => entry.kind === "group")).toBe(true);
     expect(entries.filter((entry) => entry.kind === "row")).toHaveLength(2);
+  });
+
+  it("groups rows from a basic engine instead of reconfiguring its view", () => {
+    const data = [
+      { id: "1", team: "eng" },
+      { id: "2", team: "eng" },
+    ];
+    const engine = createBasicTableEngine({
+      data,
+      columns,
+      rowKey: getRowId,
+    });
+    engine.refreshCallbacks({ getRowId });
+    const entries = groupedEntriesForStrategy({
+      kind: "client",
+      groupByKeys: ["team"],
+      allFilteredRows: engine.rows("full"),
+      columns,
+      getRowId,
+      collapsedGroupIds: new Set(),
+    });
+    const plain = groupedEntriesForStrategy({
+      kind: "client",
+      groupByKeys: ["team"],
+      allFilteredRows: data,
+      columns,
+      getRowId,
+      collapsedGroupIds: new Set(),
+    });
+    expect(entries).toEqual(plain);
+    expect(entries.some((entry) => entry.kind === "group")).toBe(true);
+  });
+
+  it("reconfigures and patches a full-engine snapshot", () => {
+    const ada = { id: "1", team: "eng", name: "Ada" };
+    const grace = { id: "2", team: "web", name: "Grace" };
+    const data = [ada, grace];
+    const engine = createTableEngine({ data, columns, rowKey: getRowId });
+    const grouped = () =>
+      groupedEntriesForStrategy({
+        kind: "client",
+        groupByKeys: ["team"],
+        allFilteredRows: engine.rows("full"),
+        columns,
+        getRowId,
+        collapsedGroupIds: new Set(),
+      });
+    expect(grouped().some((entry) => entry.kind === "group")).toBe(true);
+    const patched = applyRowPatchesToView(
+      createIncrementalView(data, { getRowId, groupBy: ["team"], columns }),
+      [updateRow("2", { team: "eng" })]
+    );
+    engine.invalidate(["data"], {
+      data: [ada, { ...grace, team: "eng" }],
+    });
+    expect(grouped()).toEqual(patched.groups);
+  });
+
+  it("keeps group aggregates when the engine reattaches its own snapshot", () => {
+    const data = [
+      { id: "1", team: "eng", budget: 1 },
+      { id: "2", team: "web", budget: 4 },
+    ];
+    const engine = createTableEngine({ data, columns, rowKey: getRowId });
+    const aggregates = vi.fn((rows: readonly { budget: number }[]) => ({
+      budget: rows.reduce((sum, row) => sum + row.budget, 0),
+    }));
+    const read = () =>
+      groupedEntriesForStrategy({
+        kind: "client",
+        groupByKeys: ["team"],
+        allFilteredRows: engine.rows("full"),
+        columns,
+        getRowId,
+        collapsedGroupIds: new Set(),
+        aggregates,
+      });
+    read();
+    const calls = aggregates.mock.calls.length;
+    expect(calls).toBe(2);
+    read();
+    engine.refreshCallbacks({ columns, getRowId });
+    read();
+    expect(aggregates).toHaveBeenCalledTimes(calls);
+  });
+
+  it("reads groups from the snapshot attached to the filtered rows", () => {
+    const rows = [
+      { id: "1", team: "eng" },
+      { id: "2", team: "eng" },
+    ];
+    const view = createIncrementalView(rows, {
+      getRowId,
+      groupBy: ["team"],
+      columns,
+    });
+    const entries = groupedEntriesForStrategy({
+      kind: "client",
+      groupByKeys: ["team"],
+      allFilteredRows: rows,
+      columns,
+      getRowId,
+      collapsedGroupIds: new Set(),
+    });
+    expect(entries).toEqual(view.groups);
   });
 
   it("does not label a server group with a later Average override", () => {

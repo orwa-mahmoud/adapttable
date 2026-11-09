@@ -6,11 +6,11 @@
  * only surface editors when the table passes `onCellEdit` (see
  * {@link TableChrome.editing}) and a column sets `editable`.
  */
+import { type CellEditingState } from "@adapttable/core";
 import {
-  type CellEditingState,
   cellEditingView,
   createCellEditSession,
-} from "@adapttable/core";
+} from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import type { EditEventHandler } from "./editingEvents";
@@ -21,7 +21,7 @@ export type {
   CellEditKeyOutcome,
   CellEditNavigation,
 } from "@adapttable/core";
-export { beginCellEdit } from "@adapttable/core";
+export { beginCellEdit } from "@adapttable/core/editing";
 
 /**
  * What `useCellEditing` observes, when the host wired lifecycle events.

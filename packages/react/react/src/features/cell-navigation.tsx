@@ -12,6 +12,7 @@ import {
   reportedCellRange,
 } from "@adapttable/core";
 import { coreCellNavigation } from "@adapttable/core/binding";
+import { beginCellEdit } from "@adapttable/core/editing";
 import {
   type ReactNode,
   useCallback,
@@ -20,6 +21,7 @@ import {
   useRef,
 } from "react";
 
+import type { EditableCellEditing } from "../editing/editableCellController";
 import { useFindFocus } from "../find/useFindInTable";
 import { GridFocusAnnouncer } from "../focus/GridFocusAnnouncer";
 import { useGridFocus } from "../focus/useGridFocus";
@@ -42,8 +44,15 @@ function LiveCellNav({
   onFind,
   matchKeys,
   currentMatch,
+  editing,
   children,
-}: CellNavLiveSlotProps<never>): ReactNode {
+}: CellNavLiveSlotProps<never> & {
+  /**
+   * Present when the table composed editing. Enter and F2 open the focused
+   * cell from here so the shell does not import the editing session.
+   */
+  readonly editing?: EditableCellEditing<never>;
+}): ReactNode {
   const scrollToRow = useContext(RowScrollContext);
   const scrollToIndex = useCallback(
     (index: number) => {
@@ -54,6 +63,17 @@ function LiveCellNav({
   );
   const gridFocus = useGridFocus({
     ...options,
+    // The shell builds the grid inputs without an activate callback. Opening
+    // an editor stays in this entry, which is the only module that imports it.
+    onActivate: (cell) => {
+      const state = editing?.state;
+      if (!state) return;
+      const windowStart = options.firstRowIndex ?? 0;
+      const row = options.rows[cell.row - windowStart];
+      const column = options.columns[cell.col];
+      if (row === undefined || column === undefined) return;
+      beginCellEdit(state, row, column, hostProps.rowKey);
+    },
     scrollToRow: options.scrollToRow ?? scrollToIndex,
     enabled: true,
     ...cellNavigationChannels({

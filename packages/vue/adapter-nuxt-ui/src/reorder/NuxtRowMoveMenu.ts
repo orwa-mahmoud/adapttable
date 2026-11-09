@@ -1,6 +1,7 @@
 import {
   createMenuNavigation,
   type RowMoveMenuSlotProps,
+  scheduleTick,
   toVueAttrs,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -9,7 +10,6 @@ import UModal from "@nuxt/ui/components/Modal.vue";
 import {
   defineComponent,
   h,
-  nextTick,
   onMounted,
   type PropType,
   shallowRef,
@@ -82,7 +82,7 @@ export const NuxtRowMoveMenu = /*#__PURE__*/ defineComponent(
           !(surface instanceof Node && surface.contains(focused))
         )
           return;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (
             current() &&
             !props.confirmation &&
@@ -170,7 +170,7 @@ export const NuxtRowMoveMenu = /*#__PURE__*/ defineComponent(
                 onOpenAutoFocus: (event: Event) => {
                   event.preventDefault();
                   const root = event.target;
-                  void nextTick(() => {
+                  scheduleTick(() => {
                     if (
                       !menuCurrent() ||
                       !open.value ||
@@ -245,7 +245,7 @@ export const NuxtRowMoveMenu = /*#__PURE__*/ defineComponent(
                 }),
                 onOpenAutoFocus: (event: Event) => {
                   event.preventDefault();
-                  void nextTick(() => {
+                  scheduleTick(() => {
                     if (current() && props.confirmation === confirmation)
                       cancelButton.value?.focus();
                   });

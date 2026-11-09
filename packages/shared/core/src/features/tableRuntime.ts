@@ -7,16 +7,35 @@
  * announcement is always an event rather than a render. These are the shapes
  * of that read; each binding publishes them its own way.
  */
-import type { ColumnMetadata, ExtraFilters } from "../columnModel";
-import type { PinSide } from "../columns/columnLayoutModel";
+
+import type {
+  ColumnLayoutContribution,
+  PinningContribution,
+} from "../columns/columnLayoutModel";
+import type { ColumnMetadata } from "../contracts/columns";
+import type { QueryAggregate } from "../contracts/query";
+import type { TableSourceCapabilities } from "../contracts/source";
 import type { NeutralTable } from "../engine/neutralTable";
 import type { FilterDef } from "../filters/filterDefs";
+import type { FilteringContribution } from "../filters/filterFormModel";
 import type { FilterTypeRegistry } from "../filters/filterRegistry";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
-import type { RowPinSide } from "../rows/rowPinModel";
-import type { TableSourceCapabilities } from "../source/capabilities";
-import type { QueryAggregate } from "../source/queryContract";
+import type { SelectionContribution } from "../selection/selectionBindingState";
+import type { QueryContribution } from "../source/queryContract";
+import type { TreeContribution } from "../tree/treeBindingState";
 import type { BulkAction, RowAction } from "../types";
+import type {
+  EditingContribution,
+  GroupingContribution,
+} from "./featureContribution";
+import type {
+  CommandPaletteContribution,
+  ContextMenuContribution,
+  DensityContribution,
+  FindContribution,
+  FullscreenContribution,
+  PrintContribution,
+} from "./shellOperations";
 
 /**
  * The latest fully composed view of a table, as a feature above it reads it.
@@ -39,8 +58,13 @@ export interface TableRuntimeView<TRow = unknown> {
   readonly rowLabel: (row: TRow) => string;
   /** Active sort key, when visual order is source-controlled. */
   readonly sortBy?: string;
-  /** Live grouping bundle; feature providers narrow this structurally. */
-  readonly grouping?: unknown;
+  /**
+   * Grouping's owned entries, projected for compatibility.
+   *
+   * The runtime stores the contribution a binding or feature already owns.
+   * It does not keep a second grouping controller.
+   */
+  readonly grouping?: GroupingContribution<TRow>;
   /** URL/source-backed grouping state used by optional interaction chrome. */
   readonly groupingState?: {
     readonly groupBy: string | undefined;
@@ -69,47 +93,39 @@ export interface TableRuntimeView<TRow = unknown> {
       overrides: GroupAggregateOverrides
     ) => void;
   };
-  /** Live tree bundle; feature providers narrow this structurally. */
-  readonly tree?: unknown;
   /**
-   * Page, search and sort the source currently owns.
+   * The host's walked tree. Grouping is a separate contribution. Expansion
+   * stays on the tree controller; this view aliases the host's entries.
+   */
+  readonly tree?: TreeContribution<TRow>;
+  /**
+   * Page, search, and sort the source currently owns.
    *
    * Optional so a test-published view can omit it. Live chrome fills it
    * so a feature above the table can apply ordinary view operations.
+   * Applied values stay here. The catalog is {@link FilteringContribution}.
    */
-  readonly query?: {
-    readonly page: number;
-    readonly limit: number;
-    /**
-     * Rows matching the current query, when the source counted them.
-     *
-     * The filtered total, not the dataset and not the rows on screen. Absent
-     * where the source cannot say, which a consumer must carry as unknown
-     * rather than substituting what happens to be loaded.
-     */
-    readonly total?: number;
-    /**
-     * The table's default page size, so a rows-per-page list can keep it
-     * after the reader picks another size.
-     */
-    readonly defaultLimit?: number;
-    readonly search: string;
-    readonly sortBy?: string;
-    readonly sortDir?: "asc" | "desc";
-    readonly setPage: (page: number) => void;
-    readonly setLimit: (limit: number) => void;
-    readonly setSearch: (search: string) => void;
-    readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
-    readonly extra?: ExtraFilters;
-    readonly setExtras?: (extra: ExtraFilters) => void;
-    readonly clearExtras?: () => void;
-  };
+  readonly query?: QueryContribution;
+  /**
+   * The filter catalog the host published.
+   *
+   * {@link filterDefs} and {@link filterRegistry} are this contribution's
+   * fields, projected so existing readers keep those names. Applied values
+   * stay on {@link TableRuntimeView.query}.
+   */
+  readonly filtering?: FilteringContribution<TRow>;
   /**
    * Declarative filter definitions the live chrome resolved. Absent when
    * the host never published defs (a custom form with no catalog).
+   *
+   * The same array as {@link FilteringContribution.defs}.
    */
   readonly filterDefs?: readonly FilterDef<TRow>[];
-  /** Type registry those defs were built against. */
+  /**
+   * Type registry those defs were built against.
+   *
+   * The same registry as {@link FilteringContribution.registry}.
+   */
   readonly filterRegistry?: FilterTypeRegistry;
   /**
    * Declared source capabilities from the live `TableSource`, when the
@@ -125,15 +141,13 @@ export interface TableRuntimeView<TRow = unknown> {
     readonly row: readonly RowAction<TRow>[];
     readonly bulk: readonly BulkAction[];
   };
-  /** Live selection, when a selection-owning feature is composed. */
-  readonly selection?: {
-    readonly selectedIds: ReadonlySet<string>;
-    /** Whether the selection covers every row matching the current query. */
-    readonly allMatching?: boolean;
-    /** Observed source reachability; this flag grants no row or operation access. */
-    readonly acrossPages?: boolean;
-    readonly replace: (ids: readonly string[] | undefined) => void;
-  };
+  /**
+   * Live selection, when a selection-owning feature is composed.
+   *
+   * The host's set and replace function. Grouping reads those ids through
+   * `groupSelectionState` and does not keep another copy.
+   */
+  readonly selection?: SelectionContribution;
   /**
    * Live pinning, when a pin-owning feature is composed.
    *
@@ -141,22 +155,11 @@ export interface TableRuntimeView<TRow = unknown> {
    * under RTL. Row sides are physical (`top`/`bottom`) because a pinned row
    * is above or below the scrolled body in every writing direction.
    *
-   * `columns` and `rows` are the CURRENT state, so unpinning is an inverse
+   * `columns` and `rows` are the current state, so unpinning is an inverse
    * of what is actually pinned rather than a reset of the whole layout.
+   * Row pinning and column pinning stay separate controllers.
    */
-  readonly pinning?: {
-    /** Column key to the edge it is pinned to. */
-    readonly columns: Readonly<Record<string, PinSide>>;
-    /** Pin a column to an edge, or unpin it with `undefined`. */
-    readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
-    /** Row keys pinned above and below the scrolled body. */
-    readonly rows?: {
-      readonly top: readonly string[];
-      readonly bottom: readonly string[];
-    };
-    /** Pin a row to an edge, or unpin it with `undefined`. */
-    readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
-  };
+  readonly pinning?: PinningContribution;
   /**
    * Live hide and order, when a layout-owning feature is composed.
    *
@@ -164,32 +167,45 @@ export interface TableRuntimeView<TRow = unknown> {
    * when the reader can hide and reorder too. Advertising a no-op would
    * tell the agent it moved a column the table left alone.
    */
-  readonly columnLayout?: {
-    /** Full order, hidden columns included. */
-    readonly keys: readonly string[];
-    /** Column ids the reader has hidden. */
-    readonly hidden: readonly string[];
-    readonly setHidden?: (key: string, hidden: boolean) => void;
-    readonly move?: (key: string, toIndex: number) => void;
-    readonly setOrder?: (order: readonly string[]) => void;
-  };
+  readonly columnLayout?: ColumnLayoutContribution;
   /**
    * Live editing channels. `onCellEdit` is the host callback; `stageCell`
    * is the batch/dirty path when batch editing is composed.
    */
-  readonly editing?: {
-    readonly onCellEdit?: (
-      row: TRow,
-      key: string,
-      nextValue: unknown
-    ) => unknown;
-    readonly stageCell?: (
-      row: TRow,
-      rowId: string,
-      columnKey: string,
-      value: string
-    ) => void;
-  };
+  readonly editing?: EditingContribution<TRow>;
+  /**
+   * The find bar, when find is composed and can open.
+   *
+   * The find controller's own state. Absent when find is off, so the view
+   * does not advertise a bar the table does not have.
+   */
+  readonly find?: FindContribution;
+  /**
+   * The density chooser, when that feature is composed.
+   *
+   * A table that only renders a default density does not publish this.
+   */
+  readonly density?: DensityContribution;
+  /**
+   * Fullscreen, when the feature is composed and the browser supports it.
+   */
+  readonly fullscreen?: FullscreenContribution;
+  /**
+   * The context menu, when that feature is composed.
+   *
+   * The host's factories or the menu model the binding already resolved.
+   */
+  readonly contextMenu?: ContextMenuContribution<TRow>;
+  /**
+   * The command palette, when that feature is armed.
+   *
+   * `commands` is the host's list.
+   */
+  readonly commandPalette?: CommandPaletteContribution;
+  /**
+   * Print, when the host wired a print handler and asked for the control.
+   */
+  readonly print?: PrintContribution;
 }
 
 /**

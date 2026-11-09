@@ -42,6 +42,12 @@ function chromeFrom<TRow>(
     columnLayoutLive: options.columnLayoutLive,
     rowPinning: options.rowPinning,
     editing: options.editing,
+    find: options.find,
+    density: options.density,
+    fullscreen: options.fullscreen,
+    contextMenu: options.contextMenu,
+    commandPalette: options.commandPalette,
+    print: options.print,
     getRowId: (row) => table.rowKey(row),
     allColumns: table.allColumns(),
     columnLayout: {
@@ -83,6 +89,12 @@ export interface RuntimeTableOptions<TRow> extends Pick<
   | "tree"
   | "rowPinning"
   | "editing"
+  | "find"
+  | "density"
+  | "fullscreen"
+  | "contextMenu"
+  | "commandPalette"
+  | "print"
 > {
   /** Live selection, only when the table owns a selection channel. */
   readonly selection?: Exclude<

@@ -10,34 +10,26 @@
  * revision, and whether an infinite list has more — so a binding adds only its
  * own reactivity and the moment it commits.
  */
-import type { ColumnMetadata, SortableValue } from "../columnModel";
+
+import type {
+  ColumnMetadata,
+  ExtraFilters,
+  SortableValue,
+  SortDirection,
+} from "../contracts/columns";
+import type { QueryFilterGroup, SortLevel } from "../contracts/query";
+import type { RowPatchLog } from "../contracts/rows";
 import {
   createTableEngine,
+  type CreateTableEngineOptions,
   type TableEngine,
   type TableEngineReader,
 } from "../engine/createTableEngine";
-import {
-  incrementalSearchText,
-  type IncrementalView,
-  type IncrementalViewConfig,
-  incrementalViewConfig,
-  incrementalViewOf,
-} from "../rows/incremental";
-import {
-  type RowPatchLog,
-  rowPatchLog,
-  rowPatchLogStartsAt,
-} from "../rows/patch";
-import type { SortLevel } from "../sort/compare";
-import type {
-  ExtraFilters,
-  PaginationMode,
-  ResolvedPaginationMode,
-  SortDirection,
-} from "../types";
+import { engineSearchText } from "../engine/searchText";
+import { rowPatchLog, rowPatchLogStartsAt } from "../rows/patch";
+import type { PaginationMode, ResolvedPaginationMode } from "../types";
 import { devWarn } from "../utils/devWarn";
 import { stableKey } from "../utils/stableKey";
-import type { QueryFilterGroup } from "./queryContract";
 
 /**
  * Resolve `"auto"` to a concrete pagination mode (mobile → infinite,
@@ -63,7 +55,7 @@ export function resolvePaginationMode(
  * @public
  */
 export function defaultSearchText<TRow>(row: TRow): string {
-  return incrementalSearchText(row);
+  return engineSearchText(row);
 }
 
 /**
@@ -159,6 +151,18 @@ export interface FrontendSourceFrame<TRow> {
 }
 
 /**
+ * Builds the engine a frontend source drives.
+ *
+ * {@link createFrontendSource} passes the full evaluator. A plain table
+ * passes {@link createBasicTableEngine} so grouping stays out of that graph.
+ *
+ * @public
+ */
+export type FrontendEngineFactory<TRow> = (
+  options: CreateTableEngineOptions<TRow>
+) => TableEngine<TRow>;
+
+/**
  * One table's frontend tier.
  *
  * @public
@@ -166,6 +170,8 @@ export interface FrontendSourceFrame<TRow> {
 export interface FrontendSource<TRow> {
   /** The engine the source drives, for agents and a second reader. */
   readonly engine: TableEngine<TRow>;
+  /** The evaluator the next update will keep, or install if it changed. */
+  readonly engineFactory: FrontendEngineFactory<TRow>;
   /**
    * Stage the host's data and view on the engine's candidate and read what
    * the table shows from it. Nothing outside the caller sees the change until
@@ -177,6 +183,11 @@ export interface FrontendSource<TRow> {
   ) => FrontendSourceFrame<TRow>;
   /** Publish the staged candidate to the engine's subscribers. */
   readonly commit: () => void;
+  /**
+   * Drop the current engine without publishing its candidate and use
+   * `createEngine` on the next update. The same factory is a no-op.
+   */
+  readonly replaceEngine: (createEngine: FrontendEngineFactory<TRow>) => void;
 }
 
 /** Value-only inputs. Callback and array identity are ignored. */
@@ -204,21 +215,6 @@ function viewFingerprint<TRow>(
     page: view.page,
     limit: view.limit,
   });
-}
-
-/** Point the live view at this update's callbacks without restaging it. */
-function adoptCallbacks<TRow>(
-  view: IncrementalView<TRow>,
-  config: IncrementalViewConfig<TRow>
-): void {
-  const current = incrementalViewConfig(view);
-  if (!current) return;
-  current.getRowId = config.getRowId;
-  current.getSearchText = config.getSearchText;
-  current.filterFn = config.filterFn;
-  current.filterTreeFn = config.filterTreeFn;
-  current.columns = config.columns;
-  current.getSortValue = config.getSortValue;
 }
 
 function forgetPatchedSearch<TRow>(
@@ -268,17 +264,22 @@ function warnUnresolvableSort<TRow>(
 }
 
 /**
- * Create one table's frontend tier.
+ * Create one table's frontend tier on an explicit evaluator.
  *
  * The first update seeds the engine; every later one restages it only when
  * the data array or a value-level input moved, so a host that rebuilds its
  * columns or filter callbacks on every render keeps the same page slice.
+ * {@link createFrontendSource} is the convenience form that supplies the
+ * full evaluator.
  *
  * @returns The source; call {@link FrontendSource.update} before reading.
  *
  * @public
  */
-export function createFrontendSource<TRow>(): FrontendSource<TRow> {
+export function createFrontendSourceWith<TRow>(
+  initialEngine: FrontendEngineFactory<TRow>
+): FrontendSource<TRow> {
+  let createEngine = initialEngine;
   let engine: TableEngine<TRow> | undefined;
   let data: readonly TRow[] | undefined;
   let fingerprint: string | undefined;
@@ -309,7 +310,7 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
   ): TableEngine<TRow> {
     if (engine) return engine;
     data = config.data;
-    engine = createTableEngine({
+    engine = createEngine({
       data: config.data,
       columns: config.columns ?? [],
       locale: config.locale,
@@ -365,7 +366,7 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
       stages += 1;
     }
 
-    const viewConfig: IncrementalViewConfig<TRow> = {
+    const viewConfig = {
       getRowId,
       getSearchText: projectSearchText,
       filterFn: config.filterFn,
@@ -409,18 +410,22 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
     // Everything this frame reads comes from the candidate; the committed
     // engine stays on the table on screen until the binding commits.
     const reader = table.candidate;
-    const incremental = incrementalViewOf(reader.rows("full"));
-    if (!incremental) {
-      throw new Error("TableEngine is missing its incremental snapshot");
-    }
-    adoptCallbacks(incremental, viewConfig);
+    table.refreshCallbacks({
+      getRowId: viewConfig.getRowId,
+      getSearchText: viewConfig.getSearchText,
+      filterFn: viewConfig.filterFn,
+      filterTreeFn: viewConfig.filterTreeFn,
+      columns: viewConfig.columns,
+      getSortValue: viewConfig.getSortValue,
+    });
 
     const { sortBy, sortDir, sortLevels } = view;
+    const sorted = reader.rows("full");
     if (sortLevels.length === 0 && sortBy && sortDir) {
       warnUnresolvableSort(
         sortBy,
         config.columns?.find((column) => column.key === sortBy),
-        incremental.filtered,
+        sorted,
         config.getSortValue
       );
     }
@@ -441,7 +446,7 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
 
     return {
       rows: page.rows,
-      allFilteredRows: incremental.sorted,
+      allFilteredRows: sorted,
       // Facets count after search, BEFORE extra filters: `filtered` already
       // applied filterFn, so a selected checklist would hide every other value.
       allSearchedRows: searchedRows(config.data, view.search),
@@ -453,6 +458,23 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
     };
   }
 
+  function replaceEngine(next: FrontendEngineFactory<TRow>): void {
+    if (next === createEngine) return;
+    if (engine) {
+      engine.discardCandidate();
+      engine.dispose();
+    }
+    engine = undefined;
+    data = undefined;
+    fingerprint = undefined;
+    filterKey = undefined;
+    stages = 0;
+    searched = undefined;
+    page = undefined;
+    searchCache.clear();
+    createEngine = next;
+  }
+
   return {
     get engine() {
       if (!engine) {
@@ -460,7 +482,26 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
       }
       return engine;
     },
+    get engineFactory() {
+      return createEngine;
+    },
     update,
     commit: () => engine?.commitCandidate(),
+    replaceEngine,
   };
+}
+
+/**
+ * Create one table's frontend tier with the full evaluator.
+ *
+ * Filter, sort, search, grouping, and aggregates all run in the engine.
+ * A table that only filters, sorts, and searches uses
+ * {@link createFrontendSourceWith} with {@link createBasicTableEngine}.
+ *
+ * @returns The source; call {@link FrontendSource.update} before reading.
+ *
+ * @public
+ */
+export function createFrontendSource<TRow>(): FrontendSource<TRow> {
+  return createFrontendSourceWith(createTableEngine);
 }

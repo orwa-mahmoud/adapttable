@@ -4,14 +4,16 @@
 import {
   type BatchEditingState,
   type CellEditingState,
-  createEditConflictStore,
   type EditableColumnLike,
   type EditConflictHandler,
   type EditConflictPolicy,
   type EditConflictState,
-  editConflictView,
   type RowEditingState,
 } from "@adapttable/core";
+import {
+  createEditConflictStore,
+  editConflictView,
+} from "@adapttable/core/editing";
 import {
   assertInInjectionContext,
   computed,

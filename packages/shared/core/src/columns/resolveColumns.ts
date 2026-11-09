@@ -1,4 +1,4 @@
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
 import { humanizeKey } from "../utils/humanizeKey";
 import { resolveLocaleTag } from "../utils/localeTag";
 import { getPath } from "../utils/path";
@@ -36,6 +36,9 @@ export function columnPathText(value: unknown): string | null {
       return null;
   }
 }
+
+/** The same text, under the name the bindings already publish. */
+export { columnPathText as primitiveText };
 
 /**
  * What {@link resolveColumnDefaults} reads from a binding's column type.

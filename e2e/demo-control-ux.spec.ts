@@ -23,7 +23,7 @@ async function settle(surface: Locator): Promise<void> {
 }
 
 for (const kit of builtAdapters("angular")) {
-  test(`${kit.key}: server mode preserves frontend choices and restores their controls`, async ({
+  test(`${kit.key}: backend mode preserves frontend choices and restores their controls`, async ({
     page,
   }) => {
     const preferences = [
@@ -50,7 +50,7 @@ for (const kit of builtAdapters("angular")) {
       exact: true,
     });
     await expect(editing).toBeChecked();
-    await controls.getByRole("radio", { name: "Server", exact: true }).check();
+    await controls.getByRole("radio", { name: "Backend", exact: true }).check();
     await expect(editing).toBeDisabled();
     await expect(editing).not.toBeChecked();
     await expect(grouping).toBeDisabled();

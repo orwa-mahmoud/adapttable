@@ -1,5 +1,6 @@
 import {
   createMenuNavigation,
+  scheduleTick,
   type TableAssistantMenuProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -8,7 +9,6 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
-  nextTick,
   type PropType,
   type ShallowRef,
   shallowRef,
@@ -91,7 +91,7 @@ export const NaiveExamplesMenu = defineComponent(
     watch(open, (expanded) => {
       navigation.reset();
       if (!expanded) return;
-      void nextTick(() => {
+      scheduleTick(() => {
         const panel = card.value ? htmlRoot(card.value) : null;
         panel
           ?.querySelector<HTMLElement>('[role="menuitem"]')

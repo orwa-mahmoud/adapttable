@@ -2,7 +2,8 @@
  * The removable chips that name a table's active filters, and what the strip
  * that draws them receives.
  */
-import type { ExtraFilters, FilterValue, TableLabels } from "../types";
+import type { ExtraFilters, FilterValue } from "../contracts/columns";
+import type { TableLabels } from "../types";
 import type { ChipLabelResolver } from "./filterDefs";
 
 /**

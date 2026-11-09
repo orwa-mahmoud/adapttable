@@ -18,12 +18,18 @@
  *   9. `@adapttable/server` parses a query in a backend with NO React
  *  10. A Vite production build of a real table                (vite build)
  *  11. A Next.js App Router build whose prerender renders rows (next build)
+ *  12. Typed React, Angular and Vue examples compile against the packed
+ *      declarations, with the compiler's types, instantiations, memory and
+ *      check time recorded                                     (tsc, offline)
  *
  * Monorepo tests can never see these failures: they resolve source, not
  * `exports` maps, tarball file lists, or bundler resolution rules.
  *
  * Run via pnpm (`pnpm consumer:harness`) after a build; exits non-zero on
  * the first failing step. Packages must be built first (`pnpm build`).
+ * `--case <id>` runs only the named cases — `resolution` (1–6, 8), `pnpm`
+ * (7), `react-free` (9), `vite` (10), `next` (11), `typing` (12) — and
+ * `--out <file>` writes the typing baseline as JSON.
  */
 import { execFileSync } from "node:child_process";
 import {
@@ -37,8 +43,11 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
+import { requestedCases, selectCases } from "./case-selection.mjs";
+import { typingBaseline } from "./consumer-typing.mjs";
 import {
   aliasRuntimeProbe,
   aliasTypeProbe,
@@ -60,12 +69,6 @@ const NPM_BIN = join(
   process.platform === "win32" ? "npm.cmd" : "npm"
 );
 const PNPM_CLI = process.env.npm_execpath;
-if (!PNPM_CLI || !PNPM_CLI.includes("pnpm")) {
-  console.error(
-    "Run this through pnpm (`pnpm consumer:harness`) — it needs pnpm's pack to rewrite workspace: ranges."
-  );
-  process.exit(1);
-}
 
 const bin = (dir, name) =>
   join(
@@ -140,20 +143,22 @@ function checkPackedNames(resDir) {
   console.log("ok");
 }
 
-function main() {
-  const packDir = mkdtempSync(join(tmpdir(), "consumer-packs-"));
-  const scratches = [];
-  const scratch = (name) => {
-    const dir = mkdtempSync(join(tmpdir(), `consumer-${name}-`));
-    scratches.push(dir);
-    return dir;
-  };
-  process.on("exit", () => {
-    for (const dir of scratches) rmSync(dir, { recursive: true, force: true });
-    rmSync(packDir, { recursive: true, force: true });
-  });
+const scratches = [];
+function scratch(name) {
+  const dir = mkdtempSync(join(tmpdir(), `consumer-${name}-`));
+  scratches.push(dir);
+  return dir;
+}
 
-  // ── Pack every publishable package ────────────────────────────────────
+/** Pack every publishable package once; the npm-installed cases share it. */
+function packAll() {
+  if (!PNPM_CLI || !PNPM_CLI.includes("pnpm")) {
+    console.error(
+      "Run this through pnpm (`pnpm consumer:harness`) — it needs pnpm's pack to rewrite workspace: ranges."
+    );
+    process.exit(1);
+  }
+  const packDir = scratch("packs");
   const tarballs = {};
   for (const { dir } of listPackages()) {
     const name = JSON.parse(
@@ -197,40 +202,48 @@ function main() {
     `packages: []\n${settings}overrides:\n${Object.entries(tarballs)
       .map(([name, file]) => `  "${name}": "file:${file}"`)
       .join("\n")}\n`;
+  return {
+    REACT,
+    CORE,
+    REACT_PKG,
+    UNSTYLED,
+    BASE_UI,
+    SERVER,
+    SHADCN,
+    OVERRIDES,
+    pnpmWorkspace,
+  };
+}
 
-  // ── 1–8. Resolution scratch: ESM, CJS, tsc ×3, layers, names, aliases,
-  //         pnpm, CSS ────────────────────────────────────────────────────
-  const resDir = scratch("resolution");
-  writeFileSync(
-    join(resDir, "package.json"),
-    JSON.stringify(
-      {
-        name: "consumer-resolution",
-        version: "0.0.0",
-        private: true,
-        type: "module",
-        dependencies: {
-          ...CORE,
-          ...REACT_PKG,
-          ...UNSTYLED,
-          ...BASE_UI,
-          ...SERVER,
-          ...SHADCN,
-          ...REACT,
-        },
-        overrides: OVERRIDES,
-        devDependencies: {
-          typescript: "^6.0.0",
-          "@types/react": "^19.0.0",
-        },
+/** The resolution app's manifest; the pnpm case installs the same graph. */
+function resolutionManifest(packs) {
+  return JSON.stringify(
+    {
+      name: "consumer-resolution",
+      version: "0.0.0",
+      private: true,
+      type: "module",
+      dependencies: {
+        ...packs.CORE,
+        ...packs.REACT_PKG,
+        ...packs.UNSTYLED,
+        ...packs.BASE_UI,
+        ...packs.SERVER,
+        ...packs.SHADCN,
+        ...packs.REACT,
       },
-      null,
-      2
-    )
+      overrides: packs.OVERRIDES,
+      devDependencies: {
+        typescript: "^6.0.0",
+        "@types/react": "^19.0.0",
+      },
+    },
+    null,
+    2
   );
-  writeFileSync(
-    join(resDir, "esm.mjs"),
-    `import { DataTable } from "@adapttable/unstyled";
+}
+
+const ESM_PROBE = `import { DataTable } from "@adapttable/unstyled";
 import { createTableEngine, tableQueryKey } from "@adapttable/core";
 import { useQuerySource } from "@adapttable/react";
 import { useDataTableShell } from "@adapttable/react/adapter";
@@ -254,8 +267,14 @@ if (typeof parseTableQuery !== "function")
 if (tableQueryKey({ page: 1, limit: 25 })[0] !== "adapttable")
   throw new Error("tableQueryKey did not build a key without a query library");
 console.log("esm ok");
-`
-  );
+`;
+
+// ── 1–6, 8. Resolution scratch: ESM, CJS, tsc ×3, layers, names, aliases,
+//            CSS ──────────────────────────────────────────────────────────
+function resolutionCase(packs) {
+  const resDir = scratch("resolution");
+  writeFileSync(join(resDir, "package.json"), resolutionManifest(packs));
+  writeFileSync(join(resDir, "esm.mjs"), ESM_PROBE);
   writeFileSync(
     join(resDir, "cjs.cjs"),
     `const { DataTable } = require("@adapttable/unstyled");
@@ -390,19 +409,15 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
     process.exit(1);
   }
   console.log("ok");
+}
 
-  // Same dependency graph must also resolve under pnpm — its stricter
-  // linker surfaces peer/exports mistakes npm's flat tree hides.
+// ── 7. Same dependency graph must also resolve under pnpm — its stricter
+//       linker surfaces peer/exports mistakes npm's flat tree hides.
+function pnpmCase(packs) {
   const pnpmDir = scratch("pnpm");
-  writeFileSync(
-    join(pnpmDir, "package.json"),
-    readFileSync(join(resDir, "package.json"))
-  );
-  writeFileSync(join(pnpmDir, "pnpm-workspace.yaml"), pnpmWorkspace());
-  writeFileSync(
-    join(pnpmDir, "esm.mjs"),
-    readFileSync(join(resDir, "esm.mjs"))
-  );
+  writeFileSync(join(pnpmDir, "package.json"), resolutionManifest(packs));
+  writeFileSync(join(pnpmDir, "pnpm-workspace.yaml"), packs.pnpmWorkspace());
+  writeFileSync(join(pnpmDir, "esm.mjs"), ESM_PROBE);
   process.stdout.write("pnpm install + ESM import … ");
   run(
     process.execPath,
@@ -412,22 +427,24 @@ export type Probe<T> = { columns: ColumnDef<T>[]; source?: TableSource<T> };
   );
   run(process.execPath, ["esm.mjs"], pnpmDir, "ESM import under pnpm");
   console.log("ok");
+}
 
-  // ── 9. A backend with no React at all ─────────────────────────────────
-  //
-  // Every scratch app above has React, because every one of them renders a
-  // table. `@adapttable/server` renders nothing: it reads a query string inside
-  // a route handler, and the Express or Fastify service that installs it may
-  // have no React in the project and no intention of adding any. So this app
-  // installs the server tarball on its own and runs a real parse.
-  //
-  // `autoInstallPeers: false` is the point. npm and pnpm both install a missing
-  // peer for you, which is exactly what hid this: `@adapttable/core` declares
-  // React as a non-optional peer, so the package manager quietly puts React on
-  // disk and the import resolves — in the harness. Turning that off is what
-  // makes the scratch app the backend it claims to be, and what lets this step
-  // see an `ERR_MODULE_NOT_FOUND` the day something in the server's graph
-  // reaches a hook again.
+// ── 9. A backend with no React at all ─────────────────────────────────
+//
+// Every scratch app above has React, because every one of them renders a
+// table. `@adapttable/server` renders nothing: it reads a query string inside
+// a route handler, and the Express or Fastify service that installs it may
+// have no React in the project and no intention of adding any. So this app
+// installs the server tarball on its own and runs a real parse.
+//
+// `autoInstallPeers: false` is the point. npm and pnpm both install a missing
+// peer for you, which is exactly what hid this: `@adapttable/core` declares
+// React as a non-optional peer, so the package manager quietly puts React on
+// disk and the import resolves — in the harness. Turning that off is what
+// makes the scratch app the backend it claims to be, and what lets this step
+// see an `ERR_MODULE_NOT_FOUND` the day something in the server's graph
+// reaches a hook again.
+function reactFreeCase({ CORE, SERVER, pnpmWorkspace }) {
   const nodeDir = scratch("node");
   writeFileSync(
     join(nodeDir, "package.json"),
@@ -578,8 +595,10 @@ console.log("core-neutral ok");
   process.stdout.write("server parses a query without React (CJS) … ");
   run(process.execPath, ["parse.cjs"], nodeDir, "react-free CJS parse");
   console.log("ok");
+}
 
-  // ── 10. Vite production build ─────────────────────────────────────────
+// ── 10. Vite production build ─────────────────────────────────────────
+function viteCase({ CORE, REACT_PKG, UNSTYLED, REACT, OVERRIDES }) {
   const viteDir = scratch("vite");
   mkdirSync(join(viteDir, "src"), { recursive: true });
   writeFileSync(
@@ -637,8 +656,10 @@ createRoot(document.getElementById("root")!).render(
     process.exit(1);
   }
   console.log("ok");
+}
 
-  // ── 11. Next.js App Router build + prerender ──────────────────────────
+// ── 11. Next.js App Router build + prerender ──────────────────────────
+function nextCase({ CORE, UNSTYLED, REACT, OVERRIDES }) {
   const nextDir = scratch("next");
   mkdirSync(join(nextDir, "app"), { recursive: true });
   writeFileSync(
@@ -714,8 +735,90 @@ export default function Page() {
     process.exit(1);
   }
   console.log("ok");
-
-  console.log("\nconsumer-harness: every packed-tarball check passed.");
 }
 
-main();
+// ── 12. What a typed table costs the developer's compiler ─────────────
+function typingCase(_packs, { out }) {
+  process.stdout.write(
+    "typed React, Angular and Vue examples against the packed declarations … "
+  );
+  const baseline = typingBaseline();
+  const failed = baseline.examples.filter((example) => example.errors.length);
+  if (failed.length) {
+    for (const example of failed) {
+      console.error(`\n✗ ${example.id}\n  ${example.errors.join("\n  ")}`);
+    }
+    process.exit(1);
+  }
+  console.log("ok");
+  for (const { id, diagnostics: d } of baseline.examples) {
+    console.log(
+      `  ${id.padEnd(8)} types ${String(d.types).padStart(6)}` +
+        `   instantiations ${String(d.instantiations).padStart(7)}` +
+        `   memory ${(d.memoryKB / 1024).toFixed(0).padStart(4)} MiB` +
+        `   check ${d.checkSeconds.toFixed(2)}s   (TypeScript ${baseline.typescript})`
+    );
+  }
+  if (out) {
+    writeFileSync(
+      out,
+      `${JSON.stringify({ measuredAt: new Date().toISOString(), ...baseline }, null, 2)}\n`
+    );
+  }
+}
+
+const CASES = {
+  resolution: resolutionCase,
+  pnpm: pnpmCase,
+  "react-free": reactFreeCase,
+  vite: viteCase,
+  next: nextCase,
+  typing: typingCase,
+};
+
+/** Every harness case, in run order; `--case` selects among them. */
+export const HARNESS_CASES = Object.keys(CASES);
+
+/** The cases `argv` asks for, in run order; none named means all of them. */
+export function selectedHarnessCases(argv) {
+  return selectCases(
+    HARNESS_CASES.map((id) => ({ id })),
+    requestedCases(argv)
+  ).map(({ id }) => id);
+}
+
+function outPath(argv) {
+  const index = argv.indexOf("--out");
+  if (index === -1) return undefined;
+  const value = argv[index + 1];
+  if (!value || value.startsWith("--")) throw new Error("--out needs a file");
+  return resolve(value);
+}
+
+function main(argv) {
+  let cases;
+  let out;
+  try {
+    cases = selectedHarnessCases(argv);
+    out = outPath(argv);
+  } catch (error) {
+    console.error(`✗ ${error.message}`);
+    process.exit(2);
+  }
+  process.on("exit", () => {
+    for (const dir of scratches) rmSync(dir, { recursive: true, force: true });
+  });
+  // Typing installs its own tarballs offline; every other case npm-installs.
+  const packs = cases.some((id) => id !== "typing") ? packAll() : undefined;
+  for (const id of cases) CASES[id](packs, { out });
+  console.log(
+    `\nconsumer-harness: ${cases.length === HARNESS_CASES.length ? "every" : cases.join(", ")} packed-tarball check passed.`
+  );
+}
+
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main(process.argv.slice(2));
+}

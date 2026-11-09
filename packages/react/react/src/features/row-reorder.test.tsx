@@ -1,4 +1,5 @@
-import { buildGroupedFlatModel, buildTreeEntries } from "@adapttable/core";
+import { buildTreeEntries } from "@adapttable/core";
+import { buildGroupedFlatModel } from "@adapttable/core/grouping";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

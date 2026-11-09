@@ -8,7 +8,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnModel } from "../columnModel";
+import type { ColumnModel } from "../contracts/columns";
 import { selectionStats } from "./selectionStats";
 
 interface Row {

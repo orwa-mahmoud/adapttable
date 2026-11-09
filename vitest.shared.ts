@@ -150,7 +150,8 @@ export const sharedConfig = defineConfig({
     css: true,
     clearMocks: true,
     restoreMocks: true,
-    // CI is 2-core and already shards packages across jobs — one worker.
+    // CI shards packages across 4-core jobs and runs several packages per
+    // job — one worker each.
     // Local turbo takes a slice per suite; a solo filter run uses half the
     // cores. See scripts/vitest-workers.mjs.
     // Threads over the default forks: nearly all of a suite's wall time is

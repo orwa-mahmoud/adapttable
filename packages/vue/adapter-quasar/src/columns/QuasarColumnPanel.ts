@@ -1,5 +1,6 @@
 import {
   type ManagedOverlayPanelProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { QCard, QCardSection, QMenu } from "quasar";
@@ -7,7 +8,6 @@ import {
   defineComponent,
   h,
   mergeProps,
-  nextTick,
   onBeforeUnmount,
   onScopeDispose,
   type PropType,
@@ -51,7 +51,7 @@ function finishFocus(
   // deliberately move focus as part of an action that also closes the menu.
   if (origin !== anchor && (!origin || !panel?.contains(origin))) return;
   const ownerModal = anchor.closest('[aria-modal="true"]');
-  void nextTick(() => {
+  scheduleTick(() => {
     if (!accepted() || !control.isCurrent() || !visible(anchor)) return;
     const current = doc.activeElement;
     if (current === anchor) return;
@@ -136,7 +136,7 @@ export const QuasarColumnPanel = defineComponent(
         return;
       const panel = target();
       requestedClose = true;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (!disposed && props.control.open) requestedClose = false;
       });
       control.onClose(reason);

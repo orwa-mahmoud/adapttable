@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import { ASSUMED_COLUMN_WIDTH, responsiveColumns } from "./responsiveColumns";
 
 interface Row {

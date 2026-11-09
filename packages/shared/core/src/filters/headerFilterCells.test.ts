@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { ExtraFilters } from "../contracts/columns";
 import { resolveLabels } from "../labels";
-import type { ExtraFilters } from "../types";
 import {
   builtInFilterSpecs,
   defaultFilterRegistry,

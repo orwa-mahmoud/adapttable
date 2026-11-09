@@ -10,7 +10,8 @@ import { defineConfig, devices } from "@playwright/test";
  * browser. Depth stays in the unit suites; this is a smoke net.
  *
  * Tiers:
- * - Per-PR / `pnpm test:e2e`: Chromium (+ the Vite-only `chromium-dev` file).
+ * - Per-PR / `pnpm test:e2e`: Chromium, the Vite-only `chromium-dev` file,
+ *   and the packed Angular consumer.
  * - Nightly / pre-release (`.github/workflows/e2e-nightly.yml`): Firefox,
  *   WebKit, Pixel 5, and Chromium visual baselines. Those projects are always
  *   defined here so a local `playwright test --project=firefox` works; the
@@ -54,14 +55,20 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  // Nine GitHub-hosted boxes (`--shard=i/9` in pr.yml) × 1 Chromium.
-  // Four workers on one runner contended and stalled; one per box is enough.
-  // Locally the machine is not a 2-core runner: Playwright's own default is
-  // half the cores, which leaves most of a laptop idle across 1,588 browser
-  // tests. Everything but the efficiency cores runs them instead.
-  workers: process.env.CI ? 1 : Math.max(4, availableParallelism() - 2),
-  // CI also writes playwright-report/, which the workflows upload on failure.
-  reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : "list",
+  // Nine 4-core GitHub-hosted runners, each running two Chromiums beside the
+  // production showcase and docs servers, which leaves headroom for those
+  // servers. Locally Playwright's own default is half the cores, which leaves
+  // most of a laptop idle, so everything but the efficiency cores runs them.
+  workers: process.env.CI ? 2 : Math.max(4, availableParallelism() - 2),
+  // CI also writes playwright-report/, which the workflows upload on failure,
+  // and playwright-timings/, which the next run's shards are balanced by.
+  reporter: process.env.CI
+    ? [
+        ["line"],
+        ["html", { open: "never" }],
+        ["json", { outputFile: "playwright-timings/report.json" }],
+      ]
+    : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
@@ -75,8 +82,20 @@ export default defineConfig({
         "**/dev-server/**",
         "**/visual/**",
         "**/nightly-smoke.spec.ts",
+        // The packed Angular consumer builds and serves itself. The
+        // `angular-consumer` project runs it after its packages are built,
+        // so a showcase shard does not pack it and does not fail on it.
+        "**/angular-packed-consumer.spec.ts",
       ],
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      // Builds and serves its own packed page, so it needs none of the
+      // showcase, dev or docs servers the other projects share.
+      name: "angular-consumer",
+      testMatch: "**/angular-packed-consumer.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+      webServer: [],
     },
     {
       // Behaviour that exists only while Vite is serving — today, the real

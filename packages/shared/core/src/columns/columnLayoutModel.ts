@@ -4,7 +4,9 @@
  * The hook that *changes* hide/order/pin/resize lives in
  * {@link useColumnLayout}. This module is safe on the three-prop path.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
+import type { RowPinSide, RowPinState } from "../rows/rowPinModel";
 
 /**
  * Edge a column can be pinned to — logical, so it follows the writing
@@ -13,6 +15,40 @@ import type { ColumnMetadata } from "../columnModel";
  * @public
  */
 export type PinSide = "start" | "end";
+
+/**
+ * Column pins and, when row pinning is composed, the row-pin lists.
+ *
+ * Column edges stay logical. Row edges stay physical. The two setters write
+ * different controllers.
+ *
+ * @public
+ */
+export interface PinningContribution {
+  /** Column key to the edge it is pinned to. */
+  readonly columns: Readonly<Record<string, PinSide>>;
+  /** Pin a column to an edge, or unpin it with `undefined`. */
+  readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
+  /** Row keys pinned above and below the scrolled body. */
+  readonly rows?: RowPinState;
+  /** Pin a row to an edge, or unpin it with `undefined`. */
+  readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
+}
+
+/**
+ * Hide and order, when a layout-owning feature publishes setters.
+ *
+ * @public
+ */
+export interface ColumnLayoutContribution {
+  /** Full order, hidden columns included. */
+  readonly keys: readonly string[];
+  /** Column ids the reader has hidden. */
+  readonly hidden: readonly string[];
+  readonly setHidden?: (key: string, hidden: boolean) => void;
+  readonly move?: (key: string, toIndex: number) => void;
+  readonly setOrder?: (order: readonly string[]) => void;
+}
 
 /**
  * User-driven column layout: which columns are hidden, their order, pinning,

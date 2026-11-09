@@ -9,7 +9,8 @@
  * kit's stylesheet decides what that looks like. A binding turns the store
  * off under `prefers-reduced-motion` — a flash nobody asked for is a bug.
  */
-import type { RowPatchEvent } from "./patch";
+
+import type { RowPatchEvent } from "../contracts/rows";
 
 /**
  * How long a changed-cell mark lasts unless the host says otherwise, in

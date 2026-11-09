@@ -31,9 +31,7 @@ import {
   Directive,
   ElementRef,
   inject,
-  input,
   type TemplateRef,
-  viewChild,
 } from "@angular/core";
 
 import { type ColumnGroupToggleProps } from "../columns/columnGroupToggle";
@@ -42,18 +40,14 @@ import { columnSelectLabel } from "../focus/columnSelectCheckbox";
 import { type RowReorderState } from "../rows/rowReorder";
 import { type RowReorderHandleProps } from "../rows/rowReorderHandle";
 import { type TableTree } from "../tree/tableTree";
-import {
-  type BodyCellView,
-  type BodyRow,
-  type TableView,
-} from "./dataTableShell";
+import { AdaptTableSurface, scrollBoxStyle } from "./tableSurface";
+import { type BodyCellView, type BodyRow } from "./tableSurfaceHost";
 
 /** Shared AdaptDesktopTable signals; adapters supply native templates and controls. @public */
 @Directive({})
-export abstract class AdaptDesktopTableModel<TRow> {
-  readonly view = input.required<TableView<TRow>>();
-  readonly rowKey = input.required<(row: TRow) => string>();
-  readonly maxHeight = input<number | string>();
+export abstract class AdaptDesktopTableModel<
+  TRow,
+> extends AdaptTableSurface<TRow> {
   protected readonly filterSlots = { header: FILTER_HEADER };
   protected readonly reorderHandleSlot = ROW_REORDER_HANDLE;
   protected readonly editableCellSlot = EDITABLE_CELL;
@@ -71,6 +65,7 @@ export abstract class AdaptDesktopTableModel<TRow> {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   constructor() {
+    super();
     // A sticky header's height is where pinned rows stick below it.
     afterRenderEffect((onCleanup) => {
       const view = this.view();
@@ -194,11 +189,6 @@ export abstract class AdaptDesktopTableModel<TRow> {
   private treeCellCache = new Map<string, TreeCellProps<never>>();
   private treeCellModel: TableTree<TRow> | undefined;
   private treeCellLabels: TableLabels | undefined;
-  protected readonly scrollBox =
-    viewChild<ElementRef<HTMLElement>>("scrollBox");
-  scrollElement(): HTMLElement | null {
-    return this.scrollBox()?.nativeElement ?? null;
-  }
   protected readonly headerCells = computed(() => {
     const view = this.view();
     const panel = view.groupingPanel?.().state;
@@ -318,23 +308,10 @@ export abstract class AdaptDesktopTableModel<TRow> {
     this.treeCellCache.set(entry.treeEntry.key, props);
     return props;
   }
-  protected scrollBoxStyle(): Record<string, string> | null {
-    const maxHeight = this.maxHeight();
-    if (maxHeight != null) {
-      return {
-        maxHeight:
-          typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight,
-        overflow: "auto",
-      };
-    }
-    // Sized columns give the table a minimum width that can outgrow the box;
-    // the box then scrolls sideways instead of the page.
-    const style = this.view().table.tableAttrs().style;
-    const sized =
-      typeof style === "object" &&
-      style !== null &&
-      "minWidth" in style &&
-      Boolean(style.minWidth);
-    return sized ? { overflowX: "auto" } : null;
+  protected boxStyle(): Record<string, string> | null {
+    return scrollBoxStyle(
+      this.maxHeight(),
+      this.view().table.tableAttrs().style
+    );
   }
 }

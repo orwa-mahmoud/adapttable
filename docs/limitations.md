@@ -83,7 +83,7 @@ Sizes are minified + gzipped AdaptTable bytes. React and the UI kit are
 external — an application already ships them. The method is packed
 consumer fixtures in `scripts/bundle-budget.mjs`.
 
-- A published adapter's base `DataTable` is held to **≤ 81 KB**
+- A published adapter's base `DataTable` is held to **≤ 80 KB**
   (`PLAIN_ADAPTER_CEILING_KB`) and at least 35% under that kit's recorded
   pre-v3 size (`scripts/consumer-fixtures.mjs`). Omitted feature markers must be absent from the base graph.
 - Optional features arrive with their import. Called with no argument,
@@ -92,6 +92,9 @@ consumer fixtures in `scripts/bundle-budget.mjs`.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
+- Importing every core export measured 103.63 KiB gzip on 2026-11-07
+  (106,115 bytes). The fixture ceiling is that measurement. The figure is the
+  whole public surface, not a table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 
 Published FAQ figures are the measurements the budget script checks, not
 a second estimate. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable) ·
@@ -135,7 +138,8 @@ and unstyled.
 ## Accessibility
 
 Keyboard, names, RTL and forced-colors are on by default across the eight
-published React kits ([accessibility](./accessibility.md)).
+published React kits, the eight published Vue kits, and the nine published
+Angular kits ([accessibility](./accessibility.md)).
 
 antd keeps a sticky header. `role="grid"` sits on the wrapper around
 both of antd's tables so a cell and its `columnheader` share one grid.
@@ -162,23 +166,24 @@ a fix was attempted and failed. None is listed.
 
 ## Sources
 
-| Claim                                    | Source                                                                                                   |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Host callbacks own writes                | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                 |
-| Formula grammar and refused tokens       | [formulas](./formulas.md), `parseFormula`                                                                |
-| Move policy, cycle guard, sort block     | [row-reordering](./row-reordering.md)                                                                    |
-| `fullDataset` / export-all / `rows.read` | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts` |
-| `readMax` default 50                     | `packages/shared/ai/src/session.ts` `readMaxOf`                                                          |
-| Virtualize DOM count                     | [virtualization](./virtualization.md)                                                                    |
-| Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                  |
-| URL-state 8,192 cap, `limit` 1–500       | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`             |
-| Adapter ≤ 81 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                             |
-| AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                               |
-| Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                          |
-| Chromium e2e                             | `playwright.config.ts`                                                                                   |
-| Nightly Firefox / WebKit / Pixel 5       | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                         |
-| Showcase axe audit                       | `e2e/axe-audit.spec.ts`                                                                                  |
-| Visual baselines                         | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                       |
-| SSR seams                                | [ssr-rsc](./ssr-rsc.md)                                                                                  |
-| antd sticky header association           | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                           |
-| React / Node / kit floors                | [getting-started](./getting-started.md)                                                                  |
+| Claim                                       | Source                                                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Host callbacks own writes                   | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                      |
+| Formula grammar and refused tokens          | [formulas](./formulas.md), `parseFormula`                                                                     |
+| Move policy, cycle guard, sort block        | [row-reordering](./row-reordering.md)                                                                         |
+| `fullDataset` / export-all / `rows.read`    | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts`      |
+| `readMax` default 50                        | `packages/shared/ai/src/session.ts` `readMaxOf`                                                               |
+| Virtualize DOM count                        | [virtualization](./virtualization.md)                                                                         |
+| Export 50,000 cap                           | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
+| URL-state 8,192 cap, `limit` 1–500          | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |
+| Adapter ≤ 80 KB, omitted-feature markers    | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                                  |
+| Every core export at its 103.63 KiB ceiling | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
+| AI absent from base graphs                  | `scripts/ai-isolation.mjs`                                                                                    |
+| Perf baseline                               | `scripts/v3-perf-baseline.json`                                                                               |
+| Chromium e2e                                | `playwright.config.ts`                                                                                        |
+| Nightly Firefox / WebKit / Pixel 5          | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                              |
+| Showcase axe audit                          | `e2e/axe-audit.spec.ts`                                                                                       |
+| Visual baselines                            | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                            |
+| SSR seams                                   | [ssr-rsc](./ssr-rsc.md)                                                                                       |
+| antd sticky header association              | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                                |
+| React / Node / kit floors                   | [getting-started](./getting-started.md)                                                                       |

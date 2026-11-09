@@ -1,4 +1,4 @@
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { CssProperties } from "../style/cssProperties";
 
 /**

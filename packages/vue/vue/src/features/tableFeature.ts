@@ -15,6 +15,7 @@ import {
   type FilterRuntime,
   type LiveFeatureHost,
   mergeFeaturePatches,
+  preferLastById,
   type SlotFill,
   slotFillsOf,
   type TableRuntime,
@@ -87,7 +88,7 @@ export type ComposedFeature<TRow> = TableFeature<TRow>;
 export function normalizeFeatures<TRow>(
   features: readonly ComposedFeature<TRow>[]
 ): readonly ComposedFeature<TRow>[] {
-  const winners = new Map<string, ComposedFeature<TRow>>();
+  const seen = new Set<string>();
   for (const declaration of features) {
     if (
       !declaration ||
@@ -105,14 +106,13 @@ export function normalizeFeatures<TRow>(
         throw new Error(
           `AdaptTable: feature "${declaration.id}" has an invalid ${name}.`
         );
-    if (winners.has(declaration.id))
+    if (seen.has(declaration.id))
       devWarn(
         `Two features share the id "${declaration.id}". The last declaration wins.`
       );
-    winners.delete(declaration.id);
-    winners.set(declaration.id, declaration);
+    seen.add(declaration.id);
   }
-  return [...winners.values()];
+  return preferLastById(features);
 }
 /** Merge only after duplicate resolution; a discarded feature never applies. */
 export function featureOptionsOf<TRow>(

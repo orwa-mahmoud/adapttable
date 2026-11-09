@@ -47,6 +47,9 @@ export interface ActiveFilterChipsOptions {
 }
 
 // @public
+export function activeTierValue<T>(active: boolean, value: T, idle: T): T;
+
+// @public
 export function addAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, operationId: string): Readonly<Partial<Record<string, string>>>;
 
 // @public
@@ -297,7 +300,19 @@ export function applyTableUrlState(search: string, savedSearch: string, namespac
 export const APPROVAL_PREVIEW_LIMIT = 3;
 
 // @public
+export interface ApprovalArgumentPair {
+    readonly name: string;
+    readonly value: string;
+}
+
+// @public
+export function approvalArgumentPairs(args: unknown): readonly ApprovalArgumentPair[];
+
+// @public
 export type ApprovalPresentation = "widget" | "table" | "modal";
+
+// @public
+export function approvalProposalText(proposal: AgentApprovalProposal, labels: TableLabels | undefined): string;
 
 // @public
 export interface ApprovalReview {
@@ -329,6 +344,9 @@ export interface ApprovalReviewItem {
     readonly index: number;
     readonly proposal: AgentApprovalProposal;
 }
+
+// @public
+export function approvalValueText(value: unknown): string | undefined;
 
 // @public
 export function asBatchGesture<TRow>(apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
@@ -1381,6 +1399,18 @@ export function columnHeaderLabel<TRow>(column: ColumnMetadata<TRow>): string;
 export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
 
 // @public
+export interface ColumnLayoutContribution {
+    readonly hidden: readonly string[];
+    readonly keys: readonly string[];
+    // (undocumented)
+    readonly move?: (key: string, toIndex: number) => void;
+    // (undocumented)
+    readonly setHidden?: (key: string, hidden: boolean) => void;
+    // (undocumented)
+    readonly setOrder?: (order: readonly string[]) => void;
+}
+
+// @public
 export interface ColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
     readonly configure: (options: ColumnLayoutControllerOptions<TRow, TColumn>) => void;
     readonly move: (key: string, toIndex: number) => void;
@@ -1769,6 +1799,13 @@ export interface CommandPaletteCommandsOptions extends TableCommandOptions {
 }
 
 // @public
+export interface CommandPaletteContribution {
+    readonly close?: () => void;
+    readonly commands: readonly Command[];
+    readonly open?: () => void;
+}
+
+// @public
 export interface CommandPaletteController {
     readonly configure: (options: CommandPaletteControllerOptions) => void;
     readonly getSnapshot: () => CommandPaletteSnapshot;
@@ -1866,6 +1903,13 @@ export interface ContextMenuActions<TRow> {
     onHide?: (columnKey: string) => void;
     onSort?: (columnKey: string, direction: "asc" | "desc") => void;
     onTogglePin?: (columnKey: string) => void;
+}
+
+// @public
+export interface ContextMenuContribution<TRow = unknown> {
+    readonly close?: () => void;
+    readonly entries?: readonly ContextMenuItem[];
+    readonly items?: readonly ContextMenuItemsFactory<TRow>[];
 }
 
 // @public
@@ -2110,6 +2154,9 @@ export function coveredAddressSet<TRow>(options: {
 export function createAllMatchingScope(): AllMatchingScope;
 
 // @public
+export function createBasicTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
+
+// @public
 export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>): BatchEditStore<TRow>;
 
 // @public
@@ -2182,7 +2229,13 @@ export function createFirstLoadLatch(): FirstLoadLatch;
 export function createFrontendSource<TRow>(): FrontendSource<TRow>;
 
 // @public
+export function createFrontendSourceWith<TRow>(initialEngine: FrontendEngineFactory<TRow>): FrontendSource<TRow>;
+
+// @public
 export function createGridFocusController<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
+
+// @public
+export function createGridNavigation<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
 
 // @public
 export function createGroupingPanelController(initial: GroupingPanelControllerOptions): GroupingPanelController;
@@ -2444,6 +2497,12 @@ export function deferGroupingDropToInner<TEvent extends {
 
 // @public
 export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
+
+// @public
+export interface DensityContribution {
+    readonly density: TableDensity;
+    readonly onDensityChange: (next: TableDensity) => void;
+}
 
 // @public
 export const densitySlice: UrlSliceSpec<TableDensity, {
@@ -2888,6 +2947,12 @@ export interface EditingBundle<TRow> {
     saving?: CellSaveState<TRow>;
     state: CellEditingState;
     validation?: EditValidationState<TRow>;
+}
+
+// @public
+export interface EditingContribution<TRow> {
+    readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
 }
 
 // @public
@@ -3587,6 +3652,12 @@ export function filterExportView<TRow>(view: readonly ExportViewEntry<TRow>[], s
 export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
 
 // @public
+export interface FilteringContribution<TRow> {
+    readonly defs?: readonly FilterDef<TRow>[];
+    readonly registry?: FilterTypeRegistry;
+}
+
+// @public
 export function filterLabel(def: Pick<FilterDef, "key" | "label">): string;
 
 // @public
@@ -3789,6 +3860,15 @@ export interface FindBarKeyTarget {
     readonly next: () => void;
     readonly previous: () => void;
     readonly setOpen: (open: boolean) => void;
+}
+
+// @public
+export interface FindContribution {
+    readonly open: boolean;
+    readonly openBar?: () => void;
+    readonly query: string;
+    readonly setOpen: (open: boolean) => void;
+    readonly setQuery: (query: string) => void;
 }
 
 // @public
@@ -4007,9 +4087,14 @@ export type FormulaValue = {
 };
 
 // @public
+export type FrontendEngineFactory<TRow> = (options: CreateTableEngineOptions<TRow>) => TableEngine<TRow>;
+
+// @public
 export interface FrontendSource<TRow> {
     readonly commit: () => void;
     readonly engine: TableEngine<TRow>;
+    readonly engineFactory: FrontendEngineFactory<TRow>;
+    readonly replaceEngine: (createEngine: FrontendEngineFactory<TRow>) => void;
     readonly update: (config: FrontendSourceConfig<TRow>, view: FrontendSourceViewState) => FrontendSourceFrame<TRow>;
 }
 
@@ -4048,6 +4133,13 @@ export interface FrontendSourceViewState {
     readonly sortBy: string | undefined;
     readonly sortDir: SortDirection | undefined;
     readonly sortLevels: readonly SortLevel[];
+}
+
+// @public
+export interface FullscreenContribution {
+    readonly active: boolean;
+    readonly supported: boolean;
+    readonly toggle: () => void;
 }
 
 // @public
@@ -4500,6 +4592,16 @@ export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
 }
 
 // @public
+export function groupingCollapseCommands(openGroups: readonly {
+    readonly key: string;
+    readonly level: number;
+}[], collapse: Pick<GroupCollapseActions, "expandAll" | "collapseToDepth">): {
+    readonly expandAll: () => void;
+    readonly collapseAll: () => void;
+    readonly collapseToDepth: (depth: number) => void;
+};
+
+// @public
 export function groupingColumnName(column: {
     readonly key: string;
     readonly header?: unknown;
@@ -4516,6 +4618,12 @@ export function groupingComputationKind(input: {
     allFilteredRows?: readonly unknown[];
     capabilities?: TableSourceCapabilities;
 }): GroupingComputationKind;
+
+// @public
+export interface GroupingContribution<TRow> {
+    readonly entries: readonly GroupedFlatEntry<TRow>[];
+    readonly groupBy?: readonly string[];
+}
 
 // @public
 export interface GroupingDragEventLike {
@@ -4668,7 +4776,76 @@ export interface GroupingPanelState extends GroupingPanelInteractions {
 }
 
 // @public
+export interface GroupingProjection<TRow> {
+    readonly aggregates: GroupingAggregates<TRow>;
+    readonly ignoredWarning: string | undefined;
+    readonly model: GroupedRowModel<TRow> | undefined;
+}
+
+// @public
+export function groupingProjectionBundle<TRow, TCollapsed extends Pick<GroupCollapseActions, "expandAll" | "collapseToDepth">>(input: {
+    readonly groupBy: readonly string[];
+    readonly projection: GroupingProjection<TRow>;
+    readonly collapsed: TCollapsed;
+    readonly setGroupBy: (key: GroupByInput) => void;
+    readonly paging: GroupingShowMoreTarget;
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+    readonly onGroupLoadMore?: (groupKey: string) => void;
+    readonly whenActive?: () => boolean;
+}): {
+    readonly groupBy: readonly string[];
+    readonly collapsed: TCollapsed;
+    readonly aggregates: GroupingAggregates<TRow>["aggregates"];
+    readonly entries: GroupedRowModel<TRow>["entries"];
+    readonly setGroupBy: (key: GroupByInput) => void;
+    readonly showMore: (entry: {
+        readonly scope: "groups" | "rows";
+        readonly groupKey?: string;
+    }) => void;
+    readonly expandAll: () => void;
+    readonly collapseAll: () => void;
+    readonly collapseToDepth: (depth: number) => void;
+} | undefined;
+
+// @public
+export interface GroupingProjectionInput<TRow> {
+    readonly collapsedGroupIds: ReadonlySet<string>;
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly extraRows?: readonly ExtraRow[];
+    readonly getRowId: (row: TRow) => string;
+    readonly groupAggregates?: (rows: readonly TRow[]) => unknown;
+    readonly groupByKeys: readonly string[];
+    readonly groupFilter?: (group: GroupNode<TRow>) => boolean;
+    readonly groupFooters?: boolean;
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+    readonly groupSort?: GroupSort<TRow>;
+    readonly locale?: string;
+    readonly paging?: GroupPaging;
+    readonly panelDeclared?: DeclaredAggregates;
+    readonly source: GroupingRuntimeSource<TRow>;
+}
+
+// @public
 export type GroupingRuntimeSource<TRow> = Pick<TableSource<TRow>, "allFilteredRows" | "groups" | "capabilities" | "honorsAggregates" | "aggregateOperations" | "groupAggregateOverrides" | "queryAggregates" | "groupAggregations">;
+
+// @public
+export function groupingShowMoreAction(entry: {
+    readonly scope: "groups" | "rows";
+    readonly groupKey?: string;
+}, sizes: {
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+}, paging: GroupingShowMoreTarget, onGroupLoadMore?: (groupKey: string) => void): void;
+
+// @public
+export interface GroupingShowMoreTarget {
+    showMore(pageSize: number, groupKey?: string): void;
+}
+
+// @public
+export function groupingSourceOf<TRow>(source: GroupingRuntimeSource<TRow>): GroupingRuntimeSource<TRow>;
 
 // @public
 export function groupLeafCount(entry: {
@@ -4987,6 +5164,9 @@ export function idSetReader(): (ids: readonly string[] | undefined) => ReadonlyS
 
 // @public
 export function impliedOperations<TRow>(column: ColumnMetadata<TRow>): readonly AggregateName[];
+
+// @public
+export const INACTIVE_TIER_ROWS: readonly never[];
 
 // @public
 export function incrementalSearchText<TRow>(row: TRow): string;
@@ -5383,6 +5563,9 @@ export interface MergedRowActions<TRow> {
 
 // @public
 export function mergeFilterChips(filterChips: readonly ActiveFilterChip[], extraChips: readonly ActiveFilterChip[] | undefined): readonly ActiveFilterChip[];
+
+// @public
+export function mergeGroupingContributions<TRow>(contributions: readonly (GroupingContribution<TRow> | undefined)[]): GroupingContribution<TRow> | undefined;
 
 // @internal
 export function mergeProps<T extends Props>(base: T, overrides?: Props): T;
@@ -5873,6 +6056,14 @@ export function pinnedSummaryRowId(side: RowPinSide, index: number): string;
 export function pinnedSummarySideFromId(id: string): RowPinSide | undefined;
 
 // @public
+export interface PinningContribution {
+    readonly columns: Readonly<Record<string, PinSide>>;
+    readonly rows?: RowPinState;
+    readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
+    readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
+}
+
+// @public
 export interface PinOffset {
     inset: number;
     side: PinSide;
@@ -6056,6 +6247,30 @@ export interface PointerReleaseTarget {
 }
 
 // @public
+export interface PrintContribution {
+    readonly onPrint: () => void;
+}
+
+// @public
+export function projectedGroupingSource<TSource extends {
+    readonly allFilteredRows?: readonly unknown[];
+}>(source: TSource, projection: {
+    readonly model: unknown;
+}): TSource;
+
+// @public
+export function projectGrouping<TRow>(input: GroupingProjectionInput<TRow>): GroupingProjection<TRow>;
+
+// @public
+export function projectGroupingContribution<TRow>(input: {
+    readonly host: GroupingContribution<TRow> | undefined;
+    readonly feature: GroupingContribution<TRow> | undefined;
+}): GroupingContribution<TRow> | undefined;
+
+// @public
+export function projectShellOperations<TRow>(input: ShellOperationInput<TRow>): ShellOperationInput<TRow>;
+
+// @public
 export type Props = Record<string, unknown>;
 
 // @public
@@ -6078,6 +6293,24 @@ export interface QueryCondition {
     key: string;
     op: string;
     value?: unknown;
+}
+
+// @public
+export interface QueryContribution {
+    readonly clearExtras?: () => void;
+    readonly defaultLimit?: number;
+    readonly extra?: ExtraFilters;
+    readonly limit: number;
+    readonly page: number;
+    readonly search: string;
+    readonly setExtras?: (extra: ExtraFilters) => void;
+    readonly setLimit: (limit: number) => void;
+    readonly setPage: (page: number) => void;
+    readonly setSearch: (search: string) => void;
+    readonly setSort: (key?: string, dir?: SortDirection) => void;
+    readonly sortBy?: string;
+    readonly sortDir?: SortDirection;
+    readonly total?: number;
 }
 
 // @public
@@ -6425,6 +6658,12 @@ export function relativeTokenLabel(raw: string, labels: {
     relLastN: string;
     relNextN: string;
 }): string;
+
+// @public
+export const REMAINING_FEATURE_OWNERSHIP: {};
+
+// @public
+export type RemainingFeatureDomain = keyof typeof REMAINING_FEATURE_OWNERSHIP;
 
 // @public
 export function removeAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, declaredByDeveloper: boolean): Readonly<Partial<Record<string, string>>>;
@@ -7013,10 +7252,7 @@ export interface RowMoveView<TRow> {
     };
     readonly rowLabel: (row: TRow) => string;
     readonly sortBy?: string;
-    readonly tree?: {
-        readonly entries: readonly TreeEntry<TRow>[];
-        readonly allEntries?: readonly TreeEntry<TRow>[];
-    };
+    readonly tree?: TreeContribution<TRow>;
 }
 
 // @public
@@ -7200,6 +7436,7 @@ export interface RowReorderControllerOptions<TRow> {
     getMoveMenu?: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
     getRowId?: (row: TRow) => string;
     readonly getRowIndex?: (row: TRow) => number | undefined;
+    isRtl?: (element: HTMLElement | null) => boolean;
     labels: Pick<RowReorderLabels, "rowLifted" | "rowMoved" | "rowReorderCancelled"> & Partial<Pick<RowReorderLabels, "rowMovedToGroup" | "rowMovedUnder" | "moveRejectedPolicyNever">>;
     movePolicy?: RowMovePolicy;
     onRowMove?: (request: RowMoveRequest<TRow>) => unknown;
@@ -7517,6 +7754,14 @@ export const SEARCH_DEBOUNCE_MS = 300;
 export function searchChecklistItems(items: readonly ChecklistValue[], query: string): readonly ChecklistValue[];
 
 // @public
+export interface SelectionContribution {
+    readonly acrossPages?: boolean;
+    readonly allMatching?: boolean;
+    readonly replace: (ids: readonly string[] | undefined) => void;
+    readonly selectedIds: ReadonlySet<string>;
+}
+
+// @public
 export interface SelectionStatPart {
     readonly key: "count" | "sum" | "average" | "min" | "max";
     readonly text: string;
@@ -7651,6 +7896,35 @@ export function setMeasureAgg(config: PivotConfig, index: number, agg: Aggregate
 
 // @public
 export function settledFilterTree(tree: QueryFilterGroup | undefined): QueryFilterGroup | undefined;
+
+// @public
+export const SHELL_OPERATION_OWNERS: {
+    readonly find: "find/findController.ts";
+    readonly density: "layout/densityContract.ts";
+    readonly fullscreen: "layout/layoutBindingState.ts";
+    readonly contextMenu: "actions/contextMenuModel.ts";
+    readonly commandPalette: "actions/commandPaletteController.ts";
+    readonly print: "layout/shellPipeline.ts";
+};
+
+// @public
+export type ShellOperation = keyof typeof SHELL_OPERATION_OWNERS;
+
+// @public
+export interface ShellOperationInput<TRow = unknown> {
+    // (undocumented)
+    readonly commandPalette?: CommandPaletteContribution;
+    // (undocumented)
+    readonly contextMenu?: ContextMenuContribution<TRow>;
+    // (undocumented)
+    readonly density?: DensityContribution;
+    // (undocumented)
+    readonly find?: FindContribution;
+    // (undocumented)
+    readonly fullscreen?: FullscreenContribution;
+    // (undocumented)
+    readonly print?: PrintContribution;
+}
 
 // @public
 export interface Shortcut {
@@ -7917,6 +8191,16 @@ export interface TableBodyCell<TRow> {
 }
 
 // @public
+export interface TableCallbackRefresh<TRow> {
+    readonly columns?: NonNullable<IncrementalViewConfig<TRow>["columns"]>;
+    readonly filterFn?: NonNullable<IncrementalViewConfig<TRow>["filterFn"]>;
+    readonly filterTreeFn?: NonNullable<IncrementalViewConfig<TRow>["filterTreeFn"]>;
+    readonly getRowId?: (row: TRow) => string;
+    readonly getSearchText?: (row: TRow) => string;
+    readonly getSortValue?: NonNullable<IncrementalViewConfig<TRow>["getSortValue"]>;
+}
+
+// @public
 export interface TableCommandOptions {
     exportLabel?: string;
     hasFilters?: boolean;
@@ -7992,6 +8276,7 @@ export interface TableEngine<TRow = unknown> extends TableEngineReader<TRow> {
     }, options?: {
         silent?: boolean;
     }) => void;
+    readonly refreshCallbacks: (patch: TableCallbackRefresh<TRow>) => void;
     readonly rowKey: (row: TRow) => string;
     readonly stageCandidate: (patch: TableEngineConfigPatch<TRow>, next?: {
         readonly data?: readonly TRow[];
@@ -8624,21 +8909,18 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly row: readonly RowAction<TRow>[];
         readonly bulk: readonly BulkAction[];
     };
-    readonly columnLayout?: {
-        readonly keys: readonly string[];
-        readonly hidden: readonly string[];
-        readonly setHidden?: (key: string, hidden: boolean) => void;
-        readonly move?: (key: string, toIndex: number) => void;
-        readonly setOrder?: (order: readonly string[]) => void;
-    };
-    readonly editing?: {
-        readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-        readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
-    };
+    readonly columnLayout?: ColumnLayoutContribution;
+    readonly commandPalette?: CommandPaletteContribution;
+    readonly contextMenu?: ContextMenuContribution<TRow>;
+    readonly density?: DensityContribution;
+    readonly editing?: EditingContribution<TRow>;
     readonly filterDefs?: readonly FilterDef<TRow>[];
+    readonly filtering?: FilteringContribution<TRow>;
     readonly filterRegistry?: FilterTypeRegistry;
+    readonly find?: FindContribution;
+    readonly fullscreen?: FullscreenContribution;
     readonly getRowId: (row: TRow) => string;
-    readonly grouping?: unknown;
+    readonly grouping?: GroupingContribution<TRow>;
     readonly groupingState?: {
         readonly groupBy: string | undefined;
         readonly aggregateOverrides: GroupAggregateOverrides;
@@ -8653,42 +8935,15 @@ export interface TableRuntimeView<TRow = unknown> {
         readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
     };
     readonly neutralTable?: NeutralTable<TRow>;
-    readonly pinning?: {
-        readonly columns: Readonly<Record<string, PinSide>>;
-        readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
-        readonly rows?: {
-            readonly top: readonly string[];
-            readonly bottom: readonly string[];
-        };
-        readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
-    };
-    readonly query?: {
-        readonly page: number;
-        readonly limit: number;
-        readonly total?: number;
-        readonly defaultLimit?: number;
-        readonly search: string;
-        readonly sortBy?: string;
-        readonly sortDir?: "asc" | "desc";
-        readonly setPage: (page: number) => void;
-        readonly setLimit: (limit: number) => void;
-        readonly setSearch: (search: string) => void;
-        readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
-        readonly extra?: ExtraFilters;
-        readonly setExtras?: (extra: ExtraFilters) => void;
-        readonly clearExtras?: () => void;
-    };
+    readonly pinning?: PinningContribution;
+    readonly print?: PrintContribution;
+    readonly query?: QueryContribution;
     readonly rowLabel: (row: TRow) => string;
     readonly rows: readonly TRow[];
-    readonly selection?: {
-        readonly selectedIds: ReadonlySet<string>;
-        readonly allMatching?: boolean;
-        readonly acrossPages?: boolean;
-        readonly replace: (ids: readonly string[] | undefined) => void;
-    };
+    readonly selection?: SelectionContribution;
     readonly sortBy?: string;
     readonly sourceCapabilities?: TableSourceCapabilities;
-    readonly tree?: unknown;
+    readonly tree?: TreeContribution<TRow>;
     readonly visibleRows?: readonly TRow[];
 }
 
@@ -8877,6 +9132,9 @@ export function textFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<Filter
 export type TextOp = (typeof TEXT_OPS)[number];
 
 // @public
+export function tierRows<TRow>(active: boolean, data: readonly TRow[] | undefined): readonly TRow[];
+
+// @public
 export function toAggregateInstant(value: AggregateOrderedValue): number | undefined;
 
 // @public
@@ -8919,6 +9177,12 @@ export function treeCardStyle(level: number): {
 
 // @public
 export function treeColumnKey<TRow>(columns: readonly ColumnMetadata<TRow>[], declared?: string): string | undefined;
+
+// @public
+export interface TreeContribution<TRow> {
+    readonly allEntries?: readonly TreeEntry<TRow>[];
+    readonly entries: readonly TreeEntry<TRow>[];
+}
 
 // @public
 export interface TreeEntry<TRow> {
@@ -9094,6 +9358,9 @@ export interface VirtualItemMeta {
     size: number;
     start: number;
 }
+
+// @public
+export function virtualItemMeta(item: VirtualItemMeta): VirtualItemMeta;
 
 // @public
 export interface VirtualTableRow<TRow> {

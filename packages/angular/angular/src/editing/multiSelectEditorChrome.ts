@@ -2,12 +2,12 @@
  * Multi-select editor structure for kits whose select holds one value.
  * The kit supplies every checkbox; the binding owns the group and focus.
  */
+import type { MultiSelectEditorCheckboxProps as NeutralMultiSelectEditorCheckboxProps } from "@adapttable/core/binding";
 import {
   editorValidationProps,
   formatMultiDraft,
   readMultiDraft,
-} from "@adapttable/core";
-import type { MultiSelectEditorCheckboxProps as NeutralMultiSelectEditorCheckboxProps } from "@adapttable/core/binding";
+} from "@adapttable/core/editing";
 import {
   ChangeDetectionStrategy,
   Component,

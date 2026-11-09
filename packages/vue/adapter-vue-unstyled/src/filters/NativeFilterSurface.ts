@@ -1,13 +1,13 @@
 import {
   type FilterPanelSurfaceProps,
   resolveLabels,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
   type CSSProperties,
   defineComponent,
   h,
-  nextTick,
   onMounted,
   type PropType,
   shallowRef,
@@ -94,7 +94,7 @@ export const NativeFilterSurface = defineComponent(
       closeRequest = request;
       closeReason = reason;
       props.onClose(reason);
-      void nextTick(() => {
+      scheduleTick(() => {
         if (props.open && closeRequest === request) {
           closeRequest = undefined;
           closeReason = undefined;
@@ -109,7 +109,7 @@ export const NativeFilterSurface = defineComponent(
     ) => {
       const request = focusRequest;
       const anchor = props.anchor;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           request !== focusRequest ||
           !active.value ||

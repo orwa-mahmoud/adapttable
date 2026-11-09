@@ -6,8 +6,14 @@ import {
   type AdaptTableFeature,
   type BatchEditHandler,
   type CellEditHandler,
+  type ColumnDef,
   type DirtyEdits,
+  editingBundleFor,
+  featureOptionsOf,
   type RowEditHandler,
+  SURFACE_EDITING,
+  SURFACE_HANDLES,
+  SURFACE_OCCUPIED,
 } from "@adapttable/angular";
 import type {
   EditConflictHandler,
@@ -21,6 +27,7 @@ import {
   coreEditing,
   coreRowEditing,
 } from "@adapttable/core/binding";
+import { computed } from "@angular/core";
 
 /**
  * Lifecycle observers a host may pass to {@link editing}.
@@ -85,6 +92,37 @@ export function editing<TRow>(
   return {
     ...coreEditing(onCellEdit, extras),
     onCellEdit,
+    mount(context) {
+      const occupied = context.state.get(SURFACE_OCCUPIED)();
+      if (occupied?.editing) return;
+      const handles = context.injector.get(SURFACE_HANDLES, null);
+      if (!handles) return;
+      const options = featureOptionsOf(handles.features);
+      const editing = editingBundleFor<TRow>({
+        live: computed(() => ({
+          rows: handles.viewSource().rows as readonly TRow[],
+          columns: handles.table.allColumns() as readonly ColumnDef<TRow>[],
+          rowKey: handles.table.rowKey,
+        })),
+        featureOptions: options,
+        activation: computed(
+          () => options.editActivation as "doubleClick" | "click" | undefined
+        ),
+        columns: computed(
+          () => handles.table.allColumns() as readonly ColumnDef<TRow>[]
+        ),
+        get featureHost() {
+          return handles.table.featureHost;
+        },
+        labels: handles.table.labels,
+        injector: context.injector,
+      });
+      if (editing === undefined) return;
+      context.state.set(SURFACE_EDITING, editing);
+      return () => {
+        context.state.set(SURFACE_EDITING, undefined);
+      };
+    },
   } as EditingFeature<TRow>;
 }
 

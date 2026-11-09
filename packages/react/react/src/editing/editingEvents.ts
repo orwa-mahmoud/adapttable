@@ -10,8 +10,8 @@ import {
   type EditEvent,
   type EditEventHandler,
   type EditLifecycle,
-  observeEdit,
 } from "@adapttable/core";
+import { observeEdit } from "@adapttable/core/editing";
 import { useMemo } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
@@ -22,7 +22,7 @@ export type {
   EditLifecycle,
   EditUnit,
 } from "@adapttable/core";
-export { observeEdit } from "@adapttable/core";
+export { observeEdit } from "@adapttable/core/editing";
 
 /**
  * Latch one observer: stable identity, missing stays missing. Calling through

@@ -20,7 +20,32 @@ interface Recognition {
 }
 
 const scopes = new Set<ReturnType<typeof Injector.create>>();
-beforeEach(() => localStorage.clear());
+
+/** jsdom storage, or a memory stand-in when this Node leaves the global unset. */
+function installStorage(): void {
+  const existing = globalThis.localStorage;
+  if (existing) {
+    existing.clear();
+    return;
+  }
+  const values = new Map<string, string>();
+  vi.stubGlobal("localStorage", {
+    get length() {
+      return values.size;
+    },
+    clear: () => values.clear(),
+    getItem: (key: string) => values.get(key) ?? null,
+    key: (index: number) => [...values.keys()][index] ?? null,
+    removeItem: (key: string) => {
+      values.delete(key);
+    },
+    setItem: (key: string, value: string) => {
+      values.set(key, String(value));
+    },
+  });
+}
+
+beforeEach(() => installStorage());
 afterEach(() => {
   for (const scope of scopes) scope.destroy();
   scopes.clear();

@@ -2,22 +2,11 @@
  * Distinct checklist values and counts. Widget state lives on
  * `@adapttable/react`.
  */
+import type { ChecklistValue } from "../contracts/query";
 import { getPath } from "../utils/path";
 import type { FilterDef, FilterOption } from "./filterDefs";
 
-/**
- * One distinct value in a checklist, with its count in the current set.
- *
- * @public
- */
-export interface ChecklistValue {
-  /** The value itself. */
-  value: string;
-  /** Caption shown for the entry. */
-  label: string;
-  /** How many rows carry this value. */
-  count: number;
-}
+export type { ChecklistValue } from "../contracts/query";
 
 function valueText(value: unknown): string {
   switch (typeof value) {

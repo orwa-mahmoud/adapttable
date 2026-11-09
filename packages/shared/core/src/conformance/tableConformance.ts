@@ -92,6 +92,8 @@ export interface ConformanceLabels {
     readonly column: string;
     readonly ascending: boolean;
   }) => string;
+  /** Placeholder for the search box. */
+  readonly searchPlaceholder?: string;
 }
 
 /**
@@ -137,6 +139,29 @@ export interface ConformanceScenario {
   readonly virtualize?: boolean;
   /** Labels that replace the defaults. */
   readonly labels?: ConformanceLabels;
+  /** Activate a row from its body. Clicks on interactive children do not count. */
+  readonly onRowClick?: (row: ConformanceRow) => void;
+  /** Cells that should carry `data-flash` right now. */
+  readonly isCellFlashing?: (rowId: string, columnKey: string) => boolean;
+  /** Placeholder shown in the search box, ahead of the label. */
+  readonly searchPlaceholder?: string;
+  /**
+   * `"server"` shows the host's rows as sent. `"frontend"` keeps sorting them
+   * and only notifies `onQueryChange`. Omit it and `onQueryChange` means server.
+   */
+  readonly mode?: "frontend" | "server";
+  /** One consolidated query per change. */
+  readonly onQueryChange?: (
+    query: {
+      readonly page?: number;
+      readonly limit?: number;
+      readonly sortBy?: string;
+      readonly sortDir?: string;
+    },
+    info: { readonly signal: AbortSignal }
+  ) => void;
+  /** Row count across every page, on the server tier. */
+  readonly total?: number;
 }
 
 /**
@@ -149,6 +174,8 @@ export interface ConformanceMount {
   readonly container: HTMLElement;
   /** Completion of a framework's queued mount render; omit for synchronous mounts. */
   readonly ready?: Promise<void>;
+  /** Draw the current scenario again after a clock change. */
+  readonly refresh?: () => void | Promise<void>;
   /** Remove the table. */
   readonly unmount: () => void;
 }
@@ -175,6 +202,8 @@ export interface ConformanceExpectation {
   toBe(expected: unknown): void;
   /** Deep equality. */
   toEqual(expected: unknown): void;
+  /** The value has this length. */
+  toHaveLength(expected: number): void;
   /** The value is `null`. */
   toBeNull(): void;
   /** The negated assertions. */
@@ -349,6 +378,13 @@ export function tableConformanceTests(
 ): readonly ConformanceTest[] {
   // Expectations use the supplied minimal protocol, not global runner matchers.
   const { expect, fireEvent, waitFor } = harness;
+  let time = 0;
+  const clock = {
+    now: () => time,
+    advance(ms: number) {
+      time += ms;
+    },
+  };
   const tests: ConformanceTest[] = [];
   const it = (name: string, run: () => Promise<void>): void => {
     tests.push({ name, run });
@@ -357,12 +393,15 @@ export function tableConformanceTests(
   /** Mount, run, and always unmount. */
   const withTable = async (
     scenario: ConformanceScenario,
-    body: (container: HTMLElement) => void | Promise<void>
+    body: (
+      container: HTMLElement,
+      mounted: ConformanceMount
+    ) => void | Promise<void>
   ): Promise<void> => {
     const mounted = driver.mount(scenario);
     try {
       await mounted.ready;
-      await body(mounted.container);
+      await body(mounted.container, mounted);
     } finally {
       mounted.unmount();
     }
@@ -717,6 +756,146 @@ export function tableConformanceTests(
         });
       }
     ));
+
+  it("activates a row from its body and not from an interactive control", () => {
+    const clicks: string[] = [];
+    return withTable(
+      {
+        ...BASE,
+        selectable: true,
+        onRowClick: (row) => {
+          clicks.push(row.id);
+        },
+      },
+      async (container) => {
+        const row = parts(container, "row")[0];
+        expect(row ?? null).not.toBeNull();
+        if (!row) return;
+        const checkbox = row.querySelector(
+          'input[type="checkbox"], [role="checkbox"]'
+        );
+        expect(checkbox ?? null).not.toBeNull();
+        fireEvent.click(row);
+        await waitFor(() => {
+          expect(clicks).toEqual(["r1"]);
+        });
+        if (!checkbox) return;
+        fireEvent.click(checkbox);
+        await waitFor(() => {
+          expect(clicks).toEqual(["r1"]);
+        });
+      }
+    );
+  });
+
+  it("marks a flashing cell and clears it when its time passes", () =>
+    withTable(
+      {
+        ...BASE,
+        isCellFlashing: (rowId, columnKey) =>
+          rowId === "r2" && columnKey === "age" && clock.now() < 1000,
+      },
+      async (container, mounted) => {
+        const marked = [
+          ...container.querySelectorAll<HTMLElement>("[data-flash]"),
+        ];
+        expect(marked).toHaveLength(1);
+        expect(marked[0]?.dataset.adapttablePart).toBe("cell");
+        expect(marked[0]?.textContent?.trim()).toBe("28");
+        clock.advance(1000);
+        await mounted.refresh?.();
+        await waitFor(() => {
+          expect(container.querySelector("[data-flash]")).toBeNull();
+        });
+      }
+    ));
+
+  it("shows the search placeholder ahead of the label", () =>
+    withTable(
+      {
+        ...BASE,
+        labels: { searchPlaceholder: "From labels" },
+        searchPlaceholder: "Search names",
+      },
+      (container) => {
+        const placeholders = new Set(
+          [
+            ...container.querySelectorAll<HTMLInputElement>(
+              "input[placeholder]"
+            ),
+          ].map((input) => input.placeholder)
+        );
+        expect(placeholders.has("Search names")).toBe(true);
+        expect(placeholders.has("From labels")).toBe(false);
+      }
+    ));
+
+  it("asks the server for the page and shows the host rows unsorted", () => {
+    const queries: {
+      query: {
+        sortBy?: string;
+        sortDir?: string;
+        page?: number;
+        limit?: number;
+      };
+      signal: AbortSignal;
+    }[] = [];
+    return withTable(
+      {
+        ...BASE,
+        rows: CONFORMANCE_ROWS.slice(0, 2),
+        pageSize: 1,
+        total: 3,
+        onQueryChange: (query, info) => {
+          queries.push({ query, signal: info.signal });
+        },
+      },
+      async (container) => {
+        await waitFor(() => {
+          expect(queries).toHaveLength(1);
+        });
+        expect(queries[0]?.query.page).toBe(1);
+        expect(queries[0]?.query.limit).toBe(1);
+        expect(rowIds(container)).toEqual(["r1", "r2"]);
+        const button = sortControlOf(headerFor(container, "age"));
+        expect(button).not.toBeNull();
+        if (!button) return;
+        fireEvent.click(button);
+        await waitFor(() => {
+          expect(queries.at(-1)?.query.sortBy).toBe("age");
+          expect(queries.at(-1)?.query.sortDir).toBe("asc");
+        });
+        expect(queries[0]?.signal.aborted).toBe(true);
+        expect(rowIds(container)).toEqual(["r1", "r2"]);
+      }
+    );
+  });
+
+  it("tells a frontend table what changed and still sorts its rows", () => {
+    const queries: { sortBy?: string; sortDir?: string }[] = [];
+    return withTable(
+      {
+        ...BASE,
+        mode: "frontend",
+        onQueryChange: (query) => {
+          queries.push(query);
+        },
+      },
+      async (container) => {
+        expect(queries).toHaveLength(0);
+        const button = sortControlOf(headerFor(container, "age"));
+        expect(button).not.toBeNull();
+        if (!button) return;
+        fireEvent.click(button);
+        await waitFor(() => {
+          expect(queries).toHaveLength(1);
+          expect(queries[0]?.sortBy).toBe("age");
+          expect(queries[0]?.sortDir).toBe("asc");
+        });
+        expect(rowIds(container)).toEqual(["r2", "r1", "r3"]);
+      }
+    );
+  });
 
   it("renders a window of virtualized phone cards, not every card", () => {
     // A few rows legitimately fit in a viewport plus overscan. Use enough

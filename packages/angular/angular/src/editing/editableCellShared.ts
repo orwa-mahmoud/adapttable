@@ -8,12 +8,9 @@ import {
   type editableCellController,
   type EditableCellEditing,
 } from "@adapttable/angular";
-import {
-  booleanDraft,
-  type CellConflictAsk,
-  formatMultiDraft,
-} from "@adapttable/core";
+import { type CellConflictAsk } from "@adapttable/core";
 import type { EditableCellButtonProps } from "@adapttable/core/binding";
+import { booleanDraft, formatMultiDraft } from "@adapttable/core/editing";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   type AfterViewInit,

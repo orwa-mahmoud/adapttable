@@ -62,17 +62,55 @@ const referenceDriver: ConformanceDriver = {
       lifted: undefined,
       collapsed: new Set<string>(),
     };
+    let controller = new AbortController();
+    const notify = (sort?: "asc" | "desc"): void => {
+      controller.abort();
+      controller = new AbortController();
+      scenario.onQueryChange?.(
+        {
+          page: state.page + 1,
+          limit: scenario.pageSize ?? scenario.rows.length,
+          ...(sort === undefined
+            ? {}
+            : { sortBy: "age", sortDir: sort === "asc" ? "asc" : "desc" }),
+        },
+        { signal: controller.signal }
+      );
+    };
     const draw = (): void => {
       container.replaceChildren(build(scenario, state));
       for (const button of container.querySelectorAll("th button")) {
         button.addEventListener("click", () => {
           const sort = state.sort === "asc" ? "desc" : "asc";
+          if (scenario.mode !== "frontend" && scenario.onQueryChange) {
+            notify(sort);
+            return;
+          }
           state.sort = sort;
           state.status = labels.sortedBy({
             column: button.textContent ?? "",
             ascending: sort === "asc",
           });
+          if (scenario.onQueryChange) notify(sort);
           draw();
+        });
+      }
+      for (const row of container.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="row"]'
+      )) {
+        row.addEventListener("click", (event) => {
+          const target = event.target;
+          if (
+            target instanceof Element &&
+            target.closest(
+              "button,a,input,select,textarea,label,[role='button'],[role='checkbox']"
+            )
+          ) {
+            return;
+          }
+          const id = row.dataset.rowId;
+          const clicked = scenario.rows.find((item) => item.id === id);
+          if (clicked) scenario.onRowClick?.(clicked);
         });
       }
       for (const box of container.querySelectorAll("input[type=checkbox]")) {
@@ -160,7 +198,14 @@ const referenceDriver: ConformanceDriver = {
         });
     };
     draw();
-    return { container, unmount: () => container.remove() };
+    if (scenario.onQueryChange && scenario.mode !== "frontend") notify();
+    return {
+      container,
+      refresh: () => {
+        draw();
+      },
+      unmount: () => container.remove(),
+    };
   },
 };
 
@@ -260,6 +305,9 @@ function rowElement(
           {
             "data-adapttable-part": "cell",
             "data-column-key": column.key,
+            ...(scenario.isCellFlashing?.(row.id, column.key)
+              ? { "data-flash": "" }
+              : {}),
             ...(navigable ? gridCellAttributes(state, index, columnIndex) : {}),
           },
           cellContent(scenario, state, row, column.key)
@@ -324,17 +372,25 @@ function build(scenario: ConformanceScenario, state: DrawState): HTMLElement {
   const labels = { ...defaultLabels, ...scenario.labels };
   const navigable = scenario.navigable === true;
   const size = scenario.pageSize ?? scenario.rows.length;
+  const server =
+    scenario.onQueryChange !== undefined && scenario.mode !== "frontend";
   const sorted = [...scenario.rows];
-  if (sort) {
+  if (sort && !server) {
     sorted.sort((a, b) => (sort === "asc" ? a.age - b.age : b.age - a.age));
   }
-  const rows = sorted.slice(state.page * size, state.page * size + size);
+  const rows = server
+    ? sorted
+    : sorted.slice(state.page * size, state.page * size + size);
   const root = element("div", {
     "data-adapttable-part": "root",
     dir: scenario.dir,
   });
   root.append(
-    element("div", { "data-adapttable-part": "toolbar" }),
+    element("div", { "data-adapttable-part": "toolbar" }, [
+      element("input", {
+        placeholder: scenario.searchPlaceholder ?? labels.searchPlaceholder,
+      }),
+    ]),
     element(
       "div",
       {
@@ -417,6 +473,14 @@ function recording(
     toBe: (expected) => record(Object.is(actual, expected), "toBe"),
     toEqual: (expected) =>
       record(JSON.stringify(actual) === JSON.stringify(expected), "toEqual"),
+    toHaveLength: (expected) =>
+      record(
+        typeof actual === "object" &&
+          actual !== null &&
+          "length" in actual &&
+          actual.length === expected,
+        "toHaveLength"
+      ),
     toBeNull: () => record(actual === null, "toBeNull"),
     not: { toBeNull: () => record(actual !== null, "not.toBeNull") },
   });
@@ -427,7 +491,7 @@ describe("the table conformance suite", () => {
   const failures: string[] = [];
 
   it("returns every assertion, in order", () => {
-    expect(tests.map((test) => test.name)).toHaveLength(25);
+    expect(tests.map((test) => test.name)).toHaveLength(30);
   });
 
   for (const test of tests) {

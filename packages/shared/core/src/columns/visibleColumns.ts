@@ -1,4 +1,4 @@
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 
 /**
  * Which layout a table is rendering in.

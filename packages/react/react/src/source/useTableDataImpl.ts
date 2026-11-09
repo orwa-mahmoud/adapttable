@@ -1,4 +1,5 @@
 import {
+  activeTierValue,
   createTableData,
   type ExtraFilters,
   type FacetMap,
@@ -7,20 +8,25 @@ import {
   type FilterEngine,
   type FilterRuntime,
   type FilterTypeSpec,
+  INACTIVE_TIER_ROWS,
   isDeclarativeFilters,
   type PaginationMode,
   type QueryAggregate,
+  type QueryFilterGroup,
   type QuerySupport,
   type SortableValue,
   type TableData,
   type TableDataPlan,
   type TableSource,
+  tierRows,
 } from "@adapttable/core";
 import type { UseTableDataResult } from "@adapttable/core/binding";
 import {
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -37,9 +43,6 @@ import {
 export type { UseTableDataResult } from "@adapttable/core/binding";
 
 export type { UseServerDataOptions };
-
-/** The inactive server hook's columns: none, so it asks for nothing. */
-const NO_COLUMNS: readonly never[] = [];
 
 /**
  * Options for {@link useTableData}.
@@ -174,16 +177,11 @@ export type DataModeProps<_TRow = unknown> = {
 );
 
 /**
- * The tier a table is NOT on still has its hook called — that is the rule of
- * hooks — so it is handed inert input instead: no rows, no URL, no query
- * callback. These two say what each tier gets, in one place, so the reader can
- * see the whole of "which tier owns this table" without walking two call sites.
+ * What the frontend tier is given. Inert while the table is on the server.
+ *
+ * The tier a table is not on still has its hook called, so it receives no
+ * rows, no URL and no query callback. The facade itself stays.
  */
-function activeOnly<T>(active: boolean, value: T, idle: T): T {
-  return active ? value : idle;
-}
-
-/** What the frontend tier is given. Inert while the table is on the server. */
 function frontendTierInput<TRow>(input: {
   active: boolean;
   urlSync: boolean | undefined;
@@ -195,12 +193,13 @@ function frontendTierInput<TRow>(input: {
 }) {
   const { runtime } = input;
   return {
-    urlSync: activeOnly(input.active, input.urlSync, false),
-    data: activeOnly(input.active, input.data ?? [], [] as readonly TRow[]),
+    active: input.active,
+    urlSync: activeTierValue(input.active, input.urlSync, false),
+    data: tierRows(input.active, input.data),
     filterTreeFn: input.filterTreeFn,
     arrayExtraKeys: runtime.arrayExtraKeys,
     numberExtraKeys: runtime.numberExtraKeys,
-    isLoading: activeOnly(input.isFrontendMode, input.loading, undefined),
+    isLoading: activeTierValue(input.isFrontendMode, input.loading, undefined),
   };
 }
 
@@ -219,16 +218,17 @@ function serverTierInput<TRow>(input: {
 }) {
   const { active, runtime } = input;
   return {
-    urlSync: activeOnly(active, input.urlSync, false),
-    rows: activeOnly(active, input.data ?? [], [] as readonly TRow[]),
-    onQueryChange: activeOnly(active, input.onQueryChange, undefined),
-    aggregates: activeOnly(active, input.aggregates, undefined),
-    responseKey: activeOnly(active, input.responseKey, undefined),
+    active,
+    urlSync: activeTierValue(active, input.urlSync, false),
+    rows: tierRows(active, input.data),
+    onQueryChange: activeTierValue(active, input.onQueryChange, undefined),
+    aggregates: activeTierValue(active, input.aggregates, undefined),
+    responseKey: activeTierValue(active, input.responseKey, undefined),
     arrayExtraKeys: runtime.arrayExtraKeys,
     numberExtraKeys: runtime.numberExtraKeys,
-    supports: activeOnly(active, input.supports, undefined),
-    facetKeys: activeOnly(active, input.facetKeys, undefined),
-    facets: activeOnly(active, input.facets, undefined),
+    supports: activeTierValue(active, input.supports, undefined),
+    facetKeys: activeTierValue(active, input.facetKeys, undefined),
+    facets: activeTierValue(active, input.facets, undefined),
   };
 }
 
@@ -295,6 +295,14 @@ export function useTableDataWithEngine<TRow>(
     () => resolveColumns(columns, locale),
     [columns, locale]
   );
+  // `plan()` builds a new tree predicate every render. The predicate's
+  // meaning is `filterKey`; a fresh closure would keep an idle tier refreshing.
+  const filterTreeRef = useRef(plan.filterTreeFn);
+  filterTreeRef.current = plan.filterTreeFn;
+  const applyFilterTree = useCallback((row: TRow, tree: QueryFilterGroup) => {
+    const apply = filterTreeRef.current;
+    return apply ? apply(row, tree) : false;
+  }, []);
   const frontend = useFrontendData<TRow>({
     ...urlOptions,
     ...frontendTierInput<TRow>({
@@ -302,7 +310,7 @@ export function useTableDataWithEngine<TRow>(
       urlSync: urlOptions.urlSync,
       data,
       runtime,
-      filterTreeFn: plan.filterTreeFn,
+      filterTreeFn: plan.filterTreeFn ? applyFilterTree : undefined,
       isFrontendMode: mode === "frontend",
       loading,
     }),
@@ -333,7 +341,7 @@ export function useTableDataWithEngine<TRow>(
     }),
     // A column's default aggregate is a request to the server; the hook that
     // would send it only runs for the server tier, so only that tier reads it.
-    columns: tier === "server" ? resolvedColumns : NO_COLUMNS,
+    columns: tier === "server" ? resolvedColumns : INACTIVE_TIER_ROWS,
     total,
     loading,
     error,

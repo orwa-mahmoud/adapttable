@@ -45,6 +45,7 @@
   ],
   "dependencies": {
     "@adapttable/core": "3.13.1",
+    "@adapttable/i18n": "3.3.9",
     "@tanstack/virtual-core": "^3.17.11"
   },
   "exports": {

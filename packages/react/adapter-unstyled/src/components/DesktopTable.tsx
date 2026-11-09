@@ -8,6 +8,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
+  DesktopTableChrome,
   edgePinStyle,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
@@ -492,6 +493,8 @@ function LeafHeader<TRow>({
 
 /** Desktop semantic table rendering. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const { classNames, filterRegistry, closeHeaderFilterOnSelect } = props;
   const assembly = useDesktopTableAssembly(props, { widths: UNSTYLED_WIDTHS });
   const Row = useMemo(
@@ -506,16 +509,9 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     model,
     summary,
     showColumnFooter,
-    headerPlan,
-    headerBand,
     header,
     pin,
-    scroll,
-    tableStyle,
-    tableProps,
-    gridProps,
     callbacks,
-    bodySlots,
     resizeHandleStyle,
   } = assembly;
   const { columns, selection, labels, showActions, showReorder, leadingCells } =
@@ -649,147 +645,100 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     </>
   );
 
-  const summaryPad = (
-    <td
-      data-adapttable-part="summary-cell"
-      className={classNames.summaryCell}
-    />
-  );
-
-  const tableEl = (
-    <table
-      {...tableProps}
-      {...gridProps}
-      data-adapttable-part="table"
-      className={classNames.table}
-      style={tableStyle}
-    >
-      <thead
-        ref={header.theadRef}
-        data-adapttable-part="thead"
-        className={classNames.thead}
-      >
-        {headerPlan ? (
-          headerPlan.map((row, rowIndex) => {
-            const last = rowIndex === headerPlan.length - 1;
-            return (
-              <tr
-                key={row.map((cell) => cell.key).join("|")}
-                {...(last ? header.headerRowProps : {})}
-                ref={last ? header.headerRowRef : undefined}
-                data-adapttable-part={last ? "header-row" : "header-group-row"}
-                className={
-                  last ? classNames.headerRow : classNames.headerGroupRow
-                }
-              >
-                {rowIndex === 0 ? leadingHeaders(headerBand) : null}
-                {row.map(renderPlanCell)}
-                {rowIndex === 0 ? trailingHeaders(headerBand) : null}
-              </tr>
-            );
-          })
-        ) : (
-          <tr
-            {...header.headerRowProps}
-            ref={header.headerRowRef}
-            data-adapttable-part="header-row"
-            className={classNames.headerRow}
-          >
-            {leadingHeaders(1)}
-            {columns.map((column, headerIndex) => (
-              <LeafHeader
-                key={column.key}
-                leaf={header.leaf(column, headerIndex)}
-                {...leafProps}
-              />
-            ))}
-            {trailingHeaders(1)}
-          </tr>
-        )}
-      </thead>
-      <tbody data-adapttable-part="tbody" className={classNames.tbody}>
-        {bodySlots.map((slot) => {
-          if (slot.kind === "extra") {
-            return (
-              <ExtraSlotRow
-                key={slot.key}
-                kind={slot.extraKind}
-                colSpan={slot.colSpan}
-                render={slot.render}
-                labels={labels}
-                classNames={classNames}
-                fillStyle={slot.fillStyle}
-              />
-            );
-          }
-          if (slot.kind === "virtualPad") {
-            return (
-              <tr
-                key={slot.key}
-                data-adapttable-part="virtual-spacer"
-                className={classNames.virtualSpacer}
-              >
-                <td
-                  colSpan={slot.colSpan}
-                  style={{ height: slot.height, padding: 0 }}
-                />
-              </tr>
-            );
-          }
-          if (slot.kind === "group") {
-            return (
-              <OptionalGroupHeaderRow
-                key={slot.key}
-                entry={slot.entry}
-                columns={columns}
-                leadingCells={leadingCells}
-                showActions={showActions}
-                getCellProps={props.table.getCellProps}
-                selection={selection}
-                labels={labels}
-                onToggleCollapse={callbacks.onToggleGroup}
-                onShowMore={props.grouping?.showMore ?? (() => undefined)}
-              />
-            );
-          }
-          return (
-            <Row key={slot.key} {...slot.wiring} classNames={classNames} />
-          );
-        })}
-      </tbody>
-      {showColumnFooter && (
-        <tfoot data-adapttable-part="summary" className={classNames.summary}>
-          <tr
-            data-adapttable-part="summary-row"
-            className={classNames.summaryRow}
-          >
-            {header.leading.expand && summaryPad}
-            {showReorder && summaryPad}
-            {selection && summaryPad}
-            {columns.map((column) => (
-              <td
-                key={column.key}
-                data-adapttable-part="summary-cell"
-                className={classNames.summaryCell}
-              >
-                {resolveColumnFooter(column, summary?.[column.key])}
-              </td>
-            ))}
-            {showActions && summaryPad}
-          </tr>
-        </tfoot>
-      )}
-    </table>
-  );
-
   return (
-    <div
-      ref={scroll.bindScrollBox}
-      data-adapttable-part="scroll-box"
-      className={classNames.scrollBox}
-      style={scroll.boxStyle}
-    >
-      {tableEl}
-    </div>
+    <DesktopTableChrome
+      assembly={assembly}
+      classNames={classNames}
+      renderLeading={leadingHeaders}
+      renderTrailing={trailingHeaders}
+      renderPlanCell={renderPlanCell}
+      renderLeaf={(leaf) => (
+        <LeafHeader key={leaf.column.key} leaf={leaf} {...leafProps} />
+      )}
+      renderRow={(slot) => (
+        <Row key={slot.key} {...slot.wiring} classNames={classNames} />
+      )}
+      renderGroup={(slot) => (
+        <OptionalGroupHeaderRow
+          key={slot.key}
+          entry={slot.entry}
+          columns={columns}
+          leadingCells={leadingCells}
+          showActions={showActions}
+          getCellProps={props.table.getCellProps}
+          selection={selection}
+          labels={labels}
+          onToggleCollapse={callbacks.onToggleGroup}
+          onShowMore={props.grouping?.showMore ?? (() => undefined)}
+        />
+      )}
+      renderExtra={(slot) => (
+        <ExtraSlotRow
+          key={slot.key}
+          kind={slot.extraKind}
+          colSpan={slot.colSpan}
+          render={slot.render}
+          labels={labels}
+          classNames={classNames}
+          fillStyle={slot.fillStyle}
+        />
+      )}
+      renderVirtualPad={(slot) => (
+        <tr
+          key={slot.key}
+          data-adapttable-part="virtual-spacer"
+          className={classNames.virtualSpacer}
+        >
+          <td
+            colSpan={slot.colSpan}
+            style={{ height: slot.height, padding: 0 }}
+          />
+        </tr>
+      )}
+      renderSummary={() =>
+        showColumnFooter ? (
+          <tfoot data-adapttable-part="summary" className={classNames.summary}>
+            <tr
+              data-adapttable-part="summary-row"
+              className={classNames.summaryRow}
+            >
+              {header.leading.expand && (
+                <td
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                />
+              )}
+              {showReorder && (
+                <td
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                />
+              )}
+              {selection && (
+                <td
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                />
+              )}
+              {columns.map((column) => (
+                <td
+                  key={column.key}
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                >
+                  {resolveColumnFooter(column, summary?.[column.key])}
+                </td>
+              ))}
+              {showActions && (
+                <td
+                  data-adapttable-part="summary-cell"
+                  className={classNames.summaryCell}
+                />
+              )}
+            </tr>
+          </tfoot>
+        ) : null
+      }
+    />
   );
 }

@@ -10,8 +10,8 @@
  * these the same way, so the answers live here.
  */
 import { aggregationModel } from "../aggregate/aggregationModel";
-import type { ColumnMetadata } from "../columnModel";
 import { REORDER_COLUMN_KEY } from "../columns/columnMenuModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type {
   GroupingPanelInteractions,
   GroupingPanelState,

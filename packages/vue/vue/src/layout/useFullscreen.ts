@@ -29,7 +29,8 @@ export function useFullscreen(
   activity?: MaybeRefOrGetter<boolean>
 ) {
   requireScope("useFullscreen");
-  const enabled = activity ?? useScopeActivity();
+  const scopeActive = useScopeActivity();
+  const enabled = activity ?? scopeActive;
   const target = computed(() => toValue(element) ?? null);
   const active = shallowRef(false);
   const supported = shallowRef(false);

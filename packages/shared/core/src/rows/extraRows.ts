@@ -14,8 +14,8 @@
  * cards keep the same slots: a rule between cards, or a full-width note.
  */
 import { PIN_Z } from "../columns/columnLayoutModel";
+import type { CssProperties } from "../contracts/cssProperties";
 import type { DisplayValue } from "../display";
-import type { CssProperties } from "../style/cssProperties";
 
 export { extraHostFillStyle } from "./rowPresentation";
 

@@ -17,6 +17,7 @@ migration rules live in [Upgrading from v2](docs/migrate-from-v2.md#v3-package-s
         ↑
 @adapttable/react             hooks + React structural Chrome
 @adapttable/angular           signals + Angular structural Chrome
+@adapttable/vue               composables + Vue structural Chrome
         ↑
 @adapttable/<kit>             kit DataTable, feature factories, required slots
         ↑
@@ -36,6 +37,7 @@ Canonical names:
 | `@adapttable/core`                                      | Column models, `TableSource`, query/filter/sort/page/group/tree contracts, revisions, operations, feature **registrations** (operators, not pixels) | React, React types, Chrome, AI           |
 | `@adapttable/react`                                     | `useDataTable`, hooks, Chrome, React `ColumnDef` / renderer types, feature **providers**                                                            | A UI kit, a model SDK                    |
 | `@adapttable/angular`                                   | Signal controllers, Angular `ColumnDef`, templates/components and structural Chrome                                                                 | Kit widgets, engine state, AI runtime    |
+| `@adapttable/vue`                                       | Composables, Vue `ColumnDef`, structural Chrome                                                                                                     | A UI kit, engine state, AI runtime       |
 | `@adapttable/angular-unstyled` / `@adapttable/ng-zorro` | Native/NG-ZORRO `AdaptDataTable`, kit controls and feature entrypoints                                                                              | Engine state, another framework binding  |
 | `@adapttable/<kit>`                                     | `DataTable`, kit-native slots, kit feature entrypoints                                                                                              | Engine state, AI runtime                 |
 | `@adapttable/ai`                                        | Provider-neutral session, manifest, schemas, validation                                                                                             | React (root), model SDKs, hosted service |
@@ -413,7 +415,8 @@ Rewriting a working library to clear a namespace buys nothing.
 named in `frameworkBoundary.engineModules` in the classification artifact must
 not import `react`, `react-dom`, `react-compiler-runtime` or a
 `@tanstack/react-*` package. And the built neutral entrypoints — core's `.`,
-`binding`, `query`, `pivot`, `stream`, `formula`, `xlsx` and `pdf`,
+`binding`, `query`, `pivot`, `stream`, `formula`, `xlsx`, `pdf`,
+`conformance`, `engine`, `grouping`, `editing` and `selection`,
 `@adapttable/server`, and every `@adapttable/ai` entry — must reach no React package, client
 directive or React type anywhere in their transitive graph. New engine code
 joins that list; a module that becomes binding moves to `@adapttable/react`
@@ -422,21 +425,161 @@ and leaves the list, with the reason in the commit.
 This is what makes a Vue or Angular binding possible without a rewrite: the
 line is drawn and enforced so a second binding never requires one.
 
+## Core layer owners
+
+`scripts/check-core-dependencies.mjs` classifies `packages/shared/core/src`
+from `scripts/core-export-ownership.json`.
+
+| Layer        | Rank | Owners                                                    |
+| ------------ | ---- | --------------------------------------------------------- |
+| Leaf         | 0    | `contracts/`, `sort/`                                     |
+| Engine       | 10   | `engine/`, `rows/`                                        |
+| Source       | 20   | `source/`                                                 |
+| Domain       | 30   | every other folder, including `utils/`                    |
+| Presentation | 40   | `layout/`, `style/`, `a11y/`, `overlays/`, `conformance/` |
+
+A module at rank 20 or below importing presentation fails, and the message
+names the path. Public entry files directly under `src/` may re-export.
+`utils/` sits at the domain rank, so a helper may type CSS.
+
+The incremental cache is `rows/incremental.ts`. Runtime owners are every
+module under `rows/` and `engine/fullRowModel.ts`. Grouping reads an attached
+snapshot through `rows/incrementalGroups.ts` and does not import the cache.
+A runtime import from any other module is a reach. The table session calls
+the row model; it does not import the cache itself. Type-only edges are
+reported on their own line and are not counted as JavaScript.
+
+The recorded runtime and type-only violation lists are empty. A new edge
+fails, and a listed edge that the source no longer has fails as stale.
+
+The same checker inventories every public export of the core entries through
+TypeScript symbol resolution: name, type or runtime, defining module,
+audience, preferred path, forwarding, deprecation, and compatibility identity.
+The default run fails when that inventory drifts. `--write-inventory` rewrites
+it after an intentional surface change.
+
+Binding capabilities and shared conformance registration run from
+`scripts/check-feature-parity.mjs` and from a full `scripts/api-reports.mjs`
+run. Both read `scripts/kits.mjs` rather than a second kit list.
+
 `useQuerySource` is a React hook on `@adapttable/react` and keeps structural
 typing for its query function, so React Query is an integration a host may use
 rather than a dependency core or the binding carries. The query/source
 contracts (`TableSource`, `TableQueryParams`, capabilities) live in core.
 
+## Composed session
+
+One session, `engine/tableSession.ts`, takes an injected row model.
+`createBasicTableEngine` from `@adapttable/core/engine` uses the basic model:
+filter, sort, search, and page. `createTableEngine` uses the full model, which
+is what grouping and aggregation read. Both accept `CreateTableEngineOptions`.
+The focused entries are listed in
+[versioning](docs/versioning.md#focused-core-subpaths). The export names are
+listed in [the API reference](docs/api.md#composed-ownership). This section
+does not copy either list.
+
+Importing either constructor from the root `@adapttable/core` entry still
+works. That import is additive: an application that already imports
+`createTableEngine` from the root does not change its import and does not
+rebuild to keep the same behavior. A program that wants the basic
+constructor's smaller graph imports `@adapttable/core/engine` and rebuilds
+its application bundle. Bindings import a value from the one focused door
+that publishes it. A kit imports only its binding.
+
+```ts
+import { createTableEngine } from "@adapttable/core";
+import { planFeatureRegistration } from "@adapttable/core/binding";
+import { createBasicTableEngine } from "@adapttable/core/engine";
+
+const rows = [
+  { id: "1", name: "Ada" },
+  { id: "2", name: "Grace" },
+];
+const columns = [{ key: "name", header: "Name", sortable: true }];
+const rowKey = (row: { id: string }) => row.id;
+
+const basic = createBasicTableEngine({ data: rows, columns, rowKey });
+const full = createTableEngine({ data: rows, columns, rowKey });
+const plan = planFeatureRegistration(
+  [],
+  [{ id: "notes", feature: { id: "notes" } }],
+  (current, next) => current === next
+);
+```
+
+`planFeatureRegistration` is binding SPI on `@adapttable/core/binding`. The
+root entry publishes the `FeatureRegistration` type and does not publish that
+function. The kit feature a host turns on is the `rowReorder` composition in
+[features](docs/features.md): `applyRowReorder` from `@adapttable/react`,
+`DataTable` from the kit, and `rowReorder` from the kit's `/row-reorder`
+subpath. `scripts/showcase-snippets.test.mjs` compiles that snippet. App code
+does not import `@adapttable/core` to turn a kit feature on.
+`@adapttable/react/adapter` is the adapter-author boundary, the same promise
+as the binding entry, described in [versioning](docs/versioning.md).
+
+One header click: the kit paints the sortable header inside
+`data-adapttable-part="header-cell"`. The binding's `toggleSort` calls
+`source.setSort` on the view-state store. The source hook stages that view
+on the engine candidate and, once the render is accepted, publishes it with
+`commitCandidate`. Subscribers then render the committed row order. The kit
+does not sort the array. The view store owns the sort keys the host asked
+for. The engine owns the row order. A subscriber that throws runs after that
+write has landed (`engine/candidate.test.ts`). Feature cleanup failures are
+collected by `invokeCleanups` on the binding entry; one failure does not
+skip the remaining cleanups.
+
+Edit history is capped at `DEFAULT_EDIT_HISTORY_DEPTH` (50). The incremental
+snapshot, shell operations, and row memos are `WeakMap`s keyed by the object
+that owns them.
+
 ## Bundle cost
 
 The promise is that features are opt-in, so the cost of a table is measured
-rather than asserted. `scripts/bundle-budget.mjs` bundles real consumer fixtures
-against the built packages — what npm ships, not the source — with React and the
-UI kits external, and holds each fixture to a written ceiling.
+rather than asserted. `scripts/bundle-budget.mjs` packs each package a run
+needs with `pnpm pack`, unpacks the tarballs into a scratch consumer that has no
+workspace to fall back on, and bundles real consumer fixtures through their
+public specifiers and `exports` maps — what npm ships, not the source — with
+React, Vue and the UI kits external. Every module the graph resolved is
+recorded and must come from a tarball. Every emitted chunk and stylesheet is
+counted once, and each fixture is held to a written initial ceiling (the
+entries' static graph and styles) and total ceiling (everything behind a
+dynamic import as well). Every fixture also type-checks against the packed
+declarations, and the query, stream and server entries run in Node with no
+framework installed. `--case <id>` measures only the named fixtures.
 
 A green total is not sufficient on its own: each fixture also names markers that
 must be **absent** from its graph, which is what distinguishes a feature that is
 genuinely not bundled from one that merely compressed well.
+
+Initial is the static graph and its styles. Total adds every dynamic import.
+Peers — React, Vue, and the UI kits — stay external, because the application
+already ships them. KiB in these readings is 1024 bytes. The
+[FAQ](docs/faq.md#how-big-is-it--is-it-tree-shakeable) is the figure the budget
+checks for the headless table, the every-export graph, and a React adapter
+`DataTable`. [Features](docs/features.md) is the figure it checks for the MUI
+table and the same table with `standardFeatures()`. Installing a package still
+installs that package. Tree-shaking drops unused exports from an application
+bundle. The every-export row is `export *` from `@adapttable/core`: the whole
+public surface imported at once, not the download of a table.
+
+| Fixture (`--case`)      | What it imports                        |          2026-11-06 min+gzip |    Ceiling |
+| ----------------------- | -------------------------------------- | ---------------------------: | ---------: |
+| `core-every-export`     | `export *` from `@adapttable/core`     | 103.63 KiB initial and total | 103.63 KiB |
+| `core-basic-table`      | `createBasicTableEngine`               |    4.4 KiB initial and total |      6 KiB |
+| `core-simple-table`     | `createTableEngine`                    |   10.1 KiB initial and total |     20 KiB |
+| `react-simple-table`    | `useFrontendData` + `useDataTable`     |   21.2 KiB initial and total |     35 KiB |
+| `mui-table`             | MUI `DataTable`                        |   71.7 KiB initial and total |     80 KiB |
+| `mui-plus-grouping`     | MUI `DataTable` + grouping             |   83.7 KiB initial and total |    160 KiB |
+| `mui-table-plus-preset` | MUI `DataTable` + `standardFeatures()` |  133.5 KiB initial and total |    160 KiB |
+
+These seven fixtures emitted no lazy chunk, so initial and total are the same
+number. `core-every-export` is 103.63 KiB (106,115 bytes), measured
+2026-11-07. The ceiling is that measurement: the composed session, the
+grouping projection, and the shell operations, plus the snapshot guard, the
+grouped-snapshot cache, and the shared behaviours the bindings used to copy.
+The FAQ rounds that row to ~104 kB
+and the headless row to ~21 kB. The features page rounds the MUI pair to 72 kB
+and 133 kB. A later `pnpm budget` is what moves those published figures.
 
 ## Supported Node
 

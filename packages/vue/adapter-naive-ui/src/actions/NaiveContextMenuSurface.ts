@@ -1,6 +1,7 @@
 import {
   type ContextMenuSurfaceProps,
   createMenuNavigation,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NCard, NPopover } from "naive-ui";
@@ -8,7 +9,6 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
-  nextTick,
   type PropType,
   shallowRef,
   type VNodeChild,
@@ -35,7 +35,7 @@ export const NaiveContextMenuSurface = /*#__PURE__*/ defineComponent(
         navigation.reset();
         if (!live) return;
         let current = true;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (current && active.value)
             entries()
               .find((item) => item.getAttribute("aria-disabled") !== "true")

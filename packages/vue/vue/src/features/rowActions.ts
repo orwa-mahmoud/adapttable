@@ -23,7 +23,7 @@ export type {
 export { useRowMutations } from "../rows/rowMutations";
 export type { ActionConfirm, RowAction, TableLabels } from "@adapttable/core";
 import { rowActionsModelKey } from "../layout/modelChannels";
-function mount<TRow>(context: FeatureMountContext<TRow>): void {
+function useRowActions<TRow>(context: FeatureMountContext<TRow>): void {
   let disposed = false;
   onScopeDispose(() => {
     disposed = true;
@@ -87,7 +87,7 @@ export function rowActions<TRow>(
       handlers?.confirmDeleteRow,
     ],
     apply: (input) => ({ ...base.apply?.(input), rowActionControls }),
-    mount,
+    mount: useRowActions,
   };
 }
 export type {

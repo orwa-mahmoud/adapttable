@@ -56,12 +56,17 @@ function renderLiveChrome<TRow>(
       </ChromeExtrasGate>
     );
   }
-  const view = render(
+  const tree = (
     <FeatureProviders props={applied}>
       <Probe />
     </FeatureProviders>
   );
-  return { result: box, unmount: view.unmount };
+  const view = render(tree);
+  return {
+    result: box,
+    unmount: view.unmount,
+    rerender: () => view.rerender(tree),
+  };
 }
 
 function mount(
@@ -397,7 +402,8 @@ describe("useTableChrome", () => {
   it("onGroupByChange observes — a logging handler never breaks grouping", () => {
     const onGroupByChange = vi.fn();
     const adapter = createMemoryAdapter("");
-    const { result } = renderLiveChrome([grouping("name")], () => {
+    let controlled = "name";
+    const { result, rerender } = renderLiveChrome([grouping("name")], () => {
       const source = useFrontendData<Row>({
         data: ROWS,
         urlAdapter: adapter,
@@ -408,15 +414,19 @@ describe("useTableChrome", () => {
         source,
         columns,
         rowKey: (r) => r.id,
-        groupBy: "name",
+        groupBy: controlled,
         onGroupByChange,
       };
     });
     expect(result.current.grouping).toBeDefined();
     act(() => result.current.grouping!.setGroupBy(null));
     // An explicit empty marker keeps the cleared choice across kit remounts.
+    expect(onGroupByChange).toHaveBeenCalledTimes(1);
     expect(onGroupByChange).toHaveBeenCalledWith([]);
     expect(new URLSearchParams(adapter.getSearch()).get("groupBy")).toBe("");
+    controlled = "team";
+    rerender();
+    expect(onGroupByChange).toHaveBeenCalledTimes(1);
   });
 
   it("dev-warns when editable columns have no composed editing handler", () => {

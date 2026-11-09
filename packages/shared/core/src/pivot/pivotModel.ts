@@ -31,13 +31,14 @@
  * {@link PIVOT_BLANK}, rather than being dropped. Rows that fall in no column
  * silently disappearing is how a pivot table lies about a total.
  */
-import {
-  type AggregateName,
-  type AggregateOrderedValue,
-  type Aggregator,
-  resolveAggregateValue,
-} from "../aggregate/aggregate";
-import type { ColumnMetadata, ColumnModel } from "../columnModel";
+import { resolveAggregateValue } from "../aggregate/aggregate";
+import type {
+  AggregateName,
+  AggregateOrderedValue,
+  Aggregator,
+  ColumnMetadata,
+  ColumnModel,
+} from "../contracts/columns";
 import type { DisplayValue } from "../display";
 import { compareValues } from "../sort/compare";
 import {

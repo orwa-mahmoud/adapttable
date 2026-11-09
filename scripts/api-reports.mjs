@@ -38,7 +38,11 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
+import {
+  CompilerState,
+  Extractor,
+  ExtractorConfig,
+} from "@microsoft/api-extractor";
 
 import { entrypoints } from "./api-entrypoints.mjs";
 import { finishApiReportOutput } from "./api-report-diagnostics.mjs";
@@ -54,6 +58,8 @@ import {
   entryExports,
   summarize,
 } from "./api-warnings.mjs";
+import { checkBindingCapabilities } from "./binding-capabilities.mjs";
+import { checkConformanceRegistry } from "./check-conformance-registry.mjs";
 import { packageDir } from "./packages.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -146,7 +152,52 @@ function warningProof(proof, symbol) {
   };
 }
 
-function extractOne({ dir, report, entry, isMainEntry }) {
+/** The extractor configuration for one report. */
+function extractorConfigFor({ dir, report, entry }, includeForgottenExports) {
+  return ExtractorConfig.prepare({
+    configObject: {
+      projectFolder: packageDir(dir),
+      mainEntryPointFilePath: entry,
+      apiReport: {
+        enabled: true,
+        // Source-proven aliases must retain the underlying reviewable contract.
+        includeForgottenExports,
+        reportFileName: report,
+        reportFolder: OUT,
+        reportTempFolder: join(REPO_ROOT, "node_modules", ".api-extractor"),
+      },
+      docModel: { enabled: false },
+      dtsRollup: { enabled: false },
+      tsdocMetadata: { enabled: false },
+      compiler: {
+        overrideTsconfig: {
+          compilerOptions: {
+            lib: ["ES2022", "DOM", "DOM.Iterable"],
+            types: ["react"],
+            skipLibCheck: true,
+            // Kit `/pivot` (and similar) re-export `@adapttable/core/pivot`.
+            // Classic resolution cannot read package `exports` subpaths, and
+            // API Extractor then InternalError's instead of rolling the types.
+            module: "ESNext",
+            moduleResolution: "bundler",
+          },
+        },
+      },
+      messages: {
+        extractorMessageReporting: {
+          // Unexported types referenced by the public surface are real
+          // review information, not failures — they land IN the report.
+          "ae-forgotten-export": { logLevel: "warning" },
+          default: { logLevel: "warning" },
+        },
+      },
+    },
+    configObjectFullPath: undefined,
+    packageJsonFullPath: join(packageDir(dir), "package.json"),
+  });
+}
+
+function extractOne({ dir, report, entry, isMainEntry }, packageState) {
   if (!existsSync(entry)) {
     console.error(`✗ ${report}: missing ${entry} — run \`pnpm build\` first.`);
     return false;
@@ -170,47 +221,7 @@ function extractOne({ dir, report, entry, isMainEntry }) {
     ? readFileSync(join(ETC, report), "utf8")
     : "";
   const configFor = (includeForgottenExports) =>
-    ExtractorConfig.prepare({
-      configObject: {
-        projectFolder: packageDir(dir),
-        mainEntryPointFilePath: entry,
-        apiReport: {
-          enabled: true,
-          // Source-proven aliases must retain the underlying reviewable contract.
-          includeForgottenExports,
-          reportFileName: report,
-          reportFolder: OUT,
-          reportTempFolder: join(REPO_ROOT, "node_modules", ".api-extractor"),
-        },
-        docModel: { enabled: false },
-        dtsRollup: { enabled: false },
-        tsdocMetadata: { enabled: false },
-        compiler: {
-          overrideTsconfig: {
-            compilerOptions: {
-              lib: ["ES2022", "DOM", "DOM.Iterable"],
-              types: ["react"],
-              skipLibCheck: true,
-              // Kit `/pivot` (and similar) re-export `@adapttable/core/pivot`.
-              // Classic resolution cannot read package `exports` subpaths, and
-              // API Extractor then InternalError's instead of rolling the types.
-              module: "ESNext",
-              moduleResolution: "bundler",
-            },
-          },
-        },
-        messages: {
-          extractorMessageReporting: {
-            // Unexported types referenced by the public surface are real
-            // review information, not failures — they land IN the report.
-            "ae-forgotten-export": { logLevel: "warning" },
-            default: { logLevel: "warning" },
-          },
-        },
-      },
-      configObjectFullPath: undefined,
-      packageJsonFullPath: join(packageDir(dir), "package.json"),
-    });
+    extractorConfigFor({ dir, report, entry }, includeForgottenExports);
   // Always a "local" build: warnings (undocumented symbols, missing release
   // tags) are review information inside the report, never a gate failure.
   const handleMessage = (message, proof) => {
@@ -314,7 +325,7 @@ function extractOne({ dir, report, entry, isMainEntry }) {
         const result = Extractor.invoke(configFor(includeForgottenExports), {
           localBuild: true,
           showVerboseMessages: false,
-          compilerState,
+          compilerState: compilerState ?? packageState,
           messageCallback,
         });
         if (!result.succeeded) flushWarnings();
@@ -356,8 +367,22 @@ function extractOne({ dir, report, entry, isMainEntry }) {
 
 mkdirSync(ETC, { recursive: true });
 let ok = true;
-for (const target of targets) {
-  ok = extractOne(target) && ok;
+// One TypeScript program per package, shared by every entry it publishes:
+// building it once per report costs most of the run.
+for (const packageTargets of Map.groupBy(
+  targets,
+  (target) => target.dir
+).values()) {
+  const built = packageTargets.filter((target) => existsSync(target.entry));
+  const packageState =
+    built.length > 0
+      ? CompilerState.create(extractorConfigFor(built[0], false), {
+          additionalEntryPoints: built.map((target) => target.entry),
+        })
+      : undefined;
+  for (const target of packageTargets) {
+    ok = extractOne(target, packageState) && ok;
+  }
 }
 // Only claim a match when every report actually matched. A run that prints
 // "every committed report matches" under the line saying one is out of date is
@@ -431,5 +456,20 @@ if (!LOCAL) {
     reports: generatedReports,
     success: ok,
   });
+}
+if (!scoped) {
+  const capabilities = checkBindingCapabilities();
+  const registry = checkConformanceRegistry();
+  const extra = [...capabilities.problems, ...registry.problems];
+  if (extra.length > 0) {
+    console.error(
+      `\napi-reports: ${extra.length} binding capability or conformance registration problem(s)\n  ${extra.join("\n  ")}`
+    );
+    ok = false;
+  } else {
+    console.log(
+      "api-reports: binding capabilities and conformance registration match"
+    );
+  }
 }
 if (!ok) process.exit(1);

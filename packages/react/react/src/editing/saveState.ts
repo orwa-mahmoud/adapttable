@@ -13,11 +13,8 @@
  * the old one back: `onRollback` hands the host the previous value to restore,
  * because only the host can write to its own rows.
  */
-import {
-  type CellSaveState,
-  cellSaveView,
-  createCellSaveStore,
-} from "@adapttable/core";
+import { type CellSaveState } from "@adapttable/core";
+import { cellSaveView, createCellSaveStore } from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import type { EditEventHandler } from "./editingEvents";

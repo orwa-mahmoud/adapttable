@@ -80,7 +80,7 @@ describe("batch editing (unstyled)", () => {
             "Batch save refused"
           )
         );
-        expect(part("batch-edit-error")).toHaveAttribute("role", "status");
+        expect(part("batch-edit-error")).toHaveRole("status");
         expect(editors()[0]!).toHaveValue("Ship it");
         expect(editors()[2]!).toHaveValue("Test it");
         expect(part("batch-edit-count")).toHaveTextContent("2");

@@ -12,7 +12,7 @@
  * That means auto-sizing measures the RENDERED rows — the page, or the window
  * under virtualization — which is the same set the reader is looking at.
  */
-import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "./columnResize";
+import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "./widthBounds";
 
 /** Breathing room added to the widest cell so text never touches the edge. */
 const CONTENT_PADDING = 24;

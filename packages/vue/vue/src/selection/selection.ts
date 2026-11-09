@@ -1,7 +1,6 @@
 /** Selection remains a host-controlled value when selectedIds is supplied. */
 import {
   applyGroupLeafSelection,
-  createAllMatchingScope,
   headerSelectionOf,
   resolveLabels,
   type TableLabels,
@@ -12,6 +11,7 @@ import type {
   HeaderSelectionState,
   SelectionState,
 } from "@adapttable/core/binding";
+import { createAllMatchingScope } from "@adapttable/core/selection";
 import {
   computed,
   type ComputedRef,

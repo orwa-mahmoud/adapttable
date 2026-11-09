@@ -1,6 +1,7 @@
 import {
   elementRef,
   type RowMoveMenuSlotProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import { NCard, NModal } from "naive-ui";
@@ -8,7 +9,6 @@ import {
   type ComponentPublicInstance,
   defineComponent,
   h,
-  nextTick,
   type PropType,
   shallowRef,
   useId,
@@ -39,7 +39,7 @@ export const NaiveRowMoveMenu = /*#__PURE__*/ defineComponent(
       { flush: "sync" }
     );
     const restore = () => {
-      void nextTick(() => {
+      scheduleTick(() => {
         if (active.value && !props.confirmation && trigger.value?.isConnected)
           trigger.value.focus();
       });

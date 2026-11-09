@@ -5,7 +5,7 @@
  * objects, so a React kit spreads them into `style` and an Angular kit binds
  * them with `[ngStyle]`.
  */
-import type { ColumnModel } from "../columnModel";
+
 import {
   edgePinStyle,
   type PinLeads,
@@ -14,6 +14,7 @@ import {
   type PinOffset,
   type PinSide,
 } from "../columns/columnLayoutModel";
+import type { ColumnModel } from "../contracts/columns";
 import { type CellSpanAppearance, cellSpanMark } from "../rows/cellSpan";
 
 /**

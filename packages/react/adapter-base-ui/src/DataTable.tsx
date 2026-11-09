@@ -34,6 +34,7 @@ import {
   useMountStagger,
   useStickyToolbarLayout,
   useTableFeatures,
+  withKitEnvironment,
 } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
@@ -45,6 +46,7 @@ import { PortalContainerProvider } from "./components/portalContainer";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
 import { ensureBaseUiStyles } from "./injectStyles";
+import { useBaseUiLibrary } from "./libraryEnvironment";
 import { subtleText } from "./styles";
 import type { DataTableProps } from "./types";
 import { Box, Button, Flex, Progress, Text } from "./ui";
@@ -507,7 +509,10 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
  * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
+  const kit = useBaseUiLibrary();
+  const props = useTableFeatures(
+    withKitEnvironment(incoming, { dir: kit.dir })
+  );
   return (
     <FeatureProviders props={props}>
       <DataTableContent<TRow> {...props} />

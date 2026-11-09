@@ -30,6 +30,28 @@ export interface VirtualItemMeta {
 }
 
 /**
+ * The virtualizer fields a row keeps.
+ *
+ * TanStack's item is wider. This is the slice every binding reads, copied
+ * so a later field on the virtualizer cannot leak into the row model.
+ *
+ * @param item - One virtualizer item, or anything with the same fields.
+ * @returns The metadata stored on a rendered row.
+ *
+ * @public
+ */
+export function virtualItemMeta(item: VirtualItemMeta): VirtualItemMeta {
+  return {
+    index: item.index,
+    start: item.start,
+    end: item.end,
+    size: item.size,
+    key: item.key,
+    lane: item.lane,
+  };
+}
+
+/**
  * One row/card entry materialized from a virtual window.
  *
  * @public

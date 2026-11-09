@@ -9,15 +9,17 @@
  */
 import {
   aggregate,
-  type AggregateName,
   type AggregateOptions,
-  type AggregateOrderedValue,
   type AggregateSpec,
   resolveAggregateValue,
   toAggregateNumber,
   toAggregateOrdered,
 } from "../aggregate/aggregate";
-import type { ColumnMetadata } from "../columnModel";
+import type {
+  AggregateName,
+  AggregateOrderedValue,
+  ColumnMetadata,
+} from "../contracts/columns";
 import type { DisplayValue } from "../display";
 
 interface ColumnAcc {

@@ -11,6 +11,7 @@ import {
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
+  withKitEnvironment,
 } from "@adapttable/vue/adapter";
 import {
   computed,
@@ -34,6 +35,7 @@ import {
   elementGroupRowSlotKey,
 } from "./elementHierarchyControlSlots";
 import { elementSurfaceControls } from "./elementSurfaceControls";
+import { useElementPlusLibrary } from "./libraryEnvironment";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 
 defineOptions({ inheritAttrs: false });
@@ -61,28 +63,35 @@ onBeforeUpdate(() => {
 const rootElement = shallowRef<HTMLElement | null>(null);
 const scrollElement = shallowRef<HTMLElement | null>(null);
 const appContext = getCurrentInstance()?.appContext;
+const kit = useElementPlusLibrary();
 const confirmRequest = useElementConfirm(() => ({
   active: shell.active.value,
   appContext,
   container: rootElement.value ?? undefined,
-  dir: props.dir,
+  dir: props.dir ?? kit.value.dir,
 }));
-const shell = useDataTableShell<TRow>(() => ({
-  ...props,
-  footer: footerSlot.value,
-  confirm: props.confirm ?? confirmRequest,
-  onDensityChange: (density) => {
-    props.onDensityChange?.(density);
-    emit("update:density", density);
-  },
-  onSelectionChange:
-    props.selectable ||
-    props.selectedIds !== undefined ||
-    props.defaultSelectedIds !== undefined
-      ? (ids) => emit("update:selectedIds", ids)
-      : undefined,
-  onColumnLayoutChange: (layout) => emit("update:columnLayout", layout),
-}));
+const shell = useDataTableShell<TRow>(() =>
+  withKitEnvironment(
+    {
+      ...props,
+      footer: footerSlot.value,
+      confirm: props.confirm ?? confirmRequest,
+      onDensityChange: (density: TableDensity) => {
+        props.onDensityChange?.(density);
+        emit("update:density", density);
+      },
+      onSelectionChange:
+        props.selectable ||
+        props.selectedIds !== undefined ||
+        props.defaultSelectedIds !== undefined
+          ? (ids: string[]) => emit("update:selectedIds", ids)
+          : undefined,
+      onColumnLayoutChange: (layout: ColumnLayoutState) =>
+        emit("update:columnLayout", layout),
+    },
+    kit.value
+  )
+);
 const { table } = shell;
 const names = computed(() => ({
   ...props.classNames,
@@ -383,8 +392,9 @@ function setScrollElement(element: HTMLElement | null): void {
   min-inline-size: 0;
 }
 
-.adapttable-element-plus[data-density="compact"] :is(th, td) {
-  padding-block: 0.4rem;
+.adapttable-element-plus[data-density="compact"] :is(th, td),
+.adapttable-element-plus[data-density="compact"] :is(th, td).el-table__cell {
+  padding-block: 4px;
 }
 
 .adapttable-element-plus [data-adapttable-part="resize-handle"] {

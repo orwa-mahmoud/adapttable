@@ -38,6 +38,7 @@ reports/mutation/
 # Playwright E2E — generated reports/results. Never committed.
 /test-results/
 /playwright-report/
+/playwright-timings/
 /blob-report/
 
 # Playwright MCP scratch output (screenshots, snapshots) — never committed.

@@ -3,6 +3,7 @@ import {
   editorInputType,
   formatMultiDraft,
   readMultiDraft,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
@@ -10,7 +11,6 @@ import {
   createVNode,
   defineComponent,
   h,
-  nextTick,
   onMounted,
   type PropType,
   shallowRef,
@@ -135,7 +135,7 @@ const ElementCellEditorPresentation = defineComponent(
       )
         return;
       const commit = props.onBlur;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           active.value &&
           !popup.value &&

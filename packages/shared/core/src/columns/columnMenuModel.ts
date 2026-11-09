@@ -1,5 +1,5 @@
 import type { ResolvedAggregateOperation } from "../aggregate/aggregatable";
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { FeatureHostState } from "../features/currentHost";
 import type { GroupingPanelState } from "../grouping/groupingPanelModel";
 import type { Direction } from "../types";

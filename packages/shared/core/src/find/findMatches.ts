@@ -11,8 +11,9 @@
  * is searched by that date rather than by the ISO string underneath. Nothing
  * else would match what a person can see on screen.
  */
-import type { ColumnMetadata } from "../columnModel";
+
 import { columnText } from "../columns/columnText";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { GridCell } from "../focus/gridFocus";
 
 /**

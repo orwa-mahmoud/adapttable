@@ -1267,6 +1267,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
+      '@adapttable/i18n':
+        specifier: 3.3.9
+        version: link:../../shared/i18n
       '@tanstack/angular-virtual':
         specifier: ^6.0.6
         version: 6.0.6(@angular/core@22.2.3(@angular/compiler@22.2.3)(rxjs@7.8.2))
@@ -1664,6 +1667,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
+      '@adapttable/i18n':
+        specifier: 3.3.9
+        version: link:../../shared/i18n
       '@tanstack/react-virtual':
         specifier: ^3.14.10
         version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1950,6 +1956,9 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
+      '@adapttable/i18n':
+        specifier: 3.3.9
+        version: link:../../shared/i18n
       '@tanstack/virtual-core':
         specifier: ^3.17.11
         version: 3.17.11

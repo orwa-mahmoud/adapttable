@@ -14,7 +14,8 @@
  * each caller re-discriminate by hand, which is precisely where a missed
  * check turns an error into a zero and a wrong total starts looking right.
  */
-import type { SortableValue } from "../types";
+
+import type { SortableValue } from "../contracts/columns";
 import type { FormulaNode } from "./parse";
 
 export type { SortableValue };

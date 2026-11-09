@@ -1,8 +1,9 @@
 import {
   type FilterPanelModel,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
-import { nextTick, onScopeDispose } from "vue";
+import { onScopeDispose } from "vue";
 
 function visible(element: HTMLElement): boolean {
   return (
@@ -39,7 +40,7 @@ export function usePanelClose<TRow>(
     pending = null;
     if (!active.value || !anchor) return;
     const ticket = revision;
-    void nextTick(() => {
+    scheduleTick(() => {
       if (!active.value || ticket !== revision) return;
       const current = read();
       if (!current.open && current.anchor === anchor && visible(anchor))

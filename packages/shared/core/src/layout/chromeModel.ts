@@ -20,12 +20,13 @@ import {
 } from "../columns/columnLayoutModel";
 import { columnSizeStyle } from "../columns/columnSizing";
 import { pinnedColumnWidth } from "../columns/columnWidths";
+import type { ColumnMetadata, SortDirection } from "../contracts/columns";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { ExtraRow } from "../rows/extraRows";
 import type { RowPinSide } from "../rows/rowPinModel";
 import { pinnedRowCellStyle } from "../rows/rowPresentation";
 import type { CssProperties } from "../style/cssProperties";
-import type { ColumnMetadata, Direction, SortDirection } from "../types";
+import type { Direction } from "../types";
 import { REORDER_COLUMN_WIDTH } from "./leanAssembly";
 
 /* ── Desktop layout ────────────────────────────────────────────────── */

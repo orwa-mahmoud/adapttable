@@ -16,6 +16,7 @@ import {
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
+  withKitEnvironment,
 } from "@adapttable/vue/adapter";
 import { ConfigProvider } from "reka-ui";
 import {
@@ -30,6 +31,7 @@ import {
 import { resolveShadcnClassNames } from "./classNames";
 import { shadcnSelectionCheckbox } from "./controls";
 import { provideShadcnPortalContainer } from "./lib/portal";
+import { useShadcnLibrary } from "./libraryEnvironment";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rows/slot";
 import { shadcnSurfaceControls } from "./surfaceControls";
 import { shadcnTableControls } from "./tableControls";
@@ -56,22 +58,29 @@ const footer = shallowRef(slots.footer);
 onBeforeUpdate(() => {
   footer.value = slots.footer;
 });
-const shell = useDataTableShell<TRow>(() => ({
-  ...props,
-  footer: footer.value,
-  confirm: props.confirm ?? defaultConfirm,
-  onDensityChange: (value) => {
-    props.onDensityChange?.(value);
-    emit("update:density", value);
-  },
-  onSelectionChange:
-    props.selectable ||
-    props.selectedIds !== undefined ||
-    props.defaultSelectedIds !== undefined
-      ? (ids) => emit("update:selectedIds", ids)
-      : undefined,
-  onColumnLayoutChange: (layout) => emit("update:columnLayout", layout),
-}));
+const kit = useShadcnLibrary();
+const shell = useDataTableShell<TRow>(() =>
+  withKitEnvironment(
+    {
+      ...props,
+      footer: footer.value,
+      confirm: props.confirm ?? defaultConfirm,
+      onDensityChange: (value: TableDensity) => {
+        props.onDensityChange?.(value);
+        emit("update:density", value);
+      },
+      onSelectionChange:
+        props.selectable ||
+        props.selectedIds !== undefined ||
+        props.defaultSelectedIds !== undefined
+          ? (ids: string[]) => emit("update:selectedIds", ids)
+          : undefined,
+      onColumnLayoutChange: (layout: ColumnLayoutState) =>
+        emit("update:columnLayout", layout),
+    },
+    kit.value
+  )
+);
 const names = computed(() => resolveShadcnClassNames(props.classNames));
 provideDataTableClassNames(() => names.value);
 const fullscreen = shell.state.get(FULLSCREEN_MODEL);

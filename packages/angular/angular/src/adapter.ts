@@ -250,8 +250,26 @@ export {
   type RowActionsCell,
   type TableView,
 } from "./layout/dataTableShell";
+export {
+  type AdaptDesktopSlots,
+  AdaptDesktopStructure,
+} from "./layout/desktopStructure";
 export { AdaptDesktopTableModel } from "./layout/desktopTableModel";
+export {
+  AdaptHeaderTemplate,
+  AdaptHeaderTemplateSlot,
+} from "./layout/headerTemplate";
+export type { KitEnvironment } from "./layout/kitEnvironment";
+export {
+  AdaptDesktopTableHost,
+  AdaptMobileCardsHost,
+  provideAdaptTableState,
+} from "./layout/kitHosts";
 export { AdaptMobileCardsModel } from "./layout/mobileCardsModel";
+export {
+  type AdaptMobileSlots,
+  AdaptMobileStructure,
+} from "./layout/mobileStructure";
 export { injectPopoverSpace } from "./layout/popoverSpace";
 export {
   AdaptSidePanelChrome,
@@ -263,6 +281,12 @@ export {
   type RuntimeTableOptions,
   tableRuntimeFor,
 } from "./layout/tableRuntime";
+export { AdaptTableSurface, scrollBoxStyle } from "./layout/tableSurface";
+export {
+  injectTableSurfaceHost,
+  type TableSurfaceHostOptions,
+  type TableSurfaceView,
+} from "./layout/tableSurfaceHost";
 export { AdaptExtraRowContent } from "./rows/extraRowContent";
 export {
   injectRowReorder,
@@ -316,10 +340,8 @@ export {
 export {
   ACTIONS_COLUMN_KEY,
   approvalReview,
-  asBatchGesture,
   bindHeaderFilterDismiss,
   bulkActionErrorMessage,
-  cellConflictAsk,
   CHECKLIST_LIST_HEIGHT,
   type ColumnMenuChoice,
   type ColumnMenuItem,
@@ -330,28 +352,15 @@ export {
   defaultConfirm,
   defaultFilterRegistry,
   devWarn,
-  dirtyMarkerView,
-  editorInputType,
   FILTER_ENGINE_IMPL,
   filterDefForColumn,
   filterLabel,
   filterOpLabel,
   filterWidgetKind,
   type FilterWidgetRenderProps,
-  focusEditorOnMount,
-  formatMultiDraft,
-  groupAggregateEntries,
   groupedViewSource,
-  groupLeafCount,
-  groupRowLayout,
-  groupSelectionState,
   hasActiveHeaderFilter,
   headerFilterInsideSelector,
-  isBooleanEditor,
-  isDraftChecked,
-  isFirstEditableColumn,
-  isMultiSelectEditor,
-  isSelectEditor,
   joinRelativeToken,
   listFilterValues,
   mobileCardListStyle,
@@ -361,26 +370,19 @@ export {
   partitionPinnedRows,
   pinActionLabel,
   pinnedSummaryPart,
-  readMultiDraft,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
   REORDER_COLUMN_KEY,
   requestDensityChange,
-  resolveCellEditor,
   resolveDensity,
   resolveDisabledReason,
-  resolveEditableCellDisplay,
-  resolveEditingArming,
-  resolveRowEditTrigger,
   restoreFocusSoon,
   type RowClickProps,
   rowClickProps,
-  rowEditConflict,
   runRowAction,
   showSimpleFilterFields,
   splitRelativeToken,
-  stopCellEditKeyboard,
   treeCardStyle,
   visibleRowActions,
   watchOverlayDismiss,
@@ -558,6 +560,32 @@ export {
   unpinAllColumns,
   virtualizeIgnoredOnPage,
 } from "@adapttable/core/binding";
+export {
+  asBatchGesture,
+  cellConflictAsk,
+  dirtyMarkerView,
+  editorInputType,
+  focusEditorOnMount,
+  formatMultiDraft,
+  isBooleanEditor,
+  isDraftChecked,
+  isFirstEditableColumn,
+  isMultiSelectEditor,
+  isSelectEditor,
+  readMultiDraft,
+  resolveCellEditor,
+  resolveEditableCellDisplay,
+  resolveEditingArming,
+  resolveRowEditTrigger,
+  rowEditConflict,
+  stopCellEditKeyboard,
+} from "@adapttable/core/editing";
+export {
+  groupAggregateEntries,
+  groupLeafCount,
+  groupRowLayout,
+  groupSelectionState,
+} from "@adapttable/core/grouping";
 
 // Types this entry's own signatures hand back, named from their owning entry.
 export type {

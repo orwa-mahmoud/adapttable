@@ -9,7 +9,8 @@
  * layout with percentage widths shares space proportionally, and `min-width` /
  * `max-width` clamp it.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import type { CssProperties } from "../style/cssProperties";
 import { columnGroupStubStyle, isColumnGroupStubKey } from "./headerGroups";
 

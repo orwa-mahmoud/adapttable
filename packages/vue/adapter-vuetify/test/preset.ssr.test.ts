@@ -55,7 +55,7 @@ describe("standard features", () => {
       "column-menu-button",
       "density-toggle",
       "export-csv-button",
-      "status-bar",
+      "footer",
     ])
       expect(html).toContain(`data-adapttable-part="${part}"`);
   });

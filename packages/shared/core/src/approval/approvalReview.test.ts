@@ -3,7 +3,12 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { approvalReview } from "./approvalReview";
+import {
+  approvalArgumentPairs,
+  approvalProposalText,
+  approvalReview,
+  approvalValueText,
+} from "./approvalReview";
 import type { AgentApprovalPending } from "./types";
 
 function pending(
@@ -192,5 +197,52 @@ describe("localization", () => {
     expect(review.approveLabel).toBe("LOC approve rest");
     expect(review.rejectLabel).toBe("LOC reject rest");
     expect(review.reviewAllLabel).toBe("LOC all 4");
+  });
+});
+
+describe("reading a value onto a review line", () => {
+  it("keeps absent, empty and a plain value apart", () => {
+    expect(approvalValueText(undefined)).toBeUndefined();
+    expect(approvalValueText(null)).toBe("—");
+    expect(approvalValueText("Ada")).toBe("Ada");
+    expect(approvalValueText(3)).toBe("3");
+    expect(approvalValueText(false)).toBe("false");
+    expect(approvalValueText(1n)).toBe("1");
+    expect(approvalValueText({ a: 1 })).toBe('{"a":1}');
+  });
+
+  it("reads operation arguments as spaced pairs", () => {
+    expect(approvalArgumentPairs(undefined)).toEqual([]);
+    expect(approvalArgumentPairs(null)).toEqual([{ name: "", value: "—" }]);
+    expect(approvalArgumentPairs("plain")).toEqual([
+      { name: "", value: "plain" },
+    ]);
+    expect(approvalArgumentPairs({ rowKey: "a", pageSize: 2 })).toEqual([
+      { name: "Row Key", value: "a" },
+      { name: "Page Size", value: "2" },
+    ]);
+    expect(approvalArgumentPairs({ note: undefined })).toEqual([
+      { name: "Note", value: "—" },
+    ]);
+  });
+});
+
+describe("approvalProposalText", () => {
+  it("prefers the column's own wording and marks an unknown value", () => {
+    const text = approvalProposalText(
+      {
+        rowKey: "r1",
+        rowLabel: "Acme",
+        column: "price",
+        columnLabel: "Price",
+        beforeUnavailable: true,
+        after: 12,
+        afterText: "$12.00",
+      },
+      undefined
+    );
+    expect(text).toContain("Acme");
+    expect(text).toContain("Price");
+    expect(text).toContain("$12.00");
   });
 });

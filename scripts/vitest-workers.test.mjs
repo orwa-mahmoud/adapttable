@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { vitestFileParallelism, vitestMaxWorkers } from "./vitest-workers.mjs";
 
 describe("vitestMaxWorkers", () => {
-  it("keeps CI on one thread so a 2-core shard stays deterministic", () => {
+  it("keeps CI on one thread per suite", () => {
     assert.equal(
       vitestMaxWorkers({ ci: true, turbo: true, cores: 2, forced: "" }),
       1

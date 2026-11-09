@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import { useRef, useState } from "react";
 
+import { spaceBelow } from "./spaceBelow";
+
 /**
  * The label strings the saved-views menu renders.
  *
@@ -73,17 +75,7 @@ export function SavedViewsMenu({
           sx={{
             p: 0.75,
             minWidth: 250,
-            maxHeight: anchor
-              ? Math.max(
-                  120,
-                  Math.min(
-                    360,
-                    window.innerHeight -
-                      anchor.getBoundingClientRect().bottom -
-                      8
-                  )
-                )
-              : 360,
+            maxHeight: anchor ? spaceBelow(anchor, 360) : 360,
             overflowY: "auto",
           }}
         >

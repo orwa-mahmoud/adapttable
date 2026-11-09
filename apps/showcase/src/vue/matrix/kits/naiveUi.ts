@@ -40,6 +40,7 @@ import {
   NProgress,
   NSelect,
   NTag,
+  unstableButtonRtl,
 } from "naive-ui";
 import { defineComponent, h, shallowRef, useId } from "vue";
 
@@ -62,6 +63,7 @@ const Root = defineComponent(
         {
           theme: props.dark ? darkTheme : null,
           locale: props.dir === "rtl" ? arDZ : enUS,
+          rtl: props.dir === "rtl" ? [unstableButtonRtl] : undefined,
         },
         { default: () => slots.default?.() }
       ),

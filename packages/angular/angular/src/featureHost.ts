@@ -5,12 +5,17 @@
 import {
   createFeatureHost,
   disposeFeatureHost,
+  EMPTY_FEATURE_HOST,
   type FeatureApplyInput,
   type FeatureHostState,
   type FeaturePatch,
   type FeatureRender,
   type FeatureSetup,
   mergeFeaturePatches,
+  planFeatureRegistration,
+  preferLastById,
+  projectFeatureHosts,
+  sameItems,
   type SidePanelEntry,
   type SlotFill,
   slotFillsOf,
@@ -93,27 +98,32 @@ const anonymousFeatures = new WeakMap<
 function withIds(
   features: readonly AdaptTableFeature[]
 ): (AdaptTableFeature & { readonly id: string })[] {
-  const byId = new Map<string, AdaptTableFeature & { readonly id: string }>();
-  features.forEach((feature, index) => {
-    const id = feature.id ?? `feature-${String(index)}`;
-    byId.delete(id);
-    if (feature.id !== undefined) {
-      byId.set(id, feature as AdaptTableFeature & { readonly id: string });
-      return;
-    }
-    let resolved = anonymousFeatures.get(feature);
-    if (!resolved) {
-      resolved = new Map();
-      anonymousFeatures.set(feature, resolved);
-    }
-    let declaration = resolved.get(id);
-    if (!declaration) {
-      declaration = { ...feature, id };
-      resolved.set(id, declaration);
-    }
-    byId.set(id, declaration);
-  });
-  return [...byId.values()];
+  return [
+    ...preferLastById(
+      features.map((feature, index) => identified(feature, index))
+    ),
+  ];
+}
+
+function identified(
+  feature: AdaptTableFeature,
+  index: number
+): AdaptTableFeature & { readonly id: string } {
+  if (feature.id !== undefined) {
+    return feature as AdaptTableFeature & { readonly id: string };
+  }
+  const id = `feature-${String(index)}`;
+  let resolved = anonymousFeatures.get(feature);
+  if (!resolved) {
+    resolved = new Map();
+    anonymousFeatures.set(feature, resolved);
+  }
+  let declaration = resolved.get(id);
+  if (!declaration) {
+    declaration = { ...feature, id };
+    resolved.set(id, declaration);
+  }
+  return declaration;
 }
 
 /**
@@ -183,7 +193,7 @@ export function provideAdaptTableFeatures(
 export function tableFeaturesOf(
   injector: Injector,
   own: readonly AdaptTableFeature[] | undefined
-): readonly AdaptTableFeature[] {
+): readonly (AdaptTableFeature & { readonly id: string })[] {
   const provided =
     injector.get(ADAPTTABLE_FEATURES, null, { optional: true }) ?? [];
   return withIds([...provided, ...(own ?? [])]);
@@ -198,64 +208,140 @@ export function featureHostFor(
   own: MaybeSignalOptional<readonly AdaptTableFeature[]> | undefined
 ): Signal<FeatureHostState> {
   const features = computed(() => tableFeaturesOf(injector, readMaybe(own)), {
-    equal: (left, right) =>
-      left.length === right.length &&
-      left.every((feature, index) => feature === right[index]),
+    equal: sameItems,
   });
-  let current:
-    | {
-        readonly host: FeatureHostState;
-        readonly scope: ReturnType<typeof Injector.create>;
-      }
-    | undefined;
-  const disposeCurrent = (): void => {
-    const mounted = current;
-    current = undefined;
-    if (!mounted) return;
+  interface OwnedSetup {
+    readonly feature: AdaptTableFeature & { readonly id: string };
+    readonly host: FeatureHostState;
+    readonly scope: ReturnType<typeof Injector.create>;
+  }
+  const owned = new Map<string, OwnedSetup>();
+  let published: FeatureHostState = EMPTY_FEATURE_HOST;
+  let disposed = false;
+  const releaseIds = (ids: readonly string[]): void => {
     const failures: unknown[] = [];
-    try {
-      disposeFeatureHost(mounted.host);
-    } catch (error) {
-      failures.push(error);
-    }
-    try {
-      mounted.scope.destroy();
-    } catch (error) {
-      failures.push(error);
+    for (const id of ids) {
+      const entry = owned.get(id);
+      owned.delete(id);
+      if (!entry) continue;
+      try {
+        disposeFeatureHost(entry.host);
+      } catch (error) {
+        failures.push(error);
+      }
+      try {
+        entry.scope.destroy();
+      } catch (error) {
+        failures.push(error);
+      }
     }
     if (failures.length > 0)
       throw new AggregateError(failures, "Table feature setup cleanup failed");
   };
+  const mountOne = (
+    feature: AdaptTableFeature & { readonly id: string }
+  ): OwnedSetup => {
+    const scope = Injector.create({ providers: [], parent: injector });
+    try {
+      const created = runInInjectionContext(scope, () =>
+        createFeatureHost([feature])
+      );
+      return { feature, host: created, scope };
+    } catch (error) {
+      try {
+        scope.destroy();
+      } catch (cleanupError) {
+        throw new AggregateError(
+          [error, cleanupError],
+          "Table feature setup and cleanup failed"
+        );
+      }
+      throw error;
+    }
+  };
+  const projectOwned = (): FeatureHostState => {
+    const parts = [...owned.values()]
+      .map((entry) => entry.host)
+      .filter((host) => host !== EMPTY_FEATURE_HOST);
+    return parts.length === 0 ? EMPTY_FEATURE_HOST : projectFeatureHosts(parts);
+  };
+  const discardPending = (
+    pending: ReadonlyMap<string, OwnedSetup>,
+    error: unknown
+  ): never => {
+    const failures: unknown[] = [error];
+    const created = [...pending.values()];
+    created.reverse();
+    for (const entry of created) {
+      try {
+        disposeFeatureHost(entry.host);
+      } catch (cleanupError) {
+        failures.push(cleanupError);
+      }
+      try {
+        entry.scope.destroy();
+      } catch (cleanupError) {
+        failures.push(cleanupError);
+      }
+    }
+    if (failures.length > 1)
+      throw new AggregateError(
+        failures,
+        "Table feature setup and cleanup failed"
+      );
+    throw error;
+  };
+  const remember = (pending: ReadonlyMap<string, OwnedSetup>): void => {
+    for (const [id, entry] of pending) owned.set(id, entry);
+  };
+  const syncComposition = (
+    list: readonly (AdaptTableFeature & { readonly id: string })[]
+  ): FeatureHostState => {
+    if (disposed) return published;
+    const next = list.map((feature) => ({ id: feature.id, feature }));
+    const retainedIds = [...owned.keys()];
+    retainedIds.reverse();
+    const retained = retainedIds.map((id) => {
+      const entry = owned.get(id);
+      if (!entry) throw new Error("Missing retained feature");
+      return { id, feature: entry.feature };
+    });
+    const plan = planFeatureRegistration(retained, next, Object.is);
+    const pending = new Map<string, OwnedSetup>();
+    try {
+      for (const entry of plan.mount)
+        pending.set(entry.id, mountOne(entry.feature));
+    } catch (error) {
+      discardPending(pending, error);
+    }
+    try {
+      releaseIds(plan.release);
+    } catch (error) {
+      remember(pending);
+      published = projectOwned();
+      throw error;
+    }
+    remember(pending);
+    if (plan.release.length > 0 || plan.mount.length > 0)
+      published = projectOwned();
+    return published;
+  };
   const host = computed(() => {
     const list = features();
-    return untracked(() => {
-      disposeCurrent();
-      const scope = Injector.create({ providers: [], parent: injector });
-      try {
-        const created = runInInjectionContext(scope, () =>
-          createFeatureHost(list)
-        );
-        current = { host: created, scope };
-        return created;
-      } catch (error) {
-        try {
-          scope.destroy();
-        } catch (cleanupError) {
-          throw new AggregateError(
-            [error, cleanupError],
-            "Table feature setup and cleanup failed"
-          );
-        }
-        throw error;
-      }
-    });
+    return untracked(() => syncComposition(list));
   });
+  const disposeOwned = (): void => {
+    if (disposed) return;
+    disposed = true;
+    releaseIds([...owned.keys()].reverse());
+    published = EMPTY_FEATURE_HOST;
+  };
   effect(
     () => {
       host();
     },
     { injector }
   );
-  injector.get(DestroyRef).onDestroy(disposeCurrent);
+  injector.get(DestroyRef).onDestroy(disposeOwned);
   return host;
 }

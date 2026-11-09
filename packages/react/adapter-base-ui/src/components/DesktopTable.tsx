@@ -11,6 +11,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
+  DesktopTableChrome,
   type Direction,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
@@ -42,7 +43,7 @@ import {
 } from "react";
 
 import type { BaseUiAccentColor } from "../types";
-import { Box, Table, Text } from "../ui";
+import { Table, Text } from "../ui";
 import {
   OptionalColumnGroupToggle,
   OptionalColumnHeaderRename,
@@ -554,6 +555,8 @@ function LeafHeader<TRow>({
 
 /** Desktop Base UI table. */
 export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
   const {
     size,
     accentColor,
@@ -579,16 +582,12 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
     model,
     summary,
     showColumnFooter,
-    headerPlan,
-    headerBand,
     header,
     pin,
     scroll,
     tableStyle,
     tableProps,
-    gridProps,
     callbacks,
-    bodySlots,
     resizeHandleStyle,
   } = assembly;
   const {
@@ -753,155 +752,150 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
 
   const minWidth =
     typeof tableStyle?.minWidth === "number" ? tableStyle.minWidth : 0;
+  const renderLeaf = (leaf: DesktopHeaderLeaf<TRow>): ReactElement => {
+    return <LeafHeader key={leaf.column.key} leaf={leaf} {...leafProps} />;
+  };
+  const renderRow = (slot: {
+    key: string;
+    wiring: DesktopRowWiring<TRow>;
+  }): ReactElement => {
+    return (
+      <Row
+        key={slot.key}
+        {...slot.wiring}
+        size={size}
+        accentColor={accentColor}
+        dir={dir}
+      />
+    );
+  };
+  const renderGroup = (slot: {
+    key: string;
+    entry: Parameters<typeof OptionalGroupHeaderRow<TRow>>[0]["entry"];
+  }): ReactElement => {
+    return (
+      <OptionalGroupHeaderRow
+        key={slot.key}
+        entry={slot.entry}
+        columns={columns}
+        leadingCells={leadingCells}
+        showActions={showActions}
+        getCellProps={props.table.getCellProps}
+        selection={selection}
+        labels={labels}
+        onToggleCollapse={callbacks.onToggleGroup}
+        onShowMore={props.grouping?.showMore ?? (() => undefined)}
+      />
+    );
+  };
+  const renderExtra = (slot: {
+    key: string;
+    extraKind: "separator" | "fullWidth";
+    colSpan: number;
+    render?: () => ReactNode;
+    fillStyle?: CSSProperties;
+  }): ReactElement => {
+    return (
+      <ExtraSlotRow
+        key={slot.key}
+        kind={slot.extraKind}
+        colSpan={slot.colSpan}
+        render={slot.render}
+        labels={labels}
+        fillStyle={slot.fillStyle}
+      />
+    );
+  };
+  const renderPad = (slot: {
+    key: string;
+    colSpan: number;
+    height: number;
+  }): ReactElement => {
+    return (
+      <Table.Row key={slot.key} aria-hidden>
+        <Table.Cell
+          colSpan={slot.colSpan}
+          style={{ height: slot.height, padding: 0 }}
+        />
+      </Table.Row>
+    );
+  };
+  const renderSummary = (): ReactNode => {
+    if (!showColumnFooter) return null;
+    return (
+      <tfoot
+        data-adapttable-part="summary"
+        style={{ verticalAlign: "inherit" }}
+      >
+        <Table.Row data-summary="" data-adapttable-part="summary-row">
+          {header.leading.expand && (
+            <Table.Cell data-adapttable-part="summary-cell" />
+          )}
+          <When show={showReorder}>
+            <Table.Cell data-adapttable-part="summary-cell" />
+          </When>
+          {selection && <Table.Cell data-adapttable-part="summary-cell" />}
+          {columns.map((column) => (
+            <Table.Cell
+              key={column.key}
+              data-adapttable-part="summary-cell"
+              justify={justifyFor(column.align)}
+            >
+              {resolveColumnFooter(column, summary?.[column.key])}
+            </Table.Cell>
+          ))}
+          {showActions && <Table.Cell data-adapttable-part="summary-cell" />}
+        </Table.Row>
+      </tfoot>
+    );
+  };
 
   return (
-    <Box
-      ref={(node: HTMLDivElement | null) => {
-        scroll.bindScrollBox(node);
-        node?.style.setProperty(
-          "--adapttable-min-width",
-          minWidth > 0 ? `${minWidth}px` : "0"
-        );
+    <DesktopTableChrome
+      assembly={assembly}
+      hosts={{ Table: Table.Root, Row: Table.Row }}
+      applyHeaderRowProps={false}
+      scrollBoxProps={{
+        ref: (node: HTMLDivElement | null) => {
+          scroll.bindScrollBox(node);
+          node?.style.setProperty(
+            "--adapttable-min-width",
+            minWidth > 0 ? `${minWidth}px` : "0"
+          );
+        },
+        "data-adapttable-part": undefined,
+        className: STICKY_FIX_CLASS,
+        style: {
+          maxHeight: maxHeight == null ? undefined : `${maxHeight}px`,
+          overflowX:
+            maxHeight != null || pin.hasPinned || scroll.overflowing
+              ? "auto"
+              : undefined,
+          overflowY: maxHeight == null ? undefined : "auto",
+        },
       }}
-      className={STICKY_FIX_CLASS}
-      style={{
-        maxHeight: maxHeight == null ? undefined : `${maxHeight}px`,
-        overflowX:
-          maxHeight != null || pin.hasPinned || scroll.overflowing
-            ? "auto"
-            : undefined,
-        overflowY: maxHeight == null ? undefined : "auto",
+      beforeTable={<style>{STICKY_FIX_CSS}</style>}
+      tableProps={{
+        size,
+        variant: "surface",
+        "data-size": size,
+        className,
+        "aria-label": tableProps["aria-label"],
+        dir: undefined,
+        style: undefined,
+        tableStyle: tableStyle
+          ? { tableLayout: tableStyle.tableLayout, width: tableStyle.width }
+          : undefined,
       }}
-    >
-      <style>{STICKY_FIX_CSS}</style>
-      <Table.Root
-        size={size}
-        variant="surface"
-        data-size={size}
-        className={className}
-        aria-label={tableProps["aria-label"]}
-        {...gridProps}
-        tableStyle={
-          tableStyle
-            ? { tableLayout: tableStyle.tableLayout, width: tableStyle.width }
-            : undefined
-        }
-      >
-        <thead data-adapttable-part="thead" ref={header.theadRef}>
-          {headerPlan ? (
-            headerPlan.map((row, rowIndex) => {
-              const last = rowIndex === headerPlan.length - 1;
-              return (
-                <Table.Row
-                  key={row.map((cell) => cell.key).join("|")}
-                  ref={last ? header.headerRowRef : undefined}
-                  data-adapttable-part={
-                    last ? "header-row" : "header-group-row"
-                  }
-                >
-                  {rowIndex === 0 ? leadingHeaders(headerBand) : null}
-                  {row.map(renderPlanCell)}
-                  {rowIndex === 0 ? trailingHeaders(headerBand) : null}
-                </Table.Row>
-              );
-            })
-          ) : (
-            <Table.Row
-              ref={header.headerRowRef}
-              data-adapttable-part="header-row"
-            >
-              {leadingHeaders(1)}
-              {columns.map((column, headerIndex) => (
-                <LeafHeader
-                  key={column.key}
-                  leaf={header.leaf(column, headerIndex)}
-                  {...leafProps}
-                />
-              ))}
-              {trailingHeaders(1)}
-            </Table.Row>
-          )}
-        </thead>
-        <tbody data-adapttable-part="tbody">
-          {bodySlots.map((slot) => {
-            if (slot.kind === "extra") {
-              return (
-                <ExtraSlotRow
-                  key={slot.key}
-                  kind={slot.extraKind}
-                  colSpan={slot.colSpan}
-                  render={slot.render}
-                  labels={labels}
-                  fillStyle={slot.fillStyle}
-                />
-              );
-            }
-            if (slot.kind === "virtualPad") {
-              return (
-                <Table.Row key={slot.key} aria-hidden>
-                  <Table.Cell
-                    colSpan={slot.colSpan}
-                    style={{ height: slot.height, padding: 0 }}
-                  />
-                </Table.Row>
-              );
-            }
-            if (slot.kind === "group") {
-              return (
-                <OptionalGroupHeaderRow
-                  key={slot.key}
-                  entry={slot.entry}
-                  columns={columns}
-                  leadingCells={leadingCells}
-                  showActions={showActions}
-                  getCellProps={props.table.getCellProps}
-                  selection={selection}
-                  labels={labels}
-                  onToggleCollapse={callbacks.onToggleGroup}
-                  onShowMore={props.grouping?.showMore ?? (() => undefined)}
-                />
-              );
-            }
-            return (
-              <Row
-                key={slot.key}
-                {...slot.wiring}
-                size={size}
-                accentColor={accentColor}
-                dir={dir}
-              />
-            );
-          })}
-        </tbody>
-        {showColumnFooter && (
-          <tfoot
-            data-adapttable-part="summary"
-            style={{ verticalAlign: "inherit" }}
-          >
-            <Table.Row data-summary="" data-adapttable-part="summary-row">
-              {header.leading.expand && (
-                <Table.Cell data-adapttable-part="summary-cell" />
-              )}
-              <When show={showReorder}>
-                <Table.Cell data-adapttable-part="summary-cell" />
-              </When>
-              {selection && <Table.Cell data-adapttable-part="summary-cell" />}
-              {columns.map((column) => (
-                <Table.Cell
-                  key={column.key}
-                  data-adapttable-part="summary-cell"
-                  justify={justifyFor(column.align)}
-                >
-                  {resolveColumnFooter(column, summary?.[column.key])}
-                </Table.Cell>
-              ))}
-              {showActions && (
-                <Table.Cell data-adapttable-part="summary-cell" />
-              )}
-            </Table.Row>
-          </tfoot>
-        )}
-      </Table.Root>
-    </Box>
+      renderLeading={leadingHeaders}
+      renderTrailing={trailingHeaders}
+      renderPlanCell={renderPlanCell}
+      renderLeaf={renderLeaf}
+      renderRow={renderRow}
+      renderGroup={renderGroup}
+      renderExtra={renderExtra}
+      renderVirtualPad={renderPad}
+      renderSummary={renderSummary}
+    />
   );
 }

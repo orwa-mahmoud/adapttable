@@ -17,11 +17,17 @@
  * each one carries — and what this check would say about the kit's own files,
  * then exits 0.
  */
-import { readFileSync } from "node:fs";
-import { basename, extname, join, relative } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { basename, dirname, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { inheritedBindingSources } from "./binding-inheritance.mjs";
+import { checkBindingCapabilities } from "./binding-capabilities.mjs";
+import {
+  classChainSources,
+  importedBindingClass,
+  inheritedBindingSources,
+} from "./binding-inheritance.mjs";
+import { checkConformanceRegistry } from "./check-conformance-registry.mjs";
 import { REPORT_REFERENCES } from "./check-parts-parity.mjs";
 import {
   bindingDir,
@@ -57,7 +63,10 @@ const EXTRA_SUBPATHS = ["./preset"];
  * `onHeaderCell` is the whole of its `<th>`). React spreads in JSX; a Vue
  * template binds the object whole with `v-bind`; Angular uses `adaptAttrs`.
  * Angular's desktop assembly first preserves both table and grid attrs whole,
- * then its paired template binds the merged record to the header element.
+ * then its paired template binds the merged record to the header element —
+ * either in the kit's own component, or in the binding's
+ * `AdaptDesktopStructure`, which hands the merged record to the header-cell
+ * template the kit gives it.
  * A framework with no entry has no rule yet, and its kits fail until one is
  * written.
  */
@@ -72,7 +81,9 @@ const HEADER_RULES = {
   },
   angular: {
     spread: /<th\b[^>]*\[adaptAttrs\]\s*=\s*(["'])leaf\.headerProps\1/,
-    assembly: angularHeaderHandoff,
+    assembly: (files, kit, root) =>
+      angularHeaderHandoff(files, kit, root) ||
+      angularStructureHandoff(files, kit, root),
   },
 };
 const HEADER_NAMED = /leaf\.headerProps\s*\[/;
@@ -98,6 +109,19 @@ function angularHeaderHandoff(files, kit, root) {
       )
         .map((base) => stripComments(base.source))
         .join("\n");
+  if (!assemblesHeaderCells(assembly)) return false;
+  const wholeBinding =
+    /<th\b[^>]*\[adaptAttrs\]\s*=\s*(["'])\s*headerCells\(\)\.get\(column\.key\)!?\s*\1/.test(
+      template
+    );
+  return wholeBinding;
+}
+
+/**
+ * True when a `headerCells` computed keeps the grid or table attrs whole and
+ * merges the grouping panel's drag props over them, never naming fields.
+ */
+function assemblesHeaderCells(assembly) {
   const body = assembly.match(
     /\bheaderCells\s*=\s*computed\(\(\)\s*=>\s*\{([\s\S]*?)\breturn\s+cells\s*;\s*\}\)/
   )?.[1];
@@ -110,11 +134,107 @@ function angularHeaderHandoff(files, kit, root) {
     /cells\.set\(column\.key,panel===undefined\|\|column\.groupable===false\?base:\{\.\.\.base,\.\.\.panel\.headerDragProps\(column\.key\),?\},?\)/.test(
       compact
     );
-  const wholeBinding =
-    /<th\b[^>]*\[adaptAttrs\]\s*=\s*(["'])\s*headerCells\(\)\.get\(column\.key\)!?\s*\1/.test(
+  return wholeBase && wholeMerge;
+}
+
+/** An `<ng-template>` in `template` whose opening tag matches `marker`. */
+function ngTemplate(template, marker) {
+  const found = template.match(
+    new RegExp(
+      String.raw`<ng-template\b([^>]*${marker}[^>]*)>([\s\S]*?)<\/ng-template>`
+    )
+  );
+  return found
+    ? {
+        receivesAttrs: /\blet-attrs\s*=\s*(["'])attrs\1/.test(found[1]),
+        body: found[2],
+      }
+    : undefined;
+}
+
+const TH_BINDS_ATTRS = /<th\b[^>]*\[adaptAttrs\]\s*=\s*(["'])\s*attrs\s*\1/;
+
+/**
+ * True when the kit's `#headerCell` template puts the attrs it receives
+ * whole on its `<th>`, directly or by forwarding them whole to the header
+ * template it declares with `adaptHeaderTemplate`.
+ */
+function headerCellBindsWhole(template) {
+  const cell = ngTemplate(template, String.raw`#headerCell\b`);
+  if (!cell?.receivesAttrs) return false;
+  if (TH_BINDS_ATTRS.test(cell.body)) return true;
+  const declared = ngTemplate(template, String.raw`\badaptHeaderTemplate\b`);
+  return (
+    /\*ngTemplateOutlet\s*=\s*"\s*header\.template\s*;[\s\S]*?\battrs\s*:\s*attrs\s*,/.test(
+      cell.body
+    ) &&
+    declared?.receivesAttrs === true &&
+    TH_BINDS_ATTRS.test(declared.body)
+  );
+}
+
+/**
+ * True when the structure's outlet for `kit.headerCell` passes the merged
+ * `headerCells()` record as `attrs`, whole or through the pinned-inset shift.
+ */
+function structurePassesHeaderCells(template) {
+  const outlet = template.indexOf('[ngTemplateOutlet]="kit.headerCell"');
+  if (outlet === -1) return false;
+  const end = template.indexOf("/>", outlet);
+  const context = template
+    .slice(outlet, end === -1 ? undefined : end)
+    .replace(/\s/g, "");
+  return (
+    context.includes("attrs:shiftedPin(headerCells().get(column.key)!),") ||
+    context.includes("attrs:headerCells().get(column.key)!,")
+  );
+}
+
+/** The binding's shared desktop structure, which a kit fills with its cells. */
+const DESKTOP_STRUCTURE = "AdaptDesktopStructure";
+
+/**
+ * A kit drawn through the binding's desktop structure: the kit's component
+ * imports the structure, hands it the `headerCell` template, and that
+ * template binds the attrs it receives whole on its `<th>`; the structure's
+ * own template passes the merged `headerCells()` record as those attrs, and
+ * its class chain assembles that record whole.
+ */
+function angularStructureHandoff(files, kit, root) {
+  const source = files.get("src/components/desktopTable.ts") ?? "";
+  const template = files.get("src/components/desktopTable.html") ?? "";
+  if (!/templateUrl\s*:\s*(["'])\.\/desktopTable\.html\1/.test(source)) {
+    return false;
+  }
+  const handsOver =
+    /<adapt-desktop-structure\b[\s\S]*?\bheaderCell\s*:\s*headerCell\b/.test(
       template
     );
-  return wholeBase && wholeMerge && wholeBinding;
+  if (!handsOver || !headerCellBindsWhole(template)) return false;
+  const structure = importedBindingClass(
+    join(kitDir(kit, root), "src/components/desktopTable.ts"),
+    DESKTOP_STRUCTURE,
+    kit.framework,
+    root
+  );
+  if (!structure) return false;
+  const chain = classChainSources(structure, DESKTOP_STRUCTURE);
+  const templateUrl = stripComments(chain[0]?.source ?? "").match(
+    /templateUrl\s*:\s*(["'])(\.\/[^"']+\.html)\1/
+  )?.[2];
+  const structureTemplate = templateUrl
+    ? join(dirname(structure), templateUrl)
+    : undefined;
+  if (!structureTemplate || !existsSync(structureTemplate)) return false;
+  const passesWhole = structurePassesHeaderCells(
+    stripTemplateComments(readFileSync(structureTemplate, "utf8"))
+  );
+  return (
+    passesWhole &&
+    assemblesHeaderCells(
+      chain.map((link) => stripComments(link.source)).join("\n")
+    )
+  );
 }
 
 /**
@@ -426,14 +546,25 @@ function printReport() {
 
 function main() {
   const { problems, kits, subpaths } = checkFeatureParity();
-  if (problems.length > 0) {
-    console.error(`feature parity: ${problems.length} problem(s)\n`);
-    for (const problem of problems) console.error(`  ${problem}`);
+  const capabilities = checkBindingCapabilities();
+  const registry = checkConformanceRegistry();
+  const all = [...problems, ...capabilities.problems, ...registry.problems];
+  if (all.length > 0) {
+    console.error(`feature parity: ${all.length} problem(s)\n`);
+    for (const problem of all) console.error(`  ${problem}`);
     process.exit(1);
   }
   console.log(
     `feature parity: ${kits} kits share ${subpaths} subpaths ` +
       `and pass core's header props through whole`
+  );
+  console.log(
+    `binding capabilities: ${Object.values(capabilities.found)
+      .map((rows) => rows.length)
+      .join("/")}`
+  );
+  console.log(
+    `conformance registry: ${registry.kits} kits register the shared suite`
   );
 }
 

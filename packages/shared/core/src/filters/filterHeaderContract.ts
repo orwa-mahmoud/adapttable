@@ -9,7 +9,8 @@
  * its column type and inline styles its style object, so a React kit and an
  * Angular kit fill the same shapes with their own types.
  */
-import type { ColumnModel } from "../columnModel";
+
+import type { ColumnModel } from "../contracts/columns";
 import type { CssProperties } from "../style/cssProperties";
 import type { TableLabels } from "../types";
 import type { FilterDef } from "./filterDefs";

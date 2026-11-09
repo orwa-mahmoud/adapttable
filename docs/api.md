@@ -582,6 +582,11 @@ Framework-free — see [concepts](./concepts.md#the-framework-neutral-engine).
 - `createTableEngine(options: CreateTableEngineOptions): TableEngine` — build
   an engine over in-memory rows. Filter, sort, page and group run here, with no
   React in the import graph.
+- `createBasicTableEngine(options: CreateTableEngineOptions): TableEngine`
+  (`@adapttable/core` and `@adapttable/core/engine`) — the same session with
+  the basic evaluator: filter, sort, search and page. Grouping and aggregate
+  code stay out of that graph. An existing root import of `createTableEngine`
+  keeps working.
 - `TableEngine` — the handle: `snapshot()`, `rows(scope)`, `dispatch(op)`,
   `configure(patch)`, `invalidate(axes, next)`, `subscribe(axes, listener)`,
   `cellValue`, `rowByKey`, `rowKey`, `getColumn`, `dispose()`.
@@ -611,6 +616,76 @@ Framework-free — see [concepts](./concepts.md#the-framework-neutral-engine).
   `operations` map of what is wired right now. `NeutralTableBinding` is how a
   host supplies the visible rows and that map.
 - `devWarn(message)` — development-only warning, printed once per message.
+
+### Composed ownership
+
+These names are the composed session, the typed feature contributions, and
+the registration helpers. [Architecture](../ARCHITECTURE.md#composed-session)
+explains which import a program changes. This list is the reference.
+
+- `createFrontendSourceWith(engineFactory)` — a frontend source on an explicit
+  evaluator. `FrontendEngineFactory` builds that engine.
+  `createFrontendSource` is the convenience form that supplies the full one.
+- `TableCallbackRefresh` — callback identities `refreshCallbacks` adopts:
+  row id, search text, filters, columns and sort value.
+- `createGridNavigation(options): GridFocusController` — arrow keys, Home,
+  End, PageUp, PageDown, Enter and F2, without selection, clipboard, fill or
+  history.
+- `INACTIVE_TIER_ROWS` — the one empty array an inactive built-in tier
+  receives. `activeTierValue` picks the live value or the idle one.
+  `tierRows` returns the host array while that tier is serving, and
+  `INACTIVE_TIER_ROWS` otherwise.
+- `GroupingContribution` — grouping's `entries`, and `groupBy` when the
+  binding published the keys on that bundle. `projectGroupingContribution`
+  returns the host contribution when it is defined, otherwise the feature
+  contribution, as the same object. `mergeGroupingContributions` keeps the
+  last defined contribution. `resolveFeatureGrouping` does that for the host
+  plus each feature, skipping undefined entries.
+  `REMAINING_FEATURE_OWNERSHIP` is the empty map of domains that have not
+  moved onto a typed contribution. `RemainingFeatureDomain` is its key type,
+  which is `never`.
+- `EditingContribution` — `onCellEdit` and, when batch editing is composed,
+  `stageCell`. The table does not write the row. `QueryContribution` is the
+  page, search and sort the source owns. `FilteringContribution` is the
+  filter catalog (`defs` and `registry`); applied values stay on the query.
+  `TreeContribution` aliases the host's tree entries. `DetailContribution`
+  is a row-detail renderer plus `RowExpansionState`.
+  `RowPinningContribution` is the row-pin controller. `PinningContribution`
+  is column pins and, when row pinning is composed, the row-pin lists.
+  `ColumnLayoutContribution` is hide and order when a layout feature
+  publishes setters. `SelectionContribution` is the host's `selectedIds` set
+  on the runtime view. It does not copy that set.
+- `projectGrouping(input): GroupingProjection` — one grouping snapshot.
+  `GroupingProjectionInput` is what it reads besides the binding's collapse
+  and paging snapshots. `GroupingProjection` is the warning, the aggregates
+  and the model. `groupingSourceOf` copies the source fields that snapshot
+  reads. `projectedGroupingSource` is the source the table renders: the
+  grouped view when the projection has a model, otherwise the source itself.
+  `groupingShowMoreAction` advances a `GroupingShowMoreTarget`.
+  `groupingCollapseCommands` closes over the open groups and the binding's
+  collapse owner. `groupingProjectionBundle` is the grouped view a binding
+  publishes, or `undefined` when the projection has no model.
+- `SHELL_OPERATION_OWNERS` names the module that owns each shell operation.
+  `ShellOperation` is one of those keys. `ShellOperationInput` holds the
+  optional contributions: `FindContribution`, `DensityContribution`,
+  `FullscreenContribution`, `ContextMenuContribution`,
+  `CommandPaletteContribution` and `PrintContribution`. An absent field is
+  an operation that is not armed. `publishShellOverlay` remembers that input
+  on the chrome object. `projectShellOperations` keeps each armed
+  contribution as the owner's object. `withShellOperations` lays those onto
+  a runtime view and clears the ones that are no longer armed.
+- `planFeatureRegistration` — which retained features stay and which
+  declarations still mount. `preferLastById` keeps the last declaration of
+  each id. `FeatureRegistrationPlan` is the release list and the mount list.
+  `RegisteredFeature` is one id plus its declaration. `projectFeatureHosts`
+  reads the per-feature hosts as one host. `invokeCleanups` runs every
+  cleanup and returns the failures; one failure does not skip the rest.
+  These functions are on `@adapttable/core/binding`.
+- `featureLifecycleConformanceTests(driver, harness)` — the registration
+  cases a binding runs against its own lifecycle. `FeatureLifecycleDriver`
+  opens an independent table and a nested one. `LifecycleHarness` is the
+  runner's `expect`. `LifecycleDeclaration` is one feature the driver mounts.
+  `LifecycleObservation` is what the driver can see after a reconcile.
 
 ### Table options and runtime contracts
 
@@ -1057,8 +1132,20 @@ results and the rest), the feature-state keys `DENSITY_STATE`
 (`DensityFeatureState`) and `ROW_REORDER`, `resolveColumnDefaults`
 (`ResolvableColumn`) and `resolveColumnHeaders` for a column's declarative
 defaults, `columnPathText` for a data-path value as cell text, and
-`sameRows` — whether a new `data` array holds the same rows, so a table
-engine does not rebuild for an inline array.
+`sameItems` — whether two lists hold the same items by identity, so a table
+engine does not rebuild for an inline array (`sameRows` is its deprecated
+row-named form) — with `retainItems`, which keeps the previous list while its
+items are unchanged — and `isRecord`, whether a value is a plain record.
+Source refresh shares `sourceViewKey` /
+`SourceViewKeyInput` and `cachedSnapshot` / `CachedSnapshot`; a composed grouping feature carries its evaluator through
+`withFrontendRowModel` / `frontendRowModelOf`; `virtualItemMeta` copies the
+virtualizer fields a row keeps; and `approvalValueText` /
+`approvalArgumentPairs` / `ApprovalArgumentPair` turn an approval review's
+values and arguments into readable text, with `approvalProposalText` writing
+one proposed change as its review line. `rowMoveMenuProps` (reading a `RowMoveMenuSource`) builds a row's
+move menu and the confirmation its pending move waits for. `KitEnvironment` / `withKitEnvironment` merge what a
+kit read from its UI library — direction, locale, labels, density — under the
+table's own props; every binding re-exports them.
 
 - `chromeColumnPlan` (`ChromeColumnPlan`) — the columns a desktop table draws,
   with selection, expansion and action lanes.
@@ -2661,6 +2748,20 @@ cell's props put it inside the selected range, for a kit applying its own fill),
 `DEFAULT_CARD_SIZE_PX`, `useKeyedVirtualization` / `KeyedVirtualization`
 (virtualize an opaque keyed list, e.g. grouped entries),
 `useMountStagger` (the `animate` stagger),
+`DesktopTableChrome` / `DesktopTableChromeProps` /
+`DesktopTableChromeClassNames` / `DesktopTableHosts` and `MobileCardsChrome` /
+`MobileCardsChromeProps` / `MobileCardsChromeClassNames` / `MobileCardsHosts` /
+`MobileCardSlot` (the one desktop table and mobile card list every kit fills
+with its own elements and controls), `mobileCardSlots` / `MobileCardSlotKit` /
+`MobileCardEntry` / `MobileCardListProps` / `MobileCardGrouping` /
+`MobileCardGroupEntry` (the card
+list's order, pinned totals, groups, extra rows and each card's list-item
+attributes, drawn with the kit's card host and body), `MobileCardBodyProps` /
+`mobileCardPropsEqual` (a card body's inputs and its memo comparator), `KitEnvironment` / `withKitEnvironment`
+(the direction, locale, labels and density a kit read from its UI library,
+with the table's own props winning), `useLocaleLabels` (that library
+locale's labels, loaded on demand), `ReducedMotionScope` (marks a table whose
+UI library turned motion off),
 `useOverlayTransition` / `OverlayTransition` (turns an `open` boolean into
 `{ rendered, state }` — `rendered` outlives `open` by one exit so an overlay
 has something to animate on the way out, and reduced motion skips both edges),
@@ -3168,7 +3269,31 @@ references implement `DataTableSurface`, which exposes the scroll element to
 virtualization. `AdaptDesktopTableModel` and `AdaptMobileCardsModel` build live
 header, row, field and custom-renderer plans while each kit renders its native
 table or cards. `AdaptGroupHeaderRowModel` and `AdaptGroupHeaderCardModel`
-provide group captions, aggregates and expansion props.
+provide group captions, aggregates and expansion props. `AdaptDesktopStructure`
+and `AdaptMobileStructure` draw the shared desktop table and card list from a
+kit's `AdaptDesktopSlots` / `AdaptMobileSlots` templates. A kit that declares its header-cell template inside
+its table template marks it with `AdaptHeaderTemplate` and reads it from an
+`AdaptHeaderTemplateSlot` it provides. `AdaptTableSurface` holds the inputs
+and scroll box both structures and every kit body share;
+`AdaptDesktopTableHost` and `AdaptMobileCardsHost` give a kit's table and card
+components their structure's scroll box; `provideAdaptTableState()` provides
+the find, palette and context-menu state a kit's data table needs; and
+`scrollBoxStyle` is the scroll box's style rule.
+`ADAPTTABLE_KIT_MOTION_OFF`, from `@adapttable/angular`, is the token a kit
+provides when its UI library turns motion off.
+
+`injectTableSurfaceHost(options)` returns a `TableSurfaceView`: the
+structural view the compatibility shell and the lean host share.
+`TableSurfaceHostOptions` is the rows, columns and features that host
+composes. `editingBundleFor` builds the one editing bundle both the shell
+and a feature mount use. A lean feature mount reads `SurfaceHandles` from
+the `SURFACE_HANDLES` token. `SURFACE_OCCUPIED` (`SurfaceOccupation`) records
+which of grid, grouping and editing the shell already created.
+`SURFACE_GRID`, `SURFACE_GROUPING` and `SURFACE_EDITING` are the feature-state
+keys a lean mount publishes. `injectTableSurfaceHost`,
+`TableSurfaceHostOptions` and `TableSurfaceView` come from
+`@adapttable/angular/adapter`; `editingBundleFor` and the surface tokens come
+from `@adapttable/angular`.
 
 `AdaptAutoFilterFormModel` builds field plans. `AdaptTextFilterFieldModel`,
 `AdaptRangeFilterFieldModel`, `AdaptSelectFilterFieldModel`,
@@ -4038,7 +4163,8 @@ Applications should use the documented table, feature and provider APIs instead.
   `isRtlLocale(locale)`, `hasLocale(locale)`, `primarySubtag(locale)`,
   `RTL_LANGUAGES`, `locales` (keyed by `LocaleKey`) and the bundled
   presets (`en`, `ar`, `cs`, `de`, `es`, `fr`, `he`, `it`, `ja`, `pt`, `zh`,
-  … including `zhTW`) — see [i18n & RTL](./i18n-rtl.md).
+  … including `zhTW`), and `loadLabels(locale)` from `@adapttable/i18n/load`,
+  which fetches one preset on demand — see [i18n & RTL](./i18n-rtl.md).
 - `@adapttable/cli` — binary `adapttable init [--kit <kit>] [--force]`; programmatic
   `detectFramework`, `detectKit`, `choosePackageManager`, `installCommand`,
   `scaffoldFiles`, `runInit` plus the pieces they compose: `KITS` / `KitInfo` / `SHADCN`
@@ -4138,6 +4264,8 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | `toVueAttrs`, `toVueStyle`, `mergeVueAttrs`                                                                     | Translate neutral events/styles and merge complete semantic bindings without losing listeners or class/style composition.                                                                                     |
 | `elementRef`, `composeElementRefs`, `useElementRef`                                                             | Resolve semantic DOM targets from Vue refs and release old targets before publishing replacements.                                                                                                            |
 | `useScopeActivity()`                                                                                            | Mounted/activated state; false during component SSR, deactivation and disposal.                                                                                                                               |
+| `scheduleTick(work)`                                                                                            | Runs work after Vue commits the DOM and rethrows its failure instead of discarding it.                                                                                                                        |
+| `mountForcedColorsStyles()`                                                                                     | Installs the shared high-contrast stylesheet once the table mounts; a server render never touches `document`.                                                                                                 |
 | `useExternalStore(store)`                                                                                       | Readonly shallow snapshot bridge with replacement-aware subscriptions and cleanup.                                                                                                                            |
 | `FeatureLifecycle`, `useFeatureLifecycle`                                                                       | Retained feature scopes and registrations, with reconcile/dispose operations and a reactive host snapshot.                                                                                                    |
 | `TableFeatureState`, `OwnedFeatureState`, `provideFeatureState`                                                 | Table-local state, ownership-safe publication cleanup and descendant injection. `createFeatureState` constructs the registry; `useFeatureState` reads it.                                                     |

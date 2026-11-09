@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { FacetMap } from "../filters/facets";
+import type { FacetMap } from "../contracts/query";
 import type { TableQueryParams } from "../types";
 import type { InfiniteQueryLike } from "./dataTier";
 import { createQuerySource, type QuerySourceConfig } from "./querySource";

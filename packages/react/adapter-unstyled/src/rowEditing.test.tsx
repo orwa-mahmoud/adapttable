@@ -78,7 +78,7 @@ describe("row editing (unstyled)", () => {
         await waitFor(() =>
           expect(part("row-edit-error")).toHaveTextContent("Row save refused")
         );
-        expect(part("row-edit-error")).toHaveAttribute("role", "status");
+        expect(part("row-edit-error")).toHaveRole("status");
         expect(editors()[0]!.value).toBe("Ship it");
         if (recovery === "retry") {
           fireEvent.click(part("row-edit-save")!);

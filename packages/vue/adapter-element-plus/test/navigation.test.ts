@@ -102,12 +102,7 @@ describe("Element Plus grid navigation and status", () => {
     expect(
       node(stat, part("selection-stat")).classList.contains("el-text")
     ).toBe(true);
-    expect(node(root, part("status-item")).classList.contains("el-text")).toBe(
-      true
-    );
-    expect(
-      node(root, part("status-item")).classList.contains("host-item")
-    ).toBe(true);
+    expect(root.querySelector('[data-status="rows"]')).toBeNull();
     expect(node(root, part("grid-announcer")).getAttribute("aria-live")).toBe(
       "polite"
     );

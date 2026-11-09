@@ -1,5 +1,5 @@
 import type { ColumnLayoutState } from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
+import { getDirection } from "@adapttable/i18n";
 import { DataTable } from "@adapttable/mui";
 import { bulkActions as bulkActions_ } from "@adapttable/mui/bulk-actions";
 import { cellNavigation as cellNavigation_ } from "@adapttable/mui/cell-navigation";
@@ -114,6 +114,7 @@ import {
   showsRowActions,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
+import { pageTablePresentation } from "../demoPresentation";
 import {
   nestedInnerFeatures,
   nestedOuterFeatures,
@@ -310,7 +311,10 @@ export function MuiDemo({
 }>) {
   const s = strings(locale);
   const filters = useDemoFilterDefs(locale);
-  const theme = createTheme({ palette: { mode: dark ? "dark" : "light" } });
+  const theme = createTheme({
+    direction: getDirection(locale),
+    palette: { mode: dark ? "dark" : "light" },
+  });
   const rowActionsShown = showsRowActions({
     rowMutations,
     focused,
@@ -425,10 +429,7 @@ export function MuiDemo({
             maxHeight={maxHeight}
             density={density}
             filtersMode={filtersUi}
-            labels={getLabels(locale)}
-            locale={locale}
-            dir={getDirection(locale)}
-            searchPlaceholder={s.search}
+            {...pageTablePresentation(locale, s.search)}
             rowActionsLayout={rowMutations ? "menu" : undefined}
             confirm={demoConfirm}
             animate={animate}

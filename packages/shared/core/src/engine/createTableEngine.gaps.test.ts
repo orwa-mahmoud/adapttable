@@ -76,6 +76,41 @@ describe("getColumn / cellValue", () => {
     expect(engine.cellValue(ROWS[0]!, "name")).toBe("Ada");
     expect(engine.cellValue(ROWS[0]!, "gone")).toBeUndefined();
   });
+
+  it("uses the last column when two share a key, including an in-place edit", () => {
+    const columns = [
+      { key: "name", header: "Name" },
+      { key: "name", header: "Alias" },
+    ];
+    const engine = createTableEngine({
+      data: ROWS,
+      columns,
+      rowKey: (row: Row) => row.id,
+    });
+    expect(engine.getColumn("name")?.header).toBe("Alias");
+    expect(engine.cellValue(ROWS[0]!, "name")).toBe("Ada");
+
+    columns[1]!.header = "Renamed";
+    expect(engine.getColumn("name")?.header).toBe("Renamed");
+
+    columns[1]!.key = "title";
+    expect(engine.getColumn("name")?.header).toBe("Name");
+    expect(engine.getColumn("title")?.header).toBe("Renamed");
+  });
+
+  it("keeps a staged column list off the committed lookup", () => {
+    const engine = engineOf();
+    engine.stageCandidate({}, { columns: [{ key: "team", header: "Squad" }] });
+
+    expect(engine.getColumn("name")?.header).toBe("Name");
+    expect(engine.getColumn("team")?.header).toBe("Team");
+    expect(engine.candidate.getColumn("team")?.header).toBe("Squad");
+    expect(engine.candidate.getColumn("name")).toBeUndefined();
+
+    engine.discardCandidate();
+    expect(engine.getColumn("name")?.header).toBe("Name");
+    expect(engine.getColumn("team")?.header).toBe("Team");
+  });
 });
 
 describe("configure", () => {

@@ -5,15 +5,11 @@
  * engine. Nothing here hard-wires grouping to the browser in a way a
  * source-provided strategy cannot replace.
  */
-import type { ColumnMetadata } from "../columnModel";
-import {
-  configureIncrementalView,
-  incrementalViewOf,
-} from "../rows/incremental";
-import {
-  sourceCapabilities,
-  type TableSourceCapabilities,
-} from "../source/capabilities";
+
+import type { ColumnMetadata } from "../contracts/columns";
+import type { TableSourceCapabilities } from "../contracts/source";
+import { configuredIncrementalGroups } from "../rows/incrementalGroups";
+import { sourceCapabilities } from "../source/capabilities";
 import { type QueryGroupRow, serverGroupEntries } from "../source/queryGroups";
 import type { GroupAggregateOps } from "./groupRowLayout";
 import {
@@ -116,27 +112,23 @@ export function groupedEntriesForStrategy<TRow>(
     });
   }
   const rows = options.allFilteredRows ?? [];
-  const incremental = incrementalViewOf(rows);
-  const view = incremental
-    ? configureIncrementalView(incremental, {
-        groupBy: options.groupByKeys,
-        columns: options.columns,
-        getRowId: options.getRowId,
-        groupAggregates: options.aggregates as
-          GroupAggregatesFn<TRow> | undefined,
-        groupSort: options.sort,
-        groupFilter: options.filter,
-        groupFooters: options.footers === true,
-        collapsedGroupIds: options.collapsedGroupIds,
-        groupPageSize: options.groupPageSize,
-        rowPageSize: options.rowPageSize,
-        paging: options.paging,
-        derivedKey: options.derivedKey,
-        groupAggregateOps: options.aggregateOps,
-      })
-    : undefined;
+  const groups = configuredIncrementalGroups(rows, {
+    groupBy: options.groupByKeys,
+    columns: options.columns,
+    getRowId: options.getRowId,
+    groupAggregates: options.aggregates as GroupAggregatesFn<TRow> | undefined,
+    groupSort: options.sort,
+    groupFilter: options.filter,
+    groupFooters: options.footers === true,
+    collapsedGroupIds: options.collapsedGroupIds,
+    groupPageSize: options.groupPageSize,
+    rowPageSize: options.rowPageSize,
+    paging: options.paging,
+    derivedKey: options.derivedKey,
+    groupAggregateOps: options.aggregateOps,
+  });
   return [
-    ...(view?.groups ??
+    ...(groups ??
       buildGroupedFlatModel({
         rows,
         groupBy: options.groupByKeys,

@@ -55,7 +55,6 @@ import {
   type GroupedFlatEntry,
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
-  insertExtraRows,
   isDeclarativeFilters,
   isExtraEntry,
   KEYED_WINDOW,
@@ -71,6 +70,7 @@ import {
   pinnedSummaryPart,
   pinnedSummaryRowId,
   printToolbar,
+  ReducedMotionScope,
   rememberFeatureHost,
   renderedRowsOf,
   REORDER_COLUMN_WIDTH,
@@ -102,6 +102,7 @@ import {
   useFeatureSlotFilled,
   useFeatureState,
   useFullscreen,
+  useLocaleLabels,
   useMountStagger,
   useOffsetHeight,
   useResolvedAdapter,
@@ -112,6 +113,7 @@ import {
   viewControlsToolbar,
   type VirtualTableRow,
   windowGroupedEntries,
+  withKitEnvironment,
 } from "@adapttable/react/adapter";
 import {
   Button,
@@ -173,6 +175,7 @@ import {
 import { MobileCards } from "./components/MobileCards";
 import { SkeletonTable } from "./components/SkeletonTable";
 import { Toolbar } from "./components/Toolbar";
+import { useAntdLibrary } from "./libraryEnvironment";
 import type { DataTableProps } from "./types";
 
 // Table always nests its rows in Spin, even when loading is false. Its
@@ -575,10 +578,11 @@ function resolveAntdDataSource<TRow>(
   grouping: unknown,
   rows: readonly GroupedDataRecord<TRow>[],
   extraRows: ComposedProps<TRow>["extraRows"],
-  getRowId: (row: TRow) => string
+  getRowId: (row: TRow) => string,
+  insertRows: NonNullable<RenderModelAssembly<TRow>>["insertExtraRows"]
 ): readonly GroupedDataRecord<TRow>[] {
-  if (grouping) return rows;
-  return insertExtraRows(
+  if (grouping || insertRows === undefined) return rows;
+  return insertRows(
     (rows as readonly TRow[]).map((row) => ({
       kind: "row" as const,
       key: getRowId(row),
@@ -2317,11 +2321,15 @@ function AntdTableBody<TRow>({
           dataSourceBase,
           c.pinnedRows
         );
+        const featureAssembly = (
+          props as Partial<{ assembly: RenderModelAssembly<TRow> }>
+        ).assembly;
         const dataSource = resolveAntdDataSource(
           grouping,
           partitionedSource,
           props.extraRows,
-          getRowId
+          getRowId,
+          featureAssembly?.insertExtraRows
         );
         const { cellsByRow } = tableRenderModel({
           table,
@@ -2342,8 +2350,7 @@ function AntdTableBody<TRow>({
           // Features that replace an assembly heavy — cell spanning, extra rows —
           // write it onto the props the feature pass returns. antd assembles its own
           // table, so it reads that here the way the shared shell does.
-          assembly: (props as Partial<{ assembly: RenderModelAssembly<TRow> }>)
-            .assembly,
+          assembly: featureAssembly,
         });
         const pinRowSticky = !bodyCellsHaveRowSpan(cellsByRow);
 
@@ -2869,13 +2876,31 @@ function AntdTableBody<TRow>({
  * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
+  const kit = useAntdLibrary();
+  const libraryLabels = useLocaleLabels(
+    incoming.labels === undefined ? kit.locale : undefined
+  );
+  const sized = {
+    ...incoming,
+    size:
+      incoming.size ?? (incoming.density === undefined ? kit.size : undefined),
+  } as typeof incoming;
+  const props = useTableFeatures(
+    withKitEnvironment(sized, {
+      dir: kit.dir,
+      locale: kit.locale,
+      labels: libraryLabels,
+      density: incoming.size === undefined ? kit.density : undefined,
+    })
+  );
   return (
-    <FeatureProviders props={props}>
-      <HeaderFilterOpenProvider>
-        <ForcedColorsStyle />
-        <DataTableContent<TRow> {...props} />
-      </HeaderFilterOpenProvider>
-    </FeatureProviders>
+    <ReducedMotionScope off={kit.motionOff}>
+      <FeatureProviders props={props}>
+        <HeaderFilterOpenProvider>
+          <ForcedColorsStyle />
+          <DataTableContent<TRow> {...props} />
+        </HeaderFilterOpenProvider>
+      </FeatureProviders>
+    </ReducedMotionScope>
   );
 }

@@ -9,6 +9,7 @@
  */
 
 /* ── Types ─────────────────────────────────────────────────────────── */
+export { createBasicTableEngine } from "./engine/basicTableEngine";
 export {
   cellSortValue,
   cellValue,
@@ -17,6 +18,7 @@ export {
 export {
   createTableEngine,
   type CreateTableEngineOptions,
+  type TableCallbackRefresh,
   type TableEngine,
   type TableEngineConfigPatch,
   type TableEngineReader,
@@ -191,9 +193,13 @@ export {
 } from "./aggregate/aggregationModel";
 export {
   APPROVAL_PREVIEW_LIMIT,
+  type ApprovalArgumentPair,
+  approvalArgumentPairs,
+  approvalProposalText,
   type ApprovalReview,
   approvalReview,
   type ApprovalReviewItem,
+  approvalValueText,
 } from "./approval/approvalReview";
 export { columnText } from "./columns/columnText";
 export { computed, type ComputedColumnSpec } from "./columns/computed";
@@ -572,6 +578,7 @@ export {
   isGridColumnSelected,
   type PointerReleaseTarget,
 } from "./focus/gridFocusController";
+export { createGridNavigation } from "./focus/gridNavigation";
 export {
   cellFillHandler,
   type CellFillHandlerOptions,
@@ -596,6 +603,7 @@ export {
   isFilterGroup,
   type QueryAggregate,
   type QueryCondition,
+  type QueryContribution,
   type QueryExtensions,
   type QueryFilterGroup,
   type QuerySupport,
@@ -657,6 +665,7 @@ export {
 export type { ChipLabelResolver } from "./filters/filterDefs";
 export {
   type FilterFormSource,
+  type FilteringContribution,
   listFilterValues,
 } from "./filters/filterFormModel";
 export { formulaSlice } from "./formula/formulaUrlSlice";
@@ -748,8 +757,10 @@ export {
 } from "./source/dataTier";
 export {
   createFrontendSource,
+  createFrontendSourceWith,
   defaultFrontendRowId,
   defaultSearchText,
+  type FrontendEngineFactory,
   type FrontendSource,
   type FrontendSourceConfig,
   type FrontendSourceFrame,
@@ -776,10 +787,13 @@ export {
   type ServerSourceViewState,
 } from "./source/serverSource";
 export {
+  activeTierValue,
   createTableData,
+  INACTIVE_TIER_ROWS,
   type TableData,
   type TableDataConfig,
   type TableDataPlan,
+  tierRows,
 } from "./source/tableData";
 export type { TableSource } from "./source/TableSource";
 export type {
@@ -1047,6 +1061,7 @@ export {
   type RowGroupRef,
 } from "./grouping/groupRows";
 export { groupSelectionState } from "./grouping/groupSelection";
+export type { SelectionContribution } from "./selection/selectionBindingState";
 export {
   type QueryGroupRow,
   type QueryGroupsPage,
@@ -1137,6 +1152,18 @@ export type {
   ContextMenuItemsFactory,
   FilterTypeExtend,
 } from "./features/currentHost";
+export {
+  type CommandPaletteContribution,
+  type ContextMenuContribution,
+  type DensityContribution,
+  type FindContribution,
+  type FullscreenContribution,
+  type PrintContribution,
+  projectShellOperations,
+  SHELL_OPERATION_OWNERS,
+  type ShellOperation,
+  type ShellOperationInput,
+} from "./features/shellOperations";
 export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
 export * from "./rowFeatureExports";
 export type {

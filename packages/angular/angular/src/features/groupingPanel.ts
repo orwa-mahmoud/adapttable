@@ -3,7 +3,9 @@
  */
 import type { AdaptTableFeature } from "@adapttable/angular";
 import { coreGroupingPanel } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
 
+import { withFrontendRowModel } from "../source/rowModel";
 import type { GroupingExtras } from "./grouping";
 
 /**
@@ -40,11 +42,14 @@ export function groupingPanel<TRow = unknown>(
   groupBy?: string | readonly string[],
   extras: GroupingPanelExtras<TRow> = {}
 ): AdaptTableFeature {
-  return {
-    ...coreGroupingPanel<TRow>(groupBy, extras),
-    initialGroupBy: groupBy,
-    extras,
-  } as GroupingPanelFeature<TRow>;
+  return withFrontendRowModel(
+    {
+      ...coreGroupingPanel<TRow>(groupBy, extras),
+      initialGroupBy: groupBy,
+      extras,
+    } as GroupingPanelFeature<TRow>,
+    createTableEngine
+  );
 }
 
 export type { GroupingPanelFeature };

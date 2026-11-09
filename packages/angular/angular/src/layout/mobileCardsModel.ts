@@ -24,8 +24,6 @@ import {
 import {
   computed,
   Directive,
-  type ElementRef,
-  input,
   type TemplateRef,
   viewChild,
 } from "@angular/core";
@@ -34,13 +32,13 @@ import { resolveRenderer } from "../cell";
 import { type RowReorderState } from "../rows/rowReorder";
 import { type RowReorderButtonsProps } from "../rows/rowReorderHandle";
 import { type TreeToggleProps } from "../tree/treeToggle";
-import { type TableView } from "./dataTableShell";
+import { AdaptTableSurface } from "./tableSurface";
 
 /** Shared AdaptMobileCards signals; adapters supply native templates and controls. @public */
 @Directive({})
-export abstract class AdaptMobileCardsModel<TRow> {
-  readonly view = input.required<TableView<TRow>>();
-  readonly rowKey = input.required<(row: TRow) => string>();
+export abstract class AdaptMobileCardsModel<
+  TRow,
+> extends AdaptTableSurface<TRow> {
   protected readonly reorderButtonsSlot = ROW_REORDER_BUTTONS;
   protected readonly editableCellSlot = EDITABLE_CELL;
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
@@ -147,12 +145,6 @@ export abstract class AdaptMobileCardsModel<TRow> {
     }
     return cards;
   });
-  readonly maxHeight = input<number | string>();
-  protected readonly scrollBox =
-    viewChild<ElementRef<HTMLElement>>("scrollBox");
-  scrollElement(): HTMLElement | null {
-    return this.scrollBox()?.nativeElement ?? null;
-  }
   protected readonly listStyle = computed(() => {
     const maxHeight = this.maxHeight();
     if (typeof maxHeight === "string") {

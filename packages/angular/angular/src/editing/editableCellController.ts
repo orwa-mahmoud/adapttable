@@ -1,9 +1,9 @@
 import {
   type EditableCellController,
-  editableCellController as coreEditableCellController,
   type EditingBundle,
 } from "@adapttable/core";
 import type { RowEditIcons } from "@adapttable/core/binding";
+import { editableCellController as coreEditableCellController } from "@adapttable/core/editing";
 
 import type { ColumnDef } from "../columnDef";
 

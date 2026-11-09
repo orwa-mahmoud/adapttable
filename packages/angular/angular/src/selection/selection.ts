@@ -8,7 +8,6 @@
  */
 import {
   applyGroupLeafSelection,
-  createAllMatchingScope,
   createControllableStore,
   headerSelectionOf,
   resolveLabels,
@@ -20,6 +19,7 @@ import type {
   HeaderSelectionState,
   SelectionState,
 } from "@adapttable/core/binding";
+import { createAllMatchingScope } from "@adapttable/core/selection";
 import {
   assertInInjectionContext,
   computed,

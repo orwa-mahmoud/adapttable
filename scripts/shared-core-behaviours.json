@@ -1,0 +1,64 @@
+{
+  "behaviours": [
+    {
+      "name": "approvalArgumentPairs",
+      "owner": "packages/shared/core/src/approval/approvalReview.ts"
+    },
+    {
+      "name": "approvalProposalText",
+      "owner": "packages/shared/core/src/approval/approvalReview.ts"
+    },
+    {
+      "name": "approvalValueText",
+      "owner": "packages/shared/core/src/approval/approvalReview.ts"
+    },
+    {
+      "name": "cachedSnapshot",
+      "owner": "packages/shared/core/src/source/sourceRefresh.ts"
+    },
+    {
+      "name": "columnSelectLabel",
+      "owner": "packages/shared/core/src/layout/leanAssembly.ts"
+    },
+    {
+      "name": "frontendRowModelOf",
+      "owner": "packages/shared/core/src/source/frontendRowModel.ts"
+    },
+    {
+      "name": "isRecord",
+      "owner": "packages/shared/core/src/utils/isRecord.ts"
+    },
+    {
+      "name": "primitiveText",
+      "owner": "packages/shared/core/src/columns/resolveColumns.ts"
+    },
+    {
+      "name": "retainItems",
+      "owner": "packages/shared/core/src/utils/sameItems.ts"
+    },
+    {
+      "name": "revisionToken",
+      "owner": "packages/shared/core/src/engine/neutralTable.ts"
+    },
+    {
+      "name": "rowMoveMenuProps",
+      "owner": "packages/shared/core/src/rows/rowMoveMenu.ts"
+    },
+    {
+      "name": "sameItems",
+      "owner": "packages/shared/core/src/utils/sameItems.ts"
+    },
+    {
+      "name": "sourceViewKey",
+      "owner": "packages/shared/core/src/source/sourceRefresh.ts"
+    },
+    {
+      "name": "virtualItemMeta",
+      "owner": "packages/shared/core/src/virtual/virtualTableModel.ts"
+    },
+    {
+      "name": "withFrontendRowModel",
+      "owner": "packages/shared/core/src/source/frontendRowModel.ts"
+    }
+  ]
+}

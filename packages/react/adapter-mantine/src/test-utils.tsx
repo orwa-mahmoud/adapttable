@@ -7,5 +7,10 @@ export function renderMantine(ui: ReactElement): RenderResult {
   // `env="test"` is Mantine's own testing environment: it disables the
   // transitions and portals that never settle under jsdom, which is what
   // 9.5's floating-ui-based Combobox needs to mount its dropdown here.
-  return render(<MantineProvider env="test">{ui}</MantineProvider>);
+  const view = render(<MantineProvider env="test">{ui}</MantineProvider>);
+  return {
+    ...view,
+    rerender: (next) =>
+      view.rerender(<MantineProvider env="test">{next}</MantineProvider>),
+  };
 }

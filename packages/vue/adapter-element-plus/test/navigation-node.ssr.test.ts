@@ -46,10 +46,15 @@ describe("Element Plus grid/status Node SSR", () => {
       app.provide(ID_INJECTION_KEY, { prefix: 9400, current: 0 });
       app.provide(ZINDEX_INJECTION_KEY, { current: 0 });
       const html = await renderToString(app);
-      expect(html).toContain('data-adapttable-part="status-bar"');
-      expect(html).toMatch(
-        /<span[^>]*class="el-text[^>]*data-adapttable-part="status-item"/
-      );
+      if (mobile) {
+        expect(html).toContain('data-adapttable-part="status-bar"');
+        expect(html).toMatch(
+          /<span[^>]*class="el-text[^>]*data-adapttable-part="status-item"/
+        );
+      } else {
+        expect(html).not.toContain('data-status="rows"');
+        expect(html).toContain('data-adapttable-part="footer"');
+      }
       expect(html).toContain("30");
       expect(html).toContain('dir="rtl"');
       expect(html).not.toContain('data-adapttable-part="fill-handle"');

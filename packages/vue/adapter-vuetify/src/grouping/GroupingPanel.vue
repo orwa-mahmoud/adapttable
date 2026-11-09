@@ -16,15 +16,13 @@ Render.props = renderProps;
 
 <style>
 .adapttable-vuetify-grouping-layout {
-  border-color: rgba(var(--v-border-color), var(--v-border-opacity));
-}
-.adapttable-vuetify-grouping-layout {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   min-inline-size: 0;
+  border-color: rgba(var(--v-border-color), var(--v-border-opacity));
 }
 .adapttable-vuetify-grouping-layout-label,
 .adapttable-vuetify-grouping-layout

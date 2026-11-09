@@ -53,6 +53,10 @@ export function vueNativeConsumerConfig(
       sourcemap: false,
       lib: { entry: input, formats: ["es"] },
       rolldownOptions: {
+        // Library minification keeps module region comments, which name each
+        // module relative to `cwd`: the consumer's own root keeps them the
+        // same on every machine.
+        cwd: directory,
         external: (id) => externals.some((pattern) => pattern.test(id)),
       },
     },

@@ -358,16 +358,20 @@ export function FilterHeaderTrigger<TRow>(
       {open &&
         anchor != null &&
         createPortal(
-          <div
+          <dialog
             {...sessionProps}
             id={panelId}
-            role="dialog"
+            open
             aria-label={label}
             data-adapttable-part="filter-header-cell"
             style={{
               position: "fixed",
               top: anchor.top,
               left: anchor.left,
+              right: "auto",
+              bottom: "auto",
+              margin: 0,
+              border: "none",
               zIndex: 1050,
               minWidth: "20rem",
               padding: 12,
@@ -383,7 +387,7 @@ export function FilterHeaderTrigger<TRow>(
               labels={props.labels}
               registry={props.registry}
             />
-          </div>,
+          </dialog>,
           // Fullscreen hides everything outside the promoted element, the body
           // included; the field opens inside it while it is up.
           (document.fullscreenElement as HTMLElement | null) ?? document.body

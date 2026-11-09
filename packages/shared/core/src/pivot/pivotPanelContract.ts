@@ -7,7 +7,8 @@
  * the components differ. Rendered content is the binding's `TNode`, so a
  * React kit and an Angular kit fill the same shapes with their own nodes.
  */
-import type { AggregateName } from "../aggregate/aggregate";
+
+import type { AggregateName } from "../contracts/columns";
 import type { TableLabels } from "../types";
 import type { PivotField, PivotZone } from "./pivotConfigModel";
 import type { PivotConfig } from "./pivotModel";

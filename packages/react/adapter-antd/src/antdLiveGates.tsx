@@ -7,7 +7,6 @@
  * matches the other kits.
  */
 import {
-  asBatchGesture,
   type BatchRowEdit,
   type EditHistoryState,
   type FindInTableState,
@@ -20,7 +19,6 @@ import {
   DISABLED_FIND,
   disabledHistory,
   EDIT_HISTORY_LIVE,
-  editableCellController,
   type EditableCellEditing,
   type EditHistoryLiveSlotProps,
   type EditHistoryOptions,
@@ -80,15 +78,20 @@ export function AntdHistoryGate<TRow>({
     history: EditHistoryState<TRow>;
     onCellEdit:
       ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+    onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
   }) =>
     children({
       ...result,
-      onBatchEdit: asBatchGesture(onBatchEdit, result.history.record),
+      // The editing entry wraps the callback when the slot is filled. An empty
+      // slot leaves the host callback as it arrived, so this file does not
+      // import the gesture wrapper.
+      onBatchEdit: result.onBatchEdit ?? onBatchEdit,
     });
   const historyProps = {
     editHistory,
     columns,
     onCellEdit,
+    onBatchEdit,
     children: apply,
   } as unknown as EditHistoryLiveSlotProps<never>;
   return filled ? (
@@ -366,22 +369,6 @@ function NavStage<TRow>({
     labels,
     columnsWindowed,
     onCut: props.onCellCut,
-    // Enter and F2 on a focused cell open it, as in every other kit: the grid
-    // leaves those keys to the cell, and nothing else inside it handles them.
-    onActivate: (cell: { row: number; col: number }) => {
-      const row = rows[cell.row - firstRowIndex];
-      const column = columns[cell.col];
-      if (row === undefined || column === undefined) return;
-      editableCellController({
-        editing,
-        row,
-        column,
-        rowId: getRowId(row),
-        rows,
-        columns,
-        rowKey: getRowId,
-      }).begin();
-    },
   };
   const navProps = {
     options,
@@ -392,6 +379,8 @@ function NavStage<TRow>({
     onFind: find.openBar,
     matchKeys: find.matchKeys,
     currentMatch: find.current,
+    // Enter and F2 open the focused cell inside the cell-navigation entry.
+    editing,
     children,
   } as unknown as CellNavLiveSlotProps<never>;
   return filled ? (

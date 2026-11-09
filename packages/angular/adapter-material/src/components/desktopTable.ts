@@ -1,17 +1,10 @@
-/**
- * The desktop table body: header, rows, reorder handles and cell editors.
- */
 import {
   AdaptAttrs,
-  AdaptCell,
-  AdaptColumnSpacer,
-  AdaptDesktopTableModel,
-  AdaptExtraRowContent,
-  AdaptFooter,
+  AdaptDesktopStructure,
+  AdaptDesktopTableHost,
   AdaptHeader,
-  AdaptHeaderActions,
-  AdaptRowDetail,
-  AdaptSlot,
+  AdaptHeaderTemplate,
+  AdaptHeaderTemplateSlot,
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component } from "@angular/core";
@@ -22,34 +15,27 @@ import { AdaptRowActions } from "./rowActionButtons";
 import { AdaptSelectionCheckbox } from "./selectionCheckbox";
 
 /**
- * The desktop table drawn with native elements: sticky header, body rows,
- * selection, reorder and in-place cell editors.
- *
- * Editable cells go through the {@link EDITABLE_CELL} slot when editing is
- * composed; otherwise the column cell renders as usual.
+ * The desktop table body. Layout, rows and part names come from
+ * {@link AdaptDesktopStructure}; this kit fills the slots with its own elements.
  *
  * @internal
  */
 @Component({
   selector: "adapt-desktop-table",
+  providers: [AdaptHeaderTemplateSlot],
   imports: [
+    AdaptAttrs,
+    AdaptColumnHeaderRename,
+    AdaptHeaderTemplate,
+    AdaptDesktopStructure,
+    AdaptHeader,
+    AdaptRowActions,
     AdaptSelectionCheckbox,
     MatButtonModule,
-    AdaptAttrs,
-    AdaptCell,
-    AdaptColumnHeaderRename,
-    AdaptColumnSpacer,
-    AdaptExtraRowContent,
-    AdaptFooter,
-    AdaptHeader,
-    AdaptHeaderActions,
-    AdaptRowActions,
-    AdaptRowDetail,
-    AdaptSlot,
     NgTemplateOutlet,
   ],
   templateUrl: "./desktopTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
 })
-export class AdaptDesktopTable<TRow> extends AdaptDesktopTableModel<TRow> {}
+export class AdaptDesktopTable<TRow> extends AdaptDesktopTableHost<TRow> {}

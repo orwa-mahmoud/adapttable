@@ -12,7 +12,8 @@
  * tab-separated fields, newline-separated rows, and RFC-4180 quoting when a
  * field carries a tab, a newline or a quote.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import { isCellEditable } from "../editing/cellEditing";
 import { batchEditHandler, type CellEdit } from "./cellEdits";
 import { type CellRange, cellRangeBounds } from "./cellRange";

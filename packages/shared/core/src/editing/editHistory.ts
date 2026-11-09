@@ -14,14 +14,10 @@
  * than each cell recording itself.
  */
 import type { CellEdit } from "../focus/cellEdits";
-import {
-  createEditHistoryStack,
-  DEFAULT_EDIT_HISTORY_DEPTH,
-  editHistoryEntry,
-  type EditHistorySnapshot,
-  readCellValue,
-} from "./editingController";
+import { getPath } from "../utils/path";
+import type { BatchRowEdit } from "./editContracts";
 import { PREPARE_RECORDING, recordedGesture } from "./recordedGesture";
+import { listenerSet } from "./storePlumbing";
 
 /**
  * The host's commit channel — what an undo replays through.
@@ -253,4 +249,186 @@ export function recordingCellEdit<TRow>(
     recordedGesture(record, [{ row, columnKey: key, value: nextValue }], () =>
       onCellEdit(row, key, nextValue)
     );
+}
+
+/* ── Undo / redo ───────────────────────────────────────────────────── */
+
+/**
+ * One gesture: the edits it made, and the edits that put it back.
+ *
+ * @public
+ */
+export interface EditHistoryEntry<TRow> {
+  /** The edits the gesture made. */
+  redo: readonly CellEdit<TRow>[];
+  /** The edits that undo it. */
+  undo: readonly CellEdit<TRow>[];
+}
+
+/**
+ * How much can be undone and redone.
+ *
+ * @public
+ */
+export interface EditHistorySnapshot {
+  /** Gestures that can be undone. */
+  readonly past: number;
+  /** Gestures that can be redone. */
+  readonly future: number;
+}
+
+/**
+ * The undo and redo stacks.
+ *
+ * @public
+ */
+export interface EditHistoryStack<TRow> {
+  /** The stack depths now. */
+  readonly getSnapshot: () => EditHistorySnapshot;
+  /** Listen for changes. Returns the unsubscribe. */
+  readonly subscribe: (listener: () => void) => () => void;
+  /** Push a gesture, keeping at most `depth`, and drop every redo. */
+  readonly record: (entry: EditHistoryEntry<TRow>, depth: number) => void;
+  /** Pop the last gesture onto the redo stack and hand it back. */
+  readonly undo: () => EditHistoryEntry<TRow> | undefined;
+  /** Pop the last undone gesture back and hand it back. */
+  readonly redo: () => EditHistoryEntry<TRow> | undefined;
+  /** Forget every gesture. */
+  readonly clear: () => void;
+}
+
+/**
+ * How many gestures a history keeps when the host does not say.
+ *
+ * @public
+ */
+export const DEFAULT_EDIT_HISTORY_DEPTH = 50;
+
+/**
+ * Create the undo and redo stacks.
+ *
+ * @public
+ */
+export function createEditHistoryStack<TRow>(): EditHistoryStack<TRow> {
+  let past: EditHistoryEntry<TRow>[] = [];
+  let future: EditHistoryEntry<TRow>[] = [];
+  let snapshot: EditHistorySnapshot = { past: 0, future: 0 };
+  const { subscribe, notify } = listenerSet();
+  const sync = (): void => {
+    snapshot = { past: past.length, future: future.length };
+    notify();
+  };
+  return {
+    getSnapshot: () => snapshot,
+    subscribe,
+    record(entry, depth) {
+      const limit = Math.max(0, Math.trunc(depth));
+      past = limit > 0 ? [...past, entry].slice(-limit) : [];
+      future = [];
+      sync();
+    },
+    undo() {
+      const entry = past.at(-1);
+      if (!entry) return undefined;
+      past = past.slice(0, -1);
+      future = [...future, entry];
+      sync();
+      return entry;
+    },
+    redo() {
+      const entry = future.at(-1);
+      if (!entry) return undefined;
+      future = future.slice(0, -1);
+      past = [...past, entry];
+      sync();
+      return entry;
+    },
+    clear() {
+      past = [];
+      future = [];
+      sync();
+    },
+  };
+}
+
+/**
+ * A cell's current value as an undo would restore it: the column's
+ * `editValue`, else its `sortValue`, else the field at its key.
+ *
+ * @public
+ */
+export function readCellValue<TRow>(
+  row: TRow,
+  column: {
+    readonly key: string;
+    readonly editValue?: (row: TRow) => unknown;
+    readonly sortValue?: (row: TRow) => unknown;
+  }
+): unknown {
+  if (column.editValue) return column.editValue(row);
+  if (column.sortValue) return column.sortValue(row);
+  return getPath(row, column.key);
+}
+
+/**
+ * The history entry for a gesture: the edits, and for each one whose column
+ * is known, the value it replaces.
+ *
+ * @public
+ */
+export function editHistoryEntry<TRow>(
+  edits: readonly CellEdit<TRow>[],
+  readValue: (edit: CellEdit<TRow>) => { value: unknown } | undefined
+): EditHistoryEntry<TRow> {
+  const undo = edits.flatMap((edit) => {
+    const read = readValue(edit);
+    return read
+      ? [{ row: edit.row, columnKey: edit.columnKey, value: read.value }]
+      : [];
+  });
+  return { redo: edits.map((edit) => ({ ...edit })), undo };
+}
+
+/**
+ * Wrap a paste or fill handler so the batch is recorded as ONE gesture.
+ *
+ * @public
+ */
+export function asGesture<TRow>(
+  apply: ((edits: CellEdit<TRow>[]) => unknown) | undefined,
+  record: (edits: readonly CellEdit<TRow>[]) => void
+): ((edits: CellEdit<TRow>[]) => unknown) | undefined {
+  if (!apply) return undefined;
+  return (edits) => recordedGesture(record, edits, () => apply(edits));
+}
+
+/**
+ * The cell edits a batch save is made of.
+ *
+ * @public
+ */
+export function cellsOfBatch<TRow>(
+  edits: readonly BatchRowEdit<TRow>[]
+): CellEdit<TRow>[] {
+  const cells: CellEdit<TRow>[] = [];
+  for (const edit of edits) {
+    for (const [columnKey, value] of Object.entries(edit.patch)) {
+      cells.push({ row: edit.row, columnKey, value });
+    }
+  }
+  return cells;
+}
+
+/**
+ * Wrap a batch save so the whole batch is recorded as ONE gesture.
+ *
+ * @public
+ */
+export function asBatchGesture<TRow>(
+  apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined,
+  record: (edits: readonly CellEdit<TRow>[]) => void
+): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined {
+  if (!apply) return undefined;
+  return (edits) =>
+    recordedGesture(record, cellsOfBatch(edits), () => apply(edits));
 }

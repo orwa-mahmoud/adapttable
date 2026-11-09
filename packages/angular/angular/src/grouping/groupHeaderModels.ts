@@ -1,11 +1,5 @@
 import { type ColumnDef } from "@adapttable/angular";
 import {
-  groupAggregateEntries,
-  groupLeafCount,
-  groupRowLayout,
-  groupSelectionState,
-} from "@adapttable/core";
-import {
   expandChevronIcon,
   type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
@@ -15,6 +9,12 @@ import {
   resolveMobileLabel,
   type SelectionState,
 } from "@adapttable/core/binding";
+import {
+  groupAggregateEntries,
+  groupLeafCount,
+  groupRowLayout,
+  groupSelectionState,
+} from "@adapttable/core/grouping";
 import { computed, Directive, input, type Signal } from "@angular/core";
 type Entry = GroupHeaderRowSlotProps<
   never,

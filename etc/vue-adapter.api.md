@@ -105,7 +105,7 @@ import { EditConflictPolicy } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
-import { editorInputType } from '@adapttable/core';
+import { editorInputType } from '@adapttable/core/editing';
 import { EditValidationStoreOptions } from '@adapttable/core';
 import { EffectScope } from 'vue';
 import { ExportHandlerState } from '@adapttable/core/binding';
@@ -168,7 +168,8 @@ import { FindButtonProps } from '@adapttable/core/binding';
 import { FindInTableState } from '@adapttable/core/binding';
 import { FindSearchProps } from '@adapttable/core/binding';
 import { flattenColumnTree } from '@adapttable/core/binding';
-import { formatMultiDraft } from '@adapttable/core';
+import { formatMultiDraft } from '@adapttable/core/editing';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GridFocusAnnouncerSlotProps } from '@adapttable/core/binding';
@@ -197,6 +198,7 @@ import { isColumnGroupRenderKey } from '@adapttable/core/binding';
 import { isColumnGroupStubKey } from '@adapttable/core/binding';
 import { isColumnGroupSummaryKey } from '@adapttable/core/binding';
 import { isExtraEntry } from '@adapttable/core/binding';
+import { KitEnvironment } from '@adapttable/core/binding';
 import { LiveFeatureHost } from '@adapttable/core/binding';
 import { MaybeRefOrGetter } from 'vue';
 import { MenuNavigationAction } from '@adapttable/core/binding';
@@ -225,7 +227,7 @@ import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
-import { readMultiDraft } from '@adapttable/core';
+import { readMultiDraft } from '@adapttable/core/editing';
 import { Ref } from 'vue';
 import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
 import { resetColumnLayout } from '@adapttable/core/binding';
@@ -320,6 +322,7 @@ import { VNode } from 'vue';
 import { VNodeChild } from 'vue';
 import { VNodeProps } from 'vue';
 import { VNodeRef } from 'vue';
+import { withKitEnvironment } from '@adapttable/core/binding';
 
 // @public (undocumented)
 export interface ActionButton {
@@ -1452,6 +1455,7 @@ export interface DataTableHandle<TRow> {
 // @public
 export interface DataTableProps<TRow> {
     readonly aggregates?: readonly QueryAggregate[];
+    readonly animate?: boolean;
     // (undocumented)
     readonly assistant?: TableAssistantProps;
     // (undocumented)
@@ -1540,6 +1544,8 @@ export interface DataTableProps<TRow> {
     readonly skeletonRows?: number;
     // (undocumented)
     readonly source?: TableSource<TRow>;
+    readonly stickyHeader?: boolean;
+    readonly stickyTop?: number;
     readonly summaryRow?: SummaryRowFn<TRow>;
     readonly supports?: QuerySupport;
     // (undocumented)
@@ -2770,6 +2776,8 @@ export { isColumnGroupSummaryKey }
 
 export { isExtraEntry }
 
+export { KitEnvironment }
+
 // @public
 export function managedCommandPaletteSurface(render: (props: ManagedCommandPaletteSurfaceProps) => VNodeChild): CommandPaletteSurfaceSlot;
 
@@ -2842,6 +2850,9 @@ export namespace MobileSummaryChrome {
     var // (undocumented)
     props: string[];
 }
+
+// @public
+export function mountForcedColorsStyles(): void;
 
 // @public (undocumented)
 export function mountGrouping<TRow>(context: FeatureMountContext<TRow>): void;
@@ -3259,6 +3270,9 @@ export { SavedViewsPanelInputProps }
 
 // @public (undocumented)
 export type SavedViewsPanelSlots = SavedViewsPanelSlots_2<VNodeChild>;
+
+// @public
+export function scheduleTick(work: () => void | Promise<void>): void;
 
 // @public (undocumented)
 export const SELECTION_STATS_MODEL: FeatureStateKey<SelectionStats | null>;
@@ -4271,6 +4285,8 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly selection?: RowSelection;
     // (undocumented)
     readonly source: MaybeRefOrGetter<TableSource<TRow>>;
+    readonly stickyHeader?: MaybeRefOrGetterOptional<boolean>;
+    readonly stickyTop?: MaybeRefOrGetterOptional<number>;
     // (undocumented)
     readonly tableLabel?: MaybeRefOrGetterOptional<string>;
 }
@@ -4459,6 +4475,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+    readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps_2<VNodeChild>>;
     // (undocumented)
@@ -4576,6 +4593,7 @@ defaultExpanded?: boolean;
 export interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, SourceViewportOptions {
     // (undocumented)
     readonly columns?: MaybeRefOrGetterOptional<readonly ColumnMetadata<TRow>[]>;
+    readonly createEngine?: FrontendEngineFactory<TRow>;
     // (undocumented)
     readonly data: MaybeRefOrGetter<readonly TRow[]>;
     // (undocumented)
@@ -4615,6 +4633,9 @@ close: (reason?: "escape" | "outside" | "done") => void;
 dir: "ltr" | "rtl";
 resetKey: number;
 }>;
+
+// @public
+export function useLocaleLabels(environment: Readonly<Ref<KitEnvironment>>): ComputedRef<KitEnvironment>;
 
 // @public (undocumented)
 export function useMobileCardsModel<TRow>(table: UseDataTableResult<TRow>, desktop: ComputedRef<DesktopTableModel<TRow>>): ComputedRef<MobileCardsModel<TRow>>;
@@ -4715,6 +4736,8 @@ export interface VueRowReorderModel<TRow> {
     // (undocumented)
     readonly snapshot: RowReorderSnapshot<TRow>;
 }
+
+export { withKitEnvironment }
 
 // (No @packageDocumentation comment for this package)
 

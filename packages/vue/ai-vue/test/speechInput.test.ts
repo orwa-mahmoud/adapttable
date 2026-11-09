@@ -40,7 +40,32 @@ function recognizer() {
 }
 const setup = (options: UseSpeechInputOptions) =>
   mountComposable(options, useSpeechInput);
-beforeEach(() => localStorage.clear());
+
+/** jsdom storage, or a memory stand-in when this Node leaves the global unset. */
+function installStorage(): void {
+  const existing = globalThis.localStorage;
+  if (existing) {
+    existing.clear();
+    return;
+  }
+  const values = new Map<string, string>();
+  vi.stubGlobal("localStorage", {
+    get length() {
+      return values.size;
+    },
+    clear: () => values.clear(),
+    getItem: (key: string) => values.get(key) ?? null,
+    key: (index: number) => [...values.keys()][index] ?? null,
+    removeItem: (key: string) => {
+      values.delete(key);
+    },
+    setItem: (key: string, value: string) => {
+      values.set(key, String(value));
+    },
+  });
+}
+
+beforeEach(() => installStorage());
 afterEach(() => vi.unstubAllGlobals());
 describe("useSpeechInput", () => {
   it("does not activate absent voice or unsupported browser", () => {

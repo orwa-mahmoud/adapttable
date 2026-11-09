@@ -111,14 +111,9 @@ export function ColumnSelectCheckboxChrome({
  * The checkbox's accessible name: what it does, and which column.
  *
  * "Select column" twelve times over names nothing — a screen reader user
- * hearing it has no idea which column is about to be selected.
+ * hearing it has no idea which column is about to be selected. The wording
+ * is core's.
  *
  * @public
  */
-export function columnSelectLabel(
-  label: string | undefined,
-  column: { header?: ReactNode; key: string }
-): string {
-  const name = typeof column.header === "string" ? column.header : column.key;
-  return `${label ?? "Select column"}: ${name}`;
-}
+export { columnSelectLabel } from "@adapttable/core/binding";

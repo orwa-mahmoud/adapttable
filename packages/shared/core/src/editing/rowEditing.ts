@@ -24,7 +24,7 @@ import {
   validateEditCommit,
 } from "./editCommitLifecycle";
 import type { EditEventHandler } from "./editContracts";
-import { observeEdit } from "./editingController";
+import { observeEdit } from "./editSession";
 import { listenerSet } from "./storePlumbing";
 
 /**

@@ -12,7 +12,7 @@ function rtlScrollbarGutter(dir: string | undefined): string {
   if (dir !== "rtl" || !view) return "0px";
   const layout = view.document.documentElement.getBoundingClientRect().width;
   const gutter = view.innerWidth - layout;
-  return `${gutter > 0 ? gutter : 0}px`;
+  return `${Math.max(gutter, 0)}px`;
 }
 
 defineOptions({ inheritAttrs: false });

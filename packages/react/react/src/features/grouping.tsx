@@ -8,26 +8,41 @@
 import {
   computePagination,
   devWarn,
-  formatGroupBy,
   type GroupByInput,
-  groupedRowModel,
-  groupedViewSource,
-  groupingAggregates,
   groupingIgnoredWarning,
   groupingPanelAggregations,
+  groupingProjectionBundle,
+  groupingSourceOf,
   type GroupNode,
-  groupShowMoreRequest,
   type GroupSort,
-  parseGroupBy,
+  projectedGroupingSource,
+  projectGrouping,
 } from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
+import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";
 import { useGroupPaging } from "../grouping/useGroupPaging";
-import { slotRender } from "./providers";
+import {
+  type FeatureProviderProps,
+  FeatureStateScope,
+  slotRender,
+} from "./providers";
+import { FRONTEND_ROW_MODEL } from "./rowModelKey";
 import { type ChromeExtraSlotProps, GROUPING_LIVE } from "./slotKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
+
+function GroupingModelProvider({
+  children,
+}: Readonly<FeatureProviderProps>): ReactNode {
+  return (
+    <FeatureStateScope stateKey={FRONTEND_ROW_MODEL} value={createTableEngine}>
+      {children}
+    </FeatureStateScope>
+  );
+}
 
 function LiveGrouping({
   chrome,
@@ -47,26 +62,37 @@ function LiveGrouping({
   });
   // Only the fields grouping reads, so a source change elsewhere — a page, a
   // search — does not rebuild the grouped model.
+  const {
+    allFilteredRows,
+    groups,
+    capabilities,
+    honorsAggregates,
+    aggregateOperations,
+    groupAggregateOverrides,
+    queryAggregates,
+    groupAggregations,
+  } = source;
   const groupingSource = useMemo(
-    () => ({
-      allFilteredRows: source.allFilteredRows,
-      groups: source.groups,
-      capabilities: source.capabilities,
-      honorsAggregates: source.honorsAggregates,
-      aggregateOperations: source.aggregateOperations,
-      groupAggregateOverrides: source.groupAggregateOverrides,
-      queryAggregates: source.queryAggregates,
-      groupAggregations: source.groupAggregations,
-    }),
+    () =>
+      groupingSourceOf({
+        allFilteredRows,
+        groups,
+        capabilities,
+        honorsAggregates,
+        aggregateOperations,
+        groupAggregateOverrides,
+        queryAggregates,
+        groupAggregations,
+      }),
     [
-      source.allFilteredRows,
-      source.groups,
-      source.capabilities,
-      source.honorsAggregates,
-      source.aggregateOperations,
-      source.groupAggregateOverrides,
-      source.queryAggregates,
-      source.groupAggregations,
+      allFilteredRows,
+      groups,
+      capabilities,
+      honorsAggregates,
+      aggregateOperations,
+      groupAggregateOverrides,
+      queryAggregates,
+      groupAggregations,
     ]
   );
   const ignoredWarning = groupingIgnoredWarning(groupByKeys, groupingSource);
@@ -96,80 +122,69 @@ function LiveGrouping({
     extraRows,
     locale,
   } = props;
-  const aggregates = useMemo(
+  const projected = useMemo(
     () =>
-      groupingAggregates({
+      projectGrouping({
+        groupByKeys,
         source: groupingSource,
         columns: chrome.allColumns,
+        locale,
+        getRowId,
+        collapsedGroupIds: groupCollapse.collapsedGroupIds,
         groupAggregates,
         panelDeclared: chrome.groupingPanel?.declaredAggregates,
+        groupFooters,
+        groupSort,
+        groupFilter,
+        groupPageSize,
+        groupRowPageSize,
+        paging: groupPaging.paging,
+        extraRows,
       }),
-    [chrome.allColumns, chrome.groupingPanel, groupAggregates, groupingSource]
+    [
+      chrome.allColumns,
+      chrome.groupingPanel,
+      extraRows,
+      getRowId,
+      groupAggregates,
+      groupByKeys,
+      groupCollapse.collapsedGroupIds,
+      groupFilter,
+      groupFooters,
+      groupPageSize,
+      groupPaging.paging,
+      groupRowPageSize,
+      groupSort,
+      groupingSource,
+      locale,
+    ]
   );
 
-  const grouping = useMemo(() => {
-    const model = groupedRowModel({
+  const grouping = useMemo(
+    () =>
+      groupingProjectionBundle({
+        groupBy: groupByKeys,
+        projection: projected,
+        collapsed: groupCollapse,
+        setGroupBy,
+        paging: groupPaging,
+        groupPageSize,
+        groupRowPageSize,
+        onGroupLoadMore,
+      }),
+    [
       groupByKeys,
-      source: groupingSource,
-      columns: chrome.allColumns,
-      locale,
-      getRowId,
-      collapsedGroupIds: groupCollapse.collapsedGroupIds,
-      aggregates,
-      groupFooters,
-      groupSort,
-      groupFilter,
+      groupCollapse,
       groupPageSize,
+      groupPaging,
       groupRowPageSize,
-      paging: groupPaging.paging,
-      extraRows,
-    });
-    if (!model) return undefined;
-    const { openGroups } = model;
-    return {
-      groupBy: groupByKeys,
-      collapsed: groupCollapse,
-      aggregates: aggregates.aggregates,
-      entries: model.entries,
+      onGroupLoadMore,
+      projected,
       setGroupBy,
-      showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => {
-        const request = groupShowMoreRequest(entry, {
-          groupPageSize,
-          groupRowPageSize,
-        });
-        groupPaging.showMore(request.pageSize, request.groupKey);
-        if (request.loadMoreKey !== undefined) {
-          onGroupLoadMore?.(request.loadMoreKey);
-        }
-      },
-      expandAll: groupCollapse.expandAll,
-      collapseAll: () => {
-        groupCollapse.collapseToDepth(0, openGroups);
-      },
-      collapseToDepth: (depth: number) => {
-        groupCollapse.collapseToDepth(depth, openGroups);
-      },
-    };
-  }, [
-    groupByKeys,
-    locale,
-    groupingSource,
-    getRowId,
-    groupCollapse,
-    aggregates,
-    groupFooters,
-    groupSort,
-    groupFilter,
-    groupPageSize,
-    groupRowPageSize,
-    onGroupLoadMore,
-    extraRows,
-    groupPaging,
-    setGroupBy,
-    chrome.allColumns,
-  ]);
+    ]
+  );
 
-  const viewSource = grouping ? groupedViewSource(source) : source;
+  const viewSource = projectedGroupingSource(source, projected);
   const groupingArmed = grouping !== undefined;
   const groupingPanel = useMemo(() => {
     if (!chrome.groupingPanel) return undefined;
@@ -293,6 +308,7 @@ export function grouping<TRow>(
 ): TableFeature<TRow> {
   return {
     ...coreGrouping<TRow>(groupBy, extras),
+    provider: { Provider: GroupingModelProvider },
     renders: [
       slotRender(GROUPING_LIVE, (props) => <LiveGrouping {...props} />),
     ],

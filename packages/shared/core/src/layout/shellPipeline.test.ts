@@ -6,14 +6,17 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ColumnMetadata } from "../columnModel";
 import {
   ACTIONS_COLUMN_KEY,
   REORDER_COLUMN_KEY,
 } from "../columns/columnMenuModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import { createTableEngine } from "../engine/createTableEngine";
+import type { GroupingContribution } from "../features/featureContribution";
+import { publishShellOverlay } from "../features/shellOperations";
 import type { GroupedFlatEntry } from "../grouping/groupRows";
 import type { TableSource } from "../source/TableSource";
+import type { TreeEntry } from "../tree/treeRows";
 import {
   cellNavigationInput,
   CHROME_EXTRA_SLOT_ORDER,
@@ -46,6 +49,18 @@ const ROWS: Row[] = [
 ];
 
 const getRowId = (row: Row) => row.id;
+
+function treeEntry(row: Row): TreeEntry<Row> {
+  return {
+    row,
+    key: row.id,
+    level: 0,
+    hasChildren: false,
+    expanded: false,
+    path: [],
+    descendantIds: [],
+  };
+}
 
 const COLUMNS: ColumnMetadata<Row>[] = [
   { key: "name", header: "Name", accessor: (row) => row.name },
@@ -133,10 +148,13 @@ describe("renderedRowsOf", () => {
         { kind: "row", key: "b", row: ROWS[1], index: 0 },
       ] as unknown as GroupedFlatEntry<Row>[],
     };
-    const tree = { entries: [{ row: ROWS[0]! }] };
+    const tree = { entries: [treeEntry(ROWS[0]!)] };
     const source = { rows: ROWS };
     expect(renderedRowsOf({ source, grouping, tree })).toEqual([ROWS[1]]);
     expect(renderedRowsOf({ source, tree })).toEqual([ROWS[0]]);
+    expect(
+      renderedRowsOf({ source, tree: { entries: [{ row: ROWS[0]! }] } })
+    ).toEqual([ROWS[0]]);
     expect(renderedRowsOf({ source })).toBe(ROWS);
   });
 });
@@ -271,6 +289,35 @@ describe("tableRuntimeView", () => {
     expect(view.columnLayout).toBeUndefined();
     expect(view.editing).toBeUndefined();
     expect(view.pinning?.setRowPin).toBeUndefined();
+    expect(view.filtering).toBeUndefined();
+    expect(view.filterDefs).toBeUndefined();
+    expect(view.filterRegistry).toBeUndefined();
+  });
+
+  it("projects the host filter catalog and leaves applied extras on the query", () => {
+    const defs = [{ key: "name", type: "text" as const }];
+    const registry = { types: {} };
+    const extra = { name: "Ada" };
+    const view = tableRuntimeView(
+      makeChrome({
+        filterDefs: defs,
+        filterRegistry: registry as never,
+        source: makeSource({ extra }),
+      }),
+      {}
+    );
+    expect(view.filtering?.defs).toBe(defs);
+    expect(view.filtering?.registry).toBe(registry);
+    expect(view.filterDefs).toBe(defs);
+    expect(view.filterRegistry).toBe(registry);
+    expect(view.query?.extra).toBe(extra);
+    const registryOnly = tableRuntimeView(
+      makeChrome({ filterRegistry: registry as never }),
+      {}
+    );
+    expect(registryOnly.filtering?.defs).toBeUndefined();
+    expect(registryOnly.filtering?.registry).toBe(registry);
+    expect(registryOnly.filterDefs).toBeUndefined();
   });
 
   it("labels grouping columns by string header, mobile label, then key", () => {
@@ -299,6 +346,26 @@ describe("tableRuntimeView", () => {
     expect(view.visibleRows).toEqual([ROWS[0]]);
     expect(view.groupingState?.computedAggregateKeys).toEqual(["score"]);
     expect(view.groupingState?.aggregateOverrides).toEqual({ score: "sum" });
+  });
+
+  it("projects a feature grouping contribution unless the host published one", () => {
+    const feature: GroupingContribution<Row> = {
+      entries: [],
+      groupBy: ["team"],
+    };
+    const host: GroupingContribution<Row> = {
+      entries: [],
+      groupBy: ["name"],
+    };
+    expect(
+      tableRuntimeView(makeChrome({ featureGrouping: feature }), {}).grouping
+    ).toBe(feature);
+    expect(
+      tableRuntimeView(
+        makeChrome({ grouping: host, featureGrouping: feature }),
+        {}
+      ).grouping
+    ).toBe(host);
   });
 
   it("publishes the host's own actions when either list is non-empty", () => {
@@ -379,13 +446,15 @@ describe("TableRuntimePublisher", () => {
     expect(neutral?.rows("visible")).toEqual(ROWS);
 
     // The host turns selection off and a tree reorders the rendered rows.
+    const tree = { entries: [treeEntry(ROWS[1]!)] };
     const second = publisher.update(
       makeChrome({
         source: makeSource({ tableEngine: engine }),
-        tree: { entries: [{ row: ROWS[1]! }] },
+        tree,
       }),
       {}
     );
+    expect(second.tree).toBe(tree);
     expect(second.neutralTable).toBe(neutral);
     expect(neutral?.operations.setSelection).toBe(false);
     expect(neutral?.rows("visible")).toEqual([ROWS[1]]);
@@ -399,6 +468,33 @@ describe("TableRuntimePublisher", () => {
     );
     expect(withEngine.neutralTable).toBeDefined();
     expect(publisher.update(makeChrome(), {}).neutralTable).toBeUndefined();
+  });
+
+  it("reads a shell overlay published after the view, per chrome", () => {
+    const engine = makeEngine();
+    const publisher = new TableRuntimePublisher<Row>();
+    const chrome = makeChrome({
+      source: makeSource({ tableEngine: engine }),
+    });
+    const view = publisher.update(chrome, {});
+    expect(view.neutralTable?.operations.find).toBe(false);
+    const find = {
+      open: true,
+      query: "ada",
+      setOpen: vi.fn(),
+      setQuery: vi.fn(),
+      openBar: vi.fn(),
+    };
+    publishShellOverlay(chrome, { find });
+    expect(view.neutralTable?.operations.find).toBe(true);
+    expect(view.find).toBeUndefined();
+    const nested = new TableRuntimePublisher<Row>();
+    const nestedView = nested.update(
+      makeChrome({ source: makeSource({ tableEngine: makeEngine() }) }),
+      {}
+    );
+    expect(nestedView.neutralTable?.operations.find).toBe(false);
+    expect(view.neutralTable?.operations.find).toBe(true);
   });
 });
 
@@ -573,7 +669,12 @@ describe("finishShellLive", () => {
       },
     };
     const live = {
-      find: { query: "" },
+      find: {
+        open: false,
+        query: "",
+        setOpen: vi.fn(),
+        setQuery: vi.fn(),
+      },
       gridFocus: { enabled: true },
       exportHandler: { onExport: vi.fn() },
       fullscreen: { supported: true, active: false, toggle: vi.fn() },
@@ -637,8 +738,19 @@ describe("overlayChromeExtras", () => {
       tree: { entries: [] },
       grouping: { entries: [] },
       editing: { active: null },
-      detail: { render: vi.fn(), expansion: { expandedIds: new Set() } },
-      rowPinning: { state: {} },
+      detail: {
+        render: vi.fn(),
+        expansion: {
+          expandedIds: new Set<string>(),
+          isExpanded: () => false,
+          toggle: vi.fn(),
+        },
+      },
+      rowPinning: {
+        state: { top: [], bottom: [] },
+        pin: vi.fn(),
+        unpin: vi.fn(),
+      },
       rowActions: { open: vi.fn() },
       columnGroups: [{ key: "g" }],
       hasRowActions: true,
@@ -761,7 +873,10 @@ describe("overlayChromeExtras", () => {
 });
 
 describe("finishShellBody", () => {
-  function makeShell(chrome: { grouping?: object; tree?: object }) {
+  function makeShell(chrome: {
+    grouping?: { readonly entries: readonly unknown[] };
+    tree?: { readonly entries: readonly unknown[] };
+  }) {
     return {
       tableProps: {
         virtualScrollRef: "shellRef" as string,

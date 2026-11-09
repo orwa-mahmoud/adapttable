@@ -1,4 +1,4 @@
-import { resolveEditableCellDisplay } from "@adapttable/core";
+import { resolveEditableCellDisplay } from "@adapttable/core/editing";
 import { createElement, type ReactNode } from "react";
 
 import type { BatchRowEdit } from "../editing/batchEditing";

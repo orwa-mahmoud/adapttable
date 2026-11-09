@@ -1,4 +1,4 @@
-import type { SortLevel } from "./compare";
+import type { SortLevel } from "../contracts/query";
 
 /**
  * Advance the three-step sort cycle for a column header click:

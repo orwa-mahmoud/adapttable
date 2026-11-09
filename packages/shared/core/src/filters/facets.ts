@@ -2,25 +2,15 @@
  * Facet counts — what selecting a value WOULD give, which is the
  * filtered set with this facet's own filter removed (#281).
  */
-import type { ExtraFilters } from "../types";
-import { type ChecklistValue, collectChecklistValues } from "./checklistValues";
+
+import type { ExtraFilters } from "../contracts/columns";
+import type { ChecklistValue, FacetMap } from "../contracts/query";
+import { collectChecklistValues } from "./checklistValues";
 import type { FilterDef } from "./filterDefs";
 import { listFilterValues } from "./filterFormModel";
 import type { FilterTypeRegistry } from "./filterRegistry";
 
-/**
- * Distinct values + counts for one filter key.
- *
- * @public
- */
-export type FacetCounts = readonly ChecklistValue[];
-
-/**
- * Facet counts keyed by filter key.
- *
- * @public
- */
-export type FacetMap = Readonly<Record<string, FacetCounts>>;
+export type { FacetCounts, FacetMap } from "../contracts/query";
 
 /**
  * Rows that still match after every filter except `key`. The count on

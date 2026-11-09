@@ -1,6 +1,9 @@
-import type { ColumnMetadata, ColumnModel } from "../columnModel";
+import type {
+  ColumnGroupShow,
+  ColumnMetadata,
+  ColumnModel,
+} from "../contracts/columns";
 import type { DisplayValue } from "../display";
-import type { ColumnGroupShow } from "../types";
 import {
   COLUMN_GROUP_ID_SEP,
   COLUMN_GROUP_RENDER_PREFIX,

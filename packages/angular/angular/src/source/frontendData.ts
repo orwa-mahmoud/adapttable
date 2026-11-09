@@ -5,14 +5,16 @@
  */
 import {
   type ColumnMetadata,
-  createFrontendSource,
+  createFrontendSourceWith,
   type ExtraFilters,
+  type FrontendEngineFactory,
   type PaginationMode,
   type QueryFilterGroup,
   resolvePaginationMode,
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
+import { createBasicTableEngine } from "@adapttable/core/engine";
 import {
   assertInInjectionContext,
   computed,
@@ -77,11 +79,21 @@ export interface FrontendDataOptions<TRow> extends Omit<
   readonly mobileBreakpoint?: number;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
+  /**
+   * Evaluator for this table's engine. Defaults to the basic one. Grouping
+   * passes the full evaluator; a headless caller can pass it the same way.
+   */
+  readonly createEngine?: MaybeSignalOptional<FrontendEngineFactory<TRow>>;
 }
 
 /**
  * An in-memory `TableSource`, as a signal: reads the URL-synced view
  * state and searches, filters, sorts and pages the rows it is given.
+ *
+ * The basic evaluator filters, sorts, and searches. A grouping feature
+ * supplies the full evaluator, which is what the grouping projection reads.
+ * Replacing that evaluator discards the pending candidate and replays the
+ * view onto the new engine; the effect publishes only after that replay.
  *
  * The engine a source exposes as `tableEngine` publishes each frame once
  * Angular has run the effects that follow it, so an agent or a second reader
@@ -108,9 +120,17 @@ export function injectFrontendData<TRow>(
       readMaybe(options.forceMobile) ?? viewportMobile()
     )
   );
-  const source = createFrontendSource<TRow>();
-  const frame = computed(() =>
-    source.update(
+  const factory = computed(
+    (): FrontendEngineFactory<TRow> =>
+      readMaybe(options.createEngine) ?? createBasicTableEngine
+  );
+  const source = createFrontendSourceWith(untracked(() => factory()));
+  const frame = computed(() => {
+    const next = factory();
+    // Synchronous so a reader in this turn, including grouping, sees the
+    // evaluator it asked for. The effect below is what publishes it.
+    if (source.engineFactory !== next) source.replaceEngine(next);
+    return source.update(
       {
         data: readMaybe(options.data),
         columns: options.columns && readMaybe(options.columns),
@@ -124,13 +144,14 @@ export function injectFrontendData<TRow>(
         paginationMode: mode(),
       },
       url.state()
-    )
-  );
+    );
+  });
   effect(
     () => {
+      const next = factory();
       frame();
       untracked(() => {
-        source.commit();
+        if (source.engineFactory === next) source.commit();
       });
     },
     { injector }

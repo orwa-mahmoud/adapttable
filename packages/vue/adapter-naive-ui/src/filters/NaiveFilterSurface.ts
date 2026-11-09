@@ -1,6 +1,7 @@
 import {
   type FilterPanelSurfaceProps,
   type OverlayCloseReason,
+  scheduleTick,
   useDataTableClassNames,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -9,7 +10,6 @@ import {
   defineComponent,
   h,
   type HTMLAttributes,
-  nextTick,
   onMounted,
   type PropType,
   shallowRef,
@@ -80,7 +80,7 @@ export const NaiveFilterSurface = defineComponent(
           surface.contains(focused) &&
           anchor?.isConnected
         ) {
-          void nextTick(() => {
+          scheduleTick(() => {
             const current = anchor.ownerDocument.activeElement;
             if (
               ticket === lifetime &&
@@ -221,7 +221,7 @@ export const NaiveFilterSurface = defineComponent(
         if (props.modal) {
           // NDrawer's public update event follows its own topmost focus-trap check.
           reason = "escape";
-          void nextTick(() => {
+          scheduleTick(() => {
             if (ticket === lifetime) reason = undefined;
           });
         } else {

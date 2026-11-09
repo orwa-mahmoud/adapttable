@@ -103,6 +103,16 @@ inputs and outputs remain the kit's public table contract. Render through
 scroll element. The models supply plans and renderer contexts; the adapter
 still supplies its own native table, cards and every required control.
 
+`AdaptDesktopStructure` and `AdaptMobileStructure` draw the one desktop table
+and phone card list every Angular kit shares; the kit passes its own
+elements and controls as `AdaptDesktopSlots` and `AdaptMobileSlots`
+templates. A kit that declares its header-cell template inside its table template, so the cell and the table are one view tree, marks it with `AdaptHeaderTemplate` and provides an `AdaptHeaderTemplateSlot` to read it from. Override the shell's `kitEnvironment()` to return the
+`KitEnvironment` the kit read from its UI library — direction, locale and
+density — and the shell loads that locale's labels on demand. Provide
+`ADAPTTABLE_KIT_MOTION_OFF` with a signal that is `true` when the library has
+turned animation off. The shell installs the shared high-contrast
+stylesheet.
+
 For a shell assembled directly, keep persistent state separate from feature composition:
 
 1. Resolve inherited and local features, their options and slot fills

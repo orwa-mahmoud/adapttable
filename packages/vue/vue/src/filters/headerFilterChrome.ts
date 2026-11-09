@@ -9,17 +9,16 @@ import {
 import type { FilterHeaderControlProps } from "@adapttable/core/binding";
 import {
   computed,
-  getCurrentInstance,
   h,
   type MaybeRefOrGetter,
   onScopeDispose,
   shallowRef,
   toValue,
-  useId,
   type VNodeChild,
   watch,
 } from "vue";
 
+import { useInstanceId } from "../componentId";
 import { useExternalStore, useScopeActivity } from "../store";
 import type { FilterFieldOptions } from "./filterFieldChrome";
 import type {
@@ -35,7 +34,7 @@ export interface HeaderFilterOptions<
 export function useHeaderFilter<TRow>(
   input: MaybeRefOrGetter<HeaderFilterOptions<TRow>>
 ) {
-  const id = getCurrentInstance() ? useId() : toValue(input).id;
+  const id = useInstanceId(() => toValue(input).id ?? "");
   if (!id)
     throw new Error(
       "AdaptTable: a headless header filter needs an explicit id."

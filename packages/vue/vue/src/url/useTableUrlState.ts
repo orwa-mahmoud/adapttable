@@ -7,6 +7,7 @@ import {
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
+import { retainItems } from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -87,11 +88,23 @@ export function useTableUrlState(
     }
     return store;
   });
-  const config = computed((): TableViewStateConfig => ({
-    defaults: toValue(options.value.defaults),
-    numberExtraKeys: toValue(options.value.numberExtraKeys),
-    arrayExtraKeys: toValue(options.value.arrayExtraKeys),
-  }));
+  let numberExtraKeys: readonly string[] | undefined;
+  let arrayExtraKeys: readonly string[] | undefined;
+  const config = computed((): TableViewStateConfig => {
+    numberExtraKeys = retainItems(
+      numberExtraKeys,
+      toValue(options.value.numberExtraKeys)
+    );
+    arrayExtraKeys = retainItems(
+      arrayExtraKeys,
+      toValue(options.value.arrayExtraKeys)
+    );
+    return {
+      defaults: toValue(options.value.defaults),
+      numberExtraKeys,
+      arrayExtraKeys,
+    };
+  });
   // Configure before projecting the store, including when only config changes.
   watch(
     [current, config],

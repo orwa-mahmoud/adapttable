@@ -15,6 +15,7 @@ import {
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
+  withKitEnvironment,
 } from "@adapttable/vue/adapter";
 import {
   computed,
@@ -29,6 +30,7 @@ import {
 
 import { naiveClassNames } from "./classNames";
 import { naiveTableControls } from "./controls/table";
+import { useNaiveLibrary } from "./libraryEnvironment";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
 import { naiveSurfaceControls } from "./surface";
 import { naiveDirection, useNaiveTableStyle } from "./theme";
@@ -59,22 +61,29 @@ onBeforeUpdate(() => {
 });
 const names = computed(() => naiveClassNames(props.classNames));
 provideDataTableClassNames(() => names.value);
-const shell = useDataTableShell<TRow>(() => ({
-  ...props,
-  footer: footer.value,
-  confirm: props.confirm ?? defaultConfirm,
-  onDensityChange: (density) => {
-    props.onDensityChange?.(density);
-    emit("update:density", density);
-  },
-  onSelectionChange:
-    props.selectable ||
-    props.selectedIds !== undefined ||
-    props.defaultSelectedIds !== undefined
-      ? (ids) => emit("update:selectedIds", ids)
-      : undefined,
-  onColumnLayoutChange: (layout) => emit("update:columnLayout", layout),
-}));
+const kit = useNaiveLibrary();
+const shell = useDataTableShell<TRow>(() =>
+  withKitEnvironment(
+    {
+      ...props,
+      footer: footer.value,
+      confirm: props.confirm ?? defaultConfirm,
+      onDensityChange: (density: TableDensity) => {
+        props.onDensityChange?.(density);
+        emit("update:density", density);
+      },
+      onSelectionChange:
+        props.selectable ||
+        props.selectedIds !== undefined ||
+        props.defaultSelectedIds !== undefined
+          ? (ids: string[]) => emit("update:selectedIds", ids)
+          : undefined,
+      onColumnLayoutChange: (layout: ColumnLayoutState) =>
+        emit("update:columnLayout", layout),
+    },
+    kit.value
+  )
+);
 const root = shallowRef<HTMLElement | null>(null);
 const scroll = shallowRef<HTMLElement | null>(null);
 watch(

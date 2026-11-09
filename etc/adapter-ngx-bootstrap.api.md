@@ -8,10 +8,10 @@ import { ActiveFilterChipsSlotProps } from '@adapttable/angular/adapter';
 import { AdaptAutoFilterFormModel } from '@adapttable/angular/adapter';
 import { AdaptColumnMenuModel } from '@adapttable/angular/adapter';
 import { AdaptDataTableShell } from '@adapttable/angular/adapter';
-import { AdaptDesktopTableModel } from '@adapttable/angular/adapter';
+import { AdaptDesktopTableHost } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderCardModel } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderRowModel } from '@adapttable/angular/adapter';
-import { AdaptMobileCardsModel } from '@adapttable/angular/adapter';
+import { AdaptMobileCardsHost } from '@adapttable/angular/adapter';
 import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
 import { AfterViewInit } from '@angular/core';
 import { BodyCellView } from '@adapttable/angular/adapter';
@@ -309,7 +309,7 @@ export class AdaptDensityButton {
 }
 
 // @internal
-export class AdaptDesktopTable<TRow> extends AdaptDesktopTableModel<TRow> {
+export class AdaptDesktopTable<TRow> extends AdaptDesktopTableHost<TRow> {
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDesktopTable<any>, "adapt-desktop-table", never, {}, {}, never, never, true, never>;
     // (undocumented)
@@ -586,7 +586,7 @@ export class AdaptGroupMore {
 }
 
 // @internal
-export class AdaptMobileCards<TRow> extends AdaptMobileCardsModel<TRow> {
+export class AdaptMobileCards<TRow> extends AdaptMobileCardsHost<TRow> {
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMobileCards<any>, "adapt-mobile-cards", never, {}, {}, never, never, true, never>;
     // (undocumented)

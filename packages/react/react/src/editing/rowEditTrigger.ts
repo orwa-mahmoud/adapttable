@@ -7,8 +7,8 @@
  * `@adapttable/core` (`resolveRowEditTrigger`), as does the row's
  * incoming-change question (`rowEditConflict`).
  */
+export { type RowEditTrigger } from "@adapttable/core";
 export {
   resolveRowEditTrigger,
   rowEditConflict,
-  type RowEditTrigger,
-} from "@adapttable/core";
+} from "@adapttable/core/editing";

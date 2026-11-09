@@ -1,17 +1,19 @@
 /** Choose a cell's editing unit; all draft, parse, validation and save transitions stay in core. */
 import {
   type CellConflictAsk,
-  cellConflictAsk,
-  controllerConflictAsk,
   type EditableCellController,
   type EditableColumnLike,
   type EditingBundle,
+} from "@adapttable/core";
+import {
+  cellConflictAsk,
+  controllerConflictAsk,
   editorSelectOptions,
   handleRowEditorKey,
   isCellEditable,
   isFirstEditableColumn,
   resolveCellEditor,
-} from "@adapttable/core";
+} from "@adapttable/core/editing";
 export interface EditableUnitModel<TRow> {
   readonly controller: EditableCellController<TRow>;
   readonly unit: "cell" | "row" | "batch";

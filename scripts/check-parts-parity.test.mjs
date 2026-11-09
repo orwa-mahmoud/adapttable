@@ -10,7 +10,19 @@ import { dirname, join } from "node:path";
 import { after, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { checkPartsParity, partsGapReport } from "./check-parts-parity.mjs";
+import {
+  checkPartsParity,
+  CORE_GETTER_PARTS,
+  partsGapReport,
+} from "./check-parts-parity.mjs";
+
+/** The row routes alone, for fixtures that check only the row part. */
+const ROW_ROUTES = Object.fromEntries(
+  Object.entries(CORE_GETTER_PARTS).map(([framework, parts]) => [
+    framework,
+    { row: parts.row },
+  ])
+);
 
 const SCRIPT = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -491,6 +503,7 @@ const rowParity = (root) =>
     root,
     kits: NATIVE_KITS,
     contract: ["row"],
+    getterParts: ROW_ROUTES,
     expectedGaps: {},
     fallbackOnly: { "native elements": ["table", "cell", "bulk-bar"] },
     unnamedInKits: {},

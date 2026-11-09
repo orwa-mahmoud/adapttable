@@ -2,6 +2,7 @@ import type { RowActionControl } from "@adapttable/vue";
 import {
   createMenuNavigation,
   mergeVueAttrs,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import UCard from "@nuxt/ui/components/Card.vue";
@@ -10,7 +11,6 @@ import {
   defineComponent,
   Fragment,
   h,
-  nextTick,
   shallowRef,
   useId,
   type VNode,
@@ -171,7 +171,7 @@ const NuxtRowActionsPresentation = /*#__PURE__*/ defineComponent(
                 onOpenAutoFocus: (event: Event) => {
                   event.preventDefault();
                   const root = event.target;
-                  void nextTick(() => {
+                  scheduleTick(() => {
                     if (
                       !active.value ||
                       !open.value ||

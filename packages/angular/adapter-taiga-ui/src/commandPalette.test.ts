@@ -312,7 +312,8 @@ describe("command palette (Taiga UI Angular)", () => {
     fixture.destroy();
   });
 
-  it("omits the toolbar button unless the host asks, and draws nothing without the token", () => {
+  it("omits the toolbar button by default and when the host turns it off, and draws nothing without the token", () => {
+    expect(commandPalette()).toBeTruthy();
     expect(commandPalette(false)).toBeTruthy();
     expect(commandPalette({ button: false })).toBeTruthy();
 

@@ -1,34 +1,17 @@
-import { type AdaptTableFeature } from "@adapttable/angular";
-import { type GroupNode, type GroupSort } from "@adapttable/core";
+import {
+  type AdaptTableFeature,
+  SURFACE_GROUPING,
+  SURFACE_HANDLES,
+  SURFACE_OCCUPIED,
+} from "@adapttable/angular";
+import { projectedGroupingSource } from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
+import { createTableEngine } from "@adapttable/core/engine";
 
-/**
- * Everything grouping can be told.
- *
- * @public
- */
-export interface GroupingExtras<TRow = unknown> {
-  /** Told when the keys change, so a host can mirror them. */
-  readonly onGroupByChange?: (groupBy: readonly string[]) => void;
-  /** Draw a footer row under each group. */
-  readonly groupFooters?: boolean;
-  /** Show this many groups at a time. */
-  readonly groupPageSize?: number;
-  /** Show this many rows inside each group. */
-  readonly groupRowPageSize?: number;
-  /** Keep only the groups this accepts — each with its value, label and rows. */
-  readonly groupFilter?: (group: GroupNode<TRow>) => boolean;
-  /** Order the groups themselves. */
-  readonly groupSort?: GroupSort<TRow>;
-  /** Per-group subtotals, the same mapper shape as a summary row. */
-  readonly groupAggregates?: (rows: readonly TRow[]) => unknown;
-  /** Controlled collapse state. */
-  readonly collapsedGroupIds?: readonly string[];
-  /** Told when a group opens or closes. */
-  readonly onCollapsedGroupIdsChange?: (ids: string[]) => void;
-  /** Fetch the rest of a group on demand. */
-  readonly onGroupLoadMore?: (groupKey: string) => void;
-}
+import { withFrontendRowModel } from "../source/rowModel";
+import { type GroupingExtras } from "./groupingExtras";
+
+export type { GroupingExtras } from "./groupingExtras";
 
 /**
  * Group rows under collapsible headers.
@@ -49,5 +32,27 @@ export function grouping<TRow = unknown>(
   groupBy: string | readonly string[],
   extras: GroupingExtras<TRow> = {}
 ): AdaptTableFeature {
-  return coreGrouping<TRow>(groupBy, extras) as AdaptTableFeature;
+  return {
+    ...withFrontendRowModel(
+      coreGrouping<TRow>(groupBy, extras) as AdaptTableFeature,
+      createTableEngine
+    ),
+    mount(context) {
+      const occupied = context.state.get(SURFACE_OCCUPIED)();
+      if (occupied?.grouping) return;
+      const handles = context.injector.get(SURFACE_HANDLES, null);
+      if (!handles) return;
+      handles.installProjector((source, model) =>
+        projectedGroupingSource(source, { model })
+      );
+      const grouping = handles.createGrouping(context.injector);
+      if (grouping === undefined) return;
+      handles.publishGrouping(grouping);
+      context.state.set(SURFACE_GROUPING, grouping);
+      return () => {
+        handles.publishGrouping(undefined);
+        context.state.set(SURFACE_GROUPING, undefined);
+      };
+    },
+  };
 }

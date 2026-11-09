@@ -35,6 +35,12 @@ export {
   type ApprovalReviewSlots,
 } from "./approval/agentApprovalContract";
 export {
+  type ApprovalArgumentPair,
+  approvalArgumentPairs,
+  approvalProposalText,
+  approvalValueText,
+} from "./approval/approvalReview";
+export {
   assistantActionsName,
   assistantBadgeTone,
   assistantComposerState,
@@ -184,6 +190,15 @@ export {
   slotFillsOf,
   slotRender,
 } from "./features/featureKeys";
+export {
+  type FeatureRegistration,
+  type FeatureRegistrationPlan,
+  invokeCleanups,
+  planFeatureRegistration,
+  preferLastById,
+  projectFeatureHosts,
+  type RegisteredFeature,
+} from "./features/featureRegistration";
 export {
   createFeatureHost,
   disposeFeatureHost,
@@ -405,6 +420,7 @@ export {
   type AssemblyFns,
   bodyCellsHaveRowSpan,
   cellsForRow,
+  columnSelectLabel,
   extraHostFillStyle,
   isExtraEntry,
   pinnedRowCellStyle,
@@ -486,7 +502,7 @@ export type {
   SavedViewsPanelSlots,
   SavedViewsPanelSurfaceProps,
 } from "./url/savedViewsPanelContract";
-export { rowSourceIndex } from "./virtual/virtualTableModel";
+export { rowSourceIndex, virtualItemMeta } from "./virtual/virtualTableModel";
 
 /**
  * The member types the signatures above hand back, so a consumer of this
@@ -545,9 +561,11 @@ export type {
   SortDirection,
 } from "./columnModel";
 export type {
+  ColumnLayoutContribution,
   ColumnLayoutState,
   PinLeads,
   PinnedCellStyle,
+  PinningContribution,
   PinOffset,
   PinSide,
   UseColumnLayoutResult,
@@ -579,6 +597,8 @@ export type {
   CustomCellEditorRender,
 } from "./editing/cellEditing";
 export type {
+  CreateTableEngineOptions,
+  TableCallbackRefresh,
   TableEngine,
   TableEngineConfigPatch,
   TableEngineReader,
@@ -668,6 +688,14 @@ export type {
   SidePanelEntry,
 } from "./features/currentHost";
 export {
+  type EditingContribution,
+  type GroupingContribution,
+  mergeGroupingContributions,
+  projectGroupingContribution,
+  REMAINING_FEATURE_OWNERSHIP,
+  type RemainingFeatureDomain,
+} from "./features/featureContribution";
+export {
   applyTableFeatures,
   type FeatureApplyInput,
   type FeaturePatch,
@@ -675,8 +703,22 @@ export {
   mergeFeaturePatches,
   type PatchFeature,
   rememberAppliedFeatures,
+  resolveFeatureGrouping,
 } from "./features/featurePatch";
-export type { FeatureRegistration } from "./features/featureRegistration";
+export {
+  type CommandPaletteContribution,
+  type ContextMenuContribution,
+  type DensityContribution,
+  type FindContribution,
+  type FullscreenContribution,
+  type PrintContribution,
+  projectShellOperations,
+  publishShellOverlay,
+  SHELL_OPERATION_OWNERS,
+  type ShellOperation,
+  type ShellOperationInput,
+  withShellOperations,
+} from "./features/shellOperations";
 export {
   type CoreStandardFeatureFactories,
   type CoreStandardFeatureOptions,
@@ -697,6 +739,7 @@ export {
 export type { FilterEngine } from "./filters/filterEngine";
 export type {
   FilterFormSource,
+  FilteringContribution,
   FiltersFormSlotProps,
 } from "./filters/filterFormModel";
 export type {
@@ -807,7 +850,11 @@ export type { PivotMeasure } from "./pivot/pivotModel";
 export type { CellSpanAppearance } from "./rows/cellSpan";
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "./rows/extraRows";
 export type { IncrementalViewConfig } from "./rows/incremental";
-export type { RowPinLookup, RowPinSide } from "./rows/rowPinModel";
+export type {
+  RowPinLookup,
+  RowPinningContribution,
+  RowPinSide,
+} from "./rows/rowPinModel";
 export type { RowPinState } from "./rows/rowPinModel";
 export type { RowReorderLabels } from "./rows/rowReorderEngine";
 export { ROW_DND_MIME } from "./rows/rowReorderEngine";
@@ -820,14 +867,26 @@ export type {
   TableSourceCapabilities,
   TotalCountCapability,
 } from "./source/capabilities";
+export {
+  frontendRowModelOf,
+  withFrontendRowModel,
+} from "./source/frontendRowModel";
+export type { FrontendEngineFactory } from "./source/frontendSource";
 export type {
   AggregateFn,
   QueryAggregate,
   QueryCondition,
+  QueryContribution,
   QueryFilterGroup,
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
 export { commitSearchOnBlur } from "./source/searchInputFlush";
+export {
+  type CachedSnapshot,
+  cachedSnapshot,
+  sourceViewKey,
+  type SourceViewKeyInput,
+} from "./source/sourceRefresh";
 export type { TableSource } from "./source/TableSource";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";
@@ -942,11 +1001,14 @@ export type {
 // test its table engine runs on each render.
 export {
   columnPathText,
+  primitiveText,
   type ResolvableColumn,
   resolveColumnDefaults,
   resolveColumnHeaders,
 } from "./columns/resolveColumns";
 export { sameRows } from "./engine/sameRows";
+export { isRecord } from "./utils/isRecord";
+export { retainItems, sameItems } from "./utils/sameItems";
 
 // Shared state shapes the bindings return from their hooks.
 export type { BulkBarState } from "./actions/actionsBindingState";
@@ -968,15 +1030,20 @@ export {
 } from "./layout/densityContract";
 export type { FullscreenState } from "./layout/layoutBindingState";
 export type { UsePivotUrlStateResult } from "./pivot/pivotBindingState";
+export { rowMoveMenuProps, type RowMoveMenuSource } from "./rows/rowMoveMenu";
 export { ROW_REORDER, type RowReorderState } from "./rows/rowReorderContract";
 export type {
   ChangedCellFlashState,
+  DetailContribution,
   HighlightState,
   RowExpansionState,
   RowMutationsState,
   RowPinningState,
 } from "./rows/rowsBindingState";
-export type { SelectionState } from "./selection/selectionBindingState";
+export type {
+  SelectionContribution,
+  SelectionState,
+} from "./selection/selectionBindingState";
 export type { HeaderSelectionState } from "./selection/selectionState";
 export type {
   SearchInputState,
@@ -985,6 +1052,7 @@ export type {
 export type { RowPatchStreamState } from "./stream/streamBindingState";
 export type {
   LazyChildrenState,
+  TreeContribution,
   TreeExpansionState,
 } from "./tree/treeBindingState";
 export type {
@@ -1012,6 +1080,10 @@ export type {
 export type { RowValidator } from "./editing/editContracts";
 export { preserveEditorFocusOnLayoutChange } from "./editing/layoutFocus";
 export type { ChecklistWindow } from "./filters/checklistModel";
+export {
+  type KitEnvironment,
+  withKitEnvironment,
+} from "./layout/kitEnvironment";
 export type { HighlightedCell } from "./rows/highlightStore";
 export type { RowPatchEvent } from "./rows/patch";
 export type {

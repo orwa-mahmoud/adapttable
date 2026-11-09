@@ -700,9 +700,10 @@ describe("approval and commit", () => {
   });
 
   it("records a rejected approval without writing", async () => {
+    const hooks = apply();
     const session = createAgentSession({
       observe: () => observation({ approval: "writes" }),
-      apply: apply(),
+      apply: hooks,
       onApprove: () => Promise.resolve(false),
     });
     const result = await session.execute(
@@ -715,6 +716,10 @@ describe("approval and commit", () => {
       approval: "rejected",
       applied: false,
     });
+    expect(hooks.editCells).not.toHaveBeenCalled();
+    expect(hooks.stageCells).not.toHaveBeenCalled();
+    expect(hooks.addRows).not.toHaveBeenCalled();
+    expect(hooks.deleteRows).not.toHaveBeenCalled();
   });
 
   it("commit stage uses stageCells when wired", async () => {

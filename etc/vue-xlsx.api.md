@@ -47,6 +47,7 @@ import { FilterDef } from '@adapttable/core';
 import { FilterEngine } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core/binding';
 import { FilterTypeSpec } from '@adapttable/core';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
@@ -849,6 +850,8 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly selection?: RowSelection;
     // (undocumented)
     readonly source: MaybeRefOrGetter<TableSource<TRow>>;
+    readonly stickyHeader?: MaybeRefOrGetterOptional<boolean>;
+    readonly stickyTop?: MaybeRefOrGetterOptional<number>;
     // (undocumented)
     readonly tableLabel?: MaybeRefOrGetterOptional<string>;
 }
@@ -859,6 +862,7 @@ export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 // @public (undocumented)
 export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions<TRow>, "source" | "selection">, Omit<UseFrontendDataOptions<TRow>, "data" | keyof UseDataTableOptions<TRow>> {
     readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
+    readonly animate?: MaybeRefOrGetterOptional<boolean>;
     // (undocumented)
     readonly assistant?: MaybeRefOrGetterOptional<TableAssistantProps<VNodeChild>>;
     // (undocumented)
@@ -907,6 +911,7 @@ export interface UseDataTableShellOptions<TRow> extends Omit<UseDataTableOptions
 export interface UseFrontendDataOptions<TRow> extends UseTableUrlStateOptions, SourceViewportOptions {
     // (undocumented)
     readonly columns?: MaybeRefOrGetterOptional<readonly ColumnMetadata<TRow>[]>;
+    readonly createEngine?: FrontendEngineFactory<TRow>;
     // (undocumented)
     readonly data: MaybeRefOrGetter<readonly TRow[]>;
     // (undocumented)

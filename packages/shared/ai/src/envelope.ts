@@ -1,3 +1,5 @@
+import { isRecord } from "@adapttable/core/binding";
+
 import { AGENT_SCHEMA_VERSION } from "./keys";
 import type { AgentSession, ExecuteResult } from "./types";
 
@@ -41,10 +43,6 @@ export type ApprovalPolicy = "writes" | "destructive" | "never";
  * @public
  */
 export type CommitPolicy = "stage" | "immediate";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /**
  * Parse an unknown JSON body into an {@link AgentEnvelope}.

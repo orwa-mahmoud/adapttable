@@ -11,17 +11,13 @@
  * each is dropped rather than applied, because a malformed frame must not
  * be able to empty a table.
  */
-import type { RowPatch } from "../rows/patch";
+
+import type { RowPatch } from "../contracts/rows";
+import { isRecord } from "../utils/isRecord";
 
 export type { RowPatch };
 
 /** One entry of a frame, before it is known to be a patch. */
-type Unknown = Record<string, unknown>;
-
-/** Whether a value is a plain object we can read fields off. */
-function isRecord(value: unknown): value is Unknown {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /** A string id, or `undefined` when the field cannot serve as one. */
 function idOf(value: unknown): string | undefined {

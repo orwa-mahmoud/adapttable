@@ -1,45 +1,24 @@
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type ReactMobileCardRenderer,
-} from "@adapttable/react";
-import {
-  bodyRowEntries,
   cellFlashAttr,
-  type ConfirmHandler,
-  EXTRA_ROW_PARTS,
-  insertExtraRows,
-  isExtraEntry,
+  type MobileCardBodyProps,
   mobileCardListStyle,
+  mobileCardPropsEqual,
   mobileCardRegionProps,
-  orderedCardEntries,
-  pinnedSummaryPart,
-  pinnedSummaryRowId,
-  pinnedSummarySideFromId,
+  MobileCardsChrome,
+  type MobileCardSlotKit,
+  mobileCardSlots,
   resolveMobileLabel,
   resolveRowEditTrigger,
-  resolveRowStyle,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  rowClickProps,
   rowEditConflict,
-  rowEditingSignature,
-  rowFlashSignature,
-  rowIsDirty,
-  rowReorderSignature,
-  rowStyleSignature,
   type SharedTableRenderProps,
-  type TableLabels,
-  treeCardStyle,
-  type TreeEntry,
+  type UseDataTableResult,
   useSummaryCells,
 } from "@adapttable/react/adapter";
 import { Box, Card, Checkbox, Group, Stack, Text } from "@mantine/core";
 import {
+  type ComponentType,
   type CSSProperties,
   memo,
-  type ReactElement,
   type ReactNode,
   type RefObject,
   useId,
@@ -57,22 +36,6 @@ import {
 } from "./featureSlots";
 import { MobileTarget } from "./mobileTarget";
 import { RowActionButtons } from "./RowActionButtons";
-
-/** Drop row-interaction props on pinned summary cards. */
-function unlessPinned<T>(
-  side: ReturnType<typeof pinnedSummarySideFromId>,
-  value: T | undefined
-): T | undefined {
-  return side ? undefined : value;
-}
-
-function unlessPinnedMatch(
-  side: ReturnType<typeof pinnedSummarySideFromId>,
-  match: ((id: string) => boolean) | undefined,
-  id: string
-): boolean {
-  return Boolean(unlessPinned(side, match)?.(id));
-}
 
 /**
  * Props for {@link MobileCards}: the card-relevant slice of core's shared
@@ -112,6 +75,7 @@ export interface MobileCardsProps<TRow> extends Pick<
   | "pinnedSummaryTop"
   | "pinnedSummaryBottom"
   | "extraRows"
+  | "assembly"
   | "maxHeight"
   | "virtualScrollRef"
 > {
@@ -120,121 +84,10 @@ export interface MobileCardsProps<TRow> extends Pick<
   density?: Density;
 }
 
-/** Per-card inputs for the memoized {@link MobileCardBase}. */
-interface MobileCardProps<TRow> {
-  /** Replace the card's body — see `BaseDataTableProps.renderCard`. */
-  renderCard?: ReactMobileCardRenderer<TRow>;
-  /** This card's place in the tree, when the table is one. */
-  treeEntry?: TreeEntry<TRow>;
-  /** Open or close this node. */
-  onToggleTree?: (id: string) => void;
-  row: TRow;
-  index: number;
-  /** Stable row id (selection / expansion key). */
-  id: string;
-  columns: readonly ColumnDef<TRow>[];
-  labels: Required<TableLabels>;
-  confirm: ConfirmHandler;
-  rowActions?: RowAction<TRow>[];
-  rowActionsLayout?: RowActionsLayout;
-  renderRowActions?: RowActionsRenderer<TRow>;
-  /** Resolved `rowClassName(row, index)`, compared as a plain string. */
-  className?: string;
-  /** Resolved `rowStyle` + `rowHeight`. Compared via `styleSignature`. */
-  style?: CSSProperties;
-  styleSignature: string;
-  /**
-   * Flashing column keys for this card, joined. Compared instead of
-   * `isCellFlashing`, which stays referentially stable while the marks move.
-   */
-  flashSignature: string;
-  isCellFlashing?: (rowId: string, columnKey: string) => boolean;
-  selected: boolean;
-  expanded: boolean;
-  /** Selection toggle — present only when selection is enabled. */
-  onToggleSelect?: (id: string) => void;
-  /** Expansion toggle — present only when `renderRowDetail` is set. */
-  onToggleExpand?: (id: string) => void;
-  renderDetail?: (row: TRow) => ReactNode;
-  onRowClick?: (row: TRow) => void;
-  measureElement?: (node: Element | null) => void;
+/** A card body: the list's inputs, plus this kit's own. */
+interface MobileCardProps<TRow> extends MobileCardBodyProps<TRow> {
   cardPadding: string;
   cardGap: string | number;
-  /**
-   * Opt-in editing bundle — uncompared. Its identity changes on every
-   * keystroke anywhere in the table; the per-row visual churn is
-   * fingerprinted by `editingSignature` instead. A held card keeps an
-   * older bundle safely: its handlers read live state through refs.
-   */
-  editing?: EditableCellEditing<TRow>;
-  /** Page rows for Tab advance — uncompared (see `editing`). */
-  rows: readonly TRow[];
-  getRowId: (row: TRow) => string;
-  /** Memo digest from {@link rowEditingSignature}. */
-  editingSignature: string | null;
-  /** Headless reorder; uncompared — visual churn is `reorderSignature`. */
-  rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
-  windowStart: number;
-  rowCount: number;
-  /** Rows in the whole dataset, for `aria-setsize`. */
-  setSize: number;
-  reorderSignature: string | null;
-  part?: string;
-  ariaLabel?: string;
-}
-
-/** The card props the memo comparator deliberately skips (see `editing`). */
-type UncomparedCardProp =
-  "editing" | "rows" | "getRowId" | "rowReorder" | "style" | "isCellFlashing";
-
-/** Every card prop the memo comparator checks with `Object.is`. */
-const COMPARED_CARD_PROPS: readonly Exclude<
-  keyof MobileCardProps<unknown>,
-  UncomparedCardProp
->[] = [
-  "row",
-  "index",
-  "id",
-  "columns",
-  "labels",
-  "confirm",
-  "rowActions",
-  "rowActionsLayout",
-  "renderRowActions",
-  "className",
-  "styleSignature",
-  "flashSignature",
-  "selected",
-  "expanded",
-  "onToggleSelect",
-  "onToggleExpand",
-  "renderDetail",
-  "onRowClick",
-  "measureElement",
-  "cardPadding",
-  "cardGap",
-  "editingSignature",
-  "reorderSignature",
-  "windowStart",
-  "rowCount",
-  "setSize",
-  // Or a folder opens and its own chevron never turns.
-  "treeEntry",
-  "part",
-  "ariaLabel",
-];
-
-/**
- * `React.memo` comparator: re-render a card only when one of its VISUAL
- * inputs changes — a search keystroke or another card's checkbox re-renders
- * the list shell, but every unchanged card bails out here (column accessors
- * are not re-invoked).
- */
-function mobileCardPropsEqual<TRow>(
-  prev: Readonly<MobileCardProps<TRow>>,
-  next: Readonly<MobileCardProps<TRow>>
-): boolean {
-  return COMPARED_CARD_PROPS.every((key) => Object.is(prev[key], next[key]));
 }
 
 /** One card. Memoized by {@link mobileCardPropsEqual} at the call site. */
@@ -248,17 +101,12 @@ function MobileCardBase<TRow>({
   rowActions,
   rowActionsLayout,
   renderRowActions,
-  className,
-  style,
   isCellFlashing,
   selected,
   expanded,
   onToggleSelect,
   onToggleExpand,
   renderDetail,
-  onRowClick,
-  measureElement,
-  cardPadding,
   cardGap,
   editing,
   rows,
@@ -268,10 +116,7 @@ function MobileCardBase<TRow>({
   rowReorder,
   windowStart,
   rowCount,
-  setSize,
   renderCard,
-  part,
-  ariaLabel,
 }: Readonly<MobileCardProps<TRow>>) {
   // Built once and used by both paths, so a custom card shows the very
   // same value node the built-in would have — cell renderers and editors
@@ -308,239 +153,252 @@ function MobileCardBase<TRow>({
   const rowConflict = rowEditConflict(editing, id);
   return (
     <MobileTarget.Provider value={true}>
-      <Card
-        {...rowClickProps(row, onRowClick, index)}
-        style={{
-          minHeight: "max-content",
-          borderColor: selected
-            ? "var(--mantine-primary-color-filled)"
-            : undefined,
-          ...treeCardStyle(treeEntry?.level ?? 0),
-          ...style,
-        }}
-        className={className}
-        ref={measureElement}
-        data-index={index}
-        // A windowed list has only a slice of its items in the DOM, so each
-        // one states where it sits and how many there are; a complete list
-        // needs neither, because assistive tech can simply count.
-        aria-posinset={setSize > rowCount ? windowStart + index + 1 : undefined}
-        aria-setsize={setSize > rowCount ? setSize : undefined}
-        data-adapttable-part={part ?? "card"}
-        withBorder
-        radius="md"
-        padding={cardPadding}
-        role="listitem"
-        aria-label={ariaLabel}
-        data-stagger=""
-        data-selected={selected ? "" : undefined}
-        data-dirty={rowIsDirty(editing, id) ? "" : undefined}
-      >
-        <Stack gap={cardGap}>
-          {(treeEntry ?? onToggleSelect ?? onToggleExpand) && (
-            <Group justify="space-between" wrap="nowrap" gap="xs">
-              <Group gap="xs">
-                {treeEntry && (
-                  <OptionalTreeToggle
-                    entry={treeEntry}
-                    labels={labels}
-                    onToggle={onToggleTree ?? (() => undefined)}
-                  />
-                )}
-                {onToggleSelect && (
-                  <label
-                    htmlFor={selectionId}
-                    style={{
-                      display: "inline-flex",
-                      minWidth: 44,
-                      minHeight: 44,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <Checkbox
-                      id={selectionId}
-                      aria-label={labels.selectRow}
-                      checked={selected}
-                      onChange={() => onToggleSelect(id)}
-                      styles={{
-                        body: { minHeight: 44, alignItems: "center" },
-                        input: { cursor: "pointer" },
-                      }}
-                    />
-                  </label>
-                )}
-              </Group>
-              {onToggleExpand && (
-                <OptionalExpandToggle
-                  id={id}
-                  expanded={Boolean(expanded)}
-                  onToggle={onToggleExpand}
-                  expandLabel={labels.expandRow}
-                  collapseLabel={labels.collapseRow}
+      <Stack gap={cardGap}>
+        {(treeEntry ?? onToggleSelect ?? onToggleExpand) && (
+          <Group justify="space-between" wrap="nowrap" gap="xs">
+            <Group gap="xs">
+              {treeEntry && (
+                <OptionalTreeToggle
+                  entry={treeEntry}
+                  labels={labels}
+                  onToggle={onToggleTree ?? (() => undefined)}
                 />
               )}
-            </Group>
-          )}
-          {renderCard ? (
-            renderCard(row, {
-              index,
-              fields,
-              selected,
-              expanded,
-            })
-          ) : (
-            <Box
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(min(100%, 7rem), 1fr))",
-                gap:
-                  typeof cardGap === "number"
-                    ? cardGap
-                    : `var(--mantine-spacing-${cardGap})`,
-              }}
-            >
-              {fields.map(({ column, label, value }) => (
-                <Box
-                  key={column.key}
-                  data-adapttable-part="card-row"
+              {onToggleSelect && (
+                <label
+                  htmlFor={selectionId}
                   style={{
-                    minWidth: 0,
-                    overflowWrap: "anywhere",
-                    gridColumn: label ? undefined : "1 / -1",
-                    borderRadius: "var(--mantine-radius-sm)",
+                    display: "inline-flex",
+                    minWidth: 44,
+                    minHeight: 44,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
                   }}
-                  p={label ? "xs" : 0}
-                  bg={label ? "var(--mantine-color-default-hover)" : undefined}
                 >
-                  {label && (
-                    <Text
-                      data-adapttable-part="card-label"
-                      fz="xs"
-                      c="var(--mantine-color-text)"
-                      fw={500}
-                    >
-                      {label}
-                    </Text>
-                  )}
-                  {/* Cells are arbitrary ReactNode (often block elements) —
-                a <p> wrapper would be invalid HTML. */}
-                  <Text
-                    component="div"
-                    fz={label ? "sm" : "md"}
-                    fw={label ? undefined : 600}
-                    data-adapttable-part="card-value"
-                    data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
-                  >
-                    {value}
-                  </Text>
-                </Box>
-              ))}
-            </Box>
-          )}
-          {rowReorder && (
-            <OptionalRowReorderButtons
-              reorder={rowReorder}
-              labels={labels}
-              localIndex={index}
-              row={row}
-              windowStart={windowStart}
-              rowCount={rowCount}
-            />
-          )}
-          {expanded && renderDetail && (
-            <div data-adapttable-part="card-detail">{renderDetail(row)}</div>
-          )}
-          {editing?.rowEditing && (
-            <OptionalRowEditActions
-              rowEditing={editing.rowEditing}
-              row={row}
-              rowId={id}
-              showBegin={rowEdit.showBegin}
-              icons={editing.rowEditIcons}
-              conflict={rowConflict}
-              labels={labels}
-            />
-          )}
-          {rowEdit.actions.length > 0 && (
-            <Box
-              data-adapttable-part="card-actions"
-              pt="sm"
-              style={{
-                borderTop: "1px solid var(--mantine-color-default-border)",
-              }}
-            >
-              <RowActionButtons
-                minTargetSize={44}
-                row={row}
-                actions={rowEdit.actions}
-                confirm={confirm}
-                labels={labels}
-                layout={rowActionsLayout}
-                render={renderRowActions}
+                  <Checkbox
+                    id={selectionId}
+                    aria-label={labels.selectRow}
+                    checked={selected}
+                    onChange={() => onToggleSelect(id)}
+                    styles={{
+                      body: { minHeight: 44, alignItems: "center" },
+                      input: { cursor: "pointer" },
+                    }}
+                  />
+                </label>
+              )}
+            </Group>
+            {onToggleExpand && (
+              <OptionalExpandToggle
+                id={id}
+                expanded={Boolean(expanded)}
+                onToggle={onToggleExpand}
+                expandLabel={labels.expandRow}
+                collapseLabel={labels.collapseRow}
               />
-            </Box>
-          )}
-        </Stack>
-      </Card>
+            )}
+          </Group>
+        )}
+        {renderCard ? (
+          renderCard(row, {
+            index,
+            fields,
+            selected,
+            expanded,
+          })
+        ) : (
+          <Box
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(min(100%, 7rem), 1fr))",
+              gap:
+                typeof cardGap === "number"
+                  ? cardGap
+                  : `var(--mantine-spacing-${cardGap})`,
+            }}
+          >
+            {fields.map(({ column, label, value }) => (
+              <Box
+                key={column.key}
+                data-adapttable-part="card-row"
+                style={{
+                  minWidth: 0,
+                  overflowWrap: "anywhere",
+                  gridColumn: label ? undefined : "1 / -1",
+                  borderRadius: "var(--mantine-radius-sm)",
+                }}
+                p={label ? "xs" : 0}
+                bg={label ? "var(--mantine-color-default-hover)" : undefined}
+              >
+                {label && (
+                  <Text
+                    data-adapttable-part="card-label"
+                    fz="xs"
+                    c="var(--mantine-color-text)"
+                    fw={500}
+                  >
+                    {label}
+                  </Text>
+                )}
+                {/* Cells are arbitrary ReactNode (often block elements) —
+                a <p> wrapper would be invalid HTML. */}
+                <Text
+                  component="div"
+                  fz={label ? "sm" : "md"}
+                  fw={label ? undefined : 600}
+                  data-adapttable-part="card-value"
+                  data-flash={cellFlashAttr(isCellFlashing, id, column.key)}
+                >
+                  {value}
+                </Text>
+              </Box>
+            ))}
+          </Box>
+        )}
+        {rowReorder && (
+          <OptionalRowReorderButtons
+            reorder={rowReorder}
+            labels={labels}
+            localIndex={index}
+            row={row}
+            windowStart={windowStart}
+            rowCount={rowCount}
+          />
+        )}
+        {expanded && renderDetail && (
+          <div data-adapttable-part="card-detail">{renderDetail(row)}</div>
+        )}
+        {editing?.rowEditing && (
+          <OptionalRowEditActions
+            rowEditing={editing.rowEditing}
+            row={row}
+            rowId={id}
+            showBegin={rowEdit.showBegin}
+            icons={editing.rowEditIcons}
+            conflict={rowConflict}
+            labels={labels}
+          />
+        )}
+        {rowEdit.actions.length > 0 && (
+          <Box
+            data-adapttable-part="card-actions"
+            pt="sm"
+            style={{
+              borderTop: "1px solid var(--mantine-color-default-border)",
+            }}
+          >
+            <RowActionButtons
+              minTargetSize={44}
+              row={row}
+              actions={rowEdit.actions}
+              confirm={confirm}
+              labels={labels}
+              layout={rowActionsLayout}
+              render={renderRowActions}
+            />
+          </Box>
+        )}
+      </Stack>
     </MobileTarget.Provider>
   );
 }
 
-/** Mobile rendering: one Mantine Card per row with labelled key/value rows. */
-export function MobileCards<TRow>({
+/**
+ * Stable list elements. An inline host is a new component every render,
+ * which remounts the cards. A spacer stays a plain div, and a group card
+ * already draws its own surface, so it is not wrapped again.
+ */
+function MantineMobileCardHost(props: {
+  readonly children?: ReactNode;
+  readonly style?: CSSProperties;
+  readonly "data-passthrough"?: string;
+  readonly "data-adapttable-part"?: string;
+}) {
+  "use no memo";
+  if (props["data-adapttable-part"] === "virtual-spacer") {
+    return <div aria-hidden style={{ height: props.style?.height }} />;
+  }
+  if (props["data-passthrough"] != null) return <>{props.children}</>;
+  return <Card {...props} />;
+}
+
+/** What the card list's callbacks read beside each card's entry. */
+interface CardSlotInputs<TRow> {
+  readonly table: UseDataTableResult<TRow>;
+  readonly CardItem: ComponentType<MobileCardProps<TRow>>;
+  readonly compact: boolean;
+  readonly cardPadding: MobileCardProps<TRow>["cardPadding"];
+  readonly cardGap: MobileCardProps<TRow>["cardGap"];
+}
+
+/** This kit's card host, body, extra-row cell and group card. */
+function cardSlotKit<TRow>({
   table,
-  rows,
-  rowActions,
-  rowActionsLayout,
-  renderRowActions,
-  confirm,
-  getRowId,
-  bodyRef,
-  className,
-  rowEntries,
-  paddingTop = 0,
-  paddingBottom = 0,
-  measureElement,
-  density = "comfortable",
-  onRowClick,
-  rowClassName,
-  isCellFlashing,
-  rowStyle,
-  rowHeight,
-  renderRowDetail,
-  summaryRow,
-  expansion,
-  editing,
-  grouping,
-  tree,
-  rowReorder,
-  windowStart = 0,
-  cardSetSize = 0,
-  pinnedTopRows = [],
-  pinnedBottomRows = [],
-  pinnedSummaryTop = [],
-  pinnedSummaryBottom = [],
-  extraRows,
-  renderCard,
-  maxHeight,
-  virtualScrollRef,
-}: Readonly<MobileCardsProps<TRow>>) {
+  CardItem,
+  compact,
+  cardPadding,
+  cardGap,
+}: CardSlotInputs<TRow>): MobileCardSlotKit<TRow> {
   const { columns, selection, labels } = table;
+  return {
+    card: (entry) => ({
+      key: entry.key,
+      props: {
+        ...entry.itemProps,
+        style: {
+          borderColor: entry.selected
+            ? "var(--mantine-primary-color-filled)"
+            : undefined,
+          ...entry.itemProps.style,
+        },
+        className: entry.rowClass,
+        withBorder: true,
+        radius: "md",
+        padding: cardPadding,
+      },
+      content: (
+        <CardItem {...entry.body} cardPadding={cardPadding} cardGap={cardGap} />
+      ),
+    }),
+    extraCell: (part, content) => (
+      <div data-adapttable-part={part}>{content}</div>
+    ),
+    groupCard: (entry, grouping) => (
+      <OptionalGroupHeaderCard
+        entry={entry}
+        columns={columns}
+        selection={selection}
+        labels={labels}
+        compact={compact}
+        onToggleCollapse={(groupKey) => grouping.collapsed.toggle(groupKey)}
+        onShowMore={grouping.showMore}
+      />
+    ),
+  };
+}
+
+/** Mobile rendering: one Mantine Card per row with labelled key/value rows. */
+export function MobileCards<TRow>(props: Readonly<MobileCardsProps<TRow>>) {
+  // The compiler's cache around these slots is larger than the slots.
+  "use no memo";
+  const {
+    table,
+    rows,
+    bodyRef,
+    className,
+    paddingTop = 0,
+    paddingBottom = 0,
+    density = "comfortable",
+    summaryRow,
+    maxHeight,
+    virtualScrollRef,
+  } = props;
+  const { columns, labels } = table;
   const compact = density === "compact";
   const cardPadding = compact ? "sm" : "md";
   const cardGap = compact ? 4 : "xs";
-  const entries = orderedCardEntries(
-    rows,
-    getRowId,
-    rowEntries,
-    pinnedTopRows,
-    pinnedBottomRows,
-    pinnedSummaryTop,
-    pinnedSummaryBottom
-  );
   // Header groups and multi-sort are desktop-only: cards have no column axis
   // to span a group label across or to chain a sort on, so neither renders
   // here. The footer summary still applies — it closes the list as one card.
@@ -549,205 +407,76 @@ export function MobileCards<TRow>({
   // `memo` erases generics at module level, so the memoized card is
   // instantiated here (once — the identity is stable for the list's life).
   const CardItem = useMemo(
-    () => memo(MobileCardBase<TRow>, mobileCardPropsEqual),
+    () =>
+      memo(
+        MobileCardBase<TRow>,
+        mobileCardPropsEqual<TRow, MobileCardProps<TRow>>([
+          "cardPadding",
+          "cardGap",
+        ])
+      ),
     []
   );
 
-  const cardFor = (
-    row: TRow,
-    index: number,
-    key: string,
-    treeEntry?: TreeEntry<TRow>
-  ): ReactElement => {
-    const side = pinnedSummarySideFromId(key);
-    const id = side ? key : getRowId(row);
-    return (
-      <CardItem
-        key={key}
-        row={row}
-        index={index}
-        id={id}
-        columns={columns}
-        labels={labels}
-        confirm={confirm}
-        rowActions={unlessPinned(side, rowActions)}
-        rowActionsLayout={rowActionsLayout}
-        renderRowActions={unlessPinned(side, renderRowActions)}
-        className={rowClassName?.(row, index)}
-        style={resolveRowStyle(rowStyle, rowHeight, row, index)}
-        styleSignature={rowStyleSignature(
-          resolveRowStyle(rowStyle, rowHeight, row, index)
-        )}
-        flashSignature={rowFlashSignature(isCellFlashing, id, columns)}
-        isCellFlashing={isCellFlashing}
-        selected={unlessPinnedMatch(side, selection?.isSelected, id)}
-        expanded={unlessPinnedMatch(side, expansion?.isExpanded, id)}
-        onToggleSelect={unlessPinned(side, selection?.toggle)}
-        onToggleExpand={unlessPinned(
-          side,
-          renderRowDetail ? expansion?.toggle : undefined
-        )}
-        renderDetail={unlessPinned(side, renderRowDetail)}
-        onRowClick={unlessPinned(side, onRowClick)}
-        measureElement={measureElement}
-        cardPadding={cardPadding}
-        cardGap={cardGap}
-        editing={editing}
-        rows={rows}
-        getRowId={getRowId}
-        editingSignature={rowEditingSignature(editing, id)}
-        treeEntry={unlessPinned(side, treeEntry)}
-        onToggleTree={unlessPinned(side, tree?.expansion.toggle)}
-        rowReorder={unlessPinned(side, rowReorder)}
-        windowStart={windowStart}
-        rowCount={rows.length}
-        setSize={cardSetSize}
-        reorderSignature={rowReorderSignature(rowReorder, id, index)}
-        renderCard={unlessPinned(side, renderCard)}
-        part={side ? pinnedSummaryPart(side) : undefined}
-        ariaLabel={side ? labels.pinnedSummaryRow : undefined}
-      />
-    );
-  };
+  const cards = mobileCardSlots(
+    props,
+    cardSlotKit({ table, CardItem, compact, cardPadding, cardGap })
+  );
+
+  const summary = summaryCells ? (
+    <Card
+      data-adapttable-part="summary-card"
+      withBorder
+      radius="md"
+      padding={cardPadding}
+      role="listitem"
+    >
+      <Stack gap={cardGap}>
+        {columns
+          .filter((column) => summaryCells[column.key] !== undefined)
+          .map((column) => (
+            <div key={column.key} data-adapttable-part="card-row">
+              {resolveMobileLabel(column) && (
+                <Text
+                  data-adapttable-part="card-label"
+                  fz="xs"
+                  c="dimmed"
+                  tt="uppercase"
+                  fw={500}
+                >
+                  {resolveMobileLabel(column)}
+                </Text>
+              )}
+              <Text component="div" fz="sm" fw={600}>
+                {summaryCells[column.key]}
+              </Text>
+            </div>
+          ))}
+      </Stack>
+    </Card>
+  ) : null;
 
   return (
-    <section
-      {...mobileCardRegionProps(
+    <MobileCardsChrome
+      regionProps={mobileCardRegionProps(
         table.getTableProps()["aria-label"],
         labels.table,
         maxHeight
       )}
-      ref={virtualScrollRef}
+      scrollRef={virtualScrollRef}
       style={mobileCardListStyle(maxHeight)}
-    >
-      <Stack
-        gap={compact ? "xs" : "sm"}
-        ref={bodyRef}
-        data-adapttable-part="cards"
-        className={className}
-        {...table.getTableProps({ role: "list" })}
-      >
-        {paddingTop > 0 && <div aria-hidden style={{ height: paddingTop }} />}
-        {grouping
-          ? pinnedSummaryTop.map((row, index) =>
-              cardFor(row, index, pinnedSummaryRowId("top", index))
-            )
-          : null}
-        {grouping
-          ? grouping.entries.map((entry) => {
-              if (isExtraEntry(entry)) {
-                return (
-                  <Card
-                    key={entry.key}
-                    withBorder
-                    radius="md"
-                    padding={cardPadding}
-                    data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].row}
-                    role={entry.kind === "separator" ? "separator" : undefined}
-                    aria-label={
-                      entry.kind === "separator"
-                        ? labels.rowSeparator
-                        : undefined
-                    }
-                  >
-                    <div
-                      data-adapttable-part={EXTRA_ROW_PARTS[entry.kind].cell}
-                    >
-                      {entry.kind === "fullWidth"
-                        ? (entry.render?.() as ReactNode)
-                        : null}
-                    </div>
-                  </Card>
-                );
-              }
-              if (
-                entry.kind === "group" ||
-                entry.kind === "groupFooter" ||
-                entry.kind === "groupMore"
-              ) {
-                return (
-                  <OptionalGroupHeaderCard
-                    key={entry.key}
-                    entry={entry}
-                    columns={columns}
-                    selection={selection}
-                    labels={labels}
-                    compact={compact}
-                    onToggleCollapse={(key) => grouping.collapsed.toggle(key)}
-                    onShowMore={grouping.showMore}
-                  />
-                );
-              }
-              return cardFor(entry.row, entry.index, entry.key);
-            })
-          : insertExtraRows(
-              bodyRowEntries(entries, tree),
-              extraRows,
-              (e) => e.key
-            ).map((slot) =>
-              "kind" in slot ? (
-                <Card
-                  key={slot.key}
-                  withBorder
-                  radius="md"
-                  padding={cardPadding}
-                  data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].row}
-                  role={slot.kind === "separator" ? "separator" : undefined}
-                  aria-label={
-                    slot.kind === "separator" ? labels.rowSeparator : undefined
-                  }
-                >
-                  <div data-adapttable-part={EXTRA_ROW_PARTS[slot.kind].cell}>
-                    {slot.kind === "fullWidth"
-                      ? (slot.render?.() as ReactNode)
-                      : null}
-                  </div>
-                </Card>
-              ) : (
-                cardFor(slot.row, slot.index, slot.key, slot.treeEntry)
-              )
-            )}
-        {grouping
-          ? pinnedSummaryBottom.map((row, index) =>
-              cardFor(row, index, pinnedSummaryRowId("bottom", index))
-            )
-          : null}
-        {paddingBottom > 0 && (
-          <div aria-hidden style={{ height: paddingBottom }} />
-        )}
-        {summaryCells && (
-          <Card
-            data-adapttable-part="summary-card"
-            withBorder
-            radius="md"
-            padding={cardPadding}
-            role="listitem"
-          >
-            <Stack gap={cardGap}>
-              {columns
-                .filter((column) => summaryCells[column.key] !== undefined)
-                .map((column) => (
-                  <div key={column.key} data-adapttable-part="card-row">
-                    {resolveMobileLabel(column) && (
-                      <Text
-                        data-adapttable-part="card-label"
-                        fz="xs"
-                        c="dimmed"
-                        tt="uppercase"
-                        fw={500}
-                      >
-                        {resolveMobileLabel(column)}
-                      </Text>
-                    )}
-                    <Text component="div" fz="sm" fw={600}>
-                      {summaryCells[column.key]}
-                    </Text>
-                  </div>
-                ))}
-            </Stack>
-          </Card>
-        )}
-      </Stack>
-    </section>
+      classNames={{ cards: className }}
+      hosts={{ List: Stack, Card: MantineMobileCardHost }}
+      listProps={{
+        gap: compact ? "xs" : "sm",
+        ref: bodyRef,
+        ...table.getTableProps({ role: "list" }),
+      }}
+      listStyle={{ margin: undefined, padding: undefined }}
+      paddingTop={paddingTop}
+      paddingBottom={paddingBottom}
+      cards={cards}
+      summary={summary}
+    />
   );
 }

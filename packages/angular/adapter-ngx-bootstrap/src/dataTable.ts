@@ -4,28 +4,16 @@
  * this kit's kit, so every control a reader uses is the browser's own.
  */
 import {
-  ADAPTTABLE_FIND_STATE,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
-} from "@adapttable/angular";
-import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
-  ADAPTTABLE_CONTEXT_MENU,
-  ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
-  type PaletteOpenState,
+  provideAdaptTableState,
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-  signal,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 import { AdaptDesktopTable } from "./components/desktopTable";
 import { AdaptErrorState } from "./components/errorState";
@@ -65,20 +53,7 @@ export type {
   ],
   templateUrl: "./dataTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: ADAPTTABLE_FIND_STATE,
-      useFactory: () => signal<FindInTableState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_PALETTE_OPEN,
-      useFactory: () => signal<PaletteOpenState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_CONTEXT_MENU,
-      useFactory: () => signal<ContextMenuRegionHandlers | null>(null),
-    },
-  ],
+  providers: [provideAdaptTableState()],
 })
 export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {
   /** Bootstrap color mode, scoped to this table and its overlays. */

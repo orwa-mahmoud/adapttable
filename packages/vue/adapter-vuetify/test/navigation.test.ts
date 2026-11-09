@@ -285,9 +285,9 @@ it("server-renders status controls and hydrates navigation admission without mis
   const html = await renderToString(createSSRApp(root).use(vuetify()));
   expect(html).toContain('data-adapttable-part="find-button"');
   expect(html).toContain("host-find");
-  expect(html).toContain("host-status");
-  expect(html).toContain("host-item");
-  expect(html).toContain("v-chip");
+  expect(html).toContain('data-adapttable-part="footer"');
+  expect(html).toContain("Showing 1–2 of 2");
+  expect(html).not.toContain('data-status="rows"');
   const host = document.createElement("div");
   host.innerHTML = html;
   document.body.append(host);

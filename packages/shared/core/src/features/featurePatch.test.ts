@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { GroupingContribution } from "./featureContribution";
 import {
   applyTableFeatures,
   getAppliedFeatures,
   mergeFeaturePatches,
   type PatchFeature,
   rememberAppliedFeatures,
+  resolveFeatureGrouping,
 } from "./featurePatch";
 
 function set(id: string, patch: Record<string, unknown>): PatchFeature {
@@ -186,6 +188,28 @@ describe("applyTableFeatures", () => {
     const first = applyTableFeatures({ features: list });
     expect(getAppliedFeatures(first)).toBe(list);
     expect(applyTableFeatures(first)).toBe(first);
+  });
+});
+
+describe("resolveFeatureGrouping", () => {
+  const earlier: GroupingContribution<{ id: string }> = { entries: [] };
+  const later: GroupingContribution<{ id: string }> = {
+    entries: [],
+    groupBy: ["team"],
+  };
+
+  it("lets a later feature win and skips a feature that contributes nothing", () => {
+    expect(resolveFeatureGrouping(undefined, [earlier, undefined, later])).toBe(
+      later
+    );
+  });
+
+  it("lets a defined host contribution win over every feature", () => {
+    expect(resolveFeatureGrouping(earlier, [later])).toBe(earlier);
+  });
+
+  it("does not let an undefined host contribution erase a feature", () => {
+    expect(resolveFeatureGrouping(undefined, [earlier])).toBe(earlier);
   });
 });
 

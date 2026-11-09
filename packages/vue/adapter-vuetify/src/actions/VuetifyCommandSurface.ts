@@ -1,11 +1,11 @@
 import {
   type ManagedCommandPaletteSurfaceProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
   defineComponent,
   h,
-  nextTick,
   onBeforeUnmount,
   type PropType,
   shallowRef,
@@ -31,7 +31,7 @@ export const VuetifyCommandSurface = defineComponent(
         : null;
     const focus = () => {
       const control = props.control;
-      void nextTick(() => {
+      scheduleTick(() => {
         const root: unknown = card.value?.$el;
         if (
           !active.value ||

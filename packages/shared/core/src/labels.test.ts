@@ -22,6 +22,13 @@ describe("resolveLabels", () => {
   it("overrides function labels", () => {
     const merged = resolveLabels({ selectedCount: (n) => `${n} picked` });
     expect(merged.selectedCount(3)).toBe("3 picked");
+    expect(merged.showing).toBe(defaultLabels.showing);
+  });
+
+  it("keeps default key order under a partial override", () => {
+    const merged = resolveLabels({ search: "Buscar", noData: undefined });
+    expect(Object.keys(merged)).toEqual(Object.keys(defaultLabels));
+    expect(merged.noData).toBe(defaultLabels.noData);
   });
 });
 

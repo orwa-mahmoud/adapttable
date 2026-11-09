@@ -5,7 +5,13 @@
  * The headless hook stays {@link injectGridFocus}; this factory only turns
  * the capability on so a kit can list it with the other features.
  */
-import type { AdaptTableFeature } from "@adapttable/angular";
+import {
+  type AdaptTableFeature,
+  injectGridFocus,
+  SURFACE_GRID,
+  SURFACE_HANDLES,
+  SURFACE_OCCUPIED,
+} from "@adapttable/angular";
 import type { CellRange } from "@adapttable/core";
 import { coreCellNavigation } from "@adapttable/core/binding";
 
@@ -42,7 +48,25 @@ export interface CellNavigationOptions {
 export function cellNavigation(
   options: CellNavigationOptions = {}
 ): AdaptTableFeature {
-  return coreCellNavigation(
-    options.onRangeChange ? { onRangeChange: options.onRangeChange } : {}
-  );
+  return {
+    ...coreCellNavigation(
+      options.onRangeChange ? { onRangeChange: options.onRangeChange } : {}
+    ),
+    mount(context) {
+      const occupied = context.state.get(SURFACE_OCCUPIED)();
+      if (occupied?.grid) return;
+      const handles = context.injector.get(SURFACE_HANDLES, null);
+      if (!handles) return;
+      const grid = injectGridFocus({
+        table: handles.table,
+        enabled: true,
+        onRangeChange: options.onRangeChange,
+        injector: context.injector,
+      });
+      context.state.set(SURFACE_GRID, grid);
+      return () => {
+        context.state.set(SURFACE_GRID, undefined);
+      };
+    },
+  };
 }

@@ -21,7 +21,7 @@ import {
   validateEditCommit,
 } from "./editCommitLifecycle";
 import type { BatchRowEdit, EditEventHandler } from "./editContracts";
-import { observeEdit } from "./editingController";
+import { observeEdit } from "./editSession";
 import { parseColumnDraft, type RowEditDrafts } from "./rowEditing";
 import { listenerSet } from "./storePlumbing";
 

@@ -7,7 +7,8 @@
  * a binding draws it from kit slots; what each zone lists and offers is
  * decided here once.
  */
-import type { AggregateName } from "../aggregate/aggregate";
+
+import type { AggregateName } from "../contracts/columns";
 import type { TableLabels } from "../types";
 import {
   availableFields,

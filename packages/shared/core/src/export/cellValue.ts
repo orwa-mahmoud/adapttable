@@ -1,5 +1,6 @@
 /** Internal value resolution shared by exports, clipboard and selection stats. */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
 import { getPath } from "../utils/path";
 import { defaultCsvValue } from "./csv";
 

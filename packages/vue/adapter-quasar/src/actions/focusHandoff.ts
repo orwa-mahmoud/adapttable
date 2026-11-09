@@ -1,4 +1,4 @@
-import { nextTick } from "vue";
+import { scheduleTick } from "@adapttable/vue/adapter";
 
 /** Complete a native overlay's unmount without stealing a newer focus owner. */
 export function finishOverlayFocus(
@@ -11,7 +11,7 @@ export function finishOverlayFocus(
   const origin = doc.activeElement;
   if (!origin || !root.contains(origin)) return;
   const ownerModal = opener.closest('[aria-modal="true"]');
-  void nextTick(() => {
+  scheduleTick(() => {
     if (
       !current() ||
       !opener.isConnected ||

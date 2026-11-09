@@ -2,6 +2,7 @@
  * The live grouped model — what a grouped table renders from.
  */
 import { createMemoryAdapter, type TableSource } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -55,6 +56,11 @@ class Host {
     data: this.tasks,
     columns: COLUMNS,
     getRowId: (row) => row.id,
+    createEngine: features.some(
+      (feature) => feature.id === "grouping" || feature.id === "grouping-panel"
+    )
+      ? createTableEngine
+      : undefined,
   });
   private readonly table = injectDataTable<Task>({
     source: this.source,

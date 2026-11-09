@@ -1,4 +1,3 @@
-import { resolveRowEditTrigger, rowEditConflict } from "@adapttable/core";
 import {
   BATCH_EDIT_BAR,
   coreBatchEditing,
@@ -11,6 +10,10 @@ import {
   ROW_EDIT_ACTIONS,
   type RowEditIcons,
 } from "@adapttable/core/binding";
+import {
+  resolveRowEditTrigger,
+  rowEditConflict,
+} from "@adapttable/core/editing";
 import type {
   FeatureMountContext,
   StaticTableFeature,
@@ -41,7 +44,7 @@ export type EditingLifecycleExtras<TRow> = Omit<
   | "batchEditing"
 > & { readonly rowEditIcons?: RowEditIcons };
 /** One stable model factory shared by all three independently named editing features. */
-function mountEditing<TRow>(context: FeatureMountContext<TRow>): void {
+function useEditing<TRow>(context: FeatureMountContext<TRow>): void {
   // Editing only consumes the row-free editor registry; keep its projection stable.
   const editorHost = computed(() => ({
     ...context.featureHost.value,
@@ -128,7 +131,7 @@ export function editing<TRow>(
   const base = coreEditing<TRow>(onCellEdit, extras);
   return {
     id: base.id,
-    apply: (input) => ({ ...base.apply?.(input), editingModel: mountEditing }),
+    apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL],
   };
 }
@@ -139,7 +142,7 @@ export function rowEditing<TRow>(
   const base = coreRowEditing<TRow>(onRowEdit, extras);
   return {
     id: base.id,
-    apply: (input) => ({ ...base.apply?.(input), editingModel: mountEditing }),
+    apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL, ROW_EDIT_ACTIONS],
   };
 }
@@ -150,7 +153,7 @@ export function batchEditing<TRow>(
   const base = coreBatchEditing<TRow>(onBatchEdit, extras);
   return {
     id: base.id,
-    apply: (input) => ({ ...base.apply?.(input), editingModel: mountEditing }),
+    apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL, BATCH_EDIT_BAR],
   };
 }
@@ -213,8 +216,8 @@ export type {
   CustomCellEditorConflict,
   CustomCellEditorCtrl,
 } from "@adapttable/core";
-export { formatMultiDraft, readMultiDraft } from "@adapttable/core";
 export type { RowEditIcons } from "@adapttable/core/binding";
+export { formatMultiDraft, readMultiDraft } from "@adapttable/core/editing";
 
 /** Public feature signatures share the binding's nameable member types. */
 export { UNDO_REDO_CONTROL } from "./actions/contracts";

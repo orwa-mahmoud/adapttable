@@ -3,6 +3,7 @@
  * announces and marks while a row is moving.
  */
 import { createMemoryAdapter, type RowReorderOptions } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -45,6 +46,11 @@ class Host {
     data: signal(PEOPLE),
     columns: COLUMNS,
     getRowId: (row) => row.id,
+    createEngine: this.features.some(
+      (feature) => feature.id === "grouping" || feature.id === "grouping-panel"
+    )
+      ? createTableEngine
+      : undefined,
   });
   readonly table = injectDataTable<Person>({
     source: this.source,

@@ -187,4 +187,178 @@ describe("a write from anywhere else owns the table", () => {
     expect(engine.snapshot().search).toBe("");
     expect(engine.snapshot().limit).toBe(1);
   });
+
+  it("dispatch and readers stay on committed rows until the candidate commits", () => {
+    const engine = engineOf();
+    const committed = engine.rows("full");
+    engine.stageCandidate({ search: "lin" });
+
+    expect(engine.rows("full")).toBe(committed);
+    expect(engine.candidate.rows("full").map((row) => row.id)).toEqual(["3"]);
+
+    engine.dispatch({ type: "setPage", page: 2 });
+
+    expect(engine.snapshot().search).toBe("");
+    expect(engine.snapshot().page).toBe(2);
+    expect(engine.rows("full")).toBe(committed);
+    const after = engine.snapshot().revisions;
+    engine.commitCandidate();
+    expect(engine.snapshot().revisions).toEqual(after);
+  });
+
+  it("a discarded or stale candidate leaves the newer committed rows", () => {
+    const engine = engineOf();
+    const committed = engine.rows("full");
+    engine.stageCandidate({ search: "ada" }, { data: [LIN, ADA] });
+    engine.discardCandidate();
+
+    expect(engine.rows("full")).toBe(committed);
+    expect(engine.snapshot().search).toBe("");
+
+    engine.stageCandidate({ search: "lin" });
+    engine.dispatch({ type: "setLimit", limit: 1 });
+    engine.commitCandidate();
+
+    expect(engine.snapshot().limit).toBe(1);
+    expect(engine.snapshot().search).toBe("");
+    expect(engine.rows("full")).toBe(committed);
+  });
+});
+
+describe("callback refresh", () => {
+  it("clears a filter and shows the rows it was hiding", () => {
+    const engine = createTableEngine<Row>({
+      data: [ADA, GRACE, LIN],
+      columns: [{ key: "team", header: "Team" }],
+      rowKey: (row) => row.id,
+      filterFn: (row) => row.team === "core",
+    });
+    expect(engine.rows("full").map((row) => row.id)).toEqual(["1", "3"]);
+
+    engine.refreshCallbacks({ filterFn: undefined });
+
+    expect(engine.rows("full").map((row) => row.id)).toEqual(["1", "2", "3"]);
+  });
+
+  it("keeps the derived rows when a new closure has the same presence", () => {
+    const engine = createTableEngine<Row>({
+      data: [ADA, GRACE],
+      columns: [{ key: "team", header: "Team" }],
+      rowKey: (row) => row.id,
+      filterFn: (row) => row.team === "core",
+    });
+    const before = engine.rows("full");
+    const woken = vi.fn();
+    engine.subscribe("all", woken);
+
+    engine.refreshCallbacks({ filterFn: (row) => row.team === "web" });
+
+    expect(engine.rows("full")).toBe(before);
+    expect(woken).not.toHaveBeenCalled();
+  });
+
+  it("does not let a candidate callback reach committed readers", () => {
+    const engine = engineOf();
+    const committed = engine.rows("full");
+    engine.stageCandidate({ search: "ada" });
+    engine.refreshCallbacks({ filterFn: () => false });
+
+    expect(engine.rows("full")).toBe(committed);
+    expect(engine.candidate.rows("full")).toEqual([]);
+
+    engine.discardCandidate();
+    expect(engine.rows("full")).toBe(committed);
+    expect(engine.snapshot().search).toBe("");
+  });
+
+  it("ignores a patch that names nothing", () => {
+    const engine = engineOf();
+    const before = engine.snapshot().revisions;
+    const woken = vi.fn();
+    engine.subscribe("all", woken);
+
+    engine.refreshCallbacks({});
+    engine.stageCandidate({});
+    engine.commitCandidate();
+
+    expect(engine.snapshot().revisions).toEqual(before);
+    expect(woken).not.toHaveBeenCalled();
+  });
+});
+
+describe("notification reliability", () => {
+  it("runs a dispatch that a subscriber starts", () => {
+    const engine = engineOf();
+    let nested = false;
+    engine.subscribe("all", () => {
+      if (nested) return;
+      nested = true;
+      engine.dispatch({ type: "setPage", page: 2 });
+    });
+
+    engine.dispatch({ type: "setSort", key: "name", dir: "asc" });
+
+    expect(engine.snapshot().sortBy).toBe("name");
+    expect(engine.snapshot().page).toBe(2);
+  });
+
+  it("still notifies a later subscriber when an earlier one unsubscribes", () => {
+    const engine = engineOf();
+    const second = vi.fn();
+    const unsubscribe = engine.subscribe("all", () => {
+      unsubscribe();
+    });
+    engine.subscribe("all", second);
+
+    engine.dispatch({ type: "setPage", page: 2 });
+
+    expect(second).toHaveBeenCalledTimes(1);
+    expect(engine.snapshot().page).toBe(2);
+  });
+
+  it("stops the engine when a subscriber disposes it", () => {
+    const engine = engineOf();
+    const second = vi.fn();
+    engine.subscribe("all", () => {
+      engine.dispose();
+    });
+    engine.subscribe("all", second);
+
+    engine.dispatch({ type: "setPage", page: 2 });
+
+    expect(engine.snapshot).toThrow(/disposed/);
+  });
+
+  it("lets a throwing subscriber propagate after the write has landed", () => {
+    const engine = engineOf();
+    const second = vi.fn();
+    engine.subscribe("all", () => {
+      throw new Error("listener failed");
+    });
+    engine.subscribe("all", second);
+
+    expect(() => engine.dispatch({ type: "setPage", page: 2 })).toThrow(
+      /listener failed/
+    );
+    expect(engine.snapshot().page).toBe(2);
+    expect(second).not.toHaveBeenCalled();
+  });
+
+  it("leaves committed rows in place when a staged filter throws", () => {
+    const engine = engineOf();
+    const committed = engine.rows("full");
+
+    expect(() =>
+      engine.stageCandidate({
+        filterFn: () => {
+          throw new Error("filter failed");
+        },
+      })
+    ).toThrow(/filter failed/);
+
+    expect(engine.rows("full")).toBe(committed);
+    engine.discardCandidate();
+    expect(engine.rows("full")).toBe(committed);
+    expect(engine.snapshot().search).toBe("");
+  });
 });

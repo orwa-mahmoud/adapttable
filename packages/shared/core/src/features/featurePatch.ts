@@ -11,6 +11,11 @@
  * The binding adds what it draws (providers, slot renders) on its own
  * feature type; the merge is the same for every binding, so it lives here.
  */
+import {
+  type GroupingContribution,
+  mergeGroupingContributions,
+  projectGroupingContribution,
+} from "./featureContribution";
 import type { FeatureRegistration } from "./featureRegistration";
 
 /**
@@ -175,4 +180,27 @@ export function applyTableFeatures<P extends object>(options: P): P {
   applied.add(resolved);
   rememberAppliedFeatures(resolved, list);
   return resolved;
+}
+
+/**
+ * Resolve grouping contributions with the same precedence as
+ * {@link applyTableFeatures}.
+ *
+ * Later features win. A defined host contribution wins over every feature.
+ * Undefined entries are skipped. The winner is returned as itself.
+ *
+ * @param host - The host's own grouping, when it published one.
+ * @param features - Grouping each feature contributed, in array order.
+ * @returns The contribution the runtime view projects.
+ *
+ * @public
+ */
+export function resolveFeatureGrouping<TRow>(
+  host: GroupingContribution<TRow> | undefined,
+  features: readonly (GroupingContribution<TRow> | undefined)[]
+): GroupingContribution<TRow> | undefined {
+  return projectGroupingContribution({
+    host,
+    feature: mergeGroupingContributions(features),
+  });
 }

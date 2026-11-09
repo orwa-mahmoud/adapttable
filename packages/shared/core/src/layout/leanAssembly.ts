@@ -3,11 +3,15 @@
  *
  * Small functions live here in full. Heavy implementations (cell-span math,
  * extra-row splicing, column-resize drag) are injected through
- * {@link resolveAssembly} when the owning feature is composed.
+ * {@link resolveAssembly} when the owning feature is composed. Summary
+ * aggregates and browser measurement stay out of this bag: the row, header
+ * and sticky builders call these seams, and they do not import the
+ * incremental engine or the viewport measurer.
  */
-import type { ColumnMetadata } from "../columnModel";
+
 import type { PinOffset } from "../columns/columnLayoutModel";
 import type { ColumnResizeHandleProps } from "../columns/columnResize";
+import type { ColumnMetadata } from "../contracts/columns";
 import type { DisplayValue } from "../display";
 import type { FilterDef } from "../filters/filterDefs";
 import type { BodyCell, GetCellSpan } from "../rows/cellSpan";

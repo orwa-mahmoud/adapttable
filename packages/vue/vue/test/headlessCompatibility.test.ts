@@ -82,6 +82,40 @@ describe("optional headless factories", () => {
     expect(test.table.featureOptions.value.multiSort).toBeUndefined();
     test.scope.stop();
   });
+  it("sticks the header at the page offset, and at 0 inside a scroll box", () => {
+    const page = effectScope();
+    const stuck = page.run(() =>
+      useDataTableShell({
+        data: rows,
+        columns,
+        rowKey: (row: Row) => row.id,
+        urlSync: false,
+        stickyHeader: true,
+        stickyTop: 12,
+      })
+    );
+    expect(stuck!.table.headerCellAttrs(required(columns[0]))).toMatchObject({
+      "data-sticky": "",
+      style: { position: "sticky", top: "12px" },
+    });
+    page.stop();
+    const boxed = effectScope();
+    const scrolled = boxed.run(() =>
+      useDataTableShell({
+        data: rows,
+        columns,
+        rowKey: (row: Row) => row.id,
+        urlSync: false,
+        stickyHeader: true,
+        stickyTop: 12,
+        maxHeight: 240,
+      })
+    );
+    expect(
+      scrolled!.table.headerCellAttrs(required(columns[0])).style
+    ).toMatchObject({ position: "sticky", top: "0px" });
+    boxed.stop();
+  });
   it("fitColumns actually supplies flex sizing and retracts on replacement", () => {
     const test = shell([fitColumns()]);
     expect(test.table.desktop.value.attrs.style).toMatchObject({

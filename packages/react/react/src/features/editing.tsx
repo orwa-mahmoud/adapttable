@@ -8,17 +8,17 @@
  * {@link editing}, {@link rowEditing} and {@link batchEditing} all fill
  * the same slot; apply() sets the channel each one owns.
  */
-import {
-  devWarn,
-  dirtyMarkerView,
-  resolveEditingArming,
-} from "@adapttable/core";
+import { devWarn } from "@adapttable/core";
 import {
   coreBatchEditing,
   coreDirtyIndicators,
   coreEditing,
   coreRowEditing,
 } from "@adapttable/core/binding";
+import {
+  dirtyMarkerView,
+  resolveEditingArming,
+} from "@adapttable/core/editing";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { type BatchRowEdit, useBatchEditing } from "../editing/batchEditing";

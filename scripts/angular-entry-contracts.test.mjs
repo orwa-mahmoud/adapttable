@@ -25,7 +25,7 @@ describe("Angular canonical entries", () => {
     assert.deepEqual(angularSourceOwnershipErrors(REPO_ROOT), []);
     const names = Object.values(ownership).flat();
     assert.equal(new Set(names).size, names.length);
-    assert.equal(names.length, 826);
+    assert.equal(names.length, 850);
   });
 
   it("routes returned types through their owner without moving ownership", () => {

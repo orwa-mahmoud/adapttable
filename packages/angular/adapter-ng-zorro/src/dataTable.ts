@@ -3,22 +3,16 @@
  * State and callbacks stay in the binding; NG-ZORRO owns the visible controls.
  */
 import {
-  ADAPTTABLE_FIND_STATE,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
-} from "@adapttable/angular";
-import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
-  ADAPTTABLE_CONTEXT_MENU,
-  ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
-  type PaletteOpenState,
+  type KitEnvironment,
+  provideAdaptTableState,
 } from "@adapttable/angular/adapter";
-import { BidiModule } from "@angular/cdk/bidi";
+import { BidiModule, Directionality } from "@angular/cdk/bidi";
 import {
   FullscreenOverlayContainer,
   OverlayContainer,
@@ -28,14 +22,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  signal,
+  inject,
   viewChild,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { NzBadgeModule } from "ng-zorro-antd/badge";
 import { NzButtonModule } from "ng-zorro-antd/button";
+import { NZ_CONFIG } from "ng-zorro-antd/core/config";
 import { NzEmptyModule } from "ng-zorro-antd/empty";
 import { NzFlexModule } from "ng-zorro-antd/flex";
+import { NZ_I18N } from "ng-zorro-antd/i18n";
 import { NzInputModule } from "ng-zorro-antd/input";
 import { NzSelectModule } from "ng-zorro-antd/select";
 import { NzSpinModule } from "ng-zorro-antd/spin";
@@ -47,6 +43,7 @@ import { AdaptOverlayOrigin } from "./components/overlayPlacement";
 import { AdaptPaginationFooter } from "./components/paginationFooter";
 import { AdaptTableRegion } from "./components/tableRegion";
 import { AdaptTableSkeleton } from "./components/tableSkeleton";
+import { ngZorroLibrary } from "./libraryEnvironment";
 
 export type {
   BodyCellView,
@@ -89,21 +86,15 @@ export type {
     // the table's selects, menus and popovers render into a CDK overlay
     // container that follows the page into fullscreen.
     { provide: OverlayContainer, useClass: FullscreenOverlayContainer },
-    {
-      provide: ADAPTTABLE_FIND_STATE,
-      useFactory: () => signal<FindInTableState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_PALETTE_OPEN,
-      useFactory: () => signal<PaletteOpenState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_CONTEXT_MENU,
-      useFactory: () => signal<ContextMenuRegionHandlers | null>(null),
-    },
+    provideAdaptTableState(),
   ],
 })
 export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {
+  private readonly inheritedDirection = inject(Directionality, {
+    optional: true,
+  });
+  private readonly i18n = inject(NZ_I18N, { optional: true });
+  private readonly config = inject(NZ_CONFIG, { optional: true });
   private readonly sortSelect = viewChild<
     ElementRef<HTMLElement>,
     ElementRef<HTMLElement>
@@ -112,4 +103,12 @@ export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {
   /** Label the kit's real combobox, rather than only its host. */
   protected readonly sortInput = (): HTMLElement | null =>
     this.sortSelect()?.nativeElement.querySelector("input") ?? null;
+
+  protected override kitEnvironment(): KitEnvironment {
+    return ngZorroLibrary({
+      dir: this.inheritedDirection?.valueSignal(),
+      locale: this.i18n?.locale,
+      size: this.config?.table?.nzSize,
+    });
+  }
 }

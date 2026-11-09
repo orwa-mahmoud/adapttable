@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { scheduleTick } from "@adapttable/vue/adapter";
 import {
   cloneVNode,
   type HTMLAttributes,
   mergeProps,
-  nextTick,
   onBeforeUnmount,
   shallowRef,
   type VNode,
@@ -36,7 +36,7 @@ function captureInput(value: unknown): void {
 function restoreControlledState(event: Event): void {
   const target = event.currentTarget;
   if (!(target instanceof HTMLInputElement)) return;
-  void nextTick(() => {
+  scheduleTick(() => {
     if (!active || input.value !== target || !target.isConnected) return;
     target.checked = props.checked;
     target.indeterminate = props.indeterminate === true;

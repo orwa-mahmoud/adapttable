@@ -7,7 +7,7 @@
 import { coreEditHistory } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
-import { useTableEditHistory } from "../editing/editHistory";
+import { asBatchGesture, useTableEditHistory } from "../editing/editHistory";
 import type { EditHistoryHandle, EditHistoryOptions } from "../props";
 import { slotRender } from "./providers";
 import { EDIT_HISTORY_LIVE, type EditHistoryLiveSlotProps } from "./slotKeys";
@@ -18,7 +18,14 @@ function LiveEditHistory({
   editHistory,
   columns,
   onCellEdit,
-}: EditHistoryLiveSlotProps<never>): ReactNode {
+  onBatchEdit,
+}: EditHistoryLiveSlotProps<never> & {
+  /**
+   * The host's batch callback. Recorded here, inside the editing entry, so a
+   * table that never imports editing does not carry the gesture wrapper.
+   */
+  readonly onBatchEdit?: NonNullable<Parameters<typeof asBatchGesture>[0]>;
+}): ReactNode {
   const result = useTableEditHistory({
     editHistory,
     columns,
@@ -28,7 +35,10 @@ function LiveEditHistory({
     typeof editHistory === "object" ? editHistory.onChange : undefined,
     result.history
   );
-  return children(result);
+  return children({
+    ...result,
+    onBatchEdit: asBatchGesture(onBatchEdit, result.history.record),
+  } as Parameters<typeof children>[0]);
 }
 
 /**

@@ -4,23 +4,18 @@
  * this kit's kit, so every control a reader uses is the browser's own.
  */
 import {
-  ADAPTTABLE_FIND_STATE,
-  type ContextMenuRegionHandlers,
-  type FindInTableState,
-} from "@adapttable/angular";
-import {
   AdaptAttrs,
   AdaptDataTableShell,
   AdaptGridFocusAnnouncer,
   AdaptIcon,
   AdaptSlot,
-  ADAPTTABLE_CONTEXT_MENU,
-  ADAPTTABLE_PALETTE_OPEN,
   AdaptTableStatusAnnouncer,
-  type PaletteOpenState,
+  type KitEnvironment,
+  provideAdaptTableState,
 } from "@adapttable/angular/adapter";
+import { Directionality } from "@angular/cdk/bidi";
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 
 import { AdaptDesktopTable } from "./components/desktopTable";
 import { AdaptErrorState } from "./components/errorState";
@@ -56,19 +51,19 @@ export type {
   ],
   templateUrl: "./dataTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: ADAPTTABLE_FIND_STATE,
-      useFactory: () => signal<FindInTableState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_PALETTE_OPEN,
-      useFactory: () => signal<PaletteOpenState | null>(null),
-    },
-    {
-      provide: ADAPTTABLE_CONTEXT_MENU,
-      useFactory: () => signal<ContextMenuRegionHandlers | null>(null),
-    },
-  ],
+  providers: [provideAdaptTableState()],
 })
-export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {}
+export class AdaptDataTable<TRow> extends AdaptDataTableShell<TRow> {
+  private readonly inheritedDirection = inject(Directionality, {
+    optional: true,
+  });
+
+  /**
+   * Angular Aria takes direction from CDK `Directionality`. It has no
+   * runtime locale, density, or motion setting for the table's chrome.
+   */
+  protected override kitEnvironment(): KitEnvironment {
+    const dir = this.inheritedDirection?.valueSignal();
+    return dir === undefined ? {} : { dir };
+  }
+}

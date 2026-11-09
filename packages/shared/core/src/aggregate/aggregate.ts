@@ -18,77 +18,26 @@
  * `sortValue` if it has one, else the key's data path — so a formatted cell
  * (`accessor: r => money.format(r.budget)`) still aggregates on its number.
  */
-import type { ColumnMetadata } from "../columnModel";
+import type {
+  AggregateName,
+  AggregateOperationId,
+  AggregateOrderedValue,
+  Aggregator,
+  ColumnMetadata,
+} from "../contracts/columns";
 import type { DisplayValue } from "../display";
 import {
   currentFeatureHost,
   type FeatureHostState,
 } from "../features/currentHost";
-import type { SortableValue } from "../types";
 import { getPath } from "../utils/path";
-
-/**
- * A value min/max can rank: the sortable primitives plus a `Date`.
- *
- * `SortableValue` stays the sort-key type. A date column's raw cell is a
- * `Date` without a `sortValue`, and min/max keep that original rather than
- * forcing it through a number first.
- *
- * @public
- */
-export type AggregateOrderedValue = SortableValue | Date;
-
-/**
- * The aggregate functions available by name.
- *
- * @public
- */
-export type AggregateName = "sum" | "avg" | "count" | "min" | "max";
-
-/**
- * An operation id: a built-in name, or one a column declared itself.
- *
- * The open half is what carries a host's `{ id, label, calculate }` operation
- * through state, a URL and a request; the named half is what keeps built-ins
- * autocompleting.
- *
- * @public
- */
-export type AggregateOperationId =
-  AggregateName | (string & Record<never, never>);
-
-/**
- * A custom aggregator: the values found for one column across the rows being
- * aggregated, already narrowed to those that are present.
- *
- * Return whatever the cell should show — a number, a formatted string, a
- * node. Return `undefined` for "no cell here".
- *
- * The return type is `DisplayValue` so the built mapper is directly assignable
- * to `summaryRow` and `groupAggregates`, which is the whole point of it.
- *
- * @public
- */
-export type Aggregator<TValue = AggregateOrderedValue> = (
-  values: readonly TValue[]
-) => DisplayValue | undefined;
-
-/**
- * What the table knows about the aggregate a column is about to show.
- *
- * @public
- */
-export interface AggregateFormatContext {
-  /** The column the value belongs to. */
-  readonly columnKey: string;
-  /**
-   * The operation that produced it, when the table knows: the reader's own
-   * choice, or the one a server was asked for — a built-in name, or the id of
-   * an operation the column declared itself. A hand-written `groupAggregates`
-   * mapper declares nothing, so this is absent there.
-   */
-  readonly aggregation?: AggregateOperationId;
-}
+export type {
+  AggregateFormatContext,
+  AggregateName,
+  AggregateOperationId,
+  AggregateOrderedValue,
+  Aggregator,
+} from "../contracts/columns";
 
 /**
  * What to compute per column: a built-in name, a name registered with

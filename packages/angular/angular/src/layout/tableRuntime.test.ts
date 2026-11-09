@@ -10,6 +10,7 @@ import {
   rowReorderRuntimeOptions,
   type TableSource,
 } from "@adapttable/core";
+import { createTableEngine } from "@adapttable/core/engine";
 import { Component, computed, type Signal, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
@@ -167,6 +168,7 @@ describe("tableRuntimeFor", () => {
       readonly source = injectFrontendData({
         data: this.data,
         columns: COLUMNS,
+        createEngine: createTableEngine<Person>,
       });
       readonly table = injectDataTable({
         source: this.source,

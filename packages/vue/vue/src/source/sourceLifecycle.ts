@@ -1,4 +1,5 @@
 import {
+  MOBILE_BREAKPOINT_PX,
   type PaginationMode,
   type ResolvedPaginationMode,
   resolvePaginationMode,
@@ -32,7 +33,7 @@ export function useViewportMobile(
   watch(
     [
       active,
-      () => toValue(toValue(input).mobileBreakpoint) ?? 768,
+      () => toValue(toValue(input).mobileBreakpoint) ?? MOBILE_BREAKPOINT_PX,
       () => toValue(toValue(input).forceMobile),
     ],
     ([enabled, breakpoint, forced], _previous, onCleanup) => {

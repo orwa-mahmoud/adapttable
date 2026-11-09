@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { ColumnModel } from "../types";
+import type { ColumnModel } from "../contracts/columns";
 import { buildExportTable } from "./exportWriter";
 import { buildTablePdf, pdfWriter } from "./pdf";
 import { fontCovering } from "./testFont";

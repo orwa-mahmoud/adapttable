@@ -15,7 +15,7 @@ import type {
   ContextMenuActions,
   ContextMenuTarget,
 } from "../actions/contextMenuModel";
-import type { ColumnMetadata } from "../columnModel";
+import type { ColumnMetadata } from "../contracts/columns";
 import { type CellRange, cellRangeBounds } from "./cellRange";
 import { clipboardRangeText, writeClipboardText } from "./clipboardRange";
 import type { GridCell } from "./gridFocus";

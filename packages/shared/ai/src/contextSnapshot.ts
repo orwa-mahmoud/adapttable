@@ -18,6 +18,8 @@
  * unavailable rather than omitted, because a model cannot tell an empty list
  * from a question nobody asked.
  */
+import type { RowPinState } from "@adapttable/core/binding";
+
 import type { AgentPagination } from "./pagination";
 import type {
   AgentAggregations,
@@ -105,7 +107,7 @@ export interface AgentContextView {
   /** Filter state, with excluded keys already removed. */
   readonly filters?: Readonly<Record<string, unknown>>;
   readonly pinnedColumns?: Readonly<Record<string, unknown>>;
-  readonly pinnedRows?: Readonly<Record<string, unknown>>;
+  readonly pinnedRows?: RowPinState | Readonly<Record<string, unknown>>;
   readonly hiddenColumns?: readonly string[];
   readonly columnOrder?: readonly string[];
   /**
@@ -311,7 +313,7 @@ export function buildView(
     readonly groupBy?: string;
     readonly filters?: Readonly<Record<string, unknown>>;
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
-    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    readonly pinnedRows?: RowPinState | Readonly<Record<string, unknown>>;
     readonly hiddenColumns?: readonly string[];
     readonly columnOrder?: readonly string[];
     readonly pagination?: AgentPagination;

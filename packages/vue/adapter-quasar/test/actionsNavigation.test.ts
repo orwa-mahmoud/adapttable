@@ -4,7 +4,7 @@ import {
   provideDataTableClassNames,
 } from "@adapttable/vue/adapter";
 import { mount } from "@vue/test-utils";
-import { QBadge, QBar, QBtn, QInput, Quasar } from "quasar";
+import { QBadge, QBtn, QInput, Quasar } from "quasar";
 import { afterEach, expect, it, vi } from "vitest";
 import { defineComponent, h, KeepAlive, nextTick, shallowRef } from "vue";
 
@@ -230,8 +230,7 @@ it("finds rows through the same native search target and returns focus after Esc
   await settle();
   expect(f.wrapper.get(part("find-count")).text()).toContain("1");
   expect(f.wrapper.get(part("find-input")).element).toBe(input.element);
-  expect(f.wrapper.findComponent(QBar).exists()).toBe(true);
-  expect(f.wrapper.get(part("status-bar")).attributes("role")).toBe("status");
+  expect(f.wrapper.find(part("status-bar")).exists()).toBe(false);
   await input.trigger("keydown", { key: "Enter" });
   await input.trigger("keydown", { key: "Escape" });
   await settle();
@@ -251,8 +250,8 @@ it("keeps optional print and find toolbar controls absent until requested", asyn
 it("installs the status bar independently of selection statistics", async () => {
   const f = fixture(() => ({ features: [statusBar()] }));
   await settle();
-  expect(f.wrapper.get(part("status-bar")).attributes("role")).toBe("status");
-  expect(f.wrapper.get(part("status-bar")).text()).toContain("2");
+  expect(f.wrapper.find(part("status-bar")).exists()).toBe(false);
+  expect(f.wrapper.get(part("footer")).text()).toContain("2");
   expect(f.wrapper.find(part("selection-stats")).exists()).toBe(false);
 });
 

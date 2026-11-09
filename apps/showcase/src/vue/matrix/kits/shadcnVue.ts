@@ -38,20 +38,34 @@ import { virtualize } from "@adapttable/shadcn-vue/virtualize";
 import {
   AvatarFallback,
   AvatarRoot,
+  ConfigProvider,
   Primitive,
   ProgressIndicator,
   ProgressRoot,
   ToggleGroupItem,
   ToggleGroupRoot,
 } from "reka-ui";
-import { h } from "vue";
+import { defineComponent, h } from "vue";
 
 import type { ShowcaseKit } from "../showcaseKit";
 import DataTable from "./tables/ShadcnVueDataTable.vue";
 
+/** The same Reka config provider this kit reads for direction and locale. */
+const Root = defineComponent(
+  (props: { dark: boolean; dir: "ltr" | "rtl" }, { slots }) =>
+    () =>
+      h(
+        ConfigProvider,
+        { dir: props.dir, locale: props.dir === "rtl" ? "ar" : "en" },
+        { default: () => slots.default?.() }
+      ),
+  { name: "ShadcnVueShowcaseRoot", props: ["dark", "dir"] }
+);
+
 /** Components and feature factories are always from this one kit. */
 export const kit: ShowcaseKit = {
   key: "shadcn-vue",
+  Root,
   input: ({ label, part, value, type, disabled, onChange }) =>
     h(Primitive, {
       as: "input",

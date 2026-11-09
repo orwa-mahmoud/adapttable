@@ -11,7 +11,7 @@
  * from the arguments that actually ran; anything the host did not supply is
  * left out rather than guessed.
  */
-import type { TableLabels } from "@adapttable/core";
+import { resolveLabels, type TableLabels } from "@adapttable/core";
 import {
   assistantActionsName,
   assistantInitials,
@@ -221,7 +221,7 @@ function Receipt({
           // it would put back.
           <span data-adapttable-part="assistant-receipt-undo">
             <Button
-              label={labels?.assistantUndo ?? "Undo"}
+              label={resolveLabels(labels).assistantUndo}
               part="assistant-receipt-undo-button"
               variant="subtle"
               icon={<UndoIcon />}
@@ -233,10 +233,7 @@ function Receipt({
       {assistantReceiptNeedsSave(receipt) ? (
         <span data-adapttable-part="assistant-receipt-save">
           <Badge
-            label={
-              labels?.assistantSaveInTable ??
-              "Save in the table to keep this change."
-            }
+            label={resolveLabels(labels).assistantSaveInTable}
             part="assistant-receipt-save-badge"
             // The only status that draws this badge is the one that needs
             // saving, and a change the reader still has to keep is a warning
@@ -248,7 +245,7 @@ function Receipt({
       {receipt.message ? (
         <>
           <Button
-            label={labels?.assistantDetail ?? "Details"}
+            label={resolveLabels(labels).assistantDetail}
             part="assistant-receipt-detail"
             variant="subtle"
             expanded={open}
@@ -365,9 +362,8 @@ export function AssistantMessage({
       }
     : {};
   const mine = message.role === "user";
-  const speaker = mine
-    ? (labels?.assistantYou ?? "You")
-    : (labels?.assistantSpeaker ?? "Assistant");
+  const copy = resolveLabels(labels);
+  const speaker = mine ? copy.assistantYou : copy.assistantSpeaker;
   return (
     <li
       data-adapttable-part="assistant-message"
@@ -848,7 +844,7 @@ function LoneUndo({
   return (
     <span data-adapttable-part="assistant-undo">
       <slots.Button
-        label={labels?.assistantUndo ?? "Undo"}
+        label={resolveLabels(labels).assistantUndo}
         part="assistant-undo-button"
         variant="secondary"
         icon={<UndoIcon />}
@@ -1049,7 +1045,7 @@ function Receipts({
           id={headingId}
           style={{ fontSize: "0.85em", opacity: 0.75, fontWeight: 600 }}
         >
-          {labels?.assistantActionsTitle ?? "What this turn changed"}
+          {resolveLabels(labels).assistantActionsTitle}
         </strong>
         {undoTurn && perRow !== 1 ? (
           <span data-adapttable-part="assistant-receipts-undo-all">
@@ -1237,7 +1233,7 @@ export function AssistantAlwaysAllowed({
       style={{ display: "flex", flexDirection: "column", gap: "0.3em" }}
     >
       <span data-adapttable-part="assistant-always-allowed-title">
-        {labels?.assistantAlwaysAllowedTitle ?? "Not asking about"}
+        {resolveLabels(labels).assistantAlwaysAllowedTitle}
       </span>
       <ul
         style={{

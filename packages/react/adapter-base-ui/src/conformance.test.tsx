@@ -54,8 +54,8 @@ function featuresFor(scenario: ConformanceScenario) {
 
 const driver: ConformanceDriver = {
   name: "base-ui",
-  mount: (scenario) =>
-    renderBaseUi(
+  mount: (scenario) => {
+    const element = () => (
       <DataTable
         data={[...scenario.rows]}
         columns={columnsFor(scenario)}
@@ -70,6 +70,17 @@ const driver: ConformanceDriver = {
             : { limit: scenario.pageSize }
         }
         labels={scenario.labels}
+        onRowClick={scenario.onRowClick}
+        isCellFlashing={
+          scenario.isCellFlashing === undefined
+            ? undefined
+            : (rowId: string, columnKey: string) =>
+                scenario.isCellFlashing?.(rowId, columnKey) === true
+        }
+        searchPlaceholder={scenario.searchPlaceholder}
+        onQueryChange={scenario.onQueryChange}
+        total={scenario.total}
+        mode={scenario.mode === "frontend" ? "frontend" : undefined}
         features={featuresFor(scenario)}
         {...(scenario.virtualize
           ? { paginationMode: "infinite" as const, maxHeight: 200 }
@@ -80,7 +91,14 @@ const driver: ConformanceDriver = {
             : undefined
         }
       />
-    ),
+    );
+    const view = renderBaseUi(element());
+    return {
+      container: view.container,
+      unmount: () => view.unmount(),
+      refresh: () => view.rerender(element()),
+    };
+  },
 };
 
 describe(`table conformance — ${driver.name}`, () => {

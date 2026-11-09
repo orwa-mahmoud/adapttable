@@ -174,6 +174,12 @@ disposed subscriptions. Snapshots and their row/engine objects are not deep-prox
 `ExternalStoreOptions.active` optionally adds an activity ref/getter to the
 owning scope's lifecycle. These helpers come from `@adapttable/vue/adapter`.
 
+A kit reads its UI library's direction, locale and density into a
+`KitEnvironment` and merges it under the table's props with
+`withKitEnvironment`; `useLocaleLabels` fills that environment's labels for
+the library locale, loading one language on demand. `mountForcedColorsStyles`
+installs the shared high-contrast stylesheet from setup.
+
 ## Data sources
 
 Each source returns `Readonly<ShallowRef<TableSource<TRow>>>`; the respective

@@ -16,6 +16,8 @@
  *
  * @packageDocumentation
  */
+import type { RowPinState } from "@adapttable/core/binding";
+
 import {
   type AgentContextOptions,
   type AgentContextProfile,
@@ -123,7 +125,7 @@ export interface AgentContextInputs {
     readonly groupBy?: string;
     readonly filters?: Readonly<Record<string, unknown>>;
     readonly pinnedColumns?: Readonly<Record<string, unknown>>;
-    readonly pinnedRows?: Readonly<Record<string, unknown>>;
+    readonly pinnedRows?: RowPinState | Readonly<Record<string, unknown>>;
     readonly hiddenColumns?: readonly string[];
     readonly columnOrder?: readonly string[];
     /** Overrides the session's own pagination, for a host that knows better. */

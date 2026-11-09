@@ -3,13 +3,12 @@
  * The engine owns state; this hook re-renders on revision bumps.
  */
 import {
-  createTableEngine,
   type CreateTableEngineOptions,
   devWarn,
   type TableEngine,
-  type TableEngineReader,
 } from "@adapttable/core";
-import { sameRows } from "@adapttable/core/binding";
+import { sameItems } from "@adapttable/core/binding";
+import { createTableEngine, revisionToken } from "@adapttable/core/engine";
 import {
   useDebugValue,
   useEffect,
@@ -17,11 +16,6 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
-
-function revisionToken<TRow>(reader: TableEngineReader<TRow>): string {
-  const revisions = reader.snapshot().revisions;
-  return `${revisions.data}:${revisions.view}:${revisions.schema}:${revisions.policy}`;
-}
 
 /**
  * The options this hook keeps replaying onto the committed engine. Anything
@@ -82,7 +76,7 @@ function syncEngine<TRow>(
   // A fresh array holding the same rows is the same data: adopting it without
   // staging is what keeps an inline `data={[…]}` from re-deriving the whole
   // view — and, now that a commit publishes, from re-rendering forever.
-  const dataChanged = !sameRows(previous.data, options.data);
+  const dataChanged = !sameItems(previous.data, options.data);
   const columnsChanged = !Object.is(previous.columns, options.columns);
 
   const patch: {
@@ -173,8 +167,8 @@ export function useTableEngine<TRow>(
         if (publishingRef.current) return;
         onStoreChange();
       }),
-    () => revisionToken(engine.candidate),
-    () => revisionToken(engine.candidate)
+    () => revisionToken(engine.candidate.snapshot().revisions),
+    () => revisionToken(engine.candidate.snapshot().revisions)
   );
 
   // The render was accepted: publish what it staged, before paint, so an

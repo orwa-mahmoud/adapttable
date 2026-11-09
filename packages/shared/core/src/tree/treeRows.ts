@@ -12,7 +12,9 @@
  * data, or `getParentId(row)` for a flat table with a parent column — and the
  * model flattens it to the same list of entries adapters render.
  */
-import type { ColumnMetadata } from "../columnModel";
+
+import type { ColumnMetadata } from "../contracts/columns";
+
 /**
  * One visual row of a tree: the row itself, plus where it sits.
  *

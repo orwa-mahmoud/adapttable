@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { scheduleTick } from "@adapttable/vue/adapter";
 import { ElOption, ElSelect, type SelectInstance } from "element-plus";
-import { nextTick, shallowRef } from "vue";
+import { shallowRef } from "vue";
 
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(
@@ -17,13 +18,13 @@ const emit = defineEmits<{ change: [value: string] }>();
 const control = shallowRef<SelectInstance>();
 function change(value: unknown): void {
   if (typeof value === "string") emit("change", value);
-  void nextTick(() => control.value?.$forceUpdate());
+  scheduleTick(() => control.value?.$forceUpdate());
 }
 // A parent ref resolves before this template ref does, so a focus requested
 // while the select mounts waits a tick for it.
 function focus(): void {
   if (control.value) control.value.focus();
-  else void nextTick(() => control.value?.focus());
+  else scheduleTick(() => control.value?.focus());
 }
 defineExpose({
   focus,

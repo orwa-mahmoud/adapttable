@@ -102,6 +102,9 @@ for (const kit of ANGULAR_KITS) {
       .first()
       .locator('[data-adapttable-part="cell"]')
       .first();
+    // The first row sits under the demo chrome in a short window. Scroll it
+    // fully into view so the double-click lands on the edit control.
+    await cell.scrollIntoViewIfNeeded();
     await cell.dblclick();
     const editor = page.locator('[data-adapttable-part="edit-cell-editor"]');
     await editor.fill("");
@@ -296,7 +299,7 @@ for (const kit of ANGULAR_KITS) {
       await expect(surface).toBeVisible();
       // The shared 768px breakpoint automatically renders cards at 390px.
       const cards = surface.locator('[data-adapttable-part="card"]');
-      await expect(cards).toHaveCount(10);
+      await expect(cards).toHaveCount(5);
       await expect(surface.locator('[data-adapttable-part="row"]')).toHaveCount(
         0
       );
@@ -320,7 +323,7 @@ for (const kit of ANGULAR_KITS) {
       await expect(columns).toHaveCount(0);
       await page.setViewportSize({ width: 1280, height: 844 });
       await expect(surface.locator('[data-adapttable-part="row"]')).toHaveCount(
-        10
+        5
       );
       await columns.click();
       const menu = angularPart(kit, page, "column-menu-panel");
@@ -339,7 +342,7 @@ for (const kit of ANGULAR_KITS) {
       await expect(columns).toBeFocused();
       await page.setViewportSize({ width: 390, height: 844 });
       await expect(columns).toHaveCount(0);
-      await expect(cards).toHaveCount(10);
+      await expect(cards).toHaveCount(5);
       await expect(cardLabels).toHaveText([
         "Team",
         "Status",
@@ -384,7 +387,7 @@ for (const kit of ANGULAR_KITS) {
       await expect(
         page.getByRole("radio", { name: kit.label, exact: true })
       ).toBeChecked();
-      await expect(cards).toHaveCount(10);
+      await expect(cards).toHaveCount(5);
       await expect(
         cards.first().locator('[data-adapttable-part="card-value"]').first()
       ).toHaveText("Ada Lovelace");

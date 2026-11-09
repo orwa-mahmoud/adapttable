@@ -3,7 +3,8 @@
  * owns its structure and every control is supplied by the kit.
  */
 import {
-  type AgentApprovalProposal,
+  approvalArgumentPairs,
+  approvalProposalText,
   type ApprovalReview,
   type ApprovalReviewItem,
   resolveLabels,
@@ -82,54 +83,6 @@ export interface ApprovalReviewChromeProps {
   readonly buttonClassName?: string;
 }
 
-/** A readable value, preserving the difference between absent and empty. */
-function display(value: unknown): string | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return "—";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  return JSON.stringify(value);
-}
-
-/** Prefer the column's own display units and the reader's vocabulary. */
-function describeItem(
-  proposal: AgentApprovalProposal,
-  labels: TableLabels | undefined
-): string {
-  const copy = resolveLabels(labels);
-  const describe = copy.proposalChange;
-  return describe({
-    row: proposal.rowLabel ?? proposal.rowKey,
-    ...(proposal.column === undefined
-      ? {}
-      : { column: proposal.columnLabel ?? proposal.column }),
-    before: proposal.beforeUnavailable
-      ? copy.proposalValueUnavailable
-      : (proposal.beforeText ?? display(proposal.before)),
-    after: proposal.afterText ?? display(proposal.after),
-  });
-}
-
-/** The arguments a host receives, read as pairs without inventing row data. */
-function argumentPairs(
-  args: unknown
-): readonly { name: string; value: string }[] {
-  if (!args || typeof args !== "object" || Array.isArray(args)) {
-    const single = display(args);
-    return single === undefined ? [] : [{ name: "", value: single }];
-  }
-  return Object.entries(args as Record<string, unknown>).map(
-    ([name, value]) => ({
-      name: name
-        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-        .replace(/^./, (first) => first.toUpperCase()),
-      value: display(value) ?? "—",
-    })
-  );
-}
-
 /**
  * The same review body in the table strip, assistant and modal. No visible
  * controls are drawn here: even the list is a required kit slot.
@@ -176,7 +129,7 @@ export class AdaptApprovalReviewChrome {
     viewChild<TemplateRef<unknown>>("rowsTemplate");
 
   protected readonly pairs = computed(() =>
-    argumentPairs(this.review().operation?.arguments)
+    approvalArgumentPairs(this.review().operation?.arguments)
   );
 
   private readonly shown = computed(() =>
@@ -201,7 +154,7 @@ export class AdaptApprovalReviewChrome {
       const decide = this.onDecide();
       return this.shown().map((item) => ({
         item,
-        text: describeItem(item.proposal, labels),
+        text: approvalProposalText(item.proposal, labels),
         approve: this.button(
           labels.approveProposal,
           APPROVAL_REVIEW_PARTS.rowApprove,

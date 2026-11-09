@@ -8,9 +8,10 @@
  * is recorded as ONE undo gesture, so two hundred pasted cells undo in one
  * press. Undo and redo walk that history.
  */
-import type { ColumnMetadata } from "../columnModel";
+
 import type { PinOffset } from "../columns/columnLayoutModel";
-import { asGesture } from "../editing/editingController";
+import type { ColumnMetadata } from "../contracts/columns";
+import { asGesture } from "../editing/editHistory";
 import { coveredAddressSet, type GetCellSpan } from "../rows/cellSpan";
 import type { CellEdit } from "./cellEdits";
 import { type CellRange, isSingleCell } from "./cellRange";

@@ -156,3 +156,68 @@ export function inheritedBindingSources(file, framework, root) {
     source: readFileSync(base, "utf8"),
   }));
 }
+
+/**
+ * The binding file that defines a runtime class `name`, imported by name from
+ * a binding entry in `file`; undefined when `file` does not import it so.
+ */
+export function importedBindingClass(file, name, framework, root) {
+  if (!file.endsWith(".ts")) return undefined;
+  const binding = bindingDir(framework, root);
+  const imported = bindingImports(parse(file), binding, framework, root).get(
+    name
+  );
+  return imported ? exportedSource(imported.entry, imported.name) : undefined;
+}
+
+/** The class declaration `name` in a parsed source, if it declares one. */
+function classNamed(source, name) {
+  return source.statements.find(
+    (node) => ts.isClassDeclaration(node) && node.name?.text === name
+  );
+}
+
+/** The file and exported name a relative import of `local` resolves to. */
+function relativeImport(source, file, local) {
+  for (const node of source.statements) {
+    if (
+      !ts.isImportDeclaration(node) ||
+      !ts.isStringLiteral(node.moduleSpecifier)
+    )
+      continue;
+    const named = node.importClause?.namedBindings;
+    if (!named || !ts.isNamedImports(named)) continue;
+    const element = named.elements.find((item) => item.name.text === local);
+    const target = element && relativeSource(file, node.moduleSpecifier.text);
+    if (!target) continue;
+    const name = element.propertyName?.text ?? element.name.text;
+    const exported = exportedSource(target, name);
+    if (exported) return { file: exported, name };
+  }
+  return undefined;
+}
+
+/**
+ * The files of class `name` in `file` and of every base class it extends
+ * in the same file or through relative imports inside the same package,
+ * nearest first.
+ */
+export function classChainSources(file, name, visited = new Set()) {
+  const key = file + ":" + name;
+  if (visited.has(key)) return [];
+  visited.add(key);
+  const source = parse(file);
+  const declaration = classNamed(source, name);
+  if (!declaration) return [];
+  const chain = [{ file, source: readFileSync(file, "utf8") }];
+  for (const base of baseNames(declaration)) {
+    const next = classNamed(source, base)
+      ? { file, name: base }
+      : relativeImport(source, file, base);
+    if (next) {
+      const inherited = classChainSources(next.file, next.name, visited);
+      chain.push(...(next.file === file ? inherited.slice(1) : inherited));
+    }
+  }
+  return chain;
+}

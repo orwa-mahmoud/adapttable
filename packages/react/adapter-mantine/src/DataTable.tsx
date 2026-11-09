@@ -36,6 +36,7 @@ import {
   useFeatureState,
   useStickyToolbarLayout,
   useTableFeatures,
+  withKitEnvironment,
 } from "@adapttable/react/adapter";
 import { Box, Button, Group, Paper, Progress, Stack } from "@mantine/core";
 import { useRef } from "react";
@@ -49,6 +50,7 @@ import { MobileCards } from "./components/MobileCards";
 import { PaginationFooter } from "./components/PaginationFooter";
 import { TableSkeleton } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
+import { useMantineLibrary } from "./libraryEnvironment";
 import { SURFACE } from "./surface";
 import type { DataTableProps } from "./types";
 
@@ -564,7 +566,10 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
  * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
+  const kit = useMantineLibrary();
+  const props = useTableFeatures(
+    withKitEnvironment(incoming, { dir: kit.dir })
+  );
   return (
     <FeatureProviders props={props}>
       <DataTableContent<TRow> {...props} />

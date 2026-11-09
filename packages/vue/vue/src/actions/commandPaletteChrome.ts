@@ -3,6 +3,7 @@ import {
   commandListKeyAction,
   commandListView,
   createCommandList,
+  resolveLabels,
   runCommand,
   tabTrapTarget,
 } from "@adapttable/core";
@@ -14,7 +15,6 @@ import {
   computed,
   defineComponent,
   h,
-  nextTick,
   onScopeDispose,
   type PropType,
   shallowRef,
@@ -24,6 +24,7 @@ import {
 } from "vue";
 
 import { elementRef } from "../attrs";
+import { scheduleTick } from "../scheduleTick";
 import { useExternalStore, useScopeActivity } from "../store";
 export type CommandPaletteSurfaceSlotProps = Parameters<
   NeutralSlots<VNodeChild, KeyboardEvent>["Surface"]
@@ -164,7 +165,7 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
       if (opener === null && current instanceof HTMLElement) opener = current;
       if (managed.value) return;
       const currentLifetime = lifetime();
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           currentLifetime() &&
           props.open &&
@@ -201,7 +202,7 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
           ? {
               ...command,
               onSelect: () => {
-                void nextTick(() => {
+                scheduleTick(() => {
                   if (active.value && (!owned || current())) command.onSelect();
                 });
               },
@@ -266,12 +267,13 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
         snapshot.value
       );
       const slots = props.slots;
+      const labels = resolveLabels(props.labels);
       const isCurrent = lifetime();
       const close = () => {
         if (isCurrent() && props.open) props.onClose();
       };
       return slots.Surface({
-        label: props.labels?.commandPalette ?? "Command palette",
+        label: labels.commandPalette,
         onClose: managed.value ? close : props.onClose,
         ...(managed.value
           ? { open: props.open, isCurrent, getOpener: () => opener }
@@ -292,8 +294,8 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
               "aria-activedescendant": matches[at]
                 ? `${id}-${matches[at].key}`
                 : undefined,
-              "aria-label": props.labels?.commandSearch ?? "Search commands",
-              placeholder: props.labels?.commandSearch ?? "Search commands",
+              "aria-label": labels.commandSearch,
+              placeholder: labels.commandSearch,
               "data-adapttable-part": "command-input",
             },
           }),
@@ -302,7 +304,7 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
             {
               id,
               role: "listbox",
-              "aria-label": props.labels?.commandPalette ?? "Command palette",
+              "aria-label": labels.commandPalette,
               "data-adapttable-part": "command-list",
             },
             matches.map((command, index) =>
@@ -329,7 +331,7 @@ export const CommandPaletteChrome = /*#__PURE__*/ defineComponent(
           ),
           matches.length === 0
             ? slots.Empty({
-                message: props.labels?.commandEmpty ?? "No matching command",
+                message: labels.commandEmpty,
               })
             : null,
         ]),

@@ -1,6 +1,7 @@
 import {
   type EditableCellEditorProps,
   editorInputType,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
@@ -8,7 +9,6 @@ import {
   createVNode,
   defineComponent,
   h,
-  nextTick,
   onMounted,
   type PropType,
   shallowRef,
@@ -104,7 +104,7 @@ const NuxtCellEditorPresentation = defineComponent(
       const commit = props.onBlur;
       // A Select closes by moving focus back to its trigger. Commit only after
       // focus has left the complete public control, using the captured owner.
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           active.value &&
           !popup.value &&

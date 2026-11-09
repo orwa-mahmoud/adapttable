@@ -21,9 +21,10 @@ import type {
   ExtraFilters,
   SortableValue,
   SortDirection,
-} from "../columnModel";
+} from "../contracts/columns";
+import type { QueryFilterGroup, SortLevel } from "../contracts/query";
+import type { RowPatch, RowPatchEvent, RowPatchLog } from "../contracts/rows";
 import type { DisplayValue } from "../display";
-import { cellSortValue } from "../engine/cellValue";
 import { engineSearchText } from "../engine/searchText";
 import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 import {
@@ -42,11 +43,7 @@ import {
   compareSortEntries,
   compareSortLevel,
   sortedInsertIndex,
-  type SortLevel,
-  sortRows,
-  sortRowsMulti,
 } from "../sort/compare";
-import type { QueryFilterGroup } from "../source/queryContract";
 import { stableKey } from "../utils/stableKey";
 import {
   addAggregateRow,
@@ -61,6 +58,7 @@ import {
   type IncrementalGroupTree,
   incrementalGroupTree,
   moveGroupedRow,
+  type MutablePartition,
   removeGroupedRow,
   rowGroupPath,
   snapshotPartitions,
@@ -69,12 +67,17 @@ import {
   attachIncrementalView as attachView,
   incrementalViewOf as viewOf,
 } from "./incrementalView";
+import { applyRowPatchesWithLog } from "./patch";
 import {
-  applyRowPatchesWithLog,
-  type RowPatch,
-  type RowPatchEvent,
-  type RowPatchLog,
-} from "./patch";
+  definedConfigPatch,
+  hasFilter,
+  hasSort,
+  queryConfigFingerprint,
+  resolveSortValue,
+  rowMatches,
+  searchTerm,
+  sortMatchedRows,
+} from "./rowQuery";
 
 export { rowPatchLog } from "./patch";
 
@@ -250,6 +253,107 @@ export function incrementalViewConfig<TRow>(
 }
 
 /**
+ * A second snapshot over the same row objects.
+ *
+ * The copy owns its derived arrays, indexes, grouping tree and aggregate
+ * accumulators. It keeps the source row array, so a patch log that starts
+ * at that array still continues, and it does not retarget that array's
+ * snapshot — the committed view stays reachable from it. Row objects are
+ * not cloned.
+ *
+ * @typeParam TRow - The row type.
+ * @param view - The snapshot to copy.
+ * @returns The copy, or `view` when it has no snapshot.
+ */
+export function forkIncrementalView<TRow>(
+  view: IncrementalView<TRow>
+): IncrementalView<TRow> {
+  const state = getState(view);
+  if (!state) return view;
+  const filtered = state.filtered.slice();
+  const sorted =
+    state.sorted === state.filtered ? filtered : state.sorted.slice();
+  const filteredPos = new Map(state.filteredPos);
+  const forkedState: ViewState<TRow> = {
+    config: { ...state.config },
+    searchText: new Map(state.searchText),
+    sortValues: new Map(state.sortValues),
+    filtered,
+    filteredSourceIndex: state.filteredSourceIndex.slice(),
+    filteredPos,
+    sorted,
+    sortedPos:
+      state.sortedPos === state.filteredPos
+        ? filteredPos
+        : new Map(state.sortedPos),
+    tree: state.tree ? cloneGroupTree(state.tree) : undefined,
+    summary: state.summary ? cloneSummary(state.summary) : undefined,
+    summaryDirty: state.summaryDirty,
+    groupCells: cloneGroupCells(state.groupCells),
+    dirtyGroups: new Set(state.dirtyGroups),
+  };
+  const forked: IncrementalView<TRow> = {
+    rows: view.rows,
+    filtered,
+    sorted,
+    groups: view.groups?.slice(),
+    aggregates: view.aggregates ? { ...view.aggregates } : undefined,
+  };
+  STATES.set(forked, forkedState as ViewState<unknown>);
+  attachView(filtered, forked);
+  attachView(sorted, forked);
+  return forked;
+}
+
+function clonePartition<TRow>(
+  node: MutablePartition<TRow>
+): MutablePartition<TRow> {
+  const children = node.children?.map(clonePartition);
+  return {
+    value: node.value,
+    valueKey: node.valueKey,
+    rows: node.rows.slice(),
+    children,
+    childMap: new Map(children?.map((child) => [child.valueKey, child])),
+  };
+}
+
+function cloneGroupTree<TRow>(
+  tree: IncrementalGroupTree<TRow>
+): IncrementalGroupTree<TRow> {
+  const roots = tree.roots.map(clonePartition);
+  return {
+    keys: tree.keys,
+    columns: tree.columns,
+    locale: tree.locale,
+    roots,
+    rootMap: new Map(roots.map((root) => [root.valueKey, root])),
+  };
+}
+
+function cloneSummary<TRow>(
+  summary: IncrementalAggregate<TRow>
+): IncrementalAggregate<TRow> {
+  return {
+    spec: summary.spec,
+    options: summary.options,
+    columns: new Map(summary.columns),
+    bindings: summary.bindings.map((binding) => ({
+      key: binding.key,
+      acc: { ...binding.acc },
+    })),
+  };
+}
+
+function cloneGroupCells(
+  cells: ReadonlyMap<string, Partial<Record<string, DisplayValue>>>
+): Map<string, Partial<Record<string, DisplayValue>>> {
+  const copy = new Map<string, Partial<Record<string, DisplayValue>>>();
+  for (const [key, value] of cells) copy.set(key, { ...value });
+  return copy;
+}
+
+/**
  * Merge new settings into a snapshot without walking the row set when
  * only grouping / summary extras changed.
  *
@@ -343,7 +447,7 @@ export function createIncrementalView<TRow>(
   const filtered = hasFilter(config)
     ? rows.filter((row) => rowMatches(row, config))
     : [...rows];
-  const sorted = hasSort(config) ? fullSort(filtered, config) : filtered;
+  const sorted = hasSort(config) ? sortMatchedRows(filtered, config) : filtered;
   const keys = groupingKeys(config.groupBy ?? []);
   const columns = config.columns ?? [];
   const partitions =
@@ -440,7 +544,9 @@ export function applyRowPatchLogToView<TRow>(
   }
 
   state.filtered = state.filtered.slice();
-  state.filteredSourceIndex = state.filteredSourceIndex.slice();
+  if (hasFilter(config)) {
+    state.filteredSourceIndex = state.filteredSourceIndex.slice();
+  }
   state.sorted = state.sorted.slice();
 
   const source = [...view.rows];
@@ -457,7 +563,11 @@ export function applyRowPatchLogToView<TRow>(
   state.filtered = filtered as TRow[];
   state.sorted = sorted as TRow[];
   state.filteredPos = indexMap(filtered, config.getRowId);
-  state.sortedPos = indexMap(sorted, config.getRowId);
+  state.sortedPos =
+    sorted === filtered ? state.filteredPos : indexMap(sorted, config.getRowId);
+  if (!hasFilter(config)) {
+    state.filteredSourceIndex = source.map((_, index) => index);
+  }
 
   const groups = state.tree
     ? paintGroups(
@@ -478,6 +588,16 @@ function getState<TRow>(
   view: IncrementalView<TRow>
 ): ViewState<TRow> | undefined {
   return STATES.get(view) as ViewState<TRow> | undefined;
+}
+
+/**
+ * Whether `view` was built by {@link createIncrementalView}. A basic-engine
+ * row array can carry a lookalike, and grouping must not reconfigure that.
+ */
+export function hasIncrementalSnapshot<TRow>(
+  view: IncrementalView<TRow>
+): boolean {
+  return STATES.has(view);
 }
 
 function publish<TRow>(
@@ -542,40 +662,6 @@ function republishDerived<TRow>(
   );
 }
 
-function definedConfigPatch<TRow>(
-  patch: Partial<IncrementalViewConfig<TRow>>
-): Partial<IncrementalViewConfig<TRow>> {
-  const defined: Partial<IncrementalViewConfig<TRow>> = {};
-  for (const key of Object.keys(
-    patch
-  ) as (keyof IncrementalViewConfig<TRow>)[]) {
-    const value = patch[key];
-    if (value !== undefined) Object.assign(defined, { [key]: value });
-  }
-  return defined;
-}
-
-function queryConfigFingerprint<TRow>(
-  config: IncrementalViewConfig<TRow>
-): string {
-  return stableKey({
-    search: config.search ?? "",
-    extra: config.extra ?? {},
-    filterTree: config.filterTree ?? null,
-    sortBy: config.sortBy ?? null,
-    sortDir: config.sortDir ?? null,
-    sortLevels: (config.sortLevels ?? []).map((level) => ({
-      key: level.key,
-      dir: level.dir,
-    })),
-    columnKeys: (config.columns ?? []).map((column) => column.key),
-    locale: config.locale ?? null,
-    hasFilterFn: config.filterFn !== undefined,
-    hasFilterTreeFn: config.filterTreeFn !== undefined,
-    hasGetSortValue: config.getSortValue !== undefined,
-  });
-}
-
 function derivedConfigFingerprint<TRow>(
   config: IncrementalViewConfig<TRow>
 ): string {
@@ -613,81 +699,6 @@ function needsDerived<TRow>(config: IncrementalViewConfig<TRow>): boolean {
     config.summaryRow !== undefined ||
     config.aggregateSpec !== undefined
   );
-}
-
-function hasFilter<TRow>(config: IncrementalViewConfig<TRow>): boolean {
-  return (
-    Boolean(searchTerm(config)) ||
-    config.filterFn !== undefined ||
-    (config.filterTree !== undefined && config.filterTreeFn !== undefined)
-  );
-}
-
-function hasSort<TRow>(config: IncrementalViewConfig<TRow>): boolean {
-  if (config.sortLevels && config.sortLevels.length > 0) return true;
-  return Boolean(config.sortBy && config.sortDir);
-}
-
-function searchTerm<TRow>(config: IncrementalViewConfig<TRow>): string {
-  return config.search?.trim().toLowerCase() ?? "";
-}
-
-function rowMatches<TRow>(
-  row: TRow,
-  config: IncrementalViewConfig<TRow>,
-  cachedText?: string
-): boolean {
-  const term = searchTerm(config);
-  if (term) {
-    const projector = config.getSearchText ?? incrementalSearchText;
-    const text = (cachedText ?? projector(row)).toLowerCase();
-    if (!text.includes(term)) return false;
-  }
-  if (config.filterFn && !config.filterFn(row, config.extra ?? {})) {
-    return false;
-  }
-  if (
-    config.filterTree &&
-    config.filterTreeFn &&
-    !config.filterTreeFn(row, config.filterTree)
-  ) {
-    return false;
-  }
-  return true;
-}
-
-function fullSort<TRow>(
-  rows: readonly TRow[],
-  config: IncrementalViewConfig<TRow>
-): TRow[] {
-  const levels = config.sortLevels;
-  if (levels && levels.length > 0) {
-    return sortRowsMulti(rows, levels, (row, key) =>
-      resolveSortValue(row, key, config)
-    );
-  }
-  return sortRows(
-    rows,
-    (row) => resolveSortValue(row, config.sortBy!, config),
-    config.sortDir!
-  );
-}
-
-function resolveSortValue<TRow>(
-  row: TRow,
-  key: string,
-  config: IncrementalViewConfig<TRow>
-): SortableValue {
-  if (config.getSortValue) return config.getSortValue(row, key);
-  const column = config.columns?.find((item) => item.key === key);
-  // A column that declares `sortValue` owns its whole ordering, including the
-  // rows it answers `null` for — that answer means "this one has no place in
-  // the order", and the comparator groups those at the end. Reading the
-  // accessor for those rows instead would order one column by two different
-  // extractors at once: some rows by their value, the rest by their rendered
-  // text, with nothing on screen to say which row got which.
-  if (column) return cellSortValue(row, column, config.locale);
-  return null;
 }
 
 function warmCaches<TRow>(
@@ -739,7 +750,6 @@ function applyFilterEvent<TRow>(
 ): FilterDelta<TRow> {
   if (!hasFilter(config)) {
     state.filtered = source as TRow[];
-    state.filteredSourceIndex = source.map((_, index) => index);
     return sourceDelta(event);
   }
   if (event.type === "insert") return filterInsert(state, event, config);
@@ -839,11 +849,16 @@ function applySortEvent<TRow>(
 ): void {
   if (!hasSort(config)) {
     state.sorted = state.filtered;
-    state.sortedPos = indexMap(state.filtered, config.getRowId);
+    // Mid-batch, only the group tree reads sorted positions; the batch
+    // end rebuilds them for everyone else.
+    if (state.tree) state.sortedPos = indexMap(state.filtered, config.getRowId);
     return;
   }
   if (delta.kind === "none") return;
-  state.filteredPos = indexMap(state.filtered, config.getRowId);
+  // A replace keeps every filtered position, so the map is still current.
+  if (delta.kind !== "replace") {
+    state.filteredPos = indexMap(state.filtered, config.getRowId);
+  }
   if (delta.kind === "enter") {
     insertSorted(state, delta.row, config);
   } else if (delta.kind === "leave") {
@@ -851,7 +866,7 @@ function applySortEvent<TRow>(
   } else {
     replaceSorted(state, delta.prev, delta.next, config);
   }
-  state.sortedPos = indexMap(state.sorted, config.getRowId);
+  if (state.tree) state.sortedPos = indexMap(state.sorted, config.getRowId);
 }
 
 function insertSorted<TRow>(

@@ -4,7 +4,6 @@ import {
   defineComponent,
   Fragment,
   h,
-  nextTick,
   onScopeDispose,
   type PropType,
   shallowRef,
@@ -16,6 +15,7 @@ import {
 import { type Attrs, elementRef } from "../attrs";
 import { PanelContent } from "../layout/panelContent";
 import { isManagedOverlayPanel, type OverlayPanelSlot } from "../overlayPanel";
+import { scheduleTick } from "../scheduleTick";
 import type {
   ColumnHeaderRenameSlotProps,
   ColumnMenuLabels,
@@ -517,7 +517,7 @@ export const ColumnMenuChrome = /*#__PURE__*/ defineComponent(
       if (!open.value) surfaceLifetime += 1;
       open.value = true;
       const ticket = ++generation;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (
           !disposed &&
           ticket === generation &&

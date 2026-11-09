@@ -13,8 +13,11 @@ the live demo must change how the whole table looks, including the Filters
 popover and drawer: an MUI table filters with MUI controls, a Mantine table
 with Mantine controls.
 
-Unify the **model**, never the **pixels**. The standing pattern is
-**Chrome + slots**:
+Unify the **model**, never the **pixels**. Framework-neutral logic — a
+decision about state, layout, labels, URL state, keyboard maps, or sizes
+that does not touch a framework's lifecycle or rendering — lives in core,
+once. Bindings adapt that logic; they do not keep a second copy of it. The
+standing pattern is **Chrome + slots**:
 
 - The binding ships `*Chrome` components that own structure only — layout,
   the recursion over groups, keyboard wiring, localized labels, and the

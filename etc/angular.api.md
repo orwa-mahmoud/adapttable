@@ -80,6 +80,7 @@ import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FindInTableState } from '@adapttable/core/binding';
+import { FrontendEngineFactory } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
@@ -213,6 +214,9 @@ export const ADAPTTABLE_FEATURES: InjectionToken<readonly AdaptTableFeature[]>;
 
 // @public
 export const ADAPTTABLE_FIND_STATE: InjectionToken<WritableSignal<FindInTableState | null>>;
+
+// @public
+export const ADAPTTABLE_KIT_MOTION_OFF: InjectionToken<Signal<boolean>>;
 
 // @public
 export const ADAPTTABLE_SLOT_TABLE: InjectionToken<SlotTable>;
@@ -622,6 +626,17 @@ export { EditHistoryState }
 
 export { EditingBundle }
 
+// @public
+export function editingBundleFor<TRow>(options: {
+    readonly live: Signal<LiveEditConflictInput<TRow>>;
+    readonly featureOptions: Readonly<Record<string, unknown>>;
+    readonly activation: Signal<"doubleClick" | "click" | undefined>;
+    readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+    readonly featureHost: DataTable<TRow>["featureHost"];
+    readonly labels: DataTable<TRow>["labels"];
+    readonly injector: Injector;
+}): Signal<EditableCellEditing<TRow>> | undefined;
+
 export { EditLifecycle }
 
 export { EditUnit }
@@ -788,6 +803,7 @@ export interface FromStoreOptions {
 // @public
 export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "injector"> {
     readonly columns?: MaybeSignal<readonly ColumnMetadata<TRow>[]>;
+    readonly createEngine?: MaybeSignalOptional<FrontendEngineFactory<TRow>>;
     readonly data: MaybeSignal<readonly TRow[]>;
     readonly error?: MaybeSignalOptional<Error | null>;
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
@@ -1483,6 +1499,40 @@ export { SortDirection }
 export { SummaryRowFn }
 
 // @public
+export const SURFACE_EDITING: FeatureStateKey<unknown>;
+
+// @public
+export const SURFACE_GRID: FeatureStateKey<unknown>;
+
+// @public
+export const SURFACE_GROUPING: FeatureStateKey<unknown>;
+
+// @public
+export const SURFACE_HANDLES: InjectionToken<SurfaceHandles<unknown>>;
+
+// @public
+export const SURFACE_OCCUPIED: FeatureStateKey<SurfaceOccupation>;
+
+// @public
+export interface SurfaceHandles<TRow> {
+    createGrouping(injector: Injector): Signal<unknown> | undefined;
+    readonly features: readonly AdaptTableFeature[];
+    groupingModel(): unknown;
+    installProjector(project: (source: TableSource<TRow>, model: unknown) => TableSource<TRow>): void;
+    publishGrouping(grouping: Signal<unknown> | undefined): void;
+    readonly source: Signal<TableSource<TRow>>;
+    readonly table: DataTable<TRow>;
+    readonly viewSource: Signal<TableSource<TRow>>;
+}
+
+// @public
+export interface SurfaceOccupation {
+    readonly editing: boolean;
+    readonly grid: boolean;
+    readonly grouping: boolean;
+}
+
+// @public
 export type TableAssistantAvatars = TableAssistantAvatars_2<TableAssistantNode>;
 
 export { TableAssistantBoundary }
@@ -1502,6 +1552,7 @@ export type TableAssistantProps = TableAssistantProps_2<TableAssistantNode>;
 export interface TableDataOptions<TRow> extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
     readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
     readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
+    readonly createEngine?: MaybeSignalOptional<FrontendEngineFactory<TRow>>;
     readonly data?: MaybeSignalOptional<readonly TRow[]>;
     readonly engine?: FilterEngine;
     readonly error?: MaybeSignalOptional<Error | null>;
@@ -1544,7 +1595,9 @@ export interface TableEditHistoryProps<TRow> {
 }
 
 // @public
-export function tableFeaturesOf(injector: Injector, own: readonly AdaptTableFeature[] | undefined): readonly AdaptTableFeature[];
+export function tableFeaturesOf(injector: Injector, own: readonly AdaptTableFeature[] | undefined): readonly (AdaptTableFeature & {
+    readonly id: string;
+})[];
 
 // @public
 export interface TableFilters<TRow> {

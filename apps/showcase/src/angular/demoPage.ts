@@ -149,8 +149,8 @@ function controlValue(target: HTMLInputElement | HTMLSelectElement): string {
     [tableLabel]="defaults().tableLabel"
     [searchable]="defaults().searchable"
     [density]="defaults().density"
-    [dir]="presentation.dir"
-    [labels]="presentation.labels"
+    [dir]="presentation.tableDir"
+    [labels]="presentation.tableLabels"
   />`,
 })
 class LabOrders {
@@ -228,7 +228,9 @@ export class AdaptShowcaseDemoPage {
       ? "infinite"
       : "paged";
   readonly mobile = this.availableEnabled("mobile");
-  readonly selectable = this.availableEnabled("selection", this.lab);
+  readonly motion = this.availableEnabled("motion", true);
+  readonly animate = this.motion;
+  readonly selectable = this.availableEnabled("selection", true);
   readonly searchable = this.availableEnabled("search", true);
   readonly requestedStructure = initialStructure(this.server, this.urlKey);
   readonly structure =
@@ -260,7 +262,6 @@ export class AdaptShowcaseDemoPage {
     );
   }
   readonly reducedMotion = injectPrefersReducedMotion();
-  readonly motion = this.availableEnabled("motion", true);
   readonly highlight = injectHighlight(
     this.availableEnabled("highlight") || this.availableEnabled("cell-flash")
   );
@@ -460,13 +461,19 @@ export class AdaptShowcaseDemoPage {
     ...(this.grouping
       ? [this.kit.groupingPanel<Person>(["team", "status"])]
       : []),
-    ...(this.editingMode === "cell"
+    ...(this.editingMode === "cell" && this.canWrite
       ? [
-          // A visitor's first click on a value opens it, as a form field would.
           this.kit.editing<Person>(
             (row, key, value) => this.write(row, { [key]: value }),
             { editActivation: "click" }
           ),
+          ...(this.availableEnabled("row-mutations")
+            ? []
+            : [
+                this.kit.rowEditing<Person>((row, patch) =>
+                  this.write(row, patch)
+                ),
+              ]),
         ]
       : []),
     ...(this.editingMode === "row"
@@ -480,7 +487,7 @@ export class AdaptShowcaseDemoPage {
         ]
       : []),
     ...(this.editing ? [this.kit.editHistory()] : []),
-    ...(this.editing && this.availableEnabled("undo-redo", !this.lab)
+    ...(this.editing && this.availableEnabled("undo-redo")
       ? [this.kit.undoRedoButtons()]
       : []),
     ...(this.availableEnabled("columns", true)
@@ -489,15 +496,47 @@ export class AdaptShowcaseDemoPage {
     ...(this.availableEnabled("navigation", this.lab) || this.editing
       ? [this.kit.cellNavigation()]
       : []),
-    ...(this.availableEnabled("export", this.lab)
-      ? [this.kit.exportCsv()]
-      : []),
-    ...(this.availableEnabled("views", this.lab)
+    ...(this.availableEnabled("export", true) ? [this.kit.exportCsv()] : []),
+    ...(this.availableEnabled("views", true)
       ? [
           this.kit.savedViews({
             storageKey: this.storageKey,
             urlKey: this.urlKey,
           }),
+        ]
+      : []),
+    ...(this.selectable && this.canWrite
+      ? [
+          this.kit.bulkActions([
+            {
+              key: "export",
+              label: "Export",
+              onClick: (ids) => this.log.set(`Export: ${ids.length}`),
+            },
+            {
+              key: "archive",
+              label: "Archive",
+              onClick: (ids) => this.log.set(`Archive: ${ids.length}`),
+            },
+          ]),
+        ]
+      : []),
+    ...(this.canWrite && !this.availableEnabled("row-mutations")
+      ? [
+          this.kit.rowActions<Person>([
+            { key: "edit", label: "Edit", editsRow: true },
+            {
+              key: "delete",
+              label: "Delete",
+              color: "red",
+              onClick: (row) => {
+                this.rows.update((rows) =>
+                  rows.filter((item) => item.id !== row.id)
+                );
+                this.log.set(`Deleted ${row.name}`);
+              },
+            },
+          ]),
         ]
       : []),
     ...(this.availableEnabled("row-pinning") &&
@@ -1040,7 +1079,7 @@ export class AdaptShowcaseDemoPage {
     const values: Readonly<Record<string, string>> = {
       framework: "angular",
       kit: this.kit.key,
-      mode: this.server ? "server" : "frontend",
+      mode: this.server ? "backend" : "frontend",
       locale: this.presentation.locale,
       density: this.density(),
       mobile: this.mobile ? "on" : "off",

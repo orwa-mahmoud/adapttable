@@ -2,14 +2,13 @@
  * Row-reorder Chrome: the grip, the mobile up/down pair, and the live
  * region — structure and wiring only. Every visible control is the kit's.
  */
-import { resolveLabels } from "@adapttable/core";
-import type {
-  RowMoveMenuSlotProps,
-  RowReorderButtonsProps as NeutralRowReorderButtonsProps,
-  RowReorderHandleProps as NeutralRowReorderHandleProps,
-  RowReorderHandleSlotProps as NeutralRowReorderHandleSlotProps,
-  RowReorderLabels,
-  RowReorderMoveButtonProps,
+import {
+  rowMoveMenuProps,
+  type RowReorderButtonsProps as NeutralRowReorderButtonsProps,
+  type RowReorderHandleProps as NeutralRowReorderHandleProps,
+  type RowReorderHandleSlotProps as NeutralRowReorderHandleSlotProps,
+  type RowReorderLabels,
+  type RowReorderMoveButtonProps,
 } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
@@ -85,56 +84,6 @@ export type {
   RowMoveMenuSlotProps,
   RowReorderMoveButtonProps,
 } from "@adapttable/core/binding";
-
-/**
- * The destination menu both reorder controls offer, and the state it needs.
- */
-function moveMenuProps<TRow>(
-  reorder: RowReorderState<TRow>,
-  labels: RowReorderLabels,
-  row: TRow,
-  moveLocked: boolean
-): RowMoveMenuSlotProps | undefined {
-  const copy = resolveLabels(labels);
-  const menu = reorder.moveMenu?.(row);
-  if (!menu) return undefined;
-  const ownsPending =
-    reorder.isMovePending?.(row) ?? reorder.pendingMove?.row === row;
-  const pending = ownsPending ? reorder.pendingMove : undefined;
-  const from =
-    pending?.kind === "group"
-      ? pending.fromGroup.label
-      : pending?.fromParent.label;
-  const to =
-    pending?.kind === "group" ? pending.toGroup.label : pending?.toParent.label;
-  return {
-    label: menu.label,
-    items: menu.targets.map((target) => ({
-      id: target.id,
-      label: target.label,
-      disabled: moveLocked || target.disabledReason !== undefined,
-      disabledReason: target.disabledReason,
-      onSelect: () => {
-        reorder.selectMoveTarget(target);
-      },
-    })),
-    confirmation:
-      pending && from && to
-        ? {
-            title: copy.confirmRowMoveTitle,
-            description: copy.confirmRowMoveDescription(
-              pending.rowLabel,
-              from,
-              to
-            ),
-            confirmLabel: copy.confirmRowMove,
-            cancelLabel: copy.cancel,
-            onConfirm: reorder.confirmMove,
-            onCancel: reorder.cancelMove,
-          }
-        : undefined,
-  };
-}
 
 /**
  * Desktop grip: pointer drag plus Space-lift keyboard. Kits wrap this in
@@ -214,7 +163,12 @@ export class AdaptRowReorderHandleChrome<TRow> {
   });
 
   protected readonly menu = computed(() =>
-    moveMenuProps(this.reorder(), this.labels(), this.row(), this.moveLocked())
+    rowMoveMenuProps(
+      this.reorder(),
+      this.labels(),
+      this.row(),
+      this.moveLocked()
+    )
   );
 }
 
@@ -310,7 +264,12 @@ export class AdaptRowReorderButtonsChrome<TRow> {
   });
 
   protected readonly menu = computed(() =>
-    moveMenuProps(this.reorder(), this.labels(), this.row(), this.moveLocked())
+    rowMoveMenuProps(
+      this.reorder(),
+      this.labels(),
+      this.row(),
+      this.moveLocked()
+    )
   );
 }
 

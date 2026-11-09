@@ -1,45 +1,35 @@
 import {
   AdaptAttrs,
-  AdaptCell,
-  AdaptExtraRowContent,
-  AdaptMobileCardsModel,
-  AdaptRowDetail,
-  AdaptSlot,
+  AdaptMobileCardsHost,
+  AdaptMobileStructure,
 } from "@adapttable/angular/adapter";
-import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+} from "@angular/core";
 
 import { TAIGA_CONTROLS } from "../taigaControls";
 import { AdaptRowActions } from "./rowActionButtons";
 
 /**
- * The card list rendered in place of the table on narrow screens.
- */
-
-/**
- * The phone card list drawn with native elements.
- *
- * Editable fields go through the {@link EDITABLE_CELL} slot when editing is
- * composed, matching React's mobile cards.
+ * The phone card list. Layout comes from {@link AdaptMobileStructure}; this
+ * kit fills the slots and keeps its own card styles.
  *
  * @internal
  */
 @Component({
   selector: "adapt-mobile-cards",
   imports: [
-    ...TAIGA_CONTROLS,
     AdaptAttrs,
-    AdaptCell,
-    AdaptExtraRowContent,
+    AdaptMobileStructure,
     AdaptRowActions,
-    AdaptRowDetail,
-    AdaptSlot,
-    NgComponentOutlet,
-    NgTemplateOutlet,
+    ...TAIGA_CONTROLS,
   ],
   templateUrl: "./mobileCards.html",
   styleUrl: "./mobileCards.css",
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: "display: contents" },
+  host: { style: "display: contents", class: "adapt-taiga-mobile" },
 })
-export class AdaptMobileCards<TRow> extends AdaptMobileCardsModel<TRow> {}
+export class AdaptMobileCards<TRow> extends AdaptMobileCardsHost<TRow> {}

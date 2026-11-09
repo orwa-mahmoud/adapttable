@@ -53,12 +53,8 @@ test("keeps genuine Vuetify status controls visible in RTL", async ({
   await page
     .getByRole("button", { name: "Right to left", exact: true })
     .click();
-  await expect(
-    page.locator('[data-adapttable-part="status-bar"].v-sheet')
-  ).toBeVisible();
-  await expect(
-    page.locator('[data-adapttable-part="status-item"].v-chip')
-  ).toBeVisible();
+  await expect(page.locator('[data-status="rows"]')).toHaveCount(0);
+  await expect(page.locator('[data-adapttable-part="footer"]')).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath("vuetify-navigation-rtl.png"),
     fullPage: true,

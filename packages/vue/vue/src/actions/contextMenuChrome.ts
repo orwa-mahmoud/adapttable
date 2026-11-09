@@ -1,3 +1,4 @@
+import { resolveLabels } from "@adapttable/core";
 import type {
   ContextMenuChromeProps as NeutralProps,
   ContextMenuSlots as NeutralSlots,
@@ -15,6 +16,7 @@ import {
 } from "vue";
 
 import { elementRef } from "../attrs";
+import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 export type ContextMenuSlots = NeutralSlots<VNodeChild>;
 /** A complete native menu presentation with binding-owned selection lifetimes. */
@@ -123,7 +125,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
           pendingSelection = undefined;
           throw error;
         }
-        void nextTick(async () => {
+        scheduleTick(async () => {
           // The close may be rejected without scheduling a render. Allow any
           // synchronous parent replacement to flush before reading its props.
           await nextTick();
@@ -151,7 +153,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
         surface = props.presentation({
           at: props.at,
           anchorRef,
-          label: props.labels?.contextMenu ?? "Table actions",
+          label: resolveLabels(props.labels).contextMenu,
           onClose: close,
           container: props.container,
           className: props.className,
@@ -166,7 +168,7 @@ export const ContextMenuChrome = /*#__PURE__*/ defineComponent(
         surface = slots.Surface({
           at: props.at,
           anchorRef,
-          label: props.labels?.contextMenu ?? "Table actions",
+          label: resolveLabels(props.labels).contextMenu,
           onClose: close,
           container: props.container,
           className: props.className,

@@ -1,5 +1,6 @@
 import {
   type RowMoveMenuSlotProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
@@ -11,7 +12,6 @@ import {
 import {
   defineComponent,
   h,
-  nextTick,
   type PropType,
   shallowRef,
   useId,
@@ -57,7 +57,7 @@ export const ElementRowMoveMenu = defineComponent(
               if (!isCurrent()) return;
               const item = items.find((item) => item.id === value);
               if (item && !item.disabled) item.onSelect();
-              void nextTick(() => {
+              scheduleTick(() => {
                 if (isCurrent()) trigger.value?.$forceUpdate();
               });
             },

@@ -7,24 +7,22 @@ import {
   type MaybeSignalOptional,
   readMaybe,
 } from "@adapttable/angular";
-import type { GroupingExtras } from "@adapttable/angular/features";
 import {
   declaredAggregates,
   devWarn,
   type ExtraRow,
-  formatGroupBy,
   type GroupAggregatesFn,
   type GroupByInput,
   type GroupedFlatEntry,
-  groupedRowModel,
-  groupingAggregates,
   groupingIgnoredWarning,
+  groupingProjectionBundle,
   type GroupingRuntimeSource,
-  groupShowMoreRequest,
-  parseGroupBy,
+  groupingSourceOf,
+  projectGrouping,
   type TableSource,
 } from "@adapttable/core";
-import { type GroupCollapseState } from "@adapttable/core/binding";
+import { type GroupCollapseState, sameItems } from "@adapttable/core/binding";
+import { formatGroupBy, parseGroupBy } from "@adapttable/core/grouping";
 import {
   assertInInjectionContext,
   computed,
@@ -33,6 +31,8 @@ import {
   Injector,
   type Signal,
 } from "@angular/core";
+
+import type { GroupingExtras } from "../features/groupingExtras";
 
 /**
  * The grouped table a kit renders: its keys, collapse state and flat
@@ -127,24 +127,12 @@ export function injectGrouping<TRow>(
 
   const groupByKeys = computed(
     () => parseGroupBy(extras.groupBy ?? options.source().groupBy),
-    { equal: sameKeys }
+    { equal: sameItems }
   );
   // Only the fields grouping reads, so a page or a search does not rebuild
   // the grouped model.
   const groupingSource = computed(
-    (): GroupingRuntimeSource<TRow> => {
-      const source = options.source();
-      return {
-        allFilteredRows: source.allFilteredRows,
-        groups: source.groups,
-        capabilities: source.capabilities,
-        honorsAggregates: source.honorsAggregates,
-        aggregateOperations: source.aggregateOperations,
-        groupAggregateOverrides: source.groupAggregateOverrides,
-        queryAggregates: source.queryAggregates,
-        groupAggregations: source.groupAggregations,
-      };
-    },
+    (): GroupingRuntimeSource<TRow> => groupingSourceOf(options.source()),
     { equal: sameFields }
   );
 
@@ -160,26 +148,18 @@ export function injectGrouping<TRow>(
     options.source().setGroupBy(formatGroupBy(key));
     extras.onGroupByChange?.(parseGroupBy(key));
   };
-  const aggregates = computed(() =>
-    groupingAggregates({
-      source: groupingSource(),
-      columns: table.allColumns(),
-      groupAggregates: extras.groupAggregates,
-      panelDeclared,
-    })
-  );
-
-  return computed((): TableGrouping<TRow> | undefined => {
+  const projected = computed(() => {
     const collapsed = collapse();
     const pagingState = paging();
-    const model = groupedRowModel({
+    return projectGrouping({
       groupByKeys: groupByKeys(),
       source: groupingSource(),
       columns: table.allColumns(),
       locale: options.locale && readMaybe(options.locale),
       getRowId: (row) => table.rowKey(row),
       collapsedGroupIds: collapsed.collapsedGroupIds,
-      aggregates: aggregates(),
+      groupAggregates: extras.groupAggregates,
+      panelDeclared,
       groupFooters: extras.groupFooters,
       groupSort: extras.groupSort,
       groupFilter: extras.groupFilter,
@@ -188,41 +168,22 @@ export function injectGrouping<TRow>(
       paging: pagingState.paging,
       extraRows: extras.extraRows,
     });
-    if (!model) return undefined;
-    const { openGroups } = model;
-    return {
-      groupBy: groupByKeys(),
-      collapsed,
-      aggregates: aggregates().aggregates,
-      entries: model.entries,
-      setGroupBy,
-      showMore: (entry) => {
-        const request = groupShowMoreRequest(entry, {
-          groupPageSize: extras.groupPageSize,
-          groupRowPageSize: extras.groupRowPageSize,
-        });
-        pagingState.showMore(request.pageSize, request.groupKey);
-        if (request.loadMoreKey !== undefined) {
-          extras.onGroupLoadMore?.(request.loadMoreKey);
-        }
-      },
-      expandAll: collapsed.expandAll,
-      collapseAll: () => {
-        collapsed.collapseToDepth(0, openGroups);
-      },
-      collapseToDepth: (depth) => {
-        collapsed.collapseToDepth(depth, openGroups);
-      },
-    };
   });
-}
 
-/** Whether two key lists name the same keys in the same order. */
-function sameKeys(left: readonly string[], right: readonly string[]): boolean {
-  return (
-    left.length === right.length &&
-    left.every((key, index) => key === right[index])
-  );
+  return computed((): TableGrouping<TRow> | undefined => {
+    const collapsed = collapse();
+    const pagingState = paging();
+    return groupingProjectionBundle({
+      groupBy: groupByKeys(),
+      projection: projected(),
+      collapsed,
+      setGroupBy,
+      paging: pagingState,
+      groupPageSize: extras.groupPageSize,
+      groupRowPageSize: extras.groupRowPageSize,
+      onGroupLoadMore: extras.onGroupLoadMore,
+    });
+  });
 }
 
 /** Whether two records hold the same value under every key. */

@@ -27,7 +27,9 @@ const RELATED =
 export function isE2eRelated(file) {
   const path = file.replaceAll("\\", "/");
   return (
-    RELATED.test(path) || path === "scripts/build-vue-browser-consumer.mjs"
+    RELATED.test(path) ||
+    path === "scripts/build-vue-browser-consumer.mjs" ||
+    path === "scripts/build-angular-browser-consumer.mjs"
   );
 }
 
@@ -65,6 +67,7 @@ const PLAYWRIGHT = join(
 export const DEFAULT_E2E_PROJECTS = [
   "--project=chromium",
   "--project=chromium-dev",
+  "--project=angular-consumer",
 ];
 
 /** Visual specs live under e2e/visual/ and only match chromium-visual. */

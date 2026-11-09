@@ -3,6 +3,25 @@
  * binding adapts core's stores to its reactivity and hands back these
  * shapes, so a kit reads the same fields in every framework.
  */
+import type { TreeEntry } from "./treeRows";
+
+/**
+ * The tree a table already walked, as the runtime view publishes it.
+ *
+ * Expansion stays {@link TreeExpansionState}. This aliases the host's
+ * entries. It does not build another tree.
+ *
+ * @typeParam TRow - The row type.
+ *
+ * @public
+ */
+export interface TreeContribution<TRow> {
+  /** Open nodes in render order. */
+  readonly entries: readonly TreeEntry<TRow>[];
+  /** Every loaded node, including descendants of collapsed parents. */
+  readonly allEntries?: readonly TreeEntry<TRow>[];
+}
+
 /**
  * Lazy-loading state for a tree.
  *

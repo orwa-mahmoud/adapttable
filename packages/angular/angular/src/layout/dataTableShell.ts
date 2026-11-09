@@ -5,31 +5,23 @@ import {
   type Attrs,
   type BatchEditHandler,
   type CellEditHandler,
-  type CellSaveStateInjectOptions,
   type ColumnDef,
   type ColumnInput,
   createFeatureResources,
   type DataTable,
   type DataTableClassNames,
-  type DirtyEdits,
   editableCellController,
-  type EditableCellEditing,
   type EditConflictHandler,
   type EditConflictPolicy,
   type EditHistoryOptions,
-  type EditValidationInjectOptions,
+  editingBundleFor,
   featureOptionsOf,
   type FeatureResources,
   findMarkAttrs,
   flattenColumns,
   type GridFocus,
-  injectBatchEditing,
-  injectCellEditing,
-  injectCellSaveState,
   injectDataTable,
   injectDensity,
-  injectDirtyCells,
-  injectEditValidation,
   injectExportCsv,
   injectFindFocus,
   injectFindInTable,
@@ -39,22 +31,19 @@ import {
   injectFullscreen,
   injectGridFocus,
   injectIsMobile,
-  injectKeyedVirtualization,
-  injectLiveEditConflict,
-  injectRowEditing,
+  injectPrefersReducedMotion,
   injectRowMutations,
   injectRowSelection,
   injectTableData,
   injectTableEditHistory,
-  injectTableVirtualizer,
   type LiveEditConflictInput,
   type MobileCardRenderer,
   mountTableFeatures,
   readMaybe,
   type RowActionsRenderer,
-  type RowEditHandler,
   type RowSelection,
   type SummaryRowFn,
+  SURFACE_OCCUPIED,
   type TableAssistantProps,
   tableFeaturesOf,
   type TableQueryHandler,
@@ -64,7 +53,6 @@ import { type SidePanelOptions } from "@adapttable/angular/features";
 import {
   ACTIONS_COLUMN_KEY,
   type ActiveFilterChip,
-  asBatchGesture,
   type BulkAction,
   type CellNavigationChannelsOptions,
   type CellRange,
@@ -73,12 +61,8 @@ import {
   type ConfirmHandler,
   type ContextMenuTarget,
   copyContextMenuSelection,
-  type CssProperties,
   defaultConfirm,
-  devWarn,
   type Direction,
-  dirtyMarkerView,
-  type EditEventHandler,
   type ExportCsvOptions,
   type ExtraFilters,
   type ExtraRow,
@@ -86,23 +70,18 @@ import {
   FILTER_ENGINE_IMPL,
   type FilterDef,
   type FilterTypeSpec,
+  type FrontendEngineFactory,
   type GetCellSpan,
-  groupedViewSource,
-  type NestedTableParent,
   type PaginationMode,
   partitionPinnedRows,
   type PinnedRows,
-  pinnedSummaryPart,
+  projectedGroupingSource,
   type QueryAggregate,
   type QuerySupport,
   requestDensityChange,
   resolveDensity,
-  resolveEditingArming,
-  resolveRowEditTrigger,
   type RowAction,
   type RowActionsLayout,
-  rowClickProps,
-  rowEditConflict,
   type RowHeight,
   type RowStyle,
   type SavedViewsControllerOptions,
@@ -112,10 +91,7 @@ import {
   type TableLabels,
   type TableQueryParams,
   type TableSource,
-  type TableVirtualization,
-  type TreeEntry,
   type TreeShape,
-  windowGroupedEntries,
   withRowMutationActions,
   withRowPinActions,
 } from "@adapttable/core";
@@ -126,26 +102,13 @@ import {
   type AgentApprovalProps,
   type AssemblyFns,
   BATCH_EDIT_BAR,
-  bodyWindowKind,
   BULK_BAR,
   type BulkBarSlotProps,
-  cellSpanMark,
-  type ChromeBodySlot,
   chromeFeatureNotices,
-  chromeRenderModel,
   COLUMN_MENU,
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
   CONTEXT_MENU_LIVE,
-  desktopBodySlots,
-  desktopDetailMeasureRef,
-  desktopRowMeasureRef,
-  type DesktopRowWiringArgs,
-  desktopStickyPlan,
-  type EditableCellSlotProps,
-  estimateBodyItemSize,
-  type ExpandToggleSlotProps,
-  extraHostFillStyle,
   FILTER_DRAWER,
   FILTER_HEADER,
   FILTER_POPOVER,
@@ -154,22 +117,12 @@ import {
   FIND_BAR,
   type FindBarProps,
   type FindInTableState,
-  type GroupedFlatEntry,
-  type GroupHeaderCardSlotProps,
-  type GroupHeaderRowSlotProps,
   GROUPING_PANEL,
-  type GroupingPanelSlotProps,
-  insertExtraRows,
-  insertExtrasBeforeRows,
-  pinnedRowPart,
-  pinnedRowSticky,
   printToolbarProps,
   renderedRowsOf,
-  resolveBodyVirtualization,
-  resolveRowStyle,
   ROW_REORDER_ANNOUNCER,
-  type RowEditIcons,
   type RowMutationsState,
+  sameItems,
   SAVED_VIEWS,
   type SavedViewsSlotProps,
   SEARCH_ICON,
@@ -181,13 +134,14 @@ import {
   type ToolbarExtrasSlotProps,
   TREE_CELL,
   undoRedoToolbarProps,
-  virtualizeIgnoredOnPage,
 } from "@adapttable/core/binding";
+import { asBatchGesture } from "@adapttable/core/editing";
+import { loadLabels } from "@adapttable/i18n/load";
 import {
+  afterRenderEffect,
   computed,
   contentChild,
   contentChildren,
-  DestroyRef,
   Directive,
   effect,
   type ElementRef,
@@ -196,6 +150,7 @@ import {
   input,
   type OnInit,
   output,
+  PendingTasks,
   type Signal,
   signal,
   type TemplateRef,
@@ -203,30 +158,40 @@ import {
   viewChild,
 } from "@angular/core";
 
+import { mountForcedColorsStyles } from "../a11y/forcedColors";
 import { type CommandPaletteInjectOptions } from "../actions/commandPalette";
 import {
   ADAPTTABLE_CONTEXT_MENU,
   type TableContextMenuOptions,
 } from "../actions/tableContextMenu";
-import {
-  type BatchEditBarProps,
-  type RowEditActionsProps,
-} from "../editing/rowEditGate";
-import { rowIsDirty } from "../editing/rowEditingHelpers";
+import { type BatchEditBarProps } from "../editing/rowEditGate";
 import {
   type FiltersMode,
   type FiltersView,
   filtersViewFor,
 } from "../filters/tableFilters";
 import { selectionStatsOf } from "../focus/selectionStats";
+import { staggerMounted } from "../motion/mountStagger";
+import type { KitEnvironment } from "./kitEnvironment";
+import {
+  bodyWindowFor,
+  buildSurfaceBody,
+  type TableSurfaceView,
+} from "./tableSurfaceHost";
+export type {
+  BodyCellView,
+  BodyRow,
+  BodySlot,
+  RowActionsCell,
+} from "./tableSurfaceHost";
 import { injectGroupingPanelState } from "../grouping/groupingPanelState";
 import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
-import { injectRowReorder, type RowReorderState } from "../rows/rowReorder";
+import { injectRowReorder } from "../rows/rowReorder";
 import { injectTableRowPinning } from "../rows/tableRowPinning";
-import { injectRowDetail, type TableRowDetail } from "../tree/tableRowDetail";
-import { injectTree, type TableTree } from "../tree/tableTree";
+import { frontendRowModelOf } from "../source/rowModel";
+import { injectRowDetail } from "../tree/tableRowDetail";
+import { injectTree } from "../tree/tableTree";
 import { injectColumnWindow } from "../virtual/columnWindow";
-import { injectMeasuredWindowScrollMargin } from "../virtual/windowScrollMargin";
 import { tableRuntimeFor } from "./tableRuntime";
 
 /** A required kit-rendered surface exposes its native scroll element. @public */
@@ -269,372 +234,6 @@ function editingOptionsFor<TRow>(
       history().history.record
     ),
   };
-}
-
-/** Keep callbacks from a disposed editing scope from reaching the host. */
-function scopedEditCallback<TArgs extends unknown[], TResult>(
-  callback: ((...args: TArgs) => TResult) | undefined,
-  destroyRef: DestroyRef
-): ((...args: TArgs) => TResult | undefined) | undefined {
-  if (!callback) return undefined;
-  return (...args) => (destroyRef.destroyed ? undefined : callback(...args));
-}
-
-/**
- * The editing bundle for composed editing features, or absent.
- */
-function editingBundleFor<TRow>(options: {
-  readonly live: Signal<LiveEditConflictInput<TRow>>;
-  readonly featureOptions: Readonly<Record<string, unknown>>;
-  readonly activation: Signal<"doubleClick" | "click" | undefined>;
-  readonly columns: Signal<readonly ColumnDef<TRow>[]>;
-  readonly featureHost: DataTable<TRow>["featureHost"];
-  readonly labels: DataTable<TRow>["labels"];
-  readonly injector: Injector;
-}): Signal<EditableCellEditing<TRow>> | undefined {
-  const armed = resolveEditingArming(options.featureOptions);
-  if (!armed.any) return undefined;
-  const destroyRef = options.injector.get(DestroyRef);
-  const declaredCellEdit = options.featureOptions.onCellEdit as
-    CellEditHandler<TRow> | undefined;
-  const onCellEdit: CellEditHandler<TRow> | undefined = scopedEditCallback(
-    declaredCellEdit,
-    destroyRef
-  );
-  const declaredRowEdit = options.featureOptions.onRowEdit as
-    RowEditHandler<TRow> | undefined;
-  const onRowEdit: RowEditHandler<TRow> | undefined = scopedEditCallback(
-    declaredRowEdit,
-    destroyRef
-  );
-  const declaredBatchEdit = options.featureOptions.onBatchEdit as
-    BatchEditHandler<TRow> | undefined;
-  const onBatchEdit: BatchEditHandler<TRow> | undefined = scopedEditCallback(
-    declaredBatchEdit,
-    destroyRef
-  );
-  const declaredEditStart = options.featureOptions.onEditStart as
-    EditEventHandler<TRow> | undefined;
-  const onEditStart: EditEventHandler<TRow> | undefined = scopedEditCallback(
-    declaredEditStart,
-    destroyRef
-  );
-  const declaredEditCancel = options.featureOptions.onEditCancel as
-    EditEventHandler<TRow> | undefined;
-  const onEditCancel: EditEventHandler<TRow> | undefined = scopedEditCallback(
-    declaredEditCancel,
-    destroyRef
-  );
-  const declaredEditCommit = options.featureOptions.onEditCommit as
-    EditEventHandler<TRow> | undefined;
-  const onEditCommit: EditEventHandler<TRow> | undefined = scopedEditCallback(
-    declaredEditCommit,
-    destroyRef
-  );
-  const cellState = injectCellEditing<TRow>({
-    onEditStart,
-    onEditCancel,
-    onEditCommit,
-    injector: options.injector,
-  });
-  const validation = injectEditValidation<TRow>({
-    validateRow: options.featureOptions
-      .validateRow as EditValidationInjectOptions<TRow>["validateRow"],
-    applyEdit: options.featureOptions
-      .applyEdit as EditValidationInjectOptions<TRow>["applyEdit"],
-    injector: options.injector,
-  });
-  const saving = injectCellSaveState<TRow>({
-    onRollback: options.featureOptions
-      .onEditRollback as CellSaveStateInjectOptions<TRow>["onRollback"],
-    formatError: options.featureOptions
-      .formatEditError as CellSaveStateInjectOptions<TRow>["formatError"],
-    onEditError: options.featureOptions.onEditError as
-      EditEventHandler<TRow> | undefined,
-    injector: options.injector,
-  });
-  const tracked = injectDirtyCells({
-    enabled: armed.trackDirty,
-    onDirtyChange: options.featureOptions.onDirtyChange as
-      ((dirty: DirtyEdits) => void) | undefined,
-    injector: options.injector,
-  });
-  const rowEditIcons = options.featureOptions.rowEditIcons as
-    RowEditIcons | undefined;
-  const lifecycle = {
-    onEditStart,
-    onEditCancel,
-    onEditCommit,
-    onValidationFail: options.featureOptions.onValidationFail as
-      EditEventHandler<TRow> | undefined,
-  };
-  const rowEditing = armed.row
-    ? injectRowEditing<TRow>({
-        enabled: true,
-        columns: options.columns,
-        onRowEdit,
-        onEditStart,
-        onEditCancel,
-        onEditCommit,
-        get featureHost() {
-          return options.featureHost;
-        },
-        injector: options.injector,
-      })
-    : undefined;
-  const batch = armed.batch
-    ? injectBatchEditing<TRow>({
-        enabled: true,
-        columns: options.columns,
-        onBatchEdit,
-        onEditStart,
-        onEditCancel,
-        onEditCommit,
-        get featureHost() {
-          return options.featureHost;
-        },
-        injector: options.injector,
-      })
-    : undefined;
-  const conflict = injectLiveEditConflict({
-    input: options.live,
-    cell: cellState,
-    row: rowEditing,
-    batch,
-    injector: options.injector,
-  });
-  return computed((): EditableCellEditing<TRow> => {
-    const labels = options.labels();
-    return {
-      onCellEdit,
-      state: cellState(),
-      validation: validation(),
-      saving: saving(),
-      dirty: dirtyMarkerView(tracked(), armed.dirtyMarkers),
-      rowEditing: rowEditing?.(),
-      rowEditIcons,
-      batch: batch?.(),
-      lifecycle,
-      conflict: conflict(),
-      conflictLabels: {
-        message: labels.editConflict,
-        keepMine: labels.keepMine,
-        takeTheirs: labels.takeTheirs,
-        theirsValue: labels.theirsValue,
-      },
-      featureHost: options.featureHost,
-      activation: options.activation(),
-    };
-  });
-}
-
-/**
- * One row's actions cell: row editing's controls and the host's actions.
- *
- * @public
- */
-export interface RowActionsCell<TRow> {
-  /** The row-edit controls' props, when row editing is composed. */
-  readonly rowEdit: RowEditActionsProps<never> | undefined;
-  /** The host's actions, less any whose trigger row editing now owns. */
-  readonly actions: readonly RowAction<TRow>[];
-}
-
-/**
- * One data row the body draws: the row, its index in the page, its id, and
- * the attributes its row or card carries.
- *
- * @public
- */
-export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
-  /**
-   * The row's attributes — the grid's or the table's, plus the window's
-   * measure ref while virtualized.
-   */
-  readonly rowAttrs: Attrs;
-  /** The same row as a phone card: its attributes, measured the same way. */
-  readonly cardAttrs: Attrs;
-  /**
-   * The row's detail row's attributes: the window's measure ref, so a row
-   * and its open detail count as one virtual item.
-   */
-  readonly detailAttrs: Attrs;
-}
-
-/**
- * One drawn body cell: its column, where focus addresses it, and how far it
- * spans.
- *
- * @public
- */
-export interface BodyCellView<TRow> {
-  /** The column. */
-  readonly column: ColumnDef<TRow>;
-  /** Its index among the visible columns — what focus addresses. */
-  readonly columnIndex: number;
-  /** Columns the cell covers. */
-  readonly colSpan: number;
-  /** Rows the cell covers. */
-  readonly rowSpan: number;
-  /** `data-cell-span`, e.g. `"1x2"`, on a merged cell. */
-  readonly mark: string | undefined;
-}
-
-/**
- * One slot of the body in reading order: a group header, footer or "show
- * more" row, a data row, a host extra row, or a virtual spacer.
- *
- * @public
- */
-export type BodySlot<TRow> = ChromeBodySlot<TRow, BodyRow<TRow>>;
-
-/**
- * The group header slots' props — {@link GROUP_HEADER_ROW} on desktop and
- * {@link GROUP_HEADER_CARD} on phones — keyed by entry key.
- */
-function groupHeadersFor<TRow>(options: {
-  readonly table: DataTable<TRow>;
-  readonly grouping: Signal<TableGrouping<TRow> | undefined>;
-  readonly slots: Signal<readonly BodySlot<TRow>[]>;
-  readonly columns: Signal<readonly ColumnDef<TRow>[]>;
-  readonly selection: RowSelection | undefined;
-  readonly leadingCells: Signal<number>;
-  readonly showActions: Signal<boolean>;
-}): Signal<{
-  readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
-  readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
-}> {
-  const { table } = options;
-  const getCellProps = (column: ColumnDef<TRow>) => table.cellAttrs(column);
-  return computed(() => {
-    const grouping = options.grouping();
-    const rows = new Map<string, GroupHeaderRowSlotProps<never>>();
-    const cards = new Map<string, GroupHeaderCardSlotProps<never>>();
-    if (!grouping) return { rows, cards };
-    const columns = options.columns();
-    const labels = table.labels();
-    const selection = options.selection?.state() ?? null;
-    const onToggleCollapse = (groupKey: string): void => {
-      grouping.collapsed.toggle(groupKey);
-    };
-    for (const slot of options.slots()) {
-      if (slot.kind !== "group") continue;
-      const shared = {
-        entry: slot.entry,
-        columns,
-        selection,
-        labels,
-        onToggleCollapse,
-        onShowMore: grouping.showMore,
-      };
-      rows.set(slot.key, {
-        ...shared,
-        leadingCells: options.leadingCells(),
-        showActions: options.showActions(),
-        getCellProps,
-      } as unknown as GroupHeaderRowSlotProps<never>);
-      cards.set(slot.key, {
-        ...shared,
-        compact: false,
-      } as unknown as GroupHeaderCardSlotProps<never>);
-    }
-    return { rows, cards };
-  });
-}
-
-/**
- * The {@link EDITABLE_CELL} props of every cell in the body window, keyed
- * `rowId:columnKey`. A computed map keeps each object the same between
- * change-detection passes, so a slot's props change only when editing,
- * the rows or the columns do.
- */
-function editableCellsFor<TRow>(options: {
-  readonly table: DataTable<TRow>;
-  readonly editing: Signal<EditableCellEditing<TRow>>;
-  readonly rows: Signal<readonly BodyRow<TRow>[]>;
-  readonly rowKey: Signal<(row: TRow) => string>;
-}): Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> {
-  return computed(() => {
-    const { table } = options;
-    const editing = options.editing();
-    const labels = table.labels();
-    const rows = table.rows();
-    const columns = table.columns();
-    const rowKey = options.rowKey();
-    const cells = new Map<string, EditableCellSlotProps<never>>();
-    for (const entry of options.rows()) {
-      const rowId = rowKey(entry.row);
-      for (const column of columns) {
-        const props = {
-          editing,
-          row: entry.row,
-          column,
-          rowId,
-          rowIndex: entry.index,
-          rows,
-          columns,
-          rowKey,
-          editLabel: labels.editCell,
-          undoLabel: labels.undoEdit,
-        };
-        cells.set(
-          `${rowId}:${column.key}`,
-          props as unknown as EditableCellSlotProps<never>
-        );
-      }
-    }
-    return cells;
-  });
-}
-
-/**
- * Every window row's actions cell, keyed by row id: the row-edit controls
- * and the host's actions, with a host action that opens the row taking the
- * begin control's place.
- */
-function actionsCellsFor<TRow>(options: {
-  readonly table: DataTable<TRow>;
-  readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
-  readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
-  readonly rows: Signal<readonly BodyRow<TRow>[]>;
-  readonly rowKey: Signal<(row: TRow) => string>;
-}): Signal<ReadonlyMap<string, RowActionsCell<TRow>>> {
-  return computed(() => {
-    const editing = options.editing?.();
-    const rowEditing = editing?.rowEditing;
-    const actions = options.rowActions();
-    const labels = options.table.labels();
-    const rowKey = options.rowKey();
-    const cells = new Map<string, RowActionsCell<TRow>>();
-    for (const entry of options.rows()) {
-      const rowId = rowKey(entry.row);
-      const trigger = resolveRowEditTrigger(
-        actions,
-        rowEditing,
-        entry.row,
-        rowId
-      );
-      const rowEdit: RowEditActionsProps<TRow> | undefined = rowEditing && {
-        rowEditing,
-        row: entry.row,
-        rowId,
-        showBegin: trigger.showBegin,
-        icons: editing.rowEditIcons,
-        conflict: rowEditConflict(editing, rowId),
-        labels,
-      };
-      cells.set(rowId, {
-        rowEdit: rowEdit as unknown as RowEditActionsProps<never> | undefined,
-        actions: trigger.actions,
-      });
-    }
-    return cells;
-  });
-}
-
-/** A number feature option, or nothing when it is not a number. */
-function numberOption(value: unknown): number | undefined {
-  return typeof value === "number" ? value : undefined;
 }
 
 /** The live find state, when the feature is composed. */
@@ -872,183 +471,16 @@ function cellAttrsWithFind<TRow>(
 }
 
 /**
- * The window the body draws: the flat rows (or a keyed window's spacers)
- * and, while grouping renders, the grouped entries in view.
- */
-interface BodyWindow<TRow> {
-  /** The row window — every row when virtualization is off. */
-  readonly virtualization: TableVirtualization<TRow>;
-  /**
-   * Scroll the flat virtual window to a loaded-row index. Absent when the
-   * body is not a flat virtual list.
-   */
-  readonly scrollToRowIndex?: (index: number) => void;
-  /** The grouped entries in the window, while grouping renders. */
-  readonly groupingEntries: readonly GroupedFlatEntry<TRow>[] | undefined;
-  /** The tree entries in the window, while the rows are a tree. */
-  readonly treeEntries: readonly TreeEntry<TRow>[] | undefined;
-}
-
-/**
- * The body window for a composed {@link virtualize} feature, or every row
- * and entry when the feature is absent. A grouped body windows over its
- * entries — headers, footers and leaves — and a tree over its open nodes,
- * rather than over the rows.
- */
-function bodyWindowFor<TRow>(options: {
-  readonly table: DataTable<TRow>;
-  readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
-  readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
-  readonly expandable: boolean;
-  /** The rows that scroll — every row but the pinned ones. */
-  readonly scrollRows: Signal<readonly TRow[]>;
-  readonly featureOptions: Readonly<Record<string, unknown>>;
-  readonly rowKey: (row: TRow) => string;
-  readonly maxHeight: number | string | undefined;
-  readonly scrollBox: () => HTMLElement | null;
-  readonly root: () => HTMLElement | null;
-  readonly injector: Injector;
-}): Signal<BodyWindow<TRow>> {
-  const {
-    table,
-    grouping,
-    tree,
-    expandable,
-    scrollRows,
-    featureOptions,
-    rowKey,
-    maxHeight,
-    scrollBox,
-    root,
-    injector,
-  } = options;
-  const source = table.source;
-  const wantVirtualize = featureOptions.virtualize === true;
-  const groupEntries = computed(() => grouping?.()?.entries);
-  const treeEntries = computed(() => tree?.()?.entries);
-  const bodyChrome = computed(() => {
-    const entries = groupEntries();
-    const nodes = treeEntries();
-    return {
-      body: table.bodyRegion(),
-      isPaged: source().paginationMode === "paged",
-      source: source(),
-      grouping: entries === undefined ? undefined : { entries },
-      tree: nodes === undefined ? undefined : { entries: nodes },
-      isMobile: table.isMobile(),
-    };
-  });
-  if (wantVirtualize && virtualizeIgnoredOnPage(true, bodyChrome())) {
-    devWarn(
-      'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it, or group the rows: an expanded page is windowed.'
-    );
-  }
-  if (!wantVirtualize) {
-    return computed(() => ({
-      virtualization: {
-        enabled: false,
-        rows: scrollRows().map((row, index) => ({
-          row,
-          index,
-          key: rowKey(row),
-        })),
-        paddingTop: 0,
-        paddingBottom: 0,
-      },
-      scrollToRowIndex: undefined,
-      groupingEntries: groupEntries(),
-      treeEntries: treeEntries(),
-    }));
-  }
-  const sizes = {
-    estimateRowSize: numberOption(featureOptions.estimateRowSize),
-    estimateCardSize: numberOption(featureOptions.estimateCardSize),
-    rowHeight: featureOptions.rowHeight as RowHeight<TRow> | undefined,
-  };
-  const estimateSize = computed(() =>
-    estimateBodyItemSize(bodyChrome(), sizes, scrollRows())
-  );
-  const overscan = numberOption(featureOptions.virtualOverscan);
-  const hostMargin = numberOption(featureOptions.virtualScrollMargin);
-  const inScrollBox = maxHeight != null;
-  // Scrolling the page, a list that starts down the page windows from where
-  // it starts; the host's margin wins when it gave one.
-  const measuredMargin = injectMeasuredWindowScrollMargin({
-    enabled: !inScrollBox && hostMargin === undefined,
-    element: root,
-    injector,
-  });
-  const scrollMargin = computed(() => hostMargin ?? measuredMargin());
-  const getScrollElement = inScrollBox ? () => scrollBox() : undefined;
-  const onEndReached = (): void => {
-    table.loadMore();
-  };
-  const kind = computed(() => bodyWindowKind(true, bodyChrome()));
-  const flat = injectTableVirtualizer<TRow>({
-    rows: scrollRows,
-    rowKey,
-    enabled: computed(() => kind() === "flat"),
-    expandable,
-    estimateSize,
-    overscan,
-    scrollMargin,
-    getScrollElement,
-    onEndReached,
-    injector,
-  });
-  const keyed = injectKeyedVirtualization({
-    keys: computed(() =>
-      (kind() === "tree" ? (treeEntries() ?? []) : (groupEntries() ?? [])).map(
-        (entry) => entry.key
-      )
-    ),
-    enabled: computed(() => kind() === "grouped" || kind() === "tree"),
-    estimateSize,
-    overscan,
-    scrollMargin,
-    getScrollElement,
-    onEndReached,
-    injector,
-  });
-  return computed(() => {
-    const entries = groupEntries();
-    const nodes = treeEntries();
-    const window = keyed();
-    return {
-      virtualization: resolveBodyVirtualization(window, flat.virtualization()),
-      scrollToRowIndex: kind() === "flat" ? flat.scrollToIndex : undefined,
-      groupingEntries:
-        entries === undefined
-          ? undefined
-          : windowGroupedEntries(entries, window.indices),
-      treeEntries:
-        nodes === undefined
-          ? undefined
-          : windowGroupedEntries(nodes, window.indices),
-    };
-  });
-}
-
-/**
- * What the table renders from once its inputs have arrived.
+ * What the compatibility shell renders once its inputs have arrived.
+ * Structural fields come from {@link TableSurfaceView}.
  *
  * @public
  */
-export interface TableView<TRow> {
-  /** The headless table. */
-  readonly table: DataTable<TRow>;
-  /** Live class hooks for the mobile and row-action parts. */
-  readonly classNames: Signal<DataTableClassNames>;
-  /** A host template or component replacing only the card's field layout. */
-  readonly renderCard: Signal<MobileCardRenderer<TRow> | undefined>;
+export interface TableView<TRow> extends TableSurfaceView<TRow> {
   /** A host template or component replacing the resolved row actions. */
   readonly renderRowActions: Signal<RowActionsRenderer<TRow> | undefined>;
   /** The host's live changed-cell marks, shared by cells and card values. */
   readonly isCellFlashing: (rowId: string, columnKey: string) => boolean;
-  /** Row selection, when the table is selectable. */
-  readonly selection: RowSelection | undefined;
-  /** Cell navigation, when it is on. */
-  readonly grid: GridFocus<TRow> | undefined;
   /** The find bar's props, when `findInTable()` is composed. */
   readonly findBar: Signal<FindBarProps> | undefined;
   /** Props for the command-palette slot. Empty when the feature is absent. */
@@ -1085,80 +517,13 @@ export interface TableView<TRow> {
   readonly rowMutations: Signal<RowMutationsState<TRow>>;
   /** Asks before an action that declares a `confirm`. */
   readonly confirm: ConfirmHandler;
-  /** The row density the root states. */
-  readonly density: Signal<TableDensity>;
-  /** The header's sticky style, absent unless `stickyHeader` is on. */
-  readonly stickyHead: Signal<CssProperties | undefined>;
-  /** A desktop table reports its header's height, so pinned rows sit below it. */
-  readonly reportHeaderHeight: (px: number) => void;
   /** The toolbar extras' props: density, fullscreen and export. */
   readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
   /** The saved-views menu's props, when it is composed. */
   readonly savedViews:
     Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
-  /** The grouping strip's props, when the panel feature is composed. */
-  readonly groupingPanel:
-    Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
-  /** Row reorder state, when the feature is composed. */
-  readonly reorder: Signal<RowReorderState<TRow>> | undefined;
-  /** The live tree, when `tree()` is composed. */
-  readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
-  /** Whether a kit draws the tree column's cell. */
-  readonly treeCellFilled: boolean;
-  /** Whether each column header carries a column-selection checkbox. */
-  readonly columnSelect: boolean;
-  /** The live row detail, when `rowDetail()` or `nestedTable()` is composed. */
-  readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
-  /** Each window row's expand toggle props, keyed by row id. */
-  readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
-  /** Each drawn row's cells, spans applied, keyed by row id. */
-  readonly bodyCells: Signal<
-    ReadonlyMap<string, readonly BodyCellView<TRow>[]>
-  >;
-  /** How a merged cell looks: `"merged"` (default) or `"plain"`. */
-  readonly cellSpanAppearance: CellSpanAppearance | undefined;
-  /** What this table hands the tables nested under its rows. */
-  readonly detailParent: Signal<NestedTableParent>;
-  /** The summary row's value per column, when `summaryRow` is given. */
-  readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
-  /** Whether the summary row draws: a `summaryRow`, or a column footer. */
-  readonly showSummary: Signal<boolean>;
-  /**
-   * Cell editing bundle, when an editing feature is composed — state, channel,
-   * validation, save tracking and lifecycle observers for the gate.
-   */
-  readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
-  /** Each window cell's editable-cell props, when editing is composed. */
-  readonly editableCells:
-    Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
-  /**
-   * Whether the actions column is drawn — row actions, or row editing's
-   * begin/save/cancel controls.
-   */
-  readonly showActions: Signal<boolean>;
-  /** Each window row's actions cell, keyed by row id. */
-  readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
   /** The batch-edit bar's props, when batch editing is composed. */
   readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
-  /** The grouped model, while `grouping()` or `groupingPanel()` is composed. */
-  readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
-  /** The body window — every row when virtualization is off. */
-  readonly virtualization: Signal<TableVirtualization<TRow>>;
-  /** The body in reading order, from core's body layout. */
-  readonly body: Signal<readonly BodySlot<TRow>[]>;
-  /** The group header, footer and "show more" slots' props, by entry key. */
-  readonly groupHeaders: Signal<{
-    readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
-    readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
-  }>;
-  /** Column span for spacer/detail cells. */
-  readonly bodyColSpan: Signal<number>;
-  /** The columns the desktop table draws — a window of them when wide. */
-  readonly columns: Signal<readonly ColumnDef<TRow>[]>;
-  /** The spacer widths either side of a column window, when windowed. */
-  readonly columnSpacers: Signal<{ start: number; end: number } | undefined>;
-  /** Each column's position among all visible columns, by key. */
-  readonly columnIndex: Signal<ReadonlyMap<string, number>>;
 }
 
 /**
@@ -1214,8 +579,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   readonly rowKey = input.required<(row: TRow) => string>();
   /** The table's accessible name. Defaults to the `table` label. */
   readonly tableLabel = input<string>();
-  /** Text direction. */
-  readonly dir = input<Direction>("ltr");
+  /**
+   * Text direction. An explicit value wins. Otherwise a kit may supply its
+   * library's direction. With neither, the table stays left to right.
+   */
+  readonly dir = input<Direction>();
   /** Show the phone layout whatever the viewport. */
   readonly forceMobile = input<boolean>();
   /** Keep the desktop header in view while the table or the page scrolls. */
@@ -1343,6 +711,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   readonly closeHeaderFilterOnSelect = input(false);
   /** The host's own chips, shown after the table's filter chips. */
   readonly extraChips = input<readonly ActiveFilterChip[]>([]);
+  /**
+   * Animate rows and cards as they mount. Off by default. Skipped when the
+   * reader prefers reduced motion.
+   */
+  readonly animate = input(false);
   /** Controlled row density. Omit to use the composed chooser's state. */
   readonly density = input<TableDensity>();
   /** Every density request; a controlled table waits for its density input. */
@@ -1487,7 +860,16 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     viewChild<TemplateRef<unknown>>("filtersTrigger");
   private scrollToGridRow: ((rowIndex: number) => void) | undefined;
   private readonly injector = inject(Injector);
+  private readonly pendingTasks = inject(PendingTasks);
+  private readonly reducedMotion = injectPrefersReducedMotion();
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
+  /** Skips a repeat entrance when the row count and layout have not changed. */
+  private staggerGeneration = "";
+  /** Labels for the kit library's locale, once loaded. */
+  private readonly libraryLabels = signal<
+    | { readonly locale: string; readonly labels: TableLabels | undefined }
+    | undefined
+  >(undefined);
 
   /** Ctrl/Cmd+X and the menu's Cut, after the clipboard write succeeds. */
   private cutSelection(range: CellRange): void {
@@ -1549,14 +931,52 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       .setSort(table.sortBy(), table.sortDir() === "desc" ? "asc" : "desc");
   }
 
+  constructor() {
+    mountForcedColorsStyles();
+    // Only the library locale's language is fetched, and only when neither
+    // the kit nor the host supplies labels.
+    effect((onCleanup) => {
+      const kit = this.kitEnvironment();
+      if (kit.labels !== undefined || this.labels() !== undefined) return;
+      const locale = kit.locale;
+      if (locale === undefined) return;
+      let current = true;
+      onCleanup(() => {
+        current = false;
+      });
+      // A pending task holds server rendering until the language arrives, so
+      // the page is serialized in it rather than in English.
+      this.pendingTasks.run(async () => {
+        const labels = await loadLabels(locale);
+        if (current) this.libraryLabels.set({ locale, labels });
+      });
+    });
+    afterRenderEffect(() => {
+      const current = this.view();
+      const rows = current?.table.source().rows.length ?? 0;
+      const mobile = current?.table.isMobile() ?? false;
+      const enabled = this.animate();
+      const reduced = this.reducedMotion();
+      const root = this.root()?.nativeElement;
+      const marked = root?.querySelectorAll("[data-stagger]").length ?? 0;
+      const generation = `${enabled}:${reduced}:${rows}:${mobile ? 1 : 0}:${marked}`;
+      if (!enabled || reduced) {
+        this.staggerGeneration = generation;
+        return;
+      }
+      if (!root || marked === 0 || generation === this.staggerGeneration)
+        return;
+      this.staggerGeneration = generation;
+      staggerMounted({ root, enabled, reduced, rows, mobile });
+    });
+  }
+
   ngOnInit(): void {
     const resources = createFeatureResources(this.injector);
     const features = computed(
       () => tableFeaturesOf(this.injector, this.features()),
       {
-        equal: (left, right) =>
-          left.length === right.length &&
-          left.every((feature, index) => feature === right[index]),
+        equal: sameItems,
       }
     );
     const inScrollBox = computed(() => this.maxHeight() != null);
@@ -1592,6 +1012,15 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     );
   }
 
+  /**
+   * The kit's library settings. The binding calls this while resolving
+   * direction, labels, locale and density, so overrides must read signals
+   * here rather than inject.
+   */
+  protected kitEnvironment(): KitEnvironment {
+    return {};
+  }
+
   /** Compose current chrome while retaining each unchanged controller scope. */
   private assembleTable(
     features: readonly AdaptTableFeature[],
@@ -1599,9 +1028,19 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   ): void {
     const labels = computed((): TableLabels | undefined => {
       const placeholder = this.searchPlaceholder();
+      const environment = this.kitEnvironment();
+      const loaded = this.libraryLabels();
+      const kit =
+        environment.labels ??
+        (loaded !== undefined && loaded.locale === environment.locale
+          ? loaded.labels
+          : undefined);
+      const own = this.labels();
+      const merged =
+        own === undefined && kit === undefined ? undefined : { ...kit, ...own };
       return placeholder === undefined
-        ? this.labels()
-        : { ...this.labels(), searchPlaceholder: placeholder };
+        ? merged
+        : { ...merged, searchPlaceholder: placeholder };
     });
     const liveOptions = resources.use("options", [], () =>
       computed(() =>
@@ -1669,6 +1108,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         paginationMode: computed(() => this.paginationMode() ?? "auto"),
         locale: this.locale,
         mobileBreakpoint: this.mobileBreakpoint(),
+        createEngine: computed(
+          () =>
+            frontendRowModelOf(
+              tableFeaturesOf(this.injector, this.features())
+            ) as FrontendEngineFactory<TRow> | undefined
+        ),
         injector,
       })
     );
@@ -1721,7 +1166,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     );
     const viewSource = resources.use("view-source", [], () =>
       computed(() =>
-        groupingRef()?.() === undefined ? source() : groupedViewSource(source())
+        projectedGroupingSource(source(), { model: groupingRef()?.() })
       )
     );
     const readRename = this.onColumnRename;
@@ -1732,8 +1177,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         rowKey: (row) => this.rowKey()(row),
         tableLabel: this.tableLabel,
         labels,
-        dir: this.dir,
-        locale: this.locale,
+        dir: computed(() => this.dir() ?? this.kitEnvironment().dir ?? "ltr"),
+        locale: computed(() => this.locale() ?? this.kitEnvironment().locale),
         searchDebounceMs: this.searchDebounceMs(),
         forceMobile: isMobile,
         cellTemplates: this.cellTemplates,
@@ -1927,7 +1372,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           : undefined
     );
     const density = computed(() =>
-      resolveDensity(this.density(), densityState?.density())
+      resolveDensity(
+        this.density() ?? this.kitEnvironment().density,
+        densityState?.density()
+      )
     );
     const fullscreen = resources.use(
       "fullscreen",
@@ -2340,7 +1788,6 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         injector,
       })
     );
-    const virtualization = computed(() => bodyWindow().virtualization);
     const rowKey = computed(() => this.rowKey());
     const rowActionList = computed(() => mergedActions().rowActions);
     const columnWindow = resources.use(
@@ -2361,320 +1808,54 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           injector,
         })
     );
-    // Core's render model: the rendered (possibly windowed) columns, the
-    // spacer widths, the injected columns and the full-width span.
-    const renderModel = computed(() => {
-      const window = bodyWindow();
-      const entries = window.groupingEntries;
-      return chromeRenderModel({
-        table: {
-          columns: table.columns(),
-          selection: selection?.state() ?? null,
-          labels: table.labels(),
-        },
-        rows: table.source().rows,
-        rowActions: rowActionList(),
-        getRowId: rowKey(),
-        rowEntries: window.virtualization.rows,
-        columnWindow: columnWindow(),
-        editing: editing?.(),
-        rowReorder: reorder?.(),
-        grouping: entries === undefined ? undefined : { entries },
-        renderRowDetail: rowDetail?.(),
-        expansion: rowDetail?.().expansion,
-        pinnedTopRows: pinnedRows()?.top ?? [],
-        pinnedBottomRows: pinnedRows()?.bottom ?? [],
-        pinnedSummaryTop: summaryRows?.top ?? [],
-        pinnedSummaryBottom: summaryRows?.bottom ?? [],
-        tree:
-          window.treeEntries === undefined
-            ? undefined
-            : { entries: window.treeEntries },
-        getCellSpan,
-        extraRows,
-        assembly,
-      });
-    });
-    // Each drawn row's cells, as core's span pass left them: a cell another
-    // one covers is absent, and a merged cell carries its extent.
-    const bodyCells = computed(() => {
-      const byKey = new Map(
-        renderModel().columns.map((column) => [column.key, column])
-      );
-      const cells = new Map<string, readonly BodyCellView<TRow>[]>();
-      for (const [rowId, rowCells] of renderModel().cellsByRow) {
-        cells.set(
-          rowId,
-          rowCells.flatMap((cell) => {
-            const column = byKey.get(cell.column.key);
-            return column === undefined
-              ? []
-              : [
-                  {
-                    column,
-                    columnIndex: cell.columnIndex,
-                    colSpan: cell.colSpan,
-                    rowSpan: cell.rowSpan,
-                    mark: cellSpanMark(cell.colSpan, cell.rowSpan),
-                  },
-                ];
-          })
-        );
-      }
-      return cells;
-    });
-    const showActions = computed(() => renderModel().showActions);
-    const bodyColSpan = computed(() => renderModel().columnSpan);
-    const renderedColumns = computed(() => renderModel().columns);
-    const columnSpacers = computed(() => renderModel().columnSpacers);
-    const columnIndex = computed(
-      () => new Map(table.columns().map((column, index) => [column.key, index]))
-    );
-    // A virtualized row hands itself to the window, which measures it — with
-    // its open detail row, as one item, when rows can expand.
-    const withRef = (
-      attrs: Attrs,
-      ref: ((node: Element | null) => void) | undefined
-    ): Attrs => (ref === undefined ? attrs : { ...attrs, ref });
-    const measured = (attrs: Attrs): Attrs =>
-      withRef(attrs, virtualization().measureElement);
-    // A pinned row keeps its place above or below the scrolling rows, stuck
-    // there inside a scroll box; a host summary row is marked and named, with
-    // none of a data row's interactions. A pinned card is an ordinary card.
-    // The header sticks to the page, or at 0 inside a scroll box: a maxHeight
-    // box, or one that scrolls sized columns sideways.
-    const headerHeight = signal(0);
-    const stickyPlan = computed(() => {
-      const tableStyle = table.tableAttrs().style;
-      return desktopStickyPlan({
-        maxHeight: this.maxHeight() == null ? undefined : 0,
-        hasPinned: false,
-        overflowing:
-          typeof tableStyle === "object" &&
-          tableStyle !== null &&
-          "minWidth" in tableStyle &&
-          Boolean(tableStyle.minWidth),
-        stickyHeader: this.stickyHeader(),
-        stickyTop: this.stickyTop(),
-        headerHeight: headerHeight(),
-      });
-    });
-    const pinSticky = this.maxHeight() != null || this.stickyHeader();
-    const pinnedAttrs = (
-      attrs: Attrs,
-      args: DesktopRowWiringArgs<TRow>,
-      card: boolean
-    ): Attrs => {
-      const side = args.rowPinSide;
-      if (side === undefined) return attrs;
-      const summary = args.summary === true;
-      if (card && !summary) return attrs;
-      const style = attrs.style;
-      return {
-        ...attrs,
-        "data-adapttable-part": summary
-          ? pinnedSummaryPart(side)
-          : pinnedRowPart(side),
-        "data-row-pin": side,
-        "aria-selected": summary ? undefined : attrs["aria-selected"],
-        "aria-label": summary
-          ? table.labels().pinnedSummaryRow
-          : attrs["aria-label"],
-        style: card
-          ? style
-          : {
-              ...(typeof style === "object" && style !== null ? style : {}),
-              ...pinnedRowSticky(side, pinSticky, stickyPlan().rowPinOffset),
-              // A pinned total is the host's figure, not a record: semibold.
-              ...(summary ? { fontWeight: 600 } : {}),
-            },
-      };
-    };
-    // The host's class, style and height for a row or its card.
-    const appearance = (
-      attrs: Attrs,
-      args: DesktopRowWiringArgs<TRow>
-    ): Attrs => {
-      const className = rowClassName?.(args.row, args.sourceIndex);
-      const style = resolveRowStyle(
-        rowStyle,
-        rowHeight,
-        args.row,
-        args.sourceIndex
-      );
-      if (className === undefined && style === undefined) return attrs;
-      const base = attrs.style;
-      return {
-        ...attrs,
-        class: className,
-        style: {
-          ...(typeof base === "object" && base !== null ? base : {}),
-          ...style,
-        },
-      };
-    };
-    // Core owns activation, interactive-child guards and arrow-key roving.
-    // Pinned summaries are read-only labels, never row-navigation stops.
-    const interactiveAttrs = (
-      attrs: Attrs,
-      args: DesktopRowWiringArgs<TRow>,
-      focusIndex: number
-    ): Attrs => {
-      if (args.summary === true) {
-        return { ...attrs, "data-selected": undefined };
-      }
-      const click = rowClickProps(
-        args.row,
-        this.onRowClick() ??
-          (featureOptions.onRowClick as ((row: TRow) => void) | undefined),
-        focusIndex
-      );
-      return {
-        ...attrs,
-        ...click,
-        "data-clickable": click ? "" : undefined,
-        "data-dirty": rowIsDirty(editing?.(), args.id) ? "" : undefined,
-        style: {
-          ...click?.style,
-          ...(typeof attrs.style === "object" && attrs.style !== null
-            ? attrs.style
-            : {}),
-        },
-      };
-    };
-    const body = computed((): readonly BodySlot<TRow>[] => {
-      const window = bodyWindow();
-      const entries = window.groupingEntries;
-      let focusIndex = 0;
-      return desktopBodySlots<TRow, BodyRow<TRow>>({
-        pinnedTopRows: pinnedRows()?.top ?? [],
-        pinnedBottomRows: pinnedRows()?.bottom ?? [],
-        pinnedSummaryTop: summaryRows?.top ?? [],
-        pinnedSummaryBottom: summaryRows?.bottom ?? [],
-        extraRows,
-        extraFill: (key) =>
-          extraHostFillStyle(
-            key,
-            extraRows,
-            table.source().rows,
-            rowKey(),
-            rowStyle
-          ),
-        insertExtraRows,
-        insertExtrasBeforeRows,
-        paddingTop: window.virtualization.paddingTop,
-        paddingBottom: window.virtualization.paddingBottom,
-        grouping: entries === undefined ? undefined : { entries },
-        entries: window.virtualization.rows,
-        tree:
-          window.treeEntries === undefined
-            ? undefined
-            : { entries: window.treeEntries },
-        getRowId: rowKey(),
-        columnSpan: bodyColSpan(),
-        rows: table.source().rows,
-        wiring: (args) => {
-          const window = virtualization();
-          const rowFocusIndex = args.summary === true ? -1 : focusIndex++;
-          return {
-            ...args,
-            rowAttrs: withRef(
-              pinnedAttrs(
-                interactiveAttrs(
-                  appearance(
-                    grid && args.summary !== true
-                      ? grid.rowAttrs(args.row, args.index)
-                      : table.rowAttrs(args.row, args.index),
-                    args
-                  ),
-                  args,
-                  rowFocusIndex
-                ),
-                args,
-                false
-              ),
-              desktopRowMeasureRef(
-                args.rowPinSide,
-                window.measureRowPair,
-                args.index,
-                window.measureElement
-              )
-            ),
-            cardAttrs: (args.measure ? measured : (attrs: Attrs) => attrs)(
-              pinnedAttrs(
-                interactiveAttrs(
-                  appearance(table.cardAttrs(args.row, args.index), args),
-                  args,
-                  rowFocusIndex
-                ),
-                args,
-                true
-              )
-            ),
-            detailAttrs: withRef(
-              {},
-              desktopDetailMeasureRef(
-                args.rowPinSide,
-                window.measureRowPair,
-                args.index
-              )
-            ),
-          };
-        },
-      });
-    });
-    const bodyRows = computed(() =>
-      body().flatMap((slot) => (slot.kind === "row" ? [slot.wiring] : []))
-    );
-    const editableCells =
-      editing === undefined
-        ? undefined
-        : editableCellsFor({ table, editing, rows: bodyRows, rowKey });
-    const actionsCells = actionsCellsFor({
+    const surface = buildSurfaceBody({
       table,
-      editing,
-      rowActions: rowActionList,
-      rows: bodyRows,
-      rowKey,
-    });
-    const expandToggles = computed(() => {
-      const toggles = new Map<string, ExpandToggleSlotProps>();
-      const detail = rowDetail?.();
-      if (!detail) return toggles;
-      const labels = table.labels();
-      const dir = table.dir();
-      for (const entry of bodyRows()) {
-        const id = entry.id;
-        toggles.set(id, {
-          id,
-          expanded: detail.expansion.isExpanded(id),
-          onToggle: detail.expansion.toggle,
-          dir,
-          expandLabel: labels.expandRow,
-          collapseLabel: labels.collapseRow,
-        });
-      }
-      return toggles;
-    });
-    const summary = computed(() => this.summaryRow()?.(table.source().rows));
-    const showSummary = computed(
-      () =>
-        this.summaryRow() !== undefined ||
-        table.columns().some((column) => column.footer !== undefined)
-    );
-    const detailParent = computed((): NestedTableParent => ({
-      density: density(),
-      labels: labels(),
-    }));
-    const groupHeaders = groupHeadersFor({
-      table,
-      grouping: grouping ?? computed(() => undefined),
-      slots: body,
-      columns: renderedColumns,
+      bodyWindow,
+      columnWindow,
       selection,
-      leadingCells: computed(() => renderModel().leadingCells),
-      showActions,
+      grid,
+      editing,
+      reorder,
+      grouping,
+      rowDetail,
+      pinnedRows,
+      summaryRows,
+      extraRows,
+      getCellSpan,
+      rowActionList,
+      rowKey,
+      assembly,
+      rowClassName,
+      rowStyle,
+      rowHeight,
+      density,
+      labels,
+      featureOptions,
+      maxHeight: () => this.maxHeight(),
+      stickyHeader: () => this.stickyHeader(),
+      stickyTop: () => this.stickyTop(),
+      onRowClick: () => this.onRowClick(),
+      summaryRow: () => this.summaryRow(),
     });
+    const {
+      body,
+      bodyCells,
+      showActions,
+      bodyColSpan,
+      renderedColumns,
+      columnSpacers,
+      columnIndex,
+      virtualization,
+      groupHeaders,
+      editableCells,
+      actionsCells,
+      expandToggles,
+      summary,
+      showSummary,
+      detailParent,
+      stickyHead,
+      reportHeaderHeight,
+    } = surface;
     const findBar = findBarFor(find, table.labels);
     const commandPalette = commandPalettePropsFor({
       commandPalette:
@@ -2751,10 +1932,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       bulkBar,
       rowActions: rowActionList,
       density,
-      stickyHead: computed(() => stickyPlan().stickyStyle),
-      reportHeaderHeight: (px) => {
-        headerHeight.set(px);
-      },
+      stickyHead,
+      reportHeaderHeight,
       toolbarExtras,
       rowMutations,
       savedViews,
@@ -2789,6 +1968,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         RowActionsLayout | undefined,
       confirm,
     });
+    table.featureState.set(SURFACE_OCCUPIED, {
+      grid: grid !== undefined,
+      grouping: grouping !== undefined,
+      editing: editing !== undefined,
+    });
     resources.use("mounted-features", [], (injector) => {
       const liveFeatures = computed(() =>
         tableFeaturesOf(this.injector, this.features())
@@ -2818,6 +2002,24 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
             tree: current?.tree?.(),
             rowPinning: livePinning(),
             editing: current?.editing?.(),
+            find: find?.(),
+            density: densityState
+              ? {
+                  density: densityState.density(),
+                  onDensityChange: densityState.setDensity,
+                }
+              : undefined,
+            fullscreen: fullscreen?.(),
+            contextMenu: liveFeatures().some(
+              (feature) => feature.id === "context-menu"
+            )
+              ? { items: table.featureHost.contextMenuItems }
+              : undefined,
+            commandPalette: paletteContribution(
+              featureOptions.commandPalette,
+              table.featureHost.commands
+            ),
+            print: printContribution(featureOptions),
             rowActions: options.rowActions as
               readonly RowAction<TRow>[] | undefined,
             bulkActions: options.bulkActions as
@@ -2839,6 +2041,27 @@ function groupByKeys(value: unknown): readonly string[] {
   if (typeof value === "string") return [value];
   if (!Array.isArray(value)) return [];
   return value as readonly string[];
+}
+
+/** The host's commands, when the palette is armed. The array is the host's. */
+function paletteContribution<TCommand extends { readonly key: string }>(
+  commandPalette: unknown,
+  commands: readonly TCommand[]
+): { readonly commands: readonly TCommand[] } | undefined {
+  if (commandPalette === false) return undefined;
+  if (commandPalette === undefined && commands.length === 0) return undefined;
+  return { commands };
+}
+
+/** The host's print handler, when the toolbar button was asked for. */
+function printContribution(
+  options: Readonly<Record<string, unknown>>
+): { onPrint: () => void } | undefined {
+  const onPrint = options.onPrint;
+  if (options.printButton !== true || typeof onPrint !== "function") {
+    return undefined;
+  }
+  return { onPrint: onPrint as () => void };
 }
 
 /** What the status strip shows for one table. */

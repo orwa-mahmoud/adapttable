@@ -1,6 +1,7 @@
 import {
-  createFrontendSource,
+  createFrontendSourceWith,
   type ExtraFilters,
+  type FrontendEngineFactory,
   type FrontendSource,
   type PaginationMode,
   type QueryFilterGroup,
@@ -8,14 +9,23 @@ import {
   type SortableValue,
   type TableSource,
 } from "@adapttable/core";
-import { useCallback, useLayoutEffect, useState } from "react";
+import { createBasicTableEngine } from "@adapttable/core/engine";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";
+import { useFeatureState } from "../features/featureState";
+import { FRONTEND_ROW_MODEL } from "../features/rowModelKey";
 import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
+import {
+  type FrameHold,
+  markFrameCommitted,
+  sourceViewKey,
+  takeRetainedFrame,
+} from "./retainedFrame";
 
 export { defaultFrontendRowId, defaultSearchText } from "@adapttable/core";
 
@@ -91,6 +101,18 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
    * so the mode follows the same rule as the card layout.
    */
   mobileBreakpoint?: number;
+  /**
+   * Evaluator for this table's engine. Defaults to the basic one. Grouping
+   * passes the full evaluator; a headless caller can pass it the same way.
+   */
+  createEngine?: FrontendEngineFactory<TRow>;
+  /**
+   * When `false`, the source stays mounted but a repeat of the same inputs
+   * does not refresh it. The first inactive render still applies what it is
+   * given, so the shell can hand it an empty row list and release the
+   * previous cache. Defaults to active.
+   */
+  active?: boolean;
 }
 
 /**
@@ -98,9 +120,9 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
  * and slices a caller-supplied array. The mirror of `useQuerySource` —
  * the table cannot tell which produced it.
  *
- * A {@link rowPatchLog} on `data` continues the live {@link IncrementalView}
- * so only touched rows re-run search, filters and sort. Spreading the
- * patched array drops the log and falls back to a full rebuild.
+ * The basic evaluator filters, sorts, and searches. A grouping feature
+ * supplies the full evaluator, which keeps the patch log's one-row path.
+ * Spreading a patched array drops the log and rebuilds either way.
  *
  * @typeParam TRow - The row item type.
  * @param options - See {@link UseFrontendDataOptions}.
@@ -111,9 +133,10 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
 export function useFrontendData<TRow>(
   options: UseFrontendDataOptions<TRow>
 ): TableSource<TRow> {
-  // The source is mutable and must see every render's inputs, and the base
-  // bundle carries this hook: the compiler's cache would skip updates and add
-  // weight without adding hits.
+  // The source is created once. An active render, and the first inactive
+  // render, apply this render's inputs; a later render of those same inputs
+  // does not. The compiler's cache would skip a real refresh and add weight,
+  // so this hook stays opted out.
   "use no memo";
   const {
     data,
@@ -132,8 +155,14 @@ export function useFrontendData<TRow>(
     forceMobile,
     mobileBreakpoint,
     locale,
+    createEngine: requestedEngine,
+    active: activeOption = true,
     ...urlOptions
   } = options;
+  const publishedEngine = useFeatureState(FRONTEND_ROW_MODEL) as
+    FrontendEngineFactory<TRow> | undefined;
+  const createEngine =
+    requestedEngine ?? publishedEngine ?? createBasicTableEngine;
 
   const mediaMobile = useIsMobile(mobileBreakpoint);
   const isMobile = forceMobile ?? mediaMobile;
@@ -142,27 +171,62 @@ export function useFrontendData<TRow>(
   const state = useTableUrlState(urlOptions);
   const { limit, search, sortBy, sortDir, groupBy } = state;
 
-  const [source] = useState<FrontendSource<TRow>>(createFrontendSource);
+  const [source] = useState<FrontendSource<TRow>>(() =>
+    createFrontendSourceWith(createEngine)
+  );
+  const [modelEpoch, setModelEpoch] = useState(0);
+  const held = useRef<FrameHold<
+    ReturnType<FrontendSource<TRow>["update"]>
+  > | null>(null);
   // The frame is read from the engine's candidate; the committed engine — the
   // one an agent or a second component holds — stays on the table that is on
   // screen until React accepts this render, which is where it is published.
-  const frame = source.update(
-    {
+  // A repeat of inputs already committed skips that work. Deactivation still
+  // runs once, so the empty row list replaces the previous cache.
+  const { frame, skipped } = takeRetainedFrame(
+    held,
+    [
+      activeOption,
+      modelEpoch,
       data,
+      columns,
+      filterKey,
       getRowId,
       getSearchText,
       getSortValue,
-      columns,
       filterFn,
       filterTreeFn,
-      filterKey,
       locale,
-      paginationMode: resolvedMode,
-    },
-    state
+      resolvedMode,
+    ],
+    sourceViewKey(state),
+    () =>
+      source.update(
+        {
+          data,
+          getRowId,
+          getSearchText,
+          getSortValue,
+          columns,
+          filterFn,
+          filterTreeFn,
+          filterKey,
+          locale,
+          paginationMode: resolvedMode,
+        },
+        state
+      )
   );
   useLayoutEffect(() => {
+    if (source.engineFactory === createEngine) return;
+    source.replaceEngine(createEngine);
+    held.current = null;
+    setModelEpoch((epoch) => epoch + 1);
+  }, [source, createEngine]);
+  useLayoutEffect(() => {
+    if (source.engineFactory !== createEngine || skipped) return;
     source.commit();
+    markFrameCommitted(held);
   });
 
   const { page: safePage, total, hasNextPage } = frame;

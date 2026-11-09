@@ -1,7 +1,5 @@
-import {
-  editableCellController,
-  type EditableColumnLike,
-} from "@adapttable/core";
+import { type EditableColumnLike } from "@adapttable/core";
+import { editableCellController } from "@adapttable/core/editing";
 import { describe, expect, it, vi } from "vitest";
 import { effectScope } from "vue";
 

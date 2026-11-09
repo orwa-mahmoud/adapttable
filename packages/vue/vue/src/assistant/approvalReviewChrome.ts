@@ -1,7 +1,8 @@
 /** Shared approval structure. All decisions and list surfaces are kit slots. */
 import {
   type AgentApprovalPending,
-  type AgentApprovalProposal,
+  approvalArgumentPairs,
+  approvalProposalText,
   approvalReview,
   resolveLabels,
   type TableLabels,
@@ -32,45 +33,6 @@ export interface ApprovalReviewChromeProps {
   readonly onBack?: () => void;
   readonly className?: string;
   readonly buttonClassName?: string;
-}
-function display(value: unknown): string | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return "—";
-  if (typeof value === "string") return value;
-  if (
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    typeof value === "bigint"
-  )
-    return String(value);
-  return JSON.stringify(value);
-}
-function argumentPairs(args: unknown): readonly (readonly [string, unknown])[] {
-  if (args === undefined) return [];
-  if (args !== null && typeof args === "object" && !Array.isArray(args))
-    return Object.entries(args).map(([name, value]) => [
-      name
-        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-        .replace(/^./, (first) => first.toUpperCase()),
-      value,
-    ]);
-  return [["", args]];
-}
-function describe(
-  proposal: AgentApprovalProposal,
-  labels: TableLabels | undefined
-): string {
-  const copy = resolveLabels(labels);
-  return copy.proposalChange({
-    row: proposal.rowLabel ?? proposal.rowKey,
-    ...(proposal.column === undefined
-      ? {}
-      : { column: proposal.columnLabel ?? proposal.column }),
-    before: proposal.beforeUnavailable
-      ? copy.proposalValueUnavailable
-      : (proposal.beforeText ?? display(proposal.before)),
-    after: proposal.afterText ?? display(proposal.after),
-  });
 }
 /** @public */
 export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
@@ -136,7 +98,7 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
       });
       const rows = (full ? review.items : review.preview).map(
         ({ id, index, proposal, decision }) => {
-          const text = describe(proposal, props.labels);
+          const text = approvalProposalText(proposal, props.labels);
           return h(
             "li",
             {
@@ -178,7 +140,7 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
         }
       );
       const operation = review.operation;
-      const pairs = argumentPairs(operation?.arguments);
+      const pairs = approvalArgumentPairs(operation?.arguments);
       return h(
         "div",
         {
@@ -217,9 +179,9 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
                       "data-adapttable-part":
                         "approval-review-operation-arguments",
                     },
-                    pairs.flatMap(([name, value]) => [
-                      h("dt", name),
-                      h("dd", display(value) ?? "—"),
+                    pairs.flatMap((pair) => [
+                      h("dt", pair.name),
+                      h("dd", pair.value),
                     ])
                   ),
                 ]

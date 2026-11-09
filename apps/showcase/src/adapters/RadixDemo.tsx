@@ -1,7 +1,6 @@
 import "@radix-ui/themes/styles.css";
 
 import type { ColumnLayoutState } from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
 import { DataTable } from "@adapttable/radix";
 import { bulkActions as bulkActions_ } from "@adapttable/radix/bulk-actions";
 import { cellNavigation as cellNavigation_ } from "@adapttable/radix/cell-navigation";
@@ -45,6 +44,7 @@ import type {
   NestedTableDefaults,
 } from "@adapttable/react";
 
+import { pageTablePresentation } from "../demoPresentation";
 import { kitChromeFeatures } from "./chromeFeatures";
 
 /** This kit's factories, handed to the shared builder. */
@@ -415,10 +415,7 @@ export function RadixDemo({
             maxHeight={maxHeight}
             density={density}
             filtersMode={filtersUi}
-            labels={getLabels(locale)}
-            locale={locale}
-            dir={getDirection(locale)}
-            searchPlaceholder={s.search}
+            {...pageTablePresentation(locale, s.search)}
             rowActionsLayout={rowMutations ? "menu" : undefined}
             confirm={demoConfirm}
             animate={animate}

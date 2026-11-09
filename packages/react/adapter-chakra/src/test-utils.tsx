@@ -4,5 +4,14 @@ import type { ReactElement } from "react";
 
 /** Render a component tree wrapped in a default v3 `ChakraProvider`. */
 export function renderChakra(ui: ReactElement): RenderResult {
-  return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>);
+  const view = render(
+    <ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>
+  );
+  return {
+    ...view,
+    rerender: (next) =>
+      view.rerender(
+        <ChakraProvider value={defaultSystem}>{next}</ChakraProvider>
+      ),
+  };
 }

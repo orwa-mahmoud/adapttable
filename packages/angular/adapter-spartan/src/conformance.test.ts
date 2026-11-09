@@ -94,12 +94,28 @@ const driver: ConformanceDriver = {
     if (scenario.pageSize !== undefined) {
       set("defaults", { limit: scenario.pageSize });
     }
+    const applyScenario = (): void => {
+      set("onRowClick", scenario.onRowClick);
+      set(
+        "isCellFlashing",
+        scenario.isCellFlashing === undefined
+          ? undefined
+          : (rowId: string, columnKey: string) =>
+              scenario.isCellFlashing?.(rowId, columnKey) === true
+      );
+      set("searchPlaceholder", scenario.searchPlaceholder);
+      set("onQueryChange", scenario.onQueryChange);
+      set("total", scenario.total);
+      set("mode", scenario.mode);
+      fixture.detectChanges();
+    };
+    applyScenario();
     fixture.autoDetectChanges();
-    fixture.detectChanges();
     const container = fixture.nativeElement as HTMLElement;
     document.body.append(container);
     return {
       container,
+      refresh: () => applyScenario(),
       unmount: () => {
         fixture.destroy();
         container.remove();

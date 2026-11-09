@@ -215,7 +215,10 @@ for (const key of [
       // a native input whose checked property changes during the click.
       if (key === "spartan") await core.click();
       else await core.check();
-      await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(6);
+      await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(5);
+      await expect(
+        page.locator('[data-adapttable-part="footer"]')
+      ).toContainText(locale === "ar" ? "من 6" : "of 6");
       await expect(
         panel.getByRole("checkbox", {
           name: locale === "ar" ? "الأساسية" : "Core",
@@ -240,7 +243,10 @@ for (const key of [
       }
       await done.click();
       await expect(panel).toBeHidden();
-      await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(6);
+      await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(5);
+      await expect(
+        page.locator('[data-adapttable-part="footer"]')
+      ).toContainText(locale === "ar" ? "من 6" : "of 6");
       if (key === "material") {
         const chips = page.locator('[data-adapttable-part="chips"]');
         const clear = await expectMaterialClearAllFits(chips, locale);
@@ -252,7 +258,7 @@ for (const key of [
         await page.keyboard.press("Enter");
         await expect(chips).toHaveCount(0);
         await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(
-          10
+          5
         );
 
         await trigger.click();
@@ -261,7 +267,7 @@ for (const key of [
         await expect(panel).toBeHidden();
         await page.setViewportSize({ width: 320, height: 844 });
         await expect(page.locator('[data-adapttable-part="card"]')).toHaveCount(
-          6
+          5
         );
         await chips.scrollIntoViewIfNeeded();
         const mobileClear = await expectMaterialClearAllFits(chips, locale);
@@ -282,7 +288,7 @@ for (const key of [
         await page.keyboard.press("Space");
         await expect(chips).toHaveCount(0);
         await expect(page.locator('[data-adapttable-part="card"]')).toHaveCount(
-          10
+          5
         );
       }
     });
@@ -306,7 +312,10 @@ test("NG-ZORRO native overlays follow the selected light and dark theme", async 
   await expect.poll(background).toBe("rgb(31, 31, 31)");
   const card = page.locator(".ant-popover-inner");
   await card.getByRole("checkbox", { name: "Core", exact: true }).check();
-  await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(6);
+  await expect(page.locator('[data-adapttable-part="row"]')).toHaveCount(5);
+  await expect(page.locator('[data-adapttable-part="footer"]')).toContainText(
+    "of 6"
+  );
   await theme.click();
   await page.getByRole("button", { name: "Filters (1)", exact: true }).click();
   await expect.poll(background).toBe("rgb(255, 255, 255)");

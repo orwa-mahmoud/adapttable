@@ -11,6 +11,10 @@ import {
   editableCellController,
   type EditableCellEditing,
 } from "@adapttable/angular";
+import type {
+  EditableCellActivateProps as NeutralEditableCellActivateProps,
+  EditableCellButtonProps,
+} from "@adapttable/core/binding";
 import {
   cellConflictAsk,
   controllerConflictAsk,
@@ -21,11 +25,7 @@ import {
   isEditActivateKey,
   isFirstEditableColumn,
   stopCellEditKeyboard,
-} from "@adapttable/core";
-import type {
-  EditableCellActivateProps as NeutralEditableCellActivateProps,
-  EditableCellButtonProps,
-} from "@adapttable/core/binding";
+} from "@adapttable/core/editing";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -57,12 +57,12 @@ export {
   multiDraftFromSelect,
 } from "./editableCellShared";
 export type { CellConflictAsk } from "@adapttable/core";
+export type { EditableCellButtonProps } from "@adapttable/core/binding";
 export {
   editorBusyProps,
   editorValidationProps,
   stopEditKeys,
-} from "@adapttable/core";
-export type { EditableCellButtonProps } from "@adapttable/core/binding";
+} from "@adapttable/core/editing";
 
 /**
  * Kit activate control the gate calls while the cell is idle.

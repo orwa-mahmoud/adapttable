@@ -1,5 +1,5 @@
 /**
- * v3 base-table performance — parse/build, first render, sort/page/search
+ * v3 base-table performance — bundler build, first render, sort/page/search
  * updates, and optional panel first-open.
  *
  * Smaller bytes must not buy a slower table, a layout shift, a hydration
@@ -18,21 +18,15 @@
  *   node scripts/v3-perf.mjs --baseline scripts/v3-perf-baseline.linux.json
  */
 import { spawn } from "node:child_process";
-import {
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { chromium } from "@playwright/test";
 
 import { measure } from "./bundle-budget.mjs";
-import { FIXTURES } from "./consumer-fixtures.mjs";
+import { fixtureFolders, FIXTURES } from "./consumer-fixtures.mjs";
+import { packedConsumer } from "./packed-consumers.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -58,20 +52,22 @@ function median(values) {
 }
 
 async function measureParseBuild() {
-  const dir = mkdtempSync(join(tmpdir(), "adapttable-v3-perf-"));
+  const fixtures = PARSE_FIXTURES.map((name) =>
+    FIXTURES.find((entry) => entry.name === name)
+  );
+  const install = packedConsumer(fixtureFolders(fixtures), { peers: true });
   const parseBuildMs = {};
   try {
-    for (const name of PARSE_FIXTURES) {
-      const fixture = FIXTURES.find((entry) => entry.name === name);
+    for (const fixture of fixtures) {
       const samples = [];
       for (let i = 0; i < 3; i++) {
-        const { parseMs } = await measure(fixture, dir);
-        samples.push(parseMs);
+        const { buildMs } = await measure(fixture, install.dir, install);
+        samples.push(buildMs);
       }
-      parseBuildMs[name] = median(samples);
+      parseBuildMs[fixture.name] = median(samples);
     }
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    install.dispose();
   }
   return parseBuildMs;
 }
@@ -279,7 +275,7 @@ function regressions(current, baseline) {
   );
   for (const name of PARSE_FIXTURES) {
     compare(
-      `parse ${name}`,
+      `bundler build ${name}`,
       current.parseBuildMs[name],
       baseline.parseBuildMs?.[name]
     );
@@ -304,7 +300,7 @@ try {
   const current = {
     measuredAt: new Date().toISOString().slice(0, 10),
     method:
-      "rolldown parse of packed adapter-root fixtures; Playwright against /tailwind/ for first render, sort, page, search and column-menu first-open. React and the kit stay external in the parse fixtures.",
+      "rolldown build time of packed adapter-root fixtures (bundler, not browser parse); Playwright against /tailwind/ for first render, sort, page, search and column-menu first-open. React and the kit stay external in the build fixtures.",
     parseBuildMs,
     ...interaction,
   };
@@ -313,7 +309,7 @@ try {
     console.log(JSON.stringify(current, null, 2));
   } else {
     console.log(
-      `parse/build  unstyled ${parseBuildMs["unstyled · table"]}ms  mui ${parseBuildMs["mui · table"]}ms  antd ${parseBuildMs["antd · table"]}ms`
+      `bundler build  unstyled ${parseBuildMs["unstyled · table"]}ms  mui ${parseBuildMs["mui · table"]}ms  antd ${parseBuildMs["antd · table"]}ms`
     );
     console.log(
       `first render ${current.firstRenderMs}ms  sort ${current.sortMs}ms  page ${current.pageMs}ms  search ${current.searchMs}ms  panel ${current.panelFirstOpenMs}ms  CLS ${current.cls}`

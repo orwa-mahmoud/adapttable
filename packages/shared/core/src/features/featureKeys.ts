@@ -1,14 +1,14 @@
 /**
  * The typed handles features and bindings exchange: keys for state a feature
- * publishes, keys for positions a feature draws into, and the rule that
- * orders several features' contributions.
+ * publishes, and keys for positions a feature draws into.
  *
- * Every binding composes features the same way, so the handles and the order
- * are part of the table, not of any one framework. What a slot is filled
- * WITH is the binding's render node — a React node in React — which is why
- * {@link FeatureRender} takes it as a type parameter.
+ * Every binding composes features the same way, so the handles are part of
+ * the table, not of any one framework. What a slot is filled WITH is the
+ * binding's render node — a React node in React — which is why
+ * {@link FeatureRender} takes it as a type parameter. Contribution order
+ * lives in {@link orderedContributions}; this module imports no
+ * implementation.
  */
-import { devWarn } from "../utils/devWarn";
 
 /**
  * A typed handle for one piece of feature-published state.
@@ -182,57 +182,7 @@ export function drawnSlotFills<TNode>(
   return slot.single === true ? fills.slice(0, 1) : fills;
 }
 
-/**
- * One feature's contribution of some kind, keyed by the feature's id.
- *
- * @public
- */
-export interface OrderedContribution<TFeature, TContribution> {
-  /** The contributing feature's id. */
-  readonly id: string;
-  /** What the feature contributed. */
-  readonly contribution: TContribution;
-  /** The feature itself, so one stable handler can serve every call of a factory. */
-  readonly feature: TFeature;
-}
-
-/**
- * The contributions a feature list makes, in canonical order and deduplicated.
- *
- * Order is by feature id, not by array position, so writing
- * `[grouping(), rowReorder(fn)]` and `[rowReorder(fn), grouping()]` produces
- * the same sequence — reordering the array must not remount anything and
- * throw its state away. Two features sharing an id warn in development and
- * the last one wins, matching how `apply` resolves duplicates.
- *
- * @param features - The composed features.
- * @param pick - The contribution one feature makes, or `undefined` for none.
- * @param kind - What is being contributed, for the duplicate warning.
- *
- * @public
- */
-export function orderedContributions<
-  TFeature extends { readonly id: string },
-  TContribution,
->(
-  features: readonly TFeature[],
-  pick: (feature: TFeature) => TContribution | undefined,
-  kind: string
-): readonly OrderedContribution<TFeature, TContribution>[] {
-  const byId = new Map<string, OrderedContribution<TFeature, TContribution>>();
-  for (const feature of features) {
-    const contribution = pick(feature);
-    if (contribution === undefined) continue;
-    if (byId.has(feature.id)) {
-      devWarn(
-        `Two features share the id "${feature.id}" and both contribute a ` +
-          `${kind}. The last one wins, as it does for \`apply\`. Give one of ` +
-          `them a different id.`
-      );
-    }
-    byId.set(feature.id, { id: feature.id, contribution, feature });
-  }
-  return [...byId.values()].sort((left, right) =>
-    left.id < right.id ? -1 : 1
-  );
-}
+export {
+  type OrderedContribution,
+  orderedContributions,
+} from "./featureContribution";

@@ -36,7 +36,6 @@ import {
 } from "@adapttable/chakra/status-bar";
 import { tree as tree_ } from "@adapttable/chakra/tree";
 import type { ColumnLayoutState } from "@adapttable/core";
-import { getDirection, getLabels } from "@adapttable/i18n";
 import type {
   ColumnDef,
   FeatureProps,
@@ -84,6 +83,7 @@ import {
   Box,
   ChakraProvider,
   defaultSystem,
+  LocaleProvider,
   Progress,
   Text,
   Theme,
@@ -120,6 +120,7 @@ import {
   showsRowActions,
 } from "../Demo";
 import { useDemoFilterDefs } from "../demoFilters";
+import { pageTablePresentation } from "../demoPresentation";
 import {
   nestedInnerFeatures,
   nestedOuterFeatures,
@@ -312,127 +313,126 @@ export function ChakraDemo({
   });
   return (
     <ChakraProvider value={defaultSystem}>
-      <Theme appearance={dark ? "dark" : "light"}>
-        <DemoBody
-          rowActionsShown={rowActionsShown}
-          mode={mode}
-          pageMode={pageMode}
-          urlKey={urlKey}
-          defaultColumnLayout={
-            // The wide showcase pins BOTH edges by default: person at the
-            // start, the actions column at the end (it pins like any column).
-            wide
-              ? {
-                  pinned: focused
-                    ? { person: "start" }
-                    : { person: "start", actions: "end" },
+      <LocaleProvider locale={locale === "ar" ? "ar" : "en-US"}>
+        <Theme appearance={dark ? "dark" : "light"}>
+          <DemoBody
+            rowActionsShown={rowActionsShown}
+            mode={mode}
+            pageMode={pageMode}
+            urlKey={urlKey}
+            defaultColumnLayout={
+              // The wide showcase pins BOTH edges by default: person at the
+              // start, the actions column at the end (it pins like any column).
+              wide
+                ? {
+                    pinned: focused
+                      ? { person: "start" }
+                      : { person: "start", actions: "end" },
+                  }
+                : (defaultColumnLayout ?? LIVE_DEFAULT_LAYOUT)
+            }
+            grouping={grouping}
+            tree={tree}
+            rowMode={rowMode}
+            batch={batch}
+            rowMutations={rowMutations}
+            rowReorder={rowReorder}
+            rowPinning={rowPinning}
+            pinnedSummaryRows={pinnedSummaryRows}
+            summaryRow={summaryRow}
+            cellSpan={cellSpan}
+            extraRows={extraRows}
+            rowStyle={rowStyle}
+            highlight={highlight}
+            failure={failure}
+            onRecover={onRecover}
+            customCard={customCard}
+            realtime={realtime}
+            editing={editing}
+            derivedFields={derivedFields}
+            formulaColumns={formulaColumns}
+            render={(
+              source,
+              { features: demoFeatures, demoRowHandlers, ...columns }
+            ) => (
+              <DataTable
+                source={source}
+                columns={
+                  wide
+                    ? makeWideColumns(locale, CHAKRA_CELLS, {
+                        editable: Boolean(
+                          editing === true ||
+                          rowMode === true ||
+                          batch === true ||
+                          editorShowcase === true
+                        ),
+                      })
+                    : makeColumns(locale, CHAKRA_CELLS, {
+                        groups: columnGroups,
+                        sparkline,
+                        editors: editorShowcase,
+                        formulas: formulaColumns,
+                        editable: Boolean(
+                          editing === true ||
+                          rowMode === true ||
+                          batch === true ||
+                          editorShowcase === true
+                        ),
+                      })
                 }
-              : (defaultColumnLayout ?? LIVE_DEFAULT_LAYOUT)
-          }
-          grouping={grouping}
-          tree={tree}
-          rowMode={rowMode}
-          batch={batch}
-          rowMutations={rowMutations}
-          rowReorder={rowReorder}
-          rowPinning={rowPinning}
-          pinnedSummaryRows={pinnedSummaryRows}
-          summaryRow={summaryRow}
-          cellSpan={cellSpan}
-          extraRows={extraRows}
-          rowStyle={rowStyle}
-          highlight={highlight}
-          failure={failure}
-          onRecover={onRecover}
-          customCard={customCard}
-          realtime={realtime}
-          editing={editing}
-          derivedFields={derivedFields}
-          formulaColumns={formulaColumns}
-          render={(
-            source,
-            { features: demoFeatures, demoRowHandlers, ...columns }
-          ) => (
-            <DataTable
-              source={source}
-              columns={
-                wide
-                  ? makeWideColumns(locale, CHAKRA_CELLS, {
-                      editable: Boolean(
-                        editing === true ||
-                        rowMode === true ||
-                        batch === true ||
-                        editorShowcase === true
-                      ),
-                    })
-                  : makeColumns(locale, CHAKRA_CELLS, {
-                      groups: columnGroups,
-                      sparkline,
-                      editors: editorShowcase,
-                      formulas: formulaColumns,
-                      editable: Boolean(
-                        editing === true ||
-                        rowMode === true ||
-                        batch === true ||
-                        editorShowcase === true
-                      ),
-                    })
-              }
-              rowKey={(r) => r.id}
-              features={[
-                ...(nested ? nestedOuterFeatures<Person>() : []),
-                ...kitChromeFeatures(KIT_CHROME, {
-                  cellNavigation,
-                  columnSelectionCheckbox,
-                  densityChooser,
-                  editing,
-                  exportCsv,
-                  focused,
-                  fullscreen,
-                  headerFilters,
-                  nested: nested ? nestedOrders : undefined,
-                  nestedOpenIds: nestedOpenIds(nested, source.rows),
-                  onPrint,
-                  printButton,
-                  undoRedoButtons,
-                  urlKey,
-                  bulkActions,
-                  bulkActionList: makeBulkActions(locale),
-                  collapsibleColumnGroups: columns.collapsibleColumnGroups,
-                  columnMenu,
-                  rowActions: rowActionsShown
-                    ? makeActions(locale, demoRowHandlers)
-                    : undefined,
-                  commandPalette,
-                  contextMenu,
-                  filterControls,
-                  filterDefs: filters,
-                  filterTypeSpecs: demoFilterTypes(),
-                  sidePanel,
-                  statusBar,
-                  kitFeatures: columns.kitFeatures,
-                }),
-                ...(demoFeatures ?? []),
-              ]}
-              onDensityChange={onDensityChange}
-              {...columns}
-              forceMobile={forceMobile}
-              maxHeight={maxHeight}
-              density={density}
-              filtersMode={filtersUi}
-              labels={getLabels(locale)}
-              locale={locale}
-              dir={getDirection(locale)}
-              searchPlaceholder={s.search}
-              rowActionsLayout={rowMutations ? "menu" : undefined}
-              confirm={demoConfirm}
-              animate={animate}
-              stickyHeader
-              filterFields={filterFields}
-            />
-          )}
-        />
-      </Theme>
+                rowKey={(r) => r.id}
+                features={[
+                  ...(nested ? nestedOuterFeatures<Person>() : []),
+                  ...kitChromeFeatures(KIT_CHROME, {
+                    cellNavigation,
+                    columnSelectionCheckbox,
+                    densityChooser,
+                    editing,
+                    exportCsv,
+                    focused,
+                    fullscreen,
+                    headerFilters,
+                    nested: nested ? nestedOrders : undefined,
+                    nestedOpenIds: nestedOpenIds(nested, source.rows),
+                    onPrint,
+                    printButton,
+                    undoRedoButtons,
+                    urlKey,
+                    bulkActions,
+                    bulkActionList: makeBulkActions(locale),
+                    collapsibleColumnGroups: columns.collapsibleColumnGroups,
+                    columnMenu,
+                    rowActions: rowActionsShown
+                      ? makeActions(locale, demoRowHandlers)
+                      : undefined,
+                    commandPalette,
+                    contextMenu,
+                    filterControls,
+                    filterDefs: filters,
+                    filterTypeSpecs: demoFilterTypes(),
+                    sidePanel,
+                    statusBar,
+                    kitFeatures: columns.kitFeatures,
+                  }),
+                  ...(demoFeatures ?? []),
+                ]}
+                onDensityChange={onDensityChange}
+                {...columns}
+                forceMobile={forceMobile}
+                maxHeight={maxHeight}
+                density={density}
+                filtersMode={filtersUi}
+                {...pageTablePresentation(locale, s.search)}
+                rowActionsLayout={rowMutations ? "menu" : undefined}
+                confirm={demoConfirm}
+                animate={animate}
+                stickyHeader
+                filterFields={filterFields}
+              />
+            )}
+          />
+        </Theme>
+      </LocaleProvider>
     </ChakraProvider>
   );
 }

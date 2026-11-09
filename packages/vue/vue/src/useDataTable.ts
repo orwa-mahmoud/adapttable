@@ -86,6 +86,10 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
   readonly mobileBreakpoint?: MaybeRefOrGetterOptional<number>;
   readonly locale?: MaybeRefOrGetterOptional<string>;
   readonly searchDebounceMs?: number;
+  /** Stick the header while the body scrolls. Inside `maxHeight`, it sticks at 0. */
+  readonly stickyHeader?: MaybeRefOrGetterOptional<boolean>;
+  /** Page offset for a sticky header, in pixels. Ignored inside a scroll box. */
+  readonly stickyTop?: MaybeRefOrGetterOptional<number>;
   /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
   readonly searchPlaceholder?: MaybeRefOrGetterOptional<string>;
   readonly multiSort?: MaybeRefOrGetter<boolean>;
@@ -439,10 +443,23 @@ export function useDataTable<TRow>(
     headerRowAttrs: () => toVueAttrs(headerRowAttributes()),
     headerCellAttrs: (column: ColumnDef<TRow>) => {
       const attrs = headerCellAttributes(column, source.value, sizing.value);
+      const sticky = toValue(options.value.stickyHeader) === true;
+      const stickyStyle = sticky
+        ? {
+            position: "sticky" as const,
+            top: `${toValue(options.value.stickyTop) ?? 0}px`,
+            zIndex: PIN_Z.header,
+          }
+        : undefined;
       return toVueAttrs({
         ...attrs,
         "data-pinned": layout.value.pinOffset(column.key)?.side,
-        style: { ...attrs.style, ...pinStyle(column.key, true) },
+        "data-sticky": sticky ? "" : undefined,
+        style: {
+          ...attrs.style,
+          ...pinStyle(column.key, true),
+          ...stickyStyle,
+        },
       });
     },
     sortButtonAttrs: (column: ColumnDef<TRow>) =>
@@ -469,6 +486,7 @@ export function useDataTable<TRow>(
         ),
         ...click,
         "data-clickable": click ? "" : undefined,
+        "data-stagger": "",
       });
     },
     /** Whether a live update to this cell is fresh enough to flash. */
@@ -494,6 +512,7 @@ export function useDataTable<TRow>(
         "data-selected": options.value.selection?.isSelected(rowKey(row))
           ? ""
           : undefined,
+        "data-stagger": "",
         "aria-posinset":
           size > rows.value.length ? windowStart.value + index + 1 : undefined,
         "aria-setsize": size > rows.value.length ? size : undefined,

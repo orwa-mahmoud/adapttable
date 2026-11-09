@@ -439,6 +439,7 @@
   border-radius: var(--adapttable-radius);
   background: var(--adapttable-surface);
   color: #18181b;
+  min-width: var(--anchor-width);
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 12%),
     0 4px 6px -4px rgb(0 0 0 / 10%);
@@ -699,11 +700,6 @@ button.adapttable-btn:has([data-slot="select-value"]) {
 .adapttable-popup-positioner,
 .adapttable-select-positioner {
   z-index: var(--adapttable-overlay-z);
-}
-
-/* The list is at least as wide as the field that opened it. */
-.adapttable-select-popup {
-  min-width: var(--anchor-width);
 }
 
 .adapttable-select-icon {

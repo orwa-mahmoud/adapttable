@@ -9,6 +9,7 @@ import {
 } from "../useDataTableShell";
 import { DataTableShellView } from "./chromeBodyGate";
 import { editing } from "./editing";
+import { findInTable } from "./find-in-table";
 import { FeatureProviders, useTableRuntime } from "./providers";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 
@@ -117,5 +118,18 @@ describe("runtime operations follow the composed features", () => {
     view.rerender(<Harness features={[]} onOperations={record} />);
     expect(sawNeutralTable).toBe(true);
     expect(latest?.editCells).toBe(false);
+  });
+
+  it("claims find only while the find bar is composed", () => {
+    let latest: Readonly<Record<string, boolean>> | undefined;
+    const record = (ops: Readonly<Record<string, boolean>> | undefined) => {
+      latest = ops;
+    };
+    const view = render(<Harness features={[]} onOperations={record} />);
+    expect(latest?.find).toBe(false);
+    view.rerender(<Harness features={[findInTable()]} onOperations={record} />);
+    expect(latest?.find).toBe(true);
+    view.rerender(<Harness features={[]} onOperations={record} />);
+    expect(latest?.find).toBe(false);
   });
 });

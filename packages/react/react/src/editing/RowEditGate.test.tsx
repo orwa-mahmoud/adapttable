@@ -474,7 +474,7 @@ describe("RowEditActions", () => {
         await Promise.resolve();
       });
       expect(part("row-edit-error")).toHaveTextContent("Host refused row");
-      expect(part("row-edit-error")).toHaveAttribute("role", "status");
+      expect(part("row-edit-error")?.tagName).toBe("OUTPUT");
       fireEvent.click(
         part(recovery === "retry" ? "row-edit-save" : "row-edit-cancel")!
       );

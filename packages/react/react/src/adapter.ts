@@ -487,6 +487,11 @@ export {
 export { GroupToggleSpacer } from "./grouping/GroupToggleSpacer";
 export type { GroupCollapseState } from "./grouping/useGroupCollapse";
 export {
+  type KitEnvironment,
+  useLocaleLabels,
+  withKitEnvironment,
+} from "./hooks/kitEnvironment";
+export {
   type MountStaggerOptions,
   useMountStagger,
 } from "./hooks/useMountStagger";
@@ -495,6 +500,7 @@ export {
   type OverlayTransition,
   useOverlayTransition,
 } from "./hooks/useOverlayTransition";
+export { ReducedMotionScope } from "./hooks/usePrefersReducedMotion";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
 export {
   createDesktopRow,
@@ -516,6 +522,29 @@ export {
   type DesktopVirtualPadSlot,
   useDesktopTableAssembly,
 } from "./layout/desktopTableAssembly";
+export {
+  DesktopTableChrome,
+  type DesktopTableChromeClassNames,
+  type DesktopTableChromeProps,
+  type DesktopTableHosts,
+} from "./layout/desktopTableChrome";
+export {
+  MobileCardsChrome,
+  type MobileCardsChromeClassNames,
+  type MobileCardsChromeProps,
+  type MobileCardsHosts,
+  type MobileCardSlot,
+} from "./layout/mobileCardsChrome";
+export {
+  type MobileCardBodyProps,
+  type MobileCardEntry,
+  type MobileCardGroupEntry,
+  type MobileCardGrouping,
+  type MobileCardListProps,
+  mobileCardPropsEqual,
+  type MobileCardSlotKit,
+  mobileCardSlots,
+} from "./layout/mobileCardSlots";
 export type { SidePanelEntry } from "./layout/SidePanelChrome";
 export {
   SidePanelChrome,
@@ -1068,7 +1097,6 @@ export {
 export { editableCellController } from "./editing/editableCellController";
 export type { ExportRowRole } from "@adapttable/core";
 export type { AggregateFn } from "@adapttable/core";
-export { normalizeEditorOptions } from "@adapttable/core";
 export {
   applyCollapsedColumnGroups,
   bodyCellsHaveRowSpan,
@@ -1128,6 +1156,7 @@ export {
   toggleCollapsedColumnGroup,
   unpinAllColumns,
 } from "@adapttable/core/binding";
+export { normalizeEditorOptions } from "@adapttable/core/editing";
 
 // Core names the kits use, so a kit imports only this binding and never
 // reaches into @adapttable/core itself.
@@ -1143,30 +1172,18 @@ export {
   defaultFilterRegistry,
   defaultLabels,
   edgePinStyle,
-  editorInputType,
   FILTER_TYPES,
   filterLabel,
   filterStateKeys,
   filterWidgetKind,
-  formatMultiDraft,
-  groupAggregateEntries,
-  groupAggregateNode,
   type GroupAggregateOps,
-  groupLeafCount,
-  groupRowLayout,
-  groupSelectionState,
-  isBooleanEditor,
   isDeclarativeFilters,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
   joinRelativeToken,
   pageSizeOptions,
   type PaginatedResponse,
   partitionPinnedRows,
   PIN_Z,
   pinnedCellStyle,
-  readMultiDraft,
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
@@ -1182,6 +1199,22 @@ export {
   treeCardStyle,
   visibleRowActions,
 } from "@adapttable/core";
+export {
+  editorInputType,
+  formatMultiDraft,
+  isBooleanEditor,
+  isDraftChecked,
+  isMultiSelectEditor,
+  isSelectEditor,
+  readMultiDraft,
+} from "@adapttable/core/editing";
+export {
+  groupAggregateEntries,
+  groupAggregateNode,
+  groupLeafCount,
+  groupRowLayout,
+  groupSelectionState,
+} from "@adapttable/core/grouping";
 
 // What a live runtime offers, for a binding projecting it into the neutral
 // AI contracts. Nothing here decides what an operation means — that is

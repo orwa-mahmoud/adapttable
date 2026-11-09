@@ -1,4 +1,5 @@
 import {
+  scheduleTick,
   type TableAssistantMenuProps,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
@@ -68,7 +69,7 @@ export const NativeExamplesMenu = defineComponent(
       event.preventDefault();
       open.value = true;
       const owner = generation.value;
-      void nextTick(() => {
+      scheduleTick(() => {
         if (!active.value || props.disabled || owner !== generation.value)
           return;
         const items = buttons();

@@ -21,6 +21,7 @@
  * then fights whatever the action just did.
  */
 
+import { resolveLabels } from "@adapttable/core";
 import type {
   ContextMenuChromeProps as NeutralContextMenuChromeProps,
   ContextMenuSlots as NeutralContextMenuSlots,
@@ -89,7 +90,7 @@ export function ContextMenuChrome(props: Readonly<ContextMenuChromeProps>) {
       <slots.Surface
         at={at}
         anchorRef={anchorRef}
-        label={props.labels?.contextMenu ?? "Table actions"}
+        label={resolveLabels(props.labels).contextMenu}
         onClose={onClose}
         container={props.container}
         className={props.className}

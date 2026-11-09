@@ -636,6 +636,7 @@ export function injectDataTable<TRow>(
           { enabled: false, windowed: windowed() },
           windowStart() + index
         ),
+        "data-stagger": "",
       };
     },
     cellAttrs: (column) => {
@@ -675,6 +676,7 @@ export function injectDataTable<TRow>(
         "data-row-id": id,
         "data-index": index,
         "data-selected": options.selection?.isSelected(id) ? "" : undefined,
+        "data-stagger": "",
         // A windowed list has only a slice of its items in the DOM, so each
         // one states where it sits; a complete list is simply counted.
         "aria-posinset": partial ? windowStart() + index + 1 : undefined,

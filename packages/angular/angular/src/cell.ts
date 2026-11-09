@@ -5,7 +5,7 @@ import {
   type HeaderContext,
   type Renderer,
 } from "@adapttable/angular";
-import { cellValue } from "@adapttable/core";
+import { cellValue } from "@adapttable/core/engine";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,

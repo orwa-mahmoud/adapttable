@@ -9,7 +9,7 @@
  *
  * These are functions of the row, not table state — nothing goes in the URL.
  */
-import type { CssProperties } from "../style/cssProperties";
+import type { CssProperties } from "../contracts/cssProperties";
 
 export {
   estimateFromRowHeight,

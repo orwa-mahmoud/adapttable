@@ -1,6 +1,7 @@
 /** One source, feature lifecycle and model composition shared by every Vue kit. */
 import {
   ACTIONS_COLUMN_KEY,
+  activeTierValue,
   type BulkAction,
   type CellEdit,
   type CellRange,
@@ -11,8 +12,9 @@ import {
   type FacetMap,
   type FilterDef,
   type FilterTypeSpec,
-  groupedViewSource,
-  isCellEditable,
+  type FrontendEngineFactory,
+  INACTIVE_TIER_ROWS,
+  projectedGroupingSource,
   type QueryAggregate,
   type QueryFilterGroup,
   type QuerySupport,
@@ -23,6 +25,7 @@ import {
   type TableDensity,
   type TableQueryListener,
   type TableSource,
+  tierRows,
   withRowPinActions,
 } from "@adapttable/core";
 import {
@@ -30,11 +33,13 @@ import {
   AGENT_APPROVAL,
   AGENT_APPROVAL_STATE,
   COLUMN_SELECT,
+  columnSelectLabel,
   DENSITY_STATE,
   EMPTY_FEATURE_HOST,
   type FeatureHostState,
   type FilterEngine,
   FIND_BAR,
+  retainItems,
   type RuntimeChromeInput,
   STATUS_BAR,
   TABLE_ASSISTANT,
@@ -46,6 +51,7 @@ import {
   type ToolbarExtrasSlotProps,
   undoRedoToolbarProps,
 } from "@adapttable/core/binding";
+import { isCellEditable } from "@adapttable/core/editing";
 import {
   computed,
   getCurrentInstance,
@@ -59,6 +65,7 @@ import {
   watch,
 } from "vue";
 
+import { mountForcedColorsStyles } from "./a11y/forcedColors";
 import {
   BULK_ACTIONS_CONTROL,
   BULK_ACTIONS_MODEL,
@@ -131,6 +138,7 @@ import {
   useSummaryCells,
   useTableSummaryModel,
 } from "./layout/tableSummaryModel";
+import { useMountStagger } from "./motion/useMountStagger";
 import {
   FILL_HANDLE_CONTROL,
   FIND_BUTTON,
@@ -140,6 +148,7 @@ import {
   SELECTION_STATS_MODEL,
 } from "./navigation/contracts";
 import { useRowSelection } from "./selection/selection";
+import { frontendRowModelOf } from "./source/rowModel";
 import { useViewportMobile } from "./source/sourceLifecycle";
 import {
   useFrontendData,
@@ -218,6 +227,11 @@ export interface UseDataTableShellOptions<TRow>
   readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
   readonly confirm?: ConfirmHandler;
   readonly density?: MaybeRefOrGetterOptional<TableDensity>;
+  /**
+   * Animate rows and cards as they mount. Off by default. Skipped when the
+   * reader prefers reduced motion.
+   */
+  readonly animate?: MaybeRefOrGetterOptional<boolean>;
   readonly defaultDensity?: TableDensity;
   readonly onDensityChange?: (next: TableDensity) => void;
   readonly selectable?: MaybeRefOrGetter<boolean>;
@@ -271,6 +285,7 @@ export interface ResolvedTableOptions<TRow>
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
 ) {
+  mountForcedColorsStyles();
   const options = computed(() => toValue(input));
   const declarations = computed(() =>
     normalizeFeatures(toValue(options.value.features) ?? [])
@@ -358,11 +373,22 @@ export function useDataTableShell<TRow>(
   );
   const onFrontend = computed(() => tier.value === "frontend");
   const onServer = computed(() => tier.value === "server");
+  let columnSource: unknown;
+  let columnLeaves: ReturnType<typeof flattenColumns<TRow>>["leaves"] = [];
+  const tierColumns = (live: boolean) => {
+    if (!live) return INACTIVE_TIER_ROWS;
+    const input = toValue(resolved.value.columns);
+    if (input === columnSource) return columnLeaves;
+    columnSource = input;
+    columnLeaves = input ? flattenColumns(input).leaves : [];
+    return columnLeaves;
+  };
+  let facetKeyList: readonly string[] | undefined;
   const frontend = useFrontendData(() => ({
     ...resolved.value,
     forceMobile: isMobile,
-    data: onFrontend.value ? (toValue(resolved.value.data) ?? []) : [],
-    columns: flattenColumns(toValue(resolved.value.columns)).leaves,
+    data: tierRows(onFrontend.value, toValue(resolved.value.data)),
+    columns: tierColumns(onFrontend.value),
     getRowId: resolved.value.rowKey,
     urlAdapter: onFrontend.value ? urlAdapter : undefined,
     urlSync: onFrontend.value,
@@ -381,35 +407,40 @@ export function useDataTableShell<TRow>(
       ...(toValue(resolved.value.numberExtraKeys) ?? []),
       ...(filterRuntime.value?.numberExtraKeys ?? []),
     ],
+    createEngine: frontendRowModelOf(declarations.value) as
+      FrontendEngineFactory<TRow> | undefined,
   }));
   const server = useServerData<TRow>(() => {
     const value = resolved.value;
     const live = onServer.value;
     const filters = filterRuntime.value;
+    if (live) {
+      const checklistKeys = filters?.defs
+        .filter(
+          (def) =>
+            (filters.registry.get(def.type)?.widget ?? def.type) === "checklist"
+        )
+        .map((def) => def.key);
+      facetKeyList = retainItems(
+        facetKeyList,
+        toValue(value.facetKeys) ?? checklistKeys
+      );
+    }
     return {
-      rows: live ? (toValue(value.data) ?? []) : [],
+      rows: tierRows(live, toValue(value.data)),
       total: () => toValue(value.total) ?? 0,
       loading: value.isLoading,
       error: value.error,
-      onQueryChange: live ? value.onQueryChange : undefined,
+      onQueryChange: activeTierValue(live, value.onQueryChange, undefined),
       // A column's default aggregate is a request to the server, so only the
       // server tier reads the columns.
-      columns: live ? flattenColumns(toValue(value.columns)).leaves : [],
-      supports: live ? value.supports : undefined,
-      aggregates: live ? value.aggregates : undefined,
-      responseKey: live ? value.responseKey : undefined,
-      facets: live ? value.facets : undefined,
+      columns: tierColumns(live),
+      supports: activeTierValue(live, value.supports, undefined),
+      aggregates: activeTierValue(live, value.aggregates, undefined),
+      responseKey: activeTierValue(live, value.responseKey, undefined),
+      facets: activeTierValue(live, value.facets, undefined),
       // A server query counts every checklist filter unless told which.
-      facetKeys: live
-        ? (toValue(value.facetKeys) ??
-          filters?.defs
-            .filter(
-              (def) =>
-                (filters.registry.get(def.type)?.widget ?? def.type) ===
-                "checklist"
-            )
-            .map((def) => def.key))
-        : undefined,
+      facetKeys: live ? facetKeyList : undefined,
       urlAdapter: live ? urlAdapter : undefined,
       urlSync: live,
       urlKey: value.urlKey,
@@ -452,7 +483,7 @@ export function useDataTableShell<TRow>(
   const tree = state.get(treeModelKey<TRow>());
   const detail = state.get(rowDetailModelKey<TRow>());
   const viewSource = computed(() =>
-    grouping.value ? groupedViewSource(source.value) : source.value
+    projectedGroupingSource(source.value, { model: grouping.value })
   );
   const pinning = state.get(rowPinningModelKey<TRow>());
   const rowInventory = computed(() =>
@@ -490,6 +521,7 @@ export function useDataTableShell<TRow>(
     forceMobile: isMobile,
     source: viewSource,
     selection: selection.value,
+    stickyTop: resolved.value.maxHeight != null ? 0 : resolved.value.stickyTop,
   }));
   watch(
     () => {
@@ -888,7 +920,10 @@ export function useDataTableShell<TRow>(
       total: source.value.total,
       selected: selection.value?.selectedIds.value.size ?? 0,
       stats: selectionStats.value ?? null,
-      labels: table.labels.value,
+      // The footer already prints this range. Blanking it keeps the two from repeating.
+      labels: table.showFooter.value
+        ? { ...table.labels.value, showing: () => "" }
+        : table.labels.value,
       locale: toValue(resolved.value.locale),
       className: classNames?.statusBar,
     }),
@@ -1102,7 +1137,10 @@ export function useDataTableShell<TRow>(
         selection: gridFocus.value?.columnCheckbox
           ? (className?: string) =>
               renderFeatureSlot(COLUMN_SELECT, slotFills.value, {
-                label: `${table.labels.value.selectColumn}: ${header.context.label}`,
+                label: columnSelectLabel(table.labels.value.selectColumn, {
+                  key: header.key,
+                  header: header.context.label,
+                }),
                 checked: gridFocus.value?.isColumnSelected(col) ?? false,
                 onToggle: columnToggle(col),
                 className,
@@ -1193,6 +1231,25 @@ export function useDataTableShell<TRow>(
         : undefined,
     },
     ...toValue(resolved.value.runtimeChannels),
+    find: find.value,
+    density: featureDensity.value
+      ? {
+          density: featureDensity.value.density,
+          onDensityChange: featureDensity.value.setDensity,
+        }
+      : undefined,
+    fullscreen: fullscreen.value,
+    contextMenu: contextMenu.value
+      ? { entries: contextMenu.value.items, close: contextMenu.value.close }
+      : undefined,
+    commandPalette: commandPalette.value
+      ? {
+          commands: commandPalette.value.commands,
+          open: commandPalette.value.show,
+          close: commandPalette.value.close,
+        }
+      : undefined,
+    print: printing.value ? { onPrint: printing.value } : undefined,
   }));
   const publish = (): TableRuntimeView<TRow> | undefined => {
     if (disposed) return undefined;
@@ -1229,9 +1286,7 @@ export function useDataTableShell<TRow>(
       lifecycle.reconcile(declarations.value);
       const model = resolved.value.editingModel;
       if (model) {
-        editingLifecycle ??= lifecycleOwner?.run(() =>
-          useFeatureLifecycle(lifecycleInput)
-        );
+        editingLifecycle ??= lifecycleOwner?.run(useEditingLifecycle);
         editingLifecycle?.reconcile([{ id: "editing-model", mount: model }]);
       } else editingLifecycle?.reconcile([]);
       publish();
@@ -1276,6 +1331,9 @@ export function useDataTableShell<TRow>(
       if (active.value) reconcile();
     },
   };
+  function useEditingLifecycle(): FeatureLifecycle<TRow> {
+    return useFeatureLifecycle(lifecycleInput);
+  }
   const lifecycle = useFeatureLifecycle(lifecycleInput);
   watch(
     lifecycle.host,
@@ -1298,6 +1356,11 @@ export function useDataTableShell<TRow>(
     currentView = undefined;
     surface.value = null;
   });
+  useMountStagger(
+    root,
+    () => [table.source.value.rows.length, isMobile.value],
+    () => ({ enabled: toValue(options.value.animate) === true })
+  );
   return {
     table,
     rowInventory,
@@ -1363,6 +1426,7 @@ export function useDataTableShell<TRow>(
     },
   };
 }
+
 export type UseDataTableShellResult<TRow> = ReturnType<
   typeof useDataTableShell<TRow>
 >;

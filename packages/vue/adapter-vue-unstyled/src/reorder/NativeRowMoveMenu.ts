@@ -2,12 +2,12 @@ import {
   elementRef,
   type RowMoveConfirmationProps,
   type RowMoveMenuSlotProps,
+  scheduleTick,
   useScopeActivity,
 } from "@adapttable/vue/adapter";
 import {
   defineComponent,
   h,
-  nextTick,
   type PropType,
   shallowRef,
   useId,
@@ -32,7 +32,7 @@ const NativeRowMoveConfirmation = defineComponent(
         if (typeof element.showModal === "function") element.showModal();
         else element.setAttribute("open", "");
         let ownsSurface = true;
-        void nextTick(() => {
+        scheduleTick(() => {
           if (ownsSurface && active.value) cancel.value?.focus();
         });
         cleanup(() => {
@@ -132,7 +132,7 @@ export const NativeRowMoveMenu = defineComponent(
     const trigger = shallowRef<HTMLSelectElement | null>(null);
     const active = useScopeActivity();
     const restoreFocus = () => {
-      void nextTick(() => {
+      scheduleTick(() => {
         const element = trigger.value;
         if (
           active.value &&

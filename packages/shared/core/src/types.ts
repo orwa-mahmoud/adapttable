@@ -7,9 +7,14 @@
  *
  * @packageDocumentation
  */
-import type { ColumnModel, ExtraFilters, SortDirection } from "./columnModel";
+
+import type {
+  ColumnModel,
+  ExtraFilters,
+  SortDirection,
+} from "./contracts/columns";
+import type { FacetMap } from "./contracts/query";
 import type { DisplayValue } from "./display";
-import type { FacetMap } from "./filters/facets";
 
 export type {
   ColumnAiOptions,

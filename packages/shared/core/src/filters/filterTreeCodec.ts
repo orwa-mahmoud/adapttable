@@ -3,11 +3,8 @@
  * Kept free of predicates so the URL layer does not pull the filter engine
  * into a table that never declares filters.
  */
-import {
-  isFilterGroup,
-  type QueryCondition,
-  type QueryFilterGroup,
-} from "../source/queryContract";
+import type { QueryCondition, QueryFilterGroup } from "../contracts/query";
+import { isFilterGroup } from "../source/queryContract";
 import { isValuelessFilterOp } from "./operators";
 
 /**
