@@ -3,6 +3,7 @@
  * hooks and isolated Bootstrap styling, over `@adapttable/angular`. Native HTML is
  * this kit's kit, so every control a reader uses is the browser's own.
  */
+import { ADAPTTABLE_KIT_MOTION_OFF } from "@adapttable/angular";
 import {
   AdaptAttrs,
   AdaptDataTableShell,
@@ -12,7 +13,6 @@ import {
   AdaptTableStatusAnnouncer,
   provideAdaptTableState,
 } from "@adapttable/angular/adapter";
-import { ADAPTTABLE_KIT_MOTION_OFF } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
