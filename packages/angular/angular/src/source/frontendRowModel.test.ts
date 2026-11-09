@@ -50,7 +50,7 @@ describe("frontend row model", () => {
     });
   });
 
-  it("keeps search across a grouping mount and removal, and does not publish the discarded engine", async () => {
+  it("keeps one engine, its search and its subscribers across a grouping mount and removal", async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.detectChanges();
     const source = fixture.componentInstance.source;
@@ -67,14 +67,17 @@ describe("frontend row model", () => {
     fixture.componentInstance.full.set(true);
     fixture.detectChanges();
     await fixture.whenStable();
+    expect(source().tableEngine).toBe(engine);
     expect(groupsOf(source().tableEngine)).toBeDefined();
     expect(source().search).toBe("core");
     expect(source().groupBy).toBe("team");
-    expect(woken).not.toHaveBeenCalled();
+    // The grouped rows are news to the table's own subscribers.
+    expect(woken).toHaveBeenCalledTimes(1);
 
     fixture.componentInstance.full.set(false);
     fixture.detectChanges();
     await fixture.whenStable();
+    expect(source().tableEngine).toBe(engine);
     expect(groupsOf(source().tableEngine)).toBeUndefined();
     expect(source().search).toBe("core");
     expect(source().groupBy).toBe("team");

@@ -521,20 +521,44 @@ describe("createFrontendSourceWith", () => {
     expect(groupsOf(source.engine.rows("full"))).toBeDefined();
   });
 
-  it("drops a pending candidate when the evaluator is replaced", () => {
+  it("switches the evaluator inside the same table", () => {
     const source = createFrontendSourceWith<Row>(createBasicTableEngine);
     source.update(config(), VIEW);
     source.commit();
     const first = source.engine;
+    const { tableId } = first;
+    first.dispatch({ type: "setSelection", ids: ["1"] });
     const heard = vi.fn();
     first.subscribe("all", heard);
+
     source.update(config(), { ...VIEW, search: "bob" });
     source.replaceEngine(createTableEngine);
     expect(heard).not.toHaveBeenCalled();
-    expect(() => source.engine).toThrow(/update\(\)/);
+    expect(source.engine).toBe(first);
+
+    source.update(config(), { ...VIEW, groupBy: "name" });
+    expect(groupsOf(first.rows("full"))).toBeUndefined();
+    source.commit();
+
+    expect(source.engine).toBe(first);
+    expect(first.tableId).toBe(tableId);
+    expect(first.snapshot().selectedIds).toEqual(["1"]);
+    expect(groupsOf(first.rows("full"))).toBeDefined();
+    expect(heard).toHaveBeenCalledTimes(1);
+  });
+
+  it("stages the evaluator again when its candidate was dropped", () => {
+    const source = createFrontendSourceWith<Row>(createBasicTableEngine);
+    source.update(config(), { ...VIEW, groupBy: "name" });
+    source.commit();
+    source.replaceEngine(createTableEngine);
+    source.update(config(), { ...VIEW, groupBy: "name" });
+    // A direct write owns the table and drops the render's candidate.
+    source.engine.dispatch({ type: "setPage", page: 2 });
+    expect(groupsOf(source.engine.rows("full"))).toBeUndefined();
+
     source.update(config(), { ...VIEW, groupBy: "name" });
     source.commit();
     expect(groupsOf(source.engine.rows("full"))).toBeDefined();
-    expect(source.engine).not.toBe(first);
   });
 });
