@@ -123,6 +123,10 @@ export function FilterPopover({
         // Both axes: a panel that cannot shift horizontally runs off the
         // edge on a narrow viewport and clips its own labels.
         { name: "preventOverflow", options: { padding: 8 } },
+        // Offsets from the left and top edges. An end-aligned panel is
+        // otherwise offset from the right edge, and a page whose scrollbar
+        // takes width the measurement did not see moves it off the left edge.
+        { name: "computeStyles", options: { adaptive: false } },
         FIT_BELOW_TRIGGER,
       ]}
       style={{ zIndex: 10050 }}

@@ -13,4 +13,4 @@ Every React kit draws its desktop table and phone cards through one shared struc
 
 A plain React table no longer loads the editing session or the extra-row splicer: enter-to-edit and batch undo come with the cell-navigation and editing features, and extra rows are spliced only when `extraRows()` is composed.
 
-The MUI filters panel stays within the window below its trigger after the page shifts while it is open.
+The MUI filters panel stays within the window below its trigger after the page shifts while it is open, and inside its left edge in a right-to-left page with a scrollbar.
