@@ -1,0 +1,292 @@
+/**
+ * One store per table: every piece of the table's state is a slice of it.
+ *
+ * A slice is a value under a typed key — the view state, the column layout,
+ * the selection, the rows the evaluator derived. Changes go in as named
+ * actions; an action's reducer writes the slices it changes, and each reader
+ * hears about a change only when the slices it reads moved and what it
+ * selects from them is different. Writes inside one action or one
+ * {@link TableStore.batch} reach readers and listeners together when it ends,
+ * and not at all when it throws, so nothing ever sees half an action.
+ *
+ * The store holds no framework code. A binding reads it through one adapter
+ * — a hook, a ref, a signal — and writes it only from events and effects.
+ */
+
+/** Where one store keeps one slice's value and who listens to it. */
+interface SliceCell<T> {
+  value: T;
+  /** The value an action in progress wrote, until the action ends. */
+  staged: { value: T } | undefined;
+  readonly listeners: Set<() => void>;
+}
+
+/** A slice's key: its name and, in the type, its value. */
+export interface SliceKey<T> {
+  readonly name: string;
+  /** The slice's starting value. */
+  readonly initial: () => T;
+  /** Whether two values of the slice are the same; `Object.is` by default. */
+  readonly equals: (a: T, b: T) => boolean;
+  /** Each store's cell for this slice, by the store's private token. */
+  readonly cells: WeakMap<object, SliceCell<T>>;
+}
+
+/**
+ * Define a slice: the key a store holds its value under.
+ *
+ * @param name - Unique within a table; features prefix their own.
+ * @param initial - The value a store starts the slice with.
+ * @param equals - When a write changes nothing; `Object.is` by default.
+ *
+ * @public
+ */
+export function defineSlice<T>(
+  name: string,
+  initial: () => T,
+  equals: (a: T, b: T) => boolean = Object.is
+): SliceKey<T> {
+  return { name, initial, equals, cells: new WeakMap() };
+}
+
+/** Something a binding can read and listen to. */
+export interface StoreReader<T> {
+  readonly getSnapshot: () => T;
+  readonly subscribe: (listener: () => void) => () => void;
+}
+
+/** Read slices by key. */
+export type SliceRead = <T>(key: SliceKey<T>) => T;
+
+/** What an action's reducer may do: read and write slices. */
+export interface StoreWriter {
+  readonly read: SliceRead;
+  readonly write: <T>(key: SliceKey<T>, value: T) => void;
+  readonly update: <T>(key: SliceKey<T>, recipe: (current: T) => T) => void;
+}
+
+/** A named change: its type, its payload, and the reducer that applies it. */
+export interface TableAction<TPayload> {
+  readonly type: string;
+  readonly payload: TPayload;
+  readonly reduce: (store: StoreWriter, payload: TPayload) => void;
+}
+
+/** A named action, called to make one. */
+export interface ActionDefinition<TPayload> {
+  (payload: TPayload): TableAction<TPayload>;
+  readonly type: string;
+}
+
+/**
+ * Define a named action.
+ *
+ * @param type - Unique within a table; features prefix their own.
+ * @param reduce - Writes the slices the action changes.
+ *
+ * @public
+ */
+export function defineAction<TPayload>(
+  type: string,
+  reduce: (store: StoreWriter, payload: TPayload) => void
+): ActionDefinition<TPayload> {
+  const create = (payload: TPayload): TableAction<TPayload> => ({
+    type,
+    payload,
+    reduce,
+  });
+  return Object.assign(create, { type });
+}
+
+/** One table's state. */
+export interface TableStore {
+  /** The current value of a slice; its initial value until it is written. */
+  readonly read: SliceRead;
+  /** A reader of one slice. */
+  readonly slice: <T>(key: SliceKey<T>) => StoreReader<T>;
+  /**
+   * A reader of what `selector` makes of the slices it reads, heard only
+   * when those slices change and the selected value with them.
+   */
+  readonly select: <T>(
+    selector: (read: SliceRead) => T,
+    equals?: (a: T, b: T) => boolean
+  ) => StoreReader<T>;
+  /** Apply a named action. */
+  readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
+  /** Apply `run`'s writes as one change. */
+  readonly batch: (run: (store: StoreWriter) => void) => void;
+}
+
+/** What a store notifies when a slice changes. */
+interface Listened {
+  readonly listeners: Set<() => void>;
+}
+
+/** A cell an action wrote: publish or drop its staged value. */
+interface StagedCell extends Listened {
+  /** Make the staged value the value; whether it changed. */
+  readonly publish: () => boolean;
+  readonly drop: () => void;
+}
+
+/**
+ * Create a table's store.
+ *
+ * @public
+ */
+export function createTableStore(): TableStore {
+  /** This store's identity in every slice key's cells. */
+  const token = {};
+  let depth = 0;
+  const staged = new Map<Listened, StagedCell>();
+
+  function cellOf<T>(key: SliceKey<T>): SliceCell<T> {
+    let cell = key.cells.get(token);
+    if (!cell) {
+      cell = { value: key.initial(), staged: undefined, listeners: new Set() };
+      key.cells.set(token, cell);
+    }
+    return cell;
+  }
+
+  /** A slice's value, with the writes of an action in progress. */
+  const read: SliceRead = (key) => {
+    const cell = cellOf(key);
+    return cell.staged ? cell.staged.value : cell.value;
+  };
+
+  function publish(): void {
+    const heard = new Set<() => void>();
+    for (const cell of staged.values()) {
+      if (!cell.publish()) continue;
+      for (const listener of cell.listeners) heard.add(listener);
+    }
+    staged.clear();
+    for (const listener of heard) listener();
+  }
+
+  function run(apply: (store: StoreWriter) => void): void {
+    depth += 1;
+    try {
+      apply(writer);
+    } catch (error) {
+      if (depth === 1) {
+        for (const cell of staged.values()) cell.drop();
+        staged.clear();
+      }
+      throw error;
+    } finally {
+      depth -= 1;
+    }
+    if (depth === 0) publish();
+  }
+
+  const writer: StoreWriter = {
+    read,
+    write(key, value) {
+      const cell = cellOf(key);
+      if (key.equals(read(key), value)) return;
+      cell.staged = { value };
+      if (staged.has(cell)) return;
+      staged.set(cell, {
+        listeners: cell.listeners,
+        publish() {
+          const next = cell.staged;
+          cell.staged = undefined;
+          if (!next || key.equals(cell.value, next.value)) return false;
+          cell.value = next.value;
+          return true;
+        },
+        drop() {
+          cell.staged = undefined;
+        },
+      });
+    },
+    update(key, recipe) {
+      writer.write(key, recipe(read(key)));
+    },
+  };
+
+  return {
+    read,
+    slice(key) {
+      return {
+        getSnapshot: () => read(key),
+        subscribe(listener) {
+          const { listeners } = cellOf(key);
+          listeners.add(listener);
+          return () => {
+            listeners.delete(listener);
+          };
+        },
+      };
+    },
+    select(selector, equals = Object.is) {
+      let reads = new Set<Listened>();
+      let value: ReturnType<typeof selector>;
+      let fresh = false;
+      const tracking: SliceRead = (key) => {
+        reads.add(cellOf(key));
+        return read(key);
+      };
+      const evaluate = () => {
+        reads = new Set();
+        return selector(tracking);
+      };
+      /** Evaluate, keeping the last value when the selection is the same. */
+      const refresh = () => {
+        const next = evaluate();
+        if (!fresh || !equals(value, next)) value = next;
+        fresh = true;
+      };
+      const listeners = new Set<() => void>();
+      const unsubscribers = new Map<Listened, () => void>();
+      const onChange = () => {
+        const next = evaluate();
+        watch();
+        if (fresh && equals(value, next)) return;
+        value = next;
+        fresh = true;
+        for (const listener of [...listeners]) listener();
+      };
+      // Listen to exactly the slices the last evaluation read.
+      const watch = () => {
+        for (const [state, stop] of unsubscribers) {
+          if (reads.has(state)) continue;
+          stop();
+          unsubscribers.delete(state);
+        }
+        for (const state of reads) {
+          if (unsubscribers.has(state)) continue;
+          state.listeners.add(onChange);
+          unsubscribers.set(state, () => state.listeners.delete(onChange));
+        }
+      };
+      return {
+        getSnapshot() {
+          if (listeners.size === 0 || !fresh) refresh();
+          return value;
+        },
+        subscribe(listener) {
+          if (listeners.size === 0) {
+            refresh();
+            watch();
+          }
+          listeners.add(listener);
+          return () => {
+            listeners.delete(listener);
+            if (listeners.size > 0) return;
+            for (const stop of unsubscribers.values()) stop();
+            unsubscribers.clear();
+            fresh = false;
+          };
+        },
+      };
+    },
+    dispatch(action) {
+      run((store) => action.reduce(store, action.payload));
+    },
+    batch: run,
+  };
+}
