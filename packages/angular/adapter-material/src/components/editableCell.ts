@@ -32,12 +32,13 @@ import {
   Component,
   computed,
   Directive,
+  effect,
   ElementRef,
   inject,
   input,
-  type OnChanges,
   TemplateRef,
   type Type,
+  untracked,
   viewChild,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
@@ -120,16 +121,20 @@ class AdaptEditCellButton {
   selector:
     "[matInput][adaptEditorInvalid], [matNativeControl][adaptEditorInvalid]",
 })
-export class AdaptMaterialEditorValidation implements OnChanges {
+export class AdaptMaterialEditorValidation {
   readonly adaptEditorInvalid = input.required<boolean>();
   readonly invalid = this.adaptEditorInvalid;
   private readonly control = inject(MatInput);
 
-  ngOnChanges(): void {
-    const invalid = this.invalid();
-    if (this.control.errorState === invalid) return;
-    this.control.errorState = invalid;
-    this.control.stateChanges.next();
+  constructor() {
+    effect(() => {
+      const invalid = this.invalid();
+      untracked(() => {
+        if (this.control.errorState === invalid) return;
+        this.control.errorState = invalid;
+        this.control.stateChanges.next();
+      });
+    });
   }
 }
 

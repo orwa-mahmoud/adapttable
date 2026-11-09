@@ -12,13 +12,14 @@ import {
   computed,
   DestroyRef,
   Directive,
+  effect,
   ElementRef,
   inject,
   input,
-  type OnChanges,
   type OnInit,
   output,
   Renderer2,
+  untracked,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { PaginationComponent } from "ngx-bootstrap/pagination";
@@ -30,7 +31,7 @@ import type { TableView } from "../dataTable";
  * @internal
  */
 @Directive({ selector: "[adaptPaginationLink]" })
-export class AdaptPaginationLink implements OnChanges, OnInit {
+export class AdaptPaginationLink implements OnInit {
   readonly state = input.required<{
     readonly part: string;
     readonly label: string;
@@ -44,10 +45,20 @@ export class AdaptPaginationLink implements OnChanges, OnInit {
   private readonly renderer = inject(Renderer2);
   private readonly destroy = inject(DestroyRef);
 
-  ngOnChanges(): void {
+  constructor() {
+    // The link's state is written onto ngx-bootstrap's own anchor, on the
+    // server too, so assistive tech reads it from the first paint.
+    effect(() => {
+      const state = this.state();
+      untracked(() => {
+        this.describe(state);
+      });
+    });
+  }
+
+  private describe(state: ReturnType<typeof this.state>): void {
     const link = this.element.nativeElement.parentElement;
     if (!link) return;
-    const state = this.state();
     this.renderer.setAttribute(link, "role", "button");
     this.renderer.setAttribute(link, "data-ngx-bootstrap-part", state.part);
     this.renderer.setAttribute(link, "aria-label", state.label);
