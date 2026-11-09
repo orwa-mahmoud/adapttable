@@ -257,16 +257,21 @@ function axesForChange(
   return axes;
 }
 
+/** What a source reads of one session state, whatever its row type. */
+interface ControlledState {
+  readonly view: { readonly data: readonly unknown[] };
+  readonly model: unknown;
+  readonly evaluator: unknown;
+}
+
 /** Session internals a frontend source reaches through the engine handle. */
 interface SessionControls {
-  /** The row model the committed state evaluates with. */
-  committedModel(): unknown;
-  /** The evaluator the next commit leaves live. */
-  evaluator(): unknown;
+  /** The committed table. */
+  committed(): ControlledState;
+  /** The state the next stage builds on: the candidate, else the committed table. */
+  base(): ControlledState;
   /** Stage `model` as the evaluator, published with the next commit. */
   stageModel(model: unknown, evaluator: unknown): void;
-  /** The state the next stage builds on: the candidate, else the committed table. */
-  base(): SessionBase;
 }
 
 /**
@@ -292,7 +297,7 @@ const SESSIONS = new WeakMap<object, SessionControls>();
  * @internal
  */
 export function sessionEvaluator(engine: object): unknown {
-  return SESSIONS.get(engine)?.evaluator();
+  return SESSIONS.get(engine)?.base().evaluator;
 }
 
 /**
@@ -302,7 +307,8 @@ export function sessionEvaluator(engine: object): unknown {
  * @internal
  */
 export function sessionBase(engine: object): SessionBase | undefined {
-  return SESSIONS.get(engine)?.base();
+  const view = SESSIONS.get(engine)?.base().view;
+  return view && { view, data: view.data };
 }
 
 /**
@@ -326,7 +332,7 @@ export function stageSessionEvaluator(
   const target = SESSIONS.get(engine);
   const source = SESSIONS.get(carrier);
   if (!target || !source) return false;
-  target.stageModel(source.committedModel(), evaluator);
+  target.stageModel(source.committed().model, evaluator);
   return true;
 }
 
@@ -960,8 +966,8 @@ export function createTableSession<TRow>(
   };
 
   SESSIONS.set(engine, {
-    committedModel: () => committed.model,
-    evaluator: () => (candidate ?? committed).evaluator,
+    committed: () => committed,
+    base: () => candidate ?? committed,
     stageModel(nextModel: unknown, evaluator: unknown) {
       assertLive();
       writeCandidate((draft) => {
@@ -969,10 +975,6 @@ export function createTableSession<TRow>(
         draft.evaluator = evaluator;
         rebuild(draft);
       });
-    },
-    base() {
-      const state = candidate ?? committed;
-      return { view: state.view, data: state.view.data };
     },
   });
   return engine;

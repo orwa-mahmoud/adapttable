@@ -374,7 +374,7 @@ export function configureIncrementalView<TRow>(
   view: IncrementalView<TRow>,
   patch: Partial<IncrementalViewConfig<TRow>>
 ): IncrementalView<TRow> {
-  return reconfigured(view, patch, [], "in place");
+  return reconfigured(view, patch, [], true);
 }
 
 /**
@@ -396,20 +396,22 @@ export function reconfigureIncrementalView<TRow>(
   patch: Partial<IncrementalViewConfig<TRow>>,
   cleared: readonly (keyof IncrementalViewConfig<TRow>)[]
 ): IncrementalView<TRow> {
-  return reconfigured(view, patch, cleared, "new record");
+  return reconfigured(view, patch, cleared, false);
 }
 
 /**
- * Where a configuration that derives the same rows goes: onto `view` itself,
- * which keeps its identity for a host's page slice, or onto a new record.
+ * Merge `patch` into `view`'s configuration. With `inPlace`, a configuration
+ * that derives the same rows goes onto `view` itself, which keeps its
+ * identity for a host's page slice, and new groups or totals share its row
+ * arrays. Without it `view` is never written: the result is a new record,
+ * with its own row arrays when its groups or totals differ, so metadata
+ * attached to the arrays the caller still shows keeps describing `view`.
  */
-type UnchangedRowsConfig = "in place" | "new record";
-
 function reconfigured<TRow>(
   view: IncrementalView<TRow>,
   patch: Partial<IncrementalViewConfig<TRow>>,
   cleared: readonly (keyof IncrementalViewConfig<TRow>)[],
-  unchanged: UnchangedRowsConfig
+  inPlace: boolean
 ): IncrementalView<TRow> {
   const state = getState(view);
   if (!state) {
@@ -422,32 +424,27 @@ function reconfigured<TRow>(
     ...definedConfigPatch(patch),
   };
   for (const key of cleared) delete merged[key];
-  const queryChanged =
-    queryConfigFingerprint(state.config) !== queryConfigFingerprint(merged);
-  const derivedChanged =
-    derivedConfigFingerprint(state.config) !== derivedConfigFingerprint(merged);
-  if (!queryChanged && !derivedChanged) {
-    if (unchanged === "in place") {
+  if (queryConfigFingerprint(state.config) !== queryConfigFingerprint(merged)) {
+    return createIncrementalView(view.rows, merged);
+  }
+  const next: ViewState<TRow> = { ...state, config: merged };
+  if (
+    derivedConfigFingerprint(state.config) === derivedConfigFingerprint(merged)
+  ) {
+    if (inPlace) {
       state.config = merged;
       return view;
     }
-    return withConfig(view, { ...state, config: merged });
+    const record = { ...view };
+    STATES.set(record, next as ViewState<unknown>);
+    return record;
   }
-  if (queryChanged) return createIncrementalView(view.rows, merged);
-  if (unchanged === "new record") {
-    // New groups or totals over the same rows: the record gets its own row
-    // arrays, so metadata attached to the arrays the caller still shows
-    // keeps describing the caller's snapshot.
-    return republishDerived(
-      view,
-      { ...ownRowArrays(state), config: merged },
-      merged
-    );
+  if (!inPlace) {
+    next.filtered = state.filtered.slice();
+    next.sorted =
+      state.sorted === state.filtered ? next.filtered : state.sorted.slice();
   }
-  // A table's grouping projection shares the source rows, but must keep
-  // its derived configuration separate from the source snapshot. Otherwise
-  // a later call can mistake that source's uncomputed groups for current totals.
-  return republishDerived(view, { ...state, config: merged }, merged);
+  return republishDerived(view, next, merged);
 }
 
 /**
@@ -674,28 +671,6 @@ function publish<TRow>(
   attachView(filtered, view);
   attachView(sorted, view);
   return view;
-}
-
-/** `state` with its own copies of the filtered and sorted arrays. */
-function ownRowArrays<TRow>(state: ViewState<TRow>): ViewState<TRow> {
-  const filtered = state.filtered.slice();
-  const sorted =
-    state.sorted === state.filtered ? filtered : state.sorted.slice();
-  return { ...state, filtered, sorted };
-}
-
-/**
- * A snapshot record over `view`'s arrays and results with its own state. The
- * arrays stay attached to `view`, whose rows, groups and totals this record
- * shares.
- */
-function withConfig<TRow>(
-  view: IncrementalView<TRow>,
-  state: ViewState<TRow>
-): IncrementalView<TRow> {
-  const record: IncrementalView<TRow> = { ...view };
-  STATES.set(record, state as ViewState<unknown>);
-  return record;
 }
 
 function republishDerived<TRow>(
