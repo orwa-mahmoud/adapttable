@@ -422,6 +422,8 @@ jobs:
       - name: Restore built packages
         id: built-packages
         run: pnpm build --concurrency=1
+      - name: Run the script tests that read built packages
+        run: node --test scripts/angular-consumer-fixtures.test.mjs scripts/core-entry-interop.test.mjs
       - name: Verify current and minimum Vue built contracts and ownership
         run: pnpm check:vue-built-peers
       - name: Run every Vue kit on its minimum and current Vue

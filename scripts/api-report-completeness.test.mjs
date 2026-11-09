@@ -18,6 +18,28 @@ import { fileURLToPath } from "node:url";
 import { Extractor, ExtractorConfig } from "@microsoft/api-extractor";
 
 import { missingDeferredReportTargets } from "./api-report-references.mjs";
+
+/**
+ * The fixture repository holds one package, so selecting it regenerates every
+ * report while leaving out the repository-wide binding checks it has no
+ * bindings for.
+ */
+const FIXTURE_ONLY = ["--package", "fixture"];
+
+/** `entry` and every script it imports by relative path, transitively. */
+function localImportClosure(entry) {
+  const seen = new Set();
+  const pending = [entry];
+  while (pending.length) {
+    const file = pending.pop();
+    if (seen.has(file)) continue;
+    seen.add(file);
+    const source = readFileSync(new URL(`./${file}`, import.meta.url), "utf8");
+    for (const [, imported] of source.matchAll(/from "\.\/([\w-]+\.mjs)"/g))
+      pending.push(imported);
+  }
+  return [...seen];
+}
 import { classifyForgottenExport, entryExports } from "./api-warnings.mjs";
 
 // A minimal emitted declaration that reproduces the assistant report defect:
@@ -39,21 +61,7 @@ function fixture(t) {
   const pkg = join(root, "packages", "shared", "fixture");
   for (const directory of [scripts, modules, pkg])
     mkdirSync(directory, { recursive: true });
-  for (const file of [
-    "api-reports.mjs",
-    "api-union-order.mjs",
-    "api-entrypoints.mjs",
-    "api-report-diagnostics.mjs",
-    "api-report-references.mjs",
-    "api-report-retention.mjs",
-    "api-value-graph.mjs",
-    "api-declaration-origins.mjs",
-    "api-report-selection.mjs",
-    "api-warnings.mjs",
-    "packed-names.mjs",
-    "packages.mjs",
-    "kits.mjs",
-  ])
+  for (const file of localImportClosure("api-reports.mjs"))
     copyFileSync(new URL(`./${file}`, import.meta.url), join(scripts, file));
   // Keep Extractor's temporary output local; dependency links are read-only.
   const dependencies = fileURLToPath(
@@ -197,7 +205,7 @@ test("real malformed extraction stays a red fixture while source-proven retentio
   // the ordinary first extraction happens to reproduce the same incomplete file.
   mkdirSync(dirname(paths.report));
   writeFileSync(paths.report, raw.report);
-  const changed = run(paths.root);
+  const changed = run(paths.root, ...FIXTURE_ONLY);
   assert.equal(changed.status, 1, changed.output);
   assert.match(changed.output, /out of date/);
   assert.match(
@@ -218,7 +226,7 @@ test("real malformed extraction stays a red fixture while source-proven retentio
     raw.report
   );
 
-  const local = run(paths.root, "--local");
+  const local = run(paths.root, "--local", ...FIXTURE_ONLY);
   assert.equal(local.status, 0, local.output);
   assert.match(local.output, /1 published-name copy\(s\)/);
   assert.doesNotMatch(local.output, /2 published-name copy/);
@@ -240,7 +248,7 @@ declare const RuntimeValue: typeof implementation;
 export { RuntimeValue };
 `
   );
-  const local = run(paths.root, "--local");
+  const local = run(paths.root, "--local", ...FIXTURE_ONLY);
   assert.equal(local.status, 0, local.output);
   assert.match(
     local.output,
@@ -250,9 +258,9 @@ export { RuntimeValue };
     readFileSync(paths.report, "utf8"),
     /interface StaticTableFeature_2/
   );
-  const check = run(paths.root);
+  const check = run(paths.root, ...FIXTURE_ONLY);
   assert.equal(check.status, 0, check.output);
-  assert.match(check.output, /every committed report matches/);
+  assert.match(check.output, /every selected report matches/);
 });
 
 test("ordinary unexported types stay failing findings", (t) => {
@@ -261,7 +269,7 @@ test("ordinary unexported types stay failing findings", (t) => {
     paths.entry,
     "interface PrivateResult { secret: string } declare function createFeature(): PrivateResult; export { createFeature };"
   );
-  const local = run(paths.root, "--local");
+  const local = run(paths.root, "--local", ...FIXTURE_ONLY);
   assert.equal(local.status, 1, local.output);
   assert.match(local.output, /1 at a front door/);
   assert.match(local.output, /PrivateResult \(main entry\)/);
@@ -292,7 +300,7 @@ export { type Mixed };
       "front-door"
     );
   }
-  const local = run(paths.root, "--local");
+  const local = run(paths.root, "--local", ...FIXTURE_ONLY);
   assert.equal(local.status, 1, local.output);
   assert.match(local.output, /1 published-name copy\(s\), 1 at a front door/);
   assert.match(
@@ -307,7 +315,7 @@ export { type Mixed };
     missingDeferredReportTargets(fresh, new Set(["StaticTableFeature"])),
     []
   );
-  const check = run(paths.root);
+  const check = run(paths.root, ...FIXTURE_ONLY);
   assert.equal(check.status, 1, check.output);
   assert.match(check.output, /1 at a front door/);
   assert.match(check.output, /PrivateMember \(main entry\)/);
@@ -340,7 +348,7 @@ test("queued split-module warnings use the fresh report and preserve unrelated p
     export { take };
   `
   );
-  const local = run(paths.root, "--local");
+  const local = run(paths.root, "--local", ...FIXTURE_ONLY);
   assert.equal(local.status, 1, local.output);
   assert.match(
     local.output,
@@ -349,7 +357,7 @@ test("queued split-module warnings use the fresh report and preserve unrelated p
   const fresh = readFileSync(paths.report, "utf8");
   assert.match(fresh, /const Public: typeof implementation/);
   assert.match(fresh, /rows: Row\[\]/);
-  const check = run(paths.root);
+  const check = run(paths.root, ...FIXTURE_ONLY);
   assert.equal(check.status, 1, check.output);
   assert.match(check.output, /1 at a front door/);
   assert.doesNotMatch(check.output, /out of date/);
@@ -365,7 +373,7 @@ test("a failed runner drains warnings without borrowing a stale report", (t) => 
     export { RuntimeValue };
   `
   );
-  const first = run(paths.root, "--local");
+  const first = run(paths.root, "--local", ...FIXTURE_ONLY);
   assert.equal(first.status, 0, first.output);
   const before = readFileSync(paths.report, "utf8");
   const preload = join(paths.root, "fail-extraction.cjs");
@@ -390,7 +398,11 @@ test("a failed runner drains warnings without borrowing a stale report", (t) => 
     };
   `
   );
-  const failed = invokeScript(paths.root, ["--require", preload], ["--local"]);
+  const failed = invokeScript(
+    paths.root,
+    ["--require", preload],
+    ["--local", ...FIXTURE_ONLY]
+  );
   assert.equal(failed.status, 1, failed.output);
   assert.match(failed.output, /extraction errored/);
   assert.match(failed.output, /2 at a front door/);
@@ -426,7 +438,7 @@ test("the actual runner rejects ambiguous mapped origins even with retained defi
       mappings: "AAAA,AAAC",
     })
   );
-  const result = run(paths.root, "--local");
+  const result = run(paths.root, "--local", ...FIXTURE_ONLY);
   assert.equal(result.status, 1, result.output);
   assert.match(result.output, /2 at a front door/);
   assert.doesNotMatch(result.output, /published-value-alias/);

@@ -13,6 +13,7 @@ import { join } from "node:path";
 import { after, describe, it } from "node:test";
 import { pathToFileURL } from "node:url";
 
+import { packageDir } from "./packages.mjs";
 import { packedConsumer } from "./packed-consumers.mjs";
 
 const SUBPATHS = ["engine", "grouping", "editing", "selection"];
@@ -32,7 +33,12 @@ function assertChunkMaps(file, pattern, mapSuffix) {
   assert.ok(seen.size > 0, file);
 }
 
-describe("focused core entries from a tarball", () => {
+/** Packs core's build; CI runs this in the job that builds. */
+const UNBUILT = existsSync(join(packageDir("core"), "dist/index.js"))
+  ? false
+  : "needs @adapttable/core built";
+
+describe("focused core entries from a tarball", { skip: UNBUILT }, () => {
   const consumer = packedConsumer(["core"]);
   const root = join(consumer.dir, "node_modules/@adapttable/core");
 

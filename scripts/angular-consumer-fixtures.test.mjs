@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, describe, it } from "node:test";
@@ -18,7 +24,15 @@ import {
   plantedControllerFixture,
 } from "./angular-consumer-graphs.mjs";
 import { caseId, fixtureFolders, FIXTURES } from "./consumer-fixtures.mjs";
+import { packageDir } from "./packages.mjs";
 import { packedConsumer } from "./packed-consumers.mjs";
+
+/** These cases read the kits' builds; CI runs them in the job that builds. */
+const UNBUILT = angularKits().some(
+  (kit) => !existsSync(join(packageDir(kit.folder), "dist"))
+)
+  ? "needs the Angular kits built"
+  : false;
 
 describe("angular consumer fixtures", () => {
   it("covers every Angular kit plus the headless table and each feature", () => {
@@ -89,13 +103,19 @@ describe("angular consumer fixtures", () => {
     assert.equal(material.code.includes("angular-unstyled"), false);
   });
 
-  it("reads each kit base entry's binding imports from its build", () => {
-    for (const kit of angularKits()) {
-      const imports = angularBaseImports(kit.folder);
-      assert.deepEqual(imports, ANGULAR_BASE_IMPORTS, kit.name);
+  it(
+    "reads each kit base entry's binding imports from its build",
+    {
+      skip: UNBUILT,
+    },
+    () => {
+      for (const kit of angularKits()) {
+        const imports = angularBaseImports(kit.folder);
+        assert.deepEqual(imports, ANGULAR_BASE_IMPORTS, kit.name);
+      }
+      assert.deepEqual(baseImportProblems(), []);
     }
-    assert.deepEqual(baseImportProblems(), []);
-  });
+  );
 
   it("plants a controller the base table does not use", () => {
     const planted = plantedControllerFixture();
@@ -108,7 +128,7 @@ describe("angular consumer fixtures", () => {
   });
 });
 
-describe("angular consumer graphs", () => {
+describe("angular consumer graphs", { skip: UNBUILT }, () => {
   let install;
 
   before(() => {

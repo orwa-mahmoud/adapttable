@@ -53,7 +53,14 @@ it("keeps core tests and test globals in normal typechecking, outside production
       /"(src\/[^"]+\.ts)"/g
     ),
   ].map((match) => join(root, match[1]));
-  assert.equal(entries.length, 9);
+  const published = Object.keys(
+    JSON.parse(readFileSync(join(root, "package.json"), "utf8")).exports
+  ).filter((key) => key !== "./package.json");
+  assert.equal(
+    entries.length,
+    published.length,
+    "one build entry per published entry point"
+  );
   for (const entry of entries)
     assert.ok(build.fileNames.includes(entry), entry);
 });
