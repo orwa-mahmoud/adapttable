@@ -1,9 +1,9 @@
 /**
  * How many Vitest workers a suite should start.
  *
- * CI (`ubuntu-latest`) is 2 cores and already shards packages across jobs —
- * each suite stays on one thread so cssinjs first-paint does not miss the
- * 30s budget. Local turbo already fans packages; each suite takes a slice
+ * CI (`ubuntu-latest`, 4 cores) shards packages across jobs and runs two or
+ * three packages per job — each suite stays on one thread so cssinjs
+ * first-paint does not miss the 30s budget. Local turbo already fans packages; each suite takes a slice
  * of the machine. A solo `pnpm --filter … test` has the machine to itself
  * and takes a worker per core.
  */
