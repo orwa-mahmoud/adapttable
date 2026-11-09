@@ -226,12 +226,12 @@ jobs:
         if: needs.detect.outputs.runLintRoot == 'true'
         run: pnpm lint:root
 
-  eslint:
-    name: ESLint
+  lint-types:
+    name: ESLint and TypeScript
     needs: detect
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ (matrix.name == 'vue' || matrix.name == 'showcase') && 15 || 10 }}
+    timeout-minutes: ${{ (matrix.name == 'vue' || matrix.name == 'showcase' || matrix.name == 'angular') && 20 || 15 }}
     strategy:
       fail-fast: false
       matrix:
@@ -242,7 +242,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
-      - name: Lint
+      - name: Lint and typecheck
         id: package-lint
         env:
           LANE: ${{ matrix.name }}
@@ -263,8 +263,12 @@ jobs:
             tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=@adapttable/examples" ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          # 2-core runner: two packages at once, each lint is one process.
-          pnpm lint $f $AFFECTED --concurrency=1 --continue=dependencies-successful
+          # 4-core runner: ESLint and tsc are one process each, so a lane
+          # runs two of them at a time.
+          pnpm exec turbo run lint typecheck $f $AFFECTED --concurrency=2 --continue=dependencies-successful
+      - name: Verify current and minimum Vue source contracts
+        if: matrix.name == 'vue'
+        run: pnpm check:vue-peer-types
 
       - name: Capture proposed Vue lint fixes
         id: vue-lint-fixes
@@ -280,48 +284,9 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  typescript:
-    name: TypeScript
-    needs: detect
-    if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runLint == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        name: [core, react, vue, antd, mui, kits, tools]
-    steps:
-      # Full history so turbo can diff against the base branch.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - uses: ./.github/actions/setup-pnpm
-      - name: Typecheck
-        env:
-          LANE: ${{ matrix.name }}
-          # Pull requests check only the packages the diff affects and their
-          # dependents; a push to main checks every package.
-          AFFECTED: ${{ github.event_name == 'pull_request' && '--affected' || '' }}
-          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
-        run: |
-          case "$LANE" in
-            core) f="--filter=@adapttable/core" ;;
-            react) f="--filter=@adapttable/react" ;;
-            vue) f="--filter=./packages/vue/*" ;;
-            antd) f="--filter=@adapttable/antd" ;;
-            mui) f="--filter=@adapttable/mui" ;;
-            kits) f="--filter=@adapttable/chakra --filter=@adapttable/mantine --filter=@adapttable/radix --filter=@adapttable/base-ui --filter=@adapttable/shadcn --filter=@adapttable/unstyled" ;;
-            tools) f="--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=./packages/angular/* --filter=@adapttable/showcase --filter=@adapttable/examples" ;;
-            *) echo "unknown lane: $LANE"; exit 1 ;;
-          esac
-          pnpm typecheck $f $AFFECTED --concurrency=1
-      - name: Verify current and minimum Vue source contracts
-        if: matrix.name == 'vue'
-        run: pnpm check:vue-peer-types
-
   lint:
     name: Lint
-    needs: [detect, format, eslint, typescript]
+    needs: [detect, format, lint-types]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
@@ -334,8 +299,7 @@ jobs:
           fi
           [ "${{ needs.format.result }}" = "success" ] || { echo "Format: ${{ needs.format.result }}"; exit 1; }
           if [ "${{ needs.detect.outputs.runLint }}" = "true" ]; then
-            [ "${{ needs.eslint.result }}" = "success" ] || { echo "ESLint: ${{ needs.eslint.result }}"; exit 1; }
-            [ "${{ needs.typescript.result }}" = "success" ] || { echo "TypeScript: ${{ needs.typescript.result }}"; exit 1; }
+            [ "${{ needs.lint-types.result }}" = "success" ] || { echo "ESLint and TypeScript: ${{ needs.lint-types.result }}"; exit 1; }
           fi
 
   unit-shard:
@@ -343,21 +307,15 @@ jobs:
     needs: [detect, build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runUnit == 'true'
     runs-on: ubuntu-latest
-    # Framework adapters run sequentially. Vue's full uncached lane takes
-    # over 15 minutes, including dependency builds and cache uploads.
+    # Vue's full uncached lane includes dependency builds and cache uploads.
     timeout-minutes: ${{ matrix.name == 'angular' && 45 || matrix.name == 'vue' && 20 || 15 }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: antd
-          - name: chakra
-          - name: core · unstyled
-          - name: mui · shadcn
-          - name: react
-          - name: mantine
-          - name: base-ui · ai
-          - name: radix · server · cli · i18n
+          - name: antd · mui · base-ui
+          - name: chakra · react · radix · core
+          - name: mantine · unstyled · shadcn · ai · server · cli · i18n
           - name: angular
           - name: vue
     steps:
@@ -375,26 +333,21 @@ jobs:
           TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           case "$LANE" in
-            antd) f="--filter=@adapttable/antd" ;;
-            chakra) f="--filter=@adapttable/chakra" ;;
-            "core · unstyled") f="--filter=@adapttable/core --filter=@adapttable/unstyled" ;;
-            "mui · shadcn") f="--filter=@adapttable/mui --filter=@adapttable/shadcn" ;;
-            react) f="--filter=@adapttable/react" ;;
-            vue) f="--filter=./packages/vue/*" ;;
-            mantine) f="--filter=@adapttable/mantine" ;;
-            "base-ui · ai") f="--filter=@adapttable/base-ui --filter=@adapttable/ai" ;;
-            "radix · server · cli · i18n") f="--filter=@adapttable/radix --filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n" ;;
-            angular) f="--filter=./packages/angular/*" ;;
+            "antd · mui · base-ui") f="--filter=@adapttable/antd --filter=@adapttable/mui --filter=@adapttable/base-ui"; c=2 ;;
+            "chakra · react · radix · core") f="--filter=@adapttable/chakra --filter=@adapttable/react --filter=@adapttable/radix --filter=@adapttable/core"; c=2 ;;
+            "mantine · unstyled · shadcn · ai · server · cli · i18n") f="--filter=@adapttable/mantine --filter=@adapttable/unstyled --filter=@adapttable/shadcn --filter=@adapttable/ai --filter=@adapttable/server --filter=@adapttable/cli --filter=@adapttable/i18n"; c=2 ;;
+            vue) f="--filter=./packages/vue/*"; c=3 ;;
+            angular) f="--filter=./packages/angular/*"; c=3 ;;
             *) echo "unknown lane: $LANE"; exit 1 ;;
           esac
-          # Lanes are balanced by measured suite time, not package count:
-          # antd 85s, chakra 69s, mui 53s, react 52s, mantine 51s, base-ui
-          # 46s, radix 45s, unstyled 40s, core 33s, shadcn 18s, ai 8s,
-          # server/cli/i18n ~1s each. antd alone sets the floor.
-          # angular runs alone: its suites compile with Angular's compiler,
-          # not the React plugin the other lanes share. Vue has its own lane
-          # using the SFC compiler and its per-package coverage floors.
-          pnpm test:coverage $f $AFFECTED --concurrency=1 --continue=dependencies-successful
+          # Lanes are balanced by measured suite time: antd 85s, chakra 69s,
+          # mui 53s, react 52s, mantine 51s, base-ui 46s, radix 45s, unstyled
+          # 40s, core 33s, shadcn 18s, ai 8s, server/cli/i18n ~1s each. On a
+          # 4-core runner a React lane runs two packages at a time and the
+          # Angular and Vue lanes three, each package with one Vitest worker.
+          # Angular compiles with Angular's compiler and Vue with the SFC
+          # compiler, so each keeps its own lane and coverage floors.
+          pnpm test:coverage $f $AFFECTED --concurrency=$c --continue=dependencies-successful
 
   unit:
     name: Unit

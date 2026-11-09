@@ -105,42 +105,32 @@ describe("Vue CI package gates", () => {
       join(root, ".github/workflows/pr.yml"),
       "utf8"
     );
-    for (const [job, next, command] of [
-      ["eslint", "typescript", "lint"],
-      ["typescript", "lint", "typecheck"],
-      ["unit-shard", "unit", "test:coverage"],
-    ]) {
-      const lane = workflow.slice(
+    const jobText = (job, next) =>
+      workflow.slice(
         workflow.indexOf(`  ${job}:`),
         workflow.indexOf(`  ${next}:`, workflow.indexOf(`  ${job}:`) + 1)
       );
-      assert.match(lane, /vue\) f="--filter=\.\/packages\/vue\/\*" ;;/);
-      assert.ok(lane.includes(`pnpm ${command} $f $AFFECTED --concurrency=1`));
+    for (const [job, next, command] of [
+      ["lint-types", "lint", "pnpm exec turbo run lint typecheck $f $AFFECTED"],
+      ["unit-shard", "unit", "pnpm test:coverage $f $AFFECTED"],
+    ]) {
+      const lane = jobText(job, next);
+      assert.match(lane, /vue\) f="--filter=\.\/packages\/vue\/\*"/);
+      assert.ok(lane.includes(command), `${job} runs ${command}`);
       assert.match(lane, /github.event_name == 'pull_request' && '--affected'/);
-      if (job === "unit-shard") {
-        assert.match(lane, /- name: vue/);
-      } else if (job === "eslint") {
-        assert.match(
-          lane,
-          /name: \[core, react, vue, antd, mui, kits, angular, showcase, tools\]/
-        );
-        assert.match(
-          lane,
-          /angular\) f="--filter=\.\/packages\/angular\/\*" ;;/
-        );
-        assert.match(lane, /showcase\) f="--filter=@adapttable\/showcase" ;;/);
-        const tools = lane.match(/tools\) f="([^"]+)" ;;/)?.[1];
-        assert.equal(
-          tools,
-          "--filter=@adapttable/cli --filter=@adapttable/i18n --filter=@adapttable/server --filter=@adapttable/ai --filter=@adapttable/examples"
-        );
-      } else {
-        assert.match(
-          lane,
-          /name: \[core, react, vue, antd, mui, kits, tools\]/
-        );
-      }
     }
+    const lintTypes = jobText("lint-types", "lint");
+    assert.match(
+      lintTypes,
+      /name: \[core, react, vue, antd, mui, kits, angular, showcase, tools\]/
+    );
+    assert.match(
+      lintTypes,
+      /angular\) f="--filter=\.\/packages\/angular\/\*" ;;/
+    );
+    assert.match(lintTypes, /showcase\) f="--filter=@adapttable\/showcase" ;;/);
+    assert.match(lintTypes, /pnpm check:vue-peer-types/);
+    assert.match(jobText("unit-shard", "unit"), /- name: vue/);
     const turbo = JSON.parse(readFileSync(join(root, "turbo.json"), "utf8"));
     assert.ok(turbo.globalDependencies.includes("scripts/check-vue-types.mjs"));
     for (const folder of ["vue", "adapter-vue-unstyled"]) {
