@@ -645,8 +645,14 @@ jobs:
     needs: [detect, showcase-build]
     if: needs.detect.outputs.skipAll != 'true' && needs.detect.outputs.runPlaywright == 'true'
     runs-on: ubuntu-latest
-    # Keep the expanded browser matrix sequential within each shard.
+    # Each shard gets an equal share of the measured browser time from the
+    # newest main run's timings (scripts/playwright-shards.mjs), and runs two
+    # Playwright workers (playwright.config.ts).
     timeout-minutes: 35
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
     strategy:
       fail-fast: false
       matrix:
@@ -674,8 +680,23 @@ jobs:
         with:
           name: docs-dist
           path: apps/docs/dist/
+      - name: Download main's browser timings
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=playwright-timings-1&per_page=50" \
+            --jq '[.artifacts[] | select(.expired == false and .workflow_run.head_branch == "main")][0].workflow_run.id // empty')
+          if [ -z "$run_id" ]; then
+            echo "::notice::No browser timings from main; the shards split by test count."
+            exit 0
+          fi
+          gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --pattern 'playwright-timings-*' --dir "$RUNNER_TEMP/playwright-timings"
       - name: Run E2E smoke suite
-        run: xvfb-run --auto-servernum pnpm exec playwright test --project=chromium --project=chromium-dev --shard=${{ matrix.shard }}/9
+        run: |
+          shard_args=$(node scripts/playwright-shards.mjs --shard ${{ matrix.shard }} --total 9 \
+            --timings "$RUNNER_TEMP/playwright-timings" --out "$RUNNER_TEMP/shard-tests.txt" \
+            --projects chromium,chromium-dev)
+          xvfb-run --auto-servernum pnpm exec playwright test --project=chromium --project=chromium-dev $shard_args
         env:
           SHOWCASE_SKIP_BUILD: "1"
           DOCS_SKIP_BUILD: "1"
@@ -687,6 +708,14 @@ jobs:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 7
+      - name: Upload browser timings
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-timings-${{ matrix.shard }}
+          path: playwright-timings/
+          if-no-files-found: ignore
+          retention-days: 30
       - name: Upload Vue kit screenshots
         if: ${{ always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

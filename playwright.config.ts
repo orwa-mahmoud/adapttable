@@ -55,14 +55,20 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  // Nine GitHub-hosted boxes (`--shard=i/9` in pr.yml) × 1 Chromium.
-  // Four workers on one runner contended and stalled; one per box is enough.
-  // Locally the machine is not a 2-core runner: Playwright's own default is
-  // half the cores, which leaves most of a laptop idle across 1,588 browser
-  // tests. Everything but the efficiency cores runs them instead.
-  workers: process.env.CI ? 1 : Math.max(4, availableParallelism() - 2),
-  // CI also writes playwright-report/, which the workflows upload on failure.
-  reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : "list",
+  // Nine 4-core GitHub-hosted runners, each running two Chromiums beside the
+  // production showcase and docs servers, which leaves headroom for those
+  // servers. Locally Playwright's own default is half the cores, which leaves
+  // most of a laptop idle, so everything but the efficiency cores runs them.
+  workers: process.env.CI ? 2 : Math.max(4, availableParallelism() - 2),
+  // CI also writes playwright-report/, which the workflows upload on failure,
+  // and playwright-timings/, which the next run's shards are balanced by.
+  reporter: process.env.CI
+    ? [
+        ["line"],
+        ["html", { open: "never" }],
+        ["json", { outputFile: "playwright-timings/report.json" }],
+      ]
+    : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
