@@ -2,6 +2,38 @@ import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Box, Button, Paper, Popper, Stack, Typography } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
 
+import { spaceBelow } from "./spaceBelow";
+
+/** The panel's height limit, kept current by {@link FIT_BELOW_TRIGGER}. */
+const PANEL_HEIGHT_VAR = "--adapttable-filters-max-height";
+
+/**
+ * Keeps the panel within the window below its trigger. Popper reruns it on
+ * every reposition (scroll, resize, layout shift after opening), so the
+ * limit follows the trigger instead of the position it had when the panel
+ * opened.
+ */
+const FIT_BELOW_TRIGGER = {
+  name: "adapttableFitBelowTrigger",
+  enabled: true,
+  phase: "write" as const,
+  fn: ({
+    state,
+  }: {
+    state: {
+      elements: {
+        reference: { getBoundingClientRect(): DOMRect };
+        popper: HTMLElement;
+      };
+    };
+  }) => {
+    state.elements.popper.style.setProperty(
+      PANEL_HEIGHT_VAR,
+      `${String(spaceBelow(state.elements.reference, 560))}px`
+    );
+  },
+};
+
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
   /** Whether the overlay is showing. */
@@ -91,6 +123,7 @@ export function FilterPopover({
         // Both axes: a panel that cannot shift horizontally runs off the
         // edge on a narrow viewport and clips its own labels.
         { name: "preventOverflow", options: { padding: 8 } },
+        FIT_BELOW_TRIGGER,
       ]}
       style={{ zIndex: 10050 }}
     >
@@ -107,17 +140,7 @@ export function FilterPopover({
           // the window. Pinned below the trigger it has to stop at the
           // viewport edge, or its lower fields are painted off-screen and
           // cannot be reached.
-          maxHeight: anchorEl
-            ? Math.max(
-                120,
-                Math.min(
-                  560,
-                  window.innerHeight -
-                    anchorEl.getBoundingClientRect().bottom -
-                    8
-                )
-              )
-            : "min(calc(50dvh - 16px), 560px)",
+          maxHeight: `var(${PANEL_HEIGHT_VAR}, min(calc(50dvh - 16px), 560px))`,
           overflowY: "auto",
           borderRadius: 2,
         }}

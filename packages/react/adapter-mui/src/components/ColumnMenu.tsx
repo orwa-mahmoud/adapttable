@@ -37,6 +37,8 @@ import {
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
+import { spaceBelow } from "./spaceBelow";
+
 /** The shared Columns-menu contract, declared once in core. */
 export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
 
@@ -528,17 +530,7 @@ export function ColumnMenu<TRow>({
           sx={{
             p: 0.75,
             minWidth: 250,
-            maxHeight: anchor
-              ? Math.max(
-                  120,
-                  Math.min(
-                    480,
-                    window.innerHeight -
-                      anchor.getBoundingClientRect().bottom -
-                      8
-                  )
-                )
-              : 480,
+            maxHeight: anchor ? spaceBelow(anchor, 480) : 480,
             overflowY: "auto",
           }}
         >
