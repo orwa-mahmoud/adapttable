@@ -426,9 +426,6 @@ function liveShellOperations<TRow>(
       ? { items: host?.contextMenuItems ?? [] }
       : undefined,
     commandPalette: paletteArmed ? { commands } : undefined,
-    print:
-      props.printButton === true && onPrint
-        ? { onPrint }
-        : undefined,
+    print: props.printButton === true && onPrint ? { onPrint } : undefined,
   };
 }

@@ -166,24 +166,24 @@ a fix was attempted and failed. None is listed.
 
 ## Sources
 
-| Claim                                    | Source                                                                                                   |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Host callbacks own writes                | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                 |
-| Formula grammar and refused tokens       | [formulas](./formulas.md), `parseFormula`                                                                |
-| Move policy, cycle guard, sort block     | [row-reordering](./row-reordering.md)                                                                    |
-| `fullDataset` / export-all / `rows.read` | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts` |
-| `readMax` default 50                     | `packages/shared/ai/src/session.ts` `readMaxOf`                                                          |
-| Virtualize DOM count                     | [virtualization](./virtualization.md)                                                                    |
-| Export 50,000 cap                        | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                  |
-| URL-state 8,192 cap, `limit` 1–500       | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`             |
-| Adapter ≤ 80 KB, omitted-feature markers | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                             |
+| Claim                                       | Source                                                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Host callbacks own writes                   | [cell-editing](./cell-editing.md), [row-reordering](./row-reordering.md)                                      |
+| Formula grammar and refused tokens          | [formulas](./formulas.md), `parseFormula`                                                                     |
+| Move policy, cycle guard, sort block        | [row-reordering](./row-reordering.md)                                                                         |
+| `fullDataset` / export-all / `rows.read`    | [data-tiers](./data-tiers.md), [agent-capabilities](./agent-capabilities.md), `session.governed.test.ts`      |
+| `readMax` default 50                        | `packages/shared/ai/src/session.ts` `readMaxOf`                                                               |
+| Virtualize DOM count                        | [virtualization](./virtualization.md)                                                                         |
+| Export 50,000 cap                           | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
+| URL-state 8,192 cap, `limit` 1–500          | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |
+| Adapter ≤ 80 KB, omitted-feature markers    | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                                  |
 | Every core export at its 103.63 KiB ceiling | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
-| AI absent from base graphs               | `scripts/ai-isolation.mjs`                                                                               |
-| Perf baseline                            | `scripts/v3-perf-baseline.json`                                                                          |
-| Chromium e2e                             | `playwright.config.ts`                                                                                   |
-| Nightly Firefox / WebKit / Pixel 5       | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                         |
-| Showcase axe audit                       | `e2e/axe-audit.spec.ts`                                                                                  |
-| Visual baselines                         | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                       |
-| SSR seams                                | [ssr-rsc](./ssr-rsc.md)                                                                                  |
-| antd sticky header association           | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                           |
-| React / Node / kit floors                | [getting-started](./getting-started.md)                                                                  |
+| AI absent from base graphs                  | `scripts/ai-isolation.mjs`                                                                                    |
+| Perf baseline                               | `scripts/v3-perf-baseline.json`                                                                               |
+| Chromium e2e                                | `playwright.config.ts`                                                                                        |
+| Nightly Firefox / WebKit / Pixel 5          | `.github/workflows/e2e-nightly.yml`, `name: "firefox"` in `playwright.config.ts`                              |
+| Showcase axe audit                          | `e2e/axe-audit.spec.ts`                                                                                       |
+| Visual baselines                            | `e2e/visual/v3-ui.spec.ts`, `e2e/visual/README.md`                                                            |
+| SSR seams                                   | [ssr-rsc](./ssr-rsc.md)                                                                                       |
+| antd sticky header association              | `e2e/aria-parity.spec.ts`, [accessibility](./accessibility.md)                                                |
+| React / Node / kit floors                   | [getting-started](./getting-started.md)                                                                       |

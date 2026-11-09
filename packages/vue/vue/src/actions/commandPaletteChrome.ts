@@ -11,7 +11,17 @@ import type {
   CommandPaletteChromeProps as NeutralProps,
   CommandPaletteSlots as NeutralSlots,
 } from "@adapttable/core/binding";
-import { computed, defineComponent, h, onScopeDispose, type PropType, shallowRef, useId, type VNodeChild, watch } from "vue";
+import {
+  computed,
+  defineComponent,
+  h,
+  onScopeDispose,
+  type PropType,
+  shallowRef,
+  useId,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import { elementRef } from "../attrs";
 import { scheduleTick } from "../scheduleTick";

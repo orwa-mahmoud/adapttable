@@ -24,7 +24,9 @@ class Shell extends AdaptDataTableShell<Row> {}
 const columns = [{ key: "name" }];
 const rowKey = (row: Row) => row.id;
 
-function bind(fixture: ReturnType<typeof TestBed.createComponent<Shell>>): void {
+function bind(
+  fixture: ReturnType<typeof TestBed.createComponent<Shell>>
+): void {
   fixture.componentRef.setInput("data", [{ id: "1", name: "Ada" }]);
   fixture.componentRef.setInput("columns", columns);
   fixture.componentRef.setInput("rowKey", rowKey);
@@ -45,9 +47,9 @@ describe("mountForcedColorsStyles", () => {
     second.detectChanges();
     await first.whenStable();
     await second.whenStable();
-    expect(document.querySelectorAll(`#${FORCED_COLORS_STYLE_ID}`)).toHaveLength(
-      1
-    );
+    expect(
+      document.querySelectorAll(`#${FORCED_COLORS_STYLE_ID}`)
+    ).toHaveLength(1);
     first.destroy();
     expect(document.getElementById(FORCED_COLORS_STYLE_ID)).not.toBeNull();
   });

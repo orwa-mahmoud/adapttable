@@ -430,11 +430,7 @@ function main() {
   const { problems, kits, subpaths } = checkFeatureParity();
   const capabilities = checkBindingCapabilities();
   const registry = checkConformanceRegistry();
-  const all = [
-    ...problems,
-    ...capabilities.problems,
-    ...registry.problems,
-  ];
+  const all = [...problems, ...capabilities.problems, ...registry.problems];
   if (all.length > 0) {
     console.error(`feature parity: ${all.length} problem(s)\n`);
     for (const problem of all) console.error(`  ${problem}`);

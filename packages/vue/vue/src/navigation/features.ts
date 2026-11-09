@@ -150,7 +150,11 @@ function useFindMount<TRow>(context: FeatureMountContext<TRow>): void {
   });
 }
 export function findInTable(): StaticTableFeature {
-  return { ...coreFindInTable(), mount: useFindMount, requiredSlots: [FIND_BAR] };
+  return {
+    ...coreFindInTable(),
+    mount: useFindMount,
+    requiredSlots: [FIND_BAR],
+  };
 }
 function mountStats<TRow>(context: FeatureMountContext<TRow>): void {
   const grid = context.state.get(GRID_FOCUS_MODEL);

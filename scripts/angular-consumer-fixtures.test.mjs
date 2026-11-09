@@ -17,19 +17,28 @@ import {
   baseImportProblems,
   plantedControllerFixture,
 } from "./angular-consumer-graphs.mjs";
-import { caseId, fixtureFolders,FIXTURES } from "./consumer-fixtures.mjs";
+import { caseId, fixtureFolders, FIXTURES } from "./consumer-fixtures.mjs";
 import { packedConsumer } from "./packed-consumers.mjs";
 
 describe("angular consumer fixtures", () => {
   it("covers every Angular kit plus the headless table and each feature", () => {
     const fixtures = angularConsumerFixtures();
     const kits = angularKits();
-    assert.ok(kits.length >= 9, `expected the Angular kits, got ${kits.length}`);
+    assert.ok(
+      kits.length >= 9,
+      `expected the Angular kits, got ${kits.length}`
+    );
     for (const kit of kits) {
       const base = fixtures.filter((fixture) => fixture.pkg === kit.folder);
       assert.ok(base.length >= 1, `${kit.name} has no base consumer`);
     }
-    for (const feature of ["grouping", "editing", "filters", "virtualize", "preset"]) {
+    for (const feature of [
+      "grouping",
+      "editing",
+      "filters",
+      "virtualize",
+      "preset",
+    ]) {
       assert.ok(
         fixtures.some((fixture) => fixture.name.includes(feature)),
         `no fixture turns on ${feature}`
@@ -66,9 +75,16 @@ describe("angular consumer fixtures", () => {
 
   it("imports each feature from the fixture's own kit", () => {
     const fixtures = angularConsumerFixtures();
-    const grouping = fixtures.find((fixture) => fixture.name.includes("+ grouping"));
-    assert.match(grouping.code, /from "@adapttable\/angular-unstyled\/grouping"/);
-    const material = fixtures.find((fixture) => fixture.pkg === "adapter-material");
+    const grouping = fixtures.find((fixture) =>
+      fixture.name.includes("+ grouping")
+    );
+    assert.match(
+      grouping.code,
+      /from "@adapttable\/angular-unstyled\/grouping"/
+    );
+    const material = fixtures.find(
+      (fixture) => fixture.pkg === "adapter-material"
+    );
     assert.match(material.code, /from "@adapttable\/angular-material"/);
     assert.equal(material.code.includes("angular-unstyled"), false);
   });
@@ -106,7 +122,10 @@ describe("angular consumer graphs", () => {
     const fixtures = [...angularConsumerFixtures(), plantedControllerFixture()];
     const compiled = compileAngularConsumers(
       install.dir,
-      fixtures.map((fixture) => ({ id: caseId(fixture.name), code: fixture.code }))
+      fixtures.map((fixture) => ({
+        id: caseId(fixture.name),
+        code: fixture.code,
+      }))
     );
     for (const fixture of fixtures) {
       const result = compiled.get(caseId(fixture.name));

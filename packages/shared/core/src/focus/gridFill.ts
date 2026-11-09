@@ -43,11 +43,16 @@ export function previewGridFill<TRow>(
   session: GridNavSession<TRow>,
   range: CellRange | null
 ): CellRange | null {
-  if (range === session.previewOf.range && session.fillTo === session.previewOf.to) {
+  if (
+    range === session.previewOf.range &&
+    session.fillTo === session.previewOf.to
+  ) {
     return session.snapshot.fillPreview;
   }
   session.previewOf = { range, to: session.fillTo };
-  return range && session.fillTo ? fillTargetRange(range, session.fillTo) : null;
+  return range && session.fillTo
+    ? fillTargetRange(range, session.fillTo)
+    : null;
 }
 
 /** Commit a fill drag. The filled rectangle stays selected. */
@@ -78,7 +83,9 @@ export function commitGridFill<TRow>(
           session.write({ range: fillTargetRange(range, to) });
         }
         session.say(
-          (session.labels()?.gridRangeFilled ?? defaultLabels.gridRangeFilled)(count)
+          (session.labels()?.gridRangeFilled ?? defaultLabels.gridRangeFilled)(
+            count
+          )
         );
       }),
     session.labels()?.gridRangeFillFailed ?? defaultLabels.gridRangeFillFailed
@@ -110,7 +117,9 @@ export function fillGridDown<TRow>(
     },
     () =>
       session.say(
-        (session.labels()?.gridRangeFilled ?? defaultLabels.gridRangeFilled)(count)
+        (session.labels()?.gridRangeFilled ?? defaultLabels.gridRangeFilled)(
+          count
+        )
       ),
     session.labels()?.gridRangeFillFailed ?? defaultLabels.gridRangeFillFailed
   );

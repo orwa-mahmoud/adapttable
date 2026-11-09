@@ -4,11 +4,7 @@
  * The indices count in the dataset, not in the rendered window. A virtualized
  * table mounting 24 of 100,000 rows still reports row 40,000 as row 40,000.
  */
-import {
-  type CellRange,
-  isInCellRange,
-  isSingleCell,
-} from "./cellRange";
+import { type CellRange, isInCellRange, isSingleCell } from "./cellRange";
 import { type GridCell, sameGridCell } from "./gridFocus";
 import { GRID_CELL_ATTR, gridCellAttr } from "./gridNavigation";
 

@@ -144,7 +144,10 @@ export function useTableVirtualizer<TRow>({
   const virtualItems = virtualizer.getVirtualItems();
   const active = enabled && virtualItems.length > 0;
   const measureRowPair = useRowPairMeasurer(virtualizer, enabled && expandable);
-  const items = useMemo(() => virtualItems.map(virtualItemMeta), [virtualItems]);
+  const items = useMemo(
+    () => virtualItems.map(virtualItemMeta),
+    [virtualItems]
+  );
   const materializedRows = useMemo<readonly VirtualTableRow<TRow>[]>(
     () => materializeWindowRows(rows, rowKey, enabled, active ? items : []),
     [active, enabled, items, rowKey, rows]

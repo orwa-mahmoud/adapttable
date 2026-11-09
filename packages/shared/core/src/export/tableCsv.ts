@@ -233,8 +233,4 @@ export type {
   FetchAllExport,
 } from "./tableExportContract";
 export { EXPORT_FETCH_ALL_MAX_ROWS } from "./tableExportContract";
-export {
-  exportAllFallsBackToPage,
-  fetchAllExportRows,
-  resolveExportCsv,
-};
+export { exportAllFallsBackToPage, fetchAllExportRows, resolveExportCsv };

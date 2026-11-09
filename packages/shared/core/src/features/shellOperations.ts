@@ -211,7 +211,9 @@ export function projectShellOperations<TRow>(
   input: ShellOperationInput<TRow>
 ): ShellOperationInput<TRow> {
   const projected: {
-    -readonly [Key in keyof ShellOperationInput<TRow>]?: ShellOperationInput<TRow>[Key];
+    -readonly [
+      Key in keyof ShellOperationInput<TRow>
+    ]?: ShellOperationInput<TRow>[Key];
   } = {};
   if (input.find?.openBar) projected.find = input.find;
   if (input.density) projected.density = input.density;

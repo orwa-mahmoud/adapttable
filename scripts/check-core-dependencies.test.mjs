@@ -208,7 +208,10 @@ describe("core dependency checker", () => {
   it("records no temporary core dependency violation", () => {
     const ownership = JSON.parse(
       readFileSync(
-        join(dirname(fileURLToPath(import.meta.url)), "core-export-ownership.json"),
+        join(
+          dirname(fileURLToPath(import.meta.url)),
+          "core-export-ownership.json"
+        ),
         "utf8"
       )
     );

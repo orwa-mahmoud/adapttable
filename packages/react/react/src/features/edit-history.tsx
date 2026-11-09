@@ -7,10 +7,7 @@
 import { coreEditHistory } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
-import {
-  asBatchGesture,
-  useTableEditHistory,
-} from "../editing/editHistory";
+import { asBatchGesture, useTableEditHistory } from "../editing/editHistory";
 import type { EditHistoryHandle, EditHistoryOptions } from "../props";
 import { slotRender } from "./providers";
 import { EDIT_HISTORY_LIVE, type EditHistoryLiveSlotProps } from "./slotKeys";

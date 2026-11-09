@@ -257,11 +257,7 @@ export function CommandPaletteChrome(
             />
           ))}
         </div>
-        {matches.length === 0 && (
-          <slots.Empty
-            message={labels.commandEmpty}
-          />
-        )}
+        {matches.length === 0 && <slots.Empty message={labels.commandEmpty} />}
       </div>
     </slots.Surface>
   );

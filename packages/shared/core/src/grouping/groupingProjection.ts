@@ -173,7 +173,10 @@ export interface GroupingShowMoreTarget {
  */
 export function groupingShowMoreAction(
   entry: { readonly scope: "groups" | "rows"; readonly groupKey?: string },
-  sizes: { readonly groupPageSize?: number; readonly groupRowPageSize?: number },
+  sizes: {
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+  },
   paging: GroupingShowMoreTarget,
   onGroupLoadMore?: (groupKey: string) => void
 ): void {
@@ -225,7 +228,10 @@ export function groupingCollapseCommands(
  */
 export function groupingProjectionBundle<
   TRow,
-  TCollapsed extends Pick<GroupCollapseActions, "expandAll" | "collapseToDepth">,
+  TCollapsed extends Pick<
+    GroupCollapseActions,
+    "expandAll" | "collapseToDepth"
+  >,
 >(input: {
   /** The grouping keys, outermost first. */
   readonly groupBy: readonly string[];

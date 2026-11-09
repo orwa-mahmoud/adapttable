@@ -15,10 +15,8 @@ import { kitDir, participatingKits } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
 
 const SUITE = /tableConformanceTests\s*\(/;
-const SKIPPED =
-  /describe\.skip\s*\([\s\S]*tableConformanceTests\s*\(/;
-const FULL_LOOP =
-  /for\s*\(\s*const\s+test\s+of\s+tableConformanceTests\s*\(/;
+const SKIPPED = /describe\.skip\s*\([\s\S]*tableConformanceTests\s*\(/;
+const FULL_LOOP = /for\s*\(\s*const\s+test\s+of\s+tableConformanceTests\s*\(/;
 
 /** Cases every kit runs by iterating the shared suite, not by naming them. */
 export const REQUIRED_CONFORMANCE_CASES = [
@@ -85,7 +83,8 @@ function suiteProblems(suiteFile, root) {
 function kitProblem(label, dir) {
   if (!existsSync(dir)) return `${label}: conformance suite is not registered`;
   const files = conformanceTests(dir);
-  if (files.length === 0) return `${label}: conformance suite is not registered`;
+  if (files.length === 0)
+    return `${label}: conformance suite is not registered`;
   const text = files.map((file) => readFileSync(file, "utf8")).join("\n");
   if (!SUITE.test(text)) return `${label}: conformance suite is not registered`;
   if (SKIPPED.test(text)) return `${label}: conformance suite is skipped`;
@@ -122,13 +121,9 @@ export function checkConformanceRegistry({
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const { problems, kits, cases } = checkConformanceRegistry();
   if (problems.length > 0) {
-    console.error(
-      `conformance registry: ${problems.length} problem(s)\n`
-    );
+    console.error(`conformance registry: ${problems.length} problem(s)\n`);
     for (const problem of problems) console.error(`  ${problem}`);
     process.exit(1);
   }
-  console.log(
-    `conformance registry: ${kits} kits run ${cases} shared cases`
-  );
+  console.log(`conformance registry: ${kits} kits run ${cases} shared cases`);
 }

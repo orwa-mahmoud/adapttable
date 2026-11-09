@@ -1034,8 +1034,7 @@ export function TableAssistantChrome({
         sticky={resolved !== "panel"}
         {...(composer.answering
           ? {
-              placeholder:
-                resolveLabels(labels).assistantAnswerPlaceholder,
+              placeholder: resolveLabels(labels).assistantAnswerPlaceholder,
             }
           : {})}
         {...(speech ? { speech } : {})}

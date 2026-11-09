@@ -125,13 +125,11 @@ describe("DesktopTableChrome", () => {
         </table>
       );
     }
-    const { container } = render(
-      <Desktop hosts={{ Table: KitTable }} />
-    );
+    const { container } = render(<Desktop hosts={{ Table: KitTable }} />);
     expect(
-      container.querySelector('[data-adapttable-part="table"]')?.getAttribute(
-        "data-kit"
-      )
+      container
+        .querySelector('[data-adapttable-part="table"]')
+        ?.getAttribute("data-kit")
     ).toBe("yes");
   });
 });
@@ -195,9 +193,9 @@ describe("MobileCardsChrome", () => {
       />
     );
     expect(
-      container.querySelector('[data-adapttable-part="card"]')?.getAttribute(
-        "data-kit"
-      )
+      container
+        .querySelector('[data-adapttable-part="card"]')
+        ?.getAttribute("data-kit")
     ).toBe("card");
   });
 });

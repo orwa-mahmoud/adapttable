@@ -2,7 +2,10 @@ import { slotRender } from "@adapttable/core/binding";
 import { expect, it, vi } from "vitest";
 import { createApp, nextTick } from "vue";
 
-import { CONTEXT_MENU_CONTROL, CONTEXT_MENU_MODEL } from "../src/actions/contracts";
+import {
+  CONTEXT_MENU_CONTROL,
+  CONTEXT_MENU_MODEL,
+} from "../src/actions/contracts";
 import { contextMenu } from "../src/context-menu";
 import type { TableFeature } from "../src/features/tableFeature";
 import { useDataTableShell } from "../src/useDataTableShell";

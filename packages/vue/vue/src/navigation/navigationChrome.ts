@@ -20,7 +20,15 @@ import type {
   StatusBarSlotProps as NeutralStatusBarSlotProps,
   StatusBarSlots as NeutralStatusBarSlots,
 } from "@adapttable/core/binding";
-import { defineComponent, h, onScopeDispose, type PropType, shallowRef, type VNodeChild, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  onScopeDispose,
+  type PropType,
+  shallowRef,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";

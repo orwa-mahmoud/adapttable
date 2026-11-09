@@ -23,7 +23,13 @@ export const BINDING_CAPABILITIES = Object.freeze([
   { id: "sticky-header", names: ["stickyHeader"], shape: "boolean" },
   { id: "mobile-breakpoint", names: ["mobileBreakpoint"], shape: "number" },
   { id: "debounce", names: ["searchDebounceMs"], shape: "number" },
-  { id: "row-click", names: ["onRowClick"], shape: "callback", params: 1, param: "row" },
+  {
+    id: "row-click",
+    names: ["onRowClick"],
+    shape: "callback",
+    params: 1,
+    param: "row",
+  },
   {
     id: "cell-flash",
     names: ["isCellFlashing"],
@@ -89,7 +95,8 @@ function unwrap(checker, type, depth = 0) {
  */
 function isText(checker, type) {
   const inner = unwrap(checker, type);
-  if (inner.isUnion()) return inner.types.every((part) => isText(checker, part));
+  if (inner.isUnion())
+    return inner.types.every((part) => isText(checker, part));
   return (
     (inner.flags & (ts.TypeFlags.String | ts.TypeFlags.StringLiteral)) !== 0
   );
@@ -116,7 +123,9 @@ function isBoolean(type) {
 
 function isNumber(checker, type) {
   const inner = unwrap(checker, type);
-  return (inner.flags & (ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral)) !== 0;
+  return (
+    (inner.flags & (ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral)) !== 0
+  );
 }
 
 /**
@@ -218,7 +227,8 @@ function capabilityResult({
       ? undefined
       : checker.getTypeOfSymbolAtLocation(property, declaration);
   const matches =
-    propertyType !== undefined && shapeMatches(checker, propertyType, capability);
+    propertyType !== undefined &&
+    shapeMatches(checker, propertyType, capability);
   if (!matches) {
     return {
       problems: [
@@ -280,7 +290,9 @@ export function checkCapabilitySurface({
     return { problems: [`${framework}: missing ${typeName}`], found: [] };
   }
   const properties = new Map(
-    checker.getPropertiesOfType(type).map((property) => [property.name, property])
+    checker
+      .getPropertiesOfType(type)
+      .map((property) => [property.name, property])
   );
   /** @type {{ id: string, name: string }[]} */
   const found = [];
@@ -298,7 +310,11 @@ export function checkCapabilitySurface({
   }
   for (const difference of differences) {
     if (difference.framework !== framework) continue;
-    if (!capabilities.some((capability) => capability.id === difference.capability)) {
+    if (
+      !capabilities.some(
+        (capability) => capability.id === difference.capability
+      )
+    ) {
       problems.push(
         `${framework}: unknown capability difference ${difference.capability}`
       );
@@ -455,7 +471,8 @@ export function checkBindingCapabilities({
     problems.push(...factoryProblems(names, factoryNames, surface.framework));
   }
   const seen = new Set(SURFACES.map((surface) => surface.framework));
-  if (seen.size !== 3) problems.push("binding capabilities: a framework was not checked");
+  if (seen.size !== 3)
+    problems.push("binding capabilities: a framework was not checked");
   return { problems, found };
 }
 

@@ -210,9 +210,9 @@ export function useServerData<TRow>(
     source.revision,
     source.revision
   );
-  const held = useRef<FrameHold<ReturnType<ServerSource<TRow>["update"]>> | null>(
-    null
-  );
+  const held = useRef<FrameHold<
+    ReturnType<ServerSource<TRow>["update"]>
+  > | null>(null);
   const seenRevision = useRef<number | null>(null);
   // A repeat of inputs already committed skips the refresh. The first
   // inactive render still applies, so empty rows replace the previous page.

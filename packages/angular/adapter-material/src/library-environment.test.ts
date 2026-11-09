@@ -78,7 +78,8 @@ class UnsetDirection {
 }
 
 async function rootDir(
-  host: typeof ParentDirection | typeof ExplicitDirection | typeof UnsetDirection
+  host:
+    typeof ParentDirection | typeof ExplicitDirection | typeof UnsetDirection
 ) {
   const fixture = TestBed.createComponent(host);
   fixture.autoDetectChanges();

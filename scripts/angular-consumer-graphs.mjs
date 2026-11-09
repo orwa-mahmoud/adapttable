@@ -69,7 +69,10 @@ export function baseImportProblems(kits = angularKits()) {
   return kits.flatMap((kit) =>
     angularBaseImports(kit.folder)
       .filter((specifier) => !ANGULAR_BASE_IMPORTS.includes(specifier))
-      .map((specifier) => `${kit.name} base imports ${specifier}, which is not a known binding subpath`)
+      .map(
+        (specifier) =>
+          `${kit.name} base imports ${specifier}, which is not a known binding subpath`
+      )
   );
 }
 
@@ -114,7 +117,9 @@ export async function angularGraphProblems(dir, compiled) {
         transformer
       );
       for (const marker of graph.missing) {
-        problems.push(`${fixture.name}: ${marker} is missing from the linked graph`);
+        problems.push(
+          `${fixture.name}: ${marker} is missing from the linked graph`
+        );
       }
     }
   } finally {

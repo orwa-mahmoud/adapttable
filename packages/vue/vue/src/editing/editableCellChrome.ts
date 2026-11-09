@@ -18,7 +18,18 @@ import {
   isEditActivateKey,
   stopEditKeys,
 } from "@adapttable/core/editing";
-import { computed, Fragment, h, type MaybeRefOrGetter, onScopeDispose, shallowRef, toValue, type VNode, type VNodeChild, watch } from "vue";
+import {
+  computed,
+  Fragment,
+  h,
+  type MaybeRefOrGetter,
+  onScopeDispose,
+  shallowRef,
+  toValue,
+  type VNode,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import type { ColumnDef } from "../columnDef";
 import { useInstanceId } from "../componentId";

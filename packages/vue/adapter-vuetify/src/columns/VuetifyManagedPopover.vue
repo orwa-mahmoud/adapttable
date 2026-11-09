@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {
   type ManagedOverlayPanelProps,
-  type OverlayCloseReason, scheduleTick 
+  type OverlayCloseReason,
+  scheduleTick,
 } from "@adapttable/vue/adapter";
 import { computed, onBeforeUnmount, shallowRef } from "vue";
 import { VCard } from "vuetify/components/VCard";

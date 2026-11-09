@@ -64,7 +64,9 @@ export function selectGridRange<TRow>(
     if (!next || isSingleCell(next)) return;
     const b = cellRangeBounds(next);
     session.say(
-      (session.labels()?.gridRangeSelection ?? defaultLabels.gridRangeSelection)({
+      (
+        session.labels()?.gridRangeSelection ?? defaultLabels.gridRangeSelection
+      )({
         fromRow: b.fromRow + 1,
         toRow: b.toRow + 1,
         fromColumn: b.fromCol + 1,

@@ -35,7 +35,9 @@ const columns: ColumnMetadata<Row>[] = [
 
 const getRowId = (row: Row) => row.id;
 
-function project(overrides: Partial<Parameters<typeof projectGrouping<Row>>[0]> = {}) {
+function project(
+  overrides: Partial<Parameters<typeof projectGrouping<Row>>[0]> = {}
+) {
   return projectGrouping({
     groupByKeys: ["team"],
     source: { allFilteredRows: rows },
@@ -49,12 +51,17 @@ function project(overrides: Partial<Parameters<typeof projectGrouping<Row>>[0]> 
 describe("projectGrouping", () => {
   it("groups the full filtered set and warns only when the source cannot", () => {
     const open = project({
-      source: { allFilteredRows: rows, groupAggregateOverrides: { budget: "sum" } },
+      source: {
+        allFilteredRows: rows,
+        groupAggregateOverrides: { budget: "sum" },
+      },
     });
     expect(open.ignoredWarning).toBeUndefined();
     expect(open.model?.openGroups).toHaveLength(2);
     const group = open.model?.entries.find((entry) => entry.kind === "group");
-    expect(group && "aggregateCells" in group ? group.aggregateCells : {}).toMatchObject({
+    expect(
+      group && "aggregateCells" in group ? group.aggregateCells : {}
+    ).toMatchObject({
       budget: 40,
     });
 
@@ -66,7 +73,12 @@ describe("projectGrouping", () => {
 
   it("reads server groups and does not regroup a loaded page", () => {
     const groups: QueryGroupRow<Row>[] = [
-      { value: "a", count: 2, rows: [rows[0]!, rows[2]!], aggregates: { budget: 40 } },
+      {
+        value: "a",
+        count: 2,
+        rows: [rows[0]!, rows[2]!],
+        aggregates: { budget: 40 },
+      },
     ];
     const source = groupingSourceOf({
       allFilteredRows: pageSlice,
@@ -98,12 +110,19 @@ describe("projectGrouping", () => {
     const stop = paging.subscribe(listener);
 
     const open = project({ collapsedGroupIds: store.getSnapshot() });
-    const commands = groupingCollapseCommands(open.model?.openGroups ?? [], collapse);
+    const commands = groupingCollapseCommands(
+      open.model?.openGroups ?? [],
+      collapse
+    );
     expect(commands.expandAll).toBe(collapse.expandAll);
     commands.collapseAll();
     const closed = project({ collapsedGroupIds: store.getSnapshot() });
-    const openRows = open.model?.entries.filter((entry) => entry.kind === "row").length;
-    const closedRows = closed.model?.entries.filter((entry) => entry.kind === "row").length;
+    const openRows = open.model?.entries.filter(
+      (entry) => entry.kind === "row"
+    ).length;
+    const closedRows = closed.model?.entries.filter(
+      (entry) => entry.kind === "row"
+    ).length;
     expect(openRows).toBeGreaterThan(0);
     expect(closedRows).toBe(0);
 
@@ -111,7 +130,9 @@ describe("projectGrouping", () => {
       groupPageSize: 1,
       paging: paging.getSnapshot(),
     });
-    const before = paged.model?.entries.filter((entry) => entry.kind === "group").length;
+    const before = paged.model?.entries.filter(
+      (entry) => entry.kind === "group"
+    ).length;
     groupingShowMoreAction({ scope: "groups" }, { groupPageSize: 1 }, paging);
     expect(listener).toHaveBeenCalledTimes(1);
     const after = project({
@@ -124,7 +145,12 @@ describe("projectGrouping", () => {
   });
 
   it("widens only while a model exists, and an inactive view ignores writes", () => {
-    const source = { rows: pageSlice, allFilteredRows: rows, page: 3, limit: 1 };
+    const source = {
+      rows: pageSlice,
+      allFilteredRows: rows,
+      page: 3,
+      limit: 1,
+    };
     const projected = project();
     expect(projectedGroupingSource(source, projected).rows).toBe(rows);
     expect(projectedGroupingSource(source, { model: undefined })).toBe(source);

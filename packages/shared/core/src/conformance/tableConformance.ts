@@ -832,7 +832,12 @@ export function tableConformanceTests(
 
   it("asks the server for the page and shows the host rows unsorted", () => {
     const queries: {
-      query: { sortBy?: string; sortDir?: string; page?: number; limit?: number };
+      query: {
+        sortBy?: string;
+        sortDir?: string;
+        page?: number;
+        limit?: number;
+      };
       signal: AbortSignal;
     }[] = [];
     return withTable(

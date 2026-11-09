@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="TRow">
 import type { Direction, RowActionControl } from "@adapttable/vue";
-import { type RowActionsLayout, scheduleTick  } from "@adapttable/vue/adapter";
+import { type RowActionsLayout, scheduleTick } from "@adapttable/vue/adapter";
 import { NPopover } from "naive-ui";
 import {
   computed,

@@ -42,7 +42,10 @@ export function isGridCell(target: unknown): boolean {
 }
 
 /** The last dataset row the browser holds. */
-export function lastLoadedRow(firstRowIndex: number, loadedRows: number): number {
+export function lastLoadedRow(
+  firstRowIndex: number,
+  loadedRows: number
+): number {
   return firstRowIndex + Math.max(0, loadedRows - 1);
 }
 
@@ -337,7 +340,11 @@ export interface GridNavSession<TRow> {
   announce: (cell: GridCell) => void;
   focusCell: (cell: GridCell) => void;
   setFillTo: (to: GridCell | null) => void;
-  applyGesture: (apply: () => unknown, done: () => void, failed: string) => void;
+  applyGesture: (
+    apply: () => unknown,
+    done: () => void,
+    failed: string
+  ) => void;
   columnIdentity: (column: ColumnMetadata<TRow>) => ClipboardColumn<TRow>;
 }
 
@@ -377,7 +384,10 @@ export interface GridNavigationParts<TRow> {
     cell: GridCell | undefined,
     cut: boolean
   ) => void;
-  selectRange?: (session: GridNavSession<TRow>, range: CellRange | null) => void;
+  selectRange?: (
+    session: GridNavSession<TRow>,
+    range: CellRange | null
+  ) => void;
   selectColumn?: (
     session: GridNavSession<TRow>,
     col: number,
@@ -505,12 +515,15 @@ export function composeGridNavigation<TRow>(
     const column = session.options.columns[cell.col];
     if (!column) return;
     const row = session.options.rows[cell.row - session.firstRow()];
-    const header = typeof column.header === "string" ? column.header : column.key;
+    const header =
+      typeof column.header === "string" ? column.header : column.key;
     const value = row === undefined ? "" : columnText(column, row);
     const position = (
       session.labels()?.gridCellPosition ?? defaultLabels.gridCellPosition
     )(cell.row + 1, session.options.rowCount);
-    session.say(value ? `${header}, ${value}, ${position}` : `${header}, ${position}`);
+    session.say(
+      value ? `${header}, ${value}, ${position}` : `${header}, ${position}`
+    );
   };
   session.focusCell = (cell) => {
     session.batch(() => {
@@ -527,7 +540,8 @@ export function composeGridNavigation<TRow>(
   session.applyGesture = (apply, done, failed) => {
     const version = ++session.gestureVersion;
     const complete = (callback: () => void): void => {
-      if (session.options.enabled && version === session.gestureVersion) callback();
+      if (session.options.enabled && version === session.gestureVersion)
+        callback();
     };
     try {
       const result = apply();
@@ -586,7 +600,10 @@ export function composeGridNavigation<TRow>(
       session.bounds(),
       session.options.isCoveredCell
     );
-    const next = { row: Math.max(moved.row, session.firstRow()), col: moved.col };
+    const next = {
+      row: Math.max(moved.row, session.firstRow()),
+      col: moved.col,
+    };
     event.preventDefault();
     if (sameGridCell(next, active)) return;
     if (parts?.afterMove) parts.afterMove(session, event, next, from);
@@ -691,7 +708,8 @@ export function composeGridNavigation<TRow>(
     },
     trackFocus(cell) {
       session.pending = null;
-      if (!sameGridCell(cell, session.snapshot.active)) session.write({ active: cell });
+      if (!sameGridCell(cell, session.snapshot.active))
+        session.write({ active: cell });
     },
     clickHeader(col, event, sortable) {
       parts?.clickHeader?.(session, col, event, sortable);

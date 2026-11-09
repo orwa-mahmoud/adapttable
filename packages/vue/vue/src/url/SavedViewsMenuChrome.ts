@@ -1,6 +1,15 @@
 /** Saved-view disclosure and keyboard wiring, shared by every Vue kit. */
 /** Saved-view disclosure and keyboard wiring, shared by every Vue kit. */
-import { defineComponent, h, onScopeDispose, type PropType, shallowRef, useId, type VNodeChild, watch } from "vue";
+import {
+  defineComponent,
+  h,
+  onScopeDispose,
+  type PropType,
+  shallowRef,
+  useId,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import { type Attrs, elementRef } from "../attrs";
 import { isManagedOverlayPanel, type OverlayPanelSlot } from "../overlayPanel";

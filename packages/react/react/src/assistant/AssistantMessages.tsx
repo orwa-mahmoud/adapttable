@@ -233,9 +233,7 @@ function Receipt({
       {assistantReceiptNeedsSave(receipt) ? (
         <span data-adapttable-part="assistant-receipt-save">
           <Badge
-            label={
-              resolveLabels(labels).assistantSaveInTable
-            }
+            label={resolveLabels(labels).assistantSaveInTable}
             part="assistant-receipt-save-badge"
             // The only status that draws this badge is the one that needs
             // saving, and a change the reader still has to keep is a warning

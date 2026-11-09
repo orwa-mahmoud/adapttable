@@ -862,9 +862,7 @@ export function DesktopTable<TRow>(props: Readonly<DesktopTableProps<TRow>>) {
                   {resolveColumnFooter(column, summary?.[column.key])}
                 </Table.Td>
               ))}
-              {showActions && (
-                <Table.Td data-adapttable-part="summary-cell" />
-              )}
+              {showActions && <Table.Td data-adapttable-part="summary-cell" />}
             </Table.Tr>
           </Table.Tfoot>
         ) : null

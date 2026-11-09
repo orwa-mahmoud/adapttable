@@ -486,9 +486,9 @@ describe("createTableData", () => {
     const host = sourceOf();
     const dispose = vi.fn();
     Object.assign(host, { dispose });
-    expect(
-      table.plan(config({ source: host, data: undefined })).tier
-    ).toBe("source");
+    expect(table.plan(config({ source: host, data: undefined })).tier).toBe(
+      "source"
+    );
     expect(table.finish({ resolved: host, frontend: sourceOf() })).toBe(host);
     table.dispose();
     expect(dispose).not.toHaveBeenCalled();
@@ -549,9 +549,11 @@ describe("tier activation", () => {
     );
     expect(calls).toBe(afterLoad);
     expect(factories).toBe(1);
-    expect(source.update(
-      { data: INACTIVE_TIER_ROWS, getSearchText, paginationMode: "paged" },
-      view
-    ).allSearchedRows).toHaveLength(0);
+    expect(
+      source.update(
+        { data: INACTIVE_TIER_ROWS, getSearchText, paginationMode: "paged" },
+        view
+      ).allSearchedRows
+    ).toHaveLength(0);
   });
 });

@@ -66,7 +66,10 @@ export class LiveFeatureHost<
    * A later call wins, including a re-add of the same id. Unrelated
    * registrations on this host are left alone.
    */
-  contributeGrouping(id: string, contribution: GroupingContribution<TRow>): void {
+  contributeGrouping(
+    id: string,
+    contribution: GroupingContribution<TRow>
+  ): void {
     if (this.disposed) return;
     const index = this.groupingOrder.indexOf(id);
     if (index >= 0) this.groupingOrder.splice(index, 1);

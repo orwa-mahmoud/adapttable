@@ -1,4 +1,7 @@
-import { scheduleTick,type TableAssistantComposerProps  } from "@adapttable/vue/adapter";
+import {
+  scheduleTick,
+  type TableAssistantComposerProps,
+} from "@adapttable/vue/adapter";
 import {
   defineComponent,
   h,

@@ -56,7 +56,8 @@ class ArabicHost {
 }
 
 function ids(host: { source: () => { rows: readonly Row[] } }): string {
-  return host.source()
+  return host
+    .source()
     .rows.map((row) => row.id)
     .join(",");
 }

@@ -36,14 +36,15 @@ export function copyGridSelection<TRow>(
     return;
   }
   void writeClipboardText(text).then((ok) => {
-    if (!session.options.enabled || version !== session.clipboardVersion) return;
+    if (!session.options.enabled || version !== session.clipboardVersion)
+      return;
     session.say(
       ok
         ? (session.labels()?.gridRangeCopied ?? defaultLabels.gridRangeCopied)(
             cellRangeSize(selection)
           )
         : (session.labels()?.gridRangeCopyFailed ??
-          defaultLabels.gridRangeCopyFailed)
+            defaultLabels.gridRangeCopyFailed)
     );
     if (ok && cut) session.options.onCut?.(selection);
   });
@@ -69,10 +70,12 @@ export function pasteGridSelection<TRow>(
 ): void {
   const version = session.clipboardVersion;
   void readClipboardText().then((text) => {
-    if (!session.options.enabled || version !== session.clipboardVersion) return;
+    if (!session.options.enabled || version !== session.clipboardVersion)
+      return;
     if (text === null) {
       session.say(
-        session.labels()?.gridRangePasteFailed ?? defaultLabels.gridRangePasteFailed
+        session.labels()?.gridRangePasteFailed ??
+          defaultLabels.gridRangePasteFailed
       );
       return;
     }
@@ -91,9 +94,12 @@ export function pasteGridSelection<TRow>(
       },
       () =>
         session.say(
-          (session.labels()?.gridRangePasted ?? defaultLabels.gridRangePasted)(count)
+          (session.labels()?.gridRangePasted ?? defaultLabels.gridRangePasted)(
+            count
+          )
         ),
-      session.labels()?.gridRangePasteFailed ?? defaultLabels.gridRangePasteFailed
+      session.labels()?.gridRangePasteFailed ??
+        defaultLabels.gridRangePasteFailed
     );
   });
 }

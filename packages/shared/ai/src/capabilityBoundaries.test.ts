@@ -28,9 +28,7 @@ const NAME = {
   sortable: true,
 };
 
-function observation(
-  patch: Partial<AgentObservation> = {}
-): AgentObservation {
+function observation(patch: Partial<AgentObservation> = {}): AgentObservation {
   return {
     tableId: "orders",
     viewRevision: 4,
@@ -80,7 +78,9 @@ describe("enabled operations", () => {
       hasEdit: true,
       source: { ...PAGE_ONLY, grouping: "client" },
       aggregations: {
-        columns: [{ id: "name", operations: [{ id: "count", label: "Count" }] }],
+        columns: [
+          { id: "name", operations: [{ id: "count", label: "Count" }] },
+        ],
         active: [],
       },
     });

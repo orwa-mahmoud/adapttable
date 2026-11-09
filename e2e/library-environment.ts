@@ -79,7 +79,9 @@ export async function assertLibraryKit(
   await expect(pinned.first()).toHaveCSS("direction", expected.dir);
 
   await root.getByRole("button", { name: labels.columns, exact: true }).click();
-  const item = page.locator('[data-adapttable-part="column-menu-item"]').first();
+  const item = page
+    .locator('[data-adapttable-part="column-menu-item"]')
+    .first();
   await expect(item).toBeVisible();
   await expect(item).toHaveCSS("direction", expected.dir);
 }

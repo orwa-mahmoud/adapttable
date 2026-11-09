@@ -3,7 +3,14 @@ import {
   type ColumnRenameEditorOptions,
   createColumnRenameEditor,
 } from "@adapttable/core";
-import { computed, type MaybeRefOrGetter, onScopeDispose, toValue, watch, watchEffect } from "vue";
+import {
+  computed,
+  type MaybeRefOrGetter,
+  onScopeDispose,
+  toValue,
+  watch,
+  watchEffect,
+} from "vue";
 
 import { elementRef } from "../attrs";
 import { useInstanceId } from "../componentId";

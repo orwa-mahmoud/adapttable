@@ -30,9 +30,9 @@ describe("mountForcedColorsStyles", () => {
     });
     app.mount(host);
     await nextTick();
-    expect(document.querySelectorAll(`#${FORCED_COLORS_STYLE_ID}`)).toHaveLength(
-      1
-    );
+    expect(
+      document.querySelectorAll(`#${FORCED_COLORS_STYLE_ID}`)
+    ).toHaveLength(1);
     app.unmount();
     expect(document.getElementById(FORCED_COLORS_STYLE_ID)).not.toBeNull();
     host.remove();

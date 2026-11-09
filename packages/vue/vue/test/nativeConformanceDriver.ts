@@ -451,7 +451,8 @@ export function nativeServerConformanceTests(
     {
       name: "fetches the page from onQueryChange and shows the host's rows",
       async run() {
-        const fetch = vi.fn<NonNullable<ConformanceScenario["onQueryChange"]>>();
+        const fetch =
+          vi.fn<NonNullable<ConformanceScenario["onQueryChange"]>>();
         const view = driver.mount({
           rows: CONFORMANCE_ROWS.slice(0, 2),
           columns: CONFORMANCE_COLUMNS,

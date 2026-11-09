@@ -83,9 +83,7 @@ describe("standard native features", () => {
         expect(host.querySelectorAll(part("status-bar"))).toHaveLength(1);
       else {
         expect(host.querySelector(part("status-bar"))).toBeNull();
-        expect(host.querySelector(part("footer"))?.textContent).toContain(
-          "of"
-        );
+        expect(host.querySelector(part("footer"))?.textContent).toContain("of");
       }
       expect(host.querySelector(part("find-button"))).toBeNull();
       const select = find<HTMLSelectElement>(host, part("density-toggle"));

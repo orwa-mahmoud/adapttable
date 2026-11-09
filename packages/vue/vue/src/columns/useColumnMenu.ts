@@ -24,7 +24,14 @@ import {
   showAllColumns,
   unpinAllColumns,
 } from "@adapttable/core/binding";
-import { computed, type MaybeRefOrGetter, type ShallowRef, shallowRef, toValue, watch } from "vue";
+import {
+  computed,
+  type MaybeRefOrGetter,
+  type ShallowRef,
+  shallowRef,
+  toValue,
+  watch,
+} from "vue";
 
 import type { Attrs } from "../attrs";
 import { scheduleTick } from "../scheduleTick";

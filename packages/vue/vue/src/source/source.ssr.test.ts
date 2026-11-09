@@ -97,10 +97,7 @@ describe("server-safe sources", () => {
           })
         )
       );
-    const [english, arabic] = await Promise.all([
-      render("en"),
-      render("ar"),
-    ]);
+    const [english, arabic] = await Promise.all([render("en"), render("ar")]);
     expect(await render("en")).toBe(english);
     expect(await render("ar")).toBe(arabic);
     expect(english).toBe("<p>en-first,ar-first</p>");

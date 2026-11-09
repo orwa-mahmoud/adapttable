@@ -505,8 +505,15 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
       ),
     []
   );
-  const { model, summary, showColumnFooter, header, pin, callbacks, resizeHandleStyle } =
-    assembly;
+  const {
+    model,
+    summary,
+    showColumnFooter,
+    header,
+    pin,
+    callbacks,
+    resizeHandleStyle,
+  } = assembly;
   const { columns, selection, labels, showActions, showReorder, leadingCells } =
     model;
 
@@ -682,7 +689,10 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
           data-adapttable-part="virtual-spacer"
           className={classNames.virtualSpacer}
         >
-          <td colSpan={slot.colSpan} style={{ height: slot.height, padding: 0 }} />
+          <td
+            colSpan={slot.colSpan}
+            style={{ height: slot.height, padding: 0 }}
+          />
         </tr>
       )}
       renderSummary={() =>

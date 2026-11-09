@@ -1,6 +1,16 @@
 /** Column-menu structure and keyboard wiring; kits supply every control. */
 /** Column-menu structure and keyboard wiring; kits supply every control. */
-import { defineComponent, Fragment, h, onScopeDispose, type PropType, shallowRef, useId, type VNodeChild, watch } from "vue";
+import {
+  defineComponent,
+  Fragment,
+  h,
+  onScopeDispose,
+  type PropType,
+  shallowRef,
+  useId,
+  type VNodeChild,
+  watch,
+} from "vue";
 
 import { type Attrs, elementRef } from "../attrs";
 import { PanelContent } from "../layout/panelContent";

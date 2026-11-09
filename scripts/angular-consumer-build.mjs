@@ -22,7 +22,14 @@
  * copy, resolved from the Angular binding that builds with it.
  */
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, relative, sep } from "node:path";
 
@@ -33,7 +40,10 @@ import { bindingDir } from "./kits.mjs";
 const angular = createRequire(join(bindingDir("angular"), "package.json"));
 const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
 const COMPILER_MANIFEST = angular.resolve("@angular/compiler-cli/package.json");
-const NGC = join(dirname(COMPILER_MANIFEST), readJson(COMPILER_MANIFEST).bin.ngc);
+const NGC = join(
+  dirname(COMPILER_MANIFEST),
+  readJson(COMPILER_MANIFEST).bin.ngc
+);
 
 /** The installed toolchain, recorded with every Angular result. */
 export const ANGULAR_TOOLCHAIN = Object.freeze({
@@ -167,7 +177,12 @@ function consumerDiagnostics(source, output, results) {
 function linkPlatformBrowser(dir) {
   const link = join(dir, "node_modules", "@angular", "platform-browser");
   if (existsSync(link)) return;
-  const copy = join(bindingDir("angular"), "node_modules", "@angular", "platform-browser");
+  const copy = join(
+    bindingDir("angular"),
+    "node_modules",
+    "@angular",
+    "platform-browser"
+  );
   symlinkSync(copy, link, "dir");
 }
 
@@ -327,7 +342,8 @@ export function unlinkedDeclarations(output) {
   return output
     .filter((file) => file.type === "chunk")
     .reduce(
-      (count, chunk) => count + (chunk.code.match(/ɵɵngDeclare\w+/g) ?? []).length,
+      (count, chunk) =>
+        count + (chunk.code.match(/ɵɵngDeclare\w+/g) ?? []).length,
       0
     );
 }

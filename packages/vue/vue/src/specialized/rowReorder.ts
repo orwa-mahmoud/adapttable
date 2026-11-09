@@ -303,80 +303,80 @@ export function rowReorder<TRow>(
   options?: RowReorderOptions<TRow>
 ): TableFeature<TRow> {
   function useRowReorderMount(context: FeatureMountContext<TRow>): void {
-      let previousOrder: ReadonlyMap<string, number> | undefined;
-      const hostOrder = computed(() => {
-        const previous = previousOrder;
-        const supplied = toValue(context.options.value.source);
-        const rows = supplied
-          ? context.source.value.rows
-          : (toValue(context.options.value.data) ?? context.source.value.rows);
-        const offset = supplied ? context.table.windowStart.value : 0;
-        const next = new Map(
-          rows.map((row, index) => [context.table.rowKey(row), index + offset])
-        );
-        const current =
-          previous?.size === next.size &&
-          [...next].every(([key, index]) => previous.get(key) === index)
-            ? previous
-            : next;
-        previousOrder = current;
-        return current;
-      });
-      const readSession = () => {
-        const inputSource = toValue(context.options.value.source);
-        return {
-          inputSource,
-          inputData: inputSource
-            ? undefined
-            : toValue(context.options.value.data),
-          columns: toValue(context.options.value.columns),
-          source: context.source.value,
-          visibleRows: context.rowInventory?.value.visibleRows,
-          hostOrder: hostOrder.value,
-          active: context.active.value,
-        };
-      };
-      let previousSession: ReturnType<typeof readSession> | undefined;
-      const session = computed(() => {
-        const previous = previousSession;
-        const next = readSession();
-        // Host rerenders can rebuild a source view or use an equivalent row
-        // key callback. Raw input replacements still retire every old handle.
-        const current =
-          previous &&
-          previous.inputSource === next.inputSource &&
-          previous.inputData === next.inputData &&
-          previous.columns === next.columns &&
-          sameSourceView(previous.source, next.source) &&
-          previous.hostOrder === next.hostOrder &&
-          previous.active === next.active &&
-          sameRowSequence(previous.visibleRows, next.visibleRows)
-            ? previous
-            : next;
-        previousSession = current;
-        return current;
-      });
-      const model = useRowReorder(() => ({
-        ...rowReorderRuntimeOptions(
-          {
-            ...context.runtime,
-            rowAt: (index) =>
-              context.rowInventory?.value.visibleRows[index] ??
-              context.runtime.rowAt(index),
-          },
-          onRowReorder,
-          options
-        ),
-        enabled: context.active.value,
-        session: session.value,
-        getRowIndex: (row: TRow) =>
-          hostOrder.value.get(context.table.rowKey(row)),
-      }));
-      watch(
-        model,
-        (value) => context.state.set(rowReorderModelKey<TRow>(), value),
-        { immediate: true, flush: "sync" }
+    let previousOrder: ReadonlyMap<string, number> | undefined;
+    const hostOrder = computed(() => {
+      const previous = previousOrder;
+      const supplied = toValue(context.options.value.source);
+      const rows = supplied
+        ? context.source.value.rows
+        : (toValue(context.options.value.data) ?? context.source.value.rows);
+      const offset = supplied ? context.table.windowStart.value : 0;
+      const next = new Map(
+        rows.map((row, index) => [context.table.rowKey(row), index + offset])
       );
+      const current =
+        previous?.size === next.size &&
+        [...next].every(([key, index]) => previous.get(key) === index)
+          ? previous
+          : next;
+      previousOrder = current;
+      return current;
+    });
+    const readSession = () => {
+      const inputSource = toValue(context.options.value.source);
+      return {
+        inputSource,
+        inputData: inputSource
+          ? undefined
+          : toValue(context.options.value.data),
+        columns: toValue(context.options.value.columns),
+        source: context.source.value,
+        visibleRows: context.rowInventory?.value.visibleRows,
+        hostOrder: hostOrder.value,
+        active: context.active.value,
+      };
+    };
+    let previousSession: ReturnType<typeof readSession> | undefined;
+    const session = computed(() => {
+      const previous = previousSession;
+      const next = readSession();
+      // Host rerenders can rebuild a source view or use an equivalent row
+      // key callback. Raw input replacements still retire every old handle.
+      const current =
+        previous &&
+        previous.inputSource === next.inputSource &&
+        previous.inputData === next.inputData &&
+        previous.columns === next.columns &&
+        sameSourceView(previous.source, next.source) &&
+        previous.hostOrder === next.hostOrder &&
+        previous.active === next.active &&
+        sameRowSequence(previous.visibleRows, next.visibleRows)
+          ? previous
+          : next;
+      previousSession = current;
+      return current;
+    });
+    const model = useRowReorder(() => ({
+      ...rowReorderRuntimeOptions(
+        {
+          ...context.runtime,
+          rowAt: (index) =>
+            context.rowInventory?.value.visibleRows[index] ??
+            context.runtime.rowAt(index),
+        },
+        onRowReorder,
+        options
+      ),
+      enabled: context.active.value,
+      session: session.value,
+      getRowIndex: (row: TRow) =>
+        hostOrder.value.get(context.table.rowKey(row)),
+    }));
+    watch(
+      model,
+      (value) => context.state.set(rowReorderModelKey<TRow>(), value),
+      { immediate: true, flush: "sync" }
+    );
   }
   return {
     id: "row-reorder",

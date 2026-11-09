@@ -897,9 +897,7 @@ export function DesktopTable<TRow>(props: Readonly<SharedProps<TRow>>) {
               <When show={showReorder}>
                 <Table.Cell data-adapttable-part="summary-cell" px={1} />
               </When>
-              {selection && (
-                <Table.Cell data-adapttable-part="summary-cell" />
-              )}
+              {selection && <Table.Cell data-adapttable-part="summary-cell" />}
               {columns.map((column) => (
                 <Table.Cell
                   data-adapttable-part="summary-cell"

@@ -7,7 +7,14 @@ import {
   createColumnLayoutController,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
-import { computed, type ComputedRef, type MaybeRefOrGetter, onScopeDispose, toValue, watchEffect } from "vue";
+import {
+  computed,
+  type ComputedRef,
+  type MaybeRefOrGetter,
+  onScopeDispose,
+  toValue,
+  watchEffect,
+} from "vue";
 
 import type { ColumnDef } from "../columnDef";
 import { scheduleTick } from "../scheduleTick";

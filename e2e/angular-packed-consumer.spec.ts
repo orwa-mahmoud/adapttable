@@ -18,14 +18,18 @@ test.describe("packed Angular consumer", () => {
   let served: Awaited<ReturnType<typeof serveAngularBrowserConsumer>>;
 
   test.beforeAll(async () => {
-    served = await serveAngularBrowserConsumer(await buildAngularBrowserConsumer());
+    served = await serveAngularBrowserConsumer(
+      await buildAngularBrowserConsumer()
+    );
   });
 
   test.afterAll(async () => {
     await served.close();
   });
 
-  test("renders rows, sorts a column and collapses a group", async ({ page }) => {
+  test("renders rows, sorts a column and collapses a group", async ({
+    page,
+  }) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     const response = await page.goto(served.url);
@@ -38,12 +42,13 @@ test.describe("packed Angular consumer", () => {
 
     const nameSort = table.locator("[aria-label='Sort by: Name']");
     await nameSort.click();
-    await expect(nameSort.locator("xpath=ancestor::*[@aria-sort][1]")).toHaveAttribute(
-      "aria-sort",
-      /ascending|descending/
-    );
+    await expect(
+      nameSort.locator("xpath=ancestor::*[@aria-sort][1]")
+    ).toHaveAttribute("aria-sort", /ascending|descending/);
 
-    const group = table.locator("[data-adapttable-part='group-toggle']").first();
+    const group = table
+      .locator("[data-adapttable-part='group-toggle']")
+      .first();
     await expect(group).toBeVisible();
     const expanded = await group.getAttribute("aria-expanded");
     await group.click();

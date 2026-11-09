@@ -127,9 +127,7 @@ describe("runtime operations follow the composed features", () => {
     };
     const view = render(<Harness features={[]} onOperations={record} />);
     expect(latest?.find).toBe(false);
-    view.rerender(
-      <Harness features={[findInTable()]} onOperations={record} />
-    );
+    view.rerender(<Harness features={[findInTable()]} onOperations={record} />);
     expect(latest?.find).toBe(true);
     view.rerender(<Harness features={[]} onOperations={record} />);
     expect(latest?.find).toBe(false);

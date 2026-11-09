@@ -199,9 +199,7 @@ export function injectTableData<TRow>(
     data: computed(() =>
       onFrontend() ? tierRows(true, data()) : INACTIVE_TIER_ROWS
     ),
-    columns: computed(() =>
-      onFrontend() ? columns() : INACTIVE_TIER_ROWS
-    ),
+    columns: computed(() => (onFrontend() ? columns() : INACTIVE_TIER_ROWS)),
     getRowId: options.getRowId,
     getSearchText: options.getSearchText,
     getSortValue: options.getSortValue,
