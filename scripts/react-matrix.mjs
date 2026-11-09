@@ -22,27 +22,22 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
-import { packageDir } from "./packages.mjs";
+import {
+  localSpecs,
+  packageClosure,
+  packTarballs,
+} from "./packed-consumers.mjs";
 
 // The oldest supported 18.x with createRoot semantics, each 19 minor's
 // floor, and the current 19.2 line the workspace itself develops on.
 const ALL_VERSIONS = ["18.3.1", "19.0.0", "19.2.8"];
 // Executables come from fixed locations, never a bare name off a (possibly
-// writable) PATH: npm ships beside the running node, and pnpm — needed for
-// `pnpm pack`, which rewrites `workspace:` ranges to real versions (npm's
-// pack does not) — is the very launcher that ran this script, exposed via
-// `npm_execpath` when invoked as `pnpm react:matrix`.
+// writable) PATH: npm ships beside the running node, and the packs come from
+// the repository's pinned pnpm, which rewrites `workspace:` ranges.
 const NPM_BIN = join(
   dirname(process.execPath),
   process.platform === "win32" ? "npm.cmd" : "npm"
 );
-const PNPM_CLI = process.env.npm_execpath;
-if (!PNPM_CLI || !PNPM_CLI.includes("pnpm")) {
-  console.error(
-    "Run this through pnpm (`pnpm react:matrix [version]`) — it needs pnpm's pack to rewrite workspace: ranges."
-  );
-  process.exit(1);
-}
 const VITEST_REL = join(
   "node_modules",
   ".bin",
@@ -175,23 +170,8 @@ describe(\`AdaptTable on React \${version}\`, () => {
 });
 `;
 
-/** Pack one workspace package into `dest`, returning the tarball path. */
-function packInto(pkgDir, dest) {
-  const out = execFileSync(
-    process.execPath,
-    [PNPM_CLI, "pack", "--pack-destination", dest],
-    {
-      cwd: packageDir(pkgDir),
-      encoding: "utf8",
-    }
-  );
-  // pnpm prints the tarball path as the last non-empty line.
-  const lines = out.trim().split("\n");
-  return lines[lines.length - 1].trim();
-}
-
 /** Run the smoke suite against one pinned React version. */
-function runVersion(reactVersion, tarballs) {
+function runVersion(reactVersion, local) {
   const dir = mkdtempSync(join(tmpdir(), `react-matrix-${reactVersion}-`));
   try {
     const pkg = {
@@ -200,9 +180,8 @@ function runVersion(reactVersion, tarballs) {
       private: true,
       type: "module",
       dependencies: {
-        "@adapttable/core": `file:${tarballs.core}`,
-        "@adapttable/react": `file:${tarballs.react}`,
-        "@adapttable/unstyled": `file:${tarballs.unstyled}`,
+        // Every packed workspace package, so nested pins resolve locally too.
+        ...local,
         react: reactVersion,
         "react-dom": reactVersion,
       },
@@ -249,14 +228,12 @@ function main() {
   const packDir = mkdtempSync(join(tmpdir(), "react-matrix-packs-"));
   let failed = false;
   try {
-    const tarballs = {
-      core: packInto("core", packDir),
-      react: packInto("react", packDir),
-      unstyled: packInto("adapter-unstyled", packDir),
-    };
+    const local = localSpecs(
+      packTarballs(packageClosure(["adapter-unstyled"]), packDir)
+    );
     for (const version of versions) {
       process.stdout.write(`• React ${version} … `);
-      const { ok, output } = runVersion(version, tarballs);
+      const { ok, output } = runVersion(version, local);
       process.stdout.write(ok ? "ok\n" : "FAIL\n");
       if (!ok) {
         failed = true;

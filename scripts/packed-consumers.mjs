@@ -75,6 +75,17 @@ export function packageClosure(folders, packages = workspacePackages()) {
   return [...seen].sort();
 }
 
+/**
+ * `file:` specifiers for packed tarballs, keyed by package name, so a
+ * consumer resolves every packed workspace package, direct or transitive, to
+ * the local build rather than the registry.
+ */
+export function localSpecs(packs) {
+  return Object.fromEntries(
+    packs.map((pack) => [pack.name, `file:${pack.file}`])
+  );
+}
+
 /** Pack each folder with the repository's pinned pnpm. */
 export function packTarballs(
   folders,

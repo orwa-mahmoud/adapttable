@@ -21,7 +21,11 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
-import { packageDir } from "./packages.mjs";
+import {
+  localSpecs,
+  packageClosure,
+  packTarballs,
+} from "./packed-consumers.mjs";
 
 // Keep nested optional test peers on the workspace's actual test runner.
 const VITEST_VERSION = createRequire(import.meta.url)(
@@ -37,13 +41,6 @@ const VITEST_REL = join(
   ".bin",
   process.platform === "win32" ? "vitest.cmd" : "vitest"
 );
-const PNPM_CLI = process.env.npm_execpath;
-if (!PNPM_CLI || !PNPM_CLI.includes("pnpm")) {
-  console.error(
-    "Run this through pnpm (`pnpm peer:floors [kit]`) — it needs pnpm's pack to rewrite workspace: ranges."
-  );
-  process.exit(1);
-}
 
 // Floor cells run the OLDEST React our own peer range supports: a
 // consumer pinned to an old kit floor (Mantine 7.2, Radix Themes 3.0)
@@ -233,18 +230,9 @@ export {};
 `;
 
 /** Pack one workspace package into `dest`, returning the tarball path. */
-function packInto(pkgDir, dest) {
-  const out = execFileSync(
-    process.execPath,
-    [PNPM_CLI, "pack", "--pack-destination", dest],
-    { cwd: packageDir(pkgDir), encoding: "utf8" }
-  );
-  const lines = out.trim().split("\n");
-  return lines[lines.length - 1].trim();
-}
 
-function runCell(cell, workspaceTarballs, packDir) {
-  const adapterTarball = packInto(cell.pkg, packDir);
+function runCell(cell, packDir) {
+  const local = localSpecs(packTarballs(packageClosure([cell.pkg]), packDir));
   const dir = mkdtempSync(join(tmpdir(), `floor-${cell.kit}-`));
   try {
     const pkg = {
@@ -253,11 +241,9 @@ function runCell(cell, workspaceTarballs, packDir) {
       private: true,
       type: "module",
       dependencies: {
-        [`@adapttable/${cell.kit}`]: `file:${adapterTarball}`,
-        // Named directly, not only overridden: the binding is not published
-        // yet, and npm's peer resolution needs a concrete node for it.
-        "@adapttable/core": `file:${workspaceTarballs.core}`,
-        "@adapttable/react": `file:${workspaceTarballs.react}`,
+        // Named directly, not only overridden: npm's peer resolution needs a
+        // concrete node for each local package.
+        ...local,
         ...cell.deps,
         ...REACT,
       },
@@ -269,12 +255,10 @@ function runCell(cell, workspaceTarballs, packDir) {
         jsdom: "^29.0.0",
         vitest: VITEST_VERSION,
       },
-      // The adapter's ^-ranged workspace dependencies must resolve to the
-      // LOCAL build, not the registry — and `@adapttable/react` is not
-      // published at all yet, so an unpinned range fails to install.
+      // The adapter's workspace dependencies resolve to the local build, not
+      // the registry.
       overrides: {
-        "@adapttable/core": `file:${workspaceTarballs.core}`,
-        "@adapttable/react": `file:${workspaceTarballs.react}`,
+        ...local,
         // Nested optional test-tool peers must use the selected test runner.
         vitest: VITEST_VERSION,
       },
@@ -327,10 +311,6 @@ function main() {
   const packDir = mkdtempSync(join(tmpdir(), "peer-floors-packs-"));
   let failed = false;
   try {
-    const workspaceTarballs = {
-      core: packInto("core", packDir),
-      react: packInto("react", packDir),
-    };
     for (const cell of cells) {
       process.stdout.write(
         `• @adapttable/${cell.kit} × ${Object.entries(cell.deps)
@@ -338,7 +318,7 @@ function main() {
           .map(([name, version]) => `${name}@${version}`)
           .join(" + ")} … `
       );
-      const { ok, output } = runCell(cell, workspaceTarballs, packDir);
+      const { ok, output } = runCell(cell, packDir);
       process.stdout.write(ok ? "ok\n" : "FAIL\n");
       if (!ok) {
         failed = true;
