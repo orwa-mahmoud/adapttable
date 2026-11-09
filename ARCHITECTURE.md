@@ -562,23 +562,23 @@ installs that package. Tree-shaking drops unused exports from an application
 bundle. The every-export row is `export *` from `@adapttable/core`: the whole
 public surface imported at once, not the download of a table.
 
-| Fixture (`--case`)      | What it imports                        |          2026-11-06 min+gzip |    Ceiling |
+| Fixture (`--case`)      | What it imports                        |          2026-11-09 min+gzip |    Ceiling |
 | ----------------------- | -------------------------------------- | ---------------------------: | ---------: |
-| `core-every-export`     | `export *` from `@adapttable/core`     | 103.63 KiB initial and total | 103.63 KiB |
-| `core-basic-table`      | `createBasicTableEngine`               |    4.4 KiB initial and total |      6 KiB |
-| `core-simple-table`     | `createTableEngine`                    |   10.1 KiB initial and total |     20 KiB |
-| `react-simple-table`    | `useFrontendData` + `useDataTable`     |   21.2 KiB initial and total |     35 KiB |
-| `mui-table`             | MUI `DataTable`                        |   71.7 KiB initial and total |     80 KiB |
-| `mui-plus-grouping`     | MUI `DataTable` + grouping             |   83.7 KiB initial and total |    160 KiB |
-| `mui-table-plus-preset` | MUI `DataTable` + `standardFeatures()` |  133.5 KiB initial and total |    160 KiB |
+| `core-every-export`     | `export *` from `@adapttable/core`     | 104.28 KiB initial and total | 104.28 KiB |
+| `core-basic-table`      | `createBasicTableEngine`               |    4.7 KiB initial and total |      6 KiB |
+| `core-simple-table`     | `createTableEngine`                    |   10.3 KiB initial and total |     20 KiB |
+| `react-simple-table`    | `useFrontendData` + `useDataTable`     |   21.5 KiB initial and total |     35 KiB |
+| `mui-table`             | MUI `DataTable`                        |   71.2 KiB initial and total |     80 KiB |
+| `mui-plus-grouping`     | MUI `DataTable` + grouping             |   83.3 KiB initial and total |    160 KiB |
+| `mui-table-plus-preset` | MUI `DataTable` + `standardFeatures()` |  133.3 KiB initial and total |    160 KiB |
 
 These seven fixtures emitted no lazy chunk, so initial and total are the same
-number. `core-every-export` is 103.63 KiB (106,115 bytes), measured
-2026-11-07. The ceiling is that measurement: the composed session, the
-grouping projection, and the shell operations, plus the snapshot guard, the
+number. `core-every-export` is 104.28 KiB (106,778 bytes), measured
+2026-11-09. The ceiling is that measurement: the composed session with one
+committed state and a staged row-model evaluator, the grouping projection, and the shell operations, plus the snapshot guard, the
 grouped-snapshot cache, and the shared behaviours the bindings used to copy.
 The FAQ rounds that row to ~104 kB
-and the headless row to ~21 kB. The features page rounds the MUI pair to 72 kB
+and the headless row to ~22 kB. The features page rounds the MUI pair to 72 kB
 and 133 kB. A later `pnpm budget` is what moves those published figures.
 
 ## Supported Node

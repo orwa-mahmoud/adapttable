@@ -21803,22 +21803,22 @@ Every package declares its side effects — none, or only its stylesheet in
 `@adapttable/base-ui` — and ships ESM, so unused code is tree-shaken. You only install the one adapter you use; the headless core has
 zero UI-kit dependencies.
 
-Measured 2026-11-06 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
+Measured 2026-11-09 from packed fixtures (`pnpm budget`: rolldown, min+gzip,
 React and the UI kit external because your app already ships those):
 
 | What you import                            | min+gzip  |
 | ------------------------------------------ | --------- |
-| `useFrontendData` + `useDataTable` (react) | ~21 kB    |
+| `useFrontendData` + `useDataTable` (react) | ~22 kB    |
 | every core export                          | ~104 kB   |
 | `DataTable` from an adapter                | ~71–78 kB |
 
 The first row is the one to read: a headless table costs about a fifth of the
 full core, because the parts you never import never arrive. The every-export
-row is the whole public surface imported at once, measured 2026-11-07 at
-103.63 KiB (106,115 bytes). Its ceiling is that measurement: the composed
-session, the grouping projection, and the shell operations, plus the snapshot
-guard, the grouped-snapshot cache, and the shared behaviours the bindings
-used to copy. It is not the download of a table. All eight React adapters
+row is the whole public surface imported at once, measured 2026-11-09 at
+104.28 KiB (106,778 bytes). Its ceiling is that measurement: the composed
+session with one committed state and a staged row-model evaluator, the
+grouping projection, and the shell operations, plus the snapshot guard, the
+grouped-snapshot cache, and the shared behaviours the bindings used to copy. It is not the download of a table. All eight React adapters
 land within ~12 kB of each other, so switching kits does not change what you
 pay. Tree-shaking drops unused exports from an application bundle. Installing
 a package still installs that package.
@@ -21973,8 +21973,8 @@ consumer fixtures in `scripts/bundle-budget.mjs`.
 - `@adapttable/ai` is a separate package. Eleven base graphs contain none
   of `createAgentSession`, `tableAgent`, `adapttable.agent.v1` or
   `@adapttable/ai` (`scripts/ai-isolation.mjs`).
-- Importing every core export measured 103.63 KiB gzip on 2026-11-07
-  (106,115 bytes). The fixture ceiling is that measurement. The figure is the
+- Importing every core export measured 104.28 KiB gzip on 2026-11-09
+  (106,778 bytes). The fixture ceiling is that measurement. The figure is the
   whole public surface, not a table's download. [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable).
 
 Published FAQ figures are the measurements the budget script checks, not
@@ -22058,7 +22058,7 @@ a fix was attempted and failed. None is listed.
 | Export 50,000 cap                           | [exporting](./exporting.md) `EXPORT_FETCH_ALL_MAX_ROWS`                                                       |
 | URL-state 8,192 cap, `limit` 1–500          | `MAX_TABLE_URL_STATE_LENGTH` in `packages/shared/core/src/url/urlStateCodec.ts`, `MAX_LIMIT`                  |
 | Adapter ≤ 80 KB, omitted-feature markers    | `scripts/bundle-budget.mjs`, `scripts/consumer-fixtures.mjs`                                                  |
-| Every core export at its 103.63 KiB ceiling | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
+| Every core export at its 104.28 KiB ceiling | [FAQ](./faq.md#how-big-is-it--is-it-tree-shakeable), `core · every export` in `scripts/consumer-fixtures.mjs` |
 | AI absent from base graphs                  | `scripts/ai-isolation.mjs`                                                                                    |
 | Perf baseline                               | `scripts/v3-perf-baseline.json`                                                                               |
 | Chromium e2e                                | `playwright.config.ts`                                                                                        |
