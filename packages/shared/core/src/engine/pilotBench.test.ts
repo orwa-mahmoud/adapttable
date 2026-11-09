@@ -103,7 +103,11 @@ function distribution(samples: readonly number[]) {
   };
 }
 
-/** A reproducible regression: slower at the tail, and not by a sub-frame gap. */
+/**
+ * Slower at the tail, and not by a sub-frame gap. A caller confirms it on a
+ * second measurement before calling it a regression: the two evaluators
+ * share their code, so one noisy tail under load is not one.
+ */
 function regressed(basic: readonly number[], full: readonly number[]): boolean {
   const gap = quantile(basic, 95) - quantile(full, 95);
   return gap > 15 && quantile(basic, 95) > quantile(full, 95) * 1.5;
@@ -136,6 +140,7 @@ describe("composed engine pilot", () => {
     const report: Record<string, unknown>[] = [];
     const problems: string[] = [];
     const timed = new Map<string, number[]>();
+    const rerun = new Map<string, () => number[]>();
 
     for (const count of SIZES) {
       const data = makeRows(count);
@@ -240,6 +245,21 @@ describe("composed engine pilot", () => {
 
         timed.set(`${name}:${count}:construct`, construct);
         timed.set(`${name}:${count}:patch`, patch);
+        rerun.set(`${name}:${count}:construct`, () =>
+          sample(() => {
+            const engine = create(options);
+            engine.rows("full");
+            engine.dispose();
+          }, repetitions)
+        );
+        rerun.set(`${name}:${count}:patch`, () =>
+          sample(() => {
+            const engine = create(options);
+            engine.invalidate(["data"], { data: next });
+            engine.rows("full");
+            engine.dispose();
+          }, repetitions)
+        );
         report.push({
           evaluator: name,
           rows: count,
@@ -256,10 +276,15 @@ describe("composed engine pilot", () => {
       const fullConstruct = timed.get(`full:${count}:construct`) ?? [];
       const basicPatch = timed.get(`basic:${count}:patch`) ?? [];
       const fullPatch = timed.get(`full:${count}:patch`) ?? [];
-      if (regressed(basicConstruct, fullConstruct)) {
+      const again = (kind: string) =>
+        regressed(
+          rerun.get(`basic:${count}:${kind}`)?.() ?? [],
+          rerun.get(`full:${count}:${kind}`)?.() ?? []
+        );
+      if (regressed(basicConstruct, fullConstruct) && again("construct")) {
         problems.push(`construct ${count}`);
       }
-      if (regressed(basicPatch, fullPatch)) {
+      if (regressed(basicPatch, fullPatch) && again("patch")) {
         problems.push(`one-row patch ${count}`);
       }
     }

@@ -97,29 +97,6 @@ export function compareSortLevel(
 }
 
 /**
- * First index in a sorted list where `compare(item)` is positive — the
- * insertion point that keeps the list ordered the way {@link sortRows} would.
- *
- * @typeParam T - The item type.
- * @param items - A list already in comparator order.
- * @param compare - Negative/zero when `item` belongs at or before the target.
- * @returns The index to splice at.
- */
-export function sortedInsertIndex<T>(
-  items: readonly T[],
-  compare: (item: T) => number
-): number {
-  let lo = 0;
-  let hi = items.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (compare(items[mid]!) <= 0) lo = mid + 1;
-    else hi = mid;
-  }
-  return lo;
-}
-
-/**
  * Return a new array sorted by the given value extractor and direction.
  * The sort is stable (input order is preserved for equal keys). The input
  * array is not mutated.

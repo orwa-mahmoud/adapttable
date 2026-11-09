@@ -415,6 +415,37 @@ export function groupingKeys(groupBy: string | readonly string[]): string[] {
   return parseGroupBy(groupBy);
 }
 
+/** One level of a row's group path: its value and the key that buckets it. */
+export interface GroupPathStep {
+  readonly value: unknown;
+  readonly valueKey: string;
+}
+
+/**
+ * Read rows' group paths, outermost level first. Each key's column is looked
+ * up once.
+ *
+ * @typeParam TRow - The row type.
+ * @param keys - The grouping keys.
+ * @param columns - The columns, for each key's `sortValue`.
+ * @param locale - Active locale tag, for each column's `i18n` path.
+ */
+export function groupPathReader<TRow>(
+  keys: readonly string[],
+  columns: readonly ColumnMetadata<TRow>[],
+  locale?: string
+): (row: TRow) => GroupPathStep[] {
+  const levels = keys.map((key) => ({
+    key,
+    column: columns.find((column) => column.key === key),
+  }));
+  return (row) =>
+    levels.map(({ key, column }) => {
+      const value = resolveGroupValue(row, key, column, locale);
+      return { value, valueKey: groupValueKey(value) };
+    });
+}
+
 /**
  * Partition rows into the nested bucket tree grouping walks.
  *
@@ -426,27 +457,34 @@ export function groupingKeys(groupBy: string | readonly string[]): string[] {
  * @param groupBy - Column key, or an ordered list for nested grouping.
  * @param columns - The columns, for each key's `sortValue`.
  * @param locale - Active locale tag, for each column's `i18n` path.
+ * @param paths - Each row's group path, by position, when the caller already
+ *   holds them; read from `columns` otherwise.
  * @returns The top-level buckets, or an empty list when there is no key.
  */
 export function partitionGroupedRows<TRow>(
   rows: readonly TRow[],
   groupBy: string | readonly string[],
   columns: readonly ColumnMetadata<TRow>[],
-  locale?: string
+  locale?: string,
+  paths?: readonly (readonly GroupPathStep[])[]
 ): GroupPartition<TRow>[] {
   const keys = groupingKeys(groupBy);
   if (keys.length === 0) return [];
-  return partitionLevel(rows, keys, 0, columns, locale);
+  return partitionLevel(
+    rows,
+    paths ?? rows.map(groupPathReader(keys, columns, locale)),
+    keys.length,
+    0
+  );
 }
 
 function partitionLevel<TRow>(
   rows: readonly TRow[],
-  keys: readonly string[],
-  level: number,
-  columns: readonly ColumnMetadata<TRow>[],
-  locale: string | undefined
+  paths: readonly (readonly GroupPathStep[])[],
+  depth: number,
+  level: number
 ): GroupPartition<TRow>[] {
-  const { order, buckets } = bucketBy(rows, keys[level]!, columns, locale);
+  const { order, buckets } = bucketBy(rows, paths, level);
   return order.map((valueKey) => {
     const bucket = buckets.get(valueKey)!;
     return {
@@ -454,8 +492,8 @@ function partitionLevel<TRow>(
       valueKey,
       rows: bucket.rows,
       children:
-        level + 1 < keys.length
-          ? partitionLevel(bucket.rows, keys, level + 1, columns, locale)
+        level + 1 < depth
+          ? partitionLevel(bucket.rows, bucket.paths, depth, level + 1)
           : undefined,
     };
   });
@@ -742,28 +780,30 @@ function pageLimit(
  * @param locale - Active locale tag, for the column's `i18n` path.
  * @returns The bucket keys in order, and the buckets themselves.
  */
+interface Bucket<TRow> {
+  value: unknown;
+  rows: TRow[];
+  paths: (readonly GroupPathStep[])[];
+}
+
 function bucketBy<TRow>(
   rows: readonly TRow[],
-  key: string,
-  columns: readonly ColumnMetadata<TRow>[],
-  locale: string | undefined
-): {
-  order: string[];
-  buckets: Map<string, { value: unknown; rows: TRow[] }>;
-} {
-  const column = columns.find((c) => c.key === key);
+  paths: readonly (readonly GroupPathStep[])[],
+  level: number
+): { order: string[]; buckets: Map<string, Bucket<TRow>> } {
   const order: string[] = [];
-  const buckets = new Map<string, { value: unknown; rows: TRow[] }>();
-  for (const row of rows) {
-    const value = resolveGroupValue(row, key, column, locale);
-    const valueKey = groupValueKey(value);
+  const buckets = new Map<string, Bucket<TRow>>();
+  for (const [index, row] of rows.entries()) {
+    const path = paths[index]!;
+    const { value, valueKey } = path[level]!;
     let bucket = buckets.get(valueKey);
     if (!bucket) {
-      bucket = { value, rows: [] };
+      bucket = { value, rows: [], paths: [] };
       buckets.set(valueKey, bucket);
       order.push(valueKey);
     }
     bucket.rows.push(row);
+    bucket.paths.push(path);
   }
   return { order, buckets };
 }

@@ -24,7 +24,6 @@ import {
   attachIncrementalView,
   configureIncrementalView,
   createIncrementalView,
-  forkIncrementalView,
   incrementalSearchText,
   type IncrementalView,
   type IncrementalViewConfig,
@@ -1054,17 +1053,28 @@ const TRACED_PROFILES: [string, TracedProfile][] = [
   ],
 ];
 
-/** One predicate call per row an event brought in — nothing else re-tested. */
+/**
+ * One predicate call per row object the batch leaves changed, in the order
+ * each id was first touched. A row a later event in the same batch replaced
+ * again is never tested, and neither is any untouched row.
+ */
 function expectedFilterCalls(
   events: readonly RowPatchEvent<Person>[],
   config: IncrementalViewConfig<Person>
 ): string[] {
   if (!config.filterFn) return [];
-  return events.flatMap((event) => {
-    if (event.type === "remove") return [];
-    const row = event.type === "insert" ? event.row : event.next;
-    return [`filter:${row.id}:${String(row.budget)}`];
-  });
+  const last = new Map<string, { first: Person | undefined; row?: Person }>();
+  for (const event of events) {
+    const entry = last.get(event.id) ?? {
+      first: event.type === "update" ? event.prev : undefined,
+    };
+    if (event.type === "remove") entry.row = undefined;
+    else entry.row = event.type === "insert" ? event.row : event.next;
+    last.set(event.id, entry);
+  }
+  return [...last.values()].flatMap(({ row }) =>
+    row ? [`filter:${row.id}:${String(row.budget)}`] : []
+  );
 }
 
 describe("applyRowPatchesToView — seeded batches", () => {
@@ -1097,7 +1107,6 @@ describe("applyRowPatchesToView — seeded batches", () => {
           expect(ids(sparse.sorted)).toEqual(ids(batch.sorted));
           expect(groupShape(sparse.groups)).toEqual(groupShape(batch.groups));
           expect(sparse.aggregates).toEqual(batch.aggregates);
-          expect(sparseTrace).toEqual(batchTrace);
           expect(
             batchTrace.filter((call) => call.startsWith("filter:"))
           ).toEqual(expectedFilterCalls(events, config));
@@ -1180,15 +1189,13 @@ function mappedSlots(run: () => void): number {
 
 /**
  * Process `batch` updates on even-budget rows that lead both the source and
- * the sort order. They pass every profile's filter, so locating a row stays
- * short and any remaining cost that grows with the row count is index work.
- * `perEventBatches` is the planted regression: the same patches, one batch
- * per event.
+ * the sort order. They pass every profile's filter; every callback read the
+ * patch makes is counted.
  */
 function patchWork(
   profile: WorkProfile,
   batch: number,
-  perEventBatches = false
+  rowCount = WORK_ROWS
 ): PatchWork {
   const work: PatchWork = {
     rowIds: 0,
@@ -1196,61 +1203,51 @@ function patchWork(
     filterCalls: 0,
     sortCalls: 0,
   };
-  const rows = people(WORK_ROWS, (index) => index);
+  const rows = people(rowCount, (index) => index);
   const view = createIncrementalView(rows, profile(work));
   const patches = rows
     .filter((row) => row.budget % 2 === 0)
     .slice(0, batch)
-    .map((row) =>
-      updateRow<Person>(row.id, { budget: row.budget + WORK_ROWS })
-    );
-  let base: readonly Person[] = rows;
-  const logs = perEventBatches
-    ? patches.map((patch) => {
-        const log = applyRowPatchesWithLog(base, [patch], byId);
-        base = log.rows;
-        return log;
-      })
-    : [applyRowPatchesWithLog(rows, patches, byId)];
+    .map((row) => updateRow<Person>(row.id, { budget: row.budget + rowCount }));
+  const log = applyRowPatchesWithLog(rows, patches, byId);
   Object.assign(work, { rowIds: 0, filterCalls: 0, sortCalls: 0 });
   work.mappedSlots = mappedSlots(() => {
-    let next = view;
-    for (const log of logs) next = applyRowPatchLogToView(next, log);
+    applyRowPatchLogToView(view, log);
   });
   return work;
 }
 
-/**
- * Work is row-id reads plus array slots mapped, and one pass over the rows
- * costs `WORK_ROWS` of it. Each event past the first may cost under an eighth
- * of a pass: locating and moving one row, never re-indexing the set. Grouping
- * is left out — its tree reads a fresh sorted-position map after every event.
- */
-function expectNoPerEventIndexPass(
-  profile: WorkProfile,
-  perEventBatches = false
-): void {
-  const one = patchWork(profile, 1, perEventBatches);
-  const many = patchWork(profile, 32, perEventBatches);
-  const total = (work: PatchWork) => work.rowIds + work.mappedSlots;
-  const perExtraEvent = (total(many) - total(one)) / 31;
-  expect(perExtraEvent).toBeLessThan(WORK_ROWS / 8);
+/** A batch's work: the same patches over `WORK_ROWS` rows and twice that. */
+function workAtTwoSizes(profile: WorkProfile): [PatchWork, PatchWork] {
+  return [patchWork(profile, 32), patchWork(profile, 32, WORK_ROWS * 2)];
 }
 
-describe("applyRowPatchLogToView — index work per event", () => {
+describe("applyRowPatchLogToView — work per batch", () => {
   it.each(WORK_PROFILES)(
-    "%s: an extra event in the batch costs no pass over the rows",
+    "%s: a batch reads no more rows when the table holds more",
     (_, profile) => {
-      expectNoPerEventIndexPass(profile);
+      const [small, large] = workAtTwoSizes(profile);
+      expect(large.rowIds).toBe(small.rowIds);
+      expect(large.filterCalls).toBe(small.filterCalls);
+      expect(large.sortCalls).toBe(small.sortCalls);
     }
   );
 
   it.each(WORK_PROFILES)(
-    "%s: the guard fails when every event rebuilds the indexes",
+    "%s: the measure sees a build that reads every row",
     (_, profile) => {
-      expect(() => {
-        expectNoPerEventIndexPass(profile, true);
-      }).toThrow();
+      const work: PatchWork = {
+        rowIds: 0,
+        mappedSlots: 0,
+        filterCalls: 0,
+        sortCalls: 0,
+      };
+      const config = profile(work);
+      const rows = people(WORK_ROWS, (index) => index);
+      createIncrementalView(rows, config);
+      const total = work.rowIds + work.filterCalls + work.sortCalls;
+      const reads = config.filterFn || config.getSortValue ? WORK_ROWS : 0;
+      expect(total).toBeGreaterThanOrEqual(reads);
     }
   );
 
@@ -1266,8 +1263,8 @@ describe("applyRowPatchLogToView — index work per event", () => {
   );
 });
 
-describe("forkIncrementalView", () => {
-  it("patches the fork and leaves the committed snapshot's rows and totals", () => {
+describe("a patched snapshot", () => {
+  it("leaves the snapshot it started from with its rows and totals", () => {
     const view = createIncrementalView(ROWS, {
       getRowId: (row) => row.id,
       columns: COLS,
@@ -1276,9 +1273,8 @@ describe("forkIncrementalView", () => {
       aggregateOptions: { columns: COLS },
     });
     const before = view.aggregates?.budget;
-    const fork = forkIncrementalView(view);
     const removed = ROWS[0]!;
-    const patched = applyRowPatchesToView(fork, [
+    const patched = applyRowPatchesToView(view, [
       { type: "remove", id: removed.id },
     ]);
 

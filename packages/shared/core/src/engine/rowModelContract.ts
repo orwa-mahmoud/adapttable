@@ -38,6 +38,4 @@ export interface RowModel<TRow> {
     view: IncrementalView<TRow>,
     log: RowPatchLog<TRow>
   ) => IncrementalView<TRow>;
-  /** A second view over the same row objects. */
-  readonly fork: (view: IncrementalView<TRow>) => IncrementalView<TRow>;
 }

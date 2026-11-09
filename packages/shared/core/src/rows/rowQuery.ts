@@ -4,9 +4,9 @@
  * The basic and full row models both evaluate it from here.
  */
 import type { SortableValue } from "../contracts/columns";
+import type { SortLevel } from "../contracts/query";
 import { cellSortValue } from "../engine/cellValue";
 import { engineSearchText } from "../engine/searchText";
-import { sortRows, sortRowsMulti } from "../sort/compare";
 import { stableKey } from "../utils/stableKey";
 import type { IncrementalViewConfig } from "./incremental";
 
@@ -52,54 +52,42 @@ export function hasFilter<TRow>(config: IncrementalViewConfig<TRow>): boolean {
   );
 }
 
+/** The levels the query sorts by, outermost first; empty when it does not sort. */
+export function sortLevels<TRow>(
+  config: IncrementalViewConfig<TRow>
+): readonly SortLevel[] {
+  if (config.sortLevels && config.sortLevels.length > 0) {
+    return config.sortLevels;
+  }
+  return config.sortBy && config.sortDir
+    ? [{ key: config.sortBy, dir: config.sortDir }]
+    : [];
+}
+
 export function hasSort<TRow>(config: IncrementalViewConfig<TRow>): boolean {
-  if (config.sortLevels && config.sortLevels.length > 0) return true;
-  return Boolean(config.sortBy && config.sortDir);
+  return sortLevels(config).length > 0;
 }
 
 export function searchTerm<TRow>(config: IncrementalViewConfig<TRow>): string {
   return config.search?.trim().toLowerCase() ?? "";
 }
 
-export function rowMatches<TRow>(
-  row: TRow,
-  config: IncrementalViewConfig<TRow>,
-  cachedText?: string
-): boolean {
-  const term = searchTerm(config);
-  if (term) {
-    const projector = config.getSearchText ?? engineSearchText;
-    const text = (cachedText ?? projector(row)).toLowerCase();
-    if (!text.includes(term)) return false;
-  }
-  if (config.filterFn && !config.filterFn(row, config.extra ?? {})) {
-    return false;
-  }
-  if (
-    config.filterTree &&
-    config.filterTreeFn &&
-    !config.filterTreeFn(row, config.filterTree)
-  ) {
-    return false;
-  }
-  return true;
-}
-
-export function sortMatchedRows<TRow>(
-  rows: readonly TRow[],
+/**
+ * Whether a row passes `config`'s search, extra filters and filter tree. The
+ * term and the callbacks are read once, not once per row.
+ */
+export function rowMatcher<TRow>(
   config: IncrementalViewConfig<TRow>
-): TRow[] {
-  const levels = config.sortLevels;
-  if (levels && levels.length > 0) {
-    return sortRowsMulti(rows, levels, (row, key) =>
-      resolveSortValue(row, key, config)
-    );
-  }
-  return sortRows(
-    rows,
-    (row) => resolveSortValue(row, config.sortBy!, config),
-    config.sortDir!
-  );
+): (row: TRow) => boolean {
+  const term = searchTerm(config);
+  const project = config.getSearchText ?? engineSearchText;
+  const { filterFn, filterTree, filterTreeFn } = config;
+  const extra = config.extra ?? {};
+  return (row) => {
+    if (term && !project(row).toLowerCase().includes(term)) return false;
+    if (filterFn && !filterFn(row, extra)) return false;
+    return !filterTree || !filterTreeFn || filterTreeFn(row, filterTree);
+  };
 }
 
 export function resolveSortValue<TRow>(
