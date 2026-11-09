@@ -3,9 +3,13 @@ description: Node 24, frozen lockfile, optional turbo cache for this SHA.
 
 inputs:
   turbo-cache:
-    description: Restore and save .turbo keyed on runner OS + commit SHA.
+    description: Restore .turbo keyed on runner OS + commit SHA.
     required: false
     default: "true"
+  turbo-cache-save:
+    description: Also save .turbo under this commit's key when the job ends.
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -21,12 +25,21 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile
 
-    # Same key in every job that compiles or consumes dist. The Build job
-    # saves it; later jobs in this run restore it and turbo replays `^build`
-    # instead of compiling the graph again.
-    - name: Restore Turborepo cache
-      if: ${{ inputs.turbo-cache == 'true' }}
+    # Same key in every job that compiles or consumes dist. Only the Build
+    # job saves it, so the key holds the complete build graph; every other
+    # job restores it and turbo replays `^build` instead of compiling the
+    # graph again.
+    - name: Restore and save Turborepo cache
+      if: ${{ inputs.turbo-cache == 'true' && inputs.turbo-cache-save == 'true' }}
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .turbo
+        key: turbo-${{ runner.os }}-${{ github.sha }}
+        restore-keys: |
+          turbo-${{ runner.os }}-
+    - name: Restore Turborepo cache
+      if: ${{ inputs.turbo-cache == 'true' && inputs.turbo-cache-save != 'true' }}
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: .turbo
         key: turbo-${{ runner.os }}-${{ github.sha }}

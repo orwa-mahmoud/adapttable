@@ -26,6 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-pnpm
+        with:
+          turbo-cache-save: "true"
       - name: Build
         run: pnpm turbo run build --filter=@adapttable/showcase
       - name: Build the isolated packed Vue browser consumer
