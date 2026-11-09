@@ -96,7 +96,6 @@ import { copyContextMenuSelection } from '@adapttable/core';
 import { coreBulkActions } from '@adapttable/core/binding';
 import { coreColumnMenu } from '@adapttable/core/binding';
 import { coreDensityChooser } from '@adapttable/core/binding';
-import { coreExportCsv as coreExportCsv_2 } from '@adapttable/core/binding';
 import { CoreFeature } from '@adapttable/core/binding';
 import { coreFullscreen } from '@adapttable/core/binding';
 import { coreGrouping } from '@adapttable/core/binding';
@@ -135,6 +134,7 @@ import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { ExportProgressState } from '@adapttable/core';
 import { ExportProgressSurfaceSlotProps } from '@adapttable/core/binding';
 import { ExportProgressView } from '@adapttable/core';
+import { ExportWriter } from '@adapttable/core';
 import { EXTRA_OVER_SPAN_ROW_STYLE } from '@adapttable/core/binding';
 import { EXTRA_OVER_SPAN_STYLE } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
@@ -1890,7 +1890,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly dir: InputSignal<Direction | undefined>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<"start" | "end">;
-    readonly editActivation: InputSignal<"doubleClick" | "click" | undefined>;
+    readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
@@ -3301,7 +3301,7 @@ export class AdaptGroupMoreButtonChrome {
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"groups" | "rows">;
+    readonly scope: InputSignal<"rows" | "groups">;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {
@@ -5243,7 +5243,9 @@ export { coreColumnMenu }
 export { coreDensityChooser }
 
 // @public
-export function coreExportCsv<TRow>(options?: Parameters<typeof coreExportCsv_2<TRow>>[0]): CoreFeature<TRow>;
+export function coreExportCsv<TRow>(options?: boolean | {
+    readonly writer?: ExportWriter;
+}): CoreFeature<TRow>;
 
 // @public
 export function coreFilters<TRow>(defs: unknown): CoreFeature<TRow>;

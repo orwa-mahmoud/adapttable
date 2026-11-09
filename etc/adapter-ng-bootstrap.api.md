@@ -13,7 +13,6 @@ import { AdaptGroupHeaderCardModel } from '@adapttable/angular/adapter';
 import { AdaptGroupHeaderRowModel } from '@adapttable/angular/adapter';
 import { AdaptMobileCardsHost } from '@adapttable/angular/adapter';
 import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
-import { AfterViewInit } from '@angular/core';
 import { BodyCellView } from '@adapttable/angular/adapter';
 import { BodyRow } from '@adapttable/angular/adapter';
 import { BodySlot } from '@adapttable/angular/adapter';
@@ -586,7 +585,8 @@ export class AdaptMobileCards<TRow> extends AdaptMobileCardsHost<TRow> {
 }
 
 // @public
-export class AdaptNativeCellEditor implements AfterViewInit {
+export class AdaptNativeCellEditor {
+    constructor();
     // (undocumented)
     protected commitBoolean(checked: boolean): void;
     // (undocumented)
@@ -603,8 +603,6 @@ export class AdaptNativeCellEditor implements AfterViewInit {
     protected readonly isSelectEditor: typeof isSelectEditor;
     // (undocumented)
     protected readonly multiDraftFromSelect: typeof multiDraftFromSelect;
-    // (undocumented)
-    ngAfterViewInit(): void;
     // (undocumented)
     protected onKeyDown(event: KeyboardEvent): void;
     // (undocumented)
