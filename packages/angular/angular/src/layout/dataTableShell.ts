@@ -10,24 +10,19 @@ import {
   createFeatureResources,
   type DataTable,
   type DataTableClassNames,
-  editableCellController,
   type EditConflictHandler,
   type EditConflictPolicy,
+  type EditHistoryImplementation,
   type EditHistoryOptions,
-  editingBundleFor,
+  FEATURE_IMPLEMENTATIONS,
+  featureImplementation,
   featureOptionsOf,
   type FeatureResources,
-  findMarkAttrs,
+  type FindInTableImplementation,
   flattenColumns,
   type GridFocus,
   injectDataTable,
   injectDensity,
-  injectExportCsv,
-  injectFindFocus,
-  injectFindInTable,
-  injectFindScroll,
-  injectFindShortcut,
-  injectFindWindowScroll,
   injectFullscreen,
   injectGridFocus,
   injectIsMobile,
@@ -35,7 +30,7 @@ import {
   injectRowMutations,
   injectRowSelection,
   injectTableData,
-  injectTableEditHistory,
+  type injectTableEditHistory,
   type LiveEditConflictInput,
   type MobileCardRenderer,
   mountTableFeatures,
@@ -67,13 +62,11 @@ import {
   type ExtraFilters,
   type ExtraRow,
   type FacetMap,
-  FILTER_ENGINE_IMPL,
   type FilterDef,
   type FilterTypeSpec,
   type FrontendEngineFactory,
   type GetCellSpan,
   type PaginationMode,
-  partitionPinnedRows,
   type PinnedRows,
   projectedGroupingSource,
   type QueryAggregate,
@@ -110,6 +103,7 @@ import {
   COMMAND_PALETTE_LIVE,
   CONTEXT_MENU_LIVE,
   FILTER_DRAWER,
+  FILTER_ENGINE,
   FILTER_HEADER,
   FILTER_POPOVER,
   FILTERS_FORM,
@@ -135,7 +129,6 @@ import {
   TREE_CELL,
   undoRedoToolbarProps,
 } from "@adapttable/core/binding";
-import { asBatchGesture } from "@adapttable/core/editing";
 import { loadLabels } from "@adapttable/i18n/load";
 import {
   afterRenderEffect,
@@ -200,16 +193,18 @@ export interface DataTableSurface {
 }
 
 function historyFor<TRow>(
+  implementation: EditHistoryImplementation | undefined,
   featureOptions: Readonly<Record<string, unknown>>,
   columns: Signal<readonly ColumnDef<TRow>[]>,
   injector: Injector
 ): ReturnType<typeof injectTableEditHistory<TRow>> | undefined {
   if (
+    implementation === undefined ||
     featureOptions.editHistory === undefined ||
     featureOptions.editHistory === false
   )
     return undefined;
-  return injectTableEditHistory<TRow>(
+  return implementation.inject<TRow>(
     computed(() => ({
       editHistory: featureOptions.editHistory as boolean | EditHistoryOptions,
       columns: columns(),
@@ -223,13 +218,14 @@ function historyFor<TRow>(
 /** Record inline and batch writes as their respective core gestures. */
 function editingOptionsFor<TRow>(
   featureOptions: Readonly<Record<string, unknown>>,
-  history: ReturnType<typeof injectTableEditHistory<TRow>> | undefined
+  history: ReturnType<typeof injectTableEditHistory<TRow>> | undefined,
+  implementation: EditHistoryImplementation | undefined
 ): Readonly<Record<string, unknown>> {
-  if (!history) return featureOptions;
+  if (!history || !implementation) return featureOptions;
   return {
     ...featureOptions,
     onCellEdit: history().onCellEdit,
-    onBatchEdit: asBatchGesture(
+    onBatchEdit: implementation.batchGesture(
       featureOptions.onBatchEdit as BatchEditHandler<TRow> | undefined,
       history().history.record
     ),
@@ -238,6 +234,7 @@ function editingOptionsFor<TRow>(
 
 /** The live find state, when the feature is composed. */
 function findStateFor<TRow>(options: {
+  readonly implementation: FindInTableImplementation | undefined;
   readonly enabled: boolean;
   readonly table: DataTable<TRow>;
   readonly urlAdapter: ReturnType<typeof urlAdapterFor>;
@@ -245,9 +242,9 @@ function findStateFor<TRow>(options: {
   readonly urlKey: string | undefined;
   readonly injector: Injector;
 }): Signal<FindInTableState> | undefined {
-  if (!options.enabled) return undefined;
-  const { table } = options;
-  return injectFindInTable<TRow>({
+  const { implementation, table } = options;
+  if (!options.enabled || !implementation) return undefined;
+  return implementation.state<TRow>({
     rows: computed(() => table.source().rows),
     columns: table.columns,
     firstRowIndex: computed(() => table.windowStart()),
@@ -260,27 +257,28 @@ function findStateFor<TRow>(options: {
 
 /** Shortcut, scroll and grid focus for a composed find bar. */
 function wireFindChrome<TRow>(options: {
+  readonly implementation: FindInTableImplementation | undefined;
   readonly find: Signal<FindInTableState> | undefined;
   readonly grid: GridFocus<TRow> | undefined;
   readonly root: () => HTMLElement | null;
   readonly injector: Injector;
 }): void {
-  const { find, grid, injector } = options;
-  if (!find) return;
+  const { implementation, find, grid, injector } = options;
+  if (!find || !implementation) return;
   const current = computed(() => find().current);
-  injectFindShortcut({
+  implementation.shortcut({
     root: options.root,
     openBar: computed(() => find().openBar),
     injector,
   });
-  injectFindScroll({
+  implementation.scroll({
     root: options.root,
     current,
     enabled: computed(() => grid === undefined),
     injector,
   });
   if (!grid) return;
-  injectFindFocus({
+  implementation.focus({
     find,
     focusCell: grid.focusCell,
     selectRange: grid.selectRange,
@@ -291,15 +289,16 @@ function wireFindChrome<TRow>(options: {
 
 /** Ask a flat virtual window to render the current match. */
 function scrollFindWindow<TRow>(options: {
+  readonly implementation: FindInTableImplementation | undefined;
   readonly find: Signal<FindInTableState> | undefined;
   readonly rows: Signal<readonly TRow[]>;
   readonly firstRowIndex: Signal<number>;
   readonly scrollToIndex: () => ((index: number) => void) | undefined;
   readonly injector: Injector;
 }): void {
-  const { find } = options;
-  if (!find) return;
-  injectFindWindowScroll({
+  const { implementation, find } = options;
+  if (!find || !implementation) return;
+  implementation.windowScroll({
     current: computed(() => find().current),
     rows: options.rows,
     firstRowIndex: options.firstRowIndex,
@@ -456,14 +455,15 @@ function findBarFor(
 function cellAttrsWithFind<TRow>(
   table: DataTable<TRow>,
   grid: GridFocus<TRow> | undefined,
-  find: Signal<FindInTableState> | undefined
+  find: Signal<FindInTableState> | undefined,
+  implementation: FindInTableImplementation | undefined
 ): (column: ColumnDef<TRow>, index: number, col: number) => Attrs {
   return (column, index, col) => {
     if (grid) return grid.cellAttrs(column, index, col);
     const base = table.cellAttrs(column);
     const state = find?.();
-    if (!state?.open) return base;
-    return findMarkAttrs(base, state, {
+    if (!state?.open || !implementation) return base;
+    return implementation.markAttrs(base, state, {
       row: table.windowStart() + index,
       col,
     });
@@ -1042,12 +1042,31 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         ? merged
         : { ...merged, searchPlaceholder: placeholder };
     });
+    const liveFeatures = resources.use("features", [], () =>
+      computed(() => tableFeaturesOf(this.injector, this.features()))
+    );
     const liveOptions = resources.use("options", [], () =>
-      computed(() =>
-        featureOptionsOf(tableFeaturesOf(this.injector, this.features()))
-      )
+      computed(() => featureOptionsOf(liveFeatures()))
     );
     const featureOptions = liveOptions();
+    // A feature's code arrives with the feature: a table that composes none
+    // of these never reaches their implementations.
+    const editHistoryCode = featureImplementation(
+      features,
+      FEATURE_IMPLEMENTATIONS.editHistory
+    );
+    const findCode = featureImplementation(
+      features,
+      FEATURE_IMPLEMENTATIONS.findInTable
+    );
+    const editableCell = featureImplementation(
+      features,
+      FEATURE_IMPLEMENTATIONS.editableCell
+    );
+    const exportCsv = featureImplementation(
+      features,
+      FEATURE_IMPLEMENTATIONS.exportCsv
+    );
     const declaredFilters = featureOptions.filters;
     const filtersOn = Array.isArray(declaredFilters);
     const headerOn = featureOptions.headerFilters === true;
@@ -1086,11 +1105,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         facets: this.facets,
         facetKeys: this.facetKeys,
         columns: computed(() => flattenColumns(this.columns()).leaves),
+        // Read live: the data tier outlives a change of features.
         get engine() {
           const current = liveOptions();
           return Array.isArray(current.filters) ||
             current.headerFilters === true
-            ? FILTER_ENGINE_IMPL
+            ? featureImplementation(liveFeatures(), FILTER_ENGINE)
             : undefined;
         },
         get filters() {
@@ -1260,9 +1280,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     );
     const history = resources.use(
       "history",
-      [featureOptions.editHistory, featureOptions.onCellEdit],
+      [editHistoryCode, featureOptions.editHistory, featureOptions.onCellEdit],
       (injector) =>
         historyFor(
+          editHistoryCode,
           featureOptions,
           computed(() => table.allColumns()),
           injector
@@ -1280,9 +1301,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         : undefined;
     const find = resources.use(
       "find",
-      [featureOptions.findInTable, urlAdapter, this.urlKey()],
+      [findCode, featureOptions.findInTable, urlAdapter, this.urlKey()],
       (injector) =>
         findStateFor({
+          implementation: findCode,
           enabled: featureOptions.findInTable === true,
           table,
           urlAdapter,
@@ -1296,6 +1318,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       [
         this.cellNavigation(),
         featureOptions.cellNavigation,
+        editableCell,
         find,
         history,
         featureOptions.onCellEdit,
@@ -1326,7 +1349,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
                     ?.some((entry) => entry.column.key === column.key)
                 )
                   return;
-                editableCellController({
+                editableCell?.({
                   editing: this.view()?.editing?.(),
                   row,
                   column,
@@ -1357,7 +1380,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     );
     const root = (): HTMLElement | null => this.root()?.nativeElement ?? null;
     resources.use("find-chrome", [find, grid], (injector) =>
-      wireFindChrome({ find, grid, root, injector })
+      wireFindChrome({ implementation: findCode, find, grid, root, injector })
     );
     const densityState = resources.use(
       "density",
@@ -1511,10 +1534,14 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const livePinning = resources.use("live-pinning", [], () =>
       computed(() => pinningRef()?.())
     );
+    const pinningCode = featureImplementation(
+      features,
+      FEATURE_IMPLEMENTATIONS.rowPinning
+    );
     const pinnedRows = computed(() => {
       const pins = pinning?.();
-      return pins
-        ? partitionPinnedRows(table.source().rows, pins.state, (row) =>
+      return pins && pinningCode
+        ? pinningCode.partition(table.source().rows, pins.state, (row) =>
             this.rowKey()(row)
           )
         : undefined;
@@ -1531,6 +1558,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     const exporter = resources.use(
       "export",
       [
+        exportCsv,
         exportOption,
         selection,
         grid,
@@ -1542,7 +1570,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       (injector) =>
         exportOption === undefined || exportOption === false
           ? undefined
-          : injectExportCsv<TRow>({
+          : exportCsv?.<TRow>({
               exportCsv: exportOption,
               source: table.source,
               columns: table.columns,
@@ -1655,6 +1683,12 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
           injector,
         })
     );
+    // Editing code comes with the editing features; a table without one
+    // never reaches it.
+    const createEditing = featureImplementation(
+      features,
+      FEATURE_IMPLEMENTATIONS.editing
+    );
     const editing = resources.use(
       "editing",
       [
@@ -1683,7 +1717,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         grouping,
       ],
       (injector) =>
-        editingBundleFor<TRow>({
+        createEditing?.<TRow>({
           live: computed(() => ({
             rows: renderedRowsOf({
               source: viewSource(),
@@ -1703,7 +1737,11 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
               (featureOptions.onEditConflict as
                 EditConflictHandler<TRow> | undefined),
           })),
-          featureOptions: editingOptionsFor(featureOptions, history),
+          featureOptions: editingOptionsFor(
+            featureOptions,
+            history,
+            editHistoryCode
+          ),
           activation: computed(
             () =>
               this.editActivation() ??
@@ -1781,6 +1819,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     };
     resources.use("find-window", [find, bodyWindow], (injector) =>
       scrollFindWindow({
+        implementation: findCode,
         find,
         rows: computed(() => table.source().rows),
         firstRowIndex: computed(() => table.windowStart()),
@@ -1878,7 +1917,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
       rowKey: (row) => this.rowKey()(row),
       onCellCut: this.onCellCut,
     });
-    const cellAttrs = cellAttrsWithFind(table, grid, find);
+    const cellAttrs = cellAttrsWithFind(table, grid, find, findCode);
     const markedCellAttrs = (
       column: ColumnDef<TRow>,
       index: number,

@@ -431,13 +431,9 @@ export {
   coreBulkActions,
   coreColumnMenu,
   coreDensityChooser,
-  coreExportCsv,
-  coreFilters,
-  coreFindInTable,
   coreFullscreen,
   coreGrouping,
   coreGroupingPanel,
-  coreHeaderFilters,
   coreRowActions,
   coreSavedViews,
   desktopBodySlots,
@@ -588,6 +584,12 @@ export {
 } from "@adapttable/core/grouping";
 
 // Types this entry's own signatures hand back, named from their owning entry.
+export {
+  coreExportCsv,
+  coreFilters,
+  coreFindInTable,
+  coreHeaderFilters,
+} from "./kitFeatures";
 export type {
   AdaptCellTemplate,
   AdaptTableFeature,

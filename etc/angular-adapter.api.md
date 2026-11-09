@@ -96,13 +96,11 @@ import { copyContextMenuSelection } from '@adapttable/core';
 import { coreBulkActions } from '@adapttable/core/binding';
 import { coreColumnMenu } from '@adapttable/core/binding';
 import { coreDensityChooser } from '@adapttable/core/binding';
-import { coreExportCsv } from '@adapttable/core/binding';
-import { coreFilters } from '@adapttable/core/binding';
-import { coreFindInTable } from '@adapttable/core/binding';
+import { coreExportCsv as coreExportCsv_2 } from '@adapttable/core/binding';
+import { CoreFeature } from '@adapttable/core/binding';
 import { coreFullscreen } from '@adapttable/core/binding';
 import { coreGrouping } from '@adapttable/core/binding';
 import { coreGroupingPanel } from '@adapttable/core/binding';
-import { coreHeaderFilters } from '@adapttable/core/binding';
 import { coreRowActions } from '@adapttable/core/binding';
 import { coreSavedViews } from '@adapttable/core/binding';
 import { CssProperties } from '@adapttable/core';
@@ -1892,7 +1890,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     readonly dir: InputSignal<Direction | undefined>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<"start" | "end">;
-    readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
+    readonly editActivation: InputSignal<"doubleClick" | "click" | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
@@ -3303,7 +3301,7 @@ export class AdaptGroupMoreButtonChrome {
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"rows" | "groups">;
+    readonly scope: InputSignal<"groups" | "rows">;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {
@@ -4629,6 +4627,7 @@ export class AdaptTableAssistantChrome {
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
+    readonly implementations?: Readonly<Record<string, unknown>>;
     mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
@@ -5243,11 +5242,14 @@ export { coreColumnMenu }
 
 export { coreDensityChooser }
 
-export { coreExportCsv }
+// @public
+export function coreExportCsv<TRow>(options?: Parameters<typeof coreExportCsv_2<TRow>>[0]): CoreFeature<TRow>;
 
-export { coreFilters }
+// @public
+export function coreFilters<TRow>(defs: unknown): CoreFeature<TRow>;
 
-export { coreFindInTable }
+// @public
+export function coreFindInTable(): CoreFeature;
 
 export { coreFullscreen }
 
@@ -5255,7 +5257,8 @@ export { coreGrouping }
 
 export { coreGroupingPanel }
 
-export { coreHeaderFilters }
+// @public
+export function coreHeaderFilters(): CoreFeature;
 
 export { coreRowActions }
 

@@ -1,9 +1,9 @@
 import {
   type AdaptTableFeature,
   type DataTable,
+  FEATURE_IMPLEMENTATIONS,
+  featureImplementation,
   featureOptionsOf,
-  injectGroupCollapse,
-  injectGroupPaging,
   type MaybeSignalOptional,
   readMaybe,
 } from "@adapttable/angular";
@@ -14,11 +14,7 @@ import {
   type GroupAggregatesFn,
   type GroupByInput,
   type GroupedFlatEntry,
-  groupingIgnoredWarning,
-  groupingProjectionBundle,
   type GroupingRuntimeSource,
-  groupingSourceOf,
-  projectGrouping,
   type TableSource,
 } from "@adapttable/core";
 import { type GroupCollapseState, sameItems } from "@adapttable/core/binding";
@@ -109,7 +105,11 @@ export function injectGrouping<TRow>(
   );
   const armed =
     panel !== undefined || features.some((f) => f.id === "grouping");
-  if (!armed) return undefined;
+  const code = featureImplementation(
+    features,
+    FEATURE_IMPLEMENTATIONS.grouping
+  );
+  if (!armed || !code) return undefined;
   if (!options.injector) assertInInjectionContext(injectGrouping);
   const injector = options.injector ?? inject(Injector);
 
@@ -118,12 +118,12 @@ export function injectGrouping<TRow>(
     readonly extraRows?: readonly ExtraRow[];
   };
   const panelDeclared = declaredAggregates(panel?.extras?.groupAggregates);
-  const collapse = injectGroupCollapse({
+  const collapse = code.collapse({
     collapsedGroupIds: extras.collapsedGroupIds,
     onCollapsedGroupIdsChange: extras.onCollapsedGroupIdsChange,
     injector,
   });
-  const paging = injectGroupPaging({ injector });
+  const paging = code.paging({ injector });
 
   const groupByKeys = computed(
     () => parseGroupBy(extras.groupBy ?? options.source().groupBy),
@@ -132,13 +132,13 @@ export function injectGrouping<TRow>(
   // Only the fields grouping reads, so a page or a search does not rebuild
   // the grouped model.
   const groupingSource = computed(
-    (): GroupingRuntimeSource<TRow> => groupingSourceOf(options.source()),
+    (): GroupingRuntimeSource<TRow> => code.sourceOf(options.source()),
     { equal: sameFields }
   );
 
   effect(
     () => {
-      const warning = groupingIgnoredWarning(groupByKeys(), groupingSource());
+      const warning = code.ignoredWarning(groupByKeys(), groupingSource());
       if (warning !== undefined) devWarn(warning);
     },
     { injector }
@@ -151,7 +151,7 @@ export function injectGrouping<TRow>(
   const projected = computed(() => {
     const collapsed = collapse();
     const pagingState = paging();
-    return projectGrouping({
+    return code.project({
       groupByKeys: groupByKeys(),
       source: groupingSource(),
       columns: table.allColumns(),
@@ -173,7 +173,7 @@ export function injectGrouping<TRow>(
   return computed((): TableGrouping<TRow> | undefined => {
     const collapsed = collapse();
     const pagingState = paging();
-    return groupingProjectionBundle({
+    return code.bundle({
       groupBy: groupByKeys(),
       projection: projected(),
       collapsed,

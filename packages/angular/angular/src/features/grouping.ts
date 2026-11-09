@@ -1,10 +1,21 @@
 import {
   type AdaptTableFeature,
+  FEATURE_IMPLEMENTATIONS,
+  type GroupingImplementation,
+  injectGroupCollapse,
+  injectGroupPaging,
   SURFACE_GROUPING,
   SURFACE_HANDLES,
   SURFACE_OCCUPIED,
+  withFeatureImplementation,
 } from "@adapttable/angular";
-import { projectedGroupingSource } from "@adapttable/core";
+import {
+  groupingIgnoredWarning,
+  groupingProjectionBundle,
+  groupingSourceOf,
+  projectedGroupingSource,
+  projectGrouping,
+} from "@adapttable/core";
 import { coreGrouping } from "@adapttable/core/binding";
 import { createTableEngine } from "@adapttable/core/engine";
 
@@ -12,6 +23,19 @@ import { withFrontendRowModel } from "../source/rowModel";
 import { type GroupingExtras } from "./groupingExtras";
 
 export type { GroupingExtras } from "./groupingExtras";
+
+/**
+ * The grouped model's code, filed by {@link grouping} and by
+ * `groupingPanel()`, which groups too.
+ */
+export const GROUPING_IMPLEMENTATION: GroupingImplementation = {
+  collapse: injectGroupCollapse,
+  paging: injectGroupPaging,
+  sourceOf: groupingSourceOf,
+  ignoredWarning: groupingIgnoredWarning,
+  project: projectGrouping,
+  bundle: groupingProjectionBundle,
+};
 
 /**
  * Group rows under collapsible headers.
@@ -33,9 +57,13 @@ export function grouping<TRow = unknown>(
   extras: GroupingExtras<TRow> = {}
 ): AdaptTableFeature {
   return {
-    ...withFrontendRowModel(
-      coreGrouping<TRow>(groupBy, extras) as AdaptTableFeature,
-      createTableEngine
+    ...withFeatureImplementation(
+      withFrontendRowModel(
+        coreGrouping<TRow>(groupBy, extras) as AdaptTableFeature,
+        createTableEngine
+      ),
+      FEATURE_IMPLEMENTATIONS.grouping,
+      GROUPING_IMPLEMENTATION
     ),
     mount(context) {
       const occupied = context.state.get(SURFACE_OCCUPIED)();

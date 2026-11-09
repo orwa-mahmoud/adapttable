@@ -12,9 +12,11 @@ import { AggregateOptions } from '@adapttable/core';
 import { AggregateSpec } from '@adapttable/core';
 import { ApprovalReview } from '@adapttable/core';
 import { ApprovalReviewItem } from '@adapttable/core';
+import { asBatchGesture } from '@adapttable/core/editing';
 import { BatchEditingState } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
+import { buildTreeEntries } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { BulkActionOutcome } from '@adapttable/core';
@@ -25,6 +27,7 @@ import { CellRange } from '@adapttable/core';
 import { CellSaveState } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
+import { closeFailedTreeNode } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
 import { ColumnGroupRecord } from '@adapttable/core';
 import { ColumnLayoutState } from '@adapttable/core';
@@ -36,6 +39,8 @@ import { ContextMenuRegionHandlers } from '@adapttable/core';
 import { ContextMenuState } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
 import { ContextMenuTriggerHandlers } from '@adapttable/core';
+import { createGroupingPanelController } from '@adapttable/core';
+import { createRowReorderController } from '@adapttable/core';
 import { DEFAULT_SHORTCUTS } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
@@ -85,6 +90,11 @@ import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
+import { groupingIgnoredWarning } from '@adapttable/core';
+import { groupingPanelAggregations } from '@adapttable/core';
+import { groupingPanelState } from '@adapttable/core/binding';
+import { groupingProjectionBundle } from '@adapttable/core';
+import { groupingSourceOf } from '@adapttable/core';
 import { GroupPagingState } from '@adapttable/core/binding';
 import { GroupSort } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
@@ -96,6 +106,7 @@ import { IconDescriptor } from '@adapttable/core/binding';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
+import { isRowMovePending } from '@adapttable/core';
 import { KeyedVirtualization } from '@adapttable/core';
 import { LazyChildrenOptions } from '@adapttable/core';
 import { LazyChildrenState } from '@adapttable/core/binding';
@@ -108,9 +119,11 @@ import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
+import { partitionPinnedRows } from '@adapttable/core';
 import { PinnedRows } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
+import { projectGrouping } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
@@ -131,12 +144,15 @@ import { RowMutationsState } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
 import { RowPatchEvent } from '@adapttable/core';
 import { RowPinLabels } from '@adapttable/core';
+import { rowPinningControl } from '@adapttable/core';
 import { RowPinningState } from '@adapttable/core/binding';
 import { RowPinSide } from '@adapttable/core';
 import { RowPinState } from '@adapttable/core/binding';
 import { RowPinState as RowPinState_2 } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
 import { RowReorderOptions } from '@adapttable/core';
+import { rowReorderRowAttributes } from '@adapttable/core';
+import { rowReorderRuntimeOptions } from '@adapttable/core';
 import { RowStyle } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
 import { SavedView } from '@adapttable/core';
@@ -171,8 +187,10 @@ import { TableVirtualization } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
+import { toggleTreeNode } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
 import { TreeExpansionState } from '@adapttable/core/binding';
+import { treeExportExpandedIds } from '@adapttable/core';
 import { Type } from '@angular/core';
 import { UrlSliceSpec } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
@@ -228,6 +246,7 @@ export const ADAPTTABLE_URL_ADAPTER: InjectionToken<UrlStateAdapter>;
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
+    readonly implementations?: Readonly<Record<string, unknown>>;
     mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
@@ -571,6 +590,9 @@ export { DirtyCellState }
 // @public
 export type DirtyEdits = Readonly<Pick<DirtyCellState, "count" | "confirm" | "confirmRow" | "confirmAll">>;
 
+// @public
+export const EDIT_HISTORY_IMPLEMENTATION: EditHistoryImplementation;
+
 export { EditableCellController }
 
 // @public
@@ -614,6 +636,12 @@ export interface EditHistoryHandle {
     readonly clear: () => void;
     readonly redo: () => number;
     readonly undo: () => number;
+}
+
+// @public
+export interface EditHistoryImplementation {
+    readonly batchGesture: typeof asBatchGesture;
+    readonly inject: typeof injectTableEditHistory;
 }
 
 // @public
@@ -683,6 +711,23 @@ export { ExtraFilters }
 export { ExtraRow }
 
 export { FacetMap }
+
+// @public
+export const FEATURE_IMPLEMENTATIONS: {
+    readonly editing: FeatureStateKey<typeof editingBundleFor>;
+    readonly editableCell: FeatureStateKey<typeof editableCellController>;
+    readonly editHistory: FeatureStateKey<EditHistoryImplementation>;
+    readonly findInTable: FeatureStateKey<FindInTableImplementation>;
+    readonly exportCsv: FeatureStateKey<typeof injectExportCsv>;
+    readonly rowReorder: FeatureStateKey<RowReorderImplementation>;
+    readonly grouping: FeatureStateKey<GroupingImplementation>;
+    readonly groupingPanel: FeatureStateKey<GroupingPanelImplementation>;
+    readonly rowPinning: FeatureStateKey<RowPinningImplementation>;
+    readonly tree: FeatureStateKey<TreeImplementation>;
+};
+
+// @public
+export function featureImplementation<T>(features: readonly AdaptTableFeature[], key: FeatureStateKey<T>): T | undefined;
 
 // @public
 export interface FeatureMountContext {
@@ -763,6 +808,19 @@ export { FilterTypeRegistry }
 export { FilterTypeSpec }
 
 export { FilterValue }
+
+// @public
+export const FIND_IN_TABLE_IMPLEMENTATION: FindInTableImplementation;
+
+// @public
+export interface FindInTableImplementation {
+    readonly focus: typeof injectFindFocus;
+    readonly markAttrs: typeof findMarkAttrs;
+    readonly scroll: typeof injectFindScroll;
+    readonly shortcut: typeof injectFindShortcut;
+    readonly state: typeof injectFindInTable;
+    readonly windowScroll: typeof injectFindWindowScroll;
+}
 
 // @public
 export interface FindInTableOptions<TRow> {
@@ -884,6 +942,23 @@ export interface GroupCollapseUrlState {
 // @public
 export interface GroupCollapseUrlStateOptions extends UrlSliceOptions {
     readonly defaultCollapsedGroupIds?: MaybeSignalOptional<readonly string[]>;
+}
+
+// @public
+export interface GroupingImplementation {
+    readonly bundle: typeof groupingProjectionBundle;
+    readonly collapse: typeof injectGroupCollapse;
+    readonly ignoredWarning: typeof groupingIgnoredWarning;
+    readonly paging: typeof injectGroupPaging;
+    readonly project: typeof projectGrouping;
+    readonly sourceOf: typeof groupingSourceOf;
+}
+
+// @public
+export interface GroupingPanelImplementation {
+    readonly aggregations: typeof groupingPanelAggregations;
+    readonly controller: typeof createGroupingPanelController;
+    readonly state: typeof groupingPanelState;
 }
 
 // @public
@@ -1378,6 +1453,14 @@ export interface RowPairMeasurerOptions {
 export { RowPinLabels }
 
 // @public
+export interface RowPinningImplementation {
+    readonly control: typeof rowPinningControl;
+    readonly partition: typeof partitionPinnedRows;
+    readonly state: typeof injectRowPinning;
+    readonly url: typeof injectRowPinningUrlState;
+}
+
+// @public
 export interface RowPinningOptions<TRow> {
     readonly enabled: MaybeSignal<boolean>;
     readonly getRowId: (row: TRow) => string;
@@ -1400,6 +1483,14 @@ export { RowPinSide }
 export { RowPinState }
 
 export { RowReorderHandler }
+
+// @public
+export interface RowReorderImplementation {
+    readonly controller: typeof createRowReorderController;
+    readonly isMovePending: typeof isRowMovePending;
+    readonly rowAttributes: typeof rowReorderRowAttributes;
+    readonly runtimeOptions: typeof rowReorderRuntimeOptions;
+}
 
 export { RowReorderOptions }
 
@@ -1677,6 +1768,16 @@ export interface TreeExpansionOptions {
 export { TreeExpansionState }
 
 // @public
+export interface TreeImplementation {
+    readonly closeFailed: typeof closeFailedTreeNode;
+    readonly entries: typeof buildTreeEntries;
+    readonly expansion: typeof injectTreeExpansion;
+    readonly exportExpandedIds: typeof treeExportExpandedIds;
+    readonly lazyChildren: typeof injectLazyChildren;
+    readonly toggle: typeof toggleTreeNode;
+}
+
+// @public
 export function urlAdapterFor(options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">, injector: Injector): UrlStateAdapter;
 
 // @public
@@ -1705,6 +1806,12 @@ export interface UseShortcutsOptions {
 }
 
 export { VirtualTableRow }
+
+// @public
+export function withFeatureImplementation<TFeature extends {
+    readonly id?: string;
+    readonly implementations?: Readonly<Record<string, unknown>>;
+}, T>(feature: TFeature, key: FeatureStateKey<T>, implementation: T): TFeature;
 
 // (No @packageDocumentation comment for this package)
 

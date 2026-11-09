@@ -6,7 +6,12 @@
  * feature. A kit extends the feature with the bar and, optionally, a
  * toolbar button.
  */
-import type { AdaptTableFeature } from "@adapttable/angular";
+import {
+  type AdaptTableFeature,
+  FEATURE_IMPLEMENTATIONS,
+  FIND_IN_TABLE_IMPLEMENTATION,
+  withFeatureImplementation,
+} from "@adapttable/angular";
 import { coreFindInTable } from "@adapttable/core/binding";
 
 /**
@@ -19,5 +24,9 @@ import { coreFindInTable } from "@adapttable/core/binding";
  * @public
  */
 export function findInTable(): AdaptTableFeature {
-  return coreFindInTable();
+  return withFeatureImplementation(
+    coreFindInTable(),
+    FEATURE_IMPLEMENTATIONS.findInTable,
+    FIND_IN_TABLE_IMPLEMENTATION
+  );
 }

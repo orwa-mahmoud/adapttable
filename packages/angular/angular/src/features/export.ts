@@ -1,4 +1,9 @@
-import type { AdaptTableFeature } from "@adapttable/angular";
+import {
+  type AdaptTableFeature,
+  FEATURE_IMPLEMENTATIONS,
+  injectExportCsv,
+  withFeatureImplementation,
+} from "@adapttable/angular";
 import { type ExportCsvOptions, type ExportWriter } from "@adapttable/core";
 import { coreExportCsv } from "@adapttable/core/binding";
 import { pdfWriter } from "@adapttable/core/pdf";
@@ -19,7 +24,11 @@ function exportWith<TRow>(
   writer: ExportWriter
 ): AdaptTableFeature {
   if (options === false) return coreExportCsv(false);
-  return coreExportCsv(writerOptions(options, writer));
+  return withFeatureImplementation(
+    coreExportCsv(writerOptions(options, writer)),
+    FEATURE_IMPLEMENTATIONS.exportCsv,
+    injectExportCsv
+  );
 }
 
 /**

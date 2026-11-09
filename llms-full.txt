@@ -20353,6 +20353,23 @@ See [building an Angular adapter](./angular/building-an-adapter.md).
   release their scopes. `tableFeaturesOf` combines injector-provided features
   with the table's own list; a later duplicate id wins for setup, options,
   rendering and mounting alike.
+- A feature brings its own code to the table. `withFeatureImplementation`
+  files an implementation on a feature under a `FeatureStateKey`, and
+  `featureImplementation(features, key)` returns the one
+  the composed features bring, a later feature winning. The table reads every
+  optional feature's code this way, so a table bundles only the code of the
+  features it composes. `FEATURE_IMPLEMENTATIONS` holds the keys:
+  `editing` (`editingBundleFor`), `editableCell` (`editableCellController`),
+  `editHistory` (`EditHistoryImplementation`, filed as
+  `EDIT_HISTORY_IMPLEMENTATION`), `findInTable` (`FindInTableImplementation`,
+  filed as `FIND_IN_TABLE_IMPLEMENTATION`), `exportCsv` (`injectExportCsv`),
+  `rowReorder` (`RowReorderImplementation`), `grouping`
+  (`GroupingImplementation`), `groupingPanel` (`GroupingPanelImplementation`),
+  `rowPinning` (`RowPinningImplementation`) and `tree` (`TreeImplementation`).
+  The filter engine travels under core's `FILTER_ENGINE` key. The adapter
+  entry's `coreExportCsv`, `coreFilters`, `coreHeaderFilters` and
+  `coreFindInTable` are the core factories with their implementations filed,
+  for a kit to extend.
 - All supported Angular kits accept live `selectable`, `cellNavigation`, `filtersMode`
   and `closeHeaderFilterOnSelect` inputs. Their controlled `density` input
   overrides the chooser's state; `densityChange` reports requests and waits

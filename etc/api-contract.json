@@ -8082,7 +8082,19 @@
       "DirtyCellState",
       "DirtyCellsOptions",
       "DirtyEdits",
-      "injectDirtyCells"
+      "injectDirtyCells",
+      "EDIT_HISTORY_IMPLEMENTATION",
+      "EditHistoryImplementation",
+      "FEATURE_IMPLEMENTATIONS",
+      "featureImplementation",
+      "FIND_IN_TABLE_IMPLEMENTATION",
+      "FindInTableImplementation",
+      "GroupingImplementation",
+      "GroupingPanelImplementation",
+      "RowPinningImplementation",
+      "RowReorderImplementation",
+      "TreeImplementation",
+      "withFeatureImplementation"
     ],
     "angular-formula": [
       "AngularFormulaColumnsResult",
@@ -12825,7 +12837,11 @@
       "provideAdaptTableState",
       "scrollBoxStyle",
       "injectTableSurfaceHost",
-      "TableSurfaceHostOptions"
+      "TableSurfaceHostOptions",
+      "coreExportCsv",
+      "coreFilters",
+      "coreFindInTable",
+      "coreHeaderFilters"
     ],
     "adapter-element-plus-batch-editing": [
       "batchEditing",

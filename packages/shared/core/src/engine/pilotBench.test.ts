@@ -122,11 +122,12 @@ describe("composed engine pilot", () => {
     );
     for (const path of [
       "packages/react/react/src/features/grouping.tsx",
-      "packages/angular/angular/src/grouping/tableGrouping.ts",
+      // Angular's grouping feature hands core's function to the table.
+      "packages/angular/angular/src/features/grouping.ts",
       "packages/vue/vue/src/features/grouping.ts",
     ]) {
       const source = readFileSync(join(ROOT, path), "utf8");
-      expect(source, path).toContain("projectGrouping(");
+      expect(source, path).toMatch(/\bprojectGrouping\b/);
       expect(source, path).not.toContain("export function projectGrouping");
     }
   });

@@ -1,7 +1,10 @@
 /** Edit history is opt-in and uses core's feature configuration. */
 import {
   type AdaptTableFeature,
+  EDIT_HISTORY_IMPLEMENTATION,
   type EditHistoryOptions,
+  FEATURE_IMPLEMENTATIONS,
+  withFeatureImplementation,
 } from "@adapttable/angular";
 import { coreEditHistory } from "@adapttable/core/binding";
 
@@ -9,5 +12,9 @@ import { coreEditHistory } from "@adapttable/core/binding";
 export function editHistory(
   options: boolean | EditHistoryOptions = true
 ): AdaptTableFeature {
-  return coreEditHistory(options);
+  return withFeatureImplementation(
+    coreEditHistory(options),
+    FEATURE_IMPLEMENTATIONS.editHistory,
+    EDIT_HISTORY_IMPLEMENTATION
+  );
 }

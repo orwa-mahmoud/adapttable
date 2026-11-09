@@ -49,6 +49,7 @@ import { VirtualizeInput } from '@adapttable/core/binding';
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
     apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
     readonly id?: string;
+    readonly implementations?: Readonly<Record<string, unknown>>;
     mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }
