@@ -3,6 +3,7 @@ import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { expect, it } from "vitest";
 
+import type { AdaptTableFeature } from "../featureHost";
 import { cellNavigation } from "../features/cellNavigation";
 import { editing } from "../features/editing";
 import { grouping } from "../features/grouping";
@@ -63,6 +64,56 @@ it("mounts grouping, navigation and editing when they are composed", async () =>
   await fixture.whenStable();
   const view = fixture.componentInstance.view();
   expect(view.body().some((slot) => slot.kind === "group")).toBe(true);
+  expect(view.grid).toBeDefined();
+  expect(view.editing?.()).toBeDefined();
+  expect(view.grouping?.()?.groupBy).toEqual(["team"]);
+  fixture.destroy();
+});
+
+it("follows navigation, editing and grouping added, removed and added again after mount", async () => {
+  const composed = [
+    grouping("team"),
+    cellNavigation(),
+    editing(() => undefined),
+  ] as const;
+  @Component({ selector: "host", template: "" })
+  class Host {
+    readonly features = signal<readonly AdaptTableFeature[]>([]);
+    readonly view = injectTableSurfaceHost<Person>({
+      data: signal(rows),
+      columns,
+      rowKey,
+      features: this.features,
+    });
+  }
+  const fixture = TestBed.createComponent(Host);
+  const settle = async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return fixture.componentInstance.view();
+  };
+
+  let view = await settle();
+  expect(view.grid).toBeUndefined();
+  expect(view.editing).toBeUndefined();
+  expect(view.grouping).toBeUndefined();
+
+  fixture.componentInstance.features.set(composed);
+  view = await settle();
+  expect(view.grid).toBeDefined();
+  expect(view.editing?.()).toBeDefined();
+  expect(view.grouping?.()?.groupBy).toEqual(["team"]);
+  expect(view.body().some((slot) => slot.kind === "group")).toBe(true);
+
+  fixture.componentInstance.features.set([]);
+  view = await settle();
+  expect(view.grid).toBeUndefined();
+  expect(view.editing).toBeUndefined();
+  expect(view.grouping).toBeUndefined();
+  expect(view.body().some((slot) => slot.kind === "group")).toBe(false);
+
+  fixture.componentInstance.features.set(composed);
+  view = await settle();
   expect(view.grid).toBeDefined();
   expect(view.editing?.()).toBeDefined();
   expect(view.grouping?.()?.groupBy).toEqual(["team"]);
