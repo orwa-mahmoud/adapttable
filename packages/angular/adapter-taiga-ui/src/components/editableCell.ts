@@ -26,7 +26,7 @@ import {
 import { NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
-  type AfterViewInit,
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -86,15 +86,17 @@ import { AdaptTaigaEditorValidation } from "./editorValidation";
     </button>
   `,
 })
-class AdaptEditCellActivate implements AfterViewInit {
+class AdaptEditCellActivate {
   readonly props = input.required<EditableCellActivateProps>();
   protected readonly displayTemplate = computed(() => {
     const content = this.props().display;
     return content instanceof TemplateRef ? content : null;
   });
   private readonly btn = viewChild<ElementRef<HTMLButtonElement>>("btn");
-  ngAfterViewInit(): void {
-    this.props().activateRef(this.btn()?.nativeElement ?? null);
+  constructor() {
+    afterRenderEffect(() => {
+      this.props().activateRef(this.btn()?.nativeElement ?? null);
+    });
   }
 }
 
@@ -230,7 +232,7 @@ class AdaptEditCellButton {
     }
   `,
 })
-export class AdaptNativeCellEditor implements AfterViewInit {
+export class AdaptNativeCellEditor {
   readonly props = input.required<EditableCellEditorCtrl>();
   private readonly el = viewChild<unknown, ElementRef<HTMLElement>>("el", {
     read: ElementRef,
@@ -266,8 +268,10 @@ export class AdaptNativeCellEditor implements AfterViewInit {
     );
   }
 
-  ngAfterViewInit(): void {
-    this.props().focusRef(this.el()?.nativeElement ?? null);
+  constructor() {
+    afterRenderEffect(() => {
+      this.props().focusRef(this.el()?.nativeElement ?? null);
+    });
   }
 
   protected commitBoolean(checked: boolean): void {

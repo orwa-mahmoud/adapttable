@@ -27,7 +27,7 @@ import {
 } from "@adapttable/angular/adapter";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-  type AfterViewInit,
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -78,7 +78,7 @@ import { AdaptMaterialCheckboxAttrs } from "./materialCheckbox";
     </button>
   `,
 })
-class AdaptEditCellActivate implements AfterViewInit {
+class AdaptEditCellActivate {
   readonly props = input.required<EditableCellActivateProps>();
   protected readonly displayTemplate = computed(() => {
     const content = this.props().display;
@@ -88,8 +88,10 @@ class AdaptEditCellActivate implements AfterViewInit {
     "btn",
     { read: ElementRef }
   );
-  ngAfterViewInit(): void {
-    this.props().activateRef(this.btn()?.nativeElement ?? null);
+  constructor() {
+    afterRenderEffect(() => {
+      this.props().activateRef(this.btn()?.nativeElement ?? null);
+    });
   }
 }
 
@@ -243,7 +245,7 @@ export class AdaptMaterialEditorValidation {
     }
   `,
 })
-export class AdaptMaterialCellEditor implements AfterViewInit {
+export class AdaptMaterialCellEditor {
   readonly props = input.required<EditableCellEditorCtrl>();
   private readonly el = viewChild<unknown, ElementRef<HTMLElement>>("el", {
     read: ElementRef,
@@ -258,13 +260,15 @@ export class AdaptMaterialCellEditor implements AfterViewInit {
   protected readonly readMultiDraft = readMultiDraft;
   protected readonly multiDraftFromSelect = multiDraftFromSelect;
 
-  ngAfterViewInit(): void {
-    const el = this.el()?.nativeElement;
-    this.props().focusRef(
-      el?.matches("mat-checkbox")
-        ? el.querySelector<HTMLInputElement>("input")
-        : (el ?? null)
-    );
+  constructor() {
+    afterRenderEffect(() => {
+      const el = this.el()?.nativeElement;
+      this.props().focusRef(
+        el?.matches("mat-checkbox")
+          ? el.querySelector<HTMLInputElement>("input")
+          : (el ?? null)
+      );
+    });
   }
 
   protected commitBoolean(checked: boolean): void {
@@ -300,17 +304,19 @@ export class AdaptMaterialCellEditor implements AfterViewInit {
     </div>
   `,
 })
-class AdaptEditCellOption implements AfterViewInit {
+class AdaptEditCellOption {
   readonly props = input.required<MultiSelectEditorCheckboxProps>();
   private readonly el = viewChild.required<unknown, ElementRef<HTMLElement>>(
     "el",
     { read: ElementRef }
   );
 
-  ngAfterViewInit(): void {
-    this.props().focusRef?.(
-      this.el().nativeElement.querySelector<HTMLInputElement>("input") ?? null
-    );
+  constructor() {
+    afterRenderEffect(() => {
+      this.props().focusRef?.(
+        this.el().nativeElement.querySelector<HTMLInputElement>("input") ?? null
+      );
+    });
   }
 }
 
