@@ -3307,6 +3307,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "gridRowFocusSignature",
+      "kind": "runtime",
+      "module": "focus/gridAria.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "focus/gridAria.ts#gridRowFocusSignature",
+      "subpaths": ["."]
+    },
+    {
       "name": "groupCollapseActions",
       "kind": "runtime",
       "module": "grouping/groupCollapse.ts",
