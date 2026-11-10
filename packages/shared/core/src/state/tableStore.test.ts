@@ -27,6 +27,20 @@ describe("createTableStore", () => {
     expect(store.read(NAMES)).toEqual([]);
   });
 
+  it("starts with the state a seed writes", () => {
+    const store = createTableStore((writer) => {
+      writer.write(COUNT, 3);
+      writer.write(NAMES, ["a"]);
+    });
+    expect(store.read(COUNT)).toBe(3);
+    expect(store.read(NAMES)).toEqual(["a"]);
+    const heard = vi.fn();
+    store.slice(COUNT).subscribe(heard);
+    store.dispatch(increment(1));
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(store.read(COUNT)).toBe(4);
+  });
+
   it("keeps each store's slices apart", () => {
     const first = createTableStore();
     const second = createTableStore();

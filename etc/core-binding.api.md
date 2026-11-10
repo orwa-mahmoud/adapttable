@@ -1848,7 +1848,7 @@ export interface CreateTableEngineOptions<TRow> {
 }
 
 // @public
-export function createTableStore(): TableStore;
+export function createTableStore(seed?: (store: StoreWriter) => void): TableStore;
 
 // @public
 export type CssProperties = Record<string, string | number | undefined>;

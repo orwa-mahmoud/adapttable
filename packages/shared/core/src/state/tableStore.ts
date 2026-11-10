@@ -138,9 +138,15 @@ interface StagedCell extends Listened {
 /**
  * Create a table's store.
  *
+ * @param seed - Writes the store's starting state. It runs before the store
+ *   is returned, when nothing can listen yet, so creating a store with state
+ *   changes nothing anyone reads.
+ *
  * @public
  */
-export function createTableStore(): TableStore {
+export function createTableStore(
+  seed?: (store: StoreWriter) => void
+): TableStore {
   /** This store's identity in every slice key's cells. */
   const token = {};
   let depth = 0;
@@ -212,6 +218,8 @@ export function createTableStore(): TableStore {
       writer.write(key, recipe(read(key)));
     },
   };
+
+  if (seed) run(seed);
 
   return {
     read,

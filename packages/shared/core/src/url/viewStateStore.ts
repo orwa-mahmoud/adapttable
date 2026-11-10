@@ -324,7 +324,6 @@ export function createTableViewStore(
   source: ViewStateSource,
   config: TableViewStateConfig = {}
 ): TableViewStore {
-  const store = createTableStore();
   const { adapter } = source;
   const ns = namespaceOf(source.urlKey);
   const viewOf = viewStateReader();
@@ -334,14 +333,22 @@ export function createTableViewStore(
     (search: string, current: TableViewStateConfig) =>
       overridesFromParams(parseTableUrlState(search, ns), ns, current)
   );
-  store.dispatch(configureView(config));
   const initialSearch = adapter.getSearch();
+  let initialOverrides: ViewOverrides = {};
+  // The configuration and the URL's overrides are the store's starting
+  // state: creating the store changes nothing anyone reads.
+  const store = createTableStore((writer) => {
+    const configure = configureView(config);
+    configure.reduce(writer, configure.payload);
+    initialOverrides = overridesOf(initialSearch, writer.read(VIEW_CONFIG));
+    const start = replaceOverrides(initialOverrides);
+    start.reduce(writer, start.payload);
+  });
   /** The URL the store last matched, and the overrides it holds there. */
   let synced: { search: string; overrides: ViewOverrides } = {
     search: initialSearch,
-    overrides: overridesOf(initialSearch, store.read(VIEW_CONFIG)),
+    overrides: initialOverrides,
   };
-  store.dispatch(replaceOverrides(synced.overrides));
   let pulling = false;
   /** New extra keys read the filter params differently: read the URL again. */
   let rereadUrl = false;
