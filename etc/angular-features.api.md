@@ -155,10 +155,16 @@ export interface EditingLifecycleExtras<TRow = unknown> {
 }
 
 // @public
-export function exportPdf<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+function exportPdf$1<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public @deprecated
+export const exportPdf: typeof exportPdf$1;
 
 // @public
-export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+function exportXlsx$1<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public @deprecated
+export const exportXlsx: typeof exportXlsx$1;
 
 // @public
 export function extraRows(rows: readonly ExtraRow[]): AdaptTableFeature;

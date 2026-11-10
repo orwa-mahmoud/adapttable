@@ -5,7 +5,10 @@
 `xlsxWriter()` turns the export button into a real `.xlsx` download. It
 ships as `@adapttable/core/xlsx`, a separate entry point with no
 dependency: the workbook and its ZIP container are written by hand, and a
-table that never imports the writer never carries the code.
+table that never imports the writer never carries the code. Every binding
+ships the same writer as a feature on the same subpath: `exportXlsx()` from
+`@adapttable/react/xlsx`, `@adapttable/vue/xlsx` or `@adapttable/angular/xlsx`
+is the export with `xlsxWriter()`, beside core's `buildTableXlsx`.
 
 ```tsx
 import { xlsxWriter } from "@adapttable/core/xlsx";

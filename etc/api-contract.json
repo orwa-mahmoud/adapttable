@@ -40,6 +40,8 @@
       "angular-pivot",
       "angular-router",
       "angular-sparkline",
+      "angular-pdf",
+      "angular-xlsx",
       "angular-stream",
       "ai-angular",
       "adapter-angular-unstyled",
@@ -558,6 +560,8 @@
       "react-formula",
       "react-pivot",
       "react-sparkline",
+      "react-pdf",
+      "react-xlsx",
       "react-stream",
       "shadcn/preset",
       "unstyled/density",
@@ -15069,6 +15073,66 @@
       "tableAssistant",
       "TableAssistant",
       "TableAssistantProps"
+    ],
+    "react-pdf": [
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "ExportPdfOptions",
+      "FeatureProviderContribution",
+      "FeatureProviderProps",
+      "FeatureRender",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable",
+      "SidePanelEntry",
+      "TableFeature",
+      "TableFeatureHost"
+    ],
+    "react-xlsx": [
+      "buildTableXlsx",
+      "exportXlsx",
+      "ExportXlsxOptions",
+      "FeatureProviderContribution",
+      "FeatureProviderProps",
+      "FeatureRender",
+      "SidePanelEntry",
+      "TableFeature",
+      "TableFeatureHost",
+      "xlsxWriter"
+    ],
+    "angular-pdf": [
+      "AdaptTableFeature",
+      "buildPrintDocument",
+      "buildPrintTableHtml",
+      "buildTablePdf",
+      "exportPdf",
+      "FeatureMountContext",
+      "FeatureState",
+      "openPrintLayout",
+      "pdfWriter",
+      "PdfWriterOptions",
+      "PrintLayoutOptions",
+      "PrintPageBreak",
+      "PrintPageSize",
+      "printStyles",
+      "printTable",
+      "SlotComponent"
+    ],
+    "angular-xlsx": [
+      "AdaptTableFeature",
+      "buildTableXlsx",
+      "exportXlsx",
+      "FeatureMountContext",
+      "FeatureState",
+      "SlotComponent",
+      "xlsxWriter"
     ]
   },
   "entrypoints": {
@@ -18405,6 +18469,18 @@
     },
     "adapter-vuetify-assistant.api.md": {
       "surface": "adapter-vuetify-assistant"
+    },
+    "react-pdf.api.md": {
+      "surface": "react-pdf"
+    },
+    "react-xlsx.api.md": {
+      "surface": "react-xlsx"
+    },
+    "angular-pdf.api.md": {
+      "surface": "angular-pdf"
+    },
+    "angular-xlsx.api.md": {
+      "surface": "angular-xlsx"
     }
   }
 }

@@ -41,7 +41,7 @@ export default defineConfig({
         replacement: path.resolve(packageDir, "src/index.ts"),
       },
       {
-        find: /^@adapttable\/angular\/(features|adapter)$/,
+        find: /^@adapttable\/angular\/(features|adapter|pdf|xlsx)$/,
         replacement: path.resolve(packageDir, "src/$1.ts"),
       },
       {

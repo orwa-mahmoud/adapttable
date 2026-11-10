@@ -11249,7 +11249,10 @@ options, see [PDF export and print layout](./export-pdf.md).
 `xlsxWriter()` turns the export button into a real `.xlsx` download. It
 ships as `@adapttable/core/xlsx`, a separate entry point with no
 dependency: the workbook and its ZIP container are written by hand, and a
-table that never imports the writer never carries the code.
+table that never imports the writer never carries the code. Every binding
+ships the same writer as a feature on the same subpath: `exportXlsx()` from
+`@adapttable/react/xlsx`, `@adapttable/vue/xlsx` or `@adapttable/angular/xlsx`
+is the export with `xlsxWriter()`, beside core's `buildTableXlsx`.
 
 ```tsx
 import { xlsxWriter } from "@adapttable/core/xlsx";
@@ -11618,6 +11621,12 @@ import { exportCsv } from "@adapttable/mantine/export";
 scopes (`page`, `all`, `selected`, `range`) and the same column subset.
 The button relabels itself **Export PDF** from `labels.exportFile("pdf")`.
 `buildTablePdf` is the same file, for a host assembling rows by hand.
+
+Every binding ships the same writer as a feature on the same subpath:
+`exportPdf()` from `@adapttable/react/pdf`, `@adapttable/vue/pdf` or
+`@adapttable/angular/pdf` is the export with `pdfWriter()`, and each of those
+entries re-exports core's print and PDF helpers. A kit's export entry adds the
+toolbar button.
 
 Print is a different verb. `downloadExportFile` cannot open a dialog, so
 `openPrintLayout` (an `ExportTable`) and `printTable` (rows and columns)

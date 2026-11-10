@@ -49515,6 +49515,158 @@
       "behavior": ""
     },
     {
+      "export": "buildPrintDocument",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "buildPrintTableHtml",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "buildTablePdf",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "exportPdf",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "ExportPdfOptions",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureProviderContribution",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureProviderProps",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureRender",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "openPrintLayout",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "pdfWriter",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "PdfWriterOptions",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "PrintLayoutOptions",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "PrintPageBreak",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "PrintPageSize",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "printStyles",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "printTable",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "SidePanelEntry",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "TableFeature",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
+      "export": "TableFeatureHost",
+      "currentImport": "@adapttable/react/pdf",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/pdf",
+      "behavior": ""
+    },
+    {
       "export": "ColumnDef",
       "currentImport": "@adapttable/react/pivot",
       "kind": "type",
@@ -49696,6 +49848,86 @@
       "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/react/stream",
+      "behavior": ""
+    },
+    {
+      "export": "buildTableXlsx",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "exportXlsx",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "ExportXlsxOptions",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureProviderContribution",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureProviderProps",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureRender",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "SidePanelEntry",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "type",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "TableFeature",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "TableFeatureHost",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/react/xlsx",
+      "behavior": ""
+    },
+    {
+      "export": "xlsxWriter",
+      "currentImport": "@adapttable/react/xlsx",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/xlsx",
       "behavior": ""
     },
     {

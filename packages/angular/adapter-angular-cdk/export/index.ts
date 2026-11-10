@@ -10,10 +10,8 @@ import {
   slotRender,
 } from "@adapttable/angular";
 import { coreExportCsv, TOOLBAR_EXTRAS } from "@adapttable/angular/adapter";
-import {
-  exportPdf as bindingExportPdf,
-  exportXlsx as bindingExportXlsx,
-} from "@adapttable/angular/features";
+import { exportPdf as bindingExportPdf } from "@adapttable/angular/pdf";
+import { exportXlsx as bindingExportXlsx } from "@adapttable/angular/xlsx";
 import { AdaptExportButton } from "@adapttable/angular-cdk";
 
 /**

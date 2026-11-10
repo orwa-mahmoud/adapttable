@@ -1,7 +1,7 @@
 {
   "name": "@adapttable/angular",
   "version": "0.8.1",
-  "description": "Headless Angular binding for AdaptTable. Signals over the framework-neutral engine in @adapttable/core — tables with sorting, filtering, editing, grouping, URL state and server data.",
+  "description": "Headless Angular binding for AdaptTable. Signals over the framework-neutral engine in @adapttable/core \u2014 tables with sorting, filtering, editing, grouping, URL state and server data.",
   "keywords": [
     "angular",
     "signals",
@@ -65,6 +65,14 @@
     "./stream": {
       "types": "./dist/types/adapttable-angular-stream.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-stream.mjs"
+    },
+    "./pdf": {
+      "types": "./dist/types/adapttable-angular-pdf.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-pdf.mjs"
+    },
+    "./xlsx": {
+      "types": "./dist/types/adapttable-angular-xlsx.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-xlsx.mjs"
     },
     "./package.json": "./package.json"
   },
