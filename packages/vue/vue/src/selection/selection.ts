@@ -191,18 +191,26 @@ export function useRowSelection<TRow>(
       toggleGroupLeaves: ownedAction(toggleGroupLeaves),
       selectAllMatching: ownedAction(selectAllMatching),
     })),
+    // `checked` and `indeterminate` are read when a control draws them, so a
+    // model that holds these attributes does not follow the selection.
     rowCheckboxAttrs: (id) => ({
       type: "checkbox",
       "aria-label": labels.value.selectRow,
-      checked: isSelected(id),
+      get checked() {
+        return isSelected(id);
+      },
       ...(!enabled.value ? { disabled: true } : {}),
       onChange: ownedAction(() => toggle(id)),
     }),
     headerCheckboxAttrs: () => ({
       type: "checkbox",
       "aria-label": labels.value.selectAll,
-      checked: headerState.value === "all",
-      indeterminate: headerState.value === "some",
+      get checked() {
+        return headerState.value === "all";
+      },
+      get indeterminate() {
+        return headerState.value === "some";
+      },
       ...(!enabled.value ? { disabled: true } : {}),
       onChange: ownedAction(toggleAll),
     }),

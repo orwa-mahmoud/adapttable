@@ -163,8 +163,8 @@ export function projectHeadlessRows<TRow>(
       ? pinnedSummaryPart(rowPinSide ?? "top")
       : pinnedRowPart(rowPinSide);
     let rowAttrs = card
-      ? { ...table.cardAttrs(row, args.index), role: "listitem" }
-      : (prior?.attrs ?? table.rowAttrs(row, args.index));
+      ? { ...table.cardAttrs(row, args.index, {}), role: "listitem" }
+      : (prior?.attrs ?? table.rowAttrs(row, args.index, {}));
     if (isSummary)
       rowAttrs = {
         "data-adapttable-part": part,
@@ -299,7 +299,11 @@ export function projectHeadlessRows<TRow>(
             labels: table.labels.value,
             leadingColumns,
             trailingColumns: desktop.actionsLabel ? 1 : 0,
-            selection: selection?.state.value,
+            // Read when the group row is drawn, so a selection change
+            // redraws that row and leaves the body model as it is.
+            get selection() {
+              return selection?.state.value;
+            },
             onToggle: grouping.collapsed.toggle,
             onShowMore: grouping.showMore,
           },

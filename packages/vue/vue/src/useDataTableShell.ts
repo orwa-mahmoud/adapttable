@@ -147,6 +147,7 @@ import {
   GRID_FOCUS_MODEL,
   SELECTION_STATS_MODEL,
 } from "./navigation/contracts";
+import { withLiveSelection, withLiveSelectionSlots } from "./rows/liveRowState";
 import { useRowSelection } from "./selection/selection";
 import { frontendRowModelOf } from "./source/rowModel";
 import { useViewportMobile } from "./source/sourceLifecycle";
@@ -1178,17 +1179,33 @@ export function useDataTableShell<TRow>(
       };
     }),
     rows: windowedBody.value.desktop.rows.map((row) =>
-      decorateNavigation(decorateRow(row))
+      withLiveSelection(
+        decorateNavigation(decorateRow(row)),
+        selection.value,
+        "row"
+      )
     ),
-    bodySlots: decorateSlots(windowedBody.value.desktop.bodySlots),
+    bodySlots: withLiveSelectionSlots(
+      decorateSlots(windowedBody.value.desktop.bodySlots),
+      selection.value,
+      "row"
+    ),
   }));
   const mobile = computed(() => ({
     ...windowedBody.value.mobile,
     summary: mobileSummary.value,
     rows: windowedBody.value.mobile.rows.map((row) =>
-      decorateNavigation(decorateRow(row))
+      withLiveSelection(
+        decorateNavigation(decorateRow(row)),
+        selection.value,
+        "card"
+      )
     ),
-    bodySlots: decorateSlots(windowedBody.value.mobile.bodySlots),
+    bodySlots: withLiveSelectionSlots(
+      decorateSlots(windowedBody.value.mobile.bodySlots),
+      selection.value,
+      "card"
+    ),
   }));
   if (getCurrentInstance()) provideFeatureState(state);
   const active = useScopeActivity();

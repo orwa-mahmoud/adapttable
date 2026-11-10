@@ -211,7 +211,8 @@ export function useDesktopTableModel<TRow>(
           key: table.rowKey(row),
           row,
           index,
-          attrs: table.rowAttrs(row, index),
+          // The row's selection is applied when the row is drawn.
+          attrs: table.rowAttrs(row, index, {}),
           checkboxAttrs: selected?.rowCheckboxAttrs(table.rowKey(row)),
           get cells() {
             return cells();
@@ -240,7 +241,7 @@ export function useMobileCardsModel<TRow>(
         row: row.row,
         index: row.index,
         checkboxAttrs: row.checkboxAttrs,
-        attrs: { ...table.cardAttrs(row.row, row.index), role: "listitem" },
+        attrs: { ...table.cardAttrs(row.row, row.index, {}), role: "listitem" },
         get cells() {
           return cells();
         },

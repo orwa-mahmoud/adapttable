@@ -340,6 +340,15 @@ export function useDataTable<TRow>(
       layout.value.pinOffset(key),
       header ? PIN_Z.headerPinned : PIN_Z.body
     );
+  /**
+   * The row's selected state: what `state` says when it is given, without
+   * reading the table's selection; else the table's.
+   */
+  const rowSelected = (
+    row: TRow,
+    state: { readonly selected?: boolean } | undefined
+  ): boolean | undefined =>
+    state ? state.selected : options.value.selection?.isSelected(rowKey(row));
   const readonlySearchValue: Readonly<ShallowRef<string>> =
     shallowReadonly(searchValue);
   const readonlyStatusAnnouncement: Readonly<ShallowRef<string>> =
@@ -472,14 +481,14 @@ export function useDataTable<TRow>(
           toggleSortLevel: (key) => source.value.toggleSortLevel(key),
         })
       ),
-    rowAttrs: (row: TRow, index: number) => {
+    rowAttrs: (
+      row: TRow,
+      index: number,
+      state?: { readonly selected?: boolean }
+    ) => {
       const click = rowClickProps(row, options.value.onRowClick, index);
       return toVueAttrs({
-        ...rowAttributes(
-          rowKey(row),
-          index,
-          options.value.selection?.isSelected(rowKey(row))
-        ),
+        ...rowAttributes(rowKey(row), index, rowSelected(row, state)),
         ...gridRowAttributes(
           { enabled: false, windowed: windowed.value },
           windowStart.value + index
@@ -500,7 +509,11 @@ export function useDataTable<TRow>(
         style: { ...attrs.style, ...pinStyle(column.key, false) },
       });
     },
-    cardAttrs: (row: TRow, index: number) => {
+    cardAttrs: (
+      row: TRow,
+      index: number,
+      state?: { readonly selected?: boolean }
+    ) => {
       const size = cardSetSize(source.value, windowStart.value);
       const click = rowClickProps(row, options.value.onRowClick, index);
       return toVueAttrs({
@@ -509,9 +522,7 @@ export function useDataTable<TRow>(
         "data-adapttable-part": "card",
         "data-row-id": rowKey(row),
         "data-index": index,
-        "data-selected": options.value.selection?.isSelected(rowKey(row))
-          ? ""
-          : undefined,
+        "data-selected": rowSelected(row, state) ? "" : undefined,
         "data-stagger": "",
         "aria-posinset":
           size > rows.value.length ? windowStart.value + index + 1 : undefined,

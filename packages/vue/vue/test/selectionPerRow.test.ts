@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { effectScope, shallowRef, watchEffect } from "vue";
 
 import { useRowSelection } from "../src/selection/selection";
+import { useDataTableShell } from "../src/useDataTableShell";
 
 interface Row {
   id: string;
@@ -63,5 +64,36 @@ describe("row selection reads", () => {
       checkbox: [false, true],
     });
     expect(selection.isSelected("b")).toBe(true);
+  });
+});
+
+describe("the body model under a selection change", () => {
+  it("keeps every row model, and the selected row reads its new state", () => {
+    const scope = effectScope();
+    scopes.push(() => scope.stop());
+    const shell = scope.run(() =>
+      useDataTableShell<Row>(() => ({
+        data: rows,
+        columns: [{ key: "id" }],
+        rowKey,
+        selectable: true,
+        urlSync: false,
+        forceMobile: false,
+      }))
+    )!;
+    const desktop = shell.desktop.value;
+    const mobile = shell.mobile.value;
+    const [first, second] = desktop.rows;
+    expect(first?.attrs["aria-selected"]).toBe(false);
+
+    shell.selection.value!.toggle("a");
+
+    expect(shell.desktop.value).toBe(desktop);
+    expect(shell.mobile.value).toBe(mobile);
+    expect(first?.attrs["aria-selected"]).toBe(true);
+    expect(first?.checkboxAttrs?.checked).toBe(true);
+    expect(second?.attrs["aria-selected"]).toBe(false);
+    expect(mobile.rows[0]?.attrs["data-selected"]).toBe("");
+    expect(desktop.headerCheckboxAttrs?.indeterminate).toBe(true);
   });
 });
