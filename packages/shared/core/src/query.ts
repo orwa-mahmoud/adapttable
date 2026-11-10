@@ -196,10 +196,12 @@ export type {
 } from "./grouping/groupAggregateOverrides";
 export type {
   GroupingChipKeyboardProps,
+  GroupingDragEventLike,
   GroupingDragProps,
   GroupingDragSource,
   GroupingDragState,
   GroupingDropProps,
+  GroupingKeyEventLike,
   GroupingPanelInteractions,
   GroupingPanelState,
 } from "./grouping/groupingPanelModel";

@@ -6,13 +6,17 @@ import type { ReactNode } from "react";
 
 import { useSelection } from "../selection/useSelection";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, SELECTION_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  SELECTION_LIVE,
+} from "./slotKeys";
 
-function LiveSelection({
+function LiveSelection<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const getId = chrome.getRowId;
   const resetKey = stableKey([
     chrome.source.search,
@@ -35,6 +39,7 @@ function LiveSelection({
 }
 
 /** Shared live render so bulk actions and column-select share one hook. */
-export const SELECTION_LIVE_RENDER = slotRender(SELECTION_LIVE, (props) => (
-  <LiveSelection {...props} />
-));
+export const SELECTION_LIVE_RENDER = slotRender<ChromeExtraDraw>(
+  SELECTION_LIVE,
+  (props) => <LiveSelection {...props} />
+);

@@ -31,7 +31,11 @@ import {
   slotRender,
 } from "./providers";
 import { FRONTEND_ROW_MODEL } from "./rowModelKey";
-import { type ChromeExtraSlotProps, GROUPING_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  GROUPING_LIVE,
+} from "./slotKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 function GroupingModelProvider({
@@ -44,11 +48,11 @@ function GroupingModelProvider({
   );
 }
 
-function LiveGrouping({
+function LiveGrouping<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const source = chrome.source;
   const requestedGroupBy =
     props.groupBy === undefined ? source.groupBy : props.groupBy;
@@ -310,7 +314,9 @@ export function grouping<TRow>(
     ...coreGrouping<TRow>(groupBy, extras),
     provider: { Provider: GroupingModelProvider },
     renders: [
-      slotRender(GROUPING_LIVE, (props) => <LiveGrouping {...props} />),
+      slotRender<ChromeExtraDraw>(GROUPING_LIVE, (props) => (
+        <LiveGrouping {...props} />
+      )),
     ],
   };
 }

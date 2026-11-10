@@ -1,19 +1,8 @@
 import {
-  CELL_NAV_LIVE,
   cellNavigationInput,
-  type CellNavLiveSlotProps,
-  EDIT_HISTORY_LIVE,
-  type EditHistoryLiveSlotProps,
-  EXPORT_LIVE,
-  type ExportLiveSlotProps,
   exportPageOnly,
-  FIND_LIVE,
   finishShellLive,
-  FULLSCREEN_LIVE,
-  type FullscreenLiveSlotProps,
   publishShellOverlay,
-  SELECTION_STATS_LIVE,
-  type SelectionStatsLiveSlotProps,
   type ShellOperationInput,
   sourceWindowStart,
   withShellOperations,
@@ -45,7 +34,20 @@ import {
   disabledHistory,
   windowedTableAria,
 } from "./shellLiveStubs";
-import { type FindLiveSlotProps } from "./slotKeys";
+import {
+  CELL_NAV_LIVE,
+  type CellNavLiveSlotProps,
+  EDIT_HISTORY_LIVE,
+  type EditHistoryLiveSlotProps,
+  EXPORT_LIVE,
+  type ExportLiveSlotProps,
+  FIND_LIVE,
+  type FindLiveSlotProps,
+  FULLSCREEN_LIVE,
+  type FullscreenLiveSlotProps,
+  SELECTION_STATS_LIVE,
+  type SelectionStatsLiveSlotProps,
+} from "./slotKeys";
 
 interface HistoryResult<TRow> {
   history: DataTableShellResult<TRow>["editHistory"];
@@ -93,7 +95,7 @@ export function HistoryLiveGate<TRow>({
     onCellEdit: shell.chromeProps.onCellEdit,
     onBatchEdit: shell.chromeProps.onBatchEdit,
     children: apply,
-  } as unknown as EditHistoryLiveSlotProps;
+  } satisfies EditHistoryLiveSlotProps<TRow>;
   return filled ? (
     <FeatureSlot slot={EDIT_HISTORY_LIVE} props={historyProps} />
   ) : (
@@ -150,7 +152,7 @@ function FindStage<TRow>({
     urlKey: shell.chromeProps.urlKey,
     root: chrome.rootRef,
     children: (find: typeof DISABLED_FIND) => children({ ...live, find }),
-  } as unknown as FindLiveSlotProps<never>;
+  } satisfies FindLiveSlotProps<TRow>;
   return filled ? (
     <FeatureSlot slot={FIND_LIVE} props={findProps} />
   ) : (
@@ -210,7 +212,7 @@ function CellNavStage<TRow>({
     editing: chrome.editing,
     children: (gridFocus: ReturnType<typeof disabledGridFocus>) =>
       children({ ...live, gridFocus }),
-  } as unknown as CellNavLiveSlotProps;
+  } satisfies CellNavLiveSlotProps<TRow>;
   return filled ? (
     <FeatureSlot slot={CELL_NAV_LIVE} props={navProps} />
   ) : (
@@ -253,7 +255,7 @@ function ExportStage<TRow>({
     pageOnly: exportPageOnly(chrome.featureNotices),
     children: (exportHandler: typeof DISABLED_EXPORT) =>
       children({ ...live, exportHandler }),
-  } as unknown as ExportLiveSlotProps;
+  } satisfies ExportLiveSlotProps<TRow>;
   return filled ? (
     <FeatureSlot slot={EXPORT_LIVE} props={exportProps} />
   ) : (
@@ -281,7 +283,7 @@ function FullscreenStage<TRow>({
     element,
     children: (fullscreen: typeof DISABLED_FULLSCREEN) =>
       children({ ...live, fullscreen }),
-  } as unknown as FullscreenLiveSlotProps;
+  } satisfies FullscreenLiveSlotProps;
   return filled ? (
     <FeatureSlot slot={FULLSCREEN_LIVE} props={fullscreenProps} />
   ) : (
@@ -302,7 +304,7 @@ function SelectionStatsStage<TRow>({
     firstRowIndex: windowStartOf(shell),
     children: (stats: DataTableShellResult<TRow>["selectionStats"]) =>
       children({ ...live, stats }),
-  } as unknown as SelectionStatsLiveSlotProps;
+  } satisfies SelectionStatsLiveSlotProps<TRow>;
   return filled ? (
     <FeatureSlot slot={SELECTION_STATS_LIVE} props={statsProps} />
   ) : (

@@ -27,5 +27,5 @@ export function toReactColumnResizeHandleProps(
   return {
     ...props,
     "data-adapttable-part": "resize-handle",
-  } as unknown as ReactColumnResizeHandleProps;
+  };
 }

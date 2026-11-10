@@ -57,6 +57,7 @@ import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { bulkActionErrorMessage } from '@adapttable/core';
 import { BulkBarState } from '@adapttable/core/binding';
+import { CELL_NAV_LIVE } from '@adapttable/core/binding';
 import { CellConflictAsk } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
@@ -87,6 +88,7 @@ import { ChecklistSearchProps } from '@adapttable/core/binding';
 import { ChecklistSlots as ChecklistSlots_2 } from '@adapttable/core/binding';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
+import { CHROME_BODY } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { ChromeBodySlotProps as ChromeBodySlotProps_2 } from '@adapttable/core/binding';
 import { ChromeExtraSlot } from '@adapttable/core/binding';
@@ -102,6 +104,7 @@ import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_WIDTH } from '@adapttable/core/binding';
 import { COLUMN_GROUP_TOGGLE } from '@adapttable/core/binding';
+import { COLUMN_LAYOUT_LIVE } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
 import { ColumnDragRowAttrs } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
@@ -185,6 +188,7 @@ import { DirtyCellState } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { edgePinStyle } from '@adapttable/core';
+import { EDIT_HISTORY_LIVE } from '@adapttable/core/binding';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
@@ -202,6 +206,7 @@ import { EditEvent } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
 import { EditHistoryLiveSlotProps as EditHistoryLiveSlotProps_2 } from '@adapttable/core/binding';
 import { EditHistoryState } from '@adapttable/core';
+import { EDITING_LIVE } from '@adapttable/core/binding';
 import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { editorBusyProps } from '@adapttable/core/editing';
@@ -213,6 +218,8 @@ import { ElementType } from 'react';
 import { ensureForcedColorsStyles } from '@adapttable/core/binding';
 import { EXPAND_TOGGLE } from '@adapttable/core/binding';
 import { ExpandToggleSlotProps } from '@adapttable/core/binding';
+import { EXPANSION_LIVE } from '@adapttable/core/binding';
+import { EXPORT_LIVE } from '@adapttable/core/binding';
 import { ExportAllControls } from '@adapttable/core';
 import { ExportAllQuery } from '@adapttable/core';
 import { ExportAllResult } from '@adapttable/core';
@@ -270,6 +277,7 @@ import { FetchAllExport } from '@adapttable/core';
 import { FillHandleCellSlotProps as FillHandleCellSlotProps_2 } from '@adapttable/core/binding';
 import { FillHandleSlotProps } from '@adapttable/core/binding';
 import { FillHandleSlots as FillHandleSlots_2 } from '@adapttable/core/binding';
+import { FILTER_CHIPS_LIVE } from '@adapttable/core/binding';
 import { FILTER_HEADER } from '@adapttable/core/binding';
 import { FILTER_TYPES } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
@@ -309,6 +317,7 @@ import { FilterWidgetKind } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
 import { FilterWidgetRenderProps } from '@adapttable/core';
 import { FIND_BAR } from '@adapttable/core/binding';
+import { FIND_LIVE } from '@adapttable/core/binding';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
 import { FindBarProps } from '@adapttable/core/binding';
 import { FindBarSlots as FindBarSlots_2 } from '@adapttable/core/binding';
@@ -322,6 +331,7 @@ import { FlattenedColumns } from '@adapttable/core';
 import { focusEditorOnMount } from '@adapttable/core/editing';
 import { FORCED_COLORS_CSS } from '@adapttable/core/binding';
 import { formatMultiDraft } from '@adapttable/core/editing';
+import { FULLSCREEN_LIVE } from '@adapttable/core/binding';
 import { FullscreenLiveSlotProps as FullscreenLiveSlotProps_2 } from '@adapttable/core/binding';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
@@ -346,6 +356,7 @@ import { groupedHeaderChildRule } from '@adapttable/core/binding';
 import { groupedHeaderLabelStyle } from '@adapttable/core/binding';
 import { GroupHeaderCardSlotProps as GroupHeaderCardSlotProps_2 } from '@adapttable/core/binding';
 import { GroupHeaderRowSlotProps as GroupHeaderRowSlotProps_2 } from '@adapttable/core/binding';
+import { GROUPING_LIVE } from '@adapttable/core/binding';
 import { GroupingCapability } from '@adapttable/core';
 import { GroupingChipKeyboardProps as GroupingChipKeyboardProps_2 } from '@adapttable/core/binding';
 import { GroupingDragProps as GroupingDragProps_2 } from '@adapttable/core/binding';
@@ -454,6 +465,7 @@ import { PinnedSummaryEntry } from '@adapttable/core';
 import { pinnedSummaryPart } from '@adapttable/core';
 import { pinnedSummaryRowId } from '@adapttable/core';
 import { pinnedSummarySideFromId } from '@adapttable/core';
+import { PINNING_LIVE } from '@adapttable/core/binding';
 import { PinOffset } from '@adapttable/core';
 import { PinOffset as PinOffset_2 } from '@adapttable/core/binding';
 import { PinSide } from '@adapttable/core';
@@ -469,6 +481,7 @@ import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
 import { PivotPanelSurfaceProps as PivotPanelSurfaceProps_2 } from '@adapttable/core/binding';
 import { PivotZone } from '@adapttable/core';
 import { PivotZoneProps as PivotZoneProps_2 } from '@adapttable/core/binding';
+import { PlainSlotKey } from '@adapttable/core/binding';
 import { Props } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
@@ -507,6 +520,7 @@ import { resolveRowStyle } from '@adapttable/core/binding';
 import { resolveStickyToolbar } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
 import { restoreFocusSoon } from '@adapttable/core';
+import { ROW_ACTIONS_LIVE } from '@adapttable/core/binding';
 import { ROW_DND_MIME } from '@adapttable/core/binding';
 import { ROW_EDIT_ACTIONS } from '@adapttable/core/binding';
 import { ROW_ID_ATTRIBUTE } from '@adapttable/core';
@@ -558,6 +572,7 @@ import { RowReorderLabels } from '@adapttable/core';
 import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
+import { RowSlotKey } from '@adapttable/core/binding';
 import { rowSourceIndex } from '@adapttable/core/binding';
 import { rowSpanSignature } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
@@ -581,6 +596,8 @@ import { SavedViewsSlotProps as SavedViewsSlotProps_2 } from '@adapttable/core/b
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
 import { SearchInputState } from '@adapttable/core/binding';
+import { SELECTION_LIVE } from '@adapttable/core/binding';
+import { SELECTION_STATS_LIVE } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
 import { SelectionStatPart } from '@adapttable/core/binding';
 import { SelectionStats } from '@adapttable/core';
@@ -660,6 +677,7 @@ import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
 import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
 import { toolbarShowsFilters } from '@adapttable/core';
 import { TotalCountCapability } from '@adapttable/core';
+import { TREE_LIVE } from '@adapttable/core/binding';
 import { TREE_TOGGLE } from '@adapttable/core/binding';
 import { treeCardStyle } from '@adapttable/core';
 import { TreeCellProps as TreeCellProps_2 } from '@adapttable/core/binding';
@@ -985,8 +1003,7 @@ export interface BulkBarChromeProps {
 
 export { BulkBarState }
 
-// @public
-export const CELL_NAV_LIVE: FeatureSlotKey<CellNavLiveSlotProps<never>>;
+export { CELL_NAV_LIVE }
 
 export { CellConflictAsk }
 
@@ -1021,7 +1038,12 @@ export { cellFlashAttr }
 export const cellHighlightStyle: (props: Readonly<Record<string, unknown>> | undefined, base: CSSProperties | undefined, selected: CSSProperties) => CSSProperties | undefined;
 
 // @public
-export type CellNavLiveSlotProps<TRow = never> = CellNavLiveSlotProps_2<Omit<UseGridFocusOptions<TRow>, "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind">, ComposedTableProps<TRow>, GridFocusState, ReactNode>;
+export type CellNavLiveDraw = <TRow>(props: CellNavLiveSlotProps<TRow>) => ReactNode;
+
+// @public
+export type CellNavLiveSlotProps<TRow = never> = CellNavLiveSlotProps_2<Omit<UseGridFocusOptions<TRow>, "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind">, ComposedTableProps<TRow>, GridFocusState, ReactNode, CellEdit<TRow>> & {
+    readonly editing?: EditableCellEditing<TRow>;
+};
 
 export { CellProps }
 
@@ -1072,8 +1094,7 @@ export { ChecklistValue }
 
 export { ChipLabelResolver }
 
-// @public
-export const CHROME_BODY: FeatureSlotKey<ChromeBodySlotProps<never>>;
+export { CHROME_BODY }
 
 // @public
 export interface ChromeBodyData<TRow> {
@@ -1091,6 +1112,9 @@ export interface ChromeBodyData<TRow> {
 }
 
 // @public
+export type ChromeBodyDraw = <TRow>(props: ChromeBodySlotProps<TRow>) => ReactNode;
+
+// @public
 export function ChromeBodyGate<TRow>(input: {
     readonly chrome: TableChrome<TRow>;
     readonly props: ComposedTableProps<TRow>;
@@ -1099,6 +1123,9 @@ export function ChromeBodyGate<TRow>(input: {
 
 // @public
 export type ChromeBodySlotProps<TRow = never> = ChromeBodySlotProps_2<TableChrome<TRow>, ComposedTableProps<TRow>, ChromeBodyData<TRow>, ReactNode>;
+
+// @public
+export type ChromeExtraDraw = <TRow>(props: ChromeExtraSlotProps<TRow>) => ReactNode;
 
 // @public
 export function ChromeExtrasGate<TRow>(input: {
@@ -1131,8 +1158,7 @@ export { COLUMN_GROUP_TOGGLE }
 // @public
 export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps>;
 
-// @public
-export const COLUMN_LAYOUT_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { COLUMN_LAYOUT_LIVE }
 
 export { COLUMN_MENU }
 
@@ -1901,8 +1927,7 @@ export function disabledHistory<TRow>(): EditHistoryState<TRow>;
 
 export { edgePinStyle }
 
-// @public
-export const EDIT_HISTORY_LIVE: FeatureSlotKey<EditHistoryLiveSlotProps<never>>;
+export { EDIT_HISTORY_LIVE }
 
 // @public
 export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<never>>;
@@ -1992,6 +2017,9 @@ export interface EditHistoryHandle {
 }
 
 // @public
+export type EditHistoryLiveDraw = <TRow>(props: EditHistoryLiveSlotProps<TRow>) => ReactNode;
+
+// @public
 export type EditHistoryLiveSlotProps<TRow = never> = EditHistoryLiveSlotProps_2<TRow, EditHistoryState<TRow>, EditHistoryOptions, ColumnDef<TRow>, ReactNode>;
 
 // @public
@@ -2002,8 +2030,7 @@ export interface EditHistoryOptions {
 
 export { EditHistoryState }
 
-// @public
-export const EDITING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { EDITING_LIVE }
 
 export { EditLifecycle }
 
@@ -2034,11 +2061,9 @@ export function ExpandChevron(input: Readonly<{
 
 export { ExpandToggleSlotProps }
 
-// @public
-export const EXPANSION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { EXPANSION_LIVE }
 
-// @public
-export const EXPORT_LIVE: FeatureSlotKey<ExportLiveSlotProps>;
+export { EXPORT_LIVE }
 
 export { ExportAllControls }
 
@@ -2065,6 +2090,9 @@ export { ExportCsvOptions }
 export { ExportHandlerState }
 
 export { ExportInfo }
+
+// @public
+export type ExportLiveDraw = <TRow>(props: ExportLiveSlotProps<TRow>) => ReactNode;
 
 // @public
 export type ExportLiveSlotProps<TRow = never> = ExportLiveSlotProps_2<TRow, ExportHandlerState, ColumnDef<TRow>, ReactNode>;
@@ -2254,8 +2282,14 @@ export function FeatureProviders(input: {
 export type FeatureRender<TProps> = FeatureRender_2<TProps, ReactNode>;
 
 // @public
-export function FeatureSlot<TProps>(input: {
-    readonly slot: FeatureSlotKey<TProps>;
+export function FeatureSlot<TProps>(props: {
+    readonly slot: PlainSlotKey<TProps>;
+    readonly props: TProps;
+}): ReactNode;
+
+// @public
+export function FeatureSlot<TProps>(props: {
+    readonly slot: RowSlotKey<(props: NoInfer<TProps>) => ReactNode>;
     readonly props: TProps;
 }): ReactNode;
 
@@ -2303,8 +2337,7 @@ export type FillHandleSlots = FillHandleSlots_2<ReactNode>;
 // @public
 export function fillSlot<TState>(slot: Slot<TState> | undefined, state: TState): ReactNode;
 
-// @public
-export const FILTER_CHIPS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { FILTER_CHIPS_LIVE }
 
 // @public
 export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps>;
@@ -2428,8 +2461,7 @@ export { FilterWidgetRenderProps }
 
 export { FIND_BAR }
 
-// @public
-export const FIND_LIVE: FeatureSlotKey<FindLiveSlotProps<never>>;
+export { FIND_LIVE }
 
 export { FIND_URL_WRITE_DEBOUNCE_MS }
 
@@ -2454,6 +2486,9 @@ export { FindButtonProps }
 export function findButtonRender(Button: AdapterFeatureComponent<AdapterFindButtonProps>): FeatureRender<ToolbarExtrasSlotProps>;
 
 export { FindInTableState }
+
+// @public
+export type FindLiveDraw = <TRow>(props: FindLiveSlotProps<TRow>) => ReactNode;
 
 // @public
 export interface FindLiveSlotProps<TRow = never> extends UseFindInTableOptions<TRow> {
@@ -2488,8 +2523,10 @@ export function ForcedColorsStyle(): null;
 
 export { formatMultiDraft }
 
+export { FULLSCREEN_LIVE }
+
 // @public
-export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps>;
+export type FullscreenLiveDraw = (props: FullscreenLiveSlotProps) => ReactNode;
 
 // @public
 export type FullscreenLiveSlotProps = FullscreenLiveSlotProps_2<FullscreenState, ReactNode>;
@@ -2563,8 +2600,7 @@ export type GroupHeaderRowSlotProps<TRow = never> = GroupHeaderRowSlotProps_2<TR
 // @public
 export const groupIndentStyle: (level: number) => CSSProperties;
 
-// @public
-export const GROUPING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { GROUPING_LIVE }
 
 // @public
 export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<never>>;
@@ -3057,8 +3093,7 @@ export { pinnedSummaryRowId }
 
 export { pinnedSummarySideFromId }
 
-// @public
-export const PINNING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { PINNING_LIVE }
 
 export { PinOffset }
 
@@ -3213,8 +3248,7 @@ export { resolveVirtualRows }
 
 export { restoreFocusSoon }
 
-// @public
-export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { ROW_ACTIONS_LIVE }
 
 export { ROW_DND_MIME }
 
@@ -3491,11 +3525,9 @@ export interface SearchInputElementProps extends Props {
 
 export { SearchInputState }
 
-// @public
-export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { SELECTION_LIVE }
 
-// @public
-export const SELECTION_STATS_LIVE: FeatureSlotKey<SelectionStatsLiveSlotProps<never>>;
+export { SELECTION_STATS_LIVE }
 
 export { SelectionState }
 
@@ -3508,6 +3540,9 @@ export function SelectionStatsChrome(input: Readonly<SelectionStatsChromeProps>)
 
 // @public
 export type SelectionStatsChromeProps = SelectionStatsChromeProps_2<ReactNode>;
+
+// @public
+export type SelectionStatsLiveDraw = <TRow>(props: SelectionStatsLiveSlotProps<TRow>) => ReactNode;
 
 // @public
 export type SelectionStatsLiveSlotProps<TRow = never> = SelectionStatsLiveSlotProps_2<TRow, ColumnDef<TRow>, ReactNode>;
@@ -3663,9 +3698,14 @@ export type SidePanelTabProps = SidePanelTabProps_2<SidePanelEntry, KeyboardEven
 export type Slot<TState> = ReactNode | ((state: TState) => ReactNode);
 
 // @public
-export function slotRender<TProps>(slot: FeatureSlotKey<TProps>, render: (props: TProps) => ReactNode, options?: {
+export function slotRender<TProps>(slot: PlainSlotKey<TProps>, render: (props: TProps) => ReactNode, options?: {
     readonly orderAs?: string;
 }): FeatureRender<TProps>;
+
+// @public
+export function slotRender<TDraw extends (props: never) => ReactNode>(slot: RowSlotKey<TDraw>, render: NoInfer<TDraw>, options?: {
+    readonly orderAs?: string;
+}): FeatureRender<never>;
 
 export { SortableValue }
 
@@ -4086,8 +4126,7 @@ export { TotalCountCapability }
 // @public
 export const TREE_CELL: FeatureSlotKey<TreeCellProps<never>>;
 
-// @public
-export const TREE_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
+export { TREE_LIVE }
 
 export { TREE_TOGGLE }
 

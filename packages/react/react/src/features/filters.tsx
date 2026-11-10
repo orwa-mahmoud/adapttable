@@ -21,7 +21,11 @@ import {
   FeatureStateScope,
   slotRender,
 } from "./providers";
-import { type ChromeExtraSlotProps, FILTER_CHIPS_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  FILTER_CHIPS_LIVE,
+} from "./slotKeys";
 import type { StaticTableFeature, TableFeature } from "./tableFeature";
 
 function FiltersEngineProvider({
@@ -34,11 +38,11 @@ function FiltersEngineProvider({
   );
 }
 
-function LiveFilterChips({
+function LiveFilterChips<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const extraChips = useExtraChips({
     extra: chrome.source.extra,
     setExtra: chrome.source.setExtra,
@@ -99,7 +103,9 @@ export function filters<TRow>(
     ...coreFilters<TRow, ReactNode>(defs),
     provider: { Provider: FiltersEngineProvider },
     renders: [
-      slotRender(FILTER_CHIPS_LIVE, (props) => <LiveFilterChips {...props} />),
+      slotRender<ChromeExtraDraw>(FILTER_CHIPS_LIVE, (props) => (
+        <LiveFilterChips {...props} />
+      )),
     ],
   };
 }

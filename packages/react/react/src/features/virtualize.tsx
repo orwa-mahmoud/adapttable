@@ -15,6 +15,7 @@ import { useVirtualChromeBody } from "../virtual/useVirtualChromeBodyData";
 import { slotRender } from "./providers";
 import {
   CHROME_BODY,
+  type ChromeBodyDraw,
   type ChromeBodySlotProps,
   KEYED_WINDOW,
   type KeyedWindowSlotProps,
@@ -40,11 +41,11 @@ export type VirtualizeOptions =
  * The in-tree body that calls TanStack. Mounted only when this feature
  * fills {@link CHROME_BODY}.
  */
-function VirtualChromeBody({
+function VirtualChromeBody<TRow>({
   chrome,
   props,
   children,
-}: Readonly<ChromeBodySlotProps<never>>): ReactNode {
+}: Readonly<ChromeBodySlotProps<TRow>>): ReactNode {
   const { body, scrollToRow } = useVirtualChromeBody(chrome, props);
   return (
     <RowScrollContext.Provider value={scrollToRow}>
@@ -82,7 +83,7 @@ export function virtualize(
   return {
     ...coreVirtualize(options),
     renders: [
-      slotRender(CHROME_BODY, (slotProps) => (
+      slotRender<ChromeBodyDraw>(CHROME_BODY, (slotProps) => (
         <VirtualChromeBody {...slotProps} />
       )),
       slotRender(KEYED_WINDOW, (slotProps) => <KeyedWindow {...slotProps} />),

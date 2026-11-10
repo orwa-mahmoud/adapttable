@@ -25,6 +25,39 @@ export interface GroupingDragState {
 }
 
 /**
+ * As much of a native drag event as the grouping panel reads. A DOM
+ * `DragEvent` and every framework's wrapper around one satisfy it.
+ *
+ * @public
+ */
+export interface GroupingDragEventLike {
+  /** The drag's payload; `null` only on a synthetic event. */
+  readonly dataTransfer: DataTransfer | null;
+  /** Where the event started. */
+  readonly target: EventTarget | null;
+  /** The element the handler is bound to. */
+  readonly currentTarget: EventTarget | null;
+  /** Whether an inner target already took the drop. */
+  readonly defaultPrevented: boolean;
+  /** Accept the drop, or refuse the drag start. */
+  preventDefault(): void;
+}
+
+/**
+ * As much of a key press on a grouping chip as the panel reads.
+ *
+ * @public
+ */
+export interface GroupingKeyEventLike {
+  /** The key pressed, as `KeyboardEvent.key` names it. */
+  readonly key: string;
+  /** The chip the handler is bound to, for its writing direction. */
+  readonly currentTarget: EventTarget | null;
+  /** Keep the arrow from scrolling the page. */
+  preventDefault(): void;
+}
+
+/**
  * Drag props spread onto a desktop column header or a grouping chip.
  *
  * @typeParam TDragEvent - The binding's drag event (React's synthetic event
@@ -36,9 +69,9 @@ export interface GroupingDragProps<TDragEvent = DragEvent> {
   /** Native HTML drag handle. */
   draggable?: boolean;
   /** Starts the grouping-field drag. */
-  onDragStart?: (event: TDragEvent) => void;
+  onDragStart?(event: TDragEvent): void;
   /** Ends the grouping-field drag. */
-  onDragEnd?: (event: TDragEvent) => void;
+  onDragEnd?(event: TDragEvent): void;
   /** Marks the element whose native drag is active. */
   "data-grouping-dragging"?: boolean;
 }
@@ -52,13 +85,13 @@ export interface GroupingDragProps<TDragEvent = DragEvent> {
  */
 export interface GroupingDropProps<TDragEvent = DragEvent> {
   /** Enters an insertion target. */
-  onDragEnter?: (event: TDragEvent) => void;
+  onDragEnter?(event: TDragEvent): void;
   /** Moves over an insertion target. */
-  onDragOver?: (event: TDragEvent) => void;
+  onDragOver?(event: TDragEvent): void;
   /** Leaves an insertion target. */
-  onDragLeave?: (event: TDragEvent) => void;
+  onDragLeave?(event: TDragEvent): void;
   /** Drops onto an insertion target. */
-  onDrop?: (event: TDragEvent) => void;
+  onDrop?(event: TDragEvent): void;
   /** Marks the insertion target currently under the dragged field. */
   "data-drop-active"?: boolean;
 }
@@ -78,7 +111,7 @@ export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
   /** Localized move instruction for the field. */
   "aria-label": string;
   /** Handle logical arrow movement and removal keys. */
-  onKeyDown: (event: TKeyboardEvent) => void;
+  onKeyDown(event: TKeyboardEvent): void;
 }
 
 /** Interaction engine published by the optional feature provider. @public */
@@ -106,15 +139,18 @@ export interface GroupingPanelInteractions {
     };
   };
   /** Props for a draggable desktop column header. */
-  headerDragProps: (key: string) => GroupingDragProps;
+  headerDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
   /** Props for a draggable grouping chip. */
-  chipDragProps: (key: string) => GroupingDragProps;
+  chipDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
   /** Keyboard controls for a grouping chip. */
-  chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+  chipKeyboardProps: (
+    key: string,
+    label: string
+  ) => GroupingChipKeyboardProps<GroupingKeyEventLike>;
   /** Props for one insertion boundary. */
-  dropProps: (index: number) => GroupingDropProps;
+  dropProps: (index: number) => GroupingDropProps<GroupingDragEventLike>;
   /** Props for the drag-to-ungroup target. */
-  removeDropProps: () => GroupingDropProps;
+  removeDropProps: () => GroupingDropProps<GroupingDragEventLike>;
   /** Append a grouping field. */
   add: (key: string) => void;
   /** Remove a grouping field. */

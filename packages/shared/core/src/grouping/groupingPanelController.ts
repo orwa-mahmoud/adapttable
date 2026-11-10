@@ -35,11 +35,13 @@ import type { GroupAggregateOverride } from "./groupAggregateOverrides";
 import {
   GROUPING_COLUMN_DND_MIME,
   type GroupingChipKeyboardProps,
+  type GroupingDragEventLike,
   groupingDragKey,
   type GroupingDragProps,
   type GroupingDragSource,
   type GroupingDragState,
   type GroupingDropProps,
+  type GroupingKeyEventLike,
   type GroupingPanelInteractions,
   hasGroupingColumnDrag,
   moveGroupingKey,
@@ -48,36 +50,7 @@ import {
 } from "./groupingPanelModel";
 import { formatGroupBy, parseGroupBy } from "./groupKeys";
 
-/**
- * As much of a native drag event as the grouping panel reads. A DOM
- * `DragEvent` and every framework's wrapper around one satisfy it.
- *
- * @public
- */
-export interface GroupingDragEventLike {
-  /** The drag's payload; `null` only on a synthetic event. */
-  readonly dataTransfer: DataTransfer | null;
-  /** Where the event started. */
-  readonly target: EventTarget | null;
-  /** The element the handler is bound to. */
-  readonly currentTarget: EventTarget | null;
-  /** Accept the drop, or refuse the drag start. */
-  preventDefault(): void;
-}
-
-/**
- * As much of a key press on a grouping chip as the panel reads.
- *
- * @public
- */
-export interface GroupingKeyEventLike {
-  /** The key pressed, as `KeyboardEvent.key` names it. */
-  readonly key: string;
-  /** The chip the handler is bound to, for its writing direction. */
-  readonly currentTarget: EventTarget | null;
-  /** Keep the arrow from scrolling the page. */
-  preventDefault(): void;
-}
+export type { GroupingDragEventLike, GroupingKeyEventLike };
 
 /**
  * What a grouping panel controller reads.
@@ -651,7 +624,7 @@ export function createGroupingPanelController(
   const dragProps = (
     key: string,
     source: GroupingDragSource
-  ): GroupingDragProps => ({
+  ): GroupingDragProps<GroupingDragEventLike> => ({
     draggable: true,
     onDragStart: (event) => {
       startDrag(key, source, event);
@@ -659,7 +632,9 @@ export function createGroupingPanelController(
     onDragEnd: finishDrag,
     "data-grouping-dragging": dragFlag(key, source),
   });
-  const dropProps = (index: number): GroupingDropProps => ({
+  const dropProps = (
+    index: number
+  ): GroupingDropProps<GroupingDragEventLike> => ({
     onDragEnter: (event) => {
       dragEnter(index, event);
     },
@@ -675,7 +650,7 @@ export function createGroupingPanelController(
         ? true
         : undefined,
   });
-  const removeDropProps = (): GroupingDropProps => ({
+  const removeDropProps = (): GroupingDropProps<GroupingDragEventLike> => ({
     onDragEnter: removeDragEnter,
     onDragOver: removeDragOver,
     onDragLeave: () => undefined,
@@ -685,7 +660,7 @@ export function createGroupingPanelController(
   const chipKeyboardProps = (
     key: string,
     label: string
-  ): GroupingChipKeyboardProps => ({
+  ): GroupingChipKeyboardProps<GroupingKeyEventLike> => ({
     tabIndex: 0,
     role: "button",
     "aria-label": chipLabel(label),

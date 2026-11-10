@@ -9819,17 +9819,6 @@
       "subpaths": [".", "./binding"]
     },
     {
-      "name": "GroupingDragEventLike",
-      "kind": "type",
-      "module": "grouping/groupingPanelController.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "grouping/groupingPanelController.ts#GroupingDragEventLike",
-      "subpaths": ["."]
-    },
-    {
       "name": "GroupingDropHandlers",
       "kind": "type",
       "module": "grouping/groupingPanelChromeModel.ts",
@@ -9849,17 +9838,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupingPanelChromeModel.ts#GroupingDropPlan",
-      "subpaths": ["."]
-    },
-    {
-      "name": "GroupingKeyEventLike",
-      "kind": "type",
-      "module": "grouping/groupingPanelController.ts",
-      "audience": "app",
-      "path": ".",
-      "forward": true,
-      "deprecated": false,
-      "identity": "grouping/groupingPanelController.ts#GroupingKeyEventLike",
       "subpaths": ["."]
     },
     {
@@ -10674,6 +10652,39 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/featureContribution.ts#RemainingFeatureDomain",
+      "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "ResizeHandleEventLike",
+      "kind": "type",
+      "module": "columns/columnResize.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "columns/columnResize.ts#ResizeHandleEventLike",
+      "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "ResizeKeyEventLike",
+      "kind": "type",
+      "module": "columns/columnResize.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "columns/columnResize.ts#ResizeKeyEventLike",
+      "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "ResizePointerEventLike",
+      "kind": "type",
+      "module": "columns/columnResize.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "columns/columnResize.ts#ResizePointerEventLike",
       "subpaths": [".", "./binding"]
     },
     {
@@ -15627,6 +15638,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "rowSlotKey",
+      "kind": "runtime",
+      "module": "features/featureKeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureKeys.ts#rowSlotKey",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "rowSourceIndex",
       "kind": "runtime",
       "module": "virtual/virtualTableModel.ts",
@@ -16408,6 +16430,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "CellNavLiveDraw",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#CellNavLiveDraw",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "CellNavLiveSlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
@@ -16518,6 +16551,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "ChromeBodyDraw",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#ChromeBodyDraw",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ChromeBodyRegion",
       "kind": "type",
       "module": "layout/tableChromeState.ts",
@@ -16570,6 +16614,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/chromeModel.ts#ChromeColumnPlan",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ChromeExtraDraw",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#ChromeExtraDraw",
       "subpaths": ["./binding"]
     },
     {
@@ -17145,6 +17200,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "EditHistoryLiveDraw",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#EditHistoryLiveDraw",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "EditHistoryLiveSlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
@@ -17175,6 +17241,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "export/exportBindingState.ts#ExportHandlerState",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ExportLiveDraw",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#ExportLiveDraw",
       "subpaths": ["./binding"]
     },
     {
@@ -17662,6 +17739,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "FindLiveDraw",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#FindLiveDraw",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FindLiveSlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
@@ -17681,6 +17769,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "find/findBarContract.ts#FindSearchProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FullscreenLiveDraw",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#FullscreenLiveDraw",
       "subpaths": ["./binding"]
     },
     {
@@ -18289,6 +18388,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "PlainSlotKey",
+      "kind": "type",
+      "module": "features/featureKeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureKeys.ts#PlainSlotKey",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "RegisteredFeature",
       "kind": "type",
       "module": "features/featureRegistration.ts",
@@ -18553,6 +18663,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "RowSlotKey",
+      "kind": "type",
+      "module": "features/featureKeys.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featureKeys.ts#RowSlotKey",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "RuntimeChromeInput",
       "kind": "type",
       "module": "layout/shellPipeline.ts",
@@ -18693,6 +18814,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "focus/selectionStatsContract.ts#SelectionStatsChromeProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "SelectionStatsLiveDraw",
+      "kind": "type",
+      "module": "features/slotContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/slotContract.ts#SelectionStatsLiveDraw",
       "subpaths": ["./binding"]
     },
     {
@@ -22620,6 +22752,24 @@
       ]
     },
     {
+      "name": "GroupingDragEventLike",
+      "kind": "type",
+      "module": "grouping/groupingPanelModel.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingPanelModel.ts#GroupingDragEventLike",
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./grouping",
+        "./query"
+      ]
+    },
+    {
       "name": "GroupingDragProps",
       "kind": "type",
       "module": "grouping/groupingPanelModel.ts",
@@ -22682,6 +22832,24 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupingPanelModel.ts#GroupingDropProps",
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./grouping",
+        "./query"
+      ]
+    },
+    {
+      "name": "GroupingKeyEventLike",
+      "kind": "type",
+      "module": "grouping/groupingPanelModel.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupingPanelModel.ts#GroupingKeyEventLike",
       "subpaths": [
         ".",
         "./binding",

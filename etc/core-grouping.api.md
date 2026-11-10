@@ -274,17 +274,26 @@ export type GroupingCapability = "client" | "server" | false;
 // @public
 export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     "aria-label": string;
-    onKeyDown: (event: TKeyboardEvent) => void;
+    onKeyDown(event: TKeyboardEvent): void;
     role: "button";
     tabIndex: 0;
+}
+
+// @public
+export interface GroupingDragEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly dataTransfer: DataTransfer | null;
+    readonly defaultPrevented: boolean;
+    preventDefault(): void;
+    readonly target: EventTarget | null;
 }
 
 // @public
 export interface GroupingDragProps<TDragEvent = DragEvent> {
     "data-grouping-dragging"?: boolean;
     draggable?: boolean;
-    onDragEnd?: (event: TDragEvent) => void;
-    onDragStart?: (event: TDragEvent) => void;
+    onDragEnd?(event: TDragEvent): void;
+    onDragStart?(event: TDragEvent): void;
 }
 
 // @public
@@ -301,10 +310,17 @@ export interface GroupingDragState {
 // @public
 export interface GroupingDropProps<TDragEvent = DragEvent> {
     "data-drop-active"?: boolean;
-    onDragEnter?: (event: TDragEvent) => void;
-    onDragLeave?: (event: TDragEvent) => void;
-    onDragOver?: (event: TDragEvent) => void;
-    onDrop?: (event: TDragEvent) => void;
+    onDragEnter?(event: TDragEvent): void;
+    onDragLeave?(event: TDragEvent): void;
+    onDragOver?(event: TDragEvent): void;
+    onDrop?(event: TDragEvent): void;
+}
+
+// @public
+export interface GroupingKeyEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly key: string;
+    preventDefault(): void;
 }
 
 // @public
@@ -312,12 +328,12 @@ export interface GroupingPanelInteractions {
     add: (key: string) => void;
     addAggregate: (key: string) => void;
     announcement: string;
-    chipDragProps: (key: string) => GroupingDragProps;
-    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+    chipDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
+    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps<GroupingKeyEventLike>;
     declaredAggregates?: DeclaredAggregates;
     drag?: GroupingDragState;
-    dropProps: (index: number) => GroupingDropProps;
-    headerDragProps: (key: string) => GroupingDragProps;
+    dropProps: (index: number) => GroupingDropProps<GroupingDragEventLike>;
+    headerDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
     live?: {
         readonly subscribe: (listener: () => void) => () => void;
         readonly getSnapshot: () => {
@@ -328,7 +344,7 @@ export interface GroupingPanelInteractions {
     moveBy: (key: string, delta: -1 | 1) => void;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;
-    removeDropProps: () => GroupingDropProps;
+    removeDropProps: () => GroupingDropProps<GroupingDragEventLike>;
     restoreAggregateDefaults: () => void;
     setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
     setAggregateOperation: (key: string, operationId: string) => void;

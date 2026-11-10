@@ -195,8 +195,12 @@ and labels through `useTableRuntime` (`TableRuntime`, `TableRuntimeView`) rather
 them (`featureIds()`, optional `query` for page/search/sort); chrome offers them with `usePublishTableRuntime`. A feature also fills
 named positions: `renders` is a list of `FeatureRender` entries, each pairing a
 `FeatureSlotKey` from `featureSlotKey` with what to draw — built with
-`slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`,
-and the positions themselves are named constants: `STATUS_BAR` (the footer
+`slotRender`, which keeps the props typed — chrome asks through `FeatureSlot`.
+A position whose props carry types each table supplies (its rows, a
+binding's state) is a `RowSlotKey` from `rowSlotKey`: its fill is one
+function generic over those types, and each table asks with its own props.
+Every other key is a `PlainSlotKey`. The positions themselves are named
+constants: `STATUS_BAR` (the footer
 strip, filled by `statusBar` or `selectionStats` from
 `@adapttable/<kit>/status-bar` — a single slot, so the pair share one element
 and it draws once), `FIND_BAR` (`findInTable` from
@@ -287,7 +291,11 @@ state arrives through `ChromeExtrasGate` (`ChromeExtraSlotProps`) —
 (`FullscreenLiveSlotProps`), `SELECTION_STATS_LIVE`
 (`SelectionStatsLiveSlotProps`), `COMMAND_PALETTE_LIVE` and
 `CONTEXT_MENU_LIVE` (`ContextMenuLiveSlotProps`). An unfilled live slot passes
-an inert stand-in through, so the same chrome renders either way.
+an inert stand-in through, so the same chrome renders either way. Every live
+slot above but the command palette and context menu is a row slot key, each
+with its fill's type, which a fill names when it fills the slot: `ChromeExtraDraw`, `ChromeBodyDraw`,
+`EditHistoryLiveDraw`, `FindLiveDraw`, `CellNavLiveDraw`, `ExportLiveDraw`,
+`FullscreenLiveDraw` and `SelectionStatsLiveDraw`.
 
 Factories: `feature` (ad-hoc) · `rowReorder` · `rowPinning` · `cellSpan` ·
 `extraRows` · `rowAppearance` · `rowDetail` · `nestedTable` · `editing` ·
@@ -2769,7 +2777,9 @@ reorder/resize/pin rows. `columnResizeHandleProps(columnKey, onResize, label,
 options?)` accepts `ColumnResizeHandleOptions`, whose optional `signal` ties a
 custom handle to its owner. Aborting cancels pending drag frames, removes the
 handle's document listeners, and makes retained pointer, keyboard and autosize
-callbacks inert. Existing callers can omit the options. Toolbar glue: `SearchInputState` (debounced
+callbacks inert. Existing callers can omit the options. The handlers read
+`ResizePointerEventLike`, `ResizeKeyEventLike` and `ResizeHandleEventLike`, which
+a DOM event and every framework's event satisfy. Toolbar glue: `SearchInputState` (debounced
 search binding), `FilterTriggerToggle` (popover/drawer trigger
 handlers). Editing/grouping glue: `focusEditorOnMount`,
 `preserveEditorFocusOnLayoutChange` (capture the active editor before a responsive

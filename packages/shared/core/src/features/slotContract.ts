@@ -21,6 +21,7 @@ import type {
   ColumnMenuSlotProps,
 } from "../columns/columnMenuModel";
 import type { ColumnModel } from "../contracts/columns";
+import type { BatchEditHandler } from "../editing/batchEditing";
 import type {
   BatchEditBarProps,
   RowEditActionsProps,
@@ -50,7 +51,7 @@ import type {
 } from "../tree/treeToggleContract";
 import type { BulkAction, Direction, TableLabels } from "../types";
 import type { FeatureHostState } from "./currentHost";
-import { featureSlotKey } from "./featureKeys";
+import { featureSlotKey, type RowSlotKey } from "./featureKeys";
 
 /**
  * The Columns menu in the toolbar.
@@ -357,14 +358,23 @@ export interface ChromeBodySlotProps<
 }
 
 /**
+ * What fills the scroll-window body: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type ChromeBodyDraw = <TChrome, TProps, TBody, TNode>(
+  props: ChromeBodySlotProps<TChrome, TProps, TBody, TNode>
+) => TNode;
+
+/**
  * The scroll-window body. Filled only by `virtualize()`; the plain path
  * never loads the window math.
  *
  * @public
  */
-export const CHROME_BODY = featureSlotKey<ChromeBodySlotProps>("chrome-body", {
+export const CHROME_BODY = featureSlotKey<never>("chrome-body", {
   single: true,
-});
+}) as RowSlotKey<ChromeBodyDraw>;
 
 /**
  * A window over an opaque keyed list, for a kit that assembles its own body.
@@ -497,13 +507,22 @@ export type FindLiveSlotProps<
 };
 
 /**
+ * What fills the find stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type FindLiveDraw = <TOptions, TNode>(
+  props: FindLiveSlotProps<TOptions, TNode>
+) => TNode;
+
+/**
  * Find state. Filled only by `findInTable()`.
  *
  * @public
  */
-export const FIND_LIVE = featureSlotKey<FindLiveSlotProps>("find-live", {
+export const FIND_LIVE = featureSlotKey<never>("find-live", {
   single: true,
-});
+}) as RowSlotKey<FindLiveDraw>;
 
 /**
  * Edit history plus the state that records gestures.
@@ -529,23 +548,34 @@ export interface EditHistoryLiveSlotProps<
   columns: readonly TColumn[];
   /** The host's commit channel. */
   onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-  /** The table; receives history and the recording commit channel. */
+  /** The host's batch channel, recorded as one gesture per batch. */
+  onBatchEdit?: BatchEditHandler<TRow>;
+  /** The table; receives history and the recording commit channels. */
   children: (result: {
     history: THistory;
     onCellEdit:
       ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+    onBatchEdit?: BatchEditHandler<TRow>;
   }) => TNode;
 }
+
+/**
+ * What fills the edit-history stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type EditHistoryLiveDraw = <TRow, THistory, TOptions, TColumn, TNode>(
+  props: EditHistoryLiveSlotProps<TRow, THistory, TOptions, TColumn, TNode>
+) => TNode;
 
 /**
  * Undo and redo.
  *
  * @public
  */
-export const EDIT_HISTORY_LIVE = featureSlotKey<EditHistoryLiveSlotProps>(
-  "edit-history-live",
-  { single: true }
-);
+export const EDIT_HISTORY_LIVE = featureSlotKey<never>("edit-history-live", {
+  single: true,
+}) as RowSlotKey<EditHistoryLiveDraw>;
 
 /**
  * Cell navigation plus the state that arms the grid.
@@ -554,6 +584,7 @@ export const EDIT_HISTORY_LIVE = featureSlotKey<EditHistoryLiveSlotProps>(
  * @typeParam THostProps - The host props the paste and fill channels read.
  * @typeParam TFocus - The binding's grid-focus state.
  * @typeParam TNode - The binding's render node.
+ * @typeParam TEdit - One recorded cell edit.
  *
  * @public
  */
@@ -562,13 +593,14 @@ export interface CellNavLiveSlotProps<
   THostProps = unknown,
   TFocus = unknown,
   TNode = unknown,
+  TEdit = unknown,
 > {
   /** Inputs the grid needs after chrome has run. `enabled` is implied. */
   options: TOptions;
   /** Host props the paste/fill channels read. */
   hostProps: THostProps;
   /** Record a paste/fill as one undo gesture. */
-  record: (edits: readonly unknown[]) => void;
+  record: (edits: readonly TEdit[]) => void;
   /** Undo the last paste/fill gesture. */
   undo: () => number;
   /** Redo the last undone gesture. */
@@ -586,14 +618,22 @@ export interface CellNavLiveSlotProps<
 }
 
 /**
+ * What fills the cell-navigation stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type CellNavLiveDraw = <TOptions, THostProps, TFocus, TNode, TEdit>(
+  props: CellNavLiveSlotProps<TOptions, THostProps, TFocus, TNode, TEdit>
+) => TNode;
+
+/**
  * Cell navigation.
  *
  * @public
  */
-export const CELL_NAV_LIVE = featureSlotKey<CellNavLiveSlotProps>(
-  "cell-nav-live",
-  { single: true }
-);
+export const CELL_NAV_LIVE = featureSlotKey<never>("cell-nav-live", {
+  single: true,
+}) as RowSlotKey<CellNavLiveDraw>;
 
 /**
  * Export plus the state that single-flights the write.
@@ -630,13 +670,22 @@ export interface ExportLiveSlotProps<
 }
 
 /**
+ * What fills the export stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type ExportLiveDraw = <TRow, TExport, TColumn, TNode>(
+  props: ExportLiveSlotProps<TRow, TExport, TColumn, TNode>
+) => TNode;
+
+/**
  * Export.
  *
  * @public
  */
-export const EXPORT_LIVE = featureSlotKey<ExportLiveSlotProps>("export-live", {
+export const EXPORT_LIVE = featureSlotKey<never>("export-live", {
   single: true,
-});
+}) as RowSlotKey<ExportLiveDraw>;
 
 /**
  * Fullscreen plus the state that names the portal container.
@@ -657,14 +706,22 @@ export interface FullscreenLiveSlotProps<
 }
 
 /**
+ * What fills the fullscreen stage: one function for any binding's state.
+ *
+ * @public
+ */
+export type FullscreenLiveDraw = <TFullscreen, TNode>(
+  props: FullscreenLiveSlotProps<TFullscreen, TNode>
+) => TNode;
+
+/**
  * Fullscreen.
  *
  * @public
  */
-export const FULLSCREEN_LIVE = featureSlotKey<FullscreenLiveSlotProps>(
-  "fullscreen-live",
-  { single: true }
-);
+export const FULLSCREEN_LIVE = featureSlotKey<never>("fullscreen-live", {
+  single: true,
+}) as RowSlotKey<FullscreenLiveDraw>;
 
 /**
  * Optional chrome that transforms the row model or editing bundle.
@@ -695,14 +752,22 @@ export interface ChromeExtraSlotProps<
 }
 
 /**
+ * What fills a chrome-extra stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type ChromeExtraDraw = <TChrome, TProps, TNode>(
+  props: ChromeExtraSlotProps<TChrome, TProps, TNode>
+) => TNode;
+
+/**
  * Grouping row model, collapse and paging.
  *
  * @public
  */
-export const GROUPING_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "grouping-live",
-  { single: true }
-);
+export const GROUPING_LIVE = featureSlotKey<never>("grouping-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Kit-owned interactive grouping strip above the table body.
@@ -719,79 +784,72 @@ export const GROUPING_PANEL = featureSlotKey<GroupingPanelSlotProps>(
  *
  * @public
  */
-export const TREE_LIVE = featureSlotKey<ChromeExtraSlotProps>("tree-live", {
+export const TREE_LIVE = featureSlotKey<never>("tree-live", {
   single: true,
-});
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Row-detail / nested-table expansion.
  *
  * @public
  */
-export const EXPANSION_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "expansion-live",
-  { single: true }
-);
+export const EXPANSION_LIVE = featureSlotKey<never>("expansion-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Cell, row and batch editing.
  *
  * @public
  */
-export const EDITING_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "editing-live",
-  { single: true }
-);
+export const EDITING_LIVE = featureSlotKey<never>("editing-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Row-pin state machine.
  *
  * @public
  */
-export const PINNING_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "pinning-live",
-  { single: true }
-);
+export const PINNING_LIVE = featureSlotKey<never>("pinning-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Filter-tree chips merged onto chrome.
  *
  * @public
  */
-export const FILTER_CHIPS_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "filter-chips-live",
-  { single: true }
-);
+export const FILTER_CHIPS_LIVE = featureSlotKey<never>("filter-chips-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * User column layout (hide / order / pin / resize).
  *
  * @public
  */
-export const COLUMN_LAYOUT_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "column-layout-live",
-  { single: true }
-);
+export const COLUMN_LAYOUT_LIVE = featureSlotKey<never>("column-layout-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Add / duplicate / delete and host row actions.
  *
  * @public
  */
-export const ROW_ACTIONS_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "row-actions-live",
-  { single: true }
-);
+export const ROW_ACTIONS_LIVE = featureSlotKey<never>("row-actions-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Row selection state machine.
  *
  * @public
  */
-export const SELECTION_LIVE = featureSlotKey<ChromeExtraSlotProps>(
-  "selection-live",
-  { single: true }
-);
+export const SELECTION_LIVE = featureSlotKey<never>("selection-live", {
+  single: true,
+}) as RowSlotKey<ChromeExtraDraw>;
 
 /**
  * Selection aggregates. Computed only when the feature is composed.
@@ -820,14 +878,23 @@ export interface SelectionStatsLiveSlotProps<
 }
 
 /**
+ * What fills the selection-figures stage: one function for any row and any binding's types.
+ *
+ * @public
+ */
+export type SelectionStatsLiveDraw = <TRow, TColumn, TNode>(
+  props: SelectionStatsLiveSlotProps<TRow, TColumn, TNode>
+) => TNode;
+
+/**
  * Selection-stats compute.
  *
  * @public
  */
-export const SELECTION_STATS_LIVE = featureSlotKey<SelectionStatsLiveSlotProps>(
+export const SELECTION_STATS_LIVE = featureSlotKey<never>(
   "selection-stats-live",
   { single: true }
-);
+) as RowSlotKey<SelectionStatsLiveDraw>;
 
 /**
  * Header checkbox that selects a column.

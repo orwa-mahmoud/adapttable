@@ -9,11 +9,8 @@ import {
   focusAfterAggregationRemoval,
   groupingAggregationOptions,
   groupingAvailableColumns,
-  type GroupingChipKeyboardProps as CoreGroupingChipKeyboardProps,
   groupingColumnName,
-  type GroupingDragProps as CoreGroupingDragProps,
   groupingDropPlan,
-  type GroupingDropProps as CoreGroupingDropProps,
   INERT_GROUPING_DROP_HANDLERS,
 } from "@adapttable/core";
 import type {
@@ -75,26 +72,8 @@ export type GroupingDropProps = NeutralGroupingDropProps<DragEvent>;
 export type GroupingChipKeyboardProps =
   NeutralGroupingChipKeyboardProps<KeyboardEvent>;
 
-function reactGroupingDragProps(
-  props: CoreGroupingDragProps
-): GroupingDragProps {
-  return props as unknown as GroupingDragProps;
-}
-
 /** Drop handlers that refuse, without letting the refusal bubble. */
 const INERT_DROP_PROPS: GroupingDropProps = INERT_GROUPING_DROP_HANDLERS;
-
-function reactGroupingDropProps(
-  props: CoreGroupingDropProps
-): GroupingDropProps {
-  return props as unknown as GroupingDropProps;
-}
-
-function reactGroupingChipKeyboardProps(
-  props: CoreGroupingChipKeyboardProps
-): GroupingChipKeyboardProps {
-  return props as unknown as GroupingChipKeyboardProps;
-}
 
 /**
  * Props for the kit-owned grouping panel surface — `@adapttable/core`'s
@@ -254,17 +233,15 @@ export function GroupingPanelChrome<TRow>({
   const { drag, announcement } = useLiveGroupingState(state);
   const plan = groupingDropPlan(state.groupBy, drag);
   const inert = plan.inert;
-  const ontoChip = (index: number): CoreGroupingDropProps => {
+  const ontoChip = (index: number): GroupingDropProps => {
     const target = plan.chipTarget(index);
-    if (target === undefined) {
-      return INERT_DROP_PROPS as unknown as CoreGroupingDropProps;
-    }
-    return deferGroupingDropToInner(state.dropProps(target));
+    if (target === undefined) return INERT_DROP_PROPS;
+    return deferGroupingDropToInner<DragEvent>(state.dropProps(target));
   };
-  const ontoPanel = (): CoreGroupingDropProps =>
+  const ontoPanel = (): GroupingDropProps =>
     plan.panelTarget === undefined
       ? {}
-      : deferGroupingDropToInner(state.dropProps(plan.panelTarget));
+      : deferGroupingDropToInner<DragEvent>(state.dropProps(plan.panelTarget));
 
   const boundary = (index: number) =>
     inert(index)
@@ -276,7 +253,7 @@ export function GroupingPanelChrome<TRow>({
       : {
           dragging: drag !== undefined,
           active: drag?.overIndex === index,
-          dropProps: reactGroupingDropProps(state.dropProps(index)),
+          dropProps: state.dropProps(index),
         };
 
   return (
@@ -284,7 +261,7 @@ export function GroupingPanelChrome<TRow>({
       label={labels.groupingPanel}
       mobile={mobile}
       dir={dir}
-      {...(mobile ? {} : reactGroupingDropProps(ontoPanel()))}
+      {...(mobile ? {} : ontoPanel())}
       data-adapttable-part="grouping-panel"
     >
       {state.groupBy.map((key, index) => {
@@ -300,7 +277,7 @@ export function GroupingPanelChrome<TRow>({
             key={key}
             data-adapttable-part="grouping-item"
             style={{ display: "inline-flex", alignItems: "center" }}
-            {...(mobile ? {} : reactGroupingDropProps(ontoChip(index)))}
+            {...(mobile ? {} : ontoChip(index))}
           >
             {!mobile ? (
               <DropZone
@@ -313,10 +290,8 @@ export function GroupingPanelChrome<TRow>({
             <Chip
               label={label}
               level={index + 1}
-              dragProps={reactGroupingDragProps(state.chipDragProps(key))}
-              keyboardProps={reactGroupingChipKeyboardProps(
-                state.chipKeyboardProps(key, label)
-              )}
+              dragProps={state.chipDragProps(key)}
+              keyboardProps={state.chipKeyboardProps(key, label)}
               onRemove={() => state.remove(key)}
               removeLabel={labels.removeGroupingColumn(label)}
               data-adapttable-part="grouping-chip"
@@ -338,7 +313,7 @@ export function GroupingPanelChrome<TRow>({
           empty
           dragging={drag !== undefined}
           active={drag?.overIndex === 0}
-          dropProps={reactGroupingDropProps(state.dropProps(0))}
+          dropProps={state.dropProps(0)}
           data-adapttable-part="grouping-drop-zone"
         />
       ) : null}
@@ -456,7 +431,7 @@ export function GroupingPanelChrome<TRow>({
           <RemoveZone
             label={labels.groupingDropToRemove}
             active={drag.overRemove === true}
-            dropProps={reactGroupingDropProps(state.removeDropProps())}
+            dropProps={state.removeDropProps()}
             data-adapttable-part="grouping-remove-zone"
           />
         </span>

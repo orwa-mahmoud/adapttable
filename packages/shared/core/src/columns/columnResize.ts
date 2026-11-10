@@ -22,11 +22,48 @@ export interface ColumnResizeHandleProps {
   /** The handle's accessible name, naming the column it resizes. */
   "aria-label": string;
   /** Starts the drag. */
-  onPointerDown: (event: PointerEvent & { currentTarget: HTMLElement }) => void;
+  onPointerDown(event: ResizePointerEventLike): void;
   /** Handles the keys this control owns. */
-  onKeyDown: (event: KeyboardEvent & { currentTarget: HTMLElement }) => void;
+  onKeyDown(event: ResizeKeyEventLike): void;
   /** Double-click sizes the column to its content, as every grid does. */
-  onDoubleClick: (event: MouseEvent & { currentTarget: HTMLElement }) => void;
+  onDoubleClick(event: ResizeHandleEventLike): void;
+}
+
+/**
+ * As much of an event on a resize handle as the handle reads. A DOM event and
+ * every framework's wrapper around one satisfy it.
+ *
+ * @public
+ */
+export interface ResizeHandleEventLike {
+  /** The handle the listener is bound to. */
+  readonly currentTarget: HTMLElement;
+}
+
+/**
+ * As much of a pointer press on a resize handle as the drag reads.
+ *
+ * @public
+ */
+export interface ResizePointerEventLike extends ResizeHandleEventLike {
+  /** Where the drag starts. */
+  readonly clientX: number;
+  /** Keep the press from selecting text. */
+  preventDefault(): void;
+  /** Keep the press from reaching the header's own handlers. */
+  stopPropagation(): void;
+}
+
+/**
+ * As much of a key press on a resize handle as the handle reads.
+ *
+ * @public
+ */
+export interface ResizeKeyEventLike extends ResizeHandleEventLike {
+  /** The key pressed, as `KeyboardEvent.key` names it. */
+  readonly key: string;
+  /** Keep the arrow from scrolling the page. */
+  preventDefault(): void;
 }
 
 /** Ownership for a resize handle and any drag it starts. @public */

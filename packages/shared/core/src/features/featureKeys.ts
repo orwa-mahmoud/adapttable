@@ -86,6 +86,55 @@ export function featureSlotKey<TProps>(
 }
 
 /**
+ * A slot whose props carry types each table supplies: its row type, or a
+ * binding's own state.
+ *
+ * One fill draws the slot for every table, so it is written once for any of
+ * them: `TDraw` is that fill's type, a function generic over those types
+ * (`<TRow>(props: SomeSlotProps<TRow>) => Node`). A table asks with its own
+ * props, and a fill written for one row type does not fit.
+ *
+ * @typeParam TDraw - The fill's draw function, generic over the row.
+ *
+ * @public
+ */
+export interface RowSlotKey<TDraw> extends FeatureSlotKey<never> {
+  /**
+   * Phantom marker that pins the fill's type; never read at runtime. It is
+   * required, so a plain slot key is never taken for a row slot key.
+   */
+  readonly __draw: TDraw | undefined;
+}
+
+/**
+ * A slot key whose props do not depend on the row: what tells a plain slot
+ * from a {@link RowSlotKey} when a fill or an ask is typed.
+ *
+ * @public
+ */
+export type PlainSlotKey<TProps> = FeatureSlotKey<TProps> & {
+  readonly __draw?: undefined;
+};
+
+/**
+ * Declare a slot whose props carry the table's row type.
+ *
+ * @param id - The slot's id; a binding reuses core's id for the same position.
+ * @param options - Whether the position is one element rather than a list.
+ * @returns The key.
+ *
+ * @public
+ */
+/* @__NO_SIDE_EFFECTS__ */
+export function rowSlotKey<TDraw>(
+  id: string,
+  options: { readonly single?: boolean } = {}
+): RowSlotKey<TDraw> {
+  // The draw marker is phantom: the key is its id and flag, like every slot key.
+  return featureSlotKey<never>(id, options) as RowSlotKey<TDraw>;
+}
+
+/**
  * One feature's answer for one slot.
  *
  * @typeParam TProps - What the table computes for the slot.
@@ -118,10 +167,20 @@ export interface FeatureRender<TProps, TNode = unknown> {
  */
 /* @__NO_SIDE_EFFECTS__ */
 export function slotRender<TProps, TNode>(
-  slot: FeatureSlotKey<TProps>,
+  slot: PlainSlotKey<TProps>,
   render: (props: TProps) => TNode,
+  options?: { readonly orderAs?: string }
+): FeatureRender<TProps, TNode>;
+export function slotRender<TDraw extends (props: never) => unknown>(
+  slot: RowSlotKey<TDraw>,
+  render: NoInfer<TDraw>,
+  options?: { readonly orderAs?: string }
+): FeatureRender<never, ReturnType<TDraw>>;
+export function slotRender(
+  slot: FeatureSlotKey<never>,
+  render: (props: never) => unknown,
   options: { readonly orderAs?: string } = {}
-): FeatureRender<TProps, TNode> {
+): FeatureRender<never> {
   return options.orderAs === undefined
     ? { slot, render }
     : { slot, render, orderAs: options.orderAs };

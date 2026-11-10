@@ -18,14 +18,18 @@ import { useLazyChildren } from "../tree/useLazyChildren";
 import { useTreeExpansion } from "../tree/useTreeExpansion";
 import { hasLoadedChildren } from "../virtual/chromeBodyShared";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, TREE_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  TREE_LIVE,
+} from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
-function LiveTree({
+function LiveTree<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const getRowId = chrome.getRowId;
   const treeExpansion = useTreeExpansion({
     expandedIds: props.expandedIds,
@@ -146,6 +150,10 @@ export function tree<TRow>(
 ): TableFeature<TRow> {
   return {
     ...coreTree<TRow>(options),
-    renders: [slotRender(TREE_LIVE, (props) => <LiveTree {...props} />)],
+    renders: [
+      slotRender<ChromeExtraDraw>(TREE_LIVE, (props) => (
+        <LiveTree {...props} />
+      )),
+    ],
   };
 }

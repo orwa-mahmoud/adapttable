@@ -595,7 +595,7 @@ export function cachedSnapshot<T>(held: {
 export function cardSetSize(source: Pick<TableSource<unknown>, "total" | "rows">, windowStart: number): number;
 
 // @public
-export const CELL_NAV_LIVE: FeatureSlotKey<CellNavLiveSlotProps<unknown, unknown, unknown, unknown>>;
+export const CELL_NAV_LIVE: RowSlotKey<CellNavLiveDraw>;
 
 // @public
 export function cellAttributes<TRow>(column: ColumnMetadata<TRow>, sizing: ChromeCellSizing): {
@@ -641,7 +641,10 @@ export function cellNavigationInput<TRow, TColumn>(input: {
 };
 
 // @public
-export interface CellNavLiveSlotProps<TOptions = unknown, THostProps = unknown, TFocus = unknown, TNode = unknown> {
+export type CellNavLiveDraw = <TOptions, THostProps, TFocus, TNode, TEdit>(props: CellNavLiveSlotProps<TOptions, THostProps, TFocus, TNode, TEdit>) => TNode;
+
+// @public
+export interface CellNavLiveSlotProps<TOptions = unknown, THostProps = unknown, TFocus = unknown, TNode = unknown, TEdit = unknown> {
     children: (gridFocus: TFocus) => TNode;
     currentMatch: GridCell | null | undefined;
     hostProps: THostProps;
@@ -649,7 +652,7 @@ export interface CellNavLiveSlotProps<TOptions = unknown, THostProps = unknown, 
     onFind?: () => void;
     options: TOptions;
     pinOffset?: (key: string) => PinOffset | undefined;
-    record: (edits: readonly unknown[]) => void;
+    record: (edits: readonly TEdit[]) => void;
     redo: () => number;
     undo: () => number;
 }
@@ -778,10 +781,13 @@ export interface ChecklistWindowState extends ChecklistWindow {
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
 // @public
-export const CHROME_BODY: FeatureSlotKey<ChromeBodySlotProps<unknown, unknown, unknown, unknown>>;
+export const CHROME_BODY: RowSlotKey<ChromeBodyDraw>;
 
 // @public
 export const CHROME_EXTRA_SLOT_ORDER: readonly ["column-layout-live", "filter-chips-live", "grouping-live", "tree-live", "selection-live", "row-actions-live", "pinning-live", "expansion-live", "editing-live"];
+
+// @public
+export type ChromeBodyDraw = <TChrome, TProps, TBody, TNode>(props: ChromeBodySlotProps<TChrome, TProps, TBody, TNode>) => TNode;
 
 // @public
 export type ChromeBodyRegion = "skeleton" | "empty" | "mobile" | "desktop";
@@ -834,6 +840,9 @@ export function chromeEmptyVariant(input: {
     readonly extra?: Readonly<Record<string, unknown>>;
     readonly search: string;
 }): "noData" | "noResults";
+
+// @public
+export type ChromeExtraDraw = <TChrome, TProps, TNode>(props: ChromeExtraSlotProps<TChrome, TProps, TNode>) => TNode;
 
 // @public
 export interface ChromeExtraSlot<TNode = unknown, TStyle = unknown> {
@@ -1023,7 +1032,7 @@ export const COLUMN_GROUP_TOGGLE: FeatureSlotKey<ColumnGroupToggleProps>;
 export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps<unknown>>;
 
 // @public
-export const COLUMN_LAYOUT_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const COLUMN_LAYOUT_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
 export const COLUMN_MENU: FeatureSlotKey<ColumnMenuSlotProps<never>>;
@@ -1355,15 +1364,9 @@ export { columnPathText as primitiveText }
 // @public
 export interface ColumnResizeHandleProps {
     "aria-label": string;
-    onDoubleClick: (event: MouseEvent & {
-        currentTarget: HTMLElement;
-    }) => void;
-    onKeyDown: (event: KeyboardEvent & {
-        currentTarget: HTMLElement;
-    }) => void;
-    onPointerDown: (event: PointerEvent & {
-        currentTarget: HTMLElement;
-    }) => void;
+    onDoubleClick(event: ResizeHandleEventLike): void;
+    onKeyDown(event: ResizeKeyEventLike): void;
+    onPointerDown(event: ResizePointerEventLike): void;
     role: "button";
     tabIndex: 0;
 }
@@ -2517,7 +2520,7 @@ export function drawnSlotFills<TNode>(slot: {
 }, fills: readonly SlotFill<TNode>[]): readonly SlotFill<TNode>[];
 
 // @public
-export const EDIT_HISTORY_LIVE: FeatureSlotKey<EditHistoryLiveSlotProps<never, unknown, unknown, ColumnModel<never>, unknown>>;
+export const EDIT_HISTORY_LIVE: RowSlotKey<EditHistoryLiveDraw>;
 
 // @public
 export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
@@ -2635,18 +2638,23 @@ export type EditHistoryInput = boolean | {
 };
 
 // @public
+export type EditHistoryLiveDraw = <TRow, THistory, TOptions, TColumn, TNode>(props: EditHistoryLiveSlotProps<TRow, THistory, TOptions, TColumn, TNode>) => TNode;
+
+// @public
 export interface EditHistoryLiveSlotProps<TRow = never, THistory = unknown, TOptions = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
     children: (result: {
         history: THistory;
         onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+        onBatchEdit?: BatchEditHandler<TRow>;
     }) => TNode;
     columns: readonly TColumn[];
     editHistory: boolean | TOptions | undefined;
+    onBatchEdit?: BatchEditHandler<TRow>;
     onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
 }
 
 // @public
-export const EDITING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const EDITING_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
 export interface EditingContribution<TRow> {
@@ -2697,10 +2705,10 @@ export interface ExpandToggleSlotProps {
 }
 
 // @public
-export const EXPANSION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const EXPANSION_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
-export const EXPORT_LIVE: FeatureSlotKey<ExportLiveSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+export const EXPORT_LIVE: RowSlotKey<ExportLiveDraw>;
 
 // @public
 export interface ExportAllControls {
@@ -2791,6 +2799,9 @@ export interface ExportInfo<TRow> {
     filename: string;
     rows: readonly TRow[];
 }
+
+// @public
+export type ExportLiveDraw = <TRow, TExport, TColumn, TNode>(props: ExportLiveSlotProps<TRow, TExport, TColumn, TNode>) => TNode;
 
 // @public
 export interface ExportLiveSlotProps<TRow = never, TExport = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
@@ -3158,7 +3169,7 @@ export interface FillHandleSlots<TNode = unknown> {
 }
 
 // @public
-export const FILTER_CHIPS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const FILTER_CHIPS_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
 export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
@@ -3512,12 +3523,7 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
 export const FIND_BAR: FeatureSlotKey<FindBarProps>;
 
 // @public
-export const FIND_LIVE: FeatureSlotKey<{
-    root?: {
-        readonly current: HTMLElement | null;
-    };
-    children: (find: FindInTableState) => unknown;
-}>;
+export const FIND_LIVE: RowSlotKey<FindLiveDraw>;
 
 // @public
 export interface FindBarProps {
@@ -3567,6 +3573,9 @@ export interface FindInTableState {
     setOpen: (open: boolean) => void;
     setQuery: (query: string) => void;
 }
+
+// @public
+export type FindLiveDraw = <TOptions, TNode>(props: FindLiveSlotProps<TOptions, TNode>) => TNode;
 
 // @public
 export type FindLiveSlotProps<TOptions = unknown, TNode = unknown> = TOptions & {
@@ -3641,7 +3650,7 @@ export type FrontendEngineFactory<TRow> = (options: CreateTableEngineOptions<TRo
 export function frontendRowModelOf(features: readonly object[]): FrontendEngineFactory<unknown> | undefined;
 
 // @public
-export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps<unknown, unknown>>;
+export const FULLSCREEN_LIVE: RowSlotKey<FullscreenLiveDraw>;
 
 // @public
 export interface FullscreenContribution {
@@ -3649,6 +3658,9 @@ export interface FullscreenContribution {
     readonly supported: boolean;
     readonly toggle: () => void;
 }
+
+// @public
+export type FullscreenLiveDraw = <TFullscreen, TNode>(props: FullscreenLiveSlotProps<TFullscreen, TNode>) => TNode;
 
 // @public
 export interface FullscreenLiveSlotProps<TFullscreen = unknown, TNode = unknown> {
@@ -3869,7 +3881,7 @@ export function groupIndentStyle(level: number): {
 };
 
 // @public
-export const GROUPING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const GROUPING_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
 export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
@@ -3883,7 +3895,7 @@ export type GroupingCapability = "client" | "server" | false;
 // @public
 export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     "aria-label": string;
-    onKeyDown: (event: TKeyboardEvent) => void;
+    onKeyDown(event: TKeyboardEvent): void;
     role: "button";
     tabIndex: 0;
 }
@@ -3895,11 +3907,20 @@ export interface GroupingContribution<TRow> {
 }
 
 // @public
+export interface GroupingDragEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly dataTransfer: DataTransfer | null;
+    readonly defaultPrevented: boolean;
+    preventDefault(): void;
+    readonly target: EventTarget | null;
+}
+
+// @public
 export interface GroupingDragProps<TDragEvent = DragEvent> {
     "data-grouping-dragging"?: boolean;
     draggable?: boolean;
-    onDragEnd?: (event: TDragEvent) => void;
-    onDragStart?: (event: TDragEvent) => void;
+    onDragEnd?(event: TDragEvent): void;
+    onDragStart?(event: TDragEvent): void;
 }
 
 // @public
@@ -3916,10 +3937,17 @@ export interface GroupingDragState {
 // @public
 export interface GroupingDropProps<TDragEvent = DragEvent> {
     "data-drop-active"?: boolean;
-    onDragEnter?: (event: TDragEvent) => void;
-    onDragLeave?: (event: TDragEvent) => void;
-    onDragOver?: (event: TDragEvent) => void;
-    onDrop?: (event: TDragEvent) => void;
+    onDragEnter?(event: TDragEvent): void;
+    onDragLeave?(event: TDragEvent): void;
+    onDragOver?(event: TDragEvent): void;
+    onDrop?(event: TDragEvent): void;
+}
+
+// @public
+export interface GroupingKeyEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly key: string;
+    preventDefault(): void;
 }
 
 // @public
@@ -3980,12 +4008,12 @@ export interface GroupingPanelInteractions {
     add: (key: string) => void;
     addAggregate: (key: string) => void;
     announcement: string;
-    chipDragProps: (key: string) => GroupingDragProps;
-    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+    chipDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
+    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps<GroupingKeyEventLike>;
     declaredAggregates?: DeclaredAggregates;
     drag?: GroupingDragState;
-    dropProps: (index: number) => GroupingDropProps;
-    headerDragProps: (key: string) => GroupingDragProps;
+    dropProps: (index: number) => GroupingDropProps<GroupingDragEventLike>;
+    headerDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
     live?: {
         readonly subscribe: (listener: () => void) => () => void;
         readonly getSnapshot: () => {
@@ -3996,7 +4024,7 @@ export interface GroupingPanelInteractions {
     moveBy: (key: string, delta: -1 | 1) => void;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;
-    removeDropProps: () => GroupingDropProps;
+    removeDropProps: () => GroupingDropProps<GroupingDragEventLike>;
     restoreAggregateDefaults: () => void;
     setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
     setAggregateOperation: (key: string, operationId: string) => void;
@@ -4776,7 +4804,7 @@ export function pinnedScrollRows<TRow>(rows: readonly TRow[], pinState: RowPinSt
 export type PinnedSide = PinSide | undefined;
 
 // @public
-export const PINNING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const PINNING_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
 export interface PinningContribution {
@@ -4889,6 +4917,11 @@ export interface PivotZoneProps<TNode = unknown> {
     readonly label: string;
     readonly zone: PivotZone;
 }
+
+// @public
+export type PlainSlotKey<TProps> = FeatureSlotKey<TProps> & {
+    readonly __draw?: undefined;
+};
 
 // @public
 export function planFeatureRegistration<TFeature>(retained: readonly RegisteredFeature<TFeature>[], next: readonly RegisteredFeature<TFeature>[], same: (current: TFeature, next: TFeature) => boolean): FeatureRegistrationPlan<TFeature>;
@@ -5020,6 +5053,24 @@ export const replaceSelection: ActionDefinition<Iterable<string>>;
 export function resetColumnLayout<TRow>(row: ColumnMenuRow<TRow>, layout: UseColumnLayoutResult<TRow>): void;
 
 // @public
+export interface ResizeHandleEventLike {
+    readonly currentTarget: HTMLElement;
+}
+
+// @public
+export interface ResizeKeyEventLike extends ResizeHandleEventLike {
+    readonly key: string;
+    preventDefault(): void;
+}
+
+// @public
+export interface ResizePointerEventLike extends ResizeHandleEventLike {
+    readonly clientX: number;
+    preventDefault(): void;
+    stopPropagation(): void;
+}
+
+// @public
 export interface ResolvableColumn<TRow> {
     readonly accessor?: (row: TRow) => unknown;
     readonly formatValue?: (row: TRow) => string;
@@ -5084,7 +5135,7 @@ export function resolveRowStyle<TRow>(rowStyle: RowStyle<TRow> | undefined, rowH
 export function retainItems<T>(previous: readonly T[] | undefined, next: readonly T[] | undefined): readonly T[] | undefined;
 
 // @public
-export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const ROW_ACTIONS_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
 export const ROW_DND_MIME = "application/x-adapttable-row";
@@ -5556,6 +5607,16 @@ export function rowScrollTarget<TRow>(row: TRow, rowKey: (row: TRow) => string, 
 export function rowSelectedReader(store: TableStore, id: string): StoreReader<boolean>;
 
 // @public
+export interface RowSlotKey<TDraw> extends FeatureSlotKey<never> {
+    readonly __draw: TDraw | undefined;
+}
+
+// @public
+export function rowSlotKey<TDraw>(id: string, options?: {
+    readonly single?: boolean;
+}): RowSlotKey<TDraw>;
+
+// @public
 export function rowSourceIndex(entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">): number;
 
 // @public
@@ -5784,10 +5845,10 @@ export const SELECTED_IDS: SliceKey<ReadonlySet<string>>;
 export function selectFrom<T>(store: TableStore, selector: (read: SliceRead) => T, equals?: (a: T, b: T) => boolean): StoreReader<T>;
 
 // @public
-export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const SELECTION_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
-export const SELECTION_STATS_LIVE: FeatureSlotKey<SelectionStatsLiveSlotProps<never, ColumnModel<never>, unknown>>;
+export const SELECTION_STATS_LIVE: RowSlotKey<SelectionStatsLiveDraw>;
 
 // @public
 export interface SelectionContribution {
@@ -5841,6 +5902,9 @@ export interface SelectionStatsChromeProps<TNode = unknown> {
     slots: SelectionStatsSlots<TNode>;
     stats: SelectionStats | null;
 }
+
+// @public
+export type SelectionStatsLiveDraw = <TRow, TColumn, TNode>(props: SelectionStatsLiveSlotProps<TRow, TColumn, TNode>) => TNode;
 
 // @public
 export interface SelectionStatsLiveSlotProps<TRow = never, TColumn = ColumnModel<TRow>, TNode = unknown> {
@@ -6033,9 +6097,14 @@ export function slotFillsOf<TNode>(features: readonly {
 }[]): ReadonlyMap<string, readonly SlotFill<TNode>[]>;
 
 // @public
-export function slotRender<TProps, TNode>(slot: FeatureSlotKey<TProps>, render: (props: TProps) => TNode, options?: {
+export function slotRender<TProps, TNode>(slot: PlainSlotKey<TProps>, render: (props: TProps) => TNode, options?: {
     readonly orderAs?: string;
 }): FeatureRender<TProps, TNode>;
+
+// @public (undocumented)
+export function slotRender<TDraw extends (props: never) => unknown>(slot: RowSlotKey<TDraw>, render: NoInfer<TDraw>, options?: {
+    readonly orderAs?: string;
+}): FeatureRender<never, ReturnType<TDraw>>;
 
 // @public
 export type SortableValue = string | number | boolean | null | undefined;
@@ -7276,7 +7345,7 @@ export type TotalCountCapability = "exact" | "loaded";
 export const TREE_CELL: FeatureSlotKey<TreeCellProps<never, unknown>>;
 
 // @public
-export const TREE_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+export const TREE_LIVE: RowSlotKey<ChromeExtraDraw>;
 
 // @public
 export const TREE_TOGGLE: FeatureSlotKey<TreeToggleProps<never>>;

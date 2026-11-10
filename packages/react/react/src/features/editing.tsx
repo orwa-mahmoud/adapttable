@@ -32,7 +32,11 @@ import { useEditValidation } from "../editing/validation";
 import type { ComposedTableProps } from "../props";
 import { featureHostOf } from "./featureHost";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, EDITING_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  EDITING_LIVE,
+} from "./slotKeys";
 import type {
   FeaturePatch,
   StaticTableFeature,
@@ -63,11 +67,11 @@ function useReportDirty(
   }, [wired, count, signature, confirm, confirmRow, confirmAll]);
 }
 
-function LiveEditing({
+function LiveEditing<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const lifecycle = useEditLifecycle({
     onEditStart: props.onEditStart,
     onEditCancel: props.onEditCancel,
@@ -173,8 +177,8 @@ function LiveEditing({
   }, [hasEditableColumn, onCellEdit]);
 
   const editingRows = useMemo(() => {
-    if (!chrome.grouping) return chrome.source.rows as never[];
-    const leaves: never[] = [];
+    if (!chrome.grouping) return chrome.source.rows;
+    const leaves: TRow[] = [];
     for (const entry of chrome.grouping.entries) {
       if (entry.kind === "row") leaves.push(entry.row);
     }
@@ -281,7 +285,7 @@ function LiveEditing({
   return children({ ...chrome, editing, editingRows } as never);
 }
 
-const editingRender = slotRender(EDITING_LIVE, (props) => (
+const editingRender = slotRender<ChromeExtraDraw>(EDITING_LIVE, (props) => (
   <LiveEditing {...props} />
 ));
 

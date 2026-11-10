@@ -13,13 +13,17 @@ import { applyReactColumnNames } from "../columns/reactColumns";
 import { resolveColumns } from "../columns/resolveColumns";
 import { useColumnLayout } from "../columns/useColumnLayout";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, COLUMN_LAYOUT_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  COLUMN_LAYOUT_LIVE,
+} from "./slotKeys";
 
-function LiveColumnLayout({
+function LiveColumnLayout<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   // Kept across renders explicitly: the values flow into a hook, and the
   // compiler does not memoize across one, so a render would otherwise hand
   // every row new columns.
@@ -71,7 +75,7 @@ function LiveColumnLayout({
 }
 
 /** Shared live render for every feature that owns user column layout. */
-export const COLUMN_LAYOUT_LIVE_RENDER = slotRender(
+export const COLUMN_LAYOUT_LIVE_RENDER = slotRender<ChromeExtraDraw>(
   COLUMN_LAYOUT_LIVE,
   (props) => <LiveColumnLayout {...props} />
 );

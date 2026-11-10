@@ -13099,6 +13099,14 @@
       "behavior": ""
     },
     {
+      "export": "CellNavLiveDraw",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "CellNavLiveSlotProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -13259,6 +13267,14 @@
       "behavior": ""
     },
     {
+      "export": "ChromeBodyDraw",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "chromeBodyRegion",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -13319,6 +13335,14 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ChromeExtraDraw",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -13806,8 +13830,8 @@
       "export": "ColumnResizeHandleProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
@@ -15051,6 +15075,14 @@
       "behavior": ""
     },
     {
+      "export": "EditHistoryLiveDraw",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "EditHistoryLiveSlotProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -15212,6 +15244,14 @@
     },
     {
       "export": "ExportInfo",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ExportLiveDraw",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16147,6 +16187,14 @@
       "behavior": ""
     },
     {
+      "export": "FindLiveDraw",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "FindLiveSlotProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -16228,6 +16276,14 @@
     },
     {
       "export": "FullscreenContribution",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FullscreenLiveDraw",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16491,6 +16547,14 @@
       "behavior": ""
     },
     {
+      "export": "GroupingDragEventLike",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "GroupingDragProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -16516,6 +16580,14 @@
     },
     {
       "export": "GroupingDropProps",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingKeyEventLike",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -17515,6 +17587,14 @@
       "behavior": ""
     },
     {
+      "export": "PlainSlotKey",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "planFeatureRegistration",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -17711,6 +17791,30 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ResizeHandleEventLike",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ResizeKeyEventLike",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ResizePointerEventLike",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -18275,6 +18379,22 @@
       "behavior": ""
     },
     {
+      "export": "rowSlotKey",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "RowSlotKey",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "rowSourceIndex",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -18572,6 +18692,14 @@
     },
     {
       "export": "SelectionStatsChromeProps",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "SelectionStatsLiveDraw",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -21395,6 +21523,14 @@
       "behavior": ""
     },
     {
+      "export": "GroupingDragEventLike",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
       "export": "GroupingDragProps",
       "currentImport": "@adapttable/core/editing",
       "kind": "type",
@@ -21420,6 +21556,14 @@
     },
     {
       "export": "GroupingDropProps",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingKeyEventLike",
       "currentImport": "@adapttable/core/editing",
       "kind": "type",
       "class": "neutral-model",
@@ -22795,6 +22939,14 @@
       "behavior": ""
     },
     {
+      "export": "GroupingDragEventLike",
+      "currentImport": "@adapttable/core/engine",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/engine",
+      "behavior": ""
+    },
+    {
       "export": "GroupingDragProps",
       "currentImport": "@adapttable/core/engine",
       "kind": "type",
@@ -22820,6 +22972,14 @@
     },
     {
       "export": "GroupingDropProps",
+      "currentImport": "@adapttable/core/engine",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/engine",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingKeyEventLike",
       "currentImport": "@adapttable/core/engine",
       "kind": "type",
       "class": "neutral-model",
@@ -23795,6 +23955,14 @@
       "behavior": ""
     },
     {
+      "export": "GroupingDragEventLike",
+      "currentImport": "@adapttable/core/grouping",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/grouping",
+      "behavior": ""
+    },
+    {
       "export": "GroupingDragProps",
       "currentImport": "@adapttable/core/grouping",
       "kind": "type",
@@ -23820,6 +23988,14 @@
     },
     {
       "export": "GroupingDropProps",
+      "currentImport": "@adapttable/core/grouping",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/grouping",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingKeyEventLike",
       "currentImport": "@adapttable/core/grouping",
       "kind": "type",
       "class": "neutral-model",
@@ -25563,6 +25739,14 @@
       "behavior": ""
     },
     {
+      "export": "GroupingDragEventLike",
+      "currentImport": "@adapttable/core/query",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
       "export": "GroupingDragProps",
       "currentImport": "@adapttable/core/query",
       "kind": "type",
@@ -25588,6 +25772,14 @@
     },
     {
       "export": "GroupingDropProps",
+      "currentImport": "@adapttable/core/query",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/query",
+      "behavior": ""
+    },
+    {
+      "export": "GroupingKeyEventLike",
       "currentImport": "@adapttable/core/query",
       "kind": "type",
       "class": "neutral-model",
@@ -28734,8 +28926,8 @@
       "export": "ColumnResizeHandleProps",
       "currentImport": "@adapttable/core",
       "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
       "behavior": ""
     },
     {
@@ -35655,6 +35847,30 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ResizeHandleEventLike",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ResizeKeyEventLike",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ResizePointerEventLike",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -43243,6 +43459,14 @@
       "behavior": ""
     },
     {
+      "export": "CellNavLiveDraw",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "CellNavLiveSlotProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -43355,6 +43579,14 @@
       "behavior": ""
     },
     {
+      "export": "ChromeBodyDraw",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "ChromeBodyGate",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -43364,6 +43596,14 @@
     },
     {
       "export": "ChromeBodySlotProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "ChromeExtraDraw",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
@@ -44339,6 +44579,14 @@
       "behavior": ""
     },
     {
+      "export": "EditHistoryLiveDraw",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "EditHistoryLiveSlotProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -44487,6 +44735,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "ExportLiveDraw",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -45115,6 +45371,14 @@
       "behavior": ""
     },
     {
+      "export": "FindLiveDraw",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "FindLiveSlotProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -45175,6 +45439,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "FullscreenLiveDraw",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -46732,6 +47004,14 @@
     },
     {
       "export": "SelectionStatsChromeProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "SelectionStatsLiveDraw",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",

@@ -15,10 +15,14 @@ import type { ReactNode } from "react";
 
 import { useExportHandler } from "../export/useExportHandler";
 import { slotRender } from "./providers";
-import { EXPORT_LIVE, type ExportLiveSlotProps } from "./slotKeys";
+import {
+  EXPORT_LIVE,
+  type ExportLiveDraw,
+  type ExportLiveSlotProps,
+} from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
-function LiveExport({
+function LiveExport<TRow>({
   exportCsv,
   source,
   columns,
@@ -27,7 +31,7 @@ function LiveExport({
   labels,
   pageOnly,
   children,
-}: ExportLiveSlotProps<never>): ReactNode {
+}: ExportLiveSlotProps<TRow>): ReactNode {
   const handler = makeExportCsvHandler(
     exportCsv,
     source,
@@ -59,6 +63,10 @@ export function exportCsv<TRow>(
 ): TableFeature<TRow> {
   return {
     ...coreExportCsv<TRow>(options),
-    renders: [slotRender(EXPORT_LIVE, (props) => <LiveExport {...props} />)],
+    renders: [
+      slotRender<ExportLiveDraw>(EXPORT_LIVE, (props) => (
+        <LiveExport {...props} />
+      )),
+    ],
   };
 }

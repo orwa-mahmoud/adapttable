@@ -13,7 +13,7 @@ import { editing } from "./editing";
 import { findInTable } from "./find-in-table";
 import { FeatureProviders, FeatureSlot } from "./providers";
 import { DISABLED_GRID_FOCUS } from "./shellLiveStubs";
-import { FIND_LIVE } from "./slotKeys";
+import { FIND_LIVE, type FindLiveSlotProps } from "./slotKeys";
 import { applyTableFeatures, type TableFeature } from "./tableFeature";
 
 /**
@@ -216,17 +216,19 @@ describe("find without cell navigation", () => {
         >
           <FeatureSlot
             slot={FIND_LIVE}
-            props={{
-              enabled: false,
-              rows: ROWS as never[],
-              columns: columns as never[],
-              urlSync: false,
-              root,
-              children: (find) => {
-                seen.push(find.open);
-                return <span>inside</span>;
-              },
-            }}
+            props={
+              {
+                enabled: false,
+                rows: ROWS,
+                columns,
+                urlSync: false,
+                root,
+                children: (find) => {
+                  seen.push(find.open);
+                  return <span>inside</span>;
+                },
+              } satisfies FindLiveSlotProps<Row>
+            }
           />
         </div>
       </FeatureProviders>

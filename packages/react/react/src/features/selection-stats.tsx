@@ -13,17 +13,18 @@ import { slotRender } from "./providers";
 import { SELECTION_LIVE_RENDER } from "./selection-live";
 import {
   SELECTION_STATS_LIVE,
+  type SelectionStatsLiveDraw,
   type SelectionStatsLiveSlotProps,
 } from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
-function LiveSelectionStats({
+function LiveSelectionStats<TRow>({
   range,
   rows,
   columns,
   firstRowIndex,
   children,
-}: SelectionStatsLiveSlotProps<never>): ReactNode {
+}: SelectionStatsLiveSlotProps<TRow>): ReactNode {
   return children(
     compute({
       enabled: true,
@@ -45,7 +46,7 @@ export function selectionStats(): StaticTableFeature {
     ...coreSelectionStats(),
     renders: [
       SELECTION_LIVE_RENDER,
-      slotRender(SELECTION_STATS_LIVE, (props) => (
+      slotRender<SelectionStatsLiveDraw>(SELECTION_STATS_LIVE, (props) => (
         <LiveSelectionStats {...props} />
       )),
     ],

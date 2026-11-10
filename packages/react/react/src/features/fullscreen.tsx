@@ -9,7 +9,11 @@ import type { ReactNode } from "react";
 
 import { useFullscreen } from "../layout/useFullscreen";
 import { slotRender } from "./providers";
-import { FULLSCREEN_LIVE, type FullscreenLiveSlotProps } from "./slotKeys";
+import {
+  FULLSCREEN_LIVE,
+  type FullscreenLiveDraw,
+  type FullscreenLiveSlotProps,
+} from "./slotKeys";
 import type { StaticTableFeature } from "./tableFeature";
 
 function LiveFullscreen({
@@ -29,7 +33,9 @@ export function fullscreen(): StaticTableFeature {
   return {
     ...coreFullscreen(),
     renders: [
-      slotRender(FULLSCREEN_LIVE, (props) => <LiveFullscreen {...props} />),
+      slotRender<FullscreenLiveDraw>(FULLSCREEN_LIVE, (props) => (
+        <LiveFullscreen {...props} />
+      )),
     ],
   };
 }

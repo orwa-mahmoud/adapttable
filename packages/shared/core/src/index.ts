@@ -842,6 +842,9 @@ export {
   type ColumnResizeHandleOptions,
   type ColumnResizeHandleProps,
   columnResizeHandleProps,
+  type ResizeHandleEventLike,
+  type ResizeKeyEventLike,
+  type ResizePointerEventLike,
 } from "./columns/columnResize";
 export {
   type ColumnGroupDef,

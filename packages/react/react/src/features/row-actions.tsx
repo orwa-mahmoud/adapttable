@@ -18,14 +18,18 @@ import {
   useRowMutations,
 } from "../rows/rowMutations";
 import { slotRender } from "./providers";
-import { type ChromeExtraSlotProps, ROW_ACTIONS_LIVE } from "./slotKeys";
+import {
+  type ChromeExtraDraw,
+  type ChromeExtraSlotProps,
+  ROW_ACTIONS_LIVE,
+} from "./slotKeys";
 import type { TableFeature } from "./tableFeature";
 
-function LiveRowActions({
+function LiveRowActions<TRow>({
   chrome,
   props,
   children,
-}: ChromeExtraSlotProps<never>): ReactNode {
+}: ChromeExtraSlotProps<TRow>): ReactNode {
   const rowMutations = useRowMutations({
     labels: chrome.table.labels,
     onAddRow: props.onAddRow,
@@ -92,7 +96,9 @@ export function rowActions<TRow>(
   return {
     ...coreRowActions<TRow>(actions, handlers),
     renders: [
-      slotRender(ROW_ACTIONS_LIVE, (props) => <LiveRowActions {...props} />),
+      slotRender<ChromeExtraDraw>(ROW_ACTIONS_LIVE, (props) => (
+        <LiveRowActions {...props} />
+      )),
     ],
   };
 }

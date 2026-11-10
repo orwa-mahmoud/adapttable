@@ -1715,15 +1715,9 @@ export interface ColumnResizeHandleOptions {
 // @public
 export interface ColumnResizeHandleProps {
     "aria-label": string;
-    onDoubleClick: (event: MouseEvent & {
-        currentTarget: HTMLElement;
-    }) => void;
-    onKeyDown: (event: KeyboardEvent & {
-        currentTarget: HTMLElement;
-    }) => void;
-    onPointerDown: (event: PointerEvent & {
-        currentTarget: HTMLElement;
-    }) => void;
+    onDoubleClick(event: ResizeHandleEventLike): void;
+    onKeyDown(event: ResizeKeyEventLike): void;
+    onPointerDown(event: ResizePointerEventLike): void;
     role: "button";
     tabIndex: 0;
 }
@@ -4597,7 +4591,7 @@ export type GroupingCapability = "client" | "server" | false;
 // @public
 export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     "aria-label": string;
-    onKeyDown: (event: TKeyboardEvent) => void;
+    onKeyDown(event: TKeyboardEvent): void;
     role: "button";
     tabIndex: 0;
 }
@@ -4640,6 +4634,7 @@ export interface GroupingContribution<TRow> {
 export interface GroupingDragEventLike {
     readonly currentTarget: EventTarget | null;
     readonly dataTransfer: DataTransfer | null;
+    readonly defaultPrevented: boolean;
     preventDefault(): void;
     readonly target: EventTarget | null;
 }
@@ -4651,8 +4646,8 @@ export function groupingDragKey(event: Pick<DragEvent, "dataTransfer">): string 
 export interface GroupingDragProps<TDragEvent = DragEvent> {
     "data-grouping-dragging"?: boolean;
     draggable?: boolean;
-    onDragEnd?: (event: TDragEvent) => void;
-    onDragStart?: (event: TDragEvent) => void;
+    onDragEnd?(event: TDragEvent): void;
+    onDragStart?(event: TDragEvent): void;
 }
 
 // @public
@@ -4687,10 +4682,10 @@ export function groupingDropPlan(groupBy: readonly string[], drag: GroupingDragS
 // @public
 export interface GroupingDropProps<TDragEvent = DragEvent> {
     "data-drop-active"?: boolean;
-    onDragEnter?: (event: TDragEvent) => void;
-    onDragLeave?: (event: TDragEvent) => void;
-    onDragOver?: (event: TDragEvent) => void;
-    onDrop?: (event: TDragEvent) => void;
+    onDragEnter?(event: TDragEvent): void;
+    onDragLeave?(event: TDragEvent): void;
+    onDragOver?(event: TDragEvent): void;
+    onDrop?(event: TDragEvent): void;
 }
 
 // @public
@@ -4758,12 +4753,12 @@ export interface GroupingPanelInteractions {
     add: (key: string) => void;
     addAggregate: (key: string) => void;
     announcement: string;
-    chipDragProps: (key: string) => GroupingDragProps;
-    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps;
+    chipDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
+    chipKeyboardProps: (key: string, label: string) => GroupingChipKeyboardProps<GroupingKeyEventLike>;
     declaredAggregates?: DeclaredAggregates;
     drag?: GroupingDragState;
-    dropProps: (index: number) => GroupingDropProps;
-    headerDragProps: (key: string) => GroupingDragProps;
+    dropProps: (index: number) => GroupingDropProps<GroupingDragEventLike>;
+    headerDragProps: (key: string) => GroupingDragProps<GroupingDragEventLike>;
     live?: {
         readonly subscribe: (listener: () => void) => () => void;
         readonly getSnapshot: () => {
@@ -4774,7 +4769,7 @@ export interface GroupingPanelInteractions {
     moveBy: (key: string, delta: -1 | 1) => void;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;
-    removeDropProps: () => GroupingDropProps;
+    removeDropProps: () => GroupingDropProps<GroupingDragEventLike>;
     restoreAggregateDefaults: () => void;
     setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
     setAggregateOperation: (key: string, operationId: string) => void;
@@ -6741,6 +6736,24 @@ export function resetDevWarnings(): void;
 
 // @internal
 export function resetHistoryAdapter(): void;
+
+// @public
+export interface ResizeHandleEventLike {
+    readonly currentTarget: HTMLElement;
+}
+
+// @public
+export interface ResizeKeyEventLike extends ResizeHandleEventLike {
+    readonly key: string;
+    preventDefault(): void;
+}
+
+// @public
+export interface ResizePointerEventLike extends ResizeHandleEventLike {
+    readonly clientX: number;
+    preventDefault(): void;
+    stopPropagation(): void;
+}
 
 // @public
 export function resolveActiveFilterCount(override: number | undefined, chipCount: number): number;
