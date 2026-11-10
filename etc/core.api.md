@@ -2697,6 +2697,15 @@ export interface EditableCellEditing<_TRow = unknown> {
 }
 
 // @public
+export interface EditableCellEditorCtrl extends EditorDraftControl {
+    conflict?: boolean;
+    errorId: string;
+    focusRef: (node: {
+        focus: () => void;
+    } | null) => void;
+}
+
+// @public
 export function editableCellErrorId(rowId: string, columnKey: string): string;
 
 // @public
@@ -2995,18 +3004,18 @@ export function editorBusyProps(ctrl: EditorAriaState): {
 
 // @public
 export interface EditorDraftControl {
-    readonly commitOnBlur: () => void;
-    readonly draft: string;
-    readonly editor: CellEditor;
-    readonly error?: string;
-    readonly onEditorKeyDown: (event: {
+    commitOnBlur: () => void;
+    draft: string;
+    editor: CellEditor;
+    error?: string;
+    onEditorKeyDown: (event: {
         key: string;
         preventDefault: () => void;
         shiftKey?: boolean;
     }) => void;
-    readonly selectOptions: ReturnType<typeof editorSelectOptions>;
-    readonly setDraft: (value: string) => void;
-    readonly validating: boolean;
+    selectOptions: ReturnType<typeof editorSelectOptions>;
+    setDraft: (value: string) => void;
+    validating: boolean;
 }
 
 // @public

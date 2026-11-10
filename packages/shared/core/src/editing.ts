@@ -169,6 +169,7 @@ export {
   controllerConflictAsk,
   customEditorConflict,
   defaultPendingRows,
+  type EditableCellEditorCtrl,
   editableCellErrorId,
   type EditableCellPresentation,
   editableCellPresentation,

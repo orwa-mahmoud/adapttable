@@ -22347,6 +22347,17 @@
       "subpaths": [".", "./editing"]
     },
     {
+      "name": "EditableCellEditorCtrl",
+      "kind": "type",
+      "module": "editing/editingGate.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/editingGate.ts#EditableCellEditorCtrl",
+      "subpaths": [".", "./editing"]
+    },
+    {
       "name": "EditableCellMode",
       "kind": "type",
       "module": "editing/editableCell.ts",

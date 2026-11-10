@@ -120,6 +120,7 @@ import { EDITABLE_CELL } from '@adapttable/core/binding';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
+import { EditableCellEditorCtrl as EditableCellEditorCtrl_2 } from '@adapttable/core/editing';
 import { EditableCellPresentation } from '@adapttable/core';
 import { EditableCellSlotProps } from '@adapttable/core/binding';
 import { EditActivation } from '@adapttable/core';
@@ -5420,25 +5421,8 @@ export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
 }
 
 // @public
-export interface EditableCellEditorCtrl {
-    commitOnBlur: () => void;
-    conflict?: boolean;
-    draft: string;
-    editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
-    error?: string;
-    errorId: string;
-    focusRef: (node: {
-        focus: () => void;
-    } | null) => void;
+export interface EditableCellEditorCtrl extends EditableCellEditorCtrl_2 {
     label: string;
-    onEditorKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }) => void;
-    selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
-    setDraft: (value: string) => void;
-    validating: boolean;
 }
 
 export { EditableCellSlotProps }

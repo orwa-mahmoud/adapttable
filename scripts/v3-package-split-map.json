@@ -21187,6 +21187,14 @@
       "behavior": ""
     },
     {
+      "export": "EditableCellEditorCtrl",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
       "export": "editableCellErrorId",
       "currentImport": "@adapttable/core/editing",
       "kind": "value",
@@ -30836,6 +30844,14 @@
     },
     {
       "export": "EditableCellEditing",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditableCellEditorCtrl",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",

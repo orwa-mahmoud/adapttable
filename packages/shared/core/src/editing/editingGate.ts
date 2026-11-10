@@ -733,25 +733,49 @@ export function batchEditBarModel<TRow>(
  */
 export interface EditorDraftControl {
   /** The value being edited, as text. */
-  readonly draft: string;
+  draft: string;
   /** Replaces the draft on every keystroke. */
-  readonly setDraft: (value: string) => void;
+  setDraft: (value: string) => void;
   /** Handles the editor's keys. */
-  readonly onEditorKeyDown: (event: {
+  onEditorKeyDown: (event: {
     key: string;
     preventDefault: () => void;
     shiftKey?: boolean;
   }) => void;
   /** Runs when focus leaves the editor. */
-  readonly commitOnBlur: () => void;
+  commitOnBlur: () => void;
   /** The editor shape the column declared. */
-  readonly editor: CellEditor;
+  editor: CellEditor;
   /** Choices for a select editor, empty for other shapes. */
-  readonly selectOptions: ReturnType<typeof editorSelectOptions>;
+  selectOptions: ReturnType<typeof editorSelectOptions>;
   /** A validator's message for this cell, when the last save was refused. */
-  readonly error?: string;
+  error?: string;
   /** Whether a validator is still deciding. */
-  readonly validating: boolean;
+  validating: boolean;
+}
+
+/**
+ * Props for a kit-native editor while a cell is active: its draft control,
+ * where its validation message lives, what takes focus, and whether a live
+ * row changed under it.
+ *
+ * @public
+ */
+export interface EditableCellEditorCtrl extends EditorDraftControl {
+  /**
+   * `id` of the element holding the message. Put it on the editor's
+   * `aria-describedby` so the message is announced with the field, and set
+   * `aria-invalid` when `error` is set.
+   */
+  errorId: string;
+  /**
+   * Attach as the editor's `ref` so the table decides what takes focus. In
+   * cell mode that is this editor, every time; in row mode only the first
+   * field of the row that opened.
+   */
+  focusRef: (node: { focus: () => void } | null) => void;
+  /** A live row changed under this editor. */
+  conflict?: boolean;
 }
 
 /** The validator's message for one cell of a row, from a commit snapshot. */

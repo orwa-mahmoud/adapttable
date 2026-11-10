@@ -193,6 +193,7 @@ import { EDIT_HISTORY_LIVE } from '@adapttable/core/binding';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
+import { EditableCellEditorCtrl } from '@adapttable/core/editing';
 import { EditableCellMode } from '@adapttable/core';
 import { EditableCellSlotProps as EditableCellSlotProps_2 } from '@adapttable/core/binding';
 import { EditableCellSlots as EditableCellSlots_2 } from '@adapttable/core/binding';
@@ -1958,26 +1959,7 @@ export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
     rowEditIcons?: RowEditIcons;
 }
 
-// @public
-export interface EditableCellEditorCtrl {
-    commitOnBlur: () => void;
-    conflict?: boolean;
-    draft: string;
-    editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
-    error?: string;
-    errorId: string;
-    focusRef: (node: {
-        focus: () => void;
-    } | null) => void;
-    onEditorKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }) => void;
-    selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
-    setDraft: (value: string) => void;
-    validating: boolean;
-}
+export { EditableCellEditorCtrl }
 
 export { EditableCellMode }
 

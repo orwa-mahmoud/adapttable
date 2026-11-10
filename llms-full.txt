@@ -17952,7 +17952,9 @@ EditHistoryController` — the history a table runs: records a gesture with
   `rowEditorControl(rowEditing, columnKey, editor, saveBlocked)` and
   `batchEditorControl(batch, row, rowId, columnKey, editor)` — one field's
   `EditorDraftControl` (its draft, keys, editor, choices and the validation
-  it reports) in a row form or a batch;
+  it reports) in a row form or a batch; `EditableCellEditorCtrl` adds the
+  message's `errorId`, the `focusRef` and the live-row `conflict` a kit's
+  editor reads;
   `cellConflictAsk`, `controllerConflictAsk`, `customEditorConflict`
   (`CellConflictAsk`) and `rowEditConflict` (`RowEditConflict`) — the
   conflict questions; `resolveRowEditTrigger` (`RowEditTrigger`),
