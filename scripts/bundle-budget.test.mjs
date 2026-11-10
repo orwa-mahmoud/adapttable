@@ -209,6 +209,54 @@ describe("emitted-file accounting", () => {
     assert.equal(accounted.lazy.gzipBytes, arabic.gzipBytes);
   });
 
+  it("counts a preset's chunk as that preset, with the strings it spreads", () => {
+    const presetDir = "/app/node_modules/@adapttable/i18n/dist";
+    const output = [
+      {
+        type: "chunk",
+        fileName: "entry.js",
+        isEntry: true,
+        imports: [],
+        dynamicImports: ["en-1.js", "ar-1.js"],
+        moduleIds: ["/app/entry.js"],
+        code: "export const a = 1;",
+      },
+      {
+        type: "chunk",
+        fileName: "en-1.js",
+        isEntry: false,
+        imports: [],
+        dynamicImports: [],
+        facadeModuleId: `${presetDir}/en-1.js`,
+        moduleIds: [
+          "/app/node_modules/@adapttable/core/dist/labels-filterLabels-1.js",
+          `${presetDir}/en-1.js`,
+        ],
+        code: `export const en = ${JSON.stringify("en ".repeat(200))};`,
+      },
+      {
+        type: "chunk",
+        fileName: "ar-1.js",
+        isEntry: false,
+        imports: [],
+        dynamicImports: [],
+        facadeModuleId: `${presetDir}/ar-1.js`,
+        moduleIds: [`${presetDir}/ar-1.js`],
+        code: `export const ar = ${JSON.stringify("ar ".repeat(400))};`,
+      },
+    ];
+    const ledger = emittedLedger(output);
+    const english = ledger.find((file) => file.fileName === "en-1.js");
+    const arabic = ledger.find((file) => file.fileName === "ar-1.js");
+    assert.equal(english.alternative, "locale preset");
+    const accounted = accountOutputs(output, output);
+    assert.equal(accounted.lazy.files, 1);
+    assert.equal(
+      accounted.lazy.gzipBytes,
+      Math.max(english.gzipBytes, arabic.gzipBytes)
+    );
+  });
+
   it("counts an unclaimed stylesheet as initial and never counts sourcemaps", () => {
     const ledger = emittedLedger([
       {

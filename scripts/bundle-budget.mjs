@@ -153,12 +153,19 @@ const SOURCE_MAP = /\.map$/;
 const LOCALE_PRESET =
   /[\\/]@adapttable[\\/]i18n[\\/]dist[\\/](?!index|load|rolldown-runtime)[\w-]+\.js$/;
 
-/** The group a lazy chunk is one alternative of, when it is one. */
+/**
+ * The group a lazy chunk is one alternative of, when it is one: a chunk that
+ * holds only presets, or one a preset loads, whose other modules (the strings
+ * the preset spreads) arrive only with that preset.
+ */
 function alternativeOf(file) {
   const ids = file.moduleIds ?? [];
-  return ids.length > 0 && ids.every((id) => LOCALE_PRESET.test(id))
-    ? "locale preset"
-    : undefined;
+  const loadedByPreset =
+    typeof file.facadeModuleId === "string" &&
+    LOCALE_PRESET.test(file.facadeModuleId);
+  const onlyPresets =
+    ids.length > 0 && ids.every((id) => LOCALE_PRESET.test(id));
+  return loadedByPreset || onlyPresets ? "locale preset" : undefined;
 }
 
 function emittedBytes(file) {
