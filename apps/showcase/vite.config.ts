@@ -5,7 +5,8 @@ import { fileURLToPath } from "node:url";
 import angular from "@analogjs/vite-plugin-angular";
 import ui from "@nuxt/ui/vite";
 import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
-import react from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig, type Plugin } from "vite";
 
@@ -333,6 +334,18 @@ const VUE_SOURCES = [
   `${packageDir("adapter-quasar")}${sep}`,
 ];
 
+/**
+ * The React packages, which publish through the React Compiler: the demo runs
+ * their source through it too, so it renders as the packages do.
+ */
+const REACT_PACKAGE_SOURCES = listPackages()
+  .filter(({ group }) => group === "react")
+  .map(({ dir }) => `${dir}${sep}`);
+
+/** Whether a module is source of a package that ships compiled for React. */
+const isReactPackageSource = (id: string | undefined): boolean =>
+  id !== undefined && REACT_PACKAGE_SOURCES.some((dir) => id.startsWith(dir));
+
 /** Whether a module is Angular source the Angular compiler owns. */
 const isAngularSource = (id: string): boolean =>
   ANGULAR_SOURCES.some((dir) => id.startsWith(dir));
@@ -388,6 +401,10 @@ export default defineConfig({
     quasar(),
     react({
       exclude: [...ANGULAR_SOURCES, ...VUE_SOURCES].map((dir) => `${dir}**`),
+    }),
+    babel({
+      include: [isReactPackageSource],
+      presets: [reactCompilerPreset({ target: "18" })],
     }),
     // Nuxt UI installs the shared Tailwind Vite integration once.
     taigaAssets(),
