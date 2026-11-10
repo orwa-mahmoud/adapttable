@@ -12,12 +12,8 @@ import {
   type Type,
 } from "@angular/core";
 
+import { isComponentType } from "../componentType";
 import { primitiveText } from "../primitiveText";
-
-// A compiled Angular component carries its definition as `ɵcmp`.
-function isComponentType(value: unknown): value is Type<unknown> {
-  return typeof value === "function" && "ɵcmp" in value;
-}
 
 /**
  * Renders a full-width extra row's content into the element it sits on:
