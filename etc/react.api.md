@@ -14,6 +14,7 @@ import { applyRowReorder } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core/editing';
 import { asGesture } from '@adapttable/core/editing';
 import { BatchEditingState } from '@adapttable/core';
+import { BatchEditStoreOptions } from '@adapttable/core/editing';
 import { BatchRowEdit } from '@adapttable/core';
 import { BooleanChoice } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
@@ -184,6 +185,7 @@ import { RowAction } from '@adapttable/core';
 import { RowEditDrafts } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
+import { RowEditStoreOptions } from '@adapttable/core/editing';
 import { RowExpansionState } from '@adapttable/core/binding';
 import { RowHeight } from '@adapttable/core';
 import { RowMutationsState } from '@adapttable/core/binding';
@@ -1173,7 +1175,7 @@ export interface UseActiveFilterChipsOptions {
 export function useBatchEditing<TRow>(options: UseBatchEditingOptions<TRow>): BatchEditingState<TRow>;
 
 // @public
-export interface UseBatchEditingOptions<TRow> {
+export interface UseBatchEditingOptions<TRow> extends Pick<BatchEditStoreOptions<TRow>, "validateRow" | "applyEdit" | "formatEditError" | "onEditError" | "onValidationFail"> {
     columns: readonly EditableColumnLike<TRow>[];
     enabled?: boolean;
     featureHost?: FeatureHostState;
@@ -1553,7 +1555,7 @@ export function useRangeFilterWidget<TRow>(def: FilterDef<TRow>, source: FilterF
 export function useRowEditing<TRow>(options: UseRowEditingOptions<TRow>): RowEditingState<TRow>;
 
 // @public
-export interface UseRowEditingOptions<TRow> {
+export interface UseRowEditingOptions<TRow> extends Pick<RowEditStoreOptions<TRow>, "validateRow" | "applyEdit" | "formatEditError" | "onEditError" | "onValidationFail"> {
     columns: readonly EditableColumnLike<TRow>[];
     enabled?: boolean;
     featureHost?: FeatureHostState;

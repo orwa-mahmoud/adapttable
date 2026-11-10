@@ -21,13 +21,13 @@ import type {
 import {
   batchEditBarModel,
   batchEditErrorId,
-  editorSelectOptions,
+  batchEditorControl,
   focusEditorOnMount,
-  handleRowEditorKey,
   resolveCellEditor,
   rowEditActionsLayout,
   rowEditControls,
   rowEditErrorId,
+  rowEditorControl,
   rowEditSaveBlocked,
 } from "@adapttable/core/editing";
 import {
@@ -393,23 +393,8 @@ export class AdaptRowEditCell<TRow> {
     const ask = this.ask();
     const saveBlocked = rowEditSaveBlocked(ask, this.rowAsking());
     return {
-      draft: rowEditing.draftFor(column.key),
-      setDraft: (value) => {
-        rowEditing.setDraft(column.key, value);
-      },
-      onEditorKeyDown: (event) => {
-        handleRowEditorKey(event, rowEditing, saveBlocked);
-      },
-      commitOnBlur: () => undefined,
-      editor,
-      selectOptions: editorSelectOptions(editor),
+      ...rowEditorControl(rowEditing, column.key, editor, saveBlocked),
       label: this.editLabel(),
-      error: rowEditing.commit?.validation?.find(
-        (failure) =>
-          failure.rowId === rowEditing.activeRowId &&
-          (failure.columnKey === undefined || failure.columnKey === column.key)
-      )?.message,
-      validating: rowEditing.commit?.phase === "validating",
       conflict: ask !== undefined,
       errorId: this.errorId(),
       focusRef: this.takesFocus() ? focusEditorOnMount : () => undefined,
@@ -504,16 +489,8 @@ export class AdaptBatchEditCell<TRow> {
     const editor = this.resolved()!;
     const ask = this.ask();
     return {
-      draft: batch.draftFor(row, rowId, column.key),
-      setDraft: (value) => {
-        batch.setDraft(row, rowId, column.key, value);
-      },
-      onEditorKeyDown: () => undefined,
-      commitOnBlur: () => undefined,
-      editor,
-      selectOptions: editorSelectOptions(editor),
+      ...batchEditorControl(batch, row, rowId, column.key, editor),
       label: this.editLabel(),
-      validating: false,
       conflict: ask !== undefined,
       errorId: this.errorId(),
       focusRef: () => undefined,

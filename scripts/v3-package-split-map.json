@@ -20475,6 +20475,14 @@
       "behavior": ""
     },
     {
+      "export": "batchEditorControl",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
       "export": "BatchEditSnapshot",
       "currentImport": "@adapttable/core/editing",
       "kind": "type",
@@ -21467,6 +21475,14 @@
       "behavior": ""
     },
     {
+      "export": "EditorDraftControl",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
       "export": "editorInputType",
       "currentImport": "@adapttable/core/editing",
       "kind": "value",
@@ -22332,6 +22348,14 @@
     },
     {
       "export": "rowEditingView",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditorControl",
       "currentImport": "@adapttable/core/editing",
       "kind": "value",
       "class": "neutral-operation",
@@ -27763,6 +27787,14 @@
       "behavior": ""
     },
     {
+      "export": "batchEditorControl",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "BatchEditSnapshot",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -31103,6 +31135,14 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditorDraftControl",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -36940,6 +36980,14 @@
     },
     {
       "export": "rowEditingView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditorControl",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",

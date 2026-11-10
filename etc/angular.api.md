@@ -15,6 +15,7 @@ import { ApprovalReviewItem } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core/editing';
 import { BatchEditHandler } from '@adapttable/core';
 import { BatchEditingState } from '@adapttable/core';
+import { BatchEditStoreOptions } from '@adapttable/core/editing';
 import { BatchRowEdit } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
 import { buildTreeEntries } from '@adapttable/core';
@@ -141,6 +142,7 @@ import { RowActionsRenderContext } from '@adapttable/core';
 import { RowEditHandler } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
+import { RowEditStoreOptions } from '@adapttable/core/editing';
 import { RowExpansionState } from '@adapttable/core/binding';
 import { RowHeight } from '@adapttable/core';
 import { RowMutationsState } from '@adapttable/core/binding';
@@ -278,7 +280,7 @@ export type Attrs = Readonly<Record<string, unknown>>;
 export { BatchEditHandler }
 
 // @public
-export interface BatchEditingInjectOptions<TRow> {
+export interface BatchEditingInjectOptions<TRow> extends Pick<BatchEditStoreOptions<TRow>, "validateRow" | "applyEdit" | "formatEditError" | "onEditError" | "onValidationFail"> {
     readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
     readonly enabled?: MaybeSignal<boolean>;
     readonly featureHost?: FeatureHostState_2;
@@ -1404,7 +1406,7 @@ export { RowEditHandler }
 export { RowEditIcons }
 
 // @public
-export interface RowEditingInjectOptions<TRow> {
+export interface RowEditingInjectOptions<TRow> extends Pick<RowEditStoreOptions<TRow>, "validateRow" | "applyEdit" | "formatEditError" | "onEditError" | "onValidationFail"> {
     readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
     readonly enabled?: MaybeSignal<boolean>;
     readonly featureHost?: FeatureHostState_2;

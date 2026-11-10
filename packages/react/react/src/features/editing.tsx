@@ -110,6 +110,11 @@ function LiveEditing<TRow>({
     onEditStart: lifecycle.onEditStart,
     onEditCancel: lifecycle.onEditCancel,
     onEditCommit: lifecycle.onEditCommit,
+    validateRow: props.validateRow,
+    applyEdit: props.applyEdit,
+    formatEditError: props.formatEditError,
+    onEditError: lifecycle.onEditError,
+    onValidationFail: lifecycle.onValidationFail,
     featureHost: featureHostOf(props),
   });
   const batchArmed = armed.batch;
@@ -120,6 +125,11 @@ function LiveEditing<TRow>({
     onEditStart: lifecycle.onEditStart,
     onEditCancel: lifecycle.onEditCancel,
     onEditCommit: lifecycle.onEditCommit,
+    validateRow: props.validateRow,
+    applyEdit: props.applyEdit,
+    formatEditError: props.formatEditError,
+    onEditError: lifecycle.onEditError,
+    onValidationFail: lifecycle.onValidationFail,
     featureHost: featureHostOf(props),
   });
   const editingArmed = armed.any;

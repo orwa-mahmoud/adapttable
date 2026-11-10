@@ -17940,6 +17940,10 @@ EditHistoryController` — the history a table runs: records a gesture with
   `editableCellErrorId`, `rowEditErrorId`, `batchEditErrorId`,
   `editorValidationProps` and `editorBusyProps` (`EditorAriaState`) — ids and
   ARIA; `editorSelectOptions`, `resolveEditableCellDisplay`;
+  `rowEditorControl(rowEditing, columnKey, editor, saveBlocked)` and
+  `batchEditorControl(batch, row, rowId, columnKey, editor)` — one field's
+  `EditorDraftControl` (its draft, keys, editor, choices and the validation
+  it reports) in a row form or a batch;
   `cellConflictAsk`, `controllerConflictAsk`, `customEditorConflict`
   (`CellConflictAsk`) and `rowEditConflict` (`RowEditConflict`) — the
   conflict questions; `resolveRowEditTrigger` (`RowEditTrigger`),

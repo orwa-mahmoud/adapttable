@@ -6,13 +6,13 @@ import {
   type EditingBundle,
 } from "@adapttable/core";
 import {
+  batchEditorControl,
   cellConflictAsk,
   controllerConflictAsk,
-  editorSelectOptions,
-  handleRowEditorKey,
   isCellEditable,
   isFirstEditableColumn,
   resolveCellEditor,
+  rowEditorControl,
 } from "@adapttable/core/editing";
 export interface EditableUnitModel<TRow> {
   readonly controller: EditableCellController<TRow>;
@@ -50,22 +50,18 @@ export function editableUnitModel<TRow>(input: {
     };
   const ask = cellConflictAsk(editing, rowId, column.key);
   const commit = batch?.commit ?? rowEditing?.commit;
-  const invalid = commit?.validation?.find(
-    (failure) =>
-      failure.rowId === rowId &&
-      (failure.columnKey === undefined || failure.columnKey === column.key)
-  );
   const blocked = editing?.conflict?.isRowContested(rowId) ?? false;
+  const control = batch
+    ? batchEditorControl(batch, row, rowId, column.key, editor)
+    : rowEditorControl(rowEditing!, column.key, editor, blocked);
   const ctrl: EditableCellController<TRow> = {
     ...controller,
     mode: "editing",
-    editor,
-    selectOptions: editorSelectOptions(editor),
-    draft: batch
-      ? batch.draftFor(row, rowId, column.key)
-      : rowEditing!.draftFor(column.key),
-    error: ask ? editing?.conflictLabels?.message : invalid?.message,
-    validating: commit?.phase === "validating",
+    editor: control.editor,
+    selectOptions: control.selectOptions,
+    draft: control.draft,
+    error: ask ? editing?.conflictLabels?.message : control.error,
+    validating: control.validating,
     saveStatus:
       commit?.phase === "saving" || commit?.phase === "failed"
         ? commit.phase
@@ -74,10 +70,7 @@ export function editableUnitModel<TRow>(input: {
     canRollback: false,
     isDirty: editing?.dirty?.isDirty(rowId, column.key) ?? false,
     begin: () => undefined,
-    setDraft: (value) => {
-      if (batch) batch.setDraft(row, rowId, column.key, value);
-      else rowEditing!.setDraft(column.key, value);
-    },
+    setDraft: control.setDraft,
     commit: () => {
       if (!batch && !blocked) rowEditing!.save();
     },
@@ -85,10 +78,8 @@ export function editableUnitModel<TRow>(input: {
       if (batch) batch.cancelRow(rowId);
       else rowEditing!.cancel();
     },
-    onEditorKeyDown: (event) => {
-      if (!batch) handleRowEditorKey(event, rowEditing!, blocked);
-    },
-    commitOnBlur: () => undefined,
+    onEditorKeyDown: control.onEditorKeyDown,
+    commitOnBlur: control.commitOnBlur,
     keepConflict: () => ask?.keep(),
     takeConflict: () => ask?.take(),
     conflictLabels: ask ? editing?.conflictLabels : undefined,

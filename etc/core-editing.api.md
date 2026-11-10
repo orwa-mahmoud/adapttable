@@ -150,6 +150,9 @@ export interface BatchEditingState<TRow> {
 export function batchEditingView<TRow>(store: BatchEditStore<TRow>, snapshot: BatchEditSnapshot, options: Pick<BatchEditStoreOptions<TRow>, "columns" | "featureHost">): BatchEditingState<TRow>;
 
 // @public
+export function batchEditorControl<TRow>(batch: Pick<BatchEditingState<TRow>, "draftFor" | "setDraft" | "commit">, row: TRow, rowId: string, columnKey: string, editor: CellEditor): EditorDraftControl;
+
+// @public
 export interface BatchEditSnapshot {
     readonly commit?: EditCommitSnapshot;
     readonly entries: readonly BatchEditEntry[];
@@ -1109,6 +1112,22 @@ export function editorBusyProps(ctrl: EditorAriaState): {
 };
 
 // @public
+export interface EditorDraftControl {
+    readonly commitOnBlur: () => void;
+    readonly draft: string;
+    readonly editor: CellEditor;
+    readonly error?: string;
+    readonly onEditorKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }) => void;
+    readonly selectOptions: ReturnType<typeof editorSelectOptions>;
+    readonly setDraft: (value: string) => void;
+    readonly validating: boolean;
+}
+
+// @public
 export function editorInputType(editor: CellEditor | null): "text" | "number" | "date" | "datetime-local" | "time";
 
 // @public
@@ -1804,6 +1823,9 @@ export interface RowEditingState<TRow> {
 
 // @public
 export function rowEditingView<TRow>(store: RowEditStore<TRow>, snapshot: RowEditSnapshot, featureHost?: FeatureHostState): RowEditingState<TRow>;
+
+// @public
+export function rowEditorControl<TRow>(rowEditing: Pick<RowEditingState<TRow>, "draftFor" | "setDraft" | "save" | "cancel" | "commit" | "activeRowId">, columnKey: string, editor: CellEditor, saveBlocked: boolean): EditorDraftControl;
 
 // @public
 export function rowEditSaveBlocked(ask: CellConflictAsk | undefined, rowAsking: boolean | undefined): boolean;

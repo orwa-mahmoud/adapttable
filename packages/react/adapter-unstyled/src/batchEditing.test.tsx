@@ -141,6 +141,21 @@ describe("batch editing (unstyled)", () => {
     expect(part("batch-edit-bar")).toBeNull();
   });
 
+  it("refuses a batch a row rule rejects and says why", async () => {
+    const { onBatchEdit } = table({
+      validateRow: (row: Task) =>
+        row.points < 0 ? "Points cannot be negative" : undefined,
+    });
+    fireEvent.change(editors()[1]!, { target: { value: "-1" } });
+    fireEvent.click(part("batch-edit-save")!);
+    await waitFor(() => {
+      expect(part("batch-edit-bar")!.textContent).toContain(
+        "Points cannot be negative"
+      );
+    });
+    expect(onBatchEdit).not.toHaveBeenCalled();
+  });
+
   it("puts everything back on cancel", () => {
     const { onBatchEdit } = table();
     fireEvent.change(editors()[0]!, { target: { value: "Ship it" } });

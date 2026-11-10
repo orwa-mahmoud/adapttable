@@ -3,7 +3,7 @@
  * rows and phone cards.
  */
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
-import { rowEditing } from "@adapttable/angular-unstyled/editing";
+import { editing, rowEditing } from "@adapttable/angular-unstyled/editing";
 import { rowActions } from "@adapttable/angular-unstyled/row-actions";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -165,6 +165,28 @@ describe("row editing (unstyled Angular)", () => {
       points: 8,
     });
     expect(editors()).toHaveLength(0);
+  });
+
+  it("refuses a row a row rule rejects and says why", async () => {
+    const onRowEdit = vi.fn();
+    const settle = await mount([
+      rowEditing(onRowEdit),
+      editing(vi.fn(), {
+        validateRow: (row: Task) =>
+          row.points < 0 ? { points: "Points cannot be negative" } : undefined,
+      }),
+    ]);
+    all("row-edit-begin")[0]!.click();
+    await settle();
+    type(editors()[1]!, "-1");
+    await settle();
+    one("row-edit-save").click();
+    await vi.waitFor(async () => {
+      await settle();
+      expect(document.body.textContent).toContain("Points cannot be negative");
+    });
+    expect(onRowEdit).not.toHaveBeenCalled();
+    expect(editors()).toHaveLength(2);
   });
 
   it("saves on Enter and cancels on Escape from any field", async () => {

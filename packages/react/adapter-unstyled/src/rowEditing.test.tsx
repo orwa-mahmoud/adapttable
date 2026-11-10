@@ -131,6 +131,21 @@ describe("row editing (unstyled)", () => {
     expect(editors()).toHaveLength(0);
   });
 
+  it("refuses a row a row rule rejects and marks the field", async () => {
+    const { onRowEdit } = table({
+      validateRow: (row: Task) =>
+        row.points < 0 ? { points: "Points cannot be negative" } : undefined,
+    });
+    openFirstRow();
+    fireEvent.change(editors()[1]!, { target: { value: "-1" } });
+    fireEvent.click(part("row-edit-save")!);
+    await waitFor(() => {
+      expect(screen.getByText("Points cannot be negative")).toBeVisible();
+    });
+    expect(onRowEdit).not.toHaveBeenCalled();
+    expect(editors()).toHaveLength(2);
+  });
+
   it("throws the drafts away on cancel", () => {
     const { onRowEdit } = table();
     openFirstRow();

@@ -205,6 +205,26 @@ describe("batch editing (unstyled Angular)", () => {
     expect(all("batch-edit-bar")).toHaveLength(0);
   });
 
+  it("refuses a batch a row rule rejects and says why", async () => {
+    const onBatchEdit = vi.fn();
+    const settle = await mount(onBatchEdit, false, [
+      editing(vi.fn(), {
+        validateRow: (row: Task) =>
+          row.points < 0 ? "Points cannot be negative" : undefined,
+      }),
+    ]);
+    type(editors()[1]!, "-1");
+    await settle();
+    one("batch-edit-save").click();
+    await vi.waitFor(async () => {
+      await settle();
+      expect(one("batch-edit-error").textContent).toContain(
+        "Points cannot be negative"
+      );
+    });
+    expect(onBatchEdit).not.toHaveBeenCalled();
+  });
+
   it("puts every field back on cancel and tells the host nothing", async () => {
     const onBatchEdit = vi.fn();
     const settle = await mount(onBatchEdit);

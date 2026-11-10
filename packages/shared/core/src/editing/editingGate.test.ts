@@ -4,6 +4,7 @@ import type { EditingBundle as EditableCellEditing } from "./editableCell";
 import {
   batchEditBarModel,
   batchEditErrorId,
+  batchEditorControl,
   cellConflictAsk,
   controllerConflictAsk,
   customEditorConflict,
@@ -24,6 +25,7 @@ import {
   rowEditConflict,
   rowEditControls,
   rowEditErrorId,
+  rowEditorControl,
   rowEditSaveBlocked,
   stopEditKeys,
 } from "./editingGate";
@@ -504,5 +506,90 @@ describe("batch bar", () => {
       saveLabel: "Save",
       cancelLabel: "Drop",
     });
+  });
+});
+
+describe("editor controls", () => {
+  const failure = {
+    phase: "invalid" as const,
+    validation: [{ rowId: "a", columnKey: "name", message: "Required" }],
+  };
+
+  it("edits one field of an open row and saves the row on Enter", () => {
+    const save = vi.fn();
+    const setDraft = vi.fn();
+    const field = rowEditorControl(
+      {
+        activeRowId: "a",
+        draftFor: (key) => `draft:${key}`,
+        setDraft,
+        save,
+        cancel: vi.fn(),
+        commit: failure,
+      },
+      "name",
+      "text",
+      false
+    );
+    expect(field).toMatchObject({
+      draft: "draft:name",
+      error: "Required",
+      validating: false,
+      selectOptions: [],
+    });
+    field.setDraft("Ada");
+    expect(setDraft).toHaveBeenCalledWith("name", "Ada");
+    field.onEditorKeyDown({ key: "Enter", preventDefault: vi.fn() });
+    expect(save).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds Enter while the row waits on an answer", () => {
+    const save = vi.fn();
+    const field = rowEditorControl(
+      {
+        activeRowId: "a",
+        draftFor: () => "",
+        setDraft: vi.fn(),
+        save,
+        cancel: vi.fn(),
+        commit: { phase: "validating" },
+      },
+      "name",
+      "text",
+      true
+    );
+    field.onEditorKeyDown({ key: "Enter", preventDefault: vi.fn() });
+    expect(save).not.toHaveBeenCalled();
+    expect(field.validating).toBe(true);
+  });
+
+  it("edits one batch cell, answers no key, and reports a refused cell", () => {
+    const setDraft = vi.fn();
+    const cell = batchEditorControl(
+      {
+        draftFor: (row: Row, rowId, key) => `${row.id}/${rowId}/${key}`,
+        setDraft,
+        commit: failure,
+      },
+      ROW,
+      "a",
+      "name",
+      "text"
+    );
+    expect(cell.draft).toBe("a/a/name");
+    expect(cell.error).toBe("Required");
+    cell.setDraft("Ada");
+    expect(setDraft).toHaveBeenCalledWith(ROW, "a", "name", "Ada");
+    const preventDefault = vi.fn();
+    cell.onEditorKeyDown({ key: "Enter", preventDefault });
+    expect(preventDefault).not.toHaveBeenCalled();
+    const other = batchEditorControl(
+      { draftFor: () => "", setDraft, commit: failure },
+      ROW,
+      "b",
+      "name",
+      "text"
+    );
+    expect(other.error).toBeUndefined();
   });
 });

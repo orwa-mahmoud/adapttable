@@ -12,6 +12,7 @@ import {
 } from "@adapttable/core";
 import {
   batchEditingView,
+  type BatchEditStoreOptions,
   createBatchEditStore,
 } from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
@@ -25,7 +26,14 @@ export type { BatchEditingState, BatchRowEdit } from "@adapttable/core";
  *
  * @public
  */
-export interface UseBatchEditingOptions<TRow> {
+export interface UseBatchEditingOptions<TRow> extends Pick<
+  BatchEditStoreOptions<TRow>,
+  | "validateRow"
+  | "applyEdit"
+  | "formatEditError"
+  | "onEditError"
+  | "onValidationFail"
+> {
   /**
    * Whether batch editing is armed. Off by default: it changes when a commit
    * happens, which is a decision about the data rather than a preference.

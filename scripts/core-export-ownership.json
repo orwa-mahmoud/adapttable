@@ -20258,6 +20258,17 @@
       "subpaths": [".", "./editing"]
     },
     {
+      "name": "batchEditorControl",
+      "kind": "runtime",
+      "module": "editing/editingGate.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/editingGate.ts#batchEditorControl",
+      "subpaths": [".", "./editing"]
+    },
+    {
       "name": "beginCellEdit",
       "kind": "runtime",
       "module": "editing/editableCell.ts",
@@ -21102,6 +21113,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/rowEditing.ts#rowEditingView",
+      "subpaths": [".", "./editing"]
+    },
+    {
+      "name": "rowEditorControl",
+      "kind": "runtime",
+      "module": "editing/editingGate.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/editingGate.ts#rowEditorControl",
       "subpaths": [".", "./editing"]
     },
     {
@@ -22652,6 +22674,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editingGate.ts#EditorAriaState",
+      "subpaths": [".", "./editing"]
+    },
+    {
+      "name": "EditorDraftControl",
+      "kind": "type",
+      "module": "editing/editingGate.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/editingGate.ts#EditorDraftControl",
       "subpaths": [".", "./editing"]
     },
     {

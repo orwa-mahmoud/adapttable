@@ -8,7 +8,11 @@ import {
   type FeatureHostState,
   type RowEditingState,
 } from "@adapttable/core";
-import { createRowEditStore, rowEditingView } from "@adapttable/core/editing";
+import {
+  createRowEditStore,
+  rowEditingView,
+  type RowEditStoreOptions,
+} from "@adapttable/core/editing";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import type { EditEventHandler } from "./editingEvents";
@@ -20,7 +24,14 @@ export type { RowEditDrafts, RowEditingState } from "@adapttable/core";
  *
  * @public
  */
-export interface UseRowEditingOptions<TRow> {
+export interface UseRowEditingOptions<TRow> extends Pick<
+  RowEditStoreOptions<TRow>,
+  | "validateRow"
+  | "applyEdit"
+  | "formatEditError"
+  | "onEditError"
+  | "onValidationFail"
+> {
   /**
    * Whether row editing is armed. Off by default: it changes the commit unit,
    * which is a decision about the data, not a preference.

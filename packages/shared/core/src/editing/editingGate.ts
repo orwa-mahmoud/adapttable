@@ -724,3 +724,116 @@ export function batchEditBarModel<TRow>(
     cancelLabel: labels?.cancelAll ?? "Cancel all",
   };
 }
+
+/**
+ * The draft side of a row or batch editor: what it shows, how a keystroke
+ * changes it, the keys it answers, and the validation it reports.
+ *
+ * @public
+ */
+export interface EditorDraftControl {
+  /** The value being edited, as text. */
+  readonly draft: string;
+  /** Replaces the draft on every keystroke. */
+  readonly setDraft: (value: string) => void;
+  /** Handles the editor's keys. */
+  readonly onEditorKeyDown: (event: {
+    key: string;
+    preventDefault: () => void;
+    shiftKey?: boolean;
+  }) => void;
+  /** Runs when focus leaves the editor. */
+  readonly commitOnBlur: () => void;
+  /** The editor shape the column declared. */
+  readonly editor: CellEditor;
+  /** Choices for a select editor, empty for other shapes. */
+  readonly selectOptions: ReturnType<typeof editorSelectOptions>;
+  /** A validator's message for this cell, when the last save was refused. */
+  readonly error?: string;
+  /** Whether a validator is still deciding. */
+  readonly validating: boolean;
+}
+
+/** The validator's message for one cell of a row, from a commit snapshot. */
+function cellFailure(
+  commit: RowEditingState<unknown>["commit"],
+  rowId: string | null | undefined,
+  columnKey: string
+): string | undefined {
+  return commit?.validation?.find(
+    (failure) =>
+      failure.rowId === rowId &&
+      (failure.columnKey === undefined || failure.columnKey === columnKey)
+  )?.message;
+}
+
+/**
+ * One field of a row opened as a form: Enter saves the row unless the row is
+ * waiting on an answer, Escape cancels it, and leaving a field commits nothing.
+ *
+ * @param rowEditing - The table's row-editing state.
+ * @param columnKey - The field's column.
+ * @param editor - The editor the column resolved to.
+ * @param saveBlocked - Whether the row is waiting on an answer.
+ * @returns The field's draft control.
+ *
+ * @public
+ */
+export function rowEditorControl<TRow>(
+  rowEditing: Pick<
+    RowEditingState<TRow>,
+    "draftFor" | "setDraft" | "save" | "cancel" | "commit" | "activeRowId"
+  >,
+  columnKey: string,
+  editor: CellEditor,
+  saveBlocked: boolean
+): EditorDraftControl {
+  return {
+    draft: rowEditing.draftFor(columnKey),
+    setDraft: (value) => {
+      rowEditing.setDraft(columnKey, value);
+    },
+    onEditorKeyDown: (event) => {
+      handleRowEditorKey(event, rowEditing, saveBlocked);
+    },
+    commitOnBlur: () => undefined,
+    editor,
+    selectOptions: editorSelectOptions(editor),
+    error: cellFailure(rowEditing.commit, rowEditing.activeRowId, columnKey),
+    validating: rowEditing.commit?.phase === "validating",
+  };
+}
+
+/**
+ * One cell of a batch: every cell is a field, no key ends the batch, and the
+ * batch's save reports each refused cell on that cell.
+ *
+ * @param batch - The table's batch-editing state.
+ * @param row - The row the cell belongs to.
+ * @param rowId - That row's id.
+ * @param columnKey - The cell's column.
+ * @param editor - The editor the column resolved to.
+ * @returns The cell's draft control.
+ *
+ * @public
+ */
+export function batchEditorControl<TRow>(
+  batch: Pick<BatchEditingState<TRow>, "draftFor" | "setDraft" | "commit">,
+  row: TRow,
+  rowId: string,
+  columnKey: string,
+  editor: CellEditor
+): EditorDraftControl {
+  return {
+    draft: batch.draftFor(row, rowId, columnKey),
+    setDraft: (value) => {
+      batch.setDraft(row, rowId, columnKey, value);
+    },
+    onEditorKeyDown: () => undefined,
+    commitOnBlur: () => undefined,
+    editor,
+    selectOptions: editorSelectOptions(editor),
+    error: cellFailure(batch.commit, rowId, columnKey),
+    validating: batch.commit?.phase === "validating",
+  };
+}
