@@ -17,6 +17,9 @@ export {
 } from "./actions/useShortcuts";
 export type { ContextMenuOptions } from "./actions/useTableContextMenu";
 export { aggregate } from "./aggregate/aggregate";
+export { useChromeScrollReset } from "./chrome/scrollReset";
+export { type TableChrome } from "./chrome/tableChromeContract";
+export { useFilterTriggerToggle } from "./chrome/toolbarChrome";
 export type {
   CellProps,
   ColumnDef,
@@ -159,9 +162,6 @@ export {
 export {
   type FeatureNotice,
   type FeatureNoticeKind,
-  type TableChrome,
-  useChromeScrollReset,
-  useFilterTriggerToggle,
   useTableChrome,
 } from "./useTableChrome";
 export type { ChromeBodyData } from "./virtual/chromeBodyShared";
@@ -352,6 +352,8 @@ export {
 } from "./tree/useTreeExpansion";
 /* ── Inline cell editing ───────────────────────────────────────────── */
 export type { UseShortcutsOptions } from "./actions/useShortcuts";
+export type { TableBodyRegion } from "./chrome/tableChromeContract";
+export type { FilterTriggerToggle } from "./chrome/toolbarChrome";
 export type {
   ColumnDragState,
   ColumnDropProps,
@@ -472,7 +474,6 @@ export {
   type UseRowPinningUrlStateResult,
 } from "./url/useRowPinningUrlState";
 export type { SearchInputState } from "./useDataTable/useSearchInput";
-export type { FilterTriggerToggle, TableBodyRegion } from "./useTableChrome";
 export type { RowPairMeasurer } from "./virtual/measureRowPair";
 export type { ColumnWindow } from "./virtual/useColumnWindow";
 export type { TableErrorState } from "@adapttable/core";

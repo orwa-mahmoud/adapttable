@@ -61,6 +61,8 @@ import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
 import type { UseCommandPaletteOptions } from "../actions/useCommandPalette";
 import type { TableContextMenuOptions } from "../actions/useTableContextMenu";
 import type { TableAssistantProps } from "../assistant/TableAssistantChrome";
+import type { BulkBarChromeProps } from "../chrome/bulkBarChrome";
+import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ColumnDef } from "../columnDef";
 import type { EditableCellEditing } from "../editing/editableCellController";
 import type { EditHistoryState } from "../editing/editHistory";
@@ -87,7 +89,6 @@ import type { SelectionState } from "../selection/useSelection";
 import type { TreeCellProps } from "../tree/TreeCell";
 import type { UrlStateAdapter } from "../url/adapter";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
-import type { BulkBarChromeProps, TableChrome } from "../useTableChrome";
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import type { KeyedVirtualization } from "../virtual/useTableVirtualization";
 

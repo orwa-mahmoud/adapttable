@@ -8,8 +8,8 @@
 import { DEFAULT_ROW_SIZE_PX } from "@adapttable/core";
 import { describe, expect, it } from "vitest";
 
+import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
-import type { TableChrome } from "../useTableChrome";
 import { estimateBodyItemSize } from "./chromeBodyShared";
 
 interface Row {

@@ -10,12 +10,12 @@ import { overlayChromeExtras } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { ForcedColorsStyle } from "../a11y/forcedColors";
+import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
 import {
   type DataTableShellResult,
   finishDataTableShell,
 } from "../useDataTableShell";
-import type { TableChrome } from "../useTableChrome";
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import { usePlainChromeBodyData } from "../virtual/usePlainChromeBodyData";
 import { ChromeExtrasGate } from "./chromeExtrasGate";

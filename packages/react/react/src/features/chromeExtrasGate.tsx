@@ -8,8 +8,8 @@
 import { TableRuntimePublisher } from "@adapttable/core/binding";
 import { type ReactNode, useState } from "react";
 
+import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
-import type { TableChrome } from "../useTableChrome";
 import {
   FeatureSlot,
   useFeatureSlotFilled,

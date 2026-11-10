@@ -8,8 +8,8 @@
 import { bodyCanLoadMore } from "@adapttable/core/binding";
 import { type RefCallback, useCallback, useRef } from "react";
 
+import type { TableChrome } from "../chrome/tableChromeContract";
 import type { BaseDataTableProps } from "../props";
-import type { TableChrome } from "../useTableChrome";
 import {
   type ChromeBodyData,
   useBodyLoadMore,

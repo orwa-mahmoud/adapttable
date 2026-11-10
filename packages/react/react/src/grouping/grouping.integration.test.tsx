@@ -2,6 +2,7 @@ import { resetDevWarnings } from "@adapttable/core";
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { type TableChrome } from "../chrome/tableChromeContract";
 import { ChromeExtrasGate } from "../features/chromeExtrasGate";
 import { editing } from "../features/editing";
 import { grouping } from "../features/grouping";
@@ -14,7 +15,7 @@ import {
 import { useFrontendData } from "../source/useFrontendData";
 import { createMemoryAdapter } from "../url/adapter";
 import { useTableUrlState } from "../url/useTableUrlState";
-import { type TableChrome, useTableChrome } from "../useTableChrome";
+import { useTableChrome } from "../useTableChrome";
 
 function renderLiveChrome<TRow>(
   features: readonly TableFeature<TRow>[],

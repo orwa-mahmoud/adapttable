@@ -25,9 +25,9 @@ export {
   sourceWindowStart,
 } from "@adapttable/core/binding";
 
+import type { TableChrome } from "../chrome/tableChromeContract";
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import type { ComposedTableProps } from "../props";
-import type { TableChrome } from "../useTableChrome";
 import type { ColumnWindow } from "./useColumnWindow";
 
 /**

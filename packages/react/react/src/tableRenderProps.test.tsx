@@ -14,6 +14,9 @@ import { act, render, renderHook } from "@testing-library/react";
 import { type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { useChromeScrollReset } from "./chrome/scrollReset";
+import { type TableChrome } from "./chrome/tableChromeContract";
+import { useFilterTriggerToggle } from "./chrome/toolbarChrome";
 import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { FeatureProviders } from "./features/providers";
@@ -24,12 +27,7 @@ import { useFrontendData } from "./source/useFrontendData";
 import { tableRenderModel, useSummaryCells } from "./tableRenderProps";
 import { createMemoryAdapter } from "./url/adapter";
 import type { UseDataTableResult } from "./useDataTable/useDataTable";
-import {
-  type TableChrome,
-  useChromeScrollReset,
-  useFilterTriggerToggle,
-  useTableChrome,
-} from "./useTableChrome";
+import { useTableChrome } from "./useTableChrome";
 import { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";
 
 interface Row {

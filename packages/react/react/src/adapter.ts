@@ -117,6 +117,18 @@ export {
   type StandardFeaturesFactory,
 } from "./adapterFeatures/standardPreset";
 export { createAdapterTableAssistantFeature } from "./adapterFeatures/tableAssistant";
+export { type BulkBarChromeProps } from "./chrome/bulkBarChrome";
+export type { TableChrome } from "./chrome/tableChromeContract";
+export { type TableBodyRegion } from "./chrome/tableChromeContract";
+export type { PrintToolbar } from "./chrome/toolbarChrome";
+export {
+  type FilterTriggerToggle,
+  printToolbar,
+  type ToolbarChromeProps,
+  undoRedoToolbar,
+  type ViewControlsToolbar,
+  viewControlsToolbar,
+} from "./chrome/toolbarChrome";
 export type { ColumnDef, ReactColumnGroupDef } from "./columnDef";
 export {
   type ColumnGroupToggleButtonProps,
@@ -693,17 +705,6 @@ export type {
   DataTableShellToolbarProps,
 } from "./useDataTableShell";
 export { finishDataTableShell, useDataTableShell } from "./useDataTableShell";
-export type { PrintToolbar, TableChrome } from "./useTableChrome";
-export {
-  type BulkBarChromeProps,
-  type FilterTriggerToggle,
-  printToolbar,
-  type TableBodyRegion,
-  type ToolbarChromeProps,
-  undoRedoToolbar,
-  type ViewControlsToolbar,
-  viewControlsToolbar,
-} from "./useTableChrome";
 export type { ChromeBodyData } from "./virtual/chromeBodyShared";
 export { ColumnSpacer, type ColumnSpacerProps } from "./virtual/ColumnSpacer";
 export {

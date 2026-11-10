@@ -3,6 +3,8 @@ import { act, render, renderHook } from "@testing-library/react";
 import { type ReactNode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { type TableChrome } from "./chrome/tableChromeContract";
+import { printToolbar, undoRedoToolbar } from "./chrome/toolbarChrome";
 import type { ColumnDef } from "./columnDef";
 import { ChromeExtrasGate } from "./features/chromeExtrasGate";
 import { dirtyIndicators } from "./features/editing";
@@ -18,12 +20,7 @@ import { applyTableFeatures, type TableFeature } from "./features/tableFeature";
 import { tree } from "./features/tree";
 import { useFrontendData } from "./source/useFrontendData";
 import { createMemoryAdapter } from "./url/adapter";
-import {
-  printToolbar,
-  type TableChrome,
-  undoRedoToolbar,
-  useTableChrome,
-} from "./useTableChrome";
+import { useTableChrome } from "./useTableChrome";
 
 interface Row {
   id: string;
