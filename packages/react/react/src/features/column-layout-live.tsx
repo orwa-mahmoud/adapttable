@@ -6,7 +6,7 @@
  * is composed.
  */
 import { autoSizeColumns as autoSizeAllColumns } from "@adapttable/core";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 
 import { flattenReactColumnTree } from "../columns/flattenColumnTree";
 import { applyReactColumnNames } from "../columns/reactColumns";
@@ -20,8 +20,17 @@ function LiveColumnLayout({
   props,
   children,
 }: ChromeExtraSlotProps<never>): ReactNode {
-  const flattened = flattenReactColumnTree(props.columns);
-  const declaredColumns = resolveColumns(flattened.leaves, props.locale);
+  // Kept across renders explicitly: the values flow into a hook, and the
+  // compiler does not memoize across one, so a render would otherwise hand
+  // every row new columns.
+  const flattened = useMemo(
+    () => flattenReactColumnTree(props.columns),
+    [props.columns]
+  );
+  const declaredColumns = useMemo(
+    () => resolveColumns(flattened.leaves, props.locale),
+    [flattened.leaves, props.locale]
+  );
   const columnLayout = useColumnLayout({
     columns: declaredColumns,
     layout: props.columnLayout,

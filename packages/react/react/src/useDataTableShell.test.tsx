@@ -864,3 +864,41 @@ describe("savedViews owns the column layout it restores", () => {
     ).toEqual(["name"]);
   });
 });
+
+describe("a render that changes nothing about the columns", () => {
+  it("keeps the table's columns, so no row redraws for it", () => {
+    const props = applyTableFeatures({
+      features: [columnMenu()],
+      data: ROWS,
+      columns,
+      rowKey,
+      urlSync: false,
+    });
+    const seen: unknown[] = [];
+    function Probe() {
+      const shell = useDataTableShell(props as never, noForm as never);
+      return (
+        <DataTableShellView shell={shell}>
+          {(next) => {
+            seen.push(next.table.columns);
+            return null;
+          }}
+        </DataTableShellView>
+      );
+    }
+    const tree = (
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
+    );
+    const { rerender } = render(tree);
+    const first = seen.at(-1);
+    rerender(
+      <FeatureProviders props={props}>
+        <Probe />
+      </FeatureProviders>
+    );
+    expect(seen.length).toBeGreaterThan(1);
+    expect(seen.at(-1)).toBe(first);
+  });
+});
