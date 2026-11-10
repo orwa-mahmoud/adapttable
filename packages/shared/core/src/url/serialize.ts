@@ -18,8 +18,8 @@ import {
   parseFilterTree,
   serializeFilterTree,
 } from "../filters/filterTreeCodec";
+import { isEmptyFilterValue } from "../filters/isEmptyFilterValue";
 import { type RowPinSide, type RowPinState } from "../rows/rowPinModel";
-import { isEmptyFilterValue } from "../state/viewState";
 import { joinListParam, splitListParam } from "../utils/listParam";
 import { safeDecode } from "../utils/safeDecode";
 
@@ -131,7 +131,7 @@ export function readExtra(
   return out;
 }
 
-export { isEmptyFilterValue } from "../state/viewState";
+export { isEmptyFilterValue } from "../filters/isEmptyFilterValue";
 
 /**
  * Write the full extra-filter bag into `params`, stripping any existing

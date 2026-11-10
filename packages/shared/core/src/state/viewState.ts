@@ -18,9 +18,10 @@ import type {
   SortDirection,
 } from "../contracts/columns";
 import type { QueryFilterGroup, SortLevel } from "../contracts/query";
+import { isEmptyFilterValue } from "../filters/isEmptyFilterValue";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { TableQueryParams } from "../types";
-import { joinListParam, splitListParam } from "../utils/listParam";
+import { readExtra, writeExtra } from "../url/serialize";
 import { memoLast } from "../utils/memoLast";
 import { sameItems } from "../utils/sameItems";
 import {
@@ -182,62 +183,25 @@ export const VIEW_CONFIG = defineSlice<TableViewStateConfig>(
   sameViewConfig
 );
 
-/** Whether an extra value counts as no value. */
-export function isEmptyFilterValue(value: FilterValue): boolean {
-  if (value == null || value === "") return true;
-  return Array.isArray(value) && value.length === 0;
-}
+export { isEmptyFilterValue } from "../filters/isEmptyFilterValue";
 
 /**
- * An extra value as the view state keeps it: a number for a number key, a
- * list of trimmed entries for a list key, text otherwise. A list for a key
- * that is not a list key is kept as its encoded entries joined by commas,
- * which is how the view state has always written one.
- */
-function keptExtraValue(
-  key: string,
-  value: FilterValue,
-  config: TableViewStateConfig
-): FilterValue | undefined {
-  let keep: (value: FilterValue) => FilterValue | undefined = keptText;
-  if ((config.arrayExtraKeys ?? NO_KEYS).includes(key)) keep = keptList;
-  else if ((config.numberExtraKeys ?? NO_KEYS).includes(key)) keep = keptNumber;
-  return isEmptyFilterValue(value) ? undefined : keep(value);
-}
-
-/** Entries trimmed, empty ones dropped; text splits at its commas. */
-function keptList(value: FilterValue): string[] | undefined {
-  const kept = Array.isArray(value)
-    ? value.map((entry) => String(entry).trim()).filter(Boolean)
-    : splitListParam(String(value));
-  return kept.length > 0 ? kept : undefined;
-}
-
-/** A list joins its encoded entries with commas. */
-function keptText(value: FilterValue): string | undefined {
-  const text = Array.isArray(value) ? joinListParam(value) : String(value);
-  return text === "" ? undefined : text;
-}
-
-function keptNumber(value: FilterValue): number | undefined {
-  const text = keptText(value);
-  const number = Number(text);
-  return text !== undefined && Number.isFinite(number) ? number : undefined;
-}
-
-/**
- * The bag a write keeps: each value as the view state keeps it, and an empty
- * marker for every defaulted key the bag clears.
+ * The bag a write keeps: each value as a URL keeps it — written into params
+ * and read back, so a number key holds a number, a list key a list of
+ * trimmed entries and any other key text — and an empty marker for every
+ * defaulted key the bag clears.
  */
 function keptExtra(
   bag: ExtraFilters,
   config: TableViewStateConfig
 ): ExtraFilters {
-  const kept: ExtraFilters = {};
-  for (const [key, value] of Object.entries(bag)) {
-    const next = keptExtraValue(key, value, config);
-    if (next !== undefined) kept[key] = next;
-  }
+  const params = new URLSearchParams();
+  writeExtra(params, bag);
+  const kept = readExtra(
+    params,
+    config.numberExtraKeys ?? NO_KEYS,
+    config.arrayExtraKeys ?? NO_KEYS
+  );
   for (const key of Object.keys(config.defaults?.extra ?? {})) {
     kept[key] ??= "";
   }

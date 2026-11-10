@@ -23,7 +23,7 @@ import {
   parseGroupAggregateOverrides,
   serializeGroupAggregateOverrides,
 } from "../grouping/groupAggregateOverrides";
-import { createTableStore } from "../state/tableStore";
+import { type ActionDefinition, createTableStore } from "../state/tableStore";
 import {
   clearAll,
   clearExtras,
@@ -423,6 +423,9 @@ export function createTableViewStore(
       pull();
       run(...args);
     };
+  /** A mutator that dispatches one action with its one argument. */
+  const run = <TPayload>(action: ActionDefinition<TPayload>) =>
+    act((payload: TPayload) => store.dispatch(action(payload)));
 
   return {
     getSnapshot() {
@@ -487,33 +490,23 @@ export function createTableViewStore(
         else counts.set(ns, remaining);
       };
     },
-    setPage: act((page: number) => store.dispatch(setPage(page))),
-    setLimit: act((limit: number) => store.dispatch(setLimit(limit))),
-    setSearch: act((search: string) => store.dispatch(setSearch(search))),
+    setPage: run(setPage),
+    setLimit: run(setLimit),
+    setSearch: run(setSearch),
     setSort: act((key: string | undefined, dir?: SortDirection) =>
       store.dispatch(setSort({ key, dir }))
     ),
-    setGroupBy: act((key: string | undefined) =>
-      store.dispatch(setGroupBy(key))
-    ),
-    initializeGroupBy: act((key: string) =>
-      store.dispatch(initializeGroupBy(key))
-    ),
-    setGroupAggregateOverrides: act((overrides: GroupAggregateOverrides) =>
-      store.dispatch(setGroupAggregateOverrides(overrides))
-    ),
-    toggleSortLevel: act((key: string) => store.dispatch(toggleSortLevel(key))),
+    setGroupBy: run(setGroupBy),
+    initializeGroupBy: run(initializeGroupBy),
+    setGroupAggregateOverrides: run(setGroupAggregateOverrides),
+    toggleSortLevel: run(toggleSortLevel),
     setExtra: act((key: string, value: FilterValue) =>
       store.dispatch(setExtra({ key, value }))
     ),
-    setExtras: act((updates: ExtraFilters) =>
-      store.dispatch(setExtras(updates))
-    ),
-    setFilterTree: act((tree: QueryFilterGroup | undefined) =>
-      store.dispatch(setFilterTree(tree))
-    ),
-    clearExtras: act(() => store.dispatch(clearExtras())),
-    clearAll: act(() => store.dispatch(clearAll())),
+    setExtras: run(setExtras),
+    setFilterTree: run(setFilterTree),
+    clearExtras: run(clearExtras),
+    clearAll: run(clearAll),
   };
 }
 
