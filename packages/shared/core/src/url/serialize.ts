@@ -11,26 +11,16 @@
  */
 import type { ColumnLayoutState } from "../columns/columnLayoutModel";
 import { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "../columns/columnResize";
-import type {
-  ExtraFilters,
-  FilterValue,
-  SortDirection,
-} from "../contracts/columns";
+import { MAX_LIMIT } from "../constants";
+import type { ExtraFilters, SortDirection } from "../contracts/columns";
 import type { QueryFilterGroup } from "../contracts/query";
 import {
   parseFilterTree,
   serializeFilterTree,
 } from "../filters/filterTreeCodec";
 import { type RowPinSide, type RowPinState } from "../rows/rowPinModel";
-
-/** Decode a URI component, tolerating malformed input from hand-edited URLs. */
-function safeDecode(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
+import { isEmptyFilterValue } from "../state/viewState";
+import { safeDecode } from "../utils/safeDecode";
 
 /** Split a comma list into trimmed, non-empty raw (still-encoded) parts. */
 function splitRaw(raw: string | null): string[] {
@@ -90,8 +80,7 @@ export function readPage(
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
-/** Largest accepted page size — shared by the reader and the setter. */
-export const MAX_LIMIT = 500;
+export { MAX_LIMIT } from "../constants";
 
 /** Read a page size, clamped to a sane range, falling back when invalid. */
 export function readLimit(
@@ -144,11 +133,7 @@ export function readExtra(
   return out;
 }
 
-/** True when a filter value should remove its param (empty/cleared). */
-export function isEmptyFilterValue(value: FilterValue): boolean {
-  if (value == null || value === "") return true;
-  return Array.isArray(value) && value.length === 0;
-}
+export { isEmptyFilterValue } from "../state/viewState";
 
 /**
  * Write the full extra-filter bag into `params`, stripping any existing

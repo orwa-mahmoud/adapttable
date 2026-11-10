@@ -14,6 +14,13 @@ export const MOBILE_BREAKPOINT_PX = 768;
 export const DEFAULT_LIMIT = 25;
 
 /**
+ * Largest accepted page size — shared by the reader and the setter.
+ *
+ * @public
+ */
+export const MAX_LIMIT = 500;
+
+/**
  * Page-size options offered by adapter pagination controls.
  *
  * @public
