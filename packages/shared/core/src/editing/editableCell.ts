@@ -333,6 +333,13 @@ export interface EditConflictLabels {
 }
 
 /**
+ * What opens a cell's editor: a double click, or a single click.
+ *
+ * @public
+ */
+export type EditActivation = "doubleClick" | "click";
+
+/**
  * Everything a table's editing hands each cell: the channel, the state of
  * every unit the host armed, and the words the notices use.
  *
@@ -385,7 +392,7 @@ export interface EditingBundle<TRow> {
    * The pointer gesture that opens a cell's editor —
    * `TableOptions.editActivation`. Absent means `"doubleClick"`.
    */
-  activation?: "doubleClick" | "click";
+  activation?: EditActivation;
 }
 
 /* ── One cell ──────────────────────────────────────────────────────── */

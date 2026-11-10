@@ -252,6 +252,26 @@ describe("the unstyled table's tree", () => {
     expect(rowIds("row")).toEqual(["1", "4"]);
   });
 
+  it("names each row's depth, open state and place for assistive tech", async () => {
+    const { settle } = await mount();
+    toggleOf(rowById("1")).click();
+    await settle();
+    const aria = (id: string) => {
+      const row = rowById(id);
+      return [
+        row.getAttribute("aria-level"),
+        row.getAttribute("aria-expanded"),
+        row.getAttribute("aria-posinset"),
+      ];
+    };
+    expect(aria("1")).toEqual(["1", "true", "1"]);
+    expect(aria("2")).toEqual(["2", "false", "1"]);
+    expect(aria("4")).toEqual(["1", "false", "2"]);
+    toggleOf(rowById("2")).click();
+    await settle();
+    expect(aria("3")).toEqual(["3", null, "1"]);
+  });
+
   it("fetches a node's children as it opens, and shows it loading", async () => {
     let finish!: () => void;
     onLoadChildren = vi.fn(

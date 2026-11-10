@@ -38,10 +38,12 @@ import {
   type FeatureHostState,
   featureLabelsOf,
   type FilterEngine,
+  filterTreeSnapshot,
   FIND_BAR,
   LiveFeatureHost,
   retainItems,
   type RuntimeChromeInput,
+  sameFilterTree,
   STATUS_BAR,
   TABLE_ASSISTANT,
   type TableAssistantProps,
@@ -101,10 +103,6 @@ import {
   renderFeatureSlot,
 } from "./features/tableFeature";
 import { createFeatureState, provideFeatureState } from "./featureState";
-import {
-  filterTreeSnapshot,
-  sameFilterTree,
-} from "./filters/filterTreeSnapshot";
 import {
   groupingModelKey,
   rowDetailModelKey,

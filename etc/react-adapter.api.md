@@ -146,6 +146,7 @@ import { columnSelectLabel } from '@adapttable/core/binding';
 import { ColumnSelectSlots as ColumnSelectSlots_2 } from '@adapttable/core/binding';
 import { columnSizeStyle } from '@adapttable/core';
 import { ColumnSizingOptions } from '@adapttable/core';
+import { ColumnSpacerSide } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { CommandPaletteChromeProps as CommandPaletteChromeProps_2 } from '@adapttable/core/binding';
 import { CommandPaletteInputProps as CommandPaletteInputProps_2 } from '@adapttable/core/binding';
@@ -1354,7 +1355,7 @@ export function ColumnSpacer(input: Readonly<ColumnSpacerProps>): ReactElement |
 // @public
 export interface ColumnSpacerProps {
     as?: "td" | "th";
-    side: "start" | "end";
+    side: ColumnSpacerSide;
     width: number;
 }
 

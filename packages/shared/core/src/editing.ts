@@ -62,6 +62,7 @@ export {
   type EditableCellController,
   editableCellController,
   type EditableCellMode,
+  type EditActivation,
   type EditConflictLabels,
   type EditingBundle,
   type EditValidationState,

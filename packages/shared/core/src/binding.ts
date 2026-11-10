@@ -385,6 +385,7 @@ export type {
   GroupMoreButtonProps,
   GroupMoreButtonSlotProps,
   GroupMoreButtonSlots,
+  GroupMoreScope,
 } from "./grouping/groupMoreContract";
 export {
   cellAttributes,
@@ -457,6 +458,7 @@ export type {
   SidePanelChromeProps,
   SidePanelCloseProps,
   SidePanelFrameProps,
+  SidePanelSide,
   SidePanelSlots,
   SidePanelTabProps,
 } from "./layout/sidePanelContract";
@@ -773,6 +775,14 @@ export type {
   FilterWidgetKind,
   FilterWidgetRenderProps,
 } from "./filters/filterRegistry";
+export {
+  type FilterOperandPrimitive,
+  type FilterOperandSnapshot,
+  type FilterTreeSnapshot,
+  filterTreeSnapshot,
+  type FilterTreeSnapshotNode,
+  sameFilterTree,
+} from "./filters/filterTreeSnapshot";
 export type { CellRange } from "./focus/cellRange";
 export type { GridCell } from "./focus/gridFocus";
 export type { SelectionStats } from "./focus/selectionStats";
@@ -1042,6 +1052,7 @@ export {
   type WindowVirtualizer,
   withSourceIndices,
 } from "./virtual/bodyWindow";
+export type { ColumnSpacerSide } from "./virtual/viewportState";
 export type {
   KeyedVirtualization,
   TableVirtualization,

@@ -58,6 +58,7 @@ import {
   copyContextMenuSelection,
   defaultConfirm,
   type Direction,
+  type EditActivation,
   type ExportCsvOptions,
   type ExtraFilters,
   type ExtraRow,
@@ -122,6 +123,7 @@ import {
   SEARCH_ICON,
   type SelectionState,
   SIDE_PANEL,
+  type SidePanelSide,
   STATUS_BAR,
   TABLE_ASSISTANT,
   TOOLBAR_EXTRAS,
@@ -658,7 +660,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    */
   readonly skeletonRows = input<number>();
   /** Which edge a projected side panel sits on. */
-  readonly sidePanelSide = input<"start" | "end">("end");
+  readonly sidePanelSide = input<SidePanelSide>("end");
   /** Offer a checkbox on every row. */
   readonly selectable = input(false);
   /** The selected row ids, to control the selection. */
@@ -692,7 +694,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
    * keeps a single click for selecting the cell; `"click"` opens the editor on
    * the first click. Enter and F2 open it either way.
    */
-  readonly editActivation = input<"doubleClick" | "click">();
+  readonly editActivation = input<EditActivation>();
   /** The column layout, to control it. */
   readonly columnLayout = input<ColumnLayoutState>();
   /** The layout an uncontrolled table starts from. Read once. */
@@ -768,7 +770,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         .sidePanel as SidePanelOptions | undefined
   );
   /** Which edge the docked panel sits on. */
-  protected readonly dockedSide = computed(
+  protected readonly dockedSide: Signal<SidePanelSide> = computed(
     () => this.liveSidePanel()?.side ?? this.sidePanelSide()
   );
   /**

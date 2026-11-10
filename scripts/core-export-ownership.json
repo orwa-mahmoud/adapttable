@@ -7311,6 +7311,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "treeRowAria",
+      "kind": "runtime",
+      "module": "tree/treeRows.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "tree/treeRows.ts#treeRowAria",
+      "subpaths": ["."]
+    },
+    {
       "name": "UNPIN_ROW_ACTION_KEY",
       "kind": "runtime",
       "module": "rows/rowActionsRuntime.ts",
@@ -14483,6 +14494,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "filterTreeSnapshot",
+      "kind": "runtime",
+      "module": "filters/filterTreeSnapshot.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterTreeSnapshot.ts#filterTreeSnapshot",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FilterTriggerToggleState",
       "kind": "runtime",
       "module": "layout/tableChromeState.ts",
@@ -15891,6 +15913,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "sameFilterTree",
+      "kind": "runtime",
+      "module": "filters/filterTreeSnapshot.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterTreeSnapshot.ts#sameFilterTree",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "sameItems",
       "kind": "runtime",
       "module": "utils/sameItems.ts",
@@ -17057,6 +17090,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "ColumnSpacerSide",
+      "kind": "type",
+      "module": "virtual/viewportState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "virtual/viewportState.ts#ColumnSpacerSide",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ColumnViewport",
       "kind": "type",
       "module": "virtual/viewportState.ts",
@@ -17827,6 +17871,28 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "FilterOperandPrimitive",
+      "kind": "type",
+      "module": "filters/filterTreeSnapshot.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterTreeSnapshot.ts#FilterOperandPrimitive",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FilterOperandSnapshot",
+      "kind": "type",
+      "module": "filters/filterTreeSnapshot.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterTreeSnapshot.ts#FilterOperandSnapshot",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FilterOverlaySlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
@@ -17923,6 +17989,28 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/filterTreeContract.ts#FilterTreeSlots",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FilterTreeSnapshot",
+      "kind": "type",
+      "module": "filters/filterTreeSnapshot.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterTreeSnapshot.ts#FilterTreeSnapshot",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FilterTreeSnapshotNode",
+      "kind": "type",
+      "module": "filters/filterTreeSnapshot.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterTreeSnapshot.ts#FilterTreeSnapshotNode",
       "subpaths": ["./binding"]
     },
     {
@@ -18286,6 +18374,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupMoreContract.ts#GroupMoreButtonSlots",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "GroupMoreScope",
+      "kind": "type",
+      "module": "grouping/groupMoreContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "grouping/groupMoreContract.ts#GroupMoreScope",
       "subpaths": ["./binding"]
     },
     {
@@ -19166,6 +19265,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "layout/sidePanelContract.ts#SidePanelFrameProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "SidePanelSide",
+      "kind": "type",
+      "module": "layout/sidePanelContract.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/sidePanelContract.ts#SidePanelSide",
       "subpaths": ["./binding"]
     },
     {
@@ -22213,6 +22323,17 @@
       "deprecated": false,
       "identity": "editing/cellEditing.ts#EditableColumnLike",
       "subpaths": [".", "./binding", "./editing"]
+    },
+    {
+      "name": "EditActivation",
+      "kind": "type",
+      "module": "editing/editableCell.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/editableCell.ts#EditActivation",
+      "subpaths": [".", "./editing"]
     },
     {
       "name": "EditCommitSnapshot",

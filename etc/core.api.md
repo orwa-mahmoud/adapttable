@@ -2724,6 +2724,9 @@ export interface EditableColumnLike<TRow = unknown> {
 }
 
 // @public
+export type EditActivation = "doubleClick" | "click";
+
+// @public
 export interface EditCommitSnapshot {
     // (undocumented)
     readonly error?: string;
@@ -2940,7 +2943,7 @@ export interface EditingArmingProps {
 
 // @public
 export interface EditingBundle<TRow> {
-    activation?: "doubleClick" | "click";
+    activation?: EditActivation;
     batch?: BatchEditingState<TRow>;
     conflict?: EditConflictState<TRow>;
     conflictLabels?: EditConflictLabels;
@@ -8815,7 +8818,7 @@ export interface TableOptions<TRow, TNode = unknown> {
     };
     density?: "comfortable" | "compact";
     dir?: Direction;
-    editActivation?: "doubleClick" | "click";
+    editActivation?: EditActivation;
     editConflictPolicy?: EditConflictPolicy;
     estimateCardSize?: number;
     estimateRowSize?: number;
@@ -9288,6 +9291,13 @@ export function treeIndentStyle(level: number): {
 
 // @public
 export function treeMoveCreatesCycle(rowId: string, descendantIds: readonly string[], targetParentId: string | null): boolean;
+
+// @public
+export function treeRowAria<TRow>(entry: TreeEntry<TRow> | undefined): {
+    readonly "aria-level"?: number;
+    readonly "aria-expanded"?: boolean;
+    readonly "aria-posinset"?: number;
+};
 
 // @public
 export interface TreeShape<TRow> {

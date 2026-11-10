@@ -6,6 +6,7 @@
  * because it is scaffolding, not data — a screen reader walking the row would
  * otherwise meet two blank cells whose only job is width.
  */
+import type { ColumnSpacerSide } from "@adapttable/core/binding";
 import type { ReactElement } from "react";
 
 /**
@@ -17,7 +18,7 @@ export interface ColumnSpacerProps {
   /** Pixel width of the columns this cell stands in for. */
   width: number;
   /** Which side of the window it sits on, for the part name. */
-  side: "start" | "end";
+  side: ColumnSpacerSide;
   /** The element to render — a kit's own cell component, or `"td"`. */
   as?: "td" | "th";
 }

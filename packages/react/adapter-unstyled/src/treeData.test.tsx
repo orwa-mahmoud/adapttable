@@ -127,6 +127,25 @@ describe("tree data (unstyled)", () => {
     expect(open).toBeDefined();
   });
 
+  it("names each row's depth, open state and place for assistive tech", () => {
+    table();
+    fireEvent.click(toggles()[0]!);
+    const aria = () =>
+      [...document.querySelectorAll('tbody [data-adapttable-part="row"]')].map(
+        (row) => [
+          row.getAttribute("aria-level"),
+          row.getAttribute("aria-expanded"),
+          row.getAttribute("aria-posinset"),
+        ]
+      );
+    expect(aria()).toEqual([
+      ["1", "true", "1"],
+      ["2", null, "1"],
+      ["2", "false", "2"],
+      ["1", null, "2"],
+    ]);
+  });
+
   it("lets the host hold the open set", () => {
     const onExpandedIdsChange = vi.fn();
     table({ expandedIds: [], onExpandedIdsChange });

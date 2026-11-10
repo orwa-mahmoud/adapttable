@@ -234,6 +234,7 @@ export {
   type EditableCellController,
   editableCellController,
   type EditableCellMode,
+  type EditActivation,
   type EditConflictLabels,
   type EditingBundle,
   type EditValidationState,
@@ -1023,6 +1024,7 @@ export {
   treeColumnKey,
   type TreeEntry,
   treeIndentStyle,
+  treeRowAria,
   type TreeShape,
 } from "./tree/treeRows";
 /* ── Row grouping ──────────────────────────────────────────────────── */

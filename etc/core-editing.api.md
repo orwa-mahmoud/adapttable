@@ -851,6 +851,9 @@ export interface EditableColumnLike<TRow = unknown> {
 }
 
 // @public
+export type EditActivation = "doubleClick" | "click";
+
+// @public
 export interface EditCommitSnapshot {
     // (undocumented)
     readonly error?: string;
@@ -1067,7 +1070,7 @@ export interface EditingArmingProps {
 
 // @public
 export interface EditingBundle<TRow> {
-    activation?: "doubleClick" | "click";
+    activation?: EditActivation;
     batch?: BatchEditingState<TRow>;
     conflict?: EditConflictState<TRow>;
     conflictLabels?: EditConflictLabels;

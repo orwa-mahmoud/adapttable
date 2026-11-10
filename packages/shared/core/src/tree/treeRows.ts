@@ -256,6 +256,29 @@ export function treeCardStyle(level: number): {
 }
 
 /**
+ * The ARIA a tree row carries: its depth from one, whether it is open when it
+ * has children, and its place among its siblings.
+ *
+ * @param entry - The row's tree entry; none for a row outside a tree.
+ * @returns The attributes, empty outside a tree.
+ *
+ * @public
+ */
+export function treeRowAria<TRow>(entry: TreeEntry<TRow> | undefined): {
+  readonly "aria-level"?: number;
+  readonly "aria-expanded"?: boolean;
+  readonly "aria-posinset"?: number;
+} {
+  if (!entry) return {};
+  return {
+    "aria-level": entry.level + 1,
+    "aria-expanded": entry.hasChildren ? entry.expanded : undefined,
+    "aria-posinset":
+      entry.siblingIndex === undefined ? undefined : entry.siblingIndex + 1,
+  };
+}
+
+/**
  * Which column renders the chevron and the indent.
  *
  * @public

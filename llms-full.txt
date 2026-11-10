@@ -17137,7 +17137,7 @@ per-column aggregation choices.
 | `onEditError`               | `EditEventHandler<TRow>`                                        | —               | Observe a save promise rejecting.                                                                                                                                                                                                 |
 | `onEditConflict`            | `EditConflictHandler<TRow>`                                     | —               | A row changed under an open editor. Return `"keep"` or `"take"`; omit and `editConflictPolicy` decides.                                                                                                                           |
 | `editConflictPolicy`        | `"keep" \| "take" \| "ask"`                                     | `"ask"`         | What to do when the host does not choose. `"ask"` surfaces Keep mine / Take theirs.                                                                                                                                               |
-| `editActivation`            | `"doubleClick" \| "click"`                                      | `"doubleClick"` | The pointer gesture that opens a cell's editor. `"click"` opens it on the first click; Enter and F2 open it either way.                                                                                                           |
+| `editActivation`            | `"doubleClick" \| "click"`                                      | `"doubleClick"` | The pointer gesture that opens a cell's editor (an `EditActivation`). `"click"` opens it on the first click; Enter and F2 open it either way.                                                                                     |
 | `rowVersion`                | `(row: TRow) => string \| number`                               | —               | Host version of a row. Any change under an open editor is a conflict, not only the edited column.                                                                                                                                 |
 | `validateRow`               | `RowValidator<TRow>`                                            | —               | Gate a commit on a row-level rule. Receives the row the edit would produce; return a message, a column key → message map, or nothing. May be async.                                                                               |
 | `applyEdit`                 | `(row: TRow, columnKey: string, value: unknown) => TRow`        | shallow spread  | How an edit is applied to a row for `validateRow` to judge; pass it when a column reads a nested path.                                                                                                                            |
@@ -18072,6 +18072,11 @@ ColumnRenameEditor` — the inline rename form. `ColumnRenameEditorSnapshot`;
   `RangeOpLabelKeys`), `TextFieldWidget`, `BooleanFieldWidget`
   (`BooleanChoice`, `parseBooleanChoice`). `scalarFilterText`,
   `filterOpLabel`.
+- `filterTreeSnapshot(tree)` records a filter tree as a `FilterTreeSnapshot`
+  (its `FilterTreeSnapshotNode`s, each operand a `FilterOperandSnapshot` of
+  `FilterOperandPrimitive` values or kept by identity), and
+  `sameFilterTree(tree, snapshot)` says whether a tree a host passes still
+  filters the same way, even after the host mutated it in place.
 - `filterTreeConditionModel(condition, defs, registry, labels):
 FilterTreeConditionModel` — one AND/OR builder row: its field and operator
   choices (`FilterTreeOption`) and its value editor
@@ -18327,7 +18332,8 @@ shares, so a new binding calls them rather than re-deriving them.
   `pendingListSize`, `materializeWindowRows`, `rowWindow`, `keyedWindow` and
   `EndReachedLatch` are the window math over any virtualizer.
   `readColumnViewport` and `columnWindowPlan` (`ColumnViewport`,
-  `ColumnWindowPlan`) window the columns; `RowPairMeasureController`
+  `ColumnWindowPlan`) window the columns, and a `ColumnSpacerSide` names the
+  side of the window a spacer cell holds open; `RowPairMeasureController`
   measures a row with its open detail panel.
   `columnScrollTarget({ columns, columnKey, viewport, widths, pinnedKeys,
 leadingWidth, trailingWidth })` returns a logical scroll offset that reveals
@@ -18987,7 +18993,8 @@ much has been revealed (`GroupPagingState`, whose `paging` is a `GroupPaging`),
 the model emits a `groupMore` entry for the rest, and each adapter mounts
 `GroupMoreButton` / `GroupMoreButtonProps` over `GroupMoreButtonChrome` /
 `GroupMoreButtonChromeProps` / `GroupMoreButtonSlots` /
-`GroupMoreButtonSlotProps`.
+`GroupMoreButtonSlotProps`. An offer's `GroupMoreScope` says whether it reveals
+more groups or more rows inside one.
 `groupRowParts(kind)` names the `data-adapttable-part` values for each of the
 three rows a grouped body renders (`GroupRowKind`), and `GroupToggleSpacer`
 holds the chevron's width on the two rows that have no chevron, so a footer
@@ -19010,7 +19017,9 @@ adapters render, each entry carrying its `level`, `path`, `descendantIds` and
 (`TreeExpansionState`), `treeColumnKey(columns, declared?)` picks the column
 that carries the chevron, and `filterTreeRows(options)` keeps a match together
 with every ancestor that leads to it. `treeIndentStyle(level)` indents a cell
-and `treeCardStyle(level)` a mobile card; `bodyRowEntries(rows, tree)` returns
+and `treeCardStyle(level)` a mobile card; `treeRowAria(entry)` gives a tree
+row its `aria-level`, `aria-expanded` and `aria-posinset`, which every
+binding's desktop row carries; `bodyRowEntries(rows, tree)` returns
 the `BodyRowEntry<TRow>` list a body maps over, tree or flat. Each adapter
 mounts `TreeCell` / `TreeCellProps` and `TreeToggle` / `TreeToggleProps`
 over `TreeCellChrome` / `TreeCellChromeProps` / `TreeToggleChrome` /
@@ -19459,7 +19468,8 @@ cell is a row target.
 
 **Side panel.** `sidePanel` docks table settings beside the table instead of
 in a popover over them. `SidePanelOptions` types it — `panels`, `open`,
-`onOpenChange`, `side` — and `SidePanelEntry` is one panel (`key`, `label`,
+`onOpenChange`, `side` (a `SidePanelSide`, `"start"` or `"end"`) — and
+`SidePanelEntry` is one panel (`key`, `label`,
 `content`). It is controlled, because the control that opens it is the
 host's. Adapters build theirs over `SidePanelChrome` / `SidePanelChromeProps`
 / `SidePanelSlots` / `SidePanelFrameProps` / `SidePanelTabProps` /

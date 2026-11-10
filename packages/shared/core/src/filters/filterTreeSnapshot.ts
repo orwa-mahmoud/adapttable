@@ -1,27 +1,54 @@
-import {
-  isFilterGroup,
-  type QueryCondition,
-  type QueryFilterGroup,
-} from "@adapttable/core";
+/**
+ * Snapshots of a filter tree, so a binding can tell whether the tree a host
+ * passes still filters the same way as the one it last applied.
+ */
+import type { QueryCondition, QueryFilterGroup } from "../contracts/query";
+import { isFilterGroup } from "../source/queryContract";
 
-type PrimitiveOperand =
+/**
+ * An operand value compared by value in a snapshot.
+ *
+ * @public
+ */
+export type FilterOperandPrimitive =
   string | number | boolean | bigint | symbol | null | undefined;
-type OperandSnapshot =
-  | { readonly kind: "array"; readonly values: readonly PrimitiveOperand[] }
+/**
+ * One operand as recorded: a flat primitive array copied item by item, or any
+ * other value kept by identity.
+ *
+ * @public
+ */
+export type FilterOperandSnapshot =
+  | {
+      readonly kind: "array";
+      readonly values: readonly FilterOperandPrimitive[];
+    }
   | { readonly kind: "identity"; readonly value: unknown };
-interface FilterGroupSnapshot {
+/**
+ * A filter tree as it stood: each condition's key, operator and operand, with
+ * a flat primitive array copied and any other operand kept by identity.
+ *
+ * @public
+ */
+export interface FilterTreeSnapshot {
   readonly combinator: QueryFilterGroup["combinator"];
-  readonly conditions: readonly FilterNodeSnapshot[];
+  readonly conditions: readonly FilterTreeSnapshotNode[];
 }
-type FilterNodeSnapshot =
-  | { readonly kind: "group"; readonly group: FilterGroupSnapshot }
+/**
+ * One node of a recorded filter tree: a nested group, or a condition's key,
+ * operator and operand.
+ *
+ * @public
+ */
+export type FilterTreeSnapshotNode =
+  | { readonly kind: "group"; readonly group: FilterTreeSnapshot }
   | {
       readonly kind: "condition";
       readonly key: string;
       readonly op: string;
-      readonly operand: OperandSnapshot;
+      readonly operand: FilterOperandSnapshot;
     };
-function primitiveOperand(value: unknown): value is PrimitiveOperand {
+function primitiveOperand(value: unknown): value is FilterOperandPrimitive {
   return (
     value === null || (typeof value !== "object" && typeof value !== "function")
   );
@@ -29,7 +56,7 @@ function primitiveOperand(value: unknown): value is PrimitiveOperand {
 /** Snapshot flat primitive arrays without evaluating accessors or custom operands. */
 function primitiveArray(
   value: unknown
-): readonly PrimitiveOperand[] | undefined {
+): readonly FilterOperandPrimitive[] | undefined {
   try {
     if (
       !Array.isArray(value) ||
@@ -43,7 +70,7 @@ function primitiveArray(
     if (typeof length !== "number" || !Number.isInteger(length) || length < 0)
       return undefined;
     if (Reflect.ownKeys(value).length !== length + 1) return undefined;
-    const values: PrimitiveOperand[] = [];
+    const values: FilterOperandPrimitive[] = [];
     for (let index = 0; index < length; index++) {
       const property = Object.getOwnPropertyDescriptor(value, index);
       const item: unknown = property?.value;
@@ -57,13 +84,13 @@ function primitiveArray(
     return undefined;
   }
 }
-function operandSnapshot(value: unknown): OperandSnapshot {
+function operandSnapshot(value: unknown): FilterOperandSnapshot {
   const values = primitiveArray(value);
   return values ? { kind: "array", values } : { kind: "identity", value };
 }
 function filterNodeSnapshot(
   node: QueryCondition | QueryFilterGroup
-): FilterNodeSnapshot {
+): FilterTreeSnapshotNode {
   return isFilterGroup(node)
     ? { kind: "group", group: filterTreeSnapshot(node) }
     : {
@@ -73,15 +100,22 @@ function filterNodeSnapshot(
         operand: operandSnapshot(node.value),
       };
 }
-export function filterTreeSnapshot(
-  tree: QueryFilterGroup
-): FilterGroupSnapshot {
+/**
+ * Record a filter tree so a later tree can be compared with it, even when the
+ * host mutated the original in place.
+ *
+ * @param tree - The tree to record.
+ * @returns Its snapshot.
+ *
+ * @public
+ */
+export function filterTreeSnapshot(tree: QueryFilterGroup): FilterTreeSnapshot {
   return {
     combinator: tree.combinator,
     conditions: tree.conditions.map(filterNodeSnapshot),
   };
 }
-function sameOperand(value: unknown, snapshot: OperandSnapshot): boolean {
+function sameOperand(value: unknown, snapshot: FilterOperandSnapshot): boolean {
   if (snapshot.kind === "identity") return Object.is(value, snapshot.value);
   const values = primitiveArray(value);
   return (
@@ -91,7 +125,7 @@ function sameOperand(value: unknown, snapshot: OperandSnapshot): boolean {
 }
 function sameFilterNode(
   node: QueryCondition | QueryFilterGroup,
-  snapshot: FilterNodeSnapshot | undefined
+  snapshot: FilterTreeSnapshotNode | undefined
 ): boolean {
   if (!snapshot) return false;
   if (snapshot.kind === "group")
@@ -103,9 +137,20 @@ function sameFilterNode(
     sameOperand(node.value, snapshot.operand)
   );
 }
+/**
+ * Whether a tree still matches a snapshot: the same combinators, keys and
+ * operators, flat primitive operands equal item by item, and any other operand
+ * the same object.
+ *
+ * @param tree - The current tree.
+ * @param snapshot - A snapshot taken earlier, if any.
+ * @returns Whether nothing that filters has changed.
+ *
+ * @public
+ */
 export function sameFilterTree(
   tree: QueryFilterGroup,
-  snapshot: FilterGroupSnapshot | undefined
+  snapshot: FilterTreeSnapshot | undefined
 ): boolean {
   return (
     tree.combinator === snapshot?.combinator &&

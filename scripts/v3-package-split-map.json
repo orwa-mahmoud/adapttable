@@ -13923,6 +13923,14 @@
       "behavior": ""
     },
     {
+      "export": "ColumnSpacerSide",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "columnTextAlign",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -16027,6 +16035,22 @@
       "behavior": ""
     },
     {
+      "export": "FilterOperandPrimitive",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FilterOperandSnapshot",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "FilterOption",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -16148,6 +16172,30 @@
     },
     {
       "export": "FilterTreeSlots",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "filterTreeSnapshot",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FilterTreeSnapshot",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FilterTreeSnapshotNode",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16892,6 +16940,14 @@
     },
     {
       "export": "GroupMoreButtonSlots",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "GroupMoreScope",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -18651,6 +18707,14 @@
       "behavior": ""
     },
     {
+      "export": "sameFilterTree",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "sameItems",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -19028,6 +19092,14 @@
     },
     {
       "export": "SidePanelFrameProps",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "SidePanelSide",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -21140,6 +21212,14 @@
     },
     {
       "export": "EditableColumnLike",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "EditActivation",
       "currentImport": "@adapttable/core/editing",
       "kind": "type",
       "class": "neutral-model",
@@ -30763,6 +30843,14 @@
       "behavior": ""
     },
     {
+      "export": "EditActivation",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "EditCommitSnapshot",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -38796,6 +38884,14 @@
     },
     {
       "export": "treeMoveCreatesCycle",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "treeRowAria",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",

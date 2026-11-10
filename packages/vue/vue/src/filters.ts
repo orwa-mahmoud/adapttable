@@ -13,7 +13,9 @@ import {
   coreFilters,
   coreFilterTypes,
   featureStateKey,
+  filterTreeSnapshot,
   FilterTriggerToggleState,
+  sameFilterTree,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 import type {
@@ -24,10 +26,6 @@ import type {
 import { computed, onScopeDispose, shallowRef, toValue, watch } from "vue";
 
 import type { FilterPanelModel } from "./filters/filterPanelChrome";
-import {
-  filterTreeSnapshot,
-  sameFilterTree,
-} from "./filters/filterTreeSnapshot";
 import { FULLSCREEN_MODEL } from "./viewControls/contracts";
 export const FILTER_VIEW =
   featureStateKey<FilterPanelModel<unknown>>("vue-filter-view");

@@ -14,6 +14,14 @@ import type { SidePanelEntry } from "../features/currentHost";
 import type { TableLabels } from "../types";
 
 /**
+ * The edge a side panel docks to: the inline start or end, so it follows the
+ * reading direction.
+ *
+ * @public
+ */
+export type SidePanelSide = "start" | "end";
+
+/**
  * Props an adapter's panel frame receives.
  *
  * @typeParam TNode - The binding's render node (a React node in React).
@@ -24,7 +32,7 @@ export interface SidePanelFrameProps<TNode = unknown> {
   /** The tab strip and the panel body, in order. */
   readonly children: TNode;
   /** Which edge the panel is docked to, already resolved for direction. */
-  readonly side: "start" | "end";
+  readonly side: SidePanelSide;
   /** Class for the element. */
   readonly className?: string;
 }
@@ -117,7 +125,7 @@ export interface SidePanelChromeProps<
   /** Close the panel entirely. */
   onClose: () => void;
   /** Which edge to dock to. Defaults to `"end"`. */
-  side?: "start" | "end";
+  side?: SidePanelSide;
   /** Labels; falls back to the built-in English. */
   labels?: TableLabels;
   /** A unique id root, so two tables on a page do not collide. */

@@ -54,6 +54,7 @@ import {
   type TableSource,
   type TableVirtualization,
   type TreeEntry,
+  treeRowAria,
   windowGroupedEntries,
 } from "@adapttable/core";
 import {
@@ -763,9 +764,14 @@ export function buildSurfaceBody<TRow>(input: SurfaceBodyInput<TRow>) {
             pinnedAttrs(
               interactiveAttrs(
                 appearance(
-                  grid && args.summary !== true
-                    ? grid.rowAttrs(args.row, args.index)
-                    : table.rowAttrs(args.row, args.index),
+                  {
+                    ...(grid && args.summary !== true
+                      ? grid.rowAttrs(args.row, args.index)
+                      : table.rowAttrs(args.row, args.index)),
+                    ...treeRowAria(
+                      args.summary === true ? undefined : args.treeEntry
+                    ),
+                  },
                   args
                 ),
                 args,

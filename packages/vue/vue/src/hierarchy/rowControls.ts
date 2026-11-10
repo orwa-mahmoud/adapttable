@@ -5,6 +5,7 @@ import {
   treeCardStyle,
   type TreeEntry,
   treeIndentStyle,
+  treeRowAria,
 } from "@adapttable/core";
 
 import type { Attrs } from "../attrs";
@@ -20,10 +21,7 @@ export function hierarchyRowAttrs<TRow>(
 ): Attrs {
   if (!entry) return {};
   return {
-    "aria-level": entry.level + 1,
-    "aria-expanded": entry.hasChildren ? entry.expanded : undefined,
-    "aria-posinset":
-      entry.siblingIndex === undefined ? undefined : entry.siblingIndex + 1,
+    ...treeRowAria(entry),
     style: card ? treeCardStyle(entry.level) : undefined,
   };
 }

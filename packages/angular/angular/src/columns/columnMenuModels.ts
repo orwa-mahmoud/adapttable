@@ -22,6 +22,7 @@ import {
   GRIP_ICON,
   hideAllColumns,
   PIN_ICON,
+  type PinSide,
   showAllColumns,
   unpinAllColumns,
 } from "@adapttable/core/binding";
@@ -94,7 +95,7 @@ export abstract class AdaptColumnMenuRowModel {
 export abstract class AdaptColumnMenuEdgeRowModel {
   readonly layout = input.required<ColumnLayout<never>>();
   readonly columnKey = input.required<string>();
-  readonly side = input.required<"start" | "end">();
+  readonly side = input.required<PinSide>();
   readonly name = input.required<string>();
   readonly showLabel = input.required<string>();
   readonly hideLabel = input.required<string>();

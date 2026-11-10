@@ -145,6 +145,28 @@ describe("desktopRowDomProps", () => {
     });
   });
 
+  it("names a tree row's depth, open state and place for assistive tech", () => {
+    const props = desktopRowDomProps(
+      domArgs({
+        treeEntry: {
+          row: { id: "b", name: "Bea" },
+          key: "b",
+          level: 1,
+          hasChildren: true,
+          expanded: false,
+          path: ["a"],
+          descendantIds: [],
+          siblingIndex: 2,
+        },
+      })
+    );
+    expect(props).toMatchObject({
+      "aria-level": 2,
+      "aria-expanded": false,
+      "aria-posinset": 3,
+    });
+  });
+
   it("wires selection, focus, click, reorder, pin, dirt and prefetch", () => {
     const handleRowClick = vi.fn();
     const handlePrefetch = vi.fn();

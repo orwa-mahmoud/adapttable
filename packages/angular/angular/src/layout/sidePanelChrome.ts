@@ -14,6 +14,7 @@ import {
   sidePanelTabId,
   type TableLabels,
 } from "@adapttable/core";
+import type { SidePanelSide } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
@@ -79,7 +80,7 @@ export class AdaptSidePanelLayout {
   /** The panel beside the body. Absent, the body stands alone. */
   readonly panel = input<TemplateRef<unknown>>();
   /** Which edge the panel sits on. */
-  readonly side = input<"start" | "end">("end");
+  readonly side = input<SidePanelSide>("end");
 }
 
 /**
@@ -152,7 +153,7 @@ export class AdaptSidePanelChrome {
   /** Close the panel entirely. */
   readonly onClose = input.required<() => void>();
   /** Which edge to dock to. */
-  readonly side = input<"start" | "end" | undefined>("end");
+  readonly side = input<SidePanelSide | undefined>("end");
   /** Labels; gaps fall back to English. */
   readonly labels = input<TableLabels | undefined>(undefined);
   /** A unique id root, so two tables on a page do not collide. */

@@ -15,6 +15,7 @@ import {
   treeCardStyle,
   treeColumnKey,
   treeIndentStyle,
+  treeRowAria,
 } from "./treeRows";
 
 interface Node {
@@ -240,5 +241,30 @@ describe("bodyRowEntries", () => {
     );
     expect(body.map((entry) => entry.index)).toEqual([0, 1, 2, 3]);
     expect(body[1]?.treeEntry?.level).toBe(1);
+  });
+});
+
+describe("treeRowAria", () => {
+  it("names a tree row's depth, open state and place among its siblings", () => {
+    const [src, index, lib] = build(["src"]);
+    expect(treeRowAria(src)).toEqual({
+      "aria-level": 1,
+      "aria-expanded": true,
+      "aria-posinset": 1,
+    });
+    expect(treeRowAria(index)).toEqual({
+      "aria-level": 2,
+      "aria-expanded": undefined,
+      "aria-posinset": 1,
+    });
+    expect(treeRowAria(lib)).toEqual({
+      "aria-level": 2,
+      "aria-expanded": false,
+      "aria-posinset": 2,
+    });
+  });
+
+  it("gives a row outside a tree nothing", () => {
+    expect(treeRowAria(undefined)).toEqual({});
   });
 });

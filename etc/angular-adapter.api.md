@@ -84,6 +84,7 @@ import { ColumnResizeHandleProps } from '@adapttable/core';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
 import { columnSelectLabel } from '@adapttable/core/binding';
+import { ColumnSpacerSide } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { COMMAND_PALETTE_LIVE } from '@adapttable/core/binding';
 import { CommandPaletteSurfaceProps as CommandPaletteSurfaceProps_2 } from '@adapttable/core/binding';
@@ -121,6 +122,7 @@ import { EditableCellButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
 import { EditableCellPresentation } from '@adapttable/core';
 import { EditableCellSlotProps } from '@adapttable/core/binding';
+import { EditActivation } from '@adapttable/core';
 import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictLabels } from '@adapttable/core';
 import { EditConflictPolicy } from '@adapttable/core';
@@ -229,6 +231,7 @@ import { GroupingPanelSurfaceProps } from '@adapttable/core/binding';
 import { groupLeafCount } from '@adapttable/core/grouping';
 import { GroupMoreButtonProps } from '@adapttable/core/binding';
 import { GroupMoreButtonSlotProps } from '@adapttable/core/binding';
+import { GroupMoreScope } from '@adapttable/core/binding';
 import { GroupRowCell } from '@adapttable/core';
 import { GroupRowLayout } from '@adapttable/core';
 import { groupRowLayout } from '@adapttable/core/grouping';
@@ -285,6 +288,7 @@ import { pinActionLabel } from '@adapttable/core';
 import { pinnedRowPart } from '@adapttable/core/binding';
 import { pinnedRowSticky } from '@adapttable/core/binding';
 import { pinnedSummaryPart } from '@adapttable/core';
+import { PinSide } from '@adapttable/core/binding';
 import { printToolbarProps } from '@adapttable/core/binding';
 import { Provider } from '@angular/core';
 import { QueryAggregate } from '@adapttable/core';
@@ -359,6 +363,7 @@ import { SidePanelChromeProps } from '@adapttable/core/binding';
 import { SidePanelEntry } from '@adapttable/core/binding';
 import { SidePanelEntry as SidePanelEntry_2 } from '@adapttable/core';
 import { SidePanelModel } from '@adapttable/core';
+import { SidePanelSide } from '@adapttable/core/binding';
 import { Signal } from '@angular/core';
 import { SlotFill } from '@adapttable/core/binding';
 import { SortByOption } from '@adapttable/core';
@@ -1455,7 +1460,7 @@ export abstract class AdaptColumnMenuEdgeRowModel {
     // (undocumented)
     readonly showLabel: InputSignal<string>;
     // (undocumented)
-    readonly side: InputSignal<"end" | "start">;
+    readonly side: InputSignal<PinSide>;
     // (undocumented)
     readonly unpinLabel: InputSignal<string>;
     // (undocumented)
@@ -1652,7 +1657,7 @@ export class AdaptColumnSpacer {
     protected readonly header: Signal<boolean>;
     // (undocumented)
     protected readonly part: Signal<string>;
-    readonly side: InputSignal<"end" | "start">;
+    readonly side: InputSignal<ColumnSpacerSide>;
     readonly width: InputSignal<number>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnSpacer, "adapt-column-spacer", never, {
@@ -1892,8 +1897,8 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     protected readonly desktopTable: Signal<DataTableSurface | undefined>;
     readonly dir: InputSignal<Direction | undefined>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
-    protected readonly dockedSide: Signal<"end" | "start">;
-    readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
+    protected readonly dockedSide: Signal<SidePanelSide>;
+    readonly editActivation: InputSignal<EditActivation | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
@@ -1967,10 +1972,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         openPanel: string;
         onOpenPanel: (key: string) => void;
         onClose: () => void;
-        side: "end" | "start";
+        side: SidePanelSide;
         labels: TableLabels | undefined;
     } | undefined>;
-    readonly sidePanelSide: InputSignal<"end" | "start">;
+    readonly sidePanelSide: InputSignal<SidePanelSide>;
     // @internal
     protected readonly sidePanelSlot: FeatureSlotKey<Omit<SidePanelChromeProps<unknown, SidePanelEntry_2, KeyboardEvent>, "slots">>;
     readonly skeletonRows: InputSignal<number | undefined>;
@@ -3300,11 +3305,11 @@ export class AdaptGroupMoreButtonChrome {
     readonly groupKey: InputSignal<string | undefined>;
     readonly labels: InputSignal<Required<TableLabels>>;
     readonly onShowMore: InputSignal<(entry: {
-    scope: "groups" | "rows";
+    scope: GroupMoreScope;
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"rows" | "groups">;
+    readonly scope: InputSignal<GroupMoreScope>;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {
@@ -4221,7 +4226,7 @@ export class AdaptSidePanelChrome {
     protected readonly contentTemplate: Signal<TemplateRef<unknown> | undefined>;
     protected readonly contentText: Signal<string>;
     protected readonly frameProps: Signal<    {
-    side: "end" | "start";
+    side: SidePanelSide;
     className: string | undefined;
     header: TemplateRef<unknown> | undefined;
     body: TemplateRef<unknown> | undefined;
@@ -4238,7 +4243,7 @@ export class AdaptSidePanelChrome {
     readonly onOpenPanel: InputSignal<(key: string) => void>;
     readonly openPanel: InputSignal<string>;
     readonly panels: InputSignal<readonly SidePanelPanel[]>;
-    readonly side: InputSignal<"end" | "start" | undefined>;
+    readonly side: InputSignal<SidePanelSide | undefined>;
     readonly slots: InputSignal<SidePanelSlots>;
     protected readonly tabProps: Signal<    {
     readonly panel: SidePanelPanel;
@@ -4310,7 +4315,7 @@ export class AdaptSidePanelChrome {
 // @public
 export class AdaptSidePanelLayout {
     readonly panel: InputSignal<TemplateRef<unknown> | undefined>;
-    readonly side: InputSignal<"end" | "start">;
+    readonly side: InputSignal<SidePanelSide>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSidePanelLayout, "adapt-side-panel-layout", never, {
         "panel": {

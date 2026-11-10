@@ -1429,6 +1429,9 @@ export interface ColumnSelectSlots<TNode = unknown> {
 }
 
 // @public
+export type ColumnSpacerSide = "start" | "end";
+
+// @public
 export function columnTextAlign(align: string | undefined): "start" | "center" | "end";
 
 // @public
@@ -2235,6 +2238,7 @@ export function desktopRowDomProps<TRow>(args: {
     readonly pinSticky: object | undefined;
     readonly prefetch: ((row: TRow) => void) | undefined;
     readonly handlePrefetch: (row: TRow) => void;
+    readonly treeEntry?: TreeEntry<TRow>;
 }): Record<string, unknown>;
 
 // @public
@@ -3371,6 +3375,18 @@ export interface FilteringContribution<TRow> {
 }
 
 // @public
+export type FilterOperandPrimitive = string | number | boolean | bigint | symbol | null | undefined;
+
+// @public
+export type FilterOperandSnapshot = {
+    readonly kind: "array";
+    readonly values: readonly FilterOperandPrimitive[];
+} | {
+    readonly kind: "identity";
+    readonly value: unknown;
+};
+
+// @public
 export interface FilterOption {
     label: string;
     value: string;
@@ -3503,6 +3519,28 @@ export interface FilterTreeSlots<TNode = unknown> {
     readonly Input: (props: FilterTreeInputProps) => TNode;
     readonly Select: (props: FilterTreeSelectProps) => TNode;
 }
+
+// @public
+export interface FilterTreeSnapshot {
+    // (undocumented)
+    readonly combinator: QueryFilterGroup["combinator"];
+    // (undocumented)
+    readonly conditions: readonly FilterTreeSnapshotNode[];
+}
+
+// @public
+export function filterTreeSnapshot(tree: QueryFilterGroup): FilterTreeSnapshot;
+
+// @public
+export type FilterTreeSnapshotNode = {
+    readonly kind: "group";
+    readonly group: FilterTreeSnapshot;
+} | {
+    readonly kind: "condition";
+    readonly key: string;
+    readonly op: string;
+    readonly operand: FilterOperandSnapshot;
+};
 
 // @public
 export class FilterTriggerToggleState {
@@ -4186,11 +4224,11 @@ export interface GroupMoreButtonProps {
     groupKey?: string;
     labels: Required<TableLabels>;
     onShowMore: (entry: {
-        scope: "groups" | "rows";
+        scope: GroupMoreScope;
         groupKey?: string;
     }) => void;
     remaining: number;
-    scope: "groups" | "rows";
+    scope: GroupMoreScope;
 }
 
 // @public
@@ -4203,6 +4241,9 @@ export interface GroupMoreButtonSlotProps {
 export interface GroupMoreButtonSlots<TNode = unknown> {
     readonly Button: (props: GroupMoreButtonSlotProps) => TNode;
 }
+
+// @public
+export type GroupMoreScope = "groups" | "rows";
 
 // @public
 export interface GroupNode<TRow> {
@@ -5777,6 +5818,9 @@ export interface RuntimeChromeInput<TRow> {
 export type RuntimeColumn<TRow> = ColumnMetadata<TRow>;
 
 // @public
+export function sameFilterTree(tree: QueryFilterGroup, snapshot: FilterTreeSnapshot | undefined): boolean;
+
+// @public
 export function sameItems<T>(a: readonly T[], b: readonly T[]): boolean;
 
 // @public @deprecated
@@ -6099,7 +6143,7 @@ export interface SidePanelChromeProps<TNode = unknown, TPanel extends SidePanelE
     onOpenPanel: (key: string) => void;
     openPanel: string;
     panels: readonly TPanel[];
-    side?: "start" | "end";
+    side?: SidePanelSide;
     slots: SidePanelSlots<TNode, TPanel, TKeyboardEvent>;
 }
 
@@ -6118,8 +6162,11 @@ export interface SidePanelEntry {
 export interface SidePanelFrameProps<TNode = unknown> {
     readonly children: TNode;
     readonly className?: string;
-    readonly side: "start" | "end";
+    readonly side: SidePanelSide;
 }
+
+// @public
+export type SidePanelSide = "start" | "end";
 
 // @public
 export interface SidePanelSlots<TNode = unknown, TPanel extends SidePanelEntry = SidePanelEntry, TKeyboardEvent = KeyboardEvent> {
