@@ -363,5 +363,5 @@ export function useTableDataWithEngine<TRow>(
   });
   useEffect(() => controller.dispose, [controller]);
 
-  return { source: sourced, runtime };
+  return useMemo(() => ({ source: sourced, runtime }), [sourced, runtime]);
 }

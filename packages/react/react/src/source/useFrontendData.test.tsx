@@ -53,6 +53,27 @@ describe("useFrontendData", () => {
     expect(result.current.total).toBe(3);
   });
 
+  it("returns the same source while nothing in it changes", () => {
+    const adapter = createMemoryAdapter("");
+    // A host that re-renders for its own state passes fresh option objects
+    // with the same values in them.
+    const { result, rerender } = renderHook(() =>
+      useFrontendData<Row>({
+        data: ROWS,
+        columns: cols,
+        urlAdapter: adapter,
+        paginationMode: "paged",
+      })
+    );
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+
+    act(() => result.current.setSearch("bob"));
+    expect(result.current).not.toBe(first);
+    expect(result.current.rows.map((row) => row.id)).toEqual(["b"]);
+  });
+
   it("filters by the search term using the default projector", () => {
     const { result } = render("q=bob");
     expect(result.current.rows.map((r) => r.id)).toEqual(["b"]);
