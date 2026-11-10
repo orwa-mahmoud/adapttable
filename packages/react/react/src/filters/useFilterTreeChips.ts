@@ -3,13 +3,11 @@
  */
 import {
   type FilterDef,
-  filterTreeChipLabel,
+  filterTreeConditionChips,
   type FilterTypeRegistry,
-  isFilterTreeConditionSet,
   type QueryFilterGroup,
   removeFilterTreeNode,
   type TableLabels,
-  walkFilterTreeConditions,
 } from "@adapttable/core";
 import { useMemo } from "react";
 
@@ -47,15 +45,20 @@ export function useFilterTreeChips<TRow>(
   options: UseFilterTreeChipsOptions<TRow>
 ): readonly ActiveFilterChip[] {
   const { tree, defs, labels, setFilterTree, registry } = options;
-  return useMemo(() => {
-    if (!tree || !setFilterTree) return [];
-    // A condition still waiting for a value filters nothing, so it is no chip.
-    return walkFilterTreeConditions(tree)
-      .filter(({ condition }) => isFilterTreeConditionSet(condition))
-      .map(({ condition, path }) => ({
-        key: `ft:${path.join(".")}:${condition.key}:${condition.op}`,
-        label: filterTreeChipLabel(condition, defs, labels, registry),
-        onRemove: () => setFilterTree(removeFilterTreeNode(tree, path)),
-      }));
-  }, [defs, labels, setFilterTree, tree, registry]);
+  return useMemo(
+    () =>
+      filterTreeConditionChips({
+        tree,
+        defs,
+        labels,
+        registry,
+        onRemove:
+          tree && setFilterTree
+            ? (path) => {
+                setFilterTree(removeFilterTreeNode(tree, path));
+              }
+            : undefined,
+      }),
+    [defs, labels, setFilterTree, tree, registry]
+  );
 }

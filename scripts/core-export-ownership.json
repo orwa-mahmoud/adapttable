@@ -931,6 +931,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "checklistSlice",
+      "kind": "runtime",
+      "module": "filters/checklistModel.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/checklistModel.ts#checklistSlice",
+      "subpaths": ["."]
+    },
+    {
       "name": "checklistWindow",
       "kind": "runtime",
       "module": "filters/checklistModel.ts",
@@ -2977,6 +2988,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "filterTreeConditionChips",
+      "kind": "runtime",
+      "module": "filters/filterTreeChips.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/filterTreeChips.ts#filterTreeConditionChips",
+      "subpaths": ["."]
+    },
+    {
       "name": "filterTreeConditionModel",
       "kind": "runtime",
       "module": "filters/filterTreeEditor.ts",
@@ -4646,6 +4668,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/filterTreeEditor.ts#newFilterTreeCondition",
+      "subpaths": ["."]
+    },
+    {
+      "name": "nextChecklistViewport",
+      "kind": "runtime",
+      "module": "filters/checklistModel.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/checklistModel.ts#nextChecklistViewport",
       "subpaths": ["."]
     },
     {

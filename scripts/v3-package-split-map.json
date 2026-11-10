@@ -28619,6 +28619,14 @@
       "behavior": ""
     },
     {
+      "export": "checklistSlice",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "ChecklistSource",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -32091,6 +32099,14 @@
       "behavior": ""
     },
     {
+      "export": "filterTreeConditionChips",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "filterTreeConditionModel",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -34676,6 +34692,14 @@
     },
     {
       "export": "newFilterTreeCondition",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "nextChecklistViewport",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",

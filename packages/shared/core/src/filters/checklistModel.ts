@@ -252,3 +252,47 @@ export function checklistWindow(
     padBottom: Math.max(0, (rowCount - endRow) * ROW_HEIGHT),
   };
 }
+
+/**
+ * The slice of a checklist to render: the window at a scroll position when
+ * the list is virtualized, every option otherwise.
+ *
+ * @param count - How many options the list holds.
+ * @param virtualize - Whether the list renders a window.
+ * @param scrollTop - The list's scroll offset, in px.
+ * @param width - The list's measured width, in px.
+ * @returns The slice to render and the spacers around it.
+ *
+ * @public
+ */
+export function checklistSlice(
+  count: number,
+  virtualize: boolean,
+  scrollTop: number,
+  width: number
+): ChecklistWindow {
+  if (!virtualize) return { start: 0, end: count, padTop: 0, padBottom: 0 };
+  return checklistWindow(count, scrollTop, width);
+}
+
+/**
+ * The checklist's viewport after a scroll or resize, read from its element.
+ * The same numbers return the same object, so a scroll that moves nothing
+ * re-renders nothing.
+ *
+ * @param current - The viewport last read.
+ * @param node - The list element, if mounted.
+ * @returns The viewport to keep.
+ *
+ * @public
+ */
+export function nextChecklistViewport(
+  current: { readonly scrollTop: number; readonly width: number },
+  node: { readonly scrollTop: number; readonly clientWidth: number } | undefined
+): { readonly scrollTop: number; readonly width: number } {
+  if (!node) return current;
+  const next = { scrollTop: node.scrollTop, width: node.clientWidth };
+  return current.scrollTop === next.scrollTop && current.width === next.width
+    ? current
+    : next;
+}

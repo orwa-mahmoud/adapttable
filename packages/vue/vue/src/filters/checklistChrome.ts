@@ -1,7 +1,7 @@
 import {
   CHECKLIST_LIST_HEIGHT,
+  checklistSlice,
   type ChecklistWindow,
-  checklistWindow,
 } from "@adapttable/core";
 import {
   type ChecklistClassNames,
@@ -53,9 +53,12 @@ export function useChecklistWindow(
   );
   return {
     window: computed<ChecklistWindow>(() =>
-      toValue(enabled)
-        ? checklistWindow(toValue(count), scrollTop.value, width.value)
-        : { start: 0, end: toValue(count), padTop: 0, padBottom: 0 }
+      checklistSlice(
+        toValue(count),
+        toValue(enabled),
+        scrollTop.value,
+        width.value
+      )
     ),
     ref: (value: HTMLElement | null) => {
       element.value = value;

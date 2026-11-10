@@ -11,9 +11,11 @@ import {
   CHECKLIST_VIRTUALIZE_AT,
   checklistActions,
   checklistItems,
+  checklistSlice,
   type FilterDef,
   filterLabel,
   listFilterValues,
+  nextChecklistViewport,
   searchChecklistItems,
   type TableLabels,
   type TableSource,
@@ -37,7 +39,6 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
-import { checklistSlice, nextChecklistViewport } from "./checklistWindow";
 
 const FILTER_GROUPS = [FILTER_LABELS] as const;
 

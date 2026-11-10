@@ -158,10 +158,6 @@ export {
   type ChecklistSlots,
 } from "./filters/checklistChrome";
 export {
-  checklistSlice,
-  nextChecklistViewport,
-} from "./filters/checklistWindow";
-export {
   AdaptAutoFilterFormModel,
   AdaptBooleanFilterFieldModel,
   AdaptFilterOptionsModel,
@@ -337,6 +333,7 @@ export {
   injectMeasuredWindowScrollMargin,
   type MeasuredWindowScrollMarginOptions,
 } from "./virtual/windowScrollMargin";
+export { checklistSlice, nextChecklistViewport } from "@adapttable/core";
 export {
   ACTIONS_COLUMN_KEY,
   approvalReview,

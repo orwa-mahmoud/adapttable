@@ -65,9 +65,12 @@ export {
   checklistActions,
   checklistColumnsAcross,
   checklistItems,
+  checklistSlice,
   checklistWindow,
+  nextChecklistViewport,
   searchChecklistItems,
 } from "./filters/checklistModel";
+export { filterTreeConditionChips } from "./filters/filterTreeChips";
 export type {
   FilterTreeConditionModel,
   FilterTreeEditorActions,

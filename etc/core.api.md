@@ -1116,6 +1116,9 @@ export interface ChecklistItems {
 export function checklistItems<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "allFilteredRows" | "extra" | "facets">): ChecklistItems;
 
 // @public
+export function checklistSlice(count: number, virtualize: boolean, scrollTop: number, width: number): ChecklistWindow;
+
+// @public
 export type ChecklistSource<TRow> = Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
 
 // @public
@@ -3724,6 +3727,15 @@ export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: reado
 export function filterTreeCombinatorOptions(labels: FilterStrings): readonly FilterTreeOption[];
 
 // @public
+export function filterTreeConditionChips<TRow>(input: {
+    readonly tree: QueryFilterGroup | undefined;
+    readonly defs: readonly FilterDef<TRow>[];
+    readonly labels: Required<TableLabels>;
+    readonly registry?: FilterTypeRegistry;
+    readonly onRemove: ((path: readonly number[]) => void) | undefined;
+}): readonly ActiveFilterChip[];
+
+// @public
 export interface FilterTreeConditionModel<TRow> {
     readonly def: FilterDef<TRow>;
     readonly fieldOptions: readonly FilterTreeOption[];
@@ -5728,6 +5740,18 @@ export interface NeutralTableBinding<TRow = unknown> {
 
 // @public
 export function newFilterTreeCondition<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): QueryCondition;
+
+// @public
+export function nextChecklistViewport(current: {
+    readonly scrollTop: number;
+    readonly width: number;
+}, node: {
+    readonly scrollTop: number;
+    readonly clientWidth: number;
+} | undefined): {
+    readonly scrollTop: number;
+    readonly width: number;
+};
 
 // @public
 export function nextCommandIndex(key: string, at: number, count: number): number | undefined;

@@ -56,7 +56,7 @@ import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
 import { ChecklistButtonProps } from '@adapttable/core/binding';
 import { ChecklistCheckboxProps } from '@adapttable/core/binding';
 import { ChecklistSearchProps } from '@adapttable/core/binding';
-import { ChecklistWindow } from '@adapttable/core';
+import { checklistSlice } from '@adapttable/core';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { chromeColumnPlan } from '@adapttable/core/binding';
@@ -273,6 +273,7 @@ import { MobileCardModel } from '@adapttable/core';
 import { MultiSelectEditorCheckboxProps as MultiSelectEditorCheckboxProps_2 } from '@adapttable/core/binding';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
+import { nextChecklistViewport } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
 import { OnInit } from '@angular/core';
@@ -5043,8 +5044,7 @@ export { ChecklistCheckboxProps }
 
 export { ChecklistSearchProps }
 
-// @public
-export function checklistSlice(count: number, virtualize: boolean, scrollTop: number, width: number): ChecklistWindow;
+export { checklistSlice }
 
 // @public
 export interface ChecklistSlots {
@@ -5961,14 +5961,7 @@ export interface NestedTableContext<TRow = unknown> {
 // @public
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
 
-// @public
-export function nextChecklistViewport(current: {
-    readonly scrollTop: number;
-    readonly width: number;
-}, node: HTMLElement | undefined): {
-    readonly scrollTop: number;
-    readonly width: number;
-};
+export { nextChecklistViewport }
 
 export { nextPinSide }
 

@@ -18088,12 +18088,18 @@ FilterTreeEditorActions`, `filterTreeCombinatorOptions`,
   operators through the same registry widget the builder does.
 - `activeFilterChips(options: ActiveFilterChipsOptions)`,
   `chipValuesOf(extra, labels)`, `mergeFilterChips` and
-  `resolveActiveFilterCount` — the chip strip and the filters count.
+  `resolveActiveFilterCount` — the chip strip and the filters count;
+  `filterTreeConditionChips({ tree, defs, labels, registry, onRemove })` adds
+  one chip per AND/OR-tree condition that filters, keyed by its path, and
+  hands that path to `onRemove`.
 - `checklistItems(def, source: ChecklistSource): ChecklistItems`,
   `searchChecklistItems(items, query)` and
   `checklistActions(def, source, visible): ChecklistActions` — the checklist
   filter. `checklistWindow(count, scrollTop, width): ChecklistWindow` and
-  `checklistColumnsAcross(width)` window a long list;
+  `checklistColumnsAcross(width)` window a long list,
+  `checklistSlice(count, virtualize, scrollTop, width)` returns the window or
+  the whole list, and `nextChecklistViewport(current, node)` reads a scroll
+  without a new object when nothing moved;
   `CHECKLIST_VIRTUALIZE_AT`, `CHECKLIST_ITEM_HEIGHT`, `CHECKLIST_ITEM_WIDTH`,
   `CHECKLIST_OPTION_GAP`, `CHECKLIST_LIST_HEIGHT`.
 - `headerFilterCellKind(def, registry): HeaderFilterCellKind` — the compact

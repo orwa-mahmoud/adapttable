@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { checklistSlice, nextChecklistViewport } from "./checklistWindow";
+import { checklistSlice, nextChecklistViewport } from "./checklistModel";
 
 describe("checklistSlice", () => {
   it("returns the whole list when it is not windowed", () => {
@@ -32,13 +32,13 @@ describe("nextChecklistViewport", () => {
 
   it("keeps it when the numbers have not moved", () => {
     const current = { scrollTop: 4, width: 8 };
-    const node = { scrollTop: 4, clientWidth: 8 } as HTMLElement;
+    const node = { scrollTop: 4, clientWidth: 8 };
     expect(nextChecklistViewport(current, node)).toBe(current);
   });
 
   it("returns the new numbers when they moved", () => {
     const current = { scrollTop: 0, width: 8 };
-    const node = { scrollTop: 12, clientWidth: 40 } as HTMLElement;
+    const node = { scrollTop: 12, clientWidth: 40 };
     expect(nextChecklistViewport(current, node)).toEqual({
       scrollTop: 12,
       width: 40,
