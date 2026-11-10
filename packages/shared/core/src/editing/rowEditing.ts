@@ -35,6 +35,17 @@ import { listenerSet } from "./storePlumbing";
 export type RowEditDrafts = Readonly<Record<string, string>>;
 
 /**
+ * The host's channel for a row edit: one patch of parsed values keyed by
+ * column. The table never writes to a row.
+ *
+ * @public
+ */
+export type RowEditHandler<TRow> = (
+  row: TRow,
+  patch: Readonly<Record<string, unknown>>
+) => unknown;
+
+/**
  * Headless row-editing state — what a binding hands its cells.
  *
  * @public
@@ -115,10 +126,7 @@ export interface RowEditStoreOptions<
    * Take everything the reader changed, as one patch of parsed values keyed by
    * column. The table never writes to a row.
    */
-  readonly onRowEdit?: (
-    row: TRow,
-    patch: Readonly<Record<string, unknown>>
-  ) => unknown;
+  readonly onRowEdit?: RowEditHandler<TRow>;
   /** An editor opened on this row. */
   readonly onEditStart?: EditEventHandler<TRow>;
   /** The reader threw the drafts away. */

@@ -412,7 +412,7 @@ export const VUE_TYPE_EXPECTATIONS = {
       },
       {
         code: 2345,
-        message: /row: Person, patch:/,
+        message: /RowEditHandler<Person>/,
       },
       {
         code: 2345,

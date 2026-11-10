@@ -859,7 +859,8 @@ EditValidationStore` — cell then row validation, with superseded checks
 EditHistoryController` — the history a table runs: records a gesture with
   each cell's value before it changed and replays undo and redo through the
   host's `CellEditHandler`. `editHistoryView` (`EditHistoryState`),
-  `resolveEditHistory` reads the `editHistory` prop, and `recordingCellEdit`
+  `resolveEditHistory` reads the `editHistory` prop (`EditHistoryInput`: `true`
+  or `{ depth }`), and `recordingCellEdit`
   wraps the channel so each inline commit is one gesture.
 - `createEditConflictStore(): EditConflictStore` — the live-update
   reconciler for the open cell, an open row form and a batch

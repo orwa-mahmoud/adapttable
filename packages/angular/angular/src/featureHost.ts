@@ -65,7 +65,7 @@ export interface AdaptTableFeature extends FeatureSetup<
   /** Stable id: `"column-menu"`, `"density-chooser"`, a plugin's name. */
   readonly id?: string;
   /** Merge this feature's configuration into the table. Later features win. */
-  apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+  apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
   /** The slots this feature draws into, and what draws each one. */
   readonly renders?: readonly FeatureRender<never, SlotComponent>[];
   /** Start live behavior once the table runtime exists; dispose with the table. */

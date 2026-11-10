@@ -206,6 +206,7 @@ export { computed, type ComputedColumnSpec } from "./columns/computed";
 export { localizedColumnPath } from "./columns/resolveColumns";
 export {
   type BatchEditEntry,
+  type BatchEditHandler,
   type BatchEditingState,
   batchEditingView,
   type BatchEditSnapshot,
@@ -277,6 +278,7 @@ export {
   createEditHistory,
   type EditHistoryController,
   type EditHistoryControllerOptions,
+  type EditHistoryInput,
   type EditHistoryState,
   editHistoryView,
   recordingCellEdit,
@@ -364,6 +366,7 @@ export {
   createRowEditStore,
   parseColumnDraft,
   type RowEditDrafts,
+  type RowEditHandler,
   type RowEditingState,
   rowEditingView,
   rowEditSignature,

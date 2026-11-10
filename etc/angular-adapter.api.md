@@ -4625,7 +4625,7 @@ export class AdaptTableAssistantChrome {
 
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
-    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     mount?(context: FeatureMountContext): void | (() => void);
@@ -5248,7 +5248,7 @@ export function coreExportCsv<TRow>(options?: boolean | {
 }): CoreFeature<TRow>;
 
 // @public
-export function coreFilters<TRow>(defs: unknown): CoreFeature<TRow>;
+export function coreFilters<TRow, TPanel = never>(defs: readonly FilterDef<TRow>[] | TPanel): CoreFeature<TRow>;
 
 // @public
 export function coreFindInTable(): CoreFeature;

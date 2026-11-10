@@ -3,12 +3,15 @@
  * signals.
  */
 import {
+  type BatchEditHandler,
   type BatchEditingState,
   type BatchRowEdit,
+  type CellEditHandler,
   type CellEditingState,
   type EditableColumnLike,
   type EditEventHandler,
   type FeatureHostState,
+  type RowEditHandler,
   type RowEditingState,
 } from "@adapttable/core";
 import {
@@ -31,41 +34,14 @@ import {
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
 
 export type {
+  BatchEditHandler,
   BatchEditingState,
   BatchRowEdit,
+  CellEditHandler,
   CellEditingState,
+  RowEditHandler,
   RowEditingState,
 };
-
-/**
- * A cell-edit write the host applies.
- *
- * @public
- */
-export type CellEditHandler<TRow> = (
-  row: TRow,
-  columnKey: string,
-  value: unknown
-) => void | Promise<void>;
-
-/**
- * A row-edit write the host applies — one patch for every changed field.
- *
- * @public
- */
-export type RowEditHandler<TRow> = (
-  row: TRow,
-  patch: Readonly<Record<string, unknown>>
-) => void | Promise<void>;
-
-/**
- * A batch-edit write the host applies — every pending row at once.
- *
- * @public
- */
-export type BatchEditHandler<TRow> = (
-  edits: readonly BatchRowEdit<TRow>[]
-) => void | Promise<void>;
 
 /**
  * Lifecycle observers for {@link injectCellEditing}.

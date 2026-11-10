@@ -144,7 +144,7 @@ describe("coreFeatures — configured features", () => {
   });
 
   it("extraRows writes the list and its assembly", () => {
-    const rows = [{ key: "sep" }];
+    const rows = [{ key: "sep", kind: "separator" as const }];
     const made = coreExtraRows(rows);
     expect(made.id).toBe("extra-rows");
     expect(patch(made)).toEqual({
@@ -197,7 +197,7 @@ describe("coreFeatures — configured features", () => {
   });
 
   it("bulkActions writes the actions", () => {
-    const actions = [{ key: "archive" }];
+    const actions = [{ key: "archive", label: "Archive", onClick: vi.fn() }];
     const made = coreBulkActions(actions);
     expect(made.id).toBe("bulk-actions");
     expect(patch(made)).toEqual({ bulkActions: actions });
@@ -237,8 +237,8 @@ describe("coreFeatures — configured features", () => {
     const made = coreEditHistory();
     expect(made.id).toBe("edit-history");
     expect(patch(made)).toEqual({ editHistory: true });
-    expect(patch(coreEditHistory({ limit: 5 }))).toEqual({
-      editHistory: { limit: 5 },
+    expect(patch(coreEditHistory({ depth: 5 }))).toEqual({
+      editHistory: { depth: 5 },
     });
   });
 
@@ -296,7 +296,7 @@ describe("coreFeatures — configured features", () => {
   });
 
   it("rowActions writes only what it was given", () => {
-    const actions = [{ key: "open" }];
+    const actions = [{ key: "open", label: "Open", onClick: vi.fn() }];
     const onAddRow = vi.fn();
     const onDuplicateRow = vi.fn();
     const onDeleteRow = vi.fn();

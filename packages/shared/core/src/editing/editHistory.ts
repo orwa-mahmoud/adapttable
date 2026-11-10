@@ -20,6 +20,14 @@ import { PREPARE_RECORDING, recordedGesture } from "./recordedGesture";
 import { listenerSet } from "./storePlumbing";
 
 /**
+ * Whether a table keeps an edit history, and how deep: `true` for the
+ * default depth, or the number of edits to keep.
+ *
+ * @public
+ */
+export type EditHistoryInput = boolean | { readonly depth?: number };
+
+/**
  * The host's commit channel — what an undo replays through.
  *
  * @public
@@ -217,9 +225,10 @@ export function editHistoryView<TRow>(
  *
  * @public
  */
-export function resolveEditHistory(
-  editHistory: boolean | { readonly depth?: number } | undefined
-): { readonly enabled: boolean; readonly depth: number | undefined } {
+export function resolveEditHistory(editHistory: EditHistoryInput | undefined): {
+  readonly enabled: boolean;
+  readonly depth: number | undefined;
+} {
   return {
     enabled: editHistory !== undefined && editHistory !== false,
     depth: typeof editHistory === "object" ? editHistory.depth : undefined,

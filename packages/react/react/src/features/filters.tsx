@@ -91,9 +91,12 @@ export function filters<TRow>(
  */
 export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] | ReactNode
+): TableFeature<TRow>;
+export function filters<TRow>(
+  defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {
   return {
-    ...coreFilters<TRow>(defs),
+    ...coreFilters<TRow, ReactNode>(defs),
     provider: { Provider: FiltersEngineProvider },
     renders: [
       slotRender(FILTER_CHIPS_LIVE, (props) => <LiveFilterChips {...props} />),

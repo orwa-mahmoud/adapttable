@@ -26,6 +26,15 @@ import { parseColumnDraft, type RowEditDrafts } from "./rowEditing";
 import { listenerSet } from "./storePlumbing";
 
 /**
+ * The host's channel for a batch: every pending row at once, called once.
+ *
+ * @public
+ */
+export type BatchEditHandler<TRow> = (
+  edits: readonly BatchRowEdit<TRow>[]
+) => unknown;
+
+/**
  * One pending row, and what each changed field is measured against.
  *
  * @public
@@ -123,7 +132,7 @@ export interface BatchEditStoreOptions<
    * Take every pending row at once. The table never writes to a row, and the
    * whole point of the mode is that this is called once.
    */
-  readonly onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+  readonly onBatchEdit?: BatchEditHandler<TRow>;
   /** A row became pending. */
   readonly onEditStart?: EditEventHandler<TRow>;
   /** Pending changes were thrown away. */

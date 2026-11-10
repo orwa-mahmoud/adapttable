@@ -487,6 +487,9 @@ export function filters(form: ReactNode): StaticTableFeature;
 // @public
 export function filters<TRow>(defs: readonly FilterDef<TRow>[]): TableFeature<TRow>;
 
+// @public
+export function filters<TRow>(defs: readonly FilterDef<TRow>[] | ReactNode): TableFeature<TRow>;
+
 export { FilterType }
 
 export { FilterTypeExtend }

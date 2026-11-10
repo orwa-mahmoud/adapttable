@@ -13,16 +13,26 @@ import type {
   ContextMenuTarget,
 } from "../actions/contextMenuModel";
 import { columnResizeHandleProps } from "../columns/columnResize";
+import type { BatchEditHandler } from "../editing/batchEditing";
+import type { CellEditHandler, EditHistoryInput } from "../editing/editHistory";
+import type { RowEditHandler } from "../editing/rowEditing";
 import type { ExportWriter } from "../export/exportWriter";
+import type { FilterDef } from "../filters/filterDefs";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
-import { buildBodyCells } from "../rows/cellSpan";
+import {
+  buildBodyCells,
+  type CellSpanAppearance,
+  type GetCellSpan,
+} from "../rows/cellSpan";
 import {
   extraCoveredTableSlots,
+  type ExtraRow,
   inflateBodyCellRowSpans,
   insertExtraRows,
   insertExtrasBeforeRows,
 } from "../rows/extraRows";
 import { extraHostFillStyle } from "../rows/rowPresentation";
+import type { BulkAction, RowAction } from "../types";
 import type { SidePanelEntry } from "./currentHost";
 import type { FeaturePatch, PatchFeature } from "./featurePatch";
 
@@ -113,8 +123,8 @@ export function coreFeature<TRow>(
  * @public
  */
 export function coreCellSpan<TRow>(
-  getCellSpan: unknown,
-  cellSpanAppearance?: unknown
+  getCellSpan: GetCellSpan<TRow>,
+  cellSpanAppearance?: CellSpanAppearance
 ): CoreFeature<TRow> {
   return define("cell-span", {
     getCellSpan,
@@ -128,7 +138,9 @@ export function coreCellSpan<TRow>(
  *
  * @public
  */
-export function coreExtraRows(rows: readonly unknown[]): CoreFeature {
+export function coreExtraRows<
+  TExtraRow extends Pick<ExtraRow, "key" | "kind" | "beforeRowId">,
+>(rows: readonly TExtraRow[]): CoreFeature {
   return define("extra-rows", {
     extraRows: rows,
     assembly: {
@@ -146,9 +158,10 @@ export function coreExtraRows(rows: readonly unknown[]): CoreFeature {
  *
  * @public
  */
-export function corePinnedSummaryRows<TRow>(
-  pinnedRows: unknown
-): CoreFeature<TRow> {
+export function corePinnedSummaryRows<TRow>(pinnedRows: {
+  readonly top?: readonly TRow[];
+  readonly bottom?: readonly TRow[];
+}): CoreFeature<TRow> {
   return define("pinned-summary-rows", { pinnedRows });
 }
 
@@ -259,7 +272,7 @@ export function coreSidePanel<TPanel extends SidePanelEntry>(options: {
  *
  * @public
  */
-export function coreBulkActions(actions: readonly unknown[]): CoreFeature {
+export function coreBulkActions(actions: readonly BulkAction[]): CoreFeature {
   return define("bulk-actions", { bulkActions: actions });
 }
 
@@ -291,7 +304,9 @@ export function coreHeaderFilters(): CoreFeature {
  *
  * @public
  */
-export function coreSavedViews(options: unknown): CoreFeature {
+export function coreSavedViews<TOptions extends object>(
+  options: TOptions
+): CoreFeature {
   return define("saved-views", { savedViews: options });
 }
 
@@ -384,7 +399,7 @@ export function coreDensityChooser(): CoreFeature {
  *
  * @public
  */
-export function coreEditHistory(options: unknown = true): CoreFeature {
+export function coreEditHistory(options: EditHistoryInput = true): CoreFeature {
   return define("edit-history", { editHistory: options });
 }
 
@@ -394,7 +409,7 @@ export function coreEditHistory(options: unknown = true): CoreFeature {
  * @public
  */
 export function coreEditing<TRow>(
-  onCellEdit: unknown,
+  onCellEdit: CellEditHandler<TRow>,
   extras?: FeaturePatch<TRow>
 ): CoreFeature<TRow> {
   return define("editing", { onCellEdit, ...extras });
@@ -406,7 +421,7 @@ export function coreEditing<TRow>(
  * @public
  */
 export function coreRowEditing<TRow>(
-  onRowEdit: unknown,
+  onRowEdit: RowEditHandler<TRow>,
   extras?: FeaturePatch<TRow>
 ): CoreFeature<TRow> {
   return define("row-editing", { rowEditing: true, onRowEdit, ...extras });
@@ -418,7 +433,7 @@ export function coreRowEditing<TRow>(
  * @public
  */
 export function coreBatchEditing<TRow>(
-  onBatchEdit: unknown,
+  onBatchEdit: BatchEditHandler<TRow>,
   extras?: FeaturePatch<TRow>
 ): CoreFeature<TRow> {
   return define("batch-editing", {
@@ -454,9 +469,12 @@ export function coreExportCsv<TRow>(
 /**
  * The filter panel, declarative or a binding's own form.
  *
+ * @typeParam TPanel - A binding's own filter form, when it accepts one.
  * @public
  */
-export function coreFilters<TRow>(defs: unknown): CoreFeature<TRow> {
+export function coreFilters<TRow, TPanel = never>(
+  defs: readonly FilterDef<TRow>[] | TPanel
+): CoreFeature<TRow> {
   return define("filters", { filters: defs });
 }
 
@@ -514,13 +532,13 @@ export function coreGroupingPanel<TRow>(
  *
  * @public
  */
-export function coreRowActions<TRow>(
-  actions?: readonly unknown[],
+export function coreRowActions<TRow, TConfirm = boolean>(
+  actions?: readonly RowAction<TRow>[],
   handlers?: {
-    readonly onAddRow?: unknown;
-    readonly onDuplicateRow?: unknown;
-    readonly onDeleteRow?: unknown;
-    readonly confirmDeleteRow?: unknown;
+    readonly onAddRow?: () => unknown;
+    readonly onDuplicateRow?: (row: TRow) => unknown;
+    readonly onDeleteRow?: (row: TRow) => unknown;
+    readonly confirmDeleteRow?: TConfirm;
   }
 ): CoreFeature<TRow> {
   return define("row-actions", {
@@ -539,10 +557,14 @@ export function coreRowActions<TRow>(
 /**
  * A panel under an expanded row.
  *
+ * @typeParam TRender - How the binding draws the panel for a row.
  * @public
  */
-export function coreRowDetail<TRow>(
-  renderRowDetail: unknown,
+export function coreRowDetail<
+  TRow,
+  TRender extends object = (row: TRow) => unknown,
+>(
+  renderRowDetail: TRender,
   defaultExpandedRowIds?: readonly string[]
 ): CoreFeature<TRow> {
   return define("row-detail", { renderRowDetail, defaultExpandedRowIds });
@@ -551,10 +573,11 @@ export function coreRowDetail<TRow>(
 /**
  * A whole table inside a row's detail panel.
  *
+ * @typeParam TNested - The binding's nested-table description.
  * @public
  */
-export function coreNestedTable<TRow>(
-  nested: unknown,
+export function coreNestedTable<TRow, TNested extends object = object>(
+  nested: TNested,
   defaultExpandedRowIds?: readonly string[]
 ): CoreFeature<TRow> {
   return define("nested-table", {

@@ -21019,6 +21019,17 @@
       "subpaths": [".", "./binding", "./editing"]
     },
     {
+      "name": "BatchEditHandler",
+      "kind": "type",
+      "module": "editing/batchEditing.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/batchEditing.ts#BatchEditHandler",
+      "subpaths": [".", "./binding", "./editing"]
+    },
+    {
       "name": "BatchEditingState",
       "kind": "type",
       "module": "editing/batchEditing.ts",
@@ -21082,7 +21093,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editContracts.ts#BatchRowEdit",
-      "subpaths": [".", "./editing"]
+      "subpaths": [".", "./binding", "./editing"]
     },
     {
       "name": "CellConflictAsk",
@@ -21126,7 +21137,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/editHistory.ts#CellEditHandler",
-      "subpaths": [".", "./editing"]
+      "subpaths": [".", "./binding", "./editing"]
     },
     {
       "name": "CellEditingState",
@@ -22004,6 +22015,17 @@
       "deprecated": false,
       "identity": "editing/editHistory.ts#EditHistoryEntry",
       "subpaths": [".", "./editing"]
+    },
+    {
+      "name": "EditHistoryInput",
+      "kind": "type",
+      "module": "editing/editHistory.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/editHistory.ts#EditHistoryInput",
+      "subpaths": [".", "./binding", "./editing"]
     },
     {
       "name": "EditHistorySnapshot",
@@ -22980,6 +23002,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/rowEditing.ts#RowEditDrafts",
+      "subpaths": [".", "./binding", "./editing"]
+    },
+    {
+      "name": "RowEditHandler",
+      "kind": "type",
+      "module": "editing/rowEditing.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "editing/rowEditing.ts#RowEditHandler",
       "subpaths": [".", "./binding", "./editing"]
     },
     {

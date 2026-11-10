@@ -146,7 +146,11 @@ export {
   isColumnGroupSummaryKey,
   toggleCollapsedColumnGroup,
 } from "./columns/headerGroups";
-export type { BatchEditEntry, BatchEditingState } from "./editing/batchEditing";
+export type {
+  BatchEditEntry,
+  BatchEditHandler,
+  BatchEditingState,
+} from "./editing/batchEditing";
 export type {
   EditableCellActivateProps,
   EditableCellButtonProps,
@@ -169,7 +173,11 @@ export type {
   RowEditButtonProps,
   RowEditIcons,
 } from "./editing/rowEditContract";
-export type { RowEditDrafts, RowEditingState } from "./editing/rowEditing";
+export type {
+  RowEditDrafts,
+  RowEditHandler,
+  RowEditingState,
+} from "./editing/rowEditing";
 export type {
   ExportProgressAction,
   ExportProgressChromeProps,
@@ -1128,7 +1136,8 @@ export type {
   EditCommitValidationFailure,
   EditCommitValidationOptions,
 } from "./editing/editCommitLifecycle";
-export type { RowValidator } from "./editing/editContracts";
+export type { BatchRowEdit, RowValidator } from "./editing/editContracts";
+export type { CellEditHandler, EditHistoryInput } from "./editing/editHistory";
 export { preserveEditorFocusOnLayoutChange } from "./editing/layoutFocus";
 export type { ChecklistWindow } from "./filters/checklistModel";
 export {

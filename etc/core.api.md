@@ -425,6 +425,9 @@ export interface BatchEditEntry {
 export function batchEditErrorId(rowId: string, columnKey: string): string;
 
 // @public
+export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+
+// @public
 export function batchEditHandler<TRow>(batch: ((edits: CellEdit<TRow>[]) => unknown) | undefined, onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined): ((edits: CellEdit<TRow>[]) => unknown) | undefined;
 
 // @public
@@ -477,7 +480,7 @@ export interface BatchEditStoreOptions<TRow> extends EditCommitValidationOptions
     readonly enabled?: boolean;
     readonly featureHost?: FeatureHostState;
     readonly formatEditError?: (error: unknown) => string;
-    readonly onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+    readonly onBatchEdit?: BatchEditHandler<TRow>;
     readonly onEditCancel?: EditEventHandler<TRow>;
     readonly onEditCommit?: EditEventHandler<TRow>;
     readonly onEditError?: EditEventHandler<TRow>;
@@ -2881,6 +2884,11 @@ export interface EditHistoryEntry<TRow> {
 export function editHistoryEntry<TRow>(edits: readonly CellEdit<TRow>[], readValue: (edit: CellEdit<TRow>) => {
     value: unknown;
 } | undefined): EditHistoryEntry<TRow>;
+
+// @public
+export type EditHistoryInput = boolean | {
+    readonly depth?: number;
+};
 
 // @public
 export interface EditHistorySnapshot {
@@ -6815,9 +6823,7 @@ export function resolveEditableCellDisplay<TRow, TNode, TCell>(display: TNode | 
 }, renderCell: (Cell: TCell) => TNode, row: TRow): TNode | undefined;
 
 // @public
-export function resolveEditHistory(editHistory: boolean | {
-    readonly depth?: number;
-} | undefined): {
+export function resolveEditHistory(editHistory: EditHistoryInput | undefined): {
     readonly enabled: boolean;
     readonly depth: number | undefined;
 };
@@ -7094,6 +7100,9 @@ export type RowEditDrafts = Readonly<Record<string, string>>;
 export function rowEditErrorId(columnKey: string): string;
 
 // @public
+export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+
+// @public
 export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
 
 // @public
@@ -7159,7 +7168,7 @@ export interface RowEditStoreOptions<TRow> extends EditCommitValidationOptions<T
     readonly onEditCommit?: EditEventHandler<TRow>;
     readonly onEditError?: EditEventHandler<TRow>;
     readonly onEditStart?: EditEventHandler<TRow>;
-    readonly onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+    readonly onRowEdit?: RowEditHandler<TRow>;
     readonly onValidationFail?: EditEventHandler<TRow>;
 }
 

@@ -125,7 +125,7 @@ function featuresOf(options: object): readonly PatchFeature[] | undefined {
  * @public
  */
 export function mergeFeaturePatches(
-  list: readonly PatchFeature[]
+  list: readonly PatchFeature<never>[]
 ): Record<string, unknown> {
   let fromFeatures: Record<string, unknown> = {};
   for (const next of list) {

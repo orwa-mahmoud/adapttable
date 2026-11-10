@@ -13,6 +13,7 @@ import { AggregateSpec } from '@adapttable/core';
 import { ApprovalReview } from '@adapttable/core';
 import { ApprovalReviewItem } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core/editing';
+import { BatchEditHandler } from '@adapttable/core';
 import { BatchEditingState } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
@@ -21,6 +22,7 @@ import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { BulkActionOutcome } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
+import { CellEditHandler } from '@adapttable/core';
 import { CellEditingState } from '@adapttable/core';
 import { CellNavigationChannelsOptions } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
@@ -136,6 +138,7 @@ import { RelativePreset } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
 import { RowActionsRenderContext } from '@adapttable/core';
+import { RowEditHandler } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowExpansionState } from '@adapttable/core/binding';
@@ -244,7 +247,7 @@ export const ADAPTTABLE_URL_ADAPTER: InjectionToken<UrlStateAdapter>;
 
 // @public
 export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
-    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
     mount?(context: FeatureMountContext): void | (() => void);
@@ -271,8 +274,7 @@ export { ApprovalReviewItem }
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
 
-// @public
-export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => void | Promise<void>;
+export { BatchEditHandler }
 
 // @public
 export interface BatchEditingInjectOptions<TRow> {
@@ -319,8 +321,7 @@ export interface CellContext<TRow> {
     readonly value: unknown;
 }
 
-// @public
-export type CellEditHandler<TRow> = (row: TRow, columnKey: string, value: unknown) => void | Promise<void>;
+export { CellEditHandler }
 
 // @public
 export interface CellEditingOptions<TRow = unknown> {
@@ -1397,8 +1398,7 @@ export interface RowDetailContext<TRow> {
     readonly row: TRow;
 }
 
-// @public
-export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => void | Promise<void>;
+export { RowEditHandler }
 
 export { RowEditIcons }
 

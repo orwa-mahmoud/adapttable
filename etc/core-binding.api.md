@@ -448,6 +448,9 @@ export interface BatchEditEntry {
 }
 
 // @public
+export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+
+// @public
 export interface BatchEditingState<TRow> {
     acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
     cancelAll: () => void;
@@ -464,6 +467,13 @@ export interface BatchEditingState<TRow> {
     setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
     signature: string;
     takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+}
+
+// @public
+export interface BatchRowEdit<TRow> {
+    patch: Readonly<Record<string, unknown>>;
+    row: TRow;
+    rowId: string;
 }
 
 // @public
@@ -593,6 +603,9 @@ export function cellAttributes<TRow>(column: ColumnMetadata<TRow>, sizing: Chrom
     "data-column-key": string;
     style: CssProperties;
 };
+
+// @public
+export type CellEditHandler<TRow> = (row: TRow, key: string, nextValue: unknown) => unknown;
 
 // @public
 export function cellHighlightKind(props: Readonly<Record<string, unknown>> | undefined): "current-match" | "match" | "selected" | undefined;
@@ -1639,10 +1652,10 @@ export interface ControllableStoreOptions<T> {
 }
 
 // @public
-export function coreBatchEditing<TRow>(onBatchEdit: unknown, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
+export function coreBatchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
 
 // @public
-export function coreBulkActions(actions: readonly unknown[]): CoreFeature;
+export function coreBulkActions(actions: readonly BulkAction[]): CoreFeature;
 
 // @public
 export function coreCellNavigation(options?: {
@@ -1650,7 +1663,7 @@ export function coreCellNavigation(options?: {
 }): CoreFeature;
 
 // @public
-export function coreCellSpan<TRow>(getCellSpan: unknown, cellSpanAppearance?: unknown): CoreFeature<TRow>;
+export function coreCellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppearance?: CellSpanAppearance): CoreFeature<TRow>;
 
 // @public
 export function coreCollapsibleColumnGroups(): CoreFeature;
@@ -1678,10 +1691,10 @@ export function coreDensityChooser(): CoreFeature;
 export function coreDirtyIndicators(): CoreFeature;
 
 // @public
-export function coreEditHistory(options?: unknown): CoreFeature;
+export function coreEditHistory(options?: EditHistoryInput): CoreFeature;
 
 // @public
-export function coreEditing<TRow>(onCellEdit: unknown, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
+export function coreEditing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
 
 // @public
 export function coreExportCsv<TRow>(options?: boolean | {
@@ -1689,7 +1702,7 @@ export function coreExportCsv<TRow>(options?: boolean | {
 }): CoreFeature<TRow>;
 
 // @public
-export function coreExtraRows(rows: readonly unknown[]): CoreFeature;
+export function coreExtraRows<TExtraRow extends Pick<ExtraRow, "key" | "kind" | "beforeRowId">>(rows: readonly TExtraRow[]): CoreFeature;
 
 // @public
 export interface CoreFeature<TRow = unknown, THost = CoreFeatureRegistrar> extends PatchFeature<TRow> {
@@ -1708,7 +1721,7 @@ export interface CoreFeatureRegistrar<TPanel extends SidePanelEntry = SidePanelE
 }
 
 // @public
-export function coreFilters<TRow>(defs: unknown): CoreFeature<TRow>;
+export function coreFilters<TRow, TPanel = never>(defs: readonly FilterDef<TRow>[] | TPanel): CoreFeature<TRow>;
 
 // @public
 export function coreFilterTypes(specs: readonly FilterTypeSpec[]): CoreFeature;
@@ -1735,10 +1748,13 @@ export function coreHeaderFilters(): CoreFeature;
 export function coreMultiSort(): CoreFeature;
 
 // @public
-export function coreNestedTable<TRow>(nested: unknown, defaultExpandedRowIds?: readonly string[]): CoreFeature<TRow>;
+export function coreNestedTable<TRow, TNested extends object = object>(nested: TNested, defaultExpandedRowIds?: readonly string[]): CoreFeature<TRow>;
 
 // @public
-export function corePinnedSummaryRows<TRow>(pinnedRows: unknown): CoreFeature<TRow>;
+export function corePinnedSummaryRows<TRow>(pinnedRows: {
+    readonly top?: readonly TRow[];
+    readonly bottom?: readonly TRow[];
+}): CoreFeature<TRow>;
 
 // @public
 export function corePrint(onPrint: () => void, printButton?: boolean): CoreFeature;
@@ -1747,21 +1763,21 @@ export function corePrint(onPrint: () => void, printButton?: boolean): CoreFeatu
 export function coreResizableColumns(): CoreFeature;
 
 // @public
-export function coreRowActions<TRow>(actions?: readonly unknown[], handlers?: {
-    readonly onAddRow?: unknown;
-    readonly onDuplicateRow?: unknown;
-    readonly onDeleteRow?: unknown;
-    readonly confirmDeleteRow?: unknown;
+export function coreRowActions<TRow, TConfirm = boolean>(actions?: readonly RowAction<TRow>[], handlers?: {
+    readonly onAddRow?: () => unknown;
+    readonly onDuplicateRow?: (row: TRow) => unknown;
+    readonly onDeleteRow?: (row: TRow) => unknown;
+    readonly confirmDeleteRow?: TConfirm;
 }): CoreFeature<TRow>;
 
 // @public
 export function coreRowAppearance<TRow>(options: FeaturePatch<TRow>): CoreFeature<TRow>;
 
 // @public
-export function coreRowDetail<TRow>(renderRowDetail: unknown, defaultExpandedRowIds?: readonly string[]): CoreFeature<TRow>;
+export function coreRowDetail<TRow, TRender extends object = (row: TRow) => unknown>(renderRowDetail: TRender, defaultExpandedRowIds?: readonly string[]): CoreFeature<TRow>;
 
 // @public
-export function coreRowEditing<TRow>(onRowEdit: unknown, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
+export function coreRowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
 
 // @public
 export interface CoreRowFeatureRegistrar<TRow = unknown, TPanel extends SidePanelEntry = SidePanelEntry> extends CoreFeatureRegistrar<TPanel> {
@@ -1772,7 +1788,7 @@ export interface CoreRowFeatureRegistrar<TRow = unknown, TPanel extends SidePane
 export function coreRowPinning(options?: FeaturePatch): CoreFeature;
 
 // @public
-export function coreSavedViews(options: unknown): CoreFeature;
+export function coreSavedViews<TOptions extends object>(options: TOptions): CoreFeature;
 
 // @public
 export function coreSelectionStats(): CoreFeature;
@@ -2612,6 +2628,11 @@ export interface EditCommitValidationOptions<TRow> {
     // (undocumented)
     readonly validateRow?: RowValidator<TRow>;
 }
+
+// @public
+export type EditHistoryInput = boolean | {
+    readonly depth?: number;
+};
 
 // @public
 export interface EditHistoryLiveSlotProps<TRow = never, THistory = unknown, TOptions = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
@@ -4518,7 +4539,7 @@ export interface MergedCellStyle {
 export function mergedCellStyle(colSpan: number, rowSpan: number, appearance?: CellSpanAppearance, fill?: "on" | "off"): MergedCellStyle | undefined;
 
 // @public
-export function mergeFeaturePatches(list: readonly PatchFeature[]): Record<string, unknown>;
+export function mergeFeaturePatches(list: readonly PatchFeature<never>[]): Record<string, unknown>;
 
 // @public
 export function mergeGroupingContributions<TRow>(contributions: readonly (GroupingContribution<TRow> | undefined)[]): GroupingContribution<TRow> | undefined;
@@ -5152,6 +5173,9 @@ export interface RowEditControlsOptions<TRow> {
 
 // @public
 export type RowEditDrafts = Readonly<Record<string, string>>;
+
+// @public
+export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
 
 // @public
 export interface RowEditIcons {

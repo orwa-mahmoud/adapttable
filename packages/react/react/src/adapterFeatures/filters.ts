@@ -71,6 +71,5 @@ export function createAdapterFiltersFeature(
 
   return <TRow>(
     defs: readonly FilterDef<TRow>[] | ReactNode
-  ): TableFeature<TRow> =>
-    extendFeature(coreFilters(defs as readonly FilterDef<TRow>[]), renders);
+  ): TableFeature<TRow> => extendFeature(coreFilters<TRow>(defs), renders);
 }
