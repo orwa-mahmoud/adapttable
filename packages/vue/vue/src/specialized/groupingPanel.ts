@@ -24,7 +24,6 @@ import {
   defineComponent,
   h,
   onScopeDispose,
-  type PropType,
   shallowRef,
   type VNodeChild,
   watch,
@@ -39,7 +38,6 @@ import {
   type StaticGroupingExtras,
 } from "../features/grouping";
 import {
-  eraseTableRuntime,
   type FeatureMountContext,
   type StaticTableFeature,
   type TableFeature,
@@ -65,14 +63,8 @@ export interface GroupingPanelChromeProps<
   };
 }
 /** DOM refs are per rendered panel; nothing is retained across tables. */
-const GroupingPanelSurface = /*#__PURE__*/ defineComponent({
-  props: {
-    model: {
-      type: Object as PropType<GroupingPanelChromeProps<unknown>>,
-      required: true,
-    },
-  },
-  setup(props) {
+const GroupingPanelSurface = /*#__PURE__*/ defineComponent(
+  <TRow>(props: { readonly model: GroupingPanelChromeProps<TRow> }) => {
     const fieldset = shallowRef<HTMLElement | null>(null);
     let pendingRemoval: number | undefined;
     let live = true;
@@ -314,12 +306,13 @@ const GroupingPanelSurface = /*#__PURE__*/ defineComponent({
       });
     };
   },
-});
+  { props: ["model"] }
+);
 export function GroupingPanelChrome<TRow>(
   props: GroupingPanelChromeProps<TRow>
 ): VNodeChild {
-  return h(GroupingPanelSurface, {
-    model: props as unknown as GroupingPanelChromeProps<unknown>,
+  return h(GroupingPanelSurface<TRow>, {
+    model: props,
   });
 }
 export function groupingPanel(
@@ -341,10 +334,10 @@ export function groupingPanel<TRow>(
     onScopeDispose(() => {
       disposed = true;
     });
-    const neutralRuntime = eraseTableRuntime(context.runtime);
+    const tableRuntime = context.runtime;
     const setGroupBy: typeof context.source.value.setGroupBy = (value) => {
       if (disposed || !context.active.value) return;
-      const state = neutralRuntime.view()?.groupingState;
+      const state = tableRuntime.view()?.groupingState;
       if (!state) return;
       state.setGroupBy(value);
       if (disposed || !context.active.value) return;
@@ -353,10 +346,10 @@ export function groupingPanel<TRow>(
       );
     };
     const runtime = {
-      ...neutralRuntime,
+      ...tableRuntime,
       view: () => {
         if (disposed || !context.active.value) return undefined;
-        const view = neutralRuntime.view();
+        const view = tableRuntime.view();
         return view?.groupingState
           ? {
               ...view,

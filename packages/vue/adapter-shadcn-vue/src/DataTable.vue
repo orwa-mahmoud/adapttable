@@ -11,7 +11,6 @@ import {
   defaultConfirm,
   FULLSCREEN_MODEL,
   GROUP_ROW,
-  groupRowSlotKey,
   keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
@@ -137,11 +136,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: shadcn-vue grouping rows require the kit grouping feature."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        group
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, group);
     },
     card: slots.card,
     cell: slots.cell,

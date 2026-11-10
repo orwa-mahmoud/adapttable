@@ -4508,12 +4508,12 @@ These optional construction helpers belong to `@adapttable/vue/adapter`.
 Root composables remain usable with completely custom UI; see
 [the optional layout contract](./vue/api.md#optional-adapter-layout).
 
-| Export                                                            | Purpose                                                                                                                |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `DataTableSurfaceChrome`, `DataTableSurfaceChromeProps<TRow>`     | Shared outer layout over an existing shell model, with explicit application slots and real root/scroll refs.           |
-| `DataTableSurfaceSlots<TRow>`                                     | Required kit Search, Select, Button, Loading, Desktop and Mobile renderers; no implicit native controls or table body. |
-| `provideDataTableClassNames`, `useDataTableClassNames`            | Reactive presentation hooks shared between an adapter and its feature controls.                                        |
-| `GROUP_ROW`, `groupRowSlotKey<TRow>()`, `GroupRowSlotProps<TRow>` | Typed lazy grouping-row contribution, independent of a specific kit renderer.                                          |
+| Export                                                        | Purpose                                                                                                                                                                                           |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DataTableSurfaceChrome`, `DataTableSurfaceChromeProps<TRow>` | Shared outer layout over an existing shell model, with explicit application slots and real root/scroll refs.                                                                                      |
+| `DataTableSurfaceSlots<TRow>`                                 | Required kit Search, Select, Button, Loading, Desktop and Mobile renderers; no implicit native controls or table body.                                                                            |
+| `provideDataTableClassNames`, `useDataTableClassNames`        | Reactive presentation hooks shared between an adapter and its feature controls.                                                                                                                   |
+| `GROUP_ROW`, `GroupRowDraw`, `GroupRowSlotProps<TRow>`        | Lazy grouping-row contribution, independent of a specific kit renderer: a row slot key whose fill (`GroupRowDraw`) draws any row type. `groupRowSlotKey()` is deprecated; it returns `GROUP_ROW`. |
 
 ### Vue column menu contracts
 

@@ -12,7 +12,6 @@ import {
   defaultConfirm,
   FULLSCREEN_MODEL,
   GROUP_ROW,
-  groupRowSlotKey,
   keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
@@ -175,11 +174,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Nuxt UI grouping rows require the Nuxt UI grouping feature."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        control
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, control);
     },
     card: cardSlot.value,
     cell: slots.cell,

@@ -35,10 +35,10 @@ import {
   COLUMN_SELECT,
   columnSelectLabel,
   DENSITY_STATE,
-  EMPTY_FEATURE_HOST,
   type FeatureHostState,
   type FilterEngine,
   FIND_BAR,
+  LiveFeatureHost,
   retainItems,
   type RuntimeChromeInput,
   STATUS_BAR,
@@ -323,7 +323,7 @@ export function useDataTableShell<TRow>(
   const isMobile = useViewportMobile(resolved);
   const supplied = computed(() => toValue(resolved.value.source));
   const registered = shallowRef<FeatureHostState<TRow>>(
-    EMPTY_FEATURE_HOST as unknown as FeatureHostState<TRow>
+    new LiveFeatureHost<TRow>()
   );
   const filterOptionCache = createFilterOptionCache<TRow>();
   const filterRuntime = computed(() => {

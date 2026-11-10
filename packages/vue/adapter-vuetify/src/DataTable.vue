@@ -33,7 +33,7 @@ import { provideClassNames } from "./classNamesContext";
 import { vuetifyButton } from "./controls";
 import VuetifyInput from "./controls/VuetifyInput.vue";
 import VuetifySelect from "./controls/VuetifySelect.vue";
-import { VUETIFY_GROUP_ROW, vuetifyGroupRowSlotKey } from "./groupRowSlot";
+import { VUETIFY_GROUP_ROW } from "./groupRowSlot";
 import { useVuetifyLibrary } from "./libraryEnvironment";
 import LoadingState from "./LoadingState.vue";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
@@ -136,11 +136,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Vuetify grouping rows require grouping() from @adapttable/vuetify/grouping."
         );
-      return renderFeatureSlot(
-        vuetifyGroupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        group
-      );
+      return renderFeatureSlot(VUETIFY_GROUP_ROW, shell.slotFills.value, group);
     },
     card: slots.card,
     cell: slots.cell,

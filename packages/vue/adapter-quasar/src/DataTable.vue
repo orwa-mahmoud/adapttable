@@ -10,7 +10,6 @@ import {
   DataTableSurfaceChrome,
   defaultConfirm,
   GROUP_ROW,
-  groupRowSlotKey,
   keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
@@ -112,11 +111,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Quasar group rows require grouping() from @adapttable/quasar/grouping."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        props
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, props);
     },
     card: slots.card,
     cell: slots.cell,

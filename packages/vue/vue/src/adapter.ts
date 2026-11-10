@@ -259,7 +259,7 @@ export type {
   DataTableSurfaceSlots,
 } from "./layout/dataTableSurfaceChrome";
 export { DataTableSurfaceChrome } from "./layout/dataTableSurfaceChrome";
-export type { GroupRowSlotProps } from "./layout/groupRowSlot";
+export type { GroupRowDraw, GroupRowSlotProps } from "./layout/groupRowSlot";
 export { GROUP_ROW, groupRowSlotKey } from "./layout/groupRowSlot";
 export type {
   ColumnResizeModel,
@@ -562,6 +562,8 @@ export {
   rowPinSignature,
   rowReorderDropStyle,
   rowReorderSignature,
+  type RowSlotKey,
+  rowSlotKey,
   rowSourceIndex,
   rowSpanSignature,
   rowStyleSignature,

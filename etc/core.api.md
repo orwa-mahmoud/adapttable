@@ -2235,7 +2235,7 @@ export function createGridFocusController<TRow>(initial: GridFocusControllerOpti
 export function createGridNavigation<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
 
 // @public
-export function createGroupingPanelController(initial: GroupingPanelControllerOptions): GroupingPanelController;
+export function createGroupingPanelController<TRow = unknown>(initial: GroupingPanelControllerOptions<TRow>): GroupingPanelController<TRow>;
 
 // @public
 export function createGroupPagingController(): GroupPagingController;
@@ -4713,12 +4713,12 @@ export function groupingPanelAggregations<TRow>(options: {
 }): AggregationModel;
 
 // @public
-export interface GroupingPanelController {
+export interface GroupingPanelController<TRow = unknown> {
     readonly add: (key: string) => void;
     readonly addAggregate: (key: string) => void;
     readonly chipKeyDown: (key: string, event: GroupingKeyEventLike) => void;
     readonly chipLabel: (label: string) => string;
-    readonly configure: (options: GroupingPanelControllerOptions) => void;
+    readonly configure: (options: GroupingPanelControllerOptions<TRow>) => void;
     readonly dragEnter: (index: number, event: GroupingDragEventLike) => void;
     readonly dragOver: (index: number, event: GroupingDragEventLike) => void;
     readonly drop: (index: number, event: GroupingDragEventLike) => void;
@@ -4743,9 +4743,9 @@ export interface GroupingPanelController {
 }
 
 // @public
-export interface GroupingPanelControllerOptions {
+export interface GroupingPanelControllerOptions<TRow = unknown> {
     readonly groupAggregates?: unknown;
-    readonly runtime: TableRuntime;
+    readonly runtime: TableRuntime<TRow>;
 }
 
 // @public

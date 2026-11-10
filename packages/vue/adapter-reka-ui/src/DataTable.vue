@@ -13,7 +13,6 @@ import {
   defaultConfirm,
   FULLSCREEN_MODEL,
   GROUP_ROW,
-  groupRowSlotKey,
   keepTableControls,
   renderFeatureSlot,
   type TableChromeSlots,
@@ -163,11 +162,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Reka group rows require grouping() from @adapttable/reka-ui/grouping."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        control
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, control);
     },
     card: content.card,
     cell: content.cell,

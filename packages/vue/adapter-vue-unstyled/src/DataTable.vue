@@ -27,10 +27,7 @@ import { provideClassNames } from "./classNamesContext";
 import { nativeCheckbox } from "./nativeCheckbox";
 import { nativeColumnGroupToggle } from "./nativeColumnGroupToggle";
 import { nativeHierarchyControls } from "./nativeHierarchyControls";
-import {
-  NATIVE_GROUP_ROW,
-  nativeGroupRowSlotKey,
-} from "./nativeHierarchyControlSlots";
+import { NATIVE_GROUP_ROW } from "./nativeHierarchyControlSlots";
 import { NativeRowActions } from "./NativeRowActions";
 import { nativeSurfaceControls } from "./nativeSurfaceControls";
 
@@ -120,11 +117,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: native grouping rows require grouping() from @adapttable/vue-unstyled/grouping."
         );
-      return renderFeatureSlot(
-        nativeGroupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        props
-      );
+      return renderFeatureSlot(NATIVE_GROUP_ROW, shell.slotFills.value, props);
     },
     card: slots.card,
     cell: slots.cell,

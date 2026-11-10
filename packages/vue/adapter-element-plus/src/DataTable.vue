@@ -31,10 +31,7 @@ import {
   elementColumnGroupToggle,
   elementHierarchyControls,
 } from "./elementHierarchyControls";
-import {
-  ELEMENT_GROUP_ROW,
-  elementGroupRowSlotKey,
-} from "./elementHierarchyControlSlots";
+import { ELEMENT_GROUP_ROW } from "./elementHierarchyControlSlots";
 import { elementSurfaceControls } from "./elementSurfaceControls";
 import { useElementPlusLibrary } from "./libraryEnvironment";
 import { ROW_ACTIONS_CONTROL, rowActionsControlKey } from "./rowActionsSlot";
@@ -139,11 +136,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable: Element Plus grouping rows require grouping() from @adapttable/element-plus/grouping."
         );
-      return renderFeatureSlot(
-        elementGroupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        props
-      );
+      return renderFeatureSlot(ELEMENT_GROUP_ROW, shell.slotFills.value, props);
     },
     card: slots.card,
     cell: slots.cell,

@@ -12,7 +12,7 @@ import {
 import { h, type MaybeRefOrGetter } from "vue";
 
 import { nativeCheckbox } from "./nativeCheckbox";
-import { nativeGroupRowSlotKey } from "./nativeHierarchyControlSlots";
+import { NATIVE_GROUP_ROW } from "./nativeHierarchyControlSlots";
 
 /** Native group paint is loaded only with the grouping contribution. */
 export function grouping(
@@ -28,7 +28,7 @@ export function grouping<TRow>(
   extras: GroupingExtras<TRow> = {}
 ): TableFeature<TRow> {
   return extendFeature(bindingGrouping<TRow>(groupBy, extras), [
-    slotRender(nativeGroupRowSlotKey<TRow>(), (props) =>
+    slotRender(NATIVE_GROUP_ROW, (props) =>
       GroupRowChrome({
         ...props,
         slots: {

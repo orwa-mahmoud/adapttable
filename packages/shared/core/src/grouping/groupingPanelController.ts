@@ -57,9 +57,9 @@ export type { GroupingDragEventLike, GroupingKeyEventLike };
  *
  * @public
  */
-export interface GroupingPanelControllerOptions {
+export interface GroupingPanelControllerOptions<TRow = unknown> {
   /** The live table, read from event handlers. */
-  readonly runtime: TableRuntime;
+  readonly runtime: TableRuntime<TRow>;
   /**
    * The developer's `groupAggregates` mapper, when the panel was composed
    * with one — the only place its declared aggregates can be read from.
@@ -84,7 +84,7 @@ export interface GroupingPanelSnapshot {
  *
  * @public
  */
-export interface GroupingPanelController {
+export interface GroupingPanelController<TRow = unknown> {
   /** The current state. A new object whenever anything in it changes. */
   readonly getSnapshot: () => GroupingPanelSnapshot;
   /**
@@ -97,7 +97,7 @@ export interface GroupingPanelController {
   /** Listen for state changes. Returns the unsubscribe. */
   readonly subscribe: (listener: () => void) => () => void;
   /** Replace the configuration — a binding calls this on every render. */
-  readonly configure: (options: GroupingPanelControllerOptions) => void;
+  readonly configure: (options: GroupingPanelControllerOptions<TRow>) => void;
   /**
    * Seed the table's grouping from the panel's initial keys, once. A table
    * whose URL already carries a grouping keeps it.
@@ -225,9 +225,9 @@ function asElement(target: EventTarget | null): HTMLElement | null {
  *
  * @public
  */
-export function createGroupingPanelController(
-  initial: GroupingPanelControllerOptions
-): GroupingPanelController {
+export function createGroupingPanelController<TRow = unknown>(
+  initial: GroupingPanelControllerOptions<TRow>
+): GroupingPanelController<TRow> {
   let options = initial;
   let snapshot: GroupingPanelSnapshot = {
     drag: undefined,
@@ -367,7 +367,7 @@ export function createGroupingPanelController(
     if (grouping === undefined && listed === undefined) return undefined;
     return { grouping, aggregateOperations: listed };
   };
-  const aggregationInput = (): AggregationModelInput<unknown> => {
+  const aggregationInput = (): AggregationModelInput<TRow> => {
     const state = groupingState();
     return {
       columns: state?.columns ?? [],
@@ -378,7 +378,7 @@ export function createGroupingPanelController(
       source: aggregationSource(),
     };
   };
-  const columnOf = (input: AggregationModelInput<unknown>, key: string) =>
+  const columnOf = (input: AggregationModelInput<TRow>, key: string) =>
     input.columns.find((candidate) => candidate.key === key);
 
   const add = (key: string): void => {

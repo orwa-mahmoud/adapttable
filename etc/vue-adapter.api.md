@@ -221,6 +221,7 @@ import { PinnedSide } from '@adapttable/core';
 import { PivotAggProps } from '@adapttable/core/binding';
 import { PivotPanelChromeProps as PivotPanelChromeProps_2 } from '@adapttable/core/binding';
 import { PivotPanelSlots as PivotPanelSlots_2 } from '@adapttable/core/binding';
+import { PlainSlotKey } from '@adapttable/core/binding';
 import { PublicProps } from 'vue';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryCondition } from '@adapttable/core';
@@ -254,6 +255,8 @@ import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { rowReorderSignature } from '@adapttable/core/binding';
 import { RowReorderSlot } from '@adapttable/core';
 import { RowReorderSnapshot } from '@adapttable/core';
+import { RowSlotKey } from '@adapttable/core/binding';
+import { rowSlotKey } from '@adapttable/core/binding';
 import { rowSourceIndex } from '@adapttable/core/binding';
 import { rowSpanSignature } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
@@ -2555,7 +2558,7 @@ export function GridFocusAnnouncer(props: {
 }): VNodeChild;
 
 // @public (undocumented)
-export const GROUP_ROW: FeatureSlotKey<GroupRowSlotProps<unknown>>;
+export const GROUP_ROW: RowSlotKey<GroupRowDraw>;
 
 export { groupedHeaderAlign }
 
@@ -2642,6 +2645,9 @@ export interface GroupRowChromeProps<TRow> {
     };
 }
 
+// @public
+export type GroupRowDraw = <TRow>(props: GroupRowSlotProps<TRow>) => VNodeChild;
+
 // @public (undocumented)
 export interface GroupRowModel<TRow> {
     // (undocumented)
@@ -2660,8 +2666,8 @@ export interface GroupRowModel<TRow> {
     readonly trailingColumns: number;
 }
 
-// @public (undocumented)
-export function groupRowSlotKey<TRow>(): FeatureSlotKey<GroupRowSlotProps<TRow>>;
+// @public @deprecated
+export function groupRowSlotKey<_TRow = unknown>(): RowSlotKey<GroupRowDraw>;
 
 // @public
 export type GroupRowSlotProps<TRow> = Parameters<NonNullable<TableChromeSlots<TRow>["GroupRow"]>>[0];
@@ -2988,7 +2994,10 @@ export function renderContent<TContext>(renderer: Renderer<TContext>, context: T
 export type Renderer<TContext> = RenderFunction<TContext> | ComponentRenderer<TContext>;
 
 // @public (undocumented)
-export function renderFeatureSlot<TProps>(slot: FeatureSlotKey<TProps>, fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>, props: TProps): VNodeChild[];
+export function renderFeatureSlot<TProps>(slot: PlainSlotKey<TProps>, fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>, props: TProps): VNodeChild[];
+
+// @public
+export function renderFeatureSlot<TProps>(slot: RowSlotKey<(props: NoInfer<TProps>) => VNodeChild>, fills: ReadonlyMap<string, readonly SlotFill<VNodeChild>[]>, props: TProps): VNodeChild[];
 
 // @public (undocumented)
 export function renderFooter<TRow, TValue>(context: FooterContext<TRow, TValue>, slot?: RenderFunction<FooterContext<TRow, TValue>>): VNodeChild;
@@ -3217,6 +3226,10 @@ export interface RowSelection {
     // (undocumented)
     toggleGroupLeaves(ids: readonly string[]): void;
 }
+
+export { RowSlotKey }
+
+export { rowSlotKey }
 
 export { rowSourceIndex }
 

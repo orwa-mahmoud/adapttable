@@ -10,7 +10,6 @@ import {
   DataTableSurfaceChrome,
   defaultConfirm,
   GROUP_ROW,
-  groupRowSlotKey,
   keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
@@ -134,11 +133,7 @@ function controls(): TableChromeSlots<TRow> {
         throw new Error(
           "AdaptTable Naive UI: grouped rows require the kit grouping contribution."
         );
-      return renderFeatureSlot(
-        groupRowSlotKey<TRow>(),
-        shell.slotFills.value,
-        group
-      );
+      return renderFeatureSlot(GROUP_ROW, shell.slotFills.value, group);
     },
     card: slots.card,
     cell: slots.cell,
