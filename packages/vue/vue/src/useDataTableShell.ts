@@ -1,31 +1,14 @@
 /** One source, feature lifecycle and model composition shared by every Vue kit. */
 import {
   ACTIONS_COLUMN_KEY,
-  activeTierValue,
-  type BulkAction,
-  type CellEdit,
-  type CellRange,
   type ConfirmHandler,
   createMemoryAdapter,
-  createTableData,
-  type ExtraFilters,
-  type FacetMap,
-  type FilterDef,
-  type FilterTypeSpec,
-  type FrontendEngineFactory,
-  INACTIVE_TIER_ROWS,
   projectedGroupingSource,
-  type QueryAggregate,
-  type QueryFilterGroup,
-  type QuerySupport,
   REORDER_COLUMN_KEY,
   resolveUrlAdapter,
-  type RowAction,
   stableKey,
   type TableDensity,
-  type TableQueryListener,
   type TableSource,
-  tierRows,
   withRowPinActions,
 } from "@adapttable/core";
 import {
@@ -37,16 +20,13 @@ import {
   DENSITY_STATE,
   type FeatureHostState,
   featureLabelsOf,
-  type FilterEngine,
   filterTreeSnapshot,
   FIND_BAR,
   LiveFeatureHost,
-  retainItems,
   type RuntimeChromeInput,
   sameFilterTree,
   STATUS_BAR,
   TABLE_ASSISTANT,
-  type TableAssistantProps,
   type TableRuntime,
   TableRuntimePublisher,
   type TableRuntimeView,
@@ -84,19 +64,14 @@ import {
   SIDE_PANEL_MODEL,
   UNDO_REDO_CONTROL,
 } from "./actions/contracts";
-import type { SummaryRowFn } from "./aggregate/aggregate";
 import { mergeVueAttrs, toVueAttrs } from "./attrs";
-import { flattenColumns, type FooterContext } from "./columnDef";
 import {
   COLUMN_HEADER_RENAME,
   columnMenuSlotKey,
 } from "./columns/columnMenuContracts";
-import type { TableEditingOptions } from "./editing/editingModels";
 import { type FeatureLifecycle, useFeatureLifecycle } from "./featureLifecycle";
 import {
   assertRequiredSlots,
-  type ComposedFeature,
-  type FeatureMountContext,
   featureOptionsOf,
   featureSlotFillsOf,
   normalizeFeatures,
@@ -109,7 +84,6 @@ import {
   treeModelKey,
 } from "./hierarchy/models";
 import { tableRowInventory } from "./hierarchy/rowInventory";
-import { createFilterOptionCache } from "./layout/filterOptionCache";
 import {
   batchEditBarSlotKey,
   COLUMN_RESIZE_MODEL,
@@ -120,12 +94,10 @@ import {
   filterViewKey,
   headerFilterModelKey,
   headerFilterSlotKey,
-  type RowActionControlsProjector,
   rowActionsModelKey,
   rowEditActionsSlotKey,
   rowPinningModelKey,
   type TableBodyProjection,
-  type TableBodyProjector,
 } from "./layout/modelChannels";
 import {
   type TableBodySlot,
@@ -148,13 +120,14 @@ import {
 } from "./navigation/contracts";
 import { withLiveSelection, withLiveSelectionSlots } from "./rows/liveRowState";
 import { useRowSelection } from "./selection/selection";
-import { frontendRowModelOf } from "./source/rowModel";
+import type {
+  DataTableHandle,
+  DataTableSurface,
+  ResolvedTableOptions,
+  UseDataTableShellOptions,
+} from "./shell/shellContract";
+import { useShellDataTier } from "./shell/shellDataTier";
 import { useViewportMobile } from "./source/sourceLifecycle";
-import {
-  useFrontendData,
-  type UseFrontendDataOptions,
-} from "./source/useFrontendData";
-import { useServerData } from "./source/useServerData";
 import {
   bodyWindowModelKey,
   groupingPanelControlKey,
@@ -162,12 +135,8 @@ import {
   rowReorderControlKey,
   rowReorderModelKey,
 } from "./specialized/contracts";
-import {
-  type MaybeRefOrGetterOptional,
-  useOptionFields,
-  useScopeActivity,
-} from "./store";
-import { useDataTable, type UseDataTableOptions } from "./useDataTable";
+import { useOptionFields, useScopeActivity } from "./store";
+import { useDataTable } from "./useDataTable";
 import {
   DENSITY_CONTROL,
   FULLSCREEN_CONTROL,
@@ -175,117 +144,12 @@ import {
   SAVED_VIEWS_CONTROL,
   SAVED_VIEWS_MODEL,
 } from "./viewControls/contracts";
-export interface DataTableSurface {
-  scrollElement(): HTMLElement | null;
-  rootElement?(): HTMLElement | null;
-}
-export interface DataTableHandle<TRow> {
-  readonly runtime: TableRuntime<TRow>;
-  readonly getView: () => TableRuntimeView<TRow> | undefined;
-  focus(): void;
-}
-export interface UseDataTableShellOptions<TRow>
-  extends
-    Omit<UseDataTableOptions<TRow>, "source" | "selection">,
-    Omit<
-      UseFrontendDataOptions<TRow>,
-      "data" | keyof UseDataTableOptions<TRow>
-    > {
-  readonly source?: MaybeRefOrGetterOptional<TableSource<TRow>>;
-  /** Bound the rendered scroll body; CSS lengths are measured after mount. */
-  readonly maxHeight?: number | string;
-  readonly data?: MaybeRefOrGetter<readonly TRow[]>;
-  /**
-   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
-   * table's own processing and makes `onQueryChange` a notification. Absent:
-   * `data` with `onQueryChange` is server, `data` alone is frontend.
-   */
-  readonly mode?: "frontend" | "server";
-  /**
-   * Called with one consolidated query per real change: on the server tier
-   * the host fetches that page and the superseded request's `signal` is
-   * aborted; on the frontend tier it is told what the reader did.
-   */
-  readonly onQueryChange?: TableQueryListener;
-  /** Server tier: the row count across every page. */
-  readonly total?: MaybeRefOrGetterOptional<number>;
-  /** Server tier: what the endpoint can answer, such as facet counts. */
-  readonly supports?: MaybeRefOrGetterOptional<QuerySupport>;
-  /** Server tier: aggregates the endpoint computes for the query. */
-  readonly aggregates?: MaybeRefOrGetterOptional<readonly QueryAggregate[]>;
-  /** Server tier: names the response the aggregates belong to. */
-  readonly responseKey?: MaybeRefOrGetterOptional<string>;
-  /** Server tier: keys sent as `query.facets`; defaults to every checklist filter. */
-  readonly facetKeys?: MaybeRefOrGetterOptional<readonly string[]>;
-  /** Server tier: distinct-value counts from the last fetch. */
-  readonly facets?: MaybeRefOrGetterOptional<FacetMap>;
-  readonly features?: MaybeRefOrGetterOptional<
-    readonly ComposedFeature<NoInfer<TRow>>[]
-  >;
-  readonly assistant?: MaybeRefOrGetterOptional<
-    TableAssistantProps<VNodeChild>
-  >;
-  /** Maps the current source row scope to rendered footer values. */
-  readonly summaryRow?: SummaryRowFn<TRow>;
-  /** Table-wide fallback for columns without a footer renderer. */
-  readonly footer?: (context: FooterContext<TRow>) => VNodeChild;
-  readonly confirm?: ConfirmHandler;
-  readonly density?: MaybeRefOrGetterOptional<TableDensity>;
-  /**
-   * Animate rows and cards as they mount. Off by default. Skipped when the
-   * reader prefers reduced motion.
-   */
-  readonly animate?: MaybeRefOrGetterOptional<boolean>;
-  readonly defaultDensity?: TableDensity;
-  readonly onDensityChange?: (next: TableDensity) => void;
-  readonly selectable?: MaybeRefOrGetter<boolean>;
-  readonly selectedIds?: MaybeRefOrGetterOptional<readonly string[]>;
-  readonly defaultSelectedIds?: readonly string[];
-  readonly onSelectionChange?: (ids: string[]) => void;
-  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellCut?: (range: CellRange) => void;
-  readonly runtimeChannels?: MaybeRefOrGetter<
-    Pick<
-      RuntimeChromeInput<TRow>,
-      | "filterDefs"
-      | "filterRegistry"
-      | "grouping"
-      | "tree"
-      | "editing"
-      | "rowPinning"
-    >
-  >;
-}
-export interface ResolvedTableOptions<TRow>
-  extends
-    UseDataTableShellOptions<TRow>,
-    Partial<
-      Omit<
-        TableEditingOptions<TRow>,
-        "rows" | "columns" | "rowKey" | "featureHost"
-      >
-    > {
-  readonly editingModel?: (
-    context: FeatureMountContext<TRow>
-  ) => void | (() => void);
-  readonly bodyModel?: TableBodyProjector<TRow>;
-  readonly filterEngine?: FilterEngine;
-  readonly filters?: readonly FilterDef<TRow>[];
-  readonly filterTypes?: readonly FilterTypeSpec[];
-  readonly rowActionControls?: RowActionControlsProjector<TRow>;
-  readonly undoRedoButtons?: boolean;
-  readonly columnSelectionCheckbox?: boolean;
-  readonly enableColumnMenu?: boolean;
-  readonly statusBar?: boolean;
-  readonly onCellRangeChange?: (range: CellRange | null) => void;
-  readonly onCellCut?: (range: CellRange) => void;
-  readonly onCellPaste?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly onCellFill?: (edits: CellEdit<TRow>[]) => unknown;
-  readonly rowActions?: readonly RowAction<TRow>[];
-  readonly bulkActions?: readonly BulkAction[];
-  readonly [key: string]: unknown;
-}
+export type {
+  DataTableHandle,
+  DataTableSurface,
+  ResolvedTableOptions,
+  UseDataTableShellOptions,
+} from "./shell/shellContract";
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
 ) {
@@ -325,165 +189,14 @@ export function useDataTableShell<TRow>(
   const registered = shallowRef<FeatureHostState<TRow>>(
     new LiveFeatureHost<TRow>()
   );
-  const filterOptionCache = createFilterOptionCache<TRow>();
-  const filterRuntime = computed(() => {
-    const engine = resolved.value.filterEngine;
-    if (!engine) {
-      filterOptionCache.clear();
-      return undefined;
-    }
-    const columns = flattenColumns(toValue(resolved.value.columns)).leaves;
-    const definitions = resolved.value.filters ?? [];
-    return engine.buildRuntime({
-      columns,
-      declaredFilters: definitions,
-      locale: toValue(resolved.value.locale),
-      data:
-        supplied.value?.allFilteredRows ?? toValue(resolved.value.data) ?? [],
-      loadedOptions: {},
-      filterTypes: resolved.value.filterTypes,
-      featureHost: registered.value as FeatureHostState | undefined,
-      optionCache: filterOptionCache.reconcile(columns, definitions),
-    });
-  });
-  const filterRows = (row: TRow, extra: ExtraFilters): boolean =>
-    (filterRuntime.value?.filterFn(row, extra) ?? true) &&
-    (resolved.value.filterFn?.(row, extra) ?? true);
-  const filterTree = (row: TRow, tree: QueryFilterGroup): boolean => {
-    const filters = filterRuntime.value;
-    const keep = filters
-      ? (resolved.value.filterEngine?.evaluateTree(
-          tree,
-          row,
-          filters.defs,
-          filters.registry
-        ) ?? true)
-      : true;
-    return keep && (resolved.value.filterTreeFn?.(row, tree) ?? true);
-  };
-  // The data tier: a supplied source, then the host's server page when
-  // onQueryChange is wired (or mode says so), then the table's own rows.
-  // The active tier owns the URL; an inactive one keeps private state.
-  const dataController = createTableData<TRow>();
-  onScopeDispose(dataController.dispose);
-  const tier = computed(
-    () =>
-      dataController.plan({
-        engine: undefined,
-        source: supplied.value,
-        data: toValue(resolved.value.data),
-        mode: resolved.value.mode,
-        onQueryChange: resolved.value.onQueryChange,
-        columns: [],
-      }).tier
+  const { filterRuntime, source } = useShellDataTier<TRow>(
+    resolved,
+    declarations,
+    registered,
+    supplied,
+    urlAdapter,
+    isMobile
   );
-  const onFrontend = computed(() => tier.value === "frontend");
-  const onServer = computed(() => tier.value === "server");
-  let columnSource: unknown;
-  let columnLeaves: ReturnType<typeof flattenColumns<TRow>>["leaves"] = [];
-  const tierColumns = (live: boolean) => {
-    if (!live) return INACTIVE_TIER_ROWS;
-    const input = toValue(resolved.value.columns);
-    if (input === columnSource) return columnLeaves;
-    columnSource = input;
-    columnLeaves = input ? flattenColumns(input).leaves : [];
-    return columnLeaves;
-  };
-  let facetKeyList: readonly string[] | undefined;
-  const frontend = useFrontendData(() => ({
-    ...resolved.value,
-    forceMobile: isMobile,
-    data: tierRows(onFrontend.value, toValue(resolved.value.data)),
-    columns: tierColumns(onFrontend.value),
-    getRowId: resolved.value.rowKey,
-    urlAdapter: onFrontend.value ? urlAdapter : undefined,
-    urlSync: onFrontend.value,
-    filterFn: filterRuntime.value ? filterRows : resolved.value.filterFn,
-    filterTreeFn: filterRuntime.value
-      ? filterTree
-      : resolved.value.filterTreeFn,
-    filterKey: filterRuntime.value
-      ? `${String(filterRuntime.value.filterKey)}:${String(toValue(resolved.value.filterKey) ?? "")}`
-      : resolved.value.filterKey,
-    arrayExtraKeys: [
-      ...(toValue(resolved.value.arrayExtraKeys) ?? []),
-      ...(filterRuntime.value?.arrayExtraKeys ?? []),
-    ],
-    numberExtraKeys: [
-      ...(toValue(resolved.value.numberExtraKeys) ?? []),
-      ...(filterRuntime.value?.numberExtraKeys ?? []),
-    ],
-    createEngine: frontendRowModelOf(declarations.value) as
-      FrontendEngineFactory<TRow> | undefined,
-  }));
-  const server = useServerData<TRow>(() => {
-    const value = resolved.value;
-    const live = onServer.value;
-    const filters = filterRuntime.value;
-    if (live) {
-      const checklistKeys = filters?.defs
-        .filter(
-          (def) =>
-            (filters.registry.get(def.type)?.widget ?? def.type) === "checklist"
-        )
-        .map((def) => def.key);
-      facetKeyList = retainItems(
-        facetKeyList,
-        toValue(value.facetKeys) ?? checklistKeys
-      );
-    }
-    return {
-      rows: tierRows(live, toValue(value.data)),
-      total: () => toValue(value.total) ?? 0,
-      loading: value.isLoading,
-      error: value.error,
-      onQueryChange: activeTierValue(live, value.onQueryChange, undefined),
-      // A column's default aggregate is a request to the server, so only the
-      // server tier reads the columns.
-      columns: tierColumns(live),
-      supports: activeTierValue(live, value.supports, undefined),
-      aggregates: activeTierValue(live, value.aggregates, undefined),
-      responseKey: activeTierValue(live, value.responseKey, undefined),
-      facets: activeTierValue(live, value.facets, undefined),
-      // A server query counts every checklist filter unless told which.
-      facetKeys: live ? facetKeyList : undefined,
-      urlAdapter: live ? urlAdapter : undefined,
-      urlSync: live,
-      urlKey: value.urlKey,
-      defaults: value.defaults,
-      arrayExtraKeys: filters?.arrayExtraKeys,
-      numberExtraKeys: filters?.numberExtraKeys,
-      paginationMode: value.paginationMode,
-      forceMobile: isMobile,
-    };
-  });
-  // Once the frame is on screen, a frontend table's onQueryChange hears
-  // about a change; the mount is not one.
-  const tierSource = computed(() =>
-    dataController.finish({
-      resolved:
-        supplied.value ?? (onServer.value ? server.value : frontend.value),
-      frontend: frontend.value,
-    })
-  );
-  watch(tierSource, dataController.commit, { flush: "post" });
-  const source = computed(() => {
-    const raw = tierSource.value;
-    const filters = filterRuntime.value;
-    const engine = resolved.value.filterEngine;
-    if (!filters || !engine || supplied.value || !raw.allSearchedRows)
-      return raw;
-    return {
-      ...raw,
-      facets: engine.computeFacets(
-        filters.defs,
-        raw.allSearchedRows,
-        raw.extra,
-        filterRows,
-        filters.registry
-      ),
-    };
-  });
   const state = createFeatureState();
   const grouping = state.get(groupingModelKey<TRow>());
   const tree = state.get(treeModelKey<TRow>());
