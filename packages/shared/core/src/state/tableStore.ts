@@ -46,6 +46,7 @@ export interface SliceKey<T> {
  *
  * @public
  */
+/* @__NO_SIDE_EFFECTS__ */
 export function defineSlice<T>(
   name: string,
   initial: () => T,
@@ -91,6 +92,7 @@ export interface ActionDefinition<TPayload> {
  *
  * @public
  */
+/* @__NO_SIDE_EFFECTS__ */
 export function defineAction<TPayload>(
   type: string,
   reduce: (store: StoreWriter, payload: TPayload) => void
@@ -109,14 +111,6 @@ export interface TableStore {
   readonly read: SliceRead;
   /** A reader of one slice. */
   readonly slice: <T>(key: SliceKey<T>) => StoreReader<T>;
-  /**
-   * A reader of what `selector` makes of the slices it reads, heard only
-   * when those slices change and the selected value with them.
-   */
-  readonly select: <T>(
-    selector: (read: SliceRead) => T,
-    equals?: (a: T, b: T) => boolean
-  ) => StoreReader<T>;
   /** Apply a named action. */
   readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
   /** Apply `run`'s writes as one change. */
@@ -235,71 +229,88 @@ export function createTableStore(
         },
       };
     },
-    select(selector, equals = Object.is) {
-      let reads = new Set<Listened>();
-      let value: ReturnType<typeof selector>;
-      let fresh = false;
-      const tracking: SliceRead = (key) => {
-        reads.add(cellOf(key));
-        return read(key);
-      };
-      const evaluate = () => {
-        reads = new Set();
-        return selector(tracking);
-      };
-      /** Evaluate, keeping the last value when the selection is the same. */
-      const refresh = () => {
-        const next = evaluate();
-        if (!fresh || !equals(value, next)) value = next;
-        fresh = true;
-      };
-      const listeners = new Set<() => void>();
-      const unsubscribers = new Map<Listened, () => void>();
-      const onChange = () => {
-        const next = evaluate();
-        watch();
-        if (fresh && equals(value, next)) return;
-        value = next;
-        fresh = true;
-        for (const listener of [...listeners]) listener();
-      };
-      // Listen to exactly the slices the last evaluation read.
-      const watch = () => {
-        for (const [state, stop] of unsubscribers) {
-          if (reads.has(state)) continue;
-          stop();
-          unsubscribers.delete(state);
-        }
-        for (const state of reads) {
-          if (unsubscribers.has(state)) continue;
-          state.listeners.add(onChange);
-          unsubscribers.set(state, () => state.listeners.delete(onChange));
-        }
-      };
-      return {
-        getSnapshot() {
-          if (listeners.size === 0 || !fresh) refresh();
-          return value;
-        },
-        subscribe(listener) {
-          if (listeners.size === 0) {
-            refresh();
-            watch();
-          }
-          listeners.add(listener);
-          return () => {
-            listeners.delete(listener);
-            if (listeners.size > 0) return;
-            for (const stop of unsubscribers.values()) stop();
-            unsubscribers.clear();
-            fresh = false;
-          };
-        },
-      };
-    },
     dispatch(action) {
       run((store) => action.reduce(store, action.payload));
     },
     batch: run,
+  };
+}
+
+/**
+ * A reader of what `selector` makes of a store's slices, told only when the
+ * slices it read change and the selected value with them. The slices it
+ * reads may differ from one evaluation to the next; it follows them.
+ *
+ * @param store - The table's store.
+ * @param selector - Reads slices and returns what the reader needs.
+ * @param equals - When two selected values are the same; `Object.is` by
+ *   default.
+ *
+ * @public
+ */
+export function selectFrom<T>(
+  store: TableStore,
+  selector: (read: SliceRead) => T,
+  equals: (a: T, b: T) => boolean = Object.is
+): StoreReader<T> {
+  /** The slices the last evaluation read, each with how to listen to it. */
+  let reads = new Map<object, (listener: () => void) => () => void>();
+  let value: T;
+  let fresh = false;
+  const tracking: SliceRead = (key) => {
+    reads.set(key, (listener) => store.slice(key).subscribe(listener));
+    return store.read(key);
+  };
+  const evaluate = (): T => {
+    reads = new Map();
+    return selector(tracking);
+  };
+  /** Evaluate, keeping the last value when the selection is the same. */
+  const refresh = (): void => {
+    const next = evaluate();
+    if (!fresh || !equals(value, next)) value = next;
+    fresh = true;
+  };
+  const listeners = new Set<() => void>();
+  const unsubscribers = new Map<object, () => void>();
+  const onChange = (): void => {
+    const next = evaluate();
+    watch();
+    if (fresh && equals(value, next)) return;
+    value = next;
+    fresh = true;
+    for (const listener of [...listeners]) listener();
+  };
+  // Listen to exactly the slices the last evaluation read. One listener for
+  // every slice, so a change to several in one action is heard once.
+  const watch = (): void => {
+    for (const [key, stop] of unsubscribers) {
+      if (reads.has(key)) continue;
+      stop();
+      unsubscribers.delete(key);
+    }
+    for (const [key, listen] of reads) {
+      if (!unsubscribers.has(key)) unsubscribers.set(key, listen(onChange));
+    }
+  };
+  return {
+    getSnapshot() {
+      if (listeners.size === 0 || !fresh) refresh();
+      return value;
+    },
+    subscribe(listener) {
+      if (listeners.size === 0) {
+        refresh();
+        watch();
+      }
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+        if (listeners.size > 0) return;
+        for (const stop of unsubscribers.values()) stop();
+        unsubscribers.clear();
+        fresh = false;
+      };
+    },
   };
 }

@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createTableStore, defineAction, defineSlice } from "./tableStore";
+import {
+  createTableStore,
+  defineAction,
+  defineSlice,
+  selectFrom,
+} from "./tableStore";
 
 const COUNT = defineSlice("test/count", () => 0);
 const NAMES = defineSlice<readonly string[]>("test/names", () => []);
@@ -75,7 +80,10 @@ describe("createTableStore", () => {
 
   it("tells a listener once for an action that writes several slices", () => {
     const store = createTableStore();
-    const both$ = store.select((read) => [read(COUNT), read(NAMES)] as const);
+    const both$ = selectFrom(
+      store,
+      (read) => [read(COUNT), read(NAMES)] as const
+    );
     const heard = vi.fn();
     const counted = vi.fn();
     both$.subscribe(heard);
@@ -107,7 +115,7 @@ describe("createTableStore", () => {
 
   it("tells a selector's reader only when what it selects changes", () => {
     const store = createTableStore();
-    const parity = store.select((read) => read(COUNT) % 2 === 0);
+    const parity = selectFrom(store, (read) => read(COUNT) % 2 === 0);
     const heard = vi.fn();
     parity.subscribe(heard);
 
@@ -120,7 +128,7 @@ describe("createTableStore", () => {
 
   it("follows the slices a selector reads as they change", () => {
     const store = createTableStore();
-    const read$ = store.select((read) =>
+    const read$ = selectFrom(store, (read) =>
       read(FLAG) ? read(NAMES).length : read(COUNT)
     );
     const heard = vi.fn();
@@ -141,7 +149,8 @@ describe("createTableStore", () => {
 
   it("returns the same snapshot until what it selects changes", () => {
     const store = createTableStore();
-    const pair = store.select(
+    const pair = selectFrom(
+      store,
       (read) => ({ count: read(COUNT) }),
       (a, b) => a.count === b.count
     );
@@ -156,7 +165,7 @@ describe("createTableStore", () => {
 
   it("stops listening when the last reader leaves", () => {
     const store = createTableStore();
-    const parity = store.select((read) => read(COUNT) % 2 === 0);
+    const parity = selectFrom(store, (read) => read(COUNT) % 2 === 0);
     const heard = vi.fn();
     const stop = parity.subscribe(heard);
     stop();

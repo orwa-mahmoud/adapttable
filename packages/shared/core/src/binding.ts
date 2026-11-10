@@ -1032,6 +1032,7 @@ export {
   createTableStore,
   defineAction,
   defineSlice,
+  selectFrom,
   type SliceCell,
   type SliceKey,
   type SliceRead,

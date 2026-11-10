@@ -8,7 +8,7 @@ import {
   toggleRowSelected,
   toggleRowsSelected,
 } from "./selectionState";
-import { createTableStore } from "./tableStore";
+import { createTableStore, selectFrom } from "./tableStore";
 import {
   configureView,
   setSort,
@@ -64,10 +64,11 @@ describe("one store for the view and the rows", () => {
     const store = createTableStore();
     store.dispatch(configureView({ defaults: {} }));
     const view = viewStateReader();
-    const viewReader = store.select((read) =>
+    const viewReader = selectFrom(store, (read) =>
       view(read(VIEW_OVERRIDES), read(VIEW_CONFIG))
     );
-    const sortReader = store.select(
+    const sortReader = selectFrom(
+      store,
       (read) => {
         const { sortBy, sortDir, sortLevels } = view(
           read(VIEW_OVERRIDES),

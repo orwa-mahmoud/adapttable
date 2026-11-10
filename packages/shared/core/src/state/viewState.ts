@@ -20,8 +20,8 @@ import type {
 import type { QueryFilterGroup, SortLevel } from "../contracts/query";
 import type { GroupAggregateOverrides } from "../grouping/groupAggregateOverrides";
 import type { TableQueryParams } from "../types";
+import { joinListParam, splitListParam } from "../utils/listParam";
 import { memoLast } from "../utils/memoLast";
-import { safeDecode } from "../utils/safeDecode";
 import { sameItems } from "../utils/sameItems";
 import {
   type ActionDefinition,
@@ -207,24 +207,15 @@ function keptExtraValue(
 
 /** Entries trimmed, empty ones dropped; text splits at its commas. */
 function keptList(value: FilterValue): string[] | undefined {
-  const list = Array.isArray(value)
-    ? value.map((entry) => String(entry).trim())
-    : String(value)
-        .split(",")
-        .map((entry) => safeDecode(entry).trim());
-  const kept = list.filter(Boolean);
+  const kept = Array.isArray(value)
+    ? value.map((entry) => String(entry).trim()).filter(Boolean)
+    : splitListParam(String(value));
   return kept.length > 0 ? kept : undefined;
 }
 
 /** A list joins its encoded entries with commas. */
 function keptText(value: FilterValue): string | undefined {
-  const text = Array.isArray(value)
-    ? value
-        .map((entry) => String(entry).trim())
-        .filter(Boolean)
-        .map((entry) => encodeURIComponent(entry))
-        .join(",")
-    : String(value);
+  const text = Array.isArray(value) ? joinListParam(value) : String(value);
   return text === "" ? undefined : text;
 }
 

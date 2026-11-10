@@ -15726,6 +15726,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "selectFrom",
+      "kind": "runtime",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#selectFrom",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "SELECTION_LIVE",
       "kind": "runtime",
       "module": "features/slotContract.ts",

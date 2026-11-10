@@ -5700,6 +5700,9 @@ export const SELECTED_CELL_OUTLINE: {
 export const SELECTED_IDS: SliceKey<ReadonlySet<string>>;
 
 // @public
+export function selectFrom<T>(store: TableStore, selector: (read: SliceRead) => T, equals?: (a: T, b: T) => boolean): StoreReader<T>;
+
+// @public
 export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
 
 // @public
@@ -7134,7 +7137,6 @@ export interface TableStore {
     readonly batch: (run: (store: StoreWriter) => void) => void;
     readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
     readonly read: SliceRead;
-    readonly select: <T>(selector: (read: SliceRead) => T, equals?: (a: T, b: T) => boolean) => StoreReader<T>;
     readonly slice: <T>(key: SliceKey<T>) => StoreReader<T>;
 }
 

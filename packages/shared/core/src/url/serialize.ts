@@ -20,6 +20,7 @@ import {
 } from "../filters/filterTreeCodec";
 import { type RowPinSide, type RowPinState } from "../rows/rowPinModel";
 import { isEmptyFilterValue } from "../state/viewState";
+import { joinListParam, splitListParam } from "../utils/listParam";
 import { safeDecode } from "../utils/safeDecode";
 
 /** Split a comma list into trimmed, non-empty raw (still-encoded) parts. */
@@ -118,10 +119,7 @@ export function readExtra(
     if (!key.startsWith(filterPrefix) || raw === "") return;
     const bare = key.slice(filterPrefix.length);
     if (arrayKeys.includes(bare)) {
-      const arr = raw
-        .split(",")
-        .map((v) => safeDecode(v).trim())
-        .filter(Boolean);
+      const arr = splitListParam(raw);
       if (arr.length > 0) out[bare] = arr;
     } else if (numberKeys.includes(bare)) {
       const n = Number(raw);
@@ -156,12 +154,10 @@ export function writeExtra(
     if (isEmptyFilterValue(value)) continue;
     const param = `${filterPrefix}${key}`;
     if (Array.isArray(value)) {
-      // Trim entries the same way the read side does, so values round-trip
-      // byte-identical; percent-encode each element so a value may contain
-      // the comma delimiter (and survives a URLSearchParams decode).
-      const entries = value.map((v) => String(v).trim()).filter(Boolean);
-      if (entries.length === 0) continue;
-      params.set(param, entries.map((v) => encodeURIComponent(v)).join(","));
+      // Entries are trimmed and encoded the way the read side splits them,
+      // so values round-trip byte-identical.
+      const joined = joinListParam(value);
+      if (joined !== "") params.set(param, joined);
     } else {
       params.set(param, String(value));
     }

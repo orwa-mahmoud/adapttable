@@ -17822,9 +17822,10 @@ These come from `@adapttable/core/binding`.
   `SliceCell`); changes go in as named actions (`defineAction(type, reduce)`,
   `ActionDefinition`, `TableAction`) through `dispatch`, or as one change
   through `batch`, and reach readers together when the action ends.
-  `slice(key)` and `select(selector, equals?)` return a `StoreReader` that is
-  told only when what it reads changed; `SliceRead` and `StoreWriter` are what
-  selectors and reducers see.
+  `slice(key)` and `selectFrom(store, selector, equals?)` return a
+  `StoreReader` that is told only when what it reads changed; `SliceRead` and
+  `StoreWriter` are what selectors and reducers see. A seed passed to
+  `createTableStore` writes the starting state before anything can listen.
 - Selection as a slice: `SELECTED_IDS`, the actions `toggleRowSelected`,
   `toggleRowsSelected`, `replaceSelection` and `clearSelection`, and
   `rowSelectedReader(store, id)`, which is told only when that row's state

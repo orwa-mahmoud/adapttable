@@ -7673,6 +7673,7 @@
       "SearchInputState",
       "SELECTED_CELL_OUTLINE",
       "SELECTED_IDS",
+      "selectFrom",
       "SELECTION_LIVE",
       "SELECTION_STATS_LIVE",
       "SelectionContribution",

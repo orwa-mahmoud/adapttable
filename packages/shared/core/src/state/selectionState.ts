@@ -9,6 +9,7 @@ import {
   type ActionDefinition,
   defineAction,
   defineSlice,
+  selectFrom,
   type StoreReader,
   type TableStore,
 } from "./tableStore";
@@ -87,5 +88,5 @@ export function rowSelectedReader(
   store: TableStore,
   id: string
 ): StoreReader<boolean> {
-  return store.select((read) => read(SELECTED_IDS).has(id));
+  return selectFrom(store, (read) => read(SELECTED_IDS).has(id));
 }
