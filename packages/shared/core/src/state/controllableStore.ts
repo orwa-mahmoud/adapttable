@@ -9,7 +9,16 @@
  * without one, it keeps the state itself. Every mutator a domain builds on
  * top goes through {@link ControllableStore.commit}, so the split is decided
  * in one place and the mutators never need to know which mode they are in.
+ *
+ * The table's own value is a slice of its store ({@link controllableSlice}),
+ * so the same store can hold a table's view state and its row state.
  */
+import {
+  createTableStore,
+  defineSlice,
+  type SliceKey,
+  type TableStore,
+} from "./tableStore";
 
 /**
  * What the host passes to take control: a value, and where changes go.
@@ -74,8 +83,11 @@ export interface ControllableStore<T> {
   readonly update: (recipe: (current: T) => T) => void;
 }
 
+/** Never the same: every uncontrolled commit reaches the store's listeners. */
+const NEVER_SAME = (): boolean => false;
+
 /**
- * Create a controllable store.
+ * Create a controllable store over a store of its own.
  *
  * @param initial - The uncontrolled value to start from.
  * @param options - Observer mode and change detection.
@@ -87,15 +99,37 @@ export function createControllableStore<T>(
   initial: T,
   options: ControllableStoreOptions<T> = {}
 ): ControllableStore<T> {
-  let own = initial;
+  const key = defineSlice<T>("controllable", () => initial, NEVER_SAME);
+  return controllableSlice(createTableStore(), key, options);
+}
+
+/**
+ * A slice of a table's store that a host may hold.
+ *
+ * The table's own value is the slice. Given a controlled value, reads return
+ * it and every change goes to the host's change callback instead of the
+ * slice; without one, changes write the slice and reach its readers.
+ *
+ * @param store - The table's store.
+ * @param key - The slice that holds the table's own value.
+ * @param options - Observer mode and change detection.
+ * @returns The controllable view of the slice.
+ *
+ * @public
+ */
+export function controllableSlice<T>(
+  store: TableStore,
+  key: SliceKey<T>,
+  options: ControllableStoreOptions<T> = {}
+): ControllableStore<T> {
+  const own = store.slice(key);
   let control: ControllableControl<T> = { value: undefined };
   // The last controlled commit, while the host has not handed over a value.
   let committed: { value: T } | undefined;
-  const listeners = new Set<() => void>();
 
   const snapshot = (): T => {
     const { value } = control;
-    if (value === undefined) return own;
+    if (value === undefined) return own.getSnapshot();
     return value;
   };
   const current = (): T => (committed ? committed.value : snapshot());
@@ -107,19 +141,13 @@ export function createControllableStore<T>(
       control.onChange?.(next);
       return;
     }
-    own = next;
-    for (const listener of listeners) listener();
+    store.batch((writer) => writer.write(key, next));
     if (options.observeUncontrolled === true) control.onChange?.(next);
   };
 
   return {
     getSnapshot: snapshot,
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: own.subscribe,
     control(next) {
       control = next;
       committed = undefined;

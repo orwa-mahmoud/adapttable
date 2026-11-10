@@ -29,6 +29,14 @@ export interface ActionConfirm<TArg> {
 }
 
 // @public
+export interface ActionDefinition<TPayload> {
+    // (undocumented)
+    (payload: TPayload): TableAction<TPayload>;
+    // (undocumented)
+    readonly type: string;
+}
+
+// @public
 export const ACTIVE_FILTER_CHIPS: FeatureSlotKey<ActiveFilterChipsSlotProps>;
 
 // @public
@@ -956,6 +964,9 @@ export interface ChromeVirtualPadSlot {
 export function clearChromeFilters(source: Pick<TableSource<unknown>, "clearExtras" | "setFilterTree">, onClearFilters?: () => void): void;
 
 // @public
+export const clearSelection: ActionDefinition<void>;
+
+// @public
 export interface CollectFeatureNoticesInput<TRow = unknown> {
     allFilteredRows?: readonly TRow[];
     batchEditing?: boolean;
@@ -1598,6 +1609,33 @@ export type ContextMenuTarget<TRow> = {
 };
 
 // @public
+export interface ControllableControl<T> {
+    readonly onChange?: (next: T) => void;
+    readonly value: T | undefined;
+}
+
+// @public
+export function controllableSlice<T>(store: TableStore, key: SliceKey<T>, options?: ControllableStoreOptions<T>): ControllableStore<T>;
+
+// @public
+export interface ControllableStore<T> {
+    readonly commit: (next: T) => void;
+    readonly control: (control: ControllableControl<T>) => void;
+    readonly current: () => T;
+    readonly getSnapshot: () => T;
+    readonly isControlled: () => boolean;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly update: (recipe: (current: T) => T) => void;
+}
+
+// @public
+export interface ControllableStoreOptions<T> {
+    readonly equals?: (current: T, next: T) => boolean;
+    readonly observeUncontrolled?: boolean;
+    readonly readsOwnCommits?: boolean;
+}
+
+// @public
 export function coreBatchEditing<TRow>(onBatchEdit: unknown, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
 
 // @public
@@ -1810,6 +1848,9 @@ export interface CreateTableEngineOptions<TRow> {
 }
 
 // @public
+export function createTableStore(): TableStore;
+
+// @public
 export type CssProperties = Record<string, string | number | undefined>;
 
 // @public
@@ -1861,6 +1902,12 @@ export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValu
 
 // @public
 export type DeclaredAggregates = Readonly<Record<string, string>>;
+
+// @public
+export function defineAction<TPayload>(type: string, reduce: (store: StoreWriter, payload: TPayload) => void): ActionDefinition<TPayload>;
+
+// @public
+export function defineSlice<T>(name: string, initial: () => T, equals?: (a: T, b: T) => boolean): SliceKey<T>;
 
 // @public
 export const DENSITY_STATE: FeatureStateKey<DensityFeatureState>;
@@ -4889,6 +4936,9 @@ export function renderedRowsOf<TRow>(chrome: {
 export const REORDER_COLUMN_WIDTH = 64;
 
 // @public
+export const replaceSelection: ActionDefinition<Iterable<string>>;
+
+// @public
 export function resetColumnLayout<TRow>(row: ColumnMenuRow<TRow>, layout: UseColumnLayoutResult<TRow>): void;
 
 // @public
@@ -5422,6 +5472,9 @@ export function rowScrollTarget<TRow>(row: TRow, rowKey: (row: TRow) => string, 
 } | undefined;
 
 // @public
+export function rowSelectedReader(store: TableStore, id: string): StoreReader<boolean>;
+
+// @public
 export function rowSourceIndex(entry: Pick<VirtualTableRow<unknown>, "index" | "sourceIndex">): number;
 
 // @public
@@ -5644,6 +5697,9 @@ export const SELECTED_CELL_OUTLINE: {
 };
 
 // @public
+export const SELECTED_IDS: SliceKey<ReadonlySet<string>>;
+
+// @public
 export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
 
 // @public
@@ -5858,6 +5914,29 @@ export interface SidePanelTabProps<TPanel extends SidePanelEntry = SidePanelEntr
 }
 
 // @public
+export interface SliceCell<T> {
+    // (undocumented)
+    readonly listeners: Set<() => void>;
+    staged: {
+        value: T;
+    } | undefined;
+    // (undocumented)
+    value: T;
+}
+
+// @public
+export interface SliceKey<T> {
+    readonly cells: WeakMap<object, SliceCell<T>>;
+    readonly equals: (a: T, b: T) => boolean;
+    readonly initial: () => T;
+    // (undocumented)
+    readonly name: string;
+}
+
+// @public
+export type SliceRead = <T>(key: SliceKey<T>) => T;
+
+// @public
 export interface SlotFill<TNode = unknown> {
     readonly id: string;
     readonly render: (props: never) => TNode;
@@ -6036,12 +6115,40 @@ export interface StatusBarSlots<TNode = unknown> {
 }
 
 // @public
+export interface StoreReader<T> {
+    // (undocumented)
+    readonly getSnapshot: () => T;
+    // (undocumented)
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface StoreWriter {
+    // (undocumented)
+    readonly read: SliceRead;
+    // (undocumented)
+    readonly update: <T>(key: SliceKey<T>, recipe: (current: T) => T) => void;
+    // (undocumented)
+    readonly write: <T>(key: SliceKey<T>, value: T) => void;
+}
+
+// @public
 export class SummaryCellsCache<TCells> {
     read<TRow>(summaryRow: ((rows: readonly TRow[]) => TCells) | undefined, rows: readonly TRow[]): TCells | undefined;
 }
 
 // @public
 export const TABLE_ASSISTANT: FeatureSlotKey<TableAssistantProps<unknown>>;
+
+// @public
+export interface TableAction<TPayload> {
+    // (undocumented)
+    readonly payload: TPayload;
+    // (undocumented)
+    readonly reduce: (store: StoreWriter, payload: TPayload) => void;
+    // (undocumented)
+    readonly type: string;
+}
 
 // @public
 export interface TableAssistantAllowanceView {
@@ -7023,6 +7130,15 @@ export interface TableStateMutators {
 }
 
 // @public
+export interface TableStore {
+    readonly batch: (run: (store: StoreWriter) => void) => void;
+    readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
+    readonly read: SliceRead;
+    readonly select: <T>(selector: (read: SliceRead) => T, equals?: (a: T, b: T) => boolean) => StoreReader<T>;
+    readonly slice: <T>(key: SliceKey<T>) => StoreReader<T>;
+}
+
+// @public
 export interface TableVirtualization<TRow> {
     enabled: boolean;
     measureElement?: (node: Element | null) => void;
@@ -7034,6 +7150,12 @@ export interface TableVirtualization<TRow> {
 
 // @public
 export function toggleCollapsedColumnGroup(collapsedIds: readonly string[], id: string): string[];
+
+// @public
+export const toggleRowSelected: ActionDefinition<string>;
+
+// @public
+export const toggleRowsSelected: ActionDefinition<readonly string[]>;
 
 // @public
 export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarExtrasSlotProps>;

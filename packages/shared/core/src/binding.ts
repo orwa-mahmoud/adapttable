@@ -1010,6 +1010,37 @@ export { sameRows } from "./engine/sameRows";
 export { isRecord } from "./utils/isRecord";
 export { retainItems, sameItems } from "./utils/sameItems";
 
+// One store per table: typed slices, named actions and selector readers.
+// The view state, the selection and every controllable piece of row state
+// are slices of it.
+export {
+  type ControllableControl,
+  controllableSlice,
+  type ControllableStore,
+  type ControllableStoreOptions,
+} from "./state/controllableStore";
+export {
+  clearSelection,
+  replaceSelection,
+  rowSelectedReader,
+  SELECTED_IDS,
+  toggleRowSelected,
+  toggleRowsSelected,
+} from "./state/selectionState";
+export {
+  type ActionDefinition,
+  createTableStore,
+  defineAction,
+  defineSlice,
+  type SliceCell,
+  type SliceKey,
+  type SliceRead,
+  type StoreReader,
+  type StoreWriter,
+  type TableAction,
+  type TableStore,
+} from "./state/tableStore";
+
 // Shared state shapes the bindings return from their hooks.
 export type { BulkBarState } from "./actions/actionsBindingState";
 export type { UseColumnLayoutStorageStateResult } from "./columns/columnsBindingState";

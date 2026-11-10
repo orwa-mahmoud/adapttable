@@ -87,7 +87,6 @@ import { ContextMenuSurfaceProps } from '@adapttable/core/binding';
 import { createMenuNavigation } from '@adapttable/core/binding';
 import { CSSProperties } from 'vue';
 import { CssProperties } from '@adapttable/core/binding';
-import { CssProperties as CssProperties_2 } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
@@ -2776,6 +2775,9 @@ export { isColumnGroupSummaryKey }
 
 export { isExtraEntry }
 
+// @public
+export function keepTableControls<TControls extends object>(build: () => TControls, hostSlots: (controls: TControls) => readonly unknown[]): () => TControls;
+
 export { KitEnvironment }
 
 // @public
@@ -2874,6 +2876,9 @@ export function nestedTableDetail<TRow>(options: {
 
 // @public (undocumented)
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
+
+// @public
+export const NO_CLASS_NAMES: Readonly<Record<string, undefined>>;
 
 // @public (undocumented)
 export function normalizeFeatures<TRow>(features: readonly ComposedFeature<TRow>[]): readonly ComposedFeature<TRow>[];
@@ -3999,6 +4004,16 @@ export interface TableRowModel<TRow> {
 }
 
 // @public
+export function tableRowView<TRow>(row: TableRowModel<TRow>, context: TableRowViewContext, draw: () => VNodeChild): VNode;
+
+// @public
+export interface TableRowViewContext {
+    readonly classNames?: object;
+    readonly controls?: object;
+    readonly model: object;
+}
+
+// @public
 export interface TableSummaryCellModel<TRow> {
     // (undocumented)
     readonly attrs: Attrs;
@@ -4230,10 +4245,14 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     headerRowAttrs: () => Record<string, unknown>;
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    rowAttrs: (row: TRow, index: number, state?: {
+        readonly selected?: boolean;
+    }) => Record<string, unknown>;
     isCellFlashing: (row: TRow, columnKey: string) => boolean;
     cellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    cardAttrs: (row: TRow, index: number, state?: {
+        readonly selected?: boolean;
+    }) => Record<string, unknown>;
     searchInputAttrs: () => Record<string, unknown>;
     loadMoreAttrs: () => {
         ref: VNodeRef | undefined;
@@ -4344,10 +4363,14 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
         headerRowAttrs: () => Record<string, unknown>;
         headerCellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
         sortButtonAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
-        rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+        rowAttrs: (row: TRow, index: number, state?: {
+            readonly selected?: boolean;
+        } | undefined) => Record<string, unknown>;
         isCellFlashing: (row: TRow, columnKey: string) => boolean;
         cellAttrs: (column: ColumnDef<TRow, unknown>) => Record<string, unknown>;
-        cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
+        cardAttrs: (row: TRow, index: number, state?: {
+            readonly selected?: boolean;
+        } | undefined) => Record<string, unknown>;
         searchInputAttrs: () => Record<string, unknown>;
         loadMoreAttrs: () => {
             ref: VNodeRef | undefined;
@@ -4376,22 +4399,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     context: HeaderContext<TRow, unknown>;
     }[];
     rows: TableRowModel<TRow>[];
-    bodySlots: ((ChromeVirtualPadSlot & {
-    readonly attrs?: Attrs;
-    }) | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
-    readonly coveredSlots?: ReadonlySet<number>;
-    } & {
-    readonly attrs?: Attrs;
-    }) | (ChromeGroupSlot<TRow> & {
-    readonly model?: GroupRowModel<TRow> | undefined;
-    } & {
-    readonly attrs?: Attrs;
-    }) | {
-    wiring: TableRowModel<TRow>;
-    kind: "row";
-    key: string;
-    attrs?: Attrs;
-    })[] | undefined;
+    bodySlots: TableBodySlot<TRow>[] | undefined;
     headerRowAttrs: Attrs;
     headerCheckboxAttrs?: SelectionCheckboxAttrs;
     columnCount: number;
@@ -4408,22 +4416,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     mobile: ComputedRef<    {
     summary: TableSummaryModel<TRow> | undefined;
     rows: TableRowModel<TRow>[];
-    bodySlots: ((ChromeVirtualPadSlot & {
-    readonly attrs?: Attrs;
-    }) | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
-    readonly coveredSlots?: ReadonlySet<number>;
-    } & {
-    readonly attrs?: Attrs;
-    }) | (ChromeGroupSlot<TRow> & {
-    readonly model?: GroupRowModel<TRow> | undefined;
-    } & {
-    readonly attrs?: Attrs;
-    }) | {
-    wiring: TableRowModel<TRow>;
-    kind: "row";
-    key: string;
-    attrs?: Attrs;
-    })[] | undefined;
+    bodySlots: TableBodySlot<TRow>[] | undefined;
     attrs: Attrs;
     }>;
     bodyProjection: ComputedRef<TableBodyProjection<TRow>>;

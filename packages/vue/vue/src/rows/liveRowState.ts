@@ -54,10 +54,10 @@ export function withLiveSelection<TRow>(
 
 /** Each row slot's row, with its selected state read when it is drawn. */
 export function withLiveSelectionSlots<TRow>(
-  slots: readonly TableBodySlot<TRow>[] | undefined,
+  slots: TableBodySlot<TRow>[] | undefined,
   selection: RowSelection | undefined,
   element: RowElement
-): readonly TableBodySlot<TRow>[] | undefined {
+): TableBodySlot<TRow>[] | undefined {
   if (!slots || !selection) return slots;
   return slots.map((slot) =>
     slot.kind === "row"

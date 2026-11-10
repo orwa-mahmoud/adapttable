@@ -17813,6 +17813,26 @@ explains which import a program changes. This list is the reference.
   operations the rows on screen were computed with: `remember` each request's
   operations, `settle` from the response's provenance, read `current()`.
 
+### Table store
+
+These come from `@adapttable/core/binding`.
+
+- `createTableStore(): TableStore` — one table's state. Each piece is a slice
+  under a typed key (`defineSlice(name, initial, equals?)`, `SliceKey`,
+  `SliceCell`); changes go in as named actions (`defineAction(type, reduce)`,
+  `ActionDefinition`, `TableAction`) through `dispatch`, or as one change
+  through `batch`, and reach readers together when the action ends.
+  `slice(key)` and `select(selector, equals?)` return a `StoreReader` that is
+  told only when what it reads changed; `SliceRead` and `StoreWriter` are what
+  selectors and reducers see.
+- Selection as a slice: `SELECTED_IDS`, the actions `toggleRowSelected`,
+  `toggleRowsSelected`, `replaceSelection` and `clearSelection`, and
+  `rowSelectedReader(store, id)`, which is told only when that row's state
+  changes.
+- `controllableSlice(store, key, options?)` — a `ControllableStore` whose own
+  value is a slice of the table's store, so view state and row state share
+  one store.
+
 ### Controllable stores
 
 - `createControllableStore(initial, options?)` — a value that is the host's
@@ -21301,6 +21321,8 @@ These runtime helpers come from `@adapttable/vue/adapter`.
 | Export                                                                                                          | Role                                                                                                                                                                                                          |
 | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DesktopTableChrome`, `MobileCardsChrome`                                                                       | Structural Vue renderers taking a model, required control slots and optional class names.                                                                                                                     |
+| `tableRowView`, `TableRowViewContext`                                                                           | Draws one body row or card in a component of its own, so it redraws for its own changes: a new row model, table model, controls or class names, or state it read.                                             |
+| `keepTableControls`, `NO_CLASS_NAMES`                                                                           | One controls object while the host's slots stay the same, and one shared empty class-name set, so rows keep their props across redraws of the table.                                                          |
 | `TableChromeSlots`, `SortButtonProps`, `SelectionCheckboxProps`                                                 | Typed adapter-control contracts; missing controls throw rather than rendering a native fallback.                                                                                                              |
 | `SelectionCheckboxAttrs`, `SelectionCheckboxControl`, `selectionCheckboxControl`, `selectionCheckboxInputAttrs` | Typed checkbox state and a single toggle action, with safe DOM attributes for widgets that own their model-value event API. See the [Vue control contract](./vue/api.md#adapter-shell-and-structural-chrome). |
 | `TableChromeClassNames`                                                                                         | Semantic table, selection, group, action, resize and card class hooks.                                                                                                                                        |

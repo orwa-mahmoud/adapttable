@@ -13,8 +13,13 @@
  * — a hook, a ref, a signal — and writes it only from events and effects.
  */
 
-/** Where one store keeps one slice's value and who listens to it. */
-interface SliceCell<T> {
+/**
+ * Where one store keeps one slice's value and who listens to it. Read and
+ * written through the store, never directly.
+ *
+ * @public
+ */
+export interface SliceCell<T> {
   value: T;
   /** The value an action in progress wrote, until the action ends. */
   staged: { value: T } | undefined;

@@ -798,10 +798,14 @@ export function useDataTable<TRow>(input: MaybeRefOrGetter<UseDataTableOptions<T
     headerRowAttrs: () => Record<string, unknown>;
     headerCellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
     sortButtonAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    rowAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    rowAttrs: (row: TRow, index: number, state?: {
+        readonly selected?: boolean;
+    }) => Record<string, unknown>;
     isCellFlashing: (row: TRow, columnKey: string) => boolean;
     cellAttrs: (column: ColumnDef<TRow>) => Record<string, unknown>;
-    cardAttrs: (row: TRow, index: number) => Record<string, unknown>;
+    cardAttrs: (row: TRow, index: number, state?: {
+        readonly selected?: boolean;
+    }) => Record<string, unknown>;
     searchInputAttrs: () => Record<string, unknown>;
     loadMoreAttrs: () => {
         ref: VNodeRef | undefined;
