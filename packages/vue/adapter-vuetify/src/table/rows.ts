@@ -11,6 +11,7 @@ import {
   mergeVueAttrs,
   selectionCheckboxControl,
   type TableChromeSlots,
+  tableRowView,
 } from "@adapttable/vue/adapter";
 import { Fragment, h, type VNode, type VNodeChild } from "vue";
 
@@ -144,10 +145,16 @@ export function vuetifyBodyRows<TRow>(
       ),
     ]);
   }
+  // Each row in a component of its own: it redraws for its own changes.
+  function rowView(row: TableRowModel<TRow>): VNode {
+    return tableRowView(row, { model, controls, classNames: names }, () =>
+      dataRow(row)
+    );
+  }
   function bodySlot(slot: TableBodySlot<TRow>): VNode {
     switch (slot.kind) {
       case "row":
-        return dataRow(slot.wiring);
+        return rowView(slot.wiring);
       case "group":
         return h(Fragment, { key: slot.key }, [
           requiredControl(
@@ -203,5 +210,5 @@ export function vuetifyBodyRows<TRow>(
   }
   return model.bodySlots
     ? model.bodySlots.map(bodySlot)
-    : model.rows.map(dataRow);
+    : model.rows.map(rowView);
 }

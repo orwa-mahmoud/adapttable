@@ -35,6 +35,7 @@ import {
 } from "../selection/checkboxControl";
 import type { DataTableSlots } from "../tableAdapterContracts";
 import type { RowActionControl } from "./modelChannels";
+import { tableRowView } from "./rowView";
 import type {
   DesktopTableModel,
   MobileCardsModel,
@@ -260,12 +261,20 @@ function hasHeaderActionContent(content: VNodeChild): boolean {
   }
   return typeof content !== "string" || content.trim().length > 0;
 }
+/**
+ * One empty set of class names, so a table drawn without any passes the same
+ * object to its rows on every draw.
+ *
+ * @public
+ */
+export const NO_CLASS_NAMES: Readonly<Record<string, undefined>> =
+  Object.freeze({});
 export function DesktopTableChrome<TRow>(props: {
   readonly model: DesktopTableModel<TRow>;
   readonly slots: TableChromeSlots<TRow>;
   readonly classNames?: TableChromeClassNames;
 }): VNodeChild {
-  const { model, slots, classNames = {} } = props;
+  const { model, slots, classNames = NO_CLASS_NAMES } = props;
   const selection = (
     attrs: SelectionCheckboxAttrs,
     header: boolean
@@ -641,8 +650,13 @@ export function DesktopTableChrome<TRow>(props: {
         : null,
     ]);
   };
+  // Each row in a component of its own: it redraws for its own changes.
+  const row = (wiring: TableRowModel<TRow>): VNode =>
+    tableRowView(wiring, { model, controls: slots, classNames }, () =>
+      rowContent(wiring)
+    );
   const bodySlot = (slot: TableBodySlot<TRow>): VNode => {
-    if (slot.kind === "row") return rowContent(slot.wiring);
+    if (slot.kind === "row") return row(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         control(
@@ -708,9 +722,7 @@ export function DesktopTableChrome<TRow>(props: {
       h(
         "tbody",
         { class: classNames.tbody, "data-adapttable-part": "tbody" },
-        model.bodySlots
-          ? model.bodySlots.map(bodySlot)
-          : model.rows.map(rowContent)
+        model.bodySlots ? model.bodySlots.map(bodySlot) : model.rows.map(row)
       ),
       model.summary
         ? h(TableSummaryChrome<TRow>, {
@@ -735,7 +747,7 @@ export function MobileCardsChrome<TRow>(props: {
   readonly slots: TableChromeSlots<TRow>;
   readonly classNames?: TableChromeClassNames;
 }): VNodeChild {
-  const { model, slots, classNames = {} } = props;
+  const { model, slots, classNames = NO_CLASS_NAMES } = props;
   const card = (row: TableRowModel<TRow>): VNode =>
     h(
       "article",
@@ -846,8 +858,11 @@ export function MobileCardsChrome<TRow>(props: {
           : null,
       ]
     );
+  // Each card in a component of its own: it redraws for its own changes.
+  const cardView = (row: TableRowModel<TRow>): VNode =>
+    tableRowView(row, { model, controls: slots, classNames }, () => card(row));
   const bodySlot = (slot: TableBodySlot<TRow>): VNodeChild => {
-    if (slot.kind === "row") return card(slot.wiring);
+    if (slot.kind === "row") return cardView(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         control(
@@ -881,7 +896,9 @@ export function MobileCardsChrome<TRow>(props: {
     );
   };
   return h("div", mergeVueAttrs(model.attrs, { class: classNames.cards }), [
-    ...(model.bodySlots ? model.bodySlots.map(bodySlot) : model.rows.map(card)),
+    ...(model.bodySlots
+      ? model.bodySlots.map(bodySlot)
+      : model.rows.map(cardView)),
     model.summary
       ? h(MobileSummaryChrome<TRow>, {
           model: model.summary,

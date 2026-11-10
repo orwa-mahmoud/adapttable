@@ -12,6 +12,7 @@ import {
   DataTableSurfaceChrome,
   type DataTableSurfaceSlots,
   defaultConfirm,
+  keepTableControls,
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
@@ -148,6 +149,14 @@ function controls(): TableChromeSlots<TRow> {
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 function surfaceControls(): DataTableSurfaceSlots<TRow> {
   return {
     Search: ({ attrs, value, onChange, classNames }) =>
@@ -177,11 +186,15 @@ function surfaceControls(): DataTableSurfaceSlots<TRow> {
       h(VuetifyDesktop<TRow>, {
         model,
         classNames,
-        controls: controls(),
+        controls: tableControls(),
         density: shell.density.value,
       }),
     Mobile: ({ model, classNames }) =>
-      h(VuetifyMobile<TRow>, { model, classNames, controls: controls() }),
+      h(VuetifyMobile<TRow>, {
+        model,
+        classNames,
+        controls: tableControls(),
+      }),
   };
 }
 function setRootElement(element: HTMLElement | null): void {

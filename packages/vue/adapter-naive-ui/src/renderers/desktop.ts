@@ -12,11 +12,13 @@ import {
   extraUncoveredColSpans,
   groupedHeaderAlign,
   mergeVueAttrs,
+  NO_CLASS_NAMES,
   renderContent,
   renderFooter,
   renderHeader,
   selectionCheckboxControl,
   type TableChromeSlots,
+  tableRowView,
 } from "@adapttable/vue/adapter";
 import { NTable, NTbody, NTd, NTh, NThead, NTr } from "naive-ui";
 import { Fragment, h, normalizeStyle, type VNode, type VNodeChild } from "vue";
@@ -52,7 +54,7 @@ export function NaiveDesktopTable<TRow>(props: {
   readonly classNames?: DataTableClassNames;
   readonly density?: TableDensity;
 }): VNodeChild {
-  const { model, controls, classNames: names = {} } = props;
+  const { model, controls, classNames: names = NO_CLASS_NAMES } = props;
   const cell = (attrs: Attrs, content: () => VNodeChild = () => null) =>
     naiveElement(NTd, attrs, content);
   const head = (attrs: Attrs, content: () => VNodeChild = () => null) =>
@@ -357,8 +359,13 @@ export function NaiveDesktopTable<TRow>(props: {
         : null,
     ]);
   };
+  // Each row in a component of its own: it redraws for its own changes.
+  const rowView = (item: TableRowModel<TRow>): VNode =>
+    tableRowView(item, { model, controls: controls, classNames: names }, () =>
+      row(item)
+    );
   const body = (slot: TableBodySlot<TRow>): VNode => {
-    if (slot.kind === "row") return row(slot.wiring);
+    if (slot.kind === "row") return rowView(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         requireControl(
@@ -443,7 +450,7 @@ export function NaiveDesktopTable<TRow>(props: {
         NTbody,
         { class: names.tbody, "data-adapttable-part": "tbody" },
         () =>
-          model.bodySlots ? model.bodySlots.map(body) : model.rows.map(row)
+          model.bodySlots ? model.bodySlots.map(body) : model.rows.map(rowView)
       ),
       summary
         ? h(

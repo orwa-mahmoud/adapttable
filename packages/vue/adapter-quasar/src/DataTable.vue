@@ -11,6 +11,7 @@ import {
   defaultConfirm,
   GROUP_ROW,
   groupRowSlotKey,
+  keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
   type TableChromeSlots,
@@ -124,6 +125,14 @@ function controls(): TableChromeSlots<TRow> {
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const root = shallowRef<HTMLElement | null>(null);
 const scroll = shallowRef<HTMLElement | null>(null);
 const surface = {
@@ -153,7 +162,7 @@ function setScroll(element: HTMLElement | null): void {
       ...props,
       searchable,
     }"
-    :slots="quasarSurfaceControls(controls())"
+    :slots="quasarSurfaceControls(tableControls())"
     :content="slots"
     :root-ref="setRoot"
     :scroll-ref="setScroll"

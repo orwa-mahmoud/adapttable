@@ -288,13 +288,22 @@ export {
   rowEditActionsSlotKey,
   rowPinningModelKey,
 } from "./layout/modelChannels";
+export {
+  keepTableControls,
+  tableRowView,
+  type TableRowViewContext,
+} from "./layout/rowView";
 export type {
   SelectionCheckboxProps,
   SortButtonProps,
   TableChromeClassNames,
   TableChromeSlots,
 } from "./layout/tableChrome";
-export { DesktopTableChrome, MobileCardsChrome } from "./layout/tableChrome";
+export {
+  DesktopTableChrome,
+  MobileCardsChrome,
+  NO_CLASS_NAMES,
+} from "./layout/tableChrome";
 export {
   useDesktopTableModel,
   useMobileCardsModel,

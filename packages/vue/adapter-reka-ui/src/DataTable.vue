@@ -14,6 +14,7 @@ import {
   FULLSCREEN_MODEL,
   GROUP_ROW,
   groupRowSlotKey,
+  keepTableControls,
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
@@ -175,6 +176,14 @@ function controls(): TableChromeSlots<TRow> {
     footer: content.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const rootElement = shallowRef<HTMLElement | null>(null);
 const scrollElement = shallowRef<HTMLElement | null>(null);
 const surface = {
@@ -202,7 +211,7 @@ defineExpose<DataTableHandle<TRow>>(shell.handle);
       data-adapttable-kit="reka-ui"
       :model="shell"
       :options="options"
-      :slots="rekaSurfaceControls(controls())"
+      :slots="rekaSurfaceControls(tableControls())"
       :content="content"
       :root-ref="rootRef"
       :scroll-ref="scrollRef"

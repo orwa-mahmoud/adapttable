@@ -10,6 +10,7 @@ import {
   MobileSummaryChrome,
   selectionCheckboxControl,
   type TableChromeSlots,
+  tableRowView,
 } from "@adapttable/vue/adapter";
 import { Fragment, h, type VNode, type VNodeChild } from "vue";
 import { VCard, VCardActions, VCardText } from "vuetify/components/VCard";
@@ -147,8 +148,14 @@ export function VuetifyMobile<TRow>(props: {
       }
     );
   }
+  // Each card in a component of its own: it redraws for its own changes.
+  function cardView(row: TableRowModel<TRow>): VNode {
+    return tableRowView(row, { model, controls, classNames: names }, () =>
+      card(row)
+    );
+  }
   function bodySlot(slot: TableBodySlot<TRow>): VNode {
-    if (slot.kind === "row") return card(slot.wiring);
+    if (slot.kind === "row") return cardView(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         requiredControl(
@@ -194,7 +201,7 @@ export function VuetifyMobile<TRow>(props: {
     [
       ...(model.bodySlots
         ? model.bodySlots.map(bodySlot)
-        : model.rows.map(card)),
+        : model.rows.map(cardView)),
       model.summary
         ? h(MobileSummaryChrome<TRow>, {
             model: model.summary,

@@ -1,6 +1,19 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { effectScope, shallowRef, watchEffect } from "vue";
+import {
+  createApp,
+  defineComponent,
+  effectScope,
+  h,
+  nextTick,
+  shallowRef,
+  watchEffect,
+} from "vue";
 
+import {
+  DesktopTableChrome,
+  MobileCardsChrome,
+  type TableChromeSlots,
+} from "../src/layout/tableChrome";
 import { useRowSelection } from "../src/selection/selection";
 import { useDataTableShell } from "../src/useDataTableShell";
 
@@ -96,4 +109,56 @@ describe("the body model under a selection change", () => {
     expect(mobile.rows[0]?.attrs["data-selected"]).toBe("");
     expect(desktop.headerCheckboxAttrs?.indeterminate).toBe(true);
   });
+});
+
+describe("drawing a selection change", () => {
+  it.each([false, true])(
+    "redraws only the row whose selection changed, mobile=%s",
+    async (mobile) => {
+      const drawn: string[] = [];
+      let shell: ReturnType<typeof useDataTableShell<Row>> | undefined;
+      const root = document.createElement("div");
+      const slots: TableChromeSlots<Row> = {
+        SortButton: ({ attrs, content }) => h("button", attrs, [content]),
+        SelectionCheckbox: (control) => {
+          if (!control.header) drawn.push(String(control.attrs["aria-label"]));
+          return h("input", { ...control.attrs, checked: control.checked });
+        },
+      };
+      const app = createApp(
+        defineComponent({
+          setup() {
+            shell = useDataTableShell<Row>(() => ({
+              data: rows,
+              columns: [{ key: "id" }],
+              rowKey,
+              selectable: true,
+              urlSync: false,
+              forceMobile: mobile,
+              labels: { selectRow: "row" },
+            }));
+            return () =>
+              mobile
+                ? MobileCardsChrome({ model: shell!.mobile.value, slots })
+                : DesktopTableChrome({ model: shell!.desktop.value, slots });
+          },
+        })
+      );
+      app.mount(root);
+      scopes.push(() => app.unmount());
+      expect(drawn).toHaveLength(rows.length);
+      drawn.length = 0;
+
+      shell!.selection.value!.toggle("b");
+      await nextTick();
+
+      expect(drawn).toEqual(["row"]);
+      const selected = root.querySelectorAll(
+        mobile ? '[data-selected=""]' : '[aria-selected="true"]'
+      );
+      expect(
+        [...selected].map((node) => node.getAttribute("data-row-id"))
+      ).toEqual(["b"]);
+    }
+  );
 });

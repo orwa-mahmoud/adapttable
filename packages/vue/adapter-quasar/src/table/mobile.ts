@@ -6,10 +6,12 @@ import type {
 import {
   EXTRA_ROW_PARTS,
   mergeVueAttrs,
+  NO_CLASS_NAMES,
   renderFooter,
   selectionCheckboxControl,
   type TableChromeClassNames,
   type TableChromeSlots,
+  tableRowView,
 } from "@adapttable/vue/adapter";
 import { Fragment, h, type VNode, type VNodeChild } from "vue";
 
@@ -20,7 +22,7 @@ import { nativePart, paint, part } from "./parts";
 export function QuasarMobile<TRow>({
   model,
   slots,
-  classNames: names = {},
+  classNames: names = NO_CLASS_NAMES,
 }: {
   readonly model: MobileCardsModel<TRow>;
   readonly slots: TableChromeSlots<TRow>;
@@ -140,8 +142,13 @@ export function QuasarMobile<TRow>({
           : null,
       ]
     );
+  // Each card in a component of its own: it redraws for its own changes.
+  const cardView = (item: TableRowModel<TRow>): VNode =>
+    tableRowView(item, { model, controls: slots, classNames: names }, () =>
+      card(item)
+    );
   const body = (slot: TableBodySlot<TRow>): VNode => {
-    if (slot.kind === "row") return card(slot.wiring);
+    if (slot.kind === "row") return cardView(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         requiredControl(
@@ -217,7 +224,9 @@ export function QuasarMobile<TRow>({
       class: ["adapttable-quasar-cards", names.cards],
     }),
     [
-      ...(model.bodySlots ? model.bodySlots.map(body) : model.rows.map(card)),
+      ...(model.bodySlots
+        ? model.bodySlots.map(body)
+        : model.rows.map(cardView)),
       summary,
     ]
   );

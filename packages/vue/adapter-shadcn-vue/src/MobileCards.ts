@@ -6,6 +6,7 @@ import {
   selectionCheckboxControl,
   type TableChromeClassNames,
   type TableChromeSlots,
+  tableRowView,
   type UseDataTableShellResult,
 } from "@adapttable/vue/adapter";
 import { Fragment, h, type VNode, type VNodeChild } from "vue";
@@ -191,9 +192,12 @@ export function ShadcnMobileCards<TRow>(props: {
           : null,
       ]
     );
+  // Each card in a component of its own: it redraws for its own changes.
+  const cardView = (row: MobileRow<TRow>): VNode =>
+    tableRowView(row, { model, controls, classNames: names }, () => card(row));
   const body = model.bodySlots
     ? model.bodySlots.map((slot) => {
-        if (slot.kind === "row") return card(slot.wiring);
+        if (slot.kind === "row") return cardView(slot.wiring);
         if (slot.kind === "group")
           return h(Fragment, { key: slot.key }, [
             required(
@@ -226,7 +230,7 @@ export function ShadcnMobileCards<TRow>(props: {
           [h("div", { "data-adapttable-part": parts.cell }, [slot.render?.()])]
         );
       })
-    : model.rows.map(card);
+    : model.rows.map(cardView);
   return h("div", mergeVueAttrs(model.attrs, { class: names.cards }), [
     ...body,
     model.summary

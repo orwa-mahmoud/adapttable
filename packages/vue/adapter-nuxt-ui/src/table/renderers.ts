@@ -12,6 +12,7 @@ import {
   extraUncoveredColSpans,
   groupedHeaderAlign,
   mergeVueAttrs,
+  NO_CLASS_NAMES,
   renderCell,
   renderContent,
   renderFooter,
@@ -19,6 +20,7 @@ import {
   selectionCheckboxControl,
   type TableChromeClassNames,
   type TableChromeSlots,
+  tableRowView,
 } from "@adapttable/vue/adapter";
 import {
   Comment,
@@ -113,7 +115,7 @@ function valueContent<TRow>(
 export function NuxtDesktopTable<TRow>({
   model,
   slots,
-  classNames: names = {},
+  classNames: names = NO_CLASS_NAMES,
 }: {
   readonly model: DesktopTableModel<TRow>;
   readonly slots: TableChromeSlots<TRow>;
@@ -441,8 +443,13 @@ export function NuxtDesktopTable<TRow>({
         ])
       : content;
   };
+  // Each row in a component of its own: it redraws for its own changes.
+  const rowView = (item: TableRowModel<TRow>): VNode =>
+    tableRowView(item, { model, controls: slots, classNames: names }, () =>
+      row(item)
+    );
   const body = (slot: TableBodySlot<TRow>): VNodeChild => {
-    if (slot.kind === "row") return row(slot.wiring);
+    if (slot.kind === "row") return rowView(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         required(
@@ -541,7 +548,7 @@ export function NuxtDesktopTable<TRow>({
       tablePart(
         "tbody",
         { class: names.tbody, "data-adapttable-part": "tbody" },
-        model.bodySlots ? model.bodySlots.map(body) : model.rows.map(row)
+        model.bodySlots ? model.bodySlots.map(body) : model.rows.map(rowView)
       ),
       summary,
     ]
@@ -551,7 +558,7 @@ export function NuxtDesktopTable<TRow>({
 export function NuxtMobileCards<TRow>({
   model,
   slots,
-  classNames: names = {},
+  classNames: names = NO_CLASS_NAMES,
 }: {
   readonly model: MobileCardsModel<TRow>;
   readonly slots: TableChromeSlots<TRow>;
@@ -656,8 +663,13 @@ export function NuxtMobileCards<TRow>({
           : null,
       ]
     );
+  // Each card in a component of its own: it redraws for its own changes.
+  const cardView = (item: TableRowModel<TRow>): VNode =>
+    tableRowView(item, { model, controls: slots, classNames: names }, () =>
+      card(item)
+    );
   const body = (slot: TableBodySlot<TRow>): VNodeChild => {
-    if (slot.kind === "row") return card(slot.wiring);
+    if (slot.kind === "row") return cardView(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         required(
@@ -739,7 +751,7 @@ export function NuxtMobileCards<TRow>({
       )
     : null;
   return h("div", mergeVueAttrs(model.attrs, { class: names.cards }), [
-    ...(model.bodySlots ? model.bodySlots.map(body) : model.rows.map(card)),
+    ...(model.bodySlots ? model.bodySlots.map(body) : model.rows.map(cardView)),
     summary,
   ]);
 }

@@ -9,6 +9,7 @@ import {
   type DataTableSlots,
   DataTableSurfaceChrome,
   defaultConfirm,
+  keepTableControls,
   renderFeatureSlot,
   type TableChromeSlots,
   useDataTableShell,
@@ -132,6 +133,14 @@ function controls(): TableChromeSlots<TRow> {
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const rootElement = shallowRef<HTMLElement | null>(null);
 const scrollElement = shallowRef<HTMLElement | null>(null);
 const surface = {
@@ -163,7 +172,7 @@ function setScrollElement(element: HTMLElement | null): void {
       ...props,
       searchable,
     }"
-    :slots="nativeSurfaceControls(controls())"
+    :slots="nativeSurfaceControls(tableControls())"
     :content="slots"
     :root-ref="setRootElement"
     :scroll-ref="setScrollElement"

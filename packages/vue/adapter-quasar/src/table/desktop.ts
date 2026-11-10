@@ -12,12 +12,14 @@ import {
   extraUncoveredColSpans,
   groupedHeaderAlign,
   mergeVueAttrs,
+  NO_CLASS_NAMES,
   renderContent,
   renderFooter,
   renderHeader,
   selectionCheckboxControl,
   type TableChromeClassNames,
   type TableChromeSlots,
+  tableRowView,
 } from "@adapttable/vue/adapter";
 import {
   Comment,
@@ -51,7 +53,7 @@ function hasContent(content: VNodeChild): boolean {
 export function QuasarDesktop<TRow>({
   model,
   slots,
-  classNames: names = {},
+  classNames: names = NO_CLASS_NAMES,
 }: {
   readonly model: DesktopTableModel<TRow>;
   readonly slots: TableChromeSlots<TRow>;
@@ -375,8 +377,13 @@ export function QuasarDesktop<TRow>({
           )
         : null,
     ]);
+  // Each row in a component of its own: it redraws for its own changes.
+  const rowView = (item: TableRowModel<TRow>): VNode =>
+    tableRowView(item, { model, controls: slots, classNames: names }, () =>
+      row(item)
+    );
   const body = (slot: TableBodySlot<TRow>): VNode => {
-    if (slot.kind === "row") return row(slot.wiring);
+    if (slot.kind === "row") return rowView(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         requiredControl(
@@ -473,7 +480,7 @@ export function QuasarDesktop<TRow>({
         h(
           "tbody",
           { "data-adapttable-part": "tbody", class: names.tbody },
-          model.bodySlots ? model.bodySlots.map(body) : model.rows.map(row)
+          model.bodySlots ? model.bodySlots.map(body) : model.rows.map(rowView)
         ),
         summary,
       ]

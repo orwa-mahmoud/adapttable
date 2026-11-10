@@ -6,12 +6,14 @@ import type {
 import {
   EXTRA_ROW_PARTS,
   mergeVueAttrs,
+  NO_CLASS_NAMES,
   renderFooter,
   selectionCheckboxControl,
   type TableChromeSlots,
+  tableRowView,
 } from "@adapttable/vue/adapter";
 import { NCard } from "naive-ui";
-import { Fragment, h, type VNodeChild } from "vue";
+import { Fragment, h, type VNode, type VNodeChild } from "vue";
 
 import type { DataTableClassNames } from "../types";
 import { naiveCellContent, requireControl } from "./content";
@@ -23,7 +25,7 @@ export function NaiveMobileCards<TRow>(props: {
   readonly controls: TableChromeSlots<TRow>;
   readonly classNames?: DataTableClassNames;
 }): VNodeChild {
-  const { model, controls, classNames: names = {} } = props;
+  const { model, controls, classNames: names = NO_CLASS_NAMES } = props;
   const card = (row: TableRowModel<TRow>) =>
     naiveElement(
       NCard,
@@ -127,8 +129,13 @@ export function NaiveMobileCards<TRow>(props: {
           : null,
       ]
     );
+  // Each card in a component of its own: it redraws for its own changes.
+  const cardView = (item: TableRowModel<TRow>): VNode =>
+    tableRowView(item, { model, controls: controls, classNames: names }, () =>
+      card(item)
+    );
   const body = (slot: TableBodySlot<TRow>): VNodeChild => {
-    if (slot.kind === "row") return card(slot.wiring);
+    if (slot.kind === "row") return cardView(slot.wiring);
     if (slot.kind === "group")
       return h(Fragment, { key: slot.key }, [
         requireControl(
@@ -160,7 +167,7 @@ export function NaiveMobileCards<TRow>(props: {
   };
   const summary = model.summary;
   return h("div", mergeVueAttrs(model.attrs, { class: names.cards }), [
-    ...(model.bodySlots ? model.bodySlots.map(body) : model.rows.map(card)),
+    ...(model.bodySlots ? model.bodySlots.map(body) : model.rows.map(cardView)),
     summary
       ? naiveElement(
           NCard,

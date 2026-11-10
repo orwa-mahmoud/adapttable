@@ -456,9 +456,16 @@ describe("tree and detail", () => {
     ]);
     const missing = controls();
     delete (missing as { RowDetailToggle?: unknown }).RowDetailToggle;
-    expect(() =>
-      DesktopTableChrome({ model: shell.desktop.value, slots: missing })
-    ).toThrow("RowDetailToggle");
+    // Each row draws in a component of its own, so the missing control
+    // fails the render that draws the row.
+    await expect(
+      renderToString(
+        createSSRApp({
+          render: () =>
+            DesktopTableChrome({ model: shell.desktop.value, slots: missing }),
+        })
+      )
+    ).rejects.toThrow("RowDetailToggle");
     const html = await renderToString(
       createSSRApp({
         render: () =>

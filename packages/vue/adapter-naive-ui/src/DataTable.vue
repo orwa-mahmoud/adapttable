@@ -11,6 +11,7 @@ import {
   defaultConfirm,
   GROUP_ROW,
   groupRowSlotKey,
+  keepTableControls,
   provideDataTableClassNames,
   renderFeatureSlot,
   type TableChromeSlots,
@@ -146,6 +147,14 @@ function controls(): TableChromeSlots<TRow> {
     footer: slots.footer,
   };
 }
+/** One controls object while the host's slots stay the same. */
+const tableControls = keepTableControls(controls, (kept) => [
+  kept.card,
+  kept.cell,
+  kept.header,
+  kept.headerActions,
+  kept.footer,
+]);
 const Render = () =>
   naiveDirection(shell.table.dir.value, () =>
     h(DataTableSurfaceChrome<TRow>, {
@@ -164,7 +173,7 @@ const Render = () =>
         isFetching,
         classNames: names.value,
       },
-      slots: naiveSurfaceControls(controls(), shell.density.value),
+      slots: naiveSurfaceControls(tableControls(), shell.density.value),
       content: slots,
       rootRef: (element: HTMLElement | null) => {
         root.value = element;

@@ -2,10 +2,12 @@ import {
   EXTRA_ROW_PARTS,
   mergeVueAttrs,
   MobileSummaryChrome,
+  NO_CLASS_NAMES,
   renderCell,
   selectionCheckboxControl,
   type TableChromeClassNames,
   type TableChromeSlots,
+  tableRowView,
   type UseDataTableShellResult,
 } from "@adapttable/vue/adapter";
 import { Fragment, h, type VNode, type VNodeChild } from "vue";
@@ -31,7 +33,7 @@ export function ElementMobileCards<TRow>(props: {
   readonly controls: TableChromeSlots<TRow>;
   readonly classNames?: TableChromeClassNames;
 }): VNodeChild {
-  const { model, controls, classNames: names = {} } = props;
+  const { model, controls, classNames: names = NO_CLASS_NAMES } = props;
   const cellContent = (
     cell: MobileCell<TRow>,
     row: MobileRow<TRow>
@@ -191,9 +193,12 @@ export function ElementMobileCards<TRow>(props: {
         ],
       }
     );
+  // Each card in a component of its own: it redraws for its own changes.
+  const cardView = (row: MobileRow<TRow>): VNode =>
+    tableRowView(row, { model, controls, classNames: names }, () => card(row));
   const body = model.bodySlots
     ? model.bodySlots.map((slot) => {
-        if (slot.kind === "row") return card(slot.wiring);
+        if (slot.kind === "row") return cardView(slot.wiring);
         if (slot.kind === "group")
           return h(Fragment, { key: slot.key }, [
             required(
@@ -232,7 +237,7 @@ export function ElementMobileCards<TRow>(props: {
           }
         );
       })
-    : model.rows.map(card);
+    : model.rows.map(cardView);
   return h("div", mergeVueAttrs(model.attrs, { class: names.cards }), [
     ...body,
     model.summary
