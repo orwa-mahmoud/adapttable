@@ -335,12 +335,19 @@ export function createTableViewStore(
   );
   const initialSearch = adapter.getSearch();
   let initialOverrides: ViewOverrides = {};
+  /**
+   * The configuration reads use. A binding configures while it renders, so
+   * a new one is kept here and reaches the slice with the next action.
+   */
+  let configured: TableViewStateConfig = {};
+  let configPending = false;
   // The configuration and the URL's overrides are the store's starting
   // state: creating the store changes nothing anyone reads.
   const store = createTableStore((writer) => {
     const configure = configureView(config);
     configure.reduce(writer, configure.payload);
-    initialOverrides = overridesOf(initialSearch, writer.read(VIEW_CONFIG));
+    configured = writer.read(VIEW_CONFIG);
+    initialOverrides = overridesOf(initialSearch, configured);
     const start = replaceOverrides(initialOverrides);
     start.reduce(writer, start.payload);
   });
@@ -357,7 +364,7 @@ export function createTableViewStore(
     const search = adapter.getSearch();
     if (!rereadUrl && search === synced.search) return;
     rereadUrl = false;
-    const overrides = overridesOf(search, store.read(VIEW_CONFIG));
+    const overrides = overridesOf(search, configured);
     synced = { search, overrides };
     pulling = true;
     try {
@@ -402,9 +409,17 @@ export function createTableViewStore(
     };
   };
 
+  /** The configuration a binding set since the last action, into the slice. */
+  const applyConfig = (): void => {
+    if (!configPending) return;
+    configPending = false;
+    store.dispatch(configureView(configured));
+  };
+
   const act =
     <TArgs extends readonly unknown[]>(run: (...args: TArgs) => void) =>
     (...args: TArgs): void => {
+      applyConfig();
       pull();
       run(...args);
     };
@@ -412,19 +427,17 @@ export function createTableViewStore(
   return {
     getSnapshot() {
       const search = adapter.getSearch();
-      const current = store.read(VIEW_CONFIG);
       // The URL moved ahead of the store and nobody has read it back yet:
       // answer from the URL without writing the store.
       if (rereadUrl || search !== synced.search) {
-        return urlViewOf(overridesOf(search, current), current);
+        return urlViewOf(overridesOf(search, configured), configured);
       }
-      return viewOf(store.read(VIEW_OVERRIDES), current);
+      return viewOf(store.read(VIEW_OVERRIDES), configured);
     },
     getServerSnapshot: () => {
-      const current = store.read(VIEW_CONFIG);
       return serverViewOf(
-        overridesOf(source.serverSearch?.() ?? "", current),
-        current
+        overridesOf(source.serverSearch?.() ?? "", configured),
+        configured
       );
     },
     subscribe(listener) {
@@ -435,12 +448,14 @@ export function createTableViewStore(
         release();
       };
     },
-    // A binding configures while it renders, so this tells nobody: the next
-    // read derives the view with the new defaults. Reducers read the slice.
+    // A binding configures while it renders, so this writes no store: reads
+    // derive the view with the new defaults at once, and the next action
+    // carries them into the slice its reducers read.
     configure(next) {
-      const previous = store.read(VIEW_CONFIG);
+      const previous = configured;
       if (sameViewConfig(previous, next)) return;
-      store.dispatch(configureView(next));
+      configured = next;
+      configPending = true;
       if (
         sameItems(previous.numberExtraKeys ?? [], next.numberExtraKeys ?? []) &&
         sameItems(previous.arrayExtraKeys ?? [], next.arrayExtraKeys ?? [])

@@ -17,6 +17,8 @@ import {
 import { useDataTableShell } from "../src/useDataTableShell";
 
 const writes: string[] = [];
+// Every frame, so a write made deep inside a render still shows the render.
+Error.stackTraceLimit = Infinity;
 
 vi.mock("../../../shared/core/src/state/tableStore", async (load) => {
   const actual = await load<typeof TableStoreModule>();
@@ -63,6 +65,7 @@ const inRender = () =>
 describe("a Vue table render", () => {
   it("writes none of the table's stores", async () => {
     const selectedIds = shallowRef<string[]>([]);
+    const limit = shallowRef(10);
     const slots: TableChromeSlots<Row> = {
       SortButton: ({ attrs, content }) => h("button", attrs, [content]),
       SelectionCheckbox: (control) =>
@@ -85,6 +88,7 @@ describe("a Vue table render", () => {
             urlAdapter: adapter,
             selectable: true,
             selectedIds: selectedIds.value,
+            defaults: { limit: limit.value },
             features: [rowPinning()],
           }));
           return () =>
@@ -98,6 +102,9 @@ describe("a Vue table render", () => {
 
     selectedIds.value = ["a"];
     await nextTick();
+    limit.value = 20;
+    await nextTick();
+    expect(shell!.source.value.limit).toBe(20);
     shell!.table.toggleSort("name");
     await nextTick();
     shell!.source.value.setSearch("be");

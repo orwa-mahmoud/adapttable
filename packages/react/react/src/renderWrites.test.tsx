@@ -21,6 +21,8 @@ import {
 } from "./useDataTableShell";
 
 const writes: string[] = [];
+// Every frame, so a write made deep inside a render still shows the render.
+Error.stackTraceLimit = Infinity;
 
 vi.mock("../../../shared/core/src/state/tableStore", async (load) => {
   const actual = await load<typeof TableStoreModule>();
@@ -59,13 +61,17 @@ const rowKey = (row: Row) => row.id;
 const noForm = () => null;
 
 /** Writes made while React was rendering a component. */
-const inRender = () => writes.filter((stack) => stack.includes("renderWithHooks"));
+const inRender = () =>
+  writes.filter((stack) => stack.includes("renderWithHooks"));
 
 describe("a React table render", () => {
   it("writes none of the table's stores", () => {
     const adapter = createMemoryAdapter("");
     let view: DataTableShellResult<Row> | undefined;
-    function Table(props: { readonly selectedIds: readonly string[] }) {
+    function Table(props: {
+      readonly selectedIds: readonly string[];
+      readonly limit: number;
+    }) {
       const shellProps = applyTableFeatures({
         features: [columnMenu(), rowPinning()],
         data: ROWS,
@@ -75,6 +81,7 @@ describe("a React table render", () => {
         selectable: true,
         selectedIds: props.selectedIds,
         onSelectedIdsChange: () => undefined,
+        defaults: { limit: props.limit },
       });
       return (
         <FeatureProviders props={shellProps}>
@@ -94,11 +101,13 @@ describe("a React table render", () => {
       );
     }
 
-    const { rerender } = render(<Table selectedIds={[]} />);
-    rerender(<Table selectedIds={["a"]} />);
+    const { rerender } = render(<Table selectedIds={[]} limit={10} />);
+    rerender(<Table selectedIds={["a"]} limit={10} />);
+    rerender(<Table selectedIds={["a"]} limit={20} />);
     act(() => view!.table.toggleSort("name"));
     act(() => view!.source.setSearch("bo"));
     act(() => view!.chrome.columnLayout.setWidth("name", 180));
+    expect(view!.source.limit).toBe(20);
 
     expect(writes.length).toBeGreaterThan(0);
     expect(inRender()).toEqual([]);

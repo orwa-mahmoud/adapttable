@@ -18,6 +18,8 @@ import { injectFrontendData } from "./source/frontendData";
 import { ADAPTTABLE_URL_ADAPTER } from "./url/tableUrlState";
 
 const writes: string[] = [];
+// Every frame, so a write made deep inside a render still shows the render.
+Error.stackTraceLimit = Infinity;
 
 vi.mock("../../../shared/core/src/state/tableStore", async (load) => {
   const actual = await load<typeof TableStoreModule>();
@@ -71,10 +73,12 @@ const COLUMNS: ColumnDef<Person>[] = [
 })
 class Table {
   readonly controlled = signal<readonly string[]>([]);
+  readonly defaults = signal({ limit: 10 });
   readonly source = injectFrontendData({
     data: signal(PEOPLE),
     columns: COLUMNS,
     paginationMode: "paged",
+    defaults: this.defaults,
   });
   readonly selection = injectRowSelection({
     rows: computed(() => this.source().rows),
@@ -112,6 +116,9 @@ describe("an Angular table render", () => {
 
     table.controlled.set(["1"]);
     await fixture.whenStable();
+    table.defaults.set({ limit: 20 });
+    await fixture.whenStable();
+    expect(table.source().limit).toBe(20);
     table.table.toggleSort("name");
     await fixture.whenStable();
     table.source().setSearch("gr");
