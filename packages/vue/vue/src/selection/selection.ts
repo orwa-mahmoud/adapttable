@@ -16,6 +16,7 @@ import {
   computed,
   type ComputedRef,
   type MaybeRefOrGetter,
+  shallowReactive,
   shallowRef,
   toValue,
   watch,
@@ -140,7 +141,18 @@ export function useRowSelection<TRow>(
     if (controlled.value === undefined) own.value = next;
     options.value.onSelectionChange?.([...next]);
   };
-  const isSelected = (id: string): boolean => selectedIds.value.has(id);
+  // Each row reads its own membership, so a change to one row's selection
+  // re-runs that row's readers and no other row's.
+  const membership = shallowReactive(new Set<string>());
+  watch(
+    selectedIds,
+    (next) => {
+      for (const id of membership) if (!next.has(id)) membership.delete(id);
+      for (const id of next) membership.add(id);
+    },
+    { flush: "sync", immediate: true }
+  );
+  const isSelected = (id: string): boolean => membership.has(id);
   const toggle = (id: string): void => commit(toggleId(selectedIds.value, id));
   const toggleAll = (): void =>
     commit(toggleIds(selectedIds.value, visibleIds.value));
