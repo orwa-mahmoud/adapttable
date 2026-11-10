@@ -27,6 +27,7 @@ import {
   FULLSCREEN_CONTROL,
   SAVED_VIEWS_CONTROL,
 } from "../viewControls/contracts";
+import { NO_CLASS_NAMES } from "./tableChrome";
 import { TableFooterChrome } from "./tableSummaryChrome";
 
 /** Required kit paint for the shared table surface. */
@@ -117,7 +118,7 @@ function contentSlot<TProps>(
 function bodyContent<TRow>(props: DataTableSurfaceChromeProps<TRow>): VNode {
   const { model: shell, options, slots, content } = props;
   const { table } = shell;
-  const names = options.classNames ?? {};
+  const names = options.classNames ?? NO_CLASS_NAMES;
   const labels = table.labels.value;
   const source = shell.source.value;
   const button = (attrs: Attrs, child: VNodeChild) =>
@@ -192,7 +193,7 @@ function toolbarContent<TRow>(
 ): VNodeChild {
   const { model: shell, options, slots, content } = props;
   const { table } = shell;
-  const names = options.classNames ?? {};
+  const names = options.classNames ?? NO_CLASS_NAMES;
   const labels = table.labels.value;
   const button = (attrs: Attrs, child: VNodeChild) =>
     slots.Button({ attrs, content: child });
@@ -307,7 +308,7 @@ export const DataTableSurfaceChrome = /* @__PURE__ */ Object.assign(
           `AdaptTable: DataTableSurfaceChrome requires the ${name} slot.`
         );
     const { table } = shell;
-    const names = options.classNames ?? {};
+    const names = options.classNames ?? NO_CLASS_NAMES;
     const labels = table.labels.value;
     const source = shell.source.value;
     const pagination = table.pagination.value;
