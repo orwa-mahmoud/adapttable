@@ -4167,12 +4167,12 @@
     {
       "name": "isEmptyFilterValue",
       "kind": "runtime",
-      "module": "url/serialize.ts",
+      "module": "state/viewState.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/serialize.ts#isEmptyFilterValue",
+      "identity": "state/viewState.ts#isEmptyFilterValue",
       "subpaths": ["."]
     },
     {
@@ -4453,12 +4453,12 @@
     {
       "name": "MAX_LIMIT",
       "kind": "runtime",
-      "module": "url/serialize.ts",
+      "module": "constants.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/serialize.ts#MAX_LIMIT",
+      "identity": "constants.ts#MAX_LIMIT",
       "subpaths": ["."]
     },
     {
@@ -8771,7 +8771,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "state/controllableStore.ts#ControllableControl",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ControllableStore",
@@ -8782,7 +8782,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "state/controllableStore.ts#ControllableStore",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "ControllableStoreOptions",
@@ -8793,7 +8793,7 @@
       "forward": true,
       "deprecated": false,
       "identity": "state/controllableStore.ts#ControllableStoreOptions",
-      "subpaths": ["."]
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "CountFilterState",
@@ -11790,23 +11790,23 @@
     {
       "name": "TableViewState",
       "kind": "type",
-      "module": "url/viewStateStore.ts",
+      "module": "state/viewState.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/viewStateStore.ts#TableViewState",
+      "identity": "state/viewState.ts#TableViewState",
       "subpaths": ["."]
     },
     {
       "name": "TableViewStateConfig",
       "kind": "type",
-      "module": "url/viewStateStore.ts",
+      "module": "state/viewState.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "url/viewStateStore.ts#TableViewStateConfig",
+      "identity": "state/viewState.ts#TableViewStateConfig",
       "subpaths": ["."]
     },
     {
@@ -12789,6 +12789,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "clearSelection",
+      "kind": "runtime",
+      "module": "state/selectionState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/selectionState.ts#clearSelection",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "COLUMN_GROUP_ID_SEP",
       "kind": "runtime",
       "module": "columns/headerGroups.ts",
@@ -13061,6 +13072,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/slotContract.ts#CONTEXT_MENU_LIVE",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "controllableSlice",
+      "kind": "runtime",
+      "module": "state/controllableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/controllableStore.ts#controllableSlice",
       "subpaths": ["./binding"]
     },
     {
@@ -13537,6 +13559,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "createTableStore",
+      "kind": "runtime",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#createTableStore",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "CURRENT_MATCH_CELL_STYLE",
       "kind": "runtime",
       "module": "style/cellDisplay.ts",
@@ -13545,6 +13578,28 @@
       "forward": true,
       "deprecated": false,
       "identity": "style/cellDisplay.ts#CURRENT_MATCH_CELL_STYLE",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "defineAction",
+      "kind": "runtime",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#defineAction",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "defineSlice",
+      "kind": "runtime",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#defineSlice",
       "subpaths": ["./binding"]
     },
     {
@@ -15242,6 +15297,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "replaceSelection",
+      "kind": "runtime",
+      "module": "state/selectionState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/selectionState.ts#replaceSelection",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "resetColumnLayout",
       "kind": "runtime",
       "module": "columns/columnMenuModel.ts",
@@ -15517,6 +15583,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "rowSelectedReader",
+      "kind": "runtime",
+      "module": "state/selectionState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/selectionState.ts#rowSelectedReader",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "rowSourceIndex",
       "kind": "runtime",
       "module": "virtual/virtualTableModel.ts",
@@ -15635,6 +15712,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "style/cellDisplay.ts#SELECTED_CELL_OUTLINE",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "SELECTED_IDS",
+      "kind": "runtime",
+      "module": "state/selectionState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/selectionState.ts#SELECTED_IDS",
       "subpaths": ["./binding"]
     },
     {
@@ -15913,6 +16001,28 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "toggleRowSelected",
+      "kind": "runtime",
+      "module": "state/selectionState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/selectionState.ts#toggleRowSelected",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "toggleRowsSelected",
+      "kind": "runtime",
+      "module": "state/selectionState.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/selectionState.ts#toggleRowsSelected",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "TOOLBAR_EXTRAS",
       "kind": "runtime",
       "module": "features/slotContract.ts",
@@ -16053,6 +16163,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "virtual/viewportState.ts#withSourceIndices",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ActionDefinition",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#ActionDefinition",
       "subpaths": ["./binding"]
     },
     {
@@ -18520,6 +18641,39 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "SliceCell",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#SliceCell",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "SliceKey",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#SliceKey",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "SliceRead",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#SliceRead",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "SlotFill",
       "kind": "type",
       "module": "features/featureKeys.ts",
@@ -18605,6 +18759,39 @@
       "forward": true,
       "deprecated": false,
       "identity": "focus/statusBarContract.ts#StatusBarSlots",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "StoreReader",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#StoreReader",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "StoreWriter",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#StoreWriter",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "TableAction",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#TableAction",
       "subpaths": ["./binding"]
     },
     {
@@ -18924,6 +19111,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "assistant/assistantSlots.ts#TableAssistantWindowProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "TableStore",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#TableStore",
       "subpaths": ["./binding"]
     },
     {
