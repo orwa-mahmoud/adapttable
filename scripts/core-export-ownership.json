@@ -13592,6 +13592,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "defineFeature",
+      "kind": "runtime",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#defineFeature",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "defineSlice",
       "kind": "runtime",
       "module": "state/tableStore.ts",
@@ -14208,6 +14219,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "featureState",
+      "kind": "runtime",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#featureState",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "featureStateKey",
       "kind": "runtime",
       "module": "features/featureKeys.ts",
@@ -14777,6 +14799,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "style/cellDisplay.ts#isCurrentMatchCell",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "isDefinedFeature",
+      "kind": "runtime",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#isDefinedFeature",
       "subpaths": ["./binding"]
     },
     {
@@ -16188,6 +16221,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "ActionPayload",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#ActionPayload",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ActiveFilterChipsSlotProps",
       "kind": "type",
       "module": "filters/activeFilterChips.ts",
@@ -16903,6 +16947,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "DefinedFeature",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#DefinedFeature",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "DensityFeatureState",
       "kind": "type",
       "module": "layout/densityContract.ts",
@@ -17167,6 +17222,39 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "FeatureActionMap",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#FeatureActionMap",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FeatureActions",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#FeatureActions",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FeatureActionsOf",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#FeatureActionsOf",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FeatureApplyInput",
       "kind": "type",
       "module": "features/featurePatch.ts",
@@ -17175,6 +17263,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/featurePatch.ts#FeatureApplyInput",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FeatureContract",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#FeatureContract",
       "subpaths": ["./binding"]
     },
     {
@@ -17219,6 +17318,39 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/liveFeatureHost.ts#FeatureSetup",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FeatureSliceMap",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#FeatureSliceMap",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FeatureSlices",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#FeatureSlices",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FeatureSlicesOf",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#FeatureSlicesOf",
       "subpaths": ["./binding"]
     },
     {
@@ -17882,6 +18014,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "IntersectionOf",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#IntersectionOf",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "KeyedWindowSlotProps",
       "kind": "type",
       "module": "features/slotContract.ts",
@@ -18011,6 +18154,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "editing/multiSelectEditorContract.ts#MultiSelectEditorSlots",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "NoFeatureState",
+      "kind": "type",
+      "module": "features/defineFeature.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/defineFeature.ts#NoFeatureState",
       "subpaths": ["./binding"]
     },
     {

@@ -789,6 +789,21 @@ explains which import a program changes. This list is the reference.
   operations the rows on screen were computed with: `remember` each request's
   operations, `settle` from the response's provenance, read `current()`.
 
+### Defining a feature
+
+These come from `@adapttable/core/binding`.
+
+- `defineFeature(contract)` — one contract per feature (`FeatureContract`): its
+  `id`, the table `options` it sets, the store `slices` and named `actions` it
+  adds, the `labels` it needs and the `urlKeys` it owns. The result
+  (`DefinedFeature`) composes into `features` like any patch feature.
+- `featureState(features)` — the slices and actions of a table's features,
+  typed as `FeatureSlices<TFeatures>` and `FeatureActions<TFeatures>`: exactly
+  the installed features' entries and no other feature's.
+  `isDefinedFeature` tells a defined feature from a plain patch feature;
+  `FeatureSliceMap`, `FeatureActionMap`, `ActionPayload`, `FeatureSlicesOf`,
+  `FeatureActionsOf`, `IntersectionOf` and `NoFeatureState` name the parts.
+
 ### Table store
 
 These come from `@adapttable/core/binding`.

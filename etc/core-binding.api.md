@@ -37,6 +37,9 @@ export interface ActionDefinition<TPayload> {
 }
 
 // @public
+export type ActionPayload<TAction> = TAction extends ActionDefinition<infer TPayload> ? TPayload : never;
+
+// @public
 export const ACTIVE_FILTER_CHIPS: FeatureSlotKey<ActiveFilterChipsSlotProps>;
 
 // @public
@@ -1907,6 +1910,17 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 export function defineAction<TPayload>(type: string, reduce: (store: StoreWriter, payload: TPayload) => void): ActionDefinition<TPayload>;
 
 // @public
+export interface DefinedFeature<TRow = unknown, TSlices extends FeatureSliceMap = NoFeatureState, TActions extends FeatureActionMap<TActions> = NoFeatureState> extends PatchFeature<TRow> {
+    readonly actions: TActions;
+    readonly labels: Readonly<Record<string, string>>;
+    readonly slices: TSlices;
+    readonly urlKeys: readonly string[];
+}
+
+// @public
+export function defineFeature<TRow = unknown, TSlices extends FeatureSliceMap = NoFeatureState, TActions extends FeatureActionMap<TActions> = NoFeatureState>(contract: FeatureContract<TRow, TSlices, TActions>): DefinedFeature<TRow, TSlices, TActions>;
+
+// @public
 export function defineSlice<T>(name: string, initial: () => T, equals?: (a: T, b: T) => boolean): SliceKey<T>;
 
 // @public
@@ -2968,9 +2982,28 @@ export type FacetCounts = readonly ChecklistValue[];
 export type FacetMap = Readonly<Record<string, FacetCounts>>;
 
 // @public
+export type FeatureActionMap<TActions> = { readonly [K in keyof TActions]: ActionDefinition<ActionPayload<TActions[K]>>; };
+
+// @public
+export type FeatureActions<TFeatures extends readonly unknown[]> = IntersectionOf<FeatureActionsOf<TFeatures[number]>>;
+
+// @public
+export type FeatureActionsOf<TFeature> = TFeature extends DefinedFeature<never, FeatureSliceMap, infer TActions> ? TActions : NoFeatureState;
+
+// @public
 export type FeatureApplyInput<TRow = unknown> = object & {
     readonly __row?: TRow;
 };
+
+// @public
+export interface FeatureContract<TRow = unknown, TSlices extends FeatureSliceMap = NoFeatureState, TActions extends FeatureActionMap<TActions> = NoFeatureState> {
+    readonly actions?: TActions;
+    readonly id: string;
+    readonly labels?: Readonly<Record<string, string>>;
+    readonly options?: (input: FeatureApplyInput<TRow>) => FeaturePatch<TRow>;
+    readonly slices?: TSlices;
+    readonly urlKeys?: readonly string[];
+}
 
 // @public
 export interface FeatureHostState<TRow = unknown> {
@@ -3032,6 +3065,15 @@ export interface FeatureSetup<TRow, TPanel extends SidePanelEntry> {
 }
 
 // @public
+export type FeatureSliceMap = Readonly<Record<string, SliceKey<unknown>>>;
+
+// @public
+export type FeatureSlices<TFeatures extends readonly unknown[]> = IntersectionOf<FeatureSlicesOf<TFeatures[number]>>;
+
+// @public
+export type FeatureSlicesOf<TFeature> = TFeature extends DefinedFeature<never, infer TSlices> ? TSlices : NoFeatureState;
+
+// @public
 export interface FeatureSlotKey<TProps> {
     readonly __props?: (value: TProps) => void;
     readonly id: string;
@@ -3042,6 +3084,12 @@ export interface FeatureSlotKey<TProps> {
 export function featureSlotKey<TProps>(id: string, options?: {
     readonly single?: boolean;
 }): FeatureSlotKey<TProps>;
+
+// @public
+export function featureState<const TFeatures extends readonly unknown[]>(features: TFeatures): {
+    readonly slices: FeatureSlices<TFeatures>;
+    readonly actions: FeatureActions<TFeatures>;
+};
 
 // @public
 export interface FeatureStateKey<T> {
@@ -4257,6 +4305,9 @@ export function insertExtrasBeforeRows<TRow>(rows: readonly TRow[], extraRows: r
 } | ExtraEntry)[];
 
 // @public
+export type IntersectionOf<TUnion> = (TUnion extends unknown ? (part: TUnion) => void : never) extends ((all: infer TAll) => void) ? TAll : never;
+
+// @public
 export function invokeCleanups(cleanups: readonly (() => void)[]): readonly unknown[];
 
 // @public
@@ -4273,6 +4324,9 @@ export function isColumnGroupSummaryKey(key: string): boolean;
 
 // @public
 export function isCurrentMatchCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
+
+// @public
+export function isDefinedFeature(feature: unknown): feature is DefinedFeature<unknown, FeatureSliceMap, Record<string, never>>;
 
 // @public
 export function isExtraEntry(entry: object): entry is ExtraEntry;
@@ -4526,6 +4580,9 @@ export interface NeutralTable<TRow = unknown> {
     // (undocumented)
     readonly tableId: string;
 }
+
+// @public
+export type NoFeatureState = Readonly<Record<never, never>>;
 
 // @public
 export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[], summaryTop?: readonly TRow[], summaryBottom?: readonly TRow[]): readonly VirtualTableRow<TRow>[];
@@ -5930,7 +5987,7 @@ export interface SliceCell<T> {
 // @public
 export interface SliceKey<T> {
     readonly cells: WeakMap<object, SliceCell<T>>;
-    readonly equals: (a: T, b: T) => boolean;
+    equals(a: T, b: T): boolean;
     readonly initial: () => T;
     // (undocumented)
     readonly name: string;

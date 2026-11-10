@@ -31,8 +31,11 @@ export interface SliceKey<T> {
   readonly name: string;
   /** The slice's starting value. */
   readonly initial: () => T;
-  /** Whether two values of the slice are the same; `Object.is` by default. */
-  readonly equals: (a: T, b: T) => boolean;
+  /**
+   * Whether two values of the slice are the same; `Object.is` by default.
+   * A method, so a map of slices may hold slices of any value type.
+   */
+  equals(a: T, b: T): boolean;
   /** Each store's cell for this slice, by the store's private token. */
   readonly cells: WeakMap<object, SliceCell<T>>;
 }

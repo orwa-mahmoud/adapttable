@@ -1010,6 +1010,25 @@ export { sameRows } from "./engine/sameRows";
 export { isRecord } from "./utils/isRecord";
 export { retainItems, sameItems } from "./utils/sameItems";
 
+// One contract per feature: the options, store slices, actions, labels and
+// URL params it adds, and the types a table's feature list composes.
+export {
+  type ActionPayload,
+  type DefinedFeature,
+  defineFeature,
+  type FeatureActionMap,
+  type FeatureActions,
+  type FeatureActionsOf,
+  type FeatureContract,
+  type FeatureSliceMap,
+  type FeatureSlices,
+  type FeatureSlicesOf,
+  featureState,
+  type IntersectionOf,
+  isDefinedFeature,
+  type NoFeatureState,
+} from "./features/defineFeature";
+
 // One store per table: typed slices, named actions and selector readers.
 // The view state, the selection and every controllable piece of row state
 // are slices of it.
