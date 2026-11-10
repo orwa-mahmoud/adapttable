@@ -163,7 +163,11 @@ import {
   rowReorderControlKey,
   rowReorderModelKey,
 } from "./specialized/contracts";
-import { type MaybeRefOrGetterOptional, useScopeActivity } from "./store";
+import {
+  type MaybeRefOrGetterOptional,
+  useOptionFields,
+  useScopeActivity,
+} from "./store";
 import { useDataTable, type UseDataTableOptions } from "./useDataTable";
 import {
   DENSITY_CONTROL,
@@ -292,7 +296,8 @@ export function useDataTableShell<TRow>(
     normalizeFeatures(toValue(options.value.features) ?? [])
   );
   const patches = computed(() => featureOptionsOf(declarations.value));
-  const resolved = computed(() => {
+  // Read option by option: a change to one option reaches its readers only.
+  const resolved = useOptionFields(() => {
     const featureValues = patches.value;
     const explicitValues = Object.fromEntries(
       Object.entries(options.value).filter(([, value]) => value !== undefined)
@@ -1337,7 +1342,8 @@ export function useDataTableShell<TRow>(
     density,
     table,
     rowInventory,
-    options: resolved,
+    // Features watch the options as one value: a new object on any change.
+    options: computed(() => ({ ...resolved.value })),
     filterRuntime,
     featureHost: registered,
     state,

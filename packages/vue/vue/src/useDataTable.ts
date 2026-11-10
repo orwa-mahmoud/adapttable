@@ -73,6 +73,7 @@ import { useViewportMobile } from "./source/sourceLifecycle";
 import {
   type MaybeRefOrGetterOptional,
   requireScope,
+  useOptionFields,
   useScopeActivity,
 } from "./store";
 export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
@@ -110,7 +111,8 @@ export function useDataTable<TRow>(
   input: MaybeRefOrGetter<UseDataTableOptions<TRow>>
 ) {
   requireScope("useDataTable");
-  const options = computed(() => toValue(input));
+  // Read option by option: a change to one option reaches its readers only.
+  const options = useOptionFields(() => toValue(input));
   const active = useScopeActivity();
   const source = computed(() => toValue(options.value.source));
   const rows = computed(() => source.value.rows);

@@ -111,6 +111,33 @@ describe("the body model under a selection change", () => {
   });
 });
 
+describe("a controlled selection change", () => {
+  it("keeps the body model when the host passes new ids", () => {
+    const ids = shallowRef<string[]>([]);
+    const scope = effectScope();
+    scopes.push(() => scope.stop());
+    const columns = [{ key: "id" }];
+    // The host hands the table a fresh options object with only the ids new.
+    const shell = scope.run(() =>
+      useDataTableShell<Row>(() => ({
+        data: rows,
+        columns,
+        rowKey,
+        selectable: true,
+        urlSync: false,
+        forceMobile: false,
+        selectedIds: ids.value,
+      }))
+    )!;
+    const desktop = shell.desktop.value;
+
+    ids.value = ["a"];
+
+    expect(shell.desktop.value).toBe(desktop);
+    expect(desktop.rows[0]?.attrs["aria-selected"]).toBe(true);
+  });
+});
+
 describe("drawing a selection change", () => {
   it.each([false, true])(
     "redraws only the row whose selection changed, mobile=%s",

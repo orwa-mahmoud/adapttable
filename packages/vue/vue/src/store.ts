@@ -1,5 +1,6 @@
 import {
   computed,
+  type ComputedRef,
   getCurrentInstance,
   getCurrentScope,
   type MaybeRefOrGetter,
@@ -8,6 +9,7 @@ import {
   onMounted,
   onScopeDispose,
   type Ref,
+  shallowReactive,
   shallowReadonly,
   type ShallowRef,
   shallowRef,
@@ -23,6 +25,30 @@ export type MaybeRefOrGetterOptional<T> =
 export interface ExternalStore<T> {
   readonly getSnapshot: () => T;
   readonly subscribe: (listener: () => void) => () => void;
+}
+
+/**
+ * Options read option by option: one object whose fields follow `source`,
+ * each changed only when its own value changes. A reader of one option is
+ * told only when that option changes, not when the host passes a new options
+ * object with the rest the same. @internal
+ */
+export function useOptionFields<T extends object>(
+  source: () => T
+): ComputedRef<T> {
+  const fields = shallowReactive({ ...source() });
+  watch(
+    source,
+    (next) => {
+      for (const key of Object.keys(fields))
+        if (!Object.hasOwn(next, key)) Reflect.deleteProperty(fields, key);
+      for (const [key, value] of Object.entries(next))
+        if (!Object.is(Reflect.get(fields, key), value))
+          Reflect.set(fields, key, value);
+    },
+    { flush: "sync" }
+  );
+  return computed(() => fields);
 }
 
 /** Require ownership for every resource created by a composable. @internal */
