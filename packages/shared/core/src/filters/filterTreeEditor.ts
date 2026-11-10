@@ -106,7 +106,7 @@ export function filterTreeOpLabel(
 }
 
 /** Widgets whose value is picked from a set rather than typed. */
-const CHOICE_WIDGETS: ReadonlySet<string> = new Set([
+const CHOICE_WIDGETS: ReadonlySet<string> = /* @__PURE__ */ new Set([
   "select",
   "multiSelect",
   "checklist",

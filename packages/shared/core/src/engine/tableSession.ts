@@ -194,7 +194,7 @@ const PASS_THROUGH_KEYS = [
 ] as const satisfies readonly (keyof EngineView<never>)[];
 
 /** The engine fields the incremental view reads under the same name. */
-const INCREMENTAL_KEYS = new Set<string>([
+const INCREMENTAL_KEYS = /* @__PURE__ */ new Set<string>([
   ...PASS_THROUGH_KEYS,
   "search",
   "groupBy",
@@ -284,7 +284,7 @@ export interface SessionBase {
   readonly data: readonly unknown[];
 }
 
-const SESSIONS = new WeakMap<object, SessionControls>();
+const SESSIONS = /* @__PURE__ */ new WeakMap<object, SessionControls>();
 
 /**
  * The evaluator `engine` will run once its pending candidate commits: the

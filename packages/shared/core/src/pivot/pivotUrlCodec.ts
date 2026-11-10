@@ -73,7 +73,7 @@ export interface PivotUrlState {
 }
 
 /** Segment heads the grammar already uses — not a measure name. */
-const RESERVED = new Set<string>([
+const RESERVED = /* @__PURE__ */ new Set<string>([
   ROWS,
   COLUMNS,
   SUBTOTALS,

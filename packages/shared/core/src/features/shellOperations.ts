@@ -155,7 +155,7 @@ export interface ShellOperationInput<TRow = unknown> {
   readonly print?: PrintContribution;
 }
 
-const shellOverlays = new WeakMap<object, object>();
+const shellOverlays = /* @__PURE__ */ new WeakMap<object, object>();
 
 /**
  * Remember the shell operations a live gate published for one chrome.

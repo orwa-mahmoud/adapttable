@@ -18,7 +18,7 @@ import {
  * `source` is the engine snapshot it was built from. `view` is the grouped
  * snapshot. Either one may be the view currently attached to the rows.
  */
-const groupedSnapshots = new WeakMap<
+const groupedSnapshots = /* @__PURE__ */ new WeakMap<
   object,
   { source: IncrementalView<unknown>; view: IncrementalView<unknown> }
 >();

@@ -447,7 +447,8 @@ export function evaluateFormula(
  *
  * @public
  */
-export const FORMULA_FUNCTIONS: readonly string[] = Object.keys(FUNCTIONS);
+export const FORMULA_FUNCTIONS: readonly string[] =
+  /* @__PURE__ */ Object.keys(FUNCTIONS);
 
 /**
  * How a value sorts, for a formula column's `sortValue`.

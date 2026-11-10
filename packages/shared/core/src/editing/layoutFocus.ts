@@ -1,4 +1,4 @@
-const pendingRoots = new WeakSet<Element>();
+const pendingRoots = /* @__PURE__ */ new WeakSet<Element>();
 
 const EDITOR = '[data-adapttable-part="edit-cell-editor"]';
 const ROOT = '[data-adapttable-part="root"]';

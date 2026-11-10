@@ -25,7 +25,7 @@ export type {
 } from "../contracts/columns";
 
 /** Ids that mean removal or "the host calculates this itself", never an offer. */
-const RESERVED_OPERATION_IDS = new Set(["none", "custom"]);
+const RESERVED_OPERATION_IDS = /* @__PURE__ */ new Set(["none", "custom"]);
 
 /**
  * One operation, resolved against a column.

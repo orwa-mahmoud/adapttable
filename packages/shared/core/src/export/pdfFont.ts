@@ -35,7 +35,7 @@ import { type Sfnt, subsetSfnt } from "./sfnt";
 export type PdfBody = string | Uint8Array;
 
 /** WinAnsi bytes for the characters Latin-1 does not share with CP1252. */
-const WIN1252 = new Map<number, number>([
+const WIN1252 = /* @__PURE__ */ new Map<number, number>([
   [0x20ac, 0x80],
   [0x201a, 0x82],
   [0x0192, 0x83],

@@ -148,7 +148,10 @@ export interface TableViewStore
 }
 
 /** Mounted namespaces per adapter, for the duplicate-urlKey dev warning. */
-const namespaceRegistry = new WeakMap<UrlStateAdapter, Map<string, number>>();
+const namespaceRegistry = /* @__PURE__ */ new WeakMap<
+  UrlStateAdapter,
+  Map<string, number>
+>();
 
 /** Stable default for the key registries. */
 const NO_KEYS: readonly string[] = [];
@@ -552,7 +555,8 @@ export interface UrlSliceStore<
   readonly flush: () => void;
 }
 
-const NOTHING_PENDING: unique symbol = Symbol("nothing pending");
+const NOTHING_PENDING: unique symbol =
+  /* @__PURE__ */ Symbol("nothing pending");
 
 /**
  * Create the store for one slice of view state.

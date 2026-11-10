@@ -109,9 +109,9 @@ function indexOfId<TRow>(
   return list.findIndex((row) => getRowId(row) === id);
 }
 
-const PATCH_LOGS = new WeakMap<WeakKey, RowPatchLog<unknown>>();
-const ROW_IDENTITIES = new WeakMap<WeakKey, object>();
-const PATCH_BASES = new WeakMap<WeakKey, object>();
+const PATCH_LOGS = /* @__PURE__ */ new WeakMap<WeakKey, RowPatchLog<unknown>>();
+const ROW_IDENTITIES = /* @__PURE__ */ new WeakMap<WeakKey, object>();
+const PATCH_BASES = /* @__PURE__ */ new WeakMap<WeakKey, object>();
 
 /** Check the exact pre-patch identity without retaining older row arrays. */
 export function rowPatchLogStartsAt<TRow>(

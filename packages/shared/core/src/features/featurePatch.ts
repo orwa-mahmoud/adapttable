@@ -105,8 +105,11 @@ export function featureLabelsOf(
   return node.list;
 }
 
-const applied = new WeakSet<object>();
-const appliedFeatures = new WeakMap<object, readonly PatchFeature[]>();
+const applied = /* @__PURE__ */ new WeakSet<object>();
+const appliedFeatures = /* @__PURE__ */ new WeakMap<
+  object,
+  readonly PatchFeature[]
+>();
 
 /**
  * The feature list that produced this resolved options object, if any.

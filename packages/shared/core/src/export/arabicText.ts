@@ -55,7 +55,7 @@ type FormSet =
   | readonly [isolated: number, final: number]
   | readonly [isolated: number, final: number, initial: number, medial: number];
 
-const ARABIC_FORMS = new Map<number, FormSet>([
+const ARABIC_FORMS = /* @__PURE__ */ new Map<number, FormSet>([
   [0x0621, [0xfe80]], // hamza
   [0x0622, [0xfe81, 0xfe82]], // alef with madda
   [0x0623, [0xfe83, 0xfe84]], // alef with hamza above
@@ -115,7 +115,10 @@ const ARABIC_FORMS = new Map<number, FormSet>([
  * and an alef side by side is simply not how the pair is written — so it
  * is the one ligature applied here.
  */
-const LAM_ALEF = new Map<number, readonly [isolated: number, final: number]>([
+const LAM_ALEF = /* @__PURE__ */ new Map<
+  number,
+  readonly [isolated: number, final: number]
+>([
   [0x0622, [0xfef5, 0xfef6]],
   [0x0623, [0xfef7, 0xfef8]],
   [0x0625, [0xfef9, 0xfefa]],
@@ -125,7 +128,7 @@ const LAM_ALEF = new Map<number, readonly [isolated: number, final: number]>([
 const LAM = 0x0644;
 
 /** Bracket-like characters, which point the other way in an RTL run. */
-const MIRRORED = new Map<number, number>([
+const MIRRORED = /* @__PURE__ */ new Map<number, number>([
   [0x0028, 0x0029],
   [0x0029, 0x0028],
   [0x005b, 0x005d],

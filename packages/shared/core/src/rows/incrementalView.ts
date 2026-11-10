@@ -5,7 +5,7 @@
  * importing the incremental engine.
  */
 
-const VIEWS = new WeakMap<object, unknown>();
+const VIEWS = /* @__PURE__ */ new WeakMap<object, unknown>();
 
 /**
  * The snapshot attached to a derived row array, if any.

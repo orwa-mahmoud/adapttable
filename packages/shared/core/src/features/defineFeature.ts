@@ -91,8 +91,8 @@ export interface DefinedFeature<
   readonly urlKeys: readonly string[];
 }
 
-const NO_LABELS: Partial<TableLabels> = Object.freeze({});
-const NO_KEYS: readonly string[] = Object.freeze([]);
+const NO_LABELS: Partial<TableLabels> = /* @__PURE__ */ Object.freeze({});
+const NO_KEYS: readonly string[] = /* @__PURE__ */ Object.freeze([]);
 
 /**
  * Define a feature.

@@ -107,9 +107,9 @@ export type DateOp = (typeof DATE_OPS)[number];
  */
 export type FilterOp = TextOp | NumberOp | DateOp;
 
-const TEXT_OP_SET = new Set<string>(TEXT_OPS);
-const NUMBER_OP_SET = new Set<string>(NUMBER_OPS);
-const DATE_OP_SET = new Set<string>(DATE_OPS);
+const TEXT_OP_SET = /* @__PURE__ */ new Set<string>(TEXT_OPS);
+const NUMBER_OP_SET = /* @__PURE__ */ new Set<string>(NUMBER_OPS);
+const DATE_OP_SET = /* @__PURE__ */ new Set<string>(DATE_OPS);
 
 /**
  * True for operators that take no operand (`empty` / `notEmpty`).

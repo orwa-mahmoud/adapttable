@@ -11,7 +11,7 @@ function isDev(): boolean {
   return proc?.env?.NODE_ENV !== "production";
 }
 
-const seen = new Set<string>();
+const seen = /* @__PURE__ */ new Set<string>();
 
 /**
  * Log a development-only warning once per unique message. Silent in

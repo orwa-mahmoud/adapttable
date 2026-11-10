@@ -329,7 +329,7 @@ export function isCellEditable<TRow>(
   return flag(row);
 }
 
-const BUILTIN_EDITORS = new Set<string>([
+const BUILTIN_EDITORS = /* @__PURE__ */ new Set<string>([
   "text",
   "number",
   "boolean",

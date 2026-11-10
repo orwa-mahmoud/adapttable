@@ -78,7 +78,7 @@ export interface Evaluation<TRow> {
   readonly derivation: Derivation<TRow> | undefined;
 }
 
-const EVALUATION = Symbol("adapttable.evaluation");
+const EVALUATION = /* @__PURE__ */ Symbol("adapttable.evaluation");
 
 interface EvaluatedView<TRow> extends IncrementalView<TRow> {
   [EVALUATION]: Evaluation<TRow>;
