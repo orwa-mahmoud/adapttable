@@ -67,27 +67,45 @@ export function useTableUrlState(
     UrlStateAdapter,
     Map<string | undefined, TableViewStore>
   >();
-  const current = computed(() => {
-    const value = options.value;
-    const adapter = resolveUrlAdapter(
-      toValue(value.urlAdapter),
-      toValue(value.urlSync) ?? true,
+  /** Which URL and namespace the state lives in. */
+  const adapter = computed(() =>
+    resolveUrlAdapter(
+      toValue(options.value.urlAdapter),
+      toValue(options.value.urlSync) ?? true,
       local
-    );
-    const requestedKey = toValue(value.urlKey);
-    const key = requestedKey === "" ? undefined : requestedKey;
-    let namespaces = stores.get(adapter);
+    )
+  );
+  const namespace = computed(() => {
+    const requestedKey = toValue(options.value.urlKey);
+    return requestedKey === "" ? undefined : requestedKey;
+  });
+  /** The store for a URL and namespace, created the first time it is asked for. */
+  const storeFor = (
+    url: UrlStateAdapter,
+    key: string | undefined
+  ): TableViewStore => {
+    let namespaces = stores.get(url);
     if (!namespaces) {
       namespaces = new Map();
-      stores.set(adapter, namespaces);
+      stores.set(url, namespaces);
     }
     let store = namespaces.get(key);
     if (!store) {
-      store = createTableViewStore({ adapter, urlKey: key }, {});
+      store = createTableViewStore({ adapter: url, urlKey: key }, {});
       namespaces.set(key, store);
     }
     return store;
-  });
+  };
+  // A store is created where state may change, never while a computed is
+  // evaluated: creating one sets up its state.
+  const current = shallowRef(storeFor(adapter.value, namespace.value));
+  watch(
+    [adapter, namespace],
+    ([url, key]) => {
+      current.value = storeFor(url, key);
+    },
+    { flush: "sync" }
+  );
   let numberExtraKeys: readonly string[] | undefined;
   let arrayExtraKeys: readonly string[] | undefined;
   const config = computed((): TableViewStateConfig => {
