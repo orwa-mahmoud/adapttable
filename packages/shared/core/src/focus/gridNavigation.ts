@@ -449,7 +449,12 @@ export function composeGridNavigation<TRow>(
   let batchDepth = 0;
   let changed = false;
   const listeners = new Set<() => void>();
-  const session = {
+  const flush = (): void => {
+    if (batchDepth > 0 || !changed) return;
+    changed = false;
+    for (const listener of listeners) listener();
+  };
+  const session: GridNavSession<TRow> = {
     options: { ...initial },
     snapshot: EMPTY,
     pending: null,
@@ -465,97 +470,89 @@ export function composeGridNavigation<TRow>(
     clipboardColumns: initial.columns.map(columnIdentity),
     previewOf: { range: null, to: null },
     columnIdentity,
-  } as unknown as GridNavSession<TRow>;
-
-  const flush = (): void => {
-    if (batchDepth > 0 || !changed) return;
-    changed = false;
-    for (const listener of listeners) listener();
-  };
-
-  session.firstRow = () => session.options.firstRowIndex ?? 0;
-  session.labels = () => session.options.labels;
-  session.bounds = () => {
-    const loaded = session.options.rows.length;
-    return {
-      rowCount: lastLoadedRow(session.firstRow(), loaded) + 1,
-      colCount: session.options.columns.length,
-      pageSize: session.options.pageSize ?? Math.max(1, loaded),
-    };
-  };
-  session.write = (patch) => {
-    const merged = { ...session.snapshot, ...patch };
-    const fillPreview = parts?.previewFor?.(session, merged.range) ?? null;
-    const next = { ...merged, fillPreview };
-    if (
-      next.active === session.snapshot.active &&
-      next.range === session.snapshot.range &&
-      next.announcement === session.snapshot.announcement &&
-      next.fillPreview === session.snapshot.fillPreview
-    ) {
-      return;
-    }
-    session.snapshot = next;
-    changed = true;
-    flush();
-  };
-  session.batch = (run) => {
-    batchDepth += 1;
-    try {
-      run();
-    } finally {
-      batchDepth -= 1;
+    firstRow: () => session.options.firstRowIndex ?? 0,
+    labels: () => session.options.labels,
+    bounds: () => {
+      const loaded = session.options.rows.length;
+      return {
+        rowCount: lastLoadedRow(session.firstRow(), loaded) + 1,
+        colCount: session.options.columns.length,
+        pageSize: session.options.pageSize ?? Math.max(1, loaded),
+      };
+    },
+    write: (patch) => {
+      const merged = { ...session.snapshot, ...patch };
+      const fillPreview = parts?.previewFor?.(session, merged.range) ?? null;
+      const next = { ...merged, fillPreview };
+      if (
+        next.active === session.snapshot.active &&
+        next.range === session.snapshot.range &&
+        next.announcement === session.snapshot.announcement &&
+        next.fillPreview === session.snapshot.fillPreview
+      ) {
+        return;
+      }
+      session.snapshot = next;
+      changed = true;
       flush();
-    }
+    },
+    batch: (run) => {
+      batchDepth += 1;
+      try {
+        run();
+      } finally {
+        batchDepth -= 1;
+        flush();
+      }
+    },
+    say: (announcement) => {
+      session.write({ announcement });
+    },
+    announce: (cell) => {
+      const column = session.options.columns[cell.col];
+      if (!column) return;
+      const row = session.options.rows[cell.row - session.firstRow()];
+      const header =
+        typeof column.header === "string" ? column.header : column.key;
+      const value = row === undefined ? "" : columnText(column, row);
+      const position = (
+        session.labels()?.gridCellPosition ?? defaultLabels.gridCellPosition
+      )(cell.row + 1, session.options.rowCount);
+      session.say(
+        value ? `${header}, ${value}, ${position}` : `${header}, ${position}`
+      );
+    },
+    focusCell: (cell) => {
+      session.batch(() => {
+        session.write({ active: cell });
+        session.pending = cell;
+        session.options.scrollToRow?.(cell.row);
+        session.announce(cell);
+      });
+    },
+    setFillTo: (to) => {
+      session.fillTo = to;
+      session.write({});
+    },
+    applyGesture: (apply, done, failed) => {
+      const version = ++session.gestureVersion;
+      const complete = (callback: () => void): void => {
+        if (session.options.enabled && version === session.gestureVersion)
+          callback();
+      };
+      try {
+        const result = apply();
+        if (isThenable(result)) {
+          void Promise.resolve(result).then(
+            () => complete(done),
+            () => complete(() => session.say(failed))
+          );
+        } else complete(done);
+      } catch {
+        complete(() => session.say(failed));
+      }
+    },
   };
-  session.say = (announcement) => {
-    session.write({ announcement });
-  };
-  session.announce = (cell) => {
-    const column = session.options.columns[cell.col];
-    if (!column) return;
-    const row = session.options.rows[cell.row - session.firstRow()];
-    const header =
-      typeof column.header === "string" ? column.header : column.key;
-    const value = row === undefined ? "" : columnText(column, row);
-    const position = (
-      session.labels()?.gridCellPosition ?? defaultLabels.gridCellPosition
-    )(cell.row + 1, session.options.rowCount);
-    session.say(
-      value ? `${header}, ${value}, ${position}` : `${header}, ${position}`
-    );
-  };
-  session.focusCell = (cell) => {
-    session.batch(() => {
-      session.write({ active: cell });
-      session.pending = cell;
-      session.options.scrollToRow?.(cell.row);
-      session.announce(cell);
-    });
-  };
-  session.setFillTo = (to) => {
-    session.fillTo = to;
-    session.write({});
-  };
-  session.applyGesture = (apply, done, failed) => {
-    const version = ++session.gestureVersion;
-    const complete = (callback: () => void): void => {
-      if (session.options.enabled && version === session.gestureVersion)
-        callback();
-    };
-    try {
-      const result = apply();
-      if (isThenable(result)) {
-        void Promise.resolve(result).then(
-          () => complete(done),
-          () => complete(() => session.say(failed))
-        );
-      } else complete(done);
-    } catch {
-      complete(() => session.say(failed));
-    }
-  };
-
   const selectRange = (next: CellRange | null): void => {
     if (parts?.selectRange) parts.selectRange(session, next);
     else session.write({ range: next });

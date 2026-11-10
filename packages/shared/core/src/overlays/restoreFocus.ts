@@ -42,32 +42,39 @@ export function focusWasDropped(trigger: HTMLElement): boolean {
  */
 export function restoreFocusSoon(element: HTMLElement | null): () => void {
   if (!element) return () => undefined;
-  const frame =
-    typeof requestAnimationFrame === "function"
-      ? requestAnimationFrame
-      : (fn: () => void) => setTimeout(fn, 0) as unknown as number;
-  const cancel =
-    typeof cancelAnimationFrame === "function"
-      ? cancelAnimationFrame
-      : (id: number) => {
-          clearTimeout(id);
-        };
 
   const focusIfPresent = (): void => {
     if (element.isConnected) element.focus();
   };
 
-  let second: number | undefined;
-  const first = frame(() => {
+  let cancelSecond: (() => void) | undefined;
+  const cancelFirst = onNextFrame(() => {
     focusIfPresent();
-    second = frame(() => {
+    cancelSecond = onNextFrame(() => {
       if (document.activeElement === element) return;
       if (!focusWasDropped(element)) return;
       focusIfPresent();
     });
   });
   return () => {
-    cancel(first);
-    if (second !== undefined) cancel(second);
+    cancelFirst();
+    cancelSecond?.();
+  };
+}
+
+/** Run `fn` on the next animation frame, or a zero timeout without one. */
+function onNextFrame(fn: () => void): () => void {
+  if (
+    typeof requestAnimationFrame === "function" &&
+    typeof cancelAnimationFrame === "function"
+  ) {
+    const id = requestAnimationFrame(fn);
+    return () => {
+      cancelAnimationFrame(id);
+    };
+  }
+  const id = setTimeout(fn, 0);
+  return () => {
+    clearTimeout(id);
   };
 }
