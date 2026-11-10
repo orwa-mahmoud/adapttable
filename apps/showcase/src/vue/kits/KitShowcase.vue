@@ -114,6 +114,8 @@ const columns = computed<readonly ColumnDef<Order>[]>(() => {
       }))
     : values;
 });
+// One defaults object, so a selection change leaves it as it is.
+const defaults = { limit: 5 };
 const tableProps = computed(
   () =>
     ({
@@ -124,7 +126,7 @@ const tableProps = computed(
       dir: locale.value === "ar" ? "rtl" : "ltr",
       tableLabel: text.value.orders,
       searchDebounceMs: 0,
-      defaults: { limit: 5 },
+      defaults,
       selectedIds: selected.value,
       selectable: true,
       forceMobile:

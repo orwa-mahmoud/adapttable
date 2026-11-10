@@ -43,6 +43,7 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -623,13 +624,13 @@ function composeDemoFeatures(
             top: [
               {
                 ...summaryPerson("901", "Team total"),
-                budget: flags.data.reduce((sum, row) => sum + budget(row), 0),
+                budget: flags.budgetTotal,
               },
             ],
             bottom: [
               {
                 ...summaryPerson("902", "Grand total"),
-                budget: flags.data.reduce((sum, row) => sum + budget(row), 0),
+                budget: flags.budgetTotal,
               },
             ],
           }),
@@ -791,9 +792,12 @@ function frontendColumnProps(
     rowStyle?: boolean;
     customCard?: boolean;
     failure?: Failure;
-    data: readonly Person[];
-    flashClass: (row: Person) => string | undefined;
-    isCellFlashing?: (rowId: string, columnKey: string) => boolean;
+    /** The budget summed over every row, for the pinned summary rows. */
+    budgetTotal: number;
+    /** The name of the person the extra row stands in front of. */
+    extraAnchorName: string;
+    /** The first row's id, which the row-style demo accents. */
+    accentId: string | undefined;
     onCellEdit: (row: Person, key: string, nextValue: unknown) => void;
     onEditStart: EditEventHandler<Person>;
     onEditCancel: EditEventHandler<Person>;
@@ -813,8 +817,6 @@ function frontendColumnProps(
 ): DemoColumnProps {
   const next: DemoColumnProps = {
     ...columns,
-    rowClassName: flags.flashClass,
-    isCellFlashing: flags.isCellFlashing,
     slots: errorSlots(flags.failure),
     renderCard: cardRenderer(flags.customCard),
     // Delete removes the row. The pencil is a row-edit trigger and needs no
@@ -854,9 +856,7 @@ function frontendColumnProps(
   if (flags.cellSpan) {
     Object.assign(next, { getCellSpan: teamSpan });
   }
-  const extraAnchorName =
-    flags.data.find((row) => row.id === flags.extraAnchorId)?.name ??
-    "this person";
+  const { extraAnchorName, accentId } = flags;
   const demoExtraRows =
     flags.extraRows && flags.extraAnchorId
       ? [
@@ -872,7 +872,6 @@ function frontendColumnProps(
   if (demoExtraRows) {
     Object.assign(next, { extraRows: demoExtraRows });
   }
-  const accentId = flags.data[0]?.id;
   const accentRowStyle = flags.rowStyle
     ? (row: Person) =>
         row.id === accentId
@@ -1025,39 +1024,46 @@ function Frontend({
   // exactly where a real app would flash it. Note there is no highlight prop
   // on the table: `rowClassName` is the seam, so this works in every kit.
   const flash = useHighlight(highlight === true || realtime === true);
+  const { flashRow } = flash;
+  // Handlers read the rows they act on when they run, so the table's props
+  // stay the same objects while the rows change.
+  const latestData = useRef(data);
+  useEffect(() => {
+    latestData.current = data;
+  }, [data]);
   const onCellEdit = useCallback(
     (row: Person, key: string, nextValue: unknown) => {
       const field = editField(key);
       writePatches([updateRow(row.id, { [field]: nextValue as never })]);
-      flash.flashRow(row.id);
+      flashRow(row.id);
     },
-    [flash, writePatches]
+    [flashRow, writePatches]
   );
   const onBatchEdit = useCallback(
     (edits: readonly { row: Person; patch: Record<string, unknown> }[]) => {
       writePatches(
         edits.map((edit) => updateRow(edit.row.id, columnChanges(edit.patch)))
       );
-      for (const edit of edits) flash.flashRow(edit.row.id);
+      for (const edit of edits) flashRow(edit.row.id);
     },
-    [flash, writePatches]
+    [flashRow, writePatches]
   );
   // Adding, copying and removing rows: the table asks, the demo owns the list —
   // the same one-way flow a real app's mutation would follow.
   // The new row is built before the update rather than inside it: a state
   // updater must stay pure, and the flash needs the id it produced.
   const onAddRow = useCallback(() => {
-    const added = blankPerson(data);
+    const added = blankPerson(latestData.current);
     writePatches([insertRow(added, 0)]);
-    flash.flashRow(added.id);
-  }, [data, flash, writePatches]);
+    flashRow(added.id);
+  }, [flashRow, writePatches]);
   const onDuplicateRow = useCallback(
     (row: Person) => {
-      const copy = { ...row, id: nextId(data) };
+      const copy = { ...row, id: nextId(latestData.current) };
       writePatches([insertRow(copy, 0)]);
-      flash.flashRow(copy.id);
+      flashRow(copy.id);
     },
-    [data, flash, writePatches]
+    [flashRow, writePatches]
   );
   const onDeleteRow = useCallback(
     (row: Person) => {
@@ -1185,8 +1191,116 @@ function Frontend({
     urlKey,
     urlSync,
   });
-  const tableSource = advancedFilters ? source : withoutFilterTree(source);
+  const tableSource = useMemo(
+    () => (advancedFilters ? source : withoutFilterTree(source)),
+    [advancedFilters, source]
+  );
   const live = realtime === true && RealtimeSlot !== null;
+  const isCellFlashing = useMemo(
+    () =>
+      live || patchSink
+        ? (rowId: string, columnKey: string) =>
+            columnOrFieldFlashing(isFlashingRef.current, rowId, columnKey) ||
+            (patchSink
+              ? columnOrFieldFlashing(
+                  patchSink.isFlashingRef.current,
+                  rowId,
+                  columnKey
+                )
+              : false)
+        : undefined,
+    [live, patchSink]
+  );
+  const budgetTotal = useMemo(
+    () => data.reduce((sum, row) => sum + budget(row), 0),
+    [data]
+  );
+  const extraAnchorName =
+    data.find((row) => row.id === extraAnchorId)?.name ?? "this person";
+  const accentId = data[0]?.id;
+  // The composed props change only with the page's flags and the facts they
+  // name, so an edit or a streamed patch redraws the rows it touched.
+  const composed = useMemo(
+    () =>
+      frontendColumnProps(columns, {
+        large,
+        editing,
+        rowMode,
+        rowActionsShown,
+        grouping,
+        tree,
+        batch,
+        rowMutations,
+        rowReorder,
+        rowPinning,
+        pinnedSummaryRows,
+        summaryRow,
+        cellSpan,
+        extraRows,
+        extraAnchorId,
+        rowStyle,
+        customCard,
+        failure,
+        budgetTotal,
+        extraAnchorName,
+        accentId,
+        onCellEdit,
+        onEditStart,
+        onEditCancel: onEditEnd,
+        onEditCommit: onEditEnd,
+        onBatchEdit,
+        onAddRow,
+        onDuplicateRow,
+        onDeleteRow,
+        onRowReorder,
+        onGroupMove,
+        onTreeMove,
+        writePatches,
+        flashRow,
+        urlKey,
+      }),
+    [
+      columns,
+      large,
+      editing,
+      rowMode,
+      rowActionsShown,
+      grouping,
+      tree,
+      batch,
+      rowMutations,
+      rowReorder,
+      rowPinning,
+      pinnedSummaryRows,
+      summaryRow,
+      cellSpan,
+      extraRows,
+      extraAnchorId,
+      rowStyle,
+      customCard,
+      failure,
+      budgetTotal,
+      extraAnchorName,
+      accentId,
+      onCellEdit,
+      onEditStart,
+      onEditEnd,
+      onBatchEdit,
+      onAddRow,
+      onDuplicateRow,
+      onDeleteRow,
+      onRowReorder,
+      onGroupMove,
+      onTreeMove,
+      writePatches,
+      flashRow,
+      urlKey,
+    ]
+  );
+  const tableProps = useMemo(
+    () => ({ ...composed, rowClassName: flashClass, isCellFlashing }),
+    [composed, flashClass, isCellFlashing]
+  );
   // Every editing mode gets the incoming-change control: a row form and a
   // batch have something open to disagree with, the same as a cell.
   const editingArmed =
@@ -1225,61 +1339,7 @@ function Frontend({
           isFlashingRef={isFlashingRef}
         />
       ) : null}
-      {render(
-        tableSource,
-        frontendColumnProps(columns, {
-          large,
-          editing,
-          rowMode,
-          rowActionsShown,
-          grouping,
-          tree,
-          batch,
-          rowMutations,
-          rowReorder,
-          rowPinning,
-          pinnedSummaryRows,
-          summaryRow,
-          cellSpan,
-          extraRows,
-          extraAnchorId,
-          rowStyle,
-          customCard,
-          failure,
-          data,
-          flashClass,
-          isCellFlashing:
-            live || patchSink
-              ? (rowId, columnKey) =>
-                  columnOrFieldFlashing(
-                    isFlashingRef.current,
-                    rowId,
-                    columnKey
-                  ) ||
-                  (patchSink
-                    ? columnOrFieldFlashing(
-                        patchSink.isFlashingRef.current,
-                        rowId,
-                        columnKey
-                      )
-                    : false)
-              : undefined,
-          onCellEdit,
-          onEditStart,
-          onEditCancel: onEditEnd,
-          onEditCommit: onEditEnd,
-          onBatchEdit,
-          onAddRow,
-          onDuplicateRow,
-          onDeleteRow,
-          onRowReorder,
-          onGroupMove,
-          onTreeMove,
-          writePatches,
-          flashRow: flash.flashRow,
-          urlKey,
-        })
-      )}
+      {render(tableSource, tableProps)}
     </>
   );
 }
@@ -1309,9 +1369,11 @@ function Backend({
     }),
   });
   // No onCellEdit — editing stays dormant on the server path.
-  return (
-    <>{render(advancedFilters ? source : withoutFilterTree(source), columns)}</>
+  const tableSource = useMemo(
+    () => (advancedFilters ? source : withoutFilterTree(source)),
+    [advancedFilters, source]
   );
+  return <>{render(tableSource, columns)}</>;
 }
 
 /**
@@ -1434,14 +1496,24 @@ export function DemoBody({
   // Product hosts can use this channel to write the same accepted name to
   // their schema/backend as well.
   const onColumnRename = useCallback(() => undefined, []);
-  const columns: DemoColumnProps = {
-    columnLayout: layout,
-    onColumnLayoutChange,
-    onColumnRename,
-    collapsibleColumnGroups: columnGroups !== false,
-    urlSync: syncToUrl,
-    urlKey,
-  };
+  const columns = useMemo<DemoColumnProps>(
+    () => ({
+      columnLayout: layout,
+      onColumnLayoutChange,
+      onColumnRename,
+      collapsibleColumnGroups: columnGroups !== false,
+      urlSync: syncToUrl,
+      urlKey,
+    }),
+    [
+      layout,
+      onColumnLayoutChange,
+      onColumnRename,
+      columnGroups,
+      syncToUrl,
+      urlKey,
+    ]
+  );
 
   return mode === "backend" ? (
     <Backend
