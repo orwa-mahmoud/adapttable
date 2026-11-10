@@ -17,6 +17,7 @@ import {
 } from "@adapttable/core";
 import {
   ACTION_LABELS,
+  type ActionStrings,
   type CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
@@ -29,6 +30,7 @@ import {
   inject,
   Injector,
   input,
+  type Signal,
   type TemplateRef,
   type Type,
   viewChild,
@@ -100,7 +102,7 @@ export class AdaptCommandPaletteChrome {
   readonly labels = input<TableLabels | undefined>(undefined);
   /** Direction for the overlay; omission preserves the kit's native direction. */
   readonly dir = input<Direction | undefined>(undefined);
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<ActionStrings> = computed(() =>
     resolveFeatureLabels(this.labels(), ACTION_GROUPS)
   );
   /** A kit's own class for the surface. */

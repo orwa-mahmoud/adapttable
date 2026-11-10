@@ -12,6 +12,7 @@ import {
   type FindButtonProps,
   type FindInTableState,
   type FindSearchProps,
+  type FindStrings,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { focusEditorOnMount } from "@adapttable/core/editing";
@@ -20,6 +21,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
   type Type,
 } from "@angular/core";
 
@@ -88,7 +90,7 @@ export class AdaptFindBarChrome {
   readonly find = input.required<FindInTableState>();
   /** Labels; falls back to the built-in English. */
   readonly labels = input<TableLabels>();
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<FindStrings> = computed(() =>
     resolveFeatureLabels(this.labels(), FIND_GROUPS)
   );
   /** A kit's own class for the bar. */

@@ -12219,6 +12219,14 @@
       "behavior": ""
     },
     {
+      "export": "ActionStrings",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ACTIVE_FILTER_CHIPS",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -12831,6 +12839,14 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "AssistantStrings",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -16296,6 +16312,14 @@
       "kind": "type",
       "class": "react-binding",
       "proposedImport": "@adapttable/react/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FindStrings",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {

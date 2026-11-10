@@ -2,6 +2,7 @@
  * The strings the assistant and its proposals draw.
  */
 import type { TableLabels } from "../types";
+import type { FeatureStrings } from "./tableLabels";
 
 /** Connection tokens the assistant badge shows, in English. */
 const ASSISTANT_CONNECTION: Readonly<Record<string, string>> = {
@@ -300,3 +301,12 @@ export const ASSISTANT_LABELS: Pick<
   assistantReceiptProposed: ({ before, after }) =>
     `Proposed: ${before} to ${after}`,
 };
+
+/**
+ * The strings an assistant chrome draws: the base strings and the assistant's own.
+ *
+ * @public
+ */
+export type AssistantStrings = FeatureStrings<
+  readonly [typeof ASSISTANT_LABELS]
+>;

@@ -16474,6 +16474,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "ActionStrings",
+      "kind": "type",
+      "module": "labelGroups/actionLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/actionLabels.ts#ActionStrings",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ActiveFilterChipsSlotProps",
       "kind": "type",
       "module": "filters/activeFilterChips.ts",
@@ -16559,6 +16570,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "approval/agentApprovalContract.ts#ApprovalReviewSlots",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "AssistantStrings",
+      "kind": "type",
+      "module": "labelGroups/assistantLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/assistantLabels.ts#AssistantStrings",
       "subpaths": ["./binding"]
     },
     {
@@ -17989,6 +18011,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "find/findBarContract.ts#FindSearchProps",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "FindStrings",
+      "kind": "type",
+      "module": "labelGroups/findLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/findLabels.ts#FindStrings",
       "subpaths": ["./binding"]
     },
     {

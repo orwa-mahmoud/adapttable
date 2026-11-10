@@ -2,6 +2,7 @@
  * The strings the context menu and command palette draw.
  */
 import type { TableLabels } from "../types";
+import type { FeatureStrings } from "./tableLabels";
 
 /**
  * The strings the context menu and command palette draw.
@@ -17,3 +18,10 @@ export const ACTION_LABELS: Pick<
   copyCells: "Copy",
   cutCells: "Cut",
 };
+
+/**
+ * The strings an action chrome (context menu, command palette) draws: the base strings and the actions' own.
+ *
+ * @public
+ */
+export type ActionStrings = FeatureStrings<readonly [typeof ACTION_LABELS]>;

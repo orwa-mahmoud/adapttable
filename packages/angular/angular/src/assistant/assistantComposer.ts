@@ -4,6 +4,7 @@ import {
   ASSISTANT_LABELS,
   assistantIsBusy,
   assistantIsUsable,
+  type AssistantStrings,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
@@ -11,6 +12,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
 } from "@angular/core";
 
 import { AdaptLiveRegion } from "../a11y/liveRegion";
@@ -72,7 +74,7 @@ export class AdaptAssistantComposer {
   readonly props = input.required<AssistantComposerProps>();
   /** Required kit controls. */
   readonly slots = input.required<TableAssistantSlots>();
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
     resolveFeatureLabels(this.props().labels, ASSISTANT_GROUPS)
   );
   protected readonly busy = computed(

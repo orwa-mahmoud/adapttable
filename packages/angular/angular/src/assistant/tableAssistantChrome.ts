@@ -9,6 +9,7 @@ import {
   assistantLauncherName,
   assistantQuestion,
   assistantRejoinable,
+  type AssistantStrings,
   assistantWithGreeting,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
@@ -171,7 +172,7 @@ export class AdaptTableAssistantChrome {
     computed(() => this.props().assistant.messages.length),
     computed(() => this.conversation()?.nativeElement)
   );
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
     resolveFeatureLabels(this.props().labels, ASSISTANT_GROUPS)
   );
   protected readonly title = computed(() => this.copy().assistantTitle);

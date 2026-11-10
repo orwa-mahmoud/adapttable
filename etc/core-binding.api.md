@@ -43,6 +43,9 @@ export interface ActionDefinition<TPayload> {
 export type ActionPayload<TAction> = TAction extends ActionDefinition<infer TPayload> ? TPayload : never;
 
 // @public
+export type ActionStrings = FeatureStrings<readonly [typeof ACTION_LABELS]>;
+
+// @public
 export const ACTIVE_FILTER_CHIPS: FeatureSlotKey<ActiveFilterChipsSlotProps>;
 
 // @public
@@ -401,6 +404,9 @@ export function assistantRejoinable(assistant: TableAssistantView): boolean;
 
 // @public
 export function assistantShownReceipts(receipts: readonly TableAssistantReceiptView[] | undefined): readonly TableAssistantReceiptView[];
+
+// @public
+export type AssistantStrings = FeatureStrings<readonly [typeof ASSISTANT_LABELS]>;
 
 // @public
 export function assistantUndoReason(blockedCode: string | undefined, labels: TableLabels | undefined): string;
@@ -3629,6 +3635,9 @@ export interface FindSearchProps<TKeyboardEvent = KeyboardEvent> {
     readonly placeholder: string;
     readonly value: string;
 }
+
+// @public
+export type FindStrings = FeatureStrings<readonly [typeof FIND_LABELS]>;
 
 // @public
 export function finishShellBody<TRef, TShell extends PipelineShell & {

@@ -2573,7 +2573,9 @@ A feature's own chrome resolves with `resolveFeatureLabels(labels, groups)`:
 the base strings, then its groups, then the labels it was handed. Its result
 is typed `FeatureStrings<groups>`, the base keys plus `GroupKeys<groups>`, so
 a chrome cannot read a string its groups do not hold. `FilterStrings` is that
-type for the filters' chrome and the filter-tree helpers. `BASE_LABELS` and
+type for the filters' chrome and the filter-tree helpers, `AssistantStrings`
+for the assistant and approval chromes, `ActionStrings` for the context menu
+and command palette, and `FindStrings` for the find bar. `BASE_LABELS` and
 `FILTER_LABELS` are also on the main entry, and `BASE_LABELS` on
 `@adapttable/vue/adapter`.
 

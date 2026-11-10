@@ -14,6 +14,7 @@ import {
   assistantReceiptNeedsSave,
   assistantReceiptWhere,
   assistantShownReceipts,
+  type AssistantStrings,
   assistantUndoReason,
   assistantUndoTurnLabel,
   assistantVoicePlaceholder,
@@ -34,6 +35,7 @@ import {
   ElementRef,
   inject,
   input,
+  type Signal,
   signal,
   viewChild,
 } from "@angular/core";
@@ -145,7 +147,7 @@ export class AdaptAssistantReceipt {
   readonly receipt = input.required<TableAssistantReceiptView>();
   readonly slots = input.required<TableAssistantSlots>();
   readonly labels = input<TableLabels | undefined>();
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
     resolveFeatureLabels(this.labels(), ASSISTANT_GROUPS)
   );
   readonly onUndo = input<(() => void) | undefined>();
@@ -252,7 +254,7 @@ export class AdaptAssistantMessage {
     "li";
   readonly message = input.required<TableAssistantMessageView>();
   readonly labels = input<TableLabels | undefined>();
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
     resolveFeatureLabels(this.labels(), ASSISTANT_GROUPS)
   );
   readonly slots = input.required<TableAssistantSlots>();
@@ -458,7 +460,7 @@ export class AdaptAssistantWorking {
     inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.localName ===
     "li";
   readonly labels = input<TableLabels | undefined>();
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
     resolveFeatureLabels(this.labels(), ASSISTANT_GROUPS)
   );
   readonly progress = input<TableAssistantProgressView | null | undefined>();
@@ -499,7 +501,7 @@ export class AdaptAssistantWorking {
 export class AdaptAssistantAlwaysAllowed {
   readonly allowed = input.required<readonly TableAssistantAllowanceView[]>();
   readonly labels = input<TableLabels | undefined>();
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
     resolveFeatureLabels(this.labels(), ASSISTANT_GROUPS)
   );
   readonly slots = input.required<TableAssistantSlots>();

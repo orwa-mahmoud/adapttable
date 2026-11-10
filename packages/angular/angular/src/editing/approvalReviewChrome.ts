@@ -13,6 +13,7 @@ import {
   type AgentApprovalButtonProps,
   type AgentApprovalListProps as NeutralAgentApprovalListProps,
   ASSISTANT_LABELS,
+  type AssistantStrings,
   resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
@@ -20,6 +21,7 @@ import {
   Component,
   computed,
   input,
+  type Signal,
   type TemplateRef,
   type Type,
   viewChild,
@@ -106,7 +108,7 @@ export class AdaptApprovalReviewChrome {
   readonly slots = input.required<ApprovalReviewSlots>();
   /** Localized labels. */
   readonly labels = input<TableLabels>();
-  protected readonly copy = computed(() =>
+  protected readonly copy: Signal<AssistantStrings> = computed(() =>
     resolveFeatureLabels(this.labels(), APPROVAL_GROUPS)
   );
   /** Whether to show every proposal. */
