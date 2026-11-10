@@ -2,6 +2,7 @@ import {
   defaultFilterRegistry,
   filterWidgetKind,
   useFilterHeaderControl,
+  withProps,
 } from "@adapttable/vue/adapter";
 import { createVNode, defineComponent, h, type SetupContext } from "vue";
 
@@ -22,7 +23,7 @@ const CustomField = defineComponent(
 );
 
 /** The registry determines the widget; the binding owns each widget's model. */
-export function FilterField<TRow>(
+export const FilterField = /* @__PURE__ */ withProps(function FilterField<TRow>(
   props: BasicFilterFieldProps<TRow>,
   context: Pick<SetupContext, "attrs">
 ) {
@@ -39,5 +40,4 @@ export function FilterField<TRow>(
       dir: props.dir,
     });
   return h(BasicFilterField<TRow>, { ...context.attrs, ...props });
-}
-FilterField.props = BasicFilterField.props;
+}, BasicFilterField.props);

@@ -172,6 +172,9 @@ export type DeclaredAggregates = Readonly<Record<string, string>>;
 export type DisplayValue = string | number | boolean | bigint | object | null;
 
 // @public
+export type ExportScopeCapability = "all" | "page";
+
+// @public
 export type ExtraEntry = {
     kind: "separator";
     key: string;
@@ -342,6 +345,7 @@ export interface GroupingPanelInteractions {
         };
     };
     moveBy: (key: string, delta: -1 | 1) => void;
+    panelState?<TRow>(input: GroupingPanelStateInput<TRow>): GroupingPanelState;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;
     removeDropProps: () => GroupingDropProps<GroupingDragEventLike>;
@@ -351,11 +355,30 @@ export interface GroupingPanelInteractions {
 }
 
 // @public
+export interface GroupingPanelSource<TRow> {
+    readonly aggregateOperations?: readonly string[];
+    readonly allFilteredRows?: readonly TRow[];
+    readonly capabilities?: TableSourceCapabilities;
+    readonly groupAggregateOverrides?: GroupAggregateOverrides;
+    readonly groups?: readonly QueryGroupRow<TRow>[];
+    readonly honorsAggregates?: boolean;
+    readonly queryAggregates?: readonly QueryAggregate[];
+    readonly setGroupAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
+}
+
+// @public
 export interface GroupingPanelState extends GroupingPanelInteractions {
     aggregateOverrides: GroupAggregateOverrides;
     aggregations: AggregationModel;
     canSetAggregates: boolean;
     groupBy: readonly string[];
+}
+
+// @public
+export interface GroupingPanelStateInput<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly groupBy: readonly string[];
+    readonly source: GroupingPanelSource<TRow>;
 }
 
 // @public
@@ -423,6 +446,15 @@ export interface QueryAggregate {
 export function queryAggregateOps(aggregates: readonly QueryAggregate[] | undefined): GroupAggregateOps | undefined;
 
 // @public
+export interface QueryGroupRow<TRow = unknown> {
+    aggregates?: Readonly<Record<string, unknown>>;
+    count: number;
+    groups?: readonly QueryGroupRow<TRow>[];
+    rows?: readonly TRow[];
+    value: unknown;
+}
+
+// @public
 export interface ResolvedAggregateOperation {
     readonly builtIn: boolean;
     readonly calculate?: Aggregator;
@@ -450,6 +482,19 @@ export function serializeGroupAggregateOverrides(overrides: GroupAggregateOverri
 
 // @public
 export type SortableValue = string | number | boolean | null | undefined;
+
+// @public
+export interface TableSourceCapabilities {
+    readonly aggregateOperations?: readonly string[];
+    readonly exportScope: ExportScopeCapability;
+    readonly fullDataset: boolean;
+    readonly grouping: GroupingCapability;
+    readonly selectAcrossPages: boolean;
+    readonly totalCount: TotalCountCapability;
+}
+
+// @public
+export type TotalCountCapability = "exact" | "loaded";
 
 // @public
 export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> | undefined, overrides: GroupAggregateOverrides, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): GroupAggregatesFn<TRow> | undefined;

@@ -3,7 +3,6 @@ import {
   type CellRange,
   cellRangeKey,
   createGridFocusController,
-  defaultLabels,
   type GridCell,
   gridCellAttributes,
   gridColumnHeaderAttributes,
@@ -14,7 +13,7 @@ import {
   isGridColumnSelected,
   reportedCellRange,
 } from "@adapttable/core";
-import type { GridFocusState } from "@adapttable/core/binding";
+import { GRID_LABELS, type GridFocusState } from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,
@@ -229,7 +228,7 @@ export function useGridFocus<TRow>(
         canFill: current.onFill !== undefined,
       }),
       fillHandleLabel:
-        current.labels?.gridFillHandle ?? defaultLabels.gridFillHandle,
+        current.labels?.gridFillHandle ?? GRID_LABELS.gridFillHandle,
       getFillHandleProps: () =>
         toVueAttrs({
           onMouseDown: pressFill,

@@ -8,6 +8,7 @@ import {
 } from "@adapttable/react";
 import {
   defaultFilterRegistry,
+  FILTER_LABELS,
   type FilterDef,
   filterLabel,
   type FilterTypeRegistry,
@@ -17,7 +18,7 @@ import {
   RELATIVE_PRESET_LABEL_KEYS,
   RELATIVE_PRESETS,
   renderRegisteredFilter,
-  resolveLabels,
+  resolveTableLabels,
   splitRelativeToken,
   type TableLabels,
   type TableSource,
@@ -31,6 +32,8 @@ import {
 
 import type { DataTableClassNames } from "../types";
 import { ChecklistFilter } from "./ChecklistFilter";
+
+const FORM_LABELS = [FILTER_LABELS];
 
 /* Part names shared by more than one field shape. */
 const FIELD_PART = "filter-field";
@@ -568,7 +571,7 @@ export function AutoFilterForm<TRow>({
   labels,
   registry = defaultFilterRegistry,
 }: Readonly<AutoFilterFormProps<TRow>>) {
-  const resolvedLabels = resolveLabels(labels);
+  const resolvedLabels = resolveTableLabels(labels, FORM_LABELS);
   return (
     <>
       {defs.map((def) => (

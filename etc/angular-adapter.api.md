@@ -500,7 +500,7 @@ export class AdaptApprovalReviewChrome {
     readonly buttonClassName: InputSignal<string | undefined>;
     readonly className: InputSignal<string | undefined>;
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "pendingProposals" | "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantProgress" | "assistantRejoin" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantReceipt" | "assistantExamples" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">>>;
     readonly expanded: InputSignal<boolean | undefined>;
     // (undocumented)
     protected readonly expandProps: Signal<AgentApprovalButtonProps | undefined>;
@@ -605,7 +605,7 @@ export class AdaptAssistantAlwaysAllowed {
     button: TableAssistantButtonProps;
     }[]>;
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "pendingProposals" | "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantProgress" | "assistantRejoin" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantReceipt" | "assistantExamples" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">>>;
     // (undocumented)
     readonly labels: InputSignal<TableLabels | undefined>;
     // (undocumented)
@@ -648,7 +648,7 @@ export class AdaptAssistantComposer {
     // (undocumented)
     protected readonly composer: Signal<TableAssistantComposerProps>;
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "pendingProposals" | "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantProgress" | "assistantRejoin" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantReceipt" | "assistantExamples" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">>>;
     protected readonly exampleButtons: Signal<    {
     id: string;
     button: TableAssistantButtonProps;
@@ -740,7 +740,7 @@ export class AdaptAssistantMessage {
     // (undocumented)
     readonly avatars: InputSignal<TableAssistantAvatars | undefined>;
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "pendingProposals" | "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantProgress" | "assistantRejoin" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantReceipt" | "assistantExamples" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">>>;
     // (undocumented)
     protected readonly expanded: WritableSignal<boolean>;
     // (undocumented)
@@ -865,7 +865,7 @@ export class AdaptAssistantReceipt {
     spoken: string;
     } | null>;
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "pendingProposals" | "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantProgress" | "assistantRejoin" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantReceipt" | "assistantExamples" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">>>;
     // (undocumented)
     protected readonly detail: Signal<string | undefined>;
     // (undocumented)
@@ -931,7 +931,7 @@ export class AdaptAssistantReceipt {
 // @public
 export class AdaptAssistantWorking {
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "pendingProposals" | "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantProgress" | "assistantRejoin" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantReceipt" | "assistantExamples" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">>>;
     // (undocumented)
     readonly labels: InputSignal<TableLabels | undefined>;
     // (undocumented)
@@ -1452,7 +1452,7 @@ export abstract class AdaptColumnMenuEdgeRowModel {
     // (undocumented)
     readonly showLabel: InputSignal<string>;
     // (undocumented)
-    readonly side: InputSignal<"start" | "end">;
+    readonly side: InputSignal<"end" | "start">;
     // (undocumented)
     readonly unpinLabel: InputSignal<string>;
     // (undocumented)
@@ -1649,7 +1649,7 @@ export class AdaptColumnSpacer {
     protected readonly header: Signal<boolean>;
     // (undocumented)
     protected readonly part: Signal<string>;
-    readonly side: InputSignal<"start" | "end">;
+    readonly side: InputSignal<"end" | "start">;
     readonly width: InputSignal<number>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnSpacer, "adapt-column-spacer", never, {
@@ -1679,7 +1679,7 @@ export class AdaptCommandPaletteChrome {
     readonly className: InputSignal<string | undefined>;
     readonly commands: InputSignal<readonly ContextMenuItem[]>;
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "commandSearch" | "commandEmpty" | "copyCells" | "cutCells">>>;
     protected readonly dialogLabel: Signal<string>;
     readonly dir: InputSignal<Direction | undefined>;
     protected readonly emptyProps: Signal<    {
@@ -1889,7 +1889,7 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
     protected readonly desktopTable: Signal<DataTableSurface | undefined>;
     readonly dir: InputSignal<Direction | undefined>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
-    protected readonly dockedSide: Signal<"start" | "end">;
+    protected readonly dockedSide: Signal<"end" | "start">;
     readonly editActivation: InputSignal<"click" | "doubleClick" | undefined>;
     readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
@@ -1964,10 +1964,10 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
         openPanel: string;
         onOpenPanel: (key: string) => void;
         onClose: () => void;
-        side: "start" | "end";
+        side: "end" | "start";
         labels: TableLabels | undefined;
     } | undefined>;
-    readonly sidePanelSide: InputSignal<"start" | "end">;
+    readonly sidePanelSide: InputSignal<"end" | "start">;
     // @internal
     protected readonly sidePanelSlot: FeatureSlotKey<Omit<SidePanelChromeProps<unknown, SidePanelEntry_2, KeyboardEvent>, "slots">>;
     readonly skeletonRows: InputSignal<number | undefined>;
@@ -3012,7 +3012,7 @@ export class AdaptFindBarChrome {
     readonly className: InputSignal<string | undefined>;
     protected readonly closeProps: Signal<FindButtonProps>;
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "findInTable" | "findPlaceholder" | "findMatchCount" | "findPrevious" | "findNext" | "findClose">>>;
     protected readonly count: Signal<string>;
     readonly find: InputSignal<FindInTableState>;
     readonly labels: InputSignal<TableLabels | undefined>;
@@ -4218,7 +4218,7 @@ export class AdaptSidePanelChrome {
     protected readonly contentTemplate: Signal<TemplateRef<unknown> | undefined>;
     protected readonly contentText: Signal<string>;
     protected readonly frameProps: Signal<    {
-    side: "start" | "end";
+    side: "end" | "start";
     className: string | undefined;
     header: TemplateRef<unknown> | undefined;
     body: TemplateRef<unknown> | undefined;
@@ -4235,7 +4235,7 @@ export class AdaptSidePanelChrome {
     readonly onOpenPanel: InputSignal<(key: string) => void>;
     readonly openPanel: InputSignal<string>;
     readonly panels: InputSignal<readonly SidePanelPanel[]>;
-    readonly side: InputSignal<"start" | "end" | undefined>;
+    readonly side: InputSignal<"end" | "start" | undefined>;
     readonly slots: InputSignal<SidePanelSlots>;
     protected readonly tabProps: Signal<    {
     readonly panel: SidePanelPanel;
@@ -4307,7 +4307,7 @@ export class AdaptSidePanelChrome {
 // @public
 export class AdaptSidePanelLayout {
     readonly panel: InputSignal<TemplateRef<unknown> | undefined>;
-    readonly side: InputSignal<"start" | "end">;
+    readonly side: InputSignal<"end" | "start">;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSidePanelLayout, "adapt-side-panel-layout", never, {
         "panel": {
@@ -4512,7 +4512,7 @@ export class AdaptTableAssistantChrome {
     // (undocumented)
     protected readonly composer: Signal<AssistantComposerProps>;
     // (undocumented)
-    protected readonly copy: Signal<Required<TableLabels>>;
+    protected readonly copy: Signal<Readonly<Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "pendingProposals" | "proposalChange" | "proposalValueUnavailable" | "proposalSummary" | "reviewAllProposals" | "backToConversation" | "approveAllProposals" | "approveRemainingProposals" | "rejectAllProposals" | "rejectRemainingProposals" | "alwaysAllowProposal" | "proposalTally" | "approvalWaitingElsewhere" | "assistantTitle" | "assistantOpen" | "assistantClose" | "assistantSettings" | "assistantEmpty" | "assistantPlaceholder" | "assistantSend" | "assistantStop" | "assistantVoiceStart" | "assistantVoiceStop" | "assistantVoiceListening" | "assistantVoiceMessage" | "assistantVoiceLanguage" | "assistantYou" | "assistantSpeaker" | "assistantNewMessages" | "assistantUnavailable" | "assistantDetached" | "assistantProgress" | "assistantRejoin" | "assistantBackToTable" | "assistantDetail" | "assistantSaveInTable" | "assistantUndo" | "assistantUndoBlocked" | "assistantUnresolved" | "assistantAnswerLabel" | "assistantAnswerPlaceholder" | "assistantAnswerSend" | "assistantAlwaysAllowedTitle" | "assistantAlwaysAllowedRevoke" | "assistantCapabilityName" | "assistantConnection" | "assistantReceipt" | "assistantExamples" | "assistantActions" | "assistantActionsTitle" | "assistantUndoAll" | "assistantReceiptStatus" | "assistantReceiptAction" | "assistantReceiptTerms" | "assistantReceiptChange" | "assistantReceiptProposed">>>;
     // (undocumented)
     protected readonly error: Signal<string | undefined>;
     // (undocumented)
@@ -4628,6 +4628,7 @@ export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry>
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
+    readonly labels?: Partial<TableLabels>;
     mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }

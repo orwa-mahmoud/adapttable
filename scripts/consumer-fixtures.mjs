@@ -462,13 +462,9 @@ const REACT_FIXTURES = [
     initialKB: 35,
     totalKB: 35,
     code: `export { useFrontendData, useDataTable } from "PKG";`,
-    present: [
-      "useDataTable",
-      "useFrontendData",
-      "defaultLabels",
-      "resolveLabels",
-    ],
+    present: ["useDataTable", "useFrontendData", "resolveTableLabels"],
     absent: [
+      "defaultLabels",
       "grouping-drop-zone",
       "createCellEditSession",
       "createEditValidationStore",
@@ -518,10 +514,10 @@ function adapterBaseFixtures() {
     totalKB: adapterAcceptanceKB(kit) + LAZY_LOCALE_PRESET_KB,
     item1BaselineKB: ITEM1_ADAPTER_BASELINE_KB[kit],
     code: `export { DataTable } from "PKG";`,
-    absent: ADAPTER_ABSENT,
-    // The full resolver stays in the MUI base table. A narrow labels split
-    // saved a standalone focus entry and grew this graph; that is not a saving.
-    ...(kit === "mui" ? { present: ["defaultLabels", "resolveLabels"] } : {}),
+    // A kit that loads locales lazily carries every string in its English
+    // locale chunk, so only a base table without one can name them absent.
+    absent:
+      kit === "mui" ? [...ADAPTER_ABSENT, "defaultLabels"] : ADAPTER_ABSENT,
   }));
 }
 

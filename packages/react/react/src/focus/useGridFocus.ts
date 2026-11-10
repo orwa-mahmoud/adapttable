@@ -13,7 +13,6 @@
  */
 import {
   createGridFocusController,
-  defaultLabels,
   type GridCell,
   gridCellAttributes,
   gridColumnHeaderAttributes,
@@ -24,7 +23,7 @@ import {
   gridRowFocusSignature,
   isGridColumnSelected,
 } from "@adapttable/core";
-import type { GridFocusState } from "@adapttable/core/binding";
+import { GRID_LABELS, type GridFocusState } from "@adapttable/core/binding";
 import {
   useCallback,
   useEffect,
@@ -290,7 +289,7 @@ export function useGridFocus<TRow>(
       focusCell: controller.focusCell,
       fillHandleCell,
       getFillHandleProps,
-      fillHandleLabel: labels?.gridFillHandle ?? defaultLabels.gridFillHandle,
+      fillHandleLabel: labels?.gridFillHandle ?? GRID_LABELS.gridFillHandle,
       fillPreview: enabled ? fillPreview : null,
       copyCells: controller.copyCells,
       cellAt: controller.cellAt,

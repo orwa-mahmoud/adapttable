@@ -649,6 +649,9 @@ export { humanizeKey } from "./utils/humanizeKey";
 export { normalizeLocaleTag, resolveLocaleTag } from "./utils/localeTag";
 export { getPath } from "./utils/path";
 /* ── Labels ────────────────────────────────────────────────────────── */
+export { BASE_LABELS } from "./labelGroups/baseLabels";
+export { FILTER_LABELS, type FilterStrings } from "./labelGroups/filterLabels";
+export type { FeatureStrings, GroupKeys } from "./labelGroups/tableLabels";
 export { defaultLabels, resolveLabels } from "./labels";
 /* ── Constants ─────────────────────────────────────────────────────── */
 export {
@@ -1068,6 +1071,10 @@ export {
   type RowGroupRef,
 } from "./grouping/groupRows";
 export { groupSelectionState } from "./grouping/groupSelection";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./layout/tableChromeState";
 export type { SelectionContribution } from "./selection/selectionBindingState";
 export {
   type QueryGroupRow,

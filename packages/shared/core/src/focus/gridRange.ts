@@ -3,7 +3,7 @@
  *
  * Shift-extend, drag, and column select. Clipboard and fill are not imported.
  */
-import { defaultLabels } from "../labels";
+import { GRID_LABELS } from "../labelGroups/gridLabels";
 import {
   type CellRange,
   cellRangeBounds,
@@ -64,9 +64,7 @@ export function selectGridRange<TRow>(
     if (!next || isSingleCell(next)) return;
     const b = cellRangeBounds(next);
     session.say(
-      (
-        session.labels()?.gridRangeSelection ?? defaultLabels.gridRangeSelection
-      )({
+      (session.labels()?.gridRangeSelection ?? GRID_LABELS.gridRangeSelection)({
         fromRow: b.fromRow + 1,
         toRow: b.toRow + 1,
         fromColumn: b.fromCol + 1,

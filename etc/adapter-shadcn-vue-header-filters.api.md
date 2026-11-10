@@ -16,15 +16,11 @@ import { VNode } from 'vue';
 import { VNodeChild } from 'vue';
 
 // @public (undocumented)
-export function FilterHeaderControl<TRow>(props: FilterHeaderControlOptions<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterHeaderControl: (<TRow>(props: FilterHeaderControlOptions<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterHeaderControl {
-    var // (undocumented)
+}>) & {
     props: (keyof FilterHeaderControlOptions<unknown>)[];
-}
+};
 
 export { FilterHeaderControlOptions }
 
@@ -34,15 +30,11 @@ export function FilterHeaderRow<TRow>(props: FilterHeaderRowProps<TRow>): VNodeC
 export { FilterHeaderRowProps }
 
 // @public (undocumented)
-export function HeaderFilter<TRow>(props: HeaderFilterProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const HeaderFilter: (<TRow>(props: HeaderFilterProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace HeaderFilter {
-    var // (undocumented)
+}>) & {
     props: (keyof HeaderFilterProps<unknown>)[];
-}
+};
 
 // @public (undocumented)
 export interface HeaderFilterProps<TRow> extends HeaderFilterOptions<TRow> {

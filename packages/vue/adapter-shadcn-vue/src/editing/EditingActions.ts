@@ -7,6 +7,7 @@ import {
   type RowEditActionsProps,
   type ToolbarExtrasSlotProps,
   useDataTableClassNames,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -68,23 +69,25 @@ const RowActionsPresentation = defineComponent(
   },
   { name: "ShadcnRowEditActionsPresentation", props: rowProps }
 );
-export function RowEditActions<TRow>(
-  props: RowEditActionsProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(RowActionsPresentation, { ...context.attrs, ...props });
-}
-RowEditActions.props = Object.keys(rowProps) as [
-  "rowEditing",
-  "row",
-  "rowId",
-  "labels",
-  "className",
-  "buttonClassName",
-  "icons",
-  "conflict",
-  "showBegin",
-];
+export const RowEditActions = /* @__PURE__ */ withProps(
+  function RowEditActions<TRow>(
+    props: RowEditActionsProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(RowActionsPresentation, { ...context.attrs, ...props });
+  },
+  Object.keys(rowProps) as [
+    "rowEditing",
+    "row",
+    "rowId",
+    "labels",
+    "className",
+    "buttonClassName",
+    "icons",
+    "conflict",
+    "showBegin",
+  ]
+);
 
 const batchProps = {
   batch: { type: Object as PropType<BatchEditBarProps<unknown>["batch"]> },
@@ -117,13 +120,15 @@ const BatchBarPresentation = defineComponent(
   },
   { name: "ShadcnBatchEditBarPresentation", props: batchProps }
 );
-export function BatchEditBar<TRow>(
-  props: BatchEditBarProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(BatchBarPresentation, { ...context.attrs, ...props });
-}
-BatchEditBar.props = Object.keys(batchProps) as (keyof typeof batchProps)[];
+export const BatchEditBar = /* @__PURE__ */ withProps(
+  function BatchEditBar<TRow>(
+    props: BatchEditBarProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(BatchBarPresentation, { ...context.attrs, ...props });
+  },
+  Object.keys(batchProps) as (keyof typeof batchProps)[]
+);
 
 export const HistoryButtons = defineComponent(
   (props: ToolbarExtrasSlotProps) => {

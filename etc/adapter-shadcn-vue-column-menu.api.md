@@ -12,15 +12,11 @@ import { StaticTableFeature } from '@adapttable/vue';
 import { VNode } from 'vue';
 
 // @public (undocumented)
-export function ColumnMenu<TRow>(props: ColumnMenuSlotProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const ColumnMenu: (<TRow>(props: ColumnMenuSlotProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace ColumnMenu {
-    var // (undocumented)
-    props: ("dir" | "labels" | "classNames" | "allColumns" | "layout" | "hasRowActions" | "hasRowReorder" | "onAutoSize" | "onAutoSizeColumn" | "onSortColumn" | "onFilterColumn" | "onRenameColumn" | "sortBy" | "sortDir" | "groupingPanel" | "featureHost" | "container")[];
-}
+}>) & {
+    props: ("labels" | "classNames" | "dir" | "allColumns" | "layout" | "hasRowActions" | "hasRowReorder" | "onAutoSize" | "onAutoSizeColumn" | "onSortColumn" | "onFilterColumn" | "onRenameColumn" | "sortBy" | "sortDir" | "groupingPanel" | "featureHost" | "container")[];
+};
 
 // @public (undocumented)
 export function columnMenu(): StaticTableFeature;

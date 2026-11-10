@@ -523,7 +523,7 @@ describe("rowReorder", () => {
     mount(rowReorder<Row>(vi.fn()));
     fireEvent.keyDown(screen.getByTestId("row-a"), { key: " " });
     expect(screen.getByTestId("announcement")).toHaveTextContent(
-      "Row lifted, position 1"
+      "Row 1 lifted"
     );
   });
 
@@ -531,7 +531,7 @@ describe("rowReorder", () => {
     mount(rowReorder<Row>(vi.fn()), { rowMoved: () => "moved" });
     fireEvent.keyDown(screen.getByTestId("row-a"), { key: " " });
     expect(screen.getByTestId("announcement")).toHaveTextContent(
-      "Row lifted, position 1"
+      "Row 1 lifted"
     );
   });
 

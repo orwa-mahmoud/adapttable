@@ -2,6 +2,7 @@
 import {
   devWarn,
   type TableDensity,
+  type TableLabels,
   type TableSource,
   type UrlStateAdapter,
 } from "@adapttable/core";
@@ -61,6 +62,8 @@ export interface TableFeature<TRow> {
   readonly id: string;
   readonly dependencies?: readonly unknown[];
   apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
+  /** The strings the feature draws, with their English defaults. */
+  readonly labels?: Partial<TableLabels>;
   readonly setup?: (host: TableFeatureHost<TRow>) => void | (() => void);
   readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
   readonly renders?: readonly FeatureRender<never, VNodeChild>[];
@@ -79,6 +82,8 @@ export interface StaticTableFeature {
   readonly id: string;
   readonly dependencies?: readonly unknown[];
   apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+  /** The strings the feature draws, with their English defaults. */
+  readonly labels?: Partial<TableLabels>;
   readonly setup?: (host: StaticFeatureHost) => void | (() => void);
   readonly mount?: <TRow>(
     context: FeatureMountContext<TRow>

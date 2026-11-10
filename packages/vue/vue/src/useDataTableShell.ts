@@ -36,6 +36,7 @@ import {
   columnSelectLabel,
   DENSITY_STATE,
   type FeatureHostState,
+  featureLabelsOf,
   type FilterEngine,
   FIND_BAR,
   LiveFeatureHost,
@@ -304,6 +305,7 @@ export function useDataTableShell<TRow>(
     );
     return {
       ...featureValues,
+      featureLabels: featureLabelsOf(declarations.value),
       ...explicitValues,
     } as unknown as ResolvedTableOptions<TRow>;
   });

@@ -403,6 +403,9 @@ export function autoSizeColumns(root: Element | null, keys: readonly string[], s
 export function availableFields(fields: readonly PivotField[], config: PivotConfig): PivotField[];
 
 // @public
+export const BASE_LABELS: Pick<Required<TableLabels>, "table" | "search" | "searchPlaceholder" | "noData" | "noResults" | "expandRow" | "collapseRow" | "value" | "filterAll" | "applyView" | "loading" | "loadMore" | "filters" | "clearAll" | "filterTree" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "columns" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "density" | "closePanel" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "expandColumnGroup" | "collapseColumnGroup" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed">;
+
+// @public
 export interface BatchEditBarModel {
     readonly cancelLabel: string;
     readonly conflictMessage: string | undefined;
@@ -3532,6 +3535,9 @@ export interface FeatureRegistration<TRow = unknown> {
 }
 
 // @public
+export type FeatureStrings<TGroups extends readonly Partial<TableLabels>[]> = Readonly<Pick<Required<TableLabels>, keyof typeof BASE_LABELS | GroupKeys<TGroups>>>;
+
+// @public
 export interface FetchAllExport<TRow> {
     fetchPage: (query: ExportQuery) => Promise<readonly TRow[]>;
     maxRows?: number;
@@ -3574,6 +3580,9 @@ export const FILTER_AI_OPTIONS_LIMIT = 50;
 
 // @public
 export const FILTER_ENGINE_IMPL: FilterEngine;
+
+// @public
+export const FILTER_LABELS: Pick<Required<TableLabels>, "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "boolAny" | "boolTrue" | "boolFalse" | "removeFilter" | "filtersDone" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters">;
 
 // @public
 export const FILTER_OP_SUFFIX = "Op";
@@ -3669,7 +3678,7 @@ export type FilterOp = TextOp | NumberOp | DateOp;
 export function filterOpKey(key: string): string;
 
 // @public
-export function filterOpLabel(labels: Required<TableLabels>, key: keyof TableLabels): string;
+export function filterOpLabel(labels: Readonly<Partial<TableLabels>>, key: keyof TableLabels): string;
 
 // @public
 export interface FilterOption {
@@ -3703,10 +3712,13 @@ export interface FilterRuntime<TRow> {
 export function filterStateKeys(def: Pick<FilterDef, "key" | "type">, registry?: FilterTypeRegistry): string[];
 
 // @public
+export type FilterStrings = FeatureStrings<readonly [typeof FILTER_LABELS]>;
+
+// @public
 export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>, registry?: FilterTypeRegistry): string;
 
 // @public
-export function filterTreeCombinatorOptions(labels: Required<TableLabels>): readonly FilterTreeOption[];
+export function filterTreeCombinatorOptions(labels: FilterStrings): readonly FilterTreeOption[];
 
 // @public
 export interface FilterTreeConditionModel<TRow> {
@@ -3720,7 +3732,7 @@ export interface FilterTreeConditionModel<TRow> {
 }
 
 // @public
-export function filterTreeConditionModel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry, labels: Required<TableLabels>): FilterTreeConditionModel<TRow> | undefined;
+export function filterTreeConditionModel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry, labels: FilterStrings): FilterTreeConditionModel<TRow> | undefined;
 
 // @public
 export interface FilterTreeEditorActions {
@@ -3738,7 +3750,7 @@ export function filterTreeEditorActions<TRow>(tree: QueryFilterGroup | undefined
 export type FilterTreeNode = QueryCondition | QueryFilterGroup;
 
 // @public
-export function filterTreeOpLabel(widget: string | undefined, op: string, labels: Required<TableLabels>): string;
+export function filterTreeOpLabel(widget: string | undefined, op: string, labels: FilterStrings): string;
 
 // @public
 export interface FilterTreeOption {
@@ -3785,7 +3797,7 @@ export type FilterTreeValueEditor = {
 };
 
 // @public
-export function filterTreeValueEditor<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry, labels: Required<TableLabels>): FilterTreeValueEditor;
+export function filterTreeValueEditor<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry, labels: FilterStrings): FilterTreeValueEditor;
 
 // @public
 export type FilterType = (typeof FILTER_TYPES)[number];
@@ -4767,6 +4779,7 @@ export interface GroupingPanelInteractions {
         };
     };
     moveBy: (key: string, delta: -1 | 1) => void;
+    panelState?<TRow>(input: GroupingPanelStateInput<TRow>): GroupingPanelState;
     remove: (key: string) => void;
     removeAggregate: (key: string) => void;
     removeDropProps: () => GroupingDropProps<GroupingDragEventLike>;
@@ -4782,11 +4795,30 @@ export interface GroupingPanelSnapshot {
 }
 
 // @public
+export interface GroupingPanelSource<TRow> {
+    readonly aggregateOperations?: readonly string[];
+    readonly allFilteredRows?: readonly TRow[];
+    readonly capabilities?: TableSourceCapabilities;
+    readonly groupAggregateOverrides?: GroupAggregateOverrides;
+    readonly groups?: readonly QueryGroupRow<TRow>[];
+    readonly honorsAggregates?: boolean;
+    readonly queryAggregates?: readonly QueryAggregate[];
+    readonly setGroupAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
+}
+
+// @public
 export interface GroupingPanelState extends GroupingPanelInteractions {
     aggregateOverrides: GroupAggregateOverrides;
     aggregations: AggregationModel;
     canSetAggregates: boolean;
     groupBy: readonly string[];
+}
+
+// @public
+export interface GroupingPanelStateInput<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly groupBy: readonly string[];
+    readonly source: GroupingPanelSource<TRow>;
 }
 
 // @public
@@ -4860,6 +4892,9 @@ export interface GroupingShowMoreTarget {
 
 // @public
 export function groupingSourceOf<TRow>(source: GroupingRuntimeSource<TRow>): GroupingRuntimeSource<TRow>;
+
+// @public
+export type GroupKeys<TGroups extends readonly Partial<TableLabels>[]> = Extract<{ [I in keyof TGroups]: keyof TGroups[I]; }[number], keyof TableLabels>;
 
 // @public
 export function groupLeafCount(entry: {

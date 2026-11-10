@@ -46,6 +46,7 @@ export function rowDetail<TRow>(
   const base = coreRowDetail<TRow>(render, defaultExpandedRowIds);
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({
       ...base.apply?.(input),
       ...options,
@@ -63,6 +64,7 @@ export function nestedTable<TRow>(
   const base = coreNestedTable<TRow>(nested, defaultExpandedRowIds);
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({
       ...base.apply?.(input),
       ...options,

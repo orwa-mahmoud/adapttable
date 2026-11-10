@@ -67,7 +67,7 @@ export function scalarFilterText(value: FilterValue): string {
  * @public
  */
 export function filterOpLabel(
-  labels: Required<TableLabels>,
+  labels: Readonly<Partial<TableLabels>>,
   key: keyof TableLabels
 ): string {
   const value = labels[key];

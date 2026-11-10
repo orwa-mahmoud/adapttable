@@ -3,6 +3,7 @@ import {
   FilterTreeChrome,
   type FilterTreeSlots,
   useFilterTreeModel,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -87,13 +88,15 @@ const VuetifyFilterTreePresentation = defineComponent(
 );
 
 /** Keep the canonical generic props stable across supported Vue versions. */
-export function VuetifyFilterTree<TRow>(
-  props: FilterTreeBuilderProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(VuetifyFilterTreePresentation, {
-    ...context.attrs,
-    ...props,
-  });
-}
-VuetifyFilterTree.props = treeProps;
+export const VuetifyFilterTree = /* @__PURE__ */ withProps(
+  function VuetifyFilterTree<TRow>(
+    props: FilterTreeBuilderProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(VuetifyFilterTreePresentation, {
+      ...context.attrs,
+      ...props,
+    });
+  },
+  treeProps
+);

@@ -4,7 +4,7 @@
  * A late clipboard answer is dropped when the rows, columns, window or enabled
  * flag changed, or the container was detached. The host still writes the cells.
  */
-import { defaultLabels } from "../labels";
+import { GRID_LABELS } from "../labelGroups/gridLabels";
 import { type CellRange, cellRangeSize } from "./cellRange";
 import {
   clipboardRangeText,
@@ -31,7 +31,7 @@ export function copyGridSelection<TRow>(
     });
   } catch {
     session.say(
-      session.labels()?.gridRangeCopyFailed ?? defaultLabels.gridRangeCopyFailed
+      session.labels()?.gridRangeCopyFailed ?? GRID_LABELS.gridRangeCopyFailed
     );
     return;
   }
@@ -40,11 +40,11 @@ export function copyGridSelection<TRow>(
       return;
     session.say(
       ok
-        ? (session.labels()?.gridRangeCopied ?? defaultLabels.gridRangeCopied)(
+        ? (session.labels()?.gridRangeCopied ?? GRID_LABELS.gridRangeCopied)(
             cellRangeSize(selection)
           )
         : (session.labels()?.gridRangeCopyFailed ??
-            defaultLabels.gridRangeCopyFailed)
+            GRID_LABELS.gridRangeCopyFailed)
     );
     if (ok && cut) session.options.onCut?.(selection);
   });
@@ -75,7 +75,7 @@ export function pasteGridSelection<TRow>(
     if (text === null) {
       session.say(
         session.labels()?.gridRangePasteFailed ??
-          defaultLabels.gridRangePasteFailed
+          GRID_LABELS.gridRangePasteFailed
       );
       return;
     }
@@ -94,12 +94,11 @@ export function pasteGridSelection<TRow>(
       },
       () =>
         session.say(
-          (session.labels()?.gridRangePasted ?? defaultLabels.gridRangePasted)(
+          (session.labels()?.gridRangePasted ?? GRID_LABELS.gridRangePasted)(
             count
           )
         ),
-      session.labels()?.gridRangePasteFailed ??
-        defaultLabels.gridRangePasteFailed
+      session.labels()?.gridRangePasteFailed ?? GRID_LABELS.gridRangePasteFailed
     );
   });
 }

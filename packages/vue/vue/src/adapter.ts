@@ -575,7 +575,7 @@ export {
   TOOLBAR_EXTRAS,
   unpinAllColumns,
 } from "@adapttable/core/binding";
-export { resolveCellSpan } from "@adapttable/core/binding";
+export { BASE_LABELS, resolveCellSpan } from "@adapttable/core/binding";
 export {
   createMenuNavigation,
   type MenuNavigationAction,
@@ -615,6 +615,7 @@ export type {
   TableFeatureHost,
 } from "./features/tableFeature";
 export type { FeatureState } from "./featureState";
+export { withProps } from "./functionalProps";
 export type {
   GroupRowModel,
   RowDetailModel,

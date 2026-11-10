@@ -5,6 +5,7 @@ import {
   type FilterHeaderSlots,
   useFilterHeaderControl,
   useScopeActivity,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -186,12 +187,15 @@ const HeaderControlPresentation = defineComponent(
   { name: "ShadcnFilterHeaderControl", props: propNames }
 );
 
-export function FilterHeaderControl<TRow>(
-  props: FilterHeaderControlOptions<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(HeaderControlPresentation, { ...context.attrs, ...props });
-}
-FilterHeaderControl.props = Object.keys(
-  propNames
-) as (keyof FilterHeaderControlOptions<unknown>)[];
+export const FilterHeaderControl = /* @__PURE__ */ withProps(
+  function FilterHeaderControl<TRow>(
+    props: FilterHeaderControlOptions<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(HeaderControlPresentation, {
+      ...context.attrs,
+      ...props,
+    });
+  },
+  Object.keys(propNames) as (keyof FilterHeaderControlOptions<unknown>)[]
+);

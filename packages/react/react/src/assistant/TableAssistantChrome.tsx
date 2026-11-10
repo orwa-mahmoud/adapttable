@@ -15,16 +15,17 @@
 import {
   type ApprovalReview,
   approvalReview,
-  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
 import {
+  ASSISTANT_LABELS,
   assistantBadgeTone,
   assistantComposerState,
   assistantLauncherName,
   assistantQuestion,
   assistantRejoinable,
   assistantWithGreeting,
+  resolveFeatureLabels,
   type TableAssistantProps as NeutralTableAssistantProps,
 } from "@adapttable/core/binding";
 import {
@@ -73,6 +74,8 @@ export type { TableAssistantBoundary } from "./assistantPlacement";
 /** Whether the panel is mid-turn — re-exported for a host's own chrome. */
 export { assistantIsBusy } from "./assistantView";
 import { useConversationScroll } from "./useConversationScroll";
+
+const ASSISTANT_GROUPS = [ASSISTANT_LABELS] as const;
 
 export type { TableAssistantPresentation } from "@adapttable/core/binding";
 
@@ -178,7 +181,7 @@ function Header({
           textOverflow: "ellipsis",
         }}
       >
-        {resolveLabels(labels).assistantTitle}
+        {resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantTitle}
       </span>
       <Badge
         label={connection}
@@ -198,8 +201,12 @@ function Header({
       >
         {onSettings ? (
           <Button
-            label={resolveLabels(labels).assistantSettings}
-            tooltip={resolveLabels(labels).assistantSettings}
+            label={
+              resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantSettings
+            }
+            tooltip={
+              resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantSettings
+            }
             part="assistant-settings"
             variant="subtle"
             icon={<SettingsIcon />}
@@ -208,8 +215,10 @@ function Header({
           />
         ) : null}
         <Button
-          label={resolveLabels(labels).assistantClose}
-          tooltip={resolveLabels(labels).assistantClose}
+          label={resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantClose}
+          tooltip={
+            resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantClose
+          }
           part="assistant-close"
           variant="subtle"
           icon={<CloseIcon />}
@@ -279,7 +288,7 @@ function Launcher({
       // reader a white robot here and a coloured one everywhere else.
       variant="subtle"
       iconOnly
-      tooltip={resolveLabels(labels).assistantOpen}
+      tooltip={resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantOpen}
       icon={
         <span
           data-adapttable-part="assistant-launcher-mark"
@@ -542,9 +551,9 @@ function PanelNotice({
   if (rejoin) {
     return (
       <p data-adapttable-part="assistant-detached">
-        {resolveLabels(labels).assistantDetached}{" "}
+        {resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantDetached}{" "}
         <Button
-          label={resolveLabels(labels).assistantRejoin}
+          label={resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantRejoin}
           part="assistant-rejoin"
           variant="secondary"
           onClick={() => void assistant.resume?.()}
@@ -555,7 +564,7 @@ function PanelNotice({
   if (assistant.status === "disconnected") {
     return (
       <p data-adapttable-part="assistant-unavailable">
-        {resolveLabels(labels).assistantUnavailable}
+        {resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantUnavailable}
       </p>
     );
   }
@@ -711,7 +720,10 @@ function Body({
           data-adapttable-part="assistant-approval-elsewhere"
           style={{ margin: 0 }}
         >
-          {resolveLabels(labels).approvalWaitingElsewhere}
+          {
+            resolveFeatureLabels(labels, ASSISTANT_GROUPS)
+              .approvalWaitingElsewhere
+          }
         </p>
       ) : null}
       {scroll.hasUnseen ? (
@@ -723,7 +735,10 @@ function Body({
           }}
         >
           <Button
-            label={resolveLabels(labels).assistantNewMessages}
+            label={
+              resolveFeatureLabels(labels, ASSISTANT_GROUPS)
+                .assistantNewMessages
+            }
             part="assistant-jump-latest"
             variant="secondary"
             onClick={scroll.jumpToLatest}
@@ -946,7 +961,7 @@ export function TableAssistantChrome({
   // place itself is worse than a narrow one.
   const resolved =
     presentation === "floating" && !wide ? "sheet" : presentation;
-  const title = resolveLabels(labels).assistantTitle;
+  const title = resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantTitle;
   // Everything eligible, primary and overflow alike: a menu has room for the
   // lot, which is the whole reason it replaced a list that had to be split.
   const examples = {
@@ -1034,7 +1049,8 @@ export function TableAssistantChrome({
         sticky={resolved !== "panel"}
         {...(composer.answering
           ? {
-              placeholder: resolveLabels(labels).assistantAnswerPlaceholder,
+              placeholder: resolveFeatureLabels(labels, ASSISTANT_GROUPS)
+                .assistantAnswerPlaceholder,
             }
           : {})}
         {...(speech ? { speech } : {})}
@@ -1042,7 +1058,9 @@ export function TableAssistantChrome({
       />
       {resolved === "sheet" ? (
         <Button
-          label={resolveLabels(labels).assistantBackToTable}
+          label={
+            resolveFeatureLabels(labels, ASSISTANT_GROUPS).assistantBackToTable
+          }
           part="assistant-back"
           variant="subtle"
           onClick={close}

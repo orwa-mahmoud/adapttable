@@ -4,9 +4,12 @@ import {
   approvalArgumentPairs,
   approvalProposalText,
   approvalReview,
-  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
+import {
+  ASSISTANT_LABELS,
+  resolveFeatureLabels,
+} from "@adapttable/core/binding";
 import {
   defineComponent,
   h,
@@ -20,6 +23,8 @@ import {
 import { useScopeActivity } from "../store";
 import { approvalIdentity } from "./approvalIdentity";
 import type { AgentApprovalProps, ApprovalReviewSlots } from "./contracts";
+
+const APPROVAL_GROUPS = [ASSISTANT_LABELS] as const;
 
 /** @public */
 export interface ApprovalReviewChromeProps {
@@ -84,7 +89,7 @@ export const ApprovalReviewChrome = /*#__PURE__*/ defineComponent(
       const pending = props.pending;
       const review = approvalReview(pending, props.labels);
       if (!review) return null;
-      const copy = resolveLabels(props.labels);
+      const copy = resolveFeatureLabels(props.labels, APPROVAL_GROUPS);
       const full = props.expanded ?? expanded.value;
       const uncontrolled = props.expanded === undefined;
       const controls = props.slots;

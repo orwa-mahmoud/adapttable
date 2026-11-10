@@ -469,6 +469,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "BASE_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/baseLabels.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/baseLabels.ts#BASE_LABELS",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "batchEditHandler",
       "kind": "runtime",
       "module": "focus/cellEdits.ts",
@@ -2821,6 +2832,17 @@
       "deprecated": false,
       "identity": "filters/filterEngine.ts#FILTER_ENGINE_IMPL",
       "subpaths": ["."]
+    },
+    {
+      "name": "FILTER_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/filterLabels.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/filterLabels.ts#FILTER_LABELS",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "FILTER_PREFIX",
@@ -9214,6 +9236,17 @@
       "subpaths": [".", "./binding"]
     },
     {
+      "name": "FeatureStrings",
+      "kind": "type",
+      "module": "labelGroups/tableLabels.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/tableLabels.ts#FeatureStrings",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "FetchAllExport",
       "kind": "type",
       "module": "export/tableExportContract.ts",
@@ -9310,6 +9343,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "filters/filterDefs.ts#FilterRuntime",
+      "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "FilterStrings",
+      "kind": "type",
+      "module": "labelGroups/filterLabels.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/filterLabels.ts#FilterStrings",
       "subpaths": [".", "./binding"]
     },
     {
@@ -9916,6 +9960,17 @@
       "deprecated": false,
       "identity": "grouping/groupingProjection.ts#GroupingShowMoreTarget",
       "subpaths": ["."]
+    },
+    {
+      "name": "GroupKeys",
+      "kind": "type",
+      "module": "labelGroups/tableLabels.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/tableLabels.ts#GroupKeys",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "GroupPagingController",
@@ -12008,6 +12063,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "ACTION_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/actionLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/actionLabels.ts#ACTION_LABELS",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "ACTIVE_FILTER_CHIPS",
       "kind": "runtime",
       "module": "features/slotContract.ts",
@@ -12181,6 +12247,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "style/icons.ts#ASSISTANT_KIND_PATHS",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ASSISTANT_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/assistantLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/assistantLabels.ts#ASSISTANT_LABELS",
       "subpaths": ["./binding"]
     },
     {
@@ -12896,6 +12973,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/slotContract.ts#COLUMN_MENU",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "COLUMN_MENU_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/columnMenuLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/columnMenuLabels.ts#COLUMN_MENU_LABELS",
       "subpaths": ["./binding"]
     },
     {
@@ -13977,6 +14065,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "EDITING_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/editingLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/editingLabels.ts#EDITING_LABELS",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "EDITING_LIVE",
       "kind": "runtime",
       "module": "features/slotContract.ts",
@@ -14073,6 +14172,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/slotContract.ts#EXPANSION_LIVE",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "EXPORT_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/exportLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/exportLabels.ts#EXPORT_LABELS",
       "subpaths": ["./binding"]
     },
     {
@@ -14205,6 +14315,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "style/icons.ts#eyeIcon",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "featureLabelsOf",
+      "kind": "runtime",
+      "module": "features/featurePatch.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "features/featurePatch.ts#featureLabelsOf",
       "subpaths": ["./binding"]
     },
     {
@@ -14384,6 +14505,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "FIND_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/findLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/findLabels.ts#FIND_LABELS",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "FIND_LIVE",
       "kind": "runtime",
       "module": "features/slotContract.ts",
@@ -14483,6 +14615,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "GRID_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/gridLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/gridLabels.ts#GRID_LABELS",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "GRIP_ICON",
       "kind": "runtime",
       "module": "style/icons.ts",
@@ -14568,6 +14711,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "style/cellDisplay.ts#groupIndentStyle",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "GROUPING_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/groupingLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/groupingLabels.ts#GROUPING_LABELS",
       "subpaths": ["./binding"]
     },
     {
@@ -15209,6 +15363,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "PIVOT_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/pivotLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/pivotLabels.ts#PIVOT_LABELS",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "planFeatureRegistration",
       "kind": "runtime",
       "module": "features/featureRegistration.ts",
@@ -15418,6 +15583,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "resolveFeatureLabels",
+      "kind": "runtime",
+      "module": "labelGroups/tableLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/tableLabels.ts#resolveFeatureLabels",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "resolveMobileLabel",
       "kind": "runtime",
       "module": "style/cellDisplay.ts",
@@ -15448,6 +15624,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "rows/rowPresentation.ts#resolveRowStyle",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "resolveTableLabels",
+      "kind": "runtime",
+      "module": "labelGroups/tableLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/tableLabels.ts#resolveTableLabels",
       "subpaths": ["./binding"]
     },
     {
@@ -15492,6 +15679,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "features/slotContract.ts#ROW_EDIT_ACTIONS",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "ROW_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/rowLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/rowLabels.ts#ROW_LABELS",
       "subpaths": ["./binding"]
     },
     {
@@ -15712,6 +15910,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "engine/sameRows.ts#sameRows",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "SAVED_VIEW_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/savedViewLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/savedViewLabels.ts#SAVED_VIEW_LABELS",
       "subpaths": ["./binding"]
     },
     {
@@ -16152,6 +16361,17 @@
       "forward": true,
       "deprecated": false,
       "identity": "columns/columnMenuModel.ts#unpinAllColumns",
+      "subpaths": ["./binding"]
+    },
+    {
+      "name": "VIEW_CONTROL_LABELS",
+      "kind": "runtime",
+      "module": "labelGroups/viewControlLabels.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "labelGroups/viewControlLabels.ts#VIEW_CONTROL_LABELS",
       "subpaths": ["./binding"]
     },
     {
@@ -22368,7 +22588,14 @@
       "forward": true,
       "deprecated": false,
       "identity": "contracts/source.ts#ExportScopeCapability",
-      "subpaths": [".", "./binding", "./editing", "./engine", "./query"]
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./grouping",
+        "./query"
+      ]
     },
     {
       "name": "ExportTable",
@@ -22878,6 +23105,24 @@
       ]
     },
     {
+      "name": "GroupingPanelSource",
+      "kind": "type",
+      "module": "layout/tableChromeState.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/tableChromeState.ts#GroupingPanelSource",
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./grouping",
+        "./query"
+      ]
+    },
+    {
       "name": "GroupingPanelState",
       "kind": "type",
       "module": "grouping/groupingPanelModel.ts",
@@ -22886,6 +23131,24 @@
       "forward": true,
       "deprecated": false,
       "identity": "grouping/groupingPanelModel.ts#GroupingPanelState",
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./grouping",
+        "./query"
+      ]
+    },
+    {
+      "name": "GroupingPanelStateInput",
+      "kind": "type",
+      "module": "layout/tableChromeState.ts",
+      "audience": "app",
+      "path": "./editing",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/tableChromeState.ts#GroupingPanelStateInput",
       "subpaths": [
         ".",
         "./binding",
@@ -23042,7 +23305,14 @@
       "forward": true,
       "deprecated": false,
       "identity": "source/queryGroups.ts#QueryGroupRow",
-      "subpaths": [".", "./binding", "./editing", "./engine", "./query"]
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./grouping",
+        "./query"
+      ]
     },
     {
       "name": "ReconcileLiveBatchEdit",
@@ -23441,7 +23711,14 @@
       "forward": true,
       "deprecated": false,
       "identity": "contracts/source.ts#TableSourceCapabilities",
-      "subpaths": [".", "./binding", "./editing", "./engine", "./query"]
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./grouping",
+        "./query"
+      ]
     },
     {
       "name": "TableStateMutators",
@@ -23463,7 +23740,14 @@
       "forward": true,
       "deprecated": false,
       "identity": "contracts/source.ts#TotalCountCapability",
-      "subpaths": [".", "./binding", "./editing", "./engine", "./query"]
+      "subpaths": [
+        ".",
+        "./binding",
+        "./editing",
+        "./engine",
+        "./grouping",
+        "./query"
+      ]
     },
     {
       "name": "UseColumnLayoutResult",

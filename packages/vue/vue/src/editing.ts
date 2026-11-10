@@ -131,6 +131,7 @@ export function editing<TRow>(
   const base = coreEditing<TRow>(onCellEdit, extras);
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL],
   };
@@ -142,6 +143,7 @@ export function rowEditing<TRow>(
   const base = coreRowEditing<TRow>(onRowEdit, extras);
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL, ROW_EDIT_ACTIONS],
   };
@@ -153,6 +155,7 @@ export function batchEditing<TRow>(
   const base = coreBatchEditing<TRow>(onBatchEdit, extras);
   return {
     id: base.id,
+    labels: base.labels,
     apply: (input) => ({ ...base.apply?.(input), editingModel: useEditing }),
     requiredSlots: [EDITABLE_CELL, BATCH_EDIT_BAR],
   };

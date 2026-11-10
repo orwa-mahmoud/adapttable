@@ -24,15 +24,11 @@ import { VNode } from 'vue';
 import { VueEditableCellProps } from '@adapttable/vue/adapter';
 
 // @public (undocumented)
-export function BatchEditBar<TRow>(props: BatchEditBarProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const BatchEditBar: (<TRow>(props: BatchEditBarProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace BatchEditBar {
-    var // (undocumented)
+}>) & {
     props: ("labels" | "className" | "buttonClassName" | "batch" | "contested")[];
-}
+};
 
 // @public (undocumented)
 export function batchEditing<TRow>(onBatchEdit: NonNullable<TableEditingOptions<TRow>["onBatchEdit"]>, extras?: EditingLifecycleExtras<TRow>): TableFeature<TRow>;
@@ -46,15 +42,11 @@ export { CellEditHandler }
 export { dirtyIndicators }
 
 // @public
-export function EditableCell<TRow>(props: VueEditableCellProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const EditableCell: (<TRow>(props: VueEditableCellProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace EditableCell {
-    var // (undocumented)
+}>) & {
     props: ["editing", "row", "column", "rowId", "rowIndex", "rows", "columns", "rowKey", "editLabel", "undoLabel", "display"];
-}
+};
 
 export { editHistory }
 
@@ -64,15 +56,11 @@ export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Editin
 export { EditingLifecycleExtras }
 
 // @public (undocumented)
-export function RowEditActions<TRow>(props: RowEditActionsProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const RowEditActions: (<TRow>(props: RowEditActionsProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace RowEditActions {
-    var // (undocumented)
+}>) & {
     props: ["rowEditing", "row", "rowId", "labels", "className", "buttonClassName", "icons", "conflict", "showBegin"];
-}
+};
 
 export { RowEditIcons }
 

@@ -7,7 +7,11 @@
  * word. `isComposing` is the only reliable signal for that, so it is checked
  * before anything else.
  */
-import { resolveLabels, type TableLabels } from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
+import {
+  ASSISTANT_LABELS,
+  resolveFeatureLabels,
+} from "@adapttable/core/binding";
 import type { KeyboardEvent, ReactElement } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
@@ -18,6 +22,8 @@ import type {
 } from "./assistantSlots";
 import { assistantIsBusy, assistantIsUsable } from "./assistantView";
 import type { SpeechInputHandle } from "./speechView";
+
+const ASSISTANT_GROUPS = [ASSISTANT_LABELS] as const;
 
 /** Props for {@link AssistantComposer}. @internal */
 export interface AssistantComposerProps {
@@ -82,7 +88,7 @@ export function AssistantComposer({
   const LanguageChip = slots.LanguageChip;
   const Menu = slots.Menu;
   const listening = speech?.state.status === "listening";
-  const copy = resolveLabels(labels);
+  const copy = resolveFeatureLabels(labels, ASSISTANT_GROUPS);
   const micLabel = listening
     ? copy.assistantVoiceStop
     : copy.assistantVoiceStart;

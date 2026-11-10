@@ -11,7 +11,8 @@
  *
  * Nothing here renders. It is the model the surfaces read.
  */
-import { defaultLabels, resolveLabels } from "../labels";
+import { ASSISTANT_LABELS } from "../labelGroups/assistantLabels";
+import { resolveTableLabels } from "../labelGroups/tableLabels";
 import type { TableLabels } from "../types";
 import type {
   AgentApprovalDecision,
@@ -19,6 +20,8 @@ import type {
   AgentApprovalPending,
   AgentApprovalProposal,
 } from "./types";
+
+const APPROVAL_LABELS = [ASSISTANT_LABELS];
 
 /** How many changes a review shows before asking to open the full list. */
 export const APPROVAL_PREVIEW_LIMIT = 3;
@@ -128,7 +131,7 @@ export function approvalReview(
   const preview = items.slice(0, APPROVAL_PREVIEW_LIMIT);
   // Falling back to the built-in labels rather than restating them: a second
   // copy of the English is a second place for it to drift.
-  const text = { ...defaultLabels, ...labels };
+  const text = resolveTableLabels(labels, APPROVAL_LABELS);
 
   return {
     changes: items.length,
@@ -216,7 +219,7 @@ export function approvalProposalText(
   proposal: AgentApprovalProposal,
   labels: TableLabels | undefined
 ): string {
-  const copy = resolveLabels(labels);
+  const copy = resolveTableLabels(labels, APPROVAL_LABELS);
   return copy.proposalChange({
     row: proposal.rowLabel ?? proposal.rowKey,
     ...(proposal.column === undefined

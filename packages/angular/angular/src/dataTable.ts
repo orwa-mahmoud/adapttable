@@ -23,7 +23,6 @@ import {
   paginationSlots,
   PIN_Z,
   pinnedCellStyle,
-  resolveLabels,
   SEARCH_DEBOUNCE_MS,
   type SortByOption,
   type SortDirection,
@@ -45,11 +44,13 @@ import {
   type CssProperties,
   desktopTableStyle,
   type FeatureHostState,
+  featureLabelsOf,
   fetchNextBodyPage,
   headerCellAttributes,
   headerRowAttributes,
   type HtmlGroupedHeaderCell,
   htmlGroupedHeaderPlan,
+  resolveTableLabels,
   rowAttributes,
   searchInputAttributes,
   sortButtonAttributes,
@@ -327,9 +328,6 @@ export function injectDataTable<TRow>(
   const injector = options.injector ?? inject(Injector);
   const { source, rowKey } = options;
 
-  const labels = computed(() =>
-    resolveLabels(options.labels && readMaybe(options.labels))
-  );
   const dir = computed(() => readMaybe(options.dir ?? "ltr"));
   const isMobile = computed(() => readMaybe(options.forceMobile ?? false));
   const columnWidths = computed(
@@ -340,6 +338,12 @@ export function injectDataTable<TRow>(
     tableFeaturesOf(injector, readMaybe(options.features))
   );
   const featureOptions = computed(() => featureOptionsOf(features()));
+  const labels = computed(() =>
+    resolveTableLabels(
+      options.labels && readMaybe(options.labels),
+      featureLabelsOf(features())
+    )
+  );
   const featureHost = featureHostFor(injector, options.features);
   const tree = computed(() => flattenColumns(readMaybe(options.columns)));
   const columnGroups = computed(() => tree().groups);

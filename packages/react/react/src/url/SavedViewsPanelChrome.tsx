@@ -29,16 +29,17 @@
  */
 import {
   createSavedViewRenameController,
-  resolveLabels,
   type SavedViewGlyph,
   savedViewRowControls,
 } from "@adapttable/core";
-import type {
-  SavedViewRowControl as NeutralSavedViewRowControl,
-  SavedViewsPanelChromeProps as NeutralSavedViewsPanelChromeProps,
-  SavedViewsPanelRowProps as NeutralSavedViewsPanelRowProps,
-  SavedViewsPanelSlots as NeutralSavedViewsPanelSlots,
-  SavedViewsPanelSurfaceProps as NeutralSavedViewsPanelSurfaceProps,
+import {
+  resolveFeatureLabels,
+  SAVED_VIEW_LABELS,
+  type SavedViewRowControl as NeutralSavedViewRowControl,
+  type SavedViewsPanelChromeProps as NeutralSavedViewsPanelChromeProps,
+  type SavedViewsPanelRowProps as NeutralSavedViewsPanelRowProps,
+  type SavedViewsPanelSlots as NeutralSavedViewsPanelSlots,
+  type SavedViewsPanelSurfaceProps as NeutralSavedViewsPanelSurfaceProps,
 } from "@adapttable/core/binding";
 import {
   type CSSProperties,
@@ -48,6 +49,8 @@ import {
 } from "react";
 
 import type { SavedView } from "./useSavedViews";
+
+const SAVED_VIEW_GROUPS = [SAVED_VIEW_LABELS] as const;
 
 export type { SavedView };
 
@@ -212,7 +215,7 @@ export function SavedViewsPanelChrome({
   slots,
   className,
 }: Readonly<SavedViewsPanelChromeProps>) {
-  const labels = resolveLabels(labelsProp);
+  const labels = resolveFeatureLabels(labelsProp, SAVED_VIEW_GROUPS);
   const { Surface, Row, Input, Empty } = slots;
   // Which view is being renamed, and the draft. Held here rather than by the
   // host: a half-typed name is the panel's business, not the table's.

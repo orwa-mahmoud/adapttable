@@ -279,6 +279,7 @@ import { FillHandleSlotProps } from '@adapttable/core/binding';
 import { FillHandleSlots as FillHandleSlots_2 } from '@adapttable/core/binding';
 import { FILTER_CHIPS_LIVE } from '@adapttable/core/binding';
 import { FILTER_HEADER } from '@adapttable/core/binding';
+import { FILTER_LABELS } from '@adapttable/core/binding';
 import { FILTER_TYPES } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
@@ -518,6 +519,7 @@ import { resolveRowEditTrigger } from '@adapttable/core/editing';
 import { resolveRowHeight } from '@adapttable/core/binding';
 import { resolveRowStyle } from '@adapttable/core/binding';
 import { resolveStickyToolbar } from '@adapttable/core';
+import { resolveTableLabels } from '@adapttable/core/binding';
 import { resolveVirtualRows } from '@adapttable/core';
 import { restoreFocusSoon } from '@adapttable/core';
 import { ROW_ACTIONS_LIVE } from '@adapttable/core/binding';
@@ -2190,6 +2192,11 @@ export function FeatureHostProvider(input: Readonly<{
 
 export { FeatureHostState }
 
+// @public
+export function featureLabelsFor(props: {
+    readonly featureLabels?: readonly Partial<TableLabels>[];
+}): readonly Partial<TableLabels>[];
+
 export { FeatureNotice }
 
 export { FeatureNoticeAppearance }
@@ -2216,6 +2223,7 @@ export interface FeatureProps<TRow> {
     enableColumnMenu?: boolean;
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraRows?: readonly ExtraRow[];
+    featureLabels?: readonly Partial<TableLabels>[];
     filters?: readonly FilterDef<TRow>[] | ReactNode;
     filterTypes?: readonly FilterTypeSpec[];
     findInTable?: boolean;
@@ -2343,6 +2351,8 @@ export { FILTER_CHIPS_LIVE }
 export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps>;
 
 export { FILTER_HEADER }
+
+export { FILTER_LABELS }
 
 // @public
 export const FILTER_POPOVER: FeatureSlotKey<FilterOverlaySlotProps>;
@@ -3243,6 +3253,8 @@ export { resolveRowHeight }
 export { resolveRowStyle }
 
 export { resolveStickyToolbar }
+
+export { resolveTableLabels }
 
 export { resolveVirtualRows }
 
@@ -4251,7 +4263,7 @@ export interface UseDataTableResult<TRow> {
 }
 
 // @public
-export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry) => ReactNode): DataTableShellResult<TRow>;
+export function useDataTableShell<TRow>(incoming: DataTableShellProps<TRow>, renderAutoForm: (defs: readonly FilterDef<TRow>[], source: TableSource<TRow>, registry: FilterTypeRegistry, labels: Required<TableLabels>) => ReactNode): DataTableShellResult<TRow>;
 
 // @public
 export function useDesktopTableAssembly<TRow>(props: DesktopAssemblyProps<TRow>, options?: DesktopAssemblyOptions): DesktopTableAssembly<TRow>;

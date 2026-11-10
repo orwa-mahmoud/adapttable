@@ -11,12 +11,15 @@ import {
   commandListView,
   createCommandList,
   type Direction,
-  resolveLabels,
   runCommand,
   type TableLabels,
   tabTrapTarget,
 } from "@adapttable/core";
-import type { CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps } from "@adapttable/core/binding";
+import {
+  ACTION_LABELS,
+  type CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps,
+  resolveFeatureLabels,
+} from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -34,6 +37,8 @@ import {
 import { AdaptAttrs } from "../attrs";
 import { AdaptControl } from "../control";
 import { onBrowser } from "../hooks/platform";
+
+const ACTION_GROUPS = [ACTION_LABELS] as const;
 
 /** The kit owns its dialog and outlets the binding's structured content. @public */
 export type CommandPaletteSurfaceProps = NeutralCommandPaletteSurfaceProps<
@@ -95,7 +100,9 @@ export class AdaptCommandPaletteChrome {
   readonly labels = input<TableLabels | undefined>(undefined);
   /** Direction for the overlay; omission preserves the kit's native direction. */
   readonly dir = input<Direction | undefined>(undefined);
-  protected readonly copy = computed(() => resolveLabels(this.labels()));
+  protected readonly copy = computed(() =>
+    resolveFeatureLabels(this.labels(), ACTION_GROUPS)
+  );
   /** A kit's own class for the surface. */
   readonly className = input<string | undefined>(undefined);
   /** The kit's input, row and empty line. */

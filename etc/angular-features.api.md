@@ -42,6 +42,7 @@ import { SelectionStatsOptions } from '@adapttable/core';
 import { Shortcut } from '@adapttable/core';
 import { SidePanelEntry } from '@adapttable/core/binding';
 import { Signal } from '@angular/core';
+import { TableLabels } from '@adapttable/core';
 import { TableRuntime } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
 import { Type } from '@angular/core';
@@ -52,6 +53,7 @@ export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry>
     apply?(input: FeatureApplyInput<never>): FeaturePatch<never>;
     readonly id?: string;
     readonly implementations?: Readonly<Record<string, unknown>>;
+    readonly labels?: Partial<TableLabels>;
     mount?(context: FeatureMountContext): void | (() => void);
     readonly renders?: readonly FeatureRender<never, SlotComponent>[];
 }

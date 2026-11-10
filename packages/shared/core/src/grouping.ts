@@ -7,6 +7,11 @@
  *
  * @packageDocumentation
  */
+export type {
+  ExportScopeCapability,
+  TableSourceCapabilities,
+  TotalCountCapability,
+} from "./contracts/source";
 export {
   type GroupAggregateOverride,
   type GroupAggregateOverrides,
@@ -55,6 +60,11 @@ export {
   type RowGroupRef,
 } from "./grouping/groupRows";
 export { groupSelectionState } from "./grouping/groupSelection";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./layout/tableChromeState";
+export type { QueryGroupRow } from "./source/queryGroups";
 
 /**
  * Member types the signatures above hand back. Already public on

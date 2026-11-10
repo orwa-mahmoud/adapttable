@@ -12,6 +12,7 @@
  * layer reads `apply`, which a defined feature also has.
  */
 import type { ActionDefinition, SliceKey } from "../state/tableStore";
+import type { TableLabels } from "../types";
 import type {
   FeatureApplyInput,
   FeaturePatch,
@@ -63,8 +64,8 @@ export interface FeatureContract<
   readonly slices?: TSlices;
   /** The named actions the feature offers, by name. */
   readonly actions?: TActions;
-  /** The labels the feature needs, by key, with their English defaults. */
-  readonly labels?: Readonly<Record<string, string>>;
+  /** The strings the feature draws, with their English defaults. */
+  readonly labels?: Partial<TableLabels>;
   /** The URL params the feature reads and writes. */
   readonly urlKeys?: readonly string[];
 }
@@ -84,13 +85,13 @@ export interface DefinedFeature<
   readonly slices: TSlices;
   /** The named actions the feature offers, by name. */
   readonly actions: TActions;
-  /** The labels the feature needs, by key, with their English defaults. */
-  readonly labels: Readonly<Record<string, string>>;
+  /** The strings the feature draws, with their English defaults. */
+  readonly labels: Partial<TableLabels>;
   /** The URL params the feature reads and writes. */
   readonly urlKeys: readonly string[];
 }
 
-const NO_LABELS: Readonly<Record<string, string>> = Object.freeze({});
+const NO_LABELS: Partial<TableLabels> = Object.freeze({});
 const NO_KEYS: readonly string[] = Object.freeze([]);
 
 /**

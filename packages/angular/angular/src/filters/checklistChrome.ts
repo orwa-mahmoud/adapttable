@@ -14,14 +14,15 @@ import {
   type FilterDef,
   filterLabel,
   listFilterValues,
-  resolveLabels,
   searchChecklistItems,
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
-import type {
-  ChecklistButtonProps,
-  ChecklistSearchProps,
+import {
+  type ChecklistButtonProps,
+  type ChecklistSearchProps,
+  FILTER_LABELS,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   afterRenderEffect,
@@ -37,6 +38,8 @@ import {
 
 import { AdaptControl } from "../control";
 import { checklistSlice, nextChecklistViewport } from "./checklistWindow";
+
+const FILTER_GROUPS = [FILTER_LABELS] as const;
 
 /**
  * The kit's controls for the checklist. Each is a standalone component with
@@ -166,7 +169,9 @@ export class AdaptChecklistChrome<TRow> {
   private readonly list = viewChild<ElementRef<HTMLElement>>("list");
   private readonly query = signal("");
   private readonly viewport = signal({ scrollTop: 0, width: 0 });
-  private readonly resolved = computed(() => resolveLabels(this.labels()));
+  private readonly resolved = computed(() =>
+    resolveFeatureLabels(this.labels(), FILTER_GROUPS)
+  );
 
   protected readonly model = computed(() => {
     const def = this.def();

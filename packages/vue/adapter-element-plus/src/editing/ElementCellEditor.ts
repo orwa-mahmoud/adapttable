@@ -5,6 +5,7 @@ import {
   readMultiDraft,
   scheduleTick,
   useScopeActivity,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   computed,
@@ -218,13 +219,13 @@ const ElementCellEditorPresentation = defineComponent(
 
 // Keep the row type at the functional boundary; the presentation validates
 // values and owns the editor's reactive lifecycle.
-function ElementCellEditor<TRow>(
-  props: EditableCellEditorProps<TRow> & { className?: string }
-) {
-  return createVNode(ElementCellEditorPresentation, { ...props });
-}
-ElementCellEditor.props = Object.keys(
-  editorRuntimeProps
-) as (keyof typeof editorRuntimeProps)[];
-ElementCellEditor.inheritAttrs = false;
+const ElementCellEditor = /* @__PURE__ */ withProps(
+  function ElementCellEditor<TRow>(
+    props: EditableCellEditorProps<TRow> & { className?: string }
+  ) {
+    return createVNode(ElementCellEditorPresentation, { ...props });
+  },
+  Object.keys(editorRuntimeProps) as (keyof typeof editorRuntimeProps)[],
+  { inheritAttrs: false }
+);
 export default ElementCellEditor;

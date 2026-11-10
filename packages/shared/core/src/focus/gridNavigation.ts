@@ -7,7 +7,7 @@
 import { columnText } from "../columns/columnText";
 import type { ColumnMetadata } from "../contracts/columns";
 import { isThenable } from "../editing/storePlumbing";
-import { defaultLabels } from "../labels";
+import { GRID_LABELS } from "../labelGroups/gridLabels";
 import type { Direction, TableLabels } from "../types";
 import type { CellEdit } from "./cellEdits";
 import type { CellRange } from "./cellRange";
@@ -516,7 +516,7 @@ export function composeGridNavigation<TRow>(
         typeof column.header === "string" ? column.header : column.key;
       const value = row === undefined ? "" : columnText(column, row);
       const position = (
-        session.labels()?.gridCellPosition ?? defaultLabels.gridCellPosition
+        session.labels()?.gridCellPosition ?? GRID_LABELS.gridCellPosition
       )(cell.row + 1, session.options.rowCount);
       session.say(
         value ? `${header}, ${value}, ${position}` : `${header}, ${position}`

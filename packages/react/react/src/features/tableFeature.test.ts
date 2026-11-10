@@ -1,4 +1,5 @@
 import { resetDevWarnings } from "@adapttable/core";
+import { GROUPING_LABELS } from "@adapttable/core/binding";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { feature } from "./factories";
@@ -38,14 +39,20 @@ describe("applyTableFeatures", () => {
 
   it("applies a factory onto the prop surface", () => {
     const resolved = applyTableFeatures({ features: [grouping("team")] });
-    expect(resolved).toEqual({ groupBy: "team" });
+    expect(resolved).toEqual({
+      groupBy: "team",
+      featureLabels: [GROUPING_LABELS],
+    });
   });
 
   it("lets a later feature win", () => {
     const resolved = applyTableFeatures({
       features: [grouping("first"), grouping("second")],
     });
-    expect(resolved).toEqual({ groupBy: "second" });
+    expect(resolved).toEqual({
+      groupBy: "second",
+      featureLabels: [GROUPING_LABELS, GROUPING_LABELS],
+    });
   });
 
   it("lets an explicit prop win over a feature", () => {
@@ -53,7 +60,10 @@ describe("applyTableFeatures", () => {
       features: [grouping("from-feature")],
       groupBy: "from-prop",
     });
-    expect(resolved).toEqual({ groupBy: "from-prop" });
+    expect(resolved).toEqual({
+      groupBy: "from-prop",
+      featureLabels: [GROUPING_LABELS],
+    });
   });
 
   it("does not let an undefined explicit prop overwrite a feature", () => {
@@ -61,7 +71,10 @@ describe("applyTableFeatures", () => {
       features: [grouping("team")],
       groupBy: undefined,
     });
-    expect(resolved).toEqual({ groupBy: "team" });
+    expect(resolved).toEqual({
+      groupBy: "team",
+      featureLabels: [GROUPING_LABELS],
+    });
   });
 
   it("skips a feature that has no apply", () => {

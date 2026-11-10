@@ -18,31 +18,23 @@ export interface DataTableClassNames extends Omit<DataTableClassNames_2, "filter
 }
 
 // @public
-export function NaiveDesktopTable<TRow>(props: {
+export const NaiveDesktopTable: (<TRow>(props: {
     readonly model: DesktopTableModel<TRow>;
     readonly controls: TableChromeSlots<TRow>;
     readonly classNames?: DataTableClassNames;
     readonly density?: TableDensity;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace NaiveDesktopTable {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public
-export function NaiveMobileCards<TRow>(props: {
+export const NaiveMobileCards: (<TRow>(props: {
     readonly model: MobileCardsModel<TRow>;
     readonly controls: TableChromeSlots<TRow>;
     readonly classNames?: DataTableClassNames;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace NaiveMobileCards {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public
 export function naiveTableControls<TRow>(): Pick<TableChromeSlots<TRow>, "SortButton" | "SelectionCheckbox" | "ColumnGroupToggle" | "ResizeHandle" | "TreeToggle" | "RowDetailToggle">;

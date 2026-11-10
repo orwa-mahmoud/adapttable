@@ -2,23 +2,24 @@
 import {
   findMatchCountText,
   handleFindBarKey,
-  resolveLabels,
   sameGridCell,
   selectionStatParts,
   statusBarItems,
 } from "@adapttable/core";
-import type {
-  ColumnSelectCheckboxChromeProps as NeutralColumnSelectCheckboxChromeProps,
-  ColumnSelectSlots as NeutralColumnSelectSlots,
-  FillHandleSlots as NeutralFillHandleSlots,
-  FindBarProps,
-  FindBarSlots as NeutralFindBarSlots,
-  GridFocusState,
-  SelectionStatsChromeProps as NeutralSelectionStatsChromeProps,
-  SelectionStatsSlots as NeutralSelectionStatsSlots,
-  StatusBarChromeProps as NeutralStatusBarChromeProps,
-  StatusBarSlotProps as NeutralStatusBarSlotProps,
-  StatusBarSlots as NeutralStatusBarSlots,
+import {
+  type ColumnSelectCheckboxChromeProps as NeutralColumnSelectCheckboxChromeProps,
+  type ColumnSelectSlots as NeutralColumnSelectSlots,
+  type FillHandleSlots as NeutralFillHandleSlots,
+  FIND_LABELS,
+  type FindBarProps,
+  type FindBarSlots as NeutralFindBarSlots,
+  type GridFocusState,
+  resolveFeatureLabels,
+  type SelectionStatsChromeProps as NeutralSelectionStatsChromeProps,
+  type SelectionStatsSlots as NeutralSelectionStatsSlots,
+  type StatusBarChromeProps as NeutralStatusBarChromeProps,
+  type StatusBarSlotProps as NeutralStatusBarSlotProps,
+  type StatusBarSlots as NeutralStatusBarSlots,
 } from "@adapttable/core/binding";
 import {
   defineComponent,
@@ -33,6 +34,8 @@ import {
 import { scheduleTick } from "../scheduleTick";
 import { useScopeActivity } from "../store";
 
+const FIND_GROUPS = [FIND_LABELS] as const;
+
 export type FindBarSlots = NeutralFindBarSlots<VNodeChild>;
 export interface FindBarChromeProps extends FindBarProps {
   readonly slots: FindBarSlots;
@@ -42,7 +45,7 @@ function findBarStructure(
   focusRef: (node: { focus(): void } | null) => void
 ): VNodeChild {
   if (!find.open) return null;
-  const text = resolveLabels(labels);
+  const text = resolveFeatureLabels(labels, FIND_GROUPS);
   return h("div", { "data-adapttable-part": "find-bar", class: className }, [
     slots.Search({
       label: text.findInTable,

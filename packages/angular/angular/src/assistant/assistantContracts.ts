@@ -1,8 +1,8 @@
-import type {
-  IconDescriptor,
-  TableAssistantAvatars as NeutralAvatars,
-  TableAssistantFace as NeutralFace,
-  TableAssistantProps as NeutralProps,
+import {
+  type IconDescriptor,
+  type TableAssistantAvatars as NeutralAvatars,
+  type TableAssistantFace as NeutralFace,
+  type TableAssistantProps as NeutralProps,
 } from "@adapttable/core/binding";
 import type { TemplateRef } from "@angular/core";
 

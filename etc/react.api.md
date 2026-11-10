@@ -645,6 +645,7 @@ export interface FeatureProps<TRow> {
     enableColumnMenu?: boolean;
     exportCsv?: boolean | ExportCsvOptions<TRow>;
     extraRows?: readonly ExtraRow[];
+    featureLabels?: readonly Partial<TableLabels>[];
     filters?: readonly FilterDef<TRow>[] | ReactNode;
     filterTypes?: readonly FilterTypeSpec[];
     findInTable?: boolean;
@@ -1276,6 +1277,7 @@ export interface UseDataTableOptions<TRow> {
     columns: ColumnDef<TRow>[];
     columnWidths?: Readonly<Record<string, number>>;
     dir?: Direction;
+    featureLabels?: readonly Partial<TableLabels>[];
     filterLabels?: Readonly<Record<string, ChipLabelResolver>>;
     fitColumns?: boolean;
     forceMobile?: boolean;

@@ -10,14 +10,14 @@ import {
   applyGroupLeafSelection,
   createControllableStore,
   headerSelectionOf,
-  resolveLabels,
   type TableLabels,
   toggleId,
   toggleIds,
 } from "@adapttable/core";
-import type {
-  HeaderSelectionState,
-  SelectionState,
+import {
+  type HeaderSelectionState,
+  resolveTableLabels,
+  type SelectionState,
 } from "@adapttable/core/binding";
 import { createAllMatchingScope } from "@adapttable/core/selection";
 import {
@@ -134,7 +134,7 @@ export function injectRowSelection<TRow>(
     headerSelectionOf(visibleIds(), selectedIds())
   );
   const labels = computed(() =>
-    resolveLabels(options.labels && readMaybe(options.labels))
+    resolveTableLabels(options.labels && readMaybe(options.labels))
   );
 
   const scope = createAllMatchingScope();

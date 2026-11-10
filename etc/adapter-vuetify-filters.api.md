@@ -36,15 +36,11 @@ const __VLS_export: <TRow>(__VLS_props: NonNullable<Awaited<typeof __VLS_setup>>
 type __VLS_PrettifyLocal<T> = (T extends any ? { [K in keyof T]: T[K]; } : { [K in keyof T as K]: T[K]; }) & {};
 
 // @public
-export function ChecklistFilter<TRow>(props: ChecklistFilterProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const ChecklistFilter: (<TRow>(props: ChecklistFilterProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace ChecklistFilter {
-    var // (undocumented)
+}>) & {
     props: string[];
-}
+};
 
 export { ChecklistFilterProps }
 
@@ -58,13 +54,9 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[], options?: Filte
 export { FiltersOptions }
 
 // @public
-export function FilterTreeBuilder<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">): VNode<RendererNode, RendererElement, {
+export const FilterTreeBuilder: (<TRow>(props: FilterTreeBuilderProps<TRow>, context: Pick<SetupContext, "attrs">) => VNode<RendererNode, RendererElement, {
 [key: string]: any;
-}>;
-
-// @public (undocumented)
-export namespace FilterTreeBuilder {
-    var // (undocumented)
+}>) & {
     props: {
         defs: null;
         source: null;
@@ -76,7 +68,7 @@ export namespace FilterTreeBuilder {
             default: undefined;
         };
     };
-}
+};
 
 export { FilterTreeBuilderProps }
 

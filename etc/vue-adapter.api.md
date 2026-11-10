@@ -18,6 +18,7 @@ import { AgentApprovalProps } from '@adapttable/core/binding';
 import { AggregateName } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core/binding';
 import { ApprovalReviewSlots as ApprovalReviewSlots_2 } from '@adapttable/core/binding';
+import { BASE_LABELS } from '@adapttable/core/binding';
 import { BatchEditBarProps as BatchEditBarProps_2 } from '@adapttable/core/binding';
 import { BatchEditStoreOptions } from '@adapttable/core';
 import { bodyCellsHaveRowSpan } from '@adapttable/core/binding';
@@ -150,6 +151,7 @@ import { FilterHeaderSlots as FilterHeaderSlots_2 } from '@adapttable/core/bindi
 import { filterLabel } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core/binding';
 import { FilterRuntime as FilterRuntime_2 } from '@adapttable/core';
+import { FilterStrings } from '@adapttable/core/binding';
 import { FilterTreeBuilderProps } from '@adapttable/core/binding';
 import { FilterTreeButtonProps } from '@adapttable/core/binding';
 import { FilterTreeClassNames } from '@adapttable/core/binding';
@@ -414,6 +416,8 @@ export function assertRequiredSlots<TRow>(features: readonly ComposedFeature<TRo
 // @public (undocumented)
 export type Attrs = Readonly<Record<string, unknown>>;
 
+export { BASE_LABELS }
+
 // @public
 export function BatchEditBarChrome<TRow>(props: BatchEditBarProps<TRow> & {
     readonly controls: EditingActionSlots;
@@ -515,7 +519,7 @@ export interface ChecklistChromeModel {
     // (undocumented)
     readonly classNames?: ChecklistClassNames;
     // (undocumented)
-    readonly labels: ReturnType<typeof resolveLabels>;
+    readonly labels: FilterStrings;
     // (undocumented)
     readonly onScroll: () => void;
     // (undocumented)
@@ -593,13 +597,9 @@ export { columnGroupStubStyle }
 export { ColumnGroupToggleButtonProps }
 
 // @public (undocumented)
-export function ColumnGroupToggleChrome(props: ColumnGroupToggleChromeProps): VNode;
-
-// @public (undocumented)
-export namespace ColumnGroupToggleChrome {
-    var // (undocumented)
+export const ColumnGroupToggleChrome: ((props: ColumnGroupToggleChromeProps) => VNode) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface ColumnGroupToggleChromeProps extends ColumnGroupToggleProps {
@@ -1704,17 +1704,13 @@ export interface DensityControlProps extends ViewControlPresentation {
 }
 
 // @public (undocumented)
-export function DesktopTableChrome<TRow>(props: {
+export const DesktopTableChrome: (<TRow>(props: {
     readonly model: DesktopTableModel<TRow>;
     readonly slots: TableChromeSlots<TRow>;
     readonly classNames?: TableChromeClassNames;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace DesktopTableChrome {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface DesktopTableModel<TRow> {
@@ -2598,13 +2594,9 @@ export type GroupingPanelProps<TRow> = GroupingPanelSlotProps<ColumnDef<TRow>>;
 export type GroupingPanelSlots = GroupingPanelSlots_2<VNodeChild>;
 
 // @public
-export function GroupRowChrome<TRow>(props: GroupRowChromeProps<TRow>): VNodeChild;
-
-// @public (undocumented)
-export namespace GroupRowChrome {
-    var // (undocumented)
+export const GroupRowChrome: (<TRow>(props: GroupRowChromeProps<TRow>) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface GroupRowChromeProps<TRow> {
@@ -2826,17 +2818,13 @@ export { MenuNavigationKey }
 export function mergeVueAttrs(binding: Attrs, host: Attrs): Record<string, unknown>;
 
 // @public (undocumented)
-export function MobileCardsChrome<TRow>(props: {
+export const MobileCardsChrome: (<TRow>(props: {
     readonly model: MobileCardsModel<TRow>;
     readonly slots: TableChromeSlots<TRow>;
     readonly classNames?: TableChromeClassNames;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace MobileCardsChrome {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface MobileCardsModel<TRow> {
@@ -2851,13 +2839,9 @@ export interface MobileCardsModel<TRow> {
 }
 
 // @public
-export function MobileSummaryChrome<TRow>(props: TableSummaryChromeProps<TRow>): VNodeChild;
-
-// @public (undocumented)
-export namespace MobileSummaryChrome {
-    var // (undocumented)
+export const MobileSummaryChrome: (<TRow>(props: TableSummaryChromeProps<TRow>) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public
 export function mountForcedColorsStyles(): void;
@@ -2939,13 +2923,9 @@ export { pinnedRowSticky }
 export { pinnedRowStickyStyle }
 
 // @public (undocumented)
-export function PivotPanelChrome(props: PivotPanelChromeProps): VNodeChild;
-
-// @public (undocumented)
-export namespace PivotPanelChrome {
-    var // (undocumented)
+export const PivotPanelChrome: ((props: PivotPanelChromeProps) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export type PivotPanelChromeProps = Omit<PivotPanelChromeProps_2<VNodeChild>, "slots"> & {
@@ -3465,6 +3445,7 @@ export interface StaticTableFeature {
     readonly dependencies?: readonly unknown[];
     // (undocumented)
     readonly id: string;
+    readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -3892,6 +3873,7 @@ export interface TableFeature<TRow> {
     readonly dependencies?: readonly unknown[];
     // (undocumented)
     readonly id: string;
+    readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -3914,16 +3896,12 @@ export interface TableFeatureState extends FeatureState {
 }
 
 // @public
-export function TableFooterChrome(props: {
+export const TableFooterChrome: ((props: {
     readonly content: () => VNodeChild;
     readonly className?: string;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace TableFooterChrome {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface TableGrouping<TRow> {
@@ -4039,18 +4017,14 @@ export interface TableSummaryCellModel<TRow> {
 }
 
 // @public
-export function TableSummaryChrome<TRow>(props: TableSummaryChromeProps<TRow> & {
+export const TableSummaryChrome: (<TRow>(props: TableSummaryChromeProps<TRow> & {
     readonly leading?: readonly string[];
     readonly trailing?: readonly string[];
     readonly startSpacer?: () => VNodeChild;
     readonly endSpacer?: () => VNodeChild;
-}): VNodeChild;
-
-// @public (undocumented)
-export namespace TableSummaryChrome {
-    var // (undocumented)
+}) => VNodeChild) & {
     props: string[];
-}
+};
 
 // @public (undocumented)
 export interface TableSummaryChromeProps<TRow> {
@@ -4155,7 +4129,7 @@ setQuery: (value: string) => void;
 window: ChecklistWindow;
 ref: (value: HTMLElement | null) => void;
 onScroll: () => void;
-labels: Required<TableLabels>;
+labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "density" | "table" | "search" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterTree" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter">>;
 classNames: ChecklistClassNames | undefined;
 }>;
 
@@ -4292,6 +4266,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly columnWidths?: MaybeRefOrGetterOptional<Readonly<Record<string, number>>>;
     // (undocumented)
     readonly dir?: MaybeRefOrGetter<Direction>;
+    readonly featureLabels?: readonly Partial<TableLabels>[];
     // (undocumented)
     readonly fitColumns?: MaybeRefOrGetter<boolean>;
     // (undocumented)
@@ -4577,7 +4552,7 @@ export function useFilterHeaderControl<TRow>(input: MaybeRefOrGetter<FilterHeade
 
 // @public (undocumented)
 export function useFilterTreeModel<TRow>(input: MaybeRefOrGetter<FilterTreeBuilderProps<TRow>>): ComputedRef<    {
-labels: Required<TableLabels>;
+labels: Readonly<Pick<Required<TableLabels>, "value" | "columns" | "searchPlaceholder" | "density" | "table" | "search" | "noData" | "noResults" | "expandRow" | "collapseRow" | "operator" | "from" | "to" | "opEqual" | "opAtLeast" | "opAtMost" | "opBetween" | "opOn" | "opOnOrAfter" | "opOnOrBefore" | "opNotEqual" | "opGreater" | "opLess" | "opContains" | "opNotContains" | "opStartsWith" | "opEndsWith" | "opEmpty" | "opNotEmpty" | "opIn" | "opNotIn" | "opBefore" | "opAfter" | "opRelative" | "relToday" | "relYesterday" | "relTomorrow" | "relThisWeek" | "relThisMonth" | "relPreviousMonth" | "relLastN" | "relNextN" | "filterAll" | "boolAny" | "boolTrue" | "boolFalse" | "applyView" | "pageSelected" | "selectAllMatching" | "allMatchingSelected" | "loading" | "loadMore" | "filters" | "clearAll" | "removeFilter" | "filtersDone" | "filterTree" | "filterAddCondition" | "filterAddGroup" | "filterCombinatorAnd" | "filterCombinatorOr" | "filterRemoveCondition" | "filterRemoveGroup" | "filterField" | "checklistSearch" | "checklistClear" | "checklistNoValues" | "headerFilters" | "sortBy" | "rowsPerPage" | "actions" | "selectAll" | "selectRow" | "selectColumn" | "cancel" | "retry" | "errorTitle" | "errorMessage" | "previousPage" | "nextPage" | "goToPage" | "selectedCount" | "showing" | "pageOf" | "pinStart" | "unpin" | "resizeColumn" | "hideColumn" | "renameColumn" | "columnName" | "saveColumnName" | "cancelColumnRename" | "columnNameRequired" | "columnRenamed" | "sortAscending" | "sortDescending" | "sortedBy" | "sortingCleared" | "filterColumn" | "exportCsv" | "editCell" | "undoEdit" | "redoEdit" | "sidePanel" | "contextMenu" | "commandPalette" | "print" | "closePanel" | "editRow" | "saveRow" | "approveProposal" | "rejectProposal" | "addRow" | "rowActionsMenu" | "reorderRow" | "confirmRowMoveTitle" | "confirmRowMoveDescription" | "confirmRowMove" | "pinnedSummaryRow" | "pinnedSummaryTop" | "pinnedSummaryBottom" | "rowSeparator" | "expandColumnGroup" | "collapseColumnGroup" | "selectionCount" | "selectionSum" | "selectionMin" | "selectionMax" | "groupTotal" | "groupCount" | "groupingPanel" | "groupingRemoveAggregation" | "groupingAggregationCustom" | "groupingAverage" | "noticeVirtualizePaged" | "noticePinNested" | "noticeReorderNested" | "noticeGroupingUnavailable" | "noticeExportAllPage" | "noticeEditWithoutWriter">>;
 registry: FilterTypeRegistry;
 expanded: boolean;
 setExpanded: (value: boolean) => void;
@@ -4744,6 +4719,18 @@ export interface VueRowReorderModel<TRow> {
 }
 
 export { withKitEnvironment }
+
+// @public
+export function withProps<TComponent extends object, TProps>(component: TComponent, props: TProps): TComponent & {
+    props: TProps;
+};
+
+// @public (undocumented)
+export function withProps<TComponent extends object, TProps, TOptions extends {
+    readonly inheritAttrs?: boolean;
+}>(component: TComponent, props: TProps, options: TOptions): TComponent & {
+    props: TProps;
+} & TOptions;
 
 // (No @packageDocumentation comment for this package)
 

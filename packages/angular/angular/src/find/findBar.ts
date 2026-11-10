@@ -5,13 +5,14 @@
 import {
   findMatchCountText,
   handleFindBarKey,
-  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
-import type {
-  FindButtonProps,
-  FindInTableState,
-  FindSearchProps,
+import {
+  FIND_LABELS,
+  type FindButtonProps,
+  type FindInTableState,
+  type FindSearchProps,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { focusEditorOnMount } from "@adapttable/core/editing";
 import {
@@ -23,6 +24,8 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+
+const FIND_GROUPS = [FIND_LABELS] as const;
 
 /**
  * The kit's controls for {@link AdaptFindBarChrome}. Each is a standalone
@@ -85,7 +88,9 @@ export class AdaptFindBarChrome {
   readonly find = input.required<FindInTableState>();
   /** Labels; falls back to the built-in English. */
   readonly labels = input<TableLabels>();
-  protected readonly copy = computed(() => resolveLabels(this.labels()));
+  protected readonly copy = computed(() =>
+    resolveFeatureLabels(this.labels(), FIND_GROUPS)
+  );
   /** A kit's own class for the bar. */
   readonly className = input<string>();
   /** The kit's search field and buttons. */

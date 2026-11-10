@@ -1,9 +1,9 @@
 /** Mounted contract coverage: neutral Chrome renders only kit-supplied controls. */
 import type { AgentApprovalPending, TableLabels } from "@adapttable/core";
-import type {
-  TableAssistantMessageView,
-  TableAssistantReceiptView,
-  TableAssistantView,
+import {
+  type TableAssistantMessageView,
+  type TableAssistantReceiptView,
+  type TableAssistantView,
 } from "@adapttable/core/binding";
 import { NgTemplateOutlet } from "@angular/common";
 import {

@@ -768,6 +768,7 @@ export interface StaticTableFeature {
     readonly dependencies?: readonly unknown[];
     // (undocumented)
     readonly id: string;
+    readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: <TRow>(context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -897,6 +898,7 @@ export interface TableFeature<TRow> {
     readonly dependencies?: readonly unknown[];
     // (undocumented)
     readonly id: string;
+    readonly labels?: Partial<TableLabels>;
     // (undocumented)
     readonly mount?: (context: FeatureMountContext<TRow>) => void | (() => void);
     // (undocumented)
@@ -1157,6 +1159,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly columnWidths?: MaybeRefOrGetterOptional<Readonly<Record<string, number>>>;
     // (undocumented)
     readonly dir?: MaybeRefOrGetter<Direction>;
+    readonly featureLabels?: readonly Partial<TableLabels>[];
     // (undocumented)
     readonly fitColumns?: MaybeRefOrGetter<boolean>;
     // (undocumented)

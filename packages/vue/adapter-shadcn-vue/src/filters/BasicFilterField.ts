@@ -3,6 +3,7 @@ import {
   FilterFieldChrome,
   type FilterFieldOptions,
   useFilterField,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -59,16 +60,16 @@ const BasicFieldPresentation = defineComponent(
 );
 
 /** Generic boundary keeps filter accessors tied to the host's row type. */
-export function BasicFilterField<TRow>(
-  props: BasicFilterFieldProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(BasicFieldPresentation, {
-    ...context.attrs,
-    ...props,
-    dir: props.dir,
-  });
-}
-BasicFilterField.props = Object.keys(
-  propNames
-) as (keyof BasicFilterFieldProps<unknown>)[];
+export const BasicFilterField = /* @__PURE__ */ withProps(
+  function BasicFilterField<TRow>(
+    props: BasicFilterFieldProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(BasicFieldPresentation, {
+      ...context.attrs,
+      ...props,
+      dir: props.dir,
+    });
+  },
+  Object.keys(propNames) as (keyof BasicFilterFieldProps<unknown>)[]
+);

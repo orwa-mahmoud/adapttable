@@ -157,6 +157,10 @@ export type {
   GroupPaging,
   GroupSort,
 } from "./grouping/groupRows";
+export type {
+  GroupingPanelSource,
+  GroupingPanelStateInput,
+} from "./layout/tableChromeState";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { SortLevel } from "./sort/compare";
 export type {

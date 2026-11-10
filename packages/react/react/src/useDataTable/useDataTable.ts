@@ -9,7 +9,6 @@ import {
   nextSort,
   type PaginationInfo,
   type Props,
-  resolveLabels,
   SEARCH_DEBOUNCE_MS,
   type SortByOption,
   type SortDirection,
@@ -21,6 +20,7 @@ import {
   cellAttributes,
   headerCellAttributes,
   headerRowAttributes,
+  resolveTableLabels,
   rowAttributes,
   searchInputAttributes,
   sortButtonAttributes,
@@ -71,6 +71,11 @@ export interface UseDataTableOptions<TRow> {
   tableLabel?: string;
   /** Pre-translated label overrides (merged over English defaults). */
   labels?: TableLabels;
+  /**
+   * The strings the composed features draw, merged over the base strings and
+   * under `labels`.
+   */
+  featureLabels?: readonly Partial<TableLabels>[];
   /** Text direction. Defaults to `"ltr"`. */
   dir?: Direction;
   /** Render the mobile (card) layout. Defaults to `false`. */
@@ -300,6 +305,7 @@ export function useDataTable<TRow>(
     rowKey,
     tableLabel,
     labels: labelOverrides,
+    featureLabels,
     dir = "ltr",
     forceMobile: isMobile = false,
     searchDebounceMs = SEARCH_DEBOUNCE_MS,
@@ -314,7 +320,10 @@ export function useDataTable<TRow>(
     columnWidths,
   } = options;
 
-  const labels = useMemo(() => resolveLabels(labelOverrides), [labelOverrides]);
+  const labels = useMemo(
+    () => resolveTableLabels(labelOverrides, featureLabels),
+    [labelOverrides, featureLabels]
+  );
 
   // Bare-key columns auto-derive their header and accessor here, exactly
   // as they do under `<DataTable>` — headless callers get real headers and

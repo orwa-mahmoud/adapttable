@@ -2,11 +2,11 @@
  * The tree toggle's layout. The leaf spacer stays here (display only); kits
  * pass the chevron button the end user clicks.
  */
-import { resolveLabels } from "@adapttable/core";
-import type {
-  TableLabels,
-  TreeEntry,
-  TreeToggleButtonProps,
+import {
+  resolveFeatureLabels,
+  type TableLabels,
+  type TreeEntry,
+  type TreeToggleButtonProps,
 } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
@@ -17,6 +17,8 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+
+const TREE_GROUPS = [] as const;
 
 export type {
   TreeToggleButtonProps,
@@ -79,7 +81,7 @@ export class AdaptTreeToggleChrome {
     (): TreeToggleButtonProps | undefined => {
       const entry = this.entry();
       if (!entry.hasChildren) return undefined;
-      const labels = resolveLabels(this.labels());
+      const labels = resolveFeatureLabels(this.labels(), TREE_GROUPS);
       const onToggle = this.onToggle();
       return {
         label: entry.expanded ? labels.collapseRow : labels.expandRow,

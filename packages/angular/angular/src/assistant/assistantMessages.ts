@@ -4,8 +4,9 @@ import {
   type TableAssistantAvatars,
   type TableAssistantNode,
 } from "@adapttable/angular";
-import { resolveLabels, type TableLabels } from "@adapttable/core";
+import { type TableLabels } from "@adapttable/core";
 import {
+  ASSISTANT_LABELS,
   assistantActionsName,
   assistantInitials,
   assistantReceiptDetail,
@@ -17,6 +18,7 @@ import {
   assistantUndoTurnLabel,
   assistantVoicePlaceholder,
   assistantWorkingText,
+  resolveFeatureLabels,
   type TableAssistantAllowanceView,
   type TableAssistantMessageView,
   type TableAssistantProgressView,
@@ -50,6 +52,8 @@ import type {
   TableAssistantButtonProps,
   TableAssistantSlots,
 } from "./assistantSlots";
+
+const ASSISTANT_GROUPS = [ASSISTANT_LABELS] as const;
 
 const ASSISTANT_MARK_PARTS = {
   user: "assistant-user-mark",
@@ -141,7 +145,9 @@ export class AdaptAssistantReceipt {
   readonly receipt = input.required<TableAssistantReceiptView>();
   readonly slots = input.required<TableAssistantSlots>();
   readonly labels = input<TableLabels | undefined>();
-  protected readonly copy = computed(() => resolveLabels(this.labels()));
+  protected readonly copy = computed(() =>
+    resolveFeatureLabels(this.labels(), ASSISTANT_GROUPS)
+  );
   readonly onUndo = input<(() => void) | undefined>();
   protected readonly expanded = signal(false);
   protected readonly glyph = computed(() =>
@@ -246,7 +252,9 @@ export class AdaptAssistantMessage {
     "li";
   readonly message = input.required<TableAssistantMessageView>();
   readonly labels = input<TableLabels | undefined>();
-  protected readonly copy = computed(() => resolveLabels(this.labels()));
+  protected readonly copy = computed(() =>
+    resolveFeatureLabels(this.labels(), ASSISTANT_GROUPS)
+  );
   readonly slots = input.required<TableAssistantSlots>();
   readonly action = input<
     { readonly label: string; readonly onRun: () => void } | undefined
@@ -450,7 +458,9 @@ export class AdaptAssistantWorking {
     inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.localName ===
     "li";
   readonly labels = input<TableLabels | undefined>();
-  protected readonly copy = computed(() => resolveLabels(this.labels()));
+  protected readonly copy = computed(() =>
+    resolveFeatureLabels(this.labels(), ASSISTANT_GROUPS)
+  );
   readonly progress = input<TableAssistantProgressView | null | undefined>();
   protected readonly word = computed(() =>
     assistantWorkingText(this.progress(), this.copy())
@@ -489,7 +499,9 @@ export class AdaptAssistantWorking {
 export class AdaptAssistantAlwaysAllowed {
   readonly allowed = input.required<readonly TableAssistantAllowanceView[]>();
   readonly labels = input<TableLabels | undefined>();
-  protected readonly copy = computed(() => resolveLabels(this.labels()));
+  protected readonly copy = computed(() =>
+    resolveFeatureLabels(this.labels(), ASSISTANT_GROUPS)
+  );
   readonly slots = input.required<TableAssistantSlots>();
   readonly onRevoke = input.required<(capability: string) => void>();
   /** Stable slot props also keep the native button focused across harmless checks. */

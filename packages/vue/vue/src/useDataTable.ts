@@ -14,7 +14,6 @@ import {
   paginationSlots,
   PIN_Z,
   pinnedCellStyle,
-  resolveLabels,
   resolveTableStatus,
   rowClickProps,
   SEARCH_DEBOUNCE_MS,
@@ -38,6 +37,7 @@ import {
   headerCellAttributes,
   headerRowAttributes,
   htmlGroupedHeaderPlan,
+  resolveTableLabels,
   rowAttributes,
   searchInputAttributes,
   sortButtonAttributes,
@@ -82,6 +82,8 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
   readonly rowKey: (row: TRow) => string;
   readonly tableLabel?: MaybeRefOrGetterOptional<string>;
   readonly labels?: MaybeRefOrGetterOptional<TableLabels>;
+  /** The strings the composed features draw, merged over the base strings. */
+  readonly featureLabels?: readonly Partial<TableLabels>[];
   readonly dir?: MaybeRefOrGetter<Direction>;
   readonly forceMobile?: MaybeRefOrGetter<boolean>;
   readonly mobileBreakpoint?: MaybeRefOrGetterOptional<number>;
@@ -119,10 +121,11 @@ export function useDataTable<TRow>(
   const labels = computed(() => {
     const host = toValue<TableLabels | undefined>(options.value.labels);
     const placeholder = toValue(options.value.searchPlaceholder);
-    return resolveLabels(
+    return resolveTableLabels(
       placeholder === undefined
         ? host
-        : { ...host, searchPlaceholder: placeholder }
+        : { ...host, searchPlaceholder: placeholder },
+      options.value.featureLabels
     );
   });
   const dir = computed(() => toValue(options.value.dir) ?? "ltr");

@@ -192,6 +192,7 @@ export function filters<TRow>(
   const base = coreFilters<TRow>(defs);
   return {
     id: base.id,
+    labels: base.labels,
     apply: () => ({
       filters: defs,
       filterEngine: FILTER_ENGINE_IMPL,

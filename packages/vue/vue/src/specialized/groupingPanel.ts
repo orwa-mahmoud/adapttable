@@ -413,6 +413,7 @@ export function groupingPanel<TRow>(
   return withFrontendRowModel(
     {
       id: base.id,
+      labels: base.labels,
       requiredSlots: [groupingPanelControlKey<never>()],
       apply: (input) => ({
         ...base.apply?.(input),

@@ -3,6 +3,7 @@ import {
   FilterTreeChrome,
   type FilterTreeSlots,
   useFilterTreeModel,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   type CollapseModelValue,
@@ -138,13 +139,15 @@ const ElementFilterTreePresentation = defineComponent(
 );
 
 /** Preserve the canonical row contract without exposing versioned instance helpers. */
-export function ElementFilterTree<TRow>(
-  props: FilterTreeBuilderProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(ElementFilterTreePresentation, {
-    ...context.attrs,
-    ...props,
-  });
-}
-ElementFilterTree.props = treeProps;
+export const ElementFilterTree = /* @__PURE__ */ withProps(
+  function ElementFilterTree<TRow>(
+    props: FilterTreeBuilderProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(ElementFilterTreePresentation, {
+      ...context.attrs,
+      ...props,
+    });
+  },
+  treeProps
+);

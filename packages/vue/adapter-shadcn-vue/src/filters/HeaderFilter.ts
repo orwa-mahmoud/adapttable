@@ -4,6 +4,7 @@ import {
   HeaderFilterChrome,
   type HeaderFilterOptions,
   useHeaderFilter,
+  withProps,
 } from "@adapttable/vue/adapter";
 import { ListFilter } from "@lucide/vue";
 import {
@@ -128,12 +129,12 @@ const HeaderPresentation = defineComponent(
   { name: "ShadcnHeaderFilter", props: propNames }
 );
 
-export function HeaderFilter<TRow>(
-  props: HeaderFilterProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(HeaderPresentation, { ...context.attrs, ...props });
-}
-HeaderFilter.props = Object.keys(
-  propNames
-) as (keyof HeaderFilterProps<unknown>)[];
+export const HeaderFilter = /* @__PURE__ */ withProps(
+  function HeaderFilter<TRow>(
+    props: HeaderFilterProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(HeaderPresentation, { ...context.attrs, ...props });
+  },
+  Object.keys(propNames) as (keyof HeaderFilterProps<unknown>)[]
+);

@@ -1,13 +1,13 @@
 import type { TableAssistantNode } from "@adapttable/angular";
-import type {
-  TableAssistantButtonProps as NeutralButton,
-  TableAssistantComposerProps as NeutralComposer,
-  TableAssistantMenuItem as NeutralMenuItem,
-  TableAssistantMenuProps as NeutralMenu,
-  TableAssistantPanelProps as NeutralPanel,
-  TableAssistantPlacement,
-  TableAssistantSheetProps as NeutralSheet,
-  TableAssistantWindowProps as NeutralWindow,
+import {
+  type TableAssistantButtonProps as NeutralButton,
+  type TableAssistantComposerProps as NeutralComposer,
+  type TableAssistantMenuItem as NeutralMenuItem,
+  type TableAssistantMenuProps as NeutralMenu,
+  type TableAssistantPanelProps as NeutralPanel,
+  type TableAssistantPlacement,
+  type TableAssistantSheetProps as NeutralSheet,
+  type TableAssistantWindowProps as NeutralWindow,
 } from "@adapttable/core/binding";
 import type { TemplateRef, Type } from "@angular/core";
 

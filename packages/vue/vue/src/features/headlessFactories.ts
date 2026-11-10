@@ -47,6 +47,7 @@ export interface RowAppearanceOptions<TRow> {
 function rowAware<TRow>(feature: CoreFeature<TRow>): TableFeature<TRow> {
   return {
     id: feature.id,
+    labels: feature.labels,
     apply: (input) => feature.apply?.(input) ?? {},
     setup: feature.setup ? (host) => feature.setup?.(host) : undefined,
   };

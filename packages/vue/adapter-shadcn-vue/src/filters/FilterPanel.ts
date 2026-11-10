@@ -3,6 +3,7 @@ import {
   FilterPanelChrome,
   type FilterPanelModel,
   type FilterPanelSlots,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -96,10 +97,9 @@ const PanelPresentation = defineComponent(
   { name: "ShadcnFilterPanel", props: filterPanelRuntimeProps }
 );
 
-export function FilterPanel<TRow>(
+export const FilterPanel = /* @__PURE__ */ withProps(function FilterPanel<TRow>(
   props: FilterPanelProps<TRow>,
   context: Pick<SetupContext, "attrs">
 ) {
   return createVNode(PanelPresentation, { ...context.attrs, ...props });
-}
-FilterPanel.props = Object.keys(filterPanelRuntimeProps);
+}, Object.keys(filterPanelRuntimeProps));

@@ -722,6 +722,7 @@ export {
 export {
   applyTableFeatures,
   type FeatureApplyInput,
+  featureLabelsOf,
   type FeaturePatch,
   getAppliedFeatures,
   mergeFeaturePatches,
@@ -800,6 +801,26 @@ export type {
   RowGroupLevel,
   RowGroupRef,
 } from "./grouping/groupRows";
+export { ACTION_LABELS } from "./labelGroups/actionLabels";
+export { ASSISTANT_LABELS } from "./labelGroups/assistantLabels";
+export { BASE_LABELS } from "./labelGroups/baseLabels";
+export { COLUMN_MENU_LABELS } from "./labelGroups/columnMenuLabels";
+export { EDITING_LABELS } from "./labelGroups/editingLabels";
+export { EXPORT_LABELS } from "./labelGroups/exportLabels";
+export { FILTER_LABELS, type FilterStrings } from "./labelGroups/filterLabels";
+export { FIND_LABELS } from "./labelGroups/findLabels";
+export { GRID_LABELS } from "./labelGroups/gridLabels";
+export { GROUPING_LABELS } from "./labelGroups/groupingLabels";
+export { PIVOT_LABELS } from "./labelGroups/pivotLabels";
+export { ROW_LABELS } from "./labelGroups/rowLabels";
+export { SAVED_VIEW_LABELS } from "./labelGroups/savedViewLabels";
+export {
+  type FeatureStrings,
+  type GroupKeys,
+  resolveFeatureLabels,
+  resolveTableLabels,
+} from "./labelGroups/tableLabels";
+export { VIEW_CONTROL_LABELS } from "./labelGroups/viewControlLabels";
 export {
   absoluteColumnIndex,
   columnHeaderControllerFor,
@@ -864,7 +885,9 @@ export {
   clearChromeFilters,
   featureNoticesAttribute,
   FilterTriggerToggleState,
+  type GroupingPanelSource,
   groupingPanelState,
+  type GroupingPanelStateInput,
   rowReorderEnablement,
   scrollResetKeys,
   selectionObserverIds,

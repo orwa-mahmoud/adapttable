@@ -29,15 +29,16 @@ import {
   commandListKeyAction,
   commandListView,
   createCommandList,
-  resolveLabels,
   runCommand,
   tabTrapTarget,
 } from "@adapttable/core";
-import type {
-  CommandPaletteChromeProps as NeutralCommandPaletteChromeProps,
-  CommandPaletteInputProps as NeutralCommandPaletteInputProps,
-  CommandPaletteSlots as NeutralCommandPaletteSlots,
-  CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps,
+import {
+  ACTION_LABELS,
+  type CommandPaletteChromeProps as NeutralCommandPaletteChromeProps,
+  type CommandPaletteInputProps as NeutralCommandPaletteInputProps,
+  type CommandPaletteSlots as NeutralCommandPaletteSlots,
+  type CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   type KeyboardEvent,
@@ -48,6 +49,8 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+
+const ACTION_GROUPS = [ACTION_LABELS] as const;
 
 export type { Command };
 export type { CommandPaletteItemProps } from "@adapttable/core/binding";
@@ -187,7 +190,7 @@ export function CommandPaletteChrome(
   };
 
   if (!open) return null;
-  const labels = resolveLabels(props.labels);
+  const labels = resolveFeatureLabels(props.labels, ACTION_GROUPS);
   return (
     <slots.Surface
       label={labels.commandPalette}

@@ -1940,7 +1940,10 @@ pieces receive `GroupingPanelSurfaceProps`, `GroupingPanelDropZoneProps`,
 `GroupingPanelChecklistOption`, and
 `GroupingPanelRestoreProps`; select entries are `GroupingPanelOption`s and
 native event wiring uses `GroupingDragProps` / `GroupingDropProps`.
-`GroupingPanelInteractions` carries those callbacks,
+`GroupingPanelInteractions` carries those callbacks and builds the panel's
+state with `panelState(input)`, where a `GroupingPanelStateInput` names the
+render's `groupBy`, its columns and the `GroupingPanelSource` (the grouping and
+aggregate fields of the table's source),
 `GroupingChipKeyboardProps` defines the equal keyboard path, and
 `GroupingDragState` describes the active drag while `GroupingDragSource` names
 its header-or-chip origin. Every kit exports its kit-owned `GroupingPanel`;
@@ -2527,7 +2530,7 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 `filterWidgetKind` / `filterTypeOps` / `filterTypeDefaultOp` /
 `renderRegisteredFilter`,
 `mergeProps`, `stableKey`, `getPath`, `humanizeKey`, `resolveLabels` /
-`defaultLabels`, `pageSizeOptions`, and the constants `DEFAULT_LIMIT` (25),
+`defaultLabels` (every string), `pageSizeOptions`, and the constants `DEFAULT_LIMIT` (25),
 `PAGE_SIZE_OPTIONS`, `SEARCH_DEBOUNCE_MS` (300), `AUTO_OPTIONS_LIMIT` (50),
 `FILTER_AI_OPTIONS_LIMIT` (same 50, the assistant option cutoff),
 `ACTIONS_COLUMN_KEY` (`"actions"`).
@@ -2549,6 +2552,30 @@ Notable non-hook helpers: `rowsToCsv` / `downloadCsv` / `downloadTableCsv`
 | `ComposedTableProps<TRow>`     | `BaseDataTableProps` plus `FeatureProps`: the shape the table works with once features have applied, which is what an adapter's internals read.                                                |
 
 See [feature composition](./features.md).
+
+### A table's strings
+
+A table carries the strings it draws and no others. `BASE_LABELS` holds
+the strings every table draws (its name, paging, sorting, the empty, loading
+and error states, and the announcements). Each feature declares its own
+strings in `labels`: `FILTER_LABELS`, `SAVED_VIEW_LABELS`, `EXPORT_LABELS`,
+`EDITING_LABELS`, `ASSISTANT_LABELS`, `ROW_LABELS`, `GRID_LABELS`,
+`FIND_LABELS`, `PIVOT_LABELS`, `GROUPING_LABELS`, `COLUMN_MENU_LABELS`,
+`ACTION_LABELS` and `VIEW_CONTROL_LABELS`, all from
+`@adapttable/core/binding`. `featureLabelsOf(features)` lists the composed
+features' strings and `resolveTableLabels(labels, featureLabels)` resolves a
+table's strings: the base strings, then each feature's, then the host's
+`labels`. Resolved options carry the composed features' strings as
+`featureLabels`; `featureLabelsFor(props)` on `@adapttable/react/adapter`
+reads them for a kit.
+
+A feature's own chrome resolves with `resolveFeatureLabels(labels, groups)`:
+the base strings, then its groups, then the labels it was handed. Its result
+is typed `FeatureStrings<groups>`, the base keys plus `GroupKeys<groups>`, so
+a chrome cannot read a string its groups do not hold. `FilterStrings` is that
+type for the filters' chrome and the filter-tree helpers. `BASE_LABELS` and
+`FILTER_LABELS` are also on the main entry, and `BASE_LABELS` on
+`@adapttable/vue/adapter`.
 
 ## Source capabilities
 
@@ -4514,6 +4541,7 @@ Root composables remain usable with completely custom UI; see
 | `DataTableSurfaceSlots<TRow>`                                 | Required kit Search, Select, Button, Loading, Desktop and Mobile renderers; no implicit native controls or table body.                                                                            |
 | `provideDataTableClassNames`, `useDataTableClassNames`        | Reactive presentation hooks shared between an adapter and its feature controls.                                                                                                                   |
 | `GROUP_ROW`, `GroupRowDraw`, `GroupRowSlotProps<TRow>`        | Lazy grouping-row contribution, independent of a specific kit renderer: a row slot key whose fill (`GroupRowDraw`) draws any row type. `groupRowSlotKey()` is deprecated; it returns `GROUP_ROW`. |
+| `withProps(component, props, options?)`                       | A functional component with its declared props (and options such as `inheritAttrs`) attached by a call, so a bundle that never draws it drops it.                                                 |
 
 ### Vue column menu contracts
 

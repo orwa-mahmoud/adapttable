@@ -20,7 +20,6 @@ import {
   GRID_FOCUS_ANNOUNCER,
   GROUPING_PANEL,
   OptionalSidePanel,
-  resolveLabels,
   resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
   SAVED_VIEWS,
@@ -75,17 +74,20 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
     headerFiltersOn,
     props.filterFields
   );
-  const shell = useDataTableShell<TRow>(props, (defs, source, registry) => {
-    const formProps = {
-      defs,
-      source,
-      registry,
-      labels: resolveLabels(props.labels),
-      defaultExpanded: !simpleFiltersOn,
-      showSimpleFields: simpleFiltersOn,
-    } as unknown as FiltersFormSlotProps<never>;
-    return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
-  });
+  const shell = useDataTableShell<TRow>(
+    props,
+    (defs, source, registry, labels) => {
+      const formProps = {
+        defs,
+        source,
+        registry,
+        labels,
+        defaultExpanded: !simpleFiltersOn,
+        showSimpleFields: simpleFiltersOn,
+      } as unknown as FiltersFormSlotProps<never>;
+      return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
+    }
+  );
   const {
     source,
     chrome,

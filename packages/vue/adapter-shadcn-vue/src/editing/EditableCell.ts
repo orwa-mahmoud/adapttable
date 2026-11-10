@@ -8,6 +8,7 @@ import {
   useDataTableClassNames,
   useEditableCellModel,
   type VueEditableCellProps,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -152,22 +153,27 @@ const EditableCellPresentation = defineComponent(
 );
 
 /** The generic façade retains row typing without traversing framework-neutral SFC macros. */
-export function EditableCell<TRow>(
-  props: VueEditableCellProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(EditableCellPresentation, { ...context.attrs, ...props });
-}
-EditableCell.props = Object.keys(propNames) as [
-  "editing",
-  "row",
-  "column",
-  "rowId",
-  "rowIndex",
-  "rows",
-  "columns",
-  "rowKey",
-  "editLabel",
-  "undoLabel",
-  "display",
-];
+export const EditableCell = /* @__PURE__ */ withProps(
+  function EditableCell<TRow>(
+    props: VueEditableCellProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(EditableCellPresentation, {
+      ...context.attrs,
+      ...props,
+    });
+  },
+  Object.keys(propNames) as [
+    "editing",
+    "row",
+    "column",
+    "rowId",
+    "rowIndex",
+    "rows",
+    "columns",
+    "rowKey",
+    "editLabel",
+    "undoLabel",
+    "display",
+  ]
+);

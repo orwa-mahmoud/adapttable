@@ -21,13 +21,16 @@
  * then fights whatever the action just did.
  */
 
-import { resolveLabels } from "@adapttable/core";
-import type {
-  ContextMenuChromeProps as NeutralContextMenuChromeProps,
-  ContextMenuSlots as NeutralContextMenuSlots,
-  ContextMenuSurfaceProps as NeutralContextMenuSurfaceProps,
+import {
+  ACTION_LABELS,
+  type ContextMenuChromeProps as NeutralContextMenuChromeProps,
+  type ContextMenuSlots as NeutralContextMenuSlots,
+  type ContextMenuSurfaceProps as NeutralContextMenuSurfaceProps,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { Fragment, type ReactNode, useRef } from "react";
+
+const ACTION_GROUPS = [ACTION_LABELS] as const;
 
 export type { ContextMenuPoint } from "./useContextMenu";
 export type { ContextMenuItem } from "@adapttable/core";
@@ -90,7 +93,7 @@ export function ContextMenuChrome(props: Readonly<ContextMenuChromeProps>) {
       <slots.Surface
         at={at}
         anchorRef={anchorRef}
-        label={resolveLabels(props.labels).contextMenu}
+        label={resolveFeatureLabels(props.labels, ACTION_GROUPS).contextMenu}
         onClose={onClose}
         container={props.container}
         className={props.className}

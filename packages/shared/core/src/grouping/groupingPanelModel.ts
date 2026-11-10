@@ -1,5 +1,6 @@
 import type { DeclaredAggregates } from "../aggregate/aggregate";
 import type { AggregationModel } from "../aggregate/aggregationModel";
+import type { GroupingPanelStateInput } from "../layout/tableChromeState";
 import type {
   GroupAggregateOverride,
   GroupAggregateOverrides,
@@ -168,6 +169,12 @@ export interface GroupingPanelInteractions {
    * is the only part that was handed the mapper.
    */
   declaredAggregates?: DeclaredAggregates;
+  /**
+   * The strip's state for this render: its interactions with the keys,
+   * columns and aggregations the table carries. Published by the panel
+   * feature, so a table without the panel carries no aggregation model.
+   */
+  panelState?<TRow>(input: GroupingPanelStateInput<TRow>): GroupingPanelState;
   /**
    * Change one active aggregation's operation. An operation the column does
    * not offer is refused rather than calculated.

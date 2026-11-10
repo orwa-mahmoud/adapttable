@@ -1,6 +1,11 @@
 /** The one composer: Enter sends, Shift+Enter and IME composition stay text. */
-import { resolveLabels, type TableLabels } from "@adapttable/core";
-import { assistantIsBusy, assistantIsUsable } from "@adapttable/core/binding";
+import { type TableLabels } from "@adapttable/core";
+import {
+  ASSISTANT_LABELS,
+  assistantIsBusy,
+  assistantIsUsable,
+  resolveFeatureLabels,
+} from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -23,6 +28,8 @@ import type {
   TableAssistantMenuProps,
   TableAssistantSlots,
 } from "./assistantSlots";
+
+const ASSISTANT_GROUPS = [ASSISTANT_LABELS] as const;
 
 const ASSISTANT_COMPOSER_PARTS = {
   stop: "assistant-stop",
@@ -65,7 +72,9 @@ export class AdaptAssistantComposer {
   readonly props = input.required<AssistantComposerProps>();
   /** Required kit controls. */
   readonly slots = input.required<TableAssistantSlots>();
-  protected readonly copy = computed(() => resolveLabels(this.props().labels));
+  protected readonly copy = computed(() =>
+    resolveFeatureLabels(this.props().labels, ASSISTANT_GROUPS)
+  );
   protected readonly busy = computed(
     () => this.props().busy ?? assistantIsBusy(this.props().status)
   );

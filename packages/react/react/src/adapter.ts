@@ -389,7 +389,7 @@ export type {
   TableFeatureHost,
 } from "./features/tableFeature";
 export type { FeatureApplyInput, FeaturePatch } from "./features/tableFeature";
-export { applyTableFeatures } from "./features/tableFeature";
+export { applyTableFeatures, featureLabelsFor } from "./features/tableFeature";
 export {
   type ChecklistButtonProps,
   type ChecklistCheckboxProps,
@@ -1128,6 +1128,7 @@ export {
   extraHostFillStyle,
   extraRowsForSection,
   extraUncoveredColSpans,
+  FILTER_LABELS,
   filterColumnMenuRows,
   flattenColumnTree,
   groupedHeaderAlign,
@@ -1159,6 +1160,7 @@ export {
   resetColumnLayout,
   resolveRowHeight,
   resolveRowStyle,
+  resolveTableLabels,
   rowSourceIndex,
   rowSpanSignature,
   rowStyleSignature,

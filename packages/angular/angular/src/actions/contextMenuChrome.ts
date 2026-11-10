@@ -8,9 +8,9 @@
 import {
   type ContextMenuItem,
   type ContextMenuPoint,
-  resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
+import { ACTION_LABELS, resolveFeatureLabels } from "@adapttable/core/binding";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -22,6 +22,8 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+
+const ACTION_GROUPS = [ACTION_LABELS] as const;
 
 /**
  * The kit's controls for {@link AdaptContextMenuChrome}. Each is a standalone
@@ -116,7 +118,7 @@ export class AdaptContextMenuChrome {
     return {
       at: point ?? { x: 0, y: 0 },
       anchorRef: { current: this.anchor()?.nativeElement ?? null },
-      label: resolveLabels(this.labels()).contextMenu,
+      label: resolveFeatureLabels(this.labels(), ACTION_GROUPS).contextMenu,
       onClose: this.onClose(),
       className: this.className(),
       rows: this.rows(),

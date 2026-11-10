@@ -23,6 +23,7 @@ import {
 import {
   cardSetSize,
   finishShellBody,
+  resolveTableLabels,
   sortedColumnName,
   sourceWindowStart,
 } from "@adapttable/core/binding";
@@ -58,6 +59,7 @@ import {
   disabledHistory,
   disabledSelectionStats,
 } from "./features/shellLiveStubs";
+import { featureLabelsFor } from "./features/tableFeature";
 import type { ChipLabelResolver } from "./filters/useActiveFilterChips";
 import type { FindInTableState } from "./find/useFindInTable";
 import type { GridFocusState } from "./focus/useGridFocus";
@@ -348,7 +350,8 @@ export function useDataTableShell<TRow>(
   renderAutoForm: (
     defs: readonly FilterDef<TRow>[],
     source: TableSource<TRow>,
-    registry: FilterTypeRegistry
+    registry: FilterTypeRegistry,
+    labels: Required<TableLabels>
   ) => ReactNode
 ): DataTableShellResult<TRow> {
   const props = useTableFeatures(incoming);
@@ -412,9 +415,14 @@ export function useDataTableShell<TRow>(
   const history = disabledHistory<TRow>();
 
   // Declarative `filters` array → the auto-built form; JSX passes through.
+  const featureLabels = featureLabelsFor(props);
+  const formLabels = useMemo(
+    () => resolveTableLabels(props.labels, featureLabels),
+    [props.labels, featureLabels]
+  );
   const autoForm =
     runtime.defs.length > 0
-      ? renderAutoForm(runtime.defs, source, runtime.registry)
+      ? renderAutoForm(runtime.defs, source, runtime.registry, formLabels)
       : undefined;
   const filtersNode = (
     isDeclarativeFilters(props.filters) || props.filters === undefined

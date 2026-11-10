@@ -3,6 +3,7 @@ import {
   type ChecklistFilterProps,
   type ChecklistSlots,
   useChecklistModel,
+  withProps,
 } from "@adapttable/vue/adapter";
 import {
   createVNode,
@@ -96,10 +97,12 @@ const ChecklistPresentation = defineComponent(
 );
 
 /** A typed boundary preserves the row contract without SFC macro traversal. */
-export function ChecklistFilter<TRow>(
-  props: ChecklistFilterProps<TRow>,
-  context: Pick<SetupContext, "attrs">
-) {
-  return createVNode(ChecklistPresentation, { ...context.attrs, ...props });
-}
-ChecklistFilter.props = Object.keys(checklistRuntimeProps);
+export const ChecklistFilter = /* @__PURE__ */ withProps(
+  function ChecklistFilter<TRow>(
+    props: ChecklistFilterProps<TRow>,
+    context: Pick<SetupContext, "attrs">
+  ) {
+    return createVNode(ChecklistPresentation, { ...context.attrs, ...props });
+  },
+  Object.keys(checklistRuntimeProps)
+);

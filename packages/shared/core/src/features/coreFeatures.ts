@@ -19,6 +19,17 @@ import type { RowEditHandler } from "../editing/rowEditing";
 import type { ExportWriter } from "../export/exportWriter";
 import type { FilterDef } from "../filters/filterDefs";
 import type { FilterTypeSpec } from "../filters/filterRegistry";
+import { ACTION_LABELS } from "../labelGroups/actionLabels";
+import { COLUMN_MENU_LABELS } from "../labelGroups/columnMenuLabels";
+import { EDITING_LABELS } from "../labelGroups/editingLabels";
+import { EXPORT_LABELS } from "../labelGroups/exportLabels";
+import { FILTER_LABELS } from "../labelGroups/filterLabels";
+import { FIND_LABELS } from "../labelGroups/findLabels";
+import { GRID_LABELS } from "../labelGroups/gridLabels";
+import { GROUPING_LABELS } from "../labelGroups/groupingLabels";
+import { ROW_LABELS } from "../labelGroups/rowLabels";
+import { SAVED_VIEW_LABELS } from "../labelGroups/savedViewLabels";
+import { VIEW_CONTROL_LABELS } from "../labelGroups/viewControlLabels";
 import {
   buildBodyCells,
   type CellSpanAppearance,
@@ -32,7 +43,7 @@ import {
   insertExtrasBeforeRows,
 } from "../rows/extraRows";
 import { extraHostFillStyle } from "../rows/rowPresentation";
-import type { BulkAction, RowAction } from "../types";
+import type { BulkAction, RowAction, TableLabels } from "../types";
 import type { SidePanelEntry } from "./currentHost";
 import type { FeaturePatch, PatchFeature } from "./featurePatch";
 
@@ -89,9 +100,12 @@ export interface CoreFeature<
 
 function define<TRow>(
   id: string,
-  patch: FeaturePatch<TRow>
+  patch: FeaturePatch<TRow>,
+  labels?: Partial<TableLabels>
 ): CoreFeature<TRow> {
-  return { id, apply: () => patch };
+  return labels === undefined
+    ? { id, apply: () => patch }
+    : { id, apply: () => patch, labels };
 }
 
 /** Options a windowing feature accepts — a boolean or its knobs. */
@@ -182,7 +196,7 @@ export function coreRowAppearance<TRow>(
  * @public
  */
 export function coreColumnMenu(): CoreFeature {
-  return define("column-menu", { enableColumnMenu: true });
+  return define("column-menu", { enableColumnMenu: true }, COLUMN_MENU_LABELS);
 }
 
 /**
@@ -191,10 +205,14 @@ export function coreColumnMenu(): CoreFeature {
  * @public
  */
 export function coreResizableColumns(): CoreFeature {
-  return define("resizable-columns", {
-    resizableColumns: true,
-    assembly: { columnResizeHandleProps },
-  });
+  return define(
+    "resizable-columns",
+    {
+      resizableColumns: true,
+      assembly: { columnResizeHandleProps },
+    },
+    COLUMN_MENU_LABELS
+  );
 }
 
 /**
@@ -203,9 +221,13 @@ export function coreResizableColumns(): CoreFeature {
  * @public
  */
 export function coreCollapsibleColumnGroups(): CoreFeature {
-  return define("collapsible-column-groups", {
-    collapsibleColumnGroups: true,
-  });
+  return define(
+    "collapsible-column-groups",
+    {
+      collapsibleColumnGroups: true,
+    },
+    COLUMN_MENU_LABELS
+  );
 }
 
 /**
@@ -217,7 +239,11 @@ export function coreCommandPalette(
   options: boolean | { readonly commands?: readonly Command[] } = true
 ): CoreFeature {
   const commands = typeof options === "object" ? options.commands : undefined;
-  const feature = define("command-palette", { commandPalette: options });
+  const feature = define(
+    "command-palette",
+    { commandPalette: options },
+    ACTION_LABELS
+  );
   if (!commands?.length) return feature;
   return {
     ...feature,
@@ -242,7 +268,11 @@ export function coreContextMenu<TRow>(
       } = true
 ): CoreFeature<TRow, CoreRowFeatureRegistrar<TRow>> {
   const items = typeof options === "object" ? options.items : undefined;
-  const feature = define<TRow>("context-menu", { contextMenu: options });
+  const feature = define<TRow>(
+    "context-menu",
+    { contextMenu: options },
+    ACTION_LABELS
+  );
   if (!items) return feature;
   return {
     ...feature,
@@ -283,7 +313,7 @@ export function coreBulkActions(actions: readonly BulkAction[]): CoreFeature {
  */
 export function coreFilterTypes(specs: readonly FilterTypeSpec[]): CoreFeature {
   return {
-    ...define("filter-types", { filterTypes: specs }),
+    ...define("filter-types", { filterTypes: specs }, FILTER_LABELS),
     setup(host) {
       for (const spec of specs) host.registerFilterType(spec);
     },
@@ -296,7 +326,7 @@ export function coreFilterTypes(specs: readonly FilterTypeSpec[]): CoreFeature {
  * @public
  */
 export function coreHeaderFilters(): CoreFeature {
-  return define("header-filters", { headerFilters: true });
+  return define("header-filters", { headerFilters: true }, FILTER_LABELS);
 }
 
 /**
@@ -307,7 +337,7 @@ export function coreHeaderFilters(): CoreFeature {
 export function coreSavedViews<TOptions extends object>(
   options: TOptions
 ): CoreFeature {
-  return define("saved-views", { savedViews: options });
+  return define("saved-views", { savedViews: options }, SAVED_VIEW_LABELS);
 }
 
 /**
@@ -381,7 +411,8 @@ export function coreCellNavigation(
     "cell-navigation",
     options.onRangeChange
       ? { cellNavigation: true, onCellRangeChange: options.onRangeChange }
-      : { cellNavigation: true }
+      : { cellNavigation: true },
+    GRID_LABELS
   );
 }
 
@@ -391,7 +422,11 @@ export function coreCellNavigation(
  * @public
  */
 export function coreDensityChooser(): CoreFeature {
-  return define("density-chooser", { densityChooser: true });
+  return define(
+    "density-chooser",
+    { densityChooser: true },
+    VIEW_CONTROL_LABELS
+  );
 }
 
 /**
@@ -400,7 +435,7 @@ export function coreDensityChooser(): CoreFeature {
  * @public
  */
 export function coreEditHistory(options: EditHistoryInput = true): CoreFeature {
-  return define("edit-history", { editHistory: options });
+  return define("edit-history", { editHistory: options }, EDITING_LABELS);
 }
 
 /**
@@ -412,7 +447,7 @@ export function coreEditing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
   extras?: FeaturePatch<TRow>
 ): CoreFeature<TRow> {
-  return define("editing", { onCellEdit, ...extras });
+  return define("editing", { onCellEdit, ...extras }, EDITING_LABELS);
 }
 
 /**
@@ -424,7 +459,11 @@ export function coreRowEditing<TRow>(
   onRowEdit: RowEditHandler<TRow>,
   extras?: FeaturePatch<TRow>
 ): CoreFeature<TRow> {
-  return define("row-editing", { rowEditing: true, onRowEdit, ...extras });
+  return define(
+    "row-editing",
+    { rowEditing: true, onRowEdit, ...extras },
+    EDITING_LABELS
+  );
 }
 
 /**
@@ -436,11 +475,15 @@ export function coreBatchEditing<TRow>(
   onBatchEdit: BatchEditHandler<TRow>,
   extras?: FeaturePatch<TRow>
 ): CoreFeature<TRow> {
-  return define("batch-editing", {
-    batchEditing: true,
-    onBatchEdit,
-    ...extras,
-  });
+  return define(
+    "batch-editing",
+    {
+      batchEditing: true,
+      onBatchEdit,
+      ...extras,
+    },
+    EDITING_LABELS
+  );
 }
 
 /**
@@ -449,7 +492,7 @@ export function coreBatchEditing<TRow>(
  * @public
  */
 export function coreDirtyIndicators(): CoreFeature {
-  return define("dirty-indicators", { dirtyIndicators: true });
+  return define("dirty-indicators", { dirtyIndicators: true }, EDITING_LABELS);
 }
 
 /**
@@ -461,7 +504,11 @@ export function coreExportCsv<TRow>(
   options: boolean | { readonly writer?: ExportWriter } = true
 ): CoreFeature<TRow> {
   const writer = typeof options === "object" ? options.writer : undefined;
-  const feature = define<TRow>("export-csv", { exportCsv: options });
+  const feature = define<TRow>(
+    "export-csv",
+    { exportCsv: options },
+    EXPORT_LABELS
+  );
   if (!writer) return feature;
   return { ...feature, setup: (host) => host.registerWriter(writer) };
 }
@@ -475,7 +522,7 @@ export function coreExportCsv<TRow>(
 export function coreFilters<TRow, TPanel = never>(
   defs: readonly FilterDef<TRow>[] | TPanel
 ): CoreFeature<TRow> {
-  return define("filters", { filters: defs });
+  return define("filters", { filters: defs }, FILTER_LABELS);
 }
 
 /**
@@ -484,7 +531,7 @@ export function coreFilters<TRow, TPanel = never>(
  * @public
  */
 export function coreFindInTable(): CoreFeature {
-  return define("find-in-table", { findInTable: true });
+  return define("find-in-table", { findInTable: true }, FIND_LABELS);
 }
 
 /**
@@ -493,7 +540,7 @@ export function coreFindInTable(): CoreFeature {
  * @public
  */
 export function coreFullscreen(): CoreFeature {
-  return define("fullscreen", { fullscreen: true });
+  return define("fullscreen", { fullscreen: true }, VIEW_CONTROL_LABELS);
 }
 
 /**
@@ -505,7 +552,7 @@ export function coreGrouping<TRow>(
   groupBy: string | readonly string[],
   extras?: object
 ): CoreFeature<TRow> {
-  return define("grouping", { groupBy, ...extras });
+  return define("grouping", { groupBy, ...extras }, GROUPING_LABELS);
 }
 
 /**
@@ -519,6 +566,7 @@ export function coreGroupingPanel<TRow>(
   const base = coreGrouping<TRow>(groupBy ?? [], extras);
   return {
     id: "grouping-panel",
+    labels: GROUPING_LABELS,
     apply(input) {
       const withoutInitialGroup = { ...base.apply?.(input) };
       delete withoutInitialGroup.groupBy;
@@ -541,17 +589,21 @@ export function coreRowActions<TRow, TConfirm = boolean>(
     readonly confirmDeleteRow?: TConfirm;
   }
 ): CoreFeature<TRow> {
-  return define("row-actions", {
-    ...(actions ? { rowActions: actions } : {}),
-    ...(handlers
-      ? {
-          onAddRow: handlers.onAddRow,
-          onDuplicateRow: handlers.onDuplicateRow,
-          onDeleteRow: handlers.onDeleteRow,
-          confirmDeleteRow: handlers.confirmDeleteRow,
-        }
-      : {}),
-  });
+  return define(
+    "row-actions",
+    {
+      ...(actions ? { rowActions: actions } : {}),
+      ...(handlers
+        ? {
+            onAddRow: handlers.onAddRow,
+            onDuplicateRow: handlers.onDuplicateRow,
+            onDeleteRow: handlers.onDeleteRow,
+            confirmDeleteRow: handlers.confirmDeleteRow,
+          }
+        : {}),
+    },
+    ROW_LABELS
+  );
 }
 
 /**
@@ -592,7 +644,11 @@ export function coreNestedTable<TRow, TNested extends object = object>(
  * @public
  */
 export function coreRowPinning(options: FeaturePatch = {}): CoreFeature {
-  return define("row-pinning", { rowPinningArmed: true, ...options });
+  return define(
+    "row-pinning",
+    { rowPinningArmed: true, ...options },
+    ROW_LABELS
+  );
 }
 
 /**
@@ -601,7 +657,7 @@ export function coreRowPinning(options: FeaturePatch = {}): CoreFeature {
  * @public
  */
 export function coreSelectionStats(): CoreFeature {
-  return define("selection-stats", { selectionStats: true });
+  return define("selection-stats", { selectionStats: true }, GRID_LABELS);
 }
 
 /**

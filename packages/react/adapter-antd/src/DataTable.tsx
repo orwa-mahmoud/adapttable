@@ -37,6 +37,7 @@ import {
   EXTRA_ROW_PARTS,
   featureHostOf,
   FeatureHostProvider,
+  featureLabelsFor,
   type FeatureProps,
   FeatureProviders,
   FeatureSlot,
@@ -76,9 +77,9 @@ import {
   renderedRowsOf,
   REORDER_COLUMN_WIDTH,
   resolveFilterMode,
-  resolveLabels,
   resolveRowStyle,
   resolveStickyToolbar,
+  resolveTableLabels,
   ROW_REORDER_ANNOUNCER,
   rowClickProps,
   rowIsDirty,
@@ -1994,7 +1995,11 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   // prop) must still render the form — only explicit JSX takes over. The
   // form needs the resolved labels before `useTableChrome` resolves its own
   // (the chrome consumes the form node), so resolve the same prop here.
-  const formLabels = useMemo(() => resolveLabels(props.labels), [props.labels]);
+  const featureLabels = featureLabelsFor(props);
+  const formLabels = useMemo(
+    () => resolveTableLabels(props.labels, featureLabels),
+    [props.labels, featureLabels]
+  );
   const filtersNode = resolveFiltersNode(
     props.filters,
     runtime,

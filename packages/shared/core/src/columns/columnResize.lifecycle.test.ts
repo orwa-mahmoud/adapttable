@@ -61,9 +61,7 @@ describe("column resize ownership", () => {
     });
     const event = down(handle(document));
     props.onPointerDown(event);
-    props.onKeyDown({ ...event, key: "ArrowRight" } as unknown as Parameters<
-      typeof props.onKeyDown
-    >[0]);
+    props.onKeyDown({ ...event, key: "ArrowRight" });
     props.onDoubleClick(event);
     document.dispatchEvent(new MouseEvent("pointermove", { clientX: 190 }));
     document.dispatchEvent(new MouseEvent("pointerup"));

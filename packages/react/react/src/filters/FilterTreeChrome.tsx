@@ -13,16 +13,19 @@ import {
   isFilterGroup,
   type QueryCondition,
   type QueryFilterGroup,
-  resolveLabels,
-  type TableLabels,
 } from "@adapttable/core";
-import type {
-  FilterTreeBuilderProps,
-  FilterTreeClassNames,
-  FilterTreeDisclosureProps as NeutralFilterTreeDisclosureProps,
-  FilterTreeSlots as NeutralFilterTreeSlots,
+import {
+  type FeatureStrings,
+  FILTER_LABELS,
+  type FilterTreeBuilderProps,
+  type FilterTreeClassNames,
+  type FilterTreeDisclosureProps as NeutralFilterTreeDisclosureProps,
+  type FilterTreeSlots as NeutralFilterTreeSlots,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import { type CSSProperties, type ReactNode, useState } from "react";
+
+const FILTER_GROUPS = [FILTER_LABELS] as const;
 
 export type {
   FilterTreeBuilderProps,
@@ -124,7 +127,7 @@ function ConditionValue<TRow>({
   onChange,
 }: Readonly<{
   model: FilterTreeConditionModel<TRow>;
-  labels: Required<TableLabels>;
+  labels: FeatureStrings<typeof FILTER_GROUPS>;
   classNames: FilterTreeClassNames;
   slots: FilterTreeSlots;
   onChange: (value: unknown) => void;
@@ -226,7 +229,7 @@ function ConditionRow<TRow>({
   condition: QueryCondition;
   path: readonly number[];
   defs: readonly FilterDef<TRow>[];
-  labels: Required<TableLabels>;
+  labels: FeatureStrings<typeof FILTER_GROUPS>;
   classNames: FilterTreeClassNames;
   registry: FilterTypeRegistry;
   slots: FilterTreeSlots;
@@ -292,7 +295,7 @@ function GroupActions({
   onAddCondition,
   onAddGroup,
 }: Readonly<{
-  labels: Required<TableLabels>;
+  labels: FeatureStrings<typeof FILTER_GROUPS>;
   classNames: FilterTreeClassNames;
   slots: FilterTreeSlots;
   onAddCondition: () => void;
@@ -328,7 +331,7 @@ function GroupView<TRow>({
   group: QueryFilterGroup;
   path: readonly number[];
   defs: readonly FilterDef<TRow>[];
-  labels: Required<TableLabels>;
+  labels: FeatureStrings<typeof FILTER_GROUPS>;
   classNames: FilterTreeClassNames;
   registry: FilterTypeRegistry;
   slots: FilterTreeSlots;
@@ -435,7 +438,7 @@ export function FilterTreeChrome<TRow>({
   slots,
   defaultExpanded,
 }: Readonly<FilterTreeChromeProps<TRow>>) {
-  const labels = resolveLabels(labelOverrides);
+  const labels = resolveFeatureLabels(labelOverrides, FILTER_GROUPS);
   const tree = source.filterTree;
   const commit = source.setFilterTree;
   const first = defs[0];

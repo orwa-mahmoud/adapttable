@@ -512,23 +512,23 @@ describe("grouping panel controller: drag", () => {
   it("routes the prop getters to the same transitions", () => {
     const { controller, state } = harness({ groupBy: "team" });
     const ui = controller.interactions(controller.getSnapshot(), undefined);
-    ui.headerDragProps("status").onDragStart?.(dragEvent() as never);
+    ui.headerDragProps("status").onDragStart?.(dragEvent());
     const live = controller.interactions(controller.getSnapshot(), undefined);
     const drop = live.dropProps(0);
-    drop.onDragEnter?.(dragEvent("status") as never);
-    drop.onDragOver?.(dragEvent("status") as never);
+    drop.onDragEnter?.(dragEvent("status"));
+    drop.onDragOver?.(dragEvent("status"));
     expect(drop.onDragLeave?.(dragEvent() as never)).toBeUndefined();
-    drop.onDrop?.(dragEvent("status") as never);
+    drop.onDrop?.(dragEvent("status"));
     expect(state.groupBy).toBe("status,team");
 
-    ui.chipDragProps("team").onDragStart?.(dragEvent() as never);
+    ui.chipDragProps("team").onDragStart?.(dragEvent());
     const removal = controller
       .interactions(controller.getSnapshot(), undefined)
       .removeDropProps();
     expect(removal.onDragLeave?.(dragEvent() as never)).toBeUndefined();
-    removal.onDrop?.(dragEvent("team") as never);
+    removal.onDrop?.(dragEvent("team"));
     expect(state.groupBy).toBe("status");
-    ui.chipDragProps("status").onDragEnd?.(dragEvent() as never);
+    ui.chipDragProps("status").onDragEnd?.(dragEvent());
     expect(controller.getSnapshot().drag).toBeUndefined();
   });
 
@@ -584,7 +584,7 @@ describe("grouping panel controller: chip keys", () => {
       role: "button",
       "aria-label": "Move Team grouping",
     });
-    props.onKeyDown(keyEvent("ArrowDown") as never);
+    props.onKeyDown(keyEvent("ArrowDown"));
     expect(state.groupBy).toBe("status,team,budget");
   });
 });

@@ -31,7 +31,6 @@ import {
   chromeShowFooter,
   clearChromeFilters,
   FilterTriggerToggleState,
-  groupingPanelState,
   printToolbarProps,
   rowReorderEnablement,
   scrollResetKeys,
@@ -599,6 +598,7 @@ export function useTableChrome<TRow>(
     rowKey,
     tableLabel,
     labels,
+    featureLabels,
     dir,
     forceMobile,
     mobileBreakpoint,
@@ -668,6 +668,7 @@ export function useTableChrome<TRow>(
     rowKey,
     tableLabel,
     labels,
+    featureLabels,
     dir,
     forceMobile: isMobile,
     bulkActions,
@@ -790,8 +791,7 @@ export function useTableChrome<TRow>(
   const groupingPanelInteractions = useFeatureState(GROUPING_PANEL_STATE);
   const groupingPanel = useMemo<GroupingPanelState | undefined>(
     () =>
-      groupingPanelState({
-        interactions: groupingPanelInteractions,
+      groupingPanelInteractions?.panelState?.({
         groupBy: groupByKeys,
         columns: resolvedColumns,
         source: {

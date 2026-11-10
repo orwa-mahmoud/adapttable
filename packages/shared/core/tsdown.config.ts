@@ -22,6 +22,21 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
+  // One chunk per label group, so a table that reads the base strings does
+  // not import every feature's strings with them.
+  outputOptions: {
+    codeSplitting: {
+      groups: [
+        {
+          name: (id) => {
+            const group = /labelGroups[\\/](\w+)\.ts$/.exec(id);
+            return group ? `labels-${group[1]}` : null;
+          },
+          test: /labelGroups[\\/]\w+\.ts$/,
+        },
+      ],
+    },
+  },
   outExtensions: ({ format }) => ({
     js: format === "es" ? ".js" : ".cjs",
     dts: format === "es" ? ".d.ts" : ".d.cts",

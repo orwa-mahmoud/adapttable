@@ -20,6 +20,7 @@ import {
   type TableSource,
 } from "@adapttable/core";
 import {
+  ROW_LABELS,
   type RowMoveMenuSlotProps,
   type RowReorderHandleSlotProps,
   type RowReorderMoveButtonProps,
@@ -380,6 +381,7 @@ export function rowReorder<TRow>(
   }
   return {
     id: "row-reorder",
+    labels: ROW_LABELS,
     requiredSlots: [rowReorderControlKey<never>()],
     apply: () => ({ bodyModel: projectHeadlessRows }),
     mount: useRowReorderMount,

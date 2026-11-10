@@ -7,13 +7,14 @@ import {
   isFilterGroup,
   type QueryCondition,
   type QueryFilterGroup,
-  resolveLabels,
 } from "@adapttable/core";
-import type {
-  FilterTreeBuilderProps,
-  FilterTreeInputProps,
-  FilterTreeSelectProps,
-  FilterTreeSlots,
+import {
+  FILTER_LABELS,
+  type FilterTreeBuilderProps,
+  type FilterTreeInputProps,
+  type FilterTreeSelectProps,
+  type FilterTreeSlots,
+  resolveFeatureLabels,
 } from "@adapttable/core/binding";
 import {
   computed,
@@ -24,6 +25,8 @@ import {
 } from "vue";
 
 import { useFilterTree } from "./filterModels";
+
+const FILTER_GROUPS = [FILTER_LABELS] as const;
 export function useFilterTreeModel<TRow>(
   input: MaybeRefOrGetter<FilterTreeBuilderProps<TRow>>
 ) {
@@ -33,7 +36,7 @@ export function useFilterTreeModel<TRow>(
   }));
   return computed(() => ({
     ...toValue(input),
-    labels: resolveLabels(toValue(input).labels),
+    labels: resolveFeatureLabels(toValue(input).labels, FILTER_GROUPS),
     registry: toValue(input).registry ?? defaultFilterRegistry,
     expanded: state.expanded.value,
     setExpanded: state.setExpanded,

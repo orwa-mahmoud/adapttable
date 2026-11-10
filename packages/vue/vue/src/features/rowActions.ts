@@ -79,6 +79,7 @@ export function rowActions<TRow>(
   const base = coreRowActions<TRow>(actions, handlers);
   return {
     id: base.id,
+    labels: base.labels,
     dependencies: [
       actions,
       handlers?.onAddRow,

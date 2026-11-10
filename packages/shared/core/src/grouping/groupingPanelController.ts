@@ -30,6 +30,7 @@ import {
   restoreAggregationDefaults,
 } from "../aggregate/aggregationModel";
 import type { TableRuntime } from "../features/tableRuntime";
+import { panelStateOf } from "../layout/tableChromeState";
 import { isRtlElement } from "../layout/writingDirection";
 import type { GroupAggregateOverride } from "./groupAggregateOverrides";
 import {
@@ -731,6 +732,7 @@ export function createGroupingPanelController<TRow = unknown>(
         addAggregate,
         removeAggregate,
         restoreAggregateDefaults,
+        panelState: (input) => panelStateOf(value, input),
       };
       built = { snapshot: rendered, declared, value };
       return value;
