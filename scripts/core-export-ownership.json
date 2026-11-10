@@ -4167,12 +4167,12 @@
     {
       "name": "isEmptyFilterValue",
       "kind": "runtime",
-      "module": "state/viewState.ts",
+      "module": "filters/isEmptyFilterValue.ts",
       "audience": "app",
       "path": ".",
       "forward": true,
       "deprecated": false,
-      "identity": "state/viewState.ts#isEmptyFilterValue",
+      "identity": "filters/isEmptyFilterValue.ts#isEmptyFilterValue",
       "subpaths": ["."]
     },
     {
