@@ -6,7 +6,7 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import type * as AdapterModule from "@adapttable/react/adapter";
 import {
-  useDataTableShell,
+  TableComposition,
   type VirtualTableRow,
 } from "@adapttable/react/adapter";
 import { MantineProvider } from "@mantine/core";
@@ -30,7 +30,7 @@ const columns: ColumnDef<Row>[] = [
 
 vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
-  return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
+  return { ...actual, TableComposition: vi.fn(actual.TableComposition) };
 });
 
 const actualCore = await vi.importActual<typeof AdapterModule>(
@@ -38,34 +38,43 @@ const actualCore = await vi.importActual<typeof AdapterModule>(
 );
 
 /**
- * Force a controlled virtual window by overriding the shell's `tableProps` —
- * the body renderers read `rowEntries` exactly as they would from a real
- * virtualizer.
+ * Force a controlled virtual window by overriding the `tableProps` the kit's
+ * body receives — the body renderers read `rowEntries` exactly as they would
+ * from a real virtualizer.
  */
 function mockBodyData(
   rows: VirtualTableRow<Row>[],
   top: number,
   bottom: number
 ) {
-  vi.mocked(useDataTableShell).mockImplementation((props, render) => {
-    const real = actualCore.useDataTableShell(props, render);
-    return {
-      ...real,
-      skipChromeBody: true,
-      tableProps: {
-        ...real.tableProps,
-        rowEntries: rows,
-        paddingTop: top,
-        paddingBottom: bottom,
-        measureElement: vi.fn(),
+  vi.mocked(TableComposition).mockImplementation(({ props, kit }) =>
+    actualCore.TableComposition({
+      props,
+      kit: {
+        ...kit,
+        body: (view, headerOffset, tableProps) =>
+          kit.body(
+            {
+              ...view,
+              tableProps: {
+                ...view.tableProps,
+                rowEntries: rows as never,
+                paddingTop: top,
+                paddingBottom: bottom,
+                measureElement: vi.fn(),
+              },
+            },
+            headerOffset,
+            tableProps
+          ),
       },
-    };
-  });
+    })
+  );
 }
 
 beforeEach(() => {
-  // Default: the real shell, so every non-virtual test runs untouched.
-  vi.mocked(useDataTableShell).mockImplementation(actualCore.useDataTableShell);
+  // Default: the real composition, so every non-virtual test runs untouched.
+  vi.mocked(TableComposition).mockImplementation(actualCore.TableComposition);
 });
 
 function Harness(props: {

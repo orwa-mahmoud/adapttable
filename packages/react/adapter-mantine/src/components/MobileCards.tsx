@@ -7,6 +7,12 @@ import {
   MobileCardsChrome,
   type MobileCardSlotKit,
   mobileCardSlots,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalGroupHeaderCard,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalTreeToggle,
   resolveMobileLabel,
   resolveRowEditTrigger,
   rowEditConflict,
@@ -26,14 +32,6 @@ import {
 } from "react";
 
 import type { Density } from "../density";
-import {
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalGroupHeaderCard,
-  OptionalRowEditActions,
-  OptionalRowReorderButtons,
-  OptionalTreeToggle,
-} from "./featureSlots";
 import { MobileTarget } from "./mobileTarget";
 import { RowActionButtons } from "./RowActionButtons";
 
