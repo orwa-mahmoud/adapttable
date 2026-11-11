@@ -20,6 +20,17 @@ import {
   type HtmlGroupedHeaderCell,
   logicalAlign,
   mergedCellStyle,
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
   PIN_Z,
   PINNED_SUMMARY_BOTTOM_PART,
   PINNED_SUMMARY_TOP_PART,
@@ -55,19 +66,6 @@ import {
   useRef,
 } from "react";
 
-import {
-  OptionalColumnGroupToggle,
-  OptionalColumnHeaderRename,
-  OptionalColumnSelect,
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalFillHandle,
-  OptionalFilterHeader,
-  OptionalGroupHeaderRow,
-  OptionalRowEditActions,
-  OptionalRowReorderHandle,
-  OptionalTreeCell,
-} from "./featureSlots";
 import { RowActionButtons } from "./RowActionButtons";
 
 function ExtraSlotRow({

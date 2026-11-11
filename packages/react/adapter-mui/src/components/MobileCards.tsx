@@ -9,6 +9,12 @@ import {
   type MobileCardSlotKit,
   mobileCardSlots,
   MobileTarget,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalGroupHeaderCard,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalTreeToggle,
   resolveMobileLabel,
   resolveRowEditTrigger,
   rowEditConflict,
@@ -32,14 +38,6 @@ import {
 } from "react";
 
 import { type SharedProps } from "./DesktopTable";
-import {
-  OptionalEditableCell,
-  OptionalExpandToggle,
-  OptionalGroupHeaderCard,
-  OptionalRowEditActions,
-  OptionalRowReorderButtons,
-  OptionalTreeToggle,
-} from "./featureSlots";
 import { RowActionButtons } from "./RowActionButtons";
 
 /** A card body: the list's inputs, plus this kit's own. */
