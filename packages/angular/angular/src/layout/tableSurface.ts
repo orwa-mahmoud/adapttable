@@ -1,4 +1,12 @@
-import { Directive, type ElementRef, input, viewChild } from "@angular/core";
+import { type Attrs } from "@adapttable/angular";
+import { treeTableAria } from "@adapttable/core";
+import {
+  computed,
+  Directive,
+  type ElementRef,
+  input,
+  viewChild,
+} from "@angular/core";
 
 import { type TableView } from "./dataTableShell";
 
@@ -16,6 +24,18 @@ export abstract class AdaptTableSurface<TRow> {
   readonly maxHeight = input<number | string>();
   protected readonly scrollBox =
     viewChild<ElementRef<HTMLElement>>("scrollBox");
+
+  /**
+   * The table element's attributes: the grid's while cells take focus, and a
+   * treegrid while the rows are a tree, so each row's level and open state
+   * are read.
+   */
+  protected readonly tableElementAttrs = computed((): Attrs => {
+    const view = this.view();
+    const attrs = view.grid ? view.grid.tableAttrs() : view.table.tableAttrs();
+    const tree = view.tree?.();
+    return tree ? { ...attrs, ...treeTableAria(tree.entries.length) } : attrs;
+  });
 
   /** The scroll box the shell virtualizes against. */
   scrollElement(): HTMLElement | null {

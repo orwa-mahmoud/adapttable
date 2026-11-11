@@ -184,9 +184,7 @@
     [nzFrontPagination]="false"
     [nzShowPagination]="false"
     [nzSize]="view().density() === 'compact' ? 'small' : 'default'"
-    [attr.data-adapttable-part]="
-      tableAttrs()['role'] === 'grid' ? 'grid' : null
-    "
+    [attr.data-adapttable-part]="view().grid ? 'grid' : null"
     [adaptAttrs]="tableAttrs()"
     [adaptAttrsTarget]="tableElement"
   >

@@ -229,6 +229,14 @@ describe("the NG-ZORRO table's tree", () => {
     expect(rowIds("row")).toEqual(["1", "2", "4"]);
   });
 
+  it("is a treegrid, so each row's level and open state are read", async () => {
+    await mount();
+    const grid = rowById("1").closest("table");
+    expect(grid?.getAttribute("role")).toBe("treegrid");
+    expect(Number(grid?.getAttribute("aria-rowcount"))).toBeGreaterThan(1);
+    expect(rowById("1").getAttribute("aria-level")).toBe("1");
+  });
+
   it("opens a node to show its children, indented by depth", async () => {
     const { settle } = await mount();
     toggleOf(rowById("1")).click();

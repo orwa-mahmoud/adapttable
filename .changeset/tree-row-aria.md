@@ -2,6 +2,7 @@
 "@adapttable/core": minor
 "@adapttable/react": patch
 "@adapttable/angular": patch
+"@adapttable/ng-zorro": patch
 "@adapttable/vue": patch
 ---
 

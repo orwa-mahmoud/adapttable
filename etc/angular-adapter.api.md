@@ -2489,7 +2489,6 @@ export abstract class AdaptDesktopTableModel<TRow> extends AdaptTableSurface<TRo
     }): number | undefined;
     // (undocumented)
     protected spanned(attrs: Attrs, cell: BodyCellView<TRow>): Attrs;
-    protected readonly tableAttrs: Signal<Readonly<Record<string, unknown>>>;
     protected theadStyle(): Record<string, string> | null;
     // (undocumented)
     protected treeCellProps(entry: BodyRow<TRow>, columnKey: string, children: TemplateRef<unknown>): TreeCellProps<never> | undefined;
@@ -4668,6 +4667,7 @@ export abstract class AdaptTableSurface<TRow> {
     // (undocumented)
     protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
     scrollElement(): HTMLElement | null;
+    protected readonly tableElementAttrs: Signal<Readonly<Record<string, unknown>>>;
     // (undocumented)
     readonly view: InputSignal<TableView<TRow>>;
     // (undocumented)

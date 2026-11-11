@@ -68,7 +68,7 @@ export class AdaptDesktopTable<TRow> extends AdaptTableSurface<TRow> {
   }
 
   protected readonly tableAttrs = computed((): Attrs => ({
-    ...(this.view().grid?.tableAttrs() ?? this.view().table.tableAttrs()),
+    ...this.tableElementAttrs(),
     "data-adapttable-part": "table",
   }));
 
