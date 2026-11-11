@@ -557,6 +557,15 @@ export type {
   KitTriggerProps,
 } from "./kit/primitives";
 export {
+  type KitTable,
+  type KitTableClassNames,
+  type KitTableFrameProps,
+  type KitTableProps,
+  type KitTableSlots,
+  type KitToolbarProps,
+  TableComposition,
+} from "./kit/tableComposition";
+export {
   createDesktopRow,
   DESKTOP_ACTIONS_WIDTH,
   DESKTOP_EXPANSION_WIDTH,

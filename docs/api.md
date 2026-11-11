@@ -2905,6 +2905,15 @@ factory per feature control returns the component the kit exports:
 and `createFilterHeaderControl`. `MobileTarget` is the context a mobile card list sets, and `useMobileTarget`
 returns the 44 px touch-target style inside it.
 
+`TableComposition` draws one table from a kit's pieces: it builds the
+announcers, the toolbar with its saved-views and columns menus, the bars
+under it, the body for the state the data is in, the side panel, the footers
+and the overlays, and hands them to the kit as `KitTableFrameProps`. A kit
+passes a `KitTable` (its `Frame`, toolbar, body, skeleton, empty, error and
+pager renderers) and props shaped as `KitTableProps`, which adds
+`KitTableSlots` and `KitTableClassNames` to the shell's props; its toolbar
+receives `KitToolbarProps`.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

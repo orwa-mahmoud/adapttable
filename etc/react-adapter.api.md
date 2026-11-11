@@ -2904,6 +2904,68 @@ export interface KitSelectProps extends KitDataAttributes {
 }
 
 // @public
+export interface KitTable {
+    readonly body: <TRow>(view: DataTableShellResult<TRow>, headerOffset: number, props: KitTableProps<TRow>) => ReactNode;
+    readonly empty: (labels: Required<TableLabels>, onClear: (() => void) | undefined) => ReactNode;
+    readonly error: (state: TableErrorState, labels: Required<TableLabels>) => ReactNode;
+    readonly footer: <TRow>(view: DataTableShellResult<TRow>) => ReactNode;
+    readonly Frame: (props: KitTableFrameProps) => ReactNode;
+    readonly skeleton: (rows: number, columns: number, labels: Required<TableLabels>) => ReactNode;
+    readonly toolbar: <TRow>(props: KitToolbarProps<TRow>) => ReactNode;
+}
+
+// @public
+export interface KitTableClassNames {
+    readonly card?: string;
+    readonly footer?: string;
+    readonly root?: string;
+    readonly table?: string;
+    readonly toolbar?: string;
+}
+
+// @public
+export interface KitTableFrameProps {
+    readonly animate: boolean;
+    readonly announcers: ReactNode;
+    readonly bars: ReactNode;
+    readonly footers: ReactNode;
+    readonly fullscreenContainer: HTMLElement | undefined;
+    readonly labels: Required<TableLabels>;
+    readonly loadMore: {
+        readonly ref: RefObject<HTMLDivElement | null>;
+        readonly busy: boolean;
+        readonly onClick: () => void;
+    } | undefined;
+    readonly main: ReactNode;
+    readonly mobile: boolean;
+    readonly overlays: ReactNode;
+    readonly refreshing: boolean;
+    readonly rootProps: Readonly<Record<string, unknown>>;
+    readonly rootRef: RefObject<HTMLDivElement | null>;
+    readonly rowCount: number;
+    readonly toolbar: ReactNode;
+    readonly toolbarClassName: string | undefined;
+    readonly toolbarRef: RefCallback<HTMLElement | null>;
+    readonly toolbarStyle: CSSProperties | undefined;
+}
+
+// @public
+export type KitTableProps<TRow> = DataTableShellProps<TRow> & {
+    readonly slots?: KitTableSlots;
+    readonly className?: string;
+    readonly classNames?: KitTableClassNames;
+    readonly animate?: boolean;
+};
+
+// @public
+export interface KitTableSlots {
+    readonly empty?: ReactNode;
+    readonly error?: Exclude<Slot<TableErrorState>, undefined>;
+    readonly noResults?: ReactNode;
+    readonly skeleton?: ReactNode;
+}
+
+// @public
 export interface KitTextInputProps extends KitDataAttributes {
     readonly "aria-label": string;
     readonly className?: string;
@@ -2927,6 +2989,17 @@ export interface KitTextProps extends HTMLAttributes<HTMLElement> {
 
 // @public
 export type KitTone = "neutral" | "primary" | "danger";
+
+// @public
+export interface KitToolbarProps<TRow> extends DataTableShellToolbarProps<TRow> {
+    readonly columnMenu: ReactNode;
+    readonly filtersMode: "popover" | "drawer" | "header";
+    readonly filtersOpen: boolean;
+    readonly onCloseFilters: () => void;
+    readonly onFiltersTriggerPointerDown: () => void;
+    readonly onToggleFilters: () => void;
+    readonly savedViewsMenu: ReactNode;
+}
 
 // @public
 export interface KitTriggerProps {
@@ -4116,6 +4189,12 @@ export interface TableCommandPalette {
     open: boolean;
     show: () => void;
 }
+
+// @public
+export function TableComposition<TRow>(input: {
+    readonly props: KitTableProps<TRow>;
+    readonly kit: KitTable;
+}): ReactNode;
 
 // @public
 export interface TableContextMenu {

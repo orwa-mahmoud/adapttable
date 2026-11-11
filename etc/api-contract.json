@@ -6841,7 +6841,14 @@
       "KitTextInputProps",
       "KitTextProps",
       "KitTone",
-      "KitTriggerProps"
+      "KitTriggerProps",
+      "KitTable",
+      "KitTableClassNames",
+      "KitTableFrameProps",
+      "KitTableProps",
+      "KitTableSlots",
+      "KitToolbarProps",
+      "TableComposition"
     ],
     "react-features": [
       "applyTableFeatures",
