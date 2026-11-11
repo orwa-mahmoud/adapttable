@@ -6848,7 +6848,22 @@
       "KitTableProps",
       "KitTableSlots",
       "KitToolbarProps",
-      "TableComposition"
+      "TableComposition",
+      "cellDisplay",
+      "OptionalEditableCell",
+      "OptionalTreeCell",
+      "OptionalTreeToggle",
+      "OptionalFillHandle",
+      "OptionalExpandToggle",
+      "OptionalFilterHeader",
+      "OptionalRowEditActions",
+      "OptionalRowReorderHandle",
+      "OptionalRowReorderButtons",
+      "OptionalColumnGroupToggle",
+      "OptionalColumnHeaderRename",
+      "OptionalColumnSelect",
+      "OptionalGroupHeaderRow",
+      "OptionalGroupHeaderCard"
     ],
     "react-features": [
       "applyTableFeatures",

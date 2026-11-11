@@ -537,6 +537,23 @@ export {
   createTreeCell,
   createTreeToggle,
 } from "./kit/controls";
+export {
+  cellDisplay,
+  OptionalColumnGroupToggle,
+  OptionalColumnHeaderRename,
+  OptionalColumnSelect,
+  OptionalEditableCell,
+  OptionalExpandToggle,
+  OptionalFillHandle,
+  OptionalFilterHeader,
+  OptionalGroupHeaderCard,
+  OptionalGroupHeaderRow,
+  OptionalRowEditActions,
+  OptionalRowReorderButtons,
+  OptionalRowReorderHandle,
+  OptionalTreeCell,
+  OptionalTreeToggle,
+} from "./kit/featureSlots";
 export { MobileTarget, useMobileTarget } from "./kit/mobileTarget";
 export type {
   KitButtonProps,

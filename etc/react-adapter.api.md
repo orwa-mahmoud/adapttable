@@ -1012,6 +1012,9 @@ export { CELL_NAV_LIVE }
 
 export { CellConflictAsk }
 
+// @public
+export function cellDisplay<TRow>(column: ColumnDef<TRow>, row: TRow, rowIndex: number): ReactNode;
+
 export { CellEdit }
 
 export { CellEditCommit }
@@ -3246,11 +3249,53 @@ export { normalizeEditorOptions }
 export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
 
 // @public
+export function OptionalColumnGroupToggle(props: Readonly<ColumnGroupToggleProps>): ReactNode;
+
+// @public
+export function OptionalColumnHeaderRename(props: Readonly<ColumnHeaderRenameSlotProps>): ReactNode;
+
+// @public
+export function OptionalColumnSelect(props: Readonly<Omit<ColumnSelectCheckboxChromeProps, "slots">>): ReactNode;
+
+// @public
+export function OptionalEditableCell<TRow>(props: Readonly<EditableCellSlotProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalExpandToggle(props: Readonly<ExpandToggleSlotProps>): ReactNode;
+
+// @public
+export function OptionalFillHandle(props: Readonly<FillHandleCellSlotProps>): ReactNode;
+
+// @public
+export function OptionalFilterHeader<TRow>(props: Readonly<FilterHeaderControlProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalGroupHeaderCard<TRow>(props: Readonly<GroupHeaderCardSlotProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalGroupHeaderRow<TRow>(props: Readonly<GroupHeaderRowSlotProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalRowEditActions<TRow>(props: Readonly<RowEditActionsProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalRowReorderButtons<TRow>(props: Readonly<RowReorderButtonsProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalRowReorderHandle<TRow>(props: Readonly<RowReorderHandleProps<TRow>>): ReactNode;
+
+// @public
 export function OptionalSidePanel(input: {
     readonly side?: "start" | "end";
     readonly body: ReactNode;
     readonly panel: ReactNode;
 }): ReactNode;
+
+// @public
+export function OptionalTreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>): ReactNode;
+
+// @public
+export function OptionalTreeToggle<TRow>(props: Readonly<TreeToggleProps<TRow>>): ReactNode;
 
 export { orderedCardEntries }
 

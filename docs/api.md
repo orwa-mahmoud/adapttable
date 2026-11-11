@@ -2914,6 +2914,16 @@ pager renderers) and props shaped as `KitTableProps`, which adds
 `KitTableSlots` and `KitTableClassNames` to the shell's props; its toolbar
 receives `KitToolbarProps`.
 
+A kit's desktop table and mobile cards name each optional control through
+its slot wrapper, so a table that omits the feature omits the component:
+`OptionalEditableCell` (which shows `cellDisplay(column, row, rowIndex)` when
+no feature edits cells), `OptionalTreeCell`, `OptionalTreeToggle`,
+`OptionalFillHandle`, `OptionalExpandToggle`, `OptionalFilterHeader`,
+`OptionalRowEditActions`, `OptionalRowReorderHandle`,
+`OptionalRowReorderButtons`, `OptionalColumnGroupToggle`,
+`OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`
+and `OptionalGroupHeaderCard`.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);
