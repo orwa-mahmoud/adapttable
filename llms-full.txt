@@ -19957,6 +19957,12 @@ no feature edits cells), `OptionalTreeCell`, `OptionalTreeToggle`,
 `OptionalColumnHeaderRename`, `OptionalColumnSelect`, `OptionalGroupHeaderRow`
 and `OptionalGroupHeaderCard`.
 
+`createColumnMenu(kit, useLook)` returns the Columns menu drawn with a kit's
+button, icon button, text input, select, popover, text and divider
+(`KitDividerProps`). `useLook` is the kit's hook for `KitColumnMenuLook`: the
+spacing of the panel, heading, search, bulk row, column rows, submenu and
+rename form, and the colour of the drop line.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

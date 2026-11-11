@@ -60,6 +60,8 @@ export interface KitButtonProps
   readonly tone?: KitTone;
   /** Stretch to the width of its container. */
   readonly fullWidth?: boolean;
+  /** Where the caption sits in a full-width button. Absent, centred. */
+  readonly justify?: "start";
 }
 
 /**
@@ -101,7 +103,17 @@ export interface KitTextInputProps extends KitDataAttributes {
   /** The input element, for focus. */
   readonly elementRef?: Ref<HTMLInputElement>;
   /** Keys pressed in the input. */
-  readonly onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
+  readonly onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  /** The input's id, for a label that names it. */
+  readonly id?: string;
+  /** Whether the value is rejected; the kit draws its error state. */
+  readonly invalid?: boolean;
+  /** The input lost focus. */
+  readonly onBlur?: () => void;
+  /** Tells assistive technology the value is rejected. */
+  readonly "aria-invalid"?: "true";
+  /** The element that explains the rejection. */
+  readonly "aria-describedby"?: string;
 }
 
 /**
@@ -138,6 +150,10 @@ export interface KitSelectProps extends KitDataAttributes {
   readonly fullWidth?: boolean;
   /** Whether the select accepts input. */
   readonly disabled?: boolean;
+  /** A visible label, where the control shows one. */
+  readonly label?: string;
+  /** Styles for the control's root. */
+  readonly style?: CSSProperties;
 }
 
 /**
@@ -203,6 +219,10 @@ export interface KitPopoverProps {
   readonly className?: string;
   /** Inline style on the panel. */
   readonly style?: CSSProperties;
+  /** Where the panel opens. Absent, the kit's default placement. */
+  readonly placement?: "bottom-start";
+  /** The content brings its own padding; the panel adds none. */
+  readonly flush?: boolean;
 }
 
 /**
@@ -247,10 +267,24 @@ export interface KitMenuProps {
  * @public
  */
 export interface KitTextProps extends HTMLAttributes<HTMLElement> {
-  /** The type role. Absent, body text. */
-  readonly variant?: "body" | "secondary" | "title";
+  /** Its type role. Absent, `"body"`. */
+  readonly variant?: "body" | "title" | "caption";
+  /** Its colour role. Absent, the surface's text colour. */
+  readonly tone?: "secondary" | "disabled" | "danger";
   /** Draw it as this element. Absent, the kit's choice. */
-  readonly as?: "span" | "p" | "div";
+  readonly as?: "span" | "p" | "div" | "label";
+  /** The control a label names. */
+  readonly htmlFor?: string;
+}
+
+/**
+ * A thin rule between two groups of controls.
+ *
+ * @public
+ */
+export interface KitDividerProps {
+  /** Spacing around the rule. */
+  readonly style?: CSSProperties;
 }
 
 /**
@@ -276,6 +310,8 @@ export interface KitPrimitives {
   readonly Menu: ComponentType<KitMenuProps>;
   /** A run of text. */
   readonly Text: ComponentType<KitTextProps>;
+  /** A rule between groups. */
+  readonly Divider: ComponentType<KitDividerProps>;
 }
 
 /**

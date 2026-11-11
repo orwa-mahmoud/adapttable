@@ -6863,7 +6863,10 @@
       "OptionalColumnHeaderRename",
       "OptionalColumnSelect",
       "OptionalGroupHeaderRow",
-      "OptionalGroupHeaderCard"
+      "OptionalGroupHeaderCard",
+      "createColumnMenu",
+      "KitColumnMenuLook",
+      "KitDividerProps"
     ],
     "react-features": [
       "applyTableFeatures",

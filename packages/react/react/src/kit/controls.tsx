@@ -4,7 +4,13 @@
  * A kit calls one factory per feature entry with the primitives that feature
  * draws, and exports the component it returns. Every glyph, part name, label
  * and keyboard wiring lives here; the kit's primitives decide only the look.
+ *
+ * Every component here hands its props straight to a Chrome or a primitive,
+ * so the module opts out of the compiler: a cache around a pass-through
+ * outweighs the element it would save.
  */
+"use no memo";
+
 import type {
   AgentApprovalButtonProps,
   AgentApprovalListProps,

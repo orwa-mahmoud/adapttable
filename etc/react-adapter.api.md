@@ -1510,6 +1510,9 @@ export function createBatchEditBar(kit: KitPrimitivesOf<"Button">): <TRow>(props
 export function createColumnGroupToggle(kit: KitPrimitivesOf<"IconButton">): (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
 
 // @public
+export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Select" | "Popover" | "Text" | "Divider">, useLook: () => KitColumnMenuLook): <TRow>(props: Readonly<ColumnMenuSlotProps<TRow>>) => ReactElement;
+
+// @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): (props: TProps) => ReactElement;
 
 // @public
@@ -2815,6 +2818,7 @@ export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode
 export interface KitButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">, KitDataAttributes {
     readonly elementRef?: Ref<HTMLButtonElement>;
     readonly fullWidth?: boolean;
+    readonly justify?: "start";
     readonly tone?: KitTone;
     readonly variant?: KitButtonVariant;
 }
@@ -2834,7 +2838,29 @@ export interface KitCheckboxProps extends KitDataAttributes {
 }
 
 // @public
+export interface KitColumnMenuLook {
+    readonly accent: string;
+    readonly bulk: CSSProperties;
+    readonly choice: CSSProperties;
+    readonly divider: CSSProperties;
+    readonly grip: CSSProperties;
+    readonly heading: CSSProperties;
+    readonly panel: CSSProperties;
+    readonly renameActions: CSSProperties;
+    readonly renameForm: CSSProperties;
+    readonly row: CSSProperties;
+    readonly rowSpacer: CSSProperties;
+    readonly search: CSSProperties;
+    readonly submenu: CSSProperties;
+}
+
+// @public
 export type KitDataAttributes = Readonly<Partial<Record<`data-${string}`, string>>>;
+
+// @public
+export interface KitDividerProps {
+    readonly style?: CSSProperties;
+}
 
 export { KitEnvironment }
 
@@ -2871,9 +2897,11 @@ export interface KitOption {
 export interface KitPopoverProps {
     readonly children: ReactNode;
     readonly className?: string;
+    readonly flush?: boolean;
     readonly onOpenChange?: (open: boolean) => void;
     readonly open?: boolean;
     readonly part?: string;
+    readonly placement?: "bottom-start";
     readonly role?: "dialog" | "menu";
     readonly style?: CSSProperties;
     readonly trigger: (props: KitTriggerProps) => ReactNode;
@@ -2883,6 +2911,7 @@ export interface KitPopoverProps {
 export interface KitPrimitives {
     readonly Button: ComponentType<KitButtonProps>;
     readonly Checkbox: ComponentType<KitCheckboxProps>;
+    readonly Divider: ComponentType<KitDividerProps>;
     readonly IconButton: ComponentType<KitIconButtonProps>;
     readonly Menu: ComponentType<KitMenuProps>;
     readonly Popover: ComponentType<KitPopoverProps>;
@@ -2900,9 +2929,11 @@ export interface KitSelectProps extends KitDataAttributes {
     readonly className?: string;
     readonly disabled?: boolean;
     readonly fullWidth?: boolean;
+    readonly label?: string;
     readonly onValueChange: (value: string) => void;
     readonly options: readonly KitOption[];
     readonly rootPart?: string;
+    readonly style?: CSSProperties;
     readonly value: string;
 }
 
@@ -2970,12 +3001,17 @@ export interface KitTableSlots {
 
 // @public
 export interface KitTextInputProps extends KitDataAttributes {
+    readonly "aria-describedby"?: string;
+    readonly "aria-invalid"?: "true";
     readonly "aria-label": string;
     readonly className?: string;
     readonly disabled?: boolean;
     readonly elementRef?: Ref<HTMLInputElement>;
     readonly fullWidth?: boolean;
-    readonly onKeyDown?: (event: KeyboardEvent_2<HTMLElement>) => void;
+    readonly id?: string;
+    readonly invalid?: boolean;
+    readonly onBlur?: () => void;
+    readonly onKeyDown?: (event: KeyboardEvent_2<HTMLInputElement>) => void;
     readonly onValueChange: (value: string) => void;
     readonly placeholder?: string;
     readonly rootPart?: string;
@@ -2986,8 +3022,10 @@ export interface KitTextInputProps extends KitDataAttributes {
 
 // @public
 export interface KitTextProps extends HTMLAttributes<HTMLElement> {
-    readonly as?: "span" | "p" | "div";
-    readonly variant?: "body" | "secondary" | "title";
+    readonly as?: "span" | "p" | "div" | "label";
+    readonly htmlFor?: string;
+    readonly tone?: "secondary" | "disabled" | "danger";
+    readonly variant?: "body" | "title" | "caption";
 }
 
 // @public

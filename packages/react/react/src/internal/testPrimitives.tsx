@@ -8,6 +8,7 @@ import { type ReactNode, useEffect, useId, useState } from "react";
 import type {
   KitButtonProps,
   KitCheckboxProps,
+  KitDividerProps,
   KitIconButtonProps,
   KitMenuProps,
   KitPopoverProps,
@@ -22,6 +23,7 @@ function Button({
   variant,
   tone,
   fullWidth,
+  justify,
   ...rest
 }: Readonly<KitButtonProps>) {
   return (
@@ -31,6 +33,7 @@ function Button({
       data-variant={variant}
       data-tone={tone}
       data-full-width={fullWidth ? "" : undefined}
+      data-justify={justify}
       {...rest}
     />
   );
@@ -46,6 +49,7 @@ function TextInput({
   rootPart,
   elementRef,
   fullWidth,
+  invalid,
   type = "text",
   ...rest
 }: Readonly<KitTextInputProps>) {
@@ -56,6 +60,7 @@ function TextInput({
       value={value}
       data-adapttable-part={rootPart}
       data-full-width={fullWidth ? "" : undefined}
+      data-invalid={invalid ? "" : undefined}
       onChange={(event) => onValueChange(event.target.value)}
       {...rest}
     />
@@ -68,11 +73,13 @@ function Select({
   onValueChange,
   rootPart,
   fullWidth,
+  label,
   ...rest
 }: Readonly<KitSelectProps>) {
   return (
     <select
       value={value}
+      data-label={label}
       data-adapttable-part={rootPart}
       data-full-width={fullWidth ? "" : undefined}
       onChange={(event) => onValueChange(event.target.value)}
@@ -211,9 +218,18 @@ function Menu({
   );
 }
 
-function Text({ variant, as, ...rest }: Readonly<KitTextProps>): ReactNode {
+function Text({
+  variant,
+  tone,
+  as,
+  ...rest
+}: Readonly<KitTextProps>): ReactNode {
   const Tag = as ?? (variant === "title" ? "strong" : "span");
-  return <Tag data-variant={variant} {...rest} />;
+  return <Tag data-variant={variant} data-tone={tone} {...rest} />;
+}
+
+function Divider({ style }: Readonly<KitDividerProps>): ReactNode {
+  return <hr style={style} />;
 }
 
 /** The whole native set, for any factory a test builds. */
@@ -226,4 +242,5 @@ export const testPrimitives: KitPrimitives = {
   Popover,
   Menu,
   Text,
+  Divider,
 };
