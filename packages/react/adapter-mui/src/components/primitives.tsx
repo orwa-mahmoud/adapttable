@@ -7,6 +7,7 @@ import {
   type KitButtonProps,
   type KitCheckboxProps,
   type KitDataAttributes,
+  type KitDividerProps,
   type KitIconButtonProps,
   type KitMenuProps,
   type KitPopoverProps,
@@ -20,6 +21,7 @@ import {
 import {
   Button as MuiButton,
   Checkbox as MuiCheckbox,
+  Divider as MuiDivider,
   FormControlLabel,
   IconButton as MuiIconButton,
   Menu as MuiMenu,
@@ -36,13 +38,18 @@ function iconColor(tone: KitTone | undefined): "default" | "primary" | "error" {
   return tone === "primary" ? "primary" : "default";
 }
 
+const JUSTIFY_START = { justifyContent: "flex-start" } as const;
+
 /** A captioned button. @public */
 export function Button({
   elementRef,
   variant = "text",
   tone,
+  justify,
   ...rest
 }: Readonly<KitButtonProps>) {
+  // A pass-through: the compiler's cache would outweigh the element it saves.
+  "use no memo";
   return (
     <MuiButton
       ref={elementRef}
@@ -50,6 +57,7 @@ export function Button({
       size="small"
       variant={variant === "filled" ? "contained" : variant}
       color={tone === "danger" ? "error" : undefined}
+      sx={justify ? JUSTIFY_START : undefined}
       {...rest}
     />
   );
@@ -60,9 +68,12 @@ export function IconButton({
   elementRef,
   variant: _variant,
   fullWidth: _fullWidth,
+  justify: _justify,
   tone,
   ...rest
 }: Readonly<KitIconButtonProps>) {
+  // A pass-through: the compiler's cache would outweigh the element it saves.
+  "use no memo";
   return (
     <MuiIconButton
       ref={elementRef}
@@ -88,13 +99,20 @@ export function TextInput({
   disabled,
   elementRef,
   onKeyDown,
+  id,
+  invalid,
+  onBlur,
   ...data
 }: Readonly<KitTextInputProps>) {
+  // A pass-through: the compiler's cache would outweigh the element it saves.
+  "use no memo";
   return (
     <TextField
+      id={id}
       inputRef={elementRef}
       size="small"
       hiddenLabel
+      error={invalid}
       type={type}
       value={value}
       placeholder={placeholder}
@@ -104,6 +122,7 @@ export function TextInput({
       style={style}
       data-adapttable-part={rootPart}
       onChange={(event) => onValueChange(event.target.value)}
+      onBlur={onBlur}
       onKeyDown={onKeyDown}
       slotProps={{ htmlInput: { "aria-label": label, ...data } }}
     />
@@ -120,13 +139,19 @@ export function Select({
   rootPart,
   fullWidth,
   disabled,
+  label: caption,
+  style,
   ...data
 }: Readonly<KitSelectProps>) {
+  // A pass-through: the compiler's cache would outweigh the element it saves.
+  "use no memo";
   return (
     <TextField
       select
       size="small"
-      hiddenLabel
+      hiddenLabel={caption === undefined}
+      label={caption}
+      style={style}
       value={value}
       className={className}
       fullWidth={fullWidth}
@@ -158,6 +183,8 @@ export function Checkbox({
   className,
   ...data
 }: Readonly<KitCheckboxProps>) {
+  // A pass-through: the compiler's cache would outweigh the element it saves.
+  "use no memo";
   const box = (
     <MuiCheckbox
       size="small"
@@ -180,6 +207,12 @@ export function Checkbox({
   );
 }
 
+/** Under the trigger, start edges aligned, free to reach the window edge. */
+const BOTTOM_START = {
+  anchorOrigin: { vertical: "bottom", horizontal: "left" },
+  transformOrigin: { vertical: "top", horizontal: "left" },
+  marginThreshold: 0,
+} as const;
 const POPOVER_PAPER = { px: 1, py: 0.5 } as const;
 const MENU_PAPER = { minWidth: "12rem", p: 1 } as const;
 
@@ -205,6 +238,8 @@ export function Popover({
   part,
   className,
   style,
+  placement,
+  flush,
 }: Readonly<KitPopoverProps>) {
   const anchorRef = useRef<HTMLButtonElement | null>(null);
   const [own, setOwn] = useState(false);
@@ -228,8 +263,13 @@ export function Popover({
         open={shown}
         anchorEl={() => anchorRef.current}
         onClose={() => set(false)}
+        {...(placement ? BOTTOM_START : undefined)}
         slotProps={{
-          paper: paperWith(part, { className, style, sx: POPOVER_PAPER }),
+          paper: paperWith(part, {
+            className,
+            style,
+            sx: flush ? undefined : POPOVER_PAPER,
+          }),
         }}
       >
         {children}
@@ -305,25 +345,41 @@ export function Menu({
 
 const TEXT_VARIANT = {
   body: "body2",
-  secondary: "body2",
   title: "subtitle2",
+  caption: "caption",
+} as const;
+
+const TEXT_TONE = {
+  secondary: { color: "text.secondary" },
+  disabled: { color: "text.disabled" },
+  danger: { color: "error.main" },
 } as const;
 
 /** A run of text in one of MUI's type roles. @public */
 export function Text({
   variant = "body",
+  tone,
   as,
   color: _color,
   ...rest
 }: Readonly<KitTextProps>) {
+  // A pass-through: the compiler's cache would outweigh the element it saves.
+  "use no memo";
   return (
     <Typography
       variant={TEXT_VARIANT[variant]}
-      color={variant === "secondary" ? "text.secondary" : undefined}
+      sx={tone ? TEXT_TONE[tone] : undefined}
       component={as ?? (variant === "title" ? "p" : "span")}
       {...rest}
     />
   );
+}
+
+/** A rule between groups. @public */
+export function Divider({ style }: Readonly<KitDividerProps>) {
+  // A pass-through: the compiler's cache would outweigh the element it saves.
+  "use no memo";
+  return <MuiDivider style={style} />;
 }
 
 /** Every MUI primitive; the type check is that none is missing. */
@@ -336,4 +392,5 @@ export const primitives = {
   Popover,
   Menu,
   Text,
+  Divider,
 } satisfies KitPrimitives;
