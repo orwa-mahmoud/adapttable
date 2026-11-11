@@ -523,6 +523,40 @@ export {
 export { ReducedMotionScope } from "./hooks/usePrefersReducedMotion";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
 export {
+  createAgentApproval,
+  createBatchEditBar,
+  createColumnGroupToggle,
+  createEditableCellSlots,
+  createFilterHeaderControl,
+  createFilterHeaderRow,
+  createFindBar,
+  createGroupMoreButton,
+  createRowEditActions,
+  createRowReorderButtons,
+  createRowReorderHandle,
+  createTreeCell,
+  createTreeToggle,
+} from "./kit/controls";
+export { MobileTarget, useMobileTarget } from "./kit/mobileTarget";
+export type {
+  KitButtonProps,
+  KitButtonVariant,
+  KitCheckboxProps,
+  KitDataAttributes,
+  KitIconButtonProps,
+  KitMenuItem,
+  KitMenuProps,
+  KitOption,
+  KitPopoverProps,
+  KitPrimitives,
+  KitPrimitivesOf,
+  KitSelectProps,
+  KitTextInputProps,
+  KitTextProps,
+  KitTone,
+  KitTriggerProps,
+} from "./kit/primitives";
+export {
   createDesktopRow,
   DESKTOP_ACTIONS_WIDTH,
   DESKTOP_EXPANSION_WIDTH,

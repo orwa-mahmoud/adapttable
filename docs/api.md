@@ -2889,6 +2889,22 @@ leaving focus a reader moved elsewhere alone), and the inline icon set
 `bindMobileCardList`, `mobileCardListStyle`,
 `useOffsetHeight`, `PINNED_TOP_PART`, `PINNED_BOTTOM_PART`.
 
+A kit hands the binding one typed set of primitives and the binding draws each
+feature's controls from them. `KitPrimitives` is the whole set (`Button`,
+`IconButton`, `TextInput`, `Select`, `Checkbox`, `Popover`, `Menu`, `Text`) and
+`KitPrimitivesOf<...>` the subset one factory needs; their props are
+`KitButtonProps`, `KitIconButtonProps`, `KitTextInputProps`, `KitSelectProps`
+(`KitOption`), `KitCheckboxProps`, `KitPopoverProps` (its trigger receives
+`KitTriggerProps`), `KitMenuProps` (`KitMenuItem`) and `KitTextProps`, with
+`KitButtonVariant`, `KitTone` and `KitDataAttributes` shared between them. One
+factory per feature control returns the component the kit exports:
+`createFindBar`, `createRowEditActions`, `createBatchEditBar`,
+`createAgentApproval`, `createTreeToggle`, `createTreeCell`,
+`createColumnGroupToggle`, `createGroupMoreButton`, `createRowReorderHandle`,
+`createRowReorderButtons`, `createEditableCellSlots`, `createFilterHeaderRow`
+and `createFilterHeaderControl`. `MobileTarget` is the context a mobile card list sets, and `useMobileTarget`
+returns the 44 px touch-target style inside it.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

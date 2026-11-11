@@ -57,6 +57,7 @@ import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { bulkActionErrorMessage } from '@adapttable/core';
 import { BulkBarState } from '@adapttable/core/binding';
+import { ButtonHTMLAttributes } from 'react';
 import { CELL_NAV_LIVE } from '@adapttable/core/binding';
 import { CellConflictAsk } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
@@ -1497,9 +1498,48 @@ export function createAdapterStandardFeatures(factories: AdapterStandardFeatureF
 export function createAdapterTableAssistantFeature(TableAssistant: AdapterFeatureComponent<TableAssistantProps>): StaticTableFeature;
 
 // @public
+export function createAgentApproval(kit: KitPrimitivesOf<"Button">): (props: Readonly<AgentApprovalProps>) => ReactElement;
+
+// @public
+export function createBatchEditBar(kit: KitPrimitivesOf<"Button">): <TRow>(props: Readonly<BatchEditBarProps<TRow>>) => ReactElement;
+
+// @public
+export function createColumnGroupToggle(kit: KitPrimitivesOf<"IconButton">): (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
+
+// @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): (props: TProps) => ReactElement;
 
+// @public
+export function createEditableCellSlots(kit: KitPrimitivesOf<"Button">): EditableCellSlots;
+
+// @public
+export function createFilterHeaderControl(kit: KitPrimitivesOf<"TextInput" | "Select" | "Button" | "Checkbox" | "Popover">): <TRow>(props: Readonly<FilterHeaderControlProps<TRow>>) => ReactElement | null;
+
+// @public
+export function createFilterHeaderRow(kit: KitPrimitivesOf<"TextInput" | "Select" | "Button" | "Checkbox" | "Popover">): <TRow>(props: Readonly<FilterHeaderRowProps<TRow>>) => ReactElement | null;
+
 export { createFilterRegistry }
+
+// @public
+export function createFindBar(kit: KitPrimitivesOf<"TextInput" | "IconButton">): (props: Readonly<FindBarProps>) => ReactElement;
+
+// @public
+export function createGroupMoreButton(kit: KitPrimitivesOf<"Button">): (props: Readonly<GroupMoreButtonProps>) => ReactElement | null;
+
+// @public
+export function createRowEditActions(kit: KitPrimitivesOf<"Button" | "IconButton">, iconFor: (part: string, icon: unknown) => ReactNode): <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactElement;
+
+// @public
+export function createRowReorderButtons(kit: KitPrimitivesOf<"IconButton" | "Button" | "Menu" | "Popover" | "Text">): <TRow>(props: Readonly<RowReorderButtonsProps<TRow>>) => ReactElement;
+
+// @public
+export function createRowReorderHandle(kit: KitPrimitivesOf<"IconButton" | "Button" | "Menu" | "Popover" | "Text">): <TRow>(props: Readonly<RowReorderHandleProps<TRow>>) => ReactElement;
+
+// @public
+export function createTreeCell(kit: KitPrimitivesOf<"IconButton">): <TRow>(props: Readonly<TreeCellProps<TRow>>) => ReactElement;
+
+// @public
+export function createTreeToggle(kit: KitPrimitivesOf<"IconButton">): <TRow>(props: Readonly<TreeToggleProps<TRow>>) => ReactElement | null;
 
 export { CustomCellEditorConflict }
 
@@ -2768,7 +2808,134 @@ export interface KeyedWindow extends KeyedVirtualization {
 // @public
 export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode>;
 
+// @public
+export interface KitButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">, KitDataAttributes {
+    readonly elementRef?: Ref<HTMLButtonElement>;
+    readonly fullWidth?: boolean;
+    readonly tone?: KitTone;
+    readonly variant?: KitButtonVariant;
+}
+
+// @public
+export type KitButtonVariant = "text" | "outlined" | "filled";
+
+// @public
+export interface KitCheckboxProps extends KitDataAttributes {
+    readonly "aria-label"?: string;
+    readonly checked: boolean;
+    readonly className?: string;
+    readonly disabled?: boolean;
+    readonly indeterminate?: boolean;
+    readonly label?: ReactNode;
+    readonly onCheckedChange: (checked: boolean) => void;
+}
+
+// @public
+export type KitDataAttributes = Readonly<Partial<Record<`data-${string}`, string>>>;
+
 export { KitEnvironment }
+
+// @public
+export interface KitIconButtonProps extends KitButtonProps {
+    readonly "aria-label": string;
+}
+
+// @public
+export interface KitMenuItem {
+    readonly disabled?: boolean;
+    readonly disabledReason?: string;
+    readonly id: string;
+    readonly label: string;
+    readonly onSelect: () => void;
+}
+
+// @public
+export interface KitMenuProps {
+    readonly "aria-label": string;
+    readonly itemPart?: string;
+    readonly items: readonly KitMenuItem[];
+    readonly part?: string;
+    readonly trigger: (props: KitTriggerProps) => ReactNode;
+}
+
+// @public
+export interface KitOption {
+    readonly label: string;
+    readonly value: string;
+}
+
+// @public
+export interface KitPopoverProps {
+    readonly children: ReactNode;
+    readonly className?: string;
+    readonly onOpenChange?: (open: boolean) => void;
+    readonly open?: boolean;
+    readonly part?: string;
+    readonly role?: "dialog" | "menu";
+    readonly style?: CSSProperties;
+    readonly trigger: (props: KitTriggerProps) => ReactNode;
+}
+
+// @public
+export interface KitPrimitives {
+    readonly Button: ComponentType<KitButtonProps>;
+    readonly Checkbox: ComponentType<KitCheckboxProps>;
+    readonly IconButton: ComponentType<KitIconButtonProps>;
+    readonly Menu: ComponentType<KitMenuProps>;
+    readonly Popover: ComponentType<KitPopoverProps>;
+    readonly Select: ComponentType<KitSelectProps>;
+    readonly Text: ComponentType<KitTextProps>;
+    readonly TextInput: ComponentType<KitTextInputProps>;
+}
+
+// @public
+export type KitPrimitivesOf<TName extends keyof KitPrimitives> = Pick<KitPrimitives, TName>;
+
+// @public
+export interface KitSelectProps extends KitDataAttributes {
+    readonly "aria-label": string;
+    readonly className?: string;
+    readonly disabled?: boolean;
+    readonly fullWidth?: boolean;
+    readonly onValueChange: (value: string) => void;
+    readonly options: readonly KitOption[];
+    readonly rootPart?: string;
+    readonly value: string;
+}
+
+// @public
+export interface KitTextInputProps extends KitDataAttributes {
+    readonly "aria-label": string;
+    readonly className?: string;
+    readonly disabled?: boolean;
+    readonly elementRef?: Ref<HTMLInputElement>;
+    readonly fullWidth?: boolean;
+    readonly onKeyDown?: (event: KeyboardEvent_2<HTMLElement>) => void;
+    readonly onValueChange: (value: string) => void;
+    readonly placeholder?: string;
+    readonly rootPart?: string;
+    readonly style?: CSSProperties;
+    readonly type?: "text" | "search" | "number" | "date" | "datetime-local";
+    readonly value: string;
+}
+
+// @public
+export interface KitTextProps extends HTMLAttributes<HTMLElement> {
+    readonly as?: "span" | "p" | "div";
+    readonly variant?: "body" | "secondary" | "title";
+}
+
+// @public
+export type KitTone = "neutral" | "primary" | "danger";
+
+// @public
+export interface KitTriggerProps {
+    readonly "aria-controls"?: string;
+    readonly "aria-expanded": boolean;
+    readonly "aria-haspopup": "dialog" | "menu";
+    readonly elementRef: Ref<HTMLButtonElement>;
+    readonly onClick: () => void;
+}
 
 export { LayoutStorage }
 
@@ -2962,6 +3129,9 @@ export interface MobileCardSlotKit<TRow> {
 
 // @public
 export function mobileCardSlots<TRow>(props: Readonly<MobileCardListProps<TRow>>, kit: MobileCardSlotKit<TRow>): MobileCardSlot[];
+
+// @public
+export const MobileTarget: Context<boolean>;
 
 // @public
 export interface MountStaggerOptions {
@@ -4303,6 +4473,9 @@ export function useKeyedVirtualization(options: {
 
 // @public
 export function useLocaleLabels(locale: string | undefined): Required<TableLabels> | undefined;
+
+// @public
+export function useMobileTarget(): CSSProperties | undefined;
 
 // @public
 export function useMountStagger(ref: RefObject<HTMLElement | null>, deps: DependencyList, options: MountStaggerOptions): void;

@@ -256,7 +256,7 @@ const KIT_PART_PATTERNS = [
  */
 const CHROME_PART_PATTERNS = [
   ...KIT_PART_PATTERNS,
-  /\bpart[=:]\s*["'](?<part>[a-z0-9-]+)["']/g,
+  /\b(?:part|[a-z][A-Za-z]*Part)[=:]\s*["'](?<part>[a-z0-9-]+)["']/g,
   /\bpart\]?\s*=\s*(["'])\s*(["'])(?<part>[a-z0-9-]+)\2\s*\1/g,
 ];
 
