@@ -2,7 +2,7 @@
 import { createMemoryAdapter, useFrontendData } from "@adapttable/react";
 import type * as AdapterModule from "@adapttable/react/adapter";
 import {
-  useDataTableShell,
+  TableComposition,
   type VirtualTableRow,
 } from "@adapttable/react/adapter";
 import { createTheme, ThemeProvider } from "@mui/material";
@@ -29,7 +29,7 @@ const theme = createTheme();
 
 vi.mock("@adapttable/react/adapter", async (importOriginal) => {
   const actual = await importOriginal<typeof AdapterModule>();
-  return { ...actual, useDataTableShell: vi.fn(actual.useDataTableShell) };
+  return { ...actual, TableComposition: vi.fn(actual.TableComposition) };
 });
 
 const actualAdapter = await vi.importActual<typeof AdapterModule>(
@@ -37,36 +37,46 @@ const actualAdapter = await vi.importActual<typeof AdapterModule>(
 );
 
 /**
- * Force a controlled virtual window by overriding the shell's `tableProps` —
- * the body renderers read `rowEntries` exactly as from a real virtualizer.
+ * Force a controlled virtual window by overriding the `tableProps` the kit's
+ * body receives — the body renderers read `rowEntries` exactly as from a real
+ * virtualizer.
  */
 function mockBodyData(
   rows: VirtualTableRow<Row>[],
   top: number,
   bottom: number
 ) {
-  vi.mocked(useDataTableShell).mockImplementation((props, render) => {
-    const real = actualAdapter.useDataTableShell(props, render);
-    return {
-      ...real,
-      skipChromeBody: true,
-      tableProps: {
-        ...real.tableProps,
-        rowEntries: rows,
-        paddingTop: top,
-        paddingBottom: bottom,
-        measureElement: vi.fn(),
+  vi.mocked(TableComposition).mockImplementation(({ props, kit }) =>
+    actualAdapter.TableComposition({
+      props,
+      kit: {
+        ...kit,
+        body: (view, headerOffset, tableProps) =>
+          kit.body(
+            {
+              ...view,
+              tableProps: {
+                ...view.tableProps,
+                rowEntries: rows as never,
+                paddingTop: top,
+                paddingBottom: bottom,
+                measureElement: vi.fn(),
+              },
+            },
+            headerOffset,
+            tableProps
+          ),
       },
-    };
-  });
+    })
+  );
 }
 
 let adapter: ReturnType<typeof createMemoryAdapter>;
 
 beforeEach(() => {
-  // Default: the real shell, so non-virtual tests run untouched.
-  vi.mocked(useDataTableShell).mockImplementation(
-    actualAdapter.useDataTableShell
+  // Default: the real composition, so non-virtual tests run untouched.
+  vi.mocked(TableComposition).mockImplementation(
+    actualAdapter.TableComposition
   );
 });
 

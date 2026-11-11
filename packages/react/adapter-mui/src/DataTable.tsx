@@ -1,38 +1,9 @@
 import {
-  ACTIVE_FILTER_CHIPS,
-  AGENT_APPROVAL,
-  AGENT_APPROVAL_STATE,
-  BATCH_EDIT_BAR,
-  BULK_BAR,
-  COLUMN_MENU,
-  COMMAND_PALETTE_LIVE,
-  contextMenuCopyTarget,
-  ContextMenuLiveGate,
-  type ContextMenuLiveSlotProps,
-  DataTableShellView,
-  FeatureHostProvider,
   FeatureProviders,
-  FeatureSlot,
-  fillSlot,
-  FILTER_DRAWER,
-  FILTERS_FORM,
-  type FiltersFormSlotProps,
-  FIND_BAR,
-  GRID_FOCUS_ANNOUNCER,
-  GROUPING_PANEL,
-  type GroupingPanelSlotProps,
-  OptionalSidePanel,
-  resolveStickyToolbar,
-  ROW_REORDER_ANNOUNCER,
-  SAVED_VIEWS,
-  showSimpleFilterFields,
-  SIDE_PANEL,
-  STATUS_BAR,
-  TableStatusAnnouncer,
-  useDataTableShell,
-  useFeatureState,
+  type KitTable,
+  type KitTableFrameProps,
+  TableComposition,
   useMountStagger,
-  useStickyToolbarLayout,
   useTableFeatures,
   withKitEnvironment,
 } from "@adapttable/react/adapter";
@@ -44,7 +15,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import type { ReactNode } from "react";
 
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
@@ -56,17 +26,138 @@ import { Toolbar } from "./components/Toolbar";
 import { useMuiLibrary } from "./libraryEnvironment";
 import type { DataTableProps } from "./types";
 
-function TableFooterSlot({ children }: Readonly<{ children?: ReactNode }>) {
-  if (children == null) return null;
-  return <Box data-adapttable-part="table-footer">{children}</Box>;
+const STICKY_TOOLBAR = {
+  position: "sticky",
+  zIndex: 3,
+  bgcolor: "background.paper",
+  pb: 1.5,
+} as const;
+
+/** The table's regions on MUI's outlined paper, a stack apart. */
+function Frame({
+  rootProps,
+  rootRef,
+  fullscreenContainer,
+  announcers,
+  toolbarRef,
+  toolbarClassName,
+  toolbarStyle,
+  toolbar,
+  bars,
+  refreshing,
+  main,
+  loadMore,
+  footers,
+  overlays,
+  labels,
+  rowCount,
+  mobile,
+  animate,
+}: Readonly<KitTableFrameProps>) {
+  useMountStagger(rootRef, [rowCount, mobile], { enabled: animate });
+  return (
+    <FullscreenPortals container={fullscreenContainer}>
+      <Paper ref={rootRef} {...rootProps} variant="outlined" sx={{ p: 1.5 }}>
+        {announcers}
+        <Stack spacing={1.5}>
+          <Box
+            data-adapttable-part="toolbar"
+            ref={toolbarRef}
+            className={toolbarClassName}
+            sx={
+              toolbarStyle
+                ? { ...STICKY_TOOLBAR, top: toolbarStyle.top }
+                : undefined
+            }
+          >
+            {toolbar}
+          </Box>
+          {refreshing && <LinearProgress aria-label={labels.loading} />}
+          {bars}
+          {main}
+          {loadMore && (
+            <Box
+              ref={loadMore.ref}
+              sx={{ display: "flex", justifyContent: "center", py: 1 }}
+            >
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={loadMore.busy}
+                onClick={loadMore.onClick}
+              >
+                {labels.loadMore}
+              </Button>
+            </Box>
+          )}
+          {footers}
+        </Stack>
+        {overlays}
+      </Paper>
+    </FullscreenPortals>
+  );
 }
 
-/** Map row density to MUI's table `size`, independent of column pinning. */
-function tableSize(
-  bits: Readonly<{ density?: "comfortable" | "compact" }>
-): "small" | "medium" {
-  return bits.density === "compact" ? "small" : "medium";
-}
+const kit: KitTable = {
+  Frame,
+  toolbar: (props) => <Toolbar {...props} />,
+  body: (view, headerOffset, props) => {
+    const tableProps = {
+      ...view.tableProps,
+      // MUI's table `size` follows the density, independent of pinning.
+      size: view.density === "compact" ? "small" : "medium",
+      stickyTop: headerOffset,
+    } as const;
+    if (view.chrome.body === "mobile") {
+      return (
+        <MobileCards {...tableProps} cardClassName={props.classNames?.card} />
+      );
+    }
+    return (
+      <Box
+        className={props.classNames?.table}
+        data-adapttable-part={view.gridFocus.enabled ? "grid" : undefined}
+      >
+        <DesktopTable {...tableProps} prefetch={props.prefetch} />
+      </Box>
+    );
+  },
+  skeleton: (rows, columns, labels) => (
+    <LoadingState rows={rows} columns={columns} loadingLabel={labels.loading} />
+  ),
+  empty: (labels, onClear) => (
+    <Stack
+      data-adapttable-part="empty"
+      role="status"
+      spacing={1.5}
+      sx={{ py: 6, alignItems: "center" }}
+    >
+      <Typography color="text.secondary" align="center">
+        {onClear ? labels.noResults : labels.noData}
+      </Typography>
+      {onClear && (
+        <Button variant="outlined" size="small" onClick={onClear}>
+          {labels.clearAll}
+        </Button>
+      )}
+    </Stack>
+  ),
+  error: (state, labels) => (
+    <ErrorState error={state.error} labels={labels} onRetry={state.retry} />
+  ),
+  footer: ({ table, source, labels, chrome }) => (
+    <Footer
+      pagination={table.pagination}
+      total={source.total}
+      limit={source.limit}
+      defaultLimit={source.defaultLimit}
+      setPage={source.setPage}
+      setLimit={source.setLimit}
+      labels={labels}
+      showRowsPerPage={!chrome.grouping}
+    />
+  ),
+};
 
 /**
  * Batteries-included Material UI data table. Drop in `columns`, `data` (or
@@ -76,462 +167,21 @@ function tableSize(
  * experience on the headless `@adapttable/core` engine. Declarative
  * `filters` (and column `filter` shorthands) render an auto-built form.
  *
- * @typeParam TRow - The row type.
- *
- * @public
- */
-function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const props = useTableFeatures(incoming);
-  const { slots, className, classNames, animate = false } = props;
-  const { filtersMode = "popover" } = props;
-  // The whole shared orchestration lives in core's shell; MUI adds only its
-  // kit's row `size` over the returned bundles.
-  const headerFiltersOn =
-    props.headerFilters === true || props.filtersMode === "header";
-  const simpleFiltersOn = showSimpleFilterFields(
-    headerFiltersOn,
-    props.filterFields
-  );
-  const shell = useDataTableShell<TRow>(
-    props,
-    (defs, source, registry, labels) => {
-      // The slot key erases the row; TableSource is invariant in TRow.
-      const formProps = {
-        defs,
-        source,
-        registry,
-        labels,
-        defaultExpanded: !simpleFiltersOn,
-        showSimpleFields: simpleFiltersOn,
-      } as unknown as FiltersFormSlotProps<never>;
-      return <FeatureSlot slot={FILTERS_FORM} props={formProps} />;
-    }
-  );
-  const {
-    chrome: c,
-    labels,
-    filtersNode,
-    filtersOpen,
-    setFiltersOpen,
-    filtersTrigger,
-    rootRef,
-  } = shell;
-  const approval = useFeatureState(AGENT_APPROVAL_STATE);
-  const size = tableSize({ density: shell.density });
-  const stickyBar = useStickyToolbarLayout(
-    resolveStickyToolbar(
-      props.stickyHeader,
-      props.stickyToolbar,
-      props.maxHeight != null
-    ),
-    props.stickyTop ?? 0
-  );
-  // Everything rendered below reads the chrome's VIEW facade — identical to
-  // the raw source except under grouping, where it presents the full set.
-  const viewSource = shell.source;
-  const { confirm } = c;
-  useMountStagger(rootRef, [viewSource.rows.length, c.isMobile], {
-    enabled: animate,
-  });
-  // Saved views capture the table's own URL params, so the menu defaults to
-  // the table's URL backend + namespace (an explicit option still wins).
-  const savedViewsMenu = props.savedViews ? (
-    <FeatureSlot
-      slot={SAVED_VIEWS}
-      props={{
-        options: {
-          urlAdapter: shell.urlAdapter,
-          urlKey: props.urlKey,
-          ...props.savedViews,
-        },
-        labels,
-      }}
-    />
-  ) : null;
-
-  return (
-    <DataTableShellView shell={shell}>
-      {(view) => {
-        const c = view.chrome;
-        const tableProps = {
-          ...view.tableProps,
-          size,
-          stickyTop: stickyBar.headerOffset,
-        };
-        const { loadMoreRef, canLoadMore, toolbarProps, table } = view;
-        const viewSource = view.source;
-        const columnMenu = props.enableColumnMenu && !c.isMobile && (
-          <FeatureSlot
-            slot={COLUMN_MENU}
-            props={{
-              allColumns: c.allColumns,
-              onAutoSize: view.autoSizeColumns,
-              onAutoSizeColumn: view.autoSizeColumn,
-              onSortColumn: (key, dir) => viewSource.setSort(key, dir),
-              onFilterColumn: () => setFiltersOpen(true),
-              onRenameColumn: props.onColumnRename
-                ? c.columnLayout.setName
-                : undefined,
-              sortBy: viewSource.sortBy,
-              sortDir: viewSource.sortDir,
-              layout: c.columnLayout,
-              labels,
-              hasRowActions: view.hasRowActions,
-              hasRowReorder: view.hasRowReorder,
-              groupingPanel: c.groupingPanel,
-              dir: props.dir,
-              // The slot key erases the row; ColumnDef is invariant, so the
-              // table's TRow cannot be proven to be `never`.
-            }}
-          />
-        );
-        let body: React.ReactNode;
-        if (c.body === "skeleton") {
-          body = slots?.skeleton ?? (
-            <LoadingState
-              rows={props.skeletonRows ?? viewSource.limit}
-              columns={table.columns.length}
-              loadingLabel={labels.loading}
-            />
-          );
-        } else if (c.body === "empty") {
-          body = (c.emptyVariant === "noResults"
-            ? slots?.noResults
-            : undefined) ??
-            slots?.empty ?? (
-              <Stack
-                data-adapttable-part="empty"
-                role="status"
-                spacing={1.5}
-                sx={{ py: 6, alignItems: "center" }}
-              >
-                <Typography color="text.secondary" align="center">
-                  {c.emptyVariant === "noResults"
-                    ? labels.noResults
-                    : labels.noData}
-                </Typography>
-                {c.emptyVariant === "noResults" && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={c.clearFilters}
-                  >
-                    {labels.clearAll}
-                  </Button>
-                )}
-              </Stack>
-            );
-        } else if (c.body === "mobile") {
-          body = (
-            <MobileCards {...tableProps} cardClassName={classNames?.card} />
-          );
-        } else {
-          body = (
-            <Box
-              className={classNames?.table}
-              data-adapttable-part={view.gridFocus.enabled ? "grid" : undefined}
-            >
-              <DesktopTable {...tableProps} prefetch={props.prefetch} />
-            </Box>
-          );
-        }
-        const contextMenuLive = {
-          contextMenu: props.contextMenu,
-          columns: c.allColumns,
-          labels,
-          rowFor: (rowId: string) =>
-            shell.source.rows.find((row) => props.rowKey(row) === rowId),
-          actions: {
-            onCopy: (target) => {
-              // The cell that was right-clicked, unless it sits inside a
-              // selection — then the selection is what was asked for.
-              const copy = contextMenuCopyTarget(view.gridFocus, target);
-              if (!copy.available) return;
-              view.gridFocus.copyCells(copy.cell);
-            },
-            // Cut writes the target to the clipboard, then asks the host to
-            // clear it through onCellCut — offered only when both exist.
-            onCut:
-              props.onCellCut && view.gridFocus.enabled
-                ? (target) => {
-                    const copy = contextMenuCopyTarget(view.gridFocus, target);
-                    if (!copy.available) return;
-                    view.gridFocus.copyCells(copy.cell, true);
-                  }
-                : undefined,
-            onSort: (key: string, dir: "asc" | "desc") => {
-              shell.source.setSort(key, dir);
-            },
-            onHide: (key: string) => {
-              c.columnLayout.toggleVisible(key);
-            },
-            onFilter: () => {
-              shell.setFiltersOpen(true);
-            },
-          },
-          sortBy: shell.source.sortBy,
-          sortDir: shell.source.sortDir,
-          rowPins: c.rowPinning?.actions,
-          featureHost: shell.featureHost,
-          container: view.fullscreen.container,
-        } as Omit<ContextMenuLiveSlotProps<never>, "children">;
-        return (
-          <FeatureHostProvider host={shell.featureHost}>
-            <ContextMenuLiveGate props={contextMenuLive}>
-              {(regionProps) => (
-                <FullscreenPortals container={view.fullscreen.container}>
-                  <Paper
-                    ref={rootRef}
-                    {...regionProps}
-                    variant="outlined"
-                    dir={props.dir}
-                    className={
-                      [className, classNames?.root].filter(Boolean).join(" ") ||
-                      undefined
-                    }
-                    aria-busy={c.isRefreshing || undefined}
-                    sx={{ p: 1.5 }}
-                  >
-                    <FeatureSlot
-                      slot={GRID_FOCUS_ANNOUNCER}
-                      props={{ focus: view.gridFocus }}
-                    />
-                    <TableStatusAnnouncer
-                      announcement={shell.statusAnnouncement}
-                    />
-                    {view.tableProps.rowReorder ? (
-                      <FeatureSlot
-                        slot={ROW_REORDER_ANNOUNCER}
-                        props={{
-                          announcement: view.tableProps.rowReorder.announcement,
-                        }}
-                      />
-                    ) : null}
-                    <FeatureSlot
-                      slot={FIND_BAR}
-                      props={{ find: view.find, labels }}
-                    />
-                    <Stack spacing={1.5}>
-                      <Box
-                        data-adapttable-part="toolbar"
-                        ref={stickyBar.toolbarRef}
-                        className={classNames?.toolbar}
-                        sx={
-                          stickyBar.toolbarStyle
-                            ? {
-                                position: "sticky",
-                                top: stickyBar.toolbarStyle.top,
-                                zIndex: 3,
-                                bgcolor: "background.paper",
-                                pb: 1.5,
-                              }
-                            : undefined
-                        }
-                      >
-                        <Toolbar
-                          {...toolbarProps}
-                          savedViewsMenu={savedViewsMenu}
-                          filtersMode={filtersMode}
-                          filtersOpen={filtersOpen}
-                          onToggleFilters={filtersTrigger.onClick}
-                          onFiltersTriggerPointerDown={
-                            filtersTrigger.onPointerDown
-                          }
-                          onCloseFilters={() => setFiltersOpen(false)}
-                          columnMenu={columnMenu}
-                        />
-                      </Box>
-                      {c.isRefreshing && (
-                        <LinearProgress aria-label={labels.loading} />
-                      )}
-                      <FeatureSlot
-                        slot={ACTIVE_FILTER_CHIPS}
-                        props={{
-                          chips: view.chrome.mergedChips,
-                          onClearAll: c.clearFilters,
-                          labels,
-                        }}
-                      />
-                      {view.chrome.editing?.batch && (
-                        <FeatureSlot
-                          slot={BATCH_EDIT_BAR}
-                          props={{
-                            batch: view.chrome.editing.batch,
-                            contested:
-                              view.chrome.editing.conflict?.anyContested,
-                            labels,
-                          }}
-                        />
-                      )}
-                      <FeatureSlot
-                        slot={AGENT_APPROVAL}
-                        props={{ pending: approval, labels }}
-                      />
-
-                      {table.selection && props.bulkActions ? (
-                        <FeatureSlot
-                          slot={BULK_BAR}
-                          props={{
-                            selection: table.selection,
-                            total: viewSource.total,
-                            bulkActions: props.bulkActions,
-                            confirm,
-                            labels,
-                          }}
-                        />
-                      ) : null}
-                      <FeatureSlot
-                        slot={COMMAND_PALETTE_LIVE}
-                        props={{
-                          commandPalette: props.commandPalette,
-                          labels,
-                          onPrint: props.onPrint,
-                          onExport: view.toolbarProps.onExportCsv,
-                          exportLabel: view.toolbarProps.exportLabel,
-                          onClearFilters: c.clearFilters,
-                          hasFilters: c.activeFilterCount > 0,
-                          featureHost: shell.featureHost,
-                        }}
-                      />
-                      {view.groupingPanelProps ? (
-                        <FeatureSlot
-                          slot={GROUPING_PANEL}
-                          props={
-                            view.groupingPanelProps as GroupingPanelSlotProps<never>
-                          }
-                        />
-                      ) : null}
-                      <OptionalSidePanel
-                        side={props.sidePanel?.side}
-                        body={
-                          <>
-                            {c.errorState
-                              ? (fillSlot(slots?.error, c.errorState) ?? (
-                                  <ErrorState
-                                    error={c.errorState.error}
-                                    labels={labels}
-                                    onRetry={c.errorState.retry}
-                                  />
-                                ))
-                              : body}
-                          </>
-                        }
-                        panel={
-                          props.sidePanel?.open != null && (
-                            <FeatureSlot
-                              slot={SIDE_PANEL}
-                              props={{
-                                panels: props.sidePanel.panels,
-                                openPanel: props.sidePanel.open,
-                                onOpenPanel: props.sidePanel.onOpenChange,
-                                onClose: () => {
-                                  props.sidePanel?.onOpenChange(null);
-                                },
-                                side: props.sidePanel.side,
-                                labels,
-                              }}
-                            />
-                          )
-                        }
-                      />
-                      {canLoadMore && viewSource.hasNextPage && (
-                        <Box
-                          ref={loadMoreRef}
-                          sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            py: 1,
-                          }}
-                        >
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            disabled={viewSource.isFetchingNextPage}
-                            onClick={() => viewSource.fetchNextPage()}
-                          >
-                            {labels.loadMore}
-                          </Button>
-                        </Box>
-                      )}
-                      <TableFooterSlot>{props.tableFooter}</TableFooterSlot>
-                      {c.showFooter && (
-                        <Box
-                          data-adapttable-part="footer"
-                          className={classNames?.footer}
-                        >
-                          <Footer
-                            pagination={table.pagination}
-                            total={viewSource.total}
-                            limit={viewSource.limit}
-                            defaultLimit={viewSource.defaultLimit}
-                            setPage={viewSource.setPage}
-                            setLimit={viewSource.setLimit}
-                            labels={labels}
-                            showRowsPerPage={!view.chrome.grouping}
-                          />
-                        </Box>
-                      )}
-                    </Stack>
-                    {filtersNode && filtersMode === "drawer" && (
-                      <FeatureSlot
-                        slot={FILTER_DRAWER}
-                        props={{
-                          open: filtersOpen,
-                          onClose: () => setFiltersOpen(false),
-                          filters: filtersNode,
-                          activeFilterCount: c.activeFilterCount,
-                          onClearFilters: c.clearFilters,
-                          labels,
-                          dir: props.dir,
-                        }}
-                      />
-                    )}
-                    <FeatureSlot
-                      slot={STATUS_BAR}
-                      props={{
-                        enabled: props.statusBar === true,
-                        notices: c.featureNotices,
-                        shown: shell.source.rows.length,
-                        page: shell.source.page,
-                        limit: shell.source.limit,
-                        total: shell.source.total,
-                        selected: table.selection?.selectedCount ?? 0,
-                        stats: view.selectionStats,
-                        labels,
-                        locale: props.locale,
-                      }}
-                    />
-                  </Paper>
-                </FullscreenPortals>
-              )}
-            </ContextMenuLiveGate>
-          </FeatureHostProvider>
-        );
-      }}
-    </DataTableShellView>
-  );
-}
-
-/**
- * Resolve `features` and mount whatever providers they contribute, then render
- * the table inside them.
- *
- * A feature that owns hooks owns a component, so its provider has to sit ABOVE
- * the body that reads what it publishes — that is the whole reason this is two
- * components rather than one.
+ * The features it composes mount their providers above the table that reads
+ * them.
  *
  * @typeParam TRow - The row type.
  *
  * @public
  */
 export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
-  const kit = useMuiLibrary();
+  const library = useMuiLibrary();
   const props = useTableFeatures(
-    withKitEnvironment(incoming, { dir: kit.dir })
+    withKitEnvironment(incoming, { dir: library.dir })
   );
   return (
     <FeatureProviders props={props}>
-      <DataTableContent<TRow> {...props} />
+      <TableComposition<TRow> props={props} kit={kit} />
     </FeatureProviders>
   );
 }

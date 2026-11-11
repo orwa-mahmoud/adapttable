@@ -5,7 +5,6 @@
  */
 import {
   type KitButtonProps,
-  type KitButtonVariant,
   type KitCheckboxProps,
   type KitDataAttributes,
   type KitIconButtonProps,
@@ -32,18 +31,6 @@ import {
 } from "@mui/material";
 import { useId, useRef, useState } from "react";
 
-const MUI_VARIANT: Readonly<
-  Record<KitButtonVariant, "text" | "outlined" | "contained">
-> = {
-  text: "text",
-  outlined: "outlined",
-  filled: "contained",
-};
-
-function buttonColor(tone: KitTone | undefined): "error" | undefined {
-  return tone === "danger" ? "error" : undefined;
-}
-
 function iconColor(tone: KitTone | undefined): "default" | "primary" | "error" {
   if (tone === "danger") return "error";
   return tone === "primary" ? "primary" : "default";
@@ -61,8 +48,8 @@ export function Button({
       ref={elementRef}
       type="button"
       size="small"
-      variant={MUI_VARIANT[variant]}
-      color={buttonColor(tone)}
+      variant={variant === "filled" ? "contained" : variant}
+      color={tone === "danger" ? "error" : undefined}
       {...rest}
     />
   );
