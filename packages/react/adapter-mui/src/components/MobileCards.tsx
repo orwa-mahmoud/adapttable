@@ -8,6 +8,7 @@ import {
   MobileCardsChrome,
   type MobileCardSlotKit,
   mobileCardSlots,
+  MobileTarget,
   resolveMobileLabel,
   resolveRowEditTrigger,
   rowEditConflict,
@@ -39,7 +40,6 @@ import {
   OptionalRowReorderButtons,
   OptionalTreeToggle,
 } from "./featureSlots";
-import { MobileTarget } from "./mobileTarget";
 import { RowActionButtons } from "./RowActionButtons";
 
 /** A card body: the list's inputs, plus this kit's own. */

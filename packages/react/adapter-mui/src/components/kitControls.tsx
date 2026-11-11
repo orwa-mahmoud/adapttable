@@ -1,73 +1,47 @@
 /**
- * MUI kit controls — TextField / Button / IconButton / Checkbox.
- * Same `data-adapttable-part` names the chrome and the e2e suite already use.
+ * Each feature's controls, drawn with MUI's primitives. The binding owns the
+ * structure, glyphs and wiring; this file only picks the primitives.
  */
 import {
-  type AgentApprovalButtonProps,
-  AgentApprovalChrome,
-  type AgentApprovalListProps,
   type AgentApprovalProps,
-  BatchEditBarChrome,
   type BatchEditBarProps,
-  type BatchEditButtonProps,
-  type ColumnGroupToggleButtonProps,
-  ColumnGroupToggleChrome,
   type ColumnGroupToggleProps,
-  type EditableCellActivateProps,
-  type EditableCellButtonProps,
+  createAgentApproval,
+  createBatchEditBar,
+  createColumnGroupToggle,
+  createEditableCellSlots,
+  createFilterHeaderControl,
+  createFilterHeaderRow,
+  createFindBar,
+  createGroupMoreButton,
+  createRowEditActions,
+  createRowReorderButtons,
+  createRowReorderHandle,
+  createTreeCell,
+  createTreeToggle,
   type EditableCellSlots,
-  FilterHeaderChrome,
-  FilterHeaderControlChrome,
   type FilterHeaderControlProps,
-  type FilterHeaderMultiProps,
-  type FilterHeaderRangeProps,
   type FilterHeaderRowProps,
-  type FilterHeaderSearchProps,
-  type FilterHeaderSelectProps,
-  type FilterHeaderSlots,
-  FindBarChrome,
   type FindBarProps,
-  type FindButtonProps,
-  type FindSearchProps,
-  GripIcon,
-  GroupMoreButtonChrome,
   type GroupMoreButtonProps,
-  type GroupMoreButtonSlotProps,
-  restoreFocusSoon,
-  RowEditActionsChrome,
   type RowEditActionsProps,
-  type RowEditButtonProps,
-  type RowMoveMenuSlotProps,
-  RowReorderButtonsChrome,
   type RowReorderButtonsProps,
-  RowReorderHandleChrome,
   type RowReorderHandleProps,
-  type RowReorderHandleSlotProps,
-  type RowReorderMoveButtonProps,
-  TreeCellChrome,
   type TreeCellProps,
-  type TreeToggleButtonProps,
-  TreeToggleChrome,
   type TreeToggleProps,
-  type TreeToggleSlots,
 } from "@adapttable/react/adapter";
+
+import { iconForRowEditPart } from "../icons";
 import {
   Button,
   Checkbox,
-  FormControlLabel,
   IconButton,
   Menu,
-  MenuItem,
-  Paper,
-  type PaperProps,
   Popover,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useId, useRef, useState } from "react";
-
-import { iconForRowEditPart } from "../icons";
-import { useMobileTarget } from "./mobileTarget";
+  Select,
+  Text,
+  TextInput,
+} from "./primitives";
 
 export type {
   AgentApprovalProps,
@@ -84,764 +58,103 @@ export type {
   TreeToggleProps,
 };
 
-const FIND_GLYPH: Record<string, string> = {
-  previous: "↑",
-  next: "↓",
-  close: "✕",
-};
-
-const ACTIVATE_STYLE = {
-  all: "unset",
-  boxSizing: "border-box",
-  display: "block",
-  width: "100%",
-  height: "100%",
-  minHeight: "1.25em",
-  cursor: "text",
-  textAlign: "inherit",
-} as const;
-
-function HeaderSearch({
-  label,
-  placeholder,
-  value,
-  className,
-  onChange,
-}: Readonly<FilterHeaderSearchProps>) {
-  return (
-    <TextField
-      size="small"
-      type="search"
-      hiddenLabel
-      fullWidth
-      value={value}
-      placeholder={placeholder}
-      className={className}
-      onChange={(event) => onChange(event.target.value)}
-      data-adapttable-part="filter-header-input"
-      slotProps={{ htmlInput: { "aria-label": label } }}
-    />
-  );
-}
-
-function HeaderSelect({
-  label,
-  value,
-  options,
-  className,
-  onChange,
-}: Readonly<FilterHeaderSelectProps>) {
-  return (
-    <TextField
-      select
-      size="small"
-      hiddenLabel
-      fullWidth
-      value={value}
-      className={className}
-      onChange={(event) => onChange(event.target.value)}
-      data-adapttable-part="filter-header-input"
-      slotProps={{
-        select: { native: false },
-        htmlInput: { "aria-label": label },
-      }}
-    >
-      {options.map((option) => (
-        <MenuItem key={option.value} value={option.value}>
-          {option.label}
-        </MenuItem>
-      ))}
-    </TextField>
-  );
-}
-
-function HeaderRange({ label, type, value, onChange }: FilterHeaderRangeProps) {
-  return (
-    <TextField
-      size="small"
-      hiddenLabel
-      fullWidth
-      type={type}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      slotProps={{
-        htmlInput: { "aria-label": label },
-      }}
-    />
-  );
-}
-
-function HeaderMulti({
-  label,
-  summary,
-  options,
-  selected,
-  className,
-  menuClassName,
-  onToggle,
-}: Readonly<FilterHeaderMultiProps>) {
-  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-  const menuId = useId();
-  const open = Boolean(anchor);
-  return (
-    <>
-      <Button
-        size="small"
-        variant="outlined"
-        fullWidth
-        aria-label={label}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? menuId : undefined}
-        data-adapttable-part="filter-header-input"
-        className={className}
-        onClick={(event) => setAnchor(event.currentTarget)}
-        sx={{
-          justifyContent: "space-between",
-          textTransform: "none",
-          minWidth: 0,
-        }}
-      >
-        <span
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {summary}
-        </span>
-        <span aria-hidden>▾</span>
-      </Button>
-      <Menu
-        id={menuId}
-        anchorEl={anchor}
-        open={open}
-        onClose={() => setAnchor(null)}
-        slotProps={{
-          paper: {
-            className: menuClassName,
-            sx: { maxHeight: 220, minWidth: 160, px: 1, py: 0.5 },
-          },
-        }}
-      >
-        <div data-adapttable-part="filter-header-menu">
-          {options.map((option) => (
-            <FormControlLabel
-              key={option.value}
-              label={option.label}
-              sx={{ display: "flex", mx: 1 }}
-              control={
-                <Checkbox
-                  size="small"
-                  checked={selected.includes(option.value)}
-                  onChange={(_, checked) => onToggle(option.value, checked)}
-                />
-              }
-            />
-          ))}
-        </div>
-      </Menu>
-    </>
-  );
-}
-
-const headerSlots: FilterHeaderSlots = {
-  Search: HeaderSearch,
-  Select: HeaderSelect,
-  Range: HeaderRange,
-  Multi: HeaderMulti,
-};
+const headerKit = { TextInput, Select, Button, Checkbox, Popover };
 
 /**
  * The filter row under the column headers, drawn with this kit's controls.
  *
  * @public
  */
-export function FilterHeaderRow<TRow>(
-  props: Readonly<FilterHeaderRowProps<TRow>>
-) {
-  return <FilterHeaderChrome {...props} slots={headerSlots} />;
-}
+export const FilterHeaderRow = /* @__PURE__ */ createFilterHeaderRow(headerKit);
 
 /**
  * One column's header filter, drawn with this kit's controls.
  *
  * @public
  */
-export function FilterHeaderControl<TRow>(
-  props: Readonly<FilterHeaderControlProps<TRow>>
-) {
-  return <FilterHeaderControlChrome {...props} slots={headerSlots} />;
-}
-
-function FindSearch({
-  label,
-  placeholder,
-  value,
-  focusRef,
-  onChange,
-  onKeyDown,
-}: Readonly<FindSearchProps>) {
-  return (
-    <TextField
-      inputRef={focusRef}
-      size="small"
-      type="search"
-      hiddenLabel
-      value={value}
-      placeholder={placeholder}
-      onChange={(event) => onChange(event.target.value)}
-      onKeyDown={onKeyDown}
-      slotProps={{
-        htmlInput: {
-          "aria-label": label,
-          "data-adapttable-part": "find-input",
-        },
-      }}
-      sx={{ minWidth: "12em" }}
-    />
-  );
-}
-
-function FindButton({ label, part, kind, disabled, onClick }: FindButtonProps) {
-  return (
-    <IconButton
-      type="button"
-      size="small"
-      data-adapttable-part={part}
-      aria-label={label}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {FIND_GLYPH[kind]}
-    </IconButton>
-  );
-}
+export const FilterHeaderControl =
+  /* @__PURE__ */ createFilterHeaderControl(headerKit);
 
 /**
  * The find bar, drawn with this kit's input and buttons.
  *
  * @public
  */
-export function FindBar(props: Readonly<FindBarProps>) {
-  return (
-    <FindBarChrome
-      {...props}
-      slots={{ Search: FindSearch, Button: FindButton }}
-    />
-  );
-}
-
-function RowEditButton({
-  label,
-  part,
-  icon,
-  className,
-  onClick,
-}: Readonly<RowEditButtonProps>) {
-  const targetStyle = useMobileTarget();
-  const glyph = iconForRowEditPart(part, icon);
-  if (!glyph) {
-    return (
-      <Button
-        style={targetStyle}
-        type="button"
-        size="small"
-        data-adapttable-part={part}
-        className={className}
-        aria-label={label}
-        onClick={onClick}
-      >
-        {label}
-      </Button>
-    );
-  }
-  return (
-    <IconButton
-      style={targetStyle}
-      type="button"
-      size="small"
-      data-adapttable-part={part}
-      className={className}
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-    >
-      {glyph}
-    </IconButton>
-  );
-}
+export const FindBar = /* @__PURE__ */ createFindBar({ TextInput, IconButton });
 
 /**
  * Save and cancel for a row being edited.
  *
  * @public
  */
-export function RowEditActions<TRow>(
-  props: Readonly<RowEditActionsProps<TRow>>
-) {
-  return <RowEditActionsChrome {...props} slots={{ Button: RowEditButton }} />;
-}
-
-function BatchButton({
-  label,
-  part,
-  className,
-  onClick,
-}: Readonly<BatchEditButtonProps>) {
-  return (
-    <Button
-      type="button"
-      size="small"
-      data-adapttable-part={part}
-      className={className}
-      onClick={onClick}
-    >
-      {label}
-    </Button>
-  );
-}
+export const RowEditActions = /* @__PURE__ */ createRowEditActions(
+  { Button, IconButton },
+  iconForRowEditPart
+);
 
 /**
  * The bar that saves or discards a batch of edits.
  *
  * @public
  */
-export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>) {
-  return <BatchEditBarChrome {...props} slots={{ Button: BatchButton }} />;
-}
-
-function ApprovalList({
-  part,
-  label,
-  className,
-  children,
-}: Readonly<AgentApprovalListProps>) {
-  return (
-    // A real list: its children are the proposed changes, one <li> each, and
-    // the element carries that everywhere rather than only where ARIA does.
-    <ul
-      data-adapttable-part={part}
-      aria-label={label}
-      className={className}
-      style={{ listStyle: "none", margin: 0, padding: 0 }}
-    >
-      {children}
-    </ul>
-  );
-}
+export const BatchEditBar = /* @__PURE__ */ createBatchEditBar({ Button });
 
 /**
  * Approve or reject a pending agent write.
  *
  * @public
  */
-function ApprovalAction({
-  label,
-  part,
-  className,
-  onClick,
-}: Readonly<AgentApprovalButtonProps>) {
-  return (
-    <Button
-      type="button"
-      size="small"
-      variant="text"
-      data-adapttable-part={part}
-      className={className}
-      onClick={onClick}
-    >
-      {label}
-    </Button>
-  );
-}
-
-export function AgentApproval(props: Readonly<AgentApprovalProps>) {
-  return (
-    <AgentApprovalChrome
-      {...props}
-      slots={{
-        Approve: BatchButton,
-        Reject: BatchButton,
-        List: ApprovalList,
-        Action: ApprovalAction,
-      }}
-    />
-  );
-}
-
-function TreeButton({
-  label,
-  expanded,
-  loading,
-  className,
-  onClick,
-}: Readonly<TreeToggleButtonProps>) {
-  const targetStyle = useMobileTarget();
-  return (
-    <IconButton
-      style={targetStyle}
-      type="button"
-      size="small"
-      data-adapttable-part="tree-toggle"
-      className={className}
-      aria-expanded={expanded}
-      aria-label={label}
-      data-loading={loading ? "" : undefined}
-      aria-busy={loading ? true : undefined}
-      onClick={onClick}
-    >
-      <span
-        aria-hidden="true"
-        style={{
-          display: "inline-block",
-          transform: expanded ? "rotate(90deg)" : "none",
-          transition: "transform 150ms ease",
-        }}
-      >
-        ▸
-      </span>
-    </IconButton>
-  );
-}
-
-const treeSlots: TreeToggleSlots = { Button: TreeButton };
+export const AgentApproval = /* @__PURE__ */ createAgentApproval({ Button });
 
 /**
  * The expand/collapse control on a tree row.
  *
  * @public
  */
-export function TreeToggle<TRow>(props: Readonly<TreeToggleProps<TRow>>) {
-  return <TreeToggleChrome {...props} slots={treeSlots} />;
-}
+export const TreeToggle = /* @__PURE__ */ createTreeToggle({ IconButton });
 
 /**
  * A tree row's first cell: indentation, toggle and content.
  *
  * @public
  */
-export function TreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>) {
-  return <TreeCellChrome {...props} slots={treeSlots} />;
-}
-
-function GroupToggleButton({
-  label,
-  expanded,
-  className,
-  onClick,
-}: Readonly<ColumnGroupToggleButtonProps>) {
-  return (
-    <IconButton
-      type="button"
-      size="small"
-      data-adapttable-part="column-group-toggle"
-      aria-expanded={expanded}
-      aria-label={label}
-      className={className}
-      onClick={onClick}
-    >
-      {expanded ? "▼" : "▶"}
-    </IconButton>
-  );
-}
+export const TreeCell = /* @__PURE__ */ createTreeCell({ IconButton });
 
 /**
  * The control that collapses a grouped column header.
  *
  * @public
  */
-export function ColumnGroupToggle(props: Readonly<ColumnGroupToggleProps>) {
-  return (
-    <ColumnGroupToggleChrome {...props} slots={{ Button: GroupToggleButton }} />
-  );
-}
-
-function MoreButton({ label, onClick }: GroupMoreButtonSlotProps) {
-  return (
-    <Button
-      type="button"
-      size="small"
-      variant="text"
-      data-adapttable-part="group-more"
-      onClick={onClick}
-    >
-      {label}
-    </Button>
-  );
-}
+export const ColumnGroupToggle = /* @__PURE__ */ createColumnGroupToggle({
+  IconButton,
+});
 
 /**
  * The control that reveals the rest of a truncated group.
  *
  * @public
  */
-export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>) {
-  return <GroupMoreButtonChrome {...props} slots={{ Button: MoreButton }} />;
-}
+export const GroupMoreButton = /* @__PURE__ */ createGroupMoreButton({
+  Button,
+});
 
-function ReorderHandle({
-  label,
-  pressed,
-  dragging,
-  disabled,
-  className,
-  dragProps,
-  onKeyDown,
-}: Readonly<RowReorderHandleSlotProps>) {
-  return (
-    <IconButton
-      type="button"
-      size="small"
-      data-adapttable-part="row-reorder-handle"
-      data-adapttable-grip=""
-      data-dragging={dragging ? "" : undefined}
-      className={className}
-      aria-label={label}
-      aria-pressed={pressed}
-      disabled={disabled}
-      sx={{ cursor: pressed ? "grabbing" : "grab" }}
-      {...dragProps}
-      onKeyDown={onKeyDown}
-    >
-      <GripIcon />
-    </IconButton>
-  );
-}
-
-function RowMoveMenuPaper(props: Readonly<PaperProps>) {
-  return <Paper {...props} data-adapttable-part="row-move-menu-content" />;
-}
-
-function RowMoveMenu({
-  label,
-  items,
-  confirmation,
-}: Readonly<RowMoveMenuSlotProps>) {
-  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const suppressOpenRef = useRef(false);
-  const menuId = useId();
-  const open = anchor !== null;
-  const close = () => {
-    suppressOpenRef.current = true;
-    setAnchor(null);
-    window.setTimeout(() => {
-      restoreFocusSoon(triggerRef.current);
-      window.setTimeout(() => {
-        suppressOpenRef.current = false;
-      }, 500);
-    }, 0);
-  };
-  const finish = (callback: () => void) => {
-    callback();
-    close();
-  };
-  if (confirmation) {
-    return (
-      <span data-adapttable-part="row-move-menu">
-        <IconButton
-          ref={triggerRef}
-          type="button"
-          size="small"
-          aria-label={label}
-          aria-haspopup="dialog"
-          aria-expanded="true"
-          aria-controls={menuId}
-          data-adapttable-part="row-move-menu-trigger"
-        >
-          ⋮
-        </IconButton>
-        <Popover
-          id={menuId}
-          anchorEl={() => triggerRef.current}
-          open
-          onClose={() => finish(confirmation.onCancel)}
-          slots={{ paper: RowMoveMenuPaper }}
-          slotProps={{ paper: { sx: { minWidth: "12rem", p: 1 } } }}
-        >
-          <div
-            role="alertdialog"
-            aria-label={confirmation.title}
-            data-adapttable-part="row-move-confirmation"
-          >
-            <Typography variant="subtitle2">{confirmation.title}</Typography>
-            <Typography variant="body2" sx={{ my: 1 }}>
-              {confirmation.description}
-            </Typography>
-            <Button
-              type="button"
-              size="small"
-              onClick={() => finish(confirmation.onConfirm)}
-            >
-              {confirmation.confirmLabel}
-            </Button>
-            <Button
-              type="button"
-              size="small"
-              onClick={() => finish(confirmation.onCancel)}
-            >
-              {confirmation.cancelLabel}
-            </Button>
-          </div>
-        </Popover>
-      </span>
-    );
-  }
-  return (
-    <span data-adapttable-part="row-move-menu">
-      <IconButton
-        ref={triggerRef}
-        type="button"
-        size="small"
-        aria-label={label}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? menuId : undefined}
-        data-adapttable-part="row-move-menu-trigger"
-        onClick={(event) => {
-          if (!suppressOpenRef.current) setAnchor(event.currentTarget);
-        }}
-      >
-        ⋮
-      </IconButton>
-      <Menu
-        id={menuId}
-        anchorEl={anchor}
-        open={open}
-        onClose={close}
-        slots={{ paper: RowMoveMenuPaper }}
-        slotProps={{
-          list: { "aria-label": label },
-          paper: { sx: { minWidth: "12rem", p: 1 } },
-        }}
-      >
-        {items.map((item) => (
-          <MenuItem
-            key={item.id}
-            disabled={item.disabled}
-            title={item.disabledReason}
-            data-adapttable-part="row-move-menu-item"
-            onClick={item.onSelect}
-          >
-            {item.label}
-          </MenuItem>
-        ))}
-      </Menu>
-    </span>
-  );
-}
+const rowMove = { IconButton, Button, Menu, Popover, Text };
 
 /**
  * The drag handle for reordering a row.
  *
  * @public
  */
-export function RowReorderHandle<TRow>(
-  props: Readonly<RowReorderHandleProps<TRow>>
-) {
-  return (
-    <RowReorderHandleChrome
-      {...props}
-      slots={{ Handle: ReorderHandle, Menu: RowMoveMenu }}
-    />
-  );
-}
-
-function ReorderMove({
-  label,
-  part,
-  disabled,
-  className,
-  onClick,
-}: Readonly<RowReorderMoveButtonProps>) {
-  return (
-    <IconButton
-      type="button"
-      size="small"
-      sx={{ minWidth: 44, minHeight: 44 }}
-      data-adapttable-part={part}
-      aria-label={label}
-      disabled={disabled}
-      className={className}
-      onClick={onClick}
-    >
-      {part === "row-reorder-up" ? "↑" : "↓"}
-    </IconButton>
-  );
-}
+export const RowReorderHandle = /* @__PURE__ */ createRowReorderHandle(rowMove);
 
 /**
  * Keyboard-reachable move-up and move-down for a row.
  *
  * @public
  */
-export function RowReorderButtons<TRow>(
-  props: Readonly<RowReorderButtonsProps<TRow>>
-) {
-  return (
-    <RowReorderButtonsChrome
-      {...props}
-      slots={{ Button: ReorderMove, Menu: RowMoveMenu }}
-    />
-  );
-}
-
-function ActivateCell({
-  title,
-  className,
-  saveStatus,
-  dirty,
-  activateRef,
-  display,
-  onDoubleClick,
-  onClick,
-  onKeyDown,
-}: Readonly<EditableCellActivateProps>) {
-  return (
-    <button
-      ref={activateRef}
-      type="button"
-      title={title}
-      className={className}
-      data-save={saveStatus}
-      data-dirty={dirty ? "" : undefined}
-      aria-busy={saveStatus === "saving" ? true : undefined}
-      data-adapttable-part="edit-cell-activate"
-      onDoubleClick={onDoubleClick}
-      onClick={onClick}
-      onKeyDown={onKeyDown}
-      style={ACTIVATE_STYLE}
-    >
-      {display}
-    </button>
-  );
-}
-
-function EditGateButton({
-  label,
-  part,
-  className,
-  onMouseDown,
-  onClick,
-}: Readonly<EditableCellButtonProps>) {
-  return (
-    <Button
-      type="button"
-      size="small"
-      data-adapttable-part={part}
-      className={className}
-      onMouseDown={onMouseDown}
-      onClick={onClick}
-    >
-      {label}
-    </Button>
-  );
-}
+export const RowReorderButtons =
+  /* @__PURE__ */ createRowReorderButtons(rowMove);
 
 /** This kit's controls for the editable-cell gate. */
-export const editableCellSlots: EditableCellSlots = {
-  Activate: ActivateCell,
-  Button: EditGateButton,
-};
+export const editableCellSlots: EditableCellSlots =
+  /* @__PURE__ */ createEditableCellSlots({ Button });
