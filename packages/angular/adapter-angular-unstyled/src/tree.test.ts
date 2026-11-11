@@ -264,6 +264,10 @@ describe("the unstyled table's tree", () => {
         row.getAttribute("aria-posinset"),
       ];
     };
+    // A level and an open state are only read inside a treegrid.
+    const grid = rowById("1").closest("table");
+    expect(grid?.getAttribute("role")).toBe("treegrid");
+    expect(Number(grid?.getAttribute("aria-rowcount"))).toBeGreaterThan(1);
     expect(aria("1")).toEqual(["1", "true", "1"]);
     expect(aria("2")).toEqual(["2", "false", "1"]);
     expect(aria("4")).toEqual(["1", "false", "2"]);

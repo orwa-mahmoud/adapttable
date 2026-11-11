@@ -9362,6 +9362,12 @@ export interface TreeShape<TRow> {
 }
 
 // @public
+export function treeTableAria(entryCount: number | undefined): {
+    readonly role?: "treegrid";
+    readonly "aria-rowcount"?: number;
+};
+
+// @public
 export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
 
 // @public @deprecated

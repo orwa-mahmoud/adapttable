@@ -256,6 +256,26 @@ export function treeCardStyle(level: number): {
 }
 
 /**
+ * The ARIA a table carries while its rows are a tree: a row's level, open
+ * state and place among its siblings are only read inside a treegrid, which
+ * counts its header row and every entry, shown or not.
+ *
+ * @param entryCount - How many tree entries the table holds; none when its
+ *   rows are not a tree.
+ * @returns The attributes, empty outside a tree.
+ *
+ * @public
+ */
+export function treeTableAria(entryCount: number | undefined): {
+  readonly role?: "treegrid";
+  readonly "aria-rowcount"?: number;
+} {
+  return entryCount === undefined
+    ? {}
+    : { role: "treegrid", "aria-rowcount": entryCount + 1 };
+}
+
+/**
  * The ARIA a tree row carries: its depth from one, whether it is open when it
  * has children, and its place among its siblings.
  *

@@ -1030,6 +1030,7 @@ export {
   treeIndentStyle,
   treeRowAria,
   type TreeShape,
+  treeTableAria,
 } from "./tree/treeRows";
 /* ── Row grouping ──────────────────────────────────────────────────── */
 export {

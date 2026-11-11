@@ -11,6 +11,7 @@ import {
   resolvePinnedRows,
   type RowHeight,
   type RowStyle,
+  treeTableAria,
 } from "@adapttable/core";
 import {
   type BodyCell,
@@ -329,11 +330,7 @@ export function projectHeadlessRows<TRow>(
       ...desktop,
       attrs:
         tree && !grouping
-          ? {
-              ...desktop.attrs,
-              role: "treegrid",
-              "aria-rowcount": tree.entries.length + 1,
-            }
+          ? { ...desktop.attrs, ...treeTableAria(tree.entries.length) }
           : desktop.attrs,
       bodySlots: slots(false),
     },

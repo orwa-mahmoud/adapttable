@@ -559,7 +559,7 @@
       [ngTemplateOutlet]="kit.table!"
       [ngTemplateOutletContext]="{
         content: insideTable,
-        attrs: v.grid ? v.grid.tableAttrs() : v.table.tableAttrs(),
+        attrs: tableAttrs(),
       }"
     />
   </ng-template>

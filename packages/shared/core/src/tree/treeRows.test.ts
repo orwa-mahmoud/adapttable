@@ -16,6 +16,7 @@ import {
   treeColumnKey,
   treeIndentStyle,
   treeRowAria,
+  treeTableAria,
 } from "./treeRows";
 
 interface Node {
@@ -241,6 +242,16 @@ describe("bodyRowEntries", () => {
     );
     expect(body.map((entry) => entry.index)).toEqual([0, 1, 2, 3]);
     expect(body[1]?.treeEntry?.level).toBe(1);
+  });
+});
+
+describe("treeTableAria", () => {
+  it("makes the table a treegrid that counts its header and every entry", () => {
+    expect(treeTableAria(4)).toEqual({ role: "treegrid", "aria-rowcount": 5 });
+  });
+
+  it("leaves a table whose rows are not a tree alone", () => {
+    expect(treeTableAria(undefined)).toEqual({});
   });
 });
 

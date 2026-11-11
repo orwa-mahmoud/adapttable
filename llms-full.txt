@@ -19040,7 +19040,8 @@ that carries the chevron, and `filterTreeRows(options)` keeps a match together
 with every ancestor that leads to it. `treeIndentStyle(level)` indents a cell
 and `treeCardStyle(level)` a mobile card; `treeRowAria(entry)` gives a tree
 row its `aria-level`, `aria-expanded` and `aria-posinset`, which every
-binding's desktop row carries; `bodyRowEntries(rows, tree)` returns
+binding's desktop row carries; `treeTableAria(entryCount)` gives the table
+its `treegrid` role and `aria-rowcount` while its rows are a tree; `bodyRowEntries(rows, tree)` returns
 the `BodyRowEntry<TRow>` list a body maps over, tree or flat. Each adapter
 mounts `TreeCell` / `TreeCellProps` and `TreeToggle` / `TreeToggleProps`
 over `TreeCellChrome` / `TreeCellChromeProps` / `TreeToggleChrome` /

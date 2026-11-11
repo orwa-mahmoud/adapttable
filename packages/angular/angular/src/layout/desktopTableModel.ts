@@ -1,5 +1,5 @@
 import { type Attrs } from "@adapttable/angular";
-import { type TableLabels } from "@adapttable/core";
+import { type TableLabels, treeTableAria } from "@adapttable/core";
 import {
   COLUMN_GROUP_TOGGLE,
   COLUMN_SELECT,
@@ -118,6 +118,16 @@ export abstract class AdaptDesktopTableModel<
       `${table.labels().resizeColumn}: ${this.columnName(column)}`
     ) as unknown as Attrs;
   }
+  /**
+   * The table element's attributes: a treegrid while the rows are a tree, so
+   * each row's level and open state are read.
+   */
+  protected readonly tableAttrs = computed((): Attrs => {
+    const view = this.view();
+    const attrs = view.grid ? view.grid.tableAttrs() : view.table.tableAttrs();
+    const tree = view.tree?.();
+    return tree ? { ...attrs, ...treeTableAria(tree.entries.length) } : attrs;
+  });
   protected readonly headerPlan = computed(() => {
     const view = this.view();
     const table = view.table;

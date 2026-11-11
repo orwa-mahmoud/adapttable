@@ -7355,6 +7355,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "treeTableAria",
+      "kind": "runtime",
+      "module": "tree/treeRows.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "tree/treeRows.ts#treeTableAria",
+      "subpaths": ["."]
+    },
+    {
       "name": "UNPIN_ROW_ACTION_KEY",
       "kind": "runtime",
       "module": "rows/rowActionsRuntime.ts",

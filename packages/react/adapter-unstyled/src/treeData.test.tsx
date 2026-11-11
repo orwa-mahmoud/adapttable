@@ -130,6 +130,10 @@ describe("tree data (unstyled)", () => {
   it("names each row's depth, open state and place for assistive tech", () => {
     table();
     fireEvent.click(toggles()[0]!);
+    // A level and an open state are only read inside a treegrid.
+    const grid = document.querySelector('[data-adapttable-part="table"]');
+    expect(grid).toHaveAttribute("role", "treegrid");
+    expect(Number(grid?.getAttribute("aria-rowcount"))).toBeGreaterThan(1);
     const aria = () =>
       [...document.querySelectorAll('tbody [data-adapttable-part="row"]')].map(
         (row) => [

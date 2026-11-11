@@ -8,6 +8,7 @@ import {
   resolveAssembly,
   type TableLabels,
   type TreeEntry,
+  treeTableAria,
 } from "@adapttable/core";
 import {
   absoluteColumnIndex,
@@ -1049,7 +1050,13 @@ export function useDesktopTableAssembly<TRow>(
     },
     tableStyle: resolvedTableStyle,
     tableProps: table.getTableProps(),
-    gridProps: gridFocus?.getGridProps(),
+    gridProps:
+      tree && !grouping
+        ? {
+            ...gridFocus?.getGridProps(),
+            ...treeTableAria(tree.entries.length),
+          }
+        : gridFocus?.getGridProps(),
     callbacks: {
       onToggleSelect,
       onToggleExpand,

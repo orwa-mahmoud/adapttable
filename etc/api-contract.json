@@ -4528,6 +4528,7 @@
       "treeIndentStyle",
       "treeMoveCreatesCycle",
       "treeRowAria",
+      "treeTableAria",
       "TreeShape",
       "UNPIN_ROW_ACTION_KEY",
       "unpinAllColumns",
