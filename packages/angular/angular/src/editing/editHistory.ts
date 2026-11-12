@@ -18,6 +18,7 @@ import {
 
 import type { ColumnDef } from "../columnDef";
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 /** Host controls for the current edit history. @public */
 export interface EditHistoryHandle {
@@ -69,7 +70,9 @@ export function injectTableEditHistory<TRow>(
       onCellEdit: current.onCellEdit,
     };
   });
-  const controller = createEditHistory(untracked(configuration));
+  const controller = createEditHistory(untracked(configuration), {
+    store: tableStoreOf(context),
+  });
   effect(
     () => {
       controller.configure(configuration());

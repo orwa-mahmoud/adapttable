@@ -34,6 +34,7 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 export type {
   BatchEditHandler,
@@ -141,10 +142,10 @@ export function injectCellEditing<TRow = unknown>(
 ): Signal<CellEditingState> {
   if (!options.injector) assertInInjectionContext(injectCellEditing);
   const injector = options.injector ?? inject(Injector);
-  const session = createCellEditSession<TRow>({
-    onEditStart: options.onEditStart,
-    onEditCancel: options.onEditCancel,
-  });
+  const session = createCellEditSession<TRow>(
+    { onEditStart: options.onEditStart, onEditCancel: options.onEditCancel },
+    { store: tableStoreOf(injector) }
+  );
   effect(
     () => {
       session.configure({
@@ -185,7 +186,9 @@ export function injectRowEditing<TRow>(
     onEditError: options.onEditError,
     onValidationFail: options.onValidationFail,
   });
-  const store = createRowEditStore<TRow>(storeOptions());
+  const store = createRowEditStore<TRow>(storeOptions(), {
+    store: tableStoreOf(injector),
+  });
   effect(
     () => {
       store.configure(storeOptions());
@@ -223,7 +226,9 @@ export function injectBatchEditing<TRow>(
     onEditError: options.onEditError,
     onValidationFail: options.onValidationFail,
   });
-  const store = createBatchEditStore<TRow>(storeOptions());
+  const store = createBatchEditStore<TRow>(storeOptions(), {
+    store: tableStoreOf(injector),
+  });
   effect(
     () => {
       store.configure(storeOptions());

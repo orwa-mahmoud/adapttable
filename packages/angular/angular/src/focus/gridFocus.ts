@@ -42,6 +42,7 @@ import type { DataTable } from "../dataTable";
 import type { FindInTableState } from "../find/findInTable";
 import { onBrowser } from "../hooks/platform";
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 /**
  * Options for {@link injectGridFocus}.
@@ -187,7 +188,9 @@ export function injectGridFocus<TRow>(
     onCut: options.onCut,
     ...channels(),
   }));
-  const controller = createGridFocusController(untracked(configuration));
+  const controller = createGridFocusController(untracked(configuration), {
+    store: tableStoreOf(injector),
+  });
   effect(
     () => {
       controller.configure(configuration());
