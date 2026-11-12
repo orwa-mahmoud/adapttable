@@ -44795,6 +44795,14 @@
       "behavior": ""
     },
     {
+      "export": "createToolbar",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createTreeCell",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -46723,6 +46731,14 @@
       "behavior": ""
     },
     {
+      "export": "KitFiltersButtonProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "KitIconButtonProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -46799,6 +46815,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitRowsPerPageProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -46891,10 +46915,42 @@
       "behavior": ""
     },
     {
+      "export": "KitToolbar",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitToolbarFrameProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "KitToolbarProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitToolbarSearchProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitToolbarSortProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },

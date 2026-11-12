@@ -19988,6 +19988,16 @@ card, reorder, row editor, actions, detail) and the field grid. A
 hook returning `KitCardsLook`, the card element's props and the list
 elements; the component takes `KitMobileCardsProps`.
 
+`createToolbar(kit)` builds the toolbar in its fixed order: the host's start
+slot, search, the phone's sort controls, the host's toolbar content, the
+filters button and its popover, the saved-views and columns menus, the
+features' extras, add-row, the host's end slot and rows-per-page. A
+`KitToolbar` gives the kit's `Frame` (`KitToolbarFrameProps`), `Search`
+(`KitToolbarSearchProps`), `SortSelect` (`KitToolbarSortProps`), `Button`,
+`FiltersButton` (`KitFiltersButtonProps`), `RowsPerPage`
+(`KitRowsPerPageProps`), and whether its filters popover anchors to the
+button or wraps it.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

@@ -613,6 +613,15 @@ export {
   TableComposition,
 } from "./kit/tableComposition";
 export {
+  createToolbar,
+  type KitFiltersButtonProps,
+  type KitRowsPerPageProps,
+  type KitToolbar,
+  type KitToolbarFrameProps,
+  type KitToolbarSearchProps,
+  type KitToolbarSortProps,
+} from "./kit/toolbar";
+export {
   createDesktopRow,
   DESKTOP_ACTIONS_WIDTH,
   DESKTOP_EXPANSION_WIDTH,

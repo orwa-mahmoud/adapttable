@@ -1556,6 +1556,9 @@ export function createRowReorderHandle(kit: KitPrimitivesOf<"IconButton"> & (Kit
 })): <TRow>(props: Readonly<RowReorderHandleProps<TRow>>) => ReactElement;
 
 // @public
+export function createToolbar(kit: KitToolbar): <TRow>(props: Readonly<KitToolbarProps<TRow>>) => ReactElement;
+
+// @public
 export function createTreeCell(kit: KitPrimitivesOf<"IconButton">): <TRow>(props: Readonly<TreeCellProps<TRow>>) => ReactElement;
 
 // @public
@@ -2997,6 +3000,17 @@ export interface KitDividerProps {
 export { KitEnvironment }
 
 // @public
+export interface KitFiltersButtonProps {
+    readonly count: number;
+    readonly elementRef: Ref<HTMLButtonElement>;
+    readonly expanded: boolean | undefined;
+    readonly label: string;
+    readonly onClick: () => void;
+    readonly onPointerDown: () => void;
+    readonly open: boolean;
+}
+
+// @public
 export interface KitIconButtonProps extends KitButtonProps {
     readonly "aria-label": string;
 }
@@ -3100,6 +3114,14 @@ export interface KitRenameFieldProps {
     readonly onKeyDown: (event: KeyboardEvent_2<HTMLInputElement>) => void;
     readonly onValueChange: (value: string) => void;
     readonly value: string;
+}
+
+// @public
+export interface KitRowsPerPageProps {
+    readonly label: string;
+    readonly onValueChange: (value: number) => void;
+    readonly options: readonly number[];
+    readonly value: number;
 }
 
 // @public
@@ -3228,6 +3250,24 @@ export interface KitTextProps extends HTMLAttributes<HTMLElement> {
 export type KitTone = "neutral" | "primary" | "danger";
 
 // @public
+export interface KitToolbar {
+    readonly Button: ComponentType<KitButtonProps>;
+    readonly FiltersButton: ComponentType<KitFiltersButtonProps>;
+    readonly filtersPopover: "anchor" | "wrap";
+    readonly Frame: ComponentType<KitToolbarFrameProps>;
+    readonly RowsPerPage: ComponentType<KitRowsPerPageProps>;
+    readonly Search: ComponentType<KitToolbarSearchProps>;
+    readonly SortSelect: ComponentType<KitToolbarSortProps>;
+}
+
+// @public
+export interface KitToolbarFrameProps {
+    readonly controls: ReactNode;
+    readonly search: ReactNode;
+    readonly start: ReactNode;
+}
+
+// @public
 export interface KitToolbarProps<TRow> extends DataTableShellToolbarProps<TRow> {
     readonly columnMenu: ReactNode;
     readonly filtersMode: "popover" | "drawer" | "header";
@@ -3236,6 +3276,19 @@ export interface KitToolbarProps<TRow> extends DataTableShellToolbarProps<TRow> 
     readonly onFiltersTriggerPointerDown: () => void;
     readonly onToggleFilters: () => void;
     readonly savedViewsMenu: ReactNode;
+}
+
+// @public
+export interface KitToolbarSearchProps {
+    readonly input: ReturnType<KitToolbarProps<unknown>["table"]["getSearchInputProps"]>;
+}
+
+// @public
+export interface KitToolbarSortProps {
+    readonly label: string;
+    readonly onValueChange: (value: string | undefined) => void;
+    readonly options: readonly SortByOption[];
+    readonly value: string;
 }
 
 // @public
