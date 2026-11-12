@@ -2991,7 +2991,7 @@ export interface KitCardSelectProps {
 export interface KitCardsLook {
     readonly actions: CSSProperties;
     readonly detail: CSSProperties;
-    readonly field: (labelled: boolean) => CSSProperties;
+    readonly field: (labelled: boolean, compact: boolean) => CSSProperties;
     readonly grid: (compact: boolean) => CSSProperties;
 }
 

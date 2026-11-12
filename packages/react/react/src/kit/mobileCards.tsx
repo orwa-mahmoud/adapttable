@@ -124,8 +124,8 @@ export interface KitSummaryField {
 export interface KitCardsLook {
   /** The grid of fields. */
   readonly grid: (compact: boolean) => CSSProperties;
-  /** One field's box. */
-  readonly field: (labelled: boolean) => CSSProperties;
+  /** One field's box, labelled or spanning the card, in a compact list or not. */
+  readonly field: (labelled: boolean, compact: boolean) => CSSProperties;
   /** The actions' box. */
   readonly actions: CSSProperties;
   /** The detail's box. */
@@ -296,7 +296,7 @@ export function createMobileCards<TExtra>(
             <div
               key={column.key}
               data-adapttable-part="card-row"
-              style={look.field(labelled)}
+              style={look.field(labelled, compact)}
             >
               {labelled && (
                 <FieldLabel labelled data-adapttable-part="card-label">
