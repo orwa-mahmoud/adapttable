@@ -60,13 +60,16 @@ import {
   useExternalStore,
   useScopeActivity,
 } from "../store";
+import { injectTableStore } from "../tableStore";
 
 export function useCellEditing<TRow>(
   input: MaybeRefOrGetter<CellEditSessionOptions<TRow>> = {},
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useCellEditing");
-  const session = createCellEditSession(toValue(input));
+  const session = createCellEditSession(toValue(input), {
+    store: injectTableStore(),
+  });
   watch(
     () => toValue(input),
     (options) => session.configure(options),
@@ -84,7 +87,9 @@ export function useCellSaveState<TRow>(
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useCellSaveState");
-  const store = createCellSaveStore(toValue(input));
+  const store = createCellSaveStore(toValue(input), {
+    store: injectTableStore(),
+  });
   watch(
     () => toValue(input),
     (options) => store.configure(options),
@@ -101,7 +106,9 @@ export function useEditValidation<TRow>(
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useEditValidation");
-  const store = createEditValidationStore(toValue(input));
+  const store = createEditValidationStore(toValue(input), {
+    store: injectTableStore(),
+  });
   const pending = new Map<
     string,
     { rowId: string; columnKey: string; count: number }
@@ -156,7 +163,9 @@ export function useDirtyCells(
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useDirtyCells");
-  const store = createDirtyCellStore(toValue(input));
+  const store = createDirtyCellStore(toValue(input), {
+    store: injectTableStore(),
+  });
   watch(
     () => toValue(input).enabled,
     (enabled) => {
@@ -195,13 +204,14 @@ export function useRowEditing<TRow>(
     ...toValue(input),
     enabled: active.value && toValue(input).enabled === true,
   }));
-  const store = shallowRef(createRowEditStore(options.value));
+  const table = injectTableStore();
+  const store = shallowRef(createRowEditStore(options.value, { store: table }));
   watch(
     () => toValue(input).enabled === true,
     (enabled, previous) => {
       if (previous && !enabled) {
         store.value.dispose?.();
-        store.value = createRowEditStore(options.value);
+        store.value = createRowEditStore(options.value, { store: table });
       }
     },
     { flush: "sync" }
@@ -232,13 +242,16 @@ export function useBatchEditing<TRow>(
     ...toValue(input),
     enabled: active.value && toValue(input).enabled === true,
   }));
-  const store = shallowRef(createBatchEditStore(options.value));
+  const table = injectTableStore();
+  const store = shallowRef(
+    createBatchEditStore(options.value, { store: table })
+  );
   watch(
     () => toValue(input).enabled === true,
     (enabled, previous) => {
       if (previous && !enabled) {
         store.value.dispose?.();
-        store.value = createBatchEditStore(options.value);
+        store.value = createBatchEditStore(options.value, { store: table });
       }
     },
     { flush: "sync" }
@@ -261,7 +274,9 @@ export function useEditHistory<TRow>(
   activity: ExternalStoreOptions = {}
 ) {
   requireScope("useEditHistory");
-  const store = createEditHistory(toValue(input));
+  const store = createEditHistory(toValue(input), {
+    store: injectTableStore(),
+  });
   const ownerActive = useScopeActivity();
   const active = computed(
     () => ownerActive.value && (toValue(activity.active) ?? true)
@@ -395,7 +410,12 @@ export function useTableEditing<TRow>(
   );
   const record = history.value.record;
   const onCellEdit = recordingCellEdit(commit, record);
-  const unitSaves = createCellSaveStore<TRow>();
+  const unitSaves = createCellSaveStore<TRow>(
+    {},
+    {
+      store: injectTableStore(),
+    }
+  );
   const trackUnit = (edits: readonly BatchRowEdit<TRow>[], result: unknown) => {
     for (const edit of edits)
       for (const [columnKey, value] of Object.entries(edit.patch)) {
@@ -482,7 +502,9 @@ export function useTableEditing<TRow>(
     },
     { immediate: true, flush: "sync" }
   );
-  const conflicts = createEditConflictStore<TRow>();
+  const conflicts = createEditConflictStore<TRow>({
+    store: injectTableStore(),
+  });
   const conflictSnapshot = useExternalStore(conflicts, lifecycle);
   const conflict = computed(() =>
     editConflictView(conflicts, conflictSnapshot.value)

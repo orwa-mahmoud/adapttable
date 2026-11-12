@@ -31,6 +31,7 @@ import {
   useExternalStore,
   useScopeActivity,
 } from "../store";
+import { injectTableStore } from "../tableStore";
 export interface GridFocusOptions<
   TRow,
 > extends GridFocusControllerOptions<TRow> {
@@ -58,7 +59,9 @@ export function useGridFocus<TRow>(
     ...options.value,
     enabled: active.value,
   }));
-  const controller = createGridFocusController(configuration.value);
+  const controller = createGridFocusController(configuration.value, {
+    store: injectTableStore(),
+  });
   watch(configuration, (next) => controller.configure(next), { flush: "sync" });
   const snapshot = useExternalStore(controller, { active });
   watch(
