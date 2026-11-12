@@ -494,7 +494,12 @@ describe("<DataTable> (Ant Design)", () => {
     // No backdrop/scrim is rendered — the background stays interactive.
     expect(screen.queryByTestId("filter-scrim")).toBeNull();
     // A mousedown anywhere outside the popover hides it (antd toggles the
-    // `ant-popover-hidden` class rather than unmounting the content).
+    // `ant-popover-hidden` class rather than unmounting the content). The
+    // dismissal arms a microtask after opening, so the opening press never
+    // closes it.
+    await act(async () => {
+      await Promise.resolve();
+    });
     fireEvent.mouseDown(document.body);
     // The popover closes (its logical state flips); jsdom does not run antd's
     // leave animation to the `ant-popover-hidden` class, so assert the state

@@ -1,10 +1,14 @@
+import { usePointerDismiss } from "@adapttable/react";
 import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Box, Button, Paper, Popper, Stack, Typography } from "@mui/material";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useRef } from "react";
 
 import { spaceBelow } from "./spaceBelow";
 
 /** The panel's height limit, kept current by {@link FIT_BELOW_TRIGGER}. */
+/** MUI's select list and menus, which portal outside the panel. */
+const NESTED = '[role="listbox"], .MuiPopover-root';
+
 const PANEL_HEIGHT_VAR = "--adapttable-filters-max-height";
 
 /**
@@ -75,43 +79,13 @@ export function FilterPopover({
   const paperRef = useRef<HTMLDivElement>(null);
   // Escape must close the popover wherever focus sits (e.g. still on the
   // Filters trigger) — a keydown on the card alone misses that case.
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      if (
-        event.target instanceof Element &&
-        event.target.closest('[role="listbox"], .MuiPopover-root')
-      ) {
-        return;
-      }
-      onClose();
-      // Escape strands keyboard focus inside the removed card — hand it back
-      // to the trigger (the anchor IS the Filters button).
-      anchorEl?.focus();
-    };
-    const onOutsidePress = (event: MouseEvent | TouchEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      if (
-        paperRef.current?.contains(target) ||
-        anchorEl?.contains(target) ||
-        (target instanceof Element &&
-          target.closest('[role="listbox"], .MuiPopover-root'))
-      ) {
-        return;
-      }
-      onClose();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("mousedown", onOutsidePress);
-    document.addEventListener("touchstart", onOutsidePress);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("mousedown", onOutsidePress);
-      document.removeEventListener("touchstart", onOutsidePress);
-    };
-  }, [open, onClose, anchorEl]);
+  usePointerDismiss(open, onClose, NESTED, {
+    contains: (node) =>
+      paperRef.current?.contains(node) === true ||
+      anchorEl?.contains(node) === true,
+    nestedSelector: NESTED,
+    afterEscape: () => anchorEl?.focus(),
+  });
   return (
     <Popper
       open={open && anchorEl !== null}

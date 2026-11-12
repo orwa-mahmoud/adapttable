@@ -1,6 +1,10 @@
+import { usePointerDismiss } from "@adapttable/react";
 import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Button, Group, Popover, Stack, Text } from "@mantine/core";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useRef } from "react";
+
+/** The panel and Mantine's dropdowns, which portal outside the trigger. */
+const NESTED = ".mantine-Popover-dropdown, .mantine-Combobox-dropdown";
 
 /** Props for {@link FilterPopover}. */
 export interface FilterPopoverProps {
@@ -40,41 +44,11 @@ export function FilterPopover({
 }: Readonly<FilterPopoverProps>) {
   const anchorRef = useRef<HTMLSpanElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onOutsidePress = (event: MouseEvent | TouchEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      if (
-        anchorRef.current?.contains(target) ||
-        (target instanceof Element &&
-          target.closest(
-            ".mantine-Popover-dropdown, .mantine-Combobox-dropdown"
-          ))
-      ) {
-        return;
-      }
-      onClose();
-    };
-    const onEscape = (event: KeyboardEvent) => {
-      if (
-        event.key === "Escape" &&
-        !event.defaultPrevented &&
-        !event.isComposing
-      ) {
-        onClose();
-        anchorRef.current?.querySelector("button")?.focus();
-      }
-    };
-    document.addEventListener("mousedown", onOutsidePress);
-    document.addEventListener("touchstart", onOutsidePress);
-    document.addEventListener("keydown", onEscape);
-    return () => {
-      document.removeEventListener("mousedown", onOutsidePress);
-      document.removeEventListener("touchstart", onOutsidePress);
-      document.removeEventListener("keydown", onEscape);
-    };
-  }, [open, onClose]);
+  usePointerDismiss(open, onClose, NESTED, {
+    contains: (node) => anchorRef.current?.contains(node) === true,
+    // Escape strands focus inside the removed card: hand it to the trigger.
+    afterEscape: () => anchorRef.current?.querySelector("button")?.focus(),
+  });
 
   return (
     <span ref={anchorRef} style={{ display: "contents" }}>
