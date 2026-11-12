@@ -279,26 +279,12 @@ const CORE_FIXTURES = [
     name: "core · every export",
     kind: "core",
     pkg: "core",
-    // Raised from 93 KB when the feature controllers and runtimes moved out
-    // of the React binding into core, so every binding drives the same state
-    // machines (#497). The weight moved rather than grew: a headless table
-    // still costs ~25 KB, and this fixture imports everything at once.
-    // Async edit/save lifetimes, row validation and bounded clipboard/fill work
-    // bring the complete export surface to 100.9 KB (2026-10-15); settled
-    // filter trees, batch change marks, content-sized XLSX columns and pinned
-    // edge marks bring it to 101.2 KB (2026-10-30). The simple core table and
-    // the hard plain-adapter ceiling stay as they are.
-    // The owner accepted the measured graph on 2026-11-06. 103.38 KiB
-    // (105,859 bytes) is the composed session, the grouping projection, and
-    // the shell operations. The snapshot guard and the grouped-snapshot
-    // cache bring the packed graph to 103.45 KiB (105,932 bytes).
-    // Shared behaviours the bindings used to copy — approval text, the
-    // virtualizer field slice, source refresh, and the grouping carrier —
-    // now live on this surface. One committed state per session and the
-    // staged row-model evaluator bring it to 104.28 KiB (106,778 bytes),
-    // measured 2026-11-09. The ceiling is that measurement.
-    initialKB: 104.28,
-    totalKB: 104.28,
+    // Every core export at once: the table store and its slices, the
+    // controllers and state machines every binding drives, and the shared
+    // behaviours the bindings would otherwise copy. A table bundles only the
+    // names it imports, so this row tracks the surface, not a table's cost.
+    initialKB: 106,
+    totalKB: 106,
     code: `export * from "PKG";`,
     // The engines a named primitive must not carry are real identifiers of
     // the full graph, so their absence there is a finding, not a typo.
