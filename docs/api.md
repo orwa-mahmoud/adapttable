@@ -2934,6 +2934,17 @@ spacing of the panel, heading, search, bulk row, column rows, submenu and
 rename form, and the colour of the drop line. A kit whose text input draws its own label and
 error passes a `RenameField` (`KitRenameFieldProps`) for the rename form.
 
+`createDesktopTable(kit)` builds the desktop table: every row with its
+leading rails, column-window spacers, data cells and actions rail, the
+detail row, the header leaves and groups, the virtual spacers and the column
+summary. A `KitDesktopTable` gives the kit's `Row` (`KitDesktopRowProps`),
+`Cell` (`KitDesktopCellProps`, by `KitDesktopCellKind`), `HeaderCell`
+(`KitDesktopHeaderCellProps`, by `KitDesktopHeaderCellKind`), summary `Foot`,
+selection `Checkbox`, `SortLabel` (`KitSortLabelProps`) and `RowActions`, the
+rail `widths`, a `usePaint` hook returning `KitDesktopPaint` (from
+`KitDesktopRowState` and `KitDesktopLeafState`), and a `useChrome` hook for the
+table elements around the rows; the component takes `KitDesktopTableProps`.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

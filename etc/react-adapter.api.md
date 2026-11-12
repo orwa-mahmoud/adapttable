@@ -677,6 +677,8 @@ import { TableStateMutators } from '@adapttable/core';
 import { TableStatusAnnouncementOptions } from '@adapttable/core';
 import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
+import { TdHTMLAttributes } from 'react';
+import { ThHTMLAttributes } from 'react';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
 import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
 import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
@@ -1516,6 +1518,9 @@ export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | 
 
 // @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): (props: TProps) => ReactElement;
+
+// @public
+export function createDesktopTable<TExtra>(kit: KitDesktopTable<TExtra>): <TRow>(props: Readonly<KitDesktopTableProps<TRow, TExtra>>) => ReactElement;
 
 // @public
 export function createEditableCellSlots(kit: KitPrimitivesOf<"Button">): EditableCellSlots;
@@ -2864,6 +2869,90 @@ export interface KitColumnMenuLook {
 export type KitDataAttributes = Readonly<Partial<Record<`data-${string}`, string>>>;
 
 // @public
+export type KitDesktopCellKind = "lead" | "data" | "actions" | "detail" | "extra" | "pad" | "summary";
+
+// @public
+export interface KitDesktopCellProps extends Omit<TdHTMLAttributes<HTMLTableCellElement>, "align">, KitDataAttributes {
+    readonly kind: KitDesktopCellKind;
+}
+
+// @public
+export type KitDesktopHeaderCellKind = "lead" | "leaf" | "group" | "actions";
+
+// @public
+export interface KitDesktopHeaderCellProps extends Omit<ThHTMLAttributes<HTMLTableCellElement>, "align">, KitDataAttributes {
+    readonly kind: KitDesktopHeaderCellKind;
+    readonly railWidth?: number;
+}
+
+// @public
+export interface KitDesktopLeafState {
+    readonly pinned: boolean;
+    readonly rowSpan: number;
+    readonly size: CSSProperties;
+    readonly style: CSSProperties;
+}
+
+// @public
+export interface KitDesktopPaint {
+    readonly cell: (pin: CSSProperties | undefined, row: KitDesktopRowState) => CSSProperties | undefined;
+    readonly group: (cell: Exclude<HtmlGroupedHeaderCell, {
+        readonly kind: "leaf";
+    }>) => CSSProperties;
+    readonly headRail: (side: "start" | "end", pinned: boolean, inset: number, pin: DesktopTablePin) => CSSProperties | undefined;
+    readonly leaf: (leaf: KitDesktopLeafState, pin: DesktopTablePin) => CSSProperties | undefined;
+    readonly rail: (side: "start" | "end", pinned: boolean, inset: number, row: KitDesktopRowState) => CSSProperties | undefined;
+    readonly resizeHandle: (style: CSSProperties) => CSSProperties;
+    readonly selectedCell: CSSProperties;
+}
+
+// @public
+export interface KitDesktopRowProps extends HTMLAttributes<HTMLTableRowElement>, KitDataAttributes {
+    readonly elementRef?: Ref<HTMLTableRowElement>;
+    readonly kind: "body" | "detail" | "extra" | "pad" | "summary";
+    readonly selected?: boolean;
+}
+
+// @public
+export interface KitDesktopRowState {
+    readonly rowPinned: boolean;
+    readonly stickyHeader: boolean;
+}
+
+// @public
+export interface KitDesktopTable<TExtra> {
+    readonly Cell: ComponentType<KitDesktopCellProps>;
+    readonly Checkbox: ComponentType<KitCheckboxProps>;
+    readonly Foot: ComponentType<{
+        readonly "data-adapttable-part": string;
+        readonly children: ReactNode;
+    }>;
+    readonly HeaderCell: ComponentType<KitDesktopHeaderCellProps>;
+    readonly Row: ComponentType<KitDesktopRowProps>;
+    readonly RowActions: <TRow>(props: {
+        readonly row: TRow;
+        readonly actions: ReturnType<typeof resolveRowEditTrigger<TRow>>["actions"];
+        readonly confirm: DesktopRowWiring<TRow>["confirm"];
+        readonly labels: DesktopRowWiring<TRow>["labels"];
+        readonly layout: DesktopRowWiring<TRow>["rowActionsLayout"];
+        readonly render: DesktopRowWiring<TRow>["renderRowActions"];
+    }) => ReactNode;
+    readonly SortLabel: ComponentType<KitSortLabelProps>;
+    readonly useChrome: <TRow>(props: KitDesktopTableProps<TRow, TExtra>, assembly: DesktopTableAssembly<TRow>) => Omit<DesktopTableChromeProps<TRow>, "assembly" | "renderLeading" | "renderTrailing" | "renderPlanCell" | "renderLeaf" | "renderRow" | "renderGroup" | "renderExtra" | "renderVirtualPad" | "renderSummary">;
+    readonly usePaint: (stickyHeader: boolean) => KitDesktopPaint;
+    readonly widths: {
+        readonly expansion: number;
+        readonly selection: number;
+        readonly actions: number;
+    };
+}
+
+// @public
+export type KitDesktopTableProps<TRow, TExtra> = SharedTableRenderProps<TRow> & {
+    readonly dir?: "ltr" | "rtl";
+} & TExtra;
+
+// @public
 export interface KitDividerProps {
     readonly style?: CSSProperties;
 }
@@ -2956,6 +3045,16 @@ export interface KitSelectProps extends KitDataAttributes {
     readonly rootPart?: string;
     readonly style?: CSSProperties;
     readonly value: string;
+}
+
+// @public
+export interface KitSortLabelProps {
+    readonly active: boolean;
+    readonly buttonProps: SortButtonElementProps;
+    readonly children: ReactNode;
+    readonly dir: "asc" | "desc" | undefined;
+    readonly index: number | undefined;
+    readonly title: string | undefined;
 }
 
 // @public

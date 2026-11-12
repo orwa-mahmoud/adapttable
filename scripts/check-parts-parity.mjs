@@ -167,6 +167,8 @@ const CONTRACT = [
  * `row` has two such routes in React. A kit that lays out its own body spreads
  * `getRowProps` directly; a kit thinned onto the shared desktop assembly
  * receives the same props already merged, through `createDesktopRow`.
+ * A kit drawn by `createDesktopTable` receives `row`, `cell`, `table`,
+ * `thead`, `tbody` and `header-cell` from the binding's own rows and cells.
  * Vue renders its imported Chrome with complete model attrs and calls the
  * neutral `rowAttributes` API through its binding; both sides are checked.
  * Angular assembles each body entry from `table.rowAttrs` (or the grid's
@@ -177,10 +179,12 @@ const CONTRACT = [
  */
 export const CORE_GETTER_PARTS = {
   react: {
-    row: ["getRowProps", "createDesktopRow"],
-    table: ["DesktopTableChrome"],
-    thead: ["DesktopTableChrome"],
-    tbody: ["DesktopTableChrome"],
+    row: ["getRowProps", "createDesktopRow", "createDesktopTable"],
+    table: ["DesktopTableChrome", "createDesktopTable"],
+    thead: ["DesktopTableChrome", "createDesktopTable"],
+    tbody: ["DesktopTableChrome", "createDesktopTable"],
+    cell: ["createDesktopTable"],
+    "header-cell": ["createDesktopTable"],
   },
   angular: { row: ["rowAttrs"] },
   vue: { row: ["rowAttributes"] },

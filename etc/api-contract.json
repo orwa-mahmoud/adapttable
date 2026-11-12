@@ -6868,7 +6868,19 @@
       "createColumnMenu",
       "KitColumnMenuLook",
       "KitDividerProps",
-      "KitRenameFieldProps"
+      "KitRenameFieldProps",
+      "createDesktopTable",
+      "KitDesktopCellKind",
+      "KitDesktopCellProps",
+      "KitDesktopHeaderCellKind",
+      "KitDesktopHeaderCellProps",
+      "KitDesktopLeafState",
+      "KitDesktopPaint",
+      "KitDesktopRowProps",
+      "KitDesktopRowState",
+      "KitDesktopTable",
+      "KitDesktopTableProps",
+      "KitSortLabelProps"
     ],
     "react-features": [
       "applyTableFeatures",

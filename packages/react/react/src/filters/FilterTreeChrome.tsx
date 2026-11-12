@@ -35,6 +35,7 @@ export type {
   FilterTreeOption,
   FilterTreeSelectProps,
 } from "@adapttable/core/binding";
+import { VISUALLY_HIDDEN } from "../a11y/visuallyHidden";
 
 /**
  * Kit disclosure that owns the Advanced section's visible chrome —
@@ -93,18 +94,6 @@ const TREE_GROUP_NESTED: CSSProperties = {
     "2px solid color-mix(in srgb, currentColor 22%, transparent)",
   backgroundColor: "color-mix(in srgb, currentColor 5%, transparent)",
   minInlineSize: 0,
-};
-
-const TREE_LEGEND_HIDDEN: CSSProperties = {
-  position: "absolute",
-  width: "1px",
-  height: "1px",
-  margin: "-1px",
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
-  border: 0,
 };
 
 /**
@@ -350,7 +339,7 @@ function GroupView<TRow>({
       className={classNames.filterTreeGroup}
       style={path.length > 0 ? TREE_GROUP_NESTED : TREE_GROUP_ROOT}
     >
-      <legend style={TREE_LEGEND_HIDDEN}>
+      <legend style={VISUALLY_HIDDEN}>
         {group.combinator === "or"
           ? labels.filterCombinatorOr
           : labels.filterCombinatorAnd}

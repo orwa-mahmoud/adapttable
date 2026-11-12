@@ -543,6 +543,20 @@ export {
   createTreeToggle,
 } from "./kit/controls";
 export {
+  createDesktopTable,
+  type KitDesktopCellKind,
+  type KitDesktopCellProps,
+  type KitDesktopHeaderCellKind,
+  type KitDesktopHeaderCellProps,
+  type KitDesktopLeafState,
+  type KitDesktopPaint,
+  type KitDesktopRowProps,
+  type KitDesktopRowState,
+  type KitDesktopTable,
+  type KitDesktopTableProps,
+  type KitSortLabelProps,
+} from "./kit/desktopTable";
+export {
   cellDisplay,
   OptionalColumnGroupToggle,
   OptionalColumnHeaderRename,
