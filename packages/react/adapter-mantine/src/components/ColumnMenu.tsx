@@ -29,7 +29,7 @@ export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
  * The menu's buttons: its trigger is the one outlined button, at Mantine's
  * default size; the rest are compact, quiet unless filled.
  */
-function Button({
+export function Button({
   elementRef,
   variant,
   tone: _tone,
@@ -106,13 +106,14 @@ function Select({
 }
 
 /** The rename field: Mantine's input carries its label and its error. */
-function RenameField({
+export function RenameField({
   id,
   elementRef,
   label,
   value,
   error,
   errorId,
+  parts,
   onValueChange,
   onBlur,
   onKeyDown,
@@ -124,15 +125,15 @@ function RenameField({
       id={id}
       size="xs"
       label={label}
-      labelProps={{ "data-adapttable-part": "column-rename-label" }}
+      labelProps={{ "data-adapttable-part": parts.label }}
       value={value}
       error={error}
       errorProps={{
         id: errorId,
         role: "alert",
-        "data-adapttable-part": "column-rename-error",
+        "data-adapttable-part": parts.error,
       }}
-      data-adapttable-part="column-rename-input"
+      data-adapttable-part={parts.input}
       aria-invalid={error ? "true" : undefined}
       aria-describedby={error ? errorId : undefined}
       onChange={(event) => onValueChange(event.currentTarget.value)}

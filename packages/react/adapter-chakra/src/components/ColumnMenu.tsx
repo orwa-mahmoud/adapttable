@@ -38,34 +38,36 @@ const FILLED = "teal";
  * one outlined button, at the toolbar's size; the rest are compact and quiet
  * unless filled.
  */
-const Button = forwardRef<HTMLButtonElement, KitButtonProps>(function Button(
-  {
-    elementRef,
-    variant = "text",
-    tone: _tone,
-    fullWidth: _fullWidth,
-    justify: _justify,
-    busy: _busy,
-    ...rest
-  },
-  ref
-) {
-  "use no memo";
-  const trigger = variant === "outlined";
-  let look: "ghost" | "outline" | "solid" = "ghost";
-  if (trigger) look = "outline";
-  else if (variant === "filled") look = "solid";
-  return (
-    <ChakraButton
-      ref={mergeRefs(ref, elementRef)}
-      type="button"
-      size={trigger ? "sm" : "xs"}
-      variant={look}
-      colorPalette={variant === "filled" ? FILLED : undefined}
-      {...rest}
-    />
-  );
-});
+export const Button = forwardRef<HTMLButtonElement, KitButtonProps>(
+  function Button(
+    {
+      elementRef,
+      variant = "text",
+      tone: _tone,
+      fullWidth: _fullWidth,
+      justify: _justify,
+      busy: _busy,
+      ...rest
+    },
+    ref
+  ) {
+    "use no memo";
+    const trigger = variant === "outlined";
+    let look: "ghost" | "outline" | "solid" = "ghost";
+    if (trigger) look = "outline";
+    else if (variant === "filled") look = "solid";
+    return (
+      <ChakraButton
+        ref={mergeRefs(ref, elementRef)}
+        type="button"
+        size={trigger ? "sm" : "xs"}
+        variant={look}
+        colorPalette={variant === "filled" ? FILLED : undefined}
+        {...rest}
+      />
+    );
+  }
+);
 
 /** Quiet; a pinned column's pin is filled, an unpinned one grey. */
 function IconButton({
@@ -137,6 +139,7 @@ function RenameField({
   value,
   error,
   errorId,
+  parts,
   onValueChange,
   onBlur,
   onKeyDown,
@@ -146,7 +149,7 @@ function RenameField({
     <Field.Root invalid={error !== undefined}>
       <Field.Label
         htmlFor={id}
-        data-adapttable-part="column-rename-label"
+        data-adapttable-part={parts.label}
         fontSize="xs"
         mb={1}
       >
@@ -158,7 +161,7 @@ function RenameField({
         value={value}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
-        data-adapttable-part="column-rename-input"
+        data-adapttable-part={parts.input}
         size="xs"
         onChange={(event) => onValueChange(event.target.value)}
         onBlur={onBlur}
@@ -168,7 +171,7 @@ function RenameField({
         <ChakraText
           id={errorId}
           role="alert"
-          data-adapttable-part="column-rename-error"
+          data-adapttable-part={parts.error}
           color="red.500"
           fontSize="xs"
           mt={1}
