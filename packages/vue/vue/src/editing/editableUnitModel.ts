@@ -9,6 +9,7 @@ import {
   batchEditorControl,
   cellConflictAsk,
   controllerConflictAsk,
+  editableCellController,
   isCellEditable,
   isFirstEditableColumn,
   resolveCellEditor,
@@ -90,4 +91,73 @@ export function editableUnitModel<TRow>(input: {
     ask,
     takesFocus: !batch && isFirstEditableColumn(input.columns, column.key),
   };
+}
+
+/** What a cell draws from its controller: every field but its actions. */
+const DRAWN_FIELDS = [
+  "mode",
+  "error",
+  "validating",
+  "saveStatus",
+  "saveFailure",
+  "isDirty",
+  "canRollback",
+  "editor",
+  "draft",
+  "conflict",
+  "conflictLabels",
+] as const satisfies readonly (keyof EditableCellController<unknown>)[];
+
+/**
+ * What a row's editable cells draw from `editing`, as plain values read now:
+ * the same controller and unit each cell draws with, its batch mark, and
+ * its conflict's incoming value. A row keeps the bundle it last drew with
+ * while this is unchanged item by item ({@link sameDrawnView}), so an edit
+ * redraws only the rows it changes.
+ */
+export function drawnRowEditing<TRow>(
+  editing: EditingBundle<TRow>,
+  target: {
+    readonly row: TRow;
+    readonly rowId: string;
+    readonly rows: readonly TRow[];
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    readonly rowKey: (row: TRow) => string;
+  }
+): readonly unknown[] {
+  const drawn: unknown[] = [
+    editing.onCellEdit !== undefined,
+    editing.featureHost,
+    editing.conflictLabels,
+    editing.activation,
+  ];
+  for (const column of target.columns) {
+    const unit = editableUnitModel({
+      editing,
+      controller: editableCellController({ ...target, column, editing }),
+      row: target.row,
+      rowId: target.rowId,
+      column,
+      columns: target.columns,
+    });
+    drawn.push(
+      unit.unit,
+      unit.takesFocus,
+      unit.ask?.incomingValue,
+      editing.batch?.isChanged(target.rowId, column.key)
+    );
+    for (const field of DRAWN_FIELDS) drawn.push(unit.controller[field]);
+  }
+  return drawn;
+}
+
+/** Whether two views from {@link drawnRowEditing} draw the same row. */
+export function sameDrawnView(
+  previous: readonly unknown[],
+  next: readonly unknown[]
+): boolean {
+  return (
+    previous.length === next.length &&
+    previous.every((item, index) => Object.is(item, next[index]))
+  );
 }

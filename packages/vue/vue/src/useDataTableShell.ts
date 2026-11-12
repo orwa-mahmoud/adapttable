@@ -1,3 +1,33 @@
+/** Every field of an editing bundle, for a view that reads the current one. */
+const EDITING_BUNDLE_FIELDS = [
+  "onCellEdit",
+  "state",
+  "validation",
+  "saving",
+  "dirty",
+  "rowEditing",
+  "batch",
+  "lifecycle",
+  "conflict",
+  "conflictLabels",
+  "featureHost",
+  "activation",
+] as const satisfies readonly (keyof EditingBundle<unknown>)[];
+
+/** A bundle whose every field is read from `current` when it is used. */
+function liveEditingBundle<TRow>(
+  current: () => EditingBundle<TRow> | undefined
+): EditingBundle<TRow> {
+  const view = {} as EditingBundle<TRow>;
+  for (const field of EDITING_BUNDLE_FIELDS) {
+    Object.defineProperty(view, field, {
+      enumerable: true,
+      get: () => current()?.[field],
+    });
+  }
+  return view;
+}
+
 /** One source, feature lifecycle and model composition shared by every Vue kit. */
 import {
   ACTIONS_COLUMN_KEY,
@@ -35,9 +65,10 @@ import {
   type ToolbarExtrasSlotProps,
   undoRedoToolbarProps,
 } from "@adapttable/core/binding";
-import { isCellEditable } from "@adapttable/core/editing";
+import { type EditingBundle, isCellEditable } from "@adapttable/core/editing";
 import {
   computed,
+  type ComputedRef,
   getCurrentInstance,
   getCurrentScope,
   type MaybeRefOrGetter,
@@ -152,6 +183,7 @@ export type {
   ResolvedTableOptions,
   UseDataTableShellOptions,
 } from "./shell/shellContract";
+import { drawnRowEditing, sameDrawnView } from "./editing/editableUnitModel";
 import { TABLE_STORE } from "./tableStore";
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
@@ -689,6 +721,65 @@ export function useDataTableShell<TRow>(
       rowSourceOwner() === owner &&
       visibleRowObjects.value.has(row);
   };
+  // A row reads editing through what changes it: whether editing is on, and
+  // a view of the bundle that is replaced only when what the row's cells draw
+  // (`drawnRowEditing`) changes. The view reads the current bundle, so a row's
+  // actions always act on the latest state, while an edit redraws only the
+  // rows it changes.
+  const editingOn = computed(() => editing.value !== undefined);
+  const rowEditFactory = computed(() => editingChrome.value?.row);
+  let latestBundle = editing.value;
+  watch(
+    editing,
+    (bundle) => {
+      latestBundle = bundle;
+    },
+    { flush: "sync" }
+  );
+  const currentBundle = (): EditingBundle<TRow> | undefined => latestBundle;
+  const rowTargets = new Map<string, TRow>();
+  const rowBundles = new Map<
+    string,
+    ComputedRef<EditingBundle<TRow> | undefined>
+  >();
+  const bundleFor = (rowId: string): EditingBundle<TRow> | undefined => {
+    let view = rowBundles.get(rowId);
+    if (!view) {
+      let drawn: readonly unknown[] | undefined;
+      view = computed<EditingBundle<TRow> | undefined>((previous) => {
+        const next = editing.value;
+        const row = rowTargets.get(rowId);
+        const current =
+          next && row !== undefined
+            ? drawnRowEditing(next, {
+                row,
+                rowId,
+                rows: rowInventory.value.visibleRows,
+                columns: table.columns.value,
+                rowKey: table.rowKey,
+              })
+            : undefined;
+        if (previous && drawn && current && sameDrawnView(drawn, current))
+          return previous;
+        drawn = current;
+        return next && liveEditingBundle(currentBundle);
+      });
+      rowBundles.set(rowId, view);
+    }
+    return view.value;
+  };
+  // A row that leaves the drawn rows leaves its bundle behind with it.
+  watch(
+    () => rowInventory.value.visibleRows,
+    (rows) => {
+      const drawn = new Set(rows.map(table.rowKey));
+      for (const rowId of rowBundles.keys()) {
+        if (drawn.has(rowId)) continue;
+        rowBundles.delete(rowId);
+        rowTargets.delete(rowId);
+      }
+    }
+  );
   const decorateRow = (original: TableRowModel<TRow>): TableRowModel<TRow> => {
     const ownsRow =
       original.detail || resolved.value.rowActionControls
@@ -744,7 +835,7 @@ export function useDataTableShell<TRow>(
     const projector = resolved.value.rowActionControls;
     const rowEditing =
       !original.summary && rowEditControlsVisible.value
-        ? editingChrome.value?.row?.(
+        ? rowEditFactory.value?.(
             original.row,
             original.key,
             mergedActions.value.rowActions
@@ -778,7 +869,8 @@ export function useDataTableShell<TRow>(
               : undefined,
           }
         : original;
-    if (!editing.value || row.summary) return row;
+    if (!editingOn.value || row.summary) return row;
+    rowTargets.set(row.key, row.row);
     return {
       ...row,
       cells: row.cells.map((cell) =>
@@ -791,7 +883,7 @@ export function useDataTableShell<TRow>(
                   editableCellSlotKey<TRow>(),
                   slotFills.value,
                   {
-                    editing: editing.value,
+                    editing: bundleFor(row.key),
                     row: row.row,
                     rowId: row.key,
                     rowIndex: row.index,
