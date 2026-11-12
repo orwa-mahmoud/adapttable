@@ -204,7 +204,6 @@ function DesktopRowBase<TRow>(
     rowDomProps,
     bodyPinStyle,
     bodyPinSide,
-    accentColor,
     dir,
     rowPinSide,
     pinPart,
@@ -398,7 +397,6 @@ function DesktopRowBase<TRow>(
                 labels={labels}
                 layout={rowActionsLayout}
                 render={renderRowActions}
-                accentColor={accentColor}
               />
             )}
           </Table.Cell>
