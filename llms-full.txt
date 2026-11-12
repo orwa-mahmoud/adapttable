@@ -19971,7 +19971,25 @@ button, icon button, text input, select, popover, text and divider
 (`KitDividerProps`). `useLook` is the kit's hook for `KitColumnMenuLook`: the
 spacing of the panel, heading, search, bulk row, column rows, submenu and
 rename form, and the colour of the drop line. A kit whose text input draws its own label and
-error passes a `RenameField` (`KitRenameFieldProps`) for the rename form.
+error passes a `RenameField` (`KitRenameFieldProps`) for the rename form; the
+field receives the part names its label, input and error carry
+(`KitRenameFieldParts`).
+
+`createColumnHeaderRename(kit, useLook)` returns a column header's rename
+control: a button beside the caption that swaps the caption for the same
+rename form, and the announcer that reports the new name. The kit gives its
+button, icon button, text input and text, an optional `RenameField`, and the
+button's `editIcon`; `useLook` returns `KitHeaderRenameLook`, the spacing of
+the control, the form and its buttons.
+
+`createSavedViewsMenu(kit, useLook)` returns the saved-views menu: a button
+that opens a panel listing the saved views — a click applies one and closes
+the panel, the trailing button deletes it — above a row that saves the
+table's current state under a typed name and keeps the name field focused for
+the next one. A rule separates the list from that row while there is a list.
+The kit gives its button, icon button, text input, popover and divider, and
+the delete button's `deleteIcon`; `useLook` returns `KitSavedViewsLook`, the
+spacing of the panel, the rows, the rule, the save row and the name field.
 
 `createDesktopTable(kit)` builds the desktop table: every row with its
 leading rails, column-window spacers, data cells and actions rail, the
