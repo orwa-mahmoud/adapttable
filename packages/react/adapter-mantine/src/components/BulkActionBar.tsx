@@ -1,163 +1,90 @@
-import { type SelectionState, useBulkActionRunner } from "@adapttable/react";
+/** The bulk action bar, decided by the binding and drawn with Mantine. */
 import {
-  type BulkAction,
-  bulkActionErrorMessage,
-  type BulkBarChromeProps,
-  offersAllMatching,
-  resolveDisabledReason,
-  type TableLabels,
+  createBulkBar,
+  type KitBulkBarFrameProps,
+  type KitBulkButtonProps,
+  type KitBulkTextProps,
 } from "@adapttable/react/adapter";
-import { Button, Group, Stack, Text, Tooltip } from "@mantine/core";
-import type { ReactNode } from "react";
+import {
+  Button as MantineButton,
+  Group,
+  Stack,
+  Text as MantineText,
+  Tooltip,
+} from "@mantine/core";
 
-/** Selection toolbar: count, clear, and the configured bulk-action buttons. */
-export function BulkActionBar({
-  selection,
-  total,
-  bulkActions,
-  confirm,
-  labels,
-}: Readonly<BulkBarChromeProps>) {
-  const { selectedIds, selectedCount, clear, allMatching } = selection;
-  const { pending, error, run } = useBulkActionRunner({
-    confirm,
-    cancelLabel: labels.cancel,
-    // Clear only on success — a failed run keeps the selection for retry.
-    onComplete: (outcome) => {
-      if (outcome.status === "success") clear();
-    },
-  });
-
-  if (selectedCount === 0) return null;
-
-  const errorMessage = bulkActionErrorMessage(error);
-  const ids = [...selectedIds];
+function Frame({
+  count,
+  scope,
+  clear,
+  actions,
+  error,
+  ...rest
+}: Readonly<KitBulkBarFrameProps>) {
+  "use no memo";
   return (
-    <Stack data-adapttable-part="bulk-bar" gap="xs">
+    <Stack gap="xs" {...rest}>
       <Group justify="space-between" wrap="wrap" gap="sm">
-        <Text fz="sm">{labels.selectedCount(selectedCount)}</Text>
+        {count}
         <Group gap="xs" wrap="wrap">
-          <Button
-            size="xs"
-            variant="subtle"
-            onClick={clear}
-            disabled={pending !== null}
-          >
-            {labels.clearAll}
-          </Button>
-          {bulkActions.map((action) => (
-            <BulkButton
-              key={action.key}
-              action={action}
-              ids={ids}
-              pending={pending}
-              onRun={(a) => {
-                // Widened scope: the action receives the page ids plus the
-                // all-matching context, so confirm counts size by `total`.
-                if (allMatching) run(a, ids, { allMatching: true, total });
-                else run(a, ids);
-              }}
-            />
-          ))}
+          {clear}
+          {actions}
         </Group>
       </Group>
-      <ScopeBanner selection={selection} total={total} labels={labels} />
-      {errorMessage !== null && (
-        <Text data-adapttable-part="bulk-error" fz="sm" c="red" role="alert">
-          {`${labels.errorTitle}: ${errorMessage}`}
-        </Text>
+      {scope && (
+        <Group gap="xs" wrap="wrap" {...scope.attributes}>
+          {scope.text}
+          {scope.button}
+        </Group>
       )}
+      {error}
     </Stack>
   );
 }
 
-/**
- * Gmail-style scope banner. When every row on the page is selected but more
- * rows match elsewhere, offer to widen the selection to all matching rows;
- * once widened, announce the scope and offer to clear it.
- */
-function ScopeBanner({
-  selection,
-  total,
-  labels,
-}: Readonly<{
-  selection: SelectionState;
-  total: number;
-  labels: Required<TableLabels>;
-}>) {
-  if (!offersAllMatching(selection, total)) return null;
+function Text({ kind, ...rest }: Readonly<KitBulkTextProps>) {
+  "use no memo";
   return (
-    <Group
-      role="status"
-      data-adapttable-part="select-all-banner"
-      gap="xs"
-      wrap="wrap"
-    >
-      {selection.allMatching ? (
-        <>
-          <Text fz="sm" data-adapttable-part="select-all-text">
-            {labels.allMatchingSelected(total)}
-          </Text>
-          <Button
-            size="xs"
-            variant="subtle"
-            data-adapttable-part="select-all-button"
-            onClick={selection.clear}
-          >
-            {labels.clearAll}
-          </Button>
-        </>
-      ) : (
-        <>
-          <Text fz="sm" data-adapttable-part="select-all-text">
-            {labels.pageSelected(selection.selectedCount)}
-          </Text>
-          <Button
-            size="xs"
-            variant="light"
-            data-adapttable-part="select-all-button"
-            onClick={selection.selectAllMatching}
-          >
-            {labels.selectAllMatching(total)}
-          </Button>
-        </>
-      )}
-    </Group>
+    <MantineText fz="sm" c={kind === "error" ? "red" : undefined} {...rest} />
   );
 }
 
-function BulkButton({
-  action,
-  ids,
-  pending,
-  onRun,
-}: Readonly<{
-  action: BulkAction;
-  ids: string[];
-  pending: string | null;
-  onRun: (action: BulkAction) => void;
-}>) {
-  const reason = resolveDisabledReason(action.disabledReason?.(ids));
-  const ineligible = reason !== undefined;
-  const button = (
-    <Button
-      data-adapttable-part="bulk-button"
-      size="xs"
-      color={action.color}
-      leftSection={action.icon as ReactNode}
-      onClick={() => onRun(action)}
-      loading={pending === action.key}
-      disabled={ineligible || (pending !== null && pending !== action.key)}
-    >
-      {action.label}
-    </Button>
-  );
-  if (reason !== undefined) {
+function Button({
+  kind,
+  busy,
+  icon,
+  color,
+  reason,
+  ...rest
+}: Readonly<KitBulkButtonProps>) {
+  "use no memo";
+  if (kind !== "action") {
     return (
-      <Tooltip label={reason} withArrow openDelay={150}>
-        <div>{button}</div>
-      </Tooltip>
+      <MantineButton
+        size="xs"
+        variant={kind === "select-all-matching" ? "light" : "subtle"}
+        {...rest}
+      />
     );
   }
-  return button;
+  const button = (
+    <MantineButton
+      size="xs"
+      color={color}
+      leftSection={icon}
+      loading={busy}
+      {...rest}
+      // The running action shows its loader rather than greying out.
+      disabled={busy ? false : rest.disabled}
+    />
+  );
+  if (reason === undefined) return button;
+  return (
+    <Tooltip label={reason} withArrow openDelay={150}>
+      <div>{button}</div>
+    </Tooltip>
+  );
 }
+
+/** The bulk action bar, with Mantine's text and buttons. */
+export const BulkActionBar = /* @__PURE__ */ createBulkBar({ Frame, Text, Button });
