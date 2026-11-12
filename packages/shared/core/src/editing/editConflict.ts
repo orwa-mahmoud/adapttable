@@ -9,6 +9,7 @@
  * of rows. A binding calls the reconcilers from wherever it notices live rows
  * moving, and reads the question back from the snapshot.
  */
+import type { TableStore } from "../state/tableStore";
 import { devWarn } from "../utils/devWarn";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
 import type {
@@ -18,7 +19,7 @@ import type {
   EditConflictHandler,
   EditConflictPolicy,
 } from "./editContracts";
-import { listenerSet } from "./storePlumbing";
+import { stateCell } from "./storePlumbing";
 
 /**
  * Headless conflict state for the active editor — what a binding hands its
@@ -365,12 +366,17 @@ interface CellAnswer<TRow> {
  *
  * @public
  */
-export function createEditConflictStore<TRow>(): EditConflictStore<TRow> {
-  let snapshot: EditConflictSnapshot<TRow> = {
-    current: null,
-    contested: new Map(),
-  };
-  const { subscribe, notify } = listenerSet();
+export function createEditConflictStore<TRow>(
+  within: { readonly store?: TableStore } = {}
+): EditConflictStore<TRow> {
+  const state = stateCell<EditConflictSnapshot<TRow>>(
+    "edit-conflict",
+    {
+      current: null,
+      contested: new Map(),
+    },
+    within.store
+  );
   let seen = "";
   /**
    * How to answer the conflict being asked about — captured from the pass that
@@ -383,23 +389,21 @@ export function createEditConflictStore<TRow>(): EditConflictStore<TRow> {
   /**
    * Every cell waiting on an answer, keyed by row and column. This always
    * holds the newest row and the callbacks bound to it, so an answer given
-   * later acts on what arrived last; the snapshot moves only when what the
+   * later acts on what arrived last; the state.get() moves only when what the
    * reader can see does.
    */
   let contested: ReadonlyMap<string, ContestedEditCell<TRow>> = new Map();
 
   const setCurrent = (next: EditConflict<TRow> | null): void => {
-    if (snapshot.current === next) return;
-    snapshot = { ...snapshot, current: next };
-    notify();
+    if (state.get().current === next) return;
+    state.set({ ...state.get(), current: next });
   };
 
   const publishContested = (
     next: ReadonlyMap<string, ContestedEditCell<TRow>>
   ): void => {
     contested = next;
-    snapshot = { ...snapshot, contested: next };
-    notify();
+    state.set({ ...state.get(), contested: next });
   };
 
   const clear = (): void => {
@@ -554,17 +558,17 @@ export function createEditConflictStore<TRow>(): EditConflictStore<TRow> {
   };
 
   return {
-    getSnapshot: () => snapshot,
-    subscribe,
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     clear,
     keep() {
-      const conflict = pending ?? snapshot.current;
+      const conflict = pending ?? state.get().current;
       if (!conflict || !answer) return;
       answer.keep(conflict.row);
       clear();
     },
     take() {
-      const conflict = pending ?? snapshot.current;
+      const conflict = pending ?? state.get().current;
       if (!conflict || !answer) return;
       answer.take(conflict.row, conflict.incomingValue);
       clear();
@@ -680,7 +684,7 @@ export function createEditConflictStore<TRow>(): EditConflictStore<TRow> {
         settleFields({
           rowId: entry.rowId,
           row: live,
-          // The batch holds the snapshot as `unknown` so its state still fits
+          // The batch holds the state.get() as `unknown` so its state still fits
           // the chrome's erased shape; it is this row, and nothing else.
           previous: entry.openedRow as TRow | undefined,
           moved: movedFields(entry.seeds, live, input.columns),

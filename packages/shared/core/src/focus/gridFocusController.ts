@@ -69,6 +69,7 @@ export {
   type GridKeyEvent,
   type PointerReleaseTarget,
 } from "./gridNavigation";
+import type { TableStore } from "../state/tableStore";
 export { isGridColumnSelected } from "./gridRange";
 
 /**
@@ -165,7 +166,8 @@ function fullParts<TRow>(): GridNavigationParts<TRow> {
  * @public
  */
 export function createGridFocusController<TRow>(
-  initial: GridFocusControllerOptions<TRow>
+  initial: GridFocusControllerOptions<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): GridFocusController<TRow> {
-  return composeGridNavigation(initial, fullParts());
+  return composeGridNavigation(initial, fullParts(), within);
 }

@@ -360,6 +360,15 @@ export type {
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
 export type { TableSource } from "./source/TableSource";
+export type {
+  SliceCell,
+  SliceKey,
+  SliceRead,
+  StoreReader,
+  StoreWriter,
+  TableAction,
+  TableStore,
+} from "./state/tableStore";
 export type { TableStateMutators } from "./tableStateMutators";
 export type { ResolvedPaginationMode } from "./types";
 export type {

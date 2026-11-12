@@ -2164,16 +2164,22 @@ export function createAllMatchingScope(): AllMatchingScope;
 export function createBasicTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
 
 // @public
-export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>): BatchEditStore<TRow>;
+export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): BatchEditStore<TRow>;
 
 // @public
 export function createBulkActionRunner(initial: BulkActionRunnerOptions): BulkActionRunnerController;
 
 // @public
-export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>): CellEditSession<TRow>;
+export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): CellEditSession<TRow>;
 
 // @public
-export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>): CellSaveStore<TRow>;
+export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): CellSaveStore<TRow>;
 
 // @public
 export function createChangedCellFlashStore(initial: ChangedCellFlashOptions): ChangedCellFlashStore;
@@ -2202,19 +2208,29 @@ export function createContextMenuOpenController<TRow>(initial: ContextMenuOpenCo
 export function createControllableStore<T>(initial: T, options?: ControllableStoreOptions<T>): ControllableStore<T>;
 
 // @public
-export function createDirtyCellStore(options?: DirtyCellStoreOptions): DirtyCellStore;
+export function createDirtyCellStore(options?: DirtyCellStoreOptions, within?: {
+    readonly store?: TableStore;
+}): DirtyCellStore;
 
 // @public
-export function createEditConflictStore<TRow>(): EditConflictStore<TRow>;
+export function createEditConflictStore<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditConflictStore<TRow>;
 
 // @public
-export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>): EditHistoryController<TRow>;
+export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): EditHistoryController<TRow>;
 
 // @public
-export function createEditHistoryStack<TRow>(): EditHistoryStack<TRow>;
+export function createEditHistoryStack<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditHistoryStack<TRow>;
 
 // @public
-export function createEditValidationStore<TRow>(options?: EditValidationStoreOptions<TRow>): EditValidationStore<TRow>;
+export function createEditValidationStore<TRow>(options?: EditValidationStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): EditValidationStore<TRow>;
 
 // @public
 export function createExportController(initial: ExportControllerOptions): ExportController;
@@ -2241,10 +2257,14 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow>;
 export function createFrontendSourceWith<TRow>(initialEngine: FrontendEngineFactory<TRow>): FrontendSource<TRow>;
 
 // @public
-export function createGridFocusController<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
+export function createGridFocusController<TRow>(initial: GridFocusControllerOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): GridFocusController<TRow>;
 
 // @public
-export function createGridNavigation<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
+export function createGridNavigation<TRow>(initial: GridFocusControllerOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): GridFocusController<TRow>;
 
 // @public
 export function createGroupingPanelController<TRow = unknown>(initial: GroupingPanelControllerOptions<TRow>): GroupingPanelController<TRow>;
@@ -2283,7 +2303,9 @@ export function createQuerySource<TRow, TParams extends TableQueryParams = Table
 export function createResponseAggregateOps(): ResponseAggregateOps;
 
 // @public
-export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>): RowEditStore<TRow>;
+export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): RowEditStore<TRow>;
 
 // @public
 export function createRowReorderController<TRow>(initial: RowReorderControllerOptions<TRow>): RowReorderController<TRow>;

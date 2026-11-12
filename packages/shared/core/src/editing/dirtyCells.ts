@@ -13,7 +13,8 @@
  * Marks clear on confirmation and on rollback, and never on their own — a mark
  * that fades on a timer says the change is safe when nobody checked.
  */
-import { listenerSet } from "./storePlumbing";
+import type { TableStore } from "../state/tableStore";
+import { stateCell } from "./storePlumbing";
 
 /**
  * Dirty state for the whole table — what a binding hands its cells.
@@ -102,45 +103,48 @@ export function dirtyCellKey(rowId: string, columnKey: string): string {
  * @public
  */
 export function createDirtyCellStore(
-  options: DirtyCellStoreOptions = {}
+  options: DirtyCellStoreOptions = {},
+  within: { readonly store?: TableStore } = {}
 ): DirtyCellStore {
   let current = options;
-  let snapshot: DirtyCellSnapshot = { cells: new Set() };
-  const { subscribe, notify } = listenerSet();
+  const state = stateCell<DirtyCellSnapshot>(
+    "dirty-cells",
+    { cells: new Set() },
+    within.store
+  );
 
   const write = (cells: ReadonlySet<string>): void => {
-    snapshot = { cells };
-    notify();
+    state.set({ cells });
   };
 
   return {
-    getSnapshot: () => snapshot,
-    subscribe,
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     configure(next) {
       current = next;
     },
     mark(rowId, columnKey) {
       if (current.enabled !== true) return;
       const key = dirtyCellKey(rowId, columnKey);
-      if (snapshot.cells.has(key)) return;
-      write(new Set(snapshot.cells).add(key));
+      if (state.get().cells.has(key)) return;
+      write(new Set(state.get().cells).add(key));
     },
     confirm(rowId, columnKey) {
       const key = dirtyCellKey(rowId, columnKey);
-      if (!snapshot.cells.has(key)) return;
-      const next = new Set(snapshot.cells);
+      if (!state.get().cells.has(key)) return;
+      const next = new Set(state.get().cells);
       next.delete(key);
       write(next);
     },
     confirmRow(rowId) {
       const prefix = `${rowId} `;
       const next = new Set(
-        [...snapshot.cells].filter((key) => !key.startsWith(prefix))
+        [...state.get().cells].filter((key) => !key.startsWith(prefix))
       );
-      if (next.size !== snapshot.cells.size) write(next);
+      if (next.size !== state.get().cells.size) write(next);
     },
     confirmAll() {
-      if (snapshot.cells.size > 0) write(new Set());
+      if (state.get().cells.size > 0) write(new Set());
     },
   };
 }

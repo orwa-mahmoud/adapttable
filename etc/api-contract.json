@@ -4896,7 +4896,14 @@
       "validationErrorFor",
       "validationKey",
       "validationSignature",
-      "ValidationTarget"
+      "ValidationTarget",
+      "SliceCell",
+      "SliceKey",
+      "SliceRead",
+      "StoreReader",
+      "StoreWriter",
+      "TableAction",
+      "TableStore"
     ],
     "core-engine": [
       "Aggregatable",

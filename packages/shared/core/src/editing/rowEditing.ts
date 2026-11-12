@@ -11,6 +11,7 @@
  * does — the same editors, the same validators, the same save states.
  */
 import type { FeatureHostState } from "../features/currentHost";
+import type { TableStore } from "../state/tableStore";
 import {
   type EditableColumnLike,
   parseCellEditValue,
@@ -25,7 +26,7 @@ import {
 } from "./editCommitLifecycle";
 import type { EditEventHandler } from "./editContracts";
 import { observeEdit } from "./editSession";
-import { listenerSet } from "./storePlumbing";
+import { stateCell } from "./storePlumbing";
 
 /**
  * The drafts a row edit holds, by column key.
@@ -231,28 +232,31 @@ export function parseColumnDraft<TRow>(
  * @public
  */
 export function createRowEditStore<TRow>(
-  options: RowEditStoreOptions<TRow>
+  options: RowEditStoreOptions<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): RowEditStore<TRow> {
   let current = options;
-  let snapshot: RowEditSnapshot = {
-    activeRowId: null,
-    drafts: {},
-    isDirty: false,
-  };
-  const { subscribe, notify } = listenerSet();
+  const state = stateCell<RowEditSnapshot>(
+    "row-edit",
+    {
+      activeRowId: null,
+      drafts: {},
+      isDirty: false,
+    },
+    within.store
+  );
   let disposed = false;
   const commit = createEditCommitLifecycle((value) => {
     if (disposed) return;
     if (value === undefined) {
-      const next = { ...snapshot };
+      const next = { ...state.get() };
       delete next.commit;
-      snapshot = next;
-    } else snapshot = { ...snapshot, commit: value };
-    notify();
+      state.set(next);
+    } else state.set({ ...state.get(), commit: value });
   });
   // The row and its seeds as they were when the edit opened: what "changed"
   // is measured against, and what the patch is built from. Outside the
-  // snapshot because a save reads them in the same tick a keystroke wrote a
+  // state.get() because a save reads them in the same tick a keystroke wrote a
   // draft, and accepting a seed is not something the reader sees.
   let opened: { row: TRow; rowId: string; seeds: RowEditDrafts } | null = null;
 
@@ -262,8 +266,7 @@ export function createRowEditStore<TRow>(
       Object.entries(drafts).some(
         ([key, value]) => value !== opened?.seeds[key]
       );
-    snapshot = { ...snapshot, activeRowId, drafts, isDirty };
-    notify();
+    state.set({ ...state.get(), activeRowId, drafts, isDirty });
   };
 
   /** What the incoming row reads for these fields. */
@@ -290,23 +293,23 @@ export function createRowEditStore<TRow>(
         row: open.row,
         rowId: open.rowId,
         columnKey: "",
-        value: snapshot.drafts,
+        value: state.get().drafts,
         previousValue: open.seeds,
         unit: "row",
       });
     }
     opened = null;
     if (
-      snapshot.activeRowId === null &&
-      Object.keys(snapshot.drafts).length === 0
+      state.get().activeRowId === null &&
+      Object.keys(state.get().drafts).length === 0
     )
       return;
     write(null, {});
   };
 
   return {
-    getSnapshot: () => snapshot,
-    subscribe,
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     configure(next) {
       if (disposed) return;
       if (
@@ -349,12 +352,15 @@ export function createRowEditStore<TRow>(
     },
     setDraft(columnKey, value) {
       if (disposed) return;
-      const previous = snapshot.drafts[columnKey];
+      const previous = state.get().drafts[columnKey];
       if (previous === value) return;
       commit.invalidate();
       const open = opened;
       const seed = open?.seeds[columnKey];
-      write(snapshot.activeRowId, { ...snapshot.drafts, [columnKey]: value });
+      write(state.get().activeRowId, {
+        ...state.get().drafts,
+        [columnKey]: value,
+      });
       // The first time a field leaves what it read, it is the reader's — the
       // same event a batch fires when a row first changes. Opening the form
       // says which row; this says which fields inside it are at stake.
@@ -374,7 +380,7 @@ export function createRowEditStore<TRow>(
       const open = opened;
       if (!open) return;
       const patch: Record<string, unknown> = {};
-      const drafts = snapshot.drafts;
+      const drafts = state.get().drafts;
       for (const column of editableColumns(current.columns, open.row)) {
         const draft = drafts[column.key];
         if (draft === undefined || draft === open.seeds[column.key]) continue;
@@ -450,7 +456,7 @@ export function createRowEditStore<TRow>(
         rowId: open.rowId,
         seeds: { ...open.seeds, ...incoming },
       };
-      write(snapshot.activeRowId, { ...snapshot.drafts, ...incoming });
+      write(state.get().activeRowId, { ...state.get().drafts, ...incoming });
     },
   };
 }

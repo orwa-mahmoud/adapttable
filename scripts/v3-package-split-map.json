@@ -22443,6 +22443,30 @@
       "behavior": ""
     },
     {
+      "export": "SliceCell",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "SliceKey",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "SliceRead",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
       "export": "SortableValue",
       "currentImport": "@adapttable/core/editing",
       "kind": "type",
@@ -22479,6 +22503,30 @@
       "currentImport": "@adapttable/core/editing",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "StoreReader",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "StoreWriter",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "TableAction",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/editing",
       "behavior": ""
     },
@@ -22580,6 +22628,14 @@
     },
     {
       "export": "TableStateMutators",
+      "currentImport": "@adapttable/core/editing",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/editing",
+      "behavior": ""
+    },
+    {
+      "export": "TableStore",
       "currentImport": "@adapttable/core/editing",
       "kind": "type",
       "class": "neutral-model",

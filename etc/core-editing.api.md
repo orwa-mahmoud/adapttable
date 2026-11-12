@@ -653,31 +653,49 @@ export type ContextMenuTarget<TRow> = {
 export function controllerConflictAsk<TRow>(controller: Pick<EditableCellController<TRow>, "conflict" | "keepConflict" | "takeConflict">): CellConflictAsk | undefined;
 
 // @public
-export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>): BatchEditStore<TRow>;
+export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): BatchEditStore<TRow>;
 
 // @public
-export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>): CellEditSession<TRow>;
+export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): CellEditSession<TRow>;
 
 // @public
-export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>): CellSaveStore<TRow>;
+export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): CellSaveStore<TRow>;
 
 // @public
-export function createDirtyCellStore(options?: DirtyCellStoreOptions): DirtyCellStore;
+export function createDirtyCellStore(options?: DirtyCellStoreOptions, within?: {
+    readonly store?: TableStore;
+}): DirtyCellStore;
 
 // @public
-export function createEditConflictStore<TRow>(): EditConflictStore<TRow>;
+export function createEditConflictStore<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditConflictStore<TRow>;
 
 // @public
-export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>): EditHistoryController<TRow>;
+export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): EditHistoryController<TRow>;
 
 // @public
-export function createEditHistoryStack<TRow>(): EditHistoryStack<TRow>;
+export function createEditHistoryStack<TRow>(within?: {
+    readonly store?: TableStore;
+}): EditHistoryStack<TRow>;
 
 // @public
-export function createEditValidationStore<TRow>(options?: EditValidationStoreOptions<TRow>): EditValidationStore<TRow>;
+export function createEditValidationStore<TRow>(options?: EditValidationStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): EditValidationStore<TRow>;
 
 // @public
-export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>): RowEditStore<TRow>;
+export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>, within?: {
+    readonly store?: TableStore;
+}): RowEditStore<TRow>;
 
 // @public
 export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
@@ -1898,6 +1916,29 @@ export interface SidePanelEntry {
 }
 
 // @public
+export interface SliceCell<T> {
+    // (undocumented)
+    readonly listeners: Set<() => void>;
+    staged: {
+        value: T;
+    } | undefined;
+    // (undocumented)
+    value: T;
+}
+
+// @public
+export interface SliceKey<T> {
+    readonly cells: WeakMap<object, SliceCell<T>>;
+    equals(a: T, b: T): boolean;
+    readonly initial: () => T;
+    // (undocumented)
+    readonly name: string;
+}
+
+// @public
+export type SliceRead = <T>(key: SliceKey<T>) => T;
+
+// @public
 export type SortableValue = string | number | boolean | null | undefined;
 
 // @public
@@ -1919,6 +1960,34 @@ export function stopEditKeys(event: Readonly<{
     key: string;
     stopPropagation: () => void;
 }>): void;
+
+// @public
+export interface StoreReader<T> {
+    // (undocumented)
+    readonly getSnapshot: () => T;
+    // (undocumented)
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface StoreWriter {
+    // (undocumented)
+    readonly read: SliceRead;
+    // (undocumented)
+    readonly update: <T>(key: SliceKey<T>, recipe: (current: T) => T) => void;
+    // (undocumented)
+    readonly write: <T>(key: SliceKey<T>, value: T) => void;
+}
+
+// @public
+export interface TableAction<TPayload> {
+    // (undocumented)
+    readonly payload: TPayload;
+    // (undocumented)
+    readonly reduce: (store: StoreWriter, payload: TPayload) => void;
+    // (undocumented)
+    readonly type: string;
+}
 
 // @public
 export interface TableCallbackRefresh<TRow> {
@@ -2465,6 +2534,15 @@ export interface TableStateMutators {
     setSort: (key: string | undefined, dir?: SortDirection) => void;
     sortLevels: readonly SortLevel[];
     toggleSortLevel: (key: string) => void;
+}
+
+// @public
+export interface TableStore {
+    readonly batch: (run: (store: StoreWriter) => void) => void;
+    readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
+    readonly read: SliceRead;
+    readonly scope: (seed?: (store: StoreWriter) => void) => TableStore;
+    readonly slice: <T>(key: SliceKey<T>) => StoreReader<T>;
 }
 
 // @public

@@ -13,6 +13,7 @@
  * with every change in it.
  */
 import type { FeatureHostState } from "../features/currentHost";
+import type { TableStore } from "../state/tableStore";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
 import {
   createEditCommitLifecycle,
@@ -23,7 +24,7 @@ import {
 import type { BatchRowEdit, EditEventHandler } from "./editContracts";
 import { observeEdit } from "./editSession";
 import { parseColumnDraft, type RowEditDrafts } from "./rowEditing";
-import { listenerSet } from "./storePlumbing";
+import { stateCell } from "./storePlumbing";
 
 /**
  * The host's channel for a batch: every pending row at once, called once.
@@ -244,28 +245,27 @@ function batchSnapshot(pending: BatchPendingDrafts): BatchEditSnapshot {
  * @public
  */
 export function createBatchEditStore<TRow>(
-  options: BatchEditStoreOptions<TRow>
+  options: BatchEditStoreOptions<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): BatchEditStore<TRow> {
   let current = options;
-  let snapshot = batchSnapshot({});
-  const { subscribe, notify } = listenerSet();
+  const state = stateCell("batch-edit", batchSnapshot({}), within.store);
   let disposed = false;
   const commit = createEditCommitLifecycle((value) => {
     if (disposed) return;
     if (value === undefined) {
-      const next = { ...snapshot };
+      const next = { ...state.get() };
       delete next.commit;
-      snapshot = next;
-    } else snapshot = { ...snapshot, commit: value };
-    notify();
+      state.set(next);
+    } else state.set({ ...state.get(), commit: value });
   });
 
   const write = (next: BatchPendingDrafts): void => {
-    snapshot = {
+    const { commit: running } = state.get();
+    state.set({
       ...batchSnapshot(next),
-      ...(snapshot.commit ? { commit: snapshot.commit } : {}),
-    };
-    notify();
+      ...(running ? { commit: running } : {}),
+    });
   };
 
   const columnOf = (columnKey: string) =>
@@ -301,8 +301,8 @@ export function createBatchEditStore<TRow>(
   };
 
   return {
-    getSnapshot: () => snapshot,
-    subscribe,
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     configure(next) {
       if (disposed) return;
       if (
@@ -326,7 +326,7 @@ export function createBatchEditStore<TRow>(
       const column = columnOf(columnKey);
       if (!column) return;
       const stored = readEditableCellValue(row, column, current.featureHost);
-      const entry = snapshot.pending[rowId];
+      const entry = state.get().pending[rowId];
       if (commit.busy() && entry?.drafts[columnKey] === value) return;
       commit.invalidate();
       const drafts = { ...entry?.drafts, [columnKey]: value };
@@ -339,7 +339,7 @@ export function createBatchEditStore<TRow>(
         delete seeds[columnKey];
       }
       const wasPending = entry !== undefined;
-      const next = { ...snapshot.pending };
+      const next = { ...state.get().pending };
       if (Object.keys(drafts).length === 0) delete next[rowId];
       else next[rowId] = { row: entry?.row ?? row, drafts, seeds };
       write(next);
@@ -357,7 +357,7 @@ export function createBatchEditStore<TRow>(
     saveAll() {
       if (disposed || current.enabled !== true || commit.busy()) return;
       const edits: BatchRowEdit<TRow>[] = [];
-      for (const [rowId, entry] of Object.entries(snapshot.pending)) {
+      for (const [rowId, entry] of Object.entries(state.get().pending)) {
         const row = entry.row as TRow;
         const patch: Record<string, unknown> = {};
         for (const [columnKey, draft] of Object.entries(entry.drafts)) {
@@ -420,28 +420,28 @@ export function createBatchEditStore<TRow>(
     cancelAll() {
       if (disposed) return;
       commit.invalidate();
-      for (const [rowId, entry] of Object.entries(snapshot.pending)) {
+      for (const [rowId, entry] of Object.entries(state.get().pending)) {
         cancelEvent(rowId, entry);
       }
       write({});
     },
     cancelRow(rowId) {
       if (disposed) return;
-      const entry = snapshot.pending[rowId];
+      const entry = state.get().pending[rowId];
       if (!entry) return;
       commit.invalidate();
       cancelEvent(rowId, entry);
-      const next = { ...snapshot.pending };
+      const next = { ...state.get().pending };
       delete next[rowId];
       write(next);
     },
     acceptSeeds(row, rowId, columnKeys) {
       if (disposed) return;
-      const entry = snapshot.pending[rowId];
+      const entry = state.get().pending[rowId];
       if (!entry) return;
       commit.invalidate();
       write({
-        ...snapshot.pending,
+        ...state.get().pending,
         [rowId]: {
           ...entry,
           row,
@@ -451,7 +451,7 @@ export function createBatchEditStore<TRow>(
     },
     takeSeeds(row, rowId, columnKeys) {
       if (disposed) return;
-      const entry = snapshot.pending[rowId];
+      const entry = state.get().pending[rowId];
       if (!entry) return;
       commit.invalidate();
       // Taking what arrived leaves nothing changed in that cell, so the draft
@@ -462,7 +462,7 @@ export function createBatchEditStore<TRow>(
         delete drafts[columnKey];
         delete seeds[columnKey];
       }
-      const next = { ...snapshot.pending };
+      const next = { ...state.get().pending };
       if (Object.keys(drafts).length === 0) delete next[rowId];
       else next[rowId] = { row, drafts, seeds };
       write(next);

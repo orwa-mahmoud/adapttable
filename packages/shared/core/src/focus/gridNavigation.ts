@@ -6,8 +6,9 @@
  */
 import { columnText } from "../columns/columnText";
 import type { ColumnMetadata } from "../contracts/columns";
-import { isThenable } from "../editing/storePlumbing";
+import { isThenable, stateCell } from "../editing/storePlumbing";
 import { GRID_LABELS } from "../labelGroups/gridLabels";
+import type { TableStore } from "../state/tableStore";
 import type { Direction, TableLabels } from "../types";
 import type { CellEdit } from "./cellEdits";
 import type { CellRange } from "./cellRange";
@@ -318,7 +319,7 @@ interface ClipboardColumn<TRow> {
  */
 export interface GridNavSession<TRow> {
   options: GridFocusControllerOptions<TRow>;
-  snapshot: GridFocusSnapshot;
+  readonly snapshot: GridFocusSnapshot;
   pending: GridCell | null;
   container: HTMLElement | null;
   dragging: boolean;
@@ -423,9 +424,10 @@ const EMPTY: GridFocusSnapshot = {
  * @public
  */
 export function createGridNavigation<TRow>(
-  initial: GridFocusControllerOptions<TRow>
+  initial: GridFocusControllerOptions<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): GridFocusController<TRow> {
-  return composeGridNavigation(initial);
+  return composeGridNavigation(initial, undefined, within);
 }
 
 /**
@@ -436,7 +438,8 @@ export function createGridNavigation<TRow>(
  */
 export function composeGridNavigation<TRow>(
   initial: GridFocusControllerOptions<TRow>,
-  parts?: GridNavigationParts<TRow>
+  parts?: GridNavigationParts<TRow>,
+  within: { readonly store?: TableStore } = {}
 ): GridFocusController<TRow> {
   const columnIdentity = (
     column: ColumnMetadata<TRow>
@@ -446,17 +449,14 @@ export function composeGridNavigation<TRow>(
     parseValue: column.parseValue,
     editable: column.editable,
   });
-  let batchDepth = 0;
-  let changed = false;
-  const listeners = new Set<() => void>();
-  const flush = (): void => {
-    if (batchDepth > 0 || !changed) return;
-    changed = false;
-    for (const listener of listeners) listener();
-  };
+  // The focus lives in the table's store: a change made inside a batch, or
+  // inside the table's own change, reaches readers once, when it ends.
+  const state = stateCell<GridFocusSnapshot>("grid-focus", EMPTY, within.store);
   const session: GridNavSession<TRow> = {
     options: { ...initial },
-    snapshot: EMPTY,
+    get snapshot() {
+      return state.get();
+    },
     pending: null,
     container: null,
     dragging: false,
@@ -492,19 +492,9 @@ export function composeGridNavigation<TRow>(
       ) {
         return;
       }
-      session.snapshot = next;
-      changed = true;
-      flush();
+      state.set(next);
     },
-    batch: (run) => {
-      batchDepth += 1;
-      try {
-        run();
-      } finally {
-        batchDepth -= 1;
-        flush();
-      }
-    },
+    batch: state.batch,
     say: (announcement) => {
       session.write({ announcement });
     },
@@ -613,13 +603,8 @@ export function composeGridNavigation<TRow>(
   };
 
   return {
-    getSnapshot: () => session.snapshot,
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    getSnapshot: state.get,
+    subscribe: state.subscribe,
     configure(next) {
       if (
         next.enabled !== session.options.enabled ||
