@@ -1,102 +1,88 @@
-/** Selection bar with the bulk actions and cross-page banner. */
+/** The bulk action bar, decided by the binding and drawn with Chakra. */
 import {
-  type BulkBarChromeProps,
-  resolveDisabledReason,
-  useBulkBarState,
+  createBulkBar,
+  type KitBulkBarFrameProps,
+  type KitBulkButtonProps,
+  type KitBulkTextProps,
 } from "@adapttable/react/adapter";
-import { Button, HStack, Text } from "@chakra-ui/react";
+import {
+  Button as ChakraButton,
+  HStack,
+  Text as ChakraText,
+} from "@chakra-ui/react";
 import { isValidElement } from "react";
 
 import { Tooltip } from "./primitives";
 
-/** Selection toolbar. */
-export function BulkBar({
-  selection,
-  total,
-  bulkActions,
-  confirm,
-  labels,
-  accentColor,
-}: Readonly<BulkBarChromeProps & { accentColor?: string }>) {
-  const {
-    selectedCount,
-    ids,
-    pending,
-    errorMessage,
-    run,
-    clear,
-    expandable,
-    scope,
-    banner,
-  } = useBulkBarState({ selection, total, confirm, labels });
-  if (selectedCount === 0) return null;
+function Frame({
+  count,
+  scope,
+  clear,
+  actions,
+  error,
+  ...rest
+}: Readonly<KitBulkBarFrameProps>) {
+  "use no memo";
   return (
-    <HStack
-      data-adapttable-part="bulk-bar"
-      gap={2}
-      justify="space-between"
-      flexWrap="wrap"
-    >
-      {expandable ? (
-        <HStack
-          data-adapttable-part="select-all-banner"
-          gap={2}
-          flexWrap="wrap"
-        >
-          <Text data-adapttable-part="select-all-text" fontSize="sm">
-            {banner.text}
-          </Text>
-          <Button
-            data-adapttable-part="select-all-button"
-            size="xs"
-            variant="plain"
-            colorPalette={accentColor}
-            disabled={pending !== null}
-            onClick={banner.onClick}
-          >
-            {banner.action}
-          </Button>
+    <HStack gap={2} justify="space-between" flexWrap="wrap" {...rest}>
+      {scope ? (
+        <HStack gap={2} flexWrap="wrap" {...scope.attributes}>
+          {scope.text}
+          {scope.button}
         </HStack>
       ) : (
-        <Text fontSize="sm">{labels.selectedCount(selectedCount)}</Text>
+        count
       )}
       <HStack gap={2} flexWrap="wrap">
-        <Button
-          size="xs"
-          variant="ghost"
-          onClick={clear}
-          disabled={pending !== null}
-        >
-          {labels.clearAll}
-        </Button>
-        {bulkActions.map((action) => {
-          const reason = resolveDisabledReason(action.disabledReason?.(ids));
-          return (
-            <Tooltip key={action.key} label={reason ?? ""} disabled={!reason}>
-              <Button
-                data-adapttable-part="bulk-button"
-                size="xs"
-                colorPalette={action.color ?? accentColor}
-                disabled={reason !== undefined || pending !== null}
-                onClick={() => run(action, ids, scope)}
-              >
-                {isValidElement(action.icon) ? action.icon : null}
-                {action.label}
-              </Button>
-            </Tooltip>
-          );
-        })}
-        {errorMessage !== null && (
-          <Text
-            data-adapttable-part="bulk-error"
-            fontSize="sm"
-            color="red.500"
-            role="alert"
-          >
-            {`${labels.errorTitle}: ${errorMessage}`}
-          </Text>
-        )}
+        {clear}
+        {actions}
+        {error}
       </HStack>
     </HStack>
   );
 }
+
+function Text({ kind, ...rest }: Readonly<KitBulkTextProps>) {
+  "use no memo";
+  return (
+    <ChakraText
+      fontSize="sm"
+      color={kind === "error" ? "red.500" : undefined}
+      {...rest}
+    />
+  );
+}
+
+function Button({
+  kind,
+  busy: _busy,
+  icon,
+  color,
+  reason,
+  children,
+  ...rest
+}: Readonly<KitBulkButtonProps>) {
+  "use no memo";
+  if (kind !== "action") {
+    return (
+      <ChakraButton
+        size="xs"
+        variant={kind === "clear" ? "ghost" : "plain"}
+        {...rest}
+      >
+        {children}
+      </ChakraButton>
+    );
+  }
+  return (
+    <Tooltip label={reason ?? ""} disabled={!reason}>
+      <ChakraButton size="xs" colorPalette={color} {...rest}>
+        {isValidElement(icon) ? icon : null}
+        {children}
+      </ChakraButton>
+    </Tooltip>
+  );
+}
+
+/** The bulk action bar, with Chakra's text and buttons. */
+export const BulkBar = /* @__PURE__ */ createBulkBar({ Frame, Text, Button });
