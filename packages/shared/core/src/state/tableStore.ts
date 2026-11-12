@@ -118,6 +118,12 @@ export interface TableStore {
   readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
   /** Apply `run`'s writes as one change. */
   readonly batch: (run: (store: StoreWriter) => void) => void;
+  /**
+   * A part of this store with slices of its own: its writes publish with
+   * this store's, in one change when an action or batch ends, and `seed`
+   * writes its starting state, which nobody can read before it exists.
+   */
+  readonly scope: (seed?: (store: StoreWriter) => void) => TableStore;
 }
 
 /** What a store notifies when a slice changes. */
@@ -144,10 +150,25 @@ interface StagedCell extends Listened {
 export function createTableStore(
   seed?: (store: StoreWriter) => void
 ): TableStore {
+  return storeIn({ depth: 0, staged: new Map() }, seed);
+}
+
+/** What a store and its scopes share: one change in progress at a time. */
+interface Changes {
+  /** How deep the actions and batches in progress are nested. */
+  depth: number;
+  /** The cells written in the change in progress. */
+  readonly staged: Map<Listened, StagedCell>;
+}
+
+/** A store, or one of its scopes, over `changes`. */
+function storeIn(
+  changes: Changes,
+  seed: ((store: StoreWriter) => void) | undefined
+): TableStore {
   /** This store's identity in every slice key's cells. */
   const token = {};
-  let depth = 0;
-  const staged = new Map<Listened, StagedCell>();
+  const { staged } = changes;
 
   function cellOf<T>(key: SliceKey<T>): SliceCell<T> {
     let cell = key.cells.get(token);
@@ -175,19 +196,19 @@ export function createTableStore(
   }
 
   function run(apply: (store: StoreWriter) => void): void {
-    depth += 1;
+    changes.depth += 1;
     try {
       apply(writer);
     } catch (error) {
-      if (depth === 1) {
+      if (changes.depth === 1) {
         for (const cell of staged.values()) cell.drop();
         staged.clear();
       }
       throw error;
     } finally {
-      depth -= 1;
+      changes.depth -= 1;
     }
-    if (depth === 0) publish();
+    if (changes.depth === 0) publish();
   }
 
   const writer: StoreWriter = {
@@ -236,6 +257,7 @@ export function createTableStore(
       run((store) => action.reduce(store, action.payload));
     },
     batch: run,
+    scope: (scopeSeed) => storeIn(changes, scopeSeed),
   };
 }
 

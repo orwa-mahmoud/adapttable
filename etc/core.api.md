@@ -2101,6 +2101,7 @@ export interface ControllableStoreOptions<T> {
     readonly equals?: (current: T, next: T) => boolean;
     readonly observeUncontrolled?: boolean;
     readonly readsOwnCommits?: boolean;
+    readonly store?: TableStore;
 }
 
 // @public
@@ -2181,7 +2182,9 @@ export function createChangedCellFlashStore(initial: ChangedCellFlashOptions): C
 export function createColumnDragController(): ColumnDragController;
 
 // @public
-export function createColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(defaultColumnLayout?: Partial<ColumnLayoutState>): ColumnLayoutController<TRow, TColumn>;
+export function createColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(defaultColumnLayout?: Partial<ColumnLayoutState>, within?: {
+    readonly store?: TableStore;
+}): ColumnLayoutController<TRow, TColumn>;
 
 // @public
 export function createColumnRenameEditor(options: ColumnRenameEditorOptions): ColumnRenameEditor;
@@ -2325,7 +2328,9 @@ export interface CreateTableEngineOptions<TRow> {
 }
 
 // @public
-export function createTableViewStore(source: ViewStateSource, config?: TableViewStateConfig): TableViewStore;
+export function createTableViewStore(source: ViewStateSource, config?: TableViewStateConfig, options?: {
+    readonly store?: TableStore;
+}): TableViewStore;
 
 // @public
 export function createUrlSliceStore<T, TConfig extends object>(source: ViewStateSource, spec: UrlSliceSpec<T, TConfig>, config: TConfig): UrlSliceStore<T, TConfig>;
@@ -8147,6 +8152,29 @@ export interface SidePanelTabModel<TPanel extends SidePanelModelPanel = SidePane
 export function singleCellRange(cell: GridCell): CellRange;
 
 // @public
+export interface SliceCell<T> {
+    // (undocumented)
+    readonly listeners: Set<() => void>;
+    staged: {
+        value: T;
+    } | undefined;
+    // (undocumented)
+    value: T;
+}
+
+// @public
+export interface SliceKey<T> {
+    readonly cells: WeakMap<object, SliceCell<T>>;
+    equals(a: T, b: T): boolean;
+    readonly initial: () => T;
+    // (undocumented)
+    readonly name: string;
+}
+
+// @public
+export type SliceRead = <T>(key: SliceKey<T>) => T;
+
+// @public
 export type Slot<TState> = DisplayValue | ((state: TState) => DisplayValue);
 
 // @public
@@ -8298,6 +8326,24 @@ export function stopEditKeys(event: Readonly<{
 }>): void;
 
 // @public
+export interface StoreReader<T> {
+    // (undocumented)
+    readonly getSnapshot: () => T;
+    // (undocumented)
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface StoreWriter {
+    // (undocumented)
+    readonly read: SliceRead;
+    // (undocumented)
+    readonly update: <T>(key: SliceKey<T>, recipe: (current: T) => T) => void;
+    // (undocumented)
+    readonly write: <T>(key: SliceKey<T>, value: T) => void;
+}
+
+// @public
 export interface StreamSocket {
     addEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
     close(): void;
@@ -8315,6 +8361,16 @@ export function summaryExportValues(cells: Readonly<Partial<Record<string, unkno
 
 // @public
 export type SummaryRowFn<TRow, TNode = unknown> = (rows: readonly TRow[]) => Partial<Record<string, TNode>>;
+
+// @public
+export interface TableAction<TPayload> {
+    // (undocumented)
+    readonly payload: TPayload;
+    // (undocumented)
+    readonly reduce: (store: StoreWriter, payload: TPayload) => void;
+    // (undocumented)
+    readonly type: string;
+}
 
 // @public
 export interface TableBodyCell<TRow> {
@@ -9178,6 +9234,15 @@ export interface TableStatusAnnouncementOptions {
 export interface TableStatusSignature {
     readonly result: string;
     readonly sort: string;
+}
+
+// @public
+export interface TableStore {
+    readonly batch: (run: (store: StoreWriter) => void) => void;
+    readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
+    readonly read: SliceRead;
+    readonly scope: (seed?: (store: StoreWriter) => void) => TableStore;
+    readonly slice: <T>(key: SliceKey<T>) => StoreReader<T>;
 }
 
 // @public

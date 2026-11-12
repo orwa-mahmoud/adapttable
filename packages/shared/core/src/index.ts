@@ -630,6 +630,15 @@ export {
   createControllableStore,
 } from "./state/controllableStore";
 export type { Slot, TableErrorState } from "./state/errorState";
+export type {
+  SliceCell,
+  SliceKey,
+  SliceRead,
+  StoreReader,
+  StoreWriter,
+  TableAction,
+  TableStore,
+} from "./state/tableStore";
 export {
   applyRowPin,
   groupsCollapsedToDepth,

@@ -52,6 +52,11 @@ export interface ControllableStoreOptions<T> {
    * the first. Off by default: most domains compute from the value rendered.
    */
   readonly readsOwnCommits?: boolean;
+  /**
+   * The table's store to hold the value in, so it shares one store with the
+   * table's other state; a store of its own when absent.
+   */
+  readonly store?: TableStore;
 }
 
 /**
@@ -87,7 +92,7 @@ export interface ControllableStore<T> {
 const NEVER_SAME = (): boolean => false;
 
 /**
- * Create a controllable store over a store of its own.
+ * Create a controllable store in the table's store, or in one of its own.
  *
  * @param initial - The uncontrolled value to start from.
  * @param options - Observer mode and change detection.
@@ -100,7 +105,7 @@ export function createControllableStore<T>(
   options: ControllableStoreOptions<T> = {}
 ): ControllableStore<T> {
   const key = defineSlice<T>("controllable", () => initial, NEVER_SAME);
-  return controllableSlice(createTableStore(), key, options);
+  return controllableSlice(options.store ?? createTableStore(), key, options);
 }
 
 /**

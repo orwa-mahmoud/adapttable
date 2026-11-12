@@ -1673,6 +1673,7 @@ export interface ControllableStoreOptions<T> {
     readonly equals?: (current: T, next: T) => boolean;
     readonly observeUncontrolled?: boolean;
     readonly readsOwnCommits?: boolean;
+    readonly store?: TableStore;
 }
 
 // @public
@@ -7418,6 +7419,7 @@ export interface TableStore {
     readonly batch: (run: (store: StoreWriter) => void) => void;
     readonly dispatch: <TPayload>(action: TableAction<TPayload>) => void;
     readonly read: SliceRead;
+    readonly scope: (seed?: (store: StoreWriter) => void) => TableStore;
     readonly slice: <T>(key: SliceKey<T>) => StoreReader<T>;
 }
 

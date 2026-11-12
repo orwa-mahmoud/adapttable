@@ -4588,7 +4588,14 @@
       "xlsxWriter",
       "approvalProposalText",
       "gridRowFocusSignature",
-      "OverlayDismissOptions"
+      "OverlayDismissOptions",
+      "SliceCell",
+      "SliceKey",
+      "SliceRead",
+      "StoreReader",
+      "StoreWriter",
+      "TableAction",
+      "TableStore"
     ],
     "core-editing": [
       "ActionAiOptions",

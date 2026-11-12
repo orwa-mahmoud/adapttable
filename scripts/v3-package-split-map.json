@@ -38139,6 +38139,30 @@
       "behavior": ""
     },
     {
+      "export": "SliceCell",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "SliceKey",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "SliceRead",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "Slot",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -38419,6 +38443,22 @@
       "behavior": ""
     },
     {
+      "export": "StoreReader",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "StoreWriter",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "StreamSocket",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -38444,6 +38484,14 @@
     },
     {
       "export": "SummaryRowFn",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "TableAction",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
@@ -38740,6 +38788,14 @@
     },
     {
       "export": "TableStatusSignature",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "TableStore",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",

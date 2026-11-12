@@ -11612,6 +11612,39 @@
       "subpaths": ["."]
     },
     {
+      "name": "SliceCell",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#SliceCell",
+      "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "SliceKey",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#SliceKey",
+      "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "SliceRead",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#SliceRead",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "Slot",
       "kind": "type",
       "module": "state/errorState.ts",
@@ -11700,6 +11733,28 @@
       "subpaths": ["."]
     },
     {
+      "name": "StoreReader",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#StoreReader",
+      "subpaths": [".", "./binding"]
+    },
+    {
+      "name": "StoreWriter",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#StoreWriter",
+      "subpaths": [".", "./binding"]
+    },
+    {
       "name": "SummaryRowFn",
       "kind": "type",
       "module": "tableOptions.ts",
@@ -11709,6 +11764,17 @@
       "deprecated": false,
       "identity": "tableOptions.ts#SummaryRowFn",
       "subpaths": ["."]
+    },
+    {
+      "name": "TableAction",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#TableAction",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "TableBodyCell",
@@ -11907,6 +11973,17 @@
       "deprecated": false,
       "identity": "a11y/statusAnnouncement.ts#TableStatusSignature",
       "subpaths": ["."]
+    },
+    {
+      "name": "TableStore",
+      "kind": "type",
+      "module": "state/tableStore.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "state/tableStore.ts#TableStore",
+      "subpaths": [".", "./binding"]
     },
     {
       "name": "TableToolbarSlots",
@@ -19356,39 +19433,6 @@
       "subpaths": ["./binding"]
     },
     {
-      "name": "SliceCell",
-      "kind": "type",
-      "module": "state/tableStore.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "state/tableStore.ts#SliceCell",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "SliceKey",
-      "kind": "type",
-      "module": "state/tableStore.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "state/tableStore.ts#SliceKey",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "SliceRead",
-      "kind": "type",
-      "module": "state/tableStore.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "state/tableStore.ts#SliceRead",
-      "subpaths": ["./binding"]
-    },
-    {
       "name": "SlotFill",
       "kind": "type",
       "module": "features/featureKeys.ts",
@@ -19474,39 +19518,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "focus/statusBarContract.ts#StatusBarSlots",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "StoreReader",
-      "kind": "type",
-      "module": "state/tableStore.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "state/tableStore.ts#StoreReader",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "StoreWriter",
-      "kind": "type",
-      "module": "state/tableStore.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "state/tableStore.ts#StoreWriter",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "TableAction",
-      "kind": "type",
-      "module": "state/tableStore.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "state/tableStore.ts#TableAction",
       "subpaths": ["./binding"]
     },
     {
@@ -19826,17 +19837,6 @@
       "forward": true,
       "deprecated": false,
       "identity": "assistant/assistantSlots.ts#TableAssistantWindowProps",
-      "subpaths": ["./binding"]
-    },
-    {
-      "name": "TableStore",
-      "kind": "type",
-      "module": "state/tableStore.ts",
-      "audience": "binding-spi",
-      "path": "./binding",
-      "forward": true,
-      "deprecated": false,
-      "identity": "state/tableStore.ts#TableStore",
       "subpaths": ["./binding"]
     },
     {

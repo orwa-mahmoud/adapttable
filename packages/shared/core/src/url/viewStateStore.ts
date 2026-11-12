@@ -23,7 +23,12 @@ import {
   parseGroupAggregateOverrides,
   serializeGroupAggregateOverrides,
 } from "../grouping/groupAggregateOverrides";
-import { type ActionDefinition, createTableStore } from "../state/tableStore";
+import {
+  type ActionDefinition,
+  createTableStore,
+  type StoreWriter,
+  type TableStore,
+} from "../state/tableStore";
 import {
   clearAll,
   clearExtras,
@@ -319,13 +324,16 @@ function writeOverrides(
  *
  * @param source - The adapter, namespace and hydration search.
  * @param config - The initial configuration; see {@link TableViewStore.configure}.
+ * @param options - The table's store to hold the view state in; one of its
+ *   own when absent.
  * @returns The store.
  *
  * @public
  */
 export function createTableViewStore(
   source: ViewStateSource,
-  config: TableViewStateConfig = {}
+  config: TableViewStateConfig = {},
+  options: { readonly store?: TableStore } = {}
 ): TableViewStore {
   const { adapter } = source;
   const ns = namespaceOf(source.urlKey);
@@ -346,14 +354,20 @@ export function createTableViewStore(
   let configPending = false;
   // The configuration and the URL's overrides are the store's starting
   // state: creating the store changes nothing anyone reads.
-  const store = createTableStore((writer) => {
+  const seed = (writer: StoreWriter): void => {
     const configure = configureView(config);
     configure.reduce(writer, configure.payload);
     configured = writer.read(VIEW_CONFIG);
     initialOverrides = overridesOf(initialSearch, configured);
     const start = replaceOverrides(initialOverrides);
     start.reduce(writer, start.payload);
-  });
+  };
+  // In a table's store the view state is a scope of it: its starting state
+  // is written where nobody reads yet, and its actions publish with the
+  // table's other changes.
+  const store = options.store
+    ? options.store.scope(seed)
+    : createTableStore(seed);
   /** The URL the store last matched, and the overrides it holds there. */
   let synced: { search: string; overrides: ViewOverrides } = {
     search: initialSearch,
