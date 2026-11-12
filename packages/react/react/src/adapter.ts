@@ -523,6 +523,15 @@ export {
 export { ReducedMotionScope } from "./hooks/usePrefersReducedMotion";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
 export {
+  createBulkBar,
+  type KitBulkBar,
+  type KitBulkBarFrameProps,
+  type KitBulkButtonKind,
+  type KitBulkButtonProps,
+  type KitBulkTextKind,
+  type KitBulkTextProps,
+} from "./kit/bulkBar";
+export {
   type CellEditorProps,
   createCellEditor,
   createEditableCell,

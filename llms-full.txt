@@ -20037,6 +20037,13 @@ once, and hides the validation message while the cell is in conflict. A
 `createEditableCell({ Editor, slots, rendersError })` returns the cell that
 shows its value until editing starts (`EditableDataCellProps`).
 
+`createBulkBar(kit)` returns the bulk action bar: hidden with nothing
+selected, the count, the offer to extend a full page to every matching row
+(and to clear it), each action's confirm, scope and unavailable reason, and
+the error after a failed run. A `KitBulkBar` gives `Frame`
+(`KitBulkBarFrameProps`), `Text` (`KitBulkTextProps`, `KitBulkTextKind`) and
+`Button` (`KitBulkButtonProps`, `KitBulkButtonKind`).
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

@@ -6927,7 +6927,14 @@
       "KitCellCheckboxProps",
       "KitCellEditorProps",
       "KitCellEditors",
-      "KitCellInputProps"
+      "KitCellInputProps",
+      "createBulkBar",
+      "KitBulkBar",
+      "KitBulkBarFrameProps",
+      "KitBulkButtonKind",
+      "KitBulkButtonProps",
+      "KitBulkTextKind",
+      "KitBulkTextProps"
     ],
     "react-features": [
       "applyTableFeatures",

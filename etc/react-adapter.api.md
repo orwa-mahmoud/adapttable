@@ -1517,6 +1517,9 @@ export function createAgentApproval(kit: KitPrimitivesOf<"Button">): (props: Rea
 export function createBatchEditBar(kit: KitPrimitivesOf<"Button">): <TRow>(props: Readonly<BatchEditBarProps<TRow>>) => ReactElement;
 
 // @public
+export function createBulkBar(kit: KitBulkBar): (props: Readonly<BulkBarChromeProps>) => ReactElement | null;
+
+// @public
 export function createCellEditor(kit: KitCellEditors): ComponentType<CellEditorProps>;
 
 // @public
@@ -2901,6 +2904,53 @@ export interface KeyedWindow extends KeyedVirtualization {
 
 // @public
 export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode>;
+
+// @public
+export interface KitBulkBar {
+    readonly Button: ComponentType<KitBulkButtonProps>;
+    readonly Frame: ComponentType<KitBulkBarFrameProps>;
+    readonly Text: ComponentType<KitBulkTextProps>;
+}
+
+// @public
+export interface KitBulkBarFrameProps extends KitDataAttributes {
+    readonly actions: ReactNode;
+    readonly clear: ReactNode;
+    readonly count: ReactNode;
+    readonly error: ReactNode;
+    readonly scope: {
+        readonly text: ReactNode;
+        readonly button: ReactNode;
+        readonly attributes: KitDataAttributes & {
+            readonly role: "status";
+        };
+    } | null;
+}
+
+// @public
+export type KitBulkButtonKind = "clear" | "select-all-matching" | "action";
+
+// @public
+export interface KitBulkButtonProps extends KitDataAttributes {
+    readonly busy: boolean;
+    readonly children: ReactNode;
+    readonly color?: string;
+    readonly disabled: boolean;
+    readonly icon?: ReactNode;
+    readonly kind: KitBulkButtonKind;
+    readonly onClick: () => void;
+    readonly reason?: string;
+}
+
+// @public
+export type KitBulkTextKind = "count" | "scope" | "error";
+
+// @public
+export interface KitBulkTextProps extends KitDataAttributes {
+    readonly children: ReactNode;
+    readonly kind: KitBulkTextKind;
+    readonly role?: "alert";
+}
 
 // @public
 export interface KitButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">, KitDataAttributes {
