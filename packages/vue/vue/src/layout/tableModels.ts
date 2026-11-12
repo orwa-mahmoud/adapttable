@@ -194,16 +194,27 @@ export function sameAttrs(
   );
 }
 
-/** Whether two values are the same, or plain objects with the same entries. */
+/**
+ * Whether two style values are the same: styles are plain data (objects,
+ * arrays of them, strings, numbers), so they compare by their contents.
+ */
 function sameEntries(previous: unknown, next: unknown): boolean {
   if (Object.is(previous, next)) return true;
   if (!isKeyable(previous) || !isKeyable(next)) return false;
+  if (Array.isArray(previous) || Array.isArray(next)) {
+    return (
+      Array.isArray(previous) &&
+      Array.isArray(next) &&
+      previous.length === next.length &&
+      previous.every((item, index) => sameEntries(item, next[index]))
+    );
+  }
   const before = previous as Record<string, unknown>;
   const after = next as Record<string, unknown>;
   const keys = Object.keys(after);
   return (
     keys.length === Object.keys(before).length &&
-    keys.every((key) => Object.is(before[key], after[key]))
+    keys.every((key) => sameEntries(before[key], after[key]))
   );
 }
 
