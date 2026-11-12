@@ -20,6 +20,7 @@ import {
 
 import type { ColumnDef } from "../columnDef";
 import { fromStore, type MaybeSignalOptional, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 /**
  * The column-layout options a table takes.
@@ -71,7 +72,8 @@ export function columnLayoutFor<TRow>(
     collapsible: false,
   };
   const controller = createColumnLayoutController<TRow, ColumnDef<TRow>>(
-    options.defaultColumnLayout
+    options.defaultColumnLayout,
+    { store: tableStoreOf(injector) }
   );
   const { store } = controller;
   const controlled = computed(

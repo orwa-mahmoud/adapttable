@@ -14,6 +14,7 @@ import {
 } from "@angular/core";
 
 import { fromStore } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 export type { RowExpansionState } from "@adapttable/core/binding";
 
@@ -43,7 +44,8 @@ export function injectRowExpansion(
   if (!options.injector) assertInInjectionContext(injectRowExpansion);
   const injector = options.injector ?? inject(Injector);
   const store = createControllableStore<ReadonlySet<string>>(
-    new Set(options.defaultExpandedIds)
+    new Set(options.defaultExpandedIds),
+    { store: tableStoreOf(injector) }
   );
   const own = fromStore(store, { injector });
   const toggle = (id: string): void => {

@@ -18,6 +18,7 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignalOptional, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 export type { GroupCollapseState } from "@adapttable/core/binding";
 
@@ -53,7 +54,9 @@ export function injectGroupCollapse(
   if (!options.injector) assertInInjectionContext(injectGroupCollapse);
   const injector = options.injector ?? inject(Injector);
   const readIds = idSetReader();
-  const store = createControllableStore<ReadonlySet<string>>(new Set());
+  const store = createControllableStore<ReadonlySet<string>>(new Set(), {
+    store: tableStoreOf(injector),
+  });
   const own = fromStore(store, { injector });
   const controlled = computed(() =>
     readIds(

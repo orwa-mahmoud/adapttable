@@ -31,6 +31,7 @@ import {
   type MaybeSignalOptional,
   readMaybe,
 } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 export type { RowPinLabels, RowPinSide } from "@adapttable/core";
 export type { RowPinningState } from "@adapttable/core/binding";
@@ -69,10 +70,10 @@ export function injectRowPinning<TRow>(
 ): Signal<RowPinningState<TRow>> {
   if (!options.injector) assertInInjectionContext(injectRowPinning);
   const injector = options.injector ?? inject(Injector);
-  const store = createControllableStore<RowPinState>(
-    EMPTY_ROW_PIN_STATE,
-    ROW_PIN_STORE_OPTIONS
-  );
+  const store = createControllableStore<RowPinState>(EMPTY_ROW_PIN_STATE, {
+    ...ROW_PIN_STORE_OPTIONS,
+    store: tableStoreOf(injector),
+  });
   const own = fromStore(store, { injector });
   const controlled = computed(() =>
     options.pinnedRowIds === undefined

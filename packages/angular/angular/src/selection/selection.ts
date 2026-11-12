@@ -38,6 +38,7 @@ import {
   type MaybeSignalOptional,
   readMaybe,
 } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 /**
  * Options for {@link injectRowSelection}.
@@ -122,6 +123,7 @@ export function injectRowSelection<TRow>(
   const destroyRef = injector.get(DestroyRef);
   const store = createControllableStore<ReadonlySet<string>>(new Set(), {
     observeUncontrolled: true,
+    store: tableStoreOf(injector),
   });
   const own = fromStore(store, { injector });
   const controlled = computed(() => {

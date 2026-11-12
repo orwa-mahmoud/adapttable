@@ -103,6 +103,7 @@ import {
   type ColumnMenuSlotProps,
   COMMAND_PALETTE_LIVE,
   CONTEXT_MENU_LIVE,
+  createTableStore,
   FILTER_DRAWER,
   FILTER_ENGINE,
   FILTER_HEADER,
@@ -137,6 +138,7 @@ import {
   computed,
   contentChild,
   contentChildren,
+  DestroyRef,
   Directive,
   effect,
   type ElementRef,
@@ -184,6 +186,7 @@ import { injectGrouping, type TableGrouping } from "../grouping/tableGrouping";
 import { injectRowReorder } from "../rows/rowReorder";
 import { injectTableRowPinning } from "../rows/tableRowPinning";
 import { frontendRowModelOf } from "../source/rowModel";
+import { TABLE_STORE } from "../tableStore";
 import { injectRowDetail } from "../tree/tableRowDetail";
 import { injectTree } from "../tree/tableTree";
 import { injectColumnWindow } from "../virtual/columnWindow";
@@ -974,7 +977,15 @@ export abstract class AdaptDataTableShell<TRow> implements OnInit {
   }
 
   ngOnInit(): void {
-    const resources = createFeatureResources(this.injector);
+    // One store per table: every part created below keeps its state in it.
+    const tableInjector = Injector.create({
+      providers: [{ provide: TABLE_STORE, useValue: createTableStore() }],
+      parent: this.injector,
+    });
+    // It lives as long as the table, so what its parts register to run on
+    // destroy runs when the table goes.
+    this.injector.get(DestroyRef).onDestroy(() => tableInjector.destroy());
+    const resources = createFeatureResources(tableInjector);
     const features = computed(
       () => tableFeaturesOf(this.injector, this.features()),
       {

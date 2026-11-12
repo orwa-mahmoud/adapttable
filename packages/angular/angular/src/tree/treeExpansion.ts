@@ -23,6 +23,7 @@ import {
 } from "@angular/core";
 
 import { fromStore, type MaybeSignalOptional, readMaybe } from "../store";
+import { tableStoreOf } from "../tableStore";
 
 export type { TreeExpansionState } from "@adapttable/core/binding";
 
@@ -54,7 +55,9 @@ export function injectTreeExpansion(
   if (!options.injector) assertInInjectionContext(injectTreeExpansion);
   const injector = options.injector ?? inject(Injector);
   const readIds = idSetReader();
-  const store = createControllableStore<ReadonlySet<string>>(new Set());
+  const store = createControllableStore<ReadonlySet<string>>(new Set(), {
+    store: tableStoreOf(injector),
+  });
   const own = fromStore(store, { injector });
   const controlled = computed(() =>
     readIds(
