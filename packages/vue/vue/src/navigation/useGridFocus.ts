@@ -40,6 +40,9 @@ export interface GridFocusOptions<
   /** Multi-cell range changes, including the initial null. */
   readonly reportRange?: (range: CellRange | null) => void;
 }
+/** How many cell addresses keep their handlers before the set starts over. */
+const CELL_HANDLER_LIMIT = 4096;
+
 export function useGridFocus<TRow>(
   input: MaybeRefOrGetter<GridFocusOptions<TRow>>,
   activity: ExternalStoreOptions = {}
@@ -172,6 +175,36 @@ export function useGridFocus<TRow>(
     controller.releasePointer();
     controller.attach(null);
   });
+  // A cell's handlers depend only on its address, so they are kept: a focus
+  // move changes the attributes of the cells it moves between, not every
+  // cell's handlers, and so redraws only those rows. Kept for at most
+  // CELL_HANDLER_LIMIT addresses, so a long scroll does not grow it unbounded.
+  const cellHandlers = new Map<string, Record<string, unknown>>();
+  const handlersFor = (cell: GridCell): Record<string, unknown> => {
+    const key = `${String(cell.row)}:${String(cell.col)}`;
+    let handlers = cellHandlers.get(key);
+    if (!handlers) {
+      if (cellHandlers.size >= CELL_HANDLER_LIMIT) cellHandlers.clear();
+      handlers = {
+        onMouseDown: (event: MouseEvent) => {
+          if (
+            !(event.target instanceof Element) ||
+            !event.target.closest(
+              "button,input,select,textarea,summary,label,a[href],[contenteditable=true],[role=button]"
+            )
+          )
+            pressCell(cell, event);
+        },
+        onMouseEnter: () => enterCell(cell),
+        onMouseUp: () => run(controller.releaseCell),
+        onFocus: (event: FocusEvent) => {
+          if (event.target === event.currentTarget) trackFocus(cell);
+        },
+      };
+      cellHandlers.set(key, handlers);
+    }
+    return handlers;
+  };
   return computed(() => {
     const current = options.value;
     const enabled = active.value;
@@ -198,24 +231,7 @@ export function useGridFocus<TRow>(
           },
           cell
         ),
-        ...(enabled
-          ? {
-              onMouseDown: (event: MouseEvent) => {
-                if (
-                  !(event.target instanceof Element) ||
-                  !event.target.closest(
-                    "button,input,select,textarea,summary,label,a[href],[contenteditable=true],[role=button]"
-                  )
-                )
-                  pressCell(cell, event);
-              },
-              onMouseEnter: () => enterCell(cell),
-              onMouseUp: () => run(controller.releaseCell),
-              onFocus: (event: FocusEvent) => {
-                if (event.target === event.currentTarget) trackFocus(cell);
-              },
-            }
-          : {}),
+        ...(enabled ? handlersFor(cell) : {}),
       });
     const getRowProps = (index: number) =>
       gridRowAttributes({ enabled, windowed }, index);

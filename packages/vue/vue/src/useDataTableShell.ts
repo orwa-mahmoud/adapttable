@@ -106,6 +106,7 @@ import {
 import {
   keptAttrs,
   lazyCells,
+  sameAttrs,
   type TableBodySlot,
   type TableCellModel,
   type TableRowModel,
@@ -191,14 +192,12 @@ function sameNavigationCells<TRow>(
     previous.length === next.length &&
     next.every((cell, index) => {
       const before = previous[index]!;
-      const keys = Object.keys(cell.attrs);
       return (
         cell.key === before.key &&
         cell.context === before.context &&
         cell.render === before.render &&
         (cell.addon === undefined) === (before.addon === undefined) &&
-        keys.length === Object.keys(before.attrs).length &&
-        keys.every((key) => Object.is(cell.attrs[key], before.attrs[key]))
+        sameAttrs(before.attrs, cell.attrs)
       );
     })
   );
@@ -687,6 +686,15 @@ export function useDataTableShell<TRow>(
   // every row change, while each row's own value usually stays the same.
   const rowActionControls = computed(() => resolved.value.rowActionControls);
   const positions = new Map<string, ComputedRef<number | undefined>>();
+  const columnPositions = new Map<string, ComputedRef<number>>();
+  const columnPosition = (key: string): number => {
+    let position = columnPositions.get(key);
+    if (!position) {
+      position = computed(() => bodyColumnPositions.value.get(key) ?? -1);
+      columnPositions.set(key, position);
+    }
+    return position.value;
+  };
   const rowPosition = (key: string): number | undefined => {
     let position = positions.get(key);
     if (!position) {
@@ -706,7 +714,7 @@ export function useDataTableShell<TRow>(
     rowIndex: number,
     absolute: number
   ): TableCellModel<TRow> => {
-    const col = bodyColumnPositions.value.get(cell.key) ?? -1;
+    const col = columnPosition(cell.key);
     const key = `${absolute}:${col}`;
     const search = find.value;
     const current = search?.current;

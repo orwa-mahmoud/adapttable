@@ -75,8 +75,23 @@ it.each([
   const activate = root.querySelectorAll<HTMLButtonElement>(
     '[data-adapttable-part="edit-cell-activate"]'
   )[1]!;
-  redrawn.length = 0;
+  // Warm up on the same row: features that switch on with the first
+  // interaction (cell navigation) are not counted as the edit's work.
   activate.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+  await nextTick();
+  await nextTick();
+  root
+    .querySelector('[data-adapttable-part="edit-cell-editor"]')
+    ?.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+  for (let tick = 0; tick < 3; tick++) await nextTick();
+  redrawn.length = 0;
+  root
+    .querySelectorAll<HTMLButtonElement>(
+      '[data-adapttable-part="edit-cell-activate"]'
+    )[1]!
+    .dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
   await nextTick();
   await nextTick();
   const editor = root.querySelector<HTMLInputElement>(

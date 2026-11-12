@@ -165,17 +165,46 @@ export function keptAttrs<T extends object | undefined>(
   return computed<T>((previous) => {
     const next = read();
     if (!previous || !next) return next;
-    const keys = Object.keys(next);
-    return keys.length === Object.keys(previous).length &&
-      keys.every((key) =>
-        Object.is(
-          (next as Record<string, unknown>)[key],
-          (previous as Record<string, unknown>)[key]
-        )
-      )
+    return sameAttrs(
+      previous as Readonly<Record<string, unknown>>,
+      next as Readonly<Record<string, unknown>>
+    )
       ? previous
       : next;
   });
+}
+
+/**
+ * Whether two attribute objects draw the same: the same keys, each value the
+ * same, and a `style` object compared by its entries, since styles are
+ * rebuilt as new objects.
+ */
+export function sameAttrs(
+  previous: Readonly<Record<string, unknown>>,
+  next: Readonly<Record<string, unknown>>
+): boolean {
+  const keys = Object.keys(next);
+  return (
+    keys.length === Object.keys(previous).length &&
+    keys.every((key) =>
+      key === "style"
+        ? sameEntries(previous[key], next[key])
+        : Object.is(previous[key], next[key])
+    )
+  );
+}
+
+/** Whether two values are the same, or plain objects with the same entries. */
+function sameEntries(previous: unknown, next: unknown): boolean {
+  if (Object.is(previous, next)) return true;
+  if (!isKeyable(previous) || !isKeyable(next)) return false;
+  const before = previous as Record<string, unknown>;
+  const after = next as Record<string, unknown>;
+  const keys = Object.keys(after);
+  return (
+    keys.length === Object.keys(before).length &&
+    keys.every((key) => Object.is(before[key], after[key]))
+  );
 }
 
 /** Whether a value can key a weak map. */
