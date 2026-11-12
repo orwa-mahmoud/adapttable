@@ -33,7 +33,6 @@ import {
   type CSSProperties,
   type ReactElement,
   type ReactNode,
-  type Ref,
   useRef,
 } from "react";
 
@@ -85,6 +84,7 @@ import {
 } from "../tree/TreeToggle";
 import { useMobileTarget } from "./mobileTarget";
 import type { KitPrimitivesOf, KitTriggerProps } from "./primitives";
+import { mergeRefs } from "./refs";
 
 const FIND_GLYPH: Readonly<Record<FindButtonProps["kind"], string>> = {
   previous: "↑",
@@ -443,10 +443,7 @@ function rowMoveMenu(kit: RowMoveMenuKit) {
     const trigger = (props: KitTriggerProps) => (
       <IconButton
         {...props}
-        elementRef={(node: HTMLButtonElement | null) => {
-          triggerRef.current = node;
-          assignRef(props.elementRef, node);
-        }}
+        elementRef={mergeRefs(triggerRef, props.elementRef)}
         aria-label={label}
         data-adapttable-part="row-move-menu-trigger"
       >
@@ -510,11 +507,6 @@ function moveMenuOf(
     | { readonly MoveMenu: (props: RowMoveMenuSlotProps) => ReactNode }
 ): (props: RowMoveMenuSlotProps) => ReactNode {
   return "MoveMenu" in kit ? kit.MoveMenu : rowMoveMenu(kit);
-}
-
-function assignRef<T>(ref: Ref<T> | undefined, node: T | null): void {
-  if (typeof ref === "function") ref(node);
-  else if (ref) (ref as { current: T | null }).current = node;
 }
 
 /**

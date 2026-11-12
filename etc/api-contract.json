@@ -6934,7 +6934,8 @@
       "KitBulkButtonKind",
       "KitBulkButtonProps",
       "KitBulkTextKind",
-      "KitBulkTextProps"
+      "KitBulkTextProps",
+      "mergeRefs"
     ],
     "react-features": [
       "applyTableFeatures",

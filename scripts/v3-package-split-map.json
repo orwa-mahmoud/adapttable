@@ -47299,6 +47299,14 @@
       "behavior": ""
     },
     {
+      "export": "mergeRefs",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "MobileCardBodyProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",

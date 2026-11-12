@@ -3006,7 +3006,7 @@ selected, the count, the offer to extend a full page to every matching row
 (and to clear it), each action's confirm, scope and unavailable reason, and
 the error after a failed run. A `KitBulkBar` gives `Frame`
 (`KitBulkBarFrameProps`), `Text` (`KitBulkTextProps`, `KitBulkTextKind`) and
-`Button` (`KitBulkButtonProps`, `KitBulkButtonKind`).
+`Button` (`KitBulkButtonProps`, `KitBulkButtonKind`). `mergeRefs(...refs)` hands one element to several refs, for a kit control that takes a ref from its overlay and the binding's `elementRef`.
 
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders

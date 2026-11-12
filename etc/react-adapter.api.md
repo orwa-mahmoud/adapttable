@@ -3578,6 +3578,9 @@ export { logicalAlign }
 export const mergedCellStyle: (colSpan: number, rowSpan: number, appearance?: CellSpanAppearance_2, fill?: "on" | "off") => CSSProperties | undefined;
 
 // @public
+export function mergeRefs<T>(...refs: readonly (Ref<T> | undefined)[]): RefCallback<T>;
+
+// @public
 export interface MobileCardBodyProps<TRow> {
     // (undocumented)
     readonly ariaLabel?: string;

@@ -633,6 +633,7 @@ export type {
   KitTone,
   KitTriggerProps,
 } from "./kit/primitives";
+export { mergeRefs } from "./kit/refs";
 export {
   createRowActionButtons,
   type KitRowActionItem,
