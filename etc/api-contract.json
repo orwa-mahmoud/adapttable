@@ -6917,7 +6917,15 @@
       "KitRowActionMenuProps",
       "KitRowActionProps",
       "KitRowActions",
-      "RowActionButtonsProps"
+      "RowActionButtonsProps",
+      "CellEditorProps",
+      "createCellEditor",
+      "createEditableCell",
+      "EditableDataCellProps",
+      "KitCellCheckboxProps",
+      "KitCellEditorProps",
+      "KitCellEditors",
+      "KitCellInputProps"
     ],
     "react-features": [
       "applyTableFeatures",

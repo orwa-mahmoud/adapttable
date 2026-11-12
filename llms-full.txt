@@ -20022,6 +20022,16 @@ buttons or one menu. A `KitRowActions` gives the kit's `Action`
 (`KitRowActionProps`), `Strip`, `Menu` (`KitRowActionMenuProps`, items as
 `KitRowActionItem`) and `iconFor`.
 
+`createCellEditor(kit)` returns the editor of the cell being edited
+(`CellEditorProps`): it picks a checkbox, multi-select, select or input for
+the column, keeps Enter, Escape and Tab in the editor, commits a tick at
+once, and hides the validation message while the cell is in conflict. A
+`KitCellEditors` gives `Checkbox` (`KitCellCheckboxProps`), `MultiSelect`,
+`Select` (`KitCellEditorProps`), `Input` (`KitCellInputProps`) and
+`rendersError`, true when the kit's inputs draw the message.
+`createEditableCell({ Editor, slots, rendersError })` returns the cell that
+shows its value until editing starts (`EditableDataCellProps`).
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

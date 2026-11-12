@@ -523,6 +523,16 @@ export {
 export { ReducedMotionScope } from "./hooks/usePrefersReducedMotion";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
 export {
+  type CellEditorProps,
+  createCellEditor,
+  createEditableCell,
+  type EditableDataCellProps,
+  type KitCellCheckboxProps,
+  type KitCellEditorProps,
+  type KitCellEditors,
+  type KitCellInputProps,
+} from "./kit/cellEditor";
+export {
   createColumnMenu,
   type KitColumnMenuLook,
   type KitRenameFieldProps,

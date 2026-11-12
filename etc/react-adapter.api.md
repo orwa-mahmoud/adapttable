@@ -1034,6 +1034,13 @@ export { CellEditor }
 
 export { CellEditorOption }
 
+// @public
+export interface CellEditorProps {
+    readonly className?: string;
+    readonly ctrl: EditableCellEditorCtrl;
+    readonly label: string;
+}
+
 export { CellEditTarget }
 
 // @public
@@ -1510,6 +1517,9 @@ export function createAgentApproval(kit: KitPrimitivesOf<"Button">): (props: Rea
 export function createBatchEditBar(kit: KitPrimitivesOf<"Button">): <TRow>(props: Readonly<BatchEditBarProps<TRow>>) => ReactElement;
 
 // @public
+export function createCellEditor(kit: KitCellEditors): ComponentType<CellEditorProps>;
+
+// @public
 export function createColumnGroupToggle(kit: KitPrimitivesOf<"IconButton">): (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
 
 // @public
@@ -1528,6 +1538,13 @@ export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(Ro
 
 // @public
 export function createDesktopTable<TExtra>(kit: KitDesktopTable<TExtra>): <TRow>(props: Readonly<KitDesktopTableProps<TRow, TExtra>>) => ReactElement;
+
+// @public
+export function createEditableCell(kit: {
+    readonly Editor: ComponentType<CellEditorProps>;
+    readonly slots: EditableCellSlots;
+    readonly rendersError: boolean;
+}): <TRow>(props: Readonly<EditableDataCellProps<TRow>>) => ReactElement;
 
 // @public
 export function createEditableCellSlots(kit: KitPrimitivesOf<"Button">): EditableCellSlots;
@@ -2073,6 +2090,25 @@ export type EditableCellSlotProps<TRow = never> = EditableCellSlotProps_2<TRow, 
 export type EditableCellSlots = EditableCellSlots_2<ReactNode>;
 
 export { EditableColumnLike }
+
+// @public
+export interface EditableDataCellProps<TRow> {
+    readonly activateClassName?: string;
+    readonly column: ColumnDef<TRow>;
+    readonly columns: readonly ColumnDef<TRow>[];
+    readonly display: ReactNode;
+    readonly editing: EditableCellEditing<TRow> | undefined;
+    readonly editLabel: string;
+    readonly editorClassName?: string;
+    readonly errorClassName?: string;
+    readonly rollbackClassName?: string;
+    readonly row: TRow;
+    readonly rowId: string;
+    readonly rowKey: (row: TRow) => string;
+    readonly rows: readonly TRow[];
+    readonly saveErrorClassName?: string;
+    readonly undoLabel?: string;
+}
 
 export { EditConflict }
 
@@ -2911,6 +2947,36 @@ export interface KitCardsLook {
 export interface KitCardTextProps extends KitDataAttributes {
     readonly children: ReactNode;
     readonly labelled: boolean;
+}
+
+// @public
+export interface KitCellCheckboxProps extends KitCellEditorProps {
+    readonly checked: boolean;
+    readonly onCheckedChange: (checked: boolean) => void;
+}
+
+// @public
+export interface KitCellEditorProps {
+    readonly aria: Readonly<Record<string, string | true | undefined>>;
+    readonly className?: string;
+    readonly ctrl: EditableCellEditorCtrl;
+    readonly error: string | undefined;
+    readonly label: string;
+    readonly onKeyDown: (event: KeyboardEvent_2) => void;
+}
+
+// @public
+export interface KitCellEditors {
+    readonly Checkbox: ComponentType<KitCellCheckboxProps>;
+    readonly Input: ComponentType<KitCellInputProps>;
+    readonly MultiSelect: ComponentType<KitCellEditorProps>;
+    readonly rendersError: boolean;
+    readonly Select: ComponentType<KitCellEditorProps>;
+}
+
+// @public
+export interface KitCellInputProps extends KitCellEditorProps {
+    readonly type: string;
 }
 
 // @public
