@@ -78,13 +78,17 @@ function SortSelect({
   );
 }
 
-/** The sort direction quiet-default, add-row light. */
-function Button({
+/**
+ * The toolbar's button: default, or light for add-row. While busy it shows
+ * Mantine's own loader, which reads as "working" rather than as switched off.
+ */
+export function Button({
   elementRef,
   variant,
   tone: _tone,
   justify: _justify,
   fullWidth: _fullWidth,
+  busy,
   ...rest
 }: Readonly<KitButtonProps>) {
   "use no memo";
@@ -94,6 +98,7 @@ function Button({
       type="button"
       size="sm"
       variant={variant === "filled" ? "light" : "default"}
+      loading={busy}
       {...rest}
     />
   );

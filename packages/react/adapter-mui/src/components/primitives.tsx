@@ -21,6 +21,7 @@ import {
 import {
   Button as MuiButton,
   Checkbox as MuiCheckbox,
+  CircularProgress,
   Divider as MuiDivider,
   FormControlLabel,
   IconButton as MuiIconButton,
@@ -46,6 +47,8 @@ export function Button({
   variant = "text",
   tone,
   justify,
+  busy,
+  disabled,
   ...rest
 }: Readonly<KitButtonProps>) {
   // A pass-through: the compiler's cache would outweigh the element it saves.
@@ -58,6 +61,10 @@ export function Button({
       variant={variant === "filled" ? "contained" : variant}
       color={tone === "danger" ? "error" : undefined}
       sx={justify ? JUSTIFY_START : undefined}
+      disabled={disabled === true || busy === true}
+      startIcon={
+        busy ? <CircularProgress size={14} color="inherit" /> : undefined
+      }
       {...rest}
     />
   );
@@ -69,6 +76,7 @@ export function IconButton({
   variant: _variant,
   fullWidth: _fullWidth,
   justify: _justify,
+  busy: _busy,
   tone,
   ...rest
 }: Readonly<KitIconButtonProps>) {

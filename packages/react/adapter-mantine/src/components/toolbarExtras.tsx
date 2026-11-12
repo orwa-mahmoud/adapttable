@@ -1,20 +1,16 @@
-/**
- * The optional toolbar controls, each drawn with Mantine's own components.
- *
- * They render through `TOOLBAR_EXTRAS`, so the button and the feature that
- * makes it work arrive together: a table that never imports `/export` carries
- * neither the handler nor this button.
- */
+/** The toolbar controls the composed features add, drawn with Mantine's buttons. */
 import {
-  type AdapterCommandPaletteTriggerProps,
-  type AdapterFindButtonProps,
-  ExportAnnouncer,
-  ExportProgressChrome,
+  createCommandPaletteButton,
+  createDensityButton,
+  createExportCsvButton,
+  createFindButton,
+  createFullscreenButton,
+  createPrintButton,
+  createUndoRedoButtons,
   type ExportProgressSurfaceSlotProps,
-  type ToolbarExtrasSlotProps,
 } from "@adapttable/react/adapter";
 import {
-  Button,
+  Button as MantineButton,
   Group,
   Loader,
   Paper,
@@ -24,80 +20,9 @@ import {
 } from "@mantine/core";
 import type { ReactNode } from "react";
 
-export function UndoRedoButtons({
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
-  undoLabel,
-  redoLabel,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onUndo || !onRedo) return null;
-  return (
-    <Button.Group>
-      <Button
-        variant="default"
-        size="sm"
-        data-adapttable-part="undo-button"
-        disabled={canUndo !== true}
-        onClick={onUndo}
-      >
-        {undoLabel}
-      </Button>
-      <Button
-        variant="default"
-        size="sm"
-        data-adapttable-part="redo-button"
-        disabled={canRedo !== true}
-        onClick={onRedo}
-      >
-        {redoLabel}
-      </Button>
-    </Button.Group>
-  );
-}
+import { Button } from "./Toolbar";
 
-export function ExportCsvButton(
-  props: Readonly<ToolbarExtrasSlotProps>
-): ReactNode {
-  const {
-    onExportCsv,
-    exportBusy,
-    exportAnnouncement = "",
-    exportProgressState = null,
-    exportLabel,
-    exportDisabled = false,
-    exportDisabledReason = "",
-    labels,
-  } = props;
-  if (!onExportCsv) return null;
-  return (
-    <>
-      {/* Mantine's own loading Button: it swaps in the kit's Loader and
-          blocks interaction itself, which reads as "working" rather than as a
-          control that has been switched off. */}
-      <Button
-        variant="default"
-        size="sm"
-        data-adapttable-part="export-csv-button"
-        onClick={onExportCsv}
-        loading={exportBusy}
-        aria-busy={exportBusy}
-        disabled={exportDisabled}
-        title={exportDisabled ? exportDisabledReason : undefined}
-      >
-        {exportLabel}
-      </Button>
-      <ExportProgressChrome
-        progress={exportProgressState}
-        labels={labels}
-        slots={{ Surface: ExportProgressSurface }}
-      />
-      <ExportAnnouncer announcement={exportAnnouncement} />
-    </>
-  );
-}
-
+/** A long export's progress, as a Mantine paper in the corner. */
 function ExportProgressSurface({
   status,
   heading,
@@ -150,14 +75,14 @@ function ExportProgressSurface({
             {heading}
           </Text>
           {dismiss ? (
-            <Button
+            <MantineButton
               variant="subtle"
               size="xs"
               onClick={dismiss.onAction}
               data-adapttable-part="export-progress-dismiss"
             >
               {dismiss.label}
-            </Button>
+            </MantineButton>
           ) : null}
         </Group>
         {progressIndicator}
@@ -181,26 +106,26 @@ function ExportProgressSurface({
           data-adapttable-part="export-progress-actions"
         >
           {cancel ? (
-            <Button
+            <MantineButton
               variant="subtle"
               size="xs"
               onClick={cancel.onAction}
               data-adapttable-part="export-progress-cancel"
             >
               {cancel.label}
-            </Button>
+            </MantineButton>
           ) : null}
           {retry ? (
-            <Button
+            <MantineButton
               size="xs"
               onClick={retry.onAction}
               data-adapttable-part="export-progress-retry"
             >
               {retry.label}
-            </Button>
+            </MantineButton>
           ) : null}
           {download ? (
-            <Button
+            <MantineButton
               component="a"
               href={download.url}
               download
@@ -208,7 +133,7 @@ function ExportProgressSurface({
               data-adapttable-part="export-progress-download"
             >
               {download.label}
-            </Button>
+            </MantineButton>
           ) : null}
         </Group>
       </Stack>
@@ -216,99 +141,29 @@ function ExportProgressSurface({
   );
 }
 
-export function PrintButton({
-  onPrint,
-  printLabel,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onPrint) return null;
-  return (
-    <Button
-      variant="default"
-      size="sm"
-      data-adapttable-part="print-button"
-      onClick={onPrint}
-    >
-      {printLabel}
-    </Button>
-  );
+function ButtonGroup({ children }: Readonly<{ children: ReactNode }>) {
+  "use no memo";
+  return <MantineButton.Group>{children}</MantineButton.Group>;
 }
 
-export function DensityButton({
-  density,
-  onDensityChange,
-  labels,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  return (
-    <Button
-      variant="default"
-      size="sm"
-      aria-label={labels.density}
-      data-adapttable-part="density-toggle"
-      onClick={() => {
-        onDensityChange(density === "compact" ? "comfortable" : "compact");
-      }}
-    >
-      {density === "compact"
-        ? labels.densityCompact
-        : labels.densityComfortable}
-    </Button>
-  );
-}
-
-export function FullscreenButton({
-  onToggleFullscreen,
-  isFullscreen,
-  labels,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onToggleFullscreen) return null;
-  return (
-    <Button
-      variant="default"
-      size="sm"
-      aria-label={
-        isFullscreen === true ? labels.exitFullscreen : labels.enterFullscreen
-      }
-      data-adapttable-part="fullscreen-toggle"
-      onClick={onToggleFullscreen}
-    >
-      {isFullscreen === true ? "✕" : "⛶"}
-    </Button>
-  );
-}
-
-export function CommandPaletteButton({
-  labels,
-  onOpenPalette,
-  paletteOpen,
-}: Readonly<AdapterCommandPaletteTriggerProps>): ReactNode {
-  return (
-    <Button
-      variant="default"
-      size="sm"
-      data-adapttable-part="command-palette-button"
-      aria-haspopup="dialog"
-      aria-expanded={paletteOpen}
-      onClick={onOpenPalette}
-    >
-      {labels.commandPalette}
-    </Button>
-  );
-}
-
-export function FindButton({
-  labels,
-  onOpenFind,
-  findOpen,
-}: Readonly<AdapterFindButtonProps>): ReactNode {
-  return (
-    <Button
-      variant="default"
-      size="sm"
-      data-adapttable-part="find-button"
-      aria-expanded={findOpen}
-      onClick={onOpenFind}
-    >
-      {labels.findInTable}
-    </Button>
-  );
-}
+/** Undo and redo the last edit. */
+export const UndoRedoButtons = /* @__PURE__ */ createUndoRedoButtons(
+  Button,
+  ButtonGroup
+);
+/** Export to CSV, with a long export's progress. */
+export const ExportCsvButton = /* @__PURE__ */ createExportCsvButton(
+  Button,
+  ExportProgressSurface
+);
+/** Print the table. */
+export const PrintButton = /* @__PURE__ */ createPrintButton(Button);
+/** Switch row density. */
+export const DensityButton = /* @__PURE__ */ createDensityButton(Button);
+/** Enter or leave fullscreen. */
+export const FullscreenButton = /* @__PURE__ */ createFullscreenButton(Button);
+/** Open the command palette. */
+export const CommandPaletteButton =
+  /* @__PURE__ */ createCommandPaletteButton(Button);
+/** Open find in table. */
+export const FindButton = /* @__PURE__ */ createFindButton(Button);
