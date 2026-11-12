@@ -189,7 +189,7 @@ const noop = (): void => undefined;
  * The panel under its button's end edge, never flipped. The binding owns
  * Escape, so Escape inside the rename field never closes the whole menu.
  */
-function Popover({
+export function Popover({
   trigger,
   children,
   open,

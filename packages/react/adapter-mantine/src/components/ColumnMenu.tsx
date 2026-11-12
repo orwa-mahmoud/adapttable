@@ -148,7 +148,7 @@ export function RenameField({
  * leaves room for. The binding owns Escape, so the focus inside the rename
  * field never closes the whole menu.
  */
-function Popover({
+export function Popover({
   trigger,
   children,
   open,

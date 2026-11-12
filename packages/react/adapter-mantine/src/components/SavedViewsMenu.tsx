@@ -1,17 +1,17 @@
-import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
-import { type TableLabels, useEscapeClose } from "@adapttable/react/adapter";
+/** The saved-views menu, drawn by the binding with Mantine's controls. */
+import type { UseSavedViewsOptions } from "@adapttable/react";
 import {
-  ActionIcon,
-  Box,
-  Button,
-  Divider,
-  Group,
-  Popover,
-  TextInput,
-} from "@mantine/core";
-import { useState } from "react";
+  createSavedViewsMenu,
+  type KitButtonProps,
+  type KitSavedViewsLook,
+  type TableLabels,
+} from "@adapttable/react/adapter";
+import { Button as MantineButton } from "@mantine/core";
+import type { ReactElement } from "react";
 
 import { CloseIcon } from "../icons";
+import { Popover } from "./ColumnMenu";
+import { Divider, iconButton, TextInput } from "./primitives";
 
 /**
  * The label strings the saved-views menu renders.
@@ -36,101 +36,81 @@ export interface SavedViewsMenuProps {
 }
 
 /**
- * Saved-views menu: lists every captured view (click a name to apply it and
- * close, the trailing ✕ to delete it) above a save row that captures the
- * table's CURRENT URL state under the typed name. Pairs with core's
- * `useSavedViews` and composes into the `toolbar` slot — or let
+ * The menu's buttons: the trigger at Mantine's default size, each view a
+ * quiet compact button that fills its row, the save button filled.
+ */
+function Button({
+  elementRef,
+  variant,
+  tone: _tone,
+  fullWidth,
+  justify,
+  busy: _busy,
+  style,
+  ...rest
+}: Readonly<KitButtonProps>) {
+  "use no memo";
+  if (variant === "outlined")
+    return (
+      <MantineButton
+        ref={elementRef}
+        type="button"
+        size="sm"
+        variant="default"
+        style={style}
+        {...rest}
+      />
+    );
+  const quiet = variant === "text";
+  return (
+    <MantineButton
+      ref={elementRef}
+      type="button"
+      size={quiet ? "compact-sm" : "xs"}
+      variant={quiet ? "subtle" : "filled"}
+      justify={justify ? "flex-start" : undefined}
+      style={fullWidth ? { flex: 1, ...style } : style}
+      {...rest}
+    />
+  );
+}
+
+const ROW = {
+  display: "flex",
+  flexWrap: "nowrap",
+  alignItems: "center",
+  gap: 6,
+} as const;
+
+const LOOK: KitSavedViewsLook = {
+  panel: { padding: 4, minWidth: 220, maxHeight: "min(70vh, 360px)" },
+  row: { ...ROW, padding: "2px 4px" },
+  divider: { marginBlock: 4 },
+  saveRow: { ...ROW, padding: 4 },
+  nameInput: { flex: 1 },
+};
+
+const useLook = (): KitSavedViewsLook => LOOK;
+
+/**
+ * Saved-views toolbar menu: a popover listing the captured views (click to
+ * apply and close, the trailing ✕ to delete it) above a save row that
+ * captures the table's CURRENT URL state under the typed name. Pairs with
+ * core's `useSavedViews` and composes into the `toolbar` slot — or let
  * `<DataTable savedViews>` mount it for you next to the Columns menu.
  *
  * @public
  */
-export function SavedViewsMenu({
-  options,
-  labels,
-}: Readonly<SavedViewsMenuProps>) {
-  const views = useSavedViews(options);
-  const [opened, setOpened] = useState(false);
-  const [name, setName] = useState("");
-  const trimmed = name.trim();
-  useEscapeClose(opened, () => setOpened(false));
-  // Saving clears the input but keeps the menu open, so several views can
-  // be captured in one sitting.
-  const handleSave = () => {
-    views.save(trimmed);
-    setName("");
-  };
-  // A Popover, not a Menu: the panel holds buttons and a text input, so
-  // `role="menu"` semantics (menuitem children, typeahead) would be a lie.
-  return (
-    <Popover
-      opened={opened}
-      onChange={(nextOpened) => {
-        if (!nextOpened) setOpened(false);
-      }}
-      position="bottom-end"
-      withinPortal
-      returnFocus
-      zIndex={10050}
-      middlewares={{ flip: false, shift: { padding: 8 } }}
-    >
-      <Popover.Target>
-        <Button
-          variant="default"
-          size="sm"
-          aria-expanded={opened}
-          onClick={() => setOpened((value) => !value)}
-        >
-          {labels.savedViews}
-        </Button>
-      </Popover.Target>
-      <Popover.Dropdown>
-        <Box
-          p={4}
-          miw={220}
-          mah="min(70vh, 360px)"
-          style={{ overflowY: "auto" }}
-        >
-          {views.views.map((view) => (
-            <Group key={view.name} gap={6} px={4} py={2} wrap="nowrap">
-              <Button
-                variant="subtle"
-                size="compact-sm"
-                justify="flex-start"
-                style={{ flex: 1 }}
-                onClick={() => {
-                  views.apply(view.name);
-                  setOpened(false);
-                }}
-              >
-                {view.name}
-              </Button>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                size="sm"
-                aria-label={`${labels.deleteView}: ${view.name}`}
-                onClick={() => views.remove(view.name)}
-              >
-                <CloseIcon size={12} />
-              </ActionIcon>
-            </Group>
-          ))}
-          {views.views.length > 0 && <Divider my={4} />}
-          <Group gap={6} p={4} wrap="nowrap">
-            <TextInput
-              size="xs"
-              style={{ flex: 1 }}
-              aria-label={labels.viewName}
-              placeholder={labels.viewName}
-              value={name}
-              onChange={(e) => setName(e.currentTarget.value)}
-            />
-            <Button size="xs" disabled={trimmed === ""} onClick={handleSave}>
-              {labels.saveView}
-            </Button>
-          </Group>
-        </Box>
-      </Popover.Dropdown>
-    </Popover>
-  );
-}
+export const SavedViewsMenu: (
+  props: Readonly<SavedViewsMenuProps>
+) => ReactElement = /* @__PURE__ */ createSavedViewsMenu(
+  {
+    Button,
+    IconButton: /* @__PURE__ */ iconButton("sm"),
+    TextInput,
+    Popover,
+    Divider,
+    deleteIcon: <CloseIcon size={12} />,
+  },
+  useLook
+);
