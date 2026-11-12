@@ -171,12 +171,15 @@ describe("DesktopTable assembly paint (Chakra)", () => {
         },
       ],
     });
-    const caption = (key: string) =>
-      document.querySelector(
-        `th[data-column-key="${key}"] [data-adapttable-part="header-caption"]`
-      )!.parentElement!;
-    expect(getComputedStyle(caption("city")).justifyContent).toBe("flex-end");
-    expect(getComputedStyle(caption("name")).justifyContent).toBe("flex-start");
+    const align = (selector: string) =>
+      getComputedStyle(document.querySelector(selector)!).textAlign;
+    // The caption row is inline, so the heading follows its cell's alignment.
+    expect(align('th[data-column-key="city"]')).toBe(
+      align('td[data-column-key="city"]')
+    );
+    expect(align('th[data-column-key="city"]')).not.toBe(
+      align('th[data-column-key="name"]')
+    );
   });
 
   it("forwards size tokens onto the table root", () => {

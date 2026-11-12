@@ -242,6 +242,12 @@ export interface KitDesktopPaint {
   ) => CSSProperties;
   /** The column resize handle, given the binding's own style for it. */
   readonly resizeHandle: (style: CSSProperties) => CSSProperties;
+  /**
+   * The row that holds a column header's caption, given the column's
+   * alignment. Absent, the caption row is inline and follows the cell's
+   * alignment.
+   */
+  readonly captionRow?: (align: ColumnDef<unknown>["align"]) => CSSProperties;
 }
 
 /**
@@ -658,7 +664,7 @@ export function createDesktopTable<TExtra>(
           assembly.pin
         )}
       >
-        <div style={CAPTION_ROW}>
+        <div style={paint.captionRow?.(column.align) ?? CAPTION_ROW}>
           {column.renameable === true && props.onRenameColumn ? (
             <OptionalColumnHeaderRename
               columnKey={column.key}

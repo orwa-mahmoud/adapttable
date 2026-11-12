@@ -3089,6 +3089,7 @@ export interface KitDesktopLeafState {
 
 // @public
 export interface KitDesktopPaint {
+    readonly captionRow?: (align: ColumnDef<unknown>["align"]) => CSSProperties;
     readonly cell: (pin: CSSProperties | undefined, row: KitDesktopRowState) => CSSProperties | undefined;
     readonly group: (cell: Exclude<HtmlGroupedHeaderCell, {
         readonly kind: "leaf";

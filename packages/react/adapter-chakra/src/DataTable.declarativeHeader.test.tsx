@@ -136,7 +136,8 @@ describe("header groups (Chakra)", () => {
     const cells = within(headRows[0]!).getAllByRole("columnheader");
     // expansion + selection + Person + City (rowspan) + Org + actions
     expect(cells).toHaveLength(6);
-    expect(cells[0]).toBeEmptyDOMElement();
+    expect(cells[0]).toHaveAttribute("data-adapttable-part", "expand-header");
+    expect(cells[0]).toHaveAccessibleName("Expand row");
     expect(cells[1]).toHaveAttribute(
       "data-adapttable-part",
       "selection-header"

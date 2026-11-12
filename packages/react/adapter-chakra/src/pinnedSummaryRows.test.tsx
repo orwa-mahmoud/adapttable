@@ -81,11 +81,9 @@ describe("pinned summary rows (chakra)", () => {
     for (const name of ["pinned-summary-top", "pinned-summary-bottom"]) {
       expect(
         weight(part(name)?.querySelector("td[data-column-key=title]"))
-      ).toBe("var(--chakra-font-weights-semibold)");
+      ).toBe("600");
     }
-    expect(weight(screen.getByText("Ship").closest("td"))).not.toBe(
-      "var(--chakra-font-weights-semibold)"
-    );
+    expect(weight(screen.getByText("Ship").closest("td"))).not.toBe("600");
   });
 
   it("stays on a grouped table where lift-a-data-row pinning is refused", () => {
