@@ -44707,6 +44707,22 @@
       "behavior": ""
     },
     {
+      "export": "createCommandPaletteButton",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createDensityButton",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createDesktopRow",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -44727,6 +44743,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createExportCsvButton",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -44755,6 +44779,22 @@
       "behavior": ""
     },
     {
+      "export": "createFindButton",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createFullscreenButton",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createGroupHeader",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -44772,6 +44812,14 @@
     },
     {
       "export": "createMobileCards",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createPrintButton",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "react-chrome",
@@ -44820,6 +44868,14 @@
     },
     {
       "export": "createTreeToggle",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createUndoRedoButtons",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
       "class": "react-chrome",

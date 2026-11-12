@@ -62,6 +62,11 @@ export interface KitButtonProps
   readonly fullWidth?: boolean;
   /** Where the caption sits in a full-width button. Absent, centred. */
   readonly justify?: "start";
+  /**
+   * The action is in flight: the kit shows its own working state and the
+   * button takes no presses until it ends.
+   */
+  readonly busy?: boolean;
 }
 
 /**

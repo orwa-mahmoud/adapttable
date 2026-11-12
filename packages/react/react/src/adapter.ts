@@ -633,6 +633,15 @@ export {
   type KitToolbarSortProps,
 } from "./kit/toolbar";
 export {
+  createCommandPaletteButton,
+  createDensityButton,
+  createExportCsvButton,
+  createFindButton,
+  createFullscreenButton,
+  createPrintButton,
+  createUndoRedoButtons,
+} from "./kit/toolbarExtras";
+export {
   createDesktopRow,
   DESKTOP_ACTIONS_WIDTH,
   DESKTOP_EXPANSION_WIDTH,

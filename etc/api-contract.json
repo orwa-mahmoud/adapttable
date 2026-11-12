@@ -6904,7 +6904,14 @@
       "KitGroupRowProps",
       "KitGroupTextKind",
       "KitGroupTextProps",
-      "KitGroupToggleProps"
+      "KitGroupToggleProps",
+      "createCommandPaletteButton",
+      "createDensityButton",
+      "createExportCsvButton",
+      "createFindButton",
+      "createFullscreenButton",
+      "createPrintButton",
+      "createUndoRedoButtons"
     ],
     "react-features": [
       "applyTableFeatures",

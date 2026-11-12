@@ -2973,6 +2973,14 @@ kit's desktop `Row` and `Cell`, `Checkbox`, `Toggle` (`KitGroupToggleProps`),
 (`KitGroupCardProps`), `MoreButton` and a `useLook` hook returning
 `KitGroupLook`.
 
+One factory per toolbar control a feature adds, so a table carries only the
+controls of the features it composes: `createUndoRedoButtons(Button, Group?)`,
+`createExportCsvButton(Button, Surface)` (with the kit's surface for a long
+export's progress), `createPrintButton`, `createDensityButton`,
+`createFullscreenButton`, `createCommandPaletteButton` and `createFindButton`,
+each from the kit's toolbar button. A primitive button marked `busy` shows the
+kit's working state and takes no presses.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

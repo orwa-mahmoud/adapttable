@@ -1517,6 +1517,12 @@ export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | 
 }, useLook: () => KitColumnMenuLook): <TRow>(props: Readonly<ColumnMenuSlotProps<TRow>>) => ReactElement;
 
 // @public
+export function createCommandPaletteButton(Button: ComponentType<KitButtonProps>): (props: Readonly<AdapterCommandPaletteTriggerProps>) => ReactElement;
+
+// @public
+export function createDensityButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement;
+
+// @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): (props: TProps) => ReactElement;
 
 // @public
@@ -1524,6 +1530,9 @@ export function createDesktopTable<TExtra>(kit: KitDesktopTable<TExtra>): <TRow>
 
 // @public
 export function createEditableCellSlots(kit: KitPrimitivesOf<"Button">): EditableCellSlots;
+
+// @public
+export function createExportCsvButton(Button: ComponentType<KitButtonProps>, Surface: (props: ExportProgressSurfaceSlotProps) => ReactNode): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
 
 // @public
 export function createFilterHeaderControl(kit: KitPrimitivesOf<"TextInput" | "Select" | "Button" | "Checkbox" | "Popover">): <TRow>(props: Readonly<FilterHeaderControlProps<TRow>>) => ReactElement | null;
@@ -1535,6 +1544,12 @@ export { createFilterRegistry }
 
 // @public
 export function createFindBar(kit: KitPrimitivesOf<"TextInput" | "IconButton">): (props: Readonly<FindBarProps>) => ReactElement;
+
+// @public
+export function createFindButton(Button: ComponentType<KitButtonProps>): (props: Readonly<AdapterFindButtonProps>) => ReactElement;
+
+// @public
+export function createFullscreenButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
 
 // @public
 export function createGroupHeader(kit: KitGroupHeader): {
@@ -1549,6 +1564,9 @@ export function createGroupMoreButton(kit: KitPrimitivesOf<"Button">): (props: R
 
 // @public
 export function createMobileCards<TExtra>(kit: KitMobileCards<TExtra>): <TRow>(props: Readonly<KitMobileCardsProps<TRow, TExtra>>) => ReactElement;
+
+// @public
+export function createPrintButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
 
 // @public
 export function createRowEditActions(kit: KitPrimitivesOf<"Button" | "IconButton">, iconFor: (part: string, icon: unknown) => ReactNode): <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactElement;
@@ -1571,6 +1589,11 @@ export function createTreeCell(kit: KitPrimitivesOf<"IconButton">): <TRow>(props
 
 // @public
 export function createTreeToggle(kit: KitPrimitivesOf<"IconButton">): <TRow>(props: Readonly<TreeToggleProps<TRow>>) => ReactElement | null;
+
+// @public
+export function createUndoRedoButtons(Button: ComponentType<KitButtonProps>, Group?: ComponentType<{
+    readonly children: ReactNode;
+}>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
 
 export { CustomCellEditorConflict }
 
@@ -2841,6 +2864,7 @@ export type KeyedWindowSlotProps = KeyedWindowSlotProps_2<KeyedWindow, ReactNode
 
 // @public
 export interface KitButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">, KitDataAttributes {
+    readonly busy?: boolean;
     readonly elementRef?: Ref<HTMLButtonElement>;
     readonly fullWidth?: boolean;
     readonly justify?: "start";
