@@ -3,6 +3,7 @@ import {
   type CellConflictAsk,
   type EditableCellController,
   type EditableColumnLike,
+  type EditConflictLabels,
   type EditingBundle,
 } from "@adapttable/core";
 import {
@@ -105,7 +106,6 @@ const DRAWN_FIELDS = [
   "editor",
   "draft",
   "conflict",
-  "conflictLabels",
 ] as const satisfies readonly (keyof EditableCellController<unknown>)[];
 
 /**
@@ -128,8 +128,9 @@ export function drawnRowEditing<TRow>(
   const drawn: unknown[] = [
     editing.onCellEdit !== undefined,
     editing.featureHost,
-    editing.conflictLabels,
+    ...labelValues(editing.conflictLabels),
     editing.activation,
+    ...rowEditValues(editing, target.rowId),
   ];
   for (const column of target.columns) {
     const unit = editableUnitModel({
@@ -147,8 +148,37 @@ export function drawnRowEditing<TRow>(
       editing.batch?.isChanged(target.rowId, column.key)
     );
     for (const field of DRAWN_FIELDS) drawn.push(unit.controller[field]);
+    drawn.push(...labelValues(unit.controller.conflictLabels));
   }
   return drawn;
+}
+
+/** What a row's edit controls draw: whether it is open, and then its commit. */
+function rowEditValues<TRow>(
+  editing: EditingBundle<TRow>,
+  rowId: string
+): readonly unknown[] {
+  const rowEditing = editing.rowEditing;
+  const open = rowEditing?.isEditing(rowId) ?? false;
+  return [
+    rowEditing !== undefined,
+    open,
+    open ? rowEditing?.commit : undefined,
+    open ? rowEditing?.isDirty : undefined,
+    editing.conflict?.isRowConflict(rowId),
+  ];
+}
+
+/** The conflict labels as the values a cell shows: rebuilt with the options. */
+function labelValues(
+  labels: EditConflictLabels | undefined
+): readonly unknown[] {
+  return [
+    labels?.message,
+    labels?.keepMine,
+    labels?.takeTheirs,
+    labels?.theirsValue,
+  ];
 }
 
 /** Whether two views from {@link drawnRowEditing} draw the same row. */

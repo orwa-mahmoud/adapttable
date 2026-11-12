@@ -36,7 +36,7 @@ import {
 } from "../selection/checkboxControl";
 import type { DataTableSlots } from "../tableAdapterContracts";
 import type { RowActionControl } from "./modelChannels";
-import { tableRowView } from "./rowView";
+import { keptRowContext, tableRowView } from "./rowView";
 import type {
   DesktopTableModel,
   MobileCardsModel,
@@ -666,9 +666,20 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
       ]);
     };
     // Each row in a component of its own: it redraws for its own changes.
+    // A row redraws when what it reads from the model changes, not each
+    // time the model is rebuilt for another row's data.
+    const rowModel = keptRowContext(slots, {
+      actionsLabel: model.actionsLabel,
+      columnCount: model.columnCount,
+      expandLabel: model.expandLabel,
+      selectable: model.headerCheckboxAttrs !== undefined,
+      reorderLabel: model.reorderLabel,
+    });
     const row = (wiring: TableRowModel<TRow>): VNode =>
-      tableRowView(wiring, { model, controls: slots, classNames }, () =>
-        rowContent(wiring)
+      tableRowView(
+        wiring,
+        { model: rowModel, controls: slots, classNames },
+        () => rowContent(wiring)
       );
     const bodySlot = (slot: TableBodySlot<TRow>): VNode => {
       if (slot.kind === "row") return row(slot.wiring);

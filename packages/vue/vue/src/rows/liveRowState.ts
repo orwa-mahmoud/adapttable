@@ -1,5 +1,5 @@
 import type { Attrs } from "../attrs";
-import type { TableBodySlot, TableRowModel } from "../layout/tableModels";
+import type { TableRowModel } from "../layout/tableModels";
 import type { RowSelection } from "../selection/selection";
 
 /** Which element a row is drawn as, and the attribute that marks it selected. */
@@ -26,15 +26,17 @@ function selectedAttrs(
  */
 export function withLiveSelection<TRow>(
   row: TableRowModel<TRow>,
-  selection: RowSelection | undefined,
+  selection: () => RowSelection | undefined,
   element: RowElement
 ): TableRowModel<TRow> {
-  if (!selection || row.summary) return row;
+  if (row.summary) return row;
   const base: Attrs = row.attrs;
-  const attrs = (): Attrs => ({
-    ...base,
-    ...selectedAttrs(element, selection.isSelected(row.key)),
-  });
+  const attrs = (): Attrs => {
+    const current = selection();
+    return current
+      ? { ...base, ...selectedAttrs(element, current.isSelected(row.key)) }
+      : base;
+  };
   return Object.defineProperties(
     {
       key: row.key,
@@ -49,19 +51,5 @@ export function withLiveSelection<TRow>(
       ...Object.getOwnPropertyDescriptors(row),
       attrs: { get: attrs, enumerable: true, configurable: true },
     }
-  );
-}
-
-/** Each row slot's row, with its selected state read when it is drawn. */
-export function withLiveSelectionSlots<TRow>(
-  slots: TableBodySlot<TRow>[] | undefined,
-  selection: RowSelection | undefined,
-  element: RowElement
-): TableBodySlot<TRow>[] | undefined {
-  if (!slots || !selection) return slots;
-  return slots.map((slot) =>
-    slot.kind === "row"
-      ? { ...slot, wiring: withLiveSelection(slot.wiring, selection, element) }
-      : slot
   );
 }

@@ -148,12 +148,93 @@ function cardCells<TRow>(
     },
   }));
 }
+/**
+ * A desktop row's model, kept while its row object, position and selection
+ * are unchanged: a change to other rows' data, or a recompute of the table
+ * model, hands an unchanged row the same model, so it does not redraw. What
+ * the row draws from the table's state (attributes, checkbox, cells) is read
+ * when the row is drawn, so a kept model stays current.
+ */
+/**
+ * A computed whose value keeps the previous object while the next one has
+ * the same entries: attributes are rebuilt as new objects on every read.
+ */
+function keptAttrs<T extends object | undefined>(
+  read: () => T
+): ComputedRef<T> {
+  return computed<T>((previous) => {
+    const next = read();
+    if (!previous || !next) return next;
+    const keys = Object.keys(next);
+    return keys.length === Object.keys(previous).length &&
+      keys.every((key) =>
+        Object.is(
+          (next as Record<string, unknown>)[key],
+          (previous as Record<string, unknown>)[key]
+        )
+      )
+      ? previous
+      : next;
+  });
+}
+
+/** Whether a value can key a weak map. */
+function isKeyable(value: unknown): value is object {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * A desktop row's model, kept while its row object and position are
+ * unchanged: a change to other rows' data, or a recompute of the table model,
+ * hands an unchanged row the same model, so it does not redraw. What the row
+ * draws from the table's state (attributes, checkbox, cells) is read when the
+ * row is drawn, through the current selection, so a kept model stays current.
+ */
+function keptRowModels<TRow>(
+  table: UseDataTableResult<TRow>,
+  selection: () => RowSelection | undefined
+): (row: TRow, index: number) => TableRowModel<TRow> {
+  const kept = new WeakMap<
+    object,
+    { readonly index: number; readonly model: TableRowModel<TRow> }
+  >();
+  const build = (row: TRow, index: number): TableRowModel<TRow> => {
+    const key = table.rowKey(row);
+    const cells = lazyCells(() => desktopCells(table, row, index));
+    const attrs = keptAttrs(() => table.rowAttrs(row, index, {}));
+    const checkboxAttrs = keptAttrs(() => selection()?.rowCheckboxAttrs(key));
+    return {
+      key,
+      row,
+      index,
+      get attrs() {
+        return attrs.value;
+      },
+      get checkboxAttrs() {
+        return checkboxAttrs.value;
+      },
+      get cells() {
+        return cells();
+      },
+    };
+  };
+  return (row, index) => {
+    if (!isKeyable(row)) return build(row, index);
+    const previous = kept.get(row);
+    if (previous?.index === index) return previous.model;
+    const model = build(row, index);
+    kept.set(row, { index, model });
+    return model;
+  };
+}
+
 export function useDesktopTableModel<TRow>(
   table: UseDataTableResult<TRow>,
   selection?: () => RowSelection | undefined,
   fitColumns?: () => boolean,
   expandLabel?: () => string | undefined
 ): ComputedRef<DesktopTableModel<TRow>> {
+  const rowModel = keptRowModels(table, () => selection?.());
   return computed(() => {
     const selected = selection?.();
     const expansion = expandLabel?.();
@@ -205,20 +286,7 @@ export function useDesktopTableModel<TRow>(
       headerCheckboxAttrs: selected?.headerCheckboxAttrs(),
       expandLabel: expansion,
       columnCount: headers.length + (selected ? 1 : 0) + (expansion ? 1 : 0),
-      rows: table.rows.value.map((row, index) => {
-        const cells = lazyCells(() => desktopCells(table, row, index));
-        return {
-          key: table.rowKey(row),
-          row,
-          index,
-          // The row's selection is applied when the row is drawn.
-          attrs: table.rowAttrs(row, index, {}),
-          checkboxAttrs: selected?.rowCheckboxAttrs(table.rowKey(row)),
-          get cells() {
-            return cells();
-          },
-        };
-      }),
+      rows: table.rows.value.map((row, index) => rowModel(row, index)),
     };
   });
 }

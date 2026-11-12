@@ -95,3 +95,32 @@ export function keepTableControls<TControls extends object>(
     return controls;
   };
 }
+
+/** The row context each owner last handed its rows. */
+const ROW_CONTEXTS = new WeakMap<object, Readonly<Record<string, unknown>>>();
+
+/**
+ * What every row of a body reads from the body's model, kept as the same
+ * object while each value is the same: a row redraws when what it reads
+ * changes, not when the body's model is rebuilt around it.
+ *
+ * @param owner - Whose rows these are; the table's kept controls.
+ * @param values - The model's values the rows read.
+ * @returns The context to hand the rows.
+ */
+export function keptRowContext(
+  owner: object,
+  values: Readonly<Record<string, unknown>>
+): Readonly<Record<string, unknown>> {
+  const previous = ROW_CONTEXTS.get(owner);
+  if (
+    previous &&
+    Object.keys(values).length === Object.keys(previous).length &&
+    Object.entries(values).every(([key, value]) =>
+      Object.is(value, previous[key])
+    )
+  )
+    return previous;
+  ROW_CONTEXTS.set(owner, values);
+  return values;
+}

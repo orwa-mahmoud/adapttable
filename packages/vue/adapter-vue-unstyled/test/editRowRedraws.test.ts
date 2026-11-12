@@ -18,25 +18,38 @@ afterEach(() => {
   for (const stop of stops.splice(0)) stop();
 });
 
+const columns: DataTableProps<Row>["columns"] = [
+  { key: "name", header: "Name", editable: true },
+];
+const rowKey = (row: Row) => row.id;
+
 it.each([
   { name: "editing" },
   { name: "selectable", selectable: true },
   { name: "navigation", nav: true },
   { name: "both", selectable: true, nav: true },
+  { name: "writes back", writeBack: true },
 ])("redraws only the row whose cell is edited: $name", async (variant) => {
   const redrawn: string[] = [];
   const data = shallowRef<readonly Row[]>(rows);
+  // A host's columns and row key stay the same between renders; only the
+  // data changes.
   const props = (): DataTableProps<Row> => ({
     data: data.value,
-    columns: [{ key: "name", header: "Name", editable: true }],
-    rowKey: (row) => row.id,
+    columns,
+    rowKey,
     urlSync: false,
     searchable: false,
     selectable: variant.selectable,
     features,
   });
   const features = [
-    editing<Row>(() => undefined),
+    editing<Row>((row, key, value) => {
+      if (!("writeBack" in variant)) return;
+      data.value = data.value.map((item) =>
+        item === row ? { ...item, [key]: String(value) } : item
+      );
+    }),
     ...(variant.nav ? [cellNavigation()] : []),
   ];
   const root = document.createElement("div");

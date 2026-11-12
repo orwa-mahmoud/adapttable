@@ -1,3 +1,11 @@
+/** An array that reads `current` each time it is used, for a stable prop. */
+function liveArray<T>(current: () => readonly T[]): readonly T[] {
+  return new Proxy([] as T[], {
+    get: (_target, key): unknown => Reflect.get(current(), key) as unknown,
+    has: (_target, key) => Reflect.has(current(), key),
+  });
+}
+
 /** Every field of an editing bundle, for a view that reads the current one. */
 const EDITING_BUNDLE_FIELDS = [
   "onCellEdit",
@@ -151,7 +159,7 @@ import {
   GRID_FOCUS_MODEL,
   SELECTION_STATS_MODEL,
 } from "./navigation/contracts";
-import { withLiveSelection, withLiveSelectionSlots } from "./rows/liveRowState";
+import { withLiveSelection } from "./rows/liveRowState";
 import { useRowSelection } from "./selection/selection";
 import type {
   DataTableHandle,
@@ -190,8 +198,11 @@ export function useDataTableShell<TRow>(
 ) {
   mountForcedColorsStyles();
   const options = computed(() => toValue(input));
+  // The features are composed when the host's features change, not each
+  // time another option (the data) does: their slot fills reach every row.
+  const featureList = computed(() => toValue(options.value.features));
   const declarations = computed(() =>
-    normalizeFeatures(toValue(options.value.features) ?? [])
+    normalizeFeatures(featureList.value ?? [])
   );
   const patches = computed(() => featureOptionsOf(declarations.value));
   // Read option by option: a change to one option reaches its readers only.
@@ -615,12 +626,25 @@ export function useDataTableShell<TRow>(
     () =>
       new Map(table.columns.value.map((column, index) => [column.key, index]))
   );
+  // What row decoration reads, narrowed to the value it uses: the options
+  // object is rebuilt with every data change, and the positions map with
+  // every row change, while each row's own value usually stays the same.
+  const rowActionControls = computed(() => resolved.value.rowActionControls);
+  const positions = new Map<string, ComputedRef<number | undefined>>();
+  const rowPosition = (key: string): number | undefined => {
+    let position = positions.get(key);
+    if (!position) {
+      position = computed(() => bodyRowPositions.value.get(key));
+      positions.set(key, position);
+    }
+    return position.value;
+  };
   const decorateNavigation = (
     row: TableRowModel<TRow>
   ): TableRowModel<TRow> => {
     if (row.summary || (!gridFocus.value && !find.value)) return row;
     const grid = gridFocus.value;
-    const rowIndex = bodyRowPositions.value.get(row.key);
+    const rowIndex = rowPosition(row.key);
     if (rowIndex === undefined) return row;
     const absolute = table.windowStart.value + rowIndex;
     return {
@@ -737,7 +761,25 @@ export function useDataTableShell<TRow>(
     { flush: "sync" }
   );
   const currentBundle = (): EditingBundle<TRow> | undefined => latestBundle;
+  // The drawn rows an editor reads when it moves on (Tab, Enter): read then,
+  // so drawing a row does not depend on every other row's data.
+  let latestVisibleRows = rowInventory.value.visibleRows;
+  watch(
+    () => rowInventory.value.visibleRows,
+    (rows) => {
+      latestVisibleRows = rows;
+    },
+    { flush: "sync" }
+  );
+  const liveVisibleRows = liveArray(() => latestVisibleRows);
   const rowTargets = new Map<string, TRow>();
+  /** The editing view a row's edit controls draw with. */
+  const rowEditingView = (
+    model: TableRowModel<TRow>
+  ): EditingBundle<TRow> | undefined => {
+    rowTargets.set(model.key, model.row);
+    return bundleFor(model.key);
+  };
   const rowBundles = new Map<
     string,
     ComputedRef<EditingBundle<TRow> | undefined>
@@ -768,7 +810,7 @@ export function useDataTableShell<TRow>(
     }
     return view.value;
   };
-  // A row that leaves the drawn rows leaves its bundle behind with it.
+  // A row that leaves the drawn rows leaves its bundle and position behind.
   watch(
     () => rowInventory.value.visibleRows,
     (rows) => {
@@ -778,11 +820,14 @@ export function useDataTableShell<TRow>(
         rowBundles.delete(rowId);
         rowTargets.delete(rowId);
       }
+      for (const rowId of positions.keys()) {
+        if (!drawn.has(rowId)) positions.delete(rowId);
+      }
     }
   );
   const decorateRow = (original: TableRowModel<TRow>): TableRowModel<TRow> => {
     const ownsRow =
-      original.detail || resolved.value.rowActionControls
+      original.detail || rowActionControls.value
         ? rowControlOwner(original.row)
         : undefined;
     const rowDetail = original.detail;
@@ -832,16 +877,17 @@ export function useDataTableShell<TRow>(
           }),
       };
     }
-    const projector = resolved.value.rowActionControls;
+    const projector = rowActionControls.value;
     const rowEditing =
       !original.summary && rowEditControlsVisible.value
         ? rowEditFactory.value?.(
             original.row,
             original.key,
-            mergedActions.value.rowActions
+            rowActionList.value,
+            rowEditingView(original)
           )
         : undefined;
-    const actions = rowEditing?.actions ?? mergedActions.value.rowActions;
+    const actions = rowEditing?.actions ?? rowActionList.value;
     const controls =
       !original.summary && projector && actions
         ? projector({
@@ -850,8 +896,7 @@ export function useDataTableShell<TRow>(
             confirm: requestConfirm,
             cancelLabel: table.labels.value.cancel,
             enabled: () =>
-              ownsRow?.() === true &&
-              resolved.value.rowActionControls === projector,
+              ownsRow?.() === true && rowActionControls.value === projector,
           })
         : undefined;
     const row =
@@ -888,7 +933,7 @@ export function useDataTableShell<TRow>(
                     rowId: row.key,
                     rowIndex: row.index,
                     column: cell.context.column,
-                    rows: rowInventory.value.visibleRows,
+                    rows: liveVisibleRows,
                     columns: table.columns.value,
                     rowKey: table.rowKey,
                     editLabel: table.labels.value.editCell,
@@ -900,10 +945,41 @@ export function useDataTableShell<TRow>(
       ),
     };
   };
-  const decorateSlots = (slots: readonly TableBodySlot<TRow>[] | undefined) =>
+  // Each row is decorated by a computed of its own, keyed by the row model it
+  // decorates: Vue re-runs it only when something that row's decoration read
+  // changes, so a change to one row does not hand every row new props.
+  const selectable = computed(() => selection.value !== undefined);
+  const currentSelection = () => selection.value;
+  const rowActionList = computed(() => mergedActions.value.rowActions);
+  const decorated = {
+    row: new WeakMap<TableRowModel<TRow>, ComputedRef<TableRowModel<TRow>>>(),
+    card: new WeakMap<TableRowModel<TRow>, ComputedRef<TableRowModel<TRow>>>(),
+  };
+  const decorate = (
+    wiring: TableRowModel<TRow>,
+    element: "row" | "card"
+  ): TableRowModel<TRow> => {
+    let row = decorated[element].get(wiring);
+    if (!row) {
+      row = computed(() => {
+        const drawn = decorateNavigation(decorateRow(wiring));
+        // Whether rows are selectable, not the selection itself: a row reads
+        // its own selected state when it is drawn.
+        return selectable.value
+          ? withLiveSelection(drawn, currentSelection, element)
+          : drawn;
+      });
+      decorated[element].set(wiring, row);
+    }
+    return row.value;
+  };
+  const decorateSlots = (
+    slots: readonly TableBodySlot<TRow>[] | undefined,
+    element: "row" | "card"
+  ) =>
     slots?.map((slot) =>
       slot.kind === "row"
-        ? { ...slot, wiring: decorateNavigation(decorateRow(slot.wiring)) }
+        ? { ...slot, wiring: decorate(slot.wiring, element) }
         : slot
     );
   const renameColumn = (key: string, name: string): void =>
@@ -998,34 +1074,14 @@ export function useDataTableShell<TRow>(
         resizeAttrs,
       };
     }),
-    rows: windowedBody.value.desktop.rows.map((row) =>
-      withLiveSelection(
-        decorateNavigation(decorateRow(row)),
-        selection.value,
-        "row"
-      )
-    ),
-    bodySlots: withLiveSelectionSlots(
-      decorateSlots(windowedBody.value.desktop.bodySlots),
-      selection.value,
-      "row"
-    ),
+    rows: windowedBody.value.desktop.rows.map((row) => decorate(row, "row")),
+    bodySlots: decorateSlots(windowedBody.value.desktop.bodySlots, "row"),
   }));
   const mobile = computed(() => ({
     ...windowedBody.value.mobile,
     summary: mobileSummary.value,
-    rows: windowedBody.value.mobile.rows.map((row) =>
-      withLiveSelection(
-        decorateNavigation(decorateRow(row)),
-        selection.value,
-        "card"
-      )
-    ),
-    bodySlots: withLiveSelectionSlots(
-      decorateSlots(windowedBody.value.mobile.bodySlots),
-      selection.value,
-      "card"
-    ),
+    rows: windowedBody.value.mobile.rows.map((row) => decorate(row, "card")),
+    bodySlots: decorateSlots(windowedBody.value.mobile.bodySlots, "card"),
   }));
   if (getCurrentInstance()) provideFeatureState(state);
   const active = useScopeActivity();

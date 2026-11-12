@@ -88,6 +88,7 @@ import { ContextMenuSurfaceProps } from '@adapttable/core/binding';
 import { createMenuNavigation } from '@adapttable/core/binding';
 import { CSSProperties } from 'vue';
 import { CssProperties } from '@adapttable/core/binding';
+import { CssProperties as CssProperties_2 } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
@@ -104,6 +105,7 @@ import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictPolicy } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
+import { EditingBundle as EditingBundle_2 } from '@adapttable/core/editing';
 import { EditLifecycle } from '@adapttable/core';
 import { editorInputType } from '@adapttable/core/editing';
 import { EditValidationStoreOptions } from '@adapttable/core';
@@ -1870,7 +1872,7 @@ export interface EditingChromeModel<TRow> {
     // (undocumented)
     readonly batch?: BatchEditBarProps_2<TRow>;
     // (undocumented)
-    readonly row?: (row: TRow, rowId: string, actions: readonly RowAction<TRow>[] | undefined) => {
+    readonly row?: (row: TRow, rowId: string, actions: readonly RowAction<TRow>[] | undefined, editing?: EditingBundle<TRow>) => {
         readonly props: RowEditActionsProps_2<TRow>;
         readonly actions: readonly RowAction<TRow>[];
     };
@@ -4378,40 +4380,70 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     rowInventory: ComputedRef<TableRowInventory<TRow>>;
     source: ComputedRef<TableSource<TRow>>;
     selection: ComputedRef<RowSelection | undefined>;
-    desktop: ComputedRef<    {
-    summary: TableSummaryModel<TRow> | undefined;
-    attrs: Record<string, unknown>;
-    headers: {
-    attrs: Record<string, unknown>;
-    selection: ((className?: string) => VNodeChild[]) | undefined;
-    rename: ((children: VNodeChild, classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[]) | undefined;
-    filter: ((className?: string) => VNodeChild[] | null) | undefined;
-    resizeAttrs: Readonly<Record<string, unknown>> | undefined;
-    key: string;
-    column: ColumnDef<TRow, unknown>;
-    sortAttrs?: Attrs;
-    context: HeaderContext<TRow, unknown>;
-    }[];
-    rows: TableRowModel<TRow>[];
-    bodySlots: TableBodySlot<TRow>[] | undefined;
-    headerRowAttrs: Attrs;
-    headerCheckboxAttrs?: SelectionCheckboxAttrs;
-    columnCount: number;
-    actionsLabel?: string;
-    reorderLabel?: string;
-    expandLabel?: string;
-    columnSpacers?: {
-    readonly start: number;
-    readonly end: number;
-    };
-    groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;
-    headerPlan: HtmlGroupedHeaderCell[][] | null;
+    desktop: ComputedRef<{
+        summary: TableSummaryModel<TRow> | undefined;
+        attrs: Record<string, unknown>;
+        headers: {
+            attrs: Record<string, unknown>;
+            selection: ((className?: string) => VNodeChild[]) | undefined;
+            rename: ((children: VNodeChild, classNames?: Readonly<Record<string, string | undefined>>) => VNodeChild[]) | undefined;
+            filter: ((className?: string) => VNodeChild[] | null) | undefined;
+            resizeAttrs: Readonly<Record<string, unknown>> | undefined;
+            key: string;
+            column: ColumnDef<TRow, unknown>;
+            sortAttrs?: Attrs;
+            context: HeaderContext<TRow, unknown>;
+        }[];
+        rows: TableRowModel<TRow>[];
+        bodySlots: ((ChromeVirtualPadSlot & {
+            readonly attrs?: Attrs;
+        }) | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
+            readonly coveredSlots?: ReadonlySet<number>;
+        } & {
+            readonly attrs?: Attrs;
+        }) | (ChromeGroupSlot<TRow> & {
+            readonly model?: GroupRowModel<TRow> | undefined;
+        } & {
+            readonly attrs?: Attrs;
+        }) | {
+            wiring: TableRowModel<TRow>;
+            kind: "row";
+            key: string;
+            attrs?: Attrs;
+        })[] | undefined;
+        headerRowAttrs: Attrs;
+        headerCheckboxAttrs?: SelectionCheckboxAttrs;
+        columnCount: number;
+        actionsLabel?: string;
+        reorderLabel?: string;
+        expandLabel?: string;
+        columnSpacers?: {
+            readonly start: number;
+            readonly end: number;
+        };
+        groupToggleProps: (cell: HeaderGroupCell) => ColumnGroupToggleProps | undefined;
+        headerPlan: HtmlGroupedHeaderCell[][] | null;
     }>;
-    mobile: ComputedRef<    {
-    summary: TableSummaryModel<TRow> | undefined;
-    rows: TableRowModel<TRow>[];
-    bodySlots: TableBodySlot<TRow>[] | undefined;
-    attrs: Attrs;
+    mobile: ComputedRef<{
+        summary: TableSummaryModel<TRow> | undefined;
+        rows: TableRowModel<TRow>[];
+        bodySlots: ((ChromeVirtualPadSlot & {
+            readonly attrs?: Attrs;
+        }) | (ChromeExtraSlot<VNodeChild, CssProperties_2> & {
+            readonly coveredSlots?: ReadonlySet<number>;
+        } & {
+            readonly attrs?: Attrs;
+        }) | (ChromeGroupSlot<TRow> & {
+            readonly model?: GroupRowModel<TRow> | undefined;
+        } & {
+            readonly attrs?: Attrs;
+        }) | {
+            wiring: TableRowModel<TRow>;
+            kind: "row";
+            key: string;
+            attrs?: Attrs;
+        })[] | undefined;
+        attrs: Attrs;
     }>;
     bodyProjection: ComputedRef<TableBodyProjection<TRow>>;
     bodyWindow: Readonly<ShallowRef<BodyWindowModel<TRow> | undefined>>;
@@ -4424,7 +4456,7 @@ export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShel
     grouping: Readonly<ShallowRef<TableGrouping<TRow> | undefined>>;
     tree: Readonly<ShallowRef<TableTree<TRow> | undefined>>;
     detail: Readonly<ShallowRef<TableRowDetail<TRow> | undefined>>;
-    editing: Readonly<ShallowRef<EditingBundle<TRow> | undefined>>;
+    editing: Readonly<ShallowRef<EditingBundle_2<TRow> | undefined>>;
     filterRuntime: ComputedRef<FilterRuntime_2<TRow> | undefined>;
     featureOptions: ComputedRef<Readonly<Record<string, unknown>>>;
     density: ComputedRef<TableDensity>;
