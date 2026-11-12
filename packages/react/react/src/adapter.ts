@@ -645,6 +645,10 @@ export {
   type RowActionButtonsProps,
 } from "./kit/rowActions";
 export {
+  createSavedViewsMenu,
+  type KitSavedViewsLook,
+} from "./kit/savedViewsMenu";
+export {
   type KitTable,
   type KitTableClassNames,
   type KitTableFrameProps,

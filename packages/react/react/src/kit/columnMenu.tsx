@@ -41,6 +41,7 @@ import {
 import { useFeatureHost } from "../features/featureHostContext";
 import { useEscapeClose } from "../overlays/useEscapeClose";
 import { type KitRenameFieldProps, RenameForm } from "./columnRename";
+import { spaceBelow } from "./panelHeight";
 import type { KitPrimitivesOf, KitTriggerProps } from "./primitives";
 
 /**
@@ -97,21 +98,6 @@ const NOOP_RENAME = (): void => undefined;
 
 /** The tallest the panel grows before it scrolls. */
 const PANEL_MAX_HEIGHT = 480;
-/** The smallest height kept below the trigger, so the panel never collapses. */
-const PANEL_MIN_HEIGHT = 120;
-/** The gap kept between the panel and the bottom of the window. */
-const WINDOW_MARGIN = 8;
-
-function panelHeight(anchor: HTMLElement | null): number {
-  if (!anchor) return PANEL_MAX_HEIGHT;
-  return Math.max(
-    PANEL_MIN_HEIGHT,
-    Math.min(
-      PANEL_MAX_HEIGHT,
-      window.innerHeight - anchor.getBoundingClientRect().bottom - WINDOW_MARGIN
-    )
-  );
-}
 
 /** The line that shows which side of a row a dragged column lands on. */
 function dropLine(edge: "before" | "after", color: string): string {
@@ -511,7 +497,9 @@ export function createColumnMenu(
           dir={dir}
           style={{
             ...look.panel,
-            maxHeight: look.panel.maxHeight ?? panelHeight(anchorRef.current),
+            maxHeight:
+              look.panel.maxHeight ??
+              spaceBelow(anchorRef.current, PANEL_MAX_HEIGHT),
             overflowY: "auto",
           }}
         >

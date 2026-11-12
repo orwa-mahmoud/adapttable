@@ -2946,6 +2946,15 @@ button, icon button, text input and text, an optional `RenameField`, and the
 button's `editIcon`; `useLook` returns `KitHeaderRenameLook`, the spacing of
 the control, the form and its buttons.
 
+`createSavedViewsMenu(kit, useLook)` returns the saved-views menu: a button
+that opens a panel listing the saved views — a click applies one and closes
+the panel, the trailing button deletes it — above a row that saves the
+table's current state under a typed name and keeps the name field focused for
+the next one. A rule separates the list from that row while there is a list.
+The kit gives its button, icon button, text input, popover and divider, and
+the delete button's `deleteIcon`; `useLook` returns `KitSavedViewsLook`, the
+spacing of the panel, the rows, the rule, the save row and the name field.
+
 `createDesktopTable(kit)` builds the desktop table: every row with its
 leading rails, column-window spacers, data cells and actions rail, the
 detail row, the header leaves and groups, the virtual spacers and the column

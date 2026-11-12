@@ -1613,6 +1613,11 @@ export function createRowReorderHandle(kit: KitPrimitivesOf<"IconButton"> & (Kit
 })): <TRow>(props: Readonly<RowReorderHandleProps<TRow>>) => ReactElement;
 
 // @public
+export function createSavedViewsMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Popover" | "Divider"> & {
+    readonly deleteIcon: ReactNode;
+}, useLook: () => KitSavedViewsLook): (props: Readonly<SavedViewsSlotProps>) => ReactElement;
+
+// @public
 export function createToolbar(kit: KitToolbar): <TRow>(props: Readonly<KitToolbarProps<TRow>>) => ReactElement;
 
 // @public
@@ -3406,6 +3411,15 @@ export interface KitRowsPerPageProps {
     readonly onValueChange: (value: number) => void;
     readonly options: readonly number[];
     readonly value: number;
+}
+
+// @public
+export interface KitSavedViewsLook {
+    readonly divider: CSSProperties;
+    readonly nameInput: CSSProperties;
+    readonly panel: CSSProperties;
+    readonly row: CSSProperties;
+    readonly saveRow: CSSProperties;
 }
 
 // @public

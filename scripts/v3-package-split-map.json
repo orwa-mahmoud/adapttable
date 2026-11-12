@@ -45019,6 +45019,14 @@
       "behavior": ""
     },
     {
+      "export": "createSavedViewsMenu",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createToolbar",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -47255,6 +47263,14 @@
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitSavedViewsLook",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },

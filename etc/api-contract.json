@@ -6888,6 +6888,8 @@
       "KitRenameFieldParts",
       "createColumnHeaderRename",
       "KitHeaderRenameLook",
+      "createSavedViewsMenu",
+      "KitSavedViewsLook",
       "createDesktopTable",
       "KitDesktopCellKind",
       "KitDesktopCellProps",
