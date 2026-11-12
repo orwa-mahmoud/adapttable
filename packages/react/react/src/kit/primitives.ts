@@ -223,6 +223,13 @@ export interface KitPopoverProps {
   readonly placement?: "bottom-start";
   /** The content brings its own padding; the panel adds none. */
   readonly flush?: boolean;
+  /**
+   * The panel's text direction. A panel portalled out of the table needs it
+   * on itself, both to lay out and to be placed on the right edge.
+   */
+  readonly dir?: "ltr" | "rtl";
+  /** The panel's accessible name. */
+  readonly "aria-label"?: string;
 }
 
 /**

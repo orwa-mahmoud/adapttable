@@ -522,7 +522,11 @@ export {
 } from "./hooks/useOverlayTransition";
 export { ReducedMotionScope } from "./hooks/usePrefersReducedMotion";
 export { ExpandChevron, FiltersIcon, SearchIcon } from "./icons";
-export { createColumnMenu, type KitColumnMenuLook } from "./kit/columnMenu";
+export {
+  createColumnMenu,
+  type KitColumnMenuLook,
+  type KitRenameFieldProps,
+} from "./kit/columnMenu";
 export {
   createAgentApproval,
   createBatchEditBar,

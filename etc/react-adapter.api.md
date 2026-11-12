@@ -1510,7 +1510,9 @@ export function createBatchEditBar(kit: KitPrimitivesOf<"Button">): <TRow>(props
 export function createColumnGroupToggle(kit: KitPrimitivesOf<"IconButton">): (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
 
 // @public
-export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Select" | "Popover" | "Text" | "Divider">, useLook: () => KitColumnMenuLook): <TRow>(props: Readonly<ColumnMenuSlotProps<TRow>>) => ReactElement;
+export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Select" | "Popover" | "Text" | "Divider"> & {
+    readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
+}, useLook: () => KitColumnMenuLook): <TRow>(props: Readonly<ColumnMenuSlotProps<TRow>>) => ReactElement;
 
 // @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): (props: TProps) => ReactElement;
@@ -2899,8 +2901,10 @@ export interface KitOption {
 
 // @public
 export interface KitPopoverProps {
+    readonly "aria-label"?: string;
     readonly children: ReactNode;
     readonly className?: string;
+    readonly dir?: "ltr" | "rtl";
     readonly flush?: boolean;
     readonly onOpenChange?: (open: boolean) => void;
     readonly open?: boolean;
@@ -2926,6 +2930,19 @@ export interface KitPrimitives {
 
 // @public
 export type KitPrimitivesOf<TName extends keyof KitPrimitives> = Pick<KitPrimitives, TName>;
+
+// @public
+export interface KitRenameFieldProps {
+    readonly elementRef: Ref<HTMLInputElement>;
+    readonly error: string | undefined;
+    readonly errorId: string;
+    readonly id: string;
+    readonly label: string;
+    readonly onBlur: () => void;
+    readonly onKeyDown: (event: KeyboardEvent_2<HTMLInputElement>) => void;
+    readonly onValueChange: (value: string) => void;
+    readonly value: string;
+}
 
 // @public
 export interface KitSelectProps extends KitDataAttributes {

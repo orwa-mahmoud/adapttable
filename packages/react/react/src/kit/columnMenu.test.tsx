@@ -15,7 +15,11 @@ import { describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import type { UseColumnLayoutResult } from "../columns/useColumnLayout";
 import { testPrimitives } from "../internal/testPrimitives";
-import { createColumnMenu, type KitColumnMenuLook } from "./columnMenu";
+import {
+  createColumnMenu,
+  type KitColumnMenuLook,
+  type KitRenameFieldProps,
+} from "./columnMenu";
 
 interface Row {
   id: string;
@@ -233,6 +237,81 @@ describe("createColumnMenu", () => {
     await waitFor(() =>
       expect(button).toHaveAttribute("aria-expanded", "false")
     );
+  });
+
+  it("draws a kit's own rename field with the label, the error and Escape", async () => {
+    const RenameField = vi.fn(
+      ({
+        id,
+        elementRef,
+        label,
+        value,
+        error,
+        errorId,
+        onValueChange,
+        onBlur,
+        onKeyDown,
+      }: KitRenameFieldProps) => (
+        <span data-testid="own-field">
+          <label htmlFor={id}>{label}</label>
+          <input
+            id={id}
+            ref={elementRef}
+            value={value}
+            data-adapttable-part="column-rename-input"
+            aria-describedby={error ? errorId : undefined}
+            onChange={(event) => onValueChange(event.target.value)}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
+          />
+          {error ? <em id={errorId}>{error}</em> : null}
+        </span>
+      )
+    );
+    const OwnMenu = createColumnMenu(
+      { ...testPrimitives, RenameField },
+      () => look
+    );
+    const onRenameColumn = vi.fn();
+    render(
+      <OwnMenu
+        allColumns={columns}
+        layout={fakeLayout()}
+        labels={labels}
+        onAutoSize={vi.fn()}
+        onRenameColumn={onRenameColumn}
+      />
+    );
+    fireEvent.click(part("column-menu-button")!);
+    fireEvent.click(named(`${labels.columnActions}: Alpha`));
+    fireEvent.click(screen.getByRole("button", { name: labels.renameColumn }));
+
+    expect(screen.getByTestId("own-field")).toBeInTheDocument();
+    expect(part("column-rename-label")).toBeNull();
+    const input = screen.getByLabelText(labels.columnName);
+    await waitFor(() => expect(input).toHaveFocus());
+    fireEvent.change(input, { target: { value: "" } });
+    fireEvent.blur(input);
+    expect(screen.getByText(labels.columnNameRequired)).toHaveAttribute(
+      "id",
+      input.getAttribute("aria-describedby")
+    );
+    fireEvent.change(input, { target: { value: "Owner" } });
+    fireEvent.click(part("column-rename-save")!);
+    expect(onRenameColumn).toHaveBeenCalledWith("a", "Owner");
+
+    fireEvent.click(screen.getByRole("button", { name: labels.renameColumn }));
+    fireEvent.keyDown(screen.getByLabelText(labels.columnName), {
+      key: "Escape",
+    });
+    expect(screen.queryByTestId("own-field")).toBeNull();
+  });
+
+  it("returns focus to its button when Escape closes it", async () => {
+    const { button } = open(fakeLayout());
+    part("column-menu-search")!.focus();
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    await waitFor(() => expect(button).toHaveFocus());
   });
 
   it("hands the text direction to the panel", () => {

@@ -46651,6 +46651,14 @@
       "behavior": ""
     },
     {
+      "export": "KitRenameFieldProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "KitSelectProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",

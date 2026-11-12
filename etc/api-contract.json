@@ -6867,7 +6867,8 @@
       "OptionalGroupHeaderCard",
       "createColumnMenu",
       "KitColumnMenuLook",
-      "KitDividerProps"
+      "KitDividerProps",
+      "KitRenameFieldProps"
     ],
     "react-features": [
       "applyTableFeatures",

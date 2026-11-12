@@ -2931,7 +2931,8 @@ and `OptionalGroupHeaderCard`.
 button, icon button, text input, select, popover, text and divider
 (`KitDividerProps`). `useLook` is the kit's hook for `KitColumnMenuLook`: the
 spacing of the panel, heading, search, bulk row, column rows, submenu and
-rename form, and the colour of the drop line.
+rename form, and the colour of the drop line. A kit whose text input draws its own label and
+error passes a `RenameField` (`KitRenameFieldProps`) for the rename form.
 
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
