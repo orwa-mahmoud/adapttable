@@ -19,7 +19,6 @@ export function Footer({
   setPage,
   setLimit,
   labels,
-  className,
   showRowsPerPage = true,
 }: Readonly<{
   pagination: PaginationInfo;
@@ -29,20 +28,12 @@ export function Footer({
   setPage: (n: number) => void;
   setLimit: (n: number) => void;
   labels: Required<TableLabels>;
-  /** Class hook for the footer row. */
-  className?: string;
   /** Hidden in the grouped full-set view, where page size has no effect. */
   showRowsPerPage?: boolean;
 }>) {
   const { safePage, totalPages, fromIndex, toIndex } = pagination;
   return (
-    <HStack
-      data-adapttable-part="footer"
-      gap={3}
-      justify="space-between"
-      flexWrap="wrap"
-      className={className}
-    >
+    <HStack gap={3} justify="space-between" flexWrap="wrap">
       <HStack gap={2}>
         {showRowsPerPage && (
           <>

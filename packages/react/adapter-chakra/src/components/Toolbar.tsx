@@ -4,7 +4,6 @@ import {
   type KitFiltersButtonProps,
   type KitRowsPerPageProps,
   type KitToolbarFrameProps,
-  type KitToolbarProps,
   type KitToolbarSearchProps,
   type KitToolbarSortProps,
   SearchIcon,
@@ -29,9 +28,9 @@ const SEARCH_ICON_PROPS = {
 } as const;
 
 /** The host's class for the toolbar, handed to its frame. */
-const ToolbarClassName = /* @__PURE__ */ createContext<string | undefined>(
-  undefined
-);
+export const ToolbarClassName = /* @__PURE__ */ createContext<
+  string | undefined
+>(undefined);
 
 function Frame({ start, search, controls }: Readonly<KitToolbarFrameProps>) {
   const className = useContext(ToolbarClassName);
@@ -169,7 +168,8 @@ function RowsPerPage({
   );
 }
 
-const KitToolbar = /* @__PURE__ */ createToolbar({
+/** The toolbar; its frame takes the host's class from `ToolbarClassName`. */
+export const Toolbar = /* @__PURE__ */ createToolbar({
   Frame,
   Search,
   SortSelect,
@@ -178,20 +178,3 @@ const KitToolbar = /* @__PURE__ */ createToolbar({
   filtersPopover: "wrap",
   RowsPerPage,
 });
-
-/** The props of Chakra's toolbar: the binding's, plus the host's class. */
-export interface ToolbarProps<TRow> extends KitToolbarProps<TRow> {
-  readonly className?: string;
-}
-
-/** The toolbar, with the host's class on its root. */
-export function Toolbar<TRow>({
-  className,
-  ...props
-}: Readonly<ToolbarProps<TRow>>) {
-  return (
-    <ToolbarClassName.Provider value={className}>
-      <KitToolbar {...props} />
-    </ToolbarClassName.Provider>
-  );
-}
