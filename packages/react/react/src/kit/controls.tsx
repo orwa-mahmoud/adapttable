@@ -109,7 +109,6 @@ const MULTI_LIST: CSSProperties = {
   flexDirection: "column",
   gap: 6,
   maxHeight: 220,
-  minWidth: 160,
   overflow: "auto",
 };
 
@@ -429,11 +428,11 @@ export function createGroupMoreButton(
 }
 
 /** What the keyboard move menu draws with. */
-type RowMoveKit = KitPrimitivesOf<
+type RowMoveMenuKit = KitPrimitivesOf<
   "IconButton" | "Button" | "Menu" | "Popover" | "Text"
 >;
 
-function rowMoveMenu(kit: RowMoveKit) {
+function rowMoveMenu(kit: RowMoveMenuKit) {
   const { IconButton, Button, Menu, Popover, Text } = kit;
   return function RowMoveMenu({
     label,
@@ -504,6 +503,15 @@ function rowMoveMenu(kit: RowMoveKit) {
   };
 }
 
+/** The kit's own move menu where its structure differs, else the shared one. */
+function moveMenuOf(
+  kit:
+    | RowMoveMenuKit
+    | { readonly MoveMenu: (props: RowMoveMenuSlotProps) => ReactNode }
+): (props: RowMoveMenuSlotProps) => ReactNode {
+  return "MoveMenu" in kit ? kit.MoveMenu : rowMoveMenu(kit);
+}
+
 function assignRef<T>(ref: Ref<T> | undefined, node: T | null): void {
   if (typeof ref === "function") ref(node);
   else if (ref) (ref as { current: T | null }).current = node;
@@ -512,10 +520,17 @@ function assignRef<T>(ref: Ref<T> | undefined, node: T | null): void {
 /**
  * The drag handle for reordering a row, with its keyboard move menu.
  *
+ * @param kit - The icon button, plus either the primitives the shared move
+ *   menu draws with or the kit's own `MoveMenu`.
+ *
  * @public
  */
 export function createRowReorderHandle(
-  kit: KitPrimitivesOf<"IconButton" | "Button" | "Menu" | "Popover" | "Text">
+  kit: KitPrimitivesOf<"IconButton"> &
+    (
+      | KitPrimitivesOf<"Button" | "Menu" | "Popover" | "Text">
+      | { readonly MoveMenu: (props: RowMoveMenuSlotProps) => ReactNode }
+    )
 ): <TRow>(props: Readonly<RowReorderHandleProps<TRow>>) => ReactElement {
   const { IconButton } = kit;
   function Handle({
@@ -544,7 +559,7 @@ export function createRowReorderHandle(
       </IconButton>
     );
   }
-  const slots = { Handle, Menu: rowMoveMenu(kit) };
+  const slots = { Handle, Menu: moveMenuOf(kit) };
   return function RowReorderHandle(props) {
     return <RowReorderHandleChrome {...props} slots={slots} />;
   };
@@ -553,10 +568,17 @@ export function createRowReorderHandle(
 /**
  * Keyboard-reachable move-up and move-down for a row.
  *
+ * @param kit - The icon button, plus either the primitives the shared move
+ *   menu draws with or the kit's own `MoveMenu`.
+ *
  * @public
  */
 export function createRowReorderButtons(
-  kit: KitPrimitivesOf<"IconButton" | "Button" | "Menu" | "Popover" | "Text">
+  kit: KitPrimitivesOf<"IconButton"> &
+    (
+      | KitPrimitivesOf<"Button" | "Menu" | "Popover" | "Text">
+      | { readonly MoveMenu: (props: RowMoveMenuSlotProps) => ReactNode }
+    )
 ): <TRow>(props: Readonly<RowReorderButtonsProps<TRow>>) => ReactElement {
   const { IconButton } = kit;
   function Move({
@@ -579,7 +601,7 @@ export function createRowReorderButtons(
       </IconButton>
     );
   }
-  const slots = { Button: Move, Menu: rowMoveMenu(kit) };
+  const slots = { Button: Move, Menu: moveMenuOf(kit) };
   return function RowReorderButtons(props) {
     return <RowReorderButtonsChrome {...props} slots={slots} />;
   };

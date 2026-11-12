@@ -1536,10 +1536,14 @@ export function createGroupMoreButton(kit: KitPrimitivesOf<"Button">): (props: R
 export function createRowEditActions(kit: KitPrimitivesOf<"Button" | "IconButton">, iconFor: (part: string, icon: unknown) => ReactNode): <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactElement;
 
 // @public
-export function createRowReorderButtons(kit: KitPrimitivesOf<"IconButton" | "Button" | "Menu" | "Popover" | "Text">): <TRow>(props: Readonly<RowReorderButtonsProps<TRow>>) => ReactElement;
+export function createRowReorderButtons(kit: KitPrimitivesOf<"IconButton"> & (KitPrimitivesOf<"Button" | "Menu" | "Popover" | "Text"> | {
+    readonly MoveMenu: (props: RowMoveMenuSlotProps) => ReactNode;
+})): <TRow>(props: Readonly<RowReorderButtonsProps<TRow>>) => ReactElement;
 
 // @public
-export function createRowReorderHandle(kit: KitPrimitivesOf<"IconButton" | "Button" | "Menu" | "Popover" | "Text">): <TRow>(props: Readonly<RowReorderHandleProps<TRow>>) => ReactElement;
+export function createRowReorderHandle(kit: KitPrimitivesOf<"IconButton"> & (KitPrimitivesOf<"Button" | "Menu" | "Popover" | "Text"> | {
+    readonly MoveMenu: (props: RowMoveMenuSlotProps) => ReactNode;
+})): <TRow>(props: Readonly<RowReorderHandleProps<TRow>>) => ReactElement;
 
 // @public
 export function createTreeCell(kit: KitPrimitivesOf<"IconButton">): <TRow>(props: Readonly<TreeCellProps<TRow>>) => ReactElement;
