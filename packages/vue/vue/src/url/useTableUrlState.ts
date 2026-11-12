@@ -7,7 +7,7 @@ import {
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
-import { retainItems } from "@adapttable/core/binding";
+import { retainItems,type TableStore  } from "@adapttable/core/binding";
 import {
   computed,
   type MaybeRefOrGetter,
@@ -25,9 +25,15 @@ import {
   useExternalStore,
   useScopeActivity,
 } from "../store";
+import { injectTableStore } from "../tableStore";
 
 /** Reactive URL configuration. Callback fields are never getter inputs. @public */
 export interface UseTableUrlStateOptions {
+  /**
+   * The table's store to keep the view state in; the store of the table
+   * this component is inside, or one of its own, when absent.
+   */
+  readonly store?: TableStore;
   readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
   readonly urlSync?: MaybeRefOrGetterOptional<boolean>;
   readonly defaults?: MaybeRefOrGetter<TableViewStateConfig["defaults"]>;
@@ -62,6 +68,7 @@ export function useTableUrlState(
 ): TableUrlState {
   requireScope("useTableUrlState");
   const options = computed(() => toValue(input));
+  const enclosing = injectTableStore();
   const local = createMemoryAdapter();
   const stores = new Map<
     UrlStateAdapter,
@@ -91,7 +98,11 @@ export function useTableUrlState(
     }
     let store = namespaces.get(key);
     if (!store) {
-      store = createTableViewStore({ adapter: url, urlKey: key }, {});
+      store = createTableViewStore(
+        { adapter: url, urlKey: key },
+        {},
+        { store: options.value.store ?? enclosing }
+      );
       namespaces.set(key, store);
     }
     return store;
@@ -155,10 +166,14 @@ export function useTableUrlState(
   onScopeDispose(() => {
     disposed = true;
   });
+  // While active, the new state reaches `state` when the store publishes it:
+  // at the end of this action, or of the table's batch the action runs
+  // inside. Without a subscription (on the server, or while inactive) it is
+  // read here.
   function mutate(run: () => void): void {
     if (disposed) return;
     run();
-    state.value = current.value.getSnapshot();
+    if (!active.value) state.value = current.value.getSnapshot();
   }
   return {
     state: shallowReadonly(state),

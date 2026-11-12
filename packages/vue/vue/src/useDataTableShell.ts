@@ -17,6 +17,7 @@ import {
   AGENT_APPROVAL_STATE,
   COLUMN_SELECT,
   columnSelectLabel,
+  createTableStore,
   DENSITY_STATE,
   type FeatureHostState,
   featureLabelsOf,
@@ -42,6 +43,7 @@ import {
   type MaybeRefOrGetter,
   nextTick,
   onScopeDispose,
+  provide,
   shallowRef,
   toValue,
   type VNodeChild,
@@ -150,6 +152,7 @@ export type {
   ResolvedTableOptions,
   UseDataTableShellOptions,
 } from "./shell/shellContract";
+import { TABLE_STORE } from "./tableStore";
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
 ) {
@@ -189,13 +192,19 @@ export function useDataTableShell<TRow>(
   const registered = shallowRef<FeatureHostState<TRow>>(
     new LiveFeatureHost<TRow>()
   );
+  // One store per table: its view state, column layout, expansion and row
+  // pinning are its slices. What this setup calls gets it passed; the
+  // components inside the table inject it.
+  const tableStore = createTableStore();
+  provide(TABLE_STORE, tableStore);
   const { filterRuntime, source } = useShellDataTier<TRow>(
     resolved,
     declarations,
     registered,
     supplied,
     urlAdapter,
-    isMobile
+    isMobile,
+    tableStore
   );
   const state = createFeatureState();
   const grouping = state.get(groupingModelKey<TRow>());
@@ -237,6 +246,7 @@ export function useDataTableShell<TRow>(
   );
   const table = useDataTable(() => ({
     ...resolved.value,
+    store: tableStore,
     forceMobile: isMobile,
     source: viewSource,
     selection: selection.value,

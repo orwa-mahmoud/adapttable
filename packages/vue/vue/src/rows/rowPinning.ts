@@ -39,6 +39,7 @@ export {
   PIN_TOP_ACTION_KEY,
   UNPIN_ROW_ACTION_KEY,
 } from "@adapttable/core";
+import { injectTableStore } from "../tableStore";
 export type { RowPinningState } from "@adapttable/core/binding";
 export { rowPinSignature } from "@adapttable/core/binding";
 
@@ -64,6 +65,7 @@ export function useRowPinning<TRow>(
   const store = createControllableStore<RowPinState>(EMPTY_ROW_PIN_STATE, {
     ...ROW_PIN_STORE_OPTIONS,
     observeUncontrolled: true,
+    store: injectTableStore(),
   });
   const own = useExternalStore(store);
   const enabled = computed(

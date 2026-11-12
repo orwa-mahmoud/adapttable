@@ -14,6 +14,7 @@ import {
   useExternalStore,
   useScopeActivity,
 } from "../store";
+import { injectTableStore } from "../tableStore";
 export interface HierarchyIdsOptions {
   readonly ids?: MaybeRefOrGetterOptional<readonly string[]>;
   readonly defaultIds?: readonly string[];
@@ -31,7 +32,7 @@ export function useHierarchyIds(input: MaybeRefOrGetter<HierarchyIdsOptions>) {
   });
   const store = createControllableStore<ReadonlySet<string>>(
     new Set(options.value.defaultIds),
-    { observeUncontrolled: true }
+    { observeUncontrolled: true, store: injectTableStore() }
   );
   watch(
     () => ({

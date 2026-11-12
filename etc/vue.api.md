@@ -227,6 +227,7 @@ import { TableRuntimeView } from '@adapttable/core/binding';
 import { TableSource } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
+import { TableStore } from '@adapttable/core/binding';
 import { TableViewState } from '@adapttable/core';
 import { TableViewStateConfig } from '@adapttable/core';
 import { TableViewStore } from '@adapttable/core';
@@ -402,6 +403,7 @@ export interface ColumnLayoutOptions {
     readonly onColumnLayoutChange?: (next: ColumnLayoutState) => void;
     // (undocumented)
     readonly onColumnRename?: (key: string, name: string) => void;
+    readonly store?: TableStore;
 }
 
 export { ColumnLayoutState }
@@ -2103,6 +2105,7 @@ export interface UseTableUrlStateOptions {
     readonly defaults?: MaybeRefOrGetter<TableViewStateConfig["defaults"]>;
     // (undocumented)
     readonly numberExtraKeys?: MaybeRefOrGetterOptional<readonly string[]>;
+    readonly store?: TableStore;
     // (undocumented)
     readonly urlAdapter?: MaybeRefOrGetterOptional<UrlStateAdapter>;
     // (undocumented)

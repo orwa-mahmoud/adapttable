@@ -14,7 +14,11 @@ import {
   tierRows,
   type UrlStateAdapter,
 } from "@adapttable/core";
-import { type FeatureHostState, retainItems } from "@adapttable/core/binding";
+import {
+  type FeatureHostState,
+  retainItems,
+  type TableStore,
+} from "@adapttable/core/binding";
 import {
   computed,
   type ComputedRef,
@@ -50,7 +54,8 @@ export function useShellDataTier<TRow>(
   registered: ShallowRef<FeatureHostState<TRow>>,
   supplied: ComputedRef<TableSource<TRow> | undefined>,
   urlAdapter: ComputedRef<UrlStateAdapter>,
-  isMobile: Readonly<ShallowRef<boolean>>
+  isMobile: Readonly<ShallowRef<boolean>>,
+  tableStore: TableStore
 ) {
   const filterOptionCache = createFilterOptionCache<TRow>();
   const filterRuntime = computed(() => {
@@ -119,6 +124,7 @@ export function useShellDataTier<TRow>(
   let facetKeyList: readonly string[] | undefined;
   const frontend = useFrontendData(() => ({
     ...resolved.value,
+    store: tableStore,
     forceMobile: isMobile,
     data: tierRows(onFrontend.value, toValue(resolved.value.data)),
     columns: tierColumns(onFrontend.value),
@@ -160,6 +166,7 @@ export function useShellDataTier<TRow>(
       );
     }
     return {
+      store: tableStore,
       rows: tierRows(live, toValue(value.data)),
       total: () => toValue(value.total) ?? 0,
       loading: value.isLoading,
