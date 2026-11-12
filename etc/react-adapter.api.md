@@ -430,6 +430,7 @@ import { MobileCardField } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
 import { MobileCardRenderer } from '@adapttable/core';
+import { MouseEvent as MouseEvent_2 } from 'react';
 import { NestedTableDefaults } from '@adapttable/core';
 import { nestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
@@ -1567,6 +1568,9 @@ export function createMobileCards<TExtra>(kit: KitMobileCards<TExtra>): <TRow>(p
 
 // @public
 export function createPrintButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
+
+// @public
+export function createRowActionButtons(kit: KitRowActions): <TRow>(props: Readonly<RowActionButtonsProps<TRow>>) => ReactElement | null;
 
 // @public
 export function createRowEditActions(kit: KitPrimitivesOf<"Button" | "IconButton">, iconFor: (part: string, icon: unknown) => ReactNode): <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactElement;
@@ -3222,6 +3226,41 @@ export interface KitRenameFieldProps {
 }
 
 // @public
+export interface KitRowActionItem {
+    readonly color: string | undefined;
+    readonly disabled: boolean;
+    readonly icon: ReactNode;
+    readonly key: string;
+    readonly label: string;
+    readonly minTargetSize: number | undefined;
+    readonly reason: string | undefined;
+}
+
+// @public
+export interface KitRowActionMenuProps {
+    readonly items: readonly (KitRowActionItem & {
+        readonly onSelect: () => void;
+    })[];
+    readonly label: string;
+    readonly minTargetSize: number | undefined;
+}
+
+// @public
+export interface KitRowActionProps extends KitRowActionItem {
+    readonly onClick: ((event: MouseEvent_2) => void) | undefined;
+}
+
+// @public
+export interface KitRowActions {
+    readonly Action: ComponentType<KitRowActionProps>;
+    readonly iconFor: (action: RowAction<never>) => ReactNode;
+    readonly Menu: ComponentType<KitRowActionMenuProps>;
+    readonly Strip: ComponentType<{
+        readonly children: ReactNode;
+    }>;
+}
+
+// @public
 export interface KitRowsPerPageProps {
     readonly label: string;
     readonly onValueChange: (value: number) => void;
@@ -3940,6 +3979,17 @@ export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<never>>;
 export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<never>>;
 
 export { RowAction }
+
+// @public
+export interface RowActionButtonsProps<TRow> {
+    readonly actions: readonly RowAction<TRow>[];
+    readonly confirm: ConfirmHandler;
+    readonly labels: Required<TableLabels>;
+    readonly layout?: RowActionsLayout;
+    readonly minTargetSize?: number;
+    readonly render?: RowActionsRenderer<TRow>;
+    readonly row: TRow;
+}
 
 export { RowActionsLayout }
 

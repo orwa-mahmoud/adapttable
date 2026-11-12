@@ -2981,6 +2981,13 @@ export's progress), `createPrintButton`, `createDensityButton`,
 each from the kit's toolbar button. A primitive button marked `busy` shows the
 kit's working state and takes no presses.
 
+`createRowActionButtons(kit)` returns a row's actions
+(`RowActionButtonsProps`): which show, why one is disabled, the confirm
+before a destructive one, keeping the press off the row, and a strip of
+buttons or one menu. A `KitRowActions` gives the kit's `Action`
+(`KitRowActionProps`), `Strip`, `Menu` (`KitRowActionMenuProps`, items as
+`KitRowActionItem`) and `iconFor`.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

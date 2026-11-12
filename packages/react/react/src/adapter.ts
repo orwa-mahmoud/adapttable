@@ -615,6 +615,14 @@ export type {
   KitTriggerProps,
 } from "./kit/primitives";
 export {
+  createRowActionButtons,
+  type KitRowActionItem,
+  type KitRowActionMenuProps,
+  type KitRowActionProps,
+  type KitRowActions,
+  type RowActionButtonsProps,
+} from "./kit/rowActions";
+export {
   type KitTable,
   type KitTableClassNames,
   type KitTableFrameProps,

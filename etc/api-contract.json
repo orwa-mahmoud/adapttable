@@ -6911,7 +6911,13 @@
       "createFindButton",
       "createFullscreenButton",
       "createPrintButton",
-      "createUndoRedoButtons"
+      "createUndoRedoButtons",
+      "createRowActionButtons",
+      "KitRowActionItem",
+      "KitRowActionMenuProps",
+      "KitRowActionProps",
+      "KitRowActions",
+      "RowActionButtonsProps"
     ],
     "react-features": [
       "applyTableFeatures",
