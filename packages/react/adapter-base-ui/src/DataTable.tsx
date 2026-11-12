@@ -37,6 +37,7 @@ import {
 } from "@adapttable/react/adapter";
 import type { ReactNode } from "react";
 
+import { AccentColor } from "./components/accent";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { MobileCards } from "./components/MobileCards";
@@ -517,7 +518,9 @@ export function DataTable<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
   );
   return (
     <FeatureProviders props={props}>
-      <DataTableContent<TRow> {...props} />
+      <AccentColor.Provider value={props.accentColor}>
+        <DataTableContent<TRow> {...props} />
+      </AccentColor.Provider>
     </FeatureProviders>
   );
 }
