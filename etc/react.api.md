@@ -152,6 +152,7 @@ import { MultiSelectEditorSlots as MultiSelectEditorSlots_2 } from '@adapttable/
 import { NestedTableDefaults } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { NumberOp } from '@adapttable/core';
+import { OverlayDismissOptions } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
@@ -799,6 +800,8 @@ export { NumberOp }
 
 // @public
 export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" | "headerState" | "visibleIds">, total: number): boolean;
+
+export { OverlayDismissOptions }
 
 export { PageSelector }
 
@@ -1504,7 +1507,7 @@ export function useMediaQuery(query: string, defaultValue?: boolean): boolean;
 export function usePlainChromeBodyData<TRow>(chrome: TableChrome<TRow>, props: BaseDataTableProps<TRow>): ChromeBodyData<TRow>;
 
 // @public
-export function usePointerDismiss(open: boolean, dismiss: () => void, insideSelector: string): void;
+export function usePointerDismiss(open: boolean, dismiss: () => void, insideSelector: string, options?: OverlayDismissOptions): void;
 
 // @public
 export function usePrefersReducedMotion(): boolean;

@@ -167,6 +167,7 @@ export {
 export type { ChromeBodyData } from "./virtual/chromeBodyShared";
 export { usePlainChromeBodyData } from "./virtual/usePlainChromeBodyData";
 export { useVirtualChromeBodyData } from "./virtual/useVirtualChromeBodyData";
+export type { OverlayDismissOptions } from "@adapttable/core";
 /* ── URL state ─────────────────────────────────────────────────────── */
 
 export {

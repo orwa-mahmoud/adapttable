@@ -468,6 +468,7 @@ export {
   type HeaderFilterOverlaySnapshot,
   type HeaderFilterWrites,
   isHeaderFilterOpen,
+  type OverlayDismissOptions,
   watchOverlayDismiss,
 } from "./filters/headerFilterOverlay";
 export {

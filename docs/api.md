@@ -985,7 +985,10 @@ RowReorderController` — the keyboard grab, drag and drop, the mobile swap and
 HeaderFilterOverlayController` — one header filter's open state and reset
   key. `HeaderFilterOverlaySnapshot`, `isHeaderFilterOpen`,
   `HEADER_FILTER_SESSION_ATTR`, `headerFilterInsideSelector`,
-  `watchOverlayDismiss`, `HeaderFilterWrites`.
+  `watchOverlayDismiss` (an Escape a nested dropdown, an input method or an
+  earlier handler took is left to them; `OverlayDismissOptions` adds nodes no
+  selector names, a nested dropdown's selector and what follows an Escape),
+  `HeaderFilterWrites`.
 - `createSavedViewsController(options: SavedViewsControllerOptions):
 SavedViewsController` — the saved views list, its storage and every
   operation on it. `SavedViewsSnapshot`.

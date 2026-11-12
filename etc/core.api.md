@@ -5854,6 +5854,13 @@ export const orderedCardEntries: typeof orderedCardEntries_2;
 function orderedCardEntries_2<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[], summaryTop?: readonly TRow[], summaryBottom?: readonly TRow[]): readonly VirtualTableRow<TRow>[];
 
 // @public
+export interface OverlayDismissOptions {
+    readonly afterEscape?: () => void;
+    readonly contains?: (node: Node) => boolean;
+    readonly nestedSelector?: string;
+}
+
+// @public
 export const PAGE_SIZE_OPTIONS: readonly [10, 25, 50, 100];
 
 // @public
@@ -9530,7 +9537,7 @@ export function walkFilterTreeConditions(tree: QueryFilterGroup | undefined, pat
 export function warnDataTierMisuse(source: unknown, mode: "frontend" | "server" | undefined, data: unknown, onQueryChange: unknown): void;
 
 // @public
-export function watchOverlayDismiss(doc: Document, insideSelector: string, dismiss: () => void): () => void;
+export function watchOverlayDismiss(doc: Document, insideSelector: string, dismiss: () => void, options?: OverlayDismissOptions): () => void;
 
 // @public
 export type WidthColumn = Pick<ColumnModel<unknown>, "key" | "width">;

@@ -10402,6 +10402,17 @@
       "subpaths": ["."]
     },
     {
+      "name": "OverlayDismissOptions",
+      "kind": "type",
+      "module": "filters/headerFilterOverlay.ts",
+      "audience": "app",
+      "path": ".",
+      "forward": true,
+      "deprecated": false,
+      "identity": "filters/headerFilterOverlay.ts#OverlayDismissOptions",
+      "subpaths": ["."]
+    },
+    {
       "name": "PageSelector",
       "kind": "type",
       "module": "source/dataTier.ts",

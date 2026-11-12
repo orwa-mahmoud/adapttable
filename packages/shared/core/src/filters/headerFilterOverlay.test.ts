@@ -194,6 +194,57 @@ describe("watchOverlayDismiss", () => {
     expect(dismiss).toHaveBeenCalledTimes(1);
     stop();
   });
+
+  it("leaves an Escape to a nested dropdown, a composing input or a handler that took it", () => {
+    const { overlay } = mount();
+    const nested = document.createElement("ul");
+    nested.setAttribute("role", "listbox");
+    document.body.append(nested);
+    const dismiss = vi.fn();
+    const afterEscape = vi.fn();
+    const stop = watchOverlayDismiss(document, selector, dismiss, {
+      nestedSelector: '[role="listbox"]',
+      afterEscape,
+    });
+    nested.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+    overlay.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        isComposing: true,
+      })
+    );
+    const taken = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    taken.preventDefault();
+    overlay.dispatchEvent(taken);
+    expect(dismiss).not.toHaveBeenCalled();
+    overlay.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+    expect(dismiss).toHaveBeenCalledTimes(1);
+    expect(afterEscape).toHaveBeenCalledTimes(1);
+    stop();
+  });
+
+  it("treats what contains says is inside as inside", async () => {
+    const { outside } = mount();
+    const dismiss = vi.fn();
+    const stop = watchOverlayDismiss(document, selector, dismiss, {
+      contains: (node) => node === outside,
+    });
+    await Promise.resolve();
+    outside.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    expect(dismiss).not.toHaveBeenCalled();
+    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    expect(dismiss).toHaveBeenCalledTimes(1);
+    stop();
+  });
 });
 
 describe("createHeaderFilterOverlay", () => {

@@ -6,7 +6,7 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { FilterFormSource } from "./filterForm";
@@ -239,6 +239,34 @@ describe("usePointerDismiss", () => {
     render(<Probe />);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(dismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it("counts the trigger as inside and hands focus back after Escape", async () => {
+    const dismiss = vi.fn();
+    function Probe() {
+      const trigger = useRef<HTMLButtonElement>(null);
+      usePointerDismiss(true, dismiss, "[data-session]", {
+        contains: (node) => trigger.current?.contains(node) === true,
+        nestedSelector: '[role="listbox"]',
+        afterEscape: () => trigger.current?.focus(),
+      });
+      return (
+        <>
+          <button ref={trigger}>trigger</button>
+          <ul role="listbox" aria-label="nested">
+            <li>a</li>
+          </ul>
+        </>
+      );
+    }
+    render(<Probe />);
+    await flushArm();
+    fireEvent.mouseDown(screen.getByRole("button", { name: "trigger" }));
+    fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });
+    expect(dismiss).not.toHaveBeenCalled();
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    expect(dismiss).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "trigger" })).toHaveFocus();
   });
 });
 

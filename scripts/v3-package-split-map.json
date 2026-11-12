@@ -34883,6 +34883,14 @@
       "behavior": ""
     },
     {
+      "export": "OverlayDismissOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "PAGE_SIZE_OPTIONS",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -51919,6 +51927,14 @@
       "currentImport": "@adapttable/react",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/react",
+      "behavior": ""
+    },
+    {
+      "export": "OverlayDismissOptions",
+      "currentImport": "@adapttable/react",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/react",
       "behavior": ""
     },

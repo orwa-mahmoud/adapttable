@@ -4661,7 +4661,9 @@ column's compact control) and `FilterHeaderRow` (a filter row for a custom
 header) over `FilterHeaderControlChrome` / `FilterHeaderChrome`. The overlay
 logic is headless in `@adapttable/react`: `useHeaderFilterOverlay`,
 `bindHeaderFilterDismiss`, `headerFilterFieldIsComplete` and
-`usePointerDismiss`.
+`usePointerDismiss`, which the filters popovers use too, with
+`OverlayDismissOptions` naming the trigger and panel as inside and handing
+focus back to the trigger after Escape.
 
 ## Notes
 
@@ -18019,7 +18021,10 @@ RowReorderController` — the keyboard grab, drag and drop, the mobile swap and
 HeaderFilterOverlayController` — one header filter's open state and reset
   key. `HeaderFilterOverlaySnapshot`, `isHeaderFilterOpen`,
   `HEADER_FILTER_SESSION_ATTR`, `headerFilterInsideSelector`,
-  `watchOverlayDismiss`, `HeaderFilterWrites`.
+  `watchOverlayDismiss` (an Escape a nested dropdown, an input method or an
+  earlier handler took is left to them; `OverlayDismissOptions` adds nodes no
+  selector names, a nested dropdown's selector and what follows an Escape),
+  `HeaderFilterWrites`.
 - `createSavedViewsController(options: SavedViewsControllerOptions):
 SavedViewsController` — the saved views list, its storage and every
   operation on it. `SavedViewsSnapshot`.

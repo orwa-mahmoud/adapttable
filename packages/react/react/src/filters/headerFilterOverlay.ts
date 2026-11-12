@@ -16,6 +16,7 @@ import {
   headerFilterInsideSelector,
   type HeaderFilterOpenHost,
   isHeaderFilterOpen,
+  type OverlayDismissOptions,
   watchOverlayDismiss,
 } from "@adapttable/core";
 import {
@@ -25,7 +26,9 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -91,19 +94,32 @@ export function bindHeaderFilterDismiss<TRow>(
 
 /**
  * Dismiss on a true outside press or Escape. Nested kit dropdowns (and a
- * focused native `<select>` whose OS list is open) are not outside.
+ * focused native `<select>` whose OS list is open) are not outside; `options`
+ * adds nodes no selector names, a nested dropdown that takes Escape first,
+ * and what follows an Escape.
  *
  * @public
  */
 export function usePointerDismiss(
   open: boolean,
   dismiss: () => void,
-  insideSelector: string
+  insideSelector: string,
+  options?: OverlayDismissOptions
 ): void {
+  // Read on each event, so a caller's inline options never re-subscribe.
+  const latest = useRef(options);
+  useLayoutEffect(() => {
+    latest.current = options;
+  });
+  const nestedSelector = options?.nestedSelector;
   useEffect(() => {
     if (!open) return undefined;
-    return watchOverlayDismiss(document, insideSelector, dismiss);
-  }, [open, dismiss, insideSelector]);
+    return watchOverlayDismiss(document, insideSelector, dismiss, {
+      contains: (node) => latest.current?.contains?.(node) === true,
+      nestedSelector,
+      afterEscape: () => latest.current?.afterEscape?.(),
+    });
+  }, [open, dismiss, insideSelector, nestedSelector]);
 }
 
 /**

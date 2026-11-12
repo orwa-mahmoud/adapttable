@@ -4587,7 +4587,8 @@
       "writeStoredColumnLayout",
       "xlsxWriter",
       "approvalProposalText",
-      "gridRowFocusSignature"
+      "gridRowFocusSignature",
+      "OverlayDismissOptions"
     ],
     "core-editing": [
       "ActionAiOptions",
@@ -6141,7 +6142,8 @@
       "useVirtualChromeBodyData",
       "ValidationCheckResult",
       "ValidationTarget",
-      "withKitEnvironment"
+      "withKitEnvironment",
+      "OverlayDismissOptions"
     ],
     "react-adapter": [
       "ACTIVE_FILTER_CHIPS",
