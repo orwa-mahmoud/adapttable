@@ -1537,6 +1537,14 @@ export { createFilterRegistry }
 export function createFindBar(kit: KitPrimitivesOf<"TextInput" | "IconButton">): (props: Readonly<FindBarProps>) => ReactElement;
 
 // @public
+export function createGroupHeader(kit: KitGroupHeader): {
+    readonly GroupHeaderRow: <TRow>(props: Readonly<KitGroupRowProps<TRow>>) => ReactElement;
+    readonly GroupHeaderCard: <TRow>(props: Readonly<KitGroupHeaderProps<TRow> & {
+        readonly compact?: boolean;
+    }>) => ReactElement;
+};
+
+// @public
 export function createGroupMoreButton(kit: KitPrimitivesOf<"Button">): (props: Readonly<GroupMoreButtonProps>) => ReactElement | null;
 
 // @public
@@ -3008,6 +3016,79 @@ export interface KitFiltersButtonProps {
     readonly onClick: () => void;
     readonly onPointerDown: () => void;
     readonly open: boolean;
+}
+
+// @public
+export interface KitGroupCardProps extends KitDataAttributes {
+    readonly aggregates: ReactNode;
+    readonly compact: boolean;
+    readonly head: ReactNode;
+}
+
+// @public
+export interface KitGroupHeader {
+    readonly Card: ComponentType<KitGroupCardProps>;
+    readonly Cell: ComponentType<KitDesktopCellProps>;
+    readonly Checkbox: ComponentType<KitCheckboxProps>;
+    readonly MoreButton: ComponentType<{
+        readonly scope: "groups" | "rows";
+        readonly remaining: number;
+        readonly groupKey?: string;
+        readonly labels: KitGroupHeaderProps<unknown>["labels"];
+        readonly onShowMore: KitGroupHeaderProps<unknown>["onShowMore"];
+    }>;
+    readonly Row: ComponentType<KitDesktopRowProps>;
+    readonly Text: ComponentType<KitGroupTextProps>;
+    readonly Toggle: ComponentType<KitGroupToggleProps>;
+    readonly useLook: () => KitGroupLook;
+}
+
+// @public
+export interface KitGroupHeaderProps<TRow> {
+    readonly columns: readonly ColumnDef<TRow>[];
+    readonly entry: Extract<GroupedFlatEntry<TRow>, {
+        kind: "group" | "groupFooter" | "groupMore";
+    }>;
+    readonly labels: Required<TableLabels>;
+    readonly onShowMore: (entry: {
+        scope: "groups" | "rows";
+        groupKey?: string;
+    }) => void;
+    readonly onToggleCollapse: (groupKey: string) => void;
+    readonly selection: SelectionState | null;
+}
+
+// @public
+export interface KitGroupLook {
+    readonly cardAggregate: CSSProperties;
+    readonly cardHead: CSSProperties;
+    readonly head: CSSProperties;
+    readonly labelCell: CSSProperties;
+    readonly row: CSSProperties;
+}
+
+// @public
+export interface KitGroupRowProps<TRow> extends KitGroupHeaderProps<TRow> {
+    readonly getCellProps: (column: ColumnDef<TRow>) => Record<string, unknown>;
+    readonly leadingCells: number;
+    readonly showActions: boolean;
+}
+
+// @public
+export type KitGroupTextKind = "label" | "count" | "aggregate" | "caption";
+
+// @public
+export interface KitGroupTextProps extends KitDataAttributes {
+    readonly children: ReactNode;
+    readonly kind: KitGroupTextKind;
+    readonly style?: CSSProperties;
+}
+
+// @public
+export interface KitGroupToggleProps {
+    readonly expanded: boolean;
+    readonly label: string;
+    readonly onToggle: () => void;
 }
 
 // @public

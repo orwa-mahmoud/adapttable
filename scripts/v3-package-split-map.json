@@ -44755,6 +44755,14 @@
       "behavior": ""
     },
     {
+      "export": "createGroupHeader",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createGroupMoreButton",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -46732,6 +46740,70 @@
     },
     {
       "export": "KitFiltersButtonProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitGroupCardProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitGroupHeader",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitGroupHeaderProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitGroupLook",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitGroupRowProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitGroupTextKind",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitGroupTextProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitGroupToggleProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",

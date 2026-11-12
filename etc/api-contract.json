@@ -6895,7 +6895,16 @@
       "KitToolbar",
       "KitToolbarFrameProps",
       "KitToolbarSearchProps",
-      "KitToolbarSortProps"
+      "KitToolbarSortProps",
+      "createGroupHeader",
+      "KitGroupCardProps",
+      "KitGroupHeader",
+      "KitGroupHeaderProps",
+      "KitGroupLook",
+      "KitGroupRowProps",
+      "KitGroupTextKind",
+      "KitGroupTextProps",
+      "KitGroupToggleProps"
     ],
     "react-features": [
       "applyTableFeatures",

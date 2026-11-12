@@ -19998,6 +19998,15 @@ features' extras, add-row, the host's end slot and rows-per-page. A
 (`KitRowsPerPageProps`), and whether its filters popover anchors to the
 button or wraps it.
 
+`createGroupHeader(kit)` returns `GroupHeaderRow` and `GroupHeaderCard`: a
+group's toggle (none on a footer or "show more"), select-all, label, count,
+and its subtotals under their columns on a row (`KitGroupRowProps`) or
+captioned on a card (`KitGroupHeaderProps`). A `KitGroupHeader` gives the
+kit's desktop `Row` and `Cell`, `Checkbox`, `Toggle` (`KitGroupToggleProps`),
+`Text` (`KitGroupTextProps`, by `KitGroupTextKind`), `Card`
+(`KitGroupCardProps`), `MoreButton` and a `useLook` hook returning
+`KitGroupLook`.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);

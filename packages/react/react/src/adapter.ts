@@ -574,6 +574,17 @@ export {
   OptionalTreeToggle,
 } from "./kit/featureSlots";
 export {
+  createGroupHeader,
+  type KitGroupCardProps,
+  type KitGroupHeader,
+  type KitGroupHeaderProps,
+  type KitGroupLook,
+  type KitGroupRowProps,
+  type KitGroupTextKind,
+  type KitGroupTextProps,
+  type KitGroupToggleProps,
+} from "./kit/groupHeader";
+export {
   createMobileCards,
   type KitCardRegions,
   type KitCardSelectProps,
