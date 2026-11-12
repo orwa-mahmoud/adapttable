@@ -1540,6 +1540,9 @@ export function createFindBar(kit: KitPrimitivesOf<"TextInput" | "IconButton">):
 export function createGroupMoreButton(kit: KitPrimitivesOf<"Button">): (props: Readonly<GroupMoreButtonProps>) => ReactElement | null;
 
 // @public
+export function createMobileCards<TExtra>(kit: KitMobileCards<TExtra>): <TRow>(props: Readonly<KitMobileCardsProps<TRow, TExtra>>) => ReactElement;
+
+// @public
 export function createRowEditActions(kit: KitPrimitivesOf<"Button" | "IconButton">, iconFor: (part: string, icon: unknown) => ReactNode): <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactElement;
 
 // @public
@@ -2838,6 +2841,40 @@ export interface KitButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElem
 export type KitButtonVariant = "text" | "outlined" | "filled";
 
 // @public
+export interface KitCardRegions {
+    readonly actions: ReactNode;
+    readonly body: ReactNode;
+    readonly compact: boolean;
+    readonly detail: ReactNode;
+    readonly expand: ReactNode;
+    readonly reorder: ReactNode;
+    readonly rowEdit: ReactNode;
+    readonly select: ReactNode;
+    readonly tree: ReactNode;
+}
+
+// @public
+export interface KitCardSelectProps {
+    readonly "aria-label": string;
+    readonly checked: boolean;
+    readonly onToggle: () => void;
+}
+
+// @public
+export interface KitCardsLook {
+    readonly actions: CSSProperties;
+    readonly detail: CSSProperties;
+    readonly field: (labelled: boolean) => CSSProperties;
+    readonly grid: (compact: boolean) => CSSProperties;
+}
+
+// @public
+export interface KitCardTextProps extends KitDataAttributes {
+    readonly children: ReactNode;
+    readonly labelled: boolean;
+}
+
+// @public
 export interface KitCheckboxProps extends KitDataAttributes {
     readonly "aria-label"?: string;
     readonly checked: boolean;
@@ -2983,6 +3020,38 @@ export interface KitMenuProps {
 }
 
 // @public
+export interface KitMobileCards<TExtra> {
+    readonly CardFrame: ComponentType<KitCardRegions>;
+    readonly cardProps: <TRow>(entry: MobileCardEntry<TRow>, props: KitMobileCardsProps<TRow, TExtra>) => Record<string, unknown>;
+    readonly compact: <TRow>(props: KitMobileCardsProps<TRow, TExtra>) => boolean;
+    readonly extraCell: (part: string, content: ReactNode) => ReactNode;
+    readonly FieldLabel: ComponentType<KitCardTextProps>;
+    readonly FieldValue: ComponentType<KitCardTextProps>;
+    readonly RowActions: <TRow>(props: {
+        readonly minTargetSize: number;
+        readonly row: TRow;
+        readonly actions: ReturnType<typeof resolveRowEditTrigger<TRow>>["actions"];
+        readonly confirm: MobileCardBodyProps<TRow>["confirm"];
+        readonly labels: MobileCardBodyProps<TRow>["labels"];
+        readonly layout: MobileCardBodyProps<TRow>["rowActionsLayout"];
+        readonly render: MobileCardBodyProps<TRow>["renderRowActions"];
+    }) => ReactNode;
+    readonly Select: ComponentType<KitCardSelectProps>;
+    readonly SummaryCard: ComponentType<{
+        readonly fields: readonly KitSummaryField[];
+        readonly compact: boolean;
+    }>;
+    readonly summaryPlacement: "last-card" | "after-list";
+    readonly useChrome: <TRow>(props: KitMobileCardsProps<TRow, TExtra>, compact: boolean) => Pick<MobileCardsChromeProps, "hosts" | "listProps" | "listStyle" | "classNames">;
+    readonly useLook: () => KitCardsLook;
+}
+
+// @public
+export type KitMobileCardsProps<TRow, TExtra> = SharedTableRenderProps<TRow> & {
+    readonly dir?: "ltr" | "rtl";
+} & TExtra;
+
+// @public
 export interface KitOption {
     readonly label: string;
     readonly value: string;
@@ -3055,6 +3124,13 @@ export interface KitSortLabelProps {
     readonly dir: "asc" | "desc" | undefined;
     readonly index: number | undefined;
     readonly title: string | undefined;
+}
+
+// @public
+export interface KitSummaryField {
+    readonly key: string;
+    readonly label: ReactNode;
+    readonly value: ReactNode;
 }
 
 // @public

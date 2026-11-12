@@ -44763,6 +44763,14 @@
       "behavior": ""
     },
     {
+      "export": "createMobileCards",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createRowEditActions",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -46563,6 +46571,38 @@
       "behavior": ""
     },
     {
+      "export": "KitCardRegions",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitCardSelectProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitCardsLook",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitCardTextProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "KitCheckboxProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -46707,6 +46747,22 @@
       "behavior": ""
     },
     {
+      "export": "KitMobileCards",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitMobileCardsProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "KitOption",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -46756,6 +46812,14 @@
     },
     {
       "export": "KitSortLabelProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitSummaryField",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "react-chrome",

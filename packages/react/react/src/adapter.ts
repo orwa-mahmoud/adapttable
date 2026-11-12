@@ -573,6 +573,16 @@ export {
   OptionalTreeCell,
   OptionalTreeToggle,
 } from "./kit/featureSlots";
+export {
+  createMobileCards,
+  type KitCardRegions,
+  type KitCardSelectProps,
+  type KitCardsLook,
+  type KitCardTextProps,
+  type KitMobileCards,
+  type KitMobileCardsProps,
+  type KitSummaryField,
+} from "./kit/mobileCards";
 export { MobileTarget, useMobileTarget } from "./kit/mobileTarget";
 export type {
   KitButtonProps,

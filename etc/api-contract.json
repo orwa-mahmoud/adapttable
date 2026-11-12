@@ -6880,7 +6880,15 @@
       "KitDesktopRowState",
       "KitDesktopTable",
       "KitDesktopTableProps",
-      "KitSortLabelProps"
+      "KitSortLabelProps",
+      "createMobileCards",
+      "KitCardRegions",
+      "KitCardSelectProps",
+      "KitCardsLook",
+      "KitCardTextProps",
+      "KitMobileCards",
+      "KitMobileCardsProps",
+      "KitSummaryField"
     ],
     "react-features": [
       "applyTableFeatures",

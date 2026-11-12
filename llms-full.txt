@@ -19979,6 +19979,15 @@ rail `widths`, a `usePaint` hook returning `KitDesktopPaint` (from
 `KitDesktopRowState` and `KitDesktopLeafState`), and a `useChrome` hook for the
 table elements around the rows; the component takes `KitDesktopTableProps`.
 
+`createMobileCards(kit)` builds the card list the same way: each card's
+regions (`KitCardRegions`: tree, select, expand, the fields or the host's
+card, reorder, row editor, actions, detail) and the field grid. A
+`KitMobileCards` gives the kit's `CardFrame`, `FieldLabel` and `FieldValue`
+(`KitCardTextProps`), card `Select` (`KitCardSelectProps`), `RowActions`,
+`SummaryCard` (fields as `KitSummaryField`) and where it goes, a `useLook`
+hook returning `KitCardsLook`, the card element's props and the list
+elements; the component takes `KitMobileCardsProps`.
+
 **Bulk actions.** `useBulkBarState` / `BulkBarState` /
 `BulkBarChromeProps` derive everything a bulk-action toolbar renders
 (selected ids, in-flight action, the "select all matching" banner);
