@@ -10,21 +10,30 @@ import type {
   KitButtonProps,
   KitButtonVariant,
   KitCheckboxProps,
+  KitDividerProps,
   KitIconButtonProps,
   KitPopoverProps,
   KitSelectProps,
   KitTextInputProps,
+  KitTextProps,
 } from "@adapttable/react/adapter";
 import {
   ActionIcon,
   Button as MantineButton,
   Checkbox as MantineCheckbox,
+  Divider as MantineDivider,
   NativeSelect,
   Popover as MantinePopover,
+  Text as MantineText,
   TextInput as MantineTextInput,
   Tooltip,
 } from "@mantine/core";
-import type { ReactElement } from "react";
+import {
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+  type Ref,
+} from "react";
 
 /** The Mantine variant for each emphasis the binding asks for. */
 const VARIANT: Readonly<Record<KitButtonVariant, string>> = {
@@ -44,7 +53,7 @@ export function button(
     elementRef,
     variant = "outlined",
     tone,
-    justify: _justify,
+    justify,
     ...rest
   }) {
     "use no memo";
@@ -55,6 +64,7 @@ export function button(
         size={size}
         variant={VARIANT[variant]}
         color={tone === "danger" ? "red" : undefined}
+        justify={justify ? "flex-start" : undefined}
         {...rest}
       />
     );
@@ -187,6 +197,39 @@ export function Checkbox({
   );
 }
 
+const TEXT_SIZE = { body: "sm", title: "sm", caption: "xs" } as const;
+const TEXT_COLOR = {
+  secondary: "dimmed",
+  disabled: "dimmed",
+  danger: "red",
+} as const;
+
+/** A run of text in one of Mantine's sizes and colours. @public */
+export function Text({
+  variant = "body",
+  tone,
+  as,
+  color: _color,
+  ...rest
+}: Readonly<KitTextProps>) {
+  "use no memo";
+  return (
+    <MantineText
+      component={as ?? "p"}
+      size={TEXT_SIZE[variant]}
+      fw={variant === "title" ? 600 : undefined}
+      c={tone ? TEXT_COLOR[tone] : undefined}
+      {...rest}
+    />
+  );
+}
+
+/** A rule between groups. @public */
+export function Divider({ style }: Readonly<KitDividerProps>) {
+  "use no memo";
+  return <MantineDivider style={style} />;
+}
+
 /**
  * A floating panel under its trigger. Mantine's target gives the trigger its
  * ref, its ARIA and, while the panel keeps its own state, its click.
@@ -203,6 +246,8 @@ export function Popover({
   className,
   style,
   flush,
+  dir,
+  "aria-label": label,
 }: Readonly<KitPopoverProps>) {
   "use no memo";
   return (
@@ -213,15 +258,17 @@ export function Popover({
       opened={open}
       onChange={onOpenChange}
     >
-      <MantinePopover.Target refProp="elementRef">
+      <PopoverTarget>
         {trigger({
           elementRef: null,
           onClick: () => onOpenChange?.(open !== true),
           "aria-expanded": open === true,
           "aria-haspopup": role ?? "dialog",
         })}
-      </MantinePopover.Target>
+      </PopoverTarget>
       <MantinePopover.Dropdown
+        dir={dir}
+        aria-label={label}
         data-adapttable-part={part}
         className={className}
         style={style}
@@ -230,5 +277,22 @@ export function Popover({
         {children}
       </MantinePopover.Dropdown>
     </MantinePopover>
+  );
+}
+
+/**
+ * Mantine's popover target for a binding trigger. The target hands the
+ * trigger Mantine's ref through `elementRef`, which replaces the trigger's
+ * own; passing that one in as the target's `ref` keeps both.
+ */
+export function PopoverTarget({ children }: Readonly<{ children: ReactNode }>) {
+  "use no memo";
+  const own = isValidElement<{ elementRef?: Ref<HTMLButtonElement> }>(children)
+    ? children.props.elementRef
+    : undefined;
+  return (
+    <MantinePopover.Target refProp="elementRef" ref={own ?? undefined}>
+      {children}
+    </MantinePopover.Target>
   );
 }
