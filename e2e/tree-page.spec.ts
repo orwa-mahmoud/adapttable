@@ -44,7 +44,7 @@ const demo = (page: Page) => page.locator(".mx-demo");
 test("is reachable from the kit's feature grid", async ({ page }) => {
   await gotoFromFeatureGrid(page, "mantine", "Tree data");
   await expect(page).toHaveURL(/\/tree\/$/);
-  await expect(page.getByRole("table").first()).toBeVisible();
+  await expect(page.getByRole("treegrid").first()).toBeVisible();
 });
 
 test("answers the search phrase without JavaScript", async ({ browser }) => {
@@ -73,7 +73,7 @@ test("answers the search phrase without JavaScript", async ({ browser }) => {
 
 test("keeps other pages' subjects off it", async ({ page }) => {
   await page.goto(`/${KIT}/tree/`);
-  await expect(page.getByRole("table").first()).toBeVisible();
+  await expect(page.getByRole("treegrid").first()).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Saved views", exact: true })
   ).toHaveCount(0);
