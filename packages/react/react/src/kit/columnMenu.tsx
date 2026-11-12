@@ -24,15 +24,7 @@ import {
   showAllColumns,
   unpinAllColumns,
 } from "@adapttable/core/binding";
-import {
-  type CSSProperties,
-  type KeyboardEvent,
-  type ReactElement,
-  type Ref,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, type ReactElement, useRef, useState } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import {
@@ -48,6 +40,7 @@ import {
 } from "../columns/useColumnRenameEditor";
 import { useFeatureHost } from "../features/featureHostContext";
 import { useEscapeClose } from "../overlays/useEscapeClose";
+import { type KitRenameFieldProps, RenameForm } from "./columnRename";
 import type { KitPrimitivesOf, KitTriggerProps } from "./primitives";
 
 /**
@@ -84,33 +77,6 @@ export interface KitColumnMenuLook {
   readonly renameActions: CSSProperties;
   /** The colour of the line that shows where a dragged row lands. */
   readonly accent: string;
-}
-
-/**
- * A labelled text field that shows its own error: the rename form's field,
- * for a kit whose text input carries its label and error itself.
- *
- * @public
- */
-export interface KitRenameFieldProps {
-  /** The input's id, which the label names. */
-  readonly id: string;
-  /** The input element, focused when the form opens. */
-  readonly elementRef: Ref<HTMLInputElement>;
-  /** The visible label. */
-  readonly label: string;
-  /** The draft name. */
-  readonly value: string;
-  /** Why the draft is rejected; absent while it is valid. */
-  readonly error: string | undefined;
-  /** The error message's id, for `aria-describedby`. */
-  readonly errorId: string;
-  /** The draft changed. */
-  readonly onValueChange: (value: string) => void;
-  /** The input lost focus. */
-  readonly onBlur: () => void;
-  /** Enter saves and Escape cancels. */
-  readonly onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
 /** What the Columns menu draws with. */
@@ -257,97 +223,6 @@ function FixedRow<TRow>({
   );
 }
 
-function RenameForm({
-  kit,
-  look,
-  labels,
-  rename,
-}: Readonly<Shared & { rename: ColumnRenameEditorState }>): ReactElement {
-  // Drawn fresh with its row: the compiler's cache would outweigh it.
-  "use no memo";
-  const { Button, TextInput, Text, RenameField } = kit;
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-  const invalid = rename.error !== undefined;
-  return (
-    <form
-      data-adapttable-part="column-rename-form"
-      style={look.renameForm}
-      onSubmit={(event) => {
-        event.preventDefault();
-        rename.submit();
-      }}
-    >
-      {RenameField ? (
-        <RenameField
-          id={rename.inputId}
-          elementRef={inputRef}
-          label={labels.columnName}
-          value={rename.draft}
-          error={rename.error}
-          errorId={rename.errorId}
-          onValueChange={rename.setDraft}
-          onBlur={rename.blur}
-          onKeyDown={rename.onKeyDown}
-        />
-      ) : (
-        <>
-          <Text
-            as="label"
-            variant="caption"
-            htmlFor={rename.inputId}
-            data-adapttable-part="column-rename-label"
-          >
-            {labels.columnName}
-          </Text>
-          <TextInput
-            id={rename.inputId}
-            elementRef={inputRef}
-            fullWidth
-            aria-label={labels.columnName}
-            value={rename.draft}
-            invalid={invalid}
-            data-adapttable-part="column-rename-input"
-            aria-invalid={invalid ? "true" : undefined}
-            aria-describedby={invalid ? rename.errorId : undefined}
-            onValueChange={rename.setDraft}
-            onBlur={rename.blur}
-            onKeyDown={rename.onKeyDown}
-          />
-          {invalid ? (
-            <Text
-              id={rename.errorId}
-              variant="caption"
-              tone="danger"
-              role="alert"
-              data-adapttable-part="column-rename-error"
-            >
-              {rename.error}
-            </Text>
-          ) : null}
-        </>
-      )}
-      <div style={look.renameActions}>
-        <Button
-          type="submit"
-          variant="filled"
-          data-adapttable-part="column-rename-save"
-        >
-          {labels.saveColumnName}
-        </Button>
-        <Button
-          data-adapttable-part="column-rename-cancel"
-          onClick={rename.cancel}
-        >
-          {labels.cancelColumnRename}
-        </Button>
-      </div>
-    </form>
-  );
-}
-
 function Submenu({
   kit,
   look,
@@ -400,7 +275,14 @@ function Submenu({
         )
       )}
       {rename.editing ? (
-        <RenameForm kit={kit} look={look} labels={labels} rename={rename} />
+        <RenameForm
+          kit={kit}
+          place="menu"
+          labels={labels}
+          rename={rename}
+          formStyle={look.renameForm}
+          actionsStyle={look.renameActions}
+        />
       ) : null}
     </div>
   );

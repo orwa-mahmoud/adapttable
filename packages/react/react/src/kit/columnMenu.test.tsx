@@ -15,11 +15,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { ColumnDef } from "../columnDef";
 import type { UseColumnLayoutResult } from "../columns/useColumnLayout";
 import { testPrimitives } from "../internal/testPrimitives";
-import {
-  createColumnMenu,
-  type KitColumnMenuLook,
-  type KitRenameFieldProps,
-} from "./columnMenu";
+import { createColumnMenu, type KitColumnMenuLook } from "./columnMenu";
+import type { KitRenameFieldProps } from "./columnRename";
 
 interface Row {
   id: string;

@@ -1527,6 +1527,12 @@ export function createCellEditor(kit: KitCellEditors): ComponentType<CellEditorP
 export function createColumnGroupToggle(kit: KitPrimitivesOf<"IconButton">): (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
 
 // @public
+export function createColumnHeaderRename(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Text"> & {
+    readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
+    readonly editIcon: ReactNode;
+}, useLook: () => KitHeaderRenameLook): (props: Readonly<ColumnHeaderRenameSlotProps>) => ReactElement;
+
+// @public
 export function createColumnMenu(kit: KitPrimitivesOf<"Button" | "IconButton" | "TextInput" | "Select" | "Popover" | "Text" | "Divider"> & {
     readonly RenameField?: (props: KitRenameFieldProps) => ReactElement;
 }, useLook: () => KitColumnMenuLook): <TRow>(props: Readonly<ColumnMenuSlotProps<TRow>>) => ReactElement;
@@ -3239,6 +3245,13 @@ export interface KitGroupToggleProps {
 }
 
 // @public
+export interface KitHeaderRenameLook {
+    readonly actions: CSSProperties;
+    readonly form: CSSProperties;
+    readonly root: CSSProperties;
+}
+
+// @public
 export interface KitIconButtonProps extends KitButtonProps {
     readonly "aria-label": string;
 }
@@ -3332,6 +3345,13 @@ export interface KitPrimitives {
 export type KitPrimitivesOf<TName extends keyof KitPrimitives> = Pick<KitPrimitives, TName>;
 
 // @public
+export interface KitRenameFieldParts {
+    readonly error: string;
+    readonly input: string;
+    readonly label: string;
+}
+
+// @public
 export interface KitRenameFieldProps {
     readonly elementRef: Ref<HTMLInputElement>;
     readonly error: string | undefined;
@@ -3341,6 +3361,7 @@ export interface KitRenameFieldProps {
     readonly onBlur: () => void;
     readonly onKeyDown: (event: KeyboardEvent_2<HTMLInputElement>) => void;
     readonly onValueChange: (value: string) => void;
+    readonly parts: KitRenameFieldParts;
     readonly value: string;
 }
 

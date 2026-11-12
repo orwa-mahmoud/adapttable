@@ -2935,7 +2935,16 @@ button, icon button, text input, select, popover, text and divider
 (`KitDividerProps`). `useLook` is the kit's hook for `KitColumnMenuLook`: the
 spacing of the panel, heading, search, bulk row, column rows, submenu and
 rename form, and the colour of the drop line. A kit whose text input draws its own label and
-error passes a `RenameField` (`KitRenameFieldProps`) for the rename form.
+error passes a `RenameField` (`KitRenameFieldProps`) for the rename form; the
+field receives the part names its label, input and error carry
+(`KitRenameFieldParts`).
+
+`createColumnHeaderRename(kit, useLook)` returns a column header's rename
+control: a button beside the caption that swaps the caption for the same
+rename form, and the announcer that reports the new name. The kit gives its
+button, icon button, text input and text, an optional `RenameField`, and the
+button's `editIcon`; `useLook` returns `KitHeaderRenameLook`, the spacing of
+the control, the form and its buttons.
 
 `createDesktopTable(kit)` builds the desktop table: every row with its
 leading rails, column-window spacers, data cells and actions rail, the

@@ -44843,6 +44843,14 @@
       "behavior": ""
     },
     {
+      "export": "createColumnHeaderRename",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createColumnMenu",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -47115,6 +47123,14 @@
       "behavior": ""
     },
     {
+      "export": "KitHeaderRenameLook",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "KitIconButtonProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
@@ -47180,6 +47196,14 @@
     },
     {
       "export": "KitPrimitivesOf",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitRenameFieldParts",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",

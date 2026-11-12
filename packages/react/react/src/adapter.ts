@@ -541,11 +541,13 @@ export {
   type KitCellEditors,
   type KitCellInputProps,
 } from "./kit/cellEditor";
+export { createColumnMenu, type KitColumnMenuLook } from "./kit/columnMenu";
 export {
-  createColumnMenu,
-  type KitColumnMenuLook,
+  createColumnHeaderRename,
+  type KitHeaderRenameLook,
+  type KitRenameFieldParts,
   type KitRenameFieldProps,
-} from "./kit/columnMenu";
+} from "./kit/columnRename";
 export {
   createAgentApproval,
   createBatchEditBar,
