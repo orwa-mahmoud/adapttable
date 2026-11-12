@@ -139,7 +139,7 @@ function Body<TRow>({
       bodyRef={desktopBodyRef}
       className={props.classNames?.table}
       stickyHeader={props.stickyHeader ?? false}
-      stickyHeaderOffset={headerOffset}
+      stickyTop={headerOffset}
     />
   );
 }
