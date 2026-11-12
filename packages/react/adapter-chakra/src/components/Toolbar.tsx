@@ -1,16 +1,26 @@
-/** Search field, sort select, filters trigger, menus and rows-per-page. */
+/** The toolbar, laid out by the binding and drawn with Chakra's controls. */
 import {
-  FeatureSlot,
-  FILTER_POPOVER,
-  pageSizeOptions,
+  createToolbar,
+  type KitFiltersButtonProps,
+  type KitRowsPerPageProps,
+  type KitToolbarFrameProps,
+  type KitToolbarProps,
+  type KitToolbarSearchProps,
+  type KitToolbarSortProps,
   SearchIcon,
-  TOOLBAR_EXTRAS,
-  type ToolbarChromeProps,
 } from "@adapttable/react/adapter";
-import { Badge, Button, HStack, Input, InputGroup } from "@chakra-ui/react";
-import { type ReactNode } from "react";
+import {
+  Badge,
+  Button as ChakraButton,
+  HStack,
+  Input,
+  InputGroup,
+} from "@chakra-ui/react";
+import { createContext, forwardRef, useContext } from "react";
 
 import { FiltersIcon } from "../icons";
+import { useAccentColor } from "./accent";
+import { buttonOfSize } from "./kitPrimitives";
 import { NativeSelect } from "./primitives";
 
 const SEARCH_ICON_PROPS = {
@@ -18,93 +28,13 @@ const SEARCH_ICON_PROPS = {
   "aria-hidden": true,
 } as const;
 
-export interface ToolbarProps<TRow> extends ToolbarChromeProps<TRow> {
-  /** Which filter container opens from the Filters button. */
-  filtersMode: "popover" | "drawer" | "header";
-  /** Filter widgets rendered inside the popover container. */
-  filters?: ReactNode;
-  /** Close the filter popover (Escape / outside click). */
-  onCloseFilters: () => void;
-  /** Clear-filters handler for the popover header. */
-  onClearFilters: () => void;
-  /** Chakra color scheme for primary accents. */
-  accentColor?: string;
-  /** Class hook for the toolbar row. */
-  className?: string;
-}
+/** The host's class for the toolbar, handed to its frame. */
+const ToolbarClassName = /* @__PURE__ */ createContext<string | undefined>(
+  undefined
+);
 
-/** Search + sort select + filters button + columns menu + rows-per-page. */
-export function Toolbar<TRow>({
-  table,
-  searchable,
-  searchPlaceholder,
-  sortByOptions,
-  toolbar,
-  toolbarSlots,
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
-  undoLabel,
-  redoLabel,
-  onPrint,
-  printLabel,
-  density,
-  onDensityChange,
-  onToggleFullscreen,
-  isFullscreen,
-  hasFilters,
-  activeFilterCount,
-  filtersMode,
-  filters,
-  filtersOpen,
-  onToggleFilters,
-  onFiltersTriggerPointerDown,
-  onCloseFilters,
-  onClearFilters,
-  savedViewsMenu,
-  columnMenu,
-  onAddRow,
-  addRowLabel,
-  onExportCsv,
-  exportBusy,
-  exportAnnouncement = "",
-  exportProgressState,
-  exportDisabled = false,
-  exportDisabledReason = "",
-  exportLabel,
-  showRowsPerPage,
-  accentColor,
-  dir,
-  className,
-}: Readonly<ToolbarProps<TRow>>) {
-  const { labels, source } = table;
-  const sortOptions =
-    sortByOptions ?? (table.isMobile ? table.sortByOptions : undefined);
-  const searchProps = table.getSearchInputProps(
-    searchPlaceholder ? { placeholder: searchPlaceholder } : undefined
-  );
-
-  const filtersButton = (
-    <Button
-      size="sm"
-      variant="outline"
-      colorPalette={accentColor}
-      aria-expanded={filtersMode === "popover" ? filtersOpen : undefined}
-      data-active={filtersOpen || undefined}
-      onPointerDown={onFiltersTriggerPointerDown}
-      onClick={onToggleFilters}
-    >
-      <FiltersIcon />
-      {labels.filters}
-      {activeFilterCount > 0 && (
-        <Badge ml={2} colorPalette={accentColor} borderRadius="full">
-          {activeFilterCount}
-        </Badge>
-      )}
-    </Button>
-  );
-
+function Frame({ start, search, controls }: Readonly<KitToolbarFrameProps>) {
+  const className = useContext(ToolbarClassName);
   return (
     <HStack
       data-adapttable-part="toolbar"
@@ -115,146 +45,153 @@ export function Toolbar<TRow>({
       align="center"
       className={className}
     >
-      {toolbarSlots?.start}
-      {searchable !== false && (
-        <InputGroup
-          data-adapttable-part="search-field"
-          maxW="360px"
-          flex="1"
-          minW="160px"
-          startElement={<SearchIcon />}
-          startElementProps={SEARCH_ICON_PROPS}
-        >
-          <Input
-            data-adapttable-part="search"
-            size="sm"
-            aria-label={labels.search}
-            type="search"
-            value={searchProps.value}
-            placeholder={searchProps.placeholder}
-            onChange={searchProps.onChange}
-          />
-        </InputGroup>
-      )}
+      {start}
+      {search}
       <HStack gap={2} flexWrap="wrap" rowGap={2} align="center">
-        {sortOptions && sortOptions.length > 0 && (
-          <NativeSelect
-            size="sm"
-            w="160px"
-            aria-label={labels.sortBy}
-            placeholder={labels.sortBy}
-            value={source.sortBy ?? ""}
-            onChange={(e) =>
-              source.setSort(
-                e.target.value || undefined,
-                source.sortDir ?? "asc"
-              )
-            }
-          >
-            {sortOptions.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </NativeSelect>
-        )}
-        {table.isMobile && sortOptions && sortOptions.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            data-adapttable-part="sort-direction"
-            disabled={!source.sortBy}
-            aria-label={
-              source.sortDir === "desc"
-                ? labels.sortAscending
-                : labels.sortDescending
-            }
-            onClick={() =>
-              source.setSort(
-                source.sortBy,
-                source.sortDir === "desc" ? "asc" : "desc"
-              )
-            }
-          >
-            {source.sortDir === "desc"
-              ? labels.sortDescending
-              : labels.sortAscending}
-          </Button>
-        )}
-        {toolbar}
-        {hasFilters && filtersMode === "popover" ? (
-          <FeatureSlot
-            slot={FILTER_POPOVER}
-            props={{
-              open: filtersOpen,
-              onClose: onCloseFilters,
-              filters,
-              activeFilterCount,
-              onClearFilters,
-              labels,
-              dir,
-              children: filtersButton,
-            }}
-          />
-        ) : (
-          hasFilters && filtersButton
-        )}
-        {savedViewsMenu}
-        {columnMenu}
-        <FeatureSlot
-          slot={TOOLBAR_EXTRAS}
-          props={{
-            onUndo,
-            onRedo,
-            canUndo,
-            canRedo,
-            undoLabel,
-            redoLabel,
-            onPrint,
-            printLabel,
-            density,
-            onDensityChange,
-            onToggleFullscreen,
-            isFullscreen,
-            onExportCsv,
-            exportBusy,
-            exportAnnouncement,
-            exportProgressState,
-            exportLabel,
-            exportDisabled,
-            exportDisabledReason,
-            accentColor,
-            labels,
-          }}
-        />
-        {onAddRow && (
-          <Button
-            size="sm"
-            colorPalette={accentColor}
-            data-adapttable-part="add-row"
-            onClick={onAddRow}
-          >
-            {addRowLabel}
-          </Button>
-        )}
-        {toolbarSlots?.end}
-        {showRowsPerPage && (
-          <NativeSelect
-            size="sm"
-            w="90px"
-            aria-label={labels.rowsPerPage}
-            value={source.limit}
-            onChange={(e) => source.setLimit(Number(e.target.value))}
-          >
-            {pageSizeOptions([source.limit, source.defaultLimit]).map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </NativeSelect>
-        )}
+        {controls}
       </HStack>
     </HStack>
+  );
+}
+
+function Search({ input }: Readonly<KitToolbarSearchProps>) {
+  "use no memo";
+  return (
+    <InputGroup
+      data-adapttable-part="search-field"
+      maxW="360px"
+      flex="1"
+      minW="160px"
+      startElement={<SearchIcon />}
+      startElementProps={SEARCH_ICON_PROPS}
+    >
+      <Input
+        data-adapttable-part="search"
+        size="sm"
+        aria-label={input["aria-label"]}
+        type="search"
+        value={input.value}
+        placeholder={input.placeholder}
+        onChange={input.onChange}
+      />
+    </InputGroup>
+  );
+}
+
+function SortSelect({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitToolbarSortProps>) {
+  "use no memo";
+  return (
+    <NativeSelect
+      size="sm"
+      w="160px"
+      aria-label={label}
+      placeholder={label}
+      value={value}
+      onChange={(event) => onValueChange(event.target.value || undefined)}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </NativeSelect>
+  );
+}
+
+/** The toolbar's buttons: small; add-row (filled) in the table's accent. */
+const Button = /* @__PURE__ */ buttonOfSize("sm", useAccentColor);
+
+const FiltersButton = forwardRef<HTMLButtonElement, KitFiltersButtonProps>(
+  function FiltersButton(
+    {
+      elementRef: _elementRef,
+      label,
+      count,
+      expanded,
+      open,
+      onPointerDown,
+      onClick,
+      ...target
+    },
+    ref
+  ) {
+    const accent = useAccentColor();
+    return (
+      <ChakraButton
+        ref={ref}
+        size="sm"
+        variant="outline"
+        colorPalette={accent}
+        aria-expanded={expanded}
+        data-active={open || undefined}
+        onPointerDown={onPointerDown}
+        onClick={onClick}
+        {...target}
+      >
+        <FiltersIcon />
+        {label}
+        {count > 0 && (
+          <Badge ml={2} colorPalette={accent} borderRadius="full">
+            {count}
+          </Badge>
+        )}
+      </ChakraButton>
+    );
+  }
+);
+
+function RowsPerPage({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitRowsPerPageProps>) {
+  "use no memo";
+  return (
+    <NativeSelect
+      size="sm"
+      w="90px"
+      aria-label={label}
+      value={value}
+      onChange={(event) => onValueChange(Number(event.target.value))}
+    >
+      {options.map((size) => (
+        <option key={size} value={size}>
+          {size}
+        </option>
+      ))}
+    </NativeSelect>
+  );
+}
+
+const KitToolbar = /* @__PURE__ */ createToolbar({
+  Frame,
+  Search,
+  SortSelect,
+  Button,
+  FiltersButton,
+  filtersPopover: "wrap",
+  RowsPerPage,
+});
+
+/** The props of Chakra's toolbar: the binding's, plus the host's class. */
+export interface ToolbarProps<TRow> extends KitToolbarProps<TRow> {
+  readonly className?: string;
+}
+
+/** The toolbar, with the host's class on its root. */
+export function Toolbar<TRow>({
+  className,
+  ...props
+}: Readonly<ToolbarProps<TRow>>) {
+  return (
+    <ToolbarClassName.Provider value={className}>
+      <KitToolbar {...props} />
+    </ToolbarClassName.Provider>
   );
 }
