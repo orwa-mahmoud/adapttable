@@ -26,6 +26,7 @@ import {
 import { GRID_LABELS, type GridFocusState } from "@adapttable/core/binding";
 import {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -33,6 +34,7 @@ import {
 } from "react";
 
 import type { ColumnDef } from "../columnDef";
+import { TableStoreContext } from "../state/tableStoreContext";
 export { GRID_CELL_ATTR, gridCellAttr } from "@adapttable/core";
 export type { GridFocusState } from "@adapttable/core/binding";
 
@@ -76,7 +78,10 @@ export function useGridFocus<TRow>(
     currentMatch,
   } = options;
 
-  const [controller] = useState(() => createGridFocusController(options));
+  const table = useContext(TableStoreContext);
+  const [controller] = useState(() =>
+    createGridFocusController(options, { store: table })
+  );
   controller.configure(options);
   const { active, range, announcement, fillPreview } = useSyncExternalStore(
     controller.subscribe,

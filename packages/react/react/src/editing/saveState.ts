@@ -15,7 +15,7 @@
  */
 import { type CellSaveState } from "@adapttable/core";
 import { cellSaveView, createCellSaveStore } from "@adapttable/core/editing";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
 import type { EditEventHandler } from "./editingEvents";
 
@@ -24,6 +24,7 @@ export type {
   CellSaveStatus,
   FailedCellSave,
 } from "@adapttable/core";
+import { TableStoreContext } from "../state/tableStoreContext";
 
 /**
  * What {@link useCellSaveState} needs.
@@ -55,7 +56,10 @@ export interface UseCellSaveStateOptions<TRow> {
 export function useCellSaveState<TRow>(
   options: UseCellSaveStateOptions<TRow> = {}
 ): CellSaveState<TRow> {
-  const [store] = useState(() => createCellSaveStore<TRow>(options));
+  const table = useContext(TableStoreContext);
+  const [store] = useState(() =>
+    createCellSaveStore<TRow>(options, { store: table })
+  );
   store.configure(options);
   const snapshot = useSyncExternalStore(
     store.subscribe,

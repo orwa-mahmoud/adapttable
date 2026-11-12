@@ -15,8 +15,9 @@ import {
   type BatchEditStoreOptions,
   createBatchEditStore,
 } from "@adapttable/core/editing";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
+import { TableStoreContext } from "../state/tableStoreContext";
 import type { EditEventHandler } from "./editingEvents";
 
 export type { BatchEditingState, BatchRowEdit } from "@adapttable/core";
@@ -68,7 +69,10 @@ export interface UseBatchEditingOptions<TRow> extends Pick<
 export function useBatchEditing<TRow>(
   options: UseBatchEditingOptions<TRow>
 ): BatchEditingState<TRow> {
-  const [store] = useState(() => createBatchEditStore<TRow>(options));
+  const table = useContext(TableStoreContext);
+  const [store] = useState(() =>
+    createBatchEditStore<TRow>(options, { store: table })
+  );
   store.configure(options);
   const snapshot = useSyncExternalStore(
     store.subscribe,

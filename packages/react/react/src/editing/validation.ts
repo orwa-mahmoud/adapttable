@@ -24,7 +24,7 @@ import {
   createEditValidationStore,
   editValidationView,
 } from "@adapttable/core/editing";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 
 export type {
   CellValidator,
@@ -33,6 +33,7 @@ export type {
   ValidationCheckResult,
   ValidationTarget,
 } from "@adapttable/core";
+import { TableStoreContext } from "../state/tableStoreContext";
 
 /** What {@link useEditValidation} needs. */
 export interface UseEditValidationOptions<TRow> {
@@ -56,7 +57,10 @@ export interface UseEditValidationOptions<TRow> {
 export function useEditValidation<TRow>(
   options: UseEditValidationOptions<TRow> = {}
 ): EditValidationState<TRow> {
-  const [store] = useState(() => createEditValidationStore<TRow>(options));
+  const table = useContext(TableStoreContext);
+  const [store] = useState(() =>
+    createEditValidationStore<TRow>(options, { store: table })
+  );
   store.configure(options);
   const snapshot = useSyncExternalStore(
     store.subscribe,
