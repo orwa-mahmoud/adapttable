@@ -130,7 +130,7 @@ function usePaint(stickyHeader: boolean): KitDesktopPaint {
   };
 }
 
-function Row({
+export function Row({
   kind: _kind,
   selected: _selected,
   elementRef,
@@ -141,7 +141,7 @@ function Row({
 }
 
 /** A body or summary cell: rails centre, actions end, totals read semibold. */
-function Cell({ kind, ...rest }: Readonly<KitDesktopCellProps>) {
+export function Cell({ kind, ...rest }: Readonly<KitDesktopCellProps>) {
   "use no memo";
   if (kind === "lead") return <Table.Td ta="center" {...rest} />;
   if (kind === "actions") return <Table.Td ta="end" {...rest} />;
@@ -168,15 +168,18 @@ function Foot(
   return <Table.Tfoot {...props} />;
 }
 
-function Checkbox({
+export function Checkbox({
   checked,
   onCheckedChange,
   indeterminate,
   "aria-label": label,
+  label: _label,
+  ...rest
 }: Readonly<KitCheckboxProps>) {
   "use no memo";
   return (
     <MantineCheckbox
+      {...rest}
       aria-label={label}
       checked={checked}
       indeterminate={indeterminate}

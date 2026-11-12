@@ -147,7 +147,7 @@ function usePaint(stickyHeader: boolean): KitDesktopPaint {
 }
 
 /** A body row: MUI's hover tint and selected colour, carried onto pinned cells. */
-function Row({
+export function Row({
   kind,
   elementRef,
   selected,
@@ -186,7 +186,7 @@ function tableCell(
 }
 
 /** A body or summary cell. */
-function Cell({ kind, ...rest }: Readonly<KitDesktopCellProps>) {
+export function Cell({ kind, ...rest }: Readonly<KitDesktopCellProps>) {
   "use no memo";
   return tableCell(kind, rest);
 }
@@ -209,15 +209,22 @@ function Foot(
 }
 
 /** The selection checkbox at MUI's table size. */
-function Checkbox({
+export function Checkbox({
   checked,
   onCheckedChange,
   indeterminate,
   "aria-label": label,
+  label: _label,
+  disabled,
+  className,
+  ...data
 }: Readonly<KitCheckboxProps>) {
   "use no memo";
   return (
     <MuiCheckbox
+      {...data}
+      className={className}
+      disabled={disabled}
       slotProps={{ input: { "aria-label": label } }}
       checked={checked}
       indeterminate={indeterminate}
