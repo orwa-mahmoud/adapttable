@@ -17,7 +17,7 @@ import { AccentColor, useAccentColor } from "./components/accent";
 import { DesktopTable } from "./components/DesktopTable";
 import { ErrorState } from "./components/ErrorState";
 import { MobileCards } from "./components/MobileCards";
-import { Footer } from "./components/PaginationFooter";
+import { footer } from "./components/PaginationFooter";
 import { LoadingState } from "./components/TableSkeleton";
 import { Toolbar, ToolbarClassName } from "./components/Toolbar";
 import { useChakraLibrary } from "./libraryEnvironment";
@@ -171,18 +171,7 @@ const kit: KitTable = {
   error: (state, labels) => (
     <ErrorState error={state.error} labels={labels} onRetry={state.retry} />
   ),
-  footer: ({ table, source, labels, chrome }) => (
-    <Footer
-      pagination={table.pagination}
-      total={source.total}
-      limit={source.limit}
-      defaultLimit={source.defaultLimit}
-      setPage={source.setPage}
-      setLimit={source.setLimit}
-      labels={labels}
-      showRowsPerPage={!chrome.grouping}
-    />
-  ),
+  footer,
 };
 
 /**

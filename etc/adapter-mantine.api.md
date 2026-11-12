@@ -370,7 +370,7 @@ export { PageSelector }
 export { PaginatedResponse }
 
 // @public
-export function PaginationFooter(input: Readonly<PaginationFooterProps>): JSX.Element;
+export function PaginationFooter(input: Readonly<PaginationFooterProps>): ReactElement;
 
 // @public
 export interface PaginationFooterProps {

@@ -17,7 +17,7 @@ import { EmptyState } from "./components/EmptyState";
 import { ErrorState } from "./components/ErrorState";
 import { FullscreenPortals } from "./components/FullscreenPortals";
 import { MobileCards } from "./components/MobileCards";
-import { PaginationFooter } from "./components/PaginationFooter";
+import { footer } from "./components/PaginationFooter";
 import { TableSkeleton } from "./components/TableSkeleton";
 import { Toolbar } from "./components/Toolbar";
 import { useMantineLibrary } from "./libraryEnvironment";
@@ -180,21 +180,7 @@ const kit: KitTable = {
       isRetrying={state.retrying}
     />
   ),
-  footer: ({ table, source, labels, chrome }) => (
-    <PaginationFooter
-      page={table.pagination.safePage}
-      totalPages={table.pagination.totalPages}
-      limit={source.limit}
-      defaultLimit={source.defaultLimit}
-      total={source.total}
-      fromIndex={table.pagination.fromIndex}
-      toIndex={table.pagination.toIndex}
-      onPageChange={source.setPage}
-      onLimitChange={source.setLimit}
-      labels={labels}
-      showRowsPerPage={!chrome.grouping}
-    />
-  ),
+  footer,
 };
 
 /**

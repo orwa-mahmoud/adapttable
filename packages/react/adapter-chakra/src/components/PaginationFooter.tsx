@@ -1,106 +1,79 @@
-/** Row count and the windowed pager. */
+/** Row count and the windowed pager, drawn by the binding with Chakra's controls. */
 import {
-  pageSizeOptions,
-  type PaginationInfo,
-  paginationSlots,
-  type TableLabels,
+  createPageButtons,
+  createPager,
+  type KitPagerFrameProps,
+  type KitRowsPerPageProps,
 } from "@adapttable/react/adapter";
-import { Button, HStack, Text } from "@chakra-ui/react";
+import { HStack, Text } from "@chakra-ui/react";
+import type { ReactNode } from "react";
 
 import { subtleText } from "../styles";
+import { Button, Text as KitText } from "./kitPrimitives";
 import { NativeSelect } from "./primitives";
 
-/** Paged footer with prev/next. */
-export function Footer({
-  pagination,
-  total,
-  limit,
-  defaultLimit = limit,
-  setPage,
-  setLimit,
-  labels,
-  showRowsPerPage = true,
-}: Readonly<{
-  pagination: PaginationInfo;
-  total: number;
-  limit: number;
-  defaultLimit?: number;
-  setPage: (n: number) => void;
-  setLimit: (n: number) => void;
-  labels: Required<TableLabels>;
-  /** Hidden in the grouped full-set view, where page size has no effect. */
-  showRowsPerPage?: boolean;
-}>) {
-  const { safePage, totalPages, fromIndex, toIndex } = pagination;
+/** Page size and range at the start, "page n of m" and the pages at the end. */
+function Frame({ rowsPerPage, range, pageOf, pages }: KitPagerFrameProps) {
+  "use no memo";
   return (
     <HStack gap={3} justify="space-between" flexWrap="wrap">
       <HStack gap={2}>
-        {showRowsPerPage && (
-          <>
-            <Text fontSize="xs" {...subtleText}>
-              {labels.rowsPerPage}
-            </Text>
-            <NativeSelect
-              size="xs"
-              w="72px"
-              aria-label={labels.rowsPerPage}
-              value={String(limit)}
-              onChange={(e) => setLimit(Number(e.target.value))}
-            >
-              {pageSizeOptions([limit, defaultLimit]).map((n) => (
-                <option key={n} value={String(n)}>
-                  {n}
-                </option>
-              ))}
-            </NativeSelect>
-          </>
-        )}
-        {total > 0 && (
-          <Text fontSize="xs" {...subtleText}>
-            {labels.showing({ from: fromIndex, to: toIndex, total })}
-          </Text>
-        )}
+        {rowsPerPage}
+        {range}
       </HStack>
       <HStack gap={1}>
-        <Text fontSize="xs" {...subtleText}>
-          {labels.pageOf({ page: safePage, total: totalPages })}
-        </Text>
-        <Button
-          size="xs"
-          variant="outline"
-          aria-label={labels.previousPage}
-          disabled={safePage <= 1}
-          onClick={() => setPage(safePage - 1)}
-        >
-          ‹
-        </Button>
-        {paginationSlots(safePage, totalPages).map(({ item, key }) =>
-          item === "ellipsis" ? (
-            <Text key={key} fontSize="xs" px={1} {...subtleText}>
-              …
-            </Text>
-          ) : (
-            <Button
-              key={key}
-              size="xs"
-              variant={item === safePage ? "solid" : "outline"}
-              aria-current={item === safePage ? "page" : undefined}
-              onClick={() => setPage(item)}
-            >
-              {item}
-            </Button>
-          )
-        )}
-        <Button
-          size="xs"
-          variant="outline"
-          aria-label={labels.nextPage}
-          disabled={safePage >= totalPages}
-          onClick={() => setPage(safePage + 1)}
-        >
-          ›
-        </Button>
+        {pageOf}
+        {pages}
       </HStack>
     </HStack>
   );
 }
+
+function Caption({ children }: Readonly<{ children: ReactNode }>) {
+  "use no memo";
+  return (
+    <Text fontSize="xs" {...subtleText}>
+      {children}
+    </Text>
+  );
+}
+
+/** The page size, named by its visible caption. */
+function RowsPerPage({
+  label,
+  value,
+  options,
+  onValueChange,
+}: Readonly<KitRowsPerPageProps>) {
+  "use no memo";
+  return (
+    <>
+      <Caption>{label}</Caption>
+      <NativeSelect
+        size="xs"
+        w="72px"
+        aria-label={label}
+        value={String(value)}
+        onChange={(event) => onValueChange(Number(event.target.value))}
+      >
+        {options.map((size) => (
+          <option key={size} value={String(size)}>
+            {size}
+          </option>
+        ))}
+      </NativeSelect>
+    </>
+  );
+}
+
+/** The table's footer: page size, range, "page n of m" and the pages. */
+export const footer = /* @__PURE__ */ createPager({
+  Frame,
+  RowsPerPage,
+  Caption,
+  // The pages sit in the frame's own row, beside "page n of m".
+  Pages: /* @__PURE__ */ createPageButtons(
+    { Button, Text: KitText },
+    { row: { display: "contents" }, ellipsis: { paddingInline: 4 } }
+  ),
+});
