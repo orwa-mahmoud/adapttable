@@ -330,7 +330,6 @@ function DataTableContent<TRow>(incoming: Readonly<DataTableProps<TRow>>) {
                               />
                             ) : undefined
                           }
-                          accentColor={accentColor}
                         />
                       </div>
                       {chrome.isRefreshing && (
