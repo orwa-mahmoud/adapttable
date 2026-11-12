@@ -4309,7 +4309,7 @@ export interface UseDataTableOptions<TRow> extends ColumnLayoutOptions {
 // @public (undocumented)
 export type UseDataTableResult<TRow> = ReturnType<typeof useDataTable<TRow>>;
 
-// @public (undocumented)
+// @public
 export function useDataTableShell<TRow>(input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>): {
     table: {
         source: ComputedRef<TableSource<TRow>>;

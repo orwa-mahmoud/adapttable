@@ -159,7 +159,7 @@ function cardCells<TRow>(
  * A computed whose value keeps the previous object while the next one has
  * the same entries: attributes are rebuilt as new objects on every read.
  */
-function keptAttrs<T extends object | undefined>(
+export function keptAttrs<T extends object | undefined>(
   read: () => T
 ): ComputedRef<T> {
   return computed<T>((previous) => {

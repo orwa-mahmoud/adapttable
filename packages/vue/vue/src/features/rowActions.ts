@@ -44,8 +44,10 @@ function useRowActions<TRow>(context: FeatureMountContext<TRow>): void {
     const current = options.value.rowActions?.find((item) => item.key === key);
     return current?.onClick?.(row);
   };
+  // The declared actions alone: the options object is rebuilt with the data.
+  const declaredActions = computed(() => options.value.rowActions);
   const hostActions = computed(() =>
-    options.value.rowActions?.map((action) => ({
+    declaredActions.value?.map((action) => ({
       ...action,
       onClick: (row: TRow) => invokeHost(action.key, row),
     }))

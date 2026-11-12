@@ -75,6 +75,9 @@ function useEditing<TRow>(context: FeatureMountContext<TRow>): void {
   // The row factory is one function for the table's life: a row hands it the
   // editing view it draws with, so the factory does not change with every
   // edit and every row is not handed new props.
+  const rowEditIcons = computed(
+    () => context.options.value.rowEditIcons as RowEditIcons | undefined
+  );
   const rowFactory: NonNullable<EditingChromeModel<TRow>["row"]> = (
     row,
     rowId,
@@ -92,7 +95,7 @@ function useEditing<TRow>(context: FeatureMountContext<TRow>): void {
         labels: context.table.labels.value,
         conflict: rowEditConflict(editing, rowId),
         showBegin: trigger.showBegin,
-        icons: context.options.value.rowEditIcons as RowEditIcons | undefined,
+        icons: rowEditIcons.value,
       },
     };
   };

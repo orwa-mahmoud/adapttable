@@ -1,42 +1,3 @@
-/** An array that reads `current` each time it is used, for a stable prop. */
-function liveArray<T>(current: () => readonly T[]): readonly T[] {
-  return new Proxy([] as T[], {
-    get: (_target, key): unknown => Reflect.get(current(), key) as unknown,
-    has: (_target, key) => Reflect.has(current(), key),
-  });
-}
-
-/** Every field of an editing bundle, for a view that reads the current one. */
-const EDITING_BUNDLE_FIELDS = [
-  "onCellEdit",
-  "state",
-  "validation",
-  "saving",
-  "dirty",
-  "rowEditing",
-  "batch",
-  "lifecycle",
-  "conflict",
-  "conflictLabels",
-  "featureHost",
-  "activation",
-] as const satisfies readonly (keyof EditingBundle<unknown>)[];
-
-/** A bundle whose every field is read from `current` when it is used. */
-function liveEditingBundle<TRow>(
-  current: () => EditingBundle<TRow> | undefined
-): EditingBundle<TRow> {
-  const view = {} as EditingBundle<TRow>;
-  for (const field of EDITING_BUNDLE_FIELDS) {
-    Object.defineProperty(view, field, {
-      enumerable: true,
-      get: () => current()?.[field],
-    });
-  }
-  return view;
-}
-
-/** One source, feature lifecycle and model composition shared by every Vue kit. */
 import {
   ACTIONS_COLUMN_KEY,
   type ConfirmHandler,
@@ -44,6 +5,7 @@ import {
   projectedGroupingSource,
   REORDER_COLUMN_KEY,
   resolveUrlAdapter,
+  type RowAction,
   stableKey,
   type TableDensity,
   type TableSource,
@@ -110,6 +72,7 @@ import {
   COLUMN_HEADER_RENAME,
   columnMenuSlotKey,
 } from "./columns/columnMenuContracts";
+import { drawnRowEditing, sameDrawnView } from "./editing/editableUnitModel";
 import { type FeatureLifecycle, useFeatureLifecycle } from "./featureLifecycle";
 import {
   assertRequiredSlots,
@@ -141,7 +104,10 @@ import {
   type TableBodyProjection,
 } from "./layout/modelChannels";
 import {
+  keptAttrs,
+  lazyCells,
   type TableBodySlot,
+  type TableCellModel,
   type TableRowModel,
   useDesktopTableModel,
   useMobileCardsModel,
@@ -177,6 +143,7 @@ import {
   rowReorderModelKey,
 } from "./specialized/contracts";
 import { useOptionFields, useScopeActivity } from "./store";
+import { TABLE_STORE } from "./tableStore";
 import { useDataTable } from "./useDataTable";
 import {
   DENSITY_CONTROL,
@@ -191,8 +158,97 @@ export type {
   ResolvedTableOptions,
   UseDataTableShellOptions,
 } from "./shell/shellContract";
-import { drawnRowEditing, sameDrawnView } from "./editing/editableUnitModel";
-import { TABLE_STORE } from "./tableStore";
+/**
+ * A row model with fields added or replaced. The row's own getters stay
+ * getters, so what it reads lazily is still read when it is drawn; `getters`
+ * add fields of that kind.
+ */
+function withRowFields<TRow>(
+  row: TableRowModel<TRow>,
+  fields: Partial<TableRowModel<TRow>>,
+  getters: Readonly<Record<string, () => unknown>> = {}
+): TableRowModel<TRow> {
+  const descriptors: PropertyDescriptorMap = {
+    ...Object.getOwnPropertyDescriptors(row),
+  };
+  for (const [key, value] of Object.entries(fields))
+    descriptors[key] = { value, enumerable: true, configurable: true };
+  for (const [key, get] of Object.entries(getters))
+    descriptors[key] = { get, enumerable: true, configurable: true };
+  return Object.defineProperties({}, descriptors) as TableRowModel<TRow>;
+}
+
+/**
+ * Whether two navigation cell lists draw the same: each cell's own fields are
+ * the same, its attributes have the same entries, and it has a fill handle in
+ * both or neither (the handle reads the current focus when drawn).
+ */
+function sameNavigationCells<TRow>(
+  previous: readonly TableCellModel<TRow>[],
+  next: readonly TableCellModel<TRow>[]
+): boolean {
+  return (
+    previous.length === next.length &&
+    next.every((cell, index) => {
+      const before = previous[index]!;
+      const keys = Object.keys(cell.attrs);
+      return (
+        cell.key === before.key &&
+        cell.context === before.context &&
+        cell.render === before.render &&
+        (cell.addon === undefined) === (before.addon === undefined) &&
+        keys.length === Object.keys(before.attrs).length &&
+        keys.every((key) => Object.is(cell.attrs[key], before.attrs[key]))
+      );
+    })
+  );
+}
+
+/** Whether a value can key a weak map. */
+function isKeyable(value: unknown): value is object {
+  return typeof value === "object" && value !== null;
+}
+
+/** An array that reads `current` each time it is used, for a stable prop. */
+function liveArray<T>(current: () => readonly T[]): readonly T[] {
+  return new Proxy([] as T[], {
+    get: (_target, key): unknown => Reflect.get(current(), key) as unknown,
+    has: (_target, key) => Reflect.has(current(), key),
+  });
+}
+
+/** Every field of an editing bundle, for a view that reads the current one. */
+const EDITING_BUNDLE_FIELDS = [
+  "onCellEdit",
+  "state",
+  "validation",
+  "saving",
+  "dirty",
+  "rowEditing",
+  "batch",
+  "lifecycle",
+  "conflict",
+  "conflictLabels",
+  "featureHost",
+  "activation",
+] as const satisfies readonly (keyof EditingBundle<unknown>)[];
+
+/** A bundle whose every field is read from `current` when it is used. */
+function liveEditingBundle<TRow>(
+  current: () => EditingBundle<TRow> | undefined
+): EditingBundle<TRow> {
+  const view = {} as EditingBundle<TRow>;
+  for (const field of EDITING_BUNDLE_FIELDS) {
+    Object.defineProperty(view, field, {
+      enumerable: true,
+      get: () => current()?.[field],
+    });
+  }
+  return view;
+}
+
+/** One source, feature lifecycle and model composition shared by every Vue kit. */
+
 export function useDataTableShell<TRow>(
   input: MaybeRefOrGetter<UseDataTableShellOptions<TRow>>
 ) {
@@ -639,50 +695,71 @@ export function useDataTableShell<TRow>(
     }
     return position.value;
   };
+  // Navigation decorates rows while cell navigation or find is on; the focus
+  // and matches a row shows are read when the row is drawn, and kept while
+  // they are the same, so a focus move redraws the rows it moves between.
+  const navigationOn = computed(
+    () => gridFocus.value !== undefined || find.value !== undefined
+  );
+  const navigationCell = (
+    cell: TableCellModel<TRow>,
+    rowIndex: number,
+    absolute: number
+  ): TableCellModel<TRow> => {
+    const col = bodyColumnPositions.value.get(cell.key) ?? -1;
+    const key = `${absolute}:${col}`;
+    const search = find.value;
+    const current = search?.current;
+    const marks = search?.open
+      ? {
+          "data-cell-match": search.matchKeys.has(key) ? "" : undefined,
+          "data-cell-match-current":
+            current?.row === absolute && current.col === col ? "" : undefined,
+        }
+      : {};
+    const attrs = mergeVueAttrs(cell.attrs, {
+      ...gridFocus.value?.getCellProps({ row: absolute, col }),
+      ...marks,
+    });
+    return {
+      ...cell,
+      attrs,
+      addon: gridFocus.value?.enabled
+        ? (className?: string) =>
+            renderFeatureSlot(FILL_HANDLE_CONTROL, slotFills.value, {
+              focus: gridFocus.value!,
+              windowIndex: rowIndex,
+              firstRowIndex: table.windowStart.value,
+              col,
+              className,
+            })
+        : undefined,
+    };
+  };
   const decorateNavigation = (
     row: TableRowModel<TRow>
   ): TableRowModel<TRow> => {
-    if (row.summary || (!gridFocus.value && !find.value)) return row;
-    const grid = gridFocus.value;
+    if (row.summary || !navigationOn.value) return row;
     const rowIndex = rowPosition(row.key);
     if (rowIndex === undefined) return row;
     const absolute = table.windowStart.value + rowIndex;
-    return {
-      ...row,
-      attrs: mergeVueAttrs(row.attrs, grid?.getRowProps(absolute) ?? {}),
-      cells: row.cells.map((cell) => {
-        const col = bodyColumnPositions.value.get(cell.key) ?? -1;
-        const address = { row: absolute, col };
-        const key = `${absolute}:${col}`;
-        const current = find.value?.current;
-        const marks = find.value?.open
-          ? {
-              "data-cell-match": find.value.matchKeys.has(key) ? "" : undefined,
-              "data-cell-match-current":
-                current?.row === absolute && current.col === col
-                  ? ""
-                  : undefined,
-            }
-          : {};
-        return {
-          ...cell,
-          attrs: mergeVueAttrs(cell.attrs, {
-            ...grid?.getCellProps(address),
-            ...marks,
-          }),
-          addon: grid?.enabled
-            ? (className?: string) =>
-                renderFeatureSlot(FILL_HANDLE_CONTROL, slotFills.value, {
-                  focus: grid,
-                  windowIndex: rowIndex,
-                  firstRowIndex: table.windowStart.value,
-                  col,
-                  className,
-                })
-            : undefined,
-        };
-      }),
-    };
+    const attrs = keptAttrs(() =>
+      mergeVueAttrs(row.attrs, gridFocus.value?.getRowProps(absolute) ?? {})
+    );
+    const cells = computed<readonly TableCellModel<TRow>[]>((previous) => {
+      const next = row.cells.map((cell) =>
+        navigationCell(cell, rowIndex, absolute)
+      );
+      return previous && sameNavigationCells(previous, next) ? previous : next;
+    });
+    return withRowFields(
+      row,
+      {},
+      {
+        attrs: () => attrs.value,
+        cells: () => cells.value,
+      }
+    );
   };
   const renderNavigationBefore = (
     classNames?: Readonly<Record<string, string | undefined>>
@@ -736,14 +813,31 @@ export function useDataTableShell<TRow>(
     source.value.setPage ??
     supplied.value ??
     source.value;
+  // The owner, not the source it is read from: the source is a new object
+  // with each data change while its owner usually stays the same.
+  const sourceOwner = computed(rowSourceOwner);
+  // Whether one row is still drawn, as its own value: the set of drawn rows is
+  // rebuilt with each data change.
+  const visibility = new WeakMap<object, ComputedRef<boolean>>();
+  const rowVisible = (row: TRow): ComputedRef<boolean> => {
+    if (!isKeyable(row))
+      return computed(() => visibleRowObjects.value.has(row));
+    let visible = visibility.get(row);
+    if (!visible) {
+      visible = computed(() => visibleRowObjects.value.has(row));
+      visibility.set(row, visible);
+    }
+    return visible;
+  };
   const rowControlOwner = (row: TRow) => {
-    const owner = rowSourceOwner();
+    const owner = sourceOwner.value;
     const revision = rowOwnerRevision.value;
+    const visible = rowVisible(row);
     return () =>
       active.value &&
       rowOwnerRevision.value === revision &&
-      rowSourceOwner() === owner &&
-      visibleRowObjects.value.has(row);
+      sourceOwner.value === owner &&
+      visible.value;
   };
   // A row reads editing through what changes it: whether editing is on, and
   // a view of the bundle that is replaced only when what the row's cells draw
@@ -825,6 +919,30 @@ export function useDataTableShell<TRow>(
       }
     }
   );
+  /** A cell that edits in place, drawn through the kit's editable cell. */
+  const editableCell = (
+    row: TableRowModel<TRow>,
+    cell: TableCellModel<TRow>
+  ): TableCellModel<TRow> =>
+    isCellEditable(cell.context.column, row.row)
+      ? {
+          ...cell,
+          render: (display) =>
+            renderFeatureSlot(editableCellSlotKey<TRow>(), slotFills.value, {
+              editing: bundleFor(row.key),
+              row: row.row,
+              rowId: row.key,
+              rowIndex: row.index,
+              column: cell.context.column,
+              rows: liveVisibleRows,
+              columns: table.columns.value,
+              rowKey: table.rowKey,
+              editLabel: table.labels.value.editCell,
+              undoLabel: table.labels.value.undoEdit,
+              display,
+            }),
+        }
+      : cell;
   const decorateRow = (original: TableRowModel<TRow>): TableRowModel<TRow> => {
     const ownsRow =
       original.detail || rowActionControls.value
@@ -833,8 +951,7 @@ export function useDataTableShell<TRow>(
     const rowDetail = original.detail;
     if (rowDetail) {
       const toggle = rowDetail.toggleAttrs.onClick;
-      original = {
-        ...original,
+      original = withRowFields(original, {
         detail: {
           ...rowDetail,
           toggleAttrs: {
@@ -845,7 +962,7 @@ export function useDataTableShell<TRow>(
             },
           },
         },
-      };
+      });
     }
     const reorder = rowReorder.value;
     if (reorder && !original.summary) {
@@ -901,8 +1018,7 @@ export function useDataTableShell<TRow>(
         : undefined;
     const row =
       controls || rowEditing
-        ? {
-            ...original,
+        ? withRowFields(original, {
             actionControls: controls,
             editActions: rowEditing
               ? () =>
@@ -912,45 +1028,29 @@ export function useDataTableShell<TRow>(
                     rowEditing.props
                   )
               : undefined,
-          }
+          })
         : original;
     if (!editingOn.value || row.summary) return row;
     rowTargets.set(row.key, row.row);
-    return {
-      ...row,
-      cells: row.cells.map((cell) =>
-        !isCellEditable(cell.context.column, row.row)
-          ? cell
-          : {
-              ...cell,
-              render: (display) =>
-                renderFeatureSlot(
-                  editableCellSlotKey<TRow>(),
-                  slotFills.value,
-                  {
-                    editing: bundleFor(row.key),
-                    row: row.row,
-                    rowId: row.key,
-                    rowIndex: row.index,
-                    column: cell.context.column,
-                    rows: liveVisibleRows,
-                    columns: table.columns.value,
-                    rowKey: table.rowKey,
-                    editLabel: table.labels.value.editCell,
-                    undoLabel: table.labels.value.undoEdit,
-                    display,
-                  }
-                ),
-            }
-      ),
-    };
+    const editableCells = lazyCells(() =>
+      row.cells.map((cell) => editableCell(row, cell))
+    );
+    return withRowFields(row, {}, { cells: editableCells });
   };
   // Each row is decorated by a computed of its own, keyed by the row model it
   // decorates: Vue re-runs it only when something that row's decoration read
   // changes, so a change to one row does not hand every row new props.
   const selectable = computed(() => selection.value !== undefined);
   const currentSelection = () => selection.value;
-  const rowActionList = computed(() => mergedActions.value.rowActions);
+  const rowActionList = computed<readonly RowAction<TRow>[] | undefined>(
+    (previous) => {
+      const next = mergedActions.value.rowActions;
+      if (!next || previous?.length !== next.length) return next;
+      return previous.every((action, index) => action === next[index])
+        ? previous
+        : next;
+    }
+  );
   const decorated = {
     row: new WeakMap<TableRowModel<TRow>, ComputedRef<TableRowModel<TRow>>>(),
     card: new WeakMap<TableRowModel<TRow>, ComputedRef<TableRowModel<TRow>>>(),
