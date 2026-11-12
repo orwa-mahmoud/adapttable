@@ -1,581 +1,280 @@
-import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
+/**
+ * Chakra's Columns menu: the binding's composition, drawn with Chakra's
+ * controls on Chakra's spacing.
+ */
 import {
-  ACTIONS_COLUMN_KEY,
-  type ColumnMenuAction,
-  columnMenuActions,
-  type ColumnMenuItem,
-  type ColumnMenuLabels,
-  type ColumnMenuRow,
-  columnMenuRows,
   type ColumnMenuSlotProps,
-  type ColumnRenameEditorState,
-  EyeIcon,
-  filterColumnMenuRows,
-  GripIcon,
-  type GroupingPanelState,
-  hideAllColumns,
-  LiveRegion,
-  nextPinSide,
-  pinActionLabel,
-  PinIcon,
-  REORDER_COLUMN_KEY,
-  showAllColumns,
-  unpinAllColumns,
-  type UseColumnLayoutResult,
-  useColumnRenameEditor,
-  useEscapeClose,
-  useFeatureHost,
+  createColumnMenu,
+  type KitButtonProps,
+  type KitColumnMenuLook,
+  type KitIconButtonProps,
+  type KitPopoverProps,
+  type KitRenameFieldProps,
+  type KitSelectProps,
+  mergeRefs,
 } from "@adapttable/react/adapter";
 import {
-  Button,
+  Button as ChakraButton,
   Field,
-  HStack,
-  IconButton,
+  IconButton as ChakraIconButton,
   Input,
-  Popover,
-  Separator,
-  Text,
+  Popover as ChakraPopover,
+  Text as ChakraText,
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, type ReactElement } from "react";
 
 import { KitPortal } from "./kitPortal";
+import { Divider, Text, TextInput } from "./kitPrimitives";
 import { NativeSelect } from "./primitives";
 
 /** The shared Columns-menu contract, declared once in core. */
 export type ColumnMenuProps<TRow> = ColumnMenuSlotProps<TRow>;
 
-const ignoreColumnRename = () => undefined;
-
-function useAdapterColumnRename<TRow>(
-  row: ColumnMenuRow<TRow>,
-  labels: ColumnMenuLabels,
-  onRenameColumn: ((key: string, name: string) => void) | undefined
-) {
-  const rename = useColumnRenameEditor({
-    key: row.key,
-    name: row.name,
-    onRename: onRenameColumn ?? ignoreColumnRename,
-    requiredMessage: labels.columnNameRequired,
-    renamedMessage: labels.columnRenamed,
-  });
-  return {
-    rename,
-    onBeginRename: onRenameColumn ? rename.begin : undefined,
-  };
-}
-
-function runColumnMenuAction(
-  action: ColumnMenuAction,
-  setOpen: (open: boolean) => void
-): void {
-  action.run();
-  if (action.id !== "rename") setOpen(false);
-}
-
-function columnMenuActionDisabled(
-  action: ColumnMenuAction,
-  editing: boolean
-): boolean {
-  return action.disabled || (action.id === "rename" && editing);
-}
-
-function ColumnRenameForm({
-  rename,
-  labels,
-}: Readonly<{
-  rename: ColumnRenameEditorState;
-  labels: ColumnMenuLabels;
-}>) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-  return (
-    <form
-      data-adapttable-part="column-rename-form"
-      onSubmit={(event) => {
-        event.preventDefault();
-        rename.submit();
-      }}
-    >
-      <Field.Root invalid={Boolean(rename.error)}>
-        <Field.Label
-          htmlFor={rename.inputId}
-          data-adapttable-part="column-rename-label"
-          fontSize="xs"
-          mb={1}
-        >
-          {labels.columnName}
-        </Field.Label>
-        <Input
-          ref={inputRef}
-          id={rename.inputId}
-          value={rename.draft}
-          aria-invalid={rename.error ? true : undefined}
-          aria-describedby={rename.error ? rename.errorId : undefined}
-          data-adapttable-part="column-rename-input"
-          size="xs"
-          onChange={(event) => rename.setDraft(event.target.value)}
-          onBlur={rename.blur}
-          onKeyDown={rename.onKeyDown}
-        />
-        {rename.error ? (
-          <Text
-            id={rename.errorId}
-            role="alert"
-            data-adapttable-part="column-rename-error"
-            color="red.500"
-            fontSize="xs"
-            mt={1}
-          >
-            {rename.error}
-          </Text>
-        ) : null}
-        <HStack gap={1} mt={1}>
-          <Button
-            type="submit"
-            size="xs"
-            colorPalette="teal"
-            data-adapttable-part="column-rename-save"
-          >
-            {labels.saveColumnName}
-          </Button>
-          <Button
-            type="button"
-            size="xs"
-            variant="ghost"
-            data-adapttable-part="column-rename-cancel"
-            onClick={rename.cancel}
-          >
-            {labels.cancelColumnRename}
-          </Button>
-        </HStack>
-      </Field.Root>
-    </form>
-  );
-}
-
-/** Eye toggle for one menu row (a data column or the actions entry). */
-function VisibilityToggle({
-  hidden,
-  name,
-  labels,
-  onToggle,
-  disabled = false,
-}: Readonly<{
-  hidden: boolean;
-  name: string;
-  labels: ColumnMenuLabels;
-  onToggle: () => void;
-  disabled?: boolean;
-}>) {
-  return (
-    <IconButton
-      size="xs"
-      variant="ghost"
-      aria-label={`${hidden ? labels.showColumn : labels.hideColumn}: ${name}`}
-      aria-pressed={!hidden}
-      disabled={disabled}
-      onClick={onToggle}
-    >
-      <EyeIcon off={hidden} />
-    </IconButton>
-  );
-}
-
-/** Menu-row label, struck through while its column is hidden. */
-function RowName({
-  hidden,
-  name,
-}: Readonly<{ hidden: boolean; name: string }>) {
-  return (
-    <Text
-      fontSize="sm"
-      flex={1}
-      color={hidden ? "gray.500" : undefined}
-      textDecoration={hidden ? "line-through" : undefined}
-    >
-      {name}
-    </Text>
-  );
-}
-
-/** Pin toggle for one menu row; `label` names the action it performs next. */
-function PinToggle({
-  pinned,
-  label,
-  onClick,
-  disabled = false,
-}: Readonly<{
-  pinned: boolean;
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-}>) {
-  return (
-    <IconButton
-      size="xs"
-      variant={pinned ? "solid" : "ghost"}
-      colorPalette={pinned ? "teal" : "gray"}
-      aria-label={label}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      <PinIcon />
-    </IconButton>
-  );
-}
-
-function ColumnMenuRowItem<TRow>({
-  row,
-  layout,
-  labels,
-  drag,
-  sortBy,
-  sortDir,
-  onSortColumn,
-  onAutoSizeColumn,
-  onFilterColumn,
-  onRenameColumn,
-  groupingPanel,
-}: Readonly<{
-  row: ColumnMenuRow<TRow>;
-  layout: UseColumnLayoutResult<TRow>;
-  labels: ColumnMenuLabels;
-  drag: ReturnType<typeof useColumnDragState>;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  onSortColumn?: (key: string, dir: "asc" | "desc") => void;
-  onAutoSizeColumn?: (key: string) => void;
-  onFilterColumn?: (key: string) => void;
-  onRenameColumn?: (key: string, name: string) => void;
-  groupingPanel?: GroupingPanelState;
-}>) {
-  const { key, name, hidden, pinned, index, canMove, canHide, canPin } = row;
-  const [open, setOpen] = useState(false);
-  const featureHost = useFeatureHost<TRow>();
-  const { rename, onBeginRename } = useAdapterColumnRename(
-    row,
-    labels,
-    onRenameColumn
-  );
-  const actions = columnMenuActions(row, {
-    featureHost,
-    labels,
-    layout,
-    sortBy,
-    sortDir,
-    onSortColumn,
-    onAutoSizeColumn,
-    onFilterColumn,
-    onBeginRename,
-    groupingPanel,
-  });
-  const indicator = canMove ? drag.rowAttrs(key, index) : {};
-  const edge = indicator["data-drop"];
-  const edgeOffset = edge === "before" ? "2px" : "-2px";
-  return (
-    <div
-      data-adapttable-part="column-menu-item"
-      data-hidden={hidden || undefined}
-      data-pinned={pinned}
-    >
-      <HStack
-        gap={1}
-        py={0.5}
-        cursor={canMove ? "grab" : "default"}
-        opacity={"data-dragging" in indicator ? 0.4 : undefined}
-        boxShadow={
-          edge
-            ? `inset 0 ${edgeOffset} 0 0 var(--chakra-colors-blue-500)`
-            : undefined
-        }
-        {...(canMove
-          ? {
-              ...drag.rowDragProps(key, index),
-              ...drag.dropProps(index, layout.move),
-              ...indicator,
-            }
-          : {})}
-      >
-        <IconButton
-          size="xs"
-          variant="ghost"
-          cursor={canMove ? "grab" : "default"}
-          disabled={!canMove}
-          {...(canMove
-            ? columnReorderKeyProps(
-                key,
-                index,
-                layout.move,
-                `${labels.moveStart} / ${labels.moveEnd}: ${name}`
-              )
-            : {})}
-        >
-          <GripIcon />
-        </IconButton>
-        <VisibilityToggle
-          hidden={hidden}
-          name={name}
-          labels={labels}
-          disabled={!canHide}
-          onToggle={() => layout.toggleVisible(key)}
-        />
-        <RowName hidden={hidden} name={name} />
-        <PinToggle
-          pinned={Boolean(pinned)}
-          label={`${pinActionLabel(pinned, labels)}: ${name}`}
-          disabled={!canPin}
-          onClick={() => layout.setPinned(key, nextPinSide(pinned))}
-        />
-        <IconButton
-          size="xs"
-          variant="ghost"
-          data-adapttable-part="column-menu-more"
-          aria-expanded={open}
-          aria-label={`${labels.columnActions}: ${name}`}
-          onClick={() => setOpen((value) => !value)}
-        >
-          ⋯
-        </IconButton>
-      </HStack>
-      {open ? (
-        <div data-adapttable-part="column-menu-submenu">
-          {actions.map((action: ColumnMenuItem) =>
-            "kind" in action ? (
-              <Field.Root key={action.id} disabled={action.disabled}>
-                <Field.Label fontSize="xs">{action.label}</Field.Label>
-                <NativeSelect
-                  size="xs"
-                  aria-label={action.label}
-                  value={action.value}
-                  disabled={action.disabled}
-                  data-adapttable-part="column-menu-choice"
-                  onChange={(event) => action.onChange(event.target.value)}
-                >
-                  {action.options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </Field.Root>
-            ) : (
-              <Button
-                key={action.id}
-                size="xs"
-                variant="ghost"
-                data-adapttable-part="column-menu-action"
-                disabled={columnMenuActionDisabled(action, rename.editing)}
-                onClick={() => runColumnMenuAction(action, setOpen)}
-              >
-                {action.label}
-              </Button>
-            )
-          )}
-          {rename.editing ? (
-            <ColumnRenameForm rename={rename} labels={labels} />
-          ) : null}
-        </div>
-      ) : null}
-      <LiveRegion part="column-rename-announcer" statusRole={false}>
-        {rename.announcement}
-      </LiveRegion>
-    </div>
-  );
-}
+/** The colour of a filled control: the save button, a pinned column. */
+const FILLED = "teal";
 
 /**
- * Chakra column-management popover: per-column drag grip (reorder), eye
- * (show/hide), and pin toggle — plus, when the table has row actions, a
- * trailing entry that hides or end-pins the injected actions column.
+ * The menu's buttons, side by side at their own width: the trigger is the
+ * one outlined button, at the toolbar's size; the rest are compact and quiet
+ * unless filled.
  */
-export function ColumnMenu<TRow>({
-  allColumns,
-  layout,
-  labels,
-  hasRowActions = false,
-  hasRowReorder = false,
-  onAutoSize,
-  onAutoSizeColumn,
-  onSortColumn,
-  onFilterColumn,
-  onRenameColumn,
-  sortBy,
-  sortDir,
-  dir,
-  groupingPanel,
-}: Readonly<ColumnMenuProps<TRow>>) {
-  const drag = useColumnDragState();
-  const [query, setQuery] = useState("");
-  const rows = filterColumnMenuRows(columnMenuRows(allColumns, layout), query);
-  const actionsHidden = layout.isHidden(ACTIONS_COLUMN_KEY);
-  const actionsPinned = layout.state.pinned[ACTIONS_COLUMN_KEY] === "end";
-  // Controlled so Escape can close it: the kit's own dismissal does not
-  // fire for every place focus can be inside this menu.
-  const [menuOpen, setMenuOpen] = useState(false);
-  useEscapeClose(
-    menuOpen,
-    () => {
-      setMenuOpen(false);
-    },
-    { ignoreWithin: '[data-adapttable-part="column-rename-input"]' }
-  );
-  const reorderHidden = layout.isHidden(REORDER_COLUMN_KEY);
-  const reorderPinned = layout.state.pinned[REORDER_COLUMN_KEY] !== undefined;
+const Button = forwardRef<HTMLButtonElement, KitButtonProps>(function Button(
+  {
+    elementRef,
+    variant = "text",
+    tone: _tone,
+    fullWidth: _fullWidth,
+    justify: _justify,
+    busy: _busy,
+    ...rest
+  },
+  ref
+) {
+  "use no memo";
+  const trigger = variant === "outlined";
+  let look: "ghost" | "outline" | "solid" = "ghost";
+  if (trigger) look = "outline";
+  else if (variant === "filled") look = "solid";
   return (
-    <Popover.Root
-      open={menuOpen}
-      onOpenChange={(event) => {
-        setMenuOpen(event.open);
-      }}
-      // One owner for Escape. Ark's own dismissal fires wherever focus sits
-      // inside the panel — including the rename editor — so cancelling an
-      // edit took the whole menu with it. `useEscapeClose` closes the menu
-      // and leaves the key alone inside a control that owns it.
+    <ChakraButton
+      ref={mergeRefs(ref, elementRef)}
+      type="button"
+      size={trigger ? "sm" : "xs"}
+      variant={look}
+      colorPalette={variant === "filled" ? FILLED : undefined}
+      {...rest}
+    />
+  );
+});
+
+/** Quiet; a pinned column's pin is filled, an unpinned one grey. */
+function IconButton({
+  elementRef,
+  variant,
+  tone,
+  fullWidth: _fullWidth,
+  justify: _justify,
+  busy: _busy,
+  ...rest
+}: Readonly<KitIconButtonProps>) {
+  "use no memo";
+  const filled = variant === "filled";
+  let color: string | undefined;
+  if (filled) color = FILLED;
+  else if (tone === "neutral") color = "gray";
+  return (
+    <ChakraIconButton
+      ref={elementRef}
+      type="button"
+      size="xs"
+      variant={filled ? "solid" : "ghost"}
+      colorPalette={color}
+      {...rest}
+    />
+  );
+}
+
+/** A labelled native choice. */
+function Select({
+  value,
+  options,
+  onValueChange,
+  rootPart,
+  label,
+  disabled,
+  fullWidth: _fullWidth,
+  className,
+  style,
+  "aria-label": ariaLabel,
+}: Readonly<KitSelectProps>) {
+  "use no memo";
+  return (
+    <Field.Root disabled={disabled} className={className} style={style}>
+      {label ? <Field.Label fontSize="xs">{label}</Field.Label> : null}
+      <NativeSelect
+        size="xs"
+        aria-label={ariaLabel}
+        value={value}
+        disabled={disabled}
+        data-adapttable-part={rootPart}
+        onChange={(event) => onValueChange(event.target.value)}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </NativeSelect>
+    </Field.Root>
+  );
+}
+
+/** The rename field: Chakra's field holds the label, input and error. */
+function RenameField({
+  id,
+  elementRef,
+  label,
+  value,
+  error,
+  errorId,
+  onValueChange,
+  onBlur,
+  onKeyDown,
+}: Readonly<KitRenameFieldProps>): ReactElement {
+  "use no memo";
+  return (
+    <Field.Root invalid={error !== undefined}>
+      <Field.Label
+        htmlFor={id}
+        data-adapttable-part="column-rename-label"
+        fontSize="xs"
+        mb={1}
+      >
+        {label}
+      </Field.Label>
+      <Input
+        ref={elementRef}
+        id={id}
+        value={value}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
+        data-adapttable-part="column-rename-input"
+        size="xs"
+        onChange={(event) => onValueChange(event.target.value)}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
+      />
+      {error ? (
+        <ChakraText
+          id={errorId}
+          role="alert"
+          data-adapttable-part="column-rename-error"
+          color="red.500"
+          fontSize="xs"
+          mt={1}
+        >
+          {error}
+        </ChakraText>
+      ) : null}
+    </Field.Root>
+  );
+}
+
+const noop = (): void => undefined;
+
+/**
+ * The panel under its button's end edge, never flipped. The binding owns
+ * Escape, so Escape inside the rename field never closes the whole menu.
+ */
+function Popover({
+  trigger,
+  children,
+  open,
+  onOpenChange,
+  dir,
+  "aria-label": label,
+}: Readonly<KitPopoverProps>) {
+  "use no memo";
+  return (
+    <ChakraPopover.Root
+      open={open}
+      onOpenChange={(event) => onOpenChange?.(event.open)}
       closeOnEscape={false}
       positioning={{ placement: "bottom-end", flip: false }}
       lazyMount
     >
-      <Popover.Trigger asChild>
-        <Button
-          size="sm"
-          variant="outline"
-          data-adapttable-part="column-menu-button"
-        >
-          {labels.columns}
-        </Button>
-      </Popover.Trigger>
+      <ChakraPopover.Trigger asChild>
+        {/* Chakra toggles from its own trigger props. */}
+        {trigger({
+          elementRef: noop,
+          onClick: noop,
+          "aria-expanded": open === true,
+          "aria-haspopup": "dialog",
+        })}
+      </ChakraPopover.Trigger>
       <KitPortal>
-        <Popover.Positioner>
-          <Popover.Content
-            aria-label={labels.columns}
-            minW="260px"
-            w="auto"
-            dir={dir}
-            maxH="min(var(--available-height), 70vh, 480px)"
-            overflowY="auto"
-          >
-            <Popover.Body px={2} py={2}>
-              <Text
-                fontSize="xs"
-                fontWeight="600"
-                textTransform="uppercase"
-                letterSpacing="0.06em"
-                color="gray.500"
-                px={1}
-                pb={1}
-              >
-                {labels.columns}
-              </Text>
-              <Input
-                type="search"
-                size="xs"
-                mb={1}
-                data-adapttable-part="column-menu-search"
-                placeholder={labels.searchColumns}
-                aria-label={labels.searchColumns}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <HStack gap={1} mb={1} data-adapttable-part="column-menu-bulk">
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  data-adapttable-part="column-menu-bulk-button"
-                  onClick={() => showAllColumns(rows, layout)}
-                >
-                  {labels.showAllColumns}
-                </Button>
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  data-adapttable-part="column-menu-bulk-button"
-                  onClick={() => hideAllColumns(rows, layout)}
-                >
-                  {labels.hideAllColumns}
-                </Button>
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  data-adapttable-part="column-menu-bulk-button"
-                  onClick={() => unpinAllColumns(rows, layout)}
-                >
-                  {labels.unpinAllColumns}
-                </Button>
-              </HStack>
-              {rows.map((row) => (
-                <ColumnMenuRowItem
-                  key={row.key}
-                  row={row}
-                  layout={layout}
-                  labels={labels}
-                  drag={drag}
-                  sortBy={sortBy}
-                  sortDir={sortDir}
-                  onSortColumn={onSortColumn}
-                  onAutoSizeColumn={onAutoSizeColumn}
-                  onFilterColumn={onFilterColumn}
-                  onRenameColumn={onRenameColumn}
-                  groupingPanel={groupingPanel}
-                />
-              ))}
-              {(hasRowReorder || hasRowActions) && <Separator my={1} />}
-              {hasRowReorder && (
-                <div data-adapttable-part="column-menu-item" data-reorder="">
-                  <HStack gap={1} py={0.5}>
-                    <VisibilityToggle
-                      hidden={reorderHidden}
-                      name={labels.reorderRow}
-                      labels={labels}
-                      onToggle={() => layout.toggleVisible(REORDER_COLUMN_KEY)}
-                    />
-                    <RowName hidden={reorderHidden} name={labels.reorderRow} />
-                    <PinToggle
-                      pinned={reorderPinned}
-                      label={`${reorderPinned ? labels.unpin : labels.pinStart}: ${labels.reorderRow}`}
-                      onClick={() =>
-                        layout.setPinned(
-                          REORDER_COLUMN_KEY,
-                          reorderPinned ? undefined : "start"
-                        )
-                      }
-                    />
-                  </HStack>
-                </div>
-              )}
-              {hasRowActions && (
-                <HStack gap={1} py={0.5}>
-                  <VisibilityToggle
-                    hidden={actionsHidden}
-                    name={labels.actions}
-                    labels={labels}
-                    onToggle={() => layout.toggleVisible(ACTIONS_COLUMN_KEY)}
-                  />
-                  <RowName hidden={actionsHidden} name={labels.actions} />
-                  <PinToggle
-                    pinned={actionsPinned}
-                    label={`${actionsPinned ? labels.unpin : labels.pinEnd}: ${labels.actions}`}
-                    onClick={() =>
-                      layout.setPinned(
-                        ACTIONS_COLUMN_KEY,
-                        actionsPinned ? undefined : "end"
-                      )
-                    }
-                  />
-                </HStack>
-              )}
-              <Separator my={1} />
-              <Button size="xs" variant="ghost" onClick={onAutoSize}>
-                {labels.autoSizeColumns}
-              </Button>
-              <Button size="xs" variant="ghost" onClick={() => layout.reset()}>
-                {labels.resetColumns}
-              </Button>
-            </Popover.Body>
-          </Popover.Content>
-        </Popover.Positioner>
+        <ChakraPopover.Positioner>
+          <ChakraPopover.Content aria-label={label} w="auto" p={0} dir={dir}>
+            {children}
+          </ChakraPopover.Content>
+        </ChakraPopover.Positioner>
       </KitPortal>
-    </Popover.Root>
+    </ChakraPopover.Root>
   );
 }
+
+/** Chakra's step of 4 px between the menu's controls. */
+const STEP = 4;
+
+/** The gap Chakra's field keeps between its label, input and message. */
+const FIELD_GAP = 6;
+
+const LINE = { display: "flex", alignItems: "center", gap: STEP } as const;
+
+const LOOK: KitColumnMenuLook = {
+  panel: {
+    padding: 2 * STEP,
+    minWidth: 260,
+    maxHeight: "min(var(--available-height), 70vh, 480px)",
+  },
+  heading: {
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    color: "var(--chakra-colors-gray-500)",
+    paddingInline: STEP,
+    paddingBottom: STEP,
+  },
+  search: { marginBottom: STEP },
+  bulk: { ...LINE, marginBottom: STEP },
+  row: { ...LINE, paddingBlock: STEP / 2 },
+  rowSpacer: { display: "none" },
+  grip: {},
+  divider: { marginBlock: STEP },
+  submenu: {},
+  choice: {},
+  renameForm: {},
+  // Below the field, past the field's own 6 px gap between its parts.
+  renameActions: { ...LINE, marginTop: STEP + FIELD_GAP },
+  accent: "var(--chakra-colors-blue-500)",
+};
+
+const useLook = (): KitColumnMenuLook => LOOK;
+
+/**
+ * Column-management popover: per-column drag grip (reorder), eye
+ * (show/hide), pin toggle and a list of column actions.
+ */
+export const ColumnMenu = /* @__PURE__ */ createColumnMenu(
+  {
+    Button,
+    IconButton,
+    TextInput,
+    Select,
+    Popover,
+    Text,
+    Divider,
+    RenameField,
+  },
+  useLook
+);

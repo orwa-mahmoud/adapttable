@@ -6,10 +6,12 @@ import {
   type KitButtonProps,
   type KitButtonVariant,
   type KitCheckboxProps,
+  type KitDividerProps,
   type KitIconButtonProps,
   type KitPopoverProps,
   type KitSelectProps,
   type KitTextInputProps,
+  type KitTextProps,
   mergeRefs,
 } from "@adapttable/react/adapter";
 import {
@@ -17,9 +19,12 @@ import {
   IconButton as ChakraIconButton,
   Input,
   Popover as ChakraPopover,
+  Separator,
+  Text as ChakraText,
 } from "@chakra-ui/react";
 import { forwardRef, type ReactElement, useState } from "react";
 
+import { subtleText } from "../styles";
 import { KitPortal } from "./kitPortal";
 import { Checkbox as ChakraCheckbox, NativeSelect } from "./primitives";
 
@@ -241,4 +246,40 @@ export function Popover({
       </KitPortal>
     </ChakraPopover.Root>
   );
+}
+
+/** Chakra's type for each text role the binding asks for. */
+const TEXT_VARIANT = {
+  body: { fontSize: "sm" },
+  caption: { fontSize: "xs" },
+  title: { fontSize: "md", fontWeight: "semibold" },
+} as const;
+
+/** Chakra's colour for each text tone. */
+const TEXT_TONE = {
+  secondary: subtleText,
+  disabled: { color: "gray.500" },
+  danger: { color: "red.500" },
+} as const;
+
+/** Text in Chakra's type: body unless the binding asks otherwise. */
+export function Text({
+  variant = "body",
+  tone,
+  ...rest
+}: Readonly<KitTextProps>): ReactElement {
+  "use no memo";
+  return (
+    <ChakraText
+      {...TEXT_VARIANT[variant]}
+      {...(tone ? TEXT_TONE[tone] : undefined)}
+      {...rest}
+    />
+  );
+}
+
+/** A horizontal rule. */
+export function Divider({ style }: Readonly<KitDividerProps>): ReactElement {
+  "use no memo";
+  return <Separator style={style} />;
 }
