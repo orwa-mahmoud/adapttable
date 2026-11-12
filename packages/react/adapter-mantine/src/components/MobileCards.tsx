@@ -7,6 +7,7 @@ import {
   MobileCardsChrome,
   type MobileCardSlotKit,
   mobileCardSlots,
+  MobileTarget,
   OptionalEditableCell,
   OptionalExpandToggle,
   OptionalGroupHeaderCard,
@@ -32,7 +33,6 @@ import {
 } from "react";
 
 import type { Density } from "../density";
-import { MobileTarget } from "./mobileTarget";
 import { RowActionButtons } from "./RowActionButtons";
 
 /**

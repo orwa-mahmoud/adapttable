@@ -70,6 +70,7 @@ import { PageSelector } from '@adapttable/react';
 import { PaginatedResponse } from '@adapttable/react/adapter';
 import { PaginationMode } from '@adapttable/react/adapter';
 import { PivotPanelChromeProps } from '@adapttable/react/adapter';
+import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { resolveFilterRegistry } from '@adapttable/react/adapter';
 import { RowAction } from '@adapttable/react/adapter';
@@ -127,8 +128,8 @@ export interface ActiveFilterChipsProps {
     removeLabel?: (label: string) => string;
 }
 
-// @public (undocumented)
-export function AgentApproval(props: Readonly<AgentApprovalProps>): JSX.Element;
+// @public
+export const AgentApproval: (props: Readonly<AgentApprovalProps>) => ReactElement;
 
 // @public
 export function agentApproval(): StaticTableFeature;
@@ -149,7 +150,7 @@ export interface AutoFilterFormProps<TRow> {
 export { BaseDataTableProps }
 
 // @public
-export function BatchEditBar<TRow>(props: Readonly<BatchEditBarProps<TRow>>): JSX.Element;
+export const BatchEditBar: <TRow>(props: Readonly<BatchEditBarProps<TRow>>) => ReactElement;
 
 export { BatchEditBarProps }
 
@@ -179,7 +180,7 @@ export { ColumnGroupDef }
 export { ColumnGroupShow }
 
 // @public
-export function ColumnGroupToggle(props: Readonly<ColumnGroupToggleProps>): JSX.Element;
+export const ColumnGroupToggle: (props: Readonly<ColumnGroupToggleProps>) => ReactElement;
 
 export { ColumnGroupToggleProps }
 
@@ -319,12 +320,12 @@ export interface FilterDrawerProps {
 }
 
 // @public
-export function FilterHeaderControl<TRow>(props: Readonly<FilterHeaderControlProps<TRow>>): JSX.Element;
+export const FilterHeaderControl: <TRow>(props: Readonly<FilterHeaderControlProps<TRow>>) => ReactElement | null;
 
 export { FilterHeaderControlProps }
 
 // @public
-export function FilterHeaderRow<TRow>(props: Readonly<FilterHeaderRowProps<TRow>>): JSX.Element;
+export const FilterHeaderRow: <TRow>(props: Readonly<FilterHeaderRowProps<TRow>>) => ReactElement | null;
 
 export { FilterHeaderRowProps }
 
@@ -344,7 +345,7 @@ export { FilterTypeSpec }
 export { FilterValue }
 
 // @public
-export function FindBar(props: Readonly<FindBarProps>): JSX.Element;
+export const FindBar: (props: Readonly<FindBarProps>) => ReactElement;
 
 export { FindBarProps }
 
@@ -354,7 +355,7 @@ export { getHistoryAdapter }
 export function GroupingPanel<TRow>(props: Readonly<Omit<GroupingPanelChromeProps<TRow>, "slots">>): JSX.Element;
 
 // @public
-export function GroupMoreButton(props: Readonly<GroupMoreButtonProps>): JSX.Element;
+export const GroupMoreButton: (props: Readonly<GroupMoreButtonProps>) => ReactElement | null;
 
 export { GroupMoreButtonProps }
 
@@ -398,17 +399,17 @@ export { RowAction }
 export { RowActionsRenderer }
 
 // @public
-export function RowEditActions<TRow>(props: Readonly<RowEditActionsProps<TRow>>): JSX.Element;
+export const RowEditActions: <TRow>(props: Readonly<RowEditActionsProps<TRow>>) => ReactElement;
 
 export { RowEditActionsProps }
 
 // @public
-export function RowReorderButtons<TRow>(props: Readonly<RowReorderButtonsProps<TRow>>): JSX.Element;
+export const RowReorderButtons: <TRow>(props: Readonly<RowReorderButtonsProps<TRow>>) => ReactElement;
 
 export { RowReorderButtonsProps }
 
 // @public
-export function RowReorderHandle<TRow>(props: Readonly<RowReorderHandleProps<TRow>>): JSX.Element;
+export const RowReorderHandle: <TRow>(props: Readonly<RowReorderHandleProps<TRow>>) => ReactElement;
 
 export { RowReorderHandleProps }
 
@@ -461,12 +462,12 @@ export { TableSource }
 export { ToolbarSlots }
 
 // @public
-export function TreeCell<TRow>(props: Readonly<TreeCellProps<TRow>>): JSX.Element;
+export const TreeCell: <TRow>(props: Readonly<TreeCellProps<TRow>>) => ReactElement;
 
 export { TreeCellProps }
 
 // @public
-export function TreeToggle<TRow>(props: Readonly<TreeToggleProps<TRow>>): JSX.Element;
+export const TreeToggle: <TRow>(props: Readonly<TreeToggleProps<TRow>>) => ReactElement | null;
 
 export { TreeToggleProps }
 

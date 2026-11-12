@@ -24,6 +24,7 @@ import {
   type FilterHeaderRowProps,
   type FindBarProps,
   type GroupMoreButtonProps,
+  type KitPopoverProps,
   type RowEditActionsProps,
   type RowReorderButtonsProps,
   type RowReorderHandleProps,
@@ -58,7 +59,19 @@ export type {
   TreeToggleProps,
 };
 
-const headerKit = { TextInput, Select, Button, Checkbox, Popover };
+/** The header filter's list of choices is at least a comfortable 160 px. */
+function HeaderPopover(props: Readonly<KitPopoverProps>) {
+  "use no memo";
+  return <Popover {...props} style={{ ...props.style, minWidth: 160 }} />;
+}
+
+const headerKit = {
+  TextInput,
+  Select,
+  Button,
+  Checkbox,
+  Popover: HeaderPopover,
+};
 
 /**
  * The filter row under the column headers, drawn with this kit's controls.
