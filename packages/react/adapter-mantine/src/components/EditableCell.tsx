@@ -1,108 +1,119 @@
+/** The in-place cell editor and editable cell, drawn with Mantine's inputs. */
 import {
-  type ColumnDef,
-  type EditableCellEditing,
-  type EditableCellEditorCtrl,
-  EditableCellGate,
-} from "@adapttable/react";
-import {
-  commitBooleanDraft,
-  editorBusyProps,
-  editorInputType,
-  editorValidationProps,
+  createCellEditor,
+  createEditableCell,
   formatMultiDraft,
-  isBooleanEditor,
-  isDraftChecked,
-  isMultiSelectEditor,
-  isSelectEditor,
+  type KitCellCheckboxProps,
+  type KitCellEditorProps,
+  type KitCellInputProps,
   readMultiDraft,
-  stopEditKeys,
 } from "@adapttable/react/adapter";
-import { Checkbox, MultiSelect, Select, TextInput } from "@mantine/core";
-import type { KeyboardEvent, ReactElement, ReactNode } from "react";
+import {
+  Checkbox as MantineCheckbox,
+  MultiSelect as MantineMultiSelect,
+  Select as MantineSelect,
+  TextInput,
+} from "@mantine/core";
 
 import { editableCellSlots } from "./kitControls";
 
-/** Mantine text / number / select editor for the active cell. */
-export function MantineCellEditor({
+function Checkbox({
   ctrl,
   label,
-}: Readonly<{
-  ctrl: EditableCellEditorCtrl;
-  label: string;
-}>): ReactElement {
-  const onKeyDown = (event: KeyboardEvent) => {
-    ctrl.onEditorKeyDown(event);
-    stopEditKeys(event);
-  };
-
-  if (isBooleanEditor(ctrl.editor)) {
-    return (
-      <Checkbox
-        ref={ctrl.focusRef}
-        data-adapttable-part="edit-cell-editor"
-        aria-label={label}
-        checked={isDraftChecked(ctrl.draft)}
-        onChange={(event) =>
-          commitBooleanDraft(ctrl, event.currentTarget.checked)
-        }
-        onKeyDown={onKeyDown}
-        {...editorValidationProps(ctrl)}
-      />
-    );
-  }
-
-  if (isMultiSelectEditor(ctrl.editor)) {
-    return (
-      <MultiSelect
-        error={ctrl.conflict === true ? undefined : ctrl.error}
-        {...editorBusyProps(ctrl)}
-        ref={ctrl.focusRef}
-        data-adapttable-part="edit-cell-editor"
-        aria-label={label}
-        size="xs"
-        data={ctrl.selectOptions.map((option) => ({
-          value: option.value,
-          label: option.label,
-        }))}
-        value={readMultiDraft(ctrl.draft)}
-        onChange={(values) => ctrl.setDraft(formatMultiDraft(values))}
-        onKeyDown={onKeyDown}
-        onBlur={ctrl.commitOnBlur}
-      />
-    );
-  }
-
-  if (isSelectEditor(ctrl.editor)) {
-    return (
-      <Select
-        error={ctrl.conflict === true ? undefined : ctrl.error}
-        {...editorBusyProps(ctrl)}
-        ref={ctrl.focusRef}
-        data-adapttable-part="edit-cell-editor"
-        aria-label={label}
-        size="xs"
-        data={ctrl.selectOptions.map((option) => ({
-          value: option.value,
-          label: option.label,
-        }))}
-        value={ctrl.draft}
-        onChange={(value) => ctrl.setDraft(value ?? "")}
-        onKeyDown={onKeyDown}
-        onBlur={ctrl.commitOnBlur}
-        allowDeselect={false}
-      />
-    );
-  }
-
+  aria,
+  checked,
+  onCheckedChange,
+  onKeyDown,
+}: Readonly<KitCellCheckboxProps>) {
+  "use no memo";
   return (
-    <TextInput
-      error={ctrl.conflict === true ? undefined : ctrl.error}
-      {...editorBusyProps(ctrl)}
+    <MantineCheckbox
+      ref={ctrl.focusRef}
+      data-adapttable-part="edit-cell-editor"
+      aria-label={label}
+      checked={checked}
+      onChange={(event) => onCheckedChange(event.currentTarget.checked)}
+      onKeyDown={onKeyDown}
+      {...aria}
+    />
+  );
+}
+
+const optionsOf = (ctrl: KitCellEditorProps["ctrl"]) =>
+  ctrl.selectOptions.map((option) => ({
+    value: option.value,
+    label: option.label,
+  }));
+
+function MultiSelect({
+  ctrl,
+  label,
+  aria,
+  error,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <MantineMultiSelect
+      error={error}
+      {...aria}
       ref={ctrl.focusRef}
       data-adapttable-part="edit-cell-editor"
       aria-label={label}
       size="xs"
-      type={editorInputType(ctrl.editor)}
+      data={optionsOf(ctrl)}
+      value={readMultiDraft(ctrl.draft)}
+      onChange={(values) => ctrl.setDraft(formatMultiDraft(values))}
+      onKeyDown={onKeyDown}
+      onBlur={ctrl.commitOnBlur}
+    />
+  );
+}
+
+function Select({
+  ctrl,
+  label,
+  aria,
+  error,
+  onKeyDown,
+}: Readonly<KitCellEditorProps>) {
+  "use no memo";
+  return (
+    <MantineSelect
+      error={error}
+      {...aria}
+      ref={ctrl.focusRef}
+      data-adapttable-part="edit-cell-editor"
+      aria-label={label}
+      size="xs"
+      data={optionsOf(ctrl)}
+      value={ctrl.draft}
+      onChange={(value) => ctrl.setDraft(value ?? "")}
+      onKeyDown={onKeyDown}
+      onBlur={ctrl.commitOnBlur}
+      allowDeselect={false}
+    />
+  );
+}
+
+function Input({
+  ctrl,
+  label,
+  aria,
+  error,
+  type,
+  onKeyDown,
+}: Readonly<KitCellInputProps>) {
+  "use no memo";
+  return (
+    <TextInput
+      error={error}
+      {...aria}
+      ref={ctrl.focusRef}
+      data-adapttable-part="edit-cell-editor"
+      aria-label={label}
+      size="xs"
+      type={type}
       value={ctrl.draft}
       onChange={(event) => ctrl.setDraft(event.currentTarget.value)}
       onKeyDown={onKeyDown}
@@ -111,40 +122,18 @@ export function MantineCellEditor({
   );
 }
 
-/** Opt-in editable cell — pass-through when `editing` is omitted.
- * Callers precompute `display` in the row so memoized rows still re-invoke
- * accessors when selection/expansion changes.
- */
-export function EditableDataCell<TRow>(props: {
-  readonly editing: EditableCellEditing<TRow> | undefined;
-  readonly row: TRow;
-  readonly column: ColumnDef<TRow>;
-  readonly rowId: string;
-  readonly rows: readonly TRow[];
-  readonly columns: readonly ColumnDef<TRow>[];
-  readonly rowKey: (row: TRow) => string;
-  readonly editLabel: string;
-  /** `labels.undoEdit` — the control a failed save offers. */
-  readonly undoLabel?: string;
-  readonly display: ReactNode;
-}): ReactElement {
-  return (
-    <EditableCellGate
-      kitRendersError
-      editing={props.editing}
-      row={props.row}
-      column={props.column}
-      rowId={props.rowId}
-      rows={props.rows}
-      columns={props.columns}
-      rowKey={props.rowKey}
-      editLabel={props.editLabel}
-      undoLabel={props.undoLabel}
-      display={props.display}
-      slots={editableCellSlots}
-      renderEditor={(ctrl) => (
-        <MantineCellEditor ctrl={ctrl} label={props.editLabel} />
-      )}
-    />
-  );
-}
+/** The editor for the active cell, with Mantine's inputs. */
+export const MantineCellEditor = /* @__PURE__ */ createCellEditor({
+  Checkbox,
+  MultiSelect,
+  Select,
+  Input,
+  rendersError: true,
+});
+
+/** A cell that edits in place; shows its value until editing starts. */
+export const EditableDataCell = /* @__PURE__ */ createEditableCell({
+  Editor: MantineCellEditor,
+  slots: editableCellSlots,
+  rendersError: true,
+});
