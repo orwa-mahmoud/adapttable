@@ -39,6 +39,7 @@ export interface UseQuerySourceOptions<
   | "numberExtraKeys"
   | "arrayExtraKeys"
   | "urlKey"
+  | "store"
 > {
   /**
    * The caller's paginated-query hook, built on `useInfiniteQuery`. It

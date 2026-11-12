@@ -226,6 +226,7 @@ import { TableOptions } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
+import { TableStore } from '@adapttable/core/binding';
 import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
 import { TextFieldWidget } from '@adapttable/core';
@@ -1399,7 +1400,7 @@ export interface UseFindInTableOptions<TRow> {
 export function useFrontendData<TRow>(options: UseFrontendDataOptions<TRow>): TableSource<TRow>;
 
 // @public
-export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+export interface UseFrontendDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey" | "store"> {
     active?: boolean;
     columns?: readonly ColumnDef<TRow>[];
     createEngine?: FrontendEngineFactory<TRow>;
@@ -1516,7 +1517,7 @@ export function usePrefersReducedMotion(): boolean;
 export function useQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(options: UseQuerySourceOptions<TRow, TParams, TPage>): TableSource<TRow>;
 
 // @public
-export interface UseQuerySourceOptions<TRow, TParams extends TableQueryParams, TPage> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+export interface UseQuerySourceOptions<TRow, TParams extends TableQueryParams, TPage> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey" | "store"> {
     aggregates?: readonly QueryAggregate[];
     baseParams?: Partial<TParams>;
     columns?: readonly ColumnMetadata<TRow>[];
@@ -1628,7 +1629,7 @@ export interface UseSelectionOptions<TRow> {
 export function useServerData<TRow>(options: UseServerDataOptions<TRow>): TableSource<TRow>;
 
 // @public
-export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey" | "store"> {
     active?: boolean;
     aggregates?: readonly QueryAggregate[];
     columns?: readonly ColumnMetadata<TRow>[];
@@ -1669,7 +1670,7 @@ export function useTableChrome<TRow>(props: ComposedTableProps<TRow>): TableChro
 export function useTableData<TRow>(options: UseTableDataOptions<TRow>): UseTableDataResult<TRow>;
 
 // @public
-export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
+export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey" | "store"> {
     aggregates?: readonly QueryAggregate[];
     columns: readonly ColumnDef<TRow>[];
     data?: readonly TRow[];
@@ -1716,6 +1717,7 @@ export interface UseTableUrlStateOptions {
         extra?: ExtraFilters;
     };
     numberExtraKeys?: readonly string[];
+    store?: TableStore;
     urlAdapter?: UrlStateAdapter;
     urlKey?: string;
     urlSync?: boolean;

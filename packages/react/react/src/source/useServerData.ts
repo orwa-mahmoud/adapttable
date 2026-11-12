@@ -55,6 +55,7 @@ export interface UseServerDataOptions<TRow> extends Pick<
   | "numberExtraKeys"
   | "arrayExtraKeys"
   | "urlKey"
+  | "store"
 > {
   /** The current page of rows, exactly as the server returned them. */
   rows: readonly TRow[];

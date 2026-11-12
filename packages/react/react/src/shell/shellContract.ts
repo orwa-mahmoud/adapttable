@@ -12,6 +12,7 @@ import {
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
+import type { TableStore } from "@adapttable/core/binding";
 import { type ReactNode, type RefCallback, type RefObject } from "react";
 
 import type { TableChrome } from "../chrome/tableChromeContract";
@@ -207,6 +208,8 @@ export interface DataTableShellGroupingPanelProps<TRow> {
  * @public
  */
 export interface DataTableShellResult<TRow> {
+  /** The table's one store, which its feature components share. */
+  tableStore: TableStore;
   /** Cell-navigation state; inert unless `cellNavigation` is set. */
   gridFocus: GridFocusState;
   /** What to announce when the rows change. */

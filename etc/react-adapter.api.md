@@ -676,6 +676,7 @@ import { TableSource } from '@adapttable/core';
 import { TableSourceCapabilities } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
 import { TableStatusAnnouncementOptions } from '@adapttable/core';
+import { TableStore } from '@adapttable/core/binding';
 import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
 import { TdHTMLAttributes } from 'react';
@@ -1704,6 +1705,7 @@ export interface DataTableShellResult<TRow> {
     statusAnnouncement: string;
     table: UseDataTableResult<TRow>;
     tableProps: DataTableShellTableProps<TRow>;
+    tableStore: TableStore;
     toolbarProps: DataTableShellToolbarProps<TRow>;
     urlAdapter: UrlStateAdapter;
 }
@@ -5195,7 +5197,7 @@ export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, 
 }
 
 // @public
-export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey"> {
+export interface UseServerDataOptions<TRow> extends Pick<UseTableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "numberExtraKeys" | "arrayExtraKeys" | "urlKey" | "store"> {
     active?: boolean;
     aggregates?: readonly QueryAggregate[];
     columns?: readonly ColumnMetadata<TRow>[];
@@ -5247,6 +5249,7 @@ export interface UseTableUrlStateOptions {
         extra?: ExtraFilters;
     };
     numberExtraKeys?: readonly string[];
+    store?: TableStore;
     urlAdapter?: UrlStateAdapter;
     urlKey?: string;
     urlSync?: boolean;

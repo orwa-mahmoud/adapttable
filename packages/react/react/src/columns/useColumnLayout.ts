@@ -6,9 +6,16 @@ import {
   createColumnLayoutController,
   type UseColumnLayoutResult,
 } from "@adapttable/core";
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import type { ColumnDef } from "../columnDef";
+import { TableStoreContext } from "../state/tableStoreContext";
 
 export type {
   ColumnLayoutState,
@@ -88,8 +95,11 @@ export function useColumnLayout<TRow>({
   // the store's latest commit, so two mutations in ONE event handler compose
   // (the second sees the first's result) instead of the last write silently
   // winning; a render hands the host's value back over.
+  const table = useContext(TableStoreContext);
   const [controller] = useState(() =>
-    createColumnLayoutController<TRow, ColumnDef<TRow>>(defaultColumnLayout)
+    createColumnLayoutController<TRow, ColumnDef<TRow>>(defaultColumnLayout, {
+      store: table,
+    })
   );
   const { store } = controller;
   store.control({ value: layout, onChange: onLayoutChange });

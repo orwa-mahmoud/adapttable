@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import { ForcedColorsStyle } from "../a11y/forcedColors";
 import type { TableChrome } from "../chrome/tableChromeContract";
 import type { ComposedTableProps } from "../props";
+import { TableStoreContext } from "../state/tableStoreContext";
 import {
   type DataTableShellResult,
   finishDataTableShell,
@@ -85,7 +86,7 @@ export function DataTableShellView<TRow>({
   readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode {
   return (
-    <>
+    <TableStoreContext.Provider value={shell.tableStore}>
       <ForcedColorsStyle />
       <HistoryLiveGate shell={shell}>
         {(withHistory) => (
@@ -110,6 +111,6 @@ export function DataTableShellView<TRow>({
           </ChromeExtrasGate>
         )}
       </HistoryLiveGate>
-    </>
+    </TableStoreContext.Provider>
   );
 }

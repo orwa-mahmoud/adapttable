@@ -24,25 +24,31 @@ const writes: string[] = [];
 // Every frame, so a write made deep inside a render still shows the render.
 Error.stackTraceLimit = Infinity;
 
+/** A store whose writes, and its scopes' writes, are recorded. */
+function recorded(
+  store: TableStoreModule.TableStore
+): TableStoreModule.TableStore {
+  const record = () => writes.push(new Error("store write").stack ?? "");
+  return {
+    ...store,
+    dispatch: (action) => {
+      record();
+      store.dispatch(action);
+    },
+    batch: (run) => {
+      record();
+      store.batch(run);
+    },
+    scope: (seed) => recorded(store.scope(seed)),
+  };
+}
+
 vi.mock("../../../shared/core/src/state/tableStore", async (load) => {
   const actual = await load<typeof TableStoreModule>();
   return {
     ...actual,
-    createTableStore: () => {
-      const store = actual.createTableStore();
-      const record = () => writes.push(new Error("store write").stack ?? "");
-      return {
-        ...store,
-        dispatch: (action: Parameters<typeof store.dispatch>[0]) => {
-          record();
-          store.dispatch(action);
-        },
-        batch: (run: Parameters<typeof store.batch>[0]) => {
-          record();
-          store.batch(run);
-        },
-      };
-    },
+    createTableStore: (seed?: Parameters<typeof actual.createTableStore>[0]) =>
+      recorded(actual.createTableStore(seed)),
   };
 });
 

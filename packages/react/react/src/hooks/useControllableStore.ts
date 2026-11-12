@@ -9,7 +9,9 @@ import {
   type ControllableStoreOptions,
   createControllableStore,
 } from "@adapttable/core";
-import { useState, useSyncExternalStore } from "react";
+import { useContext, useState, useSyncExternalStore } from "react";
+
+import { TableStoreContext } from "../state/tableStoreContext";
 
 /** No host value: the store holds the state itself. */
 export const UNCONTROLLED = { value: undefined } as const;
@@ -27,7 +29,11 @@ export function useControllableStore<T>(
   control: ControllableControl<T>,
   options?: ControllableStoreOptions<T>
 ): readonly [value: T, store: ControllableStore<T>] {
-  const [store] = useState(() => createControllableStore(initial(), options));
+  // Inside a table the value is a slice of the table's store.
+  const table = useContext(TableStoreContext);
+  const [store] = useState(() =>
+    createControllableStore(initial(), { ...options, store: table })
+  );
   store.control(control);
   const value = useSyncExternalStore(
     store.subscribe,

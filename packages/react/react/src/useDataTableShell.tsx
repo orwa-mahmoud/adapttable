@@ -9,6 +9,7 @@ import {
   type TableSource,
 } from "@adapttable/core";
 import {
+  createTableStore,
   finishShellBody,
   resolveTableLabels,
   sortedColumnName,
@@ -98,6 +99,9 @@ export function useDataTableShell<TRow>(
 ): DataTableShellResult<TRow> {
   const props = useTableFeatures(incoming);
   const featureHost = featureHostOf(props);
+  // One store per table: its view state, selection, column layout and
+  // expansion are slices of it.
+  const [tableStore] = useState(createTableStore);
   const { density, onDensityChange: requestDensityChange } =
     useResolvedDensity(props);
   // ONE resolved URL backend for everything in this table: the tier hooks
@@ -139,6 +143,7 @@ export function useDataTableShell<TRow>(
     // the tier hooks would otherwise apply it a second time — routing the
     // active tier to a private store that saved views cannot see.
     urlKey: props.urlKey,
+    store: tableStore,
     columns: dataColumns,
     filters: props.filters,
     filterTypes: props.filterTypes,
@@ -290,6 +295,8 @@ export function useDataTableShell<TRow>(
   });
 
   return {
+    /** The table's one store, which its feature components share. */
+    tableStore,
     /** Cell-navigation state; inert unless `cellNavigation` is set. */
     gridFocus,
     /** What to announce when the rows change; pass to `TableStatusAnnouncer`. */

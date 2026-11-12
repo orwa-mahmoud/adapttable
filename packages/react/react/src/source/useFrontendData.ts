@@ -42,6 +42,7 @@ export interface UseFrontendDataOptions<TRow> extends Pick<
   | "numberExtraKeys"
   | "arrayExtraKeys"
   | "urlKey"
+  | "store"
 > {
   /** The source array. Filtered / sorted / sliced internally by state. */
   data: readonly TRow[];
