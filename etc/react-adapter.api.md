@@ -2928,7 +2928,7 @@ export interface KitBulkBarFrameProps extends KitDataAttributes {
 }
 
 // @public
-export type KitBulkButtonKind = "clear" | "select-all-matching" | "action";
+export type KitBulkButtonKind = "clear" | "clear-scope" | "select-all-matching" | "action";
 
 // @public
 export interface KitBulkButtonProps extends KitDataAttributes {

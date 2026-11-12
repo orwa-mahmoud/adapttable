@@ -36,12 +36,14 @@ export interface KitBulkTextProps extends KitDataAttributes {
 }
 
 /**
- * Which button of the bar a kit is drawing: clear the selection, extend or
- * clear the scope, or one of the host's actions.
+ * Which button of the bar a kit is drawing: clear the selection, clear the
+ * all-matching scope, extend a full page to every matching row, or one of the
+ * host's actions.
  *
  * @public
  */
-export type KitBulkButtonKind = "clear" | "select-all-matching" | "action";
+export type KitBulkButtonKind =
+  "clear" | "clear-scope" | "select-all-matching" | "action";
 
 /**
  * A button of the bar.
@@ -169,7 +171,9 @@ export function createBulkBar(
                 button: (
                   <Button
                     kind={
-                      selection.allMatching ? "clear" : "select-all-matching"
+                      selection.allMatching
+                        ? "clear-scope"
+                        : "select-all-matching"
                     }
                     data-adapttable-part="select-all-button"
                     busy={false}
