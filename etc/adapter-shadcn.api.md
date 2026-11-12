@@ -184,6 +184,7 @@ export const shadcnClassNames: {
     table: string;
     headerCell: string;
     columnSelect: string;
+    headerCaptionControl: string;
     sortButton: string;
     row: string;
     cell: string;

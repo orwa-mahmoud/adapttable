@@ -349,6 +349,8 @@ export interface DataTableClassNames {
   headerGroupCell?: string;
   /** Collapse/expand control inside a collapsible group header. */
   columnGroupToggle?: string;
+  /** The caption inside a header cell: its sort control or its plain label. */
+  headerCaptionControl?: string;
   /** The sort control inside a header cell. */
   sortButton?: string;
   /** The 1-based multi-sort position badge inside a sorted header. */

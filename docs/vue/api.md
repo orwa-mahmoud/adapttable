@@ -622,7 +622,8 @@ Additional class hooks land on their corresponding functional elements:
 
 - Chips: `chips`, `chip`, `chipRemove`.
 - Actions and headers: `actionButton`, `rowActionsMenu`, `rowActionsTrigger`,
-  `sortIndex`, `headerActions`, `expandHeader`, `expandCell`.
+  `headerCaptionControl`, `sortIndex`, `headerActions`, `expandHeader`,
+  `expandCell`.
 - Loading: `loadingTable`, `loadingHeaderRow`, `loadingHeaderCell`, `loadingRow`,
   `loadingCell`, `loadingCards`, `loadingCard`, `loadingLine`.
 - Affordances and announcements: `searchIcon`, `exportSpinner`,

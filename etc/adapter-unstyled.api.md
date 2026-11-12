@@ -357,6 +357,7 @@ export interface DataTableClassNames {
     groupSelect?: string;
     groupToggle?: string;
     headerActions?: string;
+    headerCaptionControl?: string;
     headerCell?: string;
     headerGroupCell?: string;
     headerGroupRow?: string;

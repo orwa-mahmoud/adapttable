@@ -105,6 +105,7 @@ export interface TableChromeClassNames extends TableSummaryClassNames {
   readonly tr?: string;
   readonly th?: string;
   readonly td?: string;
+  readonly headerCaptionControl?: string;
   readonly sortButton?: string;
   readonly sortIndex?: string;
   readonly headerActions?: string;
@@ -328,6 +329,14 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
               "SortButton"
             )
           : content;
+      const captionControl = h(
+        "span",
+        {
+          "data-adapttable-part": "header-caption-control",
+          class: classNames.headerCaptionControl,
+        },
+        [caption]
+      );
       return h(
         "th",
         {
@@ -339,7 +348,9 @@ export const DesktopTableChrome = /* @__PURE__ */ withProps(
           key,
         },
         [
-          leaf.rename ? leaf.rename(caption, { ...classNames }) : caption,
+          leaf.rename
+            ? leaf.rename(captionControl, { ...classNames })
+            : captionControl,
           leaf.selection?.(classNames.columnSelect),
           leaf.filter?.(classNames.filterHeaderTrigger),
           !hasHeaderActionContent(actions)

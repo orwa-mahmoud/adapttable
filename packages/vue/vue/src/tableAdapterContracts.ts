@@ -264,6 +264,7 @@ export interface DataTableClassNames {
   readonly tr?: string;
   readonly th?: string;
   readonly td?: string;
+  readonly headerCaptionControl?: string;
   readonly sortButton?: string;
   readonly sortIndex?: string;
   readonly headerActions?: string;

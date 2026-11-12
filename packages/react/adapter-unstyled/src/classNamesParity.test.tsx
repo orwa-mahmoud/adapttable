@@ -829,6 +829,7 @@ const KEYS = [
   "headerGroupRow",
   "headerGroupCell",
   "columnGroupToggle",
+  "headerCaptionControl",
   "sortButton",
   "sortIndex",
   "tbody",

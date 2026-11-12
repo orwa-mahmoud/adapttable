@@ -126,6 +126,7 @@ plain CSS, Tailwind, and shadcn tokens all work. The main parts are below;
 | `table` / `thead` / `tbody`            | The `<table>` and its sections.                                                              |
 | `headerRow` / `headerCell`             | The header `<tr>` and one `<th>`.                                                            |
 | `groupRow` / `groupCell`               | The grouped-header row and one spanning cell.                                                |
+| `headerCaptionControl`                 | A header's caption: its sort button or its plain label.                                      |
 | `sortButton` / `sortIndex`             | A sortable header's button and its multi-sort badge.                                         |
 | `row` / `cell`                         | One body `<tr>` and one `<td>`.                                                              |
 | `actionsCell` / `actionButton`         | The trailing actions cell and one action button.                                             |

@@ -429,6 +429,14 @@ function LeafHeader<TRow>({
   ) : (
     <span title={column.headerTooltip}>{leaf.caption}</span>
   );
+  const control = (
+    <span
+      data-adapttable-part="header-caption-control"
+      className={classNames.headerCaptionControl}
+    >
+      {caption}
+    </span>
+  );
   return (
     <th
       key={column.key}
@@ -449,10 +457,10 @@ function LeafHeader<TRow>({
           labels={labels}
           onRenameColumn={onRenameColumn}
         >
-          {caption}
+          {control}
         </OptionalColumnHeaderRename>
       ) : (
-        caption
+        control
       )}
       {leaf.showColumnCheckbox && leaf.onToggleColumn && (
         <OptionalColumnSelect
