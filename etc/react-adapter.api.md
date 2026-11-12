@@ -1594,6 +1594,12 @@ export function createGroupMoreButton(kit: KitPrimitivesOf<"Button">): (props: R
 export function createMobileCards<TExtra>(kit: KitMobileCards<TExtra>): <TRow>(props: Readonly<KitMobileCardsProps<TRow, TExtra>>) => ReactElement;
 
 // @public
+export function createPageButtons(kit: KitPrimitivesOf<"Button" | "Text">, look: KitPageButtonsLook): (props: Readonly<KitPagesProps>) => ReactElement;
+
+// @public
+export function createPager(kit: KitPager): (view: KitPagerView) => ReactElement;
+
+// @public
 export function createPrintButton(Button: ComponentType<KitButtonProps>): (props: Readonly<ToolbarExtrasSlotProps>) => ReactElement | null;
 
 // @public
@@ -3315,6 +3321,50 @@ export type KitMobileCardsProps<TRow, TExtra> = SharedTableRenderProps<TRow> & {
 export interface KitOption {
     readonly label: string;
     readonly value: string;
+}
+
+// @public
+export interface KitPageButtonsLook {
+    readonly ellipsis: CSSProperties;
+    readonly row: CSSProperties;
+}
+
+// @public
+export interface KitPager {
+    readonly Caption: ComponentType<{
+        readonly children: ReactNode;
+    }>;
+    readonly Frame: ComponentType<KitPagerFrameProps>;
+    readonly Pages: ComponentType<KitPagesProps>;
+    readonly RowsPerPage: ComponentType<KitRowsPerPageProps>;
+}
+
+// @public
+export interface KitPagerFrameProps {
+    readonly pageOf: ReactNode;
+    readonly pages: ReactNode;
+    readonly range: ReactNode;
+    readonly rowsPerPage: ReactNode;
+}
+
+// @public
+export interface KitPagerView {
+    readonly chrome: {
+        readonly grouping?: unknown;
+    };
+    readonly labels: Required<TableLabels>;
+    readonly source: Pick<TableSource<unknown>, "limit" | "defaultLimit" | "total" | "setLimit" | "setPage">;
+    readonly table: {
+        readonly pagination: PaginationInfo;
+    };
+}
+
+// @public
+export interface KitPagesProps {
+    readonly labels: Pick<Required<TableLabels>, "previousPage" | "nextPage" | "goToPage">;
+    readonly onPageChange: (page: number) => void;
+    readonly page: number;
+    readonly totalPages: number;
 }
 
 // @public

@@ -616,6 +616,15 @@ export {
   type KitSummaryField,
 } from "./kit/mobileCards";
 export { MobileTarget, useMobileTarget } from "./kit/mobileTarget";
+export {
+  createPageButtons,
+  createPager,
+  type KitPageButtonsLook,
+  type KitPager,
+  type KitPagerFrameProps,
+  type KitPagerView,
+  type KitPagesProps,
+} from "./kit/pager";
 export type {
   KitButtonProps,
   KitButtonVariant,

@@ -44979,6 +44979,22 @@
       "behavior": ""
     },
     {
+      "export": "createPageButtons",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "createPager",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "value",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
       "export": "createPrintButton",
       "currentImport": "@adapttable/react/adapter",
       "kind": "value",
@@ -47180,6 +47196,46 @@
     },
     {
       "export": "KitOption",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitPageButtonsLook",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitPager",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitPagerFrameProps",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "react-chrome",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitPagerView",
+      "currentImport": "@adapttable/react/adapter",
+      "kind": "type",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/react/adapter",
+      "behavior": ""
+    },
+    {
+      "export": "KitPagesProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
       "class": "neutral-operation",

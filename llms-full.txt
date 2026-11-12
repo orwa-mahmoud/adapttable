@@ -19991,6 +19991,17 @@ The kit gives its button, icon button, text input, popover and divider, and
 the delete button's `deleteIcon`; `useLook` returns `KitSavedViewsLook`, the
 spacing of the panel, the rows, the rule, the save row and the name field.
 
+`createPager(kit)` takes a `KitPager` and returns the table's footer (`KitTable.footer`): the
+page-size choice (none in a grouped table, where every row is on one page),
+the range shown (none while there are no rows), "page n of m" and the page
+controls, laid out by the kit's `Frame` (`KitPagerFrameProps`). The kit gives
+its `RowsPerPage` (`KitRowsPerPageProps`), a `Caption` and its `Pages`
+(`KitPagesProps`); the pager reads only what `KitPagerView` names from the
+finished table. A kit without its own pagination component builds `Pages`
+with `createPageButtons(kit, look)`: previous, the first, last and nearby page
+numbers with an ellipsis where pages are skipped, and next, the current page
+filled and marked `aria-current="page"`, spaced by `KitPageButtonsLook`.
+
 `createDesktopTable(kit)` builds the desktop table: every row with its
 leading rails, column-window spacers, data cells and actions rail, the
 detail row, the header leaves and groups, the virtual spacers and the column
