@@ -1,96 +1,35 @@
 /**
- * The optional toolbar controls, each drawn with Chakra's own components.
- *
- * They render through `TOOLBAR_EXTRAS`, so the button and the feature that
- * makes it work arrive together: a table that never imports `/export` carries
- * neither the handler nor this button.
+ * The toolbar controls the features add, built by the binding from Chakra's
+ * toolbar button; the export keeps Chakra's own progress surface.
  */
 import {
-  type AdapterCommandPaletteTriggerProps,
-  type AdapterFindButtonProps,
-  ExportAnnouncer,
-  ExportProgressChrome,
+  createCommandPaletteButton,
+  createDensityButton,
+  createExportCsvButton,
+  createFindButton,
+  createFullscreenButton,
+  createPrintButton,
+  createUndoRedoButtons,
   type ExportProgressSurfaceSlotProps,
-  type ToolbarExtrasSlotProps,
 } from "@adapttable/react/adapter";
-import { Box, Button, Progress, Spinner, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button as ChakraButton,
+  Progress,
+  Spinner,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import type { ReactNode } from "react";
 
-export function UndoRedoButtons({
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
-  undoLabel,
-  redoLabel,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onUndo || !onRedo) return null;
-  return (
-    <>
-      <Button
-        size="sm"
-        variant="outline"
-        data-adapttable-part="undo-button"
-        disabled={canUndo !== true}
-        onClick={onUndo}
-      >
-        {undoLabel}
-      </Button>
-      <Button
-        size="sm"
-        variant="outline"
-        data-adapttable-part="redo-button"
-        disabled={canRedo !== true}
-        onClick={onRedo}
-      >
-        {redoLabel}
-      </Button>
-    </>
-  );
-}
+import { useAccentColor } from "./accent";
+import { buttonOfSize } from "./kitPrimitives";
 
-export function ExportCsvButton(
-  props: Readonly<ToolbarExtrasSlotProps>
-): ReactNode {
-  const {
-    onExportCsv,
-    exportBusy,
-    exportAnnouncement = "",
-    exportProgressState = null,
-    exportLabel,
-    exportDisabled = false,
-    exportDisabledReason = "",
-    accentColor,
-    labels,
-  } = props;
-  if (!onExportCsv) return null;
-  return (
-    <>
-      {/* Chakra's own loading Button: its Spinner replaces the label and the
-          control blocks itself, which is the kit's own vocabulary for work in
-          progress. */}
-      <Button
-        size="sm"
-        variant="outline"
-        colorPalette={accentColor}
-        data-adapttable-part="export-csv-button"
-        onClick={onExportCsv}
-        loading={exportBusy}
-        aria-busy={exportBusy}
-        disabled={exportDisabled}
-        title={exportDisabled ? exportDisabledReason : undefined}
-      >
-        {exportLabel}
-      </Button>
-      <ExportProgressChrome
-        progress={exportProgressState}
-        labels={labels}
-        slots={{ Surface: ExportProgressSurface }}
-      />
-      <ExportAnnouncer announcement={exportAnnouncement} />
-    </>
-  );
-}
+/** A toolbar button: small and outlined; a busy one shows Chakra's loader. */
+const ToolbarButton = /* @__PURE__ */ buttonOfSize("sm");
+
+/** The export button, in the table's accent colour. */
+const AccentButton = /* @__PURE__ */ buttonOfSize("sm", useAccentColor);
 
 function ExportProgressSurface({
   status,
@@ -148,14 +87,14 @@ function ExportProgressSurface({
             {heading}
           </Text>
           {dismiss ? (
-            <Button
+            <ChakraButton
               size="xs"
               variant="ghost"
               onClick={dismiss.onAction}
               data-adapttable-part="export-progress-dismiss"
             >
               {dismiss.label}
-            </Button>
+            </ChakraButton>
           ) : null}
         </Stack>
         {progressIndicator}
@@ -179,26 +118,26 @@ function ExportProgressSurface({
           data-adapttable-part="export-progress-actions"
         >
           {cancel ? (
-            <Button
+            <ChakraButton
               size="xs"
               variant="ghost"
               onClick={cancel.onAction}
               data-adapttable-part="export-progress-cancel"
             >
               {cancel.label}
-            </Button>
+            </ChakraButton>
           ) : null}
           {retry ? (
-            <Button
+            <ChakraButton
               size="xs"
               onClick={retry.onAction}
               data-adapttable-part="export-progress-retry"
             >
               {retry.label}
-            </Button>
+            </ChakraButton>
           ) : null}
           {download ? (
-            <Button size="xs" asChild>
+            <ChakraButton size="xs" asChild>
               <a
                 href={download.url}
                 download
@@ -206,7 +145,7 @@ function ExportProgressSurface({
               >
                 {download.label}
               </a>
-            </Button>
+            </ChakraButton>
           ) : null}
         </Stack>
       </Stack>
@@ -214,99 +153,29 @@ function ExportProgressSurface({
   );
 }
 
-export function PrintButton({
-  onPrint,
-  printLabel,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onPrint) return null;
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      data-adapttable-part="print-button"
-      onClick={onPrint}
-    >
-      {printLabel}
-    </Button>
-  );
-}
+/** Undo and redo. */
+export const UndoRedoButtons =
+  /* @__PURE__ */ createUndoRedoButtons(ToolbarButton);
 
-export function DensityButton({
-  density,
-  onDensityChange,
-  labels,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      aria-label={labels.density}
-      data-adapttable-part="density-toggle"
-      onClick={() => {
-        onDensityChange(density === "compact" ? "comfortable" : "compact");
-      }}
-    >
-      {density === "compact"
-        ? labels.densityCompact
-        : labels.densityComfortable}
-    </Button>
-  );
-}
+/** Export to CSV, with Chakra's progress surface for a long export. */
+export const ExportCsvButton = /* @__PURE__ */ createExportCsvButton(
+  AccentButton,
+  ExportProgressSurface
+);
 
-export function FullscreenButton({
-  onToggleFullscreen,
-  isFullscreen,
-  labels,
-}: Readonly<ToolbarExtrasSlotProps>): ReactNode {
-  if (!onToggleFullscreen) return null;
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      aria-label={
-        isFullscreen === true ? labels.exitFullscreen : labels.enterFullscreen
-      }
-      data-adapttable-part="fullscreen-toggle"
-      onClick={onToggleFullscreen}
-    >
-      {isFullscreen === true ? "✕" : "⛶"}
-    </Button>
-  );
-}
+/** Print the table. */
+export const PrintButton = /* @__PURE__ */ createPrintButton(ToolbarButton);
 
-export function CommandPaletteButton({
-  labels,
-  onOpenPalette,
-  paletteOpen,
-}: Readonly<AdapterCommandPaletteTriggerProps>): ReactNode {
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      data-adapttable-part="command-palette-button"
-      aria-haspopup="dialog"
-      aria-expanded={paletteOpen}
-      onClick={onOpenPalette}
-    >
-      {labels.commandPalette}
-    </Button>
-  );
-}
+/** Switch between comfortable and compact rows. */
+export const DensityButton = /* @__PURE__ */ createDensityButton(ToolbarButton);
 
-export function FindButton({
-  labels,
-  onOpenFind,
-  findOpen,
-}: Readonly<AdapterFindButtonProps>): ReactNode {
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      data-adapttable-part="find-button"
-      aria-expanded={findOpen}
-      onClick={onOpenFind}
-    >
-      {labels.findInTable}
-    </Button>
-  );
-}
+/** Enter or leave fullscreen. */
+export const FullscreenButton =
+  /* @__PURE__ */ createFullscreenButton(ToolbarButton);
+
+/** Open the command palette. */
+export const CommandPaletteButton =
+  /* @__PURE__ */ createCommandPaletteButton(ToolbarButton);
+
+/** Open find in the table. */
+export const FindButton = /* @__PURE__ */ createFindButton(ToolbarButton);

@@ -32,9 +32,15 @@ const VARIANT: Readonly<
   filled: "solid",
 };
 
-/** A captioned button: outlined unless the binding asks otherwise. */
-export const Button = forwardRef<HTMLButtonElement, KitButtonProps>(
-  function Button(
+/**
+ * A captioned button of one Chakra size: outlined unless the binding asks
+ * otherwise, in the colour `useColor` reads (none by default).
+ */
+export function buttonOfSize(
+  size: "xs" | "sm",
+  useColor: () => string | undefined = () => undefined
+) {
+  return forwardRef<HTMLButtonElement, KitButtonProps>(function Button(
     {
       elementRef,
       variant = "outlined",
@@ -46,22 +52,25 @@ export const Button = forwardRef<HTMLButtonElement, KitButtonProps>(
     },
     ref
   ) {
-    "use no memo";
+    const color = useColor();
     return (
       <ChakraButton
         ref={mergeRefs(ref, elementRef)}
         type="button"
-        size="xs"
+        size={size}
         variant={VARIANT[variant]}
-        colorPalette={tone === "danger" ? "red" : undefined}
+        colorPalette={tone === "danger" ? "red" : color}
         width={fullWidth ? "100%" : undefined}
         justifyContent={justify ? "flex-start" : undefined}
         loading={busy}
         {...rest}
       />
     );
-  }
-);
+  });
+}
+
+/** The kit's compact button. */
+export const Button = /* @__PURE__ */ buttonOfSize("xs");
 
 /** A glyph button: quiet unless the binding asks otherwise. */
 export const IconButton = forwardRef<HTMLButtonElement, KitIconButtonProps>(
