@@ -87,4 +87,8 @@ function Button({
 }
 
 /** The bulk action bar, with Mantine's text and buttons. */
-export const BulkActionBar = /* @__PURE__ */ createBulkBar({ Frame, Text, Button });
+export const BulkActionBar = /* @__PURE__ */ createBulkBar({
+  Frame,
+  Text,
+  Button,
+});
