@@ -1,7 +1,7 @@
 /** `columns.describe` and `view.describe`: what the table is, without rows. */
 import type { TableCommand } from "./command";
 import { observedPagination } from "./page";
-import { objectSchema } from "./schema";
+import { objectSchema, STRING_LIST } from "./schema";
 
 export const describeColumnsCommand: TableCommand<"columns.describe"> = {
   key: "columns.describe",
@@ -50,7 +50,13 @@ export const describeViewCommand: TableCommand<"view.describe"> = {
     sortBy: { type: ["string", "null"] },
     sortDir: { type: ["string", "null"] },
     groupBy: { type: ["string", "null"] },
+    pinnedColumns: { type: "object" },
+    pinnedRows: objectSchema({ top: STRING_LIST, bottom: STRING_LIST }),
+    hiddenColumns: STRING_LIST,
+    columnOrder: STRING_LIST,
     filters: {},
+    availableFilters: { type: "array", items: { type: "object" } },
+    pagination: { type: "object" },
     revision: { type: "integer", minimum: 1 },
   }),
   kind: "view",

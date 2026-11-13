@@ -32,6 +32,7 @@ import {
   ROW_KEY_OR_POSITION,
   ROW_REF_PROPERTIES,
   SCOPE,
+  STRING_LIST,
 } from "./schema";
 
 /**
@@ -54,17 +55,23 @@ export const readRowsCommand: TableCommand<"rows.read"> = {
     },
     ["offset", "limit"]
   ),
+  // Rows arrive labelled as somebody's data, read at one revision.
   output: objectSchema({
-    rows: {
-      type: "array",
-      items: objectSchema({
-        rowKey: { type: "string" },
-        cells: { type: "object" },
-      }),
-    },
-    offset: { type: "integer", minimum: 0 },
-    limit: { type: "integer", minimum: 1 },
-    redacted: { type: "array", items: { type: "string" } },
+    source: { type: "string", const: "table-rows" },
+    untrusted: { type: "boolean", const: true },
+    revision: { type: "integer", minimum: 1 },
+    rows: objectSchema({
+      rows: {
+        type: "array",
+        items: objectSchema({
+          rowKey: { type: "string" },
+          cells: { type: "object" },
+        }),
+      },
+      offset: { type: "integer", minimum: 0 },
+      limit: { type: "integer", minimum: 1 },
+      redacted: STRING_LIST,
+    }),
   }),
   kind: "read",
   staging: "unsupported",

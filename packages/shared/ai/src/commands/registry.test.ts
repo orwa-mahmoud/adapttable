@@ -210,7 +210,7 @@ describe("the command registry", () => {
   });
 
   it.each(CAPABILITY_KEYS)(
-    "%s: its schema accepts the sample the command handles",
+    "%s: its schema accepts the sample, and the result matches its output",
     async (key) => {
       const sample = SAMPLES[key];
       expect(validateSchema(guideOf(key).input, sample)).toBeUndefined();
@@ -219,6 +219,9 @@ describe("the command registry", () => {
       expect(validateSchema(guide.input, sample)).toBeUndefined();
       expect(result.error).toBeUndefined();
       expect(result.ok).toBe(true);
+      // What crosses the wire: a property left `undefined` is not sent.
+      const sent: unknown = JSON.parse(JSON.stringify(result.result));
+      expect(validateSchema(guideOf(key).output, sent)).toBeUndefined();
     }
   );
 

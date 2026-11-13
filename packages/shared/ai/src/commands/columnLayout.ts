@@ -9,7 +9,14 @@ import {
   type TableCommand,
   viewMoved,
 } from "./command";
-import { ID, ID_LIST, objectSchema, OK_OUTPUT } from "./schema";
+import {
+  ID,
+  ID_LIST,
+  objectSchema,
+  OK_OUTPUT,
+  okWith,
+  STRING_LIST,
+} from "./schema";
 
 /**
  * Validate a column pin request against what this table actually allows.
@@ -134,7 +141,7 @@ export const hideColumnCommand: TableCommand<"view.hideColumn"> = {
     "id and `hidden: true` to hide, or `hidden: false` to show it again. " +
     "The last visible column cannot be hidden.",
   input: objectSchema({ key: ID, hidden: { type: "boolean" } }, ["key"]),
-  output: OK_OUTPUT,
+  output: okWith({ key: { type: "string" }, hidden: { type: "boolean" } }),
   kind: "view",
   staging: "unsupported",
   partial: "unsupported",
@@ -226,7 +233,11 @@ export const setColumnOrderCommand: TableCommand<"view.setColumnOrder"> = {
     index: { type: "integer", minimum: 0 },
     order: ID_LIST,
   }),
-  output: OK_OUTPUT,
+  output: okWith({
+    order: STRING_LIST,
+    key: { type: "string" },
+    index: { type: "integer", minimum: 0 },
+  }),
   kind: "view",
   staging: "unsupported",
   partial: "unsupported",

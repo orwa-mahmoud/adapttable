@@ -34,6 +34,12 @@ export function okWith(properties: Record<string, JsonSchema>): JsonSchema {
   });
 }
 
+/** A list of strings. */
+export const STRING_LIST: JsonSchema = {
+  type: "array",
+  items: { type: "string" },
+};
+
 /** What every governed write returns. */
 export const WRITE_RESULT = objectSchema({
   proposals: {
@@ -48,7 +54,27 @@ export const WRITE_RESULT = objectSchema({
   applied: { type: "boolean" },
   approval: {
     type: "string",
-    enum: ["pending", "approved", "rejected", "cancelled", "not-required"],
+    enum: [
+      "pending",
+      "approved",
+      "partial",
+      "rejected",
+      "cancelled",
+      "not-required",
+    ],
+  },
+  approvalReason: { type: "string" },
+  results: {
+    type: "array",
+    items: objectSchema({
+      rowKey: { type: "string" },
+      column: { type: "string" },
+      ok: { type: "boolean" },
+      error: objectSchema({
+        code: { type: "string" },
+        message: { type: "string" },
+      }),
+    }),
   },
 });
 

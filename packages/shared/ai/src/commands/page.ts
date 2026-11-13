@@ -8,7 +8,7 @@ import {
 } from "../pagination";
 import type { AgentObservation, CapabilityGuide } from "../types";
 import { ApplyError, assertApply, type TableCommand } from "./command";
-import { objectSchema, OK_OUTPUT } from "./schema";
+import { objectSchema, okWith } from "./schema";
 
 /**
  * The pages an observation describes.
@@ -103,7 +103,10 @@ export const setPageCommand: TableCommand<"view.setPage"> = {
     },
     ["page"]
   ),
-  output: OK_OUTPUT,
+  output: okWith({
+    page: { type: "integer", minimum: 1 },
+    limit: { type: "integer", minimum: 1 },
+  }),
   kind: "view",
   staging: "unsupported",
   partial: "unsupported",
