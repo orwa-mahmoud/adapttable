@@ -12,6 +12,7 @@
  */
 import type { RowCallback } from "../contracts/rowCallback";
 import type { FeatureHostState } from "../features/currentHost";
+import { runBeforeLayoutChange } from "../layout/layoutChange";
 import type { TableStore } from "../state/tableStore";
 import {
   type EditableColumnLike,
@@ -27,6 +28,7 @@ import {
 } from "./editCommitLifecycle";
 import type { EditEventHandler } from "./editContracts";
 import { observeEdit } from "./editSession";
+import { preserveEditorFocusOnLayoutChange } from "./layoutFocus";
 import { stateCell } from "./storePlumbing";
 
 /**
@@ -248,6 +250,8 @@ export function createRowEditStore<TRow>(
   options: RowEditStoreOptions<TRow>,
   within: { readonly store?: TableStore } = {}
 ): RowEditStore<TRow> {
+  // A row editor this table opens keeps its focus across a responsive relayout.
+  runBeforeLayoutChange(preserveEditorFocusOnLayoutChange);
   let current = options;
   const state = stateCell<RowEditSnapshot>(
     "row-edit",

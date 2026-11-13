@@ -4748,6 +4748,9 @@ export interface NeutralTable<TRow = unknown> {
 export type NoFeatureState = Readonly<Record<never, never>>;
 
 // @public
+export function notifyLayoutChange(): void;
+
+// @public
 export function orderedCardEntries<TRow>(rows: readonly TRow[], getRowId: (row: TRow) => string, rowEntries: readonly VirtualTableRow<TRow>[] | undefined, pinnedTop: readonly TRow[], pinnedBottom: readonly TRow[], summaryTop?: readonly TRow[], summaryBottom?: readonly TRow[]): readonly VirtualTableRow<TRow>[];
 
 // @public

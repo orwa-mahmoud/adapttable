@@ -240,12 +240,14 @@ Related: [Getting started](./getting-started.md) ·
 
 ## Editing across layouts
 
-Custom framework bindings can call `preserveEditorFocusOnLayoutChange()` from
+Custom framework bindings call `notifyLayoutChange()` from
 `@adapttable/core/binding` immediately before publishing a responsive layout
-change. It captures the active editor and caret, then restores them after the
-DOM replacement. It leaves focus alone if the original control remains mounted,
-the editor inventory changes, or focus moves outside the table. The supplied
-React, Angular and Vue bindings already wire this behavior.
+change. Once the table edits — a cell edit session or a row edit store
+exists — it captures the active editor and caret, then restores them after
+the DOM replacement; a table without editing never loads that code. It leaves
+focus alone if the original control remains mounted, the editor inventory
+changes, or focus moves outside the table. The supplied React, Angular and
+Vue bindings already wire this behavior.
 
 A layout change keeps row drafts, selection, filters and expanded rows in the
 same table state. Native editor focus and text selection follow viewport changes

@@ -7875,6 +7875,7 @@
       "MultiSelectEditorSlots",
       "NeutralTable",
       "NoFeatureState",
+      "notifyLayoutChange",
       "orderedCardEntries",
       "OrderedContribution",
       "orderedContributions",

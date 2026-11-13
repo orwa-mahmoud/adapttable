@@ -9,7 +9,8 @@ const INPUTS =
  * Capture the active editor before a responsive layout replaces its DOM.
  * Restore the corresponding native control and caret after paint, only when
  * the old control was removed and the reader has not focused outside the table.
- * Bindings call this immediately before publishing a media-query change.
+ * Editing installs it to run on each `notifyLayoutChange()`; a binding
+ * can also call it directly before a DOM replacement of its own.
  * @public
  */
 export function preserveEditorFocusOnLayoutChange(): void {

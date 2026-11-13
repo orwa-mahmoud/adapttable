@@ -15099,6 +15099,17 @@
       "subpaths": ["./binding"]
     },
     {
+      "name": "notifyLayoutChange",
+      "kind": "runtime",
+      "module": "layout/layoutChange.ts",
+      "audience": "binding-spi",
+      "path": "./binding",
+      "forward": true,
+      "deprecated": false,
+      "identity": "layout/layoutChange.ts#notifyLayoutChange",
+      "subpaths": ["./binding"]
+    },
+    {
       "name": "orderedCardEntries",
       "kind": "runtime",
       "module": "rows/pinnedRowChrome.ts",

@@ -1220,6 +1220,7 @@ export {
   type KitEnvironment,
   withKitEnvironment,
 } from "./layout/kitEnvironment";
+export { notifyLayoutChange } from "./layout/layoutChange";
 export type { HighlightedCell } from "./rows/highlightStore";
 export type { RowPatchEvent } from "./rows/patch";
 export type {

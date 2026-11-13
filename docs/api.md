@@ -2877,8 +2877,11 @@ callbacks inert. Existing callers can omit the options. The handlers read
 a DOM event and every framework's event satisfy. Toolbar glue: `SearchInputState` (debounced
 search binding), `FilterTriggerToggle` (popover/drawer trigger
 handlers). Editing/grouping glue: `focusEditorOnMount`,
-`preserveEditorFocusOnLayoutChange` (capture the active editor before a responsive
-DOM replacement and restore its focus and caret after paint),
+`notifyLayoutChange` (announce a responsive layout change right before
+publishing it; once the table edits, it keeps the active editor's focus and
+caret across the change), `preserveEditorFocusOnLayoutChange` (capture the
+active editor before a DOM replacement and restore its focus and caret after
+paint),
 `rowEditingSignature`, `HeaderGroupCell`, `HtmlGroupedHeaderCell`, `headerGroupRow` /
 `headerGroupRows` / `htmlGroupedHeaderPlan` / `groupedHeaderChildRule` /
 `groupedHeaderCellStyle` / `groupedHeaderLabelStyle` / `groupedHeaderAlign` / `columnGroupStubStyle` / `COLUMN_GROUP_STUB_WIDTH`, `columnGroupHeaderCaption`. Each adapter mounts `ColumnGroupToggle` /

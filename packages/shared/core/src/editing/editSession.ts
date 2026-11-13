@@ -5,6 +5,7 @@
  * A newer save of the same cell supersedes an older one. A late answer is
  * ignored, including a success, so it cannot clear the save the cell is in now.
  */
+import { runBeforeLayoutChange } from "../layout/layoutChange";
 import type { TableStore } from "../state/tableStore";
 import { devWarn } from "../utils/devWarn";
 import {
@@ -14,6 +15,7 @@ import {
   stepEditableCell,
 } from "./cellEditing";
 import type { EditEvent, EditEventHandler } from "./editContracts";
+import { preserveEditorFocusOnLayoutChange } from "./layoutFocus";
 import { isThenable, stateCell } from "./storePlumbing";
 
 /* ── Observers ─────────────────────────────────────────────────────── */
@@ -172,6 +174,8 @@ export function createCellEditSession<TRow = unknown>(
   options: CellEditSessionOptions<TRow> = {},
   within: { readonly store?: TableStore } = {}
 ): CellEditSession<TRow> {
+  // An editor this table opens keeps its focus across a responsive relayout.
+  runBeforeLayoutChange(preserveEditorFocusOnLayoutChange);
   let observers = options;
   const state = stateCell("cell-edit", NO_EDIT, within.store);
   let opened: {

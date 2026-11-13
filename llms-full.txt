@@ -10744,12 +10744,14 @@ Related: [Getting started](./getting-started.md) ·
 
 ## Editing across layouts
 
-Custom framework bindings can call `preserveEditorFocusOnLayoutChange()` from
+Custom framework bindings call `notifyLayoutChange()` from
 `@adapttable/core/binding` immediately before publishing a responsive layout
-change. It captures the active editor and caret, then restores them after the
-DOM replacement. It leaves focus alone if the original control remains mounted,
-the editor inventory changes, or focus moves outside the table. The supplied
-React, Angular and Vue bindings already wire this behavior.
+change. Once the table edits — a cell edit session or a row edit store
+exists — it captures the active editor and caret, then restores them after
+the DOM replacement; a table without editing never loads that code. It leaves
+focus alone if the original control remains mounted, the editor inventory
+changes, or focus moves outside the table. The supplied React, Angular and
+Vue bindings already wire this behavior.
 
 A layout change keeps row drafts, selection, filters and expanded rows in the
 same table state. Native editor focus and text selection follow viewport changes
@@ -19924,8 +19926,11 @@ callbacks inert. Existing callers can omit the options. The handlers read
 a DOM event and every framework's event satisfy. Toolbar glue: `SearchInputState` (debounced
 search binding), `FilterTriggerToggle` (popover/drawer trigger
 handlers). Editing/grouping glue: `focusEditorOnMount`,
-`preserveEditorFocusOnLayoutChange` (capture the active editor before a responsive
-DOM replacement and restore its focus and caret after paint),
+`notifyLayoutChange` (announce a responsive layout change right before
+publishing it; once the table edits, it keeps the active editor's focus and
+caret across the change), `preserveEditorFocusOnLayoutChange` (capture the
+active editor before a DOM replacement and restore its focus and caret after
+paint),
 `rowEditingSignature`, `HeaderGroupCell`, `HtmlGroupedHeaderCell`, `headerGroupRow` /
 `headerGroupRows` / `htmlGroupedHeaderPlan` / `groupedHeaderChildRule` /
 `groupedHeaderCellStyle` / `groupedHeaderLabelStyle` / `groupedHeaderAlign` / `columnGroupStubStyle` / `COLUMN_GROUP_STUB_WIDTH`, `columnGroupHeaderCaption`. Each adapter mounts `ColumnGroupToggle` /
