@@ -1,6 +1,5 @@
 /** Selection remains a host-controlled value when selectedIds is supplied. */
 import {
-  applyGroupLeafSelection,
   headerSelectionOf,
   type TableLabels,
   toggleId,
@@ -176,7 +175,7 @@ export function useRowSelection<TRow>(
   const replace = (ids: readonly string[] | undefined): void =>
     commit(new Set(ids));
   const toggleGroupLeaves = (ids: readonly string[]): void =>
-    commit(applyGroupLeafSelection(ids, selectedIds.value));
+    commit(toggleIds(selectedIds.value, ids));
   const selectAllMatching = (): void => {
     if (available.value) scope.select(acrossPages.value);
   };
