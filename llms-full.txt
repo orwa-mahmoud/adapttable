@@ -19970,7 +19970,7 @@ and `OptionalGroupHeaderCard`.
 button, icon button, text input, select, popover, text and divider
 (`KitDividerProps`). `useLook` is the kit's hook for `KitColumnMenuLook`: the
 spacing of the panel, heading, search, bulk row, column rows, submenu and
-rename form, and the colour of the drop line. A kit whose text input draws its own label and
+rename form, and the colour of the drop line; `fixedRow`, when given, spaces the rows of the columns the table injects (row reorder, actions) apart from column rows. A kit whose text input draws its own label and
 error passes a `RenameField` (`KitRenameFieldProps`) for the rename form; the
 field receives the part names its label, input and error carry
 (`KitRenameFieldParts`).
@@ -19980,7 +19980,7 @@ control: a button beside the caption that swaps the caption for the same
 rename form, and the announcer that reports the new name. The kit gives its
 button, icon button, text input and text, an optional `RenameField`, and the
 button's `editIcon`; `useLook` returns `KitHeaderRenameLook`, the spacing of
-the control, the form and its buttons.
+the control, the form and its buttons, and `buttonFirst` to put the button before the caption. Enter in the field saves.
 
 `createSavedViewsMenu(kit, useLook)` returns the saved-views menu: a button
 that opens a panel listing the saved views — a click applies one and closes
