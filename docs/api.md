@@ -633,7 +633,13 @@ Framework-free — see [concepts](./concepts.md#the-framework-neutral-engine).
   engine as the shape `@adapttable/ai` reads: rows, revisions, and an
   `operations` map of what is wired right now. `NeutralTableBinding` is how a
   host supplies the visible rows and that map.
-- `devWarn(message)` — development-only warning, printed once per message.
+- `devWarn(message)` — development-only warning, printed once per message
+  outside a `NODE_ENV=production` run. The package's own warnings live only in
+  its development build: `@adapttable/core` publishes a production build as
+  the default export condition, with every one of them and their text
+  compiled out, and the warning build under the `development` condition that
+  Vite, webpack and other bundlers select in development (Node needs
+  `--conditions=development`).
 
 ### Composed ownership
 

@@ -74,6 +74,8 @@ export const ADAPTER_ABSENT = [
   "SavedViewsMenu",
   "DensityButton",
   "header-rename-form",
+  // A development warning: the production build packs none of their text.
+  "no data tier provided",
 ];
 
 /** Unique identifier that proves a feature entry actually entered the graph. */
