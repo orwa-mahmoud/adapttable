@@ -3065,6 +3065,7 @@ export interface KitColumnMenuLook {
     readonly bulk: CSSProperties;
     readonly choice: CSSProperties;
     readonly divider: CSSProperties;
+    readonly fixedRow?: CSSProperties;
     readonly grip: CSSProperties;
     readonly heading: CSSProperties;
     readonly panel: CSSProperties;
@@ -3258,6 +3259,7 @@ export interface KitGroupToggleProps {
 // @public
 export interface KitHeaderRenameLook {
     readonly actions: CSSProperties;
+    readonly buttonFirst?: boolean;
     readonly form: CSSProperties;
     readonly root: CSSProperties;
 }

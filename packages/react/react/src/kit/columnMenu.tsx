@@ -62,6 +62,8 @@ export interface KitColumnMenuLook {
   readonly bulk: CSSProperties;
   /** One column's row: grip, eye, name, pin, more. */
   readonly row: CSSProperties;
+  /** A row for a column the table injects; absent, as a column's row. */
+  readonly fixedRow?: CSSProperties;
   /** The gap that stands where a fixed row has no grip. */
   readonly rowSpacer: CSSProperties;
   /** The grip, beyond what the kit's icon button gives it. */
@@ -193,7 +195,7 @@ function FixedRow<TRow>({
   const pinned = layout.state.pinned[columnKey] !== undefined;
   const pinLabel = side === "start" ? labels.pinStart : labels.pinEnd;
   return (
-    <div style={look.row}>
+    <div style={look.fixedRow ?? look.row}>
       <span aria-hidden style={look.rowSpacer} />
       <RowControls
         kit={kit}

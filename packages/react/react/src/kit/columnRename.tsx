@@ -126,6 +126,14 @@ export function RenameForm({
   }, []);
   const invalid = rename.error !== undefined;
   const parts = RENAME_PARTS[place];
+  // Enter saves from the field itself, so key handling around the form (a
+  // header cell's, a grid's) cannot swallow the implicit submit.
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    rename.onKeyDown(event);
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    rename.submit();
+  };
   return (
     <form
       data-adapttable-part={parts.form}
@@ -146,7 +154,7 @@ export function RenameForm({
           parts={parts}
           onValueChange={rename.setDraft}
           onBlur={rename.blur}
-          onKeyDown={rename.onKeyDown}
+          onKeyDown={onKeyDown}
         />
       ) : (
         <>
@@ -170,7 +178,7 @@ export function RenameForm({
             aria-describedby={invalid ? rename.errorId : undefined}
             onValueChange={rename.setDraft}
             onBlur={rename.blur}
-            onKeyDown={rename.onKeyDown}
+            onKeyDown={onKeyDown}
           />
           {invalid ? (
             <Text
@@ -213,6 +221,8 @@ export interface KitHeaderRenameLook {
   readonly form: CSSProperties;
   /** The form's save and cancel buttons. */
   readonly actions: CSSProperties;
+  /** Whether the rename button comes before the caption. Absent, after it. */
+  readonly buttonFirst?: boolean;
 }
 
 /**
@@ -252,8 +262,19 @@ export function createColumnHeaderRename(
       requiredMessage: labels.columnNameRequired,
       renamedMessage: labels.columnRenamed,
     });
+    const button = (
+      <IconButton
+        aria-label={`${labels.renameColumn}: ${name}`}
+        data-adapttable-part="header-rename-button"
+        disabled={rename.editing}
+        onClick={rename.begin}
+      >
+        {kit.editIcon}
+      </IconButton>
+    );
     return (
       <div style={look.root}>
+        {look.buttonFirst ? button : null}
         {rename.editing ? (
           <RenameForm
             kit={kit}
@@ -266,14 +287,7 @@ export function createColumnHeaderRename(
         ) : (
           children
         )}
-        <IconButton
-          aria-label={`${labels.renameColumn}: ${name}`}
-          data-adapttable-part="header-rename-button"
-          disabled={rename.editing}
-          onClick={rename.begin}
-        >
-          {kit.editIcon}
-        </IconButton>
+        {look.buttonFirst ? null : button}
         <LiveRegion part="header-rename-announcer" statusRole={false}>
           {rename.announcement}
         </LiveRegion>

@@ -77,6 +77,20 @@ describe("createColumnHeaderRename", () => {
     expect(screen.getByTestId("caption")).toBeInTheDocument();
   });
 
+  it("saves on Enter from the field, once", () => {
+    const onRename = mount(HeaderRename);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `${defaultLabels.renameColumn}: Alpha`,
+      })
+    );
+    const input = screen.getByLabelText(defaultLabels.columnName);
+    fireEvent.change(input, { target: { value: "Owner" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onRename).toHaveBeenCalledTimes(1);
+    expect(onRename).toHaveBeenCalledWith("a", "Owner");
+  });
+
   it("hands a kit's own field the header's parts", () => {
     const RenameField = vi.fn(
       ({
